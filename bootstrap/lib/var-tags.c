@@ -1335,12 +1335,12 @@ List _tag_rows(void){
   return Array_list(rows);
 }
 
-static String Var_string(Var);
+String Var_as_string(Var);
 
 Var List_getindex(List, int);
 
 String _tag_id(List row){
-  return Var_string(List_getindex(row, 1));
+  return Var_as_string(List_getindex(row, 1));
 }
 
 Symbol _tag_kind(List row){

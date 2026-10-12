@@ -375,7 +375,7 @@ static void Compiler__write_json_location(Compiler c, Buffer out, List location)
         Var position;
         position = _x2c_match_value_4;
         {
-          Buffer_write(out, String_join(NULL, cons(String_var(_16), cons(String_var(Var_json(String_var(Compiler__json_path(c, Var_string(file))))), NULL))));
+          Buffer_write(out, String_join(NULL, cons(String_var(_16), cons(String_var(Var_json(String_var(Compiler__json_path(c, Var_as_string(file))))), NULL))));
           Buffer_write(out, ({
             Var _x2c_literal_part_5 = String_var(Var_str(line));  Var _x2c_literal_part_6 = String_var(Var_str(column));  String_join(NULL, cons(String_var(_17), cons(_x2c_literal_part_5, cons(String_var(_18), cons(_x2c_literal_part_6, NULL)))));
           }
@@ -416,10 +416,10 @@ void Compiler_print_diagnostic(Compiler compiler, List entry){
         {
           String note = _note_line(Var_list(notes));
           if(diagnostics_json >= 0){
-            Compiler__write_json(compiler, Var_symbol(code), Var_symbol(severity), Var_string(message), Var_list(location), note);
+            Compiler__write_json(compiler, Var_symbol(code), Var_symbol(severity), Var_as_string(message), Var_list(location), note);
             return;
           }
-          Compiler__write_heading(compiler, Var_symbol(code), Var_string(message), Var_list(location));
+          Compiler__write_heading(compiler, Var_symbol(code), Var_as_string(message), Var_list(location));
           if(String_truth(note)) fprintf(stderr, "  note: %s\n", note);
           fprintf(stderr, "\n");
           fflush(stderr);
@@ -577,7 +577,7 @@ String Compiler_token_source(Compiler c, Token token, int * line){
         List _x2c_destructure_0 = row;
         int position = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 0), 3453797));
         int text_line = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 1), 3453797));
-        String marked = Var_string(List_getindex(_x2c_destructure_0, 2));
+        String marked = Var_as_string(List_getindex(_x2c_destructure_0, 2));
         int marked_line = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 3), 3453797));
         if(position > token -> pos) break;
         file = marked;
@@ -606,7 +606,7 @@ String Compiler_text_source(Compiler c, int position, int * offset){
         List _x2c_destructure_1 = row;
         int start = Var_int(Var_convert(List_getindex(_x2c_destructure_1, 0), 3453797));
         int text_line = Var_int(Var_convert(List_getindex(_x2c_destructure_1, 1), 3453797));
-        String marked = Var_string(List_getindex(_x2c_destructure_1, 2));
+        String marked = Var_as_string(List_getindex(_x2c_destructure_1, 2));
         int line = Var_int(Var_convert(List_getindex(_x2c_destructure_1, 3), 3453797));
         Var origin = List_getindex(_x2c_destructure_1, 4);
         if(start > position || Var_is_void(origin)) break;

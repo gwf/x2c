@@ -35,6 +35,8 @@ int x2c_var_tag_descriptor_index(Symbol tag);
 
 String Var_str(Var v);
 
+String Var_as_string(Var v);
+
 String Var_fallback_str(Var v);
 
 String Var_pointer_string(Var v);

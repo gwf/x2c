@@ -1099,9 +1099,11 @@ static int _pattern_borrowable(Var value, int depth, int permanent_lists){
 
 int String_is_permanent(String);
 
+String Var_as_string(Var);
+
 static int _object_borrowable(Var value, int depth, int permanent_lists){
   if(Var_is(value, 826970)) return String_is_permanent((String) Var_pointer(value));
-  if(Var_is_row(value, 11, 7, 1)) return String_is_permanent(Var_string(value));
+  if(Var_is_row(value, 11, 7, 1)) return String_is_permanent(Var_as_string(value));
   if(! Var_is_row(value, 9, 7, 4)) return 0;
   if(! Var_pointer(value)) return 1;
   if(permanent_lists && ! Pool_is_permanent(value)) return 0;

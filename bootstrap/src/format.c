@@ -100,7 +100,7 @@ static void Pretty_source_marker(Pretty * p, Var value){
   while(Buffer_len((* p).buff) > 0 && Buffer_getindex((* p).buff, - 1) == ' ') Buffer_unwrite((* p).buff, 1);
   if(Buffer_len((* p).buff) > 0 && Buffer_getindex((* p).buff, - 1) != '\n') _write_newline((* p).buff);
   while((* p).scanned < Buffer_len((* p).buff)) if(Buffer_getindex((* p).buff, (* p).scanned ++) == '\n')(* p).output_line ++;
-  String file = Var_string(List_truth(location) ? List_assoc(location, Symbol_var(412426)) : String_var((* p).output_file));
+  String file = Var_as_string(List_truth(location) ? List_assoc(location, Symbol_var(412426)) : String_var((* p).output_file));
   if(! String_truth(file)) file = _0;
   int line = Var_int(Var_convert(List_truth(location) ? List_assoc(location, Symbol_var(805770)) : int_var((* p).output_line + 1), 3453797));
   (* p).source_line = List_truth(location) ? line : 0;

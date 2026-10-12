@@ -4323,14 +4323,14 @@ static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func
   ;
 }
 
-static String Var_string(Var);
+String Var_as_string(Var);
 
 void * x2c_func_declared_reference_argument(Func, const FuncArg *, unsigned, List, List);
 
 int String_try_next(String, int *, int *);
 
 static Var _x2c_func_adapt_3(Func _x2c_func_binding_3, const FuncArg * _x2c_func_argv_3){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_3, _x2c_func_argv_3, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_3, _x2c_func_argv_3, 0, 1318210446));
   int * a1 = x2c_func_declared_reference_argument(_x2c_func_binding_3, _x2c_func_argv_3, 1, _12, _12);
   int * a2 = x2c_func_declared_reference_argument(_x2c_func_binding_3, _x2c_func_argv_3, 2, _12, _12);
   return int_var(String_try_next(a0, a1, a2));
@@ -4718,7 +4718,7 @@ static Var _x2c_func_adapt_45(Func _x2c_func_binding_45, const FuncArg * _x2c_fu
 int String_len(String);
 
 static Var _x2c_func_adapt_46(Func _x2c_func_binding_46, const FuncArg * _x2c_func_argv_46){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_46, _x2c_func_argv_46, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_46, _x2c_func_argv_46, 0, 1318210446));
   return int_var(String_len(a0));
   ;
 }
@@ -4726,7 +4726,7 @@ static Var _x2c_func_adapt_46(Func _x2c_func_binding_46, const FuncArg * _x2c_fu
 String String_format(String, List);
 
 static Var _x2c_func_adapt_47(Func _x2c_func_binding_47, const FuncArg * _x2c_func_argv_47){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_47, _x2c_func_argv_47, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_47, _x2c_func_argv_47, 0, 1318210446));
   List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_47, _x2c_func_argv_47, 1, 806120));
   return String_var(String_format(a0, a1));
   ;
@@ -4735,8 +4735,8 @@ static Var _x2c_func_adapt_47(Func _x2c_func_binding_47, const FuncArg * _x2c_fu
 Var lisp_string_append(String, String);
 
 static Var _x2c_func_adapt_48(Func _x2c_func_binding_48, const FuncArg * _x2c_func_argv_48){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_48, _x2c_func_argv_48, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_48, _x2c_func_argv_48, 1, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_48, _x2c_func_argv_48, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_48, _x2c_func_argv_48, 1, 1318210446));
   return lisp_string_append(a0, a1);
   ;
 }
@@ -4744,7 +4744,7 @@ static Var _x2c_func_adapt_48(Func _x2c_func_binding_48, const FuncArg * _x2c_fu
 Var lisp_substring(String, int, int);
 
 static Var _x2c_func_adapt_49(Func _x2c_func_binding_49, const FuncArg * _x2c_func_argv_49){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_49, _x2c_func_argv_49, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_49, _x2c_func_argv_49, 0, 1318210446));
   int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_49, _x2c_func_argv_49, 1, 3453797), 3453797));
   int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_49, _x2c_func_argv_49, 2, 3453797), 3453797));
   return lisp_substring(a0, a1, a2);
@@ -4754,7 +4754,7 @@ static Var _x2c_func_adapt_49(Func _x2c_func_binding_49, const FuncArg * _x2c_fu
 Var lisp_string_downcase(String);
 
 static Var _x2c_func_adapt_50(Func _x2c_func_binding_50, const FuncArg * _x2c_func_argv_50){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_50, _x2c_func_argv_50, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_50, _x2c_func_argv_50, 0, 1318210446));
   return lisp_string_downcase(a0);
   ;
 }
@@ -4762,7 +4762,7 @@ static Var _x2c_func_adapt_50(Func _x2c_func_binding_50, const FuncArg * _x2c_fu
 Var lisp_read_file(String);
 
 static Var _x2c_func_adapt_51(Func _x2c_func_binding_51, const FuncArg * _x2c_func_argv_51){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_51, _x2c_func_argv_51, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_51, _x2c_func_argv_51, 0, 1318210446));
   return lisp_read_file(a0);
   ;
 }
@@ -4770,8 +4770,8 @@ static Var _x2c_func_adapt_51(Func _x2c_func_binding_51, const FuncArg * _x2c_fu
 Var lisp_write_file(String, String);
 
 static Var _x2c_func_adapt_52(Func _x2c_func_binding_52, const FuncArg * _x2c_func_argv_52){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_52, _x2c_func_argv_52, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_52, _x2c_func_argv_52, 1, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_52, _x2c_func_argv_52, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_52, _x2c_func_argv_52, 1, 1318210446));
   return lisp_write_file(a0, a1);
   ;
 }
@@ -4978,7 +4978,7 @@ static Var _x2c_func_adapt_83(Func _x2c_func_binding_83, const FuncArg * _x2c_fu
 static int String_truth(String);
 
 static Var _x2c_func_adapt_84(Func _x2c_func_binding_84, const FuncArg * _x2c_func_argv_84){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_84, _x2c_func_argv_84, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_84, _x2c_func_argv_84, 0, 1318210446));
   return int_var(String_truth(a0));
   ;
 }
@@ -5004,6 +5004,8 @@ static Var _x2c_func_adapt_87(Func _x2c_func_binding_87, const FuncArg * _x2c_fu
   return Map_var(Var_map(a0));
   ;
 }
+
+String Var_string(Var);
 
 static Var _x2c_func_adapt_88(Func _x2c_func_binding_88, const FuncArg * _x2c_func_argv_88){
   Var a0 = x2c_func_value_argument(_x2c_func_binding_88, _x2c_func_argv_88, 0, 45156);
@@ -5182,27 +5184,27 @@ static Var _x2c_func_adapt_114(Func _x2c_func_binding_114, const FuncArg * _x2c_
 }
 
 static Var _x2c_func_adapt_115(Func _x2c_func_binding_115, const FuncArg * _x2c_func_argv_115){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_115, _x2c_func_argv_115, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_115, _x2c_func_argv_115, 0, 1318210446));
   return String_var(String_sha256(a0));
   ;
 }
 
 static Var _x2c_func_adapt_116(Func _x2c_func_binding_116, const FuncArg * _x2c_func_argv_116){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_116, _x2c_func_argv_116, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_116, _x2c_func_argv_116, 0, 1318210446));
   int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_116, _x2c_func_argv_116, 1, 3453797), 3453797));
   return String_var(_lisp_string_new_len(a0, a1));
   ;
 }
 
 static Var _x2c_func_adapt_117(Func _x2c_func_binding_117, const FuncArg * _x2c_func_argv_117){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_117, _x2c_func_argv_117, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_117, _x2c_func_argv_117, 0, 1318210446));
   int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_117, _x2c_func_argv_117, 1, 3453797), 3453797));
   return Symbol_var(_lisp_symbol_new_len(a0, a1));
   ;
 }
 
 static Var _x2c_func_adapt_118(Func _x2c_func_binding_118, const FuncArg * _x2c_func_argv_118){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_118, _x2c_func_argv_118, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_118, _x2c_func_argv_118, 0, 1318210446));
   return Symbol_var(_lisp_symbol_parse(a0));
   ;
 }
@@ -5344,7 +5346,7 @@ static Var _x2c_func_adapt_134(Func _x2c_func_binding_134, const FuncArg * _x2c_
 String lisp_string_lstrip(String, Var);
 
 static Var _x2c_func_adapt_135(Func _x2c_func_binding_135, const FuncArg * _x2c_func_argv_135){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_135, _x2c_func_argv_135, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_135, _x2c_func_argv_135, 0, 1318210446));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_135, _x2c_func_argv_135, 1, 45156);
   return String_var(lisp_string_lstrip(a0, a1));
   ;
@@ -5353,7 +5355,7 @@ static Var _x2c_func_adapt_135(Func _x2c_func_binding_135, const FuncArg * _x2c_
 String lisp_string_rstrip(String, Var);
 
 static Var _x2c_func_adapt_136(Func _x2c_func_binding_136, const FuncArg * _x2c_func_argv_136){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_136, _x2c_func_argv_136, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_136, _x2c_func_argv_136, 0, 1318210446));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_136, _x2c_func_argv_136, 1, 45156);
   return String_var(lisp_string_rstrip(a0, a1));
   ;
@@ -5362,7 +5364,7 @@ static Var _x2c_func_adapt_136(Func _x2c_func_binding_136, const FuncArg * _x2c_
 int String_getindex(String, int);
 
 static Var _x2c_func_adapt_137(Func _x2c_func_binding_137, const FuncArg * _x2c_func_argv_137){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_137, _x2c_func_argv_137, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_137, _x2c_func_argv_137, 0, 1318210446));
   int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_137, _x2c_func_argv_137, 1, 3453797), 3453797));
   return int_var(String_getindex(a0, a1));
   ;
@@ -5371,8 +5373,8 @@ static Var _x2c_func_adapt_137(Func _x2c_func_binding_137, const FuncArg * _x2c_
 String String_add(String, String);
 
 static Var _x2c_func_adapt_138(Func _x2c_func_binding_138, const FuncArg * _x2c_func_argv_138){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_138, _x2c_func_argv_138, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_138, _x2c_func_argv_138, 1, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_138, _x2c_func_argv_138, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_138, _x2c_func_argv_138, 1, 1318210446));
   return String_var(String_add(a0, a1));
   ;
 }
@@ -5380,7 +5382,7 @@ static Var _x2c_func_adapt_138(Func _x2c_func_binding_138, const FuncArg * _x2c_
 String lisp_string_strip(String, Var);
 
 static Var _x2c_func_adapt_139(Func _x2c_func_binding_139, const FuncArg * _x2c_func_argv_139){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_139, _x2c_func_argv_139, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_139, _x2c_func_argv_139, 0, 1318210446));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_139, _x2c_func_argv_139, 1, 45156);
   return String_var(lisp_string_strip(a0, a1));
   ;
@@ -5644,7 +5646,7 @@ String Array_join(Array, String);
 
 static Var _x2c_func_adapt_174(Func _x2c_func_binding_174, const FuncArg * _x2c_func_argv_174){
   Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_174, _x2c_func_argv_174, 0, 3313778));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_174, _x2c_func_argv_174, 1, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_174, _x2c_func_argv_174, 1, 1318210446));
   return String_var(Array_join(a0, a1));
   ;
 }
@@ -6000,17 +6002,17 @@ static Var _x2c_func_adapt_215(Func _x2c_func_binding_215, const FuncArg * _x2c_
 }
 
 static Var _x2c_func_adapt_216(Func _x2c_func_binding_216, const FuncArg * _x2c_func_argv_216){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_216, _x2c_func_argv_216, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_216, _x2c_func_argv_216, 1, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_216, _x2c_func_argv_216, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_216, _x2c_func_argv_216, 1, 1318210446));
   return List_var(Diff_lines(a0, a1));
   ;
 }
 
 static Var _x2c_func_adapt_217(Func _x2c_func_binding_217, const FuncArg * _x2c_func_argv_217){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_217, _x2c_func_argv_217, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_217, _x2c_func_argv_217, 1, 1318210446));
-  String a2 = Var_string(x2c_func_value_argument(_x2c_func_binding_217, _x2c_func_argv_217, 2, 1318210446));
-  String a3 = Var_string(x2c_func_value_argument(_x2c_func_binding_217, _x2c_func_argv_217, 3, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_217, _x2c_func_argv_217, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_217, _x2c_func_argv_217, 1, 1318210446));
+  String a2 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_217, _x2c_func_argv_217, 2, 1318210446));
+  String a3 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_217, _x2c_func_argv_217, 3, 1318210446));
   return String_var(Diff_unified(a0, a1, a2, a3));
   ;
 }
@@ -6168,7 +6170,7 @@ static Var _x2c_func_adapt_235(Func _x2c_func_binding_235, const FuncArg * _x2c_
 }
 
 static Var _x2c_func_adapt_236(Func _x2c_func_binding_236, const FuncArg * _x2c_func_argv_236){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_236, _x2c_func_argv_236, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_236, _x2c_func_argv_236, 0, 1318210446));
   return Json_parse(a0);
   ;
 }
@@ -6599,7 +6601,7 @@ static Var _x2c_func_adapt_286(Func _x2c_func_binding_286, const FuncArg * _x2c_
 Path Path_basename(Path);
 
 static Var _x2c_func_adapt_287(Func _x2c_func_binding_287, const FuncArg * _x2c_func_argv_287){
-  Path a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_287, _x2c_func_argv_287, 0, 1318210446));
+  Path a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_287, _x2c_func_argv_287, 0, 1318210446));
   return String_var(Path_basename(a0));
   ;
 }
@@ -6607,7 +6609,7 @@ static Var _x2c_func_adapt_287(Func _x2c_func_binding_287, const FuncArg * _x2c_
 Path Path_dirname(Path);
 
 static Var _x2c_func_adapt_288(Func _x2c_func_binding_288, const FuncArg * _x2c_func_argv_288){
-  Path a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_288, _x2c_func_argv_288, 0, 1318210446));
+  Path a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_288, _x2c_func_argv_288, 0, 1318210446));
   return String_var(Path_dirname(a0));
   ;
 }
@@ -6615,7 +6617,7 @@ static Var _x2c_func_adapt_288(Func _x2c_func_binding_288, const FuncArg * _x2c_
 String Path_extension(Path);
 
 static Var _x2c_func_adapt_289(Func _x2c_func_binding_289, const FuncArg * _x2c_func_argv_289){
-  Path a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_289, _x2c_func_argv_289, 0, 1318210446));
+  Path a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_289, _x2c_func_argv_289, 0, 1318210446));
   return String_var(Path_extension(a0));
   ;
 }
@@ -6623,8 +6625,8 @@ static Var _x2c_func_adapt_289(Func _x2c_func_binding_289, const FuncArg * _x2c_
 Path Path_join(Path, Path);
 
 static Var _x2c_func_adapt_290(Func _x2c_func_binding_290, const FuncArg * _x2c_func_argv_290){
-  Path a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_290, _x2c_func_argv_290, 0, 1318210446));
-  Path a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_290, _x2c_func_argv_290, 1, 1318210446));
+  Path a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_290, _x2c_func_argv_290, 0, 1318210446));
+  Path a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_290, _x2c_func_argv_290, 1, 1318210446));
   return String_var(Path_join(a0, a1));
   ;
 }
@@ -6632,7 +6634,7 @@ static Var _x2c_func_adapt_290(Func _x2c_func_binding_290, const FuncArg * _x2c_
 String Path_stem(Path);
 
 static Var _x2c_func_adapt_291(Func _x2c_func_binding_291, const FuncArg * _x2c_func_argv_291){
-  Path a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_291, _x2c_func_argv_291, 0, 1318210446));
+  Path a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_291, _x2c_func_argv_291, 0, 1318210446));
   return String_var(Path_stem(a0));
   ;
 }
@@ -6759,7 +6761,7 @@ static Var _x2c_func_adapt_306(Func _x2c_func_binding_306, const FuncArg * _x2c_
 String String_capitalize(String);
 
 static Var _x2c_func_adapt_307(Func _x2c_func_binding_307, const FuncArg * _x2c_func_argv_307){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_307, _x2c_func_argv_307, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_307, _x2c_func_argv_307, 0, 1318210446));
   return String_var(String_capitalize(a0));
   ;
 }
@@ -6767,8 +6769,8 @@ static Var _x2c_func_adapt_307(Func _x2c_func_binding_307, const FuncArg * _x2c_
 int String_compare(String, String);
 
 static Var _x2c_func_adapt_308(Func _x2c_func_binding_308, const FuncArg * _x2c_func_argv_308){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_308, _x2c_func_argv_308, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_308, _x2c_func_argv_308, 1, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_308, _x2c_func_argv_308, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_308, _x2c_func_argv_308, 1, 1318210446));
   return int_var(String_compare(a0, a1));
   ;
 }
@@ -6776,8 +6778,8 @@ static Var _x2c_func_adapt_308(Func _x2c_func_binding_308, const FuncArg * _x2c_
 int String_contains(String, String);
 
 static Var _x2c_func_adapt_309(Func _x2c_func_binding_309, const FuncArg * _x2c_func_argv_309){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_309, _x2c_func_argv_309, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_309, _x2c_func_argv_309, 1, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_309, _x2c_func_argv_309, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_309, _x2c_func_argv_309, 1, 1318210446));
   return int_var(String_contains(a0, a1));
   ;
 }
@@ -6785,7 +6787,7 @@ static Var _x2c_func_adapt_309(Func _x2c_func_binding_309, const FuncArg * _x2c_
 int String_contains_digit(String);
 
 static Var _x2c_func_adapt_310(Func _x2c_func_binding_310, const FuncArg * _x2c_func_argv_310){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_310, _x2c_func_argv_310, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_310, _x2c_func_argv_310, 0, 1318210446));
   return int_var(String_contains_digit(a0));
   ;
 }
@@ -6793,8 +6795,8 @@ static Var _x2c_func_adapt_310(Func _x2c_func_binding_310, const FuncArg * _x2c_
 int String_count(String, String);
 
 static Var _x2c_func_adapt_311(Func _x2c_func_binding_311, const FuncArg * _x2c_func_argv_311){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_311, _x2c_func_argv_311, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_311, _x2c_func_argv_311, 1, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_311, _x2c_func_argv_311, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_311, _x2c_func_argv_311, 1, 1318210446));
   return int_var(String_count(a0, a1));
   ;
 }
@@ -6802,7 +6804,7 @@ static Var _x2c_func_adapt_311(Func _x2c_func_binding_311, const FuncArg * _x2c_
 String String_dedent(String);
 
 static Var _x2c_func_adapt_312(Func _x2c_func_binding_312, const FuncArg * _x2c_func_argv_312){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_312, _x2c_func_argv_312, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_312, _x2c_func_argv_312, 0, 1318210446));
   return String_var(String_dedent(a0));
   ;
 }
@@ -6810,8 +6812,8 @@ static Var _x2c_func_adapt_312(Func _x2c_func_binding_312, const FuncArg * _x2c_
 int String_endswith(String, String);
 
 static Var _x2c_func_adapt_313(Func _x2c_func_binding_313, const FuncArg * _x2c_func_argv_313){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_313, _x2c_func_argv_313, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_313, _x2c_func_argv_313, 1, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_313, _x2c_func_argv_313, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_313, _x2c_func_argv_313, 1, 1318210446));
   return int_var(String_endswith(a0, a1));
   ;
 }
@@ -6819,7 +6821,7 @@ static Var _x2c_func_adapt_313(Func _x2c_func_binding_313, const FuncArg * _x2c_
 String String_escape(String);
 
 static Var _x2c_func_adapt_314(Func _x2c_func_binding_314, const FuncArg * _x2c_func_argv_314){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_314, _x2c_func_argv_314, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_314, _x2c_func_argv_314, 0, 1318210446));
   return String_var(String_escape(a0));
   ;
 }
@@ -6827,8 +6829,8 @@ static Var _x2c_func_adapt_314(Func _x2c_func_binding_314, const FuncArg * _x2c_
 int String_find(String, String);
 
 static Var _x2c_func_adapt_315(Func _x2c_func_binding_315, const FuncArg * _x2c_func_argv_315){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_315, _x2c_func_argv_315, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_315, _x2c_func_argv_315, 1, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_315, _x2c_func_argv_315, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_315, _x2c_func_argv_315, 1, 1318210446));
   return int_var(String_find(a0, a1));
   ;
 }
@@ -6836,8 +6838,8 @@ static Var _x2c_func_adapt_315(Func _x2c_func_binding_315, const FuncArg * _x2c_
 List String_find_all(String, String, int, int);
 
 static Var _x2c_func_adapt_316(Func _x2c_func_binding_316, const FuncArg * _x2c_func_argv_316){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_316, _x2c_func_argv_316, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_316, _x2c_func_argv_316, 1, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_316, _x2c_func_argv_316, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_316, _x2c_func_argv_316, 1, 1318210446));
   int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_316, _x2c_func_argv_316, 2, 3453797), 3453797));
   int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_316, _x2c_func_argv_316, 3, 3453797), 3453797));
   return List_var(String_find_all(a0, a1, a2, a3));
@@ -6847,8 +6849,8 @@ static Var _x2c_func_adapt_316(Func _x2c_func_binding_316, const FuncArg * _x2c_
 int String_find_within(String, String, int, int);
 
 static Var _x2c_func_adapt_317(Func _x2c_func_binding_317, const FuncArg * _x2c_func_argv_317){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_317, _x2c_func_argv_317, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_317, _x2c_func_argv_317, 1, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_317, _x2c_func_argv_317, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_317, _x2c_func_argv_317, 1, 1318210446));
   int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_317, _x2c_func_argv_317, 2, 3453797), 3453797));
   int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_317, _x2c_func_argv_317, 3, 3453797), 3453797));
   return int_var(String_find_within(a0, a1, a2, a3));
@@ -6858,7 +6860,7 @@ static Var _x2c_func_adapt_317(Func _x2c_func_binding_317, const FuncArg * _x2c_
 void String_free(String);
 
 static Var _x2c_func_adapt_318(Func _x2c_func_binding_318, const FuncArg * _x2c_func_argv_318){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_318, _x2c_func_argv_318, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_318, _x2c_func_argv_318, 0, 1318210446));
   String_free(a0);
   return((void) 0, Void);
 }
@@ -6866,7 +6868,7 @@ static Var _x2c_func_adapt_318(Func _x2c_func_binding_318, const FuncArg * _x2c_
 String String_getslice(String, int, int, int);
 
 static Var _x2c_func_adapt_319(Func _x2c_func_binding_319, const FuncArg * _x2c_func_argv_319){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_319, _x2c_func_argv_319, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_319, _x2c_func_argv_319, 0, 1318210446));
   int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_319, _x2c_func_argv_319, 1, 3453797), 3453797));
   int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_319, _x2c_func_argv_319, 2, 3453797), 3453797));
   int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_319, _x2c_func_argv_319, 3, 3453797), 3453797));
@@ -6877,7 +6879,7 @@ static Var _x2c_func_adapt_319(Func _x2c_func_binding_319, const FuncArg * _x2c_
 unsigned String_hash(String);
 
 static Var _x2c_func_adapt_320(Func _x2c_func_binding_320, const FuncArg * _x2c_func_argv_320){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_320, _x2c_func_argv_320, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_320, _x2c_func_argv_320, 0, 1318210446));
   return unsigned_var(String_hash(a0));
   ;
 }
@@ -6885,7 +6887,7 @@ static Var _x2c_func_adapt_320(Func _x2c_func_binding_320, const FuncArg * _x2c_
 String String_intern(String);
 
 static Var _x2c_func_adapt_321(Func _x2c_func_binding_321, const FuncArg * _x2c_func_argv_321){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_321, _x2c_func_argv_321, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_321, _x2c_func_argv_321, 0, 1318210446));
   return String_var(String_intern(a0));
   ;
 }
@@ -6893,7 +6895,7 @@ static Var _x2c_func_adapt_321(Func _x2c_func_binding_321, const FuncArg * _x2c_
 int String_is_alnum(String);
 
 static Var _x2c_func_adapt_322(Func _x2c_func_binding_322, const FuncArg * _x2c_func_argv_322){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_322, _x2c_func_argv_322, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_322, _x2c_func_argv_322, 0, 1318210446));
   return int_var(String_is_alnum(a0));
   ;
 }
@@ -6901,7 +6903,7 @@ static Var _x2c_func_adapt_322(Func _x2c_func_binding_322, const FuncArg * _x2c_
 int String_is_alnum_under(String);
 
 static Var _x2c_func_adapt_323(Func _x2c_func_binding_323, const FuncArg * _x2c_func_argv_323){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_323, _x2c_func_argv_323, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_323, _x2c_func_argv_323, 0, 1318210446));
   return int_var(String_is_alnum_under(a0));
   ;
 }
@@ -6909,7 +6911,7 @@ static Var _x2c_func_adapt_323(Func _x2c_func_binding_323, const FuncArg * _x2c_
 int String_is_alpha(String);
 
 static Var _x2c_func_adapt_324(Func _x2c_func_binding_324, const FuncArg * _x2c_func_argv_324){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_324, _x2c_func_argv_324, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_324, _x2c_func_argv_324, 0, 1318210446));
   return int_var(String_is_alpha(a0));
   ;
 }
@@ -6917,7 +6919,7 @@ static Var _x2c_func_adapt_324(Func _x2c_func_binding_324, const FuncArg * _x2c_
 int String_is_alpha_under(String);
 
 static Var _x2c_func_adapt_325(Func _x2c_func_binding_325, const FuncArg * _x2c_func_argv_325){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_325, _x2c_func_argv_325, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_325, _x2c_func_argv_325, 0, 1318210446));
   return int_var(String_is_alpha_under(a0));
   ;
 }
@@ -6925,7 +6927,7 @@ static Var _x2c_func_adapt_325(Func _x2c_func_binding_325, const FuncArg * _x2c_
 int String_is_digit(String);
 
 static Var _x2c_func_adapt_326(Func _x2c_func_binding_326, const FuncArg * _x2c_func_argv_326){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_326, _x2c_func_argv_326, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_326, _x2c_func_argv_326, 0, 1318210446));
   return int_var(String_is_digit(a0));
   ;
 }
@@ -6933,7 +6935,7 @@ static Var _x2c_func_adapt_326(Func _x2c_func_binding_326, const FuncArg * _x2c_
 int String_is_identifier(String);
 
 static Var _x2c_func_adapt_327(Func _x2c_func_binding_327, const FuncArg * _x2c_func_argv_327){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_327, _x2c_func_argv_327, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_327, _x2c_func_argv_327, 0, 1318210446));
   return int_var(String_is_identifier(a0));
   ;
 }
@@ -6941,7 +6943,7 @@ static Var _x2c_func_adapt_327(Func _x2c_func_binding_327, const FuncArg * _x2c_
 int String_is_lower(String);
 
 static Var _x2c_func_adapt_328(Func _x2c_func_binding_328, const FuncArg * _x2c_func_argv_328){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_328, _x2c_func_argv_328, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_328, _x2c_func_argv_328, 0, 1318210446));
   return int_var(String_is_lower(a0));
   ;
 }
@@ -6949,7 +6951,7 @@ static Var _x2c_func_adapt_328(Func _x2c_func_binding_328, const FuncArg * _x2c_
 int String_is_lower_under(String);
 
 static Var _x2c_func_adapt_329(Func _x2c_func_binding_329, const FuncArg * _x2c_func_argv_329){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_329, _x2c_func_argv_329, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_329, _x2c_func_argv_329, 0, 1318210446));
   return int_var(String_is_lower_under(a0));
   ;
 }
@@ -6957,7 +6959,7 @@ static Var _x2c_func_adapt_329(Func _x2c_func_binding_329, const FuncArg * _x2c_
 int String_is_space(String);
 
 static Var _x2c_func_adapt_330(Func _x2c_func_binding_330, const FuncArg * _x2c_func_argv_330){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_330, _x2c_func_argv_330, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_330, _x2c_func_argv_330, 0, 1318210446));
   return int_var(String_is_space(a0));
   ;
 }
@@ -6965,7 +6967,7 @@ static Var _x2c_func_adapt_330(Func _x2c_func_binding_330, const FuncArg * _x2c_
 int String_is_upper(String);
 
 static Var _x2c_func_adapt_331(Func _x2c_func_binding_331, const FuncArg * _x2c_func_argv_331){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_331, _x2c_func_argv_331, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_331, _x2c_func_argv_331, 0, 1318210446));
   return int_var(String_is_upper(a0));
   ;
 }
@@ -6973,7 +6975,7 @@ static Var _x2c_func_adapt_331(Func _x2c_func_binding_331, const FuncArg * _x2c_
 int String_is_upper_under(String);
 
 static Var _x2c_func_adapt_332(Func _x2c_func_binding_332, const FuncArg * _x2c_func_argv_332){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_332, _x2c_func_argv_332, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_332, _x2c_func_argv_332, 0, 1318210446));
   return int_var(String_is_upper_under(a0));
   ;
 }
@@ -6981,14 +6983,14 @@ static Var _x2c_func_adapt_332(Func _x2c_func_binding_332, const FuncArg * _x2c_
 Iter String_iter(String, Iter);
 
 static Var _x2c_func_adapt_333(Func _x2c_func_binding_333, const FuncArg * _x2c_func_argv_333){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_333, _x2c_func_argv_333, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_333, _x2c_func_argv_333, 0, 1318210446));
   Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_333, _x2c_func_argv_333, 1, 631140));
   return Iter_var(String_iter(a0, a1));
   ;
 }
 
 static Var _x2c_func_adapt_334(Func _x2c_func_binding_334, const FuncArg * _x2c_func_argv_334){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_334, _x2c_func_argv_334, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_334, _x2c_func_argv_334, 0, 1318210446));
   List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_334, _x2c_func_argv_334, 1, 806120));
   return String_var(String_join(a0, a1));
   ;
@@ -6997,8 +6999,8 @@ static Var _x2c_func_adapt_334(Func _x2c_func_binding_334, const FuncArg * _x2c_
 String String_keep(String, String);
 
 static Var _x2c_func_adapt_335(Func _x2c_func_binding_335, const FuncArg * _x2c_func_argv_335){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_335, _x2c_func_argv_335, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_335, _x2c_func_argv_335, 1, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_335, _x2c_func_argv_335, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_335, _x2c_func_argv_335, 1, 1318210446));
   return String_var(String_keep(a0, a1));
   ;
 }
@@ -7008,7 +7010,7 @@ Var Split_var(Split);
 Split String_lines(String);
 
 static Var _x2c_func_adapt_336(Func _x2c_func_binding_336, const FuncArg * _x2c_func_argv_336){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_336, _x2c_func_argv_336, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_336, _x2c_func_argv_336, 0, 1318210446));
   return Split_var(String_lines(a0));
   ;
 }
@@ -7016,7 +7018,7 @@ static Var _x2c_func_adapt_336(Func _x2c_func_binding_336, const FuncArg * _x2c_
 String String_lower(String);
 
 static Var _x2c_func_adapt_337(Func _x2c_func_binding_337, const FuncArg * _x2c_func_argv_337){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_337, _x2c_func_argv_337, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_337, _x2c_func_argv_337, 0, 1318210446));
   return String_var(String_lower(a0));
   ;
 }
@@ -7033,7 +7035,7 @@ static Var _x2c_func_adapt_338(Func _x2c_func_binding_338, const FuncArg * _x2c_
 String String_pad_center(String, int, char);
 
 static Var _x2c_func_adapt_339(Func _x2c_func_binding_339, const FuncArg * _x2c_func_argv_339){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_339, _x2c_func_argv_339, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_339, _x2c_func_argv_339, 0, 1318210446));
   int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_339, _x2c_func_argv_339, 1, 3453797), 3453797));
   char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_func_binding_339, _x2c_func_argv_339, 2, 26993), 26993));
   return String_var(String_pad_center(a0, a1, a2));
@@ -7043,7 +7045,7 @@ static Var _x2c_func_adapt_339(Func _x2c_func_binding_339, const FuncArg * _x2c_
 String String_pad_left(String, int, char);
 
 static Var _x2c_func_adapt_340(Func _x2c_func_binding_340, const FuncArg * _x2c_func_argv_340){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_340, _x2c_func_argv_340, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_340, _x2c_func_argv_340, 0, 1318210446));
   int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_340, _x2c_func_argv_340, 1, 3453797), 3453797));
   char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_func_binding_340, _x2c_func_argv_340, 2, 26993), 26993));
   return String_var(String_pad_left(a0, a1, a2));
@@ -7053,7 +7055,7 @@ static Var _x2c_func_adapt_340(Func _x2c_func_binding_340, const FuncArg * _x2c_
 String String_pad_right(String, int, char);
 
 static Var _x2c_func_adapt_341(Func _x2c_func_binding_341, const FuncArg * _x2c_func_argv_341){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_341, _x2c_func_argv_341, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_341, _x2c_func_argv_341, 0, 1318210446));
   int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_341, _x2c_func_argv_341, 1, 3453797), 3453797));
   char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_func_binding_341, _x2c_func_argv_341, 2, 26993), 26993));
   return String_var(String_pad_right(a0, a1, a2));
@@ -7063,7 +7065,7 @@ static Var _x2c_func_adapt_341(Func _x2c_func_binding_341, const FuncArg * _x2c_
 String String_parse(String);
 
 static Var _x2c_func_adapt_342(Func _x2c_func_binding_342, const FuncArg * _x2c_func_argv_342){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_342, _x2c_func_argv_342, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_342, _x2c_func_argv_342, 0, 1318210446));
   return String_var(String_parse(a0));
   ;
 }
@@ -7071,7 +7073,7 @@ static Var _x2c_func_adapt_342(Func _x2c_func_binding_342, const FuncArg * _x2c_
 int String_parse_char(String);
 
 static Var _x2c_func_adapt_343(Func _x2c_func_binding_343, const FuncArg * _x2c_func_argv_343){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_343, _x2c_func_argv_343, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_343, _x2c_func_argv_343, 0, 1318210446));
   return int_var(String_parse_char(a0));
   ;
 }
@@ -7079,8 +7081,8 @@ static Var _x2c_func_adapt_343(Func _x2c_func_binding_343, const FuncArg * _x2c_
 List String_partition(String, String);
 
 static Var _x2c_func_adapt_344(Func _x2c_func_binding_344, const FuncArg * _x2c_func_argv_344){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_344, _x2c_func_argv_344, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_344, _x2c_func_argv_344, 1, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_344, _x2c_func_argv_344, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_344, _x2c_func_argv_344, 1, 1318210446));
   return List_var(String_partition(a0, a1));
   ;
 }
@@ -7088,8 +7090,8 @@ static Var _x2c_func_adapt_344(Func _x2c_func_binding_344, const FuncArg * _x2c_
 String String_reject(String, String);
 
 static Var _x2c_func_adapt_345(Func _x2c_func_binding_345, const FuncArg * _x2c_func_argv_345){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_345, _x2c_func_argv_345, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_345, _x2c_func_argv_345, 1, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_345, _x2c_func_argv_345, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_345, _x2c_func_argv_345, 1, 1318210446));
   return String_var(String_reject(a0, a1));
   ;
 }
@@ -7097,8 +7099,8 @@ static Var _x2c_func_adapt_345(Func _x2c_func_binding_345, const FuncArg * _x2c_
 String String_remove_prefix(String, String);
 
 static Var _x2c_func_adapt_346(Func _x2c_func_binding_346, const FuncArg * _x2c_func_argv_346){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_346, _x2c_func_argv_346, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_346, _x2c_func_argv_346, 1, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_346, _x2c_func_argv_346, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_346, _x2c_func_argv_346, 1, 1318210446));
   return String_var(String_remove_prefix(a0, a1));
   ;
 }
@@ -7106,8 +7108,8 @@ static Var _x2c_func_adapt_346(Func _x2c_func_binding_346, const FuncArg * _x2c_
 String String_remove_suffix(String, String);
 
 static Var _x2c_func_adapt_347(Func _x2c_func_binding_347, const FuncArg * _x2c_func_argv_347){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_347, _x2c_func_argv_347, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_347, _x2c_func_argv_347, 1, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_347, _x2c_func_argv_347, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_347, _x2c_func_argv_347, 1, 1318210446));
   return String_var(String_remove_suffix(a0, a1));
   ;
 }
@@ -7115,7 +7117,7 @@ static Var _x2c_func_adapt_347(Func _x2c_func_binding_347, const FuncArg * _x2c_
 String String_repeat(String, int);
 
 static Var _x2c_func_adapt_348(Func _x2c_func_binding_348, const FuncArg * _x2c_func_argv_348){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_348, _x2c_func_argv_348, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_348, _x2c_func_argv_348, 0, 1318210446));
   int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_348, _x2c_func_argv_348, 1, 3453797), 3453797));
   return String_var(String_repeat(a0, a1));
   ;
@@ -7124,9 +7126,9 @@ static Var _x2c_func_adapt_348(Func _x2c_func_binding_348, const FuncArg * _x2c_
 String String_replace(String, String, String);
 
 static Var _x2c_func_adapt_349(Func _x2c_func_binding_349, const FuncArg * _x2c_func_argv_349){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_349, _x2c_func_argv_349, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_349, _x2c_func_argv_349, 1, 1318210446));
-  String a2 = Var_string(x2c_func_value_argument(_x2c_func_binding_349, _x2c_func_argv_349, 2, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_349, _x2c_func_argv_349, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_349, _x2c_func_argv_349, 1, 1318210446));
+  String a2 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_349, _x2c_func_argv_349, 2, 1318210446));
   return String_var(String_replace(a0, a1, a2));
   ;
 }
@@ -7134,9 +7136,9 @@ static Var _x2c_func_adapt_349(Func _x2c_func_binding_349, const FuncArg * _x2c_
 String String_replace_n(String, String, String, int);
 
 static Var _x2c_func_adapt_350(Func _x2c_func_binding_350, const FuncArg * _x2c_func_argv_350){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_350, _x2c_func_argv_350, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_350, _x2c_func_argv_350, 1, 1318210446));
-  String a2 = Var_string(x2c_func_value_argument(_x2c_func_binding_350, _x2c_func_argv_350, 2, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_350, _x2c_func_argv_350, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_350, _x2c_func_argv_350, 1, 1318210446));
+  String a2 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_350, _x2c_func_argv_350, 2, 1318210446));
   int a3 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_350, _x2c_func_argv_350, 3, 3453797), 3453797));
   return String_var(String_replace_n(a0, a1, a2, a3));
   ;
@@ -7145,8 +7147,8 @@ static Var _x2c_func_adapt_350(Func _x2c_func_binding_350, const FuncArg * _x2c_
 int String_rfind(String, String);
 
 static Var _x2c_func_adapt_351(Func _x2c_func_binding_351, const FuncArg * _x2c_func_argv_351){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_351, _x2c_func_argv_351, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_351, _x2c_func_argv_351, 1, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_351, _x2c_func_argv_351, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_351, _x2c_func_argv_351, 1, 1318210446));
   return int_var(String_rfind(a0, a1));
   ;
 }
@@ -7154,8 +7156,8 @@ static Var _x2c_func_adapt_351(Func _x2c_func_binding_351, const FuncArg * _x2c_
 List String_rpartition(String, String);
 
 static Var _x2c_func_adapt_352(Func _x2c_func_binding_352, const FuncArg * _x2c_func_argv_352){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_352, _x2c_func_argv_352, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_352, _x2c_func_argv_352, 1, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_352, _x2c_func_argv_352, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_352, _x2c_func_argv_352, 1, 1318210446));
   return List_var(String_rpartition(a0, a1));
   ;
 }
@@ -7163,8 +7165,8 @@ static Var _x2c_func_adapt_352(Func _x2c_func_binding_352, const FuncArg * _x2c_
 List String_split(String, String);
 
 static Var _x2c_func_adapt_353(Func _x2c_func_binding_353, const FuncArg * _x2c_func_argv_353){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_353, _x2c_func_argv_353, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_353, _x2c_func_argv_353, 1, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_353, _x2c_func_argv_353, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_353, _x2c_func_argv_353, 1, 1318210446));
   return List_var(String_split(a0, a1));
   ;
 }
@@ -7172,7 +7174,7 @@ static Var _x2c_func_adapt_353(Func _x2c_func_binding_353, const FuncArg * _x2c_
 List String_split_lines(String, int);
 
 static Var _x2c_func_adapt_354(Func _x2c_func_binding_354, const FuncArg * _x2c_func_argv_354){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_354, _x2c_func_argv_354, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_354, _x2c_func_argv_354, 0, 1318210446));
   int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_354, _x2c_func_argv_354, 1, 3453797), 3453797));
   return List_var(String_split_lines(a0, a1));
   ;
@@ -7181,8 +7183,8 @@ static Var _x2c_func_adapt_354(Func _x2c_func_binding_354, const FuncArg * _x2c_
 List String_split_n(String, String, int);
 
 static Var _x2c_func_adapt_355(Func _x2c_func_binding_355, const FuncArg * _x2c_func_argv_355){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_355, _x2c_func_argv_355, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_355, _x2c_func_argv_355, 1, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_355, _x2c_func_argv_355, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_355, _x2c_func_argv_355, 1, 1318210446));
   int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_355, _x2c_func_argv_355, 2, 3453797), 3453797));
   return List_var(String_split_n(a0, a1, a2));
   ;
@@ -7191,8 +7193,8 @@ static Var _x2c_func_adapt_355(Func _x2c_func_binding_355, const FuncArg * _x2c_
 Split String_splits(String, String);
 
 static Var _x2c_func_adapt_356(Func _x2c_func_binding_356, const FuncArg * _x2c_func_argv_356){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_356, _x2c_func_argv_356, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_356, _x2c_func_argv_356, 1, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_356, _x2c_func_argv_356, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_356, _x2c_func_argv_356, 1, 1318210446));
   return Split_var(String_splits(a0, a1));
   ;
 }
@@ -7200,8 +7202,8 @@ static Var _x2c_func_adapt_356(Func _x2c_func_binding_356, const FuncArg * _x2c_
 String String_squeeze(String, String);
 
 static Var _x2c_func_adapt_357(Func _x2c_func_binding_357, const FuncArg * _x2c_func_argv_357){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_357, _x2c_func_argv_357, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_357, _x2c_func_argv_357, 1, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_357, _x2c_func_argv_357, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_357, _x2c_func_argv_357, 1, 1318210446));
   return String_var(String_squeeze(a0, a1));
   ;
 }
@@ -7209,8 +7211,8 @@ static Var _x2c_func_adapt_357(Func _x2c_func_binding_357, const FuncArg * _x2c_
 int String_startswith(String, String);
 
 static Var _x2c_func_adapt_358(Func _x2c_func_binding_358, const FuncArg * _x2c_func_argv_358){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_358, _x2c_func_argv_358, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_358, _x2c_func_argv_358, 1, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_358, _x2c_func_argv_358, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_358, _x2c_func_argv_358, 1, 1318210446));
   return int_var(String_startswith(a0, a1));
   ;
 }
@@ -7218,7 +7220,7 @@ static Var _x2c_func_adapt_358(Func _x2c_func_binding_358, const FuncArg * _x2c_
 Symbol String_symbol(String);
 
 static Var _x2c_func_adapt_359(Func _x2c_func_binding_359, const FuncArg * _x2c_func_argv_359){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_359, _x2c_func_argv_359, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_359, _x2c_func_argv_359, 0, 1318210446));
   return Symbol_var(String_symbol(a0));
   ;
 }
@@ -7226,7 +7228,7 @@ static Var _x2c_func_adapt_359(Func _x2c_func_binding_359, const FuncArg * _x2c_
 int String_try_double(String, double *);
 
 static Var _x2c_func_adapt_360(Func _x2c_func_binding_360, const FuncArg * _x2c_func_argv_360){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_360, _x2c_func_argv_360, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_360, _x2c_func_argv_360, 0, 1318210446));
   double * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_360, _x2c_func_argv_360, 1, 429601877));
   return int_var(String_try_double(a0, a1));
   ;
@@ -7235,7 +7237,7 @@ static Var _x2c_func_adapt_360(Func _x2c_func_binding_360, const FuncArg * _x2c_
 int String_try_long(String, long *);
 
 static Var _x2c_func_adapt_361(Func _x2c_func_binding_361, const FuncArg * _x2c_func_argv_361){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_361, _x2c_func_argv_361, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_361, _x2c_func_argv_361, 0, 1318210446));
   long * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_361, _x2c_func_argv_361, 1, 26178038));
   return int_var(String_try_long(a0, a1));
   ;
@@ -7244,7 +7246,7 @@ static Var _x2c_func_adapt_361(Func _x2c_func_binding_361, const FuncArg * _x2c_
 String String_unescape(String);
 
 static Var _x2c_func_adapt_362(Func _x2c_func_binding_362, const FuncArg * _x2c_func_argv_362){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_362, _x2c_func_argv_362, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_362, _x2c_func_argv_362, 0, 1318210446));
   return String_var(String_unescape(a0));
   ;
 }
@@ -7252,7 +7254,7 @@ static Var _x2c_func_adapt_362(Func _x2c_func_binding_362, const FuncArg * _x2c_
 String String_upper(String);
 
 static Var _x2c_func_adapt_363(Func _x2c_func_binding_363, const FuncArg * _x2c_func_argv_363){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_363, _x2c_func_argv_363, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_363, _x2c_func_argv_363, 0, 1318210446));
   return String_var(String_upper(a0));
   ;
 }
@@ -7260,7 +7262,7 @@ static Var _x2c_func_adapt_363(Func _x2c_func_binding_363, const FuncArg * _x2c_
 String String_withindex(String, int, char);
 
 static Var _x2c_func_adapt_364(Func _x2c_func_binding_364, const FuncArg * _x2c_func_argv_364){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_364, _x2c_func_argv_364, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_364, _x2c_func_argv_364, 0, 1318210446));
   int a1 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_364, _x2c_func_argv_364, 1, 3453797), 3453797));
   char a2 = Var_char(Var_convert(x2c_func_value_argument(_x2c_func_binding_364, _x2c_func_argv_364, 2, 26993), 26993));
   return String_var(String_withindex(a0, a1, a2));
@@ -7270,7 +7272,7 @@ static Var _x2c_func_adapt_364(Func _x2c_func_binding_364, const FuncArg * _x2c_
 Split String_words(String);
 
 static Var _x2c_func_adapt_365(Func _x2c_func_binding_365, const FuncArg * _x2c_func_argv_365){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_365, _x2c_func_argv_365, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_365, _x2c_func_argv_365, 0, 1318210446));
   return Split_var(String_words(a0));
   ;
 }
@@ -7313,7 +7315,7 @@ static Var _x2c_func_adapt_369(Func _x2c_func_binding_369, const FuncArg * _x2c_
 int Symbol_try_new(String, Symbol *);
 
 static Var _x2c_func_adapt_370(Func _x2c_func_binding_370, const FuncArg * _x2c_func_argv_370){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_370, _x2c_func_argv_370, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_370, _x2c_func_argv_370, 0, 1318210446));
   Symbol * a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_370, _x2c_func_argv_370, 1, 42507336502));
   return int_var(Symbol_try_new(a0, a1));
   ;
@@ -7731,7 +7733,7 @@ static Var _x2c_func_adapt_422(Func _x2c_func_binding_422, const FuncArg * _x2c_
 Var Var_parse(String, Symbol);
 
 static Var _x2c_func_adapt_423(Func _x2c_func_binding_423, const FuncArg * _x2c_func_argv_423){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_423, _x2c_func_argv_423, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_423, _x2c_func_argv_423, 0, 1318210446));
   Symbol a1 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_423, _x2c_func_argv_423, 1, 1328354264));
   return Var_parse(a0, a1);
   ;

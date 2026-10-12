@@ -318,7 +318,7 @@ static List _selector_chain(String spelling, List value){
 
 static int List_truth(List);
 
-static String Var_string(Var);
+String Var_as_string(Var);
 
 static Var List_car(List);
 
@@ -328,7 +328,7 @@ static List List_cdr(List);
 
 static List _selector_double(List steps){
   if(! List_truth(steps)) return NULL;
-  String rest = Var_string(List_car(steps)), a = String_join(NULL, cons(String_var(_52), cons(String_var(rest), NULL))), d = String_join(NULL, cons(String_var(_53), cons(String_var(rest), NULL)));
+  String rest = Var_as_string(List_car(steps)), a = String_join(NULL, cons(String_var(_52), cons(String_var(rest), NULL))), d = String_join(NULL, cons(String_var(_53), cons(String_var(rest), NULL)));
   return({
     Var _x2c_literal_part_0 = String_var(a);  Var _x2c_literal_part_1 = String_var(d);  List _x2c_literal_part_2 = _selector_double(List_cdr(steps));  cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, List_append(_x2c_literal_part_2, NULL)));
   }
@@ -354,7 +354,7 @@ List Macro_apply(Macro, List);
 
 static List _selector_units(List middles, Macro car, Macro cdr){
   if(! List_truth(middles)) return NULL;
-  String middle = Var_string(List_car(middles));
+  String middle = Var_as_string(List_car(middles));
   List rest = _selector_units(List_cdr(middles), car, cdr);
   if(List_contains(_67, String_var(middle))) return rest;
   String name = String_join(NULL, cons(String_var(_68), cons(String_var(middle), cons(String_var(_69), NULL))));

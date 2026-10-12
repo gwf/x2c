@@ -755,8 +755,8 @@ List Compiler_emit(Compiler c, List ast, Map cache_bindings){
       entry = Var_list(_x2c_macro_cursor_output_0);
       {
         List _x2c_destructure_0 = entry;
-        String name = Var_string(List_getindex(_x2c_destructure_0, 0));
-        String definition = Var_string(List_getindex(_x2c_destructure_0, 1));
+        String name = Var_as_string(List_getindex(_x2c_destructure_0, 0));
+        String definition = Var_as_string(List_getindex(_x2c_destructure_0, 1));
         Array_push(before, String_var(definition));
         Array_push(after, String_var(String_join(NULL, cons(String_var(_1), cons(String_var(name), NULL)))));
       }
@@ -1615,7 +1615,7 @@ static List Emitter__emit_ident(Emitter * e, Var binding){
         default: ; if (!_x2c_match_none) { static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_380), &_x2c_match_capture)) { Var _x2c_match_value_0 = _x2c_match_values[0]; {
         Var spelling;  spelling = _x2c_match_value_0; {
           Var _x2c_match_value_0 = spelling; {
-            String spelling = Var_string(_x2c_match_value_0);  return cons(String_var(spelling), NULL);
+            String spelling = Var_as_string(_x2c_match_value_0);  return cons(String_var(spelling), NULL);
           }
 
         }
@@ -1683,7 +1683,7 @@ static List Emitter__emit_label(Emitter * e, Var name){
 
 List Compiler_origin_location(Compiler, int);
 static List Emitter__raise(Emitter * e, Ast ast, Var cause, List arguments){
-  List code = Emitter__emit(&((* e)), Var_list(cause));  List arg_tokens = _commas(Emitter__emit(&((* e)), arguments));  String site_name = Compiler_fresh_name((* e).c, _415);  List location = Compiler_origin_location((* e).c, (* e).origin);  String file = Var_string(List_truth(location) ? List_assoc(location, Symbol_var(412426)) : String_var((* e).c -> filename));  int line = Var_int(Var_convert(List_truth(location) ? List_assoc(location, Symbol_var(805770)) : int_var(0), 3453797));  String function = String_truth((* e).fn_name) ?(* e).fn_name : _416;  String file_literal = _c_string_literal(file);  String function_literal = _c_string_literal(function);  List tail = List_truth(arguments) ? cons(_14, List_append(arg_tokens, NULL)) : NULL;  List terminal = Ast_never_returns(ast) ? _419 : NULL;  return({
+  List code = Emitter__emit(&((* e)), Var_list(cause));  List arg_tokens = _commas(Emitter__emit(&((* e)), arguments));  String site_name = Compiler_fresh_name((* e).c, _415);  List location = Compiler_origin_location((* e).c, (* e).origin);  String file = Var_as_string(List_truth(location) ? List_assoc(location, Symbol_var(412426)) : String_var((* e).c -> filename));  int line = Var_int(Var_convert(List_truth(location) ? List_assoc(location, Symbol_var(805770)) : int_var(0), 3453797));  String function = String_truth((* e).fn_name) ?(* e).fn_name : _416;  String file_literal = _c_string_literal(file);  String function_literal = _c_string_literal(function);  List tail = List_truth(arguments) ? cons(_14, List_append(arg_tokens, NULL)) : NULL;  List terminal = Ast_never_returns(ast) ? _419 : NULL;  return({
     Var _x2c_literal_part_86 = String_var(site_name);  Var _x2c_literal_part_87 = String_var(file_literal);  Var _x2c_literal_part_88 = String_var(function_literal);  Var _x2c_literal_part_89 = int_var(line);  Var _x2c_literal_part_90 = String_var(site_name);  List _x2c_literal_part_91 = code;  Var _x2c_literal_part_92 = String_var(String_join(NULL, cons(String_var(int_str(List_len(arguments) / 2)), NULL)));  cons(_93, cons(_421, cons(_x2c_literal_part_86, cons(_423, cons(_425, cons(_x2c_literal_part_87, cons(_14, cons(_427, cons(_x2c_literal_part_88, cons(_14, cons(_429, cons(_x2c_literal_part_89, cons(_222, cons(_431, cons(_x2c_literal_part_90, cons(_14, List_append(_x2c_literal_part_91, cons(_14, cons(_x2c_literal_part_92, List_append(tail, cons(_16, List_append(terminal, _96))))))))))))))))))))));
   }
   );
@@ -1696,7 +1696,7 @@ static String _c_string_literal(String value){
 int Type_integer_literal_magnitude(Type, String, unsigned long long *);
 Symbol Type_scalar_tag(Type);
 static List Emitter__literal(Emitter * e, List ast){
-  List _x2c_destructure_6 = List_cdr(ast);  List type = Var_list(List_getindex(_x2c_destructure_6, 0));  String text = Var_string(List_getindex(_x2c_destructure_6, 1));  Var value = List_getindex(_x2c_destructure_6, 2);  if(type == _435 && String_equal(text, _436)) return _439;  if(type == _442){
+  List _x2c_destructure_6 = List_cdr(ast);  List type = Var_list(List_getindex(_x2c_destructure_6, 0));  String text = Var_as_string(List_getindex(_x2c_destructure_6, 1));  Var value = List_getindex(_x2c_destructure_6, 2);  if(type == _435 && String_equal(text, _436)) return _439;  if(type == _442){
     String qq = _443;  text = String_add(String_add(qq, String_escape(text)), qq);  return cons(_445, cons(_22, cons(String_var(text), _8)));
   }
   if(type == _448){
@@ -1730,7 +1730,7 @@ static List _atom_intern(String spelling){
 String preproc_include_target(String, int *);
 int is_source_file(String);
 static List Emitter__preproc(Emitter * e, List ast){
-  int angle = 0;  String target = preproc_include_target(Var_string(List_cadr(ast)), &(angle));  if(! String_truth(target) || ! is_source_file(target)) return List_cdr(ast);  String stem = String_getslice(target, (-2147483647 - 1), String_rfind(target, _460), 1);  String out = String_join(NULL, cons(String_var(_461), cons(String_var(stem), cons(String_var(_462), NULL))));  return cons(String_var(out), NULL);
+  int angle = 0;  String target = preproc_include_target(Var_as_string(List_cadr(ast)), &(angle));  if(! String_truth(target) || ! is_source_file(target)) return List_cdr(ast);  String stem = String_getslice(target, (-2147483647 - 1), String_rfind(target, _460), 1);  String out = String_join(NULL, cons(String_var(_461), cons(String_var(stem), cons(String_var(_462), NULL))));  return cons(String_var(out), NULL);
 }
 
 static List Emitter__declare_stmt(Emitter * e, List ast){
@@ -1790,7 +1790,7 @@ static List Emitter__function(Emitter * e, List ast){
   List function_binding = Var_list(List_cadr(bindings));
   (* e).fn_name = binding_identity_spelling(function_binding);
   Var defer_owner;
-  if(Map_try_get(Compiler_semantic_binding_facts((* e).c), List_var(cons(_470, cons(List_var(function_binding), NULL))), &(defer_owner)))(* e).fn_name = Var_string(defer_owner);
+  if(Map_try_get(Compiler_semantic_binding_facts((* e).c), List_var(cons(_470, cons(List_var(function_binding), NULL))), &(defer_owner)))(* e).fn_name = Var_as_string(defer_owner);
   type = Emitter__emit(&((* e)), cons(List_var(type), NULL));
   bindings = cons(List_var(bindings), NULL);
   body = cons(List_var(body), NULL);

@@ -1545,7 +1545,7 @@ void x2c_cleanup_push(X2CCleanup *);
 
 void Block_reserve(Block, size_t);
 
-static String Var_string(Var);
+String Var_as_string(Var);
 
 Var Context_export_nested(Context, Var);
 
@@ -1571,7 +1571,7 @@ static ArrayString _prepare_string_array_export(ArrayString array, Context sourc
       Block_reserve(((Block) staged), array -> cap);
       String * data = array -> bytes;
       for(size_t i = 0;  i < array -> length;  i ++){
-        String value = Var_string(Context_export_nested(source, String_var(data[i])));
+        String value = Var_as_string(Context_export_nested(source, String_var(data[i])));
         Block_append(((Block) staged), & value, 1);
       }
       {
@@ -5753,7 +5753,7 @@ ArrayString Array_arraystring(Array _x2c_macro_values_34){
     ;
     x2c_cleanup_push(& _x2c_defer_record_34);
     {
-      for(size_t _x2c_macro_i_69 = 0;  _x2c_macro_i_69 < _x2c_macro_values_34 -> length;  _x2c_macro_i_69 ++) ArrayString_push(_x2c_macro_packed_6, Var_string(Array_getindex(_x2c_macro_values_34, _x2c_macro_i_69)));
+      for(size_t _x2c_macro_i_69 = 0;  _x2c_macro_i_69 < _x2c_macro_values_34 -> length;  _x2c_macro_i_69 ++) ArrayString_push(_x2c_macro_packed_6, Var_as_string(Array_getindex(_x2c_macro_values_34, _x2c_macro_i_69)));
       {
         ArrayString _x2c_return_value_33 = _x2c_macro_result_14 = _x2c_macro_packed_6;
         {
@@ -6423,7 +6423,7 @@ static inline Iter _x2c_proto_arraystring_iter_0(Var a0, Iter a1){
 }
 
 static inline int _x2c_proto_arraystring_contains_0(Var a0, Var a1){
-  return ArrayString_contains(Var_arraystring(a0), Var_string(a1));
+  return ArrayString_contains(Var_arraystring(a0), Var_as_string(a1));
 }
 
 static inline Var _x2c_proto_arraystring_getindex_0(Var a0, Var a1){
@@ -6431,11 +6431,11 @@ static inline Var _x2c_proto_arraystring_getindex_0(Var a0, Var a1){
 }
 
 static inline Var _x2c_proto_arraystring_setindex_0(Var a0, Var a1, Var a2){
-  return String_var(ArrayString_setindex(Var_arraystring(a0), Var_int(Var_convert(a1, 3453797)), Var_string(a2)));
+  return String_var(ArrayString_setindex(Var_arraystring(a0), Var_int(Var_convert(a1, 3453797)), Var_as_string(a2)));
 }
 
 static inline Var _x2c_proto_arraystring_updateindex_0(Var a0, Var a1, Symbol a2, Var a3){
-  return String_var(ArrayString_updateindex(Var_arraystring(a0), Var_int(Var_convert(a1, 3453797)), a2, Var_string(a3)));
+  return String_var(ArrayString_updateindex(Var_arraystring(a0), Var_int(Var_convert(a1, 3453797)), a2, Var_as_string(a3)));
 }
 
 static inline Var _x2c_proto_arraystring_postfixindex_0(Var a0, Var a1, Symbol a2){

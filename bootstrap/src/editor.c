@@ -152,7 +152,7 @@ static CliRequest _project_target(CliRequest request, String source){
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
     while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      input = Var_string(_x2c_macro_cursor_output_0);
+      input = Var_as_string(_x2c_macro_cursor_output_0);
       {
         if(! String_equal(Path_absolute(input), source)) continue;
         if(selected && selected != node -> request) _fail("x2c editor: source belongs to multiple selected targets\n");
@@ -250,7 +250,7 @@ static int _changed_dependency(Compiler c, SourceView sources){
     Var _x2c_macro_item_1;
     while(Iter_try_next(_x2c_macro_iterator_1, &(_x2c_macro_item_1))){
       path = _x2c_macro_item_1;
-      if(SourceView_is_changed(sources, Var_string(path))) return 1;
+      if(SourceView_is_changed(sources, Var_as_string(path))) return 1;
     }
 
   }
@@ -263,7 +263,7 @@ static int _changed_dependency(Compiler c, SourceView sources){
     Var _x2c_macro_item_2;
     while(Iter_try_next(_x2c_macro_iterator_2, &(_x2c_macro_item_2))){
       path = _x2c_macro_item_2;
-      if(SourceView_is_changed(sources, Var_string(path))) return 1;
+      if(SourceView_is_changed(sources, Var_as_string(path))) return 1;
     }
 
   }
@@ -348,7 +348,7 @@ static Map Query_diagnostic_range(Query * q, List location){
           Compiler c =(* q).compiler;
           int start = Var_int(Var_convert(position, 3453797)), width = Var_int(Var_convert(length, 3453797));
           if(! Var_equal(String_var(Compiler_display_path(c, Compiler_text_source(c, Var_int(Var_convert(position, 3453797)), &(start)))), file)) start = Var_int(Var_convert(position, 3453797));
-          return Query_location(&((* q)), Path_absolute(Var_string(file)), start, start + width);
+          return Query_location(&((* q)), Path_absolute(Var_as_string(file)), start, start + width);
         }
 
       }
@@ -381,7 +381,7 @@ static List _occurrence(Compiler c, String path, int offset){
     while(Array_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_2))){
       row = Var_list(_x2c_macro_cursor_output_2);
       {
-        String file = Var_string(List_getindex(row, 0));
+        String file = Var_as_string(List_getindex(row, 0));
         int start = Var_int(Var_convert(List_getindex(row, 1), 3453797)), end = Var_int(Var_convert(List_getindex(row, 2), 3453797));
         if(! String_equal(file, path) || offset < start || offset >= end) continue;
         if(! List_truth(found) || end - start < Var_int(List_getindex(found, 2)) - Var_int(List_getindex(found, 1))) found = row;
@@ -398,7 +398,7 @@ static void Query_definition(Query * q, List row){
   Var value = Map_getindex((* q).compiler -> source_definitions, List_var(binding));
   if(! Var_is_row(value, 9, 7, 4)) return;
   List target = Var_list(value);
-  Map_setindex((* q).reply, Symbol_var(292902696930268), Map_var(Query_location(&((* q)), Var_string(List_getindex(target, 0)), Var_int(Var_convert(List_getindex(target, 1), 3453797)), Var_int(Var_convert(List_getindex(target, 2), 3453797)))));
+  Map_setindex((* q).reply, Symbol_var(292902696930268), Map_var(Query_location(&((* q)), Var_as_string(List_getindex(target, 0)), Var_int(Var_convert(List_getindex(target, 1), 3453797)), Var_int(Var_convert(List_getindex(target, 2), 3453797)))));
 }
 
 static Type Var_type(Var);
@@ -412,7 +412,7 @@ static void Query_hover(Query * q, List row){
   if(! List_truth(Type_list(type))) return;
   Compiler c =(* q).compiler;
   List declaration = Type_declaration_ast(type, Var_list(List_getindex(row, 3)));
-  Map hover = Query_location(&((* q)), Var_string(List_getindex(row, 0)), Var_int(Var_convert(List_getindex(row, 1), 3453797)), Var_int(Var_convert(List_getindex(row, 2), 3453797)));
+  Map hover = Query_location(&((* q)), Var_as_string(List_getindex(row, 0)), Var_int(Var_convert(List_getindex(row, 1), 3453797)), Var_int(Var_convert(List_getindex(row, 2), 3453797)));
   Map_setindex(hover, Symbol_var(1322536), String_var(String_new(Compiler_code_pretty_string(c, Compiler_emit(c, cons(List_var(declaration), NULL), NULL), NULL))));
   Map_setindex((* q).reply, Symbol_var(17805668), Map_var(hover));
 }

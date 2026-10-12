@@ -82,7 +82,7 @@ static String _delegate_type_name(Type type){
 static String _delegate_path(Type type, List fields, String member){
   Array parts = Array_update_n(Array_new(), 1, String_var(_delegate_type_name(type))); {
     String field;  List _x2c_macro_object_0 = fields;  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      field = Var_string(_x2c_macro_cursor_output_0);  Array_push(parts, String_var(field));
+      field = Var_as_string(_x2c_macro_cursor_output_0);  Array_push(parts, String_var(field));
     }
 
   }

@@ -339,7 +339,7 @@ static String _recorded_tool(String name){
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
     while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      line = Var_string(_x2c_macro_cursor_output_0);
+      line = Var_as_string(_x2c_macro_cursor_output_0);
       if(String_startswith(line, String_join(NULL, cons(String_var(name), cons(String_var(_6), NULL))))) return String_remove_prefix(line, String_join(NULL, cons(String_var(name), cons(String_var(_6), NULL))));
     }
 
@@ -451,7 +451,7 @@ ToolRun ToolAction_start(ToolAction action){
   execution -> action = action;
   if(action -> dry_run) return execution;
   Job command = action -> inherit_stdio ? Job_live(List_job(action -> arguments)) : _captured(action -> arguments);
-  execution -> job = _start_tool(command, Var_string(List_car(action -> arguments)), &(execution -> start_error));
+  execution -> job = _start_tool(command, Var_as_string(List_car(action -> arguments)), &(execution -> start_error));
   return execution;
 }
 
@@ -477,7 +477,7 @@ int ToolRun_wait(ToolRun execution){
 
 int tool_capture(List arguments, String * output, String * errors){
   if(! _init_guard_) _file_init_();
-  return _capture(_captured(arguments), Var_string(List_car(arguments)), &((* output)), &((* errors)));
+  return _capture(_captured(arguments), Var_as_string(List_car(arguments)), &((* output)), &((* errors)));
 }
 
 static int _capture(Job command, String program, String * output, String * errors){
@@ -555,7 +555,7 @@ int Toolchain_preprocess(Toolchain t, const char * fname, List include_dirs, con
   List arguments = Toolchain__cpp_arguments(t, include_dirs, String_new(imacros), depfile, String_new(fname));
   if(t -> verbose) _print_action(1165861522189542, arguments);
   Job command = Job_options(_captured(arguments), Map_update_n(Map_new(), 1, Symbol_var(19826024), String_var(_49)));
-  int status = _capture(command, Var_string(List_car(arguments)), &((* output)), &((* errors)));
+  int status = _capture(command, Var_as_string(List_car(arguments)), &((* output)), &((* errors)));
   {
     ExceptionFrame _x2c_exception_frame_2;
     static MatchCaptureSite _x2c_macro_arms_2[1];
@@ -642,7 +642,7 @@ static void _add_include_directories(Array directories, String listing){
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      line = Var_string(_x2c_macro_cursor_output_1);
+      line = Var_as_string(_x2c_macro_cursor_output_1);
       {
         if(String_startswith(line, _127)) return;
         if(String_contains(line, _128)) listed = 1;
@@ -670,7 +670,7 @@ static void _add_library_directories(Array directories, String output){
     List _x2c_macro_cursor_3 = _x2c_macro_object_3;
     Var _x2c_macro_cursor_output_3;
     while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
-      line = Var_string(_x2c_macro_cursor_output_3);
+      line = Var_as_string(_x2c_macro_cursor_output_3);
       {
         if(! String_startswith(line, _132)) continue;
         String list = String_remove_prefix(String_remove_prefix(line, _132), _133);
@@ -680,7 +680,7 @@ static void _add_library_directories(Array directories, String output){
           List _x2c_macro_cursor_2 = _x2c_macro_object_2;
           Var _x2c_macro_cursor_output_2;
           while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-            directory = Var_string(_x2c_macro_cursor_output_2);
+            directory = Var_as_string(_x2c_macro_cursor_output_2);
             if(String_truth(directory)) Array_push(directories, String_var(directory));
           }
 
@@ -702,7 +702,7 @@ static void _print_action(Symbol phase, List arguments){
     List _x2c_macro_cursor_4 = _x2c_macro_object_4;
     Var _x2c_macro_cursor_output_4;
     while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
-      argument = Var_string(_x2c_macro_cursor_output_4);
+      argument = Var_as_string(_x2c_macro_cursor_output_4);
       {
         fputc(' ', stderr);
         _print_argument(argument);
@@ -777,7 +777,7 @@ static Var _x2c_lambda_1(Var directory, String option){
 static Var _x2c_lambda_2(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
   Var a0 = x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 45156);
   const struct _x2c_lambda_context_0 * record =(const struct _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
-  return _x2c_lambda_1(a0, Var_string(record -> c0));
+  return _x2c_lambda_1(a0, Var_as_string(record -> c0));
 }
 
 #undef _x2c_initializer_choice_242786A8_0_expanded

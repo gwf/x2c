@@ -389,7 +389,7 @@ void Compiler_note_preprocessor_macros(Compiler c, List directives){
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       directive = Var_list(_x2c_macro_cursor_output_1);
-      Compiler_note_object_macro(c, Var_string(List_cadr(directive)));
+      Compiler_note_object_macro(c, Var_as_string(List_cadr(directive)));
     }
 
   }

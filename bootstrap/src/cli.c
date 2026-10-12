@@ -1155,7 +1155,7 @@ CliRequest cli_parse(int argc, char * * argv){
     {
       _read_arguments(args, argc, argv);
       if(! Array_len(args)) _help_exit(0, 2);
-      String first = Var_string(Array_getindex(args, 0));
+      String first = Var_as_string(Array_getindex(args, 0));
       if(! String_truth(first)) driver_error("expected a command, found an empty argument");
       CliCommand * command = _command_row(first);
       if(command){
@@ -1206,7 +1206,7 @@ static CliRequest _parse_command(Array args, CliCommand * command){
 }
 
 static void Parse_word(Parse * p, int * i){
-  String arg = Var_string(Array_getindex((* p).args, (* i)));
+  String arg = Var_as_string(Array_getindex((* p).args, (* i)));
   if(!(* p).operands && String_equal(arg, _85))(* p).operands = 1;
   else if(Parse_expands(&((* p)), arg, (* i))) Parse_expand(&((* p)), arg, &((* i)));
   else if((* p).operands || ! String_truth(arg) || String_getindex(arg, 0) != '-') Parse_operand(&((* p)), arg, &((* i)));
@@ -1260,7 +1260,7 @@ static void CliRequest__check(CliRequest r, int mask){
 static void _help_command(Array args){
   if(Array_len(args) == 1) _help_exit(0, 0);
   if(Array_len(args) > 2) driver_error("help accepts at most one command");
-  String name = Var_string(Array_getindex(args, 1));
+  String name = Var_as_string(Array_getindex(args, 1));
   if(String_equal(name, _79) || String_equal(name, _1) || String_equal(name, _0)) _help_exit(535328, 0);
   CliCommand * asked = String_truth(name) ? _command_row(name) : NULL;
   if(! asked) driver_error(String_join(NULL, cons(String_var(_89), cons(String_var(name), cons(String_var(_84), NULL)))));
@@ -1285,7 +1285,7 @@ static void CliRequest__save_temps_dir(CliRequest r, String arg){
 }
 
 static Given _take_option(Array args, int * i, int mask){
-  String arg = Var_string(Array_getindex(args, (* i))), written = arg, joined = NULL, suffix = NULL;
+  String arg = Var_as_string(Array_getindex(args, (* i))), written = arg, joined = NULL, suffix = NULL;
   int equals = String_startswith(arg, _85) ? String_find(arg, _91) : - 1;
   if(equals > 2){
     written = String_getslice(arg, (-2147483647 - 1), equals, 1);
@@ -1301,7 +1301,7 @@ static Given _take_option(Array args, int * i, int mask){
   given.attached = suffix != NULL;
   if(given.option -> value && ! String_truth(given.value) && equals <= 2){
     if(++(* i) == Array_len(args)) driver_error(String_join(NULL, cons(String_var(_93), cons(String_var(arg), cons(String_var(_84), NULL)))));
-    given.value = Var_string(Array_getindex(args, (* i)));
+    given.value = Var_as_string(Array_getindex(args, (* i)));
   }
   return given;
 }
@@ -1529,7 +1529,7 @@ CliRequest cli_package_options(String path, String package){
         List _x2c_macro_cursor_0 = _x2c_macro_object_0;
         Var _x2c_macro_cursor_output_0;
         while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-          word = Var_string(_x2c_macro_cursor_output_0);
+          word = Var_as_string(_x2c_macro_cursor_output_0);
           Array_push(words, String_var(String_replace(word, _125, package)));
         }
 
@@ -1561,7 +1561,7 @@ CliRequest cli_package_options(String path, String package){
 }
 
 static void Parse_native(Parse * p, int * i){
-  String arg = Var_string(Array_getindex((* p).args, (* i)));
+  String arg = Var_as_string(Array_getindex((* p).args, (* i)));
   if(! String_truth(arg)) driver_error("empty package native argument");
   if(String_getindex(arg, 0) != '-' && String_getindex(arg, 0) != '@' && String_endswith(arg, _108)){
     Array_push((* p).ld_args, String_var(arg));
@@ -1593,7 +1593,7 @@ static void _expand_argument(Array out, String arg, List stack){
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      word = Var_string(_x2c_macro_cursor_output_1);
+      word = Var_as_string(_x2c_macro_cursor_output_1);
       _expand_argument(out, word, nested);
     }
 

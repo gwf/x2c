@@ -274,7 +274,7 @@ static int _match_nested(Buffer b, Array out, List pattern, Var value, int * dep
       }
       if(step < 0 || ! levels) break;
       rest = Var_list(Array_take_last(rests));
-      path = Var_string(Array_take_last(paths));
+      path = Var_as_string(Array_take_last(paths));
       cursor = _match_cursor(levels - 1);
     }
     if(step < 0) break;

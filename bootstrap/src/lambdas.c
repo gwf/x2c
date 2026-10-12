@@ -780,7 +780,7 @@ static List Compiler__template_capture(Compiler c){
          _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936780766120ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && Var_is(_x2c_match_cursor1->car, 806120) && (_x2c_match_cursor2 = Var_list(_x2c_match_cursor1->car), 1) && _x2c_match_cursor2 && Var_equal(_x2c_match_cursor2->car, Var_list(Var_list(_39 ->cdr->cdr->car)->cdr->car)->car) && (_x2c_match_cursor2 = _x2c_match_cursor2->cdr, 1) && _x2c_match_cursor2 && Var_is(_x2c_match_cursor2->car, 1318210446)) { Var _x2c_match_value_0 = _x2c_match_cursor2->car; if ((_x2c_match_cursor2 = _x2c_match_cursor2->cdr, 1) && !_x2c_match_cursor2 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
           Var spelling;  spelling = _x2c_match_value_0; {
             Var _x2c_match_value_0 = spelling; {
-              String spelling = Var_string(_x2c_match_value_0);  return({
+              String spelling = Var_as_string(_x2c_match_value_0);  return({
                 Var _x2c_literal_part_2 = String_var(spelling);  Var _x2c_literal_part_3 = List_var(reference);  Var _x2c_literal_part_4 = List_var(({
                   Var _x2c_literal_part_0 = List_var(reference);  Var _x2c_literal_part_1 = List_var(cons(_40, cons(_13, cons(List_var(value), NULL))));  cons(_17, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
                 }
@@ -1000,12 +1000,12 @@ static void Compiler__prescribe(Compiler c, List row, Array prescribed, Array al
 }
 
 static String _alias_spelling(Var target, List binding){
-  String spelling = Var_is_row(target, 11, 7, 1) ? Var_string(target) : NULL; {
+  String spelling = Var_is_row(target, 11, 7, 1) ? Var_as_string(target) : NULL; {
     List _x2c_match_expr = binding; List _x2c_match_cursor;  switch(0){
         default: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var name;  name = _x2c_match_value_0; {
           Var _x2c_match_value_1 = name; {
-            String name = Var_string(_x2c_match_value_1);  spelling = name;
+            String name = Var_as_string(_x2c_match_value_1);  spelling = name;
           }
 
         }
@@ -1014,7 +1014,7 @@ static String _alias_spelling(Var target, List binding){
        break; } } _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _402 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var name;  name = _x2c_match_value_0; {
           Var _x2c_match_value_2 = name; {
-            String name = Var_string(_x2c_match_value_2);  spelling = name;
+            String name = Var_as_string(_x2c_match_value_2);  spelling = name;
           }
 
         }

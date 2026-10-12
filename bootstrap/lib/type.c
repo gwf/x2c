@@ -815,19 +815,19 @@ Symbol Type_scalar_tag(Type type){
   return Var_symbol(List_truth(row) ? List_car(row) : Symbol_var((Symbol) 0));
 }
 
-static String Var_string(Var);
+String Var_as_string(Var);
 
 String Type_var_numeric_extractor(Type type){
   if(! _init_guard_) _file_init_();
   if(Type_is_enum(type)) return _212;
   List row = _scalar_row(type);
-  return List_truth(row) ? Var_string(List_cadr(row)) : NULL;
+  return List_truth(row) ? Var_as_string(List_cadr(row)) : NULL;
 }
 
 String Type_var_numeric_update_helper(Type type){
   if(! _init_guard_) _file_init_();
   List row = _scalar_row(type);
-  return List_truth(row) ? Var_string(List_caddr(row)) : NULL;
+  return List_truth(row) ? Var_as_string(List_caddr(row)) : NULL;
 }
 
 Type Type_promote(Type type){

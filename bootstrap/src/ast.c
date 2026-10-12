@@ -317,7 +317,7 @@ int binding_identity_try_parts(List binding, int * identity, String * spelling){
         {
           Var _x2c_match_value_0 = name;
           {
-            String name = Var_string(_x2c_match_value_0);
+            String name = Var_as_string(_x2c_match_value_0);
             {
               if(! Var_is_integer(id) || Var_integer(id) <= 0) return 0;
               if(identity)(* identity) = Var_int(Var_convert(id, 3453797));

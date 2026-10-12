@@ -1656,7 +1656,7 @@ static void _collect_functions(Var node, Array found){
 
 static void Walk_analyze(Walk * w, List function){
   List _x2c_destructure_0 = function;
-  String name = Var_string(List_getindex(_x2c_destructure_0, 0));
+  String name = Var_as_string(List_getindex(_x2c_destructure_0, 0));
   List parameters = Var_list(List_getindex(_x2c_destructure_0, 1));
   Var body = List_getindex(_x2c_destructure_0, 2);
   (* w).function = name;
@@ -2646,7 +2646,7 @@ static int _empty(Var value){
     Var _x2c_match_var = _unwrap(value); int _x2c_match_none = !Var_is(_x2c_match_var, 806120);  List _x2c_match_expr = Var_list(_x2c_match_var); List _x2c_match_cursor, _x2c_match_cursor1;  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
         case 9224497936780766120ULL: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936780766120ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497941690207118ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && Var_equal(_x2c_match_cursor1->car, Var_list(_1095 ->cdr->car)->cdr->cdr->car) && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {return 1;  break; } } case 9224497963177709656ULL: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497963177709656ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_1 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var ltype;  ltype = _x2c_match_value_0;  Var text;  text = _x2c_match_value_1; {
-          Type type = Var_type(ltype);  unsigned long long number;  return Type_integer_literal_magnitude(type, Var_string(text), &(number)) && ! number;
+          Type type = Var_type(ltype);  unsigned long long number;  return Type_integer_literal_magnitude(type, Var_as_string(text), &(number)) && ! number;
         }
 
       }
@@ -2909,7 +2909,7 @@ void Compiler_check_regions(Compiler c, List ast){
         List _x2c_destructure_6 = warning;
         Symbol code = Var_symbol(List_getindex(_x2c_destructure_6, 0));
         int at = Var_int(Var_convert(List_getindex(_x2c_destructure_6, 1), 3453797));
-        String message = Var_string(List_getindex(_x2c_destructure_6, 2));
+        String message = Var_as_string(List_getindex(_x2c_destructure_6, 2));
         List notes = Var_list(List_getindex(_x2c_destructure_6, 3));
         c -> origin = at;
         Compiler_report_warning(c, code, message, NULL, notes);
@@ -2935,7 +2935,7 @@ void Compiler_check_meta_regions(Compiler c, List fn){
         {
           Var _x2c_match_value_0 = name;
           {
-            String name = Var_string(_x2c_match_value_0);
+            String name = Var_as_string(_x2c_match_value_0);
             {
               Map_setindex(c -> meta_regions, String_var(name), List_var(_51));
             }
@@ -2958,7 +2958,7 @@ void Compiler_check_meta_regions(Compiler c, List fn){
   List _x2c_destructure_7 = Var_list(Array_getindex(w.warnings, 0));
   Symbol code = Var_symbol(List_getindex(_x2c_destructure_7, 0));
   int at = Var_int(Var_convert(List_getindex(_x2c_destructure_7, 1), 3453797));
-  String message = Var_string(List_getindex(_x2c_destructure_7, 2));
+  String message = Var_as_string(List_getindex(_x2c_destructure_7, 2));
   List notes = Var_list(List_getindex(_x2c_destructure_7, 3));
   {
     int * _x2c_macro_address_0 = & c -> origin;

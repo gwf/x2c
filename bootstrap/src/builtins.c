@@ -2161,7 +2161,7 @@ static List _assign(List target, List value){
 List meta_invocation_location(void);
 
 static List _class_expand(List capture){
-  String owner = Var_string(List_getindex(capture, 1));
+  String owner = Var_as_string(List_getindex(capture, 1));
   Type type = Var_type(List_getindex(capture, 2));
   if(! List_truth(Type_list(type))) return cons(List_var(capture), NULL);
   if(! Type_is_pointer(Type_canonicalize(type)) && Var_equal(List_car(Type_list(type)), Symbol_var(357722))) x2c_diagnostic_fail(String_add(String_join(NULL, cons(String_var(_495), cons(String_var(owner), cons(String_var(_496), NULL)))), _497), _500);
@@ -2714,7 +2714,7 @@ static List _method(Type type, String name){
             List _x2c_macro_cursor_10 = _x2c_macro_object_10;
             Var _x2c_macro_cursor_output_10;
             while(List_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_10))){
-              package = Var_string(_x2c_macro_cursor_output_10);
+              package = Var_as_string(_x2c_macro_cursor_output_10);
               Array_push(notes, String_var(String_join(NULL, cons(String_var(_1360), cons(String_var(package), cons(String_var(_1361), NULL))))));
             }
 
@@ -2769,7 +2769,7 @@ static List _value_type(List type){
 }
 
 static List _field_on(List field, List receiver){
-  String name = Var_string(List_getindex(field, 0));
+  String name = Var_as_string(List_getindex(field, 0));
   {
     Var _x2c_match_var = List_getindex(field, 1); int _x2c_match_none = !Var_is(_x2c_match_var, 806120);
     List _x2c_match_expr = Var_list(_x2c_match_var); List _x2c_match_cursor, _x2c_match_cursor1;
@@ -2871,7 +2871,7 @@ static List _binding_record(Var group, Var name, List function, List all_rows, L
 
 static String _binding_name(Var node){
   Var value = Code_value(Var_list(node));
-  if(Var_is_row(value, 11, 7, 1)) return Var_string(value);
+  if(Var_is_row(value, 11, 7, 1)) return Var_as_string(value);
   x2c_diagnostic_fail(_1385, cons(String_var(String_join(NULL, cons(String_var(_1386), cons(String_var(Var_repr(node)), NULL)))), NULL));
   return NULL;
 }
@@ -2934,8 +2934,8 @@ static List _binding_statement(List lisp, List row){
           Var _x2c_match_value_0 = name;
           Var _x2c_match_value_1 = function;
           {
-            String name = Var_string(_x2c_match_value_0);
-            String function = Var_string(_x2c_match_value_1);
+            String name = Var_as_string(_x2c_match_value_0);
+            String function = Var_as_string(_x2c_match_value_1);
             {
               List signature = binding_literal_list(Var_list(type));
               return({
@@ -3190,14 +3190,14 @@ static Var _x2c_func_adapt_10(Func _x2c_func_binding_10, const FuncArg * _x2c_fu
 }
 
 static Var _x2c_func_adapt_11(Func _x2c_func_binding_11, const FuncArg * _x2c_func_argv_11){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_11, _x2c_func_argv_11, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_11, _x2c_func_argv_11, 0, 1318210446));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_11, _x2c_func_argv_11, 1, 45156);
   return List_var(_class_initializer(a0, a1));
   ;
 }
 
 static Var _x2c_func_adapt_12(Func _x2c_func_binding_12, const FuncArg * _x2c_func_argv_12){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_12, _x2c_func_argv_12, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_12, _x2c_func_argv_12, 0, 1318210446));
   List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_12, _x2c_func_argv_12, 1, 806120));
   return List_var(_class_write_fields(a0, a1));
   ;
@@ -3210,7 +3210,7 @@ static Var _x2c_func_adapt_13(Func _x2c_func_binding_13, const FuncArg * _x2c_fu
 }
 
 static Var _x2c_func_adapt_14(Func _x2c_func_binding_14, const FuncArg * _x2c_func_argv_14){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_14, _x2c_func_argv_14, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_14, _x2c_func_argv_14, 0, 1318210446));
   List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_14, _x2c_func_argv_14, 1, 806120));
   List a2 = Var_list(x2c_func_value_argument(_x2c_func_binding_14, _x2c_func_argv_14, 2, 806120));
   return List_var(_class_defaults(a0, a1, a2));
@@ -3218,7 +3218,7 @@ static Var _x2c_func_adapt_14(Func _x2c_func_binding_14, const FuncArg * _x2c_fu
 }
 
 static Var _x2c_func_adapt_15(Func _x2c_func_binding_15, const FuncArg * _x2c_func_argv_15){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_15, _x2c_func_argv_15, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_15, _x2c_func_argv_15, 0, 1318210446));
   List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_15, _x2c_func_argv_15, 1, 806120));
   return List_var(_binding_call(a0, a1));
   ;
@@ -3231,7 +3231,7 @@ static Var _x2c_func_adapt_16(Func _x2c_func_binding_16, const FuncArg * _x2c_fu
 }
 
 static Var _x2c_func_adapt_17(Func _x2c_func_binding_17, const FuncArg * _x2c_func_argv_17){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_17, _x2c_func_argv_17, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_17, _x2c_func_argv_17, 0, 1318210446));
   List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_17, _x2c_func_argv_17, 1, 806120));
   return List_var(_binding_rows_for(a0, a1));
   ;
@@ -3255,7 +3255,7 @@ static Var _x2c_func_adapt_19(Func _x2c_func_binding_19, const FuncArg * _x2c_fu
 }
 
 static Var _x2c_func_adapt_20(Func _x2c_func_binding_20, const FuncArg * _x2c_func_argv_20){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_20, _x2c_func_argv_20, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_20, _x2c_func_argv_20, 0, 1318210446));
   List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_20, _x2c_func_argv_20, 1, 806120));
   return List_var(_binding_install_rows(a0, a1));
   ;
@@ -3269,9 +3269,9 @@ static Var _x2c_func_adapt_21(Func _x2c_func_binding_21, const FuncArg * _x2c_fu
 }
 
 static Var _x2c_func_adapt_22(Func _x2c_func_binding_22, const FuncArg * _x2c_func_argv_22){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_22, _x2c_func_argv_22, 0, 1318210446));
-  String a1 = Var_string(x2c_func_value_argument(_x2c_func_binding_22, _x2c_func_argv_22, 1, 1318210446));
-  String a2 = Var_string(x2c_func_value_argument(_x2c_func_binding_22, _x2c_func_argv_22, 2, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_22, _x2c_func_argv_22, 0, 1318210446));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_22, _x2c_func_argv_22, 1, 1318210446));
+  String a2 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_22, _x2c_func_argv_22, 2, 1318210446));
   return List_var(_binding_target(a0, a1, a2));
   ;
 }

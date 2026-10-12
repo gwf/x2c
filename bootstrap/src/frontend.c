@@ -665,7 +665,7 @@ static List _unit_private_rows(Compiler c, Map globs){
             Var name;
             name = _x2c_match_value_0;
             {
-              String path = home_absolute_path(Var_string(List_car(Var_list(owner))));
+              String path = home_absolute_path(Var_as_string(List_car(Var_list(owner))));
               if(String_equal(Compiler_canonical_path(c, path), unit)) continue;
               Array_push(rows, List_var(_unit_private_row(globs, cons(name, NULL))));
               Array_push(rows, List_var(_unit_private_row(globs, cons(_22, cons(name, NULL)))));
@@ -734,7 +734,7 @@ static void _enter_package(Frontend frontend, Compiler c){
   if(packages == NULL) return;
   Var root = Map_getindex(packages, String_var(Path_absolute(c -> filename)));
   if(Var_is_void(root)) return;
-  c -> package = Path_basename(Var_string(root));
+  c -> package = Path_basename(Var_as_string(root));
   Map_setindex(c -> package_roots, String_var(c -> package), root);
 }
 
@@ -766,7 +766,7 @@ static Compiler _run_cpp(Frontend frontend, ParsedUnit * unit){
     List _x2c_macro_cursor_3 = _x2c_macro_object_3;
     Var _x2c_macro_cursor_output_4;
     while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_4))){
-      dependency = Var_string(_x2c_macro_cursor_output_4);
+      dependency = Var_as_string(_x2c_macro_cursor_output_4);
       Compiler_add_translation_dependency(c, dependency);
     }
 
@@ -785,7 +785,7 @@ static String _take_line_markers(Compiler cpp, String text){
     List _x2c_macro_cursor_4 = _x2c_macro_object_4;
     Var _x2c_macro_cursor_output_5;
     while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_5))){
-      line = Var_string(_x2c_macro_cursor_output_5);
+      line = Var_as_string(_x2c_macro_cursor_output_5);
       {
         int number = 0;
         String file = String_startswith(line, _55) ? preproc_marker_file(line, &(number)) : NULL;
@@ -892,7 +892,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
         );
         Var _x2c_macro_item_6;
         while(Iter_try_next(_x2c_macro_iterator_6, &(_x2c_macro_item_6))){
-          name = Var_string(_x2c_macro_item_6);
+          name = Var_as_string(_x2c_macro_item_6);
           {
             Var function;
             if((String_startswith(name, _58) || String_startswith(name, _59) || String_startswith(name, _60)) && Lisp_try_get(shared, name, &(function))) Compiler_bind_meta_operation(shared, name, function);
@@ -960,7 +960,7 @@ static Var _x2c_lambda_0(String path){
 }
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 1318210446));
   return _x2c_lambda_0(a0);
   ;
 }

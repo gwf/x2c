@@ -172,7 +172,7 @@ static Var Context__export_wide(Context c, Var v){
 
 static Var Context__export_string(Context c, Var value){
   if(! c -> pool || ! Pool_owns(c -> pool, value)) return value;
-  String string = Var_string(value);
+  String string = Var_as_string(value);
   return String_var(String_new_in(c -> destination_pool, string, String_len(string)));
 }
 

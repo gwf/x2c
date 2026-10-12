@@ -687,7 +687,7 @@ static inline Map Var_map(Var _x2c_macro_value_7){
   if(_x2c_macro_value_7.u64 >> 48 != 9 ||(_x2c_macro_value_7.u64 & 0x7) != 6) return NULL;  return(Map)(_x2c_macro_value_7.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline String Var_string(Var _x2c_macro_value_8){
+static inline String Var_string_payload(Var _x2c_macro_value_8){
   if(_x2c_macro_value_8.u64 >> 48 != 11 ||(_x2c_macro_value_8.u64 & 0x7) != 1) return NULL;  return(String)(_x2c_macro_value_8.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
@@ -1143,6 +1143,7 @@ static inline Var _x2c_proto_map_postfixindex_0(Var a0, Var a1, Symbol a2){
   return Map_postfixindex(Var_map(a0), a1, a2);
 }
 
+String Var_string(Var);
 static inline String _x2c_proto_string_str_0(Var a0){
   return String_str(Var_string(a0));
 }
@@ -1180,7 +1181,7 @@ static inline Iter _x2c_proto_string_iter_0(Var a0, Iter a1){
 }
 
 static inline int _x2c_proto_string_contains_0(Var a0, Var a1){
-  return String_contains(Var_string(a0), Var_string(a1));
+  return String_contains(Var_string(a0), Var_as_string(a1));
 }
 
 String String_add(String, String);

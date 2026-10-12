@@ -505,7 +505,7 @@ static void _parse_manifest(Project p){
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
     while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      text = Var_string(_x2c_macro_cursor_output_0);
+      text = Var_as_string(_x2c_macro_cursor_output_0);
       {
         m.line ++;
         char * line = _content(text);
@@ -849,7 +849,7 @@ static void _validate_target(Project p, ProjectTarget target){
     List _x2c_macro_cursor_2 = _x2c_macro_object_2;
     Var _x2c_macro_cursor_output_2;
     while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-      name = Var_string(_x2c_macro_cursor_output_2);
+      name = Var_as_string(_x2c_macro_cursor_output_2);
       {
         ProjectTarget prerequisite = _target(p, name);
         if(! prerequisite) _error_name(p, 0, _58, name);
@@ -1083,7 +1083,7 @@ static void _plan_target(Project p, ProjectTarget target){
     List _x2c_macro_cursor_5 = _x2c_macro_object_5;
     Var _x2c_macro_cursor_output_5;
     while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
-      name = Var_string(_x2c_macro_cursor_output_5);
+      name = Var_as_string(_x2c_macro_cursor_output_5);
       _plan_target(p, _target(p, name));
     }
 
@@ -1154,7 +1154,7 @@ static List _target_inputs(Project p, ProjectTarget target, Symbol kind){
     List _x2c_macro_cursor_6 = _x2c_macro_object_6;
     Var _x2c_macro_cursor_output_6;
     while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_6))){
-      name = Var_string(_x2c_macro_cursor_output_6);
+      name = Var_as_string(_x2c_macro_cursor_output_6);
       {
         ProjectTarget dependency = _target(p, name);
         if(dependency -> kind != 1381098885964356) _error_name(p, 0, _69, dependency -> name);
@@ -1175,7 +1175,7 @@ static List _target_modules(Project p, ProjectTarget target){
     List _x2c_macro_cursor_7 = _x2c_macro_object_7;
     Var _x2c_macro_cursor_output_7;
     while(List_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_7))){
-      name = Var_string(_x2c_macro_cursor_output_7);
+      name = Var_as_string(_x2c_macro_cursor_output_7);
       {
         ProjectTarget loaded = _target(p, name);
         if(loaded -> kind != 904178442) _error_name(p, 0, _70, name);
@@ -1219,7 +1219,7 @@ static Array _target_sources(Project p, ProjectTarget target){
     int _x2c_macro_cursor_9 = 0;
     Var _x2c_macro_cursor_output_9;
     while(Array_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_9))){
-      path = Var_string(_x2c_macro_cursor_output_9);
+      path = Var_as_string(_x2c_macro_cursor_output_9);
       if(!(is_source_file(path) || String_endswith(path, _73))) _error_name(p, 0, _74, path);
     }
 
@@ -1235,7 +1235,7 @@ static Array _expand_patterns(Project p, List patterns, String owner){
     List _x2c_macro_cursor_11 = _x2c_macro_object_11;
     Var _x2c_macro_cursor_output_11;
     while(List_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_11))){
-      pattern = Var_string(_x2c_macro_cursor_output_11);
+      pattern = Var_as_string(_x2c_macro_cursor_output_11);
       {
         Array expanded = _expand_pattern(p, pattern, owner);
         {
@@ -1286,7 +1286,7 @@ static Array _glob(Project p, String pattern){
     List _x2c_macro_cursor_12 = _x2c_macro_object_12;
     Var _x2c_macro_cursor_output_12;
     while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_12))){
-      path = Var_string(_x2c_macro_cursor_output_12);
+      path = Var_as_string(_x2c_macro_cursor_output_12);
       if(String_startswith(path, prefix) && Path_glob_match(pattern, String_remove_prefix(path, prefix)) && !(String_truth(p -> build_root) && String_startswith(path, String_join(NULL, cons(String_var(p -> build_root), cons(String_var(_67), NULL))))) && SourceView_exists(p -> sources, path) && !(Array_contains(matches, String_var(path)))) Array_push(matches, String_var(path));
     }
 
@@ -1351,7 +1351,7 @@ static List _c_flags(Project p, List values){
     List _x2c_macro_cursor_13 = _x2c_macro_object_13;
     Var _x2c_macro_cursor_output_13;
     while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_13))){
-      value = Var_string(_x2c_macro_cursor_output_13);
+      value = Var_as_string(_x2c_macro_cursor_output_13);
       if(cli_dependency_pass_through(value)) _error_name(p, 0, _92, value);
     }
 
@@ -1398,7 +1398,7 @@ void driver_error(const char *);
 
 int new_command(CliRequest request){
   if(! _init_guard_) _file_init_();
-  Path dir = Var_string(List_car(request -> inputs));
+  Path dir = Var_as_string(List_car(request -> inputs));
   if(! String_truth(dir)) driver_error("new: the directory operand is empty");
   String name = _starter_name(dir);
   {
@@ -1488,7 +1488,7 @@ static Var _x2c_lambda_1(String flag){
 }
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 0, 1318210446));
   return _x2c_lambda_1(a0);
   ;
 }
@@ -1510,9 +1510,9 @@ static Var _x2c_lambda_3(String value, String root){
 }
 
 static Var _x2c_lambda_4(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 1318210446));
   const struct _x2c_lambda_context_0 * record =(const struct _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
-  return _x2c_lambda_3(a0, Var_string(record -> c0));
+  return _x2c_lambda_3(a0, Var_as_string(record -> c0));
 }
 
 static Var _x2c_lambda_5(Var path, String option){
@@ -1523,7 +1523,7 @@ static Var _x2c_lambda_5(Var path, String option){
 static Var _x2c_lambda_6(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1){
   Var a0 = x2c_func_value_argument(_x2c_lambda_closure_1, _x2c_lambda_argv_1, 0, 45156);
   const struct _x2c_lambda_context_2 * record =(const struct _x2c_lambda_context_2 *) Func_context(_x2c_lambda_closure_1);
-  return _x2c_lambda_5(a0, Var_string(record -> c0));
+  return _x2c_lambda_5(a0, Var_as_string(record -> c0));
 }
 
 #undef _x2c_initializer_choice_05ED52D8_0_expanded

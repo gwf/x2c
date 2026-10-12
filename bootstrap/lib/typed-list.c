@@ -90,10 +90,10 @@ static inline Var _typed_list_encode_string(String value){
   ;
 }
 
-static String Var_string(Var);
+String Var_as_string(Var);
 
 static inline String _typed_list_decode_string(Var value){
-  return Var_string(value);
+  return Var_as_string(value);
 }
 
 static inline Var _typed_list_encode_symbol(Symbol value){

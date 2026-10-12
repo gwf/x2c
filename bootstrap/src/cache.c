@@ -693,7 +693,7 @@ static List Compiler__rewrite_statics(Compiler c, List code, StaticQueue * q){
               Var declaration;  declaration = _x2c_match_value_0;  item = Compiler__rewrite_static(c, Var_list(declaration), &((* q)));
             }
              break; } _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497972340888518ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
-              Var content;  content = _x2c_match_value_0; (* q).arms = preproc_track_arms((* q).arms, Var_string(content));
+              Var content;  content = _x2c_match_value_0; (* q).arms = preproc_track_arms((* q).arms, Var_as_string(content));
             }
              break; } }
           }

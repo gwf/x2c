@@ -325,7 +325,7 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
             Var _x2c_match_value_1 = message;
             Var _x2c_match_value_2 = notes;
             {
-              String message = Var_string(_x2c_match_value_1);
+              String message = Var_as_string(_x2c_match_value_1);
               List notes = Var_list(_x2c_match_value_2);
               Compiler_report_warning(c, 27335838, message, site, notes);
             }
@@ -348,7 +348,7 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
             Var _x2c_match_value_3 = message;
             Var _x2c_match_value_4 = notes;
             {
-              String message = Var_string(_x2c_match_value_3);
+              String message = Var_as_string(_x2c_match_value_3);
               List notes = Var_list(_x2c_match_value_4);
               Compiler_report_error(c, 27335838, message, site, notes);
             }
@@ -369,7 +369,7 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
             Var _x2c_match_value_5 = message;
             Var _x2c_match_value_6 = notes;
             {
-              String message = Var_string(_x2c_match_value_5);
+              String message = Var_as_string(_x2c_match_value_5);
               List notes = Var_list(_x2c_match_value_6);
               Compiler_report_meta_error(c, node, Var_symbol(category), message, site, notes, 1);
             }
@@ -386,8 +386,8 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
             Var _x2c_match_value_7 = path;
             Var _x2c_match_value_8 = hash;
             {
-              String path = Var_string(_x2c_match_value_7);
-              String hash = Var_string(_x2c_match_value_8);
+              String path = Var_as_string(_x2c_match_value_7);
+              String hash = Var_as_string(_x2c_match_value_8);
               Map_merge_translation_dependency(c -> deps, path, String_var(hash));
             }
 
@@ -403,7 +403,7 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
             Var _x2c_match_value_9 = operation;
             Var _x2c_match_value_10 = operands;
             {
-              String operation = Var_string(_x2c_match_value_9);
+              String operation = Var_as_string(_x2c_match_value_9);
               List operands = Var_list(_x2c_match_value_10);
               Call_answer(&(call), operation, operands);
             }
@@ -490,9 +490,9 @@ static void Call_answer(Call * c, String operation, List operands){
 
 static void Call_check(Call * call){
   Var failure;
-  if(! String_truth(helper_path) && Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(- 1), &(failure))) Call_refuse(&((* call)), Var_string(failure));
+  if(! String_truth(helper_path) && Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(- 1), &(failure))) Call_refuse(&((* call)), Var_as_string(failure));
   if(! String_truth(helper_path)) Call_refuse(&((* call)), _3);
-  if(Map_truth(helper_failures) && Map_try_get(helper_failures, int_var((* call).table), &(failure))) Call_refuse(&((* call)), Var_string(failure));
+  if(Map_truth(helper_failures) && Map_try_get(helper_failures, int_var((* call).table), &(failure))) Call_refuse(&((* call)), Var_as_string(failure));
   Compiler_refuse_record_meta_call((* call).compiler, (* call).name, (* call).site);
 }
 

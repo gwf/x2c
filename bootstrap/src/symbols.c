@@ -544,7 +544,7 @@ List Sym_visible_symbols(Sym s){
               {
                 Var _x2c_match_value_0 = name;
                 {
-                  String name = Var_string(_x2c_match_value_0);
+                  String name = Var_as_string(_x2c_match_value_0);
                   if(_unseen(seen, String_var(name))) Array_push(rows, List_var(cons(String_var(name), cons(value, NULL))));
                 }
 
@@ -637,7 +637,7 @@ static String _var_converter_owner(List key, List type){
         {
           Var _x2c_match_value_1 = named;
           {
-            String named = Var_string(_x2c_match_value_1);
+            String named = Var_as_string(_x2c_match_value_1);
             {
               List _x2c_match_expr = key; List _x2c_match_cursor;
               switch(0){
@@ -648,7 +648,7 @@ static String _var_converter_owner(List key, List type){
                   {
                     Var _x2c_match_value_2 = spelling;
                     {
-                      String spelling = Var_string(_x2c_match_value_2);
+                      String spelling = Var_as_string(_x2c_match_value_2);
                       return String_equal(spelling, String_join(NULL, cons(String_var(named), cons(String_var(_34), NULL)))) ? named : NULL;
                     }
 
@@ -715,7 +715,7 @@ static List Sym__scope_binding(Sym s, SymScope * scope, List key){
   List _x2c_destructure_0 = binding;
   Var binding_tag = List_getindex(_x2c_destructure_0, 0);
   int identity = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 1), 3453797));
-  String spelling = Var_string(List_getindex(_x2c_destructure_0, 2));
+  String spelling = Var_as_string(List_getindex(_x2c_destructure_0, 2));
   (void) binding_tag;
   if(!(Map_contains(s -> binding_facts, List_var(cons(_55, cons(int_var(identity), NULL)))))) Sym_put(s, s -> binding_facts, List_var(cons(_55, cons(int_var(identity), NULL))), String_var(spelling));
   List self_key = cons(_56, cons(List_var(binding), NULL));
@@ -743,7 +743,7 @@ List binding_identity_new(int, String);
 static List Sym__new_binding(Sym s, List key){
   int identity = ++ s -> c -> names -> next_binding;
   Var name = List_last(key);
-  List binding = binding_identity_new(identity, Var_string(name));
+  List binding = binding_identity_new(identity, Var_as_string(name));
   Sym_put(s, s -> binding_facts, List_var(cons(_55, cons(int_var(identity), NULL))), name);
   return binding;
 }
@@ -841,7 +841,7 @@ String Compiler_package_spelling(Compiler c, String name);
 static List Sym__package_retry_key(Sym s, List key){
   String package = s -> c -> package;
   if(! String_truth(package) || ! List_truth(key) || List_truth(List_cdr(key)) || ! Var_is_row(List_car(key), 11, 7, 1)) return NULL;
-  String spelling = Var_string(List_car(key));
+  String spelling = Var_as_string(List_car(key));
   String prefixed = Compiler_package_spelling(s -> c, spelling);
   return String_equal(prefixed, spelling) ? NULL : cons(String_var(prefixed), NULL);
 }
@@ -924,9 +924,9 @@ static List Sym__package_declared_key(Sym s, List context, List key, List ast){
   List _x2c_destructure_1 = key;
   head = List_getindex(_x2c_destructure_1, 0);
   tag = List_getindex(_x2c_destructure_1, 1);
-  if(Var_is_row(head, 11, 7, 1) && ! List_truth(List_cdr(key))) return cons(String_var(Compiler_package_spelling(c, Var_string(head))), NULL);
+  if(Var_is_row(head, 11, 7, 1) && ! List_truth(List_cdr(key))) return cons(String_var(Compiler_package_spelling(c, Var_as_string(head))), NULL);
   if((Var_equal(head, Symbol_var(1318234344)) || Var_equal(head, Symbol_var(44977116)) || Var_equal(head, Symbol_var(357722))) && List_truth(List_cdr(key)) && ! List_truth(List_cddr(key)) && Var_is_row(tag, 11, 7, 1)) return({
-    Var _x2c_literal_part_5 = head;  Var _x2c_literal_part_6 = String_var(Compiler_package_spelling(c, Var_string(tag)));  cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL));
+    Var _x2c_literal_part_5 = head;  Var _x2c_literal_part_6 = String_var(Compiler_package_spelling(c, Var_as_string(tag)));  cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL));
   }
   );
   return key;
@@ -937,8 +937,8 @@ static String _declared_spelling(List key){
   List _x2c_destructure_2 = key;
   head = List_getindex(_x2c_destructure_2, 0);
   tag = List_getindex(_x2c_destructure_2, 1);
-  if(Var_is_row(head, 11, 7, 1)) return Var_string(head);
-  if(Var_equal(head, Symbol_var(1318234344)) || Var_equal(head, Symbol_var(44977116)) || Var_equal(head, Symbol_var(357722))) if(Var_is_row(tag, 11, 7, 1)) return Var_string(tag);
+  if(Var_is_row(head, 11, 7, 1)) return Var_as_string(head);
+  if(Var_equal(head, Symbol_var(1318234344)) || Var_equal(head, Symbol_var(44977116)) || Var_equal(head, Symbol_var(357722))) if(Var_is_row(tag, 11, 7, 1)) return Var_as_string(tag);
   return NULL;
 }
 
@@ -970,7 +970,7 @@ static String Compiler__package_reserved_owner(Compiler c, String spelling){
       alias = _x2c_macro_cursor_output_8;
       value = _x2c_macro_cursor_output_9;
       {
-        String name = Var_string(value);
+        String name = Var_as_string(value);
         if(String_equal(name, c -> package)) continue;
         if(String_startswith(spelling, String_join(NULL, cons(String_var(name), cons(String_var(_66), NULL))))) return name;
       }
@@ -1049,7 +1049,7 @@ Var Compiler_aggregate_name(Compiler c, Symbol kind, Var name, int definition){
   Sym s = c -> sym;
   if(! Var_is_row(name, 11, 7, 1)) return name;
   if(Map_truth(c -> macro_holes)){
-    List local = Compiler_macro_tag_name(c, kind, Var_string(name), definition);
+    List local = Compiler_macro_tag_name(c, kind, Var_as_string(name), definition);
     return List_truth(local) ? List_var(local) : name;
   }
   Type type = List_type(cons(Symbol_var(kind), cons(name, NULL)));
@@ -1208,21 +1208,21 @@ void Compiler_register_package_member(Compiler c, String name, String member, St
 }
 
 static void Compiler__check_package_binding(Compiler c, String kind, String local, Token token){
-  Var alias = Map_getindex(c -> package_aliases, String_var(local));  Var member = Map_getindex(c -> package_members, String_var(local));  String bound = Var_is_void(alias) ? NULL : Var_string(alias);  if(! String_truth(bound) && ! Var_is_void(member)){
-    List pair = Var_list(member);  List _x2c_destructure_4 = pair;  String package = Var_string(List_getindex(_x2c_destructure_4, 0));  String member_name = Var_string(List_getindex(_x2c_destructure_4, 1));  bound = String_join(NULL, cons(String_var(package), cons(String_var(_135), cons(String_var(member_name), NULL))));
+  Var alias = Map_getindex(c -> package_aliases, String_var(local));  Var member = Map_getindex(c -> package_members, String_var(local));  String bound = Var_is_void(alias) ? NULL : Var_as_string(alias);  if(! String_truth(bound) && ! Var_is_void(member)){
+    List pair = Var_list(member);  List _x2c_destructure_4 = pair;  String package = Var_as_string(List_getindex(_x2c_destructure_4, 0));  String member_name = Var_as_string(List_getindex(_x2c_destructure_4, 1));  bound = String_join(NULL, cons(String_var(package), cons(String_var(_135), cons(String_var(member_name), NULL))));
   }
   if(String_truth(bound)) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_136), cons(String_var(kind), cons(String_var(_137), cons(String_var(local), cons(String_var(_138), NULL)))))), token, cons(String_var(String_join(NULL, cons(String_var(_139), cons(String_var(bound), NULL)))), NULL));  if(List_truth(Sym_get_exact(c -> sym, cons(String_var(local), NULL)))) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_136), cons(String_var(kind), cons(String_var(_137), cons(String_var(local), cons(String_var(_140), NULL)))))), token, NULL);
 }
 
 String Compiler_package_member_spelling(Compiler c, String name){
-  if(! _init_guard_) _file_init_();  if(! Map_len(c -> package_members)) return NULL;  Var bound = Map_getindex(c -> package_members, String_var(name));  if(Var_is_void(bound) || List_truth(Sym_get_exact(c -> sym, cons(String_var(name), NULL)))) return NULL;  List pair = Var_list(bound);  List _x2c_destructure_5 = pair;  String package = Var_string(List_getindex(_x2c_destructure_5, 0));  String member_name = Var_string(List_getindex(_x2c_destructure_5, 1));  return String_join(NULL, cons(String_var(package), cons(String_var(_66), cons(String_var(member_name), NULL))));
+  if(! _init_guard_) _file_init_();  if(! Map_len(c -> package_members)) return NULL;  Var bound = Map_getindex(c -> package_members, String_var(name));  if(Var_is_void(bound) || List_truth(Sym_get_exact(c -> sym, cons(String_var(name), NULL)))) return NULL;  List pair = Var_list(bound);  List _x2c_destructure_5 = pair;  String package = Var_as_string(List_getindex(_x2c_destructure_5, 0));  String member_name = Var_as_string(List_getindex(_x2c_destructure_5, 1));  return String_join(NULL, cons(String_var(package), cons(String_var(_66), cons(String_var(member_name), NULL))));
 }
 
 List Compiler_imported_providers(Compiler c, String name){
   if(! _init_guard_) _file_init_();  if(! String_truth(name) || ! Map_len(c -> package_roots)) return NULL;  List packages = NULL; {
     Var key, root;  Map _x2c_macro_object_8 = c -> package_roots;  unsigned _x2c_macro_cursor_8 = 0;  Var _x2c_macro_cursor_output_13;  Var _x2c_macro_cursor_output_14;  while(Map_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_13), &(_x2c_macro_cursor_output_14))){
       key = _x2c_macro_cursor_output_13;  root = _x2c_macro_cursor_output_14; {
-        String package = Var_string(key);  if(List_truth(Sym_get_exact(c -> sym, cons(String_var(String_join(NULL, cons(String_var(package), cons(String_var(_66), cons(String_var(name), NULL))))), NULL)))) packages = cons(String_var(package), packages);
+        String package = Var_as_string(key);  if(List_truth(Sym_get_exact(c -> sym, cons(String_var(String_join(NULL, cons(String_var(package), cons(String_var(_66), cons(String_var(name), NULL))))), NULL)))) packages = cons(String_var(package), packages);
       }
 
     }
@@ -1311,7 +1311,7 @@ Type Sym_sole_typedef(Sym s, Type type){
             case 9224497981422903628ULL: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497981422903628ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
             Var name;  name = _x2c_match_value_0; {
               Var _x2c_match_value_3 = name; {
-                String name = Var_string(_x2c_match_value_3);  if(Var_equal(target, List_var(type))){
+                String name = Var_as_string(_x2c_match_value_3);  if(Var_equal(target, List_var(type))){
                   if(String_truth(found) && ! String_equal(found, name)) return NULL;  found = name;
                 }
 
@@ -1478,7 +1478,7 @@ List Sym_marked_fields(Sym s, Type aggregate, Symbol mark){
   if(! _init_guard_) _file_init_();  List order = Sym_field_order(s, aggregate);  Array rows = Array_new(); {
     List row;  List _x2c_macro_object_13 = List_truth(order) ? List_cdr(order) : NULL;  List _x2c_macro_cursor_13 = _x2c_macro_object_13;  Var _x2c_macro_cursor_output_20;  while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_20))){
       row = Var_list(_x2c_macro_cursor_output_20); {
-        String name = Var_string(List_car(row));  if(String_truth(name) && List_truth(Sym_get(s, ({
+        String name = Var_as_string(List_car(row));  if(String_truth(name) && List_truth(Sym_get(s, ({
           List _x2c_literal_part_26 = Type_list(aggregate);  List_append(_x2c_literal_part_26, cons(Symbol_var(mark), cons(String_var(name), NULL)));
         }
         )))) Array_push(rows, List_var(row));

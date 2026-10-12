@@ -264,7 +264,7 @@ Symbol Type_fixed_var_tag(Type type){
 }
 
 String Type_var_converter(Type type){
-  if(! _init_guard_) _file_init_();  if(declared_typetags == NULL || ! List_truth(Type_list(type))) return NULL;  Var row = Map_getindex(declared_typetags, List_var(Type_canonicalize(type)));  if(Var_is_void(row)) return NULL;  return Var_string(List_cadr(Var_list(row)));
+  if(! _init_guard_) _file_init_();  if(declared_typetags == NULL || ! List_truth(Type_list(type))) return NULL;  Var row = Map_getindex(declared_typetags, List_var(Type_canonicalize(type)));  if(Var_is_void(row)) return NULL;  return Var_as_string(List_cadr(Var_list(row)));
 }
 
 int Type_var_tag_row(Symbol tag, unsigned long * top, unsigned long * mask, unsigned long * bottom){

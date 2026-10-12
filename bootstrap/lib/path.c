@@ -195,7 +195,7 @@ List String_split(String, String);
 
 int List_try_next(List, List *, Var *);
 
-static String Var_string(Var);
+String Var_as_string(Var);
 
 Path Path_absolute(Path path){
   if(! _init_guard_) _file_init_();
@@ -212,7 +212,7 @@ Path Path_absolute(Path path){
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
     while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      part = Var_string(_x2c_macro_cursor_output_0);
+      part = Var_as_string(_x2c_macro_cursor_output_0);
       {
         if(! String_truth(part) || String_equal(part, _2)) continue;
         if(String_equal(part, _4)){
@@ -321,7 +321,7 @@ static void _push_children(Array pending, Path directory){
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      name = Var_string(_x2c_macro_cursor_output_1);
+      name = Var_as_string(_x2c_macro_cursor_output_1);
       Array_push(pending, String_var(Path_join(directory, name)));
     }
 
@@ -336,7 +336,7 @@ Var Array_take_last(Array);
 static int _walk_next(Iter iter, Var * out){
   Array pending = Var_array(iter -> state);
   if(! Array_len(pending)) return 0;
-  String path = Var_string(Array_take_last(pending));
+  String path = Var_as_string(Array_take_last(pending));
   if(_descends(path)) _push_children(pending, path);
   * out = String_var(path);
   return 1;
@@ -363,7 +363,7 @@ static void _walk(Path directory, int depth, int hidden, Array paths){
     List _x2c_macro_cursor_2 = _x2c_macro_object_2;
     Var _x2c_macro_cursor_output_2;
     while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-      name = Var_string(_x2c_macro_cursor_output_2);
+      name = Var_as_string(_x2c_macro_cursor_output_2);
       {
         Path child = Path_join(directory, name);
         Array_push(paths, String_var(child));
@@ -476,7 +476,7 @@ static int _glob_depth(String components){
     List _x2c_macro_cursor_3 = _x2c_macro_object_3;
     Var _x2c_macro_cursor_output_3;
     while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
-      part = Var_string(_x2c_macro_cursor_output_3);
+      part = Var_as_string(_x2c_macro_cursor_output_3);
       {
         if(! String_truth(part)) continue;
         if(String_equal(part, _8)) return - 1;
@@ -511,7 +511,7 @@ List Path_glob(Path pattern){
     int _x2c_macro_cursor_4 = 0;
     Var _x2c_macro_cursor_output_4;
     while(Array_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
-      path = Var_string(_x2c_macro_cursor_output_4);
+      path = Var_as_string(_x2c_macro_cursor_output_4);
       {
         String candidate = String_truth(base) ? path : String_getslice(path, 2, (-2147483647 - 1), 1);
         if(directories) candidate = String_join(NULL, cons(String_var(candidate), cons(String_var(_1), NULL)));
@@ -571,7 +571,7 @@ static void _remove_entries(Path path, String * failed, int * failure){
         int child_failure = 0;
         _remove_tree(Path_join(path, String_new(entry -> d_name)), &(child_failed), &(child_failure));
         if(String_truth(child_failed) && ! String_truth((* failed))){
-          (* failed) = Var_string(Context_export(context, String_var(child_failed)));
+          (* failed) = Var_as_string(Context_export(context, String_var(child_failed)));
           (* failure) = child_failure;
         }
 
@@ -691,7 +691,7 @@ static void _copy_tree(Path source, Path target){
       List _x2c_macro_cursor_5 = _x2c_macro_object_5;
       Var _x2c_macro_cursor_output_5;
       while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
-        name = Var_string(_x2c_macro_cursor_output_5);
+        name = Var_as_string(_x2c_macro_cursor_output_5);
         _copy_tree(Path_join(source, name), Path_join(target, name));
       }
 

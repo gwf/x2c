@@ -1261,9 +1261,11 @@ static Var LogMemorySink__retain_wide(LogMemorySink l, Var value){
   return copy;
 }
 
+String Var_as_string(Var);
+
 static Var LogMemorySink__retain_string(LogMemorySink l, Var value){
   if(_pool_chain_owns(l -> pool, value)) return value;
-  String string = Var_string(value);
+  String string = Var_as_string(value);
   return String_var(String_new_in(l -> pool, string, String_len(string)));
 }
 

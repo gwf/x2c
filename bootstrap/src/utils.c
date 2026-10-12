@@ -277,7 +277,7 @@ String find_program(String name){
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
     while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      directory = Var_string(_x2c_macro_cursor_output_0);
+      directory = Var_as_string(_x2c_macro_cursor_output_0);
       {
         Path candidate = Path_join(directory, name);
         if(Path_is_executable(candidate)) return candidate;
@@ -315,11 +315,11 @@ String package_directory(List roots, String path){
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      root = Var_string(_x2c_macro_cursor_output_1);
+      root = Var_as_string(_x2c_macro_cursor_output_1);
       {
         String prefix = String_join(NULL, cons(String_var(Path_absolute(root)), cons(String_var(_25), NULL)));
         if(! String_startswith(source, prefix)) continue;
-        String name = Var_string(List_car(String_split(String_remove_prefix(source, prefix), _6)));
+        String name = Var_as_string(List_car(String_split(String_remove_prefix(source, prefix), _6)));
         if(String_is_identifier(name) && ! String_equal(source, String_join(NULL, cons(String_var(prefix), cons(String_var(name), NULL))))) return String_join(NULL, cons(String_var(prefix), cons(String_var(name), NULL)));
       }
 
@@ -337,7 +337,7 @@ String package_entry(SourceView sources, List roots, String name, String * direc
     List _x2c_macro_cursor_3 = _x2c_macro_object_3;
     Var _x2c_macro_cursor_output_3;
     while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
-      package_dir = Var_string(_x2c_macro_cursor_output_3);
+      package_dir = Var_as_string(_x2c_macro_cursor_output_3);
       {
         String root =({
           Var _x2c_literal_part_0 = String_var(Path_absolute(package_dir));  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_25), cons(String_var(name), NULL))));
@@ -349,7 +349,7 @@ String package_entry(SourceView sources, List roots, String name, String * direc
           List _x2c_macro_cursor_2 = _x2c_macro_object_2;
           Var _x2c_macro_cursor_output_2;
           while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-            suffix = Var_string(_x2c_macro_cursor_output_2);
+            suffix = Var_as_string(_x2c_macro_cursor_output_2);
             {
               String nested = String_join(NULL, cons(String_var(root), cons(String_var(_32), cons(String_var(name), cons(String_var(suffix), NULL)))));
               String entry = SourceView_exists(sources, nested) ? nested : String_join(NULL, cons(String_var(root), cons(String_var(_25), cons(String_var(name), cons(String_var(suffix), NULL)))));
@@ -474,9 +474,9 @@ void file_publish(List outputs){
       for(List rest = outputs;  List_truth(rest);  rest = List_cddr(rest)) Path_write_text(({
         Var _x2c_literal_part_1 = String_var(Var_str(List_car(rest)));  String_join(NULL, cons(_x2c_literal_part_1, cons(String_var(suffix), NULL)));
       }
-      ), Var_string(List_cadr(rest)));
+      ), Var_as_string(List_cadr(rest)));
       for(List rest = outputs;  List_truth(rest);  rest = List_cddr(rest)){
-        String target = Var_string(List_car(rest));
+        String target = Var_as_string(List_car(rest));
         if(rename(String_join(NULL, cons(String_var(target), cons(String_var(suffix), NULL))), target)) File_path_error(Symbol_var(1219365706), target, errno);
       }
 

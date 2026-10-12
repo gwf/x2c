@@ -1689,7 +1689,7 @@ static Var Lisp__special_eval(Lisp lisp, List args, LispEnv * env){
   return Lisp__eval(lisp, Lisp__eval(lisp, List_car(args), env), NULL);
 }
 
-static String Var_string(Var);
+String Var_as_string(Var);
 
 static Var Lisp__special_bind(Lisp lisp, List args, LispEnv * env){
   _arity(args, 2, _5);
@@ -1709,7 +1709,7 @@ static Var Lisp__special_bind(Lisp lisp, List args, LispEnv * env){
     }
 
   }
-  String native_name = Var_string(name);
+  String native_name = Var_as_string(name);
   List native_signature = Var_list(signature);
   Func fn = _native_target(native_name);
   if(! fn){
@@ -3223,6 +3223,8 @@ int Var_is_integer(Var);
 
 long Var_integer(Var);
 
+String Var_string(Var);
+
 static char * _string_charset(Var chars){
   return Var_is_nil(chars) ||(Var_is_integer(chars) && ! Var_integer(chars)) ? NULL : Var_string(chars);
 }
@@ -4315,14 +4317,14 @@ static Var _x2c_func_adapt_14(Func _x2c_func_binding_14, const FuncArg * _x2c_fu
 }
 
 static Var _x2c_func_adapt_15(Func _x2c_func_binding_15, const FuncArg * _x2c_func_argv_15){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_15, _x2c_func_argv_15, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_15, _x2c_func_argv_15, 0, 1318210446));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_15, _x2c_func_argv_15, 1, 45156);
   return String_var(_lisp_String_map(a0, a1));
   ;
 }
 
 static Var _x2c_func_adapt_16(Func _x2c_func_binding_16, const FuncArg * _x2c_func_argv_16){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_16, _x2c_func_argv_16, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_16, _x2c_func_argv_16, 0, 1318210446));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_16, _x2c_func_argv_16, 1, 45156);
   return String_var(_lisp_String_filter(a0, a1));
   ;
@@ -4438,7 +4440,7 @@ static Var _x2c_func_adapt_30(Func _x2c_func_binding_30, const FuncArg * _x2c_fu
 }
 
 static Var _x2c_func_adapt_31(Func _x2c_func_binding_31, const FuncArg * _x2c_func_argv_31){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_31, _x2c_func_argv_31, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_31, _x2c_func_argv_31, 0, 1318210446));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_31, _x2c_func_argv_31, 1, 45156);
   return String_var(_lisp_Lisp_String_filter(a0, a1));
   ;

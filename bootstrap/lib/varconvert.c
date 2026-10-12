@@ -18,6 +18,12 @@ typedef struct X2CVarNumeric{
 X2CVarNumeric;
 
 #include "meta.h"
+static Var _1, _0;
+
+static int _init_guard_ = 0;
+
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
+
 #include "var.h"
 #include "error.h"
 #include "list.h"
@@ -30,12 +36,6 @@ X2CVarNumeric;
 extern const SymbolSet x2c_var_numeric_tags;
 
 extern const X2CVarNumericInfo x2c_var_numerics[];
-
-static Var _1, _0;
-
-static int _init_guard_ = 0;
-
-__attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static void _numeric_decode(Var value, X2CVarNumericInfo info, X2CVarNumeric * out);
 
@@ -55,32 +55,46 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _1 = Symbol_var(1307939018);
 }
 
-int Var_numeric_info(Symbol tag, X2CVarNumericInfo * out);
-
 #include "error.h"
 
 
 
+
+String Var_string(Var value){
+  if(! Var_is_row(value, 11, 7, 1)){
+    Var _x2c_literal_part_0 = Symbol_var(Var_tag(value));
+    Var _x2c_literal_part_1 = String_var(String_new("String"));
+    {
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/varconvert.x",.function = "Var_string",.line = 73};
+      x2c_error_raise_n(& _x2c_error_site_0, 1020285550996648, 2, Symbol_var(1307939018), _x2c_literal_part_0, Symbol_var(1345468776), _x2c_literal_part_1);
+      __builtin_unreachable();
+    }
+
+  }
+  return Var_string_payload(value);
+}
+
+int Var_numeric_info(Symbol tag, X2CVarNumericInfo * out);
 
 Var Var_convert(Var value, Symbol target){
   if(! _init_guard_) _file_init_();
   if(! Var_encoding_valid(value)){
     unsigned long bits = value.u64;
     {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 120};
-      x2c_error_raise_n(& _x2c_error_site_0, 4372507526, 1, Symbol_var(46228810), Var_box_ulong(bits));
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 131};
+      x2c_error_raise_n(& _x2c_error_site_1, 4372507526, 1, Symbol_var(46228810), Var_box_ulong(bits));
       __builtin_unreachable();
     }
 
   }
   if(Var_is_void(value)){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 122};
-    x2c_error_raise_n(& _x2c_error_site_1, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.convert")), NULL))));
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 133};
+    x2c_error_raise_n(& _x2c_error_site_2, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.convert")), NULL))));
     __builtin_unreachable();
   }
   if(! target || ! Var_known_tag(target) || target == 1473096 || target == 28764 || target == 2050956 || target == 1854348){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 123};
-    x2c_error_raise_n(& _x2c_error_site_2, 143279306979688, 1, Symbol_var(1345468776), Symbol_var(target));
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 134};
+    x2c_error_raise_n(& _x2c_error_site_3, 143279306979688, 1, Symbol_var(1345468776), Symbol_var(target));
     __builtin_unreachable();
   }
   Symbol source_tag = Var_tag(value);
@@ -90,8 +104,8 @@ Var Var_convert(Var value, Symbol target){
   if(! Var_numeric_info(source_tag, &(info))){
     List _x2c_macro_lower_0 = cons(_0, cons(List_var(cons(_1, cons(Symbol_var(source_tag), NULL))), NULL));
     {
-      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 133};
-      x2c_error_raise_n(& _x2c_error_site_3, 1020285550996648, 2, Symbol_var(1345468776), Symbol_var(target), Symbol_var(6401226), List_var(_x2c_macro_lower_0));
+      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 144};
+      x2c_error_raise_n(& _x2c_error_site_4, 1020285550996648, 2, Symbol_var(1345468776), Symbol_var(target), Symbol_var(6401226), List_var(_x2c_macro_lower_0));
       __builtin_unreachable();
     }
 
@@ -99,8 +113,8 @@ Var Var_convert(Var value, Symbol target){
   X2CVarNumeric source;
   _numeric_decode(value, info, &(source));
   if(! Var_numeric_info(target, &(info))){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 136};
-    x2c_error_raise_n(& _x2c_error_site_4, 1020285550996648, 2, Symbol_var(1307939018), Symbol_var(source_tag), Symbol_var(1345468776), Symbol_var(target));
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 147};
+    x2c_error_raise_n(& _x2c_error_site_5, 1020285550996648, 2, Symbol_var(1307939018), Symbol_var(source_tag), Symbol_var(1345468776), Symbol_var(target));
     __builtin_unreachable();
   }
   return info.floating ? _convert_to_float(&(source), target) : _convert_to_integer(&(source), target, info.unsigned_value, info.bits);
@@ -117,29 +131,29 @@ int Var_numeric_info(Symbol tag, X2CVarNumericInfo * out){
 
 void Var_numeric_decode(Var value, X2CVarNumeric * out){
   if(! out){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/varconvert.x",.function = "Var_numeric_decode",.line = 164};
-    x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.numeric_decode")), NULL))));
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/varconvert.x",.function = "Var_numeric_decode",.line = 175};
+    x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.numeric_decode")), NULL))));
     __builtin_unreachable();
   }
   if(! Var_encoding_valid(value)){
     unsigned long bits = value.u64;
     {
-      static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/varconvert.x",.function = "Var_numeric_decode",.line = 167};
-      x2c_error_raise_n(& _x2c_error_site_6, 4372507526, 1, Symbol_var(46228810), Var_box_ulong(bits));
+      static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/varconvert.x",.function = "Var_numeric_decode",.line = 178};
+      x2c_error_raise_n(& _x2c_error_site_7, 4372507526, 1, Symbol_var(46228810), Var_box_ulong(bits));
       __builtin_unreachable();
     }
 
   }
   if(Var_is_void(value)){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/varconvert.x",.function = "Var_numeric_decode",.line = 169};
-    x2c_error_raise_n(& _x2c_error_site_7, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.numeric_decode")), NULL))));
+    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/varconvert.x",.function = "Var_numeric_decode",.line = 180};
+    x2c_error_raise_n(& _x2c_error_site_8, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.numeric_decode")), NULL))));
     __builtin_unreachable();
   }
   X2CVarNumericInfo info;
   Symbol tag = Var_tag(value);
   if(! Var_numeric_info(tag, &(info))){
-    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/varconvert.x",.function = "Var_numeric_decode",.line = 172};
-    x2c_error_raise_n(& _x2c_error_site_8, 4477479911782, 1, Symbol_var(1307939018), Symbol_var(tag));
+    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/varconvert.x",.function = "Var_numeric_decode",.line = 183};
+    x2c_error_raise_n(& _x2c_error_site_9, 4477479911782, 1, Symbol_var(1307939018), Symbol_var(tag));
     __builtin_unreachable();
   }
   _numeric_decode(value, info, &((* out)));
@@ -201,8 +215,8 @@ static Var _convert_to_integer(X2CVarNumeric * source, Symbol target, int unsign
 _Noreturn static void _out_of_range(X2CVarNumeric * source, Symbol target){
   Symbol source_tag =(* source).tag;
   {
-    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/varconvert.x",.function = "_out_of_range",.line = 231};
-    x2c_error_raise_n(& _x2c_error_site_9, 245103016899018, 2, Symbol_var(1307939018), Symbol_var(source_tag), Symbol_var(1345468776), Symbol_var(target));
+    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/varconvert.x",.function = "_out_of_range",.line = 242};
+    x2c_error_raise_n(& _x2c_error_site_10, 245103016899018, 2, Symbol_var(1307939018), Symbol_var(source_tag), Symbol_var(1345468776), Symbol_var(target));
     __builtin_unreachable();
   }
 
@@ -216,8 +230,8 @@ static long double _integer_limit(int bits){
 Var Var_integer_box(Symbol target, unsigned long long raw){
   X2CVarNumericInfo info;
   if(! Var_numeric_info(target, &(info)) || info.floating){
-    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/varconvert.x",.function = "Var_integer_box",.line = 248};
-    x2c_error_raise_n(& _x2c_error_site_10, 143279306979688, 1, Symbol_var(1345468776), Symbol_var(target));
+    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/varconvert.x",.function = "Var_integer_box",.line = 259};
+    x2c_error_raise_n(& _x2c_error_site_11, 143279306979688, 1, Symbol_var(1345468776), Symbol_var(target));
     __builtin_unreachable();
   }
   raw &= Var_width_mask(info.bits);
@@ -237,8 +251,8 @@ Var Var_integer_box(Symbol target, unsigned long long raw){
     case 1435270030 : return Var_box_ulong_long(raw);
   }
   {
-    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/varconvert.x",.function = "Var_integer_box",.line = 266};
-    x2c_error_raise_n(& _x2c_error_site_11, 143279306979688, 1, Symbol_var(1345468776), Symbol_var(target));
+    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/varconvert.x",.function = "Var_integer_box",.line = 277};
+    x2c_error_raise_n(& _x2c_error_site_12, 143279306979688, 1, Symbol_var(1345468776), Symbol_var(target));
     __builtin_unreachable();
   }
 
@@ -280,8 +294,8 @@ static Var _convert_to_float(X2CVarNumeric * source, Symbol target){
     case 3356265 : return Var_box_f64(X2CVarNumeric_f64(&((* source))));
     case 26071077642 : return Var_box_long_double(X2CVarNumeric_ldouble(&((* source))));
     default:{
-      static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/varconvert.x",.function = "_convert_to_float",.line = 314};
-      x2c_error_raise_n(& _x2c_error_site_12, 143279306979688, 1, Symbol_var(1345468776), Symbol_var(target));
+      static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/varconvert.x",.function = "_convert_to_float",.line = 325};
+      x2c_error_raise_n(& _x2c_error_site_13, 143279306979688, 1, Symbol_var(1345468776), Symbol_var(target));
       __builtin_unreachable();
     }
 

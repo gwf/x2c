@@ -986,17 +986,17 @@ Job Job_options(Job job, Map options){
   return job;
 }
 
-static String Var_string(Var);
+String Var_as_string(Var);
 
 static Map Var_map(Var);
 
 static void JobLaunch_set(JobLaunch * l, Symbol name, Var value){
   switch(name){
-    case 8804 :(* l).dir = Var_string(value);
+    case 8804 :(* l).dir = Var_as_string(value);
     break;
     case 11180 :(* l).environment = _environment(Var_map(value));
     break;
-    case 19826024 :(* l).input = Var_string(value);
+    case 19826024 :(* l).input = Var_as_string(value);
     (* l).has_input = 1;
     break;
     case 1317305704 : JobLaunch_route_output(&((* l)), value);
@@ -1019,13 +1019,13 @@ static void JobLaunch_set(JobLaunch * l, Symbol name, Var value){
 
 static void JobLaunch_route_output(JobLaunch * l, Var value){
   (* l).capture_output = _is(value, 6544469130);
-  (* l).stdout_path =(* l).capture_output || _is(value, 20284019304) ? NULL : Var_string(value);
+  (* l).stdout_path =(* l).capture_output || _is(value, 20284019304) ? NULL : Var_as_string(value);
 }
 
 static void JobLaunch_route_errors(JobLaunch * l, Var value){
   (* l).capture_errors = _is(value, 6544469130);
   (* l).errors_to_output = _is(value, 1317305704);
-  (* l).stderr_path =(* l).capture_errors ||(* l).errors_to_output || _is(value, 20284019304) ? NULL : Var_string(value);
+  (* l).stderr_path =(* l).capture_errors ||(* l).errors_to_output || _is(value, 20284019304) ? NULL : Var_as_string(value);
 }
 
 static int _is(Var value, Symbol name){
@@ -1249,7 +1249,7 @@ static char * * _environment(Map env){
     int _x2c_macro_cursor_6 = 0;
     Var _x2c_macro_cursor_output_7;
     while(Array_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_7))){
-      entry = Var_string(_x2c_macro_cursor_output_7);
+      entry = Var_as_string(_x2c_macro_cursor_output_7);
       out[index ++] = entry;
     }
 

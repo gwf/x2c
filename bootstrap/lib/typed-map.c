@@ -3421,7 +3421,7 @@ String MapStringString_updateindex(MapStringString _x2c_macro_map_137, String _x
   return _update_string(_x2c_macro_stored_22, _x2c_macro_op_5, _x2c_macro_rhs_2);
 }
 
-static String Var_string(Var);
+String Var_as_string(Var);
 
 String MapStringString_postfixindex(MapStringString _x2c_macro_map_138, String _x2c_macro_key_87, Symbol _x2c_macro_op_6){
   if(! _init_guard_) _file_init_();
@@ -3445,7 +3445,7 @@ String MapStringString_postfixindex(MapStringString _x2c_macro_map_138, String _
   if(0){
     Var _x2c_macro_boxed_value_6 = String_var(_x2c_macro_old_2);
     Var_postfix(&(_x2c_macro_boxed_value_6), _x2c_macro_op_6);
-    _x2c_macro_stored_23[0] = Var_string(_x2c_macro_boxed_value_6);
+    _x2c_macro_stored_23[0] = Var_as_string(_x2c_macro_boxed_value_6);
     return _x2c_macro_old_2;
   }
   if(! 0)(void) _bad_op(_x2c_macro_op_6);
@@ -3509,7 +3509,7 @@ MapStringString Map_mapstringstring(Map _x2c_macro_entries_14){
       unsigned _x2c_macro_cursor_25 = 0;
       Var _x2c_macro_key_91, _x2c_macro_val_34;
       while(Map_try_next(_x2c_macro_entries_14, &(_x2c_macro_cursor_25), &(_x2c_macro_key_91), &(_x2c_macro_val_34)))({
-        MapStringString _x2c_protocol_arg_6 = _x2c_macro_packed_2;  String _x2c_protocol_arg_7 = Var_string(_x2c_macro_key_91);  String _x2c_protocol_arg_8 = Var_string(_x2c_macro_val_34);  MapStringString_setindex(_x2c_protocol_arg_6, _x2c_protocol_arg_7, _x2c_protocol_arg_8);
+        MapStringString _x2c_protocol_arg_6 = _x2c_macro_packed_2;  String _x2c_protocol_arg_7 = Var_as_string(_x2c_macro_key_91);  String _x2c_protocol_arg_8 = Var_as_string(_x2c_macro_val_34);  MapStringString_setindex(_x2c_protocol_arg_6, _x2c_protocol_arg_7, _x2c_protocol_arg_8);
       }
       );
       _x2c_macro_finished_4 = _x2c_macro_packed_2;
@@ -3738,8 +3738,8 @@ static MapStringString _prepare_string_export(MapStringString map, Context sourc
           key = _x2c_macro_cursor_output_0;
           value = _x2c_macro_cursor_output_1;
           {
-            key = Var_string(Context_export_nested(source, String_var(key)));
-            value = Var_string(Context_export_nested(source, String_var(value)));
+            key = Var_as_string(Context_export_nested(source, String_var(key)));
+            value = Var_as_string(Context_export_nested(source, String_var(value)));
             ({
               MapStringString _x2c_protocol_arg_9 = staged;  String _x2c_protocol_arg_10 = key;  String _x2c_protocol_arg_11 = value;  MapStringString_setindex(_x2c_protocol_arg_9, _x2c_protocol_arg_10, _x2c_protocol_arg_11);
             }
@@ -4421,7 +4421,7 @@ MapStringInt Map_mapstringint(Map _x2c_macro_entries_19){
       unsigned _x2c_macro_cursor_35 = 0;
       Var _x2c_macro_key_124, _x2c_macro_val_47;
       while(Map_try_next(_x2c_macro_entries_19, &(_x2c_macro_cursor_35), &(_x2c_macro_key_124), &(_x2c_macro_val_47)))({
-        MapStringInt _x2c_protocol_arg_12 = _x2c_macro_packed_3;  String _x2c_protocol_arg_13 = Var_string(_x2c_macro_key_124);  int _x2c_protocol_arg_14 = Var_int(Var_convert(_x2c_macro_val_47, 3453797));  MapStringInt_setindex(_x2c_protocol_arg_12, _x2c_protocol_arg_13, _x2c_protocol_arg_14);
+        MapStringInt _x2c_protocol_arg_12 = _x2c_macro_packed_3;  String _x2c_protocol_arg_13 = Var_as_string(_x2c_macro_key_124);  int _x2c_protocol_arg_14 = Var_int(Var_convert(_x2c_macro_val_47, 3453797));  MapStringInt_setindex(_x2c_protocol_arg_12, _x2c_protocol_arg_13, _x2c_protocol_arg_14);
       }
       );
       _x2c_macro_finished_6 = _x2c_macro_packed_3;
@@ -4642,7 +4642,7 @@ static MapStringInt _prepare_string_int_export(MapStringInt map, Context source)
       String key;
       int value;
       while(MapStringInt_try_next(map, &(cursor), &(key), &(value))){
-        key = Var_string(Context_export_nested(source, String_var(key)));
+        key = Var_as_string(Context_export_nested(source, String_var(key)));
         ({
           MapStringInt _x2c_protocol_arg_15 = staged;  String _x2c_protocol_arg_16 = key;  int _x2c_protocol_arg_17 = value;  MapStringInt_setindex(_x2c_protocol_arg_15, _x2c_protocol_arg_16, _x2c_protocol_arg_17);
         }
@@ -4921,23 +4921,23 @@ static inline Iter _x2c_proto_mapstringint_iter_0(Var a0, Iter a1){
 }
 
 static inline int _x2c_proto_mapstringint_contains_0(Var a0, Var a1){
-  return MapStringInt_contains(Var_mapstringint(a0), Var_string(a1));
+  return MapStringInt_contains(Var_mapstringint(a0), Var_as_string(a1));
 }
 
 static inline Var _x2c_proto_mapstringint_getindex_0(Var a0, Var a1){
-  return int_var(MapStringInt_getindex(Var_mapstringint(a0), Var_string(a1)));
+  return int_var(MapStringInt_getindex(Var_mapstringint(a0), Var_as_string(a1)));
 }
 
 static inline Var _x2c_proto_mapstringint_setindex_0(Var a0, Var a1, Var a2){
-  return int_var(MapStringInt_setindex(Var_mapstringint(a0), Var_string(a1), Var_int(Var_convert(a2, 3453797))));
+  return int_var(MapStringInt_setindex(Var_mapstringint(a0), Var_as_string(a1), Var_int(Var_convert(a2, 3453797))));
 }
 
 static inline Var _x2c_proto_mapstringint_updateindex_0(Var a0, Var a1, Symbol a2, Var a3){
-  return int_var(MapStringInt_updateindex(Var_mapstringint(a0), Var_string(a1), a2, Var_int(Var_convert(a3, 3453797))));
+  return int_var(MapStringInt_updateindex(Var_mapstringint(a0), Var_as_string(a1), a2, Var_int(Var_convert(a3, 3453797))));
 }
 
 static inline Var _x2c_proto_mapstringint_postfixindex_0(Var a0, Var a1, Symbol a2){
-  return int_var(MapStringInt_postfixindex(Var_mapstringint(a0), Var_string(a1), a2));
+  return int_var(MapStringInt_postfixindex(Var_mapstringint(a0), Var_as_string(a1), a2));
 }
 
 static inline Var _x2c_proto_mapstringint_export_context_0(Var a0, Context a1){
@@ -4977,23 +4977,23 @@ static inline Iter _x2c_proto_mapstringstring_iter_0(Var a0, Iter a1){
 }
 
 static inline int _x2c_proto_mapstringstring_contains_0(Var a0, Var a1){
-  return MapStringString_contains(Var_mapstringstring(a0), Var_string(a1));
+  return MapStringString_contains(Var_mapstringstring(a0), Var_as_string(a1));
 }
 
 static inline Var _x2c_proto_mapstringstring_getindex_0(Var a0, Var a1){
-  return String_var(MapStringString_getindex(Var_mapstringstring(a0), Var_string(a1)));
+  return String_var(MapStringString_getindex(Var_mapstringstring(a0), Var_as_string(a1)));
 }
 
 static inline Var _x2c_proto_mapstringstring_setindex_0(Var a0, Var a1, Var a2){
-  return String_var(MapStringString_setindex(Var_mapstringstring(a0), Var_string(a1), Var_string(a2)));
+  return String_var(MapStringString_setindex(Var_mapstringstring(a0), Var_as_string(a1), Var_as_string(a2)));
 }
 
 static inline Var _x2c_proto_mapstringstring_updateindex_0(Var a0, Var a1, Symbol a2, Var a3){
-  return String_var(MapStringString_updateindex(Var_mapstringstring(a0), Var_string(a1), a2, Var_string(a3)));
+  return String_var(MapStringString_updateindex(Var_mapstringstring(a0), Var_as_string(a1), a2, Var_as_string(a3)));
 }
 
 static inline Var _x2c_proto_mapstringstring_postfixindex_0(Var a0, Var a1, Symbol a2){
-  return String_var(MapStringString_postfixindex(Var_mapstringstring(a0), Var_string(a1), a2));
+  return String_var(MapStringString_postfixindex(Var_mapstringstring(a0), Var_as_string(a1), a2));
 }
 
 static inline Var _x2c_proto_mapstringstring_export_context_0(Var a0, Context a1){

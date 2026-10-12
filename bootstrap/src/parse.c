@@ -3246,7 +3246,7 @@ static List Compiler__declared(Compiler c, List decl, Token meta, Token first){
         {
           Var _x2c_match_value_0 = name;
           {
-            String name = Var_string(_x2c_match_value_0);
+            String name = Var_as_string(_x2c_match_value_0);
             if(Type_is_function(List_type_from_ast(decl))) Map_del(c -> meta_comptime, String_var(name));
           }
 
@@ -3329,7 +3329,7 @@ static void Compiler__reject_expanded_meta(Compiler c, List decl, Token meta){
         {
           Var _x2c_match_value_1 = own;
           {
-            String own = Var_string(_x2c_match_value_1);
+            String own = Var_as_string(_x2c_match_value_1);
             name = own;
           }
 
@@ -3377,7 +3377,7 @@ static void Compiler__record_meta_hash(Compiler c, List definition, Token first,
         {
           Var _x2c_match_value_2 = own;
           {
-            String own = Var_string(_x2c_match_value_2);
+            String own = Var_as_string(_x2c_match_value_2);
             Compiler__store_meta_hash(c, own, content, first);
           }
 
@@ -3394,7 +3394,7 @@ static void Compiler__record_meta_hash(Compiler c, List definition, Token first,
         {
           Var _x2c_match_value_3 = own;
           {
-            String own = Var_string(_x2c_match_value_3);
+            String own = Var_as_string(_x2c_match_value_3);
             Compiler__store_static_meta(c, spec, own, init, first);
           }
 
@@ -3404,7 +3404,7 @@ static void Compiler__record_meta_hash(Compiler c, List definition, Token first,
        break; } } } } static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_69), &_x2c_match_capture)) { Var _x2c_match_value_0 = _x2c_match_values[0]; Var _x2c_match_value_1 = _x2c_match_values[1]; Var _x2c_match_value_2 = _x2c_match_values[2]; {
         Var spec;  spec = _x2c_match_value_0;  Var binding;  binding = _x2c_match_value_1;  Var own;  own = _x2c_match_value_2; {
           Var _x2c_match_value_4 = own; {
-            String own = Var_string(_x2c_match_value_4);  Compiler__store_collected_meta(c, spec, Var_list(binding), own, first, collected_body);
+            String own = Var_as_string(_x2c_match_value_4);  Compiler__store_collected_meta(c, spec, Var_list(binding), own, first, collected_body);
           }
 
         }
@@ -3494,7 +3494,7 @@ static void _referenced_names(Var node, Map seen, Array names){
               name = _x2c_match_value_0;
               {
                 if(! Var_is_row(name, 11, 7, 1)) break;
-                String spelling = Var_string(name);
+                String spelling = Var_as_string(name);
                 if(!(Map_contains(seen, String_var(spelling)))){
                   Map_setindex(seen, String_var(spelling), int_var(1));
                   Array_push(names, String_var(spelling));
@@ -3536,7 +3536,7 @@ static void Compiler__publish_definition(Compiler c, List decl, List function, T
         {
           Var _x2c_match_value_5 = name;
           {
-            String name = Var_string(_x2c_match_value_5);
+            String name = Var_as_string(_x2c_match_value_5);
             Map_del(c -> meta_comptime, String_var(name));
           }
 
@@ -3862,7 +3862,7 @@ static List Compiler__destructure_targets(Compiler c, List binding_type){
     if(Compiler_peek(c, 0) != 19147688) Compiler_report_error(c, 33658058, _92, c -> token, _95);
     List ident = Compiler_parse_basic_identifier(c);
     if(Map_truth(c -> macro_holes)){
-      List local = Compiler_macro_introduced_name(c, Var_string(List_car(ident)));
+      List local = Compiler_macro_introduced_name(c, Var_as_string(List_car(ident)));
       Compiler_bind_template_local(c, local, binding_type, NULL);
       Array_push(targets, List_var(local));
     }
@@ -4096,7 +4096,7 @@ static List Compiler__method_self_signature(Compiler c, List binding){
 }
 
 static Type Compiler__self_owner_type(Compiler c, List method){
-  String source = Var_string(List_car(method));
+  String source = Var_as_string(List_car(method));
   Type declared = List_type(Sym_get(c -> sym, cons(String_var(source), NULL)));
   if(Type_is_typedef(declared)) return List_type(cons(String_var(Compiler__package_type_reference(c, 0, source)), NULL));
   Symbol builtin = Var_symbol(Atom_intern(source));
@@ -4409,7 +4409,7 @@ static List Compiler__tag_name(Compiler c){
 
 static List Compiler__package_aggregate_name(Compiler c, Symbol tag, List name){
   if(! Var_is_row(List_car(name), 11, 7, 1)) return name;
-  String spelling = Var_string(List_car(name));
+  String spelling = Var_as_string(List_car(name));
   if(Compiler_peek(c, 0) == 247) return cons(String_var(Compiler_package_spelling(c, spelling)), NULL);
   return cons(String_var(Compiler__package_type_reference(c, tag, spelling)), NULL);
 }
@@ -5312,7 +5312,7 @@ static List Compiler__install_declarator(Compiler c, List base, List context, Li
   if(List_truth(binding)) Compiler__method_facts(c, binding, method, self_signature, &((* preserved_self)));
   if(List_truth(binding) && List_truth(method) && c -> token && ! Type_is_static(declared_type)){
     String path = home_portable_path(Path_absolute(c -> filename));
-    String owner = Compiler_package_spelling(c, Var_string(List_car(method)));
+    String owner = Compiler_package_spelling(c, Var_as_string(List_car(method)));
     Sym_set(c -> sym, cons(_17, cons(List_var(cons(_212, cons(String_var(path), cons(int_var(c -> token -> pos), cons(String_var(exact), NULL))))), NULL)), ({
       Var _x2c_literal_part_59 = String_var(exact);  Var _x2c_literal_part_60 = List_var(cons(List_var(cons(String_var(owner), NULL)), NULL));  cons(_212, cons(_x2c_literal_part_59, cons(_x2c_literal_part_60, NULL)));
     }
@@ -5342,7 +5342,7 @@ static Var Compiler__declared_name(Compiler c, Var name, int * exact_name){
         {
           Var _x2c_match_value_7 = exact;
           {
-            String exact = Var_string(_x2c_match_value_7);
+            String exact = Var_as_string(_x2c_match_value_7);
             name = String_var(exact), (* exact_name) = 1;
           }
 
@@ -5364,7 +5364,7 @@ static Var Compiler__method_spelling(Compiler c, Var name, Type declared_type, L
         default: ; if (!_x2c_match_none) { static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_246), &_x2c_match_capture)) { Var _x2c_match_value_0 = _x2c_match_values[0]; Var _x2c_match_value_1 = _x2c_match_values[1]; {
         Var owner;  owner = _x2c_match_value_0;  Var member;  member = _x2c_match_value_1; {
           Var _x2c_match_value_8 = member; {
-            String member = Var_string(_x2c_match_value_8); {
+            String member = Var_as_string(_x2c_match_value_8); {
               String owner_name = Var_is(owner, 1328354264) ? Symbol_str(Var_symbol(owner)) : Var_str(owner);  name = String_var(String_join(NULL, cons(String_var(owner_name), cons(String_var(_247), cons(String_var(member), NULL)))));  if(String_truth(c -> package)){
                 String prefix = String_join(NULL, cons(String_var(c -> package), cons(String_var(_248), NULL)));  if(String_startswith(owner_name, prefix)) owner_name = String_getslice(owner_name, String_len(prefix), (-2147483647 - 1), 1);
               }
@@ -5379,7 +5379,7 @@ static Var Compiler__method_spelling(Compiler c, Var name, Type declared_type, L
        break; } } if (!_x2c_match_none) { static MatchCaptureSite _x2c_match_site_1; if (x2c_match_site_try_capture(&_x2c_match_site_1, _x2c_match_expr, List_var(_270), &_x2c_match_capture)) { Var _x2c_match_value_0 = _x2c_match_values[0]; {
         Var member;  member = _x2c_match_value_0; {
           Var _x2c_match_value_9 = member; {
-            String member = Var_string(_x2c_match_value_9);  if(Type_is_static(declared_type)){
+            String member = Var_as_string(_x2c_match_value_9);  if(Type_is_static(declared_type)){
               name = String_var(member); (* exact_name) = 1;
             }
             else Compiler_report_error(c, 1362954, _271, c -> token, NULL);
@@ -5621,7 +5621,7 @@ static List Compiler__member_name(Compiler c, String owner, List * method_identi
 static String Compiler__package_alias_member(Compiler c){
   String spelling = Compiler_package_alias_spelling(c);
   if(! String_truth(spelling)) return NULL;
-  String package = Var_string(Map_getindex(c -> package_aliases, String_var(c -> token -> text)));
+  String package = Var_as_string(Map_getindex(c -> package_aliases, String_var(c -> token -> text)));
   Compiler_next(c);
   Compiler_next(c);
   if(! List_truth(Sym_get_exact(c -> sym, cons(String_var(spelling), NULL)))) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_287), cons(String_var(package), cons(String_var(_288), cons(String_var(c -> token -> text), cons(String_var(_184), NULL)))))), c -> token, NULL);
@@ -5658,7 +5658,7 @@ List Compiler_parse_optional_identifier(Compiler c){
 }
 
 static String _syntax_exact_name(Var value){
-  if(Var_is_row(value, 11, 7, 1)) return Var_string(value);
+  if(Var_is_row(value, 11, 7, 1)) return Var_as_string(value);
   if(! Var_is_row(value, 9, 7, 4)) return NULL;
   {
     Var _x2c_match_var = value; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);
@@ -5670,7 +5670,7 @@ static String _syntax_exact_name(Var value){
         {
           Var _x2c_match_value_10 = exact;
           {
-            String exact = Var_string(_x2c_match_value_10);
+            String exact = Var_as_string(_x2c_match_value_10);
             return exact;
           }
 
@@ -5683,7 +5683,7 @@ static String _syntax_exact_name(Var value){
         {
           Var _x2c_match_value_11 = exact;
           {
-            String exact = Var_string(_x2c_match_value_11);
+            String exact = Var_as_string(_x2c_match_value_11);
             return exact;
           }
 
@@ -5830,7 +5830,7 @@ static String Compiler__lifecycle_owner(Compiler c, List binding, String member)
     List _x2c_match_expr = method; Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };  switch(0){
         default: ; if (x2c_match_try_capture(_x2c_match_expr, List_var(cons(_315, cons(String_var(member), NULL))), &_x2c_match_capture)) { Var _x2c_match_value_0 = _x2c_match_values[0]; {
         Var name;  name = _x2c_match_value_0; {
-          String owner = Var_string(name);  Type owner_type = List_type(Sym_get(c -> sym, cons(String_var(owner), NULL)));  return Type_is_typedef(owner_type) ? owner : NULL;
+          String owner = Var_as_string(name);  Type owner_type = List_type(Sym_get(c -> sym, cons(String_var(owner), NULL)));  return Type_is_typedef(owner_type) ? owner : NULL;
         }
 
       }
@@ -6229,7 +6229,7 @@ static List Compiler__bind_form(Compiler c, List input, AstPos context, int pend
        } } } } _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9225486202628787210ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_1 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var name;  name = _x2c_match_value_0;  Var type;  type = _x2c_match_value_1; {
           Var _x2c_match_value_13 = name; {
-            String name = Var_string(_x2c_match_value_13);  if(unit){
+            String name = Var_as_string(_x2c_match_value_13);  if(unit){
               return Compiler__bind_named_type(c, name, type);  break;
             }
 
@@ -6337,7 +6337,7 @@ static List Compiler__bind_form(Compiler c, List input, AstPos context, int pend
        break; } _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497972340888518ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var directive;  directive = _x2c_match_value_0; {
           Var _x2c_match_value_14 = directive; {
-            String directive = Var_string(_x2c_match_value_14);  if(unit || block){
+            String directive = Var_as_string(_x2c_match_value_14);  if(unit || block){
               return Compiler__bind_preproc(c, input);  break;
             }
 
@@ -6584,7 +6584,7 @@ static List Compiler__bind_item(Compiler c, Var origin, List node){
 }
 
 static List Compiler__bind_api_source(Compiler c, Var line, Var doc, Var syntax){
-  List bound = Compiler_bind_syntax(c, syntax, AST_UNIT, List_type(c -> return_type));  Token invocation = List_truth(c -> macro_stack) ? Var_token(List_getindex(Var_list(List_last(c -> macro_stack)), 3)) : NULL;  String invocation_doc = invocation ? Compiler_definition_doc(c, invocation) : NULL;  line = invocation ? int_var(invocation -> line) : line;  doc = String_var(String_truth(invocation_doc) ? invocation_doc : Compiler__filled_doc(c, Var_string(doc)));  if(c -> shallow) return cons(_27, cons(line, cons(doc, cons(List_var(bound), NULL))));  Compiler__definition_source(c, bound, Var_int(Var_convert(line, 3453797)), Var_string(doc), NULL);  return bound;
+  List bound = Compiler_bind_syntax(c, syntax, AST_UNIT, List_type(c -> return_type));  Token invocation = List_truth(c -> macro_stack) ? Var_token(List_getindex(Var_list(List_last(c -> macro_stack)), 3)) : NULL;  String invocation_doc = invocation ? Compiler_definition_doc(c, invocation) : NULL;  line = invocation ? int_var(invocation -> line) : line;  doc = String_var(String_truth(invocation_doc) ? invocation_doc : Compiler__filled_doc(c, Var_as_string(doc)));  if(c -> shallow) return cons(_27, cons(line, cons(doc, cons(List_var(bound), NULL))));  Compiler__definition_source(c, bound, Var_int(Var_convert(line, 3453797)), Var_as_string(doc), NULL);  return bound;
 }
 
 static String Compiler__filled_doc(Compiler c, String doc){
@@ -6610,7 +6610,7 @@ static Map Compiler__hole_spellings(Compiler c){
                 default: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936761658502ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && Var_is(_x2c_match_cursor1->car, 806120) && (_x2c_match_cursor2 = Var_list(_x2c_match_cursor1->car), 1) && _x2c_match_cursor2 && _x2c_match_cursor2->car.u64 == 9224497938069557450ULL && (_x2c_match_cursor2 = _x2c_match_cursor2->cdr, 1) && _x2c_match_cursor2 && Var_is(_x2c_match_cursor2->car, 1318210446)) { Var _x2c_match_value_0 = _x2c_match_cursor2->car; if ((_x2c_match_cursor2 = _x2c_match_cursor2->cdr, 1) && _x2c_match_cursor2 && Var_is(_x2c_match_cursor2->car, 3453797)) { Var _x2c_match_value_1 = _x2c_match_cursor2->car; if ((_x2c_match_cursor2 = _x2c_match_cursor2->cdr, 1) && _x2c_match_cursor2 && Var_is(_x2c_match_cursor2->car, 3453797)) { Var _x2c_match_value_2 = _x2c_match_cursor2->car; if ((_x2c_match_cursor2 = _x2c_match_cursor2->cdr, 1) && !_x2c_match_cursor2 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_3 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
                 Var path;  path = _x2c_match_value_0;  Var begin;  begin = _x2c_match_value_1;  Var end;  end = _x2c_match_value_2;  Var syntax;  syntax = _x2c_match_value_3; {
                   Var _x2c_match_value_15 = path;  Var _x2c_match_value_16 = begin;  Var _x2c_match_value_17 = end; {
-                    String path = Var_string(_x2c_match_value_15);  int begin = Var_int(Var_convert(_x2c_match_value_16, 3453797));  int end = Var_int(Var_convert(_x2c_match_value_17, 3453797));  if(String_truth(c -> text) && String_equal(path, file)) Map_setindex(written, syntax, String_var(String_new_len(c -> text + begin, end - begin)));
+                    String path = Var_as_string(_x2c_match_value_15);  int begin = Var_int(Var_convert(_x2c_match_value_16, 3453797));  int end = Var_int(Var_convert(_x2c_match_value_17, 3453797));  if(String_truth(c -> text) && String_equal(path, file)) Map_setindex(written, syntax, String_var(String_new_len(c -> text + begin, end - begin)));
                   }
 
                 }
@@ -6648,7 +6648,7 @@ static Map Compiler__hole_spellings(Compiler c){
               case 9224497936761658502ULL: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761658502ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497938069557450ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && Var_is(_x2c_match_cursor1->car, 1318210446)) { Var _x2c_match_value_0 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && Var_is(_x2c_match_cursor1->car, 3453797)) { Var _x2c_match_value_1 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && Var_is(_x2c_match_cursor1->car, 3453797)) { Var _x2c_match_value_2 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
               Var path;  path = _x2c_match_value_0;  Var begin;  begin = _x2c_match_value_1;  Var end;  end = _x2c_match_value_2; {
                 Var _x2c_match_value_18 = path;  Var _x2c_match_value_19 = begin;  Var _x2c_match_value_20 = end; {
-                  String path = Var_string(_x2c_match_value_18);  int begin = Var_int(Var_convert(_x2c_match_value_19, 3453797));  int end = Var_int(Var_convert(_x2c_match_value_20, 3453797));  if(Var_is_void(spelling) && String_truth(c -> text) && String_equal(path, file)) spelling = String_var(String_new_len(c -> text + begin, end - begin));
+                  String path = Var_as_string(_x2c_match_value_18);  int begin = Var_int(Var_convert(_x2c_match_value_19, 3453797));  int end = Var_int(Var_convert(_x2c_match_value_20, 3453797));  if(Var_is_void(spelling) && String_truth(c -> text) && String_equal(path, file)) spelling = String_var(String_new_len(c -> text + begin, end - begin));
                 }
 
               }
@@ -7579,7 +7579,7 @@ static Var Compiler__finish_type_spec(Compiler c, Var spec){
        break; } } } } if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497941690207118ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var name;  name = _x2c_match_value_0; {
           Var _x2c_match_value_21 = name; {
-            String name = Var_string(_x2c_match_value_21);  return String_var(name);
+            String name = Var_as_string(_x2c_match_value_21);  return String_var(name);
           }
 
         }

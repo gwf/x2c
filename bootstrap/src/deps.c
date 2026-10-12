@@ -179,8 +179,8 @@ static String _contents(CliRequest request, Compiler compiler, String input, Str
               path = _x2c_macro_cursor_output_0;
               content_hash = _x2c_macro_cursor_output_1;
               {
-                if(Var_is_row(content_hash, 11, 7, 1) && String_startswith(Var_string(content_hash), _2)){
-                  String candidate = Var_string(path);
+                if(Var_is_row(content_hash, 11, 7, 1) && String_startswith(Var_as_string(content_hash), _2)){
+                  String candidate = Var_as_string(path);
                   Array_push(searches, String_var(String_startswith(candidate, _3) ? String_getslice(candidate, 4, (-2147483647 - 1), 1) : candidate));
                 }
                 else Array_push(paths, path);
@@ -213,7 +213,7 @@ static String _contents(CliRequest request, Compiler compiler, String input, Str
                 int _x2c_macro_cursor_1 = 0;
                 Var _x2c_macro_cursor_output_2;
                 while(Array_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_2))){
-                  path = Var_string(_x2c_macro_cursor_output_2);
+                  path = Var_as_string(_x2c_macro_cursor_output_2);
                   {
                     Buffer_write_char(out, ' ');
                     _write_word(out, path);
@@ -233,7 +233,7 @@ static String _contents(CliRequest request, Compiler compiler, String input, Str
                   int _x2c_macro_cursor_2 = 0;
                   Var _x2c_macro_cursor_output_3;
                   while(Array_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_3))){
-                    path = Var_string(_x2c_macro_cursor_output_3);
+                    path = Var_as_string(_x2c_macro_cursor_output_3);
                     {
                       Buffer_write_char(out, ' ');
                       _write_word(out, path);
@@ -287,7 +287,7 @@ static void _write_phony(Buffer out, Array paths, String primary){
     int _x2c_macro_cursor_3 = 0;
     Var _x2c_macro_cursor_output_4;
     while(Array_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_4))){
-      path = Var_string(_x2c_macro_cursor_output_4);
+      path = Var_as_string(_x2c_macro_cursor_output_4);
       if(! String_equal(path, primary)){
         _write_word(out, path);
         Buffer_write(out, ":\n");

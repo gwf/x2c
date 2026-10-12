@@ -2021,7 +2021,7 @@ static List Compiler__build_func_adapter(Compiler c, Type diagnostic_type, Type 
 static void Compiler__require_func_readers(Compiler c, Type diagnostic_type, Type source_type){
   {
     String helper_name;  List _x2c_macro_object_0 = _826;  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      helper_name = Var_string(_x2c_macro_cursor_output_0); {
+      helper_name = Var_as_string(_x2c_macro_cursor_output_0); {
         Type helper_type = NULL;  List helper = Compiler__adapter_helper(c, helper_name, &(helper_type));  if(! List_truth(helper) || ! List_truth(Type_list(helper_type))) Compiler__adapter_error(c, _827, diagnostic_type, source_type, NULL);
       }
 

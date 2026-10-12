@@ -2963,7 +2963,7 @@ static String Compiler__file_scope_name(Compiler c, Token root, String source){
 static String Compiler__scope_owner(Compiler c){
   String owner = NULL;
   Var _x2c_macro_cached_0;
-  if(Map_try_get(c -> names -> file_scope_owners, List_var(cons(String_var(c -> filename), cons(String_var(c -> package), NULL))), &(_x2c_macro_cached_0))) owner = Var_string(_x2c_macro_cached_0);
+  if(Map_try_get(c -> names -> file_scope_owners, List_var(cons(String_var(c -> filename), cons(String_var(c -> package), NULL))), &(_x2c_macro_cached_0))) owner = Var_as_string(_x2c_macro_cached_0);
   else{
     {
       owner = String_truth(c -> filename) ? Compiler__owner_spelling(c) : _51;
@@ -2981,7 +2981,7 @@ static String Compiler__owner_spelling(Compiler c){
   String owner = home_portable_path(path);
   Var package_root = String_truth(c -> package) ? Map_getindex(c -> package_roots, String_var(c -> package)) :((void) 0, Void);
   if(! Var_is_row(package_root, 11, 7, 1)) return owner;
-  String prefix = String_join(NULL, cons(String_var(Compiler_canonical_path(c, Path_absolute(Var_string(package_root)))), cons(String_var(_52), NULL)));
+  String prefix = String_join(NULL, cons(String_var(Compiler_canonical_path(c, Path_absolute(Var_as_string(package_root)))), cons(String_var(_52), NULL)));
   if(! String_startswith(path, prefix)) return owner;
   return({
     Var _x2c_literal_part_13 = String_var(c -> package);  Var _x2c_literal_part_14 = String_var(String_getslice(path, String_len(prefix), (-2147483647 - 1), 1));
@@ -3566,7 +3566,7 @@ static List Definition_rebuild_keys(Definition * d, Map uses){
           List _x2c_macro_cursor_16 = _x2c_macro_object_14;
           Var _x2c_macro_cursor_output_14;
           while(List_try_next(_x2c_macro_object_14, &(_x2c_macro_cursor_16), &(_x2c_macro_cursor_output_14))){
-            projection = Var_string(_x2c_macro_cursor_output_14);
+            projection = Var_as_string(_x2c_macro_cursor_output_14);
             Array_push(used, _used(uses, hole, projection, Symbol_var(58)));
           }
 
@@ -3597,7 +3597,7 @@ static int Definition_uses_holes_once(Definition * d, Map uses){
           List _x2c_macro_cursor_18 = _x2c_macro_object_16;
           Var _x2c_macro_cursor_output_16;
           while(List_try_next(_x2c_macro_object_16, &(_x2c_macro_cursor_18), &(_x2c_macro_cursor_output_16))){
-            projection = Var_string(_x2c_macro_cursor_output_16);
+            projection = Var_as_string(_x2c_macro_cursor_output_16);
             count += Var_int(Map_getdefault(uses, _hole_key(hole, projection), int_var(0)));
           }
 
@@ -4045,8 +4045,8 @@ static List Compiler__hole_local(Compiler c, Map holes, int position){
 static List Compiler__expression_hole(Compiler c, Token prefix){
   Var name;
   if(! Map_truth(c -> macro_holes) || ! Map_try_get(c -> macro_holes, List_var(cons(_319, cons(int_var(prefix -> pos), NULL))), &(name))) return NULL;
-  List hole = Compiler__hole_record(c, Atom_intern(Var_string(name)));
-  return List_truth(hole) ? hole : Compiler__quoted_hole(c, Var_string(name), prefix);
+  List hole = Compiler__hole_record(c, Atom_intern(Var_as_string(name)));
+  return List_truth(hole) ? hole : Compiler__quoted_hole(c, Var_as_string(name), prefix);
 }
 
 static List Compiler__quoted_type(Compiler c, Map holes){
@@ -4719,7 +4719,7 @@ static List _unit_trailing(List hole, Map binders){
     List _x2c_macro_cursor_32 = _x2c_macro_object_30;
     Var _x2c_macro_cursor_output_30;
     while(List_try_next(_x2c_macro_object_30, &(_x2c_macro_cursor_32), &(_x2c_macro_cursor_output_30))){
-      role = Var_string(_x2c_macro_cursor_output_30);
+      role = Var_as_string(_x2c_macro_cursor_output_30);
       used |= Map_contains(binders, _hole_key(hole, role));
     }
 
@@ -4805,7 +4805,7 @@ void Compiler_install_compile_time_effects(Compiler c, List rows){
             site = _x2c_match_value_2;
             {
               Token token = Var_token(Compiler_thaw_declaration_syntax(c, site));
-              String file = home_absolute_path(Var_string(path)), text = NULL;
+              String file = home_absolute_path(Var_as_string(path)), text = NULL;
               Compiler_read_source(c, file, &(text));
               {
                 String * _x2c_macro_address_14 = & c -> filename;
@@ -4859,8 +4859,8 @@ void Compiler_install_compile_time_effects(Compiler c, List rows){
                               {
                                 * _x2c_macro_address_12 = NULL;
                                 {
-                                  if(c -> shallow) Compiler_queue_declaration_effect(c, Var_string(form), token, NULL);
-                                  else Compiler_evaluate_declaration_effect(c, Var_string(form), token);
+                                  if(c -> shallow) Compiler_queue_declaration_effect(c, Var_as_string(form), token, NULL);
+                                  else Compiler_evaluate_declaration_effect(c, Var_as_string(form), token);
                                 }
 
                               }
@@ -4893,7 +4893,7 @@ void Compiler_install_compile_time_effects(Compiler c, List rows){
             site = _x2c_match_value_2;
             {
               Token token = Var_token(Compiler_thaw_declaration_syntax(c, site));
-              String file = home_absolute_path(Var_string(source)), text = NULL;
+              String file = home_absolute_path(Var_as_string(source)), text = NULL;
               Compiler_read_source(c, file, &(text));
               {
                 String * _x2c_macro_address_17 = & c -> filename;
@@ -4946,7 +4946,7 @@ void Compiler_install_compile_time_effects(Compiler c, List rows){
                               x2c_cleanup_push(& _x2c_defer_record_21);
                               {
                                 * _x2c_macro_address_15 = NULL;
-                                Compiler__import(c, home_absolute_path(Var_string(path)), token);
+                                Compiler__import(c, home_absolute_path(Var_as_string(path)), token);
                               }
                               x2c_cleanup_leave(& _x2c_defer_record_21);
                             }
@@ -5098,8 +5098,8 @@ static void Compiler__install_rewrite(Compiler c, List row){
         Var holes;
         holes = _x2c_match_value_4;
         {
-          if(c -> builtin_defs && ! links_meta_function(Var_string(name))) return;
-          RewriteRule rule = _rewrite_rule(Var_symbol(point), Compiler_thaw_declaration_syntax(c, kind), Var_string(name), Var_list(Compiler_thaw_declaration_syntax(c, shape)), Var_list(Compiler_thaw_declaration_syntax(c, holes)), c -> builtin_defs, 1);
+          if(c -> builtin_defs && ! links_meta_function(Var_as_string(name))) return;
+          RewriteRule rule = _rewrite_rule(Var_symbol(point), Compiler_thaw_declaration_syntax(c, kind), Var_as_string(name), Var_list(Compiler_thaw_declaration_syntax(c, shape)), Var_list(Compiler_thaw_declaration_syntax(c, holes)), c -> builtin_defs, 1);
           Compiler__register_rewrite(c, rule);
         }
 
@@ -5145,7 +5145,7 @@ static Var Compiler__ship_rewrite(Compiler c, List row){
                   Var holes;
                   holes = _x2c_match_value_4;
                   {
-                    if(_unit_bound(List_var(row)) || ! links_meta_function(Var_string(name))) break;
+                    if(_unit_bound(List_var(row)) || ! links_meta_function(Var_as_string(name))) break;
                     List thawed =({
                       Var _x2c_literal_part_80 = Compiler_thaw_declaration_syntax(c, kind);  Var _x2c_literal_part_81 = Compiler_thaw_declaration_syntax(c, shape);  Var _x2c_literal_part_82 = Compiler_thaw_declaration_syntax(c, holes);  cons(_x2c_literal_part_80, cons(_x2c_literal_part_81, cons(_x2c_literal_part_82, NULL)));
                     }
@@ -5156,7 +5156,7 @@ static Var Compiler__ship_rewrite(Compiler c, List row){
                     own_kind = List_getindex(_x2c_destructure_7, 0);
                     own_shape = List_getindex(_x2c_destructure_7, 1);
                     own_holes = List_getindex(_x2c_destructure_7, 2);
-                    shared = RewriteRule_var(_rewrite_rule(Var_symbol(point), own_kind, Var_string(name), Var_list(own_shape), Var_list(own_holes), 1, 0));
+                    shared = RewriteRule_var(_rewrite_rule(Var_symbol(point), own_kind, Var_as_string(name), Var_list(own_shape), Var_list(own_holes), 1, 0));
                   }
 
                 }
@@ -6696,7 +6696,7 @@ static void Compiler__bind_name_arguments(Compiler c, List definition, List argu
         while(List_try_next(_x2c_macro_object_48, &(_x2c_macro_cursor_54), &(_x2c_macro_cursor_output_49))){
           value = _x2c_macro_cursor_output_49;
           {
-            String name = Var_string(Var_is_row(value, 9, 7, 4) ? String_var(binding_identity_spelling(Var_list(value))) : value);
+            String name = Var_as_string(Var_is_row(value, 9, 7, 4) ? String_var(binding_identity_spelling(Var_list(value))) : value);
             Sym_reference(c -> sym, cons(String_var(name), NULL), NULL);
           }
 
@@ -6859,7 +6859,7 @@ static String _forwarded_prefix(String spelling){
     List _x2c_macro_cursor_59 = _x2c_macro_object_53;
     Var _x2c_macro_cursor_output_54;
     while(List_try_next(_x2c_macro_object_53, &(_x2c_macro_cursor_59), &(_x2c_macro_cursor_output_54))){
-      prefix = Var_string(_x2c_macro_cursor_output_54);
+      prefix = Var_as_string(_x2c_macro_cursor_output_54);
       if(String_startswith(spelling, prefix)) return prefix;
     }
 
@@ -6876,7 +6876,7 @@ static List _forwarded_prefix_list(void){
     List _x2c_macro_cursor_60 = _x2c_macro_object_54;
     Var _x2c_macro_cursor_output_55;
     while(List_try_next(_x2c_macro_object_54, &(_x2c_macro_cursor_60), &(_x2c_macro_cursor_output_55))){
-      projection = Var_string(_x2c_macro_cursor_output_55);
+      projection = Var_as_string(_x2c_macro_cursor_output_55);
       for(int sequence = 0;  sequence <= 1;  sequence ++){
         String prefix = Atom_str(Macro_binder(Symbol_var(58), projection, sequence));
         if(Map_contains(seen, String_var(prefix))) continue;
@@ -7330,7 +7330,7 @@ Var Compiler_evaluate_macro_slot(Compiler c, Var value){
 
 Var Compiler_evaluate_meta_value(Compiler c, List expression, Token site, int slot);
 static Var Compiler__slot_value(Compiler c, List slot){
-  int splice = Var_int(Var_convert(List_cadr(slot), 3453797));  Var form = List_caddr(slot);  List active = Var_list(List_car(c -> macro_stack));  List _x2c_destructure_9 = active;  List definition = Var_list(List_getindex(_x2c_destructure_9, 0));  Var input = List_getindex(_x2c_destructure_9, 1);  List bindings = Var_list(List_getindex(_x2c_destructure_9, 2));  Token invocation = Var_token(List_getindex(_x2c_destructure_9, 3)); (void) input;  String source_file = _definition_file(definition);  Var required = List_assoc(slot, Symbol_var(7659244923112));  Var result = Var_is_row(form, 9, 7, 4) ? Compiler_evaluate_meta_value(c, Var_list(form), invocation, 1) : Compiler__eval_template_form(c, Var_string(form), bindings, invocation, source_file, required);  result = Compiler__helper_result(c, result);  Var construction = List_assoc(slot, Symbol_var(1345468776));  if(! Var_is_void(required) && splice){
+  int splice = Var_int(Var_convert(List_cadr(slot), 3453797));  Var form = List_caddr(slot);  List active = Var_list(List_car(c -> macro_stack));  List _x2c_destructure_9 = active;  List definition = Var_list(List_getindex(_x2c_destructure_9, 0));  Var input = List_getindex(_x2c_destructure_9, 1);  List bindings = Var_list(List_getindex(_x2c_destructure_9, 2));  Token invocation = Var_token(List_getindex(_x2c_destructure_9, 3)); (void) input;  String source_file = _definition_file(definition);  Var required = List_assoc(slot, Symbol_var(7659244923112));  Var result = Var_is_row(form, 9, 7, 4) ? Compiler_evaluate_meta_value(c, Var_list(form), invocation, 1) : Compiler__eval_template_form(c, Var_as_string(form), bindings, invocation, source_file, required);  result = Compiler__helper_result(c, result);  Var construction = List_assoc(slot, Symbol_var(1345468776));  if(! Var_is_void(required) && splice){
     construction = required;  result = _replace_target(result, _source_unwrap(required), required);
   }
   if(! Var_is_void(construction)) result = _constructed_identifier(result, construction);  return splice && Var_is_row(result, 9, 7, 4) ? _slot_rows(result) : result;
@@ -7346,7 +7346,7 @@ static Var _constructed_identifier(Var result, Var construction){
         {
           Var _x2c_match_value_2 = spelling;
           {
-            String spelling = Var_string(_x2c_match_value_2);
+            String spelling = Var_as_string(_x2c_match_value_2);
             exact = spelling;
           }
 
@@ -7609,7 +7609,7 @@ static String _rewrite_references(String form, List references){
         }
         Token name = Tokenizer_next(tokenizer);
         Var replacement = name && name -> type == 19147688 ? List_assoc(references, String_var(name -> text)) :((void) 0, Void);
-        String temporary = Var_is_row(replacement, 11, 7, 1) ? Var_string(replacement) : NULL;
+        String temporary = Var_is_row(replacement, 11, 7, 1) ? Var_as_string(replacement) : NULL;
         if(String_truth(temporary)){
           Buffer_write_len(rewritten, form + copied, token -> pos - copied);
           Buffer_write(rewritten, temporary);
@@ -8615,7 +8615,7 @@ int Compiler_take_code_value(Compiler c, Var input, Var * value, int * retained)
         {
           Var _x2c_match_value_6 = stage;
           {
-            String stage = Var_string(_x2c_match_value_6);
+            String stage = Var_as_string(_x2c_match_value_6);
             {
               Map replacements = Compiler__code_effects(c, effects);
               (* value) = Map_len(replacements) ? _replace_bindings(code, replacements) : code;
@@ -8668,7 +8668,7 @@ static Map Compiler__code_effects(Compiler c, Var effects){
             Var holes;
             holes = _x2c_match_value_4;
             {
-              Compiler__register_rewrite(c, _rewrite_rule(Var_symbol(point), kind, Var_string(name), Var_list(shape), Var_list(holes), 0, 1));
+              Compiler__register_rewrite(c, _rewrite_rule(Var_symbol(point), kind, Var_as_string(name), Var_list(shape), Var_list(holes), 0, 1));
               Compiler_record_compile_time_effect(c, ({
                 Var _x2c_literal_part_125 = point;  Var _x2c_literal_part_126 = Compiler_freeze_declaration_syntax(c, kind);  Var _x2c_literal_part_127 = name;  Var _x2c_literal_part_128 = Compiler_freeze_declaration_syntax(c, shape);  Var _x2c_literal_part_129 = Compiler_freeze_declaration_syntax(c, holes);  cons(_433, cons(_451, cons(_x2c_literal_part_125, cons(_x2c_literal_part_126, cons(_x2c_literal_part_127, cons(_x2c_literal_part_128, cons(_x2c_literal_part_129, NULL)))))));
               }
@@ -8685,7 +8685,7 @@ static Map Compiler__code_effects(Compiler c, Var effects){
             {
               Var _x2c_match_value_7 = role;
               {
-                String role = Var_string(_x2c_match_value_7);
+                String role = Var_as_string(_x2c_match_value_7);
                 Map_setindex(replacements, token, List_var(Sym_introduce(c -> sym, Compiler_fresh_name(c, role))));
               }
 
@@ -8857,7 +8857,7 @@ void Compiler_ensure_macro_lisp(Compiler c){
       int_var(0)
     }
     );  Var _x2c_macro_item_77;  while(Iter_try_next(_x2c_macro_iterator_71, &(_x2c_macro_item_77))){
-      List _x2c_macro_pair_71 = Var_list(_x2c_macro_item_77);  path = List_getindex(_x2c_macro_pair_71, 0);  message = List_getindex(_x2c_macro_pair_71, 1);  Compiler__eval_library(c, ready, Var_string(path), Var_string(message));
+      List _x2c_macro_pair_71 = Var_list(_x2c_macro_item_77);  path = List_getindex(_x2c_macro_pair_71, 0);  message = List_getindex(_x2c_macro_pair_71, 1);  Compiler__eval_library(c, ready, Var_as_string(path), Var_as_string(message));
     }
 
   }
@@ -9089,7 +9089,7 @@ static List Compiler__import(Compiler c, String requested, Token invocation){
     Array _x2c_macro_parents_0 = c -> import_stack;
     for(int _x2c_macro_i_0 = 0;  _x2c_macro_i_0 < Array_len(_x2c_macro_parents_0);  _x2c_macro_i_0 ++){
       Var _x2c_macro_parent_0 = Array_getindex(_x2c_macro_parents_0, _x2c_macro_i_0);
-      Array_push(_x2c_macro_notes_0, String_var(String_join(NULL, cons(String_var(_894), cons(String_var(Compiler_display_path(c, Var_string(_x2c_macro_parent_0))), NULL)))));
+      Array_push(_x2c_macro_notes_0, String_var(String_join(NULL, cons(String_var(_894), cons(String_var(Compiler_display_path(c, Var_as_string(_x2c_macro_parent_0))), NULL)))));
     }
     Compiler_report_error(c, 27335838, _895, invocation, Array_list_free(_x2c_macro_notes_0));
   }
@@ -9210,7 +9210,7 @@ String Compiler_token_source(Compiler, Token, int *);
 Path Path_dirname(Path);
 
 static String Compiler__source_dir(Compiler c, Token site){
-  String filename = Var_string(Array_len(c -> import_stack) ? Array_getindex(c -> import_stack, - 1) : String_var(Compiler_token_source(c, site ? site : c -> token, NULL)));
+  String filename = Var_as_string(Array_len(c -> import_stack) ? Array_getindex(c -> import_stack, - 1) : String_var(Compiler_token_source(c, site ? site : c -> token, NULL)));
   return String_truth(filename) ? Path_dirname(filename) : _902;
 }
 
@@ -9223,7 +9223,7 @@ String Compiler_source_path(Compiler c, String file){
 }
 
 static String _definition_file(List definition){
-  String file = Var_string(List_assoc(definition, Symbol_var(412426)));
+  String file = Var_as_string(List_assoc(definition, Symbol_var(412426)));
   return ! String_truth(file) || String_startswith(file, _903) ? file : home_absolute_path(file);
 }
 
@@ -9336,7 +9336,7 @@ static Lisp Compiler__fill_library(Compiler c, Lisp shared){
           List _x2c_macro_pair_74 = Var_list(_x2c_macro_item_80);
           path = List_getindex(_x2c_macro_pair_74, 0);
           message = List_getindex(_x2c_macro_pair_74, 1);
-          Compiler__eval_library(c, 0, Var_string(path), Var_string(message));
+          Compiler__eval_library(c, 0, Var_as_string(path), Var_as_string(message));
         }
 
       }
@@ -9420,7 +9420,7 @@ void Compiler_add_library_dependencies(Compiler c){
     Var _x2c_macro_cursor_output_74;
     while(List_try_next(_x2c_macro_object_76, &(_x2c_macro_cursor_85), &(_x2c_macro_cursor_output_74))){
       library = Var_list(_x2c_macro_cursor_output_74);
-      Compiler_add_translation_dependency(c, Var_string(List_car(library)));
+      Compiler_add_translation_dependency(c, Var_as_string(List_car(library)));
     }
 
   }
@@ -9491,7 +9491,7 @@ void Compiler_inherit_library_comptime(Compiler c){
     );
     Var _x2c_macro_item_83;
     while(Iter_try_next(_x2c_macro_iterator_77, &(_x2c_macro_item_83))){
-      name = Var_string(_x2c_macro_item_83);
+      name = Var_as_string(_x2c_macro_item_83);
       Map_setindex(c -> meta_comptime, String_var(name), int_var(1));
     }
 
@@ -9596,8 +9596,8 @@ static void Compiler__install_native_operations(Compiler c){
       name = _x2c_macro_cursor_output_75;
       function = _x2c_macro_cursor_output_76;
       {
-        Lisp_set_global(c -> macro_lisp, Var_string(name), function);
-        Compiler_bind_meta_operation(c -> macro_lisp, Var_string(name), function);
+        Lisp_set_global(c -> macro_lisp, Var_as_string(name), function);
+        Compiler_bind_meta_operation(c -> macro_lisp, Var_as_string(name), function);
       }
 
     }
@@ -9623,7 +9623,7 @@ static void _install_builtins(Lisp lisp){
       name = _x2c_macro_cursor_output_77;
       function = _x2c_macro_cursor_output_78;
       {
-        String spelling = Var_string(name);
+        String spelling = Var_as_string(name);
         Lisp_set_global(lisp, String_startswith(spelling, _969) ? String_join(NULL, cons(String_var(_970), cons(String_var(spelling), NULL))) : spelling, function);
       }
 
@@ -9651,7 +9651,7 @@ static String _meta_lisp_name(String name){
 
 static String _definition_note(List definition){
   List origin = Var_list(List_assoc(definition, Symbol_var(1044986460)));
-  String file = Var_string(List_assoc(origin, Symbol_var(412426)));
+  String file = Var_as_string(List_assoc(origin, Symbol_var(412426)));
   int line = Var_int(Var_convert(List_assoc(origin, Symbol_var(805770)), 3453797)), column = Var_int(Var_convert(List_assoc(origin, Symbol_var(233614172)), 3453797));
   return String_join(NULL, cons(String_var(_973), cons(String_var(file), cons(String_var(_47), cons(String_var(int_str(line)), cons(String_var(_47), cons(String_var(int_str(column)), NULL)))))));
 }
@@ -10102,7 +10102,7 @@ static void _x2c_defer_cleanup_81(void * _x2c_defer_opaque_81){
 }
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 1318210446));
   return _lisp_import_hook(a0);
   ;
 }

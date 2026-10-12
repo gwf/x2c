@@ -886,7 +886,7 @@ static inline Map Var_map(Var _x2c_macro_value_7){
   if(_x2c_macro_value_7.u64 >> 48 != 9 ||(_x2c_macro_value_7.u64 & 0x7) != 6) return NULL;  return(Map)(_x2c_macro_value_7.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline String Var_string(Var _x2c_macro_value_8){
+static inline String Var_string_payload(Var _x2c_macro_value_8){
   if(_x2c_macro_value_8.u64 >> 48 != 11 ||(_x2c_macro_value_8.u64 & 0x7) != 1) return NULL;  return(String)(_x2c_macro_value_8.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 

@@ -381,6 +381,7 @@ static int _macro_items(List items){
   Var first = List_car(items);  return Var_is_row(first, 9, 7, 4) || Var_is_row(first, 11, 7, 1) || Var_is_integer(first) || Var_is_floating(first);
 }
 
+String Var_as_string(Var);
 Var Macro_inserted(Var value, int lifts, int expression){
   if(! _init_guard_) _file_init_();  if(lifts) value = _macro_expr_value(value);  Var spelling = value; {
     Var _x2c_match_var = value; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);  List _x2c_match_expr = Var_list(_x2c_match_var); List _x2c_match_cursor;
@@ -391,7 +392,7 @@ Var Macro_inserted(Var value, int lifts, int expression){
         {
           Var _x2c_match_value_0 = name;
           {
-            String name = Var_string(_x2c_match_value_0);
+            String name = Var_as_string(_x2c_match_value_0);
             spelling = String_var(name);
           }
 
@@ -814,7 +815,7 @@ static Var _macro_pattern_view(Var value){
         {
           Var _x2c_match_value_1 = name;
           {
-            String name = Var_string(_x2c_match_value_1);
+            String name = Var_as_string(_x2c_match_value_1);
             return List_var(cons(_37, cons(_38, cons(String_var(name), NULL))));
           }
 
@@ -827,7 +828,7 @@ static Var _macro_pattern_view(Var value){
         {
           Var _x2c_match_value_2 = name;
           {
-            String name = Var_string(_x2c_match_value_2);
+            String name = Var_as_string(_x2c_match_value_2);
             return _macro_free_reference(name);
           }
 
@@ -1355,7 +1356,7 @@ static String _macro_source_spelling(Var value){
             {
               Var _x2c_match_value_4 = spelling;
               {
-                String spelling = Var_string(_x2c_match_value_4);
+                String spelling = Var_as_string(_x2c_match_value_4);
                 if(List_compare(Var_list(binding), Var_list(value)) == 0) return spelling;
               }
 
@@ -1380,7 +1381,7 @@ static String _macro_source_spelling(Var value){
         {
           Var _x2c_match_value_5 = spelling;
           {
-            String spelling = Var_string(_x2c_match_value_5);
+            String spelling = Var_as_string(_x2c_match_value_5);
             return spelling;
           }
 

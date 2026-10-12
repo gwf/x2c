@@ -1124,7 +1124,7 @@ List try_catch_site(List frame, List clause){
           Var _x2c_match_value_0 = state;
           Var _x2c_match_value_1 = arms;
           {
-            String state = Var_string(_x2c_match_value_0);
+            String state = Var_as_string(_x2c_match_value_0);
             List arms = Var_list(_x2c_match_value_1);
             {
               int count = List_len(arms), filtered = List_len(patterns);

@@ -51,7 +51,7 @@ static Var String_var(String);
 
 Symbol Var_tag(Var);
 
-static String Var_string(Var);
+String Var_as_string(Var);
 
 #include "error.h"
 
@@ -69,7 +69,7 @@ static String _string(Var value, String operation){
     }
 
   }
-  return Var_string(value);
+  return Var_as_string(value);
 }
 
 static List Var_list(Var);
@@ -326,7 +326,7 @@ Var lisp_string_append_all(List strings){
     Var _x2c_macro_cursor_output_3;
     while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
       s = _x2c_macro_cursor_output_3;
-      text = lisp_string_append(Var_string(text), _string(s, _4));
+      text = lisp_string_append(Var_as_string(text), _string(s, _4));
     }
 
   }

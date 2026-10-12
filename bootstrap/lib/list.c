@@ -364,8 +364,10 @@ List List_promote(List lst){
   return lst;
 }
 
+String Var_as_string(Var);
+
 static void _promote_node(Var node){
-  if(Var_is_row(node, 11, 7, 1)) return(void) String_promote(Var_string(node));
+  if(Var_is_row(node, 11, 7, 1)) return(void) String_promote(Var_as_string(node));
   if(Var_is(node, 826970)) return(void) Atom_promote(node);
   if(! Var_is_row(node, 9, 7, 4)) return;
   for(List cur = Var_list(node);  List_truth(cur);  cur = cur -> cdr){
@@ -378,6 +380,8 @@ static void _promote_node(Var node){
 int List_try_own(List lst){
   return ! List_truth(lst) || _try_own_node(List_var(lst));
 }
+
+String Var_string(Var);
 
 static int _try_own_node(Var node){
   if(Var_is_row(node, 11, 7, 1)) return String_try_own(Var_string(node));

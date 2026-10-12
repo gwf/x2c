@@ -464,6 +464,8 @@ static Var _clone_in(Scope * owner, Var v){
   return copy;
 }
 
+String Var_string(Var);
+
 static Var ErrorRegion__copy_text(ErrorRegion * region, Var value){
   String source = Var_is(value, 826970) ? Var_str(value) : Var_string(value);
   if(! region) return _snapshot_text(value, source);

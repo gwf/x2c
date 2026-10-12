@@ -361,7 +361,7 @@ static String _work_directory(String packages){
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
     while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      name = Var_string(_x2c_macro_cursor_output_0);
+      name = Var_as_string(_x2c_macro_cursor_output_0);
       if(String_startswith(name, _1)) Path_remove_tree(String_join(NULL, cons(String_var(packages), cons(String_var(_2), cons(String_var(name), NULL)))));
     }
 
@@ -438,7 +438,7 @@ static void _host_error(List detail){
 
 int install_command(CliRequest request){
   if(! _init_guard_) _file_init_();
-  Install i = _locked_install(request, Var_string(List_car(request -> inputs)));
+  Install i = _locked_install(request, Var_as_string(List_car(request -> inputs)));
   {
     X2CCleanup _x2c_defer_record_0 ={
       .fn = _x2c_defer_cleanup_0, .env = 0
@@ -475,7 +475,7 @@ List install_require(CliRequest request, String name, String version, List locke
     x2c_cleanup_push(& _x2c_defer_record_1);
     {
       List row = List_truth(locked) ? locked : _index_row(request, name, i.work);
-      String resolved = Var_string(List_getindex(row, 1));
+      String resolved = Var_as_string(List_getindex(row, 1));
       if(! String_equal(resolved, version)) _error(String_join(NULL, cons(String_var(_5), cons(String_var(name), cons(String_var(_6), cons(String_var(resolved), cons(String_var(_7), cons(String_var(version), NULL))))))));
       if(! String_equal(_installed_version(String_join(NULL, cons(String_var(i.packages), cons(String_var(_2), cons(String_var(name), NULL))))), version)){
         Install_resolve(&(i), row);
@@ -518,9 +518,9 @@ static void Install_locate(Install * i){
 }
 
 static void Install_resolve(Install * i, List row){
-  (* i).version = Var_string(List_getindex(row, 1));
-  (* i).url = Var_string(List_getindex(row, 4));
-  (* i).sha256 = Var_string(List_getindex(row, 5));
+  (* i).version = Var_as_string(List_getindex(row, 1));
+  (* i).url = Var_as_string(List_getindex(row, 4));
+  (* i).sha256 = Var_as_string(List_getindex(row, 5));
 }
 
 Path Path_basename(Path);
@@ -718,7 +718,7 @@ static void _refuse_native(String package, String name){
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      manifest = Var_string(_x2c_macro_cursor_output_1);
+      manifest = Var_as_string(_x2c_macro_cursor_output_1);
       if(String_endswith(manifest, _62) || String_startswith(Path_stem(manifest), _63)) _error(String_join(NULL, cons(String_var(name), cons(String_var(_64), NULL))));
     }
 
@@ -855,7 +855,7 @@ static String _marker_string(String path, String field){
   }
   if(! Var_is(marker, 26720)) return NULL;
   Var value = Var_getindex(marker, String_var(field));
-  return Var_is_row(value, 11, 7, 1) ? Var_string(value) : NULL;
+  return Var_is_row(value, 11, 7, 1) ? Var_as_string(value) : NULL;
 }
 
 List install_rows(String text){
@@ -867,7 +867,7 @@ List install_rows(String text){
     List _x2c_macro_cursor_2 = _x2c_macro_object_2;
     Var _x2c_macro_cursor_output_2;
     while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-      line = Var_string(_x2c_macro_cursor_output_2);
+      line = Var_as_string(_x2c_macro_cursor_output_2);
       {
         List fields = List_filter(String_split(line, _86), _x2c_func_handle_0);
         if(! String_startswith(line, _87) && List_len(fields) == 6) Array_push(rows, List_var(fields));
@@ -933,7 +933,7 @@ static List _index_row(CliRequest request, String name, String work){
       row = Var_list(_x2c_macro_cursor_output_3);
       {
         if(! Var_equal(List_car(row), String_var(name))) continue;
-        String kind = Var_string(List_getindex(row, 2)), target = Var_string(List_getindex(row, 3));
+        String kind = Var_as_string(List_getindex(row, 2)), target = Var_as_string(List_getindex(row, 3));
         if(String_equal(kind, _84) && String_equal(target, platform)) return row;
         if(String_equal(kind, _15)) source = row;
       }
@@ -1088,7 +1088,7 @@ static List _files_with(String directory, String suffix){
     List _x2c_macro_cursor_4 = _x2c_macro_object_4;
     Var _x2c_macro_cursor_output_4;
     while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
-      name = Var_string(_x2c_macro_cursor_output_4);
+      name = Var_as_string(_x2c_macro_cursor_output_4);
       if(String_endswith(name, suffix)) Array_push(paths, String_var(String_join(NULL, cons(String_var(directory), cons(String_var(_2), cons(String_var(name), NULL))))));
     }
 
@@ -1098,7 +1098,7 @@ static List _files_with(String directory, String suffix){
 
 int remove_command(CliRequest request){
   if(! _init_guard_) _file_init_();
-  String name = Var_string(List_car(request -> inputs));
+  String name = Var_as_string(List_car(request -> inputs));
   String target =({
     Var _x2c_literal_part_34 = String_var(_home_packages(_120));  String_join(NULL, cons(_x2c_literal_part_34, cons(String_var(_2), cons(String_var(name), NULL))));
   }
@@ -1183,7 +1183,7 @@ int list_command(CliRequest request){
     List _x2c_macro_cursor_5 = _x2c_macro_object_5;
     Var _x2c_macro_cursor_output_5;
     while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
-      name = Var_string(_x2c_macro_cursor_output_5);
+      name = Var_as_string(_x2c_macro_cursor_output_5);
       {
         String package = String_join(NULL, cons(String_var(packages), cons(String_var(_2), cons(String_var(name), NULL)))), kind = _installed_kind(package);
         if(! String_truth(kind)) continue;
@@ -1211,9 +1211,9 @@ static Var _x2c_lambda_0(String path, String row){
 }
 
 static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 1318210446));
   const struct _x2c_lambda_context_0 * record =(const struct _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
-  return _x2c_lambda_0(a0, Var_string(record -> c0));
+  return _x2c_lambda_0(a0, Var_as_string(record -> c0));
 }
 
 static Var _x2c_lambda_2(String field){
@@ -1222,7 +1222,7 @@ static Var _x2c_lambda_2(String field){
 }
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 1318210446));
   return _x2c_lambda_2(a0);
   ;
 }
@@ -1238,7 +1238,7 @@ static Var _x2c_lambda_3(String name){
 }
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1){
-  String a0 = Var_string(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 0, 1318210446));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 0, 1318210446));
   return _x2c_lambda_3(a0);
   ;
 }

@@ -2452,7 +2452,7 @@ Map Compiler_semantic_binding_facts(Compiler);
 int Type_is_inline(Type);
 int Type_is_static(Type);
 static Ast Compiler__function_node(Compiler c, List function, List return_type, List declarator, List binding, List body, int written){
-  List replaced = Compiler__function_rewrite(c, function, return_type, written);  if(List_truth(replaced)) return replaced;  String owner = binding_identity_spelling(binding);  Var stored_owner;  int callback = Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_441, cons(List_var(binding), NULL))), &(stored_owner));  if(callback) owner = Var_string(stored_owner);  Type function_type = List_type(return_type);  int inline_header = Type_is_inline(function_type) && ! Type_is_static(function_type);  List transformed; {
+  List replaced = Compiler__function_rewrite(c, function, return_type, written);  if(List_truth(replaced)) return replaced;  String owner = binding_identity_spelling(binding);  Var stored_owner;  int callback = Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_441, cons(List_var(binding), NULL))), &(stored_owner));  if(callback) owner = Var_as_string(stored_owner);  Type function_type = List_type(return_type);  int inline_header = Type_is_inline(function_type) && ! Type_is_static(function_type);  List transformed; {
     String * _x2c_macro_address_3 = & c -> fn_name;  String _x2c_macro_previous_3 = * _x2c_macro_address_3; {
       _x2c_defer_env_3 _x2c_macro_environment_4 ={
         0
@@ -2526,7 +2526,7 @@ static Ast Compiler__slice_node(Compiler c, List expression, Type type, List sta
         default: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var name;  name = _x2c_match_value_0; {
           Var _x2c_match_value_0 = name; {
-            String name = Var_string(_x2c_match_value_0);  nominal = name;
+            String name = Var_as_string(_x2c_match_value_0);  nominal = name;
           }
 
         }

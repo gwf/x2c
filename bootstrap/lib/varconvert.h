@@ -22,15 +22,8 @@ typedef struct X2CVarNumeric{
 X2CVarNumeric;
 
 #include "meta.h"
-#include "var.h"
-#include "error.h"
-#include "list.h"
-#include "string.h"
-#include "symbol.h"
-#include "symbolset.h"
-#include <limits.h>
-#include <math.h>
-#include <string.h>
+String Var_string(Var value);
+
 extern const SymbolSet x2c_var_numeric_tags;
 
 extern const X2CVarNumericInfo x2c_var_numerics[];

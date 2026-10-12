@@ -237,7 +237,7 @@ int SourceView_exists(SourceView sources, String path){
 int SourceView_read(SourceView sources, String path, String volatile * text){
   Var value;
   if(sources && Map_try_get(sources -> overlays, String_var(Path_absolute(path)), &(value))){
-    (* text) = Var_string(value);
+    (* text) = Var_as_string(value);
     return 1;
   }
   struct stat info;

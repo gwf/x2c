@@ -866,13 +866,13 @@ static RegexMatch Matcher_found(Matcher * m, String subject, int at){
   return(RegexMatch) captures;
 }
 
-static String Var_string(Var);
+String Var_as_string(Var);
 
 Var List_getindex(List, int);
 
 static RegexCapture Matcher_capture(Matcher * m, String subject, int i){
   int start =(* m).starts[i], end =(* m).ends[i], matched = start >= 0;
-  String name = i ? Var_string(List_getindex((* m).regex -> capture_names, i - 1)) : NULL;
+  String name = i ? Var_as_string(List_getindex((* m).regex -> capture_names, i - 1)) : NULL;
   String text = matched ? String_getslice(subject, start, end, 1) : NULL;
   return cons(int_var(i), cons(String_var(name), cons(int_var(matched), cons(String_var(text), cons(int_var(start), cons(int_var(end), NULL))))));
 }
@@ -1327,7 +1327,7 @@ int RegexCapture_index(RegexCapture capture){
 }
 
 String RegexCapture_name(RegexCapture capture){
-  return Var_string(List_getindex(capture, 1));
+  return Var_as_string(List_getindex(capture, 1));
 }
 
 int Var_truth(Var);
@@ -1337,7 +1337,7 @@ int RegexCapture_matched(RegexCapture capture){
 }
 
 String RegexCapture_text(RegexCapture capture){
-  return Var_string(List_getindex(capture, 3));
+  return Var_as_string(List_getindex(capture, 3));
 }
 
 int RegexCapture_start(RegexCapture capture){

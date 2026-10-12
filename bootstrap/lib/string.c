@@ -144,11 +144,12 @@ static String _from_bytes(const char * bytes, int length){
   return _from_bytes_in(Pool_current(), bytes, length);
 }
 
+String Var_as_string(Var);
 static String _from_bytes_in(Pool pool, const char * bytes, int length){
   if(! pool || ! bytes || length <= 0) return NULL;  unsigned hash = _hash_n(bytes, length);  if(length <= STRING_STACK_BYTES){
-    Var existing = _lookup_bytes(pool, bytes, length, hash);  if(! Var_is_void(existing)) return Var_string(existing);
+    Var existing = _lookup_bytes(pool, bytes, length, hash);  if(! Var_is_void(existing)) return Var_as_string(existing);
   }
-  size_t total = sizeof(struct StringHeader) +(size_t) length + 1;  StringHeader header = Pool_malloc(pool, total);  String string = _store(header, bytes, length, hash);  if(length > STRING_STACK_BYTES) return Var_string(Pool_intern(pool, String_var(string), header));  Pool_insert(pool, String_var(string));  return string;
+  size_t total = sizeof(struct StringHeader) +(size_t) length + 1;  StringHeader header = Pool_malloc(pool, total);  String string = _store(header, bytes, length, hash);  if(length > STRING_STACK_BYTES) return Var_as_string(Pool_intern(pool, String_var(string), header));  Pool_insert(pool, String_var(string));  return string;
 }
 
 static Var _lookup_bytes(Pool pool, const char * bytes, int length, unsigned hash){
@@ -184,9 +185,10 @@ static String _intern_owned(String string){
   Pool pool = Pool_current();  Var existing = Pool_lookup(pool, String_var(string));  if(Var_is_void(existing)){
     Pool_insert(pool, String_var(string));  return string;
   }
-  String found = Var_string(existing);  if(found != string) _free_unchecked(string);  return found;
+  String found = Var_as_string(existing);  if(found != string) _free_unchecked(string);  return found;
 }
 
+String Var_string(Var);
 void String_free(String str){
   if(str == NULL) return;  if(_header(str) -> hash){
     Var existing = Pool_lookup(Pool_current(), String_var(str));  if(! Var_is_void(existing) && Var_string(existing) == str) return;
@@ -352,7 +354,7 @@ String String_join(String sep, List strings){
 static int _join_length(List strings, int n, int sep_len){
   if(sep_len &&(size_t)(n - 1) >(size_t)(INT_MAX - 1) /(size_t) sep_len) return - 1;  size_t total =(size_t)(n - 1) *(size_t) sep_len; {
     String str;  List _x2c_macro_object_0 = strings;  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      str = Var_string(_x2c_macro_cursor_output_0); {
+      str = Var_as_string(_x2c_macro_cursor_output_0); {
         int length = String_len(str);  if((size_t) length >(size_t)(INT_MAX - 1) - total) return - 1;  total +=(size_t) length;
       }
 
@@ -364,7 +366,7 @@ static int _join_length(List strings, int n, int sep_len){
 
 static void _join_into(char * out, List strings, String sep, int sep_len){
   for(List p = strings;  List_truth(p);  p = List_cdr(p)){
-    String str = Var_string(List_car(p));  if(String_truth(str)){
+    String str = Var_as_string(List_car(p));  if(String_truth(str)){
       int length = String_len(str);  memcpy(out, str, length);  out += length;
     }
     if(List_truth(List_cdr(p)) && String_truth(sep)){
@@ -616,7 +618,7 @@ Iter String_iter(String x, Iter dest){
 }
 
 static int _next(Iter iter, Var * out){
-  int index = Var_int(Var_convert(iter -> state, 3453797));  String str = Var_string(iter -> obj);  if(index < 0 || index >= String_len(str)) return 0;  * out = int_var(String_getindex(str, index));  iter -> state = int_var(index + 1);  return 1;
+  int index = Var_int(Var_convert(iter -> state, 3453797));  String str = Var_as_string(iter -> obj);  if(index < 0 || index >= String_len(str)) return 0;  * out = int_var(String_getindex(str, index));  iter -> state = int_var(index + 1);  return 1;
 }
 
 int String_try_next(String str, int * cursor, int * out){

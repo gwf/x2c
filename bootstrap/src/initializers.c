@@ -2403,12 +2403,12 @@ static int _initializer_integer(List expression, unsigned long long * value){
   {
     List _x2c_match_expr = expression; List _x2c_match_cursor, _x2c_match_cursor1;  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
         case 9224497936761996324ULL: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497963177709656ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_0 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_1 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
-        Var type;  type = _x2c_match_value_0;  Var spelling;  spelling = _x2c_match_value_1;  return Type_integer_literal_magnitude((Var_type(type)), Var_string(spelling), &((* value)));
+        Var type;  type = _x2c_match_value_0;  Var spelling;  spelling = _x2c_match_value_1;  return Type_integer_literal_magnitude((Var_type(type)), Var_as_string(spelling), &((* value)));
       }
        break; } } } default: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var spelling;  spelling = _x2c_match_value_0; {
           Var _x2c_match_value_0 = spelling; {
-            String spelling = Var_string(_x2c_match_value_0);  return Type_integer_literal_magnitude(List_type(_292), spelling, &((* value)));
+            String spelling = Var_as_string(_x2c_match_value_0);  return Type_integer_literal_magnitude(List_type(_292), spelling, &((* value)));
           }
 
         }

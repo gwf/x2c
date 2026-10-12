@@ -156,7 +156,7 @@ int String_startswith(String, String);
 
 int List_try_next(List, List *, Var *);
 
-static String Var_string(Var);
+String Var_as_string(Var);
 
 int String_equal(String, String);
 
@@ -172,7 +172,7 @@ static int _tag_headed(List list){
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
     while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      tag = Var_string(_x2c_macro_cursor_output_0);
+      tag = Var_as_string(_x2c_macro_cursor_output_0);
       if(String_equal(text, tag)) return 1;
     }
 

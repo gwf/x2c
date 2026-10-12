@@ -90,7 +90,7 @@ int script_prepare(CliRequest c){
   if(! _init_guard_) _file_init_();
   String root = script_cache_root();
   if(! String_truth(root)) driver_error("no cache directory: set X2C_CACHE_DIR");
-  String script = Path_absolute(Var_string(List_car(c -> inputs)));
+  String script = Path_absolute(Var_as_string(List_car(c -> inputs)));
   c -> build_dir = _entry(root, script);
   if(c -> clean){
     _clean(c -> build_dir);
@@ -234,7 +234,7 @@ static void _prune(String scripts){
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
     while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      name = Var_string(_x2c_macro_cursor_output_0);
+      name = Var_as_string(_x2c_macro_cursor_output_0);
       {
         String directory = Path_join(scripts, name);
         Path source = String_join(NULL, cons(String_var(directory), cons(String_var(_7), NULL)));
@@ -312,7 +312,7 @@ static void _exec(CliRequest c){
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      argument = Var_string(_x2c_macro_cursor_output_1);
+      argument = Var_as_string(_x2c_macro_cursor_output_1);
       argv[n ++] = String_truth(argument) ? argument : "";
     }
 

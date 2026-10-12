@@ -126,7 +126,7 @@ List String_split_lines(String, int);
 
 void x2c_cleanup_push(X2CCleanup *);
 
-static String Var_string(Var);
+String Var_as_string(Var);
 
 Var Array_getindex(Array, int);
 
@@ -170,7 +170,7 @@ List Diff_lines(String old, String new){
           ;
           Script_trim(&(s));
           if(Script_myers(&(s)) < 0) Script_replace(&(s));
-          for(int i = s.lo + s.n;  i < Array_len(s.old);  i ++) Script_emit(&(s), 1248074, Var_string(Array_getindex(s.old, i)));
+          for(int i = s.lo + s.n;  i < Array_len(s.old);  i ++) Script_emit(&(s), 1248074, Var_as_string(Array_getindex(s.old, i)));
           {
             List _x2c_return_value_0 = List_reverse(s.edits);
             {
@@ -193,14 +193,14 @@ List Diff_lines(String old, String new){
 
 static void Script_trim(Script * s){
   int lo = 0, old_hi = Array_len((* s).old), new_hi = Array_len((* s).new);
-  for(;  lo < old_hi && lo < new_hi && Script_same(&((* s)), lo, lo);  lo ++) Script_emit(&((* s)), 1248074, Var_string(Array_getindex((* s).old, lo)));
+  for(;  lo < old_hi && lo < new_hi && Script_same(&((* s)), lo, lo);  lo ++) Script_emit(&((* s)), 1248074, Var_as_string(Array_getindex((* s).old, lo)));
   while(old_hi > lo && new_hi > lo && Script_same(&((* s)), old_hi - 1, new_hi - 1)) old_hi --, new_hi --;
   (* s).lo = lo, (* s).n = old_hi - lo, (* s).m = new_hi - lo;
 }
 
 static void Script_replace(Script * s){
-  for(int i =(* s).lo;  i <(* s).lo +(* s).n;  i ++) Script_emit(&((* s)), 279719178, Var_string(Array_getindex((* s).old, i)));
-  for(int j =(* s).lo;  j <(* s).lo +(* s).m;  j ++) Script_emit(&((* s)), 634596520, Var_string(Array_getindex((* s).new, j)));
+  for(int i =(* s).lo;  i <(* s).lo +(* s).n;  i ++) Script_emit(&((* s)), 279719178, Var_as_string(Array_getindex((* s).old, i)));
+  for(int j =(* s).lo;  j <(* s).lo +(* s).m;  j ++) Script_emit(&((* s)), 634596520, Var_as_string(Array_getindex((* s).new, j)));
 }
 
 List cons(Var, List);
@@ -214,6 +214,8 @@ static void Script_emit(Script * s, Symbol kind, String line){
 }
 
 int String_equal(String, String);
+
+String Var_string(Var);
 
 static int Script_same(Script * s, int i, int j){
   return String_equal(Var_string(Array_getindex((* s).old, i)), Var_string(Array_getindex((* s).new, j)));
@@ -263,7 +265,7 @@ static int Script_myers(Script * s){
             Symbol kind = Var_symbol(List_getindex(_x2c_destructure_0, 0));
             int i = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 1), 3453797));
             int j = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 2), 3453797));
-            Script_emit(&((* s)), kind, Var_string(kind == 634596520 ? Array_getindex((* s).new, (* s).lo + j) : Array_getindex((* s).old, (* s).lo + i)));
+            Script_emit(&((* s)), kind, Var_as_string(kind == 634596520 ? Array_getindex((* s).new, (* s).lo + j) : Array_getindex((* s).old, (* s).lo + i)));
           }
 
         }
@@ -431,7 +433,7 @@ static Hunk _hunk(Array edits, int at, int old_line, int new_line){
   for(int i = start;  i < h.end;  i ++){
     List _x2c_destructure_1 = Var_list(Array_getindex(edits, i));
     Symbol kind = Var_symbol(List_getindex(_x2c_destructure_1, 0));
-    String text = Var_string(List_getindex(_x2c_destructure_1, 1));
+    String text = Var_as_string(List_getindex(_x2c_destructure_1, 1));
     h.lines = cons(String_var(({
       Var _x2c_literal_part_2 = String_var(char_str(_mark(kind)));  String_join(NULL, cons(_x2c_literal_part_2, cons(String_var(text), cons(String_var(_3), NULL))));
     }
@@ -467,7 +469,7 @@ static void Hunk_write(Hunk * h, Buffer out){
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      line = Var_string(_x2c_macro_cursor_output_1);
+      line = Var_as_string(_x2c_macro_cursor_output_1);
       Buffer_write(out, line);
     }
 

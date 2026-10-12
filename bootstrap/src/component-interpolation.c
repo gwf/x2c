@@ -118,7 +118,7 @@ Code interpolation(Code code){
                   }
                    break; } _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497938047668334ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
                     Var text;  text = _x2c_match_value_0; {
-                      String raw = Var_string(text);  Code literal = cons(_10, cons(_15, cons(List_var(cons(_16, cons(_15, cons(String_var(String_repr(raw)), NULL)))), NULL)));  Array_push(parts, List_var(cons(_10, cons(_20, cons(List_var(cons(_21, cons(_38, cons(List_var(cons(_39, cons(Macro_inserted(List_var(literal), 1, 1), NULL))), NULL)))), NULL)))));
+                      String raw = Var_as_string(text);  Code literal = cons(_10, cons(_15, cons(List_var(cons(_16, cons(_15, cons(String_var(String_repr(raw)), NULL)))), NULL)));  Array_push(parts, List_var(cons(_10, cons(_20, cons(List_var(cons(_21, cons(_38, cons(List_var(cons(_39, cons(Macro_inserted(List_var(literal), 1, 1), NULL))), NULL)))), NULL)))));
                     }
 
                   }
