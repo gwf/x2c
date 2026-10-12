@@ -79,8 +79,6 @@ The entry `calculations.x` names members under its companion directory
 ```x2c,ignore
 /* calculations.x */
 #include <stdio.h>
-static int helper(int value);
-static int counter;
 
 module {
   "calculations/implementation.x",
@@ -110,9 +108,11 @@ block, or a second block is a driver error at the block.
 A member's text stands where the block stood, in the listed order, and C
 declaration order applies to the whole. Declarations before the block are
 visible to every member. A member's statics are visible to later members and
-to the entry after the block. A member may hold its own block, whose members
-lie under the member's companion directory; their text is spliced in turn,
-and the namespace stays flat.
+to the entry after the block, so `main` above needs no prototypes. A member
+that uses a name defined later, in a later member or in the entry after the
+block, needs a prototype before the use, as it would in one file. A member
+may hold its own block, whose members lie under the member's companion
+directory; their text is spliced in turn, and the namespace stays flat.
 
 A quoted include in a member that names a file beside the member reaches that
 file, in collection and in the generated C. Any other include resolves as it

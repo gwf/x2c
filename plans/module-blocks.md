@@ -24,8 +24,6 @@ interface change, no build expansion.
 ```x2c
 /* calculations.x */
 #include "x2c.x"
-static int helper(int value);
-static int counter;
 
 module {
   "calculations/implementation.x",
@@ -49,8 +47,10 @@ static int helper(int value) { return value + counter; }
   at the block.
 - A member is spliced where the block stands. Declarations before the block
   are visible to every member; a member's statics are visible to later
-  members and to the entry after the block; declaration order follows C. A
-  member may hold its own block, spliced in turn; the namespace stays flat.
+  members and to the entry after the block; declaration order follows C, so
+  a prototype is needed only where a member uses a name defined later, as in
+  one file. A member may hold its own block, spliced in turn; the namespace
+  stays flat.
 - Members are not translation units. The build never lists them; the entry's
   C and header carry everything. The entry's depfile and collection entry
   depend on every member's content, so editing a member retranslates the
