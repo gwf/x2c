@@ -646,6 +646,12 @@ List syntax_grammar(void) => %(grammar
         (seq
           (token "sizeof")
           (choice
+            (seq
+              (token "(")
+              (ref type-operand)
+              (token ")")
+              (ref initializer)
+              (repeat 0 (ref postfix-part)))
             (seq (token "(") (ref type-operand) (token ")"))
             (ref type-operand)
             (ref unary)))

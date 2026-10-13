@@ -125,10 +125,11 @@ At statement start, named parameters in the parentheses select a typed destructu
 declaration; one anonymous parameter can instead be a cast.
 
 After `sizeof`, a parenthesized declaration start is a type operand that ends
-at its `)`. Any other operand is a `unary` expression, so a parenthesized
-expression keeps its postfix continuation: `sizeof(a)[0]` measures an element.
-A compound literal therefore needs its own parentheses, as in
-`sizeof((int[]){1, 2, 3})`; `sizeof (int[]){1, 2, 3}` is rejected.
+at its `)`, unless `{` follows the `)`. Then the operand is a compound
+literal with its postfix continuation: `sizeof (int[]){1, 2, 3}` measures the
+array, and `sizeof (P){1, 2}.y` measures the member. Any other operand is a
+`unary` expression, so a parenthesized expression keeps its postfix
+continuation: `sizeof(a)[0]` measures an element.
 
 `is [not]` shares relational precedence. Its right operand is a type when
 `_is_type_selector_start` recognizes a declaration, `Void`, or an unbound
