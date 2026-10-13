@@ -431,11 +431,13 @@ def write(path: str, text: str) -> None:
 
 INDEX_HEADER = """# Agent failure incidents
 
-One row per captured incident; the evidence is outside the repository under
-the directory `tools/agent-failure.py list` names.
+> Status: reference
+>
+> One row per captured incident; the evidence is outside the repository under
+> the directory `tools/agent-failure.py list` names.
 
-| Date | Kind | What was reported |
-| --- | --- | --- |
+| Date | Kind | What was reported | Session | Evidence | Status |
+| --- | --- | --- | --- | --- | --- |
 """
 
 
