@@ -1717,7 +1717,7 @@ static List _literal(Emitter * e, List ast){
     }
 
   }
-  int digits = String_getindex(text, 0) == '-' || String_getindex(text, 0) == '+';  if(String_getindex(text, digits) == '0' &&(String_getindex(text, digits + 1) == 'o' || String_getindex(text, digits + 1) == 'O')) text = String_add(String_add(String_getslice(text, (-2147483647 - 1), digits, 1), _196), String_new(text + digits + 2));  return cons(String_var(text), NULL);
+  int digits = String_getindex(text, 0) == '-' || String_getindex(text, 0) == '+';  if(String_getindex(text, digits) == '0' &&(String_getindex(text, digits + 1) == 'o' || String_getindex(text, digits + 1) == 'O')) text = String_add(String_add(String_getslice(text, (-2147483647 - 1), x2c_slice_bound(digits), 1), _196), String_new(text + digits + 2));  return cons(String_var(text), NULL);
 }
 
 static List _atom_intern(String spelling){
@@ -1730,7 +1730,7 @@ static List _atom_intern(String spelling){
 String preproc_include_target(String, int *);
 int is_source_file(String);
 static List _preproc(Emitter * e, List ast){
-  int angle = 0;  String target = preproc_include_target(Var_as_string(List_cadr(ast)), &(angle));  if(! String_truth(target) || ! is_source_file(target)) return List_cdr(ast);  String stem = String_getslice(target, (-2147483647 - 1), String_rfind(target, _460), 1);  String out = String_join(NULL, cons(String_var(_461), cons(String_var(stem), cons(String_var(_462), NULL))));  return cons(String_var(out), NULL);
+  int angle = 0;  String target = preproc_include_target(Var_as_string(List_cadr(ast)), &(angle));  if(! String_truth(target) || ! is_source_file(target)) return List_cdr(ast);  String stem = String_getslice(target, (-2147483647 - 1), x2c_slice_bound(String_rfind(target, _460)), 1);  String out = String_join(NULL, cons(String_var(_461), cons(String_var(stem), cons(String_var(_462), NULL))));  return cons(String_var(out), NULL);
 }
 
 static List _declare_stmt(Emitter * e, List ast){

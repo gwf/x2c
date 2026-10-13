@@ -920,6 +920,7 @@ double Var_double(Var x);
 void x2c_initialize_protocols(void);
 void x2c_initialize(void);
 int x2c_normalize_index(int index, int length);
+int x2c_slice_bound(int bound);
 int x2c_normalize_slice(int * start, int * stop, int step, int length);
 extern File Stdin, Stdout, Stderr;
 extern Var Void;

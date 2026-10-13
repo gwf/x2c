@@ -499,7 +499,7 @@ List Compiler_origin_location(Compiler compiler, int occurrence){
 }
 
 String Compiler_display_path(Compiler compiler, String path){
-  if(! _init_guard_) _file_init_();  if(! String_truth(path) || String_startswith(path, _7)) return path;  if(compiler -> source_facts) return Path_absolute(path);  String root = compiler -> root_dir;  if(String_truth(root) && String_truth(path) && String_startswith(path, root) && String_len(path) > String_len(root) && String_getindex(path, String_len(root)) == '/') return String_getslice(path, String_len(root) + 1, (-2147483647 - 1), 1);
+  if(! _init_guard_) _file_init_();  if(! String_truth(path) || String_startswith(path, _7)) return path;  if(compiler -> source_facts) return Path_absolute(path);  String root = compiler -> root_dir;  if(String_truth(root) && String_truth(path) && String_startswith(path, root) && String_len(path) > String_len(root) && String_getindex(path, String_len(root)) == '/') return String_getslice(path, x2c_slice_bound(String_len(root) + 1), (-2147483647 - 1), 1);
   return path;
 }
 

@@ -928,9 +928,13 @@ int x2c_normalize_index(int index, int length){
   if(index < 0) index += length;  if(index < 0 || index >= length) return - 1;  return index;
 }
 
+int x2c_slice_bound(int bound){
+  if(! _init_guard_) _file_init_();  return bound == INT_MIN ? bound + 1 : bound;
+}
+
 int x2c_normalize_slice(int * start, int * stop, int step, int length){
   if(! _init_guard_) _file_init_();  if(! start || ! stop || ! step || length < 0){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 891};  x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_slice")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 896};  x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_slice")), NULL))));  __builtin_unreachable();
   }
   int orig_stop = * stop;  if(* start == INT_MIN) * start =(step > 0) ? 0 : length - 1;  if(* stop == INT_MIN) * stop = - 1;  if(* start < 0){
     * start += length;  if(* start < 0) * start =(step < 0) ? - 1 : 0;

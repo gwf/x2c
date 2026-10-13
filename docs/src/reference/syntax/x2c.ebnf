@@ -187,7 +187,11 @@ cast = ( ( cast-head , cast ) | unary ) ;
 cast-head = ? parenthesized type operand with cast-follow lookahead; E1 ? ;
 unary = ( ( ( "++" | "--" ) , unary ) |
     ( ( "&" | "*" | "+" | "-" | "~" | "!" ) , cast ) |
-    ( "sizeof" , ( ( "(" , type-operand , ")" ) | type-operand | unary ) ) |
+    ( "sizeof" ,
+    ( ( "(" , type-operand , ")" , initializer , { postfix-part } ) |
+    ( "(" , type-operand , ")" ) |
+    type-operand |
+    unary ) ) |
     postfix ) ;
 postfix = ( primary , { postfix-part } ) ;
 postfix-part = ( ( "[" , expression , "]" ) |

@@ -2108,7 +2108,7 @@ static String _body_tag(Type type){
 }
 
 static List _tag_only(Type type, Type core, Var name){
-  return List_append(List_getslice(Type_list(type), (-2147483647 - 1), List_len(Type_list(type)) - List_len(Type_list(core)), 1), ({
+  return List_append(List_getslice(Type_list(type), (-2147483647 - 1), x2c_slice_bound(List_len(Type_list(type)) - List_len(Type_list(core))), 1), ({
     Var _x2c_literal_part_20 = List_car(Type_list(core));  cons(_x2c_literal_part_20, cons(name, NULL));
   }
   ));

@@ -127,7 +127,7 @@ int String_getindex(String, int);
 static String _trimmed(String path){
   int length = String_len(path);
   while(length > 1 && String_getindex(path, length - 1) == '/') length --;
-  return String_getslice(path, (-2147483647 - 1), length, 1);
+  return String_getslice(path, (-2147483647 - 1), x2c_slice_bound(length), 1);
 }
 
 static int String_truth(String);
@@ -155,7 +155,7 @@ Path Path_dirname(Path path){
   int slash = String_rfind(trimmed, _0);
   if(slash < 0) return _2;
   while(slash > 0 && String_getindex(trimmed, slash - 1) == '/') slash --;
-  return slash ? String_getslice(trimmed, (-2147483647 - 1), slash, 1) : _0;
+  return slash ? String_getslice(trimmed, (-2147483647 - 1), x2c_slice_bound(slash), 1) : _0;
 }
 
 int String_equal(String, String);
@@ -165,7 +165,7 @@ Path Path_basename(Path path){
   String trimmed = _trimmed(path);
   if(String_equal(trimmed, _0)) return trimmed;
   int slash = String_rfind(trimmed, _0);
-  return slash < 0 ? trimmed : String_getslice(trimmed, slash + 1, (-2147483647 - 1), 1);
+  return slash < 0 ? trimmed : String_getslice(trimmed, x2c_slice_bound(slash + 1), (-2147483647 - 1), 1);
 }
 
 static int _extension_dot(String base){
@@ -177,14 +177,14 @@ String Path_extension(Path path){
   if(! _init_guard_) _file_init_();
   String base = Path_basename(path);
   int dot = _extension_dot(base);
-  return dot < 0 ? NULL : String_getslice(base, dot, (-2147483647 - 1), 1);
+  return dot < 0 ? NULL : String_getslice(base, x2c_slice_bound(dot), (-2147483647 - 1), 1);
 }
 
 String Path_stem(Path path){
   if(! _init_guard_) _file_init_();
   String base = Path_basename(path);
   int dot = _extension_dot(base);
-  return dot < 0 ? base : String_getslice(base, (-2147483647 - 1), dot, 1);
+  return dot < 0 ? base : String_getslice(base, (-2147483647 - 1), x2c_slice_bound(dot), 1);
 }
 
 String String_new(const char *);
@@ -500,8 +500,8 @@ List Path_glob(Path pattern){
   if(! wildcard) return Path_exists(pattern) ? cons(String_var(pattern), NULL) : NULL;
   int cut = wildcard -(const char *) text;
   while(cut && String_getindex(text, cut - 1) != '/') cut --;
-  Path base = cut ? String_getslice(text, (-2147483647 - 1), cut, 1) : NULL, root = String_truth(base) ? base : _2;
-  int directories = String_endswith(text, _0), depth = _glob_depth(String_getslice(text, cut, (-2147483647 - 1), 1));
+  Path base = cut ? String_getslice(text, (-2147483647 - 1), x2c_slice_bound(cut), 1) : NULL, root = String_truth(base) ? base : _2;
+  int directories = String_endswith(text, _0), depth = _glob_depth(String_getslice(text, x2c_slice_bound(cut), (-2147483647 - 1), 1));
   int hidden = String_startswith(pattern, _2) || String_contains(pattern, _9);
   Array paths = Array_new(), matches = Array_new();
   if(Path_is_dir(root)) _walk(root, depth, hidden, paths);

@@ -3839,7 +3839,7 @@ static void _real_paths_shutdown(void){
 }
 
 String home_portable_path(String path){
-  if(! _init_guard_) _file_init_();  String prefix = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_533), NULL)));  return String_startswith(path, prefix) ? String_getslice(path, String_len(prefix), (-2147483647 - 1), 1) : path;
+  if(! _init_guard_) _file_init_();  String prefix = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_533), NULL)));  return String_startswith(path, prefix) ? String_getslice(path, x2c_slice_bound(String_len(prefix)), (-2147483647 - 1), 1) : path;
 }
 
 String home_absolute_path(String spelling){

@@ -882,7 +882,7 @@ static String _cc_error(String errors){
   String first = Var_as_string(Array_getindex(lines, 0));
   if(! String_endswith(first, _14) || Array_len(lines) < 2) return first;
   String next = Var_as_string(Array_getindex(lines, 1));
-  if(String_endswith(next, _14)) next = String_getslice(next, (-2147483647 - 1), String_len(next) - 1, 1);
+  if(String_endswith(next, _14)) next = String_getslice(next, (-2147483647 - 1), x2c_slice_bound(String_len(next) - 1), 1);
   return String_join(NULL, cons(String_var(first), cons(String_var(_6), cons(String_var(next), NULL))));
 }
 
@@ -1223,7 +1223,7 @@ static Array _runtime_includes(Compiler c, String lib){
   {
     Var path, hash;  Map _x2c_macro_object_10 = c -> deps;  unsigned _x2c_macro_cursor_11 = 0;  Var _x2c_macro_cursor_output_11;  Var _x2c_macro_cursor_output_12;  while(Map_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_11), &(_x2c_macro_cursor_output_12))){
       path = _x2c_macro_cursor_output_11;  hash = _x2c_macro_cursor_output_12; {
-        if(Var_is_row(hash, 11, 7, 1) && String_startswith(Var_as_string(hash), _230)) continue;  if(String_equal(Compiler_canonical_path(c, Var_as_string(path)), Compiler_canonical_path(c, c -> filename))) continue;  String dependency = Var_as_string(path);  if(String_startswith(dependency, lib) && String_endswith(dependency, _231) && !(String_contains(String_getslice(dependency, String_len(lib), (-2147483647 - 1), 1), _5))){
+        if(Var_is_row(hash, 11, 7, 1) && String_startswith(Var_as_string(hash), _230)) continue;  if(String_equal(Compiler_canonical_path(c, Var_as_string(path)), Compiler_canonical_path(c, c -> filename))) continue;  String dependency = Var_as_string(path);  if(String_startswith(dependency, lib) && String_endswith(dependency, _231) && !(String_contains(String_getslice(dependency, x2c_slice_bound(String_len(lib)), (-2147483647 - 1), 1), _5))){
           String header = Path_basename(dependency);  Var index;  if(Map_try_get(meta_build_tables, String_var(Path_absolute(dependency)), &(index))) header = String_join(NULL, cons(String_var(_232), cons(String_var(Var_str(index)), cons(String_var(_233), NULL))));  Array_push(ordered, List_var(cons(_227, cons(String_var(String_join(NULL, cons(String_var(_228), cons(String_var(header), cons(String_var(_229), NULL))))), NULL))));
         }
 

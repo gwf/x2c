@@ -85,7 +85,7 @@ SourceView SourceView_alloc(void){
 }
 
 void SourceView_free(SourceView value){
-  Scope_free(value);
+  Scope_free((void *) value);
 }
 
 void SourceView_cleanup(SourceView value){

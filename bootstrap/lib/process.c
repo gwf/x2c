@@ -222,7 +222,7 @@ Job Job_alloc(void){
 void Scope_free(void *);
 
 void Job_free(Job value){
-  Scope_free(value);
+  Scope_free((void *) value);
 }
 
 Var Var_new(Symbol, ...);
@@ -1223,7 +1223,7 @@ static char * * _environment(Map env){
   for(char * * entry = environ;  * entry;  entry ++){
     String text = String_new(* entry);
     int equals = String_find(text, _5);
-    if(!(Map_contains(names, String_var((equals < 0 ? text : String_getslice(text, (-2147483647 - 1), equals, 1)))))) Array_push(entries, String_var(text));
+    if(!(Map_contains(names, String_var((equals < 0 ? text : String_getslice(text, (-2147483647 - 1), x2c_slice_bound(equals), 1)))))) Array_push(entries, String_var(text));
   }
   {
     Var name, value;

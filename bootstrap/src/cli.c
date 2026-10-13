@@ -1288,8 +1288,8 @@ static Given _take_option(Array args, int * i, int mask){
   String arg = Var_as_string(Array_getindex(args, (* i))), written = arg, joined = NULL, suffix = NULL;
   int equals = String_startswith(arg, _85) ? String_find(arg, _91) : - 1;
   if(equals > 2){
-    written = String_getslice(arg, (-2147483647 - 1), equals, 1);
-    joined = String_getslice(arg, equals + 1, (-2147483647 - 1), 1);
+    written = String_getslice(arg, (-2147483647 - 1), x2c_slice_bound(equals), 1);
+    joined = String_getslice(arg, x2c_slice_bound(equals + 1), (-2147483647 - 1), 1);
   }
   Given given ={
     _find_option(written, mask, &(suffix)), written

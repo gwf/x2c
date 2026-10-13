@@ -329,7 +329,7 @@ Tokenizer Tokenizer_alloc(void){
 void Scope_free(void *);
 
 void Tokenizer_free(Tokenizer value){
-  Scope_free(value);
+  Scope_free((void *) value);
 }
 
 void Tokenizer_cleanup(Tokenizer value){
