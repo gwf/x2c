@@ -209,11 +209,11 @@ static inline int MachineSlot_final_equal(MachineSlot * slot, List input, Machin
 
 #include <string.h>
 #include "exception.h"
-static int MachineBuilder__grow_code(MachineBuilder * b);
+static int _grow_code(MachineBuilder * b);
 
-static int MachineBuilder__grow_consts(MachineBuilder * b);
+static int _grow_consts(MachineBuilder * b);
 
-static int MachineBuilder__fail(MachineBuilder * b, const char * reason);
+static int _fail(MachineBuilder * b, const char * reason);
 
 static size_t _program_bytes(int length, int const_count, int binder_count);
 
@@ -422,8 +422,8 @@ String MachineProgram_repr(MachineProgram value){
 }
 
 int MachineBuilder_emit(MachineBuilder * b, int op, int a, int operand_b, int c, int d, int target){
-  if((* b).status != MACHINE_PREPARED || MachineBuilder__grow_code(&((* b))) < 0) return - 1;
-  if(op < 0 || op > 255 || operand_b < 0 || operand_b > 255 || c < 0 || c > 255 || d < 0 || d > 255 || a < - 1 || a >= MACHINE_CODE_MAX || target < - 1 || target >= MACHINE_CODE_MAX) return MachineBuilder__fail(&((* b)), "instruction-range");
+  if((* b).status != MACHINE_PREPARED || _grow_code(&((* b))) < 0) return - 1;
+  if(op < 0 || op > 255 || operand_b < 0 || operand_b > 255 || c < 0 || c > 255 || d < 0 || d > 255 || a < - 1 || a >= MACHINE_CODE_MAX || target < - 1 || target >= MACHINE_CODE_MAX) return _fail(&((* b)), "instruction-range");
   (* b).code[(* b).length] =(MachineWord){
     .op = op, .b = operand_b, .c = c, .d = d, .a = a, .target = target
   }
@@ -431,9 +431,9 @@ int MachineBuilder_emit(MachineBuilder * b, int op, int a, int operand_b, int c,
   return(* b).length ++;
 }
 
-static int MachineBuilder__grow_code(MachineBuilder * b){
+static int _grow_code(MachineBuilder * b){
   if((* b).length <(* b).code_capacity) return 0;
-  if((* b).code_capacity >= MACHINE_CODE_MAX) return MachineBuilder__fail(&((* b)), "code-capacity");
+  if((* b).code_capacity >= MACHINE_CODE_MAX) return _fail(&((* b)), "code-capacity");
   int capacity =(* b).code_capacity ?(* b).code_capacity * 2 : 64;
   if(capacity > MACHINE_CODE_MAX) capacity = MACHINE_CODE_MAX;
   MachineWord * grown = Scope_realloc((* b).code, sizeof(MachineWord) * capacity);
@@ -445,14 +445,14 @@ static int MachineBuilder__grow_code(MachineBuilder * b){
 int MachineBuilder_constant(MachineBuilder * b, Var value){
   if((* b).status != MACHINE_PREPARED) return - 1;
   for(int i = 0;  i <(* b).const_count;  i ++) if((* b).consts[i].u64 == value.u64) return i;
-  if(MachineBuilder__grow_consts(&((* b))) < 0) return - 1;
+  if(_grow_consts(&((* b))) < 0) return - 1;
   (* b).consts[(* b).const_count] = value;
   return(* b).const_count ++;
 }
 
-static int MachineBuilder__grow_consts(MachineBuilder * b){
+static int _grow_consts(MachineBuilder * b){
   if((* b).const_count <(* b).const_capacity) return 0;
-  if((* b).const_capacity >= MACHINE_CONST_MAX) return MachineBuilder__fail(&((* b)), "constant-capacity");
+  if((* b).const_capacity >= MACHINE_CONST_MAX) return _fail(&((* b)), "constant-capacity");
   int capacity =(* b).const_capacity ?(* b).const_capacity * 2 : 16;
   if(capacity > MACHINE_CONST_MAX) capacity = MACHINE_CONST_MAX;
   Var * grown = Scope_realloc((* b).consts, sizeof(Var) * capacity);
@@ -464,7 +464,7 @@ static int MachineBuilder__grow_consts(MachineBuilder * b){
 int MachineBuilder_binder(MachineBuilder * b, Atom binder){
   if((* b).status != MACHINE_PREPARED) return - 1;
   for(int i = 0;  i <(* b).binder_count;  i ++) if((* b).binders[i].u64 == binder.u64) return i;
-  if((* b).binder_count >= MACHINE_BINDER_MAX) return MachineBuilder__fail(&((* b)), "binder-capacity");
+  if((* b).binder_count >= MACHINE_BINDER_MAX) return _fail(&((* b)), "binder-capacity");
   (* b).binders[(* b).binder_count] = binder;
   return(* b).binder_count ++;
 }
@@ -475,7 +475,7 @@ int MachineBuilder_binder(MachineBuilder * b, Atom binder){
 
 
 void MachineBuilder_set_target(MachineBuilder * b, int site, int target){
-  if(target ==(* b).length &&(* b).length == MACHINE_CODE_MAX) MachineBuilder__fail(&((* b)), "code-capacity");
+  if(target ==(* b).length &&(* b).length == MACHINE_CODE_MAX) _fail(&((* b)), "code-capacity");
   else if(target < 0 || target >= MACHINE_CODE_MAX){
     Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("MachineBuilder.set_target")), NULL)));
     {
@@ -493,7 +493,7 @@ void MachineBuilder_patch(MachineBuilder * b, int * sites, int count, int target
   for(int i = 0;  i < count;  i ++) MachineBuilder_set_target(&((* b)), sites[i], target);
 }
 
-static int MachineBuilder__fail(MachineBuilder * b, const char * reason){
+static int _fail(MachineBuilder * b, const char * reason){
   if((* b).status == MACHINE_PREPARED){
     (* b).status = MACHINE_INELIGIBLE;
     (* b).reason = reason;

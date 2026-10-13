@@ -110,41 +110,41 @@ static int _table_value_equal(Var * _x2c_macro_a_1, Var * _x2c_macro_b_1);
 
 static void _table_value_valid(Var * _x2c_macro_value_0);
 
-static void PoolTable__core_free(PoolTable _x2c_macro_map_2);
+static void _for_pool_table__free(PoolTable _x2c_macro_map_2);
 
-static PoolTable PoolTable__core_new_capacity(PoolTable _x2c_macro_unused_0, unsigned _x2c_macro_capacity_2);
+static PoolTable _for_pool_table__new_capacity(PoolTable _x2c_macro_unused_0, unsigned _x2c_macro_capacity_2);
 
-static long PoolTable__core_find_hashed(PoolTable _x2c_macro_map_4, Var * _x2c_macro_key_1, unsigned _x2c_macro_key_hash_0);
+static long _for_pool_table__find_hashed(PoolTable _x2c_macro_map_4, Var * _x2c_macro_key_1, unsigned _x2c_macro_key_hash_0);
 
-static long PoolTable__core_find_index(PoolTable _x2c_macro_map_5, Var * _x2c_macro_key_2);
+static long _for_pool_table__find_index(PoolTable _x2c_macro_map_5, Var * _x2c_macro_key_2);
 
-static int PoolTable__core_try_get(PoolTable _x2c_macro_map_6, Var * _x2c_macro_key_3, Var * _x2c_macro_out_0);
+static int _for_pool_table__try_get(PoolTable _x2c_macro_map_6, Var * _x2c_macro_key_3, Var * _x2c_macro_out_0);
 
-static void PoolTable__core_reinsert(PoolTable _x2c_macro_map_7, unsigned _x2c_macro_todo_hash_0, struct PoolRecord _x2c_macro_todo_0, int _x2c_macro_psl_0);
+static void _for_pool_table__reinsert(PoolTable _x2c_macro_map_7, unsigned _x2c_macro_todo_hash_0, struct PoolRecord _x2c_macro_todo_0, int _x2c_macro_psl_0);
 
-static void PoolTable__core_expand(PoolTable _x2c_macro_map_8);
+static void _for_pool_table__expand(PoolTable _x2c_macro_map_8);
 
-static Var * PoolTable__core_get_or_insert(PoolTable _x2c_macro_map_9, Var * _x2c_macro_key_4, Var * _x2c_macro_val_0, int * _x2c_macro_inserted_0);
+static Var * _for_pool_table__get_or_insert(PoolTable _x2c_macro_map_9, Var * _x2c_macro_key_4, Var * _x2c_macro_val_0, int * _x2c_macro_inserted_0);
 
-static void PoolTable__core_set(PoolTable _x2c_macro_map_10, Var * _x2c_macro_key_5, Var * _x2c_macro_val_1);
+static void _for_pool_table__set(PoolTable _x2c_macro_map_10, Var * _x2c_macro_key_5, Var * _x2c_macro_val_1);
 
-static int PoolTable__core_try_del(PoolTable _x2c_macro_map_11, Var * _x2c_macro_key_6, Var * _x2c_macro_out_1);
+static int _for_pool_table__try_del(PoolTable _x2c_macro_map_11, Var * _x2c_macro_key_6, Var * _x2c_macro_out_1);
 
-static int PoolTable__core_try_next(PoolTable _x2c_macro_map_12, unsigned * _x2c_macro_cursor_0, Var * _x2c_macro_key_7, Var * _x2c_macro_val_2);
+static int _for_pool_table__try_next(PoolTable _x2c_macro_map_12, unsigned * _x2c_macro_cursor_0, Var * _x2c_macro_key_7, Var * _x2c_macro_val_2);
 
-static void PoolTable__core_insert_all(PoolTable _x2c_macro_map_13, PoolTable _x2c_macro_other_0);
+static void _for_pool_table__insert_all(PoolTable _x2c_macro_map_13, PoolTable _x2c_macro_other_0);
 
-static PoolTable PoolTable__core_copy(PoolTable _x2c_macro_map_14);
+static PoolTable _for_pool_table__copy(PoolTable _x2c_macro_map_14);
 
-static PoolTable PoolTable__core_merge(PoolTable _x2c_macro_map_15, PoolTable _x2c_macro_other_1);
+static PoolTable _for_pool_table__merge(PoolTable _x2c_macro_map_15, PoolTable _x2c_macro_other_1);
 
-static int PoolTable__core_truth(PoolTable _x2c_macro_map_16);
+static int _for_pool_table__truth(PoolTable _x2c_macro_map_16);
 
-static int PoolTable__core_equal(PoolTable _x2c_macro_a_2, PoolTable _x2c_macro_b_2);
+static int _for_pool_table__equal(PoolTable _x2c_macro_a_2, PoolTable _x2c_macro_b_2);
 
-static Var PoolTable__get_hashed(PoolTable table, Var key, unsigned key_hash);
+static Var _get_hashed(PoolTable table, Var key, unsigned key_hash);
 
-static Var PoolTable__setdefault(PoolTable table, Var object, int * inserted);
+static Var _setdefault(PoolTable table, Var object, int * inserted);
 
 enum PoolStorageConstant{
   POOL_CLASS_COUNT = 10, POOL_DEPOT_COUNT = 5, POOL_KEEP_WORDS = 1
@@ -339,30 +339,30 @@ static Pool value_root;
 static unsigned long value_epoch;
 static _Thread_local struct PoolValueThreadState value_thread;
 static int pool_multithreaded;
-static Var Pool__lookup_locked(Pool inner, Var key, unsigned key_hash);
-static Var Pool__intern_locked(Pool inner, Var object, int * discard);
-static void Pool__insert_locked(Pool inner, Var object);
-static int Pool__owns_locked(Pool pool, Var key);
-static void * Pool__small_malloc(Pool inner, int class_index, size_t size);
+static Var _lookup_locked(Pool inner, Var key, unsigned key_hash);
+static Var _intern_locked(Pool inner, Var object, int * discard);
+static void _insert_locked(Pool inner, Var object);
+static int _owns_locked(Pool pool, Var key);
+static void * _small_malloc(Pool inner, int class_index, size_t size);
 static int _size_class(size_t size);
-static PoolBlock Pool__block_with_room(Pool pool, int class_index);
-static int PoolBlock__has_room(PoolBlock block);
-static void * PoolBlock__take_slot(PoolBlock block, int class_index);
-static PoolBlock Pool__fresh_block(Pool inner, int class_index);
-static void PoolBlock__free_slot(PoolBlock block, void * ptr);
-static void PoolBlock__push_free(PoolBlock block, void * slot);
-static PoolBlock Pool__block_lease(Pool p, int class_index, PoolBlock fresh);
-static unsigned Pool__block_bytes(Pool pool, int class_index);
+static PoolBlock _block_with_room(Pool pool, int class_index);
+static int _has_room(PoolBlock block);
+static void * _take_slot(PoolBlock block, int class_index);
+static PoolBlock _fresh_block(Pool inner, int class_index);
+static void _free_slot(PoolBlock block, void * ptr);
+static void _push_free(PoolBlock block, void * slot);
+static PoolBlock _block_lease(Pool p, int class_index, PoolBlock fresh);
+static unsigned _block_bytes(Pool pool, int class_index);
 static PoolBlock _depot_pop(unsigned bytes);
 static PoolBlock _registry_add(PoolBlock block, unsigned bytes);
-static void PoolBlock__reset(PoolBlock block, Pool owner);
-static void PoolBlock__link(PoolBlock block, Pool pool);
+static void _reset(PoolBlock block, Pool owner);
+static void _link(PoolBlock block, Pool pool);
 static void _depot_push(PoolBlock block);
 static int _depot_index(unsigned bytes);
-static inline char * PoolBlock__data(PoolBlock block);
-static inline void * PoolBlock__slot(PoolBlock block, unsigned slot);
-static inline unsigned PoolBlock__slot_index(PoolBlock block, void * alloc);
-static int PoolBlock__contains(PoolBlock block, const void * ptr);
+static inline char * _data(PoolBlock block);
+static inline void * _slot(PoolBlock block, unsigned slot);
+static inline unsigned _slot_index(PoolBlock block, void * alloc);
+static int _contains(PoolBlock block, const void * ptr);
 static PoolBlock _find_block(const void * ptr);
 static PoolBlock _index_find(const void * ptr);
 static PoolBlock _registry_find(const void * ptr);
@@ -370,22 +370,22 @@ static void _index_add(PoolBlock block, unsigned bytes);
 static int _index_grow(void);
 static void _index_place(PoolIndexSlot * table, unsigned slots, uintptr_t page, PoolBlock block);
 static unsigned _index_start(uintptr_t page, unsigned slots);
-static int Pool__promote_level(Pool inner, Var object, void * alloc, PoolBlock block);
+static int _promote_level(Pool inner, Var object, void * alloc, PoolBlock block);
 static PoolBlock _block_of(void * alloc);
-static void PoolBlock__mark_slot(PoolBlock block, unsigned slot);
-static void Pool__push_promotion(Pool inner, PoolPromotion promotion);
-static void Pool__release_blocks(Pool inner);
-static void PoolBlock__transfer(PoolBlock block, Pool parent);
-static void PoolBlock__free_unkept(PoolBlock block);
-static int PoolBlock__slot_kept(PoolBlock block, unsigned slot);
+static void _mark_slot(PoolBlock block, unsigned slot);
+static void _push_promotion(Pool inner, PoolPromotion promotion);
+static void _release_blocks(Pool inner);
+static void _transfer(PoolBlock block, Pool parent);
+static void _free_unkept(PoolBlock block);
+static int _slot_kept(PoolBlock block, unsigned slot);
 static void _storage_lock(void);
 static void _storage_unlock(void);
-static void Pool__lock(Pool pool);
-static void Pool__unlock(Pool pool);
+static void _lock(Pool pool);
+static void _unlock(Pool pool);
 _Noreturn static void _fatal(const char * message);
 static void _record_request(size_t size);
 static void _storage_initialize(void);
-static unsigned Pool__child_capacity(Pool inner);
+static unsigned _child_capacity(Pool inner);
 static void _storage_shutdown(void);
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -518,30 +518,30 @@ static void _table_value_valid(Var * _x2c_macro_value_0){
 
 }
 
-static void PoolTable__core_free(PoolTable _x2c_macro_map_2){
+static void _for_pool_table__free(PoolTable _x2c_macro_map_2){
   if((void *) _x2c_macro_map_2 == 0) return;  Bytes_free(_x2c_macro_map_2 -> hashes);  Bytes_free(_x2c_macro_map_2 -> entries);  Scope_free(_x2c_macro_map_2);
 }
 
-static PoolTable PoolTable__core_new_capacity(PoolTable _x2c_macro_unused_0, unsigned _x2c_macro_capacity_2){
+static PoolTable _for_pool_table__new_capacity(PoolTable _x2c_macro_unused_0, unsigned _x2c_macro_capacity_2){
   (void) _x2c_macro_unused_0;  PoolTable _x2c_macro_map_3 = Scope_malloc(sizeof(struct PoolTable));  _x2c_macro_map_3 -> scope = * Scope_top();  _x2c_macro_map_3 -> hashes = Bytes_new(sizeof(unsigned));  _x2c_macro_map_3 -> hashes = Bytes_append(_x2c_macro_map_3 -> hashes, 0, _x2c_macro_capacity_2);  _x2c_macro_map_3 -> entries = Bytes_new(sizeof(struct PoolRecord));  _x2c_macro_map_3 -> entries = Bytes_append(_x2c_macro_map_3 -> entries, 0, _x2c_macro_capacity_2);  _x2c_macro_map_3 -> capacity = _x2c_macro_capacity_2;  _x2c_macro_map_3 -> mask = _x2c_macro_capacity_2 - 1;  _x2c_macro_map_3 -> used = 0;  return _x2c_macro_map_3;
 }
 
-static long PoolTable__core_find_hashed(PoolTable _x2c_macro_map_4, Var * _x2c_macro_key_1, unsigned _x2c_macro_key_hash_0){
+static long _for_pool_table__find_hashed(PoolTable _x2c_macro_map_4, Var * _x2c_macro_key_1, unsigned _x2c_macro_key_hash_0){
   unsigned * _x2c_macro_hashes_0 = _x2c_macro_map_4 -> hashes;  unsigned _x2c_macro_mask_0 = _x2c_macro_map_4 -> mask, _x2c_macro_todo_start_0 = _x2c_macro_key_hash_0 & _x2c_macro_mask_0;  unsigned _x2c_macro_cap_0 = _x2c_macro_map_4 -> capacity;  for(int _x2c_macro_todo_psl_0 = 0;  _x2c_macro_todo_psl_0 <(int) _x2c_macro_cap_0;  _x2c_macro_todo_psl_0 ++){
     unsigned _x2c_macro_index_2 =(_x2c_macro_todo_start_0 + _x2c_macro_todo_psl_0) & _x2c_macro_mask_0;  unsigned _x2c_macro_stored_0 = _x2c_macro_hashes_0[_x2c_macro_index_2];  if(_x2c_macro_stored_0 == 0) break;  if(_x2c_macro_stored_0 == _x2c_macro_key_hash_0 && _table_key_equal(_record_key(_x2c_macro_map_4, _x2c_macro_index_2), _x2c_macro_key_1)) return(long) _x2c_macro_index_2;  unsigned _x2c_macro_stored_start_0 = _x2c_macro_stored_0 & _x2c_macro_mask_0;  int _x2c_macro_stored_psl_0 =(_x2c_macro_cap_0 + _x2c_macro_index_2 - _x2c_macro_stored_start_0) & _x2c_macro_mask_0;  if(_x2c_macro_stored_psl_0 < _x2c_macro_todo_psl_0) break;
   }
   return - 1;
 }
 
-static long PoolTable__core_find_index(PoolTable _x2c_macro_map_5, Var * _x2c_macro_key_2){
-  return PoolTable__core_find_hashed(_x2c_macro_map_5, _x2c_macro_key_2, _table_hash(_x2c_macro_key_2));
+static long _for_pool_table__find_index(PoolTable _x2c_macro_map_5, Var * _x2c_macro_key_2){
+  return(_for_pool_table__find_hashed)(_x2c_macro_map_5, _x2c_macro_key_2, _table_hash(_x2c_macro_key_2));
 }
 
-static int PoolTable__core_try_get(PoolTable _x2c_macro_map_6, Var * _x2c_macro_key_3, Var * _x2c_macro_out_0){
-  if((void *) _x2c_macro_map_6 == 0 || ! _x2c_macro_out_0) return 0;  long _x2c_macro_index_3 = PoolTable__core_find_index(_x2c_macro_map_6, _x2c_macro_key_3);  if(_x2c_macro_index_3 < 0) return 0;  * _x2c_macro_out_0 = * _record_value(_x2c_macro_map_6, (unsigned) _x2c_macro_index_3);  return 1;
+static int _for_pool_table__try_get(PoolTable _x2c_macro_map_6, Var * _x2c_macro_key_3, Var * _x2c_macro_out_0){
+  if((void *) _x2c_macro_map_6 == 0 || ! _x2c_macro_out_0) return 0;  long _x2c_macro_index_3 =(_for_pool_table__find_index)(_x2c_macro_map_6, _x2c_macro_key_3);  if(_x2c_macro_index_3 < 0) return 0;  * _x2c_macro_out_0 = * _record_value(_x2c_macro_map_6, (unsigned) _x2c_macro_index_3);  return 1;
 }
 
-static void PoolTable__core_reinsert(PoolTable _x2c_macro_map_7, unsigned _x2c_macro_todo_hash_0, struct PoolRecord _x2c_macro_todo_0, int _x2c_macro_psl_0){
+static void _for_pool_table__reinsert(PoolTable _x2c_macro_map_7, unsigned _x2c_macro_todo_hash_0, struct PoolRecord _x2c_macro_todo_0, int _x2c_macro_psl_0){
   unsigned * _x2c_macro_hashes_1 = _x2c_macro_map_7 -> hashes;  struct PoolRecord * _x2c_macro_entries_0 = _x2c_macro_map_7 -> entries;  unsigned _x2c_macro_mask_1 = _x2c_macro_map_7 -> mask, _x2c_macro_todo_start_1 = _x2c_macro_todo_hash_0 & _x2c_macro_mask_1;  unsigned _x2c_macro_cap_1 = _x2c_macro_map_7 -> capacity;  for(int _x2c_macro_todo_psl_1 = _x2c_macro_psl_0;  _x2c_macro_todo_psl_1 <(int) _x2c_macro_cap_1;  _x2c_macro_todo_psl_1 ++){
     unsigned _x2c_macro_index_4 =(_x2c_macro_todo_start_1 + _x2c_macro_todo_psl_1) & _x2c_macro_mask_1;  unsigned _x2c_macro_stored_1 = _x2c_macro_hashes_1[_x2c_macro_index_4];  if(_x2c_macro_stored_1 == 0){
       _x2c_macro_hashes_1[_x2c_macro_index_4] = _x2c_macro_todo_hash_0;  _x2c_macro_entries_0[_x2c_macro_index_4] = _x2c_macro_todo_0;  return;
@@ -554,9 +554,9 @@ static void PoolTable__core_reinsert(PoolTable _x2c_macro_map_7, unsigned _x2c_m
   (void) _reinsert_error(_x2c_macro_cap_1, _x2c_macro_psl_0);
 }
 
-static void PoolTable__core_expand(PoolTable _x2c_macro_map_8){
+static void _for_pool_table__expand(PoolTable _x2c_macro_map_8){
   unsigned * _x2c_macro_hashes_2 = _x2c_macro_map_8 -> hashes;  struct PoolRecord * _x2c_macro_entries_1 = _x2c_macro_map_8 -> entries;  unsigned _x2c_macro_cap_2 = _x2c_macro_map_8 -> capacity;  if(_x2c_macro_cap_2 > ~ 0u / 2){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/pool.x",.function = "PoolTable__core_expand",.line = 80};  x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_macro_cap_2));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/pool.x",.function = "_for_pool_table__expand",.line = 80};  x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_macro_cap_2));  __builtin_unreachable();
   }
   unsigned _x2c_macro_capacity_3 = _x2c_macro_cap_2 * 2;  Bytes _x2c_macro_staged_hashes_0 = Bytes_new(sizeof(unsigned)); {
     _x2c_defer_env_1 _x2c_macro_environment_1 ={
@@ -574,7 +574,7 @@ static void PoolTable__core_expand(PoolTable _x2c_macro_map_8){
           .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
         }
         ;  x2c_cleanup_push(& _x2c_defer_record_1); {
-          _x2c_macro_staged_entries_0 = Bytes_append(_x2c_macro_staged_entries_0, 0, _x2c_macro_capacity_3);  struct PoolTable _x2c_macro_expanded_0 = * _x2c_macro_map_8;  _x2c_macro_expanded_0.hashes = _x2c_macro_staged_hashes_0;  _x2c_macro_expanded_0.entries = _x2c_macro_staged_entries_0;  _x2c_macro_expanded_0.capacity = _x2c_macro_capacity_3;  _x2c_macro_expanded_0.mask = _x2c_macro_capacity_3 - 1;  PoolTable _x2c_macro_expanded_map_0 =(PoolTable) & _x2c_macro_expanded_0;  for(unsigned _x2c_macro_i_0 = 0;  _x2c_macro_i_0 < _x2c_macro_cap_2;  _x2c_macro_i_0 ++) if(_x2c_macro_hashes_2[_x2c_macro_i_0]) PoolTable__core_reinsert(_x2c_macro_expanded_map_0, _x2c_macro_hashes_2[_x2c_macro_i_0], _x2c_macro_entries_1[_x2c_macro_i_0], 0);  Scope_move(Bytes_block(_x2c_macro_staged_hashes_0), & _x2c_macro_map_8 -> scope);  Scope_move((unsigned char *) _x2c_macro_staged_hashes_0 - sizeof(Block), & _x2c_macro_map_8 -> scope);  Scope_move(Bytes_block(_x2c_macro_staged_entries_0), & _x2c_macro_map_8 -> scope);  Scope_move((unsigned char *) _x2c_macro_staged_entries_0 - sizeof(Block), & _x2c_macro_map_8 -> scope);  _x2c_macro_map_8 -> hashes = _x2c_macro_expanded_0.hashes;  _x2c_macro_map_8 -> entries = _x2c_macro_expanded_0.entries;  _x2c_macro_map_8 -> capacity = _x2c_macro_expanded_0.capacity;  _x2c_macro_map_8 -> mask = _x2c_macro_expanded_0.mask;  _x2c_macro_staged_hashes_0 = 0;  _x2c_macro_staged_entries_0 = 0;  Bytes_free((Bytes) _x2c_macro_hashes_2);  Bytes_free((Bytes) _x2c_macro_entries_1);
+          _x2c_macro_staged_entries_0 = Bytes_append(_x2c_macro_staged_entries_0, 0, _x2c_macro_capacity_3);  struct PoolTable _x2c_macro_expanded_0 = * _x2c_macro_map_8;  _x2c_macro_expanded_0.hashes = _x2c_macro_staged_hashes_0;  _x2c_macro_expanded_0.entries = _x2c_macro_staged_entries_0;  _x2c_macro_expanded_0.capacity = _x2c_macro_capacity_3;  _x2c_macro_expanded_0.mask = _x2c_macro_capacity_3 - 1;  PoolTable _x2c_macro_expanded_map_0 =(PoolTable) & _x2c_macro_expanded_0;  for(unsigned _x2c_macro_i_0 = 0;  _x2c_macro_i_0 < _x2c_macro_cap_2;  _x2c_macro_i_0 ++) if(_x2c_macro_hashes_2[_x2c_macro_i_0])(_for_pool_table__reinsert)(_x2c_macro_expanded_map_0, _x2c_macro_hashes_2[_x2c_macro_i_0], _x2c_macro_entries_1[_x2c_macro_i_0], 0);  Scope_move(Bytes_block(_x2c_macro_staged_hashes_0), & _x2c_macro_map_8 -> scope);  Scope_move((unsigned char *) _x2c_macro_staged_hashes_0 - sizeof(Block), & _x2c_macro_map_8 -> scope);  Scope_move(Bytes_block(_x2c_macro_staged_entries_0), & _x2c_macro_map_8 -> scope);  Scope_move((unsigned char *) _x2c_macro_staged_entries_0 - sizeof(Block), & _x2c_macro_map_8 -> scope);  _x2c_macro_map_8 -> hashes = _x2c_macro_expanded_0.hashes;  _x2c_macro_map_8 -> entries = _x2c_macro_expanded_0.entries;  _x2c_macro_map_8 -> capacity = _x2c_macro_expanded_0.capacity;  _x2c_macro_map_8 -> mask = _x2c_macro_expanded_0.mask;  _x2c_macro_staged_hashes_0 = 0;  _x2c_macro_staged_entries_0 = 0;  Bytes_free((Bytes) _x2c_macro_hashes_2);  Bytes_free((Bytes) _x2c_macro_entries_1);
         }
         x2c_cleanup_leave(& _x2c_defer_record_1);
       }
@@ -585,31 +585,31 @@ static void PoolTable__core_expand(PoolTable _x2c_macro_map_8){
 
 }
 
-static Var * PoolTable__core_get_or_insert(PoolTable _x2c_macro_map_9, Var * _x2c_macro_key_4, Var * _x2c_macro_val_0, int * _x2c_macro_inserted_0){
+static Var * _for_pool_table__get_or_insert(PoolTable _x2c_macro_map_9, Var * _x2c_macro_key_4, Var * _x2c_macro_val_0, int * _x2c_macro_inserted_0){
   * _x2c_macro_inserted_0 = 0;  retry :;  unsigned _x2c_macro_key_hash_1 = _table_hash(_x2c_macro_key_4), _x2c_macro_mask_2 = _x2c_macro_map_9 -> mask;  unsigned _x2c_macro_todo_start_2 = _x2c_macro_key_hash_1 & _x2c_macro_mask_2;  unsigned * _x2c_macro_hashes_3 = _x2c_macro_map_9 -> hashes;  struct PoolRecord * _x2c_macro_entries_2 = _x2c_macro_map_9 -> entries;  unsigned _x2c_macro_cap_3 = _x2c_macro_map_9 -> capacity;  for(int _x2c_macro_todo_psl_2 = 0;  _x2c_macro_todo_psl_2 <(int) _x2c_macro_cap_3;  _x2c_macro_todo_psl_2 ++){
     unsigned _x2c_macro_index_5 =(_x2c_macro_todo_start_2 + _x2c_macro_todo_psl_2) & _x2c_macro_mask_2;  unsigned _x2c_macro_stored_2 = _x2c_macro_hashes_3[_x2c_macro_index_5];  if(_x2c_macro_stored_2 == _x2c_macro_key_hash_1 && _table_key_equal(_record_key(_x2c_macro_map_9, _x2c_macro_index_5), _x2c_macro_key_4)) return _record_value(_x2c_macro_map_9, _x2c_macro_index_5);  if(_x2c_macro_stored_2 == 0){
       (void) _table_value_valid(_x2c_macro_val_0);  if(_x2c_macro_map_9 -> used >=(unsigned long) _x2c_macro_map_9 -> capacity * 3 / 4){
-        PoolTable__core_expand(_x2c_macro_map_9);  goto retry;
+        (_for_pool_table__expand)(_x2c_macro_map_9);  goto retry;
       }
       _x2c_macro_hashes_3[_x2c_macro_index_5] = _x2c_macro_key_hash_1;  _x2c_macro_entries_2[_x2c_macro_index_5].key = * _x2c_macro_key_4;  _x2c_macro_entries_2[_x2c_macro_index_5].val = * _x2c_macro_val_0;  _x2c_macro_map_9 -> used += 1;  * _x2c_macro_inserted_0 = 1;  return _record_value(_x2c_macro_map_9, _x2c_macro_index_5);
     }
     unsigned _x2c_macro_stored_start_2 = _x2c_macro_stored_2 & _x2c_macro_mask_2;  int _x2c_macro_stored_psl_2 =(_x2c_macro_cap_3 + _x2c_macro_index_5 - _x2c_macro_stored_start_2) & _x2c_macro_mask_2;  if(_x2c_macro_stored_psl_2 < _x2c_macro_todo_psl_2){
       (void) _table_value_valid(_x2c_macro_val_0);  if(_x2c_macro_map_9 -> used >=(unsigned long) _x2c_macro_map_9 -> capacity * 3 / 4){
-        PoolTable__core_expand(_x2c_macro_map_9);  goto retry;
+        (_for_pool_table__expand)(_x2c_macro_map_9);  goto retry;
       }
-      struct PoolRecord _x2c_macro_displaced_0 = _x2c_macro_entries_2[_x2c_macro_index_5];  _x2c_macro_hashes_3[_x2c_macro_index_5] = _x2c_macro_key_hash_1;  _x2c_macro_entries_2[_x2c_macro_index_5].key = * _x2c_macro_key_4;  _x2c_macro_entries_2[_x2c_macro_index_5].val = * _x2c_macro_val_0;  _x2c_macro_map_9 -> used += 1;  * _x2c_macro_inserted_0 = 1;  PoolTable__core_reinsert(_x2c_macro_map_9, _x2c_macro_stored_2, _x2c_macro_displaced_0, _x2c_macro_stored_psl_2 + 1);  return _record_value(_x2c_macro_map_9, _x2c_macro_index_5);
+      struct PoolRecord _x2c_macro_displaced_0 = _x2c_macro_entries_2[_x2c_macro_index_5];  _x2c_macro_hashes_3[_x2c_macro_index_5] = _x2c_macro_key_hash_1;  _x2c_macro_entries_2[_x2c_macro_index_5].key = * _x2c_macro_key_4;  _x2c_macro_entries_2[_x2c_macro_index_5].val = * _x2c_macro_val_0;  _x2c_macro_map_9 -> used += 1;  * _x2c_macro_inserted_0 = 1; (_for_pool_table__reinsert)(_x2c_macro_map_9, _x2c_macro_stored_2, _x2c_macro_displaced_0, _x2c_macro_stored_psl_2 + 1);  return _record_value(_x2c_macro_map_9, _x2c_macro_index_5);
     }
 
   }
   (void) _insert_error(_x2c_macro_cap_3);
 }
 
-static void PoolTable__core_set(PoolTable _x2c_macro_map_10, Var * _x2c_macro_key_5, Var * _x2c_macro_val_1){
-  int _x2c_macro_inserted_1;  Var * _x2c_macro_stored_3 = PoolTable__core_get_or_insert(_x2c_macro_map_10, _x2c_macro_key_5, _x2c_macro_val_1, & _x2c_macro_inserted_1);  if(! _x2c_macro_inserted_1) _x2c_macro_stored_3[0] = _x2c_macro_val_1[0];
+static void _for_pool_table__set(PoolTable _x2c_macro_map_10, Var * _x2c_macro_key_5, Var * _x2c_macro_val_1){
+  int _x2c_macro_inserted_1;  Var * _x2c_macro_stored_3 =(_for_pool_table__get_or_insert)(_x2c_macro_map_10, _x2c_macro_key_5, _x2c_macro_val_1, & _x2c_macro_inserted_1);  if(! _x2c_macro_inserted_1) _x2c_macro_stored_3[0] = _x2c_macro_val_1[0];
 }
 
-static int PoolTable__core_try_del(PoolTable _x2c_macro_map_11, Var * _x2c_macro_key_6, Var * _x2c_macro_out_1){
-  if((void *) _x2c_macro_map_11 == 0 || ! _x2c_macro_out_1) return 0;  long _x2c_macro_found_0 = PoolTable__core_find_index(_x2c_macro_map_11, _x2c_macro_key_6);  if(_x2c_macro_found_0 < 0) return 0;  unsigned * _x2c_macro_hashes_4 = _x2c_macro_map_11 -> hashes;  struct PoolRecord * _x2c_macro_entries_3 = _x2c_macro_map_11 -> entries;  unsigned _x2c_macro_mask_3 = _x2c_macro_map_11 -> mask, _x2c_macro_index_6 =(unsigned) _x2c_macro_found_0, _x2c_macro_empty_0;  * _x2c_macro_out_1 = * _record_value(_x2c_macro_map_11, _x2c_macro_index_6);  _x2c_macro_hashes_4[_x2c_macro_index_6] = 0;  _x2c_macro_map_11 -> used --;  while(1){
+static int _for_pool_table__try_del(PoolTable _x2c_macro_map_11, Var * _x2c_macro_key_6, Var * _x2c_macro_out_1){
+  if((void *) _x2c_macro_map_11 == 0 || ! _x2c_macro_out_1) return 0;  long _x2c_macro_found_0 =(_for_pool_table__find_index)(_x2c_macro_map_11, _x2c_macro_key_6);  if(_x2c_macro_found_0 < 0) return 0;  unsigned * _x2c_macro_hashes_4 = _x2c_macro_map_11 -> hashes;  struct PoolRecord * _x2c_macro_entries_3 = _x2c_macro_map_11 -> entries;  unsigned _x2c_macro_mask_3 = _x2c_macro_map_11 -> mask, _x2c_macro_index_6 =(unsigned) _x2c_macro_found_0, _x2c_macro_empty_0;  * _x2c_macro_out_1 = * _record_value(_x2c_macro_map_11, _x2c_macro_index_6);  _x2c_macro_hashes_4[_x2c_macro_index_6] = 0;  _x2c_macro_map_11 -> used --;  while(1){
     _x2c_macro_empty_0 = _x2c_macro_index_6;  _x2c_macro_index_6 =(_x2c_macro_index_6 + 1) & _x2c_macro_mask_3;  if(_x2c_macro_hashes_4[_x2c_macro_index_6] == 0 ||(_x2c_macro_hashes_4[_x2c_macro_index_6] & _x2c_macro_mask_3) == _x2c_macro_index_6) break;  unsigned _x2c_macro_swap_hash_0 = _x2c_macro_hashes_4[_x2c_macro_empty_0];  struct PoolRecord _x2c_macro_swap_entry_0 = _x2c_macro_entries_3[_x2c_macro_empty_0];  _x2c_macro_hashes_4[_x2c_macro_empty_0] = _x2c_macro_hashes_4[_x2c_macro_index_6];  _x2c_macro_entries_3[_x2c_macro_empty_0] = _x2c_macro_entries_3[_x2c_macro_index_6];  _x2c_macro_hashes_4[_x2c_macro_index_6] = _x2c_macro_swap_hash_0;  _x2c_macro_entries_3[_x2c_macro_index_6] = _x2c_macro_swap_entry_0;
   }
   _x2c_macro_entries_3[_x2c_macro_empty_0] =(struct PoolRecord){
@@ -618,7 +618,7 @@ static int PoolTable__core_try_del(PoolTable _x2c_macro_map_11, Var * _x2c_macro
   ;  return 1;
 }
 
-static int PoolTable__core_try_next(PoolTable _x2c_macro_map_12, unsigned * _x2c_macro_cursor_0, Var * _x2c_macro_key_7, Var * _x2c_macro_val_2){
+static int _for_pool_table__try_next(PoolTable _x2c_macro_map_12, unsigned * _x2c_macro_cursor_0, Var * _x2c_macro_key_7, Var * _x2c_macro_val_2){
   if((void *) _x2c_macro_map_12 == 0 || ! _x2c_macro_cursor_0 || ! _x2c_macro_key_7 || ! _x2c_macro_val_2) return 0;  unsigned * _x2c_macro_hashes_5 = _x2c_macro_map_12 -> hashes;  while(* _x2c_macro_cursor_0 < _x2c_macro_map_12 -> capacity){
     unsigned _x2c_macro_index_7 = * _x2c_macro_cursor_0;  * _x2c_macro_cursor_0 += 1;  if(_x2c_macro_hashes_5[_x2c_macro_index_7] != 0){
       * _x2c_macro_key_7 = * _record_key(_x2c_macro_map_12, _x2c_macro_index_7);  * _x2c_macro_val_2 = * _record_value(_x2c_macro_map_12, _x2c_macro_index_7);  return 1;
@@ -628,12 +628,12 @@ static int PoolTable__core_try_next(PoolTable _x2c_macro_map_12, unsigned * _x2c
   return 0;
 }
 
-static void PoolTable__core_insert_all(PoolTable _x2c_macro_map_13, PoolTable _x2c_macro_other_0){
-  unsigned _x2c_macro_cursor_1 = 0;  Var _x2c_macro_key_8;  Var _x2c_macro_val_3;  while(PoolTable__core_try_next(_x2c_macro_other_0, & _x2c_macro_cursor_1, & _x2c_macro_key_8, & _x2c_macro_val_3)) PoolTable__core_set(_x2c_macro_map_13, & _x2c_macro_key_8, & _x2c_macro_val_3);
+static void _for_pool_table__insert_all(PoolTable _x2c_macro_map_13, PoolTable _x2c_macro_other_0){
+  unsigned _x2c_macro_cursor_1 = 0;  Var _x2c_macro_key_8;  Var _x2c_macro_val_3;  while((_for_pool_table__try_next)(_x2c_macro_other_0, & _x2c_macro_cursor_1, & _x2c_macro_key_8, & _x2c_macro_val_3))(_for_pool_table__set)(_x2c_macro_map_13, & _x2c_macro_key_8, & _x2c_macro_val_3);
 }
 
-static PoolTable PoolTable__core_copy(PoolTable _x2c_macro_map_14){
-  PoolTable _x2c_macro_copy_0 = PoolTable__core_new_capacity(_x2c_macro_map_14, 2), _x2c_macro_result_0 = 0; {
+static PoolTable _for_pool_table__copy(PoolTable _x2c_macro_map_14){
+  PoolTable _x2c_macro_copy_0 =(_for_pool_table__new_capacity)(_x2c_macro_map_14, 2), _x2c_macro_result_0 = 0; {
     _x2c_defer_env_2 _x2c_macro_environment_2 ={
       0
     }
@@ -641,7 +641,7 @@ static PoolTable PoolTable__core_copy(PoolTable _x2c_macro_map_14){
       .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_2
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_2); {
-      PoolTable__core_insert_all(_x2c_macro_copy_0, _x2c_macro_map_14); {
+      (_for_pool_table__insert_all)(_x2c_macro_copy_0, _x2c_macro_map_14); {
         PoolTable _x2c_return_value_0 = _x2c_macro_result_0 = _x2c_macro_copy_0; {
           x2c_cleanup_leave(& _x2c_defer_record_2);  return _x2c_return_value_0;
         }
@@ -654,9 +654,9 @@ static PoolTable PoolTable__core_copy(PoolTable _x2c_macro_map_14){
 
 }
 
-static PoolTable PoolTable__core_merge(PoolTable _x2c_macro_map_15, PoolTable _x2c_macro_other_1){
+static PoolTable _for_pool_table__merge(PoolTable _x2c_macro_map_15, PoolTable _x2c_macro_other_1){
   if(! _x2c_macro_other_1) return _x2c_macro_map_15;  int _x2c_macro_created_0 = 0;  if((void *) _x2c_macro_map_15 == 0){
-    _x2c_macro_map_15 = PoolTable__core_new_capacity(_x2c_macro_map_15, 2);  _x2c_macro_created_0 = 1;
+    _x2c_macro_map_15 =(_for_pool_table__new_capacity)(_x2c_macro_map_15, 2);  _x2c_macro_created_0 = 1;
   }
   PoolTable _x2c_macro_result_1 = 0; {
     _x2c_defer_env_3 _x2c_macro_environment_3 ={
@@ -666,7 +666,7 @@ static PoolTable PoolTable__core_merge(PoolTable _x2c_macro_map_15, PoolTable _x
       .fn = _x2c_defer_cleanup_3, .env = & _x2c_macro_environment_3
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_3); {
-      PoolTable__core_insert_all(_x2c_macro_map_15, _x2c_macro_other_1); {
+      (_for_pool_table__insert_all)(_x2c_macro_map_15, _x2c_macro_other_1); {
         PoolTable _x2c_return_value_1 = _x2c_macro_result_1 = _x2c_macro_map_15; {
           x2c_cleanup_leave(& _x2c_defer_record_3);  return _x2c_return_value_1;
         }
@@ -679,20 +679,20 @@ static PoolTable PoolTable__core_merge(PoolTable _x2c_macro_map_15, PoolTable _x
 
 }
 
-static int PoolTable__core_truth(PoolTable _x2c_macro_map_16){
+static int _for_pool_table__truth(PoolTable _x2c_macro_map_16){
   return(void *) _x2c_macro_map_16 != 0 && _x2c_macro_map_16 -> used != 0;
 }
 
-static int PoolTable__core_equal(PoolTable _x2c_macro_a_2, PoolTable _x2c_macro_b_2){
-  if((void *) _x2c_macro_a_2 ==(void *) _x2c_macro_b_2) return 1;  if((void *) _x2c_macro_a_2 == 0 ||(void *) _x2c_macro_b_2 == 0) return 0;  if(_x2c_macro_a_2 -> used != _x2c_macro_b_2 -> used) return 0;  unsigned _x2c_macro_cursor_2 = 0;  Var _x2c_macro_key_9;  Var _x2c_macro_avalue_0, _x2c_macro_bvalue_0;  while(PoolTable__core_try_next(_x2c_macro_a_2, & _x2c_macro_cursor_2, & _x2c_macro_key_9, & _x2c_macro_avalue_0)) if(! PoolTable__core_try_get(_x2c_macro_b_2, & _x2c_macro_key_9, & _x2c_macro_bvalue_0) || ! _table_value_equal(& _x2c_macro_avalue_0, & _x2c_macro_bvalue_0)) return 0;  return 1;
+static int _for_pool_table__equal(PoolTable _x2c_macro_a_2, PoolTable _x2c_macro_b_2){
+  if((void *) _x2c_macro_a_2 ==(void *) _x2c_macro_b_2) return 1;  if((void *) _x2c_macro_a_2 == 0 ||(void *) _x2c_macro_b_2 == 0) return 0;  if(_x2c_macro_a_2 -> used != _x2c_macro_b_2 -> used) return 0;  unsigned _x2c_macro_cursor_2 = 0;  Var _x2c_macro_key_9;  Var _x2c_macro_avalue_0, _x2c_macro_bvalue_0;  while((_for_pool_table__try_next)(_x2c_macro_a_2, & _x2c_macro_cursor_2, & _x2c_macro_key_9, & _x2c_macro_avalue_0)) if(!(_for_pool_table__try_get)(_x2c_macro_b_2, & _x2c_macro_key_9, & _x2c_macro_bvalue_0) || ! _table_value_equal(& _x2c_macro_avalue_0, & _x2c_macro_bvalue_0)) return 0;  return 1;
 }
 
-static Var PoolTable__get_hashed(PoolTable table, Var key, unsigned key_hash){
-  long index = PoolTable__core_find_hashed(table, & key, key_hash);  return index < 0 ?((void) 0, Void) : * _record_key(table, (unsigned) index);
+static Var _get_hashed(PoolTable table, Var key, unsigned key_hash){
+  long index = _for_pool_table__find_hashed(table, & key, key_hash);  return index < 0 ?((void) 0, Void) : * _record_key(table, (unsigned) index);
 }
 
-static Var PoolTable__setdefault(PoolTable table, Var object, int * inserted){
-  return * PoolTable__core_get_or_insert(table, & object, & object, &(* inserted));
+static Var _setdefault(PoolTable table, Var object, int * inserted){
+  return * _for_pool_table__get_or_insert(table, & object, & object, &(* inserted));
 }
 
 void Pool_initialize(void);
@@ -701,15 +701,15 @@ Var Pool_lookup(Pool inner, Var key){
   if(! _init_guard_) Pool_initialize();
   if(! inner) return((void) 0, Void);
   unsigned key_hash = Var_hash(key);
-  if(pool_multithreaded) return Pool__lookup_locked(inner, key, key_hash);
+  if(pool_multithreaded) return _lookup_locked(inner, key, key_hash);
   for(Pool pool = inner;  pool;  pool = pool -> up){
-    Var found = PoolTable__get_hashed(pool -> table, key, key_hash);
+    Var found = _get_hashed(pool -> table, key, key_hash);
     if(! Var_is_void(found)) return found;
   }
   return((void) 0, Void);
 }
 
-static Var Pool__lookup_locked(Pool inner, Var key, unsigned key_hash){
+static Var _lookup_locked(Pool inner, Var key, unsigned key_hash){
   Pool locked = NULL;
   {
     _x2c_defer_env_4 _x2c_macro_environment_4 ={
@@ -724,10 +724,10 @@ static Var Pool__lookup_locked(Pool inner, Var key, unsigned key_hash){
     x2c_cleanup_push(& _x2c_defer_record_4);
     {
       for(Pool pool = inner;  pool;  pool = pool -> up){
-        Pool__lock(pool);
+        _lock(pool);
         locked = pool;
-        Var found = PoolTable__get_hashed(pool -> table, key, key_hash);
-        Pool__unlock(pool);
+        Var found = _get_hashed(pool -> table, key, key_hash);
+        _unlock(pool);
         locked = NULL;
         if(! Var_is_void(found)){
           Var _x2c_return_value_2 = found;
@@ -766,7 +766,7 @@ Var Pool_intern(Pool inner, Var object, void * alloc){
   Var canonical;
   int discard = 0;
   {
-    Pool__lock(inner);
+    _lock(inner);
     {
       _x2c_defer_env_5 _x2c_macro_environment_5 ={
         0
@@ -784,7 +784,7 @@ Var Pool_intern(Pool inner, Var object, void * alloc){
           canonical = existing;
           discard = 1;
         }
-        else canonical = Pool__intern_locked(inner, object, &(discard));
+        else canonical = _intern_locked(inner, object, &(discard));
       }
       x2c_cleanup_leave(& _x2c_defer_record_5);
     }
@@ -794,9 +794,9 @@ Var Pool_intern(Pool inner, Var object, void * alloc){
   return canonical;
 }
 
-static Var Pool__intern_locked(Pool inner, Var object, int * discard){
+static Var _intern_locked(Pool inner, Var object, int * discard){
   int inserted;
-  Var stored = PoolTable__setdefault(inner -> table, object, &(inserted));
+  Var stored = _setdefault(inner -> table, object, &(inserted));
   if(inserted) inner -> interned ++;
   else(* discard) = 1;
   return stored;
@@ -812,7 +812,7 @@ Var Pool_intern_new(Pool inner, Var object, void * alloc){
   Var canonical;
   int discard = 0;
   {
-    Pool__lock(inner);
+    _lock(inner);
     {
       _x2c_defer_env_6 _x2c_macro_environment_6 ={
         0
@@ -825,7 +825,7 @@ Var Pool_intern_new(Pool inner, Var object, void * alloc){
       ;
       x2c_cleanup_push(& _x2c_defer_record_6);
       {
-        canonical = Pool__intern_locked(inner, object, &(discard));
+        canonical = _intern_locked(inner, object, &(discard));
       }
       x2c_cleanup_leave(& _x2c_defer_record_6);
     }
@@ -842,7 +842,7 @@ void Pool_insert(Pool inner, Var object){
     x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.insert")), NULL))));
     __builtin_unreachable();
   }
-  Pool__lock(inner);
+  _lock(inner);
   {
     _x2c_defer_env_7 _x2c_macro_environment_7 ={
       0
@@ -855,22 +855,22 @@ void Pool_insert(Pool inner, Var object){
     ;
     x2c_cleanup_push(& _x2c_defer_record_7);
     {
-      Pool__insert_locked(inner, object);
+      _insert_locked(inner, object);
     }
     x2c_cleanup_leave(& _x2c_defer_record_7);
   }
 
 }
 
-static void Pool__insert_locked(Pool inner, Var object){
-  PoolTable__core_set(inner -> table, & object, & object);
+static void _insert_locked(Pool inner, Var object){
+  _for_pool_table__set(inner -> table, & object, & object);
   inner -> interned ++;
 }
 
 int Pool_owns(Pool pool, Var key){
   if(! _init_guard_) Pool_initialize();
   if(! pool) return 0;
-  Pool__lock(pool);
+  _lock(pool);
   {
     _x2c_defer_env_8 _x2c_macro_environment_8 ={
       0
@@ -884,7 +884,7 @@ int Pool_owns(Pool pool, Var key){
     x2c_cleanup_push(& _x2c_defer_record_8);
     {
       {
-        int _x2c_return_value_4 = Pool__owns_locked(pool, key);
+        int _x2c_return_value_4 = _owns_locked(pool, key);
         {
           x2c_cleanup_leave(& _x2c_defer_record_8);
           return _x2c_return_value_4;
@@ -898,8 +898,8 @@ int Pool_owns(Pool pool, Var key){
 
 }
 
-static int Pool__owns_locked(Pool pool, Var key){
-  Var found = PoolTable__get_hashed(pool -> table, key, Var_hash(key));
+static int _owns_locked(Pool pool, Var key){
+  Var found = _get_hashed(pool -> table, key, Var_hash(key));
   return ! Var_is_void(found) && Var_same(found, key);
 }
 
@@ -911,11 +911,11 @@ void * Pool_malloc(Pool inner, size_t size){
     __builtin_unreachable();
   }
   int class_index = _size_class(size);
-  if(class_index >= 0) return Pool__small_malloc(inner, class_index, size);
+  if(class_index >= 0) return _small_malloc(inner, class_index, size);
   _storage_lock();
   _record_request(size);
   _storage_unlock();
-  Pool__lock(inner);
+  _lock(inner);
   {
     _x2c_defer_env_9 _x2c_macro_environment_9 ={
       0
@@ -943,25 +943,25 @@ void * Pool_malloc(Pool inner, size_t size){
 
 }
 
-static void * Pool__small_malloc(Pool inner, int class_index, size_t size){
+static void * _small_malloc(Pool inner, int class_index, size_t size){
   PoolBlock fresh = NULL;
   while(1){
     _storage_lock();
-    Pool__lock(inner);
-    PoolBlock block = Pool__block_with_room(inner, class_index);
-    if(! block) block = Pool__block_lease(inner, class_index, fresh);
+    _lock(inner);
+    PoolBlock block = _block_with_room(inner, class_index);
+    if(! block) block = _block_lease(inner, class_index, fresh);
     if(block){
       if(block == fresh) fresh = NULL;
-      void * slot = PoolBlock__take_slot(block, class_index);
+      void * slot = _take_slot(block, class_index);
       _record_request(size);
-      Pool__unlock(inner);
+      _unlock(inner);
       _storage_unlock();
       free(fresh);
       return slot;
     }
-    Pool__unlock(inner);
+    _unlock(inner);
     _storage_unlock();
-    fresh = Pool__fresh_block(inner, class_index);
+    fresh = _fresh_block(inner, class_index);
   }
 
 }
@@ -971,35 +971,35 @@ static int _size_class(size_t size){
   return - 1;
 }
 
-static PoolBlock Pool__block_with_room(Pool pool, int class_index){
+static PoolBlock _block_with_room(Pool pool, int class_index){
   PoolBlock current = pool -> current[class_index];
-  return PoolBlock__has_room(current) ? current : NULL;
+  return _has_room(current) ? current : NULL;
 }
 
-static int PoolBlock__has_room(PoolBlock block){
+static int _has_room(PoolBlock block){
   if(! block) return 0;
   if(block -> free) return 1;
   unsigned size = pool_class_sizes[block -> class_index];
   return block -> used + size <= block -> bytes - POOL_BLOCK_DATA_OFFSET;
 }
 
-static void * PoolBlock__take_slot(PoolBlock block, int class_index){
+static void * _take_slot(PoolBlock block, int class_index){
   void * slot = block -> free;
   if(slot){
     block -> free = *(void * *) slot;
     pool_slot_reuses ++;
     return slot;
   }
-  slot = PoolBlock__data(block) + block -> used;
+  slot = _data(block) + block -> used;
   block -> used += pool_class_sizes[class_index];
   return slot;
 }
 
-static PoolBlock Pool__fresh_block(Pool inner, int class_index){
-  PoolBlock fresh = malloc(Pool__block_bytes(inner, class_index));
+static PoolBlock _fresh_block(Pool inner, int class_index){
+  PoolBlock fresh = malloc(_block_bytes(inner, class_index));
   if(fresh) return fresh;
   if(x2c_error_runtime_ready){
-    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/pool.x",.function = "Pool__fresh_block",.line = 409};
+    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/pool.x",.function = "_fresh_block",.line = 409};
     x2c_error_raise_n(& _x2c_error_site_8, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool backing block")), NULL))));
     __builtin_unreachable();
   }
@@ -1022,7 +1022,7 @@ void Pool_free(Pool inner, void * alloc){
     ;
     x2c_cleanup_push(& _x2c_defer_record_10);
     {
-      Pool__lock(inner);
+      _lock(inner);
       {
         _x2c_defer_env_10 _x2c_macro_environment_10 ={
           0
@@ -1037,7 +1037,7 @@ void Pool_free(Pool inner, void * alloc){
         {
           PoolBlock block = _find_block(alloc);
           pool_free_calls ++;
-          if(block) PoolBlock__free_slot(block, alloc);
+          if(block) _free_slot(block, alloc);
           else Scope_free(alloc);
         }
         x2c_cleanup_leave(& _x2c_defer_record_11);
@@ -1049,18 +1049,18 @@ void Pool_free(Pool inner, void * alloc){
 
 }
 
-static void PoolBlock__free_slot(PoolBlock block, void * ptr){
-  PoolBlock__push_free(block, ptr);
+static void _free_slot(PoolBlock block, void * ptr){
+  _push_free(block, ptr);
   block -> owner -> current[block -> class_index] = block;
 }
 
-static void PoolBlock__push_free(PoolBlock block, void * slot){
+static void _push_free(PoolBlock block, void * slot){
   *(void * *) slot = block -> free;
   block -> free = slot;
 }
 
-static PoolBlock Pool__block_lease(Pool p, int class_index, PoolBlock fresh){
-  unsigned bytes = Pool__block_bytes(p, class_index);
+static PoolBlock _block_lease(Pool p, int class_index, PoolBlock fresh){
+  unsigned bytes = _block_bytes(p, class_index);
   PoolBlock block = _depot_pop(bytes);
   if(! block){
     if(! fresh) return NULL;
@@ -1068,14 +1068,14 @@ static PoolBlock Pool__block_lease(Pool p, int class_index, PoolBlock fresh){
   }
   pool_active_blocks ++;
   pool_active_bytes += bytes;
-  PoolBlock__reset(block, p);
+  _reset(block, p);
   block -> class_index = class_index;
   block -> bytes = bytes;
-  PoolBlock__link(block, p);
+  _link(block, p);
   return block;
 }
 
-static unsigned Pool__block_bytes(Pool pool, int class_index){
+static unsigned _block_bytes(Pool pool, int class_index){
   return class_index == 0 && pool -> up ? 256 : pool_block_sizes[class_index];
 }
 
@@ -1099,7 +1099,7 @@ static PoolBlock _registry_add(PoolBlock block, unsigned bytes){
   return block;
 }
 
-static void PoolBlock__reset(PoolBlock block, Pool owner){
+static void _reset(PoolBlock block, Pool owner){
   block -> owner = owner;
   block -> free = NULL;
   block -> used = 0;
@@ -1107,7 +1107,7 @@ static void PoolBlock__reset(PoolBlock block, Pool owner){
   memset(block -> keep, 0, sizeof block -> keep);
 }
 
-static void PoolBlock__link(PoolBlock block, Pool pool){
+static void _link(PoolBlock block, Pool pool){
   block -> next = pool -> blocks;
   pool -> blocks = block;
   pool -> current[block -> class_index] = block;
@@ -1115,7 +1115,7 @@ static void PoolBlock__link(PoolBlock block, Pool pool){
 
 static void _depot_push(PoolBlock block){
   int depot_index = _depot_index(block -> bytes);
-  PoolBlock__reset(block, NULL);
+  _reset(block, NULL);
   block -> next = pool_depot[depot_index];
   pool_depot[depot_index] = block;
   pool_active_blocks --;
@@ -1135,21 +1135,21 @@ static int _depot_index(unsigned bytes){
 
 }
 
-static inline char * PoolBlock__data(PoolBlock block){
+static inline char * _data(PoolBlock block){
   return(char *) block + POOL_BLOCK_DATA_OFFSET;
 }
 
-static inline void * PoolBlock__slot(PoolBlock block, unsigned slot){
-  return PoolBlock__data(block) + slot * pool_class_sizes[block -> class_index];
+static inline void * _slot(PoolBlock block, unsigned slot){
+  return _data(block) + slot * pool_class_sizes[block -> class_index];
 }
 
-static inline unsigned PoolBlock__slot_index(PoolBlock block, void * alloc){
-  return((char *) alloc - PoolBlock__data(block)) / pool_class_sizes[block -> class_index];
+static inline unsigned _slot_index(PoolBlock block, void * alloc){
+  return((char *) alloc - _data(block)) / pool_class_sizes[block -> class_index];
 }
 
-static int PoolBlock__contains(PoolBlock block, const void * ptr){
+static int _contains(PoolBlock block, const void * ptr){
   if(! block || ! ptr || ! block -> owner) return 0;
-  const char * data = PoolBlock__data(block), * candidate = ptr;
+  const char * data = _data(block), * candidate = ptr;
   unsigned size = pool_class_sizes[block -> class_index];
   if(candidate < data || candidate >= data + block -> used) return 0;
   return(size_t)(candidate - data) % size == 0;
@@ -1164,14 +1164,14 @@ static PoolBlock _index_find(const void * ptr){
   uintptr_t page =(uintptr_t) ptr >> POOL_INDEX_PAGE_SHIFT;
   unsigned at = _index_start(page, pool_index_slots);
   while(pool_index[at].block){
-    if(pool_index[at].page == page && PoolBlock__contains(pool_index[at].block, ptr)) return pool_index[at].block;
+    if(pool_index[at].page == page && _contains(pool_index[at].block, ptr)) return pool_index[at].block;
     at =(at + 1) &(pool_index_slots - 1);
   }
   return NULL;
 }
 
 static PoolBlock _registry_find(const void * ptr){
-  for(PoolBlock block = pool_registry;  block;  block = block -> registry_next) if(PoolBlock__contains(block, ptr)) return block;
+  for(PoolBlock block = pool_registry;  block;  block = block -> registry_next) if(_contains(block, ptr)) return block;
   return NULL;
 }
 
@@ -1216,7 +1216,7 @@ static unsigned _index_start(uintptr_t page, unsigned slots){
 int Pool_promote(Pool inner, Var object, void * alloc){
   if(! _init_guard_) Pool_initialize();
   if(! inner || ! inner -> up || ! alloc) return 0;
-  return Pool__promote_level(inner, object, alloc, _block_of(alloc));
+  return _promote_level(inner, object, alloc, _block_of(alloc));
 }
 
 int Pool_own(Pool inner, Var object, void * alloc){
@@ -1229,14 +1229,14 @@ int Pool_own(Pool inner, Var object, void * alloc){
   if(! alloc) return 0;
   PoolBlock block = _block_of(alloc);
   while(owner -> up){
-    if(! Pool__promote_level(owner, object, alloc, block)) return 0;
+    if(! _promote_level(owner, object, alloc, block)) return 0;
     owner = owner -> up;
   }
   return 1;
 }
 
-static int Pool__promote_level(Pool inner, Var object, void * alloc, PoolBlock block){
-  Pool__lock(inner);
+static int _promote_level(Pool inner, Var object, void * alloc, PoolBlock block){
+  _lock(inner);
   {
     _x2c_defer_env_12 _x2c_macro_environment_12 ={
       0
@@ -1249,7 +1249,7 @@ static int Pool__promote_level(Pool inner, Var object, void * alloc, PoolBlock b
     ;
     x2c_cleanup_push(& _x2c_defer_record_12);
     {
-      if(! Pool__owns_locked(inner, object)){
+      if(! _owns_locked(inner, object)){
         int _x2c_return_value_6 = 0;
         {
           x2c_cleanup_leave(& _x2c_defer_record_12);
@@ -1257,7 +1257,7 @@ static int Pool__promote_level(Pool inner, Var object, void * alloc, PoolBlock b
         }
 
       }
-      unsigned slot = block ? PoolBlock__slot_index(block, alloc) : 0;
+      unsigned slot = block ? _slot_index(block, alloc) : 0;
       PoolPromotion promotion = NULL;
       if(block && block -> owner != inner){
         promotion = Scope_malloc_in(& inner -> scope, sizeof(struct PoolPromotion));
@@ -1265,7 +1265,7 @@ static int Pool__promote_level(Pool inner, Var object, void * alloc, PoolBlock b
         promotion -> slot = slot;
       }
       Pool up = inner -> up;
-      Pool__lock(up);
+      _lock(up);
       {
         _x2c_defer_env_11 _x2c_macro_environment_11 ={
           0
@@ -1279,10 +1279,10 @@ static int Pool__promote_level(Pool inner, Var object, void * alloc, PoolBlock b
         x2c_cleanup_push(& _x2c_defer_record_13);
         {
           int inserted;
-          PoolTable__setdefault(up -> table, object, &(inserted));
+          _setdefault(up -> table, object, &(inserted));
           if(inserted) up -> interned ++;
-          if(block && block -> owner == inner) PoolBlock__mark_slot(block, slot);
-          else if(promotion) Pool__push_promotion(inner, promotion);
+          if(block && block -> owner == inner) _mark_slot(block, slot);
+          else if(promotion) _push_promotion(inner, promotion);
           else Scope_move(alloc, & up -> scope);
           inner -> promoted ++;
           {
@@ -1312,24 +1312,24 @@ static PoolBlock _block_of(void * alloc){
   return block;
 }
 
-static void PoolBlock__mark_slot(PoolBlock block, unsigned slot){
+static void _mark_slot(PoolBlock block, unsigned slot){
   uint64_t mask =(uint64_t) 1 <<(slot % 64), * word = & block -> keep[slot / 64];
   if(* word & mask) return;
   * word |= mask;
   block -> keep_count ++;
 }
 
-static void Pool__push_promotion(Pool inner, PoolPromotion promotion){
+static void _push_promotion(Pool inner, PoolPromotion promotion){
   promotion -> next = inner -> promotions;
   inner -> promotions = promotion;
 }
 
-static void Pool__release_blocks(Pool inner){
-  for(PoolPromotion p = inner -> promotions;  p;  p = p -> next) PoolBlock__mark_slot(p -> block, p -> slot);
+static void _release_blocks(Pool inner){
+  for(PoolPromotion p = inner -> promotions;  p;  p = p -> next) _mark_slot(p -> block, p -> slot);
   PoolBlock block = inner -> blocks;
   while(block){
     PoolBlock next = block -> next;
-    if(inner -> up && block -> keep_count) PoolBlock__transfer(block, inner -> up);
+    if(inner -> up && block -> keep_count) _transfer(block, inner -> up);
     else _depot_push(block);
     block = next;
   }
@@ -1337,21 +1337,21 @@ static void Pool__release_blocks(Pool inner){
   for(int i = 0;  i < POOL_CLASS_COUNT;  i ++) inner -> current[i] = NULL;
 }
 
-static void PoolBlock__transfer(PoolBlock block, Pool parent){
-  PoolBlock__free_unkept(block);
+static void _transfer(PoolBlock block, Pool parent){
+  _free_unkept(block);
   block -> owner = parent;
   block -> keep_count = 0;
   memset(block -> keep, 0, sizeof block -> keep);
-  PoolBlock__link(block, parent);
+  _link(block, parent);
 }
 
-static void PoolBlock__free_unkept(PoolBlock block){
+static void _free_unkept(PoolBlock block){
   unsigned count = block -> used / pool_class_sizes[block -> class_index];
   block -> free = NULL;
-  for(unsigned slot = count;  slot -- > 0; ) if(! PoolBlock__slot_kept(block, slot)) PoolBlock__push_free(block, PoolBlock__slot(block, slot));
+  for(unsigned slot = count;  slot -- > 0; ) if(! _slot_kept(block, slot)) _push_free(block, _slot(block, slot));
 }
 
-static int PoolBlock__slot_kept(PoolBlock block, unsigned slot){
+static int _slot_kept(PoolBlock block, unsigned slot){
   uint64_t mask =(uint64_t) 1 <<(slot % 64);
   return(block -> keep[slot / 64] & mask) != 0;
 }
@@ -1369,11 +1369,11 @@ static void _storage_unlock(void){
   if(pool_multithreaded && pthread_mutex_unlock(& pool_storage_mutex)) _fatal("could not unlock storage mutex");
 }
 
-static void Pool__lock(Pool pool){
+static void _lock(Pool pool){
   if(pool_multithreaded && pool && pthread_mutex_lock(& pool -> mutex)) _fatal("could not lock branch mutex");
 }
 
-static void Pool__unlock(Pool pool){
+static void _unlock(Pool pool){
   if(pool_multithreaded && pool && pthread_mutex_unlock(& pool -> mutex)) _fatal("could not unlock branch mutex");
 }
 
@@ -1398,7 +1398,7 @@ PoolStats Pool_stats(Pool inner){
     ;
     x2c_cleanup_push(& _x2c_defer_record_14);
     {
-      Pool__lock(inner);
+      _lock(inner);
       {
         _x2c_defer_env_13 _x2c_macro_environment_13 ={
           0
@@ -1443,7 +1443,7 @@ PoolStats Pool_stats(Pool inner){
 Pool Pool_retain_named(Pool inner, const char * name){
   if(! _init_guard_) Pool_initialize();
   _storage_initialize();
-  unsigned capacity = Pool__child_capacity(inner);
+  unsigned capacity = _child_capacity(inner);
   Scope scope = Scope_new_named(name);
   Pool pool = NULL;
   int mutex_ready = 0, finished = 0;
@@ -1479,7 +1479,7 @@ Pool Pool_retain_named(Pool inner, const char * name){
             ;
             x2c_cleanup_push(& _x2c_defer_record_17);
             {
-              pool -> table = PoolTable__core_new_capacity(NULL, capacity);
+              pool -> table = _for_pool_table__new_capacity(NULL, capacity);
             }
             x2c_cleanup_leave(& _x2c_defer_record_17);
           }
@@ -1524,11 +1524,11 @@ static void _storage_initialize(void){
 
 }
 
-static unsigned Pool__child_capacity(Pool inner){
+static unsigned _child_capacity(Pool inner){
   if(! inner) return 2;
-  Pool__lock(inner);
+  _lock(inner);
   unsigned capacity = inner -> child_capacity;
-  Pool__unlock(inner);
+  _unlock(inner);
   return capacity;
 }
 
@@ -1542,15 +1542,15 @@ Pool Pool_release(Pool inner){
   if(! inner) return NULL;
   __atomic_fetch_add(& value_epoch, 1, __ATOMIC_RELEASE);
   _storage_lock();
-  Pool__lock(inner);
+  _lock(inner);
   Pool up = inner -> up;
   if(up){
-    Pool__lock(up);
+    _lock(up);
     up -> child_capacity = inner -> table -> capacity;
-    Pool__unlock(up);
+    _unlock(up);
   }
-  Pool__release_blocks(inner);
-  Pool__unlock(inner);
+  _release_blocks(inner);
+  _unlock(inner);
   _storage_unlock();
   pthread_mutex_destroy(& inner -> mutex);
   Scope_destroy(inner -> scope);
@@ -1667,47 +1667,47 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
-  if((void *)(*(PoolTable *) _x2c_defer_data_2->_x2c_defer_capture_2) == 0) PoolTable__core_free((*(PoolTable *) _x2c_defer_data_2->_x2c_defer_capture_3));
+  if((void *)(*(PoolTable *) _x2c_defer_data_2->_x2c_defer_capture_2) == 0)(_for_pool_table__free)((*(PoolTable *) _x2c_defer_data_2->_x2c_defer_capture_3));
 }
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
   _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
-  if((*(int *) _x2c_defer_data_3->_x2c_defer_capture_4) && !(*(PoolTable *) _x2c_defer_data_3->_x2c_defer_capture_5)) PoolTable__core_free((*(PoolTable *) _x2c_defer_data_3->_x2c_defer_capture_6));
+  if((*(int *) _x2c_defer_data_3->_x2c_defer_capture_4) && !(*(PoolTable *) _x2c_defer_data_3->_x2c_defer_capture_5))(_for_pool_table__free)((*(PoolTable *) _x2c_defer_data_3->_x2c_defer_capture_6));
 }
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
   _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;
-  Pool__unlock((*(Pool *) _x2c_defer_data_4->_x2c_defer_capture_7));
+  _unlock((*(Pool *) _x2c_defer_data_4->_x2c_defer_capture_7));
 }
 
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
   _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5;
-  Pool__unlock((*(Pool *) _x2c_defer_data_5->_x2c_defer_capture_8));
+  _unlock((*(Pool *) _x2c_defer_data_5->_x2c_defer_capture_8));
 }
 
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){
   _x2c_defer_env_6 * _x2c_defer_data_6 =(_x2c_defer_env_6 *) _x2c_defer_opaque_6;
-  Pool__unlock((*(Pool *) _x2c_defer_data_6->_x2c_defer_capture_9));
+  _unlock((*(Pool *) _x2c_defer_data_6->_x2c_defer_capture_9));
 }
 
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7){
   _x2c_defer_env_7 * _x2c_defer_data_7 =(_x2c_defer_env_7 *) _x2c_defer_opaque_7;
-  Pool__unlock((*(Pool *) _x2c_defer_data_7->_x2c_defer_capture_10));
+  _unlock((*(Pool *) _x2c_defer_data_7->_x2c_defer_capture_10));
 }
 
 static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8){
   _x2c_defer_env_8 * _x2c_defer_data_8 =(_x2c_defer_env_8 *) _x2c_defer_opaque_8;
-  Pool__unlock((*(Pool *) _x2c_defer_data_8->_x2c_defer_capture_11));
+  _unlock((*(Pool *) _x2c_defer_data_8->_x2c_defer_capture_11));
 }
 
 static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9){
   _x2c_defer_env_9 * _x2c_defer_data_9 =(_x2c_defer_env_9 *) _x2c_defer_opaque_9;
-  Pool__unlock((*(Pool *) _x2c_defer_data_9->_x2c_defer_capture_12));
+  _unlock((*(Pool *) _x2c_defer_data_9->_x2c_defer_capture_12));
 }
 
 static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10){
   _x2c_defer_env_10 * _x2c_defer_data_10 =(_x2c_defer_env_10 *) _x2c_defer_opaque_10;
-  Pool__unlock((*(Pool *) _x2c_defer_data_10->_x2c_defer_capture_13));
+  _unlock((*(Pool *) _x2c_defer_data_10->_x2c_defer_capture_13));
 }
 
 static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11){
@@ -1716,17 +1716,17 @@ static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11){
 
 static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12){
   _x2c_defer_env_11 * _x2c_defer_data_11 =(_x2c_defer_env_11 *) _x2c_defer_opaque_12;
-  Pool__unlock((*(Pool *) _x2c_defer_data_11->_x2c_defer_capture_14));
+  _unlock((*(Pool *) _x2c_defer_data_11->_x2c_defer_capture_14));
 }
 
 static void _x2c_defer_cleanup_13(void * _x2c_defer_opaque_13){
   _x2c_defer_env_12 * _x2c_defer_data_12 =(_x2c_defer_env_12 *) _x2c_defer_opaque_13;
-  Pool__unlock((*(Pool *) _x2c_defer_data_12->_x2c_defer_capture_15));
+  _unlock((*(Pool *) _x2c_defer_data_12->_x2c_defer_capture_15));
 }
 
 static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14){
   _x2c_defer_env_13 * _x2c_defer_data_13 =(_x2c_defer_env_13 *) _x2c_defer_opaque_14;
-  Pool__unlock((*(Pool *) _x2c_defer_data_13->_x2c_defer_capture_16));
+  _unlock((*(Pool *) _x2c_defer_data_13->_x2c_defer_capture_16));
 }
 
 static void _x2c_defer_cleanup_15(void * _x2c_defer_opaque_15){

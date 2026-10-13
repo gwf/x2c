@@ -48,9 +48,9 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static List _macro_group(Macro t, List values);
+static List _group(Macro t, List values);
 
-static int _macro_items(List items);
+static int _items(List items);
 
 static Var macro_subject;
 
@@ -62,31 +62,31 @@ static Var macro_subject;
 _x2c_initializer_choice_55030A90_0((macro_subject =((void) 0, Void)))
 static _Thread_local int macro_subject_used;
 
-static Var _macro_free_reference(String spelling);
+static Var _free_reference(String spelling);
 
-static List _macro_pattern(Macro t, List names, int case_pattern);
+static List _pattern(Macro t, List names, int case_pattern);
 
-static List _macro_binder_rows(Macro t, List names, int case_pattern);
+static List _binder_rows(Macro t, List names, int case_pattern);
 
-static Var _macro_hidden(Var binder);
+static Var _hidden(Var binder);
 
-static Var _macro_shown(Var value);
+static Var _shown(Var value);
 
-static Atom _macro_key(List hole, String projection);
+static Atom _key(List hole, String projection);
 
-static Atom _macro_name_identity(List hole);
+static Atom _name_identity(List hole);
 
-static Var _macro_inline(List environment, Var tree);
+static Var _inline(List environment, Var tree);
 
-static Macro _macro_child(List environment, Var binding);
+static Macro _child(List environment, Var binding);
 
-static List _macro_instantiate(Macro t, List values);
+static List _instantiate(Macro t, List values);
 
-static List _macro_value_rows(Macro t, List values);
+static List _value_rows(Macro t, List values);
 
-static Var _macro_expr_value(Var value);
+static Var _expr_value(Var value);
 
-static List _macro_expr_values(List values);
+static List _expr_values(List values);
 
 static List _int_literal(Type result, Var value);
 
@@ -96,15 +96,15 @@ static String _float_text(long double n);
 
 static String _hex_float(long double n);
 
-static Var _macro_pattern_view(Var value);
+static Var _pattern_view(Var value);
 
-static Var _macro_expr_view(Var type, Var body);
+static Var _expr_view(Var type, Var body);
 
-static List _macro_pattern_views(List items);
+static List _pattern_views(List items);
 
-static Var _macro_slot_view(int splice, Var form);
+static Var _slot_view(int splice, Var form);
 
-static Var _macro_slot_binder(Var form);
+static Var _slot_binder(Var form);
 
 typedef struct MacroMatcher{
   Macro shape;
@@ -112,47 +112,47 @@ typedef struct MacroMatcher{
 }
 MacroMatcher;
 
-static int _macro_pending_parts(Macro t, List code, List * grouped);
+static int _pending_parts(Macro t, List code, List * grouped);
 
-static int _macro_same(Macro t, Var descriptor);
+static int _same(Macro t, Var descriptor);
 
-static List _macro_invoke_values(Macro t, List rows);
+static List _invoke_values(Macro t, List rows);
 
-static int _macro_pending_capture(Macro t, List grouped, List names, MatchCaptureBuffer * published);
+static int _pending_capture(Macro t, List grouped, List names, MatchCaptureBuffer * published);
 
-static List _macro_internal_names(Macro t, List names, int pending);
+static List _internal_names(Macro t, List names, int pending);
 
-static int _macro_capture(List code, MatchPlan plan, MacroFixedSlots * policy, MacroPublishing * route, MatchCaptureBuffer * published);
+static int _capture(List code, MatchPlan plan, MacroFixedSlots * policy, MacroPublishing * route, MatchCaptureBuffer * published);
 
-static int _macro_derived_capture(MacroCaseSite * site, List code, Macro t, List names, MatchCaptureBuffer * published);
+static int _derived_capture(MacroCaseSite * site, List code, Macro t, List names, MatchCaptureBuffer * published);
 
-static int _macro_keep(MacroCaseSite * site, Macro t, List names, List pattern, MacroPublishing * route);
+static int _keep(MacroCaseSite * site, Macro t, List names, List pattern, MacroPublishing * route);
 
-static List _macro_case_shape(Macro t, List names);
+static List _case_shape(Macro t, List names);
 
-static Atom _macro_fixed(int index);
+static Atom _fixed(int index);
 
-static Var _macro_view(Var value);
+static Var _view(Var value);
 
-static MacroFixedSlots _macro_fixed_slots(Macro t, List names, MatchPlan plan);
+static MacroFixedSlots _fixed_slots(Macro t, List names, MatchPlan plan);
 
-static int _macro_case_match(List code, MatchPlan plan, MacroFixedSlots * policy, MatchCaptureBuffer * captured);
+static int _case_match(List code, MatchPlan plan, MacroFixedSlots * policy, MatchCaptureBuffer * captured);
 
-static int _macro_take_slots(MatchMachine * machine, MatchCaptureBuffer * captured);
+static int _take_slots(MatchMachine * machine, MatchCaptureBuffer * captured);
 
-static int _macro_identity_equal(void * raw_machine, int slot, Var left, Var right, void * raw_policy);
+static int _identity_equal(void * raw_machine, int slot, Var left, Var right, void * raw_policy);
 
-static int _macro_has_slot(const int * slots, int count, int slot);
+static int _has_slot(const int * slots, int count, int slot);
 
-static String _macro_source_spelling(Var value);
+static String _source_spelling(Var value);
 
-static int _macro_held_elsewhere(MatchMachine * machine, MacroFixedSlots * policy, int slot, Var value);
+static int _held_elsewhere(MatchMachine * machine, MacroFixedSlots * policy, int slot, Var value);
 
-static Var _macro_unwrap(Var value);
+static Var _unwrap(Var value);
 
-static MacroPublishing _macro_publishing(Macro t, Var pattern, List names, List internal);
+static MacroPublishing _publishing(Macro t, Var pattern, List names, List internal);
 
-static int _macro_publish(MacroPublishing * route, MatchCaptureBuffer * captured, MatchCaptureBuffer * published);
+static int _publish(MacroPublishing * route, MatchCaptureBuffer * captured, MatchCaptureBuffer * published);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -337,12 +337,12 @@ Macro Macro_close(Macro value, List captures){
 List Macro_apply(Macro t, List values){
   if(! _init_guard_) _file_init_();
   return({
-    Var _x2c_literal_part_0 = List_var(t);  Var _x2c_literal_part_1 = List_var(_macro_group(t, values));  cons(_2, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
+    Var _x2c_literal_part_0 = List_var(t);  Var _x2c_literal_part_1 = List_var(_group(t, values));  cons(_2, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
   }
   );
 }
 
-static List _macro_group(Macro t, List values){
+static List _group(Macro t, List values){
   Array grouped = Array_new();
   {
     List hole;
@@ -353,7 +353,7 @@ static List _macro_group(Macro t, List values){
       hole = Var_list_payload(_x2c_macro_cursor_output_0);
       {
         int sequence = Var_int(Var_convert(List_assoc(hole, Symbol_var(1317592723658)), 3453797));
-        if(sequence && List_truth(values) && ! List_truth(List_cdr(values)) && Var_is_row(List_car(values), 9, 7, 4) && _macro_items(Var_list_payload(List_car(values)))) values = Var_list_payload(List_car(values));
+        if(sequence && List_truth(values) && ! List_truth(List_cdr(values)) && Var_is_row(List_car(values), 9, 7, 4) && _items(Var_list_payload(List_car(values)))) values = Var_list_payload(List_car(values));
         Array_push(grouped, sequence ? List_var(values) : List_car(values));
         values = sequence ? NULL : List_cdr(values);
       }
@@ -368,7 +368,7 @@ int Var_is_integer(Var);
 
 int Var_is_floating(Var);
 
-static int _macro_items(List items){
+static int _items(List items){
   if(! List_truth(items)) return 1;
   {
     List _x2c_match_expr = items; MatchCaptureBuffer _x2c_match_capture = { 0 };
@@ -383,7 +383,7 @@ static int _macro_items(List items){
 
 String Var_as_string(Var);
 Var Macro_inserted(Var value, int lifts, int expression){
-  if(! _init_guard_) _file_init_();  if(lifts) value = _macro_expr_value(value);  Var spelling = value; {
+  if(! _init_guard_) _file_init_();  if(lifts) value = _expr_value(value);  Var spelling = value; {
     Var _x2c_match_var = value; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);  List _x2c_match_expr = Var_list_payload(_x2c_match_var); List _x2c_match_cursor;
     switch(0){
         default: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _26 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
@@ -425,7 +425,7 @@ Var Macro_declared(Var value){
 
 List Macro_inserted_items(List values){
   if(! _init_guard_) _file_init_();
-  return _macro_expr_values(values);
+  return _expr_values(values);
 }
 
 List Macro_typed(List type, Var value){
@@ -451,7 +451,7 @@ void Macro_use_subject(Var rows){
 
 int Var_is_void(Var);
 
-static Var _macro_free_reference(String spelling){
+static Var _free_reference(String spelling){
   if(Var_is_void(macro_subject)) return List_var(cons(_37, cons(_38, cons(String_var(spelling), NULL))));
   macro_subject_used = 1;
   {
@@ -470,13 +470,13 @@ static Var _macro_free_reference(String spelling){
 
 List Macro_pattern(Macro t, List names){
   if(! _init_guard_) _file_init_();
-  return _macro_pattern(t, names, 0);
+  return _pattern(t, names, 0);
 }
 
-static List _macro_pattern(Macro t, List names, int case_pattern){
-  List rows = _macro_binder_rows(t, names, case_pattern);
+static List _pattern(Macro t, List names, int case_pattern){
+  List rows = _binder_rows(t, names, case_pattern);
   List body = Var_list_payload(List_assoc(t, Symbol_var(1386033712394)));
-  List pattern = Var_list_payload(_macro_pattern_view(_macro_inline(Var_list_payload(List_assoc(t, Symbol_var(11180))), List_var(List_replace(body, rows)))));
+  List pattern = Var_list_payload(_pattern_view(_inline(Var_list_payload(List_assoc(t, Symbol_var(11180))), List_var(List_replace(body, rows)))));
   if(x2c_var_equal(List_assoc(t, Symbol_var(740232)), Symbol_var(168163805864282)) && x2c_var_equal(List_car(body), Symbol_var(39266)) && List_len(List_cdr(body)) == 1) return({
     Var _x2c_literal_part_4 = List_var(pattern);  Var _x2c_literal_part_5 = List_var(cons(_40, cons(List_var(pattern), NULL)));  cons(_3, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL)));
   }
@@ -484,7 +484,7 @@ static List _macro_pattern(Macro t, List names, int case_pattern){
   return pattern;
 }
 
-static List _macro_binder_rows(Macro t, List names, int case_pattern){
+static List _binder_rows(Macro t, List names, int case_pattern){
   List rows = NULL;
   {
     List hole;
@@ -497,33 +497,33 @@ static List _macro_binder_rows(Macro t, List names, int case_pattern){
         Var given = List_car(names), kind = List_assoc(hole, Symbol_var(740232));
         names = List_cdr(names);
         if(x2c_var_equal(kind, Symbol_var(1362954)) || x2c_var_equal(kind, Symbol_var(209423012198))) given = Atom_intern(String_add(_41, String_getslice(Var_str(given), 1, (-2147483647 - 1), 1)));
-        Var selected = _macro_hidden(given);
+        Var selected = _hidden(given);
         int sequence = Var_int(Var_convert(List_assoc(hole, Symbol_var(1317592723658)), 3453797));
         Var projected = sequence ? List_var(cons(selected, NULL)) : selected;
         if(! sequence && Var_is_row(selected, 9, 7, 4) && x2c_var_equal(List_car(Var_list(selected)), Symbol_var(377892))) projected = List_var(cons(_42, cons(selected, NULL)));
         if(case_pattern && x2c_var_equal(kind, Symbol_var(920394))) projected = List_var(({
-          Var _x2c_literal_part_6 = given;  Atom _x2c_literal_part_7 = _macro_name_identity(hole);  cons(_42, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, NULL)));
+          Var _x2c_literal_part_6 = given;  Atom _x2c_literal_part_7 = _name_identity(hole);  cons(_42, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, NULL)));
         }
         ));
         Var expression = ! sequence && x2c_var_equal(kind, Symbol_var(920394)) ? List_var(cons(_27, cons(_38, cons(List_var(cons(_29, cons(projected, NULL))), NULL)))) : projected;
         rows = cons(List_var(({
-          Atom _x2c_literal_part_8 = _macro_key(hole, _43);  cons(_x2c_literal_part_8, cons(expression, NULL));
+          Atom _x2c_literal_part_8 = _key(hole, _43);  cons(_x2c_literal_part_8, cons(expression, NULL));
         }
         )), rows);
         rows = cons(List_var(({
-          Atom _x2c_literal_part_9 = _macro_key(hole, _44);  cons(_x2c_literal_part_9, cons(projected, NULL));
+          Atom _x2c_literal_part_9 = _key(hole, _44);  cons(_x2c_literal_part_9, cons(projected, NULL));
         }
         )), rows);
         rows = cons(List_var(({
-          Atom _x2c_literal_part_10 = _macro_key(hole, _45);  cons(_x2c_literal_part_10, cons(projected, NULL));
+          Atom _x2c_literal_part_10 = _key(hole, _45);  cons(_x2c_literal_part_10, cons(projected, NULL));
         }
         )), rows);
         rows = cons(List_var(({
-          Atom _x2c_literal_part_11 = _macro_key(hole, _46);  cons(_x2c_literal_part_11, cons(selected, NULL));
+          Atom _x2c_literal_part_11 = _key(hole, _46);  cons(_x2c_literal_part_11, cons(selected, NULL));
         }
         )), rows);
         rows = cons(List_var(({
-          Atom _x2c_literal_part_12 = _macro_key(hole, _47);  Var _x2c_literal_part_13 = List_var(cons(selected, NULL));  cons(_x2c_literal_part_12, cons(_x2c_literal_part_13, NULL));
+          Atom _x2c_literal_part_12 = _key(hole, _47);  Var _x2c_literal_part_13 = List_var(cons(selected, NULL));  cons(_x2c_literal_part_12, cons(_x2c_literal_part_13, NULL));
         }
         )), rows);
       }
@@ -534,12 +534,12 @@ static List _macro_binder_rows(Macro t, List names, int case_pattern){
   return rows;
 }
 
-static Var _macro_hidden(Var binder){
+static Var _hidden(Var binder){
   if(! Var_is_binder(binder) || String_len(Var_str(binder)) != 1) return binder;
   return Atom_intern(String_add(Var_str(binder), _48));
 }
 
-static Var _macro_shown(Var value){
+static Var _shown(Var value){
   if(! Var_is_binder(value)) return value;
   String name = Var_str(value);
   if(String_len(name) != 18 || ! String_endswith(name, _48)) return value;
@@ -557,15 +557,15 @@ Atom Macro_binder(Var binder, String projection, int sequence){
   ));
 }
 
-static Atom _macro_key(List hole, String projection){
+static Atom _key(List hole, String projection){
   return Macro_binder(List_assoc(hole, Symbol_var(154018148)), projection, Var_int(Var_convert(List_assoc(hole, Symbol_var(1317592723658)), 3453797)));
 }
 
-static Atom _macro_name_identity(List hole){
+static Atom _name_identity(List hole){
   return Atom_intern(String_join(NULL, cons(String_var(_55), cons(String_var(String_getslice(Var_str(List_assoc(hole, Symbol_var(154018148))), 1, (-2147483647 - 1), 1)), NULL))));
 }
 
-static Var _macro_inline(List environment, Var tree){
+static Var _inline(List environment, Var tree){
   if(! Var_is_row(tree, 9, 7, 4)) return tree;
   {
     Var _x2c_match_var = tree; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);
@@ -576,14 +576,14 @@ static Var _macro_inline(List environment, Var tree){
         type = _x2c_match_value_0;
         Var body;
         body = _x2c_match_value_1;
-        return _macro_inline(environment, List_var(cons(_27, cons(type, cons(body, NULL)))));
+        return _inline(environment, List_var(cons(_27, cons(type, cons(body, NULL)))));
       }
        break; } } } } case 9224499346381409048ULL: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224499346381409048ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list_payload(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936761996324ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && Var_is(_x2c_match_cursor1->car, 806120) && (_x2c_match_cursor2 = Var_list_payload(_x2c_match_cursor1->car), 1) && _x2c_match_cursor2 && _x2c_match_cursor2->car.u64 == 9224497936780766120ULL && (_x2c_match_cursor2 = _x2c_match_cursor2->cdr, 1) && _x2c_match_cursor2) { Var _x2c_match_value_0 = _x2c_match_cursor2->car; if ((_x2c_match_cursor2 = _x2c_match_cursor2->cdr, 1) && !_x2c_match_cursor2 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list_payload(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936761721318ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1)) { List _x2c_match_list_1 = _x2c_match_cursor1; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var binding;
         binding = _x2c_match_value_0;
         List arguments;
         arguments = _x2c_match_list_1;
-        return List_var(_macro_instantiate(_macro_child(environment, binding), arguments));
+        return List_var(_instantiate(_child(environment, binding), arguments));
       }
        break; } } } } case 9224497963177709656ULL: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497963177709656ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) {return tree;
        break; } } default: break;
@@ -598,14 +598,14 @@ static Var _macro_inline(List environment, Var tree){
     Var _x2c_macro_cursor_output_3;
     while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
       part = _x2c_macro_cursor_output_3;
-      Array_push(parts, _macro_inline(environment, part));
+      Array_push(parts, _inline(environment, part));
     }
 
   }
   return List_var(Array_list_free(parts));
 }
 
-static Macro _macro_child(List environment, Var binding){
+static Macro _child(List environment, Var binding){
   {
     List row;
     List _x2c_macro_object_4 = environment;
@@ -620,12 +620,12 @@ static Macro _macro_child(List environment, Var binding){
   return NULL;
 }
 
-static List _macro_instantiate(Macro t, List values){
-  List rows = _macro_value_rows(t, values), body = Var_list_payload(List_assoc(t, Symbol_var(1386033712394)));
-  return Var_list_payload(_macro_inline(Var_list_payload(List_assoc(t, Symbol_var(11180))), List_var(List_replace(body, rows))));
+static List _instantiate(Macro t, List values){
+  List rows = _value_rows(t, values), body = Var_list_payload(List_assoc(t, Symbol_var(1386033712394)));
+  return Var_list_payload(_inline(Var_list_payload(List_assoc(t, Symbol_var(11180))), List_var(List_replace(body, rows))));
 }
 
-static List _macro_value_rows(Macro t, List values){
+static List _value_rows(Macro t, List values){
   List rows = NULL;
   {
     List hole;
@@ -638,26 +638,26 @@ static List _macro_value_rows(Macro t, List values){
         int sequence = Var_int(Var_convert(List_assoc(hole, Symbol_var(1317592723658)), 3453797));
         Var kind = List_assoc(hole, Symbol_var(740232));
         Var value = sequence ? List_var(values) : List_car(values);
-        if(x2c_var_equal(kind, Symbol_var(377892))) value = sequence ? List_var(_macro_expr_values(values)) : _macro_expr_value(value);
+        if(x2c_var_equal(kind, Symbol_var(377892))) value = sequence ? List_var(_expr_values(values)) : _expr_value(value);
         Var expression = ! sequence && x2c_var_equal(kind, Symbol_var(920394)) ? List_var(cons(_27, cons(_28, cons(List_var(cons(_29, cons(value, NULL))), NULL)))) : value;
         rows = cons(List_var(({
-          Atom _x2c_literal_part_17 = _macro_key(hole, _43);  cons(_x2c_literal_part_17, cons(expression, NULL));
+          Atom _x2c_literal_part_17 = _key(hole, _43);  cons(_x2c_literal_part_17, cons(expression, NULL));
         }
         )), rows);
         rows = cons(List_var(({
-          Atom _x2c_literal_part_18 = _macro_key(hole, _44);  cons(_x2c_literal_part_18, cons(value, NULL));
+          Atom _x2c_literal_part_18 = _key(hole, _44);  cons(_x2c_literal_part_18, cons(value, NULL));
         }
         )), rows);
         rows = cons(List_var(({
-          Atom _x2c_literal_part_19 = _macro_key(hole, _45);  cons(_x2c_literal_part_19, cons(value, NULL));
+          Atom _x2c_literal_part_19 = _key(hole, _45);  cons(_x2c_literal_part_19, cons(value, NULL));
         }
         )), rows);
         if(x2c_var_equal(kind, Symbol_var(920394))) rows = cons(List_var(({
-          Atom _x2c_literal_part_20 = _macro_key(hole, _46);  cons(_x2c_literal_part_20, cons(value, NULL));
+          Atom _x2c_literal_part_20 = _key(hole, _46);  cons(_x2c_literal_part_20, cons(value, NULL));
         }
         )), rows);
         rows = cons(List_var(({
-          Atom _x2c_literal_part_21 = _macro_key(hole, _47);  cons(_x2c_literal_part_21, cons(value, NULL));
+          Atom _x2c_literal_part_21 = _key(hole, _47);  cons(_x2c_literal_part_21, cons(value, NULL));
         }
         )), rows);
         values = sequence ? NULL : List_cdr(values);
@@ -673,7 +673,7 @@ List Macro_number_type(Var value);
 
 List Macro_number_literal(List result, List type, Var value);
 
-static Var _macro_expr_value(Var value){
+static Var _expr_value(Var value){
   if(Var_is_row(value, 11, 7, 1)) return List_var(cons(_27, cons(_59, cons(List_var(cons(_36, cons(_59, cons(String_var(Var_repr(value)), NULL)))), NULL))));
   if(Var_is(value, 1328354264)) return List_var(cons(_27, cons(_63, cons(List_var(({
     Var _x2c_literal_part_22 = String_var(Var_str(value));  cons(_36, cons(_63, cons(_x2c_literal_part_22, cons(value, NULL))));
@@ -683,7 +683,7 @@ static Var _macro_expr_value(Var value){
   return List_truth(type) ? List_var(Macro_number_literal(type, type, value)) : value;
 }
 
-static List _macro_expr_values(List values){
+static List _expr_values(List values){
   Array lifted = Array_new();
   {
     Var item;
@@ -692,7 +692,7 @@ static List _macro_expr_values(List values){
     Var _x2c_macro_cursor_output_6;
     while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_6))){
       item = _x2c_macro_cursor_output_6;
-      Array_push(lifted, _macro_expr_value(item));
+      Array_push(lifted, _expr_value(item));
     }
 
   }
@@ -791,8 +791,8 @@ static String _hex_float(long double n){
   return String_printf(_92, sign, count ? "." : "", digits, exponent - 1);
 }
 
-static Var _macro_pattern_view(Var value){
-  if(! Var_is_row(value, 9, 7, 4)) return x2c_var_equal(value, Symbol_var(54)) || x2c_var_equal(value, Symbol_var(58)) ? List_var(cons(_93, cons(value, NULL))) : _macro_shown(value);
+static Var _pattern_view(Var value){
+  if(! Var_is_row(value, 9, 7, 4)) return x2c_var_equal(value, Symbol_var(54)) || x2c_var_equal(value, Symbol_var(58)) ? List_var(cons(_93, cons(value, NULL))) : _shown(value);
   List node = Var_list_payload(value);
   if(Var_is_match_op(List_car(node))) return List_var(node);
   {
@@ -804,7 +804,7 @@ static Var _macro_pattern_view(Var value){
         type = _x2c_match_value_0;
         Var body;
         body = _x2c_match_value_1;
-        return _macro_expr_view(type, body);
+        return _expr_view(type, body);
       }
        break; } } } case 9224497963177709656ULL: ;
        _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497963177709656ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) {return List_var(cons(_93, cons(List_var(node), NULL)));
@@ -829,7 +829,7 @@ static Var _macro_pattern_view(Var value){
           Var _x2c_match_value_2 = name;
           {
             String name = Var_as_string(_x2c_match_value_2);
-            return _macro_free_reference(name);
+            return _free_reference(name);
           }
 
         }
@@ -842,14 +842,14 @@ static Var _macro_pattern_view(Var value){
         List operands;
         operands = _x2c_match_list_1;
         return List_var(({
-          Var _x2c_literal_part_37 = List_var(cons(_93, cons(operator, NULL)));  List _x2c_literal_part_38 = _macro_pattern_views(operands);  cons(_97, cons(_x2c_literal_part_37, List_append(_x2c_literal_part_38, NULL)));
+          Var _x2c_literal_part_37 = List_var(cons(_93, cons(operator, NULL)));  List _x2c_literal_part_38 = _pattern_views(operands);  cons(_97, cons(_x2c_literal_part_37, List_append(_x2c_literal_part_38, NULL)));
         }
         ));
       }
        break; } } _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761657698ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var one;
         one = _x2c_match_value_0;
-        return _macro_pattern_view(one);
+        return _pattern_view(one);
       }
        break; } } _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9225415175345234920ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 3453797)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_1 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var splice;
@@ -860,7 +860,7 @@ static Var _macro_pattern_view(Var value){
           Var _x2c_match_value_3 = splice;
           {
             int splice = Var_int(Var_convert(_x2c_match_value_3, 3453797));
-            return _macro_slot_view(splice, form);
+            return _slot_view(splice, form);
           }
 
         }
@@ -869,24 +869,24 @@ static Var _macro_pattern_view(Var value){
        break; } } } _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497937981418652ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var body;
         body = _x2c_match_value_0;
-        return List_var(cons(_98, cons(_38, cons(_macro_pattern_view(body), NULL))));
+        return List_var(cons(_98, cons(_38, cons(_pattern_view(body), NULL))));
       }
        break; } }
     }
 
   }
-  return List_var(_macro_pattern_views(node));
+  return List_var(_pattern_views(node));
 }
 
-static Var _macro_expr_view(Var type, Var body){
+static Var _expr_view(Var type, Var body){
   int shell = x2c_var_identical(type, List_var(_100));
-  if(shell && Var_is_binder(body)) return _macro_shown(body);
+  if(shell && Var_is_binder(body)) return _shown(body);
   if(shell && Var_is_row(body, 9, 7, 4) && Var_is_match_op(List_car(Var_list(body)))) return body;
-  if(shell && Var_is_row(body, 9, 7, 4) && x2c_var_equal(List_car(Var_list(body)), Symbol_var(377892))) return _macro_pattern_view(body);
-  return List_var(cons(_27, cons(_38, cons(_macro_pattern_view(body), NULL))));
+  if(shell && Var_is_row(body, 9, 7, 4) && x2c_var_equal(List_car(Var_list(body)), Symbol_var(377892))) return _pattern_view(body);
+  return List_var(cons(_27, cons(_38, cons(_pattern_view(body), NULL))));
 }
 
-static List _macro_pattern_views(List items){
+static List _pattern_views(List items){
   Array parts = Array_new();
   {
     Var part;
@@ -895,21 +895,21 @@ static List _macro_pattern_views(List items){
     Var _x2c_macro_cursor_output_7;
     while(List_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_7))){
       part = _x2c_macro_cursor_output_7;
-      Array_push(parts, _macro_pattern_view(part));
+      Array_push(parts, _pattern_view(part));
     }
 
   }
   return Array_list_free(parts);
 }
 
-static Var _macro_slot_view(int splice, Var form){
+static Var _slot_view(int splice, Var form){
   if(! splice) return Symbol_var(58);
-  Var binder = _macro_slot_binder(form);
+  Var binder = _slot_binder(form);
   return Var_truth(binder) ? binder : Symbol_var(54);
 }
 
-static Var _macro_slot_binder(Var form){
-  if(Var_is_binder(form)) return String_len(Var_str(form)) > 1 && String_getindex(Var_str(form), 0) == '*' && x2c_var_equal(_macro_shown(form), form) ? form : Var_null();
+static Var _slot_binder(Var form){
+  if(Var_is_binder(form)) return String_len(Var_str(form)) > 1 && String_getindex(Var_str(form), 0) == '*' && x2c_var_equal(_shown(form), form) ? form : Var_null();
   if(! Var_is_row(form, 9, 7, 4)) return Var_null();
   {
     Var child;
@@ -919,7 +919,7 @@ static Var _macro_slot_binder(Var form){
     while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_8))){
       child = _x2c_macro_cursor_output_8;
       {
-        Var binder = _macro_slot_binder(child);
+        Var binder = _slot_binder(child);
         if(Var_truth(binder)) return binder;
       }
 
@@ -937,9 +937,9 @@ List Macro_case_pattern(Macro t, List names){
 int Macro_case_capture_at(MacroCaseSite * site, List code, Macro t, List names, MatchCaptureBuffer * published){
   if(! _init_guard_) _file_init_();
   List grouped = NULL;
-  if(_macro_pending_parts(t, code, &(grouped))) return _macro_pending_capture(t, grouped, names, published);
-  if(site && __atomic_load_n(& site -> ready, __ATOMIC_ACQUIRE)) return _macro_capture(code, site -> match.plan, & site -> policy, & site -> route, published);
-  return _macro_derived_capture(site, code, t, names, published);
+  if(_pending_parts(t, code, &(grouped))) return _pending_capture(t, grouped, names, published);
+  if(site && __atomic_load_n(& site -> ready, __ATOMIC_ACQUIRE)) return _capture(code, site -> match.plan, & site -> policy, & site -> route, published);
+  return _derived_capture(site, code, t, names, published);
 }
 
 void x2c_cleanup_push(X2CCleanup *);
@@ -963,7 +963,7 @@ MacroMatcher Macro_matcher(Macro shape, List holes){
     x2c_cleanup_push(& _x2c_defer_record_0);
     {
       macro_subject_used = 0;
-      List pattern = _macro_case_shape(shape, holes);
+      List pattern = _case_shape(shape, holes);
       {
         MacroMatcher _x2c_return_value_0 =(MacroMatcher){
           shape, holes, macro_subject_used ? NULL : pattern
@@ -984,7 +984,7 @@ MacroMatcher Macro_matcher(Macro shape, List holes){
 
 int MacroMatcher_matches(MacroMatcher * m, List code){
   if(! _init_guard_) _file_init_();
-  List pattern = List_truth((* m).pattern) ?(* m).pattern : _macro_case_shape((* m).shape, (* m).holes);
+  List pattern = List_truth((* m).pattern) ?(* m).pattern : _case_shape((* m).shape, (* m).holes);
   MatchLease lease;
   int status = MatchCache_acquire(MatchCache_current(), List_var(pattern), &(lease), "Macro.matches");
   {
@@ -1008,9 +1008,9 @@ int MacroMatcher_matches(MacroMatcher * m, List code){
 
       }
       MatchPlan plan = MatchLease_plan(&(lease));
-      MacroFixedSlots policy = _macro_fixed_slots((* m).shape, (* m).holes, plan);
+      MacroFixedSlots policy = _fixed_slots((* m).shape, (* m).holes, plan);
       {
-        int _x2c_return_value_2 = _macro_case_match(code, plan, & policy, NULL);
+        int _x2c_return_value_2 = _case_match(code, plan, & policy, NULL);
         {
           x2c_cleanup_leave(& _x2c_defer_record_1);
           return _x2c_return_value_2;
@@ -1033,7 +1033,7 @@ int Macro_matches(Macro t, List code, List holes){
   return MacroMatcher_matches(&(matcher), code);
 }
 
-static int _macro_pending_parts(Macro t, List code, List * grouped){
+static int _pending_parts(Macro t, List code, List * grouped){
   {
     List _x2c_match_expr = code; List _x2c_match_cursor; Var _x2c_match_values[2]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch(0){
@@ -1044,7 +1044,7 @@ static int _macro_pending_parts(Macro t, List code, List * grouped){
         Var arguments;
         arguments = _x2c_match_value_1;
         {
-          if(! _macro_same(t, descriptor)) return 0;
+          if(! _same(t, descriptor)) return 0;
           (* grouped) = Var_list_payload(arguments);
           return 1;
         }
@@ -1052,7 +1052,7 @@ static int _macro_pending_parts(Macro t, List code, List * grouped){
       }
        break; } } } static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_123), &_x2c_match_capture)) { Var _x2c_match_value_0 = _x2c_match_values[0]; List _x2c_match_list_1 = Var_list_payload(_x2c_match_values[1]); {
         Var descriptor;  descriptor = _x2c_match_value_0;  List rows;  rows = _x2c_match_list_1; {
-          if(! _macro_same(t, descriptor)) return 0; (* grouped) = _macro_invoke_values(t, rows);  return 1;
+          if(! _same(t, descriptor)) return 0; (* grouped) = _invoke_values(t, rows);  return 1;
         }
 
       }
@@ -1063,11 +1063,11 @@ static int _macro_pending_parts(Macro t, List code, List * grouped){
   return 0;
 }
 
-static int _macro_same(Macro t, Var descriptor){
+static int _same(Macro t, Var descriptor){
   if(Var_is_atom(descriptor)) return String_equal(Var_str(descriptor), Var_str(List_assoc(t, Symbol_var(920394))));  if(! Var_is_row(descriptor, 9, 7, 4)) return 0;  List stored = Var_list_payload(descriptor);  return List_compare(stored, t) == 0 ||(x2c_var_equal(List_car(stored), Symbol_var(895740748108)) && String_equal(Var_str(List_assoc(stored, Symbol_var(920394))), Var_str(List_assoc(t, Symbol_var(920394)))) && List_compare(Var_list_payload(List_assoc(stored, Symbol_var(1044986460))), Var_list_payload(List_assoc(t, Symbol_var(1044986460)))) == 0);
 }
 
-static List _macro_invoke_values(Macro t, List rows){
+static List _invoke_values(Macro t, List rows){
   Array projected = Array_new();  List holes = Var_list_payload(List_assoc(t, Symbol_var(1129338912386214))); {
     List row;  List _x2c_macro_object_9 = rows;  List _x2c_macro_cursor_9 = _x2c_macro_object_9;  Var _x2c_macro_cursor_output_9;  while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_9))){
       row = Var_list_payload(_x2c_macro_cursor_output_9); {
@@ -1089,14 +1089,14 @@ static List _macro_invoke_values(Macro t, List rows){
   return Array_list_free(projected);
 }
 
-static int _macro_pending_capture(Macro t, List grouped, List names, MatchCaptureBuffer * published){
+static int _pending_capture(Macro t, List grouped, List names, MatchCaptureBuffer * published){
   Var values[MACHINE_BINDER_MAX];  MatchCaptureBuffer captured ={
     values, 0, MACHINE_BINDER_MAX
   }
-  ;  List internal = _macro_internal_names(t, names, 1);  if(! x2c_match_try_capture(grouped, List_var(internal), & captured)) return 0;  MacroPublishing route = _macro_publishing(t, List_var(internal), names, internal);  return _macro_publish(& route, & captured, published);
+  ;  List internal = _internal_names(t, names, 1);  if(! x2c_match_try_capture(grouped, List_var(internal), & captured)) return 0;  MacroPublishing route = _publishing(t, List_var(internal), names, internal);  return _publish(& route, & captured, published);
 }
 
-static List _macro_internal_names(Macro t, List names, int pending){
+static List _internal_names(Macro t, List names, int pending){
   Array internal = Array_new(); {
     List hole;  List _x2c_macro_object_10 = Var_list(List_assoc(t, Symbol_var(1129338912386214)));  List _x2c_macro_cursor_10 = _x2c_macro_object_10;  Var _x2c_macro_cursor_output_10;  while(List_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_10))){
       hole = Var_list_payload(_x2c_macro_cursor_output_10); {
@@ -1109,22 +1109,22 @@ static List _macro_internal_names(Macro t, List names, int pending){
   return Array_list_free(internal);
 }
 
-static int _macro_capture(List code, MatchPlan plan, MacroFixedSlots * policy, MacroPublishing * route, MatchCaptureBuffer * published){
+static int _capture(List code, MatchPlan plan, MacroFixedSlots * policy, MacroPublishing * route, MatchCaptureBuffer * published){
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captured ={
     values, 0, MACHINE_BINDER_MAX
   }
   ;
-  return _macro_case_match(code, plan, policy, & captured) && _macro_publish(route, & captured, published);
+  return _case_match(code, plan, policy, & captured) && _publish(route, & captured, published);
 }
 
 MatchPlan MatchPlan_prepare(Var);
 
-static int _macro_derived_capture(MacroCaseSite * site, List code, Macro t, List names, MatchCaptureBuffer * published){
+static int _derived_capture(MacroCaseSite * site, List code, Macro t, List names, MatchCaptureBuffer * published){
   macro_subject_used = 0;
-  List pattern = _macro_case_shape(t, names);
-  MacroPublishing route = _macro_publishing(t, List_var(pattern), names, _macro_internal_names(t, names, 0));
-  if(_macro_keep(site, t, names, pattern, &(route))) return _macro_capture(code, site -> match.plan, & site -> policy, & site -> route, published);
+  List pattern = _case_shape(t, names);
+  MacroPublishing route = _publishing(t, List_var(pattern), names, _internal_names(t, names, 0));
+  if(_keep(site, t, names, pattern, &(route))) return _capture(code, site -> match.plan, & site -> policy, & site -> route, published);
   MatchPlan plan = MatchPlan_prepare(List_var(pattern));
   {
     _x2c_defer_env_2 _x2c_macro_environment_2 ={
@@ -1138,9 +1138,9 @@ static int _macro_derived_capture(MacroCaseSite * site, List code, Macro t, List
     ;
     x2c_cleanup_push(& _x2c_defer_record_2);
     {
-      MacroFixedSlots policy = _macro_fixed_slots(t, names, plan);
+      MacroFixedSlots policy = _fixed_slots(t, names, plan);
       {
-        int _x2c_return_value_3 = _macro_capture(code, plan, & policy, & route, published);
+        int _x2c_return_value_3 = _capture(code, plan, & policy, & route, published);
         {
           x2c_cleanup_leave(& _x2c_defer_record_2);
           return _x2c_return_value_3;
@@ -1154,17 +1154,17 @@ static int _macro_derived_capture(MacroCaseSite * site, List code, Macro t, List
 
 }
 
-static int _macro_keep(MacroCaseSite * site, Macro t, List names, List pattern, MacroPublishing * route){
+static int _keep(MacroCaseSite * site, Macro t, List names, List pattern, MacroPublishing * route){
   MatchPlan kept = site && ! macro_subject_used && List_try_own(pattern) ? x2c_match_site_prepare(& site -> match, List_var(pattern)) : NULL;
   if(! kept || kept -> status != MACHINE_PREPARED) return 0;
-  site -> policy = _macro_fixed_slots(t, names, kept);
+  site -> policy = _fixed_slots(t, names, kept);
   site -> route =(* route);
   __atomic_store_n(& site -> ready, 1, __ATOMIC_RELEASE);
   return 1;
 }
 
-static List _macro_case_shape(Macro t, List names){
-  List pattern = _macro_pattern(t, names, 1), replacements = NULL;
+static List _case_shape(Macro t, List names){
+  List pattern = _pattern(t, names, 1), replacements = NULL;
   int ordinal = 0;
   {
     List fresh;
@@ -1174,7 +1174,7 @@ static List _macro_case_shape(Macro t, List names){
     while(List_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_11))){
       fresh = Var_list_payload(_x2c_macro_cursor_output_11);
       {
-        Atom identity = _macro_fixed(ordinal ++);
+        Atom identity = _fixed(ordinal ++);
         replacements = cons(List_var(({
           Var _x2c_literal_part_39 = List_car(fresh);  Var _x2c_literal_part_40 = List_var(cons(_37, cons(List_var(cons(_42, cons(identity, cons(identity, NULL)))), _112)));  cons(_x2c_literal_part_39, cons(_x2c_literal_part_40, NULL));
         }
@@ -1208,15 +1208,15 @@ static List _macro_case_shape(Macro t, List names){
     }
 
   }
-  return Var_list_payload(_macro_view(List_var(pattern)));
+  return Var_list_payload(_view(List_var(pattern)));
 }
 
-static Atom _macro_fixed(int index){
+static Atom _fixed(int index){
   return Atom_intern(String_join(NULL, cons(String_var(_125), cons(String_var(int_str(index)), NULL))));
 }
 
-static Var _macro_view(Var value){
-  value = _macro_unwrap(value);
+static Var _view(Var value){
+  value = _unwrap(value);
   if(! Var_is_row(value, 9, 7, 4)) return value;
   List node = Var_list_payload(value);
   {
@@ -1238,14 +1238,14 @@ static Var _macro_view(Var value){
     Var _x2c_macro_cursor_output_12;
     while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_12))){
       child = _x2c_macro_cursor_output_12;
-      Array_push(parts, _macro_view(child));
+      Array_push(parts, _view(child));
     }
 
   }
   return List_var(Array_list_free(parts));
 }
 
-static MacroFixedSlots _macro_fixed_slots(Macro t, List names, MatchPlan plan){
+static MacroFixedSlots _fixed_slots(Macro t, List names, MatchPlan plan){
   MacroFixedSlots policy;
   policy.count = policy.names = 0;
   if(plan -> status != MACHINE_PREPARED) return policy;
@@ -1258,7 +1258,7 @@ static MacroFixedSlots _macro_fixed_slots(Macro t, List names, MatchPlan plan){
     while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_13))){
       fresh = Var_list_payload(_x2c_macro_cursor_output_13);
       {
-        int slot = MatchCaptureLayout_index(plan -> layout, _macro_fixed(ordinal ++));
+        int slot = MatchCaptureLayout_index(plan -> layout, _fixed(ordinal ++));
         if(slot >= 0) policy.slots[policy.count ++] = slot;
       }
 
@@ -1288,23 +1288,23 @@ static MacroFixedSlots _macro_fixed_slots(Macro t, List names, MatchPlan plan){
 
 MachineView MachineProgram_view(MachineProgram);
 
-static int _macro_case_match(List code, MatchPlan plan, MacroFixedSlots * policy, MatchCaptureBuffer * captured){
+static int _case_match(List code, MatchPlan plan, MacroFixedSlots * policy, MatchCaptureBuffer * captured){
   if(plan -> status != MACHINE_PREPARED) return MatchPlan_execute_capture(plan, List_var(code), &(* captured), NULL) == 1;
-  if(! MatchPlan_admits(plan, List_var(code), _macro_unwrap)) return 0;
+  if(! MatchPlan_admits(plan, List_var(code), _unwrap)) return 0;
   MatchMachine machine;
   MatchMachine_open(&(machine));
-  machine.relation = _macro_identity_equal;
+  machine.relation = _identity_equal;
   machine.relation_context = policy;
-  machine.view = _macro_unwrap;
+  machine.view = _unwrap;
   MatchMachine_begin(&(machine), MachineProgram_view(plan -> program), List_var(code));
   MatchMachine_run(&(machine));
-  int matched = machine.status == 982 &&(! captured || _macro_take_slots(&(machine), captured));
+  int matched = machine.status == 982 &&(! captured || _take_slots(&(machine), captured));
   MatchMachine_finish(&(machine));
   MatchMachine_dispose(&(machine));
   return matched;
 }
 
-static int _macro_take_slots(MatchMachine * machine, MatchCaptureBuffer * captured){
+static int _take_slots(MatchMachine * machine, MatchCaptureBuffer * captured){
   for(int i = 0;  i <(* machine).slot_count;  i ++){
     MachineSlot * slot = &(* machine).slots[i];
     if(slot -> kind == MACHINE_SLOT_INVALID) continue;
@@ -1314,28 +1314,28 @@ static int _macro_take_slots(MatchMachine * machine, MatchCaptureBuffer * captur
   return(* machine).status == 982;
 }
 
-static int _macro_identity_equal(void * raw_machine, int slot, Var left, Var right, void * raw_policy){
+static int _identity_equal(void * raw_machine, int slot, Var left, Var right, void * raw_policy){
   MatchMachine * machine = raw_machine;
   MacroFixedSlots * policy = raw_policy;
-  left = _macro_unwrap(left);
-  right = _macro_unwrap(right);
-  if(_macro_has_slot(policy -> name_slots, policy -> names, slot)){
+  left = _unwrap(left);
+  right = _unwrap(right);
+  if(_has_slot(policy -> name_slots, policy -> names, slot)){
     String spelling = NULL;
-    if(Var_is_row(left, 11, 7, 1) && Var_is_row(right, 9, 7, 4)) spelling = _macro_source_spelling(right);
-    else if(Var_is_row(right, 11, 7, 1) && Var_is_row(left, 9, 7, 4)) spelling = _macro_source_spelling(left);
+    if(Var_is_row(left, 11, 7, 1) && Var_is_row(right, 9, 7, 4)) spelling = _source_spelling(right);
+    else if(Var_is_row(right, 11, 7, 1) && Var_is_row(left, 9, 7, 4)) spelling = _source_spelling(left);
     if(String_truth(spelling)) return x2c_var_equal(String_var(spelling), (Var_is_row(left, 11, 7, 1) ? left : right));
   }
   if(! Var_equal(left, right)) return 0;
-  if(! _macro_has_slot(policy -> slots, policy -> count, slot)) return 1;
-  return ! _macro_held_elsewhere(&(* machine), policy, slot, right);
+  if(! _has_slot(policy -> slots, policy -> count, slot)) return 1;
+  return ! _held_elsewhere(&(* machine), policy, slot, right);
 }
 
-static int _macro_has_slot(const int * slots, int count, int slot){
+static int _has_slot(const int * slots, int count, int slot){
   for(int i = 0;  i < count;  i ++) if(slots[i] == slot) return 1;
   return 0;
 }
 
-static String _macro_source_spelling(Var value){
+static String _source_spelling(Var value){
   if(! Var_is_row(value, 9, 7, 4)) return NULL;
   {
     List row;
@@ -1395,7 +1395,7 @@ static String _macro_source_spelling(Var value){
   return NULL;
 }
 
-static int _macro_held_elsewhere(MatchMachine * machine, MacroFixedSlots * policy, int slot, Var value){
+static int _held_elsewhere(MatchMachine * machine, MacroFixedSlots * policy, int slot, Var value){
   for(int i = 0;  i < policy -> count;  i ++){
     int other = policy -> slots[i];
     if(other != slot &&(* machine).slots[other].kind == MACHINE_SLOT_VALUE && Var_equal((* machine).slots[other].value, value)) return 1;
@@ -1403,7 +1403,7 @@ static int _macro_held_elsewhere(MatchMachine * machine, MacroFixedSlots * polic
   return 0;
 }
 
-static Var _macro_unwrap(Var value){
+static Var _unwrap(Var value){
   for(; ; ){
     if(! Var_is_row(value, 9, 7, 4)) return value;
     List node = Var_list_payload(value);
@@ -1435,17 +1435,17 @@ static Var _macro_unwrap(Var value){
 
 }
 
-static MacroPublishing _macro_publishing(Macro t, Var pattern, List names, List internal){
+static MacroPublishing _publishing(Macro t, Var pattern, List names, List internal){
   MacroPublishing route ={
     .complete = 1
   }
   ;  MatchCaptureLayout actual = MatchCaptureLayout_analyze(pattern);  MatchCaptureLayout logical = MatchCaptureLayout_analyze(List_var(names));  List holes = Var_list_payload(List_assoc(t, Symbol_var(1129338912386214)));  for(;  List_truth(names);  names = List_cdr(names), internal = List_cdr(internal), holes = List_cdr(holes)){
-    int fallback = MatchCaptureLayout_index(actual, List_car(internal));  int from = x2c_var_equal(List_assoc(Var_list(List_car(holes)), Symbol_var(740232)), Symbol_var(920394)) ? MatchCaptureLayout_index(actual, _macro_name_identity(Var_list_payload(List_car(holes)))) : - 1;  if(from < 0) from = fallback;  int to = MatchCaptureLayout_index(logical, List_car(names));  if(from < 0 || to < 0) route.complete = 0;  route.from[route.count] = from;  route.fallback[route.count] = fallback;  route.to[route.count ++] = to;
+    int fallback = MatchCaptureLayout_index(actual, List_car(internal));  int from = x2c_var_equal(List_assoc(Var_list(List_car(holes)), Symbol_var(740232)), Symbol_var(920394)) ? MatchCaptureLayout_index(actual, _name_identity(Var_list_payload(List_car(holes)))) : - 1;  if(from < 0) from = fallback;  int to = MatchCaptureLayout_index(logical, List_car(names));  if(from < 0 || to < 0) route.complete = 0;  route.from[route.count] = from;  route.fallback[route.count] = fallback;  route.to[route.count ++] = to;
   }
   route.binders = logical -> binder_count;  route.definite = logical -> definite;  MatchCaptureLayout_free(actual);  MatchCaptureLayout_free(logical);  return route;
 }
 
-static int _macro_publish(MacroPublishing * route, MatchCaptureBuffer * captured, MatchCaptureBuffer * published){
+static int _publish(MacroPublishing * route, MatchCaptureBuffer * captured, MatchCaptureBuffer * published){
   if(! route -> complete) return 0;  Var ordered[MACHINE_BINDER_MAX];  for(int i = 0;  i < route -> count;  i ++){
     int from = MatchCaptureBuffer_has(captured, route -> from[i]) ? route -> from[i] : route -> fallback[i];  if(from < 0 || ! MatchCaptureBuffer_has(captured, from)) return 0;  ordered[route -> to[i]] = captured -> values[from];
   }

@@ -19,15 +19,15 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static void Pretty_source_marker(Pretty * p, Var value);
+static void _source_marker(Pretty * p, Var value);
 
-static void Pretty_directive(Pretty * p, String token);
+static void _directive(Pretty * p, String token);
 
-static void Pretty_ordinary(Pretty * p, String token, List rest);
+static void _ordinary(Pretty * p, String token, List rest);
 
-static void Pretty_before(Pretty * p, String token);
+static void _before(Pretty * p, String token);
 
-static void Pretty_after(Pretty * p, String token, char last, List rest);
+static void _after(Pretty * p, String token, char last, List rest);
 
 static int _is_prefix_punct(char ch);
 
@@ -71,7 +71,7 @@ char * Compiler_code_pretty_string(Compiler c, List code, String output_file){
   for(List lst = code;  List_truth(lst);  lst = List_cdr(lst)){
     if(x2c_var_equal(List_car(lst), Symbol_var(1313077352))){
       lst = List_cdr(lst);
-      Pretty_source_marker(&(p), List_car(lst));
+      _source_marker(&(p), List_car(lst));
       continue;
     }
     String token = Var_str(List_car(lst));
@@ -85,17 +85,17 @@ char * Compiler_code_pretty_string(Compiler c, List code, String output_file){
 
     }
     if(_is_preprocessor(token)){
-      Pretty_directive(&(p), token);
+      _directive(&(p), token);
       continue;
     }
-    Pretty_ordinary(&(p), token, List_cdr(lst));
+    _ordinary(&(p), token, List_cdr(lst));
   }
   return Buffer_str_free(p.buff);
 }
 
 List Compiler_origin_location(Compiler, int);
 
-static void Pretty_source_marker(Pretty * p, Var value){
+static void _source_marker(Pretty * p, Var value){
   List location = Compiler_origin_location((* p).c, Var_int(Var_convert(value, 3453797)));
   while(Buffer_len((* p).buff) > 0 && Buffer_getindex((* p).buff, - 1) == ' ') Buffer_unwrite((* p).buff, 1);
   if(Buffer_len((* p).buff) > 0 && Buffer_getindex((* p).buff, - 1) != '\n') _write_newline((* p).buff);
@@ -112,7 +112,7 @@ static void Pretty_source_marker(Pretty * p, Var value){
   (* p).prev_token = NULL;
 }
 
-static void Pretty_directive(Pretty * p, String token){
+static void _directive(Pretty * p, String token){
   while(Buffer_len((* p).buff) > 0 && Buffer_getindex((* p).buff, - 1) == ' ') Buffer_unwrite((* p).buff, 1);
   if(Buffer_len((* p).buff) > 0 && Buffer_getindex((* p).buff, - 1) != '\n') _write_newline((* p).buff);
   _write_token((* p).buff, token, 0);
@@ -122,19 +122,19 @@ static void Pretty_directive(Pretty * p, String token){
   (* p).prev_token = NULL;
 }
 
-static void Pretty_ordinary(Pretty * p, String token, List rest){
+static void _ordinary(Pretty * p, String token, List rest){
   char last = String_truth(token) ? String_getindex(token, - 1) : '\0';
   if(last == '(')(* p).paren_depth ++;
   else if(last == ')'){
     (* p).paren_depth --;
     if((* p).paren_depth < 0)(* p).paren_depth = 0;
   }
-  Pretty_before(&((* p)), token);
+  _before(&((* p)), token);
   _write_token((* p).buff, token, (* p).source_line);
-  Pretty_after(&((* p)), token, last, rest);
+  _after(&((* p)), token, last, rest);
 }
 
-static void Pretty_before(Pretty * p, String token){
+static void _before(Pretty * p, String token){
   if(_token_is(token, '}')){
     if((* p).indent >= 2)(* p).indent -= 2;
     if(Buffer_len((* p).buff) > 0 && Buffer_getindex((* p).buff, - 1) != '\n') _write_mapped_newline((* p).buff, (* p).source_line);
@@ -144,7 +144,7 @@ static void Pretty_before(Pretty * p, String token){
   else if(_need_space((* p).prev_token, token)) Buffer_write((* p).buff, " ");
 }
 
-static void Pretty_after(Pretty * p, String token, char last, List rest){
+static void _after(Pretty * p, String token, char last, List rest){
   if(_token_is(token, '{')){
     (* p).indent += 2;
     _write_mapped_newline((* p).buff, (* p).source_line);

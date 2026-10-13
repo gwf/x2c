@@ -38,41 +38,41 @@ struct MatchCache{
 }
 ;
 
-static int MatchCache__transient(MatchCache cache, Var pattern, MatchLease * lease, const char * owner);
+static int _transient(MatchCache cache, Var pattern, MatchLease * lease, const char * owner);
 
-static MatchPlan MatchCache__prepare(MatchCache cache, Var pattern, const char * owner);
+static MatchPlan _prepare(MatchCache cache, Var pattern, const char * owner);
 
 static MatchPlan _unfenced(MatchPlan plan, const char * owner);
 
-static void MatchCache__insert(MatchCache cache, int slot, unsigned long key, MatchPlan plan);
+static void _insert(MatchCache cache, int slot, unsigned long key, MatchPlan plan);
 
-static int MatchCache__admitted(MatchCache cache, Var pattern);
+static int _admitted(MatchCache cache, Var pattern);
 
-static int MatchCache__resync(MatchCache cache);
+static int _resync(MatchCache cache);
 
 static int _memo_slot(unsigned long key);
 
-static int MatchCache__find(MatchCache cache, unsigned long key);
+static int _find(MatchCache cache, unsigned long key);
 
-static int MatchCache__bucket(MatchCache cache, unsigned long key);
+static int _bucket(MatchCache cache, unsigned long key);
 
 static unsigned long _cache_mix(unsigned long key);
 
-static void MatchCache__touch(MatchCache cache, int slot);
+static void _touch(MatchCache cache, int slot);
 
-static void MatchCache__unlink(MatchCache cache, int slot);
+static void _unlink(MatchCache cache, int slot);
 
-static void MatchCache__link_mru(MatchCache cache, int slot);
+static void _link_mru(MatchCache cache, int slot);
 
-static int MatchCache__free_slot(MatchCache m);
+static int _free_slot(MatchCache m);
 
-static int MatchCache__victim(MatchCache cache);
+static int _victim(MatchCache cache);
 
-static void MatchCache__remove(MatchCache cache, int slot);
+static void _remove(MatchCache cache, int slot);
 
-static void MatchCache__activate(MatchCache m, int slot, MatchLease * lease);
+static void _activate(MatchCache m, int slot, MatchLease * lease);
 
-static MatchCacheEntry * MatchLease__entry(MatchLease * lease);
+static MatchCacheEntry * _entry(MatchLease * lease);
 
 typedef struct MatchContextState{
   struct MatchContextState * prev;
@@ -144,26 +144,26 @@ int MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char
     .slot = - 1
   }
   ;
-  if(! MatchCache__admitted(m, pattern)) return MatchCache__transient(m, pattern, &(* lease), owner);
+  if(! _admitted(m, pattern)) return _transient(m, pattern, &(* lease), owner);
   unsigned long key = pattern.u64;
-  int slot = MatchCache__find(m, key);
+  int slot = _find(m, key);
   if(slot >= 0){
-    MatchCache__touch(m, slot);
-    MatchCache__activate(m, slot, &(* lease));
+    _touch(m, slot);
+    _activate(m, slot, &(* lease));
     return m -> entries[slot].plan -> status;
   }
-  slot = m -> size < m -> capacity ? MatchCache__free_slot(m) : MatchCache__victim(m);
+  slot = m -> size < m -> capacity ? _free_slot(m) : _victim(m);
   if(slot < 0) return MATCH_CACHE_PRESSURE;
-  MatchPlan plan = MatchCache__prepare(m, pattern, owner);
-  if(m -> entries[slot].occupied) MatchCache__remove(m, slot);
-  MatchCache__insert(m, slot, key, plan);
-  MatchCache__activate(m, slot, &(* lease));
+  MatchPlan plan = _prepare(m, pattern, owner);
+  if(m -> entries[slot].occupied) _remove(m, slot);
+  _insert(m, slot, key, plan);
+  _activate(m, slot, &(* lease));
   return plan -> status;
 }
 
 MatchPlan MatchPlan_prepare(Var);
 
-static int MatchCache__transient(MatchCache cache, Var pattern, MatchLease * lease, const char * owner){
+static int _transient(MatchCache cache, Var pattern, MatchLease * lease, const char * owner){
   MatchPlan plan = _unfenced(MatchPlan_prepare(pattern), owner);
   lease -> cache = cache;
   lease -> transient_plan = plan;
@@ -176,7 +176,7 @@ void x2c_cleanup_push(X2CCleanup *);
 
 void x2c_cleanup_leave(X2CCleanup *);
 
-static MatchPlan MatchCache__prepare(MatchCache cache, Var pattern, const char * owner){
+static MatchPlan _prepare(MatchCache cache, Var pattern, const char * owner){
   MatchPlan plan = NULL;
   {
     Scope_push(& cache -> scope);
@@ -213,23 +213,23 @@ static MatchPlan _unfenced(MatchPlan plan, const char * owner){
   return plan;
 }
 
-static void MatchCache__insert(MatchCache cache, int slot, unsigned long key, MatchPlan plan){
+static void _insert(MatchCache cache, int slot, unsigned long key, MatchPlan plan){
   MatchCacheEntry * entry = & cache -> entries[slot];
   entry -> key = key;
   entry -> plan = plan;
   entry -> occupied = 1;
   entry -> generation = ++ cache -> next_generation;
-  int bucket = MatchCache__bucket(cache, key);
+  int bucket = _bucket(cache, key);
   entry -> bucket_next = cache -> buckets[bucket];
   cache -> buckets[bucket] = slot;
-  MatchCache__link_mru(cache, slot);
+  _link_mru(cache, slot);
   cache -> size ++;
 }
 
-static int MatchCache__admitted(MatchCache cache, Var pattern){
+static int _admitted(MatchCache cache, Var pattern){
   unsigned long key = pattern.u64;
   if(! key) return 0;
-  if(! MatchCache__resync(cache)) return 0;
+  if(! _resync(cache)) return 0;
   int slot = _memo_slot(key);
   if(cache -> admitted_memo[slot] == key) return 1;
   if(cache -> refused_memo[slot] == key) return 0;
@@ -241,11 +241,11 @@ static int MatchCache__admitted(MatchCache cache, Var pattern){
   return 1;
 }
 
-static int MatchCache__resync(MatchCache cache){
+static int _resync(MatchCache cache){
   unsigned long epoch = Pool_epoch();
   if(cache -> pool_epoch == epoch) return 1;
   if(cache -> active_leases) return 0;
-  for(int slot = 0;  slot < cache -> capacity;  slot ++) if(cache -> entries[slot].occupied) MatchCache__remove(cache, slot);
+  for(int slot = 0;  slot < cache -> capacity;  slot ++) if(cache -> entries[slot].occupied) _remove(cache, slot);
   memset(cache -> admitted_memo, 0, sizeof(cache -> admitted_memo));
   memset(cache -> refused_memo, 0, sizeof(cache -> refused_memo));
   cache -> pool_epoch = epoch;
@@ -256,12 +256,12 @@ static int _memo_slot(unsigned long key){
   return(int)((key * 0x9e3779b97f4a7c15UL >> 48) &(MATCH_ADMITTED_MEMO - 1));
 }
 
-static int MatchCache__find(MatchCache cache, unsigned long key){
-  for(int slot = cache -> buckets[MatchCache__bucket(cache, key)];  slot >= 0;  slot = cache -> entries[slot].bucket_next) if(cache -> entries[slot].occupied && cache -> entries[slot].key == key) return slot;
+static int _find(MatchCache cache, unsigned long key){
+  for(int slot = cache -> buckets[_bucket(cache, key)];  slot >= 0;  slot = cache -> entries[slot].bucket_next) if(cache -> entries[slot].occupied && cache -> entries[slot].key == key) return slot;
   return - 1;
 }
 
-static int MatchCache__bucket(MatchCache cache, unsigned long key){
+static int _bucket(MatchCache cache, unsigned long key){
   return(int)(_cache_mix(key) %(unsigned long) cache -> bucket_count);
 }
 
@@ -273,25 +273,25 @@ static unsigned long _cache_mix(unsigned long key){
   return key ^(key >> 33);
 }
 
-static void MatchCache__touch(MatchCache cache, int slot){
+static void _touch(MatchCache cache, int slot){
   int head = cache -> lru_head;
   if(head == slot) return;
   if(cache -> entries[head].lru_prev == slot){
     cache -> lru_head = slot;
     return;
   }
-  MatchCache__unlink(cache, slot);
-  MatchCache__link_mru(cache, slot);
+  _unlink(cache, slot);
+  _link_mru(cache, slot);
 }
 
-static void MatchCache__unlink(MatchCache cache, int slot){
+static void _unlink(MatchCache cache, int slot){
   MatchCacheEntry * entry = & cache -> entries[slot];
   cache -> entries[entry -> lru_prev].lru_next = entry -> lru_next;
   cache -> entries[entry -> lru_next].lru_prev = entry -> lru_prev;
   if(cache -> lru_head == slot) cache -> lru_head = entry -> lru_next == slot ? - 1 : entry -> lru_next;
 }
 
-static void MatchCache__link_mru(MatchCache cache, int slot){
+static void _link_mru(MatchCache cache, int slot){
   MatchCacheEntry * entry = & cache -> entries[slot];
   int head = cache -> lru_head;
   entry -> lru_next = head < 0 ? slot : head;
@@ -301,12 +301,12 @@ static void MatchCache__link_mru(MatchCache cache, int slot){
   cache -> lru_head = slot;
 }
 
-static int MatchCache__free_slot(MatchCache m){
+static int _free_slot(MatchCache m){
   for(int i = 0;  i < m -> capacity;  i ++) if(! m -> entries[i].occupied) return i;
   return - 1;
 }
 
-static int MatchCache__victim(MatchCache cache){
+static int _victim(MatchCache cache){
   int slot = cache -> entries[cache -> lru_head].lru_prev;
   for(int i = 0;  i < cache -> size;  i ++){
     if(! cache -> entries[slot].pin_count) return slot;
@@ -315,20 +315,20 @@ static int MatchCache__victim(MatchCache cache){
   return - 1;
 }
 
-static void MatchCache__remove(MatchCache cache, int slot){
+static void _remove(MatchCache cache, int slot){
   MatchCacheEntry * entry = & cache -> entries[slot];
   assert(entry -> occupied && ! entry -> pin_count);
-  int * link = & cache -> buckets[MatchCache__bucket(cache, entry -> key)];
+  int * link = & cache -> buckets[_bucket(cache, entry -> key)];
   while(* link >= 0 && * link != slot) link = & cache -> entries[* link].bucket_next;
   assert(* link == slot);
   * link = entry -> bucket_next;
-  MatchCache__unlink(cache, slot);
+  _unlink(cache, slot);
   MatchPlan_free(entry -> plan);
   entry -> occupied = 0;
   cache -> size --;
 }
 
-static void MatchCache__activate(MatchCache m, int slot, MatchLease * lease){
+static void _activate(MatchCache m, int slot, MatchLease * lease){
   MatchCacheEntry * entry = & m -> entries[slot];
   lease -> cache = m;
   lease -> generation = entry -> generation;
@@ -368,7 +368,7 @@ void MatchLease_release(MatchLease * lease){
     lease -> active = 0;
     return;
   }
-  MatchCacheEntry * entry = MatchLease__entry(lease);
+  MatchCacheEntry * entry = _entry(lease);
   if(! entry || lease -> cache -> active_leases <= 0 || entry -> pin_count <= 0){
     static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/match-cache.x",.function = "MatchLease_release",.line = 312};
     x2c_error_raise_n(& _x2c_error_site_2, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
@@ -383,7 +383,7 @@ MatchPlan MatchLease_plan(MatchLease * m){
   return m -> transient_plan ? m -> transient_plan : m -> cache -> entries[m -> slot].plan;
 }
 
-static MatchCacheEntry * MatchLease__entry(MatchLease * lease){
+static MatchCacheEntry * _entry(MatchLease * lease){
   MatchCache cache = lease -> cache;
   if(! cache || lease -> slot < 0 || lease -> slot >= cache -> capacity) return NULL;
   MatchCacheEntry * entry = & cache -> entries[lease -> slot];

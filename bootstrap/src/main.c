@@ -69,7 +69,7 @@ Translation;
 
 static int _run_translation(CliRequest request, Map unit_dirs, Build build);
 
-static void Translation_preflight(Translation * t);
+static void _preflight(Translation * t);
 
 static void _check_out_dir(String out_dir);
 
@@ -79,13 +79,13 @@ static void _print_command(CliRequest request);
 
 static void _preprocessor_errors(String text);
 
-static void Translation_translate_serial(Translation * t);
+static void _translate_serial(Translation * t);
 
-static void Translation_translate(Translation * t, String input);
+static void _translate(Translation * t, String input);
 
-static String Translation_output_dir(Translation * t, String input);
+static String _output_dir(Translation * t, String input);
 
-static void Translation_report(Translation * t, unsigned long started_at);
+static void _report(Translation * t, unsigned long started_at);
 
 typedef struct Workers{
   Translation * t;
@@ -100,27 +100,27 @@ Workers;
 
 static Workers _workers;
 
-static int Translation_translate_parallel(Translation * t);
+static int _translate_parallel(Translation * t);
 
-static void Translation_preload_modules(Translation * t);
+static void _preload_modules(Translation * t);
 
-static Map Translation_package_names(Translation * t, List roots);
+static Map _package_names(Translation * t, List roots);
 
 static List _imported_packages(String path);
 
 static Array _slices(List inputs, int total, int count);
 
-static int Translation_run_workers(Translation * t, Array slices);
+static int _run_workers(Translation * t, Array slices);
 
-static void Workers_start(Workers * w);
+static void _start(Workers * w);
 
-static void Translation_work(Translation * t, List slice);
+static void _work(Translation * t, List slice);
 
-static void Workers_reap(Workers * w);
+static void _reap(Workers * w);
 
-static void Workers_show(Workers * w);
+static void _show(Workers * w);
 
-static int Workers_carries(Workers * w, int index);
+static int _carries(Workers * w, int index);
 
 static void _forward_stop(int number);
 
@@ -444,7 +444,7 @@ static int _run_translation(CliRequest request, Map unit_dirs, Build build){
     .request = request, .unit_dirs = unit_dirs, .build = build, .total = List_len(request -> inputs)
   }
   ;
-  Translation_preflight(&(t));
+  _preflight(&(t));
   if(request -> verbose || request -> dry_run) _print_command(request);
   if(request -> dry_run) return 0;
   t.frontend = Frontend_new(request);
@@ -452,16 +452,16 @@ static int _run_translation(CliRequest request, Map unit_dirs, Build build){
   if(! Frontend_preload_macro_libraries(t.frontend)) return 1;
   Frontend_prepare_meta(t.frontend, request -> inputs);
   if(request -> jobs > 1 && t.total > 1 && ! CliRequest_inspects(request)){
-    if(Translation_translate_parallel(&(t))) return 1;
+    if(_translate_parallel(&(t))) return 1;
   }
-  else Translation_translate_serial(&(t));
-  if(! build && ! CliRequest_inspects(request)) Translation_report(&(t), started_at);
+  else _translate_serial(&(t));
+  if(! build && ! CliRequest_inspects(request)) _report(&(t), started_at);
   return 0;
 }
 
 String Path_stem(Path);
 
-static void Translation_preflight(Translation * t){
+static void _preflight(Translation * t){
   CliRequest request =(* t).request;
   if(! CliRequest_inspects(request)) _check_out_dir(request -> out_dir);
   int shared = ! CliRequest_inspects(request) && ! Map_truth((* t).unit_dirs);
@@ -523,7 +523,7 @@ static void _preprocessor_errors(String text){
   File_printf(Stderr, "%s", text);
 }
 
-static void Translation_translate_serial(Translation * t){
+static void _translate_serial(Translation * t){
   int done = 0;
   {
     String input;
@@ -535,7 +535,7 @@ static void Translation_translate_serial(Translation * t){
       {
         if((* t).build) Build_begin_translation((* t).build, input);
         else report_progress(45220543335690, done, (* t).total, input);
-        Translation_translate(&((* t)), input);
+        _translate(&((* t)), input);
         done ++;
         if((* t).build) Build_end_translation((* t).build, input, 0);
         else report_progress(45220543335690, done, (* t).total, input);
@@ -547,16 +547,16 @@ static void Translation_translate_serial(Translation * t){
 
 }
 
-static void Translation_translate(Translation * t, String input){
-  _translate_unit((* t).frontend, input, Translation_output_dir(&((* t)), input));
+static void _translate(Translation * t, String input){
+  _translate_unit((* t).frontend, input, _output_dir(&((* t)), input));
 }
 
-static String Translation_output_dir(Translation * t, String input){
+static String _output_dir(Translation * t, String input){
   if(! Map_truth((* t).unit_dirs)) return(* t).request -> out_dir;
   return Var_as_string(Map_getindex((* t).unit_dirs, String_var(input)));
 }
 
-static void Translation_report(Translation * t, unsigned long started_at){
+static void _report(Translation * t, unsigned long started_at){
   String out_dir =(* t).request -> out_dir;
   unsigned long long bytes = 0;
   {
@@ -582,11 +582,11 @@ static void Translation_report(Translation * t, unsigned long started_at){
   report_generated(n, bytes);
 }
 
-static int Translation_translate_parallel(Translation * t){
-  Translation_preload_modules(&((* t)));
+static int _translate_parallel(Translation * t){
+  _preload_modules(&((* t)));
   int count = Map_truth((* t).unit_dirs) ?(* t).total :(* t).request -> jobs;
   Array slices = _slices((* t).request -> inputs, (* t).total, count);
-  int failed = Translation_run_workers(&((* t)), slices);
+  int failed = _run_workers(&((* t)), slices);
   Array_free(slices);
   return failed;
 }
@@ -597,12 +597,12 @@ int Path_is_file(Path);
 
 void Compiler_preload_native_module(String);
 
-static void Translation_preload_modules(Translation * t){
+static void _preload_modules(Translation * t){
   List roots = CliRequest_package_roots((* t).request);
   if(! List_truth(roots)) return;
   {
     String name;
-    Iter _x2c_macro_iterator_6 = Map_keys(Translation_package_names(&((* t)), roots), &(struct Iter){
+    Iter _x2c_macro_iterator_6 = Map_keys(_package_names(&((* t)), roots), &(struct Iter){
       int_var(0)
     }
     );
@@ -631,7 +631,7 @@ Path Path_basename(Path);
 
 
 
-static Map Translation_package_names(Translation * t, List roots){
+static Map _package_names(Translation * t, List roots){
   Map names = Map_new();
   {
     String input;
@@ -653,7 +653,7 @@ static Map Translation_package_names(Translation * t, List roots){
 
         }
         String depfile =({
-          Var _x2c_literal_part_0 = String_var(Translation_output_dir(&((* t)), input));  Var _x2c_literal_part_1 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_7), cons(_x2c_literal_part_1, cons(String_var(_18), NULL)))));
+          Var _x2c_literal_part_0 = String_var(_output_dir(&((* t)), input));  Var _x2c_literal_part_1 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_7), cons(_x2c_literal_part_1, cons(String_var(_18), NULL)))));
         }
         );
         String volatile text = NULL;
@@ -806,7 +806,7 @@ static Array _slices(List inputs, int total, int count){
   return slices;
 }
 
-static int Translation_run_workers(Translation * t, Array slices){
+static int _run_workers(Translation * t, Array slices){
   int jobs =(* t).request -> jobs, count = Array_len(slices);
   if(jobs > count) jobs = count;
   if((* t).request -> verbose) fprintf(stderr, "x2c: translate with %d workers over %d files\n", jobs, (* t).total);
@@ -818,9 +818,9 @@ static int Translation_run_workers(Translation * t, Array slices){
   _forward_stop_signal(SIGTERM, & term);
   _forward_stop_signal(SIGINT, & interrupt);
   while(_workers.started < count || _workers.live){
-    if(_workers.started < count && _workers.live < jobs) Workers_start(&(_workers));
-    else Workers_reap(&(_workers));
-    Workers_show(&(_workers));
+    if(_workers.started < count && _workers.live < jobs) _start(&(_workers));
+    else _reap(&(_workers));
+    _show(&(_workers));
   }
   sigaction(SIGTERM, & term, NULL);
   sigaction(SIGINT, & interrupt, NULL);
@@ -831,7 +831,7 @@ static int Translation_run_workers(Translation * t, Array slices){
   return _workers.failed;
 }
 
-static void Workers_start(Workers * w){
+static void _start(Workers * w){
   int index =(* w).started ++;
   List slice = Var_list_payload(Array_getindex((* w).slices, index));
   if((* w).t -> build) Build_begin_translation((* w).t -> build, Var_as_string(List_car(slice)));
@@ -842,7 +842,7 @@ static void Workers_start(Workers * w){
     (* w).live = 0;
     sigprocmask(SIG_SETMASK, & unblocked, NULL);
     dup2(File_fileno(capture), STDERR_FILENO);
-    Translation_work(&((*(* w).t)), slice);
+    _work(&((*(* w).t)), slice);
   }
   if(pid > 0){
     (* w).carried[(* w).live] = index;
@@ -859,7 +859,7 @@ static void Workers_start(Workers * w){
 
 void Compiler_stop_meta_helper(void);
 
-static void Translation_work(Translation * t, List slice){
+static void _work(Translation * t, List slice){
   {
     String input;
     List _x2c_macro_object_10 = slice;
@@ -867,7 +867,7 @@ static void Translation_work(Translation * t, List slice){
     Var _x2c_macro_cursor_output_9;
     while(List_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_9))){
       input = Var_as_string(_x2c_macro_cursor_output_9);
-      Translation_translate(&((* t)), input);
+      _translate(&((* t)), input);
     }
 
   }
@@ -875,7 +875,7 @@ static void Translation_work(Translation * t, List slice){
   worker_exit(0);
 }
 
-static void Workers_reap(Workers * w){
+static void _reap(Workers * w){
   int status, slot = worker_wait_any((* w).pids, (* w).live, &(status));
   if(status)(* w).failed ++;
   int index =(* w).carried[slot];
@@ -912,8 +912,8 @@ static void Workers_reap(Workers * w){
 
 }
 
-static void Workers_show(Workers * w){
-  while((* w).shown <(* w).started && ! Workers_carries(&((* w)), (* w).shown)){
+static void _show(Workers * w){
+  while((* w).shown <(* w).started && ! _carries(&((* w)), (* w).shown)){
     Block output =(* w).output[(* w).shown ++];
     if(output == NULL) continue;
     {
@@ -942,7 +942,7 @@ static void Workers_show(Workers * w){
 
 }
 
-static int Workers_carries(Workers * w, int index){
+static int _carries(Workers * w, int index){
   for(int slot = 0;  slot <(* w).live;  slot ++) if((* w).carried[slot] == index) return 1;
   return 0;
 }

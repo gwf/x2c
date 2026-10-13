@@ -8,81 +8,81 @@
 #include "array.h"
 #include "exception.h"
 #include "match.h"
-static List * MatchMachine__cursor(MatchMachine * m, int reg);
+static List * _cursor(MatchMachine * m, int reg);
 
-static int * MatchMachine__distance(MatchMachine * m, int reg);
+static int * _distance(MatchMachine * m, int reg);
 
-static int * MatchMachine__int_reg(MatchMachine * m, int reg);
+static int * _int_reg(MatchMachine * m, int reg);
 
-static MachineMark * MatchMachine__mark(MatchMachine * m);
+static MachineMark * _mark(MatchMachine * m);
 
-static Var MatchMachine__const(MatchMachine * m, int index);
+static Var _const(MatchMachine * m, int index);
 
-static void MatchMachine__clear_registers(MatchMachine * m, int depth);
+static void _clear_registers(MatchMachine * m, int depth);
 
-static void MatchMachine__execute(MatchMachine * m, const MachineWord * w);
+static void _execute(MatchMachine * m, const MachineWord * w);
 
 static int _equal(int mode, Var left, Var right);
 
-static void MatchMachine__tag(MatchMachine * m, const MachineWord * w);
+static void _tag(MatchMachine * m, const MachineWord * w);
 
 static int _is_kind(Var value, int kind);
 
-static int MatchMachine__enter(MatchMachine * m, int reg, Var input);
+static int _enter(MatchMachine * m, int reg, Var input);
 
-static int MatchMachine__advance(MatchMachine * m, int reg);
+static int _advance(MatchMachine * m, int reg);
 
-static void MatchMachine__move(MatchMachine * m, const MachineWord * w);
+static void _move(MatchMachine * m, const MachineWord * w);
 
-static void MatchMachine__offset(MatchMachine * m, const MachineWord * w);
+static void _offset(MatchMachine * m, const MachineWord * w);
 
-static void MatchMachine__descend(MatchMachine * m, const MachineWord * w);
+static void _descend(MatchMachine * m, const MachineWord * w);
 
-static void MatchMachine__scan(MatchMachine * m, const MachineWord * w);
+static void _scan(MatchMachine * m, const MachineWord * w);
 
-static void MatchMachine__cursor_value(MatchMachine * m, const MachineWord * w);
+static void _cursor_value(MatchMachine * m, const MachineWord * w);
 
-static void MatchMachine__skip(MatchMachine * m, int reg, List at);
+static void _skip(MatchMachine * m, int reg, List at);
 
-static void MatchMachine__call(MatchMachine * m, const MachineWord * w);
+static void _call(MatchMachine * m, const MachineWord * w);
 
-static void MatchMachine__push_frame(MatchMachine * m, Var argument, int entry);
+static void _push_frame(MatchMachine * m, Var argument, int entry);
 
-static void MatchMachine__return(MatchMachine * m, Symbol status);
+static void _return(MatchMachine * m, Symbol status);
 
-static void MatchMachine__pop_frame(MatchMachine * m);
+static void _pop_frame(MatchMachine * m);
 
-static void MatchMachine__set_value(MatchMachine * m, int index, Var value, int replace_span);
+static void _set_value(MatchMachine * m, int index, Var value, int replace_span);
 
-static void MatchMachine__set_span(MatchMachine * m, const MachineWord * w);
+static void _set_span(MatchMachine * m, const MachineWord * w);
 
-static void MatchMachine__journal(MatchMachine * m, int index, MachineSlot capture);
+static void _journal(MatchMachine * m, int index, MachineSlot capture);
 
-static void MatchMachine__rollback(MatchMachine * m, int mark);
+static void _rollback(MatchMachine * m, int mark);
 
-static void MatchMachine__restore(MatchMachine * m, const MachineWord * w);
+static void _restore(MatchMachine * m, const MachineWord * w);
 
-static int MatchMachine__value_equal(MatchMachine * m, int index, Var value);
+static int _value_equal(MatchMachine * m, int index, Var value);
 
-static void MatchMachine__eq_prefix(MatchMachine * m, const MachineWord * w);
+static void _eq_prefix(MatchMachine * m, const MachineWord * w);
 
-static int MatchMachine__sequence_equal(MatchMachine * m, int index, List input, int length, int final);
+static int _sequence_equal(MatchMachine * m, int index, List input, int length, int final);
 
-static void MatchMachine__eq_head(MatchMachine * m, const MachineWord * w);
+static void _eq_head(MatchMachine * m, const MachineWord * w);
 
-static void MatchMachine__bind_head(MatchMachine * m, const MachineWord * w);
+static void _bind_head(MatchMachine * m, const MachineWord * w);
 
-static int MatchMachine__copy_span(MatchMachine * m, MachineSpan span);
+static int _copy_span(MatchMachine * m, MachineSpan span);
 
-static void MatchMachine__ensure_scratch(MatchMachine * m, int length);
+static void _ensure_scratch(MatchMachine * m, int length);
 
-static List MatchMachine__cons_scratch(MatchMachine * m, int length);
+static List _cons_scratch(MatchMachine * m, int length);
 
-static void MatchMachine__error(MatchMachine * m, Symbol code);
+static void _error(MatchMachine * m, Symbol code);
 
-static void MatchMachine__count_call(MatchMachine * m);
+static void _count_call(MatchMachine * m);
 
-static void MatchMachine__count_share(MatchMachine * m);
+static void _count_share(MatchMachine * m);
 
 enum{
   MACHINE_SPARES = 8
@@ -95,31 +95,31 @@ static _Thread_local struct{
 }
 machine_thread;
 
-static void MatchMachine__clear_slots(MatchMachine * m);
+static void _clear_slots(MatchMachine * m);
 
-static void MatchMachine__clear_frames(MatchMachine * m);
+static void _clear_frames(MatchMachine * m);
 
-static List * MatchMachine__cursor(MatchMachine * m, int reg){
+static List * _cursor(MatchMachine * m, int reg){
   return &(* m).regs[(* m).fp].cursors[reg];
 }
 
-static int * MatchMachine__distance(MatchMachine * m, int reg){
+static int * _distance(MatchMachine * m, int reg){
   return &(* m).regs[(* m).fp].distances[reg];
 }
 
-static int * MatchMachine__int_reg(MatchMachine * m, int reg){
+static int * _int_reg(MatchMachine * m, int reg){
   return &(* m).regs[(* m).fp].ints[reg];
 }
 
-static MachineMark * MatchMachine__mark(MatchMachine * m){
+static MachineMark * _mark(MatchMachine * m){
   return &(* m).regs[(* m).fp].mark;
 }
 
-static Var MatchMachine__const(MatchMachine * m, int index){
+static Var _const(MatchMachine * m, int index){
   return(* m).program.consts[index];
 }
 
-static void MatchMachine__clear_registers(MatchMachine * m, int depth){
+static void _clear_registers(MatchMachine * m, int depth){
   memset(&(* m).regs[depth], 0, sizeof(MachineRegs));
 }
 
@@ -134,81 +134,81 @@ void MatchMachine_run(MatchMachine * m){
 
 int MatchMachine_step(MatchMachine * m){
   if(!(* m).running) return 0;
-  MatchMachine__execute(&((* m)), &((* m).program.code[(* m).pc ++]));
+  _execute(&((* m)), &((* m).program.code[(* m).pc ++]));
   return(* m).running;
 }
 
 static int List_truth(List);
 
-static void MatchMachine__execute(MatchMachine * m, const MachineWord * w){
+static void _execute(MatchMachine * m, const MachineWord * w){
   switch((* w).op){
-    case MW_EQ_VALUE_CONST : if(! _equal((* w).d, (* m).value, MatchMachine__const(&((* m)), (* w).a)))(* m).pc =(* w).target;
+    case MW_EQ_VALUE_CONST : if(! _equal((* w).d, (* m).value, _const(&((* m)), (* w).a)))(* m).pc =(* w).target;
     break;
-    case MW_EQ_VALUE_BITS : if((* m).value.u64 != MatchMachine__const(&((* m)), (* w).a).u64)(* m).pc =(* w).target;
+    case MW_EQ_VALUE_BITS : if((* m).value.u64 != _const(&((* m)), (* w).a).u64)(* m).pc =(* w).target;
     break;
-    case MW_INPUT_LIST : if(! MatchMachine__enter(&((* m)), (* w).a, (* m).value))(* m).pc =(* w).target;
+    case MW_INPUT_LIST : if(! _enter(&((* m)), (* w).a, (* m).value))(* m).pc =(* w).target;
     break;
-    case MW_NONNIL : if(! List_truth(* MatchMachine__cursor(&((* m)), (* w).a)))(* m).pc =(* w).target;
+    case MW_NONNIL : if(! List_truth(* _cursor(&((* m)), (* w).a)))(* m).pc =(* w).target;
     break;
-    case MW_NIL : if(List_truth(* MatchMachine__cursor(&((* m)), (* w).a)))(* m).pc =(* w).target;
+    case MW_NIL : if(List_truth(* _cursor(&((* m)), (* w).a)))(* m).pc =(* w).target;
     break;
-    case MW_CALL : MatchMachine__call(&((* m)), &((* w)));
+    case MW_CALL : _call(&((* m)), &((* w)));
     break;
     case MW_BR_FAIL : if((* m).status != 982)(* m).pc =(* w).target;
     break;
     case MW_JUMP :(* m).pc =(* w).target;
     break;
-    case MW_ADVANCE : if(! MatchMachine__advance(&((* m)), (* w).a)) MatchMachine__error(&((* m)), 2462150858);
+    case MW_ADVANCE : if(! _advance(&((* m)), (* w).a)) _error(&((* m)), 2462150858);
     break;
-    case MW_ADVANCE_OPTIONAL : if(! MatchMachine__advance(&((* m)), (* w).a)) * MatchMachine__int_reg(&((* m)), (* w).b) = 0;
+    case MW_ADVANCE_OPTIONAL : if(! _advance(&((* m)), (* w).a)) * _int_reg(&((* m)), (* w).b) = 0;
     break;
-    case MW_MOVE : MatchMachine__move(&((* m)), &((* w)));
+    case MW_MOVE : _move(&((* m)), &((* w)));
     break;
-    case MW_OFFSET : MatchMachine__offset(&((* m)), &((* w)));
+    case MW_OFFSET : _offset(&((* m)), &((* w)));
     break;
-    case MW_DESCEND : MatchMachine__descend(&((* m)), &((* w)));
+    case MW_DESCEND : _descend(&((* m)), &((* w)));
     break;
-    case MW_SCAN : MatchMachine__scan(&((* m)), &((* w)));
+    case MW_SCAN : _scan(&((* m)), &((* w)));
     break;
-    case MW_SET_ACTIVE : * MatchMachine__int_reg(&((* m)), (* w).a) =(* w).b;
+    case MW_SET_ACTIVE : * _int_reg(&((* m)), (* w).a) =(* w).b;
     break;
-    case MW_REQUIRE_ACTIVE : if(! * MatchMachine__int_reg(&((* m)), (* w).a))(* m).pc =(* w).target;
+    case MW_REQUIRE_ACTIVE : if(! * _int_reg(&((* m)), (* w).a))(* m).pc =(* w).target;
     break;
-    case MW_MARK : MatchMachine__mark(&((* m))) -> undo_count =(* m).undo_count;
+    case MW_MARK : _mark(&((* m))) -> undo_count =(* m).undo_count;
     break;
-    case MW_ROLLBACK : MatchMachine__restore(&((* m)), &((* w)));
+    case MW_ROLLBACK : _restore(&((* m)), &((* w)));
     break;
     case MW_SLOT_VALID : if((* m).slots[(* w).a].kind != MACHINE_SLOT_INVALID)(* m).pc =(* w).target;
     break;
     case MW_SLOT_IS_SPAN : if((* m).slots[(* w).a].kind == MACHINE_SLOT_SPAN)(* m).pc =(* w).target;
     break;
-    case MW_SLOT_SET_VALUE : MatchMachine__set_value(&((* m)), (* w).a, (* m).value, (* w).b);
+    case MW_SLOT_SET_VALUE : _set_value(&((* m)), (* w).a, (* m).value, (* w).b);
     break;
-    case MW_SLOT_SET_SPAN : MatchMachine__set_span(&((* m)), &((* w)));
+    case MW_SLOT_SET_SPAN : _set_span(&((* m)), &((* w)));
     break;
-    case MW_SLOT_EQ_VALUE : if(! MatchMachine__value_equal(&((* m)), (* w).a, (* m).value))(* m).pc =(* w).target;
+    case MW_SLOT_EQ_VALUE : if(! _value_equal(&((* m)), (* w).a, (* m).value))(* m).pc =(* w).target;
     break;
-    case MW_SLOT_EQ_PREFIX : MatchMachine__eq_prefix(&((* m)), &((* w)));
+    case MW_SLOT_EQ_PREFIX : _eq_prefix(&((* m)), &((* w)));
     break;
-    case MW_SLOT_EQ_FINAL_IDENTITY : if(! MatchMachine__sequence_equal(&((* m)), (* w).a, * MatchMachine__cursor(&((* m)), (* w).b), 0, 1))(* m).pc =(* w).target;
+    case MW_SLOT_EQ_FINAL_IDENTITY : if(! _sequence_equal(&((* m)), (* w).a, * _cursor(&((* m)), (* w).b), 0, 1))(* m).pc =(* w).target;
     break;
-    case MW_CURSOR_VALUE : MatchMachine__cursor_value(&((* m)), &((* w)));
+    case MW_CURSOR_VALUE : _cursor_value(&((* m)), &((* w)));
     break;
-    case MW_EQ_HEAD_CONST : MatchMachine__eq_head(&((* m)), &((* w)));
+    case MW_EQ_HEAD_CONST : _eq_head(&((* m)), &((* w)));
     break;
-    case MW_BIND_HEAD : MatchMachine__bind_head(&((* m)), &((* w)));
+    case MW_BIND_HEAD : _bind_head(&((* m)), &((* w)));
     break;
-    case MW_SKIP_HEAD : if(! MatchMachine__advance(&((* m)), (* w).b))(* m).pc =(* w).target;
+    case MW_SKIP_HEAD : if(! _advance(&((* m)), (* w).b))(* m).pc =(* w).target;
     break;
-    case MW_RET_SUCCESS : MatchMachine__return(&((* m)), 982);
+    case MW_RET_SUCCESS : _return(&((* m)), 982);
     break;
-    case MW_RET_FAILURE : MatchMachine__return(&((* m)), 395864);
+    case MW_RET_FAILURE : _return(&((* m)), 395864);
     break;
-    case MW_TAG : MatchMachine__tag(&((* m)), &((* w)));
+    case MW_TAG : _tag(&((* m)), &((* w)));
     break;
     case MW_MATCH_KIND : if(! _is_kind((* m).value, (* w).b))(* m).pc =(* w).target;
     break;
-    default: MatchMachine__error(&((* m)), 139921423496);
+    default: _error(&((* m)), 139921423496);
   }
 
 }
@@ -221,8 +221,8 @@ static int _equal(int mode, Var left, Var right){
 
 int Var_is(Var, Symbol);
 
-static void MatchMachine__tag(MatchMachine * m, const MachineWord * w){
-  Symbol tag = Var_symbol(MatchMachine__const(&((* m)), (* w).a));
+static void _tag(MatchMachine * m, const MachineWord * w){
+  Symbol tag = Var_symbol(_const(&((* m)), (* w).a));
   if(! Var_is((* m).value, tag))(* m).pc =(* w).target;
 }
 
@@ -240,43 +240,43 @@ static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 static List Var_list_payload(Var);
 
-static int MatchMachine__enter(MatchMachine * m, int reg, Var input){
+static int _enter(MatchMachine * m, int reg, Var input){
   Var seen =(* m).view ?(* m).view(input) : input;
   if(! Var_is_row(seen, 9, 7, 4)) return 0;
-  * MatchMachine__cursor(&((* m)), reg) = Var_list_payload(seen);
-  * MatchMachine__distance(&((* m)), reg) = 0;
+  * _cursor(&((* m)), reg) = Var_list_payload(seen);
+  * _distance(&((* m)), reg) = 0;
   return 1;
 }
 
-static int MatchMachine__advance(MatchMachine * m, int reg){
-  List at = * MatchMachine__cursor(&((* m)), reg);
+static int _advance(MatchMachine * m, int reg){
+  List at = * _cursor(&((* m)), reg);
   if(! List_truth(at)) return 0;
-  MatchMachine__skip(&((* m)), reg, at);
+  _skip(&((* m)), reg, at);
   return 1;
 }
 
-static void MatchMachine__move(MatchMachine * m, const MachineWord * w){
-  * MatchMachine__cursor(&((* m)), (* w).a) = * MatchMachine__cursor(&((* m)), (* w).b);
-  * MatchMachine__distance(&((* m)), (* w).a) = * MatchMachine__distance(&((* m)), (* w).b);
+static void _move(MatchMachine * m, const MachineWord * w){
+  * _cursor(&((* m)), (* w).a) = * _cursor(&((* m)), (* w).b);
+  * _distance(&((* m)), (* w).a) = * _distance(&((* m)), (* w).b);
 }
 
-static void MatchMachine__offset(MatchMachine * m, const MachineWord * w){
-  for(int n = 0;  n <(* w).b;  n ++) if(! MatchMachine__advance(&((* m)), (* w).a)) return;
+static void _offset(MatchMachine * m, const MachineWord * w){
+  for(int n = 0;  n <(* w).b;  n ++) if(! _advance(&((* m)), (* w).a)) return;
 }
 
 static Var List_car(List);
 
-static void MatchMachine__descend(MatchMachine * m, const MachineWord * w){
-  List at = * MatchMachine__cursor(&((* m)), (* w).b);
-  if(! List_truth(at) || ! MatchMachine__enter(&((* m)), (* w).c, List_car(at)))(* m).pc =(* w).target;
+static void _descend(MatchMachine * m, const MachineWord * w){
+  List at = * _cursor(&((* m)), (* w).b);
+  if(! List_truth(at) || ! _enter(&((* m)), (* w).c, List_car(at)))(* m).pc =(* w).target;
 }
 
 static List List_cdr(List);
 
-static void MatchMachine__scan(MatchMachine * m, const MachineWord * w){
-  List split = * MatchMachine__cursor(&((* m)), (* w).a), probe = * MatchMachine__cursor(&((* m)), (* w).b);
-  int split_distance = * MatchMachine__distance(&((* m)), (* w).a), probe_distance = * MatchMachine__distance(&((* m)), (* w).b);
-  Var anchor = MatchMachine__const(&((* m)), (* w).c);
+static void _scan(MatchMachine * m, const MachineWord * w){
+  List split = * _cursor(&((* m)), (* w).a), probe = * _cursor(&((* m)), (* w).b);
+  int split_distance = * _distance(&((* m)), (* w).a), probe_distance = * _distance(&((* m)), (* w).b);
+  Var anchor = _const(&((* m)), (* w).c);
   while(List_truth(probe)){
     if((* m).stats)(* m).stats -> scan_cells ++;
     if(_equal((* w).d, List_car(probe), anchor)) break;
@@ -285,65 +285,65 @@ static void MatchMachine__scan(MatchMachine * m, const MachineWord * w){
     split_distance ++;
     probe_distance ++;
   }
-  * MatchMachine__cursor(&((* m)), (* w).a) = split;
-  * MatchMachine__cursor(&((* m)), (* w).b) = probe;
-  * MatchMachine__distance(&((* m)), (* w).a) = split_distance;
-  * MatchMachine__distance(&((* m)), (* w).b) = probe_distance;
+  * _cursor(&((* m)), (* w).a) = split;
+  * _cursor(&((* m)), (* w).b) = probe;
+  * _distance(&((* m)), (* w).a) = split_distance;
+  * _distance(&((* m)), (* w).b) = probe_distance;
   if(! List_truth(probe))(* m).pc =(* w).target;
 }
 
 static Var List_var(List);
 
-static void MatchMachine__cursor_value(MatchMachine * m, const MachineWord * w){
-  (* m).value = List_var(* MatchMachine__cursor(&((* m)), (* w).a));
-  if((* w).b) MatchMachine__count_share(&((* m)));
+static void _cursor_value(MatchMachine * m, const MachineWord * w){
+  (* m).value = List_var(* _cursor(&((* m)), (* w).a));
+  if((* w).b) _count_share(&((* m)));
 }
 
-static void MatchMachine__skip(MatchMachine * m, int reg, List at){
-  * MatchMachine__cursor(&((* m)), reg) = List_cdr(at);
-  (* MatchMachine__distance(&((* m)), reg)) ++;
+static void _skip(MatchMachine * m, int reg, List at){
+  * _cursor(&((* m)), reg) = List_cdr(at);
+  (* _distance(&((* m)), reg)) ++;
 }
 
-static void MatchMachine__call(MatchMachine * m, const MachineWord * w){
+static void _call(MatchMachine * m, const MachineWord * w){
   Var argument =(* m).value;
   if((* w).b == MACHINE_CALL_HEAD){
-    List at = * MatchMachine__cursor(&((* m)), (* w).c);
+    List at = * _cursor(&((* m)), (* w).c);
     if(! List_truth(at)){
-      MatchMachine__error(&((* m)), 6692429899848);
+      _error(&((* m)), 6692429899848);
       return;
     }
     argument = List_car(at);
   }
-  else if((* w).b == MACHINE_CALL_CURSOR) argument = List_var(* MatchMachine__cursor(&((* m)), (* w).c));
-  MatchMachine__push_frame(&((* m)), argument, (* w).a);
+  else if((* w).b == MACHINE_CALL_CURSOR) argument = List_var(* _cursor(&((* m)), (* w).c));
+  _push_frame(&((* m)), argument, (* w).a);
 }
 
-static void MatchMachine__push_frame(MatchMachine * m, Var argument, int entry){
+static void _push_frame(MatchMachine * m, Var argument, int entry){
   if((* m).fp + 1 >= MACHINE_FRAME_MAX){
-    MatchMachine__error(&((* m)), 14434122557552);
+    _error(&((* m)), 14434122557552);
     return;
   }
   (* m).frames[(* m).fp ++] =(MatchFrame){
     (* m).pc, (* m).current_entry_undo, (* m).value
   }
   ;
-  MatchMachine__clear_registers(&((* m)), (* m).fp);
+  _clear_registers(&((* m)), (* m).fp);
   (* m).current_entry_undo =(* m).undo_count;
-  MatchMachine__count_call(&((* m)));
+  _count_call(&((* m)));
   (* m).value = argument;
   (* m).pc = entry;
 }
 
-static void MatchMachine__return(MatchMachine * m, Symbol status){
-  if(status == 395864) MatchMachine__rollback(&((* m)), (* m).current_entry_undo);
+static void _return(MatchMachine * m, Symbol status){
+  if(status == 395864) _rollback(&((* m)), (* m).current_entry_undo);
   (* m).status = status;
   if((* m).stats)(* m).stats -> returns ++;
-  MatchMachine__clear_registers(&((* m)), (* m).fp);
-  if((* m).fp) MatchMachine__pop_frame(&((* m)));
+  _clear_registers(&((* m)), (* m).fp);
+  if((* m).fp) _pop_frame(&((* m)));
   else(* m).running = 0;
 }
 
-static void MatchMachine__pop_frame(MatchMachine * m){
+static void _pop_frame(MatchMachine * m){
   assert((* m).fp > 0);
   MatchFrame * frame = &(* m).frames[--(* m).fp];
   (* m).pc = frame -> return_pc;
@@ -351,33 +351,33 @@ static void MatchMachine__pop_frame(MatchMachine * m){
   (* m).value = frame -> caller_value;
 }
 
-static void MatchMachine__set_value(MatchMachine * m, int index, Var value, int replace_span){
+static void _set_value(MatchMachine * m, int index, Var value, int replace_span){
   MachineSlot capture ={
     .kind = MACHINE_SLOT_VALUE, .value = value
   }
   ;
   MachineSlotKind expected = replace_span ? MACHINE_SLOT_SPAN : MACHINE_SLOT_INVALID;
-  if((* m).slots[index].kind != expected) MatchMachine__error(&((* m)), 1364470281800970);
-  else MatchMachine__journal(&((* m)), index, capture);
+  if((* m).slots[index].kind != expected) _error(&((* m)), 1364470281800970);
+  else _journal(&((* m)), index, capture);
 }
 
-static void MatchMachine__set_span(MatchMachine * m, const MachineWord * w){
-  int length = * MatchMachine__distance(&((* m)), (* w).c) - * MatchMachine__distance(&((* m)), (* w).b);
+static void _set_span(MatchMachine * m, const MachineWord * w){
+  int length = * _distance(&((* m)), (* w).c) - * _distance(&((* m)), (* w).b);
   MachineSlot capture ={
     .kind = MACHINE_SLOT_SPAN, .span =(MachineSpan){
-      * MatchMachine__cursor(&((* m)), (* w).b), * MatchMachine__cursor(&((* m)), (* w).c), length
+      * _cursor(&((* m)), (* w).b), * _cursor(&((* m)), (* w).c), length
     }
 
   }
   ;
   if((* m).stats)(* m).stats -> span_descriptors ++;
-  if((* m).slots[(* w).a].kind != MACHINE_SLOT_INVALID) MatchMachine__error(&((* m)), 1364470281800970);
-  else MatchMachine__journal(&((* m)), (* w).a, capture);
+  if((* m).slots[(* w).a].kind != MACHINE_SLOT_INVALID) _error(&((* m)), 1364470281800970);
+  else _journal(&((* m)), (* w).a, capture);
 }
 
-static void MatchMachine__journal(MatchMachine * m, int index, MachineSlot capture){
+static void _journal(MatchMachine * m, int index, MachineSlot capture){
   if((* m).undo_count >= MACHINE_UNDO_MAX){
-    MatchMachine__error(&((* m)), 1473475733616);
+    _error(&((* m)), 1473475733616);
     return;
   }
   MachineUndo * entry = &(* m).undo[(* m).undo_count ++];
@@ -386,7 +386,7 @@ static void MatchMachine__journal(MatchMachine * m, int index, MachineSlot captu
   (* m).slots[index] = capture;
 }
 
-static void MatchMachine__rollback(MatchMachine * m, int mark){
+static void _rollback(MatchMachine * m, int mark){
   while((* m).undo_count > mark){
     MachineUndo undo =(* m).undo[--(* m).undo_count];
     (* m).slots[undo.slot] = undo.prior;
@@ -394,21 +394,21 @@ static void MatchMachine__rollback(MatchMachine * m, int mark){
 
 }
 
-static void MatchMachine__restore(MatchMachine * m, const MachineWord * w){
-  MatchMachine__rollback(&((* m)), MatchMachine__mark(&((* m))) -> undo_count);
+static void _restore(MatchMachine * m, const MachineWord * w){
+  _rollback(&((* m)), _mark(&((* m))) -> undo_count);
   if((* m).stats &&(* w).b == MACHINE_ROLLBACK_RETRY)(* m).stats -> retries ++;
 }
 
-static int MatchMachine__value_equal(MatchMachine * m, int index, Var value){
+static int _value_equal(MatchMachine * m, int index, Var value){
   MachineSlot * slot = &(* m).slots[index];
   if(slot -> kind != MACHINE_SLOT_VALUE) return 0;
   if((* m).relation) return(* m).relation(&(* m), index, slot -> value, value, (* m).relation_context);
   return Var_equal(slot -> value, value);
 }
 
-static void MatchMachine__eq_prefix(MatchMachine * m, const MachineWord * w){
-  int length = * MatchMachine__distance(&((* m)), (* w).c) - * MatchMachine__distance(&((* m)), (* w).b);
-  if(! MatchMachine__sequence_equal(&((* m)), (* w).a, * MatchMachine__cursor(&((* m)), (* w).b), length, 0))(* m).pc =(* w).target;
+static void _eq_prefix(MatchMachine * m, const MachineWord * w){
+  int length = * _distance(&((* m)), (* w).c) - * _distance(&((* m)), (* w).b);
+  if(! _sequence_equal(&((* m)), (* w).a, * _cursor(&((* m)), (* w).b), length, 0))(* m).pc =(* w).target;
 }
 
 List MatchMachine_materialize_span(MatchMachine * m, MachineSpan span);
@@ -417,7 +417,7 @@ List Var_list(Var);
 
 List Array_list_free(Array);
 
-static int MatchMachine__sequence_equal(MatchMachine * m, int index, List input, int length, int final){
+static int _sequence_equal(MatchMachine * m, int index, List input, int length, int final){
   MachineSlot * slot = &(* m).slots[index];
   if(!(* m).relation) return final ? MachineSlot_final_equal(slot, input, (* m).stats) : MachineSlot_prefix_equal(slot, input, length, (* m).stats);
   List expected = slot -> kind == MACHINE_SLOT_SPAN ? MatchMachine_materialize_span(&((* m)), slot -> span) : Var_list(slot -> value);
@@ -432,42 +432,42 @@ static int MatchMachine__sequence_equal(MatchMachine * m, int index, List input,
   return(* m).relation(&(* m), index, List_var(expected), List_var(Array_list_free(items)), (* m).relation_context);
 }
 
-static void MatchMachine__eq_head(MatchMachine * m, const MachineWord * w){
-  List at = * MatchMachine__cursor(&((* m)), (* w).b);
-  if(List_truth(at) && _equal((* w).d, List_car(at), MatchMachine__const(&((* m)), (* w).a))) MatchMachine__skip(&((* m)), (* w).b, at);
+static void _eq_head(MatchMachine * m, const MachineWord * w){
+  List at = * _cursor(&((* m)), (* w).b);
+  if(List_truth(at) && _equal((* w).d, List_car(at), _const(&((* m)), (* w).a))) _skip(&((* m)), (* w).b, at);
   else(* m).pc =(* w).target;
 }
 
-static void MatchMachine__bind_head(MatchMachine * m, const MachineWord * w){
-  List at = * MatchMachine__cursor(&((* m)), (* w).b);
+static void _bind_head(MatchMachine * m, const MachineWord * w){
+  List at = * _cursor(&((* m)), (* w).b);
   if(! List_truth(at))(* m).pc =(* w).target;
   else if((* m).slots[(* w).a].kind == MACHINE_SLOT_INVALID){
-    MatchMachine__set_value(&((* m)), (* w).a, List_car(at), 0);
-    if((* m).status != 11703268) MatchMachine__skip(&((* m)), (* w).b, at);
+    _set_value(&((* m)), (* w).a, List_car(at), 0);
+    if((* m).status != 11703268) _skip(&((* m)), (* w).b, at);
   }
-  else if(MatchMachine__value_equal(&((* m)), (* w).a, List_car(at))) MatchMachine__skip(&((* m)), (* w).b, at);
+  else if(_value_equal(&((* m)), (* w).a, List_car(at))) _skip(&((* m)), (* w).b, at);
   else(* m).pc =(* w).target;
 }
 
 List MatchMachine_materialize_span(MatchMachine * m, MachineSpan span){
   if((* m).stats)(* m).stats -> materialization_requests ++;
   if(! List_truth(span.end)){
-    MatchMachine__count_share(&((* m)));
+    _count_share(&((* m)));
     return span.begin;
   }
-  if(span.length && ! MatchMachine__copy_span(&((* m)), span)){
-    MatchMachine__error(&((* m)), 139921162332);
+  if(span.length && ! _copy_span(&((* m)), span)){
+    _error(&((* m)), 139921162332);
     return NULL;
   }
-  List out = MatchMachine__cons_scratch(&((* m)), span.length);
+  List out = _cons_scratch(&((* m)), span.length);
   if((* m).stats)(* m).stats -> materialization_completions ++;
   return out;
 }
 
 int List_equal(List, List);
 
-static int MatchMachine__copy_span(MatchMachine * m, MachineSpan span){
-  MatchMachine__ensure_scratch(&((* m)), span.length);
+static int _copy_span(MatchMachine * m, MachineSpan span){
+  _ensure_scratch(&((* m)), span.length);
   List at = span.begin;
   for(int i = 0;  i < span.length;  i ++){
     if(! List_truth(at)) return 0;
@@ -478,7 +478,7 @@ static int MatchMachine__copy_span(MatchMachine * m, MachineSpan span){
   return List_equal(at, span.end);
 }
 
-static void MatchMachine__ensure_scratch(MatchMachine * m, int length){
+static void _ensure_scratch(MatchMachine * m, int length){
   if(length <=(* m).scratch_capacity) return;
   int capacity =(* m).scratch_capacity ?(* m).scratch_capacity : 16;
   while(capacity < length) capacity *= 2;
@@ -489,7 +489,7 @@ static void MatchMachine__ensure_scratch(MatchMachine * m, int length){
 
 List cons(Var, List);
 
-static List MatchMachine__cons_scratch(MatchMachine * m, int length){
+static List _cons_scratch(MatchMachine * m, int length){
   List out = NULL;
   for(int i = length;  i;  i --){
     if((* m).stats)(* m).stats -> cons_requests ++;
@@ -500,22 +500,22 @@ static List MatchMachine__cons_scratch(MatchMachine * m, int length){
 
 static Var Symbol_var(Symbol);
 
-static void MatchMachine__error(MatchMachine * m, Symbol code){
-  MatchMachine__rollback(&((* m)), 0);
-  MatchMachine__clear_frames(&((* m)));
+static void _error(MatchMachine * m, Symbol code){
+  _rollback(&((* m)), 0);
+  _clear_frames(&((* m)));
   (* m).current_entry_undo = 0;
   (* m).error = Symbol_var(code);
   (* m).status = 11703268;
   (* m).running = 0;
 }
 
-static void MatchMachine__count_call(MatchMachine * m){
+static void _count_call(MatchMachine * m){
   if(!(* m).stats) return;
   (* m).stats -> calls ++;
   if((* m).fp + 1 >(* m).stats -> max_frames)(* m).stats -> max_frames =(* m).fp + 1;
 }
 
-static void MatchMachine__count_share(MatchMachine * m){
+static void _count_share(MatchMachine * m){
   if(!(* m).stats) return;
   (* m).stats -> direct_shares ++;
   (* m).stats -> materializations_avoided ++;
@@ -542,7 +542,7 @@ void MatchMachine_open(MatchMachine * m){
 
 void MatchMachine_begin(MatchMachine * m, MachineView program, Var input){
   if((* m).running ||(* m).undo_count ||(* m).fp){
-    MatchMachine__error(&((* m)), 995692716810);
+    _error(&((* m)), 995692716810);
     return;
   }
   (* m).program = program;
@@ -553,9 +553,9 @@ void MatchMachine_begin(MatchMachine * m, MachineView program, Var input){
   (* m).error =((void) 0, Void);
   (* m).current_entry_undo = 0;
   (* m).slot_count = program.binder_count;
-  MatchMachine__clear_slots(&((* m)));
-  MatchMachine__clear_registers(&((* m)), 0);
-  MatchMachine__count_call(&((* m)));
+  _clear_slots(&((* m)));
+  _clear_registers(&((* m)), 0);
+  _count_call(&((* m)));
 }
 
 static Var String_var(String);
@@ -573,8 +573,8 @@ void MatchMachine_finish(MatchMachine * m){
     x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchMachine.finish")), NULL))));
     __builtin_unreachable();
   }
-  MatchMachine__clear_slots(&((* m)));
-  MatchMachine__clear_frames(&((* m)));
+  _clear_slots(&((* m)));
+  _clear_frames(&((* m)));
   (* m).slot_count = 0;
   (* m).undo_count = 0;
   (* m).current_entry_undo = 0;
@@ -621,7 +621,7 @@ void MatchMachine_release_spares(void){
   while(machine_thread.count) free(machine_thread.spares[-- machine_thread.count]);
 }
 
-static void MatchMachine__clear_slots(MatchMachine * m){
+static void _clear_slots(MatchMachine * m){
   for(int i = 0;  i <(* m).slot_count;  i ++){
     memset(&(* m).slots[i], 0, sizeof(MachineSlot));
     (* m).slots[i].kind = MACHINE_SLOT_INVALID;
@@ -629,8 +629,8 @@ static void MatchMachine__clear_slots(MatchMachine * m){
 
 }
 
-static void MatchMachine__clear_frames(MatchMachine * m){
-  for(int depth = 0;  depth <=(* m).fp;  depth ++) MatchMachine__clear_registers(&((* m)), depth);
+static void _clear_frames(MatchMachine * m){
+  for(int depth = 0;  depth <=(* m).fp;  depth ++) _clear_registers(&((* m)), depth);
   (* m).fp = 0;
 }
 

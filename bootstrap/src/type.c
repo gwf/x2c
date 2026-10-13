@@ -42,7 +42,7 @@ static List _without_leading_text(List items);
 
 static int _is_source_text(Var item);
 
-static Type Type__modify(Type type, List mods);
+static Type _modify(Type type, List mods);
 
 Map Type_builtin_var_tags(void);
 
@@ -186,7 +186,7 @@ static List _from_bind(List mods, List context){
     }
 
   }
-  return Type_list(Type__modify(List_type(context), _from_ast(Array_list_free(typed), context)));
+  return Type_list(_modify(List_type(context), _from_ast(Array_list_free(typed), context)));
 }
 
 static List _from_fields(List fields, List context){
@@ -226,7 +226,7 @@ static int _is_source_text(Var item){
   return Var_is_row(item, 9, 7, 4) && Var_is_row(car(Var_list_payload(item)), 11, 7, 1);
 }
 
-static Type Type__modify(Type type, List mods){
+static Type _modify(Type type, List mods){
   return List_type(({
     List _x2c_literal_part_2 = mods;  List _x2c_literal_part_3 = Type_list(type);  List_append(_x2c_literal_part_2, List_append(_x2c_literal_part_3, NULL));
   }

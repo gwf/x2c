@@ -55,9 +55,9 @@ static int _try_seed(Array symbols, uint32_t span, uint64_t seed, uint32_t * tab
 
 static Graph _graph(Array symbols, uint32_t span, uint64_t seed);
 
-static int Graph_peel(Graph * g);
+static int _peel(Graph * g);
 
-static void Graph_assign(Graph * g, uint32_t * table);
+static void _assign(Graph * g, uint32_t * table);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
@@ -218,7 +218,7 @@ static int _try_seed(Array symbols, uint32_t span, uint64_t seed, uint32_t * tab
         {
           {
             Graph g = _graph(symbols, span, seed);
-            if(! Graph_peel(&(g))){
+            if(! _peel(&(g))){
               int _x2c_return_value_0 = 0;
               {
                 x2c_cleanup_leave(& _x2c_defer_record_0);
@@ -226,7 +226,7 @@ static int _try_seed(Array symbols, uint32_t span, uint64_t seed, uint32_t * tab
               }
 
             }
-            Graph_assign(&(g), table);
+            _assign(&(g), table);
             {
               int _x2c_return_value_1 = 1;
               {
@@ -273,7 +273,7 @@ static Graph _graph(Array symbols, uint32_t span, uint64_t seed){
   return g;
 }
 
-static int Graph_peel(Graph * g){
+static int _peel(Graph * g){
   int head = 0, tail = 0, ordered = 0;
   for(int vertex = 0;  vertex <(* g).vertices;  vertex ++) if((* g).degree[vertex] == 1)(* g).queue[tail ++] = vertex;
   while(head < tail){
@@ -295,7 +295,7 @@ static int Graph_peel(Graph * g){
   return ordered ==(* g).count;
 }
 
-static void Graph_assign(Graph * g, uint32_t * table){
+static void _assign(Graph * g, uint32_t * table){
   for(int position =(* g).count - 1;  position >= 0;  position --){
     int edge =(* g).order_edges[position], vertex =(* g).order_vertices[position];
     uint32_t value =(uint32_t) edge;

@@ -34,7 +34,7 @@ static SourceView _snapshots(char * * argv, int count);
 
 static const char * unsaved_cpp = "x2c editor: unsaved sources with native CPP symbol modes are " "not supported; syntax highlighting remains available\n";
 
-static CliRequest Query_configure(Query * q, int argc, char * * argv);
+static CliRequest _configure(Query * q, int argc, char * * argv);
 
 static CliRequest _project_target(CliRequest request, String source);
 
@@ -42,29 +42,29 @@ _Noreturn static void _fail(const char * message);
 
 static int _native_cpp(CliRequest request);
 
-static int Query_serve(Query * q, CliRequest request);
+static int _serve(Query * q, CliRequest request);
 
 static int _changed_dependency(Compiler c, SourceView sources);
 
-static int Query_write(Query * q, int parsed);
+static int _write(Query * q, int parsed);
 
-static Array Query_diagnostics(Query * q);
+static Array _diagnostics(Query * q);
 
-static Map Query_diagnostic(Query * q, List entry);
+static Map _diagnostic(Query * q, List entry);
 
-static Map Query_diagnostic_range(Query * q, List location);
+static Map _diagnostic_range(Query * q, List location);
 
-static Map Query_location(Query * q, String path, int start, int end);
+static Map _location(Query * q, String path, int start, int end);
 
-static void Query_answer(Query * q);
+static void _answer(Query * q);
 
 static List _occurrence(Compiler c, String path, int offset);
 
-static void Query_definition(Query * q, List row);
+static void _definition(Query * q, List row);
 
-static void Query_hover(Query * q, List row);
+static void _hover(Query * q, List row);
 
-static Array Query_texts(Query * q);
+static Array _texts(Query * q);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -109,7 +109,7 @@ int editor_request(int argc, char * * argv){
   q.sources = _snapshots(argv + 6, count);
   if(q.sources == NULL) return 2;
   argv[boundary] = argv[0];
-  return Query_serve(&(q), Query_configure(&(q), argc - boundary, argv + boundary));
+  return _serve(&(q), _configure(&(q), argc - boundary, argv + boundary));
 }
 
 static SourceView _snapshots(char * * argv, int count){
@@ -126,7 +126,7 @@ static SourceView _snapshots(char * * argv, int count){
 
 CliRequest cli_parse(int, char * *);
 
-static CliRequest Query_configure(Query * q, int argc, char * * argv){
+static CliRequest _configure(Query * q, int argc, char * * argv){
   char * defaults[] ={
     argv[0], "build", NULL
   }
@@ -175,7 +175,7 @@ static int _native_cpp(CliRequest request){
   return request -> live_symbols || request -> cpp_symbols;
 }
 
-static int Query_serve(Query * q, CliRequest request){
+static int _serve(Query * q, CliRequest request){
   Frontend frontend = Frontend_new(request);
   if(! Frontend_preload_macro_libraries(frontend)) return 2;
   Frontend_prepare_meta(frontend, cons(String_var((* q).source), NULL));
@@ -221,7 +221,7 @@ static int Query_serve(Query * q, CliRequest request){
 
           }
           {
-            int _x2c_return_value_1 = Query_write(&((* q)), parsed);
+            int _x2c_return_value_1 = _write(&((* q)), parsed);
             {
               x2c_cleanup_leave(& _x2c_defer_record_1);
               x2c_cleanup_leave(& _x2c_defer_record_0);
@@ -272,21 +272,21 @@ static int _changed_dependency(Compiler c, SourceView sources){
 
 String Var_json(Var);
 
-static int Query_write(Query * q, int parsed){
+static int _write(Query * q, int parsed){
   File out = fopen((* q).response, "w");
   if(! out) return 2;
   (* q).needed = Map_new();
   (* q).reply =({
-    Var _x2c_literal_part_0 = String_var((* q).source);  Var _x2c_literal_part_1 = Array_var(Query_diagnostics(&((* q))));  Map_update_n(Map_new(), 2, Symbol_var(412426), _x2c_literal_part_0, Atom_intern(String_new("diagnostics")), _x2c_literal_part_1);
+    Var _x2c_literal_part_0 = String_var((* q).source);  Var _x2c_literal_part_1 = Array_var(_diagnostics(&((* q))));  Map_update_n(Map_new(), 2, Symbol_var(412426), _x2c_literal_part_0, Atom_intern(String_new("diagnostics")), _x2c_literal_part_1);
   }
   );
-  if(parsed) Query_answer(&((* q)));
-  Map_setindex((* q).reply, Symbol_var(41854048614), Array_var(Query_texts(&((* q)))));
+  if(parsed) _answer(&((* q)));
+  Map_setindex((* q).reply, Symbol_var(41854048614), Array_var(_texts(&((* q)))));
   fprintf(out, "%s\n", Var_json(Map_var((* q).reply)));
   return fclose(out) ? 2 : 0;
 }
 
-static Array Query_diagnostics(Query * q){
+static Array _diagnostics(Query * q){
   Array diagnostics = Array_new();
   {
     List entry;
@@ -295,14 +295,14 @@ static Array Query_diagnostics(Query * q){
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_1))){
       entry = Var_list_payload(_x2c_macro_cursor_output_1);
-      Array_push(diagnostics, Map_var(Query_diagnostic(&((* q)), entry)));
+      Array_push(diagnostics, Map_var(_diagnostic(&((* q)), entry)));
     }
 
   }
   return diagnostics;
 }
 
-static Map Query_diagnostic(Query * q, List entry){
+static Map _diagnostic(Query * q, List entry){
   {
     List _x2c_match_expr = entry; List _x2c_match_cursor, _x2c_match_cursor1;
     switch(0){
@@ -317,7 +317,7 @@ static Map Query_diagnostic(Query * q, List entry){
         Var location;
         location = _x2c_match_value_3;
         {
-          Map diagnostic = Query_diagnostic_range(&((* q)), Var_list_payload(location));
+          Map diagnostic = _diagnostic_range(&((* q)), Var_list_payload(location));
           Map_setindex(diagnostic, Symbol_var(28293925322), message);
           Map_setindex(diagnostic, Symbol_var(227594), code);
           Map_setindex(diagnostic, Symbol_var(1317895556402), severity);
@@ -332,7 +332,7 @@ static Map Query_diagnostic(Query * q, List entry){
   __builtin_unreachable();
 }
 
-static Map Query_diagnostic_range(Query * q, List location){
+static Map _diagnostic_range(Query * q, List location){
   {
     List _x2c_match_expr = location; List _x2c_match_cursor, _x2c_match_cursor1;
     switch(0){
@@ -348,7 +348,7 @@ static Map Query_diagnostic_range(Query * q, List location){
           Compiler c =(* q).compiler;
           int start = Var_int(Var_convert(position, 3453797)), width = Var_int(Var_convert(length, 3453797));
           if(! x2c_var_equal(String_var(Compiler_display_path(c, Compiler_text_source(c, Var_int(Var_convert(position, 3453797)), &(start)))), file)) start = Var_int(Var_convert(position, 3453797));
-          return Query_location(&((* q)), Path_absolute(Var_as_string(file)), start, start + width);
+          return _location(&((* q)), Path_absolute(Var_as_string(file)), start, start + width);
         }
 
       }
@@ -356,19 +356,19 @@ static Map Query_diagnostic_range(Query * q, List location){
     }
 
   }
-  return Query_location(&((* q)), Path_absolute((* q).compiler -> filename), 0, 0);
+  return _location(&((* q)), Path_absolute((* q).compiler -> filename), 0, 0);
 }
 
-static Map Query_location(Query * q, String path, int start, int end){
+static Map _location(Query * q, String path, int start, int end){
   Map_setindex((* q).needed, String_var(path), int_var(1));
   return Map_update_n(Map_new(), 3, Symbol_var(412426), String_var(path), Symbol_var(41159848), int_var(start), Symbol_var(11144), int_var(end));
 }
 
-static void Query_answer(Query * q){
+static void _answer(Query * q){
   List row = _occurrence((* q).compiler, (* q).source, (* q).offset);
   if(! List_truth(row)) return;
-  if(String_equal((* q).kind, _0)) Query_definition(&((* q)), row);
-  else if(String_equal((* q).kind, _1)) Query_hover(&((* q)), row);
+  if(String_equal((* q).kind, _0)) _definition(&((* q)), row);
+  else if(String_equal((* q).kind, _1)) _hover(&((* q)), row);
 }
 
 static List _occurrence(Compiler c, String path, int offset){
@@ -393,12 +393,12 @@ static List _occurrence(Compiler c, String path, int offset){
   return found;
 }
 
-static void Query_definition(Query * q, List row){
+static void _definition(Query * q, List row){
   List binding = Var_list_payload(List_getindex(row, 3));
   Var value = Map_getindex((* q).compiler -> source_definitions, List_var(binding));
   if(! Var_is_row(value, 9, 7, 4)) return;
   List target = Var_list_payload(value);
-  Map_setindex((* q).reply, Symbol_var(292902696930268), Map_var(Query_location(&((* q)), Var_as_string(List_getindex(target, 0)), Var_int(Var_convert(List_getindex(target, 1), 3453797)), Var_int(Var_convert(List_getindex(target, 2), 3453797)))));
+  Map_setindex((* q).reply, Symbol_var(292902696930268), Map_var(_location(&((* q)), Var_as_string(List_getindex(target, 0)), Var_int(Var_convert(List_getindex(target, 1), 3453797)), Var_int(Var_convert(List_getindex(target, 2), 3453797)))));
 }
 
 static Type Var_type(Var);
@@ -407,17 +407,17 @@ static List Type_list(Type);
 
 List Type_declaration_ast(Type, List);
 
-static void Query_hover(Query * q, List row){
+static void _hover(Query * q, List row){
   Type type = Var_type(List_getindex(row, 4));
   if(! List_truth(Type_list(type))) return;
   Compiler c =(* q).compiler;
   List declaration = Type_declaration_ast(type, Var_list_payload(List_getindex(row, 3)));
-  Map hover = Query_location(&((* q)), Var_as_string(List_getindex(row, 0)), Var_int(Var_convert(List_getindex(row, 1), 3453797)), Var_int(Var_convert(List_getindex(row, 2), 3453797)));
+  Map hover = _location(&((* q)), Var_as_string(List_getindex(row, 0)), Var_int(Var_convert(List_getindex(row, 1), 3453797)), Var_int(Var_convert(List_getindex(row, 2), 3453797)));
   Map_setindex(hover, Symbol_var(1322536), String_var(String_new(Compiler_code_pretty_string(c, Compiler_emit(c, cons(List_var(declaration), NULL), NULL), NULL))));
   Map_setindex((* q).reply, Symbol_var(17805668), Map_var(hover));
 }
 
-static Array Query_texts(Query * q){
+static Array _texts(Query * q){
   Array texts = Array_new();
   {
     Var path;

@@ -118,21 +118,21 @@ typedef struct Render{
 }
 Render;
 
-static void Render__value(Render * r, Var elem);
+static void _value(Render * r, Var elem);
 
-static void Render__leaf(Render * r, Var elem);
+static void _leaf(Render * r, Var elem);
 
 static void _nil(Buffer out);
 
-static int Render__fits(Render * r, Var elem);
+static int _fits(Render * r, Var elem);
 
-static void Render__items(Render * r, Var elem);
+static void _items(Render * r, Var elem);
 
-static void Render__flat(Render * r, Var elem);
+static void _flat(Render * r, Var elem);
 
-static void Render__flat_items(Render * r, Var elem);
+static void _flat_items(Render * r, Var elem);
 
-static void Render__write_leaf(Render * r, Var elem);
+static void _write_leaf(Render * r, Var elem);
 
 static void _open(List lst, Buffer out);
 
@@ -1500,7 +1500,7 @@ Buffer List_write_str(List lst, Buffer out){
       x2c_exception_push(& _x2c_exception_frame_0);
       if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
         * _x2c_macro_address_0 = 1;
-        Render__value(&(r), List_var(lst));
+        _value(&(r), List_var(lst));
       }
       else{
         x2c_exception_landed(& _x2c_exception_frame_0);
@@ -1561,29 +1561,29 @@ Buffer List_write_repr(List lst, Buffer out){
     out, 1190948
   }
   ;
-  Render__value(&(r), List_var(lst));
+  _value(&(r), List_var(lst));
   return out;
 }
 
 List Var_list(Var);
 
-static void Render__value(Render * r, Var elem){
+static void _value(Render * r, Var elem){
   Buffer out =(* r).out;
   if(out -> pos >= _WIDTH - 1 || out -> pos - out -> _indent > 40) Buffer_newline_indent(out);
-  if(! Var_is_row(elem, 9, 7, 4)) Render__leaf(&((* r)), elem);
+  if(! Var_is_row(elem, 9, 7, 4)) _leaf(&((* r)), elem);
   else if(! List_truth(Var_list(elem))) _nil(out);
-  else if(! Render__fits(&((* r)), elem)) Render__items(&((* r)), elem);
+  else if(! _fits(&((* r)), elem)) _items(&((* r)), elem);
 }
 
-static void Render__leaf(Render * r, Var elem){
+static void _leaf(Render * r, Var elem){
   Buffer out =(* r).out;
   size_t before = out -> content -> length, position = out -> pos;
-  Render__write_leaf(&((* r)), elem);
+  _write_leaf(&((* r)), elem);
   size_t length = out -> content -> length - before;
   if(position + length <= _WIDTH) return;
   Buffer_unwrite(out, length);
   Buffer_newline_indent(out);
-  Render__write_leaf(&((* r)), elem);
+  _write_leaf(&((* r)), elem);
 }
 
 static void _nil(Buffer out){
@@ -1591,7 +1591,7 @@ static void _nil(Buffer out){
   Buffer_write(out, "()");
 }
 
-static int Render__fits(Render * r, Var elem){
+static int _fits(Render * r, Var elem){
   Buffer line = Buffer_new((* r).out -> padding);
   const Buffer _x2c_macro_acquired_19 = line;
   {
@@ -1610,7 +1610,7 @@ static int Render__fits(Render * r, Var elem){
         line, (* r).mode
       }
       ;
-      Render__flat(&(flat), elem);
+      _flat(&(flat), elem);
       if((* r).out -> pos + line -> content -> length > _WIDTH){
         int _x2c_return_value_22 = 0;
         {
@@ -1635,30 +1635,30 @@ static int Render__fits(Render * r, Var elem){
 
 }
 
-static void Render__items(Render * r, Var elem){
+static void _items(Render * r, Var elem){
   List lst = Var_list_payload(elem);
   Buffer out =(* r).out;
   if(out -> pos - Buffer_tabstop(out) > 5) Buffer_newline_indent(out);
   _open(lst, out);
   for(List l = lst;  List_truth(l);  l = List_cdr(l)){
-    Render__value(&((* r)), List_car(l));
+    _value(&((* r)), List_car(l));
     if(List_truth(List_cdr(l))) Buffer_write(out, " ");
   }
   _close(out);
 }
 
-static void Render__flat(Render * r, Var elem){
-  if(! Var_is_row(elem, 9, 7, 4)) Render__write_leaf(&((* r)), elem);
+static void _flat(Render * r, Var elem){
+  if(! Var_is_row(elem, 9, 7, 4)) _write_leaf(&((* r)), elem);
   else if(! List_truth(Var_list(elem))) Buffer_write((* r).out, "()");
-  else Render__flat_items(&((* r)), elem);
+  else _flat_items(&((* r)), elem);
 }
 
-static void Render__flat_items(Render * r, Var elem){
+static void _flat_items(Render * r, Var elem){
   List lst = Var_list_payload(elem);
   Buffer out =(* r).out;
   _open(lst, out);
   for(List l = lst;  List_truth(l);  l = List_cdr(l)){
-    Render__flat(&((* r)), List_car(l));
+    _flat(&((* r)), List_car(l));
     if(List_truth(List_cdr(l))) Buffer_write(out, " ");
   }
   _close(out);
@@ -1666,7 +1666,7 @@ static void Render__flat_items(Render * r, Var elem){
 
 Buffer Var_write_repr(Var, Buffer);
 
-static void Render__write_leaf(Render * r, Var elem){
+static void _write_leaf(Render * r, Var elem){
   if((* r).mode == 40228) Var_write_str(elem, (* r).out);
   else if(Var_is(elem, 1328354264)) Atom_write_repr(elem, (* r).out);
   else Var_write_repr(elem, (* r).out);

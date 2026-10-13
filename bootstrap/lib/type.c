@@ -48,13 +48,13 @@ static const SymbolSet number_types =(SymbolSet) "\001\000\000\000\011\000\000\0
 
 static const SymbolSet tagged_types =(SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\033\126\160\042\037\016\242\101\000\001\001\002\000\000\350\250\222\116\000\000\000\000\334\113\256\002\000\000\000\000\132\165\005\000\000\000\000\000";
 
-static int Symbol__is_number_type(Symbol sym);
+static int _is_number_type(Symbol sym);
 
-static int Symbol__is_tagged(Symbol sym);
+static int _is_tag_keyword(Symbol sym);
 
-static int Type__is_aggregate_body(Type type);
+static int _is_aggregate_body(Type type);
 
-static int Type__is_enum_body(Type type);
+static int _is_enum_body(Type type);
 
 static Symbol _declarator_kind(Type type);
 
@@ -66,16 +66,16 @@ static int _omit_specifier(Symbol first, int keep_qualifiers);
 
 static unsigned _qualifiers(Type * cursor);
 
-static int Type__is_tagged(Type type);
+static int _is_tagged(Type type);
 
 typedef struct Specifiers{
   int sign, signs, shorts, longs, ints, chars, floats, doubles, voids, count;
 }
 Specifiers;
 
-static int Specifiers_add(Specifiers * s, Symbol symbol);
+static int _add(Specifiers * s, Symbol symbol);
 
-static Type Specifiers_spelling(Specifiers * s);
+static Type _spelling(Specifiers * s);
 
 static Map scalartypes;
 
@@ -344,17 +344,17 @@ int Symbol_is_type_modifier(Symbol sym){
   return SymbolSet_contains(type_modifiers, sym);
 }
 
-static int Symbol__is_number_type(Symbol sym){
+static int _is_number_type(Symbol sym){
   return SymbolSet_contains(number_types, sym);
 }
 
-static int Symbol__is_tagged(Symbol sym){
+static int _is_tag_keyword(Symbol sym){
   return SymbolSet_contains(tagged_types, sym);
 }
 
 int Symbol_is_builtin_type(Symbol sym){
   if(! _init_guard_) _file_init_();
-  return Symbol__is_number_type(sym) || Symbol__is_tagged(sym) || sym == 1473096;
+  return _is_number_type(sym) || _is_tag_keyword(sym) || sym == 1473096;
 }
 
 static int List_truth(List);
@@ -369,7 +369,7 @@ int Type_is_aggregate_tag(Type t){
   return ! ! List_truth(({ static MatchCaptureSite _x2c_match_site_1;  x2c_match_site_match(& _x2c_match_site_1, Type_list(t), List_var(_30)); }));
 }
 
-static int Type__is_aggregate_body(Type type){
+static int _is_aggregate_body(Type type){
   return ! ! List_truth(({ static MatchCaptureSite _x2c_match_site_2;  x2c_match_site_match(& _x2c_match_site_2, Type_list(type), List_var(_31)); }));
 }
 
@@ -388,7 +388,7 @@ int Type_is_enum_tag(Type type){
   return ! ! List_truth(({ static MatchCaptureSite _x2c_match_site_5;  x2c_match_site_match(& _x2c_match_site_5, Type_list(type), List_var(_41)); }));
 }
 
-static int Type__is_enum_body(Type type){
+static int _is_enum_body(Type type){
   return ! ! List_truth(({ static MatchCaptureSite _x2c_match_site_6;  x2c_match_site_match(& _x2c_match_site_6, Type_list(type), List_var(_42)); }));
 }
 
@@ -405,7 +405,7 @@ List Type_tag(Type type){
 
 List Type_body(Type t){
   if(! _init_guard_) _file_init_();
-  if(Type__is_enum_body(t) || Type__is_aggregate_body(t)) return cdr(Type_list(t));
+  if(_is_enum_body(t) || _is_aggregate_body(t)) return cdr(Type_list(t));
   if(Type_is_enum_tag_body(t) || Type_is_aggregate_tag_body(t)) return Type_list(List_cddr(t));
   return NULL;
 }
@@ -683,13 +683,13 @@ Type Type_scalar(Type t);
 
 int Type_is_builtin(Type type){
   if(! _init_guard_) _file_init_();
-  return ! ! List_truth(Type_list(Type_scalar(type))) || Type__is_tagged(type);
+  return ! ! List_truth(Type_list(Type_scalar(type))) || _is_tagged(type);
 }
 
-static int Type__is_tagged(Type type){
+static int _is_tagged(Type type){
   if(! List_truth(Type_list(type))) return 0;
   Var first = List_car(Type_list(type));
-  if(Var_is(first, 1328354264)) return Symbol__is_tagged(Var_symbol(first));
+  if(Var_is(first, 1328354264)) return _is_tag_keyword(Var_symbol(first));
   return 0;
 }
 
@@ -735,14 +735,14 @@ Type Type_scalar(Type t){
     Var _x2c_macro_item_3;
     while(Iter_try_next(_x2c_macro_iterator_3, &(_x2c_macro_item_3))){
       item = _x2c_macro_item_3;
-      if(! Var_is(item, 1328354264) || ! Specifiers_add(&(s), Var_symbol(item))) return NULL;
+      if(! Var_is(item, 1328354264) || ! _add(&(s), Var_symbol(item))) return NULL;
     }
 
   }
-  return Specifiers_spelling(&(s));
+  return _spelling(&(s));
 }
 
-static int Specifiers_add(Specifiers * s, Symbol symbol){
+static int _add(Specifiers * s, Symbol symbol){
   if(_omit_specifier(symbol, 0)) return 1;
   (* s).count ++;
   switch(symbol){
@@ -771,7 +771,7 @@ static int Specifiers_add(Specifiers * s, Symbol symbol){
   return 1;
 }
 
-static Type Specifiers_spelling(Specifiers * s){
+static Type _spelling(Specifiers * s){
   if(!(* s).count ||(* s).signs > 1 ||(* s).shorts > 1 ||(* s).longs > 2 ||(* s).ints > 1 ||(* s).chars > 1 ||(* s).floats > 1 ||(* s).doubles > 1 ||(* s).voids > 1) return NULL;
   if((* s).voids) return(* s).count == 1 ? List_type(_58) : NULL;
   if((* s).floats) return(* s).count == 1 ? List_type(_85) : NULL;

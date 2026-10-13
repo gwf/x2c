@@ -29,31 +29,31 @@ typedef struct ArmScan{
 }
 ArmScan;
 
-static void ArmScan_directive(ArmScan * s, Token token, size_t i);
+static void _directive(ArmScan * s, Token token, size_t i);
 
 static int _hidden_group(Array stack);
 
-static size_t ArmScan_code(ArmScan * s, Token token, size_t i);
+static size_t _code(ArmScan * s, Token token, size_t i);
 
-static size_t ArmScan__note_attribute(ArmScan * s, size_t index);
+static size_t _note_attribute(ArmScan * s, size_t index);
 
-static void ArmScan__mark_layout(ArmScan * s, size_t index, int packed);
+static void _mark_layout(ArmScan * s, size_t index, int packed);
 
 static int _layout_attribute(Token open, int * packed);
 
-static void ArmScan__note_layout_macro(ArmScan * s, String content);
+static void _note_layout_macro(ArmScan * s, String content);
 
 static int _attribute_layout(Token token);
 
-static void Compiler__note_function_macro(Compiler c, String name, Token params);
+static void _note_function_macro(Compiler c, String name, Token params);
 
-static void Compiler__note_prefix_macro(Compiler c, String name, Token body);
+static void _note_prefix_macro(Compiler c, String name, Token body);
 
-static Var Compiler__macro_prefix(Compiler c, Token token, String param);
+static Var _macro_prefix(Compiler c, Token token, String param);
 
 static int _is_specifier(Symbol type);
 
-static int Compiler__is_annotation(Compiler c, String word);
+static int _is_annotation(Compiler c, String word);
 
 static int _prefix_rank(Var v);
 
@@ -244,8 +244,8 @@ void Compiler_scan_conditionals(Compiler c){
           for(size_t i = 0;  i < Bytes_len(c -> tokenizer -> tokens);  i ++){
             Token token = &((struct Token *) c -> tokenizer -> tokens)[i];
             if(token -> type == 11212) break;
-            if(token -> type == 35579270086) ArmScan_directive(&(scan), token, i);
-            else i = ArmScan_code(&(scan), token, i);
+            if(token -> type == 35579270086) _directive(&(scan), token, i);
+            else i = _code(&(scan), token, i);
           }
 
         }
@@ -258,7 +258,7 @@ void Compiler_scan_conditionals(Compiler c){
 
 }
 
-static void ArmScan_directive(ArmScan * s, Token token, size_t i){
+static void _directive(ArmScan * s, Token token, size_t i){
   Symbol kind = preproc_conditional_kind(token -> text);
   int conditional = kind == 1016156 ||(kind && Array_len((* s).stack));
   if(kind == 1016156) Array_push((* s).stack, List_var(({
@@ -277,7 +277,7 @@ static void ArmScan_directive(ArmScan * s, Token token, size_t i){
     )));
   }
   else if(kind == 7109834 && Array_len((* s).stack)) Array_take_last((* s).stack);
-  else if(!(* s).hidden) ArmScan__note_layout_macro(&((* s)), token -> text);
+  else if(!(* s).hidden) _note_layout_macro(&((* s)), token -> text);
   if(! conditional) return;
   Map_setindex((* s).c -> arm_stacks, long_var((long) i), List_var(Array_list((* s).stack)));
   (* s).hidden = _hidden_group((* s).stack);
@@ -298,25 +298,25 @@ static int _hidden_group(Array stack){
   return 0;
 }
 
-static size_t ArmScan_code(ArmScan * s, Token token, size_t i){
+static size_t _code(ArmScan * s, Token token, size_t i){
   if((* s).hidden && token -> type != 40896714 && token -> type != 11703268) token -> type = 7477210024;
-  else if(token -> type == 19147688 && String_equal(token -> text, _27)) return ArmScan__note_attribute(&((* s)), i);
-  else if(token -> type == 19147688 && Map_contains((* s).layout, String_var(token -> text))) ArmScan__mark_layout(&((* s)), i, x2c_var_equal(Map_getindex((* s).layout, String_var(token -> text)), int_var(2)));
+  else if(token -> type == 19147688 && String_equal(token -> text, _27)) return _note_attribute(&((* s)), i);
+  else if(token -> type == 19147688 && Map_contains((* s).layout, String_var(token -> text))) _mark_layout(&((* s)), i, x2c_var_equal(Map_getindex((* s).layout, String_var(token -> text)), int_var(2)));
   return i;
 }
 
-static size_t ArmScan__note_attribute(ArmScan * s, size_t index){
+static size_t _note_attribute(ArmScan * s, size_t index){
   Token base =(* s).c -> tokenizer -> tokens;
   Token open = Token_skip_trivia(base + index + 1);
   if(open -> type != 81) return index;
   Token last = Token_group_close(open);
   if(last -> type == 11212) return index;
   int level = _attribute_layout(base + index);
-  if(level) ArmScan__mark_layout(&((* s)), index, level == 2);
+  if(level) _mark_layout(&((* s)), index, level == 2);
   return last - base;
 }
 
-static void ArmScan__mark_layout(ArmScan * s, size_t index, int packed){
+static void _mark_layout(ArmScan * s, size_t index, int packed){
   Compiler c =(* s).c;
   Array_push(c -> layout_marks, long_var((long) index));
   Array_push(c -> layout_marks, long_var((long) index + 1));
@@ -341,7 +341,7 @@ static int _layout_attribute(Token open, int * packed){
   return layout;
 }
 
-static void ArmScan__note_layout_macro(ArmScan * s, String content){
+static void _note_layout_macro(ArmScan * s, String content){
   int undefined;
   Token name = _macro_directive(content, &(undefined));
   if(! name) return;
@@ -404,26 +404,26 @@ void Compiler_note_object_macro(Compiler c, String content){
   String name = token -> text;
   Token body = token + 1;
   if(undefined) Map_del(c -> object_macros, String_var(name));
-  else if(body -> type == 81) Compiler__note_function_macro(c, name, body);
-  else Compiler__note_prefix_macro(c, name, Token_skip_trivia(body));
+  else if(body -> type == 81) _note_function_macro(c, name, body);
+  else _note_prefix_macro(c, name, Token_skip_trivia(body));
 }
 
-static void Compiler__note_function_macro(Compiler c, String name, Token params){
+static void _note_function_macro(Compiler c, String name, Token params){
   Token after = Token_after_group(params);
   String param = NULL;
   Token first = Token_skip_trivia(params + 1);
   if(first -> type == 19147688 && Token_skip_trivia(first + 1) -> type == 83) param = first -> text;
-  Var kind = Compiler__macro_prefix(c, after, param);
+  Var kind = _macro_prefix(c, after, param);
   if(x2c_var_equal(kind, List_var(NULL))) Map_setindex(c -> object_macros, String_var(name), Symbol_var(102150700288988));
   else if(x2c_var_equal(kind, Symbol_var(50603262308))) Map_setindex(c -> object_macros, String_var(name), Symbol_var(50603262308));
 }
 
-static void Compiler__note_prefix_macro(Compiler c, String name, Token body){
-  Var definition = Compiler__macro_prefix(c, body, NULL), existing;
+static void _note_prefix_macro(Compiler c, String name, Token body){
+  Var definition = _macro_prefix(c, body, NULL), existing;
   if(! Map_try_get(c -> object_macros, String_var(name), &(existing)) || _prefix_rank(definition) > _prefix_rank(existing) ||(x2c_var_equal(existing, Symbol_var(1318210446)) && ! x2c_var_equal(definition, Symbol_var(1318210446)))) Map_setindex(c -> object_macros, String_var(name), definition);
 }
 
-static Var Compiler__macro_prefix(Compiler c, Token token, String param){
+static Var _macro_prefix(Compiler c, Token token, String param){
   if(token -> type == 27051791223990) return Symbol_var(1318210446);
   Array words = Array_new();
   int wrapped = 0;
@@ -435,7 +435,7 @@ static Var Compiler__macro_prefix(Compiler c, Token token, String param){
     if(_is_specifier(type)) Array_push(words, Symbol_var(type));
     else if(type == 27051791223990);
     else if(type != 19147688) return int_var(1);
-    else if(Compiler__is_annotation(c, word)){
+    else if(_is_annotation(c, word)){
       if(next -> type != 81) return int_var(1);
       next = Token_after_group(next);
     }
@@ -471,7 +471,7 @@ static int _is_specifier(Symbol type){
   return Symbol_is_storage_class(type) || Symbol_is_inline(type) || Symbol_is_type_qualifier(type) || Symbol_is_builtin_type(type);
 }
 
-static int Compiler__is_annotation(Compiler c, String word){
+static int _is_annotation(Compiler c, String word){
   Var definition;
   return String_equal(word, _27) || String_equal(word, _33) ||(Map_try_get(c -> object_macros, String_var(word), &(definition)) && x2c_var_equal(definition, Symbol_var(102150700288988)));
 }

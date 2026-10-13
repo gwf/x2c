@@ -20,115 +20,115 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static List Compiler__statement(Compiler c, AstPos position);
+static List _statement(Compiler c, AstPos position);
 
 static List _statement_keywords(void);
 
-static List Compiler__macro_statement(Compiler c);
+static List _macro_statement(Compiler c);
 
-static List Compiler__compound_statement(Compiler c);
+static List _compound_statement(Compiler c);
 
-static List Compiler__expression_statement(Compiler c, AstPos position);
+static List _expression_statement(Compiler c, AstPos position);
 
-static List Compiler__label_statement(Compiler c);
+static List _label_statement(Compiler c);
 
-static List Compiler__with_statement(Compiler c);
+static List _with_statement(Compiler c);
 
-static String Compiler__with_alias(Compiler c);
+static String _with_alias(Compiler c);
 
-static List Compiler__with_body(Compiler c, List expression, String alias);
+static List _with_body(Compiler c, List expression, String alias);
 
-static List Compiler__keyword_paren_expr(Compiler c, Symbol keyword);
+static List _keyword_paren_expr(Compiler c, Symbol keyword);
 
-static List Compiler__paren_expr(Compiler c);
+static List _paren_expr(Compiler c);
 
-static List Compiler__then_arm(Compiler c);
+static List _then_arm(Compiler c);
 
-static List Compiler__do_body(Compiler c);
+static List _do_body(Compiler c);
 
-static List Compiler__for_init(Compiler c);
+static List _for_init(Compiler c);
 
-static List Compiler__for_clause(Compiler c, Symbol end);
+static List _for_clause(Compiler c, Symbol end);
 
-static List Compiler__return_statement(Compiler c);
+static List _return_statement(Compiler c);
 
-static List Compiler__case_statement(Compiler c);
+static List _case_statement(Compiler c);
 
-static List Compiler__break_statement(Compiler c);
+static List _break_statement(Compiler c);
 
-static List Compiler__continue_statement(Compiler c);
+static List _continue_statement(Compiler c);
 
-static List Compiler__goto_statement(Compiler c);
+static List _goto_statement(Compiler c);
 
-static List Compiler__raise_statement(Compiler c);
+static List _raise_statement(Compiler c);
 
-static List Compiler__defer_statement(Compiler c);
+static List _defer_statement(Compiler c);
 
-static List Compiler__switch_statement(Compiler c);
+static List _switch_statement(Compiler c);
 
-static List Compiler__default_statement(Compiler c);
+static List _default_statement(Compiler c);
 
-static List Compiler__empty_statement(Compiler c);
+static List _empty_statement(Compiler c);
 
-static List Compiler__match_arms(Compiler c);
+static List _match_arms(Compiler c);
 
-static List Compiler__match_cases(Compiler c);
+static List _match_cases(Compiler c);
 
-static int Compiler__arm_directives(Compiler c, Array cases, Array groups, int saw_default);
+static int _arm_directives(Compiler c, Array cases, Array groups, int saw_default);
 
 static int _default_after_directive(Array groups, int saw_default, List d);
 
-static List Compiler__match_case(Compiler c);
+static List _match_case(Compiler c);
 
-static List Compiler__case_pattern(Compiler c, Token start, List * types);
+static List _case_pattern(Compiler c, Token start, List * types);
 
-static List Compiler__parse_pattern(Compiler c, List * types);
+static List _parse_pattern(Compiler c, List * types);
 
-static void Compiler__require_list_literal(Compiler c, List pattern, Token start);
+static void _require_list_literal(Compiler c, List pattern, Token start);
 
-static List Compiler__typed_captures(Compiler c, List types, List * temporaries);
+static List _typed_captures(Compiler c, List types, List * temporaries);
 
-static List Compiler__capture_temporaries(Compiler c, List types, Array locals);
+static List _capture_temporaries(Compiler c, List types, Array locals);
 
-static List Compiler__capture_declaration(Compiler c, Type type, String name, List initializer, int temporary);
+static List _capture_declaration(Compiler c, Type type, String name, List initializer, int temporary);
 
-static List Compiler__capture_locals(Compiler c, Array locals);
+static List _capture_locals(Compiler c, Array locals);
 
-static List Compiler__catches(Compiler c);
+static List _catches(Compiler c);
 
-static List Compiler__finally(Compiler c);
+static List _finally(Compiler c);
 
-static List Compiler__catch_cases(Compiler c);
+static List _catch_cases(Compiler c);
 
-static List Compiler__catch_handle(Compiler c);
+static List _catch_handle(Compiler c);
 
-static List Compiler__catch_arm(Compiler c, int * is_default, List handle);
+static List _catch_arm(Compiler c, int * is_default, List handle);
 
-static List Compiler__catch_body(Compiler c);
+static List _catch_body(Compiler c);
 
-static List Compiler__catch_filter(Compiler c);
+static List _catch_filter(Compiler c);
 
-static int Compiler__take_directives(Compiler c, Array items);
+static int _take_directives(Compiler c, Array items);
 
 static int _group_step(String s);
 
-static int Compiler__depth_after(Compiler c, Token start, int depth);
+static int _depth_after(Compiler c, Token start, int depth);
 
 static Symbol _arm_end(List run);
 
-static List Compiler__continued(Compiler c, List statement);
+static List _continued(Compiler c, List statement);
 
 static List _block_keywords(void);
 
-static List Compiler__local_macro(Compiler c);
+static List _local_macro(Compiler c);
 
-static List Compiler__declaration_item(Compiler c);
+static List _declaration_item(Compiler c);
 
-static List Compiler__block_items(Compiler c, int anchor_items);
+static List _block_items(Compiler c, int anchor_items);
 
-static void Compiler__push_item(Compiler c, Array block, int anchor_items);
+static void _push_item(Compiler c, Array block, int anchor_items);
 
-static int Compiler__expands(Compiler c);
+static int _expands(Compiler c);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -389,40 +389,40 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 List Compiler_parse_statement(Compiler c){
   if(! _init_guard_) _file_init_();
-  return Compiler__statement(c, AST_STATEMENT);
+  return _statement(c, AST_STATEMENT);
 }
 
 List Compiler_with_binding(Compiler c);
 
-static List Compiler__statement(Compiler c, AstPos position){
+static List _statement(Compiler c, AstPos position){
   Compiler___complete_here(c, 43159332400040, _statement_keywords());
   List slot = Compiler_try_parse_macro_slot(c, 43159332400040);
   if(List_truth(slot)) return slot;
-  if(Compiler_at_word(c, _0)) return Compiler__with_statement(c);
-  if(! List_truth(Compiler_with_binding(c)) && Compiler_macro_starts_target_at(c, AST_STATEMENT)) return Compiler__macro_statement(c);
+  if(Compiler_at_word(c, _0)) return _with_statement(c);
+  if(! List_truth(Compiler_with_binding(c)) && Compiler_macro_starts_target_at(c, AST_STATEMENT)) return _macro_statement(c);
   switch(Compiler_peek(c, 0)){
     case 588 : case 48777994 : case 13284 : case 286 : case 27369680 : case 42162 : return Compiler_bind_source_statement(c);
-    case 1219800220 : return Compiler__return_statement(c);
-    case 199882 : return Compiler__case_statement(c);
-    case 5384278 : return Compiler__break_statement(c);
-    case 239352771914 : return Compiler__continue_statement(c);
-    case 490782 : return Compiler__goto_statement(c);
-    case 37833930 : return Compiler__raise_statement(c);
-    case 8728932 : return Compiler__defer_statement(c);
-    case 1323933904 : return Compiler__switch_statement(c);
-    case 8938171176 : return Compiler__default_statement(c);
-    case 119 : return Compiler__empty_statement(c);
+    case 1219800220 : return _return_statement(c);
+    case 199882 : return _case_statement(c);
+    case 5384278 : return _break_statement(c);
+    case 239352771914 : return _continue_statement(c);
+    case 490782 : return _goto_statement(c);
+    case 37833930 : return _raise_statement(c);
+    case 8728932 : return _defer_statement(c);
+    case 1323933904 : return _switch_statement(c);
+    case 8938171176 : return _default_statement(c);
+    case 119 : return _empty_statement(c);
     case 81 : return Compiler_parse_parenthesized_statement(c);
-    case 247 : case 9719 : return Compiler__compound_statement(c);
+    case 247 : case 9719 : return _compound_statement(c);
   }
-  return Compiler__expression_statement(c, position);
+  return _expression_statement(c, position);
 }
 
 static List _statement_keywords(void){
   return _48;
 }
 
-static List Compiler__macro_statement(Compiler c){
+static List _macro_statement(Compiler c){
   List hole = Compiler_peek_macro_hole(c);
   List macro = Compiler_try_parse_macro_target_at(c, AST_STATEMENT);
   if(List_truth(macro)) return macro;
@@ -433,15 +433,15 @@ static List Compiler__macro_statement(Compiler c){
 
 List Compiler_parse_compound_statement(Compiler c);
 
-static List Compiler__compound_statement(Compiler c){
+static List _compound_statement(Compiler c){
   Compiler_next(c);
   return Compiler_parse_compound_statement(c);
 }
 
 List Compiler_evaluate_meta_statement(Compiler, List, AstPos, Token);
 
-static List Compiler__expression_statement(Compiler c, AstPos position){
-  List label = Compiler__label_statement(c);
+static List _expression_statement(Compiler c, AstPos position){
+  List label = _label_statement(c);
   if(List_truth(label)) return label;
   Token start = c -> token;
   List expr;
@@ -481,7 +481,7 @@ static List Compiler__expression_statement(Compiler c, AstPos position){
   return cons(_49, cons(List_var(expr), NULL));
 }
 
-static List Compiler__label_statement(Compiler c){
+static List _label_statement(Compiler c){
   Token head = c -> token;
   if(Compiler_peek(c, 0) == 19147688 ||(Map_truth(c -> macro_holes) && List_truth(Compiler_peek_macro_hole(c)) && Compiler_after_hole(c) -> type == 117)){
     List label = Compiler_try_parse_macro_slot(c, 920394);
@@ -494,16 +494,16 @@ static List Compiler__label_statement(Compiler c){
 
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
-static List Compiler__with_statement(Compiler c){
+static List _with_statement(Compiler c){
   Compiler_next(c);
   if((Compiler_peek(c, 0) == 247 && Compiler_peek(c, 1) == 251) || Compiler_peek(c, 0) == 119 || Compiler_peek(c, 0) == 11212) Compiler_report_error(c, 33658058, _51, c -> token, NULL);
   List expression = Compiler_parse_expression(c);
-  String alias = Compiler__with_alias(c);
+  String alias = _with_alias(c);
   if(Compiler_peek(c, 0) != 247) Compiler_report_error(c, 33658058, _52, c -> token, NULL);
-  return Compiler__with_body(c, expression, alias);
+  return _with_body(c, expression, alias);
 }
 
-static String Compiler__with_alias(Compiler c){
+static String _with_alias(Compiler c){
   if(! Compiler_take_word(c, _53)) return _54;
   if(Compiler_peek(c, 0) != 19147688) Compiler_report_error(c, 33658058, _55, c -> token, NULL);
   String alias = c -> token -> text;
@@ -519,7 +519,7 @@ void Compiler_set_fact(Compiler, Var, Var);
 
 Map Compiler_semantic_binding_facts(Compiler);
 
-static List Compiler__with_body(Compiler c, List expression, String alias){
+static List _with_body(Compiler c, List expression, String alias){
   List type = NULL;
   {
     List _x2c_match_expr = expression; List _x2c_match_cursor;
@@ -587,54 +587,54 @@ List Compiler_parse_governed(Compiler c, AstPos position);
 List Compiler_parse_source_clause(Compiler c, Symbol kind){
   if(! _init_guard_) _file_init_();
   switch(kind){
-    case 1322216 : return Compiler__paren_expr(c);
-    case 1327452 : return Compiler__then_arm(c);
+    case 1322216 : return _paren_expr(c);
+    case 1327452 : return _then_arm(c);
     case 353482 : return Compiler_test(c, 353482) ? Compiler_parse_governed(c, AST_STATEMENT) : NULL;
-    case 286 : return Compiler__do_body(c);
-    case 619112 : return Compiler__for_init(c);
-    case 228232 : return Compiler__for_clause(c, 119);
-    case 929320 : return Compiler__for_clause(c, 83);
-    case 103270 : return Compiler__match_arms(c);
-    case 42162 : return Compiler__continued(c, Compiler_parse_governed(c, AST_STATEMENT));
-    case 6551716198 : return Compiler__catches(c);
-    case 6398160 : return Compiler__catch_body(c);
-    case 13518332722 : return Compiler__finally(c);
+    case 286 : return _do_body(c);
+    case 619112 : return _for_init(c);
+    case 228232 : return _for_clause(c, 119);
+    case 929320 : return _for_clause(c, 83);
+    case 103270 : return _match_arms(c);
+    case 42162 : return _continued(c, Compiler_parse_governed(c, AST_STATEMENT));
+    case 6551716198 : return _catches(c);
+    case 6398160 : return _catch_body(c);
+    case 13518332722 : return _finally(c);
   }
   return Compiler_parse_governed(c, AST_STATEMENT);
 }
 
-static List Compiler__keyword_paren_expr(Compiler c, Symbol keyword){
+static List _keyword_paren_expr(Compiler c, Symbol keyword){
   Compiler_expect(c, keyword);
-  return Compiler__paren_expr(c);
+  return _paren_expr(c);
 }
 
-static List Compiler__paren_expr(Compiler c){
+static List _paren_expr(Compiler c){
   Compiler_expect(c, 81);
   List expr = Compiler_parse_expression(c);
   Compiler_expect(c, 83);
   return expr;
 }
 
-static List Compiler__then_arm(Compiler c){
+static List _then_arm(Compiler c){
   List arm = Compiler_parse_governed(c, AST_STATEMENT);
   Compiler___complete_here(c, 239352771914, _60);
-  return Compiler_peek(c, 0) == 353482 ? Compiler__continued(c, arm) : arm;
+  return Compiler_peek(c, 0) == 353482 ? _continued(c, arm) : arm;
 }
 
-static List Compiler__do_body(Compiler c){
-  List body = Compiler__continued(c, Compiler_parse_governed(c, AST_STATEMENT));
+static List _do_body(Compiler c){
+  List body = _continued(c, Compiler_parse_governed(c, AST_STATEMENT));
   Compiler_expect(c, 48777994);
   return body;
 }
 
-static List Compiler__for_init(Compiler c){
+static List _for_init(Compiler c){
   Compiler_expect(c, 81);
   List init = Compiler_peek(c, 0) == 119 ? NULL : Compiler_test_declaration(c) ? Compiler_parse_type_operand(c, NULL) : Compiler_parse_expression(c);
   Compiler_expect(c, 119);
   return init;
 }
 
-static List Compiler__for_clause(Compiler c, Symbol end){
+static List _for_clause(Compiler c, Symbol end){
   List clause = Compiler_peek(c, 0) == end ? NULL : Compiler_parse_expression(c);
   Compiler_expect(c, end);
   return clause;
@@ -642,7 +642,7 @@ static List Compiler__for_clause(Compiler c, Symbol end){
 
 List Compiler_finish_return_statement(Compiler c, List expr);
 
-static List Compiler__return_statement(Compiler c){
+static List _return_statement(Compiler c){
   Compiler_expect(c, 1219800220);
   Compiler___complete_here(c, 377892, NULL);
   if(Compiler_peek(c, 0) == 119){
@@ -664,33 +664,33 @@ List Compiler_finish_return_statement(Compiler c, List expr){
   return cons(_61, cons(List_var(c -> return_type), cons(List_var(resolved), NULL)));
 }
 
-static List Compiler__case_statement(Compiler c){
+static List _case_statement(Compiler c){
   Compiler_expect(c, 199882);
   List expr = Compiler_parse_expression(c);
   Compiler_expect(c, 117);
   return cons(_63, cons(List_var(expr), NULL));
 }
 
-static List Compiler__break_statement(Compiler c){
+static List _break_statement(Compiler c){
   Compiler_expect(c, 5384278);
   Compiler_expect(c, 119);
   return _65;
 }
 
-static List Compiler__continue_statement(Compiler c){
+static List _continue_statement(Compiler c){
   Compiler_expect(c, 239352771914);
   Compiler_expect(c, 119);
   return _67;
 }
 
-static List Compiler__goto_statement(Compiler c){
+static List _goto_statement(Compiler c){
   Compiler_expect(c, 490782);
   List label = Compiler_parse_optional_identifier(c);
   Compiler_expect(c, 119);
   return cons(_68, cons(List_var(label), NULL));
 }
 
-static List Compiler__raise_statement(Compiler c){
+static List _raise_statement(Compiler c){
   Compiler_expect(c, 37833930);
   if(Compiler_peek(c, 0) != 9553) Compiler_report_error(c, 33658058, _69, c -> token, _72);
   List stmt = Compiler_parse_raise_literal(c);
@@ -698,36 +698,36 @@ static List Compiler__raise_statement(Compiler c){
   return stmt;
 }
 
-static List Compiler__defer_statement(Compiler c){
+static List _defer_statement(Compiler c){
   Compiler_expect(c, 8728932);
   return cons(_73, cons(List_var(Compiler_parse_governed(c, AST_STATEMENT)), NULL));
 }
 
-static List Compiler__switch_statement(Compiler c){
-  List expr = Compiler__keyword_paren_expr(c, 1323933904);
+static List _switch_statement(Compiler c){
+  List expr = _keyword_paren_expr(c, 1323933904);
   List body = Compiler_parse_governed(c, AST_STATEMENT);
   return cons(_74, cons(List_var(expr), cons(List_var(body), NULL)));
 }
 
-static List Compiler__default_statement(Compiler c){
+static List _default_statement(Compiler c){
   Compiler_expect(c, 8938171176);
   Compiler_expect(c, 117);
   return _76;
 }
 
-static List Compiler__empty_statement(Compiler c){
+static List _empty_statement(Compiler c){
   Compiler_expect(c, 119);
   return _78;
 }
 
-static List Compiler__match_arms(Compiler c){
-  if(! Compiler_test(c, 247)) return cons(List_var(Compiler__match_case(c)), NULL);
-  List cases = Compiler__match_cases(c);
+static List _match_arms(Compiler c){
+  if(! Compiler_test(c, 247)) return cons(List_var(_match_case(c)), NULL);
+  List cases = _match_cases(c);
   Compiler_expect(c, 251);
   return cases;
 }
 
-static List Compiler__match_cases(Compiler c){
+static List _match_cases(Compiler c){
   Array cases = Array_new();
   Array groups = Array_new();
   const Array _x2c_macro_acquired_0 = groups;
@@ -746,7 +746,7 @@ static List Compiler__match_cases(Compiler c){
       Symbol peek = Compiler_peek(c, 0);
       int saw_default = 0;
       while(1){
-        saw_default = Compiler__arm_directives(c, cases, groups, saw_default);
+        saw_default = _arm_directives(c, cases, groups, saw_default);
         List hole = Compiler_try_parse_macro_slot(c, 28699191645166);
         if(List_truth(hole)){
           Array_push(cases, List_var(hole));
@@ -756,7 +756,7 @@ static List Compiler__match_cases(Compiler c){
         if(peek != 199882 && peek != 8938171176) break;
         if(saw_default) Compiler_report_error(c, 33658058, _79, c -> token, _82);
         if(peek == 8938171176) saw_default = 1;
-        Array_push(cases, List_var(Compiler__match_case(c)));
+        Array_push(cases, List_var(_match_case(c)));
         peek = Compiler_peek(c, 0);
       }
       {
@@ -776,7 +776,7 @@ static List Compiler__match_cases(Compiler c){
 
 List Compiler_leading_preproc(Compiler);
 
-static int Compiler__arm_directives(Compiler c, Array cases, Array groups, int saw_default){
+static int _arm_directives(Compiler c, Array cases, Array groups, int saw_default){
   if(c -> token == c -> directives_taken) return saw_default;
   {
     List directive;
@@ -815,27 +815,27 @@ static int _default_after_directive(Array groups, int saw_default, List d){
 
 List Compiler_parse_match_row_argument(Compiler c){
   if(! _init_guard_) _file_init_();
-  return Compiler__match_case(c);
+  return _match_case(c);
 }
 
-static List Compiler__match_case(Compiler c){
+static List _match_case(Compiler c){
   Symbol peek = Compiler_peek(c, 0);
   Token start = c -> token;
   List pattern = NULL, types = NULL;
-  if(Compiler_test(c, 199882)) pattern = Compiler__case_pattern(c, start, &(types));
+  if(Compiler_test(c, 199882)) pattern = _case_pattern(c, start, &(types));
   else if(Compiler_test(c, 8938171176)) pattern = _84;
   else Compiler_report_error(c, 33658058, _85, c -> token, cons(_87, cons(String_var(c -> token -> text), NULL)));
   return Compiler_bind_match_arm(c, pattern, source_clause(3226), start, peek == 199882, types);
 }
 
-static List Compiler__case_pattern(Compiler c, Token start, List * types){
-  List pattern = Compiler__parse_pattern(c, &((* types)));
+static List _case_pattern(Compiler c, Token start, List * types){
+  List pattern = _parse_pattern(c, &((* types)));
   if(List_truth((* types))) pattern = Compiler_typed_match_pattern(c, pattern, (* types));
-  Compiler__require_list_literal(c, pattern, start);
+  _require_list_literal(c, pattern, start);
   return pattern;
 }
 
-static List Compiler__parse_pattern(Compiler c, List * types){
+static List _parse_pattern(Compiler c, List * types){
   Array captures = Array_new();
   const Array _x2c_macro_acquired_1 = captures;
   {
@@ -918,7 +918,7 @@ static List Compiler__parse_pattern(Compiler c, List * types){
 
 }
 
-static void Compiler__require_list_literal(Compiler c, List pattern, Token start){
+static void _require_list_literal(Compiler c, List pattern, Token start){
   {
     List _x2c_match_expr = pattern; MatchCaptureBuffer _x2c_match_capture = { 0 };
     switch(0){
@@ -932,7 +932,7 @@ static void Compiler__require_list_literal(Compiler c, List pattern, Token start
 
 SymScope Sym_pop_scope(Sym);
 List Compiler_parse_case_body(Compiler c, List types){
-  if(! _init_guard_) _file_init_();  List temporaries = NULL;  List declarations = List_truth(types) ? Compiler__typed_captures(c, types, &(temporaries)) : NULL;  List guard = Compiler_peek(c, 0) == 588 ? Compiler__keyword_paren_expr(c, 588) : NULL;  Compiler_expect(c, 117);  List body = Compiler_parse_governed(c, AST_STATEMENT);  if(List_truth(guard)) body =({
+  if(! _init_guard_) _file_init_();  List temporaries = NULL;  List declarations = List_truth(types) ? _typed_captures(c, types, &(temporaries)) : NULL;  List guard = Compiler_peek(c, 0) == 588 ? _keyword_paren_expr(c, 588) : NULL;  Compiler_expect(c, 117);  List body = Compiler_parse_governed(c, AST_STATEMENT);  if(List_truth(guard)) body =({
     Var _x2c_literal_part_0 = List_var(guard);  Var _x2c_literal_part_1 = List_var(cons(_102, cons(List_var(body), _104)));  cons(_105, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
   }
   );  if(List_truth(types)){
@@ -944,18 +944,18 @@ List Compiler_parse_case_body(Compiler c, List types){
   if(List_truth(guard)) body = cons(_106, cons(List_var(body), NULL));  return body;
 }
 
-static List Compiler__typed_captures(Compiler c, List types, List * temporaries){
-  Array locals = Array_new(); (* temporaries) = Compiler__capture_temporaries(c, types, locals);  Sym_push_new_scope(c -> sym);  List declarations = Compiler__capture_locals(c, locals);  Array_free(locals);  return declarations;
+static List _typed_captures(Compiler c, List types, List * temporaries){
+  Array locals = Array_new(); (* temporaries) = _capture_temporaries(c, types, locals);  Sym_push_new_scope(c -> sym);  List declarations = _capture_locals(c, locals);  Array_free(locals);  return declarations;
 }
 
-static List Compiler__capture_temporaries(Compiler c, List types, Array locals){
+static List _capture_temporaries(Compiler c, List types, Array locals){
   Array declarations = Array_new(); {
     List row;  List _x2c_macro_object_1 = types;  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       row = Var_list_payload(_x2c_macro_cursor_output_1); {
         List _x2c_match_expr = row; List _x2c_match_cursor;  switch(0){
             default: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_1 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
             Var name;  name = _x2c_match_value_0;  Var type;  type = _x2c_match_value_1; {
-              String temporary = Compiler_fresh_name(c, _107);  Array_push(declarations, List_var(Compiler__capture_declaration(c, List_type(_110), temporary, cons(_89, cons(_111, cons(List_var(cons(_112, cons(List_var(cons(name, NULL)), NULL))), NULL))), 1)));  Array_push(locals, List_var(cons(name, cons(type, cons(String_var(temporary), NULL)))));
+              String temporary = Compiler_fresh_name(c, _107);  Array_push(declarations, List_var(_capture_declaration(c, List_type(_110), temporary, cons(_89, cons(_111, cons(List_var(cons(_112, cons(List_var(cons(name, NULL)), NULL))), NULL))), 1)));  Array_push(locals, List_var(cons(name, cons(type, cons(String_var(temporary), NULL)))));
             }
 
           }
@@ -972,7 +972,7 @@ static List Compiler__capture_temporaries(Compiler c, List types, Array locals){
 
 static List Type_list(Type);
 List Sym_introduce(Sym, String);
-static List Compiler__capture_declaration(Compiler c, Type type, String name, List initializer, int temporary){
+static List _capture_declaration(Compiler c, Type type, String name, List initializer, int temporary){
   List binding;  if(Map_truth(c -> macro_holes)){
     binding = Compiler_macro_introduced_name(c, name);  initializer = Compiler_resolve_expression(c, initializer, c -> token);  Compiler_bind_template_local(c, binding, Type_list(type), NULL);
   }
@@ -986,13 +986,13 @@ static List Compiler__capture_declaration(Compiler c, Type type, String name, Li
 }
 
 static Type Var_type(Var);
-static List Compiler__capture_locals(Compiler c, Array locals){
+static List _capture_locals(Compiler c, Array locals){
   Array declarations = Array_new(); {
     List row;  Array _x2c_macro_object_2 = locals;  int _x2c_macro_cursor_2 = 0;  Var _x2c_macro_cursor_output_2;  while(Array_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
       row = Var_list_payload(_x2c_macro_cursor_output_2); {
         List _x2c_match_expr = row; List _x2c_match_cursor;  switch(0){
             default: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_1 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_2 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
-            Var name;  name = _x2c_match_value_0;  Var type;  type = _x2c_match_value_1;  Var temporary;  temporary = _x2c_match_value_2;  Array_push(declarations, List_var(Compiler__capture_declaration(c, Var_type(type), Var_as_string(name), cons(_89, cons(_111, cons(List_var(cons(_112, cons(List_var(cons(temporary, NULL)), NULL))), NULL))), 0)));
+            Var name;  name = _x2c_match_value_0;  Var type;  type = _x2c_match_value_1;  Var temporary;  temporary = _x2c_match_value_2;  Array_push(declarations, List_var(_capture_declaration(c, Var_type(type), Var_as_string(name), cons(_89, cons(_111, cons(List_var(cons(_112, cons(List_var(cons(temporary, NULL)), NULL))), NULL))), 0)));
           }
            break; } } } }
         }
@@ -1005,20 +1005,20 @@ static List Compiler__capture_locals(Compiler c, Array locals){
   return Array_list_free(declarations);
 }
 
-static List Compiler__catches(Compiler c){
-  Compiler___complete_here(c, 239352771914, _126);  if(Compiler_test(c, 6398160)) return Compiler__catch_cases(c);  if(Compiler_peek(c, 0) != 13518332722) Compiler_report_error(c, 33658058, _127, c -> token, NULL);  return NULL;
+static List _catches(Compiler c){
+  Compiler___complete_here(c, 239352771914, _126);  if(Compiler_test(c, 6398160)) return _catch_cases(c);  if(Compiler_peek(c, 0) != 13518332722) Compiler_report_error(c, 33658058, _127, c -> token, NULL);  return NULL;
 }
 
-static List Compiler__finally(Compiler c){
+static List _finally(Compiler c){
   Compiler___complete_here(c, 239352771914, _125);  return Compiler_test(c, 13518332722) ? Compiler_parse_governed(c, AST_STATEMENT) : NULL;
 }
 
-static List Compiler__catch_cases(Compiler c){
-  List handle = Compiler__catch_handle(c);  Array arms = Array_new();  int saw_default = 0;  while(1){
+static List _catch_cases(Compiler c){
+  List handle = _catch_handle(c);  Array arms = Array_new();  int saw_default = 0;  while(1){
     List hole = Compiler_try_parse_macro_slot(c, 6398160);  if(List_truth(hole)){
       Array_push(arms, List_var(hole));  if(! Compiler_test(c, 6398160)) break;  continue;
     }
-    int is_default = 0;  Array_push(arms, List_var(Compiler__catch_arm(c, &(is_default), handle)));  if(is_default) saw_default = 1;  if(! Compiler_test(c, 6398160)) break;  if(saw_default) Compiler_report_error(c, 33658058, _128, c -> token, _131);
+    int is_default = 0;  Array_push(arms, List_var(_catch_arm(c, &(is_default), handle)));  if(is_default) saw_default = 1;  if(! Compiler_test(c, 6398160)) break;  if(saw_default) Compiler_report_error(c, 33658058, _128, c -> token, _131);
   }
   return({
     Var _x2c_literal_part_7 = List_var(Array_list_free(arms));  cons(_132, cons(_x2c_literal_part_7, cons(List_var(handle), NULL)));
@@ -1026,19 +1026,19 @@ static List Compiler__catch_cases(Compiler c){
   );
 }
 
-static List Compiler__catch_handle(Compiler c){
+static List _catch_handle(Compiler c){
   return Map_truth(c -> macro_holes) ? Compiler_macro_introduced_name(c, _133) : Sym_introduce(c -> sym, Compiler_fresh_name(c, _133));
 }
 
-static List Compiler__catch_arm(Compiler c, int * is_default, List handle){
-  Token start = c -> token;  List pattern = NULL;  if(Compiler_test(c, 117))(* is_default) = 1;  else pattern = Compiler__catch_filter(c);  return Compiler_bind_catch_arm(c, pattern, source_clause(6398160), start, handle);
+static List _catch_arm(Compiler c, int * is_default, List handle){
+  Token start = c -> token;  List pattern = NULL;  if(Compiler_test(c, 117))(* is_default) = 1;  else pattern = _catch_filter(c);  return Compiler_bind_catch_arm(c, pattern, source_clause(6398160), start, handle);
 }
 
-static List Compiler__catch_body(Compiler c){
-  List body = Compiler_parse_governed(c, AST_STATEMENT);  Compiler___complete_here(c, 239352771914, _126);  return Compiler_peek(c, 0) == 6398160 || Compiler_peek(c, 0) == 13518332722 ? Compiler__continued(c, body) : body;
+static List _catch_body(Compiler c){
+  List body = Compiler_parse_governed(c, AST_STATEMENT);  Compiler___complete_here(c, 239352771914, _126);  return Compiler_peek(c, 0) == 6398160 || Compiler_peek(c, 0) == 13518332722 ? _continued(c, body) : body;
 }
 
-static List Compiler__catch_filter(Compiler c){
+static List _catch_filter(Compiler c){
   if(Compiler_peek(c, 0) != 9553) Compiler_report_error(c, 33658058, _134, c -> token, _137);  List pattern = Compiler_parse_catch_pattern_literal(c);  Compiler_expect(c, 117);  return pattern;
 }
 
@@ -1052,8 +1052,8 @@ List Compiler_parse_governed(Compiler c, AstPos position){
       .fn = _x2c_defer_cleanup_6, .env = & _x2c_macro_environment_6
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_6); {
-      int depth = Compiler__take_directives(c, items);  while(1){
-        Token start = c -> token;  Array_push(items, List_var(position == AST_BLOCK ? Compiler_parse_block_item(c) : Compiler_parse_statement(c)));  depth = Compiler__depth_after(c, start, depth);  if(depth <= 0) break;  Symbol end = _arm_end(Compiler_leading_preproc(c));  if(! end) break;  depth += Compiler__take_directives(c, items);  c -> directives_taken = c -> token;  if(depth <= 0 || end == 7109834 || Compiler_peek(c, 0) == 251 || Compiler_peek(c, 0) == 11212) break;
+      int depth = _take_directives(c, items);  while(1){
+        Token start = c -> token;  Array_push(items, List_var(position == AST_BLOCK ? Compiler_parse_block_item(c) : Compiler_parse_statement(c)));  depth = _depth_after(c, start, depth);  if(depth <= 0) break;  Symbol end = _arm_end(Compiler_leading_preproc(c));  if(! end) break;  depth += _take_directives(c, items);  c -> directives_taken = c -> token;  if(depth <= 0 || end == 7109834 || Compiler_peek(c, 0) == 251 || Compiler_peek(c, 0) == 11212) break;
       }
       {
         List _x2c_return_value_3 = Var_list_payload(Array_len(items) == 1 ? Array_getindex(items, 0) : List_var(cons(_138, List_append(Array_list(items), NULL)))); {
@@ -1068,7 +1068,7 @@ List Compiler_parse_governed(Compiler c, AstPos position){
 
 }
 
-static int Compiler__take_directives(Compiler c, Array items){
+static int _take_directives(Compiler c, Array items){
   int depth = 0; {
     List directive;  List _x2c_macro_object_3 = Compiler_leading_preproc(c);  List _x2c_macro_cursor_3 = _x2c_macro_object_3;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
       directive = Var_list_payload(_x2c_macro_cursor_output_3); {
@@ -1085,7 +1085,7 @@ static int _group_step(String s){
   Symbol kind = preproc_conditional_kind(s);  return kind == 1016156 ? 1 : kind == 7109834 ? - 1 : 0;
 }
 
-static int Compiler__depth_after(Compiler c, Token start, int depth){
+static int _depth_after(Compiler c, Token start, int depth){
   int pending = 0;  for(Token token = start;  depth > 0 && token < c -> token;  token ++) if(token -> type == 35579270086) pending += _group_step(token -> text);  else if(token -> type != 40896714 && token -> type != 7477210024){
     depth += pending;  pending = 0;
   }
@@ -1105,23 +1105,23 @@ static Symbol _arm_end(List run){
   return end;
 }
 
-static List Compiler__continued(Compiler c, List statement){
+static List _continued(Compiler c, List statement){
   if(c -> token == c -> directives_taken) return statement;  List directives = Compiler_leading_preproc(c);  return List_truth(directives) ? cons(_138, cons(List_var(statement), List_append(directives, NULL))) : statement;
 }
 
 List Compiler_parse_block_item(Compiler c){
-  if(! _init_guard_) _file_init_();  Compiler___complete_here(c, 5011670, _block_keywords());  if(Compiler_test_static_assert(c)) return Compiler_parse_static_assert(c);  List slot = Compiler_try_parse_macro_slot(c, 5011670);  if(List_truth(slot)) return slot;  if(Compiler_local_macro_form_is_definition(c)) return Compiler__local_macro(c);  if(Compiler_at_word(c, _0)) return Compiler_parse_statement(c);  int with_expression = ! ! List_truth(Compiler_with_binding(c));  List macro = with_expression ? NULL : Compiler_try_parse_macro_target_at(c, AST_BLOCK);  if(List_truth(macro)) return macro;  if(Compiler_test_declaration(c)) return Compiler__declaration_item(c);  return Compiler__statement(c, AST_BLOCK);
+  if(! _init_guard_) _file_init_();  Compiler___complete_here(c, 5011670, _block_keywords());  if(Compiler_test_static_assert(c)) return Compiler_parse_static_assert(c);  List slot = Compiler_try_parse_macro_slot(c, 5011670);  if(List_truth(slot)) return slot;  if(Compiler_local_macro_form_is_definition(c)) return _local_macro(c);  if(Compiler_at_word(c, _0)) return Compiler_parse_statement(c);  int with_expression = ! ! List_truth(Compiler_with_binding(c));  List macro = with_expression ? NULL : Compiler_try_parse_macro_target_at(c, AST_BLOCK);  if(List_truth(macro)) return macro;  if(Compiler_test_declaration(c)) return _declaration_item(c);  return _statement(c, AST_BLOCK);
 }
 
 static List _block_keywords(void){
   return _165;
 }
 
-static List Compiler__local_macro(Compiler c){
+static List _local_macro(Compiler c){
   List definition = Compiler_parse_macro_definition(c);  return Map_truth(c -> macro_holes) ? definition : _167;
 }
 
-static List Compiler__declaration_item(Compiler c){
+static List _declaration_item(Compiler c){
   Token origin = c -> token;  List decl = Compiler_parse_declaration_row(c);  Compiler_expect(c, 119);  return Compiler_finish_initializers(c, decl, origin);
 }
 
@@ -1140,7 +1140,7 @@ List Compiler_parse_block_items(Compiler c, int anchor_items){
     }
     ;  x2c_cleanup_push(& _x2c_defer_record_7); {
       {
-        List _x2c_return_value_4 = Compiler__block_items(c, anchor_items); {
+        List _x2c_return_value_4 = _block_items(c, anchor_items); {
           x2c_cleanup_leave(& _x2c_defer_record_7);  return _x2c_return_value_4;
         }
 
@@ -1153,10 +1153,10 @@ List Compiler_parse_block_items(Compiler c, int anchor_items){
 }
 
 List Compiler_parse_callable_body(Compiler c){
-  if(! _init_guard_) _file_init_();  return Compiler__block_items(c, 1);
+  if(! _init_guard_) _file_init_();  return _block_items(c, 1);
 }
 
-static List Compiler__block_items(Compiler c, int anchor_items){
+static List _block_items(Compiler c, int anchor_items){
   Array block = Array_new();  const Array _x2c_macro_acquired_3 = block; {
     _x2c_defer_env_9 _x2c_macro_environment_9 ={
       0
@@ -1180,7 +1180,7 @@ static List Compiler__block_items(Compiler c, int anchor_items){
               }
 
             }
-            if(Compiler_peek(c, 0) == 251) break;  Compiler__push_item(c, block, anchor_items);
+            if(Compiler_peek(c, 0) == 251) break;  _push_item(c, block, anchor_items);
           }
           Compiler_expect(c, 251); {
             List _x2c_return_value_5 = cons(Symbol_var(5011670), Array_list(block)); {
@@ -1199,8 +1199,8 @@ static List Compiler__block_items(Compiler c, int anchor_items){
 
 }
 
-static void Compiler__push_item(Compiler c, Array block, int anchor_items){
-  Token origin = c -> token;  int expansion = Compiler__expands(c);  Compiler_enter(c, (Ancestor){
+static void _push_item(Compiler c, Array block, int anchor_items){
+  Token origin = c -> token;  int expansion = _expands(c);  Compiler_enter(c, (Ancestor){
     .what = 43159332400040, .token = origin
   }
   );  List stmt = Compiler_parse_block_item(c);  List after = Compiler_leave_item(c);  if(Map_truth(c -> macro_holes) &&(x2c_var_equal(List_car(stmt), Symbol_var(917238582496136)) || x2c_var_equal(List_car(stmt), Symbol_var(917238583616488)))){
@@ -1215,7 +1215,7 @@ static void Compiler__push_item(Compiler c, Array block, int anchor_items){
 
 }
 
-static int Compiler__expands(Compiler c){
+static int _expands(Compiler c){
   return(Compiler_macro_starts_target_at(c, AST_BLOCK) && !(Map_truth(c -> macro_holes) && List_truth(Compiler_peek_macro_hole(c)))) ||(! Map_truth(c -> macro_holes) && Compiler_local_macro_form_is_definition(c));
 }
 

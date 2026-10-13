@@ -656,8 +656,8 @@ static inline int Var_is_row(Var value, unsigned top, unsigned long mask, unsign
 unsigned long Var_tag_top(Symbol tag);
 unsigned long Var_tag_bottom(Symbol tag);
 static Symbol _literal_tag(List tag);
-static int var_tag_top(List tag);
-static int var_tag_bottom(List tag);
+static int _var_tag_top(List tag);
+static int _var_tag_bottom(List tag);
 static inline String Var_string_payload(Var _x2c_macro_value_0){
   if(_x2c_macro_value_0.u64 >> 48 != 11 ||(_x2c_macro_value_0.u64 & 0x7) != 1) return NULL;  return(String)(_x2c_macro_value_0.u64 & 0x0000FFFFFFFFFFF8ul);
 }
@@ -811,11 +811,11 @@ static Symbol _literal_tag(List tag){
   return 0;
 }
 
-static int var_tag_top(List tag){
+static int _var_tag_top(List tag){
   return(int) Var_tag_top(_literal_tag(tag));
 }
 
-static int var_tag_bottom(List tag){
+static int _var_tag_bottom(List tag){
   return(int) Var_tag_bottom(_literal_tag(tag));
 }
 

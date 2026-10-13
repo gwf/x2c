@@ -115,49 +115,49 @@ typedef struct Call{
 }
 Call;
 
-static void Call_answer(Call * c, String operation, List operands);
+static void _answer(Call * c, String operation, List operands);
 
-static void Call_check(Call * call);
+static void _check(Call * call);
 
-static void Call_send(Call * c, List arguments);
+static void _send(Call * c, List arguments);
 
-static void Call_send_frame(Call * call, List message);
+static void _send_frame(Call * call, List message);
 
-static void Call_set_deadline(Call * call);
+static void _set_deadline(Call * call);
 
 static double _now(void);
 
-static Var Call_next_reply(Call * call);
+static Var _next_reply(Call * call);
 
-static int _helper_start(void);
+static int _start(void);
 
-_Noreturn static void _helper_exec(int requests, int replies);
+_Noreturn static void _exec(int requests, int replies);
 
-static int _helper_running(void);
+static int _running(void);
 
-static int _helper_reaped(void);
+static int _reaped(void);
 
-static int _helper_stop(int signal);
+static int _stop(int signal);
 
-static String _helper_ending(void);
+static String _exit_reason(void);
 
-static int _helper_send(List message, double deadline);
+static int _write_frame(List message, double deadline);
 
-static int _helper_receive(double deadline, Var * reply);
+static int _read_reply(double deadline, Var * reply);
 
 static int _take_frame(Var * reply);
 
 static int _read_input(double deadline);
 
-static void Call_refuse(Call * call, String why);
+static void _refuse(Call * call, String why);
 
-static void Call_overdue(Call * c);
+static void _overdue(Call * c);
 
-static void Call_stopped(Call * call, String reason);
+static void _stopped(Call * call, String reason);
 
 static int _table_of(String path, int otherwise);
 
-static void _helper_shutdown(void);
+static void _shutdown(void);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -306,12 +306,12 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
     .compiler = c, .name = name, .site = site, .table = _table_of(file, helper_table)
   }
   ;
-  Call_check(&(call));
-  Call_set_deadline(&(call));
-  if(! _helper_start()) Call_refuse(&(call), _0);
-  Call_send(&(call), arguments);
+  _check(&(call));
+  _set_deadline(&(call));
+  if(! _start()) _refuse(&(call), _0);
+  _send(&(call), arguments);
   for(; ; ){
-    Var reply = Call_next_reply(&(call));
+    Var reply = _next_reply(&(call));
     {
       Var _x2c_match_var = reply; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);
       List _x2c_match_expr = Var_list_payload(_x2c_match_var); List _x2c_match_cursor, _x2c_match_cursor1;
@@ -405,13 +405,13 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
             {
               String operation = Var_as_string(_x2c_match_value_9);
               List operands = Var_list_payload(_x2c_match_value_10);
-              Call_answer(&(call), operation, operands);
+              _answer(&(call), operation, operands);
             }
 
           }
 
         }
-         break; } } } } case 9224497965323996046ULL: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497965323996046ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Call_refuse(&(call), Compiler_meta_call_missing(c, name));
+         break; } } } } case 9224497965323996046ULL: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497965323996046ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {_refuse(&(call), Compiler_meta_call_missing(c, name));
          break; } } case 9224497949733334154ULL: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497949733334154ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list_payload(_x2c_match_cursor->car), 1) && _x2c_match_cursor1) { Var _x2c_match_value_0 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1)) { List _x2c_match_list_1 = _x2c_match_cursor1; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
           Var code;
           code = _x2c_match_value_0;
@@ -420,7 +420,7 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
           Error_raise(Var_symbol(code), detail);
         }
          break; } } } } default: ;
-        Call_stopped(&(call), _1);
+        _stopped(&(call), _1);
          break;
       }
 
@@ -437,7 +437,7 @@ Var Compiler_apply_meta_function(Compiler, String, List, Token);
 
 
 
-static void Call_answer(Call * c, String operation, List operands){
+static void _answer(Call * c, String operation, List operands){
   Var volatile value =((void) 0, Void);
   {
     ExceptionFrame _x2c_exception_frame_0;
@@ -465,7 +465,7 @@ static void Call_answer(Call * c, String operation, List operands){
           List volatile detail;
           detail = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_0, 1));
           {
-            _helper_stop(SIGKILL);
+            _stop(SIGKILL);
             Error_raise(Var_symbol(code), detail);
           }
 
@@ -485,37 +485,37 @@ static void Call_answer(Call * c, String operation, List operands){
     x2c_exception_leave(& _x2c_exception_frame_0);
   }
   if(Var_is_void(value)) value = List_var(NULL);
-  Call_send_frame(&((* c)), cons(_2, cons(value, NULL)));
+  _send_frame(&((* c)), cons(_2, cons(value, NULL)));
 }
 
-static void Call_check(Call * call){
+static void _check(Call * call){
   Var failure;
-  if(! String_truth(helper_path) && Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(- 1), &(failure))) Call_refuse(&((* call)), Var_as_string(failure));
-  if(! String_truth(helper_path)) Call_refuse(&((* call)), _3);
-  if(Map_truth(helper_failures) && Map_try_get(helper_failures, int_var((* call).table), &(failure))) Call_refuse(&((* call)), Var_as_string(failure));
+  if(! String_truth(helper_path) && Map_truth(helper_failures) && Map_try_get(helper_failures, int_var(- 1), &(failure))) _refuse(&((* call)), Var_as_string(failure));
+  if(! String_truth(helper_path)) _refuse(&((* call)), _3);
+  if(Map_truth(helper_failures) && Map_try_get(helper_failures, int_var((* call).table), &(failure))) _refuse(&((* call)), Var_as_string(failure));
   Compiler_refuse_record_meta_call((* call).compiler, (* call).name, (* call).site);
 }
 
-static void Call_send(Call * c, List arguments){
+static void _send(Call * c, List arguments){
   if(helper_reset){
-    Call_send_frame(&((* c)), _5);
+    _send_frame(&((* c)), _5);
     helper_reset = 0;
   }
-  Call_send_frame(&((* c)), ({
+  _send_frame(&((* c)), ({
     Var _x2c_literal_part_0 = int_var((* c).table);  Var _x2c_literal_part_1 = String_var((* c).name);  Var _x2c_literal_part_2 = List_var(arguments);  Var _x2c_literal_part_3 = Macro_subject();  cons(_6, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)))));
   }
   ));
 }
 
-static void Call_send_frame(Call * call, List message){
-  int status = _helper_send(message, (* call).deadline);
-  if(status < 0) Call_overdue(&((* call)));
-  if(! status) Call_stopped(&((* call)), _helper_ending());
+static void _send_frame(Call * call, List message){
+  int status = _write_frame(message, (* call).deadline);
+  if(status < 0) _overdue(&((* call)));
+  if(! status) _stopped(&((* call)), _exit_reason());
 }
 
 String Env_get(String);
 
-static void Call_set_deadline(Call * call){
+static void _set_deadline(Call * call){
   String text = Env_get(_7);
   (* call).limit = String_truth(text) ? atof(text) : 60.0;
   (* call).deadline =(* call).limit > 0 ? _now() +(* call).limit : 0;
@@ -527,16 +527,16 @@ static double _now(void){
   return now.tv_sec + now.tv_nsec / 1e9;
 }
 
-static Var Call_next_reply(Call * call){
+static Var _next_reply(Call * call){
   Var reply;
-  int status = _helper_receive((* call).deadline, &(reply));
-  if(status < 0) Call_overdue(&((* call)));
-  if(! status) Call_stopped(&((* call)), _helper_ending());
+  int status = _read_reply((* call).deadline, &(reply));
+  if(status < 0) _overdue(&((* call)));
+  if(! status) _stopped(&((* call)), _exit_reason());
   return reply;
 }
 
-static int _helper_start(void){
-  if(_helper_running()) return 1;
+static int _start(void){
+  if(_running()) return 1;
   helper_pid = 0;
   int requests[2], replies[2];
   if(pipe(requests)) return 0;
@@ -558,7 +558,7 @@ static int _helper_start(void){
     return 0;
   }
   pid_t pid = fork();
-  if(! pid) _helper_exec(requests[0], replies[1]);
+  if(! pid) _exec(requests[0], replies[1]);
   close(requests[0]);
   close(replies[1]);
   if(pid < 0){
@@ -576,7 +576,7 @@ static int _helper_start(void){
   return 1;
 }
 
-_Noreturn static void _helper_exec(int requests, int replies){
+_Noreturn static void _exec(int requests, int replies){
   int in = fcntl(requests, F_DUPFD_CLOEXEC, 10);
   int out = fcntl(replies, F_DUPFD_CLOEXEC, 10);
   dup2(in, 3);
@@ -586,21 +586,21 @@ _Noreturn static void _helper_exec(int requests, int replies){
   _exit(127);
 }
 
-static int _helper_running(void){
+static int _running(void){
   return helper_pid > 0 && helper_owner == getpid();
 }
 
-static int _helper_reaped(void){
+static int _reaped(void){
   int status;
   if(helper_status < 0 && waitpid(helper_pid, & status, WNOHANG) == helper_pid) helper_status = status;
   return helper_status >= 0;
 }
 
-static int _helper_stop(int signal){
+static int _stop(int signal){
   int status = 0;
-  if(_helper_running()){
+  if(_running()){
     if(signal) killpg(helper_pid, signal);
-    else _helper_send(_9, 0);
+    else _write_frame(_9, 0);
     close(helper_to);
     close(helper_from);
     if(helper_status < 0) waitpid(helper_pid, & helper_status, 0);
@@ -616,14 +616,14 @@ static int _helper_stop(int signal){
 
 int shell_status(int, int *);
 
-static String _helper_ending(void){
-  int signal, code = shell_status(_helper_stop(0), &(signal));
+static String _exit_reason(void){
+  int signal, code = shell_status(_stop(0), &(signal));
   if(! signal) return String_join(NULL, cons(String_var(_10), cons(String_var(int_str(code)), NULL)));
   String name = String_new(strsignal(signal));
   return String_join(NULL, cons(String_var(_11), cons(String_var(int_str(signal)), cons(String_var(_12), cons(String_var(name), cons(String_var(_13), NULL))))));
 }
 
-static int _helper_send(List message, double deadline){
+static int _write_frame(List message, double deadline){
   Buffer out = Buffer_new(0);
   const Buffer _x2c_macro_acquired_0 = out;
   {
@@ -672,7 +672,7 @@ static int _helper_send(List message, double deadline){
           }
           ;
           int polled = poll(& ready, 1, wait);
-          if((polled < 0 && errno != EINTR) || _helper_reaped() ||(ready.revents &(POLLERR | POLLHUP | POLLNVAL))){
+          if((polled < 0 && errno != EINTR) || _reaped() ||(ready.revents &(POLLERR | POLLHUP | POLLNVAL))){
             status = 0;
             break;
           }
@@ -697,7 +697,7 @@ static int _helper_send(List message, double deadline){
 
 }
 
-static int _helper_receive(double deadline, Var * reply){
+static int _read_reply(double deadline, Var * reply){
   for(; ; ){
     int volatile framed = 0;
     {
@@ -777,7 +777,7 @@ static int _read_input(double deadline){
   ;
   int polled = poll(& ready, 1, wait);
   if(polled < 0 && errno == EINTR) return 1;
-  if(polled == 0) return _helper_reaped() ? 0 : 1;
+  if(polled == 0) return _reaped() ? 0 : 1;
   char bytes[65536];
   ssize_t n = read(helper_from, bytes, sizeof bytes);
   if(n < 0 && errno == EINTR) return 1;
@@ -786,16 +786,16 @@ static int _read_input(double deadline){
   return 1;
 }
 
-static void Call_refuse(Call * call, String why){
+static void _refuse(Call * call, String why){
   Compiler_refuse_meta_call((* call).compiler, (* call).name, (* call).site, why);
 }
 
-static void Call_overdue(Call * c){
-  _helper_stop(SIGKILL);
+static void _overdue(Call * c){
+  _stop(SIGKILL);
   Compiler_report_error((* c).compiler, 27335838, String_printf(_14, "this meta call ran longer than ", (* c).limit), (* c).site, cons(String_var(String_join(NULL, cons(String_var(_15), cons(String_var((* c).name), NULL)))), _18));
 }
 
-static void Call_stopped(Call * call, String reason){
+static void _stopped(Call * call, String reason){
   Compiler_report_error((* call).compiler, 27335838, _19, (* call).site, ({
     Var _x2c_literal_part_4 = String_var(String_join(NULL, cons(String_var(_15), cons(String_var((* call).name), NULL))));  Var _x2c_literal_part_5 = String_var(String_join(NULL, cons(String_var(_20), cons(String_var(reason), NULL))));  cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL));
   }
@@ -805,7 +805,7 @@ static void Call_stopped(Call * call, String reason){
 void Compiler_use_meta_helper(String path, Map failures, Map units){
   if(! _init_guard_) _file_init_();
   if(! String_truth(path) && ! Map_truth(failures)) return;
-  if(! helper_scope) Scope_shutdown_hook(_helper_shutdown);
+  if(! helper_scope) Scope_shutdown_hook(_shutdown);
   {
     Scope_push(& helper_scope);
     {
@@ -848,11 +848,11 @@ static int _table_of(String path, int otherwise){
 
 void Compiler_stop_meta_helper(void){
   if(! _init_guard_) _file_init_();
-  _helper_stop(0);
+  _stop(0);
 }
 
-static void _helper_shutdown(void){
-  _helper_stop(0);
+static void _shutdown(void){
+  _stop(0);
   Scope_destroy(helper_scope);
   helper_scope = NULL;
   helper_path = NULL;

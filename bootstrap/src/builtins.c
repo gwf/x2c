@@ -71,15 +71,15 @@ static int _atom_type(Var type);
 
 static int _valid_outputs(List outputs);
 
-static List Foreach_with_cursor(Foreach * f, List spec);
+static List _with_cursor(Foreach * f, List spec);
 
 static List _cursor_assignments(List targets, List outputs);
 
-static List Foreach_with_iter(Foreach * f, List converter);
+static List _with_iter(Foreach * f, List converter);
 
-static List Foreach_loop(Foreach * f, List condition, List body, List setup);
+static List _loop(Foreach * f, List condition, List body, List setup);
 
-static List Foreach_constructor(Foreach * f, List converter);
+static List _iter_constructor(Foreach * f, List converter);
 
 static List _iter_call(List function, List collection);
 
@@ -112,23 +112,23 @@ static List _named(List fields);
 
 static int _positional(List fields);
 
-static List Shape_constructor(Shape * s);
+static List _class_constructor(Shape * s);
 
-static List Shape_release(Shape * s);
+static List _release(Shape * s);
 
-static List Shape_alloc(Shape * s);
+static List _alloc(Shape * s);
 
-static List Shape_cleanup(Shape * s, List release);
+static List _cleanup(Shape * s, List release);
 
-static List Shape_boxed(Shape * s);
+static List _boxed(Shape * s);
 
-static List Shape_boxing(Shape * s);
+static List _boxing(Shape * s);
 
-static List Shape_comparison(Shape * s);
+static List _comparison(Shape * s);
 
-static List Shape_writers(Shape * s);
+static List _writers(Shape * s);
 
-static List Shape_scalar(Shape * s);
+static List _scalar(Shape * s);
 
 static List _new(String owner, List representation, int heap, List named, int positional, List extras);
 
@@ -1948,8 +1948,8 @@ static List _foreach_expand(List declaration, List collection, List body, Var it
     .declaration = declaration, .collection = collection, .body = body, .targets = targets, .type = Type_list(type), .iterator = iterator, .item = item, .pair = pair, .object = object, .cursor = cursor
   }
   ;
-  if(List_truth(spec) &&(List_len(targets) == 1 || List_len(Var_list_payload(List_getindex(spec, 2))) >= 2)) return Foreach_with_cursor(&(f), spec);
-  return Foreach_with_iter(&(f), converter);
+  if(List_truth(spec) &&(List_len(targets) == 1 || List_len(Var_list_payload(List_getindex(spec, 2))) >= 2)) return _with_cursor(&(f), spec);
+  return _with_iter(&(f), converter);
 }
 
 List meta_function_reference(String);
@@ -2009,7 +2009,7 @@ static int _valid_outputs(List outputs){
 
 static Type List_type(List);
 
-static List Foreach_with_cursor(Foreach * f, List spec){
+static List _with_cursor(Foreach * f, List spec){
   List function = Var_list_payload(List_getindex(spec, 0)), cursor_type = Var_list_payload(List_getindex(spec, 1)), types = Var_list_payload(List_getindex(spec, 2));
   int by_reference = List_len(spec) > 3;
   List outputs = List_map(types, _x2c_func_handle_1);
@@ -2038,7 +2038,7 @@ static List Foreach_with_cursor(Foreach * f, List spec){
     Var _x2c_literal_part_11 = List_var(_declare(List_type((* f).type), (* f).object, (* f).collection));  Var _x2c_literal_part_12 = List_var(_declare(List_type(cursor_type), (* f).cursor, initial));  cons(_x2c_literal_part_11, cons(_x2c_literal_part_12, List_append(declarations, NULL)));
   }
   );
-  return Foreach_loop(&((* f)), condition, loop_body, setup);
+  return _loop(&((* f)), condition, loop_body, setup);
 }
 
 static List _cursor_assignments(List targets, List outputs){
@@ -2051,8 +2051,8 @@ static List _cursor_assignments(List targets, List outputs){
 
 List builtin_foreach_complete(List);
 
-static List Foreach_with_iter(Foreach * f, List converter){
-  List constructor = Foreach_constructor(&((* f)), converter);
+static List _with_iter(Foreach * f, List converter){
+  List constructor = _iter_constructor(&((* f)), converter);
   List item_expression = _expr(_434, (* f).item);
   List initializer = builtin_foreach_complete(List_truth(constructor) ? _iter_call(constructor, (* f).collection) :(* f).collection);
   Code next = meta_function_reference(_460);
@@ -2080,10 +2080,10 @@ static List Foreach_with_iter(Foreach * f, List converter){
     Var _x2c_literal_part_21 = List_var(_declare(List_type(_425), (* f).iterator, initializer));  Var _x2c_literal_part_22 = List_var(_declare(List_type(_434), (* f).item, NULL));  cons(_x2c_literal_part_21, cons(_x2c_literal_part_22, NULL));
   }
   );
-  return Foreach_loop(&((* f)), condition, loop_body, setup);
+  return _loop(&((* f)), condition, loop_body, setup);
 }
 
-static List Foreach_loop(Foreach * f, List condition, List body, List setup){
+static List _loop(Foreach * f, List condition, List body, List setup){
   return({
     List _x2c_hole_4 =(* f).declaration;  cons(_2, cons(_3, cons(List_var(cons(_118, cons(List_var(({
       Var _x2c_literal_part_25 = List_var(cons(_25, cons(_138, cons(_139, cons(List_var(_x2c_hole_4), NULL)))));  Var _x2c_literal_part_26 = List_var(cons(_25, cons(_444, cons(_40, cons(List_var(setup), NULL)))));  Var _x2c_literal_part_27 = List_var(cons(_120, cons(List_var(({
@@ -2096,7 +2096,7 @@ static List Foreach_loop(Foreach * f, List condition, List body, List setup){
   );
 }
 
-static List Foreach_constructor(Foreach * f, List converter){
+static List _iter_constructor(Foreach * f, List converter){
   List type =(* f).type;
   int atom = _atom_type(List_var(type));
   String owner = atom ? Var_str(List_car(type)) : _462;
@@ -2176,13 +2176,13 @@ static List _class_expand(List capture){
 
 static List _class_defaults(String owner, List type, List location){
   Shape s = _shape(owner, List_type(type), location);
-  List body = Shape_constructor(&(s));
+  List body = _class_constructor(&(s));
   if(s.alias) return cons(_118, List_append(body, NULL));
-  List release = Shape_release(&(s));
-  if(s.heap && s.aggregate) body = List_append(body, cons(List_var(Shape_alloc(&(s))), NULL));
-  if(s.heap) body = List_append(body, Shape_cleanup(&(s), release));
-  if(s.aggregate || s.heap) body = List_append(body, Shape_boxed(&(s)));
-  else body = List_append(body, Shape_scalar(&(s)));
+  List release = _release(&(s));
+  if(s.heap && s.aggregate) body = List_append(body, cons(List_var(_alloc(&(s))), NULL));
+  if(s.heap) body = List_append(body, _cleanup(&(s), release));
+  if(s.aggregate || s.heap) body = List_append(body, _boxed(&(s)));
+  else body = List_append(body, _scalar(&(s)));
   return cons(_118, List_append(body, NULL));
 }
 
@@ -2235,7 +2235,7 @@ static int _positional(List fields){
   return 1;
 }
 
-static List Shape_constructor(Shape * s){
+static List _class_constructor(Shape * s){
   String owner =(* s).owner;
   if(List_truth(_own_method(owner, _504))) return NULL;
   List extras = NULL;
@@ -2254,7 +2254,7 @@ static List Shape_constructor(Shape * s){
   return cons(List_var(constructor), NULL);
 }
 
-static List Shape_release(Shape * s){
+static List _release(Shape * s){
   List drop = _own_method((* s).owner, _510);
   List release = List_truth(drop) ?({
     List _x2c_hole_5 = _ref(Code_binding_spelling(List_var(((Code) drop))));  cons(_2, cons(_3, cons(List_var(cons(_118, cons(List_var(cons(_511, cons(_523, cons(List_var(cons(_121, cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_8, cons(List_var(cons(_25, cons(_129, cons(_130, cons(List_var(_x2c_hole_5), NULL))))), _527))), NULL)))), NULL))), NULL)))), _550))), NULL)));
@@ -2263,13 +2263,13 @@ static List Shape_release(Shape * s){
   return cons(List_var(release), NULL);
 }
 
-static List Shape_alloc(Shape * s){
+static List _alloc(Shape * s){
   Type type = List_type(cons(String_var((* s).owner), NULL));
   List body = cons(_2, cons(_561, cons(List_var(cons(_118, cons(List_var(cons(_275, cons(List_var(cons(List_var(cons(_25, cons(_494, cons(_40, cons(List_var(type), NULL))))), NULL)), _628))), _633))), NULL)));
   return _default((* s).owner, _634, Type_list(type), NULL, cons(List_var(body), NULL));
 }
 
-static List Shape_cleanup(Shape * s, List release){
+static List _cleanup(Shape * s, List release){
   String owner =(* s).owner;
   List parameter =(* s).parameter;
   List free_method = _default(owner, _635, _54, cons(List_var(parameter), NULL), release);
@@ -2284,10 +2284,10 @@ static List Shape_cleanup(Shape * s, List release){
   );
 }
 
-static List Shape_boxed(Shape * s){
-  List body = Shape_boxing(&((* s)));
-  body = List_append(body, Shape_comparison(&((* s))));
-  body = List_append(body, Shape_writers(&((* s))));
+static List _boxed(Shape * s){
+  List body = _boxing(&((* s)));
+  body = List_append(body, _comparison(&((* s))));
+  body = List_append(body, _writers(&((* s))));
   return List_append(body, cons(List_var(({
     Var _x2c_literal_part_60 = List_var(cons(String_var((* s).owner), NULL));  Var _x2c_literal_part_61 = List_var(cons(_671, cons(List_var(({
       Symbol _x2c_hole_6 =(* s).tag;  Macro_typed(_674, Symbol_var(_x2c_hole_6));
@@ -2297,7 +2297,7 @@ static List Shape_boxed(Shape * s){
   )), NULL));
 }
 
-static List Shape_boxing(Shape * s){
+static List _boxing(Shape * s){
   String owner =(* s).owner;
   Type type = List_type(cons(String_var(owner), NULL)), pointer = List_type(cons(_220, cons(String_var(owner), NULL)));
   List unboxed =(* s).heap ? cons(_2, cons(_3, cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_676, cons(List_var(cons(_165, cons(List_var(cons(List_var(cons(_25, cons(_494, cons(_40, cons(List_var(type), NULL))))), NULL)), _683))), _703))), NULL)))), NULL))) : cons(_2, cons(_3, cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_288, cons(_220, cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_676, cons(List_var(cons(_165, cons(List_var(cons(List_var(cons(_25, cons(_494, cons(_40, cons(List_var(pointer), NULL))))), NULL)), _683))), _703))), NULL)))), NULL)))), NULL)))), NULL)));
@@ -2312,7 +2312,7 @@ static List Shape_boxing(Shape * s){
   );
 }
 
-static List Shape_comparison(Shape * s){
+static List _comparison(Shape * s){
   String owner =(* s).owner;
   if((* s).heap ||(* s).positional) return({
     Var _x2c_literal_part_65 = List_var(_equal(owner, (* s).heap, (* s).named));  Var _x2c_literal_part_66 = List_var(_hash(owner, (* s).heap, (* s).named));  cons(_x2c_literal_part_65, cons(_x2c_literal_part_66, NULL));
@@ -2322,7 +2322,7 @@ static List Shape_comparison(Shape * s){
   return NULL;
 }
 
-static List Shape_writers(Shape * s){
+static List _writers(Shape * s){
   String owner =(* s).owner;
   Array writers = Array_new();
   {
@@ -2346,7 +2346,7 @@ static List Shape_writers(Shape * s){
   return Array_list_free(writers);
 }
 
-static List Shape_scalar(Shape * s){
+static List _scalar(Shape * s){
   String owner =(* s).owner;
   Type type = List_type(cons(String_var(owner), NULL)), representation = List_type((* s).representation);
   List boxed = cons(_2, cons(_3, cons(List_var(cons(_118, cons(List_var(cons(_629, cons(_3, cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_676, cons(_719, cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_676, cons(List_var(cons(_165, cons(List_var(cons(List_var(cons(_25, cons(_494, cons(_40, cons(List_var(representation), NULL))))), NULL)), _683))), _524))), NULL)))), NULL)))), NULL)))), NULL)))), NULL))), NULL)));

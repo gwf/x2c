@@ -46,39 +46,39 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static void Format_conversion(Format * f);
+static void _conversion(Format * f);
 
-static void Format_write_literal(Format * f);
+static void _write_literal(Format * f);
 
-static void Format_need_byte(Format * f);
+static void _need_byte(Format * f);
 
-static Spec Format_spec(Format * f);
+static Spec _spec(Format * f);
 
-static int Format_flags(Format * f);
+static int _flags(Format * f);
 
-static void Format_width(Format * f, Spec * spec);
+static void _width(Format * f, Spec * spec);
 
-static int Format_star(Format * f);
+static int _star(Format * f);
 
-static void Format_precision(Format * f, Spec * spec);
+static void _precision(Format * f, Spec * spec);
 
-static int Format_decimal(Format * f, String label);
+static int _decimal(Format * f, String label);
 
-static int Format_byte(Format * f);
+static int _byte(Format * f);
 
-static int Format_digit(Format * f);
+static int _digit(Format * f);
 
-static int Format_modifier(Format * f);
+static int _modifier(Format * f);
 
-static int Format_doubled(Format * f, char letter, int once, int twice);
+static int _doubled(Format * f, char letter, int once, int twice);
 
-static void Format_check(Format * f, Spec spec);
+static void _check(Format * f, Spec spec);
 
-static Var Format_take(Format * f, String reason);
+static Var _take(Format * f, String reason);
 
-static Buffer Format_print(Format * f, Spec spec, Var arg);
+static Buffer _print(Format * f, Spec spec, Var arg);
 
-static void Spec_spell(Spec s, char * out);
+static void _spell(Spec s, char * out);
 
 static const Symbol _integer_targets[][2] ={
   {
@@ -100,21 +100,21 @@ static const Symbol _integer_targets[][2] ={
 }
 ;
 
-static Buffer Format_integer(Format * f, Spec spec, Var arg);
+static Buffer _integer(Format * f, Spec spec, Var arg);
 
-static Buffer Format_floating(Format * f, const char * text, int modifier, Var arg);
+static Buffer _floating(Format * f, const char * text, int modifier, Var arg);
 
-static Buffer Format_character(Format * f, const char * text, Var arg);
+static Buffer _character(Format * f, const char * text, Var arg);
 
-static Buffer Format_string(Format * f, const char * text, Var arg);
+static Buffer _string(Format * f, const char * text, Var arg);
 
-static Var Format_number(Format * f, Var arg, Symbol target);
+static Var _number(Format * f, Var arg, Symbol target);
 
 _Noreturn static void _format_error(int offset, String reason);
 
-static void Format_fail(Format * f, String reason);
+static void _fail(Format * f, String reason);
 
-_Noreturn static void Format_nested(Format * f, String reason, Var code, List details);
+_Noreturn static void _nested(Format * f, String reason, Var code, List details);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -175,9 +175,9 @@ String String_format(String fmt, List values){
         .fmt = fmt, .length = String_len(fmt), .args = values, .out = out
       }
       ;
-      while(f.cursor < f.length) if(Format_byte(&(f)) == '%') Format_conversion(&(f));
+      while(f.cursor < f.length) if(_byte(&(f)) == '%') _conversion(&(f));
       else f.cursor ++;
-      Format_write_literal(&(f));
+      _write_literal(&(f));
       if(List_truth(f.args)) _format_error(f.length, _0);
       {
         String _x2c_return_value_0 = Buffer_str(out);
@@ -194,89 +194,89 @@ String String_format(String fmt, List values){
 
 }
 
-static void Format_conversion(Format * f){
-  Format_write_literal(&((* f)));
+static void _conversion(Format * f){
+  _write_literal(&((* f)));
   (* f).offset =(* f).cursor ++;
-  Format_need_byte(&((* f)));
-  if(Format_byte(&((* f))) == '%'){
+  _need_byte(&((* f)));
+  if(_byte(&((* f))) == '%'){
     Buffer_write_char((* f).out, '%');
     (* f).cursor ++;
   }
   else{
-    Spec spec = Format_spec(&((* f)));
-    Format_print(&((* f)), spec, Format_take(&((* f)), _1));
+    Spec spec = _spec(&((* f)));
+    _print(&((* f)), spec, _take(&((* f)), _1));
   }
   (* f).literal =(* f).cursor;
 }
 
-static void Format_write_literal(Format * f){
+static void _write_literal(Format * f){
   if((* f).cursor ==(* f).literal) return;
   Buffer_write_len((* f).out, (* f).fmt +(* f).literal, (size_t)((* f).cursor -(* f).literal));
 }
 
-static void Format_need_byte(Format * f){
-  if((* f).cursor ==(* f).length) Format_fail(&((* f)), _2);
+static void _need_byte(Format * f){
+  if((* f).cursor ==(* f).length) _fail(&((* f)), _2);
 }
 
-static Spec Format_spec(Format * f){
+static Spec _spec(Format * f){
   Spec spec ={
-    .flags = Format_flags(&((* f))), .precision = - 1
+    .flags = _flags(&((* f))), .precision = - 1
   }
   ;
-  Format_width(&((* f)), &(spec));
-  Format_precision(&((* f)), &(spec));
-  Format_need_byte(&((* f)));
-  spec.modifier = Format_modifier(&((* f)));
-  Format_need_byte(&((* f)));
+  _width(&((* f)), &(spec));
+  _precision(&((* f)), &(spec));
+  _need_byte(&((* f)));
+  spec.modifier = _modifier(&((* f)));
+  _need_byte(&((* f)));
   spec.conversion = String_getindex((* f).fmt, (* f).cursor ++);
-  Format_check(&((* f)), spec);
+  _check(&((* f)), spec);
   return spec;
 }
 
-static int Format_flags(Format * f){
+static int _flags(Format * f){
   int flags = 0;
-  for(const char * flag; (flag = strchr(_format_flags, Format_byte(&((* f))))); ){
+  for(const char * flag; (flag = strchr(_format_flags, _byte(&((* f))))); ){
     flags |= 1 <<(flag - _format_flags);
     (* f).cursor ++;
-    Format_need_byte(&((* f)));
+    _need_byte(&((* f)));
   }
   return flags;
 }
 
 int abs(int);
 
-static void Format_width(Format * f, Spec * spec){
-  if(Format_byte(&((* f))) == '*'){
-    int width = Format_star(&((* f)));
-    if(width == INT_MIN) Format_fail(&((* f)), _3);
+static void _width(Format * f, Spec * spec){
+  if(_byte(&((* f))) == '*'){
+    int width = _star(&((* f)));
+    if(width == INT_MIN) _fail(&((* f)), _3);
     if(width < 0)(* spec).flags |= FORMAT_LEFT;
     (* spec).width = abs(width);
     (* f).cursor ++;
   }
-  else(* spec).width = Format_decimal(&((* f)), _4);
+  else(* spec).width = _decimal(&((* f)), _4);
 }
 
-static int Format_star(Format * f){
-  return(int) Var_integer(Format_number(&((* f)), Format_take(&((* f)), _5), 3453797));
+static int _star(Format * f){
+  return(int) Var_integer(_number(&((* f)), _take(&((* f)), _5), 3453797));
 }
 
-static void Format_precision(Format * f, Spec * spec){
-  if(Format_byte(&((* f))) != '.') return;
+static void _precision(Format * f, Spec * spec){
+  if(_byte(&((* f))) != '.') return;
   (* f).cursor ++;
-  Format_need_byte(&((* f)));
-  if(Format_byte(&((* f))) == '*'){
-    (* spec).precision = Format_star(&((* f)));
+  _need_byte(&((* f)));
+  if(_byte(&((* f))) == '*'){
+    (* spec).precision = _star(&((* f)));
     (* f).cursor ++;
   }
-  else(* spec).precision = Format_decimal(&((* f)), _6);
+  else(* spec).precision = _decimal(&((* f)), _6);
 }
 
 static Var String_var(String);
 
-static int Format_decimal(Format * f, String label){
+static int _decimal(Format * f, String label){
   int number = 0, start =(* f).cursor;
-  while(Format_digit(&((* f)))){
-    int digit = Format_byte(&((* f))) - '0';
+  while(_digit(&((* f)))){
+    int digit = _byte(&((* f))) - '0';
     if(number >(INT_MAX - digit) / 10) _format_error(start, String_join(NULL, cons(String_var(label), cons(String_var(_7), NULL))));
     number = number * 10 + digit;
     (* f).cursor ++;
@@ -284,64 +284,64 @@ static int Format_decimal(Format * f, String label){
   return number;
 }
 
-static int Format_byte(Format * f){
+static int _byte(Format * f){
   return String_getindex((* f).fmt, (* f).cursor);
 }
 
-static int Format_digit(Format * f){
-  return Format_byte(&((* f))) >= '0' && Format_byte(&((* f))) <= '9';
+static int _digit(Format * f){
+  return _byte(&((* f))) >= '0' && _byte(&((* f))) <= '9';
 }
 
-static int Format_modifier(Format * f){
-  switch(Format_byte(&((* f)))){
-    case 'h' : return Format_doubled(&((* f)), 'h', FORMAT_H, FORMAT_HH);
-    case 'l' : return Format_doubled(&((* f)), 'l', FORMAT_L, FORMAT_LL);
+static int _modifier(Format * f){
+  switch(_byte(&((* f)))){
+    case 'h' : return _doubled(&((* f)), 'h', FORMAT_H, FORMAT_HH);
+    case 'l' : return _doubled(&((* f)), 'l', FORMAT_L, FORMAT_LL);
     case 'L' :(* f).cursor ++;
     return FORMAT_CAP_L;
-    case 'j' : case 'z' : case 't' : Format_fail(&((* f)), _8);
+    case 'j' : case 'z' : case 't' : _fail(&((* f)), _8);
   }
   return 0;
 }
 
-static int Format_doubled(Format * f, char letter, int once, int twice){
+static int _doubled(Format * f, char letter, int once, int twice){
   (* f).cursor ++;
-  if(Format_byte(&((* f))) != letter) return once;
+  if(_byte(&((* f))) != letter) return once;
   (* f).cursor ++;
   return twice;
 }
 
-static void Format_check(Format * f, Spec spec){
+static void _check(Format * f, Spec spec){
   char ch = spec.conversion;
   int integer = strchr("diouxX", ch) != NULL;
   int floating = strchr("fFeEgGaA", ch) != NULL, text = ch == 'c' || ch == 's';
-  if(ch == '$') Format_fail(&((* f)), _9);
-  if(! integer && ! floating && ! text) Format_fail(&((* f)), _10);
-  if(integer && spec.modifier == FORMAT_CAP_L) Format_fail(&((* f)), _11);
-  if(floating && spec.modifier && spec.modifier != FORMAT_L && spec.modifier != FORMAT_CAP_L) Format_fail(&((* f)), _12);
-  if(text && spec.modifier) Format_fail(&((* f)), _13);
-  if(text &&(spec.flags & ~ FORMAT_LEFT)) Format_fail(&((* f)), _14);
-  if(ch == 'c' && spec.precision >= 0) Format_fail(&((* f)), _15);
+  if(ch == '$') _fail(&((* f)), _9);
+  if(! integer && ! floating && ! text) _fail(&((* f)), _10);
+  if(integer && spec.modifier == FORMAT_CAP_L) _fail(&((* f)), _11);
+  if(floating && spec.modifier && spec.modifier != FORMAT_L && spec.modifier != FORMAT_CAP_L) _fail(&((* f)), _12);
+  if(text && spec.modifier) _fail(&((* f)), _13);
+  if(text &&(spec.flags & ~ FORMAT_LEFT)) _fail(&((* f)), _14);
+  if(ch == 'c' && spec.precision >= 0) _fail(&((* f)), _15);
 }
 
-static Var Format_take(Format * f, String reason){
-  if(! List_truth((* f).args)) Format_fail(&((* f)), reason);
+static Var _take(Format * f, String reason){
+  if(! List_truth((* f).args)) _fail(&((* f)), reason);
   Var arg = List_car((* f).args);
   (* f).args = List_cdr((* f).args);
   return arg;
 }
 
-static Buffer Format_print(Format * f, Spec spec, Var arg){
-  if(strchr("diouxX", spec.conversion)) return Format_integer(&((* f)), spec, arg);
+static Buffer _print(Format * f, Spec spec, Var arg){
+  if(strchr("diouxX", spec.conversion)) return _integer(&((* f)), spec, arg);
   char text[48];
-  Spec_spell(spec, text);
+  _spell(spec, text);
   switch(spec.conversion){
-    case 'c' : return Format_character(&((* f)), text, arg);
-    case 's' : return Format_string(&((* f)), text, arg);
+    case 'c' : return _character(&((* f)), text, arg);
+    case 's' : return _string(&((* f)), text, arg);
   }
-  return Format_floating(&((* f)), text, spec.modifier, arg);
+  return _floating(&((* f)), text, spec.modifier, arg);
 }
 
-static void Spec_spell(Spec s, char * out){
+static void _spell(Spec s, char * out){
   int n = 0;
   out[n ++] = '%';
   for(int bit = 0;  _format_flags[bit];  bit ++) if(s.flags & 1 << bit) out[n ++] = _format_flags[bit];
@@ -354,24 +354,24 @@ unsigned long long Var_ulong_long(Var);
 
 long long Var_long_long(Var);
 
-static Buffer Format_integer(Format * f, Spec spec, Var arg){
+static Buffer _integer(Format * f, Spec spec, Var arg){
   int is_unsigned = strchr("ouxX", spec.conversion) != NULL;
-  Var value = Format_number(&((* f)), arg, _integer_targets[spec.modifier][is_unsigned]);
+  Var value = _number(&((* f)), arg, _integer_targets[spec.modifier][is_unsigned]);
   char text[48];
   spec.modifier = FORMAT_LL;
-  Spec_spell(spec, text);
+  _spell(spec, text);
   if(is_unsigned) return Buffer_printf((* f).out, text, Var_ulong_long(value));
   return Buffer_printf((* f).out, text, Var_long_long(value));
 }
 
-static Buffer Format_floating(Format * f, const char * text, int modifier, Var arg){
-  if(modifier == FORMAT_CAP_L) return Buffer_printf((* f).out, text, Var_long_double_value(Format_number(&((* f)), arg, 26071077642)));
-  return Buffer_printf((* f).out, text, Var_floating(Format_number(&((* f)), arg, 3356265)));
+static Buffer _floating(Format * f, const char * text, int modifier, Var arg){
+  if(modifier == FORMAT_CAP_L) return Buffer_printf((* f).out, text, Var_long_double_value(_number(&((* f)), arg, 26071077642)));
+  return Buffer_printf((* f).out, text, Var_floating(_number(&((* f)), arg, 3356265)));
 }
 
-static Buffer Format_character(Format * f, const char * text, Var arg){
-  int byte =(int) Var_integer(Format_number(&((* f)), arg, 3453797));
-  if(!(unsigned char) byte) Format_fail(&((* f)), _16);
+static Buffer _character(Format * f, const char * text, Var arg){
+  int byte =(int) Var_integer(_number(&((* f)), arg, 3453797));
+  if(!(unsigned char) byte) _fail(&((* f)), _16);
   return Buffer_printf((* f).out, text, byte);
 }
 
@@ -398,7 +398,7 @@ void x2c_error_catch_close(ErrorHandler);
 
 static int String_truth(String);
 
-static Buffer Format_string(Format * f, const char * text, Var arg){
+static Buffer _string(Format * f, const char * text, Var arg){
   String volatile string = NULL;
   {
     ExceptionFrame _x2c_exception_frame_0;
@@ -425,7 +425,7 @@ static Buffer Format_string(Format * f, const char * text, Var arg){
           code = x2c_error_catch_capture(_x2c_error_handler_0, 0);
           List volatile details;
           details = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_0, 1));
-          Format_nested(&((* f)), _17, code, details);
+          _nested(&((* f)), _17, code, details);
         }
 
       }
@@ -446,7 +446,7 @@ static Buffer Format_string(Format * f, const char * text, Var arg){
 
 Var Var_convert(Var, Symbol);
 
-static Var Format_number(Format * f, Var arg, Symbol target){
+static Var _number(Format * f, Var arg, Symbol target){
   Var volatile converted =((void) 0, Void);
   {
     ExceptionFrame _x2c_exception_frame_1;
@@ -473,7 +473,7 @@ static Var Format_number(Format * f, Var arg, Symbol target){
           code = x2c_error_catch_capture(_x2c_error_handler_1, 0);
           List volatile details;
           details = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_1, 1));
-          Format_nested(&((* f)), _18, code, details);
+          _nested(&((* f)), _18, code, details);
         }
 
       }
@@ -503,16 +503,16 @@ _Noreturn static void _format_error(int offset, String reason){
 
 }
 
-static void Format_fail(Format * f, String reason){
+static void _fail(Format * f, String reason){
   _format_error((* f).offset, reason);
 }
 
-_Noreturn static void Format_nested(Format * f, String reason, Var code, List details){
+_Noreturn static void _nested(Format * f, String reason, Var code, List details){
   List cause = cons(code, details);
   {
     Var _x2c_literal_part_0 = int_var((* f).offset);
     {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/string-format.x",.function = "Format_nested",.line = 342};
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/string-format.x",.function = "_nested",.line = 342};
       x2c_error_raise_n(& _x2c_error_site_1, 435316840, 3, Symbol_var(1019648360), _x2c_literal_part_0, Symbol_var(1218550748), String_var(reason), Symbol_var(6401226), List_var(cause));
       __builtin_unreachable();
     }

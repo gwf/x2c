@@ -58,39 +58,39 @@ static void _emit_entry(Diagnostics diag, List entry);
 
 static List _build_entry(Symbol code, Symbol severity, String message, List location, List notes);
 
-static int Diagnostics__publish(Diagnostics diag, List entry);
+static int _publish(Diagnostics diag, List entry);
 
-static void Diagnostics__store(Diagnostics diag, List entry);
+static void _store(Diagnostics diag, List entry);
 
-static void Diagnostics__forget(Diagnostics diag, int from);
+static void _forget(Diagnostics diag, int from);
 
 static void _publish_limit_notice(Diagnostics diag);
 
-static void Diagnostics__warn(Diagnostics diag, Symbol code, String message, List location, List notes);
+static void _warn(Diagnostics diag, Symbol code, String message, List location, List notes);
 
 static String _note_line(List l);
 
-static String Compiler__json_path(Compiler compiler, String path);
+static String _json_path(Compiler compiler, String path);
 
-static void Compiler__write_json(Compiler c, Symbol code, Symbol severity, String message, List location, String note);
+static void _write_json(Compiler c, Symbol code, Symbol severity, String message, List location, String note);
 
-static void Compiler__write_json_location(Compiler c, Buffer out, List location);
+static void _write_json_location(Compiler c, Buffer out, List location);
 
-static void Compiler__write_heading(Compiler c, Symbol code, String message, List location);
+static void _write_heading(Compiler c, Symbol code, String message, List location);
 
-static List Compiler__token_region(Compiler c, Token token);
+static List _token_region(Compiler c, Token token);
 
-static List Compiler__region(Compiler c, int position);
+static List _region(Compiler c, int position);
 
 static List _compiler_location(Compiler compiler, Token token);
 
-static void Compiler__show_source_context(Compiler compiler, int line, int column, int length, int position);
+static void _show_source_context(Compiler compiler, int line, int column, int length, int position);
 
-static int Compiler__text_line(Compiler c, int position);
+static int _text_line(Compiler c, int position);
 
 static int _context_line(Compiler c, int line, char * * line_start, char * * line_end);
 
-static Array Compiler__line_starts(Compiler c);
+static Array _line_starts(Compiler c);
 
 static void _context_caret(char * line_start, char * line_end, int column, int length);
 
@@ -205,7 +205,7 @@ Diagnostics Diagnostics_new(Compiler printer, int limit){
 
 void Diagnostics_reset(Diagnostics diag){
   if(! _init_guard_) _file_init_();
-  Diagnostics__forget(diag, 0);
+  _forget(diag, 0);
   Array_clear(diag -> entries);
   diag -> count = 0;
   diag -> limit_notified = 0;
@@ -228,7 +228,7 @@ void Diagnostics_release(Diagnostics diag, DiagnosticsHold hold, int keep){
     for(int i = hold.entries;  i < Array_len(diag -> entries);  i ++) _emit_entry(diag, Var_list_payload(Array_getindex(diag -> entries, i)));
     return;
   }
-  Diagnostics__forget(diag, hold.entries);
+  _forget(diag, hold.entries);
   Array_resize(diag -> entries, hold.entries);
   diag -> count = hold.count;
   diag -> limit_notified = hold.limit_notified;
@@ -254,19 +254,19 @@ static List _build_entry(Symbol code, Symbol severity, String message, List loca
   );
 }
 
-static int Diagnostics__publish(Diagnostics diag, List entry){
+static int _publish(Diagnostics diag, List entry){
   if(Map_contains(diag -> published, List_var(entry))) return 0;
-  Diagnostics__store(diag, entry);
+  _store(diag, entry);
   _emit_entry(diag, entry);
   return 1;
 }
 
-static void Diagnostics__store(Diagnostics diag, List entry){
+static void _store(Diagnostics diag, List entry){
   Map_setdefault(diag -> published, List_var(entry), Var_box_ulong(Array_len(diag -> entries)));
   Array_push(diag -> entries, List_var(entry));
 }
 
-static void Diagnostics__forget(Diagnostics diag, int from){
+static void _forget(Diagnostics diag, int from){
   for(int i = from;  i < Array_len(diag -> entries);  i ++){
     Var first;
     if(Map_try_get(diag -> published, Array_getindex(diag -> entries, i), &(first)) && Var_int(first) >= from) Map_del(diag -> published, Array_getindex(diag -> entries, i));
@@ -278,7 +278,7 @@ static void _publish_limit_notice(Diagnostics diag){
   if(diag -> limit == 1) return;
   String note = _5;
   List entry = _build_entry(25782888, 949514, note, NULL, NULL);
-  Diagnostics__store(diag, entry);
+  _store(diag, entry);
   _emit_entry(diag, entry);
 }
 
@@ -292,7 +292,7 @@ void Diagnostics_report(Diagnostics diag, Symbol code, String message, List loca
     return;
   }
   List entry = _build_entry(code, 11703268, message, location, notes);
-  if(! Diagnostics__publish(diag, entry)) return;
+  if(! _publish(diag, entry)) return;
   diag -> count += 1;
   if(diag -> limit > 0 && diag -> count >= diag -> limit && ! diag -> limit_notified){
     diag -> limit_notified = 1;
@@ -301,8 +301,8 @@ void Diagnostics_report(Diagnostics diag, Symbol code, String message, List loca
 
 }
 
-static void Diagnostics__warn(Diagnostics diag, Symbol code, String message, List location, List notes){
-  Diagnostics__publish(diag, _build_entry(code, 49497918350, message, location, notes));
+static void _warn(Diagnostics diag, Symbol code, String message, List location, List notes){
+  _publish(diag, _build_entry(code, 49497918350, message, location, notes));
 }
 
 static String _note_line(List l){
@@ -322,7 +322,7 @@ Path Path_join(Path, Path);
 
 Path Path_absolute(Path);
 
-static String Compiler__json_path(Compiler compiler, String path){
+static String _json_path(Compiler compiler, String path){
   if(! String_truth(path) || String_startswith(path, _7)) return path;
   if(! String_startswith(path, _8) && ! Path_exists(path)) path = Path_join(compiler -> root_dir, path);
   path = Path_absolute(path);
@@ -330,7 +330,7 @@ static String Compiler__json_path(Compiler compiler, String path){
   return String_startswith(path, directory) ? String_remove_prefix(path, directory) : path;
 }
 
-static void Compiler__write_json(Compiler c, Symbol code, Symbol severity, String message, List location, String note){
+static void _write_json(Compiler c, Symbol code, Symbol severity, String message, List location, String note){
   Buffer out = Buffer_new(0);
   const Buffer _x2c_macro_acquired_0 = out;
   {
@@ -348,7 +348,7 @@ static void Compiler__write_json(Compiler c, Symbol code, Symbol severity, Strin
       Buffer_write(out, String_join(NULL, cons(String_var(_11), cons(String_var(Var_json(Symbol_var(code))), NULL))));
       Buffer_write(out, String_join(NULL, cons(String_var(_12), cons(String_var(Var_json(String_var(message))), NULL))));
       Buffer_write(out, String_join(NULL, cons(String_var(_13), cons(String_var(Var_json(Symbol_var(severity))), NULL))));
-      Compiler__write_json_location(c, out, location);
+      _write_json_location(c, out, location);
       Buffer_write(out, String_join(NULL, cons(String_var(_14), cons(String_var(Var_json(Array_var(String_truth(note) ? Array_update_n(Array_new(), 1, String_var(note)) : Array_new()))), cons(String_var(_15), NULL)))));
       while(write(diagnostics_json, out -> content -> bytes, out -> content -> length) < 0 && errno == EINTR){
 
@@ -360,7 +360,7 @@ static void Compiler__write_json(Compiler c, Symbol code, Symbol severity, Strin
 
 }
 
-static void Compiler__write_json_location(Compiler c, Buffer out, List location){
+static void _write_json_location(Compiler c, Buffer out, List location){
   {
     List _x2c_match_expr = location; List _x2c_match_cursor, _x2c_match_cursor1;
     switch(0){
@@ -377,7 +377,7 @@ static void Compiler__write_json_location(Compiler c, Buffer out, List location)
         Var position;
         position = _x2c_match_value_4;
         {
-          Buffer_write(out, String_join(NULL, cons(String_var(_16), cons(String_var(Var_json(String_var(Compiler__json_path(c, Var_as_string(file))))), NULL))));
+          Buffer_write(out, String_join(NULL, cons(String_var(_16), cons(String_var(Var_json(String_var(_json_path(c, Var_as_string(file))))), NULL))));
           Buffer_write(out, ({
             Var _x2c_literal_part_5 = String_var(Var_str(line));  Var _x2c_literal_part_6 = String_var(Var_str(column));  String_join(NULL, cons(String_var(_17), cons(_x2c_literal_part_5, cons(String_var(_18), cons(_x2c_literal_part_6, NULL)))));
           }
@@ -418,10 +418,10 @@ void Compiler_print_diagnostic(Compiler compiler, List entry){
         {
           String note = _note_line(Var_list_payload(notes));
           if(diagnostics_json >= 0){
-            Compiler__write_json(compiler, Var_symbol(code), Var_symbol(severity), Var_as_string(message), Var_list_payload(location), note);
+            _write_json(compiler, Var_symbol(code), Var_symbol(severity), Var_as_string(message), Var_list_payload(location), note);
             return;
           }
-          Compiler__write_heading(compiler, Var_symbol(code), Var_as_string(message), Var_list_payload(location));
+          _write_heading(compiler, Var_symbol(code), Var_as_string(message), Var_list_payload(location));
           if(String_truth(note)) fprintf(stderr, "  note: %s\n", note);
           fprintf(stderr, "\n");
           fflush(stderr);
@@ -435,7 +435,7 @@ void Compiler_print_diagnostic(Compiler compiler, List entry){
 
 }
 
-static void Compiler__write_heading(Compiler c, Symbol code, String message, List location){
+static void _write_heading(Compiler c, Symbol code, String message, List location){
   {
     List _x2c_match_expr = location; List _x2c_match_cursor, _x2c_match_cursor1;
     switch(0){
@@ -457,7 +457,7 @@ static void Compiler__write_heading(Compiler c, Symbol code, String message, Lis
           }
           );
           fprintf(stderr, "%s: %s: %s\n", place, Symbol_str(code), message);
-          Compiler__show_source_context(c, Var_int(Var_convert(line, 3453797)), Var_int(Var_convert(column, 3453797)), Var_int(Var_convert(length, 3453797)), Var_int(Var_convert(position, 3453797)));
+          _show_source_context(c, Var_int(Var_convert(line, 3453797)), Var_int(Var_convert(column, 3453797)), Var_int(Var_convert(length, 3453797)), Var_int(Var_convert(position, 3453797)));
           return;
         }
 
@@ -525,7 +525,7 @@ List Compiler_token_location(Compiler compiler, Token token){
 String Compiler_token_source(Compiler c, Token token, int * line){
   if(! _init_guard_) _file_init_();
   if(line)(* line) = token -> line;
-  List region = Compiler__token_region(c, token);
+  List region = _token_region(c, token);
   if(! List_truth(region)) return c -> filename;
   List _x2c_destructure_0 = region;
   int start = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 0), 3453797));
@@ -539,7 +539,7 @@ String Compiler_token_source(Compiler c, Token token, int * line){
 int Compiler_token_column(Compiler c, Token token){
   if(! _init_guard_) _file_init_();
   {
-    List _x2c_match_expr = Compiler__token_region(c, token); List _x2c_match_cursor;
+    List _x2c_match_expr = _token_region(c, token); List _x2c_match_cursor;
     switch(0){
         default: ;
        _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 3453797)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446)) { Var _x2c_match_value_1 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
@@ -570,7 +570,7 @@ String Compiler_text_source(Compiler c, int position, int * offset){
   if(! _init_guard_) _file_init_();
   (* offset) = position;
   {
-    List _x2c_match_expr = Compiler__region(c, position); List _x2c_match_cursor;
+    List _x2c_match_expr = _region(c, position); List _x2c_match_cursor;
     switch(0){
         default: ;
        _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 3453797)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446)) { Var _x2c_match_value_1 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 3453797)) { Var _x2c_match_value_2 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
@@ -615,8 +615,8 @@ Token Compiler_source_token(Compiler c, Token token, String * file){
   return placed;
 }
 
-static List Compiler__token_region(Compiler c, Token token){
-  List region = Compiler__region(c, token -> pos);
+static List _token_region(Compiler c, Token token){
+  List region = _region(c, token -> pos);
   {
     List _x2c_match_expr = region; List _x2c_match_cursor;
     switch(0){
@@ -631,7 +631,7 @@ static List Compiler__token_region(Compiler c, Token token){
   return token >= first && token < first + Bytes_len(c -> tokenizer -> tokens) ? region : NULL;
 }
 
-static List Compiler__region(Compiler c, int position){
+static List _region(Compiler c, int position){
   List region = NULL;
   if(Array_truth(c -> line_markers)){
     List row;
@@ -708,16 +708,16 @@ void Compiler_report_warning_at(Compiler compiler, Symbol code, String message, 
   report_suspend();
   Diagnostics diag = compiler -> diagnostics;
   message = String_truth(message) ? message : _57;
-  Diagnostics__warn(diag, code ? code : 49497918350, message, location, notes);
+  _warn(diag, code ? code : 49497918350, message, location, notes);
 }
 
-static void Compiler__show_source_context(Compiler compiler, int line, int column, int length, int position){
+static void _show_source_context(Compiler compiler, int line, int column, int length, int position){
   if(! String_truth(compiler -> text)) return;
-  if(Array_truth(compiler -> line_markers)) line = Compiler__text_line(compiler, position);
+  if(Array_truth(compiler -> line_markers)) line = _text_line(compiler, position);
   char * line_start, * line_end;
   if(! _context_line(compiler, line, &(line_start), &(line_end))) return;
   {
-    List _x2c_match_expr = Compiler__region(compiler, position); List _x2c_match_cursor;
+    List _x2c_match_expr = _region(compiler, position); List _x2c_match_cursor;
     switch(0){
         default: ;
        _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 3453797)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446)) { Var _x2c_match_value_1 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
@@ -752,11 +752,11 @@ static void Compiler__show_source_context(Compiler compiler, int line, int colum
   _context_caret(line_start, line_end, column, length);
 }
 
-static int Compiler__text_line(Compiler c, int position){
+static int _text_line(Compiler c, int position){
   int line = 0;
   {
     Var start;
-    Array _x2c_macro_object_2 = Compiler__line_starts(c);
+    Array _x2c_macro_object_2 = _line_starts(c);
     int _x2c_macro_cursor_2 = 0;
     Var _x2c_macro_cursor_output_2;
     while(Array_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
@@ -783,14 +783,14 @@ static int _context_line(Compiler c, int line, char * * line_start, char * * lin
     else while(*(* line_end) && *(* line_end) != '\n')(* line_end) ++;
     return line == 1;
   }
-  Array starts = Compiler__line_starts(c);
+  Array starts = _line_starts(c);
   if(line > Array_len(starts)) return 0;
   (* line_start) =(* line_end) = text + Var_int(Array_getindex(starts, line - 1));
   while(*(* line_end) && *(* line_end) != '\n')(* line_end) ++;
   return 1;
 }
 
-static Array Compiler__line_starts(Compiler c){
+static Array _line_starts(Compiler c){
   if(c -> lines_text == c -> text) return c -> line_starts;
   c -> lines_text = c -> text;
   Array_clear(c -> line_starts);
@@ -824,7 +824,7 @@ void Compiler_take_diagnostics(Compiler c, Compiler child){
     Var _x2c_macro_cursor_output_3;
     while(Array_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
       entry = Var_list_payload(_x2c_macro_cursor_output_3);
-      Diagnostics__store(target, entry);
+      _store(target, entry);
     }
 
   }

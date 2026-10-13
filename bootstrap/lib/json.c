@@ -70,31 +70,31 @@ Reader;
 
 static Var _parse(String source, String path);
 
-static Var Reader__value(Reader * r);
+static Var _read_value(Reader * r);
 
-static Var Reader__object(Reader * r);
+static Var _object(Reader * r);
 
-static Var Reader__array(Reader * r);
+static Var _array(Reader * r);
 
-static String Reader__string(Reader * r);
+static String _string(Reader * r);
 
-static void Reader__escape(Reader * r, Buffer out);
+static void _escape(Reader * r, Buffer out);
 
-static long Reader__hex4(Reader * r);
+static long _hex4(Reader * r);
 
-static Var Reader__number(Reader * r);
+static Var _number(Reader * r);
 
-static int Reader__digits(Reader * r);
+static int _digits(Reader * r);
 
-static void Reader__word(Reader * r, const char * word);
+static void _word(Reader * r, const char * word);
 
-static void Reader__expect(Reader * r, char byte, const char * why);
+static void _expect(Reader * r, char byte, const char * why);
 
-static void Reader__space(Reader * r);
+static void _space(Reader * r);
 
-static int Reader__peek(Reader * r);
+static int _peek(Reader * r);
 
-_Noreturn static void Reader__fail(Reader * r, String why);
+_Noreturn static void _fail(Reader * r, String why);
 
 typedef struct Writer{
   Buffer out;
@@ -104,13 +104,13 @@ Writer;
 
 static String _json(Var value, int pretty);
 
-static void Writer__value(Writer * w, Var value, int depth);
+static void _write_value(Writer * w, Var value, int depth);
 
-static void Writer__elements(Writer * w, Var sequence, int depth);
+static void _elements(Writer * w, Var sequence, int depth);
 
-static void Writer__members(Writer * w, Map object, int depth);
+static void _members(Writer * w, Map object, int depth);
 
-static void Writer__line(Writer * w, int depth);
+static void _line(Writer * w, int depth);
 
 static void _write_string(Buffer out, String text);
 
@@ -294,35 +294,35 @@ static Var _parse(String source, String path){
     .text = String_truth(source) ? source : "", .path = path
   }
   ;
-  Var value = Reader__value(&(r));
-  Reader__space(&(r));
-  if(Reader__peek(&(r))) Reader__fail(&(r), _2);
+  Var value = _read_value(&(r));
+  _space(&(r));
+  if(_peek(&(r))) _fail(&(r), _2);
   return value;
 }
 
-static Var Reader__value(Reader * r){
-  Reader__space(&((* r)));
-  switch(Reader__peek(&((* r)))){
+static Var _read_value(Reader * r){
+  _space(&((* r)));
+  switch(_peek(&((* r)))){
     case '{' : case '[' :{
-      if(++(* r).depth > JSON_MAX_DEPTH) Reader__fail(&((* r)), _3);
-      Var nested = Reader__peek(&((* r))) == '{' ? Reader__object(&((* r))) : Reader__array(&((* r)));
+      if(++(* r).depth > JSON_MAX_DEPTH) _fail(&((* r)), _3);
+      Var nested = _peek(&((* r))) == '{' ? _object(&((* r))) : _array(&((* r)));
       (* r).depth --;
       return nested;
     }
-    case '"' : return String_var(Reader__string(&((* r))));
-    case 't' : Reader__word(&((* r)), "true");
+    case '"' : return String_var(_string(&((* r))));
+    case 't' : _word(&((* r)), "true");
     return Json_bool(1);
-    case 'f' : Reader__word(&((* r)), "false");
+    case 'f' : _word(&((* r)), "false");
     return Json_bool(0);
-    case 'n' : Reader__word(&((* r)), "null");
+    case 'n' : _word(&((* r)), "null");
     return(Var){
       .u64 = 0
     }
     ;
-    case '-' : case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : case '8' : case '9' : return Reader__number(&((* r)));
-    case '\0' : Reader__fail(&((* r)), _4);
+    case '-' : case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : case '8' : case '9' : return _number(&((* r)));
+    case '\0' : _fail(&((* r)), _4);
   }
-  Reader__fail(&((* r)), _5);
+  _fail(&((* r)), _5);
 }
 
 Map Map_new(void);
@@ -331,26 +331,26 @@ static Var Map_var(Map);
 
 Var Map_setindex(Map, Var, Var);
 
-static Var Reader__object(Reader * r){
+static Var _object(Reader * r){
   Map object = Map_new();
   (* r).at ++;
-  Reader__space(&((* r)));
-  if(Reader__peek(&((* r))) == '}'){
+  _space(&((* r)));
+  if(_peek(&((* r))) == '}'){
     (* r).at ++;
     return Map_var(object);
   }
   while(1){
-    Reader__space(&((* r)));
-    if(Reader__peek(&((* r))) != '"') Reader__fail(&((* r)), _6);
-    String name = Reader__string(&((* r)));
-    Reader__expect(&((* r)), ':', "expected ':'");
-    Map_setindex(object, String_var(name), Reader__value(&((* r))));
-    Reader__space(&((* r)));
-    if(Reader__peek(&((* r))) == '}'){
+    _space(&((* r)));
+    if(_peek(&((* r))) != '"') _fail(&((* r)), _6);
+    String name = _string(&((* r)));
+    _expect(&((* r)), ':', "expected ':'");
+    Map_setindex(object, String_var(name), _read_value(&((* r))));
+    _space(&((* r)));
+    if(_peek(&((* r))) == '}'){
       (* r).at ++;
       return Map_var(object);
     }
-    Reader__expect(&((* r)), ',', "expected ',' or '}'");
+    _expect(&((* r)), ',', "expected ',' or '}'");
   }
 
 }
@@ -361,22 +361,22 @@ static Var Array_var(Array);
 
 Var Array_push(Array, Var);
 
-static Var Reader__array(Reader * r){
+static Var _array(Reader * r){
   Array array = Array_new();
   (* r).at ++;
-  Reader__space(&((* r)));
-  if(Reader__peek(&((* r))) == ']'){
+  _space(&((* r)));
+  if(_peek(&((* r))) == ']'){
     (* r).at ++;
     return Array_var(array);
   }
   while(1){
-    Array_push(array, Reader__value(&((* r))));
-    Reader__space(&((* r)));
-    if(Reader__peek(&((* r))) == ']'){
+    Array_push(array, _read_value(&((* r))));
+    _space(&((* r)));
+    if(_peek(&((* r))) == ']'){
       (* r).at ++;
       return Array_var(array);
     }
-    Reader__expect(&((* r)), ',', "expected ',' or ']'");
+    _expect(&((* r)), ',', "expected ',' or ']'");
   }
 
 }
@@ -395,7 +395,7 @@ Buffer Buffer_new(size_t);
 
 int scan_utf8_length(const unsigned char *);
 
-static String Reader__string(Reader * r){
+static String _string(Reader * r){
   int run = ++(* r).at;
   Buffer decoded = NULL;
   {
@@ -411,7 +411,7 @@ static String Reader__string(Reader * r){
     x2c_cleanup_push(& _x2c_defer_record_0);
     {
       while(1){
-        int byte = Reader__peek(&((* r)));
+        int byte = _peek(&((* r)));
         if(byte == '"'){
           int end =(* r).at ++;
           if(decoded == NULL){
@@ -436,14 +436,14 @@ static String Reader__string(Reader * r){
         if(byte == '\\'){
           if(decoded == NULL) decoded = Buffer_new(0);
           Buffer_write_len(decoded, (* r).text + run, (* r).at - run);
-          Reader__escape(&((* r)), decoded);
+          _escape(&((* r)), decoded);
           run =(* r).at;
         }
-        else if(! byte) Reader__fail(&((* r)), _7);
-        else if(byte < 0x20) Reader__fail(&((* r)), _8);
+        else if(! byte) _fail(&((* r)), _7);
+        else if(byte < 0x20) _fail(&((* r)), _8);
         else{
           int length = scan_utf8_length((const unsigned char *)(* r).text +(* r).at);
-          if(length < 0) Reader__fail(&((* r)), _9);
+          if(length < 0) _fail(&((* r)), _9);
           (* r).at += length;
         }
 
@@ -457,7 +457,7 @@ static String Reader__string(Reader * r){
 
 Buffer Buffer_write_char(Buffer, char);
 
-static void Reader__escape(Reader * r, Buffer out){
+static void _escape(Reader * r, Buffer out){
   int escape =(* r).text[++(* r).at];
   (* r).at ++;
   switch(escape){
@@ -475,41 +475,41 @@ static void Reader__escape(Reader * r, Buffer out){
     return;
     case 'u' : break;
     default:(* r).at -= 2;
-    Reader__fail(&((* r)), _10);
+    _fail(&((* r)), _10);
   }
   int start =(* r).at - 2;
-  long point = Reader__hex4(&((* r)));
+  long point = _hex4(&((* r)));
   if(point >= 0xD800 && point <= 0xDBFF){
-    if(Reader__peek(&((* r))) != '\\' ||(* r).text[(* r).at + 1] != 'u'){
+    if(_peek(&((* r))) != '\\' ||(* r).text[(* r).at + 1] != 'u'){
       (* r).at = start;
-      Reader__fail(&((* r)), _11);
+      _fail(&((* r)), _11);
     }
     (* r).at += 2;
-    long low = Reader__hex4(&((* r)));
+    long low = _hex4(&((* r)));
     if(low < 0xDC00 || low > 0xDFFF){
       (* r).at = start;
-      Reader__fail(&((* r)), _11);
+      _fail(&((* r)), _11);
     }
     point = 0x10000 +((point - 0xD800) << 10) +(low - 0xDC00);
   }
   else if(point >= 0xDC00 && point <= 0xDFFF){
     (* r).at = start;
-    Reader__fail(&((* r)), _11);
+    _fail(&((* r)), _11);
   }
   else if(! point){
     (* r).at = start;
-    Reader__fail(&((* r)), _12);
+    _fail(&((* r)), _12);
   }
   _write_code_point(out, point);
 }
 
 static int scan_ascii_hex_value(int);
 
-static long Reader__hex4(Reader * r){
+static long _hex4(Reader * r){
   long unit = 0;
   for(int i = 0;  i < 4;  i ++){
-    int digit = scan_ascii_hex_value(Reader__peek(&((* r))));
-    if(digit < 0) Reader__fail(&((* r)), _13);
+    int digit = scan_ascii_hex_value(_peek(&((* r))));
+    if(digit < 0) _fail(&((* r)), _13);
     unit = unit * 16 + digit;
     (* r).at ++;
   }
@@ -526,24 +526,24 @@ Var Var_box_ulong(unsigned long);
 
 static Var double_var(double);
 
-static Var Reader__number(Reader * r){
+static Var _number(Reader * r){
   int start =(* r).at;
-  if(Reader__peek(&((* r))) == '-')(* r).at ++;
-  if(Reader__peek(&((* r))) == '0')(* r).at ++;
-  else if(! Reader__digits(&((* r)))) Reader__fail(&((* r)), _14);
+  if(_peek(&((* r))) == '-')(* r).at ++;
+  if(_peek(&((* r))) == '0')(* r).at ++;
+  else if(! _digits(&((* r)))) _fail(&((* r)), _14);
   int integral = 1;
-  if(Reader__peek(&((* r))) == '.'){
+  if(_peek(&((* r))) == '.'){
     integral = 0;
     (* r).at ++;
-    if(! Reader__digits(&((* r)))) Reader__fail(&((* r)), _14);
+    if(! _digits(&((* r)))) _fail(&((* r)), _14);
   }
-  if((Reader__peek(&((* r))) | 32) == 'e'){
+  if((_peek(&((* r))) | 32) == 'e'){
     integral = 0;
     (* r).at ++;
-    if(Reader__peek(&((* r))) == '+' || Reader__peek(&((* r))) == '-')(* r).at ++;
-    if(! Reader__digits(&((* r)))) Reader__fail(&((* r)), _14);
+    if(_peek(&((* r))) == '+' || _peek(&((* r))) == '-')(* r).at ++;
+    if(! _digits(&((* r)))) _fail(&((* r)), _14);
   }
-  if(scan_ascii_digit(Reader__peek(&((* r))))) Reader__fail(&((* r)), _14);
+  if(scan_ascii_digit(_peek(&((* r))))) _fail(&((* r)), _14);
   const char * spelling =(* r).text + start;
   errno = 0;
   if(integral){
@@ -562,34 +562,34 @@ static Var Reader__number(Reader * r){
   double number = strtod(spelling, NULL);
   if(isinf(number)){
     (* r).at = start;
-    Reader__fail(&((* r)), _15);
+    _fail(&((* r)), _15);
   }
   return double_var(number);
 }
 
-static int Reader__digits(Reader * r){
+static int _digits(Reader * r){
   int start =(* r).at;
-  while(scan_ascii_digit(Reader__peek(&((* r)))))(* r).at ++;
+  while(scan_ascii_digit(_peek(&((* r)))))(* r).at ++;
   return(* r).at - start;
 }
 
 int strncmp(const char *, const char *, size_t);
 
-static void Reader__word(Reader * r, const char * word){
+static void _word(Reader * r, const char * word){
   size_t length = strlen(word);
-  if(strncmp((* r).text +(* r).at, word, length)) Reader__fail(&((* r)), _5);
+  if(strncmp((* r).text +(* r).at, word, length)) _fail(&((* r)), _5);
   (* r).at += length;
 }
 
-static void Reader__expect(Reader * r, char byte, const char * why){
-  Reader__space(&((* r)));
-  if(Reader__peek(&((* r))) != byte) Reader__fail(&((* r)), String_new(why));
+static void _expect(Reader * r, char byte, const char * why){
+  _space(&((* r)));
+  if(_peek(&((* r))) != byte) _fail(&((* r)), String_new(why));
   (* r).at ++;
 }
 
-static void Reader__space(Reader * r){
+static void _space(Reader * r){
   while(1){
-    switch(Reader__peek(&((* r)))){
+    switch(_peek(&((* r)))){
       case ' ' : case '\t' : case '\n' : case '\r' :(* r).at ++;
       break;
       default: return;
@@ -599,20 +599,20 @@ static void Reader__space(Reader * r){
 
 }
 
-static int Reader__peek(Reader * r){
+static int _peek(Reader * r){
   return(unsigned char)(* r).text[(* r).at];
 }
 
 void scan_next_line_col(char *, int, int *, int *);
 
-_Noreturn static void Reader__fail(Reader * r, String why){
+_Noreturn static void _fail(Reader * r, String why){
   int line = 1, column = 1, offset =(* r).at;
   scan_next_line_col((char *)(* r).text, offset, & line, & column);
   if(String_truth((* r).path)){
     Var _x2c_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("Json.read_file")), NULL)));
     Var _x2c_literal_part_2 = String_var((* r).path);
     {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/json.x",.function = "Reader__fail",.line = 442};
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/json.x",.function = "_fail",.line = 442};
       x2c_error_raise_n(& _x2c_error_site_1, 28682226919752, 6, Symbol_var(34096809266140), _x2c_literal_part_1, Symbol_var(1051920), _x2c_literal_part_2, Symbol_var(1218550748), String_var(why), Symbol_var(1019648360), int_var(offset), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
       __builtin_unreachable();
     }
@@ -621,7 +621,7 @@ _Noreturn static void Reader__fail(Reader * r, String why){
   {
     Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("Json.parse")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/json.x",.function = "Reader__fail",.line = 444};
+      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/json.x",.function = "_fail",.line = 444};
       x2c_error_raise_n(& _x2c_error_site_2, 28682226919752, 5, Symbol_var(34096809266140), _x2c_literal_part_3, Symbol_var(1218550748), String_var(why), Symbol_var(1019648360), int_var(offset), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
       __builtin_unreachable();
     }
@@ -664,7 +664,7 @@ static String _json(Var value, int pretty){
         .out = out, .pretty = pretty
       }
       ;
-      Writer__value(&(w), value, 0);
+      _write_value(&(w), value, 0);
       {
         String _x2c_return_value_2 = Buffer_str(out);
         {
@@ -698,12 +698,12 @@ double Var_floating(Var);
 
 static Map Var_map_payload(Var);
 
-static void Writer__value(Writer * w, Var value, int depth){
+static void _write_value(Writer * w, Var value, int depth){
   if(depth > JSON_MAX_DEPTH){
     Var _x2c_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL)));
     Var _x2c_literal_part_5 = String_var(String_join(NULL, cons(String_var(String_new("nesting exceeds 512 levels")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/json.x",.function = "Writer__value",.line = 496};
+      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/json.x",.function = "_write_value",.line = 496};
       x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_literal_part_4, Symbol_var(1218550748), _x2c_literal_part_5);
       __builtin_unreachable();
     }
@@ -714,14 +714,14 @@ static void Writer__value(Writer * w, Var value, int depth){
   else if(Var_is_row(value, 11, 7, 1) || Var_is_atom(value)) _write_string((* w).out, Var_str(value));
   else if(Var_is_integer(value)) _write_integer((* w).out, value);
   else if(Var_is_floating(value)) _write_double((* w).out, Var_floating(value));
-  else if(Var_is(value, 3313778) || Var_is_row(value, 9, 7, 4)) Writer__elements(&((* w)), value, depth);
-  else if(Var_is(value, 26720)) Writer__members(&((* w)), Var_map_payload(value), depth);
+  else if(Var_is(value, 3313778) || Var_is_row(value, 9, 7, 4)) _elements(&((* w)), value, depth);
+  else if(Var_is(value, 26720)) _members(&((* w)), Var_map_payload(value), depth);
   else{
     Symbol tag = Var_tag(value);
     {
       Var _x2c_literal_part_6 = String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL)));
       {
-        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/json.x",.function = "Writer__value",.line = 508};
+        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/json.x",.function = "_write_value",.line = 508};
         x2c_error_raise_n(& _x2c_error_site_4, 4477479911782, 2, Symbol_var(34096809266140), _x2c_literal_part_6, Symbol_var(41038), Symbol_var(tag));
         __builtin_unreachable();
       }
@@ -736,7 +736,7 @@ Iter Var_iter(Var, Iter);
 
 int Iter_try_next(Iter, Var *);
 
-static void Writer__elements(Writer * w, Var sequence, int depth){
+static void _elements(Writer * w, Var sequence, int depth){
   int count = 0;
   Buffer_write_char((* w).out, '[');
   {
@@ -750,14 +750,14 @@ static void Writer__elements(Writer * w, Var sequence, int depth){
       element = _x2c_macro_item_0;
       {
         if(count ++) Buffer_write_char((* w).out, ',');
-        Writer__line(&((* w)), depth + 1);
-        Writer__value(&((* w)), element, depth + 1);
+        _line(&((* w)), depth + 1);
+        _write_value(&((* w)), element, depth + 1);
       }
 
     }
 
   }
-  if(count) Writer__line(&((* w)), depth);
+  if(count) _line(&((* w)), depth);
   Buffer_write_char((* w).out, ']');
 }
 
@@ -771,7 +771,7 @@ int String_equal(String, String);
 
 Var Map_getindex(Map, Var);
 
-static void Writer__members(Writer * w, Map object, int depth){
+static void _members(Writer * w, Map object, int depth){
   Array names = Array_new();
   const Array _x2c_macro_acquired_1 = names;
   {
@@ -802,7 +802,7 @@ static void Writer__members(Writer * w, Map object, int depth){
                 Var _x2c_literal_part_7 = String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL)));
                 Var _x2c_literal_part_8 = String_var(String_join(NULL, cons(String_var(String_new("String object key")), NULL)));
                 {
-                  static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/json.x",.function = "Writer__members",.line = 529};
+                  static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/json.x",.function = "_members",.line = 529};
                   x2c_error_raise_n(& _x2c_error_site_5, 4477479911782, 3, Symbol_var(34096809266140), _x2c_literal_part_7, Symbol_var(1510312), _x2c_literal_part_8, Symbol_var(41038), Symbol_var(tag));
                   __builtin_unreachable();
                 }
@@ -833,7 +833,7 @@ static void Writer__members(Writer * w, Map object, int depth){
               Var _x2c_literal_part_9 = String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL)));
               Var _x2c_literal_part_10 = String_var(String_join(NULL, cons(String_var(String_new("duplicate object name")), NULL)));
               {
-                static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/json.x",.function = "Writer__members",.line = 540};
+                static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/json.x",.function = "_members",.line = 540};
                 x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 3, Symbol_var(34096809266140), _x2c_literal_part_9, Symbol_var(1218550748), _x2c_literal_part_10, Symbol_var(920394), String_var(text));
                 __builtin_unreachable();
               }
@@ -841,16 +841,16 @@ static void Writer__members(Writer * w, Map object, int depth){
             }
             previous = text;
             if(count ++) Buffer_write_char((* w).out, ',');
-            Writer__line(&((* w)), depth + 1);
+            _line(&((* w)), depth + 1);
             _write_string((* w).out, text);
             Buffer_write((* w).out, (* w).pretty ? ": " : ":");
-            Writer__value(&((* w)), Map_getindex(object, name), depth + 1);
+            _write_value(&((* w)), Map_getindex(object, name), depth + 1);
           }
 
         }
 
       }
-      if(count) Writer__line(&((* w)), depth);
+      if(count) _line(&((* w)), depth);
       Buffer_write_char((* w).out, '}');
     }
     x2c_cleanup_leave(& _x2c_defer_record_2);
@@ -862,7 +862,7 @@ Buffer Buffer_write_repeat(Buffer, char, size_t);
 
 Buffer Buffer_newline(Buffer);
 
-static void Writer__line(Writer * w, int depth){
+static void _line(Writer * w, int depth){
   if((* w).pretty) Buffer_write_repeat(Buffer_newline((* w).out), ' ', 2 * depth);
 }
 

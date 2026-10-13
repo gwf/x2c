@@ -31,23 +31,23 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Spec _read_spec(List spec);
 
-static void Option__read_row(Option * o, List row, Map index, int position);
+static void _read_row(Option * o, List row, Map index, int position);
 
-static void Option__read_property(Option * o, List property);
+static void _read_property(Option * o, List property);
 
-static void Spec__free(Spec * s);
+static void _free(Spec * s);
 
-static void Spec__parse_long(Spec * s, Map result, List * rest, String word);
+static void _parse_long(Spec * s, Map result, List * rest, String word);
 
-static void Spec__parse_short(Spec * s, Map result, List * rest, String word);
+static void _parse_short(Spec * s, Map result, List * rest, String word);
 
-static Option * Spec__find(Spec * s, String spelling);
+static Option * _find(Spec * s, String spelling);
 
 static String _next_value(List * rest, String spelling);
 
-static void Option__store(Option * o, Map result, Var value);
+static void _store(Option * o, Map result, Var value);
 
-static void Spec__assign_operands(Spec * s, Map result, List operands);
+static void _assign_operands(Spec * s, Map result, List operands);
 
 _Noreturn static void _bad_option(String why, String option);
 
@@ -55,7 +55,7 @@ _Noreturn static void _bad_operand(String why, String operand);
 
 _Noreturn static void _bad_spec(String why, Var entry);
 
-static String Option__label(Option * o);
+static String _label(Option * o);
 
 static void _write_row(Buffer out, String label, String help);
 
@@ -238,11 +238,11 @@ Map Args_parse(List args, List spec){
                 String word = Var_str(List_car(rest));
                 if(options_ended || String_len(word) < 2 || String_getindex(word, 0) != '-') Array_push(operands, String_var(word));
                 else if(String_equal(word, _0)) options_ended = 1;
-                else if(String_getindex(word, 1) == '-') Spec__parse_long(&(parsed), result, &(rest), word);
-                else Spec__parse_short(&(parsed), result, &(rest), word);
+                else if(String_getindex(word, 1) == '-') _parse_long(&(parsed), result, &(rest), word);
+                else _parse_short(&(parsed), result, &(rest), word);
               }
               List remaining = Array_list(operands);
-              Spec__assign_operands(&(parsed), result, remaining);
+              _assign_operands(&(parsed), result, remaining);
               for(int i = 0;  i < parsed.count;  i ++){
                 Option * option = & parsed.options[i];
                 if(Array_truth(option -> collected)){
@@ -323,7 +323,7 @@ static Spec _read_spec(List spec){
           row = Var_list_payload(_x2c_macro_cursor_output_0);
           {
             Option * option = & result.options[position];
-            Option__read_row(&((* option)), row, result.index, position);
+            _read_row(&((* option)), row, result.index, position);
             Var earlier;
             option -> owner = Map_try_get(result.index, String_var(option -> name), &(earlier)) ? result.options[Var_integer(earlier)].owner : option;
             Map_setindex(result.index, String_var(option -> name), int_var(position));
@@ -357,7 +357,7 @@ static int String_truth(String);
 
 String String_join(String, List);
 
-static void Option__read_row(Option * o, List row, Map index, int position){
+static void _read_row(Option * o, List row, Map index, int position){
   String first = Var_str(List_car(row));
   (* o).operand = ! String_startswith(first, _3);
   {
@@ -369,7 +369,7 @@ static void Option__read_row(Option * o, List row, Map index, int position){
       word = _x2c_macro_cursor_output_1;
       {
         if(Var_is_row(word, 9, 7, 4)){
-          Option__read_property(&((* o)), Var_list_payload(word));
+          _read_property(&((* o)), Var_list_payload(word));
           continue;
         }
         String text = Var_str(word);
@@ -404,7 +404,7 @@ int Var_is(Var, Symbol);
 
 static Var List_cadr(List);
 
-static void Option__read_property(Option * o, List property){
+static void _read_property(Option * o, List property){
   Symbol key = 0;
   if(Var_is(List_car(property), 1328354264)) key = Var_symbol(List_car(property));
   switch(key){
@@ -424,7 +424,7 @@ void Scope_free(void *);
 
 void Map_cleanup(Map);
 
-static void Spec__free(Spec * s){
+static void _free(Spec * s){
   if((* s).options) for(int i = 0;  i <(* s).count;  i ++) Array_free((* s).options[i].collected);
   Scope_free((* s).options);
   Map_cleanup((* s).index);
@@ -432,34 +432,34 @@ static void Spec__free(Spec * s){
 
 int String_find(String, String);
 
-static void Spec__parse_long(Spec * s, Map result, List * rest, String word){
+static void _parse_long(Spec * s, Map result, List * rest, String word){
   int equals = String_find(word, _9);
   String spelling = equals < 0 ? word : String_getslice(word, (-2147483647 - 1), equals, 1);
-  Option * option = Spec__find(&((* s)), spelling);
+  Option * option = _find(&((* s)), spelling);
   if(! String_truth(option -> value)){
     if(equals >= 0) _bad_option(_10, spelling);
-    Option__store(&((* option)), result, int_var(1));
+    _store(&((* option)), result, int_var(1));
   }
-  else if(equals >= 0) Option__store(&((* option)), result, String_var(String_getslice(word, equals + 1, (-2147483647 - 1), 1)));
-  else Option__store(&((* option)), result, String_var(_next_value(&((* rest)), spelling)));
+  else if(equals >= 0) _store(&((* option)), result, String_var(String_getslice(word, equals + 1, (-2147483647 - 1), 1)));
+  else _store(&((* option)), result, String_var(_next_value(&((* rest)), spelling)));
 }
 
-static void Spec__parse_short(Spec * s, Map result, List * rest, String word){
+static void _parse_short(Spec * s, Map result, List * rest, String word){
   for(int at = 1;  at < String_len(word);  at ++){
     String spelling = String_join(NULL, cons(String_var(_11), cons(String_var(String_getslice(word, at, at + 1, 1)), NULL)));
-    Option * option = Spec__find(&((* s)), spelling);
+    Option * option = _find(&((* s)), spelling);
     if(! String_truth(option -> value)){
-      Option__store(&((* option)), result, int_var(1));
+      _store(&((* option)), result, int_var(1));
       continue;
     }
     String value = at + 1 < String_len(word) ? String_getslice(word, at + 1, (-2147483647 - 1), 1) : _next_value(&((* rest)), spelling);
-    Option__store(&((* option)), result, String_var(value));
+    _store(&((* option)), result, String_var(value));
     return;
   }
 
 }
 
-static Option * Spec__find(Spec * s, String spelling){
+static Option * _find(Spec * s, String spelling){
   Var position;
   if(! Map_try_get((* s).index, String_var(spelling), &(position))) _bad_option(_12, spelling);
   return &(* s).options[Var_integer(position)];
@@ -471,7 +471,7 @@ static String _next_value(List * rest, String spelling){
   return Var_str(List_car((* rest)));
 }
 
-static void Option__store(Option * o, Map result, Var value){
+static void _store(Option * o, Map result, Var value){
   Option * owner =(* o).owner;
   if(!(* o).repeated || !(* o).given){
     Array_free(owner -> collected);
@@ -486,12 +486,12 @@ static void Option__store(Option * o, Map result, Var value){
   (* o).given ++;
 }
 
-static void Spec__assign_operands(Spec * s, Map result, List operands){
+static void _assign_operands(Spec * s, Map result, List operands){
   for(int i = 0;  i <(* s).count;  i ++){
     Option * option = &(* s).options[i];
     if(! option -> operand) continue;
     while(List_truth(operands)){
-      Option__store(&((* option)), result, List_car(operands));
+      _store(&((* option)), result, List_car(operands));
       operands = List_cdr(operands);
       if(! option -> repeated) break;
     }
@@ -625,7 +625,7 @@ String Args_usage(String program, List spec){
                     {
                       for(int i = 0;  i < parsed.count;  i ++){
                         Option * option = & parsed.options[i];
-                        String label = Option__label(&((* option)));
+                        String label = _label(&((* option)));
                         if(! option -> operand) _write_row(options, label, option -> help);
                         else{
                           Buffer_printf(synopsis, " %s", label);
@@ -673,7 +673,7 @@ String Args_usage(String program, List spec){
 
 }
 
-static String Option__label(Option * o){
+static String _label(Option * o){
   if((* o).operand){
     String label = String_join(NULL, cons(String_var(_15), cons(String_var((* o).name), cons(String_var(_16), NULL))));
     if((* o).repeated) label = String_join(NULL, cons(String_var(label), cons(String_var(_17), NULL)));
@@ -712,7 +712,7 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
-  Spec__free(&((*(Spec *) _x2c_defer_data_1->_x2c_defer_capture_2)));
+  _free(&((*(Spec *) _x2c_defer_data_1->_x2c_defer_capture_2)));
 }
 
 void Array_cleanup(Array);
@@ -724,12 +724,12 @@ static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
   _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
-  if(!(*(int *) _x2c_defer_data_3->_x2c_defer_capture_4)) Spec__free(&((*(Spec *) _x2c_defer_data_3->_x2c_defer_capture_5)));
+  if(!(*(int *) _x2c_defer_data_3->_x2c_defer_capture_4)) _free(&((*(Spec *) _x2c_defer_data_3->_x2c_defer_capture_5)));
 }
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
   _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;
-  Spec__free(&((*(Spec *) _x2c_defer_data_4->_x2c_defer_capture_6)));
+  _free(&((*(Spec *) _x2c_defer_data_4->_x2c_defer_capture_6)));
 }
 
 void Buffer_cleanup(Buffer);

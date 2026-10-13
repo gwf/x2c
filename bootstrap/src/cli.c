@@ -722,17 +722,17 @@ Parse;
 
 static CliRequest _parse_command(Array args, CliCommand * command);
 
-static void Parse_word(Parse * p, int * i);
+static void _word(Parse * p, int * i);
 
-static int Parse_expands(Parse * p, String arg, int i);
+static int _expands(Parse * p, String arg, int i);
 
-static void Parse_expand(Parse * p, String arg, int * i);
+static void _expand(Parse * p, String arg, int * i);
 
-static void Parse_operand(Parse * p, String arg, int * i);
+static void _operand(Parse * p, String arg, int * i);
 
-static void Parse_finish(Parse * p);
+static void _finish_request(Parse * p);
 
-static void CliRequest__check(CliRequest r, int mask);
+static void _check(CliRequest r, int mask);
 
 static void _help_command(Array args);
 
@@ -743,15 +743,15 @@ typedef struct Given{
 }
 Given;
 
-static void Parse_option(Parse * p, String arg, int * i);
+static void _option(Parse * p, String arg, int * i);
 
-static void CliRequest__save_temps_dir(CliRequest r, String arg);
+static void _save_temps_dir(CliRequest r, String arg);
 
 static Given _take_option(Array args, int * i, int mask);
 
 static CliOption * _find_option(String spelling, int mask, String * attached);
 
-static void Parse_apply(Parse * p, Given given);
+static void _apply(Parse * p, Given given);
 
 static Symbol _color_mode(String value);
 
@@ -789,7 +789,7 @@ _x2c_initializer_choice_29BB659F_1((0 < sizeof(target_kinds) / sizeof(target_kin
 ))
 static int _count(String value, int minimum, String noun);
 
-static void Parse_include_dir(Parse * p, String dir);
+static void _include_dir(Parse * p, String dir);
 
 static void _forward(Array out, Given given);
 
@@ -797,9 +797,9 @@ static void _push_pair(Array out, String option, String value);
 
 static String _xcc_argument(String value);
 
-static void CliRequest__set_field(CliRequest r, CliOption * option, String value);
+static void _set_field(CliRequest r, CliOption * option, String value);
 
-static void Parse_native(Parse * p, int * i);
+static void _native(Parse * p, int * i);
 
 static void _expand_argument(Array out, String arg, List stack);
 
@@ -819,17 +819,17 @@ Words;
 
 static Array _response_words(String path, const char * text, size_t length);
 
-static void Words_scan(Words * w, int c);
+static void _scan(Words * w, int c);
 
-static void Words_bare(Words * w, int c);
+static void _bare(Words * w, int c);
 
-static void Words_put(Words * w, int c);
+static void _put(Words * w, int c);
 
-static void Words_newline(Words * w);
+static void _newline(Words * w);
 
-static void Words_flush(Words * w);
+static void _flush(Words * w);
 
-static void Words_finish(Words * w);
+static void _finish_words(Words * w);
 
 _Noreturn static void _help_exit(Symbol command, int status);
 
@@ -1199,25 +1199,25 @@ static CliRequest _parse_command(Array args, CliCommand * command){
     .request = cli_request((* command).name), .args = args, .mask =(* command).mask, .inputs = Array_new(), .run_args = Array_new(), .include_dirs = Array_new(), .cpp_args = Array_new(), .cc_args = Array_new(), .ld_args = Array_new()
   }
   ;
-  for(int i = 1;  i < Array_len(args);  i ++) Parse_word(&(p), &(i));
-  Parse_finish(&(p));
-  CliRequest__check(p.request, p.mask);
+  for(int i = 1;  i < Array_len(args);  i ++) _word(&(p), &(i));
+  _finish_request(&(p));
+  _check(p.request, p.mask);
   return p.request;
 }
 
-static void Parse_word(Parse * p, int * i){
+static void _word(Parse * p, int * i){
   String arg = Var_as_string(Array_getindex((* p).args, (* i)));
   if(!(* p).operands && String_equal(arg, _85))(* p).operands = 1;
-  else if(Parse_expands(&((* p)), arg, (* i))) Parse_expand(&((* p)), arg, &((* i)));
-  else if((* p).operands || ! String_truth(arg) || String_getindex(arg, 0) != '-') Parse_operand(&((* p)), arg, &((* i)));
-  else Parse_option(&((* p)), arg, &((* i)));
+  else if(_expands(&((* p)), arg, (* i))) _expand(&((* p)), arg, &((* i)));
+  else if((* p).operands || ! String_truth(arg) || String_getindex(arg, 0) != '-') _operand(&((* p)), arg, &((* i)));
+  else _option(&((* p)), arg, &((* i)));
 }
 
-static int Parse_expands(Parse * p, String arg, int i){
+static int _expands(Parse * p, String arg, int i){
   return(* p).mask == CLI_SCRIPT && !(* p).operands && i >=(* p).expanded && String_startswith(arg, _86);
 }
 
-static void Parse_expand(Parse * p, String arg, int * i){
+static void _expand(Parse * p, String arg, int * i){
   Array words = Array_new();
   _expand_argument(words, arg, NULL);
   Array_splice((* p).args, (* i), 1, words);
@@ -1225,13 +1225,13 @@ static void Parse_expand(Parse * p, String arg, int * i){
   (* i) --;
 }
 
-static void Parse_operand(Parse * p, String arg, int * i){
+static void _operand(Parse * p, String arg, int * i){
   if((* p).operands &&(* p).mask == CLI_RUN) Array_push((* p).run_args, String_var(arg));
   else Array_push((* p).inputs, String_var(arg));
   if((* p).mask == CLI_SCRIPT) while(++(* i) < Array_len((* p).args)) Array_push((* p).run_args, Array_getindex((* p).args, (* i)));
 }
 
-static void Parse_finish(Parse * p){
+static void _finish_request(Parse * p){
   CliRequest r =(* p).request;
   r -> inputs = Array_list_free((* p).inputs);
   r -> run_args = Array_list_free((* p).run_args);
@@ -1244,7 +1244,7 @@ static void Parse_finish(Parse * p){
   r -> extensions = List_reverse(r -> extensions);
 }
 
-static void CliRequest__check(CliRequest r, int mask){
+static void _check(CliRequest r, int mask){
   Symbol name = r -> command;
   List inputs = r -> inputs;
   if(mask == CLI_TRANSLATE && ! List_truth(inputs)) driver_error("translate requires at least one input");
@@ -1267,18 +1267,18 @@ static void _help_command(Array args){
   _help_exit(asked -> name, 0);
 }
 
-static void Parse_option(Parse * p, String arg, int * i){
+static void _option(Parse * p, String arg, int * i){
   if(String_equal(arg, _80)) _removed_output();
   if(((* p).mask &(CLI_BUILD | CLI_RUN)) && String_startswith(arg, _90)){
-    CliRequest__save_temps_dir((* p).request, arg);
+    _save_temps_dir((* p).request, arg);
     return;
   }
   Given given = _take_option((* p).args, &((* i)), (* p).mask);
   if(! given.option) _unknown_option(arg, (* p).mask);
-  Parse_apply(&((* p)), given);
+  _apply(&((* p)), given);
 }
 
-static void CliRequest__save_temps_dir(CliRequest r, String arg){
+static void _save_temps_dir(CliRequest r, String arg){
   r -> save_temps = 1;
   r -> temps_dir = String_remove_prefix(arg, _90);
   if(! String_truth(r -> temps_dir)) driver_error("--save-temps= requires a directory");
@@ -1326,7 +1326,7 @@ static CliOption * _find_option(String spelling, int mask, String * attached){
   return NULL;
 }
 
-static void Parse_apply(Parse * p, Given given){
+static void _apply(Parse * p, Given given){
   CliRequest r =(* p).request;
   String spelling = given.spelling, value = given.value;
   switch(given.option -> id){
@@ -1339,7 +1339,7 @@ static void Parse_apply(Parse * p, Given given){
       break;
     }
     case 20273998090 :{
-      Parse_include_dir(&((* p)), value);
+      _include_dir(&((* p)), value);
       break;
     }
     case 54927135910154 :{
@@ -1411,7 +1411,7 @@ static void Parse_apply(Parse * p, Given given){
       break;
     }
     default:{
-      CliRequest__set_field(r, &(* given.option), value);
+      _set_field(r, &(* given.option), value);
       break;
     }
 
@@ -1458,7 +1458,7 @@ static int _count(String value, int minimum, String noun){
   return(int) count;
 }
 
-static void Parse_include_dir(Parse * p, String dir){
+static void _include_dir(Parse * p, String dir){
   Array_push((* p).include_dirs, String_var(dir));
   if((* p).request -> command != 45220543335690) _push_pair((* p).cc_args, _40, dir);
 }
@@ -1485,7 +1485,7 @@ int cli_dependency_pass_through(String s){
   return String_truth(s) &&(String_startswith(s, _117) || String_startswith(s, _118) || String_startswith(s, _119) || String_startswith(s, _120) || String_contains(s, _121) || String_contains(s, _122) || String_contains(s, _123) || String_contains(s, _124));
 }
 
-static void CliRequest__set_field(CliRequest r, CliOption * option, String value){
+static void _set_field(CliRequest r, CliOption * option, String value){
   char * field =(char *) r +(* option).offset;
   switch((* option).apply){
     case FIELD_FLAG :{
@@ -1540,7 +1540,7 @@ CliRequest cli_package_options(String path, String package){
         .request = request, .args = words, .mask = CLI_BUILD, .include_dirs = Array_new(), .cpp_args = Array_new(), .cc_args = Array_new(), .ld_args = Array_new()
       }
       ;
-      for(int i = 0;  i < Array_len(words);  i ++) Parse_native(&(p), &(i));
+      for(int i = 0;  i < Array_len(words);  i ++) _native(&(p), &(i));
       Array_free(p.include_dirs);
       Array_free(p.cpp_args);
       request -> cc_args = Array_list_free(p.cc_args);
@@ -1560,7 +1560,7 @@ CliRequest cli_package_options(String path, String package){
 
 }
 
-static void Parse_native(Parse * p, int * i){
+static void _native(Parse * p, int * i){
   String arg = Var_as_string(Array_getindex((* p).args, (* i)));
   if(! String_truth(arg)) driver_error("empty package native argument");
   if(String_getindex(arg, 0) != '-' && String_getindex(arg, 0) != '@' && String_endswith(arg, _108)){
@@ -1569,7 +1569,7 @@ static void Parse_native(Parse * p, int * i){
   }
   Given given = _take_option((* p).args, &((* i)), (* p).mask);
   if(! given.option || ! given.option -> package_native) driver_error(String_join(NULL, cons(String_var(_126), cons(String_var(arg), cons(String_var(_84), NULL)))));
-  Parse_apply(&((* p)), given);
+  _apply(&((* p)), given);
 }
 
 Path Path_absolute(Path);
@@ -1651,19 +1651,19 @@ static Array _response_words(String path, const char * text, size_t length){
     .out = Array_new(), .path = path, .word = Buffer_new(0), .line = 1, .blank = 1
   }
   ;
-  for(size_t i = 0;  i < length;  i ++) Words_scan(&(w), (unsigned char) text[i]);
-  Words_finish(&(w));
+  for(size_t i = 0;  i < length;  i ++) _scan(&(w), (unsigned char) text[i]);
+  _finish_words(&(w));
   Buffer_free(w.word);
   return w.out;
 }
 
-static void Words_scan(Words * w, int c){
+static void _scan(Words * w, int c){
   if((* w).comment){
-    if(c == '\n') Words_newline(&((* w)));
+    if(c == '\n') _newline(&((* w)));
   }
   else if((* w).escaped){
     (* w).escaped = 0;
-    Words_put(&((* w)), c);
+    _put(&((* w)), c);
   }
   else if(c == '\\'){
     (* w).escaped = 1;
@@ -1671,12 +1671,12 @@ static void Words_scan(Words * w, int c){
   }
   else if((* w).quote){
     if(c ==(* w).quote)(* w).quote = 0;
-    else Words_put(&((* w)), c);
+    else _put(&((* w)), c);
   }
-  else Words_bare(&((* w)), c);
+  else _bare(&((* w)), c);
 }
 
-static void Words_bare(Words * w, int c){
+static void _bare(Words * w, int c){
   if(c == '\'' || c == '"'){
     (* w).quote = c;
     (* w).started = 1;
@@ -1684,40 +1684,40 @@ static void Words_bare(Words * w, int c){
   }
   else if((* w).blank && c == '#')(* w).comment = 1;
   else if(isspace(c)){
-    Words_flush(&((* w)));
-    if(c == '\n') Words_newline(&((* w)));
+    _flush(&((* w)));
+    if(c == '\n') _newline(&((* w)));
   }
   else{
     (* w).blank = 0;
-    Words_put(&((* w)), c);
+    _put(&((* w)), c);
   }
 
 }
 
-static void Words_put(Words * w, int c){
+static void _put(Words * w, int c){
   Buffer_write_char((* w).word, c);
   (* w).started = 1;
   if(c == '\n')(* w).line ++;
 }
 
-static void Words_newline(Words * w){
+static void _newline(Words * w){
   (* w).comment = 0;
   (* w).blank = 1;
   (* w).line ++;
 }
 
-static void Words_flush(Words * w){
+static void _flush(Words * w){
   if(!(* w).started) return;
   Array_push((* w).out, String_var(Buffer_str((* w).word)));
   Buffer_clear((* w).word);
   (* w).started = 0;
 }
 
-static void Words_finish(Words * w){
+static void _finish_words(Words * w){
   if((* w).comment) return;
   if((* w).escaped) _response_error((* w).path, (* w).line, "trailing backslash");
   if((* w).quote) _response_error((* w).path, (* w).line, "unterminated quote");
-  Words_flush(&((* w)));
+  _flush(&((* w)));
 }
 
 _Noreturn static void _help_exit(Symbol command, int status){

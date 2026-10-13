@@ -199,19 +199,19 @@ static const char * _value_color(Var value);
 
 static void _emit_memory(Logger logger, const LogEvent * event, Var data);
 
-static List LogMemorySink__cons_retained(LogMemorySink l, Var value, List tail);
+static List _cons_retained(LogMemorySink l, Var value, List tail);
 
 static void _destroy_memory(Var data);
 
-static Var LogMemorySink__retain(LogMemorySink l, Var value);
+static Var _retain(LogMemorySink l, Var value);
 
-static Var LogMemorySink__retain_wide(LogMemorySink l, Var value);
+static Var _retain_wide(LogMemorySink l, Var value);
 
-static Var LogMemorySink__retain_string(LogMemorySink l, Var value);
+static Var _retain_string(LogMemorySink l, Var value);
 
-static Var LogMemorySink__retain_lisp_symbol(LogMemorySink l, Var value);
+static Var _retain_lisp_symbol(LogMemorySink l, Var value);
 
-static List LogMemorySink__retain_list(LogMemorySink l, List list);
+static List _retain_list(LogMemorySink l, List list);
 
 static int _pool_chain_owns(Pool pool, Var value);
 
@@ -1202,17 +1202,17 @@ LogSink Logger_add_memory_sink(Logger logger, List * destination){
 static void _emit_memory(Logger logger, const LogEvent * event, Var data){
   (void) logger;
   LogMemorySink l = Var_logmemorysink(data);
-  List entry = LogMemorySink__cons_retained(l, List_var(event -> fields), NULL);
+  List entry = _cons_retained(l, List_var(event -> fields), NULL);
   entry = List_cons_in(l -> pool, Symbol_var(event -> category), entry);
   entry = List_cons_in(l -> pool, Symbol_var(event -> level), entry);
-  entry = LogMemorySink__cons_retained(l, Var_box_long_long(event -> elapsed_us), entry);
-  entry = LogMemorySink__cons_retained(l, Var_box_long_long(event -> wall_time_us), entry);
-  entry = LogMemorySink__cons_retained(l, Var_box_ulong(event -> sequence), entry);
+  entry = _cons_retained(l, Var_box_long_long(event -> elapsed_us), entry);
+  entry = _cons_retained(l, Var_box_long_long(event -> wall_time_us), entry);
+  entry = _cons_retained(l, Var_box_ulong(event -> sequence), entry);
   * l -> destination = List_cons_in(l -> pool, List_var(entry), * l -> destination);
 }
 
-static List LogMemorySink__cons_retained(LogMemorySink l, Var value, List tail){
-  return List_cons_in(l -> pool, LogMemorySink__retain(l, value), tail);
+static List _cons_retained(LogMemorySink l, Var value, List tail){
+  return List_cons_in(l -> pool, _retain(l, value), tail);
 }
 
 static void _destroy_memory(Var data){
@@ -1224,17 +1224,17 @@ static void _destroy_memory(Var data){
   Scope_free(context);
 }
 
-static Var LogMemorySink__retain(LogMemorySink l, Var value){
+static Var _retain(LogMemorySink l, Var value){
   if(Var_is_null(value) || Var_is_nil(value) || Var_is(value, 1328354264)) return value;
-  if(Var_is_wide(value)) return LogMemorySink__retain_wide(l, value);
+  if(Var_is_wide(value)) return _retain_wide(l, value);
   if(Var_is_integer(value) || Var_is_floating(value)) return value;
-  if(Var_is_row(value, 11, 7, 1)) return LogMemorySink__retain_string(l, value);
-  if(Var_is(value, 826970)) return LogMemorySink__retain_lisp_symbol(l, value);
-  if(Var_is_row(value, 9, 7, 4)) return List_var(LogMemorySink__retain_list(l, Var_list_payload(value)));
+  if(Var_is_row(value, 11, 7, 1)) return _retain_string(l, value);
+  if(Var_is(value, 826970)) return _retain_lisp_symbol(l, value);
+  if(Var_is_row(value, 9, 7, 4)) return List_var(_retain_list(l, Var_list_payload(value)));
   return value;
 }
 
-static Var LogMemorySink__retain_wide(LogMemorySink l, Var value){
+static Var _retain_wide(LogMemorySink l, Var value){
   Var copy;
   {
     Scope_push(& l -> values);
@@ -1263,20 +1263,20 @@ static Var LogMemorySink__retain_wide(LogMemorySink l, Var value){
 
 String Var_as_string(Var);
 
-static Var LogMemorySink__retain_string(LogMemorySink l, Var value){
+static Var _retain_string(LogMemorySink l, Var value){
   if(_pool_chain_owns(l -> pool, value)) return value;
   String string = Var_as_string(value);
   return String_var(String_new_in(l -> pool, string, String_len(string)));
 }
 
-static Var LogMemorySink__retain_lisp_symbol(LogMemorySink l, Var value){
+static Var _retain_lisp_symbol(LogMemorySink l, Var value){
   String spelling = Var_str(value);
   if(_pool_chain_owns(l -> pool, String_var(spelling))) return value;
   String copy = String_new_in(l -> pool, spelling, String_len(spelling));
   return Var_new(826970, copy);
 }
 
-static List LogMemorySink__retain_list(LogMemorySink l, List list){
+static List _retain_list(LogMemorySink l, List list){
   if(! List_truth(list) || _pool_chain_owns(l -> pool, List_var(list))) return list;
   Block heads = Block_new(sizeof(Var));
   const Block _x2c_macro_acquired_0 = heads;
@@ -1294,7 +1294,7 @@ static List LogMemorySink__retain_list(LogMemorySink l, List list){
     {
       List tail = list;
       while(List_truth(tail) && ! _pool_chain_owns(l -> pool, List_var(tail))){
-        Var head = LogMemorySink__retain(l, tail -> car);
+        Var head = _retain(l, tail -> car);
         Block_push(heads, & head);
         tail = tail -> cdr;
       }

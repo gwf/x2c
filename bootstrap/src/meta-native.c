@@ -62,25 +62,25 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static int Compiler__install_included_meta(Compiler c, List declaration, Token marker);
+static int _install_included_meta(Compiler c, List declaration, Token marker);
 
-static void Compiler__install_stub(Compiler c, String name, Type type, String provider, Token marker);
+static void _install_stub(Compiler c, String name, Type type, String provider, Token marker);
 
 static Var _meta_stub(Func function, const FuncArg * argv);
 
 static Array _stub_arguments(Func function, const FuncArg * argv);
 
-static List Compiler__subject_rows(Compiler c, Array values);
+static List _subject_rows(Compiler c, Array values);
 
-static void Compiler__subject_globals(Compiler c, Var value, Map globals, Map source_names);
+static void _subject_globals(Compiler c, Var value, Map globals, Map source_names);
 
-static Var Compiler__meta_apply(Compiler c, Var function, List arguments);
+static Var _meta_apply(Compiler c, Var function, List arguments);
 
-static List Compiler__meta_result(Compiler c, List expression, Var value, Token site);
+static List _meta_result(Compiler c, List expression, Var value, Token site);
 
-static int Compiler__code_result(Compiler c, Var value);
+static int _code_result(Compiler c, Var value);
 
-static Var Compiler__run_meta(Compiler c, List expression, String name, List arguments, Token site, int slot);
+static Var _run_meta(Compiler c, List expression, String name, List arguments, Token site, int slot);
 
 static List meta_call_form;
 
@@ -94,24 +94,24 @@ static Var _meta_call_value(Compiler c, List expression, Token site);
 
 static Var _meta_named_value(Compiler c, String name, List arguments, Token site);
 
-static Var Compiler__shipped_callee(Compiler c, String name);
+static Var _shipped_callee(Compiler c, String name);
 
 static int _shipped_definition(void);
 
 static Var _apply_linked(Func function, List arguments);
 
-static Array Compiler__meta_values(Compiler c, Var callee, List arguments, Token site);
+static Array _meta_values(Compiler c, Var callee, List arguments, Token site);
 
-static Var Compiler__meta_function(Compiler c, String name, Token site);
+static Var _meta_function(Compiler c, String name, Token site);
 
-static int Compiler__bind_project_meta(Compiler c, String name, int install);
+static int _bind_project_meta(Compiler c, String name, int install);
 
 static Map shipped_targets;
 
 _x2c_initializer_choice_8AA1709E_1((shipped_targets = NULL))
-static Var Compiler__linked_target(Compiler c, String name, List signature, String provider);
+static Var _linked_target(Compiler c, String name, List signature, String provider);
 
-static String Compiler__native_meta_name(Compiler c, List declaration, Token marker);
+static String _native_meta_name(Compiler c, List declaration, Token marker);
 
 typedef struct NativeBinding{
   Compiler c;
@@ -122,35 +122,35 @@ typedef struct NativeBinding{
 }
 NativeBinding;
 
-static void Compiler__bind_native_meta(Compiler c, String name, List signature, Token marker);
+static void _bind_native_meta(Compiler c, String name, List signature, Token marker);
 
-static Var NativeBinding_linked(NativeBinding * n);
+static Var _linked(NativeBinding * n);
 
-static Var NativeBinding_module_target(NativeBinding * n);
+static Var _module_target(NativeBinding * n);
 
-static void NativeBinding_check(NativeBinding * n, Var function);
+static void _check(NativeBinding * n, Var function);
 
-static void NativeBinding_install(NativeBinding * n, Var function);
+static void _install(NativeBinding * n, Var function);
 
-static List Compiler__native_signature_type(Compiler c, List signature);
+static List _native_signature_type(Compiler c, List signature);
 
-static List Compiler__native_parameter(Compiler c, Type parameter);
+static List _native_parameter(Compiler c, Type parameter);
 
 static List _native_module_suppliers(String name);
 
-static void Compiler__certify_native_meta(Compiler c, String name, List signature, Token marker);
+static void _certify_native_meta(Compiler c, String name, List signature, Token marker);
 
-static List Compiler__native_meta_summary(Compiler c, List signature);
+static List _native_meta_summary(Compiler c, List signature);
 
-static int Compiler__native_handle(Compiler c, List type, int parameter);
+static int _native_handle(Compiler c, List type, int parameter);
 
-static int Compiler__native_owned(Compiler c, List type);
+static int _native_owned(Compiler c, List type);
 
 static int _declared_in(Var key, List paths);
 
-static List Compiler__native_meta_rows(Compiler c, Var row);
+static List _native_meta_rows(Compiler c, Var row);
 
-static List Compiler__witness_rows(Compiler c, Type base, Type participant);
+static List _witness_rows(Compiler c, Type base, Type participant);
 
 static int _takes_callback(List signature);
 
@@ -164,9 +164,9 @@ static Map linked_hashes;
 _x2c_initializer_choice_8AA1709E_3((linked_hashes = NULL))
 static Map _linked_module(void);
 
-static int Compiler__linked_copy(Compiler c, String name, Map linked);
+static int _linked_copy(Compiler c, String name, Map linked);
 
-static int Compiler__linked_texts_match(Compiler c, String name, Map linked, Map reached);
+static int _linked_texts_match(Compiler c, String name, Map linked, Map reached);
 
 static Map native_modules;
 
@@ -184,7 +184,7 @@ static Map _compiler_targets(void);
 
 static void _load_compiler_module(void);
 
-static void Compiler__load_package_module(Compiler c, String name, String module, Token token);
+static void _load_package_module(Compiler c, String name, String module, Token token);
 
 static int _module_stamp(String path);
 
@@ -972,7 +972,7 @@ void Compiler_install_meta_function(Compiler c, List fn, Token marker){
               if(Map_truth(c -> macro_holes)) return;
               Compiler_group_meta_function(c, fn);
               if(c -> meta_build) return;
-              if(! macro_library_filling() && ! Compiler_shares_meta_definition(c, name)) Compiler__install_stub(c, name, Var_type(List_last((Var_list_payload(Array_getindex(c -> meta_group, - 1))))), NULL, marker);
+              if(! macro_library_filling() && ! Compiler_shares_meta_definition(c, name)) _install_stub(c, name, Var_type(List_last((Var_list_payload(Array_getindex(c -> meta_group, - 1))))), NULL, marker);
             }
 
           }
@@ -994,17 +994,17 @@ Type List_type_from_ast(List);
 void Compiler_install_collected_meta_function(Compiler c, List declaration, Token marker){
   if(! _init_guard_) _file_init_();
   if(c -> signature_only || Map_truth(c -> macro_holes)) return;
-  if(c -> source_private < 0 && Compiler__install_included_meta(c, declaration, marker)) return;
+  if(c -> source_private < 0 && _install_included_meta(c, declaration, marker)) return;
   if(macro_library_filling()){
     Compiler_add_library_dependencies(c);
     return;
   }
-  String name = Compiler__native_meta_name(c, declaration, marker);
+  String name = _native_meta_name(c, declaration, marker);
   if(Compiler_shares_meta_definition(c, name)) return;
   Compiler_ensure_macro_lisp(c);
   Map linked = _linked_module();
   if(Compiler_groups_meta(c) && !(Map_contains(linked, String_var(name)))) return;
-  Compiler__install_stub(c, name, Type_canonicalize(List_type_from_ast(declaration)), NULL, marker);
+  _install_stub(c, name, Type_canonicalize(List_type_from_ast(declaration)), NULL, marker);
 }
 
 String Compiler_token_source(Compiler, Token, int *);
@@ -1015,11 +1015,11 @@ void Compiler_install_project_meta_effect(Compiler c, List row);
 
 List Compiler_func_signature(Compiler, Type);
 
-static int Compiler__install_included_meta(Compiler c, List declaration, Token marker){
+static int _install_included_meta(Compiler c, List declaration, Token marker){
   Type type = Type_canonicalize(List_type_from_ast(declaration));
   String file = Compiler_canonical_path(c, Compiler_token_source(c, marker, NULL));
   if(Type_is_static(type) || String_equal(file, Compiler_canonical_path(c, c -> filename))) return 0;
-  String name = Compiler__native_meta_name(c, declaration, marker);
+  String name = _native_meta_name(c, declaration, marker);
   Compiler_install_project_meta_effect(c, ({
     Var _x2c_literal_part_0 = String_var(name);  Var _x2c_literal_part_1 = List_var(Compiler_func_signature(c, type));  Var _x2c_literal_part_2 = String_var(home_portable_path(file));  cons(_2, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, cons(_x2c_literal_part_2, NULL))));
   }
@@ -1034,7 +1034,7 @@ void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
 
 
-static void Compiler__install_stub(Compiler c, String name, Type type, String provider, Token marker){
+static void _install_stub(Compiler c, String name, Type type, String provider, Token marker){
   String context =({
     Var _x2c_literal_part_3 = String_var(name);  Var _x2c_literal_part_4 = String_var(String_truth(provider) ? provider : _3);  String_join(NULL, cons(_x2c_literal_part_3, cons(String_var(_4), cons(_x2c_literal_part_4, NULL))));
   }
@@ -1103,16 +1103,16 @@ static Var _meta_stub(Func function, const FuncArg * argv){
   if(! String_len(provider)){
     Map linked = _linked_module();
     if(Map_contains(linked, String_var(name))){
-      if(c -> shallow && ! Compiler__linked_copy(c, name, linked)) Compiler_complete_meta_hashes(c);
-      if(Compiler__linked_copy(c, name, linked)) return Compiler__meta_apply(c, Map_getindex(linked, String_var(name)), Array_list_free(values));
+      if(c -> shallow && ! _linked_copy(c, name, linked)) Compiler_complete_meta_hashes(c);
+      if(_linked_copy(c, name, linked)) return _meta_apply(c, Map_getindex(linked, String_var(name)), Array_list_free(values));
     }
 
   }
   if(c -> meta_build){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/meta-native.x",.function = "_meta_stub",.line = 245};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/meta-native.x",.function = "_meta_stub",.line = 246};
     x2c_error_raise_n(& _x2c_error_site_0, 927167433253220, 1, Symbol_var(920394), String_var(name));
   }
-  List rows = Compiler__subject_rows(c, values);
+  List rows = _subject_rows(c, values);
   Var previous = Macro_subject();
   Macro_use_subject(List_var(rows));
   {
@@ -1139,7 +1139,7 @@ static Var _meta_stub(Func function, const FuncArg * argv){
       Var bound;
       Lisp_try_get(c -> macro_lisp, name, &(bound));
       {
-        Var _x2c_return_value_1 = Compiler__meta_apply(c, bound, Array_list_free(values));
+        Var _x2c_return_value_1 = _meta_apply(c, bound, Array_list_free(values));
         {
           x2c_cleanup_leave(& _x2c_defer_record_0);
           return _x2c_return_value_1;
@@ -1180,7 +1180,7 @@ int Compiler_matches_macro(Compiler c, MacroMatcher * matcher, List code){
     ;
     x2c_cleanup_push(& _x2c_defer_record_1);
     {
-      Macro_use_subject(List_var(Compiler__subject_rows(c, arguments)));
+      Macro_use_subject(List_var(_subject_rows(c, arguments)));
       {
         _x2c_defer_env_1 _x2c_macro_environment_1 ={
           0
@@ -1213,7 +1213,7 @@ int Compiler_matches_macro(Compiler c, MacroMatcher * matcher, List code){
 
 }
 
-static List Compiler__subject_rows(Compiler c, Array values){
+static List _subject_rows(Compiler c, Array values){
   Map globals = Map_new(), source_names = Map_new();
   {
     Var value;
@@ -1222,7 +1222,7 @@ static List Compiler__subject_rows(Compiler c, Array values){
     Var _x2c_macro_cursor_output_0;
     while(Array_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       value = _x2c_macro_cursor_output_0;
-      Compiler__subject_globals(c, value, globals, source_names);
+      _subject_globals(c, value, globals, source_names);
     }
 
   }
@@ -1262,7 +1262,7 @@ Map Compiler_semantic_binding_facts(Compiler);
 
 List Sym_resolve_global(Sym, List, Type *);
 
-static void Compiler__subject_globals(Compiler c, Var value, Map globals, Map source_names){
+static void _subject_globals(Compiler c, Var value, Map globals, Map source_names){
   List node;
   Array _x2c_macro_pending_0 = Array_update_n(Array_new(), 1, value);
   const Array _x2c_macro_acquired_1 = _x2c_macro_pending_0;
@@ -1302,7 +1302,7 @@ static void Compiler__subject_globals(Compiler c, Var value, Map globals, Map so
 
 }
 
-static Var Compiler__meta_apply(Compiler c, Var function, List arguments){
+static Var _meta_apply(Compiler c, Var function, List arguments){
   Array quoted = Array_update_n(Array_new(), 1, List_var(cons(_14, cons(function, NULL))));
   {
     Var argument;
@@ -1353,19 +1353,19 @@ void Compiler_install_meta_declaration(Compiler c, List declaration, Token marke
 
 List Compiler_evaluate_meta_expression(Compiler c, List expression, Token site){
   if(! _init_guard_) _file_init_();
-  return Compiler__meta_result(c, expression, Compiler_evaluate_meta_value(c, expression, site, 0), site);
+  return _meta_result(c, expression, Compiler_evaluate_meta_value(c, expression, site, 0), site);
 }
 
 List Compiler_evaluate_meta_statement(Compiler c, List expression, AstPos context, Token site){
   if(! _init_guard_) _file_init_();
   Var value = Compiler_evaluate_meta_value(c, expression, site, 0);
-  if(Compiler__code_result(c, value) && ! Var_is_nil(value)) return Compiler_bind_macro_lisp_statement(c, Var_list_payload(value), context);
-  return cons(_20, cons(List_var(Compiler__meta_result(c, expression, value, site)), NULL));
+  if(_code_result(c, value) && ! Var_is_nil(value)) return Compiler_bind_macro_lisp_statement(c, Var_list_payload(value), context);
+  return cons(_20, cons(List_var(_meta_result(c, expression, value, site)), NULL));
 }
 
 static Type List_type(List);
 
-static List Compiler__meta_result(Compiler c, List expression, Var value, Token site){
+static List _meta_result(Compiler c, List expression, Var value, Token site){
   if(Var_is_void(value) && c -> meta_build){
     List placeholder = _34;
     Array_push(c -> meta_group, List_var(cons(_35, cons(List_var(placeholder), NULL))));
@@ -1386,12 +1386,12 @@ static List Compiler__meta_result(Compiler c, List expression, Var value, Token 
 
   }
   if(declared == _10) return _44;
-  if(Compiler__code_result(c, value)) return Compiler_lift_macro_lisp_expression(c, value, site);
+  if(_code_result(c, value)) return Compiler_lift_macro_lisp_expression(c, value, site);
   List result = Compiler_meta_value_expression(c, declared, value, site);
   return List_truth(result) ? result : Compiler_lift_macro_lisp_expression(c, value, site);
 }
 
-static int Compiler__code_result(Compiler c, Var value){
+static int _code_result(Compiler c, Var value){
   if(! Var_is_row(value, 9, 7, 4)) return 0;
   if(List_truth(c -> macro_stack)) return 1;
   if(c -> in_pattern) return 0;
@@ -1407,7 +1407,7 @@ static int Compiler__code_result(Compiler c, Var value){
 }
 
 Var Compiler_run_meta_call(Compiler c, List expression, Token site, int slot){
-  if(! _init_guard_) _file_init_();  return Compiler__run_meta(c, expression, NULL, NULL, site, slot);
+  if(! _init_guard_) _file_init_();  return _run_meta(c, expression, NULL, NULL, site, slot);
 }
 
 Var Compiler_apply_meta_function(Compiler c, String name, List arguments, Token site){
@@ -1475,7 +1475,7 @@ Var Compiler_apply_meta_function(Compiler c, String name, List arguments, Token 
                                           }
                                           ;  x2c_cleanup_push(& _x2c_defer_record_10); {
                                             * _x2c_macro_address_0 = meta_call_form; {
-                                              Var _x2c_return_value_3 = Compiler__run_meta(c, NULL, name, arguments, site, 0); {
+                                              Var _x2c_return_value_3 = _run_meta(c, NULL, name, arguments, site, 0); {
                                                 x2c_cleanup_leave(& _x2c_defer_record_10);  x2c_cleanup_leave(& _x2c_defer_record_9);  x2c_cleanup_leave(& _x2c_defer_record_8);  x2c_cleanup_leave(& _x2c_defer_record_7);  x2c_cleanup_leave(& _x2c_defer_record_6);  x2c_cleanup_leave(& _x2c_defer_record_5);  x2c_cleanup_leave(& _x2c_defer_record_4);  return _x2c_return_value_3;
                                               }
 
@@ -1525,7 +1525,7 @@ Var Compiler_apply_meta_function(Compiler c, String name, List arguments, Token 
 
 }
 
-static Var Compiler__run_meta(Compiler c, List expression, String name, List arguments, Token site, int slot){
+static Var _run_meta(Compiler c, List expression, String name, List arguments, Token site, int slot){
   Var volatile value;  meta_call_form = NULL; {
     ExceptionFrame _x2c_exception_frame_1;  static MatchCaptureSite _x2c_macro_arms_1[4];  Var _x2c_macro_patterns_1[4];  static ErrorCatchSite _x2c_macro_site_1 ={
       _x2c_macro_arms_1, -1, 4, ERROR_CATCH_PENDING, - 1
@@ -1546,7 +1546,7 @@ static Var Compiler__run_meta(Compiler c, List expression, String name, List arg
           Var volatile category;
           category = x2c_error_catch_capture(_x2c_error_handler_1, 0);
           {
-            static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/meta-native.x",.function = "Compiler__run_meta",.line = 419};
+            static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/meta-native.x",.function = "_run_meta",.line = 422};
             x2c_error_raise_n(& _x2c_error_site_1, 28682226919752, 1, Symbol_var(209659067570), category);
             __builtin_unreachable();
           }
@@ -1586,7 +1586,7 @@ static Var _meta_call_value(Compiler c, List expression, Token site){
         case 9224497936761996324ULL: ;
        static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_108), &_x2c_match_capture)) { Var _x2c_match_value_0 = _x2c_match_values[0]; Var _x2c_match_value_1 = _x2c_match_values[1]; List _x2c_match_list_2 = Var_list_payload(_x2c_match_values[2]); {
         Var callee;  callee = _x2c_match_value_0;  Var name;  name = _x2c_match_value_1;  List arguments;  arguments = _x2c_match_list_2; {
-          if(! Var_is_row(name, 11, 7, 1)) break;  Array values = Compiler__meta_values(c, callee, arguments, site);  return _meta_named_value(c, Var_as_string(name), Array_list_free(values), site);
+          if(! Var_is_row(name, 11, 7, 1)) break;  Array values = _meta_values(c, callee, arguments, site);  return _meta_named_value(c, Var_as_string(name), Array_list_free(values), site);
         }
 
       }
@@ -1598,10 +1598,10 @@ static Var _meta_call_value(Compiler c, List expression, Token site){
 }
 
 static Var _meta_named_value(Compiler c, String name, List arguments, Token site){
-  Var function = Compiler__shipped_callee(c, name);  if(Var_is_void(function)) function = Compiler__meta_function(c, name, site);  meta_call_form = cons(Atom_intern(name), arguments);  if(x2c_var_identical(function, Map_getindex(_linked_module(), String_var(name)))) return _apply_linked(Var_pointer(function), arguments);  return Compiler__meta_apply(c, function, arguments);
+  Var function = _shipped_callee(c, name);  if(Var_is_void(function)) function = _meta_function(c, name, site);  meta_call_form = cons(Atom_intern(name), arguments);  if(x2c_var_identical(function, Map_getindex(_linked_module(), String_var(name)))) return _apply_linked(Var_pointer(function), arguments);  return _meta_apply(c, function, arguments);
 }
 
-static Var Compiler__shipped_callee(Compiler c, String name){
+static Var _shipped_callee(Compiler c, String name){
   if(! Compiler_applying_shipped(c) && ! _shipped_definition()) return((void) 0, Void);
   Var function;
   return Map_try_get(_linked_module(), String_var(name), &(function)) ? function :((void) 0, Void);
@@ -1656,7 +1656,7 @@ static Var _apply_linked(Func function, List arguments){
 
 }
 
-static Array Compiler__meta_values(Compiler c, Var callee, List arguments, Token site){
+static Array _meta_values(Compiler c, Var callee, List arguments, Token site){
   List params = NULL;
   {
     Var _x2c_match_var = callee; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);
@@ -1698,12 +1698,12 @@ int Compiler_bind_project_meta(Compiler c, String name);
 
 int Compiler_bind_native_meta(Compiler c, String name);
 
-static Var Compiler__meta_function(Compiler c, String name, Token site){
+static Var _meta_function(Compiler c, String name, Token site){
   Var function =((void) 0, Void);
   if(! Lisp_try_get(c -> macro_lisp, name, &(function)) && Compiler_bind_project_meta(c, name)) Lisp_try_get(c -> macro_lisp, name, &(function));
   if(! Lisp_try_get(c -> macro_lisp, name, &(function)) && Compiler_bind_native_meta(c, name)) Lisp_try_get(c -> macro_lisp, name, &(function));
   if(Var_is_void(function) && c -> meta_build){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/meta-native.x",.function = "Compiler__meta_function",.line = 519};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/meta-native.x",.function = "_meta_function",.line = 522};
     x2c_error_raise_n(& _x2c_error_site_2, 927167433253220, 1, Symbol_var(920394), String_var(name));
   }
   if(Var_is_void(function)) Compiler_report_error(c, 27335838, _109, site, cons(String_var(String_join(NULL, cons(String_var(_114), cons(String_var(name), NULL)))), NULL));
@@ -1720,7 +1720,7 @@ void Compiler_record_project_meta_effect(Compiler c, List declaration, Token mar
   Type type = Type_canonicalize(List_type_from_ast(declaration));
   if(Type_is_static(type)) return;
   String path = home_portable_path(absolute_path(c -> filename));
-  String name = Compiler__native_meta_name(c, declaration, marker);
+  String name = _native_meta_name(c, declaration, marker);
   if(Map_contains(Sym_file_statics(c -> sym), List_var(cons(_115, cons(String_var(name), NULL))))) return;
   Sym_set(c -> sym, cons(_117, cons(List_var(cons(_118, cons(String_var(path), cons(int_var(marker -> pos), NULL)))), NULL)), ({
     Var _x2c_literal_part_5 = String_var(name);  Var _x2c_literal_part_6 = List_var(Compiler_func_signature(c, type));  cons(_2, cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, cons(String_var(path), NULL))));
@@ -1747,7 +1747,7 @@ void Compiler_install_project_meta_effect(Compiler c, List row){
           Map_del(c -> meta_group_bound, String_var(String_join(NULL, cons(String_var(_0), cons(String_var(Var_str(name)), cons(String_var(_1), NULL))))));
           if(! c -> meta_build){
             Compiler_ensure_macro_lisp(c);
-            Compiler__bind_project_meta(c, Var_as_string(name), 1);
+            _bind_project_meta(c, Var_as_string(name), 1);
           }
 
         }
@@ -1767,10 +1767,10 @@ Map Sym_unit_symbols(Sym);
 int Compiler_bind_project_meta(Compiler c, String name){
   if(! _init_guard_) _file_init_();
   if(! Map_len(c -> project_meta)) Compiler_install_native_meta_effects(c, Sym_unit_symbols(c -> sym));
-  return Compiler__bind_project_meta(c, name, 0);
+  return _bind_project_meta(c, name, 0);
 }
 
-static int Compiler__bind_project_meta(Compiler c, String name, int install){
+static int _bind_project_meta(Compiler c, String name, int install){
   Var target;
   if(! Map_try_get(c -> project_meta, String_var(name), &(target))) return 0;
   if(c -> meta_build) return 0;
@@ -1780,8 +1780,8 @@ static int Compiler__bind_project_meta(Compiler c, String name, int install){
   List _x2c_destructure_0 = Var_list_payload(target);
   signature = List_getindex(_x2c_destructure_0, 0);
   provider = List_getindex(_x2c_destructure_0, 1);
-  Var function = Compiler__linked_target(c, name, Var_list_payload(signature), Var_as_string(provider));
-  if(! Var_is_row(function, 9, 7, 1)) Compiler__install_stub(c, name, Var_type(signature), Var_as_string(provider), NULL);
+  Var function = _linked_target(c, name, Var_list_payload(signature), Var_as_string(provider));
+  if(! Var_is_row(function, 9, 7, 1)) _install_stub(c, name, Var_type(signature), Var_as_string(provider), NULL);
   else if(! Lisp_try_get(c -> macro_lisp, name, &(bound)) || ! Var_equal(bound, function)) Lisp_set_global(c -> macro_lisp, name, function);
   return 1;
 }
@@ -1790,7 +1790,7 @@ int Compiler_project_meta_uses_linked(Compiler c, String name, String provider);
 
 int Compiler_native_meta_accepts(Compiler c, Var function, List signature);
 
-static Var Compiler__linked_target(Compiler c, String name, List signature, String provider){
+static Var _linked_target(Compiler c, String name, List signature, String provider){
   List key = cons(String_var(name), cons(List_var(signature), cons(String_var(provider), NULL)));
   Var function = int_var(0);
   if(Map_truth(shipped_targets) && Map_try_get(shipped_targets, List_var(key), &(function))) return function;
@@ -1882,7 +1882,7 @@ int Compiler_project_meta_uses_linked(Compiler c, String name, String provider){
                   {
                     * _x2c_macro_address_7 = Map_new();
                     {
-                      int _x2c_return_value_5 = Compiler__linked_copy(c, name, linked);
+                      int _x2c_return_value_5 = _linked_copy(c, name, linked);
                       {
                         x2c_cleanup_leave(& _x2c_defer_record_15);
                         x2c_cleanup_leave(& _x2c_defer_record_14);
@@ -1921,7 +1921,7 @@ void Compiler_record_native_meta_effect(Compiler c, List declaration, Token mark
   String path = home_portable_path(absolute_path(c -> filename));
   Type type = Type_canonicalize(List_type_from_ast(declaration));
   if(Type_is_static(type)) return;
-  String name = Compiler__native_meta_name(c, declaration, marker);
+  String name = _native_meta_name(c, declaration, marker);
   if(Map_contains(Sym_file_statics(c -> sym), List_var(cons(_115, cons(String_var(name), NULL))))) return;
   Sym_set(c -> sym, cons(_117, cons(List_var(cons(_118, cons(String_var(path), cons(int_var(marker -> pos), NULL)))), NULL)), ({
     Var _x2c_literal_part_7 = String_var(name);  Var _x2c_literal_part_8 = List_var(Compiler_func_signature(c, type));  cons(_125, cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, NULL)));
@@ -1929,7 +1929,7 @@ void Compiler_record_native_meta_effect(Compiler c, List declaration, Token mark
   ));
 }
 
-static String Compiler__native_meta_name(Compiler c, List declaration, Token marker){
+static String _native_meta_name(Compiler c, List declaration, Token marker){
   String name = NULL;
   {
     List _x2c_match_expr = declaration; List _x2c_match_cursor, _x2c_match_cursor1, _x2c_match_cursor2, _x2c_match_cursor3;
@@ -1989,7 +1989,7 @@ void Compiler_install_native_meta_effects(Compiler c, Map globs){
         if(_declared_in(key, unit)) continue;
         {
           List row;
-          List _x2c_macro_object_7 = Compiler__native_meta_rows(c, value);
+          List _x2c_macro_object_7 = _native_meta_rows(c, value);
           List _x2c_macro_cursor_8 = _x2c_macro_object_7;
           Var _x2c_macro_cursor_output_10;
           while(List_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_10))){
@@ -2000,7 +2000,7 @@ void Compiler_install_native_meta_effects(Compiler c, Map globs){
               List signature = Var_list_payload(List_getindex(_x2c_destructure_1, 1));
               if(Map_contains(c -> project_meta, String_var(name))) continue;
               Map_setindex(c -> native_meta, String_var(name), List_var(signature));
-              Compiler__certify_native_meta(c, name, signature, NULL);
+              _certify_native_meta(c, name, signature, NULL);
             }
 
           }
@@ -2021,24 +2021,24 @@ int Compiler_bind_native_meta(Compiler c, String name){
   Var signature, bound;
   if(! Map_len(c -> native_meta)) Compiler_install_native_meta_effects(c, Sym_unit_symbols(c -> sym));
   if(! Map_try_get(c -> native_meta, String_var(name), &(signature))) return 0;
-  Compiler__bind_native_meta(c, name, Var_list_payload(signature), NULL);
+  _bind_native_meta(c, name, Var_list_payload(signature), NULL);
   return Lisp_try_get(c -> macro_lisp, name, &(bound));
 }
 
 void Compiler_install_native_meta_function(Compiler c, List declaration, Token marker){
   if(! _init_guard_) _file_init_();
   Type type = Type_canonicalize(List_type_from_ast(declaration));
-  String name = Compiler__native_meta_name(c, declaration, marker);
+  String name = _native_meta_name(c, declaration, marker);
   if(! c -> collect_protocols) Compiler_run_declaration_effects(c);
   Compiler_ensure_macro_lisp(c);
   List signature = Compiler_func_signature(c, type);
   if(Compiler_bind_project_meta(c, name)) return;
   Map_setindex(c -> native_meta, String_var(name), List_var(signature));
-  Compiler__bind_native_meta(c, name, signature, marker);
+  _bind_native_meta(c, name, signature, marker);
 }
 
-static void Compiler__bind_native_meta(Compiler c, String name, List signature, Token marker){
-  Compiler__certify_native_meta(c, name, signature, marker);
+static void _bind_native_meta(Compiler c, String name, List signature, Token marker){
+  _certify_native_meta(c, name, signature, marker);
   int iterator = _iterator_operation(signature);
   String target = iterator ? String_join(NULL, cons(String_var(name), cons(String_var(_127), NULL))) : name;
   NativeBinding n ={
@@ -2064,7 +2064,7 @@ static void Compiler__bind_native_meta(Compiler c, String name, List signature, 
       }
       volatile ErrorHandler _x2c_error_handler_2 = x2c_error_catch_site_push(& _x2c_exception_frame_2, & _x2c_macro_site_2, _x2c_macro_patterns_2);
       x2c_exception_push(& _x2c_exception_frame_2);
-      if(! sigsetjmp(_x2c_exception_frame_2.env, 0)) function = NativeBinding_linked(&(n));
+      if(! sigsetjmp(_x2c_exception_frame_2.env, 0)) function = _linked(&(n));
       else{
         x2c_exception_landed(& _x2c_exception_frame_2);
         if(x2c_exception_is_error_target(& _x2c_exception_frame_2)){
@@ -2083,7 +2083,7 @@ static void Compiler__bind_native_meta(Compiler c, String name, List signature, 
                 }
 
               }
-              function = NativeBinding_module_target(&(n));
+              function = _module_target(&(n));
             }
 
           }
@@ -2103,13 +2103,13 @@ static void Compiler__bind_native_meta(Compiler c, String name, List signature, 
     }
 
   }
-  NativeBinding_check(&(n), function);
-  if(! present) NativeBinding_install(&(n), function);
+  _check(&(n), function);
+  if(! present) _install(&(n), function);
 }
 
 void Compiler_report_warning(Compiler, Symbol, String, Token, List);
 
-static Var NativeBinding_linked(NativeBinding * n){
+static Var _linked(NativeBinding * n){
   Compiler c =(* n).c;
   Var function = Lisp_eval(c -> macro_lisp, List_var(({
     Var _x2c_literal_part_9 = String_var((* n).target);  Var _x2c_literal_part_10 = List_var(cons(_14, cons(List_var((* n).signature), NULL)));  cons(_128, cons(_x2c_literal_part_9, cons(_x2c_literal_part_10, NULL)));
@@ -2119,15 +2119,15 @@ static Var NativeBinding_linked(NativeBinding * n){
   return function;
 }
 
-static Var NativeBinding_module_target(NativeBinding * n){
+static Var _module_target(NativeBinding * n){
   String first = Var_as_string(List_car((* n).suppliers));
   return Map_getindex((Var_map_payload(Map_getindex(native_modules, String_var(first)))), String_var((* n).target));
 }
 
-static void NativeBinding_check(NativeBinding * n, Var function){
+static void _check(NativeBinding * n, Var function){
   Compiler c =(* n).c;
   List suppliers =(* n).suppliers;
-  if(List_truth(List_cdr(suppliers)) && x2c_var_equal(function, NativeBinding_module_target(&((* n))))) Compiler_report_warning(c, 942951818, _131, (* n).marker, ({
+  if(List_truth(List_cdr(suppliers)) && x2c_var_equal(function, _module_target(&((* n))))) Compiler_report_warning(c, 942951818, _131, (* n).marker, ({
     Var _x2c_literal_part_11 = String_var(String_join(NULL, cons(String_var(_130), cons(String_var((* n).name), NULL))));  Var _x2c_literal_part_12 = String_var(String_join(NULL, cons(String_var(_132), cons(String_var(Var_str(List_car(suppliers))), NULL))));  Var _x2c_literal_part_13 = String_var(String_join(NULL, cons(String_var(_133), cons(String_var(String_join(_134, List_cdr(suppliers))), NULL))));  cons(_x2c_literal_part_11, cons(_x2c_literal_part_12, cons(_x2c_literal_part_13, NULL)));
   }
   ));
@@ -2137,7 +2137,7 @@ static void NativeBinding_check(NativeBinding * n, Var function){
   ));
 }
 
-static void NativeBinding_install(NativeBinding * n, Var function){
+static void _install(NativeBinding * n, Var function){
   Compiler c =(* n).c;
   if((* n).iterator){
     int arity = List_len(Var_list(List_cadr(Var_list(List_car((* n).signature))))) - 1;
@@ -2152,7 +2152,7 @@ static void NativeBinding_install(NativeBinding * n, Var function){
 int Compiler_native_meta_accepts(Compiler c, Var function, List signature){
   if(! _init_guard_) _file_init_();
   if(! Var_is_row(function, 9, 7, 1)) return 0;
-  List target = Compiler__native_signature_type(c, Func_signature((Var_pointer(function))));
+  List target = _native_signature_type(c, Func_signature((Var_pointer(function))));
   {
     List _x2c_match_expr = signature; List _x2c_match_cursor, _x2c_match_cursor1;
     switch(0){
@@ -2170,7 +2170,7 @@ int Compiler_native_meta_accepts(Compiler c, Var function, List signature){
             {
               List boxed =({ static MatchCaptureSite _x2c_match_site_0;
               x2c_match_site_search_replace(& _x2c_match_site_0, parameters, List_var(_140), List_var(_143)); });
-              return List_equal(target, Compiler__native_signature_type(c, signature)) || List_equal(target, Compiler__native_signature_type(c, ({
+              return List_equal(target, _native_signature_type(c, signature)) || List_equal(target, _native_signature_type(c, ({
                 Var _x2c_literal_part_17 = List_var(cons(_144, cons(List_var(boxed), NULL)));  cons(_x2c_literal_part_17, List_append(result, NULL));
               }
               )));
@@ -2192,7 +2192,7 @@ Type Sym_normalize_declared_type(Sym, Type);
 
 static List Type_list(Type);
 
-static List Compiler__native_signature_type(Compiler c, List signature){
+static List _native_signature_type(Compiler c, List signature){
   {
     List _x2c_match_expr = signature; List _x2c_match_cursor, _x2c_match_cursor1;
     switch(0){
@@ -2216,7 +2216,7 @@ static List Compiler__native_signature_type(Compiler c, List signature){
                 Var _x2c_macro_cursor_output_13;
                 while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_13))){
                   parameter = Var_type(_x2c_macro_cursor_output_13);
-                  Array_push(resolved, List_var(Compiler__native_parameter(c, parameter)));
+                  Array_push(resolved, List_var(_native_parameter(c, parameter)));
                 }
 
               }
@@ -2241,7 +2241,7 @@ static List Compiler__native_signature_type(Compiler c, List signature){
 
 int Type_is_reference(Type);
 
-static List Compiler__native_parameter(Compiler c, Type parameter){
+static List _native_parameter(Compiler c, Type parameter){
   if(Type_is_reference(parameter)) return cons(List_car(Type_list(parameter)), Type_list(Sym_normalize_declared_type(c -> sym, List_cdr(parameter))));
   return Type_list(Sym_normalize_declared_type(c -> sym, parameter));
 }
@@ -2272,9 +2272,9 @@ static List _native_module_suppliers(String name){
 
 int Compiler_has_region_row(String);
 
-static void Compiler__certify_native_meta(Compiler c, String name, List signature, Token marker){
+static void _certify_native_meta(Compiler c, String name, List signature, Token marker){
   if(Compiler_has_region_row(name)) return;
-  List summary = Compiler__native_meta_summary(c, signature);
+  List summary = _native_meta_summary(c, signature);
   if(List_truth(summary)){
     Map_setindex(c -> meta_regions, String_var(name), List_var(summary));
     return;
@@ -2285,7 +2285,7 @@ static void Compiler__certify_native_meta(Compiler c, String name, List signatur
   ));
 }
 
-static List Compiler__native_meta_summary(Compiler c, List signature){
+static List _native_meta_summary(Compiler c, List signature){
   {
     List _x2c_match_expr = signature; List _x2c_match_cursor, _x2c_match_cursor1;
     switch(0){
@@ -2301,7 +2301,7 @@ static List Compiler__native_meta_summary(Compiler c, List signature){
           {
             List parameters = Var_list_payload(_x2c_match_value_5);
             {
-              int takes = 0, gives = Compiler__native_handle(c, result, 0);
+              int takes = 0, gives = _native_handle(c, result, 0);
               {
                 List parameter;
                 List _x2c_macro_object_10 = parameters;
@@ -2309,11 +2309,11 @@ static List Compiler__native_meta_summary(Compiler c, List signature){
                 Var _x2c_macro_cursor_output_14;
                 while(List_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_14))){
                   parameter = Var_list_payload(_x2c_macro_cursor_output_14);
-                  takes = takes ||(Compiler__native_handle(c, parameter, 1) && ! Compiler__native_owned(c, parameter));
+                  takes = takes ||(_native_handle(c, parameter, 1) && ! _native_owned(c, parameter));
                 }
 
               }
-              if(takes && gives && ! Compiler__native_owned(c, result)) return NULL;
+              if(takes && gives && ! _native_owned(c, result)) return NULL;
               return gives ? _163 : _165;
             }
 
@@ -2331,14 +2331,14 @@ static List Compiler__native_meta_summary(Compiler c, List signature){
 
 Symbol Sym_var_tag_for_type(Sym, Type, Type *);
 
-static int Compiler__native_handle(Compiler c, List type, int parameter){
+static int _native_handle(Compiler c, List type, int parameter){
   {
     List _x2c_match_expr = type; Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch(0){
         default: ;
        static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_171), &_x2c_match_capture)) { List _x2c_match_list_0 = Var_list_payload(_x2c_match_values[0]); {
         List pointee;  pointee = _x2c_match_list_0;  if(parameter){
-          return List_equal(pointee, _10) || Compiler__native_handle(c, pointee, 0);  break;
+          return List_equal(pointee, _10) || _native_handle(c, pointee, 0);  break;
         }
 
       }
@@ -2356,7 +2356,7 @@ static int Compiler__native_handle(Compiler c, List type, int parameter){
 }
 
 List Compiler_protocol_members_for(Compiler, Type, Type);
-static int Compiler__native_owned(Compiler c, List type){
+static int _native_owned(Compiler c, List type){
   {
     List _x2c_match_expr = type; Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };  switch(0){
         default: ;  static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_201), &_x2c_match_capture)) { Var _x2c_match_value_0 = _x2c_match_values[0]; {
@@ -2381,7 +2381,7 @@ List Compiler_native_meta_targets(List paths){
     Var key, value;  Map _x2c_macro_object_13 = Sym_base_symbols(c -> sym);  unsigned _x2c_macro_cursor_14 = 0;  Var _x2c_macro_cursor_output_17;  Var _x2c_macro_cursor_output_18;  while(Map_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_14), &(_x2c_macro_cursor_output_17), &(_x2c_macro_cursor_output_18))){
       key = _x2c_macro_cursor_output_17;  value = _x2c_macro_cursor_output_18; {
         if(List_truth(paths) && ! _declared_in(key, paths)) continue; {
-          List row;  List _x2c_macro_object_12 = Compiler__native_meta_rows(c, value);  List _x2c_macro_cursor_13 = _x2c_macro_object_12;  Var _x2c_macro_cursor_output_16;  while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_16))){
+          List row;  List _x2c_macro_object_12 = _native_meta_rows(c, value);  List _x2c_macro_cursor_13 = _x2c_macro_object_12;  Var _x2c_macro_cursor_output_16;  while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_16))){
             row = Var_list_payload(_x2c_macro_cursor_output_16); {
               List _x2c_destructure_2 = row;  String name = Var_as_string(List_getindex(_x2c_destructure_2, 0));  List signature = Var_list_payload(List_getindex(_x2c_destructure_2, 1));  if(_takes_callback(signature)) continue;  String into = String_join(NULL, cons(String_var(name), cons(String_var(_127), NULL)));  Map_setindex(selected, String_var(name), List_var(_iterator_operation(signature) ?({
                 Var _x2c_literal_part_22 = String_var(name);  Var _x2c_literal_part_23 = List_var(cons(_205, cons(String_var(into), NULL)));  cons(_x2c_literal_part_22, cons(_x2c_literal_part_23, NULL));
@@ -2429,7 +2429,7 @@ static int _declared_in(Var key, List paths){
   return 0;
 }
 
-static List Compiler__native_meta_rows(Compiler c, Var row){
+static List _native_meta_rows(Compiler c, Var row){
   {
     Var _x2c_match_var = row; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);  List _x2c_match_expr = Var_list_payload(_x2c_match_var); List _x2c_match_cursor;  switch(0){
         default: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _218 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_1 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
@@ -2438,7 +2438,7 @@ static List Compiler__native_meta_rows(Compiler c, Var row){
        break; } } } } if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _233 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120)) { Var _x2c_match_value_1 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var base;  base = _x2c_match_value_0;  Var participant;  participant = _x2c_match_value_1; {
           Var _x2c_match_value_8 = base;  Var _x2c_match_value_9 = participant; {
-            Type base = Var_type(_x2c_match_value_8);  Type participant = Var_type(_x2c_match_value_9);  return Compiler__witness_rows(c, base, participant);
+            Type base = Var_type(_x2c_match_value_8);  Type participant = Var_type(_x2c_match_value_9);  return _witness_rows(c, base, participant);
           }
 
         }
@@ -2451,7 +2451,7 @@ static List Compiler__native_meta_rows(Compiler c, Var row){
   return NULL;
 }
 
-static List Compiler__witness_rows(Compiler c, Type base, Type participant){
+static List _witness_rows(Compiler c, Type base, Type participant){
   List conformance = Compiler_protocol_members_for(c, participant, base);  List rows = NULL;  if(! List_truth(conformance)) return rows; {
     List member;  List _x2c_macro_object_15 = List_cdr(Var_list(List_last(conformance)));  List _x2c_macro_cursor_16 = _x2c_macro_object_15;  Var _x2c_macro_cursor_output_20;  while(List_try_next(_x2c_macro_object_15, &(_x2c_macro_cursor_16), &(_x2c_macro_cursor_output_20))){
       member = Var_list_payload(_x2c_macro_cursor_output_20); {
@@ -2551,7 +2551,7 @@ int Compiler_bind_linked_meta(Compiler c, List fn, Type type){
     }
 
   }
-  if(! String_truth(name)) return 0;  Map linked = _linked_module();  Var function, bound;  if(! Map_try_get(linked, String_var(name), &(function))) return 0;  if(! Compiler__linked_copy(c, name, linked)) return 0;  if(! c -> collect_protocols) Compiler_run_declaration_effects(c);  Compiler_ensure_macro_lisp(c);  if(! Compiler_native_meta_accepts(c, function, Compiler_func_signature(c, type))) return 0;  if(!(macro_library_filling() && Type_is_static(Var_type(List_cadr(fn)))) &&(! Lisp_try_get(c -> macro_lisp, name, &(bound)) || ! x2c_var_equal(bound, function))) Lisp_set_global(c -> macro_lisp, name, function);  if(Compiler_meta_reaches_compile_time(c, List_var(fn))) Compiler_record_comptime(c, name);  return 1;
+  if(! String_truth(name)) return 0;  Map linked = _linked_module();  Var function, bound;  if(! Map_try_get(linked, String_var(name), &(function))) return 0;  if(! _linked_copy(c, name, linked)) return 0;  if(! c -> collect_protocols) Compiler_run_declaration_effects(c);  Compiler_ensure_macro_lisp(c);  if(! Compiler_native_meta_accepts(c, function, Compiler_func_signature(c, type))) return 0;  if(!(macro_library_filling() && Type_is_static(Var_type(List_cadr(fn)))) &&(! Lisp_try_get(c -> macro_lisp, name, &(bound)) || ! x2c_var_equal(bound, function))) Lisp_set_global(c -> macro_lisp, name, function);  if(Compiler_meta_reaches_compile_time(c, List_var(fn))) Compiler_record_comptime(c, name);  return 1;
 }
 
 int Compiler_native_module_loaded(String path);
@@ -2598,13 +2598,13 @@ List linked_meta_provider_source(String provider){
 }
 
 Path Path_absolute(Path);
-static int Compiler__linked_copy(Compiler c, String name, Map linked){
-  if(Map_contains(linked_hashes, String_var(name))) return Compiler__linked_texts_match(c, name, linked, Map_new());  return String_truth(c -> filename) && String_equal(Path_absolute(c -> filename), String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_247), NULL))));
+static int _linked_copy(Compiler c, String name, Map linked){
+  if(Map_contains(linked_hashes, String_var(name))) return _linked_texts_match(c, name, linked, Map_new());  return String_truth(c -> filename) && String_equal(Path_absolute(c -> filename), String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_247), NULL))));
 }
 
 int is_prelude_source(String);
 int Compiler_linked_meta_definitions_current(Compiler, String);
-static int Compiler__linked_texts_match(Compiler c, String name, Map linked, Map reached){
+static int _linked_texts_match(Compiler c, String name, Map linked, Map reached){
   Var hash, own, names =((void) 0, Void);  String file = Compiler_canonical_path(c, c -> filename);  String key =({
     Var _x2c_literal_part_29 = String_var(home_portable_path(file));  String_join(NULL, cons(_x2c_literal_part_29, cons(String_var(_248), cons(String_var(name), NULL))));
   }
@@ -2638,7 +2638,7 @@ static int Compiler__linked_texts_match(Compiler c, String name, Map linked, Map
                       }
                       ;  x2c_cleanup_push(& _x2c_defer_record_19); {
                         * _x2c_macro_address_10 = Map_new(); {
-                          int _x2c_return_value_6 = Compiler__linked_texts_match(c, name, linked, reached); {
+                          int _x2c_return_value_6 = _linked_texts_match(c, name, linked, reached); {
                             x2c_cleanup_leave(& _x2c_defer_record_19);  x2c_cleanup_leave(& _x2c_defer_record_18);  x2c_cleanup_leave(& _x2c_defer_record_17);  return _x2c_return_value_6;
                           }
 
@@ -2670,7 +2670,7 @@ static int Compiler__linked_texts_match(Compiler c, String name, Map linked, Map
   }
   else if(!(Map_contains(linked, String_var(name))) && !(Map_contains(c -> native_meta, String_var(name)))) return 0;  Map_try_get(c -> meta_calls, String_var(name), &(names));  if(Var_is_row(names, 11, 7, 1)) return Compiler_linked_meta_definitions_current(c, home_absolute_path(Var_as_string(names)));  if(Var_is_row(names, 9, 7, 4)){
     String callee;  List _x2c_macro_object_17 = Var_list(names);  List _x2c_macro_cursor_18 = _x2c_macro_object_17;  Var _x2c_macro_cursor_output_23;  while(List_try_next(_x2c_macro_object_17, &(_x2c_macro_cursor_18), &(_x2c_macro_cursor_output_23))){
-      callee = Var_as_string(_x2c_macro_cursor_output_23);  if(! Compiler__linked_texts_match(c, callee, linked, reached)) return 0;
+      callee = Var_as_string(_x2c_macro_cursor_output_23);  if(! _linked_texts_match(c, callee, linked, reached)) return 0;
     }
 
   }
@@ -2705,7 +2705,7 @@ void Compiler_select_package_module(Compiler c, String name, String root, Token 
   if(! _init_guard_) _file_init_();  String module = String_join(NULL, cons(String_var(root), cons(String_var(_450), cons(String_var(name), cons(String_var(_451), NULL)))));  if(Compiler_links_extension(name) || ! Path_is_file(module)) return;  if(! X2C_NATIVE_MODULES) Compiler_report_error(c, 306819428, _452, token, ({
     Var _x2c_literal_part_33 = String_var(String_join(NULL, cons(String_var(_453), cons(String_var(name), NULL))));  Var _x2c_literal_part_34 = String_var(String_join(NULL, cons(String_var(_454), cons(String_var(module), NULL))));  cons(_x2c_literal_part_33, cons(_x2c_literal_part_34, NULL));
   }
-  ));  Compiler_add_translation_dependency(c, module);  if(! Compiler_native_module_loaded(module)) Compiler__load_package_module(c, name, module, token);  if(List_contains(native_module_order, String_var(module))) return; {
+  ));  Compiler_add_translation_dependency(c, module);  if(! Compiler_native_module_loaded(module)) _load_package_module(c, name, module, token);  if(List_contains(native_module_order, String_var(module))) return; {
     Scope_push(& native_module_scope); {
       {
         X2CCleanup _x2c_defer_record_20 ={
@@ -2726,7 +2726,7 @@ void Compiler_select_package_module(Compiler c, String name, String root, Token 
 
 }
 
-static void Compiler__load_package_module(Compiler c, String name, String module, Token token){
+static void _load_package_module(Compiler c, String name, String module, Token token){
   if(_module_stamp(module) != 1) Compiler_report_error(c, 306819428, String_join(NULL, cons(String_var(_455), cons(String_var(name), cons(String_var(_456), NULL)))), token, cons(String_var(String_join(NULL, cons(String_var(_454), cons(String_var(module), NULL)))), NULL));  _open_native_module(module);
 }
 

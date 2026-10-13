@@ -52,7 +52,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static size_t _context_offset(void);
 
-static void * Func__context(Func f);
+static void * _context(Func f);
 
 #include "exception.h"
 
@@ -91,11 +91,11 @@ static inline Var Func_apply_values(Func fn, Var left, Var right){
   return Func_apply(fn, 2, arguments);
 }
 
-static List Func__parameter(Func fn, unsigned index);
+static List _parameter(Func fn, unsigned index);
 
 static int _is_reference(List parameter);
 
-static void * Func__reference_argument(Func fn, const FuncArg * argv, unsigned i, List declared_target, List want);
+static void * _reference_argument(Func fn, const FuncArg * argv, unsigned i, List declared_target, List want);
 
 static int _reference_type_accepts(List target, List source);
 
@@ -154,7 +154,7 @@ static size_t _context_offset(void){
   return remainder ? sizeof(struct Func) + alignment - remainder : sizeof(struct Func);
 }
 
-static void * Func__context(Func f){
+static void * _context(Func f){
   return(unsigned char *) f + _context_offset();
 }
 
@@ -223,11 +223,11 @@ List x2c_func_reference_type(Func fn, unsigned argc, unsigned index){
     }
 
   }
-  List parameter = Func__parameter(fn, index);
+  List parameter = _parameter(fn, index);
   return _is_reference(parameter) ? List_cdr(parameter) : NULL;
 }
 
-static List Func__parameter(Func fn, unsigned index){
+static List _parameter(Func fn, unsigned index){
   if(! fn || index >= fn -> nparams) return NULL;
   List params = fn -> params;
   while(List_truth(params) && index --) params = List_cdr(params);
@@ -362,21 +362,21 @@ Var x2c_func_record_result(const void * bytes, size_t size){
 }
 
 void * x2c_func_reference_argument(Func fn, const FuncArg * argv, unsigned i, List want){
-  return Func__reference_argument(fn, argv, i, want, want);
+  return _reference_argument(fn, argv, i, want, want);
 }
 
 void * x2c_func_declared_reference_argument(Func fn, const FuncArg * argv, unsigned i, List declared_target, List want){
-  return Func__reference_argument(fn, argv, i, declared_target, want);
+  return _reference_argument(fn, argv, i, declared_target, want);
 }
 
-static void * Func__reference_argument(Func fn, const FuncArg * argv, unsigned i, List declared_target, List want){
-  List declared = Func__parameter(fn, i), source = argv[i].reference_type;
+static void * _reference_argument(Func fn, const FuncArg * argv, unsigned i, List declared_target, List want){
+  List declared = _parameter(fn, i), source = argv[i].reference_type;
   int signature_reference = _is_reference(declared);
   List target = signature_reference ? List_cdr(declared) : NULL;
   if(! List_truth(source) ||(! argv[i].data.reference && ! x2c_var_equal(List_car(declared), Symbol_var(33330008396))) || ! signature_reference || ! List_truth(want) || ! List_equal(target, declared_target) ||(! _reference_type_accepts(want, source) && ! _reference_type_accepts(declared_target, source))){
     List sig = fn ? fn -> sig : NULL;
     {
-      static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/func.x",.function = "Func__reference_argument",.line = 310};
+      static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/func.x",.function = "_reference_argument",.line = 310};
       x2c_error_raise_n(& _x2c_error_site_12, 4477479911782, 4, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(1307939018), List_var(source), Symbol_var(1510312), List_var(want));
       __builtin_unreachable();
     }
@@ -466,7 +466,7 @@ static Func _new(FuncAdapter adapter, List signature, int rest, const void * con
     }
 
   }
-  int n = List_len(params);  int void_params = n == 1 && Var_is_row(List_car(params), 9, 7, 4) && x2c_var_equal(List_car(params), List_var(_33));  Func fn = Scope_calloc(1, context_offset + context_size);  fn -> sig = signature;  fn -> params = void_params ? NULL : params;  fn -> adapter = adapter;  fn -> rest = rest;  fn -> context_size = context_size;  fn -> nparams = void_params ? 0 : n;  if(context_size) memcpy(Func__context(fn), context, context_size);  return fn;
+  int n = List_len(params);  int void_params = n == 1 && Var_is_row(List_car(params), 9, 7, 4) && x2c_var_equal(List_car(params), List_var(_33));  Func fn = Scope_calloc(1, context_offset + context_size);  fn -> sig = signature;  fn -> params = void_params ? NULL : params;  fn -> adapter = adapter;  fn -> rest = rest;  fn -> context_size = context_size;  fn -> nparams = void_params ? 0 : n;  if(context_size) memcpy(_context(fn), context, context_size);  return fn;
 }
 
 List Func_signature(Func function){
@@ -480,7 +480,7 @@ const void * Func_context(Func function){
   if(! function){
     static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/func.x",.function = "Func_context",.line = 444};  x2c_error_raise_n(& _x2c_error_site_19, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Func.context")), NULL))));  __builtin_unreachable();
   }
-  return function -> context_size ? Func__context(function) : NULL;
+  return function -> context_size ? _context(function) : NULL;
 }
 
 void Func_move(Func function, Scope * slot){

@@ -66,15 +66,15 @@ Install;
 
 static Install _locked_install(CliRequest request, String spec);
 
-static void Install_locate(Install * i);
+static void _locate(Install * i);
 
-static void Install_resolve(Install * i, List row);
+static void _resolve(Install * i, List row);
 
-static void Install_run(Install * i);
+static void _install_package(Install * i);
 
-static String Install_unpacked(Install * i);
+static String _unpacked(Install * i);
 
-static void Install_mark_source(Install * i, String staged, String name);
+static void _mark_source(Install * i, String staged, String name);
 
 static void _publish(String staged, String packages, String name);
 
@@ -447,8 +447,8 @@ int install_command(CliRequest request){
     x2c_cleanup_push(& _x2c_defer_record_0);
     {
       i.sha256 = request -> sha256;
-      Install_locate(&(i));
-      Install_run(&(i));
+      _locate(&(i));
+      _install_package(&(i));
       {
         int _x2c_return_value_0 = 0;
         {
@@ -478,8 +478,8 @@ List install_require(CliRequest request, String name, String version, List locke
       String resolved = Var_as_string(List_getindex(row, 1));
       if(! String_equal(resolved, version)) _error(String_join(NULL, cons(String_var(_5), cons(String_var(name), cons(String_var(_6), cons(String_var(resolved), cons(String_var(_7), cons(String_var(version), NULL))))))));
       if(! String_equal(_installed_version(String_join(NULL, cons(String_var(i.packages), cons(String_var(_2), cons(String_var(name), NULL))))), version)){
-        Install_resolve(&(i), row);
-        Install_run(&(i));
+        _resolve(&(i), row);
+        _install_package(&(i));
       }
       {
         List _x2c_return_value_1 = row;
@@ -506,18 +506,18 @@ static Install _locked_install(CliRequest request, String spec){
 
 int Path_exists(Path);
 
-static void Install_locate(Install * i){
+static void _locate(Install * i){
   String spec =(* i).spec;
   if(_remote(spec)){
     if(! String_truth((* i).sha256)) _error("a URL needs --sha256 <hex>");
     (* i).url = spec;
   }
   else if(Path_exists(spec))(* i).source = spec;
-  else if(String_is_identifier(spec)) Install_resolve(&((* i)), _index_row((* i).request, spec, (* i).work));
+  else if(String_is_identifier(spec)) _resolve(&((* i)), _index_row((* i).request, spec, (* i).work));
   else _error(String_join(NULL, cons(String_var(_9), cons(String_var(spec), cons(String_var(_10), NULL)))));
 }
 
-static void Install_resolve(Install * i, List row){
+static void _resolve(Install * i, List row){
   (* i).version = Var_as_string(List_getindex(row, 1));
   (* i).url = Var_as_string(List_getindex(row, 4));
   (* i).sha256 = Var_as_string(List_getindex(row, 5));
@@ -527,8 +527,8 @@ Path Path_basename(Path);
 
 void Path_copy_tree(Path, Path);
 
-static void Install_run(Install * i){
-  String package = Install_unpacked(&((* i))), name = Path_basename(package);
+static void _install_package(Install * i){
+  String package = _unpacked(&((* i))), name = Path_basename(package);
   if(! String_is_identifier(name)) _error(String_join(NULL, cons(String_var(_10), cons(String_var(name), cons(String_var(_11), NULL)))));
   String staged =({
     Var _x2c_literal_part_0 = String_var((* i).work);  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_2), cons(String_var(name), NULL))));
@@ -576,7 +576,7 @@ static void Install_run(Install * i){
   if(Path_exists(String_join(NULL, cons(String_var(staged), cons(String_var(_12), NULL))))) _check_bundle((* i).request, staged, name);
   else{
     _build_source(staged, name, (* i).spec);
-    Install_mark_source(&((* i)), staged, name);
+    _mark_source(&((* i)), staged, name);
   }
   _publish(staged, (* i).packages, name);
   if(!(* i).request -> quiet) fprintf(stderr, "x2c: installed %s/%s\n", (* i).packages, name);
@@ -584,7 +584,7 @@ static void Install_run(Install * i){
 
 int Path_is_dir(Path);
 
-static String Install_unpacked(Install * i){
+static String _unpacked(Install * i){
   String source =(* i).source;
   if(String_truth((* i).url)){
     source = _fetch((* i).url, (* i).work, _13);
@@ -600,7 +600,7 @@ String cli_version(void);
 
 void Path_write_text(Path, String);
 
-static void Install_mark_source(Install * i, String staged, String name){
+static void _mark_source(Install * i, String staged, String name){
   String version =(* i).version;
   if(! String_truth(version)) version = _installed_version(({
     Var _x2c_literal_part_1 = String_var((* i).packages);  String_join(NULL, cons(_x2c_literal_part_1, cons(String_var(_2), cons(String_var(name), NULL))));

@@ -42,25 +42,25 @@ static int _init_guard_ = 0;
 
 static ContextThreadState _thread(void);
 
-static Var Context__export_value(Context c, Var v);
+static Var _export_value(Context c, Var v);
 
-static Var Context__export_wide(Context c, Var v);
+static Var _export_wide(Context c, Var v);
 
-static Var Context__export_string(Context c, Var value);
+static Var _export_string(Context c, Var value);
 
-static Var Context__export_atom(Context c, Var value);
+static Var _export_atom(Context c, Var value);
 
-static List Context__export_list(Context c, List list);
+static List _export_list(Context c, List list);
 
-static Var Context__export_array(Context c, Var value);
+static Var _export_array(Context c, Var value);
 
-static Var Context__export_map(Context c, Var value);
+static Var _export_map(Context c, Var value);
 
 static Var _export_callback(Var value, Context c);
 
-static Var Context__export_storage(Context c, Var v);
+static Var _export_storage(Context c, Var v);
 
-static int Context__owns_scope(Context context, Scope owner);
+static int _owns_scope(Context context, Scope owner);
 
 static Context _open(const char * name, int isolated);
 
@@ -128,7 +128,7 @@ Var Context_export(Context context, Var value){
     x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL))));
     __builtin_unreachable();
   }
-  return Context__export_value(context, value);
+  return _export_value(context, value);
 }
 
 Var Context_export_scope(Scope source_scope, Pool pool, Var value){
@@ -137,26 +137,26 @@ Var Context_export_scope(Scope source_scope, Pool pool, Var value){
     .scope = source_scope, .pool = pool, .destination_scope = Scope_top(), .destination_pool = Pool_current()
   }
   ;
-  return Context__export_value(& source, value);
+  return _export_value(& source, value);
 }
 
-static Var Context__export_value(Context c, Var v){
+static Var _export_value(Context c, Var v){
   if(Var_is_void(v) || Var_is_null(v) || Var_is_nil(v) || Var_is(v, 1328354264)) return v;
-  if(Var_is_wide(v)) return Context__export_wide(c, v);
+  if(Var_is_wide(v)) return _export_wide(c, v);
   if(Var_is_integer(v) || Var_is_floating(v)) return v;
-  if(Var_is_row(v, 11, 7, 1)) return Context__export_string(c, v);
-  if(Var_is(v, 826970)) return Context__export_atom(c, v);
-  if(Var_is_row(v, 9, 7, 4)) return List_var(Context__export_list(c, Var_list_payload(v)));
-  if(Var_is(v, 3313778)) return Context__export_array(c, v);
-  if(Var_is(v, 26720)) return Context__export_map(c, v);
-  if(Var_is_row(v, 8, 7, 1) || Var_is_row(v, 8, 7, 3) || Var_is_row(v, 8, 7, 2)) return Context__export_storage(c, v);
+  if(Var_is_row(v, 11, 7, 1)) return _export_string(c, v);
+  if(Var_is(v, 826970)) return _export_atom(c, v);
+  if(Var_is_row(v, 9, 7, 4)) return List_var(_export_list(c, Var_list_payload(v)));
+  if(Var_is(v, 3313778)) return _export_array(c, v);
+  if(Var_is(v, 26720)) return _export_map(c, v);
+  if(Var_is_row(v, 8, 7, 1) || Var_is_row(v, 8, 7, 3) || Var_is_row(v, 8, 7, 2)) return _export_storage(c, v);
   Var custom;
   if(Var_try_export_context(v, c, &(custom))) return custom;
   Symbol tag = Var_tag(v);
   {
     Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/context.x",.function = "Context__export_value",.line = 117};
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/context.x",.function = "_export_value",.line = 117};
       x2c_error_raise_n(& _x2c_error_site_1, 4477479911782, 2, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(41038), Symbol_var(tag));
       __builtin_unreachable();
     }
@@ -165,25 +165,25 @@ static Var Context__export_value(Context c, Var v){
 
 }
 
-static Var Context__export_wide(Context c, Var v){
-  if(! Context__owns_scope(c, Var_wide_owner(v))) return v;
+static Var _export_wide(Context c, Var v){
+  if(! _owns_scope(c, Var_wide_owner(v))) return v;
   return Var_move_wide_to(v, c -> destination_scope);
 }
 
-static Var Context__export_string(Context c, Var value){
+static Var _export_string(Context c, Var value){
   if(! c -> pool || ! Pool_owns(c -> pool, value)) return value;
   String string = Var_as_string(value);
   return String_var(String_new_in(c -> destination_pool, string, String_len(string)));
 }
 
-static Var Context__export_atom(Context c, Var value){
+static Var _export_atom(Context c, Var value){
   String spelling = Var_str(value);
   if(! c -> pool || ! Pool_owns(c -> pool, String_var(spelling))) return value;
   String result = String_new_in(c -> destination_pool, spelling, String_len(spelling));
   return Var_new(826970, result);
 }
 
-static List Context__export_list(Context c, List list){
+static List _export_list(Context c, List list){
   if(! List_truth(list) ||(c -> pool && ! Pool_owns(c -> pool, List_var(list)))) return list;
   Block heads = Block_new(sizeof(Var));
   const Block _x2c_macro_acquired_0 = heads;
@@ -201,7 +201,7 @@ static List Context__export_list(Context c, List list){
     {
       List tail = list;
       while(List_truth(tail) &&(! c -> pool || Pool_owns(c -> pool, List_var(tail)))){
-        Var head = Context__export_value(c, tail -> car);
+        Var head = _export_value(c, tail -> car);
         Block_push(heads, & head);
         tail = tail -> cdr;
       }
@@ -224,7 +224,7 @@ static List Context__export_list(Context c, List list){
 
 int Context_owns(Context context, void * allocation);
 
-static Var Context__export_array(Context c, Var value){
+static Var _export_array(Context c, Var value){
   Array array = Var_array_payload(value);
   if(! Context_owns(c, array)) return value;
   Scope owner = Scope_owner(array);
@@ -245,7 +245,7 @@ static Var Context__export_array(Context c, Var value){
     x2c_cleanup_push(& _x2c_defer_record_1);
     {
       Var * items = array -> bytes;
-      for(size_t i = 0;  i < array -> length;  i ++) items[i] = Context__export_value(c, items[i]);
+      for(size_t i = 0;  i < array -> length;  i ++) items[i] = _export_value(c, items[i]);
       Block_move_to(Array_block(array), c -> destination_scope);
       exported = 1;
       {
@@ -263,7 +263,7 @@ static Var Context__export_array(Context c, Var value){
 
 }
 
-static Var Context__export_map(Context c, Var value){
+static Var _export_map(Context c, Var value){
   Map map = Var_map_payload(value);
   if(! Context_owns(c, map)) return value;
   Scope owner = Scope_owner(map);
@@ -301,12 +301,12 @@ static Var Context__export_map(Context c, Var value){
 }
 
 static Var _export_callback(Var value, Context c){
-  return Context__export_value(c, value);
+  return _export_value(c, value);
 }
 
 Bytes Var_bytes(Var);
 
-static Var Context__export_storage(Context c, Var v){
+static Var _export_storage(Context c, Var v){
   void * allocation = Var_is_row(v, 8, 7, 3) ? Bytes_block(Var_bytes(v)) : Var_pointer(v);
   if(! Context_owns(c, allocation)) return v;
   if(Var_is_row(v, 8, 7, 2)) Buffer_move_to(((Buffer) allocation), c -> destination_scope);
@@ -316,15 +316,15 @@ static Var Context__export_storage(Context c, Var v){
 
 Var Context_export_nested(Context c, Var value){
   if(! _init_guard_) Context_initialize();
-  return Context__export_value(c, value);
+  return _export_value(c, value);
 }
 
 int Context_owns(Context context, void * allocation){
   if(! _init_guard_) Context_initialize();
-  return allocation && Context__owns_scope(context, Scope_owner(allocation));
+  return allocation && _owns_scope(context, Scope_owner(allocation));
 }
 
-static int Context__owns_scope(Context context, Scope owner){
+static int _owns_scope(Context context, Scope owner){
   if(! context || ! owner) return 0;
   for(Scope scope = context -> scope;  scope;  scope = scope -> down) if(scope == owner) return 1;
   return 0;
