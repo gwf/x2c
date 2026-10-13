@@ -4,10 +4,12 @@
 > Every finding below was reproduced at that commit in this worktree unless a
 > row says "by reading". Gary decided the rows on 2026-10-12; the
 > [decisions](#decisions-recorded-2026-10-12) section records them, and the
-> [execution log](#execution-log) records what landed: four batches through
-> `c397213b` on 2026-10-12. Open after them: the transform-time binding leak
-> (A6), the lambda component's carrier placements (decision 9), and the
-> reserved component macro names, each with its reason in the log.
+> [execution log](#execution-log) records what landed: ten batches through
+> `4b387196` on 2026-10-12. Batches 5, 6, 7, and 9 closed the transform-time
+> binding leak (A6), the reserved component macro names, and the lambda
+> component's carrier placements (decision 9); batch 10 carried out the
+> unboxer decision. String `switch` and typed `_Alignof` are deferred past
+> the cleanup phase (decision 11).
 
 ## Decisions recorded 2026-10-12
 
@@ -37,7 +39,7 @@
    rejected at compile time with the `goto` diagnostic family.
 7. **Self-meta.** A function rule rewrites the program's definitions; the copy
    the compiler runs is compiled as written. The book sentence at
-   `docs/src/guide/meta-functions.md:96` says so. No code change.
+   `docs/src/guide/meta-functions.md:97-98` says so. No code change.
 8. **SDK.** `Code.register_after_initialization` stays: it is the only hook on
    every initialized declaration of a type, `$rewrite` rejects ordinary
    declaration patterns, and the optional spike runner still passes all 17
@@ -372,7 +374,7 @@ components.
   they call to the
   compiler's linked copies, so a program meta function spelled like a
   component's translator or helper is a separate definition (A2, decision
-  5; `Compiler._shipped_callee` in src/meta-native.x); code placed
+  5; `_shipped_callee` in src/meta-native.x); code placed
   at function entry lowers with the function still entered, so a placement
   made while it lowers lands at the entry too, ahead of it (A7;
   `Compiler.function_entry`); a function-entry placement from inside a
@@ -412,7 +414,7 @@ components.
 - Batch 3, published to dev as `3db5216c` (2026-10-12), is the String
   crossing and module batch above.
 - Batch 4, published to dev as `c397213b` (2026-10-12): numeric
-  comparisons follow C (decision 1). `Compiler._comparison` lowers every comparison with a `Var`
+  comparisons follow C (decision 1). `_comparison` in src/transform.x lowers every comparison with a `Var`
   operand: `==` and `!=` call `x2c_var_equal`, `===` and `!==` call
   `x2c_var_identical`, and the relational operators compare
   `x2c_var_order` with 0, all in a comparisons section of lib/varops.x on
@@ -425,14 +427,14 @@ components.
   and doc comments state the rule. Serial self-translation time matched the
   baseline over five alternating rounds.
 - Hygiene (decision 11), 2026-10-12: 112 remote branches merged into dev
-  were deleted; the 14 unmerged branches and the desktop app's session
+  were deleted (the decision counted 114 when it was recorded); the 14 unmerged branches and the desktop app's session
   branches stay. The workspace note tracked inside the ignored `.context/`
   directory is untracked.
 - Batch 5, published to dev as `27bac892` (2026-10-12): the
   transform-time binding leak (A6) is fixed. A
   statement or expression replacement bound with no local scope open, as
   when the transform lowers a function, declares its names in a scope of
-  its own (`Compiler._bind_replacement` in src/macros.x), so a quotation in
+  its own (`_bind_replacement` in src/macros.x), so a quotation in
   another function no longer resolves them. Unit-support code placed while
   such a replacement binds, such as a capturing lambda's bridge, binds at
   file scope with the open local scopes set aside
@@ -454,7 +456,7 @@ components.
   instead: a macro named `x2c.*` was accepted only while the compiler
   replays its prelude, and the seed rejected it while translating the
   component as a stage source. The first round lets a prelude source
-  define `x2c.*` macros (`Definition.naming` in src/macros.x) and refreshes
+  define `x2c.*` macros (`_naming` in src/macros.x) and refreshes
   the bootstrap; the second renames the macros. A component macro rename
   needs no transition; a change to the rule that reserves its spelling
   does (agents/lowering-with-macros.md). Fixture `component-macro-name`.
@@ -540,6 +542,9 @@ components.
   and collect.x took 42.4 G instructions on `918a6af5` and 42.6 G after
   (three alternating runs), because the explicit readers are no longer
   inline. `make verify` and `make commands-check` passed.
+The three "Not done" entries below predate batches 5, 6, 7, and 9, which
+closed them.
+
 - Not done: converging the lambda component's `(place ...)` carrier rows on
   `x2c_place` (decision 9). Both forms reach `Compiler.place`; the carrier
   form exists because the placed code names bindings the driver introduces
@@ -566,7 +571,10 @@ components.
   rename needs a two-round bootstrap transition that a cleanup-phase move
   of shipped component names must plan for.
 
-## Decision needed: what a wrong tag does to `.list()` and its family
+## Decision: what a wrong tag does to `.list()` and its family
+
+Decided and carried out as recommended in batch 10 (`4b387196`). The text
+below records the state before that batch.
 
 `Var.string` raises `<no-convert>` for a value that is not a `String`
 (lib/varconvert.x:72). The unboxers that `$var.tag.unbox` generates

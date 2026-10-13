@@ -50,19 +50,26 @@ Their impact was reviewed against `2b5ee957`; no executable reproduction was rer
 
 | Owning plan | Accepted behavior or deliverable | Next action |
 | --- | --- | --- |
-| [Review remediation](review-remediation-2026-10-11.md#g-decisions-recorded-on-2026-10-12) | Numeric Var operands compare using C rules; value-type `===` also requires the same type. Wide indices cannot wrap into a valid index. Non-List match rejects its input. Implicit Var-to-String calls `.str()` and errors if absent. | Deliver bounded changes with concrete reproductions. Check comparison, hashing, Map, and sorting contracts together without inventing a new Map policy. |
-| [Review remediation: modules](review-remediation-2026-10-11.md#module-follow-ups) | Correct member-file locations when an included module's compile-time effect is replayed; normalize companion paths and reject resolved escapes. | Recheck the included-member effect replay reproduction before repairing. Post-block entry-file columns are already fixed by `9db47909`. Use the existing source mapping and containment owners. |
 | [Review remediation: writing](review-remediation-2026-10-11.md#writing-and-supported-features) | Explain legal source forms, rewrite behavior, and compile-time Lisp behavior. Maintain the factual support list. | Finish the three book explanations with accepted examples. |
-| [Language component foundation](language-components-foundation.md#recorded-decisions) | Rules see developer-written expressions and program meta definitions. Compiler-inserted support calls stay outside program rules. Templates retain author bindings. Constructed `with` behaves like handwritten `with`. | Reconcile the historical visibility discrepancy, then implement the recorded boundaries through existing owners. |
-| [Quotation adoption](quotation-adoption-audit-2026-10-03.md#typed-_alignof-and-scalar-generator-cleanup) | `_Alignof($type)` accepts a typed Type hole and emits target C alignment. Simplify the scalar generator while preserving exact native behavior. | Pair the missing quotation form with its current scalar caller. Review other quotation adoption individually. |
-| [String switch](string-switch.md) | Ordinary switch accepts String selectors and string-literal cases, with the plan's C control-flow behavior. | Review and resume the existing private implementation against current quotation and `add_early` APIs. |
+| [Language component foundation](language-components-foundation.md#recorded-decisions) | Rules see developer-written expressions and program meta definitions. Compiler-inserted support calls stay outside program rules. Templates retain author bindings. Constructed `with` behaves like handwritten `with`. | Implement the recorded boundaries through existing owners. |
+| [Quotation adoption](quotation-adoption-audit-2026-10-03.md#typed-_alignof-and-scalar-generator-cleanup) | `_Alignof($type)` accepts a typed Type hole and emits target C alignment. Simplify the scalar generator while preserving exact native behavior. | Deferred past the cleanup phase (repository review decision 11). Then pair the missing quotation form with its current scalar caller. |
+| [String switch](string-switch.md) | Ordinary switch accepts String selectors and string-literal cases, with the plan's C control-flow behavior. | Deferred past the cleanup phase (repository review decision 11). Then resume the existing private implementation against current APIs. |
 | [Lint and format](x2c-lint-and-format.md#current-remaining-work-2026-10-12) | Finish already-approved structured List findings and compiler consumption. Keep lint optional. | Continue phase 8 and the existing optional editor workflow; add no recurring gate. |
 | [C on-ramp](x2c-c-on-ramp.md#current-remaining-work-2026-10-12) | Show both existing adoption directions: rename C source to `.x`, and call x2c from C through its generated header. | Finish the worked landing-page examples. Parser and corpus work is delivered. |
 
-A practical starting order is the book explanations, the included-member effect
-replay follow-up, and `_Alignof` with scalar cleanup. The other selected changes
-can proceed as bounded tasks from their owning plans. This order is a
-recommendation, not another planning or validation requirement.
+The [repository review](repository-review-2026-10-12.md#decisions-recorded-2026-10-12)
+delivered the remediation decisions for numeric comparisons, non-List match,
+Var-to-String crossings, and the module follow-ups through `3db5216c` and
+`c397213b`. Its decisions govern where the earlier remediation text differs:
+indices are 32-bit `int` (decision 2), a non-List Var subject reaches
+`default` (decision 3), explicit Var readers raise `<no-convert>` for another
+tag (decision 4 and batch 10), and a function rule does not rewrite the
+compile-time copy of a self-meta definition (decision 7). The same review
+deferred String `switch` and typed `_Alignof` past the cleanup phase.
+
+A practical starting order is the book explanations and then the foundation
+boundaries. This order is a recommendation, not another planning or
+validation requirement.
 
 ### Candidates, not selected implementation
 
@@ -90,9 +97,10 @@ additional implementation tasks or questions for Gary.
 | [Remediation language ledger](review-remediation-language-ledger-2026-10-11.md) | Coverage evidence, not 181 tasks; current decisions belong to the remediation plan. |
 
 The recorded decisions withdraw the foreign-C-thread API, CPP/module guarantees,
-u128 feature claim, blanket typedef restrictions, generic unboxing checks,
-lexical defer, packaging redesign, and expanded recurring gates. The closed
-self-expression campaign retains other unsupported feature proposals as history.
+u128 feature claim, blanket typedef restrictions, lexical defer, packaging
+redesign, and expanded recurring gates. They first withdrew generic unboxing
+checks; repository review batch 10 later made the explicit Var readers, such
+as `.list()` and `.map()`, raise for another tag. The closed self-expression campaign retains other unsupported feature proposals as history.
 Shared ErrorSlot is dropped because it does not simplify the existing callback
 owners. Unselected consolidation, formatting, Match, descriptor, Torch, numeric
 table, and arbitrary script-port experiments remain reference material.
@@ -237,7 +245,7 @@ Archived 2026-10-12 after checking delivery on dev:
   bridge failed the requested storage and lifetime contract.
 - [Meta recovery](archive/meta-recovery.md): done; delivered as `db86d4b7`.
 - [Symlinked home spellings](archive/symlinked-home-spellings.md): done;
-  delivered as `610c52f5`.
+  delivered as `0302b1e5` (#70).
 - [Meta recovery checkpoints](archive/meta-recovery-checkpoints.md),
   [design](archive/meta-recovery-design.md) and
   [review](archive/meta-recovery-review.md): obsolete; their record wrapper

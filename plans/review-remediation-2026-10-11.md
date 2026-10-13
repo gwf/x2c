@@ -1,9 +1,12 @@
 # Repository review and language-reference remediation
 
 > Status: active - remaining decisions recorded on 2026-10-12.
-> Repair batches A-E and acquired-value cleanup are delivered.
-> The decisions below govern the remaining work; earlier checkpoints are history.
-> This consolidation changes plans only. It starts no implementation.
+> Repair batches A-E and acquired-value cleanup are delivered. The numeric,
+> match, Var-to-String, and module decisions in section G are delivered
+> through `3db5216c` and `c397213b`; the
+> [repository review](repository-review-2026-10-12.md#decisions-recorded-2026-10-12)
+> decided them later and governs where its text differs. The writing items
+> remain open. Earlier checkpoints are history.
 
 ## Result
 
@@ -433,8 +436,10 @@ source syntax or turn the eight-slot fast path into an arity limit.
 
 ### G. Decisions recorded on 2026-10-12
 
-These decisions replace the earlier question list. They describe intended
-behavior, not a claim that the implementation already provides it.
+These decisions replace the earlier question list. The
+[repository review decisions](repository-review-2026-10-12.md#decisions-recorded-2026-10-12)
+of the same day supersede the index, match, and Var-to-String text below;
+each subsection notes the delivered behavior.
 
 #### Numeric comparisons
 
@@ -459,9 +464,17 @@ An index such as `4294967297L` must not narrow to index 1. Reads, writes,
 and slices use the collection's existing out-of-range behavior. Put the
 conversion in one owner; do not widen every public API automatically.
 
+Superseded by repository review decision 2: indices are 32-bit `int`, the
+book states it, and a wider value is outside the supported domain. No
+compiler or runtime change was made.
+
 Matching a non-List Var must reject the input. A genuine empty List remains
 valid and can match an empty-List pattern. Update the guide's current unchecked
 conversion wording when implementing the change.
+
+Superseded by repository review decision 3, delivered in `2e8c1877`: a Var
+subject whose tag is not `<list>` matches no List arm and reaches `default`.
+The fixture `match-var-non-list` covers it.
 
 #### Var to String
 
@@ -475,6 +488,11 @@ String text = value; // "42", through value.str()
 Raise a runtime error when the input has no `.str()` method. Explicit
 `value.string()` continues to extract an existing String payload. This decision
 does not commission general class-unboxing checks.
+
+Superseded by repository review decision 4 and batch 10, delivered in
+`e2c9fa40` and `4b387196`. A String destination reads the Var's String
+payload or its display text. Explicit `.string()` raises `<no-convert>` for
+another tag, and so do `.list()`, `.map()`, and the other explicit readers.
 
 #### Module follow-ups
 
@@ -626,6 +644,7 @@ Final validation and performance results belong to the follow-up delivery
 report.
 
 Wide indexing, cross-tag numeric equality, class unboxing checks, rewrite
-visibility policy, additional platform guarantees, and expanded gates remain
-outside this implementation. A full new language specification is still a
+visibility policy, additional platform guarantees, and expanded gates remained
+outside this implementation. The repository review later decided the first
+three; section G notes the delivered behavior. A full new language specification is still a
 separate writing effort; the existing row ledger retains its open questions.
