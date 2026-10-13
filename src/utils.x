@@ -10,8 +10,6 @@
 */
 
 #pragma once
-#include "private-keywords.x"
-static keyword loop $private.loop;
 #include "path.x"
 #include "process.x"
 #include "sourceview.x"

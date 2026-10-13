@@ -7,6 +7,8 @@
 */
 
 #pragma once
+#include "private-keywords.x"
+static keyword loop $private.loop;
 #include "build.x"
 #include "project.x"
 #include "frontend.x"
