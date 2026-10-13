@@ -330,7 +330,7 @@ function renderMap(gs) {
         const related =
           highlighted === null || highlighted === i || highlighted === j;
         return [
-          `<g opacity="${related ? 0.65 : 0.04}"><title>${esc(gs[i].name)} to ${esc(gs[j].name)}: ${w} callers / ${calls} call sites</title><linearGradient id="outside-gradient-${n}" gradientUnits="userSpaceOnUse" x1="${x}" y1="${y}" x2="${tx}" y2="${ty}"><stop stop-color="#59cfff"/><stop offset="1" stop-color="#ffb454"/></linearGradient><path d="M${x} ${y} C${x + 40} ${y} ${tx - 40} ${ty} ${tx} ${ty}" stroke="url(#outside-gradient-${n})" stroke-width="${1 + Math.log2(w + 1)}" fill="none" marker-end="url(#outside-arrow)"/><text x="${(x + tx) / 2}" y="${(y + ty) / 2 - 5}" fill="#dcecff" font-size="12" paint-order="stroke" stroke="#11181c" stroke-width="4">${w}c</text></g>`,
+          `<g opacity="${related ? (preview && (highlighted === null || highlighted < insideCount) ? 0.12 : 0.65) : 0.04}"><title>${esc(gs[i].name)} to ${esc(gs[j].name)}: ${w} callers / ${calls} call sites</title><linearGradient id="outside-gradient-${n}" gradientUnits="userSpaceOnUse" x1="${x}" y1="${y}" x2="${tx}" y2="${ty}"><stop stop-color="#59cfff"/><stop offset="1" stop-color="#ffb454"/></linearGradient><path d="M${x} ${y} C${x + 40} ${y} ${tx - 40} ${ty} ${tx} ${ty}" stroke="url(#outside-gradient-${n})" stroke-width="${1 + Math.log2(w + 1)}" fill="none" marker-end="url(#outside-arrow)"/><text x="${(x + tx) / 2}" y="${(y + ty) / 2 - 5}" fill="#dcecff" font-size="12" paint-order="stroke" stroke="#11181c" stroke-width="4">${w}c</text></g>`,
         ];
       })
       .join("");

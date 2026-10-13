@@ -465,7 +465,7 @@ function renderGraph(gs, map) {
               activePort === "group-in:" + r.id) &&
             (focusId === null || edges.some(([, b]) => b === focusId));
           return [
-            `<g opacity="${related ? 0.85 : 0.08}"><title>${esc(callerGroup.name)} to ${esc(r.name || gs.find((g) => g.id === r.id).name)}: ${count} caller functions, ${calls} call sites</title><path class="boundary-edge" d="M${A.x} ${A.y} C${A.x + 40} ${A.y} ${x - 40} ${y} ${x - 3} ${y}" stroke="#86c7ff" stroke-width="${1 + Math.sqrt(count)}" fill="none" marker-end="url(#arrow2)"/><text x="${(A.x + x) / 2}" y="${(A.y + y) / 2 - 5}" fill="#dcecff" font-size="12" paint-order="stroke" stroke="#11181c" stroke-width="3">${count}</text></g>`,
+            `<g opacity="${related ? (preview && !activePort ? 0.12 : 0.85) : 0.08}"><title>${esc(callerGroup.name)} to ${esc(r.name || gs.find((g) => g.id === r.id).name)}: ${count} caller functions, ${calls} call sites</title><path class="boundary-edge" d="M${A.x} ${A.y} C${A.x + 40} ${A.y} ${x - 40} ${y} ${x - 3} ${y}" stroke="#86c7ff" stroke-width="${1 + Math.sqrt(count)}" fill="none" marker-end="url(#arrow2)"/><text x="${(A.x + x) / 2}" y="${(A.y + y) / 2 - 5}" fill="#dcecff" font-size="12" paint-order="stroke" stroke="#11181c" stroke-width="3">${count}</text></g>`,
           ];
         });
       })
