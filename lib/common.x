@@ -886,6 +886,11 @@ int x2c_normalize_index(int index, int length) {
 
    Raises: `<bad-arg>` when either bound pointer is NULL, step is zero, or
    length is negative. */
+/** Returns an explicit slice `bound` that `x2c_normalize_slice` cannot
+    read as omitted. INT_MIN becomes INT_MIN + 1, which every collection
+    shorter than INT_MAX clamps the same way. */
+int x2c_slice_bound(int bound) => bound == INT_MIN ? bound + 1 : bound;
+
 /** Normalizes slice bounds and returns the resulting element count. */
 int x2c_normalize_slice(int *start, int *stop, int step, int length) {
   if (!start || !stop || !step || length < 0)

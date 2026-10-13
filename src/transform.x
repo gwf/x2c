@@ -436,11 +436,18 @@ static Ast _slice_node(
   String fnname = %"${nominal}_getslice";
   if (!c.sym.get(%($fnname)))
     $report.xform.slice_unsupported(c, type, %());
-  String none = "-2147483648";
-  start = start ? start : %(literal (int) $none);
-  stop = stop ? stop : %(literal (int) $none);
+  start = _slice_bound(start);
+  stop = _slice_bound(stop);
   step = step ? step : %(literal (int) "1");
   return _step(c, %(call "$fnname" (args $expression $start $stop $step)));
+}
+
+/* INT_MIN marks an omitted bound, so a computed bound passes through
+   `x2c_slice_bound` to keep its own meaning. */
+static List _slice_bound(List bound) {
+  if (!bound) return %(literal (int) "-2147483648");
+  if (bound.match(%(expr ? (literal *)))) return bound;
+  return %(expr (int) (call "x2c_slice_bound" (args $bound)));
 }
 
 /* Access admission has established the getter signature, but its target is

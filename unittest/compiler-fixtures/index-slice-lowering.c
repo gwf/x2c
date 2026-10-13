@@ -119,7 +119,7 @@ int main(void){
   Array_setindex(array_base(), next_index(2), next_value(90));
   Map_setindex(map_base(), Symbol_var(next_key(97761636)), next_value(42));
   ((char *) buffer_base())[next_index(0)] = 'z';
-  Array slice = Array_getslice(array_base(), next_bound(0), next_bound(4), next_bound(2));
+  Array slice = Array_getslice(array_base(), x2c_slice_bound(next_bound(0)), x2c_slice_bound(next_bound(4)), next_bound(2));
   List reverse = List_getslice(list, (-2147483647 - 1), (-2147483647 - 1), - 1);
   String suffix = String_getslice(text, 1, (-2147483647 - 1), 1);
   printf("native=%d,%d values=%d,%d,%c,%d writes=%d,%d,%c\n", native_read, raw[2], Var_int(array_read), Var_int(list_read), string_read, Var_int(map_read), Var_int(Array_getindex(saved_array, 2)), Var_int(Map_getindex(saved_map, Symbol_var(97761636))), String_getindex(saved_buffer, 0));
