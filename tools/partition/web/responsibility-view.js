@@ -432,11 +432,22 @@ async function loadResponsibilityAnalysis() {
       );
     const m = await response.json();
     Responsibilities.analyze(D, m, S.ties);
-    if (m.scope.slice().sort().join("|") !== responsibilityKey)
-      throw Error(
-        "The reviewed analysis covers the complete original file. Open that scope before loading it.",
+    const key = m.scope.slice().sort().join("|");
+    if (key !== responsibilityKey) {
+      scopeStack.push(clone(scope));
+      const ids = new Map(
+        D.functions.map((_, v) => [Responsibilities.key(D, v), v]),
       );
-    S.responsibilities[responsibilityKey] = m;
+      scope = { name: files[0], members: m.scope.map((k) => ids.get(k)) };
+      responsibilityKey = key;
+      selected.clear();
+      toast(
+        "Opened the complete original file for responsibility review. Existing groups are unchanged.",
+      );
+    }
+    S.responsibilities[responsibilityKey] ||= m;
+    if (!Object.keys(S.responsibilities[responsibilityKey].operations).length)
+      S.responsibilities[responsibilityKey] = m;
     responsibilityStep = "responsibilities";
     save();
     render();

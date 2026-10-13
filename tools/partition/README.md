@@ -74,8 +74,9 @@ node tools/partition/tests/compare-decompositions.cjs
 The preparation command reproduces the versioned `*.manifest.json` files from
 that evidence and the matching graph. It refuses another snapshot. Review and
 update source evidence before preparing manifests for a new revision. The UI's
-**Load reviewed source analysis** loads these editable examples only for their
-complete original-file scopes.
+**Load reviewed source analysis** loads these editable examples for their
+complete original-file scopes. From a previously split group, loading the
+analysis opens the whole original file without changing existing groups.
 
 The compiler eight-group fixture is a comparison, never an assignment input.
 The comparison view shows the public operations and source behavior behind
