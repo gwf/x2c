@@ -56,7 +56,7 @@ Prefer:
 static int _same_slot(Map m, Var key, Var expected) =>
   m.lookup(key).same(expected);
 
-static int MatchLower._compile_bind_and_leaf(
+static int _compile_bind_and_leaf(
   MatchLower m, Var binder, Var leaf) {
   // ...
 }
@@ -65,9 +65,9 @@ static int MatchLower._compile_bind_and_leaf(
 Avoid:
 
 ```x2c
-static int MatchLower._compile_bind_and_leaf(MatchLower m,
-                                             Var binder,
-                                             Var leaf) {
+static int _compile_bind_and_leaf(MatchLower m,
+                                  Var binder,
+                                  Var leaf) {
   // ...
 }
 ```
@@ -338,9 +338,14 @@ static Var _publish_label(
 }
 ```
 
-## EX-5 - Prefer receiver chains
+## EX-5 - Prefer public receiver chains
 
-See EX-5 in [the standard](x2c-code-standard.md).
+See EX-5 in [the standard](x2c-code-standard.md). Ordinary static helpers
+use explicit arguments, including when public methods surround the call:
+
+```x2c
+String name = _stem(path.rstrip("/")).lower();
+```
 
 Prefer:
 
@@ -429,10 +434,10 @@ Example:
 
 ```x2c
 typedef struct Counter { int count; } Counter;
-static void Counter.step(Counter &c) => c.count++;
+static void _step(Counter &c) => c.count++;
 
 Counter counter = {0};
-counter.step();
+_step(counter);
 ```
 
 Example:
@@ -819,14 +824,15 @@ Example:
 return Scope.malloc_in(&inner.scope, size);
 ```
 
-## NM-1 - Names expose ownership
+## NM-1 - Names distinguish public operations and static helpers
 
-See NM-1 in [the standard](x2c-code-standard.md).
+See NM-1 in [the standard](x2c-code-standard.md). State remains an explicit
+parameter; the helper's name does not need its record's prefix.
 
 Example:
 
 ```x2c
-static List Emitter._declarator(
+static List _declarator(
   Emitter &e, List declaration, List modifiers) {
   // ...
 }
@@ -847,7 +853,7 @@ typedef struct Expansion {
   Compiler c, List definition, input, template, direct, Token invocation;
 } Expansion;
 
-static List Expansion.bind(Expansion &x, AstPos position) {
+static List _bind(Expansion &x, AstPos position) {
   // ...
 }
 ```
@@ -855,7 +861,7 @@ static List Expansion.bind(Expansion &x, AstPos position) {
 Prefer:
 
 ```x2c
-static int _path_is_readable_file(String path);
+static int _readable_file(String path);
 ```
 
 Avoid:
@@ -872,6 +878,13 @@ for (List p = values; p; p = p.cdr())
   output.push(p.car());
 ```
 
+Semantic qualifiers distinguish operations that formerly had different owners:
+
+```x2c
+static Var _read_value(Reader &r);
+static void _write_value(Writer &w, Var value, int depth);
+```
+
 ## VT-5 - Closed identities
 
 See VT-5 in [the standard](x2c-code-standard.md).
@@ -885,7 +898,9 @@ static TagId _tag2id(Symbol tag) => (TagId) x2c_var_tags.index(tag);
 
 ## VT-9 - Separate storage ownership from typed crossings
 
-See VT-9 in [the standard](x2c-code-standard.md).
+See VT-9 in [the standard](x2c-code-standard.md). These static converters
+retain their dotted names because conversion and protocol lookup require them
+(the NM-1 exception). Ordinary helpers such as `_next` use free names.
 
 Example:
 

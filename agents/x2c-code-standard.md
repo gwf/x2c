@@ -242,12 +242,14 @@ semantics or crosses a boundary the compiler cannot prove: dynamic tag
 inspection, variadic and macro boundaries, raw C ABI code, and tests of the
 converter itself. The compiler reports the rest as `conversion` warnings.
 
-**EX-5** Chain receiver methods when each result feeds the next:
-`path.rstrip("/").split("/").last()`. Write `value.method()` wherever the
-static type selects the same callable as `Type.method(value)`; use `.car()`
-and `.cdr()`. `cons(head, tail)` stays a free call. An explicit owner call
-remains where it selects different semantics, such as an Array method
-delegating to its Block implementation.
+**EX-5** Chain public receiver methods when each result feeds the next:
+`path.rstrip("/").split("/").last()`. Write `value.method()` when the
+static type selects the same public callable as `Type.method(value)`; use
+`.car()` and `.cdr()`. Ordinary static helpers take explicit arguments,
+including state records; do not give them dotted names to form a chain.
+`cons(head, tail)` stays a free call. An explicit owner call remains where
+it selects different semantics, such as an Array method delegating to its
+Block implementation.
 
 **EX-6** Reach members with `.` wherever x2c parsed the layout, native
 headers included. Keep `->` for a layout x2c never sees, for a call through
@@ -358,19 +360,20 @@ dispatcher that calls them, with the same parameter order and layout. A
 family of one-line functions forms an aligned table.
 
 **FA-2** Shared context is one value. Seven or more parameters, or a group
-of parameters passed through several steps, becomes a private record whose
-steps are methods, `Record.step(Record &r, ...)`, or the receiver of
-`Type._helper` methods. Declare the record as a value in the operation that
-owns it and borrow it through `&` receivers.
+of parameters passed through several steps, becomes a private record passed
+to ordinary static helpers: `static void _step(Record &r, ...)`. Declare the
+record as a value in the operation that owns it and borrow it through `&`
+parameters. Naming helpers as free functions does not remove their state
+parameters or the record.
 
 **FA-3** A record must own its steps. A record whose fields are copied into
 locals on entry is a parameter list; return it to parameters. A record never
 mirrors another object's fields; keep and pass the original. One concept
 has one record.
 
-**FA-4** Put a state-bearing private helper on its dominant receiver as
-`Type._step`; keep a stateless helper free as `_snake_case`. Never move a
-function only to gain dot syntax.
+**FA-4** Name ordinary static helpers `_snake_case`, whether they accept
+state or are stateless. Keep each helper with the state and operation it
+serves. Follow NM-1 for names required by lookup contracts.
 
 **FA-5** A stanza of three or more lines that repeats three or more times
 gets one owner: a helper, a table, a field list, or a macro. The owner must
@@ -509,10 +512,20 @@ name, know, or refuse anything. Spell the language `x2c`.
 ### Names
 
 **NM-1** Use `Type.method` for a public operation owned by `Type`,
-`Type._helper` for a private step on one receiver, `_snake_case` for a
-private stateless helper, `snake_case` for locals and parameters,
-`UPPER_CASE` for constants and enumerators, and bare PascalCase for types
-and private records.
+`_snake_case` for an ordinary static function, `snake_case` for locals and
+parameters, `UPPER_CASE` for constants and enumerators, and bare PascalCase
+for types and private records. Static helpers have no dotted owner, including
+helpers that accept owner state and factories that accept no receiver. Keep
+`static` and the existing signature, ownership, and mutation behavior.
+
+Preserve names required by established language or external lookup contracts,
+such as converters, protocol members, operators, lifecycle hooks, and native
+bindings. Verify each exception against the name producer and its consumers;
+dotted spelling alone is not evidence. For example, `Fact.var` and `Var.fact`
+in `src/regions.x` serve conversion and protocol lookup. Ordinary helpers
+need no forwarding wrapper or compatibility alias. A leading underscore does
+not establish static linkage: retain non-static underscore methods used by
+other files.
 
 **NM-2** Name the subject parameter with the first letter of its type
 (`Compiler c`, `Emitter &e`) when the longer name would wrap lines;
@@ -523,8 +536,13 @@ record's Compiler field is `c`.
 
 **NM-3** A name's length follows its scope: one or two words for a local,
 two or three for a helper. A helper omits what its file or section already
-says. A name of 25 or more characters, measured without its `Type.` owner,
-needs a public contract that fixes it.
+says. Remove redundant type, module, and section prefixes. Resolve collisions
+with short semantic qualifiers, such as `_read_value` and `_write_value`.
+Check declarations, macros, local bindings at call sites, and expansion names;
+different files may use the same static name. Review names of 25 or more
+characters for meaningful shortening; retain a good name when shortening
+would obscure the operation. Use only glossary abbreviations, never deleted
+vowels.
 
 **NM-4** One concept has one name across compiler and runtime. The shared
 role names, and the only abbreviations, are in the
