@@ -22,6 +22,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "path.x"
 #include "process.x"
 
 // reporter state

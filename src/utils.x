@@ -4,8 +4,8 @@
 
     Owns the environment the driver modules share: where the executable,
     home, stage, and packages are, which files are x2c source, the
-    compiler's identity, how a file is locked or replaced, translation
-    workers, and the driver's fatal error line. Host tools run through
+    compiler's identity, how a file is locked or replaced, and the
+    driver's fatal error line. Host tools run through
     `lib/process.x`.
 */
 
@@ -28,6 +28,12 @@ static keyword loop $private.loop;
 #include <sys/file.h>
 #include <sys/wait.h>
 #include <unistd.h>
+
+/** Names the translation state that `src/compiler.x` defines. */
+typedef struct Compiler *Compiler;
+
+/** Names the positioned diagnostic store that `src/diagnostics.x` defines. */
+typedef struct Diagnostics *Diagnostics;
 
 // command reports
 

@@ -750,7 +750,7 @@ static List _defer_record(
   Type type = %(${Ast.binding_spelling(environment)});
   return $!{
     $type environment = {0};
-    @builtin_defer_captures(environment, $records)
+    @Ast.defer_captures(environment, $records)
     X2CCleanup $record = {.fn = $callback, .env = &environment};
   };
 }
