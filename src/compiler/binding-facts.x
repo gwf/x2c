@@ -36,7 +36,7 @@ void Compiler.mark_reference_present(Compiler c, List binding) {
     proves presence, `yes` otherwise. A missing `no` arm falls through. */
 void Compiler.settle_reference(
   Compiler c, List binding, int true_is_present, List yes, List no) {
-  if (binding && reference_guard_exits(true_is_present ? no : yes))
+  if (binding && Ast.reference_guard_exits(true_is_present ? no : yes))
     c.mark_reference_present(binding);
 }
 
@@ -94,14 +94,3 @@ static int _null_literal(List expr) {
   return 0;
 }
 
-/** Returns whether `arm` ends with a return or non-returning raise. */
-int reference_guard_exits(List arm) {
-  if (Ast.never_returns(arm)) return 1;
-  match (arm) {
-    case $source_return_content(%(*)): return 1;
-    case %(at ? ?body): return reference_guard_exits(body);
-    case $source_block_content(%(*items)):
-      return items && reference_guard_exits(items.last());
-  }
-  return 0;
-}

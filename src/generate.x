@@ -798,6 +798,21 @@ static void _add_names(Map available, List node) {
   foreach (String name, _typedef_names(node)) available[name] = 1;
 }
 
+// initialization syntax
+
+/** Returns the function `type name(void)` running `body`. */
+List Compiler.initializer_function(
+  Compiler c, Type type, List name, List body) =>
+  c.rebuild_unit_function($!Unit{ $type $name(void) { @body } });
+
+/** Returns a run-once initializer body: `before`, then a return when
+   `guard` is set that sets it otherwise, then `after`. */
+List Compiler.run_once_body(Compiler c, List before, List guard, List after) {
+  List flag = $!int{ $guard };
+  List test = c.rebuild_statement($!{ if ($flag) return; $flag = 1; }).cdr();
+  return List.concat_n(3, before, test, after);
+}
+
 /* file initialization
 
    Queued initialization runs once per file, behind a guard. Each function
@@ -972,8 +987,8 @@ static List _synthesize(Init &i, List arms) {
     entry = i.initializer;
   }
   List statements =
-    _statements(i, _within_definitions(arms, _entry_call(entry)), NULL);
-  return _initializer_function(i.c, type, binding, statements);
+    _statements(i, _within_definitions(arms, Ast.entry_call(entry)), NULL);
+  return i.c.initializer_function(type, binding, statements);
 }
 
 /* An initializer runs `entry` and its run-once test, then the `<prepare>`
@@ -986,7 +1001,7 @@ static List _statements(Init &i, List entry, List body) {
   List queued = List.concat_n(
     5, c.init_statements(<prepare>), c.init_statements(<statics>), body,
     c.init_statements(<finish>), i.shutdown);
-  return _run_once(c, entry, i.guard, queued);
+  return c.run_once_body(entry, i.guard, queued);
 }
 
 /* `function` calls the region's initializer unless its guard is set. */
@@ -1011,7 +1026,7 @@ static List _protocol_initializer(
   List declaration = c.initialization_guard(guard);
   List queued = c.init_statements(<protocol>).append(body);
   return _replace_body(
-    c, function, _run_once(c, %($declaration), guard, queued));
+    c, function, c.run_once_body(%($declaration), guard, queued));
 }
 
 /* The registration of the unit's shutdown function, under the arms that

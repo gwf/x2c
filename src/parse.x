@@ -340,7 +340,7 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
   switch (c.peek(0)) {
     case <import>:
       if (c.signature_only) {
-        c._skip_shallow_expression(0);
+        c.skip_shallow_expression(0);
         c.expect(<;>);
         return NULL;
       }
@@ -461,7 +461,7 @@ static List _declaration_form(Compiler c, int skip_body) {
   $let(c.macro_holes, c.signature_only && !c.macro_holes
          ? {} : c.macro_holes)
     decl = c.parse_declaration_row();
-  int body = c.peek(0) == <"{"> || c._at_function_arrow();
+  int body = c.peek(0) == <"{"> || c.at_function_arrow();
   Type type = decl.type_from_ast();
   if (skip_body || (c.public_bodies && body &&
       (!type.is_inline() || type.is_static() || c.source_private))) {
@@ -474,7 +474,7 @@ static List _declaration_form(Compiler c, int skip_body) {
   if (native && !decl.type_from_ast().is_function())
     $report.parse.meta_function(c, meta);
   if (c.test(<;>)) return _declared(c, decl, meta, first);
-  if (c.peek(0) == <"{"> || c._at_function_arrow())
+  if (c.peek(0) == <"{"> || c.at_function_arrow())
     return _defined(c, decl, meta, native, first);
   c.require_input();
   Symbol unexpected = c.peek(0);
@@ -1010,7 +1010,7 @@ int Compiler.test_static_assert(Compiler c) =>
     checks. */
 List Compiler.parse_static_assert(Compiler c) {
   if (c.shallow) {
-    c._skip_shallow_expression(0);
+    c.skip_shallow_expression(0);
     c.expect(<;>);
     return %(c-assert);
   }
@@ -1391,7 +1391,7 @@ static int _unseen_prefix(Compiler c) {
 static List _type_qualifiers(Compiler c) {
   Array quals = $auto([]);
   loop {
-    c.__complete_here(<type>, _type_keywords());
+    c.complete_here(<type>, _type_keywords());
     Symbol symbol = c.peek(0);
     if (symbol.is_type_qualifier()) {
       quals.push(symbol);
@@ -1945,7 +1945,7 @@ static List _declarator_init(
   int preserved_self = 0;
   bind = _install_declarator(c, type, context, bind, method, preserved_self);
   c.record_source_declaration(bind.cadr(), first, after);
-  int function_arrow = !c.in_proto && c._at_function_arrow() &&
+  int function_arrow = !c.in_proto && c.at_function_arrow() &&
     %(declare $type (bindings $bind)).type_from_ast().is_function();
   if (!c.in_proto && !function_arrow && c.test(<=>))
     return _initialized(c, type, bind, origin);
@@ -1962,7 +1962,7 @@ static List _initialized(
     c.init_tokens[binding] = origin - tokens;
   }
   if (c.shallow && !c.capture_unit) {
-    c._skip_shallow_expression(1);
+    c.skip_shallow_expression(1);
     return bind;
   }
   c.enter((Ancestor){ .what = <declarator>, .base = type, .node = bind });
@@ -2358,7 +2358,7 @@ static void _method_facts(
    the captured scope. */
 static List _function_parameters(Compiler c) {
   c.next();
-  c.__complete_here(<type>, _type_keywords());
+  c.complete_here(<type>, _type_keywords());
   if (c.peek(0) == <)>)
     $report.parse.params_empty(c);
   SymScope saved = c.params, parsed;
@@ -2388,7 +2388,7 @@ static List _function_parameters(Compiler c) {
 List Compiler.parse_parameter_list(Compiler c) {
   Array parameters = $auto([]);
   while (1) {
-    c.__complete_here(<type>, _type_keywords());
+    c.complete_here(<type>, _type_keywords());
     List parameter = c.try_parse_macro_slot(<param>);
     if (!parameter) parameter = c.parse_parameter();
     parameters.push(parameter);
@@ -2561,7 +2561,7 @@ static String _syntax_exact_name(Var value) {
 List Compiler.parse_function_definition(Compiler c) {
   Token tokens = c.tokenizer.tokens, start = c.token;
   List declaration = c.parse_simple_declaration();
-  if (c.peek(0) != <"{"> && !c._at_function_arrow())
+  if (c.peek(0) != <"{"> && !c.at_function_arrow())
     $report.parse.function_body(c);
   int first = start - tokens, body = c.token - tokens;
   List function = _finish_function(c, declaration, NULL);
@@ -2619,7 +2619,7 @@ static List _finish_function_parts(
    the function's return type and name current. */
 static List _function_body(
   Compiler c, List declaration, String name, List syntax) {
-  int expression_body = !syntax && c._at_function_arrow();
+  int expression_body = !syntax && c.at_function_arrow();
   if (!syntax && !expression_body) c.expect(<"{">);
   Type old_return = c.return_type;
   c.return_type = declared_return(declaration);

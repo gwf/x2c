@@ -24,13 +24,16 @@ Shared helpers for x2c compiler AST nodes.
 | [`binding_identity_spelling`](#binding_identity_spelling) | Returns a valid binding node's source spelling, or `NULL`. |
 | [`binding_identity_try_parts`](#binding_identity_try_parts) | Extracts a valid `(binding positive-integer string)` node. |
 | [`Ast.designated`](#Ast.designated) | Returns the innermost node `value` designates, past the forms that still name the same object: an `expr` wrapper, parentheses, a member, and an index into an array. |
+| [`Ast.entry_call`](#Ast.entry_call) | Returns the statement calling the `void (void)` function `entry`. |
 | [`Ast.initializer_cases`](#Ast.initializer_cases) | Returns initializer alternatives and their optional native macro input. |
 | [`Ast.initializer_functions`](#Ast.initializer_functions) | Returns function alternatives when every initializer arm calls one shared input, and stores that input expression in `source`. |
 | [`Ast.lvalue_binding`](#Ast.lvalue_binding) | Returns the binding whose stored object the lvalue `ast` names, or `NULL`. |
 | [`Ast.never_returns`](#Ast.never_returns) | Returns whether control cannot flow out the bottom of `ast`. |
+| [`Ast.reference_guard_exits`](#Ast.reference_guard_exits) | Returns whether `arm` ends with a return or non-returning raise. |
 | [`Ast.rewrap_origin`](#Ast.rewrap_origin) | Returns `replacement` under the anchors of `original`, the statement it replaces, so a rewrite does not lose the node's source position. |
 | [`Ast.rewrite_children`](#Ast.rewrite_children) | Applies `per_child` to each `List` child of `ast` and returns the node rebuilt from the results; non-list children pass through. |
 | [`Ast.without_origin`](#Ast.without_origin) | Returns `ast` without the `(at ORIGIN ...)` anchors it arrived wrapped in. |
+| [`Ast.written_definitions`](#Ast.written_definitions) | Returns `decl` with each function definition marked `kernel` as written. |
 | [`Ast.written_operand`](#Ast.written_operand) | Returns the operand a write `node` changes: the left operand of an assignment or prefix update, or the operand of a postfix update; `NULL` when `node` writes no operand. |
 | [`Symbol.is_assignment_op`](#Symbol.is_assignment_op) | Returns whether `op` is plain or compound assignment. |
 
@@ -50,7 +53,7 @@ Source: `src/ast.x:138`
 
 Returns whether `op` writes its left operand.
 
-Source: `src/ast.x:347`
+Source: `src/ast.x:379`
 
 #### ast_collect_binding_references
 
@@ -156,6 +159,15 @@ pointer, or another expression; a non-list designates nothing.
 
 Source: `src/ast.x:111`
 
+<a id="Ast.entry_call"></a>
+#### Ast.entry_call
+
+`List Ast.entry_call(String entry)`
+
+Returns the statement calling the `void (void)` function `entry`.
+
+Source: `src/ast.x:307`
+
 <a id="Ast.initializer_cases"></a>
 #### Ast.initializer_cases
 
@@ -163,7 +175,7 @@ Source: `src/ast.x:111`
 
 Returns initializer alternatives and their optional native macro input.
 
-Source: `src/ast.x:353`
+Source: `src/ast.x:385`
 
 <a id="Ast.initializer_functions"></a>
 #### Ast.initializer_functions
@@ -174,7 +186,7 @@ Returns function alternatives when every initializer arm calls one shared
 input, and stores that input expression in `source`. Other forms return
 NULL.
 
-Source: `src/ast.x:367`
+Source: `src/ast.x:399`
 
 <a id="Ast.lvalue_binding"></a>
 #### Ast.lvalue_binding
@@ -198,7 +210,16 @@ calls, and blocks ending in either one when the block contains no
 `return`. Generation uses this fact to mark the enclosing function
 `_Noreturn`.
 
-Source: `src/ast.x:300`
+Source: `src/ast.x:332`
+
+<a id="Ast.reference_guard_exits"></a>
+#### Ast.reference_guard_exits
+
+`int Ast.reference_guard_exits(List arm)`
+
+Returns whether `arm` ends with a return or non-returning raise.
+
+Source: `src/ast.x:313`
 
 <a id="Ast.rewrap_origin"></a>
 #### Ast.rewrap_origin
@@ -234,6 +255,17 @@ has to see the statement, not the anchor.
 
 Source: `src/ast.x:273`
 
+<a id="Ast.written_definitions"></a>
+#### Ast.written_definitions
+
+`List Ast.written_definitions(List decl)`
+
+Returns `decl` with each function definition marked `kernel` as written.
+The transform strips the marker before it offers the definition only to
+shipped function rules.
+
+Source: `src/ast.x:297`
+
 <a id="Ast.written_operand"></a>
 #### Ast.written_operand
 
@@ -254,7 +286,7 @@ Source: `src/ast.x:192`
 
 Returns whether `op` is plain or compound assignment.
 
-Source: `src/ast.x:343`
+Source: `src/ast.x:375`
 
 ## Public types
 

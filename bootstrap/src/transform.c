@@ -3500,7 +3500,7 @@ static List _binary_operator(Compiler c, List ast, Symbol operator, List lhs, Ty
 #ifndef X2C_TRANSFORM_SOURCE
 int Sym_is_string_type(Sym, Type);
 static List _compound(Compiler c, List ast, Symbol op, List lhs, Type lhs_type, List rhs, Type rhs_type){
-  int lhs_is_var = Sym_is_var_type(c -> sym, lhs_type);  if(Compiler__indexed_builtin_helper(c, lhs_type)){
+  int lhs_is_var = Sym_is_var_type(c -> sym, lhs_type);  if(Compiler_indexed_builtin_helper(c, lhs_type)){
     String _x2c_macro_type_0 = List_repr(Type_list(lhs_type));  Compiler_report_error(c, 50756762, String_join(NULL, cons(String_var(_1742), cons(String_var(_x2c_macro_type_0), cons(String_var(_1743), NULL)))), NULL, _1746);
   }
   Type member_type = lhs_type;  if(Sym_is_string_type(c -> sym, lhs_type)){

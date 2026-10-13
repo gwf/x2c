@@ -289,6 +289,38 @@ Ast Ast.rewrap_origin(Ast original, Ast replacement) {
   return replacement;
 }
 
+// generated support
+
+/** Returns `decl` with each function definition marked `kernel` as written.
+    The transform strips the marker before it offers the definition only to
+    shipped function rules. */
+List Ast.written_definitions(List decl) {
+  match (decl) {
+    case %(function ? (bind ? ?) ?): return %(function @{decl.cdr()} kernel);
+    case %((!or at seq) *):
+      return Ast.rewrite_children(decl, Ast.written_definitions);
+  }
+  return decl;
+}
+
+/** Returns the statement calling the `void (void)` function `entry`. */
+List Ast.entry_call(String entry) =>
+  %((stmnt (expr (void) (call $entry (args)))));
+
+// control flow
+
+/** Returns whether `arm` ends with a return or non-returning raise. */
+int Ast.reference_guard_exits(List arm) {
+  if (Ast.never_returns(arm)) return 1;
+  match (arm) {
+    case $source_return_content(%(*)): return 1;
+    case %(at ? ?body): return Ast.reference_guard_exits(body);
+    case $source_block_content(%(*items)):
+      return items && Ast.reference_guard_exits(items.last());
+  }
+  return 0;
+}
+
 // code that never returns
 
 /** Returns whether control cannot flow out the bottom of `ast`.

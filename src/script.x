@@ -152,5 +152,5 @@ static void _exec(CliRequest c) {
 
 /* Prints the command that executes the script, without running it. */
 static void _print_run(CliRequest c) {
-  tool_action_new(<run>, %(${_executable(c)} @{c.run_args}), 0, 1).start();
+  ToolAction.new(<run>, %(${_executable(c)} @{c.run_args}), 0, 1).start();
 }

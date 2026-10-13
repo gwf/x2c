@@ -17,7 +17,9 @@ The generated header and source of one unit.
 | [`Compiler.definition_rows`](#Compiler.definition_rows) | Returns one row for each function, foreign alias, and typedef that the lowered unit `ast` defines, in source order: `(function NAME DISPLAY TYPE PARAMETERS LINE DOC STATIC ORIGIN DECLARATOR SPAN)` or `(typedef NAME BASE MODIFIERS SPAN)`. |
 | [`Compiler.dump_definitions`](#Compiler.dump_definitions) | Prints the `--dump-definitions` projection of the lowered unit `ast`: `(unit PATH)`, the module comment as `(module TEXT)` when the file opens with one, then one row per `Compiler.definition_rows` entry. |
 | [`Compiler.init_statements`](#Compiler.init_statements) | Returns the statements queued for `phase`, in the order they were added. |
+| [`Compiler.initializer_function`](#Compiler.initializer_function) | Returns the function `type name(void)` running `body`. |
 | [`Compiler.place_source_prelude`](#Compiler.place_source_prelude) | Places generated `declarations` after source types and includes, before the first function or captured initializer that can use them. |
+| [`Compiler.run_once_body`](#Compiler.run_once_body) | Returns a run-once initializer body: `before`, then a return when `guard` is set that sets it otherwise, then `after`. |
 | [`Init.enter`](#Init.enter) | Returns `function` with its entry setup: the protocol initializer and the type initializer run once, and a `guarded` entry calls the region's initializer unless its guard is set. |
 
 ### Functions
@@ -66,7 +68,7 @@ token range and privacy of the top-level form that produced the
 definition; either is empty when the compiler made the definition.
 `LINE` is 1 and `DOC` empty for a definition without authored source.
 
-Source: `src/generate.x:1526`
+Source: `src/generate.x:1541`
 
 <a id="Compiler.dump_definitions"></a>
 #### Compiler.dump_definitions
@@ -78,7 +80,7 @@ Prints the `--dump-definitions` projection of the lowered unit `ast`:
 with one, then one row per `Compiler.definition_rows` entry. The
 command-line reference in the book describes the fields.
 
-Source: `src/generate.x:1619`
+Source: `src/generate.x:1634`
 
 <a id="Compiler.init_statements"></a>
 #### Compiler.init_statements
@@ -87,7 +89,16 @@ Source: `src/generate.x:1619`
 
 Returns the statements queued for `phase`, in the order they were added.
 
-Source: `src/generate.x:1061`
+Source: `src/generate.x:1076`
+
+<a id="Compiler.initializer_function"></a>
+#### Compiler.initializer_function
+
+`List Compiler.initializer_function( Compiler c, Type type, List name, List body)`
+
+Returns the function `type name(void)` running `body`.
+
+Source: `src/generate.x:804`
 
 <a id="Compiler.place_source_prelude"></a>
 #### Compiler.place_source_prelude
@@ -100,7 +111,17 @@ conditional containing that first use follows the declarations. A unit
 without such a use gets them at its end, after the declarations they
 may assign.
 
-Source: `src/generate.x:884`
+Source: `src/generate.x:899`
+
+<a id="Compiler.run_once_body"></a>
+#### Compiler.run_once_body
+
+`List Compiler.run_once_body(Compiler c, List before, List guard, List after)`
+
+Returns a run-once initializer body: `before`, then a return when
+`guard` is set that sets it otherwise, then `after`.
+
+Source: `src/generate.x:810`
 
 ### `Init`
 
@@ -113,7 +134,7 @@ Returns `function` with its entry setup: the protocol initializer and
 the type initializer run once, and a `guarded` entry calls the region's
 initializer unless its guard is set.
 
-Source: `src/generate.x:849`
+Source: `src/generate.x:864`
 
 ## Public types
 
@@ -133,7 +154,7 @@ the unit's shutdown function, `synthetic` is the synthetic initializer or
 NULL, and `reachable` holds the entries a cache-only file guards, or is
 NULL when every public entry is guarded.
 
-Source: `src/generate.x:813`
+Source: `src/generate.x:828`
 
 ## Design notes
 

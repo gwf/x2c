@@ -2868,7 +2868,7 @@ List Compiler.written_support(Compiler c, List bound) {
   List writers = c.applying && c.applying.cdr() === c.active_rewrites
     ? c.applying : c.active_rewrites;
   RewriteRule writer = writers ? writers.car() : NULL;
-  return writer && writer.builtin ? written_definitions(bound) : bound;
+  return writer && writer.builtin ? Ast.written_definitions(bound) : bound;
 }
 
 /** Whether the rule whose meta function now runs is shipped, so that the
@@ -3442,7 +3442,7 @@ int Compiler.skip_named_type_declaration(Compiler c) {
   List definition = _peek_invocation(c);
   if (!definition || definition.assoc(<target>) != <named-type>) return 0;
   c.skip_macro_invocation();
-  c._skip_shallow_expression(0);
+  c.skip_shallow_expression(0);
   c.expect(<;>);
   return 1;
 }

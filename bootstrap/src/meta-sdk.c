@@ -655,13 +655,13 @@ Code Type_protocol_member(Type type, String name){
   return Macro_typed(Type_list(signature), List_var(binding));
 }
 
-List Compiler__nominal_getindex(Compiler, Type);
+List Compiler_nominal_getindex(Compiler, Type);
 
 Code Type_getter(Type type){
   if(! _init_guard_) _file_init_();
   _require_expansion(_7);
   Compiler c = active.expander;
-  List resolved = Compiler__nominal_getindex(c, type);
+  List resolved = Compiler_nominal_getindex(c, type);
   if(! List_truth(resolved)) resolved = Compiler_resolve_protocol_member(c, type, _8);
   if(! List_truth(resolved)) return NULL;
   List _x2c_destructure_1 = resolved;
@@ -756,8 +756,9 @@ List Code_func_parameters(Code parameters, Code fn, Code argv){
   if(! _init_guard_) _file_init_();  _require_expansion(_55);  return Compiler_func_parameters(active.expander, parameters, fn, argv);
 }
 
+int Ast_reference_guard_exits(List);
 int Code_exits(Code statement){
-  if(! _init_guard_) _file_init_();  _require_expansion(_56);  return reference_guard_exits(statement);
+  if(! _init_guard_) _file_init_();  _require_expansion(_56);  return Ast_reference_guard_exits(statement);
 }
 
 List Compiler_convert_expression(Compiler, List, Type);

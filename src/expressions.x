@@ -392,7 +392,7 @@ static int _c_type_known(Compiler c, List operand) {
 }
 
 static List _parse_unary_op(Compiler c) {
-  c.__complete_here(<expr>, %());
+  c.complete_here(<expr>, %());
   Symbol op = c.peek(0);
   Token origin = c.token;
   if (op == <sizeof>) return _parse_sizeof(c);
@@ -622,7 +622,7 @@ static List _parse_postfix_decinc(Compiler c, List expr) {
 */
 List Compiler.parse_primary(Compiler c) {
   c.require_input();
-  c.__complete_here(<expr>, %());
+  c.complete_here(<expr>, %());
   List slot = c.try_parse_macro_slot(<expression>);
   if (slot) return slot;
   switch (c.peek(0)) {
@@ -1452,7 +1452,7 @@ static List _postfix_index_expression(
 static List _typedef_index(
   Compiler c, List expr, List index, Type type) {
   int collection = _collection_index_type(c, type);
-  List resolved = c._nominal_getindex(type);
+  List resolved = c.nominal_getindex(type);
   if (!resolved && collection)
     resolved = c.resolve_protocol_member(type, "getindex");
   Type signature = resolved ? resolved.cadr() : NULL;
@@ -1470,7 +1470,7 @@ static int _collection_index_type(Compiler c, Type type) =>
 /** Resolves the exact nominal getter shared by bracket admission and lowering.
     A collection getter's own body uses the inherited implementation instead.
 */
-List Compiler._nominal_getindex(Compiler c, Type type) {
+List Compiler.nominal_getindex(Compiler c, Type type) {
   if (!type.is_typedef_name()) return NULL;
   match (type)
     case %(?(String nominal)): {
@@ -2379,12 +2379,12 @@ static List _binary_expression(
 static int _builtin_index_lvalue(Compiler c, List expression) {
   match (expression)
     case %(expr ? (getindex (expr ?receiver_type ?) ?)):
-      return !!c._indexed_builtin_helper(receiver_type);
+      return !!c.indexed_builtin_helper(receiver_type);
   return 0;
 }
 
 /** Identifies the Array or Map helper family for built-in indexed mutation. */
-Symbol Compiler._indexed_builtin_helper(Compiler c, Type type) {
+Symbol Compiler.indexed_builtin_helper(Compiler c, Type type) {
   if (c.sym.is_array_type(type)) return <array>;
   if (c.sym.is_map_type(type)) return <map>;
   return 0;

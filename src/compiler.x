@@ -319,6 +319,8 @@ module {
   "compiler/declarations.x",
   "compiler/source-locations.x",
   "compiler/names.x",
+  "compiler/pending.x",
+  "compiler/binding-facts.x",
   "compiler/literal-cache.x",
   "compiler/patterns.x",
   "compiler/source-files.x",

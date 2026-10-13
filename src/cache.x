@@ -142,22 +142,6 @@ static void _collect_ids(
    most file-static initializers are calls. Each such binding keeps its
    declaration and moves its assignment into a generated helper. */
 
-/* The function `type name(void)` running `body`. */
-List _initializer_function(Compiler c, Type type, List name, List body) =>
-  c.rebuild_unit_function($!Unit{ $type $name(void) { @body } });
-
-/* The body of every run-once initializer: `before`, then a return when
-   `guard` is set that sets it otherwise, then `after`. */
-List _run_once(Compiler c, List before, List guard, List after) {
-  List flag = $!int{ $guard };
-  List test = c.rebuild_statement($!{ if ($flag) return; $flag = 1; }).cdr();
-  return List.concat_n(3, before, test, after);
-}
-
-/* The statement calling the `void (void)` function `entry`. */
-List _entry_call(String entry) =>
-  %((stmnt (expr (void) (call $entry (args)))));
-
 /* The statement calling the `void (void)` function `helper` names. */
 static List _helper_call(Compiler c, List helper) {
   List callee = %(expr ((func ((void))) void) (ident $helper));
@@ -180,8 +164,8 @@ static List _rewrite_statics(Compiler c, List code, StaticQueue &q) {
     output.push(item);
     for (int i = first; i < q.initializers.len(); i++) {
       List initializer = q.initializers[i];
-      List function = _initializer_function(
-        c, %(static void), initializer.caddr(), %(${initializer.cadr()}));
+      List function = c.initializer_function(
+        %(static void), initializer.caddr(), %(${initializer.cadr()}));
       output.push(%(sourceinit $function));
     }
   }
@@ -480,9 +464,9 @@ static List _prelude(HeaderCache &h, Array ids) {
   }
   List body = _cache_batches(c, statements, declarations, h.prefix);
   List type = %(("__attribute__((constructor))") static void);
-  body = _run_once(
-    c, _entry_call("x2c_initialize_protocols"), h.guard, body);
-  declarations.push(_initializer_function(c, type, h.initializer, body));
+  body = c.run_once_body(
+    Ast.entry_call("x2c_initialize_protocols"), h.guard, body);
+  declarations.push(c.initializer_function(type, h.initializer, body));
   ids.free();
   return declarations.list_free();
 }
@@ -581,7 +565,7 @@ static List _cache_batches(
       batch.push(statements[i]);
     List helper = c.sym.introduce(c.fresh_name(stem));
     declarations.push(
-      _initializer_function(c, type, helper, batch.list_free()));
+      c.initializer_function(type, helper, batch.list_free()));
     calls.push(_helper_call(c, helper));
   }
   statements.free();

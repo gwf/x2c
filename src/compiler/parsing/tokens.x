@@ -119,6 +119,10 @@ Token Token.skip_trivia(Token token) {
   }
 }
 
+// The index after the last non-trivia token before the cursor.
+static long _end_index(Compiler c, Token tokens) =>
+  _skip_backward(c.token - 1, tokens) + 1 - tokens;
+
 static Token _skip_backward(Token token, Token origin) {
   while (token > origin) {
     switch (token.type) {
@@ -252,10 +256,9 @@ void Compiler.mark_completion(Compiler c, int position) {
 /** Reports whether the parser is at the private REPL completion marker. */
 int Compiler.at_completion(Compiler c) => c.token.type == <replcomp>;
 
-/* Transfers completion from the grammar production that owns the cursor.
-   Rows retain semantic namespace facts; keywords are choices owned by that
-   production rather than an editor-side copy of the grammar. */
-void Compiler.__complete_here(Compiler c, Symbol role, List keywords) {
+/** Raises `<replcomp>` at the completion marker with the visible symbols,
+    grammar `role`, and available `keywords`. Does nothing elsewhere. */
+void Compiler.complete_here(Compiler c, Symbol role, List keywords) {
   if (!c.at_completion()) return;
   List rows = c.sym.visible_symbols();
   raise %(replcomp (kind $role) (rows $rows) (keywords $keywords));

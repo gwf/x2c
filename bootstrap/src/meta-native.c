@@ -194,10 +194,10 @@ static void _open_native_module(String path);
 
 static void _native_module_shutdown(void);
 
-static struct _Extension{
+static struct Extension{
   const char * name;
   Map(* targets)(void);
-  struct _Extension * next;
+  struct Extension * next;
 }
 * extensions;
 
@@ -2690,7 +2690,7 @@ static void _load_compiler_module(void){
 }
 
 void Compiler_select_native_modules(List paths){
-  if(! _init_guard_) _file_init_();  _load_compiler_module();  Array linked = Array_new();  for(struct _Extension * e = extensions;  e;  e = e -> next){
+  if(! _init_guard_) _file_init_();  _load_compiler_module();  Array linked = Array_new();  for(struct Extension * e = extensions;  e;  e = e -> next){
     String key = String_join(NULL, cons(String_var(_449), cons(String_var(String_new(e -> name)), cons(String_var(_1), NULL))));  if(! Compiler_native_module_loaded(key)) Compiler_add_native_module(key, e -> targets);  Array_push(linked, String_var(key));
   }
   paths =({
@@ -2825,14 +2825,14 @@ int Compiler_supplies_native_meta(String name){
 }
 
 void x2c_register_extension(const char * name, Map(* targets)(void)){
-  if(! _init_guard_) _file_init_();  struct _Extension * extension = malloc(sizeof * extension);  if(! extension) abort();  * extension =(struct _Extension){
+  if(! _init_guard_) _file_init_();  struct Extension * extension = malloc(sizeof * extension);  if(! extension) abort();  * extension =(struct Extension){
     name, targets, extensions
   }
   ;  extensions = extension;
 }
 
 int Compiler_links_extension(String name){
-  if(! _init_guard_) _file_init_();  for(struct _Extension * e = extensions;  e;  e = e -> next) if(! strcmp(name, e -> name)) return 1;  return 0;
+  if(! _init_guard_) _file_init_();  for(struct Extension * e = extensions;  e;  e = e -> next) if(! strcmp(name, e -> name)) return 1;  return 0;
 }
 
 String Compiler_extension_archive(void){

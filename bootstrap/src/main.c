@@ -1184,7 +1184,7 @@ static int _run_env(CliRequest request){
 }
 
 static List _env_rows(CliRequest request){
-  Toolchain toolchain = toolchain_new(request);
+  Toolchain toolchain = Toolchain_new(request);
   String executable = x2c_get_executable();
   String roots = String_join(_26, CliRequest_package_roots(request));
   interface_configure(request -> out_dir, 0);

@@ -17,16 +17,13 @@ One x2c unit's translation state and its two parses.
 | [`home_portable_path`](#home_portable_path) | Returns `path` relative to the canonical x2c home when it lies below the home, otherwise `path`. |
 | [`match_value_is_static`](#match_value_is_static) | Reports whether a recovered pattern value graph is fully static. |
 | [`real_path`](#real_path) | Returns the real path of the existing file at `path`, or NULL when `path` is NULL or does not resolve. |
-| [`reference_guard_exits`](#reference_guard_exits) | Returns whether `arm` ends with a return or non-returning raise. |
-| [`written_definitions`](#written_definitions) | `decl` with each function definition in it marked `kernel` as written, which the transform strips before it offers the definition only to shipped function rules. |
-| [`Compiler._at_function_arrow`](#Compiler._at_function_arrow) | Reports whether the current two tokens are `=>`. |
-| [`Compiler._skip_shallow_expression`](#Compiler._skip_shallow_expression) | Skips a balanced shallow expression without consuming its terminator. |
 | [`Compiler.add_early`](#Compiler.add_early) | Appends a declaration the kernel generated to the unit's pending support. |
 | [`Compiler.add_init`](#Compiler.add_init) | Appends the lowered statement `stmt` to the file initialization area `phase`. |
 | [`Compiler.add_support`](#Compiler.add_support) | Appends the declaration `decl` to the unit's pending support as it is: a definition offered to every function rule, or a written one. |
 | [`Compiler.add_translation_dependency`](#Compiler.add_translation_dependency) | Records a path dependency not embedded in generated C. |
 | [`Compiler.anchor_origin`](#Compiler.anchor_origin) | Wraps a parsed node in the source location of its opening token. |
 | [`Compiler.at_completion`](#Compiler.at_completion) | Reports whether the parser is at the private REPL completion marker. |
+| [`Compiler.at_function_arrow`](#Compiler.at_function_arrow) | Reports whether the current two tokens are `=>`. |
 | [`Compiler.at_word`](#Compiler.at_word) | Reports whether the current token is the identifier `word`. |
 | [`Compiler.cache`](#Compiler.cache) | Interns a constant key and returns its stable `(cache id)` reference. |
 | [`Compiler.cache_cons_cell`](#Compiler.cache_cons_cell) | Caches a cons cell when both parts have immutable cache forms. |
@@ -36,6 +33,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.close_child`](#Compiler.close_child) | Retains a child's final diagnostics and closes its owned Lisp session. |
 | [`Compiler.collect_compile_time_definition`](#Compiler.collect_compile_time_definition) | Collects macro definitions or keyword aliases before the full source parse. |
 | [`Compiler.collect_unit_macro`](#Compiler.collect_unit_macro) | Expands the file-scope unit macro at the cursor for collection and reports whether it did. |
+| [`Compiler.complete_here`](#Compiler.complete_here) | Raises `<replcomp>` at the completion marker with the visible symbols, grammar `role`, and available `keywords`. |
 | [`Compiler.copy_source_declaration`](#Compiler.copy_source_declaration) | Carries declaration metadata with one actual symbol contribution. |
 | [`Compiler.define_pattern_binders`](#Compiler.define_pattern_binders) | Declares pattern locals and returns their capture-token/binding pairs. |
 | [`Compiler.emitted_binding_name`](#Compiler.emitted_binding_name) | Returns a binding's selected emitted spelling. |
@@ -79,6 +77,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.share_meta_group`](#Compiler.share_meta_group) | Shares `owner`'s pending `meta` group and the definitions it reads, which belong with the Lisp session that holds the group's stubs. |
 | [`Compiler.skip_collected_script_statement`](#Compiler.skip_collected_script_statement) | Skips a collected script statement, or diagnoses one beside `main`. |
 | [`Compiler.skip_script_statement`](#Compiler.skip_script_statement) | Moves past one run of a script unit's statement tokens, through a `;` or a closing `}` outside every bracket. |
+| [`Compiler.skip_shallow_expression`](#Compiler.skip_shallow_expression) | Skips a balanced shallow expression without consuming its terminator. |
 | [`Compiler.start_collection`](#Compiler.start_collection) | Starts a collection pass with the built-in macros. |
 | [`Compiler.take_unit_state`](#Compiler.take_unit_state) | Takes over `owner`'s macro, object-like `#define`, include, keyword, literal cache, and Lisp state for one segment of a collected file. |
 | [`Compiler.take_word`](#Compiler.take_word) | Consumes the identifier `word` when current and reports whether it matched. |
@@ -146,45 +145,7 @@ process.
 
 Source: `src/compiler/source-files.x:33`
 
-#### reference_guard_exits
-
-`int reference_guard_exits(List arm)`
-
-Returns whether `arm` ends with a return or non-returning raise.
-
-Source: `src/compiler/parsing/reference-facts.x:98`
-
-#### written_definitions
-
-`List written_definitions(List decl)`
-
-`decl` with each function definition in it marked `kernel` as written,
-which the transform strips before it offers the definition only to
-shipped function rules.
-
-Source: `src/compiler/names.x:47`
-
 ### `Compiler`
-
-<a id="Compiler._at_function_arrow"></a>
-#### Compiler._at_function_arrow
-
-`int Compiler._at_function_arrow(Compiler c)`
-
-Reports whether the current two tokens are `=>`.
-
-Source: `src/compiler/parsing/collection.x:151`
-
-<a id="Compiler._skip_shallow_expression"></a>
-#### Compiler._skip_shallow_expression
-
-`void Compiler._skip_shallow_expression(Compiler c, int stop_at_comma)`
-
-Skips a balanced shallow expression without consuming its terminator.
-A top-level comma also terminates the expression when `stop_at_comma` is
-nonzero.
-
-Source: `src/compiler/parsing/collection.x:158`
 
 <a id="Compiler.add_early"></a>
 #### Compiler.add_early
@@ -194,7 +155,7 @@ Source: `src/compiler/parsing/collection.x:158`
 Appends a declaration the kernel generated to the unit's pending
 support. It is implementation, so its definitions are written.
 
-Source: `src/compiler/names.x:34`
+Source: `src/compiler/pending.x:5`
 
 <a id="Compiler.add_init"></a>
 #### Compiler.add_init
@@ -205,7 +166,7 @@ Appends the lowered statement `stmt` to the file initialization area
 `phase`. Bound code that still needs lowering, such as a `String`
 literal, would reach C as is.
 
-Source: `src/compiler/names.x:59`
+Source: `src/compiler/pending.x:18`
 
 <a id="Compiler.add_support"></a>
 #### Compiler.add_support
@@ -215,7 +176,7 @@ Source: `src/compiler/names.x:59`
 Appends the declaration `decl` to the unit's pending support as it is:
 a definition offered to every function rule, or a written one.
 
-Source: `src/compiler/names.x:40`
+Source: `src/compiler/pending.x:11`
 
 <a id="Compiler.add_translation_dependency"></a>
 #### Compiler.add_translation_dependency
@@ -245,7 +206,16 @@ Source: `src/compiler/source-locations.x:29`
 
 Reports whether the parser is at the private REPL completion marker.
 
-Source: `src/compiler/parsing/tokens.x:253`
+Source: `src/compiler/parsing/tokens.x:257`
+
+<a id="Compiler.at_function_arrow"></a>
+#### Compiler.at_function_arrow
+
+`int Compiler.at_function_arrow(Compiler c)`
+
+Reports whether the current two tokens are `=>`.
+
+Source: `src/compiler/parsing/collection.x:151`
 
 <a id="Compiler.at_word"></a>
 #### Compiler.at_word
@@ -256,7 +226,7 @@ Reports whether the current token is the identifier `word`. A contextual
 keyword such as `with` or `as` is an ordinary identifier elsewhere. This
 query does not consume tokens.
 
-Source: `src/compiler/parsing/tokens.x:190`
+Source: `src/compiler/parsing/tokens.x:194`
 
 <a id="Compiler.cache"></a>
 #### Compiler.cache
@@ -346,6 +316,16 @@ invocation, so collection skips it and the full parse reports it.
 
 Source: `src/compiler/declarations/production.x:66`
 
+<a id="Compiler.complete_here"></a>
+#### Compiler.complete_here
+
+`void Compiler.complete_here(Compiler c, Symbol role, List keywords)`
+
+Raises `<replcomp>` at the completion marker with the visible symbols,
+grammar `role`, and available `keywords`. Does nothing elsewhere.
+
+Source: `src/compiler/parsing/tokens.x:261`
+
 <a id="Compiler.copy_source_declaration"></a>
 #### Compiler.copy_source_declaration
 
@@ -373,7 +353,7 @@ Returns a binding's selected emitted spelling.
 
 A binding without an explicit emission rename uses its identity spelling.
 
-Source: `src/compiler/parsing/reference-facts.x:10`
+Source: `src/compiler/binding-facts.x:10`
 
 <a id="Compiler.expect"></a>
 #### Compiler.expect
@@ -385,7 +365,7 @@ Requires and consumes the current token type.
 A mismatch reports a parse diagnostic. An active recovery boundary raises
 `<malformed>`; without one, diagnostic reporting exits.
 
-Source: `src/compiler/parsing/tokens.x:145`
+Source: `src/compiler/parsing/tokens.x:149`
 
 <a id="Compiler.finish_collected_declaration"></a>
 #### Compiler.finish_collected_declaration
@@ -465,7 +445,7 @@ Source: `src/compiler/names.x:21`
 
 Retags the token beginning at `position` as a private completion marker.
 
-Source: `src/compiler/parsing/tokens.x:242`
+Source: `src/compiler/parsing/tokens.x:246`
 
 <a id="Compiler.mark_reference_present"></a>
 #### Compiler.mark_reference_present
@@ -474,7 +454,7 @@ Source: `src/compiler/parsing/tokens.x:242`
 
 Records a nonnull optional parameter for the current lexical path.
 
-Source: `src/compiler/parsing/reference-facts.x:28`
+Source: `src/compiler/binding-facts.x:28`
 
 <a id="Compiler.match_pattern_binders"></a>
 #### Compiler.match_pattern_binders
@@ -551,7 +531,7 @@ Consumes the current token and advances past following trivia.
 This updates the unmatched-brace stack. An unmatched `}` reports a parse
 diagnostic, which raises `<malformed>` under recovery and otherwise exits.
 
-Source: `src/compiler/parsing/tokens.x:159`
+Source: `src/compiler/parsing/tokens.x:163`
 
 <a id="Compiler.optional_reference_test"></a>
 #### Compiler.optional_reference_test
@@ -562,7 +542,7 @@ Returns the optional-reference parameter tested by `condition`, or NULL.
 `truth` is set to whether the condition's true arm proves that the caller
 supplied an object. Only a direct truth or null test proves presence.
 
-Source: `src/compiler/parsing/reference-facts.x:54`
+Source: `src/compiler/binding-facts.x:54`
 
 <a id="Compiler.own_diagnostics"></a>
 #### Compiler.own_diagnostics
@@ -605,7 +585,7 @@ Source: `src/compiler/parsing/tokens.x:92`
 
 Returns the optional references proven present in this lexical path.
 
-Source: `src/compiler/parsing/reference-facts.x:24`
+Source: `src/compiler/binding-facts.x:24`
 
 <a id="Compiler.queue_declaration_effect"></a>
 #### Compiler.queue_declaration_effect
@@ -689,7 +669,7 @@ Raises `<incomplete>` when a required grammar item reaches the supplied
 input boundary. The caller sets a token in the current token stream after
 tokenizing; tokenization clears it. Semantic failures do not call this.
 
-Source: `src/compiler/parsing/tokens.x:136`
+Source: `src/compiler/parsing/tokens.x:140`
 
 <a id="Compiler.restore_reference_presence"></a>
 #### Compiler.restore_reference_presence
@@ -698,7 +678,7 @@ Source: `src/compiler/parsing/tokens.x:136`
 
 Restores the optional-reference facts saved before a lexical path.
 
-Source: `src/compiler/parsing/reference-facts.x:44`
+Source: `src/compiler/binding-facts.x:44`
 
 <a id="Compiler.return_unit_state"></a>
 #### Compiler.return_unit_state
@@ -741,7 +721,7 @@ Marks the optional reference `binding` present after an `if` when the
 arm that runs without it cannot fall through: `no` when the true arm
 proves presence, `yes` otherwise. A missing `no` arm falls through.
 
-Source: `src/compiler/parsing/reference-facts.x:37`
+Source: `src/compiler/binding-facts.x:37`
 
 <a id="Compiler.shallow_parse"></a>
 #### Compiler.shallow_parse
@@ -795,6 +775,17 @@ way leaves its remainder as the next run, and runs are rejoined in order.
 
 Source: `src/compiler/parsing/scripts.x:23`
 
+<a id="Compiler.skip_shallow_expression"></a>
+#### Compiler.skip_shallow_expression
+
+`void Compiler.skip_shallow_expression(Compiler c, int stop_at_comma)`
+
+Skips a balanced shallow expression without consuming its terminator.
+A top-level comma also terminates the expression when `stop_at_comma` is
+nonzero.
+
+Source: `src/compiler/parsing/collection.x:158`
+
 <a id="Compiler.start_collection"></a>
 #### Compiler.start_collection
 
@@ -826,7 +817,7 @@ Source: `src/compiler/lifecycle.x:43`
 Consumes the identifier `word` when current and reports whether it
 matched.
 
-Source: `src/compiler/parsing/tokens.x:195`
+Source: `src/compiler/parsing/tokens.x:199`
 
 <a id="Compiler.test"></a>
 #### Compiler.test
@@ -835,7 +826,7 @@ Source: `src/compiler/parsing/tokens.x:195`
 
 Consumes `type` when current and reports whether it matched.
 
-Source: `src/compiler/parsing/tokens.x:181`
+Source: `src/compiler/parsing/tokens.x:185`
 
 <a id="Compiler.thaw_declaration_syntax"></a>
 #### Compiler.thaw_declaration_syntax
@@ -887,7 +878,7 @@ Source: `src/compiler/source-files.x:81`
 
 Returns the storage of the destination `area`.
 
-Source: `src/compiler/names.x:69`
+Source: `src/compiler/pending.x:28`
 
 <a id="Pending.checkpoint"></a>
 #### Pending.checkpoint
@@ -896,7 +887,7 @@ Source: `src/compiler/names.x:69`
 
 Returns the mark that `restore` returns every destination to.
 
-Source: `src/compiler/names.x:79`
+Source: `src/compiler/pending.x:38`
 
 <a id="Pending.initializes"></a>
 #### Pending.initializes
@@ -905,7 +896,7 @@ Source: `src/compiler/names.x:79`
 
 Whether any file initialization area holds a statement.
 
-Source: `src/compiler/names.x:73`
+Source: `src/compiler/pending.x:32`
 
 <a id="Pending.reset"></a>
 #### Pending.reset
@@ -914,7 +905,7 @@ Source: `src/compiler/names.x:73`
 
 Gives every destination fresh, empty storage.
 
-Source: `src/compiler/names.x:64`
+Source: `src/compiler/pending.x:23`
 
 <a id="Pending.restore"></a>
 #### Pending.restore
@@ -923,7 +914,7 @@ Source: `src/compiler/names.x:64`
 
 Drops the code queued since `mark`.
 
-Source: `src/compiler/names.x:87`
+Source: `src/compiler/pending.x:46`
 
 ### `Symbol`
 
@@ -936,7 +927,7 @@ Returns 1 for a token type that opens a delimited group, -1 for one that
 closes a group, and 0 otherwise. Every opener spelling ends in the `(`,
 `[`, or `{` that its closer matches.
 
-Source: `src/compiler/parsing/tokens.x:210`
+Source: `src/compiler/parsing/tokens.x:214`
 
 ### `Token`
 
@@ -948,7 +939,7 @@ Source: `src/compiler/parsing/tokens.x:210`
 Returns the first non-trivia token after the group `t` opens, or after
 `t` when it opens no group. A group that never closes yields `eof`.
 
-Source: `src/compiler/parsing/tokens.x:234`
+Source: `src/compiler/parsing/tokens.x:238`
 
 <a id="Token.group_close"></a>
 #### Token.group_close
@@ -958,7 +949,7 @@ Source: `src/compiler/parsing/tokens.x:234`
 Returns the token that closes the group `t` opens, `t` itself when it
 opens no group, or the `eof` token when the group never closes.
 
-Source: `src/compiler/parsing/tokens.x:225`
+Source: `src/compiler/parsing/tokens.x:229`
 
 <a id="Token.skip_trivia"></a>
 #### Token.skip_trivia

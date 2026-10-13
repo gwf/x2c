@@ -1153,7 +1153,7 @@ static void _load_compiler_module(void) {
 void Compiler.select_native_modules(List paths) {
   _load_compiler_module();
   Array linked = [];
-  for (struct _Extension *e = extensions; e; e = e.next) {
+  for (struct Extension *e = extensions; e; e = e.next) {
     String key = %"<${String.new(e.name)}>";
     if (!Compiler.native_module_loaded(key))
       Compiler.add_native_module(key, e.targets);
@@ -1324,10 +1324,10 @@ int Compiler.supplies_native_meta(String name) {
    registers from a constructor, before the runtime starts, so the list is
    plain C storage that lasts for the process. */
 
-static struct _Extension {
+static struct Extension {
   const char *name;
   Map (*targets)(void);
-  struct _Extension *next;
+  struct Extension *next;
 } *extensions = NULL;
 
 /** Registers package `name`'s compile-time part, linked into the compiler,
@@ -1335,16 +1335,16 @@ static struct _Extension {
     `x2c build --extension` generates calls it from a constructor.
 */
 void x2c_register_extension(const char *name, Map (*targets)(void)) {
-  struct _Extension *extension = malloc(sizeof *extension);
+  struct Extension *extension = malloc(sizeof *extension);
   if (!extension) abort();
-  *extension = (struct _Extension) { name, targets, extensions };
+  *extension = (struct Extension) { name, targets, extensions };
   extensions = extension;
 }
 
 /** Reports whether package `name`'s compile-time part is linked into the
     compiler, so its import loads no module. */
 int Compiler.links_extension(String name) {
-  for (struct _Extension *e = extensions; e; e = e.next)
+  for (struct Extension *e = extensions; e; e = e.next)
     if (!strcmp(name, e.name)) return 1;
   return 0;
 }

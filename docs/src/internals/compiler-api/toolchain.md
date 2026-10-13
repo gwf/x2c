@@ -12,36 +12,25 @@ Host preprocessing, compilation, archive, and link actions.
 
 | Function | Summary |
 | --- | --- |
-| [`tool_action_new`](#tool_action_new) | Creates a `Scope`-owned action that reports nonzero status by default. |
 | [`tool_capture`](#tool_capture) | Runs the host tool `arguments` without a shell, captures both streams, and returns its shell-style status. |
-| [`toolchain_meta`](#toolchain_meta) | Creates the toolchain that builds meta code with `cc`. |
-| [`toolchain_meta_cc`](#toolchain_meta_cc) | Returns the host C compiler that builds meta code, which runs in this process's host: `explicit`, `X2C_META_CC`, `META_CC`, or `cc`, never the target compiler. |
-| [`toolchain_new`](#toolchain_new) | Creates a `Scope`-owned host toolchain with the tools, native options, and verbose and dry-run modes of `request`, and resolves its native layout. |
 | [`ToolAction.as_program`](#ToolAction.as_program) | Inherits the standard streams and suppresses the failure summary. |
+| [`ToolAction.new`](#ToolAction.new) | Creates a `Scope`-owned action that reports nonzero status by default. |
 | [`ToolAction.run`](#ToolAction.run) | Starts and waits for the action, returning its final status. |
 | [`ToolAction.start`](#ToolAction.start) | Starts the action without a shell and returns a `Scope`-owned execution. |
 | [`ToolRun.ready`](#ToolRun.ready) | Checks whether an execution can be waited without blocking. |
 | [`ToolRun.wait`](#ToolRun.wait) | Waits for an execution, forwards its captured streams, and returns its shell-style status. |
 | [`Toolchain.archive_action`](#Toolchain.archive_action) | Builds but does not start an `ar rcs` action in object-list order. |
 | [`Toolchain.compile_action`](#Toolchain.compile_action) | Builds but does not start one C compilation action. |
+| [`Toolchain.for_meta`](#Toolchain.for_meta) | Creates the toolchain that builds meta code with `cc`. |
 | [`Toolchain.link_action`](#Toolchain.link_action) | Builds but does not start a host-compiler link action. |
+| [`Toolchain.meta_cc`](#Toolchain.meta_cc) | Returns the host C compiler that builds meta code, which runs in this process's host: `explicit`, `X2C_META_CC`, `META_CC`, or `cc`, never the target compiler. |
 | [`Toolchain.module_action`](#Toolchain.module_action) | Builds but does not start the link of a native module. |
+| [`Toolchain.new`](#Toolchain.new) | Creates a `Scope`-owned host toolchain with the tools, native options, and verbose and dry-run modes of `request`, and resolves its native layout. |
 | [`Toolchain.preprocess`](#Toolchain.preprocess) | Runs the configured C preprocessor without a shell. |
 | [`Toolchain.preprocess_action`](#Toolchain.preprocess_action) | Builds the preprocessor action whose output identifies an object. |
 | [`Toolchain.search_directories`](#Toolchain.search_directories) | Returns the directories the C compiler searches for headers and libraries without explicit options, as it reports them, plus the `lib` directory beside each reported `include` directory. |
 
 ### Functions
-
-#### tool_action_new
-
-`ToolAction tool_action_new( Symbol phase, List arguments, int verbose, int dry_run)`
-
-Creates a `Scope`-owned action that reports nonzero status by default.
-The action retains `arguments` without copying them.
-
-**Raises:** `<alloc-fail>` when the action cannot be allocated.
-
-Source: `src/toolchain.x:142`
 
 #### tool_capture
 
@@ -53,41 +42,6 @@ and leaves the reason in `errors`.
 
 Source: `src/toolchain.x:298`
 
-#### toolchain_meta
-
-`Toolchain toolchain_meta(String cc)`
-
-Creates the toolchain that builds meta code with `cc`. It selects the
-archiver as `toolchain_new` does and has no native options.
-
-Source: `src/toolchain.x:81`
-
-#### toolchain_meta_cc
-
-`String toolchain_meta_cc(String explicit)`
-
-Returns the host C compiler that builds meta code, which runs in this
-process's host: `explicit`, `X2C_META_CC`, `META_CC`, or `cc`, never
-the target compiler.
-
-Source: `src/toolchain.x:133`
-
-#### toolchain_new
-
-`Toolchain toolchain_new(CliRequest request)`
-
-Creates a `Scope`-owned host toolchain with the tools, native options,
-and verbose and dry-run modes of `request`, and resolves its native
-layout. Tool
-selection is explicit value, `X2C_CC` or `X2C_AR`, `CC` or `AR`, the
-installed toolchain record, then `cc` or `ar`. Explicit tool `String`s and
-option `List`s are borrowed.
-
-**Raises:** `<alloc-fail>` or `<size-limit>` while constructing the toolchain
-or its canonical layout.
-
-Source: `src/toolchain.x:70`
-
 ### `ToolAction`
 
 <a id="ToolAction.as_program"></a>
@@ -98,6 +52,18 @@ Source: `src/toolchain.x:70`
 Inherits the standard streams and suppresses the failure summary.
 
 Source: `src/toolchain.x:152`
+
+<a id="ToolAction.new"></a>
+#### ToolAction.new
+
+`ToolAction ToolAction.new( Symbol phase, List arguments, int verbose, int dry_run)`
+
+Creates a `Scope`-owned action that reports nonzero status by default.
+The action retains `arguments` without copying them.
+
+**Raises:** `<alloc-fail>` when the action cannot be allocated.
+
+Source: `src/toolchain.x:142`
 
 <a id="ToolAction.run"></a>
 #### ToolAction.run
@@ -181,6 +147,16 @@ configured compiler arguments. The action requests dependency output at
 
 Source: `src/toolchain.x:168`
 
+<a id="Toolchain.for_meta"></a>
+#### Toolchain.for_meta
+
+`Toolchain Toolchain.for_meta(String cc)`
+
+Creates the toolchain that builds meta code with `cc`. It selects the
+archiver as `Toolchain.new` does and has no native options.
+
+Source: `src/toolchain.x:81`
+
 <a id="Toolchain.link_action"></a>
 #### Toolchain.link_action
 
@@ -193,6 +169,17 @@ runtime archive, and `-lm` follow the inputs.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
 Source: `src/toolchain.x:208`
+
+<a id="Toolchain.meta_cc"></a>
+#### Toolchain.meta_cc
+
+`String Toolchain.meta_cc(String explicit)`
+
+Returns the host C compiler that builds meta code, which runs in this
+process's host: `explicit`, `X2C_META_CC`, `META_CC`, or `cc`, never
+the target compiler.
+
+Source: `src/toolchain.x:133`
 
 <a id="Toolchain.module_action"></a>
 #### Toolchain.module_action
@@ -209,6 +196,23 @@ a missing runtime function fails when the compiler loads it.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
 Source: `src/toolchain.x:222`
+
+<a id="Toolchain.new"></a>
+#### Toolchain.new
+
+`Toolchain Toolchain.new(CliRequest request)`
+
+Creates a `Scope`-owned host toolchain with the tools, native options,
+and verbose and dry-run modes of `request`, and resolves its native
+layout. Tool
+selection is explicit value, `X2C_CC` or `X2C_AR`, `CC` or `AR`, the
+installed toolchain record, then `cc` or `ar`. Explicit tool `String`s and
+option `List`s are borrowed.
+
+**Raises:** `<alloc-fail>` or `<size-limit>` while constructing the toolchain
+or its canonical layout.
+
+Source: `src/toolchain.x:70`
 
 <a id="Toolchain.preprocess"></a>
 #### Toolchain.preprocess
@@ -296,7 +300,7 @@ Source: `src/toolchain.x:37`
 `typedef struct Toolchain { String cc, ar, include_dir, runtime_lib, List cpp_args, cc_args, ld_args; int verbose, dry_run, keep_system_includes; } *Toolchain`
 
 Holds resolved host tools, native layout, and borrowed option `List`s.
-The record returned by `toolchain_new` is `Scope`-owned. Its `String`s
+The record returned by `Toolchain.new` is `Scope`-owned. Its `String`s
 follow their owning canonical pools, which may be ancestors; `cpp_args`,
 `cc_args`, and `ld_args` are retained without copying.
 

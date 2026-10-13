@@ -103,7 +103,7 @@ void Compiler.finish_collected_declaration(
     case %(declare ?type (bindings (bind ?binding ((fnmod *) *)))):
       if (type.type().is_static())
         c.sym.mark_static(%(function ${binding_identity_spelling(binding)}));
-  if (c.peek(0) == <"{"> || c.peek(0) == <"%{"> || c._at_function_arrow())
+  if (c.peek(0) == <"{"> || c.peek(0) == <"%{"> || c.at_function_arrow())
     _skip_body(c, declaration, meta, native);
   else if (c.peek(0) == <;>) {
     if (meta) c.record_native_meta_effect(declaration, meta);
@@ -120,10 +120,10 @@ static void _skip_body(
     case %(declare ? (bindings (bind ?binding ?))):
       _note_function_body(c, declaration.type_from_ast(), binding);
   c.record_inline_function(declaration);
-  if (c._at_function_arrow()) {
+  if (c.at_function_arrow()) {
     c.next();
     c.next();
-    c._skip_shallow_expression(0);
+    c.skip_shallow_expression(0);
     c.expect(<;>);
   }
   else _shallow_block(c);
@@ -148,14 +148,14 @@ static void _note_function_body(Compiler c, Type type, List binding) {
 }
 
 /** Reports whether the current two tokens are `=>`. */
-int Compiler._at_function_arrow(Compiler c) =>
+int Compiler.at_function_arrow(Compiler c) =>
   c.peek(0) == <=> && c.peek(1) == <">">;
 
 /** Skips a balanced shallow expression without consuming its terminator.
     A top-level comma also terminates the expression when `stop_at_comma` is
     nonzero.
 */
-void Compiler._skip_shallow_expression(Compiler c, int stop_at_comma) {
+void Compiler.skip_shallow_expression(Compiler c, int stop_at_comma) {
   for (Symbol type = c.peek(0);
        type != <eof> && type != <;> && (!stop_at_comma || type != <,>);
        type = c.peek(0)) {

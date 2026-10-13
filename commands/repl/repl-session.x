@@ -236,7 +236,7 @@ ReplCompletion ReplSession.complete(
        declaration is submitted instead. */
     if (c.meta_form_is_declaration()) return result;
     c.mark_completion(marked.len() - marker.len());
-    c.__complete_here(
+    c.complete_here(
       <submit>,
       %("void" "char" "short" "int" "long" "float" "double"
         "signed" "unsigned" "if" "while" "for" "do" "return"

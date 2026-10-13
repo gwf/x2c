@@ -2856,7 +2856,7 @@ List Compiler_parse_top_level_mode(Compiler c, int skip_body){
   if(Compiler_protocol_form_starts(c)) return Compiler_parse_protocol_declaration(c);
   switch(Compiler_peek(c, 0)){
     case 632323240 : if(c -> signature_only){
-      Compiler__skip_shallow_expression(c, 0);
+      Compiler_skip_shallow_expression(c, 0);
       Compiler_expect(c, 119);
       return NULL;
     }
@@ -3016,7 +3016,7 @@ static List _declaration_form(Compiler c, int skip_body){
     }
 
   }
-  int body = Compiler_peek(c, 0) == 247 || Compiler__at_function_arrow(c);
+  int body = Compiler_peek(c, 0) == 247 || Compiler_at_function_arrow(c);
   Type type = List_type_from_ast(decl);
   if(skip_body ||(c -> public_bodies && body &&(! Type_is_inline(type) || Type_is_static(type) || c -> source_private))){
     Compiler_finish_collected_declaration(c, decl, meta, native);
@@ -3026,7 +3026,7 @@ static List _declaration_form(Compiler c, int skip_body){
   }
   if(native && ! Type_is_function(List_type_from_ast(decl))) Compiler_report_error(c, 33658058, _5, meta, NULL);
   if(Compiler_test(c, 119)) return _declared(c, decl, meta, first);
-  if(Compiler_peek(c, 0) == 247 || Compiler__at_function_arrow(c)) return _defined(c, decl, meta, native, first);
+  if(Compiler_peek(c, 0) == 247 || Compiler_at_function_arrow(c)) return _defined(c, decl, meta, native, first);
   Compiler_require_input(c);
   Symbol unexpected = Compiler_peek(c, 0);
   Compiler_report_error(c, 33658058, _6, c -> token, ({
@@ -3734,7 +3734,7 @@ int Compiler_test_static_assert(Compiler c){
 List Compiler_parse_static_assert(Compiler c){
   if(! _init_guard_) _file_init_();
   if(c -> shallow){
-    Compiler__skip_shallow_expression(c, 0);
+    Compiler_skip_shallow_expression(c, 0);
     Compiler_expect(c, 119);
     return _86;
   }
@@ -4256,7 +4256,7 @@ static List _type_qualifiers(Compiler c){
     x2c_cleanup_push(& _x2c_defer_record_8);
     {
       while(1){
-        Compiler___complete_here(c, 1362954, _type_keywords());
+        Compiler_complete_here(c, 1362954, _type_keywords());
         Symbol symbol = Compiler_peek(c, 0);
         if(Symbol_is_type_qualifier(symbol)){
           Array_push(quals, Symbol_var(symbol));
@@ -4998,7 +4998,7 @@ static List _declarator_init(Compiler c, List type, List context){
   int preserved_self = 0;
   bind = _install_declarator(c, type, context, bind, method, &(preserved_self));
   Compiler_record_source_declaration(c, Var_list_payload(List_cadr(bind)), first, after);
-  int function_arrow = ! c -> in_proto && Compiler__at_function_arrow(c) && Type_is_function(List_type_from_ast(({
+  int function_arrow = ! c -> in_proto && Compiler_at_function_arrow(c) && Type_is_function(List_type_from_ast(({
     Var _x2c_literal_part_41 = List_var(type);  Var _x2c_literal_part_42 = List_var(cons(_36, cons(List_var(bind), NULL)));  cons(_34, cons(_x2c_literal_part_41, cons(_x2c_literal_part_42, NULL)));
   }
   )));
@@ -5017,7 +5017,7 @@ static List _initialized(Compiler c, List type, List bind, Token origin){
     Map_setindex(c -> init_tokens, List_var(binding), Var_box_long(origin - tokens));
   }
   if(c -> shallow && ! c -> capture_unit){
-    Compiler__skip_shallow_expression(c, 1);
+    Compiler_skip_shallow_expression(c, 1);
     return bind;
   }
   Compiler_enter(c, (Ancestor){
@@ -5424,7 +5424,7 @@ List Compiler_parse_parameter_list(Compiler c);
 
 static List _function_parameters(Compiler c){
   Compiler_next(c);
-  Compiler___complete_here(c, 1362954, _type_keywords());
+  Compiler_complete_here(c, 1362954, _type_keywords());
   if(Compiler_peek(c, 0) == 83) Compiler_report_error(c, 33658058, _275, c -> token, NULL);
   SymScope saved = c -> params, parsed;
   int complete = 0;
@@ -5509,7 +5509,7 @@ List Compiler_parse_parameter_list(Compiler c){
     x2c_cleanup_push(& _x2c_defer_record_13);
     {
       while(1){
-        Compiler___complete_here(c, 1362954, _type_keywords());
+        Compiler_complete_here(c, 1362954, _type_keywords());
         List parameter = Compiler_try_parse_macro_slot(c, 33656922);
         if(! List_truth(parameter)) parameter = Compiler_parse_parameter(c);
         Array_push(parameters, List_var(parameter));
@@ -5695,7 +5695,7 @@ List Compiler_parse_function_definition(Compiler c){
   if(! _init_guard_) _file_init_();
   Token tokens = c -> tokenizer -> tokens, start = c -> token;
   List declaration = Compiler_parse_simple_declaration(c);
-  if(Compiler_peek(c, 0) != 247 && ! Compiler__at_function_arrow(c)) Compiler_report_error(c, 33658058, _289, c -> token, NULL);
+  if(Compiler_peek(c, 0) != 247 && ! Compiler_at_function_arrow(c)) Compiler_report_error(c, 33658058, _289, c -> token, NULL);
   int first = start - tokens, body = c -> token - tokens;
   List function = _finish_function(c, declaration, NULL);
   if(! Map_truth(c -> macro_holes)) _definition_source(c, function, start -> line, NULL, cons(int_var(first), cons(int_var(body), NULL)));
@@ -5764,7 +5764,7 @@ void Sym_push_scope(Sym, SymScope);
 List Compiler_bind_callable_body(Compiler c, List syntax, Type return_type);
 List Compiler_prepend_setup(Compiler, List, List);
 static List _function_body(Compiler c, List declaration, String name, List syntax){
-  int expression_body = ! List_truth(syntax) && Compiler__at_function_arrow(c);  if(! List_truth(syntax) && ! expression_body) Compiler_expect(c, 247);  Type old_return = List_type(c -> return_type);  c -> return_type = Type_list(declared_return(declaration));  String old_fn = c -> fn_name;  c -> fn_name = name;  Sym_push_scope(c -> sym, c -> params);  int depth = Block_len(c -> ancestors), placed = Array_len(c -> placements);  Compiler_enter(c, (Ancestor){
+  int expression_body = ! List_truth(syntax) && Compiler_at_function_arrow(c);  if(! List_truth(syntax) && ! expression_body) Compiler_expect(c, 247);  Type old_return = List_type(c -> return_type);  c -> return_type = Type_list(declared_return(declaration));  String old_fn = c -> fn_name;  c -> fn_name = name;  Sym_push_scope(c -> sym, c -> params);  int depth = Block_len(c -> ancestors), placed = Array_len(c -> placements);  Compiler_enter(c, (Ancestor){
     .what = 458361162716, .node = declaration
   }
   );  List body = NULL; {
