@@ -2114,10 +2114,8 @@ body `(seq)`, which `Code.name`, `Code.parameter`, and `Code.body` read. `<unit>
 
 `x2c.place` contributes code beyond the expansion's result and returns `nil`.
 It applies under the expansion's semantic transaction, as the effects of a
-code-value carrier do, and a carrier may hold the same `(place WHERE CODE)`
-effect. A `(new-name TOKEN ROLE)` row before that effect replaces TOKEN in
-CODE with the same fresh local it gives the carrier's code, so placed code
-can declare a local the result uses. `WHERE` is one of these Lists:
+code-value carrier do. Placed code that declares a name the result uses
+takes it from `x2c.binding.fresh`. `WHERE` is one of these Lists:
 
 - `(after-statement)` places code after the initialized declarator that
   `x2c.enclosing` answers, or otherwise after the enclosing block item. A

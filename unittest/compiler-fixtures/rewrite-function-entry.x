@@ -3,10 +3,10 @@
 #include "meta.x"
 
 /* A rule that runs while a function body lowers places code at the entry
-   of that function. The `new-name` row of the carrier it returns gives the
-   placed declaration and the rewritten call one fresh local. A lambda body
-   lowers as the body of its own function, so each call of the lambda
-   enters that function and starts a fresh total. */
+   of that function. `x2c_binding_fresh` gives the placed declaration and
+   the rewritten call one fresh local. A lambda body lowers as the body of
+   its own function, so each call of the lambda enters that function and
+   starts a fresh total. */
 
 static int tally(int step) => step;
 
@@ -22,14 +22,10 @@ meta Code count_tally(Code code) {
         printf("enter %s\n", $name);
         defer printf("leave %s\n", $name);
       });
-    Atom total = Atom.intern("?__tally");
-    Code read = %(expr (int) (ident $total));
-    List zero = %(expr (int) (literal (int) "0"));
-    List declaration =
-      %(declare (int) (bindings (op = (bind $total ()) $zero)));
-    return %(code-value "source" ${$!int{ $read += $step }}
-             ((new-name $total "tally")
-              (place (function-entry) $declaration)));
+    List total = x2c_binding_fresh("tally");
+    x2c_place(%(function-entry), $!{ int $total = 0; });
+    Code read = $!int{ $total };
+    return $!int{ $read += $step };
   }
   return code;
 }

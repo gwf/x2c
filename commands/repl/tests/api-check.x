@@ -101,18 +101,17 @@ static void _transaction_deletion(Compiler c) {
   }
 }
 
-/* A macro value application whose producer effects ran and whose skeleton
-   then fails to bind leaves no early declaration, adapter, generated name,
-   or exception flag behind. */
+/* A macro value application that placed support code and whose carrier's
+   effects ran, and whose skeleton then fails to bind, leaves no early
+   declaration, adapter, generated name, or exception flag behind. */
 static void _carrier_rollback(Compiler c) {
   List key = %(repl-rollback-probe);
   Atom token = Atom.intern("?__rollback_probe");
   Atom placed = Atom.intern("?__rollback_cleanup");
   List carrier = %(code-value "source"
     (seq (stmnt (expr () (ident $token))) $placed)
-    ((new-name $token "rollback")
-     (place (unit-support $key) (declare (int) (bindings (bind $token ()))))
-     (cleanup $placed (seq))));
+    ((new-name $token "rollback") (cleanup $placed (seq))));
+  List support = %(declare (int) (bindings (bind ("rollback_probe") ())));
   int early = c.pending.area(<support>).len(), exception = c.needs_exception;
   String counters = c.names.counters.repr();
   int failed = 0;
@@ -124,6 +123,7 @@ static void _carrier_rollback(Compiler c) {
     try {
       Var value;
       int retained;
+      c.place(%(unit-support $key), support);
       c.take_code_value(carrier, value, retained);
       c.bind_syntax(value, AST_STATEMENT, NULL);
       transaction.commit();

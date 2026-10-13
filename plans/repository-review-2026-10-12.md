@@ -501,6 +501,22 @@ components.
   climb: stage-1 live 3.68 s on Oct 7 and 3.88 s now. The next step, not
   taken here, is to find what each unit now does once at startup, likely
   the replay of the twelve prelude components.
+- Batch 9 (2026-10-12): the carrier `(place WHERE CODE)` row is deleted,
+  completing decision 9; `x2c_place` with `x2c_binding_fresh` is the one
+  way a rule places code. `lambda_cells` names each cell with
+  `x2c_binding_fresh` at its first use, in body order, and returns the
+  rebuilt function itself rather than a carrier. The fixture
+  `rewrite-function-entry` and the REPL rollback check
+  (commands/repl/tests/api-check.x) place their code through
+  `x2c_place` and `Compiler.place`; the language reference names
+  `x2c.binding.fresh` where it described the row. The carrier
+  `new-name` row stays: the try and destructuring components and
+  src/cleanup.x still use it. Generated C is unchanged for the compiler's
+  sources (after a refresh by the new compiler, only the edited
+  `component-lambdas`, `macros`, `linked-meta`, and the record in
+  `collect` differ) and for every fixture but the process id
+  `meta-job-lifetime` records. `make verify` and `make commands-check`
+  passed.
 - Not done: converging the lambda component's `(place ...)` carrier rows on
   `x2c_place` (decision 9). Both forms reach `Compiler.place`; the carrier
   form exists because the placed code names bindings the driver introduces

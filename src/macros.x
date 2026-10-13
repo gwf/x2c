@@ -4954,8 +4954,7 @@ int Compiler.take_code_value(
 }
 
 /* Applies a carrier's effects in order and returns what replaces each
-   effect's token in the code. Placed code sees the tokens of the effects
-   before it. */
+   effect's token in the code. */
 static Map Compiler._code_effects(Compiler c, Var effects) {
   Map replacements = {};
   foreach (List effect, effects)
@@ -4974,8 +4973,6 @@ static Map Compiler._code_effects(Compiler c, Var effects) {
         replacements[token] = placed;
         c.needs_exception = 1;
       }
-      case %(place ?(List where) ?code):
-        c.place(where, _replace_bindings(code, replacements));
       default:
         c.report_error(
           <macro>, "a meta call returned an unknown code effect", c.token,
