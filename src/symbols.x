@@ -669,7 +669,7 @@ static void _local_typedef(Sym s, Type type, List binding) {
    boxing still reaches the converter. */
 static void _local_object(Sym s, List key, List binding, Type type) {
   _mark_automatic(s, binding, type);
-  if (!s.c.macro_holes) _join_locals(s, binding);
+  if (!s.c.macro_holes) s.join_locals(binding);
   Type global_type = NULL;
   s.resolve_global(key, global_type);
   if (_var_converter_owner(key, global_type) &&
@@ -679,9 +679,10 @@ static void _local_object(Sym s, List key, List binding, Type type) {
       s.c.fresh_name("var_converter_shadow"));
 }
 
-/* Records `binding` among the locals of its spelling, under the private
-   spelling `Sym.unshadow_global` gave that spelling, if any. */
-static void _join_locals(Sym s, List binding) {
+/** Records the program local `binding` among the locals of its spelling,
+    under the private spelling `Sym.unshadow_global` gave that spelling, if
+    any. */
+void Sym.join_locals(Sym s, List binding) {
   String spelling = binding_identity_spelling(binding);
   Var alias;
   if (s.binding_facts.try_get(%(unshadowed $spelling), alias))

@@ -491,7 +491,8 @@ static List _resolve_outside(Compiler c, List frame, Var value) {
 }
 
 /* The captured copy is a fresh automatic binding: a reference parameter or
-   a snapshot. Rows join the lambda's order newest first. */
+   a snapshot, which joins the locals of its spelling outside a template.
+   Rows join the lambda's order newest first. */
 static List _record(
   Capture &k, Type captured_type, List expression, int reference) {
   Compiler c = k.c;
@@ -501,6 +502,7 @@ static List _record(
   c.set_fact(%(automatic $captured), 1);
   c.set_fact(%(type $captured), captured_type);
   c.set_fact(%(lambda-depth $captured), k.depth);
+  if (!c.macro_holes) c.sym.join_locals(captured);
   if (reference) c.set_fact(%(reference-param $captured), 1);
   else c.set_fact(%(lambda-snapshot $captured), 1);
   List order = %(lambda-order ${k.scope});
