@@ -55,24 +55,32 @@ meta static Code _lambda_cell_read(Var node, Map cells) {
   return NULL;
 }
 
-/* The declaration of the cell `name` that holds a `type` copied from
-   `value`, or that a later assignment fills when `value` is NULL. The
+/* The declaration of the cell `name` that holds a `type` initialized from
+   `value`, or that a later assignment fills when `value` is NULL. A brace
+   initializer or an array's is copied as a compound literal; any other is
+   assigned to the cell, converting as the ordinary declaration would. The
    function binds the declaration, so the cell is a local as a `defer` sees
    one; its allocation is a typed quotation. */
 meta static Code _lambda_cell(List name, Type type, Code value) {
   Type bytes = %(* void), pointer = cons(<*>, type);
-  Code allocated = NULL;
-  if (!value) allocated = $!($bytes){ Scope_malloc(sizeof($type)) };
-  else {
+  Code allocated = $!($bytes){ Scope_malloc(sizeof($type)) };
+  Code assigned = NULL;
+  if (value && (type.match(%((dim *) *)) ||
+                value.match(%(expr ? (composite ?))))) {
     if (!value.match(%(expr ? (composite ?))))
       value = %(expr $type (composite (commas $value)));
     allocated = $!($bytes){
       Scope_memdup((const void *)&($type)$value, sizeof($type))
     };
   }
+  else if (value) {
+    Code cell = %(expr $pointer (ident $name));
+    assigned = $!(void){ *$cell = $value };
+  }
   (List base, List modifiers) = pointer.parts();
-  return %(declare $base
-           (bindings (op = (bind $name $modifiers) $allocated)));
+  Code declaration = %(declare $base
+    (bindings (op = (bind $name $modifiers) $allocated)));
+  return assigned ? %(seq $declaration (stmnt $assigned)) : declaration;
 }
 
 /* The cell declaration of `binding`, initialized from `value`, when `cells`
