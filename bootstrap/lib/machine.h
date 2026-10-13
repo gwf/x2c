@@ -183,7 +183,7 @@ typedef struct MatchMachine{
 }
 MatchMachine;
 
-static List Var_list(Var);
+static List Var_list_payload(Var);
 
 static int List_truth(List);
 
@@ -198,7 +198,7 @@ int List_equal(List, List);
 static inline int MachineSlot_prefix_equal(MachineSlot * slot, List input, int length, MachineStats * stats){
   if(stats) stats -> range_comparisons ++;
   List expected, end = NULL;
-  if(slot -> kind == MACHINE_SLOT_VALUE) expected = Var_list(slot -> value);
+  if(slot -> kind == MACHINE_SLOT_VALUE) expected = Var_list_payload(slot -> value);
   else{
     if(slot -> span.length != length) return 0;
     expected = slot -> span.begin;
@@ -214,7 +214,7 @@ static inline int MachineSlot_prefix_equal(MachineSlot * slot, List input, int l
 
 static inline int MachineSlot_final_equal(MachineSlot * slot, List input, MachineStats * stats){
   if(slot -> kind == MACHINE_SLOT_VALUE){
-    List expected = Var_list(slot -> value);
+    List expected = Var_list_payload(slot -> value);
     if(List_equal(expected, input)) return 1;
     while(List_truth(expected) && List_truth(input)){
       if(! Var_equal(List_car(expected), List_car(input))) return 0;

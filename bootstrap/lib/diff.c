@@ -225,7 +225,7 @@ void * Scope_calloc(size_t, size_t);
 
 int List_try_next(List, List *, Var *);
 
-static List Var_list(Var);
+static List Var_list_payload(Var);
 
 Var List_getindex(List, int);
 
@@ -259,7 +259,7 @@ static int Script_myers(Script * s){
         List _x2c_macro_cursor_0 = _x2c_macro_object_0;
         Var _x2c_macro_cursor_output_0;
         while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-          step = Var_list(_x2c_macro_cursor_output_0);
+          step = Var_list_payload(_x2c_macro_cursor_output_0);
           {
             List _x2c_destructure_0 = step;
             Symbol kind = Var_symbol(List_getindex(_x2c_destructure_0, 0));
@@ -415,6 +415,8 @@ String Diff_unified(String old, String new, String old_name, String new_name){
 }
 
 static Var List_car(List);
+
+static List Var_list(Var);
 
 static Symbol _kind(Array edits, int at){
   return Var_symbol(List_car(Var_list(Array_getindex(edits, at))));

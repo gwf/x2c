@@ -45,14 +45,14 @@ int main(void){
     }
 
   }
-  List entry = Var_list(List_car(Error_since(mark)));
-  List detail = Var_list(List_assoc(entry, Symbol_var(280234584)));
-  List location = Var_list(List_assoc(entry, Symbol_var(857050729436)));
+  List entry = Var_list_payload(List_car(Error_since(mark)));
+  List detail = Var_list_payload(List_assoc(entry, Symbol_var(280234584)));
+  List location = Var_list_payload(List_assoc(entry, Symbol_var(857050729436)));
   int empty_mark = Error_mark();
   raise_empty();
-  List empty_entry = Var_list(List_car(Error_since(empty_mark)));
-  List empty_detail = Var_list(List_assoc(empty_entry, Symbol_var(280234584)));
-  List empty_location = Var_list(List_assoc(empty_entry, Symbol_var(857050729436)));
+  List empty_entry = Var_list_payload(List_car(Error_since(empty_mark)));
+  List empty_detail = Var_list_payload(List_assoc(empty_entry, Symbol_var(280234584)));
+  List empty_location = Var_list_payload(List_assoc(empty_entry, Symbol_var(857050729436)));
   printf("%s %ld %s %s:%ld:%s %ld:%s\n", Symbol_str(Var_symbol(List_assoc(entry, Symbol_var(227594)))), Var_integer(List_cadr(Var_list(List_getindex(detail, 0)))), Var_string(List_cadr(Var_list(List_getindex(detail, 1)))), Var_string(List_assoc(location, Symbol_var(412426))), Var_integer(List_assoc(location, Symbol_var(805770))), Var_string(List_assoc(location, Symbol_var(458361162716))), List_len(empty_detail), Var_string(List_assoc(empty_location, Symbol_var(458361162716))));
   return 0;
 }

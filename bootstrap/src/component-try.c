@@ -1085,7 +1085,7 @@ List try_catch_patterns(List patterns, List items){
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
     while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      pattern = Var_list(_x2c_macro_cursor_output_0);
+      pattern = Var_list_payload(_x2c_macro_cursor_output_0);
       {
         Array_push(prepared, List_var(cons(_1, cons(_2, cons(List_var(cons(_3, cons(List_var(cons(_4, cons(List_var(cons(_5, cons(_8, cons(List_var(({
           Var _x2c_literal_part_2 = List_var(cons(_5, cons(_8, cons(List_var(({
@@ -1125,7 +1125,7 @@ List try_catch_site(List frame, List clause){
           Var _x2c_match_value_1 = arms;
           {
             String state = Var_as_string(_x2c_match_value_0);
-            List arms = Var_list(_x2c_match_value_1);
+            List arms = Var_list_payload(_x2c_match_value_1);
             {
               int count = List_len(arms), filtered = List_len(patterns);
               String fallback = filtered < count ? int_str(filtered) : _630;
@@ -1196,9 +1196,9 @@ static Var _try_finalizer_label(Var value, List * at){
   Var found = Var_null();
   while(! Var_truth(found) && Array_len(pending)){
     Var current = Array_take_last(pending);
-    List here = Var_list(Array_take_last(around));
+    List here = Var_list_payload(Array_take_last(around));
     if(! Var_is_row(current, 9, 7, 4) || Var_is_nil(current)) continue;
-    List node = Var_list(current);
+    List node = Var_list_payload(current);
     {
       List _x2c_match_expr = node; List _x2c_match_cursor;
       switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){

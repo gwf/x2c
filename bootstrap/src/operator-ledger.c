@@ -214,7 +214,7 @@ static List _operator_cases(int key, int value, int derived){
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
     while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      row = Var_list(_x2c_macro_cursor_output_0);
+      row = Var_list_payload(_x2c_macro_cursor_output_0);
       {
         if(! Var_truth(List_getindex(row, key)) || ! Var_truth(List_getindex(row, value))) continue;
         if(derived >= 0 && ! x2c_var_equal(List_getindex(row, 4), int_var(derived))) continue;

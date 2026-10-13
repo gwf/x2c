@@ -429,7 +429,7 @@ static void Helper_use(Helper * h, List manifest){
     );
     Var _x2c_macro_item_1;
     while(Iter_try_next(_x2c_macro_iterator_1, &(_x2c_macro_item_1))){
-      row = Var_list(_x2c_macro_item_1);
+      row = Var_list_payload(_x2c_macro_item_1);
       Map_setindex(failures, List_car(row), List_cadr(row));
     }
 
@@ -1381,7 +1381,7 @@ static List _current(String directory){
     x2c_exception_leave(& _x2c_exception_frame_2);
   }
   if(! Var_is_row(datum, 9, 7, 4)) return NULL;
-  List manifest = Var_list(datum);
+  List manifest = Var_list_payload(datum);
   if(Var_truth(List_assoc(manifest, Symbol_var(415094903142))) || String_len((Var_as_string(List_assoc(manifest, Symbol_var(12971715722)))))) return NULL;
   {
     List row;
@@ -1391,7 +1391,7 @@ static List _current(String directory){
     );
     Var _x2c_macro_item_20;
     while(Iter_try_next(_x2c_macro_iterator_20, &(_x2c_macro_item_20))){
-      row = Var_list(_x2c_macro_item_20);
+      row = Var_list_payload(_x2c_macro_item_20);
       {
         List _x2c_destructure_0 = row;
         String file = Var_as_string(List_getindex(_x2c_destructure_0, 0));

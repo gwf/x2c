@@ -910,7 +910,7 @@ static void _resolve_dependencies(Project p){
           x2c_exception_mark_handled(& _x2c_exception_frame_0);
           if(_x2c_macro_selected_0 == 0){
             List volatile detail;
-            detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
+            detail = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_0, 0));
             host_error(detail);
           }
 
@@ -1007,7 +1007,7 @@ static List _locked_row(List rows, ProjectDependency entry){
     List _x2c_macro_cursor_3 = _x2c_macro_object_3;
     Var _x2c_macro_cursor_output_3;
     while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
-      row = Var_list(_x2c_macro_cursor_output_3);
+      row = Var_list_payload(_x2c_macro_cursor_output_3);
       if(x2c_var_equal(List_car(row), String_var(entry -> name)) && x2c_var_equal(List_cadr(row), String_var(entry -> version))) found = row;
     }
 
@@ -1025,7 +1025,7 @@ static void _write_lock(String path, List rows){
     List _x2c_macro_cursor_4 = _x2c_macro_object_4;
     Var _x2c_macro_cursor_output_4;
     while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
-      row = Var_list(_x2c_macro_cursor_output_4);
+      row = Var_list_payload(_x2c_macro_cursor_output_4);
       text =({
         Var _x2c_literal_part_2 = String_var(text);  Var _x2c_literal_part_3 = String_var(String_join(_62, row));  String_join(NULL, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, cons(String_var(_63), NULL))));
       }
@@ -1055,7 +1055,7 @@ static void _write_lock(String path, List rows){
         x2c_exception_mark_handled(& _x2c_exception_frame_2);
         if(_x2c_macro_selected_2 == 0){
           List volatile detail;
-          detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_2, 0));
+          detail = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_2, 0));
           host_error(detail);
         }
 
@@ -1423,7 +1423,7 @@ int new_command(CliRequest request){
         x2c_exception_mark_handled(& _x2c_exception_frame_3);
         if(_x2c_macro_selected_3 == 0){
           List volatile detail;
-          detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_3, 0));
+          detail = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_3, 0));
           host_error(detail);
         }
 

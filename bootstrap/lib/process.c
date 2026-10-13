@@ -410,7 +410,7 @@ String Job_repr(Job value){
 
 int List_try_next(List, List *, Var *);
 
-static List Var_list(Var);
+static List Var_list_payload(Var);
 
 static void Job__start(Job j){
   j -> started = 1;
@@ -455,7 +455,7 @@ static void Job__start(Job j){
             List _x2c_macro_cursor_0 = _x2c_macro_object_0;
             Var _x2c_macro_cursor_output_0;
             while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-              stage = Var_list(_x2c_macro_cursor_output_0);
+              stage = Var_list_payload(_x2c_macro_cursor_output_0);
               stdio.input = Job__stage(j, index ++, stage, stdio);
             }
 
@@ -988,13 +988,13 @@ Job Job_options(Job job, Map options){
 
 String Var_as_string(Var);
 
-static Map Var_map(Var);
+static Map Var_map_payload(Var);
 
 static void JobLaunch_set(JobLaunch * l, Symbol name, Var value){
   switch(name){
     case 8804 :(* l).dir = Var_as_string(value);
     break;
-    case 11180 :(* l).environment = _environment(Var_map(value));
+    case 11180 :(* l).environment = _environment(Var_map_payload(value));
     break;
     case 19826024 :(* l).input = Var_as_string(value);
     (* l).has_input = 1;
@@ -1062,7 +1062,7 @@ Job Job_check(Job job){
   int status = Job_status(job);
   if(! status) return job;
   List stages = job -> stages;
-  List command = Var_list(List_truth(List_cdr(stages)) ? List_var(stages) : List_car(stages));
+  List command = Var_list_payload(List_truth(List_cdr(stages)) ? List_var(stages) : List_car(stages));
   String output = job -> output_text, errors = job -> errors_text;
   int captured = job -> launch.capture_output;
   int logged = job -> launch.capture_errors;

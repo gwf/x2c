@@ -1337,7 +1337,7 @@ static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 int Var_is_nil(Var);
 
-static List Var_list(Var);
+static List Var_list_payload(Var);
 
 static Var List_car(List);
 
@@ -1364,7 +1364,7 @@ static Var Lisp__eval(Lisp lisp, Var expr, LispEnv * env){
     return value;
   }
   if(! Var_is_row(expr, 9, 7, 4) || Var_is_nil(expr)) return expr;
-  List form = Var_list(expr);
+  List form = Var_list_payload(expr);
   Var callable = Lisp__eval(lisp, List_car(form), env);
   return Lisp__apply(lisp, callable, List_cdr(form), env);
 }
@@ -1662,7 +1662,7 @@ static List _cond_clause(Var clause){
     }
 
   }
-  List pair = Var_list(clause);
+  List pair = Var_list_payload(clause);
   if(List_len(pair) != 2){
     int actual = List_len(pair);
     {
@@ -1710,7 +1710,7 @@ static Var Lisp__special_bind(Lisp lisp, List args, LispEnv * env){
 
   }
   String native_name = Var_as_string(name);
-  List native_signature = Var_list(signature);
+  List native_signature = Var_list_payload(signature);
   Func fn = _native_target(native_name);
   if(! fn){
     static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/lisp.x",.function = "Lisp__special_bind",.line = 534};
@@ -1780,7 +1780,7 @@ List Var_cons(Var, List);
 
 static Var Lisp__qq(Lisp l, Var expr, LispEnv * env, int depth){
   if(! Var_is_row(expr, 9, 7, 4) || Var_is_nil(expr)) return expr;
-  List form = Var_list(expr);
+  List form = Var_list_payload(expr);
   Var head = List_car(form);
   if(x2c_var_equal(head, lsym_quasiquote)) return List_var(Var_cons(head, Lisp__qq_elements(l, List_cdr(form), env, depth + 1)));
   if(! x2c_var_equal(head, lsym_unquote) && ! x2c_var_equal(head, lsym_splicing)) return List_var(Lisp__qq_elements(l, form, env, depth));
@@ -1876,7 +1876,7 @@ static int _is_splice(Var expr){
 }
 
 static List Lisp__splice(Lisp lisp, Var expr, LispEnv * env){
-  List form = Var_list(expr);
+  List form = Var_list_payload(expr);
   if(List_len(form) != 2){
     Var _x2c_literal_part_28 = String_var(String_join(NULL, cons(String_var(String_new("quasiquote")), NULL)));
     {
@@ -1897,7 +1897,7 @@ static List Lisp__splice(Lisp lisp, Var expr, LispEnv * env){
     }
 
   }
-  return Var_list(value);
+  return Var_list_payload(value);
 }
 
 void Scope_push(Scope *);
@@ -1928,7 +1928,7 @@ static Var Lisp__make_lambda(Lisp lisp, List args, LispEnv * env, int macro){
     x2c_cleanup_push(& _x2c_defer_record_2);
     {
       List _x2c_destructure_4 = args;
-      List params = Var_list(List_getindex(_x2c_destructure_4, 0));
+      List params = Var_list_payload(List_getindex(_x2c_destructure_4, 0));
       Var body = List_getindex(_x2c_destructure_4, 1);
       * lambda =(struct Lambda){
         .params = params, .body = body, .macro = macro
@@ -2023,7 +2023,7 @@ static void FreeNames_form(FreeNames * f, Var form, List bound, int depth){
     return;
   }
   if(! Var_is_row(form, 9, 7, 4)) return;
-  List items = Var_list(form);
+  List items = Var_list_payload(form);
   if(! List_truth(items)) return;
   if(depth < 0) FreeNames_all(&((* f)), items, bound, depth);
   else if(depth > 0) FreeNames_quoted(&((* f)), items, bound, depth);
@@ -2077,7 +2077,7 @@ static int _quote_depth(Var head, int depth){
 static List _with_params(List bound, List rest){
   if(List_truth(rest) && Var_is_row(List_car(rest), 9, 7, 4)){
     Var name;
-    List _x2c_macro_object_7 = Var_list(List_car(rest));
+    List _x2c_macro_object_7 = Var_list_payload(List_car(rest));
     List _x2c_macro_cursor_7 = _x2c_macro_object_7;
     Var _x2c_macro_cursor_output_7;
     while(List_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_7))){
@@ -2429,7 +2429,7 @@ static Var Lisp__run_source(Lisp lisp, Var body, LispEnv * env, Scope * frame){
 static Var Lisp__eval_tail(Lisp lisp, Var expr, LispEnv * env){
   for(; ; ){
     if(! Var_is_row(expr, 9, 7, 4) || Var_is_nil(expr)) return Lisp__eval(lisp, expr, env);
-    List form = Var_list(expr);
+    List form = Var_list_payload(expr);
     Var callable = Lisp__eval(lisp, List_car(form), env);
     List raw = List_cdr(form);
     if(Var_is_row(callable, 9, 7, 1) && Lisp__special_id(lisp, Var_pointer(callable)) == LISP_COND){
@@ -2674,7 +2674,7 @@ static List _list_argument(Var values){
     }
 
   }
-  return Var_list(values);
+  return Var_list_payload(values);
 }
 
 _Noreturn static void _not_procedure(Var callable){
@@ -4203,65 +4203,65 @@ static void _x2c_defer_cleanup_14(void * _x2c_defer_opaque_14){
 }
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 806120));
+  List a0 = Var_list_payload(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 806120));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 1, 45156);
   return List_var(_lisp_List_map(a0, a1));
   ;
 }
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 0, 806120));
+  List a0 = Var_list_payload(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 0, 806120));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 1, 45156);
   return List_var(_lisp_List_filter(a0, a1));
   ;
 }
 
 static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_2, _x2c_func_argv_2, 0, 806120));
+  List a0 = Var_list_payload(x2c_func_value_argument(_x2c_func_binding_2, _x2c_func_argv_2, 0, 806120));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_2, _x2c_func_argv_2, 1, 45156);
   return int_var(_lisp_List_any(a0, a1));
   ;
 }
 
 static Var _x2c_func_adapt_3(Func _x2c_func_binding_3, const FuncArg * _x2c_func_argv_3){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_3, _x2c_func_argv_3, 0, 806120));
+  List a0 = Var_list_payload(x2c_func_value_argument(_x2c_func_binding_3, _x2c_func_argv_3, 0, 806120));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_3, _x2c_func_argv_3, 1, 45156);
   return int_var(_lisp_List_all(a0, a1));
   ;
 }
 
 static Var _x2c_func_adapt_4(Func _x2c_func_binding_4, const FuncArg * _x2c_func_argv_4){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_4, _x2c_func_argv_4, 0, 806120));
-  List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_4, _x2c_func_argv_4, 1, 806120));
+  List a0 = Var_list_payload(x2c_func_value_argument(_x2c_func_binding_4, _x2c_func_argv_4, 0, 806120));
+  List a1 = Var_list_payload(x2c_func_value_argument(_x2c_func_binding_4, _x2c_func_argv_4, 1, 806120));
   Var a2 = x2c_func_value_argument(_x2c_func_binding_4, _x2c_func_argv_4, 2, 45156);
   return List_var(_lisp_List_map2(a0, a1, a2));
   ;
 }
 
 static Var _x2c_func_adapt_5(Func _x2c_func_binding_5, const FuncArg * _x2c_func_argv_5){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_5, _x2c_func_argv_5, 0, 806120));
+  List a0 = Var_list_payload(x2c_func_value_argument(_x2c_func_binding_5, _x2c_func_argv_5, 0, 806120));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_5, _x2c_func_argv_5, 1, 45156);
   return List_var(_lisp_List_sort_by(a0, a1));
   ;
 }
 
 static Var _x2c_func_adapt_6(Func _x2c_func_binding_6, const FuncArg * _x2c_func_argv_6){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_6, _x2c_func_argv_6, 0, 806120));
+  List a0 = Var_list_payload(x2c_func_value_argument(_x2c_func_binding_6, _x2c_func_argv_6, 0, 806120));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_6, _x2c_func_argv_6, 1, 45156);
   return List_var(_lisp_List_sort_with(a0, a1));
   ;
 }
 
 static Var _x2c_func_adapt_7(Func _x2c_func_binding_7, const FuncArg * _x2c_func_argv_7){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_7, _x2c_func_argv_7, 0, 806120));
-  List a1 = Var_list(x2c_func_value_argument(_x2c_func_binding_7, _x2c_func_argv_7, 1, 806120));
+  List a0 = Var_list_payload(x2c_func_value_argument(_x2c_func_binding_7, _x2c_func_argv_7, 0, 806120));
+  List a1 = Var_list_payload(x2c_func_value_argument(_x2c_func_binding_7, _x2c_func_argv_7, 1, 806120));
   Var a2 = x2c_func_value_argument(_x2c_func_binding_7, _x2c_func_argv_7, 2, 45156);
   return List_var(_lisp_List_zip_with(a0, a1, a2));
   ;
 }
 
 static Var _x2c_func_adapt_8(Func _x2c_func_binding_8, const FuncArg * _x2c_func_argv_8){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_8, _x2c_func_argv_8, 0, 806120));
+  List a0 = Var_list_payload(x2c_func_value_argument(_x2c_func_binding_8, _x2c_func_argv_8, 0, 806120));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_8, _x2c_func_argv_8, 1, 45156);
   Var a2 = x2c_func_value_argument(_x2c_func_binding_8, _x2c_func_argv_8, 2, 45156);
   return _lisp_List_foldl(a0, a1, a2);
@@ -4269,47 +4269,47 @@ static Var _x2c_func_adapt_8(Func _x2c_func_binding_8, const FuncArg * _x2c_func
 }
 
 static Var _x2c_func_adapt_9(Func _x2c_func_binding_9, const FuncArg * _x2c_func_argv_9){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_9, _x2c_func_argv_9, 0, 806120));
+  List a0 = Var_list_payload(x2c_func_value_argument(_x2c_func_binding_9, _x2c_func_argv_9, 0, 806120));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_9, _x2c_func_argv_9, 1, 45156);
   return _lisp_List_find(a0, a1);
   ;
 }
 
-static Array Var_array(Var);
+static Array Var_array_payload(Var);
 
 static Var Array_var(Array);
 
 static Var _x2c_func_adapt_10(Func _x2c_func_binding_10, const FuncArg * _x2c_func_argv_10){
-  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_10, _x2c_func_argv_10, 0, 3313778));
+  Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_func_binding_10, _x2c_func_argv_10, 0, 3313778));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_10, _x2c_func_argv_10, 1, 45156);
   return Array_var(_lisp_Array_map(a0, a1));
   ;
 }
 
 static Var _x2c_func_adapt_11(Func _x2c_func_binding_11, const FuncArg * _x2c_func_argv_11){
-  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_11, _x2c_func_argv_11, 0, 3313778));
-  Array a1 = Var_array(x2c_func_value_argument(_x2c_func_binding_11, _x2c_func_argv_11, 1, 3313778));
+  Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_func_binding_11, _x2c_func_argv_11, 0, 3313778));
+  Array a1 = Var_array_payload(x2c_func_value_argument(_x2c_func_binding_11, _x2c_func_argv_11, 1, 3313778));
   Var a2 = x2c_func_value_argument(_x2c_func_binding_11, _x2c_func_argv_11, 2, 45156);
   return Array_var(_lisp_Array_map2(a0, a1, a2));
   ;
 }
 
 static Var _x2c_func_adapt_12(Func _x2c_func_binding_12, const FuncArg * _x2c_func_argv_12){
-  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_12, _x2c_func_argv_12, 0, 3313778));
+  Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_func_binding_12, _x2c_func_argv_12, 0, 3313778));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_12, _x2c_func_argv_12, 1, 45156);
   return Array_var(_lisp_Array_sort_by(a0, a1));
   ;
 }
 
 static Var _x2c_func_adapt_13(Func _x2c_func_binding_13, const FuncArg * _x2c_func_argv_13){
-  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_13, _x2c_func_argv_13, 0, 3313778));
+  Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_func_binding_13, _x2c_func_argv_13, 0, 3313778));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_13, _x2c_func_argv_13, 1, 45156);
   return Array_var(_lisp_Array_sort_with(a0, a1));
   ;
 }
 
 static Var _x2c_func_adapt_14(Func _x2c_func_binding_14, const FuncArg * _x2c_func_argv_14){
-  Array a0 = Var_array(x2c_func_value_argument(_x2c_func_binding_14, _x2c_func_argv_14, 0, 3313778));
+  Array a0 = Var_array_payload(x2c_func_value_argument(_x2c_func_binding_14, _x2c_func_argv_14, 0, 3313778));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_14, _x2c_func_argv_14, 1, 45156);
   Var a2 = x2c_func_value_argument(_x2c_func_binding_14, _x2c_func_argv_14, 2, 45156);
   return _lisp_Array_foldl(a0, a1, a2);
@@ -4330,8 +4330,10 @@ static Var _x2c_func_adapt_16(Func _x2c_func_binding_16, const FuncArg * _x2c_fu
   ;
 }
 
+static Iter Var_iter_payload(Var);
+
 static Var _x2c_func_adapt_17(Func _x2c_func_binding_17, const FuncArg * _x2c_func_argv_17){
-  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_17, _x2c_func_argv_17, 0, 631140));
+  Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_func_binding_17, _x2c_func_argv_17, 0, 631140));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_17, _x2c_func_argv_17, 1, 45156);
   Var a2 = x2c_func_value_argument(_x2c_func_binding_17, _x2c_func_argv_17, 2, 45156);
   Var a3 = x2c_func_value_argument(_x2c_func_binding_17, _x2c_func_argv_17, 3, 45156);
@@ -4340,64 +4342,64 @@ static Var _x2c_func_adapt_17(Func _x2c_func_binding_17, const FuncArg * _x2c_fu
 }
 
 static Var _x2c_func_adapt_18(Func _x2c_func_binding_18, const FuncArg * _x2c_func_argv_18){
-  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_18, _x2c_func_argv_18, 0, 631140));
+  Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_func_binding_18, _x2c_func_argv_18, 0, 631140));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_18, _x2c_func_argv_18, 1, 45156);
-  Iter a2 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_18, _x2c_func_argv_18, 2, 631140));
+  Iter a2 = Var_iter_payload(x2c_func_value_argument(_x2c_func_binding_18, _x2c_func_argv_18, 2, 631140));
   return Iter_var(_lisp_Iter_map_into(a0, a1, a2));
   ;
 }
 
 static Var _x2c_func_adapt_19(Func _x2c_func_binding_19, const FuncArg * _x2c_func_argv_19){
-  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_19, _x2c_func_argv_19, 0, 631140));
+  Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_func_binding_19, _x2c_func_argv_19, 0, 631140));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_19, _x2c_func_argv_19, 1, 45156);
-  Iter a2 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_19, _x2c_func_argv_19, 2, 631140));
+  Iter a2 = Var_iter_payload(x2c_func_value_argument(_x2c_func_binding_19, _x2c_func_argv_19, 2, 631140));
   return Iter_var(_lisp_Iter_filter_into(a0, a1, a2));
   ;
 }
 
 static Var _x2c_func_adapt_20(Func _x2c_func_binding_20, const FuncArg * _x2c_func_argv_20){
-  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_20, _x2c_func_argv_20, 0, 631140));
-  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_20, _x2c_func_argv_20, 1, 631140));
+  Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_func_binding_20, _x2c_func_argv_20, 0, 631140));
+  Iter a1 = Var_iter_payload(x2c_func_value_argument(_x2c_func_binding_20, _x2c_func_argv_20, 1, 631140));
   Var a2 = x2c_func_value_argument(_x2c_func_binding_20, _x2c_func_argv_20, 2, 45156);
-  Iter a3 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_20, _x2c_func_argv_20, 3, 631140));
+  Iter a3 = Var_iter_payload(x2c_func_value_argument(_x2c_func_binding_20, _x2c_func_argv_20, 3, 631140));
   return Iter_var(_lisp_Iter_zip_with_into(a0, a1, a2, a3));
   ;
 }
 
 static Var _x2c_func_adapt_21(Func _x2c_func_binding_21, const FuncArg * _x2c_func_argv_21){
-  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_21, _x2c_func_argv_21, 0, 631140));
-  Iter a1 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_21, _x2c_func_argv_21, 1, 631140));
+  Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_func_binding_21, _x2c_func_argv_21, 0, 631140));
+  Iter a1 = Var_iter_payload(x2c_func_value_argument(_x2c_func_binding_21, _x2c_func_argv_21, 1, 631140));
   Var a2 = x2c_func_value_argument(_x2c_func_binding_21, _x2c_func_argv_21, 2, 45156);
-  Iter a3 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_21, _x2c_func_argv_21, 3, 631140));
+  Iter a3 = Var_iter_payload(x2c_func_value_argument(_x2c_func_binding_21, _x2c_func_argv_21, 3, 631140));
   return Iter_var(_lisp_Iter_map2_into(a0, a1, a2, a3));
   ;
 }
 
 static Var _x2c_func_adapt_22(Func _x2c_func_binding_22, const FuncArg * _x2c_func_argv_22){
-  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_22, _x2c_func_argv_22, 0, 631140));
+  Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_func_binding_22, _x2c_func_argv_22, 0, 631140));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_22, _x2c_func_argv_22, 1, 45156);
   Var a2 = x2c_func_value_argument(_x2c_func_binding_22, _x2c_func_argv_22, 2, 45156);
-  Iter a3 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_22, _x2c_func_argv_22, 3, 631140));
+  Iter a3 = Var_iter_payload(x2c_func_value_argument(_x2c_func_binding_22, _x2c_func_argv_22, 3, 631140));
   return Iter_var(_lisp_Iter_scan_into(a0, a1, a2, a3));
   ;
 }
 
 static Var _x2c_func_adapt_23(Func _x2c_func_binding_23, const FuncArg * _x2c_func_argv_23){
-  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_23, _x2c_func_argv_23, 0, 631140));
+  Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_func_binding_23, _x2c_func_argv_23, 0, 631140));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_23, _x2c_func_argv_23, 1, 45156);
   return int_var(_lisp_Iter_any(a0, a1));
   ;
 }
 
 static Var _x2c_func_adapt_24(Func _x2c_func_binding_24, const FuncArg * _x2c_func_argv_24){
-  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_24, _x2c_func_argv_24, 0, 631140));
+  Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_func_binding_24, _x2c_func_argv_24, 0, 631140));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_24, _x2c_func_argv_24, 1, 45156);
   return int_var(_lisp_Iter_all(a0, a1));
   ;
 }
 
 static Var _x2c_func_adapt_25(Func _x2c_func_binding_25, const FuncArg * _x2c_func_argv_25){
-  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_25, _x2c_func_argv_25, 0, 631140));
+  Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_func_binding_25, _x2c_func_argv_25, 0, 631140));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_25, _x2c_func_argv_25, 1, 45156);
   Var a2 = x2c_func_value_argument(_x2c_func_binding_25, _x2c_func_argv_25, 2, 45156);
   return _lisp_Iter_foldl(a0, a1, a2);
@@ -4405,35 +4407,35 @@ static Var _x2c_func_adapt_25(Func _x2c_func_binding_25, const FuncArg * _x2c_fu
 }
 
 static Var _x2c_func_adapt_26(Func _x2c_func_binding_26, const FuncArg * _x2c_func_argv_26){
-  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_26, _x2c_func_argv_26, 0, 631140));
+  Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_func_binding_26, _x2c_func_argv_26, 0, 631140));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_26, _x2c_func_argv_26, 1, 45156);
   return _lisp_Iter_find(a0, a1);
   ;
 }
 
 static Var _x2c_func_adapt_27(Func _x2c_func_binding_27, const FuncArg * _x2c_func_argv_27){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_27, _x2c_func_argv_27, 0, 806120));
+  List a0 = Var_list_payload(x2c_func_value_argument(_x2c_func_binding_27, _x2c_func_argv_27, 0, 806120));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_27, _x2c_func_argv_27, 1, 45156);
   return List_var(_lisp_Lisp_List_filter(a0, a1));
   ;
 }
 
 static Var _x2c_func_adapt_28(Func _x2c_func_binding_28, const FuncArg * _x2c_func_argv_28){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_28, _x2c_func_argv_28, 0, 806120));
+  List a0 = Var_list_payload(x2c_func_value_argument(_x2c_func_binding_28, _x2c_func_argv_28, 0, 806120));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_28, _x2c_func_argv_28, 1, 45156);
   return int_var(_lisp_Lisp_List_any(a0, a1));
   ;
 }
 
 static Var _x2c_func_adapt_29(Func _x2c_func_binding_29, const FuncArg * _x2c_func_argv_29){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_29, _x2c_func_argv_29, 0, 806120));
+  List a0 = Var_list_payload(x2c_func_value_argument(_x2c_func_binding_29, _x2c_func_argv_29, 0, 806120));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_29, _x2c_func_argv_29, 1, 45156);
   return int_var(_lisp_Lisp_List_all(a0, a1));
   ;
 }
 
 static Var _x2c_func_adapt_30(Func _x2c_func_binding_30, const FuncArg * _x2c_func_argv_30){
-  List a0 = Var_list(x2c_func_value_argument(_x2c_func_binding_30, _x2c_func_argv_30, 0, 806120));
+  List a0 = Var_list_payload(x2c_func_value_argument(_x2c_func_binding_30, _x2c_func_argv_30, 0, 806120));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_30, _x2c_func_argv_30, 1, 45156);
   return _lisp_Lisp_List_find(a0, a1);
   ;
@@ -4447,28 +4449,28 @@ static Var _x2c_func_adapt_31(Func _x2c_func_binding_31, const FuncArg * _x2c_fu
 }
 
 static Var _x2c_func_adapt_32(Func _x2c_func_binding_32, const FuncArg * _x2c_func_argv_32){
-  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_32, _x2c_func_argv_32, 0, 631140));
+  Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_func_binding_32, _x2c_func_argv_32, 0, 631140));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_32, _x2c_func_argv_32, 1, 45156);
   return Iter_var(_lisp_Lisp_Iter_filter(a0, a1));
   ;
 }
 
 static Var _x2c_func_adapt_33(Func _x2c_func_binding_33, const FuncArg * _x2c_func_argv_33){
-  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_33, _x2c_func_argv_33, 0, 631140));
+  Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_func_binding_33, _x2c_func_argv_33, 0, 631140));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_33, _x2c_func_argv_33, 1, 45156);
   return int_var(_lisp_Lisp_Iter_any(a0, a1));
   ;
 }
 
 static Var _x2c_func_adapt_34(Func _x2c_func_binding_34, const FuncArg * _x2c_func_argv_34){
-  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_34, _x2c_func_argv_34, 0, 631140));
+  Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_func_binding_34, _x2c_func_argv_34, 0, 631140));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_34, _x2c_func_argv_34, 1, 45156);
   return int_var(_lisp_Lisp_Iter_all(a0, a1));
   ;
 }
 
 static Var _x2c_func_adapt_35(Func _x2c_func_binding_35, const FuncArg * _x2c_func_argv_35){
-  Iter a0 = Var_pointer(x2c_func_value_argument(_x2c_func_binding_35, _x2c_func_argv_35, 0, 631140));
+  Iter a0 = Var_iter_payload(x2c_func_value_argument(_x2c_func_binding_35, _x2c_func_argv_35, 0, 631140));
   Var a1 = x2c_func_value_argument(_x2c_func_binding_35, _x2c_func_argv_35, 1, 45156);
   return _lisp_Lisp_Iter_find(a0, a1);
   ;

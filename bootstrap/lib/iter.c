@@ -246,7 +246,7 @@ Iter Iter_map(Iter iter, Func func, Iter dest){
 }
 
 static int _map_next(Iter iter, Var * out){
-  Iter source = Var_pointer(iter -> obj);
+  Iter source = Var_iter_payload(iter -> obj);
   if(! Iter_try_next(source, &(* out))) return 0;
   if(iter -> aux) * out = Func_apply_value(iter -> aux, * out);
   return 1;
@@ -260,7 +260,7 @@ Iter Iter_filter(Iter iter, Func func, Iter dest){
 }
 
 static int _filter_next(Iter iter, Var * out){
-  Iter source = Var_pointer(iter -> obj);
+  Iter source = Var_iter_payload(iter -> obj);
   Func func = iter -> aux;
   if(! Iter_truth(source) || ! func) return 0;
   {
@@ -291,7 +291,7 @@ Iter Iter_scan(Iter iter, Var seed, Func fn, Iter dest){
 }
 
 static int _scan_next(Iter iter, Var * out){
-  Iter source = Var_pointer(iter -> obj);
+  Iter source = Var_iter_payload(iter -> obj);
   if(! Iter_truth(source) || ! iter -> aux) return 0;
   Var item;
   if(! Iter_try_next(source, &(item))) return 0;
@@ -305,7 +305,7 @@ Iter Iter_accumulate(Iter iter, Var initial, Iter dest){
 }
 
 static int _accumulate_next(Iter iter, Var * out){
-  Iter source = Var_pointer(iter -> obj);
+  Iter source = Var_iter_payload(iter -> obj);
   Var item;
   if(! Iter_try_next(source, &(item))) return 0;
   iter -> state = Var_binary(iter -> state, 56, item);
@@ -327,7 +327,7 @@ Iter Iter_zip_with(Iter left, Iter right, Func fn, Iter dest){
 }
 
 static int _zip_with_next(Iter iter, Var * out){
-  Iter left_iter = Var_pointer(iter -> obj), right_iter = Var_pointer(iter -> state);
+  Iter left_iter = Var_iter_payload(iter -> obj), right_iter = Var_iter_payload(iter -> state);
   if(! Iter_truth(left_iter) || ! Iter_truth(right_iter)) return 0;
   Var left, right;
   if(! Iter_try_next(left_iter, &(left)) || ! Iter_try_next(right_iter, &(right))) return 0;
@@ -347,7 +347,7 @@ Iter Iter_enumerate(Iter iter, int start, Iter dest){
 }
 
 static int _enumerate_next(Iter iter, Var * out){
-  Iter source = Var_pointer(iter -> obj);
+  Iter source = Var_iter_payload(iter -> obj);
   Var value;
   if(! Iter_try_next(source, &(value))) return 0;
   int index = Var_int(Var_convert(iter -> state, 3453797));
@@ -362,9 +362,9 @@ Iter Iter_chain(Iter first, Iter second, Iter dest){
 }
 
 static int _chain_next(Iter iter, Var * out){
-  Iter current = Var_pointer(iter -> obj);
+  Iter current = Var_iter_payload(iter -> obj);
   if(Iter_truth(current) && Iter_try_next(current, &(* out))) return 1;
-  current = Var_pointer(iter -> state);
+  current = Var_iter_payload(iter -> state);
   iter -> obj = Iter_var(current);
   iter -> state =((void) 0, Void);
   return Iter_truth(current) && Iter_try_next(current, &(* out));
@@ -376,7 +376,7 @@ Iter Iter_head(Iter iter, int count, Iter dest){
 }
 
 static int _head_next(Iter iter, Var * out){
-  Iter source = Var_pointer(iter -> obj);
+  Iter source = Var_iter_payload(iter -> obj);
   int remaining = Var_int(Var_convert(iter -> state, 3453797));
   if(! Iter_truth(source) || remaining <= 0) return 0;
   if(! Iter_try_next(source, &(* out))) return 0;
@@ -405,8 +405,8 @@ Iter Iter_unique(Iter iter, Iter dest){
 }
 
 static int _unique_next(Iter iter, Var * out){
-  Iter source = Var_pointer(iter -> obj);
-  Map seen = Var_map(iter -> state);
+  Iter source = Var_iter_payload(iter -> obj);
+  Map seen = Var_map_payload(iter -> state);
   if(! Iter_truth(source)) return 0;
   while(1){
     Var value;
@@ -487,7 +487,7 @@ static void _unzip_buffer_push(UnzipShared * shared, Var pair){
     }
 
   }
-  List list = Var_list(pair);
+  List list = Var_list_payload(pair);
   if(! List_truth(list) || ! List_truth(List_cdr(list)) || List_truth(List_cdr(List_cdr(list)))){
     Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL)));
     Var _x2c_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL)));

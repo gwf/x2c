@@ -348,7 +348,7 @@ static void _record(const X2CErrorSite * site, Symbol code, List detail){
     .region = _region_new()
   }
   ;
-  detail = Var_list(ErrorRegion__copy_value(&(record.region), List_var(detail)));
+  detail = Var_list_payload(ErrorRegion__copy_value(&(record.region), List_var(detail)));
   record.entry = ErrorRegion__entry(&(record.region), site, code, detail);
   Block_push(state -> stack, & record);
   state -> floor_only --;
@@ -442,7 +442,7 @@ static Var ErrorRegion__copy_value(ErrorRegion * region, Var value){
   if(Var_is_wide(value)) return ErrorRegion__copy_wide(region, value);
   if(Var_is_integer(value) || Var_is_floating(value)) return value;
   if(Var_is_row(value, 11, 7, 1) || Var_is(value, 826970)) return ErrorRegion__copy_text(region, value);
-  if(Var_is_row(value, 9, 7, 4)) return List_var(ErrorRegion__copy_list(region, Var_list(value)));
+  if(Var_is_row(value, 9, 7, 4)) return List_var(ErrorRegion__copy_list(region, Var_list_payload(value)));
   _floor(4477479911782, region ? "error detail contains an identity-bearing value" : "error snapshot contains an identity-bearing value");
 }
 
@@ -486,7 +486,7 @@ static Var _snapshot_text(Var value, String source){
 
 static List ErrorRegion__copy_list(ErrorRegion * region, List source){
   Var head = ErrorRegion__copy_value(region, List_car(source));
-  List tail = Var_list(ErrorRegion__copy_value(region, List_var(List_cdr(source))));
+  List tail = Var_list_payload(ErrorRegion__copy_value(region, List_var(List_cdr(source))));
   if(region) return ErrorRegion__cons(region, head, tail);
   List owned = cons(head, tail);
   List_try_own(owned);
@@ -617,7 +617,7 @@ static Symbol ErrorHandler__catch_match(ErrorHandler h){
   if(Error_count() <= h -> watermark) return 285842436424;
   ErrorRecord * record = _record_at(Error_count() - 1);
   Symbol code = Var_symbol(List_cadr(Var_list(List_car(record -> entry))));
-  List detail = Var_list(List_cadr(Var_list(List_cadr(record -> entry))));
+  List detail = Var_list_payload(List_cadr(Var_list(List_cadr(record -> entry))));
   ErrorThreadState state = _thread();
   state -> floor_only ++;
   List projection = ErrorRegion__cons(&(record -> region), Symbol_var(code), detail);
@@ -951,7 +951,7 @@ static void ErrorCatchSite__bind(ErrorCatchSite * site, Var * patterns){
         return;
       }
       int retainable = 1;
-      for(int i = 0;  retainable && i < site -> arm_count;  i ++) if(i != site -> default_arm) retainable = List_try_own(Var_list(patterns[i])) && x2c_match_pattern_retainable(patterns[i]);
+      for(int i = 0;  retainable && i < site -> arm_count;  i ++) if(i != site -> default_arm) retainable = List_try_own(Var_list_payload(patterns[i])) && x2c_match_pattern_retainable(patterns[i]);
       if(retainable) for(int i = 0;  i < site -> arm_count;  i ++){
         if(i == site -> default_arm) continue;
         MatchPlan plan = x2c_match_site_prepare(& site -> arms[i], patterns[i]);

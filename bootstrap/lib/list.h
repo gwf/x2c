@@ -56,10 +56,10 @@ static inline List List_cdr(List lst){
   return cdr(lst);
 }
 
-static List Var_list(Var);
+static List Var_list_payload(Var);
 
 static inline Var List_caar(List lst){
-  return car(Var_list(car(lst)));
+  return car(Var_list_payload(car(lst)));
 }
 
 static inline Var List_cadr(List lst){
@@ -79,19 +79,19 @@ Var Var_car(Var var);
 List Var_cdr(Var var);
 
 static inline Var Var_caar(Var var){
-  return car(Var_list(car(Var_list(var))));
+  return car(Var_list_payload(car(Var_list_payload(var))));
 }
 
 static inline Var Var_cadr(Var var){
-  return car(cdr(Var_list(var)));
+  return car(cdr(Var_list_payload(var)));
 }
 
 static inline List Var_cddr(Var var){
-  return cdr(cdr(Var_list(var)));
+  return cdr(cdr(Var_list_payload(var)));
 }
 
 static inline Var Var_caddr(Var var){
-  return car(cdr(cdr(Var_list(var))));
+  return car(cdr(cdr(Var_list_payload(var))));
 }
 
 int List_try_next(List lst, List * cursor, Var * out);

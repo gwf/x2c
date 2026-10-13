@@ -285,7 +285,7 @@ void * Scope_calloc(size_t, size_t);
 
 int List_try_next(List, List *, Var *);
 
-static List Var_list(Var);
+static List Var_list_payload(Var);
 
 int Map_try_get(Map, Var, Var *);
 
@@ -320,7 +320,7 @@ static Spec _read_spec(List spec){
         List _x2c_macro_cursor_0 = _x2c_macro_object_0;
         Var _x2c_macro_cursor_output_0;
         while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-          row = Var_list(_x2c_macro_cursor_output_0);
+          row = Var_list_payload(_x2c_macro_cursor_output_0);
           {
             Option * option = & result.options[position];
             Option__read_row(&((* option)), row, result.index, position);
@@ -369,7 +369,7 @@ static void Option__read_row(Option * o, List row, Map index, int position){
       word = _x2c_macro_cursor_output_1;
       {
         if(Var_is_row(word, 9, 7, 4)){
-          Option__read_property(&((* o)), Var_list(word));
+          Option__read_property(&((* o)), Var_list_payload(word));
           continue;
         }
         String text = Var_str(word);

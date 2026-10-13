@@ -338,7 +338,7 @@ static Symbol _capture_errors(List errors, Var data){
   if(! List_truth(errors)) return 285842436424;
   Var newest = List_last(errors);
   if(! Var_is_row(newest, 9, 7, 4)) return 285842436424;
-  List entry = Var_list(newest);
+  List entry = Var_list_payload(newest);
   Var code = List_assoc(entry, Symbol_var(227594));
   if(! Var_is(code, 1328354264)) return 285842436424;
   if(Error_policy_get(Var_symbol(code)) != 2260136) return 285842436424;

@@ -231,7 +231,7 @@ static List Func__parameter(Func fn, unsigned index){
   if(! fn || index >= fn -> nparams) return NULL;
   List params = fn -> params;
   while(List_truth(params) && index --) params = List_cdr(params);
-  return List_truth(params) && Var_is_row(List_car(params), 9, 7, 4) ? Var_list(List_car(params)) : NULL;
+  return List_truth(params) && Var_is_row(List_car(params), 9, 7, 4) ? Var_list_payload(List_car(params)) : NULL;
 }
 
 static int _is_reference(List parameter){
@@ -281,7 +281,7 @@ Var x2c_func_value_argument(Func fn, const FuncArg * argv, unsigned i, Symbol wa
             Var volatile code;
             code = x2c_error_catch_capture(_x2c_error_handler_0, 0);
             List volatile cause;
-            cause = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 1));
+            cause = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_0, 1));
             {
               List lower = cons(code, cause);
               {
@@ -448,7 +448,7 @@ static Func _new(FuncAdapter adapter, List signature, int rest, const void * con
     switch(0){
         default: ;
        static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_31), &_x2c_match_capture)) { Var _x2c_match_value_0 = _x2c_match_values[0]; {
-        Var captured;  captured = _x2c_match_value_0;  params = Var_list(captured);
+        Var captured;  captured = _x2c_match_value_0;  params = Var_list_payload(captured);
       }
        break; }
     }

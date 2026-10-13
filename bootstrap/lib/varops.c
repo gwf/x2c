@@ -411,10 +411,10 @@ static List _update_row(List id){
     List _x2c_match_expr = id; List _x2c_match_cursor, _x2c_match_cursor1;
     switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
         case 9224497936761996324ULL: ;
-       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497963177709656ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_0 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list_payload(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497963177709656ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_0 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var key;
         key = _x2c_match_value_0;
-        return Var_list(List_assoc(_update_rows(), key));
+        return Var_list_payload(List_assoc(_update_rows(), key));
       }
        break; } } default: break;
     }
@@ -436,13 +436,13 @@ static String _update_decoder(List id){
 }
 
 static List _update_zero(List id){
-  return Var_list(List_getindex(_update_row(id), 3));
+  return Var_list_payload(List_getindex(_update_row(id), 3));
 }
 
 Var Var_car(Var);
 
 static List _update_cast_in(List id){
-  return Var_list(Var_car(List_getindex(_update_row(id), 4)));
+  return Var_list_payload(Var_car(List_getindex(_update_row(id), 4)));
 }
 
 static Var List_car(List);
@@ -450,7 +450,7 @@ static Var List_car(List);
 List Var_cdr(Var);
 
 static List _update_cast_out(List id){
-  return Var_list(List_car(Var_cdr(List_getindex(_update_row(id), 4))));
+  return Var_list_payload(List_car(Var_cdr(List_getindex(_update_row(id), 4))));
 }
 
 #include "error.h"

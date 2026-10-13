@@ -217,7 +217,7 @@ static unsigned _map_key_hash(Var * _x2c_macro_key_0){
 
 static int _map_key_equal(Var * _x2c_macro_a_0, Var * _x2c_macro_b_0){
   if(Var_same(_x2c_macro_a_0[0], _x2c_macro_b_0[0])) return 1;
-  List _x2c_macro_alist_0 = Var_list(_x2c_macro_a_0[0]), _x2c_macro_blist_0 = Var_list(_x2c_macro_b_0[0]);
+  List _x2c_macro_alist_0 = Var_list_payload(_x2c_macro_a_0[0]), _x2c_macro_blist_0 = Var_list_payload(_x2c_macro_b_0[0]);
   if(List_truth(_x2c_macro_alist_0) && List_truth(_x2c_macro_blist_0)) return List_equal(_x2c_macro_alist_0, _x2c_macro_blist_0);
   String _x2c_macro_astr_0 = Var_string_payload(_x2c_macro_a_0[0]), _x2c_macro_bstr_0 = Var_string_payload(_x2c_macro_b_0[0]);
   if(String_truth(_x2c_macro_astr_0) && String_truth(_x2c_macro_bstr_0)) return String_equal(_x2c_macro_astr_0, _x2c_macro_bstr_0);

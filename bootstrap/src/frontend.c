@@ -243,7 +243,7 @@ int Frontend_open_reporting(Frontend f, String filename, ParsedUnit * unit){
     Var _x2c_macro_cursor_output_0;
     while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       entry = _x2c_macro_cursor_output_0;
-      Compiler_print_diagnostic((* unit).compiler, Var_list(entry));
+      Compiler_print_diagnostic((* unit).compiler, Var_list_payload(entry));
     }
 
   }
@@ -633,7 +633,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      row = Var_list(_x2c_macro_cursor_output_1);
+      row = Var_list_payload(_x2c_macro_cursor_output_1);
       {
         if(List_len(row) == 1) Map_del(symbols, List_car(row));
         else Map_setindex(symbols, List_car(row), List_cadr(row));
@@ -659,7 +659,7 @@ static List _unit_private_rows(Compiler c, Map globs){
       owner = _x2c_macro_cursor_output_3;
       {
         Var _x2c_match_var = key; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);
-        List _x2c_match_expr = Var_list(_x2c_match_var); List _x2c_match_cursor;
+        List _x2c_match_expr = Var_list_payload(_x2c_match_var); List _x2c_match_cursor;
         switch(0){
             default: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _21 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
             Var name;
@@ -872,7 +872,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
         Var _x2c_macro_cursor_output_6;
         while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_6))){
           entry = _x2c_macro_cursor_output_6;
-          Compiler_print_diagnostic(c, Var_list(entry));
+          Compiler_print_diagnostic(c, Var_list_payload(entry));
         }
 
       }

@@ -276,14 +276,14 @@ void MatchPlan_free(MatchPlan plan){
 
 static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
-static List Var_list(Var);
+static List Var_list_payload(Var);
 
 static int List_truth(List);
 
 static int MatchLower__compile_value(MatchLower * l, Var pattern){
   if(Var_is_atom_binder(pattern)) return MatchLower__compile_binder(&((* l)), pattern);
   if(! Var_is_row(pattern, 9, 7, 4)) return MatchLower__compile_literal(&((* l)), pattern);
-  List list = Var_list(pattern);
+  List list = Var_list_payload(pattern);
   if(List_truth(list) && Var_is_match_op(List_car(list))) return MatchLower__compile_guard(&((* l)), List_car(list), List_cdr(list));
   if(List_truth(list) && _is_list_literal(list)) return MatchLower__compile_literal_list(&((* l)), list);
   return MatchLower__compile_segment(&((* l)), list);
@@ -375,7 +375,7 @@ static int _is_list_literal(List pat){
       head = _x2c_macro_cursor_output_1;
       {
         if(Var_is_binder(head) || Var_is_match_op(head)) return 0;
-        if(Var_is_row(head, 9, 7, 4) && ! _is_list_literal(Var_list(head))) return 0;
+        if(Var_is_row(head, 9, 7, 4) && ! _is_list_literal(Var_list_payload(head))) return 0;
       }
 
     }
@@ -638,8 +638,8 @@ static int MatchLower__segment_prefix(MatchLower * l, MatchSegment * s, List pat
     Var part = List_car(at);
     (* s).prefix.elements[n] = part;
     if(! Var_is_row(part, 9, 7, 4))(* s).prefix.entries[n ++] = - 1;
-    else if(_inline_descend_ok(Var_list(part), 0)){
-      if(! MatchLower__compile_nested(&((* l)), Var_list(part), 1, &((* s).nested))) return 0;
+    else if(_inline_descend_ok(Var_list_payload(part), 0)){
+      if(! MatchLower__compile_nested(&((* l)), Var_list_payload(part), 1, &((* s).nested))) return 0;
       (* s).prefix.entries[n ++] = - 2;
     }
     else{
@@ -679,7 +679,7 @@ static int MatchLower__compile_nested(MatchLower * l, List pattern, int reg, Mat
       part = _x2c_macro_cursor_output_4;
       {
         if(! Var_is_row(part, 9, 7, 4)) continue;
-        List child = Var_list(part);
+        List child = Var_list_payload(part);
         if(_inline_descend_ok(child, reg)){
           if(! MatchLower__compile_nested(&((* l)), child, reg + 1, &((* nested)))) return 0;
           continue;
@@ -727,7 +727,7 @@ static int _pattern_contains_binder(List pat, Var binder){
       {
         if(x2c_var_equal(part, binder)) return 1;
         if(Var_is_row(part, 9, 7, 4)){
-          List nested = Var_list(part);
+          List nested = Var_list_payload(part);
           if(List_truth(nested) && ! x2c_var_equal(List_car(nested), Symbol_var(2050325770)) && _pattern_contains_binder(nested, binder)) return 1;
         }
 
@@ -758,7 +758,7 @@ static int _find_fixed_anchor(List pat, Var * anchor, int * offset){
       part = _x2c_macro_cursor_output_6;
       {
         if(Var_is_list_binder(part)) return 0;
-        if((! Var_is_row(part, 9, 7, 4) && ! Var_is_binder(part)) ||(Var_is_row(part, 9, 7, 4) && _is_list_literal(Var_list(part)) && _bits_unique(part))){
+        if((! Var_is_row(part, 9, 7, 4) && ! Var_is_binder(part)) ||(Var_is_row(part, 9, 7, 4) && _is_list_literal(Var_list_payload(part)) && _bits_unique(part))){
           (* anchor) = part;
           (* offset) = width;
           return 1;
@@ -780,7 +780,7 @@ static int MatchLower__emit_prefix(MatchLower * l, MatchSegment * s){
 static int MatchLower__emit_part(MatchLower * l, MatchSegment * s, int i){
   int entry =(* s).prefix.entries[i];
   if(entry == - 1) return MatchLower__emit_head_leaf(&((* l)), (* s).prefix.elements[i], 0);
-  if(entry == - 2) return MatchLower__emit_descend(&((* l)), Var_list((* s).prefix.elements[i]), 0, &((* s).nested));
+  if(entry == - 2) return MatchLower__emit_descend(&((* l)), Var_list_payload((* s).prefix.elements[i]), 0, &((* s).nested));
   return MatchLower__emit_framed(&((* l)), entry, 0);
 }
 
@@ -818,7 +818,7 @@ static int MatchLower__emit_inline_segment(MatchLower * l, List pattern, int reg
           if(! MatchLower__emit_head_leaf(&((* l)), part, reg)) return 0;
           continue;
         }
-        List child = Var_list(part);
+        List child = Var_list_payload(part);
         if(_inline_descend_ok(child, reg)){
           if(! MatchLower__emit_descend(&((* l)), child, reg, &((* nested)))) return 0;
           continue;
@@ -954,7 +954,7 @@ static int _keys(Var pattern, int mode, MatchKeys * keys){
     pattern, ((void) 0, Void), 0, 0
   }
   );
-  List list = Var_list(pattern);
+  List list = Var_list_payload(pattern);
   if(! List_truth(list)) return 0;
   Var op = List_car(list);
   List args = List_cdr(list);

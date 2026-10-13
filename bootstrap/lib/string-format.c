@@ -424,7 +424,7 @@ static Buffer Format_string(Format * f, const char * text, Var arg){
           Var volatile code;
           code = x2c_error_catch_capture(_x2c_error_handler_0, 0);
           List volatile details;
-          details = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 1));
+          details = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_0, 1));
           Format_nested(&((* f)), _17, code, details);
         }
 
@@ -472,7 +472,7 @@ static Var Format_number(Format * f, Var arg, Symbol target){
           Var volatile code;
           code = x2c_error_catch_capture(_x2c_error_handler_1, 0);
           List volatile details;
-          details = Var_list(x2c_error_catch_capture(_x2c_error_handler_1, 1));
+          details = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_1, 1));
           Format_nested(&((* f)), _18, code, details);
         }
 

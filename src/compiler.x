@@ -2617,7 +2617,7 @@ List Compiler.pattern_binder_declarations(
           row.car().is_list_binder() ? "list" : "value"}_$index"}));
     index++;
     if (handle && row.car().is_list_binder())
-      value = %(expr $type (call "Var_list" (args $value)));
+      value = %(expr $type (call "Var_list_payload" (args $value)));
     declarations.push(%(declare $type (bindings (bind ${row.cadr()} ()))));
     declarations.push(
       %(stmnt (expr $type (op = (expr $type (ident ${row.cadr()})) $value))));

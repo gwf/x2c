@@ -1207,7 +1207,8 @@ static int _match_nested(
       step = _match_element(b, part, cell, seen, testing, braces);
       if (step == 1) {
         _match_and(b, testing);
-        b.printf("(%s = Var_list(%s), 1)", _match_cursor(levels + 1), cell);
+        b.printf(
+          "(%s = Var_list_payload(%s), 1)", _match_cursor(levels + 1), cell);
         rests.push(rest);
         paths.push(path);
         if (levels >= deepest) deepest = levels + 1;
@@ -1218,7 +1219,7 @@ static int _match_nested(
       if (step == 2) {
         _match_and(b, testing);
         b.printf("Var_equal(%s, ", cell);
-        for (int level = levels; level; level--) b.write("Var_list(");
+        for (int level = levels; level; level--) b.write("Var_list_payload(");
         _match_place(b, out, pattern);
         if (path) b.write(path);
         b.write("->car)");
@@ -1264,8 +1265,8 @@ static void _match_captures(Buffer b, List binders) {
     int list = binder.is_list_binder();
     b.printf(
       " %s _x2c_match_%s_%d = %s_x2c_match_values[%d]%s;",
-      list ? "List" : "Var", list ? "list" : "value", index, list ? "Var_list(" : "",
-      index, list ? ")" : "");
+      list ? "List" : "Var", list ? "list" : "value", index,
+      list ? "Var_list_payload(" : "", index, list ? ")" : "");
     index++;
   }
 }
@@ -1389,7 +1390,7 @@ static List _match_dynamic_read(Code subject, String locals) {
   String tested = "; int _x2c_match_none = !Var_is(_x2c_match_var, %lu);"
     .printf((unsigned long) list);
   return %("Var _x2c_match_var =" $subject $tested
-           "List _x2c_match_expr = Var_list(_x2c_match_var)" $locals);
+           "List _x2c_match_expr = Var_list_payload(_x2c_match_var)" $locals);
 }
 
 /** Lowers the bound match `node` to C text around its subject, patterns,

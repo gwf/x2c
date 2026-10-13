@@ -652,7 +652,7 @@ static List Compiler._to_list(Compiler c, List expr) =>
 
 static List Compiler._spliced(Compiler c, List expr) {
   if (c.sym.is_var_type(expr.cadr()))
-    return %(expr ("List") (call "Var_list" (args $expr)));
+    return %(expr ("List") (call "Var_list_payload" (args $expr)));
   return c._to_list(expr);
 }
 

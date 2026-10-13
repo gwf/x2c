@@ -267,7 +267,7 @@ static void ArmScan_directive(ArmScan * s, Token token, size_t i){
   )));
   else if(kind == 172060880 && Array_len((* s).stack)){
     Var id, arm, state;
-    List _x2c_destructure_0 = Var_list(Array_getindex((* s).stack, - 1));
+    List _x2c_destructure_0 = Var_list_payload(Array_getindex((* s).stack, - 1));
     id = List_getindex(_x2c_destructure_0, 0);
     arm = List_getindex(_x2c_destructure_0, 1);
     state = List_getindex(_x2c_destructure_0, 2);
@@ -290,7 +290,7 @@ static int _hidden_group(Array stack){
     int _x2c_macro_cursor_0 = 0;
     Var _x2c_macro_cursor_output_0;
     while(Array_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      group = Var_list(_x2c_macro_cursor_output_0);
+      group = Var_list_payload(_x2c_macro_cursor_output_0);
       if(x2c_var_equal(List_caddr(group), int_var(2))) return 1;
     }
 
@@ -388,7 +388,7 @@ void Compiler_note_preprocessor_macros(Compiler c, List directives){
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      directive = Var_list(_x2c_macro_cursor_output_1);
+      directive = Var_list_payload(_x2c_macro_cursor_output_1);
       Compiler_note_object_macro(c, Var_as_string(List_cadr(directive)));
     }
 
@@ -478,7 +478,7 @@ static int Compiler__is_annotation(Compiler c, String word){
 
 static int _prefix_rank(Var v){
   if(! Var_is_row(v, 9, 7, 4)) return 0;
-  if(List_truth(({ static MatchCaptureSite _x2c_match_site_0;  x2c_match_site_match(& _x2c_match_site_0, Var_list(v), List_var(_38)); }))) return 4;
+  if(List_truth(({ static MatchCaptureSite _x2c_match_site_0;  x2c_match_site_match(& _x2c_match_site_0, Var_list_payload(v), List_var(_38)); }))) return 4;
   {
     Symbol word;
     Iter _x2c_macro_iterator_3 = Var_iter(v, &(struct Iter){
@@ -501,7 +501,7 @@ List preproc_track_arms(List arms, String text){
   if(kind == 1016156) return cons(List_var(cons(List_var(cons(_32, cons(String_var(text), NULL))), NULL)), arms);
   if(! List_truth(arms)) return arms;
   if(kind == 172060880) return cons(List_var(({
-    List _x2c_literal_part_5 = Var_list(List_car(arms));  Var _x2c_literal_part_6 = List_var(cons(_32, cons(String_var(text), NULL)));  List_append(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL));
+    List _x2c_literal_part_5 = Var_list_payload(List_car(arms));  Var _x2c_literal_part_6 = List_var(cons(_32, cons(String_var(text), NULL)));  List_append(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL));
   }
   )), List_cdr(arms));
   return kind == 7109834 ? List_cdr(arms) : arms;
@@ -516,14 +516,14 @@ List preproc_within_arms(List arms, List items){
     List _x2c_macro_cursor_5 = _x2c_macro_object_5;
     Var _x2c_macro_cursor_output_3;
     while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_3))){
-      group = Var_list(_x2c_macro_cursor_output_3);
+      group = Var_list_payload(_x2c_macro_cursor_output_3);
       {
         List directive;
         List _x2c_macro_object_4 = group;
         List _x2c_macro_cursor_4 = _x2c_macro_object_4;
         Var _x2c_macro_cursor_output_2;
         while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_2))){
-          directive = Var_list(_x2c_macro_cursor_output_2);
+          directive = Var_list_payload(_x2c_macro_cursor_output_2);
           Array_push(out, List_var(directive));
         }
 

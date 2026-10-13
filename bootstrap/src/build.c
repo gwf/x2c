@@ -687,7 +687,7 @@ static void Build__make_work_dirs(Build b){
         x2c_exception_mark_handled(& _x2c_exception_frame_0);
         if(_x2c_macro_selected_0 == 0){
           List volatile detail;
-          detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
+          detail = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_0, 0));
           host_error(detail);
         }
 
@@ -980,7 +980,7 @@ static void _write_entry(Path entry, List units, String exports){
         x2c_exception_mark_handled(& _x2c_exception_frame_1);
         if(_x2c_macro_selected_1 == 0){
           List volatile detail;
-          detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_1, 0));
+          detail = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_1, 0));
           host_error(detail);
         }
 

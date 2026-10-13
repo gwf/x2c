@@ -694,6 +694,38 @@ static inline String Var_string_payload(Var _x2c_macro_value_8){
   if(_x2c_macro_value_8.u64 >> 48 != 11 ||(_x2c_macro_value_8.u64 & 0x7) != 1) return NULL;  return(String)(_x2c_macro_value_8.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
+static inline Array Var_array_payload(Var _x2c_macro_value_9){
+  if(_x2c_macro_value_9.u64 >> 48 != 8 ||(_x2c_macro_value_9.u64 & 0x7) != 0) return NULL;  return(Array)(_x2c_macro_value_9.u64 & 0x0000FFFFFFFFFFF8ul);
+}
+
+static inline Block Var_block_payload(Var _x2c_macro_value_10){
+  if(_x2c_macro_value_10.u64 >> 48 != 8 ||(_x2c_macro_value_10.u64 & 0x7) != 1) return NULL;  return(Block)(_x2c_macro_value_10.u64 & 0x0000FFFFFFFFFFF8ul);
+}
+
+static inline Buffer Var_buffer_payload(Var _x2c_macro_value_11){
+  if(_x2c_macro_value_11.u64 >> 48 != 8 ||(_x2c_macro_value_11.u64 & 0x7) != 2) return NULL;  return(Buffer)(_x2c_macro_value_11.u64 & 0x0000FFFFFFFFFFF8ul);
+}
+
+static inline Bytes Var_bytes_payload(Var _x2c_macro_value_12){
+  if(_x2c_macro_value_12.u64 >> 48 != 8 ||(_x2c_macro_value_12.u64 & 0x7) != 3) return NULL;  return(Bytes)(_x2c_macro_value_12.u64 & 0x0000FFFFFFFFFFF8ul);
+}
+
+static inline File Var_file_payload(Var _x2c_macro_value_13){
+  if(_x2c_macro_value_13.u64 >> 48 != 9 ||(_x2c_macro_value_13.u64 & 0x7) != 0) return NULL;  return(File)(_x2c_macro_value_13.u64 & 0x0000FFFFFFFFFFF8ul);
+}
+
+static inline Iter Var_iter_payload(Var _x2c_macro_value_14){
+  if(_x2c_macro_value_14.u64 >> 48 != 9 ||(_x2c_macro_value_14.u64 & 0x7) != 2) return NULL;  return(Iter)(_x2c_macro_value_14.u64 & 0x0000FFFFFFFFFFF8ul);
+}
+
+static inline List Var_list_payload(Var _x2c_macro_value_15){
+  if(_x2c_macro_value_15.u64 >> 48 != 9 ||(_x2c_macro_value_15.u64 & 0x7) != 4) return NULL;  return(List)(_x2c_macro_value_15.u64 & 0x0000FFFFFFFFFFF8ul);
+}
+
+static inline Map Var_map_payload(Var _x2c_macro_value_16){
+  if(_x2c_macro_value_16.u64 >> 48 != 9 ||(_x2c_macro_value_16.u64 & 0x7) != 6) return NULL;  return(Map)(_x2c_macro_value_16.u64 & 0x0000FFFFFFFFFFF8ul);
+}
+
 static inline Symbol Var_symbol(Var x){
   if(Var_is(x, 1328354264)) return Var_integer(x);  return 0;
 }
@@ -798,7 +830,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 static Symbol _literal_tag(List tag){
   {
     List _x2c_match_expr = tag; List _x2c_match_cursor, _x2c_match_cursor1;  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
-        case 9224497936761996324ULL: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497963177709656ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_0 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+        case 9224497936761996324ULL: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list_payload(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497963177709656ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_0 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var key;  key = _x2c_match_value_0;  return Var_symbol(key);
       }
        break; } } default: break;
@@ -918,7 +950,7 @@ void x2c_initialize(void){
 int x2c_normalize_index(int index, int length){
   if(! _init_guard_) _file_init_();  if(length < 0){
     Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_index")), NULL))); {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 871};  x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(816725264), int_var(length));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 879};  x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(816725264), int_var(length));  __builtin_unreachable();
     }
 
   }
@@ -927,7 +959,7 @@ int x2c_normalize_index(int index, int length){
 
 int x2c_normalize_slice(int * start, int * stop, int step, int length){
   if(! _init_guard_) _file_init_();  if(! start || ! stop || ! step || length < 0){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 891};  x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_slice")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 899};  x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_slice")), NULL))));  __builtin_unreachable();
   }
   int orig_stop = * stop;  if(* start == INT_MIN) * start =(step > 0) ? 0 : length - 1;  if(* stop == INT_MIN) * stop = - 1;  if(* start < 0){
     * start += length;  if(* start < 0) * start =(step < 0) ? - 1 : 0;

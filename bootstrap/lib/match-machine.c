@@ -238,12 +238,12 @@ static int _is_kind(Var value, int kind){
 
 static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
-static List Var_list(Var);
+static List Var_list_payload(Var);
 
 static int MatchMachine__enter(MatchMachine * m, int reg, Var input){
   Var seen =(* m).view ?(* m).view(input) : input;
   if(! Var_is_row(seen, 9, 7, 4)) return 0;
-  * MatchMachine__cursor(&((* m)), reg) = Var_list(seen);
+  * MatchMachine__cursor(&((* m)), reg) = Var_list_payload(seen);
   * MatchMachine__distance(&((* m)), reg) = 0;
   return 1;
 }
@@ -412,6 +412,8 @@ static void MatchMachine__eq_prefix(MatchMachine * m, const MachineWord * w){
 }
 
 List MatchMachine_materialize_span(MatchMachine * m, MachineSpan span);
+
+static List Var_list(Var);
 
 List Array_list_free(Array);
 

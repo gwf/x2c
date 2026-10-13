@@ -3213,7 +3213,7 @@ Ast Compiler.watched_step(Compiler c, Ast ast) {
   $let(c.slot_watch, owner.parent) $let(c.active_rewrites, owner.outer)
     lowered = c.normalize(ast);
   watch.inner = watch.inner.add(c._effects().since(before));
-  if (watch.outputs[slot].list()) watch.repeated = 1;
+  if (watch.outputs[slot].list_payload()) watch.repeated = 1;
   watch.outputs[slot] = lowered;
   watch.order.push(slot);
   return lowered;

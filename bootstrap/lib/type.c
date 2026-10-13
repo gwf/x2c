@@ -523,7 +523,7 @@ int Type_function_parts(Type type, List * params, Type * return_type){
     List _x2c_match_expr = Type_list(type); List _x2c_match_cursor, _x2c_match_cursor1, _x2c_match_cursor2;
     switch(0){
         default: ;
-       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936762055558ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && Var_is(_x2c_match_cursor1->car, 806120) && (_x2c_match_cursor2 = Var_list(_x2c_match_cursor1->car), 1)) { List _x2c_match_list_0 = _x2c_match_cursor2; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_1 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) { List _x2c_match_list_2 = _x2c_match_cursor;
+       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list_payload(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936762055558ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && Var_is(_x2c_match_cursor1->car, 806120) && (_x2c_match_cursor2 = Var_list_payload(_x2c_match_cursor1->car), 1)) { List _x2c_match_list_0 = _x2c_match_cursor2; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_1 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) { List _x2c_match_list_2 = _x2c_match_cursor;
       {
         List parameters;
         parameters = _x2c_match_list_0;
@@ -795,14 +795,16 @@ static Type Specifiers_spelling(Specifiers * s){
 
 Var Map_getindex(Map, Var);
 
-static List Var_list(Var);
+static List Var_list_payload(Var);
 
 static List _scalar_row(Type type){
   Type scalar = Type_scalar(type);
   if(! List_truth(Type_list(scalar))) return NULL;
   Var row = Map_getindex(scalartypes, List_var(scalar));
-  return Var_is_row(row, 9, 7, 4) ? Var_list(row) : NULL;
+  return Var_is_row(row, 9, 7, 4) ? Var_list_payload(row) : NULL;
 }
+
+static List Var_list(Var);
 
 static int _scalar_numeric_info(Type type, X2CVarNumericInfo * info){
   Var row = Map_getindex(scalartypes, List_var(type));

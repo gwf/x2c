@@ -95,8 +95,8 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 }
 
 static Code _protocol_function(List declared, List name, List forward){
-  List params = Var_list(List_car(forward)), args = Var_list(List_caddr(forward));
-  Code callee = Var_list(List_cadr(forward));
+  List params = Var_list_payload(List_car(forward)), args = Var_list_payload(List_caddr(forward));
+  Code callee = Var_list_payload(List_cadr(forward));
   return cons(_1, cons(_2, cons(List_var(cons(_3, cons(List_var(cons(_4, cons(_5, cons(_7, cons(List_var(({
     Var _x2c_literal_part_6 = List_var(cons(List_var(cons(_9, cons(_24, cons(_25, cons(List_var(declared), NULL))))), NULL));  Var _x2c_literal_part_7 = List_var(({
       Var _x2c_literal_part_0 = List_var(cons(_9, cons(_32, cons(_33, cons(List_var(name), NULL)))));  Var _x2c_literal_part_1 = List_var(cons(List_var(cons(_34, cons(List_var(cons(_35, cons(List_var(cons(_9, cons(_47, cons(_25, cons(List_var(params), NULL))))), NULL))), NULL))), NULL));  cons(_48, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));

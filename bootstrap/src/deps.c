@@ -117,7 +117,7 @@ int translation_depfile_write(CliRequest request, Compiler compiler, String inpu
         x2c_exception_mark_handled(& _x2c_exception_frame_0);
         if(_x2c_macro_selected_0 == 0){
           List volatile failure;
-          failure = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
+          failure = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_0, 0));
           error = Var_long(Var_convert(List_assoc(failure, Symbol_var(11703198)), 818062));
         }
 

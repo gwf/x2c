@@ -59,7 +59,7 @@ static inline List List_cdr(List lst){
 }
 
 static inline Var List_caar(List lst){
-  return car(Var_list(car(lst)));
+  return car(Var_list_payload(car(lst)));
 }
 
 static inline Var List_cadr(List lst){
@@ -75,19 +75,19 @@ static inline Var List_caddr(List lst){
 }
 
 static inline Var Var_caar(Var var){
-  return car(Var_list(car(Var_list(var))));
+  return car(Var_list_payload(car(Var_list_payload(var))));
 }
 
 static inline Var Var_cadr(Var var){
-  return car(cdr(Var_list(var)));
+  return car(cdr(Var_list_payload(var)));
 }
 
 static inline List Var_cddr(Var var){
-  return cdr(cdr(Var_list(var)));
+  return cdr(cdr(Var_list_payload(var)));
 }
 
 static inline Var Var_caddr(Var var){
-  return car(cdr(cdr(Var_list(var))));
+  return car(cdr(cdr(Var_list_payload(var))));
 }
 
 static int _next(Iter iter, Var * out);
@@ -302,11 +302,11 @@ List List_cons_in(Pool pool, Var head, List tail){
   }
   ;
   Var existing = Pool_lookup(pool, List_var((List) & query));
-  if(! Var_is_void(existing)) return Var_list(existing);
+  if(! Var_is_void(existing)) return Var_list_payload(existing);
   List cell = Pool_malloc(pool, sizeof(struct List));
   cell -> car = head;
   cell -> cdr = tail;
-  return Var_list(Pool_intern_new(pool, List_var(cell), cell));
+  return Var_list_payload(Pool_intern_new(pool, List_var(cell), cell));
 }
 
 #include "error.h"
@@ -370,7 +370,7 @@ static void _promote_node(Var node){
   if(Var_is_row(node, 11, 7, 1)) return(void) String_promote(Var_as_string(node));
   if(Var_is(node, 826970)) return(void) Atom_promote(node);
   if(! Var_is_row(node, 9, 7, 4)) return;
-  for(List cur = Var_list(node);  List_truth(cur);  cur = cur -> cdr){
+  for(List cur = Var_list_payload(node);  List_truth(cur);  cur = cur -> cdr){
     if(! Pool_promote(Pool_current(), List_var(cur), cur)) break;
     _promote_node(cur -> car);
   }
@@ -387,7 +387,7 @@ static int _try_own_node(Var node){
   if(Var_is_row(node, 11, 7, 1)) return String_try_own(Var_string(node));
   if(Var_is(node, 826970)) return String_try_own(Var_str(node));
   if(! Var_is_row(node, 9, 7, 4)) return 1;
-  for(List cur = Var_list(node);  List_truth(cur);  cur = cur -> cdr){
+  for(List cur = Var_list_payload(node);  List_truth(cur);  cur = cur -> cdr){
     if(! Pool_own(Pool_current(), List_var(cur), cur)) return 0;
     if(! _try_own_node(cur -> car)) return 0;
   }
@@ -418,7 +418,7 @@ Iter List_iter(List lst, Iter dest){
 }
 
 static int _next(Iter iter, Var * out){
-  List lst = Var_list(iter -> state);
+  List lst = Var_list_payload(iter -> state);
   if(! List_truth(lst)) return 0;
   * out = List_car(lst);
   lst = lst -> cdr;
@@ -646,7 +646,7 @@ static List _concat_va(unsigned n, va_list ap){
 static List _concat_lists(Array lists){
   List tail = NULL;
   for(int i =(int) Array_len(lists) - 1;  i >= 0;  i --){
-    List current = Var_list(Array_getindex(lists, i));
+    List current = Var_list_payload(Array_getindex(lists, i));
     tail = List_append(current, tail);
   }
   return tail;
@@ -781,7 +781,7 @@ Var List_assoc(List list, Var key){
     List _x2c_macro_cursor_4 = _x2c_macro_object_4;
     Var _x2c_macro_cursor_output_4;
     while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
-      pair = Var_list(_x2c_macro_cursor_output_4);
+      pair = Var_list_payload(_x2c_macro_cursor_output_4);
       {
         if(! List_truth(pair)) continue;
         Var pair_key, value;
@@ -1274,7 +1274,7 @@ List List_flatten(List lst){
           head = _x2c_macro_cursor_output_8;
           {
             if(Var_is_row(head, 9, 7, 4)){
-              List inner = Var_list(head);
+              List inner = Var_list_payload(head);
               {
                 Var item;
                 List _x2c_macro_object_7 = inner;
@@ -1350,7 +1350,7 @@ static void _flatten_into(Array values, List lst){
     while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_9))){
       head = _x2c_macro_cursor_output_9;
       {
-        if(Var_is_row(head, 9, 7, 4)) _flatten_into(values, Var_list(head));
+        if(Var_is_row(head, 9, 7, 4)) _flatten_into(values, Var_list_payload(head));
         else Array_push(values, head);
       }
 
@@ -1362,7 +1362,7 @@ static void _flatten_into(Array values, List lst){
 
 List List_sublis(List alist, List tree){
   if(! List_truth(tree)) return NULL;
-  return Var_list(_sublis_node(alist, List_var(tree)));
+  return Var_list_payload(_sublis_node(alist, List_var(tree)));
 }
 
 static Var _sublis_node(List alist, Var node){
@@ -1370,7 +1370,7 @@ static Var _sublis_node(List alist, Var node){
     Var replacement = List_assoc(alist, node);
     return Var_is_void(replacement) ? node : replacement;
   }
-  List list = Var_list(node);
+  List list = Var_list_payload(node);
   if(! List_truth(list)) return List_var(list);
   Array items = Array_new();
   const Array _x2c_macro_acquired_16 = items;
@@ -1442,7 +1442,7 @@ static int _unpack_va(List src, unsigned n, va_list ap, int lists){
   for(;  List_truth(src) && count < n;  src = List_cdr(src), count ++){
     if(lists){
       List * dst = va_arg(ap, List *);
-      if(dst) * dst = Var_list(List_car(src));
+      if(dst) * dst = Var_list_payload(List_car(src));
     }
     else{
       Var * dst = va_arg(ap, Var *);
@@ -1634,7 +1634,7 @@ static int Render__fits(Render * r, Var elem){
 }
 
 static void Render__items(Render * r, Var elem){
-  List lst = Var_list(elem);
+  List lst = Var_list_payload(elem);
   Buffer out =(* r).out;
   if(out -> pos - Buffer_tabstop(out) > 5) Buffer_newline_indent(out);
   _open(lst, out);
@@ -1652,7 +1652,7 @@ static void Render__flat(Render * r, Var elem){
 }
 
 static void Render__flat_items(Render * r, Var elem){
-  List lst = Var_list(elem);
+  List lst = Var_list_payload(elem);
   Buffer out =(* r).out;
   _open(lst, out);
   for(List l = lst;  List_truth(l);  l = List_cdr(l)){

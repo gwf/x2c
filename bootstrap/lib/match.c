@@ -391,7 +391,7 @@ static List _normalize_elements(List elements){
       for(List cell = elements;  List_truth(cell);  cell = List_cdr(cell)){
         Var head = List_car(cell);
         NormalizedCell row ={
-          cell, Var_is_row(head, 9, 7, 4) ? List_var(_normalize_pattern(Var_list(head))) : head
+          cell, Var_is_row(head, 9, 7, 4) ? List_var(_normalize_pattern(Var_list_payload(head))) : head
         }
         ;
         Block_push(spine, & row);
@@ -426,7 +426,7 @@ MatchCaptureLayout MatchCaptureLayout_analyze(Var pattern){
   const char * malformed = MatchLayoutBuilder__malformed(&(builder));
   Var normalized = pattern;
   if(malformed) builder.count = 0;
-  else if(Var_is_row(pattern, 9, 7, 4)) normalized = List_var(_normalize_pattern(Var_list(pattern)));
+  else if(Var_is_row(pattern, 9, 7, 4)) normalized = List_var(_normalize_pattern(Var_list_payload(pattern)));
   MatchCaptureLayout layout = MatchLayoutBuilder__layout(&(builder), normalized, malformed);
   if(! malformed && builder.count){
     MatchSlots slots = MatchCaptureLayout__slots(layout, normalized);
@@ -442,7 +442,7 @@ static void MatchLayoutBuilder__collect(MatchLayoutBuilder * b, Var pattern){
     return;
   }
   if(Var_is_nil(pattern)) return;
-  List list = Var_list(pattern);
+  List list = Var_list_payload(pattern);
   Var head = List_car(list);
   if(x2c_var_equal(head, Symbol_var(2050325770))) return;
   if(Var_is_match_op(head)){
@@ -498,7 +498,7 @@ static MatchSlots MatchCaptureLayout__slots(MatchCaptureLayout m, Var pattern){
     0, 0
   }
   ;
-  List list = Var_list(pattern);
+  List list = Var_list_payload(pattern);
   Var head = List_car(list);
   List args = List_cdr(list);
   if(x2c_var_equal(head, Symbol_var(2050325770))) return(MatchSlots){
@@ -857,7 +857,7 @@ static int MatchPlan__replace_all(MatchPlan plan, List input, Var template, List
   Block_free(walk.spine);
   MatchMachine_release(machine);
   if(walk.error) return - 1;
-  (* out) = Var_list(result);
+  (* out) = Var_list_payload(result);
   return 1;
 }
 
@@ -878,7 +878,7 @@ static int MatchWalk__all(MatchWalk * walk, Var input, int include_empty){
   size_t base = hits -> length;
   int visit_tail = 1;
   while(Var_is_row(input, 9, 7, 4)){
-    List lst = Var_list(input);
+    List lst = Var_list_payload(input);
     if(! List_truth(lst)){
       visit_tail = include_empty;
       break;
@@ -912,7 +912,7 @@ static int MatchWalk__first(MatchWalk * walk, Var input, int include_empty){
   Var last_cell =((void) 0, Void);
   int have_cell = 0, visit_tail = 1;
   while(Var_is_row(input, 9, 7, 4)){
-    List lst = Var_list(input);
+    List lst = Var_list_payload(input);
     if(! List_truth(lst)){
       visit_tail = include_empty;
       break;
@@ -948,7 +948,7 @@ static Var MatchWalk__rewrite(MatchWalk * walk, Var node, int include_empty){
   size_t base = heads -> length;
   int visit_tail = 1;
   while(Var_is_row(node, 9, 7, 4)){
-    List lst = Var_list(node);
+    List lst = Var_list_payload(node);
     if(! List_truth(lst)){
       visit_tail = include_empty;
       break;
@@ -961,7 +961,7 @@ static Var MatchWalk__rewrite(MatchWalk * walk, Var node, int include_empty){
   }
   if(visit_tail) node = MatchWalk__replace_node(&((* walk)), node);
   for(size_t i = heads -> length;  i > base && !(* walk).error;  i --){
-    List tail = Var_list(node);
+    List tail = Var_list_payload(node);
     node = MatchWalk__replace_node(&((* walk)), List_var(cons(_spine_get(heads, i - 1), tail)));
   }
   Block_truncate(heads, base);
@@ -1024,13 +1024,13 @@ List List_replace(List template, List bindings){
     NULL, NULL, bindings
   }
   ;
-  return Var_list(_replace(List_var(template), &(source)));
+  return Var_list_payload(_replace(List_var(template), &(source)));
 }
 
 static Var _replace(Var input, ReplacementSource * source){
   if(_named_binder(input)) return ReplacementSource__value(&((* source)), input);
   if(! Var_is_row(input, 9, 7, 4)) return input;
-  List list = Var_list(input);
+  List list = Var_list_payload(input);
   if(! List_truth(list)) return input;
   if(x2c_var_equal(List_car(list), Symbol_var(2050325770))) return List_cadr(list);
   Block spine = Block_new(sizeof(ReplacementCell));
@@ -1064,11 +1064,11 @@ static Var _replace(Var input, ReplacementSource * source){
         ReplacementCell row =((ReplacementCell *) spine -> bytes)[i - 1];
         Var head = row.value;
         if(row.splice && Var_is_row(head, 9, 7, 4)) tail = List_var(({
-          List _x2c_literal_part_4 = Var_list(head);  List _x2c_literal_part_5 = Var_list(tail);  List_append(_x2c_literal_part_4, List_append(_x2c_literal_part_5, NULL));
+          List _x2c_literal_part_4 = Var_list_payload(head);  List _x2c_literal_part_5 = Var_list_payload(tail);  List_append(_x2c_literal_part_4, List_append(_x2c_literal_part_5, NULL));
         }
         ));
         else tail = List_var(({
-          Var _x2c_literal_part_6 = head;  List _x2c_literal_part_7 = Var_list(tail);  cons(_x2c_literal_part_6, List_append(_x2c_literal_part_7, NULL));
+          Var _x2c_literal_part_6 = head;  List _x2c_literal_part_7 = Var_list_payload(tail);  cons(_x2c_literal_part_6, List_append(_x2c_literal_part_7, NULL));
         }
         ));
       }
@@ -1199,7 +1199,7 @@ static void MatchCaptureSite__prepare(MatchCaptureSite * site, Var pattern){
     }
 
   }
-  if(Var_is_row(plan -> layout -> normalized, 9, 7, 4)) List_try_own(Var_list(plan -> layout -> normalized));
+  if(Var_is_row(plan -> layout -> normalized, 9, 7, 4)) List_try_own(Var_list_payload(plan -> layout -> normalized));
   __atomic_store_n(& site -> plan, plan, __ATOMIC_RELEASE);
 }
 
@@ -1313,7 +1313,7 @@ List x2c_match_site_match_replace(MatchCaptureSite * site, List input, Var pat, 
   if(! _init_guard_) _file_init_();
   Var result;
   if(! x2c_match_site_try_match_replace(site, input, pat, template, & result)) return input;
-  return Var_is_row(result, 9, 7, 4) ? Var_list(result) : NULL;
+  return Var_is_row(result, 9, 7, 4) ? Var_list_payload(result) : NULL;
 }
 
 List List_search_replace(List input, Var pat, Var template);
@@ -1354,7 +1354,7 @@ List List_match_replace(List input, Var pat, Var template){
   if(! _init_guard_) _file_init_();
   Var result;
   if(! List_try_match_replace(input, pat, template, &(result))) return input;
-  return Var_is_row(result, 9, 7, 4) ? Var_list(result) : NULL;
+  return Var_is_row(result, 9, 7, 4) ? Var_list_payload(result) : NULL;
 }
 
 List List_search(List input, Var pat){

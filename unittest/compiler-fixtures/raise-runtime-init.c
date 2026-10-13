@@ -19,9 +19,9 @@ int main(void){
     static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/raise-runtime-init.x",.function = "main",.line = 9};
     x2c_error_raise_n(& _x2c_error_site_0, 1313822537546332, 1, Symbol_var(280234584), List_var(cons(Symbol_var(951296328), cons(String_var(String_join(NULL, cons(String_var(String_new("marker")), NULL))), NULL))));
   }
-  List entry = Var_list(List_car(Error_since(mark)));
-  List detail = Var_list(List_assoc(entry, Symbol_var(280234584)));
-  List nested = Var_list(List_cadr(Var_list(List_car(detail))));
+  List entry = Var_list_payload(List_car(Error_since(mark)));
+  List detail = Var_list_payload(List_assoc(entry, Symbol_var(280234584)));
+  List nested = Var_list_payload(List_cadr(Var_list(List_car(detail))));
   List _x2c_destructure_0 = nested;
   Symbol tag = Var_symbol(List_getindex(_x2c_destructure_0, 0));
   String value = Var_as_string(List_getindex(_x2c_destructure_0, 1));

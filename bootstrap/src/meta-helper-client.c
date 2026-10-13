@@ -257,7 +257,7 @@ static int _syntax_origin(Var node){
   if(! Var_is_row(node, 9, 7, 4)) return 0;
   {
     Var _x2c_match_var = node; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);
-    List _x2c_match_expr = Var_list(_x2c_match_var); List _x2c_match_cursor;
+    List _x2c_match_expr = Var_list_payload(_x2c_match_var); List _x2c_match_cursor;
     switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
         case 9224497936761618536ULL: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761618536ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 3453797)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var origin;
@@ -314,7 +314,7 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
     Var reply = Call_next_reply(&(call));
     {
       Var _x2c_match_var = reply; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);
-      List _x2c_match_expr = Var_list(_x2c_match_var); List _x2c_match_cursor, _x2c_match_cursor1;
+      List _x2c_match_expr = Var_list_payload(_x2c_match_var); List _x2c_match_cursor, _x2c_match_cursor1;
       switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
           case 9224497986259536782ULL: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497986259536782ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120)) { Var _x2c_match_value_1 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
           Var message;
@@ -326,7 +326,7 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
             Var _x2c_match_value_2 = notes;
             {
               String message = Var_as_string(_x2c_match_value_1);
-              List notes = Var_list(_x2c_match_value_2);
+              List notes = Var_list_payload(_x2c_match_value_2);
               Compiler_report_warning(c, 27335838, message, site, notes);
             }
 
@@ -349,14 +349,14 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
             Var _x2c_match_value_4 = notes;
             {
               String message = Var_as_string(_x2c_match_value_3);
-              List notes = Var_list(_x2c_match_value_4);
+              List notes = Var_list_payload(_x2c_match_value_4);
               Compiler_report_error(c, 27335838, message, site, notes);
             }
 
           }
 
         }
-         break; } } } } if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936773321700ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120)) { Var _x2c_match_value_1 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936761618536ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_2 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_3 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+         break; } } } } if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936773321700ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446)) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120)) { Var _x2c_match_value_1 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list_payload(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936761618536ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_2 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_3 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
           Var message;
           message = _x2c_match_value_0;
           Var notes;
@@ -370,7 +370,7 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
             Var _x2c_match_value_6 = notes;
             {
               String message = Var_as_string(_x2c_match_value_5);
-              List notes = Var_list(_x2c_match_value_6);
+              List notes = Var_list_payload(_x2c_match_value_6);
               Compiler_report_meta_error(c, node, Var_symbol(category), message, site, notes, 1);
             }
 
@@ -404,7 +404,7 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
             Var _x2c_match_value_10 = operands;
             {
               String operation = Var_as_string(_x2c_match_value_9);
-              List operands = Var_list(_x2c_match_value_10);
+              List operands = Var_list_payload(_x2c_match_value_10);
               Call_answer(&(call), operation, operands);
             }
 
@@ -412,7 +412,7 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
 
         }
          break; } } } } case 9224497965323996046ULL: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497965323996046ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Call_refuse(&(call), Compiler_meta_call_missing(c, name));
-         break; } } case 9224497949733334154ULL: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497949733334154ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1) { Var _x2c_match_value_0 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1)) { List _x2c_match_list_1 = _x2c_match_cursor1; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+         break; } } case 9224497949733334154ULL: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497949733334154ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list_payload(_x2c_match_cursor->car), 1) && _x2c_match_cursor1) { Var _x2c_match_value_0 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1)) { List _x2c_match_list_1 = _x2c_match_cursor1; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
           Var code;
           code = _x2c_match_value_0;
           List detail;
@@ -463,7 +463,7 @@ static void Call_answer(Call * c, String operation, List operands){
           Var volatile code;
           code = x2c_error_catch_capture(_x2c_error_handler_0, 0);
           List volatile detail;
-          detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 1));
+          detail = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_0, 1));
           {
             _helper_stop(SIGKILL);
             Error_raise(Var_symbol(code), detail);

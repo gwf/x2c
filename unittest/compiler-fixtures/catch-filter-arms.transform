@@ -260,7 +260,7 @@
            (expr ("List") 
             (op = (expr ("List") (ident (binding 28 "rest"))) 
              (expr ("List") 
-              (call "Var_list" 
+              (call "Var_list_payload" 
                (args (expr ("Var") 
                       (call "x2c_error_catch_capture" 
                        (args (expr ("ErrorHandler") 

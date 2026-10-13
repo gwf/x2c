@@ -696,7 +696,7 @@ int Var_is_floating(Var);
 
 double Var_floating(Var);
 
-static Map Var_map(Var);
+static Map Var_map_payload(Var);
 
 static void Writer__value(Writer * w, Var value, int depth){
   if(depth > JSON_MAX_DEPTH){
@@ -715,7 +715,7 @@ static void Writer__value(Writer * w, Var value, int depth){
   else if(Var_is_integer(value)) _write_integer((* w).out, value);
   else if(Var_is_floating(value)) _write_double((* w).out, Var_floating(value));
   else if(Var_is(value, 3313778) || Var_is_row(value, 9, 7, 4)) Writer__elements(&((* w)), value, depth);
-  else if(Var_is(value, 26720)) Writer__members(&((* w)), Var_map(value), depth);
+  else if(Var_is(value, 26720)) Writer__members(&((* w)), Var_map_payload(value), depth);
   else{
     Symbol tag = Var_tag(value);
     {

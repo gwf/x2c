@@ -324,7 +324,7 @@ static String _locked_packages(String command, int quiet){
         x2c_exception_mark_handled(& _x2c_exception_frame_0);
         if(_x2c_macro_selected_0 == 0){
           List volatile detail;
-          detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
+          detail = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_0, 0));
           _host_error(detail);
         }
 
@@ -556,7 +556,7 @@ static void Install_run(Install * i){
         x2c_exception_mark_handled(& _x2c_exception_frame_2);
         if(_x2c_macro_selected_2 == 0){
           List volatile detail;
-          detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_2, 0));
+          detail = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_2, 0));
           _host_error(detail);
         }
 
@@ -750,7 +750,7 @@ static Path _empty_builds(String package){
         x2c_exception_mark_handled(& _x2c_exception_frame_4);
         if(_x2c_macro_selected_4 == 0){
           List volatile detail;
-          detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_4, 0));
+          detail = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_4, 0));
           _host_error(detail);
         }
 
@@ -930,7 +930,7 @@ static List _index_row(CliRequest request, String name, String work){
     List _x2c_macro_cursor_3 = _x2c_macro_object_3;
     Var _x2c_macro_cursor_output_3;
     while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
-      row = Var_list(_x2c_macro_cursor_output_3);
+      row = Var_list_payload(_x2c_macro_cursor_output_3);
       {
         if(! x2c_var_equal(List_car(row), String_var(name))) continue;
         String kind = Var_as_string(List_getindex(row, 2)), target = Var_as_string(List_getindex(row, 3));
@@ -996,7 +996,7 @@ static void _run(List arguments, const char * what){
         x2c_exception_mark_handled(& _x2c_exception_frame_7);
         if(_x2c_macro_selected_7 == 0){
           List volatile detail;
-          detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_7, 0));
+          detail = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_7, 0));
           {
             long error = Var_long(Var_convert(List_assoc(detail, Symbol_var(11703198)), 818062));
             errors =({
@@ -1136,7 +1136,7 @@ int remove_command(CliRequest request){
             x2c_exception_mark_handled(& _x2c_exception_frame_8);
             if(_x2c_macro_selected_8 == 0){
               List volatile detail;
-              detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_8, 0));
+              detail = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_8, 0));
               _host_error(detail);
             }
 

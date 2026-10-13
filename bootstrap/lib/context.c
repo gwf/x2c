@@ -146,7 +146,7 @@ static Var Context__export_value(Context c, Var v){
   if(Var_is_integer(v) || Var_is_floating(v)) return v;
   if(Var_is_row(v, 11, 7, 1)) return Context__export_string(c, v);
   if(Var_is(v, 826970)) return Context__export_atom(c, v);
-  if(Var_is_row(v, 9, 7, 4)) return List_var(Context__export_list(c, Var_list(v)));
+  if(Var_is_row(v, 9, 7, 4)) return List_var(Context__export_list(c, Var_list_payload(v)));
   if(Var_is(v, 3313778)) return Context__export_array(c, v);
   if(Var_is(v, 26720)) return Context__export_map(c, v);
   if(Var_is_row(v, 8, 7, 1) || Var_is_row(v, 8, 7, 3) || Var_is_row(v, 8, 7, 2)) return Context__export_storage(c, v);
@@ -225,7 +225,7 @@ static List Context__export_list(Context c, List list){
 int Context_owns(Context context, void * allocation);
 
 static Var Context__export_array(Context c, Var value){
-  Array array = Var_array(value);
+  Array array = Var_array_payload(value);
   if(! Context_owns(c, array)) return value;
   Scope owner = Scope_owner(array);
   Scope_move(array, c -> destination_scope);
@@ -264,7 +264,7 @@ static Var Context__export_array(Context c, Var value){
 }
 
 static Var Context__export_map(Context c, Var value){
-  Map map = Var_map(value);
+  Map map = Var_map_payload(value);
   if(! Context_owns(c, map)) return value;
   Scope owner = Scope_owner(map);
   Scope_move(map, c -> destination_scope);

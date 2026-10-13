@@ -108,11 +108,11 @@ static int _x2c_callback_adapt_2(Var a0, Var a1){
 }
 
 static int _x2c_callback_adapt_3(Var a0, Var a1){
-  return File_equal(Var_file(a0), Var_file(a1));
+  return File_equal(Var_file_payload(a0), Var_file_payload(a1));
 }
 
 static Iter _x2c_callback_adapt_4(Var a0, Iter a1){
-  return Array_iter(Var_array(a0), a1);
+  return Array_iter(Var_array_payload(a0), a1);
 }
 
 #undef _x2c_initializer_choice_C7BA8BF4_0_expanded

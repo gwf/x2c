@@ -182,7 +182,7 @@ static int _tag_headed(List list){
 
 static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
-static List Var_list(Var);
+static List Var_list_payload(Var);
 
 int Var_is_null(Var);
 
@@ -206,13 +206,13 @@ long Var_integer(Var);
 
 double Var_floating(Var);
 
-static Array Var_array(Var);
+static Array Var_array_payload(Var);
 
-static Map Var_map(Var);
+static Map Var_map_payload(Var);
 
 int datum_write(Buffer out, Var value, int tagged){
   if(! _init_guard_) _file_init_();
-  if(Var_is_row(value, 9, 7, 4)) return _write_list(out, Var_list(value), tagged);
+  if(Var_is_row(value, 9, 7, 4)) return _write_list(out, Var_list_payload(value), tagged);
   if(tagged && Var_is_null(value)) Buffer_write(out, "(x2c.null)");
   else if(tagged && Var_is_void(value)) Buffer_write(out, "(x2c.void)");
   else if(tagged && Var_is(value, 1328354264) && ! Var_symbol(value)) Buffer_write(out, "(x2c.symbol0)");
@@ -221,8 +221,8 @@ int datum_write(Buffer out, Var value, int tagged){
   else if(tagged &&(Var_is_floating(value) ||(Var_is_integer(value) && ! Var_is(value, 3453797)))) _write_number(out, value);
   else if(Var_is_integer(value)) Buffer_printf(out, "%ld", Var_integer(value));
   else if(Var_is_floating(value)) Buffer_printf(out, "%.17g", Var_floating(value));
-  else if(tagged && Var_is(value, 3313778)) return _write_array(out, Var_array(value));
-  else if(tagged && Var_is(value, 26720)) return _write_map(out, Var_map(value));
+  else if(tagged && Var_is(value, 3313778)) return _write_array(out, Var_array_payload(value));
+  else if(tagged && Var_is(value, 26720)) return _write_map(out, Var_map_payload(value));
   else if(tagged && Var_is_row(value, 11, 7, 5)) Buffer_printf(out, "(x2c.token %llu)", (unsigned long long) value.u64);
   else return 0;
   return 1;
@@ -497,8 +497,8 @@ static Var Map_var(Map);
 
 static Var _decode(Var value){
   if(! Var_is_row(value, 9, 7, 4) || Var_is_nil(value)) return value;
-  if(! _tag_headed(Var_list(value))) return List_var(_decode_list(Var_list(value)));
-  List list = Var_list(value);
+  if(! _tag_headed(Var_list_payload(value))) return List_var(_decode_list(Var_list_payload(value)));
+  List list = Var_list_payload(value);
   String tag = Var_str(List_car(list));
   if(String_equal(tag, _31)) return((void) 0, Void);
   if(String_equal(tag, _32)) return Var_null();
@@ -507,7 +507,7 @@ static Var _decode(Var value){
   if(String_equal(tag, _35)) return Symbol_var(Symbol_new(Var_str(List_cadr(list))));
   if(String_equal(tag, _36)) return _decode_number(Var_str(List_cadr(list)), Var_str(List_caddr(list)));
   if(String_equal(tag, _37)) return Var_new(42948956, (void *)(ulong) Var_integer(List_cadr(list)));
-  if(String_equal(tag, _38)) return List_var(_decode_list(Var_list(List_cadr(list))));
+  if(String_equal(tag, _38)) return List_var(_decode_list(Var_list_payload(List_cadr(list))));
   if(String_equal(tag, _39)) return Array_var(List_array(_decode_list(List_cdr(list))));
   return Map_var(_decode_map(List_cdr(list)));
 }
@@ -558,7 +558,7 @@ static Map _decode_map(List entries){
     List _x2c_macro_cursor_4 = _x2c_macro_object_4;
     Var _x2c_macro_cursor_output_5;
     while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_5))){
-      entry = Var_list(_x2c_macro_cursor_output_5);
+      entry = Var_list_payload(_x2c_macro_cursor_output_5);
       Map_setindex(map, _decode(List_car(entry)), _decode(List_cadr(entry)));
     }
 
@@ -665,6 +665,10 @@ List datum_result_problem(Var value, Map marks){
   return problem;
 }
 
+static List Var_list(Var);
+
+static Array Var_array(Var);
+
 static List _items_problem(Var value, Map marks){
   if(Var_is_row(value, 9, 7, 4)){
     Var item;
@@ -698,7 +702,7 @@ static List _items_problem(Var value, Map marks){
   }
   else{
     Var key, item;
-    Map _x2c_macro_object_7 = Var_map(value);
+    Map _x2c_macro_object_7 = Var_map_payload(value);
     unsigned _x2c_macro_cursor_7 = 0;
     Var _x2c_macro_cursor_output_8;
     Var _x2c_macro_cursor_output_9;

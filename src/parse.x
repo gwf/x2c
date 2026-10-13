@@ -3340,7 +3340,7 @@ static Map Compiler._hole_spellings(Compiler c) {
 static List Compiler._bind_named_type(Compiler c, String name, Var type) {
   List key = %($name);
   if (!c.sym.get_exact(key)) c.sym.define(key, %(typedef $name));
-  if (!type.list()) return %(seq);
+  if (!type.list_payload()) return %(seq);
   List declaration = type.type().declaration_ast(key);
   match (declaration)
     case %(declare ?base ?bindings):
@@ -3833,7 +3833,7 @@ static int Compiler._declares_binders(Compiler c, List body, List bindings) {
         case %((declare ? (bindings (bind ?declared ())))
                (stmnt (expr ? (op = (expr ? (ident ?assigned))
                  (expr ? (!or (call "x2c_error_catch_capture" *)
-                   (call "Var_list"
+                   (call "Var_list_payload"
                      (args (expr ? (call "x2c_error_catch_capture" *))))
                    ($slot))))))
                *rest): {

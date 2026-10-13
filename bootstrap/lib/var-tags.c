@@ -1301,7 +1301,7 @@ Array Array_new(void);
 
 int List_try_next(List, List *, Var *);
 
-static List Var_list(Var);
+static List Var_list_payload(Var);
 
 Var Array_push(Array, Var);
 
@@ -1316,7 +1316,7 @@ List _tag_rows(void){
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      group = Var_list(_x2c_macro_cursor_output_1);
+      group = Var_list_payload(_x2c_macro_cursor_output_1);
       {
         Var row;
         List _x2c_macro_object_0 = group;
@@ -1413,7 +1413,7 @@ List _tag_info(void){
     List _x2c_macro_cursor_2 = _x2c_macro_object_2;
     Var _x2c_macro_cursor_output_2;
     while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-      row = Var_list(_x2c_macro_cursor_output_2);
+      row = Var_list_payload(_x2c_macro_cursor_output_2);
       Array_push(cells, List_var(_tag_info_row(row)));
     }
 
@@ -1440,7 +1440,7 @@ List _tag_names(void){
     List _x2c_macro_cursor_3 = _x2c_macro_object_3;
     Var _x2c_macro_cursor_output_3;
     while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
-      row = Var_list(_x2c_macro_cursor_output_3);
+      row = Var_list_payload(_x2c_macro_cursor_output_3);
       Array_push(names, List_getindex(row, 0));
     }
 
@@ -1457,7 +1457,7 @@ List _tag_numeric_rows(void){
     List _x2c_macro_cursor_4 = _x2c_macro_object_4;
     Var _x2c_macro_cursor_output_4;
     while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
-      row = Var_list(_x2c_macro_cursor_output_4);
+      row = Var_list_payload(_x2c_macro_cursor_output_4);
       if(_tag_numeric(row)) Array_push(rows, List_var(row));
     }
 
@@ -1474,7 +1474,7 @@ List _tag_numeric_names(void){
     List _x2c_macro_cursor_5 = _x2c_macro_object_5;
     Var _x2c_macro_cursor_output_5;
     while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
-      row = Var_list(_x2c_macro_cursor_output_5);
+      row = Var_list_payload(_x2c_macro_cursor_output_5);
       Array_push(names, List_getindex(row, 0));
     }
 
@@ -1490,7 +1490,7 @@ List _tag_bits_expr(List row){
   if(! _init_guard_) _file_init_();
   Var bits = _tag_bits(row);
   if(Var_tag(bits) == 806120){
-    Type type = Var_list(bits);
+    Type type = Var_list_payload(bits);
     return cons(_1078, cons(_1079, cons(List_var(cons(_1080, cons(_1168, cons(List_var(cons(_1169, cons(_1170, cons(List_var(cons(_1080, cons(_1174, cons(List_var(cons(_1175, cons(List_var(cons(_1176, cons(List_var(cons(_1177, cons(List_var(cons(List_var(cons(_1083, cons(_1184, cons(_1165, cons(List_var(type), NULL))))), NULL)), _1194))), NULL))), NULL))), NULL)))), _1209)))), NULL)))), NULL)));
   }
   int width = Var_int(Var_convert(bits, 3453797));
@@ -1517,7 +1517,7 @@ List _tag_numeric_table(void){
     List _x2c_macro_cursor_6 = _x2c_macro_object_6;
     Var _x2c_macro_cursor_output_6;
     while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_6))){
-      row = Var_list(_x2c_macro_cursor_output_6);
+      row = Var_list_payload(_x2c_macro_cursor_output_6);
       Array_push(cells, List_var(_tag_numeric_row(row)));
     }
 
@@ -1542,7 +1542,7 @@ List _tag_decode_rows(void){
     List _x2c_macro_cursor_7 = _x2c_macro_object_7;
     Var _x2c_macro_cursor_output_7;
     while(List_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_7))){
-      row = Var_list(_x2c_macro_cursor_output_7);
+      row = Var_list_payload(_x2c_macro_cursor_output_7);
       if(_tag_decode_row(row)) Array_push(rows, List_var(row));
     }
 
@@ -1597,7 +1597,7 @@ Map _tag_sibling_counts(List rows){
     List _x2c_macro_cursor_8 = _x2c_macro_object_8;
     Var _x2c_macro_cursor_output_8;
     while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_8))){
-      row = Var_list(_x2c_macro_cursor_output_8);
+      row = Var_list_payload(_x2c_macro_cursor_output_8);
       {
         Var top = int_var(_tag_top(row));
         Map_setindex(counts, top, Var_binary(Map_getdefault(counts, top, int_var(0)), 56, int_var(1)));
@@ -1637,7 +1637,7 @@ List _tag_constant_rows(void){
     List _x2c_macro_cursor_9 = _x2c_macro_object_9;
     Var _x2c_macro_cursor_output_9;
     while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_9))){
-      row = Var_list(_x2c_macro_cursor_output_9);
+      row = Var_list_payload(_x2c_macro_cursor_output_9);
       if(_tag_constant_row(row)) Array_push(entries, List_var(_tag_row_entry(row, counts)));
     }
 
@@ -1664,7 +1664,7 @@ Map _tag_types(List native){
     List _x2c_macro_cursor_12 = _x2c_macro_object_12;
     Var _x2c_macro_cursor_output_12;
     while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_12))){
-      row = Var_list(_x2c_macro_cursor_output_12);
+      row = Var_list_payload(_x2c_macro_cursor_output_12);
       Map_setindex(types, List_getindex(row, 0), List_getindex(row, 1));
     }
 
@@ -1676,7 +1676,7 @@ Map _tag_types(List native){
     List _x2c_macro_cursor_13 = _x2c_macro_object_13;
     Var _x2c_macro_cursor_output_13;
     while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_13))){
-      row = Var_list(_x2c_macro_cursor_output_13);
+      row = Var_list_payload(_x2c_macro_cursor_output_13);
       {
         if(! _tag_descriptor(row)) continue;
         String tag = Var_str(List_getindex(row, 0));

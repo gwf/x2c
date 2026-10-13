@@ -71,7 +71,7 @@ int filtered(int volatile mode){
         }
         if(_x2c_macro_selected_0 == 1){
           List volatile rest;
-          rest = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
+          rest = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_0, 0));
           {
             {
               int _x2c_return_value_1 = List_len(rest);

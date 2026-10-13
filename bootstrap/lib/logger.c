@@ -1027,7 +1027,7 @@ static void _render_text(Buffer out, const LogEvent * event, int color){
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;
     Var _x2c_macro_cursor_output_0;
     while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      field = Var_list(_x2c_macro_cursor_output_0);
+      field = Var_list_payload(_x2c_macro_cursor_output_0);
       {
         if(! List_truth(field)) continue;
         Buffer_write(out, " ");
@@ -1230,7 +1230,7 @@ static Var LogMemorySink__retain(LogMemorySink l, Var value){
   if(Var_is_integer(value) || Var_is_floating(value)) return value;
   if(Var_is_row(value, 11, 7, 1)) return LogMemorySink__retain_string(l, value);
   if(Var_is(value, 826970)) return LogMemorySink__retain_lisp_symbol(l, value);
-  if(Var_is_row(value, 9, 7, 4)) return List_var(LogMemorySink__retain_list(l, Var_list(value)));
+  if(Var_is_row(value, 9, 7, 4)) return List_var(LogMemorySink__retain_list(l, Var_list_payload(value)));
   return value;
 }
 
@@ -1418,7 +1418,7 @@ Symbol Logger_error_handler(List errors, Var data){
         }
 
       }
-      List entry = Var_list(newest);
+      List entry = Var_list_payload(newest);
       Var code = List_assoc(entry, Symbol_var(227594));
       if(! Var_is(code, 1328354264)){
         Symbol _x2c_return_value_22 = 285842436424;
@@ -1652,7 +1652,7 @@ static void _log_pending(Logger active){
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      entry = Var_list(_x2c_macro_cursor_output_1);
+      entry = Var_list_payload(_x2c_macro_cursor_output_1);
       Logger_log(active, 11703268, 392730881588392, entry);
     }
 

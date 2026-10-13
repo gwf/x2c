@@ -2842,7 +2842,7 @@ static List Resolve._append(Resolve &r, List head, List tail) {
   head = r.c.resolve_expression(head, r.origin);
   tail = r.c.resolve_expression(tail, r.origin);
   head = r.c.sym.is_var_type(head.cadr())
-       ? %(expr ("List") (call "Var_list" (args $head)))
+       ? %(expr ("List") (call "Var_list_payload" (args $head)))
        : r.c.convert_expression(head, %("List"));
   return %(expr ${r.type ? r.type : %("List")}
            (append $head $tail));
@@ -3520,16 +3520,30 @@ static List Compiler._var_checked_reader(
   return NULL;
 }
 
-/* The exact reader for a built-in Var payload is `Var.<target>`: it checks the
-   tag and yields NULL for any other kind. A `String` destination instead
-   reads `Var.as_string`: the payload, the display text of another value, or
-   NULL for `void`. `Var.pointer` checks nothing, so trying it first let a
+/* The exact reader for a built-in Var payload is `Var.<target>_payload`,
+   or `Var.<target>` when there is none: it checks the tag and yields NULL
+   for any other kind. A `String` destination instead reads
+   `Var.as_string`: the payload, the display text of another value, or NULL
+   for `void`. `Var.pointer` checks nothing, so trying it first let a
    List-valued Var read as a String. Only a raw native pointer with no typed
    Var reader should still take that path. */
 static List Compiler._var_exact_reader(Compiler c, List expr, Type target) {
   if (!target.match(%(?))) return NULL;
-  String reader = target == %("String")
-    ? "Var_as_string" : %"Var_${target.car().str().lower()}";
+  String name = target.car().str().lower();
+  List callee = NULL;
+  if (target == %("String")) callee = c._var_reader("Var_as_string", target);
+  else {
+    callee = c._var_reader(%"Var_${name}_payload", target);
+    if (!callee) callee = c._var_reader(%"Var_$name", target);
+  }
+  if (!callee) return NULL;
+  Macro called = $called;
+  return c.rebuild_expression(target, called(callee, %($expr)));
+}
+
+/* The global function `reader` from one `Var` to `target`, as a callee, or
+   NULL. */
+static List Compiler._var_reader(Compiler c, String reader, Type target) {
   Type readertype = NULL;
   List binding = c.sym.resolve_global(%($reader), readertype);
   if (!binding || !readertype || readertype.car() is not <list>) return NULL;
@@ -3539,9 +3553,7 @@ static List Compiler._var_exact_reader(Compiler c, List expr, Type target) {
       !List.equal(parameters.car(), %("Var")) ||
       readertype.cdr() != target)
     return NULL;
-  List callee = %(expr $readertype (ident $binding));
-  Macro called = $called;
-  return c.rebuild_expression(target, called(callee, %($expr)));
+  return %(expr $readertype (ident $binding));
 }
 
 /* A declared T.var converter owns custom boxing before tag based boxing. */

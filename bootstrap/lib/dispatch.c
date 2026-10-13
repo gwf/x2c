@@ -403,7 +403,7 @@ unsigned Var_hash(Var v){
     __builtin_unreachable();
   }
   if(Var_is_wide(v)) return Var_wide_hash(v);
-  List list = Var_list(v);
+  List list = Var_list_payload(v);
   if(List_truth(list)) return List_hash(list);
   String text = Var_string_payload(v);
   if(String_truth(text)) return _nonzero(String_hash(text));

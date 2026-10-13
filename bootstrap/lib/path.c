@@ -329,12 +329,12 @@ static void _push_children(Array pending, Path directory){
 
 }
 
-static Array Var_array(Var);
+static Array Var_array_payload(Var);
 
 Var Array_take_last(Array);
 
 static int _walk_next(Iter iter, Var * out){
-  Array pending = Var_array(iter -> state);
+  Array pending = Var_array_payload(iter -> state);
   if(! Array_len(pending)) return 0;
   String path = Var_as_string(Array_take_last(pending));
   if(_descends(path)) _push_children(pending, path);

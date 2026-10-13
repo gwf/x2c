@@ -32,12 +32,12 @@ int main(void){
   if(! _init_guard_) _file_init_();
   Var list_valued = List_var(_5);
   String wrong = Var_as_string(list_valued);
-  List right = Var_list(list_valued);
+  List right = Var_list_payload(list_valued);
   Var text = String_var(_6);
   String exact = Var_as_string(text);
-  List not_a_list = Var_list(text);
+  List not_a_list = Var_list_payload(text);
   Var mapped = Map_var(Map_update_n(Map_new(), 1, Symbol_var(22), int_var(1)));
-  Map map = Var_map(mapped);
+  Map map = Var_map_payload(mapped);
   void * raw = Var_pointer(list_valued);
   printf("wrong=%d right=%d exact=%s not_a_list=%d map=%d raw=%d\n", wrong != NULL, right != NULL, exact, not_a_list != NULL, map != NULL, raw != NULL);
   return 0;

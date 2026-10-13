@@ -412,7 +412,7 @@ Code array_literal(Code code){
   {
     List _x2c_match_expr = code; Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch(0){
-        default: ; static MacroCaseSite _x2c_macro_site_0; if (Macro_case_capture_at(&_x2c_macro_site_0, _x2c_match_expr, _186, _25, &_x2c_match_capture)) { List _x2c_match_list_0 = Var_list(_x2c_match_values[0]);
+        default: ; static MacroCaseSite _x2c_macro_site_0; if (Macro_case_capture_at(&_x2c_macro_site_0, _x2c_match_expr, _186, _25, &_x2c_match_capture)) { List _x2c_match_list_0 = Var_list_payload(_x2c_match_values[0]);
       {
         List items;
         items = _x2c_match_list_0;
@@ -425,7 +425,7 @@ Code array_literal(Code code){
             List _x2c_macro_cursor_0 = _x2c_macro_object_0;
             Var _x2c_macro_cursor_output_0;
             while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-              item = Var_list(_x2c_macro_cursor_output_0);
+              item = Var_list_payload(_x2c_macro_cursor_output_0);
               {
                 if(List_truth(({ static MatchCaptureSite _x2c_match_site_0;  x2c_match_site_match(& _x2c_match_site_0, item, List_var(_230)); }))) item = _252;
                 Array_push(values, List_var(cons(_28, cons(_256, cons(List_var(cons(_257, cons(List_var(item), NULL))), NULL)))));
@@ -455,7 +455,7 @@ Code map_literal(Code code){
   {
     List _x2c_match_expr = code; Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch(0){
-        default: ; static MacroCaseSite _x2c_macro_site_0; if (Macro_case_capture_at(&_x2c_macro_site_0, _x2c_match_expr, _370, _278, &_x2c_match_capture)) { List _x2c_match_list_0 = Var_list(_x2c_match_values[0]);
+        default: ; static MacroCaseSite _x2c_macro_site_0; if (Macro_case_capture_at(&_x2c_macro_site_0, _x2c_match_expr, _370, _278, &_x2c_match_capture)) { List _x2c_match_list_0 = Var_list_payload(_x2c_match_values[0]);
       {
         List rows;
         rows = _x2c_match_list_0;
@@ -468,14 +468,14 @@ Code map_literal(Code code){
             List _x2c_macro_cursor_2 = _x2c_macro_object_2;
             Var _x2c_macro_cursor_output_2;
             while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-              row = Var_list(_x2c_macro_cursor_output_2);
+              row = Var_list_payload(_x2c_macro_cursor_output_2);
               {
                 Code item;
                 List _x2c_macro_object_1 = List_cdr(row);
                 List _x2c_macro_cursor_1 = _x2c_macro_object_1;
                 Var _x2c_macro_cursor_output_1;
                 while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-                  item = Var_list(_x2c_macro_cursor_output_1);
+                  item = Var_list_payload(_x2c_macro_cursor_output_1);
                   {
                     if(List_truth(({ static MatchCaptureSite _x2c_match_site_1;  x2c_match_site_match(& _x2c_match_site_1, item, List_var(_230)); }))) item = _252;
                     Array_push(values, List_var(cons(_28, cons(_256, cons(List_var(cons(_257, cons(List_var(item), NULL))), NULL)))));

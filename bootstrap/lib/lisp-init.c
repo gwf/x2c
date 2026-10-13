@@ -72,7 +72,7 @@ static String _string(Var value, String operation){
   return Var_as_string(value);
 }
 
-static List Var_list(Var);
+static List Var_list_payload(Var);
 
 static List _list(Var value, String operation){
   if(! Var_is_row(value, 9, 7, 4)){
@@ -85,7 +85,7 @@ static List _list(Var value, String operation){
     }
 
   }
-  return Var_list(value);
+  return Var_list_payload(value);
 }
 
 Var lisp_last(Var values){
@@ -243,7 +243,7 @@ List List_match(List, Var);
 
 Var lisp_match(Var input, Var pat){
   if(! Var_is_row(input, 9, 7, 4)) return List_var(NULL);
-  List list = Var_list(input);
+  List list = Var_list_payload(input);
   return List_var(List_match(list, pat));
 }
 
@@ -283,7 +283,7 @@ Var lisp_binders(Var pat){
   }
   List reversed = NULL;
   for(Var parts = pat;  ! _nil(parts);  parts = lisp_cdr(parts)){
-    List binders = Var_list(lisp_binders(lisp_car(parts)));
+    List binders = Var_list_payload(lisp_binders(lisp_car(parts)));
     {
       Var binder;
       List _x2c_macro_object_2 = binders;

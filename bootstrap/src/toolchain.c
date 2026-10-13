@@ -517,7 +517,7 @@ static Job _start_tool(Job command, String program, String * failure){
         x2c_exception_mark_handled(& _x2c_exception_frame_1);
         if(_x2c_macro_selected_1 == 0){
           List volatile detail;
-          detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_1, 0));
+          detail = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_1, 0));
           (* failure) = _start_failure(program, detail);
         }
 

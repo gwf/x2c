@@ -78,7 +78,7 @@ static int deferred(Var item){
     {
       {
         Var _x2c_match_var = item; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);
-        List _x2c_match_expr = Var_list(_x2c_match_var); List _x2c_match_cursor;
+        List _x2c_match_expr = Var_list_payload(_x2c_match_var); List _x2c_match_cursor;
         switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
             case 9224497936762349920ULL: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936762349920ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {break;
            break; } } default: ;
@@ -118,7 +118,7 @@ static int guarded(List items){
           if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
             {
               Var _x2c_match_var = item; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);
-              List _x2c_match_expr = Var_list(_x2c_match_var); List _x2c_match_cursor;
+              List _x2c_match_expr = Var_list_payload(_x2c_match_var); List _x2c_match_cursor;
               switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
                   case 9224497936762886752ULL: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936762886752ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
                   if(x2c_exception_claim(& _x2c_exception_frame_0)){

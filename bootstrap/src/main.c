@@ -333,7 +333,7 @@ static void _report_diagnostics(Compiler c){
     Var _x2c_macro_cursor_output_0;
     while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
       entry = _x2c_macro_cursor_output_0;
-      Compiler_print_diagnostic(c, Var_list(entry));
+      Compiler_print_diagnostic(c, Var_list_payload(entry));
     }
 
   }
@@ -412,7 +412,7 @@ static void _print_ast(List ast){
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      node = Var_list(_x2c_macro_cursor_output_1);
+      node = Var_list_payload(_x2c_macro_cursor_output_1);
       printf("\n%s\n", _node_repr(node));
     }
 
@@ -425,7 +425,7 @@ static String _node_repr(List node){
     List _x2c_match_expr = node; List _x2c_match_cursor, _x2c_match_cursor1;
     switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
         case 9224498832502366540ULL: ;
-       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224498832502366540ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936762538826ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_0 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) {{
+       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224498832502366540ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list_payload(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936762538826ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_0 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) {{
         Var name;
         name = _x2c_match_value_0;
         return String_join(NULL, cons(String_var(_0), cons(String_var(Var_str(name)), cons(String_var(_1), NULL))));
@@ -833,7 +833,7 @@ static int Translation_run_workers(Translation * t, Array slices){
 
 static void Workers_start(Workers * w){
   int index =(* w).started ++;
-  List slice = Var_list(Array_getindex((* w).slices, index));
+  List slice = Var_list_payload(Array_getindex((* w).slices, index));
   if((* w).t -> build) Build_begin_translation((* w).t -> build, Var_as_string(List_car(slice)));
   File capture = tmpfile();
   sigset_t unblocked = _block_stop_signals();
@@ -879,7 +879,7 @@ static void Workers_reap(Workers * w){
   int status, slot = worker_wait_any((* w).pids, (* w).live, &(status));
   if(status)(* w).failed ++;
   int index =(* w).carried[slot];
-  List slice = Var_list(Array_getindex((* w).slices, index));
+  List slice = Var_list_payload(Array_getindex((* w).slices, index));
   File capture =(* w).captures[slot];
   {
     _x2c_defer_env_1 _x2c_macro_environment_1 ={
@@ -1161,7 +1161,7 @@ static int _run_env(CliRequest request){
     List _x2c_macro_cursor_14 = _x2c_macro_object_14;
     Var _x2c_macro_cursor_output_13;
     while(List_try_next(_x2c_macro_object_14, &(_x2c_macro_cursor_14), &(_x2c_macro_cursor_output_13))){
-      row = Var_list(_x2c_macro_cursor_output_13);
+      row = Var_list_payload(_x2c_macro_cursor_output_13);
       {
         String name, value;
         List _x2c_destructure_0 = row;
