@@ -67,9 +67,9 @@ Var Compiler.meta_argument(
     match (node)
       case %(expr ? (meta-cap ?captured)): {
         if (c.sym.is_named_value_type(want, "TypeInfo"))
-          return meta_type_description(captured);
+          return MetaContext.type_description(captured);
         if (c.sym.is_named_value_type(want, "Source"))
-          return meta_source_description(captured);
+          return MetaContext.source_description(captured);
       }
   match (node) {
     case %(expr ? (meta-cap ?captured)):
