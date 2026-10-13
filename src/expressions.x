@@ -1359,7 +1359,7 @@ static void _check_unit_static(
   if (!is_source_file(c.filename)) return;
   List owner = c.sym.get(%("unit-static" $spelling));
   if (!owner) return;
-  String file = c.display_path(home_absolute_path(owner.car()));
+  String file = c.display_path(Compiler.absolute_home_path(owner.car()));
   $report.type.function_private(c, spelling, file, origin);
 }
 

@@ -20,7 +20,7 @@ String Compiler.fresh_name(Compiler c, String stem) {
 */
 List Compiler.gensym(Compiler c) {
   String owner = c.filename
-    ? home_portable_path(c.canonical_path(c.filename)) : "";
+    ? Compiler.portable_path(c.canonical_path(c.filename)) : "";
   String key = %"gensym:$owner";
   Var stored;
   int count = c.names.counters.try_get(key, stored) ? stored.int() + 1 : 1;

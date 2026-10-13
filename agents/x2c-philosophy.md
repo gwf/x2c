@@ -96,7 +96,7 @@ captures a value; by itself it does not establish that value's type.
 | Fixture parsed AST shapes | verified | `Compiler.full_parse` | AST fixtures |
 | Fixture transforms | verified | `Compiler.transform` | transform fixtures |
 | Fixture emission | verified | `Compiler.emit` | emit fixture |
-| Fixture C/H output | verified | `generate_code` | C/H fixtures |
+| Fixture C/H output | verified | `Compiler.generate_code` | C/H fixtures |
 | Fixture native behavior | verified | generated programs | runtime fixtures |
 | Parse diagnostic output | verified | `Compiler.full_parse` | error fixture |
 | Type-owned initialization | verified | parser/generator | fixtures/example |
@@ -116,7 +116,7 @@ captures a value; by itself it does not establish that value's type.
 | Promoted immutable literal caching | verified | expression lowering, cache and generator | promoted-string-cache fixture |
 | Match transform dump | verified | `String.repr` | transform fixture |
 | Pooled interning | verified | `lib/pool.x` (`Pool.retain*`/`.release`/`.insert`/`.lookup`/`.owns`), `String.promote`, `List.promote` | Pool suite |
-| Unit interfaces | verified | `interface_text`/`_interface_read` (`src/collect.x`), `<stem>.xi` beside generated C | `run-header-cache.sh`, `run-artifact-atomicity` |
+| Unit interfaces | verified | `Compiler.interface_text`/`_interface_read` (`src/collect.x`), `<stem>.xi` beside generated C | `run-header-cache.sh`, `run-artifact-atomicity` |
 | Batch-compilation memory brackets | partial | `src/main.x` per-unit `Scope`/pool brackets, the per-unit `Context` in `src/frontend.x` | batch/solo output parity in `run-header-cache.sh`; no probe yet asserts the pool-release/no-leak discipline directly |
 
 ## Verified contracts

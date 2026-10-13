@@ -240,7 +240,7 @@ static Var _macro_pattern_argument(Compiler c) {
     element = c.parse_list_literal();
   }
   Var value = c.match_pattern_value(element);
-  if (!match_value_is_static(value))
+  if (!Compiler.match_value_is_static(value))
     $report.parse.macro_pattern_static(c, origin);
   return value;
 }

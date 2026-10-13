@@ -46,19 +46,19 @@ static macro Stmt $report.emit.file_write(Expr $c, Expr $failure) {
     work to the compiler and is not idempotent. Failures are reported as
     `emit` diagnostics.
 */
-void generate_code(Compiler c, List ast, String dir) {
+void Compiler.generate_code(Compiler c, List ast, String dir) {
   ast = _without_trivia(ast);
   String basename = %"${dir.rstrip("/")}/${Path.stem(c.filename)}";
   List outputs = _generated_code(c, ast, basename);
-  String interface = c.source_facts ? NULL : interface_text(c);
+  String interface = c.source_facts ? NULL : c.interface_text();
   if (interface) outputs = outputs.append(%("$basename.xi" $interface));
   _publish_files(c, outputs);
 }
 
 /** Returns the generated header and source of the lowered `ast` as `(hfile
     htext cfile ctext)`, named from `basename`, without writing them. It
-    affects the compiler as `generate_code` does. */
-List generate_code_text(Compiler c, List ast, String basename) =>
+    affects the compiler as `Compiler.generate_code` does. */
+List Compiler.generate_code_text(Compiler c, List ast, String basename) =>
   _generated_code(c, _without_trivia(ast), basename);
 
 static List _without_trivia(List ast) =>
@@ -633,7 +633,7 @@ static void _add_alias(Partition &p, List alias, Type type) {
 
 /* Each conditional group takes the position where its first marker opens. */
 static void _add_preproc(Partition &p, List node, String content) {
-  Symbol kind = preproc_conditional_kind(content);
+  Symbol kind = Compiler.preproc_conditional_kind(content);
   if (kind == <open>) p.open.push(p.header.len());
   if (kind && p.open.len()) _mark_conditional(p, node, kind);
   else _place_directive(p, node, content);
@@ -650,7 +650,7 @@ static void _place_directive(
   Partition &p, List node, String content) {
   if (_is_pragma_once(content)) return;
   int angle = 0;
-  String target = preproc_include_target(content, angle);
+  String target = Compiler.preproc_include_target(content, angle);
   if (target) _add_include(p, node, target, angle);
   else _publish_directive(p, node);
 }
@@ -730,7 +730,7 @@ static List _typedef_forwards(List items, List earlier, Compiler c) {
         _add_forwards(out, candidates, first, available, base, moved);
       case %(preproc ?(String text)) if (c): {
         int angle = 0;
-        String target = preproc_include_target(text, angle);
+        String target = Compiler.preproc_include_target(text, angle);
         if (target) _add_forwards(
           out, candidates, first, available,
           c.include_type_dependencies(target, angle, included), moved);
@@ -929,7 +929,7 @@ static Anchors _anchors(List source, int errors) {
     if (errors && at.error < 0 && _needs_errors(item)) at.error = here;
     if (at.function >= 0 && (!errors || at.error >= 0)) break;
     match (item) case %(preproc ?(String content)): {
-      Symbol kind = preproc_conditional_kind(content);
+      Symbol kind = Compiler.preproc_conditional_kind(content);
       if (kind == <open> && !depth) opening = position;
       if (kind == <open>) depth++;
       else if (kind == <close> && depth) depth--;
@@ -1045,7 +1045,7 @@ static List _shutdown_registration(Compiler c, List source) {
 }
 
 /* The conditional arms around each definition of the function `name`, in
-   source order, each as `preproc_track_arms` keeps them. A definition
+   source order, each as `Compiler.preproc_track_arms` keeps them. A definition
    outside every conditional group is always compiled, which gives NULL. */
 static List _definition_arms(List source, String name) {
   List arms = NULL, found = NULL;
@@ -1057,7 +1057,7 @@ static List _definition_arms(List source, String name) {
           found = cons(arms, found);
         }
       case %(preproc ?(String content)):
-        arms = preproc_track_arms(arms, content);
+        arms = Compiler.preproc_track_arms(arms, content);
     }
   return found.reverse();
 }
@@ -1068,7 +1068,7 @@ static List _within_definitions(List found, List statements) {
   if (!found) return statements;
   Array out = [];
   foreach (List arms, found)
-    foreach (List item, preproc_within_arms(arms, statements)) out.push(item);
+    foreach (List item, Compiler.preproc_within_arms(arms, statements)) out.push(item);
   return out.list_free();
 }
 
@@ -1147,7 +1147,7 @@ static List _forward_declarations(
     if (node.car() == <typedef> && node in f.seen) continue;
     if (source_includes) match (node) case %(preproc ?(String text)): {
       int angle = 0;
-      String target = preproc_include_target(text, angle);
+      String target = Compiler.preproc_include_target(text, angle);
       if (target)
         c.include_function_declarations(target, angle, f.available);
     }
@@ -1214,7 +1214,7 @@ static List _move_bodies(List source, Map inline_bodies) {
       continue;
     }
     match (node) case %(preproc ?content):
-      arms = preproc_track_arms(arms, content);
+      arms = Compiler.preproc_track_arms(arms, content);
     out.push(node);
   }
   _place_bodies(out, bodies, NULL);
@@ -1229,10 +1229,10 @@ static Map _undef_positions(List source) {
   int position = 0;
   foreach (List node, source) {
     match (node) case %(preproc ?(String content)): {
-      Symbol kind = preproc_conditional_kind(content);
+      Symbol kind = Compiler.preproc_conditional_kind(content);
       if (kind == <open>) open.push(position);
       else if (kind == <close> && open.len()) open.take_last();
-      else if (preproc_directive(content).startswith("undef"))
+      else if (Compiler.preproc_directive(content).startswith("undef"))
         _mark_undef(positions, open, position);
     }
     position++;
@@ -1258,7 +1258,7 @@ static void _place_bodies(Array out, Array bodies, List arms) {
       continue;
     }
     List reopened = written.head(written.len() - open);
-    foreach (List item, preproc_within_arms(reopened, %(${pending.car()})))
+    foreach (List item, Compiler.preproc_within_arms(reopened, %(${pending.car()})))
       out.push(item);
   }
   bodies.resize(kept);

@@ -22,7 +22,7 @@ compiler builds and projects using `etc/x2c.mk` include them, so public
 generated-header changes rebuild their consumers. A clean build is a recovery
 and diagnostic tool, not a substitute for dependency tracking.
 
-A shipped component, one of the prelude sources `compiler_prelude_sources`
+A shipped component, one of the prelude sources `Compiler.prelude_sources`
 lists, such as `src/component-access.x`, belongs to the compiler that links
 it, as the kernel does. That compiler runs its linked copies of the
 component's translators even after the source changes. It also skips a

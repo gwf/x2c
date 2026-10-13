@@ -157,7 +157,7 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
       if (c.macro_holes) return;
       c.group_meta_function(fn);
       if (c.meta_build) return;
-      if (!macro_library_filling() && !c.shares_meta_definition(name))
+      if (!Compiler.library_filling() && !c.shares_meta_definition(name))
         _install_stub(c, name, ((List) c.meta_group[-1]).last(), NULL, marker);
     }
 }
@@ -175,7 +175,7 @@ void Compiler.install_collected_meta_function(
     return;
   /* The definition depends on the compile-time libraries even while the
      shared session that will answer it is being filled. */
-  if (macro_library_filling()) {
+  if (Compiler.library_filling()) {
     c.add_library_dependencies();
     return;
   }
@@ -201,7 +201,7 @@ static int _install_included_meta(
   String name = _native_meta_name(c, declaration, marker);
   c.install_project_meta_effect(
     %(project-meta $name ${c.func_signature(type)}
-      ${home_portable_path(file)}));
+      ${Compiler.portable_path(file)}));
   return 1;
 }
 
@@ -482,7 +482,7 @@ static Var _shipped_callee(Compiler c, String name) {
 static int _shipped_definition(void) {
   String file = MetaContext.current().definition_file;
   if (!file || file.startswith("<")) return 0;
-  return !!linked_meta_provider_source(home_portable_path(file));
+  return !!Compiler.linked_meta_provider_source(Compiler.portable_path(file));
 }
 
 static Var _apply_linked(Func function, List arguments) {
@@ -532,7 +532,7 @@ void Compiler.record_project_meta_effect(
   if (c.source_private < 0) return;
   Type type = declaration.type_from_ast().canonicalize();
   if (type.is_static()) return;
-  String path = home_portable_path(absolute_path(c.filename));
+  String path = Compiler.portable_path(absolute_path(c.filename));
   String name = _native_meta_name(c, declaration, marker);
   if (%(function $name) in c.sym.file_statics()) return;
   c.sym.set(
@@ -612,7 +612,7 @@ int Compiler.project_meta_uses_linked(
   Map linked = _linked_module();
   if (!(name in linked)) return 0;
   Map hashes = c.meta_provider_hashes(provider);
-  $let(c.filename, home_absolute_path(provider))
+  $let(c.filename, Compiler.absolute_home_path(provider))
   $let(c.meta_hashes, hashes) $let(c.meta_calls, {})
     return _linked_copy(c, name, linked);
 }
@@ -630,7 +630,7 @@ void Compiler.record_native_meta_effect(
   Compiler c, List declaration, Token marker) {
   if (c.source_private < 0) return;
   if (!declaration.type_from_ast().is_function()) return;
-  String path = home_portable_path(absolute_path(c.filename));
+  String path = Compiler.portable_path(absolute_path(c.filename));
   Type type = declaration.type_from_ast().canonicalize();
   if (type.is_static()) return;
   String name = _native_meta_name(c, declaration, marker);
@@ -943,7 +943,7 @@ List Compiler.native_meta_targets(List paths) {
 static int _declared_in(Var key, List paths) {
   match (key)
     case %("source-node" (declaration ?(String path) ?)):
-      return home_absolute_path(path) in paths;
+      return Compiler.absolute_home_path(path) in paths;
   return 0;
 }
 
@@ -1026,7 +1026,7 @@ int Compiler.bind_linked_meta(Compiler c, List fn, Type type) {
   c.ensure_macro_lisp();
   if (!c.native_meta_accepts(function, c.func_signature(type))) return 0;
   /* Shared preload keeps private helpers in the native code alone. */
-  if (!(macro_library_filling() && fn.cadr().type().is_static()) &&
+  if (!(Compiler.library_filling() && fn.cadr().type().is_static()) &&
       (!c.macro_lisp.try_get(name, bound) || bound != function))
     c.macro_lisp.set_global(name, function);
   if (c.meta_reaches_compile_time(fn)) c.record_comptime(name);
@@ -1048,10 +1048,10 @@ static Map _linked_module(void) {
 }
 
 /** Reports whether the compiler links the `meta` function `name`. */
-int links_meta_function(String name) => name in _linked_module();
+int Compiler.links_meta_function(String name) => name in _linked_module();
 
 /** Returns a linked provider's source and dependency hashes. */
-List linked_meta_provider_source(String provider) {
+List Compiler.linked_meta_provider_source(String provider) {
   _linked_module();
   return linked_hashes[provider];
 }
@@ -1073,14 +1073,14 @@ static int _linked_texts_match(
   Compiler c, String name, Map linked, Map reached) {
   Var hash, own, names = void;
   String file = c.canonical_path(c.filename);
-  String key = %"${home_portable_path(file)}:$name";
+  String key = %"${Compiler.portable_path(file)}:$name";
   if (!c.meta_hashes.try_get(name, own)) {
     Var advertisement;
     if (c.project_meta.try_get(name, advertisement)) {
       Var (_, provider) = advertisement;
       Map hashes = c.meta_provider_hashes(provider);
       if (!(name in hashes)) return 0;
-      $let(c.filename, home_absolute_path(provider))
+      $let(c.filename, Compiler.absolute_home_path(provider))
       $let(c.meta_hashes, hashes) $let(c.meta_calls, {})
         return _linked_texts_match(c, name, linked, reached);
     }
@@ -1089,7 +1089,7 @@ static int _linked_texts_match(
   /* A prelude component's definitions belong to this compiler, as its
      kernel does: an edited one keeps its linked copy until a compiler is
      built from the edit, so no translation needs a helper for it. */
-  if (is_prelude_source(file)) return name in linked;
+  if (Compiler.is_prelude_source(file)) return name in linked;
   if (key in reached) return 1;
   reached[key] = 1;
   if (linked_hashes.try_get(name, hash)) {
@@ -1101,7 +1101,7 @@ static int _linked_texts_match(
   else if (!(name in linked) && !(name in c.native_meta)) return 0;
   c.meta_calls.try_get(name, names);
   if (names is <string>)
-    return c.linked_meta_definitions_current(home_absolute_path(names));
+    return c.linked_meta_definitions_current(Compiler.absolute_home_path(names));
   if (names is <list>)
     foreach (String callee, names.list())
       if (!_linked_texts_match(c, callee, linked, reached)) return 0;
@@ -1226,7 +1226,7 @@ void Compiler.preload_native_module(String path) {
    module's code, so a module from another compiler is rejected before it
    is loaded. */
 static int _module_stamp(String path) {
-  String expected = build_module_stamp();
+  String expected = Compiler.module_stamp();
   if (!expected)
     $report.native.compiler_read(path);
   File input = fopen(path, "rb");
@@ -1354,4 +1354,4 @@ int Compiler.links_extension(String name) {
     when the compiler links none. Project meta code links it. */
 String Compiler.extension_archive(void) =>
   extensions ? %"${x2c_get_executable()}.extensions/"
-               + %"${compiler_identity()}.a" : NULL;
+               + %"${Compiler.identity()}.a" : NULL;

@@ -99,7 +99,7 @@ static String _tool(String explicit, String name, String fallback) {
 }
 
 static String _recorded_tool(String name) {
-  String home = home_dir(), record = NULL;
+  String home = Compiler.home_dir(), record = NULL;
   if (!home) return NULL;
   try record = Path.read_text(%"$home/lib/x2c/toolchain");
   catch %(not-found *): {}
@@ -115,7 +115,7 @@ static String _recorded_tool(String name) {
    runtime.
 */
 static void _layout(Toolchain t) {
-  String home = home_dir(), stage = stage_dir();
+  String home = Compiler.home_dir(), stage = Compiler.stage_dir();
   String executable = x2c_get_executable(), prefix = home;
   if (!prefix)
     prefix = Path.dirname(executable ? Path.dirname(executable) : ".");
@@ -388,9 +388,9 @@ static List _cpp_arguments(
     "-D__restrict=" "-D__extension__=" "-Wno-unicode"
     "-Wno-invalid-pp-token"
     @{t.keep_system_includes > 0 ? %("-fkeep-system-includes") : NULL}
-    "-I" "." @{_includes("-I", cpp_include_dirs())}
+    "-I" "." @{_includes("-I", Compiler.cpp_include_dirs())}
     @{_includes("-I", include_dirs)}
-    @{_includes("-idirafter", default_include_dirs())}
+    @{_includes("-idirafter", Compiler.default_include_dirs())}
     @{t.cpp_args} @{macros ? %("-imacros" $macros) : NULL}
     "-MMD" "-MF" $depfile "-MT" "x2c-dependencies"
     "-include" $source "-");

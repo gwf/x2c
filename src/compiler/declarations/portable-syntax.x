@@ -150,7 +150,7 @@ static List _macro_row(Compiler c, List row, int thaw) {
   match (row) {
     case %(origin ?location):
       return %(origin ${_declaration_location(location, 0)});
-    case %(file ?path): return %(file ${home_portable_path(path)});
+    case %(file ?path): return %(file ${Compiler.portable_path(path)});
   }
   return thaw ? c.thaw_declaration_syntax(row)
               : c.freeze_declaration_syntax(row);
@@ -169,5 +169,5 @@ static List _declaration_location(List location, int thaw) {
 
 static String _declaration_path(String path, int thaw) {
   if (!path || path.startswith("<")) return path;
-  return thaw ? home_absolute_path(path) : home_portable_path(path);
+  return thaw ? Compiler.absolute_home_path(path) : Compiler.portable_path(path);
 }

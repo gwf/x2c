@@ -58,7 +58,7 @@ void Compiler.use_meta_toolchain(String cc, String include_dir) {
    because it calls the compiler's own runtime: a built checkout stage's
    `lib`, the checked-in bootstrap's, or else `include_dir`. */
 static String _runtime_headers(String include_dir) {
-  String stage = stage_dir();
+  String stage = Compiler.stage_dir();
   if (stage && Path.is_file(%"$stage/lib/x2c.h")) return %"$stage/lib";
   String executable = x2c_get_executable(), root = x2c_get_root();
   if (executable && root && Path.basename(executable) == "x2c-bootstrap" &&
@@ -231,7 +231,7 @@ static List _emit(
     /* The unit's protocol adapters and their registration belong to the
        program; group code reaches the runtime's own. */
     List ast = c.transform(lowered);
-    code = generate_code_text(c, ast, stem);
+    code = c.generate_code_text(ast, stem);
   }
   catch %(?kind *detail): {
     List entries = c.diagnostics.entries();
@@ -419,7 +419,7 @@ static Map _placeholders(Compiler c) {
 static Var _group_include(Compiler c, Var node, String lib) {
   match (node) case %(preproc ?(String text)): {
     int angle = 0;
-    String target = preproc_include_target(text, angle);
+    String target = Compiler.preproc_include_target(text, angle);
     if (!target || !is_source_file(target)) break;
     String path = collect_resolve_include(
       c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
@@ -892,7 +892,7 @@ void Compiler.write_meta_build(Compiler c) {
   String base = %"$meta_build_directory/group-$index";
   String failure = _unbound(c);
   List code = failure ? NULL : _emit(
-    c, build_module_stamp(), %"meta_group_$index", %"_$index", failure);
+    c, Compiler.module_stamp(), %"meta_group_$index", %"_$index", failure);
   Array sources = [];
   foreach (Var (path, _), c.deps) sources.push(path);
   Path.write_text(%"$base.deps", "\n".join(sources.list_free()));
@@ -951,7 +951,7 @@ static String _stage(Compiler c, String &failure) {
    new build. Returns its path, or NULL with `failure` set when there is no
    cache or the group does not build. */
 static String _module(Compiler c, String &failure) {
-  String root = script_cache_root(), stamp = build_module_stamp();
+  String root = Compiler.cache_root(), stamp = Compiler.module_stamp();
   if (!root || !stamp) {
     failure = "native modules need a cache directory and a known compiler";
     return NULL;

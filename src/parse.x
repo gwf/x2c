@@ -635,7 +635,7 @@ List Compiler.parse_import_declaration(Compiler c) {
   if (c.shallow)
     c.sym.set(
       %("source-node" (package-import
-        ${home_portable_path(Path.absolute(c.filename))} ${start.pos})),
+        ${Compiler.portable_path(Path.absolute(c.filename))} ${start.pos})),
       %(package-import $name $alias $members));
   return %(import $name $alias);
 }
@@ -2253,7 +2253,7 @@ static List _install_declarator(
   if (binding)
     _method_facts(c, binding, method, self_signature, preserved_self);
   if (binding && method && c.token && !declared_type.is_static()) {
-    String path = home_portable_path(Path.absolute(c.filename));
+    String path = Compiler.portable_path(Path.absolute(c.filename));
     String owner = c.package_spelling(method.car());
     c.sym.set(
       %("source-node" (interface-types $path ${c.token.pos} $exact)),
@@ -3663,7 +3663,7 @@ static struct Token source_clauses[] = {
 };
 
 /** The source clause `kind`, which the binder parses when it reaches it. */
-Var source_clause(Symbol kind) {
+Var Compiler.source_clause(Symbol kind) {
   Token clause = source_clauses;
   while (clause.type != kind) clause++;
   return Token.var(clause);
@@ -3688,21 +3688,21 @@ List Compiler.bind_source_statement(Compiler c) {
     case <if>:
       return _bind_if_else(
         c,
-        source_clause(<test>), source_clause(<then>), source_clause(<else>));
+        Compiler.source_clause(<test>), Compiler.source_clause(<then>), Compiler.source_clause(<else>));
     case <while>:
-      return _bind_while(c, source_clause(<test>), source_clause(<body>));
+      return _bind_while(c, Compiler.source_clause(<test>), Compiler.source_clause(<body>));
     case <do>:
-      return _bind_do(c, source_clause(<do>), source_clause(<test>));
+      return _bind_do(c, Compiler.source_clause(<do>), Compiler.source_clause(<test>));
     case <match>:
-      return _bind_match(c, source_clause(<test>), source_clause(<arms>));
+      return _bind_match(c, Compiler.source_clause(<test>), Compiler.source_clause(<arms>));
     case <try>:
       return _bind_try(
-        c, source_clause(<try>), source_clause(<catches>),
-        source_clause(<finally>));
+        c, Compiler.source_clause(<try>), Compiler.source_clause(<catches>),
+        Compiler.source_clause(<finally>));
   }
   return _bind_for(
-    c, source_clause(<init>), source_clause(<cond>), source_clause(<next>),
-    source_clause(<body>));
+    c, Compiler.source_clause(<init>), Compiler.source_clause(<cond>), Compiler.source_clause(<next>),
+    Compiler.source_clause(<body>));
 }
 
 static List _bind_do(Compiler c, Var body, Var condition) {

@@ -68,13 +68,13 @@ static void _real_paths_shutdown(void) {
     declarations, and generated identities spell paths this way, so they do
     not depend on where the home is installed.
 */
-String home_portable_path(String path) {
+String Compiler.portable_path(String path) {
   String prefix = %"${x2c_get_root()}/";
   return path.startswith(prefix) ? path[prefix.len():] : path;
 }
 
-/** Returns the absolute path that a `home_portable_path` spelling names. */
-String home_absolute_path(String spelling) =>
+/** Returns the absolute path that a `Compiler.portable_path` spelling names. */
+String Compiler.absolute_home_path(String spelling) =>
   spelling.startswith("/") ? spelling : %"${x2c_get_root()}/$spelling";
 
 /** Merges one translation dependency, preserving an existing content hash. */

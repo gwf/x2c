@@ -1181,7 +1181,7 @@ static Var _lower_content(Lowering &l, List type, Var content) {
     case %(literal ("Symbol") ? ?symbol): return %(quote $symbol);
     case %(literal ("Var") "void"): return %(C.void);
     case %(literal (* char) ?(String text)):
-      return literal_text_value(text);
+      return Compiler.literal_text_value(text);
     case %(literal ("String") ?(String text)): return text;
     case %(literal ?ltype ?(String text)):
       return _lower_number(l, ltype, text);

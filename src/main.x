@@ -111,8 +111,8 @@ static void _translate_unit(
   if (_inspect_parsed(unit, filename, dump)) return;
   List ast = _transform_ast(c, c.generate_protocol_adapters(unit.ast));
   if (_inspect_transformed(c, ast, dump)) return;
-  generate_code(c, ast, output_dir);
-  if (!translation_depfile_write(request, c, filename, output_dir)) exit(1);
+  c.generate_code(ast, output_dir);
+  if (!c.write_depfile(request, filename, output_dir)) exit(1);
   // A unit that reaches here has no errors, so any diagnostic is a warning.
   if (request.fatal_warnings && c.diagnostics()) exit(1);
 }
@@ -358,7 +358,7 @@ static Map _package_names(Translation &t, List roots) {
     try text = Path.read_text(depfile);
     catch %((!or not-found io-fail) *): continue;
     foreach (String dependency, translation_depfile_parse(text)) {
-      String package = package_directory(roots, dependency);
+      String package = Compiler.package_directory(roots, dependency);
       if (package) names[Path.basename(package)] = 1;
     }
   }
@@ -626,7 +626,7 @@ static int _build_target(CliRequest request, Array commands) {
      its Scope allocations and canonical values so a manifest dependency is
      reclaimed before the next target starts. */
   Context target = $auto(Context.open_isolated_named("build target"));
-  defer macro_library_reset();
+  defer Compiler.reset_macro_library();
   Build b = request.prepare();
   request.cc = target.export(request.cc);
   request.meta_cc = target.export(request.meta_cc);
@@ -751,19 +751,19 @@ static List _env_rows(CliRequest request) {
   Toolchain toolchain = Toolchain.new(request);
   String executable = x2c_get_executable();
   String roots = ":".join(request.package_roots());
-  interface_configure(request.out_dir, 0);
+  Compiler.configure_interfaces(request.out_dir, 0);
   return %(
     ("home" ${x2c_get_root()})
     ("executable" $executable)
-    ("libexec" ${home_libexec()})
-    ("identity" ${compiler_identity()})
+    ("libexec" ${Compiler.home_libexec()})
+    ("identity" ${Compiler.identity()})
     ("include_dir" ${toolchain.include_dir})
     ("runtime_lib" ${toolchain.runtime_lib})
-    ("prelude" ${interface_prelude()})
+    ("prelude" ${Compiler.prelude_interface()})
     ("package_dirs" $roots)
     ("cc" ${toolchain.cc})
     ("ar" ${toolchain.ar})
-    ("cache_dir" ${script_cache_root()}));
+    ("cache_dir" ${Compiler.cache_root()}));
 }
 
 // external commands
@@ -781,7 +781,7 @@ static void _run_external(int argc, char **argv) {
 
 static String _external_path(const char *name) {
   if (!_external_name(name) || CliRequest.is_builtin(name)) return NULL;
-  String libexec = home_libexec();
+  String libexec = Compiler.home_libexec();
   if (!libexec) return NULL;
   String path = %"$libexec/x2c-$name";
   return Path.is_executable(path) ? path : NULL;
@@ -795,8 +795,8 @@ static int _external_name(const char *name) {
 }
 
 static void _exec(String path, char **args) {
-  String home = home_dir(), executable = x2c_get_executable();
-  String identity = compiler_identity();
+  String home = Compiler.home_dir(), executable = x2c_get_executable();
+  String identity = Compiler.identity();
   if (home) setenv("X2C_HOME", home, 1);
   if (executable) setenv("X2C", executable, 1);
   if (identity) setenv("X2C_IDENTITY", identity, 1);

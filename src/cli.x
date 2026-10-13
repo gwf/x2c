@@ -406,7 +406,7 @@ CliRequest CliRequest.parse(int argc, char **argv) {
   if (command) return _parse_command(args, *command);
   if (first == "--help" || first == "-h") _help_exit(0, 0);
   if (first == "--version" || first == "-V") {
-    puts(cli_version());
+    puts(Compiler.version());
     exit(0);
   }
   if (first == "help") _help_command(args);
@@ -985,7 +985,7 @@ static void _print_top_help(void) {
 /* Installed external commands list themselves in `commands.txt`, one
    `name|maturity|summary` line each. */
 static void _print_external_commands(void) {
-  String libexec = home_libexec();
+  String libexec = Compiler.home_libexec();
   File manifest = libexec ? fopen(%"$libexec/commands.txt", "r") : NULL;
   if (!manifest) return;
   char *line = NULL, size_t capacity = 0;
@@ -1272,7 +1272,7 @@ int CliRequest.is_builtin(const char *word) =>
   !strcmp(word, "help") || _command_row(word) != NULL;
 
 /** Returns the version line `--version` prints, without a newline. */
-String cli_version(void) => "x2c 0.15.0";
+String Compiler.version(void) => "x2c 0.15.0";
 
 /** Returns whether `request` selects a terminating inspection or dump mode. */
 int CliRequest.inspects(CliRequest request) => request.dump != 0;
@@ -1284,7 +1284,7 @@ int CliRequest.inspects(CliRequest request) => request.dump != 0;
     `List` only when the home directory is appended.
 */
 List CliRequest.package_roots(CliRequest request) {
-  String home = home_packages();
+  String home = Compiler.home_packages();
   if (!Path.is_dir(home)) return request.package_dirs;
   return request.package_dirs.append(cons(home, NULL));
 }

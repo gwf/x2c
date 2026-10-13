@@ -77,7 +77,7 @@ Recovered at 8b78c595, against dev:
   `Type.is_text`, `Type.protocol_member`; pure Type algorithms in
   `lib/type.x` (617 lines moved out of `src/type.x`).
 - `src/component-access.x` (132 lines) is a compiler prelude source,
-  listed once in `compiler_prelude_sources()` and once in the payload, and
+  listed once in `Compiler.prelude_sources()` and once in the payload, and
   linked through the generated `src/linked-meta.x`. Its 60 lines of
   transform arms are gone.
 - The declaration-ownership repair in `collect.x` and `generate.x`, which
@@ -358,7 +358,7 @@ measure member resolution per call, then decide whether the Maps go.
 ## Single-file components and a defined bootstrap transition
 
 The foundation is close: a shipped component is one file, listed in
-`compiler_prelude_sources()` and the payload, and linked through the
+`Compiler.prelude_sources()` and the payload, and linked through the
 generated `linked-meta.x`. Generate both lists from `src/component-*.x`
 and the touch points outside the component file reach zero.
 

@@ -19,7 +19,7 @@ void Compiler.queue_declaration_effect(
 }
 
 static List _declaration_source_key(Compiler c, Token token) {
-  String path = home_portable_path(c.canonical_path(c.filename));
+  String path = Compiler.portable_path(c.canonical_path(c.filename));
   return %("source-node" (declaration $path ${token.pos}));
 }
 

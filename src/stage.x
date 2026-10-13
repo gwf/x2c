@@ -184,7 +184,7 @@ static Var _constant_leaf(Compiler c, List expr) {
       if (text is <string>): return text;
     case %(expr (* char) ${$source_literal_content(%(? ?text))})
       if (text is <string>):
-      return literal_text_value(text);
+      return Compiler.literal_text_value(text);
     case %(expr ?type ${$source_literal_content(%(? ?text))})
       if (text is <string>):
       return ((Type) type).numeric_literal_value(text);
@@ -209,7 +209,7 @@ static Var _joined_constant(Compiler c, Var left, Var right) {
 /** Returns the value of a String or character literal from its source
     `spelling`, quotes included: adjacent pieces are unescaped on their own
     and joined, as C does, and a character is its code. */
-Var literal_text_value(String spelling) {
+Var Compiler.literal_text_value(String spelling) {
   int len = spelling.len();
   if (len >= 2 && spelling[0] == '"') {
     String text = "";

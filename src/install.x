@@ -276,7 +276,7 @@ static void _mark_source(Install &i, String staged, String name) {
   if (!version) version = _installed_version(%"${i.packages}/$name");
   Map record = {
     "package": name, "source": i.url ? i.url : Path.absolute(i.spec),
-    "x2c_version": cli_version()
+    "x2c_version": Compiler.version()
   };
   if (version) record["version"] = version;
   if (i.sha256) record["sha256"] = i.sha256;
@@ -301,7 +301,7 @@ static void _publish(String staged, String packages, String name) {
 
 static void _check_bundle(CliRequest request, String package, String name) {
   String built = _marker_string(%"$package/BUNDLE.json", "x2c_version");
-  String current = cli_version();
+  String current = Compiler.version();
   if (!built) $report.install.bundle_version_missing(name);
   if (built != current && !request.force)
     $report.install.bundle_version_wrong(name, built, current);
@@ -450,7 +450,7 @@ static List _index_row(CliRequest request, String name, String work) {
 // host tools
 
 static String _home_packages(String command) {
-  String packages = home_packages();
+  String packages = Compiler.home_packages();
   if (!packages)
     $report.install.home_missing(command);
   return packages;

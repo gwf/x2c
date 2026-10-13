@@ -411,7 +411,7 @@ static int _arm_directives(
    and whether one ended any of its branches; `saw_default` is the state of
    the current branch. */
 static int _default_after_directive(Array groups, int saw_default, List d) {
-  Symbol kind = preproc_conditional_kind(d.cadr());
+  Symbol kind = Compiler.preproc_conditional_kind(d.cadr());
   if (kind == <open>) groups.push(%($saw_default $saw_default));
   else if (kind && groups.len()) {
     (int before, int any) = groups.take_last();
@@ -436,7 +436,7 @@ static List _match_case(Compiler c) {
   else
     $report.parse.match_arm(c);
   return c.bind_match_arm(
-    pattern, source_clause(<arm>), start, peek == <case>, types);
+    pattern, Compiler.source_clause(<arm>), start, peek == <case>, types);
 }
 
 /* Typed captures rewrite the pattern after `case` and leave their rows in
@@ -586,7 +586,7 @@ static List _catch_arm(Compiler c, int &is_default, List handle) {
   List pattern = NULL;
   if (c.test(<:>)) is_default = 1;
   else pattern = _catch_filter(c);
-  return c.bind_catch_arm(pattern, source_clause(<catch>), start, handle);
+  return c.bind_catch_arm(pattern, Compiler.source_clause(<catch>), start, handle);
 }
 
 /* Directives before a later `catch` or `finally` follow the arm. */
@@ -650,7 +650,7 @@ static int _take_directives(Compiler c, Array items) {
 /* How many conditional groups the directive `s` opens, or -1 when it
    closes one. */
 static int _group_step(String s) {
-  Symbol kind = preproc_conditional_kind(s);
+  Symbol kind = Compiler.preproc_conditional_kind(s);
   return kind == <open> ? 1 : kind == <close> ? -1 : 0;
 }
 
@@ -675,7 +675,7 @@ static Symbol _arm_end(List run) {
   int level = 0;
   Symbol end = 0;
   foreach (List directive, run) {
-    Symbol kind = preproc_conditional_kind(directive.cadr());
+    Symbol kind = Compiler.preproc_conditional_kind(directive.cadr());
     if (kind == <open>) level++;
     else if (!kind) continue;
     else if (!level) end = kind;

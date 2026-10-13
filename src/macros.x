@@ -667,7 +667,7 @@ static String _scope_owner(Compiler c) {
    absolute identity. */
 static String _owner_spelling(Compiler c) {
   String path = c.canonical_path(Path.absolute(c.filename));
-  String owner = home_portable_path(path);
+  String owner = Compiler.portable_path(path);
   Var package_root = c.package ? c.package_roots[c.package] : void;
   if (package_root is not <string>) return owner;
   String prefix = %"${c.canonical_path(Path.absolute(package_root))}/";
@@ -792,7 +792,7 @@ static void _naming(Definition &d) {
   if (d.local && d.name == <with>)
     $report.macro.name_with(c, d.start);
   if (spelling.startswith("x2c.") && !c.builtin_defs &&
-      !is_prelude_source(c.source_path(c.filename)))
+      !Compiler.is_prelude_source(c.source_path(c.filename)))
     $report.parse.macro_reserved(c, spelling, d.start);
 }
 
@@ -898,7 +898,7 @@ static void _announce(Definition &d) {
   Compiler c = d.c;
   (void) c.record_origin(d.start);
   d.origin = c.token_location(d.start);
-  d.file = home_portable_path(c.source_path(c.filename));
+  d.file = Compiler.portable_path(c.source_path(c.filename));
   _show(d, _definition_node(d));
 }
 
@@ -2360,7 +2360,7 @@ void Compiler.record_compile_time_effect(
       !c.sym.at_file_scope() ||
       c.builtin_defs || !c.filename ||
       c.filename.startswith("<builtin:")) return;
-  String source = home_portable_path(Path.absolute(c.filename));
+  String source = Compiler.portable_path(Path.absolute(c.filename));
   List key = %("source-node" (compile-time $source ${start.pos}));
   List previous = c.sym.get(key);
   if (previous) row = %(compile-time effects $previous $row);
@@ -2386,7 +2386,7 @@ void Compiler.install_compile_time_effects(Compiler c, List rows) {
     case %(compile-time rewrite *): _install_rewrite(c, row);
     case %(compile-time lisp ?form (source ?path ?site)): {
       Token token = c.thaw_declaration_syntax(site);
-      String file = home_absolute_path(path), text = NULL;
+      String file = Compiler.absolute_home_path(path), text = NULL;
       c.read_source(file, text);
       $let(c.filename, file)
       $let(c.text, text)
@@ -2397,12 +2397,12 @@ void Compiler.install_compile_time_effects(Compiler c, List rows) {
     }
     case %(compile-time import ?path (source ?source ?site)): {
       Token token = c.thaw_declaration_syntax(site);
-      String file = home_absolute_path(source), text = NULL;
+      String file = Compiler.absolute_home_path(source), text = NULL;
       c.read_source(file, text);
       $let(c.filename, file)
       $let(c.text, text)
       $let(c.line_markers, NULL)
-        _import(c, home_absolute_path(path), token);
+        _import(c, Compiler.absolute_home_path(path), token);
     }
     case %(project-meta *): c.install_project_meta_effect(row);
   }
@@ -2546,7 +2546,7 @@ static void _install_rewrite(Compiler c, List row) {
     return;
   }
   match (row) case %(compile-time rewrite ?point ?kind ?name ?shape ?holes): {
-    if (c.builtin_defs && !links_meta_function(name)) return;
+    if (c.builtin_defs && !Compiler.links_meta_function(name)) return;
     RewriteRule rule = _rewrite_rule(
       point, c.thaw_declaration_syntax(kind), name,
       c.thaw_declaration_syntax(shape), c.thaw_declaration_syntax(holes),
@@ -2568,7 +2568,7 @@ static Var _ship_rewrite(Compiler c, List row) {
     Var shared = 0;
     match (row)
       case %(compile-time rewrite ?point ?kind ?name ?shape ?holes): {
-        if (_unit_bound(row) || !links_meta_function(name)) break;
+        if (_unit_bound(row) || !Compiler.links_meta_function(name)) break;
         List thawed = %(${c.thaw_declaration_syntax(kind)}
           ${c.thaw_declaration_syntax(shape)}
           ${c.thaw_declaration_syntax(holes)});
@@ -5144,7 +5144,7 @@ void Compiler.parse_macro_lisp_shallow(Compiler c) {
   String requested = NULL;
   if (_import_path(c, requested)) {
     if (!c.source_private) {
-      String path = home_portable_path(_canonical_path(c, requested, c.token));
+      String path = Compiler.portable_path(_canonical_path(c, requested, c.token));
       c.record_compile_time_effect(
         %(compile-time import $path ${_effect_source(c, c.token)}), c.token);
     }
@@ -5168,14 +5168,14 @@ void Compiler.parse_macro_lisp_shallow(Compiler c) {
 static List _effect_source(Compiler c, Token site) {
   String file = NULL;
   Token placed = c.source_token(site, file);
-  return %(source ${home_portable_path(Path.absolute(file))}
+  return %(source ${Compiler.portable_path(Path.absolute(file))}
     ${c.freeze_declaration_syntax(placed)});
 }
 
 /** Evaluates a queued source Lisp form with its original diagnostic site. */
 void Compiler.evaluate_declaration_effect(
   Compiler c, String form, Token invocation) {
-  List key = %(${home_portable_path(Path.absolute(c.filename))}
+  List key = %(${Compiler.portable_path(Path.absolute(c.filename))}
                ${invocation.pos} $form);
   if (key in c.evaluated_effects ||
       (!library_filling && library_imports && key in library_imports)) return;
@@ -5372,7 +5372,7 @@ String Compiler.source_path(Compiler c, String file) {
 /* An absolute path; the definition keeps the home-portable spelling. */
 static String _definition_file(List definition) {
   String file = definition.assoc(<file>);
-  return !file || file.startswith("<") ? file : home_absolute_path(file);
+  return !file || file.startswith("<") ? file : Compiler.absolute_home_path(file);
 }
 
 /* Reads a compile-time source and records its content hash as a
@@ -5538,7 +5538,7 @@ void Compiler.inherit_library_comptime(Compiler c) {
 
 /** Answers whether the shared compile-time session is still being filled,
     before `lib/meta.x` has defined the syntax builders. */
-int macro_library_filling(void) => library_filling;
+int Compiler.library_filling(void) => library_filling;
 
 /** Returns the published definition keys, or null before publication.
     The borrowed map is the shared session's source identity table.
@@ -5660,7 +5660,7 @@ static void _bind_primitives(Lisp lisp) {
    compile-time Lisp calls; the native Lisp binding algorithms carry the
    `_x2c.` prefix of internal primitives. */
 static void _install_builtins(Lisp lisp) {
-  foreach (Var (name, function), builtin_targets()) {
+  foreach (Var (name, function), Compiler.builtin_targets()) {
     String spelling = name;
     lisp.set_global(
       spelling.startswith("binding_") ? %"_x2c.$spelling" : spelling,
@@ -5725,7 +5725,7 @@ static void _library_shutdown(void) {
 
 /** Ends the shared compile-time library before its build-target Context is
     reclaimed. A later target creates a fresh session in its own Context. */
-void macro_library_reset(void) {
+void Compiler.reset_macro_library(void) {
   _library_shutdown();
   library_filling = 0;
 }

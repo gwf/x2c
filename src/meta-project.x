@@ -83,7 +83,7 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
   }
   _scan(h, inputs);
   String include = NULL, cc = Compiler.meta_cc(include);
-  String root = script_cache_root(), stamp = build_module_stamp();
+  String root = Compiler.cache_root(), stamp = Compiler.module_stamp();
   if (!h.owners.len() || !cc || !root || !stamp) {
     Compiler.use_meta_helper(NULL, NULL, NULL);
     return;
@@ -104,7 +104,7 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
    when an edited `lib/meta.x` it includes leaves the linked copies stale. */
 static int _support_unit(List inputs) {
   if (inputs.len() != 1) return 0;
-  String root = script_cache_root();
+  String root = Compiler.cache_root();
   return root && Path.absolute(inputs.car()).startswith(%"$root/meta/support-");
 }
 
@@ -165,7 +165,7 @@ static void _scan(Helper &h, List inputs) {
     if (meta & 1) _own(h, path, owned);
     foreach (String unit, s.units) _own(h, unit, owned);
   }
-  collect_forget_provisional_entries();
+  Compiler.forget_provisional_entries();
 }
 
 static void _own(Helper &h, String path, Map owned) {
@@ -192,7 +192,7 @@ static int _file(Scan &s, String path) {
   tokens.scan();
   int meta = _file_scope(s, tokens, Path.dirname(path));
   if ((meta & 1) && _compiler_owns(path) &&
-      (is_prelude_source(path) ||
+      (Compiler.is_prelude_source(path) ||
        s.c.linked_meta_definitions_current(path))) meta &= ~1;
   s.seen[path] = meta;
   return meta;
@@ -272,7 +272,7 @@ static int _package(Scan &s, Tokenizer tokens) {
 /* An included source is read once; each meta provider joins `units`. */
 static int _include(Scan &s, String directive, String directory) {
   int angle = 0;
-  String target = preproc_include_target(directive, angle);
+  String target = Compiler.preproc_include_target(directive, angle);
   if (!target || !(target.endswith(".x") || target.endswith(".xp"))) return 0;
   String file = collect_resolve_include(
     s.request.sources, s.request.include_dirs, directory, target, angle);
@@ -410,7 +410,7 @@ static List _build(Helper &h) {
     String failure = _compile(h, index, owner);
     _record(h, index++, failure);
   }
-  collect_forget_provisional_entries();
+  Compiler.forget_provisional_entries();
   return _write_manifest(h, _link(h, count));
 }
 
@@ -527,7 +527,7 @@ static String _support(Helper &h, String &failure) {
     return NULL;
   }
   String key = String.sha256(%"${h.identity}\n${text.sha256()}");
-  String directory = %"${script_cache_root()}/meta/support-$key";
+  String directory = %"${Compiler.cache_root()}/meta/support-$key";
   String object = %"$directory/meta-helper.o";
   if (Path.is_file(object)) return object;
   Path.make_dirs(directory);

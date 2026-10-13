@@ -981,7 +981,7 @@ static List _atom_intern(String spelling) {
 // Normalize #include directives to reference generated headers.
 static List _preproc(Emitter &e, List ast) {
   int angle = 0;
-  String target = preproc_include_target(ast.cadr(), angle);
+  String target = Compiler.preproc_include_target(ast.cadr(), angle);
   if (!target || !is_source_file(target)) return ast.cdr();
   String stem = target[:target.rfind(".")];
   String out = %"#include \"$stem.h\"";

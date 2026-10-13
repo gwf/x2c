@@ -433,7 +433,7 @@ static void _link_packages(Build b, String input, String directory) {
     if (dependency.startswith("search:") || dependency == self ||
         dependency == input)
       continue;
-    String package = package_directory(roots, dependency);
+    String package = Compiler.package_directory(roots, dependency);
     if (package && !_package_built_here(b, roots, package))
       _link_package(b, package);
   }
@@ -446,8 +446,8 @@ static void _link_packages(Build b, String input, String directory) {
 static int _package_built_here(Build b, List roots, String package) {
   foreach (String input, b.request.inputs) {
     String source = Path.absolute(input);
-    if (package_directory(roots, source) == package &&
-        package_source(package, source)) return 1;
+    if (Compiler.package_directory(roots, source) == package &&
+        Compiler.is_package_source(package, source)) return 1;
   }
   return 0;
 }
@@ -489,7 +489,7 @@ static void _link_package(Build b, String package) {
     compiler must match.
 */
 CliRequest Build.module_entry(Build b) {
-  String stamp = build_module_stamp();
+  String stamp = Compiler.module_stamp();
   if (!stamp) driver_error("cannot read the running compiler to stamp");
   Path entry = %"${b.work_dir}/module/x2c_module.x";
   _write_entry(entry, b.units, $source.build.module(stamp));
@@ -1087,7 +1087,7 @@ List Build.script_helpers(Build b) {
   String script = b.request.inputs.car(), root = x2c_get_root();
   List excluded = %("$root/lib/" "$root/include/" "$root/builds/")
     .append(b.request.package_roots().map(%!(dir) => %"$dir/"));
-  List prelude = compiler_prelude_sources().map(
+  List prelude = Compiler.prelude_sources().map(
     %!(String source) => Path.join(root, source));
   String depfile = _unit_file(_unit_dir(b, script), script, ".d");
   Array candidates = [], helpers = [];
@@ -1267,7 +1267,7 @@ static uint64_t _state_base(CliRequest request, String tool, int &ok) {
   uint64_t hash = FNV_OFFSET_BASIS;
   hash = _state_text(hash, "x2c-state-v1");
   hash = _state_text(hash, request.state_seed);
-  String compiler = compiler_identity();
+  String compiler = Compiler.identity();
   if (!compiler) ok = 0;
   hash = _state_text(hash, compiler);
   hash = _state_tool(hash, tool, ok);

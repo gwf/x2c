@@ -65,7 +65,7 @@ static List default_includes = NULL, cpp_includes = NULL;
     `include/` and `etc/compiler-sdk.xlisp`, a source checkout or an
     installed prefix alike. The root is kept absolute with symbolic links
     resolved, the one spelling every path below the home is compared in.
-    Without a home the root is the current directory and `home_dir` reports
+    Without a home the root is the current directory and `Compiler.home_dir` reports
     none. The compiler identity is taken here, before any later work could
     observe a replaced executable. An already configured root leaves all
     state unchanged.
@@ -167,41 +167,41 @@ String x2c_get_root(void) => root_path;
 String x2c_get_executable(void) => executable_path;
 
 /** Returns the discovered or configured home, or NULL when there is none. */
-String home_dir(void) => root_found ? root_path : NULL;
+String Compiler.home_dir(void) => root_found ? root_path : NULL;
 
 /** Returns the directory of a compiler staged at `<home>/builds/<stage>/`,
     or NULL for any other compiler.
 */
-String stage_dir(void) {
+String Compiler.stage_dir(void) {
   if (!executable_path) return NULL;
   String stage = Path.dirname(executable_path);
   return Path.dirname(stage) == %"$root_path/builds" ? stage : NULL;
 }
 
 /** Returns `<home>/packages`, which may not exist, or NULL without a home. */
-String home_packages(void) {
-  String home = home_dir();
+String Compiler.home_packages(void) {
+  String home = Compiler.home_dir();
   return home ? %"$home/packages" : NULL;
 }
 
 /** Returns the command directory for this checkout or installed home. */
-String home_libexec(void) {
-  String stage = stage_dir();
+String Compiler.home_libexec(void) {
+  String stage = Compiler.stage_dir();
   if (stage) return %"$stage/libexec";
-  String home = home_dir();
+  String home = Compiler.home_dir();
   return home ? %"$home/libexec/x2c" : NULL;
 }
 
 /** Returns the borrowed default include `List`, `<root>/include/x2c`.
     Returns NULL before environment setup.
 */
-List default_include_dirs(void) => default_includes;
+List Compiler.default_include_dirs(void) => default_includes;
 
 /** Returns the borrowed preprocessor `List` `<root>/lib`, then `<root>/src`.
     `<root>/src` is present only when the home has that directory. Returns
     NULL before environment setup.
 */
-List cpp_include_dirs(void) => cpp_includes;
+List Compiler.cpp_include_dirs(void) => cpp_includes;
 
 /** Returns the spelling of the first `PATH` candidate for the program `name`
     that this process may execute, searched as `execvp` searches, or NULL.
@@ -241,7 +241,7 @@ int is_layout_file(String path) =>
     the root's child on the way to `path`, compared by canonical path, when
     that child's name is an identifier. Returns NULL for any other path.
 */
-String package_directory(List roots, String path) {
+String Compiler.package_directory(List roots, String path) {
   String source = Path.absolute(path);
   foreach (String root, roots) {
     String prefix = %"${Path.absolute(root)}/";
@@ -275,7 +275,7 @@ String package_entry(
 /** Recognizes a package's `src/` files or its package-named legacy entry.
     Other files under the package directory are consumers.
 */
-int package_source(String directory, String path) {
+int Compiler.is_package_source(String directory, String path) {
   if (path.startswith(%"$directory/src/")) return 1;
   String name = directory[directory.rfind("/") + 1:];
   return path == %"$directory/$name.x" || path == %"$directory/$name.xp";
@@ -288,14 +288,14 @@ int package_source(String directory, String path) {
     command uses the identity embedded from the compiler that built it.
     Returns NULL if ordinary startup could not read its executable.
 */
-String compiler_identity(void) => active_identity;
+String Compiler.identity(void) => active_identity;
 
 /** Returns the stamp a native module records: `x2c-module-stamp:` and the
     running compiler's identity. Returns NULL when the executable cannot be
     read. Only the compiler that built a module loads it.
 */
-String build_module_stamp(void) {
-  String identity = compiler_identity();
+String Compiler.module_stamp(void) {
+  String identity = Compiler.identity();
   return identity ? %"x2c-module-stamp:$identity" : NULL;
 }
 

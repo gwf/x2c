@@ -5,7 +5,7 @@
     The built-in macros expand through these functions, which run as native
     code inside the compiler. The compile-time Lisp in
     `etc/builtin-core.xlisp` and `etc/lisp-bindings.xlisp` calls them by
-    name, and `builtin_targets` binds each into the shared session.
+    name, and `Compiler.builtin_targets` binds each into the shared session.
 */
 #pragma once
 #include "x2c.x"
@@ -904,7 +904,7 @@ static macro Stmt $builtin.row(Expr $rows, Expr $name, Expr $function) {
 
 /** Returns each built-in algorithm by the name compile-time code calls it
     with. */
-Map builtin_targets(void) {
+Map Compiler.builtin_targets(void) {
   Map rows = {};
   $builtin.row(rows, "builtin_scope_expand", _scope_expand);
   $builtin.row(rows, "x2c_func_call_arguments", x2c_func_call_arguments);

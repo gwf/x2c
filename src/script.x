@@ -35,7 +35,7 @@ static macro Stmt $report.script.execute_failed(Expr $executable) {
 /** Returns the per-user cache root: `X2C_CACHE_DIR`, `XDG_CACHE_HOME/x2c`,
     or `~/.cache/x2c`, whichever is set first, or NULL when none is.
 */
-String script_cache_root(void) {
+String Compiler.cache_root(void) {
   String explicit = Env.get("X2C_CACHE_DIR"), xdg = Env.get("XDG_CACHE_HOME");
   String home = Env.get("HOME");
   return explicit ? explicit : xdg ? %"$xdg/x2c" :
@@ -50,7 +50,7 @@ String script_cache_root(void) {
     script's entry and returns 1.
 */
 int CliRequest.prepare_script(CliRequest c) {
-  String root = script_cache_root();
+  String root = Compiler.cache_root();
   if (!root) driver_error("no cache directory: set X2C_CACHE_DIR");
   String script = Path.absolute(c.inputs.car());
   c.build_dir = _entry(root, script);

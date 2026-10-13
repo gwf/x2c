@@ -256,7 +256,7 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
    compiler headers to a user's generated C. */
 /** Returns the compiler-owned prelude sources relative to its home. Their
     runtime implementations are already linked into the shipped binaries. */
-List compiler_prelude_sources(void) => %(
+List Compiler.prelude_sources(void) => %(
   "lib/x2c.x" "src/grammar.x" "src/component-access.x" "src/component-try.x"
   "src/component-delegate.x" "src/component-literals.x"
   "src/component-printf.x" "src/component-operators.x"
@@ -266,11 +266,11 @@ List compiler_prelude_sources(void) => %(
   "src/component-protocols.x");
 
 /** Reports whether the canonical `path` is a compiler prelude source. */
-int is_prelude_source(String path) =>
-  home_portable_path(path) in compiler_prelude_sources();
+int Compiler.is_prelude_source(String path) =>
+  Compiler.portable_path(path) in Compiler.prelude_sources();
 
 static void _add_prelude(Compiler c, Map globs, Map visited) {
-  foreach (String source, compiler_prelude_sources()) {
+  foreach (String source, Compiler.prelude_sources()) {
     String path = %"${x2c_get_root()}/$source";
     String canonical = _canonical_path(path);
     visited[canonical] = 1;
@@ -477,7 +477,7 @@ static String _moved_include(
   if (hash >= stop || *hash != '#') return NULL;
   int angle = 0;
   String target =
-    preproc_include_target(String.new_len(hash, stop - hash), angle);
+    Compiler.preproc_include_target(String.new_len(hash, stop - hash), angle);
   if (!target || angle || target.startswith("/") ||
       !s.c.sources.exists(%"${Path.dirname(s.path)}/$target")) return NULL;
   return String.new_len(at, stop - at).replace(
@@ -547,7 +547,7 @@ static void _walk_file(
       c.merge_translation_dependencies(module.members);
     }
     if (w.unit) {
-      String provider = home_portable_path(path);
+      String provider = Compiler.portable_path(path);
       Map metadata = _cache_map();
       // Advertisements share this table while later segments fill it.
       metadata[%("source-node" (meta-hashes $provider 0))] =
@@ -578,7 +578,7 @@ static void _split(FileWalk &w, Token first) {
 /* An include ends the segment unless its conditional arm is never taken. */
 static void _directive(FileWalk &w, Token token, int hidden) {
   int angle = 0;
-  String target = hidden ? NULL : preproc_include_target(token.text, angle);
+  String target = hidden ? NULL : Compiler.preproc_include_target(token.text, angle);
   if (!target) return;
   _flush(w, w.text[w.pos:token.pos]);
   _include_file(w, target, angle);
@@ -599,11 +599,11 @@ static int _starts_line(Token first, Token token) {
 /* Tracks the open conditional groups of a walk, one hidden-arm state each,
    and reports whether `text` is a conditional directive. */
 static int _track_arms(Array arms, String text) {
-  Symbol kind = preproc_conditional_kind(text);
+  Symbol kind = Compiler.preproc_conditional_kind(text);
   if (!kind) return 0;
-  if (kind == <open>) arms.push(preproc_open_state(text));
+  if (kind == <open>) arms.push(Compiler.preproc_open_state(text));
   else if (kind == <branch> && arms.len())
-    arms[-1] = preproc_branch_state(arms[-1]);
+    arms[-1] = Compiler.preproc_branch_state(arms[-1]);
   else if (kind == <close> && arms.len()) arms.take_last();
   return 1;
 }
@@ -799,7 +799,7 @@ static void _select_public(FileWalk &w) {
    paths. Only `.x` units publish markers; a C header's static inline
    functions belong to every file that includes it. */
 static void _publish_unit_statics(Map statics, Map overlay, String path) {
-  List owner = %(${home_portable_path(path)});
+  List owner = %(${Compiler.portable_path(path)});
   foreach (Var key, statics.keys())
     match (%($key)) case %((function ?(String name))): {
       overlay.del(%($name));
@@ -849,7 +849,7 @@ static void _include_search_dependency(
 static String _include_search_hash(Compiler c, String path) {
   if (path.startswith("cwd:")) path = path[4:];
   return c.sources.exists(path) ?
-    %"search:${home_portable_path(Path.absolute(path))}" : "search:absent";
+    %"search:${Compiler.portable_path(Path.absolute(path))}" : "search:absent";
 }
 
 /* A file still being walked, as in an include cycle, has no entry yet. */
@@ -872,8 +872,8 @@ static String _include_text(Compiler c, String target, String path) {
     A cold provider does not register an import in its including unit. */
 void Compiler.configure_package(Compiler c, List roots, String filename) {
   String source = Path.absolute(filename);
-  String package = package_directory(roots, source);
-  if (!package || !package_source(package, source)) return;
+  String package = Compiler.package_directory(roots, source);
+  if (!package || !Compiler.is_package_source(package, source)) return;
   String name = Path.basename(package);
   c.package = name;
   if (!(name in c.package_roots)) c.package_roots = c.package_roots.copy();
@@ -895,7 +895,7 @@ static List _walk_cold(
   file.signature_only = c.signature_only;
   file.filename = c.filename;
   // Every file the shared session preloads defines its Lisp there.
-  if (macro_library_filling()) {
+  if (Compiler.library_filling()) {
     file.macro_lisp = c.macro_lisp;
     file.borrowed_lisp = 1;
   }
@@ -1101,7 +1101,7 @@ static int _linked_provider_current(
   if (linked_providers.try_get(path, current)) return current;
   if (path in seen) return 1;
   seen[path] = 1;
-  List source = linked_meta_provider_source(home_portable_path(path));
+  List source = Compiler.linked_meta_provider_source(Compiler.portable_path(path));
   match (source)
     case %(source ?hash ?(List dependencies) *): {
       if (!_hash_matches(c, path, hash)) return 0;
@@ -1111,7 +1111,7 @@ static int _linked_provider_current(
       foreach (Var (dependency, expected), found)
         if (is_source_file(dependency) && expected is <string> &&
             !String.startswith(expected, "search:") &&
-            linked_meta_provider_source(home_portable_path(dependency)) &&
+            Compiler.linked_meta_provider_source(Compiler.portable_path(dependency)) &&
             !_linked_provider_current(c, dependency, seen)) return 0;
       return 1;
     }
@@ -1123,8 +1123,8 @@ static int _linked_provider_current(
 int Compiler.linked_meta_definitions_current(Compiler c, String path) {
   if (c.linked_meta_provider_current(path)) return 1;
   String canonical = _canonical_path(path);
-  String provider = home_portable_path(canonical);
-  List source = linked_meta_provider_source(provider);
+  String provider = Compiler.portable_path(canonical);
+  List source = Compiler.linked_meta_provider_source(provider);
   match (source) case %(source ?hash *):
     if (_hash_matches(c, canonical, hash)) return 1;
   match (source) case %(source ? ? ?(String definitions)): {
@@ -1168,7 +1168,7 @@ void Compiler.complete_meta_hashes(Compiler c) {
         match (value) case %(meta-hashes ? ?(Map hashes)):
           c.meta_hashes.merge(hashes);
     }
-  collect_forget_provisional_entries();
+  Compiler.forget_provisional_entries();
 }
 
 /** Returns the shared function hashes of an advertised meta provider. */
@@ -1181,7 +1181,7 @@ void Compiler.add_linked_meta_provider_hashes(Compiler c, Map rows) {
     if (!is_source_file(path)) continue;
     List entry = _entry(c, _canonical_path(path));
     if (!entry) continue;
-    String provider = home_portable_path(_canonical_path(path));
+    String provider = Compiler.portable_path(_canonical_path(path));
     List proof = NULL;
     Map hashes = NULL;
     foreach (Var part, entry.car()) {
@@ -1307,7 +1307,7 @@ static String _canonical_cwd(void) {
    builders. */
 static void _add_defaults(FileWalk &w) {
   if (w.c.signature_only || !_produces(w)) return;
-  w.deferred = macro_library_filling();
+  w.deferred = Compiler.library_filling();
   if (w.deferred) return;
   Map generated = w.c.select_declaration_defaults(
     w.path, w.globs, w.parts, w.definitions, w.statics);
@@ -1328,7 +1328,7 @@ static void _queue_public_bodies(FileWalk &w) {
     foreach (Var key, part.map().keys())
       match (key) case %("function-inline" ?): exposed = 1;
   if (!exposed) return;
-  if (macro_library_filling() || w.c.meta_build) {
+  if (Compiler.library_filling() || w.c.meta_build) {
     w.deferred = 1;
     return;
   }
@@ -1393,7 +1393,7 @@ static void _publish(FileWalk &w) {
   String hash = _content_hash(w.module ? w.module.own : w.text);
   if (w.unit) {
     Map metadata = _cache_map();
-    String provider = home_portable_path(w.path);
+    String provider = Compiler.portable_path(w.path);
     if (w.c.collection_native) {
       metadata[%("collection-native")] = 1;
       w.c.collection_native_files[w.path] = 1;
@@ -1484,7 +1484,7 @@ static Map _record(ColdConformances &cold, String path) {
 // Every file but `lib/x2c.x`, which declares no adoption, sees the prelude.
 static Gathered _gather_prelude(Compiler c) {
   Gathered prelude = {.symbols = {}, .definitions = {}, .visited = {}};
-  foreach (String source, compiler_prelude_sources())
+  foreach (String source, Compiler.prelude_sources())
     _gather_declarations(c, _canonical_path(%"${x2c_get_root()}/$source"), prelude);
   return prelude;
 }
@@ -1577,7 +1577,7 @@ Map Compiler.inline_type_dependencies(Compiler c, List ast) {
         }
         Array ordered = [];
         foreach (Var type, types.keys()) ordered.push(type);
-        String path = home_portable_path(Path.absolute(c.filename));
+        String path = Compiler.portable_path(Path.absolute(c.filename));
         String name = Ast.binding_spelling(binding);
         rows[%("source-node" (interface-types $path ${-1} $name))] =
           %(interface-types $name ${ordered.sort().list_free()});
@@ -1975,7 +1975,7 @@ void Compiler.replay_package_imports(
 
 /* An import the unit itself wrote stays at its own source site. */
 static int _imported_here(Compiler c, String path) =>
-  _canonical_path(home_absolute_path(path)) == _canonical_path(c.filename);
+  _canonical_path(Compiler.absolute_home_path(path)) == _canonical_path(c.filename);
 
 /* The shadow reads the imports as a segment of the unit reads its own. */
 static void _import_all(
@@ -2002,7 +2002,7 @@ static void _import_all(
 static void _import_package(
   Compiler c, String path, String name, String alias, List members,
   Array effects) {
-  c.filename = home_absolute_path(path);
+  c.filename = Compiler.absolute_home_path(path);
   c.collect_package(name, NULL);
   c.register_package_alias(name, alias, NULL);
   foreach (List member, members)
@@ -2021,7 +2021,7 @@ Map Compiler.included_compile_time_effects(Compiler c, Map globs) {
   Map visited = {}, delivered = {};
   if (c.prelude) {
     Array effects = [];
-    foreach (String source, compiler_prelude_sources()) {
+    foreach (String source, Compiler.prelude_sources()) {
       String path = _canonical_path(%"${x2c_get_root()}/$source");
       _replay_included(c, globs, path, visited, effects, NULL);
     }
@@ -2073,7 +2073,7 @@ void Compiler.install_included_effects(Compiler c) {
   for (Token token = first; token < c.token; token++) {
     int angle = 0;
     String target = token.type == <preproc>
-                  ? preproc_include_target(token.text, angle) : NULL;
+                  ? Compiler.preproc_include_target(token.text, angle) : NULL;
     if (!target) continue;
     String path = collect_resolve_include(
       c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
@@ -2093,7 +2093,7 @@ void Compiler.install_included_effects(Compiler c) {
    different compiler may collect different rows from the same source.
    Missing, stale, foreign, or malformed interfaces are cache misses; the
    caller walks the file cold and installs that result in the process cache.
-   Paths inside an interface use `home_portable_path` spellings. */
+   Paths inside an interface use `Compiler.portable_path` spellings. */
 
 static String interface_out_dir = NULL, interface_mirror = NULL;
 
@@ -2109,10 +2109,10 @@ static Lisp interface_reader = NULL;
     home. A `cold` process reads no interface and still writes its own. Call
     it before opening any translation unit's Context.
 */
-void interface_configure(String out_dir, int cold) {
+void Compiler.configure_interfaces(String out_dir, int cold) {
   _process_cache();
   interface_out_dir = out_dir;
-  String stage = stage_dir();
+  String stage = Compiler.stage_dir();
   interface_mirror = cold ? NULL : stage ? stage : x2c_get_root();
 }
 
@@ -2138,7 +2138,7 @@ static List _interface_read(Compiler c, String canonical) {
    directory by stem, its sibling that mirrors a home file's directory, the
    home mirror, and a package's `builds/` beside or above the source. */
 static List _interface_candidates(String canonical) {
-  String stem = Path.stem(canonical), relative = home_portable_path(canonical);
+  String stem = Path.stem(canonical), relative = Compiler.portable_path(canonical);
   String dir = Path.dirname(canonical), Array paths = [];
   if (interface_out_dir) paths.push(%"$interface_out_dir/$stem.xi");
   if (relative != canonical) {
@@ -2157,7 +2157,7 @@ static List _interface_candidates(String canonical) {
    ownership and the same ordered parts representation as a cold walk. */
 static List _interface_load(
   Compiler c, String canonical, String path) {
-  String identity = compiler_identity();
+  String identity = Compiler.identity();
   match (_interface_record(path))
     case %(interface 6 ?(String compiler) *stored):
       if (identity && compiler == identity)
@@ -2171,7 +2171,7 @@ static List _stored_entry(Compiler c, String canonical, List stored) {
   match (stored)
     case %(?(String owner) ?(String hash) ?(List parts) ?(List definitions)
            ?(List dependencies) ?(List include_dirs)):
-      if (home_absolute_path(owner) == canonical &&
+      if (Compiler.absolute_home_path(owner) == canonical &&
           _hash_matches(c, canonical, hash) &&
           _interface_include_dirs(c, canonical) == include_dirs)
         return _interface_entry(
@@ -2186,7 +2186,7 @@ static List _interface_record(String path) {
   String source = NULL;
   try source = input.string_close();
   catch %(io-fail *): return NULL;
-  String identity = compiler_identity();
+  String identity = Compiler.identity();
   if (!identity || !source.startswith(%"(interface 6 \"$identity\" "))
     return NULL;
   return _read_record(source);
@@ -2269,7 +2269,7 @@ static List _interface_entry(
 static int _read_parts(Array parts, List stored) {
   foreach (Var part, stored) {
     if (part is <string>)
-      parts.push(_canonical_path(home_absolute_path(part)));
+      parts.push(_canonical_path(Compiler.absolute_home_path(part)));
     else if (part is not <list>) return 0;
     else {
       Map rows = _read_rows(part);
@@ -2309,8 +2309,8 @@ static Map _read_dependencies(Compiler c, List stored) {
     match (dependency.list())
       case %(?(String name) ?hash): {
         String path = hash is <string> && String.startswith(hash, "search:") ?
-          (name.startswith("cwd:") ? name : home_absolute_path(name)) :
-          _canonical_path(home_absolute_path(name));
+          (name.startswith("cwd:") ? name : Compiler.absolute_home_path(name)) :
+          _canonical_path(Compiler.absolute_home_path(name));
         int unhashed = hash.is_integer() && hash.integer() == 1;
         if (!unhashed && !_hash_matches(c, path, hash)) return NULL;
         _cache_dependency(dependencies, path, hash);
@@ -2325,8 +2325,8 @@ static Map _read_dependencies(Compiler c, List stored) {
     NULL when there is none or the compiler's identity is unknown. Its
     source hashes are not checked.
 */
-String interface_prelude(void) {
-  String identity = compiler_identity();
+String Compiler.prelude_interface(void) {
+  String identity = Compiler.identity();
   if (!identity) return NULL;
   String runtime = _canonical_path(%"${x2c_get_root()}/lib/x2c.x");
   String header = %"(interface 6 \"$identity\" ";
@@ -2347,8 +2347,8 @@ String interface_prelude(void) {
     contribution that the interface grammar cannot spell is reported as an
     `emit` diagnostic.
 */
-String interface_text(Compiler c) {
-  if (!compiler_identity()) return NULL;
+String Compiler.interface_text(Compiler c) {
+  if (!Compiler.identity()) return NULL;
   String canonical = _canonical_path(c.filename);
   Var cached = _process_cache()[canonical];
   if (cached is void) return NULL;
@@ -2360,7 +2360,7 @@ String interface_text(Compiler c) {
 static int _write_interface_entry(
   Buffer out, String canonical, List entry) {
   List record = %(
-    interface 6 ${compiler_identity()} @{_stored_record(canonical, entry)});
+    interface 6 ${Compiler.identity()} @{_stored_record(canonical, entry)});
   /* An interface is plain data, which a loader never evaluates. */
   if (!datum_write(out, record, 0)) return 0;
   out.write_char('\n');
@@ -2374,7 +2374,7 @@ static List _stored_record(String canonical, List entry) {
   Map identities = {}, Array parts = [];
   foreach (Var part, cached_parts) parts.push(_stored_part(part, identities));
   return %(
-    ${home_portable_path(canonical)} $hash ${parts.list_free()} $definitions
+    ${Compiler.portable_path(canonical)} $hash ${parts.list_free()} $definitions
     ${_stored_dependencies(dependencies)} $include_dirs);
 }
 
@@ -2383,14 +2383,14 @@ static List _interface_include_dirs(
   Compiler c, String canonical) {
   Array dirs = [];
   foreach (String dir, c.include_dirs) {
-    String portable = home_portable_path(dir);
+    String portable = Compiler.portable_path(dir);
     dirs.push(
       dir == x2c_get_root() ? %(home "") :
       portable != dir ? %(home $portable) :
       dir.startswith("/") ? %(absolute $dir) : %(relative $dir));
   }
-  String root = package_directory(c.package_source_dirs, canonical);
-  String package = root && package_source(root, canonical)
+  String root = Compiler.package_directory(c.package_source_dirs, canonical);
+  String package = root && Compiler.is_package_source(root, canonical)
                  ? Path.basename(root)
                  : _package_owns(c, canonical) ? c.package : NULL;
   dirs.push(
@@ -2401,7 +2401,7 @@ static List _interface_include_dirs(
 /* A stored part is a home-portable include path or the sorted rows of a
    declaration map with bindings renumbered. */
 static Var _stored_part(Var part, Map identities) {
-  if (part is not <map>) return home_portable_path(part);
+  if (part is not <map>) return Compiler.portable_path(part);
   Array rows = [];
   foreach (Var (key, value), part.map()) rows.push(%($key $value));
   rows.sort();
@@ -2411,7 +2411,7 @@ static Var _stored_part(Var part, Map identities) {
 static List _stored_dependencies(Map dependencies) {
   Array rows = [];
   foreach (Var (path, hash), dependencies)
-    rows.push(%(${home_portable_path(path)} $hash));
+    rows.push(%(${Compiler.portable_path(path)} $hash));
   rows.sort();
   return rows.list_free();
 }
@@ -2469,7 +2469,7 @@ Map Compiler.linked_prelude_records(Compiler c) {
       _walk_apart(walker, canonical, _runtime_text(walker, path), {}, visited);
       String text = _record_text(
         _stored_record(canonical, _process_cache()[canonical]));
-      if (text) records[home_portable_path(canonical)] = text;
+      if (text) records[Compiler.portable_path(canonical)] = text;
     }
   foreach (Var (canonical, entry), saved)
     if (entry is <list>) _process_cache()[canonical] = entry;
@@ -2490,13 +2490,13 @@ static List _linked_record(String canonical) {
     $scope(&process_cache_scope) linked_records = $linked.prelude();
   }
   Var text;
-  if (!linked_records.try_get(home_portable_path(canonical), text))
+  if (!linked_records.try_get(Compiler.portable_path(canonical), text))
     return NULL;
   return _read_record(text);
 }
 
 /* Every prelude source but `lib/x2c.x`, whose interface stays a file. */
-static List _linked_prelude_sources(void) => compiler_prelude_sources().cdr();
+static List _linked_prelude_sources(void) => Compiler.prelude_sources().cdr();
 
 /* `record` as an interface spells it, or NULL when it cannot be spelled. */
 static String _record_text(List record) {
@@ -2510,7 +2510,7 @@ static String _record_text(List record) {
 /** Drops the entries collected without declaration defaults while the shared
     compile-time session was filled, or by a project meta build. Call once
     that session is published, and after the meta build's parses. */
-void collect_forget_provisional_entries(void) {
+void Compiler.forget_provisional_entries(void) {
   if (!provisional_entries) return;
   foreach (Var path, provisional_entries.keys())
     (void) _process_cache().del(path);
