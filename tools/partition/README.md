@@ -148,3 +148,20 @@ and indirect calls are counted separately; missing callers do not prove a
 function is unused. Source peek is a placeholder showing identity: exact source
 ranges and source navigation are not implemented. Edited-group source-line
 counts are estimates. Plans propose file boundaries but do not apply them.
+
+### File anchoring
+
+Selecting a function highlights its directed, transitive same-file static
+dependencies in green, while retaining immediate caller/callee context. The
+inspector lists every dependency and marks helpers with callers outside the
+root plus dependency set as shared. Show all dependency groups includes groups
+containing helpers moved outside the current view.
+
+The score is `ln(1 + E) * ln(1 + D)`, normalized to 100 at the snapshot maximum.
+E counts distinct callers from other original files. D counts reachable static
+functions in the same original file, traversing static callees only. Cycles and
+shared paths count once; the selected function does not count itself. The score
+stays tied to original files when tentative groups change. Unresolved and
+indirect calls remain outside this estimate of attachment.
+
+Optional focused check: `node tools/partition/tests/check-anchors.cjs`.

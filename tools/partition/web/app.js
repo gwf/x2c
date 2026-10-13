@@ -1,4 +1,5 @@
 let D,
+  anchorMetrics,
   S,
   base,
   preview = null,
@@ -666,6 +667,30 @@ function wireFunctions() {
       }),
   );
 }
+function anchorDetails(v) {
+  const a = anchorMetrics[v],
+    shared = new Set(a.shared);
+  return `<h3>File anchoring <strong>${a.score.toFixed(1)} / 100</strong></h3>
+    <div class="costrow"><span>External callers (E)</span><strong>${a.callers.length}</strong></div>
+    <div class="costrow"><span>Static dependencies (D)</span><strong>${a.dependencies.size}</strong></div>
+    <div class="costrow"><span>Shared static dependencies</span><strong>${a.shared.length}</strong></div>
+    <p class="note">ln(1 + E) x ln(1 + D), scaled to the snapshot maximum. Original files, not tentative groups. Directed static-only paths; cycles count once. Resolved calls only. This estimates attachment, not a requirement to stay public.</p>
+    ${
+      a.dependencies.size
+        ? `<button id="show-dependencies" class="wide">Show all dependency groups</button><details><summary>All ${a.dependencies.size} static dependencies</summary>${[
+            ...a.dependencies,
+          ]
+            .sort((x, y) => D.functions[x].n.localeCompare(D.functions[y].n))
+            .map(
+              (id) =>
+                `<div class="connection"><button data-related="${id}">${esc(D.functions[id].n)}</button><small>${shared.has(id) ? "shared" : ""}</small></div>`,
+            )
+            .join(
+              "",
+            )}</details><p class="note">Shared helpers have callers outside this function and its dependency set. Highlighted paths follow static dependencies; immediate neighbors remain visible.</p>`
+        : ""
+    }`;
+}
 function renderFunction(m) {
   const f = D.functions[fn],
     owner = S.groups.find((g) => g.members.includes(fn)),
@@ -674,7 +699,7 @@ function renderFunction(m) {
       .filter(([a, b]) => a === fn || b === fn)
       .sort((a, b) => b[2] - a[2]);
   $("inspector").innerHTML =
-    `<div class="paneltag">FUNCTION INSPECTOR</div><h2 class="fnname">${esc(f.n)}</h2><p>${f.s ? "Private function" : f.k ? "File initializer" : "Public API"} \u00b7 ${esc(D.files[f.f].id)}</p><h3>Current group</h3><select id="destination" aria-label="Move function to group">${S.groups.map((g) => `<option value="${g.id}" ${g.id === owner.id ? "selected" : ""}>${esc(g.name)}</option>`).join("")}</select><button id="move" class="wide">Move ${set.length > 1 ? set.length + " linked functions" : "function"}</button>${set.length > 1 ? '<button id="release" class="quiet wide">Release keep-together set</button>' : ""}<button id="peek" class="quiet wide">Peek at source \u2197</button>${callRelationships(fn)}`;
+    `<div class="paneltag">FUNCTION INSPECTOR</div><h2 class="fnname">${esc(f.n)}</h2><p>${f.s ? "Private function" : f.k ? "File initializer" : "Public API"} \u00b7 ${esc(D.files[f.f].id)}</p>${anchorDetails(fn)}<h3>Current group</h3><select id="destination" aria-label="Move function to group">${S.groups.map((g) => `<option value="${g.id}" ${g.id === owner.id ? "selected" : ""}>${esc(g.name)}</option>`).join("")}</select><button id="move" class="wide">Move ${set.length > 1 ? set.length + " linked functions" : "function"}</button>${set.length > 1 ? '<button id="release" class="quiet wide">Release keep-together set</button>' : ""}<button id="peek" class="quiet wide">Peek at source \u2197</button>${callRelationships(fn)}`;
   $("move").onclick = () => move(fn, $("destination").value);
   $("release")?.addEventListener("click", () =>
     change(
@@ -683,6 +708,16 @@ function renderFunction(m) {
     ),
   );
   $("peek").onclick = peek;
+  $("show-dependencies")?.addEventListener("click", () => {
+    if (scope) scopeStack.push(clone(scope));
+    scope = {
+      name: D.functions[fn].n + " dependency groups",
+      members: [fn, ...anchorMetrics[fn].dependencies],
+    };
+    previewGroup = null;
+    view = "graph";
+    render();
+  });
   wireFunctions();
 }
 async function peek() {
@@ -754,6 +789,7 @@ fetch("graph.json", { cache: "no-store" })
   .then((r) => r.json())
   .then((data) => {
     D = data;
+    anchorMetrics = Engine.anchors(D);
     const initial = makeInitial();
     base = Engine.metrics(D, initial.groups);
     try {
