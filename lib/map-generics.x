@@ -10,6 +10,25 @@
     Iter and Var publication are a separate opt-in expansion.
 */
 
+/* Separate expansions share these private names. Typed families need a
+   qualifier because several families can be declared in the same unit. */
+$(defun map.words (name)
+  (if (equal? name "") ""
+    (let ((first (substring name 0 1)))
+      (string-append (if (equal? first (lower first)) "" "_")
+        (lower first) (map.words (substring name 1 (string-length name)))))))
+
+$(defun map.helper (type operation)
+  (let* ((family (str (car type)))
+         (stem (if (String.startswith family "Map")
+                   (substring family 3 (string-length family)) family))
+         (words (map.words stem)))
+    (x2c.ident (string-append "_"
+      (if (equal? words "") ""
+        (string-append (if (String.startswith words "_")
+                          (substring words 1 (string-length words)) words) "_"))
+      operation))))
+
 macro Unit $map.var.family(
   Name $hash, Name $key_equal, Name $value_equal, Name $value_valid
 ) {
@@ -82,14 +101,15 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
   Name $reinsert_error,
   Name $insert_error
 ) {
-  static void $map._core_free($map map) {
+  static void $(map.helper $map "free")($map map) {
     if ((void *) map == 0) return;
     map.hashes.free();
     map.entries.free();
     Scope_free(map);
   }
 
-  static $map $map._core_new_capacity($map unused, unsigned capacity) {
+  static $map $(map.helper $map "new_capacity")(
+    $map unused, unsigned capacity) {
     (void) unused;
     $map map = Scope_malloc(sizeof($storage));
     /* The scope itself, not the active slot: a later `Scope.retain`
@@ -110,7 +130,7 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
      A probe reads only the hash array; the entry is touched once a hash
      matches. A caller searching several tables for one key hashes it once
      and probes each of them through this operation. */
-  static long $map._core_find_hashed(
+  static long $(map.helper $map "find_hashed")(
     $map map, $key *key, unsigned key_hash) {
     $hash_cell *hashes = map.hashes;
     unsigned mask = map.mask, todo_start = key_hash & mask;
@@ -130,19 +150,19 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
   }
 
   /* Returns the bucket index of `key`, or -1, hashing it first. */
-  static long $map._core_find_index($map map, $key *key) {
-    return map._core_find_hashed(key, $hash(key));
+  static long $(map.helper $map "find_index")($map map, $key *key) {
+    return ($(map.helper $map "find_hashed"))(map, key, $hash(key));
   }
 
-  static int $map._core_try_get($map map, $key *key, $value *out) {
+  static int $(map.helper $map "try_get")($map map, $key *key, $value *out) {
     if ((void *) map == 0 || !out) return 0;
-    long index = map._core_find_index(key);
+    long index = ($(map.helper $map "find_index"))(map, key);
     if (index < 0) return 0;
     *out = ($value) *$value_at(map, (unsigned) index);
     return 1;
   }
 
-  static void $map._core_reinsert(
+  static void $(map.helper $map "reinsert")(
     $map map, unsigned todo_hash, $entry todo, int psl) {
     $hash_cell *hashes = map.hashes;
     $entry *entries = map.entries;
@@ -172,7 +192,7 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
     (void) $reinsert_error(cap, psl);
   }
 
-  static void $map._core_expand($map map) {
+  static void $(map.helper $map "expand")($map map) {
     $hash_cell *hashes = map.hashes;
     $entry *entries = map.entries;
     unsigned cap = map.capacity;
@@ -194,7 +214,8 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
     expanded.mask = capacity - 1;
     $map expanded_map = ($map) &expanded;
     for (unsigned i = 0; i < cap; i++)
-      if (hashes[i]) expanded_map._core_reinsert(hashes[i], entries[i], 0);
+      if (hashes[i])
+        ($(map.helper $map "reinsert"))(expanded_map, hashes[i], entries[i], 0);
 
     Scope_move(staged_hashes.block(), &map.scope);
     Scope_move((unsigned char *) staged_hashes - sizeof(Block), &map.scope);
@@ -210,7 +231,7 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
     Bytes_free((Bytes) entries);
   }
 
-  static $value *$map._core_get_or_insert(
+  static $value *$(map.helper $map "get_or_insert")(
     $map map, $key *key, $value *val, int *inserted) {
     *inserted = 0;
   retry:;
@@ -230,7 +251,7 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
       if (stored == 0) {
         (void) $value_valid(val);
         if (map.used >= (unsigned long) map.capacity * 3 / 4) {
-          map._core_expand();
+          ($(map.helper $map "expand"))(map);
           goto retry;
         }
         hashes[index] = key_hash;
@@ -246,7 +267,7 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
       if (stored_psl < todo_psl) {
         (void) $value_valid(val);
         if (map.used >= (unsigned long) map.capacity * 3 / 4) {
-          map._core_expand();
+          ($(map.helper $map "expand"))(map);
           goto retry;
         }
         $entry displaced = entries[index];
@@ -255,22 +276,23 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
         entries[index].val = *val;
         map.used += 1;
         *inserted = 1;
-        map._core_reinsert(stored, displaced, stored_psl + 1);
+        ($(map.helper $map "reinsert"))(map, stored, displaced, stored_psl + 1);
         return $value_at(map, index);
       }
     }
     (void) $insert_error(cap);
   }
 
-  static void $map._core_set($map map, $key *key, $value *val) {
+  static void $(map.helper $map "set")($map map, $key *key, $value *val) {
     int inserted;
-    $value *stored = map._core_get_or_insert(key, val, &inserted);
+    $value *stored = ($(map.helper $map "get_or_insert"))(
+      map, key, val, &inserted);
     if (!inserted) stored[0] = val[0];
   }
 
-  static int $map._core_try_del($map map, $key *key, $value *out) {
+  static int $(map.helper $map "try_del")($map map, $key *key, $value *out) {
     if ((void *) map == 0 || !out) return 0;
-    long found = map._core_find_index(key);
+    long found = ($(map.helper $map "find_index"))(map, key);
     if (found < 0) return 0;
     $hash_cell *hashes = map.hashes;
     $entry *entries = map.entries;
@@ -294,7 +316,7 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
     return 1;
   }
 
-  static int $map._core_try_next(
+  static int $(map.helper $map "try_next")(
     $map map, unsigned *cursor, $key *key, $value *val) {
     if ((void *) map == 0 || !cursor || !key || !val) return 0;
     $hash_cell *hashes = map.hashes;
@@ -310,47 +332,47 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
     return 0;
   }
 
-  static void $map._core_insert_all($map map, $map other) {
+  static void $(map.helper $map "insert_all")($map map, $map other) {
     unsigned cursor = 0;
     $key key;
     $value val;
-    while (other._core_try_next(&cursor, &key, &val))
-      map._core_set(&key, &val);
+    while (($(map.helper $map "try_next"))(other, &cursor, &key, &val))
+      ($(map.helper $map "set"))(map, &key, &val);
   }
 
-  static $map $map._core_copy($map map) {
-    $map copy = map._core_new_capacity(2), result = 0;
-    defer if ((void *) result == 0) copy._core_free();
-    copy._core_insert_all(map);
+  static $map $(map.helper $map "copy")($map map) {
+    $map copy = ($(map.helper $map "new_capacity"))(map, 2), result = 0;
+    defer if ((void *) result == 0) ($(map.helper $map "free"))(copy);
+    ($(map.helper $map "insert_all"))(copy, map);
     return result = copy;
   }
 
-  static $map $map._core_merge($map map, $map other) {
+  static $map $(map.helper $map "merge")($map map, $map other) {
     if (!other) return map;
     int created = 0;
     if ((void *) map == 0) {
-      map = map._core_new_capacity(2);
+      map = ($(map.helper $map "new_capacity"))(map, 2);
       created = 1;
     }
     $map result = 0;
-    defer if (created && !result) map._core_free();
-    map._core_insert_all(other);
+    defer if (created && !result) ($(map.helper $map "free"))(map);
+    ($(map.helper $map "insert_all"))(map, other);
     return result = map;
   }
 
-  static int $map._core_truth($map map) {
+  static int $(map.helper $map "truth")($map map) {
     return (void *) map != 0 && map.used != 0;
   }
 
-  static int $map._core_equal($map a, $map b) {
+  static int $(map.helper $map "equal")($map a, $map b) {
     if ((void *) a == (void *) b) return 1;
     if ((void *) a == 0 || (void *) b == 0) return 0;
     if (a.used != b.used) return 0;
     unsigned cursor = 0;
     $key key;
     $value avalue, bvalue;
-    while (a._core_try_next(&cursor, &key, &avalue))
-      if (!b._core_try_get(&key, &bvalue) ||
+    while (($(map.helper $map "try_next"))(a, &cursor, &key, &avalue))
+      if (!($(map.helper $map "try_get"))(b, &key, &bvalue) ||
           !$value_equal(&avalue, &bvalue)) return 0;
     return 1;
   }
@@ -403,7 +425,7 @@ macro Unit $map.typed.operations(
       (void) $bad_arg($owner);
     }
     $map map = 0;
-    return map._core_new_capacity(capacity);
+    return ($(map.helper $map "new_capacity"))(map, capacity);
   }
 
   /** Returns a fresh empty map owned by the current `Scope`.
@@ -412,7 +434,7 @@ macro Unit $map.typed.operations(
   */
   $map $map.new(void) {
     $map map = 0;
-    return map._core_new_capacity(2);
+    return ($(map.helper $map "new_capacity"))(map, 2);
   }
 
   /** Returns the number of entries, or zero for a null map. */
@@ -424,7 +446,7 @@ macro Unit $map.typed.operations(
       A null map, null `out`, or absent key returns zero without writing.
   */
   int $map.try_get($map map, $key key, $value &?out) {
-    return map._core_try_get(&key, out);
+    return ($(map.helper $map "try_get"))(map, &key, out);
   }
 
   /** Returns the value for `key`.
@@ -466,13 +488,14 @@ macro Unit $map.typed.operations(
     if ((void *) map == 0) (void) $bad_arg($owner);
     if ($boxed && (Var) key is void) raise %(void-op);
     int inserted;
-    $value *stored = map._core_get_or_insert(&key, &defval, &inserted);
+    $value *stored = ($(map.helper $map "get_or_insert"))(
+      map, &key, &defval, &inserted);
     return stored[0];
   }
 
   /** Returns one when `key` is present, or zero for a null map. */
   int $map.contains($map map, $key key) {
-    return map && map._core_find_index(&key) >= 0;
+    return map && ($(map.helper $map "find_index"))(map, &key) >= 0;
   }
 
   /** Copies `key` and `val` into the table, replacing an existing value.
@@ -485,7 +508,7 @@ macro Unit $map.typed.operations(
     if ((void *) map == 0) (void) $bad_arg($owner);
     if ($boxed && ((Var) key is void || (Var) val is void))
       raise %(void-op);
-    map._core_set(&key, &val);
+    ($(map.helper $map "set"))(map, &key, &val);
   }
 
   /** Stores `val` under `key` and returns `val`.
@@ -517,12 +540,13 @@ macro Unit $map.typed.operations(
     }
     if (op == <+> && insert) {
       int inserted;
-      $value *stored = map._core_get_or_insert(&key, &rhs, &inserted);
+      $value *stored = ($(map.helper $map "get_or_insert"))(
+        map, &key, &rhs, &inserted);
       if (inserted) return rhs;
       return $update(stored, op, rhs);
     }
     if ($boxed && (Var) key is void) raise %(void-op);
-    long index = map._core_find_index(&key);
+    long index = ($(map.helper $map "find_index"))(map, &key);
     if (index < 0) {
       if ($boxed) raise %(bad-arg (key $key));
       (void) $bad_arg($owner);
@@ -540,7 +564,7 @@ macro Unit $map.typed.operations(
   $value $map.postfixindex($map map, $key key, Symbol op) {
     if ((void *) map == 0) (void) $bad_arg($owner);
     if ($boxed && (Var) key is void) raise %(void-op);
-    long index = map._core_find_index(&key);
+    long index = ($(map.helper $map "find_index"))(map, &key);
     if (index < 0) {
       if ($boxed) raise %(bad-arg (key $key));
       (void) $bad_arg($owner);
@@ -565,7 +589,7 @@ macro Unit $map.typed.operations(
       mutation. Successful removal invalidates live cursors and iterators.
   */
   int $map.try_del($map map, $key key, $value &?out) {
-    return map._core_try_del(&key, out);
+    return ($(map.helper $map "try_del"))(map, &key, out);
   }
 
   /** Removes `key` and returns its value.
@@ -586,7 +610,7 @@ macro Unit $map.typed.operations(
       Raises: an allocation, size, or invariant cause while copying.
   */
   $map $map.copy($map map) {
-    return map._core_copy();
+    return ($(map.helper $map "copy"))(map);
   }
 
   /** Copies every entry of `other` into `map` and returns the destination.
@@ -596,7 +620,7 @@ macro Unit $map.typed.operations(
       Raises: an allocation, size, or invariant cause while inserting.
   */
   $map $map.merge($map map, $map other) {
-    return map._core_merge(other);
+    return ($(map.helper $map "merge"))(map, other);
   }
 
   /** Writes the next bucket's key and value, advances `cursor`, and returns
@@ -607,19 +631,19 @@ macro Unit $map.typed.operations(
   */
   int $map.try_next(
     $map map, unsigned &?cursor, $key &?key, $value &?val) {
-    return map._core_try_next(cursor, key, val);
+    return ($(map.helper $map "try_next"))(map, cursor, key, val);
   }
 
   /** Returns one when `map` contains an entry. */
   int $map.truth($map map) {
-    return map._core_truth();
+    return ($(map.helper $map "truth"))(map);
   }
 
   /** Reports key/value equality independent of bucket and insertion order.
       Two null maps compare equal; a null and a nonnull map compare unequal.
   */
   int $map.equal($map a, $map b) {
-    return a._core_equal(b);
+    return ($(map.helper $map "equal"))(a, b);
   }
 }
 
@@ -628,13 +652,13 @@ macro Unit $map.core.observe(
   Name $box_key, Name $box_value,
   Name $compare_key, Name $compare_value
 ) {
-  static int record_compare(const void *ap, const void *bp) {
+  static int _record_compare(const void *ap, const void *bp) {
     const $entry *a = ap, *b = bp;
     int comparison = $compare_key(a.key, b.key);
     return comparison ? comparison : $compare_value(a.val, b.val);
   }
 
-  static int $map._core_compare($map a, $map b) {
+  static int $(map.helper $map "compare")($map a, $map b) {
     if ((void *) a == (void *) b) return 0;
     if (a == NULL) return -1;
     if (b == NULL) return 1;
@@ -655,16 +679,16 @@ macro Unit $map.core.observe(
     while (b.try_next(cursor, key, value))
       brecs[index++] = ($entry) { .key = key, .val = value };
 
-    qsort(arecs, asz, sizeof($entry), record_compare);
-    qsort(brecs, bsz, sizeof($entry), record_compare);
+    qsort(arecs, asz, sizeof($entry), _record_compare);
+    qsort(brecs, bsz, sizeof($entry), _record_compare);
     for (unsigned i = 0; i < asz; i++) {
-      int comparison = record_compare(arecs + i, brecs + i);
+      int comparison = _record_compare(arecs + i, brecs + i);
       if (comparison) return comparison;
     }
     return 0;
   }
 
-  static Buffer $map._core_write($map map, Buffer out, Symbol mode) {
+  static Buffer $(map.helper $map "write")($map map, Buffer out, Symbol mode) {
     RenderPath path;
     if (!path.enter(map))
       return out.printf("<map: 0x%012lX>", (long) map);
@@ -706,18 +730,18 @@ macro Unit $map.typed.observation(Type $map) {
       cause from key or value comparison.
   */
   int $map.compare($map a, $map b) {
-    return a._core_compare(b);
+    return ($(map.helper $map "compare"))(a, b);
   }
 
   /** Appends the readable typed-Map representation in bucket order. */
   Buffer $map.write_repr($map map, Buffer out) {
-    return map._core_write(out, <repr>);
+    return ($(map.helper $map "write"))(map, out, <repr>);
   }
 
   /** Appends the typed-Map display text in bucket order. */
   Buffer $map.write_str($map map, Buffer out) {
     if (!map) return out.write("{ }");
-    return map._core_write(out, <str>);
+    return ($(map.helper $map "write"))(map, out, <str>);
   }
 
   /** Returns the typed-Map display String. */
@@ -744,7 +768,7 @@ macro Unit $map.typed.iterate(Type $map, Type $key, Type $value,
   Iter $map.keys($map, Iter);
   Iter $map.enumerate($map, Iter);
   /* Advances `iter` to its next key and value, or returns 0 at the end. */
-  static int step(Iter iter, $key &key, $value &val) {
+  static int _step(Iter iter, $key &key, $value &val) {
     $map map = iter.obj.$unbox();
     if ((void *) map == 0) return 0;
     unsigned cursor = iter.state;
@@ -753,26 +777,26 @@ macro Unit $map.typed.iterate(Type $map, Type $key, Type $value,
     return 1;
   }
 
-  static int next(Iter iter, Var *out) {
+  static int _next(Iter iter, Var *out) {
     $key key;
     $value val;
-    if (!out || !step(iter, key, val)) return 0;
+    if (!out || !_step(iter, key, val)) return 0;
     *out = $box_value(val);
     return 1;
   }
 
-  static int keys_next(Iter iter, Var *out) {
+  static int _keys_next(Iter iter, Var *out) {
     $key key;
     $value val;
-    if (!out || !step(iter, key, val)) return 0;
+    if (!out || !_step(iter, key, val)) return 0;
     *out = $box_key(key);
     return 1;
   }
 
-  static int enumerate_next(Iter iter, Var *out) {
+  static int _enumerate_next(Iter iter, Var *out) {
     $key key;
     $value val;
-    if (!out || !step(iter, key, val)) return 0;
+    if (!out || !_step(iter, key, val)) return 0;
     Var boxed_key = $box_key(key), boxed_value = $box_value(val);
     *out = List_var(cons(boxed_key, cons(boxed_value, NULL)));
     return 1;
@@ -786,7 +810,7 @@ macro Unit $map.typed.iterate(Type $map, Type $key, Type $value,
   */
   Iter $map.iter($map map, Iter dest) {
     if ((void *) dest == 0) return 0;
-    return Iter_init(dest, map, next, 0);
+    return Iter_init(dest, map, _next, 0);
   }
 
   /** Initializes `dest` as a single-pass iterator over boxed keys.
@@ -804,7 +828,7 @@ macro Unit $map.typed.iterate(Type $map, Type $key, Type $value,
   */
   Iter $map.keys($map map, Iter dest) {
     if ((void *) dest == 0) return 0;
-    return Iter_init(dest, map, keys_next, 0);
+    return Iter_init(dest, map, _keys_next, 0);
   }
 
   /** Initializes `dest` to yield canonical `(key value)` `List`s in bucket
@@ -824,7 +848,7 @@ macro Unit $map.typed.iterate(Type $map, Type $key, Type $value,
   */
   Iter $map.enumerate($map map, Iter dest) {
     if ((void *) dest == 0) return 0;
-    return Iter_init(dest, map, enumerate_next, 0);
+    return Iter_init(dest, map, _enumerate_next, 0);
   }
 
 }
@@ -865,7 +889,7 @@ macro Unit $map.typed.publish(
     if ((void *) map == 0 || !source.owns(map)) return map;
     $family staged = $prepare_export(map, source), committed = NULL;
     defer if ((void *) staged != 0 && (void *) committed == 0)
-      staged._core_free();
+      ($(map.helper $family "free"))(staged);
 
     Scope *destination = source.export_destination();
     Scope.move(map, destination);
@@ -884,7 +908,7 @@ macro Unit $map.typed.publish(
       map.mask = staged.mask;
       staged.hashes = old_hashes;
       staged.entries = old_entries;
-      staged._core_free();
+      ($(map.helper $family "free"))(staged);
     }
     map.scope = *destination;
     committed = map;
@@ -892,7 +916,7 @@ macro Unit $map.typed.publish(
   }
 
   /** Releases the record and its backing Blocks, borrowing stored values. */
-  void $family.cleanup($family map) { map._core_free(); }
+  void $family.cleanup($family map) { ($(map.helper $family "free"))(map); }
   protocol Cleanup($family);
   protocol Iter($family);
   protocol Var($family) tag $tag;
@@ -911,9 +935,9 @@ macro Unit $map.typed.convert(Type $map, Name $unbox) {
   $map Map.$unbox(Map entries) {
     if ((void *) entries == 0) return 0;
     $map packed = 0;
-    packed = packed._core_new_capacity(2);
+    packed = ($(map.helper $map "new_capacity"))(packed, 2);
     $map finished = 0;
-    defer if ((void *) finished == 0) packed._core_free();
+    defer if ((void *) finished == 0) ($(map.helper $map "free"))(packed);
     unsigned cursor = 0;
     Var key, val;
     while (entries.try_next(cursor, key, val)) packed[key] = val;

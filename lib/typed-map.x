@@ -145,10 +145,10 @@ static int _equal_double(double *a, double *b) => a[0] == b[0];
 /* Canonicalization makes identity the content test, as it does for a Var. */
 static int _equal_string(String *a, String *b) => a[0] == b[0];
 
-static int _map_compare_int(int a, int b) => (a > b) - (a < b);
-static int _map_compare_long(long a, long b) => (a > b) - (a < b);
-static int _map_compare_double(double a, double b) => Var.compare(a, b);
-static int _map_compare_string(String a, String b) => a.compare(b);
+static int _compare_int(int a, int b) => (a > b) - (a < b);
+static int _compare_long(long a, long b) => (a > b) - (a < b);
+static int _compare_double(double a, double b) => Var.compare(a, b);
+static int _compare_string(String a, String b) => a.compare(b);
 
 // checks and updates
 
@@ -236,7 +236,7 @@ $map.typed.family(
   0, 1, 1, "MapIntInt");
 $map.core.observe(
   MapIntInt, int, int, struct MapIntIntRecord,
-  _box_int, _box_int, _map_compare_int, _map_compare_int);
+  _box_int, _box_int, _compare_int, _compare_int);
 $map.typed.observe(MapIntInt, int, int, _box_int, _box_int);
 $map.typed.publish(
   MapIntInt, int, int, mapintint, <mapintint>,
@@ -256,7 +256,7 @@ $map.typed.family(
   0.0, 1.0, 1, "MapLongDouble");
 $map.core.observe(
   MapLongDouble, long, double, struct MapLongDoubleRecord,
-  _box_long, _box_double, _map_compare_long, _map_compare_double);
+  _box_long, _box_double, _compare_long, _compare_double);
 $map.typed.observe(MapLongDouble, long, double, _box_long, _box_double);
 $map.typed.publish(
   MapLongDouble, long, double, maplongdouble, <maplongdou>,
@@ -277,7 +277,7 @@ $map.typed.family(
   0, "", 0, "MapStringString");
 $map.core.observe(
   MapStringString, String, String, struct MapStringStringRecord,
-  _box_string, _box_string, _map_compare_string, _map_compare_string);
+  _box_string, _box_string, _compare_string, _compare_string);
 $map.typed.observe(
  MapStringString, String, String, _box_string, _box_string);
 
@@ -287,7 +287,7 @@ static MapStringString _prepare_string_export(
      a complete destination table before export swaps the backing arrays. */
   MapStringString staged = MapStringString.new_capacity(map.capacity);
   MapStringString result = NULL;
-  defer if (result == NULL) staged._core_free();
+  defer if (result == NULL) _string_string_free(staged);
   foreach (String (key, value), map) {
     key = source.export_nested(key);
     value = source.export_nested(value);
@@ -315,14 +315,14 @@ $map.typed.family(
   0, 1, 1, "MapStringInt");
 $map.core.observe(
   MapStringInt, String, int, struct MapStringIntRecord,
-  _box_string, _box_int, _map_compare_string, _map_compare_int);
+  _box_string, _box_int, _compare_string, _compare_int);
 $map.typed.observe(MapStringInt, String, int, _box_string, _box_int);
 
 static MapStringInt _prepare_string_int_export(
   MapStringInt map, Context source) {
   MapStringInt staged = MapStringInt.new_capacity(map.capacity);
   MapStringInt result = NULL;
-  defer if (result == NULL) staged._core_free();
+  defer if (result == NULL) _string_int_free(staged);
   unsigned cursor = 0;
   String key;
   int value;

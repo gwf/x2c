@@ -74,20 +74,20 @@ static void _bad_step(String owner, int step) {
   raise %(bad-arg (operation $owner) (step $step));
 }
 
-static int _array_compare_char(char a, char b) => (a > b) - (a < b);
-static int _array_compare_short(short a, short b) => (a > b) - (a < b);
-static int _array_compare_int(int a, int b) => (a > b) - (a < b);
-static int _array_compare_long(long a, long b) => (a > b) - (a < b);
-static int _array_compare_float(float a, float b) => Var.compare(a, b);
-static int _array_compare_double(double a, double b) => Var.compare(a, b);
-static int _array_compare_string(String a, String b) => a.compare(b);
+static int _compare_char(char a, char b) => (a > b) - (a < b);
+static int _compare_short(short a, short b) => (a > b) - (a < b);
+static int _compare_int(int a, int b) => (a > b) - (a < b);
+static int _compare_long(long a, long b) => (a > b) - (a < b);
+static int _compare_float(float a, float b) => Var.compare(a, b);
+static int _compare_double(double a, double b) => Var.compare(a, b);
+static int _compare_string(String a, String b) => a.compare(b);
 
-static Block _prepare_array_export(Block array, Context source) {
+static Block _prepare_export(Block array, Context source) {
   (void) array; (void) source;
   return NULL;
 }
 
-static ArrayString _prepare_string_array_export(
+static ArrayString _prepare_string_export(
   ArrayString array, Context source) {
   ArrayString staged = ArrayString.new(), result = NULL;
   defer if (result == NULL) staged.free();
@@ -102,66 +102,66 @@ static ArrayString _prepare_string_array_export(
 
 $array.core.family(ArrayChar, char);
 $array.typed.family(ArrayChar, char, 0, "ArrayChar");
-$array.typed.observe(ArrayChar, char, _array_compare_char);
+$array.typed.observe(ArrayChar, char, _compare_char);
 $array.typed.box(ArrayChar, char, "ArrayChar");
 $array.typed.update.integer(ArrayChar, char, uchar);
 $array.typed.publish(
-  ArrayChar, char, arraychar, <arraychar>, _prepare_array_export);
+  ArrayChar, char, arraychar, <arraychar>, _prepare_export);
 $array.typed.iterate(ArrayChar, char, arraychar);
 
 $array.core.family(ArrayShort, short);
 $array.typed.family(ArrayShort, short, 0, "ArrayShort");
-$array.typed.observe(ArrayShort, short, _array_compare_short);
+$array.typed.observe(ArrayShort, short, _compare_short);
 $array.typed.box(ArrayShort, short, "ArrayShort");
 $array.typed.update.integer(ArrayShort, short, ushort);
 $array.typed.publish(
-  ArrayShort, short, arrayshort, <arrayshort>, _prepare_array_export);
+  ArrayShort, short, arrayshort, <arrayshort>, _prepare_export);
 $array.typed.iterate(ArrayShort, short, arrayshort);
 
 $array.core.family(ArrayInt, int);
 $array.typed.family(ArrayInt, int, 0, "ArrayInt");
-$array.typed.observe(ArrayInt, int, _array_compare_int);
+$array.typed.observe(ArrayInt, int, _compare_int);
 $array.typed.box(ArrayInt, int, "ArrayInt");
 $array.typed.update.integer(ArrayInt, int, uint);
 $array.typed.publish(
-  ArrayInt, int, arrayint, <arrayint>, _prepare_array_export);
+  ArrayInt, int, arrayint, <arrayint>, _prepare_export);
 $array.typed.iterate(ArrayInt, int, arrayint);
 
 $array.core.family(ArrayLong, long);
 $array.typed.family(ArrayLong, long, 0L, "ArrayLong");
-$array.typed.observe(ArrayLong, long, _array_compare_long);
+$array.typed.observe(ArrayLong, long, _compare_long);
 $array.typed.box(ArrayLong, long, "ArrayLong");
 $array.typed.update.integer(ArrayLong, long, ulong);
 $array.typed.publish(
-  ArrayLong, long, arraylong, <arraylong>, _prepare_array_export);
+  ArrayLong, long, arraylong, <arraylong>, _prepare_export);
 $array.typed.iterate(ArrayLong, long, arraylong);
 
 $array.core.family(ArrayFloat, float);
 $array.typed.family(ArrayFloat, float, 0.0f, "ArrayFloat");
-$array.typed.observe(ArrayFloat, float, _array_compare_float);
+$array.typed.observe(ArrayFloat, float, _compare_float);
 $array.typed.box(ArrayFloat, float, "ArrayFloat");
 $array.typed.update.floating(ArrayFloat, float);
 $array.typed.publish(
-  ArrayFloat, float, arrayfloat, <arrayfloat>, _prepare_array_export);
+  ArrayFloat, float, arrayfloat, <arrayfloat>, _prepare_export);
 $array.typed.iterate(ArrayFloat, float, arrayfloat);
 
 $array.core.family(ArrayDbl, double);
 $array.typed.family(ArrayDbl, double, 0.0, "ArrayDbl");
-$array.typed.observe(ArrayDbl, double, _array_compare_double);
+$array.typed.observe(ArrayDbl, double, _compare_double);
 $array.typed.box(ArrayDbl, double, "ArrayDbl");
 $array.typed.update.floating(ArrayDbl, double);
 $array.typed.publish(
-  ArrayDbl, double, arraydbl, <arraydbl>, _prepare_array_export);
+  ArrayDbl, double, arraydbl, <arraydbl>, _prepare_export);
 $array.typed.iterate(ArrayDbl, double, arraydbl);
 
 $array.core.family(ArrayString, String);
 $array.typed.family(ArrayString, String, 0, "ArrayString");
-$array.typed.observe(ArrayString, String, _array_compare_string);
+$array.typed.observe(ArrayString, String, _compare_string);
 $array.typed.box(ArrayString, String, "ArrayString");
 $array.typed.update.string(ArrayString);
 $array.typed.publish(
   ArrayString, String, arraystring, <arraystr>,
-  _prepare_string_array_export);
+  _prepare_string_export);
 $array.typed.iterate(ArrayString, String, arraystring);
 
 /* Compile-time code reaches the typed-array conversions through these literal

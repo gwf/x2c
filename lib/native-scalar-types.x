@@ -62,14 +62,14 @@ $(defun native.scalar.alignment (type)
 /* Native size, alignment, load, and store for one row's type. The
    importing unit declares NativeScalarAccess first. */
 macro Unit $native.scalar.access(Type $type) {
-  static Var load(const void *bytes, Scope *owner) {
+  static Var _load(const void *bytes, Scope *owner) {
     $type native;
     memcpy(&native, bytes, sizeof native);
     Var value = native;
     return value.move_wide_to(owner);
   }
 
-  static void store(void *bytes, Var value) {
+  static void _store(void *bytes, Var value) {
     $type native = value;
     memcpy(bytes, &native, sizeof native);
   }
@@ -77,7 +77,7 @@ macro Unit $native.scalar.access(Type $type) {
   static struct NativeScalarAccess
     $(x2c.ident (native.scalar.access-name $type)) = {
       $(x2c.literal.symbol (car (Map.getindex (native_scalar_types) $type))),
-      sizeof($type), $(native.scalar.alignment $type), load, store
+      sizeof($type), $(native.scalar.alignment $type), _load, _store
     };
 }
 

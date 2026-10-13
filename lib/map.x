@@ -108,7 +108,7 @@ meta native Self Map.merge(Self, Self);
 */
 meta native Var Map.get_hashed(Map map, Var key, unsigned key_hash) {
   if (map == NULL) return void;
-  long index = map._core_find_hashed(&key, key_hash);
+  long index = _find_hashed(map, &key, key_hash);
   return index < 0 ? void : *_record_value(map, (unsigned) index);
 }
 
@@ -169,7 +169,7 @@ void Map.export_to(
       .key = export_value(key, source),
       .val = export_value(val, source)
     };
-    ((Map) &exported)._core_reinsert(record.key.hash(), record, 0);
+    _reinsert((Map) &exported, record.key.hash(), record, 0);
   }
   map.hashes = rebuilt_hashes;
   map.entries = rebuilt_entries;
@@ -194,4 +194,4 @@ meta native Iter Map.keys(Map, Iter);
 meta native Iter Map.enumerate(Map, Iter);
 
 /** Releases this Map and both backing Blocks without freeing stored values. */
-meta native void Map.cleanup(Map value) { value._core_free(); }
+meta native void Map.cleanup(Map value) { _free(value); }
