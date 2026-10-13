@@ -1840,6 +1840,25 @@ int main(void) {
 6 10
 ```
 
+File scope is the whole file and does not depend on declaration order.
+A template therefore keeps a global that the file declares after the macro:
+
+```x2c
+macro Expression $read_later() => later + 1;
+
+int later = 3;
+
+int main(void) {
+  int later = 7;
+  printf("%d %d\n", $read_later(), later);
+  return 0;
+}
+```
+
+```text
+4 7
+```
+
 A `using` list at the start of the braced body, or after the signature of
 an `Expression` macro, such as `$scaled(Expr $value) using scale`, states
 such a binding explicitly. Each listed name is a function, object, or

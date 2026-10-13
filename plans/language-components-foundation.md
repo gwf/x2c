@@ -27,6 +27,10 @@ the next work is limited to these existing language boundaries.
   referring to the author's `helper` keeps that binding when a caller has another
   `helper`. Caller-site lookup requires an explicit request; it is not the default.
   Preserve hygiene for introduced names.
+- Recorded 2026-10-13: "the author's definition" means x2c's
+  order-independent file scope, so a template keeps a global declared later
+  in the file. Evidence: fixture
+  `unittest/compiler-fixtures/macro-forward-name-later-global`.
 - A macro-constructed `with` form behaves like the same handwritten `with` form.
   Use the ordinary binding, placement, and lifecycle owners.
 

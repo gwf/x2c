@@ -312,6 +312,8 @@ Each invocation receives a compiler-private binding for `temporary`, so
 generated names cannot collide with caller source. A name the body reads
 without declaring keeps the file-scope declaration that supplies it where
 the macro is written, even where a caller's local has the same spelling.
+That declaration can come later in the file, because file scope does not
+depend on declaration order.
 Other free names, and the names a caller writes in its arguments, resolve
 where the expansion lands. A macro that needs a caller's binding takes the
 name as a `Name` argument, as the
