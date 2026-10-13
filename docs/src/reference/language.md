@@ -2812,6 +2812,9 @@ insertion accepts `String`, `Symbol`, declared converters, `Var`, aliases of
 shipped component `src/component-interpolation.x` joins a `%""` literal's
 parts, a translator that `$rewrite(%(expr ("String") (segments *)))` registers
 on the literal's `segments` head; a rule a program registers there runs first.
+The `String.join` call the shipped rule writes is not program code, so a
+program's rule for `String.join` sees only the calls the program writes,
+including one inside a `$` insertion.
 
 The braces belong to the unquote and contain one complete x2c expression,
 including nested calls, indexing, casts, assignments, conditionals, comma
