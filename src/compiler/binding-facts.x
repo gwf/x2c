@@ -94,14 +94,3 @@ static int _null_literal(List expr) {
   return 0;
 }
 
-/** Returns whether `arm` ends with a return or non-returning raise. */
-int reference_guard_exits(List arm) {
-  if (Ast.never_returns(arm)) return 1;
-  match (arm) {
-    case $source_return_content(%(*)): return 1;
-    case %(at ? ?body): return reference_guard_exits(body);
-    case $source_block_content(%(*items)):
-      return items && reference_guard_exits(items.last());
-  }
-  return 0;
-}

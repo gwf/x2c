@@ -119,6 +119,10 @@ Token Token.skip_trivia(Token token) {
   }
 }
 
+// The index after the last non-trivia token before the cursor.
+static long _end_index(Compiler c, Token tokens) =>
+  _skip_backward(c.token - 1, tokens) + 1 - tokens;
+
 static Token _skip_backward(Token token, Token origin) {
   while (token > origin) {
     switch (token.type) {

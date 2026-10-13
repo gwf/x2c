@@ -153,10 +153,6 @@ static void _add(FullParse &p, List node, int begin, int end) {
   p.nodes.push(node);
 }
 
-// The index after the last non-trivia token before the cursor.
-static long _end_index(Compiler c, Token tokens) =>
-  _skip_backward(c.token - 1, tokens) + 1 - tokens;
-
 /* Directives join the nodes in source order, after they record native
    macro names and includes deliver their public compile-time effects. */
 static void _append_preproc(Compiler c, Array nodes) {

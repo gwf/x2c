@@ -142,22 +142,6 @@ static void _collect_ids(
    most file-static initializers are calls. Each such binding keeps its
    declaration and moves its assignment into a generated helper. */
 
-/* The function `type name(void)` running `body`. */
-List _initializer_function(Compiler c, Type type, List name, List body) =>
-  c.rebuild_unit_function($!Unit{ $type $name(void) { @body } });
-
-/* The body of every run-once initializer: `before`, then a return when
-   `guard` is set that sets it otherwise, then `after`. */
-List _run_once(Compiler c, List before, List guard, List after) {
-  List flag = $!int{ $guard };
-  List test = c.rebuild_statement($!{ if ($flag) return; $flag = 1; }).cdr();
-  return List.concat_n(3, before, test, after);
-}
-
-/* The statement calling the `void (void)` function `entry`. */
-List _entry_call(String entry) =>
-  %((stmnt (expr (void) (call $entry (args)))));
-
 /* The statement calling the `void (void)` function `helper` names. */
 static List _helper_call(Compiler c, List helper) {
   List callee = %(expr ((func ((void))) void) (ident $helper));

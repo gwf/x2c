@@ -84,5 +84,4 @@ module {
   "parsing/scripts.x",
   "parsing/definitions.x",
   "parsing/tokens.x",
-  "parsing/reference-facts.x",
 }

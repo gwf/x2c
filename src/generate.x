@@ -798,6 +798,18 @@ static void _add_names(Map available, List node) {
   foreach (String name, _typedef_names(node)) available[name] = 1;
 }
 
+/* The function `type name(void)` running `body`. */
+List _initializer_function(Compiler c, Type type, List name, List body) =>
+  c.rebuild_unit_function($!Unit{ $type $name(void) { @body } });
+
+/* The body of every run-once initializer: `before`, then a return when
+   `guard` is set that sets it otherwise, then `after`. */
+List _run_once(Compiler c, List before, List guard, List after) {
+  List flag = $!int{ $guard };
+  List test = c.rebuild_statement($!{ if ($flag) return; $flag = 1; }).cdr();
+  return List.concat_n(3, before, test, after);
+}
+
 /* file initialization
 
    Queued initialization runs once per file, behind a guard. Each function
