@@ -92,8 +92,8 @@ static List _emit_header(Compiler c, List header) {
 /* Each source use follows the declarations it needs. */
 static List _emit_source(
   Compiler c, List source, Map bindings, Map inline_bodies) {
-  source = _forward_declarations(c,
-    _move_bodies(_file_init(c, source), inline_bodies), 1);
+  source = _forward_declarations(
+    c, _move_bodies(_file_init(c, source), inline_bodies), 1);
   return c.emit(_source_unit(c, source), bindings);
 }
 
@@ -1010,8 +1010,8 @@ static List _protocol_initializer(
   List guard = c.sym.introduce("_x2c_protocol_guard_");
   List declaration = c.initialization_guard(guard);
   List queued = c.init_statements(<protocol>).append(body);
-  return _replace_body(c,
-    function, _run_once(c, %($declaration), guard, queued));
+  return _replace_body(
+    c, function, _run_once(c, %($declaration), guard, queued));
 }
 
 /* The registration of the unit's shutdown function, under the arms that
@@ -1393,7 +1393,7 @@ static void _global(Forward &f, Var binding, String spelling) {
   f.out.push(_inline_prototype(c, declaration));
 }
 
-/* Forwards the static declaration under `key` once, after what it needs. */
+/* Emits prerequisites before forwarding the symbol under `key` once. */
 static void _declaration(Forward &f, Var key) {
   Var declaration;
   if (key in f.available || key in f.seen ||

@@ -1161,7 +1161,7 @@ static Var _prefixed(LispReader &r, Var prefix, int depth) {
    on a worker thread is a fraction of the main thread's. */
 #define LISP_READ_DEPTH_MAX 1024
 
-/* The List after its `(`, or `void` when the tokens end inside it. */
+/* Starts after `(`; incomplete input returns `void`. */
 static Var _list(LispReader &r, int depth) {
   if (depth >= LISP_READ_DEPTH_MAX)
     raise %(size-limit (operation "Lisp.read") (depth $depth));
@@ -1195,7 +1195,7 @@ static Var _atom(LispReader &r, Token token) {
   return _malformed_token(r, token);
 }
 
-/* An integer that fits an `int` reads as one. */
+/* Prefer the `int` representation when the parsed number fits. */
 static Var _integer(LispReader &r, Token token) {
   long value;
   String literal = String.new_len(token.text, token.len);
@@ -1210,7 +1210,7 @@ static Var _floating(LispReader &r, Token token) {
   return value;
 }
 
-/* A Symbol literal is `<name>` or `<"escaped name">`. */
+/* Accepts `<name>` and `<"escaped name">`. */
 static Var _symbol(LispReader &r, Token token) {
   String text = token.text, int n = token.len;
   String inner = text[1] == '"'

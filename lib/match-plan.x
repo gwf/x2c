@@ -419,7 +419,7 @@ static int _is_kind(MatchLower &l, int kind) {
        ? _finish(l, entry, base) : -1;
 }
 
-/* `(atom)` holds for any value whose tag is not `list`. */
+/* Every tag except `list` satisfies this predicate. */
 static int _is_atom(MatchLower &l) {
   int entry = l.b.length, constant = l.b.constant(<list>);
   if (constant < 0) return -1;

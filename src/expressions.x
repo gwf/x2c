@@ -249,8 +249,8 @@ List Compiler.parse_parenthesized_statement(Compiler c) {
       case %((!set ?(List parameter)
                 (param ?base (!set ?binding (bind () ?))))): {
         List decl = %(decl $base (bindings $binding));
-        List cast = _finish_cast(c,
-          decl, parameter.type_from_ast(), _parse_cast(c), origin);
+        List cast = _finish_cast(
+          c, decl, parameter.type_from_ast(), _parse_cast(c), origin);
         return _finish_paren_statement(c, cast, 0);
       }
     foreach (List parameter, parameters)
@@ -680,8 +680,8 @@ List Compiler.parse_variable(Compiler c) {
   if (c.object_macros.try_get(origin.text, definition) &&
       definition == <string>) {
     c.next();
-    return _join_c_string_literals(c,
-      %(expr (* char) (literal (* char) ${origin.text})));
+    return _join_c_string_literals(
+      c, %(expr (* char) (literal (* char) ${origin.text})));
   }
   List name = c.parse_complex_identifier();
   Token after = c.token;
@@ -1038,7 +1038,8 @@ static List _resolve_content(
 static List _content(Resolve &r, List content) {
   Macro lambda = $lambda_expression, captured = $lambda_captured;
   match (r.input) {
-    case captured(?body, *rows, *params): return _lambda(r, body, rows, params);
+    case captured(?body, *rows, *params):
+      return _lambda(r, body, rows, params);
     case lambda(?body, *params): return _lambda(r, body, NULL, params);
   }
   if (content && (content.car() == <at> || content.car() == <src>))
@@ -1052,7 +1053,8 @@ static List _content(Resolve &r, List content) {
       return _resolve_indexed(r.c, base, index, r.origin);
   }
   match (content) {
-    case %(call ?(String callee) (args *args)): return _native(r, callee, args);
+    case %(call ?(String callee) (args *args)):
+      return _native(r, callee, args);
   }
   match (r.input) case $called(?callee, *args): return _call(r, callee, args);
   match (content) {
@@ -1085,7 +1087,8 @@ static List _content(Resolve &r, List content) {
     case $source_commas_content(%(*items)): return _commas(r, items);
     case %(splice ?value): return _splice(r, value);
     case %((!or offsetof nil cache macro-bind) *): return r.input;
-    case $source_content_pattern($grouped, %(?inner)): return _parens(r, inner);
+    case $source_content_pattern($grouped, %(?inner)):
+      return _parens(r, inner);
     case %(initval *): return _initval(r, content);
     case $source_composite_content(%(*items)): return _composite(r, items);
     case $source_cast_content(%((!set ?decl (decl *)) ?value)):
@@ -1186,14 +1189,14 @@ static List _resolve_identifier(
   match (value) case %(binding-global *): kept = 1;
   if (_shadow_identifier(c, binding, type, spelling, binding_facts, kept))
     type = NULL;
-  if (!type) type = _identifier_type(c,
-    binding, spelling, binding_facts, origin);
+  if (!type) type = _identifier_type(
+    c, binding, spelling, binding_facts, origin);
   if (!type && require_type)
     $report.type.ident_semantic(c, value, origin);
   List result = %(expr $type (ident $binding));
   result = _capture_lambda_value(c, result, binding, type, read_reference);
-  return _read_bound_reference(c,
-    result, binding, type, read_reference, binding_facts);
+  return _read_bound_reference(
+    c, result, binding, type, read_reference, binding_facts);
 }
 
 static List _capture_lambda_value(
@@ -1566,7 +1569,8 @@ static List _finish(
   Type applied = callee_type.apply();
   if (!applied && callee_type)
     applied = k.c.sym.resolve_key(callee_type).apply();
-  List arguments = _resolve_call_arguments(k.c, receiver, k.supplied, k.origin);
+  List arguments = _resolve_call_arguments(
+    k.c, receiver, k.supplied, k.origin);
   if (_deferred_call(callee, receiver, arguments))
     result_type = %(<macro-expr>);
   if (!result_type) result_type = applied;
@@ -1662,7 +1666,7 @@ static List _discarding_callee(
   return %(expr $signature (ident $helper_binding));
 }
 
-// method calls
+// member invocation
 
 static List _method(CallSite &k, List receiver, List field) {
   k.receiver = receiver;
@@ -1846,8 +1850,8 @@ static List _method_member(
     }
   }
   if (!signature) return NULL;
-  signature = _receiver_relative_signature(c,
-    binding, signature, receiver_type);
+  signature = _receiver_relative_signature(
+    c, binding, signature, receiver_type);
   return %(method $binding $signature);
 }
 
@@ -2162,8 +2166,8 @@ List Compiler.complete_iter_chain(Compiler c, List expression) {
     case $called(%(!set ?callee (expr ((func (!set ?parameters (*))) ?)
                                       (ident ?binding))),
                  *arguments):
-      return _complete_iter_call(c,
-        expression, callee, arguments, parameters, binding);
+      return _complete_iter_call(
+        c, expression, callee, arguments, parameters, binding);
   return expression;
 }
 
@@ -2351,8 +2355,8 @@ static List _binary_expression(
   /* An untyped preprocessor name beside a converting protocol participant
      would reach the C compiler with no usable conversion. */
   if ((lhs_type != NULL) != (rhs_type != NULL))
-    _check_untyped_operand(c,
-      operator, lhs_type ? lhs_type : rhs_type,
+    _check_untyped_operand(
+      c, operator, lhs_type ? lhs_type : rhs_type,
       lhs_type ? rhs : lhs, origin);
   return _native_binary_expression(c, operator, lhs, rhs, origin);
 }
@@ -2592,8 +2596,8 @@ static List _resolve_protocol_operator(
         c.sym.is_var_type(participant))
       return NULL;
     if (participant !== rhs_type) {
-      participant = _converted_participant(c,
-        member, participant, rhs_type, lhs, rhs);
+      participant = _converted_participant(
+        c, member, participant, rhs_type, lhs, rhs);
       if (!participant) return NULL;
     }
   }
@@ -2681,7 +2685,7 @@ static int _is_operator_temporary(Compiler c, List expression) {
   return 0;
 }
 
-// type tests and casts
+// conversions and predicates
 
 static List _is_type(Resolve &r, List operand, Type target) {
   List lhs = r.c.resolve_expression(operand, r.origin);
@@ -2935,8 +2939,8 @@ static List _resolve_initializer(
 
 static List _parens(Resolve &r, List inner) {
   if (Ast.without_origin(inner).car() == <block>)
-    return _statement_expression(r.c,
-      r.c.bind_syntax(inner, AST_STATEMENT, r.c.return_type), r.origin);
+    return _statement_expression(
+      r.c, r.c.bind_syntax(inner, AST_STATEMENT, r.c.return_type), r.origin);
   inner = r.c.resolve_expression(inner, r.origin);
   Type type = inner.cadr();
   return %(expr $type (parens $inner));
@@ -3028,8 +3032,8 @@ static void _note_explicit_converter(
 */
 void Compiler.check_explicit_converter(
   Compiler c, List parsed, Type target, int context) {
-  _check_noted_converter(c,
-    c.protocol_helpers.getdefault("explicit-converter", %()), parsed,
+  _check_noted_converter(
+    c, c.protocol_helpers.getdefault("explicit-converter", %()), parsed,
     target, context);
 }
 
@@ -3101,8 +3105,8 @@ static void _check_noted_converter(
   // A declared crossing to String calls `str`, not a reader like `string`.
   if (!source_is_var && method != "str" && c.sym.is_string_type(target))
     return;
-  int implicit = _implicit_converter(c,
-    receiver, source, target, source_is_var);
+  int implicit = _implicit_converter(
+    c, receiver, source, target, source_is_var);
   if (!implicit || _defines_crossing(c, source, target)) return;
   c.protocol_helpers.del("explicit-converter");
   $report.conversion.call_redundant(c, method, target, location, context);
@@ -3288,14 +3292,14 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
       c.sym.resolve_key(target).is_pointer())
     return expr;
   _check_object_pointer(c, type, target, type_is_var);
-  List converted = _convert_known_value(c,
-    expr, type, target, type_is_var, target_is_var);
+  List converted = _convert_known_value(
+    c, expr, type, target, type_is_var, target_is_var);
   if (converted) return converted;
   if (c.sym.resolve_numeric_type(type) &&
       c.sym.resolve_numeric_type(target))
     return expr; // allow implicit numeric conversions
-  _check_native_crossing(c,
-    expr, type, target, declared_source, declared_target);
+  _check_native_crossing(
+    c, expr, type, target, declared_source, declared_target);
   // Everything reaching here is delegated to C: a typedef alias, array or
   // function decay, varargs, a system-header type the collector never
   // sees.  The report_error calls above cover every conversion x2c

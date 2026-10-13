@@ -296,7 +296,7 @@ static const char *_malformed(MatchLayoutBuilder &b) {
   return NULL;
 }
 
-/* One allocation holds the layout and its binder table. */
+/* The binder table shares the record's allocation. */
 static MatchCaptureLayout _layout(
   MatchLayoutBuilder &b, Var normalized, const char *malformed) {
   size_t bytes = sizeof(struct MatchCaptureLayout) + sizeof(Atom) * b.count;
@@ -411,7 +411,7 @@ List MatchCaptureLayout.definite_list(MatchCaptureLayout layout) =>
 List MatchCaptureLayout.possible_list(MatchCaptureLayout layout) =>
   layout ? _binders(layout, layout.possible) : NULL;
 
-/* The binders of the `included` slots, in slot order. */
+/* Selection by `included` preserves slot order. */
 static List _binders(
   MatchCaptureLayout layout, unsigned long included) {
   List binders = NULL;
@@ -929,9 +929,10 @@ static int _replace_match(
   return 1;
 }
 
-/* The value for `binder`, or the binder itself when it has none. */
+/* An absent binding leaves `binder` unchanged. */
 static Var _value(ReplacementSource &source, Var binder) {
-  if (source.captures) return _captured(source.layout, source.captures, binder);
+  if (source.captures)
+    return _captured(source.layout, source.captures, binder);
   Var bound = source.bindings.assoc(binder);
   return bound is void ? binder : bound;
 }

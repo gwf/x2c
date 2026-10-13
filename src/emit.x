@@ -356,8 +356,6 @@ static List _leaf(Emitter &e, List ast) {
   return %($head @{_emit(e, ast.cdr())});
 }
 
-// source positions and list forms
-
 static List _at(Emitter &e, int origin, List inner) {
   int old_origin = e.origin;
   e.origin = origin;
@@ -560,8 +558,8 @@ static void _static(StaticRuntime &r) {
   List acquisition = $emit.object.acquire(r, threaded_flag, copy);
   if (r.inferred) {
     List operand = %(expr ${r.type} (cast ${r.type} ${r.initial}));
-    acquisition = _initializer_macro((*r.e),
-      %(input (${r.formal} $operand)), acquisition);
+    acquisition = _initializer_macro(
+      (*r.e), %(input (${r.formal} $operand)), acquisition);
   }
   r.output.push(acquisition);
   r.e.static_objects[r.name] = r.pointer;

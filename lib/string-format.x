@@ -156,7 +156,7 @@ static int _flags(Format &f) {
   return flags;
 }
 
-/* A `*` width takes the next value, and a negative one also sets `-`. */
+/* `*` consumes the next argument; a negative argument also sets `-`. */
 static void _width(Format &f, Spec &spec) {
   if (_byte(f) == '*') {
     int width = _star(f);
@@ -172,7 +172,7 @@ static void _width(Format &f, Spec &spec) {
 static int _star(Format &f) =>
   (int) _number(f, _take(f, $reason.missing_star()), <i32>).integer();
 
-/* A `*` precision takes the next value, and a negative one means none. */
+/* `*` consumes the next argument; a negative argument means unspecified. */
 static void _precision(Format &f, Spec &spec) {
   if (_byte(f) != '.') return;
   f.cursor++;

@@ -243,8 +243,8 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
       c.fn_defs.del(name);
     }
   visited[canonical] = 1;
-  _walk_file(c,
-    canonical, c.text, c.unit_source, Path.dirname(c.filename), globs,
+  _walk_file(
+    c, canonical, c.text, c.unit_source, Path.dirname(c.filename), globs,
     visited);
   _bind_pending_inline_bodies(c, globs, canonical);
   _record_cold_conformances(c, globs, visited, canonical);
@@ -276,8 +276,8 @@ static void _add_prelude(Compiler c, Map globs, Map visited) {
     visited[canonical] = 1;
     c.add_translation_dependency(canonical);
     if (c.runtime_hdrs)
-      _walk_file(c,
-        canonical, _runtime_text(c, path), NULL, Path.dirname(path), globs,
+      _walk_file(
+        c, canonical, _runtime_text(c, path), NULL, Path.dirname(path), globs,
         visited);
     else {
       List entry = _prelude_entry(c, path, canonical);
@@ -824,8 +824,8 @@ static void _include_file(FileWalk &w, String target, int angle) {
     w.visited[canonical] = 1;
     List entry = _collection_entry(w.c, canonical);
     if (!entry) entry = _walk_cold(w.c, target, canonical, w.globs, w.visited);
-    _replay_cached(w.c,
-      entry, canonical, w.globs, w.visited, NULL);
+    _replay_cached(
+      w.c, entry, canonical, w.globs, w.visited, NULL);
   }
   else if (w.visited[canonical] is <array>)
     _replay_included(w.c, w.globs, canonical, {}, NULL, w.visited);
@@ -856,7 +856,8 @@ static String _include_search_hash(Compiler c, String path) {
 static String _walked_hash(
   Compiler c, String target, String canonical) {
   Var walked = _process_cache()[canonical];
-  if (walked is void) return _content_hash(_include_text(c, target, canonical));
+  if (walked is void)
+    return _content_hash(_include_text(c, target, canonical));
   return walked.list().cadr();
 }
 
@@ -1351,8 +1352,8 @@ static void _bind_pending_inline_bodies(
     Map visited = {};
     visited[path] = 1;
     Array effects = [];
-    _replay_cached(body,
-      _entry(body, path), path, symbols, visited, effects);
+    _replay_cached(
+      body, _entry(body, path), path, symbols, visited, effects);
     body.filename = path;
     body.meta_hashes = hashes;
     body.tokenize(text);
@@ -1594,8 +1595,8 @@ void Compiler.publish_inline_types(Compiler c, List ast) {
   Map additions = c.inline_type_dependencies(ast);
   if (!additions.len()) return;
   String path = _canonical_path(c.filename);
-  _publish_inline_dependencies(c,
-    path, c.sym.unit_symbols(), c.sym.file_statics(), additions);
+  _publish_inline_dependencies(
+    c, path, c.sym.unit_symbols(), c.sym.file_statics(), additions);
 }
 
 static void _publish_inline_dependencies(
@@ -2171,8 +2172,8 @@ static List _stored_entry(Compiler c, String canonical, List stored) {
       if (home_absolute_path(owner) == canonical &&
           _hash_matches(c, canonical, hash) &&
           _interface_include_dirs(c, canonical) == include_dirs)
-        return _interface_entry(c,
-          canonical, hash, parts, definitions, dependencies, include_dirs);
+        return _interface_entry(
+          c, canonical, hash, parts, definitions, dependencies, include_dirs);
   return NULL;
 }
 

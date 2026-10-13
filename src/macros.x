@@ -532,7 +532,8 @@ static List _fresh_names(Expansion &x, List old_stack) {
       x.direct = cons(
         %($binder ${_private_name(c, spelling.str(), owner)}), x.direct);
   }
-  List members = _member_bindings(c, x.definition.assoc(<parameters>), x.input);
+  List members = _member_bindings(
+    c, x.definition.assoc(<parameters>), x.input);
   x.direct = x.direct.append(members);
   return fresh_values.list_free();
 }
@@ -1379,8 +1380,8 @@ static List _parse_body(Compiler c, Symbol result_kind, Array using) {
   if (result_kind == <block-item>)
     return cons(<seq>, c.parse_block_items(0).cdr());
   if (result_kind == <field>)
-    return _closed_seq(c,
-      c.peek(0) == <"}"> ? NULL : c.parse_fields(%(struct ())));
+    return _closed_seq(
+      c, c.peek(0) == <"}"> ? NULL : c.parse_fields(%(struct ())));
   if (result_kind == <enumerator>)
     return _closed_seq(c, c.parse_enumerators(%(enum ())));
   if (result_kind == <map-entry>) return _closed_seq(c, c.parse_map_entries());
@@ -1708,7 +1709,8 @@ static List _quoted_type(Compiler c, Map holes) {
              ? holes[%(expression ${c.token.pos})]
              : Token.skip_trivia(c.token + 1).text;
     c.token = c.after_hole();
-    type = _checked_type(c,
+    type = _checked_type(
+      c,
       c.resolve_expression(%(expr () (ident ${name.str()})), origin), origin);
   }
   else type = _quoted_type_name(c);
@@ -1722,8 +1724,8 @@ static List _quoted_type(Compiler c, Map holes) {
 static List _checked_type(Compiler c, List type, Token origin) {
   if (!c.meta_body) return type;
   List error = _runtime_call(c, "type_name_error", %($type), origin);
-  List fail = _runtime_call(c,
-    "x2c_diagnostic_fail", %($error (expr ("List") (nil))), origin);
+  List fail = _runtime_call(
+    c, "x2c_diagnostic_fail", %($error (expr ("List") (nil))), origin);
   return c.resolve_expression(
     %(expr () (op ? $error
       (expr ("Type") ${source_commas_content(%($fail $type))}) $type)),
@@ -1760,13 +1762,13 @@ static List _quotation(
      builds its pending invocation with the values already grouped. */
   List values = %(expr ("List") (nil));
   foreach (List hole, d.parameters.reverse())
-    values = _quoted_cons(c,
-      %(expr () (ident ${_hole_name(hole).str()})), values, start);
+    values = _quoted_cons(
+      c, %(expr () (ident ${_hole_name(hole).str()})), values, start);
   List definition = c.capture_macro_value(_publish(d));
   List empty = %(expr ("List") (nil));
-  return _quoted_cons(c,
-    $!String{ ${"x2c.template"} }, _quoted_cons(c,
-      definition, _quoted_cons(c, values, empty, start), start), start);
+  return _quoted_cons(
+    c, $!String{ ${"x2c.template"} }, _quoted_cons(
+      c, definition, _quoted_cons(c, values, empty, start), start), start);
 }
 
 /* `head` consed onto the List expression `tail`. */
@@ -1950,8 +1952,8 @@ static List _typed_hole(Compiler c, List row, Token start) {
   if (kind == <name> && projection == <value>)
     return _runtime_call(c, "Macro_declared", %($local), start);
   if (!lifts && !expression && kind != <name>) return local;
-  return _runtime_call(c,
-    "Macro_inserted",
+  return _runtime_call(
+    c, "Macro_inserted",
     %($local ${$!int{ $lifts }} ${$!int{ $expression }}), start);
 }
 
@@ -2746,8 +2748,8 @@ static List _rewrite(
       continue;
     $let(c.active_rewrites, cons(rule, c.active_rewrites)) {
       if (lower <= 0)
-        return _bound(c,
-          point, kind, source, result, position, expected, site, lower);
+        return _bound(
+          c, point, kind, source, result, position, expected, site, lower);
       if (position == AST_UNIT) return _lowered_definition(c, result);
       int held = point == <node>;
       match (result) case %(code-value "lowered" *): held = 1;
@@ -3191,7 +3193,8 @@ static int _find_slot(SlotWatch watch, Ast ast) {
     else that identifies it when a binder it uses binds again. */
 void Compiler.rebound(Compiler c, Var source, List bound) {
   SlotWatch watch = c.slot_watch;
-  if (!watch || watch.prepares || bound === source || _find_slot(watch, source) < 0)
+  if (!watch || watch.prepares || bound === source ||
+      _find_slot(watch, source) < 0)
     return;
   watch.values = watch.values.append(%($bound));
   watch.outputs.push(NULL);
@@ -3206,7 +3209,8 @@ Ast Compiler.watched_step(Compiler c, Ast ast) {
   SlotWatch watch = c.slot_watch, owner = watch;
   int slot = _find_slot(watch, ast);
   if (slot < 0) return NULL;
-  while (owner.parent && _find_slot(owner.parent, ast) >= 0) owner = owner.parent;
+  while (owner.parent && _find_slot(owner.parent, ast) >= 0)
+    owner = owner.parent;
   if (owner.kept) return ast;
   Effects before = _effects(c);
   Ast lowered;
@@ -3496,7 +3500,8 @@ static List _argument_row(Compiler c, List hole, Symbol kind) {
     _row_directives(c, kind, captured);
     Token first = c.token;
     Var argument = _parse_argument(c, kind);
-    if (kind != <name>) argument = _capture_source(c, argument, first, c.token);
+    if (kind != <name>)
+      argument = _capture_source(c, argument, first, c.token);
     captured.push(argument);
     if (!sequence || !c.test(<,>)) break;
   }
@@ -4205,7 +4210,8 @@ static Var _slot_value(Compiler c, List slot) {
   Var required = slot.assoc(<construct>);
   Var result = form is <list>
     ? c.evaluate_meta_value(form, invocation, 1)
-    : _eval_template_form(c, form, bindings, invocation, source_file, required);
+    : _eval_template_form(
+      c, form, bindings, invocation, source_file, required);
   result = _helper_result(c, result);
   Var construction = slot.assoc(<target>);
   if (required is not void && splice) {
@@ -4397,8 +4403,8 @@ Var Compiler.evaluate_declaration_recipe(
   Token invocation = c.token;
   match (c.macro_stack)
     case %((? ? ? ?token) *): invocation = token;
-  return _eval_template_form(c,
-    "(apply (eval $callback) $arguments)",
+  return _eval_template_form(
+    c, "(apply (eval $callback) $arguments)",
     %((?callback $callback) (?arguments $arguments)),
     invocation, c.filename, void);
 }
@@ -4449,8 +4455,10 @@ static List _hole_row(
                ? type_name_error(value) : NULL;
   if (error) $report.macro.type_name(c, error, invocation);
   if (!hole.assoc(<sequence>).int())
-    return _capture_row_project(c,
-      hole, %(${lifts ? _lifted(c, value, invocation) : value}), retain_syntax);
+    return _capture_row_project(
+      c,
+      hole, %(${lifts ? _lifted(c, value, invocation) : value}),
+      retain_syntax);
   List sources = value;
   if (lifts) {
     Array lifted = [];
@@ -4539,8 +4547,9 @@ static List _rebuild(
   List rows = _template_arguments(c, definition, values, c.token, 1).cdr();
   if (target)
     rows = rows.append(
-      %(${_capture_row_project(c,
-        definition.assoc(<targetp>), %($target), 1)}));
+      %(
+        ${_capture_row_project(
+          c, definition.assoc(<targetp>), %($target), 1)}));
   List bindings = NULL;
   foreach (List row, rows) {
     bindings = _row_bindings(keys.car(), row, bindings);
@@ -4633,8 +4642,8 @@ static Map _private_names(Compiler c, List fresh) {
   int file_scope = c.sym.at_file_scope();
   foreach (List row, fresh) {
     (Var binder, Var spelling, Var file) = row;
-    names[binder] = _private_name(c,
-      spelling.str(), file_scope && file.int() ? root : NULL);
+    names[binder] = _private_name(
+      c, spelling.str(), file_scope && file.int() ? root : NULL);
   }
   return names;
 }
@@ -4960,8 +4969,8 @@ static Map _code_effects(Compiler c, Var effects) {
   foreach (List effect, effects)
     match (effect) {
       case %(rewrite ?point ?kind ?name ?shape ?holes): {
-        _register_rewrite(c,
-          _rewrite_rule(point, kind, name, shape, holes, 0, 1));
+        _register_rewrite(
+          c, _rewrite_rule(point, kind, name, shape, holes, 0, 1));
         c.record_compile_time_effect(
           %(compile-time rewrite $point ${c.freeze_declaration_syntax(kind)}
             $name ${c.freeze_declaration_syntax(shape)}
@@ -5229,8 +5238,8 @@ static int _statement_expression(Compiler c, List value) {
     case %(code-value ? ?root ?): value = root;
     case %(macro-invoke ?stored ? ?site):
       return _result_kind(
-        _stored_definition(c,
-          stored, c.macro_invocation_site(site))) == <expression>;
+        _stored_definition(
+          c, stored, c.macro_invocation_site(site))) == <expression>;
     case %(expr *): return 1;
     default: return _sdk_identifier_result(value) is not void;
   }
@@ -5269,8 +5278,8 @@ static List _import(Compiler c, String requested, Token invocation) {
   if (!path.endswith(".xlisp"))
     $report.macro.import_extension(c, invocation, _path_note(c, path));
   Map before = c.deps.copy();
-  String text = _read_source(c,
-    path, "cannot open compile-time Lisp import", invocation);
+  String text = _read_source(
+    c, path, "cannot open compile-time Lisp import", invocation);
   /* Collection queues the import itself, so only evaluation fills imports.
      A nested import runs while its importing effect is on import_stack. */
   if (c.shallow && !c.import_stack.len() && !library_filling) {
@@ -5568,8 +5577,8 @@ static String builtin_macros_marker = NULL;
 /** Installs the compiler-shipped source macros into `c` once. */
 void Compiler.install_builtin_macros(Compiler c) {
   if (!builtin_macros_marker) builtin_macros_marker = "_x2c.builtin.macros";
-  _install_source(c,
-    builtin_macros, "<builtin:macros>", builtin_macros_marker, 1);
+  _install_source(
+    c, builtin_macros, "<builtin:macros>", builtin_macros_marker, 1);
 }
 
 static void _install_source(
@@ -5613,15 +5622,16 @@ static void _use_lisp_bindings(Compiler c, int install) {
   int loaded =
     !install || lisp_bindings_marker in c.macros;
   if (!loaded) c.ensure_macro_lisp();
-  _eval_library(c,
-    loaded, %"${c.root_dir}/etc/lisp-bindings.xlisp",
+  _eval_library(
+    c, loaded, %"${c.root_dir}/etc/lisp-bindings.xlisp",
     "cannot open the native Lisp macro support");
   if (loaded) return;
   /* Signature imports may preload into the shared parent; group state starts
      only when this unit installs the binding macros. */
   c.macro_lisp.eval(
     %(begin (def lisp.binding.rows ()) (def lisp.binding.sealed ())));
-  _install_source(c,
+  _install_source(
+    c,
     lisp_binding_macros, "<builtin:lisp-bindings>", lisp_bindings_marker, 0);
 }
 

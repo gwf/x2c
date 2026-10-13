@@ -167,8 +167,8 @@ static ToolAction _action(
 */
 ToolAction Toolchain.compile_action(
   Toolchain t, String source, String object, String depfile, List gen_dirs) =>
-  _action(t,
-    <compile>,
+  _action(
+    t, <compile>,
     %(@{_compile_arguments(t, gen_dirs)} "-MMD" "-MP" "-MF" $depfile
       "-MT" $object "-c" $source "-o" $object));
 
@@ -180,8 +180,8 @@ ToolAction Toolchain.compile_action(
 */
 ToolAction Toolchain.preprocess_action(
   Toolchain t, String source, String output, List gen_dirs) =>
-  _action(t,
-    <preprocess>,
+  _action(
+    t, <preprocess>,
     %(@{_compile_arguments(t, gen_dirs)} "-E" $source "-o" $output));
 
 static List _compile_arguments(Toolchain t, List gen_dirs) => %(
@@ -206,8 +206,8 @@ ToolAction Toolchain.archive_action(
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the action.
 */
 ToolAction Toolchain.link_action(Toolchain t, String output, List inputs) =>
-  _action(t,
-    <link>,
+  _action(
+    t, <link>,
     %(${t.cc} @inputs @{t.ld_args} ${t.runtime_lib} "-lm" "-o" $output));
 
 /** Builds but does not start the link of a native module. The module leaves
@@ -220,7 +220,8 @@ ToolAction Toolchain.link_action(Toolchain t, String output, List inputs) =>
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the action.
 */
 ToolAction Toolchain.module_action(Toolchain t, String output, List inputs) =>
-  _action(t,
+  _action(
+    t,
     <link>, %(${t.cc} @inputs @{t.ld_args} @{_module_shape()} "-o" $output));
 
 static List _module_shape(void) {

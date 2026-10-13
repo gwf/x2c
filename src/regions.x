@@ -34,26 +34,26 @@
 /* Deferred region findings. The walk owns collection and severity. */
 
 static macro Stmt $report.region.bad_free(Expr $w, Expr $op, Expr $subject) =>
-  _warn($w,
-    <bad-free>, $w.origin,
+  _warn(
+    $w, <bad-free>, $w.origin,
     %"${$op} is given ${$subject}, which no Scope allocator returned",
     %("only Scope.malloc, calloc, memdup, and realloc storage can be"
       "freed or reallocated"));
 
 static macro Stmt $report.region.read_ended(Expr $w, Expr $name) =>
-  _warn($w,
-    <region>, $w.origin,
+  _warn(
+    $w, <region>, $w.origin,
     %"'${$name}' is read after its owning region ended", NULL);
 
 static macro Stmt $report.region.after_free(
   Expr $w, Expr $name, Expr $ended) =>
-  _warn($w,
-    <after-free>, $w.origin, %"'${$name}' is used after ${$ended}", NULL);
+  _warn(
+    $w, <after-free>, $w.origin, %"'${$name}' is used after ${$ended}", NULL);
 
 static macro Stmt $report.region.use_ended(
   Expr $f, Expr $subject, Expr $region) =>
-  _warn((*$f.w),
-    <region>, $f.w.origin,
+  _warn(
+    (*$f.w), <region>, $f.w.origin,
     %"${$subject} is used after the region that allocated it ended",
     _opened((*$f.w), $region));
 
@@ -61,15 +61,15 @@ static macro Stmt $report.region.local_escape(
   Expr $f, Expr $subject, Expr $exit) {
   String message =
     %"${$subject} can outlive the local storage it points into when ${$exit}";
-  _warn((*$f.w),
-    <region>, $f.w.origin, message,
+  _warn(
+    (*$f.w), <region>, $f.w.origin, message,
     %("local storage ends when the function returns"));
 }
 
 static macro Stmt $report.region.escape(
   Expr $f, Expr $subject, Expr $exit, Expr $region) =>
-  _warn((*$f.w),
-    <region>, $f.w.origin,
+  _warn(
+    (*$f.w), <region>, $f.w.origin,
     %"${$subject} can outlive the region it was allocated in when ${$exit}",
     _opened((*$f.w), $region));
 
@@ -1166,7 +1166,8 @@ static Region _birth(
     case ${$map_value(*rows)}:
       return _active(w);
     case %(composite *)
-      if (_value_class(w, type ? type : _expression_type(value)) == <container>):
+      if (_value_class(w, type ? type : _expression_type(value)) ==
+          <container>):
       return _active(w);
   }
   if (callee) return _summary_birth(w, callee, born, other);
@@ -1411,7 +1412,8 @@ static Region _active(Walk &w) {
   while (region && (region.closed ||
          (region.kind != <scope> && region.kind != <slot>)))
     region = region.outer;
-  return region && region.kind == <slot> ? _allocate_in(w, region.slot) : region;
+  return region && region.kind == <slot>
+    ? _allocate_in(w, region.slot) : region;
 }
 
 // warnings

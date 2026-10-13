@@ -34,8 +34,8 @@ static List _convert_initializer(
   Compiler c, List value, Type type, List target, int &?native_used) {
   match (value)
     case %(expr ? (composite ?payload)):
-      return _convert_composite(c,
-        payload.cdr(), type.canonicalize(), target, NULL, native_used);
+      return _convert_composite(
+        c, payload.cdr(), type.canonicalize(), target, NULL, native_used);
   return c.convert_expression(value, type.declared());
 }
 
@@ -63,8 +63,8 @@ static List _convert_composite(
   if (!native_target) native_target = _zero_pointer_target(target, target);
   Array elements = [];
   int discarded = 0;
-  List rows = _composite_rows(c,
-    target, items, native_target, parent_condition, discarded);
+  List rows = _composite_rows(
+    c, target, items, native_target, parent_condition, discarded);
   // Preserve C's excess warning only when this synthetic alternative applies.
   // The always-true ICE stays on a retained value, so braces remain braces.
   List excess_check = discarded
@@ -74,8 +74,8 @@ static List _convert_composite(
       ? _condition_and(parent_condition, excess_check) : parent_condition;
     excess_check = NULL;
     elements.push(
-      _convert_composite_row(c,
-        row, native_target, row_condition, parent_condition, native_used));
+      _convert_composite_row(
+        c, row, native_target, row_condition, parent_condition, native_used));
   }
   List converted = elements.list_free();
   return $!($target){ { @converted } };
@@ -635,15 +635,15 @@ static List _convert_composite_row(
     value = value.caddr();
   if (value.match(%(expr ? (initval *))))
     return row_condition === parent_condition ? original
-      : _convert_initval_row(c,
-        row, value, native_target, row_condition, native_used);
+      : _convert_initval_row(
+        c, row, value, native_target, row_condition, native_used);
   RowSelection selected = _select_row(cases);
   if (selected.homogeneous)
-    return _convert_homogeneous_row(c,
-      original, value, selected, native_target, row_condition,
+    return _convert_homogeneous_row(
+      c, original, value, selected, native_target, row_condition,
       native_used);
-  return _convert_mixed_row(c,
-    row, value, native_target, row_condition, parent_condition,
+  return _convert_mixed_row(
+    c, row, value, native_target, row_condition, parent_condition,
     native_used);
 }
 
@@ -669,8 +669,8 @@ static List _convert_initval_row(
   Array checked = [];
   foreach (List choice, cases) {
     (List condition, List path, Type destination, List input) = choice;
-    List value = _convert_case(c,
-      choice, input, native_target, row_condition, native_used);
+    List value = _convert_case(
+      c, choice, input, native_target, row_condition, native_used);
     checked.push(%($condition $path $destination $value));
   }
   List header = NULL;
@@ -688,8 +688,8 @@ static List _convert_case(
   List row_condition, int &?native_used) {
   (List condition, List path, Type destination, List input) = choice;
   if (!destination) return value;
-  return _convert_alternative(c,
-    value, destination, _condition_and(row_condition, condition),
+  return _convert_alternative(
+    c, value, destination, _condition_and(row_condition, condition),
     c.initializer_slot(native_target, path), native_used);
 }
 
@@ -700,8 +700,8 @@ static List _convert_homogeneous_row(
   List condition = _condition_and(
     row_condition, selected.excess ? selected.applicable : NULL);
   List converted = !selected.type ? value
-    : _convert_alternative(c,
-      value, selected.type, condition, slot, native_used);
+    : _convert_alternative(
+      c, value, selected.type, condition, slot, native_used);
   return _replace_value(original, converted);
 }
 
@@ -759,8 +759,8 @@ static List _speculate(
     try {
       match (value) {
         case %(expr ? (composite ?payload)):
-          result = _convert_composite(c,
-            payload.cdr(), type.canonicalize(), target, condition,
+          result = _convert_composite(
+            c, payload.cdr(), type.canonicalize(), target, condition,
             native_used);
         default: result = c.convert_expression(value, type);
       }
@@ -814,8 +814,8 @@ static List _convert_mixed_row(
   int native_identity = !parent_condition;
   foreach (List choice, cases) {
     (List condition, List path, Type destination, List input) = choice;
-    List result = _convert_case(c,
-      choice, prepared, native_target, row_condition, native_used);
+    List result = _convert_case(
+      c, choice, prepared, native_target, row_condition, native_used);
     int identity = result === prepared;
     match (result)
       case %(expr ? (call "__builtin_choose_expr" (args ? ?yes ?))):
@@ -865,7 +865,7 @@ static List _capture_value(
   return %(expr $type $formal);
 }
 
-// Keep literal construction/cache facts while capturing native value leaves.
+// Capturing native leaves must preserve construction and cache facts.
 static int _is_literal(List value) {
   match (value) {
     case %(expr ? ${$source_literal_content(%(*))}): return 1;

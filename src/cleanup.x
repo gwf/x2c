@@ -164,8 +164,8 @@ static List _static_regions(Compiler c, List ast, Map runtime) {
         List statement = rest.car();
         if (_runtime_static_declaration(c, statement, runtime)) {
           List guard = _static_regions(c, statement, runtime);
-          List body = _static_regions(c,
-            source_block_content(rest.cdr()), runtime);
+          List body = _static_regions(
+            c, source_block_content(rest.cdr()), runtime);
           before.push(%(localinit $guard $body));
           break;
         }
@@ -547,8 +547,8 @@ static List _rewrite_switch(Walk &w, List subject, List body) {
 static List _case_label(Walk &w, List label) {
   for (int i = w.switch_stop; i < (int) w.regions.len(); i++)
     if (w.regions[i].list().car()) {
-      _report_at(w,
-        w.origin, "case label cannot enter a protected cleanup region",
+      _report_at(
+        w, w.origin, "case label cannot enter a protected cleanup region",
         %("open the region inside the case's own block"));
       break;
     }
@@ -605,8 +605,8 @@ static int _goto_stop(Walk &w, Var label) {
   String name = _label_spelling(label);
   Var stored;
   if (!name || !w.labels.try_get(name, stored)) {
-    _report_at(w,
-      w.origin, "goto target label is not defined in this function", NULL);
+    _report_at(
+      w, w.origin, "goto target label is not defined in this function", NULL);
     return (int) w.regions.len();
   }
   List target = stored, source = _region_path(w);
@@ -615,8 +615,8 @@ static int _goto_stop(Walk &w, Var label) {
   for (int i = source_depth; i > target_depth && suffix; i--)
     suffix = suffix.cdr();
   if (target_depth > source_depth || suffix !== target) {
-    _report_at(w,
-      w.origin, "goto cannot enter or cross a protected cleanup region",
+    _report_at(
+      w, w.origin, "goto cannot enter or cross a protected cleanup region",
       %("jump only within the same region or outward"));
     return (int) w.regions.len();
   }
@@ -684,7 +684,7 @@ static List _lower_landing(Walk &w, Var code, List rows) {
   return _bind_parts(c, code, parts);
 }
 
-/* A region's body, lowered inside the region `cleanup` leaves. */
+/* Lowers the body inside the scope that `cleanup` leaves. */
 static List _region(Walk &w, List cleanup, List body) =>
   %(code-value "lowered" ${_inside(w, cleanup, body, body)} ());
 
@@ -886,7 +886,8 @@ static Var _preserve_locals(Preserve &p, Var value) {
   // only when a statement expression in the function holds a landing.
   match (node) case %(expr *):
     return p.expression_landings
-      ? _rewrite_expression(node, %!(List block) using &p => _preserve_locals(p, block))
+      ? _rewrite_expression(
+        node, %!(List block) using &p => _preserve_locals(p, block))
       : node;
   match (node) {
     case %(param ?type ?bind):
@@ -1031,7 +1032,8 @@ static List _escape_loop(Preserve &p, List loop) {
       _escape_declared(p, output, binds);
       List escapes = output.list_free();
       if (!escapes) return NULL;
-      List declaration = _declaration(p, %(declare $type $bindings), p.escaped);
+      List declaration = _declaration(
+        p, %(declare $type $bindings), p.escaped);
       List remaining = _preserve_locals(p, %(for () @rest));
       return source_block_content(%($declaration @escapes $remaining));
     }
@@ -1148,7 +1150,8 @@ static List _callable_defer(Compiler c, List body, List finalizer) {
   List opaque = c.sym.introduce(c.fresh_name("defer_opaque"));
   List callback = c.sym.introduce(c.fresh_name("defer_cleanup"));
   String env_name = env_local ? binding_identity_spelling(env_local) : NULL;
-  List rewritten = env_name ? _rewrite_captures(d, finalizer, env_name) : finalizer;
+  List rewritten = env_name
+    ? _rewrite_captures(d, finalizer, env_name) : finalizer;
   c.add_early(
     _defer_callback(c, callback, opaque, env_binding, env_local, rewritten));
   if (c.fn_name)

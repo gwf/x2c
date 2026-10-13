@@ -76,8 +76,8 @@ List Compiler.setup_cache_init(
     scan.push(c.init_statements(area));
   Array source_ids = _cache_ids(c, scan.list_free());
   if (header_ids)
-    header = _header_cache(c,
-      header, header_ids, prefix, guard_name, initializer_name);
+    header = _header_cache(
+      c, header, header_ids, prefix, guard_name, initializer_name);
   Map bindings = _cache_bindings(c, source_ids, NULL);
   source = _source_cache(c, source, source_ids, bindings, statics);
   statics.initializers.free();

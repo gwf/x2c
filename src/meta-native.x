@@ -184,8 +184,8 @@ void Compiler.install_collected_meta_function(
   c.ensure_macro_lisp();
   Map linked = _linked_module();
   if (c.groups_meta() && !(name in linked)) return;
-  _install_stub(c,
-    name, declaration.type_from_ast().canonicalize(), NULL, marker);
+  _install_stub(
+    c, name, declaration.type_from_ast().canonicalize(), NULL, marker);
 }
 
 /* Host-preprocessed text holds each included file's definitions where the
@@ -237,7 +237,8 @@ static Var _meta_stub(Func function, const FuncArg *argv) {
   if (!provider.len()) {
     Map linked = _linked_module();
     if (name in linked) {
-      if (c.shallow && !_linked_copy(c, name, linked)) c.complete_meta_hashes();
+      if (c.shallow && !_linked_copy(c, name, linked))
+        c.complete_meta_hashes();
       if (_linked_copy(c, name, linked))
         return _meta_apply(c, linked[name], values.list_free());
     }
@@ -279,7 +280,8 @@ int Compiler.matches_macro(Compiler c, MacroMatcher &matcher, List code) {
    the arguments, carried through the existing helper subject context. */
 static List _subject_rows(Compiler c, Array values) {
   Map globals = {}, source_names = {};
-  foreach (Var value, values) _subject_globals(c, value, globals, source_names);
+  foreach (Var value, values)
+    _subject_globals(c, value, globals, source_names);
   Array rows = [];
   foreach (Var (spelling, binding), globals) rows.push(%($spelling $binding));
   foreach (Var (binding, spelling), source_names)
@@ -338,7 +340,8 @@ void Compiler.install_meta_declaration(
     boundary. */
 List Compiler.evaluate_meta_expression(
   Compiler c, List expression, Token site) =>
-  _meta_result(c, expression, c.evaluate_meta_value(expression, site, 0), site);
+  _meta_result(
+    c, expression, c.evaluate_meta_value(expression, site, 0), site);
 
 /** Executes an explicit meta call written as a whole statement at
     `context`. A code List result binds there, so the call may return a
@@ -569,7 +572,8 @@ static int _bind_project_meta(
   if (!install && c.macro_lisp.try_get(name, bound)) return 1;
   Var (signature, provider) = target;
   Var function = _linked_target(c, name, signature, provider);
-  if (function is not <func>) _install_stub(c, name, signature, provider, NULL);
+  if (function is not <func>)
+    _install_stub(c, name, signature, provider, NULL);
   else if (!c.macro_lisp.try_get(name, bound) || !bound.equal(function))
     c.macro_lisp.set_global(name, function);
   return 1;
@@ -735,7 +739,7 @@ static void _bind_native_meta(
   if (!present) _install(n, function);
 }
 
-/* The compiler's own linked target, which hides any module's. */
+/* The compiler's built-in target takes precedence over loaded modules. */
 static Var _linked(NativeBinding &n) {
   Compiler c = n.c;
   Var function = c.macro_lisp.eval(
@@ -866,7 +870,8 @@ static List _native_meta_summary(Compiler c, List signature) {
     int takes = 0, gives = _native_handle(c, result, 0);
     foreach (List parameter, parameters)
       takes = takes ||
-              (_native_handle(c, parameter, 1) && !_native_owned(c, parameter));
+              (_native_handle(c, parameter, 1) &&
+               !_native_owned(c, parameter));
     if (takes && gives && !_native_owned(c, result)) return NULL;
     return gives ? %(1 ()) : %(0 ());
   }

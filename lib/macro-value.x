@@ -709,7 +709,7 @@ static List _case_shape(Macro t, List names) {
   return _view(pattern);
 }
 
-/* The binder of the fixed local the body declares `index`th. */
+/* Declaration order gives each body-local binder its identity. */
 static Atom _fixed(int index) => Atom.intern(%"?__fixed_$index");
 
 /* Removes source wrappers and template shells throughout a pattern, down

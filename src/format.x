@@ -93,7 +93,7 @@ static void _directive(Pretty &p, String token) {
   p.prev_token = NULL;
 }
 
-/* Write one ordinary token between its leading and trailing layout. */
+/* Surrounds the token with its leading and trailing layout. */
 static void _ordinary(Pretty &p, String token, List rest) {
   char last = token ? token[-1] : '\0';
   if (last == '(') p.paren_depth++;

@@ -77,7 +77,7 @@ X2c declarations, parsed from source or constructed.
 The declared result type of the function `declaration`, which its
 `return` statements convert to, or NULL.
 
-Source: `src/parse.x:2650`
+Source: `src/parse.x:2651`
 
 #### source_clause
 
@@ -85,7 +85,7 @@ Source: `src/parse.x:2650`
 
 The source clause `kind`, which the binder parses when it reaches it.
 
-Source: `src/parse.x:3656`
+Source: `src/parse.x:3657`
 
 ### `Compiler`
 
@@ -97,7 +97,7 @@ Source: `src/parse.x:3656`
 Binds a callable's outer block in its active parameter scope. Ordinary
 constructed blocks open their own scope before using this operation.
 
-Source: `src/parse.x:3944`
+Source: `src/parse.x:3946`
 
 <a id="Compiler.bind_catch_arm"></a>
 #### Compiler.bind_catch_arm
@@ -110,7 +110,7 @@ Binder diagnostics use `start`. A source arm's body parses here, and a
 template's declares its binders where its expansion binds it. A parsed
 arm's body already begins with them, so it binds unchanged.
 
-Source: `src/parse.x:3791`
+Source: `src/parse.x:3793`
 
 <a id="Compiler.bind_match_arm"></a>
 #### Compiler.bind_match_arm
@@ -122,7 +122,7 @@ definite binders of `pattern` when the arm `binds`. Binder diagnostics
 use `start`. A source arm's body parses here with the typed captures
 `types` that its pattern recorded.
 
-Source: `src/parse.x:3900`
+Source: `src/parse.x:3902`
 
 <a id="Compiler.bind_parameter"></a>
 #### Compiler.bind_parameter
@@ -132,7 +132,7 @@ Source: `src/parse.x:3900`
 Binds one constructed parameter in the current scope, including nested
 function modifiers and reference parameter facts.
 
-Source: `src/parse.x:2416`
+Source: `src/parse.x:2417`
 
 <a id="Compiler.bind_source_statement"></a>
 #### Compiler.bind_source_statement
@@ -142,7 +142,7 @@ Source: `src/parse.x:2416`
 Binds the source `if`, `while`, `do`, `for`, `match`, or `try` at the
 cursor through the same binders as constructed syntax.
 
-Source: `src/parse.x:3674`
+Source: `src/parse.x:3675`
 
 <a id="Compiler.bind_syntax"></a>
 #### Compiler.bind_syntax
@@ -155,7 +155,7 @@ The input must evaluate to a nonempty AST `List` valid for the requested
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:3027`
+Source: `src/parse.x:3028`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local
@@ -166,7 +166,7 @@ Installs a definition-local template binding or typedef provisionally.
 Later template types name a local typedef by its identity, so each
 expansion refers to that expansion's private typedef.
 
-Source: `src/parse.x:2204`
+Source: `src/parse.x:2205`
 
 <a id="Compiler.check_reference_placement"></a>
 #### Compiler.check_reference_placement
@@ -186,7 +186,7 @@ Source: `src/parse.x:1172`
 Gives the placements made since `first` the `result` of the expansion
 that made them.
 
-Source: `src/parse.x:2841`
+Source: `src/parse.x:2842`
 
 <a id="Compiler.defines_main"></a>
 #### Compiler.defines_main
@@ -225,7 +225,7 @@ one the transform lowers, as its origin anchor; the function, as a
 definition whose body is still the empty `(seq)`; or the unit, as a
 `String` expression of its path.
 
-Source: `src/parse.x:2752`
+Source: `src/parse.x:2753`
 
 <a id="Compiler.enter"></a>
 #### Compiler.enter
@@ -236,7 +236,7 @@ Enters `row` as the innermost syntax `Compiler.enclosing` answers. Its
 owner leaves it with `Block.pop`, or with `Compiler.leave_item` for a
 block item.
 
-Source: `src/parse.x:2741`
+Source: `src/parse.x:2742`
 
 <a id="Compiler.enter_function"></a>
 #### Compiler.enter_function
@@ -247,7 +247,7 @@ Enters the function definition `declaration`, whose body the
 transform lowers next, so a rule lowering that body places code at its
 entry. Returns the row's depth for `Compiler.leave_function`.
 
-Source: `src/parse.x:2780`
+Source: `src/parse.x:2781`
 
 <a id="Compiler.exit_function"></a>
 #### Compiler.exit_function
@@ -257,7 +257,7 @@ Source: `src/parse.x:2780`
 Leaves the function row at `depth` that `Compiler.enter_function`
 began.
 
-Source: `src/parse.x:2807`
+Source: `src/parse.x:2808`
 
 <a id="Compiler.finish_foreign_alias"></a>
 #### Compiler.finish_foreign_alias
@@ -269,7 +269,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:4088`
+Source: `src/parse.x:4091`
 
 <a id="Compiler.finish_initializers"></a>
 #### Compiler.finish_initializers
@@ -281,7 +281,7 @@ themselves, or that an after-initialization rewrite follows, to
 declarations followed by that code in source order, preserving their
 installed bindings and the enclosing lifetime.
 
-Source: `src/parse.x:2889`
+Source: `src/parse.x:2890`
 
 <a id="Compiler.function_entry"></a>
 #### Compiler.function_entry
@@ -294,7 +294,7 @@ code binds in a scope of its own with the function's result type; its
 caller lowers it while the row is still entered, so a placement that
 lowering makes lands at the entry too.
 
-Source: `src/parse.x:2794`
+Source: `src/parse.x:2795`
 
 <a id="Compiler.leave_item"></a>
 #### Compiler.leave_item
@@ -305,7 +305,7 @@ Leaves the block item `enter` began and returns the code placed after
 it, bound in its block, or NULL. A declarator in the item that placed
 code is incomplete unless its block declaration took that code.
 
-Source: `src/parse.x:2851`
+Source: `src/parse.x:2852`
 
 <a id="Compiler.meta_form_is_declaration"></a>
 #### Compiler.meta_form_is_declaration
@@ -326,7 +326,7 @@ Returns the folded package-member spelling at the current token, or NULL.
 The token must be an unshadowed imported alias followed by `.` and an
 identifier. This lookahead does not consume tokens.
 
-Source: `src/parse.x:2517`
+Source: `src/parse.x:2518`
 
 <a id="Compiler.parse_basic_identifier"></a>
 #### Compiler.parse_basic_identifier
@@ -335,7 +335,7 @@ Source: `src/parse.x:2517`
 
 Consumes one `ident` token and returns its spelling as a one-item `List`.
 
-Source: `src/parse.x:2530`
+Source: `src/parse.x:2531`
 
 <a id="Compiler.parse_complex_identifier"></a>
 #### Compiler.parse_complex_identifier
@@ -346,7 +346,7 @@ Parses the current identifier or dotted owner/member as a one-item name.
 Package aliases and imported method spellings are folded through the
 current `Sym`, and all accepted tokens are consumed.
 
-Source: `src/parse.x:2455`
+Source: `src/parse.x:2456`
 
 <a id="Compiler.parse_declaration_argument"></a>
 #### Compiler.parse_declaration_argument
@@ -378,7 +378,7 @@ Source: `src/parse.x:896`
 Parses one declarator row for a macro argument without installing it.
 Its enclosing declaration supplies the base type when expanded.
 
-Source: `src/parse.x:2114`
+Source: `src/parse.x:2115`
 
 <a id="Compiler.parse_enumerator"></a>
 #### Compiler.parse_enumerator
@@ -389,7 +389,7 @@ Parses one enumerator for enum type `context` and returns its AST.
 Outside macro-template parsing, its binding is published immediately so
 later initializers and enumerators can resolve it.
 
-Source: `src/parse.x:1802`
+Source: `src/parse.x:1803`
 
 <a id="Compiler.parse_enumerators"></a>
 #### Compiler.parse_enumerators
@@ -399,7 +399,7 @@ Source: `src/parse.x:1802`
 Parses comma-separated enumerators up to the current closing brace.
 Returns their flat source-order `List` and leaves the brace unconsumed.
 
-Source: `src/parse.x:1779`
+Source: `src/parse.x:1780`
 
 <a id="Compiler.parse_field"></a>
 #### Compiler.parse_field
@@ -410,7 +410,7 @@ Parses one field for aggregate type `context` and returns its AST.
 Ordinary fields publish their binding in the aggregate's field scope and
 consume their terminating semicolon; macro forms follow their own syntax.
 
-Source: `src/parse.x:1629`
+Source: `src/parse.x:1630`
 
 <a id="Compiler.parse_fields"></a>
 #### Compiler.parse_fields
@@ -421,7 +421,7 @@ Parses aggregate fields in source order up to the current closing brace.
 Returns a flat field `List`, publishes delegate-field metadata, and leaves
 the closing brace unconsumed.
 
-Source: `src/parse.x:1610`
+Source: `src/parse.x:1611`
 
 <a id="Compiler.parse_function_definition"></a>
 #### Compiler.parse_function_definition
@@ -432,7 +432,7 @@ Parses one function declaration and its required compound body.
 The parameter bindings are active while the body is parsed, and the first
 token after the closing brace remains current.
 
-Source: `src/parse.x:2560`
+Source: `src/parse.x:2561`
 
 <a id="Compiler.parse_function_target"></a>
 #### Compiler.parse_function_target
@@ -443,7 +443,7 @@ Parses one function decorator target and returns its resulting AST.
 A compatible unit macro at the current token is expanded first; otherwise
 an ordinary function definition is required.
 
-Source: `src/parse.x:2576`
+Source: `src/parse.x:2577`
 
 <a id="Compiler.parse_import_declaration"></a>
 #### Compiler.parse_import_declaration
@@ -466,7 +466,7 @@ Captures a name followed by an ordinary complete type and semicolon.
 The reserved typedef identity permits fields to refer to their enclosing
 named type before its pointer or value representation is complete.
 
-Source: `src/parse.x:1697`
+Source: `src/parse.x:1698`
 
 <a id="Compiler.parse_optional_identifier"></a>
 #### Compiler.parse_optional_identifier
@@ -475,7 +475,7 @@ Source: `src/parse.x:1697`
 
 Consumes and returns the current identifier, or NULL without consuming.
 
-Source: `src/parse.x:2537`
+Source: `src/parse.x:2538`
 
 <a id="Compiler.parse_parameter"></a>
 #### Compiler.parse_parameter
@@ -486,7 +486,7 @@ Parses one parameter and returns `(param TYPE DECLARATOR)` or `(...)`.
 Outside macro-template parsing, a named parameter is installed in the
 current `Sym` scope. The following delimiter remains current.
 
-Source: `src/parse.x:2404`
+Source: `src/parse.x:2405`
 
 <a id="Compiler.parse_parameter_list"></a>
 #### Compiler.parse_parameter_list
@@ -497,7 +497,7 @@ Parses a nonempty comma-separated parameter `List` in source order.
 The caller owns the parameter scope; the first non-comma delimiter remains
 current.
 
-Source: `src/parse.x:2387`
+Source: `src/parse.x:2388`
 
 <a id="Compiler.parse_simple_declaration"></a>
 #### Compiler.parse_simple_declaration
@@ -565,7 +565,7 @@ Source: `src/parse.x:318`
 Parses a type specifier with qualifiers and pointer/reference modifiers.
 Returns its flat `Type` AST and leaves the first following token current.
 
-Source: `src/parse.x:1415`
+Source: `src/parse.x:1416`
 
 <a id="Compiler.parse_type_operand"></a>
 #### Compiler.parse_type_operand
@@ -587,7 +587,7 @@ Records `code` to follow the innermost block item, or the initialized
 declarator whose initializer is being parsed directly in it. The
 expansion that placed it gives it its result when it finishes.
 
-Source: `src/parse.x:2828`
+Source: `src/parse.x:2829`
 
 <a id="Compiler.place_entry"></a>
 #### Compiler.place_entry
@@ -600,7 +600,7 @@ a lambda body is inside the definition that holds it; while lowering, a
 lambda body is the body of its own lifted function, and a finalizer the
 kernel wrote as a callback has no entry a program can place at.
 
-Source: `src/parse.x:2816`
+Source: `src/parse.x:2817`
 
 <a id="Compiler.protocol_form_starts"></a>
 #### Compiler.protocol_form_starts

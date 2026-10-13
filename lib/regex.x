@@ -300,7 +300,7 @@ static void _fail(Parser &p, String why) {
 
 // atoms
 
-/* One atom. A quantifier here has nothing before it to repeat. */
+/* A quantifier here has nothing before it to repeat. */
 static _RegexNode _atom(Parser &p) {
   int byte = (unsigned char) p.text[p.pos];
   if (_is_quantifier(byte)) _fail(p, $reason.no_repeat());
@@ -486,7 +486,7 @@ static RegexMatch _found(Matcher &m, String subject, int at) {
   return (RegexMatch) captures;
 }
 
-/* Capture `i` as the List `(index name matched text start end)`. */
+/* Result fields are `(index name matched text start end)`. */
 static RegexCapture _capture(Matcher &m, String subject, int i) {
   int start = m.starts[i], end = m.ends[i], matched = start >= 0;
   String name = i ? m.regex.capture_names[i - 1] : NULL;

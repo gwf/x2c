@@ -756,8 +756,8 @@ static void _record_meta_hash(
     case %(seq *rows):
       _record_meta_rows(c, rows, first, collected_body);
     case %(declare ?spec (bindings ?one *more)) if (more):
-      _record_meta_bindings(c,
-        spec, definition.caddr().list().cdr(), first, collected_body);
+      _record_meta_bindings(
+        c, spec, definition.caddr().list().cdr(), first, collected_body);
     case %(function ? (bind (binding ? ?(String own)) *) ?content):
       _store_meta_hash(c, own, content, first);
     case %(declare ?spec (bindings
@@ -777,8 +777,8 @@ static void _record_meta_rows(
 static void _record_meta_bindings(
   Compiler c, Var spec, List bindings, Token first, int collected_body) {
   foreach (Var bind, bindings)
-    _record_meta_hash(c,
-      %(declare $spec (bindings $bind)), first, collected_body);
+    _record_meta_hash(
+      c, %(declare $spec (bindings $bind)), first, collected_body);
 }
 
 static void _store_static_meta(
@@ -1275,7 +1275,8 @@ static List _method_self_signature(Compiler c, List binding) {
 static Type _self_owner_type(Compiler c, List method) {
   String source = method.car();
   Type declared = c.sym.get(%($source));
-  if (declared.is_typedef()) return %(${_package_type_reference(c, 0, source)});
+  if (declared.is_typedef())
+    return %(${_package_type_reference(c, 0, source)});
   Symbol builtin = Atom.intern(source);
   return builtin.is_builtin_type() ? %($builtin) : NULL;
 }
@@ -1977,8 +1978,8 @@ static List _declarator(
   Token &source_first, Token &source_after) {
   List ptr = _pointer(c), method_identity = NULL;
   List (key, infix) =
-    _direct_declarator(c,
-      context, method_identity, source_first,
+    _direct_declarator(
+      c, context, method_identity, source_first,
       source_after).cdr();
   List sfx = _declarator_suffix(c);
   List modifiers = %( @infix @sfx @ptr );
@@ -2016,8 +2017,8 @@ static List _direct_declarator(
   int member = context.is_aggregate();
   if (c.peek(0) == <(> && _parameters_follow(c)) return %(bind () ());
   if (c.peek(0) == <(>)
-    return _parenthesized(c,
-      member ? context : NULL, method_identity, source_first,
+    return _parenthesized(
+      c, member ? context : NULL, method_identity, source_first,
       source_after);
   if (c.macro_holes) {
     List bind = _template_declarator(c, member);
@@ -2053,8 +2054,8 @@ static List _parenthesized(
   Token &source_after) {
   c.next();
   Token first = c.token;
-  List decl = _declarator(c,
-    NULL, context, method_identity, source_first, source_after);
+  List decl = _declarator(
+    c, NULL, context, method_identity, source_first, source_after);
   if (c.peek(0) != <)>) {
     c.require_input();
     /* One identifier followed by another is a parameter list whose type
@@ -2421,8 +2422,8 @@ static List _finish_parameter(
   Token source_first, Token source_after) {
   base = _finish_type(c, base);
   int preserved_self = 0;
-  declarator = _install_declarator(c,
-    base, NULL, declarator,
+  declarator = _install_declarator(
+    c, base, NULL, declarator,
     method_identity, preserved_self);
   c.record_source_declaration(declarator.cadr(), source_first, source_after);
   List modifiers = NULL;
@@ -2587,8 +2588,8 @@ static List _finish_function(
     case %(declare ?rtype
            (bindings
              (!set ?declarator (bind ?binding ?)))):
-      return _finish_function_parts(c,
-        declaration, rtype, declarator, binding,
+      return _finish_function_parts(
+        c, declaration, rtype, declarator, binding,
         syntax);
   return NULL;
 }
@@ -2607,8 +2608,8 @@ static List _finish_function_parts(
      A caller's `SymTxn` can still roll those names back if a later generated
      sibling fails. */
   String initializer_owner = NULL, shutdown_owner = NULL;
-  String name = _prepare_lifecycle(c,
-    declaration, binding, initializer_owner, shutdown_owner);
+  String name = _prepare_lifecycle(
+    c, declaration, binding, initializer_owner, shutdown_owner);
   List body = _function_body(c, declaration, name, syntax);
   _publish_lifecycle(c, name, initializer_owner, shutdown_owner);
   return %(function $rtype $declarator $body);
@@ -3563,12 +3564,12 @@ static List _bind_declaration(
       if (context != AST_FIELD && _has_bitfield(declarator))
         return _construction_error(c);
       match (declarator) case %(op = * *): initializes = 1;
-      List installed = _install_declarator(c,
-        base, declaration_context, declarator, NULL, preserved_self);
+      List installed = _install_declarator(
+        c, base, declaration_context, declarator, NULL, preserved_self);
       output.push(installed);
     }
-  List decl = _finish_declaration(c,
-    tag, base, output.list_free(), preserved_self);
+  List decl = _finish_declaration(
+    c, tag, base, output.list_free(), preserved_self);
   if (context == AST_UNIT) c.record_declaration_visibility(decl);
   if (c.shallow && context == AST_UNIT && initializes)
     return %(declaration-initialized $decl ${c.macro_stack});
@@ -3676,7 +3677,8 @@ List Compiler.bind_source_statement(Compiler c) {
   c.next();
   switch (keyword) {
     case <if>:
-      return _bind_if_else(c,
+      return _bind_if_else(
+        c,
         source_clause(<test>), source_clause(<then>), source_clause(<else>));
     case <while>:
       return _bind_while(c, source_clause(<test>), source_clause(<body>));
@@ -3685,12 +3687,12 @@ List Compiler.bind_source_statement(Compiler c) {
     case <match>:
       return _bind_match(c, source_clause(<test>), source_clause(<arms>));
     case <try>:
-      return _bind_try(c,
-        source_clause(<try>), source_clause(<catches>),
+      return _bind_try(
+        c, source_clause(<try>), source_clause(<catches>),
         source_clause(<finally>));
   }
-  return _bind_for(c,
-    source_clause(<init>), source_clause(<cond>), source_clause(<next>),
+  return _bind_for(
+    c, source_clause(<init>), source_clause(<cond>), source_clause(<next>),
     source_clause(<body>));
 }
 
@@ -3971,7 +3973,8 @@ static List _finish_type(Compiler c, List type) {
   if (base != type &&
       (base.car() == <struct> || base.car() == <union> ||
        base.car() == <enum>))
-    return c.sym.local_type(%(@{storage.list_free()} @{_finish_type(c, base)}));
+    return c.sym.local_type(
+      %(@{storage.list_free()} @{_finish_type(c, base)}));
   storage.free();
   Var whole = _finish_type_spec(c, type);
   // Binding an already constructed aggregate can preserve its whole form.

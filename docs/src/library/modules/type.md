@@ -215,7 +215,7 @@ Source: `lib/type.x:176`
 Reads an integer literal of `type` spelled in digits, with any suffix,
 into `value`. Returns 0 for any other literal.
 
-Source: `lib/type.x:543`
+Source: `lib/type.x:544`
 
 <a id="Type.is_aggregate"></a>
 #### Type.is_aggregate
@@ -437,7 +437,7 @@ Returns the native type selected by a validated numeric token.
 native families returns `NULL`. A signed data token includes its sign
 when selecting a family, so a signed minimum fits that family.
 
-Source: `lib/type.x:495`
+Source: `lib/type.x:496`
 
 <a id="Type.numeric_literal_value"></a>
 #### Type.numeric_literal_value
@@ -447,7 +447,7 @@ Source: `lib/type.x:495`
 Reads a validated numeric literal at its semantic type's precision.
 Returns `void` when its magnitude exceeds the integer representation.
 
-Source: `lib/type.x:523`
+Source: `lib/type.x:524`
 
 <a id="Type.promote"></a>
 #### Type.promote
@@ -458,7 +458,7 @@ Applies integer promotion to `type`.
 Enums and narrow integers become `int`; other scalars retain their
 canonical spelling, and a non-scalar returns `NULL`.
 
-Source: `lib/type.x:443`
+Source: `lib/type.x:444`
 
 <a id="Type.qualify"></a>
 #### Type.qualify
@@ -496,7 +496,7 @@ Source: `lib/type.x:342`
 
 Returns the fixed `Var` numeric tag for `type`, or zero when none exists.
 
-Source: `lib/type.x:415`
+Source: `lib/type.x:416`
 
 <a id="Type.tag"></a>
 #### Type.tag
@@ -517,7 +517,7 @@ Source: `lib/type.x:92`
 Returns the numeric `Var` reader for `type`, or `NULL` when unsupported.
 Enums use `Var_int` after conversion to their shared integer tag.
 
-Source: `lib/type.x:423`
+Source: `lib/type.x:424`
 
 <a id="Type.var_numeric_update_helper"></a>
 #### Type.var_numeric_update_helper
@@ -527,7 +527,7 @@ Source: `lib/type.x:423`
 Returns the native numeric update helper for `type`, or `NULL` when the
 scalar has no registered update helper.
 
-Source: `lib/type.x:432`
+Source: `lib/type.x:433`
 
 <a id="Type.widest"></a>
 #### Type.widest
@@ -537,7 +537,7 @@ Source: `lib/type.x:432`
 Returns the usual arithmetic result `Type` for two scalar operands.
 A missing or non-scalar operand produces `NULL`.
 
-Source: `lib/type.x:456`
+Source: `lib/type.x:457`
 
 ### `Var`
 

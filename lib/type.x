@@ -341,7 +341,8 @@ static typedef struct Specifiers {
 */
 Type Type.scalar(Type t) {
   Specifiers s = { 0 };
-  foreach (Var item, t) if (item is not <symbol> || !_add(s, item)) return NULL;
+  foreach (Var item, t)
+    if (item is not <symbol> || !_add(s, item)) return NULL;
   return _spelling(s);
 }
 
@@ -365,7 +366,7 @@ static int _add(Specifiers &s, Symbol symbol) {
   return 1;
 }
 
-/* The one spelling C gives a valid combination of counts, or `NULL`. */
+/* Invalid specifier counts return `NULL`; valid counts use C syntax. */
 static Type _spelling(Specifiers &s) {
   if (!s.count || s.signs > 1 || s.shorts > 1 || s.longs > 2 || s.ints > 1 ||
       s.chars > 1 || s.floats > 1 || s.doubles > 1 || s.voids > 1)

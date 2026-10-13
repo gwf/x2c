@@ -766,8 +766,8 @@ static List _publish_record(
    witnesses. Its row travels beside the adoption row it marks. */
 static void _retain_meta_protocol(Compiler c, List adoption) {
   Type (base, participant) = adoption.cdr();
-  _retain_source_node(c,
-    %(meta-protocol $base $participant), _adoption_storage(adoption),
+  _retain_source_node(
+    c, %(meta-protocol $base $participant), _adoption_storage(adoption),
     %(meta-protocol @{_adoption_location(adoption)}));
 }
 
@@ -842,8 +842,8 @@ static List _publish(AdoptionDraft &a) {
     _resolve_adoption(c, a.base, a.participant, resolved ? NULL : a.location);
   List published = _node(a);
   // A generated class declares several adoptions at one location.
-  _retain_source_node(c,
-    published, a.storage, %(adopt ${a.base} @{a.location}));
+  _retain_source_node(
+    c, published, a.storage, %(adopt ${a.base} @{a.location}));
   return published;
 }
 
@@ -996,8 +996,8 @@ static void _resolve_visible(Compiler c, int report) {
     String path = _canonical_file(c, location);
     if (storage == <static> && path != owner) continue;
     if (_recorded(c, base, participant)) continue;
-    _resolve_adoption(c,
-      base, participant, report && path == owner ? location : NULL);
+    _resolve_adoption(
+      c, base, participant, report && path == owner ? location : NULL);
   }
 }
 
@@ -1185,12 +1185,12 @@ static void _resolve_record(
   List conformance = NULL, failure = NULL;
   if (native) {
     Type definition = _participant_definition(c, participant);
-    conformance = _resolve_native(c,
-      base, participant, requirements, definition, failure);
+    conformance = _resolve_native(
+      c, base, participant, requirements, definition, failure);
   }
   else
-    conformance = _resolve_ordinary(c,
-      base, participant, requirements, failure);
+    conformance = _resolve_ordinary(
+      c, base, participant, requirements, failure);
 
   if (!conformance) {
     if (!location) return;
@@ -1454,8 +1454,8 @@ static List _resolve_ordinary(
       ? _adoption_representation(_visible_adoption(c, base, participant))
       : NULL,
     .forward = base !== %("Var") ? forward : NULL};
-  List rows = _resolve(resolution,
-    requirements.associations, requirements.templates);
+  List rows = _resolve(
+    resolution, requirements.associations, requirements.templates);
   ProtocolAdapters adapters = {
     .c = c, .base = base, .binder = requirements.binder,
     .forward = forward, .reverse = reverse};
@@ -2268,8 +2268,8 @@ static List _collision_notes(Symbol kind, List first, List second) {
 List Compiler.wrapper_function(
   Compiler c, Type result, List binding, List params, List body) {
   List lowered = %(code-value "lowered" (seq @body) ());
-  return _generated_function(c,
-    binding, $!Unit{ $result $binding(@params) { $lowered } });
+  return _generated_function(
+    c, binding, $!Unit{ $result $binding(@params) { $lowered } });
 }
 
 /** Returns `(declarations arguments)` for a helper that forwards its
@@ -2497,8 +2497,8 @@ List Compiler.generate_protocol_adapters(Compiler c, List ast) {
         if (!_defines_function(c, forward)) continue;
         if (_numeric_participant(c, participant)) continue;
         _reuse_conformance(c, base, participant);
-        _present_conformance(c,
-          c.conforms[%($base $participant)], central_initializer);
+        _present_conformance(
+          c, c.conforms[%($base $participant)], central_initializer);
       }
     }
   ordered.free();
@@ -2635,7 +2635,8 @@ static List _present(ProtocolAdapters &a, List row) {
       List parts = NULL;
       if (status == <base-dflt>) parts = _default_part(a, member, expected);
       else if (_has_descriptor(a)) {
-        if (status == <no-member>) parts = _inherited_part(a, member, template);
+        if (status == <no-member>)
+          parts = _inherited_part(a, member, template);
         if ((status == <implmntd> || parts) &&
             a.c.sym.lookup_field(%(struct "VarMethods"), %($member)))
           parts = parts.append(%(${_thunk(a, member, template)}));
@@ -2744,8 +2745,8 @@ static List _native_aliases(
     match (row)
       case %(?(String member) ? ?(String binding) ? ?
              ?(Type signature)): {
-        List alias = _native_alias(c,
-          participant, member, binding, signature, make_static);
+        List alias = _native_alias(
+          c, participant, member, binding, signature, make_static);
         aliases.push(alias);
       }
   return _insert_at_boundary(

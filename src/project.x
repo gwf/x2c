@@ -317,7 +317,7 @@ static void _enter_profile(
 
 // fields
 
-/* A `key = value` field of the current section. */
+/* Associates `key = value` with the current section. */
 static void _field(Manifest &m, char *line) {
   Project p = m.project;
   if (m.section == NONE) _error(p, m.line, "field appears before a section");

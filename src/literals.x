@@ -526,8 +526,8 @@ static void _parse_raise_detail(Compiler c, Array args) {
   List key = c.try_parse_macro_slot(<expression>);
   if (!key)
     key = _parse_bare_symbol(c, <raise>, 1);
-  List value = _parse_detail_value(c,
-    origin, "raise detail requires exactly one value",
+  List value = _parse_detail_value(
+    c, origin, "raise detail requires exactly one value",
     "raise detail value cannot splice", %("pass one value expression"));
   args.push(key);
   args.push(value);
@@ -593,8 +593,8 @@ static void _parse_catch_detail(Compiler c, Array elements) {
   if (!c.test(<(>))
     $report.parse.catch_detail(c, origin);
   List key = _parse_bare_symbol(c, <catch>, 1);
-  List value = _parse_detail_value(c,
-    origin, "catch filter detail requires exactly one pattern",
+  List value = _parse_detail_value(
+    c, origin, "catch filter detail requires exactly one pattern",
     "catch filter detail pattern cannot splice",
     %("write one match pattern"));
   Array pair = [key, value];

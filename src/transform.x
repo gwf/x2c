@@ -207,8 +207,8 @@ List Compiler.lower_lambda_expr(Compiler c, List expression) {
         c.rebuild_expression(signature, lambda(body, params)));
     }
     case $source_any_lambda():
-      return _shipped_lowering(c,
-        <literal>, <lambda>, expression, AST_EXPRESSION, expression.cadr(),
+      return _shipped_lowering(
+        c, <literal>, <lambda>, expression, AST_EXPRESSION, expression.cadr(),
         "lambda");
   }
   return expression;
@@ -226,17 +226,16 @@ void Compiler.shipped_support(
 }
 
 static Ast _shipped_statement(Compiler c, Ast ast, Symbol tag) =>
-  _shipped_lowering(c,
-    <node>, tag, ast, AST_STATEMENT, c.return_type, %"$tag statement");
+  _shipped_lowering(
+    c, <node>, tag, ast, AST_STATEMENT, c.return_type, %"$tag statement");
 
-/* A destructuring declaration or assignment statement, which
-   `src/component-destructuring.x` lowers. */
 static Ast _destructuring(
   Compiler c, Ast ast, Symbol tag, AstPos position) {
   String form = position == AST_BLOCK
     ? "destructuring declaration" : "destructuring statement";
-  return _shipped_lowering(c,
-    <node>, tag, ast, position, c.return_type, form);
+  // The implementation belongs to src/component-destructuring.x.
+  return _shipped_lowering(
+    c, <node>, tag, ast, position, c.return_type, form);
 }
 
 static int _destructures(List statement) {
@@ -247,8 +246,8 @@ static int _destructures(List statement) {
 /* A destructuring assignment expression has its source's type. */
 static Ast _destructuring_value(Compiler c, Ast ast) {
   Type type = ast.caddr().cadr();
-  return _shipped_lowering(c,
-    <literal>, <dstrasgn>, %(expr $type $ast), AST_EXPRESSION, type,
+  return _shipped_lowering(
+    c, <literal>, <dstrasgn>, %(expr $type $ast), AST_EXPRESSION, type,
     "destructuring assignment").caddr();
 }
 
@@ -374,8 +373,8 @@ static List _function_rewrite(
    wrote, except that only shipped rules see it. */
 static Ast _written_function(Compiler c, List function) {
   (List return_type, List declarator, List body) = function.cdr();
-  return _function_node(c,
-    %(function $return_type $declarator $body), return_type, declarator,
+  return _function_node(
+    c, %(function $return_type $declarator $body), return_type, declarator,
     declarator.cadr(), body, 1);
 }
 
@@ -628,8 +627,8 @@ static Ast _collection_literal(Compiler c, Ast ast, Symbol tag) {
   int map = tag == <map> || tag == <vmap>;
   Type type = map ? %("Map") : %("Array");
   Symbol head = map ? <map> : <array>;
-  List lowered = _shipped_lowering(c,
-    <literal>, head, %(expr $type ($head @{ast.cdr()})), AST_EXPRESSION,
+  List lowered = _shipped_lowering(
+    c, <literal>, head, %(expr $type ($head @{ast.cdr()})), AST_EXPRESSION,
     type, %"${type.repr()} literal");
   match (lowered) case %(expr ? (call ?callee (args *arguments))): {
     Array values = $auto([]), orders = $auto([]);
@@ -706,8 +705,8 @@ static List _ordered_parts(Compiler c, Array values, Array orders) {
   Array declarations = [];
   for (int i = 0; i < count; i++)
     if ((int) orders[i])
-      values[i] = _sequenced(c,
-        _passed_as(values[i], %("Var")), "literal_part", declarations);
+      values[i] = _sequenced(
+        c, _passed_as(values[i], %("Var")), "literal_part", declarations);
   return declarations.list_free();
 }
 
@@ -837,8 +836,8 @@ static Ast _interpolation(Compiler c, Ast ast) {
     default: rows.push(row);
   }
   List source = source_string_content(rows.list_free());
-  List lowered = _shipped_lowering(c,
-    <literal>, <segments>, %(expr ("String") $source), AST_EXPRESSION,
+  List lowered = _shipped_lowering(
+    c, <literal>, <segments>, %(expr ("String") $source), AST_EXPRESSION,
     %("String"), "interpolated String");
   match (lowered)
     case %(expr ?type (call ?callee (args ?separator
@@ -1108,8 +1107,8 @@ static List _binary_operator(
      assignment spelling; `Var_binary` accepts the same operators. */
   if (operator.compound_assignment() &&
       (c.sym.is_var_type(lhs_type) || c.sym.is_var_type(rhs_type)))
-    return _dynamic(c,
-      <binary>, %("Var"), source_operator_content(%($operator $lhs $rhs)));
+    return _dynamic(
+      c, <binary>, %("Var"), source_operator_content(%($operator $lhs $rhs)));
   return ast;
 }
 

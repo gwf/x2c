@@ -213,7 +213,7 @@ map leaves those registries empty. The conformance rows included
 interfaces recorded are kept for reuse. Conformance reset and resolution
 belong to `resolve_protocols`.
 
-Source: `src/protocol.x:2807`
+Source: `src/protocol.x:2808`
 
 <a id="Compiler.record_source_typedef"></a>
 #### Compiler.record_source_typedef
@@ -223,7 +223,7 @@ Source: `src/protocol.x:2807`
 Remembers a source typedef's declaration and visibility, which native
 alias insertion reads for its participant.
 
-Source: `src/protocol.x:2730`
+Source: `src/protocol.x:2731`
 
 <a id="Compiler.resolve_as_declared"></a>
 #### Compiler.resolve_as_declared

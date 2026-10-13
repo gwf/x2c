@@ -257,7 +257,7 @@ static int _marker(Token token) {
   return 0;
 }
 
-/* A package entry is read as an ordinary source provider. */
+/* The resolved entry follows the ordinary source-provider path. */
 static int _package(Scan &s, Tokenizer tokens) {
   String name = _quoted(tokens.next()), root = NULL;
   String entry = name ? package_entry(

@@ -507,8 +507,8 @@ static List _capture_temporaries(
     case %(?name ?type): {
       String temporary = c.fresh_name("match_value");
       declarations.push(
-        _capture_declaration(c,
-          %("Var"), temporary, %(expr () (ident ($name))), 1));
+        _capture_declaration(
+          c, %("Var"), temporary, %(expr () (ident ($name))), 1));
       locals.push(%($name $type $temporary));
     }
   return declarations.list_free();
@@ -534,8 +534,8 @@ static List _capture_locals(Compiler c, Array locals) {
   foreach (List row, locals) match (row)
     case %(?name ?type ?temporary):
       declarations.push(
-        _capture_declaration(c,
-          type, name, %(expr () (ident ($temporary))), 0));
+        _capture_declaration(
+          c, type, name, %(expr () (ident ($temporary))), 0));
   return declarations.list_free();
 }
 

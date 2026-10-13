@@ -168,8 +168,8 @@ static void _send(Call &c, List arguments) {
     _send_frame(c, %(reset));
     helper_reset = 0;
   }
-  _send_frame(c,
-    %(call ${c.table} ${c.name} $arguments ${Macro.subject()}));
+  _send_frame(
+    c, %(call ${c.table} ${c.name} $arguments ${Macro.subject()}));
 }
 
 static void _send_frame(Call &call, List message) {

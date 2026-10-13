@@ -667,7 +667,7 @@ static void _close(_Layout &l) {
   free(l.indents); free(l.closers); free(l.enums); free(l.ternary);
 }
 
-/* The edit of significant token `k`. */
+/* Significant-token indexes map back to the complete token array. */
 static _LayoutEdit *_edit(_Layout &l, int k) =>
   &l.edits[l.sig[k] - l.all];
 

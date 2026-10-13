@@ -160,7 +160,8 @@ static void _start(Job j) {
   _open_streams(j, stdio);
   fflush(NULL);
   int index = 0;
-  foreach (List stage, j.stages) stdio.input = _stage(j, index++, stage, stdio);
+  foreach (List stage, j.stages)
+    stdio.input = _stage(j, index++, stage, stdio);
   launched = 1;
 }
 

@@ -376,7 +376,7 @@ static List _release(Shape &s) {
   return %($release);
 }
 
-/* A heap aggregate's `alloc` returns zeroed storage in the active scope. */
+/* Zeroed heap storage belongs to the active scope. */
 static List _alloc(Shape &s) {
   Type type = %(${s.owner});
   List body = $!{
@@ -386,7 +386,7 @@ static List _alloc(Shape &s) {
   return _default(s.owner, "alloc", type, %(), %($body));
 }
 
-/* A heap class's `free` and `cleanup`, and its Cleanup adoption. */
+/* Pairs heap release methods with their protocol adoption. */
 static List _cleanup(Shape &s, List release) {
   String owner = s.owner;
   List parameter = s.parameter;
@@ -438,7 +438,7 @@ static List _comparison(Shape &s) {
   return %();
 }
 
-/* The `str` and `repr` writers and methods the class does not define. */
+/* Supplies missing `str` and `repr` methods. */
 static List _writers(Shape &s) {
   String owner = s.owner;
   Array writers = [];
@@ -453,7 +453,7 @@ static List _writers(Shape &s) {
   return writers.list_free();
 }
 
-/* A scalar class boxes as its representation. */
+/* Boxing uses the underlying representation. */
 static List _scalar(Shape &s) {
   String owner = s.owner;
   Type type = %($owner), representation = s.representation;

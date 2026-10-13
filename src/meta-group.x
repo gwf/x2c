@@ -332,8 +332,8 @@ static List _lower(
     _native_entries(c, units, start);
   }
   Map initials = _initial_copies(c, units);
-  foreach (Var unit, _entry(c,
-    stamp, initials, _public_functions(c, units), suffix))
+  foreach (
+    Var unit, _entry(c, stamp, initials, _public_functions(c, units), suffix))
     units.push(unit);
   return units.list_free();
 }
@@ -891,8 +891,8 @@ void Compiler.write_meta_build(Compiler c) {
   c.ensure_macro_lisp();
   String base = %"$meta_build_directory/group-$index";
   String failure = _unbound(c);
-  List code = failure ? NULL : _emit(c,
-    build_module_stamp(), %"meta_group_$index", %"_$index", failure);
+  List code = failure ? NULL : _emit(
+    c, build_module_stamp(), %"meta_group_$index", %"_$index", failure);
   Array sources = [];
   foreach (Var (path, _), c.deps) sources.push(path);
   Path.write_text(%"$base.deps", "\n".join(sources.list_free()));

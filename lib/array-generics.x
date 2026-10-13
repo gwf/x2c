@@ -22,7 +22,7 @@
 
 /* Separate expansions share each family's helper names. Encode the full
    family spelling: case and underscores distinguish legal type names.
-   `_0` escapes an underscore, so `__` separates the operation unambiguously. */
+   `_0` escapes an underscore; `__` separates the operation. */
 $(defun array.words (name)
   (if (equal? name "") ""
     (let ((first (substring name 0 1)))

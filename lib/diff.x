@@ -140,7 +140,8 @@ static List _path(Trace trace, int found, int n, int m) {
   int x = n, y = m;
   for (int step = found; step > 0; step--) {
     int k = x - y;
-    int left = _at(trace, step - 1, k - 1), right = _at(trace, step - 1, k + 1);
+    int left = _at(trace, step - 1, k - 1),
+      right = _at(trace, step - 1, k + 1);
     int inserted = _inserted(step, k, left, right);
     int prev_k = inserted ? k + 1 : k - 1, prev_x = inserted ? right : left;
     int prev_y = prev_x - prev_k;

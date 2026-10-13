@@ -1783,7 +1783,8 @@ static void _record_static_object(
     match (binding_init)
       case %(op = (bind (!set ?binding (binding ? ?)) ?)
              (expr (!set ?initializer_type (*)) ?value)): {
-        if (declared_var && !_initializable_type(c, initializer_type)) continue;
+        if (declared_var && !_initializable_type(c, initializer_type))
+          continue;
         Map references = {}, Array ordered = [];
         _collect_references(value, references, ordered);
         c.static_init_deps[binding] = ordered.list_free();
@@ -1829,7 +1830,8 @@ static void _check_static_inits(Compiler c) {
       String name = binding_identity_spelling(reference);
       if (!name || %($name) in statics) continue;
       String target = binding_identity_spelling(binding);
-      $report.parse.static_dependency(c, _init_token(c, binding), name, target);
+      $report.parse.static_dependency(
+        c, _init_token(c, binding), name, target);
     }
   }
 }
@@ -2459,8 +2461,8 @@ List Compiler.cache_literal_var(Compiler c, Var value) {
   if (value.is_integer() || value.is_floating())
     return _cache_boxed(c, c.meta_value_expression(NULL, value, NULL));
   if (value is <lsym>)
-    return _cache_boxed(c,
-      %(expr ("Atom") (literal ("Atom") ${value.str()} $value)));
+    return _cache_boxed(
+      c, %(expr ("Atom") (literal ("Atom") ${value.str()} $value)));
   if (value is not <symbol>) return NULL;
   String spelling = value.symbol();
   List literal = %(
