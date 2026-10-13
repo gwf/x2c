@@ -55,7 +55,7 @@ Drops the entries collected without declaration defaults while the shared
 compile-time session was filled, or by a project meta build. Call once
 that session is published, and after the meta build's parses.
 
-Source: `src/collect.x:2511`
+Source: `src/collect.x:2513`
 
 #### collect_resolve_include
 
@@ -86,7 +86,7 @@ stage directory when it runs from `<home>/builds/`, otherwise under the
 home. A `cold` process reads no interface and still writes its own. Call
 it before opening any translation unit's Context.
 
-Source: `src/collect.x:2110`
+Source: `src/collect.x:2112`
 
 #### interface_prelude
 
@@ -96,7 +96,7 @@ Returns the path of the first prelude interface this compiler wrote, or
 NULL when there is none or the compiler's identity is unknown. Its
 source hashes are not checked.
 
-Source: `src/collect.x:2326`
+Source: `src/collect.x:2328`
 
 #### interface_text
 
@@ -108,7 +108,7 @@ identity is unknown, since no compiler could replay that interface. A
 contribution that the interface grammar cannot spell is reported as an
 `emit` diagnostic.
 
-Source: `src/collect.x:2348`
+Source: `src/collect.x:2350`
 
 #### is_prelude_source
 
@@ -127,7 +127,7 @@ Source: `src/collect.x:269`
 
 Retains source proofs and one definition hash per linked provider.
 
-Source: `src/collect.x:1177`
+Source: `src/collect.x:1179`
 
 <a id="Compiler.collect_package"></a>
 #### Compiler.collect_package
@@ -143,7 +143,7 @@ protocol rows enter the current symbol state, and dependencies enter the
 importing compiler. Replay also merges recorded function definitions.
 `token` locates lookup and public-surface errors.
 
-Source: `src/collect.x:1785`
+Source: `src/collect.x:1787`
 
 <a id="Compiler.collect_symbols"></a>
 #### Compiler.collect_symbols
@@ -170,7 +170,7 @@ Source: `src/collect.x:229`
 Completes a linked function's own source hashes before a shallow call.
 A lookahead entry never replaces the file's ordinary contribution.
 
-Source: `src/collect.x:1160`
+Source: `src/collect.x:1162`
 
 <a id="Compiler.configure_package"></a>
 #### Compiler.configure_package
@@ -192,7 +192,7 @@ declares, in no particular order. A file that imports a package
 declares none here: the walk that records them for a cold entry does
 not install a package's surface.
 
-Source: `src/collect.x:1711`
+Source: `src/collect.x:1713`
 
 <a id="Compiler.include_function_declarations"></a>
 #### Compiler.include_function_declarations
@@ -243,7 +243,7 @@ The ordered cache walk counts each file once and groups effects by the
 canonical path of the unit's direct include. The parser installs those
 effects when it reaches that include.
 
-Source: `src/collect.x:2018`
+Source: `src/collect.x:2020`
 
 <a id="Compiler.inline_type_dependencies"></a>
 #### Compiler.inline_type_dependencies
@@ -252,7 +252,7 @@ Source: `src/collect.x:2018`
 
 Records the actual type dependencies of typed public inline bodies.
 
-Source: `src/collect.x:1550`
+Source: `src/collect.x:1552`
 
 <a id="Compiler.install_included_effects"></a>
 #### Compiler.install_included_effects
@@ -262,7 +262,7 @@ Source: `src/collect.x:1550`
 Installs the definitions of each include among the directives before
 the cursor.
 
-Source: `src/collect.x:2063`
+Source: `src/collect.x:2065`
 
 <a id="Compiler.linked_meta_definitions_current"></a>
 #### Compiler.linked_meta_definitions_current
@@ -272,7 +272,7 @@ Source: `src/collect.x:2063`
 Reports whether a provider's linked definition hashes still match.
 Changes outside definitions do not require a project helper.
 
-Source: `src/collect.x:1121`
+Source: `src/collect.x:1123`
 
 <a id="Compiler.linked_meta_provider_current"></a>
 #### Compiler.linked_meta_provider_current
@@ -296,7 +296,7 @@ the records hold this compiler's collection rather than a table linked
 into it; the unit's own entries for them are restored afterwards. A
 record the interface grammar cannot spell is left out.
 
-Source: `src/collect.x:2450`
+Source: `src/collect.x:2452`
 
 <a id="Compiler.meta_provider_hashes"></a>
 #### Compiler.meta_provider_hashes
@@ -305,7 +305,7 @@ Source: `src/collect.x:2450`
 
 Returns the shared function hashes of an advertised meta provider.
 
-Source: `src/collect.x:1173`
+Source: `src/collect.x:1175`
 
 <a id="Compiler.module_source"></a>
 #### Compiler.module_source
@@ -331,7 +331,7 @@ Selects helper C spellings for public definitions owned by `path`.
 Bindings, rather than source tokens, keep unrelated private names and
 fields unchanged. Native supplier declarations retain their C names.
 
-Source: `src/collect.x:1208`
+Source: `src/collect.x:1210`
 
 <a id="Compiler.publish_inline_types"></a>
 #### Compiler.publish_inline_types
@@ -341,7 +341,7 @@ Source: `src/collect.x:1208`
 Promotes the selected type families after the owning ordinary full
 parse. The header and Xi then use the same complete family selection.
 
-Source: `src/collect.x:1594`
+Source: `src/collect.x:1596`
 
 <a id="Compiler.publishes_type_family"></a>
 #### Compiler.publishes_type_family
@@ -350,7 +350,7 @@ Source: `src/collect.x:1594`
 
 Reports whether this unit's interface publishes the type `family`.
 
-Source: `src/collect.x:1236`
+Source: `src/collect.x:1238`
 
 <a id="Compiler.publishes_typedef"></a>
 #### Compiler.publishes_typedef
@@ -359,7 +359,7 @@ Source: `src/collect.x:1236`
 
 Reports whether this unit's selected interface publishes `name`.
 
-Source: `src/collect.x:1231`
+Source: `src/collect.x:1233`
 
 <a id="Compiler.record_conformance_rows"></a>
 #### Compiler.record_conformance_rows
@@ -372,7 +372,7 @@ publishes, as `record_generated_symbol` adds its rows. A row an earlier
 cold walk recorded may sit in an earlier map. The cache retains each key
 and value.
 
-Source: `src/collect.x:1687`
+Source: `src/collect.x:1689`
 
 <a id="Compiler.record_generated_symbol"></a>
 #### Compiler.record_generated_symbol
@@ -384,7 +384,7 @@ current file's collected entry contributes, which is the map its
 interface publishes. A file without a collected declaration map records
 nothing. The cache retains `signature`.
 
-Source: `src/collect.x:1667`
+Source: `src/collect.x:1669`
 
 <a id="Compiler.replay_package_imports"></a>
 #### Compiler.replay_package_imports
@@ -396,7 +396,7 @@ order. The shadow borrows the unit's macro state and package registries.
 The full parse collects effects for the include line and leaves the
 unit's own definitions at their source sites.
 
-Source: `src/collect.x:1954`
+Source: `src/collect.x:1956`
 
 <a id="Compiler.runtime_function_declarations"></a>
 #### Compiler.runtime_function_declarations

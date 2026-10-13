@@ -2902,7 +2902,7 @@ static int _linked_provider_current(Compiler c, String path, Map seen){
                 while(Map_try_next(_x2c_macro_object_23, &(_x2c_macro_cursor_24), &(_x2c_macro_cursor_output_20), &(_x2c_macro_cursor_output_21))){
                   dependency = _x2c_macro_cursor_output_20;
                   expected = _x2c_macro_cursor_output_21;
-                  if(is_source_file(Var_as_string(dependency)) && Var_is_row(expected, 11, 7, 1) && ! String_startswith(Var_as_string(expected), _130) && ! _linked_provider_current(c, Var_as_string(dependency), seen)) return 0;
+                  if(is_source_file(Var_as_string(dependency)) && Var_is_row(expected, 11, 7, 1) && ! String_startswith(Var_as_string(expected), _130) && List_truth(linked_meta_provider_source(home_portable_path(Var_as_string(dependency)))) && ! _linked_provider_current(c, Var_as_string(dependency), seen)) return 0;
                 }
 
               }
