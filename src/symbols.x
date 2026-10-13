@@ -395,7 +395,7 @@ static void _note_source_key(
 static List _new_binding(Sym s, List key) {
   int identity = ++s.c.names.next_binding;
   Var name = key.last();
-  List binding = binding_identity_new(identity, name);
+  List binding = Ast.binding(identity, name);
   s.put(s.binding_facts, %(known $identity), name);
   return binding;
 }
@@ -683,7 +683,7 @@ static void _local_object(Sym s, List key, List binding, Type type) {
     under the private spelling `Sym.unshadow_global` gave that spelling, if
     any. */
 void Sym.join_locals(Sym s, List binding) {
-  String spelling = binding_identity_spelling(binding);
+  String spelling = Ast.binding_spelling(binding);
   Var alias;
   if (s.binding_facts.try_get(%(unshadowed $spelling), alias))
     _unshadow_local(s, binding, alias);
@@ -720,7 +720,7 @@ static void _unshadow_local(Sym s, List binding, String alias) {
 
 /** Installs an existing binding with `ast`'s qualifier-preserving type. */
 List Sym.bind_identity(Sym s, List context, List binding, List ast) {
-  String spelling = binding_identity_spelling(binding);
+  String spelling = Ast.binding_spelling(binding);
   List key = context ? %(@context $spelling) : %($spelling);
   SymScope *scope = _scope_at(s, -1);
   Type annotation = ast.type_from_ast();
@@ -774,7 +774,7 @@ void Compiler.record_declaration_visibility(Compiler c, List declaration) {
       foreach (List row, rows) c.record_declaration_visibility(row);
     case %(function ?type (bind ?identity *) *): {
       if (!private && !type.type().is_static()) return;
-      String name = binding_identity_spelling(identity);
+      String name = Ast.binding_spelling(identity);
       if (name) c.sym.mark_static(%($name));
     }
     case %(
@@ -808,7 +808,7 @@ static void _record_native_objects(
     match (declarator) case %(bind ?binding ?): {
       List declaration = %(declare $spec (bindings $declarator));
       if (declaration.type_from_ast().is_function()) continue;
-      String name = binding_identity_spelling(binding);
+      String name = Ast.binding_spelling(binding);
       if (!name || !name.len()) continue;
       c.sym.set(
         %("source-node" (native-object $path ${c.token.pos} $name)),
@@ -829,7 +829,7 @@ static void _record_rows_visibility(
 static void _record_binding_visibility(
   Compiler c, List declaration, Symbol kind, int private, int mark,
   List identity) {
-  String name = binding_identity_spelling(identity);
+  String name = Ast.binding_spelling(identity);
   if (kind == <typedef> && name) {
     c.record_source_typedef(name, declaration, mark);
     if (mark) c.sym.mark_static(%(typedef $name));
@@ -1273,7 +1273,7 @@ void Sym.declare_field_order(Sym s, Type type, List fields) {
 
 static List _field_row(
   Sym s, Type type, List declaration, List declarator) {
-  String name = binding_identity_spelling(declarator.cadr());
+  String name = Ast.binding_spelling(declarator.cadr());
   Type declared = name ? s.get(%(@type $name))
     : %(declare ${declaration.cadr()} (bindings $declarator))
       .type_from_ast().declared();

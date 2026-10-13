@@ -273,7 +273,7 @@ change which converter wins."
 
 ### Turn positional recognizers into grammar cases
 
-`ast_addressed_identifier` and `ast_direct_identifier` in `src/ast.x:138,157`
+`Ast.addressed_identifier` and `Ast.direct_identifier` in `src/ast.x:138,157`
 state the accepted grammar directly:
 
 ```x2c

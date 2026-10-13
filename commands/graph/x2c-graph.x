@@ -32,7 +32,7 @@ static void _record_call(
       %(direct ${project_binding_target(compiler, definitions, binding)}),
       1);
   else if (kind == <automatic>)
-    project_count(calls, %(indirect ${binding_identity_spelling(binding)}), 1);
+    project_count(calls, %(indirect ${Ast.binding_spelling(binding)}), 1);
   else project_count(calls, %(indirect "computed"), 1);
 }
 
@@ -72,7 +72,7 @@ static String _source_function_name(Compiler compiler, List binding) {
       case %((!is ?owner type string) (!is ?member type string)):
         return %"$owner.$member";
   }
-  return binding_identity_spelling(binding);
+  return Ast.binding_spelling(binding);
 }
 
 static List _analyze_unit(Compiler compiler, List ast, String path) {
@@ -817,7 +817,7 @@ static void _collect_sites(
     }
     case %(op ?operator ?left *right):
       if (operator is <symbol> &&
-          ast_changes_left_operand(operator)) {
+          Symbol.changes_left_operand(operator)) {
         _collect_sites(
           compiler, left, path, caller, visibility, wanted,
           parameters, prior_writes, sites);
@@ -978,7 +978,7 @@ static void _collect_field_sites(
     }
     case %(op ?operator ?left *right):
       if (operator is <symbol> &&
-          ast_changes_left_operand(operator)) {
+          Symbol.changes_left_operand(operator)) {
         _collect_field_sites(
           compiler, left, path, caller, visibility,
           receiver_name, field_name, parameters, <mutate>, void,

@@ -145,7 +145,7 @@ static Var _unless_taken(Defaults &d, List syntax) {
   match (syntax)
     case %(function ?return_type (bind ?name ?modifiers) ?body): {
       name = d.c.evaluate_macro_slot(name);
-      String spelling = binding_identity_spelling(name);
+      String spelling = Ast.binding_spelling(name);
       match (name) {
         case %(?(String literal)): spelling = literal;
         case %("x2c.ident" ?(String literal)): spelling = literal;

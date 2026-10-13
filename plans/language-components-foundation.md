@@ -776,7 +776,7 @@ replacement template and fill steps are the remaining driver cost.
   so those parts are not lowered again; this also stopped user `raise` and
   `switch` rules applying twice inside try bodies. `_lower_function` binds
   `c.return_type` around the cleanup walk; `Walk.return_type` is gone.
-  `ast_replace_nodes` in ast.x replaces nodes by address without recursing
+  `Ast.replace_nodes` in ast.x replaces nodes by address without recursing
   and replaces cleanup.x's private copies. +120/-68 in src; fixtures
   `rewrite-try-return` and `rewrite-try-held-statements`. Open: a program
   `$tried` rule also receives the compiler-written `try` that
@@ -833,7 +833,7 @@ replacement template and fill steps are the remaining driver cost.
   rule keeps each run of unchanged function items as one lowered `(seq)`
   carrier instead of one carrier per item, takes the rebuilt items as an
   Array, and compares by identity; `_replace_bindings` tests only atoms as
-  binders and lists through `binding_identity_try_parts`. The 60-statement
+  binders and lists through `Ast.try_binding`. The 60-statement
   shared-local shape went 13.57 M -> 11.95 M per lambda against the kernel's
   11.59 M fresh (11.75 M in the plan); every other shape is at or below the
   kernel; functions without lambdas unchanged; C byte-identical. The last

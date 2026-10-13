@@ -906,7 +906,7 @@ static List _materialize_mixed_row(
 static List _adapt_choices(
   Compiler c, List source, List choices, List placeholder) {
   Type from = _adapter_type(c, source.cadr());
-  if (!from || !ast_contains_head(source, <fields>)) return NULL;
+  if (!from || !Ast.contains_head(source, <fields>)) return NULL;
   Array prepared = $auto([]);
   foreach (List choice, choices) {
     (List condition, List path, Type destination, List value) = choice;

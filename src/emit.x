@@ -854,7 +854,7 @@ static List _match_site_call(Emitter &e, Var function, Var arguments) {
     case %(expr ? (ident ?target)): binding = target;
     default: return NULL;
   }
-  String name = binding_identity_spelling(binding);
+  String name = Ast.binding_spelling(binding);
   String entry = _match_site_entry(name);
   if (!entry) return NULL;
   Type type = NULL;
@@ -1037,7 +1037,7 @@ static List _function(Emitter &e, List ast) {
   List (type, bindings, body) = ast.cdr();
   String old_fn = e.fn_name;
   List function_binding = bindings.cadr();
-  e.fn_name = binding_identity_spelling(function_binding);
+  e.fn_name = Ast.binding_spelling(function_binding);
   Var defer_owner;
   if (e.semantic_binding_facts().try_get(
     %(defer-ownr $function_binding), defer_owner))

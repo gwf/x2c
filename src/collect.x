@@ -1578,7 +1578,7 @@ Map Compiler.inline_type_dependencies(Compiler c, List ast) {
         Array ordered = [];
         foreach (Var type, types.keys()) ordered.push(type);
         String path = home_portable_path(Path.absolute(c.filename));
-        String name = binding_identity_spelling(binding);
+        String name = Ast.binding_spelling(binding);
         rows[%("source-node" (interface-types $path ${-1} $name))] =
           %(interface-types $name ${ordered.sort().list_free()});
         continue;
@@ -2432,9 +2432,9 @@ static List _renumber_bindings(List node, Map identities) {
       return %(meta-hashes $provider ${_stored_meta_hashes(hashes)});
   }
   String spelling = NULL;
-  if (binding_identity_try_parts(node, NULL, spelling)) {
+  if (Ast.try_binding(node, NULL, spelling)) {
     Var identity = identities.setdefault(node, identities.len() + 1);
-    return binding_identity_new(identity, spelling);
+    return Ast.binding(identity, spelling);
   }
   Var child;
   $ast.rewrite_children(

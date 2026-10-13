@@ -908,7 +908,7 @@ Map builtin_targets(void) {
   Map rows = {};
   $builtin.row(rows, "builtin_scope_expand", _scope_expand);
   $builtin.row(rows, "x2c_func_call_arguments", x2c_func_call_arguments);
-  $builtin.row(rows, "builtin_defer_captures", builtin_defer_captures);
+  $builtin.row(rows, "builtin_defer_captures", Ast.defer_captures);
   $builtin.row(rows, "builtin_foreach_expand", _foreach_expand);
   $builtin.row(rows, "builtin_auto_expand", _auto_expand);
   $builtin.row(rows, "builtin_auto_release", _auto_release);

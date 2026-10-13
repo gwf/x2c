@@ -635,7 +635,7 @@ static void _report_cycle(StaticQueue &q) {
     List binding = initializer.car();
     if (q.state[binding] != <visiting>) continue;
     if (!first) first = binding;
-    String name = binding_identity_spelling(binding);
+    String name = Ast.binding_spelling(binding);
     if (name) notes.push(%"initializer: $name");
   }
   Token token = NULL;

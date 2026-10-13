@@ -144,7 +144,7 @@ static void _restore_declaration_bindings(
   seen[syntax] = 1;
   int identity = 0;
   String spelling = NULL;
-  if (binding_identity_try_parts(syntax, identity, spelling)) {
+  if (Ast.try_binding(syntax, identity, spelling)) {
     c.set_fact(%(known $identity), spelling);
     c.set_fact(
       %(source-spelling $syntax),

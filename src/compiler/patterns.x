@@ -49,7 +49,7 @@ static String _converter_name(Var node) {
   if (node is <string>) return node;
   match (node)
     case %(expr ? ${$source_identifier_content(%(?binding))}):
-      return binding_identity_spelling(binding);
+      return Ast.binding_spelling(binding);
   return NULL;
 }
 

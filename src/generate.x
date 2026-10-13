@@ -443,7 +443,7 @@ static void _place_function(
    `_Noreturn` on `main`. */
 static Type _noreturn(Type type, List declarator, Ast body) {
   if (body.never_returns() && !(%("_Noreturn") in type.list()) &&
-      binding_identity_spelling(declarator.cadr()) != "main")
+      Ast.binding_spelling(declarator.cadr()) != "main")
     return %(("_Noreturn") @type);
   return type;
 }
@@ -456,7 +456,7 @@ static List _header_function(Type type, List declarator, List body) {
 }
 
 static List _prototype(List type, List declarator) =>
-  %(declare $type ${ast_prototype_declarator(declarator)});
+  %(declare $type ${Ast.prototype_declarator(declarator)});
 
 /* A public prototype that names `struct tag` before the header declares it
    would give the tag prototype scope in C. A forward declaration of each
@@ -949,7 +949,7 @@ static int _is_function(List item) {
 static int _needs_errors(List item) {
   Map types = $auto({});
   _spelled_types(item, types);
-  return ast_contains_head(item, <raise>) ||
+  return Ast.contains_head(item, <raise>) ||
     "ErrorCatchSite" in types || "ErrorHandler" in types;
 }
 
@@ -1186,7 +1186,7 @@ static List _inline_prototype(Compiler c, List node) {
 }
 
 static int _inline_binding(Compiler c, List binding) =>
-  c.sym.get(%("function-inline" ${binding_identity_spelling(binding)}))
+  c.sym.get(%("function-inline" ${Ast.binding_spelling(binding)}))
     != NULL;
 
 /* Native directives and initializer inputs keep their source order.
@@ -1287,7 +1287,7 @@ static void _collect_declared(Var value, Map available) {
 /* A function is found by its binding and by its native spelling. */
 static void _set_function(Map names, Var binding, Var value) {
   names[binding] = value;
-  names[%(native ${binding_identity_spelling(binding)})] = value;
+  names[%(native ${Ast.binding_spelling(binding)})] = value;
 }
 
 static void _set_declared(Map available, List node, List declarator) {
@@ -1295,7 +1295,7 @@ static void _set_declared(Map available, List node, List declarator) {
   if (!binding) return;
   available[binding] = 1;
   if (node.car() == <typedef>)
-    available[binding_identity_spelling(binding)] = 1;
+    available[Ast.binding_spelling(binding)] = 1;
 }
 
 static List _declaration_binding(List declarator) {
@@ -1330,7 +1330,7 @@ static void _set_static(Map statics, List node, List declarator) {
     ? node : %(declare ${node.cadr()} (bindings $declarator));
   statics[binding] = declaration;
   if (node.car() == <typedef>)
-    statics[binding_identity_spelling(binding)] = declaration;
+    statics[Ast.binding_spelling(binding)] = declaration;
 }
 
 /* forward declarations
@@ -1383,7 +1383,7 @@ static void _visit(Forward &f, List node) {
 /* A binding needs its static declaration, found by binding or by native
    spelling, or else the prototype of the global function it names. */
 static void _binding(Forward &f, Var binding) {
-  String spelling = binding_identity_spelling(binding);
+  String spelling = Ast.binding_spelling(binding);
   List native = %(native $spelling);
   if (binding in f.statics) _declaration(f, binding);
   else if (native in f.statics) _declaration(f, native);
@@ -1404,7 +1404,7 @@ static void _global(Forward &f, Var binding, String spelling) {
       (!c.meta_build || c.native_protocol_alias(spelling))) return;
   f.seen[global] = 1;
   _types(f, type);
-  List declaration = ast_prototype_declarator(type.declaration_ast(global));
+  List declaration = Ast.prototype_declarator(type.declaration_ast(global));
   f.out.push(_inline_prototype(c, declaration));
 }
 
@@ -1555,7 +1555,7 @@ List Compiler.definition_rows(Compiler c, List ast) {
       foreach (List declarator, declarators) match (declarator)
         case %(bind ?binding ?modifiers):
           rows.push(
-            %(typedef ${binding_identity_spelling(binding)} $base $modifiers
+            %(typedef ${Ast.binding_spelling(binding)} $base $modifiers
               ${_span(c, node)}));
   }
   return rows.list_free();
@@ -1565,7 +1565,7 @@ List Compiler.definition_rows(Compiler c, List ast) {
    spelling. */
 static List _function_row(
   Compiler c, List type, List binding, List modifiers, int alias) {
-  String name = binding_identity_spelling(binding);
+  String name = Ast.binding_spelling(binding);
   if (!name) return NULL;
   Type signature =
     %(declare $type (bindings (bind $binding $modifiers))).type_from_ast();
@@ -1617,7 +1617,7 @@ static List _parameter_names(Compiler c, List modifiers) {
 
 /* A parameter's source spelling, or "" for an unnamed parameter. */
 static String _parameter_name(Compiler c, List binding) {
-  String name = binding_identity_spelling(binding);
+  String name = Ast.binding_spelling(binding);
   Var spelling;
   Map facts = c.semantic_binding_facts();
   if (facts.try_get(%(source-spelling $binding), spelling)) name = spelling;

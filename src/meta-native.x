@@ -295,7 +295,7 @@ static void _subject_globals(
   List node;
   $ast.walk(value, node) {
     String spelling = NULL;
-    if (binding_identity_try_parts(node, NULL, spelling)) {
+    if (Ast.try_binding(node, NULL, spelling)) {
       Var source;
       if (c.semantic_binding_facts().try_get(%(source-spelling $node), source))
         source_names[node] = source;
@@ -384,7 +384,7 @@ static int _code_result(Compiler c, Var value) {
     case %((!or expr macro-invoke "x2c.quoted" "x2c.template" "x2c.ident")
            *):
       return 1;
-  return binding_identity_try_parts(value, NULL, NULL);
+  return Ast.try_binding(value, NULL, NULL);
 }
 
 /** Runs the explicit meta call `expression` at `site`. The project meta

@@ -290,7 +290,7 @@ static int _type_submission_names(List node, Array added) {
       Var name = type.cadr();
       if (name is <string>) added.push(name);
       else if (name is <list>)
-        added.push(binding_identity_spelling(name));
+        added.push(Ast.binding_spelling(name));
       return 1;
     }
   }

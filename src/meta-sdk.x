@@ -236,7 +236,7 @@ Type Code.type(Code value) {
       return value.type_from_ast().canonicalize();
   }
   List binding = NULL;
-  if (binding_identity_try_parts(value, NULL, NULL)) binding = value;
+  if (Ast.try_binding(value, NULL, NULL)) binding = value;
   else
     match (value) {
       case $source_identifier_content(%((!set ?captured (*)) *)):
@@ -652,7 +652,7 @@ static String _binding_spelling(List value, Var syntax) {
     case %(binding ?id (!is ? type string)):
       if (!id.is_integer() || id.integer() > INT_MAX)
         $report.sdk.binding_known(value);
-  if (!binding_identity_try_parts(value, identity, spelling))
+  if (!Ast.try_binding(value, identity, spelling))
     $report.sdk.binding_identifier(syntax);
   Var registered =
     active.expander.semantic_binding_facts()[%(known $identity)];

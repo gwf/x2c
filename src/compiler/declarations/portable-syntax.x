@@ -12,7 +12,7 @@ Var Compiler.freeze_declaration_syntax(Compiler c, Var syntax) {
   if (syntax is not <list> || syntax.is_nil()) return _freeze_leaf(syntax);
   String physical = NULL;
   Var source = void;
-  if (binding_identity_try_parts(syntax, NULL, physical) &&
+  if (Ast.try_binding(syntax, NULL, physical) &&
       c.semantic_binding_facts().try_get(%(source-spelling $syntax), source) &&
       source != physical)
     return %(declaration-binding $syntax $source);
@@ -91,7 +91,7 @@ Var Compiler.thaw_declaration_syntax(Compiler c, Var syntax) {
 /* Literal conversion calls refer to the consumer's global bindings. */
 static Var _freeze_cache_key(Compiler c, Var key) {
   String name = NULL;
-  if (binding_identity_try_parts(key, NULL, name))
+  if (Ast.try_binding(key, NULL, name))
     return %(declaration-cache-binding $name);
   if (key is not <list>) return _freeze_leaf(key);
   match (key) case %(cache ?): return c.freeze_declaration_syntax(key);

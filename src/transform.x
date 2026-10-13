@@ -383,7 +383,7 @@ static Ast _function_node(
   List binding, List body, int written) {
   List replaced = _function_rewrite(c, function, return_type, written);
   if (replaced) return replaced;
-  String owner = binding_identity_spelling(binding);
+  String owner = Ast.binding_spelling(binding);
   Var stored_owner;
   int callback =
     c.semantic_binding_facts().try_get(%(defer-ownr $binding), stored_owner);
@@ -413,7 +413,7 @@ static List _entered_body(
   Compiler c, List declaration, List body, int callback) {
   int depth = c.enter_function(declaration, callback);
   List lowered, items = NULL;
-  $let(c.return_type, declared_return(declaration)) {
+  $let(c.return_type, Ast.declared_return(declaration)) {
     lowered = _step(c, body);
     for (List entry = c.function_entry(depth); entry;
          entry = c.function_entry(depth))
@@ -473,7 +473,7 @@ static List _expression_rewrite(Compiler c, List expression) {
   match (expression) {
     case %(expr ? (call (expr ? (ident ?binding)) ?)): {
       point = <call>;
-      kind = binding_identity_spelling(binding);
+      kind = Ast.binding_spelling(binding);
     }
     case %(expr ? (getindex ? ?)): {
       kind = <read>;
@@ -922,7 +922,7 @@ static List _typed_call(
   String callee_name = NULL;
   match (callee) {
     case %(expr ? ${$source_identifier_content(%(?binding))}):
-      callee_name = binding_identity_spelling(binding);
+      callee_name = Ast.binding_spelling(binding);
   }
   int list_varargs = callee_name == "List_list_n";
   if (c.fn_name && _iter_immediate_consumer(callee_name) && args)

@@ -102,7 +102,7 @@ void Compiler.finish_collected_declaration(
   match (declaration)
     case %(declare ?type (bindings (bind ?binding ((fnmod *) *)))):
       if (type.type().is_static())
-        c.sym.mark_static(%(function ${binding_identity_spelling(binding)}));
+        c.sym.mark_static(%(function ${Ast.binding_spelling(binding)}));
   if (c.peek(0) == <"{"> || c.peek(0) == <"%{"> || c.at_function_arrow())
     _skip_body(c, declaration, meta, native);
   else if (c.peek(0) == <;>) {
@@ -136,7 +136,7 @@ void Compiler.record_inline_function(Compiler c, List declaration) {
   if (!type.is_inline() || type.is_static() || c.source_private) return;
   match (declaration)
     case %(declare ? (bindings (bind ?binding ?))): {
-      String name = binding_identity_spelling(binding);
+      String name = Ast.binding_spelling(binding);
       c.sym.set(%("function-inline" $name), %(inline));
     }
 }
@@ -144,7 +144,7 @@ void Compiler.record_inline_function(Compiler c, List declaration) {
 // `fn_defs` holds each non-static function the unit defines.
 static void _note_function_body(Compiler c, Type type, List binding) {
   if (!type.is_function() || type.is_static()) return;
-  c.fn_defs[binding_identity_spelling(binding)] = 1;
+  c.fn_defs[Ast.binding_spelling(binding)] = 1;
 }
 
 /** Reports whether the current two tokens are `=>`. */

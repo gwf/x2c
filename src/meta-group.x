@@ -472,14 +472,14 @@ static Map _roots(Compiler c, Array ordered) {
     }
   foreach (List entry, c.meta_group)
     match (entry) case %(function ?fn *): {
-      ast_collect_binding_references(fn, reached);
+      Ast.collect_binding_references(fn, reached);
       if (_function_identity(fn, identity, name) && !(identity in present))
         ordered.push(fn);
       reached[identity] = 1;
     }
   foreach (List item, ordered)
     if (!_function_identity(item, identity, name))
-      ast_collect_binding_references(item, reached);
+      Ast.collect_binding_references(item, reached);
   return reached;
 }
 
@@ -495,7 +495,7 @@ static void _close(Array ordered, Map reached) {
       if (_function_identity(item, identity, name) &&
           identity in reached && !(identity in expanded)) {
         expanded[identity] = 1;
-        ast_collect_binding_references(item, reached);
+        Ast.collect_binding_references(item, reached);
         grew = 1;
       }
   }

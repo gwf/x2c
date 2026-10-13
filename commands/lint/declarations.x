@@ -362,7 +362,7 @@ static void _saved_locals(Lint l, Compiler c, List ast):
    corpus spelling guards outside the authored definition. */
 static void _unused_statics(Lint l, Compiler c, List ast):
   Map referenced = {}, absent = {}
-  ast_collect_binding_references(ast, referenced)
+  Ast.collect_binding_references(ast, referenced)
   foreach List node in ast:
     match node:
       case %(function ?modifiers (bind (binding ?id ?name) ?) ?):

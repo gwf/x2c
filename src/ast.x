@@ -38,14 +38,14 @@ typedef enum AstPos {
 /** Constructs a `(binding identity spelling)` node.
     The caller must supply a positive compiler-issued identity.
 */
-List binding_identity_new(int identity, String spelling) =>
+List Ast.binding(int identity, String spelling) =>
   %(binding $identity $spelling);
 
 /** Extracts a valid `(binding positive-integer string)` node.
     Returns one on success and writes only non-`NULL` outputs; failure returns
     zero without changing either output.
 */
-int binding_identity_try_parts(
+int Ast.try_binding(
   List binding, int &?identity, String &?spelling) {
   match (binding)
     case %(binding ?id ?(String name)): {
@@ -58,9 +58,9 @@ int binding_identity_try_parts(
 }
 
 /** Returns a valid binding node's source spelling, or `NULL`. */
-String binding_identity_spelling(List binding) {
+String Ast.binding_spelling(List binding) {
   String spelling = NULL;
-  return binding_identity_try_parts(binding, NULL, spelling) ? spelling : NULL;
+  return Ast.try_binding(binding, NULL, spelling) ? spelling : NULL;
 }
 
 // declarators
@@ -71,7 +71,7 @@ String binding_identity_spelling(List binding) {
     transfer requires belongs to the definition that writes the parameter,
     not to the declaration its callers read.
 */
-List ast_prototype_declarator(List declarator) {
+List Ast.prototype_declarator(List declarator) {
   Array modifiers = [], int changed = 0;
   foreach (Var modifier, declarator.caddr()) {
     match (modifier)
@@ -135,15 +135,15 @@ List Ast.lvalue_binding(Ast ast) {
 }
 
 /** Returns the name whose address an expression takes, or `NULL`. */
-String ast_addressed_identifier(Var value) {
+String Ast.addressed_identifier(Var value) {
   if (value is not <list>) return NULL;
   List ast = value;
   match (ast) {
-    case %(expr ? ?inner): return ast_addressed_identifier(inner);
+    case %(expr ? ?inner): return Ast.addressed_identifier(inner);
     case ${$grouped(?inner)}:
-      return ast_addressed_identifier(inner);
+      return Ast.addressed_identifier(inner);
     case ${$addressed(?inner)}:
-      return ast_direct_identifier(inner);
+      return Ast.direct_identifier(inner);
   }
   return NULL;
 }
@@ -154,15 +154,15 @@ String ast_addressed_identifier(Var value) {
     A declaration qualifier that must reach one object, such as the `volatile`
     an error transfer requires, applies to this name.
 */
-String ast_direct_identifier(Var value) {
+String Ast.direct_identifier(Var value) {
   List designated = Ast.designated(value);
   match (designated) {
     case $source_identifier_content(%(?binding)):
-      return binding_identity_spelling(binding);
+      return Ast.binding_spelling(binding);
     case $source_operator_content(%((!quote ->) ?base *)):
-      return ast_addressed_identifier(base);
+      return Ast.addressed_identifier(base);
     case ${$dereferenced(?base)}:
-      return ast_addressed_identifier(base);
+      return Ast.addressed_identifier(base);
   }
   return NULL;
 }
@@ -170,17 +170,17 @@ String ast_direct_identifier(Var value) {
 /** Returns the name of the pointer an expression designates through, or
     `NULL` when it designates no object through a single name. `*pointer`,
     `pointer[index]`, and `pointer->member` all change the object the pointer
-    holds, which `ast_direct_identifier` reports as no name at all.
+    holds, which `Ast.direct_identifier` reports as no name at all.
 */
-String ast_indirect_identifier(Var value) {
+String Ast.indirect_identifier(Var value) {
   List designated = Ast.designated(value);
   match (designated) {
     case ${$indexed(%(!set ?base (expr ? ?)), ?)}:
-      return ast_direct_identifier(base);
+      return Ast.direct_identifier(base);
     case $source_operator_content(%((!quote ->) ?base *)):
-      return ast_direct_identifier(base);
+      return Ast.direct_identifier(base);
     case ${$dereferenced(?base)}:
-      return ast_direct_identifier(base);
+      return Ast.direct_identifier(base);
   }
   return NULL;
 }
@@ -192,7 +192,7 @@ String ast_indirect_identifier(Var value) {
 List Ast.written_operand(Ast node) {
   match (node) {
     case $source_operator_content(%(?operator ?target *)):
-      if (operator is <symbol> && ast_changes_left_operand(operator))
+      if (operator is <symbol> && Symbol.changes_left_operand(operator))
         return target;
     case $source_postfix_content(%(? ?target)): return target;
   }
@@ -212,7 +212,7 @@ Ast Ast.rewrite_children(Ast ast, Func per_child) {
 }
 
 /** Returns whether any list under `value` has `kind` as its head. */
-int ast_contains_head(Var value, Symbol kind) {
+int Ast.contains_head(Var value, Symbol kind) {
   List node;
   $ast.walk(value, node) if (node.car() === kind) return 1;
   return 0;
@@ -223,7 +223,7 @@ int ast_contains_head(Var value, Symbol kind) {
     to `replaced`. Only the ancestors of a swapped list are new, so `root`
     returns itself when nothing beneath it is swapped. The walk keeps deep
     expression chains off the C stack. */
-Var ast_replace_nodes(Var root, Map replaced) {
+Var Ast.replace_nodes(Var root, Map replaced) {
   Array levels = $auto([]);
   List node;
   $ast.walk(root, node) {
@@ -250,7 +250,7 @@ static List _replaced_children(List node, Map replaced) {
 }
 
 /** Records in `referenced` the identity of every binding `node` names. */
-void ast_collect_binding_references(Var node, Map referenced) {
+void Ast.collect_binding_references(Var node, Map referenced) {
   if (node is not <list>) return;
   List syntax = node;
   // A definition's own binder is a `bind`, so a function does not name itself.
@@ -260,7 +260,7 @@ void ast_collect_binding_references(Var node, Map referenced) {
     return;
   }
   foreach (Var child, syntax)
-    ast_collect_binding_references(child, referenced);
+    Ast.collect_binding_references(child, referenced);
 }
 
 // source anchors
@@ -335,7 +335,7 @@ int Ast.never_returns(Ast ast) {
               %(("Symbol") ? ?code))}) *):
       return code in nonreturning_error_causes;
     case %(stmnt (expr ? ${$called(%(expr () (ident ?binding)), %(*))})):
-      return binding_identity_spelling(binding) in terminating_calls;
+      return Ast.binding_spelling(binding) in terminating_calls;
     case %(block *items):
       return items && !_contains_return(items) &&
              items.last() is <list> && ((Ast) items.last()).never_returns();
@@ -376,7 +376,7 @@ int Symbol.is_assignment_op(Symbol op) =>
   op == <=> || op.compound_operator() != 0;
 
 /** Returns whether `op` writes its left operand. */
-int ast_changes_left_operand(Symbol op) =>
+int Symbol.changes_left_operand(Symbol op) =>
   op == <++> || op == <--> || op.is_assignment_op();
 
 // initializer alternatives

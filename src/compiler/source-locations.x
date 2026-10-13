@@ -73,7 +73,7 @@ static List _source_range(Compiler c, Token first, Token after) {
 void Compiler.record_source_reference(
   Compiler c, List binding, Type type, Token first, Token after) {
   if (!c.source_facts || !c.source_primary || c.shallow || c.macro_holes ||
-      !binding_identity_try_parts(binding, NULL, NULL)) return;
+      !Ast.try_binding(binding, NULL, NULL)) return;
   List range = _source_range(c, first, after);
   if (range) c.source_occurrences.push(%(@range $binding $type));
 }

@@ -46,7 +46,7 @@ static void _report_redefinition(
   if (!c.semantic_binding_facts().try_get(%(arms $binding), arms) ||
       !List.equal(arms, c.arms))
     return;
-  String spelling = binding_identity_spelling(binding);
+  String spelling = Ast.binding_spelling(binding);
   $report.type.decl_duplicate(c, site, kind, spelling);
 }
 
@@ -129,7 +129,7 @@ static void _record_definition(
   }
   c.set_fact(%(completion $binding), %(definition $contract));
   c.set_fact(%(arms $binding), c.arms);
-  String spelling = binding_identity_spelling(binding);
+  String spelling = Ast.binding_spelling(binding);
   if (spelling && !type.is_static()) c.fn_defs[spelling] = 1;
 }
 
@@ -143,7 +143,7 @@ static void _complete_prototype(
       if (contract == %(function-contract $a $b extern $d)):
         contract = prior_contract;
   if (prior_contract != contract) {
-    String spelling = binding_identity_spelling(binding);
+    String spelling = Ast.binding_spelling(binding);
     $report.type.decl_prototype(c, site, spelling, prior_contract, contract);
   }
   c.set_fact(%(completion $binding), %(completed $contract));
@@ -240,9 +240,9 @@ static void _check_static_inits(Compiler c) {
   foreach (Var (key, value), c.static_init_deps) {
     List binding = key, dependencies = value;
     foreach (List reference, dependencies) {
-      String name = binding_identity_spelling(reference);
+      String name = Ast.binding_spelling(reference);
       if (!name || %($name) in statics) continue;
-      String target = binding_identity_spelling(binding);
+      String target = Ast.binding_spelling(binding);
       $report.parse.static_dependency(
         c, _init_token(c, binding), name, target);
     }

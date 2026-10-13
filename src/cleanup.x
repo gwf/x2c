@@ -69,7 +69,7 @@ static List _rewrite_expression(List expression, Func rewrite) {
     List replacement = rewrite(block);
     if (replacement != block) changed[(void *)block] = replacement;
   }
-  return changed.len() ? ast_replace_nodes(expression, changed) : expression;
+  return changed.len() ? Ast.replace_nodes(expression, changed) : expression;
 }
 
 /* Whether a statement expression in `body`, before its regions lower,
@@ -79,7 +79,7 @@ static int _expression_holds_landing(List body) {
   List node;
   $ast.walk(body, node) match (node) {
     case %(expr *): {
-      if (ast_contains_head(node, <landing>)) return 1;
+      if (Ast.contains_head(node, <landing>)) return 1;
       continue;
     }
     case %(landing ? ?rows): {
@@ -116,7 +116,7 @@ static List _lower_function(Compiler c, List node) {
   match (node)
     case %(function ?type ?bindings ?body): {
       List declaration = %(declare $type (bindings $bindings));
-      $let(c.return_type, declared_return(declaration))
+      $let(c.return_type, Ast.declared_return(declaration))
         return _lowered_function(c, type, bindings, body);
     }
   return node;
@@ -422,13 +422,13 @@ static String _label_spelling(Var label) {
   List node = label;
   match (node) {
     case $source_identifier_content(%(?binding)):
-      return binding_identity_spelling(binding);
+      return Ast.binding_spelling(binding);
     case %(expr ? ?inner): return _label_spelling(inner);
     case $source_content_pattern($grouped, %(?inner)):
       return _label_spelling(inner);
     case %(?(String name)): return name;
   }
-  return binding_identity_spelling(node);
+  return Ast.binding_spelling(node);
 }
 
 /* Only a statement expression lets an expression hold transfers or
@@ -747,7 +747,7 @@ static List _defer_record(
   List record, List callback, List environment, List records) {
   if (!environment)
     return $!{ X2CCleanup $record = {.fn = $callback, .env = 0}; };
-  Type type = %(${binding_identity_spelling(environment)});
+  Type type = %(${Ast.binding_spelling(environment)});
   return $!{
     $type environment = {0};
     @builtin_defer_captures(environment, $records)
@@ -756,13 +756,13 @@ static List _defer_record(
 }
 
 /** Writes captured addresses in the order capture selection established. */
-List builtin_defer_captures(List environment, List records) {
+List Ast.defer_captures(List environment, List records) {
   Array assignments = [];
   foreach (List row, records) {
     /* The capture's storage type keeps a reference parameter's own
        address; the bare binding would read through the reference. */
     List captured = $!(${row.cadr()}){ ${row.car()} };
-    String field = binding_identity_spelling(row.caddr());
+    String field = Ast.binding_spelling(row.caddr());
     assignments.push($!{ $environment.$field = (const void *)&$captured; });
   }
   return assignments.list_free();
@@ -789,7 +789,7 @@ static void _collect_writes(Preserve &p, List body) {
       case %(defer ?body ? ? ? ?written *): {
         if (inside)
           foreach (List binding, written) {
-            String captured = binding_identity_spelling(binding);
+            String captured = Ast.binding_spelling(binding);
             if (captured) p.names[captured] = 1;
           }
         pending.push(body);
@@ -824,14 +824,14 @@ static void _write(Preserve &p, List node) {
   if (!operand) {
     match (node) case %(call ? (args *arguments)):
       foreach (Var argument, arguments) {
-        String addressed = ast_addressed_identifier(argument);
+        String addressed = Ast.addressed_identifier(argument);
         if (addressed) p.escaped[addressed] = 1;
       }
     return;
   }
-  String name = ast_direct_identifier(operand);
+  String name = Ast.direct_identifier(operand);
   if (name) p.names[name] = 1;
-  String holder = ast_indirect_identifier(operand);
+  String holder = Ast.indirect_identifier(operand);
   if (holder) p.holders[holder] = 1;
 }
 
@@ -867,10 +867,10 @@ static Var _changed_operand(Compiler c, List node) {
 static void _aliased(Preserve &p, List body) {
   List node;
   $ast.walk(body, node) match (node) case %(op = ?target ?source): {
-    String addressed = ast_addressed_identifier(source), holder = NULL;
+    String addressed = Ast.addressed_identifier(source), holder = NULL;
     match (target) case %(bind ?binding ?):
-      holder = binding_identity_spelling(binding);
-    if (!holder) holder = ast_direct_identifier(target);
+      holder = Ast.binding_spelling(binding);
+    if (!holder) holder = Ast.direct_identifier(target);
     if (addressed && holder && holder in p.holders) {
       p.names[addressed] = 1;
       p.pointers[holder] = 1;
@@ -976,7 +976,7 @@ static List _declaration(Preserve &p, List declaration, Map escaped) {
 static List _binding(Preserve &p, List bind, Map escaped) {
   match (bind)
     case %(bind ?name ?mods): {
-      String spelling = binding_identity_spelling(name);
+      String spelling = Ast.binding_spelling(name);
       if (spelling && spelling in p.names &&
           !(escaped && spelling in escaped) && !(<volatile> in mods))
         return %(bind $name ${cons(<volatile>, mods)});
@@ -988,7 +988,7 @@ static int _declares_name(Preserve &p, List bindings) {
   foreach (List binding, bindings.cdr())
     match (binding)
       case $source_declarator_row(%(?name ?)): {
-        String spelling = binding_identity_spelling(name);
+        String spelling = Ast.binding_spelling(name);
         if (spelling && spelling in p.names) return 1;
       }
   return 0;
@@ -1003,12 +1003,12 @@ static int _declares_pointee(Preserve &p, List bindings) {
   foreach (List binding, bindings.cdr()) {
     List declarator = binding;
     match (binding) case %(op = ?bind ?value): {
-      String addressed = ast_addressed_identifier(value);
+      String addressed = Ast.addressed_identifier(value);
       if (addressed && addressed in p.names) return 1;
       declarator = bind;
     }
     match (declarator) case %(bind ?name ?): {
-      String spelling = binding_identity_spelling(name);
+      String spelling = Ast.binding_spelling(name);
       if (spelling && spelling in p.pointers) return 1;
     }
   }
@@ -1048,7 +1048,7 @@ static void _escape_declared(Preserve &p, Array output, List binds) {
   foreach (List bind, binds)
     match (bind)
       case $source_declarator_row(%(?name ?)): {
-        String spelling = binding_identity_spelling(name);
+        String spelling = Ast.binding_spelling(name);
         if (spelling && spelling in p.escaped) {
           output.push(
             c.bind_syntax(
@@ -1149,7 +1149,7 @@ static List _callable_defer(Compiler c, List body, List finalizer) {
   }
   List opaque = c.sym.introduce(c.fresh_name("defer_opaque"));
   List callback = c.sym.introduce(c.fresh_name("defer_cleanup"));
-  String env_name = env_local ? binding_identity_spelling(env_local) : NULL;
+  String env_name = env_local ? Ast.binding_spelling(env_local) : NULL;
   List rewritten = env_name
     ? _rewrite_captures(d, finalizer, env_name) : finalizer;
   c.add_early(
@@ -1221,7 +1221,7 @@ static List _rewrite_captures(
       List binding = bound;
       Var field_var;
       if (!d.captures.try_get(binding, field_var)) return ast;
-      String field_name = binding_identity_spelling(field_var);
+      String field_name = Ast.binding_spelling(field_var);
       Type type = captured_type, target = type;
       if (binding in d.written &&
           !(<volatile> in type.flatten_all()))
@@ -1256,7 +1256,7 @@ static List _defer_callback(
   List env_local, List rewritten) {
   List body = %(code-value "lowered" (seq $rewritten) ());
   if (env_binding) {
-    Type type = %(${binding_identity_spelling(env_binding)});
+    Type type = %(${Ast.binding_spelling(env_binding)});
     return c.bind_syntax(
       $!Unit{ static void $callback(void *$opaque) {
         $type *$env_local = ($type *)$opaque;
