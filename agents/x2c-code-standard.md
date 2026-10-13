@@ -514,9 +514,18 @@ name, know, or refuse anything. Spell the language `x2c`.
 **NM-1** Use `Type.method` for a public operation owned by `Type`,
 `_snake_case` for an ordinary static function, `snake_case` for locals and
 parameters, `UPPER_CASE` for constants and enumerators, and bare PascalCase
-for types and private records. Static helpers have no dotted owner, including
-helpers that accept owner state and factories that accept no receiver. Keep
-`static` and the existing signature, ownership, and mutation behavior.
+for types and private records. A dotted method never has a leading
+underscore. A function that other files call is an ordinary `Type.method`;
+a helper used only in its own file is a `static` `_snake_case` function.
+Static helpers have no dotted owner, including helpers that accept owner
+state and factories that accept no receiver. Keep the existing signature,
+ownership, and mutation behavior.
+
+A public module service with no natural value owner uses one stable domain
+prefix, `domain_operation`, such as `report_*` in `src/report.x` or `fnv_*`
+in `src/utils.x`, not a dotted name. A parameter's type alone is not
+ownership evidence: a function that receives a `String`, `List`, or
+`CliRequest` does not belong to that type for that reason alone.
 
 Preserve names required by established language or external lookup contracts,
 such as converters, protocol members, operators, lifecycle hooks, and native
@@ -524,20 +533,18 @@ bindings. Verify each exception against the name producer and its consumers;
 dotted spelling alone is not evidence. For example, `Fact.var` and `Var.fact`
 in `src/regions.x` serve conversion and protocol lookup.
 
-Generated Array and Map family helpers retain `Type._operation` for two
-distinct reasons. Typed-alias consumers inherit core helpers through typedef
-method lookup (`_next_method_type` in `src/expressions.x`). Other consumers need
-a stable name outside the defining macro expansion: Map `_find_hashed` and
-`_reinsert` have handwritten callers, while both families' `_compare` and
-`_write` connect separate observation expansions. These six helpers need stable
-names across expansions, independently of alias inheritance. Ordinary
-macro-local bindings do not cross those boundaries. Use the existing
-method lookup instead of encoding type spellings into free names. Keep
-ordinary callbacks and expansion-local helpers undotted.
+Generated Array and Map family helpers are `static` dotted methods. Other
+expansions of the same family call them: the public members, the observation
+members, and handwritten callers such as `Map.get_hashed` and the pool table
+in `lib/pool.x`. Typed-alias consumers inherit them through typedef method
+lookup (`_next_method_type` in `src/expressions.x`). Their names have no
+leading underscore and differ from the public members they serve: Array
+`compare_elements` and `write_elements` beside `compare` and `write_repr`,
+and Map `find_hashed_bucket` and `reinsert_entry` beside `get_hashed`. Use
+the existing method lookup instead of encoding type spellings into free
+names. Keep ordinary callbacks and expansion-local helpers undotted.
 
-Ordinary helpers need no forwarding wrapper or compatibility alias. A leading
-underscore does not establish static linkage: retain non-static underscore
-methods used by other files.
+Ordinary helpers need no forwarding wrapper or compatibility alias.
 
 **NM-2** Name the subject parameter with the first letter of its type
 (`Compiler c`, `Emitter &e`) when the longer name would wrap lines;
@@ -567,11 +574,13 @@ Locals used only to save and restore state become `$let`, including
 `process`, `handle`, `request`, `do`, and `check` as whole names.
 
 **NM-6** Use an `x2c_*` name only for the intentional C interface: functions
-generated code calls, native callers, and process setup. Ordinary public
-operations are type methods; private helpers are `static`. An `x2c_*` name
-without `static` enters generated headers. Verify the
-generated-code and native callers of a retained C entry before renaming it.
-The registry `builtin_targets` in `src/builtins.x` stays non-static because
+generated code calls, native callers, and process setup. An `x2c_*` name
+without `static` enters generated headers. The `_x2c_` prefix belongs to
+compiler-generated names only; the compiler rejects a source declaration
+that uses it. Never use a `__x2c_` name, because C reserves identifiers that
+begin with two underscores. Verify the generated-code and native callers of
+a retained C entry before renaming it. The registry
+`Compiler.builtin_targets` in `src/builtins.x` stays non-static because
 `src/macros.x` calls it across units; making it static fails translation
 of `src/macros.x`.
 
@@ -1181,6 +1190,10 @@ that is not selected is not checked for a matching finding.
 | subject parameter name that wraps lines | NM-2 | `subject-parameter-name` |
 | forward declaration | FI-6 | `forward-declaration`, `src-forward-declaration`, `runtime-forward-declaration`, `same-file-forward-declaration` |
 | non-static `x2c_*` without a C caller | NM-6 | none |
+| source declaration spelled `_x2c_*` | NM-6 | compiler error "reserved for compiler-generated names" |
+| name spelled `__x2c_*` | NM-6 | none |
+| dotted method spelled `Type._name` | NM-1 | none |
+| dotted name on a hand-written `static` helper | NM-1 | none |
 | backward private include between phases | MO-5, AR-1 | none |
 
 ### Validation signals
