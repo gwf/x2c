@@ -639,7 +639,12 @@ static void _scan(Walk &w, Var value, int deferred) {
   w.pending.push(value);
   while ((int) w.pending.len() > base) {
     Var node = w.pending.take_last();
+    if (node == <nested> || node == <unnested>) {
+      w.depth += node == <nested> ? 1 : -1;
+      continue;
+    }
     if (_scan_call_node(w, node)) continue;
+    if (_scan_conditional(w, node)) continue;
     if (_scan_assignment(w, node, root)) continue;
     _scan_node(w, node);
   }
@@ -719,6 +724,19 @@ static void _scan_call(Walk &w, Var call, String callee, List arguments) {
       _flow(w, argument, type, sink, object);
     }
   }
+}
+
+/* The later operands of `&&`, `||`, and `?:` run on some paths, so they
+   count as a nested block, as a conditional statement's children do. */
+static int _scan_conditional(Walk &w, Var node) {
+  match (node) case %(op (!or && || (!quote ?)) ?first *later): {
+    w.pending.push(<unnested>);
+    _scan_children(w, later);
+    w.pending.push(<nested>);
+    w.pending.push(first);
+    return 1;
+  }
+  return 0;
 }
 
 static int _scan_assignment(Walk &w, Var node, Var root) {

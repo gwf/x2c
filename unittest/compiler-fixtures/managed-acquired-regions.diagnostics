@@ -43,3 +43,23 @@ unittest/compiler-fixtures/managed-acquired-regions.x:86:3: region: 'a' can outl
     ^^^^^^
   note: region opened at line 84
 
+unittest/compiler-fixtures/managed-acquired-regions.x:92:3: region: 'a' can outlive the region it was allocated in when returned
+    return a;
+    ^^^^^^
+  note: region opened at line 90
+
+unittest/compiler-fixtures/managed-acquired-regions.x:98:3: region: 'a' can outlive the region it was allocated in when returned
+    return a;
+    ^^^^^^
+  note: region opened at line 96
+
+unittest/compiler-fixtures/managed-acquired-regions.x:104:3: region: 'a' can outlive the region it was allocated in when returned
+    return a;
+    ^^^^^^
+  note: region opened at line 102
+
+unittest/compiler-fixtures/managed-acquired-regions.x:110:3: region: 'a' can outlive the region it was allocated in when returned
+    return a;
+    ^^^^^^
+  note: region opened at line 108
+
