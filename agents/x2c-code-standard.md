@@ -522,11 +522,19 @@ Preserve names required by established language or external lookup contracts,
 such as converters, protocol members, operators, lifecycle hooks, and native
 bindings. Verify each exception against the name producer and its consumers;
 dotted spelling alone is not evidence. For example, `Fact.var` and `Var.fact`
-in `src/regions.x` serve conversion and protocol lookup. Generated Array and
-Map family helpers retain `Type._operation`: separate typed expansions inherit
-core helpers through typedef method lookup (`_next_method_type` in
-`src/expressions.x`). Use that lookup instead of encoding type spellings into
-free names. Keep ordinary callbacks and expansion-local helpers undotted.
+in `src/regions.x` serve conversion and protocol lookup.
+
+Generated Array and Map family helpers retain `Type._operation` for two
+distinct reasons. Typed-alias consumers inherit core helpers through typedef
+method lookup (`_next_method_type` in `src/expressions.x`). Other consumers need
+a stable name outside the defining macro expansion: Map `_find_hashed` and
+`_reinsert` have handwritten callers, while both families' `_compare` and
+`_write` connect separate observation expansions. These six helpers need stable
+names across expansions, independently of alias inheritance. Ordinary
+macro-local bindings do not cross those boundaries. Use the existing
+method lookup instead of encoding type spellings into free names. Keep
+ordinary callbacks and expansion-local helpers undotted.
+
 Ordinary helpers need no forwarding wrapper or compatibility alias. A leading
 underscore does not establish static linkage: retain non-static underscore
 methods used by other files.
