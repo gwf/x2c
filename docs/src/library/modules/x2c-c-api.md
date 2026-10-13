@@ -70,6 +70,7 @@ prefix.
 | [`x2c_register_type`](dispatch.md#x2c_register_type) | `lib/dispatch.x` | `void x2c_register_type(String name)` |
 | [`x2c_scope_thread_release`](scope.md#x2c_scope_thread_release) | `lib/scope.x` | `void x2c_scope_thread_release(void)` |
 | `x2c_set_root` | `src/utils.x` | `void x2c_set_root(String root)` |
+| [`x2c_slice_bound`](common.md#x2c_slice_bound) | `lib/common.x` | `int x2c_slice_bound(int bound)` |
 | [`x2c_try_register_descriptor`](dispatch.md#x2c_try_register_descriptor) | `lib/dispatch.x` | `int x2c_try_register_descriptor(String name, VarMethods methods)` |
 | [`x2c_try_register_tagged_descriptor`](dispatch.md#x2c_try_register_tagged_descriptor) | `lib/dispatch.x` | `int x2c_try_register_tagged_descriptor( Symbol tag, String name, VarMethods methods)` |
 | [`x2c_var_custom_descriptor`](var.md#x2c_var_custom_descriptor) | `lib/var.x` | `VarDescriptor *x2c_var_custom_descriptor(Var value)` |
@@ -96,4 +97,4 @@ prefix.
 | [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_volatile`](varops.md#x2c_var_update_volatile) | `lib/varops.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
-Total: 84 functions.
+Total: 85 functions.

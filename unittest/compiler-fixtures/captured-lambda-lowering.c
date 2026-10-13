@@ -154,7 +154,7 @@ static Func nest(int first){
 }
 
 static Func counter(int value){
-  int * _x2c_lambda_cell_0 = Scope_memdup((const void *) &(int){
+  int * _x2c_lambda_cell_0 = Scope_memdup((const void *) &(int[1]){
     value
   }
   , sizeof(int));

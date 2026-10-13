@@ -13,6 +13,7 @@ The `Var` encoding every runtime module shares.
 | [`x2c_initialize_protocols`](#x2c_initialize_protocols) | Runs compiler-generated runtime protocol registration. |
 | [`x2c_normalize_index`](#x2c_normalize_index) | Normalizes one element index against `length`. |
 | [`x2c_normalize_slice`](#x2c_normalize_slice) | Normalizes slice bounds and returns the resulting element count. |
+| [`x2c_slice_bound`](#x2c_slice_bound) | Returns an explicit slice `bound` that `x2c_normalize_slice` cannot read as omitted. |
 | [`Array.var`](#Array.var) | Boxes an `Array` value as `Var`. |
 | [`Block.var`](#Block.var) | Boxes a `Block` value as `Var`. |
 | [`Buffer.var`](#Buffer.var) | Boxes a `Buffer` value as `Var`. |
@@ -127,7 +128,17 @@ Source: `lib/common.x:870`
 
 Normalizes slice bounds and returns the resulting element count.
 
-Source: `lib/common.x:890`
+Source: `lib/common.x:895`
+
+#### x2c_slice_bound
+
+`int x2c_slice_bound(int bound)`
+
+Returns an explicit slice `bound` that `x2c_normalize_slice` cannot
+read as omitted. INT_MIN becomes INT_MIN + 1, which every collection
+shorter than INT_MAX clamps the same way.
+
+Source: `lib/common.x:881`
 
 ### `Array`
 

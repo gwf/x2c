@@ -85,7 +85,7 @@ void Scope_free(void *);
 
 void DisjointSet_free(DisjointSet value){
   if(value) DisjointSet_drop(value);
-  Scope_free(value);
+  Scope_free((void *) value);
 }
 
 void DisjointSet_cleanup(DisjointSet value){

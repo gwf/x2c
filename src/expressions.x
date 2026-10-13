@@ -409,7 +409,12 @@ static List _parse_sizeof(Compiler c) {
   Token head = c.token;
   int parens = c.test(<(>);
   List arg = NULL;
-  if (c.test_declaration()) {
+  // `sizeof (T){...}` measures a compound literal, which parses as a cast
+  if (parens && c.test_declaration() && head.after_group().type == <{>) {
+    c.token = head;
+    arg = _parse_cast(c);
+  }
+  else if (c.test_declaration()) {
     arg = c.parse_type_operand(NULL);
     if (parens) {
       c.expect(<)>);
@@ -1172,10 +1177,11 @@ static List _resolve_identifier(
   List binding = _identifier_binding(c, value, type, origin, require_type);
   if (c.macro_holes && binding) {
     String name = binding_identity_spelling(binding);
-    if (c.macro_holes[%(using $name)] is <list>)
+    int free = _template_free_name(c, binding);
+    if (c.macro_holes[%(using $name)] is <list> ||
+        (free && type && !c.sym.binding_is_local(binding)))
       return %(expr (<macro-expr>) (ident (binding-global $name)));
-    if (_template_free_name(c, binding))
-      return %(expr (<macro-expr>) (ident (binding-name $name)));
+    if (free) return %(expr (<macro-expr>) (ident (binding-name $name)));
   }
   int macro_binder = value.is_binder() ||
     (value is <list> && !value.is_nil() &&
@@ -1187,6 +1193,7 @@ static List _resolve_identifier(
   _capture_identifier(c, binding);
   int kept = 0;
   match (value) case %(binding-global *): kept = 1;
+  if (kept && c.lowering_body()) c.sym.unshadow_global(spelling);
   if (_shadow_identifier(c, binding, type, spelling, binding_facts, kept))
     type = NULL;
   if (!type) type = _identifier_type(
@@ -1220,7 +1227,9 @@ static List _capture_lambda_value(
    identity; global shadow handling instead gives the visible declaration an
    emitted alias so the original identity keeps its meaning. A template's
    free name arrives as `binding-name` and binds where the expansion lands;
-   a `using` name arrives as `binding-global` and binds at file scope. */
+   a name declared at file scope where the template is written, or listed
+   with `using`, arrives as `binding-global` and keeps that declaration and
+   its type. */
 static List _identifier_binding(
   Compiler c, Var value, Type &type, Token origin, int &require_type) {
   require_type = value is <string>;
@@ -1252,8 +1261,10 @@ static List _identifier_binding(
     }
     case %(binding-name ?(String spelling)):
       return _landed_name(c, spelling, type);
-    case %(binding-global ?(String spelling)):
-      return c.sym.reference_global(%($spelling));
+    case %(binding-global ?(String spelling)): {
+      List global = c.sym.resolve_global(%($spelling), type);
+      return global ? global : c.sym.reference_global(%($spelling));
+    }
     case %((!is ? type string)):
       return c.sym.reference(name, type);
   }
@@ -1261,7 +1272,8 @@ static List _identifier_binding(
 }
 
 /* A name a template reads without declaring it binds where the expansion
-   lands. A `Macro` local is a compile-time template the body composes, so
+   lands, unless a file-scope declaration supplies it where the template is
+   written. A `Macro` local is a compile-time template the body composes, so
    an anonymous macro captures its value where it is written. */
 static int _template_free_name(Compiler c, List binding) {
   if (!binding || c.macro_template_local(binding)) return 0;
@@ -1293,8 +1305,9 @@ static void _capture_identifier(Compiler c, List binding) {
    spells, supplies a file-scope name written in the caller's arguments,
    as it would where the expansion lands. Both return 1, since the
    identifier's type is the new binding's. Any other file-scope identity
-   that a visible declaration hides, such as a name a template's `using`
-   keeps, gives that declaration an emitted alias. */
+   that a visible declaration hides, such as a name a template keeps,
+   gives every local of its spelling, the enclosing ones too, an emitted
+   alias, and the visible declaration one if it has none. */
 static int _shadow_identifier(
   Compiler c, List &binding, Type type, String spelling, Map binding_facts,
   int kept) {
@@ -1308,9 +1321,10 @@ static int _shadow_identifier(
     binding = visible;
     return 1;
   }
-  if (visible_type &&
-      (!type || c.sym.resolve_global(%($spelling), NULL)) &&
-      !(%(emitted $visible) in binding_facts))
+  if (!visible_type || (type && !c.sym.resolve_global(%($spelling), NULL)))
+    return 0;
+  c.sym.unshadow_global(spelling);
+  if (!(%(emitted $visible) in binding_facts))
     c.set_fact(%(emitted $visible), c.fresh_name("binding_shadow"));
   return 0;
 }

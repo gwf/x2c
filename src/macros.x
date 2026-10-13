@@ -2715,7 +2715,8 @@ List Compiler.rewrite_written(
     nested use of the rule applies again. A statement replacement, or a
     lowered one, also lowers the statements its source held outside the
     rule, and lowers once, so a new statement it writes stays outside the
-    rule. A statement a shipped rule's lowered carrier writes is not source,
+    rule. Code a shipped rule's replacement writes, such as the support call
+    an interpolated String or a collection literal lowers to, is not source,
     so only shipped rules see it. An expression retains the result type
     already established for its parent. A replacement whose template and
     slot signatures an earlier use in the unit prepared lowers only its
@@ -2733,9 +2734,8 @@ static List _rewrite(
   // A meta body still completes and formats the calls it makes.
   if (c.macro_holes || (c.meta_body && point != <member> && point != <call>))
     return NULL;
-  // A shipped carrier's statements and written definitions are not source.
-  int shipped = (point == <node> || point == <function>) &&
-    c.slot_watch && c.slot_watch.shipped;
+  // Code that a shipped rule or the kernel writes is not source.
+  int shipped = c.slot_watch && c.slot_watch.shipped;
   foreach (RewriteRule rule, _rewrite_candidates(c, point, kind)) {
     if (c.active_rewrites.contains(rule) || (shipped && !rule.builtin))
       continue;
@@ -2927,11 +2927,11 @@ static typedef struct Effects {
     those active outside the translator's own. A first lowering `prepares`
     a skeleton from what it records. A replacement lowered as written
     within another's has that one as its `parent`, whose source it may hold
-    as well. A shipped rule's lowered carrier, a statement the kernel
-    wrote, and any replacement lowered within either are `shipped`, as is
-    a written definition while its function rules are chosen: their own
-    statements and definitions are not source, so no user rule sees them,
-    while the values a carrier watches are. A watch whose values are
+    as well. A shipped rule's replacement, a statement the kernel wrote,
+    and any replacement lowered within either are `shipped`, as is a
+    written definition while its function rules are chosen: their own
+    code is not source, so no user rule sees it, while the values the
+    watch holds are. A watch whose values are
     lowered already has them `kept` as they are. */
 struct SlotWatch {
   List values;
@@ -2980,7 +2980,8 @@ static List _prepared(
   int refused = 0;
   Var shape = _template(c, result, sources, values, refused);
   if (refused) return _watched(c, result, sources, position, expected, site);
-  List key = %(${(int) position} $expected $shape);
+  RewriteRule rule = c.active_rewrites.car();
+  List key = %(${(int) position} ${rule.builtin} $expected $shape);
   if (!c.prepared_rewrites) c.prepared_rewrites = {};
   Var stored;
   if (c.prepared_rewrites.try_get(key, stored))
@@ -2996,6 +2997,7 @@ static List _prepared(
   struct SlotWatch watch = {values.list(), [], []};
   watch.outer = c.active_rewrites.cdr();
   watch.prepares = 1;
+  watch.shipped = rule.builtin;
   foreach (Var value, values) watch.outputs.push(NULL);
   Effects before = _effects(c);
   List lowered;
@@ -3019,8 +3021,7 @@ static List _watched(
   watch.outer = c.active_rewrites.cdr();
   if (c.slot_watch && !c.slot_watch.prepares) watch.parent = c.slot_watch;
   RewriteRule rule = c.active_rewrites.car();
-  watch.shipped = watch.parent && watch.parent.shipped;
-  match (result) case %(code-value "lowered" *): watch.shipped |= rule.builtin;
+  watch.shipped = rule.builtin || (watch.parent && watch.parent.shipped);
   foreach (Var value, sources) watch.outputs.push(NULL);
   $let(c.slot_watch, &watch)
     return _lowered(c, result, position, expected, site);

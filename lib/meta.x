@@ -187,7 +187,10 @@ meta List Code.func_parameters(Code parameters, Code fn, Code argv);
     `Function` hole, registers a function rule. The compiler offers each
     program function definition to the function rules once, bound and typed,
     before its body lowers. Compiler-written definitions, including lifted
-    lambda bodies, bypass program function rules.
+    lambda bodies, bypass program function rules. So does the code a
+    shipped component writes, such as the `String.join` call of an
+    interpolated String or the `Map.update_n` call of a Map literal; the
+    program's expressions it holds still reach program rules.
     Rules keyed by the return type and storage the pattern spells come
     before rules whose pattern holds a hole there. A rule declines by
     returning its input, void, or null, and then costs only its match and

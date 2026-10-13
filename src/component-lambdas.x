@@ -55,24 +55,31 @@ meta static Code _lambda_cell_read(Var node, Map cells) {
   return NULL;
 }
 
-/* The declaration of the cell `name` that holds a `type` copied from
-   `value`, or that a later assignment fills when `value` is NULL. The
-   function binds the declaration, so the cell is a local as a `defer` sees
-   one; its allocation is a typed quotation. */
+/* The declaration of the cell `name` that holds a `type` initialized from
+   `value`, or that a later assignment fills when `value` is NULL. The cell
+   copies a compound literal, so a const cell is initialized, not assigned.
+   An array or a brace initializer is the literal's own; any other value is
+   converted as the ordinary declaration converts it and held as the one
+   element of an array literal, which C initializes from a struct value too.
+   The function binds the declaration, so the cell is a local as a `defer`
+   sees one; its allocation is a typed quotation. */
 meta static Code _lambda_cell(List name, Type type, Code value) {
-  Type bytes = %(* void), pointer = cons(<*>, type);
-  Code allocated = NULL;
-  if (!value) allocated = $!($bytes){ Scope_malloc(sizeof($type)) };
-  else {
+  Type bytes = %(* void), pointer = cons(<*>, type), literal = type;
+  Code allocated = $!($bytes){ Scope_malloc(sizeof($type)) };
+  if (value) {
+    if (!type.match(%((dim *) *)) && !value.match(%(expr ? (composite ?)))) {
+      literal = cons(%(dim ${$!int{ 1 }}), type);
+      value = value.convert(type);
+    }
     if (!value.match(%(expr ? (composite ?))))
-      value = %(expr $type (composite (commas $value)));
+      value = %(expr $literal (composite (commas $value)));
     allocated = $!($bytes){
-      Scope_memdup((const void *)&($type)$value, sizeof($type))
+      Scope_memdup((const void *)&($literal)$value, sizeof($type))
     };
   }
   (List base, List modifiers) = pointer.parts();
   return %(declare $base
-           (bindings (op = (bind $name $modifiers) $allocated)));
+    (bindings (op = (bind $name $modifiers) $allocated)));
 }
 
 /* The cell declaration of `binding`, initialized from `value`, when `cells`

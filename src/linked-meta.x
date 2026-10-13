@@ -603,19 +603,22 @@ static Code _lambda_cell_read(Var node, Map cells) {
 }
 
 static Code _lambda_cell(List name, Type type, Code value) {
-  Type bytes = %(* void), pointer = cons(<*>, type);
-  Code allocated = NULL;
-  if (!value) allocated = $!($bytes){ Scope_malloc(sizeof($type)) };
-  else {
+  Type bytes = %(* void), pointer = cons(<*>, type), literal = type;
+  Code allocated = $!($bytes){ Scope_malloc(sizeof($type)) };
+  if (value) {
+    if (!type.match(%((dim *) *)) && !value.match(%(expr ? (composite ?)))) {
+      literal = cons(%(dim ${$!int{ 1 }}), type);
+      value = value.convert(type);
+    }
     if (!value.match(%(expr ? (composite ?))))
-      value = %(expr $type (composite (commas $value)));
+      value = %(expr $literal (composite (commas $value)));
     allocated = $!($bytes){
-      Scope_memdup((const void *)&($type)$value, sizeof($type))
+      Scope_memdup((const void *)&($literal)$value, sizeof($type))
     };
   }
   (List base, List modifiers) = pointer.parts();
   return %(declare $base
-           (bindings (op = (bind $name $modifiers) $allocated)));
+    (bindings (op = (bind $name $modifiers) $allocated)));
 }
 
 static Code _lambda_declared_cell(List binding, Code value, Map cells) {

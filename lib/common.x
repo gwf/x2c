@@ -875,6 +875,11 @@ int x2c_normalize_index(int index, int length) {
   return index;
 }
 
+/** Returns an explicit slice `bound` that `x2c_normalize_slice` cannot
+    read as omitted. INT_MIN becomes INT_MIN + 1, which every collection
+    shorter than INT_MAX clamps the same way. */
+int x2c_slice_bound(int bound) => bound == INT_MIN ? bound + 1 : bound;
+
 /* Normalize slice bounds in place following x2c conventions:
    - Forward negative stops use the endpoint after the final element, so -1
      becomes len and larger magnitudes move left.

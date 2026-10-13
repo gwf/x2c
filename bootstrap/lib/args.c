@@ -392,7 +392,7 @@ static void _read_row(Option * o, List row, Map index, int position){
   if((* o).operand)(* o).name = first;
   else{
     int dashes = String_startswith((* o).spelling, _0) ? 2 : 1;
-    (* o).name = String_getslice((* o).spelling, dashes, (-2147483647 - 1), 1);
+    (* o).name = String_getslice((* o).spelling, x2c_slice_bound(dashes), (-2147483647 - 1), 1);
   }
   if((* o).defaulted) return;
   if((* o).repeated)(* o).fallback = List_var((List) NULL);
@@ -434,25 +434,25 @@ int String_find(String, String);
 
 static void _parse_long(Spec * s, Map result, List * rest, String word){
   int equals = String_find(word, _9);
-  String spelling = equals < 0 ? word : String_getslice(word, (-2147483647 - 1), equals, 1);
+  String spelling = equals < 0 ? word : String_getslice(word, (-2147483647 - 1), x2c_slice_bound(equals), 1);
   Option * option = _find(&((* s)), spelling);
   if(! String_truth(option -> value)){
     if(equals >= 0) _bad_option(_10, spelling);
     _store(&((* option)), result, int_var(1));
   }
-  else if(equals >= 0) _store(&((* option)), result, String_var(String_getslice(word, equals + 1, (-2147483647 - 1), 1)));
+  else if(equals >= 0) _store(&((* option)), result, String_var(String_getslice(word, x2c_slice_bound(equals + 1), (-2147483647 - 1), 1)));
   else _store(&((* option)), result, String_var(_next_value(&((* rest)), spelling)));
 }
 
 static void _parse_short(Spec * s, Map result, List * rest, String word){
   for(int at = 1;  at < String_len(word);  at ++){
-    String spelling = String_join(NULL, cons(String_var(_11), cons(String_var(String_getslice(word, at, at + 1, 1)), NULL)));
+    String spelling = String_join(NULL, cons(String_var(_11), cons(String_var(String_getslice(word, x2c_slice_bound(at), x2c_slice_bound(at + 1), 1)), NULL)));
     Option * option = _find(&((* s)), spelling);
     if(! String_truth(option -> value)){
       _store(&((* option)), result, int_var(1));
       continue;
     }
-    String value = at + 1 < String_len(word) ? String_getslice(word, at + 1, (-2147483647 - 1), 1) : _next_value(&((* rest)), spelling);
+    String value = at + 1 < String_len(word) ? String_getslice(word, x2c_slice_bound(at + 1), (-2147483647 - 1), 1) : _next_value(&((* rest)), spelling);
     _store(&((* option)), result, String_var(value));
     return;
   }

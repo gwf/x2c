@@ -758,7 +758,7 @@ static int _take_frame(Var * reply){
   String input = Buffer_str(helper_input);
   size_t used = 0;
   if(! datum_unframe(input, &(used), &((* reply)))) return 0;
-  String rest = String_getslice(input, used, (-2147483647 - 1), 1);
+  String rest = String_getslice(input, x2c_slice_bound(used), (-2147483647 - 1), 1);
   Buffer_clear(helper_input);
   if(String_truth(rest)) Buffer_write(helper_input, rest);
   return 1;

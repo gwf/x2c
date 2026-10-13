@@ -373,7 +373,7 @@ String package_entry(SourceView sources, List roots, String name, String * direc
 int package_source(String directory, String path){
   if(! _init_guard_) _file_init_();
   if(String_startswith(path, String_join(NULL, cons(String_var(directory), cons(String_var(_32), NULL))))) return 1;
-  String name = String_getslice(directory, String_rfind(directory, _6) + 1, (-2147483647 - 1), 1);
+  String name = String_getslice(directory, x2c_slice_bound(String_rfind(directory, _6) + 1), (-2147483647 - 1), 1);
   return String_equal(path, String_join(NULL, cons(String_var(directory), cons(String_var(_25), cons(String_var(name), cons(String_var(_26), NULL)))))) || String_equal(path, String_join(NULL, cons(String_var(directory), cons(String_var(_25), cons(String_var(name), cons(String_var(_28), NULL))))));
 }
 

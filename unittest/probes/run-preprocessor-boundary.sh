@@ -25,7 +25,7 @@ success_stderr="$BUILD/success.stderr"
 
 # A requested dump is data on stdout; stderr carries only diagnostics.
 grep -Fq '#define PROBE_VALUE 37' "$BUILD/success.stdout"
-[[ ! -s "$success_stderr" ]]
+[[ ! -s "$success_stderr" ]] || exit 1
 grep -Fxq "$SOURCE_NAME" "$args_log"
 # The host keeps its line markers, which name each merged region's file.
 if grep -Fxq -- '-P' "$args_log"; then
@@ -44,7 +44,7 @@ awk -v first="$BUILD/include first" -v second="$BUILD/include second" \
            first_line < second_line && second_line < xonly_line)
   }
 ' "$args_log"
-[[ ! -e "$BUILD/injected-marker" ]]
+[[ ! -e "$BUILD/injected-marker" ]] || exit 1
 
 active="$ROOT/unittest/compiler-fixtures/preprocess-missing-include.x"
 inactive="$ROOT/unittest/compiler-fixtures/preprocess-inactive-missing-include.x"
@@ -83,11 +83,11 @@ set +e
 failure_status=$?
 set -e
 
-[[ $failure_status == 1 ]]
+[[ $failure_status == 1 ]] || exit 1
 grep -Fq 'deterministic preprocessor failure' "$BUILD/failure.stderr"
 grep -Fq 'driver: failed to run C preprocessor' "$BUILD/failure.stderr"
 grep -Fq 'status: 23' "$BUILD/failure.stderr"
-[[ ! -e "$BUILD/injected-marker" ]]
+[[ ! -e "$BUILD/injected-marker" ]] || exit 1
 
 cp "$ROOT/unittest/probes/fake-toolchain.sh" "$BUILD/bin/fake-cc"
 cp "$ROOT/unittest/probes/fake-toolchain.sh" "$BUILD/bin/fake-ar"
@@ -106,7 +106,7 @@ TOOL_ARGS_LOG="$tool_log" X2C_CC="$BUILD/bin/fake-cc" CC=wrong-cc \
   -Wl,-rpath,"$BUILD/lib dir" -Xlinker -dead_strip \
   --output "$BUILD/dry output" "$BUILD/tool source.c" \
   >"$BUILD/tool-dry.stdout" 2>"$BUILD/tool-dry.stderr"
-[[ ! -e "$dry_dir" && ! -e "$BUILD/dry output" && ! -e "$tool_log" ]]
+[[ ! -e "$dry_dir" && ! -e "$BUILD/dry output" && ! -e "$tool_log" ]] || exit 1
 grep -Fq "$BUILD/bin/fake-cc" "$BUILD/tool-dry.stderr"
 grep -Fq -- "-fsigned-char" "$BUILD/tool-dry.stderr"
 # -rdynamic is gone: it exported symbols for Func.load's dlsym lookup.
@@ -121,7 +121,7 @@ if grep 'x2c: compile ' "$BUILD/tool-dry.stderr" |
   exit 1
 fi
 [[ $(grep 'x2c: compile ' "$BUILD/tool-dry.stderr" |
-      grep -o -- '-MMD' | wc -l | tr -d ' ') == 1 ]]
+      grep -o -- '-MMD' | wc -l | tr -d ' ') == 1 ]] || exit 1
 
 TOOL_ARGS_LOG="$tool_log" X2C_AR="$BUILD/bin/fake-ar" AR=wrong-ar \
   "$X2C" build -### --kind static-library \
@@ -145,7 +145,7 @@ TOOL_ARGS_LOG="$tool_log" X2C_CC=wrong-cc CC=also-wrong \
   --c-include-dir "$BUILD/include second" \
   --build-dir "$BUILD/tool build" --output "$BUILD/tool output" \
   "$BUILD/tool source.c"
-[[ -e "$BUILD/tool output" ]]
+[[ -e "$BUILD/tool output" ]] || exit 1
 grep -Fxq "$BUILD/tool source.c" "$tool_log"
 grep -Fxq "$BUILD/tool build/obj/tool source-"*".o" "$tool_log"
 python3 - "$tool_log" "$BUILD/tool source.c" <<'PY_NATIVE_PHASES'
@@ -181,8 +181,8 @@ TOOL_ARGS_LOG="$tool_log" \
   "$X2C" build --cc "$BUILD/bin/fake-cc" --ar "$BUILD/bin/fake-ar" \
   --kind static-library --build-dir "$BUILD/archive build" \
   --output "$BUILD/libfake.a" "$BUILD/tool source.c"
-[[ -e "$BUILD/libfake.a" ]]
-[[ $(grep -c '^BEGIN archive$' "$tool_log") == 1 ]]
+[[ -e "$BUILD/libfake.a" ]] || exit 1
+[[ $(grep -c '^BEGIN archive$' "$tool_log") == 1 ]] || exit 1
 
 : >"$tool_log"
 set +e
@@ -193,7 +193,7 @@ TOOL_ARGS_LOG="$tool_log" TOOL_FAIL_PHASE=compile TOOL_FAIL_STATUS=23 \
   2>"$BUILD/tool-fail.stderr"
 tool_fail_status=$?
 set -e
-[[ $tool_fail_status == 1 ]]
+[[ $tool_fail_status == 1 ]] || exit 1
 grep -Fq 'compile failed with status 23' "$BUILD/tool-fail.stderr"
 
 printf 'int second(void) { return 2; }\n' >"$BUILD/tool second.c"
@@ -221,7 +221,7 @@ TOOL_ARGS_LOG="$tool_log" TOOL_PROGRAM_LOG="$program_log" \
   2>"$BUILD/run.stderr"
 run_status=$?
 set -e
-[[ $run_status == 17 ]]
+[[ $run_status == 17 ]] || exit 1
 printf '%s\n' -leading program.x "two words" >"$BUILD/program-expected.log"
 cmp "$BUILD/program-expected.log" "$program_log"
 
@@ -235,8 +235,8 @@ TOOL_ARGS_LOG="$tool_log" TOOL_PROGRAM_LOG="$program_log" \
   >"$BUILD/run-fail.stdout" 2>"$BUILD/run-fail.stderr"
 run_fail_status=$?
 set -e
-[[ $run_fail_status == 1 && ! -e "$program_log" ]]
-[[ $(grep -c '^BEGIN link$' "$tool_log") == 0 ]]
+[[ $run_fail_status == 1 && ! -e "$program_log" ]] || exit 1
+[[ $(grep -c '^BEGIN link$' "$tool_log") == 0 ]] || exit 1
 
 rm -f "$tool_log"
 set +e
@@ -246,7 +246,7 @@ TOOL_ARGS_LOG="$tool_log" \
   2>"$BUILD/tool-owned.stderr"
 owned_status=$?
 set -e
-[[ $owned_status == 2 && ! -e "$tool_log" ]]
+[[ $owned_status == 2 && ! -e "$tool_log" ]] || exit 1
 grep -Fq 'C dependency option is driver-owned' "$BUILD/tool-owned.stderr"
 
 # A public directive after an item the source holds goes to the header,

@@ -133,11 +133,11 @@ campaign.
 Current proven shapes include:
 
 - Uniform method or function families in `lib/logger.x:739-744` and `755-760`
-  and in `lib/common.x:589-598`. Names and types vary; behavior does not.
+  and in `lib/common.x:592-601`. Names and types vary; behavior does not.
 - Private pointer conversion pairs in `lib/iter.x`. The tagged
   form preserves `Var.new` and `Var.pointer`; the raw form preserves the
   direct `p64` store and load used by iterator callbacks.
-- The native update family, `$native.update` at `lib/varops.x:94` and its
+- The native update family, `$native.update` at `lib/varops.x:95` and its
   invocations after it. Each invocation supplies the facts that differ.
 - Local resource setup in `$match.machine` in `lib/match.x` and
   `$match.plan` in `lib/match-cache.x`. The macro hides stack-storage
@@ -206,7 +206,7 @@ clearest possible ledger: the enum itself.
 
 Do not make a reader reverse-engineer public function names, C types, or
 failure modes from clever Lisp. The native update macro at
-`lib/varops.x:94` explicitly receives both the native type and public
+`lib/varops.x:95` explicitly receives both the native type and public
 function name at each invocation. That repetition is useful documentation at
 the call site.
 

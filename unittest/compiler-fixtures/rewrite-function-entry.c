@@ -105,7 +105,7 @@ int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   printf("%d\n", run(3));
-  int * _x2c_lambda_cell_0 = Scope_memdup((const void *) &(int){
+  int * _x2c_lambda_cell_0 = Scope_memdup((const void *) &(int[1]){
     100
   }
   , sizeof(int));

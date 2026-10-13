@@ -1096,14 +1096,14 @@ static void _place_includes(Build b, Map headers, String unit){
 static String _unit_include(String line){
   String text = String_strip(line, " \t");
   if(! String_startswith(text, _76) || ! String_endswith(text, _77)) return NULL;
-  String target = String_getslice(text, 10, String_len(text) - 1, 1);
+  String target = String_getslice(text, 10, x2c_slice_bound(String_len(text) - 1), 1);
   return String_contains(target, _53) ? target : NULL;
 }
 
 void Path_copy_file(Path, Path);
 
 static void _place_header(Map headers, List searched, String directory, String target){
-  String source = String_join(NULL, cons(String_var(String_getslice(target, (-2147483647 - 1), String_len(target) - 2, 1)), cons(String_var(_63), NULL)));
+  String source = String_join(NULL, cons(String_var(String_getslice(target, (-2147483647 - 1), x2c_slice_bound(String_len(target) - 2), 1)), cons(String_var(_63), NULL)));
   {
     String dir;
     List _x2c_macro_object_13 = searched;
@@ -1937,7 +1937,7 @@ static void _add_option_dirs(Array directories, List args){
         flag = Var_as_string(_x2c_macro_cursor_output_32);
         {
           if(! String_startswith(arg, flag)) continue;
-          if(String_len(arg) > String_len(flag)) Array_push(directories, String_var(String_getslice(arg, String_len(flag), (-2147483647 - 1), 1)));
+          if(String_len(arg) > String_len(flag)) Array_push(directories, String_var(String_getslice(arg, x2c_slice_bound(String_len(flag)), (-2147483647 - 1), 1)));
           else if(List_truth(List_cdr(p))) Array_push(directories, List_cadr(p));
           break;
         }
@@ -2222,7 +2222,7 @@ static List _depfile_inputs(String depfile){
   long search = String_find(text, _214);
   if(search >= 0){
     String candidate;
-    List _x2c_macro_object_39 = translation_depfile_parse(String_getslice(text, search + 1, (-2147483647 - 1), 1));
+    List _x2c_macro_object_39 = translation_depfile_parse(String_getslice(text, x2c_slice_bound(search + 1), (-2147483647 - 1), 1));
     List _x2c_macro_cursor_39 = _x2c_macro_object_39;
     Var _x2c_macro_cursor_output_39;
     while(List_try_next(_x2c_macro_object_39, &(_x2c_macro_cursor_39), &(_x2c_macro_cursor_output_39))){

@@ -283,7 +283,7 @@ MachineProgram MachineProgram_alloc(void){
 }
 
 void MachineProgram_free(MachineProgram value){
-  Scope_free(value);
+  Scope_free((void *) value);
 }
 
 void MachineProgram_cleanup(MachineProgram value){

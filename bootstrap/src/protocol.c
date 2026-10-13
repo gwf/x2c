@@ -1326,8 +1326,8 @@ static String _representation_error(Type representation){
 String Compiler_reverse_converter_spelling(Compiler c, String base_name, String infix, String participant){
   if(! _init_guard_) _file_init_();
   int split = String_find(participant, _10);
-  String package = split > 0 &&(String_equal(c -> package, String_getslice(participant, (-2147483647 - 1), split, 1)) || Map_contains(c -> package_roots, String_var(String_getslice(participant, (-2147483647 - 1), split, 1)))) ? String_getslice(participant, (-2147483647 - 1), split, 1) : NULL;
-  String bare = String_truth(package) ? String_getslice(participant, split + 2, (-2147483647 - 1), 1) : participant;
+  String package = split > 0 &&(String_equal(c -> package, String_getslice(participant, (-2147483647 - 1), x2c_slice_bound(split), 1)) || Map_contains(c -> package_roots, String_var(String_getslice(participant, (-2147483647 - 1), x2c_slice_bound(split), 1)))) ? String_getslice(participant, (-2147483647 - 1), x2c_slice_bound(split), 1) : NULL;
+  String bare = String_truth(package) ? String_getslice(participant, x2c_slice_bound(split + 2), (-2147483647 - 1), 1) : participant;
   String binding =({
     Var _x2c_literal_part_8 = String_var(base_name);  Var _x2c_literal_part_9 = String_var(infix);  Var _x2c_literal_part_10 = String_var(String_lower(bare));  String_join(NULL, cons(_x2c_literal_part_8, cons(String_var(_7), cons(_x2c_literal_part_9, cons(_x2c_literal_part_10, NULL)))));
   }
@@ -1561,7 +1561,7 @@ static String _member_name(List identity, String participant){
     }
 
   }
-  if(String_truth(name)) return name;  String full_name = binding_identity_spelling(identity);  String prefix = String_join(NULL, cons(String_var(participant), cons(String_var(_7), NULL)));  return String_truth(full_name) && String_startswith(full_name, prefix) ? String_getslice(full_name, String_len(prefix), (-2147483647 - 1), 1) : NULL;
+  if(String_truth(name)) return name;  String full_name = binding_identity_spelling(identity);  String prefix = String_join(NULL, cons(String_var(participant), cons(String_var(_7), NULL)));  return String_truth(full_name) && String_startswith(full_name, prefix) ? String_getslice(full_name, x2c_slice_bound(String_len(prefix)), (-2147483647 - 1), 1) : NULL;
 }
 
 static String _native_member(Compiler c){

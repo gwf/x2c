@@ -662,11 +662,14 @@ static void _local_typedef(Sym s, Type type, List binding) {
     s.binding_facts, %(emitted $binding), s.c.fresh_name("local_typedef"));
 }
 
-/* A local object records its automatic storage and declared type. One that
-   shadows a declared `T_var` converter emits under a fresh spelling, so
-   generated boxing still reaches the converter. */
+/* A local object records its automatic storage and declared type, and
+   joins the locals of its spelling unless it is a template's own local,
+   which binds again where the template expands. One that shadows a
+   declared `T_var` converter emits under a fresh spelling, so generated
+   boxing still reaches the converter. */
 static void _local_object(Sym s, List key, List binding, Type type) {
   _mark_automatic(s, binding, type);
+  if (!s.c.macro_holes) s.join_locals(binding);
   Type global_type = NULL;
   s.resolve_global(key, global_type);
   if (_var_converter_owner(key, global_type) &&
@@ -676,9 +679,43 @@ static void _local_object(Sym s, List key, List binding, Type type) {
       s.c.fresh_name("var_converter_shadow"));
 }
 
+/** Records the program local `binding` among the locals of its spelling,
+    under the private spelling `Sym.unshadow_global` gave that spelling, if
+    any. */
+void Sym.join_locals(Sym s, List binding) {
+  String spelling = binding_identity_spelling(binding);
+  Var alias;
+  if (s.binding_facts.try_get(%(unshadowed $spelling), alias))
+    _unshadow_local(s, binding, alias);
+  s.put(
+    s.binding_facts, %(locals $spelling), cons(binding, _locals(s, spelling)));
+}
+
+static List _locals(Sym s, String spelling) {
+  Var stored;
+  return s.binding_facts.try_get(%(locals $spelling), stored) ? stored : NULL;
+}
+
 static void _mark_automatic(Sym s, List binding, Type type) {
   s.put(s.binding_facts, %(automatic $binding), 1);
   s.put(s.binding_facts, %(type $binding), type);
+}
+
+/** Emits every local object spelled `spelling` in this unit, declared
+    before or after, under one fresh spelling, so code that the transform
+    binds after their scopes closed reaches the file-scope declaration.
+    Locals of that spelling keep one spelling among themselves, as C wrote
+    them. */
+void Sym.unshadow_global(Sym s, String spelling) {
+  if (%(unshadowed $spelling) in s.binding_facts) return;
+  String alias = s.c.fresh_name("binding_shadow");
+  s.put(s.binding_facts, %(unshadowed $spelling), alias);
+  foreach (List local, _locals(s, spelling)) _unshadow_local(s, local, alias);
+}
+
+static void _unshadow_local(Sym s, List binding, String alias) {
+  if (!(%(emitted $binding) in s.binding_facts))
+    s.put(s.binding_facts, %(emitted $binding), alias);
 }
 
 /** Installs an existing binding with `ast`'s qualifier-preserving type. */

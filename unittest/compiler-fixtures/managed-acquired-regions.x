@@ -85,3 +85,33 @@ Array loop_keeps_cleanup(int count) {
   for (int i = 0; i < count; i++) a = [];
   return a;
 }
+
+Array and_keeps_cleanup(int flag) {
+  Array a = $auto([]);
+  flag && (a = [], 1);
+  return a;
+}
+
+Array or_keeps_cleanup(int flag) {
+  Array a = $auto([]);
+  flag || (a = [], 1);
+  return a;
+}
+
+Array choice_keeps_cleanup(int flag) {
+  Array a = $auto([]);
+  flag ? (a = []) : a;
+  return a;
+}
+
+Array argument_keeps_cleanup(int flag) {
+  Array a = $auto([]);
+  printf("%d\n", flag && (flag > 1 ? (a = [], 1) : 0));
+  return a;
+}
+
+Array first_operand_replaces(int flag) {
+  Array a = $auto([]);
+  (a = []).len() && flag;
+  return a;
+}

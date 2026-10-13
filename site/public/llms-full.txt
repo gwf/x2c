@@ -1473,6 +1473,20 @@ the block and must lead to a file under that file's companion directory,
 leads elsewhere, a member that is already being spliced, an unreadable member,
 a malformed block, or a second block is a driver error at the block.
 
+The block is spliced before C preprocessing, so a preprocessor condition does
+not choose members. x2c skips a block only inside a conditional arm that C
+never takes by x2c's own reading: `#if 0`, `#ifdef` or `#if defined` of a
+name that x2c output never defines, such as `__cplusplus`, and the `#else`
+arm of `#ifndef` of such a name. Every other arm counts. After
+`#define OFF 0`, a block under `#if OFF` still reads its members, and blocks
+in both arms of `#if 1` and `#else` are a second block. The spliced text,
+including each member's own directives, then reaches C as one unit in
+splice order.
+
+The entry's syntax mode applies to all spliced text. In a `.xp` entry every
+member is read with indentation layout, and in a `.x` entry with braces, so
+a member must use its entry's syntax.
+
 A member's text stands where the block stood, in the listed order. All members
 share the entry's translation unit. Function declarations are collected across
 that complete unit, so a function can call a later-defined function without an
@@ -1888,8 +1902,8 @@ is an error: its cleanup region would enclose the final statement, and C
 would lose the value. Either may stand in a block nested inside the
 statement expression. A `return`, `break`, `continue`, or `goto` that leaves
 a statement expression runs the cleanup of each region it leaves, as it does
-from any other statement. `sizeof` takes its own parentheses, so a statement
-expression operand needs a second pair: `sizeof(({ ...; }))`.
+from any other statement. A statement expression is an ordinary `sizeof`
+operand, so `sizeof({ ...; })` measures its value's type.
 
 ### Reference parameters
 
@@ -2987,8 +3001,8 @@ there inserts a value computed at the quotation. For a template Array,
 `%[${@{items}}]` splices a sequence computed while the quotation is built.
 It does not add runtime Array splicing. In a List, `@{expression}` retains
 runtime splicing and does not evaluate during template construction.
-Literal strings such as `"$ @"`, percent strings such as `%"\$ @"`, and
-quoted atom escapes such as `%(\$ \@)` preserve sigils as data.
+Literal strings such as `"$ @"`, percent strings such as `%"\$ @"` or
+`%"$$ @"`, and quoted atom escapes such as `%(\$ \@)` preserve sigils as data.
 After `case`,
 `${$name(...)}` is still a macro pattern. These holes exist only in
 quotations; in a named template's code, `${` still reports a missing macro
@@ -3013,7 +3027,9 @@ a String or Symbol as a literal. Each number, String, or Symbol item of an
 expression sequence also becomes its literal. A String is a String
 literal when the whole expression is the hole and `T` is `String`; elsewhere
 it is a C string literal. Inner nodes keep the placeholder type of unbound
-syntax, and free names stay names that bind where the code is bound. A
+syntax. A name that a file-scope declaration supplies where the quotation
+is written keeps that declaration, and other free names bind where the code
+is bound. A
 typed quotation may not declare a name that its own code spells or apply a
 template, and inside
 another quotation it is written as a hole, `${$!T{ ... }}`. The compiler
@@ -3094,9 +3110,11 @@ invocations. One with a nested pattern among its arguments, such as
 
 ### Hygiene and generated names
 
-A macro captures no bindings. An expansion means what the same code would
-mean if it were written where the expansion lands, except that the names its
-body writes are private to that expansion.
+A macro keeps the file-scope bindings of the place it is written. An
+expansion means what the same code would mean if it were written where the
+expansion lands, with two exceptions: the names its body writes are private
+to that expansion, and a name its body reads that a file-scope declaration
+supplies where the macro is written keeps that declaration.
 
 Arguments are parsed and typed where the invocation is written, and the
 names a caller writes in them also resolve where the expansion lands. A
@@ -3122,10 +3140,19 @@ lands. A local macro or an anonymous macro written inside a body shares the
 body's names the same way: its literal reference reaches a private
 declaration of the enclosing body.
 
-A name the body reads without declaring resolves where the expansion lands,
-like any name written there. A caller's declaration of that spelling
-supplies it, including a local. A name that nothing declares anywhere is left
-to C, as a native macro such as `errno` is.
+A name the body reads without declaring keeps the file-scope declaration
+that supplies it where the macro is written: a function, object, or
+enumerator of that file or of a header it includes, or a native name such as
+a C library function. The expansion reads that declaration with its type. A
+caller's local of the same spelling receives a separate generated C
+spelling, so the expansion still reaches the file-scope name, and so does
+code a rewrite rule's quotation returns into a function body. Any other name
+the body reads resolves where the expansion lands, like any name written
+there: a caller's declaration of that spelling supplies it, including a
+local, and a local macro reads the locals around it. A name that nothing
+declares anywhere is left to C, as a native macro such as `errno` is. To
+read a caller's binding of a name, take the name as a `Name` argument; that
+argument is the explicit request for lookup where the expansion lands.
 
 ```x2c
 macro Stmt $repeat(Name $i, Expr $count, Expr $value, Name $sum) {
@@ -3161,14 +3188,13 @@ from the body's literal `k`. In `$add_tens`, the caller's `k` arrives through
 `$target`; the loop variable comes from `$add_tens`'s own literal `k`, so the
 assignment reaches the caller's variable.
 
-To keep a file-scope declaration that a caller's local could otherwise
-supply, list it with `using` at the start of the braced body, or after the
-signature of an `Expression` macro:
+Here `$scaled` reads the file-scope `scale`, although `main` declares its
+own:
 
 ```x2c
 static int scale = 3;
 
-macro Expression $scaled(Expr $value) using scale => $value * scale;
+macro Expression $scaled(Expr $value) => $value * scale;
 
 int main(void) {
   int scale = 10;
@@ -3181,21 +3207,42 @@ int main(void) {
 6 10
 ```
 
-Each listed name is a function, object, or enumerator declared at file
-scope where the macro is written, or a native name such as a C library
-function that no x2c declaration supplies. A caller's local of the same
-spelling receives a separate generated C spelling, so the expansion still
-reaches the file-scope name. A `using` name resolves to that name in every
-unit that applies the macro, including through a `Macro` value. Type names
-are not listed; they resolve where the expansion lands.
+File scope is the whole file and does not depend on declaration order.
+A template therefore keeps a global that the file declares after the macro:
+
+```x2c
+macro Expression $read_later() => later + 1;
+
+int later = 3;
+
+int main(void) {
+  int later = 7;
+  printf("%d %d\n", $read_later(), later);
+  return 0;
+}
+```
+
+```text
+4 7
+```
+
+A `using` list at the start of the braced body, or after the signature of
+an `Expression` macro, such as `$scaled(Expr $value) using scale`, states
+such a binding explicitly. Each listed name is a function, object, or
+enumerator declared at file scope where the macro is written, or a native
+name such as a C library function that no x2c declaration supplies. A kept
+name, listed or not, resolves to that name in every unit that applies the
+macro, including through a `Macro` value. Type names are not kept; they
+resolve where the expansion lands.
 
 An anonymous macro keeps one kind of value from where it is written: a
 `Macro` value that its body applies. Templates compose by value, so a later
 application applies the same children.
 
-A `case` on a macro recognizes a free name by its spelling, since the code
-the macro builds binds that name where it lands, and a `using` name only by
-its file-scope declaration.
+A `case` on a macro recognizes a name the body keeps from a file-scope
+declaration, listed with `using` or not, only by that declaration, and any
+other free name by its spelling, since the code the macro builds binds that
+name where it lands.
 
 A `struct`, `union`, or `enum` tag that a body defines or declares is private
 to each expansion, like a typedef, and so are the enumerators it lists. Tags
@@ -4179,13 +4226,17 @@ insertion accepts `String`, `Symbol`, declared converters, `Var`, aliases of
 shipped component `src/component-interpolation.x` joins a `%""` literal's
 parts, a translator that `$rewrite(%(expr ("String") (segments *)))` registers
 on the literal's `segments` head; a rule a program registers there runs first.
+The `String.join` call the shipped rule writes is not program code, so a
+program's rule for `String.join` sees only the calls the program writes,
+including one inside a `$` insertion.
 
 The braces belong to the unquote and contain one complete x2c expression,
 including nested calls, indexing, casts, assignments, conditionals, comma
 expressions, and nested literals. In a collection, `$name(...)` instead inserts
 `$name` and then reads `(...)` as a nested symbolic `List`. In `%""`, the
 parentheses after `$name` are text. A runtime call in any quoted form is
-therefore `${name(...)}`.
+therefore `${name(...)}`. In `%""` and in a quoted `"..."` element, `$$` and
+`\$` each produce one literal `$`: `%"a$$"` is `a$`.
 
 Nested `(...)`, `[...]`, and `{...}` remain quoted `List`, `Array`, and `Map`
 data, and nested `"..."` selects the x2c `String` grammar with its interpolation
@@ -4771,8 +4822,10 @@ The optional typed families have different indexing rules:
   the checked read, and it does normalize a negative index.
 - A packed `Map` from `typed-map.x` adopts `protocol Var`, so its `getindex`,
   `setindex`, `updateindex`, and `postfixindex` members provide bracket reads,
-  writes, compound updates, and numeric postfix updates. A typed cons chain
-  from `typed-list.x` does not adopt `protocol Var`; use `car` and `nth_cdr`.
+  writes, compound updates, and numeric postfix updates.
+- A typed cons chain from `typed-list.x`, such as `ListInt`, is a `List`
+  typedef. Its bracket reads behave as `List` reads, including negative
+  indices, and it rejects indexed updates as `List` does.
 
 `Array`, `List`, and `String` support `value[start:stop:step]`. Bounds and step
 may be omitted. Negative bounds and reverse steps are normalized consistently.

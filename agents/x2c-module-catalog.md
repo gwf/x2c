@@ -628,10 +628,11 @@ Public functions:
 `Compiler.parse_basic_identifier`, `Compiler.parse_optional_identifier`,
 `Compiler.parse_function_definition`, `Compiler.parse_function_target`,
 `declared_return`, `Compiler.enter`, `Compiler.enclosing`,
-`Compiler.enter_function`, `Compiler.function_entry`, `Compiler.exit_function`,
-`Compiler.place_entry`, `Compiler.place_after`, `Compiler.close_placements`,
-`Compiler.leave_item`, `Compiler.finish_initializers`, `Compiler.bind_syntax`,
-`source_clause`, `Compiler.bind_source_statement`, `Compiler.bind_catch_arm`,
+`Compiler.lowering_body`, `Compiler.enter_function`, `Compiler.function_entry`,
+`Compiler.exit_function`, `Compiler.place_entry`, `Compiler.place_after`,
+`Compiler.close_placements`, `Compiler.leave_item`,
+`Compiler.finish_initializers`, `Compiler.bind_syntax`, `source_clause`,
+`Compiler.bind_source_statement`, `Compiler.bind_catch_arm`,
 `Compiler.bind_match_arm`, `Compiler.bind_callable_body`,
 `Compiler.finish_foreign_alias`
 
@@ -751,8 +752,8 @@ Public functions:
 `Sym.binding_is_local`, `Sym.binding_is_local_before`,
 `Compiler.semantic_binding_facts`, `Compiler.set_fact`, `Compiler.drop_fact`,
 `Sym.get`, `Sym.get_exact`, `Sym.lookup`, `Sym.reference`,
-`Sym.resolve_global`, `Sym.reference_global`, `Sym.declare`,
-`Sym.bind_identity`, `Compiler.aggregate_name`,
+`Sym.resolve_global`, `Sym.reference_global`, `Sym.declare`, `Sym.join_locals`,
+`Sym.unshadow_global`, `Sym.bind_identity`, `Compiler.aggregate_name`,
 `Compiler.record_declaration_visibility`, `Compiler.package_spelling`,
 `Compiler.register_package_alias`, `Compiler.register_package_member`,
 `Compiler.package_member_spelling`, `Compiler.imported_providers`,
@@ -943,7 +944,8 @@ Public functions:
 `Var.char`, `Var.uchar`, `Var.short`, `Var.ushort`, `Var.int`, `Var.uint`,
 `Var.unsigned`, `Var.long`, `Var.ulong`, `Var.long_long`, `Var.ulong_long`,
 `Var.long_double`, `Var.float`, `Var.double`, `x2c_initialize_protocols`,
-`x2c_initialize`, `x2c_normalize_index`, `x2c_normalize_slice`
+`x2c_initialize`, `x2c_normalize_index`, `x2c_slice_bound`,
+`x2c_normalize_slice`
 
 ### [lib/context.x](../lib/context.x)
 

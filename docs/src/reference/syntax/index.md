@@ -1,10 +1,12 @@
 # Syntax specifications
 
 x2c's syntax is specified here as a token grammar plus lexical transition
-rules. This first extraction describes the implementation at revision
-`48715bde0d16f1a22c5a19a00e5568080a92367c` on `dev`. It introduces no language
-change. The [language reference](../language.md) supplies the meaning and
-constraints of the forms.
+rules. It describes the current parser and introduces no language change.
+The first extraction matched revision `48715bde` on `dev`; later repairs
+update these pages with the parser. `tools/syntax-spec check` compares only
+the generated outputs with their data, not the data with the parser. The
+[language reference](../language.md) supplies the meaning and constraints of
+the forms.
 
 - [Source grammar](grammar.md): EBNF, precedence, contextual decisions, and
   macro extension contracts. The [EBNF file](x2c.ebnf) is the same grammar

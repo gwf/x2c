@@ -785,7 +785,7 @@ static List _imported_packages(String path){
     else if(String_equal(token -> text, _20)) depth --;
     else if(! depth && String_equal(token -> text, _21)){
       token = Tokenizer_next(tokens);
-      if(token -> type == 27051791223990) Array_push(names, String_var(String_getslice(token -> text, 1, - 1, 1)));
+      if(token -> type == 27051791223990) Array_push(names, String_var(String_getslice(token -> text, 1, x2c_slice_bound(- 1), 1)));
     }
 
   }

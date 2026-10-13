@@ -1884,7 +1884,9 @@ for i in 1 2 3; do
   script_jobs+=($!)
 done
 for job in "${script_jobs[@]}"; do wait "$job"; done
-for i in 1 2 3; do [[ $(cat "$SCRIPT/parallel-$i.stdout") == changed ]]; done
+for i in 1 2 3; do
+  [[ $(cat "$SCRIPT/parallel-$i.stdout") == changed ]] || exit 1
+done
 printf '%s\n' -v >"$SCRIPT/options.rsp"
 run_script "@$SCRIPT/options.rsp" "$SCRIPT/args.x" >/dev/null \
   2>"$SCRIPT/response.stderr"

@@ -1,4 +1,5 @@
 const assert = require("node:assert/strict");
+const { createHash } = require("node:crypto");
 const E = require("../web/engine.js");
 const d = {
   functions: [
@@ -37,10 +38,11 @@ for (const t of [0, 0.3, 1]) {
   assert.equal(m.authored, 6);
   assert.deepEqual(m.topLevel, [6]);
 }
-const snapshot = require("../data/graph.json");
+const snapshot = require(process.env.PARTITION_GRAPH || "../data/graph.json");
 const ref = require("../web/fixtures/compiler-responsibilities.json");
-if (ref.revision.startsWith(snapshot.revision)) {
-  const fi = snapshot.files.findIndex((f) => f.id === ref.file);
+const fi = snapshot.files.findIndex((f) => f.id === ref.file);
+const source = snapshot.files[fi]?.source ?? "";
+if (createHash("sha256").update(source).digest("hex") === ref.sha256) {
   const members = snapshot.functions.flatMap((f, v) =>
     f.f === fi && !f.k ? [v] : [],
   );
@@ -75,9 +77,11 @@ if (ref.revision.startsWith(snapshot.revision)) {
   );
 } else
   console.log(
-    "Reference comparison skipped: snapshot revision differs (" +
-      snapshot.revision +
-      ").",
+    "Reference comparison skipped: " +
+      ref.file +
+      " differs from the reference at " +
+      ref.revision.slice(0, 8) +
+      ".",
   );
 console.log(
   "Privacy fixtures passed: shared helper, transitive dependency, public boundary, top-level, cross-file scope, unattainable count.",

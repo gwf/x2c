@@ -658,7 +658,7 @@ static void _add_include_directories(Array directories, String listing){
 static void _add_include_directory(Array directories, String line){
   String directory = String_strip(line, " ");
   int note = String_find(directory, _129);
-  if(note >= 0) directory = String_getslice(directory, (-2147483647 - 1), note, 1);
+  if(note >= 0) directory = String_getslice(directory, (-2147483647 - 1), x2c_slice_bound(note), 1);
   Array_push(directories, String_var(directory));
   if(String_endswith(directory, _130)) Array_push(directories, String_var(Path_join(Path_dirname(directory), _131)));
 }

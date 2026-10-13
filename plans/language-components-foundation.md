@@ -1,11 +1,12 @@
 # Language component foundation
 
 > Status: active
-> Branch `codex/language-components-foundation`, started from dev
-> `7e946b86663f9f069fe14e284c41e2aed73c57e0`. Gary authorized publication to
-> `dev` on 2026-10-09 after Milestone 0, the three component cases, `try`,
-> and the driver work; this plan records what landed and owns the
-> extraction order that follows. `main` is untouched.
+> The foundation work is on `dev`; its working branch, started from dev
+> `7e946b86663f9f069fe14e284c41e2aed73c57e0`, is history. Gary authorized
+> publication to `dev` on 2026-10-09 after Milestone 0, the three component
+> cases, `try`, and the driver work. This plan records what landed and owns
+> the recorded decisions below; the rewrite-rule and template boundaries
+> remain open.
 
 ## Recorded decisions
 
@@ -17,12 +18,19 @@ the next work is limited to these existing language boundaries.
   `String.join` support call merely because interpolation uses that call.
   A developer-written `String.join` call remains program code. Definitions of
   the program's own meta functions remain program code and reach function rules.
-  Reconcile the historical self-meta discrepancy through the existing visibility
-  owner. Do not add origin authentication for canonical constructed Lists.
+  Do not add origin authentication for canonical constructed Lists. The
+  historical self-meta discrepancy is settled by
+  [repository review decision 7](repository-review-2026-10-12.md#decisions-recorded-2026-10-12):
+  a function rule rewrites the program's definitions, the copy the compiler
+  runs is compiled as written, and no code change follows.
 - Ordinary templates bind external names at the author's definition. A template
   referring to the author's `helper` keeps that binding when a caller has another
   `helper`. Caller-site lookup requires an explicit request; it is not the default.
   Preserve hygiene for introduced names.
+- Recorded 2026-10-13: "the author's definition" means x2c's
+  order-independent file scope, so a template keeps a global declared later
+  in the file. Evidence: fixture
+  `unittest/compiler-fixtures/macro-forward-name-later-global`.
 - A macro-constructed `with` form behaves like the same handwritten `with` form.
   Use the ordinary binding, placement, and lifecycle owners.
 
@@ -44,7 +52,8 @@ The delivered log below records the current foundation: component lowering
 for access, matching, literals, operators, lambdas, protocols, and Error forms,
 plus ordinary managed-initializer placement. Those delivered decisions
 supersede the initial recovery exclusions and milestone list preserved below.
-The remaining self-meta function-rule observation discrepancy is still open.
+Repository review decision 7 settled the self-meta function-rule observation
+discrepancy without a code change; `docs/src/guide/meta-functions.md` states it.
 The confirmed acquired-value cleanup repair is tracked in
 [review remediation](review-remediation-2026-10-11.md); the initial phrase
 "cleanup of the declared binding" does not override that requirement.

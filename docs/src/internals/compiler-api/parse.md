@@ -33,6 +33,7 @@ X2c declarations, parsed from source or constructed.
 | [`Compiler.finish_initializers`](#Compiler.finish_initializers) | Lowers block declarations whose declarators placed code after themselves, or that an after-initialization rewrite follows, to declarations followed by that code in source order, preserving their installed bindings and the enclosing lifetime. |
 | [`Compiler.function_entry`](#Compiler.function_entry) | Returns the code placed at the entry of the function row at `depth` since it was entered or last asked, in placement order, or NULL. |
 | [`Compiler.leave_item`](#Compiler.leave_item) | Leaves the block item `enter` began and returns the code placed after it, bound in its block, or NULL. |
+| [`Compiler.lowering_body`](#Compiler.lowering_body) | Reports whether the transform is lowering a function body, whose local scopes the symbol table no longer holds. |
 | [`Compiler.meta_form_is_declaration`](#Compiler.meta_form_is_declaration) | Reports whether the cursor begins a contextual top-level `meta` declaration: a function or an initialized file-static value. |
 | [`Compiler.package_alias_spelling`](#Compiler.package_alias_spelling) | Returns the folded package-member spelling at the current token, or NULL. |
 | [`Compiler.parse_basic_identifier`](#Compiler.parse_basic_identifier) | Consumes one `ident` token and returns its spelling as a one-item `List`. |
@@ -85,7 +86,7 @@ Source: `src/parse.x:2651`
 
 The source clause `kind`, which the binder parses when it reaches it.
 
-Source: `src/parse.x:3657`
+Source: `src/parse.x:3666`
 
 ### `Compiler`
 
@@ -97,7 +98,7 @@ Source: `src/parse.x:3657`
 Binds a callable's outer block in its active parameter scope. Ordinary
 constructed blocks open their own scope before using this operation.
 
-Source: `src/parse.x:3946`
+Source: `src/parse.x:3947`
 
 <a id="Compiler.bind_catch_arm"></a>
 #### Compiler.bind_catch_arm
@@ -110,7 +111,7 @@ Binder diagnostics use `start`. A source arm's body parses here, and a
 template's declares its binders where its expansion binds it. A parsed
 arm's body already begins with them, so it binds unchanged.
 
-Source: `src/parse.x:3793`
+Source: `src/parse.x:3802`
 
 <a id="Compiler.bind_match_arm"></a>
 #### Compiler.bind_match_arm
@@ -122,7 +123,7 @@ definite binders of `pattern` when the arm `binds`. Binder diagnostics
 use `start`. A source arm's body parses here with the typed captures
 `types` that its pattern recorded.
 
-Source: `src/parse.x:3902`
+Source: `src/parse.x:3903`
 
 <a id="Compiler.bind_parameter"></a>
 #### Compiler.bind_parameter
@@ -142,7 +143,7 @@ Source: `src/parse.x:2417`
 Binds the source `if`, `while`, `do`, `for`, `match`, or `try` at the
 cursor through the same binders as constructed syntax.
 
-Source: `src/parse.x:3675`
+Source: `src/parse.x:3684`
 
 <a id="Compiler.bind_syntax"></a>
 #### Compiler.bind_syntax
@@ -155,7 +156,7 @@ The input must evaluate to a nonempty AST `List` valid for the requested
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:3028`
+Source: `src/parse.x:3037`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local
@@ -186,7 +187,7 @@ Source: `src/parse.x:1172`
 Gives the placements made since `first` the `result` of the expansion
 that made them.
 
-Source: `src/parse.x:2842`
+Source: `src/parse.x:2851`
 
 <a id="Compiler.defines_main"></a>
 #### Compiler.defines_main
@@ -247,7 +248,7 @@ Enters the function definition `declaration`, whose body the
 transform lowers next, so a rule lowering that body places code at its
 entry. Returns the row's depth for `Compiler.leave_function`.
 
-Source: `src/parse.x:2781`
+Source: `src/parse.x:2790`
 
 <a id="Compiler.exit_function"></a>
 #### Compiler.exit_function
@@ -257,7 +258,7 @@ Source: `src/parse.x:2781`
 Leaves the function row at `depth` that `Compiler.enter_function`
 began.
 
-Source: `src/parse.x:2808`
+Source: `src/parse.x:2817`
 
 <a id="Compiler.finish_foreign_alias"></a>
 #### Compiler.finish_foreign_alias
@@ -269,7 +270,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:4091`
+Source: `src/parse.x:4092`
 
 <a id="Compiler.finish_initializers"></a>
 #### Compiler.finish_initializers
@@ -281,7 +282,7 @@ themselves, or that an after-initialization rewrite follows, to
 declarations followed by that code in source order, preserving their
 installed bindings and the enclosing lifetime.
 
-Source: `src/parse.x:2890`
+Source: `src/parse.x:2899`
 
 <a id="Compiler.function_entry"></a>
 #### Compiler.function_entry
@@ -294,7 +295,7 @@ code binds in a scope of its own with the function's result type; its
 caller lowers it while the row is still entered, so a placement that
 lowering makes lands at the entry too.
 
-Source: `src/parse.x:2795`
+Source: `src/parse.x:2804`
 
 <a id="Compiler.leave_item"></a>
 #### Compiler.leave_item
@@ -305,7 +306,17 @@ Leaves the block item `enter` began and returns the code placed after
 it, bound in its block, or NULL. A declarator in the item that placed
 code is incomplete unless its block declaration took that code.
 
-Source: `src/parse.x:2852`
+Source: `src/parse.x:2861`
+
+<a id="Compiler.lowering_body"></a>
+#### Compiler.lowering_body
+
+`int Compiler.lowering_body(Compiler c)`
+
+Reports whether the transform is lowering a function body, whose
+local scopes the symbol table no longer holds.
+
+Source: `src/parse.x:2780`
 
 <a id="Compiler.meta_form_is_declaration"></a>
 #### Compiler.meta_form_is_declaration
@@ -587,7 +598,7 @@ Records `code` to follow the innermost block item, or the initialized
 declarator whose initializer is being parsed directly in it. The
 expansion that placed it gives it its result when it finishes.
 
-Source: `src/parse.x:2829`
+Source: `src/parse.x:2838`
 
 <a id="Compiler.place_entry"></a>
 #### Compiler.place_entry
@@ -600,7 +611,7 @@ a lambda body is inside the definition that holds it; while lowering, a
 lambda body is the body of its own lifted function, and a finalizer the
 kernel wrote as a callback has no entry a program can place at.
 
-Source: `src/parse.x:2817`
+Source: `src/parse.x:2826`
 
 <a id="Compiler.protocol_form_starts"></a>
 #### Compiler.protocol_form_starts

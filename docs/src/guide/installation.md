@@ -59,7 +59,8 @@ An installed prefix and a source checkout share one layout, the x2c home:
 <home>/etc/              compile-time Lisp and macro sources
 <home>/packages/         installed packages, one directory each
 <home>/examples/         runnable examples (installed prefix)
-<home>/src/              compiler sources (checkout only)
+<home>/src/              language component sources (installed prefix);
+                         all compiler sources (checkout)
 ```
 
 The compiler finds its home by walking up from its own executable, then from

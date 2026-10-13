@@ -190,8 +190,8 @@ top-level references separately. It also reports unresolved and indirect calls.
 Zero static crossings does not establish source extractability.
 
 **Compare source-informed reference** loads the eight compiler responsibility
-groups from `web/fixtures/compiler-responsibilities.json`, only when the graph
-revision matches. It lists all 189 authored members and source-section evidence
+groups from `web/fixtures/compiler-responsibilities.json`, only when the
+snapshot's `src/compiler.x` matches the fixture's `sha256`. It lists all 189 authored members and source-section evidence
 and uses the same crossing metrics as automatic proposals. Top-level references
 are reported but the synthetic node is not assigned to the eight groups. This
 fixture does not guide the automatic algorithm or prescribe other files' counts.

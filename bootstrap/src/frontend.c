@@ -572,9 +572,9 @@ static String _script(Compiler c, String text, String path){
   int end = String_find(text, _14);
   ScriptUnit script = Scope_calloc(1, sizeof(struct ScriptUnit));
   script -> path = path;
-  script -> shebang = end < 0 ? text : String_getslice(text, (-2147483647 - 1), end, 1);
+  script -> shebang = end < 0 ? text : String_getslice(text, (-2147483647 - 1), x2c_slice_bound(end), 1);
   c -> unit_script = script;
-  return String_join(NULL, cons(String_var(_15), cons(String_var(end < 0 ? _16 : String_getslice(text, end, (-2147483647 - 1), 1)), NULL)));
+  return String_join(NULL, cons(String_var(_15), cons(String_var(end < 0 ? _16 : String_getslice(text, x2c_slice_bound(end), (-2147483647 - 1), 1)), NULL)));
 }
 
 static int _source_lines(String text){

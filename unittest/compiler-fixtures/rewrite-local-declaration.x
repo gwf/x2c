@@ -1,6 +1,7 @@
 /* A transform-time replacement that declares a name with unbound syntax
    declares it in its own function: a quotation another rule lowers in
-   another function still reads the file-scope name. */
+   another function still reads the file-scope name, and so does one in the
+   same function, with the file-scope name's type. */
 
 #include "x2c.x"
 #include "rewrite.x"
@@ -35,7 +36,12 @@ static int first(void) {
 
 static int second(void) => lookup(0);
 
+static int third(void) {
+  int (leaked, other) = %(1 2);
+  return leaked + other + lookup(0);
+}
+
 int main(void) {
-  printf("%d %d\n", first(), second());
+  printf("%d %d %d\n", first(), second(), third());
   return 0;
 }

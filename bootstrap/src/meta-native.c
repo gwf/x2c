@@ -1095,7 +1095,7 @@ static Var _meta_stub(Func function, const FuncArg * argv){
   Array values = _stub_arguments(function, argv);
   String context = String_new((const char *) Func_context(function));
   int split = String_find(context, _7);
-  String name = String_getslice(context, (-2147483647 - 1), split, 1), provider = String_getslice(context, split + 1, (-2147483647 - 1), 1);
+  String name = String_getslice(context, (-2147483647 - 1), x2c_slice_bound(split), 1), provider = String_getslice(context, x2c_slice_bound(split + 1), (-2147483647 - 1), 1);
   Compiler c = Compiler_expanding();
   if(! c) MetaContext_reject(String_join(NULL, cons(String_var(name), cons(String_var(_8), NULL))), NULL);
   Token site = MetaContext_current() -> site;

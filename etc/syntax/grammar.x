@@ -648,8 +648,11 @@ List syntax_grammar(void) => %(grammar
           (choice
             (seq
               (token "(")
-              (choice (ref type-operand) (ref expression))
-              (token ")"))
+              (ref type-operand)
+              (token ")")
+              (ref initializer)
+              (repeat 0 (ref postfix-part)))
+            (seq (token "(") (ref type-operand) (token ")"))
             (ref type-operand)
             (ref unary)))
         (ref postfix)))

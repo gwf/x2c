@@ -291,7 +291,7 @@ Regex Regex_alloc(void){
 void Scope_free(void *);
 
 void Regex_free(Regex value){
-  Scope_free(value);
+  Scope_free((void *) value);
 }
 
 void Regex_cleanup(Regex value){
@@ -739,7 +739,7 @@ static String _name(Parser * p){
     (* p).pos = start;
     _fail(&((* p)), _6);
   }
-  String name = String_getslice((* p).regex -> pattern, start, (* p).pos, 1);
+  String name = String_getslice((* p).regex -> pattern, x2c_slice_bound(start), x2c_slice_bound((* p).pos), 1);
   (* p).pos ++;
   return name;
 }
@@ -873,7 +873,7 @@ Var List_getindex(List, int);
 static RegexCapture _capture(Matcher * m, String subject, int i){
   int start =(* m).starts[i], end =(* m).ends[i], matched = start >= 0;
   String name = i ? Var_as_string(List_getindex((* m).regex -> capture_names, i - 1)) : NULL;
-  String text = matched ? String_getslice(subject, start, end, 1) : NULL;
+  String text = matched ? String_getslice(subject, x2c_slice_bound(start), x2c_slice_bound(end), 1) : NULL;
   return cons(int_var(i), cons(String_var(name), cons(int_var(matched), cons(String_var(text), cons(int_var(start), cons(int_var(end), NULL))))));
 }
 
@@ -1066,7 +1066,7 @@ static String _rebuild(Regex r, String subject, int all, Func fn, String replace
     {
       int cursor = 0;
       for(RegexMatch found = _search(r, subject, 0);  List_truth(found);  found = all ? _next(r, subject, found) : NULL){
-        String_write_str(String_getslice(subject, cursor, RegexCapture_start(_whole(found)), 1), out);
+        String_write_str(String_getslice(subject, x2c_slice_bound(cursor), x2c_slice_bound(RegexCapture_start(_whole(found))), 1), out);
         if(fn) String_write_str(Var_str(({
           Func _x2c_macro_function_0 = fn;  FuncArg _x2c_macro_storage_0[1];  if(List_truth(x2c_func_reference_type(_x2c_macro_function_0, 1, 0))) _x2c_macro_storage_0[0] = FuncArg_reference(&(found), _17);  else _x2c_macro_storage_0[0] = FuncArg_value(List_var(found));  Func_apply(_x2c_macro_function_0, 1, _x2c_macro_storage_0);
         }
@@ -1074,7 +1074,7 @@ static String _rebuild(Regex r, String subject, int all, Func fn, String replace
         else _expand(out, found, replacement);
         cursor = RegexCapture_end(_whole(found));
       }
-      String_write_str(String_getslice(subject, cursor, (-2147483647 - 1), 1), out);
+      String_write_str(String_getslice(subject, x2c_slice_bound(cursor), (-2147483647 - 1), 1), out);
       {
         String _x2c_return_value_5 = Buffer_str(out);
         {
@@ -1123,7 +1123,7 @@ static int _reference(Buffer out, RegexMatch found, String text, int i){
     Buffer_write_char(out, '$');
     return i;
   }
-  String_write_str(RegexMatch_getindex(found, String_var(String_getslice(text, i + 2, close, 1))), out);
+  String_write_str(RegexMatch_getindex(found, String_var(String_getslice(text, x2c_slice_bound(i + 2), x2c_slice_bound(close), 1))), out);
   return close;
 }
 
@@ -1242,10 +1242,10 @@ List Regex_split(Regex regex, String subject){
     {
       int cursor = 0;
       for(RegexMatch found = _search(regex, subject, 0);  List_truth(found);  found = _next(regex, subject, found)){
-        Array_push(parts, String_var(String_getslice(subject, cursor, RegexCapture_start(_whole(found)), 1)));
+        Array_push(parts, String_var(String_getslice(subject, x2c_slice_bound(cursor), x2c_slice_bound(RegexCapture_start(_whole(found))), 1)));
         cursor = RegexCapture_end(_whole(found));
       }
-      Array_push(parts, String_var(String_getslice(subject, cursor, (-2147483647 - 1), 1)));
+      Array_push(parts, String_var(String_getslice(subject, x2c_slice_bound(cursor), (-2147483647 - 1), 1)));
       {
         List _x2c_return_value_8 = Array_list(parts);
         {
