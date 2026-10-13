@@ -105,10 +105,8 @@ int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   printf("%d\n", run(3));
-  int * _x2c_lambda_cell_0 = Scope_memdup((const void *) &(int){
-    100
-  }
-  , sizeof(int));
+  int * _x2c_lambda_cell_0 = Scope_malloc(sizeof(int));
+  * _x2c_lambda_cell_0 = 100;
   Func plain = _x2c_func_handle_0;
   Func shared =({
     int * _x2c_lambda_capture_value_0 = &(* _x2c_lambda_cell_0);  struct _x2c_lambda_context_0 _x2c_lambda_context_1 ={
