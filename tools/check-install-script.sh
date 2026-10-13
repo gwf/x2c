@@ -24,7 +24,8 @@ export X2C_VERSION_URL="file://$WORK/releases/x2c-version.txt"
 sh "$ROOT/site/public/install.sh" >"$WORK/install.stdout"
 grep -q "installed x2c $version" "$WORK/install.stdout"
 [[ -x "$WORK/prefix/bin/x2c" ]] || exit 1
-[[ ! -d "$WORK/prefix/src" ]] || exit 1
+# The home carries prelude component sources, not the compiler.
+[[ ! -e "$WORK/prefix/src/main.x" ]] || exit 1
 
 # The installed compiler stands alone: no checkout on PATH.
 export PATH="$WORK/prefix/bin:/usr/bin:/bin"
