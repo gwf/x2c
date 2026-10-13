@@ -145,10 +145,12 @@ produced, prints a `function` row, and each `typedef` or `class` prints a
 
 ```text
 (function (name "Point_add") (display "Point.add") (line 11)
+ (source "point.x" 11)
  (span 193 242) (static 0) (origin source) (doc " Adds. ")
  (text "int Point.add(Point p, int k)")
  (type ((func (("Point") (int))) int)) (params ("p" "k")))
 (type (name "Point") (kind struct) (line 6) (span 68 113) (private 0)
+ (source "point.x" 6)
  (doc " A point. ") (text "typedef struct Point { int x; int y; } Point"))
 ```
 
@@ -156,7 +158,11 @@ produced, prints a `function` row, and each `typedef` or `class` prints a
   `Point.add`.
 - `line` is the one-based line of a function's declarator or a type's
   statement. A decorated function reports its declarator, and a function a
-  macro produced reports the invocation.
+  macro produced reports the invocation. This line is in the expanded unit.
+- `source` holds the authored path and one-based line, resolving module
+  members and preprocessor line markers. It is empty for a definition
+  without an authored source location. Documentation uses this location;
+  `line` and `span` retain their positions in the expanded unit.
 - `span` holds the byte offsets that start and end the top-level form that
   produced the definition, including decorators and a `meta` keyword. It is
   empty for a definition the compiler made itself, such as a protocol

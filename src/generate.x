@@ -1622,12 +1622,12 @@ void Compiler.dump_definitions(Compiler c, List ast) {
   while (first.type == <space> || first.type == <preproc>) first++;
   if (first.type == <comment>) printf("%s\n", %(module ${first.text}).repr());
   foreach (List row, c.definition_rows(ast)) match (row) {
-    case %(function *): _print_function(tokens, row);
+    case %(function *): _print_function(c, tokens, row);
     case %(typedef *): _print_type(c, tokens, row);
   }
 }
 
-static void _print_function(Token tokens, List row) {
+static void _print_function(Compiler c, Token tokens, List row) {
   match (row)
     case %(function ?name ?display ?type ?names ?line ?doc ?is_static
            ?origin ?declarator ?span): {
@@ -1639,6 +1639,8 @@ static void _print_function(Token tokens, List row) {
       printf(
         "%s\n",
         %(function (name $name) (display $display) (line $line)
+          ${_definition_source(
+            c, tokens, declarator ? declarator : span, line.integer())}
           ${location.cadr()} (static $is_static) (origin $origin)
           (doc $doc) (text $text) (type $type) (params $names)).repr());
     }
@@ -1663,9 +1665,24 @@ static void _print_type(Compiler c, Token tokens, List row) {
         }
       printf(
         "%s\n",
-        %(type (name $name) (kind $kind) @location @privacy (doc $doc)
+        %(type (name $name) (kind $kind) @location
+          ${_definition_source(c, tokens, span, 0)} @privacy (doc $doc)
           (text $text)).repr());
     }
+}
+
+/* Resolve an authored range or invocation line through source markers. */
+static List _definition_source(
+  Compiler c, Token tokens, List range, int line) {
+  Token first = tokens;
+  if (range) first += range.car().integer();
+  else {
+    if (line <= 1) return %(source);
+    while (first.type != <eof> && first.line < line) first++;
+  }
+  line = first.line;
+  String path = c.token_source(first, line);
+  return %(source $path $line);
 }
 
 /* Source text between two tokens with comments removed and each run of

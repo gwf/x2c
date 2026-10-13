@@ -4,8 +4,9 @@
     `gen-api-reference` and `gen-module-catalog` read the rows
     `x2c translate --dump-definitions` prints instead of scanning x2c
     source. `Unit.load` translates the units a batch at a time and keeps each
-    row as a `Map` from field name to value, with `span` as a `List` of its
-    two offsets. `Prose` normalizes doc comments as the book prints them.
+    row as a `Map` from field name to value. `span` holds two offsets and
+    `source` holds the authored path and line. `Prose` normalizes doc
+    comments as the book prints them.
 */
 #include "scripting.x"
 #include <unistd.h>
@@ -23,7 +24,8 @@ static Map _fields(List row):
   Map fields = {}
   foreach List field in row.cdr():
     Symbol key = field.car()
-    fields[key.str()] = key == <span> ? field.cdr() : field.cadr()
+    fields[key.str()] = key == <span> || key == <source>
+                         ? field.cdr() : field.cadr()
   return fields
 
 static Unit _unit(String path):
@@ -83,7 +85,8 @@ Array Unit.load(Path x2c, Path root, List paths):
   return units
 
 /** Returns `unit`'s public definitions as the reference names them, in line
-    order: `(name signature line doc)`, where a written definition keeps its
+    order: `(name signature line doc source)`, where `source` is `(path line)`
+    in the authored file and a written definition keeps its
     declarator and a Unit macro's product is spelled from its type. A
     definition without authored source is omitted. `doc` is normalized, or
     NULL.
@@ -94,13 +97,15 @@ List Unit.callables(Unit unit):
     if row["static"].integer(): continue
     String display = row["display"], doc = row["doc"]
     int line = row["line"].integer()
+    List source = row["source"]
+    if !source: source = %(${unit["path"]} $line)
     if row["origin"] == <alias>: continue
     if row["origin"] == <source>:
-      found.push(%($display ${row["text"]} $line ${Prose.normalize(doc)}))
+      found.push(%($display ${row["text"]} $line ${Prose.normalize(doc)} $source))
       continue
     if line == 1 && !doc: continue
     found.push(%($display ${Unit.signature(display, row["type"], row["params"])}
-                 $line ${Prose.normalize(doc)}))
+                 $line ${Prose.normalize(doc)} $source))
   return found.sort_by(%!(List item) => item.caddr()).list_free()
 
 // Type rendering follows the canonical Type lists of unit interfaces.

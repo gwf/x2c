@@ -130,9 +130,10 @@ static String _api_doc(String name, int line, String doc, String tier):
   return doc
 
 /* One documented callable: `name`, `receiver`, `method`, `signature`,
-   `line`, `doc`, `summary`, and `tier` (NULL for the compiler API). */
+   `path`, `line`, `doc`, `summary`, and `tier` (NULL for the compiler API). */
 static Map _item(List definition, String tier, String label):
-  (String name, String signature, int line, String doc) = definition
+  (String name, String signature, int line, String doc, List source) = definition
+  line = source.cadr()
   Map item = {}
   List parts = name.partition(".")
   item["name"] = name
@@ -140,6 +141,7 @@ static Map _item(List definition, String tier, String label):
   item["method"] = parts.cadr() ? parts.caddr() : name
   item["signature"] = signature
   item["line"] = line
+  item["path"] = source.car()
   item["tier"] = tier
   item["doc"] = tier ? _api_doc(name, line, doc, tier)
                      : _public_doc(label, name, line, doc)
@@ -197,6 +199,9 @@ static List _public_surface(Unit unit, int compiler):
     item["kind"] = row["kind"].str()
     item["signature"] = row["text"]
     item["line"] = line
+    List source = row["source"]
+    item["path"] = source ? source.car() : path
+    if source: item["line"] = source.cadr()
     item["doc"] = _public_doc(label, name, line, doc)
     item["summary"] = _first_sentence(doc)
     declarations.push(item)
@@ -354,7 +359,7 @@ static void _heading(Array lines, String name, int level):
   lines.push(%"${"#".repeat(level)} $name")
 
 static String _see_link(Map module, Map item, String target):
-  String where = %"${module["path"]}:${item["line"]}: ${item["name"]}"
+  String where = %"${item["path"]}:${item["line"]}: ${item["name"]}"
   if target.endswith(".md") || target.contains("/"):
     if !pages_dir.join(target).exists():
       _fatal(%"$where has 'See: $target', which does not resolve to a page")
@@ -388,7 +393,7 @@ static void _entry(Array lines, Map module, Map item, int level):
   _heading(lines, item["name"], level)
   _add(lines, %("" ${%"`${item["signature"]}`"} ""))
   _doc(lines, module, item)
-  _add(lines, %(${%"Source: `${module["path"]}:${item["line"]}`"} ""))
+  _add(lines, %(${%"Source: `${item["path"]}:${item["line"]}`"} ""))
 
 static List _by_name(Array items) =>
   items.list().sort_by(%!(Map item) => item["name"])

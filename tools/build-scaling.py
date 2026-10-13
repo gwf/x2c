@@ -38,8 +38,8 @@ def extract(work: Path, commit: str) -> Path:
 def source_lines(tree: Path) -> dict[str, int]:
   counts = {"authored_source_lines": 0, "generated_source_lines": 0}
   for directory in ("src", "lib"):
-    for path in (tree / directory).iterdir():
-      if path.suffix not in SOURCE_SUFFIXES:
+    for path in (tree / directory).rglob("*"):
+      if not path.is_file() or path.suffix not in SOURCE_SUFFIXES:
         continue
       kind = (
         "generated_source_lines"
