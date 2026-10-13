@@ -663,9 +663,10 @@ static void _local_typedef(Sym s, Type type, List binding) {
 }
 
 /* A local object records its automatic storage and declared type, and
-   joins the locals of its spelling. One that shadows a declared `T_var`
-   converter emits under a fresh spelling, so generated boxing still reaches
-   the converter. */
+   joins the locals of its spelling unless it is a template's own local,
+   which binds again where the template expands. One that shadows a
+   declared `T_var` converter emits under a fresh spelling, so generated
+   boxing still reaches the converter. */
 static void _local_object(Sym s, List key, List binding, Type type) {
   _mark_automatic(s, binding, type);
   if (!s.c.macro_holes) _join_locals(s, binding);
@@ -678,7 +679,8 @@ static void _local_object(Sym s, List key, List binding, Type type) {
       s.c.fresh_name("var_converter_shadow"));
 }
 
-/* A template's own locals bind again where it expands. */
+/* Records `binding` among the locals of its spelling, under the private
+   spelling `Sym.unshadow_global` gave that spelling, if any. */
 static void _join_locals(Sym s, List binding) {
   String spelling = binding_identity_spelling(binding);
   Var alias;
