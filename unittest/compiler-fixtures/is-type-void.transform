@@ -159,7 +159,7 @@
                                      (at 43 
                                       (call (expr (macro-expr) 
                                              (ident 
-                                              (binding-name "x2c_var_equal"))) 
+                                              (binding-global "x2c_var_equal"))) 
                                        (args (expr ("Var") 
                                               (literal ("Var") "void")) 
                                         (expr ("Var") (literal ("Var") "void")))))))) 
@@ -167,7 +167,7 @@
                                    (at 44 
                                     (call (expr (macro-expr) 
                                            (ident 
-                                            (binding-name "x2c_var_identical"))) 
+                                            (binding-global "x2c_var_identical"))) 
                                      (args (expr ("Var") 
                                             (literal ("Var") "void")) 
                                       (expr ("Var") (literal ("Var") "void")))))))) 
@@ -180,7 +180,7 @@
                                             (op ! (expr (macro-expr) 
                                                    (call (expr (macro-expr) 
                                                           (ident 
-                                                           (binding-name 
+                                                           (binding-global 
                                                             "x2c_var_equal"))) 
                                                     (args (expr ("Var") 
                                                            (literal ("Var") 
@@ -196,7 +196,7 @@
                                           (op ! (expr (macro-expr) 
                                                  (call (expr (macro-expr) 
                                                         (ident 
-                                                         (binding-name 
+                                                         (binding-global 
                                                           "x2c_var_identical"))) 
                                                   (args (expr ("Var") 
                                                          (literal ("Var") "void")) 
@@ -208,7 +208,7 @@
                                (op ! (expr (macro-expr) 
                                       (call (expr (macro-expr) 
                                              (ident 
-                                              (binding-name "x2c_var_equal"))) 
+                                              (binding-global "x2c_var_equal"))) 
                                        (args (expr ("Var") 
                                               (literal ("Var") "void")) 
                                         (expr ("Var") 
@@ -220,7 +220,8 @@
                             (expr (int) 
                              (op ! (expr (macro-expr) 
                                     (call (expr (macro-expr) 
-                                           (ident (binding-name "x2c_var_equal"))) 
+                                           (ident 
+                                            (binding-global "x2c_var_equal"))) 
                                      (args (expr ("Var") 
                                             (call (expr ((func ((int))) "Var") 
                                                    (ident (binding 12 "int_var"))) 
@@ -233,7 +234,7 @@
                            (op ! (expr (macro-expr) 
                                   (call (expr (macro-expr) 
                                          (ident 
-                                          (binding-name "x2c_var_identical"))) 
+                                          (binding-global "x2c_var_identical"))) 
                                    (args (expr ("Var") (literal ("Var") "void")) 
                                     (expr ("Var") 
                                      (call (expr ((func ((int))) "Var") 
@@ -244,7 +245,8 @@
                         (expr (int) 
                          (op ! (expr (macro-expr) 
                                 (call (expr (macro-expr) 
-                                       (ident (binding-name "x2c_var_identical"))) 
+                                       (ident 
+                                        (binding-global "x2c_var_identical"))) 
                                  (args (expr ("Var") 
                                         (call (expr ((func ((int))) "Var") 
                                                (ident (binding 12 "int_var"))) 
@@ -256,7 +258,7 @@
                              (expr (int) 
                               (at 51 
                                (call (expr (macro-expr) 
-                                      (ident (binding-name "x2c_var_equal"))) 
+                                      (ident (binding-global "x2c_var_equal"))) 
                                 (args (expr ("Var") (literal ("Var") "void")) 
                                  (expr ("Var") 
                                   (call (expr ((func ((int))) "Var") 
@@ -268,7 +270,7 @@
                            (expr (int) 
                             (at 52 
                              (call (expr (macro-expr) 
-                                    (ident (binding-name "x2c_var_equal"))) 
+                                    (ident (binding-global "x2c_var_equal"))) 
                               (args (expr ("Var") 
                                      (call (expr ((func ((int))) "Var") 
                                             (ident (binding 12 "int_var"))) 
@@ -280,7 +282,7 @@
                          (expr (int) 
                           (at 53 
                            (call (expr (macro-expr) 
-                                  (ident (binding-name "x2c_var_identical"))) 
+                                  (ident (binding-global "x2c_var_identical"))) 
                             (args (expr ("Var") (literal ("Var") "void")) 
                              (expr ("Var") 
                               (call (expr ((func ((int))) "Var") 
@@ -292,7 +294,7 @@
                        (expr (int) 
                         (at 54 
                          (call (expr (macro-expr) 
-                                (ident (binding-name "x2c_var_identical"))) 
+                                (ident (binding-global "x2c_var_identical"))) 
                           (args (expr ("Var") 
                                  (call (expr ((func ((int))) "Var") 
                                         (ident (binding 12 "int_var"))) 
@@ -300,7 +302,7 @@
                            (expr ("Var") (literal ("Var") "void")))))))))))) 
             (expr (int) 
              (at 55 
-              (call (expr (macro-expr) (ident (binding-name "x2c_var_equal"))) 
+              (call (expr (macro-expr) (ident (binding-global "x2c_var_equal"))) 
                (args (expr ("Var") 
                       (parens (expr ("Var") (literal ("Var") "void")))) 
                 (expr ("Var") (literal ("Var") "void")))))))) 

@@ -1646,7 +1646,9 @@ a String or Symbol as a literal. Each number, String, or Symbol item of an
 expression sequence also becomes its literal. A String is a String
 literal when the whole expression is the hole and `T` is `String`; elsewhere
 it is a C string literal. Inner nodes keep the placeholder type of unbound
-syntax, and free names stay names that bind where the code is bound. A
+syntax. A name that a file-scope declaration supplies where the quotation
+is written keeps that declaration, and other free names bind where the code
+is bound. A
 typed quotation may not declare a name that its own code spells or apply a
 template, and inside
 another quotation it is written as a hole, `${$!T{ ... }}`. The compiler
@@ -1727,9 +1729,11 @@ invocations. One with a nested pattern among its arguments, such as
 
 ### Hygiene and generated names
 
-A macro captures no bindings. An expansion means what the same code would
-mean if it were written where the expansion lands, except that the names its
-body writes are private to that expansion.
+A macro keeps the file-scope bindings of the place it is written. An
+expansion means what the same code would mean if it were written where the
+expansion lands, with two exceptions: the names its body writes are private
+to that expansion, and a name its body reads that a file-scope declaration
+supplies where the macro is written keeps that declaration.
 
 Arguments are parsed and typed where the invocation is written, and the
 names a caller writes in them also resolve where the expansion lands. A
@@ -1755,10 +1759,19 @@ lands. A local macro or an anonymous macro written inside a body shares the
 body's names the same way: its literal reference reaches a private
 declaration of the enclosing body.
 
-A name the body reads without declaring resolves where the expansion lands,
-like any name written there. A caller's declaration of that spelling
-supplies it, including a local. A name that nothing declares anywhere is left
-to C, as a native macro such as `errno` is.
+A name the body reads without declaring keeps the file-scope declaration
+that supplies it where the macro is written: a function, object, or
+enumerator of that file or of a header it includes, or a native name such as
+a C library function. The expansion reads that declaration with its type. A
+caller's local of the same spelling receives a separate generated C
+spelling, so the expansion still reaches the file-scope name, and so does
+code a rewrite rule's quotation returns into a function body. Any other name
+the body reads resolves where the expansion lands, like any name written
+there: a caller's declaration of that spelling supplies it, including a
+local, and a local macro reads the locals around it. A name that nothing
+declares anywhere is left to C, as a native macro such as `errno` is. To
+read a caller's binding of a name, take the name as a `Name` argument; that
+argument is the explicit request for lookup where the expansion lands.
 
 ```x2c
 macro Stmt $repeat(Name $i, Expr $count, Expr $value, Name $sum) {
@@ -1794,14 +1807,13 @@ from the body's literal `k`. In `$add_tens`, the caller's `k` arrives through
 `$target`; the loop variable comes from `$add_tens`'s own literal `k`, so the
 assignment reaches the caller's variable.
 
-To keep a file-scope declaration that a caller's local could otherwise
-supply, list it with `using` at the start of the braced body, or after the
-signature of an `Expression` macro:
+Here `$scaled` reads the file-scope `scale`, although `main` declares its
+own:
 
 ```x2c
 static int scale = 3;
 
-macro Expression $scaled(Expr $value) using scale => $value * scale;
+macro Expression $scaled(Expr $value) => $value * scale;
 
 int main(void) {
   int scale = 10;
@@ -1814,21 +1826,23 @@ int main(void) {
 6 10
 ```
 
-Each listed name is a function, object, or enumerator declared at file
-scope where the macro is written, or a native name such as a C library
-function that no x2c declaration supplies. A caller's local of the same
-spelling receives a separate generated C spelling, so the expansion still
-reaches the file-scope name. A `using` name resolves to that name in every
-unit that applies the macro, including through a `Macro` value. Type names
-are not listed; they resolve where the expansion lands.
+A `using` list at the start of the braced body, or after the signature of
+an `Expression` macro, such as `$scaled(Expr $value) using scale`, states
+such a binding explicitly. Each listed name is a function, object, or
+enumerator declared at file scope where the macro is written, or a native
+name such as a C library function that no x2c declaration supplies. A kept
+name, listed or not, resolves to that name in every unit that applies the
+macro, including through a `Macro` value. Type names are not kept; they
+resolve where the expansion lands.
 
 An anonymous macro keeps one kind of value from where it is written: a
 `Macro` value that its body applies. Templates compose by value, so a later
 application applies the same children.
 
-A `case` on a macro recognizes a free name by its spelling, since the code
-the macro builds binds that name where it lands, and a `using` name only by
-its file-scope declaration.
+A `case` on a macro recognizes a name the body keeps from a file-scope
+declaration, listed with `using` or not, only by that declaration, and any
+other free name by its spelling, since the code the macro builds binds that
+name where it lands.
 
 A `struct`, `union`, or `enum` tag that a body defines or declares is private
 to each expansion, like a typedef, and so are the enumerators it lists. Tags

@@ -100,7 +100,7 @@
      (op = (bind (binding 18 "value_eq") ()) 
       (expr (int) 
        (at 85 
-        (call (expr (macro-expr) (ident (binding-name "x2c_var_equal"))) 
+        (call (expr (macro-expr) (ident (binding-global "x2c_var_equal"))) 
          (args (expr ("Var") (ident (binding 14 "first"))) 
           (expr ("Var") (ident (binding 16 "equal_value"))))))))))) 
   (at 88 
@@ -111,7 +111,8 @@
        (at 87 
         (expr (int) 
          (op ! (expr (macro-expr) 
-                (call (expr (macro-expr) (ident (binding-name "x2c_var_equal"))) 
+                (call (expr (macro-expr) 
+                       (ident (binding-global "x2c_var_equal"))) 
                  (args (expr ("Var") (ident (binding 14 "first"))) 
                   (expr ("Var") (ident (binding 17 "adjacent")))))))))))))) 
   (at 90 
@@ -120,7 +121,7 @@
      (op = (bind (binding 20 "identity_eq") ()) 
       (expr (int) 
        (at 89 
-        (call (expr (macro-expr) (ident (binding-name "x2c_var_identical"))) 
+        (call (expr (macro-expr) (ident (binding-global "x2c_var_identical"))) 
          (args (expr ("Var") (ident (binding 14 "first"))) 
           (expr ("Var") (ident (binding 16 "equal_value"))))))))))) 
   (at 92 
@@ -132,7 +133,7 @@
         (expr (int) 
          (op ! (expr (macro-expr) 
                 (call (expr (macro-expr) 
-                       (ident (binding-name "x2c_var_identical"))) 
+                       (ident (binding-global "x2c_var_identical"))) 
                  (args (expr ("Var") (ident (binding 14 "first"))) 
                   (expr ("Var") (ident (binding 16 "equal_value")))))))))))))) 
   (at 94 
@@ -141,7 +142,7 @@
      (op = (bind (binding 22 "self_identity") ()) 
       (expr (int) 
        (at 93 
-        (call (expr (macro-expr) (ident (binding-name "x2c_var_identical"))) 
+        (call (expr (macro-expr) (ident (binding-global "x2c_var_identical"))) 
          (args (expr ("Var") (ident (binding 14 "first"))) 
           (expr ("Var") (ident (binding 14 "first"))))))))))) 
   (at 96 
@@ -150,7 +151,7 @@
      (op = (bind (binding 23 "mixed_eq_left") ()) 
       (expr (int) 
        (at 95 
-        (call (expr (macro-expr) (ident (binding-name "x2c_var_equal"))) 
+        (call (expr (macro-expr) (ident (binding-global "x2c_var_equal"))) 
          (args (expr ("Var") (ident (binding 14 "first"))) 
           (expr ("Var") 
            (call (expr ((func ((long))) "Var") (ident (binding 15 "long_var"))) 
@@ -161,7 +162,7 @@
      (op = (bind (binding 24 "mixed_eq_right") ()) 
       (expr (int) 
        (at 97 
-        (call (expr (macro-expr) (ident (binding-name "x2c_var_equal"))) 
+        (call (expr (macro-expr) (ident (binding-global "x2c_var_equal"))) 
          (args (expr ("Var") 
                 (call (expr ((func ((long))) "Var") 
                        (ident (binding 15 "long_var"))) 
@@ -173,7 +174,7 @@
      (op = (bind (binding 25 "mixed_identity") ()) 
       (expr (int) 
        (at 99 
-        (call (expr (macro-expr) (ident (binding-name "x2c_var_identical"))) 
+        (call (expr (macro-expr) (ident (binding-global "x2c_var_identical"))) 
          (args (expr ("Var") (ident (binding 14 "first"))) 
           (expr ("Var") 
            (call (expr ((func ((long))) "Var") (ident (binding 15 "long_var"))) 
@@ -187,7 +188,7 @@
         (expr (int) 
          (op ! (expr (macro-expr) 
                 (call (expr (macro-expr) 
-                       (ident (binding-name "x2c_var_identical"))) 
+                       (ident (binding-global "x2c_var_identical"))) 
                  (args (expr ("Var") 
                         (call (expr ((func ((long))) "Var") 
                                (ident (binding 15 "long_var"))) 
@@ -330,7 +331,7 @@
      (op = (bind (binding 46 "object_equal") ()) 
       (expr (int) 
        (at 120 
-        (call (expr (macro-expr) (ident (binding-name "x2c_var_equal"))) 
+        (call (expr (macro-expr) (ident (binding-global "x2c_var_equal"))) 
          (args (expr ("Var") (ident (binding 43 "array_value"))) 
           (expr ("Var") (ident (binding 45 "copy_value"))))))))))) 
   (at 123 
@@ -339,7 +340,7 @@
      (op = (bind (binding 47 "object_same") ()) 
       (expr (int) 
        (at 122 
-        (call (expr (macro-expr) (ident (binding-name "x2c_var_identical"))) 
+        (call (expr (macro-expr) (ident (binding-global "x2c_var_identical"))) 
          (args (expr ("Var") (ident (binding 43 "array_value"))) 
           (expr ("Var") (ident (binding 45 "copy_value"))))))))))) 
   (at 125 
@@ -348,7 +349,7 @@
      (op = (bind (binding 48 "object_mixed_same") ()) 
       (expr (int) 
        (at 124 
-        (call (expr (macro-expr) (ident (binding-name "x2c_var_identical"))) 
+        (call (expr (macro-expr) (ident (binding-global "x2c_var_identical"))) 
          (args (expr ("Var") (ident (binding 43 "array_value"))) 
           (expr ("Var") 
            (call (expr ((func (("Array"))) "Var") 
@@ -384,7 +385,7 @@
      (op = (bind (binding 51 "marked_equal") ()) 
       (expr (int) 
        (at 130 
-        (call (expr (macro-expr) (ident (binding-name "x2c_var_equal"))) 
+        (call (expr (macro-expr) (ident (binding-global "x2c_var_equal"))) 
          (args (expr ("Var") 
                 (call (expr ((func (("Var"))) "Var") 
                        (ident (binding 3 "mark_left"))) 

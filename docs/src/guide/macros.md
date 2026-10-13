@@ -309,11 +309,12 @@ The helper returns a type into the declaration's type slot. The same explicit
 call form also supplies expressions and generated names in their own slots.
 
 Each invocation receives a compiler-private binding for `temporary`, so
-generated names cannot collide with caller source. A macro captures no
-bindings: a name its body reads without declaring resolves where the
-expansion lands, as do the names a caller writes in its arguments. A
-body that must reach a file-scope declaration that a caller's local could
-hide lists it with `using name;`, as the
+generated names cannot collide with caller source. A name the body reads
+without declaring keeps the file-scope declaration that supplies it where
+the macro is written, even where a caller's local has the same spelling.
+Other free names, and the names a caller writes in its arguments, resolve
+where the expansion lands. A macro that needs a caller's binding takes the
+name as a `Name` argument, as the
 [reference](../reference/language.md#hygiene-and-generated-names) shows.
 
 Use a leading body directive only when compile-time Lisp or a nested macro
