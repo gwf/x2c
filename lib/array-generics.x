@@ -30,12 +30,12 @@ $(defun array.words (name)
 
 $(defun array.helper (type operation)
   (let* ((family (str (car type)))
-         (stem (if (String.startswith family "Array")
+         (stem (if (not (eq? (String.startswith family "Array") 0))
                    (substring family 5 (string-length family)) family))
          (words (array.words stem)))
     (x2c.ident (string-append "_"
       (if (equal? words "") ""
-        (string-append (if (String.startswith words "_")
+        (string-append (if (not (eq? (String.startswith words "_") 0))
                           (substring words 1 (string-length words)) words) "_"))
       operation))))
 

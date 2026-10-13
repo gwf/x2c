@@ -20,12 +20,12 @@ $(defun map.words (name)
 
 $(defun map.helper (type operation)
   (let* ((family (str (car type)))
-         (stem (if (String.startswith family "Map")
+         (stem (if (not (eq? (String.startswith family "Map") 0))
                    (substring family 3 (string-length family)) family))
          (words (map.words stem)))
     (x2c.ident (string-append "_"
       (if (equal? words "") ""
-        (string-append (if (String.startswith words "_")
+        (string-append (if (not (eq? (String.startswith words "_") 0))
                           (substring words 1 (string-length words)) words) "_"))
       operation))))
 
