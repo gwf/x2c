@@ -89,6 +89,12 @@ const Responsibilities = (() => {
     );
     const labels = new Map(manifest.responsibilities.map((r) => [r.id, r]));
     const operation = (v) => manifest.operations[key(data, v)];
+    const roleComplete = (id) =>
+      labels.has(id) &&
+      ["name", "description", "evidence"].every(
+        (k) =>
+          typeof labels.get(id)[k] === "string" && labels.get(id)[k].trim(),
+      );
     const complete = (v) => {
       const o = operation(v);
       return (
@@ -96,12 +102,7 @@ const Responsibilities = (() => {
         ["operation", "state", "phase", "section", "evidence"].every(
           (k) => typeof o[k] === "string" && o[k].trim(),
         ) &&
-        labels.has(o.responsibility) &&
-        ["name", "description", "evidence"].every(
-          (k) =>
-            typeof labels.get(o.responsibility)[k] === "string" &&
-            labels.get(o.responsibility)[k].trim(),
-        )
+        roleComplete(o.responsibility)
       );
     };
     const path = (a, b) => {
@@ -168,9 +169,10 @@ const Responsibilities = (() => {
           c.length !== local.length ||
           publicOps.some((v) => !complete(v)) ||
           !roles.length ||
+          roles.some((id) => !roleComplete(id)) ||
           (roles.length > 1 &&
             (resolution?.kind !== "module" || !resolution.reason?.trim())) ||
-          (helperOnly && !resolution?.reason);
+          (helperOnly && !resolution?.reason?.trim());
         return {
           id,
           members: local,

@@ -126,3 +126,9 @@ R.merge(
   [ac.id],
 );
 assert.equal(attached.resolutions[ac.id].responsibility, "c");
+const unreasoned = JSON.parse(JSON.stringify(restored));
+unreasoned.resolutions[conflict.id] = { kind: "module" };
+assert(!R.analyze(D, unreasoned).canApply);
+attached.coverage = "Fixture contains only this registered callback.";
+attached.responsibilities[0].description = "";
+assert(!R.analyze(D, attached).canApply);
