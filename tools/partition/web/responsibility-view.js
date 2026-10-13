@@ -25,6 +25,9 @@ function responsibilityDialog(html, wire) {
   $("source").showModal();
 }
 function renderResponsibilities() {
+  graphWorker?.terminate();
+  graphResize?.disconnect();
+  ++graphGeneration;
   const m = responsibilityManifest(),
     a = Responsibilities.analyze(D, m, S.ties),
     labels = new Map(m.responsibilities.map((r) => [r.id, r]));
