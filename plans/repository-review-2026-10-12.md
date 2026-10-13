@@ -501,7 +501,8 @@ components.
   climb: stage-1 live 3.68 s on Oct 7 and 3.88 s now. The next step, not
   taken here, is to find what each unit now does once at startup, likely
   the replay of the twelve prelude components.
-- Batch 9 (2026-10-12): the carrier `(place WHERE CODE)` row is deleted,
+- Batch 9, published to dev as `918a6af5` (2026-10-12): the carrier
+  `(place WHERE CODE)` row is deleted,
   completing decision 9; `x2c_place` with `x2c_binding_fresh` is the one
   way a rule places code. `lambda_cells` names each cell with
   `x2c_binding_fresh` at its first use, in body order, and returns the
@@ -517,6 +518,28 @@ components.
   `collect` differ) and for every fixture but the process id
   `meta-job-lifetime` records. `make verify` and `make commands-check`
   passed.
+- Batch 10 (2026-10-12): the unboxer decision below is carried out as
+  recommended. The explicit readers `.array()`, `.block()`, `.buffer()`,
+  `.bytes()`, `.file()`, `.as_iter()`, `.list()`, and `.map()` raise
+  `<no-convert>` for another tag, as `.string()` does
+  (`$var.tag.exact` in lib/varconvert.x). Each has a NULL-returning
+  `_payload` reader in lib/common.x, such as `Var.list_payload`, and an
+  implicit crossing such as `List l = v;` reads through it, as do the
+  `Var_list` reads the compiler writes for match, foreach, and
+  destructuring. This took two bootstrap rounds: the payload readers and
+  their emission first, then the raising methods. The conversion warning no
+  longer calls `.list()` and its relatives unnecessary at a destination of
+  their type, since the two now differ. Callers that relied on a
+  wrong-tag NULL read the payload (src/macros.x, src/parse.x); the
+  typed list views such as `.listchar()` keep their documented nil for
+  another tag by reading the payload, so they do not raise yet, which is
+  a follow-up. Fixtures `explicit-converter-warning` and
+  `meta-core-operations` read an empty List where they relied on the old
+  NULL; 17 expectation files follow the reader names. Book: values.md,
+  from-c.md, language.md. Translating expressions.x, parse.x, macros.x,
+  and collect.x took 42.4 G instructions on `918a6af5` and 42.6 G after
+  (three alternating runs), because the explicit readers are no longer
+  inline. `make verify` and `make commands-check` passed.
 - Not done: converging the lambda component's `(place ...)` carrier rows on
   `x2c_place` (decision 9). Both forms reach `Compiler.place`; the carrier
   form exists because the placed code names bindings the driver introduces
