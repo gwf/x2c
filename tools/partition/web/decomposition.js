@@ -45,16 +45,27 @@ function showDecomposition(
   wireSourceButtons();
   $("source").showModal();
 }
+async function sha256(text) {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(text),
+  );
+  return [...new Uint8Array(digest)]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
 async function showReference(g) {
   const r = await (
     await fetch("fixtures/compiler-responsibilities.json")
   ).json();
+  const file = D.files.find((f) => f.id === r.file);
   if (
-    !r.revision.startsWith(D.revision) ||
-    !g.members.some((v) => D.files[D.functions[v].f].id === r.file)
+    !file ||
+    (await sha256(file.source)) !== r.sha256 ||
+    !g.members.some((v) => D.files[D.functions[v].f] === file)
   ) {
     toast(
-      `Reference requires ${r.file} at ${r.revision.slice(0, 8)}; current snapshot is ${D.revision}.`,
+      `Reference requires ${r.file} as of ${r.revision.slice(0, 8)}; this snapshot's copy differs.`,
     );
     return;
   }
