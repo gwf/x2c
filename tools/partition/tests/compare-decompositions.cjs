@@ -1,71 +1,63 @@
-// Optional snapshot-bound comparison; no source writes or compiler probes.
-const E = require("../web/engine.js");
+// Validate reviewed responsibility manifests against their source snapshot.
+const fs = require("node:fs"),
+  path = require("node:path"),
+  assert = require("node:assert/strict");
+global.Engine = require("../web/engine.js");
+const R = require("../web/responsibility-model.js");
 const D = require(process.env.PARTITION_GRAPH || "../data/graph.json");
-const reference = require("../web/fixtures/compiler-responsibilities.json");
-console.log("Snapshot:", D.revision);
-for (const file of ["src/compiler.x", "src/macros.x", "src/collect.x"]) {
-  const fi = D.files.findIndex((f) => f.id === file),
-    all = D.functions.flatMap((f, v) => (f.f === fi ? [v] : [])),
-    authored = all.filter((v) => !D.functions[v].k),
-    ties = E.privacyTies(D);
-  const components = E.atoms(authored, ties);
-  console.log(
-    file,
-    "authored",
-    authored.length,
-    "top-level",
-    all.length - authored.length,
-    "components",
-    components.length,
-    "largest",
-    Math.max(...components.map((c) => c.length)),
+for (const file of ["compiler", "macros", "collect"]) {
+  const m = JSON.parse(
+    fs.readFileSync(
+      path.join(__dirname, "../web/responsibilities", file + ".manifest.json"),
+    ),
   );
-  for (const [mode, t, constraints] of [
-    ["ordinary", 0, []],
-    ["ordinary", 0.3, []],
-    ["privacy", 0, ties],
-    ["privacy", 0.3, ties],
-  ]) {
-    const p = E.partition(D, authored, 8, t, constraints),
-      m = E.decomposition(D, p);
-    console.log(
-      mode,
-      t,
-      JSON.stringify({
-        sizes: p.map((c) => c.length),
-        pairs: m.pairs,
-        calls: m.calls,
-        staticTargets: m.privateTargets,
-      }),
-    );
-  }
-  if (file === reference.file && reference.revision.startsWith(D.revision)) {
-    const ids = new Map(authored.map((v) => [D.functions[v].e, v]));
-    const p = reference.groups.map((g) => g.functions.map((f) => ids.get(f.e)));
-    if (p.flat().some((v) => v === undefined))
-      throw Error("Reference identities differ");
-    const m = E.decomposition(D, p);
-    console.log(
-      "semantic reference",
-      JSON.stringify({
-        sizes: p.map((c) => c.length),
-        pairs: m.pairs,
-        calls: m.calls,
-        staticTargets: m.privateTargets,
-      }),
-    );
-    const owner = new Map(
-      p.flatMap((c, i) => c.map((v) => [v, reference.groups[i].name])),
-    );
-    for (const [i, c] of E.partition(D, authored, 8, 0.3, ties).entries()) {
-      const counts = {};
-      for (const v of c) counts[owner.get(v)] = (counts[owner.get(v)] || 0) + 1;
-      console.log("automatic group", i + 1, counts);
+  const a = R.analyze(D, m);
+  assert(a.valid);
+  assert.equal(a.unreviewed.length, 0);
+  assert.equal(a.metrics.privateEdges.length, 0);
+  assert(a.unresolvedConstraints.length > 0);
+  assert.equal(a.canApply, false);
+  const expected = D.functions.flatMap((f, v) =>
+    D.files[f.f].id === "src/" + file + ".x" ? [v] : [],
+  );
+  assert.deepEqual(
+    a.units.flatMap((u) => u.members).sort((a, b) => a - b),
+    expected,
+  );
+  for (const c of a.components)
+    for (const conflict of c.conflicts) {
+      assert(conflict.path.length);
+      assert.equal(conflict.path[0].from, conflict.a);
+      assert.equal(conflict.path.at(-1).to, conflict.b);
     }
+  for (const r of m.references) {
+    assert(
+      a.components.some((c) =>
+        [r.from, r.to].every((k) => c.members.some((v) => R.key(D, v) === k)),
+      ),
+    );
   }
-  const m = E.decomposition(D, [all]);
+  if (file !== "compiler")
+    assert(a.units.some((u) => u.moduleMembers.length >= 10));
   console.log(
-    "top-level references",
-    m.topEdges.map(([a, b, w]) => [D.functions[a].n, D.functions[b].n, w]),
+    `${file}: ${Object.keys(m.operations).length} described operations, ${m.responsibilities.length} responsibilities, ${a.components.length} components, ${a.units.length} proposed containers; ${a.unresolvedConstraints.length} unresolved declaration constraints. All functions assigned once.`,
   );
 }
+const reference = require("../web/fixtures/compiler-responsibilities.json");
+if (!reference.revision.startsWith(D.revision))
+  throw Error("Reference requires its original snapshot.");
+const ids = new Map(
+  D.functions.flatMap((f, v) =>
+    D.files[f.f].id === reference.file ? [[f.e, v]] : [],
+  ),
+);
+const parts = reference.groups.map((g) => g.functions.map((f) => ids.get(f.e)));
+assert.equal(new Set(parts.flat()).size, 189);
+const metrics = Engine.decomposition(D, parts);
+assert.deepEqual(
+  [metrics.pairs, metrics.calls, metrics.privateTargets],
+  [20, 21, 0],
+);
+console.log(
+  "Compiler eight-group reference reproduced independently; it does not generate assignments.",
+);

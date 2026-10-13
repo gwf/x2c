@@ -1,8 +1,5 @@
 let D,
   anchorMetrics,
-  privacyComponents,
-  preservePrivacy = true,
-  balanceEnabled = false,
   S,
   base,
   preview = null,
@@ -12,8 +9,6 @@ let D,
   scope = null,
   history = [],
   future = [],
-  balance = 38,
-  kval = 4,
   serial = 0,
   view = "groups",
   previewGroup = null,
@@ -97,7 +92,7 @@ function enter(id) {
   if (!g) return;
   preview = null;
   previewGroup = null;
-  view = "groups";
+  view = "responsibilities";
   if (
     scope &&
     !(
@@ -111,6 +106,7 @@ function enter(id) {
   picked.clear();
   fn = null;
   render();
+  $("workspace").scrollTop = 0;
 }
 function project() {
   scopeStack = [];
@@ -134,7 +130,7 @@ function render(skipInspector = false) {
   $("undo").disabled = !history.length;
   $("redo").disabled = !future.length;
   $("heading").innerHTML =
-    `<div class="eyebrow">${scope ? "PARTITION WORKSPACE" : "GLOBAL CALL GRAPH"}</div><h1>${esc(scope ? scope.name : "Every file is a starting group.")}</h1><p style="margin-bottom:0">${scope ? "Split, combine, or move functions. The rest of the project stays connected." : "Choose a group to explore its structure. Select several groups to combine them."}</p>`;
+    `<div class="eyebrow">${scope ? "PARTITION WORKSPACE" : "GLOBAL CALL GRAPH"}</div><h1>${esc(scope ? scope.name : "Every file is a starting group.")}</h1><p style="margin-bottom:0">${scope ? (view === "responsibilities" ? "Describe public operations and reconcile their private dependencies." : "Split, combine, or move functions. The rest of the project stays connected.") : "Choose a group to explore its structure. Select several groups to combine them."}</p>`;
   let internal = 0,
     scopeCut = 0;
   const map = Engine.membership(gs, D.functions.length);
@@ -143,6 +139,7 @@ function render(skipInspector = false) {
       internal += w;
       if (map[a] !== map[b]) scopeCut += w;
     }
+  $("metrics").hidden = !!scope && view === "responsibilities";
   $("metrics").innerHTML =
     metric("Groups in " + (scope ? "view" : "project"), scoped.length) +
     metric("Global crossing call sites", fmt(m.cut), m.cut - base.cut) +
@@ -154,7 +151,7 @@ function render(skipInspector = false) {
       ? metric("Crossing within this view", fmt(scopeCut))
       : metric("Functions", fmt(D.functions.length)));
   $("toolbar").innerHTML =
-    `${scope ? `<button id="back">\u2190 ${previewGroup ? "Group arrangement" : scopeStack.length ? "Parent group" : "Project"}</button>` : ""}<button id="split" ${selected.size !== 1 || preview ? "disabled" : ""}>Preview split</button><button id="merge" ${selected.size < 2 || preview ? "disabled" : ""}>Merge ${selected.size > 1 ? selected.size + " groups" : "groups"}</button>${preview ? '<span class="previewbadge">Tentative split</span>' : ""}${scope ? `<button id="suggest-moves" ${preview ? "disabled" : ""}>Suggest moves</button><button id="localize-functions" ${preview ? "disabled" : ""}>Localize functions</button><button id="view-groups">Group arrangement</button><button id="view-graph">Functions</button><button id="view-list">Function list</button>` : ""}<small>${scope ? "Open groups or switch to Functions to move members" : "Lines show aggregated calls \u00b7 hover to trace connections"}</small>`;
+    `${scope ? `<button id="back">\u2190 ${previewGroup ? "Group arrangement" : scopeStack.length ? "Parent group" : "Project"}</button>` : ""}<button id="split" ${scope ? "hidden" : ""} ${selected.size !== 1 || preview ? "disabled" : ""}>Build responsibilities</button><button id="merge" ${view === "responsibilities" && scope ? "hidden" : ""} ${selected.size < 2 || preview ? "disabled" : ""}>Merge ${selected.size > 1 ? selected.size + " groups" : "groups"}</button>${preview ? '<span class="previewbadge">Tentative split</span>' : ""}${scope ? `<button id="view-responsibilities" ${preview ? "disabled" : ""}>Responsibilities</button><button id="view-groups">Group arrangement</button><button id="view-graph">Functions</button><button id="view-list">Function list</button>` : ""}<small>${scope ? "Open groups or switch to Functions to move members" : "Lines show aggregated calls \u00b7 hover to trace connections"}</small>`;
   $("back")?.addEventListener("click", () => {
     if (previewGroup) {
       previewGroup = null;
@@ -173,22 +170,19 @@ function render(skipInspector = false) {
   });
   $("split").onclick = startPreview;
   $("merge").onclick = merge;
-  for (const mode of ["groups", "graph", "list"])
+  for (const mode of ["responsibilities", "groups", "graph", "list"])
     $("view-" + mode)?.addEventListener("click", () => {
       view = mode;
       previewGroup = null;
       render();
     });
-  $("suggest-moves")?.addEventListener("click", () => renderMoveSuggestions());
-  $("localize-functions")?.addEventListener("click", () =>
-    renderMoveSuggestions("localize"),
-  );
   renderNav();
   if (scope) {
     const shown = previewGroup
       ? scoped.filter((g) => g.id === previewGroup)
       : scoped;
-    if (view === "groups" && shown.length > 1) renderMap(shown);
+    if (view === "responsibilities") renderResponsibilities();
+    else if (view === "groups" && shown.length > 1) renderMap(shown);
     else if (view === "list") renderBoard(shown, map);
     else renderGraph(shown, map);
   } else renderMap(gs);
@@ -387,71 +381,15 @@ function renderBoard(gs, map) {
   });
 }
 function startPreview() {
-  view = "groups";
-  previewGroup = null;
-  const g = group([...selected][0]);
-  if (!g || g.members.length < 2) {
-    toast("This group has fewer than two functions.");
-    return;
+  if (!scope) {
+    const g = group([...selected][0]);
+    if (!g) return;
+    scope = { name: g.name, members: g.members.slice() };
   }
-  if (!scope) scope = { name: g.name, members: g.members.slice() };
+  preview = null;
   fn = null;
-  picked.clear();
-  preview = { target: g.id };
-  updatePreview();
-}
-function splitTies() {
-  return preservePrivacy ? [...S.ties, ...privacyComponents] : S.ties;
-}
-function updatePreview(skipInspector = false) {
-  previewGroup = null;
-  fn = null;
-  const g = group(preview.target),
-    count = Math.max(
-      1,
-      Math.min(50, kval, Engine.atoms(g.members, splitTies()).length),
-    ),
-    parts = Engine.partition(
-      D,
-      g.members,
-      count,
-      balanceEnabled ? balance / 100 : 0,
-      splitTies(),
-    );
-  const requested = kval;
-  preview = {
-    target: g.id,
-    requested,
-    maximum: Engine.atoms(g.members, splitTies()).length,
-    parts,
-    groups: S.groups
-      .filter((x) => x.id !== g.id)
-      .concat(
-        parts.map((members, i) => ({
-          id: "preview-" + i,
-          name: g.name.replace(/\.x$/, "") + "." + (i + 1) + ".x",
-          members,
-        })),
-      ),
-  };
-  render(skipInspector);
-}
-function applyPreview() {
-  previewGroup = null;
-  view = "groups";
-  const p = preview;
-  change(`Accepted ${p.parts.length} groups`, () => {
-    const g = group(p.target);
-    S.groups = S.groups
-      .filter((x) => x.id !== g.id)
-      .concat(
-        p.parts.map((members, i) => ({
-          id: "part-" + Date.now() + "-" + ++serial,
-          name: g.name.replace(/\.x$/, "") + "." + (i + 1) + ".x",
-          members,
-        })),
-      );
-  });
+  view = "responsibilities";
+  render();
 }
 function merge() {
   const gs = S.groups.filter((g) => selected.has(g.id));
@@ -527,101 +465,16 @@ function moveImpactMarkup(effect) {
 }
 function renderMoveFeedback(members, effect) {
   $("inspector").innerHTML =
-    `<div class="paneltag">MOVE RESULT</div><h2>Moved ${members.length} function${members.length === 1 ? "" : "s"}</h2>${moveImpactMarkup(effect)}<h3>Remaining outside callers</h3>${effect.remaining.map(({ v, callers }) => `<p><strong>${esc(D.functions[v].n)}</strong>: ${callers.length}${callers.length ? `<br>${callers.map((a) => esc(D.functions[a].n) + " (" + esc(S.groups.find((g) => g.members.includes(a)).name) + ")").join("<br>")}` : ""}</p>`).join("")}<button id="review-more-moves" class="wide">Localize functions</button><p class="note">Undo restores the previous plan.</p>`;
-  $("review-more-moves").onclick = () => renderMoveSuggestions("localize");
-}
-function renderMoveSuggestions(mode = "cut") {
-  if (preview || !scope) return;
-  const proposals = Engine.suggestMoves(
-    D,
-    S.groups,
-    S.ties,
-    new Set(scope.members),
-    mode,
-  );
-  $("inspector").innerHTML =
-    `<div class="paneltag">${mode === "localize" ? "LOCALIZE FUNCTIONS" : "LOCAL MOVE SUGGESTIONS"}</div><h2>${proposals.length} candidates</h2><p>Moves out of this view into connected groups. ${mode === "localize" ? "Ranked by net private-visibility opportunities, then cut cost. Includes unchanged or higher cuts when visibility improves." : "Ranked by fewer crossing call sites."} Nothing changes until you apply a move.</p><div class="hint note">A cheaper cut can put an API beside its consumers and away from its helper. Review the functions and private boundaries. Keep-together sets are always preserved.</div><p class="note">Tries each function or keep-together set, alone and with its strongest connected neighbor set. Initializers and moves that empty a group are excluded.</p>${
-      proposals
-        .map((p, i) => {
-          const from = group(p.from),
-            to = group(p.to);
-          return `<div class="rule"></div><h3>${esc(from.name)} \u2192 ${esc(to.name)}</h3><p>Group sizes: ${from.members.length} / ${to.members.length} \u2192 ${from.members.length - p.members.length} / ${to.members.length + p.members.length}</p>${moveImpactMarkup(p)}<details><summary>${p.members.length} functions to move</summary><p>${p.members.map((v) => esc(D.functions[v].n)).join("<br>")}</p>${p.added.length ? `<p>New private boundaries: ${p.added.map((v) => esc(D.functions[v].n)).join(", ")}</p>` : ""}</details><button class="wide" data-apply-move="${i}">Apply this move</button>`;
-        })
-        .join("") ||
-      `<p>No ${mode === "localize" ? "visibility-improving" : "cut-reducing"} moves found in this neighborhood. This does not prove the partition is optimal.</p>`
-    }<button id="leave-suggestions" class="quiet wide">Back to group inspector</button>`;
-  $("leave-suggestions").onclick = () =>
-    renderInspector(Engine.metrics(D, visible()), Engine.metrics(D, S.groups));
-  $("inspector")
-    .querySelectorAll("[data-apply-move]")
-    .forEach(
-      (e) =>
-        (e.onclick = () => {
-          const p = proposals[+e.dataset.applyMove],
-            moved = new Set(p.members);
-          change(
-            `Moved ${p.members.length} functions; ${p.delta} crossing call sites`,
-            () => {
-              S.groups.forEach(
-                (g) => (g.members = g.members.filter((v) => !moved.has(v))),
-              );
-              group(p.to).members.push(...p.members);
-              scope.members = [
-                ...new Set([...scope.members, ...group(p.to).members]),
-              ];
-            },
-          );
-          renderMoveFeedback(p.members, p);
-        }),
-    );
-}
-function stepper(id, label, value, min, max) {
-  return `<div class="control"><label id="${id}-label">${label}</label><div class="spread" role="group" aria-labelledby="${id}-label"><button id="${id}-less" aria-label="Decrease ${label.toLowerCase()}" ${value <= min ? "disabled" : ""}>\u2190</button><output id="${id}" aria-live="polite">${value}</output><button id="${id}-more" aria-label="Increase ${label.toLowerCase()}" ${value >= max ? "disabled" : ""}>\u2192</button></div></div>`;
+    `<div class="paneltag">MOVE RESULT</div><h2>Moved ${members.length} function${members.length === 1 ? "" : "s"}</h2>${moveImpactMarkup(effect)}<h3>Remaining outside callers</h3>${effect.remaining.map(({ v, callers }) => `<p><strong>${esc(D.functions[v].n)}</strong>: ${callers.length}${callers.length ? `<br>${callers.map((a) => esc(D.functions[a].n) + " (" + esc(S.groups.find((g) => g.members.includes(a)).name) + ")").join("<br>")}` : ""}</p>`).join("")}<p class="note">Undo restores the previous plan.</p>`;
 }
 function renderInspector(m, current) {
-  if (preview && fn === null) {
-    const target = group(preview.target),
-      sizes = preview.parts.map((p) => p.length),
-      delta = m.cut - current.cut,
-      decomposition = Engine.decomposition(D, preview.parts);
+  if (preview?.responsibility && fn === null) {
+    renderResponsibilityPreview();
+    return;
+  }
+  if (scope && view === "responsibilities") {
     $("inspector").innerHTML =
-      `<div class="paneltag">SPLIT PREVIEW</div><h2>${esc(target.name)}</h2><p>Explore a tentative split. Accept it when the boundaries make sense.</p>${privacyControls()}${stepper("cluster-count", "Requested groups", kval, 1, 50)}${preview.requested > preview.maximum ? `<p class="hint">Requested ${preview.requested}; only ${preview.maximum} indivisible components are available. Showing ${sizes.length} groups without splitting a component.</p>` : ""}<p class="note">Up to 50 groups; keep-together sets stay intact.</p><label><input type="checkbox" id="balance-enabled" ${balanceEnabled ? "checked" : ""}> Use size balance</label>${balanceEnabled ? stepper("balance", "Size balance", balance, 0, 100) : ""}<div class="scale"><span>Lower cut cost</span><span>Similar sizes</span></div><p class="note">Balance changes the size penalty without changing group count.</p><p>${preview.maximum} indivisible components</p><div class="costrow"><span>Proposed static crossings</span><strong>${decomposition.privateTargets} targets / ${decomposition.privateEdges.reduce((n, e) => n + e[2], 0)} calls</strong></div><div class="costrow"><span>Outside-scope static calls</span><strong>${decomposition.outsidePrivate.reduce((n, e) => n + e[2], 0)}</strong></div><div class="costrow"><span>Existing public crossings</span><strong>${decomposition.publicEdges.reduce((n, e) => n + e[2], 0)} calls</strong></div><p class="note">${decomposition.authored} authored functions; ${decomposition.topLevel.length} top-level nodes. Zero private crossings does not prove extractability.</p><button id="decomposition-details" class="wide">Inspect membership and crossings</button><h3>${sizes.length} proposed groups</h3><div class="sizes">${sizes.map((n, i) => `<i style="flex:${n};background:${colors[i % 8]}" title="${n} functions"></i>`).join("")}</div><div class="spread"><small>${sizes.join(" / ")} functions</small></div><div class="rule"></div><div class="costrow"><span>Global cut change</span><strong>${delta >= 0 ? "+" : ""}${fmt(delta)} call sites</strong></div><div class="costrow"><span>Private targets crossing</span><strong>${m.exposed.length}</strong></div><div class="costrow"><span>Keep-together sets</span><strong>${S.ties.filter((t) => t.some((v) => target.members.includes(v))).length} respected</strong></div><button id="accept" class="primary wide" ${sizes.length < 2 ? "disabled" : ""}>Accept ${sizes.length} groups</button><button id="cancel" class="quiet wide">Discard preview</button><div class="hint note">A lower cut is evidence, not a design decision. Inspect API entry points before accepting.</div>`;
-    $("privacy-mode").onchange = (e) => {
-      preservePrivacy = e.target.checked;
-      updatePreview();
-    };
-    $("balance-enabled").onchange = (e) => {
-      balanceEnabled = e.target.checked;
-      updatePreview();
-    };
-    $("decomposition-details").onclick = () =>
-      showDecomposition(preview.parts, "Automatic partition", target.members);
-    for (const name of [
-      "cluster-count",
-      ...(balanceEnabled ? ["balance"] : []),
-    ]) {
-      for (const [suffix, delta] of [
-        ["less", -1],
-        ["more", 1],
-      ]) {
-        const id = `${name}-${suffix}`;
-        $(id).onclick = () => {
-          if (name === "cluster-count") kval += delta;
-          else balance += delta;
-          updatePreview();
-          const next = $(id);
-          (next.disabled
-            ? $(`${name}-${suffix === "less" ? "more" : "less"}`)
-            : next
-          ).focus();
-        };
-      }
-    }
-    $("accept").onclick = applyPreview;
-    $("cancel").onclick = () => {
-      preview = null;
-      render();
-    };
+      '<div class="paneltag">RESPONSIBILITY WORKSPACE</div><h2>Decide by purpose</h2><p>Describe public operations, assign responsibilities, then reconcile private dependencies.</p><p>Graph views remain available for tracing callers and helpers.</p><p>Export the manifest to preserve descriptions, constraints, and merge reasons in version control.</p>';
     return;
   }
   if (fn !== null) {
@@ -652,14 +505,7 @@ function renderInspector(m, current) {
   }
   const chosen = S.groups.filter((g) => selected.has(g.id));
   $("inspector").innerHTML =
-    `<div class="paneltag">${chosen.length ? "GROUP INSPECTOR" : "START WITH STRUCTURE"}</div><h2>${chosen.length === 1 ? esc(chosen[0].name) : chosen.length ? chosen.length + " groups selected" : "Files become editable groups"}</h2><p>${chosen.length ? "Preview a split of one group, or select several groups to merge them." : "Open a file on the map. Explore its call graph as possible new files, then adjust the boundaries yourself."}</p>${chosen.length === 1 ? `<button id="inspect-split" class="primary wide">Preview split \u2192</button>` : ""}${chosen.length > 1 ? '<button id="inspect-merge" class="primary wide">Merge selected groups</button>' : ""}<h3>Current plan vs. original files</h3><div class="costrow"><span>Crossing call sites</span><strong>${fmt(m.cut)}</strong></div><div class="costrow"><span>Original crossing call sites</span><strong>${fmt(base.cut)}</strong></div><div class="costrow"><span>Directed crossing pairs</span><strong>${fmt(m.pairs)}</strong></div><div class="costrow"><span>New private boundaries</span><strong>${m.exposed.filter((v) => !base.exposed.includes(v)).length}</strong></div>${chosen.length === 1 ? groupConnections(chosen[0]) : `<h3>A reversible workflow</h3><p class="note">1. Open a group and preview a split.<br>2. Accept the groups you want.<br>3. Split again, merge, or drag functions.<br>4. Export the plan when ready.</p>`}<div class="hint note">${chosen.length === 1 ? "Check functions to keep an API and its helper together. That choice survives later splits." : "Group boundaries are tentative file boundaries. No source files are changed."}</div><h3>Graph coverage</h3><p class="note">${fmt(D.stats.externalCalls)} unresolved/external and ${fmt(D.stats.indirectCalls)} indirect calls are outside the resolved graph. Cut cost counts static call sites, not execution frequency.</p>`;
-  if (chosen.length === 1) {
-    const b = document.createElement("button");
-    b.className = "wide";
-    b.textContent = "Inspect privacy components";
-    b.onclick = () => showComponents(chosen[0]);
-    $("inspector").prepend(b);
-  }
+    `<div class="paneltag">${chosen.length ? "GROUP INSPECTOR" : "START WITH STRUCTURE"}</div><h2>${chosen.length === 1 ? esc(chosen[0].name) : chosen.length ? chosen.length + " groups selected" : "Files become editable groups"}</h2><p>${chosen.length ? "Describe responsibilities for one group, or select several groups to merge them." : "Open a file to describe its public operations and build responsibility groups."}</p>${chosen.length === 1 ? `<button id="inspect-split" class="primary wide">Build responsibilities \u2192</button>` : ""}${chosen.length > 1 ? '<button id="inspect-merge" class="primary wide">Merge selected groups</button>' : ""}<h3>Current plan vs. original files</h3><div class="costrow"><span>Crossing call sites</span><strong>${fmt(m.cut)}</strong></div><div class="costrow"><span>Original crossing call sites</span><strong>${fmt(base.cut)}</strong></div><div class="costrow"><span>Directed crossing pairs</span><strong>${fmt(m.pairs)}</strong></div><div class="costrow"><span>New private boundaries</span><strong>${m.exposed.filter((v) => !base.exposed.includes(v)).length}</strong></div>${chosen.length === 1 ? groupConnections(chosen[0]) : `<h3>A reversible workflow</h3><p class="note">1. Describe public operations.<br>2. Assign responsibilities with source evidence.<br>3. Reconcile shared private components.<br>4. Export the reviewable manifest.</p>`}<div class="hint note">${chosen.length === 1 ? "Check functions to keep an API and its helper together. That choice survives later splits." : "Group boundaries are tentative file boundaries. No source files are changed."}</div><h3>Graph coverage</h3><p class="note">${fmt(D.stats.externalCalls)} unresolved/external and ${fmt(D.stats.indirectCalls)} indirect calls are outside the resolved graph. Cut cost counts static call sites, not execution frequency.</p>`;
   $("inspect-split")?.addEventListener("click", startPreview);
   $("inspect-merge")?.addEventListener("click", merge);
   wireFunctions();
@@ -790,10 +636,13 @@ $("redo").onclick = () => {
 $("export").onclick = () => {
   const out = {
     format: "partition-concept-v1",
+    responsibilities: S.responsibilities || {},
     revision: D.revision,
     generated: D.generated,
     groups: S.groups.map((g) => ({
       name: g.name,
+      classification: g.classification,
+      moduleMembers: g.moduleMembers,
       functions: g.members.map((v) => ({
         file: D.files[D.functions[v].f].id,
         name: D.functions[v].n,
@@ -822,10 +671,6 @@ fetch("graph.json", { cache: "no-store" })
   .then((data) => {
     D = data;
     anchorMetrics = Engine.anchors(D);
-    privacyComponents = Engine.atoms(
-      D.functions.map((_, v) => v),
-      Engine.privacyTies(D),
-    );
     const initial = makeInitial();
     base = Engine.metrics(D, initial.groups);
     try {

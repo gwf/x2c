@@ -1,204 +1,122 @@
 # Partition
 
-A local, experimental explorer for the x2c resolved call graph. Files start
-as groups. Preview a split, accept it, split again, merge groups, or move
-functions between them while watching the crossing-call cost. No source files
-are rewritten.
+Partition helps build source-code responsibility groups from public operations,
+subject to private dependency constraints. Graph views remain available for
+exploring calls, groups, and tentative moves. It does not rewrite source files.
 
 ## Run
-
-From the repository root, with Python 3 and the normal x2c build prerequisites:
 
 ```sh
 python3 tools/partition/generate.py
 python3 tools/partition/serve.py
 ```
 
-Open <http://127.0.0.1:8794/>. The server binds only to localhost. Use
-`--port 8795` for another port, or `--graph /absolute/path/graph.json` to view
-another exported snapshot. Stop with Ctrl-C.
+Open <http://127.0.0.1:8794/>. The server binds to localhost, disables caching,
+and accepts `--port` and `--graph`. Generation builds stage 0, exports the
+source graph through `commands/graph`, and atomically replaces ignored
+`data/graph.json`. `--repo` and `--output` select another checkout or output.
 
-Generation rebuilds stage 0 from the shipped bootstrap, builds the graph
-command, exports every hand-authored `src/*.x` and `lib/*.x` unit (excluding
-`lib/x2c.x`), then converts the TSVs to ignored `data/graph.json`. It replaces
-the snapshot only after every command succeeds. `--repo` selects another x2c
-checkout; `--output` selects another destination. Re-run generation and reload
-the page after source changes. Graph extraction remains owned by
-[`commands/graph`](../../commands/graph/README.md).
+## Build responsibilities
 
-The browser has no package dependencies or build step. JavaScript and CSS
-are served directly. Node.js is needed only for the optional checks below.
+Open a file or group. The responsibility workspace is the main decomposition
+workflow, with four steps:
 
-## Explore
+1. Describe each public operation: its work, state owner, lifecycle, source
+   section, and body/caller evidence. Source peek provides the snapshot source
+   with line numbers and search; callers link to their own source.
+2. Assign operations to named responsibilities with descriptions and evidence.
+   Combine small responsibilities by a common task, state owner, or lifecycle.
+   A combination records the affected component identities and concrete reason.
+3. Reconcile private components. Same-file callers and static targets stay
+   together, transitively. Recorded function-value references and explicit
+   private declaration constraints also bind functions. Public calls do not.
+   Conflicts show exact undirected helper paths. Merge the responsibilities
+   under a broader name, or retain them as module members in one translation
+   unit. Helpers never silently become public.
+4. Review exact membership, static crossings, existing public crossings, and
+   non-function constraints separately. Each function belongs to one proposed
+   container. Results distinguish translation-unit candidates, module-member
+   candidates, and unassigned/unresolved work. A helper-only component needs an
+   execution/accessibility explanation and a responsibility attachment.
 
-- Project nodes represent current groups. Original-file circle area indicates
-  physical source lines; edited groups use an explicitly labeled estimate
-  apportioned by function count. Directed edges aggregate crossing call sites.
-- Decomposed scopes and split previews start as circular group arrangements.
-  Springs use aggregated call weights; repulsion separates groups. Hover traces
-  connections. Workspace circle area is proportional to function count, printed
-  inside each circle. Edges run from blue through purple to orange, with an
-  orange arrowhead at the destination. Edge labels show exact call-site counts;
-  width increases logarithmically with count. Call details lists every directed
-  group pair and its exact count, largest first. Project edge counts appear on
-  hover or keyboard focus. Labels count distinct callers
-  outside each group, including siblings.
-- Click a group to inspect its functions. Back returns to the arrangement.
-  Tentative groups can be inspected without accepting the preview. Use Functions
-  to expand all groups for moving functions, or Function list for keep-together
-  selection. Shift-click project nodes or use
-  the sidebar checkboxes to select groups for merging.
-- Group count and size balance each have left/right buttons that change the
-  displayed value by one and immediately update the preview. Group count ranges
-  from one to 50; impossible counts report the available components. Size
-  balance ranges from 0 (lower cut cost) to 100 (more similar group sizes),
-  independently of group count.
-- Collapsed arrangements keep outside caller groups in a fixed, scrollable
-  peripheral rail. Only editable groups participate in the force layout. Rail
-  counts and links count distinct callers; links marked `c` distinguish these from
-  internal call-site weights. Outside callees are omitted.
-- Suggest moves ranks up to twelve cut-reducing moves from the current view into
-  connected groups. Each candidate moves a function or keep-together set, alone
-  or with its strongest neighboring set. Review exact members, group sizes, cut
-  change, and private boundaries before applying one move. Undo restores it.
-  Initializers and moves that empty a group are excluded. These local candidates
-  are design evidence, not proof of semantic suitability or global optimality.
-- Localize functions ranks the same bounded moves by net private-visibility
-  opportunities, then cut cost. Zero-cut and higher-cut moves remain eligible
-  when visibility improves. Gains and losses name public functions whose last
-  known outside caller disappears or whose first outside caller appears.
-  These are candidates for source review, not automatic visibility edits:
-  callback references, exported uses, and unresolved calls need checking.
-- Manual and suggested moves show a result with before/after global cut,
-  crossing call sites removed and introduced, visibility opportunities gained
-  and lost, and remaining outside callers for each moved function. Existing
-  private targets crossing boundaries are reported separately.
-- Preview does not change the saved plan. Accept it before moving functions.
-  Select a function, then drag it to another group, or use the inspector's
-  destination selector. The function list supports keep-together sets.
-- Static functions are amber; non-static functions are blue; initializers are
-  gray. Public-node size reflects distinct consumers outside the current
-  group. Static-node size reflects consumers inside the group. Size is not a
-  measurement of function source length.
-- The outside-caller panel groups callers by current partition membership. Each group
-  connects to each group it calls; line weight and label count distinct caller
-  functions, without multiplying callers that use several targets or call sites.
-  Rows also show separate call-site totals. Split previews use their tentative memberships too. Click a group to inspect the exact
-  callers and target functions. Per-group
-  caller badges include sibling groups. Outside callees remain available in
-  the inspector but are omitted from the graph.
-- Scroll to zoom, drag the background to pan, and use Fit to restore the
-  overview. Hover reveals names and connections.
-- Undo and Redo cover accepted edits for the current page session. Restore
-  original groups resets to source-file partitions and can be undone.
+A proposal with unresolved work can be inspected in the graph. Accepting its
+arrangement requires complete assignments and resolved recorded constraints.
+Acceptance changes the tentative graph plan, not source code. An unresolved
+constraint with no known consumer list conservatively affects the whole scope.
 
-Accepted plans are stored in this browser, keyed by snapshot revision. Export
-plan downloads JSON with function identities, groups, and keep-together sets.
-There is currently no plan-import UI. Switching source revisions starts a new
-plan; the old revision's stored plan remains in the browser. Dirty source checkouts receive a source-content suffix on the revision, so
-changed source does not reuse a saved plan with stale numeric function IDs.
+Use **Dependency constraints** to record private types, macros, file-local
+state, and function-value references. Record source evidence before marking a
+constraint reviewed or selecting functions that must stay together. The call
+exporter does not supply exhaustive non-call dependencies; the workflow makes
+those gaps explicit rather than claiming extraction safety.
 
-## Organization
+**Export manifest** preserves operation records, stable function/component
+identities, constraints, boundary decisions, and assignment/merge history.
+Commit this JSON alongside the project being analyzed. **Import manifest**
+requires the same snapshot and scope. The ordinary plan export also includes
+responsibility workspaces. Browser storage retains work across reloads;
+existing graph plans are preserved. Export remains necessary for versioning.
 
-| File                                    | Responsibility                                              |
-| --------------------------------------- | ----------------------------------------------------------- |
-| `generate.py`, `build-data.py`          | Export orchestration and TSV-to-JSON conversion             |
-| `serve.py`                              | Local static server with a separate snapshot path           |
-| `web/app.js`                            | State, actions, navigation, inspectors, storage, export     |
-| `web/engine.js`                         | Partition heuristic, cut metrics, keep-together constraints |
-| `web/decomposition.js` | Component grouping, reference comparison, snapshot source inspection |
-| `web/boundary.js`                       | Exact edges crossing a view boundary                        |
-| `web/graph-view.js`                     | Function graph, camera, drag interaction, caller panel      |
-| `web/layout.js`, `web/layout-worker.js` | Function layout in a worker                                 |
-| `web/project-map.js`                    | Weighted group graph layout and project interaction         |
-| `web/index.html`, `web/style.css`       | Shell and styling                                           |
+## Reviewed examples and reproduction
 
-The partition heuristic tries several deterministic seeds and improves a
-weighted cut plus a group-size balance penalty. It does not prove optimality.
-API/helper keep-together constraints override cheaper cuts. Function layout
-uses springs, repulsion, collision handling, and crossing refinement. Project
-layout aggregates the global call graph by current group before applying
-weighted attraction and repulsion.
+`web/responsibilities/*.x.json` contains reviewed public-operation evidence for
+compiler.x, macros.x, and collect.x at snapshot `dbdafacb`. These descriptions
+come from source bodies and caller evidence, not graph communities. Caller
+bodies were inspected selectively, not exhaustively. Known private callbacks
+are included; private declarations remain explicitly unresolved where their
+ownership has not been established.
+
+```sh
+node tools/partition/prepare-responsibilities.cjs
+node tools/partition/tests/compare-decompositions.cjs
+```
+
+The preparation command reproduces the versioned `*.manifest.json` files from
+that evidence and the matching graph. It refuses another snapshot. Review and
+update source evidence before preparing manifests for a new revision. The UI's
+**Load reviewed source analysis** loads these editable examples only for their
+complete original-file scopes.
+
+The compiler eight-group fixture is a comparison, never an assignment input.
+The comparison view shows the public operations and source behavior behind
+current responsibilities alongside the reference destinations. `macros.x` and
+`collect.x` retain large components with module members; no group count or size
+balance is imposed. See [validation results](decomposition-results.md).
+
+## Graph exploration
+
+Group arrangement, Functions, and Function list preserve zoom, pan, weighted
+calls, static/public colors, selection, source peek, and manual movement.
+Outside caller groups remain on the periphery; their links fade in previews.
+Group circles show function counts, edges show call-site weights, and arrows
+run from blue to orange. Manual moves show cut changes and private-visibility
+opportunities separately. Undo/redo applies to graph-plan changes.
+
+Selecting a function highlights directed transitive same-original-file static
+callees and reports external callers, shared helpers, and its anchor score:
+`ln(1+external callers) * ln(1+static dependencies)`, normalized to 100. These
+counts do not include missing indirect references. Source peek shows complete
+snapshot files, not exact extracted function ranges. Edited group source-line
+sizes remain estimates.
+
+Automatic count/balance partitioning and cut/localization move suggestions
+have been removed. Connectivity helps inspect a responsibility decision; it
+does not supply one.
 
 ## Optional checks
 
-After generating the snapshot:
-
 ```sh
+node tools/partition/tests/check-responsibilities.cjs
+node tools/partition/tests/compare-decompositions.cjs
 node tools/partition/tests/check-engine.cjs
+node tools/partition/tests/check-privacy.cjs
 node tools/partition/tests/check-moves.cjs
+node tools/partition/tests/check-anchors.cjs
 node tools/partition/tests/check-boundary.cjs
 node tools/partition/tests/check-layout.cjs
 node tools/partition/tests/check-project-map.cjs
 python3 tools/partition/tests/check-data.py
 ```
 
-The JavaScript checks accept `PARTITION_GRAPH=/absolute/path/graph.json`.
-Tests combine small semantic fixtures with current-corpus checks, rather than
-assuming one revision's function IDs or cut totals. They are optional and do
-not add a recurring compiler publication gate.
-
-For UI changes, also check project zoom/fit, function exploration, split
-preview/accept/discard, movement, merge, undo, reset, caller inspection, and
-export in a browser. The server disables asset caching.
-
-## Limits
-
-The snapshot is a resolved static call graph, not runtime traffic. Unresolved
-and indirect calls are counted separately; missing callers do not prove a
-function is unused. Source peek displays full snapshot source with line numbers
-and name search. Search matches are not exact definition ranges. Edited-group source-line
-counts are estimates. Plans propose file boundaries but do not apply them.
-
-### File anchoring
-
-Selecting a function highlights its directed, transitive same-file static
-dependencies in green, while retaining immediate caller/callee context. The
-inspector lists every dependency and marks helpers with callers outside the
-root plus dependency set as shared. Show all dependency groups includes groups
-containing helpers moved outside the current view.
-
-The score is `ln(1 + E) * ln(1 + D)`, normalized to 100 at the snapshot maximum.
-E counts distinct callers from other original files. D counts reachable static
-functions in the same original file, traversing static callees only. Cycles and
-shared paths count once; the selected function does not count itself. The score
-stays tied to original files when tentative groups change. Unresolved and
-indirect calls remain outside this estimate of attachment.
-
-Optional focused check: `node tools/partition/tests/check-anchors.cjs`.
-
-## Preserve private interfaces
-
-Split previews enable this mode by default. Every same-file caller of a static
-helper joins that helper's indivisible component, transitively, including
-synthetic top-level callers. Calls to existing public functions do not join
-components. Explicit keep-together sets are also respected. Size balance is
-optional and off by default; it cannot break a component. A requested count
-above the component count reports the limit and previews the achievable count.
-Existing cross-group private calls remain visible; splitting one group does not
-repair a helper already moved elsewhere.
-
-Open **Inspect privacy components** in the group inspector. Expand components
-to read public/static membership in source order. Open a function for its full
-snapshot source, including section comments, private macros, types, and state.
-Select components and give their combined group a name. Ordinary group merging,
-renaming, and undo remain available. Components do not infer responsibilities.
-
-**Inspect membership and crossings** separates static and public crossings,
-shows concrete caller/callee pairs and call-site counts, and reports synthetic
-top-level references separately. It also reports unresolved and indirect calls.
-Zero static crossings does not establish source extractability.
-
-**Compare source-informed reference** loads the eight compiler responsibility
-groups from `web/fixtures/compiler-responsibilities.json`, only when the
-snapshot's `src/compiler.x` matches the fixture's `sha256`. It lists all 189 authored members and source-section evidence
-and uses the same crossing metrics as automatic proposals. Top-level references
-are reported but the synthetic node is not assigned to the eight groups. This
-fixture does not guide the automatic algorithm or prescribe other files' counts.
-
-See [reproduced results](decomposition-results.md). Optional checks:
-
-```sh
-node tools/partition/tests/check-privacy.cjs
-node tools/partition/tests/compare-decompositions.cjs
-```
+These focused checks do not add a recurring compiler gate. The browser uses
+plain JavaScript and CSS without a build step or package dependencies.

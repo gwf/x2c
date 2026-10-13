@@ -6,7 +6,7 @@ const previousLayout = require("./layout-baseline.cjs");
 for (const file of ["src/transform.x", "src/compiler.x", "lib/typed-array.x"]) {
   const fi = D.files.findIndex((f) => f.id === file),
     members = D.functions.flatMap((f, i) => (f.f === fi ? [i] : [])),
-    parts = E.partition(D, members, 3, 0.38),
+    parts = [0, 1, 2].map(n => members.filter((_, i) => i % 3 === n)),
     gs = parts.map((members, i) => ({ id: String(i), name: file, members }));
   const old = previousLayout(gs, D),
     before = L.quality(old.nodes, old.edges);
