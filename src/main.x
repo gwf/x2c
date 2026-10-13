@@ -231,7 +231,7 @@ static void _preflight(Translation &t) {
   if (!request.inspects()) _check_out_dir(request.out_dir);
   int shared = !request.inspects() && !t.unit_dirs, Map stems = {};
   foreach (String input, request.inputs) {
-    build_check_input(input);
+    Build.require_input(input);
     if (!is_source_file(input))
       $report.main.input_not_x(input);
     String stem = Path.stem(input);
@@ -596,7 +596,7 @@ static int _run_build(CliRequest request) {
   int status = request.inputs
     ? _build_inputs(request, commands) : _build_manifest(request, commands);
   if (status || commands == NULL || request.command == <run>) return status;
-  return !compile_commands_write(request.compile_commands, commands);
+  return !Build.write_commands(request.compile_commands, commands);
 }
 
 static int _build_inputs(CliRequest request, Array commands) {
@@ -614,7 +614,7 @@ static int _build_inputs(CliRequest request, Array commands) {
 static int _build_manifest(CliRequest request, Array commands) {
   if (request.compile_only)
     driver_error("--compile-only needs input operands, not a manifest");
-  for (ProjectBuild node = project_plan(request); node; node = node.next) {
+  for (ProjectBuild node = ProjectBuild.plan(request); node; node = node.next) {
     int status = _build_target(node.request, commands);
     if (status) return status;
   }
@@ -669,7 +669,7 @@ static int _add_commands(
   foreach (String entry, b.compile_commands)
     commands.push(target.export(entry));
   if (request.command != <run>) return 0;
-  return !compile_commands_write(request.compile_commands, commands);
+  return !Build.write_commands(request.compile_commands, commands);
 }
 
 /* Translates the stale `units` and registers every unit's generated files.
@@ -780,7 +780,7 @@ static void _run_external(int argc, char **argv) {
 }
 
 static String _external_path(const char *name) {
-  if (!_external_name(name) || cli_builtin_command(name)) return NULL;
+  if (!_external_name(name) || CliRequest.is_builtin(name)) return NULL;
   String libexec = home_libexec();
   if (!libexec) return NULL;
   String path = %"$libexec/x2c-$name";
@@ -821,21 +821,21 @@ int main(int argc, char **argv) {
     return editor_request(argc - 1, argv + 1);
   }
   if (argc > 1) _run_external(argc, argv);
-  CliRequest request = cli_parse(argc, argv);
+  CliRequest request = CliRequest.parse(argc, argv);
   String diagnostics = request.diagnostics_file;
   if (diagnostics && !diagnostics_write_json(diagnostics))
     $report.main.diagnostics_unwritable(diagnostics);
-  if (request.command == <script> && script_prepare(request)) return 0;
+  if (request.command == <script> && request.prepare_script()) return 0;
   report_configure(
     request.quiet, request.plain, request.color_mode,
     request.verbose || request.debugging,
     request.dry_run, request.inspects());
   switch (request.command) {
     case <env>:     return _run_env(request);
-    case <install>: return install_command(request);
-    case <remove>:  return remove_command(request);
-    case <list>:    return list_command(request);
-    case <new>:     return new_command(request);
+    case <install>: return request.install();
+    case <remove>:  return request.remove_package();
+    case <list>:    return request.list_packages();
+    case <new>:     return request.new_project();
   }
   return _run_compiler(request);
 }
@@ -852,7 +852,7 @@ static int _run_compiler(CliRequest request) {
   int status = request.command == <translate>
     ? _run_translation(request, NULL, NULL) : _run_build(request);
   command.close();
-  if (request.command == <script> && !status) status = script_run(request);
+  if (request.command == <script> && !status) status = request.run_script();
   return status;
 }
 

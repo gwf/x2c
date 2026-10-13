@@ -11,7 +11,7 @@
 #include "build.x"
 
 /** Links native build requests in dependency-first order.
-    `project_plan` returns the head. Each node and copied `CliRequest` struct
+    `ProjectBuild.plan` returns the head. Each node and copied `CliRequest` struct
     is owned by the current `Scope` and needs no individual cleanup; its
     `String` and `List` fields retain their canonical pool lifetimes and may
     share values with the command request.
@@ -119,7 +119,7 @@ static typedef struct Project {
     without executing build actions. Manifest discovery, parsing, validation,
     or target-selection failures print a diagnostic and exit with status 2.
 */
-ProjectBuild project_plan(CliRequest request) {
+ProjectBuild ProjectBuild.plan(CliRequest request) {
   Project p = _open_project(request);
   _parse_manifest(p);
   for (ProjectTarget target = p.targets; target; target = target.next)
@@ -137,7 +137,7 @@ static Project _open_project(CliRequest request) {
   Project p = Scope.calloc(1, sizeof(struct Project));
   *p = (struct Project) {
     .seen = {}, .sources = request.sources, .command = request,
-    .path = project_manifest(request)};
+    .path = request.project_manifest()};
   if (!p.path) _error(NULL, 0, "no explicit inputs and no x2c.toml found");
   p.path = Path.absolute(p.path);
   if (!p.sources.read(p.path, p.text)) _error(p, 0, "cannot read manifest");
@@ -148,7 +148,7 @@ static Project _open_project(CliRequest request) {
 /** Returns the explicit or nearest readable project manifest, or NULL.
     Discovery uses the same request view as project parsing.
 */
-String project_manifest(CliRequest c) {
+String CliRequest.project_manifest(CliRequest c) {
   if (c.manifest) return c.manifest;
   for (Path directory = Path.absolute(".");; directory = directory.dirname()) {
     String candidate = directory.join("x2c.toml");
@@ -598,9 +598,8 @@ static void _resolve_dependencies(Project p) {
   if (_lock_satisfies(p, locked)) return;
   Array rows = [];
   for (ProjectDependency entry = p.dependencies; entry; entry = entry.next)
-    rows.push(
-      install_require(
-        request, entry.name, entry.version, _locked_row(locked, entry)));
+    rows.push(request.require_package(
+      entry.name, entry.version, _locked_row(locked, entry)));
   _write_lock(path, rows.list_free());
 }
 
@@ -857,7 +856,7 @@ static List _profile_flags(Project p, ProjectProfile profile) {
 
 static List _c_flags(Project p, List values) {
   foreach (String value, values)
-    if (cli_dependency_pass_through(value))
+    if (CliRequest.dependency_option(value))
       _error_name(p, 0, "C dependency option is driver-owned", value);
   return values;
 }
@@ -891,7 +890,7 @@ static void _error_name(Project p, int line, String message, String name) {
     unusable name, or a failed write prints a diagnostic and exits with
     status 2.
 */
-int new_command(CliRequest request) {
+int CliRequest.new_project(CliRequest request) {
   Path dir = request.inputs.car();
   if (!dir) driver_error("new: the directory operand is empty");
   String name = _starter_name(dir);

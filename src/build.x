@@ -217,7 +217,7 @@ static void _add_inputs(Build b) {
   foreach (String input, request.inputs) {
     // A dry run runs nothing and reads nothing, and a planned target's
     // archive exists only after the build it is printing would run.
-    if (!request.dry_run) build_check_input(input);
+    if (!request.dry_run) Build.require_input(input);
     if (is_source_file(input)) b.xlat_n++;
     else if (input.endswith(".c")) b.c_sources.push(input);
     else if (input.endswith(".o") || input.endswith(".a"))
@@ -231,7 +231,7 @@ static void _add_inputs(Build b) {
 /** Exits with a driver error unless `input` names a regular file.
     A wildcard or directory operand adds a note on what to pass instead.
 */
-void build_check_input(String input) {
+void Build.require_input(String input) {
   if (!input) driver_error("input path is empty");
   if (Path.is_file(input)) return;
   if (Path.is_dir(input)) {
@@ -464,7 +464,7 @@ static void _link_package(Build b, String package) {
   String response = %"$builds/$name.native.rsp";
   CliRequest native = NULL;
   if (!access(response, F_OK)) {
-    native = cli_package_options(response, package);
+    native = CliRequest.package_options(response, package);
     b.toolchain.cc_args = b.toolchain.cc_args.append(native.cc_args);
   }
   // Libraries take native compile options too; only programs link archives.
@@ -737,7 +737,7 @@ static String _compile_command(Build b, CcJob job) {
     The destination's parent must exist. A failed write preserves the
     existing database, reports a diagnostic, and returns zero.
 */
-int compile_commands_write(String path, Array commands) {
+int Build.write_commands(String path, Array commands) {
   String text = %"[\n${",\n".join(commands)}\n]\n";
   try {
     file_publish(%($path $text));

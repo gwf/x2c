@@ -177,7 +177,7 @@ static typedef struct Install {
     verified against this compiler's version unless `--force`; a pure-x2c
     source package is built by this compiler. Failures exit with status 2.
 */
-int install_command(CliRequest request) {
+int CliRequest.install(CliRequest request) {
   Install i = _locked_install(request, request.inputs.car());
   defer _release_packages();
   i.sha256 = request.sha256;
@@ -193,7 +193,7 @@ int install_command(CliRequest request) {
     instead. The row has the `install_rows` shape, and an already satisfied
     dependency reaches no network. Failures exit with status 2.
 */
-List install_require(
+List CliRequest.require_package(
   CliRequest request, String name, String version, List locked) {
   Install i = _locked_install(request, name);
   defer _release_packages();
@@ -520,7 +520,7 @@ static List _files_with(String directory, String suffix) {
 /** Removes the installed package named by the request's one operand.
     A directory without an install marker is left alone. Returns 0.
 */
-int remove_command(CliRequest request) {
+int CliRequest.remove_package(CliRequest request) {
   String name = request.inputs.car();
   String target = %"${_home_packages("remove")}/$name";
   if (!name.is_identifier())
@@ -547,7 +547,7 @@ static void _check_removable(String target, String name) {
 }
 
 /** Lists installed packages as `name version kind` lines and returns 0. */
-int list_command(CliRequest request) {
+int CliRequest.list_packages(CliRequest request) {
   String packages = _home_packages("list");
   foreach (String name, Path.is_dir(packages) ? _entries(packages) : NULL) {
     String package = %"$packages/$name", kind = _installed_kind(package);

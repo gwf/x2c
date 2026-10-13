@@ -46,10 +46,10 @@ String script_cache_root(void) {
     executable when it is current; that path does not return. Otherwise it
     locks the directory against concurrent builds of the same script, removes
     the entries of scripts that no longer exist, and returns 0; the caller
-    builds `request` and calls `script_run`. A `--clean` request removes the
+    builds `request` and calls `CliRequest.run_script`. A `--clean` request removes the
     script's entry and returns 1.
 */
-int script_prepare(CliRequest c) {
+int CliRequest.prepare_script(CliRequest c) {
   String root = script_cache_root();
   if (!root) driver_error("no cache directory: set X2C_CACHE_DIR");
   String script = Path.absolute(c.inputs.car());
@@ -125,11 +125,11 @@ static void _prune(String scripts) {
 
 // running a script
 
-/** Executes a script that `script_prepare` pointed at the cache and the
+/** Executes a script that `CliRequest.prepare_script` pointed at the cache and the
     caller built; that path does not return. A dry run prints the action and
     returns zero.
 */
-int script_run(CliRequest c) {
+int CliRequest.run_script(CliRequest c) {
   if (!c.dry_run) _exec(c);
   _print_run(c);
   return 0;

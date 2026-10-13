@@ -82,8 +82,8 @@ static const char *unsaved_cpp =
    are its sources, so an unsaved project manifest selects the target. */
 static CliRequest _configure(Query &q, int argc, char **argv) {
   char *defaults[] = { argv[0], "build", NULL };
-  CliRequest request = argc == 1 ? cli_parse(2, defaults) :
-                                 cli_parse(argc, argv);
+  CliRequest request = argc == 1 ? CliRequest.parse(2, defaults) :
+                                 CliRequest.parse(argc, argv);
   request.sources = q.sources;
   if (request.command != <build> && request.command != <translate>)
     _fail("x2c editor: use a build or translate configuration\n");
@@ -99,11 +99,11 @@ static CliRequest _configure(Query &q, int argc, char **argv) {
 /* With a project manifest, the request becomes the one selected target
    whose inputs hold `source`. */
 static CliRequest _project_target(CliRequest request, String source) {
-  String manifest = project_manifest(request);
+  String manifest = request.project_manifest();
   if (!manifest) return request;
   request.manifest = manifest;
   CliRequest selected = NULL;
-  for (ProjectBuild node = project_plan(request); node; node = node.next)
+  for (ProjectBuild node = ProjectBuild.plan(request); node; node = node.next)
     foreach (String input, node.request.inputs) {
       if (Path.absolute(input) != source) continue;
       if (selected && selected != node.request)

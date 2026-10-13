@@ -11,7 +11,7 @@
 #include "sourceview.x"
 
 /** Holds one compiler command and its command-specific inputs and options.
-    `List`s produced by `cli_parse` preserve CLI order. Copies are shallow:
+    `List`s produced by `CliRequest.parse` preserve CLI order. Copies are shallow:
     request storage and referenced canonical values keep their producing
     `Scope` and pool lifetimes.
 */
@@ -396,7 +396,7 @@ static int _command_mask(Symbol command) {
     Raises: `<alloc-fail>` or `<size-limit>` while expanding response files or
     constructing request values.
 */
-CliRequest cli_parse(int argc, char **argv) {
+CliRequest CliRequest.parse(int argc, char **argv) {
   Array args = $auto([]);
   _read_arguments(args, argc, argv);
   if (!args.len()) _help_exit(0, 2);
@@ -437,7 +437,7 @@ static typedef struct Parse {
 
 static CliRequest _parse_command(Array args, CliCommand &command) {
   Parse p = {
-    .request = cli_request(command.name), .args = args, .mask = command.mask,
+    .request = CliRequest.new(command.name), .args = args, .mask = command.mask,
     .inputs = [], .run_args = [], .include_dirs = [], .cpp_args = [],
     .cc_args = [], .ld_args = []};
   for (int i = 1; i < args.len(); i++) _word(p, i);
@@ -708,7 +708,7 @@ static void _push_pair(Array out, String option, String value) {
 
 /* The driver owns C dependency output, so `-Xcc` cannot pass it. */
 static String _xcc_argument(String value) {
-  if (cli_dependency_pass_through(value))
+  if (CliRequest.dependency_option(value))
     $report.cli.dependency_owned(value);
   return value;
 }
@@ -717,7 +717,7 @@ static String _xcc_argument(String value) {
     Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
     comma-delimited pass-through argument; `NULL` returns zero.
 */
-int cli_dependency_pass_through(String s) {
+int CliRequest.dependency_option(String s) {
   return s && (
     s.startswith("-MMD") || s.startswith("-MP") ||
     s.startswith("-MF") || s.startswith("-MT") ||
@@ -745,7 +745,7 @@ static void _set_field(
     `cc_args` and `ld_args` serve native actions; no source-preprocessing
     options are returned.
 */
-CliRequest cli_package_options(String path, String package) {
+CliRequest CliRequest.package_options(String path, String package) {
   Array words = $auto([]);
   foreach (String word, _response_arguments(path))
     words.push(word.replace("{package}", package));
@@ -1242,7 +1242,7 @@ static void _response_error(String path, int line, const char *message) {
 // requests
 
 /** Constructs a request with the command's ordinary CLI defaults. */
-CliRequest cli_request(Symbol command) {
+CliRequest CliRequest.new(Symbol command) {
   int mask = _command_mask(command);
   CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
   request.command = command;
@@ -1268,7 +1268,7 @@ static int _make_owned(void) {
 }
 
 /** Reports whether a raw command name belongs to the built-in parser. */
-int cli_builtin_command(const char *word) =>
+int CliRequest.is_builtin(const char *word) =>
   !strcmp(word, "help") || _command_row(word) != NULL;
 
 /** Returns the version line `--version` prints, without a newline. */
