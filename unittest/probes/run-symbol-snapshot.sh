@@ -72,7 +72,7 @@ default_status=$?
   >"$BUILD/live.stdout" 2>"$BUILD/live.stderr"
 live_status=$?
 set -e
-[[ $default_status == "$live_status" ]]
+[[ $default_status == "$live_status" ]] || exit 1
 diff -u "$BUILD/live.stdout" "$BUILD/default.stdout"
 diff -u "$BUILD/live.stderr" "$BUILD/default.stderr"
 
@@ -89,7 +89,7 @@ X2C_HOME="$fake_root" \
   >"$BUILD/missing.stdout" 2>"$BUILD/missing.stderr"
 missing_status=$?
 set -e
-[[ $missing_status -ne 0 ]]
+[[ $missing_status -ne 0 ]] || exit 1
 grep -F "cannot read runtime source" "$BUILD/missing.stderr" >/dev/null
 
 # A home with runtime sources but no interfaces walks the prelude cold and
@@ -104,7 +104,7 @@ cp -RL "$ROOT/include/." "$cold_root/include/"
 copy_runtime_sources "$cold_root/lib/"
 mkdir -p "$cold_root/src"
 cp "$ROOT"/src/{component-access,component-try,component-delegate,component-literals,component-printf,component-operators,component-raise,component-match,component-interpolation,component-destructuring,component-lambdas,component-protocols,grammar}.x "$cold_root/src/"
-[[ -z "$("$cold_root/bin/x2c" env prelude)" ]]
+[[ -z "$("$cold_root/bin/x2c" env prelude)" ]] || exit 1
 "$cold_root/bin/x2c" translate --out-dir "$BUILD/cold" "$ROOT/examples/foreach.x"
 diff -u "$BUILD/cold/foreach.c" "$BUILD/default/foreach.c"
 diff -u "$BUILD/cold/foreach.h" "$BUILD/default/foreach.h"
@@ -114,7 +114,7 @@ mkdir -p "$BUILD/cold-interfaces" "$BUILD/warm"
 "$cold_root/bin/x2c" translate --out-dir "$BUILD/cold-interfaces" \
   "$cold_root"/lib/*.x >/dev/null 2>&1
 cp "$BUILD/cold-interfaces/"*.xi "$cold_root/lib/"
-[[ -n "$("$cold_root/bin/x2c" env prelude)" ]]
+[[ -n "$("$cold_root/bin/x2c" env prelude)" ]] || exit 1
 "$cold_root/bin/x2c" translate --out-dir "$BUILD/warm" "$ROOT/examples/foreach.x"
 diff -u "$BUILD/warm/foreach.c" "$BUILD/default/foreach.c"
 diff -u "$BUILD/warm/foreach.h" "$BUILD/default/foreach.h"

@@ -23,19 +23,19 @@ export X2C_PREFIX="$WORK/prefix" X2C_RELEASES="file://$WORK/releases"
 export X2C_VERSION_URL="file://$WORK/releases/x2c-version.txt"
 sh "$ROOT/site/public/install.sh" >"$WORK/install.stdout"
 grep -q "installed x2c $version" "$WORK/install.stdout"
-[[ -x "$WORK/prefix/bin/x2c" ]]
-[[ ! -d "$WORK/prefix/src" ]]
+[[ -x "$WORK/prefix/bin/x2c" ]] || exit 1
+[[ ! -d "$WORK/prefix/src" ]] || exit 1
 
 # The installed compiler stands alone: no checkout on PATH.
 export PATH="$WORK/prefix/bin:/usr/bin:/bin"
-[[ "$(x2c env home)" == "$WORK/prefix" ]]
+[[ "$(x2c env home)" == "$WORK/prefix" ]] || exit 1
 x2c run -q "$WORK/prefix/examples/foreach.x" >"$WORK/foreach.stdout"
 grep -q "v = 3" "$WORK/foreach.stdout"
 
 # A package survives a re-run of the installer.
 x2c install -q "$ROOT/examples/packages/greet"
 sh "$ROOT/site/public/install.sh" --version "$version" >/dev/null
-[[ "$(x2c list)" == "greet - source" ]]
+[[ "$(x2c list)" == "greet - source" ]] || exit 1
 x2c run -q "$ROOT/examples/power/greet-client.x" >"$WORK/greet.stdout"
 grep -q "ping ping ping" "$WORK/greet.stdout"
 
@@ -49,14 +49,14 @@ for candidate in candidate-one candidate-two; do
     -C "$WORK/candidate-tree" "$(basename "$tree")"
   (cd "$WORK/releases/$candidate" && shasum -a 256 "$asset" >"$asset.sha256")
   X2C_RELEASE_TAG="$candidate" sh "$ROOT/site/public/install.sh" >/dev/null
-  [[ "$(cat "$WORK/prefix/candidate-test.txt")" == "$candidate" ]]
-  [[ "$(x2c list)" == "greet - source" ]]
+  [[ "$(cat "$WORK/prefix/candidate-test.txt")" == "$candidate" ]] || exit 1
+  [[ "$(x2c list)" == "greet - source" ]] || exit 1
   rm -rf "$WORK/candidate-tree"
 done
 # Selecting the earlier candidate still installs its original bytes.
 X2C_RELEASE_TAG=candidate-one sh "$ROOT/site/public/install.sh" \
   --version "$version" >/dev/null
-[[ "$(cat "$WORK/prefix/candidate-test.txt")" == candidate-one ]]
+[[ "$(cat "$WORK/prefix/candidate-test.txt")" == candidate-one ]] || exit 1
 
 # A bad checksum is refused before anything is replaced.
 printf 'bad\n' >"$WORK/releases/v$version/$asset.sha256"
@@ -66,6 +66,6 @@ if sh "$ROOT/site/public/install.sh" --version "$version" \
   exit 1
 fi
 grep -q "checksum mismatch" "$WORK/bad.stderr"
-[[ "$(x2c list)" == "greet - source" ]]
+[[ "$(x2c list)" == "greet - source" ]] || exit 1
 
 echo "install script: passed"
