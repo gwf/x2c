@@ -85,7 +85,7 @@ static size_t _context_offset(void) {
                    : sizeof(struct Func);
 }
 
-static void *Func._context(Func f) => (unsigned char *) f + _context_offset();
+static void *_context(Func f) => (unsigned char *) f + _context_offset();
 
 // calls
 
@@ -185,11 +185,11 @@ List x2c_func_reference_type(Func fn, unsigned argc, unsigned index) {
     unsigned expected = fn.nparams;
     $error.apply.arity(sig, expected, argc);
   }
-  List parameter = fn._parameter(index);
+  List parameter = _parameter(fn, index);
   return _is_reference(parameter) ? parameter.cdr() : NULL;
 }
 
-static List Func._parameter(Func fn, unsigned index) {
+static List _parameter(Func fn, unsigned index) {
   if (!fn || index >= fn.nparams) return NULL;
   List params = fn.params;
   while (params && index--) params = params.cdr();
@@ -277,14 +277,14 @@ Var x2c_func_record_result(const void *bytes, size_t size) =>
     Raises: `<bad-types>` on the same mismatches as the shared checker. */
 void *x2c_func_reference_argument(
   Func fn, const FuncArg *argv, unsigned i, List want) =>
-  fn._reference_argument(argv, i, want, want);
+  _reference_argument(fn, argv, i, want, want);
 
 /** Checks a generated adapter's declared pointee against the stored signature
     and its resolved `want` against the source address before casting.
     Raises: `<bad-types>` on either mismatch. */
 void *x2c_func_declared_reference_argument(
   Func fn, const FuncArg *argv, unsigned i, List declared_target, List want) =>
-  fn._reference_argument(argv, i, declared_target, want);
+  _reference_argument(fn, argv, i, declared_target, want);
 
 /* Returns reference argument `i` after checking its declared source type.
     The adapter supplies the pointee type it will cast to.
@@ -295,9 +295,9 @@ void *x2c_func_declared_reference_argument(
     differs, or conversion would discard a qualifier. It does not return on
     failure.
 */
-static void *Func._reference_argument(
+static void *_reference_argument(
   Func fn, const FuncArg *argv, unsigned i, List declared_target, List want) {
-  List declared = fn._parameter(i), source = argv[i].reference_type;
+  List declared = _parameter(fn, i), source = argv[i].reference_type;
   int signature_reference = _is_reference(declared);
   List target = signature_reference ? declared.cdr() : NULL;
   if (!source ||
@@ -421,7 +421,7 @@ static Func _new(
   fn.rest = rest;
   fn.context_size = context_size;
   fn.nparams = void_params ? 0 : n;
-  if (context_size) memcpy(fn._context(), context, context_size);
+  if (context_size) memcpy(_context(fn), context, context_size);
   return fn;
 }
 
@@ -442,7 +442,7 @@ List Func.signature(Func function) {
 */
 const void *Func.context(Func function) {
   if (!function) $error.context.null();
-  return function.context_size ? function._context() : NULL;
+  return function.context_size ? _context(function) : NULL;
 }
 
 /** Transfers `function`'s storage to the `Scope` held by `slot`.

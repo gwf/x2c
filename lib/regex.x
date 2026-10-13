@@ -106,14 +106,14 @@ static _RegexNode _group_node(int index, _RegexNode child) {
 
 // byte sets
 
-static void _RegexNode._add(_RegexNode node, int byte) =>
+static void _add(_RegexNode node, int byte) =>
   node.set[byte >> 3] |= (unsigned char) (1 << (byte & 7));
 
-static int _RegexNode._has(_RegexNode node, int byte) =>
+static int _has(_RegexNode node, int byte) =>
   node.set[byte >> 3] & (1 << (byte & 7));
 
-static void _RegexNode._add_range(_RegexNode node, int low, int high) {
-  for (int byte = low; byte <= high; byte++) node._add(byte);
+static void _add_range(_RegexNode node, int low, int high) {
+  for (int byte = low; byte <= high; byte++) _add(node, byte);
 }
 
 static int _is_word(int byte) =>
@@ -121,29 +121,29 @@ static int _is_word(int byte) =>
 
 /* Adds the bytes of `\d`, `\w`, or `\s` to `node`, or every other byte
    for the capital letter. */
-static void _RegexNode._add_class(_RegexNode node, int letter) {
+static void _add_class(_RegexNode node, int letter) {
   struct _RegexNode members = {0};
   _RegexNode bytes = &members;
   int negate = letter == 'D' || letter == 'W' || letter == 'S';
   if (negate) letter += 'a' - 'A';
-  if (letter == 'd') bytes._add_range('0', '9');
+  if (letter == 'd') _add_range(bytes, '0', '9');
   if (letter == 'w')
     for (int byte = 0; byte < 256; byte++)
-      if (_is_word(byte)) bytes._add(byte);
+      if (_is_word(byte)) _add(bytes, byte);
   if (letter == 's') {
-    bytes._add(' ');
-    bytes._add_range('\t', '\r');
+    _add(bytes, ' ');
+    _add_range(bytes, '\t', '\r');
   }
   for (int i = 0; i < 32; i++)
     node.set[i] |= negate ? (unsigned char) ~members.set[i] : members.set[i];
 }
 
-static void _RegexNode._fold(_RegexNode node) {
+static void _fold(_RegexNode node) {
   for (int byte = 'a'; byte <= 'z'; byte++) {
     int upper = byte - 'a' + 'A';
-    if (node._has(byte) || node._has(upper)) {
-      node._add(byte);
-      node._add(upper);
+    if (_has(node, byte) || _has(node, upper)) {
+      _add(node, byte);
+      _add(node, upper);
     }
   }
 }
@@ -162,14 +162,14 @@ static Regex Regex.new(String pattern) {
   Regex regex = Scope.calloc(1, sizeof(struct Regex));
   regex.pattern = pattern;
   Parser p = {regex, regex.pattern, 0, regex.pattern.len()};
-  p.flags();
-  regex.program = p.alternation();
-  if (p.pos < p.len) p.fail($reason.unmatched_close());
+  _flags(p);
+  regex.program = _parse_alternation(p);
+  if (p.pos < p.len) _fail(p, $reason.unmatched_close());
   return regex;
 }
 
 /* Reads a leading `(?i)`, `(?m)`, or `(?s)` in any combination. */
-static void Parser.flags(Parser &p) {
+static void _flags(Parser &p) {
   if (p.len < 4 || p.text[0] != '(' || p.text[1] != '?') return;
   int at = 2, caseless = 0, multiline = 0, dotall = 0;
   for (; at < p.len; at++) {
@@ -189,23 +189,23 @@ static void Parser.flags(Parser &p) {
 
 /* Sequences separated by `|`. Two or more become an `<alt>` node, with
    each sequence in a group that captures nothing. */
-static _RegexNode Parser.alternation(Parser &p) {
-  _RegexNode first = p.sequence();
-  if (p.peek() != '|') return first;
+static _RegexNode _parse_alternation(Parser &p) {
+  _RegexNode first = _sequence(p);
+  if (_peek(p) != '|') return first;
   _RegexNode node = _node(<alt>), last = _group_node(-1, first);
   node.child = last;
-  while (p.peek() == '|') {
+  while (_peek(p) == '|') {
     p.pos++;
-    last.sibling = _group_node(-1, p.sequence());
+    last.sibling = _group_node(-1, _sequence(p));
     last = last.sibling;
   }
   return node;
 }
 
-static _RegexNode Parser.sequence(Parser &p) {
+static _RegexNode _sequence(Parser &p) {
   _RegexNode head = NULL, last = NULL;
-  while (p.pos < p.len && p.peek() != '|' && p.peek() != ')') {
-    _RegexNode atom = p.quantified(p.atom());
+  while (p.pos < p.len && _peek(p) != '|' && _peek(p) != ')') {
+    _RegexNode atom = _quantified(p, _atom(p));
     if (last) last.next = atom;
     else head = atom;
     last = atom;
@@ -216,31 +216,31 @@ static _RegexNode Parser.sequence(Parser &p) {
 /* Wraps `atom` in the repetition that follows it, if any. A `?` after the
    quantifier makes it lazy, and another quantifier after that has nothing
    to repeat. */
-static _RegexNode Parser.quantified(Parser &p, _RegexNode atom) {
+static _RegexNode _quantified(Parser &p, _RegexNode atom) {
   int min, max;
-  if (!p.bounds(min, max)) return atom;
+  if (!_bounds(p, min, max)) return atom;
   if (atom.kind == <bol> || atom.kind == <eol> || atom.kind == <wordb> ||
       atom.kind == <nwordb>)
-    p.fail($reason.no_repeat());
+    _fail(p, $reason.no_repeat());
   p.pos++;
   _RegexNode node = _node(<repeat>);
   node.min = min;
   node.max = max;
-  node.greedy = p.peek() != '?';
+  node.greedy = _peek(p) != '?';
   node.child = atom;
   if (!node.greedy) p.pos++;
-  if (_is_quantifier(p.peek())) p.fail($reason.no_repeat());
+  if (_is_quantifier(_peek(p))) _fail(p, $reason.no_repeat());
   return node;
 }
 
 /* Reads the bounds of the quantifier at the position and leaves the
    position on its last byte, or returns 0 when none is there. */
-static int Parser.bounds(Parser &p, int &min, int &max) {
-  switch (p.peek()) {
+static int _bounds(Parser &p, int &min, int &max) {
+  switch (_peek(p)) {
     case '*': min = 0; max = -1; return 1;
     case '+': min = 1; max = -1; return 1;
     case '?': min = 0; max = 1; return 1;
-    case '{': return p.braces(min, max);
+    case '{': return _braces(p, min, max);
   }
   return 0;
 }
@@ -248,29 +248,29 @@ static int Parser.bounds(Parser &p, int &min, int &max) {
 /* Reads `{m}`, `{m,}`, or `{m,n}` and leaves the position on its `}`. A
    brace that starts no repetition returns 0 and leaves the position on
    the brace. */
-static int Parser.braces(Parser &p, int &min, int &max) {
+static int _braces(Parser &p, int &min, int &max) {
   int start = p.pos++;
   long long low, high;
-  if (!p.digits(low)) {
+  if (!_digits(p, low)) {
     p.pos = start;
     return 0;
   }
   high = low;
-  if (p.peek() == ',') {
+  if (_peek(p) == ',') {
     p.pos++;
-    if (!p.digits(high)) high = -1;
+    if (!_digits(p, high)) high = -1;
   }
-  if (p.peek() != '}') {
+  if (_peek(p) != '}') {
     p.pos = start;
     return 0;
   }
   if (low > INT_MAX || high > INT_MAX) {
     p.pos++;
-    p.fail($reason.repeat_count());
+    _fail(p, $reason.repeat_count());
   }
   if (high >= 0 && high < low) {
     p.pos++;
-    p.fail($reason.repeat_range());
+    _fail(p, $reason.repeat_range());
   }
   min = (int) low;
   max = (int) high;
@@ -279,10 +279,10 @@ static int Parser.braces(Parser &p, int &min, int &max) {
 
 /* Reads a decimal count into `out`, which stops growing once it passes
    INT_MAX. */
-static int Parser.digits(Parser &p, long long &out) {
+static int _digits(Parser &p, long long &out) {
   int start = p.pos;
   long long value = 0;
-  for (; scan_ascii_digit(p.peek()); p.pos++)
+  for (; scan_ascii_digit(_peek(p)); p.pos++)
     if (value <= INT_MAX) value = value * 10 + (p.text[p.pos] - '0');
   out = value;
   return p.pos > start;
@@ -291,85 +291,85 @@ static int Parser.digits(Parser &p, long long &out) {
 static int _is_quantifier(int byte) =>
   byte == '*' || byte == '+' || byte == '?';
 
-static int Parser.peek(Parser &p) =>
+static int _peek(Parser &p) =>
   p.pos < p.len ? (unsigned char) p.text[p.pos] : -1;
 
-static void Parser.fail(Parser &p, String why) {
+static void _fail(Parser &p, String why) {
   $error.compile(why, p.regex.pattern, p.pos);
 }
 
 // atoms
 
 /* One atom. A quantifier here has nothing before it to repeat. */
-static _RegexNode Parser.atom(Parser &p) {
+static _RegexNode _atom(Parser &p) {
   int byte = (unsigned char) p.text[p.pos];
-  if (_is_quantifier(byte)) p.fail($reason.no_repeat());
+  if (_is_quantifier(byte)) _fail(p, $reason.no_repeat());
   p.pos++;
   switch (byte) {
     case '.':  return _node(<any>);
     case '^':  return _node(<bol>);
     case '$':  return _node(<eol>);
-    case '[':  return p.set();
-    case '(':  return p.group();
-    case '\\': return p.escape_atom();
+    case '[':  return _set(p);
+    case '(':  return _parse_group(p);
+    case '\\': return _escape_atom(p);
   }
-  return p.literal(byte);
+  return _literal(p, byte);
 }
 
 /* An escape outside a set: a word boundary test, or a set of the byte or
    class the escape names. */
-static _RegexNode Parser.escape_atom(Parser &p) {
-  int letter = p.peek();
-  if (letter != 'b' && letter != 'B') return p.literal(p.escape());
+static _RegexNode _escape_atom(Parser &p) {
+  int letter = _peek(p);
+  if (letter != 'b' && letter != 'B') return _literal(p, _escape(p));
   p.pos++;
   return _node(letter == 'b' ? <wordb> : <nwordb>);
 }
 
 /* A set of one byte, or of the class a negated letter names, folded when
    the pattern ignores case. */
-static _RegexNode Parser.literal(Parser &p, int byte) {
+static _RegexNode _literal(Parser &p, int byte) {
   _RegexNode node = _node(<set>);
-  if (byte < 0) node._add_class(-byte);
-  else node._add(byte);
-  if (p.regex.caseless) node._fold();
+  if (byte < 0) _add_class(node, -byte);
+  else _add(node, byte);
+  if (p.regex.caseless) _fold(node);
   return node;
 }
 
 /* A group after its `(`. A plain `(` captures by number, `(?<name>` by
    number and name, and `(?:` not at all. */
-static _RegexNode Parser.group(Parser &p) {
-  int index = p.peek() == '?' ? p.group_syntax() : p.add_capture(NULL);
-  _RegexNode body = p.alternation();
-  if (p.peek() != ')') p.fail($reason.missing_close());
+static _RegexNode _parse_group(Parser &p) {
+  int index = _peek(p) == '?' ? _group_syntax(p) : _add_capture(p, NULL);
+  _RegexNode body = _parse_alternation(p);
+  if (_peek(p) != ')') _fail(p, $reason.missing_close());
   p.pos++;
   return _group_node(index, index < 0 ? body : _close_capture(body, index));
 }
 
 /* Reads the rest of a `(?` and returns the group's capture number, or -1
    for `(?:`. */
-static int Parser.group_syntax(Parser &p) {
+static int _group_syntax(Parser &p) {
   p.pos++;
-  int marker = p.peek();
+  int marker = _peek(p);
   if (marker == ':') {
     p.pos++;
     return -1;
   }
   if (marker != '<') {
     p.pos--;
-    p.fail($reason.group_syntax());
+    _fail(p, $reason.group_syntax());
   }
   p.pos++;
-  return p.add_capture(p.name());
+  return _add_capture(p, _name(p));
 }
 
 /* Reads a capture name and its `>`: word bytes that do not start with a
    digit. */
-static String Parser.name(Parser &p) {
+static String _name(Parser &p) {
   int start = p.pos;
-  while (_is_word(p.peek())) p.pos++;
-  if (p.pos == start || scan_ascii_digit(p.text[start]) || p.peek() != '>') {
+  while (_is_word(_peek(p))) p.pos++;
+  if (p.pos == start || scan_ascii_digit(p.text[start]) || _peek(p) != '>') {
     p.pos = start;
-    p.fail($reason.group_name());
+    _fail(p, $reason.group_name());
   }
   String name = p.regex.pattern[start:p.pos];
   p.pos++;
@@ -377,7 +377,7 @@ static String Parser.name(Parser &p) {
 }
 
 /* Numbers a new capture and records its name, which may be NULL. */
-static int Parser.add_capture(Parser &p, String name) {
+static int _add_capture(Parser &p, String name) {
   int index = ++p.regex.capture_count;
   p.regex.capture_names = p.regex.capture_names.append(%($name));
   return index;
@@ -396,17 +396,17 @@ static _RegexNode _close_capture(_RegexNode body, int index) {
 
 /* A set after its `[`. A `]` first in the set is a member, and a leading
    `^` negates the set after case folding. */
-static _RegexNode Parser.set(Parser &p) {
+static _RegexNode _set(Parser &p) {
   _RegexNode node = _node(<set>);
-  int negate = p.peek() == '^';
+  int negate = _peek(p) == '^';
   if (negate) p.pos++;
   int first = p.pos;
-  while (p.pos == first || p.peek() != ']') {
-    if (p.pos >= p.len) p.fail($reason.unterminated_class());
-    p.member(node);
+  while (p.pos == first || _peek(p) != ']') {
+    if (p.pos >= p.len) _fail(p, $reason.unterminated_class());
+    _member(p, node);
   }
   p.pos++;
-  if (p.regex.caseless) node._fold();
+  if (p.regex.caseless) _fold(node);
   if (negate)
     for (int i = 0; i < 32; i++) node.set[i] = (unsigned char) ~node.set[i];
   return node;
@@ -414,29 +414,29 @@ static _RegexNode Parser.set(Parser &p) {
 
 /* Adds one member to the set `node`: a byte, an escaped byte or class, or
    a range of bytes. */
-static void Parser.member(Parser &p, _RegexNode node) {
+static void _member(Parser &p, _RegexNode node) {
   int low = (unsigned char) p.text[p.pos++];
-  if (low == '\\') low = p.escape();
-  if (low < 0) node._add_class(-low);
-  else if (p.peek() == '-' && p.pos + 1 < p.len && p.text[p.pos + 1] != ']')
-    node._add_range(low, p.range_end(low));
-  else node._add(low);
+  if (low == '\\') low = _escape(p);
+  if (low < 0) _add_class(node, -low);
+  else if (_peek(p) == '-' && p.pos + 1 < p.len && p.text[p.pos + 1] != ']')
+    _add_range(node, low, _range_end(p, low));
+  else _add(node, low);
 }
 
 /* Reads the byte after `-`, which may be escaped and must not be below
    `low`. */
-static int Parser.range_end(Parser &p, int low) {
+static int _range_end(Parser &p, int low) {
   p.pos++;
   int high = (unsigned char) p.text[p.pos++];
-  if (high == '\\') high = p.escape();
-  if (high < low) p.fail($reason.character_range());
+  if (high == '\\') high = _escape(p);
+  if (high < low) _fail(p, $reason.character_range());
   return high;
 }
 
 /* Reads the byte after a backslash and returns the byte it stands for, or
    the negated letter of a `\d`, `\w`, or `\s` class or its capital. */
-static int Parser.escape(Parser &p) {
-  if (p.pos >= p.len) p.fail($reason.trailing_backslash());
+static int _escape(Parser &p) {
+  if (p.pos >= p.len) _fail(p, $reason.trailing_backslash());
   int byte = (unsigned char) p.text[p.pos++];
   switch (byte) {
     case 't': return '\t';
@@ -449,7 +449,7 @@ static int Parser.escape(Parser &p) {
   }
   if (!_is_word(byte) && byte < 128) return byte;
   p.pos--;
-  p.fail($reason.unknown_escape());
+  _fail(p, $reason.unknown_escape());
 }
 
 /* matching
@@ -471,23 +471,23 @@ static RegexMatch _search(Regex regex, String subject, int offset) {
   Matcher m = {regex, subject, subject.len(), 0, 0, starts, ends};
   for (int at = offset; at <= m.len; at++) {
     for (int i = 0; i < count; i++) starts[i] = ends[i] = -1;
-    if (m.run(regex.program, at, NULL)) return m.found(subject, at);
+    if (_run(m, regex.program, at, NULL)) return _found(m, subject, at);
   }
   return NULL;
 }
 
 /* The match that starts at `at`, with its captures in number order. */
-static RegexMatch Matcher.found(Matcher &m, String subject, int at) {
+static RegexMatch _found(Matcher &m, String subject, int at) {
   m.starts[0] = at;
   m.ends[0] = m.end;
   List captures = NULL;
   for (int i = m.regex.capture_count; i >= 0; i--)
-    captures = cons(m.capture(subject, i), captures);
+    captures = cons(_capture(m, subject, i), captures);
   return (RegexMatch) captures;
 }
 
 /* Capture `i` as the List `(index name matched text start end)`. */
-static RegexCapture Matcher.capture(Matcher &m, String subject, int i) {
+static RegexCapture _capture(Matcher &m, String subject, int i) {
   int start = m.starts[i], end = m.ends[i], matched = start >= 0;
   String name = i ? m.regex.capture_names[i - 1] : NULL;
   String text = matched ? subject[start:end] : NULL;
@@ -517,40 +517,40 @@ static typedef struct Rest {
 
 /* Runs the sequence from `n` at `pos`, then the rest `k`, and returns
    whether the whole pattern matched. */
-static int Matcher.run(Matcher &m, _RegexNode n, int pos, Rest *k) {
+static int _run(Matcher &m, _RegexNode n, int pos, Rest *k) {
   for (; n; n = n.next) {
     switch (n.kind) {
       case <set>: case <any>:
-        if (!m.accepts(n, pos)) return 0;
+        if (!_accepts(m, n, pos)) return 0;
         pos++;
         break;
-      case <bol>:    if (!m.at_line_start(pos)) return 0; break;
-      case <eol>:    if (!m.at_line_end(pos)) return 0; break;
-      case <wordb>:  if (!m.at_boundary(pos)) return 0; break;
-      case <nwordb>: if (m.at_boundary(pos)) return 0; break;
-      case <group>:  return m.group(n, pos, k);
-      case <capend>: return m.capture_end(n, pos, k);
-      case <alt>:    return m.alternation(n, pos, k);
-      case <repeat>: return m.repeat(n, pos, k);
+      case <bol>:    if (!_at_line_start(m, pos)) return 0; break;
+      case <eol>:    if (!_at_line_end(m, pos)) return 0; break;
+      case <wordb>:  if (!_at_boundary(m, pos)) return 0; break;
+      case <nwordb>: if (_at_boundary(m, pos)) return 0; break;
+      case <group>:  return _match_group(m, n, pos, k);
+      case <capend>: return _capture_end(m, n, pos, k);
+      case <alt>:    return _match_alternation(m, n, pos, k);
+      case <repeat>: return _repeat(m, n, pos, k);
     }
   }
-  return m.resume(pos, k);
+  return _resume(m, pos, k);
 }
 
-static int Matcher.accepts(Matcher &m, _RegexNode n, int pos) {
+static int _accepts(Matcher &m, _RegexNode n, int pos) {
   if (pos >= m.len) return 0;
   int byte = (unsigned char) m.text[pos];
   if (n.kind == <any>) return m.regex.dotall || byte != '\n';
-  return n._has(byte) != 0;
+  return _has(n, byte) != 0;
 }
 
-static int Matcher.at_line_start(Matcher &m, int pos) =>
+static int _at_line_start(Matcher &m, int pos) =>
   pos == 0 || (m.regex.multiline && m.text[pos - 1] == '\n');
 
-static int Matcher.at_line_end(Matcher &m, int pos) =>
+static int _at_line_end(Matcher &m, int pos) =>
   pos == m.len || (m.regex.multiline && m.text[pos] == '\n');
 
-static int Matcher.at_boundary(Matcher &m, int pos) {
+static int _at_boundary(Matcher &m, int pos) {
   int before = pos > 0 && _is_word((unsigned char) m.text[pos - 1]);
   int after = pos < m.len && _is_word((unsigned char) m.text[pos]);
   return before != after;
@@ -558,40 +558,40 @@ static int Matcher.at_boundary(Matcher &m, int pos) {
 
 /* A capture records its start, and restores the old offsets when the rest
    of the match fails. */
-static int Matcher.group(Matcher &m, _RegexNode n, int pos, Rest *k) {
+static int _match_group(Matcher &m, _RegexNode n, int pos, Rest *k) {
   Rest after = {0, n.next, 0, 0, k};
-  if (n.index < 0) return m.run(n.child, pos, &after);
+  if (n.index < 0) return _run(m, n.child, pos, &after);
   int old_start = m.starts[n.index], old_end = m.ends[n.index];
   m.starts[n.index] = pos;
-  if (m.run(n.child, pos, &after)) return 1;
+  if (_run(m, n.child, pos, &after)) return 1;
   m.starts[n.index] = old_start;
   m.ends[n.index] = old_end;
   return 0;
 }
 
-static int Matcher.capture_end(Matcher &m, _RegexNode n, int pos, Rest *k) {
+static int _capture_end(Matcher &m, _RegexNode n, int pos, Rest *k) {
   int old_end = m.ends[n.index];
   m.ends[n.index] = pos;
-  if (m.run(n.next, pos, k)) return 1;
+  if (_run(m, n.next, pos, k)) return 1;
   m.ends[n.index] = old_end;
   return 0;
 }
 
-static int Matcher.alternation(Matcher &m, _RegexNode n, int pos, Rest *k) {
+static int _match_alternation(Matcher &m, _RegexNode n, int pos, Rest *k) {
   Rest after = {0, n.next, 0, 0, k};
   for (_RegexNode alt = n.child; alt; alt = alt.sibling)
-    if (m.run(alt.child, pos, &after)) return 1;
+    if (_run(m, alt.child, pos, &after)) return 1;
   return 0;
 }
 
 /* Without a continuation the match is complete at `pos`. */
-static int Matcher.resume(Matcher &m, int pos, Rest *k) {
+static int _resume(Matcher &m, int pos, Rest *k) {
   if (!k) {
     m.end = pos;
     return 1;
   }
-  if (k.repeat) return m.iterate(k.node, k.count + 1, pos, k.start, k.up);
-  return m.run(k.node, pos, k.up);
+  if (k.repeat) return _iterate(m, k.node, k.count + 1, pos, k.start, k.up);
+  return _run(m, k.node, pos, k.up);
 }
 
 /* repeats
@@ -604,57 +604,57 @@ static int Matcher.resume(Matcher &m, int pos, Rest *k) {
    before the stack runs out, on any thread. */
 static const int _DEPTH_LIMIT = 2000;
 
-static int Matcher.repeat(Matcher &m, _RegexNode n, int pos, Rest *k) {
+static int _repeat(Matcher &m, _RegexNode n, int pos, Rest *k) {
   if (n.child.kind == <set> || n.child.kind == <any>)
-    return m.byte_loop(n, pos, k);
-  return m.iterate(n, 0, pos, -1, k);
+    return _byte_loop(m, n, pos, k);
+  return _iterate(m, n, 0, pos, -1, k);
 }
 
-static int Matcher.byte_loop(Matcher &m, _RegexNode rep, int pos, Rest *k) {
+static int _byte_loop(Matcher &m, _RegexNode rep, int pos, Rest *k) {
   int limit = rep.max < 0 ? m.len - pos : rep.max, count = 0;
-  while (count < limit && m.accepts(rep.child, pos + count)) count++;
+  while (count < limit && _accepts(m, rep.child, pos + count)) count++;
   if (count < rep.min) return 0;
   if (rep.greedy) {
     for (int n = count; n >= rep.min; n--)
-      if (m.run(rep.next, pos + n, k)) return 1;
+      if (_run(m, rep.next, pos + n, k)) return 1;
     return 0;
   }
   for (int n = rep.min; n <= count; n++)
-    if (m.run(rep.next, pos + n, k)) return 1;
+    if (_run(m, rep.next, pos + n, k)) return 1;
   return 0;
 }
 
 /* Runs iteration `count` of `rep` at `pos`; the previous iteration started
    at `last_start`. */
-static int Matcher.iterate(
+static int _iterate(
   Matcher &m, _RegexNode rep, int count, int pos, int last_start, Rest *k) {
-  if (m.depth == _DEPTH_LIMIT) m.too_deep();
+  if (m.depth == _DEPTH_LIMIT) _too_deep(m);
   m.depth++;
-  int matched = m.iteration(rep, count, pos, last_start, k);
+  int matched = _iteration(m, rep, count, pos, last_start, k);
   m.depth--;
   return matched;
 }
 
-static void Matcher.too_deep(Matcher &m) {
+static void _too_deep(Matcher &m) {
   $error.depth(m.regex.pattern, _DEPTH_LIMIT);
 }
 
 /* Runs the body again or goes on with the rest, in greedy or lazy order.
    An iteration that matched nothing ends the repeat once `min` is met, so
    an empty body cannot loop. */
-static int Matcher.iteration(
+static int _iteration(
   Matcher &m, _RegexNode rep, int count, int pos, int last_start, Rest *k) {
   if (count > 0 && pos == last_start && count >= rep.min)
-    return m.run(rep.next, pos, k);
+    return _run(m, rep.next, pos, k);
   int more = rep.max < 0 || count < rep.max;
   Rest again = {1, rep, count, pos, k};
-  if (count < rep.min) return m.run(rep.child, pos, &again);
+  if (count < rep.min) return _run(m, rep.child, pos, &again);
   if (rep.greedy) {
-    if (more && m.run(rep.child, pos, &again)) return 1;
-    return m.run(rep.next, pos, k);
+    if (more && _run(m, rep.child, pos, &again)) return 1;
+    return _run(m, rep.next, pos, k);
   }
-  if (m.run(rep.next, pos, k)) return 1;
-  return more && m.run(rep.child, pos, &again);
+  if (_run(m, rep.next, pos, k)) return 1;
+  return more && _run(m, rep.child, pos, &again);
 }
 
 // replacement

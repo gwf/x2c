@@ -49,13 +49,13 @@ int Symbol.is_type_qualifier(Symbol sym) => sym in type_qualifiers;
 /** Returns whether `sym` modifies the width or signedness of a scalar. */
 int Symbol.is_type_modifier(Symbol sym) => sym in type_modifiers;
 
-static int Symbol._is_number_type(Symbol sym) => sym in number_types;
+static int _is_number_type(Symbol sym) => sym in number_types;
 
-static int Symbol._is_tagged(Symbol sym) => sym in tagged_types;
+static int _is_tag_keyword(Symbol sym) => sym in tagged_types;
 
 /** Returns whether `sym` can begin a builtin C type specifier. */
 int Symbol.is_builtin_type(Symbol sym) =>
-  sym._is_number_type() || sym._is_tagged() || sym == <void>;
+  _is_number_type(sym) || _is_tag_keyword(sym) || sym == <void>;
 
 // aggregates and enums
 
@@ -66,7 +66,7 @@ int Type.is_aggregate(Type type) => !!type.match(%((!or struct union) *));
 int Type.is_aggregate_tag(Type t) =>
   !!t.match(%((!or struct union) (!or (!not (*)) (gensym ? ?) (binding ? ?))));
 
-static int Type._is_aggregate_body(Type type) =>
+static int _is_aggregate_body(Type type) =>
   !!type.match(%((!or struct union) (*)));
 
 /** Returns whether `type` is a tagged struct or union definition. */
@@ -80,7 +80,7 @@ int Type.is_enum(Type type) => !!type.match(%(enum *));
 int Type.is_enum_tag(Type type) =>
   !!type.match(%(enum (!or (!not (*)) (gensym ? ?))));
 
-static int Type._is_enum_body(Type type) => !!type.match(%(enum (*)));
+static int _is_enum_body(Type type) => !!type.match(%(enum (*)));
 
 /** Returns whether `type` is a tagged enum definition. */
 int Type.is_enum_tag_body(Type type) => !!type.match(%(enum ? (*)));
@@ -100,7 +100,7 @@ List Type.tag(Type type) {
     Tag references and `Type`s without a stored body return `NULL`.
 */
 List Type.body(Type t) {
-  if (t._is_enum_body() || t._is_aggregate_body()) return cdr(t);
+  if (_is_enum_body(t) || _is_aggregate_body(t)) return cdr(t);
   if (t.is_enum_tag_body() || t.is_aggregate_tag_body()) return t.cddr();
   return NULL;
 }
@@ -296,12 +296,12 @@ int Type.is_char_pointer_like(Type type) {
 }
 
 /** Returns whether `type` is a builtin scalar, struct, union, or enum. */
-int Type.is_builtin(Type type) => !!type.scalar() || type._is_tagged();
+int Type.is_builtin(Type type) => !!type.scalar() || _is_tagged(type);
 
-static int Type._is_tagged(Type type) {
+static int _is_tagged(Type type) {
   if (!type) return 0;
   Var first = type.car();
-  if (first is <symbol>) return Symbol._is_tagged(first);
+  if (first is <symbol>) return _is_tag_keyword(first);
   return 0;
 }
 
@@ -341,13 +341,13 @@ static typedef struct Specifiers {
 */
 Type Type.scalar(Type t) {
   Specifiers s = { 0 };
-  foreach (Var item, t) if (item is not <symbol> || !s.add(item)) return NULL;
-  return s.spelling();
+  foreach (Var item, t) if (item is not <symbol> || !_add(s, item)) return NULL;
+  return _spelling(s);
 }
 
 /* Counts one specifier; storage classes, qualifiers, and `inline` count as
    nothing. Any other symbol means the type is no scalar. */
-static int Specifiers.add(Specifiers &s, Symbol symbol) {
+static int _add(Specifiers &s, Symbol symbol) {
   if (_omit_specifier(symbol, 0)) return 1;
   s.count++;
   switch (symbol) {
@@ -366,7 +366,7 @@ static int Specifiers.add(Specifiers &s, Symbol symbol) {
 }
 
 /* The one spelling C gives a valid combination of counts, or `NULL`. */
-static Type Specifiers.spelling(Specifiers &s) {
+static Type _spelling(Specifiers &s) {
   if (!s.count || s.signs > 1 || s.shorts > 1 || s.longs > 2 || s.ints > 1 ||
       s.chars > 1 || s.floats > 1 || s.doubles > 1 || s.voids > 1)
     return NULL;

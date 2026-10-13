@@ -69,7 +69,7 @@ static macro Stmt $report.build.compiler_used(Expr $b, Expr $jobs) =>
   report_line(<muted>, %"  Compiled with ${$b.toolchain.cc} using ${$jobs}");
 
 static macro Stmt $report.build.intermediates(Expr $b) =>
-  report_line(<muted>, %"  Intermediates ${$b.work_dir} (${$b._retention()})");
+  report_line(<muted>, %"  Intermediates ${$b.work_dir} (${_retention($b)})");
 
 static macro Stmt $report.build.output_size(Expr $b, Expr $size) =>
   report_line(<muted>, %"  Output ${$b.output} (${$size})");
@@ -155,7 +155,7 @@ static String _key(String path) {
   return %"$stem-$digest";
 }
 
-static String Build._unit_dir(Build b, String unit) =>
+static String _unit_dir(Build b, String unit) =>
   %"${b.gen_root}/${_key(unit)}";
 
 /* A unit's generated C, header, interface, and depfile share its stem. */
@@ -163,7 +163,7 @@ static String _unit_file(String directory, String unit, String suffix) =>
   %"$directory/${Path.stem(unit)}$suffix";
 
 /* The state record of one artifact, keyed like the artifact. */
-static String Build._state_path(Build b, String kind, String path) =>
+static String _state_path(Build b, String kind, String path) =>
   %"${b.state_root}/$kind-${_key(path)}";
 
 /* The suffix of one process's private sibling of a shared artifact path.
@@ -180,28 +180,28 @@ static String _process_suffix(void) => "tmp.%ld".printf((long) getpid());
     diagnostic and exit with status 2.
 */
 Build CliRequest.prepare(CliRequest request) {
-  request._add_extensions();
+  _add_extensions(request);
   if (!request.inputs)
     driver_error("build requires input operands or a project manifest");
   Build b = Scope.calloc(1, sizeof(struct Build));
   *b = (struct Build) {
     .request = request, .c_sources = [], .gen_dirs = [], .units = [],
     .native_inputs = [], .objects = []};
-  b._add_inputs();
-  if (request.compile_only) b._check_compile_only();
+  _add_inputs(b);
+  if (request.compile_only) _check_compile_only(b);
   if (!request.state_seed) request.state_seed = "direct";
-  b._select_tools();
+  _select_tools(b);
   if (request.compile_commands && !request.dry_run) b.compile_commands = [];
-  b.output = request._default_output();
+  b.output = _default_output(request);
   b.started_at = report_now_us();
   b.started_wall = _wall_seconds();
-  b._make_work_dirs();
-  b._check_runtime();
+  _make_work_dirs(b);
+  _check_runtime(b);
   return b;
 }
 
 /* A linked package's sources are units, translated in package mode. */
-static void CliRequest._add_extensions(CliRequest request) {
+static void _add_extensions(CliRequest request) {
   foreach (String package, request.extensions) {
     String root = Path.absolute(package), parent = Path.dirname(root);
     request.package_dirs = request.package_dirs.append(%($parent));
@@ -212,7 +212,7 @@ static void CliRequest._add_extensions(CliRequest request) {
 
 /* x2c sources translate, C sources compile, and objects and archives link
    as given. */
-static void Build._add_inputs(Build b) {
+static void _add_inputs(Build b) {
   CliRequest request = b.request;
   foreach (String input, request.inputs) {
     // A dry run runs nothing and reads nothing, and a planned target's
@@ -248,7 +248,7 @@ void build_check_input(String input) {
 
 /* Compile-only builds make one object per source, so every input compiles
    and several objects need a build directory. */
-static void Build._check_compile_only(Build b) {
+static void _check_compile_only(Build b) {
   List inputs = b.request.inputs;
   if (b.native_inputs)
     driver_error("compile-only accepts only .x and .c inputs");
@@ -259,7 +259,7 @@ static void Build._check_compile_only(Build b) {
 }
 
 /* The selected compiler and archiver go back to the request. */
-static void Build._select_tools(Build b) {
+static void _select_tools(Build b) {
   CliRequest request = b.request;
   b.toolchain = toolchain_new(request);
   request.cc = b.toolchain.cc; request.ar = b.toolchain.ar;
@@ -270,7 +270,7 @@ static void Build._select_tools(Build b) {
 
 /* An unnamed output is named for the first input and the kind.
    `Build.finish` places a run's output in the work directory. */
-static String CliRequest._default_output(CliRequest request) {
+static String _default_output(CliRequest request) {
   if (request.output) return request.output;
   if (request.command == <run>) return NULL;
   String stem = Path.stem(request.inputs.car());
@@ -282,9 +282,9 @@ static String CliRequest._default_output(CliRequest request) {
 
 /* Intermediates go to the requested directory, which the build keeps, or to
    a temporary one that a successful build removes. */
-static void Build._make_work_dirs(Build b) {
+static void _make_work_dirs(Build b) {
   CliRequest request = b.request;
-  b.work_dir = request._kept_dir();
+  b.work_dir = _kept_dir(request);
   b.temporary = !b.work_dir;
   try {
     if (!b.work_dir && request.dry_run) b.work_dir = "/tmp/x2c-build-dry-run";
@@ -300,14 +300,14 @@ static void Build._make_work_dirs(Build b) {
   catch %(io-fail *detail): host_error(detail);
 }
 
-static String CliRequest._kept_dir(CliRequest request) {
+static String _kept_dir(CliRequest request) {
   if (request.build_dir) return request.build_dir;
   if (request.temps_dir) return request.temps_dir;
   return request.save_temps ? ".x2c-build" : NULL;
 }
 
 /* An executable links the runtime archive that matches this compiler. */
-static void Build._check_runtime(Build b) {
+static void _check_runtime(Build b) {
   if (b.request.compile_only || b.request.kind != <executable>) return;
   String runtime = b.toolchain.runtime_lib;
   if (access(runtime, R_OK))
@@ -321,7 +321,7 @@ static void Build._check_runtime(Build b) {
     a dry run. Native registration belongs to `Build.add_generated`.
 */
 String Build.generated_dir(Build b, String input) {
-  String directory = b._unit_dir(input);
+  String directory = _unit_dir(b, input);
   if (!b.request.dry_run) Path.make_dirs(directory);
   return directory;
 }
@@ -336,14 +336,14 @@ int Build.translation_current(Build b, String input, String directory) {
   foreach (String suffix, %(".c" ".h" ".xi"))
     if (!Path.is_file(_unit_file(directory, input, suffix))) return 0;
   int ok = 1;
-  uint64_t hash = b._translation_fingerprint(input, directory, ok);
-  int current = ok && _state_matches(b._state_path("x", input), hash);
+  uint64_t hash = _translation_fingerprint(b, input, directory, ok);
+  int current = ok && _state_matches(_state_path(b, "x", input), hash);
   if (current && b.request.verbose)
     $report.build.translation_cached(input);
   return current;
 }
 
-static uint64_t Build._translation_fingerprint(
+static uint64_t _translation_fingerprint(
   Build b, String input, String directory, int &ok) {
   CliRequest request = b.request;
   uint64_t hash = _state_base(request, b.toolchain.cc, ok);
@@ -398,9 +398,9 @@ void Build.record_translation(Build b, String input, String directory) {
   if (!b.state_root || b.request.dry_run) return;
   String depfile = _unit_file(directory, input, ".d");
   int ok = 1;
-  uint64_t hash = b._translation_fingerprint(input, directory, ok);
-  if (ok && b._files_unchanged(_depfile_inputs(depfile)))
-    _state_write(b._state_path("x", input), hash);
+  uint64_t hash = _translation_fingerprint(b, input, directory, ok);
+  if (ok && _files_unchanged(b, _depfile_inputs(depfile)))
+    _state_write(_state_path(b, "x", input), hash);
 }
 
 /** Registers generated artifacts for native compilation.
@@ -416,13 +416,13 @@ void Build.add_generated(Build b, String input, String directory) {
   b.c_sources.push(source);
   b.units.push(input);
   if (!(directory in b.gen_dirs)) b.gen_dirs.push(directory);
-  b._link_packages(input, directory);
+  _link_packages(b, input, directory);
 }
 
 /* Imported packages reach the build through the unit's recorded
    dependencies. Only an import pulls a package file into a consumer, and
    the record is present even when the translation result was reused. */
-static void Build._link_packages(Build b, String input, String directory) {
+static void _link_packages(Build b, String input, String directory) {
   List roots = b.request.package_roots();
   if (!roots) return;
   String self = Path.absolute(input);
@@ -434,8 +434,8 @@ static void Build._link_packages(Build b, String input, String directory) {
         dependency == input)
       continue;
     String package = package_directory(roots, dependency);
-    if (package && !b._package_built_here(roots, package))
-      b._link_package(package);
+    if (package && !_package_built_here(b, roots, package))
+      _link_package(b, package);
   }
 }
 
@@ -443,7 +443,7 @@ static void Build._link_packages(Build b, String input, String directory) {
    own sources, and a module built from them, link no archive of their own;
    a test or example inside the package directory imports the package like
    any consumer. */
-static int Build._package_built_here(Build b, List roots, String package) {
+static int _package_built_here(Build b, List roots, String package) {
   foreach (String input, b.request.inputs) {
     String source = Path.absolute(input);
     if (package_directory(roots, source) == package &&
@@ -454,7 +454,7 @@ static int Build._package_built_here(Build b, List roots, String package) {
 
 /* A package's generated headers and native compile options reach every
    consumer, and a program also links its archive and link inputs. */
-static void Build._link_package(Build b, String package) {
+static void _link_package(Build b, String package) {
   String builds = %"$package/builds";
   if (builds in b.gen_dirs) return;
   b.gen_dirs.push(builds);
@@ -493,7 +493,7 @@ CliRequest Build.module_entry(Build b) {
   if (!stamp) driver_error("cannot read the running compiler to stamp");
   Path entry = %"${b.work_dir}/module/x2c_module.x";
   _write_entry(entry, b.units, $source.build.module(stamp));
-  return b._entry_request(%($entry));
+  return _entry_request(b, %($entry));
 }
 
 /** Writes the registration unit of each package the request links in with
@@ -514,12 +514,12 @@ CliRequest Build.extension_entries(Build b) {
     entries.push(entry);
     packages[Path.absolute(entry)] = root;
   }
-  CliRequest request = b._entry_request(entries.list_free());
+  CliRequest request = _entry_request(b, entries.list_free());
   request.collection_packages = packages;
   return request;
 }
 
-static CliRequest Build._entry_request(Build b, List entries) {
+static CliRequest _entry_request(Build b, List entries) {
   CliRequest request = Scope.memdup(b.request, sizeof(struct CliRequest));
   request.inputs = entries;
   b.xlat_n += entries.len();
@@ -567,24 +567,24 @@ static void _write_entry(Path entry, List units, String exports) {
     fails the build and preserves intermediates.
 */
 int Build.finish(Build b) {
-  b._place_unit_headers();
-  if (b._compile_sources()) return 1;
+  _place_unit_headers(b);
+  if (_compile_sources(b)) return 1;
   if (b.request.compile_only) return 0;
   if (b.request.command == <run> && !b.output) b.output = %"${b.work_dir}/run";
-  List inputs = b._final_inputs();
-  ToolAction action = b._final_action(b.output, inputs);
+  List inputs = _final_inputs(b);
+  ToolAction action = _final_action(b, b.output, inputs);
   Symbol phase = action.phase, int count = inputs.len();
   b.final_at = report_now_us();
   report_progress(phase, 0, 1, b.output);
-  String record = b._final_record();
+  String record = _final_record(b);
   int ok = 1;
-  uint64_t hash = record ? b._action_fingerprint(action, inputs, ok) : 0;
-  if (ok && b._archive_current(phase, record, hash))
-    return b._keep_output(phase, count);
-  int status = b.request.dry_run ? action.run() : b._publish(inputs);
-  if (status < 0) return b._keep_output(phase, count);
-  if (status || b._dsym() || b._archive_extensions()) return 1;
-  b._report_final(phase, count, 0);
+  uint64_t hash = record ? _action_fingerprint(b, action, inputs, ok) : 0;
+  if (ok && _archive_current(b, phase, record, hash))
+    return _keep_output(b, phase, count);
+  int status = b.request.dry_run ? action.run() : _publish(b, inputs);
+  if (status < 0) return _keep_output(b, phase, count);
+  if (status || _dsym(b) || _archive_extensions(b)) return 1;
+  _report_final(b, phase, count, 0);
   if (record && ok) _state_write(record, hash);
   return 0;
 }
@@ -593,16 +593,16 @@ int Build.finish(Build b) {
    `#include "lib/inner.x"`, names that unit's generated header by the same
    path from its own generated directory. Copying the header to that path
    lets the include resolve as it does beside the sources. */
-static void Build._place_unit_headers(Build b) {
+static void _place_unit_headers(Build b) {
   if (b.request.dry_run || b.units.len() < 2) return;
   Map headers = {};
   foreach (String unit, b.units)
-    headers[Path.absolute(unit)] = _unit_file(b._unit_dir(unit), unit, ".h");
-  foreach (String unit, b.units) b._place_includes(headers, unit);
+    headers[Path.absolute(unit)] = _unit_file(_unit_dir(b, unit), unit, ".h");
+  foreach (String unit, b.units) _place_includes(b, headers, unit);
 }
 
-static void Build._place_includes(Build b, Map headers, String unit) {
-  String directory = b._unit_dir(unit);
+static void _place_includes(Build b, Map headers, String unit) {
+  String directory = _unit_dir(b, unit);
   List searched = %(${Path.dirname(unit)} @{b.request.include_dirs});
   foreach (String suffix, %(".h" ".c")) {
     String text = Path.read_text(_unit_file(directory, unit, suffix));
@@ -658,7 +658,7 @@ static typedef struct CcPool {
 
 /* Compiles every C source and reports the phase. Returns nonzero when a
    compile failed. */
-static int Build._compile_sources(Build b) {
+static int _compile_sources(Build b) {
   if (b.compile_commands != NULL) b.compile_directory = Path.absolute(".");
   CcPool pool = {
     .b = b, .running = Scope.calloc(b.request.jobs, sizeof(CcJob))};
@@ -666,10 +666,10 @@ static int Build._compile_sources(Build b) {
   b.cc_start = report_now_us();
   int failed = 0;
   foreach (String source, b.c_sources) {
-    failed = pool.add(source);
+    failed = _add(pool, source);
     if (failed) break;
   }
-  while (pool.count) failed |= pool.wait();
+  while (pool.count) failed |= _wait(pool);
   Scope.free(pool.running);
   if (failed || !b.cc_n) return failed;
   String noun = b.cc_n == 1 ? "C file" : "C files";
@@ -680,23 +680,23 @@ static int Build._compile_sources(Build b) {
 
 /* Starts compiling `source` once the ready jobs finish, and waits for one
    when every slot is busy. Returns nonzero when a finished job failed. */
-static int CcPool.add(CcPool &pool, String source) {
+static int _add(CcPool &pool, String source) {
   Build b = pool.b;
   report_progress(<compile>, b.cc_done, b.cc_n, source);
-  List directories = b._include_dirs(source);
-  CcJob job = b._compile_job(source, directories);
-  if (pool.reap(0)) return 1;
+  List directories = _include_dirs(b, source);
+  CcJob job = _compile_job(b, source, directories);
+  if (_reap(pool, 0)) return 1;
   ToolAction step = job.preprocessed ?
     b.toolchain.preprocess_action(source, job.preprocessed, directories) :
     job.action;
   job.execution = step.start();
   pool.running[pool.count++] = job;
-  return pool.count >= b.request.jobs && pool.wait();
+  return pool.count >= b.request.jobs && _wait(pool);
 }
 
 /* The compile of a generated source searches its own directory first, then
    each generated and package directory once. */
-static List Build._include_dirs(Build b, String source) {
+static List _include_dirs(Build b, String source) {
   Array directories = [];
   if (source.startswith(b.gen_root)) directories.push(Path.dirname(source));
   foreach (Var directory, b.gen_dirs)
@@ -706,7 +706,7 @@ static List Build._include_dirs(Build b, String source) {
 
 /* Plans the compile of `source` and records its object and compilation
    database entry. */
-static CcJob Build._compile_job(Build b, String source, List directories) {
+static CcJob _compile_job(Build b, String source, List directories) {
   String key = _key(source), object = %"${b.obj_root}/$key.o";
   if (b.request.compile_only && !b.request.inputs.cdr()) object = b.output;
   String depfile = %"${b.dep_root}/$key.d";
@@ -715,16 +715,16 @@ static CcJob Build._compile_job(Build b, String source, List directories) {
     .source = source, .object = object, .depfile = depfile};
   b.objects.push(object);
   if (b.compile_commands != NULL)
-    b.compile_commands.push(b._compile_command(job));
+    b.compile_commands.push(_compile_command(b, job));
   if (!b.state_root) return job;
-  job.state_path = b._state_path("c", source);
+  job.state_path = _state_path(b, "c", source);
   // Per process: concurrent builds of one project share `dep_root`.
   if (!b.request.dry_run)
     job.preprocessed = %"${b.dep_root}/$key.${_process_suffix()}.i";
   return job;
 }
 
-static String Build._compile_command(Build b, CcJob job) {
+static String _compile_command(Build b, CcJob job) {
   Map entry = {
     directory: b.compile_directory, file: job.source, output: job.object,
     arguments: job.action.arguments
@@ -751,10 +751,10 @@ int compile_commands_write(String path, Array commands) {
 
 /* Finishes the ready jobs from slot `i` on. Returns nonzero when one
    failed. */
-static int CcPool.reap(CcPool &pool, int i) {
+static int _reap(CcPool &pool, int i) {
   int failed = 0;
   while (i < pool.count) {
-    int status = pool.running[i].execution.ready() ? pool.finish(i) : -1;
+    int status = pool.running[i].execution.ready() ? _finish(pool, i) : -1;
     if (status < 0) i++;
     else failed |= status;
   }
@@ -765,12 +765,12 @@ static int CcPool.reap(CcPool &pool, int i) {
    lone job uses the ordinary blocking wait; parallel jobs keep their own
    statuses and captures. The short idle delay bounds polling without a
    global child signal handler or consuming another owner's child status. */
-static int CcPool.wait(CcPool &pool) {
+static int _wait(CcPool &pool) {
   for (;;) {
     for (int i = 0; i < pool.count; i++) {
       if (pool.count > 1 && !pool.running[i].execution.ready()) continue;
-      int status = pool.finish(i);
-      if (status >= 0) return status | pool.reap(i);
+      int status = _finish(pool, i);
+      if (status >= 0) return status | _reap(pool, i);
     }
     usleep(1000);
   }
@@ -778,9 +778,9 @@ static int CcPool.wait(CcPool &pool) {
 
 /* Finishes the step job `i` runs. A job that is done or failed leaves the
    pool; one whose preprocessing started its compile stays, for -1. */
-static int CcPool.finish(CcPool &pool, int i) {
+static int _finish(CcPool &pool, int i) {
   CcJob *at = pool.running + i;
-  int status = pool.b._finish_job(*at);
+  int status = _finish_job(pool.b, *at);
   if (status < 0) return -1;
   pool.count--;
   memmove(at, at + 1, (pool.count - i) * sizeof(CcJob));
@@ -789,10 +789,10 @@ static int CcPool.finish(CcPool &pool, int i) {
 
 /* Waits for the step `job` runs. Returns -1 when its preprocessing started
    the compile in the same slot, 1 when it failed, and 0 when it is done. */
-static int Build._finish_job(Build b, CcJob &job) {
+static int _finish_job(Build b, CcJob &job) {
   int status = job.execution.wait();
   if (job.preprocessed) {
-    int step = b._after_preprocess(job, status);
+    int step = _after_preprocess(b, job, status);
     if (step) return step;
   }
   else if (status) return 1;
@@ -807,25 +807,25 @@ static int Build._finish_job(Build b, CcJob &job) {
    and records nothing. Only the preprocessing command itself failing is an
    error, and the C compiler has already said why. Returns -1 when the
    compile starts, 1 on failure, and 0 when the object is current. */
-static int Build._after_preprocess(Build b, CcJob &job, int status) {
+static int _after_preprocess(Build b, CcJob &job, int status) {
   int ok = 1;
-  if (!status) job.fingerprint = b._compile_fingerprint(job, ok);
+  if (!status) job.fingerprint = _compile_fingerprint(b, job, ok);
   unlink(job.preprocessed);
   job.preprocessed = NULL;
   if (status) return 1;
   job.fingerprinted = ok;
-  if (ok && b._compile_current(job)) return 0;
+  if (ok && _compile_current(b, job)) return 0;
   job.execution = job.action.start();
   return -1;
 }
 
 /* The preprocessed text is scratch named for this process, so only what it
    says extends the compile fingerprint. */
-static uint64_t Build._compile_fingerprint(Build b, CcJob &job, int &ok) =>
+static uint64_t _compile_fingerprint(Build b, CcJob &job, int &ok) =>
   fnv_file(
-    b._action_fingerprint(job.action, NULL, ok), job.preprocessed, ok);
+    _action_fingerprint(b, job.action, NULL, ok), job.preprocessed, ok);
 
-static int Build._compile_current(Build b, CcJob &job) {
+static int _compile_current(Build b, CcJob &job) {
   if (access(job.object, R_OK) || access(job.depfile, R_OK)) return 0;
   if (!_state_matches(job.state_path, job.fingerprint)) return 0;
   if (b.request.verbose)
@@ -836,14 +836,14 @@ static int Build._compile_current(Build b, CcJob &job) {
 
 // the final action
 
-static List Build._final_inputs(Build b) {
+static List _final_inputs(Build b) {
   Array inputs = [];
   foreach (Var value, b.objects) inputs.push(value);
   foreach (Var value, b.native_inputs) inputs.push(value);
   return inputs.list_free();
 }
 
-static ToolAction Build._final_action(Build b, String output, List inputs) {
+static ToolAction _final_action(Build b, String output, List inputs) {
   if (b.request.kind == <static-lib>)
     return b.toolchain.archive_action(output, inputs);
   if (b.request.kind == <module>)
@@ -852,11 +852,11 @@ static ToolAction Build._final_action(Build b, String output, List inputs) {
 }
 
 /* The build records a final fingerprint only for a static library. */
-static String Build._final_record(Build b) =>
+static String _final_record(Build b) =>
   b.state_root && b.request.kind == <static-lib> && !b.request.dry_run ?
-    b._state_path("final", b.output) : NULL;
+    _state_path(b, "final", b.output) : NULL;
 
-static int Build._archive_current(
+static int _archive_current(
   Build b, Symbol phase, String record, uint64_t hash) {
   if (!record || access(b.output, R_OK)) return 0;
   if (!_state_matches(record, hash)) return 0;
@@ -867,13 +867,13 @@ static int Build._archive_current(
 
 /* The published output stays: every input counts as cached, and the build
    succeeds. */
-static int Build._keep_output(Build b, Symbol phase, int count) {
+static int _keep_output(Build b, Symbol phase, int count) {
   b.final_cached = 1;
-  b._report_final(phase, count, count);
+  _report_final(b, phase, count, count);
   return 0;
 }
 
-static void Build._report_final(
+static void _report_final(
   Build b, Symbol phase, int count, int cached) {
   report_progress(phase, 1, 1, b.output);
   report_phase(
@@ -892,12 +892,12 @@ static String _input_noun(Symbol phase, int count) {
    record in the file (the macOS ad-hoc signature does), so its bytes carry
    no process-specific name. Returns -1 when a relinked module is
    unchanged. */
-static int Build._publish(Build b, List inputs) {
+static int _publish(Build b, List inputs) {
   String name = Path.basename(b.output);
   String staging = %"${Path.dirname(b.output)}/.$name.${_process_suffix()}";
   Path.make_dirs(staging);
   String staged = %"$staging/$name";
-  int status = b._replace(b._final_action(staged, inputs), staged);
+  int status = _replace(b, _final_action(b, staged, inputs), staged);
   Path.remove_tree(staging);
   if (status < 0 && b.request.verbose)
     $report.build.link_unchanged(b.output);
@@ -907,7 +907,7 @@ static int Build._publish(Build b, List inputs) {
 /* A module relinks even when its named operands are unchanged: -L/-l can
    select an archive whose bytes changed. An identical module keeps the
    published file, so consumers can reuse their translations. */
-static int Build._replace(Build b, ToolAction action, String staged) {
+static int _replace(Build b, ToolAction action, String staged) {
   if (action.run()) return 1;
   if (b.request.kind == <module> && _same_file_bytes(staged, b.output))
     return -1;
@@ -935,8 +935,8 @@ static int _same_file_bytes(String first, String second) {
 // companion artifacts
 
 /* A mapped macOS debug build keeps its symbols in a companion dSYM. */
-static int Build._dsym(Build b) {
-  if (!b._mapped_debug()) return 0;
+static int _dsym(Build b) {
+  if (!_mapped_debug(b)) return 0;
   String output = b.output, symbols = %"$output.dSYM";
   return tool_action_new(
     <dsym>, %("dsymutil" $output "-o" $symbols), b.request.verbose,
@@ -944,7 +944,7 @@ static int Build._dsym(Build b) {
 }
 
 /* Native flags are ordered: an explicit -g0 can override a profile's -g. */
-static int Build._mapped_debug(Build b) {
+static int _mapped_debug(Build b) {
 #ifdef __APPLE__
   if (!b.request.source_map || b.request.kind == <static-lib>) return 0;
   List levels = %(
@@ -963,7 +963,7 @@ static int Build._mapped_debug(Build b) {
 /* A compiler that links packages in keeps their objects beside it, in an
    archive named by its identity, and their headers, for the project meta
    helper to compile and link against. */
-static int Build._archive_extensions(Build b) {
+static int _archive_extensions(Build b) {
   if (!b.request.extensions || b.request.dry_run) return 0;
   String directory = %"${b.output}.extensions";
   if (Path.exists(directory)) Path.remove_tree(directory);
@@ -971,7 +971,7 @@ static int Build._archive_extensions(Build b) {
   Path.make_dirs(include);
   Map sources = {};
   foreach (String package, b.request.extensions)
-    b._extension_sources(package, include, sources);
+    _extension_sources(b, package, include, sources);
   Array objects = [], int i = 0;
   foreach (String source, b.c_sources) {
     if (source in sources) objects.push(b.objects[i]);
@@ -984,7 +984,7 @@ static int Build._archive_extensions(Build b) {
 
 /* Adds the C sources of `package`'s units to `sources` and copies the
    headers of its x2c units into `include`. */
-static void Build._extension_sources(
+static void _extension_sources(
   Build b, String package, String include, Map sources) {
   String root = %"${Path.absolute(package)}/src/";
   foreach (String input, b.request.inputs) {
@@ -1006,25 +1006,25 @@ static void Build._extension_sources(
 /** Prints the completed build receipt and artifact details when enabled. */
 void Build.report_success(Build b) {
   if (!report_receipts()) return;
-  report_line(<success>, b._headline());
+  report_line(<success>, _headline(b));
   if (b.xlat_n) report_generated(b.xlat_n, b.gen_bytes);
   if (b.cc_n) {
     int n = b.request.jobs;
     String jobs = n == 1 ? "1 job" : %"$n jobs";
     $report.build.compiler_used(b, jobs);
   }
-  if (!b.request.compile_only) report_line(<muted>, b._final_tool());
+  if (!b.request.compile_only) report_line(<muted>, _final_tool(b));
   $report.build.intermediates(b);
   if (b.request.compile_only) return;
   String size = report_size(report_file_bytes(b.output));
   $report.build.output_size(b, size);
-  if (b._mapped_debug())
+  if (_mapped_debug(b))
     $report.build.debug_symbols(b);
 }
 
-static String Build._headline(Build b) {
+static String _headline(Build b) {
   String duration = report_duration(report_now_us() - b.started_at);
-  String cache = b._all_cached() ? " (up to date)" : "";
+  String cache = _all_cached(b) ? " (up to date)" : "";
   String label = b.request.label ? %" target '${b.request.label}'" : "";
   String built = %"Built$label", tail = %"in $duration$cache";
   if (!b.request.compile_only)
@@ -1034,18 +1034,18 @@ static String Build._headline(Build b) {
   return %"$built $objects object files in ${b.obj_root} $tail";
 }
 
-static int Build._all_cached(Build b) {
+static int _all_cached(Build b) {
   if (b.xlat_n && b.xlat_cached != b.xlat_n) return 0;
   if (b.cc_n && b.cc_cached != b.cc_n) return 0;
   if (!b.request.compile_only && !b.final_cached) return 0;
   return b.xlat_n || b.cc_n || b.final_cached;
 }
 
-static String Build._final_tool(Build b) =>
+static String _final_tool(Build b) =>
   b.request.kind == <static-lib> ?
     %"  Archived with ${b.toolchain.ar}" : %"  Linked with ${b.toolchain.cc}";
 
-static String Build._retention(Build b) {
+static String _retention(Build b) {
   if (!b.temporary) return "retained";
   if (b.request.command == <run>) return "temporary; removed after run";
   return "temporary; removed after build";
@@ -1089,7 +1089,7 @@ List Build.script_helpers(Build b) {
     .append(b.request.package_roots().map(%!(dir) => %"$dir/"));
   List prelude = compiler_prelude_sources().map(
     %!(String source) => Path.join(root, source));
-  String depfile = _unit_file(b._unit_dir(script), script, ".d");
+  String depfile = _unit_file(_unit_dir(b, script), script, ".d");
   Array candidates = [], helpers = [];
   foreach (String path, _depfile_inputs(depfile)) {
     if (path.startswith("search:") || !is_source_file(path) ||
@@ -1097,7 +1097,7 @@ List Build.script_helpers(Build b) {
     if (excluded.any(%!(String prefix) => path.startswith(prefix))) continue;
     candidates.push(path);
   }
-  Map members = b.script_members(candidates);
+  Map members = _script_members(b, candidates);
   foreach (String path, candidates) {
     if (path == script || path in members) continue;
     helpers.push(path);
@@ -1108,7 +1108,7 @@ List Build.script_helpers(Build b) {
 
 /* A module member is a content prerequisite, already translated in its
    entry. Ordinary included helpers can live beside those members. */
-static Map Build.script_members(Build b, List candidates) {
+static Map _script_members(Build b, List candidates) {
   Compiler c = Compiler.new();
   c.sources = b.request.sources;
   Map members = {};
@@ -1131,22 +1131,22 @@ static Map Build.script_members(Build b, List candidates) {
 */
 void Build.publish_script(Build b, String executable) {
   Path.move_to(b.output, executable);
-  if (b._mapped_debug()) {
+  if (_mapped_debug(b)) {
     Path symbols = %"$executable.dSYM";
     symbols.remove_tree();
     Path.move_to(%"${b.output}.dSYM", symbols);
   }
-  List files = b._script_files();
-  List paths = files.append(b._script_directories(files));
+  List files = _script_files(b);
+  List paths = files.append(_script_directories(b, files));
   int ok = 1;
   uint64_t hash = _script_fingerprint(b.request, b.toolchain.cc, paths, ok);
-  if (ok && b._files_unchanged(files))
+  if (ok && _files_unchanged(b, files))
     _state_write_lines(%"${b.state_root}/script", hash, paths);
 }
 
-static List Build._script_files(Build b) {
+static List _script_files(Build b) {
   String script = b.request.inputs.car();
-  String depfile = _unit_file(b._unit_dir(script), script, ".d");
+  String depfile = _unit_file(_unit_dir(b, script), script, ".d");
   Array files = [];
   foreach (String path, _depfile_inputs(depfile)) files.push(path);
   foreach (String source, b.c_sources)
@@ -1160,7 +1160,7 @@ static List Build._script_files(Build b) {
 /* Every directory a compile or link of the script searches: explicit include
    and library options, the compiler's own search lists, and the directory of
    each prerequisite, where quoted includes look first. */
-static List Build._script_directories(Build b, List prerequisites) {
+static List _script_directories(Build b, List prerequisites) {
   Array directories = [];
   foreach (Var directory, b.request.include_dirs) directories.push(directory);
   directories.push(b.toolchain.include_dir);
@@ -1170,7 +1170,7 @@ static List Build._script_directories(Build b, List prerequisites) {
     if (!path.startswith("search:")) directories.push(Path.dirname(path));
   foreach (Var directory, b.toolchain.search_directories())
     directories.push(directory);
-  return b._search_entries(directories);
+  return _search_entries(b, directories);
 }
 
 /* An option's directory is joined to its flag or is the next argument. */
@@ -1188,7 +1188,7 @@ static void _add_option_dirs(Array directories, List args) {
 
 /* Each directory once, absolute and ending in `/`, outside the work
    directory. */
-static List Build._search_entries(Build b, Array directories) {
+static List _search_entries(Build b, Array directories) {
   Array unique = [];
   String work = Path.absolute(b.work_dir);
   foreach (Var value, directories) {
@@ -1274,7 +1274,7 @@ static uint64_t _state_base(CliRequest request, String tool, int &ok) {
   return hash;
 }
 
-static uint64_t Build._action_fingerprint(
+static uint64_t _action_fingerprint(
   Build b, ToolAction action, List inputs, int &ok) {
   uint64_t hash = _state_base(b.request, action.arguments.car(), ok);
   hash = _state_text(hash, action.phase);
@@ -1362,7 +1362,7 @@ static void _state_write_lines(String path, uint64_t hash, List lines) {
    Every caller asks after hashing, never before: a write that reached the
    hash has already moved the modification time this reads. The build's own
    output under the work directory is not one of those files. */
-static int Build._files_unchanged(Build b, List files) {
+static int _files_unchanged(Build b, List files) {
   String work = %"${Path.absolute(b.work_dir)}/";
   foreach (String path, files) {
     if (path.startswith("search:")) path = path[7:];

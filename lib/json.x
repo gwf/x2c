@@ -75,19 +75,19 @@ static macro Stmt $error.write.nonfinite() {
 }
 
 static macro Stmt $error.read.trailing(Expr $reader) =>
-  $reader._fail("unexpected text after the value");
+  _fail($reader, "unexpected text after the value");
 
 static macro Stmt $error.read.depth(Expr $reader) =>
-  $reader._fail("nesting exceeds 512 levels");
+  _fail($reader, "nesting exceeds 512 levels");
 
 static macro Stmt $error.read.end(Expr $reader) =>
-  $reader._fail("unexpected end of input");
+  _fail($reader, "unexpected end of input");
 
 static macro Stmt $error.read.char(Expr $reader) =>
-  $reader._fail("unexpected character");
+  _fail($reader, "unexpected character");
 
 static macro Stmt $error.read.key(Expr $reader) =>
-  $reader._fail("expected a string key");
+  _fail($reader, "expected a string key");
 
 static macro Expression $reason.read.colon() => "expected ':'";
 
@@ -96,31 +96,31 @@ static macro Expression $reason.read.object.sep() => "expected ',' or '}'";
 static macro Expression $reason.read.array.sep() => "expected ',' or ']'";
 
 static macro Stmt $error.read.string.end(Expr $reader) =>
-  $reader._fail("unterminated string");
+  _fail($reader, "unterminated string");
 
 static macro Stmt $error.read.control(Expr $reader) =>
-  $reader._fail("control character in string");
+  _fail($reader, "control character in string");
 
 static macro Stmt $error.read.utf8(Expr $reader) =>
-  $reader._fail("invalid UTF-8");
+  _fail($reader, "invalid UTF-8");
 
 static macro Stmt $error.read.escape(Expr $reader) =>
-  $reader._fail("invalid escape");
+  _fail($reader, "invalid escape");
 
 static macro Stmt $error.read.surrogate(Expr $reader) =>
-  $reader._fail("unpaired surrogate");
+  _fail($reader, "unpaired surrogate");
 
 static macro Stmt $error.read.nul(Expr $reader) =>
-  $reader._fail("U+0000 cannot appear in a String");
+  _fail($reader, "U+0000 cannot appear in a String");
 
 static macro Stmt $error.read.unicode(Expr $reader) =>
-  $reader._fail("invalid \\u escape");
+  _fail($reader, "invalid \\u escape");
 
 static macro Stmt $error.read.number(Expr $reader) =>
-  $reader._fail("invalid number");
+  _fail($reader, "invalid number");
 
 static macro Stmt $error.read.range(Expr $reader) =>
-  $reader._fail("number out of range");
+  _fail($reader, "number out of range");
 
 #include <errno.h>
 #include <limits.h>
@@ -212,83 +212,83 @@ Var Json.read_file(Path path) => _parse(path.read_text(), path);
 
 static Var _parse(String source, String path) {
   Reader r = {.text = source ? source : "", .path = path};
-  Var value = r._value();
-  r._space();
-  if (r._peek()) $error.read.trailing(r);
+  Var value = _read_value(r);
+  _space(r);
+  if (_peek(r)) $error.read.trailing(r);
   return value;
 }
 
-static Var Reader._value(Reader &r) {
-  r._space();
-  switch (r._peek()) {
+static Var _read_value(Reader &r) {
+  _space(r);
+  switch (_peek(r)) {
     case '{': case '[': {
       if (++r.depth > JSON_MAX_DEPTH) $error.read.depth(r);
-      Var nested = r._peek() == '{' ? r._object() : r._array();
+      Var nested = _peek(r) == '{' ? _object(r) : _array(r);
       r.depth--;
       return nested;
     }
-    case '"': return r._string();
-    case 't': r._word("true"); return Json.bool(1);
-    case 'f': r._word("false"); return Json.bool(0);
-    case 'n': r._word("null"); return (Var) { .u64 = 0 };
+    case '"': return _string(r);
+    case 't': _word(r, "true"); return Json.bool(1);
+    case 'f': _word(r, "false"); return Json.bool(0);
+    case 'n': _word(r, "null"); return (Var) { .u64 = 0 };
     case '-': case '0': case '1': case '2': case '3': case '4':
-    case '5': case '6': case '7': case '8': case '9': return r._number();
+    case '5': case '6': case '7': case '8': case '9': return _number(r);
     case '\0': $error.read.end(r);
   }
   $error.read.char(r);
 }
 
-static Var Reader._object(Reader &r) {
+static Var _object(Reader &r) {
   Map object = {};
   r.at++;
-  r._space();
-  if (r._peek() == '}') {
+  _space(r);
+  if (_peek(r) == '}') {
     r.at++;
     return object;
   }
   loop {
-    r._space();
-    if (r._peek() != '"') $error.read.key(r);
-    String name = r._string();
-    r._expect(':', $reason.read.colon());
-    object[name] = r._value();
-    r._space();
-    if (r._peek() == '}') {
+    _space(r);
+    if (_peek(r) != '"') $error.read.key(r);
+    String name = _string(r);
+    _expect(r, ':', $reason.read.colon());
+    object[name] = _read_value(r);
+    _space(r);
+    if (_peek(r) == '}') {
       r.at++;
       return object;
     }
-    r._expect(',', $reason.read.object.sep());
+    _expect(r, ',', $reason.read.object.sep());
   }
 }
 
-static Var Reader._array(Reader &r) {
+static Var _array(Reader &r) {
   Array array = [];
   r.at++;
-  r._space();
-  if (r._peek() == ']') {
+  _space(r);
+  if (_peek(r) == ']') {
     r.at++;
     return array;
   }
   loop {
-    array.push(r._value());
-    r._space();
-    if (r._peek() == ']') {
+    array.push(_read_value(r));
+    _space(r);
+    if (_peek(r) == ']') {
       r.at++;
       return array;
     }
-    r._expect(',', $reason.read.array.sep());
+    _expect(r, ',', $reason.read.array.sep());
   }
 }
 
 /* Text without escapes becomes a String directly; the Buffer exists only
    once an escape needs decoding. A Buffer's truth is its length, so its
    presence is tested as a pointer. */
-static String Reader._string(Reader &r) {
+static String _string(Reader &r) {
   int run = ++r.at;
   Buffer decoded = NULL;
   defer decoded.free();
   loop {
-    int byte = r._peek();
+    int byte = _peek(r);
     if (byte == '"') {
       int end = r.at++;
       if (decoded == NULL) return String.new_len(r.text + run, end - run);
@@ -298,7 +298,7 @@ static String Reader._string(Reader &r) {
     if (byte == '\\') {
       if (decoded == NULL) decoded = Buffer.new(0);
       decoded.write_len(r.text + run, r.at - run);
-      r._escape(decoded);
+      _escape(r, decoded);
       run = r.at;
     }
     else if (!byte) $error.read.string.end(r);
@@ -311,7 +311,7 @@ static String Reader._string(Reader &r) {
   }
 }
 
-static void Reader._escape(Reader &r, Buffer out) {
+static void _escape(Reader &r, Buffer out) {
   int escape = r.text[++r.at];
   r.at++;
   switch (escape) {
@@ -327,14 +327,14 @@ static void Reader._escape(Reader &r, Buffer out) {
       $error.read.escape(r);
   }
   int start = r.at - 2;
-  long point = r._hex4();
+  long point = _hex4(r);
   if (point >= 0xD800 && point <= 0xDBFF) {
-    if (r._peek() != '\\' || r.text[r.at + 1] != 'u') {
+    if (_peek(r) != '\\' || r.text[r.at + 1] != 'u') {
       r.at = start;
       $error.read.surrogate(r);
     }
     r.at += 2;
-    long low = r._hex4();
+    long low = _hex4(r);
     if (low < 0xDC00 || low > 0xDFFF) {
       r.at = start;
       $error.read.surrogate(r);
@@ -352,10 +352,10 @@ static void Reader._escape(Reader &r, Buffer out) {
   _write_code_point(out, point);
 }
 
-static long Reader._hex4(Reader &r) {
+static long _hex4(Reader &r) {
   long unit = 0;
   for (int i = 0; i < 4; i++) {
-    int digit = scan_ascii_hex_value(r._peek());
+    int digit = scan_ascii_hex_value(_peek(r));
     if (digit < 0) $error.read.unicode(r);
     unit = unit * 16 + digit;
     r.at++;
@@ -365,24 +365,24 @@ static long Reader._hex4(Reader &r) {
 
 /* The grammar check runs first, so strtol, strtoul, and strtod stop exactly
    at `r.at`: none of them sees a sign, radix prefix, or suffix JSON lacks. */
-static Var Reader._number(Reader &r) {
+static Var _number(Reader &r) {
   int start = r.at;
-  if (r._peek() == '-') r.at++;
-  if (r._peek() == '0') r.at++;
-  else if (!r._digits()) $error.read.number(r);
+  if (_peek(r) == '-') r.at++;
+  if (_peek(r) == '0') r.at++;
+  else if (!_digits(r)) $error.read.number(r);
   int integral = 1;
-  if (r._peek() == '.') {
+  if (_peek(r) == '.') {
     integral = 0;
     r.at++;
-    if (!r._digits()) $error.read.number(r);
+    if (!_digits(r)) $error.read.number(r);
   }
-  if ((r._peek() | 32) == 'e') {
+  if ((_peek(r) | 32) == 'e') {
     integral = 0;
     r.at++;
-    if (r._peek() == '+' || r._peek() == '-') r.at++;
-    if (!r._digits()) $error.read.number(r);
+    if (_peek(r) == '+' || _peek(r) == '-') r.at++;
+    if (!_digits(r)) $error.read.number(r);
   }
-  if (scan_ascii_digit(r._peek())) $error.read.number(r);
+  if (scan_ascii_digit(_peek(r))) $error.read.number(r);
 
   const char *spelling = r.text + start;
   errno = 0;
@@ -406,37 +406,37 @@ static Var Reader._number(Reader &r) {
   return number;
 }
 
-static int Reader._digits(Reader &r) {
+static int _digits(Reader &r) {
   int start = r.at;
-  while (scan_ascii_digit(r._peek())) r.at++;
+  while (scan_ascii_digit(_peek(r))) r.at++;
   return r.at - start;
 }
 
-static void Reader._word(Reader &r, const char *word) {
+static void _word(Reader &r, const char *word) {
   size_t length = strlen(word);
   if (strncmp(r.text + r.at, word, length)) $error.read.char(r);
   r.at += length;
 }
 
-static void Reader._expect(Reader &r, char byte, const char *why) {
-  r._space();
-  if (r._peek() != byte) r._fail(why);
+static void _expect(Reader &r, char byte, const char *why) {
+  _space(r);
+  if (_peek(r) != byte) _fail(r, why);
   r.at++;
 }
 
-static void Reader._space(Reader &r) {
+static void _space(Reader &r) {
   loop {
-    switch (r._peek()) {
+    switch (_peek(r)) {
       case ' ': case '\t': case '\n': case '\r': r.at++; break;
       default: return;
     }
   }
 }
 
-static int Reader._peek(Reader &r) =>
+static int _peek(Reader &r) =>
   (unsigned char) r.text[r.at];
 
-static void Reader._fail(Reader &r, String why) {
+static void _fail(Reader &r, String why) {
   int line = 1, column = 1, offset = r.at;
   scan_next_line_col((char *) r.text, offset, &line, &column);
   if (r.path)
@@ -488,11 +488,11 @@ void Json.write_file(Var value, Path path) {
 static String _json(Var value, int pretty) {
   Buffer out = $auto(Buffer.new(0));
   Writer w = {.out = out, .pretty = pretty};
-  w._value(value, 0);
+  _write_value(w, value, 0);
   return out;
 }
 
-static void Writer._value(Writer &w, Var value, int depth) {
+static void _write_value(Writer &w, Var value, int depth) {
   if (depth > JSON_MAX_DEPTH)
     $error.write.depth();
   if (value.is_null()) w.out.write("null");
@@ -501,27 +501,27 @@ static void Writer._value(Writer &w, Var value, int depth) {
     _write_string(w.out, value.str());
   else if (value.is_integer()) _write_integer(w.out, value);
   else if (value.is_floating()) _write_double(w.out, value.floating());
-  else if (value is <array> || value is <list>) w._elements(value, depth);
-  else if (value is <map>) w._members(value, depth);
+  else if (value is <array> || value is <list>) _elements(w, value, depth);
+  else if (value is <map>) _members(w, value, depth);
   else {
     Symbol tag = value.tag();
     $error.write.type(tag);
   }
 }
 
-static void Writer._elements(Writer &w, Var sequence, int depth) {
+static void _elements(Writer &w, Var sequence, int depth) {
   int count = 0;
   w.out.write_char('[');
   foreach (Var element, sequence) {
     if (count++) w.out.write_char(',');
-    w._line(depth + 1);
-    w._value(element, depth + 1);
+    _line(w, depth + 1);
+    _write_value(w, element, depth + 1);
   }
-  if (count) w._line(depth);
+  if (count) _line(w, depth);
   w.out.write_char(']');
 }
 
-static void Writer._members(Writer &w, Map object, int depth) {
+static void _members(Writer &w, Map object, int depth) {
   Array names = $auto([]);
   foreach (Var (name, member), object) {
     if (name is not <string> && !name.is_atom()) {
@@ -541,16 +541,16 @@ static void Writer._members(Writer &w, Map object, int depth) {
       $error.write.duplicate(text);
     previous = text;
     if (count++) w.out.write_char(',');
-    w._line(depth + 1);
+    _line(w, depth + 1);
     _write_string(w.out, text);
     w.out.write(w.pretty ? ": " : ":");
-    w._value(object[name], depth + 1);
+    _write_value(w, object[name], depth + 1);
   }
-  if (count) w._line(depth);
+  if (count) _line(w, depth);
   w.out.write_char('}');
 }
 
-static void Writer._line(Writer &w, int depth) {
+static void _line(Writer &w, int depth) {
   if (w.pretty) w.out.newline().write_repeat(' ', 2 * depth);
 }
 

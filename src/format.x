@@ -39,7 +39,7 @@ char *Compiler.code_pretty_string(Compiler c, List code, String output_file) {
   for (List lst = code; lst; lst = lst.cdr()) {
     if (lst.car() == <src-at>) {
       lst = lst.cdr();
-      p.source_marker(lst.car());
+      _source_marker(p, lst.car());
       continue;
     }
     String token = lst.car().str();
@@ -55,16 +55,16 @@ char *Compiler.code_pretty_string(Compiler c, List code, String output_file) {
       }
     }
     if (_is_preprocessor(token)) {
-      p.directive(token);
+      _directive(p, token);
       continue;
     }
-    p.ordinary(token, lst.cdr());
+    _ordinary(p, token, lst.cdr());
   }
   return p.buff.str_free();
 }
 
 /* Emit a source position after flushing the preceding physical line. */
-static void Pretty.source_marker(Pretty &p, Var value) {
+static void _source_marker(Pretty &p, Var value) {
   List location = p.c.origin_location(value);
   while (p.buff.len() > 0 && p.buff[-1] == ' ') p.buff.unwrite(1);
   if (p.buff.len() > 0 && p.buff[-1] != '\n') _write_newline(p.buff);
@@ -83,7 +83,7 @@ static void Pretty.source_marker(Pretty &p, Var value) {
 }
 
 /* A preprocessor token occupies its own line. */
-static void Pretty.directive(Pretty &p, String token) {
+static void _directive(Pretty &p, String token) {
   while (p.buff.len() > 0 && p.buff[-1] == ' ') p.buff.unwrite(1);
   if (p.buff.len() > 0 && p.buff[-1] != '\n') _write_newline(p.buff);
   _write_token(p.buff, token, 0);
@@ -94,19 +94,19 @@ static void Pretty.directive(Pretty &p, String token) {
 }
 
 /* Write one ordinary token between its leading and trailing layout. */
-static void Pretty.ordinary(Pretty &p, String token, List rest) {
+static void _ordinary(Pretty &p, String token, List rest) {
   char last = token ? token[-1] : '\0';
   if (last == '(') p.paren_depth++;
   else if (last == ')') {
     p.paren_depth--;
     if (p.paren_depth < 0) p.paren_depth = 0;
   }
-  p.before(token);
+  _before(p, token);
   _write_token(p.buff, token, p.source_line);
-  p.after(token, last, rest);
+  _after(p, token, last, rest);
 }
 
-static void Pretty.before(Pretty &p, String token) {
+static void _before(Pretty &p, String token) {
   if (_token_is(token, '}')) {
     if (p.indent >= 2) p.indent -= 2;
     if (p.buff.len() > 0 && p.buff[-1] != '\n')
@@ -117,7 +117,7 @@ static void Pretty.before(Pretty &p, String token) {
   else if (_need_space(p.prev_token, token)) p.buff.write(" ");
 }
 
-static void Pretty.after(Pretty &p, String token, char last, List rest) {
+static void _after(Pretty &p, String token, char last, List rest) {
   if (_token_is(token, '{')) {
     p.indent += 2;
     _write_mapped_newline(p.buff, p.source_line);

@@ -236,7 +236,7 @@ patterns once. Both are compiler queries declared in `lib/meta.x`.
 
 - A bound `defer` carries the environment, callback and records binding
   computed, and a bound `return` has no declared-type slot while a template
-  writes one. No source-form macro matches either, so `Walk.rewrite` recognizes
+  writes one. No source-form macro matches either, so `_rewrite` recognizes
   them with a `%()` pattern and says why beside it.
 - Lowering an arm needs the walk's region stack, so the translator names each
   arm with a region row and the walk lowers it before CODE binds; the slot
@@ -337,7 +337,7 @@ examples are excerpts from current source.
    evaluates each hole once, where the quotation is written, in written
    order. Call helpers this way rather than as `$helper(...)` slots. A slot
    makes the quotation apply a template, so it is no longer built where it
-   is written (PR #135). `Foreach.loop` in `src/builtins.x`:
+   is written (PR #135). `_loop` in `src/builtins.x`:
 
    ```x2c
    return $!{ { ${f.declaration} @setup while ($condition) $body } };
@@ -399,7 +399,7 @@ A hand-built `%(...)` List is still right in these cases:
 - **Code queued with `Compiler.add_init`.** Generation splices it after the
   transform, so it must already be lowered. Bind a quotation for it only
   when nothing in it still needs lowering; a `String` literal still does.
-  Otherwise build it from lowered pieces, as `Compiler._cache_value` in
+  Otherwise build it from lowered pieces, as `_cache_value` in
   `src/cache.x` does.
 - **Measured hot paths.** Keep the List where a converged A/B shows that
   the quotation costs more. As a quotation, `_assignment` cost 2.1% more
@@ -455,7 +455,7 @@ outer position wrappers before rebuilding the typed expression within them.
 
 ## Defer registration
 
-The defer source macro recognizes the cleanup statement. `Walk._lower_defer`
+The defer source macro recognizes the cleanup statement. `_lower_defer`
 keeps region ownership and exit placement, then binds one statement
 quotation. Its template visibly declares the cleanup record, pushes
 it, runs the lowered body and leaves the region. The record slot chooses

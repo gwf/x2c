@@ -126,17 +126,17 @@ Sym Sym.new(Compiler c) {
     Semantic writes to scope, file-static, and binding-fact maps use this.
 */
 void Sym.put(Sym s, Map map, Var key, Var value) {
-  s._remember(map, key);
+  _remember(s, map, key);
   map[key] = value;
 }
 
 /** Deletes `key` from `map` so that an active transaction can restore it. */
 void Sym.drop(Sym s, Map map, Var key) {
-  s._remember(map, key);
+  _remember(s, map, key);
   map.del(key);
 }
 
-static void Sym._remember(Sym s, Map map, Var key) {
+static void _remember(Sym s, Map map, Var key) {
   if (!s.transactions) return;
   Var value = void;
   map.try_get(key, value);
@@ -144,7 +144,7 @@ static void Sym._remember(Sym s, Map map, Var key) {
   s.undo.push(&row);
 }
 
-static SymScope *Sym._scope_at(Sym s, int index) {
+static SymScope *_scope_at(Sym s, int index) {
   int count = s.scopes.len();
   if (index < 0) index += count;
   if (index < 0 || index >= count) return NULL;
@@ -157,8 +157,8 @@ static SymScope *Sym._scope_at(Sym s, int index) {
     Later definitions mutate that caller-supplied map.
 */
 void Sym.reset(Sym s, Map globals) {
-  s._clear_symbols(globals, 1);
-  s._push_symbols(s.globals);
+  _clear_symbols(s, globals, 1);
+  _push_symbols(s, s.globals);
 }
 
 /** Resets symbol state to read `base` below the writable scope `overlay`.
@@ -166,12 +166,12 @@ void Sym.reset(Sym s, Map globals) {
     Later definitions mutate `overlay`; `base` is only read.
 */
 void Sym.reset_overlay(Sym s, Map base, Map overlay) {
-  s._clear_symbols(overlay, 2);
-  s._push_symbols(base != NULL ? base : {});
-  s._push_symbols(s.globals);
+  _clear_symbols(s, overlay, 2);
+  _push_symbols(s, base != NULL ? base : {});
+  _push_symbols(s, s.globals);
 }
 
-static void Sym._clear_symbols(Sym s, Map globals, int base_scopes) {
+static void _clear_symbols(Sym s, Map globals, int base_scopes) {
   s.scopes.clear();
   s.globals = globals != NULL ? globals : {};
   s.statics = {};
@@ -180,14 +180,14 @@ static void Sym._clear_symbols(Sym s, Map globals, int base_scopes) {
   s.binding_facts = {};
 }
 
-static void Sym._push_symbols(Sym s, Map symbols) {
+static void _push_symbols(Sym s, Map symbols) {
   struct SymScope scope = {
     .symbols = symbols, .bindings = {}, .enumerators = {}};
   s.scopes.push(&scope);
 }
 
 /** Pushes a new empty lexical scope. */
-void Sym.push_new_scope(Sym s) => s._push_symbols({});
+void Sym.push_new_scope(Sym s) => _push_symbols(s, {});
 
 /** Pushes a caller-supplied lexical scope while retaining its map objects. */
 void Sym.push_scope(Sym s, SymScope scope) => s.scopes.push(&scope);
@@ -211,7 +211,7 @@ int Sym.at_file_scope(Sym s) => (int) s.scopes.len() <= s.base_scopes;
 Block Sym.close_local_scopes(Sym s) {
   Block local = Block.new(sizeof(SymScope));
   if (s.at_file_scope()) return local;
-  local.append(s._scope_at(s.base_scopes), s.scopes.len() - s.base_scopes);
+  local.append(_scope_at(s, s.base_scopes), s.scopes.len() - s.base_scopes);
   s.scopes.truncate(s.base_scopes);
   return local;
 }
@@ -234,13 +234,13 @@ Map Sym.global_symbols(Sym s) => s.globals;
 */
 Map Sym.base_symbols(Sym s) {
   Map seed = {};
-  for (int i = 0; i < s.base_scopes; i++) seed.merge(s._scope_at(i).symbols);
+  for (int i = 0; i < s.base_scopes; i++) seed.merge(_scope_at(s, i).symbols);
   return seed;
 }
 
 /** Returns the current scope's mutable symbol map, or `NULL`. */
 Map Sym.current_symbols(Sym s) {
-  SymScope *scope = s._scope_at(-1);
+  SymScope *scope = _scope_at(s, -1);
   return scope ? scope.symbols : NULL;
 }
 
@@ -264,7 +264,7 @@ List Sym.visible_symbols(Sym s) {
   Map seen = {};
   Array rows = [];
   for (int i = (int) s.scopes.len() - 1; i >= 0; i--) {
-    SymScope *scope = s._scope_at(i);
+    SymScope *scope = _scope_at(s, i);
     foreach (Var (key, value), scope.symbols)
       match (key)
         case %(?(String name)):
@@ -292,7 +292,7 @@ static Symbol _macro_kind(Var definition) {
 
 /** Sets a semantic type for `key` in the required active scope. */
 void Sym.set(Sym s, List key, List type) {
-  Map scope = s._scope_at(-1).symbols;
+  Map scope = _scope_at(s, -1).symbols;
   if (log_should_log(<debug>, <symtab>))
     log_debug(<symtab>, %( (func "Sym.set") (key $key) (val $type) ));
   s.put(scope, key, type);
@@ -304,10 +304,10 @@ static int _retained_member(List key) =>
 
 /** Defines `key` and returns its stable binding in the active scope. */
 List Sym.define(Sym s, List key, List type) {
-  SymScope *scope = s._scope_at(-1);
+  SymScope *scope = _scope_at(s, -1);
   s.set(key, type);
   _seed_var_tag(key, type);
-  return s._scope_binding(*scope, key);
+  return _scope_binding(s, *scope, key);
 }
 
 static void _seed_var_tag(List key, List type) {
@@ -344,25 +344,25 @@ void Sym.seed_var_tags(Sym s, Map symbols) {
     the row here or replayed it from an interface.
 */
 void Sym.define_global(Sym s, List key, List type) {
-  SymScope *scope = s._scope_at(s.base_scopes - 1);
+  SymScope *scope = _scope_at(s, s.base_scopes - 1);
   s.put(scope.symbols, key, type);
   _seed_var_tag(key, type);
 }
 
 /** Associates an enumerator key with its owner in the active scope. */
 void Sym.declare_enumerator(Sym s, List key, Symbol owner) {
-  SymScope *scope = s._scope_at(-1);
+  SymScope *scope = _scope_at(s, -1);
   if (scope) s.put(scope.enumerators, key, owner);
 }
 
 // bindings
 
-static List Sym._scope_binding(Sym s, SymScope &scope, List key) {
+static List _scope_binding(Sym s, SymScope &scope, List key) {
   Var found;
   List binding;
   if (scope.bindings.try_get(key, found)) binding = found;
   else {
-    binding = s._new_binding(key);
+    binding = _new_binding(s, key);
     s.put(scope.bindings, key, binding);
   }
   (Var binding_tag, int identity, String spelling) = binding;
@@ -375,13 +375,13 @@ static List Sym._scope_binding(Sym s, SymScope &scope, List key) {
     if (scope.symbols.try_get(%(self $spelling), relative))
       s.put(s.binding_facts, self_key, relative);
   }
-  if (s.c.source_facts) s._note_source_key(scope, key, binding);
+  if (s.c.source_facts) _note_source_key(s, scope, key, binding);
   return binding;
 }
 
 /* Source facts find a binding's declaration through the map and key that
    hold its symbol row. */
-static void Sym._note_source_key(
+static void _note_source_key(
   Sym s, SymScope &scope, List key, List binding) {
   Compiler c = s.c;
   List source_key = %(${scope.symbols} $key);
@@ -392,7 +392,7 @@ static void Sym._note_source_key(
     c.source_definitions[binding] = declaration;
 }
 
-static List Sym._new_binding(Sym s, List key) {
+static List _new_binding(Sym s, List key) {
   int identity = ++s.c.names.next_binding;
   Var name = key.last();
   List binding = binding_identity_new(identity, name);
@@ -406,23 +406,23 @@ static List Sym._new_binding(Sym s, List key) {
 int Sym.introduced(Sym s) {
   int held = 0;
   for (int i = 0; i < (int) s.scopes.len(); i++)
-    held += s._scope_at(i).bindings.len();
+    held += _scope_at(s, i).bindings.len();
   return s.c.names.next_binding - held;
 }
 
 /** Allocates a fresh binding identity for a compiler-introduced spelling. */
-List Sym.introduce(Sym s, String spelling) => s._new_binding(%($spelling));
+List Sym.introduce(Sym s, String spelling) => _new_binding(s, %($spelling));
 
 /** Returns `key`'s binding in the current scope, or `NULL`. */
 List Sym.current_binding(Sym s, List key) {
-  SymScope *scope = s._scope_at(-1);
+  SymScope *scope = _scope_at(s, -1);
   Var binding;
   return scope && scope.bindings.try_get(key, binding) ? binding : NULL;
 }
 
 /** Returns the current scope's enum owner for `key`, or zero. */
 Symbol Sym.enumerator_owner(Sym s, List key) {
-  SymScope *scope = s._scope_at(-1);
+  SymScope *scope = _scope_at(s, -1);
   Var owner;
   return scope && scope.enumerators.try_get(key, owner) ? owner : 0;
 }
@@ -438,7 +438,7 @@ int Sym.binding_is_local(Sym s, List binding) =>
 int Sym.binding_is_local_before(Sym s, List binding, int scope_count) {
   if (scope_count > (int) s.scopes.len()) scope_count = s.scopes.len();
   for (int i = scope_count - 1; i >= s.base_scopes; i--)
-    foreach (Var (_, candidate), s._scope_at(i).bindings)
+    foreach (Var (_, candidate), _scope_at(s, i).bindings)
       if (List.equal(candidate, binding)) return 1;
   return 0;
 }
@@ -464,7 +464,7 @@ void Compiler.drop_fact(Compiler c, Var key) =>
 List Sym.get(Sym s, List key) {
   List found = s.get_exact(key);
   if (found) return found;
-  List retry = s._package_retry_key(key);
+  List retry = _package_retry_key(s, key);
   return retry ? s.get_exact(retry) : NULL;
 }
 
@@ -472,7 +472,7 @@ List Sym.get(Sym s, List key) {
 List Sym.get_exact(Sym s, List key) {
   Var val;
   for (int i = (int) s.scopes.len() - 1; i >= 0; i--) {
-    Map scope = s._scope_at(i).symbols;
+    Map scope = _scope_at(s, i).symbols;
     if (scope.try_get(key, val)) return val;
   }
   if (_retained_member(key) &&
@@ -483,7 +483,7 @@ List Sym.get_exact(Sym s, List key) {
 /* Package files may reference their own file-scope names bare. A plain-key
    total miss retries the package-prefixed key; exact entries win, and
    units outside package mode never retry. */
-static List Sym._package_retry_key(Sym s, List key) {
+static List _package_retry_key(Sym s, List key) {
   String package = s.c.package;
   if (!package || !key || key.cdr() || key.car() is not <string>) return NULL;
   String spelling = key.car();
@@ -497,21 +497,21 @@ static List Sym._package_retry_key(Sym s, List key) {
     miss returns `NULL` and stores `NULL` through `type` when provided.
 */
 List Sym.lookup(Sym s, List key, Type &?type) =>
-  s._lookup_from(key, type, (int) s.scopes.len() - 1, 0);
+  _lookup_from(s, key, type, (int) s.scopes.len() - 1, 0);
 
 /** Resolves `key` or creates a forward binding in the current scope.
 
     Stores `NULL` through `type` when no declaration supplies a type.
 */
 List Sym.reference(Sym s, List key, Type &?type) =>
-  s._lookup_from(key, type, (int) s.scopes.len() - 1, 1);
+  _lookup_from(s, key, type, (int) s.scopes.len() - 1, 1);
 
 /** Resolves a binding through base scopes and optionally stores its type.
 
     Returns `NULL` when no base scope contains the key.
 */
 List Sym.resolve_global(Sym s, List key, Type &?type) =>
-  s._lookup_from(key, type, s.base_scopes - 1, 0);
+  _lookup_from(s, key, type, s.base_scopes - 1, 0);
 
 /** Resolves a global name or creates its forward binding in the base scope.
     Local declarations cannot capture a retained macro's global reference.
@@ -519,28 +519,28 @@ List Sym.resolve_global(Sym s, List key, Type &?type) =>
 List Sym.reference_global(Sym s, List key) {
   List binding = s.resolve_global(key, NULL);
   if (binding) return binding;
-  return s._scope_binding(*s._scope_at(s.base_scopes - 1), key);
+  return _scope_binding(s, *_scope_at(s, s.base_scopes - 1), key);
 }
 
-static List Sym._lookup_from(
+static List _lookup_from(
   Sym s, List key, Type &?type, int first, int forward) {
   Var found;
   for (int i = first; i >= 0; i--) {
-    SymScope *scope = s._scope_at(i);
+    SymScope *scope = _scope_at(s, i);
     if (scope.symbols.try_get(key, found)) {
       if (type) type = found;
-      return s._scope_binding(*scope, key);
+      return _scope_binding(s, *scope, key);
     }
     if (scope.bindings.try_get(key, found)) {
       if (type) type = NULL;
       return found;
     }
   }
-  List retry = s._package_retry_key(key);
+  List retry = _package_retry_key(s, key);
   if (retry && (!forward || s.get_exact(retry)))
-    return s._lookup_from(retry, type, first, forward);
+    return _lookup_from(s, retry, type, first, forward);
   if (type) type = NULL;
-  return forward ? s._scope_binding(*s._scope_at(-1), key) : NULL;
+  return forward ? _scope_binding(s, *_scope_at(s, -1), key) : NULL;
 }
 
 // declarations
@@ -553,22 +553,22 @@ static List Sym._lookup_from(
     `restrict`, and `volatile`.
 */
 List Sym.declare(Sym s, List context, List key, List ast) {
-  if (s.c.package) key = s._package_declared_key(context, key, ast);
-  s.c._check_spelling(_declared_spelling(key));
+  if (s.c.package) key = _package_declared_key(s, context, key, ast);
+  _check_spelling(s.c, _declared_spelling(key));
   Type ctxkey = %( @context @key ), type = ast.type_from_ast();
   Type declared_type = type;
   if ((int) s.scopes.len() == s.base_scopes && !context)
-    s._track_static((List) ctxkey, ast);
+    _track_static(s, (List) ctxkey, ast);
   List binding = NULL;
   if (context === %(typedef)) binding = s.define(key, (List) ctxkey);
   type = _stored_type(type, ctxkey, ast);
   if (!binding) binding = s.define(ctxkey, (List) type);
   else {
     s.set(ctxkey, (List) type);
-    s._local_typedef(type, binding);
+    _local_typedef(s, type, binding);
   }
   if (!context && !s.at_file_scope())
-    s._local_object(key, binding, declared_type);
+    _local_object(s, key, binding, declared_type);
   return binding;
 }
 
@@ -577,7 +577,7 @@ List Sym.declare(Sym s, List context, List key, List ast) {
    derived Var converters carry the prefix everywhere they are read.
    Statics keep their spellings (C internal linkage); anonymous aggregate
    gensyms are not source spellings and stay in the compiler's space. */
-static List Sym._package_declared_key(
+static List _package_declared_key(
   Sym s, List context, List key, List ast) {
   Compiler c = s.c;
   if ((int) s.scopes.len() != s.base_scopes) return key;
@@ -605,10 +605,10 @@ static String _declared_spelling(List key) {
 /* A source declaration may not take a compiler-generated spelling or one
    in an imported package's space. A shallow parse reads emitted C, whose
    generated spellings are the compiler's own output. */
-static void Compiler._check_spelling(Compiler c, String spelling) {
+static void _check_spelling(Compiler c, String spelling) {
   if (!c.shallow && _is_reserved_spelling(spelling))
     $report.parse.name_reserved(c, spelling);
-  String owner = c._package_reserved_owner(spelling);
+  String owner = _package_reserved_owner(c, spelling);
   if (owner)
     $report.parse.name_package(c, spelling, owner);
 }
@@ -625,7 +625,7 @@ static int _is_reserved_spelling(String s) {
 
 /* Only packages imported by this unit reserve their `name__` space; foreign
    headers may contain `__`, and a package unit keeps its own prefix. */
-static String Compiler._package_reserved_owner(Compiler c, String spelling) {
+static String _package_reserved_owner(Compiler c, String spelling) {
   if (!spelling || !c.package_aliases.len()) return NULL;
   foreach (Var (alias, value), c.package_aliases) {
     String name = value;
@@ -638,7 +638,7 @@ static String Compiler._package_reserved_owner(Compiler c, String spelling) {
 /* File-local globals are tracked for protocol and static initializer
    checks. The storage class is only visible here, before canonicalization
    strips it. */
-static void Sym._track_static(Sym s, List key, List ast) {
+static void _track_static(Sym s, List key, List ast) {
   if (ast.type().is_static()) s.put(s.statics, key, 1);
   else s.drop(s.statics, key);
 }
@@ -654,7 +654,7 @@ static Type _stored_type(Type type, Type key, List ast) {
 
 /* A block-local typedef emits under a fresh spelling, and a local tag
    records its named type. */
-static void Sym._local_typedef(Sym s, Type type, List binding) {
+static void _local_typedef(Sym s, Type type, List binding) {
   if (s.at_file_scope()) return;
   if (type.is_aggregate_tag())
     s.put(s.binding_facts, %(ntype $binding), type);
@@ -665,8 +665,8 @@ static void Sym._local_typedef(Sym s, Type type, List binding) {
 /* A local object records its automatic storage and declared type. One that
    shadows a declared `T_var` converter emits under a fresh spelling, so
    generated boxing still reaches the converter. */
-static void Sym._local_object(Sym s, List key, List binding, Type type) {
-  s._mark_automatic(binding, type);
+static void _local_object(Sym s, List key, List binding, Type type) {
+  _mark_automatic(s, binding, type);
   Type global_type = NULL;
   s.resolve_global(key, global_type);
   if (_var_converter_owner(key, global_type) &&
@@ -676,7 +676,7 @@ static void Sym._local_object(Sym s, List key, List binding, Type type) {
       s.c.fresh_name("var_converter_shadow"));
 }
 
-static void Sym._mark_automatic(Sym s, List binding, Type type) {
+static void _mark_automatic(Sym s, List binding, Type type) {
   s.put(s.binding_facts, %(automatic $binding), 1);
   s.put(s.binding_facts, %(type $binding), type);
 }
@@ -685,16 +685,16 @@ static void Sym._mark_automatic(Sym s, List binding, Type type) {
 List Sym.bind_identity(Sym s, List context, List binding, List ast) {
   String spelling = binding_identity_spelling(binding);
   List key = context ? %(@context $spelling) : %($spelling);
-  SymScope *scope = s._scope_at(-1);
+  SymScope *scope = _scope_at(s, -1);
   Type annotation = ast.type_from_ast();
   s.put(scope.symbols, key, annotation.declared());
   if (context === %(typedef)) {
     key = %($spelling);
     s.put(scope.symbols, key, %(typedef $spelling));
-    s._local_typedef(annotation, binding);
+    _local_typedef(s, annotation, binding);
   }
   s.put(scope.bindings, key, binding);
-  if (!context && !s.at_file_scope()) s._mark_automatic(binding, annotation);
+  if (!context && !s.at_file_scope()) _mark_automatic(s, binding, annotation);
   return binding;
 }
 
@@ -751,16 +751,16 @@ void Compiler.record_declaration_visibility(Compiler c, List declaration) {
             if (name && (body || !rows || rows === %((bind () ()))))
               c.sym.mark_static(%($tag $name));
       }
-      c._record_rows_visibility(declaration, kind, private, mark, rows);
+      _record_rows_visibility(c, declaration, kind, private, mark, rows);
       if (kind == <declare> && !mark)
-        c._record_native_objects(type, rows);
+        _record_native_objects(c, type, rows);
     }
   }
 }
 
 /* A public object definition belongs to this source, including a tentative
    definition. An extern declaration only names its native supplier. */
-static void Compiler._record_native_objects(
+static void _record_native_objects(
   Compiler c, Type spec, List rows) {
   if (!c.shallow || c.source_private < 0 || spec.is_extern() ||
       !is_source_file(c.filename)) return;
@@ -780,16 +780,16 @@ static void Compiler._record_native_objects(
   }
 }
 
-static void Compiler._record_rows_visibility(
+static void _record_rows_visibility(
   Compiler c, List declaration, Symbol kind, int private, int mark,
   List rows) {
   foreach (List row, rows)
     match (row) case $source_declarator_row(%(?identity *)):
-      _record_declaration_binding_visibility(
+      _record_binding_visibility(
         c, declaration, kind, private, mark, identity);
 }
 
-static void _record_declaration_binding_visibility(
+static void _record_binding_visibility(
   Compiler c, List declaration, Symbol kind, int private, int mark,
   List identity) {
   String name = binding_identity_spelling(identity);
@@ -822,7 +822,7 @@ void Compiler.register_package_alias(
   Compiler c, String name, String alias, Token token) {
   Var bound = c.package_aliases[alias];
   if (bound is not void && bound == name) return;
-  c._check_package_binding("alias", alias, token);
+  _check_package_binding(c, "alias", alias, token);
   c.package_aliases[alias] = name;
 }
 
@@ -842,14 +842,14 @@ void Compiler.register_package_member(
   String spelling = %"${name}__$member";
   if (!c.sym.get_exact(%($spelling)))
     $report.parse.package_member(c, member_token, name, member);
-  c._check_package_binding("name", local, local_token);
+  _check_package_binding(c, "name", local, local_token);
   c.package_members[local] = binding;
 }
 
 /* An alias and a `with` name each claim one local spelling. Rebinding that
    spelling, or taking one a declaration already uses, is the same conflict.
    Both messages name what the developer wrote. */
-static void Compiler._check_package_binding(
+static void _check_package_binding(
   Compiler c, String kind, String local, Token token) {
   Var alias = c.package_aliases[local];
   Var member = c.package_members[local];
@@ -910,7 +910,7 @@ String Compiler.imported_spelling(Compiler c, String name) {
     local macro count.
 */
 void Sym.define_macro(Sym s, Atom name, List definition) {
-  SymScope *scope = s._scope_at(-1);
+  SymScope *scope = _scope_at(s, -1);
   if (scope.macros == NULL) scope.macros = {};
   if (!(name in scope.macros)) s.local_macro_names++;
   s.put(scope.macros, name, definition);
@@ -923,7 +923,7 @@ int Sym.has_local_macros(Sym s) => s.local_macro_names != 0;
 List Sym.lookup_macro(Sym s, Atom name) {
   Var definition;
   for (int i = (int) s.scopes.len() - 1; i >= s.base_scopes; i--) {
-    SymScope *scope = s._scope_at(i);
+    SymScope *scope = _scope_at(s, i);
     if (scope.macros != NULL && scope.macros.try_get(name, definition))
       return definition;
   }
@@ -970,19 +970,19 @@ int Compiler.macro_template_local(Compiler c, List binding) {
 Type Sym.resolve_key(Sym s, Type key) {
   if (!key) return key;
   key = key.canonicalize();
-  return s._resolve_chain(key, NULL, key, 0);
+  return _resolve_chain(s, key, NULL, key, 0);
 }
 
 /* Resolve a typedef chain, optionally stopping at a semantic type
    identity. origin is the type the caller asked about, kept only so an
    over-budget walk can name it instead of some mid-chain link. */
-static Type Sym._resolve_chain(
+static Type _resolve_chain(
   Sym s, Type key, Type stop, Type origin, int hops) {
-  if (hops > RESOLVE_KEY_MAX_HOPS) s._typedef_budget_error(origin);
+  if (hops > RESOLVE_KEY_MAX_HOPS) _typedef_budget_error(s, origin);
   if (stop && key == stop) return key;
   if (key.is_typedef_name() || key.is_typedef()) {
-    Type type = s._typedef_target(key);
-    if (type) return s._resolve_chain(type, stop, origin, hops + 1);
+    Type type = _typedef_target(s, key);
+    if (type) return _resolve_chain(s, type, stop, origin, hops + 1);
   }
   match (key) case %((!set ?kind (!or struct union))
       (binding ? ?spelling)):
@@ -994,16 +994,16 @@ static Type Sym._resolve_chain(
    diagnostic states only what it can determine. `typedef Color Color;` is
    legal C; it binds ("Color") to (typedef "Color") and back, so cycles are
    real. */
-static void Sym._typedef_budget_error(Sym s, Type origin) {
+static void _typedef_budget_error(Sym s, Type origin) {
   $report.type.typedef_depth(s.c, origin);
 }
 
 /* Semantic types contain no local aliases. A retained file type's spelling
    must keep its meaning when an inner declaration shadows that spelling. */
-static Type Sym._typedef_target(Sym s, Type key) {
+static Type _typedef_target(Sym s, Type key) {
   for (int i = s.base_scopes - 1; i >= 0; i--) {
     Var target;
-    if (s._scope_at(i).symbols.try_get(key, target)) return target;
+    if (_scope_at(s, i).symbols.try_get(key, target)) return target;
   }
   return NULL;
 }
@@ -1015,9 +1015,9 @@ static Type Sym._typedef_target(Sym s, Type key) {
     into the same diagnostic as full-chain resolution.
 */
 Type Sym.next_typedef(Sym s, Type type, int &hops) {
-  if (++hops > RESOLVE_KEY_MAX_HOPS) s._typedef_budget_error(type);
+  if (++hops > RESOLVE_KEY_MAX_HOPS) _typedef_budget_error(s, type);
   return type.is_typedef_name() || type.is_typedef()
-       ? s._typedef_target(type) : s.get(type);
+       ? _typedef_target(s, type) : s.get(type);
 }
 
 /** Returns the name of the one file-scope typedef declared directly as
@@ -1025,7 +1025,7 @@ Type Sym.next_typedef(Sym s, Type type, int &hops) {
 Type Sym.sole_typedef(Sym s, Type type) {
   String found = NULL;
   for (int i = 0; i < s.base_scopes; i++)
-    foreach (Var (key, target), s._scope_at(i).symbols)
+    foreach (Var (key, target), _scope_at(s, i).symbols)
       match (key) case %(typedef ?(String name)):
         if (target == type) {
           if (found && found != name) return NULL;
@@ -1036,19 +1036,19 @@ Type Sym.sole_typedef(Sym s, Type type) {
 
 /** Resolves typedef bases while retaining every declarator qualifier. */
 Type Sym.normalize_declared_type(Sym s, Type type) =>
-  type ? s._normalize_chain(type, type, 0) : NULL;
+  type ? _normalize_chain(s, type, type, 0) : NULL;
 
-static Type Sym._normalize_chain(Sym s, Type type, Type origin, int hops) {
+static Type _normalize_chain(Sym s, Type type, Type origin, int hops) {
   type = type.declared();
-  if (hops > RESOLVE_KEY_MAX_HOPS) s._typedef_budget_error(origin);
-  Type next = s._typedef_base_step(type);
-  return next ? s._normalize_chain(next, origin, hops + 1) : type;
+  if (hops > RESOLVE_KEY_MAX_HOPS) _typedef_budget_error(s, origin);
+  Type next = _typedef_base_step(s, type);
+  return next ? _normalize_chain(s, next, origin, hops + 1) : type;
 }
 
-static Type Sym._typedef_base_step(Sym s, Type type) {
+static Type _typedef_base_step(Sym s, Type type) {
   Type base = type.base_type();
   if (!base || (!base.is_typedef_name() && !base.is_typedef())) return NULL;
-  Type next = s._typedef_target(base);
+  Type next = _typedef_target(s, base);
   if (!next) next = _builtin_typedef_scalar(base);
   return next ? _replace_type_base(type, base, next) : NULL;
 }
@@ -1069,14 +1069,14 @@ static Type _replace_type_base(Type type, Type base, Type replacement) {
 Type Sym.local_type(Sym s, Type type) {
   Type base = type.base_type();
   if (base.is_aggregate_tag() && base.cadr() is <string>)
-    return s._local_tag(type, base);
-  return base.is_bare_typedef_name() ? s._local_alias(type, base) : type;
+    return _local_tag(s, type, base);
+  return base.is_bare_typedef_name() ? _local_alias(s, type, base) : type;
 }
 
 // The binding of the nearest declaration replaces a block-scoped name.
-static Type Sym._local_tag(Sym s, Type type, Type base) {
+static Type _local_tag(Sym s, Type type, Type base) {
   for (int i = s.scopes.len() - 1; i >= s.base_scopes; i--) {
-    SymScope *scope = s._scope_at(i);
+    SymScope *scope = _scope_at(s, i);
     Var binding;
     if (scope.bindings.try_get(base, binding))
       return _replace_type_base(type, base, %(${base.car()} $binding));
@@ -1085,9 +1085,9 @@ static Type Sym._local_tag(Sym s, Type type, Type base) {
 }
 
 // A local typedef name resolves to the target saved beside its marker.
-static Type Sym._local_alias(Sym s, Type type, Type base) {
+static Type _local_alias(Sym s, Type type, Type base) {
   for (int i = s.scopes.len() - 1; i >= s.base_scopes; i--) {
-    Map symbols = s._scope_at(i).symbols;
+    Map symbols = _scope_at(s, i).symbols;
     Var marker;
     if (!symbols.try_get(base, marker)) continue;
     Type declared = marker;
@@ -1154,10 +1154,10 @@ static Type _builtin_typedef_scalar(Type key) {
 */
 Symbol Sym.var_tag_for_type(Sym s, Type type, Type &?resolved) {
   Type origin = type.canonicalize();
-  return s._var_tag_chain(origin, origin, resolved, 0);
+  return _var_tag_chain(s, origin, origin, resolved, 0);
 }
 
-static Symbol Sym._var_tag_chain(
+static Symbol _var_tag_chain(
   Sym s, Type type, Type origin, Type &?resolved, int hops) {
   type = type.canonicalize();
   Symbol tag = type.var_tag();
@@ -1165,9 +1165,9 @@ static Symbol Sym._var_tag_chain(
     if (resolved) resolved = type;
     return tag;
   }
-  if (hops > RESOLVE_KEY_MAX_HOPS) s._typedef_budget_error(origin);
-  Type next = s._typedef_base_step(type);
-  if (next) return s._var_tag_chain(next, origin, resolved, hops + 1);
+  if (hops > RESOLVE_KEY_MAX_HOPS) _typedef_budget_error(s, origin);
+  Type next = _typedef_base_step(s, type);
+  if (next) return _var_tag_chain(s, next, origin, resolved, hops + 1);
   if (resolved) resolved = type;
   return 0;
 }
@@ -1191,7 +1191,7 @@ int Sym.is_named_value_type(Sym s, Type type, String name) {
   // Stop at the named type instead of resolving through its typedef.
   if (!type || !name) return 0;
   Type wanted = %($name), origin = type.canonicalize();
-  type = s._resolve_chain(origin, wanted, origin, 0);
+  type = _resolve_chain(s, origin, wanted, origin, 0);
   return type == wanted;
 }
 
@@ -1229,12 +1229,12 @@ void Sym.declare_field_order(Sym s, Type type, List fields) {
     if (declaration.car() == <c-assert>) continue;
     List bindings = declaration.caddr();
     foreach (List declarator, bindings.cdr())
-      rows.push(s._field_row(type, declaration, declarator));
+      rows.push(_field_row(s, type, declaration, declarator));
   }
   s.set(%(@type "field-order"), %(fields @{rows.list_free()}));
 }
 
-static List Sym._field_row(
+static List _field_row(
   Sym s, Type type, List declaration, List declarator) {
   String name = binding_identity_spelling(declarator.cadr());
   Type declared = name ? s.get(%(@type $name))
@@ -1296,9 +1296,9 @@ Type Sym.aggregate_of(Sym s, Type type) {
 SymTxn Compiler.begin_semantic_transaction(Compiler c) {
   SymTxn transaction = { .c = c };
   transaction.scope_index = c.sym.scopes.len() - 1;
-  transaction._save(*c.sym._scope_at(transaction.scope_index));
-  if (transaction.extended) transaction._save_effects();
-  if (c.source_facts && c.source_primary) transaction._save_sources();
+  _save(transaction, *_scope_at(c.sym, transaction.scope_index));
+  if (transaction.extended) _save_effects(transaction);
+  if (c.source_facts && c.source_primary) _save_sources(transaction);
   /* Related compilers with their own symbol tables share these counters,
      so the transaction stages a copy instead of logging their writes. */
   c.names.counters = c.names.counters.copy();
@@ -1307,7 +1307,7 @@ SymTxn Compiler.begin_semantic_transaction(Compiler c) {
   return transaction;
 }
 
-static void SymTxn._save(SymTxn &s, SymScope scope) {
+static void _save(SymTxn &s, SymScope scope) {
   Compiler c = s.c;
   s.scope = scope;
   s.mark = c.sym.undo.len();
@@ -1324,7 +1324,7 @@ static void SymTxn._save(SymTxn &s, SymScope scope) {
   s.extended = c.macro_application > 0;
 }
 
-static void SymTxn._save_effects(SymTxn &s) {
+static void _save_effects(SymTxn &s) {
   Compiler c = s.c;
   s.adapters = c.names.adapters;
   s.pending = c.pending.checkpoint();
@@ -1334,7 +1334,7 @@ static void SymTxn._save_effects(SymTxn &s) {
   c.names.adapters = c.names.adapters.copy();
 }
 
-static void SymTxn._save_sources(SymTxn &s) {
+static void _save_sources(SymTxn &s) {
   s.source_definitions = s.c.source_definitions.copy();
   s.source_occurrences = s.c.source_occurrences.len();
 }
@@ -1343,7 +1343,7 @@ static void SymTxn._save_sources(SymTxn &s) {
    and declaration source metadata. A macro value application also restores
    the other base scopes' bindings. Rows of other maps stay in the log for
    an enclosing transaction. */
-static int SymTxn._tracks(SymTxn &s, Map map) {
+static int _tracks(SymTxn &s, Map map) {
   if (_same(map, s.scope.symbols) || _same(map, s.scope.bindings) ||
       _same(map, s.scope.enumerators) || _same(map, s.scope.macros) ||
       _same(map, s.statics) || _same(map, s.binding_facts) ||
@@ -1352,7 +1352,7 @@ static int SymTxn._tracks(SymTxn &s, Map map) {
   if (!s.extended) return 0;
   Sym sym = s.c.sym;
   for (int i = 0; i < sym.base_scopes; i++)
-    if (_same(map, sym._scope_at(i).bindings)) return 1;
+    if (_same(map, _scope_at(sym, i).bindings)) return 1;
   return 0;
 }
 
@@ -1360,7 +1360,7 @@ static int _same(Map a, Map b) => (void *) a == (void *) b;
 
 /** Returns whether the transaction's active scope changed its macro map. */
 int SymTxn.local_macros_changed(SymTxn &s) {
-  SymScope *scope = s.c.sym._scope_at(s.scope_index);
+  SymScope *scope = _scope_at(s.c.sym, s.scope_index);
   Map before = s.scope.macros, after = scope.macros;
   if (before == NULL || after == NULL) return !_same(before, after);
   Block undo = s.c.sym.undo;
@@ -1399,11 +1399,11 @@ void SymTxn.commit(SymTxn &?s) {
     c.names.adapters = s.adapters;
     s.adapters.merge(adapters);
   }
-  s._finish();
+  _finish(s);
 }
 
 /* Completing the outermost transaction empties the undo log. */
-static void SymTxn._finish(SymTxn &s) {
+static void _finish(SymTxn &s) {
   s.active = 0;
   s.c.sym.end_log();
 }
@@ -1436,33 +1436,33 @@ void SymTxn.rollback(SymTxn &?s) {
   if (!s) return;
   if (!s.active) return;
   Compiler c = s.c;
-  s._undo();
-  s._restore();
-  if (s.extended) s._restore_effects();
-  if (c.source_facts && c.source_primary) s._restore_sources();
-  s._finish();
+  _undo(s);
+  _restore(s);
+  if (s.extended) _restore_effects(s);
+  if (c.source_facts && c.source_primary) _restore_sources(s);
+  _finish(s);
 }
 
 /* Restores the logged rows this transaction tracks, newest first, and
    keeps the others in order. */
-static void SymTxn._undo(SymTxn &s) {
+static void _undo(SymTxn &s) {
   Block undo = s.c.sym.undo;
   SymUndo *rows = undo.bytes;
   int end = undo.len(), kept = s.mark;
   for (int i = end - 1; i >= s.mark; i--) {
     SymUndo row = rows[i];
-    if (!s._tracks(row.map)) continue;
+    if (!_tracks(s, row.map)) continue;
     if (row.value is void) row.map.del(row.key);
     else row.map[row.key] = row.value;
   }
   for (int i = s.mark; i < end; i++)
-    if (!s._tracks(rows[i].map)) rows[kept++] = rows[i];
+    if (!_tracks(s, rows[i].map)) rows[kept++] = rows[i];
   undo.truncate(kept);
 }
 
-static void SymTxn._restore(SymTxn &s) {
+static void _restore(SymTxn &s) {
   Compiler c = s.c;
-  SymScope *scope = c.sym._scope_at(s.scope_index);
+  SymScope *scope = _scope_at(c.sym, s.scope_index);
   *scope = s.scope;
   c.sym.statics = s.statics;
   c.sym.binding_facts = s.binding_facts;
@@ -1476,7 +1476,7 @@ static void SymTxn._restore(SymTxn &s) {
   c.fini_fn = s.shutdown_name;
 }
 
-static void SymTxn._restore_effects(SymTxn &s) {
+static void _restore_effects(SymTxn &s) {
   Compiler c = s.c;
   c.names.adapters = s.adapters;
   c.pending.restore(s.pending);
@@ -1485,7 +1485,7 @@ static void SymTxn._restore_effects(SymTxn &s) {
   c.needs_exception = s.needs_exception;
 }
 
-static void SymTxn._restore_sources(SymTxn &s) {
+static void _restore_sources(SymTxn &s) {
   Compiler c = s.c;
   c.source_occurrences.resize(s.source_occurrences);
   _replace_map(c.source_definitions, s.source_definitions);

@@ -37,34 +37,34 @@ meta native List Diff.lines(String old, String new) {
   Array old_lines = $auto(old.split_lines(0));
   Array new_lines = $auto(new.split_lines(0));
   Script s = {old_lines, new_lines};
-  s.trim();
-  if (s.myers() < 0) s.replace();
-  for (int i = s.lo + s.n; i < s.old.len(); i++) s.emit(<same>, s.old[i]);
+  _trim(s);
+  if (_myers(s) < 0) _replace(s);
+  for (int i = s.lo + s.n; i < s.old.len(); i++) _emit(s, <same>, s.old[i]);
   return s.edits.reverse();
 }
 
 /* Emits the lines both texts start with and sets the middle to the lines
    before those both texts end with. */
-static void Script.trim(Script &s) {
+static void _trim(Script &s) {
   int lo = 0, old_hi = s.old.len(), new_hi = s.new.len();
-  for (; lo < old_hi && lo < new_hi && s.same(lo, lo); lo++)
-    s.emit(<same>, s.old[lo]);
-  while (old_hi > lo && new_hi > lo && s.same(old_hi - 1, new_hi - 1))
+  for (; lo < old_hi && lo < new_hi && _same(s, lo, lo); lo++)
+    _emit(s, <same>, s.old[lo]);
+  while (old_hi > lo && new_hi > lo && _same(s, old_hi - 1, new_hi - 1))
     old_hi--, new_hi--;
   s.lo = lo, s.n = old_hi - lo, s.m = new_hi - lo;
 }
 
 /* Past `_LIMIT`, the middle becomes one run of deletions and one run of
    insertions. */
-static void Script.replace(Script &s) {
-  for (int i = s.lo; i < s.lo + s.n; i++) s.emit(<delete>, s.old[i]);
-  for (int j = s.lo; j < s.lo + s.m; j++) s.emit(<insert>, s.new[j]);
+static void _replace(Script &s) {
+  for (int i = s.lo; i < s.lo + s.n; i++) _emit(s, <delete>, s.old[i]);
+  for (int j = s.lo; j < s.lo + s.m; j++) _emit(s, <insert>, s.new[j]);
 }
 
-static void Script.emit(Script &s, Symbol kind, String line) =>
+static void _emit(Script &s, Symbol kind, String line) =>
   s.edits = cons(%($kind $line), s.edits);
 
-static int Script.same(Script &s, int i, int j) =>
+static int _same(Script &s, int i, int j) =>
   s.old[i].string() == s.new[j].string();
 
 /* frontier search
@@ -79,25 +79,25 @@ static typedef int *Trace;
 
 /* Myers' greedy search over the middle. Returns the edit count after
    emitting the edits, or -1 past `_LIMIT`. */
-static int Script.myers(Script &s) {
+static int _myers(Script &s) {
   int max = s.n + s.m < _LIMIT ? s.n + s.m : _LIMIT;
   Trace trace = Scope.calloc((max + 1) * (max + 1), sizeof(int));
   defer Scope.free(trace);
-  int found = s.forward(trace, max);
+  int found = _forward(s, trace, max);
   if (found < 0) return -1;
-  foreach (List step, trace.path(found, s.n, s.m)) {
+  foreach (List step, _path(trace, found, s.n, s.m)) {
     (Symbol kind, int i, int j) = step;
-    s.emit(kind, kind == <insert> ? s.new[s.lo + j] : s.old[s.lo + i]);
+    _emit(s, kind, kind == <insert> ? s.new[s.lo + j] : s.old[s.lo + i]);
   }
   return found;
 }
 
 /* Fills the frontier of each step up to `max` and returns the first step
    whose path reaches the end of both middles, or -1. */
-static int Script.forward(Script &s, Trace trace, int max) {
+static int _forward(Script &s, Trace trace, int max) {
   for (int step = 0; step <= max; step++)
     for (int k = -step; k <= step; k += 2) {
-      int x = s.snake(trace.entry(step, k), k);
+      int x = _snake(s, _entry(trace, step, k), k);
       trace[step * step + k + step] = x;
       if (x >= s.n && x - k >= s.m) return step;
     }
@@ -106,24 +106,24 @@ static int Script.forward(Script &s, Trace trace, int max) {
 
 /* Follows diagonal `k` from old index `x` while the lines agree and
    returns the old index where it stops. */
-static int Script.snake(Script &s, int x, int k) {
+static int _snake(Script &s, int x, int k) {
   int y = x - k;
-  while (x < s.n && y < s.m && s.same(s.lo + x, s.lo + y)) x++, y++;
+  while (x < s.n && y < s.m && _same(s, s.lo + x, s.lo + y)) x++, y++;
   return x;
 }
 
 /* Where diagonal `k` starts at `step`: the end of diagonal `k + 1` after
    an insertion, or one past the end of diagonal `k - 1` after a
    deletion. */
-static int Trace.entry(Trace trace, int step, int k) {
+static int _entry(Trace trace, int step, int k) {
   if (!step) return 0;
-  int left = trace.at(step - 1, k - 1), right = trace.at(step - 1, k + 1);
+  int left = _at(trace, step - 1, k - 1), right = _at(trace, step - 1, k + 1);
   return _inserted(step, k, left, right) ? right : left + 1;
 }
 
 /* The furthest old index on diagonal `k` at `step`, or -1 off its
    frontier. */
-static int Trace.at(Trace trace, int step, int k) =>
+static int _at(Trace trace, int step, int k) =>
   k < -step || k > step ? -1 : trace[step * step + k + step];
 
 /* True when `step` reaches diagonal `k` by an insertion from diagonal
@@ -135,12 +135,12 @@ static int _inserted(int step, int k, int left, int right) =>
 /* Walks back from the end of both middles and returns the path as
    `(same i j)`, `(delete i j)`, and `(insert i j)` steps in order, with
    indexes into the middles. */
-static List Trace.path(Trace trace, int found, int n, int m) {
+static List _path(Trace trace, int found, int n, int m) {
   List path = NULL;
   int x = n, y = m;
   for (int step = found; step > 0; step--) {
     int k = x - y;
-    int left = trace.at(step - 1, k - 1), right = trace.at(step - 1, k + 1);
+    int left = _at(trace, step - 1, k - 1), right = _at(trace, step - 1, k + 1);
     int inserted = _inserted(step, k, left, right);
     int prev_k = inserted ? k + 1 : k - 1, prev_x = inserted ? right : left;
     int prev_y = prev_x - prev_k;
@@ -189,7 +189,7 @@ meta native String Diff.unified(
     }
     if (!out.len()) out.printf("--- %s\n+++ %s\n", old_name, new_name);
     Hunk h = _hunk(edits, at, old_line, new_line);
-    h.write(out);
+    _write(h, out);
     at = h.end;
     old_line = h.old_start + h.old_count;
     new_line = h.new_start + h.new_count;
@@ -234,7 +234,7 @@ static char _mark(Symbol kind) {
 
 /* An empty side of a hunk starts at the line before it, as `diff -u`
    prints it. */
-static void Hunk.write(Hunk &h, Buffer out) {
+static void _write(Hunk &h, Buffer out) {
   out.printf(
     "@@ -%d,%d +%d,%d @@\n", h.old_count ? h.old_start + 1 : h.old_start,
     h.old_count, h.new_count ? h.new_start + 1 : h.new_start, h.new_count);

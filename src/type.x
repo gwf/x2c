@@ -113,7 +113,7 @@ static List _from_bind(List mods, List context) {
   Array typed = [];
   foreach (Var item, mods)
     if (!_is_source_text(item)) typed.push(item);
-  return context.type()._modify(_from_ast(typed.list_free(), context));
+  return _modify(context, _from_ast(typed.list_free(), context));
 }
 
 /* A static assertion among the fields, under any origin wrappers, declares
@@ -156,7 +156,7 @@ static List _without_leading_text(List items) {
 static int _is_source_text(Var item) =>
   item is <list> && car(item) is <string>;
 
-static Type Type._modify(Type type, List mods) => %( @mods @type );
+static Type _modify(Type type, List mods) => %( @mods @type );
 
 /* declarations from types
 

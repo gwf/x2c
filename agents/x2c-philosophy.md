@@ -482,7 +482,7 @@ integer domain without conversion through floating point, preserving
 adjacent values above double precision and exact Map key lookup.
 
 Source comparisons with either operand statically typed as `Var` have one
-transform owner, `Compiler._comparison`; protocol resolution leaves two `Var`
+transform owner, `_comparison`; protocol resolution leaves two `Var`
 operands to it. `==`/`!=` call `x2c_var_equal`, `===`/`!==` call
 `x2c_var_identical`, and relational operators compare `x2c_var_order` with
 zero. Two numbers compare by C's usual arithmetic conversions through the

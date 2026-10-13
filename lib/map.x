@@ -60,7 +60,7 @@ $map.scaffold(
   "Map.reinsert", "Map.insert");
 
 $map.var.family(
-  _map_key_hash, _map_key_equal, _map_value_equal, _map_value_valid);
+  _key_hash, _key_equal, _value_equal, _value_valid);
 
 /* Var.hash normalizes zero because the hash array reserves it for an empty
    bucket. Array and Map keys hash and compare by identity, so changing their
@@ -75,7 +75,7 @@ $map.var.family(
    rearranges an installed cluster in place by back-shifting it. */
 $map.core.family(
   Map, struct Map, Var, Var, unsigned, struct MapRecord,
-  _map_key_hash, _map_key_equal, _map_value_equal, _map_value_valid,
+  _key_hash, _key_equal, _value_equal, _value_valid,
   _record_key, _record_value,
   _reinsert_error, _insert_error);
 
@@ -108,7 +108,7 @@ meta native Self Map.merge(Self, Self);
 */
 meta native Var Map.get_hashed(Map map, Var key, unsigned key_hash) {
   if (map == NULL) return void;
-  long index = _find_hashed(map, &key, key_hash);
+  long index = _for_map__find_hashed(map, &key, key_hash);
   return index < 0 ? void : *_record_value(map, (unsigned) index);
 }
 
@@ -169,7 +169,7 @@ void Map.export_to(
       .key = export_value(key, source),
       .val = export_value(val, source)
     };
-    _reinsert((Map) &exported, record.key.hash(), record, 0);
+    _for_map__reinsert((Map) &exported, record.key.hash(), record, 0);
   }
   map.hashes = rebuilt_hashes;
   map.entries = rebuilt_entries;
@@ -194,4 +194,4 @@ meta native Iter Map.keys(Map, Iter);
 meta native Iter Map.enumerate(Map, Iter);
 
 /** Releases this Map and both backing Blocks without freeing stored values. */
-meta native void Map.cleanup(Map value) { _free(value); }
+meta native void Map.cleanup(Map value) { _for_map__free(value); }

@@ -151,23 +151,23 @@ static enum { _STEP_DIR = 1, _STEP_EXEC = 2 };
    already started are terminated and reaped, and capture files are closed,
    before the error transfers. `stdio` holds the next stage's input, the
    last stage's output, and every stage's errors. */
-static void Job._start(Job j) {
+static void _start(Job j) {
   j.started = 1;
-  j._open_table();
+  _open_table(j);
   Stdio stdio = { -1, -1, -1 }, int launched = 0;
   defer if (!launched) j.cleanup();
-  defer j._close_streams(stdio);
-  j._open_streams(stdio);
+  defer _close_streams(j, stdio);
+  _open_streams(j, stdio);
   fflush(NULL);
   int index = 0;
-  foreach (List stage, j.stages) stdio.input = j._stage(index++, stage, stdio);
+  foreach (List stage, j.stages) stdio.input = _stage(j, index++, stage, stdio);
   launched = 1;
 }
 
 /* The finalizer reaps through `pids`, and newer blocks in the job's Scope
    are reclaimed before it runs, so the table lives outside the Scope. A
    stage the launch never reaches reports 127. */
-static void Job._open_table(Job job) {
+static void _open_table(Job job) {
   int count = job.stages.len();
   job.pids = calloc(count + 1, sizeof(long) + sizeof(int));
   if (!job.pids) $error.start.alloc();
@@ -177,7 +177,7 @@ static void Job._open_table(Job job) {
 }
 
 /* A capture file's descriptor closes with the file, when the job reads it. */
-static void Job._close_streams(Job job, Stdio stdio) {
+static void _close_streams(Job job, Stdio stdio) {
   _close(stdio.input);
   if (!job.output_file) _close(stdio.output);
   if (!job.errors_file) _close(stdio.errors);
@@ -186,7 +186,7 @@ static void Job._close_streams(Job job, Stdio stdio) {
 /* The first stage reads the `input` text, the last writes the `stdout`
    stream, and every stage writes the `stderr` stream. Each descriptor
    reaches `stdio` as it opens, so the launch closes it on every exit. */
-static void Job._open_streams(Job j, Stdio &stdio) {
+static void _open_streams(Job j, Stdio &stdio) {
   if (j.launch.has_input) stdio.input = _input(j.launch.input);
   stdio.output =
     _stream(
@@ -220,7 +220,7 @@ static int _stream(File &file, int capture, String path) {
    `spawned` flag disarms the cleanup, since a write into `link` would put
    the array in the transfer-preserved set, whose qualifier `_pipe` would
    then discard. */
-static int Job._stage(Job job, int index, List stage, Stdio stdio) {
+static int _stage(Job job, int index, List stage, Stdio stdio) {
   int link[2] = { -1, -1 };
   if (index < job.count - 1) {
     _pipe(link);
@@ -229,7 +229,7 @@ static int Job._stage(Job job, int index, List stage, Stdio stdio) {
   int spawned = 0;
   {
     defer if (!spawned) { _close(link[0]); _close(link[1]); }
-    job._spawn(index, stage, stdio);
+    _spawn(job, index, stage, stdio);
     spawned = 1;
   }
   _close(link[1]);
@@ -239,7 +239,7 @@ static int Job._stage(Job job, int index, List stage, Stdio stdio) {
 
 // spawning a stage
 
-static void Job._spawn(Job job, int index, List stage, Stdio stdio) {
+static void _spawn(Job job, int index, List stage, Stdio stdio) {
   char **argv = _argv(stage);
   int report[2];
   _pipe(report);
@@ -355,7 +355,7 @@ static void _io_fail(int error) {
 
 // waiting
 
-static void Job._reap(Job job, int index, int flags) {
+static void _reap(Job job, int index, int flags) {
   int status;
   pid_t pid;
   do pid = waitpid((pid_t) job.pids[index], &status, flags);
@@ -371,16 +371,16 @@ static int _decoded_status(int status) {
   return -1;
 }
 
-static int Job._running(Job job) {
+static int _running(Job job) {
   int running = 0;
   for (int i = 0; i < job.count; i++) {
-    if (job.pids[i]) job._reap(i, WNOHANG);
+    if (job.pids[i]) _reap(job, i, WNOHANG);
     if (job.pids[i]) running = 1;
   }
   return running;
 }
 
-static void Job._finish(Job job) {
+static void _finish(Job job) {
   if (job.finished) return;
   job.finished = 1;
   for (int i = 0; i < job.count; i++)
@@ -405,11 +405,11 @@ static String _captured(File &file, int &nul) {
 
 /* Terminates and reaps every running stage without touching capture files,
    which may already be reclaimed when a finalizer calls this. */
-static void Job._terminate(Job job) {
+static void _terminate(Job job) {
   job.kill(SIGTERM);
-  for (int waited = 0; waited < 1000 && job._running(); waited++) usleep(1000);
+  for (int waited = 0; waited < 1000 && _running(job); waited++) usleep(1000);
   job.kill(SIGKILL);
-  for (int i = 0; i < job.count; i++) if (job.pids[i]) job._reap(i, 0);
+  for (int i = 0; i < job.count; i++) if (job.pids[i]) _reap(job, i, 0);
 }
 
 // jobs
@@ -439,7 +439,7 @@ static Job Job.new(List command) {
 
 static void _drop_job(void *ptr) {
   Job job = ptr;
-  if (job.started && !job.finished) job._terminate();
+  if (job.started && !job.finished) _terminate(job);
   if (job.output_file) job.output_file.close();
   if (job.errors_file) job.errors_file.close();
   job.output_file = job.errors_file = NULL;
@@ -456,12 +456,12 @@ static List _stages(List command) =>
     Raises: `<bad-arg>` for a job that has started.
 */
 Job Job.pipe(Job job, List command) {
-  job._unstarted("Job.pipe");
+  _unstarted(job, "Job.pipe");
   job.stages = job.stages.append(_stages(command));
   return job;
 }
 
-static Job Job._unstarted(Job job, String operation) {
+static Job _unstarted(Job job, String operation) {
   if (job.started)
     $error.job.started(operation);
   return job;
@@ -488,32 +488,32 @@ static Job Job._unstarted(Job job, String operation) {
     Raises: `<bad-arg>` for an unknown key or a job that has started.
 */
 Job Job.options(Job job, Map options) {
-  job._unstarted("Job.options");
+  _unstarted(job, "Job.options");
   foreach (Var (key, value), options) {
     if (key is not Symbol)
       $error.options.key();
-    job.launch.set(key, value);
+    _set(job.launch, key, value);
   }
   return job;
 }
 
-static void JobLaunch.set(JobLaunch &l, Symbol name, Var value) {
+static void _set(JobLaunch &l, Symbol name, Var value) {
   switch (name) {
     case <dir>:    l.dir = value; break;
     case <env>:    l.environment = _environment(value); break;
     case <input>:  l.input = value; l.has_input = 1; break;
-    case <stdout>: l.route_output(value); break;
-    case <stderr>: l.route_errors(value); break;
+    case <stdout>: _route_output(l, value); break;
+    case <stderr>: _route_errors(l, value); break;
     default: $error.options.unknown(name);
   }
 }
 
-static void JobLaunch.route_output(JobLaunch &l, Var value) {
+static void _route_output(JobLaunch &l, Var value) {
   l.capture_output = _is(value, <capture>);
   l.stdout_path = l.capture_output || _is(value, <inherit>) ? NULL : value;
 }
 
-static void JobLaunch.route_errors(JobLaunch &l, Var value) {
+static void _route_errors(JobLaunch &l, Var value) {
   l.capture_errors = _is(value, <capture>);
   l.errors_to_output = _is(value, <stdout>);
   l.stderr_path = l.capture_errors || l.errors_to_output ||
@@ -538,7 +538,7 @@ Job Job.live(Job job) => job.options({stdout: <inherit>});
     `<bad-arg>` for an empty command.
 */
 meta native Job Job.start(Job job) {
-  if (!job.started) job._start();
+  if (!job.started) _start(job);
   return job;
 }
 
@@ -549,8 +549,8 @@ meta native Job Job.start(Job job) {
 */
 int Job.status(Job job) {
   job.start();
-  for (int i = 0; i < job.count; i++) if (job.pids[i]) job._reap(i, 0);
-  job._finish();
+  for (int i = 0; i < job.count; i++) if (job.pids[i]) _reap(job, i, 0);
+  _finish(job);
   return job.status;
 }
 
@@ -620,8 +620,8 @@ String Job.errors(Job job) {
 int Job.ready(Job job) {
   if (!job.started) return 0;
   if (job.finished) return 1;
-  if (job._running()) return 0;
-  job._finish();
+  if (_running(job)) return 0;
+  _finish(job);
   return 1;
 }
 
@@ -636,8 +636,8 @@ void Job.kill(Job job, int signal) {
 */
 void Job.cleanup(Job job) {
   if (!job || !job.started || job.finished) return;
-  job._terminate();
-  job._finish();
+  _terminate(job);
+  _finish(job);
 }
 
 /** Removes and returns the first job in `jobs` that has finished, waiting

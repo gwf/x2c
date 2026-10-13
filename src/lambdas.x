@@ -60,34 +60,34 @@ List Compiler.parse_lambda_literal(Compiler c) {
   c.expect(<"%!">);
   c.expect(<(>);
   c.sym.push_new_scope();
-  List entries = c.peek(0) == <)> ? NULL : c._parse_params();
+  List entries = c.peek(0) == <)> ? NULL : _parse_params(c);
   c.expect(<)>);
   SymScope params = c.sym.pop_scope();
   Array references = [], prescribed = [];
-  c._parse_using(references, prescribed);
+  _parse_using(c, references, prescribed);
   c.expect(<"=">);
   c.expect(<">">);
   $let(c.lambda_scopes, c.lambda_scopes) {
     c.begin_lambda_captures(references.list_free(), NULL);
     c.sym.push_scope(params);
-    List body = c._parse_lambda_body();
+    List body = _parse_lambda_body(c);
     List ftype = %((func ${c.lambda_param_types(entries)}) "Var");
     List captures = c.end_lambda_captures();
     c.check_lambda_captures(body);
     if (c.macro_holes) captures = prescribed.list_free();
     c.sym.pop_scope();
-    if (c.macro_holes) return c._lambda_template(body, captures, entries);
+    if (c.macro_holes) return _lambda_template(c, body, captures, entries);
     Type type = captures ? %("Func") : ftype;
     return c.rebuild_expression(type, _lambda_node(body, captures, entries));
   }
 }
 
-static List Compiler._parse_params(Compiler c) =>
-  c._params_look_typed() ? c._parse_typed_params() : c._parse_bare_params();
+static List _parse_params(Compiler c) =>
+  _params_look_typed(c) ? _parse_typed_params(c) : _parse_bare_params(c);
 
 /* Typed parameters begin with a type: a type keyword, a typedef name, or
    a template's `$` type hole or `@` parameter sequence. */
-static int Compiler._params_look_typed(Compiler c) {
+static int _params_look_typed(Compiler c) {
   Symbol head = c.peek(0);
   if (c.macro_holes && (head == <$> || head == <@> || head == <"@(">))
     return 1;
@@ -101,7 +101,7 @@ static int Compiler._params_look_typed(Compiler c) {
   return c.sym.get(%($name)).type().is_typedef();
 }
 
-static List Compiler._parse_typed_params(Compiler c) {
+static List _parse_typed_params(Compiler c) {
   List params = c.parse_parameter_list();
   foreach (List param, params)
     match (param)
@@ -110,15 +110,15 @@ static List Compiler._parse_typed_params(Compiler c) {
   return params;
 }
 
-static List Compiler._parse_bare_params(Compiler c) {
+static List _parse_bare_params(Compiler c) {
   Array names = [];
-  do names.push(c._parse_bare_param());
+  do names.push(_parse_bare_param(c));
   while (c.test(<,>));
   return names.list_free();
 }
 
 /* A bare parameter is an automatic Var. */
-static List Compiler._parse_bare_param(Compiler c) {
+static List _parse_bare_param(Compiler c) {
   if (c.peek(0) != <ident>)
     $report.parse.param_ident(c);
   String name = c.token.text;
@@ -133,7 +133,7 @@ static List Compiler._parse_bare_param(Compiler c) {
 
 /* `using` shares source bindings by reference. A template instead lists
    reference rows, or one captures hole, for expansion to complete. */
-static void Compiler._parse_using(
+static void _parse_using(
   Compiler c, Array references, Array prescribed) {
   if (c.peek(0) != <ident> || c.token.text != "using") return;
   c.next();
@@ -141,15 +141,15 @@ static void Compiler._parse_using(
   if (hole) prescribed.push(hole);
   else do {
     c.expect(<&>);
-    if (c.macro_holes) prescribed.push(c._template_capture());
-    else references.push(c._shared_binding());
+    if (c.macro_holes) prescribed.push(_template_capture(c));
+    else references.push(_shared_binding(c));
   } while (c.test(<,>));
 }
 
 /* A template's `&$name`, or `&name` for a name the template does not
    declare, leaves the binding to expansion; `&name` for a template local
    resolves it now. */
-static List Compiler._template_capture(Compiler c) {
+static List _template_capture(Compiler c) {
   List name = NULL, value = NULL;
   Type reference = %(& <macro-expr>);
   if (c.peek(0) == <$>) {
@@ -172,7 +172,7 @@ static List Compiler._template_capture(Compiler c) {
   return %(capture $name $reference (expr $reference (op & $value)));
 }
 
-static List Compiler._shared_binding(Compiler c) {
+static List _shared_binding(Compiler c) {
   Token origin = c.token;
   String spelling = c.token.text;
   c.expect(<ident>);
@@ -183,7 +183,7 @@ static List Compiler._shared_binding(Compiler c) {
   return binding;
 }
 
-static List Compiler._parse_lambda_body(Compiler c) {
+static List _parse_lambda_body(Compiler c) {
   $let(c.return_type, %("Var")) {
     if (!c.test(<"{">)) return c.parse_assignment();
     return c.parse_callable_body();
@@ -210,7 +210,7 @@ List Compiler.lambda_param_types(Compiler c, List entries) {
 }
 
 /* The body hole may supply either an expression or a block. */
-static List Compiler._lambda_template(
+static List _lambda_template(
   Compiler c, List body, List captures, List entries) {
   match (body)
     case %(expr (<macro-expr>) (!set ?hole (macro-bind ?))): body = hole;
@@ -236,7 +236,7 @@ static List _lambda_node(List body, List captures, List params) {
 List Compiler.bind_lambda_expression(
   Compiler c, Type type, List parameters, List supplied, List body) {
   Array prescribed = [], aliases = [];
-  foreach (List row, supplied) c._prescribe(row, prescribed, aliases);
+  foreach (List row, supplied) _prescribe(c, row, prescribed, aliases);
   c.sym.push_new_scope();
   defer c.sym.pop_scope();
   foreach (List alias, aliases) {
@@ -249,15 +249,15 @@ List Compiler.bind_lambda_expression(
     defer c.sym.pop_scope();
     Array entries = [];
     foreach (List entry, parameters.cdr())
-      c._add_param(entries, c._declare_param(entry));
-    body = c._bind_body(body);
+      _add_param(c, entries, _declare_param(c, entry));
+    body = _bind_body(c, body);
     List captures = c.end_lambda_captures();
     c.check_lambda_captures(body);
     List params = entries.list_free();
     if (captures)
       return c.rebuild_expression(
         %("Func"), _lambda_node(body, captures, params));
-    return c._plain_lambda(type, supplied, params, body);
+    return _plain_lambda(c, type, supplied, params, body);
   }
 }
 
@@ -265,7 +265,7 @@ List Compiler.bind_lambda_expression(
    becomes a reference to the target's type, and a target without a
    binding identity gets a fresh binding that the lambda binds as an
    alias. */
-static void Compiler._prescribe(
+static void _prescribe(
   Compiler c, List row, Array prescribed, Array aliases) {
   match (row)
     case %(capture ?target ?captured_type ?expression): {
@@ -304,7 +304,7 @@ static String _alias_spelling(Var target, List binding) {
 }
 
 /* A `param` keeps its base and declarator; a bare binding declares a Var. */
-static List Compiler._declare_param(Compiler c, List entry) {
+static List _declare_param(Compiler c, List entry) {
   match (entry) {
     case %(param ?base ?binding):
       return c.bind_parameter(base, binding);
@@ -314,7 +314,7 @@ static List Compiler._declare_param(Compiler c, List entry) {
   return NULL;
 }
 
-static void Compiler._add_param(Compiler c, Array entries, List parameter) {
+static void _add_param(Compiler c, Array entries, List parameter) {
   match (parameter)
     case %(param ? (bind ?binding ?)): {
       c.set_fact(%(lambda-param $binding), 1);
@@ -322,7 +322,7 @@ static void Compiler._add_param(Compiler c, Array entries, List parameter) {
     }
 }
 
-static List Compiler._bind_body(Compiler c, List body) {
+static List _bind_body(Compiler c, List body) {
   match (body) case $source_block_content(%(*)):
     return c.bind_callable_body(body, %("Var"));
   $let(c.return_type, %("Var")) return c.resolve_expression(body, c.token);
@@ -331,7 +331,7 @@ static List Compiler._bind_body(Compiler c, List body) {
 /* An open type is a Func when rows were supplied, and otherwise the
    native function type of the parameters. A meta body keeps a Func lambda
    for meta lowering to adapt; the transform lifts it for native code. */
-static List Compiler._plain_lambda(
+static List _plain_lambda(
   Compiler c, Type type, List supplied, List params, List body) {
   List node = _lambda_node(body, NULL, params);
   if (type === %(<macro-expr>))
@@ -377,7 +377,7 @@ int Compiler.lambda_capture_required(Compiler c, List binding) {
   match (c.lambda_scopes)
     case %((lambda-scope ? ?depth ? ?supplied) *):
       return _prescribed_row(supplied, binding, binding) ||
-             c._declared_outside(binding, depth);
+             _declared_outside(c, binding, depth);
   return 0;
 }
 
@@ -389,7 +389,7 @@ int Compiler.lambda_capture_required(Compiler c, List binding) {
 List Compiler.capture_lambda_identifier(Compiler c, List binding, Type type) {
   List original = binding;
   foreach (List frame, c.lambda_scopes.reverse())
-    match (c._frame_capture(frame, binding, original, type))
+    match (_frame_capture(c, frame, binding, original, type))
       case %(capture ?captured ?captured_type ?): {
         binding = captured;
         type = captured_type;
@@ -410,12 +410,12 @@ static typedef struct Capture {
 
 /* The row that captures `binding` in `frame`, or NULL when the binding is
    the frame's own or static. */
-static List Compiler._frame_capture(
+static List _frame_capture(
   Compiler c, List frame, List binding, List original, Type type) {
   match (frame)
     case %(lambda-scope ?scope ?depth ?references ?supplied): {
       List prescribed = _prescribed_row(supplied, binding, original);
-      if (!prescribed && !c._declared_outside(binding, depth)) return NULL;
+      if (!prescribed && !_declared_outside(c, binding, depth)) return NULL;
       if (type.is_static()) return NULL;
       Map facts = c.semantic_binding_facts();
       List key = %(lambda-capture $scope $binding);
@@ -426,7 +426,7 @@ static List Compiler._frame_capture(
         .prescribed = prescribed, .binding = binding, .original = original,
         .type = type, .scope = scope, .depth = depth,
         .references = references};
-      return k.add();
+      return _add(k);
     }
   return NULL;
 }
@@ -446,7 +446,7 @@ static List _prescribed_row(Var supplied, List binding, List original) {
 /* A captured copy is outside every lambda deeper than the one that made
    it; another automatic binding is outside when a scope below `depth`
    declares it. */
-static int Compiler._declared_outside(Compiler c, List binding, int depth) {
+static int _declared_outside(Compiler c, List binding, int depth) {
   Var captured_depth;
   Map facts = c.semantic_binding_facts();
   if (facts.try_get(%(lambda-depth $binding), captured_depth))
@@ -458,7 +458,7 @@ static int Compiler._declared_outside(Compiler c, List binding, int depth) {
 /* A supplied row fixes the captured type and value. Otherwise a binding
    listed after `using` captures by reference, and a snapshot of a
    reference parameter copies its referent. */
-static List Capture.add(Capture &k) {
+static List _add(Capture &k) {
   Type type = k.type, captured_type = type.car() == <&> ? type.cdr() : type;
   List binding = k.binding, expression = $!($type){ $binding };
   int reference = k.original in k.references.list();
@@ -466,7 +466,7 @@ static List Capture.add(Capture &k) {
     match (k.prescribed)
       case %(capture ? ?target_type ?value): {
         captured_type = target_type;
-        expression = k.c._resolve_outside(k.frame, value);
+        expression = _resolve_outside(k.c, k.frame, value);
         reference = captured_type.car() == <&>;
       }
   }
@@ -479,11 +479,11 @@ static List Capture.add(Capture &k) {
     expression = $!($captured_type){ *$expression };
   if (reference && %(lambda-snapshot $binding) in k.facts)
     $report.type.capture_enclosing(k.c, k.original);
-  return k.record(captured_type, expression, reference);
+  return _record(k, captured_type, expression, reference);
 }
 
 /* A supplied value resolves outside its lambda and the lambdas inside it. */
-static List Compiler._resolve_outside(Compiler c, List frame, Var value) {
+static List _resolve_outside(Compiler c, List frame, Var value) {
   List outside = c.lambda_scopes;
   while (outside.car() != frame) outside = outside.cdr();
   $let(c.lambda_scopes, outside.cdr())
@@ -492,7 +492,7 @@ static List Compiler._resolve_outside(Compiler c, List frame, Var value) {
 
 /* The captured copy is a fresh automatic binding: a reference parameter or
    a snapshot. Rows join the lambda's order newest first. */
-static List Capture.record(
+static List _record(
   Capture &k, Type captured_type, List expression, int reference) {
   Compiler c = k.c;
   List captured = c.sym.introduce(binding_identity_spelling(k.binding));
@@ -521,17 +521,17 @@ void Compiler.check_lambda_captures(Compiler c, List ast) {
     match (node) {
       case $source_any_lambda(): continue;
       case $source_operator_content(%(& ?target)):
-        c._require_capture_lvalue(target);
+        _require_capture_lvalue(c, target);
       case %(dstrasgn (targets *targets) ?):
-        foreach (List target, targets) c._require_capture_lvalue(target);
+        foreach (List target, targets) _require_capture_lvalue(c, target);
       case $source_call_content($called,
           %(expr ?callee_type ?), %(*arguments)):
-        c._require_reference_arguments(callee_type, arguments);
-      default: c._require_capture_lvalue(Ast.written_operand(node));
+        _require_reference_arguments(c, callee_type, arguments);
+      default: _require_capture_lvalue(c, Ast.written_operand(node));
     }
 }
 
-static void Compiler._require_capture_lvalue(Compiler c, List target) {
+static void _require_capture_lvalue(Compiler c, List target) {
   List binding = Ast.lvalue_binding(target);
   if (binding &&
       %(lambda-snapshot $binding) in c.semantic_binding_facts())
@@ -539,7 +539,7 @@ static void Compiler._require_capture_lvalue(Compiler c, List target) {
 }
 
 /* An argument bound to a reference parameter is reference access. */
-static void Compiler._require_reference_arguments(
+static void _require_reference_arguments(
   Compiler c, Type callee_type, List arguments) {
   List parameters = NULL;
   if (!Type.function_parts(callee_type, parameters, NULL)) return;
@@ -547,6 +547,6 @@ static void Compiler._require_reference_arguments(
        parameters = parameters.cdr(), arguments = arguments.cdr()) {
     Type parameter = parameters.car();
     if (parameter.is_reference())
-      c._require_capture_lvalue(arguments.car());
+      _require_capture_lvalue(c, arguments.car());
   }
 }

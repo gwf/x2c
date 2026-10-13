@@ -110,8 +110,8 @@ static List _foreach_expand(
     .targets = targets, .type = type, .iterator = iterator, .item = item,
     .pair = pair, .object = object, .cursor = cursor};
   if (spec && (targets.len() == 1 || List.len(spec[2]) >= 2))
-    return f.with_cursor(spec);
-  return f.with_iter(converter);
+    return _with_cursor(f, spec);
+  return _with_iter(f, converter);
 }
 
 /* The function that makes an Iter of a `type` value. */
@@ -168,7 +168,7 @@ static int _valid_outputs(List outputs) {
 /* A cursor loop calls `try_next` with the collection, the cursor, and one
    output per value. A reference parameter takes the object itself; a
    pointer takes its address. */
-static List Foreach.with_cursor(Foreach &f, List spec) {
+static List _with_cursor(Foreach &f, List spec) {
   List function = spec[0], cursor_type = spec[1], types = spec[2];
   int by_reference = spec.len() > 3;
   List outputs = types.map(
@@ -191,7 +191,7 @@ static List Foreach.with_cursor(Foreach &f, List spec) {
     ${_declare(f.type, f.object, f.collection)}
     ${_declare(cursor_type, f.cursor, initial)}
     @declarations);
-  return f.loop(condition, loop_body, setup);
+  return _loop(f, condition, loop_body, setup);
 }
 
 static List _cursor_assignments(List targets, List outputs) {
@@ -202,8 +202,8 @@ static List _cursor_assignments(List targets, List outputs) {
 
 /* `Iter_try_next` reads each item into a Var; a pair of names takes the
    item's first two elements. */
-static List Foreach.with_iter(Foreach &f, List converter) {
-  List constructor = f.constructor(converter);
+static List _with_iter(Foreach &f, List converter) {
+  List constructor = _iter_constructor(f, converter);
   List item_expression = _expr(%("Var"), f.item);
   List initializer = builtin_foreach_complete(
     constructor ? _iter_call(constructor, f.collection) : f.collection);
@@ -220,17 +220,17 @@ static List Foreach.with_iter(Foreach &f, List converter) {
   List setup = %(
     ${_declare(%("Iter"), f.iterator, initializer)}
     ${_declare(%("Var"), f.item, %())});
-  return f.loop(condition, loop_body, setup);
+  return _loop(f, condition, loop_body, setup);
 }
 
-static List Foreach.loop(
+static List _loop(
   Foreach &f, List condition, List body, List setup) {
   return $!{ { ${f.declaration} @setup while ($condition) $body } };
 }
 
 /* The function that makes the loop's Iter: the owner's `enumerate` for a
    pair of names, or else the collection's converter. */
-static List Foreach.constructor(Foreach &f, List converter) {
+static List _iter_constructor(Foreach &f, List converter) {
   List type = f.type;
   int atom = _atom_type(type);
   String owner = atom ? type.car().str() : "";
@@ -294,13 +294,13 @@ static typedef struct Shape {
 
 static List _class_defaults(String owner, List type, List location) {
   Shape s = _shape(owner, type, location);
-  List body = s.constructor();
+  List body = _class_constructor(s);
   if (s.alias) return %(seq @body);
-  List release = s.release();
-  if (s.heap && s.aggregate) body = body.append(%(${s.alloc()}));
-  if (s.heap) body = body.append(s.cleanup(release));
-  if (s.aggregate || s.heap) body = body.append(s.boxed());
-  else body = body.append(s.scalar());
+  List release = _release(s);
+  if (s.heap && s.aggregate) body = body.append(%(${_alloc(s)}));
+  if (s.heap) body = body.append(_cleanup(s, release));
+  if (s.aggregate || s.heap) body = body.append(_boxed(s));
+  else body = body.append(_scalar(s));
   return %(seq @body);
 }
 
@@ -341,7 +341,7 @@ static int _positional(List fields) {
 /* The default `new`, unless the class defines one. An aggregate other
    than an alias takes the extra parameters of its own `init`, and an
    alias forwards `new` to the class it names. */
-static List Shape.constructor(Shape &s) {
+static List _class_constructor(Shape &s) {
   String owner = s.owner;
   if (_own_method(owner, "new")) return %();
   List extras = %();
@@ -365,7 +365,7 @@ static List Shape.constructor(Shape &s) {
 
 /* What `free` runs: the class's own `drop` on a set value, then the
    release of the value's storage. */
-static List Shape.release(Shape &s) {
+static List _release(Shape &s) {
   List drop = _own_method(s.owner, "drop");
   List release = drop
     ? $!{
@@ -377,7 +377,7 @@ static List Shape.release(Shape &s) {
 }
 
 /* A heap aggregate's `alloc` returns zeroed storage in the active scope. */
-static List Shape.alloc(Shape &s) {
+static List _alloc(Shape &s) {
   Type type = %(${s.owner});
   List body = $!{
     $type value = Scope_calloc(1, sizeof(*value));
@@ -387,7 +387,7 @@ static List Shape.alloc(Shape &s) {
 }
 
 /* A heap class's `free` and `cleanup`, and its Cleanup adoption. */
-static List Shape.cleanup(Shape &s, List release) {
+static List _cleanup(Shape &s, List release) {
   String owner = s.owner;
   List parameter = s.parameter;
   List free_method = _default(
@@ -401,10 +401,10 @@ static List Shape.cleanup(Shape &s, List release) {
 
 /* A heap or aggregate class boxes by its tag, with equality, hashing, and
    writers. */
-static List Shape.boxed(Shape &s) {
-  List body = s.boxing();
-  body = body.append(s.comparison());
-  body = body.append(s.writers());
+static List _boxed(Shape &s) {
+  List body = _boxing(s);
+  body = body.append(_comparison(s));
+  body = body.append(_writers(s));
   return body.append(
     %((adopt ("Var") (${s.owner}) external
         (tag ${$!Symbol{ ${s.tag} }}) ${s.location})));
@@ -412,7 +412,7 @@ static List Shape.boxed(Shape &s) {
 
 /* `var`, and the conversion back: the pointer a heap class boxed, or a
    copy of an aggregate's boxed record. */
-static List Shape.boxing(Shape &s) {
+static List _boxing(Shape &s) {
   String owner = s.owner;
   Type type = %($owner), pointer = %(* $owner);
   List unboxed = s.heap ? $!( ($type)Var_pointer(value) )
@@ -425,7 +425,7 @@ static List Shape.boxing(Shape &s) {
 
 /* `equal` and `hash` of a heap or positional class; a value class of
    another shape must define compatible ones. */
-static List Shape.comparison(Shape &s) {
+static List _comparison(Shape &s) {
   String owner = s.owner;
   if (s.heap || s.positional)
     return %(${_equal(owner, s.heap, s.named)}
@@ -439,7 +439,7 @@ static List Shape.comparison(Shape &s) {
 }
 
 /* The `str` and `repr` writers and methods the class does not define. */
-static List Shape.writers(Shape &s) {
+static List _writers(Shape &s) {
   String owner = s.owner;
   Array writers = [];
   foreach (Var member_value, %("str" "repr")) {
@@ -454,7 +454,7 @@ static List Shape.writers(Shape &s) {
 }
 
 /* A scalar class boxes as its representation. */
-static List Shape.scalar(Shape &s) {
+static List _scalar(Shape &s) {
   String owner = s.owner;
   Type type = %($owner), representation = s.representation;
   List boxed = $!{ return (Var)($representation)value; };

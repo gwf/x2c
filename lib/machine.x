@@ -320,21 +320,21 @@ inline int MachineSlot.final_equal(
    and all later emissions return -1. Allocation can raise. */
 int MachineBuilder.emit(
   MachineBuilder &b, int op, int a, int operand_b, int c, int d, int target) {
-  if (b.status != MACHINE_PREPARED || b._grow_code() < 0) return -1;
+  if (b.status != MACHINE_PREPARED || _grow_code(b) < 0) return -1;
   if (op < 0 || op > 255 || operand_b < 0 || operand_b > 255 ||
       c < 0 || c > 255 || d < 0 || d > 255 ||
       a < -1 || a >= MACHINE_CODE_MAX ||
       target < -1 || target >= MACHINE_CODE_MAX)
-    return b._fail("instruction-range");
+    return _fail(b, "instruction-range");
   b.code[b.length] = (MachineWord) {
     .op = op, .b = operand_b, .c = c, .d = d, .a = a, .target = target};
   return b.length++;
 }
 
 /* Makes room for one more word, or fails the builder at MACHINE_CODE_MAX. */
-static int MachineBuilder._grow_code(MachineBuilder &b) {
+static int _grow_code(MachineBuilder &b) {
   if (b.length < b.code_capacity) return 0;
-  if (b.code_capacity >= MACHINE_CODE_MAX) return b._fail("code-capacity");
+  if (b.code_capacity >= MACHINE_CODE_MAX) return _fail(b, "code-capacity");
   int capacity = b.code_capacity ? b.code_capacity * 2 : 64;
   if (capacity > MACHINE_CODE_MAX) capacity = MACHINE_CODE_MAX;
   MachineWord *grown = Scope.realloc(b.code, sizeof(MachineWord) * capacity);
@@ -349,17 +349,17 @@ int MachineBuilder.constant(MachineBuilder &b, Var value) {
   if (b.status != MACHINE_PREPARED) return -1;
   for (int i = 0; i < b.const_count; i++)
     if (b.consts[i].u64 == value.u64) return i;
-  if (b._grow_consts() < 0) return -1;
+  if (_grow_consts(b) < 0) return -1;
   b.consts[b.const_count] = value;
   return b.const_count++;
 }
 
 /* Makes room for one more constant, or fails the builder at
    MACHINE_CONST_MAX. */
-static int MachineBuilder._grow_consts(MachineBuilder &b) {
+static int _grow_consts(MachineBuilder &b) {
   if (b.const_count < b.const_capacity) return 0;
   if (b.const_capacity >= MACHINE_CONST_MAX)
-    return b._fail("constant-capacity");
+    return _fail(b, "constant-capacity");
   int capacity = b.const_capacity ? b.const_capacity * 2 : 16;
   if (capacity > MACHINE_CONST_MAX) capacity = MACHINE_CONST_MAX;
   Var *grown = Scope.realloc(b.consts, sizeof(Var) * capacity);
@@ -373,7 +373,7 @@ int MachineBuilder.binder(MachineBuilder &b, Atom binder) {
   if (b.status != MACHINE_PREPARED) return -1;
   for (int i = 0; i < b.binder_count; i++)
     if (b.binders[i].u64 == binder.u64) return i;
-  if (b.binder_count >= MACHINE_BINDER_MAX) return b._fail("binder-capacity");
+  if (b.binder_count >= MACHINE_BINDER_MAX) return _fail(b, "binder-capacity");
   b.binders[b.binder_count] = binder;
   return b.binder_count++;
 }
@@ -386,7 +386,7 @@ int MachineBuilder.binder(MachineBuilder &b, Atom binder) {
    failure leaves the patch site unchanged. */
 void MachineBuilder.set_target(MachineBuilder &b, int site, int target) {
   if (target == b.length && b.length == MACHINE_CODE_MAX)
-    b._fail("code-capacity");
+    _fail(b, "code-capacity");
   else if (target < 0 || target >= MACHINE_CODE_MAX)
     raise %(bad-arg (operation "MachineBuilder.set_target") (target $target));
   else if (site >= 0)
@@ -402,7 +402,7 @@ void MachineBuilder.patch(
   for (int i = 0; i < count; i++) b.set_target(sites[i], target);
 }
 
-static int MachineBuilder._fail(MachineBuilder &b, const char *reason) {
+static int _fail(MachineBuilder &b, const char *reason) {
   if (b.status == MACHINE_PREPARED) {
     b.status = MACHINE_INELIGIBLE;
     b.reason = reason;

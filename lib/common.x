@@ -645,8 +645,8 @@ meta static Symbol _literal_tag(List tag) {
   return 0;
 }
 
-meta static int var_tag_top(List tag) => (int) Var_tag_top(_literal_tag(tag));
-meta static int var_tag_bottom(List tag) =>
+meta static int _var_tag_top(List tag) => (int) Var_tag_top(_literal_tag(tag));
+meta static int _var_tag_bottom(List tag) =>
   (int) Var_tag_bottom(_literal_tag(tag));
 
 static macro Unit $var.tag.unbox(Type $type, Name $method, Literal $tag) {
@@ -654,8 +654,8 @@ static macro Unit $var.tag.unbox(Type $type, Name $method, Literal $tag) {
 
   /** Extracts the `$type` payload of `value`, or NULL for another tag. */
   inline $type Var.$method(Var value) {
-    if (value.u64 >> 48 != $var_tag_top($tag) ||
-        (value.u64 & 0x7) != $var_tag_bottom($tag)) return NULL;
+    if (value.u64 >> 48 != $_var_tag_top($tag) ||
+        (value.u64 & 0x7) != $_var_tag_bottom($tag)) return NULL;
     return ($type) (value.u64 & 0x0000FFFFFFFFFFF8ul);
   }
 }

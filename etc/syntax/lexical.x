@@ -532,7 +532,7 @@ List syntax_lexical(void) => %(lexical
     (source "docs/src/reference/syntax/lexical.md"))
   (boundaries
     (external percent-string-decoding
-      "src/literals.x:Compiler._parse_text_segment"
+      "src/literals.x:_parse_text_segment"
       (remove continuations) (normalize cr-and-crlf-to-lf) (decode escapes))
     (external symbol-representability "src/literals.x")
     (external host-preprocessing host-preprocessor)

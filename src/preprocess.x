@@ -153,12 +153,12 @@ void Compiler.scan_conditionals(Compiler c) {
   for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {
     Token token = &((struct Token *) c.tokenizer.tokens)[i];
     if (token.type == <eof>) break;
-    if (token.type == <preproc>) scan.directive(token, i);
-    else i = scan.code(token, i);
+    if (token.type == <preproc>) _directive(scan, token, i);
+    else i = _code(scan, token, i);
   }
 }
 
-static void ArmScan.directive(ArmScan &s, Token token, size_t i) {
+static void _directive(ArmScan &s, Token token, size_t i) {
   Symbol kind = preproc_conditional_kind(token.text);
   int conditional = kind == <open> || (kind && s.stack.len());
   if (kind == <open>)
@@ -168,7 +168,7 @@ static void ArmScan.directive(ArmScan &s, Token token, size_t i) {
     s.stack[-1] = %($id ${arm.integer() + 1} ${preproc_branch_state(state)});
   }
   else if (kind == <close> && s.stack.len()) s.stack.take_last();
-  else if (!s.hidden) s._note_layout_macro(token.text);
+  else if (!s.hidden) _note_layout_macro(s, token.text);
   if (!conditional) return;
   s.c.arm_stacks[(long) i] = s.stack.list();
   s.hidden = _hidden_group(s.stack);
@@ -183,33 +183,33 @@ static int _hidden_group(Array stack) {
    returns the index of the token's last part. A lexical failure ends the
    token stream, so the rest of the unit is missing whichever arm holds it;
    the `<error>` token stays visible, and the parser reports it. */
-static size_t ArmScan.code(ArmScan &s, Token token, size_t i) {
+static size_t _code(ArmScan &s, Token token, size_t i) {
   if (s.hidden && token.type != <space> && token.type != <error>)
     token.type = <comment>;
   else if (token.type == <ident> && token.text == "__attribute__")
-    return s._note_attribute(i);
+    return _note_attribute(s, i);
   else if (token.type == <ident> && token.text in s.layout)
-    s._mark_layout(i, s.layout[token.text] == 2);
+    _mark_layout(s, i, s.layout[token.text] == 2);
   return i;
 }
 
 /* Records a pair of layout marks at the `__attribute__ ((...))` starting at
    token `index` when it can change a struct's layout. Returns the index of
    the attribute's last token. */
-static size_t ArmScan._note_attribute(ArmScan &s, size_t index) {
+static size_t _note_attribute(ArmScan &s, size_t index) {
   Token base = s.c.tokenizer.tokens;
   Token open = Token.skip_trivia(base + index + 1);
   if (open.type != <(>) return index;
   Token last = open.group_close();
   if (last.type == <eof>) return index;
   int level = _attribute_layout(base + index);
-  if (level) s._mark_layout(index, level == 2);
+  if (level) _mark_layout(s, index, level == 2);
   return last - base;
 }
 
 /* A layout mark pair brackets the token at `index`, and a packing
    attribute adds a packed pair. */
-static void ArmScan._mark_layout(ArmScan &s, size_t index, int packed) {
+static void _mark_layout(ArmScan &s, size_t index, int packed) {
   Compiler c = s.c;
   c.layout_marks.push((long) index);
   c.layout_marks.push((long) index + 1);
@@ -245,7 +245,7 @@ static int _layout_attribute(Token open, int &packed) {
    layout, a macro that any arm defines with such an attribute stays in
    `layout`; only an `#undef` or definition outside every conditional group
    removes it. */
-static void ArmScan._note_layout_macro(ArmScan &s, String content) {
+static void _note_layout_macro(ArmScan &s, String content) {
   int undefined;
   Token name = _macro_directive(content, undefined);
   if (!name) return;
@@ -315,20 +315,20 @@ void Compiler.note_object_macro(Compiler c, String content) {
   Token body = token + 1;
   if (undefined) c.object_macros.del(name);
   // A parameter list touching the name makes the macro function-like.
-  else if (body.type == <(>) c._note_function_macro(name, body);
-  else c._note_prefix_macro(name, body.skip_trivia());
+  else if (body.type == <(>) _note_function_macro(c, name, body);
+  else _note_prefix_macro(c, name, body.skip_trivia());
 }
 
 /* A function-like macro whose body is empty or an attribute is an
    `<annotation>`, and one that wraps its parameter is a `<wrapper>`; any
    other function-like macro is skipped. */
-static void Compiler._note_function_macro(
+static void _note_function_macro(
   Compiler c, String name, Token params) {
   Token after = params.after_group(), String param = NULL;
   Token first = Token.skip_trivia(params + 1);
   if (first.type == <ident> && Token.skip_trivia(first + 1).type == <)>)
     param = first.text;
-  Var kind = c._macro_prefix(after, param);
+  Var kind = _macro_prefix(c, after, param);
   if (kind == %()) c.object_macros[name] = <annotation>;
   else if (kind == <wrapper>) c.object_macros[name] = <wrapper>;
 }
@@ -336,8 +336,8 @@ static void Compiler._note_function_macro(
 /* An object-like body is classified by `_macro_prefix`. A name another arm
    defines to anything but a string literal is no string literal:
    `Var v = SEP;` must not make a String of the other arm's number. */
-static void Compiler._note_prefix_macro(Compiler c, String name, Token body) {
-  Var definition = c._macro_prefix(body, NULL), existing;
+static void _note_prefix_macro(Compiler c, String name, Token body) {
+  Var definition = _macro_prefix(c, body, NULL), existing;
   if (!c.object_macros.try_get(name, existing) ||
       _prefix_rank(definition) > _prefix_rank(existing) ||
       (existing == <string> && definition != <string>))
@@ -350,7 +350,7 @@ static void Compiler._note_prefix_macro(Compiler c, String name, Token body) {
    prefix macros, amid attributes that contribute nothing; `<wrapper>` when
    a function-like body is its parameter `param` amid prefixes; `<string>`
    for a string literal; and 1 for any other text. */
-static Var Compiler._macro_prefix(Compiler c, Token token, String param) {
+static Var _macro_prefix(Compiler c, Token token, String param) {
   if (token.type == <lit-char*>) return <string>;
   Array words = [], int wrapped = 0;
   while (token.type != <eof>) {
@@ -360,7 +360,7 @@ static Var Compiler._macro_prefix(Compiler c, Token token, String param) {
     if (_is_specifier(type)) words.push(type);
     else if (type == <lit-char*>);   // the linkage name in `extern "C"`
     else if (type != <ident>) return 1;
-    else if (c._is_annotation(word)) {
+    else if (_is_annotation(c, word)) {
       if (next.type != <(>) return 1;
       next = next.after_group();
     }
@@ -378,7 +378,7 @@ static int _is_specifier(Symbol type) =>
   type.is_storage_class() || type.is_inline() || type.is_type_qualifier() ||
   type.is_builtin_type();
 
-static int Compiler._is_annotation(Compiler c, String word) {
+static int _is_annotation(Compiler c, String word) {
   Var definition;
   return word == "__attribute__" || word == "__declspec" ||
          (c.object_macros.try_get(word, definition) &&

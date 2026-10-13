@@ -96,100 +96,100 @@ String String.format(String fmt, List values) {
   Buffer out = $auto(Buffer.new(0));
   Format f = {.fmt = fmt, .length = fmt.len(), .args = values, .out = out};
   while (f.cursor < f.length)
-    if (f.byte() == '%') f.conversion();
+    if (_byte(f) == '%') _conversion(f);
     else f.cursor++;
-  f.write_literal();
+  _write_literal(f);
   if (f.args) _format_error(f.length, $reason.excess_values());
   return out;
 }
 
 /* Writes the text before the `%` at the cursor, then the conversion that
    `%` starts. */
-static void Format.conversion(Format &f) {
-  f.write_literal();
+static void _conversion(Format &f) {
+  _write_literal(f);
   f.offset = f.cursor++;
-  f.need_byte();
-  if (f.byte() == '%') {
+  _need_byte(f);
+  if (_byte(f) == '%') {
     f.out.write_char('%');
     f.cursor++;
   }
   else {
-    Spec spec = f.spec();
-    f.print(spec, f.take($reason.missing_value()));
+    Spec spec = _spec(f);
+    _print(f, spec, _take(f, $reason.missing_value()));
   }
   f.literal = f.cursor;
 }
 
-static void Format.write_literal(Format &f) {
+static void _write_literal(Format &f) {
   if (f.cursor == f.literal) return;
   f.out.write_len(f.fmt + f.literal, (size_t) (f.cursor - f.literal));
 }
 
 /* A conversion that reaches the end of the format is incomplete. */
-static void Format.need_byte(Format &f) {
-  if (f.cursor == f.length) f.fail($reason.incomplete());
+static void _need_byte(Format &f) {
+  if (f.cursor == f.length) _fail(f, $reason.incomplete());
 }
 
 // conversion specifications
 
 /* Parses the flags, width, precision, length modifier, and conversion
    after `%`, then rejects what the checked subset leaves out. */
-static Spec Format.spec(Format &f) {
-  Spec spec = {.flags = f.flags(), .precision = -1};
-  f.width(spec);
-  f.precision(spec);
-  f.need_byte();
-  spec.modifier = f.modifier();
-  f.need_byte();
+static Spec _spec(Format &f) {
+  Spec spec = {.flags = _flags(f), .precision = -1};
+  _width(f, spec);
+  _precision(f, spec);
+  _need_byte(f);
+  spec.modifier = _modifier(f);
+  _need_byte(f);
   spec.conversion = f.fmt[f.cursor++];
-  f.check(spec);
+  _check(f, spec);
   return spec;
 }
 
-static int Format.flags(Format &f) {
+static int _flags(Format &f) {
   int flags = 0;
-  for (const char *flag; (flag = strchr(_format_flags, f.byte()));) {
+  for (const char *flag; (flag = strchr(_format_flags, _byte(f)));) {
     flags |= 1 << (flag - _format_flags);
     f.cursor++;
-    f.need_byte();
+    _need_byte(f);
   }
   return flags;
 }
 
 /* A `*` width takes the next value, and a negative one also sets `-`. */
-static void Format.width(Format &f, Spec &spec) {
-  if (f.byte() == '*') {
-    int width = f.star();
-    if (width == INT_MIN) f.fail($reason.width_range());
+static void _width(Format &f, Spec &spec) {
+  if (_byte(f) == '*') {
+    int width = _star(f);
+    if (width == INT_MIN) _fail(f, $reason.width_range());
     if (width < 0) spec.flags |= FORMAT_LEFT;
     spec.width = abs(width);
     f.cursor++;
   }
-  else spec.width = f.decimal("width");
+  else spec.width = _decimal(f, "width");
 }
 
 /* A `*` width or precision is the next value as an int. */
-static int Format.star(Format &f) =>
-  (int) f.number(f.take($reason.missing_star()), <i32>).integer();
+static int _star(Format &f) =>
+  (int) _number(f, _take(f, $reason.missing_star()), <i32>).integer();
 
 /* A `*` precision takes the next value, and a negative one means none. */
-static void Format.precision(Format &f, Spec &spec) {
-  if (f.byte() != '.') return;
+static void _precision(Format &f, Spec &spec) {
+  if (_byte(f) != '.') return;
   f.cursor++;
-  f.need_byte();
-  if (f.byte() == '*') {
-    spec.precision = f.star();
+  _need_byte(f);
+  if (_byte(f) == '*') {
+    spec.precision = _star(f);
     f.cursor++;
   }
-  else spec.precision = f.decimal("precision");
+  else spec.precision = _decimal(f, "precision");
 }
 
 /* Reads the digits at the cursor. An overflow reports the offset of the
    first digit and names the field with `label`. */
-static int Format.decimal(Format &f, String label) {
+static int _decimal(Format &f, String label) {
   int number = 0, start = f.cursor;
-  while (f.digit()) {
-    int digit = f.byte() - '0';
+  while (_digit(f)) {
+    int digit = _byte(f) - '0';
     if (number > (INT_MAX - digit) / 10)
       _format_error(start, $reason.range(label));
     number = number * 10 + digit;
@@ -198,54 +198,54 @@ static int Format.decimal(Format &f, String label) {
   return number;
 }
 
-static int Format.byte(Format &f) => f.fmt[f.cursor];
+static int _byte(Format &f) => f.fmt[f.cursor];
 
-static int Format.digit(Format &f) => f.byte() >= '0' && f.byte() <= '9';
+static int _digit(Format &f) => _byte(f) >= '0' && _byte(f) <= '9';
 
-static int Format.modifier(Format &f) {
-  switch (f.byte()) {
-    case 'h': return f.doubled('h', FORMAT_H, FORMAT_HH);
-    case 'l': return f.doubled('l', FORMAT_L, FORMAT_LL);
+static int _modifier(Format &f) {
+  switch (_byte(f)) {
+    case 'h': return _doubled(f, 'h', FORMAT_H, FORMAT_HH);
+    case 'l': return _doubled(f, 'l', FORMAT_L, FORMAT_LL);
     case 'L': f.cursor++; return FORMAT_CAP_L;
-    case 'j': case 'z': case 't': f.fail($reason.length());
+    case 'j': case 'z': case 't': _fail(f, $reason.length());
   }
   return 0;
 }
 
 /* `h` or `hh`, and `l` or `ll`. */
-static int Format.doubled(Format &f, char letter, int once, int twice) {
+static int _doubled(Format &f, char letter, int once, int twice) {
   f.cursor++;
-  if (f.byte() != letter) return once;
+  if (_byte(f) != letter) return once;
   f.cursor++;
   return twice;
 }
 
 /* Rejects the conversions and combinations the checked subset leaves out,
    in this order. */
-static void Format.check(Format &f, Spec spec) {
+static void _check(Format &f, Spec spec) {
   char ch = spec.conversion;
   int integer = strchr("diouxX", ch) != NULL;
   int floating = strchr("fFeEgGaA", ch) != NULL, text = ch == 'c' || ch == 's';
-  if (ch == '$') f.fail($reason.positional());
-  if (!integer && !floating && !text) f.fail($reason.conversion());
+  if (ch == '$') _fail(f, $reason.positional());
+  if (!integer && !floating && !text) _fail(f, $reason.conversion());
   if (integer && spec.modifier == FORMAT_CAP_L)
-    f.fail($reason.integer_length());
+    _fail(f, $reason.integer_length());
   if (floating && spec.modifier && spec.modifier != FORMAT_L &&
       spec.modifier != FORMAT_CAP_L)
-    f.fail($reason.floating_length());
+    _fail(f, $reason.floating_length());
   if (text && spec.modifier)
-    f.fail($reason.wide_text());
+    _fail(f, $reason.wide_text());
   if (text && (spec.flags & ~FORMAT_LEFT))
-    f.fail($reason.flag());
+    _fail(f, $reason.flag());
   if (ch == 'c' && spec.precision >= 0)
-    f.fail($reason.character_precision());
+    _fail(f, $reason.character_precision());
 }
 
 // conversion arguments
 
 /* The next argument, or a failure with `reason` when none is left. */
-static Var Format.take(Format &f, String reason) {
-  if (!f.args) f.fail(reason);
+static Var _take(Format &f, String reason) {
+  if (!f.args) _fail(f, reason);
   Var arg = f.args.car();
   f.args = f.args.cdr();
   return arg;
@@ -253,19 +253,19 @@ static Var Format.take(Format &f, String reason) {
 
 /* Prints `arg` through the C spelling of `spec`. The check leaves only
    these conversions, so the floating ones are the rest. */
-static Buffer Format.print(Format &f, Spec spec, Var arg) {
-  if (strchr("diouxX", spec.conversion)) return f.integer(spec, arg);
+static Buffer _print(Format &f, Spec spec, Var arg) {
+  if (strchr("diouxX", spec.conversion)) return _integer(f, spec, arg);
   char text[48];
-  spec.spell(text);
+  _spell(spec, text);
   switch (spec.conversion) {
-    case 'c': return f.character(text, arg);
-    case 's': return f.string(text, arg);
+    case 'c': return _character(f, text, arg);
+    case 's': return _string(f, text, arg);
   }
-  return f.floating(text, spec.modifier, arg);
+  return _floating(f, text, spec.modifier, arg);
 }
 
 /* Writes the C spelling of `s`, with `*` values as numbers. */
-static void Spec.spell(Spec s, char *out) {
+static void _spell(Spec s, char *out) {
   int n = 0;
   out[n++] = '%';
   for (int bit = 0; _format_flags[bit]; bit++)
@@ -283,45 +283,45 @@ static const Symbol _integer_targets[][2] = {
 
 /* An integer is converted to its modifier's type, then printed as a long
    long, which prints every narrower value as its own modifier would. */
-static Buffer Format.integer(Format &f, Spec spec, Var arg) {
+static Buffer _integer(Format &f, Spec spec, Var arg) {
   int is_unsigned = strchr("ouxX", spec.conversion) != NULL;
-  Var value = f.number(arg, _integer_targets[spec.modifier][is_unsigned]);
+  Var value = _number(f, arg, _integer_targets[spec.modifier][is_unsigned]);
   char text[48];
   spec.modifier = FORMAT_LL;
-  spec.spell(text);
+  _spell(spec, text);
   if (is_unsigned) return f.out.printf(text, value.ulong_long());
   return f.out.printf(text, value.long_long());
 }
 
 /* `L` prints a long double, and the other modifiers a double. */
-static Buffer Format.floating(
+static Buffer _floating(
   Format &f, const char *text, int modifier, Var arg) {
   if (modifier == FORMAT_CAP_L)
-    return f.out.printf(text, f.number(arg, <ldouble>).long_double_value());
-  return f.out.printf(text, f.number(arg, <f64>).floating());
+    return f.out.printf(text, _number(f, arg, <ldouble>).long_double_value());
+  return f.out.printf(text, _number(f, arg, <f64>).floating());
 }
 
-static Buffer Format.character(Format &f, const char *text, Var arg) {
-  int byte = (int) f.number(arg, <i32>).integer();
-  if (!(unsigned char) byte) f.fail($reason.character_nul());
+static Buffer _character(Format &f, const char *text, Var arg) {
+  int byte = (int) _number(f, arg, <i32>).integer();
+  if (!(unsigned char) byte) _fail(f, $reason.character_nul());
   return f.out.printf(text, byte);
 }
 
 /* Prints the display text of `arg`, nesting a failure's cause. */
-static Buffer Format.string(Format &f, const char *text, Var arg) {
+static Buffer _string(Format &f, const char *text, Var arg) {
   String string = NULL;
   try string = arg.str();
   catch %(?code *details):
-    f.nested($reason.string(), code, details);
+    _nested(f, $reason.string(), code, details);
   return f.out.printf(text, string ? string : "");
 }
 
 /* Converts `arg` to the numeric `target`, nesting a failure's cause. */
-static Var Format.number(Format &f, Var arg, Symbol target) {
+static Var _number(Format &f, Var arg, Symbol target) {
   Var converted = void;
   try converted = arg.convert(target);
   catch %(?code *details):
-    f.nested($reason.value(), code, details);
+    _nested(f, $reason.value(), code, details);
   return converted;
 }
 
@@ -331,13 +331,13 @@ static void _format_error(int offset, String reason) {
   raise %(format (offset $offset) (reason $reason));
 }
 
-static void Format.fail(Format &f, String reason) {
+static void _fail(Format &f, String reason) {
   _format_error(f.offset, reason);
 }
 
 /* Raises `<format>` for the current conversion with the cause of a failed
    conversion nested. */
-static void Format.nested(Format &f, String reason, Var code, List details) {
+static void _nested(Format &f, String reason, Var code, List details) {
   List cause = cons(code, details);
   raise %(format (offset ${f.offset}) (reason $reason) (cause $cause));
 }

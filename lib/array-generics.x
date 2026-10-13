@@ -20,24 +20,21 @@
     promotions and conversions determine their results.
 */
 
-/* Separate expansions share these private names. Typed families need a
-   qualifier because several families can be declared in the same unit. */
+/* Separate expansions share each family's helper names. Encode the full
+   family spelling: case and underscores distinguish legal type names.
+   `_0` escapes an underscore, so `__` separates the operation unambiguously. */
 $(defun array.words (name)
   (if (equal? name "") ""
     (let ((first (substring name 0 1)))
-      (string-append (if (equal? first (lower first)) "" "_")
-        (lower first) (array.words (substring name 1 (string-length name)))))))
+      (string-append
+        (if (equal? first "_") "_0"
+          (string-append (if (equal? first (lower first)) "" "_")
+            (lower first)))
+        (array.words (substring name 1 (string-length name)))))))
 
 $(defun array.helper (type operation)
-  (let* ((family (str (car type)))
-         (stem (if (not (eq? (String.startswith family "Array") 0))
-                   (substring family 5 (string-length family)) family))
-         (words (array.words stem)))
-    (x2c.ident (string-append "_"
-      (if (equal? words "") ""
-        (string-append (if (not (eq? (String.startswith words "_") 0))
-                          (substring words 1 (string-length words)) words) "_"))
-      operation))))
+  (x2c.ident (string-append "_for" (array.words (str (car type)))
+    "__" operation)))
 
 /*  Generates `postfixindex` for an element family whose `updateindex`
     applies `+` and `-`.

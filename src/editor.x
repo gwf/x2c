@@ -54,7 +54,7 @@ int editor_request(int argc, char **argv) {
   if (q.sources == NULL) return 2;
   // Reuse the private metadata delimiter as the compiler's argv[0].
   argv[boundary] = argv[0];
-  return q.serve(q.configure(argc - boundary, argv + boundary));
+  return _serve(q, _configure(q, argc - boundary, argv + boundary));
 }
 
 /* Each snapshot is three arguments: the logical path, the file that holds
@@ -80,7 +80,7 @@ static const char *unsaved_cpp =
 
 /* The compiler request the arguments after `--` configure. The snapshots
    are its sources, so an unsaved project manifest selects the target. */
-static CliRequest Query.configure(Query &q, int argc, char **argv) {
+static CliRequest _configure(Query &q, int argc, char **argv) {
   char *defaults[] = { argv[0], "build", NULL };
   CliRequest request = argc == 1 ? cli_parse(2, defaults) :
                                  cli_parse(argc, argv);
@@ -130,7 +130,7 @@ static int _native_cpp(CliRequest request) =>
 /* Parses the document as its configured translation would and writes the
    reply, unless the request preprocesses natively and a file the unit
    read is unsaved. */
-static int Query.serve(Query &q, CliRequest request) {
+static int _serve(Query &q, CliRequest request) {
   Frontend frontend = Frontend.new(request);
   if (!frontend.preload_macro_libraries()) return 2;
   frontend.prepare_meta(%(${q.source}));
@@ -144,7 +144,7 @@ static int Query.serve(Query &q, CliRequest request) {
     fputs(unsaved_cpp, stderr);
     return 2;
   }
-  return q.write(parsed);
+  return _write(q, parsed);
 }
 
 /* Whether a file the unit read, or whose text it kept, is unsaved. */
@@ -159,29 +159,29 @@ static int _changed_dependency(Compiler c, SourceView sources) {
 
 /* The reply holds the document's diagnostics, the answer to the query when
    the unit parsed, and the text of each file a location names. */
-static int Query.write(Query &q, int parsed) {
+static int _write(Query &q, int parsed) {
   File out = fopen(q.response, "w");
   if (!out) return 2;
   q.needed = {};
-  q.reply = {file: q.source, diagnostics: q.diagnostics()};
-  if (parsed) q.answer();
-  q.reply[<sources>] = q.texts();
+  q.reply = {file: q.source, diagnostics: _diagnostics(q)};
+  if (parsed) _answer(q);
+  q.reply[<sources>] = _texts(q);
   fprintf(out, "%s\n", Var.json(q.reply));
   return fclose(out) ? 2 : 0;
 }
 
-static Array Query.diagnostics(Query &q) {
+static Array _diagnostics(Query &q) {
   Array diagnostics = [];
   foreach (List entry, q.compiler.diagnostics())
-    diagnostics.push(q.diagnostic(entry));
+    diagnostics.push(_diagnostic(q, entry));
   return diagnostics;
 }
 
-static Map Query.diagnostic(Query &q, List entry) {
+static Map _diagnostic(Query &q, List entry) {
   match (entry)
     case %((code ?code) (severity ?severity) (message ?message)
            (location ?location) ?): {
-      Map diagnostic = q.diagnostic_range(location);
+      Map diagnostic = _diagnostic_range(q, location);
       diagnostic[<message>] = message;
       diagnostic[<code>] = code;
       diagnostic[<severity>] = severity;
@@ -192,32 +192,32 @@ static Map Query.diagnostic(Query &q, List entry) {
 
 /* A diagnostic without a location is at the start of the unit's file. A
    position in a module member counts from the start of the member. */
-static Map Query.diagnostic_range(Query &q, List location) {
+static Map _diagnostic_range(Query &q, List location) {
   match (location)
     case %((file ?file) ? ? (length ?length) (position ?position)): {
       Compiler c = q.compiler;
       int start = position, width = length;
       if (c.display_path(c.text_source(position, start)) != file)
         start = position;
-      return q.location(Path.absolute(file), start, start + width);
+      return _location(q, Path.absolute(file), start, start + width);
     }
-  return q.location(Path.absolute(q.compiler.filename), 0, 0);
+  return _location(q, Path.absolute(q.compiler.filename), 0, 0);
 }
 
 /* A location in the reply. Its file joins `needed`, so the reply carries
    the text its offsets count in. */
-static Map Query.location(Query &q, String path, int start, int end) {
+static Map _location(Query &q, String path, int start, int end) {
   q.needed[path] = 1;
   return {file: path, start: start, end: end};
 }
 
 /* Answers a definition or hover query at the narrowest occurrence that
    holds the offset. */
-static void Query.answer(Query &q) {
+static void _answer(Query &q) {
   List row = _occurrence(q.compiler, q.source, q.offset);
   if (!row) return;
-  if (q.kind == "definition") q.definition(row);
-  else if (q.kind == "hover") q.hover(row);
+  if (q.kind == "definition") _definition(q, row);
+  else if (q.kind == "hover") _hover(q, row);
 }
 
 /* The narrowest row that holds `offset`. Each row is
@@ -233,29 +233,29 @@ static List _occurrence(Compiler c, String path, int offset) {
   return found;
 }
 
-static void Query.definition(Query &q, List row) {
+static void _definition(Query &q, List row) {
   List binding = row[3];
   Var value = q.compiler.source_definitions[binding];
   if (value is not <list>) return;
   List target = value;
-  q.reply[<definition>] = q.location(target[0], target[1], target[2]);
+  q.reply[<definition>] = _location(q, target[0], target[1], target[2]);
 }
 
 /* The declaration of the occurrence's binding, printed as C, when the
    occurrence has a type. */
-static void Query.hover(Query &q, List row) {
+static void _hover(Query &q, List row) {
   Type type = row[4];
   if (!type) return;
   Compiler c = q.compiler;
   List declaration = type.declaration_ast(row[3]);
-  Map hover = q.location(row[0], row[1], row[2]);
+  Map hover = _location(q, row[0], row[1], row[2]);
   hover[<text>] =
     String.new(c.code_pretty_string(c.emit(%($declaration), NULL), NULL));
   q.reply[<hover>] = hover;
 }
 
 /* The text the unit kept of each file a location names. */
-static Array Query.texts(Query &q) {
+static Array _texts(Query &q) {
   Array texts = [];
   foreach (Var path, q.needed.keys()) {
     Var text;

@@ -103,7 +103,7 @@ static macro Unit $list.typed.family(Type $list, Type $element,
   $list List.$lower(List xs) {
     int index = 0;
     for (List cur = xs; cur; cur = cur.cdr()) {
-      if (!_typed_list_holds(cur.car, $tag))
+      if (!_holds(cur.car, $tag))
         _no_convert($owner, index, cur.car.tag());
       index++;
     }
@@ -154,7 +154,7 @@ static void _no_convert(String owner, int index, Symbol tag) {
    `Var.box_f64` gives the infinities and NaN their own tags, so a double
    element arrives under four tags and `Var.decode_f64` reads all four. Every
    other family stores exactly one tag. */
-static int _typed_list_holds(Var value, Symbol tag) {
+static int _holds(Var value, Symbol tag) {
   Symbol found = value.tag();
   if (found == tag) return 1;
   return tag == <f64> &&

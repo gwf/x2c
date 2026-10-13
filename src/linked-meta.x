@@ -45,9 +45,9 @@ static Symbol _literal_tag(List tag) {
   return 0;
 }
 
-static int var_tag_top(List tag) => (int) Var_tag_top(_literal_tag(tag));
+static int _var_tag_top(List tag) => (int) Var_tag_top(_literal_tag(tag));
 
-static int var_tag_bottom(List tag) =>
+static int _var_tag_bottom(List tag) =>
   (int) Var_tag_bottom(_literal_tag(tag));
 
 /* --- lib/list-selectors.x ------------------------------------------------ */
@@ -2053,8 +2053,8 @@ macro Stmt $linked.row(Expr $rows, Expr $name, Expr $function) {
 Map linked_meta_targets(void) {
   Map rows = {};
   $linked.row(rows, "_literal_tag", _literal_tag);
-  $linked.row(rows, "var_tag_top", var_tag_top);
-  $linked.row(rows, "var_tag_bottom", var_tag_bottom);
+  $linked.row(rows, "_var_tag_top", _var_tag_top);
+  $linked.row(rows, "_var_tag_bottom", _var_tag_bottom);
   $linked.row(rows, "_selector_chain", _selector_chain);
   $linked.row(rows, "_selector_double", _selector_double);
   $linked.row(rows, "_selector_middles", _selector_middles);

@@ -14,7 +14,7 @@ Callable values lowered to C helpers.
 | --- | --- |
 | [`Compiler.adapt_lambda_arg`](#Compiler.adapt_lambda_arg) | Adapts a lowered noncapturing lambda helper to a typed callback. |
 | [`Compiler.capture_environment`](#Compiler.capture_environment) | Binds the file-static context type `name` with the field rows `fields`, for callable defers. |
-| [`Compiler.func_parameters`](#Compiler.func_parameters) | Returns `(SIGNATURE (STORAGE READ)...)` for an adapter of a `Var` function taking the lambda parameter rows `entries`: its Func signature as a cached `List`, and each argument as `Compiler._func_reads` reads it from `argv` of the Func `fn`. |
+| [`Compiler.func_parameters`](#Compiler.func_parameters) | Returns `(SIGNATURE (STORAGE READ)...)` for an adapter of a `Var` function taking the lambda parameter rows `entries`: its Func signature as a cached `List`, and each argument as `_func_reads` reads it from `argv` of the Func `fn`. |
 | [`Compiler.func_signature`](#Compiler.func_signature) | Returns the canonical signature shared by native and meta Func adapters. |
 | [`Compiler.lift_func_expression`](#Compiler.lift_func_expression) | Converts a resolved function-like expression to `Func` when supported. |
 | [`Compiler.lower_typed_adapter_expr`](#Compiler.lower_typed_adapter_expr) | Lowers a resolved `tadapt` expression to a typed callback helper. |
@@ -58,7 +58,7 @@ Source: `src/callables.x:150`
 
 Returns `(SIGNATURE (STORAGE READ)...)` for an adapter of a `Var`
 function taking the lambda parameter rows `entries`: its Func
-signature as a cached `List`, and each argument as `Compiler._func_reads`
+signature as a cached `List`, and each argument as `_func_reads`
 reads it from `argv` of the Func `fn`.
 
 Source: `src/callables.x:688`

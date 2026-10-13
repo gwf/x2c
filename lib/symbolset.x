@@ -227,8 +227,8 @@ static int _try_seed(
   Array symbols, uint32_t span, uint64_t seed, uint32_t *table) {
   $scope() {
     Graph g = _graph(symbols, span, seed);
-    if (!g.peel()) return 0;
-    g.assign(table);
+    if (!_peel(g)) return 0;
+    _assign(g, table);
     return 1;
   }
 }
@@ -255,7 +255,7 @@ static Graph _graph(Array symbols, uint32_t span, uint64_t seed) {
 }
 
 /* Returns whether peeling removed every edge. */
-static int Graph.peel(Graph &g) {
+static int _peel(Graph &g) {
   int head = 0, tail = 0, ordered = 0;
   for (int vertex = 0; vertex < g.vertices; vertex++)
     if (g.degree[vertex] == 1) g.queue[tail++] = vertex;
@@ -279,7 +279,7 @@ static int Graph.peel(Graph &g) {
 
 /* In reverse peeling order, the vertex that freed each edge takes the
    value that makes the edge's three values XOR to its index. */
-static void Graph.assign(Graph &g, uint32_t *table) {
+static void _assign(Graph &g, uint32_t *table) {
   for (int position = g.count - 1; position >= 0; position--) {
     int edge = g.order_edges[position], vertex = g.order_vertices[position];
     uint32_t value = (uint32_t) edge;

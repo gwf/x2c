@@ -34,44 +34,44 @@
 /* Deferred region findings. The walk owns collection and severity. */
 
 static macro Stmt $report.region.bad_free(Expr $w, Expr $op, Expr $subject) =>
-  $w.warn(
+  _warn($w,
     <bad-free>, $w.origin,
     %"${$op} is given ${$subject}, which no Scope allocator returned",
     %("only Scope.malloc, calloc, memdup, and realloc storage can be"
       "freed or reallocated"));
 
 static macro Stmt $report.region.read_ended(Expr $w, Expr $name) =>
-  $w.warn(
+  _warn($w,
     <region>, $w.origin,
     %"'${$name}' is read after its owning region ended", NULL);
 
 static macro Stmt $report.region.after_free(
   Expr $w, Expr $name, Expr $ended) =>
-  $w.warn(
+  _warn($w,
     <after-free>, $w.origin, %"'${$name}' is used after ${$ended}", NULL);
 
 static macro Stmt $report.region.use_ended(
   Expr $f, Expr $subject, Expr $region) =>
-  (*$f.w).warn(
+  _warn((*$f.w),
     <region>, $f.w.origin,
     %"${$subject} is used after the region that allocated it ended",
-    (*$f.w).opened($region));
+    _opened((*$f.w), $region));
 
 static macro Stmt $report.region.local_escape(
   Expr $f, Expr $subject, Expr $exit) {
   String message =
     %"${$subject} can outlive the local storage it points into when ${$exit}";
-  (*$f.w).warn(
+  _warn((*$f.w),
     <region>, $f.w.origin, message,
     %("local storage ends when the function returns"));
 }
 
 static macro Stmt $report.region.escape(
   Expr $f, Expr $subject, Expr $exit, Expr $region) =>
-  (*$f.w).warn(
+  _warn((*$f.w),
     <region>, $f.w.origin,
     %"${$subject} can outlive the region it was allocated in when ${$exit}",
-    (*$f.w).opened($region));
+    _opened((*$f.w), $region));
 
 static macro Expression $region.reason.returned() => "returned";
 static macro Expression $region.reason.static_store() => "stored into a static";
@@ -314,7 +314,7 @@ static Map pooled_results = %{
   "String_concat": 1,   "String_join": 1
 };
 
-static Var Walk.effect(Walk &w, String name) {
+static Var _effect(Walk &w, String name) {
   if (!w.audit) return runtime[name];
   Var effect;
   return w.effects && w.effects.try_get(name, effect)
@@ -346,7 +346,7 @@ int Compiler.has_region_row(String name) => name in runtime;
 // per-unit fixpoint
 
 /* The functions `ast` defines, walked to their final summaries. */
-static void Walk.fixpoint(Walk &w, List ast) {
+static void _fixpoint(Walk &w, List ast) {
   w.frame = Scope.calloc(1, sizeof(struct Region));
   w.frame.kind = <frame>;
   Array functions = $auto([]);
@@ -373,7 +373,7 @@ static void Walk.fixpoint(Walk &w, List ast) {
       if (!w.stale[w.current].int()) continue;
       w.stale[w.current] = 0;
       w.warnings = [];
-      w.analyze(functions[w.current]);
+      _analyze(w, functions[w.current]);
       found[w.current] = w.warnings;
     }
   } while (w.changed);
@@ -402,7 +402,7 @@ static void _collect_functions(Var node, Array found) {
 
 /* Walk one body against the current summaries. The walk starts from the
    function's previous summary, so a summary only grows. */
-static void Walk.analyze(Walk &w, List function) {
+static void _analyze(Walk &w, List function) {
   (String name, List parameters, Var body) = function;
   w.function = name;
   (int fresh, List sinks) = w.summaries[name];
@@ -414,8 +414,8 @@ static void Walk.analyze(Walk &w, List function) {
   w.fresh = fresh;
   foreach (Var row, sinks) w.sinks[row] = 1;
   int index = 0;
-  foreach (List parameter, parameters) w.new_fact(parameter, index++);
-  w.walk(body);
+  foreach (List parameter, parameters) _new_fact(w, parameter, index++);
+  _walk(w, body);
   Array rows = [];
   foreach (Var row, w.sinks.keys()) rows.push(row);
   List summary = %(${w.fresh} ${rows.sort().list_free()}),
@@ -430,103 +430,103 @@ static void Walk.analyze(Walk &w, List function) {
 
 // statements
 
-static void Walk.walk(Walk &w, Var node) {
+static void _walk(Walk &w, Var node) {
   Macro statement = $expression_statement;
   Macro deferred = $deferred;
   Macro returned = $return_value;
   match (node) {
-    case %(at ?origin ?inner): w.walk_at(origin, inner);
+    case %(at ?origin ?inner): _walk_at(w, origin, inner);
     case $source_block_content(%(*statements)):
-      w.walk_block(statements);
-    case %(seq *statements): w.walk_sequence(statements);
-    case deferred(?body): w.walk_defer(body);
+      _walk_block(w, statements);
+    case %(seq *statements): _walk_sequence(w, statements);
+    case deferred(?body): _walk_defer(w, body);
     /* A lowered defer keeps its environment and capture records. */
     case %(defer ?body ?environment ?callback ?records ?written):
-      w.walk_defer(body);
+      _walk_defer(w, body);
     case %((!or declare decl) ?specifiers (bindings *bindings)):
-      w.declare(specifiers, bindings);
+      _declare(w, specifiers, bindings);
     case returned(?result):
-      w.walk_return(source_return_type(node), result);
+      _walk_return(w, source_return_type(node), result);
     /* A jump leaves the statements after it to another path, and a label is
        where that path arrives, so neither carries forward what the path
        before it freed. */
-    case %((!or goto label) *): w.revive();
-    case statement(?expression): w.walk_expression(expression);
+    case %((!or goto label) *): _revive(w);
+    case statement(?expression): _walk_expression(w, expression);
     /* A control construct's children run conditionally, so they count as a
        nested block: what they free does not end the fall-through. */
     case $source_conditional_statement():
-      w.walk_conditional(node.cdr());
-    case %(catchcases ?rows): w.walk(rows);
-    case %((!or expr case) *): w.scan(node, 0);
+      _walk_conditional(w, node.cdr());
+    case %(catchcases ?rows): _walk(w, rows);
+    case %((!or expr case) *): _scan(w, node, 0);
     case $source_content_pattern($grouped, %(?inner)):
-      w.scan(node, 0);
+      _scan(w, node, 0);
     /* Match and catch arms are bare `(PATTERN STATEMENT ...)` rows. */
-    case %((*) *): w.walk_rows(node);
+    case %((*) *): _walk_rows(w, node);
   }
 }
 
-static void Walk.walk_at(Walk &w, int origin, Var inner) {
+static void _walk_at(Walk &w, int origin, Var inner) {
   int outer = w.origin;
   w.origin = origin;
-  w.walk(inner);
+  _walk(w, inner);
   w.origin = outer;
 }
 
-static void Walk.walk_block(Walk &w, List statements) {
+static void _walk_block(Walk &w, List statements) {
   Region outer = w.open;
   Map restored = w.restored;
   w.depth += 1;
-  foreach (Var statement, statements) w.walk(statement);
-  w.close_to(w.open, outer);
+  foreach (Var statement, statements) _walk(w, statement);
+  _close_to(w, w.open, outer);
   w.open = outer;
   w.restored = restored;
   w.depth -= 1;
 }
 
 /* Closes oldest first. */
-static void Walk.close_to(Walk &w, Region region, Region outer) {
+static void _close_to(Walk &w, Region region, Region outer) {
   if (region == outer) return;
-  w.close_to(region.outer, outer);
+  _close_to(w, region.outer, outer);
   region.closed = 1;
 }
 
-static void Walk.walk_sequence(Walk &w, List statements) {
-  foreach (Var statement, statements) w.walk(statement);
+static void _walk_sequence(Walk &w, List statements) {
+  foreach (Var statement, statements) _walk(w, statement);
 }
 
-static void Walk.walk_return(Walk &w, Type type, Var result) {
-  w.scan(result, 0);
-  w.flow(result, type, <return>, NULL);
-  w.revive();
+static void _walk_return(Walk &w, Type type, Var result) {
+  _scan(w, result, 0);
+  _flow(w, result, type, <return>, NULL);
+  _revive(w);
 }
 
 /* A free ends its local for the statements that follow it on the same path.
    Where that path ends, nothing it freed is known to be freed any more. */
-static void Walk.revive(Walk &w) {
+static void _revive(Walk &w) {
   foreach (Var known, w.facts) {
     Fact fact = known;
     fact.dead = 0;
   }
 }
 
-static void Walk.walk_expression(Walk &w, Var expression) {
+static void _walk_expression(Walk &w, Var expression) {
   List arguments = NULL;
   String callee = _callee_of(expression, arguments);
-  if (callee && w.region_call(callee, arguments)) return;
+  if (callee && _region_call(w, callee, arguments)) return;
   match (_source_assignment(_unwrap(expression))) {
-    case %(?target ?value): w.store(target, value);
-    default: w.scan(expression, 0);
+    case %(?target ?value): _store(w, target, value);
+    default: _scan(w, expression, 0);
   }
 }
 
 /* A region-opening or region-ending call in statement position. Reports
    whether `callee` is one. */
-static int Walk.region_call(Walk &w, String callee, List arguments) {
-  Fact fact = w.fact_of(arguments.car(), NULL);
-  match (w.effect(callee)) {
-    case %(open ?kind): w.open_region(kind, w.slot(arguments.car()));
+static int _region_call(Walk &w, String callee, List arguments) {
+  Fact fact = _fact_of(w, arguments.car(), NULL);
+  match (_effect(w, callee)) {
+    case %(open ?kind): _open_region(w, kind, _slot(w, arguments.car()));
     case %(close ?kind): {
-      Region region = w.innermost(kind);
+      Region region = _innermost(w, kind);
       /* A close in a nested block runs on some paths, so the region stays
          open for the statements after that block. */
       if (region) region.closed = region.depth == w.depth;
@@ -534,9 +534,9 @@ static int Walk.region_call(Walk &w, String callee, List arguments) {
     case %(destroy): if (fact && fact.depth == w.depth && fact.owner)
       fact.owner.closed = 1;
     case %(move): {
-      Fact slot = w.slot(arguments.cadr());
+      Fact slot = _slot(w, arguments.cadr());
       Region owner = (fact && fact.empty) || _empty(arguments.car())
-        ? w.owner(slot) : w.allocate_in(slot);
+        ? _owner(w, slot) : _allocate_in(w, slot);
       if (fact) _move(fact, owner);
     }
     case %(exit): if (fact) _move(fact, NULL);
@@ -545,18 +545,18 @@ static int Walk.region_call(Walk &w, String callee, List arguments) {
   return 1;
 }
 
-static void Walk.walk_conditional(Walk &w, List children) {
+static void _walk_conditional(Walk &w, List children) {
   Map restored = w.restored;
   w.depth += 1;
-  foreach (Var child, children) w.walk(child);
+  foreach (Var child, children) _walk(w, child);
   w.depth -= 1;
   w.restored = restored;
 }
 
-static void Walk.walk_rows(Walk &w, List rows) {
+static void _walk_rows(Walk &w, List rows) {
   foreach (List row, rows) {
-    w.scan(row.car(), 0);
-    foreach (Var statement, row.cdr()) w.walk(statement);
+    _scan(w, row.car(), 0);
+    foreach (Var statement, row.cdr()) _walk(w, statement);
   }
 }
 
@@ -565,27 +565,27 @@ static void Walk.walk_rows(Walk &w, List rows) {
 /* A `defer` beside a region closes it at block exit, a deferred free or
    destroy owns its local until then, and any other deferred expression
    runs at block exit. */
-static void Walk.walk_defer(Walk &w, Var body) {
+static void _walk_defer(Walk &w, Var body) {
   List arguments = NULL;
   String callee = NULL;
   Macro statement = $expression_statement;
   match (body) case statement(?expression):
     callee = _callee_of(expression, arguments);
-  Fact fact = w.fact_of(arguments.car(), NULL);
-  match (callee ? w.effect(callee) : void) {
+  Fact fact = _fact_of(w, arguments.car(), NULL);
+  match (callee ? _effect(w, callee) : void) {
     case %(close ?): return;
     case %((!or free destroy) *)
       if (fact && fact.constant && fact.param < 0): {
       if (!fact.empty)
-        _acquired(fact).cleanup = w.open_region(<auto>, NULL);
+        _acquired(fact).cleanup = _open_region(w, <auto>, NULL);
       return;
     }
     case %(free *) if (fact && fact.param < 0): {
-      fact.region = w.open_region(<auto>, NULL);
+      fact.region = _open_region(w, <auto>, NULL);
       return;
     }
     case %(destroy): {
-      Region owner = w.owner(fact);
+      Region owner = _owner(w, fact);
       if (!owner || owner.kind != <local>) return;
       owner.kind = <auto>;
       owner.outer = w.open;
@@ -593,20 +593,20 @@ static void Walk.walk_defer(Walk &w, Var body) {
       return;
     }
   }
-  if (w.note_restored(body)) return;
+  if (_note_restored(w, body)) return;
   w.restored = w.restored.copy();
-  w.note_deferred_stores(body);
-  w.scan(body, 1);
+  _note_deferred_stores(w, body);
+  _scan(w, body, 1);
 }
 
 /* `$let` saves a place, installs a value, and restores the place in a
    defer. A store into a place this block restores is undone before the
    block ends, so it is not an escape. */
-static int Walk.note_restored(Walk &w, Var body) {
+static int _note_restored(Walk &w, Var body) {
   Macro statement = $expression_statement;
   match (body) case statement(?expression):
     match (_source_assignment(_unwrap(expression))) case %(?target ?): {
-      Var place = w.target_place(target);
+      Var place = _target_place(w, target);
       if (place == _unwrap(target)) return 0;
       w.restored = w.restored.copy();
       w.restored[place] = 1;
@@ -617,13 +617,13 @@ static int Walk.note_restored(Walk &w, Var body) {
 
 /* A place a `defer` writes is put back when its block ends, so a store
    into it after the `defer` is not an escape. */
-static void Walk.note_deferred_stores(Walk &w, Var node) {
+static void _note_deferred_stores(Walk &w, Var node) {
   match (_source_assignment(node)) case %(?target ?): {
     w.restored[_unwrap(target)] = 1;
     return;
   }
   match (node) case %(*children):
-    foreach (Var child, children) w.note_deferred_stores(child);
+    foreach (Var child, children) _note_deferred_stores(w, child);
 }
 
 // expressions
@@ -633,15 +633,15 @@ static void Walk.note_deferred_stores(Walk &w, Var node) {
    free ends its local after the whole expression, and a deferred
    expression runs at block exit, so what it frees stays live for the
    statements this block still has to walk. */
-static void Walk.scan(Walk &w, Var value, int deferred) {
+static void _scan(Walk &w, Var value, int deferred) {
   Var root = _unwrap(value);
   int base = w.pending.len(), mark = w.freed.len();
   w.pending.push(value);
   while ((int) w.pending.len() > base) {
     Var node = w.pending.take_last();
-    if (w.scan_call_node(node)) continue;
-    if (w.scan_assignment(node, root)) continue;
-    w.scan_node(node);
+    if (_scan_call_node(w, node)) continue;
+    if (_scan_assignment(w, node, root)) continue;
+    _scan_node(w, node);
   }
   while ((int) w.freed.len() > mark) {
     Fact fact = w.freed.take_last();
@@ -649,18 +649,18 @@ static void Walk.scan(Walk &w, Var value, int deferred) {
   }
 }
 
-static int Walk.scan_call_node(Walk &w, Var node) {
+static int _scan_call_node(Walk &w, Var node) {
   List call = _source_call(node);
   if (!call) return 0;
   (Var function, List arguments) = call;
   String callee = binding_identity_spelling(_binding_of(function));
-  match (callee ? w.effect(callee) : void) {
+  match (callee ? _effect(w, callee) : void) {
     case %((!or exit wrap)): break;
-    case %(free): w.end(arguments.car(), NULL, <freed>);
-    case %(free scope): w.end(arguments.car(), "Scope.free", <freed>);
+    case %(free): _end(w, arguments.car(), NULL, <freed>);
+    case %(free scope): _end(w, arguments.car(), "Scope.free", <freed>);
     case %(alloc moved):
-      w.end(arguments.car(), "Scope.realloc", <moved>);
-    default: if (callee) w.scan_call(node, callee, arguments);
+      _end(w, arguments.car(), "Scope.realloc", <moved>);
+    default: if (callee) _scan_call(w, node, callee, arguments);
   }
   if (arguments) w.pending.push(arguments);
   return 1;
@@ -670,82 +670,82 @@ static int Walk.scan_call_node(Walk &w, Var node) {
    reports storage no Scope allocator returned: a literal, the function's
    own storage, or a pooled value. The local it names is dead after the
    expression, `how` recording whether it was freed or moved. */
-static void Walk.end(Walk &w, Var argument, String op, Symbol how) {
+static void _end(Walk &w, Var argument, String op, Symbol how) {
   List named = NULL;
-  Fact storage = w.value_fact(argument, named);
+  Fact storage = _value_fact(w, argument, named);
   int literal = 0;
   match (_unwrap(argument)) case $source_literal_content(%(*fields)):
     literal = 1;
   if (op && (literal || (storage &&
       (storage.region == w.frame || storage.born == 2)))) {
     String subject = literal ? "a literal"
-                             : w.subject(argument, named, storage);
+                             : _subject(w, argument, named, storage);
     $report.region.bad_free(w, op, subject);
   }
-  Fact fact = w.fact_of(argument, NULL);
+  Fact fact = _fact_of(w, argument, NULL);
   if (!fact || fact.depth != w.depth) return;
   fact.ending = how;
   w.freed.push(fact);
 }
 
 /* A call sinks each argument where the callee's summary says. */
-static void Walk.scan_call(Walk &w, Var call, String callee, List arguments) {
+static void _scan_call(Walk &w, Var call, String callee, List arguments) {
   int count = arguments.len();
   List types = _parameter_types(call);
-  foreach (List row, w.summary(callee).cadr()) {
+  foreach (List row, _summary(w, callee).cadr()) {
     (int index, Var target) = row;
     if (index >= count) continue;
     Type type = NULL, holder_type = NULL;
     Var argument = _passed(types, arguments, index, type);
-    if (target == <static>) w.flow(argument, type, <static>, NULL);
-    else if (target == <unknown>) w.flow(argument, type, <heap>, NULL);
+    if (target == <static>) _flow(w, argument, type, <static>, NULL);
+    else if (target == <unknown>) _flow(w, argument, type, <heap>, NULL);
     else if (target == <result>) {
       int born = 0;
       Region other = NULL;
       Acquired acquired = NULL;
-      Region region = w.birth(call, NULL, born, other, acquired);
+      Region region = _birth(w, call, NULL, born, other, acquired);
       struct Fact result = {
         .param = -1, .born = born, .region = region, .other = other,
         .acquired = acquired};
-      w.flow(argument, type, <heap>, &result);
+      _flow(w, argument, type, <heap>, &result);
     }
     else match (target) case %(param ?other): {
       if (other.int() >= count) continue;
       Var holder = _passed(types, arguments, other.int(), holder_type);
       int through = 1;
-      Fact base = w.base(_address_of(holder), through), object = NULL;
-      if (!base) base = w.fact_of(holder, NULL);
+      Fact base = _base(w, _address_of(holder), through), object = NULL;
+      if (!base) base = _fact_of(w, holder, NULL);
       Symbol sink = _sink_of(base, through, object);
-      w.flow(argument, type, sink, object);
+      _flow(w, argument, type, sink, object);
     }
   }
 }
 
-static int Walk.scan_assignment(Walk &w, Var node, Var root) {
+static int _scan_assignment(Walk &w, Var node, Var root) {
   List assignment = _source_assignment(node);
   if (!assignment || _unwrap(node) == root) return 0;
   (Var target, Var stored) = assignment;
-  w.store(target, stored);
+  _store(w, target, stored);
   w.pending.push(target);
   return 1;
 }
 
-static void Walk.scan_node(Walk &w, Var node) {
+static void _scan_node(Walk &w, Var node) {
   match (node) {
     case %(expr ? ?inner): w.pending.push(inner);
     case $source_identifier_content(
         %((!set ?binding (binding ? ?)))):
-      w.scan_ident(binding);
+      _scan_ident(w, binding);
     /* A statement expression declares locals of its own. */
     case %((!or declare decl) ?specifiers (bindings *bindings)):
-      w.declare(specifiers, bindings);
+      _declare(w, specifiers, bindings);
     /* A List literal retains its values in the active Pool. */
-    case %(cons ?head ?tail): w.scan_cons(node, head, tail);
-    case %(*children): w.scan_children(children);
+    case %(cons ?head ?tail): _scan_cons(w, node, head, tail);
+    case %(*children): _scan_children(w, children);
   }
 }
 
-static void Walk.scan_ident(Walk &w, Var binding) {
+static void _scan_ident(Walk &w, Var binding) {
   Var found = w.facts[binding];
   if (found is void) return;
   Fact fact = found;
@@ -764,19 +764,19 @@ static void Walk.scan_ident(Walk &w, Var binding) {
   fact.dead = 0;
 }
 
-static void Walk.scan_cons(Walk &w, Var node, Var head, Var tail) {
+static void _scan_cons(Walk &w, Var node, Var head, Var tail) {
   int born = 0;
   Region other = NULL;
   Acquired acquired = NULL;
-  Region region = w.birth(node, NULL, born, other, acquired);
+  Region region = _birth(w, node, NULL, born, other, acquired);
   struct Fact result = {.param = -1, .born = born, .region = region};
-  w.flow(head, NULL, <heap>, &result);
-  w.flow(tail, NULL, <heap>, &result);
+  _flow(w, head, NULL, <heap>, &result);
+  _flow(w, tail, NULL, <heap>, &result);
   w.pending.push(tail);
   w.pending.push(head);
 }
 
-static void Walk.scan_children(Walk &w, List children) {
+static void _scan_children(Walk &w, List children) {
   int start = w.pending.len();
   foreach (Var child, children) w.pending.push(child);
   for (int end = w.pending.len() - 1; start < end; start++, end--) {
@@ -788,43 +788,43 @@ static void Walk.scan_children(Walk &w, List children) {
 
 // stores and declarations
 
-static void Walk.store(Walk &w, Var target, Var value) {
+static void _store(Walk &w, Var target, Var value) {
   /* A store through a pointer reads the pointer. */
-  if (!_binding_of(target)) w.scan(target, 0);
-  if (w.target_place(target) in w.restored) {
-    w.scan(value, 0);
+  if (!_binding_of(target)) _scan(w, target, 0);
+  if (_target_place(w, target) in w.restored) {
+    _scan(w, value, 0);
     return;
   }
   Type type = _expression_type(target);
   List named = _binding_of(target);
   Var found = named ? w.facts[named] : void;
   if (found is not void) {
-    w.assign(found, value, type, 1);
+    _assign(w, found, value, type, 1);
     return;
   }
-  w.scan(value, 0);
+  _scan(w, value, 0);
   if (named) {
-    w.flow(value, type, <static>, NULL);
+    _flow(w, value, type, <static>, NULL);
     return;
   }
   int through = 0;
-  Fact object = NULL, base = w.base(target, through);
+  Fact object = NULL, base = _base(w, target, through);
   /* A field or element of file-scope storage is that storage. */
   if (!base && !through && _root(target)) {
-    w.flow(value, type, <static>, NULL);
+    _flow(w, value, type, <static>, NULL);
     return;
   }
   Symbol sink = _sink_of(base, through, object);
-  w.flow(value, type, sink, object);
+  _flow(w, value, type, sink, object);
 }
 
 /* The place a store target names, seen through the pointer a `$let` holds:
    `*address` and the place `address` was taken from are one storage. */
-static Var Walk.target_place(Walk &w, Var target) {
+static Var _target_place(Walk &w, Var target) {
   Var inner = _unwrap(target);
   match (inner)
     case $source_operator_content(%((!quote *) ?pointer)): {
-      Fact fact = w.fact_of(pointer, NULL);
+      Fact fact = _fact_of(w, pointer, NULL);
       if (fact && fact.place) return fact.place;
     }
   return inner;
@@ -833,18 +833,18 @@ static Var Walk.target_place(Walk &w, Var target) {
 /* `fact` receives `value`, declared or stored as `type`. A store of a
    region-born local into a local declared outside that region reports
    once, and the receiving local does not carry the region further. */
-static void Walk.assign(Walk &w, Fact fact, Var value, Type type, int store) {
-  w.scan(value, 0);
-  Fact source = w.value_fact(value, NULL);
-  if (!source) source = w.returned_argument(value, NULL);
+static void _assign(Walk &w, Fact fact, Var value, Type type, int store) {
+  _scan(w, value, 0);
+  Fact source = _value_fact(w, value, NULL);
+  if (!source) source = _returned_argument(w, value, NULL);
   int born = 0;
   Region other = source ? source.other : NULL;
   Acquired acquired = NULL;
   Region region = source ? source.region
-                         : w.birth(value, type, born, other, acquired);
+                         : _birth(w, value, type, born, other, acquired);
   int owners = source ? source.born : born;
-  int kept = (source || born) && !w.number(type, value);
-  int copies = kept && w.copies(type, value);
+  int kept = (source || born) && !_number(w, type, value);
+  int copies = kept && _copies(w, type, value);
   if (kept && copies) {
     if (owners == 3) {
       region = other;
@@ -855,7 +855,7 @@ static void Walk.assign(Walk &w, Fact fact, Var value, Type type, int store) {
   }
   if (kept && store && source &&
       (region || other || _cleanup(source.acquired)))
-    kept = !w.flow(value, type, <local>, fact);
+    kept = !_flow(w, value, type, <local>, fact);
   if (kept && source && !copies && !source.empty)
     acquired = _acquired(source);
   if (copies || (source && !kept)) acquired = NULL;
@@ -878,32 +878,32 @@ static void Walk.assign(Walk &w, Fact fact, Var value, Type type, int store) {
 
 /* A static or extern local is not the function's storage, so the walk
    treats it as file-scope state. */
-static void Walk.declare(Walk &w, Var specifiers, List bindings) {
+static void _declare(Walk &w, Var specifiers, List bindings) {
   Map types = w.c.semantic_binding_facts();
   if (<static> in specifiers || <extern> in specifiers) {
     foreach (List item, bindings)
       match (item) case %(op = (bind ?name ?) ?value): {
-        w.scan(value, 0);
-        w.flow(value, types[%(type $name)], <static>, NULL);
+        _scan(w, value, 0);
+        _flow(w, value, types[%(type $name)], <static>, NULL);
       }
     return;
   }
   foreach (Var item, bindings)
     match (item) {
       case %(op (!quote =) (bind (!set ?name (binding ? ?)) ?) ?value):
-        w.declare_initialized(name, value, types[%(type $name)]);
-      case %(bind (!set ?name (binding ? ?)) ?): w.new_fact(name, -1);
+        _declare_initialized(w, name, value, types[%(type $name)]);
+      case %(bind (!set ?name (binding ? ?)) ?): _new_fact(w, name, -1);
     }
 }
 
-static void Walk.declare_initialized(
+static void _declare_initialized(
   Walk &w, List name, Var value, Type type) {
-  Fact fact = w.new_fact(name, -1);
+  Fact fact = _new_fact(w, name, -1);
   foreach (Var part, w.c.sym.normalize_declared_type(type)) {
     if (part is not <symbol> || !part.symbol().is_type_qualifier()) break;
     if (part == <const>) fact.constant = 1;
   }
-  w.assign(fact, value, type, 0);
+  _assign(w, fact, value, type, 0);
 }
 
 // flows
@@ -925,23 +925,23 @@ static typedef struct Flow {
    destination copies. A parameter adds the sink to this function's summary;
    any other value reports when either possible owner can end first.
    Returns whether it reported. */
-static int Walk.flow(Walk &w, Var value, Type type, Symbol sink, Fact target) {
-  if (w.number(type, value)) return 0;
+static int _flow(Walk &w, Var value, Type type, Symbol sink, Fact target) {
+  if (_number(w, type, value)) return 0;
   match (_unwrap(value))
     case $source_operator_content(%((!quote ?) ? ?yes ?no)):
-      return w.flow(yes, type, sink, target) ||
-             w.flow(no, type, sink, target);
+      return _flow(w, yes, type, sink, target) ||
+             _flow(w, no, type, sink, target);
   List named = NULL;
-  Fact fact = w.value_fact(value, named);
-  if (!fact) fact = w.returned_argument(value, named);
+  Fact fact = _value_fact(w, value, named);
+  if (!fact) fact = _returned_argument(w, value, named);
   int born = 0;
   Region other = NULL;
   Acquired acquired = fact ? fact.acquired : NULL;
   Region region = fact ? fact.region
-                       : w.birth(value, NULL, born, other, acquired);
+                       : _birth(w, value, NULL, born, other, acquired);
   if (!fact && !born) return 0;
   if (fact && fact.param >= 0) {
-    w.sink_parameter(fact, sink, target);
+    _sink_parameter(w, fact, sink, target);
     return 0;
   }
   if (fact) {
@@ -949,12 +949,12 @@ static int Walk.flow(Walk &w, Var value, Type type, Symbol sink, Fact target) {
     other = fact.other;
   }
   Flow flow = {&w, value, type, sink, fact, named};
-  return flow.owners(target, region, other, born) ||
+  return _owners(flow, target, region, other, born) ||
          (_cleanup(acquired) &&
-          flow.check(target, acquired.cleanup, 1, 1));
+          _check(flow, target, acquired.cleanup, 1, 1));
 }
 
-static void Walk.sink_parameter(Walk &w, Fact fact, Symbol sink, Fact target) {
+static void _sink_parameter(Walk &w, Fact fact, Symbol sink, Fact target) {
   Var row = sink;
   if (sink == <heap>) {
     if (!target) row = <unknown>;
@@ -966,7 +966,7 @@ static void Walk.sink_parameter(Walk &w, Fact fact, Symbol sink, Fact target) {
     w.sinks[%(${fact.param} $row)] = 1;
 }
 
-static int Flow.owners(
+static int _owners(
   Flow &f, Fact target, Region region, Region other, int born) {
   int reported = 0;
   for (int choice = 0; choice < (born == 3 ? 2 : 1); choice++) {
@@ -977,18 +977,18 @@ static int Flow.owners(
       struct Fact pooled = *target;
       pooled.region = target.other;
       pooled.born = 2;
-      reported |= f.check(target, owner, kind, !reported);
-      reported |= f.check(&pooled, owner, kind, !reported);
+      reported |= _check(f, target, owner, kind, !reported);
+      reported |= _check(f, &pooled, owner, kind, !reported);
     }
     else
-      reported |= f.check(target, owner, kind, !reported);
+      reported |= _check(f, target, owner, kind, !reported);
   }
   return reported;
 }
 
-static int Flow.check(
+static int _check(
   Flow &f, Fact target, Region region, int born, int report) {
-  if ((*f.w).copies(f.type, f.value) && !(born & 2) &&
+  if (_copies((*f.w), f.type, f.value) && !(born & 2) &&
       (!region || region.kind != <pool>))
     return 0;
   if (!region) {
@@ -996,15 +996,15 @@ static int Flow.check(
     return 0;
   }
   Region cleanup = _cleanup(region.acquired);
-  if (cleanup && f.check(target, cleanup, 1, report)) return 1;
-  String subject = (*f.w).subject(f.value, f.named, f.fact);
+  if (cleanup && _check(f, target, cleanup, 1, report)) return 1;
+  String subject = _subject((*f.w), f.value, f.named, f.fact);
   if (region.closed) {
     if (report)
       $report.region.use_ended(f, subject, region);
     return 1;
   }
   if (region.kind == <local>) return 0;
-  String exit = f.exit(target, region);
+  String exit = _exit_reason(f, target, region);
   if (!exit) return 0;
   if (report) {
     // lint: allow one-statement-braces ST-1: macro emits declaration and call
@@ -1017,7 +1017,7 @@ static int Flow.check(
   return 1;
 }
 
-static String Flow.exit(Flow &f, Fact target, Region region) {
+static String _exit_reason(Flow &f, Fact target, Region region) {
   switch (f.sink) {
     case <return>: return $region.reason.returned();
     case <static>: return $region.reason.static_store();
@@ -1041,31 +1041,31 @@ static String Flow.exit(Flow &f, Fact target, Region region) {
 
 // store targets
 
-static Fact Walk.base(Walk &w, Var place, int &through) {
+static Fact _base(Walk &w, Var place, int &through) {
   through = 1;
   match (_unwrap(place)) {
     case $source_operator_content(%((!quote ->) ?base ?)): {
-      Fact fact = w.fact_of(base, NULL);
-      if (!fact) fact = w.base(base, through);
+      Fact fact = _fact_of(w, base, NULL);
+      if (!fact) fact = _base(w, base, through);
       through = 1;
       return fact;
     }
     case $source_operator_content(%((!quote .) ?base ?)):
-      return w.base(base, through);
+      return _base(w, base, through);
     case $source_operator_content(%((!quote *) ?base)):
-      return w.fact_of(base, NULL);
+      return _fact_of(w, base, NULL);
     case ${$indexed(%(!set ?base (expr ?type ?)), ?)}:
-      return w.indexed_base(base, type, through);
+      return _indexed_base(w, base, type, through);
     case %(getindex (!set ?base (expr ?type ?)) ?):
-      return w.indexed_base(base, type, through);
+      return _indexed_base(w, base, type, through);
     case $source_identifier_content(%(?binding)): {
       through = 0;
-      return w.fact_of(place, NULL);
+      return _fact_of(w, place, NULL);
     }
     /* A compound literal is storage of the block the store is in. */
     case %(composite *): {
       through = 0;
-      return w.new_fact(NULL, -1);
+      return _new_fact(w, NULL, -1);
     }
   }
   return NULL;
@@ -1074,9 +1074,9 @@ static Fact Walk.base(Walk &w, Var place, int &through) {
 /* The local a store target's storage belongs to. `through` is zero when
    the store writes the local itself and one when it writes storage the
    local reaches. */
-static Fact Walk.indexed_base(Walk &w, List base, Type type, int &through) {
-  Fact fact = w.fact_of(base, NULL);
-  if (!fact) return w.base(base, through);
+static Fact _indexed_base(Walk &w, List base, Type type, int &through) {
+  Fact fact = _fact_of(w, base, NULL);
+  if (!fact) return _base(w, base, through);
   /* A C array local owns its elements; a parameter is a pointer. */
   through = !type.is_array() || fact.param >= 0;
   return fact;
@@ -1086,14 +1086,14 @@ static Fact Walk.indexed_base(Walk &w, List base, Type type, int &through) {
    literal is this function's own storage; a place reached through a
    pointer is storage that pointer holds. `named` is the local the place
    is part of. */
-static Fact Walk.borrow(Walk &w, Var place, List &?named) {
+static Fact _borrow(Walk &w, Var place, List &?named) {
   int through = 0;
-  Fact base = w.fact_of(place, named);
-  if (!base) base = w.base(place, through);
+  Fact base = _fact_of(w, place, named);
+  if (!base) base = _base(w, place, through);
   if (!base) return NULL;
   if (named)
     if (!named) named = _root(place);
-  Fact borrow = w.new_fact(NULL, -1);
+  Fact borrow = _new_fact(w, NULL, -1);
   borrow.points = base;
   borrow.place = _unwrap(place);
   borrow.region = through ? base.region : w.frame;
@@ -1136,7 +1136,7 @@ static Symbol _sink_of(Fact base, int through, Fact &target) {
    set; NULL with `born` set is the caller's active region. A mixed
    Scope/Pool result keeps its Pool region in `other`. `type` is the
    declared type a compound literal initializes, or NULL for its own. */
-static Region Walk.birth(
+static Region _birth(
   Walk &w, Var value, Type type, int &born, Region &other,
   Acquired &acquired) {
   List arguments = NULL;
@@ -1144,12 +1144,12 @@ static Region Walk.birth(
   born = 1;
   other = NULL;
   acquired = NULL;
-  match (callee ? w.effect(callee) : void) {
-    case %(alloc slot): return w.allocate_in(w.slot(arguments.car()));
-    case %(alloc pool): return w.pooled(born);
+  match (callee ? _effect(w, callee) : void) {
+    case %(alloc slot): return _allocate_in(w, _slot(w, arguments.car()));
+    case %(alloc pool): return _pooled(w, born);
     case %(alloc final) if (w.meta): return w.frame;
-    case %(alloc *): return w.active();
-    case %(pool): return w.pooled(born);
+    case %(alloc *): return _active(w);
+    case %(pool): return _pooled(w, born);
   }
   Macro captured = $lambda_captured;
   match (source_expression(value)) {
@@ -1157,53 +1157,53 @@ static Region Walk.birth(
        reference capture moves its local into a cell of the active region,
        so the closure holds the local's value, not its address. */
     case captured(?body, *captures, *params):
-      return w.captured_birth(captures, born, other, acquired);
+      return _captured_birth(w, captures, born, other, acquired);
   }
   match (_unwrap(value)) {
-    case %(cons *): return w.pooled(born);
+    case %(cons *): return _pooled(w, born);
     case ${$array_value(*items)}:
-      return w.active();
+      return _active(w);
     case ${$map_value(*rows)}:
-      return w.active();
+      return _active(w);
     case %(composite *)
-      if (w.value_class(type ? type : _expression_type(value)) == <container>):
-      return w.active();
+      if (_value_class(w, type ? type : _expression_type(value)) == <container>):
+      return _active(w);
   }
-  if (callee) return w.summary_birth(callee, born, other);
+  if (callee) return _summary_birth(w, callee, born, other);
   born = 0;
   return NULL;
 }
 
 /* A pool value remains pooled even without a local bracket: a caller may
    open one around a helper call. */
-static Region Walk.pooled(Walk &w, int &born) {
-  Region pool = w.innermost(<pool>);
+static Region _pooled(Walk &w, int &born) {
+  Region pool = _innermost(w, <pool>);
   born = 2;
   return pool;
 }
 
-static Region Walk.summary_birth(
+static Region _summary_birth(
   Walk &w, String callee, int &born, Region &other) {
-  int owner = w.summary(callee).car().int();
+  int owner = _summary(w, callee).car().int();
   if (owner == 3) {
     born = owner;
-    other = w.innermost(<pool>);
-    return w.active();
+    other = _innermost(w, <pool>);
+    return _active(w);
   }
-  if (owner & 2) return w.pooled(born);
-  if (owner & 1) return w.active();
+  if (owner & 2) return _pooled(w, born);
+  if (owner & 1) return _active(w);
   born = 0;
   return NULL;
 }
 
 /* A closure keeps the first captured value with an owner; an address
    capture keeps the place it names. */
-static Region Walk.captured_birth(
+static Region _captured_birth(
   Walk &w, List captures, int &born, Region &other, Acquired &acquired) {
   foreach (Var capture, captures)
     match (capture) case %(capture ? ? ?captured): {
       Var place = _address_of(captured);
-      Fact fact = w.fact_of(place is void ? captured : place, NULL);
+      Fact fact = _fact_of(w, place is void ? captured : place, NULL);
       if (fact && (fact.born || fact.region || fact.other ||
                    _cleanup(fact.acquired))) {
         if (fact.born) born = fact.born;
@@ -1212,7 +1212,7 @@ static Region Walk.captured_birth(
         return fact.region;
       }
     }
-  return w.active();
+  return _active(w);
 }
 
 /* A summary is `(OWNER SINKS)`, where OWNER is a bit set of scoped (1) and
@@ -1220,21 +1220,21 @@ static Region Walk.captured_birth(
    pairs and a target is <return>, <result>, <static>, <unknown>, or
    `(param INDEX)`. <result> retains an argument in fresh result storage;
    <return> aliases an argument as the result. */
-static List Walk.summary(Walk &w, String callee) {
-  match (w.effect(callee)) {
+static List _summary(Walk &w, String callee) {
+  match (_effect(w, callee)) {
     case %(alloc pool): return %(2 ());
     case %(alloc *): return %(1 ());
     case %(pool): return %(2 ((0 result) (1 result)));
     case %(store): return %(0 ((1 (param 0)) (2 (param 0))));
     case %(summary ?owner ?sinks): return %($owner $sinks);
   }
-  w.read(callee);
+  _read(w, callee);
   Var local = w.summaries[callee];
   return local is void ? %(0 ()) : local;
 }
 
 /* Records that the current walk reads the summary of `callee`. */
-static void Walk.read(Walk &w, String callee) {
+static void _read(Walk &w, String callee) {
   Var known;
   if (!w.readers.try_get(callee, known)) {
     known = [];
@@ -1248,16 +1248,16 @@ static void Walk.read(Walk &w, String callee) {
 
 /* The argument a callee hands back as its result, when that argument is a
    parameter or region-born, so the result keeps its identity. */
-static Fact Walk.returned_argument(Walk &w, Var value, List &?named) {
+static Fact _returned_argument(Walk &w, Var value, List &?named) {
   List arguments = NULL;
   String callee = _callee_of(value, arguments);
   if (!callee) return NULL;
   List types = _parameter_types(value);
-  foreach (List row, w.summary(callee).cadr()) {
+  foreach (List row, _summary(w, callee).cadr()) {
     (int index, Var target) = row;
     if (target != <return> || index >= arguments.len()) continue;
     Type type = NULL;
-    Fact fact = w.fact_of(_passed(types, arguments, index, type), named);
+    Fact fact = _fact_of(w, _passed(types, arguments, index, type), named);
     if (fact && (fact.param >= 0 || fact.born || fact.region || fact.other ||
                  _cleanup(fact.acquired)))
       return fact;
@@ -1270,7 +1270,7 @@ static Fact Walk.returned_argument(Walk &w, Var value, List &?named) {
 /* What is known about the local an expression names or the storage an
    address borrows, through the `Var` wrappers that pass their argument
    through and either arm of `?:`, preferring an arm with a region. */
-static Fact Walk.fact_of(Walk &w, Var expression, List &?named) {
+static Fact _fact_of(Walk &w, Var expression, List &?named) {
   Var inner = _unwrap(expression);
   match (inner) {
     case $source_identifier_content(
@@ -1280,11 +1280,11 @@ static Fact Walk.fact_of(Walk &w, Var expression, List &?named) {
       return found is void ? NULL : found;
     }
     case $source_operator_content(%((!quote &) ?place)):
-      return w.borrow(place, named);
+      return _borrow(w, place, named);
     case $source_operator_content(%((!quote ?) ? ?yes ?no)): {
       List yes_name = NULL, no_name = NULL;
-      Fact fact = w.fact_of(yes, yes_name);
-      Fact other = w.fact_of(no, no_name);
+      Fact fact = _fact_of(w, yes, yes_name);
+      Fact other = _fact_of(w, no, no_name);
       if (other && (!fact ||
           ((other.region || other.other || _cleanup(other.acquired)) &&
            !fact.region && !fact.other && !_cleanup(fact.acquired)))) {
@@ -1298,31 +1298,31 @@ static Fact Walk.fact_of(Walk &w, Var expression, List &?named) {
   }
   List arguments = NULL;
   String callee = _callee_of(inner, arguments);
-  if (!callee || w.effect(callee) != %(wrap)) return NULL;
-  return w.fact_of(arguments.car(), named);
+  if (!callee || _effect(w, callee) != %(wrap)) return NULL;
+  return _fact_of(w, arguments.car(), named);
 }
 
 /* What is known about a value that is returned, stored, or passed on. A
    local C array there decays to the address of its first element, which
    is the function's own storage. */
-static Fact Walk.value_fact(Walk &w, Var value, List &?named) {
-  Fact fact = w.fact_of(value, named);
+static Fact _value_fact(Walk &w, Var value, List &?named) {
+  Fact fact = _fact_of(w, value, named);
   Type type = _expression_type(value);
   if (!fact || fact.param >= 0 || !type || !type.is_array()) return fact;
   match (_unwrap(value)) case $source_identifier_content(%(*fields)):
-    return w.borrow(value, named);
+    return _borrow(w, value, named);
   return fact;
 }
 
 /* Accepts `&local` or a `Scope *` local. */
-static Fact Walk.slot(Walk &w, Var argument) {
-  Fact fact = w.fact_of(_address_of(argument), NULL);
+static Fact _slot(Walk &w, Var argument) {
+  Fact fact = _fact_of(w, _address_of(argument), NULL);
   if (fact) return fact;
-  fact = w.fact_of(argument, NULL);
+  fact = _fact_of(w, argument, NULL);
   return fact && fact.points ? fact.points : fact;
 }
 
-static Fact Walk.new_fact(Walk &w, List binding, int param) {
+static Fact _new_fact(Walk &w, List binding, int param) {
   Fact fact = Scope.calloc(1, sizeof(struct Fact));
   *fact = (struct Fact) {.depth = w.depth, .origin = w.origin, .param = param};
   if (binding) w.facts[binding] = fact;
@@ -1361,7 +1361,7 @@ static int _empty(Var value) {
    or at the block end of a deferred destroy; until one is seen, the
    storage can outlive the function, so its values report only a read after
    the end. A caller's or static slot has none. */
-static Region Walk.owner(Walk &w, Fact slot) {
+static Region _owner(Walk &w, Fact slot) {
   if (!slot || slot.param >= 0) return NULL;
   if (!slot.owner) {
     slot.owner = Scope.calloc(1, sizeof(struct Region));
@@ -1372,8 +1372,8 @@ static Region Walk.owner(Walk &w, Fact slot) {
 
 /* An allocation fills an empty Scope slot. A deferred destroy may already
    own that slot, but a copy of its earlier NULL did not acquire this Scope. */
-static Region Walk.allocate_in(Walk &w, Fact slot) {
-  Region owner = w.owner(slot);
+static Region _allocate_in(Walk &w, Fact slot) {
+  Region owner = _owner(w, slot);
   if (owner) {
     slot.empty = 0;
     owner.acquired = _acquired(slot);
@@ -1389,13 +1389,13 @@ static void _move(Fact fact, Region region) {
   fact.param = -1;
 }
 
-static Region Walk.open_region(Walk &w, Symbol kind, Fact slot) {
+static Region _open_region(Walk &w, Symbol kind, Fact slot) {
   Region region = Scope.calloc(1, sizeof(struct Region));
   *region = (struct Region) {kind, w.depth, w.origin, 0, slot, w.open};
   return w.open = region;
 }
 
-static Region Walk.innermost(Walk &w, Symbol kind) {
+static Region _innermost(Walk &w, Symbol kind) {
   Region region = w.open;
   while (region && (region.closed || region.kind != kind))
     region = region.outer;
@@ -1406,24 +1406,24 @@ static Region Walk.innermost(Walk &w, Symbol kind) {
    storage of the Scope a pushed slot names. A bare `$auto` Scope local is
    not active, so what is allocated beside it belongs to the region around
    it. */
-static Region Walk.active(Walk &w) {
+static Region _active(Walk &w) {
   Region region = w.open;
   while (region && (region.closed ||
          (region.kind != <scope> && region.kind != <slot>)))
     region = region.outer;
-  return region && region.kind == <slot> ? w.allocate_in(region.slot) : region;
+  return region && region.kind == <slot> ? _allocate_in(w, region.slot) : region;
 }
 
 // warnings
 
-static void Walk.warn(
+static void _warn(
   Walk &w, Symbol code, int origin, String message, List notes) {
   w.warnings.push(
     w.audit ? %(${w.function} $code $origin $message $notes)
             : %($code $origin $message $notes));
 }
 
-static List Walk.opened(Walk &w, Region region) {
+static List _opened(Walk &w, Region region) {
   List location = w.c.origin_location(region.origin);
   return %("region opened at line ${location.assoc(<line>).int()}");
 }
@@ -1431,7 +1431,7 @@ static List Walk.opened(Walk &w, Region region) {
 /* How a warning names the value that leaves: a local by its name, and an
    address by the local it borrows from. A callee may hand back the address
    it was given or one inside it. */
-static String Walk.subject(Walk &w, Var value, List named, Fact fact) {
+static String _subject(Walk &w, Var value, List named, Fact fact) {
   match (source_expression(value)) case $source_any_lambda():
     return "a closure";
   if (!named) return "a fresh allocation";
@@ -1533,7 +1533,7 @@ static Var _passed(List types, List arguments, int index, Type &type) {
 
 /* A canonical type's values belong to their pool; a container type's
    compound literal allocates. */
-static Symbol Walk.value_class(Walk &w, Type type) {
+static Symbol _value_class(Walk &w, Type type) {
   Symbol tag = w.c.sym.var_tag_for_type(type, NULL);
   if (tag in %(string list symbol)) return <canonical>;
   return tag in %(map array block buffer) ? <container> : 0;
@@ -1542,8 +1542,8 @@ static Symbol Walk.value_class(Walk &w, Type type) {
 /* Whether a destination of `type` copies `value` rather than keeping it: a
    canonical destination, or a `Var`, which boxes a C string as a fresh
    String. */
-static int Walk.copies(Walk &w, Type type, Var value) {
-  if (w.value_class(type) == <canonical>) return 1;
+static int _copies(Walk &w, Type type, Var value) {
+  if (_value_class(w, type) == <canonical>) return 1;
   if (!type || !w.c.sym.is_var_type(type)) return 0;
   Type source = _expression_type(value);
   return source.is_char_pointer_like();
@@ -1552,7 +1552,7 @@ static int Walk.copies(Walk &w, Type type, Var value) {
 /* Whether `value` or a destination of `type` is a number: an integer,
    floating, or enum type. A number holds no address the program can follow
    without a cast back, so nothing the walk knows moves with it. */
-static int Walk.number(Walk &w, Type type, Var value) {
+static int _number(Walk &w, Type type, Var value) {
   Type given = _expression_type(value);
   return (type && w.c.sym.resolve_numeric_type(type)) ||
          (given && w.c.sym.resolve_numeric_type(given));
@@ -1567,7 +1567,7 @@ static int Walk.number(Walk &w, Type type, Var value) {
 */
 void Compiler.check_regions(Compiler c, List ast) {
   Walk w = {.c = c, .summaries = {}, .pending = [], .freed = []};
-  w.fixpoint(ast);
+  _fixpoint(w, ast);
   int origin = c.origin;
   foreach (List warning, w.warnings) {
     (Symbol code, int at, String message, List notes) = warning;
@@ -1594,7 +1594,7 @@ void Compiler.check_meta_regions(Compiler c, List fn) {
   Walk w = {
     .c = c, .summaries = c.meta_regions, .pending = [], .freed = [],
     .meta = 1};
-  w.fixpoint(fn);
+  _fixpoint(w, fn);
   if (!w.warnings.len()) return;
   (Symbol code, int at, String message, List notes) = w.warnings[0];
   $let(c.origin, at) { c.report_error(code, message, NULL, notes); }
@@ -1610,7 +1610,7 @@ Map Compiler.audit_regions(
   Walk w = {
     .c = c, .summaries = seed.copy(), .effects = effects,
     .pending = [], .freed = [], .audit = 1};
-  w.fixpoint(ast);
+  _fixpoint(w, ast);
   foreach (List finding, w.warnings) findings.push(finding);
   return w.summaries;
 }

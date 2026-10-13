@@ -59,7 +59,7 @@ an identifier, and each imported member must exist.
 `identifier` normally consumes `ident`. Member selection, method names,
 and declarator names also accept identifier-shaped keyword text where
 their parser explicitly does so. `method-owner` is the owner recognized by
-`Compiler._complex_identifier`: a built-in type word or known typedef,
+`_complex_identifier`: a built-in type word or known typedef,
 including package-qualified type names. `Self` is resolved as a contextual
 type. Type existence and a valid scalar combination remain semantic checks.
 The scalar-word production does not include `_Bool`: the current parser
@@ -308,7 +308,7 @@ which belongs to the enclosing expression. The implementation also accepts
 a legacy parenthesized expression body after the arrow without its own
 semicolon when the next token cannot extend that expression. A following
 semicolon selects the canonical form. See `_legacy_expression_body` and
-`Definition.expression_body`.
+`_expression_body`.
 
 A braced template can begin with `using` lines terminated by semicolons.
 `using $name` declares fresh names; `using name` retains a file-level binding.

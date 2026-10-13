@@ -133,7 +133,7 @@ static macro Stmt $report.protocols.adoption_conflict(
     String second = %"second: ${_location_string($adoption.location)}";
     $c.report_error(
       <protocol>,
-      %"conflicting adoption declarations for ${$adoption.spelling()}",
+      %"conflicting adoption declarations for ${_spelling($adoption)}",
       $c.token, %($first $second));
   }
 }
@@ -309,16 +309,16 @@ static List _adoption_tag(List adoption) {
 
 static List _adoption_location(List adoption) => adoption.last();
 
-static List Compiler._record(Compiler c, Type base) {
+static List _record(Compiler c, Type base) {
   Var stored;
   if (!c.protocols.try_get(base, stored)) return NULL;
   List occurrence = stored;
   return occurrence.car();
 }
 
-static List Compiler._adoption_row(
+static List _adoption_row(
   Compiler c, Type base, Type participant, Symbol storage) {
-  String path = c._path();
+  String path = _path(c);
   List key = storage == <static>
            ? %($base $participant $path)
            : %($base $participant);
@@ -326,18 +326,18 @@ static List Compiler._adoption_row(
   return c.adoptions.try_get(key, stored) ? stored : NULL;
 }
 
-static List Compiler._visible_adoption(
+static List _visible_adoption(
   Compiler c, Type base, Type participant) {
-  List local = c._adoption_row(base, participant, <static>);
-  return local ? local : c._adoption_row(base, participant, <external>);
+  List local = _adoption_row(c, base, participant, <static>);
+  return local ? local : _adoption_row(c, base, participant, <external>);
 }
 
-static Symbol Compiler._visibility(Compiler c, Type base, Type participant) {
-  List external = c._adoption_row(base, participant, <external>);
-  List local = c._adoption_row(base, participant, <static>);
+static Symbol _visibility(Compiler c, Type base, Type participant) {
+  List external = _adoption_row(c, base, participant, <external>);
+  List local = _adoption_row(c, base, participant, <static>);
   if (external && local) {
-    if (c._canonical_file(_adoption_location(external)) ==
-        c._canonical_file(_adoption_location(local)))
+    if (_canonical_file(c, _adoption_location(external)) ==
+        _canonical_file(c, _adoption_location(local)))
       return <static>;
     return <mixed>;
   }
@@ -347,12 +347,12 @@ static Symbol Compiler._visibility(Compiler c, Type base, Type participant) {
 }
 
 // Participation exists only for a declared adoption row.
-static int Compiler._is_adopted(Compiler c, Type base, Type participant) =>
-    !!c._visibility(base, participant);
+static int _is_adopted(Compiler c, Type base, Type participant) =>
+    !!_visibility(c, base, participant);
 
-static int Compiler._owns_adoption(Compiler c, Type base, Type participant) {
-  List row = c._visible_adoption(base, participant);
-  return row && c._canonical_file(_adoption_location(row)) == c._path();
+static int _owns_adoption(Compiler c, Type base, Type participant) {
+  List row = _visible_adoption(c, base, participant);
+  return row && _canonical_file(c, _adoption_location(row)) == _path(c);
 }
 
 static typedef struct AdoptionDraft {
@@ -365,18 +365,18 @@ static typedef struct AdoptionDraft {
 
 // source locations
 
-static String Compiler._path(Compiler c) {
+static String _path(Compiler c) {
   String result = NULL;
   $memo(c.protocol_helpers, <proto-path>, result) {
-    result = c._normalize_file(c.filename ? c.filename : "<stdin>");
+    result = _normalize_file(c, c.filename ? c.filename : "<stdin>");
   }
   return result;
 }
 
-static String Compiler._canonical_file(Compiler c, List location) {
+static String _canonical_file(Compiler c, List location) {
   String file = _location_file(location), result = NULL;
   $memo(c.protocol_helpers, %(proto-file $file), result) {
-    result = c._normalize_file(file);
+    result = _normalize_file(c, file);
   }
   return result;
 }
@@ -385,7 +385,7 @@ static String Compiler._canonical_file(Compiler c, List location) {
    the x2c root, where `Compiler.display_path` spells root sources. It
    resolves on disk itself: trying the root depends on whether the first path
    resolved, which `Compiler.canonical_path` does not report. */
-static String Compiler._normalize_file(Compiler c, String file) {
+static String _normalize_file(Compiler c, String file) {
   String real = real_path(file), root = c.root_dir;
   if (!real && root && file[0] != '/') real = real_path(%"$root/$file");
   return c.display_path(real ? real : file);
@@ -404,7 +404,7 @@ static String _location_string(List location) {
     column.is_integer() ? column.integer() : 1}";
 }
 
-static int Compiler._is_private(Compiler c, String name) =>
+static int _is_private(Compiler c, String name) =>
   %($name) in c.sym.file_statics();
 
 // spellings
@@ -442,7 +442,7 @@ String Compiler.reverse_converter_spelling(
   return package ? %"${package}__$binding" : binding;
 }
 
-static Type Compiler._declared(Compiler c, String name) {
+static Type _declared(Compiler c, String name) {
   if (c.sym.get(%("generated-protocol" $name)))
     return NULL;
   return c.sym.get(%($name));
@@ -475,14 +475,14 @@ static typedef struct ProtocolSyntax {
 */
 List Compiler.parse_protocol_declaration(Compiler c) {
   ProtocolSyntax syntax = {.c = c, .start = c.token, .storage = <external>};
-  syntax.head();
-  if (c.peek(0) == <;>) return syntax.adoption();
-  syntax.check_body();
-  syntax.warn_shadowed();
-  return syntax.body();
+  _head(syntax);
+  if (c.peek(0) == <;>) return _adoption(syntax);
+  _check_body(syntax);
+  _warn_shadowed(syntax);
+  return _body(syntax);
 }
 
-static void ProtocolSyntax.head(ProtocolSyntax &p) {
+static void _head(ProtocolSyntax &p) {
   Compiler c = p.c;
   if (c.at_word("meta")) {
     p.meta = c.token;
@@ -500,10 +500,10 @@ static void ProtocolSyntax.head(ProtocolSyntax &p) {
   p.participant = participant.len() == 1 && participant.car() is <string>
                 ? participant.car() : NULL;
   c.expect(<)>);
-  p.modifiers();
+  _modifiers(p);
 }
 
-static void ProtocolSyntax.modifiers(ProtocolSyntax &p) {
+static void _modifiers(ProtocolSyntax &p) {
   Compiler c = p.c;
   if (c.at_word("as")) {
     p.modifier_token = c.token;
@@ -524,7 +524,7 @@ static void ProtocolSyntax.modifiers(ProtocolSyntax &p) {
   }
 }
 
-static List ProtocolSyntax.adoption(ProtocolSyntax &p) {
+static List _adoption(ProtocolSyntax &p) {
   Compiler c = p.c;
   c.next();
   List location = c.token_location(p.start);
@@ -540,12 +540,12 @@ static List ProtocolSyntax.adoption(ProtocolSyntax &p) {
     .tag_expression = p.tag, .location = location,
     .participant_token = p.participant_token,
     .modifier_token = p.modifier_token};
-  List adoption = draft.publish();
-  if (p.meta) c._retain_meta_protocol(adoption);
+  List adoption = _publish(draft);
+  if (p.meta) _retain_meta_protocol(c, adoption);
   return adoption;
 }
 
-static void ProtocolSyntax.check_body(ProtocolSyntax &p) {
+static void _check_body(ProtocolSyntax &p) {
   Compiler c = p.c;
   if (p.meta)
     $report.protocols.meta_adoption(c, p.meta);
@@ -561,7 +561,7 @@ static void ProtocolSyntax.check_body(ProtocolSyntax &p) {
   c.expect(<"{">);
 }
 
-static void ProtocolSyntax.warn_shadowed(ProtocolSyntax &p) {
+static void _warn_shadowed(ProtocolSyntax &p) {
   /* Only the full parse warns about a binder shadowing a visible type. */
   Compiler c = p.c;
   if (c.shallow) return;
@@ -571,7 +571,7 @@ static void ProtocolSyntax.warn_shadowed(ProtocolSyntax &p) {
   $report.shadow.protocol_binder(c, participant, p.participant_token);
 }
 
-static List ProtocolSyntax.body(ProtocolSyntax &p) {
+static List _body(ProtocolSyntax &p) {
   Compiler c = p.c;
   String participant = p.participant;
   Array associations = [], members = [];
@@ -584,11 +584,11 @@ static List ProtocolSyntax.body(ProtocolSyntax &p) {
     if (c.peek(0) == <associated>) {
       if (saw_member)
         $report.protocols.assoc_order(c);
-      associations.push(c._parse_associated(type_names));
+      associations.push(_parse_associated(c, type_names));
       continue;
     }
     saw_member = 1;
-    members.push(c._parse_member(participant, member_names));
+    members.push(_parse_member(c, participant, member_names));
   }
   c.expect(<"}">);
   c.sym.pop_scope();
@@ -601,10 +601,10 @@ static List ProtocolSyntax.body(ProtocolSyntax &p) {
   List location = c.token_location(p.start);
   if (c.macro_holes || (c.shallow && !c.collect_protocols))
     return %(protocol $record ${p.storage} $location);
-  return c._publish_record(record, p.base, location);
+  return _publish_record(c, record, p.base, location);
 }
 
-static List Compiler._parse_associated(Compiler c, Map names) {
+static List _parse_associated(Compiler c, Map names) {
   c.expect(<associated>);
   if (c.peek(0) != <ident>)
     $report.protocols.assoc_expected(c);
@@ -620,7 +620,7 @@ static List Compiler._parse_associated(Compiler c, Map names) {
   return %($name $type);
 }
 
-static List Compiler._parse_member(
+static List _parse_member(
   Compiler c, String participant, Map members) {
   List declaration = NULL;
   $let(c.in_proto, 1) {
@@ -642,7 +642,7 @@ static List Compiler._parse_member(
     $report.protocols.member_function(c, name);
   if (name in members)
     $report.protocols.member_duplicate(c, name);
-  String native = c._native_member();
+  String native = _native_member(c);
   c.expect(<;>);
   members[name] = 1;
   return %($name $signature $native);
@@ -662,7 +662,7 @@ static String _member_name(List identity, String participant) {
     ? full_name[prefix.len():] : NULL;
 }
 
-static String Compiler._native_member(Compiler c) {
+static String _native_member(Compiler c) {
   if (!c.test(<=>)) return NULL;
   if (c.peek(0) != <ident>)
     $report.protocols.native_ident(c);
@@ -690,7 +690,7 @@ List Compiler.publish_protocol_node(
     case %(meta-protocol ?(List adoption)): {
       List published = c.publish_protocol_node(
         adoption, participant_token, representation_token);
-      c._retain_meta_protocol(published);
+      _retain_meta_protocol(c, published);
       return published;
     }
     case %(protocol
@@ -699,12 +699,12 @@ List Compiler.publish_protocol_node(
                ?(List base) (!is ? type string)
                (associated *) (members *)))
            external ?(List location)):
-      return c._publish_record(record, base, location);
+      return _publish_record(c, record, base, location);
   }
-  return c._publish_adoption(node, participant_token, representation_token);
+  return _publish_adoption(c, node, participant_token, representation_token);
 }
 
-static List Compiler._publish_adoption(
+static List _publish_adoption(
   Compiler c, List node, Token participant_token, Token modifier_token) {
   match (node)
     case %(adopt
@@ -716,12 +716,12 @@ static List Compiler._publish_adoption(
         .storage = storage, .location = location,
         .participant_token = participant_token,
         .modifier_token = modifier_token};
-      return draft.publish();
+      return _publish(draft);
     }
-  return c._publish_var_adoption(node, participant_token, modifier_token);
+  return _publish_var_adoption(c, node, participant_token, modifier_token);
 }
 
-static List Compiler._publish_var_adoption(
+static List _publish_var_adoption(
   Compiler c, List node, Token participant_token, Token modifier_token) {
   match (node) {
     case %(adopt
@@ -734,7 +734,7 @@ static List Compiler._publish_var_adoption(
         .storage = storage, .tag_expression = tag, .location = location,
         .participant_token = participant_token,
         .modifier_token = modifier_token};
-      return draft.publish();
+      return _publish(draft);
     }
     case %(adopt
            ("Var") ?(List participant)
@@ -746,56 +746,56 @@ static List Compiler._publish_var_adoption(
         .storage = storage, .representation = representation,
         .location = location, .participant_token = participant_token,
         .modifier_token = modifier_token};
-      return draft.publish();
+      return _publish(draft);
     }
   }
   $report.macro.protocol_invalid(c);
 }
 
-static List Compiler._publish_record(
+static List _publish_record(
   Compiler c, List record, Type base, List location) {
   Symbol storage = c.source_private > 0 ? <static> : <external>;
-  c._install_occurrence(base, record, storage, location);
+  _install_occurrence(c, base, record, storage, location);
   c.proto_cache = {};
   List published = %(protocol $record $storage $location);
-  c._retain_source_node(published, storage, location);
+  _retain_source_node(c, published, storage, location);
   return published;
 }
 
 /* A `meta` adoption lets compile-time code call the conformance's
    witnesses. Its row travels beside the adoption row it marks. */
-static void Compiler._retain_meta_protocol(Compiler c, List adoption) {
+static void _retain_meta_protocol(Compiler c, List adoption) {
   Type (base, participant) = adoption.cdr();
-  c._retain_source_node(
+  _retain_source_node(c,
     %(meta-protocol $base $participant), _adoption_storage(adoption),
     %(meta-protocol @{_adoption_location(adoption)}));
 }
 
-static void Compiler._retain_source_node(
+static void _retain_source_node(
   Compiler c, List node, Symbol storage, List location) {
   List invocation = c.origin_location(c.origin);
   if (!invocation &&
       (!c.shallow ||
        (storage == <static> && c.source_private < 0)))
     return;
-  List key = c._source_key(location);
+  List key = _source_key(c, location);
   c.sym.set(key, node);
   if (storage == <static>) c.sym.mark_static(key);
 }
 
 // Keep definition provenance in a generated node while its invocation site
 // makes repeated expansions distinct in the retained symbol table.
-static List Compiler._source_key(Compiler c, List location) {
+static List _source_key(Compiler c, List location) {
   List invocation = c.origin_location(c.origin);
   return invocation
        ? %("source-node" $location $invocation)
        : %("source-node" $location);
 }
 
-static void Compiler._install_occurrence(
+static void _install_occurrence(
   Compiler c, Type base, List record, Symbol storage, List location) {
-  String file = c._canonical_file(location);
-  if (storage == <static> && file != c._path()) return;
+  String file = _canonical_file(c, location);
+  if (storage == <static> && file != _path(c)) return;
   Var stored;
   if (!c.protocols.try_get(base, stored)) {
     c.protocols[base] = _occurrence(record, storage, location);
@@ -803,7 +803,7 @@ static void Compiler._install_occurrence(
   }
   List occurrence = stored, existing = occurrence.car();
   if (existing == record) {
-    if (c._canonical_file(_occurrence_location(occurrence)) == file &&
+    if (_canonical_file(c, _occurrence_location(occurrence)) == file &&
         storage == <static> &&
         _occurrence_storage(occurrence) != <static>)
       c.protocols[base] = _occurrence(record, storage, location);
@@ -821,7 +821,7 @@ static void Compiler._install_occurrence(
 
 // adoption drafts
 
-static List AdoptionDraft.publish(AdoptionDraft &a) {
+static List _publish(AdoptionDraft &a) {
   Compiler c = a.c;
   if (a.tag_expression) a.tag_expression = _tag_syntax(a.tag_expression);
   String spelling = a.participant.car().str();
@@ -829,29 +829,29 @@ static List AdoptionDraft.publish(AdoptionDraft &a) {
   if ((!declared || !declared.type().is_typedef()) && !c.shallow)
     $report.protocols.type_undeclared(c, spelling,
       a.participant_token);
-  a.tag = a.check_modifiers();
-  a.storage = a.published_storage(spelling);
-  a.check_previous();
-  a.install();
+  a.tag = _check_modifiers(a);
+  a.storage = _published_storage(a, spelling);
+  _check_previous(a);
+  _install(a);
   // An adoption resolved when the parse began has reported its failures.
   List pair = %(${a.base} ${a.participant});
   int resolved = pair in c.conforms;
   c.conforms.del(pair);
   c.proto_cache = {};
   if (!c.shallow)
-    c._resolve_adoption(a.base, a.participant, resolved ? NULL : a.location);
-  List published = a.node();
+    _resolve_adoption(c, a.base, a.participant, resolved ? NULL : a.location);
+  List published = _node(a);
   // A generated class declares several adoptions at one location.
-  c._retain_source_node(
+  _retain_source_node(c,
     published, a.storage, %(adopt ${a.base} @{a.location}));
   return published;
 }
 
-static List AdoptionDraft.node(AdoptionDraft &a) => _adoption_node(
+static List _node(AdoptionDraft &a) => _adoption_node(
   a.base, a.participant, a.storage, a.representation, a.tag_expression,
   a.location);
 
-static String AdoptionDraft.spelling(AdoptionDraft &a) =>
+static String _spelling(AdoptionDraft &a) =>
   %"${_type_spelling(a.base)}(${_type_spelling(a.participant)})";
 
 static List _tag_syntax(List expression) {
@@ -864,19 +864,19 @@ static List _tag_syntax(List expression) {
   return expression;
 }
 
-static Symbol AdoptionDraft.check_modifiers(AdoptionDraft &a) {
+static Symbol _check_modifiers(AdoptionDraft &a) {
   Type representation = a.representation;
   if (representation && !representation.fixed_var_tag())
-    a.report_modifier(_representation_error(representation));
+    _report_modifier(a, _representation_error(representation));
   if (!a.tag_expression) return 0;
   Symbol tag = _tag_value(a.tag_expression);
-  if (!tag) a.report_modifier("Var adoption tag must be a Symbol literal");
+  if (!tag) _report_modifier(a, "Var adoption tag must be a Symbol literal");
   return tag;
 }
 
 /* A constructed adoption has no modifier token, so its diagnostic goes to
    the adoption's location. */
-static void AdoptionDraft.report_modifier(AdoptionDraft &a, String message) {
+static void _report_modifier(AdoptionDraft &a, String message) {
   if (a.modifier_token)
     a.c.report_error(<protocol>, message, a.modifier_token, NULL);
   else
@@ -890,14 +890,14 @@ static Symbol _tag_value(List expression) {
   return 0;
 }
 
-static Symbol AdoptionDraft.published_storage(
+static Symbol _published_storage(
   AdoptionDraft &a, String spelling) {
   Compiler c = a.c;
   if (a.storage == <static>) return <static>;
   if (c.source_private < 0) return a.storage;
-  List record = c._record(a.base);
+  List record = _record(c, a.base);
   int private_native = record &&
-    c._has_private_native(record.last().list().cdr());
+    _has_private_native(c, record.last().list().cdr());
   String base_name = _base_name(a.base);
   String forward = base_name ? %"${spelling}_${base_name.lower()}" : NULL;
   String reverse = base_name
@@ -909,30 +909,30 @@ static Symbol AdoptionDraft.published_storage(
     ? occurrence_value : NULL;
   int private = c.source_private > 0 ||
     (occurrence && _occurrence_storage(occurrence) == <static>) ||
-    c._is_private(spelling) ||
-    (forward && c._is_private(forward)) ||
-    (reverse && c._is_private(reverse)) ||
-    (alternate && c._is_private(alternate)) ||
+    _is_private(c, spelling) ||
+    (forward && _is_private(c, forward)) ||
+    (reverse && _is_private(c, reverse)) ||
+    (alternate && _is_private(c, alternate)) ||
     private_native;
   return private ? <static> : a.storage;
 }
 
-static int Compiler._has_private_native(Compiler c, List templates) {
+static int _has_private_native(Compiler c, List templates) {
   foreach (List template, templates) {
     String binding = template.caddr();
-    if (binding && c._is_private(binding)) return 1;
+    if (binding && _is_private(c, binding)) return 1;
   }
   return 0;
 }
 
-static void AdoptionDraft.check_previous(AdoptionDraft &a) {
+static void _check_previous(AdoptionDraft &a) {
   Compiler c = a.c;
   if (c.shallow) return;
-  String path = c._canonical_file(a.location);
+  String path = _canonical_file(c, a.location);
   List key = %("parsed-protocol-adoption" ${a.base} ${a.participant} $path);
   Var previous;
   if (!c.protocol_helpers.try_get(key, previous)) {
-    c.protocol_helpers[key] = a.node();
+    c.protocol_helpers[key] = _node(a);
     return;
   }
   List row = previous;
@@ -941,19 +941,19 @@ static void AdoptionDraft.check_previous(AdoptionDraft &a) {
   String first = %"first: ${_location_string(_adoption_location(row))}";
   String second = %"second: ${_location_string(a.location)}";
   c.diagnostics.report(
-    <protocol>, %"conflicting adoption declarations for ${a.spelling()}",
+    <protocol>, %"conflicting adoption declarations for ${_spelling(a)}",
     a.location, %($first $second));
 }
 
-static void AdoptionDraft.install(AdoptionDraft &a) {
+static void _install(AdoptionDraft &a) {
   Compiler c = a.c;
-  String path = c._canonical_file(a.location);
-  if (a.storage == <static> && path != c._path()) return;
+  String path = _canonical_file(c, a.location);
+  if (a.storage == <static> && path != _path(c)) return;
   a.participant.register_var_adoption(a.representation, a.tag);
   List key = a.storage == <static>
            ? %(${a.base} ${a.participant} $path)
            : %(${a.base} ${a.participant});
-  List row = a.node();
+  List row = _node(a);
   Var stored;
   if (!c.adoptions.try_get(key, stored)) {
     c.adoptions[key] = row;
@@ -962,7 +962,7 @@ static void AdoptionDraft.install(AdoptionDraft &a) {
   List existing = stored;
   if (existing == row) return;
   List first_location = _adoption_location(existing);
-  if (c._canonical_file(first_location) == path) return;
+  if (_canonical_file(c, first_location) == path) return;
   $report.protocols.adoption_conflict(c, a, first_location);
 }
 
@@ -983,20 +983,20 @@ static typedef struct ProtocolRequirements {
     unit declared and recorded keeps that conformance, which is installed
     when it is first used.
 */
-void Compiler.resolve_protocols(Compiler c) => c._resolve_visible(1);
+void Compiler.resolve_protocols(Compiler c) => _resolve_visible(c, 1);
 
-static void Compiler._resolve_visible(Compiler c, int report) {
+static void _resolve_visible(Compiler c, int report) {
   c.conforms = {};
-  String owner = c._path();
+  String owner = _path(c);
   foreach (Var value, c.adoptions) {
     List adoption = value;
     Type (base, participant) = adoption.cdr();
     Symbol storage = _adoption_storage(adoption);
     List location = _adoption_location(adoption);
-    String path = c._canonical_file(location);
+    String path = _canonical_file(c, location);
     if (storage == <static> && path != owner) continue;
-    if (c._recorded(base, participant)) continue;
-    c._resolve_adoption(
+    if (_recorded(c, base, participant)) continue;
+    _resolve_adoption(c,
       base, participant, report && path == owner ? location : NULL);
   }
 }
@@ -1012,13 +1012,13 @@ static void Compiler._resolve_visible(Compiler c, int report) {
    resolved to a function static to this unit is left out, so it is
    `no-member` elsewhere: no other unit can call that function. A native
    conformance reads no participant member, so each unit resolves it. */
-static void Compiler._record_conformances(Compiler c) {
+static void _record_conformances(Compiler c) {
   c.record_conformance_rows(c.conformance_rows(c.declared_adoptions()));
 }
 
-static List Compiler._recorded_conformance(
+static List _recorded_conformance(
   Compiler c, Type base, Type participant) {
-  if (c._visibility(base, participant) != <external>) return NULL;
+  if (_visibility(c, base, participant) != <external>) return NULL;
   match (c.conforms[%($base $participant)])
     case %(protocol-conformance ? ? ?forward ?reverse ? ?(Map bindings)
            (members *rows)): {
@@ -1029,7 +1029,7 @@ static List Compiler._recorded_conformance(
       foreach (List row, rows)
         match (row)
           case %(?member ?(Symbol status) ?(String source) *)
-            if (status != <no-member> && !c._is_private(source)):
+            if (status != <no-member> && !_is_private(c, source)):
               resolved.push(%($member $status $source));
       return %(conformance $base $participant $forward $reverse
                (bindings @{bound.list_free()}) @{resolved.list_free()});
@@ -1043,7 +1043,7 @@ Map Compiler.conformance_rows(Compiler c, List adoptions) {
   Map rows = {};
   foreach (List adoption, adoptions) {
     Type (base, participant) = adoption.cdr();
-    List recorded = c._recorded_conformance(base, participant);
+    List recorded = _recorded_conformance(c, base, participant);
     if (recorded)
       rows[%("source-node" (conformance $base $participant))] = recorded;
   }
@@ -1058,24 +1058,24 @@ Map Compiler.conformance_rows(Compiler c, List adoptions) {
 void Compiler.resolve_as_declared(Compiler c, Map symbols) {
   c.sym.reset(symbols);
   c.rebuild_protocols(symbols);
-  c._resolve_visible(0);
+  _resolve_visible(c, 0);
   c.install_generated_protocol_symbols();
   Array pairs = [];
   foreach (Var key, c.conforms.keys()) pairs.push(key);
   foreach (List pair, pairs) {
-    if (c._recorded(pair.car(), pair.cadr())) continue;
+    if (_recorded(c, pair.car(), pair.cadr())) continue;
     c.conforms.del(pair);
     c.proto_cache = {};
-    c._resolve_adoption(pair.car(), pair.cadr(), NULL);
+    _resolve_adoption(c, pair.car(), pair.cadr(), NULL);
   }
   pairs.free();
 }
 
 /* The row an included interface recorded for an adoption this unit does not
    own, or NULL. */
-static List Compiler._recorded(Compiler c, Type base, Type participant) {
+static List _recorded(Compiler c, Type base, Type participant) {
   Var recorded;
-  if (c._owns_adoption(base, participant) ||
+  if (_owns_adoption(c, base, participant) ||
       !c.protocol_helpers.try_get(
         %("recorded-conformance" $base $participant), recorded))
     return NULL;
@@ -1084,9 +1084,9 @@ static List Compiler._recorded(Compiler c, Type base, Type participant) {
 
 /* Installs the conformance an included interface recorded for an adoption
    this unit does not own. Returns 0 when there is none to reuse. */
-static int Compiler._reuse_conformance(
+static int _reuse_conformance(
   Compiler c, Type base, Type participant) {
-  match (%(${c._record(base)} ${c._recorded(base, participant)}))
+  match (%(${_record(c, base)} ${_recorded(c, base, participant)}))
     case %((? ? ? ? (members *templates))
            (conformance ? ? ?forward ?reverse (bindings *bound) *members)): {
       Map variables = {}, bindings = {}, resolved = {};
@@ -1113,7 +1113,7 @@ static int Compiler._reuse_conformance(
 
 /* The recorded conformances this unit may reuse and has not installed, as
    `((BASE PARTICIPANT) ROW)` pairs. */
-static List Compiler._unused_recorded(Compiler c) {
+static List _unused_recorded(Compiler c) {
   Array candidates = [], unused = [];
   foreach (Var key, c.protocol_helpers.keys())
     match (key)
@@ -1121,7 +1121,7 @@ static List Compiler._unused_recorded(Compiler c) {
         candidates.push(%($base $participant));
   // Ownership answers are memoized in the helpers, so they follow the scan.
   foreach (List pair, candidates) {
-    List row = c._recorded(pair.car(), pair.cadr());
+    List row = _recorded(c, pair.car(), pair.cadr());
     if (row && !(pair in c.conforms)) unused.push(%($pair $row));
   }
   candidates.free();
@@ -1130,13 +1130,13 @@ static List Compiler._unused_recorded(Compiler c) {
 
 /* Installs each recorded conformance with a base default whose forward
    converter is defined, so that its forwarding members are published. */
-static void Compiler._reuse_defaults(Compiler c) {
-  foreach (List entry, c._unused_recorded())
+static void _reuse_defaults(Compiler c) {
+  foreach (List entry, _unused_recorded(c))
     match (entry)
       case %((?(Type base) ?(Type participant))
              (conformance ? ? ?(String forward) ? ? *members)):
         if (forward in c.fn_defs && _has_default(members))
-          c._reuse_conformance(base, participant);
+          _reuse_conformance(c, base, participant);
 }
 
 static int _has_default(List members) {
@@ -1157,9 +1157,9 @@ static List _recorded_row(
   return %($member no-member $source $expected none $template);
 }
 
-static void Compiler._resolve_adoption(
+static void _resolve_adoption(
   Compiler c, Type base, Type participant, List location) {
-  List record = c._record(base);
+  List record = _record(c, base);
   if (!record) {
     if (!location) return;
     c.diagnostics.report(
@@ -1174,38 +1174,38 @@ static void Compiler._resolve_adoption(
       ProtocolRequirements requirements = {
         .binder = binder, .associations = associations,
         .templates = members};
-      c._resolve_record(base, participant, location, requirements);
+      _resolve_record(c, base, participant, location, requirements);
     }
 }
 
-static void Compiler._resolve_record(
+static void _resolve_record(
   Compiler c, Type base, Type participant, List location,
   ProtocolRequirements &requirements) {
   int native = _is_native(requirements.templates);
   List conformance = NULL, failure = NULL;
   if (native) {
-    Type definition = c._participant_definition(participant);
-    conformance = c._resolve_native(
+    Type definition = _participant_definition(c, participant);
+    conformance = _resolve_native(c,
       base, participant, requirements, definition, failure);
   }
   else
-    conformance = c._resolve_ordinary(
+    conformance = _resolve_ordinary(c,
       base, participant, requirements, failure);
 
   if (!conformance) {
     if (!location) return;
-    String detail = c._missing_detail(base, participant, native, failure);
+    String detail = _missing_detail(c, base, participant, native, failure);
     c.diagnostics.report(<protocol>, detail, location, NULL);
     return;
   }
   if (location) {
     List rows = conformance.last().list().cdr();
-    if (native) c._install_native_bindings(participant, rows);
-    c._report_sig_conflicts(base, participant, rows, location);
+    if (native) _install_native_bindings(c, participant, rows);
+    _report_sig_conflicts(c, base, participant, rows, location);
   }
 }
 
-static String Compiler._missing_detail(
+static String _missing_detail(
   Compiler c, Type base, Type participant, int native, List failure) {
   String base_repr = _type_spelling(base);
   String participant_repr = _type_spelling(participant);
@@ -1221,7 +1221,7 @@ static String Compiler._missing_detail(
   String forward = base_name
     ? %"$participant_repr.${base_name.lower()}" : NULL;
   Type forward_type = forward && base_name
-    ? c._declared(%"${participant.car()}_${base_name.lower()}")
+    ? _declared(c, %"${participant.car()}_${base_name.lower()}")
     : NULL;
   if (base_name && !_exact_conversion(forward_type, participant, base))
     return $report.protocols.forward_conversion(prefix, forward);
@@ -1260,11 +1260,11 @@ static String _requirement_detail(Type base, Type participant, List failure) {
   return $report.protocols.native_member_alias(prefix, member);
 }
 
-static void Compiler._report_sig_conflicts(
+static void _report_sig_conflicts(
   Compiler c, Type base, Type participant, List rows, List location) {
   String base_repr = _type_spelling(base);
   String participant_repr = _type_spelling(participant);
-  String declaration_site = c._definition_location(base);
+  String declaration_site = _definition_location(c, base);
   foreach (List row, rows)
     match (row)
       case %(?(String member) sig-cnflct ?(String binding)
@@ -1272,7 +1272,7 @@ static void Compiler._report_sig_conflicts(
         List dedupe = %("protocol-sig-conflict" $participant $member);
         if (dedupe in c.protocol_helpers) continue;
         c.protocol_helpers[dedupe] = 1;
-        Type actual = c._declared(binding);
+        Type actual = _declared(c, binding);
         String owner = %"$base_repr($participant_repr)";
         $report.protocols.signature_conflict(
           c, member, owner, declaration_site, binding, actual,
@@ -1280,7 +1280,7 @@ static void Compiler._report_sig_conflicts(
       }
 }
 
-static String Compiler._definition_location(Compiler c, Type base) {
+static String _definition_location(Compiler c, Type base) {
   List stored = c.protocols[base];
   return _location_string(_occurrence_location(stored));
 }
@@ -1293,7 +1293,7 @@ static typedef struct NativeResolution {
   Map variables, bindings;
 } NativeResolution;
 
-static List Compiler._resolve_native(
+static List _resolve_native(
   Compiler c, Type base, Type participant, ProtocolRequirements &requirements,
   Type participant_definition, List &failure) {
   failure = NULL;
@@ -1302,7 +1302,7 @@ static List Compiler._resolve_native(
   if (c.conforms.try_get(key, stored)) {
     if (stored is not <list>) return NULL;
     List conformance = stored;
-    c._install_native_bindings(participant, conformance.last().list().cdr());
+    _install_native_bindings(c, participant, conformance.last().list().cdr());
     return conformance;
   }
   if (!participant.is_bare_typedef_name() || !participant_definition) {
@@ -1320,7 +1320,7 @@ static List Compiler._resolve_native(
     resolution.variables[association_name] = 1;
     resolution.bindings[association_name] = binding;
   }
-  List rows = resolution.rows(requirements.templates, failure);
+  List rows = _rows(resolution, requirements.templates, failure);
   if (failure) {
     c.conforms[key] = 0;
     return NULL;
@@ -1333,7 +1333,7 @@ static List Compiler._resolve_native(
   return conformance;
 }
 
-static List NativeResolution.rows(
+static List _rows(
   NativeResolution &r, List templates, List &failure) {
   Array members = [];
   Map native_bindings = NULL;
@@ -1395,14 +1395,14 @@ static int _native_converts(Type participant_definition, Type base) {
   return participant_definition.canonicalize() == base.canonicalize();
 }
 
-static Type Compiler._participant_definition(Compiler c, Type participant) {
+static Type _participant_definition(Compiler c, Type participant) {
   if (!participant.is_bare_typedef_name()) return NULL;
   String name = participant.car();
   Var definition = c.sym.global_symbols()[%(typedef $name)];
   return definition is <list> ? definition : NULL;
 }
 
-static void Compiler._install_native_bindings(
+static void _install_native_bindings(
   Compiler c, Type participant, List rows) {
   if (!_native_rows(rows)) return;
   foreach (List row, rows)
@@ -1434,7 +1434,7 @@ static typedef struct MemberResolution {
   Map variables, defaults, bindings;
 } MemberResolution;
 
-static List Compiler._resolve_ordinary(
+static List _resolve_ordinary(
   Compiler c, Type base, Type participant,
   ProtocolRequirements &requirements, List &failure) {
   failure = NULL;
@@ -1444,22 +1444,22 @@ static List Compiler._resolve_ordinary(
     return stored is <list> ? stored : NULL;
   String base_name = _base_name(base);
   if (!base_name || !participant.is_bare_typedef_name()) goto does_not_conform;
-  String forward = c._forward_binding(base, participant);
-  String reverse = c._reverse_binding(base, participant);
+  String forward = _forward_binding(c, base, participant);
+  String reverse = _reverse_binding(c, base, participant);
   MemberResolution resolution = {
     .c = c, .base = base, .participant = participant,
     .binder = requirements.binder,
     .variables = {}, .defaults = {}, .bindings = {},
     .representation = base === %("Var")
-      ? _adoption_representation(c._visible_adoption(base, participant))
+      ? _adoption_representation(_visible_adoption(c, base, participant))
       : NULL,
     .forward = base !== %("Var") ? forward : NULL};
-  List rows = resolution.resolve(
+  List rows = _resolve(resolution,
     requirements.associations, requirements.templates);
   ProtocolAdapters adapters = {
     .c = c, .base = base, .binder = requirements.binder,
     .forward = forward, .reverse = reverse};
-  List requirement = adapters.requirement(rows);
+  List requirement = _requirement(adapters, rows);
   if (requirement) {
     failure = requirement;
     goto does_not_conform;
@@ -1474,28 +1474,28 @@ does_not_conform: c.conforms[key] = 0;
   return NULL;
 }
 
-static String Compiler._forward_binding(
+static String _forward_binding(
   Compiler c, Type base, Type participant) {
   String base_name = _base_name(base);
   if (!base_name || !participant.is_bare_typedef_name()) return NULL;
   String binding = %"${participant.car()}_${base_name.lower()}";
-  Type found = c._declared(binding);
+  Type found = _declared(c, binding);
   if (!_exact_conversion(found, participant, base)) return NULL;
   return binding;
 }
 
-static String Compiler._reverse_binding(
+static String _reverse_binding(
   Compiler c, Type base, Type participant) {
   String base_name = _base_name(base);
   if (!base_name || !participant.is_bare_typedef_name()) return NULL;
   String participant_name = participant.car();
   String conventional =
     c.reverse_converter_spelling(base_name, "", participant_name);
-  Type found = c._declared(conventional);
+  Type found = _declared(c, conventional);
   if (_exact_conversion(found, base, participant)) return conventional;
   String alternate =
     c.reverse_converter_spelling(base_name, "as_", participant_name);
-  found = c._declared(alternate);
+  found = _declared(c, alternate);
   if (_exact_conversion(found, base, participant)) return alternate;
   return NULL;
 }
@@ -1503,7 +1503,7 @@ static String Compiler._reverse_binding(
 /* Members are selected against the participant's bindings first; the
    associated-type defaults fill what selection left unbound before each
    member's expected signature is completed. */
-static List MemberResolution.resolve(
+static List _resolve(
   MemberResolution &r, List associations, List templates) {
   r.variables[r.binder] = 1;
   r.bindings[r.binder] = r.participant;
@@ -1514,24 +1514,24 @@ static List MemberResolution.resolve(
   }
   Array selected = [];
   foreach (List row, templates) {
-    List member = r.select(row);
+    List member = _select(r, row);
     if (member) selected.push(member);
   }
   foreach (Var (name, value), r.defaults) r.bindings.setdefault(name, value);
   Array completed = [];
   foreach (List row, selected) {
-    List member = r.complete(row);
+    List member = _complete(r, row);
     if (member) completed.push(member);
   }
   selected.free();
   return completed.list_free();
 }
 
-static List MemberResolution.select(MemberResolution &r, List row) {
+static List _select(MemberResolution &r, List row) {
   match (row)
     case %(?(String member) ?(Type template) ?): {
       String selected = NULL;
-      Type actual = r.find_member(member, selected);
+      Type actual = _find_member(r, member, selected);
       Symbol status = <no-member>;
       if (actual) {
         Map candidate = r.bindings.copy();
@@ -1546,48 +1546,48 @@ static List MemberResolution.select(MemberResolution &r, List row) {
   return NULL;
 }
 
-static Type MemberResolution.find_member(
+static Type _find_member(
   MemberResolution &r, String member, String &selected) {
   String binding = _member_spelling(r.participant, member);
-  Type actual = r.c._declared(binding);
-  if (actual && r.c._default_completes(binding, actual, r.forward))
+  Type actual = _declared(r.c, binding);
+  if (actual && _default_completes(r.c, binding, actual, r.forward))
     actual = NULL;
   if (!actual) {
     String imported = r.c.imported_spelling(binding);
     if (imported) {
-      actual = r.c._declared(imported);
+      actual = _declared(r.c, imported);
       if (actual) binding = imported;
     }
   }
   if (actual) selected = binding;
   foreach (Type owner,
            (r.base !== %("Var") || r.representation) && !actual
-             ? r.c._ancestry(r.participant).cdr() : NULL) {
+             ? _ancestry(r.c, r.participant).cdr() : NULL) {
     if (owner == r.base) break;
     if (r.base === %("Var") && owner != r.representation) continue;
-    actual = r.c._method_signature(owner, r.participant, member, selected);
+    actual = _method_signature(r.c, owner, r.participant, member, selected);
     if (actual || r.base === %("Var")) break;
   }
   return actual;
 }
 
-static Type Compiler._method_signature(
+static Type _method_signature(
   Compiler c, Type owner, Type participant, String member,
   String &selected) {
   if (!owner.is_bare_typedef_name()) return NULL;
   String source = _member_spelling(owner, member);
-  Type signature = c._declared(source);
+  Type signature = _declared(c, source);
   if (!signature) {
     String imported = c.imported_spelling(source);
     if (imported) {
-      signature = c._declared(imported);
+      signature = _declared(c, imported);
       if (signature) source = imported;
     }
   }
   if (!signature) return NULL;
 
   List binding = c.sym.reference(%($source), NULL);
-  signature = c._relative_signature(binding, signature, participant);
+  signature = _relative_signature(c, binding, signature, participant);
   List parameters = NULL, Type result = NULL;
   if (_function_parts(signature, parameters, result) &&
       parameters && parameters.car() == owner) {
@@ -1598,7 +1598,7 @@ static Type Compiler._method_signature(
   return signature;
 }
 
-static Type Compiler._relative_signature(
+static Type _relative_signature(
   Compiler c, List binding, Type signature, Type receiver) {
   Var stored;
   if (!c.semantic_binding_facts().try_get(%(self $binding), stored))
@@ -1619,13 +1619,13 @@ static List _inherited_parameters(
 /* A bodyless, non-static prototype of a member whose base default the
    visible forward converter generates declares that default rather than
    implementing the member. */
-static int Compiler._default_completes(
+static int _default_completes(
   Compiler c, String name, Type declared, String forward) =>
   forward && declared.is_function() && forward in c.fn_defs &&
   !(name in c.fn_defs) &&
   !(%(function $name) in c.sym.file_statics());
 
-static List MemberResolution.complete(MemberResolution &r, List row) {
+static List _complete(MemberResolution &r, List row) {
   match (row)
     case %(?(String member) ?(Symbol status) ?(String source)
            ? ? ?(Type template)): {
@@ -1635,7 +1635,7 @@ static List MemberResolution.complete(MemberResolution &r, List row) {
         String base_name = _base_name(r.base);
         if (base_name && r.base !== %("Var")) {
           String fallback = %"${base_name}_$member";
-          Type fallback_type = r.c._declared(fallback);
+          Type fallback_type = _declared(r.c, fallback);
           Map base_bindings = r.bindings.copy();
           base_bindings[r.binder] = r.base;
           Type base_signature = _substitute_signature(
@@ -1669,33 +1669,33 @@ static typedef struct ProtocolAdapters {
   int shares_var_tag, central_initializer;
 } ProtocolAdapters;
 
-static List ProtocolAdapters.requirement(ProtocolAdapters &a, List rows) {
+static List _requirement(ProtocolAdapters &a, List rows) {
   foreach (List row, rows)
     match (row)
       case %(?(String member) ?(Symbol status) ? ?
              ?(Symbol default_kind) ?(Type template)): {
         if (status == <base-dflt> && default_kind == <ordinary>) {
           List requirement =
-            a.conversion_requirement(member, template, <fallback>);
+            _conversion_requirement(a, member, template, <fallback>);
           if (requirement) return requirement;
         }
         if (status == <implmntd>) {
-          List requirement = a.descriptor_requirement(member, template);
+          List requirement = _descriptor_requirement(a, member, template);
           if (requirement) return requirement;
         }
       }
   return NULL;
 }
 
-static List ProtocolAdapters.descriptor_requirement(
+static List _descriptor_requirement(
   ProtocolAdapters &a, String member, Type template) {
   if (a.base !== %("Var") ||
       !a.c.sym.lookup_field(%(struct "VarMethods"), %($member)))
     return NULL;
-  return a.conversion_requirement(member, template, <thunk>);
+  return _conversion_requirement(a, member, template, <thunk>);
 }
 
-static List ProtocolAdapters.conversion_requirement(
+static List _conversion_requirement(
   ProtocolAdapters &a, String member, Type template, Symbol adapter) {
   int fallback = adapter == <fallback>;
   List parameters = template.car().list().cadr();
@@ -1726,14 +1726,14 @@ static int _is_exact_variable(Var value, String variable) {
          type.car() == variable;
 }
 
-static void ProtocolAdapters.report_requirement(
+static void _report_requirement(
   ProtocolAdapters &a, List failure) {
   Type base = a.base, participant = a.participant;
   List dedupe =
     %("protocol-adapter-requirement" $base $participant ${failure.car()});
   if (dedupe in a.c.protocol_helpers) return;
   a.c.protocol_helpers[dedupe] = 1;
-  List row = a.c._visible_adoption(base, participant);
+  List row = _visible_adoption(a.c, base, participant);
   a.c.diagnostics.report(
     <protocol>, _requirement_detail(base, participant, failure),
     _adoption_location(row), NULL);
@@ -1840,44 +1840,44 @@ static int _exact_conversion(Type signature, Type parameter, Type result) {
 */
 List Compiler.protocol_members_for(Compiler c, Type participant, Type base) {
   participant = participant.canonicalize();
-  if (c.import_protocols) c._install_imports();
+  if (c.import_protocols) _install_imports(c);
   Type owner = participant;
-  if (!c._is_adopted(base, owner)) {
-    List ancestry = c._ancestry(participant).cdr();
+  if (!_is_adopted(c, base, owner)) {
+    List ancestry = _ancestry(c, participant).cdr();
     for (; ancestry; ancestry = ancestry.cdr()) {
       owner = ancestry.car();
-      if (c._is_adopted(base, owner)) break;
+      if (_is_adopted(c, base, owner)) break;
     }
     if (!ancestry) return NULL;
   }
   List key = %($base $owner);
   Var stored = c.conforms[key];
   /* One adoption is resolved where it is asked for when the parse has not
-     resolved it. `AdoptionDraft.publish` already skips resolving during
+     resolved it. `_publish` already skips resolving during
      a shallow pass, and an import installed just above resolves nothing.
      `adoptions` holds only the adoptions this compiler may use, and the full
      parse resolves all of them before it starts, except those an included
      interface recorded, which are installed here on first use. */
   if (stored is void) {
-    if (!c._reuse_conformance(base, owner))
-      c._resolve_adoption(base, owner, NULL);
+    if (!_reuse_conformance(c, base, owner))
+      _resolve_adoption(c, base, owner, NULL);
     stored = c.conforms[key];
   }
   if (stored is not <list>) return NULL;
   List conformance = stored;
-  c._install_native_bindings(owner, conformance.last().list().cdr());
+  _install_native_bindings(c, owner, conformance.last().list().cdr());
   return conformance;
 }
 
 /* Collection skips bodies and leaves protocol registries empty. A canonical
    template can need protocols before full parsing, so install the visible
    symbols on first use and resolve only the conformance requested. */
-static void Compiler._install_imports(Compiler c) {
+static void _install_imports(Compiler c) {
   c.import_protocols = 0;
   c.rebuild_protocols(c.sym.unit_symbols());
 }
 
-static List Compiler._ancestry(Compiler c, Type participant) {
+static List _ancestry(Compiler c, Type participant) {
   List result = NULL;
   $memo(c.proto_cache, %("protocol-ancestry" $participant), result) {
     Array ancestry = [], Type current = participant;
@@ -1891,8 +1891,8 @@ static List Compiler._ancestry(Compiler c, Type participant) {
   return result;
 }
 
-static List Compiler._ordered_occurrences(Compiler c) {
-  if (c.import_protocols) c._install_imports();
+static List _ordered_occurrences(Compiler c) {
+  if (c.import_protocols) _install_imports(c);
   List result = NULL;
   $memo(c.proto_cache, <proto-ordr>, result) {
     Array ordered = [];
@@ -1912,7 +1912,7 @@ static macro Decorator $adopted_rows(
   Expr $participant, Name $base, Name $rows) {
   foreach (List entry, $protocols) {
     $base = entry.car();
-    if (!$compiler._is_adopted($base, $participant)) continue;
+    if (!_is_adopted($compiler, $base, $participant)) continue;
     List conformance = $compiler.protocol_members_for($participant, $base);
     if (!conformance) continue;
     $rows = conformance.last().list().cdr();
@@ -1925,9 +1925,9 @@ static macro Decorator $adopted_rows(
 List Compiler.protocol_member_names(Compiler c, Type participant) {
   Map seen = {};
   Array names = [];
-  List protocols = c._ordered_occurrences(), rows = NULL;
+  List protocols = _ordered_occurrences(c), rows = NULL;
   Type base = NULL;
-  foreach (Type current, c._ancestry(participant.canonicalize()))
+  foreach (Type current, _ancestry(c, participant.canonicalize()))
     $adopted_rows(c, protocols, current, base, rows) {
       foreach (List row, rows) {
         String name = row.car();
@@ -1950,9 +1950,9 @@ int Compiler.protocol_rejects_direct_member(
   Type owner = participant.canonicalize();
   int rejects = 0;
   $memo(c.proto_cache, %("protocol-rejects" $owner $member), rejects) {
-    List protocols = c._ordered_occurrences();
-    foreach (Type ancestor, c._ancestry(owner)) {
-      List row = c._member_row(protocols, ancestor, member);
+    List protocols = _ordered_occurrences(c);
+    foreach (Type ancestor, _ancestry(c, owner)) {
+      List row = _member_row(c, protocols, ancestor, member);
       if (row) {
         Symbol status = row.cadr();
         rejects = status == <native> || status == <base-dflt> ||
@@ -1964,7 +1964,7 @@ int Compiler.protocol_rejects_direct_member(
   return rejects;
 }
 
-static List Compiler._member_row(
+static List _member_row(
   Compiler c, List protocols, Type participant, String member) {
   Type base = NULL;
   List rows = NULL;
@@ -1986,13 +1986,13 @@ void Compiler.dump_conformance(Compiler c, Map globs) {
       case %((?(String name)) (typedef *)):
         names.push(name);
   names.sort();
-  List protocols = c._ordered_occurrences(), rows = NULL;
+  List protocols = _ordered_occurrences(c), rows = NULL;
   Type base = NULL;
   foreach (Var candidate, names) {
     Type participant = %(${candidate.str()});
     $adopted_rows(c, protocols, participant, base, rows) {
       _dump_row(
-        "conformance", c._owns_adoption(base, participant), base,
+        "conformance", _owns_adoption(c, base, participant), base,
         participant, rows);
     }
   }
@@ -2049,32 +2049,32 @@ List Compiler.resolve_protocol_member(
   Compiler c, Type participant, String member_name) {
   // A const or volatile receiver adopts exactly what its unqualified type
   // adopts, so conformance is keyed on the unqualified participant.
-  List resolved = c._resolve_member(participant.canonicalize(), member_name);
+  List resolved = _resolve_member(c, participant.canonicalize(), member_name);
   if (!resolved) return NULL;
   String spelling = binding_identity_spelling(resolved.car());
   return spelling == c.fn_name ? NULL : resolved;
 }
 
-static List Compiler._resolve_member(
+static List _resolve_member(
   Compiler c, Type participant, String member_name) {
   List key = %("protocol-member" $participant $member_name), selected = NULL;
   $memo(c.proto_cache, key, selected) {
-    List protocols = c._ordered_occurrences();
-    List ancestry = c._ancestry(participant);
+    List protocols = _ordered_occurrences(c);
+    List ancestry = _ancestry(c, participant);
     /* A generated member is selected before a direct base alias. */
-    selected = c._generated_member(ancestry, member_name);
+    selected = _generated_member(c, ancestry, member_name);
     if (!selected)
-      selected = c._base_alias(protocols, participant, ancestry, member_name);
+      selected = _base_alias(c, protocols, participant, ancestry, member_name);
     if (!selected)
-      selected = c._adopted_member(protocols, ancestry, member_name);
+      selected = _adopted_member(c, protocols, ancestry, member_name);
   }
   return selected;
 }
 
-static List Compiler._generated_member(
+static List _generated_member(
   Compiler c, List ancestry, String member) {
   foreach (Type current, ancestry) {
-    List decision = c._generated_owner(current, member);
+    List decision = _generated_owner(c, current, member);
     match (decision)
       case %(owner ? ? ?signature ?): {
         String source = _member_spelling(current, member);
@@ -2085,7 +2085,7 @@ static List Compiler._generated_member(
   return NULL;
 }
 
-static List Compiler._base_alias(
+static List _base_alias(
   Compiler c, List protocols, Type participant, List ancestry,
   String member) {
   foreach (List entry, protocols) {
@@ -2117,10 +2117,10 @@ static int _declares_member(List rows, String member) {
   return 0;
 }
 
-static List Compiler._adopted_member(
+static List _adopted_member(
   Compiler c, List protocols, List ancestry, String member) {
   foreach (Type current, ancestry) {
-    List row = c._member_row(protocols, current, member);
+    List row = _member_row(c, protocols, current, member);
     if (!row) continue;
     match (row)
       case %(? ?(Symbol status) ?(String source) ?(Type signature) ? ?): {
@@ -2153,35 +2153,35 @@ static typedef struct GeneratedOwners {
 } GeneratedOwners;
 
 /* Select the sole generated owner across all adopted protocols. */
-static List Compiler._generated_owner(
+static List _generated_owner(
   Compiler c, Type participant, String member) {
   List key = %("protocol-generated-owner" $participant $member), owner = NULL;
   $memo(c.proto_cache, key, owner) {
-    owner = c._generated_decision(participant, member);
+    owner = _generated_decision(c, participant, member);
   }
   return owner;
 }
 
-static List Compiler._generated_decision(
+static List _generated_decision(
   Compiler c, Type participant, String member) {
   GeneratedOwners owners = {
     .participant = participant, .member = member, .candidates = []};
   Type base = NULL;
   List rows = NULL;
-  $adopted_rows(c, c._ordered_occurrences(), participant, base, rows) {
+  $adopted_rows(c, _ordered_occurrences(c), participant, base, rows) {
     foreach (List row, rows)
-      if (owners.consider(c, base, row)) return owners.decision();
+      if (_consider(owners, c, base, row)) return _decision(owners);
   }
-  return owners.decision();
+  return _decision(owners);
 }
 
-static int GeneratedOwners.consider(
+static int _consider(
   GeneratedOwners &g, Compiler c, Type base, List row) {
   match (row)
     case %(?(String member) base-dflt ?(String source)
            ?(Type expected) ordinary ?): {
       if (member != g.member) return 0;
-      Symbol storage = c._visibility(base, g.participant);
+      Symbol storage = _visibility(c, base, g.participant);
       List owner = %(owner $base $source $expected $storage);
       g.candidates.push(owner);
       if (storage == <mixed>) {
@@ -2200,7 +2200,7 @@ static int GeneratedOwners.consider(
   return 0;
 }
 
-static List GeneratedOwners.decision(GeneratedOwners &owners) {
+static List _decision(GeneratedOwners &owners) {
   List rows = owners.candidates.list_free();
   if (owners.result) return owners.result;
   match (rows) {
@@ -2211,7 +2211,7 @@ static List GeneratedOwners.decision(GeneratedOwners &owners) {
   return NULL;
 }
 
-static void Compiler._report_collision(
+static void _report_collision(
   Compiler c, Type participant, String member, Symbol kind, List first,
   List second) {
   Type first_base = first.cadr(), second_base = second.cadr();
@@ -2238,7 +2238,7 @@ static void Compiler._report_collision(
       owners, participant_repr, member);
 
   List notes = _collision_notes(kind, first, second);
-  List row = c._visible_adoption(first_base, participant);
+  List row = _visible_adoption(c, first_base, participant);
   c.diagnostics.report(<protocol>, message, _adoption_location(row), notes);
 }
 
@@ -2268,7 +2268,7 @@ static List _collision_notes(Symbol kind, List first, List second) {
 List Compiler.wrapper_function(
   Compiler c, Type result, List binding, List params, List body) {
   List lowered = %(code-value "lowered" (seq @body) ());
-  return c._generated_function(
+  return _generated_function(c,
     binding, $!Unit{ $result $binding(@params) { $lowered } });
 }
 
@@ -2289,7 +2289,7 @@ List Compiler.forward_parameters(Compiler c, List types) {
 /* Binds `syntax`, a template that defines the function `binding`. The
    template's own definition is not authored API of this unit; a documented
    prototype the function completes keeps its prose. */
-static List Compiler._generated_function(
+static List _generated_function(
   Compiler c, List binding, List syntax) {
   List key = %(api-definition $binding);
   Var authored;
@@ -2341,7 +2341,7 @@ String Compiler.protocol_update_helper(
           return lhs[0];
         }
       };
-  c._publish_update(helper, update);
+  _publish_update(c, helper, update);
   c.protocol_helpers[key] = name;
   return name;
 }
@@ -2356,8 +2356,8 @@ static Type _update_rhs(Type participant, Type signature) {
   return NULL;
 }
 
-static void Compiler._publish_update(Compiler c, List helper, List syntax) {
-  List function = c._generated_function(helper, syntax);
+static void _publish_update(Compiler c, List helper, List syntax) {
+  List function = _generated_function(c, helper, syntax);
   match (function)
     case %(function ?result ?declarator (block *body)):
       function = %(function $result $declarator
@@ -2406,8 +2406,8 @@ List Compiler.discard_helper(
     .c = c, .binding = binding, .key = key, .signature = signature,
     .result = result, .stem = stem, .which = which, .fresh = fresh,
     .declarations = declarations, .arguments = arguments, .discards = []};
-  call.collect();
-  return call.discards.len() ? call.emit() : NULL;
+  _collect(call);
+  return call.discards.len() ? _emit(call) : NULL;
 }
 
 /** The `discard_helper` for `participant`'s protocol `member`. */
@@ -2420,7 +2420,7 @@ List Compiler.protocol_discard_helper(
   return c.discard_helper(binding, signature, stem, which);
 }
 
-static void DiscardCall.collect(DiscardCall &d) {
+static void _collect(DiscardCall &d) {
   int index = 0;
   foreach (List argument, d.arguments) {
     if (d.which & (1 << index++)) {
@@ -2430,7 +2430,7 @@ static void DiscardCall.collect(DiscardCall &d) {
   }
 }
 
-static List DiscardCall.emit(DiscardCall &d) {
+static List _emit(DiscardCall &d) {
   String name = %"_x2c_discard_${d.stem}_${d.which}";
   List helper_binding = d.c.sym.introduce(name);
   List value = d.c.sym.introduce("value");
@@ -2470,14 +2470,14 @@ static List DiscardCall.emit(DiscardCall &d) {
     recorded in its interface. Returns `ast` with native insertions applied.
 */
 List Compiler.generate_protocol_adapters(Compiler c, List ast) {
-  c._record_conformances();
+  _record_conformances(c);
   /* Emit adapters only for finalized, declared conformances. A recorded
      one is installed only when this unit emits its adapters. */
-  int central_initializer = c._defines_function("x2c_initialize_protocols");
+  int central_initializer = _defines_function(c, "x2c_initialize_protocols");
   Array ordered = [];
   foreach (Var (key, value), c.conforms)
     if (value is <list>) ordered.push(%($key $value));
-  foreach (List entry, c._unused_recorded()) ordered.push(entry);
+  foreach (List entry, _unused_recorded(c)) ordered.push(entry);
   ordered.sort();
   foreach (List ordered_row, ordered)
     match (ordered_row) {
@@ -2485,19 +2485,19 @@ List Compiler.generate_protocol_adapters(Compiler c, List ast) {
                 ?(String forward) ?(String reverse) ?(Map variables)
                 ?(Map bindings) (members *rows))): {
         if (_native_rows(rows)) {
-          ast = c._native_aliases(ast, base, participant, rows);
+          ast = _native_aliases(c, ast, base, participant, rows);
           continue;
         }
-        if (!c._defines_function(forward)) continue;
-        if (c._numeric_participant(participant)) continue;
-        c._present_conformance(ordered_row.cadr(), central_initializer);
+        if (!_defines_function(c, forward)) continue;
+        if (_numeric_participant(c, participant)) continue;
+        _present_conformance(c, ordered_row.cadr(), central_initializer);
       }
       case %((?(Type base) ?(Type participant))
              (conformance ? ? ?(String forward) *)): {
-        if (!c._defines_function(forward)) continue;
-        if (c._numeric_participant(participant)) continue;
-        c._reuse_conformance(base, participant);
-        c._present_conformance(
+        if (!_defines_function(c, forward)) continue;
+        if (_numeric_participant(c, participant)) continue;
+        _reuse_conformance(c, base, participant);
+        _present_conformance(c,
           c.conforms[%($base $participant)], central_initializer);
       }
     }
@@ -2509,7 +2509,7 @@ List Compiler.generate_protocol_adapters(Compiler c, List ast) {
     Protocols must already be resolved in the active symbol table.
 */
 void Compiler.install_generated_protocol_symbols(Compiler c) {
-  c._reuse_defaults();
+  _reuse_defaults(c);
   // An owner lookup can install a recorded conformance in the registry.
   Array conformances = [];
   foreach (Var value, c.conforms) conformances.push(value);
@@ -2518,29 +2518,29 @@ void Compiler.install_generated_protocol_symbols(Compiler c) {
       case %(protocol-conformance ?(Type base) ?(Type participant)
              ?(String forward) ? ? ? (members *rows)): {
         if (_native_rows(rows)) {
-          if (c._visibility(base, participant) != <external>) continue;
+          if (_visibility(c, base, participant) != <external>) continue;
           foreach (List row, rows)
             match (row)
               case %(?(String member) ? ? ? ? ?(Type signature)):
-                c._install_generated(participant, member, signature);
+                _install_generated(c, participant, member, signature);
           continue;
         }
         if (!(forward in c.fn_defs)) continue;
-        if (c._numeric_participant(participant)) continue;
+        if (_numeric_participant(c, participant)) continue;
         foreach (List row, rows)
           match (row)
             case %(?(String member) base-dflt ? ? ordinary ?): {
-              List decision = c._generated_owner(participant, member);
+              List decision = _generated_owner(c, participant, member);
               match (decision)
                 case %(owner ? ? ?signature external):
-                  c._install_generated(participant, member, signature);
+                  _install_generated(c, participant, member, signature);
             }
       }
   conformances.free();
 }
 
 /* Publish resolved external signatures before their adapters are generated. */
-static void Compiler._install_generated(
+static void _install_generated(
   Compiler c, Type participant, String member, Type signature) {
   String generated = _member_spelling(participant, member);
   c.sym.define_global(%("generated-protocol" $generated), %(generated));
@@ -2561,10 +2561,10 @@ int Compiler.native_protocol_alias(Compiler c, String name) {
 }
 
 // Numeric participants other than Symbol keep their native operators.
-static int Compiler._numeric_participant(Compiler c, Type participant) =>
+static int _numeric_participant(Compiler c, Type participant) =>
   c.sym.resolve_numeric_type(participant) && participant !== %("Symbol");
 
-static int Compiler._defines_function(Compiler c, String name) {
+static int _defines_function(Compiler c, String name) {
   List binding = c.sym.reference(%($name), NULL);
   Var stored;
   if (!binding ||
@@ -2578,15 +2578,15 @@ static int Compiler._defines_function(Compiler c, String name) {
    `src/component-protocols.x` documents and ships. The owner of each
    member, its collisions and missing conversions, and the generated
    names are settled here; the rule writes the code. */
-static void Compiler._present_conformance(
+static void _present_conformance(
   Compiler c, List conformance, int central_initializer) {
   match (conformance)
     case %(protocol-conformance ?(Type base) ?(Type participant)
            ?(String forward) ?(String reverse) ?(Map variables)
            ?(Map bindings) (members *rows)):
-      match (c._record(base))
+      match (_record(c, base))
         case %(? ? ?(String binder) ? ?): {
-          List adoption = c._visible_adoption(base, participant);
+          List adoption = _visible_adoption(c, base, participant);
           ProtocolAdapters adapters = {
             .c = c, .base = base, .participant = participant,
             .forward = forward, .reverse = reverse, .binder = binder,
@@ -2596,18 +2596,18 @@ static void Compiler._present_conformance(
             .shares_var_tag = base === %("Var") &&
               _adoption_representation(adoption)};
           Array presented = [];
-          foreach (List row, rows) presented.push(adapters.present(row));
+          foreach (List row, rows) presented.push(_present(adapters, row));
           List members = presented.list_free();
           List form = %(
             conform $base $participant $forward $reverse $binder
-              ${adapters.descriptor()} $members);
-          c._generated_support(members, form);
+              ${_descriptor(adapters)} $members);
+          _generated_support(c, members, form);
         }
 }
 
 /* The rule's functions are generated: one that completes a documented
    prototype keeps its prose, and none publishes prose of its own. */
-static void Compiler._generated_support(Compiler c, List members, List form) {
+static void _generated_support(Compiler c, List members, List form) {
   Map facts = c.semantic_binding_facts(), authored = {};
   Array keys = [];
   foreach (List row, members) match (row) case %(? ? ? ? ? *parts):
@@ -2628,29 +2628,29 @@ static void Compiler._generated_support(Compiler c, List members, List form) {
    written for a base default; a descriptor of its own also declares a
    member another conformance generates, and fills the slot of each
    implemented or declared member that `VarMethods` has. */
-static List ProtocolAdapters.present(ProtocolAdapters &a, List row) {
+static List _present(ProtocolAdapters &a, List row) {
   match (row)
     case %(?(String member) ?(Symbol status) ?(String source)
            ?(Type expected) ? ?(Type template)): {
       List parts = NULL;
-      if (status == <base-dflt>) parts = a.default_part(member, expected);
-      else if (a.has_descriptor()) {
-        if (status == <no-member>) parts = a.inherited_part(member, template);
+      if (status == <base-dflt>) parts = _default_part(a, member, expected);
+      else if (_has_descriptor(a)) {
+        if (status == <no-member>) parts = _inherited_part(a, member, template);
         if ((status == <implmntd> || parts) &&
             a.c.sym.lookup_field(%(struct "VarMethods"), %($member)))
-          parts = parts.append(%(${a.thunk(member, template)}));
+          parts = parts.append(%(${_thunk(a, member, template)}));
       }
       return %($member $status $source $expected $template @parts);
     }
   return NULL;
 }
 
-static int ProtocolAdapters.has_descriptor(ProtocolAdapters &a) =>
+static int _has_descriptor(ProtocolAdapters &a) =>
   a.base === %("Var") && !a.shares_var_tag;
 
-static List ProtocolAdapters.default_part(
+static List _default_part(
   ProtocolAdapters &a, String member, Type expected) {
-  List decision = a.c._generated_owner(a.participant, member);
+  List decision = _generated_owner(a.c, a.participant, member);
   match (decision) {
     case %(owner ? ? ? ?storage): {
       String spelling = _member_spelling(a.participant, member);
@@ -2661,18 +2661,18 @@ static List ProtocolAdapters.default_part(
       return %((default $name $storage));
     }
     case %((!set ?kind (!or linkage conflict)) ?first ?second *):
-      a.c._report_collision(a.participant, member, kind, first, second);
+      _report_collision(a.c, a.participant, member, kind, first, second);
   }
   return NULL;
 }
 
-static List ProtocolAdapters.inherited_part(
+static List _inherited_part(
   ProtocolAdapters &a, String member, Type template) {
-  List decision = a.c._generated_owner(a.participant, member);
+  List decision = _generated_owner(a.c, a.participant, member);
   match (decision) {
     case %(owner ? ? ?owner_expected ?): {
-      List requirement = a.descriptor_requirement(member, template);
-      if (requirement) a.report_requirement(requirement);
+      List requirement = _descriptor_requirement(a, member, template);
+      if (requirement) _report_requirement(a, requirement);
       else {
         String spelling = _member_spelling(a.participant, member);
         List name = a.c.sym.reference(%($spelling), NULL);
@@ -2680,14 +2680,14 @@ static List ProtocolAdapters.inherited_part(
       }
     }
     case %((!set ?kind (!or linkage conflict)) ?first ?second *):
-      a.c._report_collision(a.participant, member, kind, first, second);
+      _report_collision(a.c, a.participant, member, kind, first, second);
   }
   return NULL;
 }
 
 /* A descriptor thunk's name and its signature with every type variable
    `Var`. */
-static List ProtocolAdapters.thunk(
+static List _thunk(
   ProtocolAdapters &a, String member, Type template) {
   Map erased = a.bindings.copy();
   foreach (Var variable, a.variables.keys()) erased[variable] = %("Var");
@@ -2697,8 +2697,8 @@ static List ProtocolAdapters.thunk(
   return %(thunk ${a.c.sym.introduce(name)} $target);
 }
 
-static List ProtocolAdapters.descriptor(ProtocolAdapters &a) {
-  if (!a.has_descriptor()) return NULL;
+static List _descriptor(ProtocolAdapters &a) {
+  if (!_has_descriptor(a)) return NULL;
   Symbol tag = _tag_value(_adoption_tag(a.adoption));
   String name = a.participant.car().str();
   if (!tag) name = name.lower();
@@ -2709,7 +2709,7 @@ static List ProtocolAdapters.descriptor(ProtocolAdapters &a) {
            @{tag ? %($tag) : NULL});
 }
 
-static List Compiler._signature_declaration(
+static List _signature_declaration(
   Compiler c, String name, Type signature, int make_static) {
   List parameters = signature.car().list().cadr();
   Type result = signature.cdr();
@@ -2732,19 +2732,19 @@ void Compiler.record_source_typedef(
   c.protocol_helpers[%("source-typedef" $name)] = %($declaration $private);
 }
 
-static List Compiler._native_aliases(
+static List _native_aliases(
   Compiler c, List ast, Type base, Type participant, List rows) {
   Var stored;
   if (!c.protocol_helpers.try_get(
     %("source-typedef" ${participant.car()}), stored)) return ast;
   (List source, int private) = stored;
-  int make_static = c._visibility(base, participant) == <static>;
+  int make_static = _visibility(c, base, participant) == <static>;
   Array aliases = [];
   foreach (List row, rows)
     match (row)
       case %(?(String member) ? ?(String binding) ? ?
              ?(Type signature)): {
-        List alias = c._native_alias(
+        List alias = _native_alias(c,
           participant, member, binding, signature, make_static);
         aliases.push(alias);
       }
@@ -2752,11 +2752,11 @@ static List Compiler._native_aliases(
     ast, source, private, aliases.list_free(), make_static);
 }
 
-static List Compiler._native_alias(
+static List _native_alias(
   Compiler c, Type participant, String member, String source,
   Type signature, int make_static) {
   String target = _member_spelling(participant, member);
-  List declaration = c._signature_declaration(target, signature, make_static);
+  List declaration = _signature_declaration(c, target, signature, make_static);
   if (!make_static) c.record_generated_symbol(target, signature);
   List native_binding = c.sym.reference(%($source), NULL);
   return c.finish_foreign_alias(
@@ -2816,9 +2816,9 @@ void Compiler.rebuild_protocols(Compiler c, Map symbols) {
       case %(protocol
              (!set ?record ("protocol-record" ?base *))
              ?storage ?location): {
-        c._install_occurrence(base, record, storage, location);
+        _install_occurrence(c, base, record, storage, location);
       }
-      case %(adopt *): c._install_stored(value);
+      case %(adopt *): _install_stored(c, value);
       case %(conformance ?base ?participant *):
         c.protocol_helpers[%("recorded-conformance" $base $participant)] =
           value;
@@ -2826,13 +2826,13 @@ void Compiler.rebuild_protocols(Compiler c, Map symbols) {
   }
 }
 
-static void Compiler._install_stored(Compiler c, List value) {
+static void _install_stored(Compiler c, List value) {
   match (value) {
     case %(adopt ?base ?participant ?storage ?location): {
       AdoptionDraft draft = {
         .c = c, .base = base, .participant = participant,
         .storage = storage, .location = location};
-      draft.install();
+      _install(draft);
     }
     case %(adopt ?base ?participant ?storage
              (tag (!set ?tag_expression (expr ("Symbol")
@@ -2843,14 +2843,14 @@ static void Compiler._install_stored(Compiler c, List value) {
         .c = c, .base = base, .participant = participant,
         .storage = storage, .tag = tag,
         .tag_expression = tag_expression, .location = location};
-      draft.install();
+      _install(draft);
     }
     case %(adopt ?base ?participant ?storage ?representation ?location): {
       AdoptionDraft draft = {
         .c = c, .base = base, .participant = participant,
         .storage = storage, .representation = representation,
         .location = location};
-      draft.install();
+      _install(draft);
     }
   }
 }

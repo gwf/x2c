@@ -84,7 +84,7 @@ static Toolchain _toolchain(String cc, String ar) {
   Toolchain t = Scope.calloc(1, sizeof(struct Toolchain));
   t.cc = _tool(cc, "CC", "cc");
   t.ar = _tool(ar, "AR", "ar");
-  t._layout();
+  _layout(t);
   return t;
 }
 
@@ -114,7 +114,7 @@ static String _recorded_tool(String name) {
    read from the executable's own prefix. No compiler links an unrelated
    runtime.
 */
-static void Toolchain._layout(Toolchain t) {
+static void _layout(Toolchain t) {
   String home = home_dir(), stage = stage_dir();
   String executable = x2c_get_executable(), prefix = home;
   if (!prefix)
@@ -154,7 +154,7 @@ void ToolAction.as_program(ToolAction action) {
   action.report = 0;
 }
 
-static ToolAction Toolchain._action(
+static ToolAction _action(
   Toolchain t, Symbol phase, List arguments) =>
   tool_action_new(phase, arguments, t.verbose, t.dry_run);
 
@@ -167,9 +167,9 @@ static ToolAction Toolchain._action(
 */
 ToolAction Toolchain.compile_action(
   Toolchain t, String source, String object, String depfile, List gen_dirs) =>
-  t._action(
+  _action(t,
     <compile>,
-    %(@{t._compile_arguments(gen_dirs)} "-MMD" "-MP" "-MF" $depfile
+    %(@{_compile_arguments(t, gen_dirs)} "-MMD" "-MP" "-MF" $depfile
       "-MT" $object "-c" $source "-o" $object));
 
 /** Builds the preprocessor action whose output identifies an object.
@@ -180,11 +180,11 @@ ToolAction Toolchain.compile_action(
 */
 ToolAction Toolchain.preprocess_action(
   Toolchain t, String source, String output, List gen_dirs) =>
-  t._action(
+  _action(t,
     <preprocess>,
-    %(@{t._compile_arguments(gen_dirs)} "-E" $source "-o" $output));
+    %(@{_compile_arguments(t, gen_dirs)} "-E" $source "-o" $output));
 
-static List Toolchain._compile_arguments(Toolchain t, List gen_dirs) => %(
+static List _compile_arguments(Toolchain t, List gen_dirs) => %(
   ${t.cc} "-fsigned-char"
   @{gen_dirs.map(%!(directory) => %("-iquote" $directory)).flatten()}
   "-iquote" ${t.include_dir} @{t.cc_args});
@@ -197,7 +197,7 @@ static List Toolchain._compile_arguments(Toolchain t, List gen_dirs) => %(
 */
 ToolAction Toolchain.archive_action(
   Toolchain t, String output, List objects) =>
-  t._action(<archive>, %(${t.ar} "rcs" $output @objects));
+  _action(t, <archive>, %(${t.ar} "rcs" $output @objects));
 
 /** Builds but does not start a host-compiler link action.
     Input order is preserved; configured linker arguments, the matching x2c
@@ -206,7 +206,7 @@ ToolAction Toolchain.archive_action(
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the action.
 */
 ToolAction Toolchain.link_action(Toolchain t, String output, List inputs) =>
-  t._action(
+  _action(t,
     <link>,
     %(${t.cc} @inputs @{t.ld_args} ${t.runtime_lib} "-lm" "-o" $output));
 
@@ -220,7 +220,7 @@ ToolAction Toolchain.link_action(Toolchain t, String output, List inputs) =>
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the action.
 */
 ToolAction Toolchain.module_action(Toolchain t, String output, List inputs) =>
-  t._action(
+  _action(t,
     <link>, %(${t.cc} @inputs @{t.ld_args} @{_module_shape()} "-o" $output));
 
 static List _module_shape(void) {
@@ -354,7 +354,7 @@ int Toolchain.preprocess(
     t.keep_system_includes = _keeps_system_includes(t.cc);
   Path scratch = Path.temp_dir();
   String depfile = %"$scratch/cpp.d";
-  List arguments = t._cpp_arguments(include_dirs, imacros, depfile, fname);
+  List arguments = _cpp_arguments(t, include_dirs, imacros, depfile, fname);
   if (t.verbose) _print_action(<preprocess>, arguments);
   /* The empty standard input is the main file, so the unit is an included
      file whose own `#pragma once` stops an include cycle from splicing it
@@ -377,7 +377,7 @@ static int _keeps_system_includes(String cc) {
   return tool_capture(probe, output, errors) == 0 ? 1 : -1;
 }
 
-static List Toolchain._cpp_arguments(
+static List _cpp_arguments(
   Toolchain t, List include_dirs, String macros, String depfile,
   String source) => %(
     ${t.cc} "-E" "-x" "c"

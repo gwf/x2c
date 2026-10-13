@@ -228,15 +228,15 @@ static typedef struct MatchSlots {
 */
 MatchCaptureLayout MatchCaptureLayout.analyze(Var pattern) {
   MatchLayoutBuilder builder = {0};
-  builder._collect(pattern);
-  const char *malformed = builder._malformed();
+  _collect(builder, pattern);
+  const char *malformed = _malformed(builder);
   Var normalized = pattern;
   if (malformed) builder.count = 0;
   else if (pattern is <list>) normalized = _normalize_pattern(pattern);
-  MatchCaptureLayout layout = builder._layout(normalized, malformed);
+  MatchCaptureLayout layout = _layout(builder, normalized, malformed);
   // a binder-free pattern has nothing to report as definite or possible
   if (!malformed && builder.count) {
-    MatchSlots slots = layout._slots(normalized);
+    MatchSlots slots = _slots(layout, normalized);
     layout.definite = slots.definite;
     layout.possible = slots.possible;
   }
@@ -248,9 +248,9 @@ MatchCaptureLayout MatchCaptureLayout.analyze(Var pattern) {
    are control vocabulary only as the final operand of `!is`. The compiler's
    dynamic-value marker retains binders in its literal children without
    treating the marker as data. */
-static void MatchLayoutBuilder._collect(MatchLayoutBuilder &b, Var pattern) {
+static void _collect(MatchLayoutBuilder &b, Var pattern) {
   if (pattern is not <list>) {
-    b._atom(pattern);
+    _atom(b, pattern);
     return;
   }
   if (pattern.is_nil()) return;
@@ -266,21 +266,21 @@ static void MatchLayoutBuilder._collect(MatchLayoutBuilder &b, Var pattern) {
   for (List at = parts; at; at = at.cdr()) {
     Var part = at.car();
     if (predicate_form && !at.cdr() && _reserved_predicate(part)) continue;
-    b._collect(part);
+    _collect(b, part);
     if (b.malformed_binder) return;
   }
 }
 
 /* A sigil-leading `Atom` must spell a binder; a named binder takes a slot. */
-static void MatchLayoutBuilder._atom(MatchLayoutBuilder &b, Var atom) {
+static void _atom(MatchLayoutBuilder &b, Var atom) {
   int kind = _binder_kind(atom);
   if (kind < 0) b.malformed_binder = 1;
-  else if (kind && atom != <?> && atom != <*> && b._add(atom) < 0)
+  else if (kind && atom != <?> && atom != <*> && _add(b, atom) < 0)
     b.past_capacity = 1;
 }
 
 /* Returns the slot for `binder`, or -1 once the pattern is past capacity. */
-static int MatchLayoutBuilder._add(MatchLayoutBuilder &b, Atom binder) {
+static int _add(MatchLayoutBuilder &b, Atom binder) {
   for (int i = 0; i < b.count; i++)
     if (b.binders[i].u64 == binder.u64) return i;
   if (b.count >= MACHINE_BINDER_MAX) return -1;
@@ -289,7 +289,7 @@ static int MatchLayoutBuilder._add(MatchLayoutBuilder &b, Atom binder) {
 }
 
 /* The first malformation the walk noted, or NULL. */
-static const char *MatchLayoutBuilder._malformed(MatchLayoutBuilder &b) {
+static const char *_malformed(MatchLayoutBuilder &b) {
   if (b.malformed_binder) return "binder-name";
   if (b.leading_list_binder) return "leading-list-binder-in-guard";
   if (b.past_capacity) return "binder-capacity";
@@ -297,7 +297,7 @@ static const char *MatchLayoutBuilder._malformed(MatchLayoutBuilder &b) {
 }
 
 /* One allocation holds the layout and its binder table. */
-static MatchCaptureLayout MatchLayoutBuilder._layout(
+static MatchCaptureLayout _layout(
   MatchLayoutBuilder &b, Var normalized, const char *malformed) {
   size_t bytes = sizeof(struct MatchCaptureLayout) + sizeof(Atom) * b.count;
   MatchCaptureLayout layout = Scope.calloc(1, bytes);
@@ -317,28 +317,28 @@ static MatchCaptureLayout MatchLayoutBuilder._layout(
    on some match. Analysis reads the normalized pattern, where a leading
    binder survives only as the `!set` capture form. */
 
-static MatchSlots MatchCaptureLayout._slots(
+static MatchSlots _slots(
   MatchCaptureLayout m, Var pattern) {
-  if (_named_binder(pattern)) return m._binder_slot(pattern);
+  if (_named_binder(pattern)) return _binder_slot(m, pattern);
   if (pattern is not <list> || pattern.is_nil()) return (MatchSlots) {0, 0};
   List list = pattern;
   Var head = list.car();
   List args = list.cdr();
   if (head == <!quote>) return (MatchSlots) {0, 0};
   if (head == <x2c-dyn>)
-    return (MatchSlots) {0, m._sequence_slots(args).possible};
-  if (!head.is_match_op()) return m._sequence_slots(list);
-  return m._guard_slots(head, args);
+    return (MatchSlots) {0, _sequence_slots(m, args).possible};
+  if (!head.is_match_op()) return _sequence_slots(m, list);
+  return _guard_slots(m, head, args);
 }
 
 /* `(!set BINDER TEST)` binds and tests, as the matcher runs it; any other
    set is a choice. A negation binds nothing on every match. */
-static MatchSlots MatchCaptureLayout._guard_slots(
+static MatchSlots _guard_slots(
   MatchCaptureLayout m, Var op, List args) {
   if (op == <!and> || (op == <!set> && _set_capture(args)))
-    return m._sequence_slots(args);
-  if (op == <!or> || op == <!set>) return m._choice_slots(args);
-  if (op == <!not>) return (MatchSlots) {0, m._sequence_slots(args).possible};
+    return _sequence_slots(m, args);
+  if (op == <!or> || op == <!set>) return _choice_slots(m, args);
+  if (op == <!not>) return (MatchSlots) {0, _sequence_slots(m, args).possible};
   return (MatchSlots) {0, 0};
 }
 
@@ -347,21 +347,21 @@ static int _set_capture(List args) =>
 
 /* Every element of a sequence matches, so each one's definite slots are
    definite. */
-static MatchSlots MatchCaptureLayout._sequence_slots(
+static MatchSlots _sequence_slots(
   MatchCaptureLayout m, List patterns) {
   MatchSlots slots = {0, 0};
-  foreach (Var pattern, patterns) slots = _union(slots, m._slots(pattern));
+  foreach (Var pattern, patterns) slots = _union(slots, _slots(m, pattern));
   return slots;
 }
 
 /* One alternative matches, so only the slots every one binds are
    definite. */
-static MatchSlots MatchCaptureLayout._choice_slots(
+static MatchSlots _choice_slots(
   MatchCaptureLayout m, List patterns) {
   MatchSlots slots = {0, 0};
   int first = 1;
   foreach (Var pattern, patterns) {
-    MatchSlots part = m._slots(pattern);
+    MatchSlots part = _slots(m, pattern);
     slots.possible |= part.possible;
     slots.definite = first ? part.definite : slots.definite & part.definite;
     first = 0;
@@ -369,9 +369,9 @@ static MatchSlots MatchCaptureLayout._choice_slots(
   return slots;
 }
 
-static MatchSlots MatchCaptureLayout._binder_slot(
+static MatchSlots _binder_slot(
   MatchCaptureLayout m, Var binder) {
-  int index = m._find(binder);
+  int index = _find(m, binder);
   assert(index >= 0);
   unsigned long bit = 1UL << index;
   return (MatchSlots) {bit, bit};
@@ -380,7 +380,7 @@ static MatchSlots MatchCaptureLayout._binder_slot(
 static MatchSlots _union(MatchSlots a, MatchSlots b) =>
   (MatchSlots) {a.definite | b.definite, a.possible | b.possible};
 
-static int MatchCaptureLayout._find(MatchCaptureLayout layout, Atom binder) {
+static int _find(MatchCaptureLayout layout, Atom binder) {
   for (int i = 0; i < layout.binder_count; i++)
     if (layout.binders[i].u64 == binder.u64) return i;
   return -1;
@@ -401,7 +401,7 @@ void MatchCaptureLayout.free(MatchCaptureLayout layout) {
     Raises: `<alloc-fail>` while constructing the `List`.
 */
 List MatchCaptureLayout.definite_list(MatchCaptureLayout layout) =>
-  layout ? layout._binders(layout.definite) : NULL;
+  layout ? _binders(layout, layout.definite) : NULL;
 
 /** Returns possible binders in canonical positional order.
     A null layout or no possible binders returns `nil`. The canonical result
@@ -409,10 +409,10 @@ List MatchCaptureLayout.definite_list(MatchCaptureLayout layout) =>
     Raises: `<alloc-fail>` while constructing the `List`.
 */
 List MatchCaptureLayout.possible_list(MatchCaptureLayout layout) =>
-  layout ? layout._binders(layout.possible) : NULL;
+  layout ? _binders(layout, layout.possible) : NULL;
 
 /* The binders of the `included` slots, in slot order. */
-static List MatchCaptureLayout._binders(
+static List _binders(
   MatchCaptureLayout layout, unsigned long included) {
   List binders = NULL;
   for (int i = layout.binder_count - 1; i >= 0; i--)
@@ -424,7 +424,7 @@ static List MatchCaptureLayout._binders(
     A null layout returns -1. Comparison uses exact `Atom` identity.
 */
 int MatchCaptureLayout.index(MatchCaptureLayout layout, Atom binder) =>
-  layout ? layout._find(binder) : -1;
+  layout ? _find(layout, binder) : -1;
 
 /** Reports whether a committed capture slot is present.
     A null buffer or an index outside its capacity or `Match`'s binder limit
@@ -458,13 +458,13 @@ void MatchPlan.raise_ineligible(const char *reason, const char *owner) {
 
 /* Entry-point guard over an already prepared plan; `plan` stays owned by
    its caller. Malformed patterns keep their categorized no-match. */
-static int MatchPlan._prepared(MatchPlan plan, const char *owner) {
+static int _prepared(MatchPlan plan, const char *owner) {
   if (plan && plan.status == MACHINE_INELIGIBLE)
     MatchPlan.raise_ineligible(plan.reason, owner);
   return plan && plan.status == MACHINE_PREPARED;
 }
 
-static int MatchCaptureLayout._buffer_valid(
+static int _buffer_valid(
   MatchCaptureLayout layout, MatchCaptureBuffer *captures) {
   if (!layout || !captures) return 0;
   if (captures.capacity < layout.binder_count) return 0;
@@ -487,10 +487,10 @@ static macro Stmt $match.machine(Name $instance, Expr $stats) {
 int MatchPlan.execute_capture(
   MatchPlan m, Var input, MatchCaptureBuffer &?captures,
   MachineStats &?stats) {
-  if (!m._prepared("MatchPlan.execute_capture") ||
-      !m.layout._buffer_valid(captures))
+  if (!_prepared(m, "MatchPlan.execute_capture") ||
+      !_buffer_valid(m.layout, captures))
     return -1;
-  return m._capture(input, captures, stats);
+  return _capture(m, input, captures, stats);
 }
 
 /** Executes a prepared `List` match into caller-owned positional storage.
@@ -501,7 +501,7 @@ int MatchPlan.try_capture(
   MatchPlan plan, List input, MatchCaptureBuffer &?captures) =>
     plan.execute_capture(input, captures, NULL);
 
-static int MatchPlan._capture(
+static int _capture(
   MatchPlan m, Var input, MatchCaptureBuffer *captures, MachineStats *stats) {
   if (!m.admits(input, NULL)) return 0;
   $match.machine(machine, stats);
@@ -519,7 +519,7 @@ int MatchPlan.admits(MatchPlan plan, Var input, Var (*view)(Var)) {
   List list = _seen_list(input, view);
   if (!list) return 0;
   for (int i = 0; i < plan.key_count; i++)
-    if (plan._key_admits(&plan.keys[i], list, view)) return 1;
+    if (_key_admits(plan, &plan.keys[i], list, view)) return 1;
   return 0;
 }
 
@@ -529,9 +529,9 @@ static List _seen_list(Var value, Var (*view)(Var)) {
   return value is <list> ? value.list() : NULL;
 }
 
-static int MatchPlan._key_admits(
+static int _key_admits(
   MatchPlan plan, MatchKey *key, List list, Var (*view)(Var)) {
-  if (!plan._key_equal(list.car(), key.head)) return 0;
+  if (!_key_equal(plan, list.car(), key.head)) return 0;
   if (!key.index) return 1;
   for (int i = 0; i < key.index && list; i++) list = list.cdr();
   if (!list) return 0;
@@ -541,10 +541,10 @@ static int MatchPlan._key_admits(
     if (!inner) return 0;
     element = inner.car();
   }
-  return plan._key_equal(element, key.inner);
+  return _key_equal(plan, element, key.inner);
 }
 
-static int MatchPlan._key_equal(MatchPlan plan, Var value, Var key) =>
+static int _key_equal(MatchPlan plan, Var value, Var key) =>
   plan.key_bits ? value.u64 == key.u64 : value.equal(key);
 
 /* Runs one prepared execution and commits positional values only after the
@@ -596,11 +596,11 @@ static int _commit(
 */
 int MatchPlan.execute(
   MatchPlan plan, Var input, List &?out_bindings, MachineStats &?stats) {
-  if (!plan._prepared("MatchPlan.execute")) return -1;
+  if (!_prepared(plan, "MatchPlan.execute")) return -1;
   if (!out_bindings) return -1;
   if (!plan.admits(input, NULL)) return 0;
   $match.machine(machine, stats);
-  List bindings, int result = plan._run(*machine, input, bindings);
+  List bindings, int result = _run(plan, *machine, input, bindings);
   machine.release();
   if (result == 1) out_bindings = bindings;
   return result;
@@ -615,17 +615,17 @@ int MatchPlan.try_match(MatchPlan plan, List input, List &?out_bindings) =>
 
 /* Publication reads committed positional state, never speculative matcher
    state. */
-static int MatchPlan._run(
+static int _run(
   MatchPlan mm, MatchMachine &m, Var input, List &out) {
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captures = { values, 0, MACHINE_BINDER_MAX };
   int result = _run_capture(mm.program.view(), m, input, &captures);
-  if (result == 1) out = mm.layout._publish(&captures);
+  if (result == 1) out = _publish_captures(mm.layout, &captures);
   return result;
 }
 
 /* The committed captures as an association List in reverse slot order. */
-static List MatchCaptureLayout._publish(
+static List _publish_captures(
   MatchCaptureLayout layout, MatchCaptureBuffer *captures) {
   List bindings = NULL;
   for (int i = 0; i < layout.binder_count; i++) {
@@ -679,17 +679,17 @@ static macro Stmt $match.walk(Expr $plan, Expr $machine, Name $walk) {
 */
 int MatchPlan.try_search(
   MatchPlan plan, List input, Var &?out_match, List &?out_bindings) {
-  if (!plan._prepared("MatchPlan.try_search") || !out_match ||
+  if (!_prepared(plan, "MatchPlan.try_search") || !out_match ||
       !out_bindings)
     return -1;
-  return plan._first(input, out_match, out_bindings);
+  return _first(plan, input, out_match, out_bindings);
 }
 
-static int MatchPlan._first(
+static int _first(
   MatchPlan plan, List input, Var &out_match, List &out_bindings) {
   $match.machine(machine, NULL);
   $match.walk(plan, machine, walk);
-  int result = walk._first(input, 1);
+  int result = _walk_first(walk, input, 1);
   walk.spine.free();
   machine.release();
   if (result == 1) {
@@ -709,14 +709,14 @@ static int MatchPlan._first(
     constructing results.
 */
 int MatchPlan.search(MatchPlan plan, List input, List &?out_results) {
-  if (!plan._prepared("MatchPlan.search") || !out_results) return -1;
-  return plan._all(input, out_results);
+  if (!_prepared(plan, "MatchPlan.search") || !out_results) return -1;
+  return _all(plan, input, out_results);
 }
 
-static int MatchPlan._all(MatchPlan plan, List input, List &out_results) {
+static int _all(MatchPlan plan, List input, List &out_results) {
   $match.machine(machine, NULL);
   $match.walk(plan, machine, walk);
-  int status = walk._all(input, 1);
+  int status = _walk_all(walk, input, 1);
   walk.spine.free();
   machine.release();
   if (status < 0) return -1;
@@ -734,16 +734,16 @@ static int MatchPlan._all(MatchPlan plan, List input, List &out_results) {
 */
 int MatchPlan.search_replace(
   MatchPlan plan, List input, Var template, List &?out) {
-  if (!plan._prepared("MatchPlan.search_replace") || !out) return -1;
-  return plan._replace_all(input, template, out);
+  if (!_prepared(plan, "MatchPlan.search_replace") || !out) return -1;
+  return _replace_all(plan, input, template, out);
 }
 
-static int MatchPlan._replace_all(
+static int _replace_all(
   MatchPlan plan, List input, Var template, List &out) {
   $match.machine(machine, NULL);
   $match.walk(plan, machine, walk);
   walk.template = template;
-  Var result = walk._rewrite(input, 1);
+  Var result = _rewrite(walk, input, 1);
   walk.spine.free();
   machine.release();
   if (walk.error) return -1;
@@ -756,13 +756,13 @@ static int MatchPlan._replace_all(
    A walk runs the plan at each node of one traversal, sharing one machine,
    one capture buffer, and one cell stack. */
 
-static int MatchWalk._test(MatchWalk &m, Var node) =>
+static int _test(MatchWalk &m, Var node) =>
   m.plan.admits(node, NULL)
     ? _run_capture(m.view, *m.m, node, m.captures) : 0;
 
 /* One search result: `(* node)` followed by the node's bindings. */
-static List MatchWalk._hit(MatchWalk &walk, Var node) =>
-  cons(%(* $node), walk.plan.layout._publish(walk.captures));
+static List _hit(MatchWalk &walk, Var node) =>
+  cons(%(* $node), _publish_captures(walk.plan.layout, walk.captures));
 
 static Var _spine_get(Block spine, size_t index) =>
   ((Var *) spine.bytes)[index];
@@ -773,7 +773,7 @@ static Var _spine_get(Block spine, size_t index) =>
    depth reaches the C stack. The loop visits every car in order and then
    answers for the cells from the last one back, which is the order the
    recursion produced. */
-static int MatchWalk._all(MatchWalk &walk, Var input, int include_empty) {
+static int _walk_all(MatchWalk &walk, Var input, int include_empty) {
   Block hits = walk.spine;
   size_t base = hits.length;
   int visit_tail = 1;
@@ -783,28 +783,28 @@ static int MatchWalk._all(MatchWalk &walk, Var input, int include_empty) {
       visit_tail = include_empty;
       break;
     }
-    if (walk._all(lst.car(), 1) < 0) return -1;
-    int status = walk._test(input);
+    if (_walk_all(walk, lst.car(), 1) < 0) return -1;
+    int status = _test(walk, input);
     if (status < 0) return -1;
     if (status == 1) {
-      Var hit = walk._hit(input);
+      Var hit = _hit(walk, input);
       hits.push(&hit);
     }
     input = lst.cdr();
     include_empty = 0;
   }
   if (visit_tail) {
-    int status = walk._test(input);
+    int status = _test(walk, input);
     if (status < 0) return -1;
-    if (status == 1) walk.results = cons(walk._hit(input), walk.results);
+    if (status == 1) walk.results = cons(_hit(walk, input), walk.results);
   }
-  walk._answer(base);
+  _answer(walk, base);
   return 0;
 }
 
 /* Prepends the hits the loop pushed above `base`, last one first, as the
    recursion answered them, and releases them. */
-static void MatchWalk._answer(MatchWalk &walk, size_t base) {
+static void _answer(MatchWalk &walk, size_t base) {
   Block hits = walk.spine;
   for (size_t i = hits.length; i > base; i--)
     walk.results = cons(_spine_get(hits, i - 1), walk.results);
@@ -813,7 +813,7 @@ static void MatchWalk._answer(MatchWalk &walk, size_t base) {
 
 /* The cells answer from the last one back, so the walk remembers the last
    cell that matched and settles on it once nothing earlier matches. */
-static int MatchWalk._first(MatchWalk &walk, Var input, int include_empty) {
+static int _walk_first(MatchWalk &walk, Var input, int include_empty) {
   Var last_cell = void;
   int have_cell = 0, visit_tail = 1;
   while (input is <list>) {
@@ -822,9 +822,9 @@ static int MatchWalk._first(MatchWalk &walk, Var input, int include_empty) {
       visit_tail = include_empty;
       break;
     }
-    int found = walk._first(lst.car(), 1);
+    int found = _walk_first(walk, lst.car(), 1);
     if (found) return found;
-    int status = walk._test(input);
+    int status = _test(walk, input);
     if (status < 0) return -1;
     if (status == 1) {
       last_cell = input;
@@ -834,26 +834,26 @@ static int MatchWalk._first(MatchWalk &walk, Var input, int include_empty) {
     include_empty = 0;
   }
   if (visit_tail) {
-    int status = walk._settle(input);
+    int status = _settle(walk, input);
     if (status) return status;
   }
   // the buffer now holds a later node, so the winner runs once more
-  return have_cell ? walk._settle(last_cell) : 0;
+  return have_cell ? _settle(walk, last_cell) : 0;
 }
 
 /* Tests `node` and, when it matches, publishes it with its bindings. */
-static int MatchWalk._settle(MatchWalk &walk, Var node) {
-  int status = walk._test(node);
+static int _settle(MatchWalk &walk, Var node) {
+  int status = _test(walk, node);
   if (status != 1) return status;
   walk.found = node;
-  walk.bindings = walk.plan.layout._publish(walk.captures);
+  walk.bindings = _publish_captures(walk.plan.layout, walk.captures);
   return 1;
 }
 
 /* Rewrites children before the List that holds them. The loop pushes each
    rewritten car; the cells then rebuild from the last one back, each around
    the tail so far. */
-static Var MatchWalk._rewrite(MatchWalk &walk, Var node, int include_empty) {
+static Var _rewrite(MatchWalk &walk, Var node, int include_empty) {
   Block heads = walk.spine;
   size_t base = heads.length;
   int visit_tail = 1;
@@ -863,24 +863,24 @@ static Var MatchWalk._rewrite(MatchWalk &walk, Var node, int include_empty) {
       visit_tail = include_empty;
       break;
     }
-    Var head = walk._rewrite(lst.car(), 1);
+    Var head = _rewrite(walk, lst.car(), 1);
     if (walk.error) return node;
     heads.push(&head);
     node = lst.cdr();
     include_empty = 0;
   }
-  if (visit_tail) node = walk._replace_node(node);
+  if (visit_tail) node = _replace_node(walk, node);
   for (size_t i = heads.length; i > base && !walk.error; i--) {
     List tail = node;
-    node = walk._replace_node(cons(_spine_get(heads, i - 1), tail));
+    node = _replace_node(walk, cons(_spine_get(heads, i - 1), tail));
   }
   heads.truncate(base);
   return node;
 }
 
 /* The instantiated template when `node` matches, or else `node`. */
-static Var MatchWalk._replace_node(MatchWalk &walk, Var node) {
-  int status = walk._test(node);
+static Var _replace_node(MatchWalk &walk, Var node) {
+  int status = _test(walk, node);
   if (status < 0) {
     walk.error = 1;
     return node;
@@ -906,8 +906,8 @@ static Var MatchWalk._replace_node(MatchWalk &walk, Var node) {
 */
 int MatchPlan.try_match_replace(
   MatchPlan plan, List input, Var template, Var &?out) {
-  if (!plan._prepared("MatchPlan.try_match_replace") || !out) return -1;
-  return plan._replace(input, template, out);
+  if (!_prepared(plan, "MatchPlan.try_match_replace") || !out) return -1;
+  return _replace_match(plan, input, template, out);
 }
 
 /* Where a named binder finds its value: the committed `captures` of a plan,
@@ -918,11 +918,11 @@ static typedef struct ReplacementSource {
   List bindings;
 } ReplacementSource;
 
-static int MatchPlan._replace(
+static int _replace_match(
   MatchPlan plan, List input, Var template, Var &out) {
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captures = { values, 0, MACHINE_BINDER_MAX };
-  int result = plan._capture(input, &captures, NULL);
+  int result = _capture(plan, input, &captures, NULL);
   if (result != 1) return result;
   ReplacementSource source = { plan.layout, &captures, NULL };
   out = _replace(template, source);
@@ -930,15 +930,15 @@ static int MatchPlan._replace(
 }
 
 /* The value for `binder`, or the binder itself when it has none. */
-static Var ReplacementSource._value(ReplacementSource &source, Var binder) {
-  if (source.captures) return source.layout._captured(source.captures, binder);
+static Var _value(ReplacementSource &source, Var binder) {
+  if (source.captures) return _captured(source.layout, source.captures, binder);
   Var bound = source.bindings.assoc(binder);
   return bound is void ? binder : bound;
 }
 
 /* The value captured for `binder`, or the binder when the match left it
    unbound. */
-static Var MatchCaptureLayout._captured(
+static Var _captured(
   MatchCaptureLayout layout, MatchCaptureBuffer *captures, Var binder) {
   int index = layout.index(binder);
   if (index < 0 || !_capture_bit(captures.present, index)) return binder;
@@ -967,7 +967,7 @@ static typedef struct ReplacementCell {
 
 /* Instantiates `input`, taking each named binder's value from `source`. */
 static Var _replace(Var input, ReplacementSource &source) {
-  if (_named_binder(input)) return source._value(input);
+  if (_named_binder(input)) return _value(source, input);
   if (input is not <list>) return input;
   List list = input;
   if (!list) return input;
@@ -1075,39 +1075,39 @@ int x2c_match_site_try_capture(
   MatchCaptureSite *site, List input, Var pattern,
   MatchCaptureBuffer *captures) {
   if (!captures) return 0;
-  MatchPlan plan = site._published(pattern);
+  MatchPlan plan = _published(site, pattern);
   // a pattern the site cannot retain takes the ordinary runtime route
   if (!plan) return x2c_match_try_capture(input, pattern, captures);
   if (plan.status == MACHINE_MALFORMED) return 0;
-  return plan._prepared("match") &&
-         plan.layout._buffer_valid(captures) &&
-         plan._capture(input, captures, NULL) == 1;
+  return _prepared(plan, "match") &&
+         _buffer_valid(plan.layout, captures) &&
+         _capture(plan, input, captures, NULL) == 1;
 }
 
 /* Returns this site's plan, publishing it on the first call and answering
    NULL for a site whose pattern it cannot retain. The refusal is recorded on
    the site, so a pattern the site rejects costs two atomic loads per call
    instead of the registry lock and a fresh admissibility walk. */
-static MatchPlan MatchCaptureSite._published(
+static MatchPlan _published(
   MatchCaptureSite *site, Var pattern) {
   if (!site) return NULL;
   MatchPlan plan = __atomic_load_n(&site.plan, __ATOMIC_ACQUIRE);
   if (plan) return plan;
   if (__atomic_load_n(&site.refused, __ATOMIC_ACQUIRE)) return NULL;
-  return site._publish(pattern);
+  return _publish_plan(site, pattern);
 }
 
 /* Prepares one site once, under the lock that also guards the site
    registry. Every later call sees the published plan and skips this. */
-static MatchPlan MatchCaptureSite._publish(MatchCaptureSite *m, Var pattern) {
+static MatchPlan _publish_plan(MatchCaptureSite *m, Var pattern) {
   _site_lock();
   // preparation allocates, and an allocation failure never returns here
   defer _site_unlock();
-  if (!m.plan) m._prepare(pattern);
+  if (!m.plan) _prepare(m, pattern);
   return m.plan;
 }
 
-static void MatchCaptureSite._prepare(MatchCaptureSite *site, Var pattern) {
+static void _prepare(MatchCaptureSite *site, Var pattern) {
   if (!MatchPlan.borrowable(pattern, 1)) {
     __atomic_store_n(&site.refused, 1, __ATOMIC_RELEASE);
     return;
@@ -1163,7 +1163,7 @@ int x2c_match_pattern_retainable(Var pattern) =>
     Raises: `<alloc-fail>` while publishing.
 */
 MatchPlan x2c_match_site_prepare(MatchCaptureSite *site, Var pattern) =>
-  site._published(pattern);
+  _published(site, pattern);
 
 /* site consumers
 
@@ -1173,8 +1173,8 @@ MatchPlan x2c_match_site_prepare(MatchCaptureSite *site, Var pattern) =>
 
 /* The plan this site holds, publishing it on the first call, or NULL for
    the ordinary runtime route. */
-static MatchPlan MatchCaptureSite._plan(MatchCaptureSite *site, Var pattern) {
-  MatchPlan plan = site._published(pattern);
+static MatchPlan _plan(MatchCaptureSite *site, Var pattern) {
+  MatchPlan plan = _published(site, pattern);
   return plan && plan.status != MACHINE_INELIGIBLE ? plan : NULL;
 }
 
@@ -1183,7 +1183,7 @@ static MatchPlan MatchCaptureSite._plan(MatchCaptureSite *site, Var pattern) {
 */
 int x2c_match_site_try_match(
   MatchCaptureSite *site, List input, Var pat, List *out_bindings) {
-  MatchPlan plan = site._plan(pat);
+  MatchPlan plan = _plan(site, pat);
   if (!plan) return input.try_match(pat, *out_bindings);
   if (!out_bindings) return 0;
   return plan.try_match(input, *out_bindings) == 1;
@@ -1204,7 +1204,7 @@ List x2c_match_site_match(MatchCaptureSite *site, List input, Var pat) {
 int x2c_match_site_try_search(
   MatchCaptureSite *site, List input, Var pat, Var *out_match,
   List *out_bindings) {
-  MatchPlan plan = site._plan(pat);
+  MatchPlan plan = _plan(site, pat);
   if (!plan) return input.try_search(pat, *out_match, *out_bindings);
   if (!out_match || !out_bindings) return 0;
   return plan.try_search(input, *out_match, *out_bindings) == 1;
@@ -1214,7 +1214,7 @@ int x2c_match_site_try_search(
     Results follow `List.search`.
 */
 List x2c_match_site_search(MatchCaptureSite *site, List input, Var pat) {
-  MatchPlan plan = site._plan(pat);
+  MatchPlan plan = _plan(site, pat);
   if (!plan) return input.search(pat);
   List results = NULL;
   plan.search(input, results);
@@ -1226,7 +1226,7 @@ List x2c_match_site_search(MatchCaptureSite *site, List input, Var pat) {
 */
 int x2c_match_site_try_match_replace(
   MatchCaptureSite *site, List input, Var pat, Var template, Var *out) {
-  MatchPlan plan = site._plan(pat);
+  MatchPlan plan = _plan(site, pat);
   if (!plan) return input.try_match_replace(pat, template, *out);
   if (!out) return 0;
   return plan.try_match_replace(input, template, *out) == 1;
@@ -1248,7 +1248,7 @@ List x2c_match_site_match_replace(
 */
 List x2c_match_site_search_replace(
   MatchCaptureSite *site, List input, Var pat, Var template) {
-  MatchPlan plan = site._plan(pat);
+  MatchPlan plan = _plan(site, pat);
   if (!plan) return input.search_replace(pat, template);
   List result = input;
   plan.search_replace(input, template, result);

@@ -238,7 +238,7 @@ typedef struct Compiler {
   Token meta_statement;
   /* A collection pass whose protocol registries are
      installed from the collected symbols on first use;
-     `Compiler._install_imports` owns the installation. */
+     `_install_imports` owns the installation. */
   int import_protocols;
   int in_pattern, match_is, runtime_literals, inline_header;
   int builtin_defs, in_proto, macro_count, recovery_depth;
@@ -422,8 +422,8 @@ void Compiler.shallow_parse(Compiler c, Map globals) {
   c.kw_aliases = {};
   c.import_stack.clear();
   c.sym.reset(globals);
-  c._shallow_parse_loop();
-  c._check_unmatched_braces();
+  _shallow_parse_loop(c);
+  _check_unmatched_braces(c);
 }
 
 /** Collects declarations with reads over `base` then `overlay`.
@@ -432,22 +432,22 @@ void Compiler.shallow_parse(Compiler c, Map globals) {
     contributes above `base`.
 */
 void Compiler.shallow_parse_overlay(Compiler c, Map base, Map overlay) {
-  if (c.macros == NULL || !c.macros.len()) c._start_macros();
+  if (c.macros == NULL || !c.macros.len()) _start_macros(c);
   c.sym.reset_overlay(base, overlay);
-  c._shallow_parse_loop();
+  _shallow_parse_loop(c);
   // Only linkage groups remain open; a later segment of the file closes them.
   c.open_linkage += c.braces.len();
 }
 
 // A unit with no macros yet starts its macro, keyword, and import state.
-static void Compiler._start_macros(Compiler c) {
+static void _start_macros(Compiler c) {
   c.macros = {};
   if (c.kw_aliases == NULL) c.kw_aliases = {};
   c.imports = {};
   c.import_stack.clear();
 }
 
-static void Compiler._shallow_parse_loop(Compiler c) {
+static void _shallow_parse_loop(Compiler c) {
   c.start_collection();
   c.braces.clear();
   while (c.peek(0) != <eof>) {
@@ -520,7 +520,7 @@ void Compiler.finish_collected_declaration(
       if (type.type().is_static())
         c.sym.mark_static(%(function ${binding_identity_spelling(binding)}));
   if (c.peek(0) == <"{"> || c.peek(0) == <"%{"> || c._at_function_arrow())
-    c._skip_body(declaration, meta, native);
+    _skip_body(c, declaration, meta, native);
   else if (c.peek(0) == <;>) {
     if (meta) c.record_native_meta_effect(declaration, meta);
     c.next();
@@ -528,13 +528,13 @@ void Compiler.finish_collected_declaration(
   else c.next();
 }
 
-static void Compiler._skip_body(
+static void _skip_body(
   Compiler c, List declaration, Token meta, int native) {
   if (native) c.record_native_meta_effect(declaration, meta);
   else if (meta) c.record_project_meta_effect(declaration, meta);
   match (declaration)
     case %(declare ? (bindings (bind ?binding ?))):
-      c._note_function_body(declaration.type_from_ast(), binding);
+      _note_function_body(c, declaration.type_from_ast(), binding);
   c.record_inline_function(declaration);
   if (c._at_function_arrow()) {
     c.next();
@@ -542,7 +542,7 @@ static void Compiler._skip_body(
     c._skip_shallow_expression(0);
     c.expect(<;>);
   }
-  else c._shallow_block();
+  else _shallow_block(c);
 }
 
 /** Records the header linkage of a public inline definition. Semantic
@@ -558,7 +558,7 @@ void Compiler.record_inline_function(Compiler c, List declaration) {
 }
 
 // `fn_defs` holds each non-static function the unit defines.
-static void Compiler._note_function_body(Compiler c, Type type, List binding) {
+static void _note_function_body(Compiler c, Type type, List binding) {
   if (!type.is_function() || type.is_static()) return;
   c.fn_defs[binding_identity_spelling(binding)] = 1;
 }
@@ -580,13 +580,13 @@ void Compiler._skip_shallow_expression(Compiler c, int stop_at_comma) {
   }
 }
 
-static void Compiler._shallow_block(Compiler c) {
+static void _shallow_block(Compiler c) {
   c.next();
   for (Symbol peek = c.peek(0); peek != <"}">; peek = c.peek(0)) {
     if (peek == <eof>)
       $report.parse.token_eof(c);
     if (peek == <"{"> || peek == <"%{"> || peek == <"${"> || peek == <"@{">)
-      c._shallow_block();
+      _shallow_block(c);
     else c.next();
   }
   c.expect(<"}">);
@@ -604,7 +604,7 @@ static void Compiler._shallow_block(Compiler c) {
 */
 void Compiler.queue_declaration_effect(
   Compiler c, String form, Token first, Token after) {
-  List key = c._declaration_source_key(first);
+  List key = _declaration_source_key(c, first);
   String context = c.import_stack.len() ? c.import_stack[-1] : c.filename;
   c.declaration_effects = cons(
     %($key ${after ? after.pos : -1} $form
@@ -612,7 +612,7 @@ void Compiler.queue_declaration_effect(
     c.declaration_effects);
 }
 
-static List Compiler._declaration_source_key(Compiler c, Token token) {
+static List _declaration_source_key(Compiler c, Token token) {
   String path = home_portable_path(c.canonical_path(c.filename));
   return %("source-node" (declaration $path ${token.pos}));
 }
@@ -623,7 +623,7 @@ void Compiler.run_declaration_effects(Compiler c) {
   c.declaration_effects = NULL;
   foreach (List effect, effects) {
     (List key, int end, String form, Var site, String context) = effect;
-    String file = c._effect_file(key), text = c.text;
+    String file = _effect_file(c, key), text = c.text;
     Array markers = c.line_markers;
     if (c.canonical_path(file) != c.canonical_path(c.filename)) {
       text = NULL;
@@ -645,7 +645,7 @@ void Compiler.run_declaration_effects(Compiler c) {
   }
 }
 
-static String Compiler._effect_file(Compiler c, List key) {
+static String _effect_file(Compiler c, List key) {
   match (key)
     case %("source-node" (declaration ?path ?)):
       return _declaration_path(path, 1);
@@ -660,18 +660,18 @@ static String Compiler._effect_file(Compiler c, List key) {
 int Compiler.collect_unit_macro(Compiler c) {
   Symbol collection = c.macro_invocation_collection();
   if (collection == <tried> || (collection && c.meta_build))
-    return c._try_unit_macro();
-  if (collection == <required>) c._expand_unit_macro();
+    return _try_unit_macro(c);
+  if (collection == <required>) _expand_unit_macro(c);
   return collection == <required>;
 }
 
-static int Compiler._try_unit_macro(Compiler c) {
+static int _try_unit_macro(Compiler c) {
   Token first = c.token;
   int failed = 0;
   SymTxn transaction = c.begin_semantic_transaction();
   DiagnosticsHold hold = c.diagnostics.hold();
   $let(c.recovery_depth, c.recovery_depth + 1) {
-    try c._expand_unit_macro();
+    try _expand_unit_macro(c);
     catch %(malformed *): failed = 1;
   }
   c.diagnostics.release(hold, 0);
@@ -686,12 +686,12 @@ static int Compiler._try_unit_macro(Compiler c) {
 /* The expansion retains its declarations for collection, and its private
    helpers remain available to later invocations. Generated-name counters
    are restored when the full parse must expand it again. */
-static void Compiler._expand_unit_macro(Compiler c) {
+static void _expand_unit_macro(Compiler c) {
   Map counters = c.names.counters;
   c.names.counters = counters.copy();
   Token first = c.token;
   List syntax = c.parse_top_level();
-  int retained = c._retain_bundle(syntax, first, c.token);
+  int retained = _retain_bundle(c, syntax, first, c.token);
   /* The full parse expands this unit again. Keep the declarations needed
      by later shallow invocations, but do not count its generated names
      twice. */
@@ -701,13 +701,13 @@ static void Compiler._expand_unit_macro(Compiler c) {
 /* The owning source records one declaration production and its token span.
    Both parses share its Context, bindings, origins, and macro frames.
    Full parsing consumes the result without invoking its producer again. */
-static int Compiler._retain_bundle(
+static int _retain_bundle(
   Compiler c, List syntax, Token first, Token after) {
   match (syntax) {
-    case %(seq ?only): return c._retain_bundle(only, first, after);
+    case %(seq ?only): return _retain_bundle(c, only, first, after);
     case %(declaration-bundle (rows *)): {
       c.sym.set(
-        c._declaration_source_key(first),
+        _declaration_source_key(c, first),
         %(declaration-source ${after.pos} $syntax
           ${c.semantic_binding_facts()}));
       return 1;
@@ -719,10 +719,10 @@ static int Compiler._retain_bundle(
 /** Binds a retained declaration production at the cursor, then advances
     past its source. Returns NULL when collection retained no production. */
 List Compiler.replay_declaration_source(Compiler c) {
-  List source = c.sym.get(c._declaration_source_key(c.token));
+  List source = c.sym.get(_declaration_source_key(c, c.token));
   match (source)
     case %(declaration-source ?(int end) ?syntax ?facts): {
-      c._restore_declaration_bindings(syntax, facts, {});
+      _restore_declaration_bindings(c, syntax, facts, {});
       List bound = c.bind_syntax(syntax, AST_UNIT, NULL);
       while (c.peek(0) != <eof> && c.token.pos < end) c.next();
       return bound;
@@ -732,7 +732,7 @@ List Compiler.replay_declaration_source(Compiler c) {
 
 /* Register only this production's identities. Shared macro frames are
    visited once, and later source declarations keep their ordinary order. */
-static void Compiler._restore_declaration_bindings(
+static void _restore_declaration_bindings(
   Compiler c, Var syntax, Map facts, Map seen) {
   if (syntax is not <list> || syntax in seen) return;
   seen[syntax] = 1;
@@ -746,7 +746,7 @@ static void Compiler._restore_declaration_bindings(
     return;
   }
   foreach (Var child, syntax.list())
-    c._restore_declaration_bindings(child, facts, seen);
+    _restore_declaration_bindings(c, child, facts, seen);
 }
 
 /* portable compile-time syntax
@@ -769,14 +769,14 @@ Var Compiler.freeze_declaration_syntax(Compiler c, Var syntax) {
     return %(declaration-binding $syntax $source);
   match (syntax) {
     case %(cache ?(int id)):
-      return %(declaration-cache ${c._freeze_cache_key(c.id_keys[id])});
-    case %(macrodef *rows): return c._declaration_macro(rows, 0);
+      return %(declaration-cache ${_freeze_cache_key(c, c.id_keys[id])});
+    case %(macrodef *rows): return _declaration_macro(c, rows, 0);
     case %(src (source ?path ?begin ?end) ?node):
       return %(src (source ${_declaration_path(path, 0)} $begin $end)
         ${c.freeze_declaration_syntax(node)});
-    case %(at ?(int origin) ?node): return c._freeze_origin(origin, node);
+    case %(at ?(int origin) ?node): return _freeze_origin(c, origin, node);
   }
-  return c._freeze_rows(syntax);
+  return _freeze_rows(c, syntax);
 }
 
 // A leaf that a List cannot carry as itself becomes a marker row.
@@ -793,7 +793,7 @@ static Var _freeze_leaf(Var syntax) {
 }
 
 // An origin index freezes as the location it names in this parse.
-static List Compiler._freeze_origin(Compiler c, int origin, Var node) {
+static List _freeze_origin(Compiler c, int origin, Var node) {
   List location = c.origin_location(origin);
   if (!location) return %(at m-origin ${c.freeze_declaration_syntax(node)});
   return %(declaration-origin ${_declaration_location(location, 0)}
@@ -801,7 +801,7 @@ static List Compiler._freeze_origin(Compiler c, int origin, Var node) {
 }
 
 // A List whose head is a marker is escaped, so thawing keeps its value.
-static List Compiler._freeze_rows(Compiler c, List syntax) {
+static List _freeze_rows(Compiler c, List syntax) {
   Array rows = [];
   foreach (Var row, syntax) rows.push(c.freeze_declaration_syntax(row));
   match (syntax)
@@ -822,9 +822,9 @@ Var Compiler.thaw_declaration_syntax(Compiler c, Var syntax) {
       return binding;
     }
     case %(declaration-cache ?key):
-      return c.cache(c._thaw_cache_key(key));
-    case %(declaration-list *rows): return c._thaw_rows(rows);
-    case %(macrodef *rows): return c._declaration_macro(rows, 1);
+      return c.cache(_thaw_cache_key(c, key));
+    case %(declaration-list *rows): return _thaw_rows(c, rows);
+    case %(macrodef *rows): return _declaration_macro(c, rows, 1);
     case %(src (source ?path ?begin ?end) ?node):
       return %(src (source ${_declaration_path(path, 1)} $begin $end)
         ${c.thaw_declaration_syntax(node)});
@@ -834,24 +834,24 @@ Var Compiler.thaw_declaration_syntax(Compiler c, Var syntax) {
     case %(declaration-token ?type ?text ?line ?column ?length ?position):
       return _thaw_token(type, text, line, column, length, position);
     case %(declaration-origin ?location ?node):
-      return c._thaw_origin(location, node);
+      return _thaw_origin(c, location, node);
   }
-  return c._thaw_rows(syntax);
+  return _thaw_rows(c, syntax);
 }
 
 /* Literal conversion calls refer to the consumer's global bindings. */
-static Var Compiler._freeze_cache_key(Compiler c, Var key) {
+static Var _freeze_cache_key(Compiler c, Var key) {
   String name = NULL;
   if (binding_identity_try_parts(key, NULL, name))
     return %(declaration-cache-binding $name);
   if (key is not <list>) return _freeze_leaf(key);
   match (key) case %(cache ?): return c.freeze_declaration_syntax(key);
   Array out = [];
-  foreach (Var child, key.list()) out.push(c._freeze_cache_key(child));
+  foreach (Var child, key.list()) out.push(_freeze_cache_key(c, child));
   return out.list_free();
 }
 
-static Var Compiler._thaw_cache_key(Compiler c, Var key) {
+static Var _thaw_cache_key(Compiler c, Var key) {
   if (key is not <list>) return key;
   match (key) {
     case %(declaration-cache-binding ?name):
@@ -862,11 +862,11 @@ static Var Compiler._thaw_cache_key(Compiler c, Var key) {
       return c.thaw_declaration_syntax(key);
   }
   Array out = [];
-  foreach (Var child, key.list()) out.push(c._thaw_cache_key(child));
+  foreach (Var child, key.list()) out.push(_thaw_cache_key(c, child));
   return out.list_free();
 }
 
-static List Compiler._thaw_rows(Compiler c, List rows) {
+static List _thaw_rows(Compiler c, List rows) {
   Array values = [];
   foreach (Var row, rows) values.push(c.thaw_declaration_syntax(row));
   return values.list_free();
@@ -882,7 +882,7 @@ static Token _thaw_token(
 }
 
 // A frozen location becomes a new row of this parse's origin table.
-static List Compiler._thaw_origin(Compiler c, List location, Var node) {
+static List _thaw_origin(Compiler c, List location, Var node) {
   match (location)
     case %((file ?file) (line ?line) (column ?column) (length ?length)
            (position ?position)):
@@ -891,13 +891,13 @@ static List Compiler._thaw_origin(Compiler c, List location, Var node) {
   return %(at $occurrence ${c.thaw_declaration_syntax(node)});
 }
 
-static List Compiler._declaration_macro(Compiler c, List rows, int thaw) {
+static List _declaration_macro(Compiler c, List rows, int thaw) {
   Array out = [];
-  foreach (List row, rows) out.push(c._macro_row(row, thaw));
+  foreach (List row, rows) out.push(_macro_row(c, row, thaw));
   return %(macrodef @{out.list_free()});
 }
 
-static List Compiler._macro_row(Compiler c, List row, int thaw) {
+static List _macro_row(Compiler c, List row, int thaw) {
   match (row) {
     case %(origin ?location):
       return %(origin ${_declaration_location(location, 0)});
@@ -950,16 +950,16 @@ Map Compiler.select_declaration_defaults(
   Map statics) {
   Compiler shadow = Compiler.new_shared(c);
   defer c.close_child(shadow);
-  shadow._prepare_shadow(c, path, symbols);
+  _prepare_shadow(shadow, c, path, symbols);
   Array sources = [];
   Map pending = {};
   Defaults d = {
     .c = shadow, .parts = parts, .sources = sources,
     .definitions = definitions, .pending = pending};
-  foreach (Var part, parts) if (part is <map>) d.produce(part);
-  d.select();
-  d.forward();
-  d.store(symbols);
+  foreach (Var part, parts) if (part is <map>) _produce_defaults(d, part);
+  _select(d);
+  _forward(d);
+  _store(d, symbols);
   Map additions = shadow.sym.current_symbols();
   symbols.merge(additions);
   statics.merge(shadow.sym.file_statics());
@@ -971,7 +971,7 @@ Map Compiler.select_declaration_defaults(
 
 /* The shadow binds over the file's collected symbols in an overlay,
    without parsing, in the unit's Lisp session and meta group. */
-static void Compiler._prepare_shadow(
+static void _prepare_shadow(
   Compiler c, Compiler owner, String path, Map symbols) {
   c.filename = path;
   c.macro_lisp = owner.macro_lisp;
@@ -984,7 +984,7 @@ static void Compiler._prepare_shadow(
 }
 
 // A part's productions run in source order.
-static void Defaults.produce(Defaults &d, Map declarations) {
+static void _produce_defaults(Defaults &d, Map declarations) {
   Array ordered = [];
   foreach (Var (key, value), declarations)
     match (key)
@@ -997,9 +997,9 @@ static void Defaults.produce(Defaults &d, Map declarations) {
     match (value)
       case %(declaration-source ?end (declaration-bundle (rows *rows))
                ?facts): {
-        d.c._restore_declaration_bindings(rows, facts, {});
+        _restore_declaration_bindings(d.c, rows, facts, {});
         Array produced = [];
-        d.c._produce(rows, produced);
+        _produce_rows(d.c, rows, produced);
         d.sources.push(%($declarations $key $end ${produced.list_free()}));
       }
   }
@@ -1007,14 +1007,14 @@ static void Defaults.produce(Defaults &d, Map declarations) {
 
 /* A pending row runs its recipe under the macro stack and privacy of its
    construction, and the rows it generates are produced in turn. */
-static void Compiler._produce(Compiler c, List rows, Array selected) {
+static void _produce_rows(Compiler c, List rows, Array selected) {
   foreach (List row, rows) {
     match (row)
       case %(declaration-pending ?callback ?arguments
                ?construction ?privacy): {
         $let(c.macro_stack, construction)
         $let(c.source_private, privacy)
-          c._produce(c._generated_rows(callback, arguments), selected);
+          _produce_rows(c, _generated_rows(c, callback, arguments), selected);
         continue;
       }
     selected.push(row);
@@ -1022,7 +1022,7 @@ static void Compiler._produce(Compiler c, List rows, Array selected) {
 }
 
 // A recipe's rows: the children of a sequence or bundle, or its one node.
-static List Compiler._generated_rows(Compiler c, Var callback, Var arguments) {
+static List _generated_rows(Compiler c, Var callback, Var arguments) {
   List generated = c.bind_syntax(
     c.evaluate_declaration_recipe(callback, arguments), AST_UNIT, NULL);
   List additions = %($generated);
@@ -1035,10 +1035,10 @@ static List Compiler._generated_rows(Compiler c, Var callback, Var arguments) {
 
 /* Each production selects its defaults, and a forwarded constructor
    waits for its parent's constructor. */
-static void Defaults.select(Defaults &d) {
+static void _select(Defaults &d) {
   for (size_t index = 0; index < d.sources.len(); index++) {
     (Map declarations, Var key, Var end, List rows) = d.sources[index];
-    List selected = d._select_rows(rows);
+    List selected = _select_rows(d, rows);
     foreach (List row, selected)
       match (row)
         case %(declaration-forward ?child *): d.pending[child] = 1;
@@ -1046,7 +1046,7 @@ static void Defaults.select(Defaults &d) {
   }
 }
 
-static List Defaults._select_rows(Defaults &d, List rows) {
+static List _select_rows(Defaults &d, List rows) {
   Compiler c = d.c;
   Array selected = [];
   foreach (List row, rows) {
@@ -1054,8 +1054,8 @@ static List Defaults._select_rows(Defaults &d, List rows) {
       case %(declaration-default ?function ?construction ?privacy): {
         $let(c.macro_stack, construction)
         $let(c.source_private, privacy) {
-          Var syntax = d._unless_taken(function);
-          if (syntax is not void) selected.push(c._bind_default(syntax));
+          Var syntax = _unless_taken(d, function);
+          if (syntax is not void) selected.push(_bind_default(c, syntax));
         }
         continue;
       }
@@ -1066,7 +1066,7 @@ static List Defaults._select_rows(Defaults &d, List rows) {
 
 /* Returns the function to bind for a default, named through its macro
    slot, or void when a declaration already takes its name. */
-static Var Defaults._unless_taken(Defaults &d, List syntax) {
+static Var _unless_taken(Defaults &d, List syntax) {
   match (syntax)
     case %(function ?return_type (bind ?name ?modifiers) ?body): {
       name = d.c.evaluate_macro_slot(name);
@@ -1075,7 +1075,7 @@ static Var Defaults._unless_taken(Defaults &d, List syntax) {
         case %(?(String literal)): spelling = literal;
         case %("x2c.ident" ?(String literal)): spelling = literal;
       }
-      if (spelling && d._taken(spelling)) return void;
+      if (spelling && _taken(d, spelling)) return void;
       return %(function $return_type (bind $name $modifiers) $body);
     }
   return syntax;
@@ -1084,7 +1084,7 @@ static Var Defaults._unless_taken(Defaults &d, List syntax) {
 /* A default yields to any declaration of its name except a bodyless,
    non-static function prototype in the default's own file, which the
    default then completes. */
-static int Defaults._taken(Defaults &d, String spelling) {
+static int _taken(Defaults &d, String spelling) {
   Compiler c = d.c;
   List key = %($spelling);
   Type declared = c.sym.get(key);
@@ -1096,7 +1096,7 @@ static int Defaults._taken(Defaults &d, String spelling) {
   return 1;
 }
 
-static List Compiler._bind_default(Compiler c, List syntax) {
+static List _bind_default(Compiler c, List syntax) {
   if (c.source_private)
     match (syntax)
       case %(function ?type ?declarator ?body):
@@ -1107,14 +1107,14 @@ static List Compiler._bind_default(Compiler c, List syntax) {
 
 /* Forwarded constructors bind as their parents' constructors complete; a
    round that completes none leaves a parent that never will. */
-static void Defaults.forward(Defaults &d) {
+static void _forward(Defaults &d) {
   int remaining = d.pending.len();
   while (remaining) {
     int previous = remaining;
     remaining = 0;
     for (size_t index = 0; index < d.sources.len(); index++) {
       (Map declarations, Var key, Var end, List rows) = d.sources[index];
-      rows = d._forward_rows(rows, remaining);
+      rows = _forward_rows(d, rows, remaining);
       d.sources[index] = %($declarations $key $end $rows);
     }
     if (remaining && remaining == previous)
@@ -1122,14 +1122,14 @@ static void Defaults.forward(Defaults &d) {
   }
 }
 
-static List Defaults._forward_rows(Defaults &d, List rows, int &remaining) {
+static List _forward_rows(Defaults &d, List rows, int &remaining) {
   Array selected = [];
   foreach (List row, rows) {
     match (row)
       case %(declaration-forward ?child ?parent ?member ?fallback ?privacy): {
         List bound = NULL;
         $let(d.c.source_private, privacy)
-          bound = d._forwarded(child, parent, member, fallback);
+          bound = _forwarded(d, child, parent, member, fallback);
         if (!bound) {
           remaining++;
           selected.push(row);
@@ -1149,7 +1149,7 @@ static List Defaults._forward_rows(Defaults &d, List rows, int &remaining) {
    `member`. It is `(seq)` when that name is already declared, the fallback
    when the parent has no such member, and NULL while the parent's own
    constructor is still pending. */
-static List Defaults._forwarded(
+static List _forwarded(
   Defaults &d, Type child, Type parent, String member, List fallback) {
   Compiler c = d.c;
   String name = %"${child.car()}_$member";
@@ -1157,7 +1157,7 @@ static List Defaults._forwarded(
   List method = c.resolve_postfix_member(parent, %($member), <.>, 1);
   if (!method) {
     if (parent in d.pending) return NULL;
-    return fallback ? c._bind_default(fallback.car()) : NULL;
+    return fallback ? _bind_default(c, fallback.car()) : NULL;
   }
   List binding = NULL, Type signature = NULL;
   match (method)
@@ -1166,11 +1166,11 @@ static List Defaults._forwarded(
       signature = type;
     }
   if (!signature) return NULL;
-  return c._bind_default(c._forwarder(name, child, binding, signature));
+  return _bind_default(c, _forwarder(c, name, child, binding, signature));
 }
 
 // The forwarding constructor passes each argument on and casts the result.
-static List Compiler._forwarder(
+static List _forwarder(
   Compiler c, String name, Type child, List binding, Type signature) {
   List types = NULL;
   match (signature) case %((func ?parameters) *): types = parameters;
@@ -1195,7 +1195,7 @@ static List Compiler._forwarder(
 
 /* The selected rows replace each production's bundle in its part and in
    the unit's symbols. */
-static void Defaults.store(Defaults &d, Map symbols) {
+static void _store(Defaults &d, Map symbols) {
   foreach (List source, d.sources) {
     (Map declarations, Var key, Var end, List rows) = source;
     declarations[key] =
@@ -1229,22 +1229,22 @@ static typedef struct FullParse {
 List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   Array nodes = [];
   c.unit_nodes = nodes;
-  c._reset_parse(globs, generated_symbols);
+  _reset_parse(c, globs, generated_symbols);
   Token conflict = NULL;
   $let(c.recovery_depth, c.recovery_depth + 1)
-    conflict = c._parse_forms(nodes);
+    conflict = _parse_forms(c, nodes);
   if (conflict) {
     c.token = conflict;
-    c._report_script_statement();
+    _report_script_statement(c);
   }
-  List ast = c._finish_parse(nodes);
+  List ast = _finish_parse(c, nodes);
   if (!c.public_bodies) c.publish_inline_types(ast);
   return ast;
 }
 
 /* A full parse starts from the unit's collected symbols, without the parse
    state that collection or an earlier parse left. */
-static void Compiler._reset_parse(Compiler c, Map globs, int generated) {
+static void _reset_parse(Compiler c, Map globs, int generated) {
   c.meta_group.clear();
   c.meta_group_bound = {};
   c.meta_comptime = {};
@@ -1259,14 +1259,14 @@ static void Compiler._reset_parse(Compiler c, Map globs, int generated) {
   c.arms = NULL;
   c.sym.reset(globs);
   c.rebuild_protocols(globs);
-  c._reset_macros();
+  _reset_macros(c);
   c.resolve_protocols();
   if (generated) c.install_generated_protocol_symbols();
   c.install_native_meta_effects(globs);
   c.included_effects = c.included_compile_time_effects(globs);
 }
 
-static void Compiler._reset_macros(Compiler c) {
+static void _reset_macros(Compiler c) {
   c.macros = {};
   c.kw_aliases = {};
   c.rewrite_rules = NULL;
@@ -1283,90 +1283,90 @@ static void Compiler._reset_macros(Compiler c) {
 /* Parses every form, then the `main` that a script's statement runs
    become. Returns the first hoisted statement when a macro defined `main`
    where the token scan saw none, and NULL otherwise. */
-static Token Compiler._parse_forms(Compiler c, Array nodes) {
-  c._append_preproc(nodes);
+static Token _parse_forms(Compiler c, Array nodes) {
+  _append_preproc(c, nodes);
   Array statements = [];
   FullParse p = {
     .c = c, .nodes = nodes, .statements = statements,
     .hoisting = c.script && !c.script.defines_main};
   loop {
-    while (c.peek(0) != <eof>) if (!p.form()) break;
+    while (c.peek(0) != <eof>) if (!_form(p)) break;
     if (!p.runs) return NULL;
     Token tokens = c.tokenizer.tokens;
     if ("main" in c.fn_defs) return tokens + p.first;
-    c._push_conditionals(statements, p.gap, c.token - tokens);
-    c._append_script_main(statements);
+    _push_conditionals(c, statements, p.gap, c.token - tokens);
+    _append_script_main(c, statements);
     p.hoisting = p.runs = 0;
   }
 }
 
 /* Parses one form, or skips a failed one whole. Returns 0 when the parse
    stops: the error limit is reached, or the skip reached the end. */
-static int FullParse.form(FullParse &p) {
+static int _form(FullParse &p) {
   Compiler c = p.c;
   Token start = c.token;
   int braces = c.braces.len();
   try {
-    p.parse(start);
+    _parse(p, start);
   }
   catch %(malformed (category ?category) *): {
     (void) category;
     if (c.diagnostics.reached_limit()) return 0;
-    c._sync_top_level(start, braces);
-    p.gap = c._end_index(c.tokenizer.tokens);
-    c._append_preproc(p.nodes);
+    _sync_top_level(c, start, braces);
+    p.gap = _end_index(c, c.tokenizer.tokens);
+    _append_preproc(c, p.nodes);
     return c.peek(0) != <eof>;
   }
   return 1;
 }
 
-static void FullParse.parse(FullParse &p, Token start) {
+static void _parse(FullParse &p, Token start) {
   Compiler c = p.c;
   Token tokens = c.tokenizer.tokens;
   int begin = start - tokens;
-  if (p.hoisting) c._push_conditionals(p.statements, p.gap, begin);
-  if (p.hoisting && c.script_statement_starts()) p.hoist(begin, tokens);
-  else p.top_level(begin, tokens);
-  p.gap = c._end_index(tokens);
-  c._append_preproc(p.nodes);
+  if (p.hoisting) _push_conditionals(c, p.statements, p.gap, begin);
+  if (p.hoisting && c.script_statement_starts()) _hoist(p, begin, tokens);
+  else _top_level(p, begin, tokens);
+  p.gap = _end_index(c, tokens);
+  _append_preproc(c, p.nodes);
   _debug_tokens(start, c.token);
 }
 
 // A script statement joins the runs that `main` executes.
-static void FullParse.hoist(FullParse &p, int begin, Token tokens) {
+static void _hoist(FullParse &p, int begin, Token tokens) {
   p.c.skip_script_statement();
-  int end = p.c._end_index(tokens);
+  int end = _end_index(p.c, tokens);
   p.statements.push(begin);
   p.statements.push(end);
   if (!p.runs++) p.first = begin;
 }
 
 // A retained declaration bundle replays; any other form parses.
-static void FullParse.top_level(FullParse &p, int begin, Token tokens) {
+static void _top_level(FullParse &p, int begin, Token tokens) {
   Compiler c = p.c;
-  c._reject_statement();
+  _reject_statement(c);
   Ast node = c.replay_declaration_source();
   if (!node) node = c.parse_top_level();
-  int end = c._end_index(tokens);
+  int end = _end_index(c, tokens);
   if (node && node.car() == <seq>)
-    foreach (List item, node.cdr()) p.add(item, begin, end);
-  else if (node) p.add(node, begin, end);
+    foreach (List item, node.cdr()) _add(p, item, begin, end);
+  else if (node) _add(p, node, begin, end);
 }
 
-static void FullParse.add(FullParse &p, List node, int begin, int end) {
+static void _add(FullParse &p, List node, int begin, int end) {
   Token tokens = p.c.tokenizer.tokens;
-  p.c._record_top_level(node, tokens + begin);
-  p.c._record_span(node, begin, end);
+  _record_top_level(p.c, node, tokens + begin);
+  _record_span(p.c, node, begin, end);
   p.nodes.push(node);
 }
 
 // The index after the last non-trivia token before the cursor.
-static long Compiler._end_index(Compiler c, Token tokens) =>
+static long _end_index(Compiler c, Token tokens) =>
   _skip_backward(c.token - 1, tokens) + 1 - tokens;
 
 /* Directives join the nodes in source order, after they record native
    macro names and includes deliver their public compile-time effects. */
-static void Compiler._append_preproc(Compiler c, Array nodes) {
+static void _append_preproc(Compiler c, Array nodes) {
   List directives = c.leading_preproc();
   c.note_preprocessor_macros(directives);
   if (c.included_effects.len()) c.install_included_effects();
@@ -1380,7 +1380,7 @@ static void Compiler._append_preproc(Compiler c, Array nodes) {
    invocation, or at a `}` that nothing on its line continues. A `struct`
    body continues to its declarators, and a second function body on the
    same line is a second declaration. */
-static void Compiler._sync_top_level(Compiler c, Token start, int braces) {
+static void _sync_top_level(Compiler c, Token start, int braces) {
   c.token = start;
   c.braces.resize(braces);
   int depth = 0;
@@ -1400,15 +1400,15 @@ static void Compiler._sync_top_level(Compiler c, Token start, int braces) {
   }
 }
 
-static List Compiler._finish_parse(Compiler c, Array nodes) {
+static List _finish_parse(Compiler c, Array nodes) {
   c.finish_meta_functions(nodes);
   if (c.meta_build) c.write_meta_build();
   c.unit_nodes = NULL;
   List ast = nodes.list_free();
   if (c.script && !c.script.defines_main && !c.error_count())
-    c._check_script_locals(ast);
-  c._check_unmatched_braces();
-  if (!c.error_count()) c._check_static_inits();
+    _check_script_locals(c, ast);
+  _check_unmatched_braces(c);
+  if (!c.error_count()) _check_static_inits(c);
   return ast;
 }
 
@@ -1426,7 +1426,7 @@ int Compiler.skip_collected_script_statement(Compiler c) {
     c.skip_script_statement();
     return 1;
   }
-  c._reject_statement();
+  _reject_statement(c);
   return 0;
 }
 
@@ -1449,19 +1449,19 @@ void Compiler.skip_script_statement(Compiler c) {
 
 /* A script unit either defines `main` or runs its top-level statements, so
    a statement beside `main` is the one form it rejects. */
-static void Compiler._reject_statement(Compiler c) {
+static void _reject_statement(Compiler c) {
   if (c.script && c.script.defines_main && c.script_statement_executes())
-    c._report_script_statement();
+    _report_script_statement(c);
 }
 
-static void Compiler._report_script_statement(Compiler c) {
+static void _report_script_statement(Compiler c) {
   $report.parse.script_main(c);
 }
 
 /* A file-scope conditional directive also governs the statements it
    surrounds, so a copy of each joins the statement runs in source order and
    the script body keeps the file's conditional structure. */
-static void Compiler._push_conditionals(
+static void _push_conditionals(
   Compiler c, Array statements, int first, int end) {
   Token tokens = c.tokenizer.tokens;
   for (int i = first; i < end; i++) {
@@ -1505,9 +1505,9 @@ static const char *script_main =
    The copy keeps every consumed token at its index, so recorded token
    indices stay valid, and drops the trivia already read before end of file.
    `statements` holds each run's first and past-the-end token index. */
-static void Compiler._append_script_main(Compiler c, Array statements) {
+static void _append_script_main(Compiler c, Array statements) {
   Token tokens = c.tokenizer.tokens, eof = c.token;
-  long kept = c._end_index(tokens);
+  long kept = _end_index(c, tokens);
   Token first = tokens + statements[0].integer();
   Bytes stream = Bytes.new(sizeof(struct Token));
   stream = stream.append(tokens, kept);
@@ -1547,14 +1547,14 @@ static Bytes _append_placed(Bytes stream, Token token, Token first) {
    statements, which are locals of `x2c_script`. C would report such a name
    as undeclared; this names the cause and the `static` spelling that
    shares it. */
-static void Compiler._check_script_locals(Compiler c, List ast) {
+static void _check_script_locals(Compiler c, List ast) {
   Map locals = _script_locals(ast);
   if (!locals.len()) return;
   foreach (List node, ast) match (node)
     case %(function ? (bind (binding ? ?(String function)) ?)
            (block *items)):
       if (function != "x2c_script" && function != "main")
-        c._check_local_uses(items, locals);
+        _check_local_uses(c, items, locals);
 }
 
 static Map _script_locals(List ast) {
@@ -1571,7 +1571,7 @@ static Map _script_locals(List ast) {
   return locals;
 }
 
-static void Compiler._check_local_uses(Compiler c, List items, Map locals) {
+static void _check_local_uses(Compiler c, List items, Map locals) {
   foreach (List item, items) match (item) case %(at ?origin ?statement):
     foreach (Var name, locals.keys()) {
       Var found;
@@ -1593,30 +1593,30 @@ static void Compiler._check_local_uses(Compiler c, List items, Map locals) {
    reported at `site`, the form's first token, or at the cursor for a form
    without one. */
 
-static void Compiler._record_top_level(Compiler c, List node, Token site) {
+static void _record_top_level(Compiler c, List node, Token site) {
   match (node) {
     case %(declare (!set ?declared (*)) (bindings *bindings)): {
       Type type = declared;
-      c._record_objects(bindings, site);
-      c._record_static_object(type, bindings);
-      c._record_prototypes(type, bindings);
+      _record_objects(c, bindings, site);
+      _record_static_object(c, type, bindings);
+      _record_prototypes(c, type, bindings);
     }
     case %(function ?return_type
            (!set ?target (bind ?binding *)) ?): {
       List declaration = %(declare $return_type (bindings $target));
-      c._record_definition(declaration.type_from_ast(), binding, site);
+      _record_definition(c, declaration.type_from_ast(), binding, site);
     }
   }
 }
 
 /* An initializer makes a file-scope declaration a definition; a tentative
    one may be repeated. */
-static void Compiler._record_objects(Compiler c, List bindings, Token site) {
+static void _record_objects(Compiler c, List bindings, Token site) {
   foreach (List row, bindings)
     match (row) case %(op = (bind (!set ?binding (binding ? ?)) ?) ?): {
       List key = %(defined $binding);
       if (key in c.semantic_binding_facts())
-        c._report_redefinition("variable", binding, site);
+        _report_redefinition(c, "variable", binding, site);
       c.set_fact(key, 1);
       c.set_fact(%(arms $binding), c.arms);
     }
@@ -1627,7 +1627,7 @@ static void Compiler._record_objects(Compiler c, List bindings, Token site) {
    different arms are not compared. For a variable, whose initializer moves
    into the generated init function, a duplicate under two true conditions
    is therefore not detected, and the later initializer wins. */
-static void Compiler._report_redefinition(
+static void _report_redefinition(
   Compiler c, String kind, List binding, Token site) {
   Var arms;
   if (!c.semantic_binding_facts().try_get(%(arms $binding), arms) ||
@@ -1641,7 +1641,7 @@ static void Compiler._report_redefinition(
    produced it, and whether that form is private, for the definition walk.
    A typedef or declaration may repeat its name, so each statement keys its
    own range. */
-static void Compiler._record_span(Compiler c, List node, int start, int end) {
+static void _record_span(Compiler c, List node, int start, int end) {
   List key = NULL;
   match (node) {
     case %(function ? (bind ?binding ?) ?): key = binding;
@@ -1660,21 +1660,21 @@ static void Compiler._record_span(Compiler c, List node, int start, int end) {
    between two prototypes. */
 
 // Record only prototypes reached in positioned full-parse source order.
-static void Compiler._record_prototypes(
+static void _record_prototypes(
   Compiler c, Type declared_type, List items) {
   foreach (List target, items)
     match (target)
       case %(bind ?binding ?modifiers): {
         List single = %(declare $declared_type (bindings $target));
         Type type = single.type_from_ast();
-        if (type.is_function()) c._record_prototype(binding, type, modifiers);
+        if (type.is_function()) _record_prototype(c, binding, type, modifiers);
       }
 }
 
-static void Compiler._record_prototype(
+static void _record_prototype(
   Compiler c, List binding, Type type, List modifiers) {
-  c._record_attributes(binding, modifiers);
-  List contract = c._contract(type, binding);
+  _record_attributes(c, binding, modifiers);
+  List contract = _contract(c, type, binding);
   Var stored;
   if (c.semantic_binding_facts().try_get(%(completion $binding), stored)) {
     List state = stored;
@@ -1690,7 +1690,7 @@ static void Compiler._record_prototype(
 
 /* A source attribute on the prototype belongs to the function; the
    generator writes it on the prototype it derives from the definition. */
-static void Compiler._record_attributes(
+static void _record_attributes(
   Compiler c, List binding, List modifiers) {
   List attributes = NULL;
   foreach (Var item, modifiers)
@@ -1700,19 +1700,19 @@ static void Compiler._record_attributes(
     c.set_fact(%(attributes $binding), attributes);
 }
 
-static void Compiler._record_definition(
+static void _record_definition(
   Compiler c, Type type, List binding, Token site) {
-  List contract = c._contract(type, binding);
+  List contract = _contract(c, type, binding);
   Var stored;
   if (c.semantic_binding_facts().try_get(%(completion $binding), stored)) {
     List state = stored;
     Var (state_kind, prior_contract) = state;
     if (state_kind == <prototype>) {
-      c._complete_prototype(binding, prior_contract, contract, site);
+      _complete_prototype(c, binding, prior_contract, contract, site);
       return;
     }
     if (state_kind == <definition> || state_kind == <completed>)
-      c._report_redefinition("function", binding, site);
+      _report_redefinition(c, "function", binding, site);
   }
   c.set_fact(%(completion $binding), %(definition $contract));
   c.set_fact(%(arms $binding), c.arms);
@@ -1723,7 +1723,7 @@ static void Compiler._record_definition(
 /* A definition completes the prior prototype whose contract it matches. A
    definition without `static` after a `static` prototype keeps the
    prototype's internal linkage in C. */
-static void Compiler._complete_prototype(
+static void _complete_prototype(
   Compiler c, List binding, List prior_contract, List contract, Token site) {
   match (prior_contract)
     case %(function-contract ?a ?b static ?d)
@@ -1737,9 +1737,9 @@ static void Compiler._complete_prototype(
   c.set_fact(%(arms $binding), c.arms);
 }
 
-static List Compiler._contract(Compiler c, Type type, List binding) =>
+static List _contract(Compiler c, Type type, List binding) =>
   _completion_contract(
-    type, c._fact(%(method $binding)), c._fact(%(self $binding)));
+    type, _fact(c, %(method $binding)), _fact(c, %(self $binding)));
 
 static List _completion_contract(
   Type type, List method_identity, List self_signature) {
@@ -1774,23 +1774,23 @@ static int _omitted_specifier(Var item, int keep_qualifiers) {
 
 // static initializers
 
-static void Compiler._record_static_object(
+static void _record_static_object(
   Compiler c, Type declared, List bindings) {
   if (!declared.is_static()) return;
   int declared_var = c.sym.is_var_type(declared);
-  if (!declared_var && !c._initializable_type(declared)) return;
+  if (!declared_var && !_initializable_type(c, declared)) return;
   foreach (List binding_init, bindings)
     match (binding_init)
       case %(op = (bind (!set ?binding (binding ? ?)) ?)
              (expr (!set ?initializer_type (*)) ?value)): {
-        if (declared_var && !c._initializable_type(initializer_type)) continue;
+        if (declared_var && !_initializable_type(c, initializer_type)) continue;
         Map references = {}, Array ordered = [];
         _collect_references(value, references, ordered);
         c.static_init_deps[binding] = ordered.list_free();
       }
 }
 
-static int Compiler._initializable_type(Compiler c, Type type) =>
+static int _initializable_type(Compiler c, Type type) =>
   c.sym.is_string_type(type) || c.sym.is_named_value_type(type, "List") ||
   c.sym.is_array_type(type) || c.sym.is_map_type(type) ||
   c.sym.is_named_value_type(type, "Func");
@@ -1821,7 +1821,7 @@ static void _collect_references(Var value, Map references, Array ordered) {
   foreach (Var child, node) _collect_references(child, references, ordered);
 }
 
-static void Compiler._check_static_inits(Compiler c) {
+static void _check_static_inits(Compiler c) {
   Map statics = c.sym.file_statics();
   foreach (Var (key, value), c.static_init_deps) {
     List binding = key, dependencies = value;
@@ -1829,12 +1829,12 @@ static void Compiler._check_static_inits(Compiler c) {
       String name = binding_identity_spelling(reference);
       if (!name || %($name) in statics) continue;
       String target = binding_identity_spelling(binding);
-      $report.parse.static_dependency(c, c._init_token(binding), name, target);
+      $report.parse.static_dependency(c, _init_token(c, binding), name, target);
     }
   }
 }
 
-static Token Compiler._init_token(Compiler c, List binding) {
+static Token _init_token(Compiler c, List binding) {
   Var index;
   if (!c.init_tokens.try_get(binding, index)) return NULL;
   Token tokens = c.tokenizer.tokens;
@@ -1851,14 +1851,14 @@ static Token Compiler._init_token(Compiler c, List binding) {
     translation finishes.
 */
 void Compiler.tokenize(Compiler c, char *text) {
-  if (c._is_script_file()) c.script = c.unit_script;
+  if (_is_script_file(c)) c.script = c.unit_script;
   c.input_boundary = NULL;
   c.text = text;
   c.tokenizer = Tokenizer.new(c.text, <x2c>);
   c.tokenizer.layout = c.layout || is_layout_file(c.filename);
   c.tokenizer.scan();
   c.layout = c.tokenizer.layout;
-  c._report_malformed_token();
+  _report_malformed_token(c);
   c.scan_conditionals();
   _retag_keywords(c.tokenizer);
   c.token = Token.skip_trivia(c.tokenizer.tokens);
@@ -1867,7 +1867,7 @@ void Compiler.tokenize(Compiler c, char *text) {
 
 /* The unit's script settings apply to the one file that carries the
    shebang, whichever compiler reads it. */
-static int Compiler._is_script_file(Compiler c) =>
+static int _is_script_file(Compiler c) =>
   c.unit_script && c.filename &&
   (c.filename == c.unit_script.path ||
    absolute_path(c.filename) == c.unit_script.path);
@@ -1876,7 +1876,7 @@ static int Compiler._is_script_file(Compiler c) =>
    appended `<eof>` and blames the end of the file. Report the refused byte
    instead. An `<incomplete>` token really did run out of source, so it keeps
    the end-of-file diagnostic that describes it. */
-static void Compiler._report_malformed_token(Compiler c) {
+static void _report_malformed_token(Compiler c) {
   Symbol status = c.tokenizer.status();
   if (status != <malformed> && status != <indent>) return;
   for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {
@@ -2005,10 +2005,10 @@ void Compiler.next(Compiler c) {
   Token consumed = c.token;
   if (consumed.type == <eof>) return;
   c.token = Token.skip_trivia(consumed + 1);
-  c._update_brace_stack(consumed);
+  _update_brace_stack(c, consumed);
 }
 
-static void Compiler._update_brace_stack(Compiler c, Token consumed) {
+static void _update_brace_stack(Compiler c, Token consumed) {
   if (!consumed) return;
   switch (consumed.type) {
     case <"{">: case <"%{">: case <"${">: case <"@{">:
@@ -2043,7 +2043,7 @@ int Compiler.take_word(Compiler c, String word) {
   return 1;
 }
 
-static void Compiler._check_unmatched_braces(Compiler c) {
+static void _check_unmatched_braces(Compiler c) {
   if (!c.braces.len()) return;
   $report.parse.brace_missing(c, c.braces[-1]);
 }
@@ -2148,7 +2148,7 @@ void Compiler.record_source_declaration(
   if (!c.source_facts || c.macro_holes) return;
   Var value;
   if (!c.semantic_binding_facts().try_get(%(src-key $binding), value)) return;
-  List source_key = value, range = c._source_range(first, after);
+  List source_key = value, range = _source_range(c, first, after);
   if (!range) return;
   Map symbols = source_key.car();
   List key = source_key.cadr();
@@ -2161,7 +2161,7 @@ void Compiler.record_source_declaration(
   }
 }
 
-static List Compiler._source_range(Compiler c, Token first, Token after) {
+static List _source_range(Compiler c, Token first, Token after) {
   if (!first || !after || first >= after || c.macro_holes) return NULL;
   Token last = after - 1;
   while (last > first &&
@@ -2182,7 +2182,7 @@ void Compiler.record_source_reference(
   Compiler c, List binding, Type type, Token first, Token after) {
   if (!c.source_facts || !c.source_primary || c.shallow || c.macro_holes ||
       !binding_identity_try_parts(binding, NULL, NULL)) return;
-  List range = c._source_range(first, after);
+  List range = _source_range(c, first, after);
   if (range) c.source_occurrences.push(%(@range $binding $type));
 }
 
@@ -2221,14 +2221,14 @@ String Compiler.emitted_binding_name(Compiler c, List binding) {
 }
 
 // The List a binding fact holds, or NULL when the fact is absent.
-static List Compiler._fact(Compiler c, List key) {
+static List _fact(Compiler c, List key) {
   Var stored;
   return c.semantic_binding_facts().try_get(key, stored) ? stored : NULL;
 }
 
 /** Returns the optional references proven present in this lexical path. */
 List Compiler.present_references(Compiler c) =>
-  c._fact(%(present-references));
+  _fact(c, %(present-references));
 
 /** Records a nonnull optional parameter for the current lexical path. */
 void Compiler.mark_reference_present(Compiler c, List binding) {
@@ -2268,7 +2268,7 @@ List Compiler.optional_reference_test(
     }
     case %(expr ? ${$source_operator_content(
         %((!set ?op (!or == !=)) ?left ?right))}):
-      return c._null_comparison(op, left, right, truth);
+      return _null_comparison(c, op, left, right, truth);
     case %(expr (opt-ref *) ${$source_identifier_content(%(?binding))}):
       if (%(optional-reference-param $binding) in
           c.semantic_binding_facts()) return binding;
@@ -2278,7 +2278,7 @@ List Compiler.optional_reference_test(
 
 /* A comparison with a null literal tests the other operand; its true arm
    proves presence for `!=`. */
-static List Compiler._null_comparison(
+static List _null_comparison(
   Compiler c, Var op, Var left, Var right, int &truth) {
   if (_null_literal(right)) {
     truth = op == <!=>;
@@ -2448,7 +2448,7 @@ List Compiler.cache_cons_cell(Compiler c, List head, List tail) {
 */
 List Compiler.cache_literal_var(Compiler c, Var value) {
   if (value is <list>) {
-    List cached = c._cache_literal_list(value);
+    List cached = _cache_literal_list(c, value);
     return c.cache(%( var (expr ("List") (expr ("List") $cached)) ));
   }
   if (value is <string>) {
@@ -2457,9 +2457,9 @@ List Compiler.cache_literal_var(Compiler c, Var value) {
     return c.cache(%(var (expr ("String") $cached)));
   }
   if (value.is_integer() || value.is_floating())
-    return c._cache_boxed(c.meta_value_expression(NULL, value, NULL));
+    return _cache_boxed(c, c.meta_value_expression(NULL, value, NULL));
   if (value is <lsym>)
-    return c._cache_boxed(
+    return _cache_boxed(c,
       %(expr ("Atom") (literal ("Atom") ${value.str()} $value)));
   if (value is not <symbol>) return NULL;
   String spelling = value.symbol();
@@ -2470,12 +2470,12 @@ List Compiler.cache_literal_var(Compiler c, Var value) {
 }
 
 // A number or atom is cached through its conversion to a `Var`.
-static List Compiler._cache_boxed(Compiler c, List literal) {
+static List _cache_boxed(Compiler c, List literal) {
   literal = c.convert_expression(literal, %("Var"));
   return c.cache(%(var $literal));
 }
 
-static List Compiler._cache_literal_list(Compiler c, List values) {
+static List _cache_literal_list(Compiler c, List values) {
   Array heads = $auto([]);
   foreach (Var value, values) heads.push(c.cache_literal_var(value));
   List cached = %(nil);
@@ -2492,7 +2492,7 @@ static List Compiler._cache_literal_list(Compiler c, List values) {
     `Symbol`s.
 */
 List Compiler.cache_literal_list(Compiler c, List values) {
-  List cached = c._cache_literal_list(values);
+  List cached = _cache_literal_list(c, values);
   return %(expr ("List") (expr ("List") $cached));
 }
 
@@ -2517,16 +2517,16 @@ Var Compiler.match_pattern_value(Compiler c, Var node) {
   }
   if (head == <var>) return c.match_pattern_value(second);
   if (head == <string>) return c.match_pattern_value(second);
-  if (head == <call>) return c._call_value(second, third);
+  if (head == <call>) return _call_value(c, second, third);
   if (head == <literal>) return ast.last();
   if (head == <nil>) return %();
-  if (head == <cons>) return c._cons_value(second, third);
+  if (head == <cons>) return _cons_value(c, second, third);
   return <x2c-dyn>;
 }
 
 /* A case pattern matches what its labels match. Other untyped calls are
    computed; typed builtin boxers were recognized with their expression. */
-static Var Compiler._call_value(Compiler c, Var callee, Var args) {
+static Var _call_value(Compiler c, Var callee, Var args) {
   String converter = _converter_name(callee);
   if (converter == "Macro_case_pattern")
     match (args) case %(args ? ?names): {
@@ -2536,7 +2536,7 @@ static Var Compiler._call_value(Compiler c, Var callee, Var args) {
   return <x2c-dyn>;
 }
 
-static Var Compiler._cons_value(Compiler c, Var head, Var tail) {
+static Var _cons_value(Compiler c, Var head, Var tail) {
   Var value = c.match_pattern_value(head);
   Var rest = c.match_pattern_value(tail);
   if (rest is not <list>) return <x2c-dyn>;
@@ -2791,9 +2791,9 @@ static Compiler _new(Compiler owner) {
   Compiler c =
     Scope.malloc_finalized(sizeof(struct Compiler), _drop_compiler);
   memset(c, 0, sizeof(struct Compiler));
-  c._init_tables();
-  if (owner) c._share_unit(owner);
-  else c._own_unit();
+  _init_tables(c);
+  if (owner) _share_unit(c, owner);
+  else _own_unit(c);
   c.sym = Sym.new(c);
   c.pending.reset();
   c.collect_protocols = 1;
@@ -2808,7 +2808,7 @@ static Compiler _new(Compiler owner) {
   return c;
 }
 
-static void Compiler._init_tables(Compiler c) {
+static void _init_tables(Compiler c) {
   c.id_keys = [];
   $set_fields(c, {}, key_ids, deps, macros, kw_aliases,
               object_macros, proto_cache, imports, init_tokens,
@@ -2820,7 +2820,7 @@ static void Compiler._init_tables(Compiler c) {
 /* A child compiler owns its tokens, symbols, and diagnostics. Package
    registries and generated-name state belong to the whole translation
    unit, so every child must mutate the owner's exact objects. */
-static void Compiler._share_unit(Compiler c, Compiler owner) {
+static void _share_unit(Compiler c, Compiler owner) {
   $copy_fields(c, owner, package, package_dirs, package_source_dirs,
                package_roots, package_aliases, package_members,
                package_effects, names,
@@ -2833,7 +2833,7 @@ static void Compiler._share_unit(Compiler c, Compiler owner) {
 
 /* The first compiler of a unit creates the state its children share and
    starts from the shared session's compile-time-only definitions. */
-static void Compiler._own_unit(Compiler c) {
+static void _own_unit(Compiler c) {
   c.pending_inline_bodies = [];
   c.collection_native_files = {};
   c.inherit_library_comptime();

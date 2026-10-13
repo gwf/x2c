@@ -904,7 +904,7 @@ String List.str(List lst) {
 */
 Buffer List.write_str(List lst, Buffer out) {
   Render r = {out, <str>};
-  $let(out.padding, 1) r._value(lst);
+  $let(out.padding, 1) _value(r, lst);
   return out;
 }
 
@@ -926,30 +926,30 @@ String List.repr(List lst) {
 /** Appends the readable representation of `List` to a `Buffer`. */
 Buffer List.write_repr(List lst, Buffer out) {
   Render r = {out, <repr>};
-  r._value(lst);
+  _value(r, lst);
   return out;
 }
 
 /* Renders `elem` at the current column, breaking lines as it goes. */
-static void Render._value(Render &r, Var elem) {
+static void _value(Render &r, Var elem) {
   Buffer out = r.out;
   if (out.pos >= _WIDTH - 1 || out.pos - out._indent > 40)
     out.newline_indent();
-  if (elem is not <list>) r._leaf(elem);
+  if (elem is not <list>) _leaf(r, elem);
   else if (!elem.list()) _nil(out);
-  else if (!r._fits(elem)) r._items(elem);
+  else if (!_fits(r, elem)) _items(r, elem);
 }
 
 /* A leaf that overflows the line is written again on the next one. */
-static void Render._leaf(Render &r, Var elem) {
+static void _leaf(Render &r, Var elem) {
   Buffer out = r.out;
   size_t before = out.content.length, position = out.pos;
-  r._write_leaf(elem);
+  _write_leaf(r, elem);
   size_t length = out.content.length - before;
   if (position + length <= _WIDTH) return;
   out.unwrite(length);
   out.newline_indent();
-  r._write_leaf(elem);
+  _write_leaf(r, elem);
 }
 
 static void _nil(Buffer out) {
@@ -959,49 +959,49 @@ static void _nil(Buffer out) {
 
 /* Writes a List flat when it fits in the rest of the line. Returns zero,
    having written nothing, when it does not fit. */
-static int Render._fits(Render &r, Var elem) {
+static int _fits(Render &r, Var elem) {
   Buffer line = $auto(Buffer.new(r.out.padding));
   Render flat = {line, r.mode};
-  flat._flat(elem);
+  _flat(flat, elem);
   if (r.out.pos + line.content.length > _WIDTH) return 0;
   r.out.write_len(line.content.bytes, line.content.length);
   return 1;
 }
 
-/* Writes a List's elements in turn, each rendered as `Render._value`
+/* Writes a List's elements in turn, each rendered as `_value`
    does. Cells are immutable, so a chain cannot reach itself; a cycle through
    a mutable container in a car stops at that container's own guard. */
-static void Render._items(Render &r, Var elem) {
+static void _items(Render &r, Var elem) {
   List lst = elem;
   Buffer out = r.out;
   if (out.pos - out.tabstop() > 5) out.newline_indent();
   _open(lst, out);
   for (List l = lst; l; l = l.cdr()) {
-    r._value(l.car());
+    _value(r, l.car());
     if (l.cdr()) out.write(" ");
   }
   _close(out);
 }
 
 /* Writes `elem` on one line. */
-static void Render._flat(Render &r, Var elem) {
-  if (elem is not <list>) r._write_leaf(elem);
+static void _flat(Render &r, Var elem) {
+  if (elem is not <list>) _write_leaf(r, elem);
   else if (!elem.list()) r.out.write("()");
-  else r._flat_items(elem);
+  else _flat_items(r, elem);
 }
 
-static void Render._flat_items(Render &r, Var elem) {
+static void _flat_items(Render &r, Var elem) {
   List lst = elem;
   Buffer out = r.out;
   _open(lst, out);
   for (List l = lst; l; l = l.cdr()) {
-    r._flat(l.car());
+    _flat(r, l.car());
     if (l.cdr()) out.write(" ");
   }
   _close(out);
 }
 
-static void Render._write_leaf(Render &r, Var elem) {
+static void _write_leaf(Render &r, Var elem) {
   if (r.mode == <str>) elem.write_str(r.out);
   else if (elem is <symbol>) Atom.write_repr(elem, r.out);
   else elem.write_repr(r.out);

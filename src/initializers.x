@@ -28,19 +28,19 @@ static keyword loop $private.loop;
     bounds. */
 List Compiler.convert_initializer(
   Compiler c, List value, Type type, List target) =>
-  c._convert_initializer(value, type, target, NULL);
+  _convert_initializer(c, value, type, target, NULL);
 
-static List Compiler._convert_initializer(
+static List _convert_initializer(
   Compiler c, List value, Type type, List target, int &?native_used) {
   match (value)
     case %(expr ? (composite ?payload)):
-      return c._convert_composite(
+      return _convert_composite(c,
         payload.cdr(), type.canonicalize(), target, NULL, native_used);
   return c.convert_expression(value, type.declared());
 }
 
 /* A qualified alias can expose another typedef below its qualifier. */
-static Type Compiler._initializer_shape(Compiler c, Type type) {
+static Type _resolve_shape(Compiler c, Type type) {
   if (!type) return type;
   type = c.sym.resolve_key(type);
   int hops = 0;
@@ -53,17 +53,17 @@ static Type Compiler._initializer_shape(Compiler c, Type type) {
   }
 }
 
-static List Compiler._convert_composite(
+static List _convert_composite(
   Compiler c, List items, Type target, List native_target,
   List parent_condition, int &?native_used) {
   if (!items) {
-    List fresh = c._empty_collection(target);
+    List fresh = _empty_collection(c, target);
     if (fresh) return fresh;
   }
   if (!native_target) native_target = _zero_pointer_target(target, target);
   Array elements = [];
   int discarded = 0;
-  List rows = c._composite_rows(
+  List rows = _composite_rows(c,
     target, items, native_target, parent_condition, discarded);
   // Preserve C's excess warning only when this synthetic alternative applies.
   // The always-true ICE stays on a retained value, so braces remain braces.
@@ -71,10 +71,10 @@ static List Compiler._convert_composite(
     ? _composite_excess_check(parent_condition) : NULL;
   foreach (List row, rows) {
     List row_condition = excess_check
-      ? _initializer_and(parent_condition, excess_check) : parent_condition;
+      ? _condition_and(parent_condition, excess_check) : parent_condition;
     excess_check = NULL;
     elements.push(
-      c._convert_composite_row(
+      _convert_composite_row(c,
         row, native_target, row_condition, parent_condition, native_used));
   }
   List converted = elements.list_free();
@@ -83,7 +83,7 @@ static List Compiler._convert_composite(
 
 /* An empty initializer for a Map or Array, or for a type that converts from
    one, is a fresh empty collection. A Var holds a fresh empty Map. */
-static List Compiler._empty_collection(Compiler c, Type target) {
+static List _empty_collection(Compiler c, Type target) {
   for (int kind = 0; kind < 2; kind++) {
     Macro shape = kind ? $array_value : $map_value;
     Type source = kind ? %("Array") : %("Map");
@@ -107,7 +107,7 @@ static List _zero_pointer_target(Type viewed, Type native) {
     (op * (expr $pointer (parens (expr $pointer (cast $pointer $zero))))))));
 }
 
-static List Compiler._composite_rows(
+static List _composite_rows(
   Compiler c, Type target, List items, List native_target,
   List parent_condition, int &discarded) {
   Array rows = [];
@@ -148,43 +148,43 @@ static List _composite_excess_check(List parent_condition) {
     unconditional, and a NULL destination is excess. */
 List Compiler.initializer_rows(
   Compiler c, Type root, List items, List target) {
-  List scalar = c._initializer_scalar_rows(root, items, target);
+  List scalar = _scalar_rows(c, root, items, target);
   if (scalar) return scalar;
   Array rows = [];
-  List first_path = c._initializer_first(root, NULL);
-  Type resolved_root = c._initializer_shape(root);
+  List first_path = _first_path(c, root, NULL);
+  Type resolved_root = _resolve_shape(c, root);
   int available = !!first_path || resolved_root.scalar() ||
     resolved_root.is_pointer() || resolved_root.is_enum();
   List states = %((() $first_path $available));
   int first = 1;
   foreach (List original, items) {
-    rows.push(c._initializer_row(root, original, target, states, first));
+    rows.push(_advance_row(c, root, original, target, states, first));
     first = 0;
   }
   return rows.list_free();
 }
 
-static List Compiler._initializer_row(
+static List _advance_row(
   Compiler c, Type root, List original, List target,
   List &states, int first) {
   List value = original;
   if (original.car() == <dotinit> || original.car() == <indexinit>) {
-    List path = c._initializer_designated(root, original, value, original);
+    List path = _designated_path(c, root, original, value, original);
     states = %((() $path 1));
   }
-  List cases = c._row_cases(root, value, states, first);
+  List cases = _row_cases(c, root, value, states, first);
   Array following = [];
   foreach (List choice, cases) {
     (List condition, List path, Type type, List input) = choice;
-    c._initializer_next(target, path, condition, following);
+    _advance_path(c, target, path, condition, following);
   }
-  states = _initializer_merge(following);
+  states = _merge_states(following);
   return %($original $cases);
 }
 
 /* An initval supplies its own cases; otherwise each cursor state descends
    to the first subobject that the value initializes whole. */
-static List Compiler._row_cases(
+static List _row_cases(
   Compiler c, Type root, List value, List states, int first) {
   match (value)
     case %(expr ? (!set ?body (initval *))): {
@@ -194,32 +194,32 @@ static List Compiler._row_cases(
   Array cases = [];
   foreach (List state, states) {
     (List condition, List path, int available) = state;
-    Type type = available ? _initializer_type(path, root) : NULL;
-    if (first && c._initializer_string_array(root, value)) {
+    Type type = available ? _path_type(path, root) : NULL;
+    if (first && _fills_char_array(c, root, value)) {
       path = NULL;
       type = root;
     }
-    while (type && !c._initializer_whole(type, value)) {
-      List next = c._initializer_first(type, path);
+    while (type && !_fills_whole(c, type, value)) {
+      List next = _first_path(c, type, path);
       if (!next) break;
       path = next;
-      type = _initializer_type(path, root);
+      type = _path_type(path, root);
     }
     cases.push(%($condition $path $type $value));
   }
   return cases.list_free();
 }
 
-static List Compiler._initializer_designated(
+static List _designated_path(
   Compiler c, Type root, List node, List &value, List &normalized) {
   List path = NULL, selectors = NULL;
   Type type = root;
   loop {
-    Type owner = c._initializer_shape(type);
+    Type owner = _resolve_shape(c, type);
     match (node) {
       case %(dotinit ?field ?inner): {
         selectors = cons(%(dotinit $field), selectors);
-        List selected = c._initializer_named(type, field.car(), path);
+        List selected = _named_field_path(c, type, field.car(), path);
         type = c.sym.lookup_field(type, field);
         path = selected ? selected
           : cons(%($owner field ${field.car()} $type ()), path);
@@ -228,7 +228,7 @@ static List Compiler._initializer_designated(
       }
       case %(indexinit ?index ?inner): {
         List reference = NULL;
-        List captured = c._initializer_index(index, reference);
+        List captured = _capture_index(c, index, reference);
         selectors = cons(%(indexinit $captured), selectors);
         type = owner.dereference();
         path = cons(%($owner index $reference $type ()), path);
@@ -243,18 +243,18 @@ static List Compiler._initializer_designated(
   }
 }
 
-static List Compiler._initializer_named(
+static List _named_field_path(
   Compiler c, Type type, Var name, List parent) {
-  Type owner = c._initializer_shape(type);
+  Type owner = _resolve_shape(c, type);
   List fields = c.sym.field_order(owner).cdr();
   while (fields) {
     List row = fields.car();
-    List path = _initializer_field(owner, fields, parent);
+    List path = _field_path(owner, fields, parent);
     if (row.car() == name) return path;
     Type member = row.cadr();
     if (!row.car() &&
-        c._initializer_shape(member).is_aggregate()) {
-      List nested = c._initializer_named(member, name, path);
+        _resolve_shape(c, member).is_aggregate()) {
+      List nested = _named_field_path(c, member, name, path);
       if (nested) return nested;
     }
     fields = fields.cdr();
@@ -267,11 +267,11 @@ static List Compiler._initializer_named(
     observe the same member promotion as native initializer conversion. */
 List Compiler.initializer_field_path(
   Compiler c, Type type, List field) =>
-  c._initializer_named(type, field.car(), NULL);
+  _named_field_path(c, type, field.car(), NULL);
 
 /* An enum constant captures one native index expansion where the original
    designator occurred. Its ordinary cast shape survives normalization. */
-static List Compiler._initializer_index(
+static List _capture_index(
   Compiler c, List index, List &reference) {
   match (index)
     case %(expr ? ${$source_cast_content(
@@ -281,7 +281,7 @@ static List Compiler._initializer_index(
       return index;
     }
   unsigned long long at;
-  if (_initializer_integer(index, at)) {
+  if (_literal_integer(index, at)) {
     reference = index;
     return index;
   }
@@ -293,7 +293,7 @@ static List Compiler._initializer_index(
   return %(expr $type (cast $native $reference));
 }
 
-static List _initializer_merge(Array states) {
+static List _merge_states(Array states) {
   Map positions = {};
   Array merged = [];
   foreach (List state, states) {
@@ -307,27 +307,27 @@ static List _initializer_merge(Array states) {
     }
     int at = stored;
     List previous = merged[at];
-    condition = _initializer_or(previous.car(), condition);
+    condition = _condition_or(previous.car(), condition);
     merged[at] = %($condition $path $available);
   }
   states.free();
   return merged.list_free();
 }
 
-static int Compiler._initializer_whole(Compiler c, Type type, List value) {
+static int _fills_whole(Compiler c, Type type, List value) {
   if (value.match(%(expr ? (composite *)))) return 1;
-  Type source = value.cadr(), resolved = c._initializer_shape(type);
-  if (c._initializer_shape(source) == resolved) return 1;
+  Type source = value.cadr(), resolved = _resolve_shape(c, type);
+  if (_resolve_shape(c, source) == resolved) return 1;
   if (c.sym.is_var_type(type)) return 1;
-  if (c._initializer_string_array(type, value)) return 1;
+  if (_fills_char_array(c, type, value)) return 1;
   return !resolved.is_array() && !resolved.is_aggregate();
 }
 
-static int Compiler._initializer_string_array(
+static int _fills_char_array(
   Compiler c, Type type, List value) {
   if (!value.match(
     %(expr (* char) ${$source_literal_content(%((* char) ?))}))) return 0;
-  Type array = c._initializer_shape(type);
+  Type array = _resolve_shape(c, type);
   if (!array.is_array()) return 0;
   Type element = c.sym.resolve_key(array.cdr()).scalar();
   return element === %(char) || element === %(signed char) ||
@@ -340,28 +340,28 @@ static int Compiler._initializer_string_array(
    frames. The same subobject walk owns conversion and deferred native
    assignment. */
 
-static Type _initializer_type(List path, Type root) {
+static Type _path_type(List path, Type root) {
   if (!path) return root;
   (Type owner, Symbol kind, Var selector, Type type, List rest) =
     path.car();
   return type;
 }
 
-static List Compiler._initializer_first(
+static List _first_path(
   Compiler c, Type type, List parent) {
-  Type owner = c._initializer_shape(type);
+  Type owner = _resolve_shape(c, type);
   if (owner.is_array()) {
     List zero = $!int{ 0 };
     return cons(%($owner index $zero ${owner.cdr()} ()), parent);
   }
   if (owner.is_aggregate())
-    return _initializer_field(owner, c.sym.field_order(owner).cdr(), parent);
+    return _field_path(owner, c.sym.field_order(owner).cdr(), parent);
   return NULL;
 }
 
-static List _initializer_field(
+static List _field_path(
   Type owner, List fields, List parent) {
-  fields = _next_initializer_field(fields);
+  fields = _next_field(fields);
   if (!fields) return NULL;
   List row = fields.car();
   return cons(
@@ -370,7 +370,7 @@ static List _initializer_field(
 
 /* C positional initialization skips unnamed bit-fields, not anonymous
    aggregate subobjects. The ordered metadata retains both kinds. */
-static List _next_initializer_field(List fields) {
+static List _next_field(List fields) {
   while (fields) {
     List row = fields.car();
     Type type = row.cadr();
@@ -380,7 +380,7 @@ static List _next_initializer_field(List fields) {
   return fields;
 }
 
-static void Compiler._initializer_next(
+static void _advance_path(
   Compiler c, List target, List path, List condition, Array states) {
   while (path) {
     List frame = path.car(), parent = path.cdr();
@@ -388,27 +388,27 @@ static void Compiler._initializer_next(
     if (kind == <field>) {
       // A union initializes one member, so no field follows another.
       List next = owner.car() == <union> ? NULL
-        : _initializer_field(owner, rest, parent);
+        : _field_path(owner, rest, parent);
       if (next) {
         states.push(%($condition $next 1));
         return;
       }
     }
-    else if (c._next_index(target, frame, parent, condition, states)) return;
+    else if (_next_index(c, target, frame, parent, condition, states)) return;
     path = parent;
   }
   // Excess entries are the native initializer's final fallback.
   states.push(%(() () 0));
 }
 
-static int Compiler._next_index(
+static int _next_index(
   Compiler c, List target, List frame, List parent,
   List &condition, Array states) {
   (Type owner, Symbol kind, Var selector, Type type, List rest) = frame;
   List index = selector, dimension = owner.car().cadr();
   unsigned long long at, count;
   List base;
-  _initializer_position(index, base, at);
+  _index_position(index, base, at);
   int known_index = !base;
   List increment = _ull_literal(at + 1);
   index = base
@@ -417,18 +417,18 @@ static int Compiler._next_index(
     : increment;
   List next = cons(%($owner index $index $type ()), parent);
   if (!dimension) { states.push(%($condition $next 1)); return 1; }
-  if (known_index && _initializer_integer(dimension, count)) {
+  if (known_index && _literal_integer(dimension, count)) {
     if (at + 1 < count) { states.push(%($condition $next 1)); return 1; }
     return 0;
   }
-  List inside = c._index_inside(target, parent, type, index);
-  states.push(%(${_initializer_and(condition, inside)} $next 1));
-  condition = _initializer_and(
+  List inside = _index_inside(c, target, parent, type, index);
+  states.push(%(${_condition_and(condition, inside)} $next 1));
+  condition = _condition_and(
     condition, %(expr (int) (op ! (expr (int) (parens $inside)))));
   return 0;
 }
 
-static List Compiler._index_inside(
+static List _index_inside(
   Compiler c, List target, List parent, Type type, List index) {
   List array = c.initializer_slot(target, parent);
   List element = %(expr $type (index $array ${$!int{ 0 }}));
@@ -459,14 +459,14 @@ List Compiler.initializer_slot(Compiler c, List target, List path) {
    cursor histories. Children pair ordinary path frames with
    (type count children) layouts. */
 
-static List Compiler._initializer_scalar_rows(
+static List _scalar_rows(
   Compiler c, Type root, List items, List target) {
   int symbolic = 0;
   List string = NULL;
-  if (!c._scalar_inputs(items, string)) return NULL;
-  List layout = c._initializer_layout(root, target, string, symbolic);
+  if (!_scalar_inputs(c, items, string)) return NULL;
+  List layout = _scalar_layout(c, root, target, string, symbolic);
   if (!layout || !symbolic) return NULL;
-  int array = c._initializer_shape(root).is_array();
+  int array = _resolve_shape(c, root).is_array();
   Array rows = [];
   unsigned long long at = 0;
   foreach (List value, items) {
@@ -475,19 +475,19 @@ static List Compiler._initializer_scalar_rows(
     List condition = array ? %(expr (int)
       (op < $ordinal (expr (unsigned long long) (parens $count)))) : NULL;
     Array cases = [];
-    _initializer_ordinal(layout, ordinal, NULL, condition, value, cases);
+    _ordinal_cases(layout, ordinal, NULL, condition, value, cases);
     cases.push(%(() () () $value));
     rows.push(%($value ${cases.list_free()}));
   }
   return rows.list_free();
 }
 
-static int Compiler._scalar_inputs(Compiler c, List items, List &string) {
+static int _scalar_inputs(Compiler c, List items, List &string) {
   foreach (List value, items) {
     match (value) {
       case %(expr ? (!or (composite *) (initval *))): return 0;
       case %(expr ?type ?): {
-        Type source = c._initializer_shape(type);
+        Type source = _resolve_shape(c, type);
         if (!c.sym.is_var_type(type) &&
             (source.is_array() || source.is_aggregate())) return 0;
       }
@@ -500,29 +500,29 @@ static int Compiler._scalar_inputs(Compiler c, List items, List &string) {
   return 1;
 }
 
-static List Compiler._initializer_layout(
+static List _scalar_layout(
   Compiler c, Type type, List target, List string, int &symbolic) {
-  Type owner = c._initializer_shape(type);
+  Type owner = _resolve_shape(c, type);
   if (c.sym.is_var_type(type) ||
       (!owner.is_array() && !owner.is_aggregate()))
     return %($type ${_ull_literal(1)} ());
   if (owner.is_array())
-    return c._array_layout(type, owner, target, string, symbolic);
+    return _array_layout(c, type, owner, target, string, symbolic);
   if (owner.car() == <union>) return NULL;
-  return c._record_layout(type, owner, target, string, symbolic);
+  return _record_layout(c, type, owner, target, string, symbolic);
 }
 
-static List Compiler._array_layout(
+static List _array_layout(
   Compiler c, Type type, Type owner, List target, List string,
   int &symbolic) {
   List dimension = owner.car().cadr();
   if (!dimension) return NULL;
-  if (string && c._initializer_string_array(type, string)) return NULL;
+  if (string && _fills_char_array(c, type, string)) return NULL;
   unsigned long long size;
-  if (!_initializer_integer(dimension, size)) symbolic = 1;
-  List path = c._initializer_first(type, NULL);
+  if (!_literal_integer(dimension, size)) symbolic = 1;
+  List path = _first_path(c, type, NULL);
   List element = c.initializer_slot(target, path);
-  List child = c._initializer_layout(owner.cdr(), element, string, symbolic);
+  List child = _scalar_layout(c, owner.cdr(), element, string, symbolic);
   if (!child) return NULL;
   List one = _ull_literal(1);
   List bytes = %(expr (unsigned long long) (sizeof (parens $element)));
@@ -536,18 +536,18 @@ static List Compiler._array_layout(
   return %($type $count ((${path.car()} $child)));
 }
 
-static List Compiler._record_layout(
+static List _record_layout(
   Compiler c, Type type, Type owner, List target, List string,
   int &symbolic) {
   Array children = $auto([]);
   List count = NULL;
   List fields = c.sym.field_order(owner).cdr();
   while (fields) {
-    List path = _initializer_field(owner, fields, NULL);
+    List path = _field_path(owner, fields, NULL);
     if (!path) break;
     (Type parent, Symbol kind, Var name, Type member, List rest) = path.car();
     List slot = c.initializer_slot(target, path);
-    List child = c._initializer_layout(member, slot, string, symbolic);
+    List child = _scalar_layout(c, member, slot, string, symbolic);
     if (!child) return NULL;
     List units = child.cadr();
     count = count ? _ull_op(<+>, count, units) : units;
@@ -558,7 +558,7 @@ static List Compiler._record_layout(
   return %($type $count ${children.list()});
 }
 
-static void _initializer_ordinal(
+static void _ordinal_cases(
   List layout, List ordinal, List path, List condition, List value,
   Array cases) {
   (Type type, List count, List children) = layout;
@@ -575,7 +575,7 @@ static void _initializer_ordinal(
     if (kind == <index>)
       frame = _ordinal_index(frame, ordinal, units, one, position);
     else _ordinal_field(ordinal, units, one, start, position, active);
-    _initializer_ordinal(
+    _ordinal_cases(
       child, position, cons(frame, path), active, value, cases);
   }
 }
@@ -601,7 +601,7 @@ static void _ordinal_field(
   if (start) {
     position = _ull_op(<->, ordinal, start);
     if (units !== one)
-      active = _initializer_and(
+      active = _condition_and(
         active,
         %(expr (int)
           (op >= (expr (unsigned long long) (parens $ordinal))
@@ -613,7 +613,7 @@ static void _ordinal_field(
     : %(expr (int)
         (op < (expr (unsigned long long) (parens $position))
               (expr (unsigned long long) (parens $units))));
-  active = _initializer_and(active, test);
+  active = _condition_and(active, test);
   start = start ? _ull_op(<+>, start, units) : units;
 }
 
@@ -626,7 +626,7 @@ static typedef struct RowSelection {
 } RowSelection;
 
 /* Every case of a row carries the value under its designators. */
-static List Compiler._convert_composite_row(
+static List _convert_composite_row(
   Compiler c, List row, List native_target, List row_condition,
   List parent_condition, int &?native_used) {
   (List original, List cases) = row;
@@ -635,14 +635,14 @@ static List Compiler._convert_composite_row(
     value = value.caddr();
   if (value.match(%(expr ? (initval *))))
     return row_condition === parent_condition ? original
-      : c._convert_initval_row(
+      : _convert_initval_row(c,
         row, value, native_target, row_condition, native_used);
   RowSelection selected = _select_row(cases);
   if (selected.homogeneous)
-    return c._convert_homogeneous_row(
+    return _convert_homogeneous_row(c,
       original, value, selected, native_target, row_condition,
       native_used);
-  return c._convert_mixed_row(
+  return _convert_mixed_row(c,
     row, value, native_target, row_condition, parent_condition,
     native_used);
 }
@@ -654,7 +654,7 @@ static RowSelection _select_row(List cases) {
     (List condition, List path, Type destination, List input) = choice;
     if (!destination) { selected.excess = 1; continue; }
     selected.applicable = applicable_seen
-      ? _initializer_or(selected.applicable, condition) : condition;
+      ? _condition_or(selected.applicable, condition) : condition;
     applicable_seen = 1;
     if (!selected.type) { selected.type = destination; selected.path = path; }
     else if (destination !== selected.type) selected.homogeneous = 0;
@@ -662,14 +662,14 @@ static RowSelection _select_row(List cases) {
   return selected;
 }
 
-static List Compiler._convert_initval_row(
+static List _convert_initval_row(
   Compiler c, List row, List terminal, List native_target,
   List row_condition, int &?native_used) {
   (List original, List cases) = row;
   Array checked = [];
   foreach (List choice, cases) {
     (List condition, List path, Type destination, List input) = choice;
-    List value = c._convert_case(
+    List value = _convert_case(c,
       choice, input, native_target, row_condition, native_used);
     checked.push(%($condition $path $destination $value));
   }
@@ -678,53 +678,53 @@ static List Compiler._convert_initval_row(
   List choices = checked.list_free();
   if (header) choices = cons(header, choices);
   List value = %(expr () (initval @choices));
-  return _initializer_replace(original, value);
+  return _replace_value(original, value);
 }
 
 /* A case's value converted for its destination under the row's condition;
    an excess case keeps the value. */
-static List Compiler._convert_case(
+static List _convert_case(
   Compiler c, List choice, List value, List native_target,
   List row_condition, int &?native_used) {
   (List condition, List path, Type destination, List input) = choice;
   if (!destination) return value;
-  return c._initializer_conversion(
-    value, destination, _initializer_and(row_condition, condition),
+  return _convert_alternative(c,
+    value, destination, _condition_and(row_condition, condition),
     c.initializer_slot(native_target, path), native_used);
 }
 
-static List Compiler._convert_homogeneous_row(
+static List _convert_homogeneous_row(
   Compiler c, List original, List value, RowSelection selected,
   List native_target, List row_condition, int &?native_used) {
   List slot = c.initializer_slot(native_target, selected.path);
-  List condition = _initializer_and(
+  List condition = _condition_and(
     row_condition, selected.excess ? selected.applicable : NULL);
   List converted = !selected.type ? value
-    : c._initializer_conversion(
+    : _convert_alternative(c,
       value, selected.type, condition, slot, native_used);
-  return _initializer_replace(original, converted);
+  return _replace_value(original, converted);
 }
 
-static List _initializer_replace(List original, List value) {
+static List _replace_value(List original, List value) {
   match (original)
     case %((!set ?tag (!or dotinit indexinit)) ?key ?inner):
-      return %($tag $key ${_initializer_replace(inner, value)});
+      return %($tag $key ${_replace_value(inner, value)});
   return value;
 }
 
 /* Only native-dependent alternatives speculate. */
-static List Compiler._initializer_conversion(
+static List _convert_alternative(
   Compiler c, List value, Type type, List condition, List target,
   int &?native_used) {
   if (!condition)
-    return c._convert_initializer(value, type, target, native_used);
+    return _convert_initializer(c, value, type, target, native_used);
   if (native_used) native_used = 1;
   match (value)
     case %(expr ?stored (call "__builtin_choose_expr"
                              (args ?when ?yes ?no))):
       if (stored === type && when === condition) return value;
-  List result = c._speculate(value, type, condition, target, native_used);
-  List zero = _initializer_zero(type, target);
+  List result = _speculate(c, value, type, condition, target, native_used);
+  List zero = _zero_value(type, target);
   return !result ? _rejected_initializer(type, condition, zero)
     : _accepted_initializer(result, type, target, condition, zero);
 }
@@ -732,7 +732,7 @@ static List Compiler._initializer_conversion(
 /* The conversion of a native-dependent alternative, or NULL when it reports
    a type error. The transaction owns binding and name rollback while
    conversion may also append literal and adapter data. */
-static List Compiler._speculate(
+static List _speculate(
   Compiler c, List value, Type type, List condition, List target,
   int &?native_used) {
   SymTxn transaction = c.begin_semantic_transaction();
@@ -759,7 +759,7 @@ static List Compiler._speculate(
     try {
       match (value) {
         case %(expr ? (composite ?payload)):
-          result = c._convert_composite(
+          result = _convert_composite(c,
             payload.cdr(), type.canonicalize(), target, condition,
             native_used);
         default: result = c.convert_expression(value, type);
@@ -772,7 +772,7 @@ static List Compiler._speculate(
   return result;
 }
 
-static List _initializer_zero(Type type, List target) {
+static List _zero_value(Type type, List target) {
   Type native = type.is_bitfield() ? type.base_type()
     : target ? %("__typeof__" (parens $target)) : type;
   return %(expr $type (cast $native (expr $type
@@ -803,18 +803,18 @@ static List _accepted_initializer(
 
 // mixed rows
 
-static List Compiler._convert_mixed_row(
+static List _convert_mixed_row(
   Compiler c, List row, List source, List native_target,
   List row_condition, List parent_condition, int &?native_used) {
   (List original, List cases) = row;
   Array converted = [], captured = [];
   List prepared = source;
   if (source.match(%(expr ? (composite *))))
-    prepared = c._initializer_capture_leaves(source, captured);
+    prepared = _capture_leaves(c, source, captured);
   int native_identity = !parent_condition;
   foreach (List choice, cases) {
     (List condition, List path, Type destination, List input) = choice;
-    List result = c._convert_case(
+    List result = _convert_case(c,
       choice, prepared, native_target, row_condition, native_used);
     int identity = result === prepared;
     match (result)
@@ -828,18 +828,18 @@ static List Compiler._convert_mixed_row(
     captured.free();
     return original;
   }
-  return c._materialize_mixed_row(original, source, converted, captured);
+  return _materialize_mixed_row(c, original, source, converted, captured);
 }
 
-static List Compiler._initializer_capture_leaves(
+static List _capture_leaves(
   Compiler c, List value, Array inputs) {
   match (value) {
     case %((!set ?kind (!or dotinit indexinit)) ?key ?inner):
-      return %($kind $key ${c._initializer_capture_leaves(inner, inputs)});
+      return %($kind $key ${_capture_leaves(c, inner, inputs)});
     case %(expr ?type ${$source_composite_content(%(*items))}): {
       Array captured = [];
       foreach (List item, items)
-        captured.push(c._initializer_capture_leaves(item, inputs));
+        captured.push(_capture_leaves(c, item, inputs));
       return %(expr $type ${source_composite_content(
         captured.list_free())});
     }
@@ -850,40 +850,40 @@ static List Compiler._initializer_capture_leaves(
                            ${$source_cast_content(%(*))}
                            ${$grouped(?)}
                            (call *))):
-      return c._capture_initializer_value(value, type, inputs);
+      return _capture_value(c, value, type, inputs);
   }
   return value;
 }
 
-static List Compiler._capture_initializer_value(
+static List _capture_value(
   Compiler c, List value, Type type, Array inputs) {
   if (!c.sym.is_var_type(type) && !c.sym.resolve_key(type).scalar())
     return value;
-  if (_initializer_literal(value)) return value;
+  if (_is_literal(value)) return value;
   String formal = c.fresh_name("initializer_value");
   inputs.push(%($formal $value));
   return %(expr $type $formal);
 }
 
 // Keep literal construction/cache facts while capturing native value leaves.
-static int _initializer_literal(List value) {
+static int _is_literal(List value) {
   match (value) {
     case %(expr ? ${$source_literal_content(%(*))}): return 1;
     case %(expr ? ${$grouped(?inner)}):
-      return _initializer_literal(inner);
+      return _is_literal(inner);
     case %(expr ? ${$source_cast_content(%(? ?inner))}):
-      return _initializer_literal(inner);
+      return _is_literal(inner);
   }
   return 0;
 }
 
-static List Compiler._materialize_mixed_row(
+static List _materialize_mixed_row(
   Compiler c, List original, List source,
   Array converted, Array captured) {
   String formal = c.fresh_name("initializer_value");
   List placeholder = %(expr ${source.cadr()} $formal);
   List values = converted.list_free();
-  List adapted = c._initializer_adapters(source, values, placeholder);
+  List adapted = _adapt_choices(c, source, values, placeholder);
   if (adapted) values = adapted;
   Array replaced = [];
   List inputs = captured.list_free();
@@ -900,17 +900,17 @@ static List Compiler._materialize_mixed_row(
   if (uses_input) inputs = cons(%($formal $source), inputs);
   if (inputs) choices = cons(%(input @inputs), choices);
   List result = %(expr () (initval @choices));
-  return _initializer_replace(original, result);
+  return _replace_value(original, result);
 }
 
-static List Compiler._initializer_adapters(
+static List _adapt_choices(
   Compiler c, List source, List choices, List placeholder) {
-  Type from = c._initializer_value_type(source.cadr());
+  Type from = _adapter_type(c, source.cadr());
   if (!from || !ast_contains_head(source, <fields>)) return NULL;
   Array prepared = $auto([]);
   foreach (List choice, choices) {
     (List condition, List path, Type destination, List value) = choice;
-    if (destination && !c._initializer_value_type(destination)) return NULL;
+    if (destination && !_adapter_type(c, destination)) return NULL;
     if (value !== source) {
       match (value) {
         case %(expr ? (call "__builtin_choose_expr" (args ? ?yes ?))):
@@ -918,13 +918,13 @@ static List Compiler._initializer_adapters(
         default: return NULL;
       }
     }
-    if (!c._initializer_value_type(value.cadr())) return NULL;
+    if (!_adapter_type(c, value.cadr())) return NULL;
     prepared.push(%($condition $path $destination $value));
   }
   Array adapted = [];
   foreach (List choice, prepared.list()) {
     (List condition, List path, Type destination, List value) = choice;
-    List adapter = c._initializer_adapter(source, value);
+    List adapter = _value_adapter(c, source, value);
     Type callable = adapter.cadr(), result = callable.apply();
     Macro called = $called;
     value = c.rebuild_expression(
@@ -934,10 +934,10 @@ static List Compiler._initializer_adapters(
   return adapted.list_free();
 }
 
-static List Compiler._initializer_adapter(
+static List _value_adapter(
   Compiler c, List source, List converted) {
-  Type from = c._initializer_value_type(source.cadr());
-  Type result = c._initializer_value_type(converted.cadr());
+  Type from = _adapter_type(c, source.cadr());
+  Type result = _adapter_type(c, converted.cadr());
   List formal = %(expr ${source.cadr()} "_x2c_initializer_argument");
   List body = converted.search_replace(%(!quote $source), formal);
   List key = %(iadapt $from $result $body), adapter = NULL;
@@ -958,7 +958,7 @@ static List Compiler._initializer_adapter(
 
 // Inline native type definitions cannot be copied into conversion arms.
 // A selected by-value adapter consumes the original expression just once.
-static Type Compiler._initializer_value_type(Compiler c, Type type) {
+static Type _adapter_type(Compiler c, Type type) {
   if (c.sym.is_var_type(type)) return %("Var");
   Type scalar = c.sym.resolve_key(type).scalar();
   return scalar === %(void) ? NULL : scalar;
@@ -967,14 +967,14 @@ static Type Compiler._initializer_value_type(Compiler c, Type type) {
 // native conditions
 
 /* A NULL condition is unconditional, so it absorbs the other. */
-static List _initializer_or(List first, List second) {
+static List _condition_or(List first, List second) {
   if (!first || !second) return NULL;
   if (first === second) return first;
   return %(expr (int) (op || (expr (int) (parens $first))
                              (expr (int) (parens $second))));
 }
 
-static List _initializer_and(List first, List second) {
+static List _condition_and(List first, List second) {
   if (!first) return second;
   if (!second) return first;
   match (second)
@@ -983,28 +983,28 @@ static List _initializer_and(List first, List second) {
             (expr ? ${$grouped(?bound)})))}): {
       unsigned long long at;
       List base;
-      _initializer_position(index, base, at);
-      first = _initializer_drop_bound(first, bound, base, at);
+      _index_position(index, base, at);
+      first = _drop_bound(first, bound, base, at);
     }
   return first ? %(expr (int) (op && (expr (int) (parens $first))
                                     (expr (int) (parens $second)))) : second;
 }
 
-static List _initializer_drop_bound(
+static List _drop_bound(
   List condition, List bound, List base, unsigned long long minimum) {
   match (condition) {
     case %(expr ? ${$source_operator_content(
         %(&& (expr ? ${$grouped(?left)})
              (expr ? ${$grouped(?right)})))}):
-      return _initializer_and(
-        _initializer_drop_bound(left, bound, base, minimum),
-        _initializer_drop_bound(right, bound, base, minimum));
+      return _condition_and(
+        _drop_bound(left, bound, base, minimum),
+        _drop_bound(right, bound, base, minimum));
     case %(expr ? ${$source_operator_content(
         %(< (expr ? ${$grouped(?index)})
             (expr ? ${$grouped(?length)})))}): {
       unsigned long long at;
       List origin;
-      _initializer_position(index, origin, at);
+      _index_position(index, origin, at);
       if (length === bound && origin === base && at <= minimum) return NULL;
     }
   }
@@ -1014,14 +1014,14 @@ static List _initializer_drop_bound(
 /* Cursor offsets are literal facts even when their native starting index
    is not. Keep one base-plus-offset expression instead of nested
    increments. */
-static void _initializer_position(
+static void _index_position(
   List index, List &base, unsigned long long &offset) {
   base = NULL;
-  if (_initializer_integer(index, offset)) return;
+  if (_literal_integer(index, offset)) return;
   match (index)
     case %(expr ? ${$source_operator_content(
         %(+ (expr ? ${$grouped(?origin)}) ?amount))}):
-      if (_initializer_integer(amount, offset)) {
+      if (_literal_integer(amount, offset)) {
         base = origin;
         return;
       }
@@ -1031,7 +1031,7 @@ static void _initializer_position(
 
 /* Decode only a literal fact; native expressions are never evaluated here.
    A bare spelling is the int bound a canonical array type keeps. */
-static int _initializer_integer(List expression, unsigned long long &value) {
+static int _literal_integer(List expression, unsigned long long &value) {
   match (expression) {
     case %(expr ? ${$source_literal_content(%(?type ?spelling))}):
       return ((Type) type).integer_literal_magnitude(spelling, value);
@@ -1061,7 +1061,7 @@ List Compiler.convert_compound_literal(
   (Type definition, Type reference) = c.initializer_native_types(native_type);
   List target = _zero_pointer_target(type, reference);
   int native_used = 0;
-  List converted = c._convert_initializer(value, type, target, native_used);
+  List converted = _convert_initializer(c, value, type, target, native_used);
   if (!native_used) definition = native_type;
   return %(cast $definition $converted);
 }
@@ -1084,7 +1084,7 @@ List Compiler.initializer_native_types(Compiler c, Type type) {
   Array definitions = [], references = [];
   for (List rest = type; rest !== base; rest = rest.cdr()) {
     Var reused = NULL;
-    Var modifier = c._native_modifier(rest.car(), reused);
+    Var modifier = _native_modifier(c, rest.car(), reused);
     definitions.push(modifier);
     references.push(reused);
   }
@@ -1093,12 +1093,12 @@ List Compiler.initializer_native_types(Compiler c, Type type) {
   return %($definition $reference);
 }
 
-static Var Compiler._native_modifier(Compiler c, Var modifier, Var &reused) {
+static Var _native_modifier(Compiler c, Var modifier, Var &reused) {
   reused = modifier;
   match (modifier)
     case %(dim ?bound): {
       unsigned long long count;
-      if (!bound || _initializer_integer(bound, count)) return modifier;
+      if (!bound || _literal_integer(bound, count)) return modifier;
       match (bound)
         case %(expr ? ${$sizeof_grouped(%(struct ?tag (fields
             (declare (char) (bindings (bind ? ((dim ?))))))))}): {

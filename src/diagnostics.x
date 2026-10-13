@@ -60,7 +60,7 @@ Diagnostics Diagnostics.new(Compiler printer, int limit) {
 
 /** Clears stored entries and limit state while preserving configuration. */
 void Diagnostics.reset(Diagnostics diag) {
-  diag._forget(0);
+  _forget(diag, 0);
   diag.entries.clear();
   diag.count = 0;
   diag.limit_notified = 0;
@@ -88,7 +88,7 @@ void Diagnostics.release(Diagnostics diag, DiagnosticsHold hold, int keep) {
       _emit_entry(diag, diag.entries[i]);
     return;
   }
-  diag._forget(hold.entries);
+  _forget(diag, hold.entries);
   diag.entries.resize(hold.entries);
   diag.count = hold.count;
   diag.limit_notified = hold.limit_notified;
@@ -139,21 +139,21 @@ static List _build_entry(
 
 /* Some producers derive one failure twice, so an entry equal to a stored
    one is not repeated. Reports whether the entry was published. */
-static int Diagnostics._publish(Diagnostics diag, List entry) {
+static int _publish(Diagnostics diag, List entry) {
   if (entry in diag.published) return 0;
-  diag._store(entry);
+  _store(diag, entry);
   _emit_entry(diag, entry);
   return 1;
 }
 
-static void Diagnostics._store(Diagnostics diag, List entry) {
+static void _store(Diagnostics diag, List entry) {
   diag.published.setdefault(entry, diag.entries.len());
   diag.entries.push(entry);
 }
 
 /* The entries from position `from` on leave the store, so the repeat rule
    stops seeing those first stored there. */
-static void Diagnostics._forget(Diagnostics diag, int from) {
+static void _forget(Diagnostics diag, int from) {
   for (int i = from; i < diag.entries.len(); i++) {
     Var first;
     if (diag.published.try_get(diag.entries[i], first) && first.int() >= from)
@@ -167,7 +167,7 @@ static void _publish_limit_notice(Diagnostics diag) {
   if (diag.limit == 1) return;
   String note = "too many errors, stopping";
   List entry = _build_entry(<limit>, <note>, note, NULL, NULL);
-  diag._store(entry);
+  _store(diag, entry);
   _emit_entry(diag, entry);
 }
 
@@ -190,7 +190,7 @@ void Diagnostics.report(
   }
 
   List entry = _build_entry(code, <error>, message, location, notes);
-  if (!diag._publish(entry)) return;
+  if (!_publish(diag, entry)) return;
   diag.count += 1;
 
   if (diag.limit > 0 && diag.count >= diag.limit && !diag.limit_notified) {
@@ -201,9 +201,9 @@ void Diagnostics.report(
 
 /* Warnings share publication order, streaming, and the repeat rule with
    reports, but never change `count` or publish the limit notice. */
-static void Diagnostics._warn(
+static void _warn(
   Diagnostics diag, Symbol code, String message, List location, List notes) {
-  diag._publish(_build_entry(code, <warning>, message, location, notes));
+  _publish(diag, _build_entry(code, <warning>, message, location, notes));
 }
 
 // diagnostics & error reporting
@@ -231,7 +231,7 @@ int diagnostics_write_json(String path) {
    directory: a relative path that is not there came from the root. A source
    inside the working directory stays relative to it; any other is absolute.
 */
-static String Compiler._json_path(Compiler compiler, String path) {
+static String _json_path(Compiler compiler, String path) {
   if (!path || path.startswith("<")) return path;
   if (!path.startswith("/") && !Path.exists(path))
     path = Path.join(compiler.root_dir, path);
@@ -240,26 +240,26 @@ static String Compiler._json_path(Compiler compiler, String path) {
   return path.startswith(directory) ? path.remove_prefix(directory) : path;
 }
 
-static void Compiler._write_json(
+static void _write_json(
   Compiler c, Symbol code, Symbol severity, String message, List location,
   String note) {
   Buffer out = $auto(Buffer.new(0));
   out.write(%"{\"code\":${Var.json(code)}");
   out.write(%",\"message\":${Var.json(message)}");
   out.write(%",\"severity\":${Var.json(severity)}");
-  c._write_json_location(out, location);
+  _write_json_location(c, out, location);
   out.write(%",\"notes\":${Var.json(note ? [note] : [])}}\n");
   while (write(diagnostics_json, out.content.bytes, out.content.length) < 0 &&
          errno == EINTR) {}
 }
 
 /* An entry without a location writes null for each location key. */
-static void Compiler._write_json_location(
+static void _write_json_location(
   Compiler c, Buffer out, List location) {
   match (location)
     case %((file ?file) (line ?line) (column ?column) (length ?length)
            (position ?position)): {
-      out.write(%",\"file\":${Var.json(c._json_path(file))}");
+      out.write(%",\"file\":${Var.json(_json_path(c, file))}");
       out.write(%",\"line\":$line,\"column\":$column");
       out.write(%",\"length\":$length,\"position\":$position");
       return;
@@ -279,10 +279,10 @@ void Compiler.print_diagnostic(Compiler compiler, List entry) {
            (location ?location) (notes ?notes)): {
       String note = _note_line(notes);
       if (diagnostics_json >= 0) {
-        compiler._write_json(code, severity, message, location, note);
+        _write_json(compiler, code, severity, message, location, note);
         return;
       }
-      compiler._write_heading(code, message, location);
+      _write_heading(compiler, code, message, location);
       if (note) fprintf(stderr, "  note: %s\n", note);
       fprintf(stderr, "\n");
       fflush(stderr);
@@ -290,14 +290,14 @@ void Compiler.print_diagnostic(Compiler compiler, List entry) {
 }
 
 /* A located heading names its source position and shows that line. */
-static void Compiler._write_heading(
+static void _write_heading(
   Compiler c, Symbol code, String message, List location) {
   match (location)
     case %((file ?file) (line ?line) (column ?column) (length ?length)
            (position ?position)): {
       String place = %"$file:$line:$column";
       fprintf(stderr, "%s: %s: %s\n", place, code.str(), message);
-      c._show_source_context(line, column, length, position);
+      _show_source_context(c, line, column, length, position);
       return;
     }
   fprintf(stderr, "%s: %s\n", code.str(), message);
@@ -375,7 +375,7 @@ List Compiler.token_location(Compiler compiler, Token token) {
     marked regions keeps the compiler's own file and its line. */
 String Compiler.token_source(Compiler c, Token token, int &?line) {
   if (line) line = token.line;
-  List region = c._token_region(token);
+  List region = _token_region(c, token);
   if (!region) return c.filename;
   (int start, int text_line, String file, int file_line) = region;
   if (line) line = file_line + token.line - text_line;
@@ -385,7 +385,7 @@ String Compiler.token_source(Compiler c, Token token, int &?line) {
 /** Returns `token`'s column in the file that holds it. A module region
     that begins inside a line of its file continues that line's columns. */
 int Compiler.token_column(Compiler c, Token token) {
-  match (c._token_region(token))
+  match (_token_region(c, token))
     case %(? ?(int text_line) ? ? ? ?(String before)):
       if (token.line == text_line) return before.len() + token.col;
   return token.col;
@@ -397,7 +397,7 @@ int Compiler.token_column(Compiler c, Token token) {
     `position`. */
 String Compiler.text_source(Compiler c, int position, int &offset) {
   offset = position;
-  match (c._region(position))
+  match (_region(c, position))
     case %(?(int start) ? ?(String file) ? ?(int origin) ?): {
       offset = origin + position - start;
       return file;
@@ -421,8 +421,8 @@ Token Compiler.source_token(Compiler c, Token token, String &file) {
 /* The region that places `token`. The host preprocessor's rows place only
    the tokens scanned from its output. A module's rows place any token of
    the spliced text, including the thawed copy of a queued effect's site. */
-static List Compiler._token_region(Compiler c, Token token) {
-  List region = c._region(token.pos);
+static List _token_region(Compiler c, Token token) {
+  List region = _region(c, token.pos);
   match (region) case %(? ? ? ? ? ?): return region;
   if (!region) return NULL;
   Token first = c.tokenizer.tokens;
@@ -432,7 +432,7 @@ static List Compiler._token_region(Compiler c, Token token) {
 
 /* The line-marker row of the region of the compiler's text that holds byte
    `position`, or NULL before the first region. */
-static List Compiler._region(Compiler c, int position) {
+static List _region(Compiler c, int position) {
   List region = NULL;
   if (c.line_markers)
     foreach (List row, c.line_markers) {
@@ -500,20 +500,20 @@ void Compiler.report_warning_at(
   report_suspend();
   Diagnostics diag = compiler.diagnostics;
   message = message ? message : "compiler warning";
-  diag._warn(code ? code : <warning>, message, location, notes);
+  _warn(diag, code ? code : <warning>, message, location, notes);
 }
 
 /* Locations use one-based coordinates while source indexing is zero-based.
    Clamp a stale column or width to the current line, retain tabs before the
    token, and render at least one caret. A merged text shows its line that
    holds byte `position`, after the text that line continues in its file. */
-static void Compiler._show_source_context(
+static void _show_source_context(
   Compiler compiler, int line, int column, int length, int position) {
   if (!compiler.text) return;
-  if (compiler.line_markers) line = compiler._text_line(position);
+  if (compiler.line_markers) line = _text_line(compiler, position);
   char *line_start, *line_end;
   if (!_context_line(compiler, line, line_start, line_end)) return;
-  match (compiler._region(position))
+  match (_region(compiler, position))
     case %(? ?(int text_line) ? ? ? ?(String before)):
       if (line == text_line && before.len()) {
         String shown =
@@ -526,9 +526,9 @@ static void Compiler._show_source_context(
 
 /* A merged text's location names a line of the file it came from, and the
    context shows the line of the text that holds its byte position. */
-static int Compiler._text_line(Compiler c, int position) {
+static int _text_line(Compiler c, int position) {
   int line = 0;
-  foreach (Var start, c._line_starts()) {
+  foreach (Var start, _line_starts(c)) {
     if (start.int() > position) break;
     line++;
   }
@@ -549,7 +549,7 @@ static int _context_line(
     else while (*line_end && *line_end != '\n') line_end++;
     return line == 1;
   }
-  Array starts = c._line_starts();
+  Array starts = _line_starts(c);
   if (line > starts.len()) return 0;
   line_start = line_end = text + starts[line - 1].int();
   while (*line_end && *line_end != '\n') line_end++;
@@ -558,7 +558,7 @@ static int _context_line(
 
 /* The offset where each line of the compiler's text starts, indexed once
    per text. */
-static Array Compiler._line_starts(Compiler c) {
+static Array _line_starts(Compiler c) {
   if (c.lines_text === c.text) return c.line_starts;
   c.lines_text = c.text;
   c.line_starts.clear();
@@ -593,7 +593,7 @@ static void _context_caret(
 void Compiler.take_diagnostics(Compiler c, Compiler child) {
   Diagnostics target = c.diagnostics, source = child.diagnostics;
   if (target == source) return;
-  foreach (List entry, source.entries) target._store(entry);
+  foreach (List entry, source.entries) _store(target, entry);
   target.count += source.count;
   target.limit_notified |= source.limit_notified;
   source.reset();

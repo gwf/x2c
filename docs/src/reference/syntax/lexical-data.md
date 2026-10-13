@@ -488,7 +488,7 @@ See [the lexical specification](lexical.md) for explanations and
 
 ```text
 (boundaries
- (external percent-string-decoding "src/literals.x:Compiler._parse_text_segment"
+ (external percent-string-decoding "src/literals.x:_parse_text_segment"
   (remove continuations) (normalize cr-and-crlf-to-lf)
   (decode escapes)) (external symbol-representability "src/literals.x")
  (external host-preprocessing host-preprocessor)

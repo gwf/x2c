@@ -207,9 +207,9 @@ static void _parse_manifest(Project p) {
     m.line++;
     char *line = _content(text);
     if (!*line) continue;
-    if (m.key) m.extend(line);
-    else if (*line == '[') m.header(line);
-    else m.field(line);
+    if (m.key) _extend(m, line);
+    else if (*line == '[') _header(m, line);
+    else _field(m, line);
   }
   if (m.key) _error(p, m.start, "unterminated array");
   if (!p.targets) _error(p, 0, "manifest defines no targets");
@@ -250,25 +250,25 @@ static char *_trim(char *text) {
 
 /* A header opens `[project]`, `[dependencies]`, `[target.<name>]`, or
    `[target.<name>.profile.<name>]`, and each section appears once. */
-static void Manifest.header(Manifest &m, char *line) {
+static void _header(Manifest &m, char *line) {
   int length = strlen(line);
   if (length < 3 || line[length - 1] != ']')
     _error(m.project, m.line, "malformed section header");
   line[length - 1] = 0;
   String name = String.new(line + 1);
-  if (name == "project") m.enter_project();
-  else if (name == "dependencies") m.enter_dependencies();
-  else m.target_header(name);
+  if (name == "project") _enter_project(m);
+  else if (name == "dependencies") _enter_dependencies(m);
+  else _target_header(m, name);
 }
 
-static void Manifest.enter_project(Manifest &m) {
+static void _enter_project(Manifest &m) {
   Project p = m.project;
   if (p.declared) _error(p, m.line, "duplicate project section");
   p.declared = 1;
   m.section = PROJECT;
 }
 
-static void Manifest.enter_dependencies(Manifest &m) {
+static void _enter_dependencies(Manifest &m) {
   Project p = m.project;
   if (p.dependency_declared)
     _error(p, m.line, "duplicate dependencies section");
@@ -279,7 +279,7 @@ static void Manifest.enter_dependencies(Manifest &m) {
 
 /* A profile header mentions its target too, so the target exists even
    before its own section. */
-static void Manifest.target_header(Manifest &m, String header) {
+static void _target_header(Manifest &m, String header) {
   Project p = m.project;
   String name = header.remove_prefix("target."), profile = NULL;
   int split = name.find(".profile.");
@@ -292,11 +292,11 @@ static void Manifest.target_header(Manifest &m, String header) {
     _error(p, m.line, "unknown manifest section");
   ProjectTarget target = _target(p, name);
   if (!target) target = _new_target(p, name);
-  if (split < 0) m.enter_target(target);
-  else m.enter_profile(target, profile);
+  if (split < 0) _enter_target(m, target);
+  else _enter_profile(m, target, profile);
 }
 
-static void Manifest.enter_target(Manifest &m, ProjectTarget target) {
+static void _enter_target(Manifest &m, ProjectTarget target) {
   if (target.declared)
     _error_name(m.project, m.line, "duplicate target section", target.name);
   target.declared = 1;
@@ -304,7 +304,7 @@ static void Manifest.enter_target(Manifest &m, ProjectTarget target) {
   m.target = target;
 }
 
-static void Manifest.enter_profile(
+static void _enter_profile(
   Manifest &m, ProjectTarget target, String name) {
   ProjectProfile profile = _profile(target, name);
   if (!profile) profile = _new_profile(target, name);
@@ -318,7 +318,7 @@ static void Manifest.enter_profile(
 // fields
 
 /* A `key = value` field of the current section. */
-static void Manifest.field(Manifest &m, char *line) {
+static void _field(Manifest &m, char *line) {
   Project p = m.project;
   if (m.section == NONE) _error(p, m.line, "field appears before a section");
   char *equals = strchr(line, '=');
@@ -326,27 +326,27 @@ static void Manifest.field(Manifest &m, char *line) {
   *equals = 0;
   String key = String.new(_trim(line)), value = String.new(_trim(equals + 1));
   if (!_name_ok(key)) _error(p, m.line, "invalid field name");
-  m.claim(key);
+  _claim(m, key);
   m.key = key;
   m.value = value;
   m.start = m.line;
-  m.settle();
+  _settle(m);
 }
 
 /* The next line of an open array continues its field's value. */
-static void Manifest.extend(Manifest &m, char *line) {
+static void _extend(Manifest &m, char *line) {
   m.value = %"${m.value} ${String.new(line)}";
-  m.settle();
+  _settle(m);
 }
 
 /* Each section takes a key once. */
-static void Manifest.claim(Manifest &m, String key) {
-  Map keys = m.keys();
+static void _claim(Manifest &m, String key) {
+  Map keys = _keys(m);
   if (key in keys) _error(m.project, m.line, "duplicate manifest field");
   keys[key] = 1;
 }
 
-static Map Manifest.keys(Manifest &m) {
+static Map _keys(Manifest &m) {
   if (m.section == PROJECT) return m.project.seen;
   if (m.section == DEPENDENCIES) return m.project.dependency_seen;
   return m.section == TARGET ? m.target.seen : m.profile.seen;
@@ -354,13 +354,13 @@ static Map Manifest.keys(Manifest &m) {
 
 /* A field whose value leaves an array open waits for the line that closes
    it; any other field is set now. */
-static void Manifest.settle(Manifest &m) {
+static void _settle(Manifest &m) {
   if (_array_open(m.value)) return;
-  m.set();
+  _set(m);
   m.key = NULL;
 }
 
-static void Manifest.set(Manifest &m) {
+static void _set(Manifest &m) {
   Project p = m.project;
   int line = m.start;
   String key = m.key, value = m.value;

@@ -109,12 +109,12 @@ Var Compiler.meta_helper_call(
   Call call = {
     .compiler = c, .name = name, .site = site,
     .table = _table_of(file, helper_table)};
-  call.check();
-  call.set_deadline();
-  if (!_helper_start()) call.refuse("the compile-time helper did not start");
-  call.send(arguments);
+  _check(call);
+  _set_deadline(call);
+  if (!_start()) _refuse(call, "the compile-time helper did not start");
+  _send(call, arguments);
   for (;;) {
-    Var reply = call.next_reply();
+    Var reply = _next_reply(call);
     match (reply) {
       case %(warning ?(String message) ?(List notes)):
         c.report_warning(<macro>, message, site, notes);
@@ -127,10 +127,10 @@ Var Compiler.meta_helper_call(
       case %(dependency ?(String path) ?(String hash)):
         c.deps.merge_translation_dependency(path, hash);
       case %(query ?(String operation) ?(List operands)):
-        call.answer(operation, operands);
-      case %(missing): call.refuse(c.meta_call_missing(name));
+        _answer(call, operation, operands);
+      case %(missing): _refuse(call, c.meta_call_missing(name));
       case %(failure (?code *detail)): Error.raise(code, detail);
-      default: call.stopped("the helper sent an unknown reply");
+      default: _stopped(call, "the helper sent an unknown reply");
     }
   }
 }
@@ -139,48 +139,48 @@ Var Compiler.meta_helper_call(
    `operands` at the call's site, in the state the call sees; a `void`
    operation answers nil. A failed answer ends the helper, which waits for
    it, before the failure leaves. */
-static void Call.answer(Call &c, String operation, List operands) {
+static void _answer(Call &c, String operation, List operands) {
   Var value = void;
   try value = c.compiler.apply_meta_function(operation, operands, c.site);
   catch %(?code *detail): {
-    _helper_stop(SIGKILL);
+    _stop(SIGKILL);
     Error.raise(code, detail);
   }
   if (value is void) value = %();
-  c.send_frame(%(answer $value));
+  _send_frame(c, %(answer $value));
 }
 
 /* Refuses the call when the project's helper or the call's table did not
    build, or when the function returns a struct or union. */
-static void Call.check(Call &call) {
+static void _check(Call &call) {
   Var failure;
   if (!helper_path && helper_failures && helper_failures.try_get(-1, failure))
-    call.refuse(failure);
-  if (!helper_path) call.refuse("the project meta module was not built");
+    _refuse(call, failure);
+  if (!helper_path) _refuse(call, "the project meta module was not built");
   if (helper_failures && helper_failures.try_get(call.table, failure))
-    call.refuse(failure);
+    _refuse(call, failure);
   call.compiler.refuse_record_meta_call(call.name, call.site);
 }
 
 /* Sends the call, after the unit's reset when that is still to be sent. */
-static void Call.send(Call &c, List arguments) {
+static void _send(Call &c, List arguments) {
   if (helper_reset) {
-    c.send_frame(%(reset));
+    _send_frame(c, %(reset));
     helper_reset = 0;
   }
-  c.send_frame(
+  _send_frame(c,
     %(call ${c.table} ${c.name} $arguments ${Macro.subject()}));
 }
 
-static void Call.send_frame(Call &call, List message) {
-  int status = _helper_send(message, call.deadline);
-  if (status < 0) call.overdue();
-  if (!status) call.stopped(_helper_ending());
+static void _send_frame(Call &call, List message) {
+  int status = _write_frame(message, call.deadline);
+  if (status < 0) _overdue(call);
+  if (!status) _stopped(call, _exit_reason());
 }
 
 /* The limit is `X2C_META_TIMEOUT` in seconds, 60 by default; zero or less
    sets no deadline. */
-static void Call.set_deadline(Call &call) {
+static void _set_deadline(Call &call) {
   String text = Env.get("X2C_META_TIMEOUT");
   call.limit = text ? atof(text) : 60.0;
   call.deadline = call.limit > 0 ? _now() + call.limit : 0;
@@ -194,11 +194,11 @@ static double _now(void) {
 
 /* The next reply. A helper that passes the deadline or ends first is
    reported at the call. */
-static Var Call.next_reply(Call &call) {
+static Var _next_reply(Call &call) {
   Var reply;
-  int status = _helper_receive(call.deadline, reply);
-  if (status < 0) call.overdue();
-  if (!status) call.stopped(_helper_ending());
+  int status = _read_reply(call.deadline, reply);
+  if (status < 0) _overdue(call);
+  if (!status) _stopped(call, _exit_reason());
   return reply;
 }
 
@@ -210,8 +210,8 @@ static Var Call.next_reply(Call &call) {
    ends. The helper leads a process group of its own, which every process
    it starts joins; this side sets the group too, so it exists before the
    helper runs. */
-static int _helper_start(void) {
-  if (_helper_running()) return 1;
+static int _start(void) {
+  if (_running()) return 1;
   helper_pid = 0;
   int requests[2], replies[2];
   if (pipe(requests)) return 0;
@@ -233,7 +233,7 @@ static int _helper_start(void) {
     return 0;
   }
   pid_t pid = fork();
-  if (!pid) _helper_exec(requests[0], replies[1]);
+  if (!pid) _exec(requests[0], replies[1]);
   close(requests[0]);
   close(replies[1]);
   if (pid < 0) {
@@ -255,7 +255,7 @@ static int _helper_start(void) {
    and its replies on 4, as the leader of a new process group. Copying each
    end above 10 first keeps `dup2` from overwriting the other end or
    leaving one close-on-exec. */
-static void _helper_exec(int requests, int replies) {
+static void _exec(int requests, int replies) {
   int in = fcntl(requests, F_DUPFD_CLOEXEC, 10);
   int out = fcntl(replies, F_DUPFD_CLOEXEC, 10);
   dup2(in, 3);
@@ -267,10 +267,10 @@ static void _helper_exec(int requests, int replies) {
 
 /* Whether this process started the helper `helper_pid` names. A worker
    forked from a process that runs one starts its own. */
-static int _helper_running(void) => helper_pid > 0 && helper_owner == getpid();
+static int _running(void) => helper_pid > 0 && helper_owner == getpid();
 
 /* Whether the helper has ended, which reaps it and keeps its status. */
-static int _helper_reaped(void) {
+static int _reaped(void) {
   int status;
   if (helper_status < 0 &&
       waitpid(helper_pid, &status, WNOHANG) == helper_pid)
@@ -284,11 +284,11 @@ static int _helper_reaped(void) {
    helper's group after the reap ends only what the helper started and
    left running, such as a job whose body crashed. Returns the helper's
    wait status. */
-static int _helper_stop(int signal) {
+static int _stop(int signal) {
   int status = 0;
-  if (_helper_running()) {
+  if (_running()) {
     if (signal) killpg(helper_pid, signal);
-    else _helper_send(%(quit), 0);
+    else _write_frame(%(quit), 0);
     close(helper_to);
     close(helper_from);
     if (helper_status < 0) waitpid(helper_pid, &helper_status, 0);
@@ -305,8 +305,8 @@ static int _helper_stop(int signal) {
 /* Why the helper that answered no more ended: how it exited, or the signal
    that stopped it, which is also how a body that overflows the stack
    ends. */
-static String _helper_ending(void) {
-  int signal, code = shell_status(_helper_stop(0), signal);
+static String _exit_reason(void) {
+  int signal, code = shell_status(_stop(0), signal);
   if (!signal) return %"the body exited with status $code";
   String name = String.new(strsignal(signal));
   return %"the body crashed or overflowed the stack (signal $signal: $name)";
@@ -317,7 +317,7 @@ static String _helper_ending(void) {
 /* Sends one frame, returning 1, 0 when the helper has gone, or -1 when
    `deadline` passes. A helper that has exited must not end the compiler
    with SIGPIPE; a helper not reading must not block its deadline. */
-static int _helper_send(List message, double deadline) {
+static int _write_frame(List message, double deadline) {
   Buffer out = $auto(Buffer.new(0));
   if (!datum_frame(out, message)) return 0;
   String frame = %"$out";
@@ -337,7 +337,7 @@ static int _helper_send(List message, double deadline) {
     if (n < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
       struct pollfd ready = { .fd = helper_to, .events = POLLOUT };
       int polled = poll(&ready, 1, wait);
-      if ((polled < 0 && errno != EINTR) || _helper_reaped() ||
+      if ((polled < 0 && errno != EINTR) || _reaped() ||
           (ready.revents & (POLLERR | POLLHUP | POLLNVAL))) {
         status = 0;
         break;
@@ -353,7 +353,7 @@ static int _helper_send(List message, double deadline) {
 
 /* Reads the next reply frame into `reply`. Returns 1, 0 when the helper
    ended, or -1 when `deadline` passed first. */
-static int _helper_receive(double deadline, Var &reply) {
+static int _read_reply(double deadline, Var &reply) {
   for (;;) {
     int framed = 0;
     try framed = _take_frame(reply);
@@ -392,7 +392,7 @@ static int _read_input(double deadline) {
   struct pollfd ready = { .fd = helper_from, .events = POLLIN };
   int polled = poll(&ready, 1, wait);
   if (polled < 0 && errno == EINTR) return 1;
-  if (polled == 0) return _helper_reaped() ? 0 : 1;
+  if (polled == 0) return _reaped() ? 0 : 1;
   char bytes[65536];
   ssize_t n = read(helper_from, bytes, sizeof bytes);
   if (n < 0 && errno == EINTR) return 1;
@@ -403,19 +403,19 @@ static int _read_input(double deadline) {
 
 // failures
 
-static void Call.refuse(Call &call, String why) =>
+static void _refuse(Call &call, String why) =>
   call.compiler.refuse_meta_call(call.name, call.site, why);
 
 /* Kills the helper, which passed the call's deadline, and reports the
    call. */
-static void Call.overdue(Call &c) {
-  _helper_stop(SIGKILL);
+static void _overdue(Call &c) {
+  _stop(SIGKILL);
   $report.macro.helper_timeout(
     c.compiler,
     c.site, c.limit, c.name);
 }
 
-static void Call.stopped(Call &call, String reason) {
+static void _stopped(Call &call, String reason) {
   $report.macro.helper_stopped(call.compiler, call.site, call.name, reason);
 }
 
@@ -426,7 +426,7 @@ static void Call.stopped(Call &call, String reason) {
     each input or included file path is in `units`. */
 void Compiler.use_meta_helper(String path, Map failures, Map units) {
   if (!path && !failures) return;
-  if (!helper_scope) Scope.shutdown_hook(_helper_shutdown);
+  if (!helper_scope) Scope.shutdown_hook(_shutdown);
   $scope(&helper_scope) {
     helper_path = path ? String.new(path) : NULL;
     helper_failures = failures ? failures.copy() : NULL;
@@ -451,10 +451,10 @@ static int _table_of(String path, int otherwise) {
 
 /** Stops the helper this process runs, which a translation worker does
     when its units are done and every process does as it ends. */
-void Compiler.stop_meta_helper(void) { _helper_stop(0); }
+void Compiler.stop_meta_helper(void) { _stop(0); }
 
-static void _helper_shutdown(void) {
-  _helper_stop(0);
+static void _shutdown(void) {
+  _stop(0);
   helper_scope.destroy();
   helper_scope = NULL;
   helper_path = NULL;

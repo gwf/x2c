@@ -205,7 +205,7 @@ static int _run_translation(CliRequest request, Map unit_dirs, Build build) {
   Translation t = {
     .request = request, .unit_dirs = unit_dirs, .build = build,
     .total = request.inputs.len()};
-  t.preflight();
+  _preflight(t);
   if (request.verbose || request.dry_run) _print_command(request);
   if (request.dry_run) return 0;
   t.frontend = Frontend.new(request);
@@ -217,16 +217,16 @@ static int _run_translation(CliRequest request, Map unit_dirs, Build build) {
   /* A dump writes one ordered stream to stdout, and inspection modes report
      per unit, so those stay in this process. The rest may run in parallel. */
   if (request.jobs > 1 && t.total > 1 && !request.inspects()) {
-    if (t.translate_parallel()) return 1;
+    if (_translate_parallel(t)) return 1;
   }
-  else t.translate_serial();
-  if (!build && !request.inspects()) t.report(started_at);
+  else _translate_serial(t);
+  if (!build && !request.inspects()) _report(t, started_at);
   return 0;
 }
 
 /* Each input must be a regular `.x` file. Units that write to the shared
    `--out-dir` must not share an output stem; inspection writes nothing. */
-static void Translation.preflight(Translation &t) {
+static void _preflight(Translation &t) {
   CliRequest request = t.request;
   if (!request.inspects()) _check_out_dir(request.out_dir);
   int shared = !request.inspects() && !t.unit_dirs, Map stems = {};
@@ -267,30 +267,30 @@ static void _preprocessor_errors(String text) {
   Stderr.printf("%s", text);
 }
 
-static void Translation.translate_serial(Translation &t) {
+static void _translate_serial(Translation &t) {
   int done = 0;
   foreach (String input, t.request.inputs) {
     if (t.build) t.build.begin_translation(input);
     else report_progress(<translate>, done, t.total, input);
-    t.translate(input);
+    _translate(t, input);
     done++;
     if (t.build) t.build.end_translation(input, 0);
     else report_progress(<translate>, done, t.total, input);
   }
 }
 
-static void Translation.translate(Translation &t, String input) =>
-  _translate_unit(t.frontend, input, t.output_dir(input));
+static void _translate(Translation &t, String input) =>
+  _translate_unit(t.frontend, input, _output_dir(t, input));
 
 /* Where one unit's generated C, header, and depfile are written. A build
    gives each unit its own directory so units sharing an output stem cannot
    collide; `x2c translate` writes them all to the shared `--out-dir`. */
-static String Translation.output_dir(Translation &t, String input) {
+static String _output_dir(Translation &t, String input) {
   if (!t.unit_dirs) return t.request.out_dir;
   return t.unit_dirs[input];
 }
 
-static void Translation.report(Translation &t, unsigned long started_at) {
+static void _report(Translation &t, unsigned long started_at) {
   String out_dir = t.request.out_dir;
   unsigned long long bytes = 0;
   foreach (String input, t.request.inputs) {
@@ -323,11 +323,11 @@ static Workers _workers;
 
 /* Translate the inputs in forked workers. Returns the number of slices
    that failed. */
-static int Translation.translate_parallel(Translation &t) {
-  t.preload_modules();
+static int _translate_parallel(Translation &t) {
+  _preload_modules(t);
   int count = t.unit_dirs ? t.total : t.request.jobs;
   Array slices = _slices(t.request.inputs, t.total, count);
-  int failed = t.run_workers(slices);
+  int failed = _run_workers(t, slices);
   slices.free();
   return failed;
 }
@@ -335,10 +335,10 @@ static int Translation.translate_parallel(Translation &t) {
 /* Loads the native modules of the packages the inputs import before the
    workers fork, so each worker inherits them. A worker loads a module this
    misses itself when its import needs it. */
-static void Translation.preload_modules(Translation &t) {
+static void _preload_modules(Translation &t) {
   List roots = t.request.package_roots();
   if (!roots) return;
-  foreach (String name, t.package_names(roots).keys()) {
+  foreach (String name, _package_names(t, roots).keys()) {
     String root = NULL;
     if (!package_entry(t.request.sources, roots, name, root) ||
         Compiler.links_extension(name)) continue;
@@ -349,11 +349,11 @@ static void Translation.preload_modules(Translation &t) {
 
 /* The packages a unit's own imports name, and those its previous depfile
    records, which include imports reached through a header. */
-static Map Translation.package_names(Translation &t, List roots) {
+static Map _package_names(Translation &t, List roots) {
   Map names = {};
   foreach (String input, t.request.inputs) {
     foreach (String name, _imported_packages(input)) names[name] = 1;
-    String depfile = %"${t.output_dir(input)}/${Path.stem(input)}.d";
+    String depfile = %"${_output_dir(t, input)}/${Path.stem(input)}.d";
     String text = NULL;
     try text = Path.read_text(depfile);
     catch %((!or not-found io-fail) *): continue;
@@ -413,7 +413,7 @@ static Array _slices(List inputs, int total, int count) {
    end, so the only state workers share is the output directory, where no
    two units write the same file. The parent reports progress as workers
    finish and prints their standard error in input order. */
-static int Translation.run_workers(Translation &t, Array slices) {
+static int _run_workers(Translation &t, Array slices) {
   int jobs = t.request.jobs, count = slices.len();
   if (jobs > count) jobs = count;
   if (t.request.verbose)
@@ -427,9 +427,9 @@ static int Translation.run_workers(Translation &t, Array slices) {
   _forward_stop_signal(SIGTERM, &term);
   _forward_stop_signal(SIGINT, &interrupt);
   while (_workers.started < count || _workers.live) {
-    if (_workers.started < count && _workers.live < jobs) _workers.start();
-    else _workers.reap();
-    _workers.show();
+    if (_workers.started < count && _workers.live < jobs) _start(_workers);
+    else _reap(_workers);
+    _show(_workers);
   }
   sigaction(SIGTERM, &term, NULL);
   sigaction(SIGINT, &interrupt, NULL);
@@ -443,7 +443,7 @@ static int Translation.run_workers(Translation &t, Array slices) {
 /* Starts the next slice. A slice that cannot start counts as one failure.
    Stop signals wait until the parent records the worker, so a forwarded
    stop reaches every worker. */
-static void Workers.start(Workers &w) {
+static void _start(Workers &w) {
   int index = w.started++;
   List slice = w.slices[index];
   if (w.t.build) w.t.build.begin_translation(slice.car());
@@ -454,7 +454,7 @@ static void Workers.start(Workers &w) {
     w.live = 0;
     sigprocmask(SIG_SETMASK, &unblocked, NULL);
     dup2(capture.fileno(), STDERR_FILENO);
-    (*w.t).work(slice);
+    _work((*w.t), slice);
   }
   if (pid > 0) {
     w.carried[w.live] = index;
@@ -470,15 +470,15 @@ static void Workers.start(Workers &w) {
 }
 
 // A forked worker exits after its slice, or at the first unit that fails.
-static void Translation.work(Translation &t, List slice) {
-  foreach (String input, slice) t.translate(input);
+static void _work(Translation &t, List slice) {
+  foreach (String input, slice) _translate(t, input);
   Compiler.stop_meta_helper();
   worker_exit(0);
 }
 
 /* Keeps the ended worker's captured bytes for `show`. The last live worker
    moves into the slot of the one that finished. */
-static void Workers.reap(Workers &w) {
+static void _reap(Workers &w) {
   int status, slot = worker_wait_any(w.pids, w.live, status);
   if (status) w.failed++;
   int index = w.carried[slot];
@@ -503,8 +503,8 @@ static void Workers.reap(Workers &w) {
 /* Prints each ended slice's captured standard error once every earlier
    slice has printed its own. A slice has ended when it has started and no
    live worker carries it. */
-static void Workers.show(Workers &w) {
-  while (w.shown < w.started && !w.carries(w.shown)) {
+static void _show(Workers &w) {
+  while (w.shown < w.started && !_carries(w, w.shown)) {
     Block output = w.output[w.shown++];
     if (output == NULL) continue;
     defer output.free();
@@ -514,7 +514,7 @@ static void Workers.show(Workers &w) {
   }
 }
 
-static int Workers.carries(Workers &w, int index) {
+static int _carries(Workers &w, int index) {
   for (int slot = 0; slot < w.live; slot++)
     if (w.carried[slot] == index) return 1;
   return 0;

@@ -181,8 +181,8 @@ int install_command(CliRequest request) {
   Install i = _locked_install(request, request.inputs.car());
   defer _release_packages();
   i.sha256 = request.sha256;
-  i.locate();
-  i.run();
+  _locate(i);
+  _install_package(i);
   return 0;
 }
 
@@ -202,8 +202,8 @@ List install_require(
   if (resolved != version)
     $report.install.version_pinned(name, resolved, version);
   if (_installed_version(%"${i.packages}/$name") != version) {
-    i.resolve(row);
-    i.run();
+    _resolve(i, row);
+    _install_package(i);
   }
   return row;
 }
@@ -218,7 +218,7 @@ static Install _locked_install(CliRequest request, String spec) {
 }
 
 /* The operand is a URL, a local path, or a name the index resolves. */
-static void Install.locate(Install &i) {
+static void _locate(Install &i) {
   String spec = i.spec;
   if (_remote(spec)) {
     if (!i.sha256) _error("a URL needs --sha256 <hex>");
@@ -226,20 +226,20 @@ static void Install.locate(Install &i) {
   }
   else if (Path.exists(spec)) i.source = spec;
   else if (spec.is_identifier())
-    i.resolve(_index_row(i.request, spec, i.work));
+    _resolve(i, _index_row(i.request, spec, i.work));
   else $report.install.spec_unknown(spec);
 }
 
 /* A resolved row names the version to record and the archive to fetch. */
-static void Install.resolve(Install &i, List row) {
+static void _resolve(Install &i, List row) {
   i.version = row[1];
   i.url = row[4];
   i.sha256 = row[5];
 }
 
 /* Stages, builds, and publishes one package. */
-static void Install.run(Install &i) {
-  String package = i.unpacked(), name = Path.basename(package);
+static void _install_package(Install &i) {
+  String package = _unpacked(i), name = Path.basename(package);
   if (!name.is_identifier()) $report.install.name_invalid(name);
   String staged = %"${i.work}/$name";
   try Path.copy_tree(package, staged);
@@ -248,7 +248,7 @@ static void Install.run(Install &i) {
     _check_bundle(i.request, staged, name);
   else {
     _build_source(staged, name, i.spec);
-    i.mark_source(staged, name);
+    _mark_source(i, staged, name);
   }
   _publish(staged, i.packages, name);
   if (!i.request.quiet)
@@ -257,7 +257,7 @@ static void Install.run(Install &i) {
 
 /* The package directory: `source` itself, or the tarball that `source`
    names or `url` downloads, checked and unpacked in the work directory. */
-static String Install.unpacked(Install &i) {
+static String _unpacked(Install &i) {
   String source = i.source;
   if (i.url) {
     source = _fetch(i.url, i.work, "package.tar.gz");
@@ -271,7 +271,7 @@ static String Install.unpacked(Install &i) {
    carries no version of its own. The package it replaces recorded one, and
    a project pin matches a name and a version, so dropping it would send the
    next build back to the index. */
-static void Install.mark_source(Install &i, String staged, String name) {
+static void _mark_source(Install &i, String staged, String name) {
   String version = i.version;
   if (!version) version = _installed_version(%"${i.packages}/$name");
   Map record = {

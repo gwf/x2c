@@ -44,18 +44,18 @@ typedef struct PrintfFn {
     value. `c.token` stops at the first token outside the expression.
 */
 List Compiler.parse_expression(Compiler c) =>
-  c._parse_expression_tail(c.parse_assignment());
+  _parse_expression_tail(c, c.parse_assignment());
 
-static List Compiler._parse_expression_tail(Compiler c, List expr) {
+static List _parse_expression_tail(Compiler c, List expr) {
   if (c.peek(0) == <,>) {
-    expr = cons(expr, c._parse_comma_list());
+    expr = cons(expr, _parse_comma_list(c));
     List last = expr.last(), type = last.cadr();
     return %(expr $type ${source_commas_content(expr)});
   }
   return expr;
 }
 
-static List Compiler._parse_comma_list(Compiler c) {
+static List _parse_comma_list(Compiler c) {
   Array expressions = [];
   do {
     c.expect(<,>);
@@ -69,15 +69,15 @@ static List Compiler._parse_comma_list(Compiler c) {
     assignment only for `=`. `c.token` stops after the expression.
 */
 List Compiler.parse_assignment(Compiler c) =>
-  c._parse_assignment_tail(c.parse_conditional());
+  _parse_assignment_tail(c, c.parse_conditional());
 
-static List Compiler._parse_assignment_tail(Compiler c, List lhs) {
+static List _parse_assignment_tail(Compiler c, List lhs) {
   Symbol op = c.peek(0);
   Token origin = c.token;
   if (!op.is_assignment_op()) return lhs;
   if (lhs.cadr().car() == <opt-ref>)
     $report.type.optional_ref_assign(c, origin);
-  List targets = op == <=> ? c._destructure_targets(lhs) : NULL;
+  List targets = op == <=> ? _destructure_targets(c, lhs) : NULL;
   c.next();
   List rhs = c.parse_assignment();
   if (targets) match (rhs)
@@ -87,7 +87,7 @@ static List Compiler._parse_assignment_tail(Compiler c, List lhs) {
     source_operator_expression(NULL, %($op $lhs $rhs)), origin);
 }
 
-static List Compiler._destructure_targets(Compiler c, List lhs) {
+static List _destructure_targets(Compiler c, List lhs) {
   match (lhs)
     case %(expr ? ${$grouped(?target)}): {
       if (_destructure_identifier(target)) return %(targets $target);
@@ -118,9 +118,9 @@ static int _destructure_identifier(List expression) {
     right-associative, and `c.token` stops after the expression.
 */
 List Compiler.parse_conditional(Compiler c) =>
-  c._parse_conditional_tail(c._parse_binary_ops());
+  _parse_conditional_tail(c, _parse_binary_ops(c));
 
-static List Compiler._parse_conditional_tail(Compiler c, List condition) {
+static List _parse_conditional_tail(Compiler c, List condition) {
   Token origin = c.token;
   if (!c.test(<?>)) return condition;
   List ontrue = c.parse_expression();
@@ -130,70 +130,70 @@ static List Compiler._parse_conditional_tail(Compiler c, List condition) {
       NULL, %(? $condition $ontrue ${c.parse_conditional()})), origin);
 }
 
-static List Compiler._parse_binary_ops(Compiler c) =>
-  c._parse_binary_level(1);
+static List _parse_binary_ops(Compiler c) =>
+  _parse_binary_level(c, 1);
 
 /* Larger levels of `Symbol.binary_precedence` bind more tightly. The
    recursive parser descends to level 10 before consuming operators while
    each level folds left; `is` shares the relational level but is recognized
    from its identifier spelling. */
-static List Compiler._parse_binary_level(Compiler c, int level) {
-  if (level > 10) return c._parse_cast();
-  return c._parse_binary_level_tail(level, c._parse_binary_level(level + 1));
+static List _parse_binary_level(Compiler c, int level) {
+  if (level > 10) return _parse_cast(c);
+  return _parse_binary_level_tail(c, level, _parse_binary_level(c, level + 1));
 }
 
-static List Compiler._parse_binary_level_tail(
+static List _parse_binary_level_tail(
   Compiler c, int level, List lhs) {
   int first = 1;
-  while (c._binary_operator().binary_precedence() == level ||
-         (level == 7 && c._is_type_operator())) {
-    if (c._is_type_operator()) {
-      lhs = c._parse_type_test(lhs);
+  while (_binary_operator(c).binary_precedence() == level ||
+         (level == 7 && _is_type_operator(c))) {
+    if (_is_type_operator(c)) {
+      lhs = _parse_type_test(c, lhs);
       continue;
     }
-    Symbol op = c._binary_operator();
+    Symbol op = _binary_operator(c);
     Token origin = c.token;
     c.next();
-    List rhs = c._parse_binary_level(level + 1);
+    List rhs = _parse_binary_level(c, level + 1);
     if (first) {
       lhs = c.resolve_expression(lhs, origin);
       first = 0;
     }
     rhs = c.resolve_expression(rhs, origin);
-    lhs = c._binary_expression(op, lhs, rhs, origin);
+    lhs = _binary_expression(c, op, lhs, rhs, origin);
   }
   return lhs;
 }
 
-static List Compiler._parse_binary_levels_from(Compiler c, List lhs) {
+static List _parse_binary_levels_from(Compiler c, List lhs) {
   for (int level = 10; level > 0; level--)
-    lhs = c._parse_binary_level_tail(level, lhs);
+    lhs = _parse_binary_level_tail(c, level, lhs);
   return lhs;
 }
 
 /* The keyword pass leaves `in` a name where a neighbor could also be C, as
    before a bare `[` literal. No name follows a complete operand, so there
    it is the membership operator. */
-static inline Symbol Compiler._binary_operator(Compiler c) =>
+static inline Symbol _binary_operator(Compiler c) =>
   c.at_word("in") ? <in> : c.peek(0);
 
-static inline int Compiler._is_type_operator(Compiler c) => c.at_word("is");
+static inline int _is_type_operator(Compiler c) => c.at_word("is");
 
 /* `value is T` tests a Var tag; `value is selector` tests a Symbol. Either
    may be negated as `is not`. */
-static List Compiler._parse_type_test(Compiler c, List lhs) {
+static List _parse_type_test(Compiler c, List lhs) {
   Token origin = c.token;
   c.next();
   int negate = c.take_word("not");
   List test;
-  if (c._is_type_selector_start()) {
-    Type target = c._parse_is_type(origin);
+  if (_is_type_selector_start(c)) {
+    Type target = _parse_is_type(c, origin);
     Macro has_type = $has_type;
     test = c.resolve_expression(
       c.rebuild_expression(NULL, has_type(lhs, target)), origin);
   }
   else {
-    List selector = c._parse_cast();
+    List selector = _parse_cast(c);
     Macro has_symbol = $has_symbol;
     test = c.resolve_expression(
       c.rebuild_expression(NULL, has_symbol(lhs, selector)), origin);
@@ -202,7 +202,7 @@ static List Compiler._parse_type_test(Compiler c, List lhs) {
                 : test;
 }
 
-static int Compiler._is_type_selector_start(Compiler c) {
+static int _is_type_selector_start(Compiler c) {
   if (c.at_word("Void")) return 1;
   Token head = c.token;
   if (c.test(<(>)) {
@@ -216,7 +216,7 @@ static int Compiler._is_type_selector_start(Compiler c) {
   return !c.sym.get(%($spelling));
 }
 
-static Type Compiler._parse_is_type(Compiler c, Token origin) {
+static Type _parse_is_type(Compiler c, Token origin) {
   int parenthesized = c.test(<(>), Type type = c.parse_type_name();
   if (parenthesized) {
     if (c.peek(0) == <[>)
@@ -249,9 +249,9 @@ List Compiler.parse_parenthesized_statement(Compiler c) {
       case %((!set ?(List parameter)
                 (param ?base (!set ?binding (bind () ?))))): {
         List decl = %(decl $base (bindings $binding));
-        List cast = c._finish_cast(
-          decl, parameter.type_from_ast(), c._parse_cast(), origin);
-        return c._finish_paren_statement(cast, 0);
+        List cast = _finish_cast(c,
+          decl, parameter.type_from_ast(), _parse_cast(c), origin);
+        return _finish_paren_statement(c, cast, 0);
       }
     foreach (List parameter, parameters)
       c.check_reference_placement(parameter.type_from_ast());
@@ -262,46 +262,46 @@ List Compiler.parse_parenthesized_statement(Compiler c) {
       %(dstrdecl (params @parameters) $source), origin);
   }
 
-  return c._finish_paren_statement(c._parse_group_rest(), 1);
+  return _finish_paren_statement(c, _parse_group_rest(c), 1);
 }
 
-static List Compiler._finish_paren_statement(
+static List _finish_paren_statement(
   Compiler c, List expression, int postfix) {
-  if (postfix) expression = c._parse_postfix_tail(expression);
-  expression = c._parse_binary_levels_from(expression);
-  expression = c._parse_conditional_tail(expression);
-  expression = c._parse_assignment_tail(expression);
-  expression = c._parse_expression_tail(expression);
+  if (postfix) expression = _parse_postfix_tail(c, expression);
+  expression = _parse_binary_levels_from(c, expression);
+  expression = _parse_conditional_tail(c, expression);
+  expression = _parse_assignment_tail(c, expression);
+  expression = _parse_expression_tail(c, expression);
   c.expect(<;>);
   return %(stmnt $expression);
 }
 
 // casts and unary operators
 
-static List Compiler._parse_cast(Compiler c) {
+static List _parse_cast(Compiler c) {
   Token head = c.token;
-  if (c._cast_operand_after_parens() && c.test(<(>)) {
+  if (_cast_operand_after_parens(c) && c.test(<(>)) {
     if (c.test_declaration() ||
-        c._macro_hole_starts_cast_type(head.after_group())) {
+        _macro_hole_starts_cast_type(c, head.after_group())) {
       Type type = NULL;
       List decl = c.parse_type_operand(&type);
       c.expect(<)>);
-      return c._finish_cast(decl, type, c._parse_cast(), head);
+      return _finish_cast(c, decl, type, _parse_cast(c), head);
     }
   }
   c.token = head;
-  return c._parse_unary_op();
+  return _parse_unary_op(c);
 }
 
 /* Types the cast of `operand` to `decl`, which declares `type`, and warns
    when the cast changes nothing. A template typedef or an operand typed at
    expansion leaves the cast typed at expansion too. */
-static List Compiler._finish_cast(
+static List _finish_cast(
   Compiler c, List decl, Type type, List operand, Token origin) {
   if (operand.cadr() === %(<macro-expr>) ||
-      c._casts_to_template_typedef(decl))
+      _casts_to_template_typedef(c, decl))
     type = %(<macro-expr>);
-  c._warn_unnecessary_cast(operand, type, origin);
+  _warn_unnecessary_cast(c, operand, type, origin);
   return %(expr $type ${source_cast_content(%($decl $operand))});
 }
 
@@ -309,13 +309,13 @@ static List Compiler._finish_cast(
     Parsing starts at `c.token` and leaves it at the first token after
     the target.
 */
-List Compiler.parse_macro_expression_target(Compiler c) => c._parse_cast();
+List Compiler.parse_macro_expression_target(Compiler c) => _parse_cast(c);
 
-static int Compiler._cast_operand_after_parens(Compiler c) =>
+static int _cast_operand_after_parens(Compiler c) =>
   c.peek(0) == <"("> &&
   _cast_operand_follows(c.token.after_group().type);
 
-static int Compiler._macro_hole_starts_cast_type(Compiler c, Token after) {
+static int _macro_hole_starts_cast_type(Compiler c, Token after) {
   if (!c.macro_holes || c.peek(0) != <$> ||
       c.after_hole().type != <)>) return 0;
   List hole = c.peek_macro_hole();
@@ -345,7 +345,7 @@ static int _cast_operand_follows(Symbol s) =>
    cast to it, qualified or not, is typed where the template expands. A
    template keeps aggregate tags as spellings, so only a typedef base ends in
    a binding. */
-static int Compiler._casts_to_template_typedef(Compiler c, List declaration) {
+static int _casts_to_template_typedef(Compiler c, List declaration) {
   List base = declaration.cadr();
   return c.macro_holes && !!base.match(%(* (binding ? ?)));
 }
@@ -357,12 +357,12 @@ static int Compiler._casts_to_template_typedef(Compiler c, List declaration) {
    constant is not. A `void` cast discards a value on purpose, and a cast of
    a C string literal is how source keeps the literal native where x2c would
    otherwise promote it to a `String`. */
-static void Compiler._warn_unnecessary_cast(
+static void _warn_unnecessary_cast(
   Compiler c, List operand, Type target, Token origin) {
   if (!target || target === %(void) || target === %(<macro-expr>) ||
-      _expr_is_raw_string_literal(operand)) return;
+      _is_raw_string_literal(operand)) return;
   Type source = operand.cadr();
-  if (!c._c_type_known(operand) || source.declared() != target.declared())
+  if (!_c_type_known(c, operand) || source.declared() != target.declared())
     return;
   $report.conversion.cast_redundant(c, target, origin);
 }
@@ -372,10 +372,10 @@ static void Compiler._warn_unnecessary_cast(
    and `ptrdiff_t` identities selected by the native toolchain; an enum's
    compatible integer type is implementation-defined; C compilers type a
    bitfield differently. */
-static int Compiler._c_type_known(Compiler c, List operand) {
+static int _c_type_known(Compiler c, List operand) {
   match (operand) {
     case %(expr ? ${$grouped(?inner)}):
-      return c._c_type_known(inner);
+      return _c_type_known(c, inner);
     case %(expr ? ${$source_literal_content(%((char) *))}): return 0;
     case %(expr ? ${$sizeof_grouped(?operand)}): return 0;
     case %(expr ? ${$sizeof_expression(?operand)}): return 0;
@@ -391,20 +391,20 @@ static int Compiler._c_type_known(Compiler c, List operand) {
   return type && !type.is_bitfield() && !(numeric && numeric.is_enum());
 }
 
-static List Compiler._parse_unary_op(Compiler c) {
+static List _parse_unary_op(Compiler c) {
   c.__complete_here(<expr>, %());
   Symbol op = c.peek(0);
   Token origin = c.token;
-  if (op == <sizeof>) return c._parse_sizeof();
+  if (op == <sizeof>) return _parse_sizeof(c);
   int increment = op in increments;
-  if (!increment && !(op in unary_operators)) return c._parse_postfix();
+  if (!increment && !(op in unary_operators)) return _parse_postfix(c);
   c.next();
-  List operand = increment ? c._parse_unary_op() : c._parse_cast();
+  List operand = increment ? _parse_unary_op(c) : _parse_cast(c);
   return c.resolve_expression(
     source_operator_expression(NULL, %($op $operand)), origin);
 }
 
-static List Compiler._parse_sizeof(Compiler c) {
+static List _parse_sizeof(Compiler c) {
   c.expect(<sizeof>);
   Token head = c.token;
   int parens = c.test(<(>);
@@ -418,7 +418,7 @@ static List Compiler._parse_sizeof(Compiler c) {
   }
   else {
     c.token = head;
-    arg = c._parse_unary_op();
+    arg = _parse_unary_op(c);
     match (arg) case %(expr ? (parens ?inner)): arg = %(parens $inner);
   }
   return %(expr ("size_t") (sizeof $arg));
@@ -426,7 +426,7 @@ static List Compiler._parse_sizeof(Compiler c) {
 
 /* `offsetof` names its member with a C member designator: a field, then
    any `.field` and `[index]` selections, kept as their C spelling. */
-static List Compiler._parse_offsetof(Compiler c) {
+static List _parse_offsetof(Compiler c) {
   c.next();
   c.expect(<(>);
   Type type = c.parse_type_name();
@@ -447,21 +447,21 @@ static List Compiler._parse_offsetof(Compiler c) {
 
 // postfix operators
 
-static List Compiler._parse_postfix(Compiler c) =>
-  c._parse_postfix_tail(c.parse_primary());
+static List _parse_postfix(Compiler c) =>
+  _parse_postfix_tail(c, c.parse_primary());
 
-static List Compiler._parse_postfix_tail(Compiler c, List expr) {
+static List _parse_postfix_tail(Compiler c, List expr) {
   while (_postfix_operator(c.peek(0))) {
     /* The operator makes what precedes it a receiver or a base, and neither
        is a destination, so a converter call noted before it never reaches
        one. */
     c.protocol_helpers.del("explicit-converter");
     switch (c.peek(0)) {
-      case <[>:      expr = c._parse_postfix_index(expr);   break;
-      case <(>:      expr = c._parse_postfix_apply(expr);   break;
-      case <"->">:   expr = c._parse_postfix_arrow(expr);   break;
-      case <.>:      expr = c._parse_postfix_dot(expr);     break;
-      default:       expr = c._parse_postfix_decinc(expr);  break;
+      case <[>:      expr = _parse_postfix_index(c, expr);   break;
+      case <(>:      expr = _parse_postfix_apply(c, expr);   break;
+      case <"->">:   expr = _parse_postfix_arrow(c, expr);   break;
+      case <.>:      expr = _parse_postfix_dot(c, expr);     break;
+      default:       expr = _parse_postfix_decinc(c, expr);  break;
     }
   }
   return expr;
@@ -481,18 +481,18 @@ static int _postfix_operator(Symbol token) {
   return 0;
 }
 
-static List Compiler._parse_postfix_index(Compiler c, List expr) {
+static List _parse_postfix_index(Compiler c, List expr) {
   c.expect(<[>);
-  if (c.test(<:>)) return c._parse_slice(expr, NULL);
+  if (c.test(<:>)) return _parse_slice(c, expr, NULL);
   List index = c.parse_expression();
-  if (c.test(<:>)) return c._parse_slice(expr, index);
+  if (c.test(<:>)) return _parse_slice(c, expr, index);
   c.expect(<]>);
   return c.resolve_expression(%(expr () (index $expr $index)), c.token);
 }
 
 /* Called after the optional start index and first `:` of
    `expr[start:end:step]`. */
-static List Compiler._parse_slice(Compiler c, List expr, List start) {
+static List _parse_slice(Compiler c, List expr, List start) {
   List type = expr.cadr(), stop = NULL, step = NULL;
   if (c.test(<:>)) {
     if (c.peek(0) != <]>) step = c.parse_expression();
@@ -509,7 +509,7 @@ static List Compiler._parse_slice(Compiler c, List expr, List start) {
     %($expr $start $stop $step))});
 }
 
-static List Compiler._parse_postfix_apply(Compiler c, List expr) {
+static List _parse_postfix_apply(Compiler c, List expr) {
   Token origin = c.token;
   c.expect(<(>);
   Array arguments = [], notes = [];
@@ -529,11 +529,11 @@ static List Compiler._parse_postfix_apply(Compiler c, List expr) {
     c.rebuild_expression(NULL, called(expr, supplied)), origin);
   int method = !!expr.match(
     %(expr () ${$source_operator_content(%(. ? (?)))}));
-  c._check_converter_args(result, method, notes.list_free());
+  _check_converter_args(c, result, method, notes.list_free());
   if (method && supplied === %((expr (void) ())))
     match (expr) case %(expr () ${$source_operator_content(
         %(. ? (?name)))}):
-      c._note_explicit_converter(result, name.str(), origin);
+      _note_explicit_converter(c, result, name.str(), origin);
   return result;
 }
 
@@ -558,28 +558,28 @@ List Compiler.apply_macro_value(
     origin);
 }
 
-static List Compiler._parse_postfix_arrow(Compiler c, List expr) {
+static List _parse_postfix_arrow(Compiler c, List expr) {
   Token origin = c.token;
   c.expect(<"->">);
   if (c.at_completion()) {
     List rows = c.postfix_completions(expr.cadr(), <"->">);
     raise %(replcomp (kind <members>) (rows $rows) (keywords ()));
   }
-  List field = c._parse_field_name(<"->">, expr);
+  List field = _parse_field_name(c, <"->">, expr);
   return c.resolve_expression(
     source_operator_expression(NULL, %(-> $expr $field)), origin);
 }
 
-static List Compiler._parse_postfix_dot(Compiler c, List expr) {
+static List _parse_postfix_dot(Compiler c, List expr) {
   Token origin = c.token;
   c.expect(<.>);
   if (c.at_completion()) {
-    Type receiver = _expr_is_raw_string_literal(expr)
+    Type receiver = _is_raw_string_literal(expr)
                   ? %("String") : expr.cadr();
     List rows = c.postfix_completions(receiver, <.>);
     raise %(replcomp (kind <members>) (rows $rows) (keywords ()));
   }
-  List field = c._parse_field_name(<.>, expr);
+  List field = _parse_field_name(c, <.>, expr);
   List result = source_operator_expression(NULL, %(. $expr $field));
   if (c.peek(0) != <(>)
     return c.resolve_expression(result, origin);
@@ -588,7 +588,7 @@ static List Compiler._parse_postfix_dot(Compiler c, List expr) {
   return result;
 }
 
-static List Compiler._parse_field_name(
+static List _parse_field_name(
   Compiler c, Symbol op_sym, List lhs_opt) {
   c.require_input();
   List slot = c.try_parse_macro_member();
@@ -601,7 +601,7 @@ static List Compiler._parse_field_name(
   return field;
 }
 
-static List Compiler._parse_postfix_decinc(Compiler c, List expr) {
+static List _parse_postfix_decinc(Compiler c, List expr) {
   Token origin = c.token;
   Symbol op = c.peek(0);
   c.next();
@@ -622,18 +622,18 @@ List Compiler.parse_primary(Compiler c) {
   if (slot) return slot;
   switch (c.peek(0)) {
     case <"$(">: return c.parse_macro_lisp_expression();
-    case <lit-char*>:  return c._parse_c_string_literals();
+    case <lit-char*>:  return _parse_c_string_literals(c);
     case <$>:
       return c.peek(1) == <!> ? c.parse_macro_quotation()
                               : c.try_parse_macro_expression();
-    case <ident>:      return c._parse_ident_primary();
+    case <ident>:      return _parse_ident_primary(c);
     /* The keyword pass keeps `in` between tokens that can end and begin
        operands, as after a cast or a condition. An operand never begins
        with the operator, so here `in` is a name. */
     case <in>:        return c.parse_variable();
-    case <"(">:       return c._parse_parens();
-    case <"{">:       return c._parse_composite();
-    case <[>:         return c._parse_bracket_array();
+    case <"(">:       return _parse_parens(c);
+    case <"{">:       return _parse_composite(c);
+    case <[>:         return _parse_bracket_array(c);
     case <"%(">:      return c.parse_list_literal();
     case <"%<<">:     return c.parse_symbol_set_literal();
     case <"%[">:      return c.parse_array_literal();
@@ -644,7 +644,7 @@ List Compiler.parse_primary(Compiler c) {
   return c.parse_atomic_literal();
 }
 
-static List Compiler._parse_ident_primary(Compiler c) {
+static List _parse_ident_primary(Compiler c) {
   if (c.token.text == "macro" && c.peek(1) == <ident> &&
       c.peek(2) == <(>) {
     List definition = c.parse_macro_definition();
@@ -664,9 +664,9 @@ static List Compiler._parse_ident_primary(Compiler c) {
   }
   List keyword = c.try_parse_macro_expression();
   if (keyword) return keyword;
-  if (c.token.text == "va_arg") return c._parse_va_arg();
-  if (c.token.text == "_Generic") return c._parse_generic();
-  if (c.token.text == "offsetof") return c._parse_offsetof();
+  if (c.token.text == "va_arg") return _parse_va_arg(c);
+  if (c.token.text == "_Generic") return _parse_generic(c);
+  if (c.token.text == "offsetof") return _parse_offsetof(c);
   return c.parse_variable();
 }
 
@@ -680,7 +680,7 @@ List Compiler.parse_variable(Compiler c) {
   if (c.object_macros.try_get(origin.text, definition) &&
       definition == <string>) {
     c.next();
-    return c._join_c_string_literals(
+    return _join_c_string_literals(c,
       %(expr (* char) (literal (* char) ${origin.text})));
   }
   List name = c.parse_complex_identifier();
@@ -696,17 +696,17 @@ List Compiler.parse_variable(Compiler c) {
   return result;
 }
 
-static List Compiler._parse_c_string_literals(Compiler c) =>
-  c._join_c_string_literals(c.parse_atomic_literal());
+static List _parse_c_string_literals(Compiler c) =>
+  _join_c_string_literals(c, c.parse_atomic_literal());
 
 /* Preserve each C token's escape boundary and the ordinary raw-string type.
    A macro defined to a string literal is one of the adjacent words, spelled
    as written, so the C preprocessor joins `printf("%" PRId64 "\n", x)`. */
-static List Compiler._join_c_string_literals(Compiler c, List first) {
-  if (c.peek(0) != <lit-char*> && !c._string_word_follows()) return first;
+static List _join_c_string_literals(Compiler c, List first) {
+  if (c.peek(0) != <lit-char*> && !_string_word_follows(c)) return first;
   Array spellings = [];
   spellings.push(first.caddr().caddr());
-  while (c.peek(0) == <lit-char*> || c._string_word_follows()) {
+  while (c.peek(0) == <lit-char*> || _string_word_follows(c)) {
     spellings.push(c.token.text);
     c.next();
   }
@@ -717,7 +717,7 @@ static List Compiler._join_c_string_literals(Compiler c, List first) {
 /* A name adjacent to a C string literal is a preprocessor word: a macro this
    unit defines to a string literal, or a name it cannot resolve, as a
    header's `PRId64` is. `in` there is the membership operator. */
-static int Compiler._string_word_follows(Compiler c) {
+static int _string_word_follows(Compiler c) {
   if (c.peek(0) != <ident> || c.token.text == "in") return 0;
   Var definition;
   if (c.object_macros.try_get(c.token.text, definition))
@@ -725,19 +725,19 @@ static int Compiler._string_word_follows(Compiler c) {
   return !c.sym.get(%(${c.token.text}));
 }
 
-static List Compiler._parse_parens(Compiler c) {
+static List _parse_parens(Compiler c) {
   c.expect(<(>);
-  return c._parse_group_rest();
+  return _parse_group_rest(c);
 }
 
 /* Parses a group after its `(` through the closing `)`. */
-static List Compiler._parse_group_rest(Compiler c) {
-  if (c._statement_expression_follows()) {
+static List _parse_group_rest(Compiler c) {
+  if (_statement_expression_follows(c)) {
     Token origin = c.token;
     c.expect(<"{">);
     List block = c.parse_compound_statement();
     c.expect(<)>);
-    return c._statement_expression(block, origin);
+    return _statement_expression(c, block, origin);
   }
   List expr = c.parse_expression();
   c.expect(<)>);
@@ -752,7 +752,7 @@ static List Compiler._parse_group_rest(Compiler c) {
    `;` of its own, a hole at the top level opens one too unless a comma
    makes the brace data; one datum states its type, as in `(T){ $x }`. Any
    other brace is a composite or Map literal. */
-static int Compiler._statement_expression_follows(Compiler c) {
+static int _statement_expression_follows(Compiler c) {
   if (c.peek(0) != <"{">) return 0;
   int hole = 0, comma = 0;
   for (Token token = Token.skip_trivia(c.token + 1);;
@@ -770,7 +770,7 @@ static int Compiler._statement_expression_follows(Compiler c) {
    statement, and is void otherwise. A defer directly inside would wrap that
    statement in a cleanup region, and C would lose the value. A template
    binds its statement expression where it expands. */
-static List Compiler._statement_expression(
+static List _statement_expression(
   Compiler c, List block, Token origin) {
   List items = Ast.without_origin(block).cdr();
   if (_defers_directly(items))
@@ -796,21 +796,21 @@ static Type _final_value_type(List items) {
   return %(void);
 }
 
-static List Compiler._parse_composite(Compiler c) {
+static List _parse_composite(Compiler c) {
   c.expect(<"{">);
-  if (c._brace_starts_map()) {
+  if (_brace_starts_map(c)) {
     List entries = c.parse_map_entries();
     c.expect(<"}">);
     return %(expr ("Map") (map @entries));
   }
-  List elems = c._parse_composite_elements();
+  List elems = _parse_composite_elements(c);
   c.expect(<"}">);
   return %(expr () ${source_composite_content(elems)});
 }
 
 /* An entry that begins with a Map-entry macro, or whose first bracket-level
    `:` belongs to no conditional, makes a brace a Map literal. */
-static int Compiler._brace_starts_map(Compiler c) {
+static int _brace_starts_map(Compiler c) {
   if (c.macro_starts_target_at(AST_MAP_ENTRY)) return 1;
   Token token = c.token;
   for (int conditionals = 0;; token = token.after_group()) {
@@ -828,7 +828,7 @@ static int Compiler._brace_starts_map(Compiler c) {
 
 /* A sequence hole splices initializer elements, as it splices call
    arguments; a Lisp slot or meta call stays one element. */
-static List Compiler._parse_composite_elements(Compiler c) {
+static List _parse_composite_elements(Compiler c) {
   Array elements = [];
   while (c.peek(0) != <"}">) {
     List hole = c.peek_macro_hole();
@@ -837,9 +837,9 @@ static List Compiler._parse_composite_elements(Compiler c) {
     List element = sequence ? c.try_parse_macro_slot(<argument>) : NULL;
     if (!element)
       element =
-        c._test_dot_init() ||
-        (c.peek(0) == <[> && c._bracket_designates())
-          ? c._parse_designated_init()
+        _test_dot_init(c) ||
+        (c.peek(0) == <[> && _bracket_designates(c))
+          ? _parse_designated_init(c)
           : c.parse_assignment();
     elements.push(element);
     if (!c.test(<,>)) break;
@@ -849,19 +849,19 @@ static List Compiler._parse_composite_elements(Compiler c) {
 
 /* A bracketed index followed by `=`, `.`, or `[` designates an element;
    any other bracket is an Array literal. */
-static int Compiler._bracket_designates(Compiler c) {
+static int _bracket_designates(Compiler c) {
   Symbol type = c.token.after_group().type;
   return type == <=> || type == <.> || type == <[>;
 }
 
 // Designator chains retain the canonical field/index initializer forms.
-static int Compiler._test_dot_init(Compiler c) {
+static int _test_dot_init(Compiler c) {
   Token token = c.token;
   return token.type == <.> &&
     Token.skip_trivia(token + 1).type == <ident>;
 }
 
-static List Compiler._parse_designated_init(Compiler c) {
+static List _parse_designated_init(Compiler c) {
   Symbol tag;
   List key;
   if (c.test(<.>)) {
@@ -876,7 +876,7 @@ static List Compiler._parse_designated_init(Compiler c) {
   }
   List value;
   if (c.peek(0) == <.> || c.peek(0) == <[>)
-    value = c._parse_designated_init();
+    value = _parse_designated_init(c);
   else {
     c.expect(<=>);
     value = c.parse_assignment();
@@ -884,7 +884,7 @@ static List Compiler._parse_designated_init(Compiler c) {
   return %($tag $key $value);
 }
 
-static List Compiler._parse_bracket_array(Compiler c) {
+static List _parse_bracket_array(Compiler c) {
   c.expect(<[>);
   Array elements = [];
   while (c.peek(0) != <]>) {
@@ -895,7 +895,7 @@ static List Compiler._parse_bracket_array(Compiler c) {
   return %(expr ("Array") (array @{elements.list_free()}));
 }
 
-static List Compiler._parse_va_arg(Compiler c) {
+static List _parse_va_arg(Compiler c) {
   c.next();
   c.expect(<(>);
   List expr = c.parse_assignment();
@@ -910,7 +910,7 @@ static List Compiler._parse_va_arg(Compiler c) {
 /* A C11 generic selection. An association names its type with
    `parse_type_name`, which covers specifiers, qualifiers, and pointers; a
    function-pointer or array association needs a typedef name. */
-static List Compiler._parse_generic(Compiler c) {
+static List _parse_generic(Compiler c) {
   Token origin = c.token;
   c.next();
   c.expect(<(>);
@@ -957,7 +957,7 @@ List Compiler.resolve_expression(Compiler c, List input, Token origin) {
       return c.bind_syntax(input, AST_EXPRESSION, c.return_type);
     case %(expr ?type ?(List content)): {
       if (type && !c.needs_resolution(input)) return input;
-      return c._resolve_content(input, type, content, origin);
+      return _resolve_content(c, input, type, content, origin);
     }
   }
   return input;
@@ -987,7 +987,7 @@ int Compiler.needs_resolution(Compiler c, Var value) {
       case $source_identifier_content(%(?name)):
         if (name is <list>) {
           List binding = name;
-          if (c._identifier_needs_resolution(binding)) return 1;
+          if (_identifier_needs_resolution(c, binding)) return 1;
         }
         else return 1;
       // A Type hole can supply declarators with the base they bind to.
@@ -997,7 +997,7 @@ int Compiler.needs_resolution(Compiler c, Var value) {
   return 0;
 }
 
-static int Compiler._identifier_needs_resolution(
+static int _identifier_needs_resolution(
   Compiler c, List binding) {
   String spelling = binding_identity_spelling(binding);
   Map facts = c.semantic_binding_facts();
@@ -1029,106 +1029,106 @@ static typedef struct Resolve {
   Token origin;
 } Resolve;
 
-static List Compiler._resolve_content(
+static List _resolve_content(
   Compiler c, List input, Type input_type, List content, Token origin) {
   Resolve r = {.c = c, .input = input, .type = input_type, .origin = origin};
-  return r._content(content);
+  return _content(r, content);
 }
 
-static List Resolve._content(Resolve &r, List content) {
+static List _content(Resolve &r, List content) {
   Macro lambda = $lambda_expression, captured = $lambda_captured;
   match (r.input) {
-    case captured(?body, *rows, *params): return r._lambda(body, rows, params);
-    case lambda(?body, *params): return r._lambda(body, NULL, params);
+    case captured(?body, *rows, *params): return _lambda(r, body, rows, params);
+    case lambda(?body, *params): return _lambda(r, body, NULL, params);
   }
   if (content && (content.car() == <at> || content.car() == <src>))
-    return r._source(content);
+    return _source(r, content);
   if (content && content.car() == <expr>)
     match (content) case %(!set ?inner (expr ? ?)):
       return r.c.resolve_expression(inner, r.origin);
   Macro indexed = $indexed;
   match (r.input) {
     case indexed(?base, ?index):
-      return r.c._resolve_indexed(base, index, r.origin);
+      return _resolve_indexed(r.c, base, index, r.origin);
   }
   match (content) {
-    case %(call ?(String callee) (args *args)): return r._native(callee, args);
+    case %(call ?(String callee) (args *args)): return _native(r, callee, args);
   }
-  match (r.input) case $called(?callee, *args): return r._call(callee, args);
+  match (r.input) case $called(?callee, *args): return _call(r, callee, args);
   match (content) {
     case $source_identifier_content(%(?value)):
-      return r.c._resolve_identifier(value, r.type, r.origin);
-    case %(!set ?binding (binding ? ?)): return r._binding(binding);
+      return _resolve_identifier(r.c, value, r.type, r.origin);
+    case %(!set ?binding (binding ? ?)): return _binding(r, binding);
     case $source_literal_content(%(*)): return r.input;
     case %(tpl-call *): return r.input;
     case %(macro-value ?form): return r.c.capture_macro_value(form);
-    case %(meta-call ? (args *)): return r._meta_call();
+    case %(meta-call ? (args *)): return _meta_call(r);
     case %(meta-cap *): return r.input;
-    case %(macro-invoke *): return r._invocation(content);
+    case %(macro-invoke *): return _invocation(r, content);
     case %("x2c.quoted" *):
       return r.c.bind_syntax(content, AST_EXPRESSION, r.c.return_type);
-    case %(macro-slot ? ? *): return r._macro_slot(content);
-    case $source_string_content(%(*items)): return r._segments(items);
-    case %(cons ?head ?tail): return r._cons(head, tail);
-    case %(append ?head ?tail): return r._append(head, tail);
-    case $source_slice_content(%(? ? ? ?)): return r._slice(content);
-    case %(getindex ?base ?index): return r._getindex(base, index);
+    case %(macro-slot ? ? *): return _macro_slot(r, content);
+    case $source_string_content(%(*items)): return _segments(r, items);
+    case %(cons ?head ?tail): return _cons(r, head, tail);
+    case %(append ?head ?tail): return _append(r, head, tail);
+    case $source_slice_content(%(? ? ? ?)): return _slice(r, content);
+    case %(getindex ?base ?index): return _getindex(r, base, index);
     case %(dstrasgn (targets *rows) ?value):
-      return r._destructure(rows, value);
+      return _destructure(r, rows, value);
     case $source_content_pattern($sizeof_grouped, %(?value)):
-      return r._sizeof($sizeof_grouped, value);
+      return _sizeof(r, $sizeof_grouped, value);
     case $source_content_pattern($sizeof_expression, %(?value)):
-      return r._sizeof($sizeof_expression, value);
+      return _sizeof(r, $sizeof_expression, value);
     case $source_generic_content(%(?control *rows)):
-      return r._generic(control, rows);
-    case $source_va_arg_content(%(?expr ?decl)): return r._va_arg(expr, decl);
-    case $source_commas_content(%(*items)): return r._commas(items);
-    case %(splice ?value): return r._splice(value);
+      return _generic(r, control, rows);
+    case $source_va_arg_content(%(?expr ?decl)): return _va_arg(r, expr, decl);
+    case $source_commas_content(%(*items)): return _commas(r, items);
+    case %(splice ?value): return _splice(r, value);
     case %((!or offsetof nil cache macro-bind) *): return r.input;
-    case $source_content_pattern($grouped, %(?inner)): return r._parens(inner);
-    case %(initval *): return r._initval(content);
-    case $source_composite_content(%(*items)): return r._composite(items);
+    case $source_content_pattern($grouped, %(?inner)): return _parens(r, inner);
+    case %(initval *): return _initval(r, content);
+    case $source_composite_content(%(*items)): return _composite(r, items);
     case $source_cast_content(%((!set ?decl (decl *)) ?value)):
-      return r._cast(decl, value);
+      return _cast(r, decl, value);
     case %(type-tag ?target): return r.c.var_tag_expression(target, r.origin);
     case $source_content_pattern($has_type, %(?value ?target)):
-      return r._is_type(value, target);
+      return _is_type(r, value, target);
     case $source_content_pattern($has_symbol, %(?value ?tag)):
-      return r._is_symbol(value, tag);
-    case $source_operator_content(%(*parts)): return r._operator(parts);
-    case $source_postfix_content(%(?op ?value)): return r._postfix(op, value);
-    case %(tadapt ?target ?value): return r._tadapt(target, value);
+      return _is_symbol(r, value, tag);
+    case $source_operator_content(%(*parts)): return _operator(r, parts);
+    case $source_postfix_content(%(?op ?value)): return _postfix(r, op, value);
+    case %(tadapt ?target ?value): return _tadapt(r, target, value);
   }
-  if (content && content.car() == <array>) return r._array_value();
-  if (content && content.car() == <map>) return r._map_value();
+  if (content && content.car() == <array>) return _array_value(r);
+  if (content && content.car() == <map>) return _map_value(r);
   return r.input;
 }
 
-static List Resolve._operator(Resolve &r, List parts) {
+static List _operator(Resolve &r, List parts) {
   match (parts) {
     case %((!or (!set ?op .) (!set ?op (!quote ->)))
            ?receiver (!set ?field (*))):
-      return r._member(op, receiver, field);
-    case %(?op ?value): return r._unary(op, value);
-    case %(?op ?test ?yes ?no): return r._conditional(op, test, yes, no);
-    case %(?op ?left ?right): return r._binary(op, left, right);
+      return _member(r, op, receiver, field);
+    case %(?op ?value): return _unary(r, op, value);
+    case %(?op ?test ?yes ?no): return _conditional(r, op, test, yes, no);
+    case %(?op ?left ?right): return _binary(r, op, left, right);
   }
   return r.input;
 }
 
-static List Resolve._binding(Resolve &r, List binding) {
+static List _binding(Resolve &r, List binding) {
   if (!binding_identity_try_parts(binding, NULL, NULL)) return r.input;
-  return r.c._resolve_identifier(binding, r.type, r.origin);
+  return _resolve_identifier(r.c, binding, r.type, r.origin);
 }
 
-static List Resolve._lambda(
+static List _lambda(
   Resolve &r, List body, List captures, List params) {
   if (r.c.macro_holes) return r.input;
   return r.c.bind_lambda_expression(
     r.type, %(params @params), captures, body);
 }
 
-static List Resolve._source(Resolve &r, List content) {
+static List _source(Resolve &r, List content) {
   match (content) case %(at m-origin ?inner): {
     if (!r.c.source_map || r.c.macro_holes) return r.input;
     return %(expr ${r.type} (at ${r.c.origin} $inner));
@@ -1136,7 +1136,7 @@ static List Resolve._source(Resolve &r, List content) {
   return r.input;
 }
 
-static List Resolve._meta_call(Resolve &r) {
+static List _meta_call(Resolve &r) {
   if (r.c.meta_body || r.c.macro_holes) return r.input;
   if (r.origin == r.c.meta_statement && r.c.peek(0) == <;>) return r.input;
   return r.c.evaluate_meta_expression(r.input, r.origin);
@@ -1144,12 +1144,12 @@ static List Resolve._meta_call(Resolve &r) {
 
 /* An invocation expands where it is resolved, as the binder expands one,
    except in a template, whose expansion expands it. */
-static List Resolve._invocation(Resolve &r, List content) {
+static List _invocation(Resolve &r, List content) {
   if (r.c.macro_holes) return r.input;
   return r.c.bind_syntax(content, AST_EXPRESSION, r.c.return_type);
 }
 
-static List Resolve._macro_slot(Resolve &r, List content) {
+static List _macro_slot(Resolve &r, List content) {
   if (r.c.macro_holes) return r.input;
   Var value = r.c.evaluate_macro_slot(content);
   match (value)
@@ -1161,17 +1161,17 @@ static List Resolve._macro_slot(Resolve &r, List content) {
 
 // identifiers
 
-static List Compiler._resolve_identifier(
+static List _resolve_identifier(
   Compiler c, Var value, Type type, Token origin) {
   if (type === %(<macro-expr>)) type = NULL;
   int read_reference = !type;
   int require_type = 0;
-  List binding = c._identifier_binding(value, type, origin, require_type);
+  List binding = _identifier_binding(c, value, type, origin, require_type);
   if (c.macro_holes && binding) {
     String name = binding_identity_spelling(binding);
     if (c.macro_holes[%(using $name)] is <list>)
       return %(expr (<macro-expr>) (ident (binding-global $name)));
-    if (c._template_free_name(binding))
+    if (_template_free_name(c, binding))
       return %(expr (<macro-expr>) (ident (binding-name $name)));
   }
   int macro_binder = value.is_binder() ||
@@ -1181,22 +1181,22 @@ static List Compiler._resolve_identifier(
   if (!binding) $report.type.binding_unknown(c, value, origin);
   Map binding_facts = c.semantic_binding_facts();
   String spelling = binding_identity_spelling(binding);
-  c._capture_identifier(binding);
+  _capture_identifier(c, binding);
   int kept = 0;
   match (value) case %(binding-global *): kept = 1;
-  if (c._shadow_identifier(binding, type, spelling, binding_facts, kept))
+  if (_shadow_identifier(c, binding, type, spelling, binding_facts, kept))
     type = NULL;
-  if (!type) type = c._identifier_type(
+  if (!type) type = _identifier_type(c,
     binding, spelling, binding_facts, origin);
   if (!type && require_type)
     $report.type.ident_semantic(c, value, origin);
   List result = %(expr $type (ident $binding));
-  result = c._capture_lambda_value(result, binding, type, read_reference);
-  return c._read_bound_reference(
+  result = _capture_lambda_value(c, result, binding, type, read_reference);
+  return _read_bound_reference(c,
     result, binding, type, read_reference, binding_facts);
 }
 
-static List Compiler._capture_lambda_value(
+static List _capture_lambda_value(
   Compiler c, List result, List &binding, Type &type, int &read_reference) {
   if (!c.lambda_scopes || c.macro_holes) return result;
   result = c.capture_lambda_identifier(binding, type);
@@ -1218,7 +1218,7 @@ static List Compiler._capture_lambda_value(
    emitted alias so the original identity keeps its meaning. A template's
    free name arrives as `binding-name` and binds where the expansion lands;
    a `using` name arrives as `binding-global` and binds at file scope. */
-static List Compiler._identifier_binding(
+static List _identifier_binding(
   Compiler c, Var value, Type &type, Token origin, int &require_type) {
   require_type = value is <string>;
   if (value is <string>) return c.sym.reference(%($value), type);
@@ -1239,7 +1239,7 @@ static List Compiler._identifier_binding(
     if (facts.try_get(%(source-spelling $name), source) &&
         !(%(type $name) in facts) &&
         c.sym.lookup(%($spelling), NULL) != name)
-      return c._landed_name(source, type);
+      return _landed_name(c, source, type);
     return name;
   }
   match (name) {
@@ -1248,7 +1248,7 @@ static List Compiler._identifier_binding(
       return c.sym.reference(%($spelling), type);
     }
     case %(binding-name ?(String spelling)):
-      return c._landed_name(spelling, type);
+      return _landed_name(c, spelling, type);
     case %(binding-global ?(String spelling)):
       return c.sym.reference_global(%($spelling));
     case %((!is ? type string)):
@@ -1260,7 +1260,7 @@ static List Compiler._identifier_binding(
 /* A name a template reads without declaring it binds where the expansion
    lands. A `Macro` local is a compile-time template the body composes, so
    an anonymous macro captures its value where it is written. */
-static int Compiler._template_free_name(Compiler c, List binding) {
+static int _template_free_name(Compiler c, List binding) {
   if (!binding || c.macro_template_local(binding)) return 0;
   Var type = c.semantic_binding_facts()[%(type $binding)];
   return !(type is <list> && c.sym.is_named_value_type(type, "Macro"));
@@ -1269,12 +1269,12 @@ static int Compiler._template_free_name(Compiler c, List binding) {
 /* A template's name where its expansion lands: the visible declaration, or
    for a name nothing declares, one file-scope forward binding that C
    resolves. */
-static List Compiler._landed_name(Compiler c, String spelling, Type &type) {
+static List _landed_name(Compiler c, String spelling, Type &type) {
   List visible = c.sym.lookup(%($spelling), type);
   return visible ? visible : c.sym.reference_global(%($spelling));
 }
 
-static void Compiler._capture_identifier(Compiler c, List binding) {
+static void _capture_identifier(Compiler c, List binding) {
   if (c.local_macro_captures == NULL || !binding ||
       !c.sym.binding_is_local_before(
         binding, c.local_macro_capture_scopes) ||
@@ -1292,7 +1292,7 @@ static void Compiler._capture_identifier(Compiler c, List binding) {
    identifier's type is the new binding's. Any other file-scope identity
    that a visible declaration hides, such as a name a template's `using`
    keeps, gives that declaration an emitted alias. */
-static int Compiler._shadow_identifier(
+static int _shadow_identifier(
   Compiler c, List &binding, Type type, String spelling, Map binding_facts,
   int kept) {
   if (!spelling) return 0;
@@ -1301,7 +1301,7 @@ static int Compiler._shadow_identifier(
   if (!visible || visible == binding) return 0;
   if ((c.sym.binding_is_local(binding) &&
        !(%(lambda-depth $binding) in binding_facts)) ||
-      (!kept && visible_type && c._expansion_introduced(visible))) {
+      (!kept && visible_type && _expansion_introduced(c, visible))) {
     binding = visible;
     return 1;
   }
@@ -1313,21 +1313,21 @@ static int Compiler._shadow_identifier(
 }
 
 /* An active expansion issued `binding` after it began. */
-static int Compiler._expansion_introduced(Compiler c, List binding) {
+static int _expansion_introduced(Compiler c, List binding) {
   int identity = 0;
   return c.macro_stack &&
          binding_identity_try_parts(binding, identity, NULL) &&
          identity > c.expansion_floor;
 }
 
-static Type Compiler._identifier_type(
+static Type _identifier_type(
   Compiler c, List binding, String spelling, Map facts, Token origin) {
   Var stored;
   if (facts.try_get(%(type $binding), stored) && stored is <list>)
     return stored;
   if (!spelling) return NULL;
   Type type = c.sym.get(%($spelling));
-  if (!type) c._check_unit_static(spelling, origin);
+  if (!type) _check_unit_static(c, spelling, origin);
   return type;
 }
 
@@ -1337,7 +1337,7 @@ static Type Compiler._identifier_type(
    would otherwise report only an undefined symbol at link time. A macro body
    is the defining library's own syntax, bound wherever it expands, so only a
    reference written in an `.x` unit is reported. */
-static void Compiler._check_unit_static(
+static void _check_unit_static(
   Compiler c, String spelling, Token origin) {
   if (!is_source_file(c.filename)) return;
   List owner = c.sym.get(%("unit-static" $spelling));
@@ -1346,7 +1346,7 @@ static void Compiler._check_unit_static(
   $report.type.function_private(c, spelling, file, origin);
 }
 
-static List Compiler._read_bound_reference(
+static List _read_bound_reference(
   Compiler c, List result, List binding, Type type,
   int read_reference, Map binding_facts) {
   if (!read_reference ||
@@ -1358,7 +1358,7 @@ static List Compiler._read_bound_reference(
            (parens (expr $value_type (op * $result))));
 }
 
-static int Compiler._expression_is_addressable(Compiler c, List expression) {
+static int _is_addressable(Compiler c, List expression) {
   match (expression) {
     case %(expr ? ${$source_identifier_content(%(?binding))}): {
       Map facts = c.semantic_binding_facts();
@@ -1368,27 +1368,27 @@ static int Compiler._expression_is_addressable(Compiler c, List expression) {
     }
     case %(expr ? ${$indexed(?receiver, ?selector)}):
       return !c.sym.normalize_declared_type(receiver.cadr()).is_array() ||
-             c._expression_is_addressable(receiver);
+             _is_addressable(c, receiver);
     case %(expr ? ${$source_operator_content(
         %((!quote *) ?operand))}): return 1;
     case %(expr ? ${$source_operator_content(
         %((!quote ->) ?receiver ?field))}): return 1;
     case %(expr ? ${$grouped(?base)}):
-      return c._expression_is_addressable(base);
+      return _is_addressable(c, base);
     case %(expr ? ${$source_operator_content(%(. ?base ?))}):
-      return c._expression_is_addressable(base);
+      return _is_addressable(c, base);
   }
   return 0;
 }
 
 /* Dynamic update helpers take a writable native address rather than leaving
    those requirements for the C assignment operator to check. */
-static void Compiler._check_dynamic_target(
+static void _check_dynamic_target(
   Compiler c, List target, Token origin) {
   match (target) {
     case %(expr ? (getindex ? ?)): return;
     case %(expr ? ${$grouped(?inner)}):
-      return c._check_dynamic_target(inner, origin);
+      return _check_dynamic_target(c, inner, origin);
   }
   Type type = c.sym.normalize_declared_type(target.cadr());
   foreach (Var part, type) {
@@ -1397,14 +1397,14 @@ static void Compiler._check_dynamic_target(
       c.report_error(
         <type>, "dynamic update cannot target a const object", origin, NULL);
   }
-  if (!c._expression_is_addressable(target))
+  if (!_is_addressable(c, target))
     c.report_error(
       <type>, "dynamic update requires an addressable object", origin, NULL);
 }
 
 // indexing and slices
 
-static List Compiler._resolve_indexed(
+static List _resolve_indexed(
   Compiler c, List receiver, List selector, Token origin) {
   receiver = c.resolve_expression(receiver, origin);
   selector = c.resolve_expression(selector, origin);
@@ -1412,7 +1412,7 @@ static List Compiler._resolve_indexed(
     $report.type.optional_ref_index(c, origin);
   if (_deferred_receiver(receiver) || _deferred_receiver(selector))
     return %(expr (<macro-expr>) (index $receiver $selector));
-  List resolved = c._postfix_index_expression(receiver, selector);
+  List resolved = _postfix_index_expression(c, receiver, selector);
   if (resolved) return resolved;
   Type receiver_type = receiver.cadr();
   // A field of a foreign struct has no x2c type; C indexes it alone.
@@ -1423,18 +1423,18 @@ static List Compiler._resolve_indexed(
   $report.parse.index_unsupported(c, receiver_type, origin);
 }
 
-static List Compiler._postfix_index_expression(
+static List _postfix_index_expression(
   Compiler c, List expr, List index) {
   Type type = expr.cadr(), element = type.dereference();
   if (element) return %(expr $element (index $expr $index));
   type = type.canonicalize();
   if (!type.is_typedef_name()) return NULL;
-  return c._typedef_index(expr, index, type);
+  return _typedef_index(c, expr, index, type);
 }
 
-static List Compiler._typedef_index(
+static List _typedef_index(
   Compiler c, List expr, List index, Type type) {
-  int collection = c._collection_index_type(type);
+  int collection = _collection_index_type(c, type);
   List resolved = c._nominal_getindex(type);
   if (!resolved && collection)
     resolved = c.resolve_protocol_member(type, "getindex");
@@ -1442,11 +1442,11 @@ static List Compiler._typedef_index(
   match (signature)
     case %((func (!set ?params (?receiver ?))) ?rtype):
       if (collection || receiver == type)
-        return c._getindex_expression(expr, index, params, rtype);
-  return c._native_index(expr, index, type);
+        return _getindex_expression(c, expr, index, params, rtype);
+  return _native_index(c, expr, index, type);
 }
 
-static int Compiler._collection_index_type(Compiler c, Type type) =>
+static int _collection_index_type(Compiler c, Type type) =>
   c.sym.is_named_value_type(type, "List") || c.sym.is_string_type(type) ||
   c.sym.is_array_type(type) || c.sym.is_map_type(type);
 
@@ -1458,7 +1458,7 @@ List Compiler._nominal_getindex(Compiler c, Type type) {
   match (type)
     case %(?(String nominal)): {
       String source = %"${nominal}_getindex";
-      if (source == c.fn_name && c._collection_index_type(type)) return NULL;
+      if (source == c.fn_name && _collection_index_type(c, type)) return NULL;
       Type signature = c.sym.get(%($source));
       match (signature)
         case %((func ($type ?)) ?):
@@ -1467,7 +1467,7 @@ List Compiler._nominal_getindex(Compiler c, Type type) {
   return NULL;
 }
 
-static List Compiler._getindex_expression(
+static List _getindex_expression(
   Compiler c, List expr, List index, Var params, Var rtype) {
   Type key = params.cadr(), supplied = index.cadr();
   if (key.is_integral() && c.sym.is_named_value_type(supplied, "Symbol"))
@@ -1475,9 +1475,9 @@ static List Compiler._getindex_expression(
   return %(expr ($rtype) (getindex $expr $index));
 }
 
-static List Compiler._native_index(
+static List _native_index(
   Compiler c, List expr, List index, Type type) {
-  Type native = c._index_native_type(expr.cadr());
+  Type native = _index_native_type(c, expr.cadr());
   Type shape = native.canonicalize();
   // A boxable handle to a record has no C array reading.
   if (shape.is_pointer() && shape.dereference().is_aggregate() &&
@@ -1492,7 +1492,7 @@ static List Compiler._native_index(
 }
 
 // Resolve the outer aliases without reducing the indexed element type.
-static Type Compiler._index_native_type(Compiler c, Type native) {
+static Type _index_native_type(Compiler c, Type native) {
   int hops = 0;
   loop {
     Type key = native.canonicalize();
@@ -1504,13 +1504,13 @@ static Type Compiler._index_native_type(Compiler c, Type native) {
   return native;
 }
 
-static List Resolve._getindex(Resolve &r, List receiver, List selector) {
+static List _getindex(Resolve &r, List receiver, List selector) {
   return %(expr ${r.type}
            (getindex ${r.c.resolve_expression(receiver, r.origin)}
                      ${r.c.resolve_expression(selector, r.origin)}));
 }
 
-static List Resolve._slice(Resolve &r, List slice) {
+static List _slice(Resolve &r, List slice) {
   (List receiver, List start, List stop, List step) = slice.cdr();
   receiver = r.c.resolve_expression(receiver, r.origin);
   if (start) start = r.c.resolve_expression(start, r.origin);
@@ -1524,8 +1524,8 @@ static List Resolve._slice(Resolve &r, List slice) {
 
 // calls
 
-static List Resolve._native(Resolve &r, String callee, List supplied) {
-  List arguments = r.c._resolve_call_arguments(NULL, supplied, r.origin);
+static List _native(Resolve &r, String callee, List supplied) {
+  List arguments = _resolve_call_arguments(r.c, NULL, supplied, r.origin);
   return %(expr ${r.type} (call $callee (args @arguments)));
 }
 
@@ -1540,40 +1540,40 @@ static typedef struct CallSite {
   String method;
 } CallSite;
 
-static List Resolve._call(Resolve &r, List function, List supplied) {
+static List _call(Resolve &r, List function, List supplied) {
   CallSite site = {
     .c = r.c, .result_type = r.type, .supplied = supplied,
     .origin = r.origin};
   match (function)
     case %(expr ? ${$source_operator_content(
         %(. ?receiver (!set ?field (?name))))}):
-      return site._method(receiver, field);
-  return site._function(function);
+      return _method(site, receiver, field);
+  return _function(site, function);
 }
 
-static List CallSite._function(CallSite &k, List function) {
+static List _function(CallSite &k, List function) {
   List resolved = k.c.resolve_expression(function, k.origin);
   Type type = resolved.cadr(), func_type = k.c.sym.resolve_key(%("Func"));
   if (type && k.c.sym.resolve_key(type) == func_type)
-    return k.c._resolve_func_call(resolved, k.supplied, k.origin);
-  return k._finish(k.result_type, resolved, type, NULL);
+    return _resolve_func_call(k.c, resolved, k.supplied, k.origin);
+  return _finish(k, k.result_type, resolved, type, NULL);
 }
 
-static List CallSite._finish(
+static List _finish(
   CallSite &k, Type result_type, List callee, Type callee_type,
   List receiver) {
   if (result_type === %(<macro-expr>)) result_type = NULL;
   Type applied = callee_type.apply();
   if (!applied && callee_type)
     applied = k.c.sym.resolve_key(callee_type).apply();
-  List arguments = k.c._resolve_call_arguments(receiver, k.supplied, k.origin);
+  List arguments = _resolve_call_arguments(k.c, receiver, k.supplied, k.origin);
   if (_deferred_call(callee, receiver, arguments))
     result_type = %(<macro-expr>);
   if (!result_type) result_type = applied;
   if (receiver && result_type !== %(<macro-expr>))
-    k._check_arity(callee_type, arguments);
+    _check_arity(k, callee_type, arguments);
   k.c.check_meta_call(callee, k.origin);
-  callee = k.c._discarding_callee(callee, callee_type, arguments);
+  callee = _discarding_callee(k.c, callee, callee_type, arguments);
   Macro called = $called;
   return k.c.rebuild_expression(result_type, called(callee, arguments));
 }
@@ -1594,7 +1594,7 @@ static int _deferred_call(List callee, List receiver, List arguments) {
   return 0;
 }
 
-static void CallSite._check_arity(
+static void _check_arity(
   CallSite &k, Type callee_type, List arguments) {
   match (callee_type)
     case %((func (!set ?parameters (*))) *):
@@ -1611,7 +1611,7 @@ static int _parameters_variadic(List parameters) {
   return 0;
 }
 
-static List Compiler._resolve_call_arguments(
+static List _resolve_call_arguments(
   Compiler c, List receiver, List supplied, Token origin) {
   Array arguments = [];
   if (receiver) arguments.push(receiver);
@@ -1639,7 +1639,7 @@ static List Compiler._resolve_call_arguments(
 
 /* A call whose receiver or argument is an unnamed operator temporary goes
    through a helper that discards that temporary once the call returns. */
-static List Compiler._discarding_callee(
+static List _discarding_callee(
   Compiler c, List callee, Type callee_type, List arguments) {
   List binding = NULL;
   match (callee) case %(expr ? ${$source_identifier_content(
@@ -1649,7 +1649,7 @@ static List Compiler._discarding_callee(
     return callee;
   int which = 0, index = 0;
   foreach (Var argument, arguments) {
-    if (argument is <list> && c._is_operator_temporary(argument))
+    if (argument is <list> && _is_operator_temporary(c, argument))
       which |= 1 << index;
     index++;
   }
@@ -1664,16 +1664,16 @@ static List Compiler._discarding_callee(
 
 // method calls
 
-static List CallSite._method(CallSite &k, List receiver, List field) {
+static List _method(CallSite &k, List receiver, List field) {
   k.receiver = receiver;
   k.field = field;
-  List resolution = k._lookup();
+  List resolution = _lookup(k);
   if (!resolution && _deferred_receiver(k.receiver)) {
     List callee = %(expr (<macro-expr>) (op . ${k.receiver} ${k.field}));
-    return k._finish(k.result_type, callee, NULL, NULL);
+    return _finish(k, k.result_type, callee, NULL, NULL);
   }
   if (!resolution && !k.c.macro_holes && k.c.rewrite_rules) {
-    List rewritten = k._member_rewrite();
+    List rewritten = _member_rewrite(k);
     if (rewritten) return rewritten;
   }
   if (!resolution) {
@@ -1682,14 +1682,14 @@ static List CallSite._method(CallSite &k, List receiver, List field) {
   }
   match (resolution) {
     case %(ambiguous *packages):
-      k.c._report_method_ambiguity(k.type, k.method, packages, k.origin);
+      _report_method_ambiguity(k.c, k.type, k.method, packages, k.origin);
     case %(method ?binding (!set ?signature
       ((func (!set ?parameters (?declared *))) *returns))):
-      return k._bound(binding, signature, declared, parameters, returns);
+      return _bound(k, binding, signature, declared, parameters, returns);
     case %(field ?access ?field_type): {
       List callee = %(expr $field_type
         (op $access ${k.receiver} ${k.field}));
-      return k._finish(k.result_type, callee, field_type, NULL);
+      return _finish(k, k.result_type, callee, field_type, NULL);
     }
   }
   return NULL;
@@ -1697,7 +1697,7 @@ static List CallSite._method(CallSite &k, List receiver, List field) {
 
 /* Member rules are keyed by the receiver's type, or by a field keyword the
    aggregate it reaches through typedefs or one pointer declares. */
-static List CallSite._member_rewrite(CallSite &k) {
+static List _member_rewrite(CallSite &k) {
   List source = %(expr () (call
     (expr () (op . ${k.receiver} ${k.field})) (args @{k.supplied})));
   List rewritten = k.c.rewrite(
@@ -1707,12 +1707,12 @@ static List CallSite._member_rewrite(CallSite &k) {
     ? k.c.marked_rewrite(aggregate, source, k.origin) : rewritten;
 }
 
-static List CallSite._lookup(CallSite &k) {
+static List _lookup(CallSite &k) {
   k.receiver = k.c.resolve_expression(k.receiver, k.origin);
   k.type = k.receiver.cadr();
   k.method = k.field.car().str();
   List resolution = k.c.resolve_postfix_member(k.type, k.field, <.>, 1);
-  if (!resolution && _expr_is_raw_string_literal(k.receiver)) {
+  if (!resolution && _is_raw_string_literal(k.receiver)) {
     k.receiver = k.c.promote_string_literal(k.receiver);
     k.type = k.receiver.cadr();
     resolution = k.c.resolve_postfix_member(k.type, k.field, <.>, 1);
@@ -1720,19 +1720,19 @@ static List CallSite._lookup(CallSite &k) {
   return resolution;
 }
 
-static List CallSite._bound(
+static List _bound(
   CallSite &k, List binding, Type signature, List declared,
   List parameters, List returns) {
-  k.receiver = k.c._method_bind(k.receiver, k.type, declared, k.origin);
+  k.receiver = _method_bind(k.c, k.receiver, k.type, declared, k.origin);
   List callee = %(expr ((func $parameters) $returns) (ident $binding));
-  return k._finish(signature.apply(), callee, signature, k.receiver);
+  return _finish(k, signature.apply(), callee, signature, k.receiver);
 }
 
-static List Compiler._method_bind(
+static List _method_bind(
   Compiler c, List receiver, Type type, Type declared, Token origin) {
   if (!declared || !type) return receiver;
   Type target = declared.canonicalize(), source = type.canonicalize();
-  Type named = source.is_aggregate() ? c._tag_typedef(source) : NULL;
+  Type named = source.is_aggregate() ? _tag_typedef(c, source) : NULL;
   if (named) {
     type = named.qualify(type);
     source = named;
@@ -1742,7 +1742,7 @@ static List Compiler._method_bind(
     $report.type.receiver_pointer(c, type, declared, origin);
   if (target.car() != <*> || cdr(target) !== source)
     return receiver;
-  if (!c._expression_is_addressable(receiver))
+  if (!_is_addressable(c, receiver))
     $report.type.receiver_address(c, origin);
   List address = %(expr ${type.reference()} (op & (parens $receiver)));
   return c.convert_expression(address, declared);
@@ -1776,20 +1776,20 @@ List Compiler.resolve_postfix_member(
     $report.type.optional_ref_access(c);
   Type type = receiver_type.canonicalize();
   if (access == <"->">)
-    return c._field_member(receiver_type, field, <"->">);
+    return _field_member(c, receiver_type, field, <"->">);
   int hops = 0, tagged = 0;
   while (type) {
     if (call_context && _method_owner(type)) {
-      List method = c._method_member(receiver_type, type, field);
+      List method = _method_member(c, receiver_type, type, field);
       if (method) return method;
     }
     if (type.is_pointer())
-      return c._field_member(receiver_type, field, <"->">);
+      return _field_member(c, receiver_type, field, <"->">);
     if (type.is_aggregate()) {
-      List member = c._field_member(receiver_type, field, <.>);
+      List member = _field_member(c, receiver_type, field, <.>);
       if (member || !call_context) return member;
     }
-    type = c._next_method_type(type, hops, tagged);
+    type = _next_method_type(c, type, hops, tagged);
   }
   return NULL;
 }
@@ -1798,15 +1798,15 @@ static int _method_owner(Type type) =>
   !type.is_aggregate() && (type.is_typedef_name() || type.is_builtin());
 
 /* Lookup and completion follow the same typedef owner from an aggregate. */
-static Type Compiler._next_method_type(
+static Type _next_method_type(
   Compiler c, Type type, int &hops, int &tagged) {
   if (type.is_pointer()) return NULL;
-  if (type.is_aggregate()) return !tagged++ ? c._tag_typedef(type) : NULL;
+  if (type.is_aggregate()) return !tagged++ ? _tag_typedef(c, type) : NULL;
   return c.sym.next_typedef(type, hops).canonicalize();
 }
 
 /* A field inherits its containing object's qualifiers, not its pointer's. */
-static List Compiler._field_member(
+static List _field_member(
   Compiler c, Type receiver, List field, Symbol access) {
   Type object = access == <"->">
     ? c.sym.normalize_declared_type(receiver).dereference() : receiver;
@@ -1818,7 +1818,7 @@ static List Compiler._field_member(
    typedef that names the same aggregate: `T` itself, as the usual
    `typedef struct T {...} T;` declares, or else the only typedef declared
    directly as that aggregate. */
-static Type Compiler._tag_typedef(Compiler c, Type aggregate) {
+static Type _tag_typedef(Compiler c, Type aggregate) {
   match (aggregate) case %(? ?(String tag)): {
     Type name = %($tag), declared = c.sym.get(%(typedef $tag));
     if (declared && c.sym.resolve_key(declared) == aggregate) return name;
@@ -1826,7 +1826,7 @@ static Type Compiler._tag_typedef(Compiler c, Type aggregate) {
   return c.sym.sole_typedef(aggregate);
 }
 
-static List Compiler._method_member(
+static List _method_member(
   Compiler c, Type receiver_type, Type type, List field) {
   String method = %"${type.base_type().car()}_${field.car()}";
   Type signature = c.sym.get(%($method));
@@ -1837,7 +1837,7 @@ static List Compiler._method_member(
   if (signature) binding = c.sym.reference(%($method), NULL);
   else {
     List imported = rejected
-      ? NULL : c._imported_method(method, receiver_type);
+      ? NULL : _imported_method(c, method, receiver_type);
     if (imported) return imported;
     List resolved = c.resolve_protocol_member(type, field.car().str());
     if (resolved) {
@@ -1846,14 +1846,14 @@ static List Compiler._method_member(
     }
   }
   if (!signature) return NULL;
-  signature = c._receiver_relative_signature(
+  signature = _receiver_relative_signature(c,
     binding, signature, receiver_type);
   return %(method $binding $signature);
 }
 
 /* Find a method that an imported package adds to an external receiver. The
    package names are sorted so an ambiguous call reports deterministically. */
-static List Compiler._imported_method(
+static List _imported_method(
   Compiler c, String method, Type receiver) {
   List packages = c.imported_providers(method);
   if (!packages) return NULL;
@@ -1862,11 +1862,11 @@ static List Compiler._imported_method(
   String spelling = %"${packages.car()}__$method";
   Type signature = c.sym.get_exact(%($spelling));
   List binding = c.sym.reference(%($spelling), NULL);
-  signature = c._receiver_relative_signature(binding, signature, receiver);
+  signature = _receiver_relative_signature(c, binding, signature, receiver);
   return %(method $binding $signature);
 }
 
-static Type Compiler._receiver_relative_signature(
+static Type _receiver_relative_signature(
   Compiler c, List binding, Type signature, Type receiver) {
   String spelling = binding_identity_spelling(binding);
   if (!spelling) return signature;
@@ -1877,7 +1877,7 @@ static Type Compiler._receiver_relative_signature(
   return relative.search_replace(<self>, base.car());
 }
 
-static List Resolve._member(
+static List _member(
   Resolve &r, Var operator, List receiver, List field) {
   receiver = r.c.resolve_expression(receiver, r.origin);
   Type receiver_type = receiver.cadr();
@@ -1891,7 +1891,7 @@ static List Resolve._member(
   return source_operator_expression(type, %($operator $receiver $field));
 }
 
-static void Compiler._report_method_ambiguity(
+static void _report_method_ambiguity(
   Compiler c, Type receiver, String member, List packages, Token origin) {
   Array notes = [];
   foreach (String package, packages) notes.push(%"package: '$package'");
@@ -1917,8 +1917,8 @@ List Compiler.postfix_completions(
   Array names = $auto([]), accepted = [];
   Type fields = c.sym.resolve_key(receiver);
   if (fields.is_pointer()) fields = fields.dereference();
-  c._completion_fields(fields, seen, names, {});
-  if (access == <.>) c._completion_methods(receiver, seen, names);
+  _completion_fields(c, fields, seen, names, {});
+  if (access == <.>) _completion_methods(c, receiver, seen, names);
   names.sort();
   foreach (String name, names) {
     List resolution = c.resolve_postfix_member(receiver, %($name), access, 1);
@@ -1929,7 +1929,7 @@ List Compiler.postfix_completions(
   return accepted.list_free();
 }
 
-static void Compiler._completion_fields(
+static void _completion_fields(
   Compiler c, Type type, Map seen, Array names, Map visited) {
   type = c.sym.resolve_key(type);
   if (!type || !type.is_aggregate_tag() || type in visited) return;
@@ -1938,28 +1938,28 @@ static void Compiler._completion_fields(
   foreach (List row, order ? order.cdr() : NULL) {
     String name = row.car();
     if (name) _completion_add(seen, names, name);
-    else c._completion_fields(row.cadr(), seen, names, visited);
+    else _completion_fields(c, row.cadr(), seen, names, visited);
   }
 }
 
-static void Compiler._completion_methods(
+static void _completion_methods(
   Compiler c, Type receiver, Map seen, Array names) {
   Type type = receiver.canonicalize();
   int hops = 0, tagged = 0;
   while (type) {
     if (_method_owner(type)) {
       String owner = type.base_type().car();
-      c._completion_owner_methods(%"${owner}_", seen, names);
+      _completion_owner_methods(c, %"${owner}_", seen, names);
       foreach (String name, c.protocol_member_names(type))
         _completion_add(seen, names, name);
     }
-    type = c._next_method_type(type, hops, tagged);
+    type = _next_method_type(c, type, hops, tagged);
   }
 }
 
 /* Functions named `Owner_name`, or `package__Owner_name` for an imported
    package, among the visible symbols. */
-static void Compiler._completion_owner_methods(
+static void _completion_owner_methods(
   Compiler c, String prefix, Map seen, Array names) {
   foreach (List row, c.sym.visible_symbols()) {
     (String spelling, Var raw) = row;
@@ -2049,7 +2049,7 @@ List x2c_func_call_arguments(List function, List storage, List arguments) {
       prepared.push(absent(function, storage, count, index, value));
       continue;
     }
-    int addressable = c._expression_is_addressable(argument);
+    int addressable = _is_addressable(c, argument);
     List address = forwarded ? argument
       : addressable ? %(expr ${type.reference()} (op & (parens $argument)))
       : $!int{ 0 };
@@ -2072,9 +2072,9 @@ static macro Expression $func_call(Expr $callee, Expr $count,
   Func_apply(function, $count, storage);
 });
 
-static List Compiler._resolve_func_call(
+static List _resolve_func_call(
   Compiler c, List callee, List supplied, Token origin) {
-  List arguments = c._resolve_call_arguments(NULL, supplied, origin);
+  List arguments = _resolve_call_arguments(c, NULL, supplied, origin);
   if (_deferred_call(callee, NULL, arguments)) {
     Macro called = $called;
     return c.rebuild_expression(%(<macro-expr>), called(callee, arguments));
@@ -2162,12 +2162,12 @@ List Compiler.complete_iter_chain(Compiler c, List expression) {
     case $called(%(!set ?callee (expr ((func (!set ?parameters (*))) ?)
                                       (ident ?binding))),
                  *arguments):
-      return c._complete_iter_call(
+      return _complete_iter_call(c,
         expression, callee, arguments, parameters, binding);
   return expression;
 }
 
-static List Compiler._complete_iter_call(
+static List _complete_iter_call(
   Compiler c, List expression, List callee, List arguments,
   List parameters, List binding) {
   Type result = expression.cadr();
@@ -2217,7 +2217,7 @@ static List _iter_destination(void) {
 
 // operators
 
-static List Resolve._unary(Resolve &r, Var operator, List operand) {
+static List _unary(Resolve &r, Var operator, List operand) {
   List lhs = r.c.resolve_expression(operand, r.origin);
   Type lhs_type = lhs.cadr();
   if (lhs_type.car() == <opt-ref> && operator != <!>)
@@ -2227,7 +2227,7 @@ static List Resolve._unary(Resolve &r, Var operator, List operand) {
   if (lhs_type === %(<macro-expr>))
     return source_operator_expression(%(<macro-expr>), %($operator $lhs));
   List lowered = operator == <->
-    ? r.c._protocol_operator_expression(operator, lhs, NULL) : NULL;
+    ? _protocol_operator_expression(r.c, operator, lhs, NULL) : NULL;
   if (lowered) return lowered;
   Type type = lhs_type;
   switch (operator.symbol()) {
@@ -2249,13 +2249,13 @@ static List Resolve._unary(Resolve &r, Var operator, List operand) {
   }
   if ((operator == <++> || operator == <-->) &&
       r.c.sym.is_var_type(lhs_type))
-    r.c._check_dynamic_target(lhs, r.origin);
+    _check_dynamic_target(r.c, lhs, r.origin);
   if ((operator == <++> || operator == <-->) &&
-      r.c._builtin_index_lvalue(lhs)) type = %("Var");
+      _builtin_index_lvalue(r.c, lhs)) type = %("Var");
   return source_operator_expression(type, %($operator $lhs));
 }
 
-static List Resolve._postfix(Resolve &r, Var operator, List operand) {
+static List _postfix(Resolve &r, Var operator, List operand) {
   operand = r.c.resolve_expression(operand, r.origin);
   Type operand_type = operand.cadr();
   if (operand_type.car() == <opt-ref>)
@@ -2264,13 +2264,13 @@ static List Resolve._postfix(Resolve &r, Var operator, List operand) {
     return source_postfix_expression(
       %(<macro-expr>), %($operator $operand));
   if (r.c.sym.is_var_type(operand_type))
-    r.c._check_dynamic_target(operand, r.origin);
-  if (r.c._builtin_index_lvalue(operand)) operand_type = %("Var");
+    _check_dynamic_target(r.c, operand, r.origin);
+  if (_builtin_index_lvalue(r.c, operand)) operand_type = %("Var");
   return source_postfix_expression(
     operand_type, %($operator $operand));
 }
 
-static List Resolve._conditional(
+static List _conditional(
   Resolve &r, Var operator, List condition, List ontrue, List onfalse) {
   condition = r.c.resolve_expression(condition, r.origin);
   ontrue = r.c.resolve_expression(ontrue, r.origin);
@@ -2288,11 +2288,11 @@ static List Resolve._conditional(
     Type left = r.c.sym.resolve_numeric_type(type);
     Type right = r.c.sym.resolve_numeric_type(false_type);
     if (left && right) type = left.widest(right);
-    else if (r.c._conditional_joins(false_type, true_type)) {
+    else if (_conditional_joins(r.c, false_type, true_type)) {
       type = false_type;
       ontrue = r.c.convert_expression(ontrue, type);
     }
-    else if (r.c._conditional_joins(true_type, false_type))
+    else if (_conditional_joins(r.c, true_type, false_type))
       onfalse = r.c.convert_expression(onfalse, type);
   }
   return source_operator_expression(
@@ -2302,16 +2302,16 @@ static List Resolve._conditional(
 /* A conditional whose arms are a `Var` and another value is a `Var`: the
    other arm boxes, so C sees one operand type. Other mixed arms keep their
    C types until a target converts each arm. */
-static int Compiler._conditional_joins(Compiler c, Type type, Type other) =>
+static int _conditional_joins(Compiler c, Type type, Type other) =>
   type && other && c.sym.is_var_type(type) && !c.sym.is_var_type(other);
 
-static List Resolve._binary(Resolve &r, Var operator, List left, List right) {
+static List _binary(Resolve &r, Var operator, List left, List right) {
   List lhs = r.c.resolve_expression(left, r.origin);
   List rhs = r.c.resolve_expression(right, r.origin);
-  return r.c._binary_expression(operator, lhs, rhs, r.origin);
+  return _binary_expression(r.c, operator, lhs, rhs, r.origin);
 }
 
-static List Compiler._binary_expression(
+static List _binary_expression(
   Compiler c, Symbol operator, List lhs, List rhs, Token origin) {
   Type lhs_type = lhs.cadr(), rhs_type = rhs.cadr();
   if (lhs_type === %(<macro-expr>) ||
@@ -2321,9 +2321,9 @@ static List Compiler._binary_expression(
   if (operator.is_assignment_op()) {
     if (operator != <=> &&
         (c.sym.is_var_type(lhs_type) || c.sym.is_var_type(rhs_type)))
-      c._check_dynamic_target(lhs, origin);
+      _check_dynamic_target(c, lhs, origin);
     Type type = lhs_type;
-    int builtin_index = c._builtin_index_lvalue(lhs);
+    int builtin_index = _builtin_index_lvalue(c, lhs);
     if (builtin_index) type = %("Var");
     /* Meta lowering adapts a callable stored to a Func itself; converting
        here would lift a function name to a hidden global first. */
@@ -2338,9 +2338,9 @@ static List Compiler._binary_expression(
       <binary>, operator, source, AST_EXPRESSION, NULL, origin);
     if (rewritten) return rewritten;
   }
-  c._convert_string_comparison(operator, lhs, rhs);
-  int constant_string = c._convert_string_addition(operator, lhs, rhs);
-  List lowered = c._protocol_operator_expression(operator, lhs, rhs);
+  _convert_string_comparison(c, operator, lhs, rhs);
+  int constant_string = _convert_string_addition(c, operator, lhs, rhs);
+  List lowered = _protocol_operator_expression(c, operator, lhs, rhs);
   if (lowered) {
     if (!constant_string || c.runtime_literals) return lowered;
     List cached = c.cache(%(string ${c.normalize(lowered)}));
@@ -2351,14 +2351,14 @@ static List Compiler._binary_expression(
   /* An untyped preprocessor name beside a converting protocol participant
      would reach the C compiler with no usable conversion. */
   if ((lhs_type != NULL) != (rhs_type != NULL))
-    c._check_untyped_operand(
+    _check_untyped_operand(c,
       operator, lhs_type ? lhs_type : rhs_type,
       lhs_type ? rhs : lhs, origin);
-  return c._native_binary_expression(operator, lhs, rhs, origin);
+  return _native_binary_expression(c, operator, lhs, rhs, origin);
 }
 
 // Built-in indexed mutation returns Var, independently of a read override.
-static int Compiler._builtin_index_lvalue(Compiler c, List expression) {
+static int _builtin_index_lvalue(Compiler c, List expression) {
   match (expression)
     case %(expr ? (getindex (expr ?receiver_type ?) ?)):
       return !!c._indexed_builtin_helper(receiver_type);
@@ -2372,23 +2372,23 @@ Symbol Compiler._indexed_builtin_helper(Compiler c, Type type) {
   return 0;
 }
 
-static void Compiler._convert_string_comparison(
+static void _convert_string_comparison(
   Compiler c, Symbol operator, List &lhs, List &rhs) {
   if (operator != <==> && operator != <!=> && operator != <"<"> &&
       operator != <">"> && operator != <"<="> && operator != <">=">)
     return;
   Type lhs_type = lhs.cadr(), rhs_type = rhs.cadr();
-  if (c.sym.is_string_type(lhs_type) && _expr_is_raw_string_literal(rhs))
+  if (c.sym.is_string_type(lhs_type) && _is_raw_string_literal(rhs))
     rhs = c.convert_expression(rhs, lhs_type);
   else if (c.sym.is_string_type(rhs_type) &&
-           _expr_is_raw_string_literal(lhs))
+           _is_raw_string_literal(lhs))
     lhs = c.convert_expression(lhs, rhs_type);
 }
 
-static int Compiler._convert_string_addition(
+static int _convert_string_addition(
   Compiler c, Symbol operator, List &lhs, List &rhs) {
-  if (operator != <+> || !c._expr_is_string_like(lhs) ||
-      !c._expr_is_string_like(rhs)) return 0;
+  if (operator != <+> || !_is_string_like(c, lhs) ||
+      !_is_string_like(c, rhs)) return 0;
   Var matched;
   List bindings;
   /* Bare `%(ident *)` also matches literal data ending in <ident>. */
@@ -2403,21 +2403,21 @@ static int Compiler._convert_string_addition(
   return constant;
 }
 
-static void Compiler._check_untyped_operand(
+static void _check_untyped_operand(
   Compiler c, Symbol operator, Type participant, List other,
   Token origin) {
   Symbol member = c.operator_member(operator);
   if (!member || operator == <==> || operator == <!=>) return;
-  if (c._converts_operands(participant) &&
+  if (_converts_operands(c, participant) &&
       c.resolve_protocol_member(participant, member) &&
       other.match(%(expr ? ${$source_identifier_content(%(?))})))
     $report.type.operand_untyped(c, origin);
 }
 
 /* Operands have been resolved in the caller's current semantic scope. */
-static List Compiler._native_binary_expression(
+static List _native_binary_expression(
   Compiler c, Symbol operator, List lhs, List rhs, Token origin) {
-  Type type = c._binary_op_type(operator, lhs, rhs);
+  Type type = _binary_op_type(c, operator, lhs, rhs);
   List operation = source_operator_content(%($operator $lhs $rhs));
   if (c.sym.is_var_type(lhs.cadr()) || c.sym.is_var_type(rhs.cadr()))
     operation = c.anchor_origin(operation, origin);
@@ -2426,9 +2426,9 @@ static List Compiler._native_binary_expression(
 
 // operator result types
 
-static List Compiler._binary_op_type(
+static List _binary_op_type(
   Compiler c, Symbol op, List lhs, List rhs) {
-  c._check_optional_operands(op, lhs, rhs);
+  _check_optional_operands(c, op, lhs, rhs);
   if (op == <in>) return NULL;
   if (_is_comparison(op)) return %(int);
   Type ltype = lhs.cadr(), rtype = rhs.cadr();
@@ -2436,12 +2436,12 @@ static List Compiler._binary_op_type(
     return %("Var");
   switch (op) {
     case <"<<">: case <">>">:
-      return c._shift_type(ltype);
+      return _shift_type(c, ltype);
     case </>:    case <%>:
     case <"|">:  case <&>:   case <*>:
-    case <^>: return c._arithmetic_type(ltype, rtype);
+    case <^>: return _arithmetic_type(c, ltype, rtype);
     case <+>:    case <->:
-      return c._binary_op_type_addsub(op, lhs, rhs);
+      return _binary_op_type_addsub(c, op, lhs, rhs);
     default: return _binary_op_type_fallback(lhs, rhs);
   }
 }
@@ -2458,7 +2458,7 @@ static int _is_comparison(Symbol op) {
 
 /* An optional reference is usable only as a truth value or beside a null
    constant in an equality test. */
-static void Compiler._check_optional_operands(
+static void _check_optional_operands(
   Compiler c, Symbol op, List lhs, List rhs) {
   Type ltype = lhs.cadr(), rtype = rhs.cadr();
   if (ltype.car() != <opt-ref> && rtype.car() != <opt-ref>) return;
@@ -2468,22 +2468,22 @@ static void Compiler._check_optional_operands(
     $report.type.optional_ref_unchecked(c, c.token);
 }
 
-static Type Compiler._shift_type(Compiler c, Type lhs) {
+static Type _shift_type(Compiler c, Type lhs) {
   Type scalar = c.sym.resolve_numeric_type(lhs);
   return scalar ? scalar.promote() : NULL;
 }
 
-static Type Compiler._arithmetic_type(Compiler c, Type lhs, Type rhs) {
+static Type _arithmetic_type(Compiler c, Type lhs, Type rhs) {
   Type left = c.sym.resolve_numeric_type(lhs);
   Type right = c.sym.resolve_numeric_type(rhs);
   return left.widest(right);
 }
 
-static List Compiler._binary_op_type_addsub(
+static List _binary_op_type_addsub(
   Compiler c, Symbol op, List lhs, List rhs) {
   Type ltype = lhs.cadr(), rtype = rhs.cadr();
-  if (op == <+> && c._expr_is_string_like(lhs) &&
-      c._expr_is_string_like(rhs))
+  if (op == <+> && _is_string_like(c, lhs) &&
+      _is_string_like(c, rhs))
     return %("String");
   Type lscalar = c.sym.resolve_numeric_type(ltype);
   Type rscalar = c.sym.resolve_numeric_type(rtype);
@@ -2515,10 +2515,10 @@ static List _binary_op_type_fallback(List lhs, List rhs) {
    becomes a call of that member. A call result that the member returns
    fresh is discarded by the operator or call that consumes it. */
 
-static List Compiler._protocol_operator_expression(
+static List _protocol_operator_expression(
   Compiler c, Symbol op, List lhs, List rhs) {
   Symbol derived = 0;
-  List resolved = c._resolve_protocol_operator(op, lhs, rhs, derived);
+  List resolved = _resolve_protocol_operator(c, op, lhs, rhs, derived);
   if (!resolved) return NULL;
   (List binding, Type signature) = resolved;
   Type result = signature.cdr(), List arguments = NULL;
@@ -2531,11 +2531,11 @@ static List Compiler._protocol_operator_expression(
   }
   else arguments = %($lhs $rhs);
   if (op != <in>) {
-    if (c._is_operator_temporary(lhs)) which |= 1;
-    if (rhs && c._is_operator_temporary(rhs)) which |= 2;
+    if (_is_operator_temporary(c, lhs)) which |= 1;
+    if (rhs && _is_operator_temporary(c, rhs)) which |= 2;
   }
   if (!derived && c.resolve_protocol_member(result, "discard"))
-    c._note_fresh_callee(binding);
+    _note_fresh_callee(c, binding);
   if (which) {
     Symbol member = rhs ? c.operator_member(op) : <neg>;
     if (!member) member = c.derived_member(op);
@@ -2561,7 +2561,7 @@ static List Compiler._protocol_operator_expression(
    describes its storage, not the type that adopts the operator, so the
    participant is the unqualified type both here and in the operands'
    comparison. */
-static List Compiler._resolve_protocol_operator(
+static List _resolve_protocol_operator(
   Compiler c, Symbol op, List &lhs, List &rhs, Symbol &derived) {
   derived = 0;
   Type lhs_type = lhs.cadr();
@@ -2587,12 +2587,12 @@ static List Compiler._resolve_protocol_operator(
     if (!member) member = source;
     derived = source;
     if (!member) return NULL;
-    // `Compiler._comparison` lowers a comparison of two `Var` operands.
+    // `_comparison` lowers a comparison of two `Var` operands.
     if ((member == <equal> || member == <compare>) &&
         c.sym.is_var_type(participant))
       return NULL;
     if (participant !== rhs_type) {
-      participant = c._converted_participant(
+      participant = _converted_participant(c,
         member, participant, rhs_type, lhs, rhs);
       if (!participant) return NULL;
     }
@@ -2602,17 +2602,17 @@ static List Compiler._resolve_protocol_operator(
        : NULL;
 }
 
-static Type Compiler._converted_participant(
+static Type _converted_participant(
   Compiler c, Symbol member, Type lhs_type, Type rhs_type,
   List &lhs, List &rhs) {
   if (c.sym.is_var_type(lhs_type) ||
       c.sym.is_var_type(rhs_type)) return NULL;
-  Type shared = c._shared_participant(lhs_type, rhs_type, member);
+  Type shared = _shared_participant(c, lhs_type, rhs_type, member);
   if (shared) return shared;
   int lhs_member = !!c.resolve_protocol_member(lhs_type, member) &&
-    c._converts_operands(lhs_type);
+    _converts_operands(c, lhs_type);
   int rhs_member = !!c.resolve_protocol_member(rhs_type, member) &&
-    c._converts_operands(rhs_type);
+    _converts_operands(c, rhs_type);
   if (lhs_member && !rhs_member) {
     List converted = c.converter_call(rhs, rhs_type, lhs_type);
     if (converted) { rhs = converted; return lhs_type; }
@@ -2628,19 +2628,19 @@ static Type Compiler._converted_participant(
    one that has `member`, so an alias of `String` compares with a `String`,
    or with another alias, through `String.equal` rather than as the pointers
    C sees. */
-static Type Compiler._shared_participant(
+static Type _shared_participant(
   Compiler c, Type lhs_type, Type rhs_type, Symbol member) {
   if (!lhs_type.is_bare_typedef_name() || !rhs_type.is_bare_typedef_name())
     return NULL;
-  Array lhs_names = c._typedef_names(lhs_type);
-  foreach (Type name, c._typedef_names(rhs_type))
+  Array lhs_names = _typedef_names(c, lhs_type);
+  foreach (Type name, _typedef_names(c, rhs_type))
     if (name in lhs_names &&
         c.resolve_protocol_member(name, member))
       return name;
   return NULL;
 }
 
-static Array Compiler._typedef_names(Compiler c, Type type) {
+static Array _typedef_names(Compiler c, Type type) {
   Array names = [];
   int hops = 0;
   for (; type && (type.is_bare_typedef_name() || type.is_typedef());
@@ -2652,7 +2652,7 @@ static Array Compiler._typedef_names(Compiler c, Type type) {
 /* A participant that converts its operator's other operand: a struct or
    union, or a handle typedef pointing at one. Scalar pointers keep native C
    behavior, since `text + 1` must stay pointer arithmetic. */
-static int Compiler._converts_operands(Compiler c, Type type) {
+static int _converts_operands(Compiler c, Type type) {
   Type resolved = c.sym.resolve_key(type);
   if (resolved && resolved.is_pointer())
     resolved = c.sym.resolve_key(resolved.dereference());
@@ -2664,15 +2664,15 @@ static int Compiler._converts_operands(Compiler c, Type type) {
    operator member, a converter from a number, or a wrapper of either. The
    callee binding is shared by every call to that function, so the record
    survives the re-resolution that rebuilds call nodes. */
-static void Compiler._note_fresh_callee(Compiler c, List binding) {
+static void _note_fresh_callee(Compiler c, List binding) {
   long identity = (long) binding;
   c.protocol_helpers[%"fresh-callee $identity"] = 1;
 }
 
-static int Compiler._is_operator_temporary(Compiler c, List expression) {
+static int _is_operator_temporary(Compiler c, List expression) {
   match (expression) {
     case %(expr ? ${$grouped(?inner)}):
-      return c._is_operator_temporary(inner);
+      return _is_operator_temporary(c, inner);
   }
   match (expression)
     case $called(%(expr ? ${$source_identifier_content(
@@ -2683,7 +2683,7 @@ static int Compiler._is_operator_temporary(Compiler c, List expression) {
 
 // type tests and casts
 
-static List Resolve._is_type(Resolve &r, List operand, Type target) {
+static List _is_type(Resolve &r, List operand, Type target) {
   List lhs = r.c.resolve_expression(operand, r.origin);
   Type lhs_type = lhs.cadr();
   if (_deferred_receiver(lhs) || _deferred_type_test(target)) {
@@ -2694,19 +2694,19 @@ static List Resolve._is_type(Resolve &r, List operand, Type target) {
     $report.type.is_var(r.c, lhs_type, r.origin);
   Macro called = $called;
   if (target === %(void) || target === %("Void")) {
-    List callee = r.c._resolve_identifier("Var_is_void", NULL, r.origin);
+    List callee = _resolve_identifier(r.c, "Var_is_void", NULL, r.origin);
     return r.c.rebuild_expression(%(int), called(callee, %($lhs)));
   }
   Symbol vartag = r.c.require_var_tag(target, r.origin);
-  List direct = r.c._constant_row_test(lhs, vartag, r.origin);
+  List direct = _constant_row_test(r.c, lhs, vartag, r.origin);
   if (direct) return direct;
   String tagsym = %"${(unsigned long) vartag}";
-  List callee = r.c._resolve_identifier("Var_is", NULL, r.origin);
+  List callee = _resolve_identifier(r.c, "Var_is", NULL, r.origin);
   return r.c.rebuild_expression(
     %(int), called(callee, %($lhs (expr ("Symbol") $tagsym))));
 }
 
-static List Resolve._is_symbol(Resolve &r, List operand, List selector) {
+static List _is_symbol(Resolve &r, List operand, List selector) {
   List lhs = r.c.resolve_expression(operand, r.origin);
   selector = r.c.resolve_expression(selector, r.origin);
   Type lhs_type = lhs.cadr(), selector_type = selector.cadr();
@@ -2724,11 +2724,11 @@ static List Resolve._is_symbol(Resolve &r, List operand, List selector) {
         %(("Symbol") ? ?tag_value))}): {
       if (tag_value is <symbol>) {
         Symbol tag = tag_value;
-        List direct = r.c._constant_row_test(lhs, tag, r.origin);
+        List direct = _constant_row_test(r.c, lhs, tag, r.origin);
         if (direct) return direct;
       }
     }
-  List callee = r.c._resolve_identifier("Var_is", NULL, r.origin);
+  List callee = _resolve_identifier(r.c, "Var_is", NULL, r.origin);
   Macro called = $called;
   return r.c.rebuild_expression(%(int), called(callee, %($lhs $selector)));
 }
@@ -2738,11 +2738,11 @@ static List Resolve._is_symbol(Resolve &r, List operand, List selector) {
    row as constants so the C compiler folds them and the operand is
    evaluated once. Tags with a validity clause, an immediate width, or a
    user registration have no row and keep the deciding decode. */
-static List Compiler._constant_row_test(
+static List _constant_row_test(
   Compiler c, List lhs, Symbol tag, Token origin) {
   unsigned long top, mask, bottom;
   if (!Type.var_tag_row(tag, top, mask, bottom)) return NULL;
-  List callee = c._resolve_identifier("Var_is_row", NULL, origin);
+  List callee = _resolve_identifier(c, "Var_is_row", NULL, origin);
   List arguments = %($lhs
     (expr (unsigned) (literal (unsigned) "$top"))
     (expr (unsigned long) (literal (unsigned long) "$mask"))
@@ -2781,17 +2781,17 @@ static int _deferred_type_test(Type target) {
   return 0;
 }
 
-static List Resolve._cast(Resolve &r, List declaration, List operand) {
+static List _cast(Resolve &r, List declaration, List operand) {
   operand = r.c.resolve_expression(operand, r.origin);
   declaration = r.c.bind_syntax(declaration, AST_BLOCK, r.c.return_type);
   List typed = %(declare @{declaration.cdr()});
   Type type = operand.cadr() === %(<macro-expr>) ||
-              r.c._casts_to_template_typedef(declaration)
+              _casts_to_template_typedef(r.c, declaration)
             ? %(<macro-expr>) : typed.type_from_ast();
   return %(expr $type (cast $declaration $operand));
 }
 
-static List Resolve._tadapt(Resolve &r, List target, List source) {
+static List _tadapt(Resolve &r, List target, List source) {
   target = r.c.resolve_expression(target, r.origin);
   source = r.c.resolve_expression(source, r.origin);
   match (target)
@@ -2807,7 +2807,7 @@ static List Resolve._tadapt(Resolve &r, List target, List source) {
 
 // collection literals
 
-static List Resolve._segments(Resolve &r, List items) {
+static List _segments(Resolve &r, List items) {
   Array resolved = [];
   Type type = %("String");
   foreach (List item, items) match (item) {
@@ -2826,7 +2826,7 @@ static List Resolve._segments(Resolve &r, List items) {
   return %(expr $type ${source_string_content(resolved.list_free())});
 }
 
-static List Resolve._cons(Resolve &r, List head, List tail) {
+static List _cons(Resolve &r, List head, List tail) {
   head = r.c.resolve_expression(head, r.origin);
   tail = r.c.resolve_expression(tail, r.origin);
   Type type = r.type ? r.type : %("List");
@@ -2838,7 +2838,7 @@ static List Resolve._cons(Resolve &r, List head, List tail) {
   return %(expr $type (cons $head $tail));
 }
 
-static List Resolve._append(Resolve &r, List head, List tail) {
+static List _append(Resolve &r, List head, List tail) {
   head = r.c.resolve_expression(head, r.origin);
   tail = r.c.resolve_expression(tail, r.origin);
   head = r.c.sym.is_var_type(head.cadr())
@@ -2848,10 +2848,10 @@ static List Resolve._append(Resolve &r, List head, List tail) {
            (append $head $tail));
 }
 
-static List Resolve._splice(Resolve &r, List expression) =>
+static List _splice(Resolve &r, List expression) =>
   %(expr ${r.type} (splice ${r.c.resolve_expression(expression, r.origin)}));
 
-static List Resolve._array_value(Resolve &r) {
+static List _array_value(Resolve &r) {
   Macro array_value = $array_value;
   match (r.input) case array_value(*elements): {
     Array resolved = [];
@@ -2864,7 +2864,7 @@ static List Resolve._array_value(Resolve &r) {
   return r.input;
 }
 
-static List Resolve._map_value(Resolve &r) {
+static List _map_value(Resolve &r) {
   Macro map_value = $map_value;
   match (r.input) case map_value(*entries): {
     Array resolved = [];
@@ -2889,7 +2889,7 @@ List Compiler.resolve_map_entry(Compiler c, List input, Token origin) {
   $report.parse.map_entry(c, origin);
 }
 
-static List Resolve._initval(Resolve &r, List content) {
+static List _initval(Resolve &r, List content) {
   List header = NULL;
   List cases = Ast.initializer_cases(content, header);
   Array resolved = [];
@@ -2910,39 +2910,39 @@ static List Resolve._initval(Resolve &r, List content) {
   return %(expr ${r.type} (initval @{resolved.list_free()}));
 }
 
-static List Resolve._composite(Resolve &r, List elements) {
+static List _composite(Resolve &r, List elements) {
   Array values = [];
   foreach (Var element, elements)
     foreach (List row, r.c.evaluate_macro_rows(element))
-      values.push(r.c._resolve_initializer(row, r.origin));
+      values.push(_resolve_initializer(r.c, row, r.origin));
   return %(expr ${r.type} ${source_composite_content(
     values.list_free())});
 }
 
-static List Compiler._resolve_initializer(
+static List _resolve_initializer(
   Compiler c, List node, Token origin) {
   match (node) {
     case %(dotinit ?field ?value):
-      return %(dotinit $field ${c._resolve_initializer(value, origin)});
+      return %(dotinit $field ${_resolve_initializer(c, value, origin)});
     case %(indexinit ?index ?value):
       return %(indexinit ${c.resolve_expression(index, origin)}
-               ${c._resolve_initializer(value, origin)});
+               ${_resolve_initializer(c, value, origin)});
   }
   return c.resolve_expression(node, origin);
 }
 
 // groups and built-in forms
 
-static List Resolve._parens(Resolve &r, List inner) {
+static List _parens(Resolve &r, List inner) {
   if (Ast.without_origin(inner).car() == <block>)
-    return r.c._statement_expression(
+    return _statement_expression(r.c,
       r.c.bind_syntax(inner, AST_STATEMENT, r.c.return_type), r.origin);
   inner = r.c.resolve_expression(inner, r.origin);
   Type type = inner.cadr();
   return %(expr $type (parens $inner));
 }
 
-static List Resolve._commas(Resolve &r, List expressions) {
+static List _commas(Resolve &r, List expressions) {
   Array resolved = [];
   foreach (List expression, expressions)
     resolved.push(r.c.resolve_expression(expression, r.origin));
@@ -2952,7 +2952,7 @@ static List Resolve._commas(Resolve &r, List expressions) {
   return %(expr $type ${source_commas_content(values)});
 }
 
-static List Resolve._destructure(Resolve &r, List targets, List source) {
+static List _destructure(Resolve &r, List targets, List source) {
   Array resolved = [];
   foreach (List target, targets)
     resolved.push(r.c.resolve_expression(target, r.origin));
@@ -2961,7 +2961,7 @@ static List Resolve._destructure(Resolve &r, List targets, List source) {
            (dstrasgn (targets @{resolved.list_free()}) $source));
 }
 
-static List Resolve._generic(Resolve &r, List control, List associations) {
+static List _generic(Resolve &r, List control, List associations) {
   control = r.c.resolve_expression(control, r.origin);
   Array resolved = [];
   foreach (List association, associations) match (association)
@@ -2975,14 +2975,14 @@ static List Resolve._generic(Resolve &r, List control, List associations) {
 
 /* A `sizeof` keeps its grouped or bare form around the resolved operand;
    an operand that is not syntax stays as written. */
-static List Resolve._sizeof(Resolve &r, Macro form, Var argument) {
+static List _sizeof(Resolve &r, Macro form, Var argument) {
   if (argument is not <list>) return r.input;
   List operand = argument;
   return r.c.rebuild_expression(
     r.input.cadr(), form(r.c.resolve_expression(operand, r.origin)));
 }
 
-static List Resolve._va_arg(Resolve &r, List argument, List declaration) {
+static List _va_arg(Resolve &r, List argument, List declaration) {
   return %(expr ${r.type}
            ${source_va_arg_content(
              %(${r.c.resolve_expression(argument, r.origin)}
@@ -3002,7 +3002,7 @@ static List Resolve._va_arg(Resolve &r, List argument, List declaration) {
    its destinations are known only once the call resolves. A converter takes
    only its receiver and is named for its result: the result spelled in
    lower case, or `str` for String. */
-static void Compiler._note_explicit_converter(
+static void _note_explicit_converter(
   Compiler c, List call, String method, Token origin) {
   Type result = call.cadr();
   if (!result.match(%(?))) return;
@@ -3028,7 +3028,7 @@ static void Compiler._note_explicit_converter(
 */
 void Compiler.check_explicit_converter(
   Compiler c, List parsed, Type target, int context) {
-  c._check_noted_converter(
+  _check_noted_converter(c,
     c.protocol_helpers.getdefault("explicit-converter", %()), parsed,
     target, context);
 }
@@ -3037,7 +3037,7 @@ void Compiler.check_explicit_converter(
    parameter type. A method receiver selects the method and is not a
    destination, and a call the compiler builds for an operator is not a
    destination the source spelled. */
-static void Compiler._check_converter_args(
+static void _check_converter_args(
   Compiler c, List result, int method, List notes) {
   List callee = NULL, params = NULL, arguments = NULL, supplied = NULL;
   match (result) case $called(?function, *values): {
@@ -3053,7 +3053,7 @@ static void Compiler._check_converter_args(
     if (car(p) is not <list> || car(a) is not <list>) continue;
     List param = car(p), argument = car(a);
     Type expected = param.car() == <param> ? param.type_from_ast() : param;
-    c._check_noted_converter(car(n), argument, expected, 0);
+    _check_noted_converter(c, car(n), argument, expected, 0);
   }
   /* A static printf-family format converts each Var value it consumes. The
      family's positions count the receiver a method call spells before the
@@ -3064,10 +3064,10 @@ static void Compiler._check_converter_args(
   int first = info.first_arg - method, index = 0;
   for (List a = arguments, n = notes; a; a = cdr(a), n = cdr(n))
     if (index++ >= first && car(a) is <list>)
-      c._check_noted_converter(car(n), car(a), car(a).list().cadr(), 2);
+      _check_noted_converter(c, car(n), car(a), car(a).list().cadr(), 2);
 }
 
-static void Compiler._check_noted_converter(
+static void _check_noted_converter(
   Compiler c, List noted, List parsed, Type target, int context) {
   if (!noted || !parsed || !target) return;
   (List call, String method, List location) = noted;
@@ -3089,7 +3089,7 @@ static void Compiler._check_noted_converter(
   if (source_is_var && context != 0 && method != "str") return;
   if (source_is_var && context == 0 &&
       (method == "str" || c.sym.is_string_type(target) ||
-       c._payload_reader(target)))
+       _payload_reader(c, target)))
     return;
   /* A Var reaches a numeric scalar other than Symbol through `Var.convert`
      and then a read. `Var.int` already converts, and a raw reader such as
@@ -3101,14 +3101,14 @@ static void Compiler._check_noted_converter(
   // A declared crossing to String calls `str`, not a reader like `string`.
   if (!source_is_var && method != "str" && c.sym.is_string_type(target))
     return;
-  int implicit = c._implicit_converter(
+  int implicit = _implicit_converter(c,
     receiver, source, target, source_is_var);
-  if (!implicit || c._defines_crossing(source, target)) return;
+  if (!implicit || _defines_crossing(c, source, target)) return;
   c.protocol_helpers.del("explicit-converter");
   $report.conversion.call_redundant(c, method, target, location, context);
 }
 
-static int Compiler._implicit_converter(
+static int _implicit_converter(
   Compiler c, List receiver, Type source, Type target,
   int source_is_var) =>
   source_is_var || c.sym.is_var_type(target) ||
@@ -3118,7 +3118,7 @@ static int Compiler._implicit_converter(
 /* The function being defined may be the implicit crossing itself, as a
    `Var.row` converter is for a `Row` destination; its explicit calls are how
    the crossing is written, not a repetition of it. */
-static int Compiler._defines_crossing(Compiler c, Type source, Type target) {
+static int _defines_crossing(Compiler c, Type source, Type target) {
   if (!c.fn_name || !source.match(%(?)) || !target.match(%(?))) return 0;
   String from = source.car().str(), to = target.car().str();
   return c.fn_name == %"${from}_${to.lower()}" ||
@@ -3189,21 +3189,21 @@ String Compiler.printf_static_format(Compiler c, Var format) {
 
 // C string literals
 
-static int _expr_is_raw_string_literal(List expr) {
+static int _is_raw_string_literal(List expr) {
   match (expr) {
     case %(expr ? ${$grouped(?inner)}):
-      return _expr_is_raw_string_literal(inner);
+      return _is_raw_string_literal(inner);
     case %(expr ? ${$source_literal_content(%(?type ?))}):
       return Type.is_char_pointer_like(type);
     case %(expr ? ${$source_operator_content(
         %(? ? ?ontrue ?onfalse))}):
-      return _expr_is_raw_string_literal(ontrue) &&
-             _expr_is_raw_string_literal(onfalse);
+      return _is_raw_string_literal(ontrue) &&
+             _is_raw_string_literal(onfalse);
   }
   return 0;
 }
 
-static inline int Compiler._expr_is_string_like(Compiler c, List expr) {
+static inline int _is_string_like(Compiler c, List expr) {
   if (!expr) return 0;
   Type type = expr.cadr();
   return c.sym.is_string_type(type) ||
@@ -3216,13 +3216,13 @@ static inline int Compiler._expr_is_string_like(Compiler c, List expr) {
     other expression is returned unchanged.
 */
 List Compiler.promote_string_literal(Compiler c, List expr) =>
-  _expr_is_raw_string_literal(expr) ? c.convert_expression(expr, %("String"))
+  _is_raw_string_literal(expr) ? c.convert_expression(expr, %("String"))
                                     : expr;
 
 /* Promote raw string expressions while caching only exact literal leaves.
    Parentheses and conditional arms retain their evaluation structure; a
    dynamic leaf still calls String_new each time it is selected. */
-static List Compiler._raw_string_to_string(Compiler c, List expr) {
+static List _raw_string_to_string(Compiler c, List expr) {
   match (expr) {
     case %(expr (!or (* char) ((dim *) char))
         ${$source_literal_content(
@@ -3235,14 +3235,14 @@ static List Compiler._raw_string_to_string(Compiler c, List expr) {
         ${$grouped(?inner)}):
       // A statement expression's block converts as one dynamic value.
       match (inner) case %(expr *): {
-        List converted = c._raw_string_to_string(inner);
+        List converted = _raw_string_to_string(c, inner);
         return %(expr ("String") (parens $converted));
       }
     case %(expr (!or (* char) ((dim *) char))
         ${$source_operator_content(
           %(? ?condition ?ontrue ?onfalse))}): {
-      List converted_true = c._raw_string_to_string(ontrue);
-      List converted_false = c._raw_string_to_string(onfalse);
+      List converted_true = _raw_string_to_string(c, ontrue);
+      List converted_false = _raw_string_to_string(c, onfalse);
       return %(expr ("String")
                (op ? $condition $converted_true $converted_false));
     }
@@ -3266,35 +3266,35 @@ static List Compiler._raw_string_to_string(Compiler c, List expr) {
 List Compiler.convert_expression(Compiler c, List expr, Type target) {
   if (!target) return expr;
   // Captured Func lambdas wait for reference-cell rewriting.
-  expr = c._adapt_lambda_value(expr, target);
+  expr = _adapt_lambda_value(c, expr, target);
   Type type = expr.cadr();
   Type declared_source = type, declared_target = target;
   if (type) type = type.canonicalize();
   target = target.canonicalize();
   int type_is_var = c.sym.is_var_type(type);
   int target_is_var = c.sym.is_var_type(target);
-  List lifted = c._lift_func_value(expr, type, target);
+  List lifted = _lift_func_value(c, expr, type, target);
   if (lifted) return lifted;
   if (expr.match(%(expr ? (composite ?))))
-    return c._compound_literal(expr, target);
-  List conditional = c._convert_conditional_arms(expr, declared_target);
+    return _compound_literal(c, expr, target);
+  List conditional = _convert_conditional_arms(c, expr, declared_target);
   if (conditional) return conditional;
-  c._check_null_reference(expr, target);
-  if (!type) return c._convert_untyped(expr, declared_target, target_is_var);
-  c._check_qualifiers(type, target, declared_source, declared_target);
+  _check_null_reference(c, expr, target);
+  if (!type) return _convert_untyped(c, expr, declared_target, target_is_var);
+  _check_qualifiers(c, type, target, declared_source, declared_target);
   if (type == target || (type_is_var && target_is_var)) return expr;
-  c._check_reference_value(type, target);
+  _check_reference_value(c, type, target);
   if (_integer_literal_kind(expr, NULL) == <zero> &&
       c.sym.resolve_key(target).is_pointer())
     return expr;
-  c._check_object_pointer(type, target, type_is_var);
-  List converted = c._convert_known_value(
+  _check_object_pointer(c, type, target, type_is_var);
+  List converted = _convert_known_value(c,
     expr, type, target, type_is_var, target_is_var);
   if (converted) return converted;
   if (c.sym.resolve_numeric_type(type) &&
       c.sym.resolve_numeric_type(target))
     return expr; // allow implicit numeric conversions
-  c._check_native_crossing(
+  _check_native_crossing(c,
     expr, type, target, declared_source, declared_target);
   // Everything reaching here is delegated to C: a typedef alias, array or
   // function decay, varargs, a system-header type the collector never
@@ -3303,7 +3303,7 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
   return expr;
 }
 
-static List Compiler._adapt_lambda_value(
+static List _adapt_lambda_value(
   Compiler c, List expr, Type target) {
   Type type = expr.cadr();
   if (!type.is_function()) return expr;
@@ -3312,7 +3312,7 @@ static List Compiler._adapt_lambda_value(
     lowered, c.sym.resolve_key(target.type_from_ast()));
 }
 
-static List Compiler._lift_func_value(
+static List _lift_func_value(
   Compiler c, List expr, Type type, Type target) {
   Type func_type = c.sym.resolve_key(%("Func"));
   if (c.sym.resolve_key(target) == func_type) {
@@ -3330,7 +3330,7 @@ static List Compiler._lift_func_value(
    compound literal of the destination, because C accepts a bare brace only
    as an initializer. An anonymous struct or union has no spelling for that
    literal. */
-static List Compiler._compound_literal(
+static List _compound_literal(
   Compiler c, List composite, Type target) {
   List converted = c.convert_initializer(composite, target, NULL);
   match (converted)
@@ -3344,7 +3344,7 @@ static List Compiler._compound_literal(
 
 /* Only one conditional arm runs; convert each arm when C cannot convert
    the result as a whole. */
-static List Compiler._convert_conditional_arms(
+static List _convert_conditional_arms(
   Compiler c, List expr, Type declared_target) {
   match (expr) case %(expr ? ${$source_operator_content(
       %(?operator ?condition ?ontrue ?onfalse))}): {
@@ -3366,7 +3366,7 @@ static List Compiler._convert_conditional_arms(
 
 /* A generic selection has no x2c type; each association owns its
    destination conversion because only one association runs. */
-static List Compiler._convert_generic_arms(
+static List _convert_generic_arms(
   Compiler c, List expr, Type declared_target) {
   match (expr) case %(expr () ${$source_generic_content(
       %(?control *associations))}): {
@@ -3386,9 +3386,9 @@ static List Compiler._convert_generic_arms(
   return NULL;
 }
 
-static List Compiler._convert_untyped(
+static List _convert_untyped(
   Compiler c, List expr, Type declared_target, int target_is_var) {
-  List generic = c._convert_generic_arms(expr, declared_target);
+  List generic = _convert_generic_arms(c, expr, declared_target);
   if (generic) return generic;
   if (target_is_var && expr.match(
     %(expr () ${$source_identifier_content(%((binding ? ?)))}))) {
@@ -3400,37 +3400,37 @@ static List Compiler._convert_untyped(
   return expr;
 }
 
-static List Compiler._convert_known_value(
+static List _convert_known_value(
   Compiler c, List expr, Type type, Type target,
   int type_is_var, int target_is_var) {
-  List reference = c._convert_reference(expr, type, target);
+  List reference = _convert_reference(c, expr, type, target);
   if (reference) return reference;
   if (type.match(%((!or (dim *) (!quote *)) char))) {
-    List string = c._raw_string_to_string(expr);
+    List string = _raw_string_to_string(c, expr);
     if (c.sym.is_string_type(target))
       return %(expr $target ${string.caddr()});
     if (target_is_var)
       return %(expr ("Var") (call "String_var" (args $string)));
   }
   if (type_is_var && !target_is_var) {
-    List reader = c._read_var(expr, type, target);
+    List reader = _read_var(c, expr, type, target);
     if (reader) return reader;
   }
   if (!type_is_var && target_is_var) {
-    List declared = c._declared_var_converter(expr, type);
+    List declared = _declared_var_converter(c, expr, type);
     if (declared) return declared;
   }
   List converted = c.converter_call(expr, type, target);
   if (converted) return converted;
-  if (!type_is_var && target_is_var) return c._box_var(expr, type);
+  if (!type_is_var && target_is_var) return _box_var(c, expr, type);
   return NULL;
 }
 
-static List Compiler._convert_reference(
+static List _convert_reference(
   Compiler c, List expr, Type type, Type target) {
   // T -> &T: pass the address of an addressable value.
   if (type === cdr(target) && target.is_reference()) {
-    if (!c._expression_is_addressable(expr))
+    if (!_is_addressable(c, expr))
       $report.type.ref_address(c);
     return %(expr $target (op & (parens $expr)));
   }
@@ -3470,7 +3470,7 @@ List Compiler.convert_segment_to_string(Compiler c, List expr) {
 
 // Var crossings
 
-static List Compiler._read_var(
+static List _read_var(
   Compiler c, List expr, Type type, Type target) {
   if (target === %("Symbol"))
     return %(expr $target (call "Var_symbol" (args $expr)));
@@ -3486,7 +3486,7 @@ static List Compiler._read_var(
       return %(expr $target (call $extractor (args $converted)));
     }
   }
-  List reader = c._var_checked_reader(expr, type, target);
+  List reader = _var_checked_reader(c, expr, type, target);
   if (reader) return reader;
   /* A Var reaching `Var *` almost always meant its address; unboxing a
      stored Var pointer must be spelled. */
@@ -3509,12 +3509,12 @@ static List Compiler._read_var(
    ahead of the unchecked pointer payload. An alias with neither reads
    through its nearest ancestor that has one, so an alias of `String` checks
    the tag exactly as `String` does. */
-static List Compiler._var_checked_reader(
+static List _var_checked_reader(
   Compiler c, List expr, Type type, Type target) {
   List owners = target.is_bare_typedef_name()
-              ? c._typedef_names(target).list_free() : %($target);
+              ? _typedef_names(c, target).list_free() : %($target);
   foreach (Type owner, owners) {
-    List reader = c._var_exact_reader(expr, owner);
+    List reader = _var_exact_reader(c, expr, owner);
     if (!reader) reader = c.converter_call(expr, type, owner);
     if (reader)
       return owner == target ? reader : %(expr $target ${reader.caddr()});
@@ -3529,14 +3529,14 @@ static List Compiler._var_checked_reader(
    for `void`. `Var.pointer` checks nothing, so trying it first let a
    List-valued Var read as a String. Only a raw native pointer with no typed
    Var reader should still take that path. */
-static List Compiler._var_exact_reader(Compiler c, List expr, Type target) {
+static List _var_exact_reader(Compiler c, List expr, Type target) {
   if (!target.match(%(?))) return NULL;
   String name = target.car().str().lower();
   List callee = NULL;
-  if (target == %("String")) callee = c._var_reader("Var_as_string", target);
+  if (target == %("String")) callee = _var_reader(c, "Var_as_string", target);
   else {
-    callee = c._payload_reader(target);
-    if (!callee) callee = c._var_reader(%"Var_$name", target);
+    callee = _payload_reader(c, target);
+    if (!callee) callee = _var_reader(c, %"Var_$name", target);
   }
   if (!callee) return NULL;
   Macro called = $called;
@@ -3545,14 +3545,14 @@ static List Compiler._var_exact_reader(Compiler c, List expr, Type target) {
 
 /* The reader that crosses a `Var` to `target` and yields NULL for another
    tag, when the runtime declares one, as a callee; or NULL. */
-static List Compiler._payload_reader(Compiler c, Type target) =>
+static List _payload_reader(Compiler c, Type target) =>
   target.match(%(?))
-    ? c._var_reader(%"Var_${target.car().str().lower()}_payload", target)
+    ? _var_reader(c, %"Var_${target.car().str().lower()}_payload", target)
     : NULL;
 
 /* The global function `reader` from one `Var` to `target`, as a callee, or
    NULL. */
-static List Compiler._var_reader(Compiler c, String reader, Type target) {
+static List _var_reader(Compiler c, String reader, Type target) {
   Type readertype = NULL;
   List binding = c.sym.resolve_global(%($reader), readertype);
   if (!binding || !readertype || readertype.car() is not <list>) return NULL;
@@ -3566,7 +3566,7 @@ static List Compiler._var_reader(Compiler c, String reader, Type target) {
 }
 
 /* A declared T.var converter owns custom boxing before tag based boxing. */
-static List Compiler._declared_var_converter(
+static List _declared_var_converter(
   Compiler c, List expr, Type type) {
   Type converter_type = type;
   String converter = converter_type.var_converter();
@@ -3587,7 +3587,7 @@ static List Compiler._declared_var_converter(
   $report.type.var_loss(c, type);
 }
 
-static List Compiler._box_var(Compiler c, List expr, Type type) {
+static List _box_var(Compiler c, List expr, Type type) {
   Type tagged_type = NULL;
   Symbol tag = c.sym.var_tag_for_type(type, tagged_type);
   if (!tag && tagged_type && tagged_type.is_enum()) tag = <i32>;
@@ -3617,17 +3617,17 @@ static List Compiler._box_var(Compiler c, List expr, Type type) {
 List Compiler.converter_call(Compiler c, List expr, Type type, Type target) {
   if (!type.match(%(?)) || !target.match(%(?))) return NULL;
   List owners = type.is_bare_typedef_name()
-              ? c._typedef_names(type).list_free() : %($type);
+              ? _typedef_names(c, type).list_free() : %($type);
   foreach (Type owner, owners) {
     if (owner == target) return NULL;
     int declared = 0;
-    List converted = c._converter_owned_call(expr, owner, target, declared);
+    List converted = _converter_owned_call(c, expr, owner, target, declared);
     if (converted || declared) return converted;
   }
   return NULL;
 }
 
-static List Compiler._converter_owned_call(
+static List _converter_owned_call(
   Compiler c, List expr, Type owner, Type target, int &declared) {
   String typename = owner.car().str();
   String convfuncname = _converter_name(owner, target);
@@ -3648,7 +3648,7 @@ static List Compiler._converter_owned_call(
     return NULL;
   Macro called = $called;
   List call = c.rebuild_expression(target, called(callee, %($argument)));
-  return c._converted_temporary(call, owner, target);
+  return _converted_temporary(c, call, owner, target);
 }
 
 /* A package converter uses the package spelling of the external owner. */
@@ -3695,21 +3695,21 @@ int Compiler.is_builtin_converter_call(Compiler c, List expr) {
 /* A converter's result exists only for the operator that asked for it.
    Only a conversion from a number is known to be fresh; a converter from a
    handle type may return storage its source still owns. */
-static List Compiler._converted_temporary(
+static List _converted_temporary(
   Compiler c, List call, Type owner, Type target) {
   if (c.sym.resolve_numeric_type(owner) &&
       c.resolve_protocol_member(target, "discard")) {
     match (call)
       case $called(%(expr ? ${$source_identifier_content(
           %((!set ?binding (*))))}), *arguments):
-        c._note_fresh_callee(binding);
+        _note_fresh_callee(c, binding);
   }
   return call;
 }
 
 // conversion checks
 
-static void Compiler._check_null_reference(
+static void _check_null_reference(
   Compiler c, List expr, Type target) {
   if (target.car() != <&>) return;
   if (_integer_literal_kind(expr, NULL) == <zero> ||
@@ -3720,7 +3720,7 @@ static void Compiler._check_null_reference(
 }
 
 /* Same-address conversions must keep qualifiers, including void pointers. */
-static void Compiler._check_qualifiers(
+static void _check_qualifiers(
   Compiler c, Type type, Type target, Type source, Type destination) {
   int take_reference = target.is_reference() && type === cdr(target);
   Type qualified = take_reference ? source.reference() : source;
@@ -3733,7 +3733,7 @@ static void Compiler._check_qualifiers(
   }
 }
 
-static void Compiler._check_reference_value(
+static void _check_reference_value(
   Compiler c, Type type, Type target) {
   /* An optional reference forwards only to another address type. */
   if (type.car() == <opt-ref> && !target.is_reference() &&
@@ -3745,7 +3745,7 @@ static void Compiler._check_reference_value(
     $report.type.ref_lvalue(c, type, target);
 }
 
-static void Compiler._check_object_pointer(
+static void _check_object_pointer(
   Compiler c, Type type, Type target, int type_is_var) {
   if (target.car() != <*> || type_is_var) return;
   Type source = c.sym.resolve_key(type);
@@ -3757,21 +3757,21 @@ static void Compiler._check_object_pointer(
 /* C accepts null pointer constants, pointer decay, and opaque system types.
    Reject only a proven nonzero integer, unrelated known pointers, or two
    typedef names that share a C representation without a declared crossing. */
-static void Compiler._check_native_crossing(
+static void _check_native_crossing(
   Compiler c, List expr, Type type, Type target,
   Type declared_source, Type declared_target) {
-  String integer = c._not_null_pointer_constant(expr);
+  String integer = _not_null_pointer_constant(c, expr);
   if (integer && c.sym.resolve_key(target).is_pointer())
     $report.type.pointer_integer(c, integer, target);
-  if (c._unrelated_pointers(type, target))
+  if (_unrelated_pointers(c, type, target))
     $report.type.pointer_unrelated(c, declared_source, declared_target);
   if (declared_source.is_bare_typedef_name() &&
       declared_target.is_bare_typedef_name() &&
       declared_source != declared_target &&
       c.sym.resolve_key(declared_target).is_pointer() &&
       c.sym.resolve_key(declared_source).base_type() !== %(void) &&
-      !(declared_target in c._typedef_names(declared_source)) &&
-      !(declared_source in c._typedef_names(declared_target))) {
+      !(declared_target in _typedef_names(c, declared_source)) &&
+      !(declared_source in _typedef_names(c, declared_target))) {
     $report.type.typedef_crossing(c, declared_source, declared_target);
   }
 }
@@ -3780,7 +3780,7 @@ static void Compiler._check_native_crossing(
    level of both chains is resolved through the typedef table first, so a
    spelling difference, Ast against List or Pool against struct Pool *, is
    not a difference here. */
-static int Compiler._unrelated_pointers(Compiler c, Type source, Type target) {
+static int _unrelated_pointers(Compiler c, Type source, Type target) {
   source = c.sym.resolve_key(source);
   target = c.sym.resolve_key(target);
   if (!source.is_pointer() || !target.is_pointer()) return 0;
@@ -3807,10 +3807,10 @@ static int _known_pointee(Type type) {
    NULL. C11 6.3.2.3p3 requires an integer constant expression with value zero,
    not just the token 0. x2c does not fold constants, so this recognizes
    only syntactically decidable forms. A wrong guess would reject legal C. */
-static String Compiler._not_null_pointer_constant(Compiler c, List expr) {
+static String _not_null_pointer_constant(Compiler c, List expr) {
   match (expr) {
     case %(expr ? ${$grouped(?inner)}):
-      return c._not_null_pointer_constant(inner);
+      return _not_null_pointer_constant(c, inner);
     // sizeof is an integer constant expression, but never a zero-valued
     // one: no type in C has size zero.
     case %(expr ? ${$sizeof_grouped(?operand)}):

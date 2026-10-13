@@ -95,7 +95,7 @@
 (def String.lstrip  (bind "lisp_string_lstrip" nil))
 (def String.rstrip  (bind "lisp_string_rstrip" nil))
 (def String.filter  (bind "Lisp_String_filter" nil))
-(def String.new_len (bind "_lisp_string_new_len" nil))
+(def String.new_len (bind "_string_new_len" nil))
 (def String.iter    (C.iterator.call (bind "String_iter_into" nil) 1))
 
 // Iter
@@ -136,8 +136,8 @@
   Var.listfloat Var.listdbl Var.liststring Var.listsymbol Var.cdddr
   Var.cddddr Var.json Var.pretty_json Var.clone_wide Var.getindex Var.null)
 (_natives Symbol.len Symbol.str Symbol.compare Symbol.first Symbol.last)
-(def Symbol.new_len (bind "_lisp_symbol_new_len" nil))
-(def Symbol.parse   (bind "_lisp_symbol_parse" nil))
+(def Symbol.new_len (bind "_symbol_new_len" nil))
+(def Symbol.parse   (bind "_symbol_parse" nil))
 
 // A compound selector `List.cxxr` or `Var.cxxr` applies the car and cdr
 // steps its name spells, right to left. The steps read raw slots so

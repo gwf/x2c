@@ -10,24 +10,21 @@
     Iter and Var publication are a separate opt-in expansion.
 */
 
-/* Separate expansions share these private names. Typed families need a
-   qualifier because several families can be declared in the same unit. */
+/* Separate expansions share each family's helper names. Encode the full
+   family spelling: case and underscores distinguish legal type names.
+   `_0` escapes an underscore, so `__` separates the operation unambiguously. */
 $(defun map.words (name)
   (if (equal? name "") ""
     (let ((first (substring name 0 1)))
-      (string-append (if (equal? first (lower first)) "" "_")
-        (lower first) (map.words (substring name 1 (string-length name)))))))
+      (string-append
+        (if (equal? first "_") "_0"
+          (string-append (if (equal? first (lower first)) "" "_")
+            (lower first)))
+        (map.words (substring name 1 (string-length name)))))))
 
 $(defun map.helper (type operation)
-  (let* ((family (str (car type)))
-         (stem (if (not (eq? (String.startswith family "Map") 0))
-                   (substring family 3 (string-length family)) family))
-         (words (map.words stem)))
-    (x2c.ident (string-append "_"
-      (if (equal? words "") ""
-        (string-append (if (not (eq? (String.startswith words "_") 0))
-                          (substring words 1 (string-length words)) words) "_"))
-      operation))))
+  (x2c.ident (string-append "_for" (map.words (str (car type)))
+    "__" operation)))
 
 macro Unit $map.var.family(
   Name $hash, Name $key_equal, Name $value_equal, Name $value_valid

@@ -153,9 +153,9 @@ static $(def lisp.native.target.rows (append '(
   (Var_json)
   (Var_pretty_json)
   (String_sha256)
-  (_lisp_string_new_len)
-  (_lisp_symbol_new_len)
-  (_lisp_symbol_parse)
+  (_string_new_len)
+  (_symbol_new_len)
+  (_symbol_parse)
   (List_getindex)
   (List_last)
   (List_contains)
@@ -182,9 +182,9 @@ static $(def lisp.native.target.rows (append '(
 ) (filter (lambda (row) (not (lisp.compiler.target? row)))
      (_x2c.native-meta.targets)) '(
   // Adapters that replace generated direct targets come last to win.
-  (_lisp_List_job (as List_job))
-  (_lisp_Job_start (as Job_start))
-  (_lisp_Buffer_write_len (as Buffer_write_len))
+  (_list_job (as List_job))
+  (_job_start (as Job_start))
+  (_buffer_write_len (as Buffer_write_len))
 )))
 
 static macro Expression $lisp.native.target.map() =>
@@ -198,28 +198,28 @@ Map lisp_native_targets(void) => native_targets;
 // adapters
 
 /* Native const-char pointers use represented String storage here. */
-static String _lisp_string_new_len(String text, int length) =>
+static String _string_new_len(String text, int length) =>
   String.new_len(text, length);
-static Symbol _lisp_symbol_parse(String text) => Symbol.parse(text);
-static Symbol _lisp_symbol_new_len(String text, int length) =>
+static Symbol _symbol_parse(String text) => Symbol.parse(text);
+static Symbol _symbol_new_len(String text, int length) =>
   Symbol.new_len(text, length);
 
 /* A Job started in compile-time Lisp, with its finalizer and capture
    files, belongs to the session that started it. */
-static Job _lisp_List_job(List command) {
+static Job _list_job(List command) {
   Job job;
   $scope(Lisp.active().storage()) { job = command; }
   return job;
 }
 
-static Job _lisp_Job_start(Job job) {
+static Job _job_start(Job job) {
   $scope(Lisp.active().storage()) { job.start(); }
   return job;
 }
 
 /* Meta text is a NUL-terminated String, so a count past its end would read
    beyond it. */
-static Buffer _lisp_Buffer_write_len(
+static Buffer _buffer_write_len(
   Buffer buf, const char *text, size_t length) {
   if (text && strnlen(text, length) < length)
     raise %(bad-arg (operation "Buffer.write_len"));

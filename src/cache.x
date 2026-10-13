@@ -65,8 +65,8 @@ List Compiler.setup_cache_init(
   Compiler c, List header, List source, String prefix,
   String guard_name, String initializer_name) {
   StaticQueue statics = {c, [], {}, {}};
-  header = c._rewrite_statics(header, statics);
-  Array header_ids = c._cache_ids(header);
+  header = _rewrite_statics(c, header, statics);
+  Array header_ids = _cache_ids(c, header);
   /* A deferred header initializer is now in the source's initializer,
      so its slots belong to the source region. */
   Array scan = [];
@@ -74,20 +74,20 @@ List Compiler.setup_cache_init(
   foreach (Var initializer, statics.initializers) scan.push(initializer);
   foreach (Symbol area, %<<protocol prepare statics finish>>)
     scan.push(c.init_statements(area));
-  Array source_ids = c._cache_ids(scan.list_free());
+  Array source_ids = _cache_ids(c, scan.list_free());
   if (header_ids)
-    header = c._header_cache(
+    header = _header_cache(c,
       header, header_ids, prefix, guard_name, initializer_name);
-  Map bindings = c._cache_bindings(source_ids, NULL);
-  source = c._source_cache(source, source_ids, bindings, statics);
+  Map bindings = _cache_bindings(c, source_ids, NULL);
+  source = _source_cache(c, source, source_ids, bindings, statics);
   statics.initializers.free();
   return %($header $source $bindings);
 }
 
-static Array Compiler._cache_ids(Compiler c, List code) {
+static Array _cache_ids(Compiler c, List code) {
   List seen[4096] = { 0 };
   Array ids = [];
-  c._collect_ids(code, seen, ids);
+  _collect_ids(c, code, seen, ids);
   if (!ids) {
     ids.free();
     return NULL;
@@ -101,7 +101,7 @@ static Array Compiler._cache_ids(Compiler c, List code) {
    Generated ASTs are canonical DAGs rather than trees, so the direct-mapped
    identity memo avoids repeatedly walking shared subgraphs. A collision only
    replaces one memo entry and may cause harmless extra work. */
-static void Compiler._collect_ids(
+static void _collect_ids(
   Compiler c, Var value, List *seen, Array ids) {
   Array pending = $auto([%($value)]), marked = $auto([]);
   marked.resize(c.id_keys.len());
@@ -159,7 +159,7 @@ List _entry_call(String entry) =>
   %((stmnt (expr (void) (call $entry (args)))));
 
 /* The statement calling the `void (void)` function `helper` names. */
-static List Compiler._helper_call(Compiler c, List helper) {
+static List _helper_call(Compiler c, List helper) {
   List callee = %(expr ((func ((void))) void) (ident $helper));
   return c.rebuild_statement($!{ $callee(); }).cadr();
 }
@@ -167,14 +167,14 @@ static List Compiler._helper_call(Compiler c, List helper) {
 /* Apply file-scope initializer rewrites across one generated region. Both
    regions share one queue, so a header definition deferred into the
    source's initializer is ordered against the file statics it reads. */
-static List Compiler._rewrite_statics(Compiler c, List code, StaticQueue &q) {
+static List _rewrite_statics(Compiler c, List code, StaticQueue &q) {
   Array output = [];
   q.arms = NULL;
   foreach (List item, code) {
     int first = q.initializers.len();
     match (item) {
       case %(!set ?declaration (declare *)):
-        item = c._rewrite_static(declaration, q);
+        item = _rewrite_static(c, declaration, q);
       case %(preproc ?content): q.arms = preproc_track_arms(q.arms, content);
     }
     output.push(item);
@@ -192,31 +192,31 @@ static List Compiler._rewrite_statics(Compiler c, List code, StaticQueue &q) {
    run in the initializer phase. A public object or a const object defers only
    where its initializer is not a C constant expression; otherwise nothing
    assigns its slot. */
-static List Compiler._rewrite_static(Compiler c, List decl, StaticQueue &q) {
+static List _rewrite_static(Compiler c, List decl, StaticQueue &q) {
   match (decl)
     case %(declare (!set ?decltype (!and (static *) (!not (* const *))))
                    (bindings *bound_list)):
-      return c._defer_bindings(decltype, bound_list, q);
+      return _defer_bindings(c, decltype, bound_list, q);
   if (!c.static_value_is_runtime(decl, NULL)) return decl;
   match (decl)
     case %(declare (!set ?decltype (!not (* const *)))
                    (bindings *bound_list)):
-      return c._defer_bindings(decltype, bound_list, q);
+      return _defer_bindings(c, decltype, bound_list, q);
   match (decl)
     case %(declare ?decltype (bindings *bound_list)):
-      return c._defer_bindings(_unqualify_const(decltype), bound_list, q);
+      return _defer_bindings(c, _unqualify_const(decltype), bound_list, q);
   return decl;
 }
 
-static List Compiler._defer_bindings(
+static List _defer_bindings(
   Compiler c, List decltype, List bound_list, StaticQueue &q) {
   Array values = [];
   foreach (Ast bound, bound_list)
-    values.push(c._defer_binding(decltype, bound, q));
+    values.push(_defer_binding(c, decltype, bound, q));
   return %(declare $decltype (bindings @{values.list_free()}));
 }
 
-static List Compiler._defer_binding(
+static List _defer_binding(
   Compiler c, List decltype, Ast bound, StaticQueue &q) {
   match (bound) {
     case %(bind *): return bound;
@@ -234,8 +234,8 @@ static List Compiler._defer_binding(
         match (value)
           case %(composite (commas *items)): {
             List target = $!($declared){ $name };
-            List assign = c._array_block(target, resolved, items);
-            List binding = q.record(name, mods, assign);
+            List assign = _array_block(c, target, resolved, items);
+            List binding = _record(q, name, mods, assign);
             List zero = c.zero_initializer(value);
             return %(op = $binding (expr $type $zero));
           }
@@ -243,7 +243,7 @@ static List Compiler._defer_binding(
       }
       List stored = _initializer_rhs(decltype, name, mods, type, value);
       List assign = _assignment(name, type, stored);
-      return q.record(name, mods, assign);
+      return _record(q, name, mods, assign);
     }
   }
   return bound;
@@ -251,7 +251,7 @@ static List Compiler._defer_binding(
 
 /* Strip one initialized binding and record the assignment that replaces it
    with the helper that runs it. */
-static List StaticQueue.record(
+static List _record(
   StaticQueue &q, List name, List mods, List assign) {
   List helper = q.c.sym.introduce(q.c.fresh_name("static_initialize"));
   List initializer = %($name $assign $helper ${q.arms});
@@ -326,17 +326,17 @@ List Compiler.zero_initializer(Compiler c, List value) {
 
 // static array blocks
 
-static List Compiler._array_block(
+static List _array_block(
   Compiler c, List target, Type array, List items) {
   Array statements = [];
   foreach (List row, c.initializer_rows(array, items, target)) {
     (List original, List cases) = row;
-    statements.push(c._array_row(target, original, cases));
+    statements.push(_array_row(c, target, original, cases));
   }
   return %(block @{statements.list_free()});
 }
 
-static List Compiler._array_row(
+static List _array_row(
   Compiler c, List target, List original, List cases) {
   List terminal = original, header = NULL, source = NULL;
   while (terminal.car() == <dotinit> || terminal.car() == <indexinit>)
@@ -352,23 +352,23 @@ static List Compiler._array_row(
   int unconditional = 0;
   foreach (List choice, cases) {
     List assignment =
-      c._array_choice(target, choice, applicable, unconditional);
+      _array_choice(c, target, choice, applicable, unconditional);
     if (assignment) assigned.push(assignment);
   }
   List code = assigned.list_free();
   if (functions && code)
-    code = c._array_input(code, header, source, applicable, unconditional);
+    code = _array_input(c, code, header, source, applicable, unconditional);
   else if (header) code = %(initcode $header $code);
   return code;
 }
 
-static List Compiler._array_choice(
+static List _array_choice(
   Compiler c, List target, List choice, List &applicable, int &unconditional) {
   (List condition, List path, Type type, List value) = choice;
   if (!type) return NULL;
   List tests = NULL;
-  List slot = c._array_slot(target, path, tests);
-  List assignment = c._array_assignment(slot, type, value, condition);
+  List slot = _array_slot(c, target, path, tests);
+  List assignment = _array_assignment(c, slot, type, value, condition);
   if (condition) tests = cons(condition, tests);
   List active = NULL;
   foreach (List test, tests) {
@@ -384,7 +384,7 @@ static List Compiler._array_choice(
 /* Reuse ordinary indexed assignments, recursing only for explicit array
    braces. C can warn and ignore excess positional values, so writes use the
    native object's actual dimensions rather than the initializer count. */
-static List Compiler._array_slot(
+static List _array_slot(
   Compiler c, List target, List path, List &tests) {
   List slot = target;
   tests = %();
@@ -402,7 +402,7 @@ static List Compiler._array_slot(
   return slot;
 }
 
-static List Compiler._array_assignment(
+static List _array_assignment(
   Compiler c, List slot, Type type, List value, List condition) {
   List inner = NULL, rhs = value;
   match (value) {
@@ -411,7 +411,7 @@ static List Compiler._array_assignment(
   }
   Type resolved = c.sym.resolve_key(type);
   if (inner && resolved.is_array())
-    return c._array_block(slot, resolved, inner.cadr().cdr());
+    return _array_block(c, slot, resolved, inner.cadr().cdr());
   if (inner)
     rhs = _initializer_rhs(type, NULL, NULL, type, inner);
   if (condition) {
@@ -423,7 +423,7 @@ static List Compiler._array_assignment(
   return c.rebuild_statement($!{ $slot = $rhs; }).cadr();
 }
 
-static List Compiler._array_input(
+static List _array_input(
   Compiler c, List code, List header, List source, List applicable,
   int unconditional) {
   Type type = source.cadr();
@@ -456,29 +456,29 @@ static typedef struct HeaderCache {
   Map bindings;
 } HeaderCache;
 
-static List Compiler._header_cache(
+static List _header_cache(
   Compiler c, List header, Array ids, String prefix, String guard_name,
   String initializer_name) {
   if (!ids) return header;
-  Map bindings = $auto(c._cache_bindings(ids, prefix));
+  Map bindings = $auto(_cache_bindings(c, ids, prefix));
   HeaderCache cache = {
     c, prefix, c.sym.reference(%($guard_name), NULL),
     c.sym.reference(%($initializer_name), NULL), bindings};
-  return cache.entries(header, cache.prelude(ids));
+  return _entries(cache, header, _prelude(cache, ids));
 }
 
-static List HeaderCache.prelude(HeaderCache &h, Array ids) {
+static List _prelude(HeaderCache &h, Array ids) {
   Compiler c = h.c;
   Array declarations = [];
-  foreach (List declaration, c._slot_declarations(ids, h.bindings))
+  foreach (List declaration, _slot_declarations(c, ids, h.bindings))
     declarations.push(declaration);
   declarations.push(c.initialization_guard(h.guard));
   Array statements = [];
   foreach (int id, ids) {
-    List statement = c._cache_initializer(id, h.bindings, 1);
+    List statement = _cache_initializer(c, id, h.bindings, 1);
     statements.push(_cache_refs(statement, h.bindings, NULL));
   }
-  List body = c._cache_batches(statements, declarations, h.prefix);
+  List body = _cache_batches(c, statements, declarations, h.prefix);
   List type = %(("__attribute__((constructor))") static void);
   body = _run_once(
     c, _entry_call("x2c_initialize_protocols"), h.guard, body);
@@ -490,7 +490,7 @@ static List HeaderCache.prelude(HeaderCache &h, Array ids) {
 /* The prelude precedes the first function that reads a cache, and each
    such function calls the header's initializer through the same entry
    decision as source functions. */
-static List HeaderCache.entries(HeaderCache &h, List header, List prelude) {
+static List _entries(HeaderCache &h, List header, List prelude) {
   Init entry = {.c = h.c, .guard = h.guard, .entry = h.initializer};
   Array output = [];
   foreach (List node, header) {
@@ -537,30 +537,30 @@ List Compiler.initialization_guard(Compiler c, List guard) =>
    While generating String.initialize or List.initialize, a cache graph that
    requires that same canonicalizer runs in `<finish>`, after the
    initializer body; dependent file-static assignments move with it. */
-static List Compiler._source_cache(
+static List _source_cache(
   Compiler c, List source, Array ids, Map bindings, StaticQueue &statics) {
-  source = c._rewrite_statics(source, statics);
+  source = _rewrite_statics(c, source, statics);
   Symbol deferred_kind = 0;
   if (c.init_fn == "String_initialize") deferred_kind = <string>;
   else if (c.init_fn == "List_initialize") deferred_kind = <cons>;
   if (!ids) {
-    statics.queue(deferred_kind);
+    _queue(statics, deferred_kind);
     return source;
   }
   Array early = [], late = [], declarations = [];
-  foreach (List declaration, c._slot_declarations(ids, bindings))
+  foreach (List declaration, _slot_declarations(c, ids, bindings))
     declarations.push(declaration);
   foreach (int id, ids) {
-    List stmt = c._cache_initializer(id, bindings, 0);
+    List stmt = _cache_initializer(c, id, bindings, 0);
     int deferred =
-      deferred_kind && c._reaches_kind(%(cache $id), deferred_kind);
+      deferred_kind && _reaches_kind(c, %(cache $id), deferred_kind);
     (deferred ? late : early).push(stmt);
   }
-  foreach (List stmt, c._cache_batches(early, declarations, NULL))
+  foreach (List stmt, _cache_batches(c, early, declarations, NULL))
     c.add_init(<prepare>, stmt);
-  foreach (List stmt, c._cache_batches(late, declarations, NULL))
+  foreach (List stmt, _cache_batches(c, late, declarations, NULL))
     c.add_init(<finish>, stmt);
-  statics.queue(deferred_kind);
+  _queue(statics, deferred_kind);
   ids.free();
   return c.place_source_prelude(source, declarations.list_free());
 }
@@ -568,7 +568,7 @@ static List Compiler._source_cache(
 /* Large literal graphs otherwise become one enormous native basic block.
    Bound only their generated assignments, keeping their dependency order
    and initialization phase. Small caches keep the direct assignments. */
-static List Compiler._cache_batches(
+static List _cache_batches(
   Compiler c, Array statements, Array declarations, String prefix) {
   int limit = 512, count = statements.len();
   if (count <= limit) return statements.list_free();
@@ -582,15 +582,15 @@ static List Compiler._cache_batches(
     List helper = c.sym.introduce(c.fresh_name(stem));
     declarations.push(
       _initializer_function(c, type, helper, batch.list_free()));
-    calls.push(c._helper_call(helper));
+    calls.push(_helper_call(c, helper));
   }
   statements.free();
   return calls.list_free();
 }
 
 /* Whether a cache that `code` uses depends on a key of `kind`. */
-static int Compiler._reaches_kind(Compiler c, List code, Symbol kind) {
-  Array dependencies = c._cache_ids(code);
+static int _reaches_kind(Compiler c, List code, Symbol kind) {
+  Array dependencies = _cache_ids(c, code);
   if (!dependencies) return 0;
   int found = 0;
   foreach (int id, dependencies)
@@ -602,49 +602,49 @@ static int Compiler._reaches_kind(Compiler c, List code, Symbol kind) {
 /* Queue a stable dependency walk. Dependencies precede their consumers, and
    independent roots retain source order. A dependency queued in `<finish>`
    moves every consuming initializer there as well. */
-static void StaticQueue.queue(StaticQueue &q, Symbol deferred_kind) {
+static void _queue(StaticQueue &q, Symbol deferred_kind) {
   q.deferred_kind = deferred_kind;
-  foreach (List initializer, q.initializers) q.visit(initializer.car());
+  foreach (List initializer, q.initializers) _visit(q, initializer.car());
 }
 
 /* Queues `binding` after its dependencies and returns its area. */
-static Symbol StaticQueue.visit(StaticQueue &q, List binding) {
+static Symbol _visit(StaticQueue &q, List binding) {
   Var status = q.state[binding];
-  if (status == <visiting>) q.report_cycle();
+  if (status == <visiting>) _report_cycle(q);
   if (status is not void) return status;
   q.state[binding] = <visiting>;
   Array definitions = q.pending[binding];
-  Symbol area = q.deferred(definitions) ? <finish> : <statics>;
+  Symbol area = _deferred(q, definitions) ? <finish> : <statics>;
   List dependencies = q.c.static_init_deps.getdefault(binding, %());
   foreach (List dependency, dependencies)
-    if (dependency in q.pending && q.visit(dependency) == <finish>)
+    if (dependency in q.pending && _visit(q, dependency) == <finish>)
       area = <finish>;
-  q.add_calls(definitions, area);
+  _add_calls(q, definitions, area);
   q.state[binding] = area;
   return area;
 }
 
-static int StaticQueue.deferred(StaticQueue &q, Array definitions) {
+static int _deferred(StaticQueue &q, Array definitions) {
   if (!q.deferred_kind) return 0;
   foreach (List initializer, definitions)
-    if (q.c._reaches_kind(initializer.cadr(), q.deferred_kind)) return 1;
+    if (_reaches_kind(q.c, initializer.cadr(), q.deferred_kind)) return 1;
   return 0;
 }
 
-static void StaticQueue.add_calls(
+static void _add_calls(
   StaticQueue &q, Array definitions, Symbol area) {
   /* Each branch of a conditional group may define the binding. A definition
      runs under the directives that enclose it, since a disabled branch
      defines no helper. */
   foreach (List initializer, definitions) {
     List helper = initializer.caddr(), arms = initializer[3];
-    List call = q.c._helper_call(helper);
+    List call = _helper_call(q.c, helper);
     foreach (List statement, preproc_within_arms(arms, %($call)))
       q.c.add_init(area, statement);
   }
 }
 
-static void StaticQueue.report_cycle(StaticQueue &q) {
+static void _report_cycle(StaticQueue &q) {
   Compiler c = q.c;
   Array notes = [], List first = NULL;
   foreach (List initializer, q.initializers) {
@@ -667,7 +667,7 @@ static void StaticQueue.report_cycle(StaticQueue &q) {
 
 /* Slot names belong to this region's reachable order. Semantic cache ids
    continue to index the unit's retained literal graph. */
-static Map Compiler._cache_bindings(Compiler c, Array ids, String prefix) {
+static Map _cache_bindings(Compiler c, Array ids, String prefix) {
   Map bindings = {};
   int slot = 0;
   foreach (Var id, ids) {
@@ -680,7 +680,7 @@ static Map Compiler._cache_bindings(Compiler c, Array ids, String prefix) {
 
 /* The static List, String, and Var slot declarations for `ids`, in that
    order, each in the descending slot order `_split_ids` keeps. */
-static List Compiler._slot_declarations(Compiler c, Array ids, Map bindings) {
+static List _slot_declarations(Compiler c, Array ids, Map bindings) {
   List (list_ids, string_ids, var_ids) = _split_ids(c.id_keys, ids);
   Array declarations = [];
   List declaration = _declare_slots(list_ids, "List", bindings);
@@ -728,33 +728,33 @@ static List _declare_slots(List ids, String type, Map bindings) {
   return %(declare (static $type) (bindings @binds));
 }
 
-static List Compiler._cache_initializer(
+static List _cache_initializer(
   Compiler c, int id, Map bindings, int header) {
   match (c.id_keys[id]) {
     case %(string ?value):
-      return c._cache_assignment(id, value, %("String"), bindings, header);
+      return _cache_assignment(c, id, value, %("String"), bindings, header);
     case %(var ?value):
-      return c._cache_assignment(id, value, %("Var"), bindings, header);
+      return _cache_assignment(c, id, value, %("Var"), bindings, header);
     case %(!set ?value (cons *)):
-      return c._cache_assignment(id, value, %("List"), bindings, header);
+      return _cache_assignment(c, id, value, %("List"), bindings, header);
   }
   __builtin_unreachable();
 }
 
-static List Compiler._cache_assignment(
+static List _cache_assignment(
   Compiler c, int id, List value, List type, Map bindings, int header) {
   List binding = bindings[id];
   List rhs = c.convert_expression(
-    c._cache_value(value, header ? bindings : NULL), type);
+    _cache_value(c, value, header ? bindings : NULL), type);
   return _assignment(binding, type, rhs);
 }
 
-static List Compiler._cache_value(Compiler c, List expr, Map bindings) {
+static List _cache_value(Compiler c, List expr, Map bindings) {
   if (!expr) return NULL;
   match (expr) {
     case %(cons ?captured_head ?captured_tail): {
-      List head = c._cache_value(captured_head, bindings);
-      List tail = c._cache_value(captured_tail, bindings);
+      List head = _cache_value(c, captured_head, bindings);
+      List tail = _cache_value(c, captured_tail, bindings);
       List cons_binding = c.sym.reference(%("cons"), NULL);
       return %(expr ("List")
         (call (expr ((func (("Var") ("List")) "List")) (ident $cons_binding))

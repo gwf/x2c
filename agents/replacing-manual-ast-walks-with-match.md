@@ -230,7 +230,7 @@ When the output is C, write it as a quotation instead; see
 ### 5. Match captures do not remove semantic ordering requirements
 
 The pattern can bind all children at once, but transformations and emission
-may still have side effects or required source order. `Emitter._emit` assigns
+may still have side effects or required source order. `_emit` assigns
 emitted operands to named locals in order before
 building the returned token literal. It does not hide several emitter calls
 inside a compact expression and assume their evaluation order is harmless.
@@ -336,8 +336,8 @@ code whose real purpose is recognizing and rewriting syntax.
 
 ### Collapse helper families into the grammar dispatcher
 
-`Emitter._emit` states its AST productions in a source `match`. Its helpers
-own substantial behavior, such as `Emitter._local_static`, which emits a
+`_emit` states its AST productions in a source `match`. Its helpers
+own substantial behavior, such as `_local_static`, which emits a
 function-local static together with its initializer.
 
 The dispatcher owns the current grammar choice. A case that reaches another

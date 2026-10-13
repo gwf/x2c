@@ -166,20 +166,20 @@ static Map _cache_copy(Map map) {
 }
 
 /* A file's entry: collected in this process, or read from its interface. */
-static List Compiler._entry(Compiler c, String canonical) {
+static List _entry(Compiler c, String canonical) {
   Var cached = _process_cache()[canonical];
   if (cached is <list>) {
-    if (List.equal(cached.list()[4], c._interface_include_dirs(canonical)))
+    if (List.equal(cached.list()[4], _interface_include_dirs(c, canonical)))
       return cached;
     (void) _process_cache().del(canonical);
   }
-  return c._interface_read(canonical);
+  return _interface_read(c, canonical);
 }
 
 /* Native declaration calls can change provider state. Only their cold walk
    reproduces both the signatures and effects in the provider's own session. */
-static List Compiler._collection_entry(Compiler c, String path) {
-  List entry = c._entry(path);
+static List _collection_entry(Compiler c, String path) {
+  List entry = _entry(c, path);
   if (!entry || path in c.collection_native_files) return entry;
   foreach (Var part, entry.car())
     if (part is <map> && %("collection-native") in part.map()) {
@@ -232,22 +232,22 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
   Map visited = {}, String canonical = _canonical_path(c.filename);
   c.deps = {};
   c.add_translation_dependency(canonical);
-  if (c.prelude) c._add_prelude(globs, visited);
+  if (c.prelude) _add_prelude(c, globs, visited);
   /* The prelude needs this file's signatures to close include cycles.
      Its own definitions must not suppress fresh declaration defaults.
      Keep type rows: public inline bodies can promote imported families. */
   if (canonical in visited)
-    foreach (Var name, c._entry(canonical).caddr()) {
+    foreach (Var name, _entry(c, canonical).caddr()) {
       globs.del(%($name));
       globs.del(%(self $name));
       c.fn_defs.del(name);
     }
   visited[canonical] = 1;
-  c._walk_file(
+  _walk_file(c,
     canonical, c.text, c.unit_source, Path.dirname(c.filename), globs,
     visited);
-  c.bind_pending_inline_bodies(globs, canonical);
-  c._record_cold_conformances(globs, visited, canonical);
+  _bind_pending_inline_bodies(c, globs, canonical);
+  _record_cold_conformances(c, globs, visited, canonical);
   return globs;
 }
 
@@ -269,21 +269,21 @@ List compiler_prelude_sources(void) => %(
 int is_prelude_source(String path) =>
   home_portable_path(path) in compiler_prelude_sources();
 
-static void Compiler._add_prelude(Compiler c, Map globs, Map visited) {
+static void _add_prelude(Compiler c, Map globs, Map visited) {
   foreach (String source, compiler_prelude_sources()) {
     String path = %"${x2c_get_root()}/$source";
     String canonical = _canonical_path(path);
     visited[canonical] = 1;
     c.add_translation_dependency(canonical);
     if (c.runtime_hdrs)
-      c._walk_file(
-        canonical, c._runtime_text(path), NULL, Path.dirname(path), globs,
+      _walk_file(c,
+        canonical, _runtime_text(c, path), NULL, Path.dirname(path), globs,
         visited);
     else {
-      List entry = c._prelude_entry(path, canonical);
+      List entry = _prelude_entry(c, path, canonical);
       // Its compile-time effects install as the compiler's own.
       $let(c.builtin_defs, 1)
-        c._replay_cached(entry, canonical, globs, visited, NULL);
+        _replay_cached(c, entry, canonical, globs, visited, NULL);
     }
   }
 }
@@ -291,24 +291,24 @@ static void Compiler._add_prelude(Compiler c, Map globs, Map visited) {
 /* A prelude source's entry: cached in this process, linked into the
    compiler, read from its interface beside a stage build, or walked cold
    once. */
-static List Compiler._prelude_entry(
+static List _prelude_entry(
   Compiler c, String runtime, String canonical) {
-  List entry = c._entry(canonical);
+  List entry = _entry(c, canonical);
   if (entry) return entry;
   Map scratch = {}, visited = {};
   visited[canonical] = 1;
-  c._walk_apart(canonical, c._runtime_text(runtime), scratch, visited);
+  _walk_apart(c, canonical, _runtime_text(c, runtime), scratch, visited);
   return _process_cache()[canonical];
 }
 
-static String Compiler._runtime_text(Compiler c, String runtime) {
+static String _runtime_text(Compiler c, String runtime) {
   String text = NULL;
   if (c.read_source(runtime, text)) return text;
   $report.driver.runtime_read(c, runtime);
 }
 
 /* Rows enter the unit's symbols and its source declarations together. */
-static void Compiler._merge_rows(Compiler c, Map globs, Map rows) {
+static void _merge_rows(Compiler c, Map globs, Map rows) {
   globs.merge(rows);
   c.merge_source_declarations(globs, rows);
 }
@@ -340,7 +340,7 @@ ModuleSource Compiler.module_source(Compiler c, String path, String text) {
     .c = c, .out = out, .markers = [], .members = {}, .splicing = {},
     .line = 1};
   s.splicing[Path.absolute(path)] = 1;
-  if (!s.file(path, text, NULL)) return NULL;
+  if (!_file(s, path, text, NULL)) return NULL;
   ModuleSource source = Scope.calloc(1, sizeof(struct ModuleSource));
   *source = (struct ModuleSource) {
     .text = s.out.str(), .own = text, .markers = s.markers,
@@ -356,22 +356,22 @@ static int _spells_block(const char *text) =>
 /* Appends a file with its block spliced and reports whether it had one. A
    member's text is marked as its own. Diagnostics locate the block in this
    file. */
-static int Splice.file(Splice &s, String path, String text, String prefix) {
+static int _file(Splice &s, String path, String text, String prefix) {
   $let(s.path, path) $let(s.text, text) $let(s.prefix, prefix)
   $let(s.c.filename, path) $let(s.c.text, text)
   $let(s.c.line_markers, NULL) {
-    if (prefix) s.mark(1, 0);
-    Token block = s.block(), close = NULL;
+    if (prefix) _mark(s, 1, 0);
+    Token block = _block(s), close = NULL;
     if (!block) {
-      s.own(0, text.len(), 1);
+      _own(s, 0, text.len(), 1);
       return 0;
     }
-    List members = s.members(block, close);
-    s.own(0, block.pos, 1);
-    s.end_line();
-    foreach (String spelling, members) s.member(spelling, block);
-    s.mark(close.line, close.pos + 1);
-    s.own(close.pos + 1, text.len(), close.line);
+    List members = _members(s, block, close);
+    _own(s, 0, block.pos, 1);
+    _end_line(s);
+    foreach (String spelling, members) _member(s, spelling, block);
+    _mark(s, close.line, close.pos + 1);
+    _own(s, close.pos + 1, text.len(), close.line);
     return 1;
   }
 }
@@ -379,7 +379,7 @@ static int Splice.file(Splice &s, String path, String text, String prefix) {
 /* The `module` that opens the file's file-scope block, or NULL. The word
    opens a block where `{` follows it and no word precedes it, so
    `struct module {` declares a tag. */
-static Token Splice.block(Splice &s) {
+static Token _block(Splice &s) {
   if (!_spells_block(s.text)) return NULL;
   Tokenizer tokenizer = Tokenizer.new(s.text, <x2c>);
   tokenizer.layout = is_layout_file(s.path);
@@ -409,7 +409,7 @@ static int _is_word(String text) =>
 
 /* The member paths of the block `block` opens, whose closing brace becomes
    `close`. */
-static List Splice.members(Splice &s, Token block, Token &close) {
+static List _members(Splice &s, Token block, Token &close) {
   Array members = [];
   Token token = Token.skip_trivia(Token.skip_trivia(block + 1) + 1);
   while (token.type != <"}">) {
@@ -428,7 +428,7 @@ static List Splice.members(Splice &s, Token block, Token &close) {
    member's resolved location, with links followed, must lie in the
    resolved companion directory, and a file being spliced cannot be spliced
    again inside itself. */
-static void Splice.member(Splice &s, String spelling, Token site) {
+static void _member(Splice &s, String spelling, Token site) {
   String stem = Path.stem(s.path), dir = Path.dirname(s.path), text = NULL;
   String path = dir == "." ? spelling : Path.join(dir, spelling);
   String companion = Path.absolute(Path.join(dir, stem));
@@ -442,36 +442,36 @@ static void Splice.member(Splice &s, String spelling, Token site) {
   s.members[_canonical_path(path)] = _content_hash(text);
   String prefix = s.prefix ? Path.join(s.prefix, spelling) : spelling;
   s.splicing[resolved] = 1;
-  s.file(path, text, Path.dirname(prefix));
+  _file(s, path, text, Path.dirname(prefix));
   s.splicing.del(resolved);
-  s.end_line();
+  _end_line(s);
 }
 
 /* Appends the file's text from byte `start` to `end`, which begins its
    line `line`. A member's include of a file beside it moves under its
    prefix. */
-static void Splice.own(Splice &s, int start, int end, int line) {
+static void _own(Splice &s, int start, int end, int line) {
   if (start == end) return;
   const char *run = s.text + start, *limit = s.text + end;
   if (s.prefix)
     for (const char *at = run; at < limit; line++) {
       const char *stop = memchr(at, '\n', limit - at);
       stop = stop ? stop + 1 : limit;
-      String moved = s.moved_include(at, stop);
+      String moved = _moved_include(s, at, stop);
       if (moved) {
-        s.write(run, at);
-        s.write(moved, (const char *) moved + moved.len());
-        s.mark(line + 1, stop - (const char *) s.text);
+        _write(s, run, at);
+        _write(s, moved, (const char *) moved + moved.len());
+        _mark(s, line + 1, stop - (const char *) s.text);
         run = stop;
       }
       at = stop;
     }
-  s.write(run, limit);
+  _write(s, run, limit);
 }
 
 /* The line from `at` to `stop` with its quoted include of a file beside
    this one spelled under the prefix, or NULL for any other line. */
-static String Splice.moved_include(
+static String _moved_include(
   Splice &s, const char *at, const char *stop) {
   const char *hash = at + strspn(at, " \t");
   if (hash >= stop || *hash != '#') return NULL;
@@ -486,7 +486,7 @@ static String Splice.moved_include(
 
 /* From here on the text comes from this file, at its line `line` and byte
    `offset`, continuing that line's text before `offset`. */
-static void Splice.mark(Splice &s, int line, int offset) {
+static void _mark(Splice &s, int line, int offset) {
   int start = offset;
   while (start > 0 && s.text[start - 1] != '\n') start--;
   String before = s.text[start:offset];
@@ -495,13 +495,13 @@ static void Splice.mark(Splice &s, int line, int offset) {
 }
 
 // Each file's text ends its last line before the next file's begins.
-static void Splice.end_line(Splice &s) {
+static void _end_line(Splice &s) {
   if (!s.out.len() || s.out[-1] == '\n') return;
   s.out.newline();
   s.line++;
 }
 
-static void Splice.write(Splice &s, const char *start, const char *end) {
+static void _write(Splice &s, const char *start, const char *end) {
   s.out.write_len(start, end - start);
   for (const char *ch = start; ch < end; ch++) if (*ch == '\n') s.line++;
 }
@@ -522,10 +522,10 @@ static typedef struct FileWalk {
    identity. The first cold visit fixes a file's contribution for later
    units, so its declarations must not depend on unit-local names visible
    before the include. */
-static void Compiler._walk_file(
+static void _walk_file(
   Compiler c, String path, String text, ModuleSource module, String dir,
   Map globs, Map visited) {
-  if (path in _process_cache()) (void) c._entry(path);
+  if (path in _process_cache()) (void) _entry(c, path);
   if (module) text = module.text;
   Tokenizer tokenizer = Tokenizer.new(text, <x2c>);
   tokenizer.layout = is_layout_file(path);
@@ -557,31 +557,31 @@ static void Compiler._walk_file(
     }
     // A cycle sees only the exports collected before its include.
     visited[path] = w.parts;
-    w.split(tokenizer.tokens);
+    _split(w, tokenizer.tokens);
     visited[path] = 1;
-    w.add_defaults();
-    w.queue_public_bodies();
-    w.select_public();
-    w.publish();
+    _add_defaults(w);
+    _queue_public_bodies(w);
+    _select_public(w);
+    _publish(w);
   }
 }
 
-static void FileWalk.split(FileWalk &w, Token first) {
+static void _split(FileWalk &w, Token first) {
   Array arms = $auto([]);
   for (Token token = first; token.type != <eof>; token++) {
     if (token.type != <preproc> || !_starts_line(first, token)) continue;
-    if (!_track_arms(arms, token.text)) w.directive(token, _hidden(arms));
+    if (!_track_arms(arms, token.text)) _directive(w, token, _hidden(arms));
   }
-  w.flush(w.text[w.pos:]);
+  _flush(w, w.text[w.pos:]);
 }
 
 /* An include ends the segment unless its conditional arm is never taken. */
-static void FileWalk.directive(FileWalk &w, Token token, int hidden) {
+static void _directive(FileWalk &w, Token token, int hidden) {
   int angle = 0;
   String target = hidden ? NULL : preproc_include_target(token.text, angle);
   if (!target) return;
-  w.flush(w.text[w.pos:token.pos]);
-  w.include(target, angle);
+  _flush(w, w.text[w.pos:token.pos]);
+  _include_file(w, target, angle);
   Token next = token + 1;
   w.line = next.line;
   w.pos = next.pos;
@@ -616,10 +616,10 @@ static int _hidden(Array arms) {
 // segments
 
 /* Append one segment's nonempty published rows before the next part. */
-static void FileWalk.flush(FileWalk &w, String segment) {
+static void _flush(FileWalk &w, String segment) {
   if (!segment || !*segment) return;
   Map overlay = _cache_map();
-  w.parse(segment, overlay);
+  _parse(w, segment, overlay);
   if (overlay.len()) w.parts.push(overlay);
 }
 
@@ -628,21 +628,21 @@ static void FileWalk.flush(FileWalk &w, String segment) {
    semantic transactions, so their committed declarations and protocol rows
    are recorded at this segment's source position. Macro, Lisp, and keyword
    state then returns to the enclosing compiler for the next segment. */
-static void FileWalk.parse(FileWalk &w, String segment, Map overlay) {
+static void _parse(FileWalk &w, String segment, Map overlay) {
   Compiler shadow = Compiler.new_shared(w.c);
   defer w.c.close_child(shadow);
-  w.prepare(shadow, segment);
+  _prepare(w, shadow, segment);
   shadow.shallow_parse_overlay(w.globs, overlay);
   w.c.collection_native |= shadow.collection_native;
   w.linkage = shadow.open_linkage;
   shadow.return_unit_state(w.c);
-  w.merge(shadow, overlay);
+  _merge_file(w, shadow, overlay);
 }
 
 /* The shadow parses the segment as part of this file, in the unit's state,
    with token lines and positions counted from the start of the file. */
-static void FileWalk.prepare(FileWalk &w, Compiler shadow, String segment) {
-  if (!w.unit || !w.c._package_owns(w.path)) shadow.package = NULL;
+static void _prepare(FileWalk &w, Compiler shadow, String segment) {
+  if (!w.unit || !_package_owns(w.c, w.path)) shadow.package = NULL;
   shadow.filename = w.path;
   // Every segment hashes its provider, including its private helpers.
   shadow.meta_hashes = w.hashes;
@@ -673,7 +673,7 @@ static void _shift_tokens(Tokenizer t, int line, int pos) {
    under its root takes its prefix. A C header, a runtime module, or foreign
    x2c source keeps its own spellings, as including that file directly gives
    them, so the collected entry is the same whichever unit walks it first. */
-static int Compiler._package_owns(Compiler c, String path) {
+static int _package_owns(Compiler c, String path) {
   if (!c.package) return 0;
   Var root = c.package_roots[c.package];
   return root is not void &&
@@ -682,7 +682,7 @@ static int Compiler._package_owns(Compiler c, String path) {
 
 /* The file takes every row the segment declared. Selection after the last
    segment can promote a static type needed by a later public declaration. */
-static void FileWalk.merge(FileWalk &w, Compiler shadow, Map overlay) {
+static void _merge_file(FileWalk &w, Compiler shadow, Map overlay) {
   if (w.unit) {
     w.c.fn_defs.merge(shadow.fn_defs);
     w.definitions.merge(shadow.fn_defs);
@@ -692,7 +692,7 @@ static void FileWalk.merge(FileWalk &w, Compiler shadow, Map overlay) {
      a later replay of the entry records them too. */
   _cache_dependencies(w.dependencies, shadow.deps);
   w.c.merge_translation_dependencies(shadow.deps);
-  w.c._merge_rows(w.globs, overlay);
+  _merge_rows(w.c, w.globs, overlay);
   Map statics = shadow.sym.file_statics();
   w.statics.merge(statics);
   if (w.unit) _publish_unit_statics(statics, overlay, w.path);
@@ -758,7 +758,7 @@ static void _needed_types(List syntax, Map rows, Map needed) {
   }
 }
 
-static void FileWalk.select_public(FileWalk &w) {
+static void _select_public(FileWalk &w) {
   if (!w.unit) return;
   Map rows = {}, needed = {}, selected = {};
   foreach (Var part, w.parts) if (part is <map>) rows.merge(part);
@@ -813,7 +813,7 @@ static void _publish_unit_statics(Map statics, Map overlay, String path) {
 /* Splice one include: replay its entry, or walk it cold, once per unit.
    Its content hash joins this file's dependencies, so a replayed interface
    is rejected when any file it spliced has changed. */
-static void FileWalk.include(FileWalk &w, String target, int angle) {
+static void _include_file(FileWalk &w, String target, int angle) {
   int covered = 0;
   String path = _resolve_include(
     w.c.sources, w.c.include_dirs, w.dir, target, angle, covered, w);
@@ -822,46 +822,46 @@ static void FileWalk.include(FileWalk &w, String target, int angle) {
   w.c.add_translation_dependency(canonical);
   if (!(canonical in w.visited)) {
     w.visited[canonical] = 1;
-    List entry = w.c._collection_entry(canonical);
-    if (!entry) entry = w.c._walk_cold(target, canonical, w.globs, w.visited);
-    w.c._replay_cached(
+    List entry = _collection_entry(w.c, canonical);
+    if (!entry) entry = _walk_cold(w.c, target, canonical, w.globs, w.visited);
+    _replay_cached(w.c,
       entry, canonical, w.globs, w.visited, NULL);
   }
   else if (w.visited[canonical] is <array>)
-    w.c._replay_included(w.globs, canonical, {}, NULL, w.visited);
+    _replay_included(w.c, w.globs, canonical, {}, NULL, w.visited);
   _cache_dependency(
-    w.dependencies, canonical, w.c._walked_hash(target, canonical));
+    w.dependencies, canonical, _walked_hash(w.c, target, canonical));
   w.parts.push(canonical);
 }
 
 /* Preserve absent candidates and alias identity, not directory timestamps.
    Canonical selected files already carry their ordinary content hashes. */
-static void FileWalk._include_search_dependency(
+static void _include_search_dependency(
   FileWalk &w, String candidate) {
   if (!candidate.startswith("/")) candidate = %"cwd:$candidate";
   if (!candidate.startswith("cwd:") && w.c.sources.exists(candidate) &&
       candidate == _canonical_path(candidate)) return;
-  String hash = w.c._include_search_hash(candidate);
+  String hash = _include_search_hash(w.c, candidate);
   _cache_dependency(w.dependencies, candidate, hash);
   w.c.deps.merge_translation_dependency(candidate, hash);
 }
 
-static String Compiler._include_search_hash(Compiler c, String path) {
+static String _include_search_hash(Compiler c, String path) {
   if (path.startswith("cwd:")) path = path[4:];
   return c.sources.exists(path) ?
     %"search:${home_portable_path(Path.absolute(path))}" : "search:absent";
 }
 
 /* A file still being walked, as in an include cycle, has no entry yet. */
-static String Compiler._walked_hash(
+static String _walked_hash(
   Compiler c, String target, String canonical) {
   Var walked = _process_cache()[canonical];
-  if (walked is void) return _content_hash(c._include_text(target, canonical));
+  if (walked is void) return _content_hash(_include_text(c, target, canonical));
   return walked.list().cadr();
 }
 
 /* Read an include's text, reporting an unreadable target as a driver error. */
-static String Compiler._include_text(Compiler c, String target, String path) {
+static String _include_text(Compiler c, String target, String path) {
   String text = NULL;
   if (c.read_source(path, text)) return text;
   $report.driver.include_read(c, target, path);
@@ -884,9 +884,9 @@ void Compiler.configure_package(Compiler c, List roots, String filename) {
    there. It runs in a compiler of its own, with the macro, import, keyword,
    and Lisp state the file's own translation starts with. The includer
    replays the selected public definitions as any later unit would. */
-static List Compiler._walk_cold(
+static List _walk_cold(
   Compiler c, String target, String canonical, Map globs, Map visited) {
-  String text = c._include_text(target, canonical);
+  String text = _include_text(c, target, canonical);
   Compiler file = Compiler.new_shared(c);
   defer c.close_child(file);
   file.interface_provider = 1;
@@ -904,7 +904,7 @@ static List Compiler._walk_cold(
   Map own_visited = {};
   foreach (Var (path, state), visited)
     if (state is <array>) own_visited[path] = state;
-  file._walk_apart(canonical, text, globs.copy(), own_visited);
+  _walk_apart(file, canonical, text, globs.copy(), own_visited);
   c.merge_translation_dependencies(file.deps);
   c.declaration_produced |= file.declaration_produced;
   return _process_cache()[canonical];
@@ -912,11 +912,11 @@ static List Compiler._walk_cold(
 
 /* A cold included file has its own generated spellings. Binding identities
    remain unique across the unit and its pending inline-body parses. */
-static void Compiler._walk_apart(
+static void _walk_apart(
   Compiler c, String path, String text, Map globs, Map visited) {
   ModuleSource module = c.module_source(path, text);
   $let(c.names.counters, {})
-    c._walk_file(path, text, module, Path.dirname(path), globs, visited);
+    _walk_file(c, path, text, module, Path.dirname(path), globs, visited);
 }
 
 /* `covered` is 1 when the file is in the runtime's `lib/` or
@@ -926,7 +926,7 @@ static String _resolve_include(
   int angle, int &covered, FileWalk &?walk) {
   covered = 0;
   if (target.startswith("/")) {
-    if (walk) walk._include_search_dependency(target);
+    if (walk) _include_search_dependency(walk, target);
     return sources.exists(target) ? target : NULL;
   }
   Array dirs = $auto(_include_dirs(
@@ -936,7 +936,7 @@ static String _resolve_include(
     covered = dir == _canonical_lib() || dir == _canonical_include();
     /* The final runtime header adds no symbols, generated or absent. */
     if (i + 1 < dirs.len() || !covered || is_source_file(path))
-      if (walk) walk._include_search_dependency(path);
+      if (walk) _include_search_dependency(walk, path);
     if (!sources.exists(path)) continue;
     return path;
   }
@@ -980,7 +980,7 @@ List Compiler.include_typedef_names(
     c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
   if (!path || !is_source_file(path)) return NULL;
   Array names = [];
-  c._add_typedef_names(names, _canonical_path(path), seen);
+  _add_typedef_names(c, names, _canonical_path(path), seen);
   return names.list_free();
 }
 
@@ -994,15 +994,15 @@ List Compiler.include_type_dependencies(
   if (!path || !is_source_file(path)) return NULL;
   seen[_canonical_path(c.filename)] = 1;
   Array types = [];
-  c._add_type_dependencies(types, _canonical_path(path), seen);
+  _add_type_dependencies(c, types, _canonical_path(path), seen);
   return types.list_free();
 }
 
-static void Compiler._add_type_dependencies(
+static void _add_type_dependencies(
   Compiler c, Array types, String path, Map seen) {
   if (path in seen) return;
   seen[path] = 1;
-  List entry = c._entry(path);
+  List entry = _entry(c, path);
   if (!entry) return;
   foreach (Var part, entry.car())
     match (%($part)) {
@@ -1017,7 +1017,7 @@ static void Compiler._add_type_dependencies(
           }
         }
       case %(?(String include)):
-        c._add_type_dependencies(types, include, seen);
+        _add_type_dependencies(c, types, include, seen);
     }
 }
 
@@ -1031,7 +1031,7 @@ void Compiler.include_function_declarations(
   Compiler c, String target, int angle, Map available) {
   String path = collect_resolve_include(
     c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
-  if (path) c._add_function_declarations(_canonical_path(path), available);
+  if (path) _add_function_declarations(c, _canonical_path(path), available);
 }
 
 /** The runtime umbrella includes each listed module's generated header.
@@ -1041,10 +1041,10 @@ void Compiler.runtime_function_declarations(Compiler c, Map available) {
   Var entry = _process_cache()[path];
   if (entry is not <list>) return;
   foreach (Var part, entry.list().car())
-    if (part is <string>) c._add_function_declarations(part, available);
+    if (part is <string>) _add_function_declarations(c, part, available);
 }
 
-static void Compiler._add_function_declarations(
+static void _add_function_declarations(
   Compiler c, String path, Map available) {
   if (path == _canonical_path(c.filename)) return;
   Var entry = _process_cache()[path];
@@ -1081,7 +1081,7 @@ int Compiler.linked_meta_provider_current(Compiler c, String path) {
   Var current;
   if (linked_providers.try_get(canonical, current)) return current;
   Map seen = {};
-  int valid = c._linked_provider_current(canonical, seen);
+  int valid = _linked_provider_current(c, canonical, seen);
   if (valid)
     foreach (String dependency, seen.keys()) {
       _retain(dependency);
@@ -1094,7 +1094,7 @@ int Compiler.linked_meta_provider_current(Compiler c, String path) {
   return valid;
 }
 
-static int Compiler._linked_provider_current(
+static int _linked_provider_current(
   Compiler c, String path, Map seen) {
   Var current;
   if (linked_providers.try_get(path, current)) return current;
@@ -1103,13 +1103,13 @@ static int Compiler._linked_provider_current(
   List source = linked_meta_provider_source(home_portable_path(path));
   match (source)
     case %(source ?hash ?(List dependencies) *): {
-      if (!c._hash_matches(path, hash)) return 0;
-      Map found = c._read_dependencies(dependencies);
+      if (!_hash_matches(c, path, hash)) return 0;
+      Map found = _read_dependencies(c, dependencies);
       if (found == NULL) return 0;
       foreach (Var (dependency, expected), found)
         if (is_source_file(dependency) && expected is <string> &&
             !String.startswith(expected, "search:") &&
-            !c._linked_provider_current(dependency, seen)) return 0;
+            !_linked_provider_current(c, dependency, seen)) return 0;
       return 1;
     }
   return 0;
@@ -1123,9 +1123,9 @@ int Compiler.linked_meta_definitions_current(Compiler c, String path) {
   String provider = home_portable_path(canonical);
   List source = linked_meta_provider_source(provider);
   match (source) case %(source ?hash *):
-    if (c._hash_matches(canonical, hash)) return 1;
+    if (_hash_matches(c, canonical, hash)) return 1;
   match (source) case %(source ? ? ?(String definitions)): {
-    List entry = c._meta_provider_entry(canonical);
+    List entry = _meta_provider_entry(c, canonical);
     if (!entry) return 0;
     foreach (Var part, entry.car()) {
       if (part is not <map>) continue;
@@ -1140,13 +1140,13 @@ int Compiler.linked_meta_definitions_current(Compiler c, String path) {
 }
 
 /* Metadata lookahead reads declarations and hashes without source effects. */
-static List Compiler._meta_provider_entry(Compiler c, String canonical) {
-  List entry = c._entry(canonical);
+static List _meta_provider_entry(Compiler c, String canonical) {
+  List entry = _entry(c, canonical);
   if (!entry) {
     DiagnosticsHold hold = c.diagnostics.hold();
     $let(c.meta_build, 1) $let(c.signature_only, 1)
     $let(c.recovery_depth, c.recovery_depth + 1) {
-      try entry = c._walk_cold(canonical, canonical, {}, {});
+      try entry = _walk_cold(c, canonical, canonical, {}, {});
       catch %(malformed *): entry = NULL;
     }
     c.diagnostics.release(hold, 0);
@@ -1157,7 +1157,7 @@ static List Compiler._meta_provider_entry(Compiler c, String canonical) {
 /** Completes a linked function's own source hashes before a shallow call.
     A lookahead entry never replaces the file's ordinary contribution. */
 void Compiler.complete_meta_hashes(Compiler c) {
-  List entry = c._meta_provider_entry(_canonical_path(c.filename));
+  List entry = _meta_provider_entry(c, _canonical_path(c.filename));
   if (entry)
     foreach (Var part, entry.car()) {
       if (part is not <map>) continue;
@@ -1176,7 +1176,7 @@ Map Compiler.meta_provider_hashes(Compiler c, String provider) =>
 void Compiler.add_linked_meta_provider_hashes(Compiler c, Map rows) {
   foreach (String path, c.deps.keys()) {
     if (!is_source_file(path)) continue;
-    List entry = c._entry(_canonical_path(path));
+    List entry = _entry(c, _canonical_path(path));
     if (!entry) continue;
     String provider = home_portable_path(_canonical_path(path));
     List proof = NULL;
@@ -1206,18 +1206,18 @@ void Compiler.add_linked_meta_provider_hashes(Compiler c, Map rows) {
     fields unchanged. Native supplier declarations retain their C names. */
 void Compiler.name_meta_provider_bindings(
   Compiler c, String path, int index) {
-  List entry = c._entry(_canonical_path(path));
+  List entry = _entry(c, _canonical_path(path));
   if (!entry) return;
-  foreach (String name, entry.caddr()) c._name_meta_provider(name, index);
+  foreach (String name, entry.caddr()) _name_meta_provider(c, name, index);
   foreach (Var part, entry.car()) {
     if (part is not <map>) continue;
     foreach (Var value, part.map())
       match (value) case %(native-object ?(String name)):
-        c._name_meta_provider(name, index);
+        _name_meta_provider(c, name, index);
   }
 }
 
-static void Compiler._name_meta_provider(
+static void _name_meta_provider(
   Compiler c, String name, int index) {
   if (%($name) in c.sym.file_statics()) return;
   if (name in c.native_meta && c.bind_native_meta(name)) return;
@@ -1233,18 +1233,18 @@ int Compiler.publishes_typedef(Compiler c, String name) {
 
 /** Reports whether this unit's interface publishes the type `family`. */
 int Compiler.publishes_type_family(Compiler c, List family) {
-  List entry = c._entry(_canonical_path(c.filename));
+  List entry = _entry(c, _canonical_path(c.filename));
   if (!entry) return 0;
   foreach (Var part, entry.car())
     if (part is <map> && family in part.map()) return 1;
   return 0;
 }
 
-static void Compiler._add_typedef_names(
+static void _add_typedef_names(
   Compiler c, Array names, String path, Map seen) {
   if (path in seen || _in_runtime(path)) return;
   seen[path] = 1;
-  List entry = c._entry(path);
+  List entry = _entry(c, path);
   if (entry)
     foreach (Var part, entry.car())
       match (%($part)) {
@@ -1253,7 +1253,7 @@ static void Compiler._add_typedef_names(
             match (%($key)) case %((typedef ?(String name))):
               names.push(name);
         case %(?(String include)):
-          c._add_typedef_names(names, include, seen);
+          _add_typedef_names(c, names, include, seen);
       }
 }
 
@@ -1302,8 +1302,8 @@ static String _canonical_cwd(void) {
    lacks while `lib/meta.x` is preloading. That walk's entry for a producing
    file is dropped afterwards, so a later unit walks the file again with the
    builders. */
-static void FileWalk.add_defaults(FileWalk &w) {
-  if (w.c.signature_only || !w.produces()) return;
+static void _add_defaults(FileWalk &w) {
+  if (w.c.signature_only || !_produces(w)) return;
   w.deferred = macro_library_filling();
   if (w.deferred) return;
   Map generated = w.c.select_declaration_defaults(
@@ -1314,7 +1314,7 @@ static void FileWalk.add_defaults(FileWalk &w) {
 
 /* Retain a cold provider's context until every included signature is
    collected. A cycle can refer to a declaration after its include. */
-static void FileWalk.queue_public_bodies(FileWalk &w) {
+static void _queue_public_bodies(FileWalk &w) {
   if (!w.unit || !w.c.interface_provider) return;
   int private_types = 0;
   foreach (Var key, w.statics.keys())
@@ -1341,7 +1341,7 @@ static void FileWalk.queue_public_bodies(FileWalk &w) {
    Included signatures come from the completed graph; effects still install
    at the provider's ordinary include positions. Remove the work before
    replay, because a cold dependency can complete more pending providers. */
-static void Compiler.bind_pending_inline_bodies(
+static void _bind_pending_inline_bodies(
   Compiler c, Map globs, String unit) {
   Array pending = c.pending_inline_bodies;
   if (!pending.len()) return;
@@ -1351,17 +1351,17 @@ static void Compiler.bind_pending_inline_bodies(
     Map visited = {};
     visited[path] = 1;
     Array effects = [];
-    body._replay_cached(
-      body._entry(path), path, symbols, visited, effects);
+    _replay_cached(body,
+      _entry(body, path), path, symbols, visited, effects);
     body.filename = path;
     body.meta_hashes = hashes;
     body.tokenize(text);
     if (markers is not void) body.line_markers = markers;
     List ast = body.full_parse(symbols, 0);
     Map additions = body.inline_type_dependencies(ast);
-    body.publish_inline_dependencies(path, own, statics, additions);
-    foreach (Var part, body._entry(path).car())
-      if (part is <map>) c._merge_rows(globs, part);
+    _publish_inline_dependencies(body, path, own, statics, additions);
+    foreach (Var part, _entry(body, path).car())
+      if (part is <map>) _merge_rows(c, globs, part);
     c.merge_translation_dependencies(body.deps);
     body.public_bodies = 0;
     c.close_child(body);
@@ -1369,11 +1369,11 @@ static void Compiler.bind_pending_inline_bodies(
   Map visited = {};
   visited[unit] = 1;
   Array effects = [];
-  List entry = c._entry(unit);
-  if (entry) c._replay_cached(entry, unit, globs, visited, effects);
+  List entry = _entry(c, unit);
+  if (entry) _replay_cached(c, entry, unit, globs, visited, effects);
 }
 
-static int FileWalk.produces(FileWalk &w) {
+static int _produces(FileWalk &w) {
   foreach (Var part, w.parts) {
     if (part is not <map>) continue;
     foreach (Var value, part.map())
@@ -1386,7 +1386,7 @@ static int FileWalk.produces(FileWalk &w) {
    walk of a file fixes its contribution: a later walk of the same file, such
    as a unit whose text the prelude already covered, does not replace an
    entry that other units may already have replayed. */
-static void FileWalk.publish(FileWalk &w) {
+static void _publish(FileWalk &w) {
   String hash = _content_hash(w.module ? w.module.own : w.text);
   if (w.unit) {
     Map metadata = _cache_map();
@@ -1408,7 +1408,7 @@ static void FileWalk.publish(FileWalk &w) {
     _retain(hash);
   }
   List definitions = _sorted_names(w.definitions);
-  List roots = w.c._interface_include_dirs(w.path);
+  List roots = _interface_include_dirs(w.c, w.path);
   List entry = %($parts $hash $definitions ${w.dependencies} $roots);
   _require_retained(entry.try_own());
   Var prior = _process_cache()[w.path];
@@ -1450,7 +1450,7 @@ static typedef struct ColdConformances {
    translation does, so a unit that includes it reuses the same answer
    whether or not the file's interface was current. The file's own unit
    records them when it translates. */
-static void Compiler._record_cold_conformances(
+static void _record_cold_conformances(
   Compiler c, Map globs, Map visited, String unit) {
   ColdConformances cold = {.c = c};
   defer if (cold.prelude_session) c.close_child(cold.prelude_session);
@@ -1459,37 +1459,37 @@ static void Compiler._record_cold_conformances(
     cold_providers = NULL;
     foreach (Var path, pending.keys()) {
       if (path == unit) continue;
-      Map rows = cold.record(path);
-      if (path in visited) c._merge_rows(globs, rows);
+      Map rows = _record(cold, path);
+      if (path in visited) _merge_rows(c, globs, rows);
     }
   }
 }
 
-static Map ColdConformances.record(ColdConformances &cold, String path) {
-  if (!cold.prelude.symbols) cold.prelude = cold.c._gather_prelude();
+static Map _record(ColdConformances &cold, String path) {
+  if (!cold.prelude.symbols) cold.prelude = _gather_prelude(cold.c);
   if (!(path in cold.prelude.visited)) {
-    Compiler provider = cold.c._cold_provider(path, cold.prelude);
+    Compiler provider = _cold_provider(cold.c, path, cold.prelude);
     defer cold.c.close_child(provider);
-    return provider._record_declared();
+    return _record_declared(provider);
   }
   if (!cold.prelude_session)
-    cold.prelude_session = cold.c._cold_provider(path, cold.prelude);
+    cold.prelude_session = _cold_provider(cold.c, path, cold.prelude);
   cold.prelude_session.filename = path;
-  return cold.prelude_session._record_declared();
+  return _record_declared(cold.prelude_session);
 }
 
 // Every file but `lib/x2c.x`, which declares no adoption, sees the prelude.
-static Gathered Compiler._gather_prelude(Compiler c) {
+static Gathered _gather_prelude(Compiler c) {
   Gathered prelude = {.symbols = {}, .definitions = {}, .visited = {}};
   foreach (String source, compiler_prelude_sources())
-    c._gather(_canonical_path(%"${x2c_get_root()}/$source"), prelude);
+    _gather_declarations(c, _canonical_path(%"${x2c_get_root()}/$source"), prelude);
   return prelude;
 }
 
 /* A compiler of its own for the file at `path` that resolves the adoptions
    visible to it as the file's translation does: it sees the declarations
    of the prelude and of the file's include closure. */
-static Compiler Compiler._cold_provider(
+static Compiler _cold_provider(
   Compiler c, String path, Gathered &prelude) {
   Compiler provider = Compiler.new_shared(c);
   provider.origins = [];
@@ -1499,14 +1499,14 @@ static Compiler Compiler._cold_provider(
     .symbols = prelude.symbols.copy(),
     .definitions = prelude.definitions.copy(),
     .visited = prelude.visited.copy()};
-  provider._gather(path, view);
+  _gather_declarations(provider, path, view);
   provider.fn_defs = view.definitions;
   provider.resolve_as_declared(view.symbols);
   return provider;
 }
 
 // Records the rows of the adoptions the current file declares in its entry.
-static Map Compiler._record_declared(Compiler c) {
+static Map _record_declared(Compiler c) {
   Map rows = c.conformance_rows(c.declared_adoptions());
   c.record_conformance_rows(rows);
   return rows;
@@ -1515,15 +1515,15 @@ static Map Compiler._record_declared(Compiler c) {
 /* Adds the declarations and definitions of the file at `path` and of its
    includes, in source order, without installing their compile-time effects
    again. */
-static void Compiler._gather(Compiler c, String path, Gathered &into) {
+static void _gather_declarations(Compiler c, String path, Gathered &into) {
   if (path in into.visited) return;
   into.visited[path] = 1;
-  List entry = c._entry(path);
+  List entry = _entry(c, path);
   if (!entry) return;
   foreach (Var name, entry.caddr()) into.definitions[name] = 1;
   foreach (Var part, entry.car()) {
     if (part is <map>) into.symbols.merge(part);
-    else if (part is <string>) c._gather(part, into);
+    else if (part is <string>) _gather_declarations(c, part, into);
   }
 }
 
@@ -1594,14 +1594,14 @@ void Compiler.publish_inline_types(Compiler c, List ast) {
   Map additions = c.inline_type_dependencies(ast);
   if (!additions.len()) return;
   String path = _canonical_path(c.filename);
-  c.publish_inline_dependencies(
+  _publish_inline_dependencies(c,
     path, c.sym.unit_symbols(), c.sym.file_statics(), additions);
 }
 
-static void Compiler.publish_inline_dependencies(
+static void _publish_inline_dependencies(
   Compiler c, String path, Map all, Map statics, Map additions) {
   if (!additions.len()) return;
-  List entry = c._entry(path);
+  List entry = _entry(c, path);
   if (!entry) return;
   Map needed = {}, selected = {};
   foreach (Var value, additions) _needed_types(value, all, needed);
@@ -1729,7 +1729,7 @@ List Compiler.declared_adoptions(Compiler c) {
    entries have the same shape and take this same path. Source traversal
    keeps its processed prefix as a cold walk does. An effects array marks
    completed-provider replay for full parsing. */
-static void Compiler._replay_cached(
+static void _replay_cached(
   Compiler c, List entry, String path, Map globs, Map visited,
   Array effects) {
   Array prefix = effects != NULL ? NULL : [];
@@ -1741,25 +1741,25 @@ static void Compiler._replay_cached(
   c.merge_translation_dependencies(entry[3]);
   foreach (Var part, entry.car()) {
     if (part is <map>) {
-      c._merge_rows(globs, part);
+      _merge_rows(c, globs, part);
       c.replay_package_imports(globs, part, effects);
     }
     else if (part is <string>)
-      c._replay_include(part, globs, visited, effects);
+      _replay_include(c, part, globs, visited, effects);
     if (prefix != NULL) prefix.push(part);
   }
   if (prefix != NULL) visited[path] = 1;
 }
 
 /* An included file replays once per unit, from its entry or a cold walk. */
-static void Compiler._replay_include(
+static void _replay_include(
   Compiler c, String path, Map globs, Map visited, Array effects) {
   c.add_translation_dependency(path);
   if (path in visited) return;
   visited[path] = 1;
-  List entry = effects != NULL ? c._entry(path) : c._collection_entry(path);
-  if (!entry) entry = c._walk_cold(path, path, globs, visited);
-  c._replay_cached(entry, path, globs, visited, effects);
+  List entry = effects != NULL ? _entry(c, path) : _collection_entry(c, path);
+  if (!entry) entry = _walk_cold(c, path, path, globs, visited);
+  _replay_cached(c, entry, path, globs, visited, effects);
 }
 
 // package imports
@@ -1784,7 +1784,7 @@ static typedef struct Surface {
 void Compiler.collect_package(Compiler c, String name, Token token) {
   if (name in c.package_roots) return;
   String root = NULL;
-  String entry = c._find_package(name, root, token);
+  String entry = _find_package(c, name, root, token);
   /* The root is registered before the walk, as a package unit's own is
      before its parse, so the walk can tell the package's files apart. */
   c.package_roots[name] = root;
@@ -1794,19 +1794,19 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
   package.interface_provider = 1;
   package.package = name;
   package.filename = entry;
-  c._walk_package(package, entry, token);
+  _walk_package(c, package, entry, token);
   c.fn_defs.merge(package.fn_defs);
   Surface s = {
     .c = c, .name = name, .root = root, .merged = {}, .visited = {},
     .token = token, .exports = []};
   s.visited[entry] = 1;
   c.add_translation_dependency(entry);
-  s.gather(entry, _process_cache()[entry]);
-  s.install();
+  _gather_surface(s, entry, _process_cache()[entry]);
+  _install(s);
   c.package_effects[name] = s.exports.list_free();
 }
 
-static String Compiler._find_package(
+static String _find_package(
   Compiler c, String name, String &root, Token token) {
   String entry = package_entry(c.sources, c.package_dirs, name, root);
   if (entry) return entry;
@@ -1815,37 +1815,37 @@ static String Compiler._find_package(
 
 /* The package's files enter the cache from their entries, or from one cold
    walk in package mode. */
-static void Compiler._walk_package(
+static void _walk_package(
   Compiler c, Compiler package, String entry, Token token) {
   Map globs = c.sym.base_symbols(), visited = {};
   visited[entry] = 1;
-  List cached = package._entry(entry);
+  List cached = _entry(package, entry);
   if (cached) {
-    package._replay_cached(cached, entry, globs, visited, NULL);
+    _replay_cached(package, cached, entry, globs, visited, NULL);
     return;
   }
   String text = NULL;
   if (!package.read_source(entry, text))
     $report.driver.package_read(c, token, package, entry);
-  package._walk_apart(entry, text, globs, visited);
+  _walk_apart(package, entry, text, globs, visited);
 }
 
 /* Replay each package include once and record its dependencies. */
-static void Surface.gather(Surface &s, String path, List entry) {
+static void _gather_surface(Surface &s, String path, List entry) {
   s.c.merge_translation_dependencies(entry[3]);
   foreach (Var part, entry.car())
     match (%($part)) {
-      case %(?(Map rows)): s.merge(path, rows);
-      case %(?(String include)): s.include(include);
+      case %(?(Map rows)): _merge_surface(s, path, rows);
+      case %(?(String include)): _include_surface(s, include);
       default: __builtin_unreachable();
     }
 }
 
-static void Surface.include(Surface &s, String path) {
+static void _include_surface(Surface &s, String path) {
   s.c.add_translation_dependency(path);
   if (path in s.visited) return;
   s.visited[path] = 1;
-  s.gather(path, _process_cache()[path]);
+  _gather_surface(s, path, _process_cache()[path]);
 }
 
 /* The package's `name__` space is visible in the importing unit, and so is
@@ -1855,23 +1855,23 @@ static void Surface.include(Surface &s, String path) {
    static, which keeps C internal linkage and stays home; outside it the file
    escaped the declare-time rewrite and its bare names would merge into the
    consumer's one flat namespace. */
-static void Surface.merge(Surface &s, String path, Map rows) {
+static void _merge_surface(Surface &s, String path, Map rows) {
   String prefix = %"${s.name}__";
   int keeps = _keeps_spellings(path);
   int foreign = !path.startswith(%"${s.root}/");
-  s.take_exports(rows);
+  _take_exports(s, rows);
   foreach (Var (key, value), rows) {
     if (key is not <list> || key.is_nil()) continue;
     String spelling = _package_key_spelling(key);
-    if (_package_protocol_row(key, value)) s.take(rows, key, value);
+    if (_package_protocol_row(key, value)) _take(s, rows, key, value);
     else if (spelling && (keeps || spelling.startswith(prefix)))
-      s.take(rows, key, value);
-    else if (spelling && foreign) s.reject(path, spelling);
+      _take(s, rows, key, value);
+    else if (spelling && foreign) _reject(s, path, spelling);
   }
 }
 
 /* Compile-time definitions follow the package's ordinary include walk. */
-static void Surface.take_exports(Surface &s, Map rows) {
+static void _take_exports(Surface &s, Map rows) {
   Array found = $auto([]);
   foreach (Var (key, value), rows)
     match (%($key $value))
@@ -1882,19 +1882,19 @@ static void Surface.take_exports(Surface &s, Map rows) {
   foreach (List entry, found) s.exports.push(entry.cadr());
 }
 
-static void Surface.take(Surface &s, Map rows, List key, Var value) {
+static void _take(Surface &s, Map rows, List key, Var value) {
   s.merged[key] = value;
   s.c.copy_source_declaration(s.merged, rows, key);
 }
 
-static void Surface.reject(Surface &s, String path, String spelling) {
+static void _reject(Surface &s, String path, String spelling) {
   String name = s.name, unit = path.split("/").last();
   String fix = %"directly, or move it into '$name/src'";
   $report.driver.package_prefix(s.c, s.token, name, spelling, unit, fix);
 }
 
 /* The merged rows enter the importing unit's symbols. */
-static void Surface.install(Surface &s) {
+static void _install(Surface &s) {
   foreach (Var (key, value), s.merged) {
     s.c.sym.set(key, value);
     s.c.copy_source_declaration(s.c.sym.current_symbols(), s.merged, key);
@@ -1960,22 +1960,22 @@ void Compiler.replay_package_imports(
         if (value is not <list> || !value.list() ||
             !(value.list().car() in
               %(package-import compile-time project-meta))) continue;
-        if (exports == NULL || !c._imported_here(path)) {
+        if (exports == NULL || !_imported_here(c, path)) {
           if (!imports) imports = [];
           imports.push(%($path $position $value));
         }
       }
   if (!imports.len()) return;
   imports.sort();
-  c._import_all(globs, imports, exports);
+  _import_all(c, globs, imports, exports);
 }
 
 /* An import the unit itself wrote stays at its own source site. */
-static int Compiler._imported_here(Compiler c, String path) =>
+static int _imported_here(Compiler c, String path) =>
   _canonical_path(home_absolute_path(path)) == _canonical_path(c.filename);
 
 /* The shadow reads the imports as a segment of the unit reads its own. */
-static void Compiler._import_all(
+static void _import_all(
   Compiler c, Map globs, Array imports, Array exports) {
   Compiler shadow = Compiler.new_shared(c);
   defer c.close_child(shadow);
@@ -1987,7 +1987,7 @@ static void Compiler._import_all(
     match (entry) {
       case %(?(String path) ?
              (package-import ?(String name) ?(String alias) ?members)):
-        shadow._import_package(path, name, alias, members, exports);
+        _import_package(shadow, path, name, alias, members, exports);
       case %(? ? (!set ?effect ((!or compile-time project-meta) *))):
         if (exports != NULL) exports.push(effect);
         else shadow.install_compile_time_effects(%($effect));
@@ -1996,7 +1996,7 @@ static void Compiler._import_all(
   c.merge_translation_dependencies(shadow.deps);
 }
 
-static void Compiler._import_package(
+static void _import_package(
   Compiler c, String path, String name, String alias, List members,
   Array effects) {
   c.filename = home_absolute_path(path);
@@ -2020,20 +2020,20 @@ Map Compiler.included_compile_time_effects(Compiler c, Map globs) {
     Array effects = [];
     foreach (String source, compiler_prelude_sources()) {
       String path = _canonical_path(%"${x2c_get_root()}/$source");
-      c._replay_included(globs, path, visited, effects, NULL);
+      _replay_included(c, globs, path, visited, effects, NULL);
     }
     $let(c.builtin_defs, 1)
       c.install_compile_time_effects(effects.list_free());
   }
   String unit = _canonical_path(c.filename);
   visited[unit] = 1;
-  List entry = c._entry(unit);
+  List entry = _entry(c, unit);
   if (!entry) return delivered;
   foreach (Var part, entry.car()) {
     Array exports = [];
     if (part is <map>) c.replay_package_imports(globs, part, exports);
     else if (part is <string>) {
-      c._replay_included(globs, part, visited, exports, NULL);
+      _replay_included(c, globs, part, visited, exports, NULL);
       if (exports.len()) delivered[part] = exports.list_free();
     }
   }
@@ -2041,19 +2041,19 @@ Map Compiler.included_compile_time_effects(Compiler c, Map globs) {
 }
 
 /* Active walks supply their public recorded prefix during an include cycle. */
-static void Compiler._replay_included(
+static void _replay_included(
   Compiler c, Map globs, String path, Map visited, Array exports,
   Map active) {
   if (path in visited) return;
   visited[path] = 1;
   Var prefix = active ? active[path] : void;
-  List entry = prefix is <array> ? NULL : c._entry(path);
+  List entry = prefix is <array> ? NULL : _entry(c, path);
   if (!entry && prefix is not <array>) return;
   List parts = prefix is <array> ? prefix.array().list() : entry.car();
   foreach (Var part, parts) {
     if (part is <map>) c.replay_package_imports(globs, part, exports);
     else if (part is <string>)
-      c._replay_included(globs, part, visited, exports, active);
+      _replay_included(c, globs, part, visited, exports, active);
   }
 }
 
@@ -2117,15 +2117,15 @@ void interface_configure(String out_dir, int cold) {
    record linked into the compiler for a prelude component, else its `.xi`.
    A source under inspection through a SourceView, or a cold process, reads
    neither. */
-static List Compiler._interface_read(Compiler c, String canonical) {
+static List _interface_read(Compiler c, String canonical) {
   if (c.source_facts || !interface_mirror) return NULL;
   List record = _linked_record(canonical);
   if (record) {
-    List entry = c._stored_entry(canonical, record);
+    List entry = _stored_entry(c, canonical, record);
     if (entry) return entry;
   }
   foreach (String path, _interface_candidates(canonical)) {
-    List entry = c._interface_load(canonical, path);
+    List entry = _interface_load(c, canonical, path);
     if (entry) return entry;
   }
   return NULL;
@@ -2152,26 +2152,26 @@ static List _interface_candidates(String canonical) {
    path and hash, and the content hashes of the includes, macros, Lisp, and
    embedded text it depends on, validate. The entry uses process_cache_scope
    ownership and the same ordered parts representation as a cold walk. */
-static List Compiler._interface_load(
+static List _interface_load(
   Compiler c, String canonical, String path) {
   String identity = compiler_identity();
   match (_interface_record(path))
     case %(interface 6 ?(String compiler) *stored):
       if (identity && compiler == identity)
-        return c._stored_entry(canonical, stored);
+        return _stored_entry(c, canonical, stored);
   return NULL;
 }
 
 /* The entry of a stored record whose source, hash, and include roots still
    match `canonical`, or NULL. */
-static List Compiler._stored_entry(Compiler c, String canonical, List stored) {
+static List _stored_entry(Compiler c, String canonical, List stored) {
   match (stored)
     case %(?(String owner) ?(String hash) ?(List parts) ?(List definitions)
            ?(List dependencies) ?(List include_dirs)):
       if (home_absolute_path(owner) == canonical &&
-          c._hash_matches(canonical, hash) &&
-          c._interface_include_dirs(canonical) == include_dirs)
-        return c._interface_entry(
+          _hash_matches(c, canonical, hash) &&
+          _interface_include_dirs(c, canonical) == include_dirs)
+        return _interface_entry(c,
           canonical, hash, parts, definitions, dependencies, include_dirs);
   return NULL;
 }
@@ -2220,15 +2220,15 @@ static void _interface_shutdown(void) {
   linked_providers = NULL;
 }
 
-static int Compiler._hash_matches(Compiler c, String path, Var expected) {
+static int _hash_matches(Compiler c, String path, Var expected) {
   if (expected is not <string>) return 0;
   String hash = String.startswith(expected, "search:") ?
-    c._include_search_hash(path) : c._source_hash(path);
+    _include_search_hash(c, path) : _source_hash(c, path);
   return hash && String.equal(hash, expected);
 }
 
 /* NULL when the source cannot be read. */
-static String Compiler._source_hash(Compiler c, String path) {
+static String _source_hash(Compiler c, String path) {
   Var cached = source_hashes[path];
   if (cached is not void) return cached;
   String text = NULL;
@@ -2245,12 +2245,12 @@ static String Compiler._source_hash(Compiler c, String path) {
 
 /* Rebuild a validated interface's rows as a process cache entry, or return
    NULL when a row is malformed or a dependency has changed. */
-static List Compiler._interface_entry(
+static List _interface_entry(
   Compiler c, String canonical, String hash, List stored_parts,
   List definitions, List stored_dependencies, List include_dirs) {
   Array parts = [];
   if (!_read_parts(parts, stored_parts)) return NULL;
-  Map dependencies = c._read_dependencies(stored_dependencies);
+  Map dependencies = _read_dependencies(c, stored_dependencies);
   if (dependencies == NULL) return NULL;
   foreach (Var definition, definitions)
     if (definition is not <string>) return NULL;
@@ -2299,7 +2299,7 @@ static Map _read_rows(List stored) {
 
 /* Each dependency still hashes as it did when the interface was written; a
    hash of 1 marks a file that is not hashed. */
-static Map Compiler._read_dependencies(Compiler c, List stored) {
+static Map _read_dependencies(Compiler c, List stored) {
   Map dependencies = _cache_map();
   foreach (Var dependency, stored) {
     if (dependency is not <list>) return NULL;
@@ -2309,7 +2309,7 @@ static Map Compiler._read_dependencies(Compiler c, List stored) {
           (name.startswith("cwd:") ? name : home_absolute_path(name)) :
           _canonical_path(home_absolute_path(name));
         int unhashed = hash.is_integer() && hash.integer() == 1;
-        if (!unhashed && !c._hash_matches(path, hash)) return NULL;
+        if (!unhashed && !_hash_matches(c, path, hash)) return NULL;
         _cache_dependency(dependencies, path, hash);
         continue;
       }
@@ -2376,7 +2376,7 @@ static List _stored_record(String canonical, List entry) {
 }
 
 /* Search roots and the file's package mode must match before replay. */
-static List Compiler._interface_include_dirs(
+static List _interface_include_dirs(
   Compiler c, String canonical) {
   Array dirs = [];
   foreach (String dir, c.include_dirs) {
@@ -2389,7 +2389,7 @@ static List Compiler._interface_include_dirs(
   String root = package_directory(c.package_source_dirs, canonical);
   String package = root && package_source(root, canonical)
                  ? Path.basename(root)
-                 : c._package_owns(canonical) ? c.package : NULL;
+                 : _package_owns(c, canonical) ? c.package : NULL;
   dirs.push(
     is_source_file(canonical) && package ? %(package $package) : %(package));
   return dirs.list_free();
@@ -2463,7 +2463,7 @@ Map Compiler.linked_prelude_records(Compiler c) {
       String canonical = _canonical_path(path);
       Map visited = {};
       visited[canonical] = 1;
-      walker._walk_apart(canonical, walker._runtime_text(path), {}, visited);
+      _walk_apart(walker, canonical, _runtime_text(walker, path), {}, visited);
       String text = _record_text(
         _stored_record(canonical, _process_cache()[canonical]));
       if (text) records[home_portable_path(canonical)] = text;

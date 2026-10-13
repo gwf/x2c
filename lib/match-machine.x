@@ -21,21 +21,21 @@
 
 // operands
 
-static List *MatchMachine._cursor(MatchMachine &m, int reg) =>
+static List *_cursor(MatchMachine &m, int reg) =>
   &m.regs[m.fp].cursors[reg];
 
-static int *MatchMachine._distance(MatchMachine &m, int reg) =>
+static int *_distance(MatchMachine &m, int reg) =>
   &m.regs[m.fp].distances[reg];
 
-static int *MatchMachine._int_reg(MatchMachine &m, int reg) =>
+static int *_int_reg(MatchMachine &m, int reg) =>
   &m.regs[m.fp].ints[reg];
 
-static MachineMark *MatchMachine._mark(MatchMachine &m) => &m.regs[m.fp].mark;
+static MachineMark *_mark(MatchMachine &m) => &m.regs[m.fp].mark;
 
-static Var MatchMachine._const(MatchMachine &m, int index) =>
+static Var _const(MatchMachine &m, int index) =>
   m.program.consts[index];
 
-static void MatchMachine._clear_registers(MatchMachine &m, int depth) {
+static void _clear_registers(MatchMachine &m, int depth) {
   memset(&m.regs[depth], 0, sizeof(MachineRegs));
 }
 
@@ -53,62 +53,62 @@ void MatchMachine.run(MatchMachine &m) {
    marked running. */
 int MatchMachine.step(MatchMachine &m) {
   if (!m.running) return 0;
-  m._execute(m.program.code[m.pc++]);
+  _execute(m, m.program.code[m.pc++]);
   return m.running;
 }
 
-static void MatchMachine._execute(MatchMachine &m, const MachineWord &w) {
+static void _execute(MatchMachine &m, const MachineWord &w) {
   switch (w.op) {
     case MW_EQ_VALUE_CONST:
-      if (!_equal(w.d, m.value, m._const(w.a))) m.pc = w.target;
+      if (!_equal(w.d, m.value, _const(m, w.a))) m.pc = w.target;
       break;
     case MW_EQ_VALUE_BITS:
-      if (m.value.u64 != m._const(w.a).u64) m.pc = w.target;
+      if (m.value.u64 != _const(m, w.a).u64) m.pc = w.target;
       break;
-    case MW_INPUT_LIST: if (!m._enter(w.a, m.value)) m.pc = w.target; break;
-    case MW_NONNIL: if (!*m._cursor(w.a)) m.pc = w.target; break;
-    case MW_NIL: if (*m._cursor(w.a)) m.pc = w.target; break;
-    case MW_CALL: m._call(w); break;
+    case MW_INPUT_LIST: if (!_enter(m, w.a, m.value)) m.pc = w.target; break;
+    case MW_NONNIL: if (!*_cursor(m, w.a)) m.pc = w.target; break;
+    case MW_NIL: if (*_cursor(m, w.a)) m.pc = w.target; break;
+    case MW_CALL: _call(m, w); break;
     case MW_BR_FAIL: if (m.status != <ok>) m.pc = w.target; break;
     case MW_JUMP: m.pc = w.target; break;
-    case MW_ADVANCE: if (!m._advance(w.a)) m._error(<advance>); break;
+    case MW_ADVANCE: if (!_advance(m, w.a)) _error(m, <advance>); break;
     case MW_ADVANCE_OPTIONAL:
-      if (!m._advance(w.a)) *m._int_reg(w.b) = 0;
+      if (!_advance(m, w.a)) *_int_reg(m, w.b) = 0;
       break;
-    case MW_MOVE: m._move(w); break;
-    case MW_OFFSET: m._offset(w); break;
-    case MW_DESCEND: m._descend(w); break;
-    case MW_SCAN: m._scan(w); break;
-    case MW_SET_ACTIVE: *m._int_reg(w.a) = w.b; break;
-    case MW_REQUIRE_ACTIVE: if (!*m._int_reg(w.a)) m.pc = w.target; break;
-    case MW_MARK: m._mark().undo_count = m.undo_count; break;
-    case MW_ROLLBACK: m._restore(w); break;
+    case MW_MOVE: _move(m, w); break;
+    case MW_OFFSET: _offset(m, w); break;
+    case MW_DESCEND: _descend(m, w); break;
+    case MW_SCAN: _scan(m, w); break;
+    case MW_SET_ACTIVE: *_int_reg(m, w.a) = w.b; break;
+    case MW_REQUIRE_ACTIVE: if (!*_int_reg(m, w.a)) m.pc = w.target; break;
+    case MW_MARK: _mark(m).undo_count = m.undo_count; break;
+    case MW_ROLLBACK: _restore(m, w); break;
     case MW_SLOT_VALID:
       if (m.slots[w.a].kind != MACHINE_SLOT_INVALID) m.pc = w.target;
       break;
     case MW_SLOT_IS_SPAN:
       if (m.slots[w.a].kind == MACHINE_SLOT_SPAN) m.pc = w.target;
       break;
-    case MW_SLOT_SET_VALUE: m._set_value(w.a, m.value, w.b); break;
-    case MW_SLOT_SET_SPAN: m._set_span(w); break;
+    case MW_SLOT_SET_VALUE: _set_value(m, w.a, m.value, w.b); break;
+    case MW_SLOT_SET_SPAN: _set_span(m, w); break;
     case MW_SLOT_EQ_VALUE:
-      if (!m._value_equal(w.a, m.value)) m.pc = w.target;
+      if (!_value_equal(m, w.a, m.value)) m.pc = w.target;
       break;
-    case MW_SLOT_EQ_PREFIX: m._eq_prefix(w); break;
+    case MW_SLOT_EQ_PREFIX: _eq_prefix(m, w); break;
     case MW_SLOT_EQ_FINAL_IDENTITY:
-      if (!m._sequence_equal(w.a, *m._cursor(w.b), 0, 1)) m.pc = w.target;
+      if (!_sequence_equal(m, w.a, *_cursor(m, w.b), 0, 1)) m.pc = w.target;
       break;
-    case MW_CURSOR_VALUE: m._cursor_value(w); break;
-    case MW_EQ_HEAD_CONST: m._eq_head(w); break;
-    case MW_BIND_HEAD: m._bind_head(w); break;
-    case MW_SKIP_HEAD: if (!m._advance(w.b)) m.pc = w.target; break;
-    case MW_RET_SUCCESS: m._return(<ok>); break;
-    case MW_RET_FAILURE: m._return(<fail>); break;
-    case MW_TAG: m._tag(w); break;
+    case MW_CURSOR_VALUE: _cursor_value(m, w); break;
+    case MW_EQ_HEAD_CONST: _eq_head(m, w); break;
+    case MW_BIND_HEAD: _bind_head(m, w); break;
+    case MW_SKIP_HEAD: if (!_advance(m, w.b)) m.pc = w.target; break;
+    case MW_RET_SUCCESS: _return(m, <ok>); break;
+    case MW_RET_FAILURE: _return(m, <fail>); break;
+    case MW_TAG: _tag(m, w); break;
     case MW_MATCH_KIND:
       if (!_is_kind(m.value, w.b)) m.pc = w.target;
       break;
-    default: m._error(<bad-word>);
+    default: _error(m, <bad-word>);
   }
 }
 
@@ -118,8 +118,8 @@ static void MatchMachine._execute(MatchMachine &m, const MachineWord &w) {
 static int _equal(int mode, Var left, Var right) =>
   mode == MACHINE_COMPARE_BITS ? left.u64 == right.u64 : left.equal(right);
 
-static void MatchMachine._tag(MatchMachine &m, const MachineWord &w) {
-  Symbol tag = m._const(w.a);
+static void _tag(MatchMachine &m, const MachineWord &w) {
+  Symbol tag = _const(m, w.a);
   if (m.value is not tag) m.pc = w.target;
 }
 
@@ -140,46 +140,46 @@ static int _is_kind(Var value, int kind) {
 
 /* Starts cursor `reg` on the List the optional view shows for `input`, or
    returns 0 when that is not a List. */
-static int MatchMachine._enter(MatchMachine &m, int reg, Var input) {
+static int _enter(MatchMachine &m, int reg, Var input) {
   Var seen = m.view ? m.view(input) : input;
   if (seen is not <list>) return 0;
-  *m._cursor(reg) = seen;
-  *m._distance(reg) = 0;
+  *_cursor(m, reg) = seen;
+  *_distance(m, reg) = 0;
   return 1;
 }
 
 /* Moves cursor `reg` one cell, or returns 0 when it is empty. */
-static int MatchMachine._advance(MatchMachine &m, int reg) {
-  List at = *m._cursor(reg);
+static int _advance(MatchMachine &m, int reg) {
+  List at = *_cursor(m, reg);
   if (!at) return 0;
-  m._skip(reg, at);
+  _skip(m, reg, at);
   return 1;
 }
 
-static void MatchMachine._move(MatchMachine &m, const MachineWord &w) {
-  *m._cursor(w.a) = *m._cursor(w.b);
-  *m._distance(w.a) = *m._distance(w.b);
+static void _move(MatchMachine &m, const MachineWord &w) {
+  *_cursor(m, w.a) = *_cursor(m, w.b);
+  *_distance(m, w.a) = *_distance(m, w.b);
 }
 
 /* Advances cursor `a` by up to `b` cells. */
-static void MatchMachine._offset(MatchMachine &m, const MachineWord &w) {
-  for (int n = 0; n < w.b; n++) if (!m._advance(w.a)) return;
+static void _offset(MatchMachine &m, const MachineWord &w) {
+  for (int n = 0; n < w.b; n++) if (!_advance(m, w.a)) return;
 }
 
 /* Enters the List at the head of cursor `b` through `c`, the bank's next
    register. No call frame is pushed. */
-static void MatchMachine._descend(MatchMachine &m, const MachineWord &w) {
-  List at = *m._cursor(w.b);
-  if (!at || !m._enter(w.c, at.car())) m.pc = w.target;
+static void _descend(MatchMachine &m, const MachineWord &w) {
+  List at = *_cursor(m, w.b);
+  if (!at || !_enter(m, w.c, at.car())) m.pc = w.target;
 }
 
 /* The split and probe cursors advance in lockstep until the probe finds
    the anchor or runs off the end of the input. Both cursors and both
    distances remain visible afterward. */
-static void MatchMachine._scan(MatchMachine &m, const MachineWord &w) {
-  List split = *m._cursor(w.a), probe = *m._cursor(w.b);
-  int split_distance = *m._distance(w.a), probe_distance = *m._distance(w.b);
-  Var anchor = m._const(w.c);
+static void _scan(MatchMachine &m, const MachineWord &w) {
+  List split = *_cursor(m, w.a), probe = *_cursor(m, w.b);
+  int split_distance = *_distance(m, w.a), probe_distance = *_distance(m, w.b);
+  Var anchor = _const(m, w.c);
   while (probe) {
     if (m.stats) m.stats.scan_cells++;
     if (_equal(w.d, probe.car(), anchor)) break;
@@ -188,24 +188,24 @@ static void MatchMachine._scan(MatchMachine &m, const MachineWord &w) {
     split_distance++;
     probe_distance++;
   }
-  *m._cursor(w.a) = split;
-  *m._cursor(w.b) = probe;
-  *m._distance(w.a) = split_distance;
-  *m._distance(w.b) = probe_distance;
+  *_cursor(m, w.a) = split;
+  *_cursor(m, w.b) = probe;
+  *_distance(m, w.a) = split_distance;
+  *_distance(m, w.b) = probe_distance;
   if (!probe) m.pc = w.target;
 }
 
 /* Makes cursor `a` the current value; a nonzero `b` counts the shared List
    as a materialization avoided. */
-static void MatchMachine._cursor_value(MatchMachine &m, const MachineWord &w) {
-  m.value = *m._cursor(w.a);
-  if (w.b) m._count_share();
+static void _cursor_value(MatchMachine &m, const MachineWord &w) {
+  m.value = *_cursor(m, w.a);
+  if (w.b) _count_share(m);
 }
 
 /* Moves cursor `reg` past the head of `at`, the List it holds. */
-static void MatchMachine._skip(MatchMachine &m, int reg, List at) {
-  *m._cursor(reg) = at.cdr();
-  (*m._distance(reg))++;
+static void _skip(MatchMachine &m, int reg, List at) {
+  *_cursor(m, reg) = at.cdr();
+  (*_distance(m, reg))++;
 }
 
 /* calls
@@ -215,32 +215,32 @@ static void MatchMachine._skip(MatchMachine &m, int reg, List at) {
 
 /* Calls the subprogram at `a` on the value `b` selects: the current value,
    or cursor `c` or its head, read from the caller's bank. */
-static void MatchMachine._call(MatchMachine &m, const MachineWord &w) {
+static void _call(MatchMachine &m, const MachineWord &w) {
   Var argument = m.value;
   if (w.b == MACHINE_CALL_HEAD) {
-    List at = *m._cursor(w.c);
+    List at = *_cursor(m, w.c);
     if (!at) {
-      m._error(<call-head>);
+      _error(m, <call-head>);
       return;
     }
     argument = at.car();
   }
-  else if (w.b == MACHINE_CALL_CURSOR) argument = *m._cursor(w.c);
-  m._push_frame(argument, w.a);
+  else if (w.b == MACHINE_CALL_CURSOR) argument = *_cursor(m, w.c);
+  _push_frame(m, argument, w.a);
 }
 
 /* Saves the caller's state in a new frame and continues at `entry` on
    `argument`. */
-static void MatchMachine._push_frame(
+static void _push_frame(
   MatchMachine &m, Var argument, int entry) {
   if (m.fp + 1 >= MACHINE_FRAME_MAX) {
-    m._error(<frame-max>);
+    _error(m, <frame-max>);
     return;
   }
   m.frames[m.fp++] = (MatchFrame) {m.pc, m.current_entry_undo, m.value};
-  m._clear_registers(m.fp);
+  _clear_registers(m, m.fp);
   m.current_entry_undo = m.undo_count;
-  m._count_call();
+  _count_call(m);
   m.value = argument;
   m.pc = entry;
 }
@@ -248,16 +248,16 @@ static void MatchMachine._push_frame(
 /* Returns from the current subprogram with <ok> or <fail>. A failure rolls
    back to the subprogram's entry position, and the root's return stops the
    machine. */
-static void MatchMachine._return(MatchMachine &m, Symbol status) {
-  if (status == <fail>) m._rollback(m.current_entry_undo);
+static void _return(MatchMachine &m, Symbol status) {
+  if (status == <fail>) _rollback(m, m.current_entry_undo);
   m.status = status;
   if (m.stats) m.stats.returns++;
-  m._clear_registers(m.fp);
-  if (m.fp) m._pop_frame();
+  _clear_registers(m, m.fp);
+  if (m.fp) _pop_frame(m);
   else m.running = 0;
 }
 
-static void MatchMachine._pop_frame(MatchMachine &m) {
+static void _pop_frame(MatchMachine &m) {
   assert(m.fp > 0);
   MatchFrame *frame = &m.frames[--m.fp];
   m.pc = frame.return_pc;
@@ -273,31 +273,31 @@ static void MatchMachine._pop_frame(MatchMachine &m) {
 
 /* Captures `value` in slot `index`. The slot must be unset or, with
    `replace_span`, hold the span whose materialized List `value` memoizes. */
-static void MatchMachine._set_value(
+static void _set_value(
   MatchMachine &m, int index, Var value, int replace_span) {
   MachineSlot capture = {.kind = MACHINE_SLOT_VALUE, .value = value};
   MachineSlotKind expected =
     replace_span ? MACHINE_SLOT_SPAN : MACHINE_SLOT_INVALID;
-  if (m.slots[index].kind != expected) m._error(<slot-state>);
-  else m._journal(index, capture);
+  if (m.slots[index].kind != expected) _error(m, <slot-state>);
+  else _journal(m, index, capture);
 }
 
 /* Captures the cells from cursor `b` to cursor `c` in the unset slot `a` as
    a borrowed span. */
-static void MatchMachine._set_span(MatchMachine &m, const MachineWord &w) {
-  int length = *m._distance(w.c) - *m._distance(w.b);
+static void _set_span(MatchMachine &m, const MachineWord &w) {
+  int length = *_distance(m, w.c) - *_distance(m, w.b);
   MachineSlot capture = {
     .kind = MACHINE_SLOT_SPAN,
-    .span = (MachineSpan) {*m._cursor(w.b), *m._cursor(w.c), length}};
+    .span = (MachineSpan) {*_cursor(m, w.b), *_cursor(m, w.c), length}};
   if (m.stats) m.stats.span_descriptors++;
-  if (m.slots[w.a].kind != MACHINE_SLOT_INVALID) m._error(<slot-state>);
-  else m._journal(w.a, capture);
+  if (m.slots[w.a].kind != MACHINE_SLOT_INVALID) _error(m, <slot-state>);
+  else _journal(m, w.a, capture);
 }
 
-static void MatchMachine._journal(
+static void _journal(
   MatchMachine &m, int index, MachineSlot capture) {
   if (m.undo_count >= MACHINE_UNDO_MAX) {
-    m._error(<undo-max>);
+    _error(m, <undo-max>);
     return;
   }
   MachineUndo *entry = &m.undo[m.undo_count++];
@@ -306,7 +306,7 @@ static void MatchMachine._journal(
   m.slots[index] = capture;
 }
 
-static void MatchMachine._rollback(MatchMachine &m, int mark) {
+static void _rollback(MatchMachine &m, int mark) {
   while (m.undo_count > mark) {
     MachineUndo undo = m.undo[--m.undo_count];
     m.slots[undo.slot] = undo.prior;
@@ -315,12 +315,12 @@ static void MatchMachine._rollback(MatchMachine &m, int mark) {
 
 /* Rolls back to the frame's mark; `b` tells a measured retry from an
    ordinary restore. */
-static void MatchMachine._restore(MatchMachine &m, const MachineWord &w) {
-  m._rollback(m._mark().undo_count);
+static void _restore(MatchMachine &m, const MachineWord &w) {
+  _rollback(m, _mark(m).undo_count);
   if (m.stats && w.b == MACHINE_ROLLBACK_RETRY) m.stats.retries++;
 }
 
-static int MatchMachine._value_equal(MatchMachine &m, int index, Var value) {
+static int _value_equal(MatchMachine &m, int index, Var value) {
   MachineSlot *slot = &m.slots[index];
   if (slot.kind != MACHINE_SLOT_VALUE) return 0;
   if (m.relation)
@@ -329,9 +329,9 @@ static int MatchMachine._value_equal(MatchMachine &m, int index, Var value) {
 }
 
 /* Compares slot `a` with the cells from cursor `b` to cursor `c`. */
-static void MatchMachine._eq_prefix(MatchMachine &m, const MachineWord &w) {
-  int length = *m._distance(w.c) - *m._distance(w.b);
-  if (!m._sequence_equal(w.a, *m._cursor(w.b), length, 0)) m.pc = w.target;
+static void _eq_prefix(MatchMachine &m, const MachineWord &w) {
+  int length = *_distance(m, w.c) - *_distance(m, w.b);
+  if (!_sequence_equal(m, w.a, *_cursor(m, w.b), length, 0)) m.pc = w.target;
 }
 
 /* Compares slot `index` with the first `length` cells of `input`, or with
@@ -339,7 +339,7 @@ static void MatchMachine._eq_prefix(MatchMachine &m, const MachineWord &w) {
    materializes both sides once; the default path keeps the allocation-free
    span comparison. Both sequence words call this one function, so the C
    compiler does not inline its relation path into the interpreter loop. */
-static int MatchMachine._sequence_equal(
+static int _sequence_equal(
   MatchMachine &m, int index, List input, int length, int final) {
   MachineSlot *slot = &m.slots[index];
   if (!m.relation)
@@ -365,20 +365,20 @@ static int MatchMachine._sequence_equal(
    child a CALL frame would execute against the cursor head, and the
    ADVANCE. Journal and comparison behavior matches the framed lowering. */
 
-static void MatchMachine._eq_head(MatchMachine &m, const MachineWord &w) {
-  List at = *m._cursor(w.b);
-  if (at && _equal(w.d, at.car(), m._const(w.a))) m._skip(w.b, at);
+static void _eq_head(MatchMachine &m, const MachineWord &w) {
+  List at = *_cursor(m, w.b);
+  if (at && _equal(w.d, at.car(), _const(m, w.a))) _skip(m, w.b, at);
   else m.pc = w.target;
 }
 
-static void MatchMachine._bind_head(MatchMachine &m, const MachineWord &w) {
-  List at = *m._cursor(w.b);
+static void _bind_head(MatchMachine &m, const MachineWord &w) {
+  List at = *_cursor(m, w.b);
   if (!at) m.pc = w.target;
   else if (m.slots[w.a].kind == MACHINE_SLOT_INVALID) {
-    m._set_value(w.a, at.car(), 0);
-    if (m.status != <error>) m._skip(w.b, at);
+    _set_value(m, w.a, at.car(), 0);
+    if (m.status != <error>) _skip(m, w.b, at);
   }
-  else if (m._value_equal(w.a, at.car())) m._skip(w.b, at);
+  else if (_value_equal(m, w.a, at.car())) _skip(m, w.b, at);
   else m.pc = w.target;
 }
 
@@ -391,22 +391,22 @@ static void MatchMachine._bind_head(MatchMachine &m, const MachineWord &w) {
 List MatchMachine.materialize_span(MatchMachine &m, MachineSpan span) {
   if (m.stats) m.stats.materialization_requests++;
   if (!span.end) {
-    m._count_share();
+    _count_share(m);
     return span.begin;
   }
-  if (span.length && !m._copy_span(span)) {
-    m._error(<bad-span>);
+  if (span.length && !_copy_span(m, span)) {
+    _error(m, <bad-span>);
     return NULL;
   }
-  List out = m._cons_scratch(span.length);
+  List out = _cons_scratch(m, span.length);
   if (m.stats) m.stats.materialization_completions++;
   return out;
 }
 
 /* Copies the span's cells into scratch, or returns 0 when its List ends
    early or at a cell other than `end`. */
-static int MatchMachine._copy_span(MatchMachine &m, MachineSpan span) {
-  m._ensure_scratch(span.length);
+static int _copy_span(MatchMachine &m, MachineSpan span) {
+  _ensure_scratch(m, span.length);
   List at = span.begin;
   for (int i = 0; i < span.length; i++) {
     if (!at) return 0;
@@ -417,7 +417,7 @@ static int MatchMachine._copy_span(MatchMachine &m, MachineSpan span) {
   return at == span.end;
 }
 
-static void MatchMachine._ensure_scratch(MatchMachine &m, int length) {
+static void _ensure_scratch(MatchMachine &m, int length) {
   if (length <= m.scratch_capacity) return;
   int capacity = m.scratch_capacity ? m.scratch_capacity : 16;
   while (capacity < length) capacity *= 2;
@@ -426,7 +426,7 @@ static void MatchMachine._ensure_scratch(MatchMachine &m, int length) {
   m.scratch_capacity = capacity;
 }
 
-static List MatchMachine._cons_scratch(MatchMachine &m, int length) {
+static List _cons_scratch(MatchMachine &m, int length) {
   List out = NULL;
   for (int i = length; i; i--) {
     if (m.stats) m.stats.cons_requests++;
@@ -440,22 +440,22 @@ static List MatchMachine._cons_scratch(MatchMachine &m, int length) {
 /* A code reaches the caller as the `reason` detail of the Machine invariant
    and is told apart by comparison. Each one stays within the ten alphabet
    characters a compact Symbol holds. */
-static void MatchMachine._error(MatchMachine &m, Symbol code) {
-  m._rollback(0);
-  m._clear_frames();
+static void _error(MatchMachine &m, Symbol code) {
+  _rollback(m, 0);
+  _clear_frames(m);
   m.current_entry_undo = 0;
   m.error = code;
   m.status = <error>;
   m.running = 0;
 }
 
-static void MatchMachine._count_call(MatchMachine &m) {
+static void _count_call(MatchMachine &m) {
   if (!m.stats) return;
   m.stats.calls++;
   if (m.fp + 1 > m.stats.max_frames) m.stats.max_frames = m.fp + 1;
 }
 
-static void MatchMachine._count_share(MatchMachine &m) {
+static void _count_share(MatchMachine &m) {
   if (!m.stats) return;
   m.stats.direct_shares++;
   m.stats.materializations_avoided++;
@@ -490,7 +490,7 @@ void MatchMachine.open(MatchMachine &m) {
    slots are initialized. A dirty machine records <not-idle> and stops. */
 void MatchMachine.begin(MatchMachine &m, MachineView program, Var input) {
   if (m.running || m.undo_count || m.fp) {
-    m._error(<not-idle>);
+    _error(m, <not-idle>);
     return;
   }
   m.program = program;
@@ -501,9 +501,9 @@ void MatchMachine.begin(MatchMachine &m, MachineView program, Var input) {
   m.error = void;
   m.current_entry_undo = 0;
   m.slot_count = program.binder_count;
-  m._clear_slots();
-  m._clear_registers(0);
-  m._count_call();
+  _clear_slots(m);
+  _clear_registers(m, 0);
+  _count_call(m);
 }
 
 /* Return a stopped invocation to idle and clear its borrowed execution state.
@@ -512,8 +512,8 @@ void MatchMachine.begin(MatchMachine &m, MachineView program, Var input) {
    Raises: `<bad-state>` when execution is still running. */
 void MatchMachine.finish(MatchMachine &m) {
   if (m.running) raise %(bad-state (operation "MatchMachine.finish"));
-  m._clear_slots();
-  m._clear_frames();
+  _clear_slots(m);
+  _clear_frames(m);
   m.slot_count = 0;
   m.undo_count = 0;
   m.current_entry_undo = 0;
@@ -584,7 +584,7 @@ void MatchMachine.release_spares(void) {
     free(machine_thread.spares[--machine_thread.count]);
 }
 
-static void MatchMachine._clear_slots(MatchMachine &m) {
+static void _clear_slots(MatchMachine &m) {
   for (int i = 0; i < m.slot_count; i++) {
     memset(&m.slots[i], 0, sizeof(MachineSlot));
     m.slots[i].kind = MACHINE_SLOT_INVALID;
@@ -592,7 +592,7 @@ static void MatchMachine._clear_slots(MatchMachine &m) {
 }
 
 /* Clears every active frame's register bank and returns to the root frame. */
-static void MatchMachine._clear_frames(MatchMachine &m) {
-  for (int depth = 0; depth <= m.fp; depth++) m._clear_registers(depth);
+static void _clear_frames(MatchMachine &m) {
+  for (int depth = 0; depth <= m.fp; depth++) _clear_registers(m, depth);
   m.fp = 0;
 }
