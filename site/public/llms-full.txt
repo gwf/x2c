@@ -163,8 +163,8 @@ Initializers, assignments, typed arguments, and returns can call converters.
 For example, `Var v = 42;` boxes, while a supported typed destination unboxes
 or converts. This is not a promise that every pair converts or that extraction
 validates a custom value. Test dynamic tags with `is` when the input is mixed.
-A `String` destination renders a value; `.string()` extracts a `String`
-payload and raises for another tag.
+A `String` destination renders a value. An explicit reader such as
+`.string()` or `.list()` extracts its payload and raises for another tag.
 
 Three distinctions matter immediately:
 
@@ -5274,6 +5274,10 @@ These explicit calls differ from the implicit crossing and are not reported:
   formats render a `Var` through `Var.str`, which displays any value. The
   implicit crossing to `String` displays any value but `void`, which it
   reads as NULL, while `.string()` reads the String payload and raises
+  `<no-convert>` for another tag.
+- An explicit reader such as `.list()` or `.map()` at a destination of its
+  type. The implicit crossing reads the payload or NULL through
+  `Var.list_payload` and its relatives, while the explicit reader raises
   `<no-convert>` for another tag.
 - A `Var` read into a numeric type other than `Symbol`, such as `v.int()` or
   `v.integer()`. The implicit crossing calls `Var.convert` and then reads the

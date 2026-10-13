@@ -26,9 +26,8 @@ The `Var` encoding every runtime module shares.
 | [`String.truth`](#String.truth) | Returns nonzero when `string` contains at least one byte. |
 | [`String.var`](#String.var) | Boxes a `String` value as `Var`. |
 | [`Symbol.var`](#Symbol.var) | Boxes a `Symbol` value as `Var`. |
-| [`Var.array`](#Var.array) | Extracts the `Array` payload of `value`, or NULL for another tag. |
-| [`Var.as_iter`](#Var.as_iter) | Extracts the `Iter` payload of `value`, or NULL for another tag. |
-| [`Var.block`](#Var.block) | Extracts the `Block` payload of `value`, or NULL for another tag. |
+| [`Var.array_payload`](#Var.array_payload) | Extracts the `Array` payload of `value`, or NULL for another tag. |
+| [`Var.block_payload`](#Var.block_payload) | Extracts the `Block` payload of `value`, or NULL for another tag. |
 | [`Var.box_f32`](#Var.box_f32) | Boxes a native `float` as an immediate `<f32>` `Var`. |
 | [`Var.box_f64`](#Var.box_f64) | Boxes a native `double` as an immediate `<f64>` `Var`. |
 | [`Var.box_i16`](#Var.box_i16) | Boxes a native `short` as an immediate `<i16>` `Var`. |
@@ -37,22 +36,23 @@ The `Var` encoding every runtime module shares.
 | [`Var.box_u16`](#Var.box_u16) | Boxes a native `ushort` as an immediate `<u16>` `Var`. |
 | [`Var.box_u32`](#Var.box_u32) | Boxes a native `uint` as an immediate `<u32>` `Var`. |
 | [`Var.box_u8`](#Var.box_u8) | Boxes a native `uchar` as an immediate `<u8>` `Var`. |
-| [`Var.buffer`](#Var.buffer) | Extracts the `Buffer` payload of `value`, or NULL for another tag. |
-| [`Var.bytes`](#Var.bytes) | Extracts the `Bytes` payload of `value`, or NULL for another tag. |
+| [`Var.buffer_payload`](#Var.buffer_payload) | Extracts the `Buffer` payload of `value`, or NULL for another tag. |
+| [`Var.bytes_payload`](#Var.bytes_payload) | Extracts the `Bytes` payload of `value`, or NULL for another tag. |
 | [`Var.char`](#Var.char) | Returns `x` as a native `char` under the `Var.convert` rules. |
 | [`Var.decode_f32`](#Var.decode_f32) | Decodes an immediate `<f32>` `Var`. |
 | [`Var.decode_f64`](#Var.decode_f64) | Decodes an immediate `<f64>` `Var`. |
 | [`Var.double`](#Var.double) | Returns `x` as a native `double` under the `Var.convert` rules. |
-| [`Var.file`](#Var.file) | Extracts the `File` payload of `value`, or NULL for another tag. |
+| [`Var.file_payload`](#Var.file_payload) | Extracts the `File` payload of `value`, or NULL for another tag. |
 | [`Var.float`](#Var.float) | Returns `x` as a native `float` under the `Var.convert` rules. |
 | [`Var.int`](#Var.int) | Returns `x` as a native `int` under the `Var.convert` rules. |
 | [`Var.is_row`](#Var.is_row) | Reports whether `value` occupies the encoding row at `top`/`bottom`. |
 | [`Var.is_wide`](#Var.is_wide) | Reports whether `v` uses a scope-owned wide numeric box. |
-| [`Var.list`](#Var.list) | Extracts the `List` payload of `value`, or NULL for another tag. |
+| [`Var.iter_payload`](#Var.iter_payload) | Extracts the `Iter` payload of `value`, or NULL for another tag. |
+| [`Var.list_payload`](#Var.list_payload) | Extracts the `List` payload of `value`, or NULL for another tag. |
 | [`Var.long`](#Var.long) | Returns `x` as a native `long` under the `Var.convert` rules. |
 | [`Var.long_double`](#Var.long_double) | Returns `x` as a native `long double` under the `Var.convert` rules. |
 | [`Var.long_long`](#Var.long_long) | Returns `x` as a native `long long` under the `Var.convert` rules. |
-| [`Var.map`](#Var.map) | Extracts the `Map` payload of `value`, or NULL for another tag. |
+| [`Var.map_payload`](#Var.map_payload) | Extracts the `Map` payload of `value`, or NULL for another tag. |
 | [`Var.payload32`](#Var.payload32) | Returns the low 32 payload bits of an immediate `Var`. |
 | [`Var.short`](#Var.short) | Returns `x` as a native `short` under the `Var.convert` rules. |
 | [`Var.string_payload`](#Var.string_payload) | Extracts the `String` payload of `value`, or NULL for another tag. |
@@ -269,32 +269,23 @@ Source: `lib/common.x:568`
 
 ### `Var`
 
-<a id="Var.array"></a>
-#### Var.array
+<a id="Var.array_payload"></a>
+#### Var.array_payload
 
-`Array Var.array(Var value)`
+`Array Var.array_payload(Var value)`
 
 Extracts the `Array` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:663`
+Source: `lib/common.x:664`
 
-<a id="Var.as_iter"></a>
-#### Var.as_iter
+<a id="Var.block_payload"></a>
+#### Var.block_payload
 
-`Iter Var.as_iter(Var value)`
-
-Extracts the `Iter` payload of `value`, or NULL for another tag.
-
-Source: `lib/common.x:668`
-
-<a id="Var.block"></a>
-#### Var.block
-
-`Block Var.block(Var value)`
+`Block Var.block_payload(Var value)`
 
 Extracts the `Block` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:664`
+Source: `lib/common.x:665`
 
 <a id="Var.box_f32"></a>
 #### Var.box_f32
@@ -368,23 +359,23 @@ Boxes a native `uchar` as an immediate `<u8>` `Var`.
 
 Source: `lib/common.x:521`
 
-<a id="Var.buffer"></a>
-#### Var.buffer
+<a id="Var.buffer_payload"></a>
+#### Var.buffer_payload
 
-`Buffer Var.buffer(Var value)`
+`Buffer Var.buffer_payload(Var value)`
 
 Extracts the `Buffer` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:665`
+Source: `lib/common.x:666`
 
-<a id="Var.bytes"></a>
-#### Var.bytes
+<a id="Var.bytes_payload"></a>
+#### Var.bytes_payload
 
-`Bytes Var.bytes(Var value)`
+`Bytes Var.bytes_payload(Var value)`
 
 Extracts the `Bytes` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:666`
+Source: `lib/common.x:667`
 
 <a id="Var.char"></a>
 #### Var.char
@@ -428,14 +419,14 @@ invalidly encoded.
 
 Source: `lib/common.x:823`
 
-<a id="Var.file"></a>
-#### Var.file
+<a id="Var.file_payload"></a>
+#### Var.file_payload
 
-`File Var.file(Var value)`
+`File Var.file_payload(Var value)`
 
 Extracts the `File` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:667`
+Source: `lib/common.x:668`
 
 <a id="Var.float"></a>
 #### Var.float
@@ -484,14 +475,23 @@ Reports whether `v` uses a scope-owned wide numeric box.
 
 Source: `lib/common.x:482`
 
-<a id="Var.list"></a>
-#### Var.list
+<a id="Var.iter_payload"></a>
+#### Var.iter_payload
 
-`List Var.list(Var value)`
+`Iter Var.iter_payload(Var value)`
+
+Extracts the `Iter` payload of `value`, or NULL for another tag.
+
+Source: `lib/common.x:669`
+
+<a id="Var.list_payload"></a>
+#### Var.list_payload
+
+`List Var.list_payload(Var value)`
 
 Extracts the `List` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:669`
+Source: `lib/common.x:670`
 
 <a id="Var.long"></a>
 #### Var.long
@@ -529,14 +529,14 @@ of floating range, or invalidly encoded.
 
 Source: `lib/common.x:780`
 
-<a id="Var.map"></a>
-#### Var.map
+<a id="Var.map_payload"></a>
+#### Var.map_payload
 
-`Map Var.map(Var value)`
+`Map Var.map_payload(Var value)`
 
 Extracts the `Map` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:670`
+Source: `lib/common.x:671`
 
 <a id="Var.payload32"></a>
 #### Var.payload32
@@ -566,7 +566,7 @@ Source: `lib/common.x:712`
 
 Extracts the `String` payload of `value`, or NULL for another tag.
 
-Source: `lib/common.x:671`
+Source: `lib/common.x:663`
 
 <a id="Var.symbol"></a>
 #### Var.symbol

@@ -937,8 +937,9 @@ Public functions:
 `uint.var`, `uint.str`, `uint.repr`, `unsigned.var`, `unsigned.str`,
 `unsigned.repr`, `float.var`, `float.str`, `float.repr`, `double.var`,
 `double.str`, `double.repr`, `long.var`, `ulong.var`, `long.str`, `long.repr`,
-`Var.is_row`, `Var.array`, `Var.block`, `Var.buffer`, `Var.bytes`, `Var.file`,
-`Var.as_iter`, `Var.list`, `Var.map`, `Var.string_payload`, `Var.symbol`,
+`Var.is_row`, `Var.string_payload`, `Var.array_payload`, `Var.block_payload`,
+`Var.buffer_payload`, `Var.bytes_payload`, `Var.file_payload`,
+`Var.iter_payload`, `Var.list_payload`, `Var.map_payload`, `Var.symbol`,
 `Var.char`, `Var.uchar`, `Var.short`, `Var.ushort`, `Var.int`, `Var.uint`,
 `Var.unsigned`, `Var.long`, `Var.ulong`, `Var.long_long`, `Var.ulong_long`,
 `Var.long_double`, `Var.float`, `Var.double`, `x2c_initialize_protocols`,
@@ -1834,9 +1835,11 @@ Public functions:
 
 Public functions:
 
-`Var.string`, `Var.convert`, `Var.numeric_info`, `Var.numeric_decode`,
-`Var.integer_box`, `Var.integer_tag`, `Var.width_mask`, `Var.signed_from_bits`,
-`X2CVarNumeric.f32`, `X2CVarNumeric.f64`, `X2CVarNumeric.ldouble`
+`Var.string`, `Var.array`, `Var.block`, `Var.buffer`, `Var.bytes`, `Var.file`,
+`Var.as_iter`, `Var.list`, `Var.map`, `Var.convert`, `Var.numeric_info`,
+`Var.numeric_decode`, `Var.integer_box`, `Var.integer_tag`, `Var.width_mask`,
+`Var.signed_from_bits`, `X2CVarNumeric.f32`, `X2CVarNumeric.f64`,
+`X2CVarNumeric.ldouble`
 
 ### [lib/varops.x](../lib/varops.x)
 

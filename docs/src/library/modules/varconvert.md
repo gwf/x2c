@@ -37,7 +37,7 @@ while boxing a wide result. A nonnumeric source is rejected before
 decoding, with the decoder's `<bad-types>` detail nested under
 `<no-convert>`.
 
-Source: `lib/varconvert.x:127`
+Source: `lib/varconvert.x:149`
 
 ### `X2CVarNumeric`
 
@@ -49,7 +49,7 @@ Source: `lib/varconvert.x:127`
 Converts a decoded numeric value to native `float` without boxing.
 Uses the target host cast, preserving its rounding behavior.
 
-Source: `lib/varconvert.x:331`
+Source: `lib/varconvert.x:353`
 
 <a id="X2CVarNumeric.f64"></a>
 #### X2CVarNumeric.f64
@@ -59,7 +59,7 @@ Source: `lib/varconvert.x:331`
 Converts a decoded numeric value to native `double` without boxing.
 Uses the target host cast, preserving its rounding behavior.
 
-Source: `lib/varconvert.x:340`
+Source: `lib/varconvert.x:362`
 
 <a id="X2CVarNumeric.ldouble"></a>
 #### X2CVarNumeric.ldouble
@@ -69,14 +69,22 @@ Source: `lib/varconvert.x:340`
 Converts a decoded numeric value to native `long double` without boxing.
 Uses the target host cast, preserving its rounding behavior.
 
-Source: `lib/varconvert.x:349`
+Source: `lib/varconvert.x:371`
 
 ## Advanced and interop API
 
 | Function | Summary |
 | --- | --- |
+| [`Var.array`](#Var.array) | Extracts the `Array` payload of `value`. |
+| [`Var.as_iter`](#Var.as_iter) | Extracts the `Iter` payload of `value`. |
+| [`Var.block`](#Var.block) | Extracts the `Block` payload of `value`. |
+| [`Var.buffer`](#Var.buffer) | Extracts the `Buffer` payload of `value`. |
+| [`Var.bytes`](#Var.bytes) | Extracts the `Bytes` payload of `value`. |
+| [`Var.file`](#Var.file) | Extracts the `File` payload of `value`. |
 | [`Var.integer_box`](#Var.integer_box) | Boxes the low target-width bits of `raw` using integer `target`. |
 | [`Var.integer_tag`](#Var.integer_tag) | Returns the integer tag selected by `rank` and signedness. |
+| [`Var.list`](#Var.list) | Extracts the `List` payload of `value`. |
+| [`Var.map`](#Var.map) | Extracts the `Map` payload of `value`. |
 | [`Var.numeric_decode`](#Var.numeric_decode) | Decodes a numeric `value` into caller-owned `out` storage. |
 | [`Var.numeric_info`](#Var.numeric_info) | Writes numeric-family metadata for `tag` and returns nonzero. |
 | [`Var.signed_from_bits`](#Var.signed_from_bits) | Interprets the low `bits` of `raw` as a two's-complement signed value. |
@@ -84,6 +92,84 @@ Source: `lib/varconvert.x:349`
 | [`Var.width_mask`](#Var.width_mask) | Returns a mask containing the low `bits` bits. |
 
 ### `Var`
+
+<a id="Var.array"></a>
+#### Var.array
+
+`Array Var.array(Var value)`
+
+Extracts the `Array` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. A `Array` destination
+converts a `Var` implicitly through `Var.array_payload`, which reads the
+payload or NULL without raising.
+
+Source: `lib/varconvert.x:90`
+
+<a id="Var.as_iter"></a>
+#### Var.as_iter
+
+`Iter Var.as_iter(Var value)`
+
+Extracts the `Iter` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. A `Iter` destination
+converts a `Var` implicitly through `Var.iter_payload`, which reads the
+payload or NULL without raising.
+
+Source: `lib/varconvert.x:95`
+
+<a id="Var.block"></a>
+#### Var.block
+
+`Block Var.block(Var value)`
+
+Extracts the `Block` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. A `Block` destination
+converts a `Var` implicitly through `Var.block_payload`, which reads the
+payload or NULL without raising.
+
+Source: `lib/varconvert.x:91`
+
+<a id="Var.buffer"></a>
+#### Var.buffer
+
+`Buffer Var.buffer(Var value)`
+
+Extracts the `Buffer` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. A `Buffer` destination
+converts a `Var` implicitly through `Var.buffer_payload`, which reads the
+payload or NULL without raising.
+
+Source: `lib/varconvert.x:92`
+
+<a id="Var.bytes"></a>
+#### Var.bytes
+
+`Bytes Var.bytes(Var value)`
+
+Extracts the `Bytes` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. A `Bytes` destination
+converts a `Var` implicitly through `Var.bytes_payload`, which reads the
+payload or NULL without raising.
+
+Source: `lib/varconvert.x:93`
+
+<a id="Var.file"></a>
+#### Var.file
+
+`File Var.file(Var value)`
+
+Extracts the `File` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. A `File` destination
+converts a `Var` implicitly through `Var.file_payload`, which reads the
+payload or NULL without raising.
+
+Source: `lib/varconvert.x:94`
 
 <a id="Var.integer_box"></a>
 #### Var.integer_box
@@ -98,7 +184,7 @@ active `Scope`.
 **Raises:** `<bad-target>` for a noninteger target, or `<alloc-fail>` or
 `<bad-enc>` while boxing a wide result.
 
-Source: `lib/varconvert.x:256`
+Source: `lib/varconvert.x:278`
 
 <a id="Var.integer_tag"></a>
 #### Var.integer_tag
@@ -111,7 +197,33 @@ callers applying integer promotion must first select its resulting
 signedness. Ranks four through six select the 48-bit, `long`, and
 `long long` families. A rank above six returns the null `Symbol`.
 
-Source: `lib/varconvert.x:285`
+Source: `lib/varconvert.x:307`
+
+<a id="Var.list"></a>
+#### Var.list
+
+`List Var.list(Var value)`
+
+Extracts the `List` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. A `List` destination
+converts a `Var` implicitly through `Var.list_payload`, which reads the
+payload or NULL without raising.
+
+Source: `lib/varconvert.x:96`
+
+<a id="Var.map"></a>
+#### Var.map
+
+`Map Var.map(Var value)`
+
+Extracts the `Map` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. A `Map` destination
+converts a `Var` implicitly through `Var.map_payload`, which reads the
+payload or NULL without raising.
+
+Source: `lib/varconvert.x:97`
 
 <a id="Var.numeric_decode"></a>
 #### Var.numeric_decode
@@ -126,7 +238,7 @@ use the members described by `X2CVarNumeric`.
 `<void-op>` for `void`, or `<bad-types>` for a nonnumeric tag. These
 failures leave `out` unchanged.
 
-Source: `lib/varconvert.x:173`
+Source: `lib/varconvert.x:195`
 
 <a id="Var.numeric_info"></a>
 #### Var.numeric_info
@@ -137,7 +249,7 @@ Writes numeric-family metadata for `tag` and returns nonzero.
 The special `<nan>`, `<-inf>`, and `<+inf>` tags report the `<f64>` family.
 A null `out` or nonnumeric tag returns zero and leaves storage untouched.
 
-Source: `lib/varconvert.x:157`
+Source: `lib/varconvert.x:179`
 
 <a id="Var.signed_from_bits"></a>
 #### Var.signed_from_bits
@@ -147,7 +259,7 @@ Source: `lib/varconvert.x:157`
 Interprets the low `bits` of `raw` as a two's-complement signed value.
 `bits` must be between one and the width of `unsigned long long`.
 
-Source: `lib/varconvert.x:304`
+Source: `lib/varconvert.x:326`
 
 <a id="Var.string"></a>
 #### Var.string
@@ -171,7 +283,7 @@ Returns a mask containing the low `bits` bits.
 Zero yields zero and a width at least `unsigned long long` yields
 `ULLONG_MAX`; `bits` must not be negative.
 
-Source: `lib/varconvert.x:297`
+Source: `lib/varconvert.x:319`
 
 ## Public types
 
