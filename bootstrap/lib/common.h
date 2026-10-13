@@ -860,74 +860,45 @@ static inline int Var_is_row(Var value, unsigned top, unsigned long mask, unsign
 
 unsigned long Var_tag_top(Symbol tag);
 unsigned long Var_tag_bottom(Symbol tag);
-static inline Array Var_array(Var _x2c_macro_value_0){
-  if(_x2c_macro_value_0.u64 >> 48 != 8 ||(_x2c_macro_value_0.u64 & 0x7) != 0) return NULL;  return(Array)(_x2c_macro_value_0.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline String Var_string_payload(Var _x2c_macro_value_0){
+  if(_x2c_macro_value_0.u64 >> 48 != 11 ||(_x2c_macro_value_0.u64 & 0x7) != 1) return NULL;  return(String)(_x2c_macro_value_0.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline Block Var_block(Var _x2c_macro_value_1){
-  if(_x2c_macro_value_1.u64 >> 48 != 8 ||(_x2c_macro_value_1.u64 & 0x7) != 1) return NULL;  return(Block)(_x2c_macro_value_1.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline Array Var_array_payload(Var _x2c_macro_value_1){
+  if(_x2c_macro_value_1.u64 >> 48 != 8 ||(_x2c_macro_value_1.u64 & 0x7) != 0) return NULL;  return(Array)(_x2c_macro_value_1.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline Buffer Var_buffer(Var _x2c_macro_value_2){
-  if(_x2c_macro_value_2.u64 >> 48 != 8 ||(_x2c_macro_value_2.u64 & 0x7) != 2) return NULL;  return(Buffer)(_x2c_macro_value_2.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline Block Var_block_payload(Var _x2c_macro_value_2){
+  if(_x2c_macro_value_2.u64 >> 48 != 8 ||(_x2c_macro_value_2.u64 & 0x7) != 1) return NULL;  return(Block)(_x2c_macro_value_2.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline Bytes Var_bytes(Var _x2c_macro_value_3){
-  if(_x2c_macro_value_3.u64 >> 48 != 8 ||(_x2c_macro_value_3.u64 & 0x7) != 3) return NULL;  return(Bytes)(_x2c_macro_value_3.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline Buffer Var_buffer_payload(Var _x2c_macro_value_3){
+  if(_x2c_macro_value_3.u64 >> 48 != 8 ||(_x2c_macro_value_3.u64 & 0x7) != 2) return NULL;  return(Buffer)(_x2c_macro_value_3.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline File Var_file(Var _x2c_macro_value_4){
-  if(_x2c_macro_value_4.u64 >> 48 != 9 ||(_x2c_macro_value_4.u64 & 0x7) != 0) return NULL;  return(File)(_x2c_macro_value_4.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline Bytes Var_bytes_payload(Var _x2c_macro_value_4){
+  if(_x2c_macro_value_4.u64 >> 48 != 8 ||(_x2c_macro_value_4.u64 & 0x7) != 3) return NULL;  return(Bytes)(_x2c_macro_value_4.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline Iter Var_as_iter(Var _x2c_macro_value_5){
-  if(_x2c_macro_value_5.u64 >> 48 != 9 ||(_x2c_macro_value_5.u64 & 0x7) != 2) return NULL;  return(Iter)(_x2c_macro_value_5.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline File Var_file_payload(Var _x2c_macro_value_5){
+  if(_x2c_macro_value_5.u64 >> 48 != 9 ||(_x2c_macro_value_5.u64 & 0x7) != 0) return NULL;  return(File)(_x2c_macro_value_5.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline List Var_list(Var _x2c_macro_value_6){
-  if(_x2c_macro_value_6.u64 >> 48 != 9 ||(_x2c_macro_value_6.u64 & 0x7) != 4) return NULL;  return(List)(_x2c_macro_value_6.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline Iter Var_iter_payload(Var _x2c_macro_value_6){
+  if(_x2c_macro_value_6.u64 >> 48 != 9 ||(_x2c_macro_value_6.u64 & 0x7) != 2) return NULL;  return(Iter)(_x2c_macro_value_6.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline Map Var_map(Var _x2c_macro_value_7){
-  if(_x2c_macro_value_7.u64 >> 48 != 9 ||(_x2c_macro_value_7.u64 & 0x7) != 6) return NULL;  return(Map)(_x2c_macro_value_7.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline List Var_list_payload(Var _x2c_macro_value_7){
+  if(_x2c_macro_value_7.u64 >> 48 != 9 ||(_x2c_macro_value_7.u64 & 0x7) != 4) return NULL;  return(List)(_x2c_macro_value_7.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline String Var_string_payload(Var _x2c_macro_value_8){
-  if(_x2c_macro_value_8.u64 >> 48 != 11 ||(_x2c_macro_value_8.u64 & 0x7) != 1) return NULL;  return(String)(_x2c_macro_value_8.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline Map Var_map_payload(Var _x2c_macro_value_8){
+  if(_x2c_macro_value_8.u64 >> 48 != 9 ||(_x2c_macro_value_8.u64 & 0x7) != 6) return NULL;  return(Map)(_x2c_macro_value_8.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline Array Var_array_payload(Var _x2c_macro_value_9){
-  if(_x2c_macro_value_9.u64 >> 48 != 8 ||(_x2c_macro_value_9.u64 & 0x7) != 0) return NULL;  return(Array)(_x2c_macro_value_9.u64 & 0x0000FFFFFFFFFFF8ul);
-}
-
-static inline Block Var_block_payload(Var _x2c_macro_value_10){
-  if(_x2c_macro_value_10.u64 >> 48 != 8 ||(_x2c_macro_value_10.u64 & 0x7) != 1) return NULL;  return(Block)(_x2c_macro_value_10.u64 & 0x0000FFFFFFFFFFF8ul);
-}
-
-static inline Buffer Var_buffer_payload(Var _x2c_macro_value_11){
-  if(_x2c_macro_value_11.u64 >> 48 != 8 ||(_x2c_macro_value_11.u64 & 0x7) != 2) return NULL;  return(Buffer)(_x2c_macro_value_11.u64 & 0x0000FFFFFFFFFFF8ul);
-}
-
-static inline Bytes Var_bytes_payload(Var _x2c_macro_value_12){
-  if(_x2c_macro_value_12.u64 >> 48 != 8 ||(_x2c_macro_value_12.u64 & 0x7) != 3) return NULL;  return(Bytes)(_x2c_macro_value_12.u64 & 0x0000FFFFFFFFFFF8ul);
-}
-
-static inline File Var_file_payload(Var _x2c_macro_value_13){
-  if(_x2c_macro_value_13.u64 >> 48 != 9 ||(_x2c_macro_value_13.u64 & 0x7) != 0) return NULL;  return(File)(_x2c_macro_value_13.u64 & 0x0000FFFFFFFFFFF8ul);
-}
-
-static inline Iter Var_iter_payload(Var _x2c_macro_value_14){
-  if(_x2c_macro_value_14.u64 >> 48 != 9 ||(_x2c_macro_value_14.u64 & 0x7) != 2) return NULL;  return(Iter)(_x2c_macro_value_14.u64 & 0x0000FFFFFFFFFFF8ul);
-}
-
-static inline List Var_list_payload(Var _x2c_macro_value_15){
-  if(_x2c_macro_value_15.u64 >> 48 != 9 ||(_x2c_macro_value_15.u64 & 0x7) != 4) return NULL;  return(List)(_x2c_macro_value_15.u64 & 0x0000FFFFFFFFFFF8ul);
-}
-
-static inline Map Var_map_payload(Var _x2c_macro_value_16){
-  if(_x2c_macro_value_16.u64 >> 48 != 9 ||(_x2c_macro_value_16.u64 & 0x7) != 6) return NULL;  return(Map)(_x2c_macro_value_16.u64 & 0x0000FFFFFFFFFFF8ul);
-}
-
+Iter Var_as_iter(Var value);
+File Var_file(Var value);
+Block Var_block(Var value);
 static inline Symbol Var_symbol(Var x){
   if(Var_is(x, 1328354264)) return Var_integer(x);  return 0;
 }

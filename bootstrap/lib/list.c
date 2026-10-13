@@ -1565,6 +1565,8 @@ Buffer List_write_repr(List lst, Buffer out){
   return out;
 }
 
+List Var_list(Var);
+
 static void Render__value(Render * r, Var elem){
   Buffer out =(* r).out;
   if(out -> pos >= _WIDTH - 1 || out -> pos - out -> _indent > 40) Buffer_newline_indent(out);

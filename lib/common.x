@@ -660,14 +660,6 @@ static macro Unit $var.tag.unbox(Type $type, Name $method, Literal $tag) {
   }
 }
 
-$var.tag.unbox(Array, array, <array>);
-$var.tag.unbox(Block, block, <block>);
-$var.tag.unbox(Buffer, buffer, <buffer>);
-$var.tag.unbox(Bytes, bytes, <bytes>);
-$var.tag.unbox(File, file, <file>);
-$var.tag.unbox(Iter, as_iter, <iter>);
-$var.tag.unbox(List, list, <list>);
-$var.tag.unbox(Map, map, <map>);
 $var.tag.unbox(String, string_payload, <string>);
 $var.tag.unbox(Array, array_payload, <array>);
 $var.tag.unbox(Block, block_payload, <block>);

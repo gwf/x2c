@@ -3084,10 +3084,12 @@ static void Compiler._check_noted_converter(
      repeats the crossing. A String destination displays any value but
      `void`, while `Var.string` reads the payload and raises for another
      tag: a different operation, never redundant, and `.str()` there asks
-     for the display of `void` too. */
+     for the display of `void` too. A destination with a payload reader
+     takes NULL for another tag, while its explicit reader raises. */
   if (source_is_var && context != 0 && method != "str") return;
   if (source_is_var && context == 0 &&
-      (method == "str" || c.sym.is_string_type(target)))
+      (method == "str" || c.sym.is_string_type(target) ||
+       c._payload_reader(target)))
     return;
   /* A Var reaches a numeric scalar other than Symbol through `Var.convert`
      and then a read. `Var.int` already converts, and a raw reader such as
@@ -3533,13 +3535,20 @@ static List Compiler._var_exact_reader(Compiler c, List expr, Type target) {
   List callee = NULL;
   if (target == %("String")) callee = c._var_reader("Var_as_string", target);
   else {
-    callee = c._var_reader(%"Var_${name}_payload", target);
+    callee = c._payload_reader(target);
     if (!callee) callee = c._var_reader(%"Var_$name", target);
   }
   if (!callee) return NULL;
   Macro called = $called;
   return c.rebuild_expression(target, called(callee, %($expr)));
 }
+
+/* The reader that crosses a `Var` to `target` and yields NULL for another
+   tag, when the runtime declares one, as a callee; or NULL. */
+static List Compiler._payload_reader(Compiler c, Type target) =>
+  target.match(%(?))
+    ? c._var_reader(%"Var_${target.car().str().lower()}_payload", target)
+    : NULL;
 
 /* The global function `reader` from one `Var` to `target`, as a callee, or
    NULL. */

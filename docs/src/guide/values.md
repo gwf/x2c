@@ -135,8 +135,11 @@ uses that type's exact reader, and a wrong tag yields NULL. An alias of such
 a type, declared with `class` or `typedef`, uses the reader of its nearest
 ancestor that has one. A `String` destination reads a `String` payload as
 itself, displays any other value through `.str()`, and reads `void` as
-NULL. The explicit `.string()` extracts a `String` payload and raises
-`<no-convert>` for any other tag:
+NULL. The explicit readers `.list()`, `.map()`, `.array()`, `.block()`,
+`.buffer()`, `.bytes()`, `.file()`, `.as_iter()`, and `.string()` extract
+their payload and raise `<no-convert>` for any other tag. Their
+`_payload` forms, such as `.list_payload()`, read the payload or NULL
+without raising, as an assignment does:
 
 ```x2c
 Var listy = %(1 2 3);
@@ -149,8 +152,9 @@ printf("text=%s same=%d\n", text, same != NULL);
 text=( 1 2 3 ) same=1
 ```
 
-Test `listy is <list>` first when a value must be a `List`. `Var.pointer`
-is the unchecked read, for a raw native pointer that has no tag to check.
+Call `.list()` when a value must be a `List`, so a wrong tag is reported
+where it is read. `Var.pointer` is the unchecked read, for a raw native
+pointer that has no tag to check.
 
 ## Formatting dynamic values
 
@@ -491,10 +495,11 @@ int clamp(int value, int low, int high) {
 ```
 
 The numeric conversion matrix does *not* generalize to nonnumeric tags.
-`Symbol`, collection, and pointer crossings have their own typed readers,
-which return NULL when the tag does not match; test the tag or returned
-value before using it. A `String` destination displays any value instead,
-and `.string()` raises for a value that is not a `String`.
+`Symbol`, collection, and pointer crossings have their own typed readers.
+An assignment returns NULL when the tag does not match; test the tag or the
+returned value before using it. The explicit readers, such as `.list()`
+and `.string()`, raise `<no-convert>` instead. A `String` destination
+displays any value.
 
 `String` interpolation reads a value instead of demanding a tag, so it has no
 such limit. A numeric segment renders through its nearest declared `T_str`

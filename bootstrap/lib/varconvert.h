@@ -24,6 +24,22 @@ X2CVarNumeric;
 #include "meta.h"
 String Var_string(Var value);
 
+Array Var_array(Var _x2c_macro_value_0);
+
+Block Var_block(Var _x2c_macro_value_1);
+
+Buffer Var_buffer(Var _x2c_macro_value_2);
+
+Bytes Var_bytes(Var _x2c_macro_value_3);
+
+File Var_file(Var _x2c_macro_value_4);
+
+Iter Var_as_iter(Var _x2c_macro_value_5);
+
+List Var_list(Var _x2c_macro_value_6);
+
+Map Var_map(Var _x2c_macro_value_7);
+
 extern const SymbolSet x2c_var_numeric_tags;
 
 extern const X2CVarNumericInfo x2c_var_numerics[];

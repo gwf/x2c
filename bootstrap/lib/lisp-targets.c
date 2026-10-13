@@ -4985,7 +4985,7 @@ static Var _x2c_func_adapt_84(Func _x2c_func_binding_84, const FuncArg * _x2c_fu
   ;
 }
 
-static List Var_list(Var);
+List Var_list(Var);
 
 static Var _x2c_func_adapt_85(Func _x2c_func_binding_85, const FuncArg * _x2c_func_argv_85){
   Var a0 = x2c_func_value_argument(_x2c_func_binding_85, _x2c_func_argv_85, 0, 45156);
@@ -4995,7 +4995,7 @@ static Var _x2c_func_adapt_85(Func _x2c_func_binding_85, const FuncArg * _x2c_fu
 
 static Var Array_var(Array);
 
-static Array Var_array(Var);
+Array Var_array(Var);
 
 static Var _x2c_func_adapt_86(Func _x2c_func_binding_86, const FuncArg * _x2c_func_argv_86){
   Var a0 = x2c_func_value_argument(_x2c_func_binding_86, _x2c_func_argv_86, 0, 45156);
@@ -5005,7 +5005,7 @@ static Var _x2c_func_adapt_86(Func _x2c_func_binding_86, const FuncArg * _x2c_fu
 
 static Var Map_var(Map);
 
-static Map Var_map(Var);
+Map Var_map(Var);
 
 static Var _x2c_func_adapt_87(Func _x2c_func_binding_87, const FuncArg * _x2c_func_argv_87){
   Var a0 = x2c_func_value_argument(_x2c_func_binding_87, _x2c_func_argv_87, 0, 45156);
@@ -7380,7 +7380,7 @@ static Var _x2c_func_adapt_378(Func _x2c_func_binding_378, const FuncArg * _x2c_
   ;
 }
 
-static Iter Var_as_iter(Var);
+Iter Var_as_iter(Var);
 
 static Var _x2c_func_adapt_379(Func _x2c_func_binding_379, const FuncArg * _x2c_func_argv_379){
   Var a0 = x2c_func_value_argument(_x2c_func_binding_379, _x2c_func_argv_379, 0, 45156);
@@ -7390,7 +7390,7 @@ static Var _x2c_func_adapt_379(Func _x2c_func_binding_379, const FuncArg * _x2c_
 
 static Var Block_var(Block);
 
-static Block Var_block(Var);
+Block Var_block(Var);
 
 static Var _x2c_func_adapt_380(Func _x2c_func_binding_380, const FuncArg * _x2c_func_argv_380){
   Var a0 = x2c_func_value_argument(_x2c_func_binding_380, _x2c_func_argv_380, 0, 45156);
@@ -7471,7 +7471,7 @@ static Var _x2c_func_adapt_388(Func _x2c_func_binding_388, const FuncArg * _x2c_
 
 static Var File_var(File);
 
-static File Var_file(Var);
+File Var_file(Var);
 
 static Var _x2c_func_adapt_389(Func _x2c_func_binding_389, const FuncArg * _x2c_func_argv_389){
   Var a0 = x2c_func_value_argument(_x2c_func_binding_389, _x2c_func_argv_389, 0, 45156);

@@ -3908,6 +3908,10 @@ These explicit calls differ from the implicit crossing and are not reported:
   implicit crossing to `String` displays any value but `void`, which it
   reads as NULL, while `.string()` reads the String payload and raises
   `<no-convert>` for another tag.
+- An explicit reader such as `.list()` or `.map()` at a destination of its
+  type. The implicit crossing reads the payload or NULL through
+  `Var.list_payload` and its relatives, while the explicit reader raises
+  `<no-convert>` for another tag.
 - A `Var` read into a numeric type other than `Symbol`, such as `v.int()` or
   `v.integer()`. The implicit crossing calls `Var.convert` and then reads the
   result. `Var.int` already converts, and `Var.integer` returns 0 where

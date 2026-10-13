@@ -18,17 +18,17 @@ String Label.str(Label label) => "label";
 String Label.string(Label label) => "text";
 
 int main(void) {
-  Var v = "one";
+  Var v = "one", none = %();
   String s = v.str();
   Var boxed = s.var();
   Symbol sym = <alpha>;
   String name = sym.str();
-  int count = _count(v.list());
-  int pair = _pair(v.list(), v.list());
+  int count = _count(none.list());
+  int pair = _pair(none.list(), none.list());
   s = v.str();
   String hole = %"value ${v.str()}";
   List holes = %(${s.var()});
-  int chained = v.list().len();
+  int chained = none.list().len();
   _write(v.string());
   printf("%s %s %s %d %d %s\n", _label(v), name, hole, count, chained,
          v.str());

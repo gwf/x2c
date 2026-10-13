@@ -119,7 +119,7 @@ static macro Unit $list.typed.family(Type $list, Type $element,
 
       Raises: `<no-convert>` for the first foreign element. */
   $list Var.$lower(Var value) {
-    List xs = value.list();
+    List xs = value.list_payload();
     return xs.$lower();
   }
 }

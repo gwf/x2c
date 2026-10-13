@@ -8,21 +8,6 @@ unittest/compiler-fixtures/explicit-converter-warning.x:25:24: conversion: unnec
                          ^
   note: remove the call; the destination converts the value
 
-unittest/compiler-fixtures/explicit-converter-warning.x:26:28: conversion: unnecessary conversion: .list() where ("List") is expected
-    int count = _count(v.list());
-                             ^
-  note: remove the call; the destination converts the value
-
-unittest/compiler-fixtures/explicit-converter-warning.x:27:26: conversion: unnecessary conversion: .list() where ("List") is expected
-    int pair = _pair(v.list(), v.list());
-                           ^
-  note: remove the call; the destination converts the value
-
-unittest/compiler-fixtures/explicit-converter-warning.x:27:36: conversion: unnecessary conversion: .list() where ("List") is expected
-    int pair = _pair(v.list(), v.list());
-                                     ^
-  note: remove the call; the destination converts the value
-
 unittest/compiler-fixtures/explicit-converter-warning.x:29:32: conversion: unnecessary conversion: .str() where ("String") is expected
     String hole = %"value ${v.str()}";
                                  ^

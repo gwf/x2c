@@ -413,7 +413,7 @@ static void MatchMachine__eq_prefix(MatchMachine * m, const MachineWord * w){
 
 List MatchMachine_materialize_span(MatchMachine * m, MachineSpan span);
 
-static List Var_list(Var);
+List Var_list(Var);
 
 List Array_list_free(Array);
 

@@ -665,9 +665,9 @@ List datum_result_problem(Var value, Map marks){
   return problem;
 }
 
-static List Var_list(Var);
+List Var_list(Var);
 
-static Array Var_array(Var);
+Array Var_array(Var);
 
 static List _items_problem(Var value, Map marks){
   if(Var_is_row(value, 9, 7, 4)){

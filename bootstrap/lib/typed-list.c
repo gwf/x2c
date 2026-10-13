@@ -232,11 +232,11 @@ ListChar List_listchar(List _x2c_macro_xs_3){
   return(ListChar) _x2c_macro_xs_3;
 }
 
-static List Var_list(Var);
+static List Var_list_payload(Var);
 
 ListChar Var_listchar(Var _x2c_macro_value_2){
   if(! _init_guard_) _file_init_();
-  List _x2c_macro_xs_4 = Var_list(_x2c_macro_value_2);
+  List _x2c_macro_xs_4 = Var_list_payload(_x2c_macro_value_2);
   return List_listchar(_x2c_macro_xs_4);
 }
 
@@ -260,7 +260,7 @@ ListShort List_listshort(List _x2c_macro_xs_8){
 
 ListShort Var_listshort(Var _x2c_macro_value_5){
   if(! _init_guard_) _file_init_();
-  List _x2c_macro_xs_9 = Var_list(_x2c_macro_value_5);
+  List _x2c_macro_xs_9 = Var_list_payload(_x2c_macro_value_5);
   return List_listshort(_x2c_macro_xs_9);
 }
 
@@ -284,7 +284,7 @@ ListInt List_listint(List _x2c_macro_xs_13){
 
 ListInt Var_listint(Var _x2c_macro_value_8){
   if(! _init_guard_) _file_init_();
-  List _x2c_macro_xs_14 = Var_list(_x2c_macro_value_8);
+  List _x2c_macro_xs_14 = Var_list_payload(_x2c_macro_value_8);
   return List_listint(_x2c_macro_xs_14);
 }
 
@@ -308,7 +308,7 @@ ListFloat List_listfloat(List _x2c_macro_xs_18){
 
 ListFloat Var_listfloat(Var _x2c_macro_value_11){
   if(! _init_guard_) _file_init_();
-  List _x2c_macro_xs_19 = Var_list(_x2c_macro_value_11);
+  List _x2c_macro_xs_19 = Var_list_payload(_x2c_macro_value_11);
   return List_listfloat(_x2c_macro_xs_19);
 }
 
@@ -332,7 +332,7 @@ ListDbl List_listdbl(List _x2c_macro_xs_23){
 
 ListDbl Var_listdbl(Var _x2c_macro_value_14){
   if(! _init_guard_) _file_init_();
-  List _x2c_macro_xs_24 = Var_list(_x2c_macro_value_14);
+  List _x2c_macro_xs_24 = Var_list_payload(_x2c_macro_value_14);
   return List_listdbl(_x2c_macro_xs_24);
 }
 
@@ -356,7 +356,7 @@ ListString List_liststring(List _x2c_macro_xs_28){
 
 ListString Var_liststring(Var _x2c_macro_value_17){
   if(! _init_guard_) _file_init_();
-  List _x2c_macro_xs_29 = Var_list(_x2c_macro_value_17);
+  List _x2c_macro_xs_29 = Var_list_payload(_x2c_macro_value_17);
   return List_liststring(_x2c_macro_xs_29);
 }
 
@@ -380,7 +380,7 @@ ListSymbol List_listsymbol(List _x2c_macro_xs_33){
 
 ListSymbol Var_listsymbol(Var _x2c_macro_value_20){
   if(! _init_guard_) _file_init_();
-  List _x2c_macro_xs_34 = Var_list(_x2c_macro_value_20);
+  List _x2c_macro_xs_34 = Var_list_payload(_x2c_macro_value_20);
   return List_listsymbol(_x2c_macro_xs_34);
 }
 

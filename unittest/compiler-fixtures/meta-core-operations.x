@@ -435,7 +435,8 @@ meta int core_Var_list(int unused) {
   (void) unused;
   Var list = %(1 2), empty = %(), number = 7, array = [1];
   return list.list().equal(%(1 2)) && empty.list().len() == 0
-    && number.list().len() == 0 && array.list().len() == 0;
+    && number.list_payload().len() == 0
+    && array.list_payload().len() == 0;
 }
 int main(int argc, char **argv) {
   (void) argv;

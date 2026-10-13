@@ -416,7 +416,7 @@ String Diff_unified(String old, String new, String old_name, String new_name){
 
 static Var List_car(List);
 
-static List Var_list(Var);
+List Var_list(Var);
 
 static Symbol _kind(Array edits, int at){
   return Var_symbol(List_car(Var_list(Array_getindex(edits, at))));

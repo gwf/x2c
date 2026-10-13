@@ -1348,7 +1348,7 @@ int RegexCapture_end(RegexCapture capture){
   return Var_int(List_getindex(capture, 5));
 }
 
-static List Var_list(Var);
+List Var_list(Var);
 
 RegexCapture Var_regexcapture(Var v){
   return(RegexCapture) Var_list(v);

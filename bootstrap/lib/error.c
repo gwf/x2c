@@ -613,6 +613,8 @@ void Error_note_rendered(void){
   if(state -> depth > 0 && state -> depth <= ERROR_MAX_DEPTH) state -> rendered[state -> depth] = 1;
 }
 
+List Var_list(Var);
+
 static Symbol ErrorHandler__catch_match(ErrorHandler h){
   if(Error_count() <= h -> watermark) return 285842436424;
   ErrorRecord * record = _record_at(Error_count() - 1);

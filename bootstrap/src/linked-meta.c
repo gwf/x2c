@@ -5784,7 +5784,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_9(void){
   _4931 = List_var(_4930);
   _4932 = String_new("lib/common.x");
   _4933 = String_var(_4932);
-  _4934 = String_new("7c347f37");
+  _4934 = String_new("d272a896");
   _4935 = String_var(_4934);
   _4936 = cons(_4935, NULL);
   _4937 = cons(_4933, _4936);
@@ -10085,7 +10085,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_17(void){
   _9208 = List_var(_9207);
   _9209 = String_new("lib/varconvert.x");
   _9210 = String_var(_9209);
-  _9211 = String_new("c270fe1a");
+  _9211 = String_new("973f4d99");
   _9212 = String_var(_9211);
   _9213 = cons(_9212, NULL);
   _9214 = cons(_9210, _9213);
@@ -12996,7 +12996,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _12101 = List_var(_12100);
   _12102 = String_new("src/expressions.x");
   _12103 = String_var(_12102);
-  _12104 = String_new("5066db18");
+  _12104 = String_new("102debd9");
   _12105 = String_var(_12104);
   _12106 = cons(_12105, NULL);
   _12107 = cons(_12103, _12106);

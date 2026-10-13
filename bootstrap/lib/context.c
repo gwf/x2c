@@ -304,6 +304,8 @@ static Var _export_callback(Var value, Context c){
   return Context__export_value(c, value);
 }
 
+Bytes Var_bytes(Var);
+
 static Var Context__export_storage(Context c, Var v){
   void * allocation = Var_is_row(v, 8, 7, 3) ? Bytes_block(Var_bytes(v)) : Var_pointer(v);
   if(! Context_owns(c, allocation)) return v;

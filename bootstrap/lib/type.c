@@ -804,7 +804,7 @@ static List _scalar_row(Type type){
   return Var_is_row(row, 9, 7, 4) ? Var_list_payload(row) : NULL;
 }
 
-static List Var_list(Var);
+List Var_list(Var);
 
 static int _scalar_numeric_info(Type type, X2CVarNumericInfo * info){
   Var row = Map_getindex(scalartypes, List_var(type));

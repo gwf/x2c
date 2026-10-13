@@ -690,6 +690,8 @@ int MatchPlan_admits(MatchPlan plan, Var input, Var(* view)(Var)){
   return 0;
 }
 
+List Var_list(Var);
+
 static List _seen_list(Var value, Var(* view)(Var)){
   if(view) value = view(value);
   return Var_is_row(value, 9, 7, 4) ? Var_list(value) : NULL;

@@ -74,6 +74,28 @@ String Var.string(Var value) {
   return value.string_payload();
 }
 
+static macro Unit $var.tag.exact(
+  Type $type, Name $method, Name $payload, Literal $tag, Literal $name) {
+  /** Extracts the `$type` payload of `value`.
+      Raises: `<no-convert>` for any other tag. A `$type` destination
+      converts a `Var` implicitly through `Var.$payload`, which reads the
+      payload or NULL without raising.
+  */
+  $type Var.$method(Var value) {
+    if (value is not $tag) $error.no_convert(value.tag(), $name);
+    return value.$payload();
+  }
+}
+
+$var.tag.exact(Array, array, array_payload, <array>, "Array");
+$var.tag.exact(Block, block, block_payload, <block>, "Block");
+$var.tag.exact(Buffer, buffer, buffer_payload, <buffer>, "Buffer");
+$var.tag.exact(Bytes, bytes, bytes_payload, <bytes>, "Bytes");
+$var.tag.exact(File, file, file_payload, <file>, "File");
+$var.tag.exact(Iter, as_iter, iter_payload, <iter>, "Iter");
+$var.tag.exact(List, list, list_payload, <list>, "List");
+$var.tag.exact(Map, map, map_payload, <map>, "Map");
+
 static macro Stmt $error.decode.output() {
   raise %(bad-arg (operation "Var.numeric_decode"));
 }
