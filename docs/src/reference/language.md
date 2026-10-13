@@ -521,8 +521,8 @@ is an error: its cleanup region would enclose the final statement, and C
 would lose the value. Either may stand in a block nested inside the
 statement expression. A `return`, `break`, `continue`, or `goto` that leaves
 a statement expression runs the cleanup of each region it leaves, as it does
-from any other statement. `sizeof` takes its own parentheses, so a statement
-expression operand needs a second pair: `sizeof(({ ...; }))`.
+from any other statement. A statement expression is an ordinary `sizeof`
+operand, so `sizeof({ ...; })` measures its value's type.
 
 ### Reference parameters
 
@@ -1620,8 +1620,8 @@ there inserts a value computed at the quotation. For a template Array,
 `%[${@{items}}]` splices a sequence computed while the quotation is built.
 It does not add runtime Array splicing. In a List, `@{expression}` retains
 runtime splicing and does not evaluate during template construction.
-Literal strings such as `"$ @"`, percent strings such as `%"\$ @"`, and
-quoted atom escapes such as `%(\$ \@)` preserve sigils as data.
+Literal strings such as `"$ @"`, percent strings such as `%"\$ @"` or
+`%"$$ @"`, and quoted atom escapes such as `%(\$ \@)` preserve sigils as data.
 After `case`,
 `${$name(...)}` is still a macro pattern. These holes exist only in
 quotations; in a named template's code, `${` still reports a missing macro
@@ -2835,7 +2835,8 @@ including nested calls, indexing, casts, assignments, conditionals, comma
 expressions, and nested literals. In a collection, `$name(...)` instead inserts
 `$name` and then reads `(...)` as a nested symbolic `List`. In `%""`, the
 parentheses after `$name` are text. A runtime call in any quoted form is
-therefore `${name(...)}`.
+therefore `${name(...)}`. In `%""` and in a quoted `"..."` element, `$$` and
+`\$` each produce one literal `$`: `%"a$$"` is `a$`.
 
 Nested `(...)`, `[...]`, and `{...}` remain quoted `List`, `Array`, and `Map`
 data, and nested `"..."` selects the x2c `String` grammar with its interpolation
@@ -3421,8 +3422,10 @@ The optional typed families have different indexing rules:
   the checked read, and it does normalize a negative index.
 - A packed `Map` from `typed-map.x` adopts `protocol Var`, so its `getindex`,
   `setindex`, `updateindex`, and `postfixindex` members provide bracket reads,
-  writes, compound updates, and numeric postfix updates. A typed cons chain
-  from `typed-list.x` does not adopt `protocol Var`; use `car` and `nth_cdr`.
+  writes, compound updates, and numeric postfix updates.
+- A typed cons chain from `typed-list.x`, such as `ListInt`, is a `List`
+  typedef. Its bracket reads behave as `List` reads, including negative
+  indices, and it rejects indexed updates as `List` does.
 
 `Array`, `List`, and `String` support `value[start:stop:step]`. Bounds and step
 may be omitted. Negative bounds and reverse steps are normalized consistently.

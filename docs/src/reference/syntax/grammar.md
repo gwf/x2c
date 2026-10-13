@@ -58,7 +58,9 @@ an identifier, and each imported member must exist.
 
 `identifier` normally consumes `ident`. Member selection, method names,
 and declarator names also accept identifier-shaped keyword text where
-their parser explicitly does so. `method-owner` is the owner recognized by
+their parser explicitly does so. In `macro-name`, the component after `$`
+must be an `ident`; each component after a `.` may also be keyword text,
+so `$a.if` and `$a.while.for` are macro names. `method-owner` is the owner recognized by
 `_complex_identifier`: a built-in type word or known typedef,
 including package-qualified type names. `Self` is resolved as a contextual
 type. Type existence and a valid scalar combination remain semantic checks.
@@ -121,6 +123,12 @@ selects a cast only when the token after `)` can start its operand.
 and unary operators. Otherwise parentheses resume a grouped expression.
 At statement start, named parameters in the parentheses select a typed destructuring
 declaration; one anonymous parameter can instead be a cast.
+
+After `sizeof`, a parenthesized declaration start is a type operand that ends
+at its `)`. Any other operand is a `unary` expression, so a parenthesized
+expression keeps its postfix continuation: `sizeof(a)[0]` measures an element.
+A compound literal therefore needs its own parentheses, as in
+`sizeof((int[]){1, 2, 3})`; `sizeof (int[]){1, 2, 3}` is rejected.
 
 `is [not]` shares relational precedence. Its right operand is a type when
 `_is_type_selector_start` recognizes a declaration, `Void`, or an unbound
