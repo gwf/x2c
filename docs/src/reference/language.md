@@ -106,6 +106,20 @@ the block and must lead to a file under that file's companion directory,
 leads elsewhere, a member that is already being spliced, an unreadable member,
 a malformed block, or a second block is a driver error at the block.
 
+The block is spliced before C preprocessing, so a preprocessor condition does
+not choose members. x2c skips a block only inside a conditional arm that C
+never takes by x2c's own reading: `#if 0`, `#ifdef` or `#if defined` of a
+name that x2c output never defines, such as `__cplusplus`, and the `#else`
+arm of `#ifndef` of such a name. Every other arm counts. After
+`#define OFF 0`, a block under `#if OFF` still reads its members, and blocks
+in both arms of `#if 1` and `#else` are a second block. The spliced text,
+including each member's own directives, then reaches C as one unit in
+splice order.
+
+The entry's syntax mode applies to all spliced text. In a `.xp` entry every
+member is read with indentation layout, and in a `.x` entry with braces, so
+a member must use its entry's syntax.
+
 A member's text stands where the block stood, in the listed order. All members
 share the entry's translation unit. Function declarations are collected across
 that complete unit, so a function can call a later-defined function without an
