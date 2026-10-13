@@ -33,10 +33,14 @@ static int function_read(void) { int helper = 7; return $helped() + helper; }
 static int typed_read(void) { int label = 2; return $label_length() + label; }
 static int named_read(void) { int leaked = 5; return $named(leaked); }
 static int rule_read(int leaked) => lookup(0) + leaked;
-static int static_read(void) { static int leaked = 3; return lookup(0) + leaked; }
+static int static_read(void) {
+  static int leaked = 3;
+  return lookup(0) + leaked;
+}
 
 int main(void) {
-  printf("%d %d %d %d %d %d\n", macro_read(), function_read(), typed_read(),
-         named_read(), rule_read(1), static_read());
+  printf(
+    "%d %d %d %d %d %d\n", macro_read(), function_read(), typed_read(),
+    named_read(), rule_read(1), static_read());
   return 0;
 }

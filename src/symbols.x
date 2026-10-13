@@ -686,8 +686,8 @@ static void _join_locals(Sym s, List binding) {
   Var alias;
   if (s.binding_facts.try_get(%(unshadowed $spelling), alias))
     _unshadow_local(s, binding, alias);
-  s.put(s.binding_facts, %(locals $spelling),
-        cons(binding, _locals(s, spelling)));
+  s.put(
+    s.binding_facts, %(locals $spelling), cons(binding, _locals(s, spelling)));
 }
 
 static List _locals(Sym s, String spelling) {
