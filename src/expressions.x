@@ -409,7 +409,12 @@ static List _parse_sizeof(Compiler c) {
   Token head = c.token;
   int parens = c.test(<(>);
   List arg = NULL;
-  if (c.test_declaration()) {
+  // `sizeof (T){...}` measures a compound literal, which parses as a cast
+  if (parens && c.test_declaration() && head.after_group().type == <{>) {
+    c.token = head;
+    arg = _parse_cast(c);
+  }
+  else if (c.test_declaration()) {
     arg = c.parse_type_operand(NULL);
     if (parens) {
       c.expect(<)>);
