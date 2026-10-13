@@ -327,10 +327,10 @@ static void _exec(CliRequest c){
 
 ToolRun ToolAction_start(ToolAction);
 
-ToolAction tool_action_new(Symbol, List, int, int);
+ToolAction ToolAction_new(Symbol, List, int, int);
 
 static void _print_run(CliRequest c){
-  ToolAction_start(tool_action_new(38236, ({
+  ToolAction_start(ToolAction_new(38236, ({
     Var _x2c_literal_part_4 = String_var(_executable(c));  cons(_x2c_literal_part_4, List_append(c -> run_args, NULL));
   }
   ), 0, 1));

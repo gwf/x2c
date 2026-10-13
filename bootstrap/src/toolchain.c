@@ -252,7 +252,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_0();
 }
 
-Toolchain toolchain_new(CliRequest request){
+Toolchain Toolchain_new(CliRequest request){
   if(! _init_guard_) _file_init_();
   Toolchain t = _toolchain(request -> cc, request -> ar);
   t -> cpp_args = request -> cpp_args;
@@ -263,7 +263,7 @@ Toolchain toolchain_new(CliRequest request){
   return t;
 }
 
-Toolchain toolchain_meta(String cc){
+Toolchain Toolchain_for_meta(String cc){
   if(! _init_guard_) _file_init_();
   return _toolchain(cc, NULL);
 }
@@ -357,12 +357,12 @@ static void _layout(Toolchain t){
   else if(String_truth(home) && ! Path_is_file(t -> runtime_lib)) t -> runtime_lib = String_join(NULL, cons(String_var(home), cons(String_var(_11), NULL)));
 }
 
-String toolchain_meta_cc(String explicit){
+String Toolchain_meta_cc(String explicit){
   if(! _init_guard_) _file_init_();
   return _tool(explicit, _12, _1);
 }
 
-ToolAction tool_action_new(Symbol phase, List arguments, int verbose, int dry_run){
+ToolAction ToolAction_new(Symbol phase, List arguments, int verbose, int dry_run){
   if(! _init_guard_) _file_init_();
   ToolAction action = Scope_calloc(1, sizeof(struct ToolAction));
   * action =(struct ToolAction){
@@ -379,7 +379,7 @@ void ToolAction_as_program(ToolAction action){
 }
 
 static ToolAction _action(Toolchain t, Symbol phase, List arguments){
-  return tool_action_new(phase, arguments, t -> verbose, t -> dry_run);
+  return ToolAction_new(phase, arguments, t -> verbose, t -> dry_run);
 }
 
 ToolAction Toolchain_compile_action(Toolchain t, String source, String object, String depfile, List gen_dirs){

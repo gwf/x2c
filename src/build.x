@@ -261,7 +261,7 @@ static void _check_compile_only(Build b) {
 /* The selected compiler and archiver go back to the request. */
 static void _select_tools(Build b) {
   CliRequest request = b.request;
-  b.toolchain = toolchain_new(request);
+  b.toolchain = Toolchain.new(request);
   request.cc = b.toolchain.cc; request.ar = b.toolchain.ar;
   // A module's code is placed wherever the loader maps it.
   if (request.kind == <module>)
@@ -354,7 +354,7 @@ static uint64_t _translation_fingerprint(
   hash = _state_list(hash, request.cpp_args);
   // The project meta build compiles with these and its own C compiler.
   hash = _state_list(hash, request.cc_args);
-  hash = _state_tool(hash, toolchain_meta_cc(request.meta_cc), ok);
+  hash = _state_tool(hash, Toolchain.meta_cc(request.meta_cc), ok);
   hash = _state_text(hash, request.no_cpp ? "no-cpp" : "cpp");
   hash = _state_text(hash, request.live_symbols ? "live" : "prelude");
   hash = _state_text(hash, request.cpp_symbols ? "cpp-symbols" : "raw");
@@ -938,7 +938,7 @@ static int _same_file_bytes(String first, String second) {
 static int _dsym(Build b) {
   if (!_mapped_debug(b)) return 0;
   String output = b.output, symbols = %"$output.dSYM";
-  return tool_action_new(
+  return ToolAction.new(
     <dsym>, %("dsymutil" $output "-o" $symbols), b.request.verbose,
     b.request.dry_run).run();
 }
@@ -1058,7 +1058,7 @@ static String _retention(Build b) {
 */
 int Build.run_program(Build b) {
   $report.build.running(b);
-  ToolAction action = tool_action_new(
+  ToolAction action = ToolAction.new(
     <run>, %(${b.output} @{b.request.run_args}), b.request.verbose,
     b.request.dry_run);
   action.as_program();
@@ -1209,7 +1209,7 @@ int CliRequest.script_current(CliRequest request, String directory) {
   List lines = NULL;
   try lines = Path.read_text(record).split_lines(0);
   catch %(io-fail *): return 0;
-  String cc = toolchain_new(request).cc;
+  String cc = Toolchain.new(request).cc;
   int ok = 1;
   uint64_t hash = _script_fingerprint(request, cc, lines.cdr(), ok);
   return ok && _state_matches(record, hash);

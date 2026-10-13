@@ -612,7 +612,7 @@ static void _check_compile_only(Build b){
 
 static void _select_tools(Build b){
   CliRequest request = b -> request;
-  b -> toolchain = toolchain_new(request);
+  b -> toolchain = Toolchain_new(request);
   request -> cc = b -> toolchain -> cc;
   request -> ar = b -> toolchain -> ar;
   if(request -> kind == 904178442) b -> toolchain -> cc_args = cons(_14, List_append(b -> toolchain -> cc_args, NULL));
@@ -756,7 +756,7 @@ static uint64_t _translation_fingerprint(Build b, String input, String directory
   hash = _state_list(hash, CliRequest_package_roots(request));
   hash = _state_list(hash, request -> cpp_args);
   hash = _state_list(hash, request -> cc_args);
-  hash = _state_tool(hash, toolchain_meta_cc(request -> meta_cc), &((* ok)));
+  hash = _state_tool(hash, Toolchain_meta_cc(request -> meta_cc), &((* ok)));
   hash = _state_text(hash, request -> no_cpp ? _38 : _39);
   hash = _state_text(hash, request -> live_symbols ? _40 : _41);
   hash = _state_text(hash, request -> cpp_symbols ? _42 : _43);
@@ -1529,7 +1529,7 @@ static int _same_file_bytes(String first, String second){
 static int _dsym(Build b){
   if(! _mapped_debug(b)) return 0;
   String output = b -> output, symbols = String_join(NULL, cons(String_var(output), cons(String_var(_96), NULL)));
-  return ToolAction_run(tool_action_new(302682, cons(_98, cons(String_var(output), cons(_100, cons(String_var(symbols), NULL)))), b -> request -> verbose, b -> request -> dry_run));
+  return ToolAction_run(ToolAction_new(302682, cons(_98, cons(String_var(output), cons(_100, cons(String_var(symbols), NULL)))), b -> request -> verbose, b -> request -> dry_run));
 }
 
 static int _mapped_debug(Build b){
@@ -1678,7 +1678,7 @@ static String _retention(Build b){
 int Build_run_program(Build b){
   if(! _init_guard_) _file_init_();
   report_line(34081994, String_join(NULL, cons(String_var(_163), cons(String_var(b -> output), NULL))));
-  ToolAction action = tool_action_new(38236, cons(String_var(b -> output), List_append(b -> request -> run_args, NULL)), b -> request -> verbose, b -> request -> dry_run);
+  ToolAction action = ToolAction_new(38236, cons(String_var(b -> output), List_append(b -> request -> run_args, NULL)), b -> request -> verbose, b -> request -> dry_run);
   ToolAction_as_program(action);
   return ToolAction_run(action);
 }
@@ -2025,7 +2025,7 @@ int CliRequest_script_current(CliRequest request, String directory){
     _x2c_error_handler_4 = NULL;
     x2c_exception_leave(& _x2c_exception_frame_6);
   }
-  String cc = toolchain_new(request) -> cc;
+  String cc = Toolchain_new(request) -> cc;
   int ok = 1;
   uint64_t hash = _script_fingerprint(request, cc, List_cdr(lines), &(ok));
   return ok && _state_matches(record, hash);

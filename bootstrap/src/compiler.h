@@ -219,9 +219,9 @@ void Compiler_finish_collected_declaration(Compiler c, List declaration, Token m
 
 void Compiler_record_inline_function(Compiler c, List declaration);
 
-int Compiler__at_function_arrow(Compiler c);
+int Compiler_at_function_arrow(Compiler c);
 
-void Compiler__skip_shallow_expression(Compiler c, int stop_at_comma);
+void Compiler_skip_shallow_expression(Compiler c, int stop_at_comma);
 
 List Compiler_full_parse(Compiler c, Map globs, int generated_symbols);
 
@@ -261,21 +261,7 @@ void Compiler_mark_completion(Compiler c, int position);
 
 int Compiler_at_completion(Compiler c);
 
-void Compiler___complete_here(Compiler c, Symbol role, List keywords);
-
-String Compiler_emitted_binding_name(Compiler c, List binding);
-
-List Compiler_present_references(Compiler c);
-
-void Compiler_mark_reference_present(Compiler c, List binding);
-
-void Compiler_settle_reference(Compiler c, List binding, int true_is_present, List yes, List no);
-
-void Compiler_restore_reference_presence(Compiler c, List before);
-
-List Compiler_optional_reference_test(Compiler c, List condition, int * truth);
-
-int reference_guard_exits(List arm);
+void Compiler_complete_here(Compiler c, Symbol role, List keywords);
 
 void Compiler_queue_declaration_effect(Compiler c, String form, Token first, Token after);
 
@@ -311,8 +297,6 @@ void Compiler_add_early(Compiler c, List decl);
 
 void Compiler_add_support(Compiler c, List decl);
 
-List written_definitions(List decl);
-
 void Compiler_add_init(Compiler c, Symbol phase, List stmt);
 
 void Pending_reset(Pending * p);
@@ -324,6 +308,18 @@ int Pending_initializes(Pending * p);
 PendingMark Pending_checkpoint(Pending * p);
 
 void Pending_restore(Pending * p, PendingMark mark);
+
+String Compiler_emitted_binding_name(Compiler c, List binding);
+
+List Compiler_present_references(Compiler c);
+
+void Compiler_mark_reference_present(Compiler c, List binding);
+
+void Compiler_settle_reference(Compiler c, List binding, int true_is_present, List yes, List no);
+
+void Compiler_restore_reference_presence(Compiler c, List before);
+
+List Compiler_optional_reference_test(Compiler c, List condition, int * truth);
 
 List Compiler_cache(Compiler c, List key);
 

@@ -205,7 +205,7 @@ Code Type.protocol_member(Type type, String name) {
 Code Type.getter(Type type) {
   _require_expansion("Type.getter");
   Compiler c = active.expander;
-  List resolved = c._nominal_getindex(type);
+  List resolved = c.nominal_getindex(type);
   if (!resolved) resolved = c.resolve_protocol_member(type, "getindex");
   if (!resolved) return NULL;
   (List binding, Type signature) = resolved;
@@ -283,7 +283,7 @@ List Code.func_parameters(Code parameters, Code fn, Code argv) {
 /** Answers `Code.exits`, declared in `lib/meta.x`. */
 int Code.exits(Code statement) {
   _require_expansion("Code.exits");
-  return reference_guard_exits(statement);
+  return Ast.reference_guard_exits(statement);
 }
 
 /** Answers `Code.convert`, declared in `lib/meta.x`. */

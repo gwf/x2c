@@ -38,13 +38,13 @@ typedef struct ToolRun{
 #include <unistd.h>
 #include "report.h"
 #include "utils.h"
-Toolchain toolchain_new(CliRequest request);
+Toolchain Toolchain_new(CliRequest request);
 
-Toolchain toolchain_meta(String cc);
+Toolchain Toolchain_for_meta(String cc);
 
-String toolchain_meta_cc(String explicit);
+String Toolchain_meta_cc(String explicit);
 
-ToolAction tool_action_new(Symbol phase, List arguments, int verbose, int dry_run);
+ToolAction ToolAction_new(Symbol phase, List arguments, int verbose, int dry_run);
 
 void ToolAction_as_program(ToolAction action);
 

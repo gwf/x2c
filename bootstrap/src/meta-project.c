@@ -347,7 +347,7 @@ void Frontend_prepare_meta(Frontend f, List inputs){
     Compiler_use_meta_helper(NULL, NULL, NULL);
     return;
   }
-  h.toolchain = toolchain_meta(cc);
+  h.toolchain = Toolchain_for_meta(cc);
   String compiler = Compiler_meta_cc_identity(cc);
   h.include = include;
   h.flags = _group_flags(f -> request, h.packages);

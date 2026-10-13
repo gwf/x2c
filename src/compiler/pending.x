@@ -1,7 +1,9 @@
+// pending support declarations and file initialization
+
 /** Appends a declaration the kernel generated to the unit's pending
     support. It is implementation, so its definitions are written. */
 void Compiler.add_early(Compiler c, List decl) {
-  c.add_support(written_definitions(decl));
+  c.add_support(Ast.written_definitions(decl));
 }
 
 /** Appends the declaration `decl` to the unit's pending support as it is:

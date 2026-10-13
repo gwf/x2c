@@ -5768,11 +5768,13 @@ static List _lowered_definition(Compiler c, Var result){
 
 }
 
+List Ast_written_definitions(List);
+
 List Compiler_written_support(Compiler c, List bound){
   if(! _init_guard_) _file_init_();
   List writers = List_truth(c -> applying) && List_cdr(c -> applying) == c -> active_rewrites ? c -> applying : c -> active_rewrites;
   RewriteRule writer = List_truth(writers) ? Var_pointer(List_car(writers)) : NULL;
-  return writer && writer -> builtin ? written_definitions(bound) : bound;
+  return writer && writer -> builtin ? Ast_written_definitions(bound) : bound;
 }
 
 int Compiler_applying_shipped(Compiler c){
@@ -6428,7 +6430,7 @@ int Compiler_skip_named_type_declaration(Compiler c){
   List definition = _peek_invocation(c);
   if(! List_truth(definition) || ! x2c_var_equal(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(988265867168778))) return 0;
   Compiler_skip_macro_invocation(c);
-  Compiler__skip_shallow_expression(c, 0);
+  Compiler_skip_shallow_expression(c, 0);
   Compiler_expect(c, 119);
   return 1;
 }

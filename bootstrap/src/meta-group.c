@@ -1744,13 +1744,12 @@ static int _braced(Var node){
   return 0;
 }
 
-List _initializer_function(Compiler, Type, List, List);
 static List _entry(Compiler c, String stamp, Map initials, List functions, String suffix){
-  List resets = _resets(c, initials);  List reset = _initializer_function(c, List_type(_184), Sym_introduce(c -> sym, String_join(NULL, cons(String_var(_321), cons(String_var(suffix), NULL)))), resets);  List table = _targets(c, _named(c, reset), functions);  List stamp_binding = Sym_introduce(c -> sym, String_join(NULL, cons(String_var(_322), cons(String_var(suffix), NULL))));  String literal = String_join(NULL, cons(String_var(_229), cons(String_var(stamp), cons(String_var(_229), NULL))));  return({
+  List resets = _resets(c, initials);  List reset = Compiler_initializer_function(c, List_type(_184), Sym_introduce(c -> sym, String_join(NULL, cons(String_var(_321), cons(String_var(suffix), NULL)))), resets);  List table = _targets(c, _named(c, reset), functions);  List stamp_binding = Sym_introduce(c -> sym, String_join(NULL, cons(String_var(_322), cons(String_var(suffix), NULL))));  String literal = String_join(NULL, cons(String_var(_229), cons(String_var(stamp), cons(String_var(_229), NULL))));  return({
     Var _x2c_literal_part_42 = List_var(cons(_49, cons(_327, cons(List_var(cons(_48, cons(List_var(({
       Var _x2c_literal_part_40 = List_var(cons(_19, cons(List_var(stamp_binding), _333)));  Var _x2c_literal_part_41 = List_var(cons(_135, cons(_335, cons(List_var(cons(_336, cons(_335, cons(String_var(literal), NULL)))), NULL))));  cons(_288, cons(_289, cons(_x2c_literal_part_40, cons(_x2c_literal_part_41, NULL))));
     }
-    )), NULL))), NULL))));  Var _x2c_literal_part_43 = List_var(reset);  Var _x2c_literal_part_44 = List_var(_initializer_function(c, List_type(_339), Sym_introduce(c -> sym, String_join(NULL, cons(String_var(_340), cons(String_var(suffix), NULL)))), cons(List_var(cons(_341, cons(_342, cons(List_var(table), NULL)))), NULL)));  cons(_x2c_literal_part_42, cons(_x2c_literal_part_43, cons(_x2c_literal_part_44, NULL)));
+    )), NULL))), NULL))));  Var _x2c_literal_part_43 = List_var(reset);  Var _x2c_literal_part_44 = List_var(Compiler_initializer_function(c, List_type(_339), Sym_introduce(c -> sym, String_join(NULL, cons(String_var(_340), cons(String_var(suffix), NULL)))), cons(List_var(cons(_341, cons(_342, cons(List_var(table), NULL)))), NULL)));  cons(_x2c_literal_part_42, cons(_x2c_literal_part_43, cons(_x2c_literal_part_44, NULL)));
   }
   );
 }
@@ -2100,7 +2099,7 @@ static String _build_module(String directory, String module, List code){
   List _x2c_destructure_3 = code;  String hfile = Var_as_string(List_getindex(_x2c_destructure_3, 0));  String header = Var_as_string(List_getindex(_x2c_destructure_3, 1));  String cfile = Var_as_string(List_getindex(_x2c_destructure_3, 2));  String source = Var_as_string(List_getindex(_x2c_destructure_3, 3));  String output =({
     Var _x2c_literal_part_73 = String_var(module);  Var _x2c_literal_part_74 = String_var(String_printf(_611, (long) getpid()));  String_join(NULL, cons(_x2c_literal_part_73, cons(String_var(_612), cons(_x2c_literal_part_74, NULL))));
   }
-  );  Path_make_dirs(directory);  Path_write_text(String_join(NULL, cons(String_var(directory), cons(String_var(_601), cons(String_var(hfile), NULL)))), header);  Path_write_text(String_join(NULL, cons(String_var(directory), cons(String_var(_601), cons(String_var(cfile), NULL)))), source);  Toolchain linker = toolchain_meta(meta_cc);  List arguments = Toolchain_module_action(linker, output, ({
+  );  Path_make_dirs(directory);  Path_write_text(String_join(NULL, cons(String_var(directory), cons(String_var(_601), cons(String_var(hfile), NULL)))), header);  Path_write_text(String_join(NULL, cons(String_var(directory), cons(String_var(_601), cons(String_var(cfile), NULL)))), source);  Toolchain linker = Toolchain_for_meta(meta_cc);  List arguments = Toolchain_module_action(linker, output, ({
     Var _x2c_literal_part_75 = String_var(directory);  Var _x2c_literal_part_76 = String_var(meta_include_dir);  Var _x2c_literal_part_77 = String_var(String_join(NULL, cons(String_var(directory), cons(String_var(_601), cons(String_var(cfile), NULL)))));  cons(_614, cons(_616, cons(_618, cons(_620, cons(_x2c_literal_part_75, cons(_620, cons(_x2c_literal_part_76, cons(_x2c_literal_part_77, NULL))))))));
   }
   )) -> arguments;  String failure = Compiler_meta_cc_run(arguments, directory);  if(! String_truth(failure)) Path_move_to(output, module);  return failure;

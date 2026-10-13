@@ -21,6 +21,10 @@ void generate_code(Compiler c, List ast, String dir);
 
 List generate_code_text(Compiler c, List ast, String basename);
 
+List Compiler_initializer_function(Compiler c, Type type, List name, List body);
+
+List Compiler_run_once_body(Compiler c, List before, List guard, List after);
+
 typedef struct Init{
   Compiler c;
   String initializer;

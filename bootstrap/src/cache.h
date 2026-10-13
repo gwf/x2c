@@ -21,12 +21,6 @@
 #include <assert.h>
 List Compiler_setup_cache_init(Compiler c, List header, List source, String prefix, String guard_name, String initializer_name);
 
-List _initializer_function(Compiler c, Type type, List name, List body);
-
-List _run_once(Compiler c, List before, List guard, List after);
-
-List _entry_call(String entry);
-
 List Compiler_zero_initializer(Compiler c, List value);
 
 List Compiler_initialization_guard(Compiler c, List guard);

@@ -36,7 +36,7 @@ void Compiler.mark_reference_present(Compiler c, List binding) {
     proves presence, `yes` otherwise. A missing `no` arm falls through. */
 void Compiler.settle_reference(
   Compiler c, List binding, int true_is_present, List yes, List no) {
-  if (binding && reference_guard_exits(true_is_present ? no : yes))
+  if (binding && Ast.reference_guard_exits(true_is_present ? no : yes))
     c.mark_reference_present(binding);
 }
 

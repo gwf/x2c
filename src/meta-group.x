@@ -686,8 +686,8 @@ static int _braced(Var node) {
 static List _entry(
   Compiler c, String stamp, Map initials, List functions, String suffix) {
   List resets = _resets(c, initials);
-  List reset = _initializer_function(
-    c, %(void), c.sym.introduce(%"x2c_module_reset$suffix"), resets);
+  List reset = c.initializer_function(
+    %(void), c.sym.introduce(%"x2c_module_reset$suffix"), resets);
   List table = _targets(c, _named(c, reset), functions);
   List stamp_binding = c.sym.introduce(%"x2c_module_stamp$suffix");
   String literal = %"\"$stamp\"";
@@ -696,8 +696,8 @@ static List _entry(
       (bindings (op = (bind $stamp_binding ((dim)))
                      (expr (* char) (literal (* char) $literal)))))
     $reset
-    ${_initializer_function(
-      c, %("Map"), c.sym.introduce(%"x2c_module_targets$suffix"),
+    ${c.initializer_function(
+      %("Map"), c.sym.introduce(%"x2c_module_targets$suffix"),
       %((return ("Map") $table)))});
 }
 
@@ -978,7 +978,7 @@ static String _build_module(String directory, String module, List code) {
   Path.make_dirs(directory);
   Path.write_text(%"$directory/$hfile", header);
   Path.write_text(%"$directory/$cfile", source);
-  Toolchain linker = toolchain_meta(meta_cc);
+  Toolchain linker = Toolchain.for_meta(meta_cc);
   List arguments = linker.module_action(
     output,
     %("-fsigned-char" "-fPIC" "-O0" "-iquote" $directory

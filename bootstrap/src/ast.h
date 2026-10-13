@@ -49,6 +49,12 @@ Ast Ast_without_origin(Ast ast);
 
 Ast Ast_rewrap_origin(Ast original, Ast replacement);
 
+List Ast_written_definitions(List decl);
+
+List Ast_entry_call(String entry);
+
+int Ast_reference_guard_exits(List arm);
+
 int Ast_never_returns(Ast ast);
 
 Symbol Symbol_compound_operator(Symbol op);

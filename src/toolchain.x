@@ -12,7 +12,7 @@
 #include "process.x"
 
 /** Holds resolved host tools, native layout, and borrowed option `List`s.
-    The record returned by `toolchain_new` is `Scope`-owned. Its `String`s
+    The record returned by `Toolchain.new` is `Scope`-owned. Its `String`s
     follow their owning canonical pools, which may be ancestors; `cpp_args`,
     `cc_args`, and `ld_args` are retained without copying.
 */
@@ -67,7 +67,7 @@ static macro Stmt $report.toolchain.tool_failed(Expr $phase, Expr $status) {
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the toolchain
     or its canonical layout.
 */
-Toolchain toolchain_new(CliRequest request) {
+Toolchain Toolchain.new(CliRequest request) {
   Toolchain t = _toolchain(request.cc, request.ar);
   t.cpp_args = request.cpp_args; t.cc_args = request.cc_args;
   t.ld_args = request.ld_args;
@@ -76,9 +76,9 @@ Toolchain toolchain_new(CliRequest request) {
 }
 
 /** Creates the toolchain that builds meta code with `cc`. It selects the
-    archiver as `toolchain_new` does and has no native options.
+    archiver as `Toolchain.new` does and has no native options.
 */
-Toolchain toolchain_meta(String cc) => _toolchain(cc, NULL);
+Toolchain Toolchain.for_meta(String cc) => _toolchain(cc, NULL);
 
 static Toolchain _toolchain(String cc, String ar) {
   Toolchain t = Scope.calloc(1, sizeof(struct Toolchain));
@@ -130,7 +130,7 @@ static void _layout(Toolchain t) {
     process's host: `explicit`, `X2C_META_CC`, `META_CC`, or `cc`, never
     the target compiler.
 */
-String toolchain_meta_cc(String explicit) => _tool(explicit, "META_CC", "cc");
+String Toolchain.meta_cc(String explicit) => _tool(explicit, "META_CC", "cc");
 
 // actions
 
@@ -139,7 +139,7 @@ String toolchain_meta_cc(String explicit) => _tool(explicit, "META_CC", "cc");
 
     Raises: `<alloc-fail>` when the action cannot be allocated.
 */
-ToolAction tool_action_new(
+ToolAction ToolAction.new(
   Symbol phase, List arguments, int verbose, int dry_run) {
   ToolAction action = Scope.calloc(1, sizeof(struct ToolAction));
   *action = (struct ToolAction) {
@@ -156,7 +156,7 @@ void ToolAction.as_program(ToolAction action) {
 
 static ToolAction _action(
   Toolchain t, Symbol phase, List arguments) =>
-  tool_action_new(phase, arguments, t.verbose, t.dry_run);
+  ToolAction.new(phase, arguments, t.verbose, t.dry_run);
 
 /** Builds but does not start one C compilation action.
     Generated include directories precede the x2c include directory and

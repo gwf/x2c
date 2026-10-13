@@ -41,7 +41,8 @@ Public functions:
 `Ast.lvalue_binding`, `ast_addressed_identifier`, `ast_direct_identifier`,
 `ast_indirect_identifier`, `Ast.written_operand`, `Ast.rewrite_children`,
 `ast_contains_head`, `ast_replace_nodes`, `ast_collect_binding_references`,
-`Ast.without_origin`, `Ast.rewrap_origin`, `Ast.never_returns`,
+`Ast.without_origin`, `Ast.rewrap_origin`, `Ast.written_definitions`,
+`Ast.entry_call`, `Ast.reference_guard_exits`, `Ast.never_returns`,
 `Symbol.is_assignment_op`, `ast_changes_left_operand`, `Ast.initializer_cases`,
 `Ast.initializer_functions`
 
@@ -73,8 +74,8 @@ cached literal slots and deferred file-static initializers.
 
 Public functions:
 
-`Compiler.setup_cache_init`, `_initializer_function`, `_run_once`,
-`_entry_call`, `Compiler.zero_initializer`, `Compiler.initialization_guard`
+`Compiler.setup_cache_init`, `Compiler.zero_initializer`,
+`Compiler.initialization_guard`
 
 ### [src/callables.x](../src/callables.x)
 
@@ -144,17 +145,13 @@ Public functions:
 `Compiler.shallow_parse_overlay`, `Compiler.start_collection`,
 `Compiler.collect_compile_time_definition`,
 `Compiler.finish_collected_declaration`, `Compiler.record_inline_function`,
-`Compiler._at_function_arrow`, `Compiler._skip_shallow_expression`,
+`Compiler.at_function_arrow`, `Compiler.skip_shallow_expression`,
 `Compiler.full_parse`, `Compiler.skip_collected_script_statement`,
 `Compiler.skip_script_statement`, `Compiler.tokenize`, `Compiler.peek`,
 `Token.skip_trivia`, `Compiler.require_input`, `Compiler.expect`,
 `Compiler.next`, `Compiler.test`, `Compiler.at_word`, `Compiler.take_word`,
 `Symbol.group_step`, `Token.group_close`, `Token.after_group`,
-`Compiler.mark_completion`, `Compiler.at_completion`,
-`Compiler.__complete_here`, `Compiler.emitted_binding_name`,
-`Compiler.present_references`, `Compiler.mark_reference_present`,
-`Compiler.settle_reference`, `Compiler.restore_reference_presence`,
-`Compiler.optional_reference_test`, `reference_guard_exits`,
+`Compiler.mark_completion`, `Compiler.at_completion`, `Compiler.complete_here`,
 `Compiler.queue_declaration_effect`, `Compiler.run_declaration_effects`,
 `Compiler.collect_unit_macro`, `Compiler.replay_declaration_source`,
 `Compiler.freeze_declaration_syntax`, `Compiler.thaw_declaration_syntax`,
@@ -162,9 +159,12 @@ Public functions:
 `Compiler.anchor_origin`, `Compiler.record_source_declaration`,
 `Compiler.record_source_reference`, `Compiler.copy_source_declaration`,
 `Compiler.merge_source_declarations`, `Compiler.fresh_name`, `Compiler.gensym`,
-`Compiler.add_early`, `Compiler.add_support`, `written_definitions`,
-`Compiler.add_init`, `Pending.reset`, `Pending.area`, `Pending.initializes`,
-`Pending.checkpoint`, `Pending.restore`, `Compiler.cache`,
+`Compiler.add_early`, `Compiler.add_support`, `Compiler.add_init`,
+`Pending.reset`, `Pending.area`, `Pending.initializes`, `Pending.checkpoint`,
+`Pending.restore`, `Compiler.emitted_binding_name`,
+`Compiler.present_references`, `Compiler.mark_reference_present`,
+`Compiler.settle_reference`, `Compiler.restore_reference_presence`,
+`Compiler.optional_reference_test`, `Compiler.cache`,
 `Compiler.cache_cons_cell`, `Compiler.cache_literal_var`,
 `Compiler.cache_literal_list`, `Compiler.match_pattern_value`,
 `match_value_is_static`, `Compiler.match_pattern_is_static`,
@@ -330,10 +330,10 @@ Public functions:
 `Compiler.parse_macro_expression_target`, `Compiler.apply_macro_value`,
 `Compiler.parse_primary`, `Compiler.parse_variable`,
 `Compiler.resolve_expression`, `Compiler.needs_resolution`,
-`Compiler._nominal_getindex`, `Compiler.resolve_postfix_member`,
+`Compiler.nominal_getindex`, `Compiler.resolve_postfix_member`,
 `Compiler.postfix_completions`, `x2c_func_call_arguments`,
 `Compiler.func_call_parts`, `Compiler.complete_iter_chain`,
-`Compiler._indexed_builtin_helper`, `Compiler.require_var_tag`,
+`Compiler.indexed_builtin_helper`, `Compiler.require_var_tag`,
 `Compiler.var_tag_expression`, `Compiler.resolve_map_entry`,
 `Compiler.check_explicit_converter`, `List.printf_family`,
 `Compiler.printf_static_format`, `Compiler.promote_string_literal`,
@@ -372,9 +372,10 @@ the generated header and source of one unit.
 
 Public functions:
 
-`generate_code`, `generate_code_text`, `Init.enter`,
-`Compiler.place_source_prelude`, `Compiler.init_statements`,
-`Compiler.definition_rows`, `Compiler.dump_definitions`
+`generate_code`, `generate_code_text`, `Compiler.initializer_function`,
+`Compiler.run_once_body`, `Init.enter`, `Compiler.place_source_prelude`,
+`Compiler.init_statements`, `Compiler.definition_rows`,
+`Compiler.dump_definitions`
 
 ### [src/grammar.x](../src/grammar.x)
 
@@ -775,7 +776,7 @@ Host preprocessing, compilation, archive, and link actions.
 
 Public functions:
 
-`toolchain_new`, `toolchain_meta`, `toolchain_meta_cc`, `tool_action_new`,
+`Toolchain.new`, `Toolchain.for_meta`, `Toolchain.meta_cc`, `ToolAction.new`,
 `ToolAction.as_program`, `Toolchain.compile_action`,
 `Toolchain.preprocess_action`, `Toolchain.archive_action`,
 `Toolchain.link_action`, `Toolchain.module_action`, `ToolAction.run`,

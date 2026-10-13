@@ -932,8 +932,8 @@ Frontend Frontend_new(CliRequest request){
   Frontend f = Scope_calloc(1, sizeof(struct Frontend));
   f -> request = request;
   f -> include_dirs = List_append(request -> include_dirs, default_include_dirs());
-  f -> toolchain = toolchain_new(request);
-  Compiler_use_meta_toolchain(toolchain_meta_cc(request -> meta_cc), f -> toolchain -> include_dir);
+  f -> toolchain = Toolchain_new(request);
+  Compiler_use_meta_toolchain(Toolchain_meta_cc(request -> meta_cc), f -> toolchain -> include_dir);
   return f;
 }
 

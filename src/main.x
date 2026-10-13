@@ -711,7 +711,7 @@ static int _run_env(CliRequest request) {
 
 // The resolved values in print order. An absent value prints empty.
 static List _env_rows(CliRequest request) {
-  Toolchain toolchain = toolchain_new(request);
+  Toolchain toolchain = Toolchain.new(request);
   String executable = x2c_get_executable();
   String roots = ":".join(request.package_roots());
   interface_configure(request.out_dir, 0);

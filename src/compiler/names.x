@@ -1,4 +1,4 @@
-// generated names and initializers
+// generated names
 
 /** Allocates the next compiler-private C spelling for `stem`.
     Related compilers increment the same per-stem counter.
@@ -28,4 +28,3 @@ List Compiler.gensym(Compiler c) {
   c.names.issued++;
   return %((gensym $owner $count));
 }
-
