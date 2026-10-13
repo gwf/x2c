@@ -67,7 +67,7 @@ Rejects writes and reference access to read-only snapshot bindings.
 The body has already resolved identifiers and call arguments. Templates
 defer this check until expansion; nested lambdas check their own bodies.
 
-Source: `src/lambdas.x:517`
+Source: `src/lambdas.x:519`
 
 <a id="Compiler.end_lambda_captures"></a>
 #### Compiler.end_lambda_captures

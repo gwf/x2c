@@ -84,8 +84,6 @@ static void _local_typedef(Sym s, Type type, List binding);
 
 static void _local_object(Sym s, List key, List binding, Type type);
 
-static void _join_locals(Sym s, List binding);
-
 static List _locals(Sym s, String spelling);
 
 static void _mark_automatic(Sym s, List binding, Type type);
@@ -1032,9 +1030,11 @@ static void _local_typedef(Sym s, Type type, List binding){
   Sym_put(s, s -> binding_facts, List_var(cons(_68, cons(List_var(binding), NULL))), String_var(Compiler_fresh_name(s -> c, _69)));
 }
 
+void Sym_join_locals(Sym s, List binding);
+
 static void _local_object(Sym s, List key, List binding, Type type){
   _mark_automatic(s, binding, type);
-  if(! Map_truth(s -> c -> macro_holes)) _join_locals(s, binding);
+  if(! Map_truth(s -> c -> macro_holes)) Sym_join_locals(s, binding);
   Type global_type = NULL;
   Sym_resolve_global(s, key, &(global_type));
   if(String_truth(_var_converter_owner(key, Type_list(global_type))) && !(Map_contains(s -> binding_facts, List_var(cons(_68, cons(List_var(binding), NULL)))))) Sym_put(s, s -> binding_facts, List_var(cons(_68, cons(List_var(binding), NULL))), String_var(Compiler_fresh_name(s -> c, _70)));
@@ -1042,7 +1042,8 @@ static void _local_object(Sym s, List key, List binding, Type type){
 
 String binding_identity_spelling(List);
 
-static void _join_locals(Sym s, List binding){
+void Sym_join_locals(Sym s, List binding){
+  if(! _init_guard_) _file_init_();
   String spelling = binding_identity_spelling(binding);
   Var alias;
   if(Map_try_get(s -> binding_facts, List_var(cons(_71, cons(String_var(spelling), NULL))), &(alias))) _unshadow_local(s, binding, Var_as_string(alias));

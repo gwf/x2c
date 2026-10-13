@@ -752,7 +752,7 @@ Public functions:
 `Sym.binding_is_local`, `Sym.binding_is_local_before`,
 `Compiler.semantic_binding_facts`, `Compiler.set_fact`, `Compiler.drop_fact`,
 `Sym.get`, `Sym.get_exact`, `Sym.lookup`, `Sym.reference`,
-`Sym.resolve_global`, `Sym.reference_global`, `Sym.declare`,
+`Sym.resolve_global`, `Sym.reference_global`, `Sym.declare`, `Sym.join_locals`,
 `Sym.unshadow_global`, `Sym.bind_identity`, `Compiler.aggregate_name`,
 `Compiler.record_declaration_visibility`, `Compiler.package_spelling`,
 `Compiler.register_package_alias`, `Compiler.register_package_member`,
