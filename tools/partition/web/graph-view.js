@@ -23,7 +23,7 @@ function renderGraph(gs, map) {
   const generation = ++graphGeneration;
   const host = $("workspace");
   host.classList.add("graph-workspace");
-  host.innerHTML = `<div class="graph-tools"><button id="zoom-out" aria-label="Zoom out">\u2212</button><button id="fit-graph">Fit graph</button><button id="zoom-in" aria-label="Zoom in">+</button><span id="zoom-value"></span><button id="focus-function" disabled>Focus function</button><button id="relayout">Arrange again</button><button id="boundary-summary" title="Inspect all calls across the view boundary"></button><span id="layout-state">Arranging connected functions\u2026</span></div><svg id="graph-svg" aria-label="Interactive function call graph"></svg><div class="graph-legend"><span><span style="color:#edbc7a">\u25cf Static</span> &nbsp; <span style="color:#86c7ff">\u25cf Non-static</span> &nbsp; <span style="color:#a5adb7">\u25cf Initializer</span> \u00b7 Size: public = outside consumers; static = inside consumers</span><span id="label-count"></span></div><div id="graph-tooltip"></div>`;
+  host.innerHTML = `<div class="graph-tools"><button id="zoom-out" aria-label="Zoom out">\u2212</button><button id="fit-graph">Fit graph</button><button id="zoom-in" aria-label="Zoom in">+</button><span id="zoom-value"></span><button id="focus-function" disabled>Focus function</button><button id="relayout">Arrange again</button><button id="boundary-summary" title="Inspect all calls across the view boundary"></button><span id="layout-state">Arranging connected functions\u2026</span></div><svg id="graph-svg" aria-label="Interactive function call graph"></svg><div class="graph-legend"><span><span style="color:#edbc7a">\u25cf Static</span> &nbsp; <span style="color:#86c7ff">\u25cf Non-static</span> &nbsp; <span style="color:#a5adb7">\u25cf Initializer</span> \u00b7 Green paths: static dependencies \u00b7 Size: public = outside consumers; static = inside consumers</span><span id="label-count"></span></div><div id="graph-tooltip"></div>`;
   const svg = $("graph-svg"),
     bounds = () => ({
       width: svg.clientWidth || 800,
@@ -274,7 +274,9 @@ function renderGraph(gs, map) {
     const c = graphCamera,
       s = bounds(),
       focusId = hovered ?? active,
-      near = new Set();
+      dependencies =
+        focusId === null ? new Set() : anchorMetrics[focusId].dependencies,
+      near = new Set(dependencies);
     if (focusId !== null)
       for (const [a, b] of D.edges) {
         if (a === focusId) near.add(b);
@@ -369,7 +371,11 @@ function renderGraph(gs, map) {
         .setAttribute("stroke", selectedNode ? "#e8f1db" : "none");
     });
     svg.querySelectorAll(".graph-edge").forEach((e) => {
+      const dependencyEdge =
+        (+e.dataset.edgeA === focusId || dependencies.has(+e.dataset.edgeA)) &&
+        dependencies.has(+e.dataset.edgeB);
       const related =
+        dependencyEdge ||
         +e.dataset.edgeA === focusId ||
         +e.dataset.edgeB === focusId ||
         incomingGroups
@@ -377,6 +383,8 @@ function renderGraph(gs, map) {
           ?.edges.some(
             ([a, b]) => a === +e.dataset.edgeA && b === +e.dataset.edgeB,
           );
+      e.classList.toggle("dependency-edge", dependencyEdge);
+      e.style.stroke = dependencyEdge ? "#b5dba0" : "";
       e.style.opacity =
         focusId === null && !activePort ? 0.48 : related ? 0.95 : 0.045;
     });

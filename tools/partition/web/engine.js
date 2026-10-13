@@ -1,5 +1,45 @@
 /* Pure partition operations. Directed edge weights count static call sites. */
 const Engine = (() => {
+  // Original-file attachment is independent of the tentative partition.
+  function anchors(data) {
+    const outgoing = data.functions.map(() => new Set()),
+      incoming = data.functions.map(() => new Set());
+    for (const [a, b] of data.edges) {
+      outgoing[a].add(b);
+      incoming[b].add(a);
+    }
+    const rows = data.functions.map((f, root) => {
+      const dependencies = new Set(),
+        seen = new Set([root]),
+        stack = [root];
+      while (stack.length) {
+        for (const v of outgoing[stack.pop()]) {
+          if (
+            seen.has(v) ||
+            !data.functions[v].s ||
+            data.functions[v].f !== f.f
+          )
+            continue;
+          seen.add(v);
+          dependencies.add(v);
+          stack.push(v);
+        }
+      }
+      const callers = [...incoming[root]].filter(
+          (v) => data.functions[v].f !== f.f,
+        ),
+        shared = [...dependencies].filter((v) =>
+          [...incoming[v]].some((a) => a !== root && !dependencies.has(a)),
+        ),
+        raw = Math.log1p(callers.length) * Math.log1p(dependencies.size);
+      return { callers, dependencies, shared, raw };
+    });
+    const maximum = Math.max(0, ...rows.map((r) => r.raw));
+    return rows.map((r) => ({
+      ...r,
+      score: maximum ? (100 * r.raw) / maximum : 0,
+    }));
+  }
   function membership(groups, n) {
     const a = new Int32Array(n).fill(-1);
     groups.forEach((g, i) => g.members.forEach((v) => (a[v] = i)));
@@ -300,6 +340,14 @@ const Engine = (() => {
       )
       .slice(0, 12);
   }
-  return { membership, metrics, partition, atoms, suggestMoves, moveEvaluator };
+  return {
+    membership,
+    metrics,
+    partition,
+    atoms,
+    suggestMoves,
+    moveEvaluator,
+    anchors,
+  };
 })();
 if (typeof module !== "undefined") module.exports = Engine;
