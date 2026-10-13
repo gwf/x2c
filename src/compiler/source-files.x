@@ -16,7 +16,7 @@ int Compiler.read_source(Compiler c, String path, String volatile &text) {
 */
 String Compiler.canonical_path(Compiler c, String path) {
   if (c.sources) return Path.absolute(path);
-  String real = real_path(path);
+  String real = Path.real(path);
   return real ? real : path;
 }
 
@@ -30,7 +30,7 @@ static Map real_paths = NULL, static Scope real_paths_scope = NULL;
     `path` is NULL or does not resolve. Each spelling is resolved once per
     process.
 */
-String real_path(String path) {
+String Path.real(String path) {
   if (!path) return NULL;
   Var known = _real_paths()[path];
   if (known is <string>) return known;
@@ -42,9 +42,9 @@ String real_path(String path) {
 }
 
 /** Returns `Path.absolute(path)`, resolving an existing file through
-    `real_path`. */
-String absolute_path(String path) {
-  String real = real_path(path);
+    `Path.real`. */
+String Path.resolved_absolute(String path) {
+  String real = Path.real(path);
   return real ? real : Path.absolute(path);
 }
 

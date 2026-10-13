@@ -386,8 +386,8 @@ static String _canonical_file(Compiler c, List location) {
    resolves on disk itself: trying the root depends on whether the first path
    resolved, which `Compiler.canonical_path` does not report. */
 static String _normalize_file(Compiler c, String file) {
-  String real = real_path(file), root = c.root_dir;
-  if (!real && root && file[0] != '/') real = real_path(%"$root/$file");
+  String real = Path.real(file), root = c.root_dir;
+  if (!real && root && file[0] != '/') real = Path.real(%"$root/$file");
   return c.display_path(real ? real : file);
 }
 

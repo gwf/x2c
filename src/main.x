@@ -56,16 +56,16 @@ static macro Stmt $report.main.translation_verbose(
   fprintf(stderr, "x2c: translate --out-dir %s %s\n", $directory, $input);
 
 static macro Stmt $report.main.input_not_x(Expr $input) =>
-  driver_error(%"translation input is not an .x file: ${$input}");
+  Diagnostics.driver_error(%"translation input is not an .x file: ${$input}");
 
 static macro Stmt $report.main.directory_missing(Expr $out_dir) =>
-  driver_error(%"output directory does not exist: ${$out_dir}");
+  Diagnostics.driver_error(%"output directory does not exist: ${$out_dir}");
 
 static macro Stmt $report.main.directory_not_dir(Expr $out_dir) =>
-  driver_error(%"output is not a directory: ${$out_dir}");
+  Diagnostics.driver_error(%"output is not a directory: ${$out_dir}");
 
 static macro Stmt $report.main.directory_unwritable(Expr $out_dir) =>
-  driver_error(%"output directory is not writable: ${$out_dir}");
+  Diagnostics.driver_error(%"output directory is not writable: ${$out_dir}");
 
 static macro Stmt $report.main.translated(
   Expr $n, Expr $noun, Expr $out_dir, Expr $duration) =>
@@ -74,14 +74,14 @@ static macro Stmt $report.main.translated(
       $duration}");
 
 static macro Stmt $report.main.env_unknown(Expr $wanted) =>
-  driver_error(%"unknown env name '${$wanted}'");
+  Diagnostics.driver_error(%"unknown env name '${$wanted}'");
 
 static macro Stmt $report.main.external_failed(Expr $path) =>
-  driver_error(
+  Diagnostics.driver_error(
     %"cannot run external command '${$path}': ${String.new(strerror(errno))}");
 
 static macro Stmt $report.main.diagnostics_unwritable(Expr $diagnostics) =>
-  driver_error(%"cannot open diagnostics file '${$diagnostics}'");
+  Diagnostics.driver_error(%"cannot open diagnostics file '${$diagnostics}'");
 
 // translating a unit
 
@@ -232,7 +232,7 @@ static void _preflight(Translation &t) {
   int shared = !request.inspects() && !t.unit_dirs, Map stems = {};
   foreach (String input, request.inputs) {
     Build.require_input(input);
-    if (!is_source_file(input))
+    if (!Path.is_x2c_source(input))
       $report.main.input_not_x(input);
     String stem = Path.stem(input);
     if (shared && stem in stems)
@@ -295,8 +295,8 @@ static void _report(Translation &t, unsigned long started_at) {
   unsigned long long bytes = 0;
   foreach (String input, t.request.inputs) {
     String stem = Path.stem(input);
-    bytes += report_file_bytes(%"$out_dir/$stem.c");
-    bytes += report_file_bytes(%"$out_dir/$stem.h");
+    bytes += Path.regular_bytes(%"$out_dir/$stem.c");
+    bytes += Path.regular_bytes(%"$out_dir/$stem.h");
   }
   String duration = report_duration(report_now_us() - started_at);
   int n = t.total;
@@ -340,7 +340,7 @@ static void _preload_modules(Translation &t) {
   if (!roots) return;
   foreach (String name, _package_names(t, roots).keys()) {
     String root = NULL;
-    if (!package_entry(t.request.sources, roots, name, root) ||
+    if (!t.request.sources.package_entry(roots, name, root) ||
         Compiler.links_extension(name)) continue;
     String module = %"$root/builds/$name.module";
     if (Path.is_file(module)) Compiler.preload_native_module(module);
@@ -603,17 +603,17 @@ static int _build_inputs(CliRequest request, Array commands) {
   /* Manifest options have no meaning without a manifest. The build fails
      before it builds something the command did not describe. */
   if (request.manifest)
-    driver_error("--manifest-path conflicts with explicit inputs");
+    Diagnostics.driver_error("--manifest-path conflicts with explicit inputs");
   if (request.target)
-    driver_error("--target conflicts with explicit inputs");
+    Diagnostics.driver_error("--target conflicts with explicit inputs");
   if (request.profile)
-    driver_error("--profile conflicts with explicit inputs");
+    Diagnostics.driver_error("--profile conflicts with explicit inputs");
   return _build_target(request, commands);
 }
 
 static int _build_manifest(CliRequest request, Array commands) {
   if (request.compile_only)
-    driver_error("--compile-only needs input operands, not a manifest");
+    Diagnostics.driver_error("--compile-only needs input operands, not a manifest");
   for (ProjectBuild node = ProjectBuild.plan(request); node; node = node.next) {
     int status = _build_target(node.request, commands);
     if (status) return status;
@@ -694,7 +694,7 @@ static int _translate_units(CliRequest request, Build b, List units) {
 static List _stale_inputs(Build b, List units, Map stale) {
   Array inputs = [];
   foreach (String input, units) {
-    if (!is_source_file(input)) continue;
+    if (!Path.is_x2c_source(input)) continue;
     String directory = b.generated_dir(input);
     if (b.translation_current(input, directory)) {
       b.begin_translation(input);
@@ -714,7 +714,7 @@ static List _stale_inputs(Build b, List units, Map stale) {
 static void _register_units(
   CliRequest request, Build b, List units, Map stale) {
   foreach (String input, units) {
-    if (!is_source_file(input)) continue;
+    if (!Path.is_x2c_source(input)) continue;
     String directory = b.generated_dir(input);
     if (input in stale && request.dry_run) {
       b.begin_translation(input);
@@ -823,7 +823,7 @@ int main(int argc, char **argv) {
   if (argc > 1) _run_external(argc, argv);
   CliRequest request = CliRequest.parse(argc, argv);
   String diagnostics = request.diagnostics_file;
-  if (diagnostics && !diagnostics_write_json(diagnostics))
+  if (diagnostics && !Diagnostics.write_json(diagnostics))
     $report.main.diagnostics_unwritable(diagnostics);
   if (request.command == <script> && request.prepare_script()) return 0;
   report_configure(

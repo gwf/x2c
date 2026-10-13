@@ -104,8 +104,8 @@ static typedef struct Call {
 Var Compiler.meta_helper_call(
   Compiler c, String name, Token site, List arguments, String provider) {
   if (c.shallow) c.collection_native = 1;
-  String file = provider ? real_path(Compiler.absolute_home_path(provider))
-                         : real_path(c.token_source(site, NULL));
+  String file = provider ? Path.real(Compiler.absolute_home_path(provider))
+                         : Path.real(c.token_source(site, NULL));
   Call call = {
     .compiler = c, .name = name, .site = site,
     .table = _table_of(file, helper_table)};
@@ -306,7 +306,7 @@ static int _stop(int signal) {
    that stopped it, which is also how a body that overflows the stack
    ends. */
 static String _exit_reason(void) {
-  int signal, code = shell_status(_stop(0), signal);
+  int signal, code = Job.decode_wait_status(_stop(0), signal);
   if (!signal) return %"the body exited with status $code";
   String name = String.new(strsignal(signal));
   return %"the body crashed or overflowed the stack (signal $signal: $name)";

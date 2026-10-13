@@ -10,7 +10,7 @@ void Compiler.tokenize(Compiler c, char *text) {
   c.input_boundary = NULL;
   c.text = text;
   c.tokenizer = Tokenizer.new(c.text, <x2c>);
-  c.tokenizer.layout = c.layout || is_layout_file(c.filename);
+  c.tokenizer.layout = c.layout || Path.is_layout_source(c.filename);
   c.tokenizer.scan();
   c.layout = c.tokenizer.layout;
   _report_malformed_token(c);
@@ -25,7 +25,7 @@ void Compiler.tokenize(Compiler c, char *text) {
 static int _is_script_file(Compiler c) =>
   c.unit_script && c.filename &&
   (c.filename == c.unit_script.path ||
-   absolute_path(c.filename) == c.unit_script.path);
+   Path.resolved_absolute(c.filename) == c.unit_script.path);
 
 /* A lexical failure truncates the token stream, so the parser reaches the
    appended `<eof>` and blames the end of the file. Report the refused byte

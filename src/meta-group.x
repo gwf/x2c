@@ -77,8 +77,8 @@ String Compiler.meta_cc(String &include_dir) {
 /** Returns the identity of the C compiler at `cc`: its path and content
     hash. */
 String Compiler.meta_cc_identity(String cc) {
-  String path = "/" in cc ? cc : find_program(cc);
-  String hash = file_identity(path);
+  String path = "/" in cc ? cc : Env.find_program(cc);
+  String hash = Path.content_identity(path);
   return hash ? %"$path $hash" : cc;
 }
 
@@ -87,7 +87,7 @@ String Compiler.meta_cc_identity(String cc) {
     `directory` when a group's C is the cause. */
 String Compiler.meta_cc_run(List arguments, String directory) {
   String printed = NULL, errors = NULL;
-  if (!tool_capture(arguments, printed, errors)) return NULL;
+  if (!ToolAction.capture(arguments, printed, errors)) return NULL;
   String failure = _cc_error(errors);
   return !directory || directory in failure ? failure
     : %"$failure; the group's C is in $directory";
@@ -420,8 +420,8 @@ static Var _group_include(Compiler c, Var node, String lib) {
   match (node) case %(preproc ?(String text)): {
     int angle = 0;
     String target = Compiler.preproc_include_target(text, angle);
-    if (!target || !is_source_file(target)) break;
-    String path = collect_resolve_include(
+    if (!target || !Path.is_x2c_source(target)) break;
+    String path = SourceView.resolve_include(
       c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
     Var index;
     if (path && meta_build_tables.try_get(Path.absolute(path), index))

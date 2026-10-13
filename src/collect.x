@@ -382,7 +382,7 @@ static int _file(Splice &s, String path, String text, String prefix) {
 static Token _block(Splice &s) {
   if (!_spells_block(s.text)) return NULL;
   Tokenizer tokenizer = Tokenizer.new(s.text, <x2c>);
-  tokenizer.layout = is_layout_file(s.path);
+  tokenizer.layout = Path.is_layout_source(s.path);
   tokenizer.scan();
   Compiler scan = Scope.calloc(1, sizeof(struct Compiler));
   scan.tokenizer = tokenizer;
@@ -528,7 +528,7 @@ static void _walk_file(
   if (path in _process_cache()) (void) _entry(c, path);
   if (module) text = module.text;
   Tokenizer tokenizer = Tokenizer.new(text, <x2c>);
-  tokenizer.layout = is_layout_file(path);
+  tokenizer.layout = Path.is_layout_source(path);
   tokenizer.scan();
   /* Keyword aliases are file-local, and every segment parses in the syntax
      the whole file selected. */
@@ -539,7 +539,7 @@ static void _walk_file(
       .c = c, .path = path, .text = text, .dir = dir, .module = module,
       .globs = globs, .visited = visited, .parts = [], .definitions = {},
       .dependencies = _cache_map(), .statics = {}, .hashes = _cache_map(),
-      .unit = is_source_file(path), .line = 1};
+      .unit = Path.is_x2c_source(path), .line = 1};
     if (path == _canonical_path(c.filename)) c.meta_hashes = w.hashes;
     // Editing a member changes the module's contribution.
     if (module) {
@@ -817,7 +817,7 @@ static void _include_file(FileWalk &w, String target, int angle) {
   int covered = 0;
   String path = _resolve_include(
     w.c.sources, w.c.include_dirs, w.dir, target, angle, covered, w);
-  if (!path || (covered && !is_source_file(path))) return;
+  if (!path || (covered && !Path.is_x2c_source(path))) return;
   String canonical = _canonical_path(path);
   w.c.add_translation_dependency(canonical);
   if (!(canonical in w.visited)) {
@@ -936,7 +936,7 @@ static String _resolve_include(
     String dir = dirs[i], path = %"$dir/$target";
     covered = dir == _canonical_lib() || dir == _canonical_include();
     /* The final runtime header adds no symbols, generated or absent. */
-    if (i + 1 < dirs.len() || !covered || is_source_file(path))
+    if (i + 1 < dirs.len() || !covered || Path.is_x2c_source(path))
       if (walk) _include_search_dependency(walk, path);
     if (!sources.exists(path)) continue;
     return path;
@@ -961,7 +961,7 @@ static Array _include_dirs(
 
 /** The file the include of `target` from `includer_dir` names, searched as
     collection searches `dirs`, or NULL. */
-String collect_resolve_include(
+String SourceView.resolve_include(
   SourceView sources, List dirs, String includer_dir, String target,
   int angle) {
   int covered = 0;
@@ -977,9 +977,9 @@ String collect_resolve_include(
     module adds nothing the prelude has not declared. */
 List Compiler.include_typedef_names(
   Compiler c, String target, int angle, Map seen) {
-  String path = collect_resolve_include(
+  String path = SourceView.resolve_include(
     c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
-  if (!path || !is_source_file(path)) return NULL;
+  if (!path || !Path.is_x2c_source(path)) return NULL;
   Array names = [];
   _add_typedef_names(c, names, _canonical_path(path), seen);
   return names.list_free();
@@ -990,9 +990,9 @@ List Compiler.include_typedef_names(
     through a cycle back to its own still-open header. */
 List Compiler.include_type_dependencies(
   Compiler c, String target, int angle, Map seen) {
-  String path = collect_resolve_include(
+  String path = SourceView.resolve_include(
     c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
-  if (!path || !is_source_file(path)) return NULL;
+  if (!path || !Path.is_x2c_source(path)) return NULL;
   seen[_canonical_path(c.filename)] = 1;
   Array types = [];
   _add_type_dependencies(c, types, _canonical_path(path), seen);
@@ -1030,7 +1030,7 @@ static void _add_type_dependencies(
     them. */
 void Compiler.include_function_declarations(
   Compiler c, String target, int angle, Map available) {
-  String path = collect_resolve_include(
+  String path = SourceView.resolve_include(
     c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
   if (path) _add_function_declarations(c, _canonical_path(path), available);
 }
@@ -1109,7 +1109,7 @@ static int _linked_provider_current(
       if (found == NULL) return 0;
       // Member content was hashed above; only included units own proofs.
       foreach (Var (dependency, expected), found)
-        if (is_source_file(dependency) && expected is <string> &&
+        if (Path.is_x2c_source(dependency) && expected is <string> &&
             !String.startswith(expected, "search:") &&
             Compiler.linked_meta_provider_source(Compiler.portable_path(dependency)) &&
             !_linked_provider_current(c, dependency, seen)) return 0;
@@ -1178,7 +1178,7 @@ Map Compiler.meta_provider_hashes(Compiler c, String provider) =>
 /** Retains source proofs and one definition hash per linked provider. */
 void Compiler.add_linked_meta_provider_hashes(Compiler c, Map rows) {
   foreach (String path, c.deps.keys()) {
-    if (!is_source_file(path)) continue;
+    if (!Path.is_x2c_source(path)) continue;
     List entry = _entry(c, _canonical_path(path));
     if (!entry) continue;
     String provider = Compiler.portable_path(_canonical_path(path));
@@ -1263,9 +1263,9 @@ static void _add_typedef_names(
 /* Unresolvable paths retain the caller's spelling. This is
    `Compiler.canonical_path` without a source view: an unsaved file keeps
    the spelling the include search built, which keys its process-cache
-   entry, and `collect_resolve_include` searches with no Compiler. */
+   entry, and `SourceView.resolve_include` searches with no Compiler. */
 static String _canonical_path(String path) {
-  String real = real_path(path);
+  String real = Path.real(path);
   return real ? real : path;
 }
 
@@ -1811,7 +1811,7 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
 
 static String _find_package(
   Compiler c, String name, String &root, Token token) {
-  String entry = package_entry(c.sources, c.package_dirs, name, root);
+  String entry = c.sources.package_entry(c.package_dirs, name, root);
   if (entry) return entry;
   $report.driver.package_unknown(c, token, name);
 }
@@ -1906,7 +1906,7 @@ static void _install(Surface &s) {
 
 /* A C header or a runtime module crosses with its own spellings. */
 static int _keeps_spellings(String path) =>
-  !is_source_file(path) || _in_runtime(path);
+  !Path.is_x2c_source(path) || _in_runtime(path);
 
 static int _in_runtime(String path) =>
   path.startswith(%"${_canonical_lib()}/") ||
@@ -2075,7 +2075,7 @@ void Compiler.install_included_effects(Compiler c) {
     String target = token.type == <preproc>
                   ? Compiler.preproc_include_target(token.text, angle) : NULL;
     if (!target) continue;
-    String path = collect_resolve_include(
+    String path = SourceView.resolve_include(
       c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
     if (!path) continue;
     String canonical = _canonical_path(path);
@@ -2394,7 +2394,7 @@ static List _interface_include_dirs(
                  ? Path.basename(root)
                  : _package_owns(c, canonical) ? c.package : NULL;
   dirs.push(
-    is_source_file(canonical) && package ? %(package $package) : %(package));
+    Path.is_x2c_source(canonical) && package ? %(package $package) : %(package));
   return dirs.list_free();
 }
 

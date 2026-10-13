@@ -60,7 +60,7 @@ static macro Stmt $report.install.package_missing(
   _error(%"no package '${$name}' for ${$platform} in ${$location}");
 
 static macro Stmt $report.install.home_missing(Expr $command) =>
-  driver_error(
+  Diagnostics.driver_error(
     %"${$command}: no x2c home: install the compiler or set X2C_HOME");
 
 static macro Stmt $report.install.tool_failed(
@@ -75,10 +75,10 @@ static macro Stmt $report.install.archive_shape(Expr $tarball) =>
   _error(%"${$tarball} must contain one package directory");
 
 static macro Stmt $report.install.remove_missing(Expr $name) =>
-  driver_error(%"remove: no installed package '${$name}'");
+  Diagnostics.driver_error(%"remove: no installed package '${$name}'");
 
 static macro Stmt $report.install.remove_unmanaged(Expr $target) =>
-  driver_error(
+  Diagnostics.driver_error(
     %"remove: ${$target} is not an installed package; remove it by hand");
 
 static macro Stmt $report.install.lock_waiting(Expr $packages) =>
@@ -99,7 +99,7 @@ static macro Expression $report.install.start_failed(
 // the packages lock
 
 /* The packages lock this process holds, and the staging directory it is
-   filling. `driver_error` exits without running deferred cleanup, so
+   filling. `Diagnostics.driver_error` exits without running deferred cleanup, so
    every failing exit below releases both first. */
 static int _packages_lock = -1;
 static String _staging = NULL;
@@ -114,11 +114,11 @@ static String _locked_packages(String command, int quiet) {
   if (_packages_lock >= 0) return packages;
   try packages.make_dirs();
   catch %(io-fail *detail): _host_error(detail);
-  int held = file_lock(lock, 0);
+  int held = Path.lock_file(lock, 0);
   if (held < 0) {
     if (!quiet)
       $report.install.lock_waiting(packages);
-    held = file_lock(lock, 1);
+    held = Path.lock_file(lock, 1);
   }
   _packages_lock = held;
   return packages;
@@ -151,12 +151,12 @@ static void _release_packages(void) {
 
 static void _error(const char *message) {
   _release_packages();
-  driver_error(%"install: $message");
+  Diagnostics.driver_error(%"install: $message");
 }
 
 static void _host_error(List detail) {
   _release_packages();
-  host_error(detail);
+  Diagnostics.host_error(detail);
 }
 
 // installing

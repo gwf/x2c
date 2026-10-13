@@ -63,40 +63,40 @@ typedef struct TargetKind {
 /* cli command reports. */
 
 static macro Stmt $report.cli.command_unknown(Expr $first) =>
-  driver_error(%"unknown command or global option '${$first}'");
+  Diagnostics.driver_error(%"unknown command or global option '${$first}'");
 
 static macro Stmt $report.cli.operand_required(Expr $name) =>
-  driver_error(%"${$name} requires exactly one operand");
+  Diagnostics.driver_error(%"${$name} requires exactly one operand");
 
 static macro Stmt $report.cli.operands_forbidden(Expr $name) =>
-  driver_error(%"${$name} accepts no operands");
+  Diagnostics.driver_error(%"${$name} accepts no operands");
 
 static macro Stmt $report.cli.help_unknown(Expr $name) =>
-  driver_error(%"unknown help command '${$name}'");
+  Diagnostics.driver_error(%"unknown help command '${$name}'");
 
 static macro Stmt $report.cli.option_value_forbidden(Expr $arg) =>
-  driver_error(%"option takes no value '${$arg}'");
+  Diagnostics.driver_error(%"option takes no value '${$arg}'");
 
 static macro Stmt $report.cli.option_value_required(Expr $arg) =>
-  driver_error(%"option requires a value '${$arg}'");
+  Diagnostics.driver_error(%"option requires a value '${$arg}'");
 
 static macro Stmt $report.cli.color_invalid(Expr $value) =>
-  driver_error(%"invalid color mode '${$value}'");
+  Diagnostics.driver_error(%"invalid color mode '${$value}'");
 
 static macro Stmt $report.cli.target_unknown(Expr $value) =>
-  driver_error(%"unknown target kind '${$value}'");
+  Diagnostics.driver_error(%"unknown target kind '${$value}'");
 
 static macro Stmt $report.cli.value_invalid(Expr $noun, Expr $value) =>
-  driver_error(%"invalid ${$noun} '${$value}'");
+  Diagnostics.driver_error(%"invalid ${$noun} '${$value}'");
 
 static macro Stmt $report.cli.dependency_owned(Expr $value) =>
-  driver_error(%"C dependency option is driver-owned '${$value}'");
+  Diagnostics.driver_error(%"C dependency option is driver-owned '${$value}'");
 
 static macro Stmt $report.cli.native_unsupported(Expr $arg) =>
-  driver_error(%"unsupported package native argument '${$arg}'");
+  Diagnostics.driver_error(%"unsupported package native argument '${$arg}'");
 
 static macro Stmt $report.cli.option_unknown(Expr $arg) =>
-  driver_error(%"unknown option '${$arg}'");
+  Diagnostics.driver_error(%"unknown option '${$arg}'");
 
 // commands and options
 
@@ -401,7 +401,7 @@ CliRequest CliRequest.parse(int argc, char **argv) {
   _read_arguments(args, argc, argv);
   if (!args.len()) _help_exit(0, 2);
   String first = args[0];
-  if (!first) driver_error("expected a command, found an empty argument");
+  if (!first) Diagnostics.driver_error("expected a command, found an empty argument");
   CliCommand *command = _command_row(first);
   if (command) return _parse_command(args, *command);
   if (first == "--help" || first == "-h") _help_exit(0, 0);
@@ -497,27 +497,27 @@ static void _finish_request(Parse &p) {
 static void _check(CliRequest r, int mask) {
   Symbol name = r.command, List inputs = r.inputs;
   if (mask == CLI_TRANSLATE && !inputs)
-    driver_error("translate requires at least one input");
+    Diagnostics.driver_error("translate requires at least one input");
   if (inputs.cdr() && (r.dep_file || r.dep_target))
-    driver_error("--dep-file and --dep-target require exactly one input");
+    Diagnostics.driver_error("--dep-file and --dep-target require exactly one input");
   if (r.no_deps && (r.dep_file || r.dep_target || r.no_phony_deps))
-    driver_error("--no-deps conflicts with dependency output options");
+    Diagnostics.driver_error("--no-deps conflicts with dependency output options");
   if (r.compile_only && r.kind != <executable>)
-    driver_error("--compile-only conflicts with a library target kind");
+    Diagnostics.driver_error("--compile-only conflicts with a library target kind");
   if (mask == CLI_ENV && inputs.cdr())
-    driver_error("env accepts at most one name");
+    Diagnostics.driver_error("env accepts at most one name");
   if ((mask == CLI_INSTALL || mask == CLI_REMOVE || mask == CLI_NEW) &&
       (!inputs || inputs.cdr()))
     $report.cli.operand_required(name);
   if (mask == CLI_LIST && inputs)
     $report.cli.operands_forbidden(name);
   if (mask == CLI_SCRIPT && !inputs)
-    driver_error("script requires a script file");
+    Diagnostics.driver_error("script requires a script file");
 }
 
 static void _help_command(Array args) {
   if (args.len() == 1) _help_exit(0, 0);
-  if (args.len() > 2) driver_error("help accepts at most one command");
+  if (args.len() > 2) Diagnostics.driver_error("help accepts at most one command");
   String name = args[1];
   if (name == "help" || name == "--help" || name == "-h")
     _help_exit(<help>, 0);
@@ -553,7 +553,7 @@ static void _option(Parse &p, String arg, int &i) {
 static void _save_temps_dir(CliRequest r, String arg) {
   r.save_temps = 1;
   r.temps_dir = arg.remove_prefix("--save-temps=");
-  if (!r.temps_dir) driver_error("--save-temps= requires a directory");
+  if (!r.temps_dir) Diagnostics.driver_error("--save-temps= requires a directory");
 }
 
 /* Reads the option at `i` for `mask`, advancing `i` past a separate value.
@@ -636,7 +636,7 @@ static void _apply(Parse &p, Given given) {
 }
 
 static Symbol _color_mode(String value) {
-  if (!value) driver_error("--color requires auto, always, or never");
+  if (!value) Diagnostics.driver_error("--color requires auto, always, or never");
   if (value == "auto") return <auto>;
   if (value == "always") return <always>;
   if (value == "never") return <never>;
@@ -646,7 +646,7 @@ static Symbol _color_mode(String value) {
 static Symbol _target_kind(String value) {
   String refusal = NULL;
   Symbol kind = TargetKind.named(value, refusal);
-  if (refusal) driver_error(refusal);
+  if (refusal) Diagnostics.driver_error(refusal);
   if (!kind) $report.cli.target_unknown(value);
   return kind;
 }
@@ -766,7 +766,7 @@ CliRequest CliRequest.package_options(String path, String package) {
    carry. */
 static void _native(Parse &p, int &i) {
   String arg = p.args[i];
-  if (!arg) driver_error("empty package native argument");
+  if (!arg) Diagnostics.driver_error("empty package native argument");
   if (arg[0] != '-' && arg[0] != '@' && arg.endswith(".a")) {
     p.ld_args.push(arg);
     return;
@@ -791,7 +791,7 @@ static void _expand_argument(Array out, String arg, List stack) {
     out.push(arg[1:]);
     return;
   }
-  if (arg.len() == 1) driver_error("empty response-file reference '@'");
+  if (arg.len() == 1) Diagnostics.driver_error("empty response-file reference '@'");
   String path = arg[1:], identity = Path.absolute(path);
   if (identity in stack)
     _fail(%"recursive response-file inclusion: $path", NULL);
@@ -1195,7 +1195,7 @@ static void _print_help_row(
 // diagnostics
 
 /* Prints an error and perhaps a note, then exits with status 2. The exit
-   runs the atexit handlers, which driver_error skips. */
+   runs the atexit handlers, which Diagnostics.driver_error skips. */
 static void _fail(String message, String note) {
   fprintf(stderr, "x2c: error: %s\n", message);
   if (note) fprintf(stderr, "note: %s\n", note);

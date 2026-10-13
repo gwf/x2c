@@ -61,7 +61,7 @@ static List _source_range(Compiler c, Token first, Token after) {
           last.type == <preproc>)) last--;
   // A module member's range counts from the start of the member.
   int start = first.pos;
-  String path = absolute_path(c.text_source(first.pos, start));
+  String path = Path.resolved_absolute(c.text_source(first.pos, start));
   if (!c.line_markers && !(path in c.source_texts))
     c.source_texts[path] = c.text;
   return %($path $start ${start + last.pos + last.len - first.pos});

@@ -41,7 +41,7 @@ static macro Stmt $report.emit.file_write(Expr $c, Expr $failure) {
     must still describe that same unit. `dir` must already exist. Generation
     partitions the AST, materializes caches and once-only initialization, and
     writes or replaces `<dir>/<source-stem>.h`, `.c`, and the `.xi` interface
-    of a collected unit through one `file_publish`, so a failed write
+    of a collected unit through one `Path.publish_files`, so a failed write
     replaces none of them. It appends generated bindings and initialization
     work to the compiler and is not idempotent. Failures are reported as
     `emit` diagnostics.
@@ -69,7 +69,7 @@ static List _without_trivia(List ast) =>
 static List _generated_code(Compiler c, List ast, String basename) {
   Map inline_bodies = $auto({});
   List (header, source) = _header_and_source(c, ast, inline_bodies);
-  String hash = filename_hash(c.filename);
+  String hash = Path.identifier_hash(c.filename);
   Map bindings;
   (header, source, bindings) = c.setup_cache_init(
     header, source, %"_x2c_hcache_${hash}_", %"_x2c_hcache_guard_$hash",
@@ -100,7 +100,7 @@ static List _emit_source(
 /* A failed write reports its file and the host error. */
 static void _publish_files(Compiler c, List outputs) {
   List failure = NULL;
-  try file_publish(outputs);
+  try Path.publish_files(outputs);
   catch %((!or not-found io-fail) *detail): failure = Error.snapshot(detail);
   if (!failure) return;
   $report.emit.file_write(c, failure);
@@ -1451,7 +1451,7 @@ static void _push_line(Array out, Var node) {
 static List _include_guard(Compiler c, List content) {
   if (c.runtime_inc && !_has_runtime_include(content))
     content = cons(%(preproc "#include \"x2c.x\""), content);
-  String guard = filename_hash(c.filename);
+  String guard = Path.identifier_hash(c.filename);
   return %(@{_banner()} @{_header_guard(content, guard)});
 }
 
@@ -1489,7 +1489,7 @@ static List _header_guard(List content, String guard) => %(
    header adds nothing; its own declarations follow in order. The runtime
    headers that lowering needs precede their first uses. */
 static List _source_unit(Compiler c, List content) {
-  String guard = filename_hash(c.filename);
+  String guard = Path.identifier_hash(c.filename);
   List runtime = c.runtime_inc ? _include_directive("x2c.x") : NULL;
   Anchors at = _anchors(content, 1);
   List error = at.error >= 0 ? _include_directive("error.h") : NULL;

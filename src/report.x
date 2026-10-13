@@ -245,7 +245,7 @@ unsigned long report_now_us(void) {
 /** Returns the size of a regular file.
     NULL, a failed `stat`, or a non-regular path returns zero.
 */
-unsigned long long report_file_bytes(String path) {
+unsigned long long Path.regular_bytes(String path) {
   struct stat info;
   if (!path || stat(path, &info) || !S_ISREG(info.st_mode)) return 0;
   return (unsigned long long) info.st_size;

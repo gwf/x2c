@@ -48,19 +48,19 @@ typedef struct Build {
 /* build command reports. */
 
 static macro Stmt $report.build.input_unsupported(Expr $input) =>
-  driver_error(%"unsupported build input: ${$input}");
+  Diagnostics.driver_error(%"unsupported build input: ${$input}");
 
 static macro Stmt $report.build.archive_nested(Expr $input) =>
-  driver_error(%"cannot nest an archive in a static library: ${$input}");
+  Diagnostics.driver_error(%"cannot nest an archive in a static library: ${$input}");
 
 static macro Stmt $report.build.input_not_file(Expr $input) =>
-  driver_error(%"input is not a regular file: ${$input}");
+  Diagnostics.driver_error(%"input is not a regular file: ${$input}");
 
 static macro Stmt $report.build.runtime_missing(Expr $runtime) =>
-  driver_error(%"matching x2c runtime is unavailable: ${$runtime}");
+  Diagnostics.driver_error(%"matching x2c runtime is unavailable: ${$runtime}");
 
 static macro Stmt $report.build.package_missing(Expr $name, Expr $path) =>
-  driver_error(%"package '${$name}' is not built: ${$path}");
+  Diagnostics.driver_error(%"package '${$name}' is not built: ${$path}");
 
 static macro Stmt $report.build.database_written(Expr $path) =>
   report_line(<muted>, %"  Compilation database ${$path}");
@@ -117,7 +117,7 @@ static macro Stmt $report.build.cleanup_failed(Expr $directory) =>
     $directory);
 
 static macro Stmt $report.build.output_ambiguous() =>
-  driver_error("--output is ambiguous with multiple compile-only inputs");
+  Diagnostics.driver_error("--output is ambiguous with multiple compile-only inputs");
 
 // source templates
 
@@ -182,7 +182,7 @@ static String _process_suffix(void) => "tmp.%ld".printf((long) getpid());
 Build CliRequest.prepare(CliRequest request) {
   _add_extensions(request);
   if (!request.inputs)
-    driver_error("build requires input operands or a project manifest");
+    Diagnostics.driver_error("build requires input operands or a project manifest");
   Build b = Scope.calloc(1, sizeof(struct Build));
   *b = (struct Build) {
     .request = request, .c_sources = [], .gen_dirs = [], .units = [],
@@ -218,7 +218,7 @@ static void _add_inputs(Build b) {
     // A dry run runs nothing and reads nothing, and a planned target's
     // archive exists only after the build it is printing would run.
     if (!request.dry_run) Build.require_input(input);
-    if (is_source_file(input)) b.xlat_n++;
+    if (Path.is_x2c_source(input)) b.xlat_n++;
     else if (input.endswith(".c")) b.c_sources.push(input);
     else if (input.endswith(".o") || input.endswith(".a"))
       b.native_inputs.push(input);
@@ -232,7 +232,7 @@ static void _add_inputs(Build b) {
     A wildcard or directory operand adds a note on what to pass instead.
 */
 void Build.require_input(String input) {
-  if (!input) driver_error("input path is empty");
+  if (!input) Diagnostics.driver_error("input path is empty");
   if (Path.is_file(input)) return;
   if (Path.is_dir(input)) {
     $report.build.input_directory(input);
@@ -251,11 +251,11 @@ void Build.require_input(String input) {
 static void _check_compile_only(Build b) {
   List inputs = b.request.inputs;
   if (b.native_inputs)
-    driver_error("compile-only accepts only .x and .c inputs");
+    Diagnostics.driver_error("compile-only accepts only .x and .c inputs");
   if (inputs.cdr() && b.request.output)
     $report.build.output_ambiguous();
   if (inputs.cdr() && !b.request.build_dir)
-    driver_error("multiple compile-only inputs require --build-dir");
+    Diagnostics.driver_error("multiple compile-only inputs require --build-dir");
 }
 
 /* The selected compiler and archiver go back to the request. */
@@ -297,7 +297,7 @@ static void _make_work_dirs(Build b) {
     if (!request.dry_run)
       foreach (Path root, roots) if (root) root.make_dirs();
   }
-  catch %(io-fail *detail): host_error(detail);
+  catch %(io-fail *detail): Diagnostics.host_error(detail);
 }
 
 static String _kept_dir(CliRequest request) {
@@ -411,8 +411,8 @@ void Build.record_translation(Build b, String input, String directory) {
 */
 void Build.add_generated(Build b, String input, String directory) {
   String source = _unit_file(directory, input, ".c");
-  b.gen_bytes += report_file_bytes(source);
-  b.gen_bytes += report_file_bytes(_unit_file(directory, input, ".h"));
+  b.gen_bytes += Path.regular_bytes(source);
+  b.gen_bytes += Path.regular_bytes(_unit_file(directory, input, ".h"));
   b.c_sources.push(source);
   b.units.push(input);
   if (!(directory in b.gen_dirs)) b.gen_dirs.push(directory);
@@ -490,7 +490,7 @@ static void _link_package(Build b, String package) {
 */
 CliRequest Build.module_entry(Build b) {
   String stamp = Compiler.module_stamp();
-  if (!stamp) driver_error("cannot read the running compiler to stamp");
+  if (!stamp) Diagnostics.driver_error("cannot read the running compiler to stamp");
   Path entry = %"${b.work_dir}/module/x2c_module.x";
   _write_entry(entry, b.units, $source.build.module(stamp));
   return _entry_request(b, %($entry));
@@ -549,7 +549,7 @@ static void _write_entry(Path entry, List units, String exports) {
     entry.write_text(
       $source.build.entry(includes, root, declared, exports));
   }
-  catch %(io-fail *detail): host_error(detail);
+  catch %(io-fail *detail): Diagnostics.host_error(detail);
 }
 
 // finishing a build
@@ -740,7 +740,7 @@ static String _compile_command(Build b, CcJob job) {
 int Build.write_commands(String path, Array commands) {
   String text = %"[\n${",\n".join(commands)}\n]\n";
   try {
-    file_publish(%($path $text));
+    Path.publish_files(%($path $text));
     $report.build.database_written(path);
     return 1;
   }
@@ -977,7 +977,7 @@ static int _archive_extensions(Build b) {
     if (source in sources) objects.push(b.objects[i]);
     i++;
   }
-  String identity = file_identity(b.output);
+  String identity = Path.content_identity(b.output);
   return b.toolchain.archive_action(
     %"$directory/$identity.a", objects.list_free()).run();
 }
@@ -1016,7 +1016,7 @@ void Build.report_success(Build b) {
   if (!b.request.compile_only) report_line(<muted>, _final_tool(b));
   $report.build.intermediates(b);
   if (b.request.compile_only) return;
-  String size = report_size(report_file_bytes(b.output));
+  String size = report_size(Path.regular_bytes(b.output));
   $report.build.output_size(b, size);
   if (_mapped_debug(b))
     $report.build.debug_symbols(b);
@@ -1092,7 +1092,7 @@ List Build.script_helpers(Build b) {
   String depfile = _unit_file(_unit_dir(b, script), script, ".d");
   Array candidates = [], helpers = [];
   foreach (String path, _depfile_inputs(depfile)) {
-    if (path.startswith("search:") || !is_source_file(path) ||
+    if (path.startswith("search:") || !Path.is_x2c_source(path) ||
         path in candidates || path in prelude) continue;
     if (excluded.any(%!(String prefix) => path.startswith(prefix))) continue;
     candidates.push(path);
@@ -1300,7 +1300,7 @@ static uint64_t _state_file(uint64_t hash, String path, int &ok) =>
   fnv_file(_state_text(hash, path), path, ok);
 
 static uint64_t _state_tool(uint64_t hash, String tool, int &ok) {
-  String path = "/" in tool ? tool : find_program(tool);
+  String path = "/" in tool ? tool : Env.find_program(tool);
   if (path) return _state_file(hash, path, ok);
   ok = 0;
   return _state_text(hash, tool);
@@ -1351,7 +1351,7 @@ static void _state_write(String path, uint64_t hash) =>
 static void _state_write_lines(String path, uint64_t hash, List lines) {
   String text = %"${_state_line(hash)}\n";
   foreach (String line, lines) text = %"$text$line\n";
-  try file_publish(%($path $text));
+  try Path.publish_files(%($path $text));
   catch %((!or not-found io-fail) *): {}
 }
 

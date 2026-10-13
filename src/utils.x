@@ -32,16 +32,16 @@ static keyword loop $private.loop;
 // command reports
 
 static macro Stmt $report.utils.identity_mismatch(Expr $detail) {
-  driver_error(%"compiler identity mismatch: ${$detail}");
+  Diagnostics.driver_error(%"compiler identity mismatch: ${$detail}");
 }
 
 static macro Stmt $report.utils.lock_failed(Expr $p) {
-  driver_error(%"cannot lock ${$p}");
+  Diagnostics.driver_error(%"cannot lock ${$p}");
 }
 
 static macro Stmt $report.utils.host_failed(
   Expr $detail, Expr $subject, Expr $error) {
-  driver_error(
+  Diagnostics.driver_error(
     %"${$detail.assoc(<operation>)} ${$subject}: ${
       String.new(strerror($error))}");
 }
@@ -111,14 +111,14 @@ static String _executable(const char *argv0) {
   }
   String name = String.new(argv0);
   // A bare name came from PATH; only a path resolves against the cwd.
-  if (name && !("/" in name)) name = find_program(name);
+  if (name && !("/" in name)) name = Env.find_program(name);
   return Path.exists(name) ? Path.absolute(name) : NULL;
 }
 
 /* Linux names the running image itself, which stays the same file even if
    the executable's path is replaced while the process runs. */
 static String _identity(void) =>
-  file_identity(
+  Path.content_identity(
     Path.exists("/proc/self/exe") ? "/proc/self/exe" : executable_path);
 
 static String _locate_home(Path p) {
@@ -207,7 +207,7 @@ List Compiler.cpp_include_dirs(void) => cpp_includes;
     that this process may execute, searched as `execvp` searches, or NULL.
     An empty entry names the current directory.
 */
-String find_program(String name) {
+String Env.find_program(String name) {
   foreach (String directory, Env.get("PATH").split(":")) {
     Path candidate = Path.join(directory, name);
     if (candidate.is_executable()) return candidate;
@@ -220,7 +220,7 @@ String find_program(String name) {
 /** Reports whether `path` is x2c source: a `.x` or `.xp` file, or a file
     of any other name whose first line is a shebang, which is a script.
 */
-int is_source_file(String path) {
+int Path.is_x2c_source(String path) {
   if (path.endswith(".x") || path.endswith(".xp")) return 1;
   if (path.endswith(".c") || path.endswith(".h") || path.endswith(".o") ||
       path.endswith(".a")) return 0;
@@ -234,7 +234,7 @@ int is_source_file(String path) {
 }
 
 /** Reports whether `path` names a file in the indentation syntax. */
-int is_layout_file(String path) =>
+int Path.is_layout_source(String path) =>
   path && path.endswith(".xp");
 
 /** Returns the package directory that holds `path` below one of `roots`:
@@ -257,7 +257,7 @@ String Compiler.package_directory(List roots, String path) {
     to `.xp`, using the importing compiler's source view. Returns its directory
     through `directory`, or NULL when the package does not exist.
 */
-String package_entry(
+String SourceView.package_entry(
   SourceView sources, List roots, String name, String &directory) {
   foreach (String package_dir, roots) {
     String root = %"${Path.absolute(package_dir)}/$name";
@@ -302,7 +302,7 @@ String Compiler.module_stamp(void) {
 /** Returns the identity a compiler executable at `path` has when it runs:
     the FNV-1a hash of its bytes, or NULL when `path` is NULL or unreadable.
 */
-String file_identity(String path) {
+String Path.content_identity(String path) {
   int ok = path != NULL;
   uint64_t hash = FNV_OFFSET_BASIS;
   if (ok) hash = fnv_file(hash, path, ok);
@@ -337,7 +337,7 @@ uint64_t fnv_bytes(uint64_t hash, const void *bytes, size_t length) {
 }
 
 /** Hashes unit filename spelling for stable generated C identifiers. */
-String filename_hash(String filename) {
+String Path.identifier_hash(String filename) {
   unsigned hash = 0;
   foreach (char byte, filename) hash = hash * 31 + (unsigned char) byte;
   return "%08X".printf(hash);
@@ -349,7 +349,7 @@ String filename_hash(String filename) {
     lock until it is closed or the process exits. Returns -1 when `wait` is
     zero and another process holds the lock.
 */
-int file_lock(Path p, int wait) {
+int Path.lock_file(Path p, int wait) {
   int lock = open(p, O_RDWR | O_CREAT | O_CLOEXEC, 0666);
   if (lock < 0) $report.utils.lock_failed(p);
   int operation = wait ? LOCK_EX : LOCK_EX | LOCK_NB;
@@ -369,7 +369,7 @@ int file_lock(Path p, int wait) {
     destinations replaced.
     Raises: `<not-found>` or `<io-fail>`, after removing the siblings.
 */
-void file_publish(List outputs) {
+void Path.publish_files(List outputs) {
   String suffix = ".tmp.%ld".printf((long) getpid());
   defer for (List rest = outputs; rest; rest = rest.cddr())
     Path.remove_file(%"${rest.car()}$suffix");
@@ -386,7 +386,7 @@ void file_publish(List outputs) {
     exit status, `128 + signal` when a signal ended it, or -1 otherwise,
     and stores that signal in `signal`, or 0 when no signal ended it.
 */
-int shell_status(int raw, int &signal) {
+int Job.decode_wait_status(int raw, int &signal) {
   signal = WIFSIGNALED(raw) ? WTERMSIG(raw) : 0;
   if (WIFEXITED(raw)) return WEXITSTATUS(raw);
   return signal ? 128 + signal : -1;
@@ -399,16 +399,16 @@ int shell_status(int raw, int &signal) {
     safe inside a `try` body or a catch arm, whose records those handlers
     would otherwise find still live.
 */
-void driver_error(const char *message) {
+void Diagnostics.driver_error(const char *message) {
   fprintf(stderr, "x2c: error: %s\n", message);
   fflush(NULL);
   _exit(2);
 }
 
-/** Reports a caught `<not-found>` or `<io-fail>` through `driver_error`
+/** Reports a caught `<not-found>` or `<io-fail>` through `Diagnostics.driver_error`
     as its operation, path or program, and system reason.
 */
-void host_error(List detail) {
+void Diagnostics.host_error(List detail) {
   Var subject = detail.assoc(<path>);
   if (subject is void) subject = detail.assoc(<program>);
   // Quoted, the key survives a host preprocessor that expands `errno`.

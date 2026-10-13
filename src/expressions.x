@@ -1356,7 +1356,7 @@ static Type _identifier_type(
    reference written in an `.x` unit is reported. */
 static void _check_unit_static(
   Compiler c, String spelling, Token origin) {
-  if (!is_source_file(c.filename)) return;
+  if (!Path.is_x2c_source(c.filename)) return;
   List owner = c.sym.get(%("unit-static" $spelling));
   if (!owner) return;
   String file = c.display_path(Compiler.absolute_home_path(owner.car()));

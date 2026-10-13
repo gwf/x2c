@@ -382,7 +382,7 @@ static List _initializer_macro(Emitter &e, List input, List body) {
     parameters.write(argument.car().str());
   }
   String formal = parameters.str_free();
-  String hash = filename_hash(e.c.filename);
+  String hash = Path.identifier_hash(e.c.filename);
   String name = e.c.fresh_name(%"initializer_choice_$hash");
   String replacement;
   $let(e.c.source_map, 0) {
@@ -982,7 +982,7 @@ static List _atom_intern(String spelling) {
 static List _preproc(Emitter &e, List ast) {
   int angle = 0;
   String target = Compiler.preproc_include_target(ast.cadr(), angle);
-  if (!target || !is_source_file(target)) return ast.cdr();
+  if (!target || !Path.is_x2c_source(target)) return ast.cdr();
   String stem = target[:target.rfind(".")];
   String out = %"#include \"$stem.h\"";
   return %( $out );

@@ -3324,7 +3324,7 @@ static String _filled_doc(Compiler c, String doc) {
    reads as the outer argument, even when two arguments have equal syntax. */
 static Map _hole_spellings(Compiler c) {
   Map written = {}, spellings = {};
-  String file = absolute_path(c.filename);
+  String file = Path.resolved_absolute(c.filename);
   foreach (List frame, c.macro_stack)
     foreach (List binding, frame[2])
       match (binding)

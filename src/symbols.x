@@ -800,7 +800,7 @@ void Compiler.record_declaration_visibility(Compiler c, List declaration) {
 static void _record_native_objects(
   Compiler c, Type spec, List rows) {
   if (!c.shallow || c.source_private < 0 || spec.is_extern() ||
-      !is_source_file(c.filename)) return;
+      !Path.is_x2c_source(c.filename)) return;
   String path = Compiler.portable_path(c.canonical_path(c.filename));
   foreach (List row, rows) {
     List declarator = row;

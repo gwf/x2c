@@ -63,13 +63,13 @@ static macro Stmt $report.project.created(Expr $directory) {
 }
 
 static macro Stmt $report.project.name_invalid(Expr $name) {
-  driver_error(
+  Diagnostics.driver_error(
     %"new: '${
       $name}' is not a target name; use letters, digits, '_', and '-'");
 }
 
 static macro Stmt $report.project.directory_occupied(Expr $dir) {
-  driver_error(%"new: ${$dir} exists and is not an empty directory");
+  Diagnostics.driver_error(%"new: ${$dir} exists and is not an empty directory");
 }
 
 // the manifest model
@@ -591,7 +591,7 @@ static void _resolve_dependencies(Project p) {
   String path = %"${p.root}/x2c.lock";
   if (!p.dependencies) {
     try Path.remove_file(path);
-    catch %(io-fail *detail): host_error(detail);
+    catch %(io-fail *detail): Diagnostics.host_error(detail);
     return;
   }
   List locked = _read_lock(path);
@@ -636,8 +636,8 @@ static void _write_lock(String path, List rows) {
     "# x2c lockfile. Written by x2c build; keep it with the manifest.\n"
     "# name version kind platform url sha256\n";
   foreach (List row, rows) text = %"$text${" ".join(row)}\n";
-  try file_publish(%($path $text));
-  catch %(io-fail *detail): host_error(detail);
+  try Path.publish_files(%($path $text));
+  catch %(io-fail *detail): Diagnostics.host_error(detail);
 }
 
 // build plans
@@ -754,7 +754,7 @@ static Array _target_sources(Project p, ProjectTarget target) {
   excluded.free();
   kept.sort();
   foreach (String path, kept)
-    if (!(is_source_file(path) || path.endswith(".c")))
+    if (!(Path.is_x2c_source(path) || path.endswith(".c")))
       _error_name(p, 0, "manifest source is not .x or .c", path);
   return kept;
 }
@@ -892,10 +892,10 @@ static void _error_name(Project p, int line, String message, String name) {
 */
 int CliRequest.new_project(CliRequest request) {
   Path dir = request.inputs.car();
-  if (!dir) driver_error("new: the directory operand is empty");
+  if (!dir) Diagnostics.driver_error("new: the directory operand is empty");
   String name = _starter_name(dir);
   try _write_starter(dir, name);
-  catch %(io-fail *detail): host_error(detail);
+  catch %(io-fail *detail): Diagnostics.host_error(detail);
   if (!request.quiet) $report.project.created(dir);
   return 0;
 }

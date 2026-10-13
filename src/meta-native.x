@@ -112,24 +112,24 @@ static macro Stmt $report.macro.outside_compilation(Expr $name) =>
   MetaContext.reject(%"${$name} used outside compilation", NULL);
 
 static macro Stmt $report.native.module_platform() =>
-  driver_error("native modules are not supported on this platform");
+  Diagnostics.driver_error("native modules are not supported on this platform");
 
 static macro Stmt $report.native.module_invalid(Expr $path) =>
-  driver_error(%"not an x2c native module: ${$path}");
+  Diagnostics.driver_error(%"not an x2c native module: ${$path}");
 
 static macro Stmt $report.native.module_compiler(Expr $path) =>
-  driver_error(
+  Diagnostics.driver_error(
     %"native module '${$path}' was built by another compiler; rebuild it");
 
 static macro Stmt $report.native.compiler_read(Expr $path) =>
-  driver_error(
+  Diagnostics.driver_error(
     %"cannot read the running compiler to check native module '${$path}'");
 
 static macro Stmt $report.native.module_read(Expr $path, Expr $cause) =>
-  driver_error(%"cannot read native module '${$path}': ${$cause}");
+  Diagnostics.driver_error(%"cannot read native module '${$path}': ${$cause}");
 
 static macro Stmt $report.native.module_load(Expr $path, Expr $cause) =>
-  driver_error(%"cannot load native module '${$path}': ${$cause}");
+  Diagnostics.driver_error(%"cannot load native module '${$path}': ${$cause}");
 
 /* meta functions
 
@@ -532,7 +532,7 @@ void Compiler.record_project_meta_effect(
   if (c.source_private < 0) return;
   Type type = declaration.type_from_ast().canonicalize();
   if (type.is_static()) return;
-  String path = Compiler.portable_path(absolute_path(c.filename));
+  String path = Compiler.portable_path(Path.resolved_absolute(c.filename));
   String name = _native_meta_name(c, declaration, marker);
   if (%(function $name) in c.sym.file_statics()) return;
   c.sym.set(
@@ -630,7 +630,7 @@ void Compiler.record_native_meta_effect(
   Compiler c, List declaration, Token marker) {
   if (c.source_private < 0) return;
   if (!declaration.type_from_ast().is_function()) return;
-  String path = Compiler.portable_path(absolute_path(c.filename));
+  String path = Compiler.portable_path(Path.resolved_absolute(c.filename));
   Type type = declaration.type_from_ast().canonicalize();
   if (type.is_static()) return;
   String name = _native_meta_name(c, declaration, marker);
@@ -654,7 +654,7 @@ static String _native_meta_name(
 /** Records the native advertisements retained by included interfaces. Each
     binds on first use, so a unit with no compile-time code pays nothing. */
 void Compiler.install_native_meta_effects(Compiler c, Map globs) {
-  List unit = %(${absolute_path(c.filename)});
+  List unit = %(${Path.resolved_absolute(c.filename)});
   foreach (Var (key, value), globs) {
     if (_declared_in(key, unit)) continue;
     if (value is <list>) c.install_project_meta_effect(value);
