@@ -1002,3 +1002,12 @@ pre {
 #caller-rail[hidden] {
   display: none;
 }
+
+#source { width: min(1100px, 94vw); max-height: 90vh; }
+#source-content details { margin: 12px 0; padding: 8px; border: 1px solid #344248; }
+#source-content section { padding: 10px 0; border-bottom: 1px solid #344248; }
+#source-content summary { cursor: pointer; }
+.source-lines { max-height: 55vh; overflow: auto; margin-top: 12px; background: #10171b; }
+.source-lines > div { display: flex; white-space: pre; min-width: max-content; }
+.source-lines small { width: 55px; flex-shrink: 0; text-align: right; padding-right: 14px; color: #829395; user-select: none; }
+.source-match { background: #344b35; }

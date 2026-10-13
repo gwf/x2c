@@ -50,7 +50,7 @@ are served directly. Node.js is needed only for the optional checks below.
   the sidebar checkboxes to select groups for merging.
 - Group count and size balance each have left/right buttons that change the
   displayed value by one and immediately update the preview. Group count ranges
-  from one to 50, limited by available functions and keep-together sets. Size
+  from one to 50; impossible counts report the available components. Size
   balance ranges from 0 (lower cut cost) to 100 (more similar group sizes),
   independently of group count.
 - Collapsed arrangements keep outside caller groups in a fixed, scrollable
@@ -106,6 +106,7 @@ changed source does not reuse a saved plan with stale numeric function IDs.
 | `serve.py`                              | Local static server with a separate snapshot path           |
 | `web/app.js`                            | State, actions, navigation, inspectors, storage, export     |
 | `web/engine.js`                         | Partition heuristic, cut metrics, keep-together constraints |
+| `web/decomposition.js` | Component grouping, reference comparison, snapshot source inspection |
 | `web/boundary.js`                       | Exact edges crossing a view boundary                        |
 | `web/graph-view.js`                     | Function graph, camera, drag interaction, caller panel      |
 | `web/layout.js`, `web/layout-worker.js` | Function layout in a worker                                 |
@@ -145,8 +146,8 @@ export in a browser. The server disables asset caching.
 
 The snapshot is a resolved static call graph, not runtime traffic. Unresolved
 and indirect calls are counted separately; missing callers do not prove a
-function is unused. Source peek is a placeholder showing identity: exact source
-ranges and source navigation are not implemented. Edited-group source-line
+function is unused. Source peek displays full snapshot source with line numbers
+and name search. Search matches are not exact definition ranges. Edited-group source-line
 counts are estimates. Plans propose file boundaries but do not apply them.
 
 ### File anchoring
@@ -165,3 +166,39 @@ stays tied to original files when tentative groups change. Unresolved and
 indirect calls remain outside this estimate of attachment.
 
 Optional focused check: `node tools/partition/tests/check-anchors.cjs`.
+
+## Preserve private interfaces
+
+Split previews enable this mode by default. Every same-file caller of a static
+helper joins that helper's indivisible component, transitively, including
+synthetic top-level callers. Calls to existing public functions do not join
+components. Explicit keep-together sets are also respected. Size balance is
+optional and off by default; it cannot break a component. A requested count
+above the component count reports the limit and previews the achievable count.
+Existing cross-group private calls remain visible; splitting one group does not
+repair a helper already moved elsewhere.
+
+Open **Inspect privacy components** in the group inspector. Expand components
+to read public/static membership in source order. Open a function for its full
+snapshot source, including section comments, private macros, types, and state.
+Select components and give their combined group a name. Ordinary group merging,
+renaming, and undo remain available. Components do not infer responsibilities.
+
+**Inspect membership and crossings** separates static and public crossings,
+shows concrete caller/callee pairs and call-site counts, and reports synthetic
+top-level references separately. It also reports unresolved and indirect calls.
+Zero static crossings does not establish source extractability.
+
+**Compare source-informed reference** loads the eight compiler responsibility
+groups from `web/fixtures/compiler-responsibilities.json`, only when the graph
+revision matches. It lists all 189 authored members and source-section evidence
+and uses the same crossing metrics as automatic proposals. Top-level references
+are reported but the synthetic node is not assigned to the eight groups. This
+fixture does not guide the automatic algorithm or prescribe other files' counts.
+
+See [reproduced results](decomposition-results.md). Optional checks:
+
+```sh
+node tools/partition/tests/check-privacy.cjs
+node tools/partition/tests/compare-decompositions.cjs
+```

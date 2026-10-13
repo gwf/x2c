@@ -52,6 +52,7 @@ for mid in module_ids:
         "dir": os.path.dirname(mid) or ".",
         "name": os.path.basename(mid),
         "lines": count_lines(mid),
+        "source": open(os.path.join(root, mid), encoding="utf-8").read(),
         "functions": 0, "staticFns": 0, "publicFns": 0, "topLevel": 0,
         "internalCalls": 0, "outCalls": 0, "inCalls": 0,
         "externalCalls": 0, "indirectCalls": 0,

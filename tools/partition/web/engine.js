@@ -40,6 +40,49 @@ const Engine = (() => {
       score: maximum ? (100 * r.raw) / maximum : 0,
     }));
   }
+  function privacyTies(data) {
+    return data.edges
+      .filter(
+        ([a, b]) =>
+          data.functions[b].s && data.functions[a].f === data.functions[b].f,
+      )
+      .map(([a, b]) => [a, b]);
+  }
+  function decomposition(data, parts) {
+    const owner = membership(
+        parts.map((members) => ({ members })),
+        data.functions.length,
+      ),
+      inside = new Set(parts.flat()),
+      privateEdges = [],
+      publicEdges = [],
+      topEdges = [],
+      outsidePrivate = [];
+    for (const edge of data.edges) {
+      const [a, b] = edge;
+      if (!inside.has(a) && !inside.has(b)) continue;
+      if (data.functions[a].k || data.functions[b].k) topEdges.push(edge);
+      if (!inside.has(a) || !inside.has(b)) {
+        if (data.functions[b].s) outsidePrivate.push(edge);
+      } else if (owner[a] !== owner[b]) {
+        (data.functions[b].s ? privateEdges : publicEdges).push(edge);
+      }
+    }
+    const members = [...inside];
+    return {
+      privateEdges,
+      publicEdges,
+      topEdges,
+      outsidePrivate,
+      privateTargets: new Set(privateEdges.map((e) => e[1])).size,
+      pairs: privateEdges.length + publicEdges.length,
+      calls: [...privateEdges, ...publicEdges].reduce((n, e) => n + e[2], 0),
+      authored: members.filter((v) => !data.functions[v].k).length,
+      topLevel: members.filter((v) => data.functions[v].k),
+      unresolved: members.reduce((n, v) => n + (data.functions[v].x || 0), 0),
+      indirect: members.reduce((n, v) => n + (data.functions[v].i || 0), 0),
+    };
+  }
   function membership(groups, n) {
     const a = new Int32Array(n).fill(-1);
     groups.forEach((g, i) => g.members.forEach((v) => (a[v] = i)));
@@ -348,6 +391,8 @@ const Engine = (() => {
     suggestMoves,
     moveEvaluator,
     anchors,
+    privacyTies,
+    decomposition,
   };
 })();
 if (typeof module !== "undefined") module.exports = Engine;

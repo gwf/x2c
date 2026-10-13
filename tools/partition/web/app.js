@@ -1,5 +1,8 @@
 let D,
   anchorMetrics,
+  privacyComponents,
+  preservePrivacy = true,
+  balanceEnabled = false,
   S,
   base,
   preview = null,
@@ -397,18 +400,29 @@ function startPreview() {
   preview = { target: g.id };
   updatePreview();
 }
+function splitTies() {
+  return preservePrivacy ? [...S.ties, ...privacyComponents] : S.ties;
+}
 function updatePreview(skipInspector = false) {
   previewGroup = null;
   fn = null;
   const g = group(preview.target),
     count = Math.max(
       1,
-      Math.min(50, kval, Engine.atoms(g.members, S.ties).length),
+      Math.min(50, kval, Engine.atoms(g.members, splitTies()).length),
     ),
-    parts = Engine.partition(D, g.members, count, balance / 100, S.ties);
-  kval = count;
+    parts = Engine.partition(
+      D,
+      g.members,
+      count,
+      balanceEnabled ? balance / 100 : 0,
+      splitTies(),
+    );
+  const requested = kval;
   preview = {
     target: g.id,
+    requested,
+    maximum: Engine.atoms(g.members, splitTies()).length,
     parts,
     groups: S.groups
       .filter((x) => x.id !== g.id)
@@ -568,10 +582,24 @@ function renderInspector(m, current) {
   if (preview && fn === null) {
     const target = group(preview.target),
       sizes = preview.parts.map((p) => p.length),
-      delta = m.cut - current.cut;
+      delta = m.cut - current.cut,
+      decomposition = Engine.decomposition(D, preview.parts);
     $("inspector").innerHTML =
-      `<div class="paneltag">SPLIT PREVIEW</div><h2>${esc(target.name)}</h2><p>Explore a tentative split. Accept it when the boundaries make sense.</p>${stepper("cluster-count", "Group count", kval, 1, Math.min(50, Engine.atoms(target.members, S.ties).length))}<p class="note">Up to 50 groups; keep-together sets stay intact.</p>${stepper("balance", "Size balance", balance, 0, 100)}<div class="scale"><span>Lower cut cost</span><span>Similar sizes</span></div><p class="note">Balance changes the size penalty without changing group count.</p><h3>${sizes.length} proposed groups</h3><div class="sizes">${sizes.map((n, i) => `<i style="flex:${n};background:${colors[i % 8]}" title="${n} functions"></i>`).join("")}</div><div class="spread"><small>${sizes.join(" / ")} functions</small></div><div class="rule"></div><div class="costrow"><span>Global cut change</span><strong>${delta >= 0 ? "+" : ""}${fmt(delta)} call sites</strong></div><div class="costrow"><span>Private targets crossing</span><strong>${m.exposed.length}</strong></div><div class="costrow"><span>Keep-together sets</span><strong>${S.ties.filter((t) => t.some((v) => target.members.includes(v))).length} respected</strong></div><button id="accept" class="primary wide" ${sizes.length < 2 ? "disabled" : ""}>Accept ${sizes.length} groups</button><button id="cancel" class="quiet wide">Discard preview</button><div class="hint note">A lower cut is evidence, not a design decision. Inspect API entry points before accepting.</div>`;
-    for (const name of ["cluster-count", "balance"]) {
+      `<div class="paneltag">SPLIT PREVIEW</div><h2>${esc(target.name)}</h2><p>Explore a tentative split. Accept it when the boundaries make sense.</p>${privacyControls()}${stepper("cluster-count", "Requested groups", kval, 1, 50)}${preview.requested > preview.maximum ? `<p class="hint">Requested ${preview.requested}; only ${preview.maximum} indivisible components are available. Showing ${sizes.length} groups without splitting a component.</p>` : ""}<p class="note">Up to 50 groups; keep-together sets stay intact.</p><label><input type="checkbox" id="balance-enabled" ${balanceEnabled ? "checked" : ""}> Use size balance</label>${balanceEnabled ? stepper("balance", "Size balance", balance, 0, 100) : ""}<div class="scale"><span>Lower cut cost</span><span>Similar sizes</span></div><p class="note">Balance changes the size penalty without changing group count.</p><p>${preview.maximum} indivisible components</p><div class="costrow"><span>Proposed static crossings</span><strong>${decomposition.privateTargets} targets / ${decomposition.privateEdges.reduce((n, e) => n + e[2], 0)} calls</strong></div><div class="costrow"><span>Outside-scope static calls</span><strong>${decomposition.outsidePrivate.reduce((n, e) => n + e[2], 0)}</strong></div><div class="costrow"><span>Existing public crossings</span><strong>${decomposition.publicEdges.reduce((n, e) => n + e[2], 0)} calls</strong></div><p class="note">${decomposition.authored} authored functions; ${decomposition.topLevel.length} top-level nodes. Zero private crossings does not prove extractability.</p><button id="decomposition-details" class="wide">Inspect membership and crossings</button><h3>${sizes.length} proposed groups</h3><div class="sizes">${sizes.map((n, i) => `<i style="flex:${n};background:${colors[i % 8]}" title="${n} functions"></i>`).join("")}</div><div class="spread"><small>${sizes.join(" / ")} functions</small></div><div class="rule"></div><div class="costrow"><span>Global cut change</span><strong>${delta >= 0 ? "+" : ""}${fmt(delta)} call sites</strong></div><div class="costrow"><span>Private targets crossing</span><strong>${m.exposed.length}</strong></div><div class="costrow"><span>Keep-together sets</span><strong>${S.ties.filter((t) => t.some((v) => target.members.includes(v))).length} respected</strong></div><button id="accept" class="primary wide" ${sizes.length < 2 ? "disabled" : ""}>Accept ${sizes.length} groups</button><button id="cancel" class="quiet wide">Discard preview</button><div class="hint note">A lower cut is evidence, not a design decision. Inspect API entry points before accepting.</div>`;
+    $("privacy-mode").onchange = (e) => {
+      preservePrivacy = e.target.checked;
+      updatePreview();
+    };
+    $("balance-enabled").onchange = (e) => {
+      balanceEnabled = e.target.checked;
+      updatePreview();
+    };
+    $("decomposition-details").onclick = () =>
+      showDecomposition(preview.parts, "Automatic partition", target.members);
+    for (const name of [
+      "cluster-count",
+      ...(balanceEnabled ? ["balance"] : []),
+    ]) {
       for (const [suffix, delta] of [
         ["less", -1],
         ["more", 1],
@@ -625,6 +653,13 @@ function renderInspector(m, current) {
   const chosen = S.groups.filter((g) => selected.has(g.id));
   $("inspector").innerHTML =
     `<div class="paneltag">${chosen.length ? "GROUP INSPECTOR" : "START WITH STRUCTURE"}</div><h2>${chosen.length === 1 ? esc(chosen[0].name) : chosen.length ? chosen.length + " groups selected" : "Files become editable groups"}</h2><p>${chosen.length ? "Preview a split of one group, or select several groups to merge them." : "Open a file on the map. Explore its call graph as possible new files, then adjust the boundaries yourself."}</p>${chosen.length === 1 ? `<button id="inspect-split" class="primary wide">Preview split \u2192</button>` : ""}${chosen.length > 1 ? '<button id="inspect-merge" class="primary wide">Merge selected groups</button>' : ""}<h3>Current plan vs. original files</h3><div class="costrow"><span>Crossing call sites</span><strong>${fmt(m.cut)}</strong></div><div class="costrow"><span>Original crossing call sites</span><strong>${fmt(base.cut)}</strong></div><div class="costrow"><span>Directed crossing pairs</span><strong>${fmt(m.pairs)}</strong></div><div class="costrow"><span>New private boundaries</span><strong>${m.exposed.filter((v) => !base.exposed.includes(v)).length}</strong></div>${chosen.length === 1 ? groupConnections(chosen[0]) : `<h3>A reversible workflow</h3><p class="note">1. Open a group and preview a split.<br>2. Accept the groups you want.<br>3. Split again, merge, or drag functions.<br>4. Export the plan when ready.</p>`}<div class="hint note">${chosen.length === 1 ? "Check functions to keep an API and its helper together. That choice survives later splits." : "Group boundaries are tentative file boundaries. No source files are changed."}</div><h3>Graph coverage</h3><p class="note">${fmt(D.stats.externalCalls)} unresolved/external and ${fmt(D.stats.indirectCalls)} indirect calls are outside the resolved graph. Cut cost counts static call sites, not execution frequency.</p>`;
+  if (chosen.length === 1) {
+    const b = document.createElement("button");
+    b.className = "wide";
+    b.textContent = "Inspect privacy components";
+    b.onclick = () => showComponents(chosen[0]);
+    $("inspector").prepend(b);
+  }
   $("inspect-split")?.addEventListener("click", startPreview);
   $("inspect-merge")?.addEventListener("click", merge);
   wireFunctions();
@@ -720,11 +755,8 @@ function renderFunction(m) {
   });
   wireFunctions();
 }
-async function peek() {
-  const f = D.functions[fn];
-  $("source-content").innerHTML =
-    `<div class="paneltag">SOURCE PEEK \u00b7 FUTURE INTEGRATION</div><h2 class="fnname">${esc(f.n)}</h2><p>${esc(D.files[f.f].id)} \u00b7 graph snapshot ${D.revision}</p><div class="hint">The graph export supplies function identity, but no exact source range. This drawer reserves the source-reading workflow.</div><p>The production adapter should provide the matching revision, declaration, and body range. Selecting a call here will navigate to that function while preserving the partition.</p><h3>Available identity</h3><pre>${esc(JSON.stringify({ file: D.files[f.f].id, source_name: f.n, emitted_name: f.e, source_order: f.o }, null, 2))}</pre>`;
-  $("source").showModal();
+function peek() {
+  showSource(fn);
 }
 $("close-source").onclick = () => $("source").close();
 $("home").onclick = (e) => {
@@ -790,6 +822,10 @@ fetch("graph.json", { cache: "no-store" })
   .then((data) => {
     D = data;
     anchorMetrics = Engine.anchors(D);
+    privacyComponents = Engine.atoms(
+      D.functions.map((_, v) => v),
+      Engine.privacyTies(D),
+    );
     const initial = makeInitial();
     base = Engine.metrics(D, initial.groups);
     try {
