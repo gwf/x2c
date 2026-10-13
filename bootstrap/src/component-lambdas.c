@@ -416,10 +416,7 @@ static Map _lambda_shared(List params, List items){
       }
       {
         Var binding, type;  Map _x2c_macro_object_19 = shared;  unsigned _x2c_macro_cursor_22 = 0;  Var _x2c_macro_cursor_output_19;  Var _x2c_macro_cursor_output_20;  while(Map_try_next(_x2c_macro_object_19, &(_x2c_macro_cursor_22), &(_x2c_macro_cursor_output_19), &(_x2c_macro_cursor_output_20))){
-          binding = _x2c_macro_cursor_output_19;  type = _x2c_macro_cursor_output_20;  if(Map_contains(declared, binding)){
-            Map_setindex(cells, binding, List_var(cons(_73, cons(type, NULL))));
-          }
-
+          binding = _x2c_macro_cursor_output_19;  type = _x2c_macro_cursor_output_20;  if(Map_contains(declared, binding)) Map_setindex(cells, binding, List_var(cons(_73, cons(type, NULL))));
         }
 
       }

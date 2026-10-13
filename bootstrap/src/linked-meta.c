@@ -3768,7 +3768,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2927 = List_var(_2926);
   _2928 = cons(_2927, _2924);
   _2929 = cons(_1743, _2928);
-  _2930 = int_var(1695);
+  _2930 = int_var(1693);
   _2931 = String_new("str");
   _2932 = String_var(_2931);
   _2933 = String_new("repr");
@@ -3818,7 +3818,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_5(void){
   _2977 = List_var(_2976);
   _2978 = cons(_2977, NULL);
   _2979 = List_var(_2978);
-  _2980 = int_var(1713);
+  _2980 = int_var(1711);
   _2981 = Symbol_var(60);
   _2982 = String_new("RenderPath_enter");
   _2983 = String_var(_2982);
@@ -7443,7 +7443,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_12(void){
   _6581 = cons(_6555, _6580);
   _6582 = String_new("_lambda_shared");
   _6583 = String_var(_6582);
-  _6584 = String_new("afebf60308e58f7b");
+  _6584 = String_new("b90bb235dfe53db9");
   _6585 = String_var(_6584);
   _6586 = String_new("_x2c_macro_object_26");
   _6587 = String_var(_6586);
@@ -13000,7 +13000,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _12105 = List_var(_12104);
   _12106 = String_new("src/linked-meta.x");
   _12107 = String_var(_12106);
-  _12108 = String_new("3d5686e7");
+  _12108 = String_new("e5835087");
   _12109 = String_var(_12108);
   _12110 = cons(_12109, NULL);
   _12111 = cons(_12107, _12110);
@@ -13630,7 +13630,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_24(void){
   _12732 = cons(_503, _12731);
   _12733 = String_new("src/component-lambdas.x");
   _12734 = String_var(_12733);
-  _12735 = String_new("c85b4233");
+  _12735 = String_new("49b29efa");
   _12736 = String_var(_12735);
   _12737 = cons(_11552, _4992);
   _12738 = cons(_4983, _12737);
@@ -13640,7 +13640,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_24(void){
   _12742 = cons(_4919, _12741);
   _12743 = cons(_4976, _12742);
   _12744 = List_var(_12743);
-  _12745 = String_new("bd3ecba0");
+  _12745 = String_new("447f1d0d");
   _12746 = String_var(_12745);
   _12747 = cons(_12746, NULL);
   _12748 = cons(_12744, _12747);
@@ -13866,7 +13866,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_25(void){
   _12965 = cons(_12851, _12964);
   _12966 = cons(_4911, _12965);
   _12967 = List_var(_12966);
-  _12968 = String_new("4b2090e3");
+  _12968 = String_new("90bbe595");
   _12969 = String_var(_12968);
   _12970 = cons(_12969, NULL);
   _12971 = cons(_12967, _12970);
@@ -16041,10 +16041,7 @@ static Map _lambda_shared(List params, List items){
       }
       {
         Var binding, type;  Map _x2c_macro_object_30 = shared;  unsigned _x2c_macro_cursor_33 = 0;  Var _x2c_macro_cursor_output_30;  Var _x2c_macro_cursor_output_31;  while(Map_try_next(_x2c_macro_object_30, &(_x2c_macro_cursor_33), &(_x2c_macro_cursor_output_30), &(_x2c_macro_cursor_output_31))){
-          binding = _x2c_macro_cursor_output_30;  type = _x2c_macro_cursor_output_31;  if(Map_contains(declared, binding)){
-            Map_setindex(cells, binding, List_var(cons(_2218, cons(type, NULL))));
-          }
-
+          binding = _x2c_macro_cursor_output_30;  type = _x2c_macro_cursor_output_31;  if(Map_contains(declared, binding)) Map_setindex(cells, binding, List_var(cons(_2218, cons(type, NULL))));
         }
 
       }
