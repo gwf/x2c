@@ -10,7 +10,9 @@ int main(void) {
   int lo = INT_MIN, near = INT_MIN + 1;
   printf("%s %s %s %s\n", a[:lo].repr(), a[:near].repr(),
          a[lo::-1].repr(), a[:lo:-1].repr());
-  printf("[%s] [%s] %s %s\n", s[:lo], s[:near],
-         ((Var) l[:lo]).repr(), ((Var) l[:near]).repr());
+  String head = s[:lo], near_head = s[:near];
+  printf("%s %s %s %s\n", head ? head : "none",
+         near_head ? near_head : "none", ((Var) l[:lo]).repr(),
+         ((Var) l[:near]).repr());
   return 0;
 }
