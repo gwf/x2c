@@ -12921,7 +12921,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_23(void){
   _12026 = cons(_503, _12025);
   _12027 = String_new("src/collect.x");
   _12028 = String_var(_12027);
-  _12029 = String_new("dec996f0");
+  _12029 = String_new("82c5a089");
   _12030 = String_var(_12029);
   _12031 = cons(_12030, NULL);
   _12032 = cons(_12028, _12031);
