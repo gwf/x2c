@@ -3800,7 +3800,7 @@ List Compiler.bind_catch_arm(
     bindings = c.define_pattern_binders(pattern);
   }
   List statement = _bind_statement(c, body);
-  if (_declares_binders(c, body, bindings))
+  if (_declares_binders(body, bindings))
     return %($pattern $statement);
   return %($pattern (block
     @{c.pattern_binder_declarations(bindings, handle)} $statement));
@@ -3823,36 +3823,28 @@ static void _check_binders(
   }
 }
 
-/* Whether an arm already carries its ordinary capture declarations. */
-static int _declares_binders(Compiler c, List body, List bindings) {
-  match (body) case %(guarded ?inner): body = inner;
-  match (body) case %(block *items): {
-    int index = 0;
-    foreach (List binding, bindings) {
-      String slot = %"_x2c_match_${
-        binding.car().is_list_binder() ? "list" : "value"}_${index++}";
-      match (items)
-        case %((declare ? (bindings (bind ?declared ())))
-               (stmnt (expr ? (op = (expr ? (ident ?assigned))
-                 (expr ? (!or (call "x2c_error_catch_capture" *)
-                   (call "Var_list_payload"
-                     (args (expr ? (call "x2c_error_catch_capture" *))))
-                   ($slot))))))
-               *rest): {
-          if (declared != assigned) return 0;
-          Var source;
-          String name = c.semantic_binding_facts().try_get(
-            %(source-spelling $declared), source)
-              ? source.string() : binding_identity_spelling(declared);
-          if (name != binding_identity_spelling(binding.cadr())) return 0;
-          items = rest;
-          continue;
-        }
-      return 0;
-    }
-    return !!bindings;
+/* Whether an arm already carries its ordinary capture declarations: its
+   body reads every capture slot, as the declarations do even after a
+   rewrite moves a binder into a lambda cell. A nested match or catch reads
+   slots of its own. */
+static int _declares_binders(List body, List bindings) {
+  if (!bindings) return 0;
+  Map read = {};
+  List node;
+  $ast.walk(body, node) match (node) {
+    case %(!or (match *) (catchcases *)): continue;
+    case %(call "x2c_error_catch_capture" (args ? (expr ? (literal ? ?n)))):
+      read[%(catch $n)] = 1;
+    case %(?(String slot)): read[slot] = 1;
   }
-  return 0;
+  int index = 0;
+  foreach (List binding, bindings) {
+    String n = %"${index++}";
+    String slot = %"_x2c_match_${
+      binding.car().is_list_binder() ? "list" : "value"}_$n";
+    if (!(slot in read || %(catch $n) in read)) return 0;
+  }
+  return 1;
 }
 
 // Source clauses parse here, so body, arms, and finalizer go in token order.
@@ -3909,7 +3901,7 @@ List Compiler.bind_match_arm(
     bindings = c.define_pattern_binders(pattern);
   }
   List statement = _bind_arm_body(c, body, types);
-  if (!bindings || _declares_binders(c, body, bindings))
+  if (!bindings || _declares_binders(body, bindings))
     return %($pattern $statement);
   List declarations = c.pattern_binder_declarations(bindings, NULL);
   match (statement)
