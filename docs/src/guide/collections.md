@@ -587,6 +587,11 @@ small number key: matches
 Key on the number itself, or on a `String` or `Symbol` spelling of it, when a
 value that wide has to be part of the key.
 
+`==` on two `List`s is the same test, boxed in a `Var` or not, so it keeps
+numeric types apart even though `==` on two numbers follows C:
+`%(1 2) == %(1L 2L)` is 0, while `(Var) 1 == (Var) 1L` is 1. Pattern
+[literals](match.md#literals) compare numbers the same way.
+
 ## Working with Lists
 
 A `List` is a canonical cons chain, as in Lisp. `car` gives the head, `cdr`
