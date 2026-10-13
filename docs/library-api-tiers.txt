@@ -47,8 +47,8 @@ lib/common.x|advanced|uint.repr,uint.str,uint.var,ulong.var,unsigned.repr
 lib/common.x|advanced|unsigned.str,unsigned.var,ushort.repr,ushort.str
 lib/common.x|advanced|ushort.var
 lib/common.x|advanced|x2c_initialize,x2c_initialize_protocols
-lib/common.x|advanced|x2c_normalize_index,x2c_normalize_slice
-lib/common.x|internal|x2c_hash_bytes,x2c_hash_word,x2c_mix64,x2c_slice_bound
+lib/common.x|advanced|x2c_normalize_index,x2c_normalize_slice,x2c_slice_bound
+lib/common.x|internal|x2c_hash_bytes,x2c_hash_word,x2c_mix64
 lib/context.x|advanced|Context.move_allocation,Context.owns
 lib/context.x|internal|Context.export_destination,Context.initialize
 lib/context.x|internal|Context.export_nested,Context.export_scope
