@@ -382,48 +382,6 @@ void file_publish(List outputs) {
   }
 }
 
-// workers
-
-/** Forks a worker that continues the current program with inherited state.
-    Returns zero in the child, its PID in the parent, or -1 on fork failure.
-    The call attempts to flush all process streams before the fork so
-    successfully flushed bytes cannot be written by both processes. Flush
-    failure is ignored. The child must leave through `worker_exit`.
-*/
-long worker_fork(void) {
-  fflush(NULL);
-  pid_t pid = fork();
-  return pid < 0 ? -1 : (long) pid;
-}
-
-/** Attempts to flush process streams and terminates a worker with `status`.
-    Flush failure is ignored. This function does not return and does not run
-    `atexit` handlers. Those belong to the parent process and would close its
-    log and process-lifetime `Scope`s twice.
-*/
-void worker_exit(int status) {
-  fflush(NULL);
-  _exit(status);
-}
-
-/** Waits until one of the `count` workers in `pids` exits and returns its
-    index, storing its shell-style status: the exit status, `128 + signal`,
-    or -1 when it cannot be waited. Other children stay unreaped, so the
-    wait polls with a short sleep.
-*/
-int worker_wait_any(long *pids, int count, int &status) {
-  loop {
-    for (int i = 0; i < count; i++) {
-      int raw, signal;
-      pid_t done = waitpid((pid_t) pids[i], &raw, WNOHANG);
-      if (!done || (done < 0 && errno == EINTR)) continue;
-      status = done < 0 ? -1 : shell_status(raw, signal);
-      return i;
-    }
-    usleep(1000);
-  }
-}
-
 /** Decodes the wait status `raw` of a child that has ended. Returns its
     exit status, `128 + signal` when a signal ended it, or -1 otherwise,
     and stores that signal in `signal`, or 0 when no signal ended it.

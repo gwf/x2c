@@ -725,7 +725,7 @@ static List _lower_defer(
   List cleanup = _defer_cleanup(c, record);
   return c.bind_syntax(
     $!{ {
-      ${builtin_defer_record(record, callback, env, records)}
+      ${_defer_record(record, callback, env, records)}
       x2c_cleanup_push(&$record);
       ${_region(w, cleanup, body)}
       $cleanup
@@ -741,9 +741,9 @@ static List _defer_cleanup(Compiler c, List record) {
   return %(code-value "lowered" (seq $call) ());
 }
 
-/** Selects the record shape; captured records keep the environment beside
-    the record in the region's scope. */
-List builtin_defer_record(
+/* Selects the record shape; captured records keep the environment beside
+   the record in the region's scope. */
+static List _defer_record(
   List record, List callback, List environment, List records) {
   if (!environment)
     return $!{ X2CCleanup $record = {.fn = $callback, .env = 0}; };

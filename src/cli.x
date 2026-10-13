@@ -747,7 +747,7 @@ static void _set_field(
 */
 CliRequest cli_package_options(String path, String package) {
   Array words = $auto([]);
-  foreach (String word, cli_response_arguments(path))
+  foreach (String word, _response_arguments(path))
     words.push(word.replace("{package}", package));
   CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
   request.command = <build>;
@@ -796,15 +796,14 @@ static void _expand_argument(Array out, String arg, List stack) {
   if (identity in stack)
     _fail(%"recursive response-file inclusion: $path", NULL);
   List nested = cons(identity, stack);
-  foreach (String word, cli_response_arguments(path))
+  foreach (String word, _response_arguments(path))
     _expand_argument(out, word, nested);
 }
 
-/** Reads response-file tokens with ordinary quoting and UTF-8 checks.
-    Returns canonical Strings without expanding `@` references. Paths and
-    arguments retain the producing pool lifetime.
-*/
-List cli_response_arguments(String path) {
+/* Reads response-file tokens with ordinary quoting and UTF-8 checks.
+   Returns canonical Strings without expanding `@` references. Paths and
+   arguments retain the producing pool lifetime. */
+static List _response_arguments(String path) {
   size_t length = 0, char *text = _read_response_file(path, length);
   Array words = _response_words(path, text, length);
   Scope.free(text);
@@ -1255,9 +1254,17 @@ CliRequest cli_request(Symbol command) {
 
 // An outer Make owns concurrency unless the caller explicitly supplies -j.
 static int _default_jobs(void) {
-  if (report_make_owned()) return 1;
+  if (_make_owned()) return 1;
   long count = sysconf(_SC_NPROCESSORS_ONLN);
   return count > 0 && count <= INT_MAX ? (int) count : 1;
+}
+
+/* Reports whether a parent Make recipe runs this process, which `MAKELEVEL`
+   set to a positive count shows. Parallel recipes share one terminal and
+   one job budget without sharing reporter state. */
+static int _make_owned(void) {
+  String level = Env.get("MAKELEVEL");
+  return level.is_digit() && atol(level) > 0;
 }
 
 /** Reports whether a raw command name belongs to the built-in parser. */

@@ -449,7 +449,7 @@ static void _start(Workers &w) {
   if (w.t.build) w.t.build.begin_translation(slice.car());
   File capture = tmpfile();
   sigset_t unblocked = _block_stop_signals();
-  long pid = capture ? worker_fork() : -1;
+  long pid = capture ? _fork_worker() : -1;
   if (!pid) {
     w.live = 0;
     sigprocmask(SIG_SETMASK, &unblocked, NULL);
@@ -473,13 +473,13 @@ static void _start(Workers &w) {
 static void _work(Translation &t, List slice) {
   foreach (String input, slice) _translate(t, input);
   Compiler.stop_meta_helper();
-  worker_exit(0);
+  _exit_worker(0);
 }
 
 /* Keeps the ended worker's captured bytes for `show`. The last live worker
    moves into the slot of the one that finished. */
 static void _reap(Workers &w) {
-  int status, slot = worker_wait_any(w.pids, w.live, status);
+  int status, slot = _wait_worker(w.pids, w.live, status);
   if (status) w.failed++;
   int index = w.carried[slot];
   List slice = w.slices[index];
@@ -498,6 +498,43 @@ static void _reap(Workers &w) {
   w.captures[slot] = w.captures[w.live];
   sigprocmask(SIG_SETMASK, &unblocked, NULL);
   if (!w.t.build) report_progress(<translate>, w.done, w.t.total, NULL);
+}
+
+/* Forks a worker that continues the current program with inherited state.
+   Returns zero in the child, its PID in the parent, or -1 on fork failure.
+   The call attempts to flush all process streams before the fork so
+   successfully flushed bytes cannot be written by both processes. Flush
+   failure is ignored. The child must leave through `_exit_worker`. */
+static long _fork_worker(void) {
+  fflush(NULL);
+  pid_t pid = fork();
+  return pid < 0 ? -1 : (long) pid;
+}
+
+/* Attempts to flush process streams and terminates a worker with `status`.
+   Flush failure is ignored. This function does not return and does not run
+   `atexit` handlers. Those belong to the parent process and would close its
+   log and process-lifetime `Scope`s twice. */
+static void _exit_worker(int status) {
+  fflush(NULL);
+  _exit(status);
+}
+
+/* Waits until one of the `count` workers in `pids` exits and returns its
+   index, storing its shell-style status: the exit status, `128 + signal`,
+   or -1 when it cannot be waited. Other children stay unreaped, so the
+   wait polls with a short sleep. */
+static int _wait_worker(long *pids, int count, int &status) {
+  loop {
+    for (int i = 0; i < count; i++) {
+      int raw, signal;
+      pid_t done = waitpid((pid_t) pids[i], &raw, WNOHANG);
+      if (!done || (done < 0 && errno == EINTR)) continue;
+      status = done < 0 ? -1 : Job.decode_wait_status(raw, signal);
+      return i;
+    }
+    usleep(1000);
+  }
 }
 
 /* Prints each ended slice's captured standard error once every earlier

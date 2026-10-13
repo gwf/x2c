@@ -78,15 +78,6 @@ static int _use_color(int plain, Symbol mode, int terminal) {
 /** Returns whether stable completion receipts are currently enabled. */
 int report_receipts(void) => report.receipts;
 
-/** Reports whether a parent Make recipe runs this process, which `MAKELEVEL`
-    set to a positive count shows. Parallel recipes share one terminal and
-    one job budget without sharing reporter state.
-*/
-int report_make_owned(void) {
-  String level = Env.get("MAKELEVEL");
-  return level.is_digit() && atol(level) > 0;
-}
-
 // the progress line
 
 static enum { BAR_WIDTH = 14 };
