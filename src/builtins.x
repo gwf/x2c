@@ -551,8 +551,9 @@ static List _class_initializer(String owner, Var heap_value) {
       List arguments = _init_arguments(parameters);
       List call = heap || reference ? $!( $init(value, @arguments) )
                                     : $!( $init(&value, @arguments) );
-      return refusable ? $!{ if (!$call) { Scope_free((void *) value); return 0; } }
-                       : $!{ $call; };
+      return refusable
+        ? $!{ if (!$call) { Scope_free((void *) value); return 0; } }
+        : $!{ $call; };
     }
   }
   String suffix = heap ? ")" : " &)";
