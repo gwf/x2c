@@ -1107,9 +1107,11 @@ static int _linked_provider_current(
       if (!_hash_matches(c, path, hash)) return 0;
       Map found = _read_dependencies(c, dependencies);
       if (found == NULL) return 0;
+      // Member content was hashed above; only included units own proofs.
       foreach (Var (dependency, expected), found)
         if (is_source_file(dependency) && expected is <string> &&
             !String.startswith(expected, "search:") &&
+            linked_meta_provider_source(home_portable_path(dependency)) &&
             !_linked_provider_current(c, dependency, seen)) return 0;
       return 1;
     }
