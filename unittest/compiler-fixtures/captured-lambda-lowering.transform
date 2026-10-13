@@ -126,17 +126,15 @@
    (bindings 
     (op = (bind (binding 25 "_x2c_lambda_cell_0") (*)) 
      (expr (* void) 
-      (call (expr ((func ((* const void) ("size_t"))) * void) 
-             (ident (binding 26 "Scope_memdup"))) 
-       (args (expr (* const void) 
-              (cast (* const void) 
-               (expr (* int) 
-                (op & (expr (int) 
-                       (cast (int) 
-                        (expr (int) 
-                         (composite 
-                          (commas (expr (int) (ident (binding 24 "value")))))))))))) 
-        (expr ("size_t") (sizeof (parens (decl (int) (bindings (bind () ())))))))))))) 
+      (call (expr ((func (("size_t"))) * void) 
+             (ident (binding 26 "Scope_malloc"))) 
+       (args (expr ("size_t") 
+              (sizeof (parens (decl (int) (bindings (bind () ())))))))))))) 
+  (stmnt 
+   (expr (int) 
+    (op = (expr (int) 
+           (op * (expr (* int) (ident (binding 25 "_x2c_lambda_cell_0"))))) 
+     (expr (int) (ident (binding 24 "value")))))) 
   (at 35 
    (return 
     (expr ("Func") 
