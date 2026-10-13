@@ -1,4 +1,6 @@
 ( ProbeMapShortLong ) ==> ( typedef ProbeMapShortLong )
+( ProbeMapShortLong__compare ) ==> (( func (( ProbeMapShortLong ) ( ProbeMapShortLong ))) int )
+( ProbeMapShortLong__write ) ==> (( func (( ProbeMapShortLong ) ( Buffer ) ( Symbol ))) Buffer )
 ( ProbeMapShortLong_cleanup ) ==> (( func (( ProbeMapShortLong ))) void )
 ( ProbeMapShortLong_compare ) ==> (( func (( ProbeMapShortLong ) ( ProbeMapShortLong ))) int )
 ( ProbeMapShortLong_contains ) ==> (( func (( ProbeMapShortLong ) ( short ))) int )
@@ -45,4 +47,4 @@
 ( struct ProbeMapShortLongRecord key ) ==> ( short )
 ( struct ProbeMapShortLongRecord val ) ==> ( long )
 ( struct ProbeMapShortLongRecord x2c-record ) ==> ( x2c )
-( typedef ProbeMapShortLong ) ==> ( * struct ProbeMapShortLong )
+( typedef ProbeMapShortLong ) ==> ( ProbeMapBase )

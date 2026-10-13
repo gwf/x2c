@@ -287,7 +287,7 @@ static MapStringString _prepare_string_export(
      a complete destination table before export swaps the backing arrays. */
   MapStringString staged = MapStringString.new_capacity(map.capacity);
   MapStringString result = NULL;
-  defer if (result == NULL) _for_map_string_string__free(staged);
+  defer if (result == NULL) staged._free();
   foreach (String (key, value), map) {
     key = source.export_nested(key);
     value = source.export_nested(value);
@@ -322,7 +322,7 @@ static MapStringInt _prepare_string_int_export(
   MapStringInt map, Context source) {
   MapStringInt staged = MapStringInt.new_capacity(map.capacity);
   MapStringInt result = NULL;
-  defer if (result == NULL) _for_map_string_int__free(staged);
+  defer if (result == NULL) staged._free();
   unsigned cursor = 0;
   String key;
   int value;

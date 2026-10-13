@@ -20,22 +20,6 @@
     promotions and conversions determine their results.
 */
 
-/* Separate expansions share each family's helper names. Encode the full
-   family spelling: case and underscores distinguish legal type names.
-   `_0` escapes an underscore; `__` separates the operation. */
-$(defun array.words (name)
-  (if (equal? name "") ""
-    (let ((first (substring name 0 1)))
-      (string-append
-        (if (equal? first "_") "_0"
-          (string-append (if (equal? first (lower first)) "" "_")
-            (lower first)))
-        (array.words (substring name 1 (string-length name)))))))
-
-$(defun array.helper (type operation)
-  (x2c.ident (string-append "_for" (array.words (str (car type)))
-    "__" operation)))
-
 /*  Generates `postfixindex` for an element family whose `updateindex`
     applies `+` and `-`.
 */
@@ -166,8 +150,12 @@ macro Unit $array.typed.update.string(Type $array) {
   }
 }
 
+/* These private methods are shared by separate family expansions. Keep
+   their dotted names so typed aliases inherit their base family helpers
+   through ordinary method lookup. */
+
 macro Unit $array.core.family(Type $array, Type $element) {
-  static int $(array.helper $array "shift")($array array, $element *out) {
+  static int $array._shift($array array, $element *out) {
     if (array == NULL || !array.length || !out) return 0;
     size_t n = array.length;
     $element *data = ($element *) array.bytes;
@@ -177,8 +165,7 @@ macro Unit $array.core.family(Type $array, Type $element) {
     return 1;
   }
 
-  static int $(array.helper $array "insert")(
-    $array array, int index, $element value) {
+  static int $array._insert($array array, int index, $element value) {
     int n = (int) array.length;
     if (index < 0) index += n + 1;
     if (index < 0 || index > n) return 0;
@@ -190,8 +177,7 @@ macro Unit $array.core.family(Type $array, Type $element) {
     return 1;
   }
 
-  static int $(array.helper $array "remove")(
-    $array array, int index, $element *out) {
+  static int $array._remove($array array, int index, $element *out) {
     if (array == NULL || !out) return 0;
     int n = (int) array.length;
     index = x2c_normalize_index(index, n);
@@ -206,14 +192,14 @@ macro Unit $array.core.family(Type $array, Type $element) {
     return 1;
   }
 
-  static $array $(array.helper $array "copy")($array array) {
+  static $array $array._copy($array array) {
     if (array == NULL) return NULL;
     $array copy = ($array) Block_new(sizeof($element));
     Block_append((Block) copy, array.bytes, array.length);
     return copy;
   }
 
-  static $array $(array.helper $array "getslice")(
+  static $array $array._getslice(
     $array array, int start, int end, int step) {
     if (array == NULL || !step) return NULL;
     $array slice = ($array) Block_new(sizeof($element));
@@ -241,8 +227,7 @@ macro Unit $array.core.family(Type $array, Type $element) {
      from the last element. `splice` names one position this way; the region
      operations normalize a start and a stop together instead, so that their
      `end` means what the same `end` means in a slice. */
-  static inline int $(array.helper $array "normalize_bound")(
-    $array array, int index) {
+  static inline int _normalize_bound($array array, int index) {
     int length = (int) array.length;
     int start = index, stop = index;
     x2c_normalize_slice(&start, &stop, 1, length);
@@ -252,7 +237,7 @@ macro Unit $array.core.family(Type $array, Type $element) {
   /* One shared call decides both bounds, so `array[start:end]` and
      `setslice(start, end, ...)` select the same region. A reversed pair is
      swapped. */
-  static inline void $(array.helper $array "normalize_span")(
+  static inline void _normalize_span(
     $array array, int *begin, int *finish) {
     x2c_normalize_slice(begin, finish, 1, (int) array.length);
     if (*finish < *begin) {
@@ -262,18 +247,18 @@ macro Unit $array.core.family(Type $array, Type $element) {
     }
   }
 
-  static void $(array.helper $array "setslice")(
+  static void $array._setslice(
     $array array, int start, int end, $array values) {
     int n = (int) array.length;
     int begin = start, finish = end;
-    ($(array.helper $array "normalize_span"))(array, &begin, &finish);
+    _normalize_span(array, &begin, &finish);
     int remove = finish - begin;
     int insert = values ? (int) values.length : 0;
     int delta = insert - remove;
     $array source = values;
     int copied = 0;
     if (insert > 0 && values && values.bytes == array.bytes) {
-      source = ($(array.helper $array "copy"))(values);
+      source = values._copy();
       copied = 1;
     }
     defer if (copied) Block_free((Block) source);
@@ -293,14 +278,12 @@ macro Unit $array.core.family(Type $array, Type $element) {
     if (delta < 0) array.length = n + delta;
   }
 
-  static $array $(array.helper $array "remslice")(
-    $array array, int start, int end) {
+  static $array $array._remslice($array array, int start, int end) {
     int n = (int) array.length;
     int begin = start, finish = end;
-    ($(array.helper $array "normalize_span"))(array, &begin, &finish);
+    _normalize_span(array, &begin, &finish);
     if (begin >= finish) return ($array) Block_new(sizeof($element));
-    $array removed = ($(array.helper $array "getslice"))(
-      array, begin, finish, 1);
+    $array removed = array._getslice(begin, finish, 1);
     $element *data = ($element *) array.bytes;
     int tail = n - finish;
     if (tail > 0)
@@ -309,39 +292,39 @@ macro Unit $array.core.family(Type $array, Type $element) {
     return removed;
   }
 
-  static $array $(array.helper $array "splice")(
+  static $array $array._splice(
     $array array, int index, int remove_count, $array values) {
     if (remove_count < 0) remove_count = 0;
     int n = (int) array.length;
-    int start = ($(array.helper $array "normalize_bound"))(array, index);
+    int start = _normalize_bound(array, index);
     long long target = (long long) start + remove_count;
     int end = target > n ? n : (int) target;
-    $array removed = ($(array.helper $array "getslice"))(array, start, end, 1);
-    ($(array.helper $array "setslice"))(array, start, end, values);
+    $array removed = array._getslice(start, end, 1);
+    array._setslice(start, end, values);
     return removed;
   }
 
-  static int $(array.helper $array "find")($array array, $element value) {
+  static int $array._find($array array, $element value) {
     $element *data = ($element *) array.bytes;
     int n = (int) array.length;
     for (int i = 0; i < n; i++) if (data[i] == value) return i;
     return -1;
   }
 
-  static int $(array.helper $array "count")($array array, $element value) {
+  static int $array._count($array array, $element value) {
     $element *data = ($element *) array.bytes;
     int n = (int) array.length, total = 0;
     for (int i = 0; i < n; i++) if (data[i] == value) total++;
     return total;
   }
 
-  static $array $(array.helper $array "concat")($array a, $array b) {
-    $array output = ($(array.helper $array "copy"))(a);
+  static $array $array._concat($array a, $array b) {
+    $array output = a._copy();
     if (b && b.length) Block_append((Block) output, b.bytes, b.length);
     return output;
   }
 
-  static $array $(array.helper $array "reverse")($array array) {
+  static $array $array._reverse($array array) {
     if (array == NULL || array.length < 2) return array;
     $element *data = ($element *) array.bytes;
     for (size_t i = 0, j = array.length - 1; i < j; i++, j--) {
@@ -352,7 +335,7 @@ macro Unit $array.core.family(Type $array, Type $element) {
     return array;
   }
 
-  static int $(array.helper $array "equal")($array a, $array b) {
+  static int $array._equal($array a, $array b) {
     if ((void *) a == (void *) b) return 1;
     if (a == NULL || b == NULL ||
         a.length != b.length || a.width != b.width) return 0;
@@ -453,8 +436,7 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   */
   $element $array.shift($array array) {
     $element value = $zero;
-    if (array && array.length <= INT_MAX &&
-        ($(array.helper $array "shift"))(array, &value))
+    if (array && array.length <= INT_MAX && array._shift(&value))
       return value;
     if (array && array.length > INT_MAX)
       _size_limit($owner, array.length);
@@ -471,7 +453,7 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
     if ($boxed && (Var) value is void) raise %(void-op);
     if (!$boxed && array == NULL) _bad_operation($owner, <unshift>);
     if (array.length >= INT_MAX) _size_limit($owner, array.length);
-    ($(array.helper $array "insert"))(array, 0, value);
+    array._insert(0, value);
     return value;
   }
 
@@ -490,11 +472,11 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
       if (index < 0 || index > n) return $zero;
       if (n == INT_MAX) _size_limit($owner, n);
       if ((Var) value is void) raise %(void-op);
-      ($(array.helper $array "insert"))(array, index, value);
+      array._insert(index, value);
       return value;
     }
     if (array == NULL || array.length >= INT_MAX ||
-        !($(array.helper $array "insert"))(array, index, value)) {
+        !array._insert(index, value)) {
       if (array && array.length >= INT_MAX)
         _size_limit($owner, array.length);
       size_t size = array ? array.length : 0;
@@ -510,8 +492,7 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   */
   $element $array.remove($array array, int index) {
     $element value = $zero;
-    if (array && array.length <= INT_MAX &&
-        ($(array.helper $array "remove"))(array, index, &value))
+    if (array && array.length <= INT_MAX && array._remove(index, &value))
       return value;
     if (array && array.length > INT_MAX)
       _size_limit($owner, array.length);
@@ -529,7 +510,7 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   Self $array.copy(Self array) {
     if (array == NULL) return NULL;
     if (array.length > INT_MAX) _size_limit($owner, array.length);
-    return ($(array.helper $array "copy"))(array);
+    return array._copy();
   }
 
   /** Returns a fresh packed array for normalized `[start:end:step]`.
@@ -540,7 +521,7 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   Self $array.getslice(Self array, int start, int end, int step) {
     if (array == NULL || !step) _bad_step($owner, step);
     if (array.length > INT_MAX) _size_limit($owner, array.length);
-    return ($(array.helper $array "getslice"))(array, start, end, step);
+    return array._getslice(start, end, step);
   }
 
   /** Replaces the region `array[start:end]` and returns `array`.
@@ -557,7 +538,7 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
     if (array.length > INT_MAX) _size_limit($owner, array.length);
     if (values && values.length > INT_MAX)
       _size_limit($owner, values.length);
-    ($(array.helper $array "setslice"))(array, start, end, values);
+    array._setslice(start, end, values);
     return array;
   }
 
@@ -570,7 +551,7 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   Self $array.remslice(Self array, int start, int end) {
     if (array == NULL) _bad_operation($owner, <remslice>);
     if (array.length > INT_MAX) _size_limit($owner, array.length);
-    return ($(array.helper $array "remslice"))(array, start, end);
+    return array._remslice(start, end);
   }
 
   /** Replaces `remove_count` values at normalized `index` and returns them.
@@ -584,8 +565,7 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
     if (array.length > INT_MAX) _size_limit($owner, array.length);
     if (values && values.length > INT_MAX)
       _size_limit($owner, values.length);
-    return ($(array.helper $array "splice"))(
-      array, index, remove_count, values);
+    return array._splice(index, remove_count, values);
   }
 
   /** Returns the first index whose native element equals `value`, or -1.
@@ -595,7 +575,7 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   int $array.find($array array, $element value) {
     if (array == NULL) return -1;
     if (array.length > INT_MAX) _size_limit($owner, array.length);
-    return ($(array.helper $array "find"))(array, value);
+    return array._find(value);
   }
 
   /** Reports whether a native element equals `value`.
@@ -613,7 +593,7 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   int $array.count($array array, $element value) {
     if (array == NULL) return 0;
     if (array.length > INT_MAX) _size_limit($owner, array.length);
-    return ($(array.helper $array "count"))(array, value);
+    return array._count(value);
   }
 
   /** Returns the same first-match index as `$array.find`. */
@@ -632,14 +612,14 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
     if (a.length > INT_MAX) _size_limit($owner, a.length);
     if (b && b.length > INT_MAX - a.length)
       _size_limit($owner, b.length);
-    return ($(array.helper $array "concat"))(a, b);
+    return a._concat(b);
   }
 
   /** Reverses `array` in place and returns that same array.
       A null or one-element array is returned unchanged.
   */
   Self $array.reverse(Self array) {
-    return ($(array.helper $array "reverse"))(array);
+    return array._reverse();
   }
 
   /** Reports elementwise native equality.
@@ -647,14 +627,14 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
       compare unequal.
   */
   int $array.equal($array a, $array b) {
-    return ($(array.helper $array "equal"))(a, b);
+    return a._equal(b);
   }
 }
 
 macro Unit $array.core.observe(
   Type $array, Type $element, Name $compare_element
 ) {
-  static int $(array.helper $array "compare")($array a, $array b) {
+  static int $array._compare($array a, $array b) {
     if ((void *) a == (void *) b) return 0;
     if (a == NULL) return -1;
     if (b == NULL) return 1;
@@ -670,7 +650,7 @@ macro Unit $array.core.observe(
     return asz < bsz ? -1 : 1;
   }
 
-  static Buffer $(array.helper $array "write")(
+  static Buffer $array._write(
     $array array, Buffer out, Symbol mode) {
     RenderPath path;
     if (!path.enter(array))
@@ -703,17 +683,17 @@ macro Unit $array.typed.observe(
       ordering. Identical handles compare equal and NULL sorts first.
   */
   int $family.compare($family a, $family b) {
-    return ($(array.helper $family "compare"))(a, b);
+    return a._compare(b);
   }
 
   /** Appends the readable packed-Array representation to `out`. */
   Buffer $family.write_repr($family array, Buffer out) {
-    return ($(array.helper $family "write"))(array, out, <repr>);
+    return array._write(out, <repr>);
   }
 
   /** Appends the packed-Array display text to `out`. */
   Buffer $family.write_str($family array, Buffer out) {
-    return ($(array.helper $family "write"))(array, out, <str>);
+    return array._write(out, <str>);
   }
 
   /** Returns the packed-Array display String. */

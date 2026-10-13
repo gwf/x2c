@@ -885,6 +885,11 @@ static Var _read_value(Reader &r);
 static void _write_value(Writer &w, Var value, int depth);
 ```
 
+Generated family helpers shared across separate expansions are a narrow
+lookup exception. For example, `$array._shift` lets typed operations inherit
+a base family's helper through typedef method lookup. Keep expansion-local
+helpers such as `_normalize_span` undotted; they use normal macro hygiene.
+
 ## VT-5 - Closed identities
 
 See VT-5 in [the standard](x2c-code-standard.md).

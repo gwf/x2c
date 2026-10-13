@@ -3,7 +3,9 @@
 
 #include <string.h>
 
-typedef Block ProbeArrayInt;
+/* Typed operations inherit the core helpers from a base family. */
+typedef Block ProbeArrayBase;
+typedef ProbeArrayBase ProbeArrayInt;
 
 static void _bad_index(String owner, int index, size_t size) {
   raise %(bad-arg (operation $owner) (index $index) (size $size));
@@ -27,7 +29,7 @@ static Block _prepare_probe_export(Block array, Context source) {
   return NULL;
 }
 
-$array.core.family(ProbeArrayInt, int);
+$array.core.family(ProbeArrayBase, int);
 $array.typed.family(ProbeArrayInt, int, 0, "ProbeArrayInt");
 $array.typed.observe(ProbeArrayInt, int, _compare_int);
 $array.typed.box(ProbeArrayInt, int, "ProbeArrayInt");

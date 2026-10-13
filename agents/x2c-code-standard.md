@@ -522,10 +522,14 @@ Preserve names required by established language or external lookup contracts,
 such as converters, protocol members, operators, lifecycle hooks, and native
 bindings. Verify each exception against the name producer and its consumers;
 dotted spelling alone is not evidence. For example, `Fact.var` and `Var.fact`
-in `src/regions.x` serve conversion and protocol lookup. Ordinary helpers
-need no forwarding wrapper or compatibility alias. A leading underscore does
-not establish static linkage: retain non-static underscore methods used by
-other files.
+in `src/regions.x` serve conversion and protocol lookup. Generated Array and
+Map family helpers retain `Type._operation`: separate typed expansions inherit
+core helpers through typedef method lookup (`_next_method_type` in
+`src/expressions.x`). Use that lookup instead of encoding type spellings into
+free names. Keep ordinary callbacks and expansion-local helpers undotted.
+Ordinary helpers need no forwarding wrapper or compatibility alias. A leading
+underscore does not establish static linkage: retain non-static underscore
+methods used by other files.
 
 **NM-2** Name the subject parameter with the first letter of its type
 (`Compiler c`, `Emitter &e`) when the longer name would wrap lines;

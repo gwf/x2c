@@ -1,4 +1,6 @@
 ( ProbeArrayInt ) ==> ( typedef ProbeArrayInt )
+( ProbeArrayInt__compare ) ==> (( func (( ProbeArrayInt ) ( ProbeArrayInt ))) int )
+( ProbeArrayInt__write ) ==> (( func (( ProbeArrayInt ) ( Buffer ) ( Symbol ))) Buffer )
 ( ProbeArrayInt_array ) ==> (( func (( ProbeArrayInt ))) Array )
 ( ProbeArrayInt_block ) ==> (( func (( ProbeArrayInt ))) Block )
 ( ProbeArrayInt_compare ) ==> (( func (( ProbeArrayInt ) ( ProbeArrayInt ))) int )
@@ -48,4 +50,4 @@
 ( self ProbeArrayInt_reverse ) ==> (( func (( self ))) self )
 ( self ProbeArrayInt_setslice ) ==> (( func (( self ) ( int ) ( int ) ( self ))) self )
 ( self ProbeArrayInt_splice ) ==> (( func (( self ) ( int ) ( int ) ( self ))) self )
-( typedef ProbeArrayInt ) ==> ( Block )
+( typedef ProbeArrayInt ) ==> ( ProbeArrayBase )

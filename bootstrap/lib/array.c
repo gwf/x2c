@@ -25,35 +25,35 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static int _for_array__shift(Array _x2c_macro_array_0, Var * _x2c_macro_out_0);
+static int Array__shift(Array _x2c_macro_array_0, Var * _x2c_macro_out_0);
 
-static int _for_array__insert(Array _x2c_macro_array_1, int _x2c_macro_index_0, Var _x2c_macro_value_0);
+static int Array__insert(Array _x2c_macro_array_1, int _x2c_macro_index_0, Var _x2c_macro_value_0);
 
-static int _for_array__remove(Array _x2c_macro_array_2, int _x2c_macro_index_1, Var * _x2c_macro_out_1);
+static int Array__remove(Array _x2c_macro_array_2, int _x2c_macro_index_1, Var * _x2c_macro_out_1);
 
-static Array _for_array__copy(Array _x2c_macro_array_3);
+static Array Array__copy(Array _x2c_macro_array_3);
 
-static Array _for_array__getslice(Array _x2c_macro_array_4, int _x2c_macro_start_0, int _x2c_macro_end_0, int _x2c_macro_step_0);
+static Array Array__getslice(Array _x2c_macro_array_4, int _x2c_macro_start_0, int _x2c_macro_end_0, int _x2c_macro_step_0);
 
-static inline int _for_array__normalize_bound(Array _x2c_macro_array_5, int _x2c_macro_index_2);
+static inline int _x2c_macro__normalize_bound_0(Array _x2c_macro_array_5, int _x2c_macro_index_2);
 
-static inline void _for_array__normalize_span(Array _x2c_macro_array_6, int * _x2c_macro_begin_0, int * _x2c_macro_finish_0);
+static inline void _x2c_macro__normalize_span_0(Array _x2c_macro_array_6, int * _x2c_macro_begin_0, int * _x2c_macro_finish_0);
 
-static void _for_array__setslice(Array _x2c_macro_array_7, int _x2c_macro_start_2, int _x2c_macro_end_1, Array _x2c_macro_values_0);
+static void Array__setslice(Array _x2c_macro_array_7, int _x2c_macro_start_2, int _x2c_macro_end_1, Array _x2c_macro_values_0);
 
-static Array _for_array__remslice(Array _x2c_macro_array_8, int _x2c_macro_start_3, int _x2c_macro_end_2);
+static Array Array__remslice(Array _x2c_macro_array_8, int _x2c_macro_start_3, int _x2c_macro_end_2);
 
-static Array _for_array__splice(Array _x2c_macro_array_9, int _x2c_macro_index_3, int _x2c_macro_remove_count_0, Array _x2c_macro_values_1);
+static Array Array__splice(Array _x2c_macro_array_9, int _x2c_macro_index_3, int _x2c_macro_remove_count_0, Array _x2c_macro_values_1);
 
-static int _for_array__find(Array _x2c_macro_array_10, Var _x2c_macro_value_1);
+static int Array__find(Array _x2c_macro_array_10, Var _x2c_macro_value_1);
 
-static int _for_array__count(Array _x2c_macro_array_11, Var _x2c_macro_value_2);
+static int Array__count(Array _x2c_macro_array_11, Var _x2c_macro_value_2);
 
-static Array _for_array__concat(Array _x2c_macro_a_0, Array _x2c_macro_b_0);
+static Array Array__concat(Array _x2c_macro_a_0, Array _x2c_macro_b_0);
 
-static Array _for_array__reverse(Array _x2c_macro_array_12);
+static Array Array__reverse(Array _x2c_macro_array_12);
 
-static int _for_array__equal(Array _x2c_macro_a_1, Array _x2c_macro_b_1);
+static int Array__equal(Array _x2c_macro_a_1, Array _x2c_macro_b_1);
 
 _Noreturn static void _size_limit(String owner, size_t size);
 
@@ -82,9 +82,9 @@ static int _int_length(Array array);
 
 static int _compare_var(Var a, Var b);
 
-static int _for_array__compare(Array _x2c_macro_a_5, Array _x2c_macro_b_5);
+static int Array__compare(Array _x2c_macro_a_5, Array _x2c_macro_b_5);
 
-static Buffer _for_array__write(Array _x2c_macro_array_39, Buffer _x2c_macro_out_10, Symbol _x2c_macro_mode_0);
+static Buffer Array__write(Array _x2c_macro_array_39, Buffer _x2c_macro_out_10, Symbol _x2c_macro_mode_0);
 
 static int _x2c_macro__next_0(Iter _x2c_macro_iter_0, Var * _x2c_macro_out_11);
 
@@ -171,7 +171,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _0 = String_new("");
 }
 
-static int _for_array__shift(Array _x2c_macro_array_0, Var * _x2c_macro_out_0){
+static int Array__shift(Array _x2c_macro_array_0, Var * _x2c_macro_out_0){
   if(_x2c_macro_array_0 == NULL || ! _x2c_macro_array_0 -> length || ! _x2c_macro_out_0) return 0;
   size_t _x2c_macro_n_0 = _x2c_macro_array_0 -> length;
   Var * _x2c_macro_data_0 =(Var *) _x2c_macro_array_0 -> bytes;
@@ -181,7 +181,7 @@ static int _for_array__shift(Array _x2c_macro_array_0, Var * _x2c_macro_out_0){
   return 1;
 }
 
-static int _for_array__insert(Array _x2c_macro_array_1, int _x2c_macro_index_0, Var _x2c_macro_value_0){
+static int Array__insert(Array _x2c_macro_array_1, int _x2c_macro_index_0, Var _x2c_macro_value_0){
   int _x2c_macro_n_1 =(int) _x2c_macro_array_1 -> length;
   if(_x2c_macro_index_0 < 0) _x2c_macro_index_0 += _x2c_macro_n_1 + 1;
   if(_x2c_macro_index_0 < 0 || _x2c_macro_index_0 > _x2c_macro_n_1) return 0;
@@ -192,7 +192,7 @@ static int _for_array__insert(Array _x2c_macro_array_1, int _x2c_macro_index_0, 
   return 1;
 }
 
-static int _for_array__remove(Array _x2c_macro_array_2, int _x2c_macro_index_1, Var * _x2c_macro_out_1){
+static int Array__remove(Array _x2c_macro_array_2, int _x2c_macro_index_1, Var * _x2c_macro_out_1){
   if(_x2c_macro_array_2 == NULL || ! _x2c_macro_out_1) return 0;
   int _x2c_macro_n_2 =(int) _x2c_macro_array_2 -> length;
   _x2c_macro_index_1 = x2c_normalize_index(_x2c_macro_index_1, _x2c_macro_n_2);
@@ -204,14 +204,14 @@ static int _for_array__remove(Array _x2c_macro_array_2, int _x2c_macro_index_1, 
   return 1;
 }
 
-static Array _for_array__copy(Array _x2c_macro_array_3){
+static Array Array__copy(Array _x2c_macro_array_3){
   if(_x2c_macro_array_3 == NULL) return NULL;
   Array _x2c_macro_copy_0 =(Array) Block_new(sizeof(Var));
   Block_append((Block) _x2c_macro_copy_0, _x2c_macro_array_3 -> bytes, _x2c_macro_array_3 -> length);
   return _x2c_macro_copy_0;
 }
 
-static Array _for_array__getslice(Array _x2c_macro_array_4, int _x2c_macro_start_0, int _x2c_macro_end_0, int _x2c_macro_step_0){
+static Array Array__getslice(Array _x2c_macro_array_4, int _x2c_macro_start_0, int _x2c_macro_end_0, int _x2c_macro_step_0){
   if(_x2c_macro_array_4 == NULL || ! _x2c_macro_step_0) return NULL;
   Array _x2c_macro_slice_0 =(Array) Block_new(sizeof(Var));
   int _x2c_macro_newlen_0 = x2c_normalize_slice(& _x2c_macro_start_0, & _x2c_macro_end_0, _x2c_macro_step_0, (int) _x2c_macro_array_4 -> length);
@@ -230,14 +230,14 @@ static Array _for_array__getslice(Array _x2c_macro_array_4, int _x2c_macro_start
   return _x2c_macro_slice_0;
 }
 
-static inline int _for_array__normalize_bound(Array _x2c_macro_array_5, int _x2c_macro_index_2){
+static inline int _x2c_macro__normalize_bound_0(Array _x2c_macro_array_5, int _x2c_macro_index_2){
   int _x2c_macro_length_0 =(int) _x2c_macro_array_5 -> length;
   int _x2c_macro_start_1 = _x2c_macro_index_2, _x2c_macro_stop_0 = _x2c_macro_index_2;
   x2c_normalize_slice(& _x2c_macro_start_1, & _x2c_macro_stop_0, 1, _x2c_macro_length_0);
   return _x2c_macro_start_1;
 }
 
-static inline void _for_array__normalize_span(Array _x2c_macro_array_6, int * _x2c_macro_begin_0, int * _x2c_macro_finish_0){
+static inline void _x2c_macro__normalize_span_0(Array _x2c_macro_array_6, int * _x2c_macro_begin_0, int * _x2c_macro_finish_0){
   x2c_normalize_slice(_x2c_macro_begin_0, _x2c_macro_finish_0, 1, (int) _x2c_macro_array_6 -> length);
   if(* _x2c_macro_finish_0 < * _x2c_macro_begin_0){
     int _x2c_macro_tmp_0 = * _x2c_macro_begin_0;
@@ -254,17 +254,17 @@ int Array_truth(Array a0);
 
 
 
-static void _for_array__setslice(Array _x2c_macro_array_7, int _x2c_macro_start_2, int _x2c_macro_end_1, Array _x2c_macro_values_0){
+static void Array__setslice(Array _x2c_macro_array_7, int _x2c_macro_start_2, int _x2c_macro_end_1, Array _x2c_macro_values_0){
   int _x2c_macro_n_3 =(int) _x2c_macro_array_7 -> length;
   int _x2c_macro_begin_1 = _x2c_macro_start_2, _x2c_macro_finish_1 = _x2c_macro_end_1;
-  (_for_array__normalize_span)(_x2c_macro_array_7, & _x2c_macro_begin_1, & _x2c_macro_finish_1);
+  _x2c_macro__normalize_span_0(_x2c_macro_array_7, & _x2c_macro_begin_1, & _x2c_macro_finish_1);
   int _x2c_macro_remove_0 = _x2c_macro_finish_1 - _x2c_macro_begin_1;
   int _x2c_macro_insert_0 = Array_truth(_x2c_macro_values_0) ?(int) _x2c_macro_values_0 -> length : 0;
   int _x2c_macro_delta_0 = _x2c_macro_insert_0 - _x2c_macro_remove_0;
   Array _x2c_macro_source_0 = _x2c_macro_values_0;
   int _x2c_macro_copied_0 = 0;
   if(_x2c_macro_insert_0 > 0 && Array_truth(_x2c_macro_values_0) && _x2c_macro_values_0 -> bytes == _x2c_macro_array_7 -> bytes){
-    _x2c_macro_source_0 =(_for_array__copy)(_x2c_macro_values_0);
+    _x2c_macro_source_0 = Array__copy(_x2c_macro_values_0);
     _x2c_macro_copied_0 = 1;
   }
   {
@@ -284,7 +284,7 @@ static void _for_array__setslice(Array _x2c_macro_array_7, int _x2c_macro_start_
         if(_x2c_macro_delta_0 > INT_MAX - _x2c_macro_n_3){
           size_t _x2c_macro_size_0 =(size_t) _x2c_macro_n_3 +(size_t) _x2c_macro_delta_0;
           {
-            static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/array.x",.function = "_for_array__setslice",.line = 53};
+            static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/array.x",.function = "Array__setslice",.line = 53};
             x2c_error_raise_n(& _x2c_error_site_0, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(_x2c_macro_size_0));
             __builtin_unreachable();
           }
@@ -303,12 +303,12 @@ static void _for_array__setslice(Array _x2c_macro_array_7, int _x2c_macro_start_
 
 }
 
-static Array _for_array__remslice(Array _x2c_macro_array_8, int _x2c_macro_start_3, int _x2c_macro_end_2){
+static Array Array__remslice(Array _x2c_macro_array_8, int _x2c_macro_start_3, int _x2c_macro_end_2){
   int _x2c_macro_n_4 =(int) _x2c_macro_array_8 -> length;
   int _x2c_macro_begin_2 = _x2c_macro_start_3, _x2c_macro_finish_2 = _x2c_macro_end_2;
-  (_for_array__normalize_span)(_x2c_macro_array_8, & _x2c_macro_begin_2, & _x2c_macro_finish_2);
+  _x2c_macro__normalize_span_0(_x2c_macro_array_8, & _x2c_macro_begin_2, & _x2c_macro_finish_2);
   if(_x2c_macro_begin_2 >= _x2c_macro_finish_2) return(Array) Block_new(sizeof(Var));
-  Array _x2c_macro_removed_0 =(_for_array__getslice)(_x2c_macro_array_8, _x2c_macro_begin_2, _x2c_macro_finish_2, 1);
+  Array _x2c_macro_removed_0 = Array__getslice(_x2c_macro_array_8, _x2c_macro_begin_2, _x2c_macro_finish_2, 1);
   Var * _x2c_macro_data_5 =(Var *) _x2c_macro_array_8 -> bytes;
   int _x2c_macro_tail_1 = _x2c_macro_n_4 - _x2c_macro_finish_2;
   if(_x2c_macro_tail_1 > 0) memmove(_x2c_macro_data_5 + _x2c_macro_begin_2, _x2c_macro_data_5 + _x2c_macro_finish_2, _x2c_macro_tail_1 * sizeof(Var));
@@ -316,38 +316,38 @@ static Array _for_array__remslice(Array _x2c_macro_array_8, int _x2c_macro_start
   return _x2c_macro_removed_0;
 }
 
-static Array _for_array__splice(Array _x2c_macro_array_9, int _x2c_macro_index_3, int _x2c_macro_remove_count_0, Array _x2c_macro_values_1){
+static Array Array__splice(Array _x2c_macro_array_9, int _x2c_macro_index_3, int _x2c_macro_remove_count_0, Array _x2c_macro_values_1){
   if(_x2c_macro_remove_count_0 < 0) _x2c_macro_remove_count_0 = 0;
   int _x2c_macro_n_5 =(int) _x2c_macro_array_9 -> length;
-  int _x2c_macro_start_4 =(_for_array__normalize_bound)(_x2c_macro_array_9, _x2c_macro_index_3);
+  int _x2c_macro_start_4 = _x2c_macro__normalize_bound_0(_x2c_macro_array_9, _x2c_macro_index_3);
   long long _x2c_macro_target_0 =(long long) _x2c_macro_start_4 + _x2c_macro_remove_count_0;
   int _x2c_macro_end_3 = _x2c_macro_target_0 > _x2c_macro_n_5 ? _x2c_macro_n_5 :(int) _x2c_macro_target_0;
-  Array _x2c_macro_removed_1 =(_for_array__getslice)(_x2c_macro_array_9, _x2c_macro_start_4, _x2c_macro_end_3, 1);
-  (_for_array__setslice)(_x2c_macro_array_9, _x2c_macro_start_4, _x2c_macro_end_3, _x2c_macro_values_1);
+  Array _x2c_macro_removed_1 = Array__getslice(_x2c_macro_array_9, _x2c_macro_start_4, _x2c_macro_end_3, 1);
+  Array__setslice(_x2c_macro_array_9, _x2c_macro_start_4, _x2c_macro_end_3, _x2c_macro_values_1);
   return _x2c_macro_removed_1;
 }
 
-static int _for_array__find(Array _x2c_macro_array_10, Var _x2c_macro_value_1){
+static int Array__find(Array _x2c_macro_array_10, Var _x2c_macro_value_1){
   Var * _x2c_macro_data_6 =(Var *) _x2c_macro_array_10 -> bytes;
   int _x2c_macro_n_6 =(int) _x2c_macro_array_10 -> length;
   for(int _x2c_macro_i_2 = 0;  _x2c_macro_i_2 < _x2c_macro_n_6;  _x2c_macro_i_2 ++) if(x2c_var_equal(_x2c_macro_data_6[_x2c_macro_i_2], _x2c_macro_value_1)) return _x2c_macro_i_2;
   return - 1;
 }
 
-static int _for_array__count(Array _x2c_macro_array_11, Var _x2c_macro_value_2){
+static int Array__count(Array _x2c_macro_array_11, Var _x2c_macro_value_2){
   Var * _x2c_macro_data_7 =(Var *) _x2c_macro_array_11 -> bytes;
   int _x2c_macro_n_7 =(int) _x2c_macro_array_11 -> length, _x2c_macro_total_0 = 0;
   for(int _x2c_macro_i_3 = 0;  _x2c_macro_i_3 < _x2c_macro_n_7;  _x2c_macro_i_3 ++) if(x2c_var_equal(_x2c_macro_data_7[_x2c_macro_i_3], _x2c_macro_value_2)) _x2c_macro_total_0 ++;
   return _x2c_macro_total_0;
 }
 
-static Array _for_array__concat(Array _x2c_macro_a_0, Array _x2c_macro_b_0){
-  Array _x2c_macro_output_0 =(_for_array__copy)(_x2c_macro_a_0);
+static Array Array__concat(Array _x2c_macro_a_0, Array _x2c_macro_b_0){
+  Array _x2c_macro_output_0 = Array__copy(_x2c_macro_a_0);
   if(Array_truth(_x2c_macro_b_0) && _x2c_macro_b_0 -> length) Block_append((Block) _x2c_macro_output_0, _x2c_macro_b_0 -> bytes, _x2c_macro_b_0 -> length);
   return _x2c_macro_output_0;
 }
 
-static Array _for_array__reverse(Array _x2c_macro_array_12){
+static Array Array__reverse(Array _x2c_macro_array_12){
   if(_x2c_macro_array_12 == NULL || _x2c_macro_array_12 -> length < 2) return _x2c_macro_array_12;
   Var * _x2c_macro_data_8 =(Var *) _x2c_macro_array_12 -> bytes;
   for(size_t _x2c_macro_i_4 = 0, _x2c_macro_j_0 = _x2c_macro_array_12 -> length - 1;  _x2c_macro_i_4 < _x2c_macro_j_0;  _x2c_macro_i_4 ++, _x2c_macro_j_0 --){
@@ -358,7 +358,7 @@ static Array _for_array__reverse(Array _x2c_macro_array_12){
   return _x2c_macro_array_12;
 }
 
-static int _for_array__equal(Array _x2c_macro_a_1, Array _x2c_macro_b_1){
+static int Array__equal(Array _x2c_macro_a_1, Array _x2c_macro_b_1){
   if((void *) _x2c_macro_a_1 ==(void *) _x2c_macro_b_1) return 1;
   if(_x2c_macro_a_1 == NULL || _x2c_macro_b_1 == NULL || _x2c_macro_a_1 -> length != _x2c_macro_b_1 -> length || _x2c_macro_a_1 -> width != _x2c_macro_b_1 -> width) return 0;
   Var * _x2c_macro_adata_0 =(Var *) _x2c_macro_a_1 -> bytes;
@@ -462,7 +462,7 @@ Var Array_take_last(Array _x2c_macro_array_18){
 
 Var Array_shift(Array _x2c_macro_array_19){
   Var _x2c_macro_value_5 =((void) 0, Void);
-  if(Array_truth(_x2c_macro_array_19) && _x2c_macro_array_19 -> length <= INT_MAX &&(_for_array__shift)(_x2c_macro_array_19, & _x2c_macro_value_5)) return _x2c_macro_value_5;
+  if(Array_truth(_x2c_macro_array_19) && _x2c_macro_array_19 -> length <= INT_MAX && Array__shift(_x2c_macro_array_19, & _x2c_macro_value_5)) return _x2c_macro_value_5;
   if(Array_truth(_x2c_macro_array_19) && _x2c_macro_array_19 -> length > INT_MAX) _size_limit(0, _x2c_macro_array_19 -> length);
   if(1) return((void) 0, Void);
   _bad_operation(0, 40389032);
@@ -476,7 +476,7 @@ Var Array_unshift(Array _x2c_macro_array_20, Var _x2c_macro_value_6){
   }
   if(! 1 && _x2c_macro_array_20 == NULL) _bad_operation(0, 46077069736);
   if(_x2c_macro_array_20 -> length >= INT_MAX) _size_limit(0, _x2c_macro_array_20 -> length);
-  (_for_array__insert)(_x2c_macro_array_20, 0, _x2c_macro_value_6);
+  Array__insert(_x2c_macro_array_20, 0, _x2c_macro_value_6);
   return _x2c_macro_value_6;
 }
 
@@ -492,10 +492,10 @@ Var Array_insert(Array _x2c_macro_array_21, int _x2c_macro_index_4, Var _x2c_mac
       x2c_error_raise_n(& _x2c_error_site_7, 48270474208, 0);
       __builtin_unreachable();
     }
-    (_for_array__insert)(_x2c_macro_array_21, _x2c_macro_index_4, _x2c_macro_value_7);
+    Array__insert(_x2c_macro_array_21, _x2c_macro_index_4, _x2c_macro_value_7);
     return _x2c_macro_value_7;
   }
-  if(_x2c_macro_array_21 == NULL || _x2c_macro_array_21 -> length >= INT_MAX || !(_for_array__insert)(_x2c_macro_array_21, _x2c_macro_index_4, _x2c_macro_value_7)){
+  if(_x2c_macro_array_21 == NULL || _x2c_macro_array_21 -> length >= INT_MAX || ! Array__insert(_x2c_macro_array_21, _x2c_macro_index_4, _x2c_macro_value_7)){
     if(Array_truth(_x2c_macro_array_21) && _x2c_macro_array_21 -> length >= INT_MAX) _size_limit(0, _x2c_macro_array_21 -> length);
     size_t _x2c_macro_size_1 = Array_truth(_x2c_macro_array_21) ? _x2c_macro_array_21 -> length : 0;
     _bad_index(0, _x2c_macro_index_4, _x2c_macro_size_1);
@@ -505,7 +505,7 @@ Var Array_insert(Array _x2c_macro_array_21, int _x2c_macro_index_4, Var _x2c_mac
 
 Var Array_remove(Array _x2c_macro_array_22, int _x2c_macro_index_5){
   Var _x2c_macro_value_8 =((void) 0, Void);
-  if(Array_truth(_x2c_macro_array_22) && _x2c_macro_array_22 -> length <= INT_MAX &&(_for_array__remove)(_x2c_macro_array_22, _x2c_macro_index_5, & _x2c_macro_value_8)) return _x2c_macro_value_8;
+  if(Array_truth(_x2c_macro_array_22) && _x2c_macro_array_22 -> length <= INT_MAX && Array__remove(_x2c_macro_array_22, _x2c_macro_index_5, & _x2c_macro_value_8)) return _x2c_macro_value_8;
   if(Array_truth(_x2c_macro_array_22) && _x2c_macro_array_22 -> length > INT_MAX) _size_limit(0, _x2c_macro_array_22 -> length);
   if(1) return((void) 0, Void);
   size_t _x2c_macro_size_2 = Array_truth(_x2c_macro_array_22) ? _x2c_macro_array_22 -> length : 0;
@@ -515,40 +515,40 @@ Var Array_remove(Array _x2c_macro_array_22, int _x2c_macro_index_5){
 Array Array_copy(Array _x2c_macro_array_23){
   if(_x2c_macro_array_23 == NULL) return NULL;
   if(_x2c_macro_array_23 -> length > INT_MAX) _size_limit(0, _x2c_macro_array_23 -> length);
-  return(_for_array__copy)(_x2c_macro_array_23);
+  return Array__copy(_x2c_macro_array_23);
 }
 
 Array Array_getslice(Array _x2c_macro_array_24, int _x2c_macro_start_5, int _x2c_macro_end_4, int _x2c_macro_step_1){
   if(_x2c_macro_array_24 == NULL || ! _x2c_macro_step_1) _bad_step(0, _x2c_macro_step_1);
   if(_x2c_macro_array_24 -> length > INT_MAX) _size_limit(0, _x2c_macro_array_24 -> length);
-  return(_for_array__getslice)(_x2c_macro_array_24, _x2c_macro_start_5, _x2c_macro_end_4, _x2c_macro_step_1);
+  return Array__getslice(_x2c_macro_array_24, _x2c_macro_start_5, _x2c_macro_end_4, _x2c_macro_step_1);
 }
 
 Array Array_setslice(Array _x2c_macro_array_25, int _x2c_macro_start_6, int _x2c_macro_end_5, Array _x2c_macro_values_2){
   if(_x2c_macro_array_25 == NULL) _bad_operation(0, 1317790304458);
   if(_x2c_macro_array_25 -> length > INT_MAX) _size_limit(0, _x2c_macro_array_25 -> length);
   if(Array_truth(_x2c_macro_values_2) && _x2c_macro_values_2 -> length > INT_MAX) _size_limit(0, _x2c_macro_values_2 -> length);
-  (_for_array__setslice)(_x2c_macro_array_25, _x2c_macro_start_6, _x2c_macro_end_5, _x2c_macro_values_2);
+  Array__setslice(_x2c_macro_array_25, _x2c_macro_start_6, _x2c_macro_end_5, _x2c_macro_values_2);
   return _x2c_macro_array_25;
 }
 
 Array Array_remslice(Array _x2c_macro_array_26, int _x2c_macro_start_7, int _x2c_macro_end_6){
   if(_x2c_macro_array_26 == NULL) _bad_operation(0, 1248601065674);
   if(_x2c_macro_array_26 -> length > INT_MAX) _size_limit(0, _x2c_macro_array_26 -> length);
-  return(_for_array__remslice)(_x2c_macro_array_26, _x2c_macro_start_7, _x2c_macro_end_6);
+  return Array__remslice(_x2c_macro_array_26, _x2c_macro_start_7, _x2c_macro_end_6);
 }
 
 Array Array_splice(Array _x2c_macro_array_27, int _x2c_macro_index_6, int _x2c_macro_remove_count_1, Array _x2c_macro_values_3){
   if(_x2c_macro_array_27 == NULL) _bad_operation(0, 1309427914);
   if(_x2c_macro_array_27 -> length > INT_MAX) _size_limit(0, _x2c_macro_array_27 -> length);
   if(Array_truth(_x2c_macro_values_3) && _x2c_macro_values_3 -> length > INT_MAX) _size_limit(0, _x2c_macro_values_3 -> length);
-  return(_for_array__splice)(_x2c_macro_array_27, _x2c_macro_index_6, _x2c_macro_remove_count_1, _x2c_macro_values_3);
+  return Array__splice(_x2c_macro_array_27, _x2c_macro_index_6, _x2c_macro_remove_count_1, _x2c_macro_values_3);
 }
 
 int Array_find(Array _x2c_macro_array_28, Var _x2c_macro_value_9){
   if(_x2c_macro_array_28 == NULL) return - 1;
   if(_x2c_macro_array_28 -> length > INT_MAX) _size_limit(0, _x2c_macro_array_28 -> length);
-  return(_for_array__find)(_x2c_macro_array_28, _x2c_macro_value_9);
+  return Array__find(_x2c_macro_array_28, _x2c_macro_value_9);
 }
 
 int Array_contains(Array _x2c_macro_array_29, Var _x2c_macro_value_10){
@@ -558,7 +558,7 @@ int Array_contains(Array _x2c_macro_array_29, Var _x2c_macro_value_10){
 int Array_count(Array _x2c_macro_array_30, Var _x2c_macro_value_11){
   if(_x2c_macro_array_30 == NULL) return 0;
   if(_x2c_macro_array_30 -> length > INT_MAX) _size_limit(0, _x2c_macro_array_30 -> length);
-  return(_for_array__count)(_x2c_macro_array_30, _x2c_macro_value_11);
+  return Array__count(_x2c_macro_array_30, _x2c_macro_value_11);
 }
 
 int Array_indexof(Array _x2c_macro_array_31, Var _x2c_macro_value_12){
@@ -569,15 +569,15 @@ Array Array_concat(Array _x2c_macro_a_2, Array _x2c_macro_b_2){
   if(_x2c_macro_a_2 == NULL) return NULL;
   if(_x2c_macro_a_2 -> length > INT_MAX) _size_limit(0, _x2c_macro_a_2 -> length);
   if(Array_truth(_x2c_macro_b_2) && _x2c_macro_b_2 -> length > INT_MAX - _x2c_macro_a_2 -> length) _size_limit(0, _x2c_macro_b_2 -> length);
-  return(_for_array__concat)(_x2c_macro_a_2, _x2c_macro_b_2);
+  return Array__concat(_x2c_macro_a_2, _x2c_macro_b_2);
 }
 
 Array Array_reverse(Array _x2c_macro_array_32){
-  return(_for_array__reverse)(_x2c_macro_array_32);
+  return Array__reverse(_x2c_macro_array_32);
 }
 
 int Array_equal(Array _x2c_macro_a_3, Array _x2c_macro_b_3){
-  return(_for_array__equal)(_x2c_macro_a_3, _x2c_macro_b_3);
+  return Array__equal(_x2c_macro_a_3, _x2c_macro_b_3);
 }
 
 Var Array_getindex(Array _x2c_macro_array_33, int _x2c_macro_index_7){
@@ -779,7 +779,7 @@ static int _compare_var(Var a, Var b){
   return Var_compare(a, b);
 }
 
-static int _for_array__compare(Array _x2c_macro_a_5, Array _x2c_macro_b_5){
+static int Array__compare(Array _x2c_macro_a_5, Array _x2c_macro_b_5){
   if((void *) _x2c_macro_a_5 ==(void *) _x2c_macro_b_5) return 0;
   if(_x2c_macro_a_5 == NULL) return - 1;
   if(_x2c_macro_b_5 == NULL) return 1;
@@ -797,7 +797,7 @@ static int _for_array__compare(Array _x2c_macro_a_5, Array _x2c_macro_b_5){
 
 Buffer Var_write_repr(Var, Buffer);
 
-static Buffer _for_array__write(Array _x2c_macro_array_39, Buffer _x2c_macro_out_10, Symbol _x2c_macro_mode_0){
+static Buffer Array__write(Array _x2c_macro_array_39, Buffer _x2c_macro_out_10, Symbol _x2c_macro_mode_0){
   RenderPath _x2c_macro_path_0;
   if(! RenderPath_enter(&(_x2c_macro_path_0), _x2c_macro_array_39)) return Buffer_printf(_x2c_macro_out_10, "<array: 0x%012lX>", (long) _x2c_macro_array_39);
   {
@@ -837,15 +837,15 @@ static Buffer _for_array__write(Array _x2c_macro_array_39, Buffer _x2c_macro_out
 }
 
 int Array_compare(Array _x2c_macro_a_4, Array _x2c_macro_b_4){
-  return(_for_array__compare)(_x2c_macro_a_4, _x2c_macro_b_4);
+  return Array__compare(_x2c_macro_a_4, _x2c_macro_b_4);
 }
 
 Buffer Array_write_repr(Array _x2c_macro_array_35, Buffer _x2c_macro_out_6){
-  return(_for_array__write)(_x2c_macro_array_35, _x2c_macro_out_6, 1190948);
+  return Array__write(_x2c_macro_array_35, _x2c_macro_out_6, 1190948);
 }
 
 Buffer Array_write_str(Array _x2c_macro_array_36, Buffer _x2c_macro_out_7){
-  return(_for_array__write)(_x2c_macro_array_36, _x2c_macro_out_7, 40228);
+  return Array__write(_x2c_macro_array_36, _x2c_macro_out_7, 40228);
 }
 
 String Array_str(Array _x2c_macro_array_37){

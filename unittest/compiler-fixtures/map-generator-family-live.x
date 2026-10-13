@@ -10,7 +10,9 @@ typedef struct ProbeMapShortLong {
   unsigned used;
   unsigned capacity;
   unsigned mask;
-} *ProbeMapShortLong;
+} *ProbeMapBase;
+/* Typed operations inherit the core helpers from a base family. */
+typedef ProbeMapBase ProbeMapShortLong;
 
 struct ProbeMapShortLongRecord { short key; long val; };
 
@@ -102,7 +104,7 @@ static ProbeMapShortLong _probe_prepare_export(
 }
 
 $map.core.family(
-  ProbeMapShortLong, struct ProbeMapShortLong, short, long,
+  ProbeMapBase, struct ProbeMapShortLong, short, long,
   unsigned, struct ProbeMapShortLongRecord,
   _probe_hash, _probe_key_equal, _probe_value_equal, _probe_value_valid,
   _probe_key, _probe_value,
