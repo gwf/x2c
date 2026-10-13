@@ -2248,8 +2248,8 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "try_catch_site", try_catch_site);
   $linked.row(rows, "try_landing", try_landing);
   $linked.row(rows, "try_exits_placement", try_exits_placement);
-  $linked.row(rows, "_field_copies", _field_copies);
-  $linked.row(rows, "_field_sets", _field_sets);
+  $linked.row(rows, "field_copies", field_copies);
+  $linked.row(rows, "field_sets", field_sets);
   $linked.row(rows, "source_return_type", source_return_type);
   $linked.row(rows, "source_conditional_statement", source_conditional_statement);
   $linked.row(rows, "source_any_lambda", source_any_lambda);
