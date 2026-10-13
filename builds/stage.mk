@@ -83,6 +83,8 @@ LIB_C_DEPS   = $(patsubst $(LIB_SOURCE)/%.x,$(LIB_BUILD)/%.c.d,$(LIB_X_FILES))
 ###############################################################################
 # Binary source files and generated files
 BIN_X_FILES  = $(wildcard $(BIN_SOURCE)/*.x)
+# Module members trigger the batch but are not separate translation units.
+BIN_X_INPUTS := $(shell find $(BIN_SOURCE) -type f -name '*.x')
 BIN_H_FILES  = $(patsubst $(BIN_SOURCE)/%.x,$(BIN_BUILD)/%.h,$(BIN_X_FILES))
 BIN_C_FILES  = $(patsubst $(BIN_SOURCE)/%.x,$(BIN_BUILD)/%.c,$(BIN_X_FILES))
 BIN_XI_FILES = $(patsubst $(BIN_SOURCE)/%.x,$(BIN_BUILD)/%.xi,$(BIN_X_FILES))
@@ -164,7 +166,7 @@ BIN_MISSING_GENERATED = $(filter-out \
 BIN_MISSING_X = $(sort $(patsubst $(BIN_BUILD)/%,$(BIN_SOURCE)/%.x, \
 	$(basename $(BIN_MISSING_GENERATED))))
 
-$(BIN_BUILD)/.translated: $(BIN_X_FILES) $(X2C_TRANSLATE_DEPS) \
+$(BIN_BUILD)/.translated: $(BIN_X_INPUTS) $(X2C_TRANSLATE_DEPS) \
 		| $(BIN_BUILD)
 	$(X2C_TRANSLATE) --out-dir $(BIN_BUILD) \
 		$(BIN_X_FILES)

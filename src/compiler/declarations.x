@@ -1,0 +1,19 @@
+/* Declaration production, portable syntax, and default selection. */
+
+static macro Stmt $report.type.ctor_parent(Expr $c) =>
+  $c.report_error(
+    <type>,
+    "a forwarded class constructor has no completed parent constructor",
+    $c.token, NULL);
+
+static macro Stmt $report.type.ctor_variadic(Expr $c, Expr $name) =>
+  $c.report_error(
+    <type>,
+    %"'${$name}' requires an explicit variadic constructor",
+    $c.token, NULL);
+
+module {
+  "declarations/production.x",
+  "declarations/portable-syntax.x",
+  "declarations/defaults.x",
+}

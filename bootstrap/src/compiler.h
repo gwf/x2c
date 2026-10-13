@@ -174,9 +174,38 @@ SymTxn;
 #include "diagnostics.h"
 #include "symbols.h"
 #include "preprocess.h"
+#include "grammar.h"
+#include "utils.h"
+#include "parse.h"
+#include "protocol.h"
+#include "macros.h"
+#include "stage.h"
+#include "meta-group.h"
+#include "meta-helper-client.h"
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "fields.h"
 Var Compiler_var(Compiler c);
 
 Compiler Var_compiler(Var value);
+
+void Compiler_own_diagnostics(Compiler c);
+
+void Compiler_close_child(Compiler c, Compiler child);
+
+void Compiler_share_meta_group(Compiler c, Compiler owner);
+
+void Compiler_take_unit_state(Compiler c, Compiler owner);
+
+void Compiler_return_unit_state(Compiler c, Compiler owner);
+
+Compiler Compiler_new(void);
+
+Compiler Compiler_new_shared(Compiler owner);
+
+void Compiler_free_lisp(Compiler c);
 
 void Compiler_shallow_parse(Compiler c, Map globals);
 
@@ -193,20 +222,6 @@ void Compiler_record_inline_function(Compiler c, List declaration);
 int Compiler__at_function_arrow(Compiler c);
 
 void Compiler__skip_shallow_expression(Compiler c, int stop_at_comma);
-
-void Compiler_queue_declaration_effect(Compiler c, String form, Token first, Token after);
-
-void Compiler_run_declaration_effects(Compiler c);
-
-int Compiler_collect_unit_macro(Compiler c);
-
-List Compiler_replay_declaration_source(Compiler c);
-
-Var Compiler_freeze_declaration_syntax(Compiler c, Var syntax);
-
-Var Compiler_thaw_declaration_syntax(Compiler c, Var syntax);
-
-Map Compiler_select_declaration_defaults(Compiler c, String path, Map symbols, Array parts, Map definitions, Map statics);
 
 List Compiler_full_parse(Compiler c, Map globs, int generated_symbols);
 
@@ -248,18 +263,6 @@ int Compiler_at_completion(Compiler c);
 
 void Compiler___complete_here(Compiler c, Symbol role, List keywords);
 
-int Compiler_record_origin(Compiler c, Token token);
-
-List Compiler_anchor_origin(Compiler c, List node, Token token);
-
-void Compiler_record_source_declaration(Compiler c, List binding, Token first, Token after);
-
-void Compiler_record_source_reference(Compiler c, List binding, Type type, Token first, Token after);
-
-void Compiler_copy_source_declaration(Compiler c, Map target, Map source, List key);
-
-void Compiler_merge_source_declarations(Compiler c, Map target, Map source);
-
 String Compiler_emitted_binding_name(Compiler c, List binding);
 
 List Compiler_present_references(Compiler c);
@@ -273,6 +276,32 @@ void Compiler_restore_reference_presence(Compiler c, List before);
 List Compiler_optional_reference_test(Compiler c, List condition, int * truth);
 
 int reference_guard_exits(List arm);
+
+void Compiler_queue_declaration_effect(Compiler c, String form, Token first, Token after);
+
+void Compiler_run_declaration_effects(Compiler c);
+
+int Compiler_collect_unit_macro(Compiler c);
+
+List Compiler_replay_declaration_source(Compiler c);
+
+Var Compiler_freeze_declaration_syntax(Compiler c, Var syntax);
+
+Var Compiler_thaw_declaration_syntax(Compiler c, Var syntax);
+
+Map Compiler_select_declaration_defaults(Compiler c, String path, Map symbols, Array parts, Map definitions, Map statics);
+
+int Compiler_record_origin(Compiler c, Token token);
+
+List Compiler_anchor_origin(Compiler c, List node, Token token);
+
+void Compiler_record_source_declaration(Compiler c, List binding, Token first, Token after);
+
+void Compiler_record_source_reference(Compiler c, List binding, Type type, Token first, Token after);
+
+void Compiler_copy_source_declaration(Compiler c, Map target, Map source, List key);
+
+void Compiler_merge_source_declarations(Compiler c, Map target, Map source);
 
 String Compiler_fresh_name(Compiler c, String stem);
 
@@ -316,16 +345,6 @@ List Compiler_define_pattern_binders(Compiler c, List pattern);
 
 List Compiler_pattern_binder_declarations(Compiler c, List bindings, List handle);
 
-void Compiler_own_diagnostics(Compiler c);
-
-void Compiler_close_child(Compiler c, Compiler child);
-
-void Compiler_share_meta_group(Compiler c, Compiler owner);
-
-void Compiler_take_unit_state(Compiler c, Compiler owner);
-
-void Compiler_return_unit_state(Compiler c, Compiler owner);
-
 int Compiler_read_source(Compiler c, String path, String volatile * text);
 
 String Compiler_canonical_path(Compiler c, String path);
@@ -343,12 +362,6 @@ void Map_merge_translation_dependency(Map m, String path, Var content_hash);
 void Compiler_add_translation_dependency(Compiler c, String path);
 
 void Compiler_merge_translation_dependencies(Compiler c, Map dependencies);
-
-Compiler Compiler_new(void);
-
-Compiler Compiler_new_shared(Compiler owner);
-
-void Compiler_free_lisp(Compiler c);
 
 
 #endif /* __GUARD_0x08246194__ */

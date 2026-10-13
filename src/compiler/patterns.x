@@ -1,0 +1,128 @@
+/* match pattern values
+
+   The compile-time value graph behind a Match pattern represents dynamic
+   expressions by a private marker, so binder analysis can distinguish a
+   computed operator head from ordinary literal data. */
+
+/** Recovers a pattern value graph, using `x2c-dyn` for computed values. */
+Var Compiler.match_pattern_value(Compiler c, Var node) {
+  if (node is not <list>) return node;
+  List ast = node;
+  if (!ast) return %();
+  Var (head, second, third) = ast;
+  if (head == <cache>) return c.match_pattern_value(c.id_keys[second]);
+  if (head == <expr>) {
+    match (ast) case %(expr ("Var") (call ? (args ?argument))):
+      if (c.is_builtin_converter_call(ast))
+        return c.match_pattern_value(argument);
+    return c.match_pattern_value(ast.last());
+  }
+  if (head == <var>) return c.match_pattern_value(second);
+  if (head == <string>) return c.match_pattern_value(second);
+  if (head == <call>) return _call_value(c, second, third);
+  if (head == <literal>) return ast.last();
+  if (head == <nil>) return %();
+  if (head == <cons>) return _cons_value(c, second, third);
+  return <x2c-dyn>;
+}
+
+/* A case pattern matches what its labels match. Other untyped calls are
+   computed; typed builtin boxers were recognized with their expression. */
+static Var _call_value(Compiler c, Var callee, Var args) {
+  String converter = _converter_name(callee);
+  if (converter == "Macro_case_pattern")
+    match (args) case %(args ? ?names): {
+      List labels = c.match_pattern_value(names);
+      return %(!and x2c-dyn @labels);
+    }
+  return <x2c-dyn>;
+}
+
+static Var _cons_value(Compiler c, Var head, Var tail) {
+  Var value = c.match_pattern_value(head);
+  Var rest = c.match_pattern_value(tail);
+  if (rest is not <list>) return <x2c-dyn>;
+  return cons(value, rest);
+}
+
+static String _converter_name(Var node) {
+  if (node is <string>) return node;
+  match (node)
+    case %(expr ? ${$source_identifier_content(%(?binding))}):
+      return binding_identity_spelling(binding);
+  return NULL;
+}
+
+/** Reports whether a recovered pattern value graph is fully static. */
+int match_value_is_static(Var value) {
+  if (value == <x2c-dyn>) return 0;
+  if (value is not <list>) return 1;
+  foreach (Var part, value.list()) if (!match_value_is_static(part)) return 0;
+  return 1;
+}
+
+/** Reports whether a typed `Match` pattern has a fully static value graph. */
+int Compiler.match_pattern_is_static(Compiler c, List pattern) =>
+  match_value_is_static(c.match_pattern_value(pattern));
+
+/* match binders
+
+   A pattern's definite binders become declarations in the scope of its
+   case, or of its catch clause, whose lowering keeps the issued bindings. */
+
+/** Returns definite binders from a typed `Match` pattern AST.
+
+    When `possible` is non-null, stores every binder appearing on any path.
+*/
+List Compiler.match_pattern_binders(
+  Compiler c, List pattern, List &?possible) {
+  Var value = c.match_pattern_value(pattern);
+  MatchCaptureLayout layout = MatchCaptureLayout.analyze(value);
+  List definite = layout.definite_list();
+  if (possible) possible = layout.possible_list();
+  layout.free();
+  return definite;
+}
+
+/** Declares pattern locals and returns their capture-token/binding pairs. */
+List Compiler.define_pattern_binders(Compiler c, List pattern) {
+  Array rows = [];
+  foreach (Var binder, c.match_pattern_binders(pattern, NULL)) {
+    String name = binder.str()[1:];
+    List binding;
+    if (c.macro_holes) {
+      binding = c.macro_introduced_name(name);
+      c.bind_template_local(binding, _binder_type(binder), NULL);
+    }
+    else binding = c.sym.declare(NULL, %($name), _binder_type(binder));
+    rows.push(%($binder $binding));
+  }
+  return rows.list_free();
+}
+
+static List _binder_type(Var binder) =>
+  binder.is_list_binder() ? %("List") : %("Var");
+
+/** Builds ordinary declarations from a pattern scope's issued bindings.
+    A catch reads through its handler; a match reads its capture slots. */
+List Compiler.pattern_binder_declarations(
+  Compiler c, List bindings, List handle) {
+  Array declarations = [];
+  int index = 0;
+  foreach (List row, bindings) {
+    Type type = _binder_type(row.car());
+    List value = handle ? %(expr ("Var")
+      (call "x2c_error_catch_capture"
+        (args (expr ("ErrorHandler") (ident $handle))
+              (expr (int) (literal (int) ${%"$index"})))))
+      : %(expr $type (${%"_x2c_match_${
+          row.car().is_list_binder() ? "list" : "value"}_$index"}));
+    index++;
+    if (handle && row.car().is_list_binder())
+      value = %(expr $type (call "Var_list_payload" (args $value)));
+    declarations.push(%(declare $type (bindings (bind ${row.cadr()} ()))));
+    declarations.push(
+      %(stmnt (expr $type (op = (expr $type (ident ${row.cadr()})) $value))));
+  }
+  return declarations.list_free();
+}
