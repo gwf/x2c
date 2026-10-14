@@ -132,3 +132,38 @@ assert(!R.analyze(D, unreasoned).canApply);
 attached.coverage = "Fixture contains only this registered callback.";
 attached.responsibilities[0].description = "";
 assert(!R.analyze(D, attached).canApply);
+
+// A missing agent reference must preserve the proposal and block extraction,
+// while a recognized callback must still keep its private component intact.
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const {execFileSync} = require('node:child_process');
+const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'partition-reference-test-'));
+try {
+  const proposal = {
+    ...restored,
+    operations: Object.entries(restored.operations).map(([key, op]) => ({...op, key})),
+    references: [...restored.references, {from: R.key(D, 0), to: 'external:unknown_callback', evidence: 'registration line 12'}],
+    moduleArrangement: restored.responsibilities.map(r => ({
+      responsibility: r.id,
+      members: r.id === 'a' ? [0,2,3].map(v => R.key(D,v)) : [r.id === 'b' ? 1 : 4].map(v => R.key(D,v)),
+      evidence: 'Fixture source ownership',
+    })),
+  };
+  for (const [name, value] of Object.entries({graph: D, scope: restored.scope, answer: proposal}))
+    fs.writeFileSync(path.join(directory, name + '.json'), JSON.stringify(value));
+  const converted = JSON.parse(execFileSync(process.execPath, [path.join(__dirname, '../analyze-responsibilities.cjs'), ...['graph','scope','answer'].map(n => path.join(directory,n+'.json'))], {encoding:'utf8'}));
+  const analyzed = R.analyze(D, converted);
+  assert(analyzed.valid);
+  assert(!analyzed.canApply);
+  assert(analyzed.components.some(c => c.members.includes(0) && c.members.includes(3)));
+  assert.equal(analyzed.unresolvedConstraints.length, 1);
+  assert.match(analyzed.unresolvedConstraints[0].symbol, /external:unknown_callback/);
+  assert.match(analyzed.unresolvedConstraints[0].evidence, /registration line 12/);
+  assert.equal(R.moduleUnits(D, converted).flatMap(g => g.members).length, 5);
+  console.log('PASS: unknown agent references remain visible without losing assignments or known private constraints');
+} finally {
+  fs.rmSync(directory, {recursive:true, force:true});
+  fs.rmSync(path.join(__dirname, '../data/analysis-responses', path.basename(directory)), {recursive:true, force:true});
+}

@@ -445,6 +445,7 @@ function previewResponsibilities(m, a) {
     responsibility: true,
     manifestKey: responsibilityKey,
     moduleArrangement: !!modules,
+    unresolvedConstraints: a.unresolvedConstraints,
     canApply: !modules && a.canApply,
     parts: units.map((u) => u.members),
     groups: S.groups
@@ -647,6 +648,8 @@ function watchAnalysisJobs() {
 function renderModuleArrangement() {
   const chosen = previewGroup ? preview.units[+previewGroup.replace('preview-', '')] : null;
   const units = preview.units;
+  const unresolved = preview.unresolvedConstraints || [];
+  const uncertainty = unresolved.length ? `<details class="hint"><summary>${unresolved.length} unresolved dependencies - extraction not verified</summary>${unresolved.map(c => `<p><strong>${esc(c.symbol)}</strong><br>${esc(c.evidence)}</p>`).join('')}</details>` : '';
   let detail = '<p>These are source-file responsibilities within one translation unit. Private symbols stay private. Select a group to inspect its public operations and exact private dependencies.</p>';
   if (chosen) {
     const inside = new Set(chosen.members);
@@ -655,7 +658,7 @@ function renderModuleArrangement() {
     const outgoing = crossing.filter(([a,b]) => inside.has(a));
     detail = `<h2>${esc(chosen.name)}</h2><p>${esc(chosen.description)}</p>${chosen.extraction ? `<p class="hint">${esc(chosen.extraction)}</p>` : ""}<h3>Public operations</h3>${chosen.members.filter(v => !D.functions[v].s && !D.functions[v].k).map(v => `<p><button data-module-source="${v}">${esc(D.functions[v].n)}</button></p>`).join('')}<p>${chosen.members.filter(v => D.functions[v].s && !D.functions[v].k).length} owned helpers</p><h3>Private dependencies across this boundary</h3><p>${outgoing.length} outgoing pairs; ${incoming.length} incoming pairs. These are legal between module members; separate compilation needs an explicit interface decision.</p><details ${crossing.length <= 5 ? 'open' : ''}><summary>Exact helper calls</summary>${crossing.map(([a,b,w]) => `<p>${esc(D.functions[a].n)} → ${esc(D.functions[b].n)} (${w} call sites)</p>`).join('')}</details><details><summary>Why this responsibility?</summary><p>${esc(chosen.evidence)}</p></details>`;
   }
-  $('inspector').innerHTML = `<div class="paneltag">RESPONSIBILITY ARRANGEMENT</div>${chosen ? '' : `<h2>${units.length} module members</h2>`}${detail}<h3>Responsibilities</h3>${units.map((u,i) => `<button class="wide" data-module-group="${i}">${esc(u.name)} · ${u.members.length}</button>`).join('')}<button id="module-evidence">Evidence and adjustments</button>`;
+  $('inspector').innerHTML = `<div class="paneltag">RESPONSIBILITY ARRANGEMENT</div>${chosen ? '' : `<h2>${units.length} module members</h2>`}${uncertainty}${detail}<h3>Responsibilities</h3>${units.map((u,i) => `<button class="wide" data-module-group="${i}">${esc(u.name)} · ${u.members.length}</button>`).join('')}<button id="module-evidence">Evidence and adjustments</button>`;
   document.querySelectorAll('[data-module-group]').forEach(b => b.onclick = () => { previewGroup = 'preview-' + b.dataset.moduleGroup; render(); });
   document.querySelectorAll('[data-module-source]').forEach(b => b.onclick = () => { showSource(+b.dataset.moduleSource); $('source').showModal(); });
   $('module-evidence').onclick = () => { preview=null; view='responsibilities'; render(); };

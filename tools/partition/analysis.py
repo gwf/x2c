@@ -24,6 +24,8 @@ constraints: array of {kind, symbol, functions, status, evidence}; functions is 
 references: array of {from, to, evidence} for additional resolved function-value references, using canonical keys.
 attachments: array of {function, responsibility, reason} for helper-only components, using one member's canonical key. The reason must explain execution and accessibility from source.
 coverage: string explaining what was read and unresolved/indirect coverage limitations.
+moduleArrangement: array of {responsibility, members, evidence, extraction}; members lists canonical keys of ALL selected functions, including helpers and synthetic records, exactly once across groups. Assign helpers by the work and state they implement, supported by source behavior. Use this arrangement to expose responsibilities as same-translation-unit module members even when shared private calls prevent separate compilation. Do not force a group count. extraction is an optional concrete separate-compilation plan; identify the exact remaining private helpers, types, macros, and state rather than silently promoting symbols.
+Do not invent keep-together constraints from shutdown order, common data formats, or shared lifecycle alone. Record private state per symbol with actual accessors. Private type constraints list actual type consumers only. Indirect execution coverage is not itself a placement veto. Keep non-placement contracts as reviewed information.
 Do the analysis now. Do not edit files, run tests, publish, or return a plan. Do not use canned analyses.
 '''
 
@@ -103,7 +105,11 @@ class Analyses:
                     text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30,
                 )
                 if checked.returncode:
-                    raise ValueError('The agent response did not pass proposal validation. ' + checked.stderr[-1000:])
+                    detail = next((line.removeprefix('Error: ') for line in checked.stderr.splitlines() if line.startswith('Error: ')), 'See the saved validation log.')
+                    archive = HERE / 'data' / 'analysis-responses' / root.name
+                    archive.mkdir(parents=True, exist_ok=True)
+                    (archive / 'validation.log').write_text(checked.stderr)
+                    raise ValueError('Proposal needs repair: ' + detail + ' Response saved in ' + str(archive))
                 self.jobs[job_id].update(status='complete', manifest=json.loads(checked.stdout), message='Source analysis ready to inspect.')
         except Exception as error:
             self.jobs[job_id].update(status='failed', message=str(error))
