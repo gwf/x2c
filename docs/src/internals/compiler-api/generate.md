@@ -12,44 +12,15 @@ The generated header and source of one unit.
 
 | Function | Summary |
 | --- | --- |
-| [`generate_code`](#generate_code) | Writes the generated C header and source for one lowered translation unit. |
-| [`generate_code_text`](#generate_code_text) | Returns the generated header and source of the lowered `ast` as `(hfile htext cfile ctext)`, named from `basename`, without writing them. |
 | [`Compiler.definition_rows`](#Compiler.definition_rows) | Returns one row for each function, foreign alias, and typedef that the lowered unit `ast` defines, in source order: `(function NAME DISPLAY TYPE PARAMETERS LINE DOC STATIC ORIGIN DECLARATOR SPAN)` or `(typedef NAME BASE MODIFIERS SPAN)`. |
 | [`Compiler.dump_definitions`](#Compiler.dump_definitions) | Prints the `--dump-definitions` projection of the lowered unit `ast`: `(unit PATH)`, the module comment as `(module TEXT)` when the file opens with one, then one row per `Compiler.definition_rows` entry. |
+| [`Compiler.generate_code`](#Compiler.generate_code) | Writes the generated C header and source for one lowered translation unit. |
+| [`Compiler.generate_code_text`](#Compiler.generate_code_text) | Returns the generated header and source of the lowered `ast` as `(hfile htext cfile ctext)`, named from `basename`, without writing them. |
 | [`Compiler.init_statements`](#Compiler.init_statements) | Returns the statements queued for `phase`, in the order they were added. |
 | [`Compiler.initializer_function`](#Compiler.initializer_function) | Returns the function `type name(void)` running `body`. |
 | [`Compiler.place_source_prelude`](#Compiler.place_source_prelude) | Places generated `declarations` after source types and includes, before the first function or captured initializer that can use them. |
 | [`Compiler.run_once_body`](#Compiler.run_once_body) | Returns a run-once initializer body: `before`, then a return when `guard` is set that sets it otherwise, then `after`. |
 | [`Init.enter`](#Init.enter) | Returns `function` with its entry setup: the protocol initializer and the type initializer run once, and a `guarded` entry calls the region's initializer unless its guard is set. |
-
-### Functions
-
-#### generate_code
-
-`void generate_code(Compiler c, List ast, String dir)`
-
-Writes the generated C header and source for one lowered translation unit.
-`ast` must be the normalized result of `transform_ast` for this compiler;
-its filename, symbols, binding facts, cache keys, and initialization state
-must still describe that same unit. `dir` must already exist. Generation
-partitions the AST, materializes caches and once-only initialization, and
-writes or replaces `<dir>/<source-stem>.h`, `.c`, and the `.xi` interface
-of a collected unit through one `file_publish`, so a failed write
-replaces none of them. It appends generated bindings and initialization
-work to the compiler and is not idempotent. Failures are reported as
-`emit` diagnostics.
-
-Source: `src/generate.x:49`
-
-#### generate_code_text
-
-`List generate_code_text(Compiler c, List ast, String basename)`
-
-Returns the generated header and source of the lowered `ast` as `(hfile
-htext cfile ctext)`, named from `basename`, without writing them. It
-affects the compiler as `generate_code` does.
-
-Source: `src/generate.x:61`
 
 ### `Compiler`
 
@@ -68,7 +39,7 @@ token range and privacy of the top-level form that produced the
 definition; either is empty when the compiler made the definition.
 `LINE` is 1 and `DOC` empty for a definition without authored source.
 
-Source: `src/generate.x:1541`
+Source: `src/generate.x:1543`
 
 <a id="Compiler.dump_definitions"></a>
 #### Compiler.dump_definitions
@@ -80,7 +51,36 @@ Prints the `--dump-definitions` projection of the lowered unit `ast`:
 with one, then one row per `Compiler.definition_rows` entry. The
 command-line reference in the book describes the fields.
 
-Source: `src/generate.x:1634`
+Source: `src/generate.x:1636`
+
+<a id="Compiler.generate_code"></a>
+#### Compiler.generate_code
+
+`void Compiler.generate_code(Compiler c, List ast, String dir)`
+
+Writes the generated C header and source for one lowered translation unit.
+`ast` must be the normalized result of `transform_ast` for this compiler;
+its filename, symbols, binding facts, cache keys, and initialization state
+must still describe that same unit. `dir` must already exist. Generation
+partitions the AST, materializes caches and once-only initialization, and
+writes or replaces `<dir>/<source-stem>.h`, `.c`, and the `.xi` interface
+of a collected unit through one `Path.publish_files`, so a failed write
+replaces none of them. It appends generated bindings and initialization
+work to the compiler and is not idempotent. Failures are reported as
+`emit` diagnostics.
+
+Source: `src/generate.x:49`
+
+<a id="Compiler.generate_code_text"></a>
+#### Compiler.generate_code_text
+
+`List Compiler.generate_code_text(Compiler c, List ast, String basename)`
+
+Returns the generated header and source of the lowered `ast` as `(hfile
+htext cfile ctext)`, named from `basename`, without writing them. It
+affects the compiler as `Compiler.generate_code` does.
+
+Source: `src/generate.x:61`
 
 <a id="Compiler.init_statements"></a>
 #### Compiler.init_statements
@@ -89,7 +89,7 @@ Source: `src/generate.x:1634`
 
 Returns the statements queued for `phase`, in the order they were added.
 
-Source: `src/generate.x:1076`
+Source: `src/generate.x:1077`
 
 <a id="Compiler.initializer_function"></a>
 #### Compiler.initializer_function

@@ -19,15 +19,15 @@
 
 /** Returns the preprocessor line `text` without its `#` and the blanks
     around the directive. */
-String preproc_directive(String text) =>
+String Compiler.preproc_directive(String text) =>
   text.strip(" \t").remove_prefix("#").strip(" \t");
 
 /** Classifies the preprocessor line `text` as a conditional directive:
     `<open>` for `#if`, `#ifdef`, and `#ifndef`, `<branch>` for `#elif`
     and `#else` forms, `<close>` for `#endif`, or 0 for any other line.
 */
-Symbol preproc_conditional_kind(String text) {
-  String directive = preproc_directive(text);
+Symbol Compiler.preproc_conditional_kind(String text) {
+  String directive = Compiler.preproc_directive(text);
   if (directive.startswith("if")) return <open>;
   if (directive.startswith("el")) return <branch>;
   if (directive.startswith("endif")) return <close>;
@@ -39,8 +39,8 @@ Symbol preproc_conditional_kind(String text) {
     never-defined name or is `0`; 1 when C never takes the arms after its
     first `#else`, because the condition is exactly `!defined(NAME)`; and 0
     otherwise. */
-int preproc_open_state(String text) {
-  String line = _directive_line(preproc_directive(text)).replace(
+int Compiler.preproc_open_state(String text) {
+  String line = _directive_line(Compiler.preproc_directive(text)).replace(
     "defined ( <never> )", "defined <never>");
   // A `||` gives the condition another way to hold, so the arm can be taken.
   if (line == "ifdef <never>" || line == "if 0" || line == "if ( 0 )" ||
@@ -76,15 +76,15 @@ static int _never_defined(String name) {
 
 /** Returns a group's hidden-arm state after its `#elif` or `#else`: 2 when
     the group's state was 1, and 0 otherwise. */
-int preproc_branch_state(int state) => state == 1 ? 2 : 0;
+int Compiler.preproc_branch_state(int state) => state == 1 ? 2 : 0;
 
 /** Returns the file named by the `#include` line `text`, or `NULL` for any
     other line. `angle` is 1 for a `<...>` name and 0 otherwise. Text after
     the name, such as a comment, is ignored.
 */
-String preproc_include_target(String text, int &angle) {
+String Compiler.preproc_include_target(String text, int &angle) {
   angle = 0;
-  String body = preproc_directive(text);
+  String body = Compiler.preproc_directive(text);
   if (!body.startswith("include")) return NULL;
   body = body.remove_prefix("include").lstrip(" \t");
   if (!body.len() || (body[0] != '"' && body[0] != '<')) return NULL;
@@ -96,8 +96,8 @@ String preproc_include_target(String text, int &angle) {
 /** Returns the file that the host preprocessor's line marker `text`,
     `# N "file" flags`, names and sets `line` to N, or returns `NULL` for
     any other line. */
-String preproc_marker_file(String text, int &line) {
-  String body = preproc_directive(text);
+String Compiler.preproc_marker_file(String text, int &line) {
+  String body = Compiler.preproc_directive(text);
   size_t digits = 0;
   while (digits < body.len() && isdigit(body[digits])) digits++;
   String rest = body[digits:].lstrip(" \t");
@@ -112,7 +112,7 @@ String preproc_marker_file(String text, int &line) {
    or NULL for any other directive, and sets `*undefined` for `#undef`. The
    directive is scanned as x2c tokens. */
 static Token _macro_directive(String content, int &undefined) {
-  String directive = preproc_directive(content);
+  String directive = Compiler.preproc_directive(content);
   undefined = directive.startswith("undef");
   if (!undefined && !directive.startswith("define")) return NULL;
   Tokenizer scanned = Tokenizer.new(
@@ -159,13 +159,15 @@ void Compiler.scan_conditionals(Compiler c) {
 }
 
 static void _directive(ArmScan &s, Token token, size_t i) {
-  Symbol kind = preproc_conditional_kind(token.text);
+  Symbol kind = Compiler.preproc_conditional_kind(token.text);
   int conditional = kind == <open> || (kind && s.stack.len());
   if (kind == <open>)
-    s.stack.push(%(${++s.serial} 0 ${preproc_open_state(token.text)}));
+    s.stack.push(
+      %(${++s.serial} 0 ${Compiler.preproc_open_state(token.text)}));
   else if (kind == <branch> && s.stack.len()) {
     Var (id, arm, state) = s.stack[-1];
-    s.stack[-1] = %($id ${arm.integer() + 1} ${preproc_branch_state(state)});
+    Var branch = Compiler.preproc_branch_state(state);
+    s.stack[-1] = %($id ${arm.integer() + 1} $branch);
   }
   else if (kind == <close> && s.stack.len()) s.stack.take_last();
   else if (!s.hidden) _note_layout_macro(s, token.text);
@@ -408,8 +410,8 @@ static int _prefix_rank(Var v) {
     `arms` holds one entry per open group, innermost first, listing the
     `preproc` nodes that select that group's current arm.
 */
-List preproc_track_arms(List arms, String text) {
-  Symbol kind = preproc_conditional_kind(text);
+List Compiler.preproc_track_arms(List arms, String text) {
+  Symbol kind = Compiler.preproc_conditional_kind(text);
   if (kind == <open>) return cons(%((preproc $text)), arms);
   if (!arms) return arms;
   if (kind == <branch>)
@@ -418,10 +420,10 @@ List preproc_track_arms(List arms, String text) {
 }
 
 /** Returns `items` inside the conditional arms `arms` tracked by
-    `preproc_track_arms`: the directives that reopen each group, outermost
-    first, then `items`, then one `#endif` per group.
+    `Compiler.preproc_track_arms`: the directives that reopen each group,
+    outermost first, then `items`, then one `#endif` per group.
 */
-List preproc_within_arms(List arms, List items) {
+List Compiler.preproc_within_arms(List arms, List items) {
   Array out = [];
   foreach (List group, arms.reverse())
     foreach (List directive, group) out.push(directive);

@@ -10,11 +10,11 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
-String script_cache_root(void);
+String Compiler_cache_root(void);
 
-int script_prepare(CliRequest c);
+int CliRequest_prepare_script(CliRequest c);
 
-int script_run(CliRequest c);
+int CliRequest_run_script(CliRequest c);
 
 
 #endif /* __GUARD_0x1B2A9980__ */

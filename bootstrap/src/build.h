@@ -37,7 +37,7 @@ typedef struct Build{
 #include "report.h"
 Build CliRequest_prepare(CliRequest request);
 
-void build_check_input(String input);
+void Build_require_input(String input);
 
 String Build_generated_dir(Build b, String input);
 
@@ -57,7 +57,7 @@ CliRequest Build_extension_entries(Build b);
 
 int Build_finish(Build b);
 
-int compile_commands_write(String path, Array commands);
+int Build_write_commands(String path, Array commands);
 
 void Build_report_success(Build b);
 

@@ -635,7 +635,7 @@ List Compiler.parse_import_declaration(Compiler c) {
   if (c.shallow)
     c.sym.set(
       %("source-node" (package-import
-        ${home_portable_path(Path.absolute(c.filename))} ${start.pos})),
+        ${Compiler.portable_path(Path.absolute(c.filename))} ${start.pos})),
       %(package-import $name $alias $members));
   return %(import $name $alias);
 }
@@ -947,7 +947,7 @@ static List _typedef(Compiler c, List context, int row) {
      even when the record declaration has no attribute of its own. */
   if (_layout_attribute_since(c, first))
     foreach (List declarator, bindings) {
-      String name = binding_identity_spelling(declarator.cadr());
+      String name = Ast.binding_spelling(declarator.cadr());
       if (name) c.sym.set(%($name "layout-attribute"), %(unknown));
     }
   return _finish_declaration(c, <typedef>, spec, bindings, 0);
@@ -1250,7 +1250,7 @@ static List _lower_self_declaration(Compiler c, List declaration) {
   }
   Type signature = declaration.type_from_ast();
   if (!signature.is_function()) return declaration;
-  String spelling = binding_identity_spelling(binding);
+  String spelling = Ast.binding_spelling(binding);
   Type relative = signature.declared();
   Type concrete = lowered.type_from_ast().declared();
   c.set_fact(%(self $binding), relative);
@@ -1666,7 +1666,7 @@ static void _declare_delegates(Compiler c, List context, List rows) {
 }
 
 static void _declare_delegate(Compiler c, List context, Var binding) {
-  String name = binding_identity_spelling(binding);
+  String name = Ast.binding_spelling(binding);
   if (!name)
     $report.parse.delegate_name(c);
   if (!c.macro_holes) c.sym.mark_field(context, <delegate>, name);
@@ -1858,7 +1858,7 @@ static List _publish_enumerator(
   name = c.evaluate_macro_slot(name);
   String exact = _syntax_exact_name(name);
   List binding = exact ? NULL : name is <list> ? name.list() : NULL;
-  String spelling = exact ? exact : binding_identity_spelling(binding);
+  String spelling = exact ? exact : Ast.binding_spelling(binding);
   if (!spelling)
     $report.parse.syntax_position(c, origin);
   List key = %($spelling);
@@ -1957,7 +1957,7 @@ static List _declarator_init(
 static List _initialized(
   Compiler c, List type, List bind, Token origin) {
   List binding = bind.cadr();
-  if (binding_identity_try_parts(binding, NULL, NULL)) {
+  if (Ast.try_binding(binding, NULL, NULL)) {
     Token tokens = c.tokenizer.tokens;
     c.init_tokens[binding] = origin - tokens;
   }
@@ -2253,7 +2253,7 @@ static List _install_declarator(
   if (binding)
     _method_facts(c, binding, method, self_signature, preserved_self);
   if (binding && method && c.token && !declared_type.is_static()) {
-    String path = home_portable_path(Path.absolute(c.filename));
+    String path = Compiler.portable_path(Path.absolute(c.filename));
     String owner = c.package_spelling(method.car());
     c.sym.set(
       %("source-node" (interface-types $path ${c.token.pos} $exact)),
@@ -2334,7 +2334,7 @@ static void _check_rebinding(
 // Binds a constructed identity unless it is already its spelling's binding.
 static void _bind_identity(
   Compiler c, List context, List binding, List declaration) {
-  String spelling = binding_identity_spelling(binding);
+  String spelling = Ast.binding_spelling(binding);
   List visible = c.sym.lookup(%($spelling), NULL);
   if (visible != binding) c.sym.bind_identity(context, binding, declaration);
 }
@@ -2622,7 +2622,7 @@ static List _function_body(
   int expression_body = !syntax && c.at_function_arrow();
   if (!syntax && !expression_body) c.expect(<"{">);
   Type old_return = c.return_type;
-  c.return_type = declared_return(declaration);
+  c.return_type = Ast.declared_return(declaration);
   String old_fn = c.fn_name;
   c.fn_name = name;
   c.sym.push_scope(c.params);
@@ -2648,7 +2648,7 @@ static List _function_body(
 
 /** The declared result type of the function `declaration`, which its
     `return` statements convert to, or NULL. */
-Type declared_return(List declaration) {
+Type Ast.declared_return(List declaration) {
   match (declaration.type_from_ast())
     case %((func *) *result): return result.type().declared();
   return NULL;
@@ -2666,7 +2666,7 @@ static List _entry_code(Compiler c, int depth) {
 static String _prepare_lifecycle(
   Compiler c, List declaration, List binding, String &initializer_owner,
   String &shutdown_owner) {
-  String name = binding_identity_spelling(binding);
+  String name = Ast.binding_spelling(binding);
   initializer_owner = name
     ? _lifecycle_owner(c, binding, "initialize") : NULL;
   shutdown_owner = name
@@ -2806,7 +2806,7 @@ List Compiler.function_entry(Compiler c, int depth) {
   List declaration = ((Ancestor *) c.ancestors.bytes)[depth].node;
   c.sym.push_new_scope();
   List entry;
-  $let(c.return_type, declared_return(declaration))
+  $let(c.return_type, Ast.declared_return(declaration))
     entry = _entry_code(c, depth);
   c.sym.pop_scope();
   return entry;
@@ -3324,7 +3324,7 @@ static String _filled_doc(Compiler c, String doc) {
    reads as the outer argument, even when two arguments have equal syntax. */
 static Map _hole_spellings(Compiler c) {
   Map written = {}, spellings = {};
-  String file = absolute_path(c.filename);
+  String file = Path.resolved_absolute(c.filename);
   foreach (List frame, c.macro_stack)
     foreach (List binding, frame[2])
       match (binding)
@@ -3505,7 +3505,7 @@ static List _collected_function(
   c.record_inline_function(declaration);
   match (declaration)
     case %(declare ?type (bindings (bind ?binding ?modifiers))): {
-      String name = binding_identity_spelling(binding);
+      String name = Ast.binding_spelling(binding);
       // A static definition stays in its unit, as in source.
       if (type.type().is_static())
         c.sym.mark_static(%(function $name));
@@ -3663,7 +3663,7 @@ static struct Token source_clauses[] = {
 };
 
 /** The source clause `kind`, which the binder parses when it reaches it. */
-Var source_clause(Symbol kind) {
+Var Compiler.source_clause(Symbol kind) {
   Token clause = source_clauses;
   while (clause.type != kind) clause++;
   return Token.var(clause);
@@ -3687,22 +3687,25 @@ List Compiler.bind_source_statement(Compiler c) {
   switch (keyword) {
     case <if>:
       return _bind_if_else(
-        c,
-        source_clause(<test>), source_clause(<then>), source_clause(<else>));
+        c, Compiler.source_clause(<test>), Compiler.source_clause(<then>),
+        Compiler.source_clause(<else>));
     case <while>:
-      return _bind_while(c, source_clause(<test>), source_clause(<body>));
+      return _bind_while(
+        c, Compiler.source_clause(<test>), Compiler.source_clause(<body>));
     case <do>:
-      return _bind_do(c, source_clause(<do>), source_clause(<test>));
+      return _bind_do(
+        c, Compiler.source_clause(<do>), Compiler.source_clause(<test>));
     case <match>:
-      return _bind_match(c, source_clause(<test>), source_clause(<arms>));
+      return _bind_match(
+        c, Compiler.source_clause(<test>), Compiler.source_clause(<arms>));
     case <try>:
       return _bind_try(
-        c, source_clause(<try>), source_clause(<catches>),
-        source_clause(<finally>));
+        c, Compiler.source_clause(<try>), Compiler.source_clause(<catches>),
+        Compiler.source_clause(<finally>));
   }
   return _bind_for(
-    c, source_clause(<init>), source_clause(<cond>), source_clause(<next>),
-    source_clause(<body>));
+    c, Compiler.source_clause(<init>), Compiler.source_clause(<cond>),
+    Compiler.source_clause(<next>), Compiler.source_clause(<body>));
 }
 
 static List _bind_do(Compiler c, Var body, Var condition) {

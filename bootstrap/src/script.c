@@ -60,14 +60,14 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 String Env_get(String);
 
-String script_cache_root(void){
+String Compiler_cache_root(void){
   if(! _init_guard_) _file_init_();
   String explicit = Env_get(_0), xdg = Env_get(_1);
   String home = Env_get(_2);
   return String_truth(explicit) ? explicit : String_truth(xdg) ? String_join(NULL, cons(String_var(xdg), cons(String_var(_3), NULL))) : String_truth(home) ? String_join(NULL, cons(String_var(home), cons(String_var(_4), NULL))) : NULL;
 }
 
-void driver_error(const char *);
+void Diagnostics_driver_error(const char *);
 
 Path Path_absolute(Path);
 
@@ -75,9 +75,9 @@ int Path_is_file(Path);
 
 void Path_make_dirs(Path);
 
-void host_error(List);
+void Diagnostics_host_error(List);
 
-int file_lock(Path, int);
+int Path_lock_file(Path, int);
 
 void Path_write_text(Path, String);
 
@@ -86,17 +86,17 @@ void Path_write_text(Path, String);
 
 
 
-int script_prepare(CliRequest c){
+int CliRequest_prepare_script(CliRequest c){
   if(! _init_guard_) _file_init_();
-  String root = script_cache_root();
-  if(! String_truth(root)) driver_error("no cache directory: set X2C_CACHE_DIR");
+  String root = Compiler_cache_root();
+  if(! String_truth(root)) Diagnostics_driver_error("no cache directory: set X2C_CACHE_DIR");
   String script = Path_absolute(Var_as_string(List_car(c -> inputs)));
   c -> build_dir = _entry(root, script);
   if(c -> clean){
     _clean(c -> build_dir);
     return 1;
   }
-  if(! Path_is_file(script)) driver_error(String_join(NULL, cons(String_var(_5), cons(String_var(script), NULL))));
+  if(! Path_is_file(script)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_5), cons(String_var(script), NULL))));
   _configure(c, script);
   if(c -> dry_run) return 0;
   _exec_current(c);
@@ -123,7 +123,7 @@ int script_prepare(CliRequest c){
         if(_x2c_macro_selected_0 == 0){
           List volatile detail;
           detail = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_0, 0));
-          host_error(detail);
+          Diagnostics_host_error(detail);
         }
 
       }
@@ -139,7 +139,7 @@ int script_prepare(CliRequest c){
     _x2c_error_handler_0 = NULL;
     x2c_exception_leave(& _x2c_exception_frame_0);
   }
-  file_lock(String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_6), NULL))), 1);
+  Path_lock_file(String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_6), NULL))), 1);
   _exec_current(c);
   Path_write_text(String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_7), NULL))), script);
   _prune(String_join(NULL, cons(String_var(root), cons(String_var(_8), NULL))));
@@ -163,7 +163,7 @@ void Path_remove_tree(Path);
 
 static void _clean(String entry){
   if(! Path_is_dir(entry)) return;
-  int lock = file_lock(String_join(NULL, cons(String_var(entry), cons(String_var(_6), NULL))), 1);
+  int lock = Path_lock_file(String_join(NULL, cons(String_var(entry), cons(String_var(_6), NULL))), 1);
   {
     ExceptionFrame _x2c_exception_frame_1;
     static MatchCaptureSite _x2c_macro_arms_1[1];
@@ -187,7 +187,7 @@ static void _clean(String entry){
         if(_x2c_macro_selected_1 == 0){
           List volatile detail;
           detail = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_1, 0));
-          host_error(detail);
+          Diagnostics_host_error(detail);
         }
 
       }
@@ -239,7 +239,7 @@ static void _prune(String scripts){
         String directory = Path_join(scripts, name);
         Path source = String_join(NULL, cons(String_var(directory), cons(String_var(_7), NULL)));
         if(! Path_is_file(source) || Path_is_file(Path_read_text(source))) continue;
-        int lock = file_lock(String_join(NULL, cons(String_var(directory), cons(String_var(_6), NULL))), 0);
+        int lock = Path_lock_file(String_join(NULL, cons(String_var(directory), cons(String_var(_6), NULL))), 0);
         if(lock < 0) continue;
         {
           ExceptionFrame _x2c_exception_frame_2;
@@ -293,7 +293,7 @@ static void _prune(String scripts){
 
 }
 
-int script_run(CliRequest c){
+int CliRequest_run_script(CliRequest c){
   if(! _init_guard_) _file_init_();
   if(! c -> dry_run) _exec(c);
   _print_run(c);
@@ -319,7 +319,7 @@ static void _exec(CliRequest c){
   }
   fflush(NULL);
   execv(executable, argv);
-  driver_error(({
+  Diagnostics_driver_error(({
     Var _x2c_literal_part_2 = String_var(executable);  Var _x2c_literal_part_3 = String_var(String_new(strerror(errno)));  String_join(NULL, cons(String_var(_16), cons(_x2c_literal_part_2, cons(String_var(_17), cons(_x2c_literal_part_3, NULL)))));
   }
   ));

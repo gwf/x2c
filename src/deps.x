@@ -30,14 +30,15 @@
     report an unlink failure. Allocation failure transfers through ordinary
     runtime `Error` handling instead of returning zero.
 */
-int translation_depfile_write(
-  CliRequest request, Compiler compiler, String input, String output_dir) {
+int Compiler.write_depfile(
+  Compiler compiler, CliRequest request, String input, String output_dir) {
   if (request.no_deps || request.inspects()) return 1;
   String path = request.dep_file ? request.dep_file :
     %"${output_dir.rstrip("/")}/${Path.stem(input)}.d";
   long error = 0;
   try {
-    file_publish(%($path ${_contents(request, compiler, input, output_dir)}));
+    String text = _contents(request, compiler, input, output_dir);
+    Path.publish_files(%($path $text));
     return 1;
   }
   catch %((!or not-found io-fail) *failure): error = failure.assoc(<"errno">);

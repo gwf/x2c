@@ -12,93 +12,29 @@ X2c command-line parsing and presentation.
 
 | Function | Summary |
 | --- | --- |
-| [`cli_builtin_command`](#cli_builtin_command) | Reports whether a raw command name belongs to the built-in parser. |
-| [`cli_dependency_pass_through`](#cli_dependency_pass_through) | Returns whether `s` contains a driver-owned dependency option. |
-| [`cli_package_options`](#cli_package_options) | Reads a package's native response options, expanding literal `{package}` after tokenization. |
-| [`cli_parse`](#cli_parse) | Expands response files and parses `argv[1..]` into one validated request. |
-| [`cli_request`](#cli_request) | Constructs a request with the command's ordinary CLI defaults. |
-| [`cli_response_arguments`](#cli_response_arguments) | Reads response-file tokens with ordinary quoting and UTF-8 checks. |
-| [`cli_version`](#cli_version) | Returns the version line `--version` prints, without a newline. |
+| [`CliRequest.dependency_option`](#CliRequest.dependency_option) | Returns whether `s` contains a driver-owned dependency option. |
 | [`CliRequest.inspects`](#CliRequest.inspects) | Returns whether `request` selects a terminating inspection or dump mode. |
+| [`CliRequest.is_builtin`](#CliRequest.is_builtin) | Reports whether a raw command name belongs to the built-in parser. |
+| [`CliRequest.new`](#CliRequest.new) | Constructs a request with the command's ordinary CLI defaults. |
+| [`CliRequest.package_options`](#CliRequest.package_options) | Reads a package's native response options, expanding literal `{package}` after tokenization. |
 | [`CliRequest.package_roots`](#CliRequest.package_roots) | Returns the package roots `request` searches: its explicit `--package-dir` and manifest directories in order, then the home's `packages/` directory when it exists. |
+| [`CliRequest.parse`](#CliRequest.parse) | Expands response files and parses `argv[1..]` into one validated request. |
+| [`Compiler.version`](#Compiler.version) | Returns the version line `--version` prints, without a newline. |
 | [`TargetKind.named`](#TargetKind.named) | Returns the target kind spelled `spelling`, or 0 when no kind has that spelling. |
 | [`TargetKind.of`](#TargetKind.of) | Returns the row of target kind `kind`; any other kind reads as an executable. |
 
-### Functions
+### `CliRequest`
 
-#### cli_builtin_command
+<a id="CliRequest.dependency_option"></a>
+#### CliRequest.dependency_option
 
-`int cli_builtin_command(const char *word)`
-
-Reports whether a raw command name belongs to the built-in parser.
-
-Source: `src/cli.x:1264`
-
-#### cli_dependency_pass_through
-
-`int cli_dependency_pass_through(String s)`
+`int CliRequest.dependency_option(String s)`
 
 Returns whether `s` contains a driver-owned dependency option.
 Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
 comma-delimited pass-through argument; `NULL` returns zero.
 
-Source: `src/cli.x:720`
-
-#### cli_package_options
-
-`CliRequest cli_package_options(String path, String package)`
-
-Reads a package's native response options, expanding literal `{package}`
-after tokenization. Only native include/define/thread options, ordered
-archive/library/framework inputs, run-time library search directories,
-and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
-`cc_args` and `ld_args` serve native actions; no source-preprocessing
-options are returned.
-
-Source: `src/cli.x:748`
-
-#### cli_parse
-
-`CliRequest cli_parse(int argc, char **argv)`
-
-Expands response files and parses `argv[1..]` into one validated request.
-Help and version requests print and exit with status zero. An empty command
-line prints help and exits with status two; other invalid input reports an
-error and exits with status two. The result has the active `Scope` and
-canonical-pool lifetimes described by `CliRequest`.
-
-**Raises:** `<alloc-fail>` or `<size-limit>` while expanding response files or
-constructing request values.
-
-Source: `src/cli.x:399`
-
-#### cli_request
-
-`CliRequest cli_request(Symbol command)`
-
-Constructs a request with the command's ordinary CLI defaults.
-
-Source: `src/cli.x:1246`
-
-#### cli_response_arguments
-
-`List cli_response_arguments(String path)`
-
-Reads response-file tokens with ordinary quoting and UTF-8 checks.
-Returns canonical Strings without expanding `@` references. Paths and
-arguments retain the producing pool lifetime.
-
-Source: `src/cli.x:807`
-
-#### cli_version
-
-`String cli_version(void)`
-
-Returns the version line `--version` prints, without a newline.
-
-Source: `src/cli.x:1268`
-
-### `CliRequest`
+Source: `src/cli.x:728`
 
 <a id="CliRequest.inspects"></a>
 #### CliRequest.inspects
@@ -107,7 +43,39 @@ Source: `src/cli.x:1268`
 
 Returns whether `request` selects a terminating inspection or dump mode.
 
-Source: `src/cli.x:1271`
+Source: `src/cli.x:1287`
+
+<a id="CliRequest.is_builtin"></a>
+#### CliRequest.is_builtin
+
+`int CliRequest.is_builtin(const char *word)`
+
+Reports whether a raw command name belongs to the built-in parser.
+
+Source: `src/cli.x:1280`
+
+<a id="CliRequest.new"></a>
+#### CliRequest.new
+
+`CliRequest CliRequest.new(Symbol command)`
+
+Constructs a request with the command's ordinary CLI defaults.
+
+Source: `src/cli.x:1254`
+
+<a id="CliRequest.package_options"></a>
+#### CliRequest.package_options
+
+`CliRequest CliRequest.package_options(String path, String package)`
+
+Reads a package's native response options, expanding literal `{package}`
+after tokenization. Only native include/define/thread options, ordered
+archive/library/framework inputs, run-time library search directories,
+and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
+`cc_args` and `ld_args` serve native actions; no source-preprocessing
+options are returned.
+
+Source: `src/cli.x:756`
 
 <a id="CliRequest.package_roots"></a>
 #### CliRequest.package_roots
@@ -120,7 +88,34 @@ when it exists. A root named twice is searched twice and resolves the
 same entries. Explicit directories are borrowed; the result is a fresh
 `List` only when the home directory is appended.
 
-Source: `src/cli.x:1279`
+Source: `src/cli.x:1295`
+
+<a id="CliRequest.parse"></a>
+#### CliRequest.parse
+
+`CliRequest CliRequest.parse(int argc, char **argv)`
+
+Expands response files and parses `argv[1..]` into one validated request.
+Help and version requests print and exit with status zero. An empty command
+line prints help and exits with status two; other invalid input reports an
+error and exits with status two. The result has the active `Scope` and
+canonical-pool lifetimes described by `CliRequest`.
+
+**Raises:** `<alloc-fail>` or `<size-limit>` while expanding response files or
+constructing request values.
+
+Source: `src/cli.x:399`
+
+### `Compiler`
+
+<a id="Compiler.version"></a>
+#### Compiler.version
+
+`String Compiler.version(void)`
+
+Returns the version line `--version` prints, without a newline.
+
+Source: `src/cli.x:1284`
 
 ### `TargetKind`
 
@@ -133,7 +128,7 @@ Returns the target kind spelled `spelling`, or 0 when no kind has that
 spelling. `refusal` says why this compiler refuses a known spelling, and
 is NULL otherwise.
 
-Source: `src/cli.x:666`
+Source: `src/cli.x:674`
 
 <a id="TargetKind.of"></a>
 #### TargetKind.of
@@ -143,7 +138,7 @@ Source: `src/cli.x:666`
 Returns the row of target kind `kind`; any other kind reads as an
 executable.
 
-Source: `src/cli.x:676`
+Source: `src/cli.x:684`
 
 ## Public types
 
@@ -158,9 +153,9 @@ Source: `src/cli.x:676`
 `typedef struct CliRequest { Symbol command, List inputs, run_args, include_dirs, package_dirs, cpp_args; List cc_args, ld_args, native_modules, extensions; Map collection_packages; String out_dir, dep_file, dep_target, manifest; String target, profile, output, build_dir, temps_dir, label, state_seed; String cc, meta_cc, ar, compile_commands, sha256, index, Symbol kind; String diagnostics_file, Symbol color_mode; Symbol dump; int jobs, debugging, verbose, dry_run, quiet, plain, no_deps; int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp; int max_errors; int source_map, source_facts, live_symbols, cpp_symbols; int force, rebuild, clean; int fatal_warnings, no_interfaces; SourceView sources; } *CliRequest`
 
 Holds one compiler command and its command-specific inputs and options.
-`List`s produced by `cli_parse` preserve CLI order. Copies are shallow:
-request storage and referenced canonical values keep their producing
-`Scope` and pool lifetimes.
+`List`s produced by `CliRequest.parse` preserve CLI order. Copies are
+shallow: request storage and referenced canonical values keep their
+producing `Scope` and pool lifetimes.
 
 Source: `src/cli.x:18`
 

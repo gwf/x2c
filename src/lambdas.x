@@ -34,13 +34,13 @@ static macro Stmt $report.type.ident_untyped(
 static macro Stmt $report.type.capture_enclosing(Expr $c, Expr $original) {
   $c.report_error(
     <type>, "reference capture requires an enclosing reference capture",
-    $c.token, %("binding: ${binding_identity_spelling($original)}"));
+    $c.token, %("binding: ${Ast.binding_spelling($original)}"));
 }
 
 static macro Stmt $report.type.capture_ref(Expr $c, Expr $binding) {
   $c.report_error(
     <type>, "captured value requires 'using &name' for reference access",
-    $c.token, %("binding: ${binding_identity_spelling($binding)}"));
+    $c.token, %("binding: ${Ast.binding_spelling($binding)}"));
 }
 
 /* lambda literals
@@ -280,13 +280,13 @@ static void _prescribe(
           else {
             Type global_type = NULL;
             List global = c.sym.resolve_global(
-              %(${binding_identity_spelling(binding)}), global_type);
+              %(${Ast.binding_spelling(binding)}), global_type);
             if (global == binding) source = global_type;
           }
         }
         target_type = source.car() == <&> ? source : cons(<&>, source);
       }
-      if (!binding_identity_spelling(binding)) {
+      if (!Ast.binding_spelling(binding)) {
         binding = c.sym.introduce(_alias_spelling(target, binding));
         aliases.push(%($binding $target_type));
       }
@@ -496,7 +496,7 @@ static List _resolve_outside(Compiler c, List frame, Var value) {
 static List _record(
   Capture &k, Type captured_type, List expression, int reference) {
   Compiler c = k.c;
-  List captured = c.sym.introduce(binding_identity_spelling(k.binding));
+  List captured = c.sym.introduce(Ast.binding_spelling(k.binding));
   List row = %(capture $captured $captured_type $expression);
   c.set_fact(k.key, row);
   c.set_fact(%(automatic $captured), 1);

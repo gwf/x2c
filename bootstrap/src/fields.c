@@ -57,7 +57,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _36 = Symbol_var(123);
 }
 
-List _field_copies(List to, List from, List fields){
+List field_copies(List to, List from, List fields){
   if(! _init_guard_) _file_init_();
   if(! List_truth(fields)) return NULL;
   Var field = List_car(fields);
@@ -71,12 +71,12 @@ List _field_copies(List to, List from, List fields){
       }
       )), NULL))));  cons(_34, cons(_36, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL))));
     }
-    )), NULL)))), NULL))), NULL))), NULL))));  List _x2c_literal_part_7 = _field_copies(to, from, List_cdr(fields));  cons(_x2c_literal_part_6, List_append(_x2c_literal_part_7, NULL));
+    )), NULL)))), NULL))), NULL))), NULL))));  List _x2c_literal_part_7 = field_copies(to, from, List_cdr(fields));  cons(_x2c_literal_part_6, List_append(_x2c_literal_part_7, NULL));
   }
   );
 }
 
-List _field_sets(List to, List value, List fields){
+List field_sets(List to, List value, List fields){
   if(! _init_guard_) _file_init_();
   if(! List_truth(fields)) return NULL;
   Var field = List_car(fields);
@@ -87,7 +87,7 @@ List _field_sets(List to, List value, List fields){
       }
       )), NULL))));  Var _x2c_literal_part_11 = List_var(cons(_10, cons(_24, cons(_25, cons(List_var(value), NULL)))));  cons(_34, cons(_36, cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, NULL))));
     }
-    )), NULL)))), NULL))), NULL))), NULL))));  List _x2c_literal_part_13 = _field_sets(to, value, List_cdr(fields));  cons(_x2c_literal_part_12, List_append(_x2c_literal_part_13, NULL));
+    )), NULL)))), NULL))), NULL))), NULL))));  List _x2c_literal_part_13 = field_sets(to, value, List_cdr(fields));  cons(_x2c_literal_part_12, List_append(_x2c_literal_part_13, NULL));
   }
   );
 }

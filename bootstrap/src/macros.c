@@ -2885,7 +2885,7 @@ static List _member_bindings(Compiler c, List parameters, List input){
 
 Map Compiler_semantic_binding_facts(Compiler);
 
-String binding_identity_spelling(List);
+String Ast_binding_spelling(List);
 
 static Var _member_spelling(Compiler c, Var value){
   Var spelling;
@@ -2904,7 +2904,7 @@ static Var _member_spelling(Compiler c, Var value){
   }
   if(! Var_is_row(value, 9, 7, 4)) return value;
   if(Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_40, cons(value, NULL))), &(spelling))) return spelling;
-  String name = binding_identity_spelling(Var_list_payload(value));
+  String name = Ast_binding_spelling(Var_list_payload(value));
   return String_truth(name) ? String_var(name) : value;
 }
 
@@ -2999,7 +2999,7 @@ Path Path_absolute(Path);
 
 static String _owner_spelling(Compiler c){
   String path = Compiler_canonical_path(c, Path_absolute(c -> filename));
-  String owner = home_portable_path(path);
+  String owner = Compiler_portable_path(path);
   Var package_root = String_truth(c -> package) ? Map_getindex(c -> package_roots, String_var(c -> package)) :((void) 0, Void);
   if(! Var_is_row(package_root, 11, 7, 1)) return owner;
   String prefix = String_join(NULL, cons(String_var(Compiler_canonical_path(c, Path_absolute(Var_as_string(package_root)))), cons(String_var(_52), NULL)));
@@ -3144,13 +3144,13 @@ static Symbol _result_kind_token(Compiler c, Token token){
   const MacroCategory * category = _category(token -> text);  if(! category || ! category -> result) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_151), cons(String_var(token -> text), cons(String_var(_16), NULL)))), token, NULL);  return category -> result;
 }
 
-int is_prelude_source(String);
+int Compiler_is_prelude_source(String);
 String Compiler_source_path(Compiler c, String file);
 static void _naming(Definition * d){
   Compiler c =(* d).c;  if((* d).anonymous)(* d).name = Atom_intern(Compiler_fresh_name(c, _152));  else if((* d).local){
     (* d).name = Atom_intern(c -> token -> text);  Compiler_next(c);
   }
-  else(* d).name = _name(c);  String spelling = Atom_str((* d).name);  if((* d).local && x2c_var_equal((* d).name, Symbol_var(1527056))) Compiler_report_error(c, 27335838, _153, (* d).start, NULL);  if(String_startswith(spelling, _154) && ! c -> builtin_defs && ! is_prelude_source(Compiler_source_path(c, c -> filename))) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_155), cons(String_var(spelling), cons(String_var(_156), NULL)))), (* d).start, _159);
+  else(* d).name = _name(c);  String spelling = Atom_str((* d).name);  if((* d).local && x2c_var_equal((* d).name, Symbol_var(1527056))) Compiler_report_error(c, 27335838, _153, (* d).start, NULL);  if(String_startswith(spelling, _154) && ! c -> builtin_defs && ! Compiler_is_prelude_source(Compiler_source_path(c, c -> filename))) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_155), cons(String_var(spelling), cons(String_var(_156), NULL)))), (* d).start, _159);
 }
 
 static void _signature(Definition * d){
@@ -3205,7 +3205,7 @@ static void _body_error(Definition * d){
 
 List Compiler_token_location(Compiler, Token);
 static void _announce(Definition * d){
-  Compiler c =(* d).c; (void) Compiler_record_origin(c, (* d).start); (* d).origin = Compiler_token_location(c, (* d).start); (* d).file = home_portable_path(Compiler_source_path(c, c -> filename));  _show(&((* d)), _definition_node(&((* d))));
+  Compiler c =(* d).c; (void) Compiler_record_origin(c, (* d).start); (* d).origin = Compiler_token_location(c, (* d).start); (* d).file = Compiler_portable_path(Compiler_source_path(c, c -> filename));  _show(&((* d)), _definition_node(&((* d))));
 }
 
 int Sym_scope_count(Sym);
@@ -3812,7 +3812,7 @@ static void _using_names(Compiler c){
     String spelling = c -> token -> text;
     Compiler_expect(c, 19147688);
     List binding = Sym_reference_global(c -> sym, cons(String_var(spelling), NULL));
-    Map_setindex(c -> macro_holes, List_var(cons(_295, cons(String_var(binding_identity_spelling(binding)), NULL))), List_var(binding));
+    Map_setindex(c -> macro_holes, List_var(cons(_295, cons(String_var(Ast_binding_spelling(binding)), NULL))), List_var(binding));
   }
   while(Compiler_test(c, 89));
   ;
@@ -4551,11 +4551,11 @@ static Atom _hole_key(List hole, String projection){
   return Macro_binder(List_assoc(hole, Symbol_var(154018148)), projection, Var_int(Var_convert(List_assoc(hole, Symbol_var(1317592723658)), 3453797)));
 }
 
-int binding_identity_try_parts(List, int *, String *);
+int Ast_try_binding(List, int *, String *);
 
 static Atom _local_binder(Var identity, int tag){
   int number = 0;
-  (void) binding_identity_try_parts(Var_list_payload(identity), &(number), NULL);
+  (void) Ast_try_binding(Var_list_payload(identity), &(number), NULL);
   int ordinal = INT_MAX - number;
   return Atom_intern(({
     Var _x2c_literal_part_66 = String_var(tag ? _422 : _423);  String_join(NULL, cons(String_var(_424), cons(_x2c_literal_part_66, cons(String_var(_50), cons(String_var(int_str(ordinal)), NULL)))));
@@ -4565,13 +4565,13 @@ static Atom _local_binder(Var identity, int tag){
 
 Map Compiler_macro_definition_locals(Compiler);
 
-List binding_identity_new(int, String);
+List Ast_binding(int, String);
 
 static List _definition_local(Compiler c, String spelling, int tag){
   Map locals = Compiler_macro_definition_locals(c);
   Var order = Map_getindex(locals, Symbol_var(32645476));
   int identity = INT_MAX -(Var_is_row(order, 9, 7, 4) ? List_len(Var_list(order)) : 0);
-  List introduced = binding_identity_new(identity, spelling);
+  List introduced = Ast_binding(identity, spelling);
   Compiler_set_fact(c, List_var(cons(_425, cons(int_var(identity), NULL))), String_var(spelling));
   Map_setindex(locals, Symbol_var(32645476), List_var(cons(List_var(introduced), Var_is_row(order, 9, 7, 4) ? Var_list_payload(order) : NULL)));
   Map_setindex(locals, List_var(introduced), String_var(spelling));
@@ -4618,7 +4618,7 @@ List Compiler_macro_tag_name(Compiler c, Symbol kind, String name, int definitio
 static Var _replace_bindings(Var value, Map bindings){
   Var replacement;
   if(! Var_is_row(value, 9, 7, 4) || Var_is_nil(value)) return Var_is_binder(value) && Map_try_get(bindings, value, &(replacement)) ? replacement : value;
-  if(binding_identity_try_parts(Var_list_payload(value), NULL, NULL) && Map_try_get(bindings, value, &(replacement))) return replacement;
+  if(Ast_try_binding(Var_list_payload(value), NULL, NULL) && Map_try_get(bindings, value, &(replacement))) return replacement;
   List original = Var_list_payload(value);
   Array items = NULL;
   for(List cursor = original;  List_truth(cursor);  cursor = List_cdr(cursor)){
@@ -4769,7 +4769,7 @@ void Sym_set(Sym, List, List);
 void Compiler_record_compile_time_effect(Compiler c, List row, Token start){
   if(! _init_guard_) _file_init_();
   if(! c -> shallow || c -> source_private || Map_truth(c -> macro_holes) || ! Sym_at_file_scope(c -> sym) || c -> builtin_defs || ! String_truth(c -> filename) || String_startswith(c -> filename, _434)) return;
-  String source = home_portable_path(Path_absolute(c -> filename));
+  String source = Compiler_portable_path(Path_absolute(c -> filename));
   List key = cons(_436, cons(List_var(cons(_433, cons(String_var(source), cons(int_var(start -> pos), NULL)))), NULL));
   List previous = Sym_get(c -> sym, key);
   if(List_truth(previous)) row = cons(_433, cons(_437, cons(List_var(previous), cons(List_var(row), NULL))));
@@ -4827,7 +4827,7 @@ void Compiler_install_compile_time_effects(Compiler c, List rows){
             site = _x2c_match_value_2;
             {
               Token token = Var_token(Compiler_thaw_declaration_syntax(c, site));
-              String file = home_absolute_path(Var_as_string(path)), text = NULL;
+              String file = Compiler_absolute_home_path(Var_as_string(path)), text = NULL;
               Compiler_read_source(c, file, &(text));
               {
                 String * _x2c_macro_address_14 = & c -> filename;
@@ -4915,7 +4915,7 @@ void Compiler_install_compile_time_effects(Compiler c, List rows){
             site = _x2c_match_value_2;
             {
               Token token = Var_token(Compiler_thaw_declaration_syntax(c, site));
-              String file = home_absolute_path(Var_as_string(source)), text = NULL;
+              String file = Compiler_absolute_home_path(Var_as_string(source)), text = NULL;
               Compiler_read_source(c, file, &(text));
               {
                 String * _x2c_macro_address_17 = & c -> filename;
@@ -4968,7 +4968,7 @@ void Compiler_install_compile_time_effects(Compiler c, List rows){
                               x2c_cleanup_push(& _x2c_defer_record_21);
                               {
                                 * _x2c_macro_address_15 = NULL;
-                                _import(c, home_absolute_path(Var_as_string(path)), token);
+                                _import(c, Compiler_absolute_home_path(Var_as_string(path)), token);
                               }
                               x2c_cleanup_leave(& _x2c_defer_record_21);
                             }
@@ -5120,7 +5120,7 @@ static void _install_rewrite(Compiler c, List row){
         Var holes;
         holes = _x2c_match_value_4;
         {
-          if(c -> builtin_defs && ! links_meta_function(Var_as_string(name))) return;
+          if(c -> builtin_defs && ! Compiler_links_meta_function(Var_as_string(name))) return;
           RewriteRule rule = _rewrite_rule(Var_symbol(point), Compiler_thaw_declaration_syntax(c, kind), Var_as_string(name), Var_list_payload(Compiler_thaw_declaration_syntax(c, shape)), Var_list_payload(Compiler_thaw_declaration_syntax(c, holes)), c -> builtin_defs, 1);
           _register_rewrite(c, rule);
         }
@@ -5167,7 +5167,7 @@ static Var _ship_rewrite(Compiler c, List row){
                   Var holes;
                   holes = _x2c_match_value_4;
                   {
-                    if(_unit_bound(List_var(row)) || ! links_meta_function(Var_as_string(name))) break;
+                    if(_unit_bound(List_var(row)) || ! Compiler_links_meta_function(Var_as_string(name))) break;
                     List thawed =({
                       Var _x2c_literal_part_80 = Compiler_thaw_declaration_syntax(c, kind);  Var _x2c_literal_part_81 = Compiler_thaw_declaration_syntax(c, shape);  Var _x2c_literal_part_82 = Compiler_thaw_declaration_syntax(c, holes);  cons(_x2c_literal_part_80, cons(_x2c_literal_part_81, cons(_x2c_literal_part_82, NULL)));
                     }
@@ -5630,7 +5630,7 @@ static List _bind_replacement(Compiler c, Var result, AstPos position, Type expe
 
 }
 
-Var ast_replace_nodes(Var, Map);
+Var Ast_replace_nodes(Var, Map);
 
 static Var _kept_lowered(Var result, List source, Array parts){
   {
@@ -5669,7 +5669,7 @@ static Var _kept_lowered(Var result, List source, Array parts){
 
       }
       {
-        Var _x2c_return_value_15 = ast_replace_nodes(result, kept);
+        Var _x2c_return_value_15 = Ast_replace_nodes(result, kept);
         {
           x2c_cleanup_leave(& _x2c_defer_record_33);
           return _x2c_return_value_15;
@@ -5683,10 +5683,10 @@ static Var _kept_lowered(Var result, List source, Array parts){
 
 }
 
-int ast_contains_head(Var, Symbol);
+int Ast_contains_head(Var, Symbol);
 
 static Var _bound_held(Compiler c, SlotWatch held, Symbol kind, Var ast, AstPos position, Type expected, Token site, int lower){
-  if(! ast_contains_head(ast, kind) || _find_slot(held, Var_list_payload(ast)) >= 0) return ast;
+  if(! Ast_contains_head(ast, kind) || _find_slot(held, Var_list_payload(ast)) >= 0) return ast;
   List node = Var_list_payload(ast);
   if(x2c_var_equal(List_car(node), Symbol_var(kind))){
     List rewritten = _rewrite(c, 948490, Symbol_var(kind), node, position, expected, site, lower);
@@ -6744,7 +6744,7 @@ static void _bind_name_arguments(Compiler c, List definition, List arguments){
         while(List_try_next(_x2c_macro_object_48, &(_x2c_macro_cursor_54), &(_x2c_macro_cursor_output_49))){
           value = _x2c_macro_cursor_output_49;
           {
-            String name = Var_as_string(Var_is_row(value, 9, 7, 4) ? String_var(binding_identity_spelling(Var_list_payload(value))) : value);
+            String name = Var_as_string(Var_is_row(value, 9, 7, 4) ? String_var(Ast_binding_spelling(Var_list_payload(value))) : value);
             Sym_reference(c -> sym, cons(String_var(name), NULL), NULL);
           }
 
@@ -6863,7 +6863,7 @@ static Var _identifier_expression(Var value){
     }
 
   }
-  if(Var_is_row(value, 9, 7, 4) && ! Var_is_nil(value) && binding_identity_try_parts(Var_list_payload(value), NULL, NULL)) return List_var(cons(_185, cons(_291, cons(List_var(cons(_321, cons(value, NULL))), NULL))));
+  if(Var_is_row(value, 9, 7, 4) && ! Var_is_nil(value) && Ast_try_binding(Var_list_payload(value), NULL, NULL)) return List_var(cons(_185, cons(_291, cons(List_var(cons(_321, cons(value, NULL))), NULL))));
   return value;
 }
 
@@ -8392,7 +8392,7 @@ List Compiler_macro_value_literal(Compiler c, List value){
 static Var _macro_value_names(Var value){
   if(! Var_is_row(value, 9, 7, 4)) return value;
   String spelling = NULL;
-  if(binding_identity_try_parts(Var_list_payload(value), NULL, &(spelling))) return List_var(cons(_648, cons(String_var(spelling), NULL)));
+  if(Ast_try_binding(Var_list_payload(value), NULL, &(spelling))) return List_var(cons(_648, cons(String_var(spelling), NULL)));
   List child;
   List _x2c_macro_original_5 = Var_list(value);
   Array _x2c_macro_rewritten_5 = NULL;
@@ -8988,7 +8988,7 @@ List Compiler_parse_macro_lisp_top_level(Compiler c){
 void Compiler_parse_macro_lisp_shallow(Compiler c){
   if(! _init_guard_) _file_init_();  String requested = NULL;  if(_import_path(c, &(requested))){
     if(! c -> source_private){
-      String path = home_portable_path(_canonical_path(c, requested, c -> token));  Compiler_record_compile_time_effect(c, ({
+      String path = Compiler_portable_path(_canonical_path(c, requested, c -> token));  Compiler_record_compile_time_effect(c, ({
         Var _x2c_literal_part_130 = String_var(path);  Var _x2c_literal_part_131 = List_var(_effect_source(c, c -> token));  cons(_433, cons(_466, cons(_x2c_literal_part_130, cons(_x2c_literal_part_131, NULL))));
       }
       ), c -> token);
@@ -9004,14 +9004,14 @@ void Compiler_parse_macro_lisp_shallow(Compiler c){
 Token Compiler_source_token(Compiler, Token, String *);
 static List _effect_source(Compiler c, Token site){
   String file = NULL;  Token placed = Compiler_source_token(c, site, &(file));  return({
-    Var _x2c_literal_part_134 = String_var(home_portable_path(Path_absolute(file)));  Var _x2c_literal_part_135 = Compiler_freeze_declaration_syntax(c, Token_var(placed));  cons(_6, cons(_x2c_literal_part_134, cons(_x2c_literal_part_135, NULL)));
+    Var _x2c_literal_part_134 = String_var(Compiler_portable_path(Path_absolute(file)));  Var _x2c_literal_part_135 = Compiler_freeze_declaration_syntax(c, Token_var(placed));  cons(_6, cons(_x2c_literal_part_134, cons(_x2c_literal_part_135, NULL)));
   }
   );
 }
 
 void Compiler_evaluate_declaration_effect(Compiler c, String form, Token invocation){
   if(! _init_guard_) _file_init_();  List key =({
-    Var _x2c_literal_part_136 = String_var(home_portable_path(Path_absolute(c -> filename)));  cons(_x2c_literal_part_136, cons(int_var(invocation -> pos), cons(String_var(form), NULL)));
+    Var _x2c_literal_part_136 = String_var(Compiler_portable_path(Path_absolute(c -> filename)));  cons(_x2c_literal_part_136, cons(int_var(invocation -> pos), cons(String_var(form), NULL)));
   }
   );  if(Map_contains(c -> evaluated_effects, List_var(key)) ||(! library_filling && Map_truth(library_imports) && Map_contains(library_imports, List_var(key)))) return; {
     int * _x2c_macro_address_51 = & c -> collect_protocols;  int _x2c_macro_previous_51 = * _x2c_macro_address_51; {
@@ -9096,14 +9096,14 @@ static Var _sdk_identifier_result(Var value){
     }
 
   }
-  return Var_is_row(value, 9, 7, 4) && binding_identity_try_parts(Var_list_payload(value), NULL, NULL) ? value :((void) 0, Void);
+  return Var_is_row(value, 9, 7, 4) && Ast_try_binding(Var_list_payload(value), NULL, NULL) ? value :((void) 0, Void);
 }
 
 static Var _lisp_import_hook(String path){
   MetaContext * context = MetaContext_current();
   Compiler c = context -> evaluator;
   if(! c){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 5259};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 5260};
     x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));
     __builtin_unreachable();
   }
@@ -9211,7 +9211,7 @@ static void _reference_bindings(Compiler c, List syntax, Map replacements){
         binding = _x2c_match_value_0;
         {
           String spelling = NULL;
-          if(binding_identity_try_parts(Var_list_payload(binding), NULL, &(spelling))) Map_setindex(replacements, binding, List_var(Sym_reference_global(c -> sym, cons(String_var(spelling), NULL))));
+          if(Ast_try_binding(Var_list_payload(binding), NULL, &(spelling))) Map_setindex(replacements, binding, List_var(Sym_reference_global(c -> sym, cons(String_var(spelling), NULL))));
           return;
         }
 
@@ -9266,7 +9266,7 @@ String Compiler_source_path(Compiler c, String file){
 
 static String _definition_file(List definition){
   String file = Var_as_string(List_assoc(definition, Symbol_var(412426)));
-  return ! String_truth(file) || String_startswith(file, _904) ? file : home_absolute_path(file);
+  return ! String_truth(file) || String_startswith(file, _904) ? file : Compiler_absolute_home_path(file);
 }
 
 static String _read_source(Compiler c, String path, String message, Token token){
@@ -9541,7 +9541,7 @@ void Compiler_inherit_library_comptime(Compiler c){
 
 }
 
-int macro_library_filling(void){
+int Compiler_library_filling(void){
   if(! _init_guard_) _file_init_();
   return library_filling;
 }
@@ -9657,7 +9657,7 @@ static void _bind_primitives(Lisp lisp){
 static void _install_builtins(Lisp lisp){
   {
     Var name, function;
-    Map _x2c_macro_object_79 = builtin_targets();
+    Map _x2c_macro_object_79 = Compiler_builtin_targets();
     unsigned _x2c_macro_cursor_88 = 0;
     Var _x2c_macro_cursor_output_77;
     Var _x2c_macro_cursor_output_78;
@@ -9725,7 +9725,7 @@ static void _library_shutdown(void){
   library_scope = NULL;
 }
 
-void macro_library_reset(void){
+void Compiler_reset_macro_library(void){
   if(! _init_guard_) _file_init_();
   _library_shutdown();
   library_filling = 0;

@@ -1275,8 +1275,8 @@ static String _canonical_file(Compiler c, List location){
 String Compiler_display_path(Compiler, String);
 
 static String _normalize_file(Compiler c, String file){
-  String real = real_path(file), root = c -> root_dir;
-  if(! String_truth(real) && String_truth(root) && String_getindex(file, 0) != '/') real = real_path(String_join(NULL, cons(String_var(root), cons(String_var(_4), cons(String_var(file), NULL)))));
+  String real = Path_real(file), root = c -> root_dir;
+  if(! String_truth(real) && String_truth(root) && String_getindex(file, 0) != '/') real = Path_real(String_join(NULL, cons(String_var(root), cons(String_var(_4), cons(String_var(file), NULL)))));
   return Compiler_display_path(c, String_truth(real) ? real : file);
 }
 
@@ -1550,7 +1550,7 @@ static List _parse_member(Compiler c, String participant, Map members){
   if(! List_truth(binding)) Compiler_report_error(c, 1139215899608, _71, c -> token, NULL);  String name = _member_name(identity, participant);  if(! String_truth(name)) Compiler_report_error(c, 1139215899608, _72, c -> token, cons(_74, cons(String_var(participant), NULL)));  Type signature = Type_canonicalize(List_type_from_ast(declaration));  if(! Type_is_function(signature)) Compiler_report_error(c, 1139215899608, _75, c -> token, cons(_77, cons(String_var(name), NULL)));  if(Map_contains(members, String_var(name))) Compiler_report_error(c, 1139215899608, String_join(NULL, cons(String_var(_78), cons(String_var(name), cons(String_var(_49), NULL)))), c -> token, NULL);  String native = _native_member(c);  Compiler_expect(c, 119);  Map_setindex(members, String_var(name), int_var(1));  return cons(String_var(name), cons(List_var(signature), cons(String_var(native), NULL)));
 }
 
-String binding_identity_spelling(List);
+String Ast_binding_spelling(List);
 static String _member_name(List identity, String participant){
   String name = NULL; {
     List _x2c_match_expr = identity; Var _x2c_match_values[2]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };  switch(0){
@@ -1561,7 +1561,7 @@ static String _member_name(List identity, String participant){
     }
 
   }
-  if(String_truth(name)) return name;  String full_name = binding_identity_spelling(identity);  String prefix = String_join(NULL, cons(String_var(participant), cons(String_var(_7), NULL)));  return String_truth(full_name) && String_startswith(full_name, prefix) ? String_getslice(full_name, x2c_slice_bound(String_len(prefix)), (-2147483647 - 1), 1) : NULL;
+  if(String_truth(name)) return name;  String full_name = Ast_binding_spelling(identity);  String prefix = String_join(NULL, cons(String_var(participant), cons(String_var(_7), NULL)));  return String_truth(full_name) && String_startswith(full_name, prefix) ? String_getslice(full_name, x2c_slice_bound(String_len(prefix)), (-2147483647 - 1), 1) : NULL;
 }
 
 static String _native_member(Compiler c){
@@ -2825,7 +2825,7 @@ static void _dump_member(String member, const char * status, String source, cons
 }
 
 List Compiler_resolve_protocol_member(Compiler c, Type participant, String member_name){
-  if(! _init_guard_) _file_init_();  List resolved = _resolve_member(c, Type_canonicalize(participant), member_name);  if(! List_truth(resolved)) return NULL;  String spelling = binding_identity_spelling(Var_list_payload(List_car(resolved)));  return String_equal(spelling, c -> fn_name) ? NULL : resolved;
+  if(! _init_guard_) _file_init_();  List resolved = _resolve_member(c, Type_canonicalize(participant), member_name);  if(! List_truth(resolved)) return NULL;  String spelling = Ast_binding_spelling(Var_list_payload(List_car(resolved)));  return String_equal(spelling, c -> fn_name) ? NULL : resolved;
 }
 
 static List _resolve_member(Compiler c, Type participant, String member_name){

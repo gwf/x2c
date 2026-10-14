@@ -11,8 +11,8 @@
 #include "build.x"
 
 /** Links native build requests in dependency-first order.
-    `project_plan` returns the head. Each node and copied `CliRequest` struct
-    is owned by the current `Scope` and needs no individual cleanup; its
+    `ProjectBuild.plan` returns the head. Each node and copied `CliRequest`
+    struct is owned by the current `Scope` and needs no individual cleanup; its
     `String` and `List` fields retain their canonical pool lifetimes and may
     share values with the command request.
 */
@@ -63,13 +63,14 @@ static macro Stmt $report.project.created(Expr $directory) {
 }
 
 static macro Stmt $report.project.name_invalid(Expr $name) {
-  driver_error(
+  Diagnostics.driver_error(
     %"new: '${
       $name}' is not a target name; use letters, digits, '_', and '-'");
 }
 
 static macro Stmt $report.project.directory_occupied(Expr $dir) {
-  driver_error(%"new: ${$dir} exists and is not an empty directory");
+  Diagnostics.driver_error(
+    %"new: ${$dir} exists and is not an empty directory");
 }
 
 // the manifest model
@@ -119,7 +120,7 @@ static typedef struct Project {
     without executing build actions. Manifest discovery, parsing, validation,
     or target-selection failures print a diagnostic and exit with status 2.
 */
-ProjectBuild project_plan(CliRequest request) {
+ProjectBuild ProjectBuild.plan(CliRequest request) {
   Project p = _open_project(request);
   _parse_manifest(p);
   for (ProjectTarget target = p.targets; target; target = target.next)
@@ -137,7 +138,7 @@ static Project _open_project(CliRequest request) {
   Project p = Scope.calloc(1, sizeof(struct Project));
   *p = (struct Project) {
     .seen = {}, .sources = request.sources, .command = request,
-    .path = project_manifest(request)};
+    .path = request.project_manifest()};
   if (!p.path) _error(NULL, 0, "no explicit inputs and no x2c.toml found");
   p.path = Path.absolute(p.path);
   if (!p.sources.read(p.path, p.text)) _error(p, 0, "cannot read manifest");
@@ -148,7 +149,7 @@ static Project _open_project(CliRequest request) {
 /** Returns the explicit or nearest readable project manifest, or NULL.
     Discovery uses the same request view as project parsing.
 */
-String project_manifest(CliRequest c) {
+String CliRequest.project_manifest(CliRequest c) {
   if (c.manifest) return c.manifest;
   for (Path directory = Path.absolute(".");; directory = directory.dirname()) {
     String candidate = directory.join("x2c.toml");
@@ -591,16 +592,16 @@ static void _resolve_dependencies(Project p) {
   String path = %"${p.root}/x2c.lock";
   if (!p.dependencies) {
     try Path.remove_file(path);
-    catch %(io-fail *detail): host_error(detail);
+    catch %(io-fail *detail): Diagnostics.host_error(detail);
     return;
   }
   List locked = _read_lock(path);
   if (_lock_satisfies(p, locked)) return;
   Array rows = [];
-  for (ProjectDependency entry = p.dependencies; entry; entry = entry.next)
-    rows.push(
-      install_require(
-        request, entry.name, entry.version, _locked_row(locked, entry)));
+  for (ProjectDependency entry = p.dependencies; entry; entry = entry.next) {
+    List row = _locked_row(locked, entry);
+    rows.push(request.require_package(entry.name, entry.version, row));
+  }
   _write_lock(path, rows.list_free());
 }
 
@@ -637,8 +638,8 @@ static void _write_lock(String path, List rows) {
     "# x2c lockfile. Written by x2c build; keep it with the manifest.\n"
     "# name version kind platform url sha256\n";
   foreach (List row, rows) text = %"$text${" ".join(row)}\n";
-  try file_publish(%($path $text));
-  catch %(io-fail *detail): host_error(detail);
+  try Path.publish_files(%($path $text));
+  catch %(io-fail *detail): Diagnostics.host_error(detail);
 }
 
 // build plans
@@ -755,7 +756,7 @@ static Array _target_sources(Project p, ProjectTarget target) {
   excluded.free();
   kept.sort();
   foreach (String path, kept)
-    if (!(is_source_file(path) || path.endswith(".c")))
+    if (!(Path.is_x2c_source(path) || path.endswith(".c")))
       _error_name(p, 0, "manifest source is not .x or .c", path);
   return kept;
 }
@@ -857,7 +858,7 @@ static List _profile_flags(Project p, ProjectProfile profile) {
 
 static List _c_flags(Project p, List values) {
   foreach (String value, values)
-    if (cli_dependency_pass_through(value))
+    if (CliRequest.dependency_option(value))
       _error_name(p, 0, "C dependency option is driver-owned", value);
   return values;
 }
@@ -891,12 +892,12 @@ static void _error_name(Project p, int line, String message, String name) {
     unusable name, or a failed write prints a diagnostic and exits with
     status 2.
 */
-int new_command(CliRequest request) {
+int CliRequest.new_project(CliRequest request) {
   Path dir = request.inputs.car();
-  if (!dir) driver_error("new: the directory operand is empty");
+  if (!dir) Diagnostics.driver_error("new: the directory operand is empty");
   String name = _starter_name(dir);
   try _write_starter(dir, name);
-  catch %(io-fail *detail): host_error(detail);
+  catch %(io-fail *detail): Diagnostics.host_error(detail);
   if (!request.quiet) $report.project.created(dir);
   return 0;
 }

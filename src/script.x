@@ -19,11 +19,12 @@
 // command reports
 
 static macro Stmt $report.script.source_missing(Expr $script) {
-  driver_error(%"script does not exist: ${$script}");
+  Diagnostics.driver_error(%"script does not exist: ${$script}");
 }
 
 static macro Stmt $report.script.execute_failed(Expr $executable) {
-  driver_error(%"cannot run ${$executable}: ${String.new(strerror(errno))}");
+  Diagnostics.driver_error(
+    %"cannot run ${$executable}: ${String.new(strerror(errno))}");
 }
 
 /* cache entries
@@ -35,7 +36,7 @@ static macro Stmt $report.script.execute_failed(Expr $executable) {
 /** Returns the per-user cache root: `X2C_CACHE_DIR`, `XDG_CACHE_HOME/x2c`,
     or `~/.cache/x2c`, whichever is set first, or NULL when none is.
 */
-String script_cache_root(void) {
+String Compiler.cache_root(void) {
   String explicit = Env.get("X2C_CACHE_DIR"), xdg = Env.get("XDG_CACHE_HOME");
   String home = Env.get("HOME");
   return explicit ? explicit : xdg ? %"$xdg/x2c" :
@@ -46,12 +47,12 @@ String script_cache_root(void) {
     executable when it is current; that path does not return. Otherwise it
     locks the directory against concurrent builds of the same script, removes
     the entries of scripts that no longer exist, and returns 0; the caller
-    builds `request` and calls `script_run`. A `--clean` request removes the
-    script's entry and returns 1.
+    builds `request` and calls `CliRequest.run_script`. A `--clean` request
+    removes the script's entry and returns 1.
 */
-int script_prepare(CliRequest c) {
-  String root = script_cache_root();
-  if (!root) driver_error("no cache directory: set X2C_CACHE_DIR");
+int CliRequest.prepare_script(CliRequest c) {
+  String root = Compiler.cache_root();
+  if (!root) Diagnostics.driver_error("no cache directory: set X2C_CACHE_DIR");
   String script = Path.absolute(c.inputs.car());
   c.build_dir = _entry(root, script);
   if (c.clean) {
@@ -64,9 +65,9 @@ int script_prepare(CliRequest c) {
   if (c.dry_run) return 0;
   _exec_current(c);
   try Path.make_dirs(c.build_dir);
-  catch %(io-fail *detail): host_error(detail);
+  catch %(io-fail *detail): Diagnostics.host_error(detail);
   // This process holds the lock until it ends or executes the script.
-  file_lock(%"${c.build_dir}/lock", 1);
+  Path.lock_file(%"${c.build_dir}/lock", 1);
   // A build of the same script may have finished while this one waited.
   _exec_current(c);
   Path.write_text(%"${c.build_dir}/source", script);
@@ -84,9 +85,9 @@ static String _entry(String root, String script) {
 /* Removes the entry once no build holds it. */
 static void _clean(String entry) {
   if (!Path.is_dir(entry)) return;
-  int lock = file_lock(%"$entry/lock", 1);
+  int lock = Path.lock_file(%"$entry/lock", 1);
   try Path.remove_tree(entry);
-  catch %(io-fail *detail): host_error(detail);
+  catch %(io-fail *detail): Diagnostics.host_error(detail);
   close(lock);
 }
 
@@ -115,7 +116,7 @@ static void _prune(String scripts) {
     String directory = Path.join(scripts, name);
     Path source = %"$directory/source";
     if (!source.is_file() || Path.is_file(source.read_text())) continue;
-    int lock = file_lock(%"$directory/lock", 0);
+    int lock = Path.lock_file(%"$directory/lock", 0);
     if (lock < 0) continue;
     try Path.remove_tree(directory);
     catch %(io-fail *): {}
@@ -125,11 +126,11 @@ static void _prune(String scripts) {
 
 // running a script
 
-/** Executes a script that `script_prepare` pointed at the cache and the
-    caller built; that path does not return. A dry run prints the action and
-    returns zero.
+/** Executes a script that `CliRequest.prepare_script` pointed at the cache
+    and the caller built; that path does not return. A dry run prints the
+    action and returns zero.
 */
-int script_run(CliRequest c) {
+int CliRequest.run_script(CliRequest c) {
   if (!c.dry_run) _exec(c);
   _print_run(c);
   return 0;

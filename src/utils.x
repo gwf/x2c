@@ -4,14 +4,12 @@
 
     Owns the environment the driver modules share: where the executable,
     home, stage, and packages are, which files are x2c source, the
-    compiler's identity, how a file is locked or replaced, translation
-    workers, and the driver's fatal error line. Host tools run through
+    compiler's identity, how a file is locked or replaced, and the
+    driver's fatal error line. Host tools run through
     `lib/process.x`.
 */
 
 #pragma once
-#include "private-keywords.x"
-static keyword loop $private.loop;
 #include "path.x"
 #include "process.x"
 #include "sourceview.x"
@@ -29,19 +27,25 @@ static keyword loop $private.loop;
 #include <sys/wait.h>
 #include <unistd.h>
 
+/** Names the translation state that `src/compiler.x` defines. */
+typedef struct Compiler *Compiler;
+
+/** Names the positioned diagnostic store that `src/diagnostics.x` defines. */
+typedef struct Diagnostics *Diagnostics;
+
 // command reports
 
 static macro Stmt $report.utils.identity_mismatch(Expr $detail) {
-  driver_error(%"compiler identity mismatch: ${$detail}");
+  Diagnostics.driver_error(%"compiler identity mismatch: ${$detail}");
 }
 
 static macro Stmt $report.utils.lock_failed(Expr $p) {
-  driver_error(%"cannot lock ${$p}");
+  Diagnostics.driver_error(%"cannot lock ${$p}");
 }
 
 static macro Stmt $report.utils.host_failed(
   Expr $detail, Expr $subject, Expr $error) {
-  driver_error(
+  Diagnostics.driver_error(
     %"${$detail.assoc(<operation>)} ${$subject}: ${
       String.new(strerror($error))}");
 }
@@ -65,9 +69,9 @@ static List default_includes = NULL, cpp_includes = NULL;
     `include/` and `etc/compiler-sdk.xlisp`, a source checkout or an
     installed prefix alike. The root is kept absolute with symbolic links
     resolved, the one spelling every path below the home is compared in.
-    Without a home the root is the current directory and `home_dir` reports
-    none. The compiler identity is taken here, before any later work could
-    observe a replaced executable. An already configured root leaves all
+    Without a home the root is the current directory and `Compiler.home_dir`
+    reports none. The compiler identity is taken here, before any later work
+    could observe a replaced executable. An already configured root leaves all
     state unchanged.
 */
 void x2c_initialize_environment(const char *argv0) {
@@ -111,14 +115,14 @@ static String _executable(const char *argv0) {
   }
   String name = String.new(argv0);
   // A bare name came from PATH; only a path resolves against the cwd.
-  if (name && !("/" in name)) name = find_program(name);
+  if (name && !("/" in name)) name = Env.find_program(name);
   return Path.exists(name) ? Path.absolute(name) : NULL;
 }
 
 /* Linux names the running image itself, which stays the same file even if
    the executable's path is replaced while the process runs. */
 static String _identity(void) =>
-  file_identity(
+  Path.content_identity(
     Path.exists("/proc/self/exe") ? "/proc/self/exe" : executable_path);
 
 static String _locate_home(Path p) {
@@ -167,47 +171,47 @@ String x2c_get_root(void) => root_path;
 String x2c_get_executable(void) => executable_path;
 
 /** Returns the discovered or configured home, or NULL when there is none. */
-String home_dir(void) => root_found ? root_path : NULL;
+String Compiler.home_dir(void) => root_found ? root_path : NULL;
 
 /** Returns the directory of a compiler staged at `<home>/builds/<stage>/`,
     or NULL for any other compiler.
 */
-String stage_dir(void) {
+String Compiler.stage_dir(void) {
   if (!executable_path) return NULL;
   String stage = Path.dirname(executable_path);
   return Path.dirname(stage) == %"$root_path/builds" ? stage : NULL;
 }
 
 /** Returns `<home>/packages`, which may not exist, or NULL without a home. */
-String home_packages(void) {
-  String home = home_dir();
+String Compiler.home_packages(void) {
+  String home = Compiler.home_dir();
   return home ? %"$home/packages" : NULL;
 }
 
 /** Returns the command directory for this checkout or installed home. */
-String home_libexec(void) {
-  String stage = stage_dir();
+String Compiler.home_libexec(void) {
+  String stage = Compiler.stage_dir();
   if (stage) return %"$stage/libexec";
-  String home = home_dir();
+  String home = Compiler.home_dir();
   return home ? %"$home/libexec/x2c" : NULL;
 }
 
 /** Returns the borrowed default include `List`, `<root>/include/x2c`.
     Returns NULL before environment setup.
 */
-List default_include_dirs(void) => default_includes;
+List Compiler.default_include_dirs(void) => default_includes;
 
 /** Returns the borrowed preprocessor `List` `<root>/lib`, then `<root>/src`.
     `<root>/src` is present only when the home has that directory. Returns
     NULL before environment setup.
 */
-List cpp_include_dirs(void) => cpp_includes;
+List Compiler.cpp_include_dirs(void) => cpp_includes;
 
 /** Returns the spelling of the first `PATH` candidate for the program `name`
     that this process may execute, searched as `execvp` searches, or NULL.
     An empty entry names the current directory.
 */
-String find_program(String name) {
+String Env.find_program(String name) {
   foreach (String directory, Env.get("PATH").split(":")) {
     Path candidate = Path.join(directory, name);
     if (candidate.is_executable()) return candidate;
@@ -220,7 +224,7 @@ String find_program(String name) {
 /** Reports whether `path` is x2c source: a `.x` or `.xp` file, or a file
     of any other name whose first line is a shebang, which is a script.
 */
-int is_source_file(String path) {
+int Path.is_x2c_source(String path) {
   if (path.endswith(".x") || path.endswith(".xp")) return 1;
   if (path.endswith(".c") || path.endswith(".h") || path.endswith(".o") ||
       path.endswith(".a")) return 0;
@@ -234,14 +238,14 @@ int is_source_file(String path) {
 }
 
 /** Reports whether `path` names a file in the indentation syntax. */
-int is_layout_file(String path) =>
+int Path.is_layout_source(String path) =>
   path && path.endswith(".xp");
 
 /** Returns the package directory that holds `path` below one of `roots`:
     the root's child on the way to `path`, compared by canonical path, when
     that child's name is an identifier. Returns NULL for any other path.
 */
-String package_directory(List roots, String path) {
+String Compiler.package_directory(List roots, String path) {
   String source = Path.absolute(path);
   foreach (String root, roots) {
     String prefix = %"${Path.absolute(root)}/";
@@ -257,7 +261,7 @@ String package_directory(List roots, String path) {
     to `.xp`, using the importing compiler's source view. Returns its directory
     through `directory`, or NULL when the package does not exist.
 */
-String package_entry(
+String SourceView.package_entry(
   SourceView sources, List roots, String name, String &directory) {
   foreach (String package_dir, roots) {
     String root = %"${Path.absolute(package_dir)}/$name";
@@ -275,7 +279,7 @@ String package_entry(
 /** Recognizes a package's `src/` files or its package-named legacy entry.
     Other files under the package directory are consumers.
 */
-int package_source(String directory, String path) {
+int Compiler.is_package_source(String directory, String path) {
   if (path.startswith(%"$directory/src/")) return 1;
   String name = directory[directory.rfind("/") + 1:];
   return path == %"$directory/$name.x" || path == %"$directory/$name.xp";
@@ -288,21 +292,21 @@ int package_source(String directory, String path) {
     command uses the identity embedded from the compiler that built it.
     Returns NULL if ordinary startup could not read its executable.
 */
-String compiler_identity(void) => active_identity;
+String Compiler.identity(void) => active_identity;
 
 /** Returns the stamp a native module records: `x2c-module-stamp:` and the
     running compiler's identity. Returns NULL when the executable cannot be
     read. Only the compiler that built a module loads it.
 */
-String build_module_stamp(void) {
-  String identity = compiler_identity();
+String Compiler.module_stamp(void) {
+  String identity = Compiler.identity();
   return identity ? %"x2c-module-stamp:$identity" : NULL;
 }
 
 /** Returns the identity a compiler executable at `path` has when it runs:
     the FNV-1a hash of its bytes, or NULL when `path` is NULL or unreadable.
 */
-String file_identity(String path) {
+String Path.content_identity(String path) {
   int ok = path != NULL;
   uint64_t hash = FNV_OFFSET_BASIS;
   if (ok) hash = fnv_file(hash, path, ok);
@@ -337,7 +341,7 @@ uint64_t fnv_bytes(uint64_t hash, const void *bytes, size_t length) {
 }
 
 /** Hashes unit filename spelling for stable generated C identifiers. */
-String filename_hash(String filename) {
+String Path.identifier_hash(String filename) {
   unsigned hash = 0;
   foreach (char byte, filename) hash = hash * 31 + (unsigned char) byte;
   return "%08X".printf(hash);
@@ -349,7 +353,7 @@ String filename_hash(String filename) {
     lock until it is closed or the process exits. Returns -1 when `wait` is
     zero and another process holds the lock.
 */
-int file_lock(Path p, int wait) {
+int Path.lock_file(Path p, int wait) {
   int lock = open(p, O_RDWR | O_CREAT | O_CLOEXEC, 0666);
   if (lock < 0) $report.utils.lock_failed(p);
   int operation = wait ? LOCK_EX : LOCK_EX | LOCK_NB;
@@ -369,7 +373,7 @@ int file_lock(Path p, int wait) {
     destinations replaced.
     Raises: `<not-found>` or `<io-fail>`, after removing the siblings.
 */
-void file_publish(List outputs) {
+void Path.publish_files(List outputs) {
   String suffix = ".tmp.%ld".printf((long) getpid());
   defer for (List rest = outputs; rest; rest = rest.cddr())
     Path.remove_file(%"${rest.car()}$suffix");
@@ -382,53 +386,11 @@ void file_publish(List outputs) {
   }
 }
 
-// workers
-
-/** Forks a worker that continues the current program with inherited state.
-    Returns zero in the child, its PID in the parent, or -1 on fork failure.
-    The call attempts to flush all process streams before the fork so
-    successfully flushed bytes cannot be written by both processes. Flush
-    failure is ignored. The child must leave through `worker_exit`.
-*/
-long worker_fork(void) {
-  fflush(NULL);
-  pid_t pid = fork();
-  return pid < 0 ? -1 : (long) pid;
-}
-
-/** Attempts to flush process streams and terminates a worker with `status`.
-    Flush failure is ignored. This function does not return and does not run
-    `atexit` handlers. Those belong to the parent process and would close its
-    log and process-lifetime `Scope`s twice.
-*/
-void worker_exit(int status) {
-  fflush(NULL);
-  _exit(status);
-}
-
-/** Waits until one of the `count` workers in `pids` exits and returns its
-    index, storing its shell-style status: the exit status, `128 + signal`,
-    or -1 when it cannot be waited. Other children stay unreaped, so the
-    wait polls with a short sleep.
-*/
-int worker_wait_any(long *pids, int count, int &status) {
-  loop {
-    for (int i = 0; i < count; i++) {
-      int raw, signal;
-      pid_t done = waitpid((pid_t) pids[i], &raw, WNOHANG);
-      if (!done || (done < 0 && errno == EINTR)) continue;
-      status = done < 0 ? -1 : shell_status(raw, signal);
-      return i;
-    }
-    usleep(1000);
-  }
-}
-
 /** Decodes the wait status `raw` of a child that has ended. Returns its
     exit status, `128 + signal` when a signal ended it, or -1 otherwise,
     and stores that signal in `signal`, or 0 when no signal ended it.
 */
-int shell_status(int raw, int &signal) {
+int Job.decode_wait_status(int raw, int &signal) {
   signal = WIFSIGNALED(raw) ? WTERMSIG(raw) : 0;
   if (WIFEXITED(raw)) return WEXITSTATUS(raw);
   return signal ? 128 + signal : -1;
@@ -441,16 +403,17 @@ int shell_status(int raw, int &signal) {
     safe inside a `try` body or a catch arm, whose records those handlers
     would otherwise find still live.
 */
-void driver_error(const char *message) {
+void Diagnostics.driver_error(const char *message) {
   fprintf(stderr, "x2c: error: %s\n", message);
   fflush(NULL);
   _exit(2);
 }
 
-/** Reports a caught `<not-found>` or `<io-fail>` through `driver_error`
-    as its operation, path or program, and system reason.
+/** Reports a caught `<not-found>` or `<io-fail>` through
+    `Diagnostics.driver_error` as its operation, path or program, and system
+    reason.
 */
-void host_error(List detail) {
+void Diagnostics.host_error(List detail) {
   Var subject = detail.assoc(<path>);
   if (subject is void) subject = detail.assoc(<program>);
   // Quoted, the key survives a host preprocessor that expands `errno`.

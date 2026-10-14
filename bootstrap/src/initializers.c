@@ -2244,7 +2244,7 @@ static List _materialize_mixed_row(Compiler c, List original, List source, Array
 
 Type Type_apply(Type);
 static List _adapt_choices(Compiler c, List source, List choices, List placeholder){
-  Type from = _adapter_type(c, Var_type(List_cadr(source)));  if(! List_truth(Type_list(from)) || ! ast_contains_head(List_var(source), 421880102)) return NULL;  Array prepared = Array_new();  const Array _x2c_macro_acquired_1 = prepared; {
+  Type from = _adapter_type(c, Var_type(List_cadr(source)));  if(! List_truth(Type_list(from)) || ! Ast_contains_head(List_var(source), 421880102)) return NULL;  Array prepared = Array_new();  const Array _x2c_macro_acquired_1 = prepared; {
     _x2c_defer_env_2 _x2c_macro_environment_2 ={
       0
     }

@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
     Stderr.printf("x2c repl: %s\n", why);
     return 2;
   }
-  CliRequest request = cli_request(<repl>);
+  CliRequest request = CliRequest.new(<repl>);
   request.native_modules = parsed["native-module"];
   ReplOptions options = {
     .dump = parsed["dump"].integer(),

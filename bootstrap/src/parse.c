@@ -3170,7 +3170,7 @@ List Compiler_parse_import_declaration(Compiler c){
   Compiler_install_compile_time_effects(c, Var_list_payload(Map_getindex(c -> package_effects, String_var(name))));
   Compiler_expect(c, 119);
   if(c -> shallow) Sym_set(c -> sym, cons(_17, cons(List_var(({
-    Var _x2c_literal_part_2 = String_var(home_portable_path(Path_absolute(c -> filename)));  cons(_18, cons(_x2c_literal_part_2, cons(int_var(start -> pos), NULL)));
+    Var _x2c_literal_part_2 = String_var(Compiler_portable_path(Path_absolute(c -> filename)));  cons(_18, cons(_x2c_literal_part_2, cons(int_var(start -> pos), NULL)));
   }
   )), NULL)), cons(_18, cons(String_var(name), cons(String_var(alias), cons(List_var(members), NULL)))));
   return cons(_19, cons(String_var(name), cons(String_var(alias), NULL)));
@@ -3640,7 +3640,7 @@ Type Sym_local_type(Sym, Type);
 
 static Type List_type(List);
 
-String binding_identity_spelling(List);
+String Ast_binding_spelling(List);
 
 static List _typedef(Compiler c, List context, int row){
   Token first = c -> token;
@@ -3656,7 +3656,7 @@ static List _typedef(Compiler c, List context, int row){
     while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
       declarator = Var_list_payload(_x2c_macro_cursor_output_2);
       {
-        String name = binding_identity_spelling(Var_list_payload(List_cadr(declarator)));
+        String name = Ast_binding_spelling(Var_list_payload(List_cadr(declarator)));
         if(String_truth(name)) Sym_set(c -> sym, cons(String_var(name), _79), _81);
       }
 
@@ -4067,7 +4067,7 @@ static List _lower_self_declaration(Compiler c, List declaration){
   }
   Type signature = List_type_from_ast(declaration);
   if(! Type_is_function(signature)) return declaration;
-  String spelling = binding_identity_spelling(binding);
+  String spelling = Ast_binding_spelling(binding);
   Type relative = Type_declared(signature);
   Type concrete = Type_declared(List_type_from_ast(lowered));
   Compiler_set_fact(c, List_var(cons(_102, cons(List_var(binding), NULL))), List_var(relative));
@@ -4613,7 +4613,7 @@ static void _declare_delegates(Compiler c, List context, List rows){
 void Sym_mark_field(Sym, Type, Symbol, String);
 
 static void _declare_delegate(Compiler c, List context, Var binding){
-  String name = binding_identity_spelling(Var_list_payload(binding));
+  String name = Ast_binding_spelling(Var_list_payload(binding));
   if(! String_truth(name)) Compiler_report_error(c, 33658058, _172, c -> token, NULL);
   if(! Map_truth(c -> macro_holes)) Sym_mark_field(c -> sym, List_type(context), 286431579402, name);
 }
@@ -4844,7 +4844,7 @@ static List _publish_enumerator(Compiler c, List input, Type context, Token orig
   name = Compiler_evaluate_macro_slot(c, name);
   String exact = _syntax_exact_name(name);
   List binding = String_truth(exact) ? NULL : Var_is_row(name, 9, 7, 4) ? Var_list(name) : NULL;
-  String spelling = String_truth(exact) ? exact : binding_identity_spelling(binding);
+  String spelling = String_truth(exact) ? exact : Ast_binding_spelling(binding);
   if(! String_truth(spelling)) Compiler_report_error(c, 33658058, _180, origin, NULL);
   List key = cons(String_var(spelling), NULL);
   Symbol prior = Sym_enumerator_owner(c -> sym, key);
@@ -5006,13 +5006,13 @@ static List _declarator_init(Compiler c, List type, List context){
   return bind;
 }
 
-int binding_identity_try_parts(List, int *, String *);
+int Ast_try_binding(List, int *, String *);
 
 void Compiler_enter(Compiler c, Ancestor row);
 
 static List _initialized(Compiler c, List type, List bind, Token origin){
   List binding = Var_list_payload(List_cadr(bind));
-  if(binding_identity_try_parts(binding, NULL, NULL)){
+  if(Ast_try_binding(binding, NULL, NULL)){
     Token tokens = c -> tokenizer -> tokens;
     Map_setindex(c -> init_tokens, List_var(binding), Var_box_long(origin - tokens));
   }
@@ -5305,7 +5305,7 @@ static List _install_declarator(Compiler c, List base, List context, List declar
   if(List_truth(binding) && ! String_truth(exact)) _bind_identity(c, context, binding, declaration);
   if(List_truth(binding)) _method_facts(c, binding, method, self_signature, &((* preserved_self)));
   if(List_truth(binding) && List_truth(method) && c -> token && ! Type_is_static(declared_type)){
-    String path = home_portable_path(Path_absolute(c -> filename));
+    String path = Compiler_portable_path(Path_absolute(c -> filename));
     String owner = Compiler_package_spelling(c, Var_as_string(List_car(method)));
     Sym_set(c -> sym, cons(_17, cons(List_var(cons(_212, cons(String_var(path), cons(int_var(c -> token -> pos), cons(String_var(exact), NULL))))), NULL)), ({
       Var _x2c_literal_part_59 = String_var(exact);  Var _x2c_literal_part_60 = List_var(cons(List_var(cons(String_var(owner), NULL)), NULL));  cons(_212, cons(_x2c_literal_part_59, cons(_x2c_literal_part_60, NULL)));
@@ -5405,7 +5405,7 @@ static void _check_rebinding(Compiler c, String exact, int exact_name, List decl
 }
 
 static void _bind_identity(Compiler c, List context, List binding, List declaration){
-  String spelling = binding_identity_spelling(binding);
+  String spelling = Ast_binding_spelling(binding);
   List visible = Sym_lookup(c -> sym, cons(String_var(spelling), NULL), NULL);
   if(! List_equal(visible, binding)) Sym_bind_identity(c -> sym, context, binding, declaration);
 }
@@ -5759,12 +5759,12 @@ static List _finish_function_parts(Compiler c, List declaration, List rtype, Lis
 
 }
 
-Type declared_return(List declaration);
+Type Ast_declared_return(List declaration);
 void Sym_push_scope(Sym, SymScope);
 List Compiler_bind_callable_body(Compiler c, List syntax, Type return_type);
 List Compiler_prepend_setup(Compiler, List, List);
 static List _function_body(Compiler c, List declaration, String name, List syntax){
-  int expression_body = ! List_truth(syntax) && Compiler_at_function_arrow(c);  if(! List_truth(syntax) && ! expression_body) Compiler_expect(c, 247);  Type old_return = List_type(c -> return_type);  c -> return_type = Type_list(declared_return(declaration));  String old_fn = c -> fn_name;  c -> fn_name = name;  Sym_push_scope(c -> sym, c -> params);  int depth = Block_len(c -> ancestors), placed = Array_len(c -> placements);  Compiler_enter(c, (Ancestor){
+  int expression_body = ! List_truth(syntax) && Compiler_at_function_arrow(c);  if(! List_truth(syntax) && ! expression_body) Compiler_expect(c, 247);  Type old_return = List_type(c -> return_type);  c -> return_type = Type_list(Ast_declared_return(declaration));  String old_fn = c -> fn_name;  c -> fn_name = name;  Sym_push_scope(c -> sym, c -> params);  int depth = Block_len(c -> ancestors), placed = Array_len(c -> placements);  Compiler_enter(c, (Ancestor){
     .what = 458361162716, .node = declaration
   }
   );  List body = NULL; {
@@ -5785,7 +5785,7 @@ static List _function_body(Compiler c, List declaration, String name, List synta
   return body;
 }
 
-Type declared_return(List declaration){
+Type Ast_declared_return(List declaration){
   if(! _init_guard_) _file_init_(); {
     List _x2c_match_expr = Type_list(List_type_from_ast(declaration)); List _x2c_match_cursor, _x2c_match_cursor1;  switch(0){
         default: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list_payload(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497936762055558ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) { List _x2c_match_list_0 = _x2c_match_cursor; {
@@ -5810,7 +5810,7 @@ static List _entry_code(Compiler c, int depth){
 }
 
 static String _prepare_lifecycle(Compiler c, List declaration, List binding, String * initializer_owner, String * shutdown_owner){
-  String name = binding_identity_spelling(binding); (* initializer_owner) = String_truth(name) ? _lifecycle_owner(c, binding, _306) : NULL; (* shutdown_owner) = String_truth(name) ? _lifecycle_owner(c, binding, _307) : NULL;  if(String_truth((* initializer_owner))){
+  String name = Ast_binding_spelling(binding); (* initializer_owner) = String_truth(name) ? _lifecycle_owner(c, binding, _306) : NULL; (* shutdown_owner) = String_truth(name) ? _lifecycle_owner(c, binding, _307) : NULL;  if(String_truth((* initializer_owner))){
     _require_signature(c, declaration, name, _308);  if(String_truth(c -> init_fn) && ! String_equal(c -> init_fn, name)) Compiler_report_error(c, 33658058, _309, c -> token, cons(_311, cons(String_var(name), NULL)));
   }
   if(String_truth((* shutdown_owner))){
@@ -5927,7 +5927,7 @@ List Compiler_function_entry(Compiler c, int depth){
         .fn = _x2c_defer_cleanup_17, .env = & _x2c_macro_environment_17
       }
       ;  x2c_cleanup_push(& _x2c_defer_record_17); {
-        * _x2c_macro_address_5 = Type_list(declared_return(declaration));  entry = _entry_code(c, depth);
+        * _x2c_macro_address_5 = Type_list(Ast_declared_return(declaration));  entry = _entry_code(c, depth);
       }
       x2c_cleanup_leave(& _x2c_defer_record_17);
     }
@@ -6596,7 +6596,7 @@ static String _filled_doc(Compiler c, String doc){
 }
 
 static Map _hole_spellings(Compiler c){
-  Map written = Map_new(), spellings = Map_new();  String file = absolute_path(c -> filename); {
+  Map written = Map_new(), spellings = Map_new();  String file = Path_resolved_absolute(c -> filename); {
     List frame;  List _x2c_macro_object_26 = c -> macro_stack;  List _x2c_macro_cursor_26 = _x2c_macro_object_26;  Var _x2c_macro_cursor_output_21;  while(List_try_next(_x2c_macro_object_26, &(_x2c_macro_cursor_26), &(_x2c_macro_cursor_output_21))){
       frame = Var_list_payload(_x2c_macro_cursor_output_21); {
         List binding;  Iter _x2c_macro_iterator_25 = Var_iter(List_getindex(frame, 2), &(struct Iter){
@@ -6884,7 +6884,7 @@ static List _collected_function(Compiler c, List declaration, Var body){
     List _x2c_match_expr = declaration; List _x2c_match_cursor, _x2c_match_cursor1, _x2c_match_cursor2;  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
         case 9224497945694178442ULL: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497945694178442ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list_payload(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224498094476456422ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && Var_is(_x2c_match_cursor1->car, 806120) && (_x2c_match_cursor2 = Var_list_payload(_x2c_match_cursor1->car), 1) && _x2c_match_cursor2 && _x2c_match_cursor2->car.u64 == 9224497936761768840ULL && (_x2c_match_cursor2 = _x2c_match_cursor2->cdr, 1) && _x2c_match_cursor2) { Var _x2c_match_value_1 = _x2c_match_cursor2->car; if ((_x2c_match_cursor2 = _x2c_match_cursor2->cdr, 1) && _x2c_match_cursor2) { Var _x2c_match_value_2 = _x2c_match_cursor2->car; if ((_x2c_match_cursor2 = _x2c_match_cursor2->cdr, 1) && !_x2c_match_cursor2 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var type;  type = _x2c_match_value_0;  Var binding;  binding = _x2c_match_value_1;  Var modifiers;  modifiers = _x2c_match_value_2; {
-          String name = binding_identity_spelling(Var_list_payload(binding));  if(Type_is_static(Var_type(type))) Sym_mark_static(c -> sym, cons(_305, cons(String_var(name), NULL)));  else Map_setindex(c -> fn_defs, String_var(name), int_var(1));  Compiler_record_declaration_visibility(c, declaration);  List method = _method_identity(c, Var_list_payload(binding));  if(List_truth(method)) declaration =({
+          String name = Ast_binding_spelling(Var_list_payload(binding));  if(Type_is_static(Var_type(type))) Sym_mark_static(c -> sym, cons(_305, cons(String_var(name), NULL)));  else Map_setindex(c -> fn_defs, String_var(name), int_var(1));  Compiler_record_declaration_visibility(c, declaration);  List method = _method_identity(c, Var_list_payload(binding));  if(List_truth(method)) declaration =({
             Var _x2c_literal_part_88 = type;  Var _x2c_literal_part_89 = List_var(cons(_36, cons(List_var(({
               Var _x2c_literal_part_87 = List_var(({
                 Var _x2c_literal_part_85 = List_var(cons(List_car(method), NULL));  Var _x2c_literal_part_86 = List_cadr(method);  cons(_x2c_literal_part_85, cons(_x2c_literal_part_86, NULL));
@@ -7126,7 +7126,7 @@ static List _bind_typed_targets(Compiler c, List parameters, Var source){
   );
 }
 
-Var source_clause(Symbol kind){
+Var Compiler_source_clause(Symbol kind){
   if(! _init_guard_) _file_init_();  Token clause = source_clauses;  while(clause -> type != kind) clause ++;  return Token_var(clause);
 }
 
@@ -7136,9 +7136,9 @@ static Symbol _source_clause_kind(Var value){
 
 List Compiler_bind_source_statement(Compiler c){
   if(! _init_guard_) _file_init_();  Symbol keyword = Compiler_peek(c, 0);  Compiler_next(c);  switch(keyword){
-    case 588 : return _bind_if_else(c, source_clause(1322216), source_clause(1327452), source_clause(353482));  case 48777994 : return _bind_while(c, source_clause(1322216), source_clause(162098));  case 286 : return _bind_do(c, source_clause(286), source_clause(1322216));  case 27369680 : return _bind_match(c, source_clause(1322216), source_clause(103270));  case 42162 : return _bind_try(c, source_clause(42162), source_clause(6551716198), source_clause(13518332722));
+    case 588 : return _bind_if_else(c, Compiler_source_clause(1322216), Compiler_source_clause(1327452), Compiler_source_clause(353482));  case 48777994 : return _bind_while(c, Compiler_source_clause(1322216), Compiler_source_clause(162098));  case 286 : return _bind_do(c, Compiler_source_clause(286), Compiler_source_clause(1322216));  case 27369680 : return _bind_match(c, Compiler_source_clause(1322216), Compiler_source_clause(103270));  case 42162 : return _bind_try(c, Compiler_source_clause(42162), Compiler_source_clause(6551716198), Compiler_source_clause(13518332722));
   }
-  return _bind_for(c, source_clause(619112), source_clause(228232), source_clause(929320), source_clause(162098));
+  return _bind_for(c, Compiler_source_clause(619112), Compiler_source_clause(228232), Compiler_source_clause(929320), Compiler_source_clause(162098));
 }
 
 static List _bind_do(Compiler c, Var body, Var condition){

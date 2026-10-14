@@ -515,7 +515,7 @@ Avoid:
     creates temporary files, renames them, and handles errors. The functions
     below are:
 
-      translation_depfile_write
+      Compiler.write_depfile
       translation_depfile_parse
       ...
 */

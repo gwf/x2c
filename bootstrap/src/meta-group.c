@@ -831,7 +831,7 @@ Path Path_basename(Path);
 Path Path_dirname(Path);
 
 static String _runtime_headers(String include_dir){
-  String stage = stage_dir();
+  String stage = Compiler_stage_dir();
   if(String_truth(stage) && Path_is_file(String_join(NULL, cons(String_var(stage), cons(String_var(_0), NULL))))) return String_join(NULL, cons(String_var(stage), cons(String_var(_1), NULL)));
   String executable = x2c_get_executable(), root = x2c_get_root();
   if(String_truth(executable) && String_truth(root) && String_equal(Path_basename(executable), _2) && String_equal(Path_dirname(executable), String_join(NULL, cons(String_var(root), cons(String_var(_3), NULL))))) return String_join(NULL, cons(String_var(root), cons(String_var(_4), NULL)));
@@ -846,15 +846,15 @@ String Compiler_meta_cc(String * include_dir){
 
 String Compiler_meta_cc_identity(String cc){
   if(! _init_guard_) _file_init_();
-  String path = String_contains(cc, _5) ? cc : find_program(cc);
-  String hash = file_identity(path);
+  String path = String_contains(cc, _5) ? cc : Env_find_program(cc);
+  String hash = Path_content_identity(path);
   return String_truth(hash) ? String_join(NULL, cons(String_var(path), cons(String_var(_6), cons(String_var(hash), NULL)))) : cc;
 }
 
 String Compiler_meta_cc_run(List arguments, String directory){
   if(! _init_guard_) _file_init_();
   String printed = NULL, errors = NULL;
-  if(! tool_capture(arguments, &(printed), &(errors))) return NULL;
+  if(! ToolAction_capture(arguments, &(printed), &(errors))) return NULL;
   String failure = _cc_error(errors);
   return ! String_truth(directory) || String_contains(failure, directory) ? failure : String_join(NULL, cons(String_var(failure), cons(String_var(_7), cons(String_var(directory), NULL))));
 }
@@ -1094,7 +1094,7 @@ static List _emit(Compiler c, String stamp, String stem, String suffix, String *
       _x2c_macro_patterns_0[0] = List_var(cons(Symbol_var(61557640), cons(Symbol_var(58262293080), NULL)));
     }
     volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
-      if(c -> meta_build) _name_provider_bindings(c, provider, units, saved.deps);  List lowered = _lower(c, units, stamp, suffix);  List ast = Compiler_transform(c, lowered);  code = generate_code_text(c, ast, stem);
+      if(c -> meta_build) _name_provider_bindings(c, provider, units, saved.deps);  List lowered = _lower(c, units, stamp, suffix);  List ast = Compiler_transform(c, lowered);  code = Compiler_generate_code_text(c, ast, stem);
     }
     else{
       x2c_exception_landed(& _x2c_exception_frame_0);  if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
@@ -1273,8 +1273,8 @@ static Map _placeholders(Compiler c){
   return placeholders;
 }
 
-String preproc_include_target(String, int *);
-String collect_resolve_include(SourceView, List, String, String, int);
+String Compiler_preproc_include_target(String, int *);
+String SourceView_resolve_include(SourceView, List, String, String, int);
 static Var _group_include(Compiler c, Var node, String lib){
   {
     Var _x2c_match_var = node; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);  List _x2c_match_expr = Var_list_payload(_x2c_match_var); List _x2c_match_cursor;  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
@@ -1282,7 +1282,7 @@ static Var _group_include(Compiler c, Var node, String lib){
         Var text;  text = _x2c_match_value_0; {
           Var _x2c_match_value_8 = text; {
             String text = Var_as_string(_x2c_match_value_8); {
-              int angle = 0;  String target = preproc_include_target(text, &(angle));  if(! String_truth(target) || ! is_source_file(target)) break;  String path = collect_resolve_include(c -> sources, c -> include_dirs, Path_dirname(c -> filename), target, angle);  Var index;  if(String_truth(path) && Map_try_get(meta_build_tables, String_var(Path_absolute(path)), &(index))) return List_var(cons(_227, cons(String_var(String_join(NULL, cons(String_var(_234), cons(String_var(Var_str(index)), cons(String_var(_235), NULL))))), NULL)));  if(Path_is_file(String_join(NULL, cons(String_var(lib), cons(String_var(target), NULL))))) break;  return((void) 0, Void);
+              int angle = 0;  String target = Compiler_preproc_include_target(text, &(angle));  if(! String_truth(target) || ! Path_is_x2c_source(target)) break;  String path = SourceView_resolve_include(c -> sources, c -> include_dirs, Path_dirname(c -> filename), target, angle);  Var index;  if(String_truth(path) && Map_try_get(meta_build_tables, String_var(Path_absolute(path)), &(index))) return List_var(cons(_227, cons(String_var(String_join(NULL, cons(String_var(_234), cons(String_var(Var_str(index)), cons(String_var(_235), NULL))))), NULL)));  if(Path_is_file(String_join(NULL, cons(String_var(lib), cons(String_var(target), NULL))))) break;  return((void) 0, Void);
             }
 
           }
@@ -1368,7 +1368,7 @@ static int _holds(Var node, Map placeholders){
   return 0;
 }
 
-void ast_collect_binding_references(Var, Map);
+void Ast_collect_binding_references(Var, Map);
 
 static Map _roots(Compiler c, Array ordered){
   Map present = Map_new(), reached = Map_new();
@@ -1404,7 +1404,7 @@ static Map _roots(Compiler c, Array ordered){
             Var fn;
             fn = _x2c_match_value_0;
             {
-              ast_collect_binding_references(fn, reached);
+              Ast_collect_binding_references(fn, reached);
               if(_function_identity(Var_list_payload(fn), &(identity), &(name)) && !(Map_contains(present, identity))) Array_push(ordered, fn);
               Map_setindex(reached, identity, int_var(1));
             }
@@ -1425,7 +1425,7 @@ static Map _roots(Compiler c, Array ordered){
     Var _x2c_macro_cursor_output_19;
     while(Array_try_next(_x2c_macro_object_17, &(_x2c_macro_cursor_18), &(_x2c_macro_cursor_output_19))){
       item = Var_list_payload(_x2c_macro_cursor_output_19);
-      if(! _function_identity(item, &(identity), &(name))) ast_collect_binding_references(List_var(item), reached);
+      if(! _function_identity(item, &(identity), &(name))) Ast_collect_binding_references(List_var(item), reached);
     }
 
   }
@@ -1448,7 +1448,7 @@ static void _close(Array ordered, Map reached){
         item = Var_list_payload(_x2c_macro_cursor_output_20);
         if(_function_identity(item, &(identity), &(name)) && Map_contains(reached, identity) && !(Map_contains(expanded, identity))){
           Map_setindex(expanded, identity, int_var(1));
-          ast_collect_binding_references(List_var(item), reached);
+          Ast_collect_binding_references(List_var(item), reached);
           grew = 1;
         }
 
@@ -2017,7 +2017,7 @@ void Compiler_use_meta_build_directory(String directory, Array owners){
 
 void Path_write_text(Path, String);
 void Compiler_write_meta_build(Compiler c){
-  if(! _init_guard_) _file_init_();  int index = c -> meta_build - 1;  if(! String_truth(meta_build_directory)) return;  Compiler_ensure_macro_lisp(c);  String base = String_join(NULL, cons(String_var(meta_build_directory), cons(String_var(_598), cons(String_var(int_str(index)), NULL))));  String failure = _unbound(c);  List code = String_truth(failure) ? NULL : _emit(c, build_module_stamp(), String_join(NULL, cons(String_var(_232), cons(String_var(int_str(index)), NULL))), String_join(NULL, cons(String_var(_60), cons(String_var(int_str(index)), NULL))), &(failure));  Array sources = Array_new(); {
+  if(! _init_guard_) _file_init_();  int index = c -> meta_build - 1;  if(! String_truth(meta_build_directory)) return;  Compiler_ensure_macro_lisp(c);  String base = String_join(NULL, cons(String_var(meta_build_directory), cons(String_var(_598), cons(String_var(int_str(index)), NULL))));  String failure = _unbound(c);  List code = String_truth(failure) ? NULL : _emit(c, Compiler_module_stamp(), String_join(NULL, cons(String_var(_232), cons(String_var(int_str(index)), NULL))), String_join(NULL, cons(String_var(_60), cons(String_var(int_str(index)), NULL))), &(failure));  Array sources = Array_new(); {
     Var path, _;  Map _x2c_macro_object_32 = c -> deps;  unsigned _x2c_macro_cursor_35 = 0;  Var _x2c_macro_cursor_output_34;  Var _x2c_macro_cursor_output_35;  while(Map_try_next(_x2c_macro_object_32, &(_x2c_macro_cursor_35), &(_x2c_macro_cursor_output_34), &(_x2c_macro_cursor_output_35))){
       path = _x2c_macro_cursor_output_34;  _ = _x2c_macro_cursor_output_35;  Array_push(sources, path);
     }
@@ -2084,7 +2084,7 @@ static String _stage(Compiler c, String * failure){
 
 String String_sha256(String);
 static String _module(Compiler c, String * failure){
-  String root = script_cache_root(), stamp = build_module_stamp();  if(! String_truth(root) || ! String_truth(stamp)){
+  String root = Compiler_cache_root(), stamp = Compiler_module_stamp();  if(! String_truth(root) || ! String_truth(stamp)){
     (* failure) = _605;  return NULL;
   }
   List code = _emit(c, stamp, _606, _607, &((* failure)));  if(! List_truth(code)) return NULL;  List _x2c_destructure_2 = code;  String hfile = Var_as_string(List_getindex(_x2c_destructure_2, 0));  String header = Var_as_string(List_getindex(_x2c_destructure_2, 1));  String cfile = Var_as_string(List_getindex(_x2c_destructure_2, 2));  String source = Var_as_string(List_getindex(_x2c_destructure_2, 3));  String key = String_sha256(String_add(String_join(NULL, cons(String_var(header), cons(String_var(_608), cons(String_var(source), cons(String_var(_608), cons(String_var(stamp), cons(String_var(_608), NULL))))))), ({

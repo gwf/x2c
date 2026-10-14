@@ -658,7 +658,7 @@ static int _scan_call_node(Walk &w, Var node) {
   List call = _source_call(node);
   if (!call) return 0;
   (Var function, List arguments) = call;
-  String callee = binding_identity_spelling(_binding_of(function));
+  String callee = Ast.binding_spelling(_binding_of(function));
   match (callee ? _effect(w, callee) : void) {
     case %((!or exit wrap)): break;
     case %(free): _end(w, arguments.car(), NULL, <freed>);
@@ -770,12 +770,12 @@ static void _scan_ident(Walk &w, Var binding) {
   Region cleanup = _cleanup(fact.acquired);
   if (w.audit && (_closed(fact.region) || _closed(fact.other) ||
                   (cleanup && cleanup.closed))) {
-    String name = binding_identity_spelling(binding);
+    String name = Ast.binding_spelling(binding);
     $report.region.read_ended(w, name);
     return;
   }
   if (!fact.dead) return;
-  String name = binding_identity_spelling(binding);
+  String name = Ast.binding_spelling(binding);
   String ended = fact.dead == <moved> ? $region.reason.moved()
                                       : $region.reason.freed();
   $report.region.after_free(w, name, ended);
@@ -1455,7 +1455,7 @@ static String _subject(Walk &w, Var value, List named, Fact fact) {
   match (source_expression(value)) case $source_any_lambda():
     return "a closure";
   if (!named) return "a fresh allocation";
-  String name = %"'${binding_identity_spelling(named)}'";
+  String name = %"'${Ast.binding_spelling(named)}'";
   Var own = w.facts[named];
   if (own is not void && own.pointer() == fact) return name;
   List arguments = NULL;
@@ -1523,7 +1523,7 @@ static String _callee_of(Var value, List &arguments) {
   match (_source_call(_unwrap(value))) case %(?function ?rows): {
     List name = _binding_of(function);
     arguments = rows;
-    return binding_identity_spelling(name);
+    return Ast.binding_spelling(name);
   }
   return NULL;
 }

@@ -290,7 +290,7 @@ static int _type_submission_names(List node, Array added) {
       Var name = type.cadr();
       if (name is <string>) added.push(name);
       else if (name is <list>)
-        added.push(binding_identity_spelling(name));
+        added.push(Ast.binding_spelling(name));
       return 1;
     }
   }
@@ -531,7 +531,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
   catch %(?cause *details): {
     // Discard cells for unpublished bindings before rollback reuses their IDs.
     Var storage;
-    if (session.evaluator.try_get("C._globals", storage)) {
+    if (session.evaluator.try_get("C.globals", storage)) {
       Map globals = storage;
       foreach (Var id, ids) globals.del(id);
     }

@@ -182,7 +182,7 @@ Each one shipped a plausible-looking result before it was found. Match the
 arity the production really has, then compare the operator or type by value
 in the case body: match `%(op ?operator ?operand)` and ask whether
 `operator` is `<"*">`. Where a pattern cannot separate two forms at all, the
-comparison moves one level down: `literal_text_value` in `src/stage.x`
+comparison moves one level down: `Compiler.literal_text_value` in `src/stage.x`
 reads the literal's opening quote to decide whether the spelling is a string
 or a character code.
 
@@ -273,7 +273,7 @@ change which converter wins."
 
 ### Turn positional recognizers into grammar cases
 
-`ast_addressed_identifier` and `ast_direct_identifier` in `src/ast.x:138,157`
+`Ast.addressed_identifier` and `Ast.direct_identifier` in `src/ast.x:138,157`
 state the accepted grammar directly:
 
 ```x2c

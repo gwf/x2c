@@ -16,7 +16,7 @@ and their costs are unchanged.
 
 ## The pieces
 
-- `cli_version` in `src/cli.x` identifies the compiler version. The CLI
+- `Compiler.version` in `src/cli.x` identifies the compiler version. The CLI
   boundary probe and installer example carry corresponding version strings.
 - `candidate.yml` manually builds the selected full source SHA. It retains
   the existing four compiler platforms and 26 native package bundles, then

@@ -7,6 +7,8 @@
 */
 
 #pragma once
+#include "private-keywords.x"
+static keyword loop $private.loop;
 #include "build.x"
 #include "project.x"
 #include "frontend.x"
@@ -56,16 +58,16 @@ static macro Stmt $report.main.translation_verbose(
   fprintf(stderr, "x2c: translate --out-dir %s %s\n", $directory, $input);
 
 static macro Stmt $report.main.input_not_x(Expr $input) =>
-  driver_error(%"translation input is not an .x file: ${$input}");
+  Diagnostics.driver_error(%"translation input is not an .x file: ${$input}");
 
 static macro Stmt $report.main.directory_missing(Expr $out_dir) =>
-  driver_error(%"output directory does not exist: ${$out_dir}");
+  Diagnostics.driver_error(%"output directory does not exist: ${$out_dir}");
 
 static macro Stmt $report.main.directory_not_dir(Expr $out_dir) =>
-  driver_error(%"output is not a directory: ${$out_dir}");
+  Diagnostics.driver_error(%"output is not a directory: ${$out_dir}");
 
 static macro Stmt $report.main.directory_unwritable(Expr $out_dir) =>
-  driver_error(%"output directory is not writable: ${$out_dir}");
+  Diagnostics.driver_error(%"output directory is not writable: ${$out_dir}");
 
 static macro Stmt $report.main.translated(
   Expr $n, Expr $noun, Expr $out_dir, Expr $duration) =>
@@ -74,14 +76,14 @@ static macro Stmt $report.main.translated(
       $duration}");
 
 static macro Stmt $report.main.env_unknown(Expr $wanted) =>
-  driver_error(%"unknown env name '${$wanted}'");
+  Diagnostics.driver_error(%"unknown env name '${$wanted}'");
 
 static macro Stmt $report.main.external_failed(Expr $path) =>
-  driver_error(
+  Diagnostics.driver_error(
     %"cannot run external command '${$path}': ${String.new(strerror(errno))}");
 
 static macro Stmt $report.main.diagnostics_unwritable(Expr $diagnostics) =>
-  driver_error(%"cannot open diagnostics file '${$diagnostics}'");
+  Diagnostics.driver_error(%"cannot open diagnostics file '${$diagnostics}'");
 
 // translating a unit
 
@@ -111,8 +113,8 @@ static void _translate_unit(
   if (_inspect_parsed(unit, filename, dump)) return;
   List ast = _transform_ast(c, c.generate_protocol_adapters(unit.ast));
   if (_inspect_transformed(c, ast, dump)) return;
-  generate_code(c, ast, output_dir);
-  if (!translation_depfile_write(request, c, filename, output_dir)) exit(1);
+  c.generate_code(ast, output_dir);
+  if (!c.write_depfile(request, filename, output_dir)) exit(1);
   // A unit that reaches here has no errors, so any diagnostic is a warning.
   if (request.fatal_warnings && c.diagnostics()) exit(1);
 }
@@ -231,8 +233,8 @@ static void _preflight(Translation &t) {
   if (!request.inspects()) _check_out_dir(request.out_dir);
   int shared = !request.inspects() && !t.unit_dirs, Map stems = {};
   foreach (String input, request.inputs) {
-    build_check_input(input);
-    if (!is_source_file(input))
+    Build.require_input(input);
+    if (!Path.is_x2c_source(input))
       $report.main.input_not_x(input);
     String stem = Path.stem(input);
     if (shared && stem in stems)
@@ -295,8 +297,8 @@ static void _report(Translation &t, unsigned long started_at) {
   unsigned long long bytes = 0;
   foreach (String input, t.request.inputs) {
     String stem = Path.stem(input);
-    bytes += report_file_bytes(%"$out_dir/$stem.c");
-    bytes += report_file_bytes(%"$out_dir/$stem.h");
+    bytes += Path.regular_bytes(%"$out_dir/$stem.c");
+    bytes += Path.regular_bytes(%"$out_dir/$stem.h");
   }
   String duration = report_duration(report_now_us() - started_at);
   int n = t.total;
@@ -340,7 +342,7 @@ static void _preload_modules(Translation &t) {
   if (!roots) return;
   foreach (String name, _package_names(t, roots).keys()) {
     String root = NULL;
-    if (!package_entry(t.request.sources, roots, name, root) ||
+    if (!t.request.sources.package_entry(roots, name, root) ||
         Compiler.links_extension(name)) continue;
     String module = %"$root/builds/$name.module";
     if (Path.is_file(module)) Compiler.preload_native_module(module);
@@ -358,7 +360,7 @@ static Map _package_names(Translation &t, List roots) {
     try text = Path.read_text(depfile);
     catch %((!or not-found io-fail) *): continue;
     foreach (String dependency, translation_depfile_parse(text)) {
-      String package = package_directory(roots, dependency);
+      String package = Compiler.package_directory(roots, dependency);
       if (package) names[Path.basename(package)] = 1;
     }
   }
@@ -449,7 +451,7 @@ static void _start(Workers &w) {
   if (w.t.build) w.t.build.begin_translation(slice.car());
   File capture = tmpfile();
   sigset_t unblocked = _block_stop_signals();
-  long pid = capture ? worker_fork() : -1;
+  long pid = capture ? _fork_worker() : -1;
   if (!pid) {
     w.live = 0;
     sigprocmask(SIG_SETMASK, &unblocked, NULL);
@@ -473,13 +475,13 @@ static void _start(Workers &w) {
 static void _work(Translation &t, List slice) {
   foreach (String input, slice) _translate(t, input);
   Compiler.stop_meta_helper();
-  worker_exit(0);
+  _exit_worker(0);
 }
 
 /* Keeps the ended worker's captured bytes for `show`. The last live worker
    moves into the slot of the one that finished. */
 static void _reap(Workers &w) {
-  int status, slot = worker_wait_any(w.pids, w.live, status);
+  int status, slot = _wait_worker(w.pids, w.live, status);
   if (status) w.failed++;
   int index = w.carried[slot];
   List slice = w.slices[index];
@@ -498,6 +500,43 @@ static void _reap(Workers &w) {
   w.captures[slot] = w.captures[w.live];
   sigprocmask(SIG_SETMASK, &unblocked, NULL);
   if (!w.t.build) report_progress(<translate>, w.done, w.t.total, NULL);
+}
+
+/* Forks a worker that continues the current program with inherited state.
+   Returns zero in the child, its PID in the parent, or -1 on fork failure.
+   The call attempts to flush all process streams before the fork so
+   successfully flushed bytes cannot be written by both processes. Flush
+   failure is ignored. The child must leave through `_exit_worker`. */
+static long _fork_worker(void) {
+  fflush(NULL);
+  pid_t pid = fork();
+  return pid < 0 ? -1 : (long) pid;
+}
+
+/* Attempts to flush process streams and terminates a worker with `status`.
+   Flush failure is ignored. This function does not return and does not run
+   `atexit` handlers. Those belong to the parent process and would close its
+   log and process-lifetime `Scope`s twice. */
+static void _exit_worker(int status) {
+  fflush(NULL);
+  _exit(status);
+}
+
+/* Waits until one of the `count` workers in `pids` exits and returns its
+   index, storing its shell-style status: the exit status, `128 + signal`,
+   or -1 when it cannot be waited. Other children stay unreaped, so the
+   wait polls with a short sleep. */
+static int _wait_worker(long *pids, int count, int &status) {
+  loop {
+    for (int i = 0; i < count; i++) {
+      int raw, signal;
+      pid_t done = waitpid((pid_t) pids[i], &raw, WNOHANG);
+      if (!done || (done < 0 && errno == EINTR)) continue;
+      status = done < 0 ? -1 : Job.decode_wait_status(raw, signal);
+      return i;
+    }
+    usleep(1000);
+  }
 }
 
 /* Prints each ended slice's captured standard error once every earlier
@@ -559,25 +598,27 @@ static int _run_build(CliRequest request) {
   int status = request.inputs
     ? _build_inputs(request, commands) : _build_manifest(request, commands);
   if (status || commands == NULL || request.command == <run>) return status;
-  return !compile_commands_write(request.compile_commands, commands);
+  return !Build.write_commands(request.compile_commands, commands);
 }
 
 static int _build_inputs(CliRequest request, Array commands) {
   /* Manifest options have no meaning without a manifest. The build fails
      before it builds something the command did not describe. */
   if (request.manifest)
-    driver_error("--manifest-path conflicts with explicit inputs");
+    Diagnostics.driver_error("--manifest-path conflicts with explicit inputs");
   if (request.target)
-    driver_error("--target conflicts with explicit inputs");
+    Diagnostics.driver_error("--target conflicts with explicit inputs");
   if (request.profile)
-    driver_error("--profile conflicts with explicit inputs");
+    Diagnostics.driver_error("--profile conflicts with explicit inputs");
   return _build_target(request, commands);
 }
 
 static int _build_manifest(CliRequest request, Array commands) {
   if (request.compile_only)
-    driver_error("--compile-only needs input operands, not a manifest");
-  for (ProjectBuild node = project_plan(request); node; node = node.next) {
+    Diagnostics.driver_error(
+      "--compile-only needs input operands, not a manifest");
+  ProjectBuild first = ProjectBuild.plan(request);
+  for (ProjectBuild node = first; node; node = node.next) {
     int status = _build_target(node.request, commands);
     if (status) return status;
   }
@@ -589,7 +630,7 @@ static int _build_target(CliRequest request, Array commands) {
      its Scope allocations and canonical values so a manifest dependency is
      reclaimed before the next target starts. */
   Context target = $auto(Context.open_isolated_named("build target"));
-  defer macro_library_reset();
+  defer Compiler.reset_macro_library();
   Build b = request.prepare();
   request.cc = target.export(request.cc);
   request.meta_cc = target.export(request.meta_cc);
@@ -632,7 +673,7 @@ static int _add_commands(
   foreach (String entry, b.compile_commands)
     commands.push(target.export(entry));
   if (request.command != <run>) return 0;
-  return !compile_commands_write(request.compile_commands, commands);
+  return !Build.write_commands(request.compile_commands, commands);
 }
 
 /* Translates the stale `units` and registers every unit's generated files.
@@ -657,7 +698,7 @@ static int _translate_units(CliRequest request, Build b, List units) {
 static List _stale_inputs(Build b, List units, Map stale) {
   Array inputs = [];
   foreach (String input, units) {
-    if (!is_source_file(input)) continue;
+    if (!Path.is_x2c_source(input)) continue;
     String directory = b.generated_dir(input);
     if (b.translation_current(input, directory)) {
       b.begin_translation(input);
@@ -677,7 +718,7 @@ static List _stale_inputs(Build b, List units, Map stale) {
 static void _register_units(
   CliRequest request, Build b, List units, Map stale) {
   foreach (String input, units) {
-    if (!is_source_file(input)) continue;
+    if (!Path.is_x2c_source(input)) continue;
     String directory = b.generated_dir(input);
     if (input in stale && request.dry_run) {
       b.begin_translation(input);
@@ -714,19 +755,19 @@ static List _env_rows(CliRequest request) {
   Toolchain toolchain = Toolchain.new(request);
   String executable = x2c_get_executable();
   String roots = ":".join(request.package_roots());
-  interface_configure(request.out_dir, 0);
+  Compiler.configure_interfaces(request.out_dir, 0);
   return %(
     ("home" ${x2c_get_root()})
     ("executable" $executable)
-    ("libexec" ${home_libexec()})
-    ("identity" ${compiler_identity()})
+    ("libexec" ${Compiler.home_libexec()})
+    ("identity" ${Compiler.identity()})
     ("include_dir" ${toolchain.include_dir})
     ("runtime_lib" ${toolchain.runtime_lib})
-    ("prelude" ${interface_prelude()})
+    ("prelude" ${Compiler.prelude_interface()})
     ("package_dirs" $roots)
     ("cc" ${toolchain.cc})
     ("ar" ${toolchain.ar})
-    ("cache_dir" ${script_cache_root()}));
+    ("cache_dir" ${Compiler.cache_root()}));
 }
 
 // external commands
@@ -743,8 +784,8 @@ static void _run_external(int argc, char **argv) {
 }
 
 static String _external_path(const char *name) {
-  if (!_external_name(name) || cli_builtin_command(name)) return NULL;
-  String libexec = home_libexec();
+  if (!_external_name(name) || CliRequest.is_builtin(name)) return NULL;
+  String libexec = Compiler.home_libexec();
   if (!libexec) return NULL;
   String path = %"$libexec/x2c-$name";
   return Path.is_executable(path) ? path : NULL;
@@ -758,8 +799,8 @@ static int _external_name(const char *name) {
 }
 
 static void _exec(String path, char **args) {
-  String home = home_dir(), executable = x2c_get_executable();
-  String identity = compiler_identity();
+  String home = Compiler.home_dir(), executable = x2c_get_executable();
+  String identity = Compiler.identity();
   if (home) setenv("X2C_HOME", home, 1);
   if (executable) setenv("X2C", executable, 1);
   if (identity) setenv("X2C_IDENTITY", identity, 1);
@@ -784,21 +825,21 @@ int main(int argc, char **argv) {
     return editor_request(argc - 1, argv + 1);
   }
   if (argc > 1) _run_external(argc, argv);
-  CliRequest request = cli_parse(argc, argv);
+  CliRequest request = CliRequest.parse(argc, argv);
   String diagnostics = request.diagnostics_file;
-  if (diagnostics && !diagnostics_write_json(diagnostics))
+  if (diagnostics && !Diagnostics.write_json(diagnostics))
     $report.main.diagnostics_unwritable(diagnostics);
-  if (request.command == <script> && script_prepare(request)) return 0;
+  if (request.command == <script> && request.prepare_script()) return 0;
   report_configure(
     request.quiet, request.plain, request.color_mode,
     request.verbose || request.debugging,
     request.dry_run, request.inspects());
   switch (request.command) {
     case <env>:     return _run_env(request);
-    case <install>: return install_command(request);
-    case <remove>:  return remove_command(request);
-    case <list>:    return list_command(request);
-    case <new>:     return new_command(request);
+    case <install>: return request.install();
+    case <remove>:  return request.remove_package();
+    case <list>:    return request.list_packages();
+    case <new>:     return request.new_project();
   }
   return _run_compiler(request);
 }
@@ -815,7 +856,7 @@ static int _run_compiler(CliRequest request) {
   int status = request.command == <translate>
     ? _run_translation(request, NULL, NULL) : _run_build(request);
   command.close();
-  if (request.command == <script> && !status) status = script_run(request);
+  if (request.command == <script> && !status) status = request.run_script();
   return status;
 }
 

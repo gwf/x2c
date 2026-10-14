@@ -426,7 +426,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_static_initialize_2();
 }
 
-ProjectBuild project_plan(CliRequest request){
+ProjectBuild ProjectBuild_plan(CliRequest request){
   if(! _init_guard_) _file_init_();
   Project p = _open_project(request);
   _parse_manifest(p);
@@ -438,7 +438,7 @@ ProjectBuild project_plan(CliRequest request){
   return p -> head;
 }
 
-String project_manifest(CliRequest c);
+String CliRequest_project_manifest(CliRequest c);
 
 Path Path_absolute(Path);
 
@@ -449,7 +449,7 @@ Path Path_dirname(Path);
 static Project _open_project(CliRequest request){
   Project p = Scope_calloc(1, sizeof(struct Project));
   * p =(struct Project){
-    .seen = Map_new(), .sources = request -> sources, .command = request, .path = project_manifest(request)
+    .seen = Map_new(), .sources = request -> sources, .command = request, .path = CliRequest_project_manifest(request)
   }
   ;
   if(! String_truth(p -> path)) _error(NULL, 0, _0);
@@ -463,7 +463,7 @@ Path Path_join(Path, Path);
 
 int SourceView_exists(SourceView, String);
 
-String project_manifest(CliRequest c){
+String CliRequest_project_manifest(CliRequest c){
   if(! _init_guard_) _file_init_();
   if(String_truth(c -> manifest)) return c -> manifest;
   for(Path directory = Path_absolute(_2); ;  directory = Path_dirname(directory)){
@@ -876,7 +876,7 @@ static ProjectProfile _selected_profile(Project p, ProjectTarget target, String 
 
 void Path_remove_file(Path);
 
-void host_error(List);
+void Diagnostics_host_error(List);
 
 #include "error.h"
 
@@ -911,7 +911,7 @@ static void _resolve_dependencies(Project p){
           if(_x2c_macro_selected_0 == 0){
             List volatile detail;
             detail = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_0, 0));
-            host_error(detail);
+            Diagnostics_host_error(detail);
           }
 
         }
@@ -932,7 +932,10 @@ static void _resolve_dependencies(Project p){
   List locked = _read_lock(path);
   if(_lock_satisfies(p, locked)) return;
   Array rows = Array_new();
-  for(ProjectDependency entry = p -> dependencies;  entry;  entry = entry -> next) Array_push(rows, List_var(install_require(request, entry -> name, entry -> version, _locked_row(locked, entry))));
+  for(ProjectDependency entry = p -> dependencies;  entry;  entry = entry -> next){
+    List row = _locked_row(locked, entry);
+    Array_push(rows, List_var(CliRequest_require_package(request, entry -> name, entry -> version, row)));
+  }
   _write_lock(path, Array_list_free(rows));
 }
 
@@ -1015,7 +1018,7 @@ static List _locked_row(List rows, ProjectDependency entry){
   return found;
 }
 
-void file_publish(List);
+void Path_publish_files(List);
 
 static void _write_lock(String path, List rows){
   String text = _61;
@@ -1046,7 +1049,7 @@ static void _write_lock(String path, List rows){
     }
     volatile ErrorHandler _x2c_error_handler_2 = x2c_error_catch_site_push(& _x2c_exception_frame_2, & _x2c_macro_site_2, _x2c_macro_patterns_2);
     x2c_exception_push(& _x2c_exception_frame_2);
-    if(! sigsetjmp(_x2c_exception_frame_2.env, 0)) file_publish(cons(String_var(path), cons(String_var(text), NULL)));
+    if(! sigsetjmp(_x2c_exception_frame_2.env, 0)) Path_publish_files(cons(String_var(path), cons(String_var(text), NULL)));
     else{
       x2c_exception_landed(& _x2c_exception_frame_2);
       if(x2c_exception_is_error_target(& _x2c_exception_frame_2)){
@@ -1056,7 +1059,7 @@ static void _write_lock(String path, List rows){
         if(_x2c_macro_selected_2 == 0){
           List volatile detail;
           detail = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_2, 0));
-          host_error(detail);
+          Diagnostics_host_error(detail);
         }
 
       }
@@ -1188,7 +1191,7 @@ static List _target_modules(Project p, ProjectTarget target){
   return Array_list_free(modules);
 }
 
-int is_source_file(String);
+int Path_is_x2c_source(String);
 
 static Array _target_sources(Project p, ProjectTarget target){
   if(! List_truth(target -> sources)) _error_name(p, 0, _71, target -> name);
@@ -1220,7 +1223,7 @@ static Array _target_sources(Project p, ProjectTarget target){
     Var _x2c_macro_cursor_output_9;
     while(Array_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_9))){
       path = Var_as_string(_x2c_macro_cursor_output_9);
-      if(!(is_source_file(path) || String_endswith(path, _73))) _error_name(p, 0, _74, path);
+      if(!(Path_is_x2c_source(path) || String_endswith(path, _73))) _error_name(p, 0, _74, path);
     }
 
   }
@@ -1342,7 +1345,7 @@ static List _profile_flags(Project p, ProjectProfile profile){
   );
 }
 
-int cli_dependency_pass_through(String);
+int CliRequest_dependency_option(String);
 
 static List _c_flags(Project p, List values){
   {
@@ -1352,7 +1355,7 @@ static List _c_flags(Project p, List values){
     Var _x2c_macro_cursor_output_13;
     while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_13))){
       value = Var_as_string(_x2c_macro_cursor_output_13);
-      if(cli_dependency_pass_through(value)) _error_name(p, 0, _92, value);
+      if(CliRequest_dependency_option(value)) _error_name(p, 0, _92, value);
     }
 
   }
@@ -1394,12 +1397,12 @@ static void _error_name(Project p, int line, String message, String name){
   _error(p, line, String_join(NULL, cons(String_var(message), cons(String_var(_118), cons(String_var(name), cons(String_var(_116), NULL))))));
 }
 
-void driver_error(const char *);
+void Diagnostics_driver_error(const char *);
 
-int new_command(CliRequest request){
+int CliRequest_new_project(CliRequest request){
   if(! _init_guard_) _file_init_();
   Path dir = Var_as_string(List_car(request -> inputs));
-  if(! String_truth(dir)) driver_error("new: the directory operand is empty");
+  if(! String_truth(dir)) Diagnostics_driver_error("new: the directory operand is empty");
   String name = _starter_name(dir);
   {
     ExceptionFrame _x2c_exception_frame_3;
@@ -1424,7 +1427,7 @@ int new_command(CliRequest request){
         if(_x2c_macro_selected_3 == 0){
           List volatile detail;
           detail = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_3, 0));
-          host_error(detail);
+          Diagnostics_host_error(detail);
         }
 
       }
@@ -1449,7 +1452,7 @@ Path Path_basename(Path);
 static String _starter_name(Path dir){
   String name = Path_basename(dir);
   if(String_equal(name, _2) || String_equal(name, _119) || String_equal(name, _4)) name = Path_basename(Path_absolute(dir));
-  if(! _name_ok(name)) driver_error(String_join(NULL, cons(String_var(_120), cons(String_var(name), cons(String_var(_121), NULL)))));
+  if(! _name_ok(name)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_120), cons(String_var(name), cons(String_var(_121), NULL)))));
   return name;
 }
 
@@ -1464,7 +1467,7 @@ void Path_make_dirs(Path);
 void Path_write_text(Path, String);
 
 static void _write_starter(Path dir, String name){
-  if(Path_exists(dir) &&(! Path_is_dir(dir) || List_truth(Path_list_dir(dir)))) driver_error(String_join(NULL, cons(String_var(_122), cons(String_var(dir), cons(String_var(_123), NULL)))));
+  if(Path_exists(dir) &&(! Path_is_dir(dir) || List_truth(Path_list_dir(dir)))) Diagnostics_driver_error(String_join(NULL, cons(String_var(_122), cons(String_var(dir), cons(String_var(_123), NULL)))));
   Path_make_dirs(Path_join(dir, _124));
   Path_write_text(Path_join(dir, _3), String_join(NULL, cons(String_var(_125), cons(String_var(name), cons(String_var(_126), NULL)))));
   Path_write_text(Path_join(dir, _127), _128);

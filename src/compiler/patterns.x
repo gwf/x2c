@@ -49,21 +49,22 @@ static String _converter_name(Var node) {
   if (node is <string>) return node;
   match (node)
     case %(expr ? ${$source_identifier_content(%(?binding))}):
-      return binding_identity_spelling(binding);
+      return Ast.binding_spelling(binding);
   return NULL;
 }
 
 /** Reports whether a recovered pattern value graph is fully static. */
-int match_value_is_static(Var value) {
+int Compiler.match_value_is_static(Var value) {
   if (value == <x2c-dyn>) return 0;
   if (value is not <list>) return 1;
-  foreach (Var part, value.list()) if (!match_value_is_static(part)) return 0;
+  foreach (Var part, value.list())
+    if (!Compiler.match_value_is_static(part)) return 0;
   return 1;
 }
 
 /** Reports whether a typed `Match` pattern has a fully static value graph. */
 int Compiler.match_pattern_is_static(Compiler c, List pattern) =>
-  match_value_is_static(c.match_pattern_value(pattern));
+  Compiler.match_value_is_static(c.match_pattern_value(pattern));
 
 /* match binders
 

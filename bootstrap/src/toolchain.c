@@ -290,7 +290,7 @@ static String _tool(String explicit, String name, String fallback){
 
 
 static String _recorded_tool(String name){
-  String home = home_dir();
+  String home = Compiler_home_dir();
   String volatile record = NULL;
   if(! String_truth(home)) return NULL;
   {
@@ -348,7 +348,7 @@ static String _recorded_tool(String name){
 }
 
 static void _layout(Toolchain t){
-  String home = home_dir(), stage = stage_dir();
+  String home = Compiler_home_dir(), stage = Compiler_stage_dir();
   String executable = x2c_get_executable(), prefix = home;
   if(! String_truth(prefix)) prefix = Path_dirname(String_truth(executable) ? Path_dirname(executable) : _7);
   t -> include_dir = String_join(NULL, cons(String_var(prefix), cons(String_var(_8), NULL)));
@@ -475,7 +475,7 @@ int ToolRun_wait(ToolRun execution){
   return status;
 }
 
-int tool_capture(List arguments, String * output, String * errors){
+int ToolAction_capture(List arguments, String * output, String * errors){
   if(! _init_guard_) _file_init_();
   return _capture(_captured(arguments), Var_as_string(List_car(arguments)), &((* output)), &((* errors)));
 }
@@ -603,12 +603,12 @@ int Toolchain_preprocess(Toolchain t, const char * fname, List include_dirs, con
 static int _keeps_system_includes(String cc){
   String output = NULL, errors = NULL;
   List probe = cons(String_var(cc), _62);
-  return tool_capture(probe, &(output), &(errors)) == 0 ? 1 : - 1;
+  return ToolAction_capture(probe, &(output), &(errors)) == 0 ? 1 : - 1;
 }
 
 static List _cpp_arguments(Toolchain t, List include_dirs, String macros, String depfile, String source){
   return({
-    Var _x2c_literal_part_8 = String_var(t -> cc);  List _x2c_literal_part_9 = t -> keep_system_includes > 0 ? _63 : NULL;  List _x2c_literal_part_10 = _includes(_64, cpp_include_dirs());  List _x2c_literal_part_11 = _includes(_64, include_dirs);  List _x2c_literal_part_12 = _includes(_65, default_include_dirs());  List _x2c_literal_part_13 = t -> cpp_args;  List _x2c_literal_part_14 = String_truth(macros) ? cons(_67, cons(String_var(macros), NULL)) : NULL;  cons(_x2c_literal_part_8, cons(_26, cons(_51, cons(_53, cons(_69, cons(_71, cons(_73, cons(_75, cons(_77, cons(_79, cons(_81, cons(_83, cons(_85, cons(_87, cons(_89, cons(_91, cons(_93, cons(_95, List_append(_x2c_literal_part_9, cons(_97, cons(_99, List_append(_x2c_literal_part_10, List_append(_x2c_literal_part_11, List_append(_x2c_literal_part_12, List_append(_x2c_literal_part_13, List_append(_x2c_literal_part_14, cons(_14, cons(_18, cons(String_var(depfile), cons(_20, cons(_101, cons(_103, cons(String_var(source), _106)))))))))))))))))))))))))))))))));
+    Var _x2c_literal_part_8 = String_var(t -> cc);  List _x2c_literal_part_9 = t -> keep_system_includes > 0 ? _63 : NULL;  List _x2c_literal_part_10 = _includes(_64, Compiler_cpp_include_dirs());  List _x2c_literal_part_11 = _includes(_64, include_dirs);  List _x2c_literal_part_12 = _includes(_65, Compiler_default_include_dirs());  List _x2c_literal_part_13 = t -> cpp_args;  List _x2c_literal_part_14 = String_truth(macros) ? cons(_67, cons(String_var(macros), NULL)) : NULL;  cons(_x2c_literal_part_8, cons(_26, cons(_51, cons(_53, cons(_69, cons(_71, cons(_73, cons(_75, cons(_77, cons(_79, cons(_81, cons(_83, cons(_85, cons(_87, cons(_89, cons(_91, cons(_93, cons(_95, List_append(_x2c_literal_part_9, cons(_97, cons(_99, List_append(_x2c_literal_part_10, List_append(_x2c_literal_part_11, List_append(_x2c_literal_part_12, List_append(_x2c_literal_part_13, List_append(_x2c_literal_part_14, cons(_14, cons(_18, cons(String_var(depfile), cons(_20, cons(_101, cons(_103, cons(String_var(source), _106)))))))))))))))))))))))))))))))));
   }
   );
 }
@@ -629,8 +629,9 @@ List Toolchain_search_directories(Toolchain t){
   List flags = t -> cc_args;
   String output = NULL, errors = NULL;
   List search = cons(String_var(t -> cc), List_append(flags, _123));
-  if(! tool_capture(search, &(output), &(errors))) _add_include_directories(directories, errors);
-  if(! tool_capture(cons(String_var(t -> cc), List_append(flags, _126)), &(output), &(errors))) _add_library_directories(directories, output);
+  if(! ToolAction_capture(search, &(output), &(errors))) _add_include_directories(directories, errors);
+  List arguments = cons(String_var(t -> cc), List_append(flags, _126));
+  if(! ToolAction_capture(arguments, &(output), &(errors))) _add_library_directories(directories, output);
   return Array_list_free(directories);
 }
 

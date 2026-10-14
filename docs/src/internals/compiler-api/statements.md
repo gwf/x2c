@@ -46,7 +46,7 @@ Parses one block-position declaration, statement, or macro insertion.
 The caller owns the surrounding scope; a macro insertion may return a
 `(seq ...)` node containing several block items.
 
-Source: `src/statements.x:701`
+Source: `src/statements.x:702`
 
 <a id="Compiler.parse_block_items"></a>
 #### Compiler.parse_block_items
@@ -56,7 +56,7 @@ Source: `src/statements.x:701`
 Parses block items after an already-consumed opening brace through `}` in
 a new lexical scope. `anchor_items` records statement origins.
 
-Source: `src/statements.x:744`
+Source: `src/statements.x:745`
 
 <a id="Compiler.parse_callable_body"></a>
 #### Compiler.parse_callable_body
@@ -65,7 +65,7 @@ Source: `src/statements.x:744`
 
 Parses a callable's outer block in its active parameter scope.
 
-Source: `src/statements.x:751`
+Source: `src/statements.x:752`
 
 <a id="Compiler.parse_case_body"></a>
 #### Compiler.parse_case_body
@@ -85,7 +85,7 @@ Source: `src/statements.x:475`
 Parses a compound body after its opening brace and consumes the closing
 `}`, returning an origin-anchored `(block ...)` node.
 
-Source: `src/statements.x:739`
+Source: `src/statements.x:740`
 
 <a id="Compiler.parse_governed"></a>
 #### Compiler.parse_governed
@@ -101,7 +101,7 @@ statement macro that wraps its body in braces keeps the whole group
 inside them. A later statement in the same arm follows the governed one,
 as in C.
 
-Source: `src/statements.x:619`
+Source: `src/statements.x:620`
 
 <a id="Compiler.parse_match_row_argument"></a>
 #### Compiler.parse_match_row_argument

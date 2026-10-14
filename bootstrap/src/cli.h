@@ -53,23 +53,21 @@ TargetKind;
   .offset = offsetof(struct CliRequest, field)
 #define CLI_FIELD_LIST(field) .apply = FIELD_LIST, \
   .offset = offsetof(struct CliRequest, field)
-CliRequest cli_parse(int argc, char * * argv);
+CliRequest CliRequest_parse(int argc, char * * argv);
 
 Symbol TargetKind_named(String spelling, String * refusal);
 
 TargetKind * TargetKind_of(Symbol kind);
 
-int cli_dependency_pass_through(String s);
+int CliRequest_dependency_option(String s);
 
-CliRequest cli_package_options(String path, String package);
+CliRequest CliRequest_package_options(String path, String package);
 
-List cli_response_arguments(String path);
+CliRequest CliRequest_new(Symbol command);
 
-CliRequest cli_request(Symbol command);
+int CliRequest_is_builtin(const char * word);
 
-int cli_builtin_command(const char * word);
-
-String cli_version(void);
+String Compiler_version(void);
 
 int CliRequest_inspects(CliRequest request);
 

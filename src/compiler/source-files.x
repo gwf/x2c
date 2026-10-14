@@ -16,7 +16,7 @@ int Compiler.read_source(Compiler c, String path, String volatile &text) {
 */
 String Compiler.canonical_path(Compiler c, String path) {
   if (c.sources) return Path.absolute(path);
-  String real = real_path(path);
+  String real = Path.real(path);
   return real ? real : path;
 }
 
@@ -30,7 +30,7 @@ static Map real_paths = NULL, static Scope real_paths_scope = NULL;
     `path` is NULL or does not resolve. Each spelling is resolved once per
     process.
 */
-String real_path(String path) {
+String Path.real(String path) {
   if (!path) return NULL;
   Var known = _real_paths()[path];
   if (known is <string>) return known;
@@ -42,9 +42,9 @@ String real_path(String path) {
 }
 
 /** Returns `Path.absolute(path)`, resolving an existing file through
-    `real_path`. */
-String absolute_path(String path) {
-  String real = real_path(path);
+    `Path.real`. */
+String Path.resolved_absolute(String path) {
+  String real = Path.real(path);
   return real ? real : Path.absolute(path);
 }
 
@@ -68,13 +68,13 @@ static void _real_paths_shutdown(void) {
     declarations, and generated identities spell paths this way, so they do
     not depend on where the home is installed.
 */
-String home_portable_path(String path) {
+String Compiler.portable_path(String path) {
   String prefix = %"${x2c_get_root()}/";
   return path.startswith(prefix) ? path[prefix.len():] : path;
 }
 
-/** Returns the absolute path that a `home_portable_path` spelling names. */
-String home_absolute_path(String spelling) =>
+/** Returns the absolute path that a `Compiler.portable_path` spelling names. */
+String Compiler.absolute_home_path(String spelling) =>
   spelling.startswith("/") ? spelling : %"${x2c_get_root()}/$spelling";
 
 /** Merges one translation dependency, preserving an existing content hash. */

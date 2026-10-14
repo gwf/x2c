@@ -57,7 +57,7 @@ static void _function_reports(Compiler c, List ast, List report, Map facts):
         foreach List hit in body.search(%(call (expr ? (ident ?callee))
                                            (args *))):
           count += List.equal(hit.assoc(<?callee>), report)
-        String name = binding_identity_spelling(binding)
+        String name = Ast.binding_spelling(binding)
         match (c.semantic_binding_facts()[%(method $binding)]):
           case %(?(String owner) ?(String member)):
             name = %"$owner.$member"

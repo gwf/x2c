@@ -12,11 +12,7 @@ One x2c unit's translation state and its two parses.
 
 | Function | Summary |
 | --- | --- |
-| [`absolute_path`](#absolute_path) | Returns `Path.absolute(path)`, resolving an existing file through `real_path`. |
-| [`home_absolute_path`](#home_absolute_path) | Returns the absolute path that a `home_portable_path` spelling names. |
-| [`home_portable_path`](#home_portable_path) | Returns `path` relative to the canonical x2c home when it lies below the home, otherwise `path`. |
-| [`match_value_is_static`](#match_value_is_static) | Reports whether a recovered pattern value graph is fully static. |
-| [`real_path`](#real_path) | Returns the real path of the existing file at `path`, or NULL when `path` is NULL or does not resolve. |
+| [`Compiler.absolute_home_path`](#Compiler.absolute_home_path) | Returns the absolute path that a `Compiler.portable_path` spelling names. |
 | [`Compiler.add_early`](#Compiler.add_early) | Appends a declaration the kernel generated to the unit's pending support. |
 | [`Compiler.add_init`](#Compiler.add_init) | Appends the lowered statement `stmt` to the file initialization area `phase`. |
 | [`Compiler.add_support`](#Compiler.add_support) | Appends the declaration `decl` to the unit's pending support as it is: a definition offered to every function rule, or a written one. |
@@ -49,6 +45,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.match_pattern_binders`](#Compiler.match_pattern_binders) | Returns definite binders from a typed `Match` pattern AST. |
 | [`Compiler.match_pattern_is_static`](#Compiler.match_pattern_is_static) | Reports whether a typed `Match` pattern has a fully static value graph. |
 | [`Compiler.match_pattern_value`](#Compiler.match_pattern_value) | Recovers a pattern value graph, using `x2c-dyn` for computed values. |
+| [`Compiler.match_value_is_static`](#Compiler.match_value_is_static) | Reports whether a recovered pattern value graph is fully static. |
 | [`Compiler.merge_source_declarations`](#Compiler.merge_source_declarations) | Carries declaration metadata beside a completed symbol-map merge. |
 | [`Compiler.merge_translation_dependencies`](#Compiler.merge_translation_dependencies) | Merges another translation's dependency rows into this compiler. |
 | [`Compiler.new`](#Compiler.new) | Creates a compiler with independent package and generated-name state. |
@@ -58,6 +55,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.own_diagnostics`](#Compiler.own_diagnostics) | Routes this compiler's diagnostic store through its own printer. |
 | [`Compiler.pattern_binder_declarations`](#Compiler.pattern_binder_declarations) | Builds ordinary declarations from a pattern scope's issued bindings. |
 | [`Compiler.peek`](#Compiler.peek) | Returns the non-trivia token type `steps` from parser position. |
+| [`Compiler.portable_path`](#Compiler.portable_path) | Returns `path` relative to the canonical x2c home when it lies below the home, otherwise `path`. |
 | [`Compiler.present_references`](#Compiler.present_references) | Returns the optional references proven present in this lexical path. |
 | [`Compiler.queue_declaration_effect`](#Compiler.queue_declaration_effect) | Queues a source Lisp form until declaration production needs its state. |
 | [`Compiler.read_source`](#Compiler.read_source) | Reads a source through the request view and retains exact response bytes. |
@@ -86,6 +84,8 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.tokenize`](#Compiler.tokenize) | Scans source and positions the compiler at its first non-trivia token. |
 | [`Compiler.var`](#Compiler.var) | Boxes the compiler's pointer; the caller keeps the compiler. |
 | [`Map.merge_translation_dependency`](#Map.merge_translation_dependency) | Merges one translation dependency, preserving an existing content hash. |
+| [`Path.real`](#Path.real) | Returns the real path of the existing file at `path`, or NULL when `path` is NULL or does not resolve. |
+| [`Path.resolved_absolute`](#Path.resolved_absolute) | Returns `Path.absolute(path)`, resolving an existing file through `Path.real`. |
 | [`Pending.area`](#Pending.area) | Returns the storage of the destination `area`. |
 | [`Pending.checkpoint`](#Pending.checkpoint) | Returns the mark that `restore` returns every destination to. |
 | [`Pending.initializes`](#Pending.initializes) | Whether any file initialization area holds a statement. |
@@ -97,55 +97,16 @@ One x2c unit's translation state and its two parses.
 | [`Token.skip_trivia`](#Token.skip_trivia) | Returns the first token at or after `token` that is not a space, comment, or preprocessor line. |
 | [`Var.compiler`](#Var.compiler) | Recovers the compiler pointer boxed by `Compiler.var`. |
 
-### Functions
+### `Compiler`
 
-#### absolute_path
+<a id="Compiler.absolute_home_path"></a>
+#### Compiler.absolute_home_path
 
-`String absolute_path(String path)`
+`String Compiler.absolute_home_path(String spelling)`
 
-Returns `Path.absolute(path)`, resolving an existing file through
-`real_path`.
-
-Source: `src/compiler/source-files.x:46`
-
-#### home_absolute_path
-
-`String home_absolute_path(String spelling)`
-
-Returns the absolute path that a `home_portable_path` spelling names.
+Returns the absolute path that a `Compiler.portable_path` spelling names.
 
 Source: `src/compiler/source-files.x:77`
-
-#### home_portable_path
-
-`String home_portable_path(String path)`
-
-Returns `path` relative to the canonical x2c home when it lies below the
-home, otherwise `path`. Interfaces, macro definitions, retained
-declarations, and generated identities spell paths this way, so they do
-not depend on where the home is installed.
-
-Source: `src/compiler/source-files.x:71`
-
-#### match_value_is_static
-
-`int match_value_is_static(Var value)`
-
-Reports whether a recovered pattern value graph is fully static.
-
-Source: `src/compiler/patterns.x:57`
-
-#### real_path
-
-`String real_path(String path)`
-
-Returns the real path of the existing file at `path`, or NULL when
-`path` is NULL or does not resolve. Each spelling is resolved once per
-process.
-
-Source: `src/compiler/source-files.x:33`
-
-### `Compiler`
 
 <a id="Compiler.add_early"></a>
 #### Compiler.add_early
@@ -342,7 +303,7 @@ Source: `src/compiler/source-locations.x:82`
 
 Declares pattern locals and returns their capture-token/binding pairs.
 
-Source: `src/compiler/patterns.x:88`
+Source: `src/compiler/patterns.x:89`
 
 <a id="Compiler.emitted_binding_name"></a>
 #### Compiler.emitted_binding_name
@@ -465,7 +426,7 @@ Returns definite binders from a typed `Match` pattern AST.
 
 When `possible` is non-null, stores every binder appearing on any path.
 
-Source: `src/compiler/patterns.x:77`
+Source: `src/compiler/patterns.x:78`
 
 <a id="Compiler.match_pattern_is_static"></a>
 #### Compiler.match_pattern_is_static
@@ -474,7 +435,7 @@ Source: `src/compiler/patterns.x:77`
 
 Reports whether a typed `Match` pattern has a fully static value graph.
 
-Source: `src/compiler/patterns.x:65`
+Source: `src/compiler/patterns.x:66`
 
 <a id="Compiler.match_pattern_value"></a>
 #### Compiler.match_pattern_value
@@ -484,6 +445,15 @@ Source: `src/compiler/patterns.x:65`
 Recovers a pattern value graph, using `x2c-dyn` for computed values.
 
 Source: `src/compiler/patterns.x:8`
+
+<a id="Compiler.match_value_is_static"></a>
+#### Compiler.match_value_is_static
+
+`int Compiler.match_value_is_static(Var value)`
+
+Reports whether a recovered pattern value graph is fully static.
+
+Source: `src/compiler/patterns.x:57`
 
 <a id="Compiler.merge_source_declarations"></a>
 #### Compiler.merge_source_declarations
@@ -564,7 +534,7 @@ Source: `src/compiler/lifecycle.x:20`
 Builds ordinary declarations from a pattern scope's issued bindings.
 A catch reads through its handler; a match reads its capture slots.
 
-Source: `src/compiler/patterns.x:108`
+Source: `src/compiler/patterns.x:109`
 
 <a id="Compiler.peek"></a>
 #### Compiler.peek
@@ -577,6 +547,18 @@ Zero reads the current token; positive and negative steps count forward
 and backward through non-trivia tokens. The parser cursor is unchanged.
 
 Source: `src/compiler/parsing/tokens.x:92`
+
+<a id="Compiler.portable_path"></a>
+#### Compiler.portable_path
+
+`String Compiler.portable_path(String path)`
+
+Returns `path` relative to the canonical x2c home when it lies below the
+home, otherwise `path`. Interfaces, macro definitions, retained
+declarations, and generated identities spell paths this way, so they do
+not depend on where the home is installed.
+
+Source: `src/compiler/source-files.x:71`
 
 <a id="Compiler.present_references"></a>
 #### Compiler.present_references
@@ -868,6 +850,29 @@ Source: `src/compiler/lifecycle.x:5`
 Merges one translation dependency, preserving an existing content hash.
 
 Source: `src/compiler/source-files.x:81`
+
+### `Path`
+
+<a id="Path.real"></a>
+#### Path.real
+
+`String Path.real(String path)`
+
+Returns the real path of the existing file at `path`, or NULL when
+`path` is NULL or does not resolve. Each spelling is resolved once per
+process.
+
+Source: `src/compiler/source-files.x:33`
+
+<a id="Path.resolved_absolute"></a>
+#### Path.resolved_absolute
+
+`String Path.resolved_absolute(String path)`
+
+Returns `Path.absolute(path)`, resolving an existing file through
+`Path.real`.
+
+Source: `src/compiler/source-files.x:46`
 
 ### `Pending`
 

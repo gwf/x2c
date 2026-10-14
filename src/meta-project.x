@@ -83,7 +83,7 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
   }
   _scan(h, inputs);
   String include = NULL, cc = Compiler.meta_cc(include);
-  String root = script_cache_root(), stamp = build_module_stamp();
+  String root = Compiler.cache_root(), stamp = Compiler.module_stamp();
   if (!h.owners.len() || !cc || !root || !stamp) {
     Compiler.use_meta_helper(NULL, NULL, NULL);
     return;
@@ -104,7 +104,7 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
    when an edited `lib/meta.x` it includes leaves the linked copies stale. */
 static int _support_unit(List inputs) {
   if (inputs.len() != 1) return 0;
-  String root = script_cache_root();
+  String root = Compiler.cache_root();
   return root && Path.absolute(inputs.car()).startswith(%"$root/meta/support-");
 }
 
@@ -113,7 +113,7 @@ static int _support_unit(List inputs) {
    process at a time does either, under the directory's lock. */
 static List _manifest(Helper &h) {
   Path.make_dirs(h.directory);
-  int lock = file_lock(%"${h.directory}/lock", 1);
+  int lock = Path.lock_file(%"${h.directory}/lock", 1);
   defer close(lock);
   List manifest = _current(h.directory);
   if (manifest) return manifest;
@@ -165,7 +165,7 @@ static void _scan(Helper &h, List inputs) {
     if (meta & 1) _own(h, path, owned);
     foreach (String unit, s.units) _own(h, unit, owned);
   }
-  collect_forget_provisional_entries();
+  Compiler.forget_provisional_entries();
 }
 
 static void _own(Helper &h, String path, Map owned) {
@@ -188,11 +188,11 @@ static int _file(Scan &s, String path) {
   catch %((!or not-found io-fail) *): return 0;
   text = _module_text(s, path, text);
   Tokenizer tokens = Tokenizer.new(text, <x2c>);
-  tokens.layout = is_layout_file(path);
+  tokens.layout = Path.is_layout_source(path);
   tokens.scan();
   int meta = _file_scope(s, tokens, Path.dirname(path));
   if ((meta & 1) && _compiler_owns(path) &&
-      (is_prelude_source(path) ||
+      (Compiler.is_prelude_source(path) ||
        s.c.linked_meta_definitions_current(path))) meta &= ~1;
   s.seen[path] = meta;
   return meta;
@@ -260,27 +260,27 @@ static int _marker(Token token) {
 /* The resolved entry follows the ordinary source-provider path. */
 static int _package(Scan &s, Tokenizer tokens) {
   String name = _quoted(tokens.next()), root = NULL;
-  String entry = name ? package_entry(
-    s.request.sources, s.request.package_roots(), name, root) : NULL;
+  String entry = name ? s.request.sources.package_entry(
+    s.request.package_roots(), name, root) : NULL;
   if (!entry) return 0;
   s.packages[root] = 1;
   int meta = _file(s, entry);
-  s.units.push(absolute_path(entry));
+  s.units.push(Path.resolved_absolute(entry));
   return !!meta;
 }
 
 /* An included source is read once; each meta provider joins `units`. */
 static int _include(Scan &s, String directive, String directory) {
   int angle = 0;
-  String target = preproc_include_target(directive, angle);
+  String target = Compiler.preproc_include_target(directive, angle);
   if (!target || !(target.endswith(".x") || target.endswith(".xp"))) return 0;
-  String file = collect_resolve_include(
-    s.request.sources, s.request.include_dirs, directory, target, angle);
+  String file = s.request.sources.resolve_include(
+    s.request.include_dirs, directory, target, angle);
   if (!file) return 0;
   String path = Path.absolute(file);
   int rooted = _compiler_owns(path);
   int meta = _file(s, path);
-  if (!rooted || (meta & 1)) s.units.push(absolute_path(path));
+  if (!rooted || (meta & 1)) s.units.push(Path.resolved_absolute(path));
   return !!meta;
 }
 
@@ -410,7 +410,7 @@ static List _build(Helper &h) {
     String failure = _compile(h, index, owner);
     _record(h, index++, failure);
   }
-  collect_forget_provisional_entries();
+  Compiler.forget_provisional_entries();
   return _write_manifest(h, _link(h, count));
 }
 
@@ -527,11 +527,11 @@ static String _support(Helper &h, String &failure) {
     return NULL;
   }
   String key = String.sha256(%"${h.identity}\n${text.sha256()}");
-  String directory = %"${script_cache_root()}/meta/support-$key";
+  String directory = %"${Compiler.cache_root()}/meta/support-$key";
   String object = %"$directory/meta-helper.o";
   if (Path.is_file(object)) return object;
   Path.make_dirs(directory);
-  int lock = file_lock(%"$directory/lock", 1);
+  int lock = Path.lock_file(%"$directory/lock", 1);
   defer close(lock);
   if (Path.is_file(object)) return object;
   failure = _compile_support(h, text, directory, object);
@@ -545,7 +545,7 @@ static String _compile_support(
   String source = %"$directory/meta-helper.x";
   Path.write_text(source, text);
   String printed = NULL, errors = NULL;
-  if (tool_capture(
+  if (ToolAction.capture(
     %(${x2c_get_executable()} "translate" "--out-dir" $directory $source),
     printed, errors))
     return %"cannot translate $source: ${errors.strip(NULL)}";

@@ -18,9 +18,7 @@ List Compiler_lower_cleanup(Compiler c, List node);
 
 int Compiler_static_value_is_runtime(Compiler c, List value, Map runtime);
 
-List builtin_defer_record(List record, List callback, List environment, List records);
-
-List builtin_defer_captures(List environment, List records);
+List Ast_defer_captures(List environment, List records);
 
 List Compiler_rewrite_defer_list(Compiler c, List stmts);
 

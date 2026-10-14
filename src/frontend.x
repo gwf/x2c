@@ -264,7 +264,7 @@ static String _input_name(Compiler c, String filename) {
   if (!filename.startswith("/")) return filename;
   String canonical = %"${c.canonical_path(Path.dirname(filename))}/${
     Path.basename(filename)}";
-  return home_portable_path(canonical) != canonical ? canonical : filename;
+  return Compiler.portable_path(canonical) != canonical ? canonical : filename;
 }
 
 /* A unit reads the runtime prelude unless it is `lib/x2c.x`, and the
@@ -353,7 +353,7 @@ static List _unit_private_rows(Compiler c, Map globs) {
   String unit = c.canonical_path(c.filename);
   foreach (Var (key, owner), globs)
     match (key) case %("unit-static" ?name): {
-      String path = home_absolute_path(owner.list().car());
+      String path = Compiler.absolute_home_path(owner.list().car());
       if (c.canonical_path(path) == unit) continue;
       rows.push(_unit_private_row(globs, %($name)));
       rows.push(_unit_private_row(globs, %(self $name)));
@@ -439,7 +439,7 @@ static String _take_line_markers(Compiler cpp, String text) {
   foreach (String line, text.split("\n")) {
     int number = 0;
     String file = line.startswith("#")
-                ? preproc_marker_file(line, number) : NULL;
+                ? Compiler.preproc_marker_file(line, number) : NULL;
     if (!file) {
       kept.push(line);
       position += line.len() + 1;
@@ -481,11 +481,11 @@ int Frontend.preload_macro_libraries(Frontend frontend) {
   if (shared && !_preload_meta_surface(frontend, shared)) {
     shared.destroy();
     c.publish_macro_library(NULL);
-    collect_forget_provisional_entries();
+    Compiler.forget_provisional_entries();
     return 0;
   }
   c.publish_macro_library(shared);
-  collect_forget_provisional_entries();
+  Compiler.forget_provisional_entries();
   return 1;
 }
 
@@ -529,7 +529,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared) {
     compile-time calls.
 */
 void Frontend.load_support(CliRequest request) {
-  interface_configure(request.out_dir, request.no_interfaces);
+  Compiler.configure_interfaces(request.out_dir, request.no_interfaces);
   Compiler.select_native_modules(
     request.native_modules.map(
       %!(String path) => Compiler.load_native_module(path)));
@@ -543,7 +543,8 @@ Frontend Frontend.new(CliRequest request) {
   Frontend.load_support(request);
   Frontend f = Scope.calloc(1, sizeof(struct Frontend));
   f.request = request;
-  f.include_dirs = request.include_dirs.append(default_include_dirs());
+  f.include_dirs =
+    request.include_dirs.append(Compiler.default_include_dirs());
   f.toolchain = Toolchain.new(request);
   Compiler.use_meta_toolchain(
     Toolchain.meta_cc(request.meta_cc), f.toolchain.include_dir);

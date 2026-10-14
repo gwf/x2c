@@ -504,12 +504,12 @@ static String _process_suffix(void){
   return String_printf(_3, (long) getpid());
 }
 
-void driver_error(const char *);
+void Diagnostics_driver_error(const char *);
 
 Build CliRequest_prepare(CliRequest request){
   if(! _init_guard_) _file_init_();
   _add_extensions(request);
-  if(! List_truth(request -> inputs)) driver_error("build requires input operands or a project manifest");
+  if(! List_truth(request -> inputs)) Diagnostics_driver_error("build requires input operands or a project manifest");
   Build b = Scope_calloc(1, sizeof(struct Build));
   * b =(struct Build){
     .request = request, .c_sources = Array_new(), .gen_dirs = Array_new(), .units = Array_new(), .native_inputs = Array_new(), .objects = Array_new()
@@ -554,9 +554,9 @@ static void _add_extensions(CliRequest request){
 
 }
 
-void build_check_input(String input);
+void Build_require_input(String input);
 
-int is_source_file(String);
+int Path_is_x2c_source(String);
 
 static void _add_inputs(Build b){
   CliRequest request = b -> request;
@@ -568,12 +568,12 @@ static void _add_inputs(Build b){
     while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
       input = Var_as_string(_x2c_macro_cursor_output_1);
       {
-        if(! request -> dry_run) build_check_input(input);
-        if(is_source_file(input)) b -> xlat_n ++;
+        if(! request -> dry_run) Build_require_input(input);
+        if(Path_is_x2c_source(input)) b -> xlat_n ++;
         else if(String_endswith(input, _7)) Array_push(b -> c_sources, String_var(input));
         else if(String_endswith(input, _8) || String_endswith(input, _9)) Array_push(b -> native_inputs, String_var(input));
-        else driver_error(String_join(NULL, cons(String_var(_10), cons(String_var(input), NULL))));
-        if(request -> kind == 1381098885964356 && String_endswith(input, _9)) driver_error(String_join(NULL, cons(String_var(_11), cons(String_var(input), NULL))));
+        else Diagnostics_driver_error(String_join(NULL, cons(String_var(_10), cons(String_var(input), NULL))));
+        if(request -> kind == 1381098885964356 && String_endswith(input, _9)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_11), cons(String_var(input), NULL))));
       }
 
     }
@@ -588,16 +588,16 @@ int Path_is_dir(Path);
 
 int Path_exists(Path);
 
-void build_check_input(String input){
+void Build_require_input(String input){
   if(! _init_guard_) _file_init_();
-  if(! String_truth(input)) driver_error("input path is empty");
+  if(! String_truth(input)) Diagnostics_driver_error("input path is empty");
   if(Path_is_file(input)) return;
   if(Path_is_dir(input)){
     fprintf(stderr, "x2c: error: input is a directory: %s\n", input);
     fputs("note: pass source files, use a shell wildcard, or define a " "manifest target\n", stderr);
     exit(2);
   }
-  if(Path_exists(input)) driver_error(String_join(NULL, cons(String_var(_12), cons(String_var(input), NULL))));
+  if(Path_exists(input)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_12), cons(String_var(input), NULL))));
   fprintf(stderr, "x2c: error: input does not exist: %s\n", input);
   if(strpbrk(input, "*?[")) fputs("note: x2c does not expand wildcard operands\n", stderr);
   exit(2);
@@ -605,9 +605,9 @@ void build_check_input(String input){
 
 static void _check_compile_only(Build b){
   List inputs = b -> request -> inputs;
-  if(Array_truth(b -> native_inputs)) driver_error("compile-only accepts only .x and .c inputs");
-  if(List_truth(List_cdr(inputs)) && String_truth(b -> request -> output)) driver_error("--output is ambiguous with multiple compile-only inputs");
-  if(List_truth(List_cdr(inputs)) && ! String_truth(b -> request -> build_dir)) driver_error("multiple compile-only inputs require --build-dir");
+  if(Array_truth(b -> native_inputs)) Diagnostics_driver_error("compile-only accepts only .x and .c inputs");
+  if(List_truth(List_cdr(inputs)) && String_truth(b -> request -> output)) Diagnostics_driver_error("--output is ambiguous with multiple compile-only inputs");
+  if(List_truth(List_cdr(inputs)) && ! String_truth(b -> request -> build_dir)) Diagnostics_driver_error("multiple compile-only inputs require --build-dir");
 }
 
 static void _select_tools(Build b){
@@ -632,7 +632,7 @@ Path Path_temp_dir(void);
 
 void Path_make_dirs(Path);
 
-void host_error(List);
+void Diagnostics_host_error(List);
 
 #include "error.h"
 
@@ -688,7 +688,7 @@ static void _make_work_dirs(Build b){
         if(_x2c_macro_selected_0 == 0){
           List volatile detail;
           detail = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_0, 0));
-          host_error(detail);
+          Diagnostics_host_error(detail);
         }
 
       }
@@ -716,7 +716,7 @@ static String _kept_dir(CliRequest request){
 static void _check_runtime(Build b){
   if(b -> request -> compile_only || b -> request -> kind != 404971770155786) return;
   String runtime = b -> toolchain -> runtime_lib;
-  if(access(runtime, R_OK)) driver_error(String_join(NULL, cons(String_var(_26), cons(String_var(runtime), NULL))));
+  if(access(runtime, R_OK)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_26), cons(String_var(runtime), NULL))));
 }
 
 String Build_generated_dir(Build b, String input){
@@ -803,15 +803,15 @@ void Build_record_translation(Build b, String input, String directory){
 void Build_add_generated(Build b, String input, String directory){
   if(! _init_guard_) _file_init_();
   String source = _unit_file(directory, input, _7);
-  b -> gen_bytes += report_file_bytes(source);
-  b -> gen_bytes += report_file_bytes(_unit_file(directory, input, _49));
+  b -> gen_bytes += Path_regular_bytes(source);
+  b -> gen_bytes += Path_regular_bytes(_unit_file(directory, input, _49));
   Array_push(b -> c_sources, String_var(source));
   Array_push(b -> units, String_var(input));
   if(!(Array_contains(b -> gen_dirs, String_var(directory)))) Array_push(b -> gen_dirs, String_var(directory));
   _link_packages(b, input, directory);
 }
 
-String package_directory(List, String);
+String Compiler_package_directory(List, String);
 
 static void _link_packages(Build b, String input, String directory){
   List roots = CliRequest_package_roots(b -> request);
@@ -827,7 +827,7 @@ static void _link_packages(Build b, String input, String directory){
       dependency = Var_as_string(_x2c_macro_cursor_output_5);
       {
         if(String_startswith(dependency, _50) || String_equal(dependency, self) || String_equal(dependency, input)) continue;
-        String package = package_directory(roots, dependency);
+        String package = Compiler_package_directory(roots, dependency);
         if(String_truth(package) && ! _package_built_here(b, roots, package)) _link_package(b, package);
       }
 
@@ -837,7 +837,7 @@ static void _link_packages(Build b, String input, String directory){
 
 }
 
-int package_source(String, String);
+int Compiler_is_package_source(String, String);
 
 static int _package_built_here(Build b, List roots, String package){
   {
@@ -849,7 +849,7 @@ static int _package_built_here(Build b, List roots, String package){
       input = Var_as_string(_x2c_macro_cursor_output_6);
       {
         String source = Path_absolute(input);
-        if(String_equal(package_directory(roots, source), package) && package_source(package, source)) return 1;
+        if(String_equal(Compiler_package_directory(roots, source), package) && Compiler_is_package_source(package, source)) return 1;
       }
 
     }
@@ -867,23 +867,23 @@ static void _link_package(Build b, String package){
   String response = String_join(NULL, cons(String_var(builds), cons(String_var(_2), cons(String_var(name), cons(String_var(_54), NULL)))));
   CliRequest native = NULL;
   if(! access(response, F_OK)){
-    native = cli_package_options(response, package);
+    native = CliRequest_package_options(response, package);
     b -> toolchain -> cc_args = List_append(b -> toolchain -> cc_args, native -> cc_args);
   }
   if(b -> request -> kind == 1381098885964356) return;
   String archive = String_join(NULL, cons(String_var(builds), cons(String_var(_55), cons(String_var(name), cons(String_var(_17), NULL)))));
-  if(access(archive, R_OK)) driver_error(String_join(NULL, cons(String_var(_56), cons(String_var(name), cons(String_var(_57), cons(String_var(archive), NULL))))));
-  if(! native) driver_error(String_join(NULL, cons(String_var(_56), cons(String_var(name), cons(String_var(_57), cons(String_var(response), NULL))))));
+  if(access(archive, R_OK)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_56), cons(String_var(name), cons(String_var(_57), cons(String_var(archive), NULL))))));
+  if(! native) Diagnostics_driver_error(String_join(NULL, cons(String_var(_56), cons(String_var(name), cons(String_var(_57), cons(String_var(response), NULL))))));
   Array_push(b -> native_inputs, String_var(archive));
   b -> toolchain -> ld_args = List_append(b -> toolchain -> ld_args, native -> ld_args);
 }
 
-String build_module_stamp(void);
+String Compiler_module_stamp(void);
 
 CliRequest Build_module_entry(Build b){
   if(! _init_guard_) _file_init_();
-  String stamp = build_module_stamp();
-  if(! String_truth(stamp)) driver_error("cannot read the running compiler to stamp");
+  String stamp = Compiler_module_stamp();
+  if(! String_truth(stamp)) Diagnostics_driver_error("cannot read the running compiler to stamp");
   Path entry = String_join(NULL, cons(String_var(b -> work_dir), cons(String_var(_58), NULL)));
   _write_entry(entry, Array_list(b -> units), String_join(NULL, cons(String_var(_59), cons(String_var(stamp), cons(String_var(_60), NULL)))));
   return _entry_request(b, cons(String_var(entry), NULL));
@@ -981,7 +981,7 @@ static void _write_entry(Path entry, List units, String exports){
         if(_x2c_macro_selected_1 == 0){
           List volatile detail;
           detail = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_1, 0));
-          host_error(detail);
+          Diagnostics_host_error(detail);
         }
 
       }
@@ -1211,9 +1211,9 @@ static String _compile_command(Build b, CcJob job){
   return String_join(NULL, cons(String_var(_85), cons(String_var(Var_json(Map_var(entry))), NULL)));
 }
 
-void file_publish(List);
+void Path_publish_files(List);
 
-int compile_commands_write(String path, Array commands){
+int Build_write_commands(String path, Array commands){
   if(! _init_guard_) _file_init_();
   String text = String_join(NULL, cons(String_var(_86), cons(String_var(String_join(_87, Array_list(commands))), cons(String_var(_88), NULL))));
   {
@@ -1230,7 +1230,7 @@ int compile_commands_write(String path, Array commands){
     volatile ErrorHandler _x2c_error_handler_2 = x2c_error_catch_site_push(& _x2c_exception_frame_2, & _x2c_macro_site_2, _x2c_macro_patterns_2);
     x2c_exception_push(& _x2c_exception_frame_2);
     if(! sigsetjmp(_x2c_exception_frame_2.env, 0)){
-      file_publish(cons(String_var(path), cons(String_var(text), NULL)));
+      Path_publish_files(cons(String_var(path), cons(String_var(text), NULL)));
       report_line(28680520, String_join(NULL, cons(String_var(_89), cons(String_var(path), NULL))));
       {
         int _x2c_return_value_0 = 1;
@@ -1556,7 +1556,7 @@ static int _mapped_debug(Build b){
 
 }
 
-String file_identity(String);
+String Path_content_identity(String);
 
 static int _archive_extensions(Build b){
   if(! List_truth(b -> request -> extensions) || b -> request -> dry_run) return 0;
@@ -1593,7 +1593,7 @@ static int _archive_extensions(Build b){
     }
 
   }
-  String identity = file_identity(b -> output);
+  String identity = Path_content_identity(b -> output);
   return ToolAction_run(Toolchain_archive_action(b -> toolchain, String_join(NULL, cons(String_var(directory), cons(String_var(_2), cons(String_var(identity), cons(String_var(_17), NULL))))), Array_list_free(objects)));
 }
 
@@ -1639,7 +1639,7 @@ void Build_report_success(Build b){
   }
   ));
   if(b -> request -> compile_only) return;
-  String size = report_size(report_file_bytes(b -> output));
+  String size = report_size(Path_regular_bytes(b -> output));
   report_line(28680520, String_join(NULL, cons(String_var(_148), cons(String_var(b -> output), cons(String_var(_146), cons(String_var(size), cons(String_var(_147), NULL)))))));
   if(_mapped_debug(b)) report_line(28680520, String_join(NULL, cons(String_var(_149), cons(String_var(b -> output), cons(String_var(_96), NULL)))));
 }
@@ -1726,7 +1726,7 @@ void Build_cleanup(Build b, int success){
 
 }
 
-List compiler_prelude_sources(void);
+List Compiler_prelude_sources(void);
 
 List Build_script_helpers(Build b){
   if(! _init_guard_) _file_init_();
@@ -1735,7 +1735,7 @@ List Build_script_helpers(Build b){
     Var _x2c_literal_part_18 = String_var(String_join(NULL, cons(String_var(root), cons(String_var(_164), NULL))));  Var _x2c_literal_part_19 = String_var(String_join(NULL, cons(String_var(root), cons(String_var(_165), NULL))));  Var _x2c_literal_part_20 = String_var(String_join(NULL, cons(String_var(root), cons(String_var(_166), NULL))));  cons(_x2c_literal_part_18, cons(_x2c_literal_part_19, cons(_x2c_literal_part_20, NULL)));
   }
   ), List_map(CliRequest_package_roots(b -> request), _x2c_func_handle_0));
-  List prelude = List_map(compiler_prelude_sources(), ({
+  List prelude = List_map(Compiler_prelude_sources(), ({
     Var _x2c_lambda_capture_value_0 = String_var(root);  struct _x2c_lambda_context_0 _x2c_lambda_context_1 ={
       _x2c_lambda_capture_value_0
     }
@@ -1752,7 +1752,7 @@ List Build_script_helpers(Build b){
     while(List_try_next(_x2c_macro_object_22, &(_x2c_macro_cursor_22), &(_x2c_macro_cursor_output_22))){
       path = Var_as_string(_x2c_macro_cursor_output_22);
       {
-        if(String_startswith(path, _50) || ! is_source_file(path) || Array_contains(candidates, String_var(path)) || List_contains(prelude, String_var(path))) continue;
+        if(String_startswith(path, _50) || ! Path_is_x2c_source(path) || Array_contains(candidates, String_var(path)) || List_contains(prelude, String_var(path))) continue;
         if(List_any(excluded, ({
           Var _x2c_lambda_capture_value_1 = String_var(path);  struct _x2c_lambda_context_2 _x2c_lambda_context_3 ={
             _x2c_lambda_capture_value_1
@@ -2083,13 +2083,13 @@ static uint64_t _state_entry(uint64_t hash, String path, int * ok){
   return _state_text(_state_text(hash, path), time);
 }
 
-String compiler_identity(void);
+String Compiler_identity(void);
 
 static uint64_t _state_base(CliRequest request, String tool, int * ok){
   uint64_t hash = FNV_OFFSET_BASIS;
   hash = _state_text(hash, _213);
   hash = _state_text(hash, request -> state_seed);
-  String compiler = compiler_identity();
+  String compiler = Compiler_identity();
   if(! String_truth(compiler))(* ok) = 0;
   hash = _state_text(hash, compiler);
   hash = _state_tool(hash, tool, &((* ok)));
@@ -2141,10 +2141,10 @@ static uint64_t _state_file(uint64_t hash, String path, int * ok){
   return fnv_file(_state_text(hash, path), path, &((* ok)));
 }
 
-String find_program(String);
+String Env_find_program(String);
 
 static uint64_t _state_tool(uint64_t hash, String tool, int * ok){
-  String path = String_contains(tool, _53) ? tool : find_program(tool);
+  String path = String_contains(tool, _53) ? tool : Env_find_program(tool);
   if(String_truth(path)) return _state_file(hash, path, &((* ok)));
   (* ok) = 0;
   return _state_text(hash, tool);
@@ -2323,7 +2323,7 @@ static void _state_write_lines(String path, uint64_t hash, List lines){
     }
     volatile ErrorHandler _x2c_error_handler_7 = x2c_error_catch_site_push(& _x2c_exception_frame_9, & _x2c_macro_site_7, _x2c_macro_patterns_7);
     x2c_exception_push(& _x2c_exception_frame_9);
-    if(! sigsetjmp(_x2c_exception_frame_9.env, 0)) file_publish(cons(String_var(path), cons(String_var(text), NULL)));
+    if(! sigsetjmp(_x2c_exception_frame_9.env, 0)) Path_publish_files(cons(String_var(path), cons(String_var(text), NULL)));
     else{
       x2c_exception_landed(& _x2c_exception_frame_9);
       if(x2c_exception_is_error_target(& _x2c_exception_frame_9)){

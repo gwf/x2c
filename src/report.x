@@ -22,6 +22,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "path.x"
 #include "process.x"
 
 // reporter state
@@ -77,15 +78,6 @@ static int _use_color(int plain, Symbol mode, int terminal) {
 
 /** Returns whether stable completion receipts are currently enabled. */
 int report_receipts(void) => report.receipts;
-
-/** Reports whether a parent Make recipe runs this process, which `MAKELEVEL`
-    set to a positive count shows. Parallel recipes share one terminal and
-    one job budget without sharing reporter state.
-*/
-int report_make_owned(void) {
-  String level = Env.get("MAKELEVEL");
-  return level.is_digit() && atol(level) > 0;
-}
 
 // the progress line
 
@@ -254,7 +246,7 @@ unsigned long report_now_us(void) {
 /** Returns the size of a regular file.
     NULL, a failed `stat`, or a non-regular path returns zero.
 */
-unsigned long long report_file_bytes(String path) {
+unsigned long long Path.regular_bytes(String path) {
   struct stat info;
   if (!path || stat(path, &info) || !S_ISREG(info.st_mode)) return 0;
   return (unsigned long long) info.st_size;

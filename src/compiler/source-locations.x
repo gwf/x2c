@@ -61,7 +61,7 @@ static List _source_range(Compiler c, Token first, Token after) {
           last.type == <preproc>)) last--;
   // A module member's range counts from the start of the member.
   int start = first.pos;
-  String path = absolute_path(c.text_source(first.pos, start));
+  String path = Path.resolved_absolute(c.text_source(first.pos, start));
   if (!c.line_markers && !(path in c.source_texts))
     c.source_texts[path] = c.text;
   return %($path $start ${start + last.pos + last.len - first.pos});
@@ -73,7 +73,7 @@ static List _source_range(Compiler c, Token first, Token after) {
 void Compiler.record_source_reference(
   Compiler c, List binding, Type type, Token first, Token after) {
   if (!c.source_facts || !c.source_primary || c.shallow || c.macro_holes ||
-      !binding_identity_try_parts(binding, NULL, NULL)) return;
+      !Ast.try_binding(binding, NULL, NULL)) return;
   List range = _source_range(c, first, after);
   if (range) c.source_occurrences.push(%(@range $binding $type));
 }

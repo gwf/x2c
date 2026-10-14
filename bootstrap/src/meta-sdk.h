@@ -70,9 +70,9 @@ Code Code_register_rewrite(Code function, List pattern, List holes);
 
 Code Code_register_after_initialization(Code c, Macro shape, List holes);
 
-List builtin_foreach_bindings(List declaration);
+List Code_declared_bindings(List declaration);
 
-List meta_function_reference(String name);
+List MetaContext_function_reference(String name);
 
 Type Type_element(Type t);
 
@@ -100,7 +100,7 @@ List x2c_ident(String spelling);
 
 List x2c_binding_fresh(String role);
 
-Var builtin_foreach_unique(String stem);
+Var MetaContext_fresh_binding(String stem);
 
 Map x2c_meta_definition_hashes(void);
 
@@ -112,15 +112,15 @@ List Code_arguments(Code parameters);
 
 Code Code_parameter(Code function, String wanted);
 
-List binding_native_type(List syntax);
+List Code_native_signature(List syntax);
 
-List binding_literal_list(List values);
+List MetaContext_literal_list(List values);
 
 String Code_source_text(Var value);
 
 String x2c_embed_text(Var requested);
 
-List meta_invocation_location(void);
+List MetaContext_invocation_location(void);
 
 String x2c_invocation_file(void);
 
@@ -140,11 +140,11 @@ Code x2c_enclosing(Symbol what);
 
 void x2c_place(List where, Code code);
 
-List meta_type_description(Var value);
+List MetaContext_type_description(Var value);
 
-List meta_source_description(Var value);
+List MetaContext_source_description(Var value);
 
-List builtin_foreach_complete(List expression);
+List Code_complete_iterator(List expression);
 
 _Noreturn void MetaContext_reject(String message, List notes);
 

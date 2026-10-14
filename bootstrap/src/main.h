@@ -6,6 +6,7 @@
 #define __GUARD_0x1E27A9AE__
 
 #include "x2c.h"
+#include "private-keywords.h"
 #include "build.h"
 #include "project.h"
 #include "frontend.h"

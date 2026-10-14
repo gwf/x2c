@@ -242,5 +242,5 @@ void repl_runtime_initialize(Lisp lisp) {
     x2c_func_pointer_argument);
   lisp.eval_string($repl._values());
   lisp.eval_string($repl._runtime());
-  lisp.eval_string("(def C._globals (Map.new))");
+  lisp.eval_string("(def C.globals (Map.new))");
 }

@@ -236,7 +236,7 @@ Type Code.type(Code value) {
       return value.type_from_ast().canonicalize();
   }
   List binding = NULL;
-  if (binding_identity_try_parts(value, NULL, NULL)) binding = value;
+  if (Ast.try_binding(value, NULL, NULL)) binding = value;
   else
     match (value) {
       case $source_identifier_content(%((!set ?captured (*)) *)):
@@ -487,7 +487,7 @@ static Type _binding_type(List binding) =>
   active.expander.semantic_binding_facts()[%(type $binding)];
 
 /** Returns an expression reading each binding `declaration` declares. */
-List builtin_foreach_bindings(List declaration) {
+List Code.declared_bindings(List declaration) {
   Array result = [];
   match (declaration)
     case %((!or declare decl typedef) ? (bindings *bindings)):
@@ -515,7 +515,7 @@ List builtin_foreach_bindings(List declaration) {
     List when no function of that name is visible. This reads the symbol
     table only, so any compile-time Lisp evaluation may call it, including
     one outside a macro expansion. */
-List meta_function_reference(String name) {
+List MetaContext.function_reference(String name) {
   Compiler c = active.evaluator;
   if (!c) raise %(bad-state (operation "_x2c.function.reference"));
   Type type = NULL;
@@ -652,7 +652,7 @@ static String _binding_spelling(List value, Var syntax) {
     case %(binding ?id (!is ? type string)):
       if (!id.is_integer() || id.integer() > INT_MAX)
         $report.sdk.binding_known(value);
-  if (!binding_identity_try_parts(value, identity, spelling))
+  if (!Ast.try_binding(value, identity, spelling))
     $report.sdk.binding_identifier(syntax);
   Var registered =
     active.expander.semantic_binding_facts()[%(known $identity)];
@@ -678,7 +678,7 @@ List x2c_binding_fresh(String role) {
 }
 
 /** Returns a fresh binding whose spelling starts with `stem`. */
-Var builtin_foreach_unique(String stem) {
+Var MetaContext.fresh_binding(String stem) {
   _require_expansion("_x2c.name.unique");
   if (!stem.is_identifier())
     $report.sdk.unique_stem(stem);
@@ -763,7 +763,7 @@ Code Code.parameter(Code function, String wanted) {
 
 /** Returns the `Func` signature of the function syntax `syntax`. A native
     binding stores the same signature as an ordinary Func adapter. */
-List binding_native_type(List syntax) {
+List Code.native_signature(List syntax) {
   match (syntax)
     case %(function ?rtype ?declarator ?):
       return active.expander.func_signature(
@@ -773,7 +773,7 @@ List binding_native_type(List syntax) {
 
 /** Returns `values`, such as a Lisp-built signature, as a cached literal
     of the expanding unit. */
-List binding_literal_list(List values) =>
+List MetaContext.literal_list(List values) =>
   active.expander.cache_literal_list(values);
 
 static Var _symbol_set(List values) {
@@ -915,7 +915,7 @@ static int _literal_string(Var syntax, String &value) {
 // invocations and diagnostics
 
 /** Returns the location of the active macro invocation. */
-List meta_invocation_location(void) {
+List MetaContext.invocation_location(void) {
   if (!active.expander || !active.site)
     $report.sdk.invocation_missing();
   return active.expander.token_location(active.site);
@@ -923,15 +923,15 @@ List meta_invocation_location(void) {
 
 /** Answers `x2c.invocation.file`, declared in `lib/meta.x`. */
 String x2c_invocation_file(void) =>
-  meta_invocation_location().assoc(<file>);
+  MetaContext.invocation_location().assoc(<file>);
 
 /** Answers `x2c.invocation.line`, declared in `lib/meta.x`. */
 int x2c_invocation_line(void) =>
-  meta_invocation_location().assoc(<line>);
+  MetaContext.invocation_location().assoc(<line>);
 
 /** Answers `x2c.invocation.column`, declared in `lib/meta.x`. */
 int x2c_invocation_column(void) =>
-  meta_invocation_location().assoc(<column>);
+  MetaContext.invocation_location().assoc(<column>);
 
 /** Answers `x2c.diagnostic.fail`, declared in `lib/meta.x`. */
 void x2c_diagnostic_fail(String message, List notes) {
@@ -996,7 +996,7 @@ void x2c_place(List where, Code code) {
     none. `K` is `struct`, `union`, `enum`, `pointer`, `scalar`, or `other`,
     `F` lists the `(name type)` rows of a struct or union's named fields,
     and `M` the names of its direct dotted methods. */
-List meta_type_description(Var value) {
+List MetaContext.type_description(Var value) {
   Type type = Code.type(value);
   Type shape = Type.resolve(type);
   String name = "";
@@ -1037,7 +1037,7 @@ static int _symbol_words(List type) {
 /** Returns what a `meta` parameter declared `Source` receives for the
     captured syntax `value`: `((text T) (file F) (syntax value))`, where `T`
     is the text the developer wrote and `F` the file it is in. */
-List meta_source_description(Var value) {
+List MetaContext.source_description(Var value) {
   String text = Code.source_text(value);
   List source = active.captures[((ulong) value.u64)];
   return %((text $text) (file ${source.cadr()}) (syntax $value));
@@ -1046,7 +1046,7 @@ List meta_source_description(Var value) {
 // built-in algorithm operations
 
 /** Returns `expression` with the iterator chain `foreach` reads completed. */
-List builtin_foreach_complete(List expression) {
+List Code.complete_iterator(List expression) {
   _require_expansion("private foreach iterator completion");
   return active.expander.complete_iter_chain(expression);
 }
@@ -1079,9 +1079,9 @@ static void _reject_value(String message, Var value) {
 void Compiler.bind_sdk_primitives(Lisp lisp) {
   $lisp.bind(lisp, "_x2c.meta.linked.hashes", _linked_hashes);
   $lisp.bind(lisp, "_x2c.prelude.linked", _linked_prelude);
-  $lisp.bind(lisp, "_x2c.function.reference", meta_function_reference);
-  $lisp.bind(lisp, "_x2c.function.native-type", binding_native_type);
-  $lisp.bind(lisp, "_x2c.literal.list", binding_literal_list);
+  $lisp.bind(lisp, "_x2c.function.reference", MetaContext.function_reference);
+  $lisp.bind(lisp, "_x2c.function.native-type", Code.native_signature);
+  $lisp.bind(lisp, "_x2c.literal.list", MetaContext.literal_list);
   $lisp.bind(lisp, "_x2c.native-meta.targets", _native_targets);
   $lisp.bind(lisp, "_x2c.native-meta.declared", _declared_targets);
   $lisp.bind(lisp, "_x2c.symbol-set", _symbol_set);

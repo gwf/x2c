@@ -99,7 +99,7 @@ static String _tool(String explicit, String name, String fallback) {
 }
 
 static String _recorded_tool(String name) {
-  String home = home_dir(), record = NULL;
+  String home = Compiler.home_dir(), record = NULL;
   if (!home) return NULL;
   try record = Path.read_text(%"$home/lib/x2c/toolchain");
   catch %(not-found *): {}
@@ -115,7 +115,7 @@ static String _recorded_tool(String name) {
    runtime.
 */
 static void _layout(Toolchain t) {
-  String home = home_dir(), stage = stage_dir();
+  String home = Compiler.home_dir(), stage = Compiler.stage_dir();
   String executable = x2c_get_executable(), prefix = home;
   if (!prefix)
     prefix = Path.dirname(executable ? Path.dirname(executable) : ".");
@@ -295,7 +295,7 @@ int ToolRun.wait(ToolRun execution) {
     and returns its shell-style status. A tool that cannot start returns 127
     and leaves the reason in `errors`.
 */
-int tool_capture(List arguments, String &output, String &errors) =>
+int ToolAction.capture(List arguments, String &output, String &errors) =>
   _capture(_captured(arguments), arguments.car(), output, errors);
 
 static int _capture(
@@ -375,7 +375,7 @@ int Toolchain.preprocess(
 static int _keeps_system_includes(String cc) {
   String output = NULL, errors = NULL;
   List probe = %($cc "-E" "-x" "c" "-fkeep-system-includes" "/dev/null");
-  return tool_capture(probe, output, errors) == 0 ? 1 : -1;
+  return ToolAction.capture(probe, output, errors) == 0 ? 1 : -1;
 }
 
 static List _cpp_arguments(
@@ -388,9 +388,9 @@ static List _cpp_arguments(
     "-D__restrict=" "-D__extension__=" "-Wno-unicode"
     "-Wno-invalid-pp-token"
     @{t.keep_system_includes > 0 ? %("-fkeep-system-includes") : NULL}
-    "-I" "." @{_includes("-I", cpp_include_dirs())}
+    "-I" "." @{_includes("-I", Compiler.cpp_include_dirs())}
     @{_includes("-I", include_dirs)}
-    @{_includes("-idirafter", default_include_dirs())}
+    @{_includes("-idirafter", Compiler.default_include_dirs())}
     @{t.cpp_args} @{macros ? %("-imacros" $macros) : NULL}
     "-MMD" "-MF" $depfile "-MT" "x2c-dependencies"
     "-include" $source "-");
@@ -410,9 +410,10 @@ List Toolchain.search_directories(Toolchain t) {
   List flags = t.cc_args;
   String output = NULL, errors = NULL;
   List search = %(${t.cc} @flags "-E" "-v" "-x" "c" "/dev/null");
-  if (!tool_capture(search, output, errors))
+  if (!ToolAction.capture(search, output, errors))
     _add_include_directories(directories, errors);
-  if (!tool_capture(%(${t.cc} @flags "-print-search-dirs"), output, errors))
+  List arguments = %(${t.cc} @flags "-print-search-dirs");
+  if (!ToolAction.capture(arguments, output, errors))
     _add_library_directories(directories, output);
   return directories.list_free();
 }

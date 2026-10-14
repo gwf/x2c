@@ -17,33 +17,33 @@ AstPos;
 #include "ast-rewrite.h"
 #include "grammar.h"
 #include "symbolset.h"
-List binding_identity_new(int identity, String spelling);
+List Ast_binding(int identity, String spelling);
 
-int binding_identity_try_parts(List binding, int * identity, String * spelling);
+int Ast_try_binding(List binding, int * identity, String * spelling);
 
-String binding_identity_spelling(List binding);
+String Ast_binding_spelling(List binding);
 
-List ast_prototype_declarator(List declarator);
+List Ast_prototype_declarator(List declarator);
 
 List Ast_designated(Var value);
 
 List Ast_lvalue_binding(Ast ast);
 
-String ast_addressed_identifier(Var value);
+String Ast_addressed_identifier(Var value);
 
-String ast_direct_identifier(Var value);
+String Ast_direct_identifier(Var value);
 
-String ast_indirect_identifier(Var value);
+String Ast_indirect_identifier(Var value);
 
 List Ast_written_operand(Ast node);
 
 Ast Ast_rewrite_children(Ast ast, Func per_child);
 
-int ast_contains_head(Var value, Symbol kind);
+int Ast_contains_head(Var value, Symbol kind);
 
-Var ast_replace_nodes(Var root, Map replaced);
+Var Ast_replace_nodes(Var root, Map replaced);
 
-void ast_collect_binding_references(Var node, Map referenced);
+void Ast_collect_binding_references(Var node, Map referenced);
 
 Ast Ast_without_origin(Ast ast);
 
@@ -65,7 +65,7 @@ int Symbol_binary_precedence(Symbol op);
 
 int Symbol_is_assignment_op(Symbol op);
 
-int ast_changes_left_operand(Symbol op);
+int Symbol_changes_left_operand(Symbol op);
 
 List Ast_initializer_cases(Ast ast, List * input);
 

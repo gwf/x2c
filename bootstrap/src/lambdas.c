@@ -969,7 +969,7 @@ List Compiler_bind_lambda_expression(Compiler c, Type type, List parameters, Lis
 
 Map Compiler_semantic_binding_facts(Compiler);
 List Sym_resolve_global(Sym, List, Type *);
-String binding_identity_spelling(List);
+String Ast_binding_spelling(List);
 List Sym_introduce(Sym, String);
 static void _prescribe(Compiler c, List row, Array prescribed, Array aliases){
   {
@@ -979,13 +979,13 @@ static void _prescribe(Compiler c, List row, Array prescribed, Array aliases){
           Type source = NULL, target_type = Var_type(captured_type);  List binding = Var_list_payload(Var_is_row(target, 11, 7, 1) ? List_var(Sym_lookup(c -> sym, cons(target, NULL), &(source))) : target);  if(List_contains(Type_list(target_type), Symbol_var(917238582723620))){
             Var stored;  if(! List_truth(Type_list(source))){
               if(Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_11, cons(List_var(binding), NULL))), &(stored))) source = Var_type(stored);  else{
-                Type global_type = NULL;  List global = Sym_resolve_global(c -> sym, cons(String_var(binding_identity_spelling(binding)), NULL), &(global_type));  if(List_equal(global, binding)) source = global_type;
+                Type global_type = NULL;  List global = Sym_resolve_global(c -> sym, cons(String_var(Ast_binding_spelling(binding)), NULL), &(global_type));  if(List_equal(global, binding)) source = global_type;
               }
 
             }
             target_type = x2c_var_equal(List_car(Type_list(source)), Symbol_var(77)) ? source : List_type(cons(Symbol_var(77), Type_list(source)));
           }
-          if(! String_truth(binding_identity_spelling(binding))){
+          if(! String_truth(Ast_binding_spelling(binding))){
             binding = Sym_introduce(c -> sym, _alias_spelling(target, binding));  Array_push(aliases, List_var(cons(List_var(binding), cons(List_var(target_type), NULL))));
           }
           Array_push(prescribed, List_var(cons(_41, cons(List_var(binding), cons(List_var(target_type), cons(expression, NULL))))));
@@ -1208,7 +1208,7 @@ static List _add(Capture * k){
   else if(x2c_var_equal(List_car(Type_list(type)), Symbol_var(77))) expression =({
     Var _x2c_literal_part_12 = List_var(captured_type);  Var _x2c_literal_part_13 = List_var(cons(_40, cons(_163, cons(Macro_inserted(List_var(expression), 1, 1), NULL))));  cons(_17, cons(_x2c_literal_part_12, cons(_x2c_literal_part_13, NULL)));
   }
-  );  if(reference && Map_contains((* k).facts, List_var(cons(_425, cons(List_var(binding), NULL))))) Compiler_report_error((* k).c, 1362954, _426, (* k).c -> token, cons(String_var(String_join(NULL, cons(String_var(_427), cons(String_var(binding_identity_spelling((* k).original)), NULL)))), NULL));  return _record(&((* k)), captured_type, expression, reference);
+  );  if(reference && Map_contains((* k).facts, List_var(cons(_425, cons(List_var(binding), NULL))))) Compiler_report_error((* k).c, 1362954, _426, (* k).c -> token, cons(String_var(String_join(NULL, cons(String_var(_427), cons(String_var(Ast_binding_spelling((* k).original)), NULL)))), NULL));  return _record(&((* k)), captured_type, expression, reference);
 }
 
 static List _resolve_outside(Compiler c, List frame, Var value){
@@ -1238,7 +1238,7 @@ static List _resolve_outside(Compiler c, List frame, Var value){
 
 void Sym_join_locals(Sym, List);
 static List _record(Capture * k, Type captured_type, List expression, int reference){
-  Compiler c =(* k).c;  List captured = Sym_introduce(c -> sym, binding_identity_spelling((* k).binding));  List row = cons(_41, cons(List_var(captured), cons(List_var(captured_type), cons(List_var(expression), NULL))));  Compiler_set_fact(c, List_var((* k).key), List_var(row));  Compiler_set_fact(c, List_var(cons(_10, cons(List_var(captured), NULL))), int_var(1));  Compiler_set_fact(c, List_var(cons(_11, cons(List_var(captured), NULL))), List_var(captured_type));  Compiler_set_fact(c, List_var(cons(_424, cons(List_var(captured), NULL))), (* k).depth);  if(! Map_truth(c -> macro_holes)) Sym_join_locals(c -> sym, captured);  if(reference) Compiler_set_fact(c, List_var(cons(_428, cons(List_var(captured), NULL))), int_var(1));  else Compiler_set_fact(c, List_var(cons(_425, cons(List_var(captured), NULL))), int_var(1));  List order = cons(_407, cons((* k).scope, NULL));  Compiler_set_fact(c, List_var(order), List_var(cons(List_var(row), Var_list_payload(Map_getdefault((* k).facts, List_var(order), List_var(NULL))))));  return row;
+  Compiler c =(* k).c;  List captured = Sym_introduce(c -> sym, Ast_binding_spelling((* k).binding));  List row = cons(_41, cons(List_var(captured), cons(List_var(captured_type), cons(List_var(expression), NULL))));  Compiler_set_fact(c, List_var((* k).key), List_var(row));  Compiler_set_fact(c, List_var(cons(_10, cons(List_var(captured), NULL))), int_var(1));  Compiler_set_fact(c, List_var(cons(_11, cons(List_var(captured), NULL))), List_var(captured_type));  Compiler_set_fact(c, List_var(cons(_424, cons(List_var(captured), NULL))), (* k).depth);  if(! Map_truth(c -> macro_holes)) Sym_join_locals(c -> sym, captured);  if(reference) Compiler_set_fact(c, List_var(cons(_428, cons(List_var(captured), NULL))), int_var(1));  else Compiler_set_fact(c, List_var(cons(_425, cons(List_var(captured), NULL))), int_var(1));  List order = cons(_407, cons((* k).scope, NULL));  Compiler_set_fact(c, List_var(order), List_var(cons(List_var(row), Var_list_payload(Map_getdefault((* k).facts, List_var(order), List_var(NULL))))));  return row;
 }
 
 List Ast_written_operand(Ast);
@@ -1284,7 +1284,7 @@ void Compiler_check_lambda_captures(Compiler c, List ast){
 
 List Ast_lvalue_binding(Ast);
 static void _require_capture_lvalue(Compiler c, List target){
-  List binding = Ast_lvalue_binding(target);  if(List_truth(binding) && Map_contains(Compiler_semantic_binding_facts(c), List_var(cons(_425, cons(List_var(binding), NULL))))) Compiler_report_error(c, 1362954, _429, c -> token, cons(String_var(String_join(NULL, cons(String_var(_427), cons(String_var(binding_identity_spelling(binding)), NULL)))), NULL));
+  List binding = Ast_lvalue_binding(target);  if(List_truth(binding) && Map_contains(Compiler_semantic_binding_facts(c), List_var(cons(_425, cons(List_var(binding), NULL))))) Compiler_report_error(c, 1362954, _429, c -> token, cons(String_var(String_join(NULL, cons(String_var(_427), cons(String_var(Ast_binding_spelling(binding)), NULL)))), NULL));
 }
 
 int Type_function_parts(Type, List *, Type *);

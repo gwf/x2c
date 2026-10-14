@@ -12,8 +12,8 @@ Host preprocessing, compilation, archive, and link actions.
 
 | Function | Summary |
 | --- | --- |
-| [`tool_capture`](#tool_capture) | Runs the host tool `arguments` without a shell, captures both streams, and returns its shell-style status. |
 | [`ToolAction.as_program`](#ToolAction.as_program) | Inherits the standard streams and suppresses the failure summary. |
+| [`ToolAction.capture`](#ToolAction.capture) | Runs the host tool `arguments` without a shell, captures both streams, and returns its shell-style status. |
 | [`ToolAction.new`](#ToolAction.new) | Creates a `Scope`-owned action that reports nonzero status by default. |
 | [`ToolAction.run`](#ToolAction.run) | Starts and waits for the action, returning its final status. |
 | [`ToolAction.start`](#ToolAction.start) | Starts the action without a shell and returns a `Scope`-owned execution. |
@@ -30,18 +30,6 @@ Host preprocessing, compilation, archive, and link actions.
 | [`Toolchain.preprocess_action`](#Toolchain.preprocess_action) | Builds the preprocessor action whose output identifies an object. |
 | [`Toolchain.search_directories`](#Toolchain.search_directories) | Returns the directories the C compiler searches for headers and libraries without explicit options, as it reports them, plus the `lib` directory beside each reported `include` directory. |
 
-### Functions
-
-#### tool_capture
-
-`int tool_capture(List arguments, String &output, String &errors)`
-
-Runs the host tool `arguments` without a shell, captures both streams,
-and returns its shell-style status. A tool that cannot start returns 127
-and leaves the reason in `errors`.
-
-Source: `src/toolchain.x:298`
-
 ### `ToolAction`
 
 <a id="ToolAction.as_program"></a>
@@ -52,6 +40,17 @@ Source: `src/toolchain.x:298`
 Inherits the standard streams and suppresses the failure summary.
 
 Source: `src/toolchain.x:152`
+
+<a id="ToolAction.capture"></a>
+#### ToolAction.capture
+
+`int ToolAction.capture(List arguments, String &output, String &errors)`
+
+Runs the host tool `arguments` without a shell, captures both streams,
+and returns its shell-style status. A tool that cannot start returns 127
+and leaves the reason in `errors`.
+
+Source: `src/toolchain.x:298`
 
 <a id="ToolAction.new"></a>
 #### ToolAction.new

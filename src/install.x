@@ -60,7 +60,7 @@ static macro Stmt $report.install.package_missing(
   _error(%"no package '${$name}' for ${$platform} in ${$location}");
 
 static macro Stmt $report.install.home_missing(Expr $command) =>
-  driver_error(
+  Diagnostics.driver_error(
     %"${$command}: no x2c home: install the compiler or set X2C_HOME");
 
 static macro Stmt $report.install.tool_failed(
@@ -75,10 +75,10 @@ static macro Stmt $report.install.archive_shape(Expr $tarball) =>
   _error(%"${$tarball} must contain one package directory");
 
 static macro Stmt $report.install.remove_missing(Expr $name) =>
-  driver_error(%"remove: no installed package '${$name}'");
+  Diagnostics.driver_error(%"remove: no installed package '${$name}'");
 
 static macro Stmt $report.install.remove_unmanaged(Expr $target) =>
-  driver_error(
+  Diagnostics.driver_error(
     %"remove: ${$target} is not an installed package; remove it by hand");
 
 static macro Stmt $report.install.lock_waiting(Expr $packages) =>
@@ -99,8 +99,8 @@ static macro Expression $report.install.start_failed(
 // the packages lock
 
 /* The packages lock this process holds, and the staging directory it is
-   filling. `driver_error` exits without running deferred cleanup, so
-   every failing exit below releases both first. */
+   filling. `Diagnostics.driver_error` exits without running deferred cleanup,
+   so every failing exit below releases both first. */
 static int _packages_lock = -1;
 static String _staging = NULL;
 
@@ -114,11 +114,11 @@ static String _locked_packages(String command, int quiet) {
   if (_packages_lock >= 0) return packages;
   try packages.make_dirs();
   catch %(io-fail *detail): _host_error(detail);
-  int held = file_lock(lock, 0);
+  int held = Path.lock_file(lock, 0);
   if (held < 0) {
     if (!quiet)
       $report.install.lock_waiting(packages);
-    held = file_lock(lock, 1);
+    held = Path.lock_file(lock, 1);
   }
   _packages_lock = held;
   return packages;
@@ -151,12 +151,12 @@ static void _release_packages(void) {
 
 static void _error(const char *message) {
   _release_packages();
-  driver_error(%"install: $message");
+  Diagnostics.driver_error(%"install: $message");
 }
 
 static void _host_error(List detail) {
   _release_packages();
-  host_error(detail);
+  Diagnostics.host_error(detail);
 }
 
 // installing
@@ -177,7 +177,7 @@ static typedef struct Install {
     verified against this compiler's version unless `--force`; a pure-x2c
     source package is built by this compiler. Failures exit with status 2.
 */
-int install_command(CliRequest request) {
+int CliRequest.install(CliRequest request) {
   Install i = _locked_install(request, request.inputs.car());
   defer _release_packages();
   i.sha256 = request.sha256;
@@ -193,7 +193,7 @@ int install_command(CliRequest request) {
     instead. The row has the `install_rows` shape, and an already satisfied
     dependency reaches no network. Failures exit with status 2.
 */
-List install_require(
+List CliRequest.require_package(
   CliRequest request, String name, String version, List locked) {
   Install i = _locked_install(request, name);
   defer _release_packages();
@@ -276,7 +276,7 @@ static void _mark_source(Install &i, String staged, String name) {
   if (!version) version = _installed_version(%"${i.packages}/$name");
   Map record = {
     "package": name, "source": i.url ? i.url : Path.absolute(i.spec),
-    "x2c_version": cli_version()
+    "x2c_version": Compiler.version()
   };
   if (version) record["version"] = version;
   if (i.sha256) record["sha256"] = i.sha256;
@@ -301,7 +301,7 @@ static void _publish(String staged, String packages, String name) {
 
 static void _check_bundle(CliRequest request, String package, String name) {
   String built = _marker_string(%"$package/BUNDLE.json", "x2c_version");
-  String current = cli_version();
+  String current = Compiler.version();
   if (!built) $report.install.bundle_version_missing(name);
   if (built != current && !request.force)
     $report.install.bundle_version_wrong(name, built, current);
@@ -450,7 +450,7 @@ static List _index_row(CliRequest request, String name, String work) {
 // host tools
 
 static String _home_packages(String command) {
-  String packages = home_packages();
+  String packages = Compiler.home_packages();
   if (!packages)
     $report.install.home_missing(command);
   return packages;
@@ -520,7 +520,7 @@ static List _files_with(String directory, String suffix) {
 /** Removes the installed package named by the request's one operand.
     A directory without an install marker is left alone. Returns 0.
 */
-int remove_command(CliRequest request) {
+int CliRequest.remove_package(CliRequest request) {
   String name = request.inputs.car();
   String target = %"${_home_packages("remove")}/$name";
   if (!name.is_identifier())
@@ -547,7 +547,7 @@ static void _check_removable(String target, String name) {
 }
 
 /** Lists installed packages as `name version kind` lines and returns 0. */
-int list_command(CliRequest request) {
+int CliRequest.list_packages(CliRequest request) {
   String packages = _home_packages("list");
   foreach (String name, Path.is_dir(packages) ? _entries(packages) : NULL) {
     String package = %"$packages/$name", kind = _installed_kind(package);

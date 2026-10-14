@@ -125,23 +125,23 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _42 = cons(_32, _41);
 }
 
-String preproc_directive(String text){
+String Compiler_preproc_directive(String text){
   if(! _init_guard_) _file_init_();
   return String_strip(String_remove_prefix(String_strip(text, " \t"), _0), " \t");
 }
 
-Symbol preproc_conditional_kind(String text){
+Symbol Compiler_preproc_conditional_kind(String text){
   if(! _init_guard_) _file_init_();
-  String directive = preproc_directive(text);
+  String directive = Compiler_preproc_directive(text);
   if(String_startswith(directive, _1)) return 1016156;
   if(String_startswith(directive, _2)) return 172060880;
   if(String_startswith(directive, _3)) return 7109834;
   return 0;
 }
 
-int preproc_open_state(String text){
+int Compiler_preproc_open_state(String text){
   if(! _init_guard_) _file_init_();
-  String line = String_replace(_directive_line(preproc_directive(text)), _4, _5);
+  String line = String_replace(_directive_line(Compiler_preproc_directive(text)), _4, _5);
   if(String_equal(line, _6) || String_equal(line, _7) || String_equal(line, _8) || String_equal(line, _9) ||(String_startswith(line, _10) && !(String_contains(line, _11)))) return 2;
   return String_equal(line, _12) || String_equal(line, _13);
 }
@@ -164,14 +164,14 @@ static int _never_defined(String name){
 
 }
 
-int preproc_branch_state(int state){
+int Compiler_preproc_branch_state(int state){
   return state == 1 ? 2 : 0;
 }
 
-String preproc_include_target(String text, int * angle){
+String Compiler_preproc_include_target(String text, int * angle){
   if(! _init_guard_) _file_init_();
   (* angle) = 0;
-  String body = preproc_directive(text);
+  String body = Compiler_preproc_directive(text);
   if(! String_startswith(body, _21)) return NULL;
   body = String_lstrip(String_remove_prefix(body, _21), " \t");
   if(! String_len(body) ||(String_getindex(body, 0) != '"' && String_getindex(body, 0) != '<')) return NULL;
@@ -181,9 +181,9 @@ String preproc_include_target(String text, int * angle){
   return close > 0 ? String_getslice(rest, (-2147483647 - 1), x2c_slice_bound(close), 1) : NULL;
 }
 
-String preproc_marker_file(String text, int * line){
+String Compiler_preproc_marker_file(String text, int * line){
   if(! _init_guard_) _file_init_();
-  String body = preproc_directive(text);
+  String body = Compiler_preproc_directive(text);
   size_t digits = 0;
   while(digits < String_len(body) && isdigit(String_getindex(body, digits))) digits ++;
   String rest = String_lstrip(String_getslice(body, x2c_slice_bound(digits), (-2147483647 - 1), 1), " \t");
@@ -195,7 +195,7 @@ String preproc_marker_file(String text, int * line){
 }
 
 static Token _macro_directive(String content, int * undefined){
-  String directive = preproc_directive(content);
+  String directive = Compiler_preproc_directive(content);
   (* undefined) = String_startswith(directive, _24);
   if(!(* undefined) && ! String_startswith(directive, _25)) return NULL;
   Tokenizer scanned = Tokenizer_new(String_remove_prefix(directive, (* undefined) ? _24 : _25), 3945159);
@@ -259,10 +259,10 @@ void Compiler_scan_conditionals(Compiler c){
 }
 
 static void _directive(ArmScan * s, Token token, size_t i){
-  Symbol kind = preproc_conditional_kind(token -> text);
+  Symbol kind = Compiler_preproc_conditional_kind(token -> text);
   int conditional = kind == 1016156 ||(kind && Array_len((* s).stack));
   if(kind == 1016156) Array_push((* s).stack, List_var(({
-    Var _x2c_literal_part_0 = int_var(++(* s).serial);  Var _x2c_literal_part_1 = int_var(preproc_open_state(token -> text));  cons(_x2c_literal_part_0, cons(_26, cons(_x2c_literal_part_1, NULL)));
+    Var _x2c_literal_part_0 = int_var(++(* s).serial);  Var _x2c_literal_part_1 = int_var(Compiler_preproc_open_state(token -> text));  cons(_x2c_literal_part_0, cons(_26, cons(_x2c_literal_part_1, NULL)));
   }
   )));
   else if(kind == 172060880 && Array_len((* s).stack)){
@@ -271,8 +271,9 @@ static void _directive(ArmScan * s, Token token, size_t i){
     id = List_getindex(_x2c_destructure_0, 0);
     arm = List_getindex(_x2c_destructure_0, 1);
     state = List_getindex(_x2c_destructure_0, 2);
+    Var branch = int_var(Compiler_preproc_branch_state(Var_int(Var_convert(state, 3453797))));
     Array_setindex((* s).stack, - 1, List_var(({
-      Var _x2c_literal_part_2 = id;  Var _x2c_literal_part_3 = long_var(Var_integer(arm) + 1);  Var _x2c_literal_part_4 = int_var(preproc_branch_state(Var_int(Var_convert(state, 3453797))));  cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, NULL)));
+      Var _x2c_literal_part_2 = id;  Var _x2c_literal_part_3 = long_var(Var_integer(arm) + 1);  cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, cons(branch, NULL)));
     }
     )));
   }
@@ -495,19 +496,19 @@ static int _prefix_rank(Var v){
   return List_truth(Var_list(v)) ? 3 : 2;
 }
 
-List preproc_track_arms(List arms, String text){
+List Compiler_preproc_track_arms(List arms, String text){
   if(! _init_guard_) _file_init_();
-  Symbol kind = preproc_conditional_kind(text);
+  Symbol kind = Compiler_preproc_conditional_kind(text);
   if(kind == 1016156) return cons(List_var(cons(List_var(cons(_32, cons(String_var(text), NULL))), NULL)), arms);
   if(! List_truth(arms)) return arms;
   if(kind == 172060880) return cons(List_var(({
-    List _x2c_literal_part_5 = Var_list_payload(List_car(arms));  Var _x2c_literal_part_6 = List_var(cons(_32, cons(String_var(text), NULL)));  List_append(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL));
+    List _x2c_literal_part_4 = Var_list_payload(List_car(arms));  Var _x2c_literal_part_5 = List_var(cons(_32, cons(String_var(text), NULL)));  List_append(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL));
   }
   )), List_cdr(arms));
   return kind == 7109834 ? List_cdr(arms) : arms;
 }
 
-List preproc_within_arms(List arms, List items){
+List Compiler_preproc_within_arms(List arms, List items){
   if(! _init_guard_) _file_init_();
   Array out = Array_new();
   {

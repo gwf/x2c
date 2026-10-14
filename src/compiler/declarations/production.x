@@ -19,7 +19,7 @@ void Compiler.queue_declaration_effect(
 }
 
 static List _declaration_source_key(Compiler c, Token token) {
-  String path = home_portable_path(c.canonical_path(c.filename));
+  String path = Compiler.portable_path(c.canonical_path(c.filename));
   return %("source-node" (declaration $path ${token.pos}));
 }
 
@@ -144,7 +144,7 @@ static void _restore_declaration_bindings(
   seen[syntax] = 1;
   int identity = 0;
   String spelling = NULL;
-  if (binding_identity_try_parts(syntax, identity, spelling)) {
+  if (Ast.try_binding(syntax, identity, spelling)) {
     c.set_fact(%(known $identity), spelling);
     c.set_fact(
       %(source-spelling $syntax),

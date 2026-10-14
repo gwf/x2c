@@ -12,15 +12,6 @@ The compiler's answers to `lib/meta.x` operations.
 
 | Function | Summary |
 | --- | --- |
-| [`binding_literal_list`](#binding_literal_list) | Returns `values`, such as a Lisp-built signature, as a cached literal of the expanding unit. |
-| [`binding_native_type`](#binding_native_type) | Returns the `Func` signature of the function syntax `syntax`. |
-| [`builtin_foreach_bindings`](#builtin_foreach_bindings) | Returns an expression reading each binding `declaration` declares. |
-| [`builtin_foreach_complete`](#builtin_foreach_complete) | Returns `expression` with the iterator chain `foreach` reads completed. |
-| [`builtin_foreach_unique`](#builtin_foreach_unique) | Returns a fresh binding whose spelling starts with `stem`. |
-| [`meta_function_reference`](#meta_function_reference) | Returns the typed expression naming the function `name`, or an empty List when no function of that name is visible. |
-| [`meta_invocation_location`](#meta_invocation_location) | Returns the location of the active macro invocation. |
-| [`meta_source_description`](#meta_source_description) | Returns what a `meta` parameter declared `Source` receives for the captured syntax `value`: `((text T) (file F) (syntax value))`, where `T` is the text the developer wrote and `F` the file it is in. |
-| [`meta_type_description`](#meta_type_description) | Returns what a `meta` parameter declared `TypeInfo` receives for the captured syntax `value`: `((name N) (kind K) (type T) (fields F) (methods M))`. |
 | [`x2c_binding_fresh`](#x2c_binding_fresh) | Answers `x2c.binding.fresh`, declared in `lib/meta.x`. |
 | [`x2c_diagnostic_error_at`](#x2c_diagnostic_error_at) | Answers `x2c.diagnostic.error.at`, declared in `lib/meta.x`. |
 | [`x2c_diagnostic_fail`](#x2c_diagnostic_fail) | Answers `x2c.diagnostic.fail`, declared in `lib/meta.x`. |
@@ -38,13 +29,16 @@ The compiler's answers to `lib/meta.x` operations.
 | [`Code.binding_spelling`](#Code.binding_spelling) | Answers `Code.binding_spelling`, declared in `lib/meta.x`. |
 | [`Code.body`](#Code.body) | Answers `Code.body`, declared in `lib/meta.x`. |
 | [`Code.call_in_order`](#Code.call_in_order) | Answers `Code.call_in_order`, declared in `lib/meta.x`. |
+| [`Code.complete_iterator`](#Code.complete_iterator) | Returns `expression` with the iterator chain `foreach` reads completed. |
 | [`Code.convert`](#Code.convert) | Answers `Code.convert`, declared in `lib/meta.x`. |
+| [`Code.declared_bindings`](#Code.declared_bindings) | Returns an expression reading each binding `declaration` declares. |
 | [`Code.exits`](#Code.exits) | Answers `Code.exits`, declared in `lib/meta.x`. |
 | [`Code.format`](#Code.format) | Answers `Code.format`, declared in `lib/meta.x`. |
 | [`Code.func_parameters`](#Code.func_parameters) | Answers `Code.func_parameters`, declared in `lib/meta.x`. |
 | [`Code.is_static_pattern`](#Code.is_static_pattern) | Answers `Code.is_static_pattern`, declared in `lib/meta.x`. |
 | [`Code.lowered`](#Code.lowered) | Answers `Code.lowered`, declared in `lib/meta.x`, with the carrier `Compiler.take_code_value` consumes. |
 | [`Code.name`](#Code.name) | Answers `Code.name`, declared in `lib/meta.x`. |
+| [`Code.native_signature`](#Code.native_signature) | Returns the `Func` signature of the function syntax `syntax`. |
 | [`Code.parameter`](#Code.parameter) | Answers `Code.parameter`, declared in `lib/meta.x`. |
 | [`Code.pattern_value`](#Code.pattern_value) | Answers `Code.pattern_value`, declared in `lib/meta.x`. |
 | [`Code.promoted`](#Code.promoted) | Answers `Code.promoted`, declared in `lib/meta.x`. |
@@ -56,7 +50,13 @@ The compiler's answers to `lib/meta.x` operations.
 | [`Compiler.bind_sdk_primitives`](#Compiler.bind_sdk_primitives) | Binds the internal primitives the compile-time SDK library wraps into `lisp`, under their `_x2c.` names. |
 | [`Compiler.expanding`](#Compiler.expanding) | Returns the compiler running the current compile-time call. |
 | [`MetaContext.current`](#MetaContext.current) | Returns the context of the running compile-time call, which an evaluation changes with `$let` for its own extent. |
+| [`MetaContext.fresh_binding`](#MetaContext.fresh_binding) | Returns a fresh binding whose spelling starts with `stem`. |
+| [`MetaContext.function_reference`](#MetaContext.function_reference) | Returns the typed expression naming the function `name`, or an empty List when no function of that name is visible. |
+| [`MetaContext.invocation_location`](#MetaContext.invocation_location) | Returns the location of the active macro invocation. |
+| [`MetaContext.literal_list`](#MetaContext.literal_list) | Returns `values`, such as a Lisp-built signature, as a cached literal of the expanding unit. |
 | [`MetaContext.reject`](#MetaContext.reject) | Reports `message` and `notes` at the active invocation and never returns, so the rejected operation's caller cannot continue with a missing answer. |
+| [`MetaContext.source_description`](#MetaContext.source_description) | Returns what a `meta` parameter declared `Source` receives for the captured syntax `value`: `((text T) (file F) (syntax value))`, where `T` is the text the developer wrote and `F` the file it is in. |
+| [`MetaContext.type_description`](#MetaContext.type_description) | Returns what a `meta` parameter declared `TypeInfo` receives for the captured syntax `value`: `((name N) (kind K) (type T) (fields F) (methods M))`. |
 | [`Type.aggregate`](#Type.aggregate) | Answers `Type.aggregate`, declared in `lib/meta.x`. |
 | [`Type.element`](#Type.element) | Answers `Type.element`, declared in `lib/meta.x`. |
 | [`Type.fields`](#Type.fields) | Answers `Type.fields`, declared in `lib/meta.x`. |
@@ -78,91 +78,6 @@ The compiler's answers to `lib/meta.x` operations.
 | [`Type.update_helper`](#Type.update_helper) | Answers `Type.update_helper`, declared in `lib/meta.x`. |
 
 ### Functions
-
-#### binding_literal_list
-
-`List binding_literal_list(List values)`
-
-Returns `values`, such as a Lisp-built signature, as a cached literal
-of the expanding unit.
-
-Source: `src/meta-sdk.x:776`
-
-#### binding_native_type
-
-`List binding_native_type(List syntax)`
-
-Returns the `Func` signature of the function syntax `syntax`. A native
-binding stores the same signature as an ordinary Func adapter.
-
-Source: `src/meta-sdk.x:766`
-
-#### builtin_foreach_bindings
-
-`List builtin_foreach_bindings(List declaration)`
-
-Returns an expression reading each binding `declaration` declares.
-
-Source: `src/meta-sdk.x:490`
-
-#### builtin_foreach_complete
-
-`List builtin_foreach_complete(List expression)`
-
-Returns `expression` with the iterator chain `foreach` reads completed.
-
-Source: `src/meta-sdk.x:1049`
-
-#### builtin_foreach_unique
-
-`Var builtin_foreach_unique(String stem)`
-
-Returns a fresh binding whose spelling starts with `stem`.
-
-Source: `src/meta-sdk.x:681`
-
-#### meta_function_reference
-
-`List meta_function_reference(String name)`
-
-Returns the typed expression naming the function `name`, or an empty
-List when no function of that name is visible. This reads the symbol
-table only, so any compile-time Lisp evaluation may call it, including
-one outside a macro expansion.
-
-Source: `src/meta-sdk.x:518`
-
-#### meta_invocation_location
-
-`List meta_invocation_location(void)`
-
-Returns the location of the active macro invocation.
-
-Source: `src/meta-sdk.x:918`
-
-#### meta_source_description
-
-`List meta_source_description(Var value)`
-
-Returns what a `meta` parameter declared `Source` receives for the
-captured syntax `value`: `((text T) (file F) (syntax value))`, where `T`
-is the text the developer wrote and `F` the file it is in.
-
-Source: `src/meta-sdk.x:1040`
-
-#### meta_type_description
-
-`List meta_type_description(Var value)`
-
-Returns what a `meta` parameter declared `TypeInfo` receives for the
-captured syntax `value`: `((name N) (kind K) (type T) (fields F)
-(methods M))`.
-`T` is the canonical type of `value` and `N` its name, or "" when it has
-none. `K` is `struct`, `union`, `enum`, `pointer`, `scalar`, or `other`,
-`F` lists the `(name type)` rows of a struct or union's named fields,
-and `M` the names of its direct dotted methods.
-
-Source: `src/meta-sdk.x:999`
 
 #### x2c_binding_fresh
 
@@ -309,6 +224,15 @@ further.
 
 Source: `src/meta-sdk.x:267`
 
+<a id="Code.complete_iterator"></a>
+#### Code.complete_iterator
+
+`List Code.complete_iterator(List expression)`
+
+Returns `expression` with the iterator chain `foreach` reads completed.
+
+Source: `src/meta-sdk.x:1049`
+
 <a id="Code.convert"></a>
 #### Code.convert
 
@@ -317,6 +241,15 @@ Source: `src/meta-sdk.x:267`
 Answers `Code.convert`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk.x:290`
+
+<a id="Code.declared_bindings"></a>
+#### Code.declared_bindings
+
+`List Code.declared_bindings(List declaration)`
+
+Returns an expression reading each binding `declaration` declares.
+
+Source: `src/meta-sdk.x:490`
 
 <a id="Code.exits"></a>
 #### Code.exits
@@ -372,6 +305,16 @@ Source: `src/meta-sdk.x:275`
 Answers `Code.name`, declared in `lib/meta.x`.
 
 Source: `src/meta-sdk.x:724`
+
+<a id="Code.native_signature"></a>
+#### Code.native_signature
+
+`List Code.native_signature(List syntax)`
+
+Returns the `Func` signature of the function syntax `syntax`. A native
+binding stores the same signature as an ordinary Func adapter.
+
+Source: `src/meta-sdk.x:766`
 
 <a id="Code.parameter"></a>
 #### Code.parameter
@@ -483,6 +426,46 @@ evaluation changes with `$let` for its own extent.
 
 Source: `src/meta-sdk.x:149`
 
+<a id="MetaContext.fresh_binding"></a>
+#### MetaContext.fresh_binding
+
+`Var MetaContext.fresh_binding(String stem)`
+
+Returns a fresh binding whose spelling starts with `stem`.
+
+Source: `src/meta-sdk.x:681`
+
+<a id="MetaContext.function_reference"></a>
+#### MetaContext.function_reference
+
+`List MetaContext.function_reference(String name)`
+
+Returns the typed expression naming the function `name`, or an empty
+List when no function of that name is visible. This reads the symbol
+table only, so any compile-time Lisp evaluation may call it, including
+one outside a macro expansion.
+
+Source: `src/meta-sdk.x:518`
+
+<a id="MetaContext.invocation_location"></a>
+#### MetaContext.invocation_location
+
+`List MetaContext.invocation_location(void)`
+
+Returns the location of the active macro invocation.
+
+Source: `src/meta-sdk.x:918`
+
+<a id="MetaContext.literal_list"></a>
+#### MetaContext.literal_list
+
+`List MetaContext.literal_list(List values)`
+
+Returns `values`, such as a Lisp-built signature, as a cached literal
+of the expanding unit.
+
+Source: `src/meta-sdk.x:776`
+
 <a id="MetaContext.reject"></a>
 #### MetaContext.reject
 
@@ -493,6 +476,32 @@ returns, so the rejected operation's caller cannot continue with a
 missing answer. With no active invocation it is a bad state.
 
 Source: `src/meta-sdk.x:1059`
+
+<a id="MetaContext.source_description"></a>
+#### MetaContext.source_description
+
+`List MetaContext.source_description(Var value)`
+
+Returns what a `meta` parameter declared `Source` receives for the
+captured syntax `value`: `((text T) (file F) (syntax value))`, where `T`
+is the text the developer wrote and `F` the file it is in.
+
+Source: `src/meta-sdk.x:1040`
+
+<a id="MetaContext.type_description"></a>
+#### MetaContext.type_description
+
+`List MetaContext.type_description(Var value)`
+
+Returns what a `meta` parameter declared `TypeInfo` receives for the
+captured syntax `value`: `((name N) (kind K) (type T) (fields F)
+(methods M))`.
+`T` is the canonical type of `value` and `N` its name, or "" when it has
+none. `K` is `struct`, `union`, `enum`, `pointer`, `scalar`, or `other`,
+`F` lists the `(name type)` rows of a struct or union's named fields,
+and `M` the names of its direct dotted methods.
+
+Source: `src/meta-sdk.x:999`
 
 ### `Type`
 

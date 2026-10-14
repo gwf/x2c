@@ -12,8 +12,6 @@ Meta functions and the native code they call.
 
 | Function | Summary |
 | --- | --- |
-| [`linked_meta_provider_source`](#linked_meta_provider_source) | Returns a linked provider's source and dependency hashes. |
-| [`links_meta_function`](#links_meta_function) | Reports whether the compiler links the `meta` function `name`. |
 | [`x2c_register_extension`](#x2c_register_extension) | Registers package `name`'s compile-time part, linked into the compiler, whose `targets` returns its name-to-`Func` Map. |
 | [`Compiler.add_native_module`](#Compiler.add_native_module) | Records the name-to-`Func` Map that the entry of the native module loaded from absolute `path` returns. |
 | [`Compiler.apply_meta_function`](#Compiler.apply_meta_function) | Applies the meta function spelled `name` to the evaluated `arguments` at `site`, outside any expansion. |
@@ -30,7 +28,9 @@ Meta functions and the native code they call.
 | [`Compiler.install_native_meta_effects`](#Compiler.install_native_meta_effects) | Records the native advertisements retained by included interfaces. |
 | [`Compiler.install_native_meta_function`](#Compiler.install_native_meta_function) | Installs a prototype-only `meta` function from the compiler's trusted native target registry. |
 | [`Compiler.install_project_meta_effect`](#Compiler.install_project_meta_effect) | Installs an included meta function's evaluator advertisement. |
+| [`Compiler.linked_meta_provider_source`](#Compiler.linked_meta_provider_source) | Returns a linked provider's source and dependency hashes. |
 | [`Compiler.links_extension`](#Compiler.links_extension) | Reports whether package `name`'s compile-time part is linked into the compiler, so its import loads no module. |
+| [`Compiler.links_meta_function`](#Compiler.links_meta_function) | Reports whether the compiler links the `meta` function `name`. |
 | [`Compiler.load_native_module`](#Compiler.load_native_module) | Loads the native module at `path` once per process and returns its absolute path. |
 | [`Compiler.matches_macro`](#Compiler.matches_macro) | Tests a registered macro with the candidate's global and source bindings. |
 | [`Compiler.native_meta_accepts`](#Compiler.native_meta_accepts) | Answers whether the native target `function` matches the declared `signature`. |
@@ -49,22 +49,6 @@ Meta functions and the native code they call.
 
 ### Functions
 
-#### linked_meta_provider_source
-
-`List linked_meta_provider_source(String provider)`
-
-Returns a linked provider's source and dependency hashes.
-
-Source: `src/meta-native.x:1054`
-
-#### links_meta_function
-
-`int links_meta_function(String name)`
-
-Reports whether the compiler links the `meta` function `name`.
-
-Source: `src/meta-native.x:1051`
-
 #### x2c_register_extension
 
 `void x2c_register_extension(const char *name, Map (*targets)(void))`
@@ -73,7 +57,7 @@ Registers package `name`'s compile-time part, linked into the compiler,
 whose `targets` returns its name-to-`Func` Map. The registration unit
 `x2c build --extension` generates calls it from a constructor.
 
-Source: `src/meta-native.x:1337`
+Source: `src/meta-native.x:1338`
 
 ### `Compiler`
 
@@ -86,7 +70,7 @@ Records the name-to-`Func` Map that the entry of the native module loaded
 from absolute `path` returns. The Funcs, names, signatures, and path last
 for the process.
 
-Source: `src/meta-native.x:1278`
+Source: `src/meta-native.x:1279`
 
 <a id="Compiler.apply_meta_function"></a>
 #### Compiler.apply_meta_function
@@ -144,7 +128,7 @@ Returns the compiler's own targets, the operations `lib/meta.x` declares
 with a bodyless `meta` prototype, loaded as the native module every
 request selects first.
 
-Source: `src/meta-native.x:1139`
+Source: `src/meta-native.x:1140`
 
 <a id="Compiler.evaluate_meta_expression"></a>
 #### Compiler.evaluate_meta_expression
@@ -176,7 +160,7 @@ Returns the archive of the linked packages' objects that the build of
 this compiler kept beside it, named by the compiler's identity, or NULL
 when the compiler links none. Project meta code links it.
 
-Source: `src/meta-native.x:1355`
+Source: `src/meta-native.x:1356`
 
 <a id="Compiler.install_collected_meta_function"></a>
 #### Compiler.install_collected_meta_function
@@ -247,6 +231,15 @@ Installs an included meta function's evaluator advertisement.
 
 Source: `src/meta-native.x:544`
 
+<a id="Compiler.linked_meta_provider_source"></a>
+#### Compiler.linked_meta_provider_source
+
+`List Compiler.linked_meta_provider_source(String provider)`
+
+Returns a linked provider's source and dependency hashes.
+
+Source: `src/meta-native.x:1054`
+
 <a id="Compiler.links_extension"></a>
 #### Compiler.links_extension
 
@@ -255,7 +248,16 @@ Source: `src/meta-native.x:544`
 Reports whether package `name`'s compile-time part is linked into the
 compiler, so its import loads no module.
 
-Source: `src/meta-native.x:1346`
+Source: `src/meta-native.x:1347`
+
+<a id="Compiler.links_meta_function"></a>
+#### Compiler.links_meta_function
+
+`int Compiler.links_meta_function(String name)`
+
+Reports whether the compiler links the `meta` function `name`.
+
+Source: `src/meta-native.x:1051`
 
 <a id="Compiler.load_native_module"></a>
 #### Compiler.load_native_module
@@ -267,7 +269,7 @@ absolute path. Loading runs the module's code inside the compiler, so it
 happens only on request. A module from another compiler, a file that is
 not a module, or an unsupported platform prints a diagnostic and exits.
 
-Source: `src/meta-native.x:1201`
+Source: `src/meta-native.x:1202`
 
 <a id="Compiler.matches_macro"></a>
 #### Compiler.matches_macro
@@ -320,7 +322,7 @@ Source: `src/meta-native.x:921`
 
 Reports whether the native module at absolute `path` is loaded.
 
-Source: `src/meta-native.x:1303`
+Source: `src/meta-native.x:1304`
 
 <a id="Compiler.native_module_targets"></a>
 #### Compiler.native_module_targets
@@ -330,7 +332,7 @@ Source: `src/meta-native.x:1303`
 Returns the name-to-`Func` Map of the loaded native module at absolute
 `path`.
 
-Source: `src/meta-native.x:1308`
+Source: `src/meta-native.x:1309`
 
 <a id="Compiler.preload_native_module"></a>
 #### Compiler.preload_native_module
@@ -342,7 +344,7 @@ and the platform loads modules. A process that loads a module before it
 forks translation workers lets them inherit it; anything else is left
 for the import to report.
 
-Source: `src/meta-native.x:1219`
+Source: `src/meta-native.x:1220`
 
 <a id="Compiler.project_meta_uses_linked"></a>
 #### Compiler.project_meta_uses_linked
@@ -397,7 +399,7 @@ Selects the loaded native modules, by absolute path, that bodyless `meta`
 prototypes bind in the current request. The first module in `paths`
 that defines a name supplies it.
 
-Source: `src/meta-native.x:1153`
+Source: `src/meta-native.x:1154`
 
 <a id="Compiler.select_package_module"></a>
 #### Compiler.select_package_module
@@ -410,7 +412,7 @@ The module is `<root>/builds/<name>.module`; a worker loads it itself
 when the process has not. A module from another compiler, or one on a
 platform that loads none, is reported at the import `token`.
 
-Source: `src/meta-native.x:1173`
+Source: `src/meta-native.x:1174`
 
 <a id="Compiler.supplies_native_meta"></a>
 #### Compiler.supplies_native_meta
@@ -421,7 +423,7 @@ Reports whether the compiler itself supplies the native function `name`.
 Such a function exists only inside a compiler, so a `meta` function that
 reaches it has no runtime form.
 
-Source: `src/meta-native.x:1314`
+Source: `src/meta-native.x:1315`
 
 ## Design notes
 

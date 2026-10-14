@@ -12,24 +12,12 @@ The values crossing between meta code and the program.
 
 | Function | Summary |
 | --- | --- |
-| [`literal_text_value`](#literal_text_value) | Returns the value of a String or character literal from its source `spelling`, quotes included: adjacent pieces are unescaped on their own and joined, as C does, and a character is its code. |
 | [`Compiler.check_meta_call`](#Compiler.check_meta_call) | Refuses a run-time call to a `meta` function this compiler derived compile-time only. |
 | [`Compiler.folded_constant`](#Compiler.folded_constant) | Returns the value of the folded constant `node`, or void when part of it is only known at run time. |
+| [`Compiler.literal_text_value`](#Compiler.literal_text_value) | Returns the value of a String or character literal from its source `spelling`, quotes included: adjacent pieces are unescaped on their own and joined, as C does, and a character is its code. |
 | [`Compiler.meta_argument`](#Compiler.meta_argument) | Returns the value the argument expression `node` of a `$` call passes to a parameter of type `want`, or of no declared type when `want` is NULL: a constant, captured syntax, or the result of another `$` call, which `call` evaluates. |
 | [`Compiler.meta_is_comptime_only`](#Compiler.meta_is_comptime_only) | Returns whether `fn` is a `meta` function this compiler recorded as compile-time only, whose runtime form the unit does not emit. |
 | [`Compiler.meta_value_expression`](#Compiler.meta_value_expression) | Returns literal code for a compile-time `value`, preserving `declared` when supplied. |
-
-### Functions
-
-#### literal_text_value
-
-`Var literal_text_value(String spelling)`
-
-Returns the value of a String or character literal from its source
-`spelling`, quotes included: adjacent pieces are unescaped on their own
-and joined, as C does, and a character is its code.
-
-Source: `src/stage.x:212`
 
 ### `Compiler`
 
@@ -61,6 +49,17 @@ compiler cache and leaves `(cache ID)`, a graph of ids over `cons`,
 `var` and `string` leaves.
 
 Source: `src/stage.x:138`
+
+<a id="Compiler.literal_text_value"></a>
+#### Compiler.literal_text_value
+
+`Var Compiler.literal_text_value(String spelling)`
+
+Returns the value of a String or character literal from its source
+`spelling`, quotes included: adjacent pieces are unescaped on their own
+and joined, as C does, and a character is its code.
+
+Source: `src/stage.x:212`
 
 <a id="Compiler.meta_argument"></a>
 #### Compiler.meta_argument

@@ -481,7 +481,7 @@ static CliOption cli_options[] ={
 }
 ;
 
-static String _158, _157, _156, _155, _154, _153, _152, _151, _150, _149, _148, _147, _146, _145, _144, _143, _142, _141, _140, _139, _138, _137, _136, _135, _134, _133, _132, _131, _130, _129, _128, _127, _126, _125, _124, _123, _122, _121, _120, _119, _118, _117, _116, _115, _114, _113, _112, _111, _110, _109, _108, _107, _106, _105, _104, _103, _102, _101, _100, _99, _98, _97, _96, _95, _94, _93, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _159, _158, _157, _156, _155, _154, _153, _152, _151, _150, _149, _148, _147, _146, _145, _144, _143, _142, _141, _140, _139, _138, _137, _136, _135, _134, _133, _132, _131, _130, _129, _128, _127, _126, _125, _124, _123, _122, _121, _120, _119, _118, _117, _116, _115, _114, _113, _112, _111, _110, _109, _108, _107, _106, _105, _104, _103, _102, _101, _100, _99, _98, _97, _96, _95, _94, _93, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -803,6 +803,8 @@ static void _native(Parse * p, int * i);
 
 static void _expand_argument(Array out, String arg, List stack);
 
+static List _response_arguments(String path);
+
 static char * _read_response_file(String path, size_t * length);
 
 static long _response_size(FILE * file, String path);
@@ -942,6 +944,8 @@ static void _one_dash_removed(String arg, String use);
 _Noreturn static void _response_error(String path, int line, const char * message);
 
 static int _default_jobs(void);
+
+static int _make_owned(void);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -1119,7 +1123,8 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _155 = String_new("one-dash long option \'");
   _156 = String_new("\' was removed");
   _157 = String_new("use \'");
-  _158 = String_new("x2c 0.15.0");
+  _158 = String_new("MAKELEVEL");
+  _159 = String_new("x2c 0.15.0");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
   _x2c_static_initialize_2();
@@ -1135,9 +1140,9 @@ static int _command_mask(Symbol command){
   return CLI_TOP;
 }
 
-String cli_version(void);
+String Compiler_version(void);
 
-CliRequest cli_parse(int argc, char * * argv){
+CliRequest CliRequest_parse(int argc, char * * argv){
   if(! _init_guard_) _file_init_();
   Array args = Array_new();
   const Array _x2c_macro_acquired_0 = args;
@@ -1156,7 +1161,7 @@ CliRequest cli_parse(int argc, char * * argv){
       _read_arguments(args, argc, argv);
       if(! Array_len(args)) _help_exit(0, 2);
       String first = Var_as_string(Array_getindex(args, 0));
-      if(! String_truth(first)) driver_error("expected a command, found an empty argument");
+      if(! String_truth(first)) Diagnostics_driver_error("expected a command, found an empty argument");
       CliCommand * command = _command_row(first);
       if(command){
         CliRequest _x2c_return_value_0 = _parse_command(args, &(* command));
@@ -1168,7 +1173,7 @@ CliRequest cli_parse(int argc, char * * argv){
       }
       if(String_equal(first, _1) || String_equal(first, _0)) _help_exit(0, 0);
       if(String_equal(first, _3) || String_equal(first, _2)){
-        puts(cli_version());
+        puts(Compiler_version());
         exit(0);
       }
       if(String_equal(first, _79)) _help_command(args);
@@ -1176,7 +1181,7 @@ CliRequest cli_parse(int argc, char * * argv){
       String spelling = _two_dash(first);
       if(String_truth(spelling)) _one_dash_removed(first, String_join(NULL, cons(String_var(_81), cons(String_var(spelling), cons(String_var(_82), NULL)))));
       if(String_getindex(first, 0) != '-') _expected_command(first);
-      driver_error(String_join(NULL, cons(String_var(_83), cons(String_var(first), cons(String_var(_84), NULL)))));
+      Diagnostics_driver_error(String_join(NULL, cons(String_var(_83), cons(String_var(first), cons(String_var(_84), NULL)))));
     }
     x2c_cleanup_leave(& _x2c_defer_record_0);
   }
@@ -1192,11 +1197,11 @@ static void _read_arguments(Array args, int argc, char * * argv){
 
 }
 
-CliRequest cli_request(Symbol command);
+CliRequest CliRequest_new(Symbol command);
 
 static CliRequest _parse_command(Array args, CliCommand * command){
   Parse p ={
-    .request = cli_request((* command).name), .args = args, .mask =(* command).mask, .inputs = Array_new(), .run_args = Array_new(), .include_dirs = Array_new(), .cpp_args = Array_new(), .cc_args = Array_new(), .ld_args = Array_new()
+    .request = CliRequest_new((* command).name), .args = args, .mask =(* command).mask, .inputs = Array_new(), .run_args = Array_new(), .include_dirs = Array_new(), .cpp_args = Array_new(), .cc_args = Array_new(), .ld_args = Array_new()
   }
   ;
   for(int i = 1;  i < Array_len(args);  i ++) _word(&(p), &(i));
@@ -1247,23 +1252,23 @@ static void _finish_request(Parse * p){
 static void _check(CliRequest r, int mask){
   Symbol name = r -> command;
   List inputs = r -> inputs;
-  if(mask == CLI_TRANSLATE && ! List_truth(inputs)) driver_error("translate requires at least one input");
-  if(List_truth(List_cdr(inputs)) &&(String_truth(r -> dep_file) || String_truth(r -> dep_target))) driver_error("--dep-file and --dep-target require exactly one input");
-  if(r -> no_deps &&(String_truth(r -> dep_file) || String_truth(r -> dep_target) || r -> no_phony_deps)) driver_error("--no-deps conflicts with dependency output options");
-  if(r -> compile_only && r -> kind != 404971770155786) driver_error("--compile-only conflicts with a library target kind");
-  if(mask == CLI_ENV && List_truth(List_cdr(inputs))) driver_error("env accepts at most one name");
-  if((mask == CLI_INSTALL || mask == CLI_REMOVE || mask == CLI_NEW) &&(! List_truth(inputs) || List_truth(List_cdr(inputs)))) driver_error(String_join(NULL, cons(String_var(Symbol_str(name)), cons(String_var(_87), NULL))));
-  if(mask == CLI_LIST && List_truth(inputs)) driver_error(String_join(NULL, cons(String_var(Symbol_str(name)), cons(String_var(_88), NULL))));
-  if(mask == CLI_SCRIPT && ! List_truth(inputs)) driver_error("script requires a script file");
+  if(mask == CLI_TRANSLATE && ! List_truth(inputs)) Diagnostics_driver_error("translate requires at least one input");
+  if(List_truth(List_cdr(inputs)) &&(String_truth(r -> dep_file) || String_truth(r -> dep_target))) Diagnostics_driver_error("--dep-file and --dep-target require exactly one input");
+  if(r -> no_deps &&(String_truth(r -> dep_file) || String_truth(r -> dep_target) || r -> no_phony_deps)) Diagnostics_driver_error("--no-deps conflicts with dependency output options");
+  if(r -> compile_only && r -> kind != 404971770155786) Diagnostics_driver_error("--compile-only conflicts with a library target kind");
+  if(mask == CLI_ENV && List_truth(List_cdr(inputs))) Diagnostics_driver_error("env accepts at most one name");
+  if((mask == CLI_INSTALL || mask == CLI_REMOVE || mask == CLI_NEW) &&(! List_truth(inputs) || List_truth(List_cdr(inputs)))) Diagnostics_driver_error(String_join(NULL, cons(String_var(Symbol_str(name)), cons(String_var(_87), NULL))));
+  if(mask == CLI_LIST && List_truth(inputs)) Diagnostics_driver_error(String_join(NULL, cons(String_var(Symbol_str(name)), cons(String_var(_88), NULL))));
+  if(mask == CLI_SCRIPT && ! List_truth(inputs)) Diagnostics_driver_error("script requires a script file");
 }
 
 static void _help_command(Array args){
   if(Array_len(args) == 1) _help_exit(0, 0);
-  if(Array_len(args) > 2) driver_error("help accepts at most one command");
+  if(Array_len(args) > 2) Diagnostics_driver_error("help accepts at most one command");
   String name = Var_as_string(Array_getindex(args, 1));
   if(String_equal(name, _79) || String_equal(name, _1) || String_equal(name, _0)) _help_exit(535328, 0);
   CliCommand * asked = String_truth(name) ? _command_row(name) : NULL;
-  if(! asked) driver_error(String_join(NULL, cons(String_var(_89), cons(String_var(name), cons(String_var(_84), NULL)))));
+  if(! asked) Diagnostics_driver_error(String_join(NULL, cons(String_var(_89), cons(String_var(name), cons(String_var(_84), NULL)))));
   _help_exit(asked -> name, 0);
 }
 
@@ -1281,7 +1286,7 @@ static void _option(Parse * p, String arg, int * i){
 static void _save_temps_dir(CliRequest r, String arg){
   r -> save_temps = 1;
   r -> temps_dir = String_remove_prefix(arg, _90);
-  if(! String_truth(r -> temps_dir)) driver_error("--save-temps= requires a directory");
+  if(! String_truth(r -> temps_dir)) Diagnostics_driver_error("--save-temps= requires a directory");
 }
 
 static Given _take_option(Array args, int * i, int mask){
@@ -1296,11 +1301,11 @@ static Given _take_option(Array args, int * i, int mask){
   }
   ;
   if(! given.option) return given;
-  if(equals > 2 && ! given.option -> value) driver_error(String_join(NULL, cons(String_var(_92), cons(String_var(arg), cons(String_var(_84), NULL)))));
+  if(equals > 2 && ! given.option -> value) Diagnostics_driver_error(String_join(NULL, cons(String_var(_92), cons(String_var(arg), cons(String_var(_84), NULL)))));
   given.value = equals > 2 ? joined : suffix;
   given.attached = suffix != NULL;
   if(given.option -> value && ! String_truth(given.value) && equals <= 2){
-    if(++(* i) == Array_len(args)) driver_error(String_join(NULL, cons(String_var(_93), cons(String_var(arg), cons(String_var(_84), NULL)))));
+    if(++(* i) == Array_len(args)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_93), cons(String_var(arg), cons(String_var(_84), NULL)))));
     given.value = Var_as_string(Array_getindex(args, (* i)));
   }
   return given;
@@ -1420,11 +1425,11 @@ static void _apply(Parse * p, Given given){
 }
 
 static Symbol _color_mode(String value){
-  if(! String_truth(value)) driver_error("--color requires auto, always, or never");
+  if(! String_truth(value)) Diagnostics_driver_error("--color requires auto, always, or never");
   if(String_equal(value, _98)) return 109854;
   if(String_equal(value, _99)) return 93785702;
   if(String_equal(value, _100)) return 29733220;
-  driver_error(String_join(NULL, cons(String_var(_101), cons(String_var(value), cons(String_var(_84), NULL)))));
+  Diagnostics_driver_error(String_join(NULL, cons(String_var(_101), cons(String_var(value), cons(String_var(_84), NULL)))));
 }
 
 Symbol TargetKind_named(String spelling, String * refusal);
@@ -1432,8 +1437,8 @@ Symbol TargetKind_named(String spelling, String * refusal);
 static Symbol _target_kind(String value){
   String refusal = NULL;
   Symbol kind = TargetKind_named(value, &(refusal));
-  if(String_truth(refusal)) driver_error(refusal);
-  if(! kind) driver_error(String_join(NULL, cons(String_var(_102), cons(String_var(value), cons(String_var(_84), NULL)))));
+  if(String_truth(refusal)) Diagnostics_driver_error(refusal);
+  if(! kind) Diagnostics_driver_error(String_join(NULL, cons(String_var(_102), cons(String_var(value), cons(String_var(_84), NULL)))));
   return kind;
 }
 
@@ -1454,7 +1459,7 @@ static int _count(String value, int minimum, String noun){
   char * end = NULL;
   errno = 0;
   long count = String_truth(value) ? strtol(value, & end, 10) : 0;
-  if(! String_truth(value) || errno || * end || count < minimum || count > INT_MAX) driver_error(String_join(NULL, cons(String_var(_114), cons(String_var(noun), cons(String_var(_115), cons(String_var(value), cons(String_var(_84), NULL)))))));
+  if(! String_truth(value) || errno || * end || count < minimum || count > INT_MAX) Diagnostics_driver_error(String_join(NULL, cons(String_var(_114), cons(String_var(noun), cons(String_var(_115), cons(String_var(value), cons(String_var(_84), NULL)))))));
   return(int) count;
 }
 
@@ -1473,14 +1478,14 @@ static void _push_pair(Array out, String option, String value){
   Array_push(out, String_var(value));
 }
 
-int cli_dependency_pass_through(String s);
+int CliRequest_dependency_option(String s);
 
 static String _xcc_argument(String value){
-  if(cli_dependency_pass_through(value)) driver_error(String_join(NULL, cons(String_var(_116), cons(String_var(value), cons(String_var(_84), NULL)))));
+  if(CliRequest_dependency_option(value)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_116), cons(String_var(value), cons(String_var(_84), NULL)))));
   return value;
 }
 
-int cli_dependency_pass_through(String s){
+int CliRequest_dependency_option(String s){
   if(! _init_guard_) _file_init_();
   return String_truth(s) &&(String_startswith(s, _117) || String_startswith(s, _118) || String_startswith(s, _119) || String_startswith(s, _120) || String_contains(s, _121) || String_contains(s, _122) || String_contains(s, _123) || String_contains(s, _124));
 }
@@ -1505,9 +1510,7 @@ static void _set_field(CliRequest r, CliOption * option, String value){
 
 }
 
-List cli_response_arguments(String path);
-
-CliRequest cli_package_options(String path, String package){
+CliRequest CliRequest_package_options(String path, String package){
   if(! _init_guard_) _file_init_();
   Array words = Array_new();
   const Array _x2c_macro_acquired_1 = words;
@@ -1525,7 +1528,7 @@ CliRequest cli_package_options(String path, String package){
     {
       {
         String word;
-        List _x2c_macro_object_0 = cli_response_arguments(path);
+        List _x2c_macro_object_0 = _response_arguments(path);
         List _x2c_macro_cursor_0 = _x2c_macro_object_0;
         Var _x2c_macro_cursor_output_0;
         while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
@@ -1562,13 +1565,13 @@ CliRequest cli_package_options(String path, String package){
 
 static void _native(Parse * p, int * i){
   String arg = Var_as_string(Array_getindex((* p).args, (* i)));
-  if(! String_truth(arg)) driver_error("empty package native argument");
+  if(! String_truth(arg)) Diagnostics_driver_error("empty package native argument");
   if(String_getindex(arg, 0) != '-' && String_getindex(arg, 0) != '@' && String_endswith(arg, _108)){
     Array_push((* p).ld_args, String_var(arg));
     return;
   }
   Given given = _take_option((* p).args, &((* i)), (* p).mask);
-  if(! given.option || ! given.option -> package_native) driver_error(String_join(NULL, cons(String_var(_126), cons(String_var(arg), cons(String_var(_84), NULL)))));
+  if(! given.option || ! given.option -> package_native) Diagnostics_driver_error(String_join(NULL, cons(String_var(_126), cons(String_var(arg), cons(String_var(_84), NULL)))));
   _apply(&((* p)), given);
 }
 
@@ -1583,13 +1586,13 @@ static void _expand_argument(Array out, String arg, List stack){
     Array_push(out, String_var(String_getslice(arg, 1, (-2147483647 - 1), 1)));
     return;
   }
-  if(String_len(arg) == 1) driver_error("empty response-file reference '@'");
+  if(String_len(arg) == 1) Diagnostics_driver_error("empty response-file reference '@'");
   String path = String_getslice(arg, 1, (-2147483647 - 1), 1), identity = Path_absolute(path);
   if(List_contains(stack, String_var(identity))) _fail(String_join(NULL, cons(String_var(_127), cons(String_var(path), NULL))), NULL);
   List nested = cons(String_var(identity), stack);
   {
     String word;
-    List _x2c_macro_object_1 = cli_response_arguments(path);
+    List _x2c_macro_object_1 = _response_arguments(path);
     List _x2c_macro_cursor_1 = _x2c_macro_object_1;
     Var _x2c_macro_cursor_output_1;
     while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
@@ -1601,8 +1604,7 @@ static void _expand_argument(Array out, String arg, List stack){
 
 }
 
-List cli_response_arguments(String path){
-  if(! _init_guard_) _file_init_();
+static List _response_arguments(String path){
   size_t length = 0;
   char * text = _read_response_file(path, &(length));
   Array words = _response_words(path, text, length);
@@ -1744,7 +1746,7 @@ static void _print_top_help(void){
 }
 
 static void _print_external_commands(void){
-  String libexec = home_libexec();
+  String libexec = Compiler_home_libexec();
   File manifest = String_truth(libexec) ? fopen(String_join(NULL, cons(String_var(libexec), cons(String_var(_130), NULL))), "r") : NULL;
   if(! manifest) return;
   char * line = NULL;
@@ -1765,7 +1767,7 @@ static void _print_external_commands(void){
 
 static HelpPage * _help_page(Symbol command){
   for(HelpPage * page = help_pages;  page -> command;  page ++) if(page -> command == command) return page;
-  driver_error(String_join(NULL, cons(String_var(_89), cons(String_var(Symbol_str(command)), cons(String_var(_84), NULL)))));
+  Diagnostics_driver_error(String_join(NULL, cons(String_var(_89), cons(String_var(Symbol_str(command)), cons(String_var(_84), NULL)))));
 }
 
 static void _print_page(HelpPage * page){
@@ -1848,7 +1850,7 @@ static void _expected_command(String arg){
 static void _unknown_option(String arg, int mask){
   String spelling = mask == CLI_TRANSLATE ? _two_dash(arg) : NULL;
   if(String_truth(spelling)) _one_dash_removed(arg, spelling);
-  driver_error(String_join(NULL, cons(String_var(_153), cons(String_var(arg), cons(String_var(_84), NULL)))));
+  Diagnostics_driver_error(String_join(NULL, cons(String_var(_153), cons(String_var(arg), cons(String_var(_84), NULL)))));
 }
 
 static String _two_dash(String arg){
@@ -1866,7 +1868,7 @@ _Noreturn static void _response_error(String path, int line, const char * messag
   exit(2);
 }
 
-CliRequest cli_request(Symbol command){
+CliRequest CliRequest_new(Symbol command){
   if(! _init_guard_) _file_init_();
   int mask = _command_mask(command);
   CliRequest request = Scope_calloc(1, sizeof(struct CliRequest));
@@ -1878,19 +1880,26 @@ CliRequest cli_request(Symbol command){
 }
 
 static int _default_jobs(void){
-  if(report_make_owned()) return 1;
+  if(_make_owned()) return 1;
   long count = sysconf(_SC_NPROCESSORS_ONLN);
   return count > 0 && count <= INT_MAX ?(int) count : 1;
 }
 
-int cli_builtin_command(const char * word){
+String Env_get(String);
+
+static int _make_owned(void){
+  String level = Env_get(_158);
+  return String_is_digit(level) && atol(level) > 0;
+}
+
+int CliRequest_is_builtin(const char * word){
   if(! _init_guard_) _file_init_();
   return ! strcmp(word, "help") || _command_row(word) != NULL;
 }
 
-String cli_version(void){
+String Compiler_version(void){
   if(! _init_guard_) _file_init_();
-  return _158;
+  return _159;
 }
 
 int CliRequest_inspects(CliRequest request){
@@ -1902,7 +1911,7 @@ int Path_is_dir(Path);
 
 List CliRequest_package_roots(CliRequest request){
   if(! _init_guard_) _file_init_();
-  String home = home_packages();
+  String home = Compiler_home_packages();
   if(! Path_is_dir(home)) return request -> package_dirs;
   return List_append(request -> package_dirs, cons(String_var(home), NULL));
 }

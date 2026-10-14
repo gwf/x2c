@@ -292,7 +292,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 void Path_make_dirs(Path);
 
-int file_lock(Path, int);
+int Path_lock_file(Path, int);
 
 #include "error.h"
 
@@ -341,10 +341,10 @@ static String _locked_packages(String command, int quiet){
     _x2c_error_handler_0 = NULL;
     x2c_exception_leave(& _x2c_exception_frame_0);
   }
-  int held = file_lock(lock, 0);
+  int held = Path_lock_file(lock, 0);
   if(held < 0){
     if(! quiet) fprintf(stderr, "x2c: waiting for another install or removal in %s\n", packages);
-    held = file_lock(lock, 1);
+    held = Path_lock_file(lock, 1);
   }
   _packages_lock = held;
   return packages;
@@ -422,21 +422,21 @@ static void _release_packages(void){
   _packages_lock = - 1;
 }
 
-void driver_error(const char *);
+void Diagnostics_driver_error(const char *);
 
 static void _error(const char * message){
   _release_packages();
-  driver_error(String_join(NULL, cons(String_var(_4), cons(String_var(String_new(message)), NULL))));
+  Diagnostics_driver_error(String_join(NULL, cons(String_var(_4), cons(String_var(String_new(message)), NULL))));
 }
 
-void host_error(List);
+void Diagnostics_host_error(List);
 
 static void _host_error(List detail){
   _release_packages();
-  host_error(detail);
+  Diagnostics_host_error(detail);
 }
 
-int install_command(CliRequest request){
+int CliRequest_install(CliRequest request){
   if(! _init_guard_) _file_init_();
   Install i = _locked_install(request, Var_as_string(List_car(request -> inputs)));
   {
@@ -464,7 +464,7 @@ int install_command(CliRequest request){
 
 }
 
-List install_require(CliRequest request, String name, String version, List locked){
+List CliRequest_require_package(CliRequest request, String name, String version, List locked){
   if(! _init_guard_) _file_init_();
   Install i = _locked_install(request, name);
   {
@@ -596,7 +596,7 @@ static String _unpacked(Install * i){
 
 Path Path_absolute(Path);
 
-String cli_version(void);
+String Compiler_version(void);
 
 void Path_write_text(Path, String);
 
@@ -607,7 +607,7 @@ static void _mark_source(Install * i, String staged, String name){
   }
   ));
   Map record =({
-    Var _x2c_literal_part_2 = String_var(name);  Var _x2c_literal_part_3 = String_truth((* i).url) ? String_var((* i).url) : String_var(Path_absolute((* i).spec));  Var _x2c_literal_part_4 = String_var(cli_version());  Map_update_n(Map_new(), 3, String_var(_14), _x2c_literal_part_2, String_var(_15), _x2c_literal_part_3, String_var(_16), _x2c_literal_part_4);
+    Var _x2c_literal_part_2 = String_var(name);  Var _x2c_literal_part_3 = String_truth((* i).url) ? String_var((* i).url) : String_var(Path_absolute((* i).spec));  Var _x2c_literal_part_4 = String_var(Compiler_version());  Map_update_n(Map_new(), 3, String_var(_14), _x2c_literal_part_2, String_var(_15), _x2c_literal_part_3, String_var(_16), _x2c_literal_part_4);
   }
   );
   if(String_truth(version)) Map_setindex(record, String_var(_17), String_var(version));
@@ -630,7 +630,7 @@ int Path_is_file(Path);
 
 static void _check_bundle(CliRequest request, String package, String name){
   String built = _marker_string(String_join(NULL, cons(String_var(package), cons(String_var(_12), NULL))), _16);
-  String current = cli_version();
+  String current = Compiler_version();
   if(! String_truth(built)) _error(String_join(NULL, cons(String_var(_23), cons(String_var(name), cons(String_var(_24), NULL)))));
   if(! String_equal(built, current) && ! request -> force) _error(String_join(NULL, cons(String_var(_23), cons(String_var(name), cons(String_var(_25), cons(String_var(built), cons(String_var(_26), cons(String_var(current), cons(String_var(_27), NULL)))))))));
   if(! Path_is_file(String_join(NULL, cons(String_var(package), cons(String_var(_28), cons(String_var(name), cons(String_var(_29), NULL))))))) _error(String_join(NULL, cons(String_var(_23), cons(String_var(name), cons(String_var(_30), cons(String_var(name), cons(String_var(_29), NULL)))))));
@@ -946,11 +946,11 @@ static List _index_row(CliRequest request, String name, String work){
   return NULL;
 }
 
-String home_packages(void);
+String Compiler_home_packages(void);
 
 static String _home_packages(String command){
-  String packages = home_packages();
-  if(! String_truth(packages)) driver_error(String_join(NULL, cons(String_var(command), cons(String_var(_94), NULL))));
+  String packages = Compiler_home_packages();
+  if(! String_truth(packages)) Diagnostics_driver_error(String_join(NULL, cons(String_var(command), cons(String_var(_94), NULL))));
   return packages;
 }
 
@@ -1096,14 +1096,14 @@ static List _files_with(String directory, String suffix){
   return Array_list_free(paths);
 }
 
-int remove_command(CliRequest request){
+int CliRequest_remove_package(CliRequest request){
   if(! _init_guard_) _file_init_();
   String name = Var_as_string(List_car(request -> inputs));
   String target =({
     Var _x2c_literal_part_34 = String_var(_home_packages(_120));  String_join(NULL, cons(_x2c_literal_part_34, cons(String_var(_2), cons(String_var(name), NULL))));
   }
   );
-  if(! String_is_identifier(name)) driver_error(String_join(NULL, cons(String_var(_121), cons(String_var(name), cons(String_var(_10), NULL)))));
+  if(! String_is_identifier(name)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_121), cons(String_var(name), cons(String_var(_10), NULL)))));
   _check_removable(target, name);
   _locked_packages(_120, request -> quiet);
   {
@@ -1170,11 +1170,11 @@ int remove_command(CliRequest request){
 }
 
 static void _check_removable(String target, String name){
-  if(! Path_exists(target)) driver_error(String_join(NULL, cons(String_var(_121), cons(String_var(name), cons(String_var(_10), NULL)))));
-  if(! String_truth(_installed_kind(target))) driver_error(String_join(NULL, cons(String_var(_122), cons(String_var(target), cons(String_var(_123), NULL)))));
+  if(! Path_exists(target)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_121), cons(String_var(name), cons(String_var(_10), NULL)))));
+  if(! String_truth(_installed_kind(target))) Diagnostics_driver_error(String_join(NULL, cons(String_var(_122), cons(String_var(target), cons(String_var(_123), NULL)))));
 }
 
-int list_command(CliRequest request){
+int CliRequest_list_packages(CliRequest request){
   if(! _init_guard_) _file_init_();
   String packages = _home_packages(_124);
   {

@@ -367,7 +367,7 @@ static List _indirect_func_value(
   List context = c.sym.introduce(c.fresh_name("func_pointer_context"));
   List declaration = _func_context_declaration(
     c, context_type, context, expression);
-  String field_name = binding_identity_spelling(context_field);
+  String field_name = Ast.binding_spelling(context_field);
   List pointer = %(
     expr $pointer_type
       (op . ${_func_bound(context_type, context)} ($field_name)));
@@ -407,7 +407,7 @@ static List _build_indirect_func_adapter(
   List context_local = c.sym.introduce(c.fresh_name("func_pointer_context"));
   List context_declaration = _context_local(
     c, context_type, context_local, fn_binding);
-  String field_name = binding_identity_spelling(field_binding);
+  String field_name = Ast.binding_spelling(field_binding);
   List context = _func_bound(context_pointer, context_local);
   List target = $!($pointer_type){ $context->$field_name };
   List adapter = _build_func_adapter(

@@ -17,9 +17,9 @@
 #include "format.h"
 #include "emit.h"
 #include "utils.h"
-void generate_code(Compiler c, List ast, String dir);
+void Compiler_generate_code(Compiler c, List ast, String dir);
 
-List generate_code_text(Compiler c, List ast, String basename);
+List Compiler_generate_code_text(Compiler c, List ast, String basename);
 
 List Compiler_initializer_function(Compiler c, Type type, List name, List body);
 

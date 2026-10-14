@@ -304,7 +304,7 @@ static void _interpreter_ownership(ReplSession s) {
     <defined>, void);
   _expect(s, "trouble();", <value>, 3);
   Var value;
-  if (s.compiler.macro_lisp.try_get("C._globals", value) ||
+  if (s.compiler.macro_lisp.try_get("C.globals", value) ||
       s.compiler.macro_lisp.try_get("wide", value)) {
     fputs("interpreter definitions leaked into compiler Lisp\n", stderr);
     failures++;

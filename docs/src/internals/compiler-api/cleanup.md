@@ -12,31 +12,22 @@ Cleanup regions and the transfers that leave them.
 
 | Function | Summary |
 | --- | --- |
-| [`builtin_defer_captures`](#builtin_defer_captures) | Writes captured addresses in the order capture selection established. |
-| [`builtin_defer_record`](#builtin_defer_record) | Selects the record shape; captured records keep the environment beside the record in the region's scope. |
+| [`Ast.defer_captures`](#Ast.defer_captures) | Writes captured addresses in the order capture selection established. |
 | [`Compiler.lower_cleanup`](#Compiler.lower_cleanup) | Lowers the cleanup regions and transfers of the completed top-level `node`; other nodes pass through. |
 | [`Compiler.lower_defer_region`](#Compiler.lower_defer_region) | Returns the region that runs `finalizer` when `body` leaves. |
 | [`Compiler.rewrite_defer_list`](#Compiler.rewrite_defer_list) | Returns `stmts` with each `defer` statement and the statements after it replaced by one region; a list without `defer` returns unchanged. |
 | [`Compiler.static_value_is_runtime`](#Compiler.static_value_is_runtime) | Reports whether the static initializer `value` has to run at runtime, because it calls, allocates, or reads an object other than a function name. |
 
-### Functions
+### `Ast`
 
-#### builtin_defer_captures
+<a id="Ast.defer_captures"></a>
+#### Ast.defer_captures
 
-`List builtin_defer_captures(List environment, List records)`
+`List Ast.defer_captures(List environment, List records)`
 
 Writes captured addresses in the order capture selection established.
 
 Source: `src/cleanup.x:759`
-
-#### builtin_defer_record
-
-`List builtin_defer_record( List record, List callback, List environment, List records)`
-
-Selects the record shape; captured records keep the environment beside
-the record in the region's scope.
-
-Source: `src/cleanup.x:746`
 
 ### `Compiler`
 

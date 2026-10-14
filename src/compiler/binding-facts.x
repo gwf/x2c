@@ -11,7 +11,7 @@ String Compiler.emitted_binding_name(Compiler c, List binding) {
   Var renamed;
   Map facts = c.semantic_binding_facts();
   if (facts.try_get(%(emitted $binding), renamed)) return renamed;
-  return binding_identity_spelling(binding);
+  return Ast.binding_spelling(binding);
 }
 
 // The List a binding fact holds, or NULL when the fact is absent.

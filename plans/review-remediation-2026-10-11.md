@@ -337,7 +337,7 @@ do not become independent compilation units or acquire their own namespaces.
 
 **Package entry agreement.** A fresh local `.xp` source package installs
 successfully, but importing that installed package reports unknown package
-because `package_entry` searches only `.x`. Align source-entry recognition
+because `SourceView.package_entry` searches only `.x`. Align source-entry recognition
 between install and import. The recommended repair supports the `.xp` entry
 already accepted by installation, preserving existing `.x` precedence and
 package ownership. Verify installed import and a same-name entry precedence

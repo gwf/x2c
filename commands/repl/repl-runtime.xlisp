@@ -87,16 +87,16 @@
 // belongs to this interpreter; records hold their own session-owned bytes.
 
 (defun C.gread (id)
-  (if (eq? (Map.contains C._globals id) 0) 0
-      (Map.getindex C._globals id)))
+  (if (eq? (Map.contains C.globals id) 0) 0
+      (Map.getindex C.globals id)))
 
 (defun C.gwrite (id value)
-  (Map.setindex C._globals id
+  (Map.setindex C.globals id
     (if (eq? (Var_is_wide value) 0) value (C.session-copy value 0))))
 (defun C.grecord.write (id value size)
-  (if (eq? (Map.contains C._globals id) 0)
+  (if (eq? (Map.contains C.globals id) 0)
       (C.gwrite id (C.session-copy value size))
-      (C.copy (Map.getindex C._globals id) value size)))
+      (C.copy (Map.getindex C.globals id) value size)))
 
 // The library operations a lowered call resolves against, under the names
 // the typed AST already uses.

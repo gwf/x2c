@@ -159,7 +159,8 @@ static List _rewrite_statics(Compiler c, List code, StaticQueue &q) {
     match (item) {
       case %(!set ?declaration (declare *)):
         item = _rewrite_static(c, declaration, q);
-      case %(preproc ?content): q.arms = preproc_track_arms(q.arms, content);
+      case %(preproc ?content):
+        q.arms = Compiler.preproc_track_arms(q.arms, content);
     }
     output.push(item);
     for (int i = first; i < q.initializers.len(); i++) {
@@ -623,7 +624,7 @@ static void _add_calls(
   foreach (List initializer, definitions) {
     List helper = initializer.caddr(), arms = initializer[3];
     List call = _helper_call(q.c, helper);
-    foreach (List statement, preproc_within_arms(arms, %($call)))
+    foreach (List statement, Compiler.preproc_within_arms(arms, %($call)))
       q.c.add_init(area, statement);
   }
 }
@@ -635,7 +636,7 @@ static void _report_cycle(StaticQueue &q) {
     List binding = initializer.car();
     if (q.state[binding] != <visiting>) continue;
     if (!first) first = binding;
-    String name = binding_identity_spelling(binding);
+    String name = Ast.binding_spelling(binding);
     if (name) notes.push(%"initializer: $name");
   }
   Token token = NULL;

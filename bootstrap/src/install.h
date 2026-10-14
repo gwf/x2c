@@ -13,17 +13,17 @@
 #include <unistd.h>
 #include "digest.h"
 #include "json.h"
-int install_command(CliRequest request);
+int CliRequest_install(CliRequest request);
 
-List install_require(CliRequest request, String name, String version, List locked);
+List CliRequest_require_package(CliRequest request, String name, String version, List locked);
 
 String install_version(String name);
 
 List install_rows(String text);
 
-int remove_command(CliRequest request);
+int CliRequest_remove_package(CliRequest request);
 
-int list_command(CliRequest request);
+int CliRequest_list_packages(CliRequest request);
 
 
 #endif /* __GUARD_0x3CFE94DA__ */

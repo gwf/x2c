@@ -545,7 +545,7 @@ static String _input_name(Compiler c, String filename){
     Var _x2c_literal_part_0 = String_var(Compiler_canonical_path(c, Path_dirname(filename)));  Var _x2c_literal_part_1 = String_var(Path_basename(filename));  String_join(NULL, cons(_x2c_literal_part_0, cons(String_var(_4), cons(_x2c_literal_part_1, NULL))));
   }
   );
-  return ! String_equal(home_portable_path(canonical), canonical) ? canonical : filename;
+  return ! String_equal(Compiler_portable_path(canonical), canonical) ? canonical : filename;
 }
 
 static void _runtime_roles(Compiler c, const char * source){
@@ -665,7 +665,7 @@ static List _unit_private_rows(Compiler c, Map globs){
             Var name;
             name = _x2c_match_value_0;
             {
-              String path = home_absolute_path(Var_as_string(List_car(Var_list(owner))));
+              String path = Compiler_absolute_home_path(Var_as_string(List_car(Var_list(owner))));
               if(String_equal(Compiler_canonical_path(c, path), unit)) continue;
               Array_push(rows, List_var(_unit_private_row(globs, cons(name, NULL))));
               Array_push(rows, List_var(_unit_private_row(globs, cons(_22, cons(name, NULL)))));
@@ -774,7 +774,7 @@ static Compiler _run_cpp(Frontend frontend, ParsedUnit * unit){
   return cpp;
 }
 
-String preproc_marker_file(String, int *);
+String Compiler_preproc_marker_file(String, int *);
 
 static String _take_line_markers(Compiler cpp, String text){
   Array kept = Array_new(), markers = Array_new();
@@ -788,7 +788,7 @@ static String _take_line_markers(Compiler cpp, String text){
       line = Var_as_string(_x2c_macro_cursor_output_5);
       {
         int number = 0;
-        String file = String_startswith(line, _55) ? preproc_marker_file(line, &(number)) : NULL;
+        String file = String_startswith(line, _55) ? Compiler_preproc_marker_file(line, &(number)) : NULL;
         if(! String_truth(file)){
           Array_push(kept, String_var(line));
           position += String_len(line) + 1;
@@ -829,11 +829,11 @@ int Frontend_preload_macro_libraries(Frontend frontend){
   if(shared && ! _preload_meta_surface(frontend, shared)){
     Lisp_destroy(shared);
     Compiler_publish_macro_library(c, NULL);
-    collect_forget_provisional_entries();
+    Compiler_forget_provisional_entries();
     return 0;
   }
   Compiler_publish_macro_library(c, shared);
-  collect_forget_provisional_entries();
+  Compiler_forget_provisional_entries();
   return 1;
 }
 
@@ -920,7 +920,7 @@ void Compiler_select_native_modules(List);
 
 void Frontend_load_support(CliRequest request){
   if(! _init_guard_) _file_init_();
-  interface_configure(request -> out_dir, request -> no_interfaces);
+  Compiler_configure_interfaces(request -> out_dir, request -> no_interfaces);
   Compiler_select_native_modules(List_map(request -> native_modules, _x2c_func_handle_0));
 }
 
@@ -931,7 +931,7 @@ Frontend Frontend_new(CliRequest request){
   Frontend_load_support(request);
   Frontend f = Scope_calloc(1, sizeof(struct Frontend));
   f -> request = request;
-  f -> include_dirs = List_append(request -> include_dirs, default_include_dirs());
+  f -> include_dirs = List_append(request -> include_dirs, Compiler_default_include_dirs());
   f -> toolchain = Toolchain_new(request);
   Compiler_use_meta_toolchain(Toolchain_meta_cc(request -> meta_cc), f -> toolchain -> include_dir);
   return f;

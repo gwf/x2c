@@ -5,7 +5,7 @@
     The built-in macros expand through these functions, which run as native
     code inside the compiler. The compile-time Lisp in
     `etc/builtin-core.xlisp` and `etc/lisp-bindings.xlisp` calls them by
-    name, and `builtin_targets` binds each into the shared session.
+    name, and `Compiler.builtin_targets` binds each into the shared session.
 */
 #pragma once
 #include "x2c.x"
@@ -90,7 +90,7 @@ static List _foreach_expand(
   List declaration, List collection, List body, Var iterator, Var item,
   Var pair, Var object, Var cursor) {
   collection = ((Code) collection).promoted();
-  List targets = builtin_foreach_bindings(declaration);
+  List targets = Code.declared_bindings(declaration);
   Type type = ((Code) collection).type();
   int direct = type == %("Iter");
   List converter = direct ? %() : _converter(type);
@@ -116,7 +116,7 @@ static List _foreach_expand(
 
 /* The function that makes an Iter of a `type` value. */
 static List _converter(Type type) =>
-  type == %("Var") ? meta_function_reference("Var_iter")
+  type == %("Var") ? MetaContext.function_reference("Var_iter")
                     : type.protocol_member("iter");
 
 /* The cursor loop's `(function cursor-type output-types)` for a
@@ -126,7 +126,7 @@ static List _converter(Type type) =>
 static List _cursor_spec(List collection_type) {
   if (!_atom_type(collection_type)) return %();
   String owner = collection_type.car().str();
-  Code function = meta_function_reference(owner + "_try_next");
+  Code function = MetaContext.function_reference(owner + "_try_next");
   if (!function) return %();
   Type type = function.type();
   List parameters = type.parameters();
@@ -172,7 +172,7 @@ static List _with_cursor(Foreach &f, List spec) {
   List function = spec[0], cursor_type = spec[1], types = spec[2];
   int by_reference = spec.len() > 3;
   List outputs = types.map(
-    %!(Var type) => %($type ${builtin_foreach_unique("cursor_output")}));
+    %!(Var type) => %($type ${MetaContext.fresh_binding("cursor_output")}));
   List values = outputs.map(%!(List record) => _expr(record[0], record[1]));
   List addresses = by_reference ? values : values.map(
     %!(List value) => _address(value));
@@ -205,9 +205,9 @@ static List _cursor_assignments(List targets, List outputs) {
 static List _with_iter(Foreach &f, List converter) {
   List constructor = _iter_constructor(f, converter);
   List item_expression = _expr(%("Var"), f.item);
-  List initializer = builtin_foreach_complete(
+  List initializer = Code.complete_iterator(
     constructor ? _iter_call(constructor, f.collection) : f.collection);
-  Code next = meta_function_reference("Iter_try_next");
+  Code next = MetaContext.function_reference("Iter_try_next");
   List output = next.type().parameters()[1];
   List item_argument = output.car() == <*>
     ? _address(item_expression) : item_expression;
@@ -236,7 +236,7 @@ static List _iter_constructor(Foreach &f, List converter) {
   String owner = atom ? type.car().str() : "";
   List enumerate = %();
   if (f.targets.len() == 2 && atom && type != %("Iter"))
-    enumerate = meta_function_reference(owner + "_enumerate");
+    enumerate = MetaContext.function_reference(owner + "_enumerate");
   return enumerate ? enumerate : converter;
 }
 
@@ -278,7 +278,7 @@ static List _class_expand(List capture) {
       "representation: Var has no fixed tag for an enum",
       %("give the enum a typedef and name that typedef instead"));
   return %($capture (declaration-recipe class.defaults
-    ($owner $type ${meta_invocation_location()})));
+    ($owner $type ${MetaContext.invocation_location()})));
 }
 
 /* One class declaration: its name `owner`, its declared `type`, and where
@@ -800,7 +800,7 @@ static List _binding_record(
   String group_name = Code.binding_spelling(group);
   String lisp_name = _binding_name(name);
   String function_name = Code.name(function);
-  List type = binding_native_type(function);
+  List type = Code.native_signature(function);
   List rows = _binding_rows_for(group_name, all_rows);
   foreach (Var installed, sealed)
     if (installed == group_name)
@@ -846,7 +846,7 @@ static List _binding_statements(List lisp, List rows) {
 
 static List _binding_statement(List lisp, List row) {
   match (row) case %(?group ?(String name) ?(String function) ?type): {
-    List signature = binding_literal_list(type);
+    List signature = MetaContext.literal_list(type);
     return $!{
       Lisp_bind($lisp, $name, Func_new(${x2c_ident(function)}, $signature));
     };
@@ -883,13 +883,13 @@ static List _binding_target(String bind_name, String name, String maker) {
   List func = _binding_call(
     maker,
     %(${_binding_ident(name)}
-      ${binding_literal_list(_binding_name_signature(name))}));
+      ${MetaContext.literal_list(_binding_name_signature(name))}));
   return %(${_binding_call("String_var", %(${$!String{ $bind_name }}))}
     ${_binding_call("Func_var", %($func))});
 }
 
 static List _binding_name_signature(String name) =>
-  binding_native_type(meta_function_reference(name));
+  Code.native_signature(MetaContext.function_reference(name));
 
 /* the Lisp names
 
@@ -904,11 +904,11 @@ static macro Stmt $builtin.row(Expr $rows, Expr $name, Expr $function) {
 
 /** Returns each built-in algorithm by the name compile-time code calls it
     with. */
-Map builtin_targets(void) {
+Map Compiler.builtin_targets(void) {
   Map rows = {};
   $builtin.row(rows, "builtin_scope_expand", _scope_expand);
   $builtin.row(rows, "x2c_func_call_arguments", x2c_func_call_arguments);
-  $builtin.row(rows, "builtin_defer_captures", builtin_defer_captures);
+  $builtin.row(rows, "Ast_defer_captures", Ast.defer_captures);
   $builtin.row(rows, "builtin_foreach_expand", _foreach_expand);
   $builtin.row(rows, "builtin_auto_expand", _auto_expand);
   $builtin.row(rows, "builtin_auto_release", _auto_release);

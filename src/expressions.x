@@ -1004,7 +1004,7 @@ int Compiler.needs_resolution(Compiler c, Var value) {
 
 static int _identifier_needs_resolution(
   Compiler c, List binding) {
-  String spelling = binding_identity_spelling(binding);
+  String spelling = Ast.binding_spelling(binding);
   Map facts = c.semantic_binding_facts();
   int retained_parameter = %(lambda-param $binding) in facts;
   int retained_capture = %(lambda-depth $binding) in facts;
@@ -1125,7 +1125,7 @@ static List _operator(Resolve &r, List parts) {
 }
 
 static List _binding(Resolve &r, List binding) {
-  if (!binding_identity_try_parts(binding, NULL, NULL)) return r.input;
+  if (!Ast.try_binding(binding, NULL, NULL)) return r.input;
   return _resolve_identifier(r.c, binding, r.type, r.origin);
 }
 
@@ -1176,7 +1176,7 @@ static List _resolve_identifier(
   int require_type = 0;
   List binding = _identifier_binding(c, value, type, origin, require_type);
   if (c.macro_holes && binding) {
-    String name = binding_identity_spelling(binding);
+    String name = Ast.binding_spelling(binding);
     int free = _template_free_name(c, binding);
     if (c.macro_holes[%(using $name)] is <list> ||
         (free && type && !c.sym.binding_is_local(binding)))
@@ -1189,7 +1189,7 @@ static List _resolve_identifier(
   if (!binding && macro_binder) return %(expr (<macro-expr>) (ident $value));
   if (!binding) $report.type.binding_unknown(c, value, origin);
   Map binding_facts = c.semantic_binding_facts();
-  String spelling = binding_identity_spelling(binding);
+  String spelling = Ast.binding_spelling(binding);
   _capture_identifier(c, binding);
   int kept = 0;
   match (value) case %(binding-global *): kept = 1;
@@ -1238,7 +1238,7 @@ static List _identifier_binding(
   List name = value;
   int identity = 0;
   String spelling = NULL;
-  if (binding_identity_try_parts(name, identity, spelling)) {
+  if (Ast.try_binding(name, identity, spelling)) {
     Map facts = c.semantic_binding_facts();
     Var issued, source;
     if (!facts.try_get(%(known $identity), issued) ||
@@ -1333,7 +1333,7 @@ static int _shadow_identifier(
 static int _expansion_introduced(Compiler c, List binding) {
   int identity = 0;
   return c.macro_stack &&
-         binding_identity_try_parts(binding, identity, NULL) &&
+         Ast.try_binding(binding, identity, NULL) &&
          identity > c.expansion_floor;
 }
 
@@ -1356,10 +1356,10 @@ static Type _identifier_type(
    reference written in an `.x` unit is reported. */
 static void _check_unit_static(
   Compiler c, String spelling, Token origin) {
-  if (!is_source_file(c.filename)) return;
+  if (!Path.is_x2c_source(c.filename)) return;
   List owner = c.sym.get(%("unit-static" $spelling));
   if (!owner) return;
-  String file = c.display_path(home_absolute_path(owner.car()));
+  String file = c.display_path(Compiler.absolute_home_path(owner.car()));
   $report.type.function_private(c, spelling, file, origin);
 }
 
@@ -1672,7 +1672,7 @@ static List _discarding_callee(
     index++;
   }
   if (!which) return callee;
-  String stem = binding_identity_spelling(binding);
+  String stem = Ast.binding_spelling(binding);
   if (!stem) return callee;
   List helper = c.discard_helper(binding, callee_type, stem, which);
   if (!helper) return callee;
@@ -1886,7 +1886,7 @@ static List _imported_method(
 
 static Type _receiver_relative_signature(
   Compiler c, List binding, Type signature, Type receiver) {
-  String spelling = binding_identity_spelling(binding);
+  String spelling = Ast.binding_spelling(binding);
   if (!spelling) return signature;
   Type relative = c.sym.get_exact(%(self $spelling));
   if (!relative) return signature;
@@ -2189,7 +2189,7 @@ static List _complete_iter_call(
   Compiler c, List expression, List callee, List arguments,
   List parameters, List binding) {
   Type result = expression.cadr();
-  String name = binding_identity_spelling(binding);
+  String name = Ast.binding_spelling(binding);
   if (!_exact_iter_type(result) || name == "Iter_unzip" ||
       _parameters_variadic(parameters))
     return expression;
@@ -3026,7 +3026,7 @@ static void _note_explicit_converter(
   if (!result.match(%(?))) return;
   match (call) case $called(?callee, ?argument): {
     match (callee) case %(expr ? (ident ?binding)):
-      if (Compiler.supplies_native_meta(binding_identity_spelling(binding)))
+      if (Compiler.supplies_native_meta(Ast.binding_spelling(binding)))
         return;
     String spelled = result.car().str().lower();
     if (method != spelled && (method != "str" || result !== %("String")))
@@ -3160,7 +3160,7 @@ static const PrintfFn printf_family_info[] = {
 const PrintfFn *List.printf_family(List l) {
   match (l)
     case %(expr ?type ${$source_identifier_content(%(?binding))}): {
-      String name = binding_identity_spelling(binding);
+      String name = Ast.binding_spelling(binding);
       int count = sizeof(printf_family_info) / sizeof(printf_family_info[0]);
       for (int i = 0; i < count; i++) {
         const PrintfFn *info = &printf_family_info[i];
@@ -3411,7 +3411,7 @@ static List _convert_untyped(
   if (target_is_var && expr.match(
     %(expr () ${$source_identifier_content(%((binding ? ?)))}))) {
     List binding = expr.caddr().cadr();
-    if (binding_identity_spelling(binding) == "NULL")
+    if (Ast.binding_spelling(binding) == "NULL")
       return %(expr ("Var") (call "Var_null" (args)));
     $report.type.var_unresolved(c, NULL);
   }
@@ -3700,7 +3700,7 @@ int Compiler.is_builtin_converter_call(Compiler c, List expr) {
       else match (callee)
         case %(expr ? ${$source_identifier_content(%(?bound))}): {
           binding = bound;
-          spelling = binding_identity_spelling(binding);
+          spelling = Ast.binding_spelling(binding);
         }
       if (spelling != _converter_name(source, target)) return 0;
       Type declared = NULL;
@@ -3733,7 +3733,7 @@ static void _check_null_reference(
   if (_integer_literal_kind(expr, NULL) == <zero> ||
       (expr.match(
         %(expr () ${$source_identifier_content(%((binding ? ?)))})) &&
-       binding_identity_spelling(expr.caddr().cadr()) == "NULL"))
+       Ast.binding_spelling(expr.caddr().cadr()) == "NULL"))
     $report.type.ref_null(c, target);
 }
 

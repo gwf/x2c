@@ -12,13 +12,14 @@ The built-in macros' compile-time algorithms.
 
 | Function | Summary |
 | --- | --- |
-| [`builtin_targets`](#builtin_targets) | Returns each built-in algorithm by the name compile-time code calls it with. |
+| [`Compiler.builtin_targets`](#Compiler.builtin_targets) | Returns each built-in algorithm by the name compile-time code calls it with. |
 
-### Functions
+### `Compiler`
 
-#### builtin_targets
+<a id="Compiler.builtin_targets"></a>
+#### Compiler.builtin_targets
 
-`Map builtin_targets(void)`
+`Map Compiler.builtin_targets(void)`
 
 Returns each built-in algorithm by the name compile-time code calls it
 with.
@@ -30,4 +31,4 @@ Source: `src/builtins.x:907`
 The built-in macros expand through these functions, which run as native
 code inside the compiler. The compile-time Lisp in
 `etc/builtin-core.xlisp` and `etc/lisp-bindings.xlisp` calls them by
-name, and `builtin_targets` binds each into the shared session.
+name, and `Compiler.builtin_targets` binds each into the shared session.
