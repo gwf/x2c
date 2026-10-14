@@ -128,8 +128,11 @@ List Compiler.replay_declaration_source(Compiler c) {
   List source = c.sym.get(_declaration_source_key(c, c.token));
   match (source)
     case %(declaration-source ?(int end) ?syntax ?facts): {
-      _restore_declaration_bindings(c, syntax, facts, {});
-      List bound = c.bind_syntax(syntax, AST_UNIT, NULL);
+      List bound;
+      $let(c.replaying_declaration, 1) {
+        _restore_declaration_bindings(c, syntax, facts, {});
+        bound = c.bind_syntax(syntax, AST_UNIT, NULL);
+      }
       while (c.peek(0) != <eof> && c.token.pos < end) c.next();
       return bound;
     }
@@ -138,7 +141,7 @@ List Compiler.replay_declaration_source(Compiler c) {
 
 /* Register only this production's identities. Shared macro frames are
    visited once, and later source declarations keep their ordinary order. */
-static void _restore_declaration_bindings(
+module void _restore_declaration_bindings(
   Compiler c, Var syntax, Map facts, Map seen) {
   if (syntax is not <list> || syntax in seen) return;
   seen[syntax] = 1;

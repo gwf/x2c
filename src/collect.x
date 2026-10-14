@@ -91,6 +91,15 @@ static macro Stmt $report.driver.module_member(
     "names it"));
 }
 
+static macro Stmt $report.driver.module_prefix(
+  Expr $c, Expr $site, Expr $member, Expr $other) {
+  $c.report_error(
+    <driver>,
+    %"module member '${$member}' takes the static prefix of '${$other}'",
+    $site, %("a file's statics take its path with each non-identifier"
+    "character made '_'; rename one of the files"));
+}
+
 static macro Stmt $report.driver.module_read(
   Expr $c, Expr $site, Expr $path) {
   $c.report_error(
@@ -318,11 +327,14 @@ static void _merge_rows(Compiler c, Map globs, Map rows) {
 /* Assembles one text from a module's files. `line` is the text line that
    the next byte written begins. `path` and `text` are the file being
    appended, and `prefix` is its directory relative to the entry's, or NULL
-   for the entry. `splicing` holds the resolved paths of the files being
-   appended. */
+   for the entry. `file_prefix` begins the spellings of that file's statics,
+   and `prefixes` maps each file prefix taken to the name of its file.
+   `root` is the entry's resolved companion directory. `splicing` holds
+   the resolved paths of the files being appended. */
 static typedef struct Splice {
-  Compiler c, Buffer out, Array markers, Map members, splicing, int line;
-  String path, text, prefix;
+  Compiler c, Buffer out, Array markers, Map members, splicing, prefixes;
+  int line;
+  String path, text, prefix, file_prefix, root;
 } Splice;
 
 /** Returns the x2c source at `path`, whose own text is `text`, with its
@@ -338,9 +350,12 @@ ModuleSource Compiler.module_source(Compiler c, String path, String text) {
   Buffer out = $auto(Buffer.new(0));
   Splice s = {
     .c = c, .out = out, .markers = [], .members = {}, .splicing = {},
-    .line = 1};
+    .prefixes = {}, .line = 1,
+    .root = Path.absolute(Path.join(Path.dirname(path), Path.stem(path)))};
   s.splicing[Path.absolute(path)] = 1;
-  if (!_file(s, path, text, NULL)) return NULL;
+  String own = _file_prefix(Path.stem(path));
+  s.prefixes[own] = Path.basename(path);
+  if (!_file(s, path, text, NULL, own)) return NULL;
   ModuleSource source = Scope.calloc(1, sizeof(struct ModuleSource));
   *source = (struct ModuleSource) {
     .text = s.out.str(), .own = text, .markers = s.markers,
@@ -353,14 +368,16 @@ ModuleSource Compiler.module_source(Compiler c, String path, String text) {
 static int _spells_block(const char *text) =>
   text && strstr(text, "module");
 
-/* Appends a file with its block spliced and reports whether it had one. A
-   member's text is marked as its own. Diagnostics locate the block in this
-   file. */
-static int _file(Splice &s, String path, String text, String prefix) {
+/* Appends a file with its block spliced and reports whether it had one.
+   Each file's text is marked as its own, so its rows carry its file
+   prefix. Diagnostics locate the block in this file. */
+static int _file(
+  Splice &s, String path, String text, String prefix, String file_prefix) {
   $let(s.path, path) $let(s.text, text) $let(s.prefix, prefix)
+  $let(s.file_prefix, file_prefix)
   $let(s.c.filename, path) $let(s.c.text, text)
   $let(s.c.line_markers, NULL) {
-    if (prefix) _mark(s, 1, 0);
+    _mark(s, 1, 0);
     Token block = _block(s), close = NULL;
     if (!block) {
       _own(s, 0, text.len(), 1);
@@ -441,10 +458,29 @@ static void _member(Splice &s, String spelling, Token site) {
     $report.driver.module_read(s.c, site, path);
   s.members[_canonical_path(path)] = _content_hash(text);
   String prefix = s.prefix ? Path.join(s.prefix, spelling) : spelling;
+  String relative = resolved[s.root.len() + 1:];
+  String own = _file_prefix(
+    Path.join(Path.dirname(relative), Path.stem(relative)));
+  if (own in s.prefixes)
+    $report.driver.module_prefix(s.c, site, spelling, s.prefixes[own]);
+  s.prefixes[own] = spelling;
   s.splicing[resolved] = 1;
-  _file(s, path, text, Path.dirname(prefix));
+  _file(s, path, text, Path.dirname(prefix), own);
   s.splicing.del(resolved);
   _end_line(s);
+}
+
+/* The prefix of a file's statics: its path under the entry's companion
+   directory, or the entry's stem, without the extension, with each
+   character that cannot continue a C identifier made `_`, then `__`. A
+   leading digit gets a leading `_`. */
+static String _file_prefix(String path) {
+  if (path.startswith("./")) path = path[2:];
+  Buffer spelling = $auto(Buffer.new(0));
+  if (isdigit((unsigned char) path[0])) spelling.write_char('_');
+  foreach (char ch, path)
+    spelling.write_char(isalnum((unsigned char) ch) ? ch : '_');
+  return %"${spelling}__";
 }
 
 /* Appends the file's text from byte `start` to `end`, which begins its
@@ -491,7 +527,8 @@ static void _mark(Splice &s, int line, int offset) {
   while (start > 0 && s.text[start - 1] != '\n') start--;
   String before = s.text[start:offset];
   s.markers.push(
-    %(${(int) s.out.len()} ${s.line} ${s.path} $line $offset $before));
+    %(${(int) s.out.len()} ${s.line} ${s.path} $line $offset $before
+      ${s.file_prefix}));
 }
 
 // Each file's text ends its last line before the next file's begins.

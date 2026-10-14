@@ -120,7 +120,7 @@ Token Token.skip_trivia(Token token) {
 }
 
 // The index after the last non-trivia token before the cursor.
-static long _end_index(Compiler c, Token tokens) =>
+module long _end_index(Compiler c, Token tokens) =>
   _skip_backward(c.token - 1, tokens) + 1 - tokens;
 
 static Token _skip_backward(Token token, Token origin) {
@@ -202,7 +202,7 @@ int Compiler.take_word(Compiler c, String word) {
   return 1;
 }
 
-static void _check_unmatched_braces(Compiler c) {
+module void _check_unmatched_braces(Compiler c) {
   if (!c.braces.len()) return;
   $report.parse.brace_missing(c, c.braces[-1]);
 }

@@ -183,7 +183,16 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
   `Compiler.source_token`
 - Member dependencies and the entry's content hash: `FileWalk` in
   `src/collect.x`
-- Tests: the `module-block` compiler fixtures
+- The `module` storage class: `_module_storage_form` in `src/parse.x`
+  retypes the word as `static` under `Compiler.module_declaration`
+- File-private statics: each marker row carries its file's prefix from
+  `_file_prefix` in `src/collect.x`; `_declared_key` in `src/symbols.x`
+  respells a static's key with `Compiler.private_prefix` and
+  `Compiler.declared_spelling`, which records prefixed spellings so derived
+  names keep theirs; `Sym.get` and `_lookup_from` try the current
+  file's key first, and `Compiler.unprefixed` restores the short name for
+  Var tags and descriptors
+- Tests: the `module-block` and `module-storage-class` compiler fixtures
 - See also: [module blocks](../reference/language.md#module-blocks)
 
 ### Exact Var-tag tests with `is` and `is not`

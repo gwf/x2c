@@ -15,7 +15,7 @@ String Compiler.emitted_binding_name(Compiler c, List binding) {
 }
 
 // The List a binding fact holds, or NULL when the fact is absent.
-static List _fact(Compiler c, List key) {
+module List _fact(Compiler c, List key) {
   Var stored;
   return c.semantic_binding_facts().try_get(key, stored) ? stored : NULL;
 }

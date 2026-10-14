@@ -1,1 +1,1 @@
-static int sub_value(void) => 41;
+module int sub_value(void) => 41;

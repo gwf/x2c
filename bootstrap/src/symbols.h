@@ -81,6 +81,8 @@ List Sym_get(Sym s, List key);
 
 List Sym_get_exact(Sym s, List key);
 
+int Sym_has_local(Sym s, List key);
+
 List Sym_lookup(Sym s, List key, Type * type);
 
 List Sym_reference(Sym s, List key, Type * type);
@@ -100,6 +102,16 @@ List Sym_bind_identity(Sym s, List context, List binding, List ast);
 Var Compiler_aggregate_name(Compiler c, Symbol kind, Var name, int definition);
 
 void Compiler_record_declaration_visibility(Compiler c, List declaration);
+
+String Compiler_private_prefix(Compiler c, Type type);
+
+String Compiler_scoped_spelling(Compiler c, String prefix, String name);
+
+String Compiler_declared_spelling(Compiler c, String prefix, String name);
+
+List Compiler_file_prefixes(Compiler c);
+
+String Compiler_unprefixed(Compiler c, String name);
 
 String Compiler_package_spelling(Compiler c, String name);
 

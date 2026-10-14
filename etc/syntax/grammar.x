@@ -31,6 +31,9 @@ List syntax_grammar(void) => %(grammar
     (rule private-interface
       (external "static typedef, protocol body, class, or Lisp interface item; D4"))
 
+    (rule module-declaration
+      (external "module before a file-scope declaration, read as static; D4"))
+
     (rule unit-item
       (choice
         (ref directive)
@@ -40,6 +43,7 @@ List syntax_grammar(void) => %(grammar
         (ref macro-definition)
         (ref keyword-definition)
         (ref private-interface)
+        (ref module-declaration)
         (ref lisp-escape)
         (ref linkage-group)
         (ref declaration-definition)

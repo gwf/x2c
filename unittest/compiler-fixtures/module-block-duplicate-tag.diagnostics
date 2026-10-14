@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/module-block-duplicate-tag/second.x:2:32: parse: two files of this module unit give a type named 'Node' a Var tag
+  static Var Node.var(Node node) => node.value;
+                                 ^
+  note: a type's Var tag comes from its name without the file prefix, so it must be unique in the unit; rename one of the types
+

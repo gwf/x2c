@@ -35,19 +35,19 @@ void Compiler.skip_script_statement(Compiler c) {
 
 /* A script unit either defines `main` or runs its top-level statements, so
    a statement beside `main` is the one form it rejects. */
-static void _reject_statement(Compiler c) {
+module void _reject_statement(Compiler c) {
   if (c.script && c.script.defines_main && c.script_statement_executes())
     _report_script_statement(c);
 }
 
-static void _report_script_statement(Compiler c) {
+module void _report_script_statement(Compiler c) {
   $report.parse.script_main(c);
 }
 
 /* A file-scope conditional directive also governs the statements it
    surrounds, so a copy of each joins the statement runs in source order and
    the script body keeps the file's conditional structure. */
-static void _push_conditionals(
+module void _push_conditionals(
   Compiler c, Array statements, int first, int end) {
   Token tokens = c.tokenizer.tokens;
   for (int i = first; i < end; i++) {
@@ -66,7 +66,7 @@ static void _push_conditionals(
    function, so the `try` that reports an uncaught error leaves their locals
    ordinary. A failed command's status becomes the exit status; any other
    uncaught error exits with 1. */
-static const char *script_main =
+module const char *script_main =
   "static int x2c_script(int argc, char **argv, List args) {\n"
   "  (void) argc, (void) argv, (void) args;\n"
   "  x2c_script_statements\n"
@@ -92,7 +92,7 @@ static const char *script_main =
    The copy keeps every consumed token at its index, so recorded token
    indices stay valid, and drops the trivia already read before end of file.
    `statements` holds each run's first and past-the-end token index. */
-static void _append_script_main(Compiler c, Array statements) {
+module void _append_script_main(Compiler c, Array statements) {
   Token tokens = c.tokenizer.tokens, eof = c.token;
   long kept = _end_index(c, tokens);
   Token first = tokens + statements[0].integer();
@@ -134,7 +134,7 @@ static Bytes _append_placed(Bytes stream, Token token, Token first) {
    statements, which are locals of `x2c_script`. C would report such a name
    as undeclared; this names the cause and the `static` spelling that
    shares it. */
-static void _check_script_locals(Compiler c, List ast) {
+module void _check_script_locals(Compiler c, List ast) {
   Map locals = _script_locals(ast);
   if (!locals.len()) return;
   foreach (List node, ast) match (node)

@@ -24,6 +24,22 @@ static macro Stmt $report.parse.name_package(
     $c.token, NULL);
 }
 
+static macro Stmt $report.parse.module_shadow(Expr $c, Expr $name) {
+  $c.report_error(
+    <parse>,
+    %"'${$name}' is a module name and a static of one file in this unit",
+    $c.token, %("a module declaration's name means one thing in every file"
+    "of the unit; rename one of them"));
+}
+
+static macro Stmt $report.parse.module_tag(Expr $c, Expr $name) {
+  $c.report_error(
+    <parse>,
+    %"two files of this module unit give a type named '${$name}' a Var tag",
+    $c.token, %("a type's Var tag comes from its name without the file prefix,"
+    "so it must be unique in the unit; rename one of the types"));
+}
+
 static macro Stmt $report.parse.name_reserved(Expr $c, Expr $spelling) {
   $c.report_error(
     <parse>,
@@ -101,7 +117,7 @@ static macro Stmt $report.type.typedef_depth(Expr $c, Expr $origin) {
     The lowest `base_scopes` contain file-scope declarations. Active
     transactions retain the rows each write replaces in `undo`. */
 static typedef struct Sym {
-  Block scopes, Map globals, statics, binding_facts;
+  Block scopes, Map globals, statics, binding_facts, prefixed;
   int base_scopes, local_macro_names;
   Block undo, int transactions;
   // Owning compiler, so type resolution can report its own diagnostics.
@@ -118,6 +134,7 @@ Sym Sym.new(Compiler c) {
   s.binding_facts = {};
   s.scopes = Block.new(sizeof(SymScope));
   s.statics = {};
+  s.prefixed = {};
   s.undo = Block.new(sizeof(SymUndo));
   return s;
 }
@@ -175,6 +192,7 @@ static void _clear_symbols(Sym s, Map globals, int base_scopes) {
   s.scopes.clear();
   s.globals = globals != NULL ? globals : {};
   s.statics = {};
+  s.prefixed = {};
   s.base_scopes = base_scopes;
   s.local_macro_names = 0;
   s.binding_facts = {};
@@ -306,15 +324,27 @@ static int _retained_member(List key) =>
 List Sym.define(Sym s, List key, List type) {
   SymScope *scope = _scope_at(s, -1);
   s.set(key, type);
-  _seed_var_tag(key, type);
+  _seed_var_tag(s, key, type);
   return _scope_binding(s, *scope, key);
 }
 
-static void _seed_var_tag(List key, List type) {
+/* A module file's static type keeps its short name as its tag, which no
+   other type of the unit may take. */
+static void _seed_var_tag(Sym s, List key, List type) {
   String owner = _var_converter_owner(key, type);
   if (!owner) return;
   String converter = %"${owner}_var", Type declared = %($owner);
-  declared.register_var_tag(owner, converter);
+  String name = s.c.unprefixed(owner);
+  if (s.c.file_prefixes()) _claim_class_tag(s, name, owner);
+  declared.register_var_tag(name, converter);
+}
+
+static void _claim_class_tag(Sym s, String name, String owner) {
+  List fact = %(class-tag ${name.lower()});
+  Var claimed;
+  if (s.binding_facts.try_get(fact, claimed) && claimed != owner)
+    $report.parse.module_tag(s.c, name);
+  s.put(s.binding_facts, fact, owner);
 }
 
 /* A declared `Var T.var(T)` is the conformance marker that lets a named
@@ -333,7 +363,7 @@ static String _var_converter_owner(List key, List type) {
 void Sym.seed_var_tags(Sym s, Map symbols) {
   if (!symbols) return;
   foreach (Var (key, type), symbols)
-    if (key is <list> && type is <list>) _seed_var_tag(key, type);
+    if (key is <list> && type is <list>) _seed_var_tag(s, key, type);
 }
 
 /** Defines `key` in the unit's writable base scope.
@@ -346,7 +376,7 @@ void Sym.seed_var_tags(Sym s, Map symbols) {
 void Sym.define_global(Sym s, List key, List type) {
   SymScope *scope = _scope_at(s, s.base_scopes - 1);
   s.put(scope.symbols, key, type);
-  _seed_var_tag(key, type);
+  _seed_var_tag(s, key, type);
 }
 
 /** Associates an enumerator key with its owner in the active scope. */
@@ -460,24 +490,46 @@ void Compiler.drop_fact(Compiler c, Var key) =>
 
 // lookup
 
-/** Returns `key`'s type, retrying a bare key in package space, or `NULL`. */
+/** Returns `key`'s type, or `NULL`. A plain key tries the current module
+    file's static spelling first and retries a miss in package space. */
 List Sym.get(Sym s, List key) {
-  List found = s.get_exact(key);
+  List found = _get_from(s, key, _file_key(s, key));
   if (found) return found;
   List retry = _package_retry_key(s, key);
   return retry ? s.get_exact(retry) : NULL;
 }
 
 /** Returns `key`'s type without package fallback, or `NULL`. */
-List Sym.get_exact(Sym s, List key) {
+List Sym.get_exact(Sym s, List key) => _get_from(s, key, NULL);
+
+/** Reports whether a scope inside the base scopes declares `key`. */
+int Sym.has_local(Sym s, List key) {
+  for (int i = (int) s.scopes.len() - 1; i >= s.base_scopes; i--)
+    if (key in _scope_at(s, i).symbols) return 1;
+  return 0;
+}
+
+/* `own`, the current module file's spelling of `key`, comes first at file
+   scope, so a file's statics shadow the unit's other names there. */
+static List _get_from(Sym s, List key, List own) {
   Var val;
   for (int i = (int) s.scopes.len() - 1; i >= 0; i--) {
     Map scope = _scope_at(s, i).symbols;
+    if (own && i < s.base_scopes && scope.try_get(own, val)) return val;
     if (scope.try_get(key, val)) return val;
   }
   if (_retained_member(key) &&
       s.binding_facts.try_get(%(aggfact $key), val)) return val;
   return NULL;
+}
+
+/* A plain key's spelling among the current module file's statics, or NULL
+   outside a module unit. */
+static List _file_key(Sym s, List key) {
+  if (!s.c.line_markers || !key || key.cdr() || key.car() is not <string>)
+    return NULL;
+  String prefix = s.c.file_prefix();
+  return prefix ? %("$prefix${key.car()}") : NULL;
 }
 
 /* Package files may reference their own file-scope names bare. A plain-key
@@ -524,23 +576,35 @@ List Sym.reference_global(Sym s, List key) {
 
 static List _lookup_from(
   Sym s, List key, Type &?type, int first, int forward) {
-  Var found;
-  for (int i = first; i >= 0; i--) {
+  List binding = NULL;
+  int i = first;
+  for (; i >= s.base_scopes; i--) {
+    binding = _scope_find(s, *_scope_at(s, i), key, type);
+    if (binding) return binding;
+  }
+  List own = _file_key(s, key);
+  for (; i >= 0; i--) {
     SymScope *scope = _scope_at(s, i);
-    if (scope.symbols.try_get(key, found)) {
-      if (type) type = found;
-      return _scope_binding(s, *scope, key);
-    }
-    if (scope.bindings.try_get(key, found)) {
-      if (type) type = NULL;
-      return found;
-    }
+    if (own) binding = _scope_find(s, *scope, own, type);
+    if (!binding) binding = _scope_find(s, *scope, key, type);
+    if (binding) return binding;
   }
   List retry = _package_retry_key(s, key);
   if (retry && (!forward || s.get_exact(retry)))
     return _lookup_from(s, retry, type, first, forward);
   if (type) type = NULL;
   return forward ? _scope_binding(s, *_scope_at(s, -1), key) : NULL;
+}
+
+static List _scope_find(Sym s, SymScope &scope, List key, Type &?type) {
+  Var found;
+  if (scope.symbols.try_get(key, found)) {
+    if (type) type = found;
+    return _scope_binding(s, scope, key);
+  }
+  if (!scope.bindings.try_get(key, found)) return NULL;
+  if (type) type = NULL;
+  return found;
 }
 
 // declarations
@@ -553,7 +617,8 @@ static List _lookup_from(
     `restrict`, and `volatile`.
 */
 List Sym.declare(Sym s, List context, List key, List ast) {
-  if (s.c.package) key = _package_declared_key(s, context, key, ast);
+  if (s.c.package || s.c.line_markers)
+    key = _declared_key(s, context, key, ast);
   _check_spelling(s.c, _declared_spelling(key));
   Type ctxkey = %( @context @key ), type = ast.type_from_ast();
   Type declared_type = type;
@@ -572,23 +637,41 @@ List Sym.declare(Sym s, List context, List key, List ast) {
   return binding;
 }
 
-/* Package mode rewrites file-scope non-static declaration keys into the
-   package's `name__` space, so binding spellings, aggregate tags, and
-   derived Var converters carry the prefix everywhere they are read.
-   Statics keep their spellings (C internal linkage); anonymous aggregate
-   gensyms are not source spellings and stay in the compiler's space. */
-static List _package_declared_key(
-  Sym s, List context, List key, List ast) {
+/* A file-scope declaration's key takes its scope's spelling. A static of
+   a module file takes the file's prefix, so each file's statics have their
+   own keys; package mode puts other declarations in the package's `name__`
+   space. Binding spellings, aggregate tags, and derived Var converters then
+   carry the prefix everywhere they are read. Other statics keep their
+   spellings; anonymous aggregate gensyms are not source spellings and stay
+   in the compiler's space. */
+static List _declared_key(Sym s, List context, List key, List ast) {
   Compiler c = s.c;
   if ((int) s.scopes.len() != s.base_scopes) return key;
   if (context && !(context === %(typedef))) return key;
-  if (ast.type().is_static()) return key;
+  String prefix = c.private_prefix(ast);
   Var (head, tag) = key;
-  if (head is <string> && !key.cdr()) return %(${c.package_spelling(head)});
+  int plain = head is <string> && !key.cdr();
+  if (plain) _check_module_shadow(s, context, prefix, head, ast);
+  if (!prefix && (!c.package || ast.type().is_static())) return key;
+  if (plain) return %(${c.declared_spelling(prefix, head)});
   if ((head == <struct> || head == <union> || head == <enum>) &&
       key.cdr() && !key.cddr() && tag is <string>)
-    return %($head ${c.package_spelling(tag)});
+    return %($head ${c.declared_spelling(prefix, tag)});
   return key;
+}
+
+/* A `module` name has one meaning across the unit, so no file's static may
+   take its name, whichever is declared first. */
+static void _check_module_shadow(
+  Sym s, List context, String prefix, String name, List ast) {
+  Compiler c = s.c;
+  if (prefix && %(@context $name) in s.statics)
+    $report.parse.module_shadow(c, name);
+  if (!c.module_declaration ||
+      !(c.source_private > 0 || ast.type().is_static())) return;
+  foreach (String other, c.file_prefixes())
+    if (%(@context "$other$name") in s.statics)
+      $report.parse.module_shadow(c, name);
 }
 
 /* The declared spelling, when the key names one. Aggregate keys carry the
@@ -843,7 +926,74 @@ static void _record_binding_visibility(
   if (mark && name) c.sym.mark_static(%($name));
 }
 
-// package names
+// module and package names
+
+/** Returns the prefix that a file-scope declaration of `type` takes in the
+    current module file, or NULL. A static takes it, and so does each
+    declaration of a `static typedef` or `static class`; a `module`
+    declaration and every declaration outside a module unit do not. */
+String Compiler.private_prefix(Compiler c, Type type) {
+  if (c.module_declaration ||
+      !(c.source_private > 0 || (type && type.is_static())))
+    return NULL;
+  return c.file_prefix();
+}
+
+/** Returns `name` spelled in a declaration's scope: with `prefix`, a file
+    prefix, or else in the current package. A name the compiler derived
+    from a spelling this unit already prefixed, such as `second__Node_new`
+    or `Var_second__node` for a private class `second__Node`, stays
+    unchanged; it is unique in the unit, so code generated outside the file
+    still reaches it. */
+String Compiler.scoped_spelling(Compiler c, String prefix, String name) {
+  if (!prefix) return c.package_spelling(name);
+  if (!name || _derived_spelling(c.sym, name)) return name;
+  return %"$prefix$name";
+}
+
+/** Returns `name` as `scoped_spelling` does for a declaration, recording
+    a spelling that took `prefix` so the names the compiler derives from
+    it are known to hold their prefix already. A replayed collected
+    declaration was spelled when it was collected, so its names are final
+    and are recorded as they are. */
+String Compiler.declared_spelling(Compiler c, String prefix, String name) {
+  String spelled =
+    c.replaying_declaration ? name : c.scoped_spelling(prefix, name);
+  if (prefix && (spelled != name || c.replaying_declaration)) {
+    c.sym.prefixed[spelled] = 1;
+    c.sym.prefixed[spelled.lower()] = 1;
+  }
+  return spelled;
+}
+
+/* `name` is a recorded prefixed spelling, one followed by `_` and more,
+   or `Var_` and one in lower case. */
+static int _derived_spelling(Sym s, String name) {
+  if (!s.prefixed.len()) return 0;
+  if (name in s.prefixed) return 1;
+  if (name.startswith("Var_") && name[4:] in s.prefixed) return 1;
+  for (int at = 1; at < name.len() - 1; at++)
+    if (name[at] == '_' && name[:at] in s.prefixed) return 1;
+  return 0;
+}
+
+/** Returns the static prefix of each file of the module unit. */
+List Compiler.file_prefixes(Compiler c) {
+  Array prefixes = [];
+  if (c.line_markers)
+    foreach (List row, c.line_markers)
+      match (row) case %(? ? ? ? ? ? ?(String prefix)):
+        if (!(prefix in prefixes)) prefixes.push(prefix);
+  return prefixes.list_free();
+}
+
+/** Returns `name` without the static prefix of a file of this module unit.
+    Var tags and descriptor names use that short name. */
+String Compiler.unprefixed(Compiler c, String name) {
+  foreach (String prefix, c.file_prefixes())
+    if (name.startswith(prefix)) return name[prefix.len():];
+  return name;
+}
 
 /** Returns a name in the current package namespace, preserving prefixes.
 

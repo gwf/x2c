@@ -323,6 +323,10 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
   List slot = skip_body ? NULL : c.try_parse_macro_slot(<unit>);
   if (slot) return slot;
   if (c.keyword_form_is_definition()) return _keyword_definition(c, skip_body);
+  if (_module_storage_form(c)) {
+    c.token.type = <static>;
+    $let(c.module_declaration, 1) return c.parse_top_level_mode(skip_body);
+  }
   if (_static_interface_form(c)) {
     c.next();
     $let(c.source_private, 1) {
@@ -359,6 +363,20 @@ static int _static_interface_form(Compiler c) {
   return c.peek(1) == <typedef> ||
          (c.peek(1) == <"$("> && !c.macro_holes) ||
          c.peek(1) == <protocol> || next.text == "class";
+}
+
+/* `module` before a file-scope declaration declares a static name for
+   every file of the module unit. Its token becomes `static`, so the
+   declaration parses as a static one. The token's text stays `module`, so
+   a later parse of the same tokens recognizes it again. `module {` opens
+   the member block instead. */
+static int _module_storage_form(Compiler c) {
+  Symbol word = c.peek(0);
+  if (c.module_declaration || (word != <ident> && word != <static>) ||
+      c.token.text != "module") return 0;
+  Symbol next = Token.skip_trivia(c.token + 1).type;
+  return next == <ident> || next == <typedef> || next == <inline> ||
+         next.is_type_qualifier() || next.is_builtin_type();
 }
 
 /* Directives record native macro names and, in the full parse, the
@@ -542,6 +560,7 @@ int Compiler.script_statement_starts(Compiler c) {
     case <typedef>: case <static>: case <extern>: case <"}">:
       return 0;
   }
+  if (_module_storage_form(c)) return 0;
   if (c.test_static_assert() || c.keyword_form_is_definition() ||
       c.macro_form_is_definition() || c.meta_form_is_declaration() ||
       c.protocol_form_starts())
@@ -1276,7 +1295,7 @@ static Type _self_owner_type(Compiler c, List method) {
   String source = method.car();
   Type declared = c.sym.get(%($source));
   if (declared.is_typedef())
-    return %(${_package_type_reference(c, 0, source)});
+    return %(${_type_reference(c, 0, source)});
   Symbol builtin = Atom.intern(source);
   return builtin.is_builtin_type() ? %($builtin) : NULL;
 }
@@ -1476,18 +1495,23 @@ static List _typedef_name(Compiler c) {
   if (!name) name = c.package_member_spelling(c.token.text);
   if (!name) name = c.token.text;
   c.next();
-  if (c.package) name = _package_type_reference(c, 0, name);
+  if (c.package || c.line_markers) name = _type_reference(c, 0, name);
   return %($name);
 }
 
-/* Package files spell their own file-scope type names bare. A bare-key
-   miss with a prefixed hit re-spells the reference; ASTs carry raw
-   strings and emit literally. */
-static String _package_type_reference(
-  Compiler c, Symbol tag, String name) {
+/* Module and package files spell their own file-scope type names bare.
+   A block-scope typedef of the name shadows every file-scope one; then the
+   current module file's static of that name comes first. In package mode a
+   bare-key miss with a prefixed hit re-spells the reference. ASTs carry
+   raw strings and emit literally. */
+static String _type_reference(Compiler c, Symbol tag, String name) {
+  List bare = tag ? %($tag $name) : %($name);
+  if (!tag && c.sym.has_local(bare)) return name;
+  String own = c.scoped_spelling(c.file_prefix(), name);
+  if (own != name && c.sym.get_exact(tag ? %($tag $own) : %($own)))
+    return own;
   String prefixed = c.package_spelling(name);
   if (prefixed == name) return name;
-  List bare = tag ? %($tag $name) : %($name);
   if (c.sym.get_exact(bare)) return name;
   List hit = tag ? %($tag $prefixed) : %($prefixed);
   return c.sym.get_exact(hit) ? prefixed : name;
@@ -1501,7 +1525,8 @@ static List _struct_or_union(Compiler c) {
   c.next();
   _skip_attributes(c);
   List name = _tag_name(c);
-  if (name && c.package) name = _package_aggregate_name(c, tag, name);
+  if (name && (c.package || c.line_markers))
+    name = _scoped_aggregate_name(c, tag, name);
   List usedname = name ? name : c.gensym();
   usedname = %(${c.aggregate_name(
     tag, usedname.car(), c.peek(0) == <"{"> || c.peek(0) == <;>)});
@@ -1544,13 +1569,13 @@ static List _tag_name(Compiler c) {
 /* An aggregate definition takes the prefix its declaration key carries, so
    the tag, its member keys, and the pointee spellings recorded for it agree
    in the shallow collection an importing unit reads and in the full parse. */
-static List _package_aggregate_name(
-  Compiler c, Symbol tag, List name) {
+static List _scoped_aggregate_name(Compiler c, Symbol tag, List name) {
   // A template's tag slot supplies its exact spelling where it expands.
   if (name.car() is not <string>) return name;
   String spelling = name.car();
-  if (c.peek(0) == <"{">) return %(${c.package_spelling(spelling)});
-  return %(${_package_type_reference(c, tag, spelling)});
+  if (c.peek(0) == <"{">)
+    return %(${c.declared_spelling(c.private_prefix(NULL), spelling)});
+  return %(${_type_reference(c, tag, spelling)});
 }
 
 /* Publishes an aggregate whose tokens start at `first`. A constructed
@@ -1699,7 +1724,7 @@ List Compiler.parse_named_type(Compiler c) {
   List slot = c.try_parse_macro_slot(<named-type>);
   if (slot) return slot;
   Token start = c.token;
-  String name = c.package_spelling(c.token.text);
+  String name = c.declared_spelling(c.private_prefix(NULL), c.token.text);
   c.expect(<ident>);
   List key = %($name);
   if (!c.sym.get_exact(key)) c.sym.define(key, %(typedef $name));
@@ -1758,7 +1783,8 @@ static List _enum(Compiler c) {
   c.expect(<enum>);
   _skip_attributes(c);
   List name = _tag_name(c);
-  if (name && c.package) name = _package_aggregate_name(c, <enum>, name);
+  if (name && (c.package || c.line_markers))
+    name = _scoped_aggregate_name(c, <enum>, name);
   if (name && c.macro_holes)
     name = %(${c.aggregate_name(
       <enum>, name.car(), c.peek(0) == <"{"> || c.peek(0) == <;>)});

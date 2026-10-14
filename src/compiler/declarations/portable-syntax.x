@@ -167,7 +167,7 @@ static List _declaration_location(List location, int thaw) {
   return rows.list_free();
 }
 
-static String _declaration_path(String path, int thaw) {
+module String _declaration_path(String path, int thaw) {
   if (!path || path.startswith("<")) return path;
   return thaw ? Compiler.absolute_home_path(path)
               : Compiler.portable_path(path);

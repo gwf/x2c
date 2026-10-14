@@ -7,6 +7,7 @@ script-unit = ? script partition described in grammar.md entry points ? ;
 translation-unit = { unit-item } ;
 module-block = ( "module" , "{" , [ ( c-string , { ( "," , c-string ) } , [ "," ] ) ] , "}" ) ;
 private-interface = ? static typedef, protocol body, class, or Lisp interface item; D4 ? ;
+module-declaration = ? module before a file-scope declaration, read as static; D4 ? ;
 unit-item = ( directive |
     static-assert |
     import-declaration |
@@ -14,6 +15,7 @@ unit-item = ( directive |
     macro-definition |
     keyword-definition |
     private-interface |
+    module-declaration |
     lisp-escape |
     linkage-group |
     declaration-definition |

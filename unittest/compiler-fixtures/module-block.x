@@ -2,8 +2,8 @@
    unit translates as the one file it replaces. */
 #include "x2c.x"
 #include <stdio.h>
-static int helper(int value);
-static int counter;
+module int helper(int value);
+module int counter;
 
 module {
   "module-block/implementation.x",

@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/module-block-shadow/second.x:1:18: parse: 'depth' is a module name and a static of one file in this unit
+  static int depth = 2;
+                   ^
+  note: a module declaration's name means one thing in every file of the unit; rename one of them
+

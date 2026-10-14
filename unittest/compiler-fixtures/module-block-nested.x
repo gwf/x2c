@@ -2,7 +2,7 @@
    companion directory. A member's include of a file beside it reaches that
    file. */
 #include <stdio.h>
-static int base = 10;
+module int base = 10;
 
 module {
   "module-block-nested/inner.x",
