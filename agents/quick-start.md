@@ -168,6 +168,7 @@ required sequence.
 | `make examples` | Check the curated executable examples manifest. |
 | `make examples-update` | Accept intentional, reviewed example-output changes. |
 | `make doc-examples` | Compile the book's code examples; optional. |
+| `make doc-pdf` | Typeset the complete book with Pandoc and Typst; see [PDF setup](../docs/README.md#pdf). |
 | `make packages-check` | Check packages with their prepared dependency cache; outside `check`. |
 | `make sanity-check` | Refresh bootstrap, rebuild stage 0, and build through stage 3 without checks. |
 | `make build-recovery` | Check that an interrupted stage build removes partial objects and replaces archives. |

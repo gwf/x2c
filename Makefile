@@ -20,7 +20,7 @@ VERIFY_TARGETS = verify-sanitize verify-fixtures verify-fixtures-update \
 	build-recovery check-native-modules packages-check
 DIFF_TARGETS = stage-diff-0 stage-diff-1 stage-diff-2 stage-diff-3 \
 	stage-diff-all
-DOC_TARGETS = doc-generate doc-check doc-examples doc-outputs doc-build \
+DOC_TARGETS = doc-generate doc-check doc-examples doc-outputs doc-build doc-pdf \
 	doc-serve \
 	examples-update
 SITE_TARGETS = site site-build site-check site-serve
@@ -332,6 +332,16 @@ doc-build: site/node_modules/.package-lock.json		## Render the documentation boo
 		exit 1; \
 	}
 	mdbook build docs
+
+PANDOC ?= pandoc
+TYPST ?= typst
+
+doc-pdf:						## Typeset the book as a PDF (Pandoc 3.12+, Typst 0.15+)
+	@mkdir -p docs/book
+	cd docs/src && $(PANDOC) SUMMARY.md --from=commonmark_x --to=typst \
+		--lua-filter=../../tools/book-pdf.lua --template=../book.typ \
+		--syntax-highlighting=none --pdf-engine=$(TYPST) \
+		--output=../book/x2c-book.pdf
 
 doc-serve: site/node_modules/.package-lock.json		## Serve the book with live reload
 	@command -v mdbook >/dev/null 2>&1 || { \
