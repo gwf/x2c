@@ -1,0 +1,1 @@
+static typedef double Number;

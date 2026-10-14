@@ -1500,16 +1500,18 @@ static List _typedef_name(Compiler c) {
 }
 
 /* Module and package files spell their own file-scope type names bare.
-   The current module file's static of that name comes first. In package
-   mode a bare-key miss with a prefixed hit re-spells the reference. ASTs
-   carry raw strings and emit literally. */
+   A block-scope typedef of the name shadows every file-scope one; then the
+   current module file's static of that name comes first. In package mode a
+   bare-key miss with a prefixed hit re-spells the reference. ASTs carry
+   raw strings and emit literally. */
 static String _type_reference(Compiler c, Symbol tag, String name) {
+  List bare = tag ? %($tag $name) : %($name);
+  if (!tag && c.sym.has_local(bare)) return name;
   String own = c.scoped_spelling(c.file_prefix(), name);
   if (own != name && c.sym.get_exact(tag ? %($tag $own) : %($own)))
     return own;
   String prefixed = c.package_spelling(name);
   if (prefixed == name) return name;
-  List bare = tag ? %($tag $name) : %($name);
   if (c.sym.get_exact(bare)) return name;
   List hit = tag ? %($tag $prefixed) : %($prefixed);
   return c.sym.get_exact(hit) ? prefixed : name;
@@ -1572,7 +1574,7 @@ static List _scoped_aggregate_name(Compiler c, Symbol tag, List name) {
   if (name.car() is not <string>) return name;
   String spelling = name.car();
   if (c.peek(0) == <"{">)
-    return %(${c.scoped_spelling(c.private_prefix(NULL), spelling)});
+    return %(${c.declared_spelling(c.private_prefix(NULL), spelling)});
   return %(${_type_reference(c, tag, spelling)});
 }
 
@@ -1722,7 +1724,7 @@ List Compiler.parse_named_type(Compiler c) {
   List slot = c.try_parse_macro_slot(<named-type>);
   if (slot) return slot;
   Token start = c.token;
-  String name = c.scoped_spelling(c.private_prefix(NULL), c.token.text);
+  String name = c.declared_spelling(c.private_prefix(NULL), c.token.text);
   c.expect(<ident>);
   List key = %($name);
   if (!c.sym.get_exact(key)) c.sym.define(key, %(typedef $name));

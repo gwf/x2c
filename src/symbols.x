@@ -27,7 +27,7 @@ static macro Stmt $report.parse.name_package(
 static macro Stmt $report.parse.module_shadow(Expr $c, Expr $name) {
   $c.report_error(
     <parse>,
-    %"static '${$name}' shadows a module name of this unit",
+    %"'${$name}' is a module name and a static of one file in this unit",
     $c.token, %("a module declaration's name means one thing in every file"
     "of the unit; rename one of them"));
 }
@@ -117,7 +117,7 @@ static macro Stmt $report.type.typedef_depth(Expr $c, Expr $origin) {
     The lowest `base_scopes` contain file-scope declarations. Active
     transactions retain the rows each write replaces in `undo`. */
 static typedef struct Sym {
-  Block scopes, Map globals, statics, binding_facts;
+  Block scopes, Map globals, statics, binding_facts, prefixed;
   int base_scopes, local_macro_names;
   Block undo, int transactions;
   // Owning compiler, so type resolution can report its own diagnostics.
@@ -134,6 +134,7 @@ Sym Sym.new(Compiler c) {
   s.binding_facts = {};
   s.scopes = Block.new(sizeof(SymScope));
   s.statics = {};
+  s.prefixed = {};
   s.undo = Block.new(sizeof(SymUndo));
   return s;
 }
@@ -191,6 +192,7 @@ static void _clear_symbols(Sym s, Map globals, int base_scopes) {
   s.scopes.clear();
   s.globals = globals != NULL ? globals : {};
   s.statics = {};
+  s.prefixed = {};
   s.base_scopes = base_scopes;
   s.local_macro_names = 0;
   s.binding_facts = {};
@@ -500,6 +502,13 @@ List Sym.get(Sym s, List key) {
 /** Returns `key`'s type without package fallback, or `NULL`. */
 List Sym.get_exact(Sym s, List key) => _get_from(s, key, NULL);
 
+/** Reports whether a scope inside the base scopes declares `key`. */
+int Sym.has_local(Sym s, List key) {
+  for (int i = (int) s.scopes.len() - 1; i >= s.base_scopes; i--)
+    if (key in _scope_at(s, i).symbols) return 1;
+  return 0;
+}
+
 /* `own`, the current module file's spelling of `key`, comes first at file
    scope, so a file's statics shadow the unit's other names there. */
 static List _get_from(Sym s, List key, List own) {
@@ -642,25 +651,27 @@ static List _declared_key(Sym s, List context, List key, List ast) {
   String prefix = c.private_prefix(ast);
   Var (head, tag) = key;
   int plain = head is <string> && !key.cdr();
-  if (plain && !context) _check_module_shadow(s, prefix, head, ast);
+  if (plain) _check_module_shadow(s, context, prefix, head, ast);
   if (!prefix && (!c.package || ast.type().is_static())) return key;
-  if (plain) return %(${c.scoped_spelling(prefix, head)});
+  if (plain) return %(${c.declared_spelling(prefix, head)});
   if ((head == <struct> || head == <union> || head == <enum>) &&
       key.cdr() && !key.cddr() && tag is <string>)
-    return %($head ${c.scoped_spelling(prefix, tag)});
+    return %($head ${c.declared_spelling(prefix, tag)});
   return key;
 }
 
 /* A `module` name has one meaning across the unit, so no file's static may
    take its name, whichever is declared first. */
 static void _check_module_shadow(
-  Sym s, String prefix, String name, List ast) {
+  Sym s, List context, String prefix, String name, List ast) {
   Compiler c = s.c;
-  if (prefix && %($name) in s.statics)
+  if (prefix && %(@context $name) in s.statics)
     $report.parse.module_shadow(c, name);
-  if (!c.module_declaration || !ast.type().is_static()) return;
+  if (!c.module_declaration ||
+      !(c.source_private > 0 || ast.type().is_static())) return;
   foreach (String other, c.file_prefixes())
-    if (%("$other$name") in s.statics) $report.parse.module_shadow(c, name);
+    if (%(@context "$other$name") in s.statics)
+      $report.parse.module_shadow(c, name);
 }
 
 /* The declared spelling, when the key names one. Aggregate keys carry the
@@ -929,15 +940,41 @@ String Compiler.private_prefix(Compiler c, Type type) {
 }
 
 /** Returns `name` spelled in a declaration's scope: with `prefix`, a file
-    prefix, or else in the current package. A name that holds its file
-    prefix already, such as `second__Node_new` or `Var_second__node` for a
-    private class `second__Node`, stays unchanged; it is unique in the unit,
-    so code generated outside the file still reaches it. */
+    prefix, or else in the current package. A name the compiler derived
+    from a spelling this unit already prefixed, such as `second__Node_new`
+    or `Var_second__node` for a private class `second__Node`, stays
+    unchanged; it is unique in the unit, so code generated outside the file
+    still reaches it. */
 String Compiler.scoped_spelling(Compiler c, String prefix, String name) {
   if (!prefix) return c.package_spelling(name);
-  if (!name || name.startswith(prefix) ||
-      strstr(name.lower(), %"_${prefix.lower()}")) return name;
+  if (!name || _derived_spelling(c.sym, name)) return name;
   return %"$prefix$name";
+}
+
+/** Returns `name` as `scoped_spelling` does for a declaration, recording
+    a spelling that took `prefix` so the names the compiler derives from
+    it are known to hold their prefix already. A replayed collected
+    declaration was spelled when it was collected, so its names are final
+    and are recorded as they are. */
+String Compiler.declared_spelling(Compiler c, String prefix, String name) {
+  String spelled =
+    c.replaying_declaration ? name : c.scoped_spelling(prefix, name);
+  if (prefix && (spelled != name || c.replaying_declaration)) {
+    c.sym.prefixed[spelled] = 1;
+    c.sym.prefixed[spelled.lower()] = 1;
+  }
+  return spelled;
+}
+
+/* `name` is a recorded prefixed spelling, one followed by `_` and more,
+   or `Var_` and one in lower case. */
+static int _derived_spelling(Sym s, String name) {
+  if (!s.prefixed.len()) return 0;
+  if (name in s.prefixed) return 1;
+  if (name.startswith("Var_") && name[4:] in s.prefixed) return 1;
+  for (int at = 1; at < (int) name.len() - 1; at++)
+    if (name[at] == '_' && name[:at] in s.prefixed) return 1;
+  return 0;
 }
 
 /** Returns the static prefix of each file of the module unit. */
