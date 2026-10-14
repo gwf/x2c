@@ -292,11 +292,12 @@ Public functions:
 `Diagnostics.release`, `Diagnostics.entries`, `Diagnostics.reached_limit`,
 `Diagnostics.report`, `diagnostics_write_json`, `Compiler.print_diagnostic`,
 `Compiler.origin_location`, `Compiler.display_path`, `Compiler.token_location`,
-`Compiler.token_source`, `Compiler.token_column`, `Compiler.text_source`,
-`Compiler.source_token`, `Compiler.report_error`, `Compiler.report_problem`,
-`Compiler.report_warning`, `Compiler.report_warning_at`,
-`Compiler.take_diagnostics`, `Compiler.error_count`, `Compiler.diagnostics`,
-`Compiler.dump_tokens`, `Compiler.dump_symbol_table`, `Compiler.dump_cache`
+`Compiler.token_source`, `Compiler.file_prefix`, `Compiler.token_column`,
+`Compiler.text_source`, `Compiler.source_token`, `Compiler.report_error`,
+`Compiler.report_problem`, `Compiler.report_warning`,
+`Compiler.report_warning_at`, `Compiler.take_diagnostics`,
+`Compiler.error_count`, `Compiler.diagnostics`, `Compiler.dump_tokens`,
+`Compiler.dump_symbol_table`, `Compiler.dump_cache`
 
 ### [src/editor.x](../src/editor.x)
 
@@ -742,10 +743,12 @@ Public functions:
 `Sym.introduce`, `Sym.current_binding`, `Sym.enumerator_owner`,
 `Sym.binding_is_local`, `Sym.binding_is_local_before`,
 `Compiler.semantic_binding_facts`, `Compiler.set_fact`, `Compiler.drop_fact`,
-`Sym.get`, `Sym.get_exact`, `Sym.lookup`, `Sym.reference`,
+`Sym.get`, `Sym.get_exact`, `Sym.has_local`, `Sym.lookup`, `Sym.reference`,
 `Sym.resolve_global`, `Sym.reference_global`, `Sym.declare`, `Sym.join_locals`,
 `Sym.unshadow_global`, `Sym.bind_identity`, `Compiler.aggregate_name`,
-`Compiler.record_declaration_visibility`, `Compiler.package_spelling`,
+`Compiler.record_declaration_visibility`, `Compiler.private_prefix`,
+`Compiler.scoped_spelling`, `Compiler.declared_spelling`,
+`Compiler.file_prefixes`, `Compiler.unprefixed`, `Compiler.package_spelling`,
 `Compiler.register_package_alias`, `Compiler.register_package_member`,
 `Compiler.package_member_spelling`, `Compiler.imported_providers`,
 `Compiler.imported_spelling`, `Sym.define_macro`, `Sym.has_local_macros`,
