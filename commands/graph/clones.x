@@ -32,7 +32,7 @@ static uint64_t _clone_hash(uint64_t head, uint64_t tail) {
   return value ^ (value >> 27);
 }
 
-static void CloneIndex._rehash(CloneIndex &index, size_t count) {
+static void _rehash(CloneIndex &index, size_t count) {
   free(index.slots);
   index.slots = calloc(count, sizeof(uint64_t));
   if (!index.slots) raise %(alloc-fail (operation "graph clones"));
@@ -45,11 +45,11 @@ static void CloneIndex._rehash(CloneIndex &index, size_t count) {
   }
 }
 
-static uint64_t CloneIndex._cons(
+static uint64_t _intern_pair(
   CloneIndex &index, uint64_t head, uint64_t tail) {
   index.visits++;
   if ((index.count + 1) * 2 >= index.slot_count)
-    index._rehash(index.slot_count ? index.slot_count * 2 : 1024);
+    _rehash(index, index.slot_count ? index.slot_count * 2 : 1024);
   size_t slot = _clone_hash(head, tail) & (index.slot_count - 1);
   while (index.slots[slot]) {
     uint64_t id = index.slots[slot];
@@ -83,7 +83,7 @@ static uint64_t CloneIndex._cons(
   return id * 2;
 }
 
-static uint64_t CloneIndex._atom(CloneIndex &index, Var value) {
+static uint64_t _intern_atom(CloneIndex &index, Var value) {
   Var found;
   if (index.atoms.try_get(value, found)) return found.integer();
   if (index.atoms.len() >= INT_MAX / 2)
@@ -94,7 +94,7 @@ static uint64_t CloneIndex._atom(CloneIndex &index, Var value) {
   return id;
 }
 
-static int CloneIndex._local(CloneIndex &index, List binding) {
+static int _is_local(CloneIndex &index, List binding) {
   Map facts = index.parsed.compiler.semantic_binding_facts();
   if (!facts.contains(%(automatic $binding))) return 0;
   Var declared;
@@ -107,23 +107,23 @@ static int CloneIndex._local(CloneIndex &index, List binding) {
 
 /* The ordered identity stream establishes one bijection per fragment.
    This optional verification is separate from linear structural indexing. */
-static void CloneIndex._bindings(
+static void _collect_bindings(
   CloneIndex &index, Var value, Map names, Array stream) {
   if (value is not <list>) return;
   List node = value;
   match (node) {
     case %(binding ? ?): {
-      if (!index._local(node)) return;
+      if (!_is_local(index, node)) return;
       if (!names.contains(node)) names[node] = names.len();
       stream.push(names[node]);
       return;
     }
     case %(at ? ?inner): {
-      index._bindings(inner, names, stream);
+      _collect_bindings(index, inner, names, stream);
       return;
     }
   }
-  foreach (Var child, node) index._bindings(child, names, stream);
+  foreach (Var child, node) _collect_bindings(index, child, names, stream);
 }
 
 static int _clone_origin(Var value) {
@@ -144,25 +144,25 @@ static int _clone_root(List node) {
       tag);
 }
 
-static uint64_t CloneIndex._list(CloneIndex &index, List node, int origin) {
+static uint64_t _index_list(CloneIndex &index, List node, int origin) {
   if (!node) return 0;
-  uint64_t head = index._value(node.car(), origin);
-  uint64_t tail = index._list(node.cdr(), origin);
-  return index._cons(head, tail);
+  uint64_t head = _index_value(index, node.car(), origin);
+  uint64_t tail = _index_list(index, node.cdr(), origin);
+  return _intern_pair(index, head, tail);
 }
 
-static uint64_t CloneIndex._value(CloneIndex &index, Var value, int origin) {
+static uint64_t _index_value(CloneIndex &index, Var value, int origin) {
   if (index.sequence == INT_MAX)
     raise %(size-limit (operation "graph clones"));
   int start = index.sequence++;
-  if (value is not <list>) return index._atom(value);
+  if (value is not <list>) return _intern_atom(index, value);
   List node = value;
   if (!node) return 0;
   match (node) {
     case %(at ?next ?inner):
-      return index._value(inner, next.integer());
+      return _index_value(index, inner, next.integer());
     case %(binding ? ?): {
-      if (index._local(node)) return index._atom(%(local));
+      if (_is_local(index, node)) return _intern_atom(index, %(local));
       String name = index.parsed.compiler.emitted_binding_name(node);
       Var source_key;
       int file_static = index.statics.contains(node);
@@ -172,16 +172,16 @@ static uint64_t CloneIndex._value(CloneIndex &index, Var value, int origin) {
           source_key);
       List key = file_static
                ? %(global ${index.path} $name) : %(global $name);
-      return index._atom(key);
+      return _intern_atom(index, key);
     }
   }
-  uint64_t id = index._list(node, origin);
+  uint64_t id = _index_list(index, node, origin);
   uint64_t size = index.sizes[id / 2];
   if (size >= index.minimum && _clone_root(node)) {
     if (!origin) origin = _clone_origin(node);
     if (!origin) { index.unlocated++; return id; }
     Array stream = [];
-    index._bindings(node, {}, stream);
+    _collect_bindings(index, node, {}, stream);
     List key = %(${(int) id} @{stream.list_free()});
     List site = %(
       site ${index.function}
@@ -246,7 +246,7 @@ List graph_clones(Frontend frontend, Array inputs, int minimum) {
       match (node)
         case %(function ? (bind ?binding ?) ?):
           index.function = parsed.compiler.emitted_binding_name(binding);
-      index._value(node, 0);
+      _index_value(index, node, 0);
     }
     index_seconds += (double) (clock() - start) / CLOCKS_PER_SEC;
     parsed.close();
