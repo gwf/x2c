@@ -1,6 +1,7 @@
 # Prepared literal formats
 
-> Status: feasibility proved locally; production feature deferred, 2026-10-04.
+> Status: reference - feasibility proved locally; production feature
+> deferred, 2026-10-04.
 > Based on origin/dev 12a095f9728796f5138278a3082f4e3e7b5e085e.
 > Gary requested further investigation until there was a concrete result
 > worth reviewing. No production source, bootstrap, or public API is changed.

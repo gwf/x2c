@@ -233,9 +233,10 @@ integration. 4b: `make examples`, then the same gate.
   and rederives only the operator results where x2c's type is not C's.
 - **Reuse and deletion.** `_Generic` reuses `parse_type_name`,
   `Sym.next_typedef`, `Type.scalar`, `Type.promote`, `Type.widest`, and
-  `Emitter._semantic_type`. The control walk and canonical spelling are new
-  because x2c's recorded types are approximations elsewhere tolerated by
-  conversion, and a selection must not act on an approximation.
+  static `_semantic_type` (src/emit.x). The control walk and canonical
+  spelling are new because x2c's recorded types are approximations
+  elsewhere tolerated by conversion, and a selection must not act on an
+  approximation.
   The one new public operation, `Compiler.skip_linkage_brace`, exists
   because two token loops (`parse_top_level` and the shallow loop) must
   agree. No new state is added to `Compiler`.

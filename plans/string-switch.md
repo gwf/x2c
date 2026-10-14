@@ -72,7 +72,7 @@ integer constants.
 
 ## Implementation
 
-1. **Recognize.** Add `case <switch>:` to `Compiler._step_tag`
+1. **Recognize.** Add `case <switch>:` to static `_step_tag`
    ([transform.x](../src/transform.x)), beside `<match>`, calling
    `Compiler._switch_node`. Recognize the input with the `switched` grammar
    macro ([grammar.x](../src/grammar.x)). Return the node unchanged unless
@@ -95,8 +95,8 @@ integer constants.
    enter the literal cache.
 4. **Rewrite.** Return `switch (NAME(selector)) BODY` with the rewritten
    body, built with the `switched` macro. `_step` then normalizes it as an
-   ordinary integer switch, so `Walk._rewrite_switch` bounds `break` and
-   emit writes it natively.
+   ordinary integer switch, so static `_rewrite_switch` (src/cleanup.x)
+   bounds `break` and emit writes it natively.
 5. **Document.** Add the rule and the example above to "C control flow" in
    [language.md](../docs/src/reference/language.md).
 6. Review and fix the completed authored diff before publication

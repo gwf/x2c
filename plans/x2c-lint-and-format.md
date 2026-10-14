@@ -333,8 +333,9 @@ public types agree. The rest are known differences, none a projection gap:
 - 17 foreign aliases in `lib/lisp.x` report the `$x2c.foreign.alias` line,
   one above the declarator the regex found.
 - 8 static helpers inside Unit macros (`load`, `store`, `next`,
-  `record_compare` and relatives) carry hygienic `_x2c_macro_*` names, one
-  per expansion, where the regex reported the template's name once.
+  `record_compare` and relatives) carry hygienic `_x2c_gensym_macro_*`
+  names, one per expansion, where the regex reported the template's name
+  once.
 - 7 compile-time-only `meta` functions in `lib/meta.x` are not part of the
   translated unit.
 - The projection also lists 15 static definitions the regex missed:
