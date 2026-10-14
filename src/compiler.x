@@ -211,6 +211,7 @@ typedef struct Compiler {
   int meta_build;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int public_bodies;  // Cold interfaces bind only exposed inline bodies.
+  int module_declaration;  // A `module` declaration is being parsed.
   int interface_provider, signature_only;
   int collection_native;  // Declaration collection executed project meta code.
   Map collection_native_files;  // Providers collected in this unit.

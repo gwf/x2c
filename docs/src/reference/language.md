@@ -39,6 +39,8 @@ layout, such as for a value type or field access in a public inline body.
 A public forward pointer type can keep a static aggregate body private.
 A static type used only by static functions remains private.
 The `static` marker on a type controls publication and emits no C storage.
+`module` in place of `static` declares the same private types; see
+[module blocks](#module-blocks).
 
 An ordinary `#include "module.x"` makes that module's public declarations,
 macro definitions, keyword aliases, and meta functions available. The same
@@ -104,7 +106,8 @@ static int helper(int value) { return value + counter; }
 
 The block is `module {`, comma-separated string paths with an optional
 trailing comma, and `}`, with no final semicolon. It appears at file scope,
-once per file. Elsewhere `module` is an ordinary identifier, and
+once per file. Before a file-scope declaration `module` is a storage class,
+described below. Elsewhere it is an ordinary identifier, and
 `struct module {` declares a tag. Each path is relative to the file that holds
 the block and must lead to a file under that file's companion directory,
 `NAME/` for `NAME.x`, once `..` and symbolic links are resolved. A path that
@@ -131,6 +134,24 @@ that complete unit, so a function can call a later-defined function without an
 explicit prototype. Other declarations retain their ordinary placement rules.
 A member may hold its own block, whose members lie under the member's companion
 directory; their text is spliced in turn, and the namespace stays flat.
+
+The `module` storage class declares a file-scope name for every file of the
+module unit. It is written where `static` would be, before an object,
+function, `typedef`, or `class` declaration:
+
+<!-- ignore: This member requires an entry file that lists it. -->
+```x2c,ignore
+/* calculations/state.x */
+module typedef struct Tally { int total; } Tally;
+module Tally tally;
+module void add(int value) { tally.total += value; }
+```
+
+A later member and the entry after the block use `Tally`, `tally`, and `add`
+by those names. The declaration parses as if `static` were written. The
+object and function are `static` in the generated C, the type stays private,
+and the unit's header and interface publish none of them. Outside a module
+unit `module` means `static`.
 
 A quoted include in a member that names a file beside the member reaches that
 file, in collection and in the generated C. Any other include resolves as it

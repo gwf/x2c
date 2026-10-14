@@ -323,6 +323,10 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
   List slot = skip_body ? NULL : c.try_parse_macro_slot(<unit>);
   if (slot) return slot;
   if (c.keyword_form_is_definition()) return _keyword_definition(c, skip_body);
+  if (_module_storage_form(c)) {
+    c.token.type = <static>;
+    $let(c.module_declaration, 1) return c.parse_top_level_mode(skip_body);
+  }
   if (_static_interface_form(c)) {
     c.next();
     $let(c.source_private, 1) {
@@ -359,6 +363,20 @@ static int _static_interface_form(Compiler c) {
   return c.peek(1) == <typedef> ||
          (c.peek(1) == <"$("> && !c.macro_holes) ||
          c.peek(1) == <protocol> || next.text == "class";
+}
+
+/* `module` before a file-scope declaration declares a static name for
+   every file of the module unit. Its token becomes `static`, so the
+   declaration parses as a static one. The token's text stays `module`, so
+   a later parse of the same tokens recognizes it again. `module {` opens
+   the member block instead. */
+static int _module_storage_form(Compiler c) {
+  Symbol word = c.peek(0);
+  if (c.module_declaration || (word != <ident> && word != <static>) ||
+      c.token.text != "module") return 0;
+  Symbol next = Token.skip_trivia(c.token + 1).type;
+  return next == <ident> || next == <typedef> || next == <inline> ||
+         next.is_type_qualifier() || next.is_builtin_type();
 }
 
 /* Directives record native macro names and, in the full parse, the
@@ -542,6 +560,7 @@ int Compiler.script_statement_starts(Compiler c) {
     case <typedef>: case <static>: case <extern>: case <"}">:
       return 0;
   }
+  if (_module_storage_form(c)) return 0;
   if (c.test_static_assert() || c.keyword_form_is_definition() ||
       c.macro_form_is_definition() || c.meta_form_is_declaration() ||
       c.protocol_form_starts())

@@ -43,7 +43,9 @@ trailing comma. Members are inserted in order from the containing file's
 companion directory, `NAME/` beside `NAME.x`; each path must resolve inside it.
 Nested module blocks are expanded too. Each file permits one file-scope
 block and must use default symbol collection. CPP and live-symbol modes do
-not support member splicing. Ordinary `module` identifiers remain identifiers.
+not support member splicing. At file scope, `module` followed by anything
+other than `{` begins a `module-declaration`; see D4. Ordinary `module`
+identifiers remain identifiers.
 
 ## Declaration contracts
 
@@ -112,7 +114,10 @@ visibility dispatch before declaration parsing. A leading `static` on a
 typedef, protocol body, class, or top-level Lisp form
 also controls source visibility. `meta native` applies to function
 interfaces. Protocol adoptions permit `meta` followed by optional `static`,
-or `static` alone; protocol bodies reject `meta`. See the reference for
+or `static` alone; protocol bodies reject `meta`. A file-scope
+`module-declaration` is the word `module` followed by an identifier, a type
+keyword, a qualifier, `inline`, or `typedef`. It parses as the same
+declaration with `static` in place of `module`. See the reference for
 the public/private and compile-time rules.
 
 ## Expression contracts
