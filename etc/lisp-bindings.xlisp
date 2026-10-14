@@ -20,7 +20,6 @@
       (if (member group-name lisp.binding.sealed) nil
         (def lisp.binding.sealed (cons group-name lisp.binding.sealed)))
       (_x2c.binding_statements lisp rows))))
-(def lisp.native._target _x2c.binding_target)
 (def lisp.native.target _x2c.binding_target_row)
 (def lisp.native.targets _x2c.binding_targets)
 

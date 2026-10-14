@@ -531,7 +531,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
   catch %(?cause *details): {
     // Discard cells for unpublished bindings before rollback reuses their IDs.
     Var storage;
-    if (session.evaluator.try_get("C._globals", storage)) {
+    if (session.evaluator.try_get("C.globals", storage)) {
       Map globals = storage;
       foreach (Var id, ids) globals.del(id);
     }
