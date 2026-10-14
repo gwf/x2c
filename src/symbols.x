@@ -524,9 +524,11 @@ static List _get_from(Sym s, List key, List own) {
 }
 
 /* A plain key's spelling among the current module file's statics, or NULL
-   outside a module unit. */
+   outside a module unit. A template's free names bind where its expansion
+   lands, so none resolves to a static of the file that defines the macro. */
 static List _file_key(Sym s, List key) {
-  if (!s.c.line_markers || !key || key.cdr() || key.car() is not <string>)
+  if (!s.c.line_markers || s.c.macro_holes || !key || key.cdr() ||
+      key.car() is not <string>)
     return NULL;
   String prefix = s.c.file_prefix();
   return prefix ? %("$prefix${key.car()}") : NULL;
@@ -617,8 +619,7 @@ static List _scope_find(Sym s, SymScope &scope, List key, Type &?type) {
     `restrict`, and `volatile`.
 */
 List Sym.declare(Sym s, List context, List key, List ast) {
-  if (s.c.package || s.c.line_markers)
-    key = _declared_key(s, context, key, ast);
+  key = s.declared_key(context, key, ast);
   _check_spelling(s.c, _declared_spelling(key));
   Type ctxkey = %( @context @key ), type = ast.type_from_ast();
   Type declared_type = type;
@@ -637,6 +638,14 @@ List Sym.declare(Sym s, List context, List key, List ast) {
   return binding;
 }
 
+/** Returns the key a declaration of `key` with type `ast` takes in this
+    unit: its file-private or package spelling at file scope, else `key`.
+    Declaring the result again returns it unchanged. */
+List Sym.declared_key(Sym s, List context, List key, List ast) {
+  if (!s.c.package && !s.c.line_markers) return key;
+  return _declared_key(s, context, key, ast);
+}
+
 /* A file-scope declaration's key takes its scope's spelling. A static of
    a module file takes the file's prefix, so each file's statics have their
    own keys; package mode puts other declarations in the package's `name__`
@@ -651,27 +660,32 @@ static List _declared_key(Sym s, List context, List key, List ast) {
   String prefix = c.private_prefix(ast);
   Var (head, tag) = key;
   int plain = head is <string> && !key.cdr();
-  if (plain) _check_module_shadow(s, context, prefix, head, ast);
+  int tagged = (head == <struct> || head == <union> || head == <enum>) &&
+               key.cdr() && !key.cddr() && tag is <string>;
+  if (plain) _check_module_shadow(s, %(() (typedef)), prefix, head, ast);
+  if (tagged) _check_module_shadow(s, %(($head)), prefix, tag, ast);
   if (!prefix && (!c.package || ast.type().is_static())) return key;
   if (plain) return %(${c.declared_spelling(prefix, head)});
-  if ((head == <struct> || head == <union> || head == <enum>) &&
-      key.cdr() && !key.cddr() && tag is <string>)
-    return %($head ${c.declared_spelling(prefix, tag)});
+  if (tagged) return %($head ${c.declared_spelling(prefix, tag)});
   return key;
 }
 
 /* A `module` name has one meaning across the unit, so no file's static may
-   take its name, whichever is declared first. */
+   take its name, whichever is declared first. `contexts` are the static
+   key contexts of the name's C namespace: objects, functions, and
+   typedefs share one, and each tag kind has its own. */
 static void _check_module_shadow(
-  Sym s, List context, String prefix, String name, List ast) {
+  Sym s, List contexts, String prefix, String name, List ast) {
   Compiler c = s.c;
-  if (prefix && %(@context $name) in s.statics)
-    $report.parse.module_shadow(c, name);
-  if (!c.module_declaration ||
-      !(c.source_private > 0 || ast.type().is_static())) return;
-  foreach (String other, c.file_prefixes())
-    if (%(@context "$other$name") in s.statics)
+  foreach (List context, contexts) {
+    if (prefix && %(@context $name) in s.statics)
       $report.parse.module_shadow(c, name);
+    if (!c.module_declaration ||
+        !(c.source_private > 0 || ast.type().is_static())) continue;
+    foreach (String other, c.file_prefixes())
+      if (%(@context "$other$name") in s.statics)
+        $report.parse.module_shadow(c, name);
+  }
 }
 
 /* The declared spelling, when the key names one. Aggregate keys carry the
@@ -959,10 +973,11 @@ String Compiler.scoped_spelling(Compiler c, String prefix, String name) {
 String Compiler.declared_spelling(Compiler c, String prefix, String name) {
   String spelled =
     c.replaying_declaration ? name : c.scoped_spelling(prefix, name);
-  if (prefix && (spelled != name || c.replaying_declaration)) {
-    c.sym.prefixed[spelled] = 1;
-    c.sym.prefixed[spelled.lower()] = 1;
-  }
+  if (!prefix || (spelled == name && !c.replaying_declaration))
+    return spelled;
+  String bare = spelled.startswith(prefix) ? spelled[prefix.len():] : name;
+  c.sym.put(c.sym.prefixed, spelled, bare);
+  c.sym.put(c.sym.prefixed, spelled.lower(), bare.lower());
   return spelled;
 }
 
@@ -987,12 +1002,11 @@ List Compiler.file_prefixes(Compiler c) {
   return prefixes.list_free();
 }
 
-/** Returns `name` without the static prefix of a file of this module unit.
-    Var tags and descriptor names use that short name. */
+/** Returns the source name of a spelling this unit gave a file prefix, or
+    `name`. Var tags and descriptor names use that short name. */
 String Compiler.unprefixed(Compiler c, String name) {
-  foreach (String prefix, c.file_prefixes())
-    if (name.startswith(prefix)) return name[prefix.len():];
-  return name;
+  Var bare;
+  return c.sym.prefixed.try_get(name, bare) ? bare : name;
 }
 
 /** Returns a name in the current package namespace, preserving prefixes.

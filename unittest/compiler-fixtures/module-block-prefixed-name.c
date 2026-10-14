@@ -12,18 +12,18 @@
 #include "x2c.h"
 
 #include <stdio.h>
-static int first__first__value;
+static int first___first__value;
 
 static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-_x2c_gensym_initializer_choice_0D5FC760_0((first__first__value = 1))
+_x2c_gensym_initializer_choice_0D5FC760_0((first___first__value = 1))
 static int first_value(void);
 
-static int second__first__value;
+static int second___first__value;
 
-_x2c_gensym_initializer_choice_0D5FC760_1((second__first__value = 2))
+_x2c_gensym_initializer_choice_0D5FC760_1((second___first__value = 2))
 static int second_value(void);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
@@ -35,11 +35,11 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 }
 
 static int first_value(void){
-  return first__first__value;
+  return first___first__value;
 }
 
 static int second_value(void){
-  return second__first__value;
+  return second___first__value;
 }
 
 int main(void){

@@ -97,7 +97,7 @@ static macro Stmt $report.driver.module_prefix(
     <driver>,
     %"module member '${$member}' takes the static prefix of '${$other}'",
     $site, %("a file's statics take its path with each non-identifier"
-    "character made '_'; rename one of the files"));
+    "character made '_', then '___'; rename one of the files"));
 }
 
 static macro Stmt $report.driver.module_read(
@@ -472,15 +472,17 @@ static void _member(Splice &s, String spelling, Token site) {
 
 /* The prefix of a file's statics: its path under the entry's companion
    directory, or the entry's stem, without the extension, with each
-   character that cannot continue a C identifier made `_`, then `__`. A
-   leading digit gets a leading `_`. */
+   character that cannot continue a C identifier made `_`, then `___`. A
+   package prefix ends in `__`, so a package entry's statics never share a
+   spelling with the package's public names. A leading digit gets a
+   leading `x`, since C reserves file-scope names that begin with `_`. */
 static String _file_prefix(String path) {
   if (path.startswith("./")) path = path[2:];
   Buffer spelling = $auto(Buffer.new(0));
-  if (isdigit((unsigned char) path[0])) spelling.write_char('_');
+  if (isdigit((unsigned char) path[0])) spelling.write_char('x');
   foreach (char ch, path)
     spelling.write_char(isalnum((unsigned char) ch) ? ch : '_');
-  return %"${spelling}__";
+  return %"${spelling}___";
 }
 
 /* Appends the file's text from byte `start` to `end`, which begins its
