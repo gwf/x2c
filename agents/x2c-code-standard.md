@@ -533,15 +533,23 @@ bindings. Verify each exception against the name producer and its consumers;
 dotted spelling alone is not evidence. For example, `Fact.var` and `Var.fact`
 in `src/regions.x` serve conversion and protocol lookup.
 
-Generated Array and Map family helpers are dotted methods because other
-expansions of the same family call them: the public members, the observation
-members, and handwritten callers in `lib/map.x` and `lib/pool.x`. Typed-alias
-consumers inherit them through typedef method lookup (`_next_method_type` in
-`src/expressions.x`). Like every dotted method, their names have no leading
-underscore, and they must differ from the public members they serve, such as
-`Array.compare` and `Map.compare`. Use the existing method lookup instead of
-encoding type spellings into free names. Keep ordinary callbacks and
-expansion-local helpers undotted.
+A helper shared across files or macro expansions is a plain `Type.method`.
+Give it a semantic qualifier that keeps it apart from the public operation
+it serves.
+
+Generated Array and Map family helpers are dotted for two reasons. Typed-alias
+consumers inherit core helpers through typedef method lookup
+(`_next_method_type` in `src/expressions.x`). Other consumers need a stable
+name outside the defining macro expansion: Map `find_hashed` and `reinsert`
+have handwritten callers in `lib/map.x` and `lib/pool.x`, while Array
+`compare_elements` and `write_elements` and Map `compare_entries` and
+`write_entries` connect separate observation expansions. Array helpers take
+an `element` qualifier and Map helpers an `entry` or `table` qualifier,
+because method lookup would otherwise reach the checking public operation of
+the same name, such as `Array.compare`. Ordinary macro-local bindings do not
+cross those boundaries. Use the existing method lookup instead of encoding
+type spellings into free names. Keep ordinary callbacks and expansion-local
+helpers undotted.
 
 Ordinary helpers need no forwarding wrapper or compatibility alias.
 
