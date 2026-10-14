@@ -15,9 +15,9 @@ macro Unit $probe.family(Type $family, Name $run) {
   static int $run(int value) {
     $family array = ($family) Block.new(sizeof(int));
     defer Block.free((Block) array);
-    array._insert(0, value);
+    array.insert_element(0, value);
     int found = 0;
-    if (!array._shift(&found)) return -1;
+    if (!array.shift_element(&found)) return -1;
     return found;
   }
 }
