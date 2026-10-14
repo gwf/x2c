@@ -38,25 +38,36 @@ Ask for the AST after parsing and macro expansion:
 ```
 
 ```text
-(block
- (declare ("Var") (bindings (bind (binding 4 "n") ())))
- (declare ("Iter")
-  (bindings (op = (bind (binding 5 "_x2c_macro_iterator_0") ())
-   (expr ("Iter") (call ... (ident (binding 10 "List_iter"))
-    (args ... (expr (* struct "Iter") (op & ...))))))))
- (while
-  (expr (int) (call ... (ident (binding 11 "Iter_try_next")) ...))
-  (block ...)))
+(block (declare ("Var") (bindings (bind (binding 5798 "n") ())))
+ (declare ("List")
+  (bindings
+   (op = (bind (binding 5802 "_x2c_gensym_macro_object_0") ())
+    (expr ("List") (ident (binding 5795 "numbers"))))))
+ (declare ("List")
+  (bindings
+   (op = (bind (binding 5803 "_x2c_gensym_macro_cursor_0") ())
+    (expr ("List") (ident (binding 5802 "_x2c_gensym_macro_object_0"))))))
+ (declare ("Var")
+  (bindings (bind (binding 5806 "_x2c_gensym_macro_cursor_output_0") ())))
+ (at 398
+  (while
+   (expr (int)
+    (call ... (ident (binding 5805 "List_try_next")))
+     (args (expr ("List") (ident (binding 5802 "_x2c_gensym_macro_object_0")))
+      (expr (opt-ref "List") (op & ...))
+      (expr (opt-ref "Var") (op & ...)))))
+   (block ...))))
 ```
 
 The built-in source macro in `src/macros.x`, `etc/builtin-macros.x`, and
 `src/builtins.x` has replaced `foreach` with declarations and a
-`while` loop that call `List_iter` and `Iter_try_next`. The final `List_iter`
-argument is a zero-initialized compound literal whose block lifetime holds the
-iterator state. The later transform pass replaces `total += n` with the
-run-time compound assignment helper for that scalar tag. Compare `--dump-ast`
-with `--dump-transforms` to see that second change. The full set of dump flags
-is listed under [compiler options](../reference/cli.md).
+`while` loop that calls `List_try_next`. The loop keeps the List, a cursor,
+and the current element in generated locals; `List_try_next` advances the
+cursor and stores the element through its reference arguments. The later
+transform pass replaces `total += n` with the run-time compound assignment
+helper for that scalar tag, and it passes the cursor and element by address.
+Compare `--dump-ast` with `--dump-transforms` to see those changes. The full
+set of dump flags is listed under [compiler options](../reference/cli.md).
 
 ## Feature ownership
 
@@ -377,8 +388,9 @@ source and splicing quote-includes in preprocessor order, replays the
 runtime prelude from the runtime `x2c.xi` interface, and writes each unit's
 interface beside its generated C as Lisp data.
 
-`src/compiler.x` owns compiler state and `src/symbols.x` its symbol
-scopes. `src/diagnostics.x` owns structured errors. `src/utils.x` owns host-environment and process
+`src/compiler.x` owns compiler state, with its members under
+`src/compiler/` for parsing, declarations, generated names, lifecycle, and
+source files; `src/symbols.x` owns its symbol scopes. `src/diagnostics.x` owns structured errors. `src/utils.x` owns host-environment and process
 helpers, including the C preprocessor process boundary. `src/frontend.x`
 shares configured source stages and sequential unit lifetimes with internal
 tools. `src/main.x` owns the translation loop, inspection output, and exit

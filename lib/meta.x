@@ -23,13 +23,14 @@
     function, is compile-time only: the compiler emits no run-time form for
     it and diagnoses a run-time call where it is written.
 
-    Two operations let a macro contribute code beyond its result.
+    Three operations let a macro contribute code beyond its result.
     `x2c_enclosing` answers the initialized declarator, block item,
     function, or unit around the invocation, and `x2c_place` puts code
     after that declarator or block item, on the exits of its block, at the
     entry of its function, among the unit's support declarations, or in its
-    initialization, under the expansion's transaction. `$auto` is built on
-    them.
+    initialization, under the expansion's transaction. `x2c_binding_fresh`
+    returns a new binding, so placed code can declare a name that the
+    result also refers to. `$auto` is built on them.
 
     The library builds it as an optional module, but the prelude's
     `varops.x` includes it for its own `meta` rows, so every unit sees its

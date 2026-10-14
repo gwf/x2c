@@ -100,9 +100,9 @@ Source: `lib/varconvert.x:371`
 
 Extracts the `Array` payload of `value`.
 
-**Raises:** `<no-convert>` for any other tag. A `Array` destination
-converts a `Var` implicitly through `Var.array_payload`, which reads the
-payload or NULL without raising.
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `Array` uses `Var.array_payload`, which reads the payload or
+NULL without raising.
 
 Source: `lib/varconvert.x:90`
 
@@ -113,9 +113,9 @@ Source: `lib/varconvert.x:90`
 
 Extracts the `Iter` payload of `value`.
 
-**Raises:** `<no-convert>` for any other tag. A `Iter` destination
-converts a `Var` implicitly through `Var.iter_payload`, which reads the
-payload or NULL without raising.
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `Iter` uses `Var.iter_payload`, which reads the payload or
+NULL without raising.
 
 Source: `lib/varconvert.x:95`
 
@@ -126,9 +126,9 @@ Source: `lib/varconvert.x:95`
 
 Extracts the `Block` payload of `value`.
 
-**Raises:** `<no-convert>` for any other tag. A `Block` destination
-converts a `Var` implicitly through `Var.block_payload`, which reads the
-payload or NULL without raising.
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `Block` uses `Var.block_payload`, which reads the payload or
+NULL without raising.
 
 Source: `lib/varconvert.x:91`
 
@@ -139,9 +139,9 @@ Source: `lib/varconvert.x:91`
 
 Extracts the `Buffer` payload of `value`.
 
-**Raises:** `<no-convert>` for any other tag. A `Buffer` destination
-converts a `Var` implicitly through `Var.buffer_payload`, which reads the
-payload or NULL without raising.
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `Buffer` uses `Var.buffer_payload`, which reads the payload or
+NULL without raising.
 
 Source: `lib/varconvert.x:92`
 
@@ -152,9 +152,9 @@ Source: `lib/varconvert.x:92`
 
 Extracts the `Bytes` payload of `value`.
 
-**Raises:** `<no-convert>` for any other tag. A `Bytes` destination
-converts a `Var` implicitly through `Var.bytes_payload`, which reads the
-payload or NULL without raising.
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `Bytes` uses `Var.bytes_payload`, which reads the payload or
+NULL without raising.
 
 Source: `lib/varconvert.x:93`
 
@@ -165,9 +165,9 @@ Source: `lib/varconvert.x:93`
 
 Extracts the `File` payload of `value`.
 
-**Raises:** `<no-convert>` for any other tag. A `File` destination
-converts a `Var` implicitly through `Var.file_payload`, which reads the
-payload or NULL without raising.
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `File` uses `Var.file_payload`, which reads the payload or
+NULL without raising.
 
 Source: `lib/varconvert.x:94`
 
@@ -206,9 +206,9 @@ Source: `lib/varconvert.x:307`
 
 Extracts the `List` payload of `value`.
 
-**Raises:** `<no-convert>` for any other tag. A `List` destination
-converts a `Var` implicitly through `Var.list_payload`, which reads the
-payload or NULL without raising.
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `List` uses `Var.list_payload`, which reads the payload or
+NULL without raising.
 
 Source: `lib/varconvert.x:96`
 
@@ -219,9 +219,9 @@ Source: `lib/varconvert.x:96`
 
 Extracts the `Map` payload of `value`.
 
-**Raises:** `<no-convert>` for any other tag. A `Map` destination
-converts a `Var` implicitly through `Var.map_payload`, which reads the
-payload or NULL without raising.
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `Map` uses `Var.map_payload`, which reads the payload or
+NULL without raising.
 
 Source: `lib/varconvert.x:97`
 

@@ -393,7 +393,8 @@ See [the lexical specification](lexical.md) for explanations and
    (dedent (append-stored-closers) (require remaining-level)
     (fail indent)) (eof close-all)) (external-details "lib/tokenizer.x:_Layout")
   (inserted-width 0) (reclassified-width preserve))
- (pass lexical-diagnostics (external "src/compiler.x:Compiler.tokenize"))
+ (pass lexical-diagnostics
+  (external "src/compiler/parsing/tokens.x:Compiler.tokenize"))
  (pass conditionals (external "src/preprocess.x:Compiler.scan_conditionals")
   (after scan) (hide inactive-branches) (retain conditional-structure))
  (pass keyword-retag
@@ -480,8 +481,8 @@ See [the lexical specification](lexical.md) for explanations and
 
 ```text
 (sources (source "lib/scan.x") (source "lib/tokenizer.x")
- (source "src/compiler.x") (source "src/literals.x")
- (source "docs/src/reference/syntax/lexical.md"))
+ (source "src/compiler/parsing/tokens.x")
+ (source "src/literals.x") (source "docs/src/reference/syntax/lexical.md"))
 ```
 
 ## boundaries

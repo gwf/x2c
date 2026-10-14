@@ -9,9 +9,11 @@ These maps list the current owners. The generated
 
 Files below are relative to `src/` unless a path is shown.
 
-- entry and shared state: `main.x`, `cli.x`, `frontend.x`, `compiler.x`,
-  `symbols.x`, `diagnostics.x`, `sourceview.x`, `collect.x`, `report.x`,
-  `deps.x`, `utils.x`;
+- entry and shared state: `main.x`, `cli.x`, `frontend.x`, `compiler.x`
+  (its members in `compiler/` hold parsing, declarations, generated names,
+  lifecycle, binding facts, the literal cache, match patterns, and source
+  files and locations), `symbols.x`, `diagnostics.x`, `sourceview.x`,
+  `collect.x`, `report.x`, `deps.x`, `utils.x`;
 - shared runtime tokenization: `lib/tokenizer.x`; compiler parsing:
   `preprocess.x`, `parse.x`, `expressions.x`, `initializers.x`,
   `statements.x`, `literals.x`, `lambdas.x`, `macros.x`, `grammar.x`,

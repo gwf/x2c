@@ -65,8 +65,8 @@ evaluate into generated helpers. Immutable values share generated
 storage; mutable collections are copied at use sites, so caching does not
 change identity.
 
-`Compiler.cache` in compiler.x decides cache-key equality and assigns the
-`(cache id)` nodes whose ids index `Compiler.id_keys`; this module trusts
-that mapping. Header and source regions may materialize the same
+`Compiler.cache` in compiler/literal-cache.x decides cache-key equality
+and assigns the `(cache id)` nodes whose ids index `Compiler.id_keys`;
+this module trusts that mapping. Header and source regions may materialize the same
 immutable value in separate static slots; `String` and `List`
 canonicalization preserves value identity across them.

@@ -1266,11 +1266,12 @@ out of range: void
 
 `Array`, `List`, and `String` accept negative indices, counting from the end.
 An index is an `int`; a wider value is outside the supported domain and
-converts as any `Var`-to-`int` conversion does. An out-of-range `Array` or
-`List` read returns `void`, and a missing `Map` key returns `void` through
-brackets. An out-of-range `String` read returns `-1`; a successful `String`
-read returns one byte as an `int` between 0 and 255, so `-1` means out of
-range on every platform and a high byte is never negative.
+converts as any `Var`-to-`int` conversion does. Slice bounds and steps share
+that `int` domain; a wider value is truncated, so a step of 2^32 becomes 0. An
+out-of-range `Array` or `List` read returns `void`, and a missing `Map` key
+returns `void` through brackets. An out-of-range `String` read returns `-1`; a
+successful `String` read returns one byte as an `int` between 0 and 255, so
+`-1` means out of range on every platform and a high byte is never negative.
 
 The packed numeric `Array`s are the exception on both counts. Their bracket is
 raw native indexing, with no bounds test and no negative-index rule. See

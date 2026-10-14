@@ -391,7 +391,7 @@ List syntax_lexical(void) => %(lexical
         (eof close-all))
       (external-details "lib/tokenizer.x:_Layout")
       (inserted-width 0) (reclassified-width preserve))
-    (pass lexical-diagnostics (external "src/compiler.x:Compiler.tokenize"))
+    (pass lexical-diagnostics (external "src/compiler/parsing/tokens.x:Compiler.tokenize"))
     (pass conditionals
       (external "src/preprocess.x:Compiler.scan_conditionals")
       (after scan) (hide inactive-branches) (retain conditional-structure))
@@ -527,7 +527,7 @@ List syntax_lexical(void) => %(lexical
   (sources
     (source "lib/scan.x")
     (source "lib/tokenizer.x")
-    (source "src/compiler.x")
+    (source "src/compiler/parsing/tokens.x")
     (source "src/literals.x")
     (source "docs/src/reference/syntax/lexical.md"))
   (boundaries

@@ -4798,6 +4798,8 @@ the collection's mutation operations; a read override does not replace them.
 - An `Array`, `List`, or `String` index is an `int`; a wider value is
   outside the supported domain and converts as any `Var`-to-`int`
   conversion does.
+- Slice bounds and steps share that `int` domain; a wider value is
+  truncated, so a step of 2^32 becomes 0.
 - An out-of-range `Array` or `List` read returns `void`.
 - An out-of-range `String` read returns `-1`; its indexed result is a byte
   represented as an `int`, not a one-byte `String`.
@@ -5330,8 +5332,8 @@ These explicit calls differ from the implicit crossing and are not reported:
 - `.str()` on a `Var` at a typed destination, and any other converter call
   on a `Var` in an interpolation hole or a printf-family value. Holes and
   formats render a `Var` through `Var.str`, which displays any value. The
-  implicit crossing to `String` displays any value but `void`, which it
-  reads as NULL, while `.string()` reads the String payload and raises
+  implicit crossing to `String` displays any value but `void` and `Null`,
+  which it reads as NULL, while `.string()` reads the String payload and raises
   `<no-convert>` for another tag.
 - An explicit reader such as `.list()` or `.map()` at a destination of its
   type. The implicit crossing reads the payload or NULL through
