@@ -85,14 +85,14 @@ $map.core.family(
 /* The stored value equal to `key`, which hashes to `key_hash`, or `void`. */
 static Var _get_hashed(
   PoolTable table, Var key, unsigned key_hash) {
-  long index = table._find_hashed(&key, key_hash);
+  long index = table.find_hashed(&key, key_hash);
   return index < 0 ? void : *_record_key(table, (unsigned) index);
 }
 
 /* The stored value equal to `object`, which is installed when absent. */
 static Var _setdefault(
   PoolTable table, Var object, int &inserted) {
-  return *table._get_or_insert(&object, &object, &inserted);
+  return *table.get_or_insert(&object, &object, &inserted);
 }
 
 /* storage
@@ -304,7 +304,7 @@ void Pool.insert(Pool inner, Var object) {
 
 /* Table insertion causes propagate and leave the object unregistered. */
 static void _insert_locked(Pool inner, Var object) {
-  inner.table._set(&object, &object);
+  inner.table.set_entry(&object, &object);
   inner.interned++;
 }
 
@@ -842,7 +842,7 @@ Pool Pool.retain_named(Pool inner, const char *name) {
     &pool.mutex, "Pool: could not initialize branch mutex");
   mutex_ready = 1;
   $scope(&pool.scope)
-    pool.table = PoolTable._new_capacity(NULL, capacity);
+    pool.table = PoolTable.new_table(NULL, capacity);
   finished = 1;
   return pool;
 }
