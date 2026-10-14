@@ -759,12 +759,12 @@ static void _note_source_key(Sym s, SymScope * scope, List key, List binding){
   if(c -> source_primary && ! c -> shallow && Map_try_get(c -> source_declarations, List_var(source_key), &(declaration))) Map_setindex(c -> source_definitions, List_var(binding), declaration);
 }
 
-List binding_identity_new(int, String);
+List Ast_binding(int, String);
 
 static List _new_binding(Sym s, List key){
   int identity = ++ s -> c -> names -> next_binding;
   Var name = List_last(key);
-  List binding = binding_identity_new(identity, Var_as_string(name));
+  List binding = Ast_binding(identity, Var_as_string(name));
   Sym_put(s, s -> binding_facts, List_var(cons(_55, cons(int_var(identity), NULL))), name);
   return binding;
 }
@@ -1040,11 +1040,11 @@ static void _local_object(Sym s, List key, List binding, Type type){
   if(String_truth(_var_converter_owner(key, Type_list(global_type))) && !(Map_contains(s -> binding_facts, List_var(cons(_68, cons(List_var(binding), NULL)))))) Sym_put(s, s -> binding_facts, List_var(cons(_68, cons(List_var(binding), NULL))), String_var(Compiler_fresh_name(s -> c, _70)));
 }
 
-String binding_identity_spelling(List);
+String Ast_binding_spelling(List);
 
 void Sym_join_locals(Sym s, List binding){
   if(! _init_guard_) _file_init_();
-  String spelling = binding_identity_spelling(binding);
+  String spelling = Ast_binding_spelling(binding);
   Var alias;
   if(Map_try_get(s -> binding_facts, List_var(cons(_71, cons(String_var(spelling), NULL))), &(alias))) _unshadow_local(s, binding, Var_as_string(alias));
   Sym_put(s, s -> binding_facts, List_var(cons(_72, cons(String_var(spelling), NULL))), List_var(cons(List_var(binding), _locals(s, spelling))));
@@ -1085,7 +1085,7 @@ static void _unshadow_local(Sym s, List binding, String alias){
 
 List Sym_bind_identity(Sym s, List context, List binding, List ast){
   if(! _init_guard_) _file_init_();
-  String spelling = binding_identity_spelling(binding);
+  String spelling = Ast_binding_spelling(binding);
   List key = List_truth(context) ? List_append(context, cons(String_var(spelling), NULL)) : cons(String_var(spelling), NULL);
   SymScope * scope = _scope_at(s, - 1);
   Type annotation = List_type_from_ast(ast);
@@ -1157,7 +1157,7 @@ void Compiler_record_declaration_visibility(Compiler c, List declaration){
         identity = _x2c_match_value_1;
         {
           if(! private && ! Type_is_static(Var_type(type))) return;
-          String name = binding_identity_spelling(Var_list_payload(identity));
+          String name = Ast_binding_spelling(Var_list_payload(identity));
           if(String_truth(name)) Sym_mark_static(c -> sym, cons(String_var(name), NULL));
         }
 
@@ -1189,10 +1189,10 @@ void Compiler_record_declaration_visibility(Compiler c, List declaration){
 }
 
 int Type_is_extern(Type);
-int is_source_file(String);
+int Path_is_x2c_source(String);
 int Type_is_function(Type);
 static void _record_native_objects(Compiler c, Type spec, List rows){
-  if(! c -> shallow || c -> source_private < 0 || Type_is_extern(spec) || ! is_source_file(c -> filename)) return;  String path = home_portable_path(Compiler_canonical_path(c, c -> filename)); {
+  if(! c -> shallow || c -> source_private < 0 || Type_is_extern(spec) || ! Path_is_x2c_source(c -> filename)) return;  String path = Compiler_portable_path(Compiler_canonical_path(c, c -> filename)); {
     List row;  List _x2c_macro_object_7 = rows;  List _x2c_macro_cursor_7 = _x2c_macro_object_7;  Var _x2c_macro_cursor_output_12;  while(List_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_12))){
       row = Var_list_payload(_x2c_macro_cursor_output_12); {
         List declarator = row; {
@@ -1211,7 +1211,7 @@ static void _record_native_objects(Compiler c, Type spec, List rows){
                 List declaration =({
                   Var _x2c_literal_part_7 = List_var(spec);  Var _x2c_literal_part_8 = List_var(cons(_87, cons(List_var(declarator), NULL)));  cons(_77, cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, NULL)));
                 }
-                );  if(Type_is_function(List_type_from_ast(declaration))) continue;  String name = binding_identity_spelling(Var_list_payload(binding));  if(! String_truth(name) || ! String_len(name)) continue;  Sym_set(c -> sym, cons(_119, cons(List_var(cons(_120, cons(String_var(path), cons(int_var(c -> token -> pos), cons(String_var(name), NULL))))), NULL)), cons(_120, cons(String_var(name), NULL)));
+                );  if(Type_is_function(List_type_from_ast(declaration))) continue;  String name = Ast_binding_spelling(Var_list_payload(binding));  if(! String_truth(name) || ! String_len(name)) continue;  Sym_set(c -> sym, cons(_119, cons(List_var(cons(_120, cons(String_var(path), cons(int_var(c -> token -> pos), cons(String_var(name), NULL))))), NULL)), cons(_120, cons(String_var(name), NULL)));
               }
 
             }
@@ -1249,7 +1249,7 @@ static void _record_rows_visibility(Compiler c, List declaration, Symbol kind, i
 
 void Compiler_record_source_typedef(Compiler, String, List, int);
 static void _record_binding_visibility(Compiler c, List declaration, Symbol kind, int private, int mark, List identity){
-  String name = binding_identity_spelling(identity);  if(kind == 44661285196 && String_truth(name)){
+  String name = Ast_binding_spelling(identity);  if(kind == 44661285196 && String_truth(name)){
     Compiler_record_source_typedef(c, name, declaration, mark);  if(mark) Sym_mark_static(c -> sym, cons(_58, cons(String_var(name), NULL)));
   }
   if(mark && String_truth(name)) Sym_mark_static(c -> sym, cons(String_var(name), NULL));
@@ -1511,7 +1511,7 @@ void Sym_declare_field_order(Sym s, Type type, List fields){
 }
 
 static List _field_row(Sym s, Type type, List declaration, List declarator){
-  String name = binding_identity_spelling(Var_list_payload(List_cadr(declarator)));  Type declared = String_truth(name) ? List_type(Sym_get(s, ({
+  String name = Ast_binding_spelling(Var_list_payload(List_cadr(declarator)));  Type declared = String_truth(name) ? List_type(Sym_get(s, ({
     List _x2c_literal_part_21 = Type_list(type);  List_append(_x2c_literal_part_21, cons(String_var(name), NULL));
   }
   ))) : Type_declared(List_type_from_ast(({

@@ -17,12 +17,11 @@
 #include <sys/uio.h>
 #include <time.h>
 #include <unistd.h>
+#include "path.h"
 #include "process.h"
 void report_configure(int quiet, int plain, Symbol color_mode, int verbose, int dry_run, int inspecting);
 
 int report_receipts(void);
-
-int report_make_owned(void);
 
 void report_progress(Symbol phase, int done, int total, String detail);
 
@@ -36,7 +35,7 @@ void report_generated(int n, unsigned long long bytes);
 
 unsigned long report_now_us(void);
 
-unsigned long long report_file_bytes(String path);
+unsigned long long Path_regular_bytes(String path);
 
 String report_duration(unsigned long microseconds);
 

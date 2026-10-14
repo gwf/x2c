@@ -190,7 +190,7 @@ void Compiler_record_comptime(Compiler c, String name);
 
 void Compiler_inherit_library_comptime(Compiler c);
 
-int macro_library_filling(void);
+int Compiler_library_filling(void);
 
 Map Compiler_shared_definitions(Compiler c);
 
@@ -202,7 +202,7 @@ void Compiler_bind_meta_operation(Lisp lisp, String name, Var function);
 
 void Compiler_report_lisp_failure(Compiler c, Token invocation, List error, String source);
 
-void macro_library_reset(void);
+void Compiler_reset_macro_library(void);
 
 
 #endif /* __GUARD_0x28FCBFDC__ */

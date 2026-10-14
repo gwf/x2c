@@ -12,15 +12,16 @@ X2c project manifests.
 
 | Function | Summary |
 | --- | --- |
-| [`new_command`](#new_command) | Creates the starter project for `x2c new` in the directory named by `request`'s one operand and returns 0. |
-| [`project_manifest`](#project_manifest) | Returns the explicit or nearest readable project manifest, or NULL. |
-| [`project_plan`](#project_plan) | Parses a project manifest and returns its selected target's build plan. |
+| [`CliRequest.new_project`](#CliRequest.new_project) | Creates the starter project for `x2c new` in the directory named by `request`'s one operand and returns 0. |
+| [`CliRequest.project_manifest`](#CliRequest.project_manifest) | Returns the explicit or nearest readable project manifest, or NULL. |
+| [`ProjectBuild.plan`](#ProjectBuild.plan) | Parses a project manifest and returns its selected target's build plan. |
 
-### Functions
+### `CliRequest`
 
-#### new_command
+<a id="CliRequest.new_project"></a>
+#### CliRequest.new_project
 
-`int new_command(CliRequest request)`
+`int CliRequest.new_project(CliRequest request)`
 
 Creates the starter project for `x2c new` in the directory named by
 `request`'s one operand and returns 0. The directory may be missing or
@@ -28,20 +29,24 @@ empty, and its last component names the target. Any other directory, an
 unusable name, or a failed write prints a diagnostic and exits with
 status 2.
 
-Source: `src/project.x:894`
+Source: `src/project.x:895`
 
-#### project_manifest
+<a id="CliRequest.project_manifest"></a>
+#### CliRequest.project_manifest
 
-`String project_manifest(CliRequest c)`
+`String CliRequest.project_manifest(CliRequest c)`
 
 Returns the explicit or nearest readable project manifest, or NULL.
 Discovery uses the same request view as project parsing.
 
-Source: `src/project.x:151`
+Source: `src/project.x:152`
 
-#### project_plan
+### `ProjectBuild`
 
-`ProjectBuild project_plan(CliRequest request)`
+<a id="ProjectBuild.plan"></a>
+#### ProjectBuild.plan
+
+`ProjectBuild ProjectBuild.plan(CliRequest request)`
 
 Parses a project manifest and returns its selected target's build plan.
 `request` must be a build or run request with no explicit operands. The
@@ -50,7 +55,7 @@ manifest fields and command-line overrides to ordinary `CliRequest` values
 without executing build actions. Manifest discovery, parsing, validation,
 or target-selection failures print a diagnostic and exit with status 2.
 
-Source: `src/project.x:122`
+Source: `src/project.x:123`
 
 ## Public types
 
@@ -64,8 +69,8 @@ Source: `src/project.x:122`
 `typedef struct ProjectBuild { CliRequest request; struct ProjectBuild *next; } *ProjectBuild`
 
 Links native build requests in dependency-first order.
-`project_plan` returns the head. Each node and copied `CliRequest` struct
-is owned by the current `Scope` and needs no individual cleanup; its
+`ProjectBuild.plan` returns the head. Each node and copied `CliRequest`
+struct is owned by the current `Scope` and needs no individual cleanup; its
 `String` and `List` fields retain their canonical pool lifetimes and may
 share values with the command request.
 

@@ -972,7 +972,7 @@ void Compiler_install_meta_function(Compiler c, List fn, Token marker){
               if(Map_truth(c -> macro_holes)) return;
               Compiler_group_meta_function(c, fn);
               if(c -> meta_build) return;
-              if(! macro_library_filling() && ! Compiler_shares_meta_definition(c, name)) _install_stub(c, name, Var_type(List_last((Var_list_payload(Array_getindex(c -> meta_group, - 1))))), NULL, marker);
+              if(! Compiler_library_filling() && ! Compiler_shares_meta_definition(c, name)) _install_stub(c, name, Var_type(List_last((Var_list_payload(Array_getindex(c -> meta_group, - 1))))), NULL, marker);
             }
 
           }
@@ -995,7 +995,7 @@ void Compiler_install_collected_meta_function(Compiler c, List declaration, Toke
   if(! _init_guard_) _file_init_();
   if(c -> signature_only || Map_truth(c -> macro_holes)) return;
   if(c -> source_private < 0 && _install_included_meta(c, declaration, marker)) return;
-  if(macro_library_filling()){
+  if(Compiler_library_filling()){
     Compiler_add_library_dependencies(c);
     return;
   }
@@ -1021,7 +1021,7 @@ static int _install_included_meta(Compiler c, List declaration, Token marker){
   if(Type_is_static(type) || String_equal(file, Compiler_canonical_path(c, c -> filename))) return 0;
   String name = _native_meta_name(c, declaration, marker);
   Compiler_install_project_meta_effect(c, ({
-    Var _x2c_literal_part_0 = String_var(name);  Var _x2c_literal_part_1 = List_var(Compiler_func_signature(c, type));  Var _x2c_literal_part_2 = String_var(home_portable_path(file));  cons(_2, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, cons(_x2c_literal_part_2, NULL))));
+    Var _x2c_literal_part_0 = String_var(name);  Var _x2c_literal_part_1 = List_var(Compiler_func_signature(c, type));  Var _x2c_literal_part_2 = String_var(Compiler_portable_path(file));  cons(_2, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, cons(_x2c_literal_part_2, NULL))));
   }
   ));
   return 1;
@@ -1256,7 +1256,7 @@ static List _subject_rows(Compiler c, Array values){
   return Array_list_free(rows);
 }
 
-int binding_identity_try_parts(List, int *, String *);
+int Ast_try_binding(List, int *, String *);
 
 Map Compiler_semantic_binding_facts(Compiler);
 
@@ -1284,7 +1284,7 @@ static void _subject_globals(Compiler c, Var value, Map globals, Map source_name
         node = Var_list_payload(_x2c_macro_current_0);
         {
           String spelling = NULL;
-          if(binding_identity_try_parts(node, NULL, &(spelling))){
+          if(Ast_try_binding(node, NULL, &(spelling))){
             Var source;
             if(Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_13, cons(List_var(node), NULL))), &(source))) Map_setindex(source_names, List_var(node), source);
             List global = Sym_resolve_global(c -> sym, cons(String_var(spelling), NULL), NULL);
@@ -1403,7 +1403,7 @@ static int _code_result(Compiler c, Var value){
     }
 
   }
-  return binding_identity_try_parts(Var_list_payload(value), NULL, NULL);
+  return Ast_try_binding(Var_list_payload(value), NULL, NULL);
 }
 
 Var Compiler_run_meta_call(Compiler c, List expression, Token site, int slot){
@@ -1607,12 +1607,12 @@ static Var _shipped_callee(Compiler c, String name){
   return Map_try_get(_linked_module(), String_var(name), &(function)) ? function :((void) 0, Void);
 }
 
-List linked_meta_provider_source(String provider);
+List Compiler_linked_meta_provider_source(String provider);
 
 static int _shipped_definition(void){
   String file = MetaContext_current() -> definition_file;
   if(! String_truth(file) || String_startswith(file, _113)) return 0;
-  return ! ! List_truth(linked_meta_provider_source(home_portable_path(file)));
+  return ! ! List_truth(Compiler_linked_meta_provider_source(Compiler_portable_path(file)));
 }
 
 static Var _apply_linked(Func function, List arguments){
@@ -1719,7 +1719,7 @@ void Compiler_record_project_meta_effect(Compiler c, List declaration, Token mar
   if(c -> source_private < 0) return;
   Type type = Type_canonicalize(List_type_from_ast(declaration));
   if(Type_is_static(type)) return;
-  String path = home_portable_path(absolute_path(c -> filename));
+  String path = Compiler_portable_path(Path_resolved_absolute(c -> filename));
   String name = _native_meta_name(c, declaration, marker);
   if(Map_contains(Sym_file_statics(c -> sym), List_var(cons(_115, cons(String_var(name), NULL))))) return;
   Sym_set(c -> sym, cons(_117, cons(List_var(cons(_118, cons(String_var(path), cons(int_var(marker -> pos), NULL)))), NULL)), ({
@@ -1846,7 +1846,7 @@ int Compiler_project_meta_uses_linked(Compiler c, String name, String provider){
       ;
       x2c_cleanup_push(& _x2c_defer_record_13);
       {
-        * _x2c_macro_address_9 = home_absolute_path(provider);
+        * _x2c_macro_address_9 = Compiler_absolute_home_path(provider);
         {
           Map * _x2c_macro_address_8 = & c -> meta_hashes;
           Map _x2c_macro_previous_8 = * _x2c_macro_address_8;
@@ -1918,7 +1918,7 @@ void Compiler_record_native_meta_effect(Compiler c, List declaration, Token mark
   if(! _init_guard_) _file_init_();
   if(c -> source_private < 0) return;
   if(! Type_is_function(List_type_from_ast(declaration))) return;
-  String path = home_portable_path(absolute_path(c -> filename));
+  String path = Compiler_portable_path(Path_resolved_absolute(c -> filename));
   Type type = Type_canonicalize(List_type_from_ast(declaration));
   if(Type_is_static(type)) return;
   String name = _native_meta_name(c, declaration, marker);
@@ -1958,7 +1958,7 @@ static String _native_meta_name(Compiler c, List declaration, Token marker){
 
 void Compiler_install_native_meta_effects(Compiler c, Map globs){
   if(! _init_guard_) _file_init_();
-  List unit = cons(String_var(absolute_path(c -> filename)), NULL);
+  List unit = cons(String_var(Path_resolved_absolute(c -> filename)), NULL);
   {
     Var key, value;
     Map _x2c_macro_object_6 = globs;
@@ -2416,7 +2416,7 @@ static int _declared_in(Var key, List paths){
         default: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && Var_equal(_x2c_match_cursor->car, _215 ->car) && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list_payload(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && Var_equal(_x2c_match_cursor1->car, Var_list_payload(_215 ->cdr->car)->car) && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && Var_is(_x2c_match_cursor1->car, 1318210446)) { Var _x2c_match_value_0 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var path;  path = _x2c_match_value_0; {
           Var _x2c_match_value_7 = path; {
-            String path = Var_as_string(_x2c_match_value_7);  return List_contains(paths, String_var(home_absolute_path(path)));
+            String path = Var_as_string(_x2c_match_value_7);  return List_contains(paths, String_var(Compiler_absolute_home_path(path)));
           }
 
         }
@@ -2551,7 +2551,7 @@ int Compiler_bind_linked_meta(Compiler c, List fn, Type type){
     }
 
   }
-  if(! String_truth(name)) return 0;  Map linked = _linked_module();  Var function, bound;  if(! Map_try_get(linked, String_var(name), &(function))) return 0;  if(! _linked_copy(c, name, linked)) return 0;  if(! c -> collect_protocols) Compiler_run_declaration_effects(c);  Compiler_ensure_macro_lisp(c);  if(! Compiler_native_meta_accepts(c, function, Compiler_func_signature(c, type))) return 0;  if(!(macro_library_filling() && Type_is_static(Var_type(List_cadr(fn)))) &&(! Lisp_try_get(c -> macro_lisp, name, &(bound)) || ! x2c_var_equal(bound, function))) Lisp_set_global(c -> macro_lisp, name, function);  if(Compiler_meta_reaches_compile_time(c, List_var(fn))) Compiler_record_comptime(c, name);  return 1;
+  if(! String_truth(name)) return 0;  Map linked = _linked_module();  Var function, bound;  if(! Map_try_get(linked, String_var(name), &(function))) return 0;  if(! _linked_copy(c, name, linked)) return 0;  if(! c -> collect_protocols) Compiler_run_declaration_effects(c);  Compiler_ensure_macro_lisp(c);  if(! Compiler_native_meta_accepts(c, function, Compiler_func_signature(c, type))) return 0;  if(!(Compiler_library_filling() && Type_is_static(Var_type(List_cadr(fn)))) &&(! Lisp_try_get(c -> macro_lisp, name, &(bound)) || ! x2c_var_equal(bound, function))) Lisp_set_global(c -> macro_lisp, name, function);  if(Compiler_meta_reaches_compile_time(c, List_var(fn))) Compiler_record_comptime(c, name);  return 1;
 }
 
 int Compiler_native_module_loaded(String path);
@@ -2589,11 +2589,11 @@ static Map _linked_module(void){
   return Var_map_payload(Map_getindex(native_modules, String_var(linked_supplier)));
 }
 
-int links_meta_function(String name){
+int Compiler_links_meta_function(String name){
   if(! _init_guard_) _file_init_();  return Map_contains(_linked_module(), String_var(name));
 }
 
-List linked_meta_provider_source(String provider){
+List Compiler_linked_meta_provider_source(String provider){
   if(! _init_guard_) _file_init_();  _linked_module();  return Var_list_payload(Map_getindex(linked_hashes, String_var(provider)));
 }
 
@@ -2602,11 +2602,11 @@ static int _linked_copy(Compiler c, String name, Map linked){
   if(Map_contains(linked_hashes, String_var(name))) return _linked_texts_match(c, name, linked, Map_new());  return String_truth(c -> filename) && String_equal(Path_absolute(c -> filename), String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_247), NULL))));
 }
 
-int is_prelude_source(String);
+int Compiler_is_prelude_source(String);
 int Compiler_linked_meta_definitions_current(Compiler, String);
 static int _linked_texts_match(Compiler c, String name, Map linked, Map reached){
   Var hash, own, names =((void) 0, Void);  String file = Compiler_canonical_path(c, c -> filename);  String key =({
-    Var _x2c_literal_part_29 = String_var(home_portable_path(file));  String_join(NULL, cons(_x2c_literal_part_29, cons(String_var(_248), cons(String_var(name), NULL))));
+    Var _x2c_literal_part_29 = String_var(Compiler_portable_path(file));  String_join(NULL, cons(_x2c_literal_part_29, cons(String_var(_248), cons(String_var(name), NULL))));
   }
   );  if(! Map_try_get(c -> meta_hashes, String_var(name), &(own))){
     Var advertisement;  if(Map_try_get(c -> project_meta, String_var(name), &(advertisement))){
@@ -2619,7 +2619,7 @@ static int _linked_texts_match(Compiler c, String name, Map linked, Map reached)
             .fn = _x2c_defer_cleanup_17, .env = & _x2c_macro_environment_17
           }
           ;  x2c_cleanup_push(& _x2c_defer_record_17); {
-            * _x2c_macro_address_12 = home_absolute_path(Var_as_string(provider)); {
+            * _x2c_macro_address_12 = Compiler_absolute_home_path(Var_as_string(provider)); {
               Map * _x2c_macro_address_11 = & c -> meta_hashes;  Map _x2c_macro_previous_11 = * _x2c_macro_address_11; {
                 _x2c_defer_env_16 _x2c_macro_environment_16 ={
                   0
@@ -2665,10 +2665,10 @@ static int _linked_texts_match(Compiler c, String name, Map linked, Map reached)
     }
     return !(Map_contains(linked_hashes, String_var(name)));
   }
-  if(is_prelude_source(file)) return Map_contains(linked, String_var(name));  if(Map_contains(reached, String_var(key))) return 1;  Map_setindex(reached, String_var(key), int_var(1));  if(Map_try_get(linked_hashes, String_var(name), &(hash))){
+  if(Compiler_is_prelude_source(file)) return Map_contains(linked, String_var(name));  if(Map_contains(reached, String_var(key))) return 1;  Map_setindex(reached, String_var(key), int_var(1));  if(Map_try_get(linked_hashes, String_var(name), &(hash))){
     List row = Var_list_payload(hash);  hash = List_car(row);  names = List_cadr(row);  if(! x2c_var_equal(hash, own)) return 0;
   }
-  else if(!(Map_contains(linked, String_var(name))) && !(Map_contains(c -> native_meta, String_var(name)))) return 0;  Map_try_get(c -> meta_calls, String_var(name), &(names));  if(Var_is_row(names, 11, 7, 1)) return Compiler_linked_meta_definitions_current(c, home_absolute_path(Var_as_string(names)));  if(Var_is_row(names, 9, 7, 4)){
+  else if(!(Map_contains(linked, String_var(name))) && !(Map_contains(c -> native_meta, String_var(name)))) return 0;  Map_try_get(c -> meta_calls, String_var(name), &(names));  if(Var_is_row(names, 11, 7, 1)) return Compiler_linked_meta_definitions_current(c, Compiler_absolute_home_path(Var_as_string(names)));  if(Var_is_row(names, 9, 7, 4)){
     String callee;  List _x2c_macro_object_17 = Var_list(names);  List _x2c_macro_cursor_18 = _x2c_macro_object_17;  Var _x2c_macro_cursor_output_23;  while(List_try_next(_x2c_macro_object_17, &(_x2c_macro_cursor_18), &(_x2c_macro_cursor_output_23))){
       callee = Var_as_string(_x2c_macro_cursor_output_23);  if(! _linked_texts_match(c, callee, linked, reached)) return 0;
     }
@@ -2731,7 +2731,7 @@ static void _load_package_module(Compiler c, String name, String module, Token t
 }
 
 String Compiler_load_native_module(String path){
-  if(! _init_guard_) _file_init_();  if(! X2C_NATIVE_MODULES) driver_error("native modules are not supported on this platform");  String absolute = Path_absolute(path);  if(Compiler_native_module_loaded(absolute)) return absolute;  int stamp = _module_stamp(path);  if(stamp < 0) driver_error(String_join(NULL, cons(String_var(_457), cons(String_var(path), NULL))));  if(! stamp) driver_error(String_join(NULL, cons(String_var(_458), cons(String_var(path), cons(String_var(_456), NULL)))));  _open_native_module(absolute);  return absolute;
+  if(! _init_guard_) _file_init_();  if(! X2C_NATIVE_MODULES) Diagnostics_driver_error("native modules are not supported on this platform");  String absolute = Path_absolute(path);  if(Compiler_native_module_loaded(absolute)) return absolute;  int stamp = _module_stamp(path);  if(stamp < 0) Diagnostics_driver_error(String_join(NULL, cons(String_var(_457), cons(String_var(path), NULL))));  if(! stamp) Diagnostics_driver_error(String_join(NULL, cons(String_var(_458), cons(String_var(path), cons(String_var(_456), NULL)))));  _open_native_module(absolute);  return absolute;
 }
 
 void Compiler_preload_native_module(String path){
@@ -2739,7 +2739,7 @@ void Compiler_preload_native_module(String path){
 }
 
 static int _module_stamp(String path){
-  String expected = build_module_stamp();  if(! String_truth(expected)) driver_error(String_join(NULL, cons(String_var(_459), cons(String_var(path), cons(String_var(_17), NULL)))));  File input = fopen(path, "rb");  if(! input) driver_error(({
+  String expected = Compiler_module_stamp();  if(! String_truth(expected)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_459), cons(String_var(path), cons(String_var(_17), NULL)))));  File input = fopen(path, "rb");  if(! input) Diagnostics_driver_error(({
     Var _x2c_literal_part_35 = String_var(path);  Var _x2c_literal_part_36 = String_var(String_new(strerror(errno)));  String_join(NULL, cons(String_var(_460), cons(_x2c_literal_part_35, cons(String_var(_461), cons(_x2c_literal_part_36, NULL)))));
   }
   ));  fseek(input, 0, SEEK_END);  long end = ftell(input);  rewind(input);  char * data = Scope_malloc(end > 0 ?(size_t) end : 1);  size_t size = end > 0 ? fread(data, 1, (size_t) end, input) : 0;  File_close(input);  int stamp = _stamp_in(data, size, expected);  Scope_free(data);  return stamp;
@@ -2768,10 +2768,10 @@ static void _open_native_module(String path){
     }
 
   }
-  if(! handle) driver_error(({
+  if(! handle) Diagnostics_driver_error(({
     Var _x2c_literal_part_37 = String_var(path);  Var _x2c_literal_part_38 = String_var(String_new(dlerror()));  String_join(NULL, cons(String_var(_463), cons(_x2c_literal_part_37, cons(String_var(_461), cons(_x2c_literal_part_38, NULL)))));
   }
-  ));  Map(* entry)(void) =(Map(*)(void)) dlsym(handle, "x2c_module_targets");  if(! entry) driver_error(String_join(NULL, cons(String_var(_457), cons(String_var(path), NULL))));  Compiler_add_native_module(path, entry);
+  ));  Map(* entry)(void) =(Map(*)(void)) dlsym(handle, "x2c_module_targets");  if(! entry) Diagnostics_driver_error(String_join(NULL, cons(String_var(_457), cons(String_var(path), NULL))));  Compiler_add_native_module(path, entry);
 }
 
 void Compiler_add_native_module(String path, Map(* entry)(void)){
@@ -2836,7 +2836,7 @@ int Compiler_links_extension(String name){
 }
 
 String Compiler_extension_archive(void){
-  if(! _init_guard_) _file_init_();  return extensions ? String_add(String_join(NULL, cons(String_var(x2c_get_executable()), cons(String_var(_464), NULL))), String_join(NULL, cons(String_var(compiler_identity()), cons(String_var(_465), NULL)))) : NULL;
+  if(! _init_guard_) _file_init_();  return extensions ? String_add(String_join(NULL, cons(String_var(x2c_get_executable()), cons(String_var(_464), NULL))), String_join(NULL, cons(String_var(Compiler_identity()), cons(String_var(_465), NULL)))) : NULL;
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){

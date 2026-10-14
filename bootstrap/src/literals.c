@@ -613,7 +613,7 @@ static Var _macro_pattern_argument(Compiler c){
     element = Compiler_parse_list_literal(c);
   }
   Var value = Compiler_match_pattern_value(c, List_var(element));
-  if(! match_value_is_static(value)) Compiler_report_error(c, 33658058, _57, origin, NULL);
+  if(! Compiler_match_value_is_static(value)) Compiler_report_error(c, 33658058, _57, origin, NULL);
   return value;
 }
 

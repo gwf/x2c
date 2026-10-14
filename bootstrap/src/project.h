@@ -19,11 +19,11 @@ typedef struct ProjectBuild{
 #include <string.h>
 #include "buffer.h"
 #include "install.h"
-ProjectBuild project_plan(CliRequest request);
+ProjectBuild ProjectBuild_plan(CliRequest request);
 
-String project_manifest(CliRequest c);
+String CliRequest_project_manifest(CliRequest c);
 
-int new_command(CliRequest request);
+int CliRequest_new_project(CliRequest request);
 
 
 #endif /* __GUARD_0x05ED52D8__ */

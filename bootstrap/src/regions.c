@@ -2082,7 +2082,7 @@ static int _scan_call_node(Walk * w, Var node){
   List _x2c_destructure_2 = call;
   Var function = List_getindex(_x2c_destructure_2, 0);
   List arguments = Var_list_payload(List_getindex(_x2c_destructure_2, 1));
-  String callee = binding_identity_spelling(_binding_of(function));
+  String callee = Ast_binding_spelling(_binding_of(function));
   {
     Var _x2c_match_var = String_truth(callee) ? _effect(&((* w)), callee) :((void) 0, Void); int _x2c_match_none = !Var_is(_x2c_match_var, 806120);
     List _x2c_match_expr = Var_list_payload(_x2c_match_var); List _x2c_match_cursor; MatchCaptureBuffer _x2c_match_capture = { 0 };
@@ -2233,9 +2233,9 @@ static void _scan_node(Walk * w, Var node){
 
 static void _scan_ident(Walk * w, Var binding){
   Var found = Map_getindex((* w).facts, binding);  if(Var_is_void(found)) return;  Fact fact = Var_fact(found);  Region cleanup = _cleanup(fact -> acquired);  if((* w).audit &&(_closed(fact -> region) || _closed(fact -> other) ||(cleanup && cleanup -> closed))){
-    String name = binding_identity_spelling(Var_list_payload(binding));  _warn(&((* w)), 1218923484, (* w).origin, String_join(NULL, cons(String_var(_797), cons(String_var(name), cons(String_var(_798), NULL)))), NULL);  return;
+    String name = Ast_binding_spelling(Var_list_payload(binding));  _warn(&((* w)), 1218923484, (* w).origin, String_join(NULL, cons(String_var(_797), cons(String_var(name), cons(String_var(_798), NULL)))), NULL);  return;
   }
-  if(! fact -> dead) return;  String name = binding_identity_spelling(Var_list_payload(binding));  String ended = fact -> dead == 28291400 ? _799 : _800;  _warn(&((* w)), 84949284065610, (* w).origin, String_join(NULL, cons(String_var(_797), cons(String_var(name), cons(String_var(_801), cons(String_var(ended), NULL))))), NULL);  fact -> dead = 0;
+  if(! fact -> dead) return;  String name = Ast_binding_spelling(Var_list_payload(binding));  String ended = fact -> dead == 28291400 ? _799 : _800;  _warn(&((* w)), 84949284065610, (* w).origin, String_join(NULL, cons(String_var(_797), cons(String_var(name), cons(String_var(_801), cons(String_var(ended), NULL))))), NULL);  fact -> dead = 0;
 }
 
 static void _scan_cons(Walk * w, Var node, Var head, Var tail){
@@ -2750,7 +2750,7 @@ static String _subject(Walk * w, Var value, List named, Fact fact){
     }
 
   }
-  if(! List_truth(named)) return _1119;  String name = String_join(NULL, cons(String_var(_797), cons(String_var(binding_identity_spelling(named)), cons(String_var(_797), NULL))));  Var own = Map_getindex((* w).facts, List_var(named));  if(! Var_is_void(own) && Var_pointer(own) == fact) return name;  List arguments = NULL;  if(String_truth(_callee_of(value, &(arguments)))) return String_join(NULL, cons(String_var(_1120), cons(String_var(name), NULL))); {
+  if(! List_truth(named)) return _1119;  String name = String_join(NULL, cons(String_var(_797), cons(String_var(Ast_binding_spelling(named)), cons(String_var(_797), NULL))));  Var own = Map_getindex((* w).facts, List_var(named));  if(! Var_is_void(own) && Var_pointer(own) == fact) return name;  List arguments = NULL;  if(String_truth(_callee_of(value, &(arguments)))) return String_join(NULL, cons(String_var(_1120), cons(String_var(name), NULL))); {
     List _x2c_match_expr = fact ? fact -> place : NULL; List _x2c_match_cursor;  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
         case 9224497936780766120ULL: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936780766120ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) { List _x2c_match_list_0 = _x2c_match_cursor; {
         List fields;  fields = _x2c_match_list_0;  return String_join(NULL, cons(String_var(_1121), cons(String_var(name), NULL)));
@@ -2860,7 +2860,7 @@ static String _callee_of(Var value, List * arguments){
     List _x2c_match_expr = _source_call(_unwrap(value)); List _x2c_match_cursor;  switch(0){
         default: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_1 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
         Var function;  function = _x2c_match_value_0;  Var rows;  rows = _x2c_match_value_1; {
-          List name = _binding_of(function); (* arguments) = Var_list_payload(rows);  return binding_identity_spelling(name);
+          List name = _binding_of(function); (* arguments) = Var_list_payload(rows);  return Ast_binding_spelling(name);
         }
 
       }

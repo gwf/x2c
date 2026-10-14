@@ -59,9 +59,9 @@ List Compiler_native_meta_targets(List paths);
 
 int Compiler_bind_linked_meta(Compiler c, List fn, Type type);
 
-int links_meta_function(String name);
+int Compiler_links_meta_function(String name);
 
-List linked_meta_provider_source(String provider);
+List Compiler_linked_meta_provider_source(String provider);
 
 Map Compiler_compiler_targets(void);
 

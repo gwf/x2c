@@ -23,7 +23,7 @@ Var Compiler_meta_argument(Compiler c, List node, Type want, Token site, MetaCal
 
 Var Compiler_folded_constant(Compiler c, Var node);
 
-Var literal_text_value(String spelling);
+Var Compiler_literal_text_value(String spelling);
 
 List Compiler_meta_value_expression(Compiler c, Type declared, Var value, Token site);
 

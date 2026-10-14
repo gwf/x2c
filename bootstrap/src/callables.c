@@ -1143,7 +1143,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _939 = cons(_938, NULL);
   _940 = cons(_253, _939);
   _941 = List_var(_940);
-  _942 = int_var(19175);
+  _942 = int_var(19165);
   _943 = cons(_942, NULL);
   _944 = cons(_266, _943);
   _945 = List_var(_944);
@@ -1772,7 +1772,7 @@ static List _indirect_func_value(Compiler c, List expression, Type pointer_type)
   if(! List_truth(constructor) || ! List_truth(Type_list(constructor_type))) _adapter_error(c, _517, List_type(_321), pointer_type, NULL);
   List context = Sym_introduce(c -> sym, Compiler_fresh_name(c, _518));
   List declaration = _func_context_declaration(c, context_type, context, expression);
-  String field_name = binding_identity_spelling(context_field);
+  String field_name = Ast_binding_spelling(context_field);
   List pointer =({
     Var _x2c_literal_part_17 = List_var(pointer_type);  Var _x2c_literal_part_18 = List_var(({
       Var _x2c_literal_part_15 = List_var(_func_bound(context_type, context));  Var _x2c_literal_part_16 = List_var(cons(String_var(field_name), NULL));  cons(_504, cons(_519, cons(_x2c_literal_part_15, cons(_x2c_literal_part_16, NULL))));
@@ -1818,7 +1818,7 @@ static List _build_indirect_func_adapter(Compiler c, Type diagnostic_type, Type 
   List fn_binding = Sym_introduce(c -> sym, Compiler_fresh_name(c, _524));
   List context_local = Sym_introduce(c -> sym, Compiler_fresh_name(c, _518));
   List context_declaration = _context_local(c, context_type, context_local, fn_binding);
-  String field_name = binding_identity_spelling(field_binding);
+  String field_name = Ast_binding_spelling(field_binding);
   List context = _func_bound(context_pointer, context_local);
   List target =({
     Var _x2c_literal_part_21 = List_var(pointer_type);  Var _x2c_literal_part_22 = List_var(({

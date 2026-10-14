@@ -674,7 +674,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _370 = cons(_367, _369);
   _371 = List_var(_370);
   _372 = Symbol_var(1133019155420);
-  _373 = int_var(1003);
+  _373 = int_var(1012);
   _374 = cons(_373, NULL);
   _375 = cons(_372, _374);
   _376 = List_var(_375);
@@ -1774,7 +1774,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
   _1464 = cons(_839, _1463);
   _1465 = List_var(_1464);
   _1466 = cons(_1465, _467);
-  _1467 = String_new("builtin_defer_captures");
+  _1467 = String_new("Ast_defer_captures");
   _1468 = String_new("builtin_foreach_expand");
   _1469 = cons(_700, NULL);
   _1470 = cons(_700, _1469);
@@ -1935,11 +1935,11 @@ static void _auto_fail(Symbol category, String message, List notes){
   x2c_diagnostic_fail_at(List_var(x2c_enclosing(43159332400040)), category, message, notes);
 }
 
-List builtin_foreach_bindings(List);
+List Code_declared_bindings(List);
 
 static List _foreach_expand(List declaration, List collection, List body, Var iterator, Var item, Var pair, Var object, Var cursor){
   collection = Code_promoted(((Code) collection));
-  List targets = builtin_foreach_bindings(declaration);
+  List targets = Code_declared_bindings(declaration);
   Type type = Code_type(((Code) collection));
   int direct = List_equal(Type_list(type), _425);
   List converter = direct ? NULL : _converter(type);
@@ -1957,10 +1957,10 @@ static List _foreach_expand(List declaration, List collection, List body, Var it
   return _with_iter(&(f), converter);
 }
 
-List meta_function_reference(String);
+List MetaContext_function_reference(String);
 
 static List _converter(Type type){
-  return List_equal(Type_list(type), _434) ? meta_function_reference(_435) : Type_protocol_member(type, _436);
+  return List_equal(Type_list(type), _434) ? MetaContext_function_reference(_435) : Type_protocol_member(type, _436);
 }
 
 int Type_is_pointer(Type);
@@ -1972,7 +1972,7 @@ int Type_is_integral(Type);
 static List _cursor_spec(List collection_type){
   if(! _atom_type(List_var(collection_type))) return NULL;
   String owner = Var_str(List_car(collection_type));
-  Code function = meta_function_reference(String_add(owner, _437));
+  Code function = MetaContext_function_reference(String_add(owner, _437));
   if(! List_truth(function)) return NULL;
   Type type = Code_type(function);
   List parameters = Type_parameters(type);
@@ -2054,13 +2054,13 @@ static List _cursor_assignments(List targets, List outputs){
   );
 }
 
-List builtin_foreach_complete(List);
+List Code_complete_iterator(List);
 
 static List _with_iter(Foreach * f, List converter){
   List constructor = _iter_constructor(&((* f)), converter);
   List item_expression = _expr(_434, (* f).item);
-  List initializer = builtin_foreach_complete(List_truth(constructor) ? _iter_call(constructor, (* f).collection) :(* f).collection);
-  Code next = meta_function_reference(_460);
+  List initializer = Code_complete_iterator(List_truth(constructor) ? _iter_call(constructor, (* f).collection) :(* f).collection);
+  Code next = MetaContext_function_reference(_460);
   List output = Var_list_payload(List_getindex(Type_parameters(Code_type(next)), 1));
   List item_argument = x2c_var_equal(List_car(output), Symbol_var(54)) ? _address(item_expression) : item_expression;
   List condition =({
@@ -2106,7 +2106,7 @@ static List _iter_constructor(Foreach * f, List converter){
   int atom = _atom_type(List_var(type));
   String owner = atom ? Var_str(List_car(type)) : _462;
   List enumerate = NULL;
-  if(List_len((* f).targets) == 2 && atom && ! List_equal(type, _425)) enumerate = meta_function_reference(String_add(owner, _463));
+  if(List_len((* f).targets) == 2 && atom && ! List_equal(type, _425)) enumerate = MetaContext_function_reference(String_add(owner, _463));
   return List_truth(enumerate) ? enumerate : converter;
 }
 
@@ -2163,7 +2163,7 @@ static List _assign(List target, List value){
   )), NULL)))), NULL))), NULL))), NULL)));
 }
 
-List meta_invocation_location(void);
+List MetaContext_invocation_location(void);
 
 static List _class_expand(List capture){
   String owner = Var_as_string(List_getindex(capture, 1));
@@ -2172,7 +2172,7 @@ static List _class_expand(List capture){
   if(! Type_is_pointer(Type_canonicalize(type)) && x2c_var_equal(List_car(Type_list(type)), Symbol_var(357722))) x2c_diagnostic_fail(String_add(String_join(NULL, cons(String_var(_495), cons(String_var(owner), cons(String_var(_496), NULL)))), _497), _500);
   return({
     Var _x2c_literal_part_50 = List_var(capture);  Var _x2c_literal_part_51 = List_var(cons(_501, cons(_502, cons(List_var(({
-      Var _x2c_literal_part_47 = String_var(owner);  Var _x2c_literal_part_48 = List_var(type);  Var _x2c_literal_part_49 = List_var(meta_invocation_location());  cons(_x2c_literal_part_47, cons(_x2c_literal_part_48, cons(_x2c_literal_part_49, NULL)));
+      Var _x2c_literal_part_47 = String_var(owner);  Var _x2c_literal_part_48 = List_var(type);  Var _x2c_literal_part_49 = List_var(MetaContext_invocation_location());  cons(_x2c_literal_part_47, cons(_x2c_literal_part_48, cons(_x2c_literal_part_49, NULL)));
     }
     )), NULL))));  cons(_x2c_literal_part_50, cons(_x2c_literal_part_51, NULL));
   }
@@ -2835,13 +2835,13 @@ static List _default(String owner, String member, List result, List parameters, 
   return cons(_881, cons(List_var(_function(String_join(NULL, cons(String_var(owner), cons(String_var(_1371), cons(String_var(member), NULL)))), List_type(result), parameters, body)), NULL));
 }
 
-List binding_native_type(List);
+List Code_native_signature(List);
 
 static List _binding_record(Var group, Var name, List function, List all_rows, List sealed){
   String group_name = Code_binding_spelling(group);
   String lisp_name = _binding_name(name);
   String function_name = Code_name(function);
-  List type = binding_native_type(function);
+  List type = Code_native_signature(function);
   List rows = _binding_rows_for(group_name, all_rows);
   {
     Var installed;
@@ -2919,7 +2919,7 @@ static List _binding_statements(List lisp, List rows){
   return Array_list_free(statements);
 }
 
-List binding_literal_list(List);
+List MetaContext_literal_list(List);
 
 static List _binding_statement(List lisp, List row){
   {
@@ -2942,7 +2942,7 @@ static List _binding_statement(List lisp, List row){
             String name = Var_as_string(_x2c_match_value_0);
             String function = Var_as_string(_x2c_match_value_1);
             {
-              List signature = binding_literal_list(Var_list_payload(type));
+              List signature = MetaContext_literal_list(Var_list_payload(type));
               return({
                 List _x2c_hole_18 = x2c_ident(function);  cons(_2, cons(_3, cons(List_var(cons(_118, cons(List_var(cons(_121, cons(List_var(cons(_4, cons(_7, cons(List_var(cons(_8, cons(_1404, cons(List_var(({
                   Var _x2c_literal_part_127 = List_var(cons(_25, cons(_129, cons(_130, cons(List_var(lisp), NULL)))));  Var _x2c_literal_part_128 = List_var(cons(_25, cons(_129, cons(_130, cons(String_var(name), NULL)))));  Var _x2c_literal_part_129 = List_var(cons(_4, cons(_7, cons(List_var(cons(_8, cons(_1416, cons(List_var(({
@@ -3044,7 +3044,7 @@ static List _binding_target_row(List row){
 
 static List _binding_target(String bind_name, String name, String maker){
   List func = _binding_call(maker, ({
-    Var _x2c_literal_part_134 = List_var(_binding_ident(name));  Var _x2c_literal_part_135 = List_var(binding_literal_list(_binding_name_signature(name)));  cons(_x2c_literal_part_134, cons(_x2c_literal_part_135, NULL));
+    Var _x2c_literal_part_134 = List_var(_binding_ident(name));  Var _x2c_literal_part_135 = List_var(MetaContext_literal_list(_binding_name_signature(name)));  cons(_x2c_literal_part_134, cons(_x2c_literal_part_135, NULL));
   }
   ));
   return({
@@ -3054,10 +3054,10 @@ static List _binding_target(String bind_name, String name, String maker){
 }
 
 static List _binding_name_signature(String name){
-  return binding_native_type(meta_function_reference(name));
+  return Code_native_signature(MetaContext_function_reference(name));
 }
 
-Map builtin_targets(void){
+Map Compiler_builtin_targets(void){
   if(! _init_guard_) _file_init_();
   Map rows = Map_new();
   Map_setindex(rows, String_var(_1452), Func_var(Func_new(_x2c_func_adapt_5, _1459)));
@@ -3094,11 +3094,11 @@ static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func
   ;
 }
 
-Var builtin_foreach_unique(String);
+Var MetaContext_fresh_binding(String);
 
 static Var _x2c_lambda_1(Var type){
   return List_var(({
-    Var _x2c_literal_part_138 = type;  Var _x2c_literal_part_139 = builtin_foreach_unique(_1562);  cons(_x2c_literal_part_138, cons(_x2c_literal_part_139, NULL));
+    Var _x2c_literal_part_138 = type;  Var _x2c_literal_part_139 = MetaContext_fresh_binding(_1562);  cons(_x2c_literal_part_138, cons(_x2c_literal_part_139, NULL));
   }
   ));
   ;
@@ -3160,12 +3160,12 @@ static Var _x2c_func_adapt_6(Func _x2c_func_binding_6, const FuncArg * _x2c_func
   ;
 }
 
-List builtin_defer_captures(List, List);
+List Ast_defer_captures(List, List);
 
 static Var _x2c_func_adapt_7(Func _x2c_func_binding_7, const FuncArg * _x2c_func_argv_7){
   List a0 = Var_list_payload(x2c_func_value_argument(_x2c_func_binding_7, _x2c_func_argv_7, 0, 806120));
   List a1 = Var_list_payload(x2c_func_value_argument(_x2c_func_binding_7, _x2c_func_argv_7, 1, 806120));
-  return List_var(builtin_defer_captures(a0, a1));
+  return List_var(Ast_defer_captures(a0, a1));
   ;
 }
 

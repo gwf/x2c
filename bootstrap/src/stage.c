@@ -310,9 +310,9 @@ static List Type_list(Type);
 
 int Sym_is_named_value_type(Sym, Type, String);
 
-List meta_type_description(Var);
+List MetaContext_type_description(Var);
 
-List meta_source_description(Var);
+List MetaContext_source_description(Var);
 
 List Compiler_capture_macro_value(Compiler, List);
 
@@ -335,8 +335,8 @@ Var Compiler_meta_argument(Compiler c, List node, Type want, Token site, MetaCal
         Var captured;
         captured = _x2c_match_value_0;
         {
-          if(Sym_is_named_value_type(c -> sym, want, _0)) return List_var(meta_type_description(captured));
-          if(Sym_is_named_value_type(c -> sym, want, _1)) return List_var(meta_source_description(captured));
+          if(Sym_is_named_value_type(c -> sym, want, _0)) return List_var(MetaContext_type_description(captured));
+          if(Sym_is_named_value_type(c -> sym, want, _1)) return List_var(MetaContext_source_description(captured));
         }
 
       }
@@ -464,7 +464,7 @@ static Var _cached_constant(Compiler c, List key){
   return List_var(key);
 }
 
-Var literal_text_value(String spelling);
+Var Compiler_literal_text_value(String spelling);
 
 Var Type_numeric_literal_value(Type, String);
 
@@ -505,7 +505,7 @@ static Var _constant_leaf(Compiler c, List expr){
       }
        } } static MatchCaptureSite _x2c_match_site_5; if (x2c_match_site_try_capture(&_x2c_match_site_5, _x2c_match_expr, List_var(_153), &_x2c_match_capture)) { Var _x2c_match_value_0 = _x2c_match_values[0]; {
         Var text;  text = _x2c_match_value_0;  if(Var_is_row(text, 11, 7, 1)){
-          return literal_text_value(Var_as_string(text));  break;
+          return Compiler_literal_text_value(Var_as_string(text));  break;
         }
 
       }
@@ -530,7 +530,7 @@ static Var _joined_constant(Compiler c, Var left, Var right){
   Var a = Compiler_folded_constant(c, left), b = Compiler_folded_constant(c, right);  if(Var_is_void(a) || Var_is_void(b)) return((void) 0, Void);  return String_var(String_add(Var_string(a), Var_as_string(b)));
 }
 
-Var literal_text_value(String spelling){
+Var Compiler_literal_text_value(String spelling){
   if(! _init_guard_) _file_init_();  int len = String_len(spelling);  if(len >= 2 && String_getindex(spelling, 0) == '"'){
     String text = _154;  for(int i = 0;  i < len;  i ++){
       if(String_getindex(spelling, i) != '"') continue;  int start = ++ i;  while(i < len && String_getindex(spelling, i) != '"') i += String_getindex(spelling, i) == '\\' ? 2 : 1;  String piece = String_unescape(String_new_len(spelling + start, i - start));  text = String_join(NULL, cons(String_var(text), cons(String_var(piece), NULL)));

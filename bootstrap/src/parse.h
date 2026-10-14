@@ -92,7 +92,7 @@ List Compiler_parse_function_definition(Compiler c);
 
 List Compiler_parse_function_target(Compiler c);
 
-Type declared_return(List declaration);
+Type Ast_declared_return(List declaration);
 
 void Compiler_enter(Compiler c, Ancestor row);
 
@@ -118,7 +118,7 @@ List Compiler_finish_initializers(Compiler c, List declaration, Token origin);
 
 List Compiler_bind_syntax(Compiler c, Var syntax, AstPos context, Type return_type);
 
-Var source_clause(Symbol kind);
+Var Compiler_source_clause(Symbol kind);
 
 List Compiler_bind_source_statement(Compiler c);
 

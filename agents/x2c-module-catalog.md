@@ -36,14 +36,14 @@ shared helpers for x2c compiler AST nodes.
 
 Public functions:
 
-`binding_identity_new`, `binding_identity_try_parts`,
-`binding_identity_spelling`, `ast_prototype_declarator`, `Ast.designated`,
-`Ast.lvalue_binding`, `ast_addressed_identifier`, `ast_direct_identifier`,
-`ast_indirect_identifier`, `Ast.written_operand`, `Ast.rewrite_children`,
-`ast_contains_head`, `ast_replace_nodes`, `ast_collect_binding_references`,
-`Ast.without_origin`, `Ast.rewrap_origin`, `Ast.written_definitions`,
-`Ast.entry_call`, `Ast.reference_guard_exits`, `Ast.never_returns`,
-`Symbol.is_assignment_op`, `ast_changes_left_operand`, `Ast.initializer_cases`,
+`Ast.binding`, `Ast.try_binding`, `Ast.binding_spelling`,
+`Ast.prototype_declarator`, `Ast.designated`, `Ast.lvalue_binding`,
+`Ast.addressed_identifier`, `Ast.direct_identifier`, `Ast.indirect_identifier`,
+`Ast.written_operand`, `Ast.rewrite_children`, `Ast.contains_head`,
+`Ast.replace_nodes`, `Ast.collect_binding_references`, `Ast.without_origin`,
+`Ast.rewrap_origin`, `Ast.written_definitions`, `Ast.entry_call`,
+`Ast.reference_guard_exits`, `Ast.never_returns`, `Symbol.is_assignment_op`,
+`Symbol.changes_left_operand`, `Ast.initializer_cases`,
 `Ast.initializer_functions`
 
 ### [src/build.x](../src/build.x)
@@ -52,11 +52,11 @@ the native build of one target.
 
 Public functions:
 
-`CliRequest.prepare`, `build_check_input`, `Build.generated_dir`,
+`CliRequest.prepare`, `Build.require_input`, `Build.generated_dir`,
 `Build.translation_current`, `Build.begin_translation`,
 `Build.end_translation`, `Build.record_translation`, `Build.add_generated`,
 `Build.module_entry`, `Build.extension_entries`, `Build.finish`,
-`compile_commands_write`, `Build.report_success`, `Build.run_program`,
+`Build.write_commands`, `Build.report_success`, `Build.run_program`,
 `Build.cleanup`, `Build.script_helpers`, `Build.publish_script`,
 `CliRequest.script_current`
 
@@ -66,7 +66,7 @@ the built-in macros' compile-time algorithms.
 
 Public functions:
 
-`builtin_targets`
+`Compiler.builtin_targets`
 
 ### [src/cache.x](../src/cache.x)
 
@@ -95,8 +95,8 @@ cleanup regions and the transfers that leave them.
 Public functions:
 
 `Compiler.lower_cleanup`, `Compiler.static_value_is_runtime`,
-`builtin_defer_record`, `builtin_defer_captures`,
-`Compiler.rewrite_defer_list`, `Compiler.lower_defer_region`
+`Ast.defer_captures`, `Compiler.rewrite_defer_list`,
+`Compiler.lower_defer_region`
 
 ### [src/cli.x](../src/cli.x)
 
@@ -104,9 +104,9 @@ x2c command-line parsing and presentation.
 
 Public functions:
 
-`cli_parse`, `TargetKind.named`, `TargetKind.of`,
-`cli_dependency_pass_through`, `cli_package_options`, `cli_response_arguments`,
-`cli_request`, `cli_builtin_command`, `cli_version`, `CliRequest.inspects`,
+`CliRequest.parse`, `TargetKind.named`, `TargetKind.of`,
+`CliRequest.dependency_option`, `CliRequest.package_options`, `CliRequest.new`,
+`CliRequest.is_builtin`, `Compiler.version`, `CliRequest.inspects`,
 `CliRequest.package_roots`
 
 ### [src/collect.x](../src/collect.x)
@@ -115,10 +115,11 @@ source-ordered shallow symbol collection and replay.
 
 Public functions:
 
-`Compiler.collect_symbols`, `compiler_prelude_sources`, `is_prelude_source`,
-`Compiler.module_source`, `Compiler.configure_package`,
-`collect_resolve_include`, `Compiler.include_typedef_names`,
-`Compiler.include_type_dependencies`, `Compiler.include_function_declarations`,
+`Compiler.collect_symbols`, `Compiler.prelude_sources`,
+`Compiler.is_prelude_source`, `Compiler.module_source`,
+`Compiler.configure_package`, `SourceView.resolve_include`,
+`Compiler.include_typedef_names`, `Compiler.include_type_dependencies`,
+`Compiler.include_function_declarations`,
 `Compiler.runtime_function_declarations`,
 `Compiler.linked_meta_provider_current`,
 `Compiler.linked_meta_definitions_current`, `Compiler.complete_meta_hashes`,
@@ -129,8 +130,9 @@ Public functions:
 `Compiler.record_conformance_rows`, `Compiler.declared_adoptions`,
 `Compiler.collect_package`, `Compiler.replay_package_imports`,
 `Compiler.included_compile_time_effects`, `Compiler.install_included_effects`,
-`interface_configure`, `interface_prelude`, `interface_text`,
-`Compiler.linked_prelude_records`, `collect_forget_provisional_entries`
+`Compiler.configure_interfaces`, `Compiler.prelude_interface`,
+`Compiler.interface_text`, `Compiler.linked_prelude_records`,
+`Compiler.forget_provisional_entries`
 
 ### [src/compiler.x](../src/compiler.x)
 
@@ -167,12 +169,12 @@ Public functions:
 `Compiler.optional_reference_test`, `Compiler.cache`,
 `Compiler.cache_cons_cell`, `Compiler.cache_literal_var`,
 `Compiler.cache_literal_list`, `Compiler.match_pattern_value`,
-`match_value_is_static`, `Compiler.match_pattern_is_static`,
+`Compiler.match_value_is_static`, `Compiler.match_pattern_is_static`,
 `Compiler.match_pattern_binders`, `Compiler.define_pattern_binders`,
 `Compiler.pattern_binder_declarations`, `Compiler.read_source`,
-`Compiler.canonical_path`, `real_path`, `absolute_path`, `home_portable_path`,
-`home_absolute_path`, `Map.merge_translation_dependency`,
-`Compiler.add_translation_dependency`,
+`Compiler.canonical_path`, `Path.real`, `Path.resolved_absolute`,
+`Compiler.portable_path`, `Compiler.absolute_home_path`,
+`Map.merge_translation_dependency`, `Compiler.add_translation_dependency`,
 `Compiler.merge_translation_dependencies`
 
 ### [src/component-access.x](../src/component-access.x)
@@ -277,7 +279,7 @@ Make dependency output for x2c translation units.
 
 Public functions:
 
-`translation_depfile_write`, `translation_depfile_parse`
+`Compiler.write_depfile`, `translation_depfile_parse`
 
 ### [src/diagnostics.x](../src/diagnostics.x)
 
@@ -287,7 +289,7 @@ Public functions:
 
 `Diagnostics.new`, `Diagnostics.reset`, `Diagnostics.hold`,
 `Diagnostics.release`, `Diagnostics.entries`, `Diagnostics.reached_limit`,
-`Diagnostics.report`, `diagnostics_write_json`, `Compiler.print_diagnostic`,
+`Diagnostics.report`, `Diagnostics.write_json`, `Compiler.print_diagnostic`,
 `Compiler.origin_location`, `Compiler.display_path`, `Compiler.token_location`,
 `Compiler.token_source`, `Compiler.token_column`, `Compiler.text_source`,
 `Compiler.source_token`, `Compiler.report_error`, `Compiler.report_problem`,
@@ -346,7 +348,7 @@ statements that copy or set named fields.
 
 Public functions:
 
-`_field_copies`, `_field_sets`
+`field_copies`, `field_sets`
 
 ### [src/format.x](../src/format.x)
 
@@ -372,10 +374,10 @@ the generated header and source of one unit.
 
 Public functions:
 
-`generate_code`, `generate_code_text`, `Compiler.initializer_function`,
-`Compiler.run_once_body`, `Init.enter`, `Compiler.place_source_prelude`,
-`Compiler.init_statements`, `Compiler.definition_rows`,
-`Compiler.dump_definitions`
+`Compiler.generate_code`, `Compiler.generate_code_text`,
+`Compiler.initializer_function`, `Compiler.run_once_body`, `Init.enter`,
+`Compiler.place_source_prelude`, `Compiler.init_statements`,
+`Compiler.definition_rows`, `Compiler.dump_definitions`
 
 ### [src/grammar.x](../src/grammar.x)
 
@@ -409,8 +411,8 @@ Package installation into the x2c home.
 
 Public functions:
 
-`install_command`, `install_require`, `install_version`, `install_rows`,
-`remove_command`, `list_command`
+`CliRequest.install`, `CliRequest.require_package`, `install_version`,
+`install_rows`, `CliRequest.remove_package`, `CliRequest.list_packages`
 
 ### [src/lambdas.x](../src/lambdas.x)
 
@@ -491,10 +493,10 @@ Public functions:
 `Compiler.source_path`, `Compiler.open_macro_library`,
 `Compiler.add_library_dependencies`, `Compiler.publish_macro_library`,
 `Compiler.inherits_import`, `Compiler.record_comptime`,
-`Compiler.inherit_library_comptime`, `macro_library_filling`,
+`Compiler.inherit_library_comptime`, `Compiler.library_filling`,
 `Compiler.shared_definitions`, `Compiler.shares_meta_definition`,
 `Compiler.install_builtin_macros`, `Compiler.bind_meta_operation`,
-`Compiler.report_lisp_failure`, `macro_library_reset`
+`Compiler.report_lisp_failure`, `Compiler.reset_macro_library`
 
 ### [src/main.x](../src/main.x)
 
@@ -544,7 +546,7 @@ Public functions:
 `Compiler.bind_native_meta`, `Compiler.install_native_meta_function`,
 `Compiler.native_meta_accepts`, `Compiler.native_meta_module`,
 `Compiler.native_meta_targets`, `Compiler.bind_linked_meta`,
-`links_meta_function`, `linked_meta_provider_source`,
+`Compiler.links_meta_function`, `Compiler.linked_meta_provider_source`,
 `Compiler.compiler_targets`, `Compiler.select_native_modules`,
 `Compiler.select_package_module`, `Compiler.load_native_module`,
 `Compiler.preload_native_module`, `Compiler.add_native_module`,
@@ -572,18 +574,19 @@ Public functions:
 `Code.value`, `Code.call_in_order`, `Code.lowered`, `Code.func_parameters`,
 `Code.exits`, `Code.convert`, `Code.format`, `Code.is_static_pattern`,
 `Code.pattern_value`, `Code.promoted`, `Code.register_rewrite`,
-`Code.register_after_initialization`, `builtin_foreach_bindings`,
-`meta_function_reference`, `Type.element`, `Type.parameters`,
+`Code.register_after_initialization`, `Code.declared_bindings`,
+`MetaContext.function_reference`, `Type.element`, `Type.parameters`,
 `Type.return_type`, `Type.reverse_name`, `Type.resolve`, `Type.layout`,
 `Type.is_value`, `Type.tag_name`, `Type.members`, `Type.fields`,
 `Code.binding_spelling`, `x2c_ident`, `x2c_binding_fresh`,
-`builtin_foreach_unique`, `x2c_meta_definition_hashes`, `Code.name`,
-`Code.body`, `Code.arguments`, `Code.parameter`, `binding_native_type`,
-`binding_literal_list`, `Code.source_text`, `x2c_embed_text`,
-`meta_invocation_location`, `x2c_invocation_file`, `x2c_invocation_line`,
-`x2c_invocation_column`, `x2c_diagnostic_fail`, `x2c_diagnostic_fail_at`,
-`x2c_diagnostic_error_at`, `x2c_diagnostic_warn`, `x2c_enclosing`, `x2c_place`,
-`meta_type_description`, `meta_source_description`, `builtin_foreach_complete`,
+`MetaContext.fresh_binding`, `x2c_meta_definition_hashes`, `Code.name`,
+`Code.body`, `Code.arguments`, `Code.parameter`, `Code.native_signature`,
+`MetaContext.literal_list`, `Code.source_text`, `x2c_embed_text`,
+`MetaContext.invocation_location`, `x2c_invocation_file`,
+`x2c_invocation_line`, `x2c_invocation_column`, `x2c_diagnostic_fail`,
+`x2c_diagnostic_fail_at`, `x2c_diagnostic_error_at`, `x2c_diagnostic_warn`,
+`x2c_enclosing`, `x2c_place`, `MetaContext.type_description`,
+`MetaContext.source_description`, `Code.complete_iterator`,
 `MetaContext.reject`, `Compiler.bind_sdk_primitives`
 
 ### [src/operator-ledger.x](../src/operator-ledger.x)
@@ -628,14 +631,14 @@ Public functions:
 `Compiler.parse_complex_identifier`, `Compiler.package_alias_spelling`,
 `Compiler.parse_basic_identifier`, `Compiler.parse_optional_identifier`,
 `Compiler.parse_function_definition`, `Compiler.parse_function_target`,
-`declared_return`, `Compiler.enter`, `Compiler.enclosing`,
+`Ast.declared_return`, `Compiler.enter`, `Compiler.enclosing`,
 `Compiler.lowering_body`, `Compiler.enter_function`, `Compiler.function_entry`,
 `Compiler.exit_function`, `Compiler.place_entry`, `Compiler.place_after`,
 `Compiler.close_placements`, `Compiler.leave_item`,
-`Compiler.finish_initializers`, `Compiler.bind_syntax`, `source_clause`,
-`Compiler.bind_source_statement`, `Compiler.bind_catch_arm`,
-`Compiler.bind_match_arm`, `Compiler.bind_callable_body`,
-`Compiler.finish_foreign_alias`
+`Compiler.finish_initializers`, `Compiler.bind_syntax`,
+`Compiler.source_clause`, `Compiler.bind_source_statement`,
+`Compiler.bind_catch_arm`, `Compiler.bind_match_arm`,
+`Compiler.bind_callable_body`, `Compiler.finish_foreign_alias`
 
 ### [src/preprocess.x](../src/preprocess.x)
 
@@ -643,11 +646,12 @@ C preprocessor directives in x2c source.
 
 Public functions:
 
-`preproc_directive`, `preproc_conditional_kind`, `preproc_open_state`,
-`preproc_branch_state`, `preproc_include_target`, `preproc_marker_file`,
+`Compiler.preproc_directive`, `Compiler.preproc_conditional_kind`,
+`Compiler.preproc_open_state`, `Compiler.preproc_branch_state`,
+`Compiler.preproc_include_target`, `Compiler.preproc_marker_file`,
 `Compiler.scan_conditionals`, `Compiler.leading_preproc`,
 `Compiler.note_preprocessor_macros`, `Compiler.note_object_macro`,
-`preproc_track_arms`, `preproc_within_arms`
+`Compiler.preproc_track_arms`, `Compiler.preproc_within_arms`
 
 ### [src/project.x](../src/project.x)
 
@@ -655,7 +659,7 @@ x2c project manifests.
 
 Public functions:
 
-`project_plan`, `project_manifest`, `new_command`
+`ProjectBuild.plan`, `CliRequest.project_manifest`, `CliRequest.new_project`
 
 ### [src/protocol.x](../src/protocol.x)
 
@@ -692,9 +696,9 @@ Command progress and completion receipts.
 
 Public functions:
 
-`report_configure`, `report_receipts`, `report_make_owned`, `report_progress`,
-`report_suspend`, `report_line`, `report_phase`, `report_generated`,
-`report_now_us`, `report_file_bytes`, `report_duration`, `report_size`
+`report_configure`, `report_receipts`, `report_progress`, `report_suspend`,
+`report_line`, `report_phase`, `report_generated`, `report_now_us`,
+`Path.regular_bytes`, `report_duration`, `report_size`
 
 ### [src/script.x](../src/script.x)
 
@@ -702,7 +706,7 @@ Build-once execution of x2c scripts.
 
 Public functions:
 
-`script_cache_root`, `script_prepare`, `script_run`
+`Compiler.cache_root`, `CliRequest.prepare_script`, `CliRequest.run_script`
 
 ### [src/sourceview.x](../src/sourceview.x)
 
@@ -719,9 +723,9 @@ the values crossing between meta code and the program.
 
 Public functions:
 
-`Compiler.meta_argument`, `Compiler.folded_constant`, `literal_text_value`,
-`Compiler.meta_value_expression`, `Compiler.check_meta_call`,
-`Compiler.meta_is_comptime_only`
+`Compiler.meta_argument`, `Compiler.folded_constant`,
+`Compiler.literal_text_value`, `Compiler.meta_value_expression`,
+`Compiler.check_meta_call`, `Compiler.meta_is_comptime_only`
 
 ### [src/statements.x](../src/statements.x)
 
@@ -780,7 +784,7 @@ Public functions:
 `ToolAction.as_program`, `Toolchain.compile_action`,
 `Toolchain.preprocess_action`, `Toolchain.archive_action`,
 `Toolchain.link_action`, `Toolchain.module_action`, `ToolAction.run`,
-`ToolAction.start`, `ToolRun.ready`, `ToolRun.wait`, `tool_capture`,
+`ToolAction.start`, `ToolRun.ready`, `ToolRun.wait`, `ToolAction.capture`,
 `Toolchain.preprocess`, `Toolchain.search_directories`
 
 ### [src/transform.x](../src/transform.x)
@@ -818,13 +822,15 @@ System utilities for environment discovery and workers.
 Public functions:
 
 `x2c_initialize_environment`, `x2c_initialize_command_environment`,
-`x2c_set_root`, `x2c_get_root`, `x2c_get_executable`, `home_dir`, `stage_dir`,
-`home_packages`, `home_libexec`, `default_include_dirs`, `cpp_include_dirs`,
-`find_program`, `is_source_file`, `is_layout_file`, `package_directory`,
-`package_entry`, `package_source`, `compiler_identity`, `build_module_stamp`,
-`file_identity`, `fnv_file`, `fnv_bytes`, `filename_hash`, `file_lock`,
-`file_publish`, `worker_fork`, `worker_exit`, `worker_wait_any`,
-`shell_status`, `driver_error`, `host_error`
+`x2c_set_root`, `x2c_get_root`, `x2c_get_executable`, `Compiler.home_dir`,
+`Compiler.stage_dir`, `Compiler.home_packages`, `Compiler.home_libexec`,
+`Compiler.default_include_dirs`, `Compiler.cpp_include_dirs`,
+`Env.find_program`, `Path.is_x2c_source`, `Path.is_layout_source`,
+`Compiler.package_directory`, `SourceView.package_entry`,
+`Compiler.is_package_source`, `Compiler.identity`, `Compiler.module_stamp`,
+`Path.content_identity`, `fnv_file`, `fnv_bytes`, `Path.identifier_hash`,
+`Path.lock_file`, `Path.publish_files`, `Job.decode_wait_status`,
+`Diagnostics.driver_error`, `Diagnostics.host_error`
 
 ## Runtime modules
 

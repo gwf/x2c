@@ -20,15 +20,15 @@
 #include <unistd.h>
 Map Compiler_collect_symbols(Compiler c, Map globs);
 
-List compiler_prelude_sources(void);
+List Compiler_prelude_sources(void);
 
-int is_prelude_source(String path);
+int Compiler_is_prelude_source(String path);
 
 ModuleSource Compiler_module_source(Compiler c, String path, String text);
 
 void Compiler_configure_package(Compiler c, List roots, String filename);
 
-String collect_resolve_include(SourceView sources, List dirs, String includer_dir, String target, int angle);
+String SourceView_resolve_include(SourceView s, List dirs, String includer_dir, String target, int angle);
 
 List Compiler_include_typedef_names(Compiler c, String target, int angle, Map seen);
 
@@ -72,15 +72,15 @@ Map Compiler_included_compile_time_effects(Compiler c, Map globs);
 
 void Compiler_install_included_effects(Compiler c);
 
-void interface_configure(String out_dir, int cold);
+void Compiler_configure_interfaces(String out_dir, int cold);
 
-String interface_prelude(void);
+String Compiler_prelude_interface(void);
 
-String interface_text(Compiler c);
+String Compiler_interface_text(Compiler c);
 
 Map Compiler_linked_prelude_records(Compiler c);
 
-void collect_forget_provisional_entries(void);
+void Compiler_forget_provisional_entries(void);
 
 
 #endif /* __GUARD_0xAB8728A9__ */

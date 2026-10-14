@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "buffer.h"
-int translation_depfile_write(CliRequest request, Compiler compiler, String input, String output_dir);
+int Compiler_write_depfile(Compiler compiler, CliRequest request, String input, String output_dir);
 
 List translation_depfile_parse(String text);
 

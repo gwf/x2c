@@ -124,14 +124,14 @@ static SourceView _snapshots(char * * argv, int count){
   return sources;
 }
 
-CliRequest cli_parse(int, char * *);
+CliRequest CliRequest_parse(int, char * *);
 
 static CliRequest _configure(Query * q, int argc, char * * argv){
   char * defaults[] ={
     argv[0], "build", NULL
   }
   ;
-  CliRequest request = argc == 1 ? cli_parse(2, defaults) : cli_parse(argc, argv);
+  CliRequest request = argc == 1 ? CliRequest_parse(2, defaults) : CliRequest_parse(argc, argv);
   request -> sources =(* q).sources;
   if(request -> command != 5589768 && request -> command != 45220543335690) _fail("x2c editor: use a build or translate configuration\n");
   if(! List_truth(request -> inputs) && request -> command == 5589768) request = _project_target(request, (* q).source);
@@ -142,11 +142,11 @@ static CliRequest _configure(Query * q, int argc, char * * argv){
 }
 
 static CliRequest _project_target(CliRequest request, String source){
-  String manifest = project_manifest(request);
+  String manifest = CliRequest_project_manifest(request);
   if(! String_truth(manifest)) return request;
   request -> manifest = manifest;
   CliRequest selected = NULL;
-  for(ProjectBuild node = project_plan(request);  node;  node = node -> next){
+  for(ProjectBuild node = ProjectBuild_plan(request);  node;  node = node -> next){
     String input;
     List _x2c_macro_object_0 = node -> request -> inputs;
     List _x2c_macro_cursor_0 = _x2c_macro_object_0;

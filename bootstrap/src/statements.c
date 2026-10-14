@@ -796,10 +796,10 @@ static int _arm_directives(Compiler c, Array cases, Array groups, int saw_defaul
   return saw_default;
 }
 
-Symbol preproc_conditional_kind(String);
+Symbol Compiler_preproc_conditional_kind(String);
 
 static int _default_after_directive(Array groups, int saw_default, List d){
-  Symbol kind = preproc_conditional_kind(Var_as_string(List_cadr(d)));
+  Symbol kind = Compiler_preproc_conditional_kind(Var_as_string(List_cadr(d)));
   if(kind == 1016156) Array_push(groups, List_var(cons(int_var(saw_default), cons(int_var(saw_default), NULL))));
   else if(kind && Array_len(groups)){
     List _x2c_destructure_0 = Var_list_payload(Array_take_last(groups));
@@ -825,7 +825,7 @@ static List _match_case(Compiler c){
   if(Compiler_test(c, 199882)) pattern = _case_pattern(c, start, &(types));
   else if(Compiler_test(c, 8938171176)) pattern = _84;
   else Compiler_report_error(c, 33658058, _85, c -> token, cons(_87, cons(String_var(c -> token -> text), NULL)));
-  return Compiler_bind_match_arm(c, pattern, source_clause(3226), start, peek == 199882, types);
+  return Compiler_bind_match_arm(c, pattern, Compiler_source_clause(3226), start, peek == 199882, types);
 }
 
 static List _case_pattern(Compiler c, Token start, List * types){
@@ -1031,7 +1031,7 @@ static List _catch_handle(Compiler c){
 }
 
 static List _catch_arm(Compiler c, int * is_default, List handle){
-  Token start = c -> token;  List pattern = NULL;  if(Compiler_test(c, 117))(* is_default) = 1;  else pattern = _catch_filter(c);  return Compiler_bind_catch_arm(c, pattern, source_clause(6398160), start, handle);
+  Token start = c -> token;  List pattern = NULL;  if(Compiler_test(c, 117))(* is_default) = 1;  else pattern = _catch_filter(c);  return Compiler_bind_catch_arm(c, pattern, Compiler_source_clause(6398160), start, handle);
 }
 
 static List _catch_body(Compiler c){
@@ -1082,7 +1082,7 @@ static int _take_directives(Compiler c, Array items){
 }
 
 static int _group_step(String s){
-  Symbol kind = preproc_conditional_kind(s);  return kind == 1016156 ? 1 : kind == 7109834 ? - 1 : 0;
+  Symbol kind = Compiler_preproc_conditional_kind(s);  return kind == 1016156 ? 1 : kind == 7109834 ? - 1 : 0;
 }
 
 static int _depth_after(Compiler c, Token start, int depth){
@@ -1096,7 +1096,7 @@ static Symbol _arm_end(List run){
   int level = 0;  Symbol end = 0; {
     List directive;  List _x2c_macro_object_4 = run;  List _x2c_macro_cursor_4 = _x2c_macro_object_4;  Var _x2c_macro_cursor_output_4;  while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
       directive = Var_list_payload(_x2c_macro_cursor_output_4); {
-        Symbol kind = preproc_conditional_kind(Var_as_string(List_cadr(directive)));  if(kind == 1016156) level ++;  else if(! kind) continue;  else if(! level) end = kind;  else if(kind == 7109834) level --;
+        Symbol kind = Compiler_preproc_conditional_kind(Var_as_string(List_cadr(directive)));  if(kind == 1016156) level ++;  else if(! kind) continue;  else if(! level) end = kind;  else if(kind == 7109834) level --;
       }
 
     }

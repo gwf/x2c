@@ -12,7 +12,6 @@ Compiler diagnostic storage and rendering.
 
 | Function | Summary |
 | --- | --- |
-| [`diagnostics_write_json`](#diagnostics_write_json) | Sends every later printed diagnostic to `path` as JSON Lines. |
 | [`Compiler.diagnostics`](#Compiler.diagnostics) | Returns a report-order snapshot of all collected diagnostics. |
 | [`Compiler.display_path`](#Compiler.display_path) | Returns a physical source path for semantic facts, otherwise a path relative to the compiler root. |
 | [`Compiler.dump_cache`](#Compiler.dump_cache) | Prints each cached numeric identifier and its key to stdout. |
@@ -20,7 +19,7 @@ Compiler diagnostic storage and rendering.
 | [`Compiler.dump_tokens`](#Compiler.dump_tokens) | Prints every non-EOF token with its position and visible content. |
 | [`Compiler.error_count`](#Compiler.error_count) | Returns the number of counted diagnostics accepted since the last reset. |
 | [`Compiler.origin_location`](#Compiler.origin_location) | Resolves a recorded occurrence through generated ancestry to its source. |
-| [`Compiler.print_diagnostic`](#Compiler.print_diagnostic) | Writes one structured diagnostic entry and source context to stderr, or one JSON line after `diagnostics_write_json`. |
+| [`Compiler.print_diagnostic`](#Compiler.print_diagnostic) | Writes one structured diagnostic entry and source context to stderr, or one JSON line after `Diagnostics.write_json`. |
 | [`Compiler.report_error`](#Compiler.report_error) | Submits a located compiler error, then transfers or exits. |
 | [`Compiler.report_problem`](#Compiler.report_problem) | Records and emits a located compiler error, then returns so the translation continues; it fails when it finishes. |
 | [`Compiler.report_warning`](#Compiler.report_warning) | Records and emits a located warning without consuming the error limit. |
@@ -38,20 +37,7 @@ Compiler diagnostic storage and rendering.
 | [`Diagnostics.release`](#Diagnostics.release) | Restores the streaming saved by `hold`. |
 | [`Diagnostics.report`](#Diagnostics.report) | Records and synchronously emits one diagnostic unless already limited. |
 | [`Diagnostics.reset`](#Diagnostics.reset) | Clears stored entries and limit state while preserving configuration. |
-
-### Functions
-
-#### diagnostics_write_json
-
-`int diagnostics_write_json(String path)`
-
-Sends every later printed diagnostic to `path` as JSON Lines.
-The file is created or truncated. Each diagnostic is one append write, so
-forked translation workers sharing the descriptor never interleave lines,
-and a line is complete before any exit. Returns zero when `path` cannot be
-opened.
-
-Source: `src/diagnostics.x:223`
+| [`Diagnostics.write_json`](#Diagnostics.write_json) | Sends every later printed diagnostic to `path` as JSON Lines. |
 
 ### `Compiler`
 
@@ -134,7 +120,7 @@ Source: `src/diagnostics.x:313`
 `void Compiler.print_diagnostic(Compiler compiler, List entry)`
 
 Writes one structured diagnostic entry and source context to stderr, or
-one JSON line after `diagnostics_write_json`.
+one JSON line after `Diagnostics.write_json`.
 NULL is ignored. A present location supplies `file`, one-based `line` and
 `column`, and token `length`; `String` notes are joined into one note line.
 
@@ -340,6 +326,19 @@ Source: `src/diagnostics.x:182`
 Clears stored entries and limit state while preserving configuration.
 
 Source: `src/diagnostics.x:62`
+
+<a id="Diagnostics.write_json"></a>
+#### Diagnostics.write_json
+
+`int Diagnostics.write_json(String path)`
+
+Sends every later printed diagnostic to `path` as JSON Lines.
+The file is created or truncated. Each diagnostic is one append write, so
+forked translation workers sharing the descriptor never interleave lines,
+and a line is complete before any exit. Returns zero when `path` cannot be
+opened.
+
+Source: `src/diagnostics.x:223`
 
 ## Public types
 

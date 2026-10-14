@@ -301,7 +301,7 @@ void Compiler_report_warning(Compiler, Symbol, String, Token, List);
 Var Compiler_meta_helper_call(Compiler c, String name, Token site, List arguments, String provider){
   if(! _init_guard_) _file_init_();
   if(c -> shallow) c -> collection_native = 1;
-  String file = String_truth(provider) ? real_path(home_absolute_path(provider)) : real_path(Compiler_token_source(c, site, NULL));
+  String file = String_truth(provider) ? Path_real(Compiler_absolute_home_path(provider)) : Path_real(Compiler_token_source(c, site, NULL));
   Call call ={
     .compiler = c, .name = name, .site = site, .table = _table_of(file, helper_table)
   }
@@ -614,10 +614,10 @@ static int _stop(int signal){
   return status;
 }
 
-int shell_status(int, int *);
+int Job_decode_wait_status(int, int *);
 
 static String _exit_reason(void){
-  int signal, code = shell_status(_stop(0), &(signal));
+  int signal, code = Job_decode_wait_status(_stop(0), &(signal));
   if(! signal) return String_join(NULL, cons(String_var(_10), cons(String_var(int_str(code)), NULL)));
   String name = String_new(strsignal(signal));
   return String_join(NULL, cons(String_var(_11), cons(String_var(int_str(signal)), cons(String_var(_12), cons(String_var(name), cons(String_var(_13), NULL))))));

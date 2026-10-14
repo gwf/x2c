@@ -586,7 +586,7 @@ static List _helper_call(Compiler c, List helper){
   return Var_list_payload(List_cadr(Compiler_rebuild_statement(c, cons(_14, cons(_15, cons(List_var(cons(_16, cons(List_var(cons(_17, cons(List_var(cons(_0, cons(_20, cons(List_var(cons(_21, cons(List_var(cons(_23, cons(_37, cons(_38, cons(List_var(callee), NULL))))), _47))), NULL)))), NULL))), NULL))), NULL))))));
 }
 
-List preproc_track_arms(List, String);
+List Compiler_preproc_track_arms(List, String);
 
 static Type List_type(List);
 
@@ -610,7 +610,7 @@ static List _rewrite_statics(Compiler c, List code, StaticQueue * q){
               Var declaration;  declaration = _x2c_match_value_0;  item = _rewrite_static(c, Var_list_payload(declaration), &((* q)));
             }
              break; } _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497972340888518ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
-              Var content;  content = _x2c_match_value_0; (* q).arms = preproc_track_arms((* q).arms, Var_as_string(content));
+              Var content;  content = _x2c_match_value_0; (* q).arms = Compiler_preproc_track_arms((* q).arms, Var_as_string(content));
             }
              break; } }
           }
@@ -1159,13 +1159,13 @@ static int _deferred(StaticQueue * q, Array definitions){
   return 0;
 }
 
-List preproc_within_arms(List, List);
+List Compiler_preproc_within_arms(List, List);
 static void _add_calls(StaticQueue * q, Array definitions, Symbol area){
   {
     List initializer;  Array _x2c_macro_object_23 = definitions;  int _x2c_macro_cursor_24 = 0;  Var _x2c_macro_cursor_output_22;  while(Array_try_next(_x2c_macro_object_23, &(_x2c_macro_cursor_24), &(_x2c_macro_cursor_output_22))){
       initializer = Var_list_payload(_x2c_macro_cursor_output_22); {
         List helper = Var_list_payload(List_caddr(initializer)), arms = Var_list_payload(List_getindex(initializer, 3));  List call = _helper_call((* q).c, helper); {
-          List statement;  List _x2c_macro_object_22 = preproc_within_arms(arms, cons(List_var(call), NULL));  List _x2c_macro_cursor_23 = _x2c_macro_object_22;  Var _x2c_macro_cursor_output_21;  while(List_try_next(_x2c_macro_object_22, &(_x2c_macro_cursor_23), &(_x2c_macro_cursor_output_21))){
+          List statement;  List _x2c_macro_object_22 = Compiler_preproc_within_arms(arms, cons(List_var(call), NULL));  List _x2c_macro_cursor_23 = _x2c_macro_object_22;  Var _x2c_macro_cursor_output_21;  while(List_try_next(_x2c_macro_object_22, &(_x2c_macro_cursor_23), &(_x2c_macro_cursor_output_21))){
             statement = Var_list_payload(_x2c_macro_cursor_output_21);  Compiler_add_init((* q).c, area, statement);
           }
 
@@ -1179,13 +1179,13 @@ static void _add_calls(StaticQueue * q, Array definitions, Symbol area){
 
 }
 
-String binding_identity_spelling(List);
+String Ast_binding_spelling(List);
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
 static void _report_cycle(StaticQueue * q){
   Compiler c =(* q).c;  Array notes = Array_new();  List first = NULL; {
     List initializer;  Array _x2c_macro_object_24 =(* q).initializers;  int _x2c_macro_cursor_25 = 0;  Var _x2c_macro_cursor_output_23;  while(Array_try_next(_x2c_macro_object_24, &(_x2c_macro_cursor_25), &(_x2c_macro_cursor_output_23))){
       initializer = Var_list_payload(_x2c_macro_cursor_output_23); {
-        List binding = Var_list_payload(List_car(initializer));  if(! x2c_var_equal(Map_getindex((* q).state, List_var(binding)), Symbol_var(1532451113870))) continue;  if(! List_truth(first)) first = binding;  String name = binding_identity_spelling(binding);  if(String_truth(name)) Array_push(notes, String_var(String_join(NULL, cons(String_var(_238), cons(String_var(name), NULL)))));
+        List binding = Var_list_payload(List_car(initializer));  if(! x2c_var_equal(Map_getindex((* q).state, List_var(binding)), Symbol_var(1532451113870))) continue;  if(! List_truth(first)) first = binding;  String name = Ast_binding_spelling(binding);  if(String_truth(name)) Array_push(notes, String_var(String_join(NULL, cons(String_var(_238), cons(String_var(name), NULL)))));
       }
 
     }

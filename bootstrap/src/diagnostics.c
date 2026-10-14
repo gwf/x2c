@@ -310,7 +310,7 @@ static String _note_line(List l){
   return List_truth(strings) ? String_join(_6, strings) : NULL;
 }
 
-int diagnostics_write_json(String path){
+int Diagnostics_write_json(String path){
   if(! _init_guard_) _file_init_();
   diagnostics_json = open(path, O_WRONLY | O_CREAT | O_TRUNC | O_APPEND | O_CLOEXEC, 0666);
   return diagnostics_json >= 0;

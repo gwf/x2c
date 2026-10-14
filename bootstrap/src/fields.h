@@ -7,9 +7,9 @@
 
 #include "x2c.h"
 #include "common.h"
-List _field_copies(List to, List from, List fields);
+List field_copies(List to, List from, List fields);
 
-List _field_sets(List to, List value, List fields);
+List field_sets(List to, List value, List fields);
 
 
 #endif /* __GUARD_0xFC1683EE__ */

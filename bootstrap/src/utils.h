@@ -6,7 +6,6 @@
 #define __GUARD_0x6E6B8BB0__
 
 #include "x2c.h"
-#include "private-keywords.h"
 #include "path.h"
 #include "process.h"
 #include "sourceview.h"
@@ -20,6 +19,10 @@
 #include <sys/file.h>
 #include <sys/wait.h>
 #include <unistd.h>
+typedef struct Compiler * Compiler;
+
+typedef struct Diagnostics * Diagnostics;
+
 void x2c_initialize_environment(const char * argv0);
 
 void x2c_initialize_command_environment(const char * argv0, String embedded_identity);
@@ -30,57 +33,51 @@ String x2c_get_root(void);
 
 String x2c_get_executable(void);
 
-String home_dir(void);
+String Compiler_home_dir(void);
 
-String stage_dir(void);
+String Compiler_stage_dir(void);
 
-String home_packages(void);
+String Compiler_home_packages(void);
 
-String home_libexec(void);
+String Compiler_home_libexec(void);
 
-List default_include_dirs(void);
+List Compiler_default_include_dirs(void);
 
-List cpp_include_dirs(void);
+List Compiler_cpp_include_dirs(void);
 
-String find_program(String name);
+String Env_find_program(String name);
 
-int is_source_file(String path);
+int Path_is_x2c_source(String path);
 
-int is_layout_file(String path);
+int Path_is_layout_source(String path);
 
-String package_directory(List roots, String path);
+String Compiler_package_directory(List roots, String path);
 
-String package_entry(SourceView sources, List roots, String name, String * directory);
+String SourceView_package_entry(SourceView sources, List roots, String name, String * directory);
 
-int package_source(String directory, String path);
+int Compiler_is_package_source(String directory, String path);
 
-String compiler_identity(void);
+String Compiler_identity(void);
 
-String build_module_stamp(void);
+String Compiler_module_stamp(void);
 
-String file_identity(String path);
+String Path_content_identity(String path);
 
 uint64_t fnv_file(uint64_t hash, String path, int * ok);
 
 uint64_t fnv_bytes(uint64_t hash, const void * bytes, size_t length);
 
-String filename_hash(String filename);
+String Path_identifier_hash(String filename);
 
-int file_lock(Path p, int wait);
+int Path_lock_file(Path p, int wait);
 
-void file_publish(List outputs);
+void Path_publish_files(List outputs);
 
-long worker_fork(void);
+int Job_decode_wait_status(int raw, int * signal);
 
-_Noreturn void worker_exit(int status);
+_Noreturn void Diagnostics_driver_error(const char * message);
 
-int worker_wait_any(long * pids, int count, int * status);
-
-int shell_status(int raw, int * signal);
-
-_Noreturn void driver_error(const char * message);
-
-void host_error(List detail);
+void Diagnostics_host_error(List detail);
 
 
 #endif /* __GUARD_0x6E6B8BB0__ */

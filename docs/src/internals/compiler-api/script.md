@@ -12,43 +12,48 @@ Build-once execution of x2c scripts.
 
 | Function | Summary |
 | --- | --- |
-| [`script_cache_root`](#script_cache_root) | Returns the per-user cache root: `X2C_CACHE_DIR`, `XDG_CACHE_HOME/x2c`, or `~/.cache/x2c`, whichever is set first, or NULL when none is. |
-| [`script_prepare`](#script_prepare) | Points `request` at its script's cache directory and executes the cached executable when it is current; that path does not return. |
-| [`script_run`](#script_run) | Executes a script that `script_prepare` pointed at the cache and the caller built; that path does not return. |
+| [`CliRequest.prepare_script`](#CliRequest.prepare_script) | Points `request` at its script's cache directory and executes the cached executable when it is current; that path does not return. |
+| [`CliRequest.run_script`](#CliRequest.run_script) | Executes a script that `CliRequest.prepare_script` pointed at the cache and the caller built; that path does not return. |
+| [`Compiler.cache_root`](#Compiler.cache_root) | Returns the per-user cache root: `X2C_CACHE_DIR`, `XDG_CACHE_HOME/x2c`, or `~/.cache/x2c`, whichever is set first, or NULL when none is. |
 
-### Functions
+### `CliRequest`
 
-#### script_cache_root
+<a id="CliRequest.prepare_script"></a>
+#### CliRequest.prepare_script
 
-`String script_cache_root(void)`
-
-Returns the per-user cache root: `X2C_CACHE_DIR`, `XDG_CACHE_HOME/x2c`,
-or `~/.cache/x2c`, whichever is set first, or NULL when none is.
-
-Source: `src/script.x:38`
-
-#### script_prepare
-
-`int script_prepare(CliRequest c)`
+`int CliRequest.prepare_script(CliRequest c)`
 
 Points `request` at its script's cache directory and executes the cached
 executable when it is current; that path does not return. Otherwise it
 locks the directory against concurrent builds of the same script, removes
 the entries of scripts that no longer exist, and returns 0; the caller
-builds `request` and calls `script_run`. A `--clean` request removes the
-script's entry and returns 1.
+builds `request` and calls `CliRequest.run_script`. A `--clean` request
+removes the script's entry and returns 1.
 
-Source: `src/script.x:52`
+Source: `src/script.x:53`
 
-#### script_run
+<a id="CliRequest.run_script"></a>
+#### CliRequest.run_script
 
-`int script_run(CliRequest c)`
+`int CliRequest.run_script(CliRequest c)`
 
-Executes a script that `script_prepare` pointed at the cache and the
-caller built; that path does not return. A dry run prints the action and
-returns zero.
+Executes a script that `CliRequest.prepare_script` pointed at the cache
+and the caller built; that path does not return. A dry run prints the
+action and returns zero.
 
-Source: `src/script.x:132`
+Source: `src/script.x:133`
+
+### `Compiler`
+
+<a id="Compiler.cache_root"></a>
+#### Compiler.cache_root
+
+`String Compiler.cache_root(void)`
+
+Returns the per-user cache root: `X2C_CACHE_DIR`, `XDG_CACHE_HOME/x2c`,
+or `~/.cache/x2c`, whichever is set first, or NULL when none is.
+
+Source: `src/script.x:39`
 
 ## Design notes
 

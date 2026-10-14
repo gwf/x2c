@@ -14,16 +14,15 @@ Command progress and completion receipts.
 | --- | --- |
 | [`report_configure`](#report_configure) | Resets process reporting for one command. |
 | [`report_duration`](#report_duration) | Formats microseconds as integer `us`, rounded whole `ms`, or seconds with two decimal places. |
-| [`report_file_bytes`](#report_file_bytes) | Returns the size of a regular file. |
 | [`report_generated`](#report_generated) | Writes the muted receipt for `n` generated C files and as many headers, `bytes` in all, when receipts are enabled. |
 | [`report_line`](#report_line) | Writes one newline-terminated receipt to stderr when receipts are enabled. |
-| [`report_make_owned`](#report_make_owned) | Reports whether a parent Make recipe runs this process, which `MAKELEVEL` set to a positive count shows. |
 | [`report_now_us`](#report_now_us) | Returns monotonic time in microseconds, or zero when the clock read fails. |
 | [`report_phase`](#report_phase) | Writes a muted phase receipt when receipts are enabled. |
 | [`report_progress`](#report_progress) | Updates the terminal's transient progress line when transient mode is active. |
 | [`report_receipts`](#report_receipts) | Returns whether stable completion receipts are currently enabled. |
 | [`report_size`](#report_size) | Formats bytes as `B`, `KiB`, or `MiB` using binary unit boundaries. |
 | [`report_suspend`](#report_suspend) | Clears the active transient line from stderr, if this process drew one. |
+| [`Path.regular_bytes`](#Path.regular_bytes) | Returns the size of a regular file. |
 
 ### Functions
 
@@ -37,7 +36,7 @@ progress additionally requires terminal stderr and non-plain output.
 Plain output disables color; automatic color respects terminal capability
 and `NO_COLOR`.
 
-Source: `src/report.x:47`
+Source: `src/report.x:48`
 
 #### report_duration
 
@@ -46,16 +45,7 @@ Source: `src/report.x:47`
 Formats microseconds as integer `us`, rounded whole `ms`, or seconds with
 two decimal places.
 
-Source: `src/report.x:266`
-
-#### report_file_bytes
-
-`unsigned long long report_file_bytes(String path)`
-
-Returns the size of a regular file.
-NULL, a failed `stat`, or a non-regular path returns zero.
-
-Source: `src/report.x:257`
+Source: `src/report.x:258`
 
 #### report_generated
 
@@ -64,7 +54,7 @@ Source: `src/report.x:257`
 Writes the muted receipt for `n` generated C files and as many headers,
 `bytes` in all, when receipts are enabled.
 
-Source: `src/report.x:201`
+Source: `src/report.x:193`
 
 #### report_line
 
@@ -74,17 +64,7 @@ Writes one newline-terminated receipt to stderr when receipts are enabled.
 In transient mode the receipt first clears the terminal line, which
 another process may be drawing, and `line` must be non-NULL.
 
-Source: `src/report.x:173`
-
-#### report_make_owned
-
-`int report_make_owned(void)`
-
-Reports whether a parent Make recipe runs this process, which `MAKELEVEL`
-set to a positive count shows. Parallel recipes share one terminal and
-one job budget without sharing reporter state.
-
-Source: `src/report.x:85`
+Source: `src/report.x:165`
 
 #### report_now_us
 
@@ -93,7 +73,7 @@ Source: `src/report.x:85`
 Returns monotonic time in microseconds, or zero when the clock read fails.
 The value measures elapsed time; it is not a wall-clock timestamp.
 
-Source: `src/report.x:247`
+Source: `src/report.x:239`
 
 #### report_phase
 
@@ -103,7 +83,7 @@ Writes a muted phase receipt when receipts are enabled.
 A fully cached nonempty phase is marked up to date; a partial cache reports
 its cached count, and every receipt includes the elapsed time.
 
-Source: `src/report.x:184`
+Source: `src/report.x:176`
 
 #### report_progress
 
@@ -114,7 +94,7 @@ active. Updates start after 125 ms and incomplete work is limited to one
 update per 50 ms. `detail` may be NULL; output is clipped to the configured
 terminal width and has no newline.
 
-Source: `src/report.x:99`
+Source: `src/report.x:91`
 
 #### report_receipts
 
@@ -122,7 +102,7 @@ Source: `src/report.x:99`
 
 Returns whether stable completion receipts are currently enabled.
 
-Source: `src/report.x:79`
+Source: `src/report.x:80`
 
 #### report_size
 
@@ -131,7 +111,7 @@ Source: `src/report.x:79`
 Formats bytes as `B`, `KiB`, or `MiB` using binary unit boundaries.
 Byte counts are exact; larger units use one decimal place.
 
-Source: `src/report.x:275`
+Source: `src/report.x:267`
 
 #### report_suspend
 
@@ -140,7 +120,19 @@ Source: `src/report.x:275`
 Clears the active transient line from stderr, if this process drew one.
 Forked workers inherit the state but leave the line to their parent.
 
-Source: `src/report.x:161`
+Source: `src/report.x:153`
+
+### `Path`
+
+<a id="Path.regular_bytes"></a>
+#### Path.regular_bytes
+
+`unsigned long long Path.regular_bytes(String path)`
+
+Returns the size of a regular file.
+NULL, a failed `stat`, or a non-regular path returns zero.
+
+Source: `src/report.x:249`
 
 ## Design notes
 

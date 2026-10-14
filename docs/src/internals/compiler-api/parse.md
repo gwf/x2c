@@ -12,8 +12,7 @@ X2c declarations, parsed from source or constructed.
 
 | Function | Summary |
 | --- | --- |
-| [`declared_return`](#declared_return) | The declared result type of the function `declaration`, which its `return` statements convert to, or NULL. |
-| [`source_clause`](#source_clause) | The source clause `kind`, which the binder parses when it reaches it. |
+| [`Ast.declared_return`](#Ast.declared_return) | The declared result type of the function `declaration`, which its `return` statements convert to, or NULL. |
 | [`Compiler.bind_callable_body`](#Compiler.bind_callable_body) | Binds a callable's outer block in its active parameter scope. |
 | [`Compiler.bind_catch_arm`](#Compiler.bind_catch_arm) | Binds one catch arm's `body` in a scope of its own, with declarations of the definite binders of `pattern`, read through `handle`, before it. |
 | [`Compiler.bind_match_arm`](#Compiler.bind_match_arm) | Binds one match arm's `body` in a scope of its own, which defines the definite binders of `pattern` when the arm `binds`. |
@@ -65,28 +64,22 @@ X2c declarations, parsed from source or constructed.
 | [`Compiler.script_statement_executes`](#Compiler.script_statement_executes) | Reports whether the top-level item at the cursor is a script statement that runs, rather than a declaration: an expression, control flow, a `with` block, or a statement macro. |
 | [`Compiler.script_statement_starts`](#Compiler.script_statement_starts) | Reports whether the top-level item at the cursor is one of a script unit's statements, which become `main`'s body. |
 | [`Compiler.skip_linkage_brace`](#Compiler.skip_linkage_brace) | Consumes one brace of a C linkage specification at file scope and reports whether it did. |
+| [`Compiler.source_clause`](#Compiler.source_clause) | The source clause `kind`, which the binder parses when it reaches it. |
 | [`Compiler.take_meta_marker`](#Compiler.take_meta_marker) | Consumes the `meta` marker at the cursor and the contextual `native` marker that may follow it, and returns the `meta` token. |
 | [`Compiler.test_declaration`](#Compiler.test_declaration) | Tests whether the current token can begin a declaration without consuming. |
 | [`Compiler.test_static_assert`](#Compiler.test_static_assert) | Reports whether the current identifier starts a C static assertion. |
 
-### Functions
+### `Ast`
 
-#### declared_return
+<a id="Ast.declared_return"></a>
+#### Ast.declared_return
 
-`Type declared_return(List declaration)`
+`Type Ast.declared_return(List declaration)`
 
 The declared result type of the function `declaration`, which its
 `return` statements convert to, or NULL.
 
 Source: `src/parse.x:2651`
-
-#### source_clause
-
-`Var source_clause(Symbol kind)`
-
-The source clause `kind`, which the binder parses when it reaches it.
-
-Source: `src/parse.x:3666`
 
 ### `Compiler`
 
@@ -98,7 +91,7 @@ Source: `src/parse.x:3666`
 Binds a callable's outer block in its active parameter scope. Ordinary
 constructed blocks open their own scope before using this operation.
 
-Source: `src/parse.x:3947`
+Source: `src/parse.x:3950`
 
 <a id="Compiler.bind_catch_arm"></a>
 #### Compiler.bind_catch_arm
@@ -111,7 +104,7 @@ Binder diagnostics use `start`. A source arm's body parses here, and a
 template's declares its binders where its expansion binds it. A parsed
 arm's body already begins with them, so it binds unchanged.
 
-Source: `src/parse.x:3802`
+Source: `src/parse.x:3805`
 
 <a id="Compiler.bind_match_arm"></a>
 #### Compiler.bind_match_arm
@@ -123,7 +116,7 @@ definite binders of `pattern` when the arm `binds`. Binder diagnostics
 use `start`. A source arm's body parses here with the typed captures
 `types` that its pattern recorded.
 
-Source: `src/parse.x:3903`
+Source: `src/parse.x:3906`
 
 <a id="Compiler.bind_parameter"></a>
 #### Compiler.bind_parameter
@@ -270,7 +263,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:4092`
+Source: `src/parse.x:4095`
 
 <a id="Compiler.finish_initializers"></a>
 #### Compiler.finish_initializers
@@ -662,6 +655,15 @@ its own braces. The declarations between them stay at file scope. The
 unguarded group reaches this operation.
 
 Source: `src/parse.x:393`
+
+<a id="Compiler.source_clause"></a>
+#### Compiler.source_clause
+
+`Var Compiler.source_clause(Symbol kind)`
+
+The source clause `kind`, which the binder parses when it reaches it.
+
+Source: `src/parse.x:3666`
 
 <a id="Compiler.take_meta_marker"></a>
 #### Compiler.take_meta_marker

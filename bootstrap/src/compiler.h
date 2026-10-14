@@ -331,7 +331,7 @@ List Compiler_cache_literal_list(Compiler c, List values);
 
 Var Compiler_match_pattern_value(Compiler c, Var node);
 
-int match_value_is_static(Var value);
+int Compiler_match_value_is_static(Var value);
 
 int Compiler_match_pattern_is_static(Compiler c, List pattern);
 
@@ -345,13 +345,13 @@ int Compiler_read_source(Compiler c, String path, String volatile * text);
 
 String Compiler_canonical_path(Compiler c, String path);
 
-String real_path(String path);
+String Path_real(String path);
 
-String absolute_path(String path);
+String Path_resolved_absolute(String path);
 
-String home_portable_path(String path);
+String Compiler_portable_path(String path);
 
-String home_absolute_path(String spelling);
+String Compiler_absolute_home_path(String spelling);
 
 void Map_merge_translation_dependency(Map m, String path, Var content_hash);
 

@@ -1117,7 +1117,7 @@ static List _at(Emitter * e, int origin, List inner){
   int old_origin =(* e).origin; (* e).origin = origin;  List result = _emit(&((* e)), inner); (* e).origin = old_origin;  if((* e).c -> source_map) return cons(_103, cons(int_var(origin), List_append(result, cons(_103, cons(int_var(old_origin), NULL)))));  return result;
 }
 
-String filename_hash(String);
+String Path_identifier_hash(String);
 static List _initializer_macro(Emitter * e, List input, List body){
   Buffer parameters = Buffer_new(0); {
     List argument;  List _x2c_macro_object_1 = List_cdr(input);  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
@@ -1128,7 +1128,7 @@ static List _initializer_macro(Emitter * e, List input, List body){
     }
 
   }
-  String formal = Buffer_str_free(parameters);  String hash = filename_hash((* e).c -> filename);  String name = Compiler_fresh_name((* e).c, String_join(NULL, cons(String_var(_104), cons(String_var(hash), NULL))));  String replacement; {
+  String formal = Buffer_str_free(parameters);  String hash = Path_identifier_hash((* e).c -> filename);  String name = Compiler_fresh_name((* e).c, String_join(NULL, cons(String_var(_104), cons(String_var(hash), NULL))));  String replacement; {
     int * _x2c_macro_address_0 = &(* e).c -> source_map;  int _x2c_macro_previous_0 = * _x2c_macro_address_0; {
       _x2c_defer_env_1 _x2c_macro_environment_1 ={
         0
@@ -1650,7 +1650,7 @@ static List _match_site_call(Emitter * e, Var function, Var arguments){
     }
 
   }
-  String name = binding_identity_spelling(binding);  String entry = _match_site_entry(name);  if(! String_truth(entry)) return NULL;  Type type = NULL;  List global = Sym_resolve_global((* e).c -> sym, cons(String_var(name), NULL), &(type));  if(! List_truth(global) || ! List_equal(global, binding) || ! Type_is_function(type)) return NULL;  List args = Var_list_payload(arguments); {
+  String name = Ast_binding_spelling(binding);  String entry = _match_site_entry(name);  if(! String_truth(entry)) return NULL;  Type type = NULL;  List global = Sym_resolve_global((* e).c -> sym, cons(String_var(name), NULL), &(type));  if(! List_truth(global) || ! List_equal(global, binding) || ! Type_is_function(type)) return NULL;  List args = Var_list_payload(arguments); {
     List _x2c_match_expr = args; List _x2c_match_cursor;  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
         case 9224497936761721318ULL: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761721318ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1)) {{
         Var pattern;  pattern = _x2c_match_value_0; {
@@ -1727,10 +1727,10 @@ static List _atom_intern(String spelling){
   );  Atom atom = Atom_intern(spelling);  if(Var_is(atom, 1328354264)) return cons(String_var(String_join(NULL, cons(String_var(_457), cons(String_var(text), cons(String_var(_458), NULL))))), NULL);  return cons(String_var(String_join(NULL, cons(String_var(_459), cons(String_var(text), cons(String_var(_458), NULL))))), NULL);
 }
 
-String preproc_include_target(String, int *);
-int is_source_file(String);
+String Compiler_preproc_include_target(String, int *);
+int Path_is_x2c_source(String);
 static List _preproc(Emitter * e, List ast){
-  int angle = 0;  String target = preproc_include_target(Var_as_string(List_cadr(ast)), &(angle));  if(! String_truth(target) || ! is_source_file(target)) return List_cdr(ast);  String stem = String_getslice(target, (-2147483647 - 1), x2c_slice_bound(String_rfind(target, _460)), 1);  String out = String_join(NULL, cons(String_var(_461), cons(String_var(stem), cons(String_var(_462), NULL))));  return cons(String_var(out), NULL);
+  int angle = 0;  String target = Compiler_preproc_include_target(Var_as_string(List_cadr(ast)), &(angle));  if(! String_truth(target) || ! Path_is_x2c_source(target)) return List_cdr(ast);  String stem = String_getslice(target, (-2147483647 - 1), x2c_slice_bound(String_rfind(target, _460)), 1);  String out = String_join(NULL, cons(String_var(_461), cons(String_var(stem), cons(String_var(_462), NULL))));  return cons(String_var(out), NULL);
 }
 
 static List _declare_stmt(Emitter * e, List ast){
@@ -1788,7 +1788,7 @@ static List _function(Emitter * e, List ast){
   body = Var_list_payload(List_getindex(_x2c_destructure_10, 2));
   String old_fn =(* e).fn_name;
   List function_binding = Var_list_payload(List_cadr(bindings));
-  (* e).fn_name = binding_identity_spelling(function_binding);
+  (* e).fn_name = Ast_binding_spelling(function_binding);
   Var defer_owner;
   if(Map_try_get(Compiler_semantic_binding_facts((* e).c), List_var(cons(_470, cons(List_var(function_binding), NULL))), &(defer_owner)))(* e).fn_name = Var_as_string(defer_owner);
   type = _emit(&((* e)), cons(List_var(type), NULL));

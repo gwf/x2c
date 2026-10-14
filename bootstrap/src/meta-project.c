@@ -342,7 +342,7 @@ void Frontend_prepare_meta(Frontend f, List inputs){
   }
   _scan(&(h), inputs);
   String include = NULL, cc = Compiler_meta_cc(&(include));
-  String root = script_cache_root(), stamp = build_module_stamp();
+  String root = Compiler_cache_root(), stamp = Compiler_module_stamp();
   if(! Array_len(h.owners) || ! String_truth(cc) || ! String_truth(root) || ! String_truth(stamp)){
     Compiler_use_meta_helper(NULL, NULL, NULL);
     return;
@@ -361,7 +361,7 @@ Path Path_absolute(Path);
 
 static int _support_unit(List inputs){
   if(List_len(inputs) != 1) return 0;
-  String root = script_cache_root();
+  String root = Compiler_cache_root();
   return String_truth(root) && String_startswith(Path_absolute(Var_as_string(List_car(inputs))), String_join(NULL, cons(String_var(root), cons(String_var(_0), NULL))));
 }
 
@@ -369,7 +369,7 @@ void Path_make_dirs(Path);
 
 static List _manifest(Helper * h){
   Path_make_dirs((* h).directory);
-  int lock = file_lock(String_join(NULL, cons(String_var((* h).directory), cons(String_var(_1), NULL))), 1);
+  int lock = Path_lock_file(String_join(NULL, cons(String_var((* h).directory), cons(String_var(_1), NULL))), 1);
   {
     _x2c_defer_env_0 _x2c_macro_environment_0 ={
       0
@@ -457,7 +457,7 @@ static void _use(Helper * h, List manifest){
 
 Compiler Compiler_new(void);
 
-void collect_forget_provisional_entries(void);
+void Compiler_forget_provisional_entries(void);
 
 static void _scan(Helper * h, List inputs){
   Map owned = Map_new();
@@ -497,7 +497,7 @@ static void _scan(Helper * h, List inputs){
     }
 
   }
-  collect_forget_provisional_entries();
+  Compiler_forget_provisional_entries();
 }
 
 static void _own(Helper * h, String path, Map owned){
@@ -512,7 +512,7 @@ String Path_read_text(Path);
 
 Path Path_dirname(Path);
 
-int is_prelude_source(String);
+int Compiler_is_prelude_source(String);
 
 int Compiler_linked_meta_definitions_current(Compiler, String);
 
@@ -576,10 +576,10 @@ static int _file(Scan * s, String path){
   }
   text = _module_text(&((* s)), path, text);
   Tokenizer tokens = Tokenizer_new(text, 3945159);
-  tokens -> layout = is_layout_file(path);
+  tokens -> layout = Path_is_layout_source(path);
   Tokenizer_scan(tokens);
   int meta = _file_scope(&((* s)), tokens, Path_dirname(path));
-  if((meta & 1) && _compiler_owns(path) &&(is_prelude_source(path) || Compiler_linked_meta_definitions_current((* s).c, path))) meta &= ~ 1;
+  if((meta & 1) && _compiler_owns(path) &&(Compiler_is_prelude_source(path) || Compiler_linked_meta_definitions_current((* s).c, path))) meta &= ~ 1;
   Map_setindex((* s).seen, String_var(path), int_var(meta));
   return meta;
 }
@@ -705,32 +705,32 @@ static int _marker(Token token){
 
 List CliRequest_package_roots(CliRequest);
 
-String absolute_path(String);
+String Path_resolved_absolute(String);
 
 static int _package(Scan * s, Tokenizer tokens){
   String name = _quoted(Tokenizer_next(tokens)), root = NULL;
-  String entry = String_truth(name) ? package_entry((* s).request -> sources, CliRequest_package_roots((* s).request), name, &(root)) : NULL;
+  String entry = String_truth(name) ? SourceView_package_entry((* s).request -> sources, CliRequest_package_roots((* s).request), name, &(root)) : NULL;
   if(! String_truth(entry)) return 0;
   Map_setindex((* s).packages, String_var(root), int_var(1));
   int meta = _file(&((* s)), entry);
-  Array_push((* s).units, String_var(absolute_path(entry)));
+  Array_push((* s).units, String_var(Path_resolved_absolute(entry)));
   return ! ! meta;
 }
 
-String preproc_include_target(String, int *);
+String Compiler_preproc_include_target(String, int *);
 
-String collect_resolve_include(SourceView, List, String, String, int);
+String SourceView_resolve_include(SourceView, List, String, String, int);
 
 static int _include(Scan * s, String directive, String directory){
   int angle = 0;
-  String target = preproc_include_target(directive, &(angle));
+  String target = Compiler_preproc_include_target(directive, &(angle));
   if(! String_truth(target) || !(String_endswith(target, _6) || String_endswith(target, _7))) return 0;
-  String file = collect_resolve_include((* s).request -> sources, (* s).request -> include_dirs, directory, target, angle);
+  String file = SourceView_resolve_include((* s).request -> sources, (* s).request -> include_dirs, directory, target, angle);
   if(! String_truth(file)) return 0;
   String path = Path_absolute(file);
   int rooted = _compiler_owns(path);
   int meta = _file(&((* s)), path);
-  if(! rooted ||(meta & 1)) Array_push((* s).units, String_var(absolute_path(path)));
+  if(! rooted ||(meta & 1)) Array_push((* s).units, String_var(Path_resolved_absolute(path)));
   return ! ! meta;
 }
 
@@ -947,7 +947,7 @@ static List _build(Helper * h){
     }
 
   }
-  collect_forget_provisional_entries();
+  Compiler_forget_provisional_entries();
   return _write_manifest(&((* h)), _link(&((* h)), count));
 }
 
@@ -1145,13 +1145,13 @@ static String _support(Helper * h, String * failure){
   }
   ));
   String directory =({
-    Var _x2c_literal_part_32 = String_var(script_cache_root());  String_join(NULL, cons(_x2c_literal_part_32, cons(String_var(_0), cons(String_var(key), NULL))));
+    Var _x2c_literal_part_32 = String_var(Compiler_cache_root());  String_join(NULL, cons(_x2c_literal_part_32, cons(String_var(_0), cons(String_var(key), NULL))));
   }
   );
   String object = String_join(NULL, cons(String_var(directory), cons(String_var(_68), NULL)));
   if(Path_is_file(object)) return object;
   Path_make_dirs(directory);
-  int lock = file_lock(String_join(NULL, cons(String_var(directory), cons(String_var(_1), NULL))), 1);
+  int lock = Path_lock_file(String_join(NULL, cons(String_var(directory), cons(String_var(_1), NULL))), 1);
   {
     _x2c_defer_env_4 _x2c_macro_environment_4 ={
       0
@@ -1192,7 +1192,7 @@ static String _compile_support(Helper * h, String text, String directory, String
   String source = String_join(NULL, cons(String_var(directory), cons(String_var(_69), NULL)));
   Path_write_text(source, text);
   String printed = NULL, errors = NULL;
-  if(tool_capture(({
+  if(ToolAction_capture(({
     Var _x2c_literal_part_33 = String_var(x2c_get_executable());  cons(_x2c_literal_part_33, cons(_71, cons(_73, cons(String_var(directory), cons(String_var(source), NULL)))));
   }
   ), &(printed), &(errors))) return({

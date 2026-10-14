@@ -11,7 +11,7 @@
 #include "lisp.h"
 #include "macros.h"
 #include "transform.h"
-Map builtin_targets(void);
+Map Compiler_builtin_targets(void);
 
 
 #endif /* __GUARD_0x2CF70D65__ */

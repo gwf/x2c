@@ -12,39 +12,14 @@ Package installation into the x2c home.
 
 | Function | Summary |
 | --- | --- |
-| [`install_command`](#install_command) | Installs the package named by the request's one operand and returns 0. |
-| [`install_require`](#install_require) | Returns the row that records `name` at `version`, installing the package under the x2c home first unless one already records that version. |
 | [`install_rows`](#install_rows) | Returns the package rows of `text`: its lines holding the six fields `name version kind platform url sha256`, where `kind` is `source` or `bundle` and a source row's platform is `-`. |
 | [`install_version`](#install_version) | Returns the version an installed package records, or NULL when no package of that name is installed or it records no version. |
-| [`list_command`](#list_command) | Lists installed packages as `name version kind` lines and returns 0. |
-| [`remove_command`](#remove_command) | Removes the installed package named by the request's one operand. |
+| [`CliRequest.install`](#CliRequest.install) | Installs the package named by the request's one operand and returns 0. |
+| [`CliRequest.list_packages`](#CliRequest.list_packages) | Lists installed packages as `name version kind` lines and returns 0. |
+| [`CliRequest.remove_package`](#CliRequest.remove_package) | Removes the installed package named by the request's one operand. |
+| [`CliRequest.require_package`](#CliRequest.require_package) | Returns the row that records `name` at `version`, installing the package under the x2c home first unless one already records that version. |
 
 ### Functions
-
-#### install_command
-
-`int install_command(CliRequest request)`
-
-Installs the package named by the request's one operand and returns 0.
-The operand is a local directory, a local `.tar.gz`, a URL with
-`--sha256`, or a name resolved through the package index. A bundle is
-verified against this compiler's version unless `--force`; a pure-x2c
-source package is built by this compiler. Failures exit with status 2.
-
-Source: `src/install.x:180`
-
-#### install_require
-
-`List install_require( CliRequest request, String name, String version, List locked)`
-
-Returns the row that records `name` at `version`, installing the package
-under the x2c home first unless one already records that version.
-`locked` is the lockfile row to reproduce, so a package a lockfile pins
-comes from the archive that lockfile recorded; NULL resolves the index
-instead. The row has the `install_rows` shape, and an already satisfied
-dependency reaches no network. Failures exit with status 2.
-
-Source: `src/install.x:196`
 
 #### install_rows
 
@@ -67,22 +42,53 @@ of that name is installed or it records no version. Reaches no network.
 
 Source: `src/install.x:382`
 
-#### list_command
+### `CliRequest`
 
-`int list_command(CliRequest request)`
+<a id="CliRequest.install"></a>
+#### CliRequest.install
+
+`int CliRequest.install(CliRequest request)`
+
+Installs the package named by the request's one operand and returns 0.
+The operand is a local directory, a local `.tar.gz`, a URL with
+`--sha256`, or a name resolved through the package index. A bundle is
+verified against this compiler's version unless `--force`; a pure-x2c
+source package is built by this compiler. Failures exit with status 2.
+
+Source: `src/install.x:180`
+
+<a id="CliRequest.list_packages"></a>
+#### CliRequest.list_packages
+
+`int CliRequest.list_packages(CliRequest request)`
 
 Lists installed packages as `name version kind` lines and returns 0.
 
 Source: `src/install.x:550`
 
-#### remove_command
+<a id="CliRequest.remove_package"></a>
+#### CliRequest.remove_package
 
-`int remove_command(CliRequest request)`
+`int CliRequest.remove_package(CliRequest request)`
 
 Removes the installed package named by the request's one operand.
 A directory without an install marker is left alone. Returns 0.
 
 Source: `src/install.x:523`
+
+<a id="CliRequest.require_package"></a>
+#### CliRequest.require_package
+
+`List CliRequest.require_package( CliRequest request, String name, String version, List locked)`
+
+Returns the row that records `name` at `version`, installing the package
+under the x2c home first unless one already records that version.
+`locked` is the lockfile row to reproduce, so a package a lockfile pins
+comes from the archive that lockfile recorded; NULL resolves the index
+instead. The row has the `install_rows` shape, and an already satisfied
+dependency reaches no network. Failures exit with status 2.
+
+Source: `src/install.x:196`
 
 ## Design notes
 

@@ -13,7 +13,7 @@ Make dependency output for x2c translation units.
 | Function | Summary |
 | --- | --- |
 | [`translation_depfile_parse`](#translation_depfile_parse) | Parses prerequisite words after the first unescaped colon in `text`. |
-| [`translation_depfile_write`](#translation_depfile_write) | Publishes the Make depfile for one completed translation. |
+| [`Compiler.write_depfile`](#Compiler.write_depfile) | Publishes the Make depfile for one completed translation. |
 
 ### Functions
 
@@ -29,11 +29,14 @@ A NULL input or no parsed prerequisites returns NULL.
 Returned cells and path `String`s follow the current canonical `List` and
 `String` pool lifetimes.
 
-Source: `src/deps.x:128`
+Source: `src/deps.x:129`
 
-#### translation_depfile_write
+### `Compiler`
 
-`int translation_depfile_write( CliRequest request, Compiler compiler, String input, String output_dir)`
+<a id="Compiler.write_depfile"></a>
+#### Compiler.write_depfile
+
+`int Compiler.write_depfile( Compiler compiler, CliRequest request, String input, String output_dir)`
 
 Publishes the Make depfile for one completed translation.
 `compiler.deps` must reflect the translated `input`, and the selected

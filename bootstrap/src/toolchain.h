@@ -66,7 +66,7 @@ int ToolRun_ready(ToolRun t);
 
 int ToolRun_wait(ToolRun execution);
 
-int tool_capture(List arguments, String * output, String * errors);
+int ToolAction_capture(List arguments, String * output, String * errors);
 
 int Toolchain_preprocess(Toolchain t, const char * fname, List include_dirs, const char * imacros, String * output, String * errors, String * dependencies);
 
