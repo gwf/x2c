@@ -480,7 +480,7 @@ static String _file_prefix(String path) {
   if (isdigit((unsigned char) path[0])) spelling.write_char('_');
   foreach (char ch, path)
     spelling.write_char(isalnum((unsigned char) ch) ? ch : '_');
-  return %"${spelling.str()}__";
+  return %"${spelling}__";
 }
 
 /* Appends the file's text from byte `start` to `end`, which begins its

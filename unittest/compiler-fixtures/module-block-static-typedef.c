@@ -262,17 +262,18 @@ int second_total(void){
   return second__counter;
 }
 
-String second_repr(void){
+int second_boxed(void){
   if(! _init_guard_) _file_init_();
   Var boxed = second__Node_var(second__Node_new(7));
-  return Var_repr(boxed);
+  second__Node node = Var_second__node(boxed);
+  return node.value;
 }
 
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   printf("%d %d %d\n", module_block_static_typedef__counter, first_total(), second_total());
-  printf("%s\n", second_repr());
+  printf("%d\n", second_boxed());
   return 0;
 }
 

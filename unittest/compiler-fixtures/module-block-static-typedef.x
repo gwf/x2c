@@ -1,6 +1,6 @@
 /* Each file of a module unit keeps its own statics. Two members declare
    the same static object and static type, and one adopts its type as a
-   class, whose readable name stays short. */
+   class and round-trips through Var. */
 #include <stdio.h>
 
 static int counter = 100;
@@ -12,6 +12,6 @@ module {
 
 int main(void) {
   printf("%d %d %d\n", counter, first_total(), second_total());
-  printf("%s\n", second_repr());
+  printf("%d\n", second_boxed());
   return 0;
 }

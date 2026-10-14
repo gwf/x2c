@@ -326,8 +326,8 @@ List Sym.define(Sym s, List key, List type) {
   return _scope_binding(s, *scope, key);
 }
 
-/* A module file's private class keeps its short name as its tag, which no
-   other class of the unit may take. */
+/* A module file's static type keeps its short name as its tag, which no
+   other type of the unit may take. */
 static void _seed_var_tag(Sym s, List key, List type) {
   String owner = _var_converter_owner(key, type);
   if (!owner) return;
@@ -567,12 +567,16 @@ List Sym.reference_global(Sym s, List key) {
 
 static List _lookup_from(
   Sym s, List key, Type &?type, int first, int forward) {
-  List own = NULL, binding = NULL;
-  for (int i = first; i >= 0; i--) {
+  List binding = NULL;
+  int i = first;
+  for (; i >= s.base_scopes; i--) {
+    binding = _scope_find(s, *_scope_at(s, i), key, type);
+    if (binding) return binding;
+  }
+  List own = _file_key(s, key);
+  for (; i >= 0; i--) {
     SymScope *scope = _scope_at(s, i);
-    if (i == s.base_scopes - 1 || (i == first && i < s.base_scopes))
-      own = _file_key(s, key);
-    if (own && i < s.base_scopes) binding = _scope_find(s, *scope, own, type);
+    if (own) binding = _scope_find(s, *scope, own, type);
     if (!binding) binding = _scope_find(s, *scope, key, type);
     if (binding) return binding;
   }
@@ -635,13 +639,12 @@ static List _declared_key(Sym s, List context, List key, List ast) {
   Compiler c = s.c;
   if ((int) s.scopes.len() != s.base_scopes) return key;
   if (context && !(context === %(typedef))) return key;
-  String prefix = c.private_prefix(ast.type());
-  if (!prefix && (!c.package || ast.type().is_static())) return key;
+  String prefix = c.private_prefix(ast);
   Var (head, tag) = key;
-  if (head is <string> && !key.cdr()) {
-    if (!context) _check_module_shadow(s, prefix, head, ast);
-    return %(${c.scoped_spelling(prefix, head)});
-  }
+  int plain = head is <string> && !key.cdr();
+  if (plain && !context) _check_module_shadow(s, prefix, head, ast);
+  if (!prefix && (!c.package || ast.type().is_static())) return key;
+  if (plain) return %(${c.scoped_spelling(prefix, head)});
   if ((head == <struct> || head == <union> || head == <enum>) &&
       key.cdr() && !key.cddr() && tag is <string>)
     return %($head ${c.scoped_spelling(prefix, tag)});
@@ -926,12 +929,15 @@ String Compiler.private_prefix(Compiler c, Type type) {
 }
 
 /** Returns `name` spelled in a declaration's scope: with `prefix`, a file
-    prefix, or else in the current package. A name that holds its file prefix
-    already, such as `Var_second__node` for a private class `second__Node`,
-    stays unchanged; it is unique in the unit. */
+    prefix, or else in the current package. A name that holds its file
+    prefix already, such as `second__Node_new` or `Var_second__node` for a
+    private class `second__Node`, stays unchanged; it is unique in the unit,
+    so code generated outside the file still reaches it. */
 String Compiler.scoped_spelling(Compiler c, String prefix, String name) {
   if (!prefix) return c.package_spelling(name);
-  return !name || strstr(name, prefix) ? name : %"$prefix$name";
+  if (!name || name.startswith(prefix) ||
+      strstr(name.lower(), %"_${prefix.lower()}")) return name;
+  return %"$prefix$name";
 }
 
 /** Returns the static prefix of each file of the module unit. */

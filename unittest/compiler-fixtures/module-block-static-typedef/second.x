@@ -8,7 +8,8 @@ int second_total(void) {
   return counter;
 }
 
-String second_repr(void) {
+int second_boxed(void) {
   Var boxed = Node.new(7);
-  return boxed.repr();
+  Node node = boxed;
+  return node.value;
 }
