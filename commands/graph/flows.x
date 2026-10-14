@@ -473,7 +473,7 @@ static void _flow_statement(
     compiler, node, path, origin, definitions, parameters, locals, calls);
 }
 
-List Flow_analyze_unit(Compiler compiler, List ast, String path) {
+List _x2c_flow_analyze_unit(Compiler compiler, List ast, String path) {
   Map definitions = project_function_targets(compiler, ast, path);
   Array functions = [];
   foreach (List node, ast)
@@ -818,7 +818,8 @@ static List _flow_sorted_unique(Array values) {
   return sorted.list_free();
 }
 
-List Flow_finish(List functions, String producer_name, String consumer_name) {
+List _x2c_flow_finish(
+  List functions, String producer_name, String consumer_name) {
   Map by_target = {}, publics = {}, by_name = {};
   _flow_indexes(functions, by_target, publics, by_name);
   List producer = resolve_project_target(
