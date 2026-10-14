@@ -1,2 +1,2 @@
-static int counter = 1;
-static int helper(int value) { return value + counter; }
+module int counter = 1;
+module int helper(int value) { return value + counter; }

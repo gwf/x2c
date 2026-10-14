@@ -1,1 +1,1 @@
-static int member_total(void) => sub_value() + 1;
+module int member_total(void) => sub_value() + 1;

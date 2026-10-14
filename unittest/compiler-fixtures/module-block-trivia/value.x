@@ -1,1 +1,1 @@
-static int answer(void) => 42;
+module int answer(void) => 42;

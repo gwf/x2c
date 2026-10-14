@@ -1998,7 +1998,7 @@ int ordinary(void);
 int ordinary(void) => 2;
 EOF
 cat >"$SCRIPT/module/app/part/inner.x" <<'EOF'
-static int nested_value = 40;
+module int nested_value = 40;
 EOF
 cat >"$SCRIPT/module/app/part.x" <<'EOF'
 module { "part/inner.x" }

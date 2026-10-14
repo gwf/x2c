@@ -1,5 +1,5 @@
-/* A member's statics are visible to later members and to the entry after
-   the block. */
+/* A `module` name is one name for every file of the unit. A `static` name
+   is private to its file, so each member keeps its own `local`. */
 #include <stdio.h>
 
 module {
@@ -8,6 +8,7 @@ module {
 }
 
 int main(void) {
-  printf("%d %d\n", shared_count, doubled());
+  printf("%d %d %d %d\n", shared_count, doubled(), first_local(),
+         second_local());
   return 0;
 }
