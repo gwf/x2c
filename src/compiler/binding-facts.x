@@ -93,4 +93,3 @@ static int _null_literal(List expr) {
   }
   return 0;
 }
-

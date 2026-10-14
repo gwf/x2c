@@ -440,7 +440,7 @@ mkdir -p "$BUILD/anon-escape/out"
 (cd "$BUILD/anon-escape" && "$X2C" translate --out-dir out anon.x)
 grep -q "AnonEscape" "$BUILD/anon-escape/out/anon.h" ||
   fail "anon-escape probe is vacuous: anon.h has no anonymous typedef"
-grep -Er "(struct|union|enum) _x2c_gensym" "$BUILD/anon-escape/out" &&
+grep -r "_x2c_gensym" "$BUILD/anon-escape/out" &&
   fail "generated name leaked into emitted C" || true
 
 # Case 8: macro-generated names are reproducible across complete compiler

@@ -1,0 +1,7 @@
+list of number: raised no-convert
+list of void: raised no-convert
+map of number: raised no-convert
+array of number: raised no-convert
+list of empty list: no raise
+crossings NULL NULL NULL
+list crossing keeps 2
