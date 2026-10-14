@@ -76,8 +76,9 @@ uses the package `import` described below.
 A module block splits one large source file across a directory without
 splitting the translation unit. The entry file names its member files, and
 the compiler reads each member's text in place of the block. The result
-translates as the single file it replaces, so `static` remains the private
-namespace and nothing else is new.
+translates as one unit with two private storage classes: `static` is visible
+in the file that declares it, and `module` is visible in every file of the
+unit.
 
 The entry `calculations.x` names members under its companion directory
 `calculations/`:
@@ -100,8 +101,8 @@ int main(void) {
 <!-- ignore: This member requires the preceding entry file. -->
 ```x2c,ignore
 /* calculations/implementation.x */
-static int counter = 2;
-static int helper(int value) { return value + counter; }
+module int counter = 2;
+module int helper(int value) { return value + counter; }
 ```
 
 The block is `module {`, comma-separated string paths with an optional
@@ -152,6 +153,30 @@ by those names. The declaration parses as if `static` were written. The
 object and function are `static` in the generated C, the type stays private,
 and the unit's header and interface publish none of them. Outside a module
 unit `module` means `static`.
+
+Inside a module unit, `static` keeps its C meaning: the name is visible in
+the file that declares it and in no other file of the unit. That holds for
+objects, functions, `static typedef`, `static class`, and the `struct`,
+`union`, or `enum` tag such a typedef declares. Two members may each declare
+`static int counter` or `static typedef struct Node { ... } Node`, and each
+file sees its own. A file's statics take a prefix in the generated C: the
+file's path under the entry's companion directory without its extension,
+with each character that cannot continue a C identifier made `_`, then
+`__`. Under the entry `parser.x`, a static `advance` in
+`parser/statements/loops.x` emits as `statements_loops__advance`, and one in
+the entry itself as `parser__advance`. Generated names are compiler details;
+source never spells them. A static type adopted as a class keeps its short
+name as its Var tag and descriptor name, so two files of one unit cannot
+each adopt a class under the same short name. Compile-time declarations,
+`static macro`, `static $(`, `static protocol`, and `meta` functions, keep
+their unit-wide behavior.
+
+Three cases are errors. Two members whose paths give one prefix, such as
+`a_b.x` and `a/b.x`, are a driver error at the block. A `static` whose name
+is a `module` name of the unit, in either order of declaration, is a parse
+error at the later declaration, because a `module` name means one thing in
+every file. Two files adopting a class under one short name is a parse
+error at the second.
 
 A quoted include in a member that names a file beside the member reaches that
 file, in collection and in the generated C. Any other include resolves as it
