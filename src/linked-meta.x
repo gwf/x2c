@@ -1869,14 +1869,7 @@ static int _try_arm_exits(List arm) {
   return 0;
 }
 
-/** Returns each lowered arm of `arms` chosen by its index in `selected`;
-    `$x2c.try.handled` calls this in a slot. Each arm is its own
-    statement, so a `break` or `continue` in it still reaches the enclosing
-    loop, and only one test holds because `selected` does not change. When
-    every arm returns or raises, control cannot leave them, and a final
-    unreachable mark tells C so that a function ending in such a `try`
-    needs no return after it. */
-List try_catch_cases(List selected, List arms) {
+List _x2c_try_catch_cases(List selected, List arms) {
   Array cases = [];
   int index = 0, exits = 1;
   foreach (List arm, arms) {
@@ -2196,7 +2189,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_raise_value", _raise_value);
   $linked.row(rows, "raise_lowering", raise_lowering);
   $linked.row(rows, "_try_arm_exits", _try_arm_exits);
-  $linked.row(rows, "try_catch_cases", try_catch_cases);
+  $linked.row(rows, "_x2c_try_catch_cases", _x2c_try_catch_cases);
   $linked.row(rows, "_try_finalizer_label", _try_finalizer_label);
   $linked.row(rows, "_try_check_label", _try_check_label);
   $linked.row(rows, "_try_frame_address", _try_frame_address);
@@ -2249,10 +2242,10 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "interpolation_lowering", interpolation_lowering);
   $linked.row(rows, "array_literal", array_literal);
   $linked.row(rows, "map_literal", map_literal);
-  $linked.row(rows, "try_catch_patterns", try_catch_patterns);
-  $linked.row(rows, "try_catch_site", try_catch_site);
-  $linked.row(rows, "try_landing", try_landing);
-  $linked.row(rows, "try_exits_placement", try_exits_placement);
+  $linked.row(rows, "_x2c_try_catch_patterns", _x2c_try_catch_patterns);
+  $linked.row(rows, "_x2c_try_catch_site", _x2c_try_catch_site);
+  $linked.row(rows, "_x2c_try_landing", _x2c_try_landing);
+  $linked.row(rows, "_x2c_try_exits_placement", _x2c_try_exits_placement);
   $linked.row(rows, "_x2c_field_copies", _x2c_field_copies);
   $linked.row(rows, "_x2c_field_sets", _x2c_field_sets);
   $linked.row(rows, "source_return_type", source_return_type);

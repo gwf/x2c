@@ -8,57 +8,6 @@
 
 Try, catch, and finally.
 
-## Functions
-
-| Function | Summary |
-| --- | --- |
-| [`try_catch_patterns`](#try_catch_patterns) | Returns the statement that prepares each of `items` into its slot of the catch site's `patterns`; `$x2c.try.site` calls this in a slot. |
-| [`try_catch_site`](#try_catch_site) | Returns the catch site `frame` pushes for the clause `clause` describes, or nothing for a try without one; `$x2c.try.frame` calls this in a slot. |
-| [`try_exits_placement`](#try_exits_placement) | Places the lowered exits of a try after its regions, with the effect that marks the unit as needing exception support; `$x2c.try.frame` calls this in a slot. |
-| [`try_landing`](#try_landing) | Returns what runs when `frame` lands: the catch arm the clause's handler selected, or `exits` and no return; `$x2c.try.frame` calls this in a slot. |
-
-### Functions
-
-#### try_catch_patterns
-
-`meta List try_catch_patterns(List patterns, List items)`
-
-Returns the statement that prepares each of `items` into its slot of
-the catch site's `patterns`; `$x2c.try.site` calls this in a slot.
-
-Source: `src/component-try.x:26`
-
-#### try_catch_site
-
-`meta List try_catch_site(List frame, List clause)`
-
-Returns the catch site `frame` pushes for the clause `clause`
-describes, or nothing for a try without one; `$x2c.try.frame` calls this in
-a slot.
-
-Source: `src/component-try.x:54`
-
-#### try_exits_placement
-
-`meta List try_exits_placement(List exits)`
-
-Places the lowered exits of a try after its regions, with the effect
-that marks the unit as needing exception support; `$x2c.try.frame` calls
-this in a slot.
-
-Source: `src/component-try.x:128`
-
-#### try_landing
-
-`meta List try_landing(List frame, List clause, List exits)`
-
-Returns what runs when `frame` lands: the catch arm the clause's
-handler selected, or `exits` and no return; `$x2c.try.frame` calls this in
-a slot. A landing no catch arm handles runs the region's exits, and
-control does not come back.
-
-Source: `src/component-try.x:114`
-
 ## Design notes
 
 A try lowers to the landing form `(landing CODE ROWS)` that the cleanup

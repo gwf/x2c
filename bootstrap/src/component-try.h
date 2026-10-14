@@ -8,13 +8,13 @@
 #include "x2c.h"
 #include "rewrite.h"
 #include "grammar.h"
-List try_catch_patterns(List patterns, List items);
+List _x2c_try_catch_patterns(List patterns, List items);
 
-List try_catch_site(List frame, List clause);
+List _x2c_try_catch_site(List frame, List clause);
 
-List try_landing(List frame, List clause, List exits);
+List _x2c_try_landing(List frame, List clause, List exits);
 
-List try_exits_placement(List exits);
+List _x2c_try_exits_placement(List exits);
 
 
 #endif /* __GUARD_0xB4F8DC6A__ */

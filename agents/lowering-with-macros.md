@@ -154,14 +154,14 @@ macro Stmt $x2c.try.frame(
   Name $frame, Expr $clause, Stmt $body, Stmt $exits) {
   {
     ExceptionFrame $frame;
-    @try_catch_site($frame, $clause)
+    @_x2c_try_catch_site($frame, $clause)
     x2c_exception_push(&$frame);
     if (!sigsetjmp($frame.env, 0)) $body
     else {
       x2c_exception_landed(&$frame);
-      @try_landing($frame, $clause, $exits)
+      @_x2c_try_landing($frame, $clause, $exits)
     }
-    @try_exits_placement($exits)
+    @_x2c_try_exits_placement($exits)
   }
 }
 
@@ -174,7 +174,7 @@ macro Stmt $x2c.try.site(
   Var patterns[$count];
   static ErrorCatchSite site = {arms, $fallback, $count, $state, -1};
   if (x2c_error_catch_site_pending(&site)) {
-    @try_catch_patterns(patterns, $patterns)
+    @_x2c_try_catch_patterns(patterns, $patterns)
   }
   volatile ErrorHandler $handle =
     x2c_error_catch_site_push(&$frame, &site, patterns);
@@ -187,7 +187,7 @@ macro Stmt $x2c.try.handled(
     int selected = x2c_error_catch_selected($handle);
     x2c_error_catch_detach($handle);
     x2c_exception_mark_handled(&$frame);
-    @try_catch_cases(selected, $arms)
+    @_x2c_try_catch_cases(selected, $arms)
   }
   else $unhandled
 }
@@ -203,7 +203,7 @@ compile-time operation when the copy binds.
 ```x2c
 /** Returns each lowered arm of `arms` chosen by its index in `selected`;
     `$x2c.try.handled` calls this in a slot. ... */
-meta List try_catch_cases(List selected, List arms) {
+meta List _x2c_try_catch_cases(List selected, List arms) {
   Array cases = [];
   int index = 0, exits = 1;
   foreach (List arm, arms) {
@@ -218,7 +218,7 @@ meta List try_catch_cases(List selected, List arms) {
 /** Returns what runs when `frame` lands: the catch arm the clause's
     handler selected, or `exits` and no return; `$x2c.try.frame` calls
     this in a slot. ... */
-meta List try_landing(List frame, List clause, List exits) {
+meta List _x2c_try_landing(List frame, List clause, List exits) {
   Macro landing = $x2c.try.handled;
   List otherwise = $!{ { $exits __builtin_unreachable(); } };
   match (clause)

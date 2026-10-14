@@ -35,7 +35,6 @@ Shipped `meta` code compiled into the compiler.
 | [`protocol_conformance`](#protocol_conformance) | Places the forwarding members, descriptor thunks, method table, and descriptor registration of one conformance. |
 | [`raise_lowering`](#raise_lowering) | Converts a raise's code and details, or declines a raise whose parts already have their types. |
 | [`register_rewrite`](#register_rewrite) | Registers the decorated translator with its pattern and hole patterns. |
-| [`try_catch_cases`](#try_catch_cases) | Returns each lowered arm of `arms` chosen by its index in `selected`; `$x2c.try.handled` calls this in a slot. |
 | [`try_lowering`](#try_lowering) | Lowers the parsed try `node` to its landing form. |
 
 ### Functions
@@ -195,7 +194,7 @@ Source: `src/linked-meta.x:824`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:2288`
+Source: `src/linked-meta.x:2281`
 
 #### linked_meta_targets
 
@@ -203,7 +202,7 @@ Source: `src/linked-meta.x:2288`
 
 Returns the linked copies, and the runtime builders, by name.
 
-Source: `src/linked-meta.x:2061`
+Source: `src/linked-meta.x:2054`
 
 #### match_lowering
 
@@ -248,27 +247,13 @@ Registers the decorated translator with its pattern and hole patterns.
 
 Source: `src/linked-meta.x:91`
 
-#### try_catch_cases
-
-`List try_catch_cases(List selected, List arms)`
-
-Returns each lowered arm of `arms` chosen by its index in `selected`;
-`$x2c.try.handled` calls this in a slot. Each arm is its own
-statement, so a `break` or `continue` in it still reaches the enclosing
-loop, and only one test holds because `selected` does not change. When
-every arm returns or raises, control cannot leave them, and a final
-unreachable mark tells C so that a function ending in such a `try`
-needs no return after it.
-
-Source: `src/linked-meta.x:1879`
-
 #### try_lowering
 
 `Code try_lowering(Code node)`
 
 Lowers the parsed try `node` to its landing form.
 
-Source: `src/linked-meta.x:2005`
+Source: `src/linked-meta.x:1998`
 
 ## Design notes
 

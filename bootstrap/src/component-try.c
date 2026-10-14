@@ -482,7 +482,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _440 = cons(_439, _432);
   _441 = List_var(_440);
   _442 = Atom_intern(String_new("binding-name"));
-  _443 = String_new("try_catch_patterns");
+  _443 = String_new("_x2c_try_catch_patterns");
   _444 = String_var(_443);
   _445 = cons(_444, NULL);
   _446 = cons(_442, _445);
@@ -630,7 +630,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _585 = cons(_582, _584);
   _586 = List_var(_585);
   _587 = Symbol_var(1133019155420);
-  _588 = int_var(1432);
+  _588 = int_var(1436);
   _589 = cons(_588, NULL);
   _590 = cons(_587, _589);
   _591 = List_var(_590);
@@ -884,7 +884,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _839 = cons(_744, _838);
   _840 = cons(_743, _839);
   _841 = List_var(_840);
-  _842 = String_new("try_catch_cases");
+  _842 = String_new("_x2c_try_catch_cases");
   _843 = String_var(_842);
   _844 = cons(_843, NULL);
   _845 = cons(_442, _844);
@@ -940,7 +940,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _895 = cons(_894, NULL);
   _896 = cons(_574, _895);
   _897 = List_var(_896);
-  _898 = int_var(3629);
+  _898 = int_var(3646);
   _899 = cons(_898, NULL);
   _900 = cons(_587, _899);
   _901 = List_var(_900);
@@ -1076,7 +1076,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1028 = List_var(_1027);
 }
 
-List try_catch_patterns(List patterns, List items){
+List _x2c_try_catch_patterns(List patterns, List items){
   if(! _init_guard_) _file_init_();
   Array prepared = Array_new();
   int index = 0;
@@ -1104,7 +1104,7 @@ List try_catch_patterns(List patterns, List items){
   return Array_list_free(prepared);
 }
 
-List try_catch_site(List frame, List clause){
+List _x2c_try_catch_site(List frame, List clause){
   if(! _init_guard_) _file_init_();
   Macro site = _630;
   {
@@ -1148,7 +1148,7 @@ List try_catch_site(List frame, List clause){
   return NULL;
 }
 
-List try_landing(List frame, List clause, List exits){
+List _x2c_try_landing(List frame, List clause, List exits){
   if(! _init_guard_) _file_init_();
   Macro landing = _923;
   List otherwise = cons(_1, cons(_2, cons(List_var(cons(_3, cons(List_var(cons(_426, cons(List_var(cons(_10, cons(_925, cons(_156, cons(List_var(exits), NULL))))), _963))), NULL))), NULL)));
@@ -1170,7 +1170,7 @@ List try_landing(List frame, List clause, List exits){
   return otherwise;
 }
 
-List try_exits_placement(List exits){
+List _x2c_try_exits_placement(List exits){
   if(! _init_guard_) _file_init_();
   Atom token = Atom_intern(_964);
   {

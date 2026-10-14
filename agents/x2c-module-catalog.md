@@ -271,7 +271,8 @@ try, catch, and finally.
 
 Public functions:
 
-`try_catch_patterns`, `try_catch_site`, `try_landing`, `try_exits_placement`
+`_x2c_try_catch_patterns`, `_x2c_try_catch_site`, `_x2c_try_landing`,
+`_x2c_try_exits_placement`
 
 ### [src/deps.x](../src/deps.x)
 
@@ -437,8 +438,9 @@ Public functions:
 `destructure_declaration`, `destructure_statement`, `destructure_value`,
 `lambda_lift`, `lambda_closure`, `lambda_cells`, `match_lowering`,
 `dynamic_binary`, `dynamic_compound`, `dynamic_change`, `dynamic_unary`,
-`printf_values`, `protocol_conformance`, `raise_lowering`, `try_catch_cases`,
-`try_lowering`, `linked_meta_targets`, `linked_meta_hashes`
+`printf_values`, `protocol_conformance`, `raise_lowering`,
+`_x2c_try_catch_cases`, `try_lowering`, `linked_meta_targets`,
+`linked_meta_hashes`
 
 ### [src/literals.x](../src/literals.x)
 
@@ -586,7 +588,7 @@ Public functions:
 `x2c_invocation_line`, `x2c_invocation_column`, `x2c_diagnostic_fail`,
 `x2c_diagnostic_fail_at`, `x2c_diagnostic_error_at`, `x2c_diagnostic_warn`,
 `x2c_enclosing`, `x2c_place`, `MetaContext.type_description`,
-`MetaContext.source_description`, `Code.complete_iterator`,
+`MetaContext.source_description`, `_x2c_complete_iterator`,
 `MetaContext.reject`, `Compiler.bind_sdk_primitives`
 
 ### [src/operator-ledger.x](../src/operator-ledger.x)

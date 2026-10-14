@@ -1737,7 +1737,7 @@ List MetaContext_source_description(Var value){
 }
 
 List Compiler_complete_iter_chain(Compiler, List);
-List Code_complete_iterator(List expression){
+List _x2c_complete_iterator(List expression){
   if(! _init_guard_) _file_init_();  _require_expansion(_429);  return Compiler_complete_iter_chain(active.expander, expression);
 }
 

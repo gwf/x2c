@@ -1045,8 +1045,8 @@ List MetaContext.source_description(Var value) {
 
 // built-in algorithm operations
 
-/** Returns `expression` with the iterator chain `foreach` reads completed. */
-List Code.complete_iterator(List expression) {
+/* Returns `expression` with the iterator chain `foreach` reads completed. */
+List _x2c_complete_iterator(List expression) {
   _require_expansion("private foreach iterator completion");
   return active.expander.complete_iter_chain(expression);
 }

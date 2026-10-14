@@ -2054,12 +2054,12 @@ static List _cursor_assignments(List targets, List outputs){
   );
 }
 
-List Code_complete_iterator(List);
+List _x2c_complete_iterator(List);
 
 static List _with_iter(Foreach * f, List converter){
   List constructor = _iter_constructor(&((* f)), converter);
   List item_expression = _expr(_434, (* f).item);
-  List initializer = Code_complete_iterator(List_truth(constructor) ? _iter_call(constructor, (* f).collection) :(* f).collection);
+  List initializer = _x2c_complete_iterator(List_truth(constructor) ? _iter_call(constructor, (* f).collection) :(* f).collection);
   Code next = MetaContext_function_reference(_460);
   List output = Var_list_payload(List_getindex(Type_parameters(Code_type(next)), 1));
   List item_argument = x2c_var_equal(List_car(output), Symbol_var(54)) ? _address(item_expression) : item_expression;
