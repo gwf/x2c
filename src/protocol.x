@@ -373,12 +373,23 @@ static String _path(Compiler c) {
   return result;
 }
 
+/* A module member's adoptions belong to its unit, as its other
+   declarations do. */
 static String _canonical_file(Compiler c, List location) {
   String file = _location_file(location), result = NULL;
   $memo(c.protocol_helpers, %(proto-file $file), result) {
     result = _normalize_file(c, file);
+    if (_module_member(c, result)) result = _path(c);
   }
   return result;
+}
+
+static int _module_member(Compiler c, String file) {
+  if (c.line_markers)
+    foreach (List row, c.line_markers)
+      match (row) case %(? ? ?(String member) ? ? ? ?):
+        if (_normalize_file(c, member) == file) return 1;
+  return 0;
 }
 
 /* A relative path names a file below the working directory, or else one below
@@ -2701,7 +2712,7 @@ static List _thunk(
 static List _descriptor(ProtocolAdapters &a) {
   if (!_has_descriptor(a)) return NULL;
   Symbol tag = _tag_value(_adoption_tag(a.adoption));
-  String name = a.participant.car().str();
+  String name = a.c.unprefixed(a.participant.car().str());
   if (!tag) name = name.lower();
   List methods =
     a.c.sym.introduce(a.c.fresh_name("protocol_methods"));

@@ -382,11 +382,24 @@ String Compiler.token_source(Compiler c, Token token, int &?line) {
   return file;
 }
 
+/** Returns the prefix that the statics of the module file holding the
+    current token take, or NULL outside a module unit. A module's first row
+    marks the start of its text, so other units return before any scan. */
+String Compiler.file_prefix(Compiler c) {
+  Array markers = c.line_markers;
+  if (!markers || !c.token) return NULL;
+  match (markers[0]) case %(? ? ? ? ? ? ?): {
+    match (_token_region(c, c.token))
+      case %(? ? ? ? ? ? ?(String prefix)): return prefix;
+  }
+  return NULL;
+}
+
 /** Returns `token`'s column in the file that holds it. A module region
     that begins inside a line of its file continues that line's columns. */
 int Compiler.token_column(Compiler c, Token token) {
   match (_token_region(c, token))
-    case %(? ?(int text_line) ? ? ? ?(String before)):
+    case %(? ?(int text_line) ? ? ? ?(String before) ?):
       if (token.line == text_line) return before.len() + token.col;
   return token.col;
 }
@@ -398,7 +411,7 @@ int Compiler.token_column(Compiler c, Token token) {
 String Compiler.text_source(Compiler c, int position, int &offset) {
   offset = position;
   match (_region(c, position))
-    case %(?(int start) ? ?(String file) ? ?(int origin) ?): {
+    case %(?(int start) ? ?(String file) ? ?(int origin) ? ?): {
       offset = origin + position - start;
       return file;
     }
@@ -423,7 +436,7 @@ Token Compiler.source_token(Compiler c, Token token, String &file) {
    the spliced text, including the thawed copy of a queued effect's site. */
 static List _token_region(Compiler c, Token token) {
   List region = _region(c, token.pos);
-  match (region) case %(? ? ? ? ? ?): return region;
+  match (region) case %(? ? ? ? ? ? ?): return region;
   if (!region) return NULL;
   Token first = c.tokenizer.tokens;
   return token >= first && token < first + c.tokenizer.tokens.len()
@@ -514,7 +527,7 @@ static void _show_source_context(
   char *line_start, *line_end;
   if (!_context_line(compiler, line, line_start, line_end)) return;
   match (_region(compiler, position))
-    case %(? ?(int text_line) ? ? ? ?(String before)):
+    case %(? ?(int text_line) ? ? ? ?(String before) ?):
       if (line == text_line && before.len()) {
         String shown =
           %"$before${String.new_len(line_start, line_end - line_start)}";

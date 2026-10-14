@@ -1,0 +1,3 @@
+unittest/compiler-fixtures/module-block-prefix-collision.x:3:1: driver: module member 'module-block-prefix-collision/a/b.x' takes the static prefix of 'module-block-prefix-collision/a_b.x'
+  note: a file's statics take its path with each non-identifier character made '_'; rename one of the files
+

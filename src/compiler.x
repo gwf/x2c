@@ -39,7 +39,8 @@ typedef struct ScriptUnit {
     holds the file's own text, `own`, with each member's text in place of the
     block. `markers` are the line-marker rows that give each region of
     `text` its file, line, and byte offset there, with the text that
-    precedes that offset on its line, and `members` maps each member's
+    precedes that offset on its line and the prefix that file's statics
+    take. The first row marks the start of `text`. `members` maps each member's
     canonical path to its content hash.
 */
 typedef struct ModuleSource {
@@ -210,6 +211,7 @@ typedef struct Compiler {
      project helper table index plus one. */
   int meta_build;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
+  int module_declaration;  // Parsing a `module` declaration.
   int public_bodies;  // Cold interfaces bind only exposed inline bodies.
   int module_declaration;  // A `module` declaration is being parsed.
   int interface_provider, signature_only;
