@@ -1,39 +1,39 @@
-#define _x2c_initializer_choice_D1E0FCF3_0_expanded(_x2c_static_input_0) static void _x2c_static_initialize_0(void){\
-  _x2c_static_input_0;\
+#define _x2c_gensym_initializer_choice_D1E0FCF3_0_expanded(_x2c_gensym_static_input_0) static void _x2c_gensym_static_initialize_0(void){\
+  _x2c_gensym_static_input_0;\
 }
-#define _x2c_initializer_choice_D1E0FCF3_0(_x2c_static_input_0) _x2c_initializer_choice_D1E0FCF3_0_expanded(_x2c_static_input_0)
-#define _x2c_initializer_choice_D1E0FCF3_1_expanded(_x2c_static_input_1) static void _x2c_static_initialize_1(void){\
-  _x2c_static_input_1;\
+#define _x2c_gensym_initializer_choice_D1E0FCF3_0(_x2c_gensym_static_input_0) _x2c_gensym_initializer_choice_D1E0FCF3_0_expanded(_x2c_gensym_static_input_0)
+#define _x2c_gensym_initializer_choice_D1E0FCF3_1_expanded(_x2c_gensym_static_input_1) static void _x2c_gensym_static_initialize_1(void){\
+  _x2c_gensym_static_input_1;\
 }
-#define _x2c_initializer_choice_D1E0FCF3_1(_x2c_static_input_1) _x2c_initializer_choice_D1E0FCF3_1_expanded(_x2c_static_input_1)
-#define _x2c_initializer_choice_D1E0FCF3_2_expanded(_x2c_static_input_2) static void _x2c_static_initialize_2(void){\
-  _x2c_static_input_2;\
+#define _x2c_gensym_initializer_choice_D1E0FCF3_1(_x2c_gensym_static_input_1) _x2c_gensym_initializer_choice_D1E0FCF3_1_expanded(_x2c_gensym_static_input_1)
+#define _x2c_gensym_initializer_choice_D1E0FCF3_2_expanded(_x2c_gensym_static_input_2) static void _x2c_gensym_static_initialize_2(void){\
+  _x2c_gensym_static_input_2;\
 }
-#define _x2c_initializer_choice_D1E0FCF3_2(_x2c_static_input_2) _x2c_initializer_choice_D1E0FCF3_2_expanded(_x2c_static_input_2)
-#define _x2c_initializer_choice_D1E0FCF3_3_expanded(_x2c_static_input_3) static void _x2c_static_initialize_3(void){\
-  _x2c_static_input_3;\
+#define _x2c_gensym_initializer_choice_D1E0FCF3_2(_x2c_gensym_static_input_2) _x2c_gensym_initializer_choice_D1E0FCF3_2_expanded(_x2c_gensym_static_input_2)
+#define _x2c_gensym_initializer_choice_D1E0FCF3_3_expanded(_x2c_gensym_static_input_3) static void _x2c_gensym_static_initialize_3(void){\
+  _x2c_gensym_static_input_3;\
 }
-#define _x2c_initializer_choice_D1E0FCF3_3(_x2c_static_input_3) _x2c_initializer_choice_D1E0FCF3_3_expanded(_x2c_static_input_3)
-#define _x2c_initializer_choice_D1E0FCF3_4_expanded(_x2c_static_input_4) static void _x2c_static_initialize_4(void){\
-  _x2c_static_input_4;\
+#define _x2c_gensym_initializer_choice_D1E0FCF3_3(_x2c_gensym_static_input_3) _x2c_gensym_initializer_choice_D1E0FCF3_3_expanded(_x2c_gensym_static_input_3)
+#define _x2c_gensym_initializer_choice_D1E0FCF3_4_expanded(_x2c_gensym_static_input_4) static void _x2c_gensym_static_initialize_4(void){\
+  _x2c_gensym_static_input_4;\
 }
-#define _x2c_initializer_choice_D1E0FCF3_4(_x2c_static_input_4) _x2c_initializer_choice_D1E0FCF3_4_expanded(_x2c_static_input_4)
-#define _x2c_initializer_choice_D1E0FCF3_5_expanded(_x2c_static_input_5) static void _x2c_static_initialize_5(void){\
-  _x2c_static_input_5;\
+#define _x2c_gensym_initializer_choice_D1E0FCF3_4(_x2c_gensym_static_input_4) _x2c_gensym_initializer_choice_D1E0FCF3_4_expanded(_x2c_gensym_static_input_4)
+#define _x2c_gensym_initializer_choice_D1E0FCF3_5_expanded(_x2c_gensym_static_input_5) static void _x2c_gensym_static_initialize_5(void){\
+  _x2c_gensym_static_input_5;\
 }
-#define _x2c_initializer_choice_D1E0FCF3_5(_x2c_static_input_5) _x2c_initializer_choice_D1E0FCF3_5_expanded(_x2c_static_input_5)
-#define _x2c_initializer_choice_D1E0FCF3_6_expanded(_x2c_static_input_6) static void _x2c_static_initialize_6(void){\
-  _x2c_static_input_6;\
+#define _x2c_gensym_initializer_choice_D1E0FCF3_5(_x2c_gensym_static_input_5) _x2c_gensym_initializer_choice_D1E0FCF3_5_expanded(_x2c_gensym_static_input_5)
+#define _x2c_gensym_initializer_choice_D1E0FCF3_6_expanded(_x2c_gensym_static_input_6) static void _x2c_gensym_static_initialize_6(void){\
+  _x2c_gensym_static_input_6;\
 }
-#define _x2c_initializer_choice_D1E0FCF3_6(_x2c_static_input_6) _x2c_initializer_choice_D1E0FCF3_6_expanded(_x2c_static_input_6)
-#define _x2c_initializer_choice_D1E0FCF3_7_expanded(_x2c_static_input_7) static void _x2c_static_initialize_7(void){\
-  _x2c_static_input_7;\
+#define _x2c_gensym_initializer_choice_D1E0FCF3_6(_x2c_gensym_static_input_6) _x2c_gensym_initializer_choice_D1E0FCF3_6_expanded(_x2c_gensym_static_input_6)
+#define _x2c_gensym_initializer_choice_D1E0FCF3_7_expanded(_x2c_gensym_static_input_7) static void _x2c_gensym_static_initialize_7(void){\
+  _x2c_gensym_static_input_7;\
 }
-#define _x2c_initializer_choice_D1E0FCF3_7(_x2c_static_input_7) _x2c_initializer_choice_D1E0FCF3_7_expanded(_x2c_static_input_7)
-#define _x2c_initializer_choice_D1E0FCF3_8_expanded(_x2c_static_input_8) static void _x2c_static_initialize_8(void){\
-  _x2c_static_input_8;\
+#define _x2c_gensym_initializer_choice_D1E0FCF3_7(_x2c_gensym_static_input_7) _x2c_gensym_initializer_choice_D1E0FCF3_7_expanded(_x2c_gensym_static_input_7)
+#define _x2c_gensym_initializer_choice_D1E0FCF3_8_expanded(_x2c_gensym_static_input_8) static void _x2c_gensym_static_initialize_8(void){\
+  _x2c_gensym_static_input_8;\
 }
-#define _x2c_initializer_choice_D1E0FCF3_8(_x2c_static_input_8) _x2c_initializer_choice_D1E0FCF3_8_expanded(_x2c_static_input_8)
+#define _x2c_gensym_initializer_choice_D1E0FCF3_8(_x2c_gensym_static_input_8) _x2c_gensym_initializer_choice_D1E0FCF3_8_expanded(_x2c_gensym_static_input_8)
 /* auto-generated by x2c.  Do not edit! */
 
 #define __GUARD_0xD1E0FCF3__
@@ -52,31 +52,31 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static String root;
 
-_x2c_initializer_choice_D1E0FCF3_0((path = String_join(NULL, cons(String_var(root), cons(String_var(_0), NULL)))))
+_x2c_gensym_initializer_choice_D1E0FCF3_0((path = String_join(NULL, cons(String_var(root), cons(String_var(_0), NULL)))))
 static String root;
 
-_x2c_initializer_choice_D1E0FCF3_1((root = _1))
+_x2c_gensym_initializer_choice_D1E0FCF3_1((root = _1))
 static List values;
 
-_x2c_initializer_choice_D1E0FCF3_2((values = cons(_2, cons(String_var(root), cons(String_var(path), NULL)))))
+_x2c_gensym_initializer_choice_D1E0FCF3_2((values = cons(_2, cons(String_var(root), cons(String_var(path), NULL)))))
 static Array positions;
 
-_x2c_initializer_choice_D1E0FCF3_3((positions = Array_update_n(Array_new(), 2, String_var(root), String_var(path))))
+_x2c_gensym_initializer_choice_D1E0FCF3_3((positions = Array_update_n(Array_new(), 2, String_var(root), String_var(path))))
 static Map lookup;
 
-_x2c_initializer_choice_D1E0FCF3_4((lookup = Map_update_n(Map_new(), 2, Symbol_var(1211368), String_var(root), Symbol_var(1051920), String_var(path))))
+_x2c_gensym_initializer_choice_D1E0FCF3_4((lookup = Map_update_n(Map_new(), 2, Symbol_var(1211368), String_var(root), Symbol_var(1051920), String_var(path))))
 static Var boxed_string;
 
-_x2c_initializer_choice_D1E0FCF3_5((boxed_string = String_var(String_join(NULL, cons(String_var(_3), cons(String_var(path), NULL))))))
+_x2c_gensym_initializer_choice_D1E0FCF3_5((boxed_string = String_var(String_join(NULL, cons(String_var(_3), cons(String_var(path), NULL))))))
 static Var boxed_list;
 
-_x2c_initializer_choice_D1E0FCF3_6((boxed_list = List_var(cons(_4, cons(String_var(root), NULL)))))
+_x2c_gensym_initializer_choice_D1E0FCF3_6((boxed_list = List_var(cons(_4, cons(String_var(root), NULL)))))
 static Var boxed_array;
 
-_x2c_initializer_choice_D1E0FCF3_7((boxed_array = Array_var(Array_update_n(Array_new(), 1, String_var(path)))))
+_x2c_gensym_initializer_choice_D1E0FCF3_7((boxed_array = Array_var(Array_update_n(Array_new(), 1, String_var(path)))))
 static Var boxed_map;
 
-_x2c_initializer_choice_D1E0FCF3_8((boxed_map = Map_var(Map_update_n(Map_new(), 1, Symbol_var(1051920), String_var(path)))))
+_x2c_gensym_initializer_choice_D1E0FCF3_8((boxed_map = Map_var(Map_update_n(Map_new(), 1, Symbol_var(1051920), String_var(path)))))
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -86,15 +86,15 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _2 = Symbol_var(2916866);
   _3 = String_new("box:");
   _4 = Symbol_var(5226824);
-  _x2c_static_initialize_1();
-  _x2c_static_initialize_0();
-  _x2c_static_initialize_2();
-  _x2c_static_initialize_3();
-  _x2c_static_initialize_4();
-  _x2c_static_initialize_5();
-  _x2c_static_initialize_6();
-  _x2c_static_initialize_7();
-  _x2c_static_initialize_8();
+  _x2c_gensym_static_initialize_1();
+  _x2c_gensym_static_initialize_0();
+  _x2c_gensym_static_initialize_2();
+  _x2c_gensym_static_initialize_3();
+  _x2c_gensym_static_initialize_4();
+  _x2c_gensym_static_initialize_5();
+  _x2c_gensym_static_initialize_6();
+  _x2c_gensym_static_initialize_7();
+  _x2c_gensym_static_initialize_8();
 }
 
 int main(void){
@@ -111,21 +111,21 @@ int main(void){
   return 0;
 }
 
-#undef _x2c_initializer_choice_D1E0FCF3_0_expanded
-#undef _x2c_initializer_choice_D1E0FCF3_0
-#undef _x2c_initializer_choice_D1E0FCF3_1_expanded
-#undef _x2c_initializer_choice_D1E0FCF3_1
-#undef _x2c_initializer_choice_D1E0FCF3_2_expanded
-#undef _x2c_initializer_choice_D1E0FCF3_2
-#undef _x2c_initializer_choice_D1E0FCF3_3_expanded
-#undef _x2c_initializer_choice_D1E0FCF3_3
-#undef _x2c_initializer_choice_D1E0FCF3_4_expanded
-#undef _x2c_initializer_choice_D1E0FCF3_4
-#undef _x2c_initializer_choice_D1E0FCF3_5_expanded
-#undef _x2c_initializer_choice_D1E0FCF3_5
-#undef _x2c_initializer_choice_D1E0FCF3_6_expanded
-#undef _x2c_initializer_choice_D1E0FCF3_6
-#undef _x2c_initializer_choice_D1E0FCF3_7_expanded
-#undef _x2c_initializer_choice_D1E0FCF3_7
-#undef _x2c_initializer_choice_D1E0FCF3_8_expanded
-#undef _x2c_initializer_choice_D1E0FCF3_8
+#undef _x2c_gensym_initializer_choice_D1E0FCF3_0_expanded
+#undef _x2c_gensym_initializer_choice_D1E0FCF3_0
+#undef _x2c_gensym_initializer_choice_D1E0FCF3_1_expanded
+#undef _x2c_gensym_initializer_choice_D1E0FCF3_1
+#undef _x2c_gensym_initializer_choice_D1E0FCF3_2_expanded
+#undef _x2c_gensym_initializer_choice_D1E0FCF3_2
+#undef _x2c_gensym_initializer_choice_D1E0FCF3_3_expanded
+#undef _x2c_gensym_initializer_choice_D1E0FCF3_3
+#undef _x2c_gensym_initializer_choice_D1E0FCF3_4_expanded
+#undef _x2c_gensym_initializer_choice_D1E0FCF3_4
+#undef _x2c_gensym_initializer_choice_D1E0FCF3_5_expanded
+#undef _x2c_gensym_initializer_choice_D1E0FCF3_5
+#undef _x2c_gensym_initializer_choice_D1E0FCF3_6_expanded
+#undef _x2c_gensym_initializer_choice_D1E0FCF3_6
+#undef _x2c_gensym_initializer_choice_D1E0FCF3_7_expanded
+#undef _x2c_gensym_initializer_choice_D1E0FCF3_7
+#undef _x2c_gensym_initializer_choice_D1E0FCF3_8_expanded
+#undef _x2c_gensym_initializer_choice_D1E0FCF3_8

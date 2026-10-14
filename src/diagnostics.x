@@ -220,7 +220,7 @@ static String _note_line(List l) {
     and a line is complete before any exit. Returns zero when `path` cannot be
     opened.
 */
-int Diagnostics.write_json(String path) {
+int diagnostics_write_json(String path) {
   diagnostics_json =
     open(path, O_WRONLY | O_CREAT | O_TRUNC | O_APPEND | O_CLOEXEC, 0666);
   return diagnostics_json >= 0;
@@ -269,7 +269,7 @@ static void _write_json_location(
 }
 
 /** Writes one structured diagnostic entry and source context to stderr, or
-    one JSON line after `Diagnostics.write_json`.
+    one JSON line after `diagnostics_write_json`.
     NULL is ignored. A present location supplies `file`, one-based `line` and
     `column`, and token `length`; `String` notes are joined into one note line.
 */

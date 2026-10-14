@@ -52,7 +52,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 static Code _destructure_element(Atom values, int index){
   String position = String_join(NULL, cons(String_var(int_str(index)), NULL));
   return cons(_0, cons(_4, cons(List_var(({
-    Var _x2c_literal_part_0 = List_var(cons(_0, cons(_8, cons(List_var(cons(_9, cons(values, NULL))), NULL))));  Var _x2c_literal_part_1 = List_var(cons(_10, cons(_13, cons(String_var(position), NULL))));  cons(_14, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
+    Var _x2c_gensym_literal_part_0 = List_var(cons(_0, cons(_8, cons(List_var(cons(_9, cons(values, NULL))), NULL))));  Var _x2c_gensym_literal_part_1 = List_var(cons(_10, cons(_13, cons(String_var(position), NULL))));  cons(_14, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL)));
   }
   )), NULL)));
 }

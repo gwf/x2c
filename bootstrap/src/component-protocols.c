@@ -98,26 +98,26 @@ static Code _protocol_function(List declared, List name, List forward){
   List params = Var_list_payload(List_car(forward)), args = Var_list_payload(List_caddr(forward));
   Code callee = Var_list_payload(List_cadr(forward));
   return cons(_1, cons(_2, cons(List_var(cons(_3, cons(List_var(cons(_4, cons(_5, cons(_7, cons(List_var(({
-    Var _x2c_literal_part_6 = List_var(cons(List_var(cons(_9, cons(_24, cons(_25, cons(List_var(declared), NULL))))), NULL));  Var _x2c_literal_part_7 = List_var(({
-      Var _x2c_literal_part_0 = List_var(cons(_9, cons(_32, cons(_33, cons(List_var(name), NULL)))));  Var _x2c_literal_part_1 = List_var(cons(List_var(cons(_34, cons(List_var(cons(_35, cons(List_var(cons(_9, cons(_47, cons(_25, cons(List_var(params), NULL))))), NULL))), NULL))), NULL));  cons(_48, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
+    Var _x2c_gensym_literal_part_6 = List_var(cons(List_var(cons(_9, cons(_24, cons(_25, cons(List_var(declared), NULL))))), NULL));  Var _x2c_gensym_literal_part_7 = List_var(({
+      Var _x2c_gensym_literal_part_0 = List_var(cons(_9, cons(_32, cons(_33, cons(List_var(name), NULL)))));  Var _x2c_gensym_literal_part_1 = List_var(cons(List_var(cons(_34, cons(List_var(cons(_35, cons(List_var(cons(_9, cons(_47, cons(_25, cons(List_var(params), NULL))))), NULL))), NULL))), NULL));  cons(_48, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL)));
     }
-    ));  Var _x2c_literal_part_8 = List_var(cons(_49, cons(List_var(cons(_51, cons(List_var(({
-      Var _x2c_literal_part_4 = List_var(cons(List_var(cons(_9, cons(_24, cons(_25, cons(List_var(declared), NULL))))), NULL));  Var _x2c_literal_part_5 = List_var(cons(_52, cons(_55, cons(List_var(({
-        Var _x2c_literal_part_2 = List_var(cons(_9, cons(_61, cons(_62, cons(List_var(callee), NULL)))));  Var _x2c_literal_part_3 = List_var(cons(_63, cons(List_var(cons(_9, cons(_66, cons(_25, cons(List_var(args), NULL))))), NULL)));  cons(_67, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)));
+    ));  Var _x2c_gensym_literal_part_8 = List_var(cons(_49, cons(List_var(cons(_51, cons(List_var(({
+      Var _x2c_gensym_literal_part_4 = List_var(cons(List_var(cons(_9, cons(_24, cons(_25, cons(List_var(declared), NULL))))), NULL));  Var _x2c_gensym_literal_part_5 = List_var(cons(_52, cons(_55, cons(List_var(({
+        Var _x2c_gensym_literal_part_2 = List_var(cons(_9, cons(_61, cons(_62, cons(List_var(callee), NULL)))));  Var _x2c_gensym_literal_part_3 = List_var(cons(_63, cons(List_var(cons(_9, cons(_66, cons(_25, cons(List_var(args), NULL))))), NULL)));  cons(_67, cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, NULL)));
       }
-      )), NULL))));  cons(_68, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL)));
+      )), NULL))));  cons(_68, cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, NULL)));
     }
-    )), NULL))), NULL)));  cons(_69, cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, NULL))));
+    )), NULL))), NULL)));  cons(_69, cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, cons(_x2c_gensym_literal_part_8, NULL))));
   }
   )), NULL))))), NULL))), NULL)));
 }
 
 static Code _protocol_runtime(Type result, String name, List arguments){
   return({
-    Var _x2c_literal_part_11 = List_var(result);  Var _x2c_literal_part_12 = List_var(({
-      Var _x2c_literal_part_9 = String_var(name);  Var _x2c_literal_part_10 = List_var(cons(_63, List_append(arguments, NULL)));  cons(_67, cons(_x2c_literal_part_9, cons(_x2c_literal_part_10, NULL)));
+    Var _x2c_gensym_literal_part_11 = List_var(result);  Var _x2c_gensym_literal_part_12 = List_var(({
+      Var _x2c_gensym_literal_part_9 = String_var(name);  Var _x2c_gensym_literal_part_10 = List_var(cons(_63, List_append(arguments, NULL)));  cons(_67, cons(_x2c_gensym_literal_part_9, cons(_x2c_gensym_literal_part_10, NULL)));
     }
-    ));  cons(_52, cons(_x2c_literal_part_11, cons(_x2c_literal_part_12, NULL)));
+    ));  cons(_52, cons(_x2c_gensym_literal_part_11, cons(_x2c_gensym_literal_part_12, NULL)));
   }
   );
 }

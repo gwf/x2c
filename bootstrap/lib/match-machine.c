@@ -569,8 +569,8 @@ String String_join(String, List);
 
 void MatchMachine_finish(MatchMachine * m){
   if((* m).running){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match-machine.x",.function = "MatchMachine_finish",.line = 514};
-    x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchMachine.finish")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/match-machine.x",.function = "MatchMachine_finish",.line = 514};
+    x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchMachine.finish")), NULL))));
     __builtin_unreachable();
   }
   _clear_slots(&((* m)));
@@ -602,8 +602,8 @@ void MatchMachine_dispose(MatchMachine * m){
 MatchMachine * MatchMachine_acquire(MachineStats * stats){
   MatchMachine * m = machine_thread.count ? machine_thread.spares[-- machine_thread.count] : calloc(1, sizeof(MatchMachine));
   if(! m){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/match-machine.x",.function = "MatchMachine_acquire",.line = 567};
-    x2c_error_raise_n(& _x2c_error_site_1, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchMachine.acquire")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/match-machine.x",.function = "MatchMachine_acquire",.line = 567};
+    x2c_error_raise_n(& _x2c_gensym_error_site_1, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchMachine.acquire")), NULL))));
     __builtin_unreachable();
   }
   MatchMachine_open(&((* m)));

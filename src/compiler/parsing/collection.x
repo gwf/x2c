@@ -103,7 +103,7 @@ void Compiler.finish_collected_declaration(
     case %(declare ?type (bindings (bind ?binding ((fnmod *) *)))):
       if (type.type().is_static())
         c.sym.mark_static(%(function ${Ast.binding_spelling(binding)}));
-  if (c.peek(0) == <"{"> || c.peek(0) == <"%{"> || c.at_function_arrow())
+  if (c.peek(0) == <"{"> || c.peek(0) == <"%{"> || _x2c_at_function_arrow(c))
     _skip_body(c, declaration, meta, native);
   else if (c.peek(0) == <;>) {
     if (meta) c.record_native_meta_effect(declaration, meta);
@@ -120,10 +120,10 @@ static void _skip_body(
     case %(declare ? (bindings (bind ?binding ?))):
       _note_function_body(c, declaration.type_from_ast(), binding);
   c.record_inline_function(declaration);
-  if (c.at_function_arrow()) {
+  if (_x2c_at_function_arrow(c)) {
     c.next();
     c.next();
-    c.skip_shallow_expression(0);
+    _x2c_skip_shallow_expression(c, 0);
     c.expect(<;>);
   }
   else _shallow_block(c);
@@ -147,15 +147,15 @@ static void _note_function_body(Compiler c, Type type, List binding) {
   c.fn_defs[Ast.binding_spelling(binding)] = 1;
 }
 
-/** Reports whether the current two tokens are `=>`. */
-int Compiler.at_function_arrow(Compiler c) =>
+/* Reports whether the current two tokens are `=>`. */
+int _x2c_at_function_arrow(Compiler c) =>
   c.peek(0) == <=> && c.peek(1) == <">">;
 
-/** Skips a balanced shallow expression without consuming its terminator.
+/* Skips a balanced shallow expression without consuming its terminator.
     A top-level comma also terminates the expression when `stop_at_comma` is
     nonzero.
 */
-void Compiler.skip_shallow_expression(Compiler c, int stop_at_comma) {
+void _x2c_skip_shallow_expression(Compiler c, int stop_at_comma) {
   for (Symbol type = c.peek(0);
        type != <eof> && type != <;> && (!stop_at_comma || type != <,>);
        type = c.peek(0)) {

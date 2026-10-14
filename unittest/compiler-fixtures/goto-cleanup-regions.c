@@ -10,19 +10,19 @@ static int outward_finally(void);
 
 static int same_region(void);
 
-typedef struct _x2c_defer_env_0{
-  const void * _x2c_defer_capture_0;
+typedef struct _x2c_gensym_defer_env_0{
+  const void * _x2c_gensym_defer_capture_0;
 }
-_x2c_defer_env_0;
+_x2c_gensym_defer_env_0;
 
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
 
-typedef struct _x2c_defer_env_1{
-  const void * _x2c_defer_capture_1;
+typedef struct _x2c_gensym_defer_env_1{
+  const void * _x2c_gensym_defer_capture_1;
 }
-_x2c_defer_env_1;
+_x2c_gensym_defer_env_1;
 
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1);
 
 #include "exception.h"
 
@@ -33,25 +33,25 @@ static int outward_defer(void){
   int value = 0;
   {
     {
-      _x2c_defer_env_0 _x2c_macro_environment_0 ={
+      _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
         0
       }
       ;
-      _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & value;
-      X2CCleanup _x2c_defer_record_0 ={
-        .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
+      _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & value;
+      X2CCleanup _x2c_gensym_defer_record_0 ={
+        .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
       }
       ;
-      x2c_cleanup_push(& _x2c_defer_record_0);
+      x2c_cleanup_push(& _x2c_gensym_defer_record_0);
       {
         value = 1;
         {
-          x2c_cleanup_leave(& _x2c_defer_record_0);
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
           goto done;
         }
 
       }
-      x2c_cleanup_leave(& _x2c_defer_record_0);
+      x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
     }
 
   }
@@ -61,43 +61,43 @@ static int outward_defer(void){
 static int outward_finally(void){
   int volatile value = 0;
   {
-    ExceptionFrame _x2c_exception_frame_0;
-    x2c_exception_push(& _x2c_exception_frame_0);
-    if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
+    ExceptionFrame _x2c_gensym_exception_frame_0;
+    x2c_exception_push(& _x2c_gensym_exception_frame_0);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)){
       value = 1;
       {
-        if(x2c_exception_claim(& _x2c_exception_frame_0)){
+        if(x2c_exception_claim(& _x2c_gensym_exception_frame_0)){
           {
             value = value * 10 + 2;
           }
 
         }
-        x2c_exception_leave(& _x2c_exception_frame_0);
+        x2c_exception_leave(& _x2c_gensym_exception_frame_0);
         goto done;
       }
 
     }
     else{
-      x2c_exception_landed(& _x2c_exception_frame_0);
+      x2c_exception_landed(& _x2c_gensym_exception_frame_0);
       {
-        if(x2c_exception_claim(& _x2c_exception_frame_0)){
+        if(x2c_exception_claim(& _x2c_gensym_exception_frame_0)){
           {
             value = value * 10 + 2;
           }
 
         }
-        x2c_exception_leave(& _x2c_exception_frame_0);
+        x2c_exception_leave(& _x2c_gensym_exception_frame_0);
         __builtin_unreachable();
       }
 
     }
-    if(x2c_exception_claim(& _x2c_exception_frame_0)){
+    if(x2c_exception_claim(& _x2c_gensym_exception_frame_0)){
       {
         value = value * 10 + 2;
       }
 
     }
-    x2c_exception_leave(& _x2c_exception_frame_0);
+    x2c_exception_leave(& _x2c_gensym_exception_frame_0);
   }
   done : return value;
 }
@@ -106,21 +106,21 @@ static int same_region(void){
   int value = 0;
   {
     {
-      _x2c_defer_env_1 _x2c_macro_environment_1 ={
+      _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
         0
       }
       ;
-      _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & value;
-      X2CCleanup _x2c_defer_record_1 ={
-        .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
+      _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & value;
+      X2CCleanup _x2c_gensym_defer_record_1 ={
+        .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_1
       }
       ;
-      x2c_cleanup_push(& _x2c_defer_record_1);
+      x2c_cleanup_push(& _x2c_gensym_defer_record_1);
       {
         again : value ++;
         if(value < 2) goto again;
       }
-      x2c_cleanup_leave(& _x2c_defer_record_1);
+      x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
     }
 
   }
@@ -136,48 +136,48 @@ int main(void){
   x2c_initialize();
   int volatile caught = 0;
   {
-    ExceptionFrame _x2c_exception_frame_1;
-    static MatchCaptureSite _x2c_macro_arms_0[1];
-    Var _x2c_macro_patterns_0[1];
-    static ErrorCatchSite _x2c_macro_site_0 ={
-      _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
+    ExceptionFrame _x2c_gensym_exception_frame_1;
+    static MatchCaptureSite _x2c_gensym_macro_arms_0[1];
+    Var _x2c_gensym_macro_patterns_0[1];
+    static ErrorCatchSite _x2c_gensym_macro_site_0 ={
+      _x2c_gensym_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
-      _x2c_macro_patterns_0[0] = List_var(cons(Symbol_var(20800632064936), NULL));
+    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_0)){
+      _x2c_gensym_macro_patterns_0[0] = List_var(cons(Symbol_var(20800632064936), NULL));
     }
-    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_1, & _x2c_macro_site_0, _x2c_macro_patterns_0);
-    x2c_exception_push(& _x2c_exception_frame_1);
-    if(! sigsetjmp(_x2c_exception_frame_1.env, 0)){
+    volatile ErrorHandler _x2c_gensym_error_handler_0 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_1, & _x2c_gensym_macro_site_0, _x2c_gensym_macro_patterns_0);
+    x2c_exception_push(& _x2c_gensym_exception_frame_1);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_1.env, 0)){
       {
-        static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/goto-cleanup-regions.x",.function = "main",.line = 41};
-        x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 0);
+        static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/goto-cleanup-regions.x",.function = "main",.line = 41};
+        x2c_error_raise_n(& _x2c_gensym_error_site_0, 20800632064936, 0);
         __builtin_unreachable();
       }
 
     }
     else{
-      x2c_exception_landed(& _x2c_exception_frame_1);
-      if(x2c_exception_is_error_target(& _x2c_exception_frame_1)){
-        int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
-        x2c_error_catch_detach(_x2c_error_handler_0);
-        x2c_exception_mark_handled(& _x2c_exception_frame_1);
-        if(_x2c_macro_selected_0 == 0){
+      x2c_exception_landed(& _x2c_gensym_exception_frame_1);
+      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_1)){
+        int _x2c_gensym_macro_selected_0 = x2c_error_catch_selected(_x2c_gensym_error_handler_0);
+        x2c_error_catch_detach(_x2c_gensym_error_handler_0);
+        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_1);
+        if(_x2c_gensym_macro_selected_0 == 0){
           caught = 1;
         }
 
       }
       else{
-        x2c_error_catch_close(_x2c_error_handler_0);
-        _x2c_error_handler_0 = NULL;
-        x2c_exception_leave(& _x2c_exception_frame_1);
+        x2c_error_catch_close(_x2c_gensym_error_handler_0);
+        _x2c_gensym_error_handler_0 = NULL;
+        x2c_exception_leave(& _x2c_gensym_exception_frame_1);
         __builtin_unreachable();
       }
 
     }
-    x2c_error_catch_close(_x2c_error_handler_0);
-    _x2c_error_handler_0 = NULL;
-    x2c_exception_leave(& _x2c_exception_frame_1);
+    x2c_error_catch_close(_x2c_gensym_error_handler_0);
+    _x2c_gensym_error_handler_0 = NULL;
+    x2c_exception_leave(& _x2c_gensym_exception_frame_1);
   }
   int first = outward_defer();
   int second = outward_finally();
@@ -186,13 +186,13 @@ int main(void){
   return first == 12 && second == 12 && third == 23 && caught ? 0 : 1;
 }
 
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
-  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  (*(volatile int *) _x2c_defer_data_0->_x2c_defer_capture_0) =(*(volatile int *) _x2c_defer_data_0->_x2c_defer_capture_0) * 10 + 2;
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
+  _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
+  (*(volatile int *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0) =(*(volatile int *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0) * 10 + 2;
 }
 
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
-  (*(volatile int *) _x2c_defer_data_1->_x2c_defer_capture_1) =(*(volatile int *) _x2c_defer_data_1->_x2c_defer_capture_1) * 10 + 3;
+static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
+  _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;
+  (*(volatile int *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1) =(*(volatile int *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1) * 10 + 3;
 }
 

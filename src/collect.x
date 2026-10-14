@@ -1228,7 +1228,7 @@ static void _name_meta_provider(
   if (name in c.native_meta && c.bind_native_meta(name)) return;
   List binding = c.sym.lookup(%($name), NULL);
   if (binding)
-    c.set_fact(%(emitted $binding), %"_x2c_meta_group_${index}_$name");
+    c.set_fact(%(emitted $binding), %"_x2c_gensym_meta_group_${index}_$name");
 }
 
 /** Reports whether this unit's selected interface publishes `name`. */

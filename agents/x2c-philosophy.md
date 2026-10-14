@@ -570,7 +570,7 @@ processing of the returned call arguments.
 
 Generated identifiers belong to one compiler translation session shared by
 the original-source and shallow declaration compilers. The reserved space is
-whatever `_is_reserved_spelling` (`src/symbols.x`) accepts: the `_x2c_`
+whatever `_is_reserved_spelling` (`src/symbols.x`) accepts: the `_x2c_gensym_`
 prefix, `_init_guard_`, `_file_init_`, and `_` followed only by digits. A
 source declaration whose spelling falls in that space is rejected with a
 located diagnostic — one check per declaration in

@@ -7,8 +7,8 @@
 int main(void){
   x2c_initialize();
   int value = 0;
-  int _x2c_macro_temporary_0 = 42;
-  value = _x2c_macro_temporary_0;
+  int _x2c_gensym_macro_temporary_0 = 42;
+  value = _x2c_gensym_macro_temporary_0;
   printf("%d\n", value);
   return 0;
 }

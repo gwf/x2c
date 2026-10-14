@@ -10,11 +10,11 @@ int main(void){
   int total = 0;
   {
     int value;
-    ArrayInt _x2c_macro_object_0 = values;
-    int _x2c_macro_cursor_0 = 0;
-    int _x2c_macro_cursor_output_0;
-    while(ArrayInt_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      value = _x2c_macro_cursor_output_0;
+    ArrayInt _x2c_gensym_macro_object_0 = values;
+    int _x2c_gensym_macro_cursor_0 = 0;
+    int _x2c_gensym_macro_cursor_output_0;
+    while(ArrayInt_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+      value = _x2c_gensym_macro_cursor_output_0;
       total += value;
     }
 

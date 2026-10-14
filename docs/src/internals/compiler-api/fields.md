@@ -7,29 +7,3 @@
 # `src/fields.x`
 
 Statements that copy or set named fields.
-
-## Functions
-
-| Function | Summary |
-| --- | --- |
-| [`field_copies`](#field_copies) | Returns `to.field = from.field;` for each of `fields`. |
-| [`field_sets`](#field_sets) | Returns `to.field = value;` for each of `fields`, evaluating `value` each time. |
-
-### Functions
-
-#### field_copies
-
-`meta List field_copies(List to, List from, List fields)`
-
-Returns `to.field = from.field;` for each of `fields`.
-
-Source: `src/fields.x:7`
-
-#### field_sets
-
-`meta List field_sets(List to, List value, List fields)`
-
-Returns `to.field = value;` for each of `fields`, evaluating `value`
-each time.
-
-Source: `src/fields.x:16`

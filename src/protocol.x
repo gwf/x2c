@@ -2320,7 +2320,7 @@ String Compiler.protocol_update_helper(
 
   String suffix = postfix ? "postfix" : "update";
   String name =
-    %"_x2c_proto_${participant.car().str().lower()}_${member}_$suffix";
+    %"_x2c_gensym_proto_${participant.car().str().lower()}_${member}_$suffix";
   List helper = c.sym.introduce(name);
   List callee = $!($source_type){ $source_binding };
   /* A direct update stores the member's result through `lhs`; the `op`
@@ -2431,7 +2431,7 @@ static void _collect(DiscardCall &d) {
 }
 
 static List _emit(DiscardCall &d) {
-  String name = %"_x2c_discard_${d.stem}_${d.which}";
+  String name = %"_x2c_gensym_discard_${d.stem}_${d.which}";
   List helper_binding = d.c.sym.introduce(name);
   List value = d.c.sym.introduce("value");
   List call = d.c.bind_syntax(
@@ -2704,7 +2704,7 @@ static List _descriptor(ProtocolAdapters &a) {
   String name = a.participant.car().str();
   if (!tag) name = name.lower();
   List methods =
-    a.c.sym.introduce(a.c.fresh_name("_x2c_protocol_methods"));
+    a.c.sym.introduce(a.c.fresh_name("protocol_methods"));
   Symbol area = a.central_initializer ? <protocol> : <prepare>;
   return %($methods $name ${a.participant.var_tag()} $area
            @{tag ? %($tag) : NULL});

@@ -410,7 +410,7 @@
          (at 87 
           (stmnt 
            (expr (int) (postfix ++ (expr (int) (ident (binding 44 "branch"))))))))))) 
-     (binding 55 "_x2c_error_handler_0")) 
+     (binding 55 "_x2c_gensym_error_handler_0")) 
     (block 
      (at 88 
       (stmnt 

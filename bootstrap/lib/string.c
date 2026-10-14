@@ -66,31 +66,31 @@ static void _join_into(char * out, List strings, String sep, int sep_len);
 static String _pad(String str, int width, char fill, int side);
 static int _newline_width(String str);
 static int _next(Iter iter, Var * out);
-typedef struct _x2c_defer_env_0{
-  const void * _x2c_defer_capture_0;  const void * _x2c_defer_capture_1;
+typedef struct _x2c_gensym_defer_env_0{
+  const void * _x2c_gensym_defer_capture_0;  const void * _x2c_gensym_defer_capture_1;
 }
-_x2c_defer_env_0;
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
-typedef struct _x2c_defer_env_1{
-  const void * _x2c_defer_capture_2;  const void * _x2c_defer_capture_3;
+_x2c_gensym_defer_env_0;
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
+typedef struct _x2c_gensym_defer_env_1{
+  const void * _x2c_gensym_defer_capture_2;  const void * _x2c_gensym_defer_capture_3;
 }
-_x2c_defer_env_1;
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
-typedef struct _x2c_defer_env_2{
-  const void * _x2c_defer_capture_4;  const void * _x2c_defer_capture_5;
+_x2c_gensym_defer_env_1;
+static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1);
+typedef struct _x2c_gensym_defer_env_2{
+  const void * _x2c_gensym_defer_capture_4;  const void * _x2c_gensym_defer_capture_5;
 }
-_x2c_defer_env_2;
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
-typedef struct _x2c_defer_env_3{
-  const void * _x2c_defer_capture_6;  const void * _x2c_defer_capture_7;
+_x2c_gensym_defer_env_2;
+static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2);
+typedef struct _x2c_gensym_defer_env_3{
+  const void * _x2c_gensym_defer_capture_6;  const void * _x2c_gensym_defer_capture_7;
 }
-_x2c_defer_env_3;
-static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
-typedef struct _x2c_defer_env_4{
-  const void * _x2c_defer_capture_8;  const void * _x2c_defer_capture_9;
+_x2c_gensym_defer_env_3;
+static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3);
+typedef struct _x2c_gensym_defer_env_4{
+  const void * _x2c_gensym_defer_capture_8;  const void * _x2c_gensym_defer_capture_9;
 }
-_x2c_defer_env_4;
-static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
+_x2c_gensym_defer_env_4;
+static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4);
 #include "exception.h"
 
 
@@ -306,8 +306,8 @@ String String_join(String sep, List strings);
 
 String String_withindex(String str, int index, char value){
   if(! String_truth(str) || ! * str) return str;  if(value == '\0'){
-    Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("String.withindex")), NULL))); {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string.x",.function = "String_withindex",.line = 685};  x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(19800432), int_var(index));  __builtin_unreachable();
+    Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("String.withindex")), NULL))); {
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/string.x",.function = "String_withindex",.line = 685};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(19800432), int_var(index));  __builtin_unreachable();
     }
 
   }
@@ -316,7 +316,7 @@ String String_withindex(String str, int index, char value){
 
 String String_add(String str, String other){
   if(! String_truth(other)) return str;  if(! String_truth(str)) return other;  int left_len = String_len(str), right_len = String_len(other);  size_t length =(size_t) left_len +(size_t) right_len;  if(length > INT_MAX - 1){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/string.x",.function = "String_add",.line = 718};  x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.add")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/string.x",.function = "String_add",.line = 718};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.add")), NULL))));  __builtin_unreachable();
   }
   if(length <= STRING_STACK_BYTES){
     char bytes[STRING_STACK_BYTES];  memcpy(bytes, str, left_len);  memcpy(bytes + left_len, other, right_len);  return _from_bytes(bytes, (int) length);
@@ -333,11 +333,11 @@ String String_repeat(String str, int count){
 
 String String_new_fill(char fill, int count){
   if(count <= 0) return NULL;  if(fill == '\0'){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 759};  x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 759};  x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))));  __builtin_unreachable();
   }
   if(count == INT_MAX){
-    Var _x2c_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))); {
-      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 760};  x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_literal_part_1, Symbol_var(7318440), int_var(count));  __builtin_unreachable();
+    Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))); {
+      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/string.x",.function = "String_new_fill",.line = 760};  x2c_error_raise_n(& _x2c_gensym_error_site_3, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(7318440), int_var(count));  __builtin_unreachable();
     }
 
   }
@@ -353,8 +353,8 @@ String String_join(String sep, List strings){
 
 static int _join_length(List strings, int n, int sep_len){
   if(sep_len &&(size_t)(n - 1) >(size_t)(INT_MAX - 1) /(size_t) sep_len) return - 1;  size_t total =(size_t)(n - 1) *(size_t) sep_len; {
-    String str;  List _x2c_macro_object_0 = strings;  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      str = Var_as_string(_x2c_macro_cursor_output_0); {
+    String str;  List _x2c_gensym_macro_object_0 = strings;  List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;  Var _x2c_gensym_macro_cursor_output_0;  while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+      str = Var_as_string(_x2c_gensym_macro_cursor_output_0); {
         int length = String_len(str);  if((size_t) length >(size_t)(INT_MAX - 1) - total) return - 1;  total +=(size_t) length;
       }
 
@@ -391,11 +391,11 @@ String String_pad_center(String str, int width, char fill){
 
 static String _pad(String str, int width, char fill, int side){
   if(fill == '\0'){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/string.x",.function = "_pad",.line = 847};  x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/string.x",.function = "_pad",.line = 847};  x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))));  __builtin_unreachable();
   }
   int length = String_len(str);  if(width <= length) return str;  if(width == INT_MAX){
-    Var _x2c_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))); {
-      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/string.x",.function = "_pad",.line = 850};  x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_literal_part_2, Symbol_var(48833808), int_var(width));  __builtin_unreachable();
+    Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))); {
+      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/string.x",.function = "_pad",.line = 850};  x2c_error_raise_n(& _x2c_gensym_error_site_5, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(48833808), int_var(width));  __builtin_unreachable();
     }
 
   }
@@ -452,150 +452,150 @@ List String_rpartition(String str, String sep){
 }
 
 String String_lower(String str){
-  if(! String_truth(str) || ! * str) return str;  int _x2c_macro_length_0 = String_len(str), _x2c_macro_changed_0 = 0;  String _x2c_macro_string_0 = String_malloc(_x2c_macro_length_0 + 1);  char * _x2c_macro_out_0 = _x2c_macro_string_0;  const char * _x2c_macro_src_0 = str;  for(int i = 0;  i < _x2c_macro_length_0;  i ++){
-    int ch =(unsigned char) _x2c_macro_src_0[i]; (_x2c_macro_out_0)[i] = tolower(ch);  if((_x2c_macro_out_0)[i] != _x2c_macro_src_0[i]) _x2c_macro_changed_0 = 1;
+  if(! String_truth(str) || ! * str) return str;  int _x2c_gensym_macro_length_0 = String_len(str), _x2c_gensym_macro_changed_0 = 0;  String _x2c_gensym_macro_string_0 = String_malloc(_x2c_gensym_macro_length_0 + 1);  char * _x2c_gensym_macro_out_0 = _x2c_gensym_macro_string_0;  const char * _x2c_gensym_macro_src_0 = str;  for(int i = 0;  i < _x2c_gensym_macro_length_0;  i ++){
+    int ch =(unsigned char) _x2c_gensym_macro_src_0[i]; (_x2c_gensym_macro_out_0)[i] = tolower(ch);  if((_x2c_gensym_macro_out_0)[i] != _x2c_gensym_macro_src_0[i]) _x2c_gensym_macro_changed_0 = 1;
   }
-  if(! _x2c_macro_changed_0){
-    _free_unchecked(_x2c_macro_string_0);  return str;
+  if(! _x2c_gensym_macro_changed_0){
+    _free_unchecked(_x2c_gensym_macro_string_0);  return str;
   }
-  return _finish(_x2c_macro_string_0, _x2c_macro_length_0);
+  return _finish(_x2c_gensym_macro_string_0, _x2c_gensym_macro_length_0);
 }
 
 String String_upper(String str){
-  if(! String_truth(str) || ! * str) return str;  int _x2c_macro_length_1 = String_len(str), _x2c_macro_changed_1 = 0;  String _x2c_macro_string_1 = String_malloc(_x2c_macro_length_1 + 1);  char * _x2c_macro_out_1 = _x2c_macro_string_1;  const char * _x2c_macro_src_1 = str;  for(int i = 0;  i < _x2c_macro_length_1;  i ++){
-    int ch =(unsigned char) _x2c_macro_src_1[i]; (_x2c_macro_out_1)[i] = toupper(ch);  if((_x2c_macro_out_1)[i] != _x2c_macro_src_1[i]) _x2c_macro_changed_1 = 1;
+  if(! String_truth(str) || ! * str) return str;  int _x2c_gensym_macro_length_1 = String_len(str), _x2c_gensym_macro_changed_1 = 0;  String _x2c_gensym_macro_string_1 = String_malloc(_x2c_gensym_macro_length_1 + 1);  char * _x2c_gensym_macro_out_1 = _x2c_gensym_macro_string_1;  const char * _x2c_gensym_macro_src_1 = str;  for(int i = 0;  i < _x2c_gensym_macro_length_1;  i ++){
+    int ch =(unsigned char) _x2c_gensym_macro_src_1[i]; (_x2c_gensym_macro_out_1)[i] = toupper(ch);  if((_x2c_gensym_macro_out_1)[i] != _x2c_gensym_macro_src_1[i]) _x2c_gensym_macro_changed_1 = 1;
   }
-  if(! _x2c_macro_changed_1){
-    _free_unchecked(_x2c_macro_string_1);  return str;
+  if(! _x2c_gensym_macro_changed_1){
+    _free_unchecked(_x2c_gensym_macro_string_1);  return str;
   }
-  return _finish(_x2c_macro_string_1, _x2c_macro_length_1);
+  return _finish(_x2c_gensym_macro_string_1, _x2c_gensym_macro_length_1);
 }
 
 String String_capitalize(String str){
-  if(! String_truth(str) || ! * str) return str;  int _x2c_macro_length_2 = String_len(str), _x2c_macro_changed_2 = 0;  String _x2c_macro_string_2 = String_malloc(_x2c_macro_length_2 + 1);  char * _x2c_macro_out_2 = _x2c_macro_string_2;  const char * _x2c_macro_src_2 = str;  for(int i = 0;  i < _x2c_macro_length_2;  i ++){
-    int ch =(unsigned char) _x2c_macro_src_2[i]; (_x2c_macro_out_2)[i] = i == 0 ? toupper(ch) : tolower(ch);  if((_x2c_macro_out_2)[i] != _x2c_macro_src_2[i]) _x2c_macro_changed_2 = 1;
+  if(! String_truth(str) || ! * str) return str;  int _x2c_gensym_macro_length_2 = String_len(str), _x2c_gensym_macro_changed_2 = 0;  String _x2c_gensym_macro_string_2 = String_malloc(_x2c_gensym_macro_length_2 + 1);  char * _x2c_gensym_macro_out_2 = _x2c_gensym_macro_string_2;  const char * _x2c_gensym_macro_src_2 = str;  for(int i = 0;  i < _x2c_gensym_macro_length_2;  i ++){
+    int ch =(unsigned char) _x2c_gensym_macro_src_2[i]; (_x2c_gensym_macro_out_2)[i] = i == 0 ? toupper(ch) : tolower(ch);  if((_x2c_gensym_macro_out_2)[i] != _x2c_gensym_macro_src_2[i]) _x2c_gensym_macro_changed_2 = 1;
   }
-  if(! _x2c_macro_changed_2){
-    _free_unchecked(_x2c_macro_string_2);  return str;
+  if(! _x2c_gensym_macro_changed_2){
+    _free_unchecked(_x2c_gensym_macro_string_2);  return str;
   }
-  return _finish(_x2c_macro_string_2, _x2c_macro_length_2);
+  return _finish(_x2c_gensym_macro_string_2, _x2c_gensym_macro_length_2);
 }
 
 String String_filter(String str, Func fn){
-  if(! String_truth(str) || ! fn || ! * str) return str;  int _x2c_macro_length_3 = String_len(str);  String _x2c_macro_string_3 = String_malloc(_x2c_macro_length_3 + 1);  int _x2c_macro_done_0 = 0; {
-    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+  if(! String_truth(str) || ! fn || ! * str) return str;  int _x2c_gensym_macro_length_3 = String_len(str);  String _x2c_gensym_macro_string_3 = String_malloc(_x2c_gensym_macro_length_3 + 1);  int _x2c_gensym_macro_done_0 = 0; {
+    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
       0
     }
-    ;  _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & _x2c_macro_done_0;  _x2c_macro_environment_0._x2c_defer_capture_1 =(const void *) & _x2c_macro_string_3;  X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
+    ;  _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_done_0;  _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_string_3;  X2CCleanup _x2c_gensym_defer_record_0 ={
+      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
     }
-    ;  x2c_cleanup_push(& _x2c_defer_record_0); {
-      char * _x2c_macro_dst_0 = _x2c_macro_string_3;  for(int i = 0;  i < _x2c_macro_length_3;  i ++) if(Var_truth(Func_apply_value(fn, char_var((char) String_getindex(str, i))))) * _x2c_macro_dst_0 ++ = String_getindex(str, i);  String _x2c_macro_result_0 = _finish(_x2c_macro_string_3, (int)(_x2c_macro_dst_0 - _x2c_macro_string_3));  _x2c_macro_done_0 = 1; {
-        String _x2c_return_value_0 = _x2c_macro_result_0; {
-          x2c_cleanup_leave(& _x2c_defer_record_0);  return _x2c_return_value_0;
+    ;  x2c_cleanup_push(& _x2c_gensym_defer_record_0); {
+      char * _x2c_gensym_macro_dst_0 = _x2c_gensym_macro_string_3;  for(int i = 0;  i < _x2c_gensym_macro_length_3;  i ++) if(Var_truth(Func_apply_value(fn, char_var((char) String_getindex(str, i))))) * _x2c_gensym_macro_dst_0 ++ = String_getindex(str, i);  String _x2c_gensym_macro_result_0 = _finish(_x2c_gensym_macro_string_3, (int)(_x2c_gensym_macro_dst_0 - _x2c_gensym_macro_string_3));  _x2c_gensym_macro_done_0 = 1; {
+        String _x2c_gensym_return_value_0 = _x2c_gensym_macro_result_0; {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);  return _x2c_gensym_return_value_0;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_0);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
   }
 
 }
 
 String String_map(String str, Func fn){
   if(! String_truth(str) || ! fn || ! * str) return str;  int n = String_len(str), done = 0;  String string = String_malloc(n + 1); {
-    _x2c_defer_env_1 _x2c_macro_environment_1 ={
+    _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
       0
     }
-    ;  _x2c_macro_environment_1._x2c_defer_capture_2 =(const void *) & done;  _x2c_macro_environment_1._x2c_defer_capture_3 =(const void *) & string;  X2CCleanup _x2c_defer_record_1 ={
-      .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
+    ;  _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_2 =(const void *) & done;  _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_3 =(const void *) & string;  X2CCleanup _x2c_gensym_defer_record_1 ={
+      .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_1
     }
-    ;  x2c_cleanup_push(& _x2c_defer_record_1); {
+    ;  x2c_cleanup_push(& _x2c_gensym_defer_record_1); {
       char * out = string;  const char * src = str;  for(int i = 0;  i < n;  i ++){
         char ch = Var_char(Var_convert(Func_apply_value(fn, char_var(src[i])), 26993));  if(! ch){
-          Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL))); {
-            static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/string.x",.function = "String_map",.line = 1147};  x2c_error_raise_n(& _x2c_error_site_6, 143279181245224, 2, Symbol_var(34096809266140), _x2c_literal_part_3, Symbol_var(19800432), int_var(i));  __builtin_unreachable();
+          Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL))); {
+            static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/string.x",.function = "String_map",.line = 1147};  x2c_error_raise_n(& _x2c_gensym_error_site_6, 143279181245224, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(19800432), int_var(i));  __builtin_unreachable();
           }
 
         }
         out[i] = ch;
       }
       String result = _finish(string, n);  done = 1; {
-        String _x2c_return_value_1 = result; {
-          x2c_cleanup_leave(& _x2c_defer_record_1);  return _x2c_return_value_1;
+        String _x2c_gensym_return_value_1 = result; {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_1);  return _x2c_gensym_return_value_1;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_1);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
   }
 
 }
 
 String String_keep(String str, String chars){
-  if(! String_truth(str)) return str;  if(! String_truth(chars)) return NULL;  if(! * str) return str;  int _x2c_macro_length_4 = String_len(str);  String _x2c_macro_string_4 = String_malloc(_x2c_macro_length_4 + 1);  int _x2c_macro_done_1 = 0; {
-    _x2c_defer_env_2 _x2c_macro_environment_2 ={
+  if(! String_truth(str)) return str;  if(! String_truth(chars)) return NULL;  if(! * str) return str;  int _x2c_gensym_macro_length_4 = String_len(str);  String _x2c_gensym_macro_string_4 = String_malloc(_x2c_gensym_macro_length_4 + 1);  int _x2c_gensym_macro_done_1 = 0; {
+    _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0
     }
-    ;  _x2c_macro_environment_2._x2c_defer_capture_4 =(const void *) & _x2c_macro_done_1;  _x2c_macro_environment_2._x2c_defer_capture_5 =(const void *) & _x2c_macro_string_4;  X2CCleanup _x2c_defer_record_2 ={
-      .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_2
+    ;  _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_4 =(const void *) & _x2c_gensym_macro_done_1;  _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_5 =(const void *) & _x2c_gensym_macro_string_4;  X2CCleanup _x2c_gensym_defer_record_2 ={
+      .fn = _x2c_gensym_defer_cleanup_2, .env = & _x2c_gensym_macro_environment_2
     }
-    ;  x2c_cleanup_push(& _x2c_defer_record_2); {
-      char * _x2c_macro_dst_1 = _x2c_macro_string_4;  for(int i = 0;  i < _x2c_macro_length_4;  i ++) if(strchr(chars, String_getindex(str, i))) * _x2c_macro_dst_1 ++ = String_getindex(str, i);  String _x2c_macro_result_1 = _finish(_x2c_macro_string_4, (int)(_x2c_macro_dst_1 - _x2c_macro_string_4));  _x2c_macro_done_1 = 1; {
-        String _x2c_return_value_2 = _x2c_macro_result_1; {
-          x2c_cleanup_leave(& _x2c_defer_record_2);  return _x2c_return_value_2;
+    ;  x2c_cleanup_push(& _x2c_gensym_defer_record_2); {
+      char * _x2c_gensym_macro_dst_1 = _x2c_gensym_macro_string_4;  for(int i = 0;  i < _x2c_gensym_macro_length_4;  i ++) if(strchr(chars, String_getindex(str, i))) * _x2c_gensym_macro_dst_1 ++ = String_getindex(str, i);  String _x2c_gensym_macro_result_1 = _finish(_x2c_gensym_macro_string_4, (int)(_x2c_gensym_macro_dst_1 - _x2c_gensym_macro_string_4));  _x2c_gensym_macro_done_1 = 1; {
+        String _x2c_gensym_return_value_2 = _x2c_gensym_macro_result_1; {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_2);  return _x2c_gensym_return_value_2;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_2);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
   }
 
 }
 
 String String_reject(String str, String chars){
-  if(! String_truth(str) || ! String_truth(chars) || ! * str) return str;  int _x2c_macro_length_5 = String_len(str);  String _x2c_macro_string_5 = String_malloc(_x2c_macro_length_5 + 1);  int _x2c_macro_done_2 = 0; {
-    _x2c_defer_env_3 _x2c_macro_environment_3 ={
+  if(! String_truth(str) || ! String_truth(chars) || ! * str) return str;  int _x2c_gensym_macro_length_5 = String_len(str);  String _x2c_gensym_macro_string_5 = String_malloc(_x2c_gensym_macro_length_5 + 1);  int _x2c_gensym_macro_done_2 = 0; {
+    _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
       0
     }
-    ;  _x2c_macro_environment_3._x2c_defer_capture_6 =(const void *) & _x2c_macro_done_2;  _x2c_macro_environment_3._x2c_defer_capture_7 =(const void *) & _x2c_macro_string_5;  X2CCleanup _x2c_defer_record_3 ={
-      .fn = _x2c_defer_cleanup_3, .env = & _x2c_macro_environment_3
+    ;  _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_6 =(const void *) & _x2c_gensym_macro_done_2;  _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_7 =(const void *) & _x2c_gensym_macro_string_5;  X2CCleanup _x2c_gensym_defer_record_3 ={
+      .fn = _x2c_gensym_defer_cleanup_3, .env = & _x2c_gensym_macro_environment_3
     }
-    ;  x2c_cleanup_push(& _x2c_defer_record_3); {
-      char * _x2c_macro_dst_2 = _x2c_macro_string_5;  for(int i = 0;  i < _x2c_macro_length_5;  i ++) if(! strchr(chars, String_getindex(str, i))) * _x2c_macro_dst_2 ++ = String_getindex(str, i);  String _x2c_macro_result_2 = _finish(_x2c_macro_string_5, (int)(_x2c_macro_dst_2 - _x2c_macro_string_5));  _x2c_macro_done_2 = 1; {
-        String _x2c_return_value_3 = _x2c_macro_result_2; {
-          x2c_cleanup_leave(& _x2c_defer_record_3);  return _x2c_return_value_3;
+    ;  x2c_cleanup_push(& _x2c_gensym_defer_record_3); {
+      char * _x2c_gensym_macro_dst_2 = _x2c_gensym_macro_string_5;  for(int i = 0;  i < _x2c_gensym_macro_length_5;  i ++) if(! strchr(chars, String_getindex(str, i))) * _x2c_gensym_macro_dst_2 ++ = String_getindex(str, i);  String _x2c_gensym_macro_result_2 = _finish(_x2c_gensym_macro_string_5, (int)(_x2c_gensym_macro_dst_2 - _x2c_gensym_macro_string_5));  _x2c_gensym_macro_done_2 = 1; {
+        String _x2c_gensym_return_value_3 = _x2c_gensym_macro_result_2; {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_3);  return _x2c_gensym_return_value_3;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_3);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
   }
 
 }
 
 String String_squeeze(String str, String chars){
-  if(! String_truth(str) || ! String_truth(chars) || ! * str) return str;  int _x2c_macro_length_6 = String_len(str);  String _x2c_macro_string_6 = String_malloc(_x2c_macro_length_6 + 1);  int _x2c_macro_done_3 = 0; {
-    _x2c_defer_env_4 _x2c_macro_environment_4 ={
+  if(! String_truth(str) || ! String_truth(chars) || ! * str) return str;  int _x2c_gensym_macro_length_6 = String_len(str);  String _x2c_gensym_macro_string_6 = String_malloc(_x2c_gensym_macro_length_6 + 1);  int _x2c_gensym_macro_done_3 = 0; {
+    _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_4 ={
       0
     }
-    ;  _x2c_macro_environment_4._x2c_defer_capture_8 =(const void *) & _x2c_macro_done_3;  _x2c_macro_environment_4._x2c_defer_capture_9 =(const void *) & _x2c_macro_string_6;  X2CCleanup _x2c_defer_record_4 ={
-      .fn = _x2c_defer_cleanup_4, .env = & _x2c_macro_environment_4
+    ;  _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_8 =(const void *) & _x2c_gensym_macro_done_3;  _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_9 =(const void *) & _x2c_gensym_macro_string_6;  X2CCleanup _x2c_gensym_defer_record_4 ={
+      .fn = _x2c_gensym_defer_cleanup_4, .env = & _x2c_gensym_macro_environment_4
     }
-    ;  x2c_cleanup_push(& _x2c_defer_record_4); {
-      char * _x2c_macro_dst_3 = _x2c_macro_string_6;  for(int i = 0;  i < _x2c_macro_length_6;  i ++) if(!(i && String_getindex(str, i) == String_getindex(str, i - 1) && strchr(chars, String_getindex(str, i)))) * _x2c_macro_dst_3 ++ = String_getindex(str, i);  String _x2c_macro_result_3 = _finish(_x2c_macro_string_6, (int)(_x2c_macro_dst_3 - _x2c_macro_string_6));  _x2c_macro_done_3 = 1; {
-        String _x2c_return_value_4 = _x2c_macro_result_3; {
-          x2c_cleanup_leave(& _x2c_defer_record_4);  return _x2c_return_value_4;
+    ;  x2c_cleanup_push(& _x2c_gensym_defer_record_4); {
+      char * _x2c_gensym_macro_dst_3 = _x2c_gensym_macro_string_6;  for(int i = 0;  i < _x2c_gensym_macro_length_6;  i ++) if(!(i && String_getindex(str, i) == String_getindex(str, i - 1) && strchr(chars, String_getindex(str, i)))) * _x2c_gensym_macro_dst_3 ++ = String_getindex(str, i);  String _x2c_gensym_macro_result_3 = _finish(_x2c_gensym_macro_string_6, (int)(_x2c_gensym_macro_dst_3 - _x2c_gensym_macro_string_6));  _x2c_gensym_macro_done_3 = 1; {
+        String _x2c_gensym_return_value_4 = _x2c_gensym_macro_result_3; {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_4);  return _x2c_gensym_return_value_4;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_4);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
   }
 
 }
@@ -625,23 +625,23 @@ int String_try_next(String str, int * cursor, int * out){
   if(! cursor) return 0;  if(! out) return 0;  if(! String_truth(str) ||(* cursor) < 0) return 0;  if((* cursor) >= String_len(str)) return 0; (* out) = String_getindex(str, (* cursor)); (* cursor) += 1;  return 1;
 }
 
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
-  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  if(!(*(int *) _x2c_defer_data_0->_x2c_defer_capture_0)) String_free((*(String *) _x2c_defer_data_0->_x2c_defer_capture_1));
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
+  _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;  if(!(*(int *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0)) String_free((*(String *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_1));
 }
 
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;  if(!(*(int *) _x2c_defer_data_1->_x2c_defer_capture_2)) String_free((*(String *) _x2c_defer_data_1->_x2c_defer_capture_3));
+static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
+  _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;  if(!(*(int *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_2)) String_free((*(String *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_3));
 }
 
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;  if(!(*(int *) _x2c_defer_data_2->_x2c_defer_capture_4)) String_free((*(String *) _x2c_defer_data_2->_x2c_defer_capture_5));
+static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
+  _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_2;  if(!(*(int *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_4)) String_free((*(String *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_5));
 }
 
-static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
-  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;  if(!(*(int *) _x2c_defer_data_3->_x2c_defer_capture_6)) String_free((*(String *) _x2c_defer_data_3->_x2c_defer_capture_7));
+static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
+  _x2c_gensym_defer_env_3 * _x2c_gensym_defer_data_3 =(_x2c_gensym_defer_env_3 *) _x2c_gensym_defer_opaque_3;  if(!(*(int *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_6)) String_free((*(String *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_7));
 }
 
-static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
-  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;  if(!(*(int *) _x2c_defer_data_4->_x2c_defer_capture_8)) String_free((*(String *) _x2c_defer_data_4->_x2c_defer_capture_9));
+static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
+  _x2c_gensym_defer_env_4 * _x2c_gensym_defer_data_4 =(_x2c_gensym_defer_env_4 *) _x2c_gensym_defer_opaque_4;  if(!(*(int *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_8)) String_free((*(String *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_9));
 }
 

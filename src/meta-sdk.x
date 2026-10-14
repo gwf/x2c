@@ -205,7 +205,7 @@ Code Type.protocol_member(Type type, String name) {
 Code Type.getter(Type type) {
   _require_expansion("Type.getter");
   Compiler c = active.expander;
-  List resolved = c.nominal_getindex(type);
+  List resolved = _x2c_nominal_getindex(c, type);
   if (!resolved) resolved = c.resolve_protocol_member(type, "getindex");
   if (!resolved) return NULL;
   (List binding, Type signature) = resolved;

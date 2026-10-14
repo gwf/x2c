@@ -1123,7 +1123,7 @@ static List _compound(
   Compiler c, List ast, Symbol op, List lhs, Type lhs_type, List rhs,
   Type rhs_type) {
   int lhs_is_var = c.sym.is_var_type(lhs_type);
-  if (c.indexed_builtin_helper(lhs_type))
+  if (_x2c_indexed_builtin_helper(c, lhs_type))
     $report.xform.container_compound(c, lhs_type);
   /* Without this rejection a nonmatching String compound falls through to
      native pointer arithmetic on an interned String. Concatenation itself

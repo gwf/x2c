@@ -13,7 +13,9 @@
  (bind (binding 2 "MacroDynamicOwner_var") 
   ((fnmod 
     (params 
-     (param ("MacroDynamicOwner") (bind (binding 3 "_x2c_macro_value_0") ())))))) 
+     (param ("MacroDynamicOwner") 
+      (bind (binding 3 "_x2c_gensym_macro_value_0") 
+       ())))))) 
  (block 
   (at 23 
    (return ("Var") 
@@ -21,13 +23,16 @@
      (call (expr ((func (("Symbol") (...))) "Var") 
             (ident (binding 4 "Var_new"))) 
       (args (expr ("Symbol") (literal ("Symbol") "<i32>" i32)) 
-       (expr ("MacroDynamicOwner") (ident (binding 3 "_x2c_macro_value_0"))))))))))
+       (expr ("MacroDynamicOwner") 
+        (ident (binding 3 "_x2c_gensym_macro_value_0"))))))))))
 
 (function (inline "Var") 
  (bind (binding 5 "MacroDynamicOwner_box") 
   ((fnmod 
     (params 
-     (param ("MacroDynamicOwner") (bind (binding 6 "_x2c_macro_value_1") ())))))) 
+     (param ("MacroDynamicOwner") 
+      (bind (binding 6 "_x2c_gensym_macro_value_1") 
+       ())))))) 
  (block 
   (at 24 
    (return ("Var") 
@@ -35,7 +40,8 @@
      (call (expr ((func (("Symbol") (...))) "Var") 
             (ident (binding 4 "Var_new"))) 
       (args (expr ("Symbol") (literal ("Symbol") "<i32>" i32)) 
-       (expr ("MacroDynamicOwner") (ident (binding 6 "_x2c_macro_value_1"))))))))))
+       (expr ("MacroDynamicOwner") 
+        (ident (binding 6 "_x2c_gensym_macro_value_1"))))))))))
 
 (function (int) 
  (bind (binding 7 "main") ((fnmod (params (param (void) (bind () ())))))) 

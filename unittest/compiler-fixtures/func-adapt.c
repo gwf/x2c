@@ -26,17 +26,17 @@ static Var nothing(void);
 
 Var Var_binary(Var lhs, Symbol op, Var rhs);
 
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
+static Var _x2c_gensym_func_adapt_0(Func _x2c_gensym_func_binding_0, const FuncArg * _x2c_gensym_func_argv_0);
 
-static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
+static Var _x2c_gensym_func_adapt_1(Func _x2c_gensym_func_binding_1, const FuncArg * _x2c_gensym_func_argv_1);
 
-static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2);
+static Var _x2c_gensym_func_adapt_2(Func _x2c_gensym_func_binding_2, const FuncArg * _x2c_gensym_func_argv_2);
 
-static Var _x2c_func_adapt_3(Func _x2c_func_binding_3, const FuncArg * _x2c_func_argv_3);
+static Var _x2c_gensym_func_adapt_3(Func _x2c_gensym_func_binding_3, const FuncArg * _x2c_gensym_func_argv_3);
 
-static Var _x2c_func_adapt_4(Func _x2c_func_binding_4, const FuncArg * _x2c_func_argv_4);
+static Var _x2c_gensym_func_adapt_4(Func _x2c_gensym_func_binding_4, const FuncArg * _x2c_gensym_func_argv_4);
 
-static Var _x2c_func_adapt_5(Func _x2c_func_binding_5, const FuncArg * _x2c_func_argv_5);
+static Var _x2c_gensym_func_adapt_5(Func _x2c_gensym_func_binding_5, const FuncArg * _x2c_gensym_func_argv_5);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -127,50 +127,50 @@ static Var nothing(void){
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  Func numeric = Func_new(_x2c_func_adapt_0, _10);
-  Func passthrough = Func_new(_x2c_func_adapt_1, _20);
-  Func object = Func_new(_x2c_func_adapt_2, _32);
-  Func returns_void = Func_new(_x2c_func_adapt_3, _41);
-  Func no_parameters = Func_new(_x2c_func_adapt_4, _48);
-  Func imported = Func_new(_x2c_func_adapt_5, _59);
-  Func forwarded = Func_new(_x2c_func_adapt_0, _10);
+  Func numeric = Func_new(_x2c_gensym_func_adapt_0, _10);
+  Func passthrough = Func_new(_x2c_gensym_func_adapt_1, _20);
+  Func object = Func_new(_x2c_gensym_func_adapt_2, _32);
+  Func returns_void = Func_new(_x2c_gensym_func_adapt_3, _41);
+  Func no_parameters = Func_new(_x2c_gensym_func_adapt_4, _48);
+  Func imported = Func_new(_x2c_gensym_func_adapt_5, _59);
+  Func forwarded = Func_new(_x2c_gensym_func_adapt_0, _10);
   return ! numeric || ! passthrough || ! object || ! returns_void || ! no_parameters || ! imported || ! forwarded;
 }
 
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
-  long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 818062), 818062));
-  long a1 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 1, 818062), 818062));
+static Var _x2c_gensym_func_adapt_0(Func _x2c_gensym_func_binding_0, const FuncArg * _x2c_gensym_func_argv_0){
+  long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_0, _x2c_gensym_func_argv_0, 0, 818062), 818062));
+  long a1 = Var_long(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_0, _x2c_gensym_func_argv_0, 1, 818062), 818062));
   return long_var(add(a0, a1));
   ;
 }
 
-static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 0, 45156);
+static Var _x2c_gensym_func_adapt_1(Func _x2c_gensym_func_binding_1, const FuncArg * _x2c_gensym_func_argv_1){
+  Var a0 = x2c_func_value_argument(_x2c_gensym_func_binding_1, _x2c_gensym_func_argv_1, 0, 45156);
   return identity(a0);
   ;
 }
 
-static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func_argv_2){
-  String a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_2, _x2c_func_argv_2, 0, 1318210446));
+static Var _x2c_gensym_func_adapt_2(Func _x2c_gensym_func_binding_2, const FuncArg * _x2c_gensym_func_argv_2){
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_2, _x2c_gensym_func_argv_2, 0, 1318210446));
   return int_var(width(a0));
   ;
 }
 
-static Var _x2c_func_adapt_3(Func _x2c_func_binding_3, const FuncArg * _x2c_func_argv_3){
-  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_3, _x2c_func_argv_3, 0, 3453797), 3453797));
+static Var _x2c_gensym_func_adapt_3(Func _x2c_gensym_func_binding_3, const FuncArg * _x2c_gensym_func_argv_3){
+  int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_3, _x2c_gensym_func_argv_3, 0, 3453797), 3453797));
   discard(a0);
   return((void) 0, Void);
 }
 
-static Var _x2c_func_adapt_4(Func _x2c_func_binding_4, const FuncArg * _x2c_func_argv_4){
+static Var _x2c_gensym_func_adapt_4(Func _x2c_gensym_func_binding_4, const FuncArg * _x2c_gensym_func_argv_4){
   return nothing();
   ;
 }
 
-static Var _x2c_func_adapt_5(Func _x2c_func_binding_5, const FuncArg * _x2c_func_argv_5){
-  Var a0 = x2c_func_value_argument(_x2c_func_binding_5, _x2c_func_argv_5, 0, 45156);
-  Symbol a1 = Var_symbol(x2c_func_value_argument(_x2c_func_binding_5, _x2c_func_argv_5, 1, 1328354264));
-  Var a2 = x2c_func_value_argument(_x2c_func_binding_5, _x2c_func_argv_5, 2, 45156);
+static Var _x2c_gensym_func_adapt_5(Func _x2c_gensym_func_binding_5, const FuncArg * _x2c_gensym_func_argv_5){
+  Var a0 = x2c_func_value_argument(_x2c_gensym_func_binding_5, _x2c_gensym_func_argv_5, 0, 45156);
+  Symbol a1 = Var_symbol(x2c_func_value_argument(_x2c_gensym_func_binding_5, _x2c_gensym_func_argv_5, 1, 1328354264));
+  Var a2 = x2c_func_value_argument(_x2c_gensym_func_binding_5, _x2c_gensym_func_argv_5, 2, 45156);
   return Var_binary(a0, a1, a2);
   ;
 }

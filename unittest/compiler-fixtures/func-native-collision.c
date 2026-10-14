@@ -14,7 +14,7 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
+static Var _x2c_gensym_func_adapt_0(Func _x2c_gensym_func_binding_0, const FuncArg * _x2c_gensym_func_argv_0);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -35,12 +35,12 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  Func target = Func_new(_x2c_func_adapt_0, _9);
+  Func target = Func_new(_x2c_gensym_func_adapt_0, _9);
   return ! target;
 }
 
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
-  long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 818062), 818062));
+static Var _x2c_gensym_func_adapt_0(Func _x2c_gensym_func_binding_0, const FuncArg * _x2c_gensym_func_argv_0){
+  long a0 = Var_long(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_0, _x2c_gensym_func_argv_0, 0, 818062), 818062));
   return long_var(_is_list_literal(a0));
   ;
 }

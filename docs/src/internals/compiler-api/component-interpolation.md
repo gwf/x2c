@@ -12,13 +12,13 @@ Interpolated Strings.
 
 | Function | Summary |
 | --- | --- |
-| [`interpolation`](#interpolation) | Joins an interpolated String's parts. |
+| [`interpolation_lowering`](#interpolation_lowering) | Joins an interpolated String's parts. |
 
 ### Functions
 
-#### interpolation
+#### interpolation_lowering
 
-`meta Code interpolation(Code code)`
+`meta Code interpolation_lowering(Code code)`
 
 Joins an interpolated String's parts.
 

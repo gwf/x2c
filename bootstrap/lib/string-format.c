@@ -116,12 +116,12 @@ static void _fail(Format * f, String reason);
 
 _Noreturn static void _nested(Format * f, String reason, Var code, List details);
 
-typedef struct _x2c_defer_env_0{
-  const void * _x2c_defer_capture_0;
+typedef struct _x2c_gensym_defer_env_0{
+  const void * _x2c_gensym_defer_capture_0;
 }
-_x2c_defer_env_0;
+_x2c_gensym_defer_env_0;
 
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
 
 #include "exception.h"
 
@@ -158,18 +158,18 @@ static int List_truth(List);
 String String_format(String fmt, List values){
   if(! _init_guard_) _file_init_();
   Buffer out = Buffer_new(0);
-  const Buffer _x2c_macro_acquired_0 = out;
+  const Buffer _x2c_gensym_macro_acquired_0 = out;
   {
-    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
       0
     }
     ;
-    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & _x2c_macro_acquired_0;
-    X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
+    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_acquired_0;
+    X2CCleanup _x2c_gensym_defer_record_0 ={
+      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_0);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
       Format f ={
         .fmt = fmt, .length = String_len(fmt), .args = values, .out = out
@@ -180,16 +180,16 @@ String String_format(String fmt, List values){
       _write_literal(&(f));
       if(List_truth(f.args)) _format_error(f.length, _0);
       {
-        String _x2c_return_value_0 = Buffer_str(out);
+        String _x2c_gensym_return_value_0 = Buffer_str(out);
         {
-          x2c_cleanup_leave(& _x2c_defer_record_0);
-          return _x2c_return_value_0;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+          return _x2c_gensym_return_value_0;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_0);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
   }
 
 }
@@ -401,45 +401,45 @@ static int String_truth(String);
 static Buffer _string(Format * f, const char * text, Var arg){
   String volatile string = NULL;
   {
-    ExceptionFrame _x2c_exception_frame_0;
-    static MatchCaptureSite _x2c_macro_arms_0[1];
-    Var _x2c_macro_patterns_0[1];
-    static ErrorCatchSite _x2c_macro_site_0 ={
-      _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
+    ExceptionFrame _x2c_gensym_exception_frame_0;
+    static MatchCaptureSite _x2c_gensym_macro_arms_0[1];
+    Var _x2c_gensym_macro_patterns_0[1];
+    static ErrorCatchSite _x2c_gensym_macro_site_0 ={
+      _x2c_gensym_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
-      _x2c_macro_patterns_0[0] = List_var(cons(Symbol_var(61045002), cons(Symbol_var(1864393378598), NULL)));
+    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_0)){
+      _x2c_gensym_macro_patterns_0[0] = List_var(cons(Symbol_var(61045002), cons(Symbol_var(1864393378598), NULL)));
     }
-    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);
-    x2c_exception_push(& _x2c_exception_frame_0);
-    if(! sigsetjmp(_x2c_exception_frame_0.env, 0)) string = Var_str(arg);
+    volatile ErrorHandler _x2c_gensym_error_handler_0 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_0, & _x2c_gensym_macro_site_0, _x2c_gensym_macro_patterns_0);
+    x2c_exception_push(& _x2c_gensym_exception_frame_0);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)) string = Var_str(arg);
     else{
-      x2c_exception_landed(& _x2c_exception_frame_0);
-      if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
-        int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
-        x2c_error_catch_detach(_x2c_error_handler_0);
-        x2c_exception_mark_handled(& _x2c_exception_frame_0);
-        if(_x2c_macro_selected_0 == 0){
+      x2c_exception_landed(& _x2c_gensym_exception_frame_0);
+      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_0)){
+        int _x2c_gensym_macro_selected_0 = x2c_error_catch_selected(_x2c_gensym_error_handler_0);
+        x2c_error_catch_detach(_x2c_gensym_error_handler_0);
+        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_0);
+        if(_x2c_gensym_macro_selected_0 == 0){
           Var volatile code;
-          code = x2c_error_catch_capture(_x2c_error_handler_0, 0);
+          code = x2c_error_catch_capture(_x2c_gensym_error_handler_0, 0);
           List volatile details;
-          details = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_0, 1));
+          details = Var_list_payload(x2c_error_catch_capture(_x2c_gensym_error_handler_0, 1));
           _nested(&((* f)), _17, code, details);
         }
 
       }
       else{
-        x2c_error_catch_close(_x2c_error_handler_0);
-        _x2c_error_handler_0 = NULL;
-        x2c_exception_leave(& _x2c_exception_frame_0);
+        x2c_error_catch_close(_x2c_gensym_error_handler_0);
+        _x2c_gensym_error_handler_0 = NULL;
+        x2c_exception_leave(& _x2c_gensym_exception_frame_0);
         __builtin_unreachable();
       }
 
     }
-    x2c_error_catch_close(_x2c_error_handler_0);
-    _x2c_error_handler_0 = NULL;
-    x2c_exception_leave(& _x2c_exception_frame_0);
+    x2c_error_catch_close(_x2c_gensym_error_handler_0);
+    _x2c_gensym_error_handler_0 = NULL;
+    x2c_exception_leave(& _x2c_gensym_exception_frame_0);
   }
   return Buffer_printf((* f).out, text, String_truth(string) ? string : "");
 }
@@ -449,45 +449,45 @@ Var Var_convert(Var, Symbol);
 static Var _number(Format * f, Var arg, Symbol target){
   Var volatile converted =((void) 0, Void);
   {
-    ExceptionFrame _x2c_exception_frame_1;
-    static MatchCaptureSite _x2c_macro_arms_1[1];
-    Var _x2c_macro_patterns_1[1];
-    static ErrorCatchSite _x2c_macro_site_1 ={
-      _x2c_macro_arms_1, -1, 1, ERROR_CATCH_PENDING, - 1
+    ExceptionFrame _x2c_gensym_exception_frame_1;
+    static MatchCaptureSite _x2c_gensym_macro_arms_1[1];
+    Var _x2c_gensym_macro_patterns_1[1];
+    static ErrorCatchSite _x2c_gensym_macro_site_1 ={
+      _x2c_gensym_macro_arms_1, -1, 1, ERROR_CATCH_PENDING, - 1
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_macro_site_1)){
-      _x2c_macro_patterns_1[0] = List_var(cons(Symbol_var(61045002), cons(Symbol_var(1864393378598), NULL)));
+    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_1)){
+      _x2c_gensym_macro_patterns_1[0] = List_var(cons(Symbol_var(61045002), cons(Symbol_var(1864393378598), NULL)));
     }
-    volatile ErrorHandler _x2c_error_handler_1 = x2c_error_catch_site_push(& _x2c_exception_frame_1, & _x2c_macro_site_1, _x2c_macro_patterns_1);
-    x2c_exception_push(& _x2c_exception_frame_1);
-    if(! sigsetjmp(_x2c_exception_frame_1.env, 0)) converted = Var_convert(arg, target);
+    volatile ErrorHandler _x2c_gensym_error_handler_1 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_1, & _x2c_gensym_macro_site_1, _x2c_gensym_macro_patterns_1);
+    x2c_exception_push(& _x2c_gensym_exception_frame_1);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_1.env, 0)) converted = Var_convert(arg, target);
     else{
-      x2c_exception_landed(& _x2c_exception_frame_1);
-      if(x2c_exception_is_error_target(& _x2c_exception_frame_1)){
-        int _x2c_macro_selected_1 = x2c_error_catch_selected(_x2c_error_handler_1);
-        x2c_error_catch_detach(_x2c_error_handler_1);
-        x2c_exception_mark_handled(& _x2c_exception_frame_1);
-        if(_x2c_macro_selected_1 == 0){
+      x2c_exception_landed(& _x2c_gensym_exception_frame_1);
+      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_1)){
+        int _x2c_gensym_macro_selected_1 = x2c_error_catch_selected(_x2c_gensym_error_handler_1);
+        x2c_error_catch_detach(_x2c_gensym_error_handler_1);
+        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_1);
+        if(_x2c_gensym_macro_selected_1 == 0){
           Var volatile code;
-          code = x2c_error_catch_capture(_x2c_error_handler_1, 0);
+          code = x2c_error_catch_capture(_x2c_gensym_error_handler_1, 0);
           List volatile details;
-          details = Var_list_payload(x2c_error_catch_capture(_x2c_error_handler_1, 1));
+          details = Var_list_payload(x2c_error_catch_capture(_x2c_gensym_error_handler_1, 1));
           _nested(&((* f)), _18, code, details);
         }
 
       }
       else{
-        x2c_error_catch_close(_x2c_error_handler_1);
-        _x2c_error_handler_1 = NULL;
-        x2c_exception_leave(& _x2c_exception_frame_1);
+        x2c_error_catch_close(_x2c_gensym_error_handler_1);
+        _x2c_gensym_error_handler_1 = NULL;
+        x2c_exception_leave(& _x2c_gensym_exception_frame_1);
         __builtin_unreachable();
       }
 
     }
-    x2c_error_catch_close(_x2c_error_handler_1);
-    _x2c_error_handler_1 = NULL;
-    x2c_exception_leave(& _x2c_exception_frame_1);
+    x2c_error_catch_close(_x2c_gensym_error_handler_1);
+    _x2c_gensym_error_handler_1 = NULL;
+    x2c_exception_leave(& _x2c_gensym_exception_frame_1);
   }
   return converted;
 }
@@ -496,8 +496,8 @@ static Var int_var(int);
 
 _Noreturn static void _format_error(int offset, String reason){
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/string-format.x",.function = "_format_error",.line = 331};
-    x2c_error_raise_n(& _x2c_error_site_0, 435316840, 2, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(reason));
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/string-format.x",.function = "_format_error",.line = 331};
+    x2c_error_raise_n(& _x2c_gensym_error_site_0, 435316840, 2, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(reason));
     __builtin_unreachable();
   }
 
@@ -510,10 +510,10 @@ static void _fail(Format * f, String reason){
 _Noreturn static void _nested(Format * f, String reason, Var code, List details){
   List cause = cons(code, details);
   {
-    Var _x2c_literal_part_0 = int_var((* f).offset);
+    Var _x2c_gensym_literal_part_0 = int_var((* f).offset);
     {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/string-format.x",.function = "_nested",.line = 342};
-      x2c_error_raise_n(& _x2c_error_site_1, 435316840, 3, Symbol_var(1019648360), _x2c_literal_part_0, Symbol_var(1218550748), String_var(reason), Symbol_var(6401226), List_var(cause));
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/string-format.x",.function = "_nested",.line = 342};
+      x2c_error_raise_n(& _x2c_gensym_error_site_1, 435316840, 3, Symbol_var(1019648360), _x2c_gensym_literal_part_0, Symbol_var(1218550748), String_var(reason), Symbol_var(6401226), List_var(cause));
       __builtin_unreachable();
     }
 
@@ -521,8 +521,8 @@ _Noreturn static void _nested(Format * f, String reason, Var code, List details)
 
 }
 
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
-  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  Buffer_cleanup((*(const Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
+  _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
+  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
 }
 

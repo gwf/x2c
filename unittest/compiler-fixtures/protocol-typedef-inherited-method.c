@@ -39,13 +39,13 @@ int main(void){
   int total = 0;
   {
     int value;
-    Iter _x2c_macro_iterator_0 = List_iter(values, &(struct Iter){
+    Iter _x2c_gensym_macro_iterator_0 = List_iter(values, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, &(_x2c_macro_item_0))){
-      value = Var_int(Var_convert(_x2c_macro_item_0, 3453797));
+    Var _x2c_gensym_macro_item_0;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_0, &(_x2c_gensym_macro_item_0))){
+      value = Var_int(Var_convert(_x2c_gensym_macro_item_0, 3453797));
       total += value;
     }
 

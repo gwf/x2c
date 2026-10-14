@@ -65,7 +65,7 @@
            (expr ("Var") 
             (call "x2c_error_catch_capture" 
              (args (expr ("ErrorHandler") 
-                    (ident (binding 6 "_x2c_error_handler_0"))) 
+                    (ident (binding 6 "_x2c_gensym_error_handler_0"))) 
               (expr (int) (literal (int) "0")))))))) 
         (return (int) 
          (expr (int) 
@@ -92,7 +92,7 @@
              (args (expr ("Var") 
                     (call "x2c_error_catch_capture" 
                      (args (expr ("ErrorHandler") 
-                            (ident (binding 6 "_x2c_error_handler_0"))) 
+                            (ident (binding 6 "_x2c_gensym_error_handler_0"))) 
                       (expr (int) (literal (int) "0"))))))))))) 
         (block 
          (at 19 
@@ -103,7 +103,7 @@
              (args (expr ("List") (ident (binding 8 "rest"))))))))))) 
       (() (block 
            (return (int) (expr (int) (op - (expr (int) (literal (int) "1")))))))) 
-     (binding 6 "_x2c_error_handler_0")) 
+     (binding 6 "_x2c_gensym_error_handler_0")) 
     (block 
      (at 20 
       (stmnt (expr (int) (postfix ++ (expr (int) (ident (binding 2 "mode")))))))))) 

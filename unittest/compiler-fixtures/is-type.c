@@ -45,14 +45,14 @@ static int symbol_shadows_type(Var value);
 
 static int custom_visible_before_protocol(Var value);
 
-static VarMethods _x2c__x2c_protocol_methods_0;
+static VarMethods _x2c_gensym_protocol_methods_0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  if(! x2c_register_builtin_descriptor(660840135016, _x2c__x2c_protocol_methods_0)){
-    x2c_register_descriptor(String_new("iswidget"), _x2c__x2c_protocol_methods_0);
+  if(! x2c_register_builtin_descriptor(660840135016, _x2c_gensym_protocol_methods_0)){
+    x2c_register_descriptor(String_new("iswidget"), _x2c_gensym_protocol_methods_0);
   }
   _0 = String_new("iswidget");
 }

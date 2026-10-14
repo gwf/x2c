@@ -19,20 +19,20 @@ static Var StaticDescriptor_var(StaticDescriptor value);
 
 static StaticDescriptor Var_staticdescriptor(Var value);
 
-static inline String _x2c_proto_staticdescriptor_str_0(Var a0);
+static inline String _x2c_gensym_proto_staticdescriptor_str_0(Var a0);
 
-static VarMethods _x2c__x2c_protocol_methods_0;
+static VarMethods _x2c_gensym_protocol_methods_0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _x2c__x2c_protocol_methods_0 =(VarMethods){
-    .str = _x2c_proto_staticdescriptor_str_0
+  _x2c_gensym_protocol_methods_0 =(VarMethods){
+    .str = _x2c_gensym_proto_staticdescriptor_str_0
   }
   ;
-  if(! x2c_register_builtin_descriptor(1381098884181190, _x2c__x2c_protocol_methods_0)){
-    x2c_register_descriptor(String_new("staticdescriptor"), _x2c__x2c_protocol_methods_0);
+  if(! x2c_register_builtin_descriptor(1381098884181190, _x2c_gensym_protocol_methods_0)){
+    x2c_register_descriptor(String_new("staticdescriptor"), _x2c_gensym_protocol_methods_0);
   }
   _0 = String_new("private:");
 }
@@ -59,7 +59,7 @@ int main(void){
   return 0;
 }
 
-static inline String _x2c_proto_staticdescriptor_str_0(Var a0){
+static inline String _x2c_gensym_proto_staticdescriptor_str_0(Var a0){
   return StaticDescriptor_str(Var_staticdescriptor(a0));
 }
 

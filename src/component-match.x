@@ -64,7 +64,7 @@ meta static int _match_nesting(String text) {
 
 /* The cursor that walks the List `depth` levels into the subject. */
 meta static String _match_cursor(int depth) =>
-  depth ? %"_x2c_match_cursor$depth" : "_x2c_match_cursor";
+  depth ? %"_x2c_gensym_match_cursor$depth" : "_x2c_gensym_match_cursor";
 
 // pattern values
 
@@ -121,7 +121,7 @@ meta static void _match_bind(
   int index = seen.len() - 1;
   int list = binder.is_list_binder();
   b.printf(
-    " %s _x2c_match_%s_%d = %s;",
+    " %s _x2c_gensym_match_%s_%d = %s;",
     list ? "List" : "Var", list ? "list" : "value", index, cell);
 }
 
@@ -175,7 +175,7 @@ meta static int _match_nested(
   int mark = out.len(), testing = 0, braces = 0, step = 0, deepest = 0;
   List rest = value;
   String path = "";
-  b.write(" _x2c_match_cursor = _x2c_match_expr;");
+  b.write(" _x2c_gensym_match_cursor = _x2c_gensym_match_expr;");
   for (;;) {
     int levels = rests.len();
     String cursor = _match_cursor(levels);
@@ -247,7 +247,7 @@ meta static void _match_captures(Buffer b, List binders) {
   foreach (Var binder, binders) {
     int list = binder.is_list_binder();
     b.printf(
-      " %s _x2c_match_%s_%d = %s_x2c_match_values[%d]%s;",
+      " %s _x2c_gensym_match_%s_%d = %s_x2c_gensym_match_values[%d]%s;",
       list ? "List" : "Var", list ? "list" : "value", index,
       list ? "Var_list_payload(" : "", index, list ? ")" : "");
     index++;
@@ -263,25 +263,27 @@ meta static int _match_test(Buffer b, Array out, List pattern, int &sites) {
                         (args ?template ?labels))): {
       int site = sites++;
       b.printf(
-        " static MacroCaseSite _x2c_macro_site_%d; "
-        "if (Macro_case_capture_at(&_x2c_macro_site_%d, _x2c_match_expr, ",
+        " static MacroCaseSite _x2c_gensym_macro_site_%d; "
+        "if (Macro_case_capture_at(&_x2c_gensym_macro_site_%d, "
+        "_x2c_gensym_match_expr, ",
         site, site);
       _match_place(b, out, template);
       b.write(", ");
       _match_place(b, out, labels);
-      b.write(", &_x2c_match_capture)) {");
+      b.write(", &_x2c_gensym_match_capture)) {");
       return 1;
     }
   if (((Code) pattern).is_static_pattern()) {
     int site = sites++;
     b.printf(
-      " static MatchCaptureSite _x2c_match_site_%d; "
-      "if (x2c_match_site_try_capture(&_x2c_match_site_%d, ", site, site);
+      " static MatchCaptureSite _x2c_gensym_match_site_%d; "
+      "if (x2c_match_site_try_capture(&_x2c_gensym_match_site_%d, ",
+      site, site);
   }
   else b.write(" if (x2c_match_try_capture(");
-  b.write("_x2c_match_expr, List_var(");
+  b.write("_x2c_gensym_match_expr, List_var(");
   _match_place(b, out, pattern);
-  b.write("), &_x2c_match_capture)) {");
+  b.write("), &_x2c_gensym_match_capture)) {");
   return 1;
 }
 
@@ -331,10 +333,12 @@ meta static String _match_locals(int depths, int values) {
   if (depths >= 0) b.write(";");
   if (values > 0)
     b.printf(
-      " Var _x2c_match_values[%d]; MatchCaptureBuffer _x2c_match_capture = "
-      "{ .values = _x2c_match_values, .capacity = %d };", values, values);
+      " Var _x2c_gensym_match_values[%d]; "
+      "MatchCaptureBuffer _x2c_gensym_match_capture = "
+      "{ .values = _x2c_gensym_match_values, .capacity = %d };",
+      values, values);
   else if (!values)
-    b.write(" MatchCaptureBuffer _x2c_match_capture = { 0 };");
+    b.write(" MatchCaptureBuffer _x2c_gensym_match_capture = { 0 };");
   return b.str_free();
 }
 
@@ -366,7 +370,7 @@ meta static Code _match_lowered(Code subject, List rows) {
     if (label && depth) out.insert(opening++, label);
     else if (label) b.write(label);
     int guarded = dynamic && !otherwise;
-    if (guarded) b.write(" if (!_x2c_match_none) {");
+    if (guarded) b.write(" if (!_x2c_gensym_match_none) {");
     int braces =
       otherwise ? 0 : _match_nested(b, out, pattern, value, depths);
     if (braces < 0) {
@@ -380,25 +384,26 @@ meta static Code _match_lowered(Code subject, List rows) {
   if (labelling) b.write(" default: break;");
   _match_flush(b, out);
   String selector = heads.len()
-    ? "_x2c_match_expr ? _x2c_match_expr->car.u64 : 0" : "0";
+    ? "_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0" : "0";
   List items = _match_items(out);
   String locals = _match_locals(depths, values);
   List prologue = dynamic
     ? _match_dynamic_read(subject, locals)
-    : %("List _x2c_match_expr =" ${subject.convert(%("List"))} $locals);
+    : %("List _x2c_gensym_match_expr =" ${subject.convert(%("List"))} $locals);
   return Code.lowered(
     %(block $prologue
             (switch (expr ("uint64_t") ($selector)) (block @items))));
 }
 
 /* The reads of a `Var` subject: once into a local, then as a List, with
-   `_x2c_match_none` set when its tag is not `<list>`. */
+   `_x2c_gensym_match_none` set when its tag is not `<list>`. */
 meta static List _match_dynamic_read(Code subject, String locals) {
   Symbol list = <list>;
-  String tested = "; int _x2c_match_none = !Var_is(_x2c_match_var, %lu);"
+  String tested = "; int _x2c_gensym_match_none = "
+    "!Var_is(_x2c_gensym_match_var, %lu);"
     .printf((unsigned long) list);
-  return %("Var _x2c_match_var =" $subject $tested
-           "List _x2c_match_expr = Var_list_payload(_x2c_match_var)" $locals);
+  return %("Var _x2c_gensym_match_var =" $subject $tested
+           "List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var)" $locals);
 }
 
 $rewrite($matched)

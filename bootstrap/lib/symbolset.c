@@ -59,7 +59,7 @@ static int _peel(Graph * g);
 
 static void _assign(Graph * g, uint32_t * table);
 
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
 
 #include "exception.h"
 
@@ -210,28 +210,28 @@ static int _try_seed(Array symbols, uint32_t span, uint64_t seed, uint32_t * tab
     Scope_retain();
     {
       {
-        X2CCleanup _x2c_defer_record_0 ={
-          .fn = _x2c_defer_cleanup_0, .env = 0
+        X2CCleanup _x2c_gensym_defer_record_0 ={
+          .fn = _x2c_gensym_defer_cleanup_0, .env = 0
         }
         ;
-        x2c_cleanup_push(& _x2c_defer_record_0);
+        x2c_cleanup_push(& _x2c_gensym_defer_record_0);
         {
           {
             Graph g = _graph(symbols, span, seed);
             if(! _peel(&(g))){
-              int _x2c_return_value_0 = 0;
+              int _x2c_gensym_return_value_0 = 0;
               {
-                x2c_cleanup_leave(& _x2c_defer_record_0);
-                return _x2c_return_value_0;
+                x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+                return _x2c_gensym_return_value_0;
               }
 
             }
             _assign(&(g), table);
             {
-              int _x2c_return_value_1 = 1;
+              int _x2c_gensym_return_value_1 = 1;
               {
-                x2c_cleanup_leave(& _x2c_defer_record_0);
-                return _x2c_return_value_1;
+                x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+                return _x2c_gensym_return_value_1;
               }
 
             }
@@ -239,7 +239,7 @@ static int _try_seed(Array symbols, uint32_t span, uint64_t seed, uint32_t * tab
           }
 
         }
-        x2c_cleanup_leave(& _x2c_defer_record_0);
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
       }
 
     }
@@ -308,7 +308,7 @@ static void _assign(Graph * g, uint32_t * table){
 
 }
 
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
   Scope_release();
 }
 

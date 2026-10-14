@@ -39,7 +39,7 @@ token range and privacy of the top-level form that produced the
 definition; either is empty when the compiler made the definition.
 `LINE` is 1 and `DOC` empty for a definition without authored source.
 
-Source: `src/generate.x:1543`
+Source: `src/generate.x:1544`
 
 <a id="Compiler.dump_definitions"></a>
 #### Compiler.dump_definitions
@@ -51,7 +51,7 @@ Prints the `--dump-definitions` projection of the lowered unit `ast`:
 with one, then one row per `Compiler.definition_rows` entry. The
 command-line reference in the book describes the fields.
 
-Source: `src/generate.x:1636`
+Source: `src/generate.x:1637`
 
 <a id="Compiler.generate_code"></a>
 #### Compiler.generate_code
@@ -89,7 +89,7 @@ Source: `src/generate.x:61`
 
 Returns the statements queued for `phase`, in the order they were added.
 
-Source: `src/generate.x:1077`
+Source: `src/generate.x:1078`
 
 <a id="Compiler.initializer_function"></a>
 #### Compiler.initializer_function
@@ -98,7 +98,7 @@ Source: `src/generate.x:1077`
 
 Returns the function `type name(void)` running `body`.
 
-Source: `src/generate.x:804`
+Source: `src/generate.x:805`
 
 <a id="Compiler.place_source_prelude"></a>
 #### Compiler.place_source_prelude
@@ -111,7 +111,7 @@ conditional containing that first use follows the declarations. A unit
 without such a use gets them at its end, after the declarations they
 may assign.
 
-Source: `src/generate.x:899`
+Source: `src/generate.x:900`
 
 <a id="Compiler.run_once_body"></a>
 #### Compiler.run_once_body
@@ -121,7 +121,7 @@ Source: `src/generate.x:899`
 Returns a run-once initializer body: `before`, then a return when
 `guard` is set that sets it otherwise, then `after`.
 
-Source: `src/generate.x:810`
+Source: `src/generate.x:811`
 
 ### `Init`
 
@@ -134,7 +134,7 @@ Returns `function` with its entry setup: the protocol initializer and
 the type initializer run once, and a `guarded` entry calls the region's
 initializer unless its guard is set.
 
-Source: `src/generate.x:864`
+Source: `src/generate.x:865`
 
 ## Public types
 
@@ -154,7 +154,7 @@ the unit's shutdown function, `synthetic` is the synthetic initializer or
 NULL, and `reachable` holds the entries a cache-only file guards, or is
 NULL when every public entry is guarded.
 
-Source: `src/generate.x:828`
+Source: `src/generate.x:829`
 
 ## Design notes
 

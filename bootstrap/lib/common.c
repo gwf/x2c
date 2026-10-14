@@ -658,40 +658,40 @@ unsigned long Var_tag_bottom(Symbol tag);
 static Symbol _literal_tag(List tag);
 static int _var_tag_top(List tag);
 static int _var_tag_bottom(List tag);
-static inline String Var_string_payload(Var _x2c_macro_value_0){
-  if(_x2c_macro_value_0.u64 >> 48 != 11 ||(_x2c_macro_value_0.u64 & 0x7) != 1) return NULL;  return(String)(_x2c_macro_value_0.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline String Var_string_payload(Var _x2c_gensym_macro_value_0){
+  if(_x2c_gensym_macro_value_0.u64 >> 48 != 11 ||(_x2c_gensym_macro_value_0.u64 & 0x7) != 1) return NULL;  return(String)(_x2c_gensym_macro_value_0.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline Array Var_array_payload(Var _x2c_macro_value_1){
-  if(_x2c_macro_value_1.u64 >> 48 != 8 ||(_x2c_macro_value_1.u64 & 0x7) != 0) return NULL;  return(Array)(_x2c_macro_value_1.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline Array Var_array_payload(Var _x2c_gensym_macro_value_1){
+  if(_x2c_gensym_macro_value_1.u64 >> 48 != 8 ||(_x2c_gensym_macro_value_1.u64 & 0x7) != 0) return NULL;  return(Array)(_x2c_gensym_macro_value_1.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline Block Var_block_payload(Var _x2c_macro_value_2){
-  if(_x2c_macro_value_2.u64 >> 48 != 8 ||(_x2c_macro_value_2.u64 & 0x7) != 1) return NULL;  return(Block)(_x2c_macro_value_2.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline Block Var_block_payload(Var _x2c_gensym_macro_value_2){
+  if(_x2c_gensym_macro_value_2.u64 >> 48 != 8 ||(_x2c_gensym_macro_value_2.u64 & 0x7) != 1) return NULL;  return(Block)(_x2c_gensym_macro_value_2.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline Buffer Var_buffer_payload(Var _x2c_macro_value_3){
-  if(_x2c_macro_value_3.u64 >> 48 != 8 ||(_x2c_macro_value_3.u64 & 0x7) != 2) return NULL;  return(Buffer)(_x2c_macro_value_3.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline Buffer Var_buffer_payload(Var _x2c_gensym_macro_value_3){
+  if(_x2c_gensym_macro_value_3.u64 >> 48 != 8 ||(_x2c_gensym_macro_value_3.u64 & 0x7) != 2) return NULL;  return(Buffer)(_x2c_gensym_macro_value_3.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline Bytes Var_bytes_payload(Var _x2c_macro_value_4){
-  if(_x2c_macro_value_4.u64 >> 48 != 8 ||(_x2c_macro_value_4.u64 & 0x7) != 3) return NULL;  return(Bytes)(_x2c_macro_value_4.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline Bytes Var_bytes_payload(Var _x2c_gensym_macro_value_4){
+  if(_x2c_gensym_macro_value_4.u64 >> 48 != 8 ||(_x2c_gensym_macro_value_4.u64 & 0x7) != 3) return NULL;  return(Bytes)(_x2c_gensym_macro_value_4.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline File Var_file_payload(Var _x2c_macro_value_5){
-  if(_x2c_macro_value_5.u64 >> 48 != 9 ||(_x2c_macro_value_5.u64 & 0x7) != 0) return NULL;  return(File)(_x2c_macro_value_5.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline File Var_file_payload(Var _x2c_gensym_macro_value_5){
+  if(_x2c_gensym_macro_value_5.u64 >> 48 != 9 ||(_x2c_gensym_macro_value_5.u64 & 0x7) != 0) return NULL;  return(File)(_x2c_gensym_macro_value_5.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline Iter Var_iter_payload(Var _x2c_macro_value_6){
-  if(_x2c_macro_value_6.u64 >> 48 != 9 ||(_x2c_macro_value_6.u64 & 0x7) != 2) return NULL;  return(Iter)(_x2c_macro_value_6.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline Iter Var_iter_payload(Var _x2c_gensym_macro_value_6){
+  if(_x2c_gensym_macro_value_6.u64 >> 48 != 9 ||(_x2c_gensym_macro_value_6.u64 & 0x7) != 2) return NULL;  return(Iter)(_x2c_gensym_macro_value_6.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline List Var_list_payload(Var _x2c_macro_value_7){
-  if(_x2c_macro_value_7.u64 >> 48 != 9 ||(_x2c_macro_value_7.u64 & 0x7) != 4) return NULL;  return(List)(_x2c_macro_value_7.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline List Var_list_payload(Var _x2c_gensym_macro_value_7){
+  if(_x2c_gensym_macro_value_7.u64 >> 48 != 9 ||(_x2c_gensym_macro_value_7.u64 & 0x7) != 4) return NULL;  return(List)(_x2c_gensym_macro_value_7.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
-static inline Map Var_map_payload(Var _x2c_macro_value_8){
-  if(_x2c_macro_value_8.u64 >> 48 != 9 ||(_x2c_macro_value_8.u64 & 0x7) != 6) return NULL;  return(Map)(_x2c_macro_value_8.u64 & 0x0000FFFFFFFFFFF8ul);
+static inline Map Var_map_payload(Var _x2c_gensym_macro_value_8){
+  if(_x2c_gensym_macro_value_8.u64 >> 48 != 9 ||(_x2c_gensym_macro_value_8.u64 & 0x7) != 6) return NULL;  return(Map)(_x2c_gensym_macro_value_8.u64 & 0x0000FFFFFFFFFFF8ul);
 }
 
 Iter Var_as_iter(Var value);
@@ -713,86 +713,86 @@ Var Void =(Var){
 }
 ;
 List nil = NULL;
-static inline String _x2c_proto_array_str_0(Var a0);
-static inline String _x2c_proto_array_repr_0(Var a0);
-static inline Buffer _x2c_proto_array_write_str_0(Var a0, Buffer a1);
-static inline Buffer _x2c_proto_array_write_repr_0(Var a0, Buffer a1);
-static inline int _x2c_proto_array_equal_0(Var a0, Var a1);
-static inline int _x2c_proto_array_compare_0(Var a0, Var a1);
+static inline String _x2c_gensym_proto_array_str_0(Var a0);
+static inline String _x2c_gensym_proto_array_repr_0(Var a0);
+static inline Buffer _x2c_gensym_proto_array_write_str_0(Var a0, Buffer a1);
+static inline Buffer _x2c_gensym_proto_array_write_repr_0(Var a0, Buffer a1);
+static inline int _x2c_gensym_proto_array_equal_0(Var a0, Var a1);
+static inline int _x2c_gensym_proto_array_compare_0(Var a0, Var a1);
 int Array_truth(Array);
-static inline int _x2c_proto_array_truth_0(Var a0);
-static inline Iter _x2c_proto_array_iter_0(Var a0, Iter a1);
-static inline int _x2c_proto_array_contains_0(Var a0, Var a1);
-static inline Var _x2c_proto_array_getindex_0(Var a0, Var a1);
-static inline Var _x2c_proto_array_setindex_0(Var a0, Var a1, Var a2);
-static inline Var _x2c_proto_array_updateindex_0(Var a0, Var a1, Symbol a2, Var a3);
-static inline Var _x2c_proto_array_postfixindex_0(Var a0, Var a1, Symbol a2);
-static VarMethods _x2c__x2c_protocol_methods_0;
-static inline int _x2c_proto_block_truth_0(Var a0);
-static VarMethods _x2c__x2c_protocol_methods_1;
-static inline String _x2c_proto_buffer_str_0(Var a0);
-static inline String _x2c_proto_buffer_repr_0(Var a0);
-static inline int _x2c_proto_buffer_truth_0(Var a0);
-static inline Var _x2c_proto_buffer_getindex_0(Var a0, Var a1);
-static VarMethods _x2c__x2c_protocol_methods_2;
+static inline int _x2c_gensym_proto_array_truth_0(Var a0);
+static inline Iter _x2c_gensym_proto_array_iter_0(Var a0, Iter a1);
+static inline int _x2c_gensym_proto_array_contains_0(Var a0, Var a1);
+static inline Var _x2c_gensym_proto_array_getindex_0(Var a0, Var a1);
+static inline Var _x2c_gensym_proto_array_setindex_0(Var a0, Var a1, Var a2);
+static inline Var _x2c_gensym_proto_array_updateindex_0(Var a0, Var a1, Symbol a2, Var a3);
+static inline Var _x2c_gensym_proto_array_postfixindex_0(Var a0, Var a1, Symbol a2);
+static VarMethods _x2c_gensym_protocol_methods_0;
+static inline int _x2c_gensym_proto_block_truth_0(Var a0);
+static VarMethods _x2c_gensym_protocol_methods_1;
+static inline String _x2c_gensym_proto_buffer_str_0(Var a0);
+static inline String _x2c_gensym_proto_buffer_repr_0(Var a0);
+static inline int _x2c_gensym_proto_buffer_truth_0(Var a0);
+static inline Var _x2c_gensym_proto_buffer_getindex_0(Var a0, Var a1);
+static VarMethods _x2c_gensym_protocol_methods_2;
 int Bytes_truth(Bytes);
-static inline int _x2c_proto_bytes_truth_0(Var a0);
-static VarMethods _x2c__x2c_protocol_methods_3;
-static inline String _x2c_proto_file_str_0(Var a0);
-static inline String _x2c_proto_file_repr_0(Var a0);
-static inline Buffer _x2c_proto_file_write_repr_0(Var a0, Buffer a1);
-static inline unsigned _x2c_proto_file_hash_0(Var a0);
-static inline int _x2c_proto_file_equal_0(Var a0, Var a1);
-static inline Iter _x2c_proto_file_iter_0(Var a0, Iter a1);
-static VarMethods _x2c__x2c_protocol_methods_4;
-static inline int _x2c_proto_iter_truth_0(Var a0);
-static inline Iter _x2c_proto_iter_iter_0(Var a0, Iter a1);
-static VarMethods _x2c__x2c_protocol_methods_5;
-static inline String _x2c_proto_list_str_0(Var a0);
-static inline String _x2c_proto_list_repr_0(Var a0);
-static inline Buffer _x2c_proto_list_write_str_0(Var a0, Buffer a1);
-static inline Buffer _x2c_proto_list_write_repr_0(Var a0, Buffer a1);
-static inline unsigned _x2c_proto_list_hash_0(Var a0);
-static inline int _x2c_proto_list_equal_0(Var a0, Var a1);
-static inline int _x2c_proto_list_compare_0(Var a0, Var a1);
-static inline int _x2c_proto_list_truth_0(Var a0);
-static inline Iter _x2c_proto_list_iter_0(Var a0, Iter a1);
-static inline int _x2c_proto_list_contains_0(Var a0, Var a1);
-static inline Var _x2c_proto_list_getindex_0(Var a0, Var a1);
-static VarMethods _x2c__x2c_protocol_methods_6;
-static inline String _x2c_proto_map_str_0(Var a0);
-static inline String _x2c_proto_map_repr_0(Var a0);
-static inline Buffer _x2c_proto_map_write_str_0(Var a0, Buffer a1);
-static inline Buffer _x2c_proto_map_write_repr_0(Var a0, Buffer a1);
-static inline int _x2c_proto_map_equal_0(Var a0, Var a1);
-static inline int _x2c_proto_map_compare_0(Var a0, Var a1);
-static inline int _x2c_proto_map_truth_0(Var a0);
-static inline Iter _x2c_proto_map_iter_0(Var a0, Iter a1);
-static inline int _x2c_proto_map_contains_0(Var a0, Var a1);
-static inline Var _x2c_proto_map_getindex_0(Var a0, Var a1);
-static inline Var _x2c_proto_map_setindex_0(Var a0, Var a1, Var a2);
-static inline Var _x2c_proto_map_updateindex_0(Var a0, Var a1, Symbol a2, Var a3);
-static inline Var _x2c_proto_map_postfixindex_0(Var a0, Var a1, Symbol a2);
-static VarMethods _x2c__x2c_protocol_methods_7;
-static inline String _x2c_proto_string_str_0(Var a0);
-static inline String _x2c_proto_string_repr_0(Var a0);
-static inline Buffer _x2c_proto_string_write_str_0(Var a0, Buffer a1);
-static inline Buffer _x2c_proto_string_write_repr_0(Var a0, Buffer a1);
-static inline unsigned _x2c_proto_string_hash_0(Var a0);
-static inline int _x2c_proto_string_equal_0(Var a0, Var a1);
-static inline int _x2c_proto_string_compare_0(Var a0, Var a1);
-static inline int _x2c_proto_string_truth_0(Var a0);
-static inline Iter _x2c_proto_string_iter_0(Var a0, Iter a1);
-static inline int _x2c_proto_string_contains_0(Var a0, Var a1);
-static inline Var _x2c_proto_string_add_0(Var a0, Var a1);
-static inline Var _x2c_proto_string_getindex_0(Var a0, Var a1);
-static VarMethods _x2c__x2c_protocol_methods_8;
-static inline String _x2c_proto_symbol_str_0(Var a0);
-static inline String _x2c_proto_symbol_repr_0(Var a0);
-static inline Buffer _x2c_proto_symbol_write_str_0(Var a0, Buffer a1);
-static inline Buffer _x2c_proto_symbol_write_repr_0(Var a0, Buffer a1);
-static inline int _x2c_proto_symbol_compare_0(Var a0, Var a1);
-static VarMethods _x2c__x2c_protocol_methods_9;
+static inline int _x2c_gensym_proto_bytes_truth_0(Var a0);
+static VarMethods _x2c_gensym_protocol_methods_3;
+static inline String _x2c_gensym_proto_file_str_0(Var a0);
+static inline String _x2c_gensym_proto_file_repr_0(Var a0);
+static inline Buffer _x2c_gensym_proto_file_write_repr_0(Var a0, Buffer a1);
+static inline unsigned _x2c_gensym_proto_file_hash_0(Var a0);
+static inline int _x2c_gensym_proto_file_equal_0(Var a0, Var a1);
+static inline Iter _x2c_gensym_proto_file_iter_0(Var a0, Iter a1);
+static VarMethods _x2c_gensym_protocol_methods_4;
+static inline int _x2c_gensym_proto_iter_truth_0(Var a0);
+static inline Iter _x2c_gensym_proto_iter_iter_0(Var a0, Iter a1);
+static VarMethods _x2c_gensym_protocol_methods_5;
+static inline String _x2c_gensym_proto_list_str_0(Var a0);
+static inline String _x2c_gensym_proto_list_repr_0(Var a0);
+static inline Buffer _x2c_gensym_proto_list_write_str_0(Var a0, Buffer a1);
+static inline Buffer _x2c_gensym_proto_list_write_repr_0(Var a0, Buffer a1);
+static inline unsigned _x2c_gensym_proto_list_hash_0(Var a0);
+static inline int _x2c_gensym_proto_list_equal_0(Var a0, Var a1);
+static inline int _x2c_gensym_proto_list_compare_0(Var a0, Var a1);
+static inline int _x2c_gensym_proto_list_truth_0(Var a0);
+static inline Iter _x2c_gensym_proto_list_iter_0(Var a0, Iter a1);
+static inline int _x2c_gensym_proto_list_contains_0(Var a0, Var a1);
+static inline Var _x2c_gensym_proto_list_getindex_0(Var a0, Var a1);
+static VarMethods _x2c_gensym_protocol_methods_6;
+static inline String _x2c_gensym_proto_map_str_0(Var a0);
+static inline String _x2c_gensym_proto_map_repr_0(Var a0);
+static inline Buffer _x2c_gensym_proto_map_write_str_0(Var a0, Buffer a1);
+static inline Buffer _x2c_gensym_proto_map_write_repr_0(Var a0, Buffer a1);
+static inline int _x2c_gensym_proto_map_equal_0(Var a0, Var a1);
+static inline int _x2c_gensym_proto_map_compare_0(Var a0, Var a1);
+static inline int _x2c_gensym_proto_map_truth_0(Var a0);
+static inline Iter _x2c_gensym_proto_map_iter_0(Var a0, Iter a1);
+static inline int _x2c_gensym_proto_map_contains_0(Var a0, Var a1);
+static inline Var _x2c_gensym_proto_map_getindex_0(Var a0, Var a1);
+static inline Var _x2c_gensym_proto_map_setindex_0(Var a0, Var a1, Var a2);
+static inline Var _x2c_gensym_proto_map_updateindex_0(Var a0, Var a1, Symbol a2, Var a3);
+static inline Var _x2c_gensym_proto_map_postfixindex_0(Var a0, Var a1, Symbol a2);
+static VarMethods _x2c_gensym_protocol_methods_7;
+static inline String _x2c_gensym_proto_string_str_0(Var a0);
+static inline String _x2c_gensym_proto_string_repr_0(Var a0);
+static inline Buffer _x2c_gensym_proto_string_write_str_0(Var a0, Buffer a1);
+static inline Buffer _x2c_gensym_proto_string_write_repr_0(Var a0, Buffer a1);
+static inline unsigned _x2c_gensym_proto_string_hash_0(Var a0);
+static inline int _x2c_gensym_proto_string_equal_0(Var a0, Var a1);
+static inline int _x2c_gensym_proto_string_compare_0(Var a0, Var a1);
+static inline int _x2c_gensym_proto_string_truth_0(Var a0);
+static inline Iter _x2c_gensym_proto_string_iter_0(Var a0, Iter a1);
+static inline int _x2c_gensym_proto_string_contains_0(Var a0, Var a1);
+static inline Var _x2c_gensym_proto_string_add_0(Var a0, Var a1);
+static inline Var _x2c_gensym_proto_string_getindex_0(Var a0, Var a1);
+static VarMethods _x2c_gensym_protocol_methods_8;
+static inline String _x2c_gensym_proto_symbol_str_0(Var a0);
+static inline String _x2c_gensym_proto_symbol_repr_0(Var a0);
+static inline Buffer _x2c_gensym_proto_symbol_write_str_0(Var a0, Buffer a1);
+static inline Buffer _x2c_gensym_proto_symbol_write_repr_0(Var a0, Buffer a1);
+static inline int _x2c_gensym_proto_symbol_compare_0(Var a0, Var a1);
+static VarMethods _x2c_gensym_protocol_methods_9;
 void x2c_initialize_protocols(void);
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();  if(_init_guard_) return;  _init_guard_ = 1;
@@ -800,9 +800,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 static Symbol _literal_tag(List tag){
   {
-    List _x2c_match_expr = tag; List _x2c_match_cursor, _x2c_match_cursor1;  switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
-        case 9224497936761996324ULL: ;  _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 806120) && (_x2c_match_cursor1 = Var_list_payload(_x2c_match_cursor->car), 1) && _x2c_match_cursor1 && _x2c_match_cursor1->car.u64 == 9224497963177709656ULL && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1 && (_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && _x2c_match_cursor1) { Var _x2c_match_value_0 = _x2c_match_cursor1->car; if ((_x2c_match_cursor1 = _x2c_match_cursor1->cdr, 1) && !_x2c_match_cursor1 && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
-        Var key;  key = _x2c_match_value_0;  return Var_symbol(key);
+    List _x2c_gensym_match_expr = tag; List _x2c_gensym_match_cursor, _x2c_gensym_match_cursor1;  switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
+        case 9224497936761996324ULL: ;  _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && _x2c_gensym_match_cursor1 && _x2c_gensym_match_cursor1->car.u64 == 9224497963177709656ULL && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && _x2c_gensym_match_cursor1 && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && _x2c_gensym_match_cursor1 && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && _x2c_gensym_match_cursor1) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor1->car; if ((_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && !_x2c_gensym_match_cursor1 && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+        Var key;  key = _x2c_gensym_match_value_0;  return Var_symbol(key);
       }
        break; } } default: break;
     }
@@ -876,37 +876,37 @@ double Var_double(Var x){
 }
 
 void x2c_initialize_protocols(void){
-  static int _x2c_protocol_guard_ = 0;  if(_x2c_protocol_guard_) return;  _x2c_protocol_guard_ = 1;  _x2c__x2c_protocol_methods_0 =(VarMethods){
-    .str = _x2c_proto_array_str_0, .repr = _x2c_proto_array_repr_0, .write_str = _x2c_proto_array_write_str_0, .write_repr = _x2c_proto_array_write_repr_0, .equal = _x2c_proto_array_equal_0, .compare = _x2c_proto_array_compare_0, .truth = _x2c_proto_array_truth_0, .iter = _x2c_proto_array_iter_0, .contains = _x2c_proto_array_contains_0, .getindex = _x2c_proto_array_getindex_0, .setindex = _x2c_proto_array_setindex_0, .updateindex = _x2c_proto_array_updateindex_0, .postfixindex = _x2c_proto_array_postfixindex_0
+  static int _x2c_gensym_protocol_guard_ = 0;  if(_x2c_gensym_protocol_guard_) return;  _x2c_gensym_protocol_guard_ = 1;  _x2c_gensym_protocol_methods_0 =(VarMethods){
+    .str = _x2c_gensym_proto_array_str_0, .repr = _x2c_gensym_proto_array_repr_0, .write_str = _x2c_gensym_proto_array_write_str_0, .write_repr = _x2c_gensym_proto_array_write_repr_0, .equal = _x2c_gensym_proto_array_equal_0, .compare = _x2c_gensym_proto_array_compare_0, .truth = _x2c_gensym_proto_array_truth_0, .iter = _x2c_gensym_proto_array_iter_0, .contains = _x2c_gensym_proto_array_contains_0, .getindex = _x2c_gensym_proto_array_getindex_0, .setindex = _x2c_gensym_proto_array_setindex_0, .updateindex = _x2c_gensym_proto_array_updateindex_0, .postfixindex = _x2c_gensym_proto_array_postfixindex_0
   }
-  ;  x2c_register_builtin_descriptor(3313778, _x2c__x2c_protocol_methods_0);  _x2c__x2c_protocol_methods_1 =(VarMethods){
-    .truth = _x2c_proto_block_truth_0
+  ;  x2c_register_builtin_descriptor(3313778, _x2c_gensym_protocol_methods_0);  _x2c_gensym_protocol_methods_1 =(VarMethods){
+    .truth = _x2c_gensym_proto_block_truth_0
   }
-  ;  x2c_register_builtin_descriptor(5011670, _x2c__x2c_protocol_methods_1);  _x2c__x2c_protocol_methods_2 =(VarMethods){
-    .str = _x2c_proto_buffer_str_0, .repr = _x2c_proto_buffer_repr_0, .truth = _x2c_proto_buffer_truth_0, .getindex = _x2c_proto_buffer_getindex_0
+  ;  x2c_register_builtin_descriptor(5011670, _x2c_gensym_protocol_methods_1);  _x2c_gensym_protocol_methods_2 =(VarMethods){
+    .str = _x2c_gensym_proto_buffer_str_0, .repr = _x2c_gensym_proto_buffer_repr_0, .truth = _x2c_gensym_proto_buffer_truth_0, .getindex = _x2c_gensym_proto_buffer_getindex_0
   }
-  ;  x2c_register_builtin_descriptor(178663780, _x2c__x2c_protocol_methods_2);  _x2c__x2c_protocol_methods_3 =(VarMethods){
-    .truth = _x2c_proto_bytes_truth_0
+  ;  x2c_register_builtin_descriptor(178663780, _x2c_gensym_protocol_methods_2);  _x2c_gensym_protocol_methods_3 =(VarMethods){
+    .truth = _x2c_gensym_proto_bytes_truth_0
   }
-  ;  x2c_register_builtin_descriptor(5874022, _x2c__x2c_protocol_methods_3);  _x2c__x2c_protocol_methods_4 =(VarMethods){
-    .str = _x2c_proto_file_str_0, .repr = _x2c_proto_file_repr_0, .write_repr = _x2c_proto_file_write_repr_0, .hash = _x2c_proto_file_hash_0, .equal = _x2c_proto_file_equal_0, .iter = _x2c_proto_file_iter_0
+  ;  x2c_register_builtin_descriptor(5874022, _x2c_gensym_protocol_methods_3);  _x2c_gensym_protocol_methods_4 =(VarMethods){
+    .str = _x2c_gensym_proto_file_str_0, .repr = _x2c_gensym_proto_file_repr_0, .write_repr = _x2c_gensym_proto_file_write_repr_0, .hash = _x2c_gensym_proto_file_hash_0, .equal = _x2c_gensym_proto_file_equal_0, .iter = _x2c_gensym_proto_file_iter_0
   }
-  ;  x2c_register_builtin_descriptor(412426, _x2c__x2c_protocol_methods_4);  _x2c__x2c_protocol_methods_5 =(VarMethods){
-    .truth = _x2c_proto_iter_truth_0, .iter = _x2c_proto_iter_iter_0
+  ;  x2c_register_builtin_descriptor(412426, _x2c_gensym_protocol_methods_4);  _x2c_gensym_protocol_methods_5 =(VarMethods){
+    .truth = _x2c_gensym_proto_iter_truth_0, .iter = _x2c_gensym_proto_iter_iter_0
   }
-  ;  x2c_register_builtin_descriptor(631140, _x2c__x2c_protocol_methods_5);  _x2c__x2c_protocol_methods_6 =(VarMethods){
-    .str = _x2c_proto_list_str_0, .repr = _x2c_proto_list_repr_0, .write_str = _x2c_proto_list_write_str_0, .write_repr = _x2c_proto_list_write_repr_0, .hash = _x2c_proto_list_hash_0, .equal = _x2c_proto_list_equal_0, .compare = _x2c_proto_list_compare_0, .truth = _x2c_proto_list_truth_0, .iter = _x2c_proto_list_iter_0, .contains = _x2c_proto_list_contains_0, .getindex = _x2c_proto_list_getindex_0
+  ;  x2c_register_builtin_descriptor(631140, _x2c_gensym_protocol_methods_5);  _x2c_gensym_protocol_methods_6 =(VarMethods){
+    .str = _x2c_gensym_proto_list_str_0, .repr = _x2c_gensym_proto_list_repr_0, .write_str = _x2c_gensym_proto_list_write_str_0, .write_repr = _x2c_gensym_proto_list_write_repr_0, .hash = _x2c_gensym_proto_list_hash_0, .equal = _x2c_gensym_proto_list_equal_0, .compare = _x2c_gensym_proto_list_compare_0, .truth = _x2c_gensym_proto_list_truth_0, .iter = _x2c_gensym_proto_list_iter_0, .contains = _x2c_gensym_proto_list_contains_0, .getindex = _x2c_gensym_proto_list_getindex_0
   }
-  ;  x2c_register_builtin_descriptor(806120, _x2c__x2c_protocol_methods_6);  _x2c__x2c_protocol_methods_7 =(VarMethods){
-    .str = _x2c_proto_map_str_0, .repr = _x2c_proto_map_repr_0, .write_str = _x2c_proto_map_write_str_0, .write_repr = _x2c_proto_map_write_repr_0, .equal = _x2c_proto_map_equal_0, .compare = _x2c_proto_map_compare_0, .truth = _x2c_proto_map_truth_0, .iter = _x2c_proto_map_iter_0, .contains = _x2c_proto_map_contains_0, .getindex = _x2c_proto_map_getindex_0, .setindex = _x2c_proto_map_setindex_0, .updateindex = _x2c_proto_map_updateindex_0, .postfixindex = _x2c_proto_map_postfixindex_0
+  ;  x2c_register_builtin_descriptor(806120, _x2c_gensym_protocol_methods_6);  _x2c_gensym_protocol_methods_7 =(VarMethods){
+    .str = _x2c_gensym_proto_map_str_0, .repr = _x2c_gensym_proto_map_repr_0, .write_str = _x2c_gensym_proto_map_write_str_0, .write_repr = _x2c_gensym_proto_map_write_repr_0, .equal = _x2c_gensym_proto_map_equal_0, .compare = _x2c_gensym_proto_map_compare_0, .truth = _x2c_gensym_proto_map_truth_0, .iter = _x2c_gensym_proto_map_iter_0, .contains = _x2c_gensym_proto_map_contains_0, .getindex = _x2c_gensym_proto_map_getindex_0, .setindex = _x2c_gensym_proto_map_setindex_0, .updateindex = _x2c_gensym_proto_map_updateindex_0, .postfixindex = _x2c_gensym_proto_map_postfixindex_0
   }
-  ;  x2c_register_builtin_descriptor(26720, _x2c__x2c_protocol_methods_7);  _x2c__x2c_protocol_methods_8 =(VarMethods){
-    .str = _x2c_proto_string_str_0, .repr = _x2c_proto_string_repr_0, .write_str = _x2c_proto_string_write_str_0, .write_repr = _x2c_proto_string_write_repr_0, .hash = _x2c_proto_string_hash_0, .equal = _x2c_proto_string_equal_0, .compare = _x2c_proto_string_compare_0, .truth = _x2c_proto_string_truth_0, .iter = _x2c_proto_string_iter_0, .contains = _x2c_proto_string_contains_0, .add = _x2c_proto_string_add_0, .getindex = _x2c_proto_string_getindex_0
+  ;  x2c_register_builtin_descriptor(26720, _x2c_gensym_protocol_methods_7);  _x2c_gensym_protocol_methods_8 =(VarMethods){
+    .str = _x2c_gensym_proto_string_str_0, .repr = _x2c_gensym_proto_string_repr_0, .write_str = _x2c_gensym_proto_string_write_str_0, .write_repr = _x2c_gensym_proto_string_write_repr_0, .hash = _x2c_gensym_proto_string_hash_0, .equal = _x2c_gensym_proto_string_equal_0, .compare = _x2c_gensym_proto_string_compare_0, .truth = _x2c_gensym_proto_string_truth_0, .iter = _x2c_gensym_proto_string_iter_0, .contains = _x2c_gensym_proto_string_contains_0, .add = _x2c_gensym_proto_string_add_0, .getindex = _x2c_gensym_proto_string_getindex_0
   }
-  ;  x2c_register_builtin_descriptor(1318210446, _x2c__x2c_protocol_methods_8);  _x2c__x2c_protocol_methods_9 =(VarMethods){
-    .str = _x2c_proto_symbol_str_0, .repr = _x2c_proto_symbol_repr_0, .write_str = _x2c_proto_symbol_write_str_0, .write_repr = _x2c_proto_symbol_write_repr_0, .compare = _x2c_proto_symbol_compare_0
+  ;  x2c_register_builtin_descriptor(1318210446, _x2c_gensym_protocol_methods_8);  _x2c_gensym_protocol_methods_9 =(VarMethods){
+    .str = _x2c_gensym_proto_symbol_str_0, .repr = _x2c_gensym_proto_symbol_repr_0, .write_str = _x2c_gensym_proto_symbol_write_str_0, .write_repr = _x2c_gensym_proto_symbol_write_repr_0, .compare = _x2c_gensym_proto_symbol_compare_0
   }
-  ;  x2c_register_builtin_descriptor(1328354264, _x2c__x2c_protocol_methods_9);
+  ;  x2c_register_builtin_descriptor(1328354264, _x2c_gensym_protocol_methods_9);
 }
 
 void x2c_initialize(void){
@@ -920,8 +920,8 @@ void x2c_initialize(void){
 
 int x2c_normalize_index(int index, int length){
   if(! _init_guard_) _file_init_();  if(length < 0){
-    Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_index")), NULL))); {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 871};  x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(816725264), int_var(length));  __builtin_unreachable();
+    Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_index")), NULL))); {
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 871};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(816725264), int_var(length));  __builtin_unreachable();
     }
 
   }
@@ -934,7 +934,7 @@ int x2c_slice_bound(int bound){
 
 int x2c_normalize_slice(int * start, int * stop, int step, int length){
   if(! _init_guard_) _file_init_();  if(! start || ! stop || ! step || length < 0){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 896};  x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_slice")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 896};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_slice")), NULL))));  __builtin_unreachable();
   }
   int orig_stop = * stop;  if(* start == INT_MIN) * start =(step > 0) ? 0 : length - 1;  if(* stop == INT_MIN) * stop = - 1;  if(* start < 0){
     * start += length;  if(* start < 0) * start =(step < 0) ? - 1 : 0;
@@ -949,282 +949,282 @@ int x2c_normalize_slice(int * start, int * stop, int step, int length){
 }
 
 Array Var_array(Var);
-static inline String _x2c_proto_array_str_0(Var a0){
+static inline String _x2c_gensym_proto_array_str_0(Var a0){
   return Array_str(Var_array(a0));
 }
 
-static inline String _x2c_proto_array_repr_0(Var a0){
+static inline String _x2c_gensym_proto_array_repr_0(Var a0){
   return Array_repr(Var_array(a0));
 }
 
-static inline Buffer _x2c_proto_array_write_str_0(Var a0, Buffer a1){
+static inline Buffer _x2c_gensym_proto_array_write_str_0(Var a0, Buffer a1){
   return Array_write_str(Var_array(a0), a1);
 }
 
-static inline Buffer _x2c_proto_array_write_repr_0(Var a0, Buffer a1){
+static inline Buffer _x2c_gensym_proto_array_write_repr_0(Var a0, Buffer a1){
   return Array_write_repr(Var_array(a0), a1);
 }
 
-static inline int _x2c_proto_array_equal_0(Var a0, Var a1){
+static inline int _x2c_gensym_proto_array_equal_0(Var a0, Var a1){
   return Array_equal(Var_array(a0), Var_array(a1));
 }
 
-static inline int _x2c_proto_array_compare_0(Var a0, Var a1){
+static inline int _x2c_gensym_proto_array_compare_0(Var a0, Var a1){
   return Array_compare(Var_array(a0), Var_array(a1));
 }
 
-static inline int _x2c_proto_array_truth_0(Var a0){
+static inline int _x2c_gensym_proto_array_truth_0(Var a0){
   return Array_truth(Var_array(a0));
 }
 
-static inline Iter _x2c_proto_array_iter_0(Var a0, Iter a1){
+static inline Iter _x2c_gensym_proto_array_iter_0(Var a0, Iter a1){
   return Array_iter(Var_array(a0), a1);
 }
 
-static inline int _x2c_proto_array_contains_0(Var a0, Var a1){
+static inline int _x2c_gensym_proto_array_contains_0(Var a0, Var a1){
   return Array_contains(Var_array(a0), a1);
 }
 
-static inline Var _x2c_proto_array_getindex_0(Var a0, Var a1){
+static inline Var _x2c_gensym_proto_array_getindex_0(Var a0, Var a1){
   return Array_getindex(Var_array(a0), Var_int(Var_convert(a1, 3453797)));
 }
 
-static inline Var _x2c_proto_array_setindex_0(Var a0, Var a1, Var a2){
+static inline Var _x2c_gensym_proto_array_setindex_0(Var a0, Var a1, Var a2){
   return Array_setindex(Var_array(a0), Var_int(Var_convert(a1, 3453797)), a2);
 }
 
-static inline Var _x2c_proto_array_updateindex_0(Var a0, Var a1, Symbol a2, Var a3){
+static inline Var _x2c_gensym_proto_array_updateindex_0(Var a0, Var a1, Symbol a2, Var a3){
   return Array_updateindex(Var_array(a0), Var_int(Var_convert(a1, 3453797)), a2, a3);
 }
 
-static inline Var _x2c_proto_array_postfixindex_0(Var a0, Var a1, Symbol a2){
+static inline Var _x2c_gensym_proto_array_postfixindex_0(Var a0, Var a1, Symbol a2){
   return Array_postfixindex(Var_array(a0), Var_int(Var_convert(a1, 3453797)), a2);
 }
 
-static inline int _x2c_proto_block_truth_0(Var a0){
+static inline int _x2c_gensym_proto_block_truth_0(Var a0){
   return Block_truth(Var_block(a0));
 }
 
 Buffer Var_buffer(Var);
-static inline String _x2c_proto_buffer_str_0(Var a0){
+static inline String _x2c_gensym_proto_buffer_str_0(Var a0){
   return Buffer_str(Var_buffer(a0));
 }
 
-static inline String _x2c_proto_buffer_repr_0(Var a0){
+static inline String _x2c_gensym_proto_buffer_repr_0(Var a0){
   return Buffer_repr(Var_buffer(a0));
 }
 
-static inline int _x2c_proto_buffer_truth_0(Var a0){
+static inline int _x2c_gensym_proto_buffer_truth_0(Var a0){
   return Buffer_truth(Var_buffer(a0));
 }
 
 int Buffer_getindex(Buffer, int);
-static inline Var _x2c_proto_buffer_getindex_0(Var a0, Var a1){
+static inline Var _x2c_gensym_proto_buffer_getindex_0(Var a0, Var a1){
   return int_var(Buffer_getindex(Var_buffer(a0), Var_int(Var_convert(a1, 3453797))));
 }
 
 Bytes Var_bytes(Var);
-static inline int _x2c_proto_bytes_truth_0(Var a0){
+static inline int _x2c_gensym_proto_bytes_truth_0(Var a0){
   return Bytes_truth(Var_bytes(a0));
 }
 
-static inline String _x2c_proto_file_str_0(Var a0){
+static inline String _x2c_gensym_proto_file_str_0(Var a0){
   return File_str(Var_file(a0));
 }
 
-static inline String _x2c_proto_file_repr_0(Var a0){
+static inline String _x2c_gensym_proto_file_repr_0(Var a0){
   return File_repr(Var_file(a0));
 }
 
-static inline Buffer _x2c_proto_file_write_repr_0(Var a0, Buffer a1){
+static inline Buffer _x2c_gensym_proto_file_write_repr_0(Var a0, Buffer a1){
   return File_write_repr(Var_file(a0), a1);
 }
 
-static inline unsigned _x2c_proto_file_hash_0(Var a0){
+static inline unsigned _x2c_gensym_proto_file_hash_0(Var a0){
   return File_hash(Var_file(a0));
 }
 
-static inline int _x2c_proto_file_equal_0(Var a0, Var a1){
+static inline int _x2c_gensym_proto_file_equal_0(Var a0, Var a1){
   return File_equal(Var_file(a0), Var_file(a1));
 }
 
-static inline Iter _x2c_proto_file_iter_0(Var a0, Iter a1){
+static inline Iter _x2c_gensym_proto_file_iter_0(Var a0, Iter a1){
   return File_iter(Var_file(a0), a1);
 }
 
-static inline int _x2c_proto_iter_truth_0(Var a0){
+static inline int _x2c_gensym_proto_iter_truth_0(Var a0){
   return Iter_truth(Var_as_iter(a0));
 }
 
-static inline Iter _x2c_proto_iter_iter_0(Var a0, Iter a1){
+static inline Iter _x2c_gensym_proto_iter_iter_0(Var a0, Iter a1){
   return Iter_iter(Var_as_iter(a0), a1);
 }
 
 List Var_list(Var);
-static inline String _x2c_proto_list_str_0(Var a0){
+static inline String _x2c_gensym_proto_list_str_0(Var a0){
   return List_str(Var_list(a0));
 }
 
-static inline String _x2c_proto_list_repr_0(Var a0){
+static inline String _x2c_gensym_proto_list_repr_0(Var a0){
   return List_repr(Var_list(a0));
 }
 
-static inline Buffer _x2c_proto_list_write_str_0(Var a0, Buffer a1){
+static inline Buffer _x2c_gensym_proto_list_write_str_0(Var a0, Buffer a1){
   return List_write_str(Var_list(a0), a1);
 }
 
-static inline Buffer _x2c_proto_list_write_repr_0(Var a0, Buffer a1){
+static inline Buffer _x2c_gensym_proto_list_write_repr_0(Var a0, Buffer a1){
   return List_write_repr(Var_list(a0), a1);
 }
 
-static inline unsigned _x2c_proto_list_hash_0(Var a0){
+static inline unsigned _x2c_gensym_proto_list_hash_0(Var a0){
   return List_hash(Var_list(a0));
 }
 
-static inline int _x2c_proto_list_equal_0(Var a0, Var a1){
+static inline int _x2c_gensym_proto_list_equal_0(Var a0, Var a1){
   return List_equal(Var_list(a0), Var_list(a1));
 }
 
-static inline int _x2c_proto_list_compare_0(Var a0, Var a1){
+static inline int _x2c_gensym_proto_list_compare_0(Var a0, Var a1){
   return List_compare(Var_list(a0), Var_list(a1));
 }
 
-static inline int _x2c_proto_list_truth_0(Var a0){
+static inline int _x2c_gensym_proto_list_truth_0(Var a0){
   return List_truth(Var_list(a0));
 }
 
-static inline Iter _x2c_proto_list_iter_0(Var a0, Iter a1){
+static inline Iter _x2c_gensym_proto_list_iter_0(Var a0, Iter a1){
   return List_iter(Var_list(a0), a1);
 }
 
-static inline int _x2c_proto_list_contains_0(Var a0, Var a1){
+static inline int _x2c_gensym_proto_list_contains_0(Var a0, Var a1){
   return List_contains(Var_list(a0), a1);
 }
 
-static inline Var _x2c_proto_list_getindex_0(Var a0, Var a1){
+static inline Var _x2c_gensym_proto_list_getindex_0(Var a0, Var a1){
   return List_getindex(Var_list(a0), Var_int(Var_convert(a1, 3453797)));
 }
 
 Map Var_map(Var);
-static inline String _x2c_proto_map_str_0(Var a0){
+static inline String _x2c_gensym_proto_map_str_0(Var a0){
   return Map_str(Var_map(a0));
 }
 
-static inline String _x2c_proto_map_repr_0(Var a0){
+static inline String _x2c_gensym_proto_map_repr_0(Var a0){
   return Map_repr(Var_map(a0));
 }
 
-static inline Buffer _x2c_proto_map_write_str_0(Var a0, Buffer a1){
+static inline Buffer _x2c_gensym_proto_map_write_str_0(Var a0, Buffer a1){
   return Map_write_str(Var_map(a0), a1);
 }
 
-static inline Buffer _x2c_proto_map_write_repr_0(Var a0, Buffer a1){
+static inline Buffer _x2c_gensym_proto_map_write_repr_0(Var a0, Buffer a1){
   return Map_write_repr(Var_map(a0), a1);
 }
 
-static inline int _x2c_proto_map_equal_0(Var a0, Var a1){
+static inline int _x2c_gensym_proto_map_equal_0(Var a0, Var a1){
   return Map_equal(Var_map(a0), Var_map(a1));
 }
 
-static inline int _x2c_proto_map_compare_0(Var a0, Var a1){
+static inline int _x2c_gensym_proto_map_compare_0(Var a0, Var a1){
   return Map_compare(Var_map(a0), Var_map(a1));
 }
 
-static inline int _x2c_proto_map_truth_0(Var a0){
+static inline int _x2c_gensym_proto_map_truth_0(Var a0){
   return Map_truth(Var_map(a0));
 }
 
-static inline Iter _x2c_proto_map_iter_0(Var a0, Iter a1){
+static inline Iter _x2c_gensym_proto_map_iter_0(Var a0, Iter a1){
   return Map_iter(Var_map(a0), a1);
 }
 
-static inline int _x2c_proto_map_contains_0(Var a0, Var a1){
+static inline int _x2c_gensym_proto_map_contains_0(Var a0, Var a1){
   return Map_contains(Var_map(a0), a1);
 }
 
-static inline Var _x2c_proto_map_getindex_0(Var a0, Var a1){
+static inline Var _x2c_gensym_proto_map_getindex_0(Var a0, Var a1){
   return Map_getindex(Var_map(a0), a1);
 }
 
-static inline Var _x2c_proto_map_setindex_0(Var a0, Var a1, Var a2){
+static inline Var _x2c_gensym_proto_map_setindex_0(Var a0, Var a1, Var a2){
   return Map_setindex(Var_map(a0), a1, a2);
 }
 
-static inline Var _x2c_proto_map_updateindex_0(Var a0, Var a1, Symbol a2, Var a3){
+static inline Var _x2c_gensym_proto_map_updateindex_0(Var a0, Var a1, Symbol a2, Var a3){
   return Map_updateindex(Var_map(a0), a1, a2, a3);
 }
 
-static inline Var _x2c_proto_map_postfixindex_0(Var a0, Var a1, Symbol a2){
+static inline Var _x2c_gensym_proto_map_postfixindex_0(Var a0, Var a1, Symbol a2){
   return Map_postfixindex(Var_map(a0), a1, a2);
 }
 
 String Var_string(Var);
-static inline String _x2c_proto_string_str_0(Var a0){
+static inline String _x2c_gensym_proto_string_str_0(Var a0){
   return String_str(Var_string(a0));
 }
 
-static inline String _x2c_proto_string_repr_0(Var a0){
+static inline String _x2c_gensym_proto_string_repr_0(Var a0){
   return String_repr(Var_string(a0));
 }
 
-static inline Buffer _x2c_proto_string_write_str_0(Var a0, Buffer a1){
+static inline Buffer _x2c_gensym_proto_string_write_str_0(Var a0, Buffer a1){
   return String_write_str(Var_string(a0), a1);
 }
 
-static inline Buffer _x2c_proto_string_write_repr_0(Var a0, Buffer a1){
+static inline Buffer _x2c_gensym_proto_string_write_repr_0(Var a0, Buffer a1){
   return String_write_repr(Var_string(a0), a1);
 }
 
-static inline unsigned _x2c_proto_string_hash_0(Var a0){
+static inline unsigned _x2c_gensym_proto_string_hash_0(Var a0){
   return String_hash(Var_string(a0));
 }
 
-static inline int _x2c_proto_string_equal_0(Var a0, Var a1){
+static inline int _x2c_gensym_proto_string_equal_0(Var a0, Var a1){
   return String_equal(Var_string(a0), Var_string(a1));
 }
 
-static inline int _x2c_proto_string_compare_0(Var a0, Var a1){
+static inline int _x2c_gensym_proto_string_compare_0(Var a0, Var a1){
   return String_compare(Var_string(a0), Var_string(a1));
 }
 
-static inline int _x2c_proto_string_truth_0(Var a0){
+static inline int _x2c_gensym_proto_string_truth_0(Var a0){
   return String_truth(Var_string(a0));
 }
 
-static inline Iter _x2c_proto_string_iter_0(Var a0, Iter a1){
+static inline Iter _x2c_gensym_proto_string_iter_0(Var a0, Iter a1){
   return String_iter(Var_string(a0), a1);
 }
 
-static inline int _x2c_proto_string_contains_0(Var a0, Var a1){
+static inline int _x2c_gensym_proto_string_contains_0(Var a0, Var a1){
   return String_contains(Var_string(a0), Var_as_string(a1));
 }
 
 String String_add(String, String);
-static inline Var _x2c_proto_string_add_0(Var a0, Var a1){
+static inline Var _x2c_gensym_proto_string_add_0(Var a0, Var a1){
   return String_var(String_add(Var_string(a0), Var_string(a1)));
 }
 
-static inline Var _x2c_proto_string_getindex_0(Var a0, Var a1){
+static inline Var _x2c_gensym_proto_string_getindex_0(Var a0, Var a1){
   return int_var(String_getindex(Var_string(a0), Var_int(Var_convert(a1, 3453797))));
 }
 
-static inline String _x2c_proto_symbol_str_0(Var a0){
+static inline String _x2c_gensym_proto_symbol_str_0(Var a0){
   return Symbol_str(Var_symbol(a0));
 }
 
-static inline String _x2c_proto_symbol_repr_0(Var a0){
+static inline String _x2c_gensym_proto_symbol_repr_0(Var a0){
   return Symbol_repr(Var_symbol(a0));
 }
 
-static inline Buffer _x2c_proto_symbol_write_str_0(Var a0, Buffer a1){
+static inline Buffer _x2c_gensym_proto_symbol_write_str_0(Var a0, Buffer a1){
   return Symbol_write_str(Var_symbol(a0), a1);
 }
 
-static inline Buffer _x2c_proto_symbol_write_repr_0(Var a0, Buffer a1){
+static inline Buffer _x2c_gensym_proto_symbol_write_repr_0(Var a0, Buffer a1){
   return Symbol_write_repr(Var_symbol(a0), a1);
 }
 
-static inline int _x2c_proto_symbol_compare_0(Var a0, Var a1){
+static inline int _x2c_gensym_proto_symbol_compare_0(Var a0, Var a1){
   return Symbol_compare(Var_symbol(a0), Var_symbol(a1));
 }
 

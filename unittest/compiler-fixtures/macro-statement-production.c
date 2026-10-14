@@ -21,8 +21,8 @@ static void bump(int * value, int amount){
 static int fallback_probe(int fail){
   if(fail){
     {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/macro-statement-production.x",.function = "fallback_probe",.line = 50};
-      x2c_error_raise_n(& _x2c_error_site_0, 425262028382176, 0);
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/macro-statement-production.x",.function = "fallback_probe",.line = 50};
+      x2c_error_raise_n(& _x2c_gensym_error_site_0, 425262028382176, 0);
     }
     return 23;
   }

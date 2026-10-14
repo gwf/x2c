@@ -49,52 +49,52 @@ static Symbol _observe_relabel(List errors, Var data){
 
 static void _relabel_nested_pattern(void){
   {
-    ExceptionFrame _x2c_exception_frame_0;
-    static MatchCaptureSite _x2c_macro_arms_0[1];
-    Var _x2c_macro_patterns_0[1];
-    static ErrorCatchSite _x2c_macro_site_0 ={
-      _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
+    ExceptionFrame _x2c_gensym_exception_frame_0;
+    static MatchCaptureSite _x2c_gensym_macro_arms_0[1];
+    Var _x2c_gensym_macro_patterns_0[1];
+    static ErrorCatchSite _x2c_gensym_macro_site_0 ={
+      _x2c_gensym_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
-      _x2c_macro_patterns_0[0] = List_var(cons(Symbol_var(33820664566756), cons(List_var(cons(Symbol_var(280234584), cons(List_var(cons(Symbol_var(951296328), cons(String_var(_0), NULL))), NULL))), NULL)));
+    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_0)){
+      _x2c_gensym_macro_patterns_0[0] = List_var(cons(Symbol_var(33820664566756), cons(List_var(cons(Symbol_var(280234584), cons(List_var(cons(Symbol_var(951296328), cons(String_var(_0), NULL))), NULL))), NULL)));
     }
-    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);
-    x2c_exception_push(& _x2c_exception_frame_0);
-    if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
+    volatile ErrorHandler _x2c_gensym_error_handler_0 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_0, & _x2c_gensym_macro_site_0, _x2c_gensym_macro_patterns_0);
+    x2c_exception_push(& _x2c_gensym_exception_frame_0);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)){
       List detail = cons(Symbol_var(951296328), cons(String_var(String_new("marker")), NULL));
       {
-        static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/catch-filter-runtime-init.x",.function = "_relabel_nested_pattern",.line = 27};
-        x2c_error_raise_n(& _x2c_error_site_0, 33820664566756, 1, Symbol_var(280234584), List_var(detail));
+        static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/catch-filter-runtime-init.x",.function = "_relabel_nested_pattern",.line = 27};
+        x2c_error_raise_n(& _x2c_gensym_error_site_0, 33820664566756, 1, Symbol_var(280234584), List_var(detail));
       }
 
     }
     else{
-      x2c_exception_landed(& _x2c_exception_frame_0);
-      if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
-        int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
-        x2c_error_catch_detach(_x2c_error_handler_0);
-        x2c_exception_mark_handled(& _x2c_exception_frame_0);
-        if(_x2c_macro_selected_0 == 0){
+      x2c_exception_landed(& _x2c_gensym_exception_frame_0);
+      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_0)){
+        int _x2c_gensym_macro_selected_0 = x2c_error_catch_selected(_x2c_gensym_error_handler_0);
+        x2c_error_catch_detach(_x2c_gensym_error_handler_0);
+        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_0);
+        if(_x2c_gensym_macro_selected_0 == 0){
           {
-            static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/catch-filter-runtime-init.x",.function = "_relabel_nested_pattern",.line = 22};
-            x2c_error_raise_n(& _x2c_error_site_1, 31181407163364, 0);
+            static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "unittest/compiler-fixtures/catch-filter-runtime-init.x",.function = "_relabel_nested_pattern",.line = 22};
+            x2c_error_raise_n(& _x2c_gensym_error_site_1, 31181407163364, 0);
           }
 
         }
 
       }
       else{
-        x2c_error_catch_close(_x2c_error_handler_0);
-        _x2c_error_handler_0 = NULL;
-        x2c_exception_leave(& _x2c_exception_frame_0);
+        x2c_error_catch_close(_x2c_gensym_error_handler_0);
+        _x2c_gensym_error_handler_0 = NULL;
+        x2c_exception_leave(& _x2c_gensym_exception_frame_0);
         __builtin_unreachable();
       }
 
     }
-    x2c_error_catch_close(_x2c_error_handler_0);
-    _x2c_error_handler_0 = NULL;
-    x2c_exception_leave(& _x2c_exception_frame_0);
+    x2c_error_catch_close(_x2c_gensym_error_handler_0);
+    _x2c_gensym_error_handler_0 = NULL;
+    x2c_exception_leave(& _x2c_gensym_exception_frame_0);
   }
 
 }

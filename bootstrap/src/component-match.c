@@ -57,8 +57,8 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _1 = String_new("#");
   _2 = String_new("endif");
   _3 = String_new("if");
-  _4 = String_new("_x2c_match_cursor");
-  _5 = String_new("_x2c_match_cursor");
+  _4 = String_new("_x2c_gensym_match_cursor");
+  _5 = String_new("_x2c_gensym_match_cursor");
   _6 = Symbol_var(2050325770);
   _7 = Symbol_var(62054);
   _8 = cons(_7, NULL);
@@ -102,10 +102,10 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _46 = String_new(" default: ;");
   _47 = String_new(" case ");
   _48 = String_new("ULL: ;");
-  _49 = String_new("; int _x2c_match_none = !Var_is(_x2c_match_var, %lu);");
-  _50 = String_new("Var _x2c_match_var =");
+  _49 = String_new("; int _x2c_gensym_match_none = " "!Var_is(_x2c_gensym_match_var, %lu);");
+  _50 = String_new("Var _x2c_gensym_match_var =");
   _51 = String_var(_50);
-  _52 = String_new("List _x2c_match_expr = Var_list_payload(_x2c_match_var)");
+  _52 = String_new("List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var)");
   _53 = String_var(_52);
 }
 
@@ -126,17 +126,17 @@ static List _match_items(Array out){
   Array items = Array_new(), run = Array_new();
   {
     Var piece;
-    Array _x2c_macro_object_0 = out;
-    int _x2c_macro_cursor_0 = 0;
-    Var _x2c_macro_cursor_output_0;
-    while(Array_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      piece = _x2c_macro_cursor_output_0;
+    Array _x2c_gensym_macro_object_0 = out;
+    int _x2c_gensym_macro_cursor_0 = 0;
+    Var _x2c_gensym_macro_cursor_output_0;
+    while(Array_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+      piece = _x2c_gensym_macro_cursor_output_0;
       {
         {
-          Var _x2c_match_var = piece; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);
-          List _x2c_match_expr = Var_list_payload(_x2c_match_var); List _x2c_match_cursor;
-          switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
-              case 9224497972340888518ULL: ; if (!_x2c_match_none) { _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497972340888518ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+          Var _x2c_gensym_match_var = piece; int _x2c_gensym_match_none = !Var_is(_x2c_gensym_match_var, 806120);
+          List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var); List _x2c_gensym_match_cursor;
+          switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
+              case 9224497972340888518ULL: ; if (!_x2c_gensym_match_none) { _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497972340888518ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
               if(Array_len(run)) Array_push(items, List_var(cons(String_var(_0), Array_list(run))));
               Array_clear(run);
               Array_push(items, piece);
@@ -182,13 +182,13 @@ static List _match_binders(Var value){
 
 static Symbol _match_capture_tag(Var element, Var * binder){
   {
-    Var _x2c_match_var = element; int _x2c_match_none = !Var_is(_x2c_match_var, 806120);
-    List _x2c_match_expr = Var_list_payload(_x2c_match_var); Var _x2c_match_values[2]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
+    Var _x2c_gensym_match_var = element; int _x2c_gensym_match_none = !Var_is(_x2c_gensym_match_var, 806120);
+    List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var); Var _x2c_gensym_match_values[2]; MatchCaptureBuffer _x2c_gensym_match_capture = { .values = _x2c_gensym_match_values, .capacity = 2 };
     switch(0){
-        default: ; if (!_x2c_match_none) { static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_23), &_x2c_match_capture)) { Var _x2c_match_value_0 = _x2c_match_values[0]; Var _x2c_match_value_1 = _x2c_match_values[1]; {
-        Var name;  name = _x2c_match_value_0;  Var tag;  tag = _x2c_match_value_1; {
-          Var _x2c_match_value_0 = tag; {
-            Symbol tag = Var_symbol(_x2c_match_value_0);  if(tag != 1059020478773725 && tag != 1479708786 && tag != 1468512){
+        default: ; if (!_x2c_gensym_match_none) { static MatchCaptureSite _x2c_gensym_match_site_0; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_0, _x2c_gensym_match_expr, List_var(_23), &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; Var _x2c_gensym_match_value_1 = _x2c_gensym_match_values[1]; {
+        Var name;  name = _x2c_gensym_match_value_0;  Var tag;  tag = _x2c_gensym_match_value_1; {
+          Var _x2c_gensym_match_value_0 = tag; {
+            Symbol tag = Var_symbol(_x2c_gensym_match_value_0);  if(tag != 1059020478773725 && tag != 1479708786 && tag != 1468512){
               (* binder) = name;  return tag;
             }
 
@@ -212,7 +212,7 @@ static void _match_bind(Buffer b, Var binder, String cell, Array seen, int * tes
   if((* testing)){
     Buffer_write(b, ") {"); (* braces) ++; (* testing) = 0;
   }
-  int index = Array_len(seen) - 1;  int list = Var_is_list_binder(binder);  Buffer_printf(b, " %s _x2c_match_%s_%d = %s;", list ? "List" : "Var", list ? "list" : "value", index, cell);
+  int index = Array_len(seen) - 1;  int list = Var_is_list_binder(binder);  Buffer_printf(b, " %s _x2c_gensym_match_%s_%d = %s;", list ? "List" : "Var", list ? "list" : "value", index, cell);
 }
 
 static int _match_element(Buffer b, Var part, String cell, Array seen, int * testing, int * braces){
@@ -226,13 +226,13 @@ static int _match_element(Buffer b, Var part, String cell, Array seen, int * tes
 }
 
 static int _match_nested(Buffer b, Array out, List pattern, Var value, int * depths){
-  if(! List_truth(({ static MatchCaptureSite _x2c_match_site_0;  x2c_match_site_match(& _x2c_match_site_0, pattern, List_var(_41)); })) || ! Var_is_row(value, 9, 7, 4)) return - 1;
+  if(! List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_0;  x2c_match_site_match(& _x2c_gensym_match_site_0, pattern, List_var(_41)); })) || ! Var_is_row(value, 9, 7, 4)) return - 1;
   _match_flush(b, out);
   Array rests = Array_new(), paths = Array_new(), seen = Array_new();
   int mark = Array_len(out), testing = 0, braces = 0, step = 0, deepest = 0;
   List rest = Var_list_payload(value);
   String path = _42;
-  Buffer_write(b, " _x2c_match_cursor = _x2c_match_expr;");
+  Buffer_write(b, " _x2c_gensym_match_cursor = _x2c_gensym_match_expr;");
   for(; ; ){
     int levels = Array_len(rests);
     String cursor = _match_cursor(levels);
@@ -300,14 +300,14 @@ static void _match_captures(Buffer b, List binders){
   int index = 0;
   {
     Var binder;
-    List _x2c_macro_object_1 = binders;
-    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
-    Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      binder = _x2c_macro_cursor_output_1;
+    List _x2c_gensym_macro_object_1 = binders;
+    List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
+    Var _x2c_gensym_macro_cursor_output_1;
+    while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
+      binder = _x2c_gensym_macro_cursor_output_1;
       {
         int list = Var_is_list_binder(binder);
-        Buffer_printf(b, " %s _x2c_match_%s_%d = %s_x2c_match_values[%d]%s;", list ? "List" : "Var", list ? "list" : "value", index, list ? "Var_list_payload(" : "", index, list ? ")" : "");
+        Buffer_printf(b, " %s _x2c_gensym_match_%s_%d = %s_x2c_gensym_match_values[%d]%s;", list ? "List" : "Var", list ? "list" : "value", index, list ? "Var_list_payload(" : "", index, list ? ")" : "");
         index ++;
       }
 
@@ -320,12 +320,12 @@ static void _match_captures(Buffer b, List binders){
 static void _match_body(Buffer b, Array out, List body, int braces){
   int finish = 1;
   {
-    List _x2c_match_expr = body; List _x2c_match_cursor;
-    switch(_x2c_match_expr ? _x2c_match_expr->car.u64 : 0){
+    List _x2c_gensym_match_expr = body; List _x2c_gensym_match_cursor;
+    switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
         case 9224497953206575432ULL: ;
-       _x2c_match_cursor = _x2c_match_expr; if (_x2c_match_cursor && _x2c_match_cursor->car.u64 == 9224497953206575432ULL && (_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor) { Var _x2c_match_value_0 = _x2c_match_cursor->car; if ((_x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {{
+       _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497953206575432ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
         Var inner;
-        inner = _x2c_match_value_0;
+        inner = _x2c_gensym_match_value_0;
         {
           body = Var_list_payload(inner);
           finish = 0;
@@ -361,8 +361,8 @@ static String _match_locals(int depths, int values){
     Buffer_write(b, _match_cursor(depth));
   }
   if(depths >= 0) Buffer_write(b, ";");
-  if(values > 0) Buffer_printf(b, " Var _x2c_match_values[%d]; MatchCaptureBuffer _x2c_match_capture = " "{ .values = _x2c_match_values, .capacity = %d };", values, values);
-  else if(! values) Buffer_write(b, " MatchCaptureBuffer _x2c_match_capture = { 0 };");
+  if(values > 0) Buffer_printf(b, " Var _x2c_gensym_match_values[%d]; " "MatchCaptureBuffer _x2c_gensym_match_capture = " "{ .values = _x2c_gensym_match_values, .capacity = %d };", values, values);
+  else if(! values) Buffer_write(b, " MatchCaptureBuffer _x2c_gensym_match_capture = { 0 };");
   return Buffer_str_free(b);
 }
 

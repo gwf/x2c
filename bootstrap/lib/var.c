@@ -182,15 +182,15 @@ static int _magnitude_compare(unsigned long long integer, long double floating);
 
 static void _classes_shutdown(void);
 
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
 
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1);
 
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
+static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2);
 
-static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
+static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3);
 
-static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
+static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4);
 
 #include "exception.h"
 
@@ -233,10 +233,10 @@ static void * _address(Var value){
 unsigned long Var_tag_top(Symbol tag){
   TagId id = _tag2id(tag);
   if(id == _invalid_){
-    Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Var.tag_top")), NULL)));
+    Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Var.tag_top")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/var.x",.function = "Var_tag_top",.line = 136};
-      x2c_error_raise_n(& _x2c_error_site_0, 143279306979688, 2, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(1345468776), Symbol_var(tag));
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/var.x",.function = "Var_tag_top",.line = 136};
+      x2c_error_raise_n(& _x2c_gensym_error_site_0, 143279306979688, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1345468776), Symbol_var(tag));
       __builtin_unreachable();
     }
 
@@ -247,10 +247,10 @@ unsigned long Var_tag_top(Symbol tag){
 unsigned long Var_tag_bottom(Symbol tag){
   TagId id = _tag2id(tag);
   if(id == _invalid_){
-    Var _x2c_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("Var.tag_bottom")), NULL)));
+    Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("Var.tag_bottom")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/var.x",.function = "Var_tag_bottom",.line = 144};
-      x2c_error_raise_n(& _x2c_error_site_1, 143279306979688, 2, Symbol_var(34096809266140), _x2c_literal_part_1, Symbol_var(1345468776), Symbol_var(tag));
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/var.x",.function = "Var_tag_bottom",.line = 144};
+      x2c_error_raise_n(& _x2c_gensym_error_site_1, 143279306979688, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(1345468776), Symbol_var(tag));
       __builtin_unreachable();
     }
 
@@ -455,10 +455,10 @@ Var Var_new(Symbol tag, ...){
   VarDescriptor * descriptor = NULL;
   int row = id == _invalid_ ? _custom_row(tag, &(descriptor)) : - 1;
   if(id == _invalid_ && row < 0){
-    Var _x2c_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
+    Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/var.x",.function = "Var_new",.line = 496};
-      x2c_error_raise_n(& _x2c_error_site_2, 143279306979688, 2, Symbol_var(34096809266140), _x2c_literal_part_2, Symbol_var(1345468776), Symbol_var(tag));
+      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/var.x",.function = "Var_new",.line = 496};
+      x2c_error_raise_n(& _x2c_gensym_error_site_2, 143279306979688, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(1345468776), Symbol_var(tag));
       __builtin_unreachable();
     }
 
@@ -482,10 +482,10 @@ static inline void _require_aligned(Symbol tag, void * address, unsigned mask){
 
 _Noreturn static void _misaligned(Symbol tag){
   {
-    Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
+    Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/var.x",.function = "_misaligned",.line = 519};
-      x2c_error_raise_n(& _x2c_error_site_3, 4372507526, 2, Symbol_var(34096809266140), _x2c_literal_part_3, Symbol_var(1345468776), Symbol_var(tag));
+      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/var.x",.function = "_misaligned",.line = 519};
+      x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372507526, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(1345468776), Symbol_var(tag));
       __builtin_unreachable();
     }
 
@@ -502,10 +502,10 @@ static Var _new_builtin(TagId id, Symbol tag, va_list ap){
     case 1473096 : return((void) 0, Void);
   }
   {
-    Var _x2c_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
+    Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/var.x",.function = "_new_builtin",.line = 532};
-      x2c_error_raise_n(& _x2c_error_site_4, 20800632064936, 2, Symbol_var(34096809266140), _x2c_literal_part_4, Symbol_var(1345468776), Symbol_var(tag));
+      static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/var.x",.function = "_new_builtin",.line = 532};
+      x2c_error_raise_n(& _x2c_gensym_error_site_4, 20800632064936, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(1345468776), Symbol_var(tag));
       __builtin_unreachable();
     }
 
@@ -518,10 +518,10 @@ static Var _new_pointer(TagId id, void * ptr){
   if((id == _array_ || id == _map_) && ! ptr){
     Symbol tag = x2c_var_taginfo[id].tag;
     {
-      Var _x2c_literal_part_5 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
+      Var _x2c_gensym_literal_part_5 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
       {
-        static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/var.x",.function = "_new_pointer",.line = 544};
-        x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_5, Symbol_var(1345468776), Symbol_var(tag));
+        static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/var.x",.function = "_new_pointer",.line = 544};
+        x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_5, Symbol_var(1345468776), Symbol_var(tag));
         __builtin_unreachable();
       }
 
@@ -606,10 +606,10 @@ static Var _integer_arg(TagId id, Symbol tag, va_list ap){
     case 1435270030 : return Var_box_ulong_long(va_arg(ap, unsigned long long));
   }
   {
-    Var _x2c_literal_part_6 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
+    Var _x2c_gensym_literal_part_6 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/var.x",.function = "_integer_arg",.line = 600};
-      x2c_error_raise_n(& _x2c_error_site_6, 20800632064936, 2, Symbol_var(34096809266140), _x2c_literal_part_6, Symbol_var(1345468776), Symbol_var(tag));
+      static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/var.x",.function = "_integer_arg",.line = 600};
+      x2c_error_raise_n(& _x2c_gensym_error_site_6, 20800632064936, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_6, Symbol_var(1345468776), Symbol_var(tag));
       __builtin_unreachable();
     }
 
@@ -622,10 +622,10 @@ static Var _new_integer(TagId id, long value){
   if(! _integer_fits(id, value, bits)){
     Symbol target = x2c_var_taginfo[id].tag;
     {
-      Var _x2c_literal_part_7 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
+      Var _x2c_gensym_literal_part_7 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
       {
-        static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/var.x",.function = "_new_integer",.line = 609};
-        x2c_error_raise_n(& _x2c_error_site_7, 245103016899018, 2, Symbol_var(34096809266140), _x2c_literal_part_7, Symbol_var(1345468776), Symbol_var(target));
+        static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/var.x",.function = "_new_integer",.line = 609};
+        x2c_error_raise_n(& _x2c_gensym_error_site_7, 245103016899018, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_7, Symbol_var(1345468776), Symbol_var(target));
         __builtin_unreachable();
       }
 
@@ -648,8 +648,8 @@ static unsigned _integer_width(TagId id){
     case _u32_ : case _i32_ : return 32;
     case _u48_ : case _i48_ : return 48;
     default:{
-      static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/var.x",.function = "_integer_width",.line = 623};
-      x2c_error_raise_n(& _x2c_error_site_8, 20800632064936, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))));
+      static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/var.x",.function = "_integer_width",.line = 623};
+      x2c_error_raise_n(& _x2c_gensym_error_site_8, 20800632064936, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))));
       __builtin_unreachable();
     }
 
@@ -667,8 +667,8 @@ static int _integer_fits(TagId id, long value, unsigned bits){
 
 static Var _new_symbol(unsigned long u){
   if(u >=(1ul << 51)){
-    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/var.x",.function = "_new_symbol",.line = 636};
-    x2c_error_raise_n(& _x2c_error_site_9, 245103016899018, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(1328354264));
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/var.x",.function = "_new_symbol",.line = 636};
+    x2c_error_raise_n(& _x2c_gensym_error_site_9, 245103016899018, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(1328354264));
     __builtin_unreachable();
   }
   return(Var){
@@ -705,10 +705,10 @@ Var Var_box_record(Symbol tag, const void * record, size_t size){
   VarDescriptor * descriptor = NULL;
   int row = _custom_row(tag, &(descriptor));
   if(row < 0){
-    Var _x2c_literal_part_8 = String_var(String_join(NULL, cons(String_var(String_new("Var.box_record")), NULL)));
+    Var _x2c_gensym_literal_part_8 = String_var(String_join(NULL, cons(String_var(String_new("Var.box_record")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/var.x",.function = "Var_box_record",.line = 700};
-      x2c_error_raise_n(& _x2c_error_site_10, 143279306979688, 2, Symbol_var(34096809266140), _x2c_literal_part_8, Symbol_var(1345468776), Symbol_var(tag));
+      static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/var.x",.function = "Var_box_record",.line = 700};
+      x2c_error_raise_n(& _x2c_gensym_error_site_10, 143279306979688, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_8, Symbol_var(1345468776), Symbol_var(tag));
       __builtin_unreachable();
     }
 
@@ -732,18 +732,18 @@ static int _assign_row(VarDescriptor * descriptor){
   if(row >= 0) return row;
   x2c_descriptor_thread_start_begin();
   {
-    X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = 0
+    X2CCleanup _x2c_gensym_defer_record_0 ={
+      .fn = _x2c_gensym_defer_cleanup_0, .env = 0
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_0);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
       row = descriptor -> row;
       if(row >= 0){
-        int _x2c_return_value_0 = row;
+        int _x2c_gensym_return_value_0 = row;
         {
-          x2c_cleanup_leave(& _x2c_defer_record_0);
-          return _x2c_return_value_0;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+          return _x2c_gensym_return_value_0;
         }
 
       }
@@ -755,16 +755,16 @@ static int _assign_row(VarDescriptor * descriptor){
       }
       __atomic_store_n(& descriptor -> row, row, __ATOMIC_RELEASE);
       {
-        int _x2c_return_value_1 = row;
+        int _x2c_gensym_return_value_1 = row;
         {
-          x2c_cleanup_leave(& _x2c_defer_record_0);
-          return _x2c_return_value_1;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+          return _x2c_gensym_return_value_1;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_0);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
   }
 
 }
@@ -772,11 +772,11 @@ static int _assign_row(VarDescriptor * descriptor){
 static VarCell * _cell(VarDescriptor * descriptor, void * pointer){
   x2c_descriptor_thread_start_begin();
   {
-    X2CCleanup _x2c_defer_record_1 ={
-      .fn = _x2c_defer_cleanup_1, .env = 0
+    X2CCleanup _x2c_gensym_defer_record_1 ={
+      .fn = _x2c_gensym_defer_cleanup_1, .env = 0
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_1);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_1);
     {
       Var key ={
         .p64 = pointer
@@ -787,11 +787,11 @@ static VarCell * _cell(VarDescriptor * descriptor, void * pointer){
         Scope_push(& class_scope);
         {
           {
-            X2CCleanup _x2c_defer_record_2 ={
-              .fn = _x2c_defer_cleanup_2, .env = 0
+            X2CCleanup _x2c_gensym_defer_record_2 ={
+              .fn = _x2c_gensym_defer_cleanup_2, .env = 0
             }
             ;
-            x2c_cleanup_push(& _x2c_defer_record_2);
+            x2c_cleanup_push(& _x2c_gensym_defer_record_2);
             {
               {
                 if(cells == NULL) cells = Map_new();
@@ -811,23 +811,23 @@ static VarCell * _cell(VarDescriptor * descriptor, void * pointer){
               }
 
             }
-            x2c_cleanup_leave(& _x2c_defer_record_2);
+            x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
           }
 
         }
 
       }
       {
-        VarCell * _x2c_return_value_2 = cell;
+        VarCell * _x2c_gensym_return_value_2 = cell;
         {
-          x2c_cleanup_leave(& _x2c_defer_record_1);
-          return _x2c_return_value_2;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+          return _x2c_gensym_return_value_2;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_1);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
   }
 
 }
@@ -851,8 +851,8 @@ static Var _new_wide(TagId id, VarWideValue value){
   if((raw & 0x7) != 0 || raw >=(1ul << 48)){
     Scope_free(box);
     {
-      static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/var.x",.function = "_new_wide",.line = 775};
-      x2c_error_raise_n(& _x2c_error_site_11, 4372507526, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.box")), NULL))));
+      static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/var.x",.function = "_new_wide",.line = 775};
+      x2c_error_raise_n(& _x2c_gensym_error_site_11, 4372507526, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.box")), NULL))));
       __builtin_unreachable();
     }
 
@@ -920,8 +920,8 @@ Var Var_clone_wide(Var value){
   if((raw & 0x7) != 0 || raw >=(1ul << 48)){
     Scope_free(box);
     {
-      static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/var.x",.function = "Var_clone_wide",.line = 877};
-      x2c_error_raise_n(& _x2c_error_site_12, 4372507526, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.clone_wide")), NULL))));
+      static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/var.x",.function = "Var_clone_wide",.line = 877};
+      x2c_error_raise_n(& _x2c_gensym_error_site_12, 4372507526, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.clone_wide")), NULL))));
       __builtin_unreachable();
     }
 
@@ -1145,45 +1145,45 @@ VarDescriptor * x2c_var_declare(Symbol tag);
 int Var_register_object_tag(Symbol tag){
   x2c_descriptor_thread_start_begin();
   {
-    X2CCleanup _x2c_defer_record_3 ={
-      .fn = _x2c_defer_cleanup_3, .env = 0
+    X2CCleanup _x2c_gensym_defer_record_3 ={
+      .fn = _x2c_gensym_defer_cleanup_3, .env = 0
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_3);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_3);
     {
       if(x2c_descriptor_registration_frozen()){
-        static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/var.x",.function = "Var_register_object_tag",.line = 1255};
-        x2c_error_raise_n(& _x2c_error_site_13, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.register_object_tag")), NULL))));
+        static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/var.x",.function = "Var_register_object_tag",.line = 1255};
+        x2c_error_raise_n(& _x2c_gensym_error_site_13, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.register_object_tag")), NULL))));
         __builtin_unreachable();
       }
       if(! tag){
-        int _x2c_return_value_3 = - 1;
+        int _x2c_gensym_return_value_3 = - 1;
         {
-          x2c_cleanup_leave(& _x2c_defer_record_3);
-          return _x2c_return_value_3;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+          return _x2c_gensym_return_value_3;
         }
 
       }
       if(_tag2id(tag) != _invalid_){
-        int _x2c_return_value_4 = - 1;
+        int _x2c_gensym_return_value_4 = - 1;
         {
-          x2c_cleanup_leave(& _x2c_defer_record_3);
-          return _x2c_return_value_4;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+          return _x2c_gensym_return_value_4;
         }
 
       }
       x2c_var_declare(tag);
       {
-        int _x2c_return_value_5 = 0;
+        int _x2c_gensym_return_value_5 = 0;
         {
-          x2c_cleanup_leave(& _x2c_defer_record_3);
-          return _x2c_return_value_5;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+          return _x2c_gensym_return_value_5;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_3);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
   }
 
 }
@@ -1199,11 +1199,11 @@ VarDescriptor * x2c_var_declare(Symbol tag){
     Scope_push(& class_scope);
     {
       {
-        X2CCleanup _x2c_defer_record_4 ={
-          .fn = _x2c_defer_cleanup_4, .env = 0
+        X2CCleanup _x2c_gensym_defer_record_4 ={
+          .fn = _x2c_gensym_defer_cleanup_4, .env = 0
         }
         ;
-        x2c_cleanup_push(& _x2c_defer_record_4);
+        x2c_cleanup_push(& _x2c_gensym_defer_record_4);
         {
           {
             if(declared == NULL) declared = Map_new();
@@ -1214,7 +1214,7 @@ VarDescriptor * x2c_var_declare(Symbol tag){
           }
 
         }
-        x2c_cleanup_leave(& _x2c_defer_record_4);
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
       }
 
     }
@@ -1230,23 +1230,23 @@ static void _classes_shutdown(void){
   row_count = 0;
 }
 
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
   x2c_descriptor_thread_start_end(0);
 }
 
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
+static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
   x2c_descriptor_thread_start_end(0);
 }
 
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
+static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
   Scope_pop();
 }
 
-static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
+static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
   x2c_descriptor_thread_start_end(0);
 }
 
-static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
+static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
   Scope_pop();
 }
 

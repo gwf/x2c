@@ -18,25 +18,27 @@
 (function (static int) 
  (bind (binding 3 "macro_body_parens") 
   ((fnmod 
-    (params (param (int) (bind (binding 4 "_x2c_macro_parens_value_0") ())))))) 
+    (params 
+     (param (int) (bind (binding 4 "_x2c_gensym_macro_parens_value_0") ())))))) 
  (block 
   (at 23 
    (return (int) 
     (expr (int) 
      (call (expr ((func ((int))) int) 
             (parens (expr ((func ((int))) int) (ident (binding 1 "increment"))))) 
-      (args (expr (int) (ident (binding 4 "_x2c_macro_parens_value_0"))))))))))
+      (args (expr (int) (ident (binding 4 "_x2c_gensym_macro_parens_value_0"))))))))))
 
 (function (static int) 
  (bind (binding 5 "macro_body_direct") 
   ((fnmod 
-    (params (param (int) (bind (binding 6 "_x2c_macro_direct_value_0") ())))))) 
+    (params 
+     (param (int) (bind (binding 6 "_x2c_gensym_macro_direct_value_0") ())))))) 
  (block 
   (at 24 
    (return (int) 
     (expr (int) 
      (call (expr ((func ((int))) int) (ident (binding 1 "increment"))) 
-      (args (expr (int) (ident (binding 6 "_x2c_macro_direct_value_0"))))))))))
+      (args (expr (int) (ident (binding 6 "_x2c_gensym_macro_direct_value_0"))))))))))
 
 (function (static int) 
  (bind (binding 7 "ordinary_parens") 

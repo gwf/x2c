@@ -12,19 +12,19 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-__attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void);
+__attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void);
 
-__attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void);
+__attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void);
 
-__attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void);
+__attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _x2c_cache_initialize_0();
-  _x2c_cache_initialize_1();
-  _x2c_cache_initialize_2();
+  _x2c_gensym_cache_initialize_0();
+  _x2c_gensym_cache_initialize_1();
+  _x2c_gensym_cache_initialize_2();
 }
 
 static Var Symbol_var(Symbol);
@@ -37,7 +37,7 @@ List cons(Var, List);
 
 static Var List_var(List);
 
-__attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
+__attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void){
   _0 = Symbol_var(30065);
   _1 = String_new("_u8_");
   _2 = String_var(_1);
@@ -552,7 +552,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_0(void){
   _511 = List_var(_510);
 }
 
-__attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
+__attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void){
   _512 = Symbol_var(5011670);
   _513 = String_new("_block_");
   _514 = String_var(_513);
@@ -1067,7 +1067,7 @@ __attribute__((noinline, cold)) static void _x2c_cache_initialize_1(void){
   _1023 = Symbol_var(28764);
 }
 
-__attribute__((noinline, cold)) static void _x2c_cache_initialize_2(void){
+__attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void){
   _1024 = String_new("_nan_");
   _1025 = String_var(_1024);
   _1026 = int_var(0x8003);
@@ -1313,18 +1313,18 @@ List _tag_rows(void){
   Array rows = Array_new();
   {
     List group;
-    List _x2c_macro_object_1 = _tag_groups();
-    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
-    Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      group = Var_list_payload(_x2c_macro_cursor_output_1);
+    List _x2c_gensym_macro_object_1 = _tag_groups();
+    List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
+    Var _x2c_gensym_macro_cursor_output_1;
+    while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
+      group = Var_list_payload(_x2c_gensym_macro_cursor_output_1);
       {
         Var row;
-        List _x2c_macro_object_0 = group;
-        List _x2c_macro_cursor_0 = _x2c_macro_object_0;
-        Var _x2c_macro_cursor_output_0;
-        while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-          row = _x2c_macro_cursor_output_0;
+        List _x2c_gensym_macro_object_0 = group;
+        List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
+        Var _x2c_gensym_macro_cursor_output_0;
+        while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+          row = _x2c_gensym_macro_cursor_output_0;
           Array_push(rows, row);
         }
 
@@ -1390,8 +1390,8 @@ int _tag_unsigned(List row){
 List _tag_info_row(List row){
   if(! _init_guard_) _file_init_();
   return({
-    Var _x2c_hole_0 = List_getindex(row, 0);  Symbol _x2c_hole_1 = _tag_kind(row);  int _x2c_hole_2 = _tag_top(row);  int _x2c_hole_3 = _tag_middle(row);  int _x2c_hole_4 = _tag_bottom(row);  cons(_1078, cons(_1079, cons(List_var(cons(_1080, cons(_1079, cons(List_var(cons(_1081, cons(List_var(({
-      Var _x2c_literal_part_0 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(_x2c_hole_0, NULL)))));  Var _x2c_literal_part_1 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(Symbol_var(_x2c_hole_1), NULL)))));  Var _x2c_literal_part_2 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(int_var(_x2c_hole_2), NULL)))));  Var _x2c_literal_part_3 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(int_var(_x2c_hole_3), NULL)))));  Var _x2c_literal_part_4 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(int_var(_x2c_hole_4), NULL)))));  cons(_1099, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, cons(_x2c_literal_part_4, NULL))))));
+    Var _x2c_gensym_hole_0 = List_getindex(row, 0);  Symbol _x2c_gensym_hole_1 = _tag_kind(row);  int _x2c_gensym_hole_2 = _tag_top(row);  int _x2c_gensym_hole_3 = _tag_middle(row);  int _x2c_gensym_hole_4 = _tag_bottom(row);  cons(_1078, cons(_1079, cons(List_var(cons(_1080, cons(_1079, cons(List_var(cons(_1081, cons(List_var(({
+      Var _x2c_gensym_literal_part_0 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(_x2c_gensym_hole_0, NULL)))));  Var _x2c_gensym_literal_part_1 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(Symbol_var(_x2c_gensym_hole_1), NULL)))));  Var _x2c_gensym_literal_part_2 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(int_var(_x2c_gensym_hole_2), NULL)))));  Var _x2c_gensym_literal_part_3 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(int_var(_x2c_gensym_hole_3), NULL)))));  Var _x2c_gensym_literal_part_4 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(int_var(_x2c_gensym_hole_4), NULL)))));  cons(_1099, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, cons(_x2c_gensym_literal_part_4, NULL))))));
     }
     )), NULL))), NULL)))), NULL)));
   }
@@ -1410,18 +1410,18 @@ List _tag_info(void){
   Array cells = Array_new();
   {
     List row;
-    List _x2c_macro_object_2 = _tag_rows();
-    List _x2c_macro_cursor_2 = _x2c_macro_object_2;
-    Var _x2c_macro_cursor_output_2;
-    while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-      row = Var_list_payload(_x2c_macro_cursor_output_2);
+    List _x2c_gensym_macro_object_2 = _tag_rows();
+    List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
+    Var _x2c_gensym_macro_cursor_output_2;
+    while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
+      row = Var_list_payload(_x2c_gensym_macro_cursor_output_2);
       Array_push(cells, List_var(_tag_info_row(row)));
     }
 
   }
   return({
-    List _x2c_hole_5 = Array_list_free(cells);  List _x2c_hole_6 = _tag_info_sentinel();  cons(_1078, cons(_1079, cons(List_var(cons(_1080, cons(_1079, cons(List_var(cons(_1081, cons(List_var(({
-      Var _x2c_literal_part_5 = List_var(cons(_1083, cons(_1164, cons(_1165, cons(List_var(_x2c_hole_5), NULL)))));  Var _x2c_literal_part_6 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(List_var(_x2c_hole_6), NULL)))));  cons(_1099, cons(_x2c_literal_part_5, cons(_x2c_literal_part_6, NULL)));
+    List _x2c_gensym_hole_5 = Array_list_free(cells);  List _x2c_gensym_hole_6 = _tag_info_sentinel();  cons(_1078, cons(_1079, cons(List_var(cons(_1080, cons(_1079, cons(List_var(cons(_1081, cons(List_var(({
+      Var _x2c_gensym_literal_part_5 = List_var(cons(_1083, cons(_1164, cons(_1165, cons(List_var(_x2c_gensym_hole_5), NULL)))));  Var _x2c_gensym_literal_part_6 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(List_var(_x2c_gensym_hole_6), NULL)))));  cons(_1099, cons(_x2c_gensym_literal_part_5, cons(_x2c_gensym_literal_part_6, NULL)));
     }
     )), NULL))), NULL)))), NULL)));
   }
@@ -1437,11 +1437,11 @@ List _tag_names(void){
   Array names = Array_new();
   {
     List row;
-    List _x2c_macro_object_3 = _tag_rows();
-    List _x2c_macro_cursor_3 = _x2c_macro_object_3;
-    Var _x2c_macro_cursor_output_3;
-    while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
-      row = Var_list_payload(_x2c_macro_cursor_output_3);
+    List _x2c_gensym_macro_object_3 = _tag_rows();
+    List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
+    Var _x2c_gensym_macro_cursor_output_3;
+    while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
+      row = Var_list_payload(_x2c_gensym_macro_cursor_output_3);
       Array_push(names, List_getindex(row, 0));
     }
 
@@ -1454,11 +1454,11 @@ List _tag_numeric_rows(void){
   Array rows = Array_new();
   {
     List row;
-    List _x2c_macro_object_4 = _tag_rows();
-    List _x2c_macro_cursor_4 = _x2c_macro_object_4;
-    Var _x2c_macro_cursor_output_4;
-    while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
-      row = Var_list_payload(_x2c_macro_cursor_output_4);
+    List _x2c_gensym_macro_object_4 = _tag_rows();
+    List _x2c_gensym_macro_cursor_4 = _x2c_gensym_macro_object_4;
+    Var _x2c_gensym_macro_cursor_output_4;
+    while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
+      row = Var_list_payload(_x2c_gensym_macro_cursor_output_4);
       if(_tag_numeric(row)) Array_push(rows, List_var(row));
     }
 
@@ -1471,11 +1471,11 @@ List _tag_numeric_names(void){
   Array names = Array_new();
   {
     List row;
-    List _x2c_macro_object_5 = _tag_numeric_rows();
-    List _x2c_macro_cursor_5 = _x2c_macro_object_5;
-    Var _x2c_macro_cursor_output_5;
-    while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
-      row = Var_list_payload(_x2c_macro_cursor_output_5);
+    List _x2c_gensym_macro_object_5 = _tag_numeric_rows();
+    List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;
+    Var _x2c_gensym_macro_cursor_output_5;
+    while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_5))){
+      row = Var_list_payload(_x2c_gensym_macro_cursor_output_5);
       Array_push(names, List_getindex(row, 0));
     }
 
@@ -1501,8 +1501,8 @@ List _tag_bits_expr(List row){
 List _tag_numeric_row(List row){
   if(! _init_guard_) _file_init_();
   return({
-    Var _x2c_hole_7 = List_getindex(row, 0);  int _x2c_hole_8 = _tag_floating(row);  int _x2c_hole_9 = _tag_unsigned(row);  List _x2c_hole_10 = _tag_bits_expr(row);  int _x2c_hole_11 = _tag_rank(row);  cons(_1078, cons(_1079, cons(List_var(cons(_1080, cons(_1079, cons(List_var(cons(_1081, cons(List_var(({
-      Var _x2c_literal_part_7 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(_x2c_hole_7, NULL)))));  Var _x2c_literal_part_8 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(int_var(_x2c_hole_8), NULL)))));  Var _x2c_literal_part_9 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(int_var(_x2c_hole_9), NULL)))));  Var _x2c_literal_part_10 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(List_var(_x2c_hole_10), NULL)))));  Var _x2c_literal_part_11 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(int_var(_x2c_hole_11), NULL)))));  cons(_1099, cons(_x2c_literal_part_7, cons(_x2c_literal_part_8, cons(_x2c_literal_part_9, cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, NULL))))));
+    Var _x2c_gensym_hole_7 = List_getindex(row, 0);  int _x2c_gensym_hole_8 = _tag_floating(row);  int _x2c_gensym_hole_9 = _tag_unsigned(row);  List _x2c_gensym_hole_10 = _tag_bits_expr(row);  int _x2c_gensym_hole_11 = _tag_rank(row);  cons(_1078, cons(_1079, cons(List_var(cons(_1080, cons(_1079, cons(List_var(cons(_1081, cons(List_var(({
+      Var _x2c_gensym_literal_part_7 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(_x2c_gensym_hole_7, NULL)))));  Var _x2c_gensym_literal_part_8 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(int_var(_x2c_gensym_hole_8), NULL)))));  Var _x2c_gensym_literal_part_9 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(int_var(_x2c_gensym_hole_9), NULL)))));  Var _x2c_gensym_literal_part_10 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(List_var(_x2c_gensym_hole_10), NULL)))));  Var _x2c_gensym_literal_part_11 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(int_var(_x2c_gensym_hole_11), NULL)))));  cons(_1099, cons(_x2c_gensym_literal_part_7, cons(_x2c_gensym_literal_part_8, cons(_x2c_gensym_literal_part_9, cons(_x2c_gensym_literal_part_10, cons(_x2c_gensym_literal_part_11, NULL))))));
     }
     )), NULL))), NULL)))), NULL)));
   }
@@ -1514,17 +1514,17 @@ List _tag_numeric_table(void){
   Array cells = Array_new();
   {
     List row;
-    List _x2c_macro_object_6 = _tag_numeric_rows();
-    List _x2c_macro_cursor_6 = _x2c_macro_object_6;
-    Var _x2c_macro_cursor_output_6;
-    while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_6))){
-      row = Var_list_payload(_x2c_macro_cursor_output_6);
+    List _x2c_gensym_macro_object_6 = _tag_numeric_rows();
+    List _x2c_gensym_macro_cursor_6 = _x2c_gensym_macro_object_6;
+    Var _x2c_gensym_macro_cursor_output_6;
+    while(List_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_6))){
+      row = Var_list_payload(_x2c_gensym_macro_cursor_output_6);
       Array_push(cells, List_var(_tag_numeric_row(row)));
     }
 
   }
   return({
-    List _x2c_hole_12 = Array_list_free(cells);  cons(_1078, cons(_1079, cons(List_var(cons(_1080, cons(_1079, cons(List_var(cons(_1081, cons(List_var(cons(_1099, cons(List_var(cons(_1083, cons(_1164, cons(_1165, cons(List_var(_x2c_hole_12), NULL))))), NULL))), NULL))), NULL)))), NULL)));
+    List _x2c_gensym_hole_12 = Array_list_free(cells);  cons(_1078, cons(_1079, cons(List_var(cons(_1080, cons(_1079, cons(List_var(cons(_1081, cons(List_var(cons(_1099, cons(List_var(cons(_1083, cons(_1164, cons(_1165, cons(List_var(_x2c_gensym_hole_12), NULL))))), NULL))), NULL))), NULL)))), NULL)));
   }
   );
 }
@@ -1539,11 +1539,11 @@ List _tag_decode_rows(void){
   Array rows = Array_new();
   {
     List row;
-    List _x2c_macro_object_7 = _tag_rows();
-    List _x2c_macro_cursor_7 = _x2c_macro_object_7;
-    Var _x2c_macro_cursor_output_7;
-    while(List_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_7))){
-      row = Var_list_payload(_x2c_macro_cursor_output_7);
+    List _x2c_gensym_macro_object_7 = _tag_rows();
+    List _x2c_gensym_macro_cursor_7 = _x2c_gensym_macro_object_7;
+    Var _x2c_gensym_macro_cursor_output_7;
+    while(List_try_next(_x2c_gensym_macro_object_7, &(_x2c_gensym_macro_cursor_7), &(_x2c_gensym_macro_cursor_output_7))){
+      row = Var_list_payload(_x2c_gensym_macro_cursor_output_7);
       if(_tag_decode_row(row)) Array_push(rows, List_var(row));
     }
 
@@ -1575,8 +1575,8 @@ List _tag_list(List items){
   if(! _init_guard_) _file_init_();
   List built = _1229;
   for(int i = List_len(items) - 1;  i >= 0;  i --) built =({
-    Var _x2c_hole_13 = List_getindex(items, i);  cons(_1078, cons(_1079, cons(List_var(cons(_1080, cons(_1168, cons(List_var(cons(_1230, cons(_1243, cons(List_var(({
-      Var _x2c_literal_part_12 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(_x2c_hole_13, NULL)))));  Var _x2c_literal_part_13 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(List_var(built), NULL)))));  cons(_1244, cons(_x2c_literal_part_12, cons(_x2c_literal_part_13, NULL)));
+    Var _x2c_gensym_hole_13 = List_getindex(items, i);  cons(_1078, cons(_1079, cons(List_var(cons(_1080, cons(_1168, cons(List_var(cons(_1230, cons(_1243, cons(List_var(({
+      Var _x2c_gensym_literal_part_12 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(_x2c_gensym_hole_13, NULL)))));  Var _x2c_gensym_literal_part_13 = List_var(cons(_1083, cons(_1097, cons(_1098, cons(List_var(built), NULL)))));  cons(_1244, cons(_x2c_gensym_literal_part_12, cons(_x2c_gensym_literal_part_13, NULL)));
     }
     )), NULL)))), NULL)))), NULL)));
   }
@@ -1594,11 +1594,11 @@ Map _tag_sibling_counts(List rows){
   Map counts = Map_new();
   {
     List row;
-    List _x2c_macro_object_8 = rows;
-    List _x2c_macro_cursor_8 = _x2c_macro_object_8;
-    Var _x2c_macro_cursor_output_8;
-    while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_8))){
-      row = Var_list_payload(_x2c_macro_cursor_output_8);
+    List _x2c_gensym_macro_object_8 = rows;
+    List _x2c_gensym_macro_cursor_8 = _x2c_gensym_macro_object_8;
+    Var _x2c_gensym_macro_cursor_output_8;
+    while(List_try_next(_x2c_gensym_macro_object_8, &(_x2c_gensym_macro_cursor_8), &(_x2c_gensym_macro_cursor_output_8))){
+      row = Var_list_payload(_x2c_gensym_macro_cursor_output_8);
       {
         Var top = int_var(_tag_top(row));
         Map_setindex(counts, top, Var_binary(Map_getdefault(counts, top, int_var(0)), 56, int_var(1)));
@@ -1619,10 +1619,10 @@ List _tag_row_entry(List row, Map counts){
   Symbol tag = Var_symbol(List_getindex(row, 0));
   int top = _tag_top(row), mask = _tag_group_mask(Var_int(Var_convert(Map_getindex(counts, int_var(top)), 3453797))), bottom = _tag_bottom(row);
   return({
-    Var _x2c_literal_part_17 = List_var(Macro_typed(_1116, Symbol_var(tag)));  Var _x2c_literal_part_18 = List_var(_tag_list(Array_list(({
-      Var _x2c_literal_part_14 = List_var(Macro_typed(_1101, int_var(top)));  Var _x2c_literal_part_15 = List_var(Macro_typed(_1101, int_var(mask)));  Var _x2c_literal_part_16 = List_var(Macro_typed(_1101, int_var(bottom)));  Array_update_n(Array_new(), 3, _x2c_literal_part_14, _x2c_literal_part_15, _x2c_literal_part_16);
+    Var _x2c_gensym_literal_part_17 = List_var(Macro_typed(_1116, Symbol_var(tag)));  Var _x2c_gensym_literal_part_18 = List_var(_tag_list(Array_list(({
+      Var _x2c_gensym_literal_part_14 = List_var(Macro_typed(_1101, int_var(top)));  Var _x2c_gensym_literal_part_15 = List_var(Macro_typed(_1101, int_var(mask)));  Var _x2c_gensym_literal_part_16 = List_var(Macro_typed(_1101, int_var(bottom)));  Array_update_n(Array_new(), 3, _x2c_gensym_literal_part_14, _x2c_gensym_literal_part_15, _x2c_gensym_literal_part_16);
     }
-    ))));  cons(_1245, cons(_x2c_literal_part_17, cons(_x2c_literal_part_18, NULL)));
+    ))));  cons(_1245, cons(_x2c_gensym_literal_part_17, cons(_x2c_gensym_literal_part_18, NULL)));
   }
   );
 }
@@ -1634,11 +1634,11 @@ List _tag_constant_rows(void){
   Array entries = Array_new();
   {
     List row;
-    List _x2c_macro_object_9 = rows;
-    List _x2c_macro_cursor_9 = _x2c_macro_object_9;
-    Var _x2c_macro_cursor_output_9;
-    while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_9))){
-      row = Var_list_payload(_x2c_macro_cursor_output_9);
+    List _x2c_gensym_macro_object_9 = rows;
+    List _x2c_gensym_macro_cursor_9 = _x2c_gensym_macro_object_9;
+    Var _x2c_gensym_macro_cursor_output_9;
+    while(List_try_next(_x2c_gensym_macro_object_9, &(_x2c_gensym_macro_cursor_9), &(_x2c_gensym_macro_cursor_output_9))){
+      row = Var_list_payload(_x2c_gensym_macro_cursor_output_9);
       if(_tag_constant_row(row)) Array_push(entries, List_var(_tag_row_entry(row, counts)));
     }
 
@@ -1661,11 +1661,11 @@ Map _tag_types(List native){
   Map types = Map_new();
   {
     List row;
-    List _x2c_macro_object_12 = native;
-    List _x2c_macro_cursor_12 = _x2c_macro_object_12;
-    Var _x2c_macro_cursor_output_12;
-    while(List_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_12))){
-      row = Var_list_payload(_x2c_macro_cursor_output_12);
+    List _x2c_gensym_macro_object_12 = native;
+    List _x2c_gensym_macro_cursor_12 = _x2c_gensym_macro_object_12;
+    Var _x2c_gensym_macro_cursor_output_12;
+    while(List_try_next(_x2c_gensym_macro_object_12, &(_x2c_gensym_macro_cursor_12), &(_x2c_gensym_macro_cursor_output_12))){
+      row = Var_list_payload(_x2c_gensym_macro_cursor_output_12);
       Map_setindex(types, List_getindex(row, 0), List_getindex(row, 1));
     }
 
@@ -1673,11 +1673,11 @@ Map _tag_types(List native){
   Symbol star = 54;
   {
     List row;
-    List _x2c_macro_object_13 = _tag_rows();
-    List _x2c_macro_cursor_13 = _x2c_macro_object_13;
-    Var _x2c_macro_cursor_output_13;
-    while(List_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_13))){
-      row = Var_list_payload(_x2c_macro_cursor_output_13);
+    List _x2c_gensym_macro_object_13 = _tag_rows();
+    List _x2c_gensym_macro_cursor_13 = _x2c_gensym_macro_object_13;
+    Var _x2c_gensym_macro_cursor_output_13;
+    while(List_try_next(_x2c_gensym_macro_object_13, &(_x2c_gensym_macro_cursor_13), &(_x2c_gensym_macro_cursor_output_13))){
+      row = Var_list_payload(_x2c_gensym_macro_cursor_output_13);
       {
         if(! _tag_descriptor(row)) continue;
         String tag = Var_str(List_getindex(row, 0));

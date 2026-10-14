@@ -18,10 +18,10 @@ static int local_macro(int value){
 int main(void){
   x2c_initialize();
   int result = 0;
-  int _x2c_macro_temporary_0 = 5;
-  result = _x2c_macro_temporary_0;
-  int _x2c_macro_temporary_1 = result + 1;
-  result = _x2c_macro_temporary_1;
+  int _x2c_gensym_macro_temporary_0 = 5;
+  result = _x2c_gensym_macro_temporary_0;
+  int _x2c_gensym_macro_temporary_1 = result + 1;
+  result = _x2c_gensym_macro_temporary_1;
   printf("%d %d %d %d %d %d %d\n", result, 4 * 2, (4) + 2, (4 + 1), 4 + 1, generated(), local_macro(4));
   return 0;
 }

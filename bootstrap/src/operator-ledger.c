@@ -210,18 +210,18 @@ static List _operator_cases(int key, int value, int derived){
   Array cases = Array_new();
   {
     List row;
-    List _x2c_macro_object_0 = _operator_rows();
-    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
-    Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      row = Var_list_payload(_x2c_macro_cursor_output_0);
+    List _x2c_gensym_macro_object_0 = _operator_rows();
+    List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
+    Var _x2c_gensym_macro_cursor_output_0;
+    while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+      row = Var_list_payload(_x2c_gensym_macro_cursor_output_0);
       {
         if(! Var_truth(List_getindex(row, key)) || ! Var_truth(List_getindex(row, value))) continue;
         if(derived >= 0 && ! x2c_var_equal(List_getindex(row, 4), int_var(derived))) continue;
         Symbol label = Var_symbol(List_getindex(row, key));
         Var result = List_getindex(row, value);
         Array_push(cases, List_var(cons(_155, cons(_156, cons(List_var(({
-          Var _x2c_literal_part_0 = List_var(cons(_157, cons(List_var(cons(_159, cons(_174, cons(_175, cons(Symbol_var(label), NULL))))), NULL)));  Var _x2c_literal_part_1 = List_var(cons(_176, cons(_156, cons(List_var(cons(_159, cons(_174, cons(_175, cons(result, NULL))))), NULL))));  cons(_177, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL)));
+          Var _x2c_gensym_literal_part_0 = List_var(cons(_157, cons(List_var(cons(_159, cons(_174, cons(_175, cons(Symbol_var(label), NULL))))), NULL)));  Var _x2c_gensym_literal_part_1 = List_var(cons(_176, cons(_156, cons(List_var(cons(_159, cons(_174, cons(_175, cons(result, NULL))))), NULL))));  cons(_177, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL)));
         }
         )), NULL)))));
       }

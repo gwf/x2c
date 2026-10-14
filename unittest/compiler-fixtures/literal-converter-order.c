@@ -36,51 +36,51 @@ int main(void){
   x2c_initialize();
   Score first = 1, second = 2;
   List explicit =({
-    Var _x2c_literal_part_0 = Score_var(first);  Var _x2c_literal_part_1 = Score_var(second);  cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL));
+    Var _x2c_gensym_literal_part_0 = Score_var(first);  Var _x2c_gensym_literal_part_1 = Score_var(second);  cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL));
   }
   );
   printf("explicit %d %ld\n", observed, (long) List_len(explicit));
   observed = 0;
   List implicit =({
-    Var _x2c_literal_part_2 = Score_var(first);  Var _x2c_literal_part_3 = Score_var(second);  cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL));
+    Var _x2c_gensym_literal_part_2 = Score_var(first);  Var _x2c_gensym_literal_part_3 = Score_var(second);  cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, NULL));
   }
   );
   printf("list %d %ld\n", observed, (long) List_len(implicit));
   observed = 0;
   List nested =({
-    Var _x2c_literal_part_4 = List_var(cons(Score_var(first), NULL));  Var _x2c_literal_part_5 = List_var(cons(Score_var(second), NULL));  cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL));
+    Var _x2c_gensym_literal_part_4 = List_var(cons(Score_var(first), NULL));  Var _x2c_gensym_literal_part_5 = List_var(cons(Score_var(second), NULL));  cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, NULL));
   }
   );
   printf("nested %d %ld\n", observed, (long) List_len(nested));
   observed = 0;
   Array values =({
-    Var _x2c_literal_part_6 = Score_var(first);  Var _x2c_literal_part_7 = Score_var(second);  Array_update_n(Array_new(), 2, _x2c_literal_part_6, _x2c_literal_part_7);
+    Var _x2c_gensym_literal_part_6 = Score_var(first);  Var _x2c_gensym_literal_part_7 = Score_var(second);  Array_update_n(Array_new(), 2, _x2c_gensym_literal_part_6, _x2c_gensym_literal_part_7);
   }
   );
   printf("array %d %ld\n", observed, (long) Array_len(values));
   observed = 0;
   Map entry =({
-    Var _x2c_literal_part_8 = Score_var(first);  Var _x2c_literal_part_9 = Score_var(second);  Map_update_n(Map_new(), 1, _x2c_literal_part_8, _x2c_literal_part_9);
+    Var _x2c_gensym_literal_part_8 = Score_var(first);  Var _x2c_gensym_literal_part_9 = Score_var(second);  Map_update_n(Map_new(), 1, _x2c_gensym_literal_part_8, _x2c_gensym_literal_part_9);
   }
   );
   printf("map %d %ld\n", observed, (long) Map_len(entry));
   observed = 0;
   String text =({
-    Var _x2c_literal_part_10 = String_var(Score_str(first));  Var _x2c_literal_part_11 = String_var(Score_str(second));  String_join(NULL, cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, NULL)));
+    Var _x2c_gensym_literal_part_10 = String_var(Score_str(first));  Var _x2c_gensym_literal_part_11 = String_var(Score_str(second));  String_join(NULL, cons(_x2c_gensym_literal_part_10, cons(_x2c_gensym_literal_part_11, NULL)));
   }
   );
   printf("string %d %s\n", observed, (char *) text);
   observed = 0;
   List empty = NULL;
-  Var(* _x2c_var_converter_shadow_0)(List) = shadowed;
+  Var(* _x2c_gensym_var_converter_shadow_0)(List) = shadowed;
   List calls =({
-    Var _x2c_literal_part_12 = _x2c_var_converter_shadow_0(empty);  Var _x2c_literal_part_13 = Score_var(second);  cons(_x2c_literal_part_12, cons(_x2c_literal_part_13, NULL));
+    Var _x2c_gensym_literal_part_12 = _x2c_gensym_var_converter_shadow_0(empty);  Var _x2c_gensym_literal_part_13 = Score_var(second);  cons(_x2c_gensym_literal_part_12, cons(_x2c_gensym_literal_part_13, NULL));
   }
   );
   printf("shadow %d %ld\n", observed, (long) List_len(calls));
   observed = 0;
   List aliases =({
-    Packed _x2c_literal_part_14 = int_packed(((int) first));  Packed _x2c_literal_part_15 = int_packed(((int) second));  cons(_x2c_literal_part_14, cons(_x2c_literal_part_15, NULL));
+    Packed _x2c_gensym_literal_part_14 = int_packed(((int) first));  Packed _x2c_gensym_literal_part_15 = int_packed(((int) second));  cons(_x2c_gensym_literal_part_14, cons(_x2c_gensym_literal_part_15, NULL));
   }
   );
   printf("alias %d %ld\n", observed, (long) List_len(aliases));

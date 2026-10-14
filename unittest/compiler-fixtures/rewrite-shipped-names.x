@@ -9,7 +9,7 @@
 #include <stdio.h>
 
 /* Spelled like the interpolation component's translator. */
-meta Code interpolation(Code code) => $!String{ String.new("program's") };
+meta Code interpolation_lowering(Code code) => $!String{ String.new("program's") };
 
 /* Spelled like the try component's landing helper. */
 meta List try_landing(List frame, List clause, List exits) => frame;

@@ -22,9 +22,9 @@ static Byte increment(Byte value);
 
 static Text echo(Text value);
 
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
+static Var _x2c_gensym_func_adapt_0(Func _x2c_gensym_func_binding_0, const FuncArg * _x2c_gensym_func_argv_0);
 
-static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
+static Var _x2c_gensym_func_adapt_1(Func _x2c_gensym_func_binding_1, const FuncArg * _x2c_gensym_func_argv_1);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -65,19 +65,19 @@ static Text echo(Text value){
 
 void install_bindings(Lisp lisp){
   if(! _init_guard_) _file_init_();
-  Func _x2c_macro_callable_0 = Func_new(_x2c_func_adapt_0, _10);
-  Lisp_bind(lisp, _11, _x2c_macro_callable_0);
-  Lisp_bind(lisp, _12, Func_new(_x2c_func_adapt_1, _22));
+  Func _x2c_gensym_macro_callable_0 = Func_new(_x2c_gensym_func_adapt_0, _10);
+  Lisp_bind(lisp, _11, _x2c_gensym_macro_callable_0);
+  Lisp_bind(lisp, _12, Func_new(_x2c_gensym_func_adapt_1, _22));
 }
 
-static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0){
-  Byte a0 = Var_uchar(Var_convert(x2c_func_value_argument(_x2c_func_binding_0, _x2c_func_argv_0, 0, 30065), 30065));
+static Var _x2c_gensym_func_adapt_0(Func _x2c_gensym_func_binding_0, const FuncArg * _x2c_gensym_func_argv_0){
+  Byte a0 = Var_uchar(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_0, _x2c_gensym_func_argv_0, 0, 30065), 30065));
   return Var_new(30065, increment(a0));
   ;
 }
 
-static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1){
-  Text a0 = Var_as_string(x2c_func_value_argument(_x2c_func_binding_1, _x2c_func_argv_1, 0, 1318210446));
+static Var _x2c_gensym_func_adapt_1(Func _x2c_gensym_func_binding_1, const FuncArg * _x2c_gensym_func_argv_1){
+  Text a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_1, _x2c_gensym_func_argv_1, 0, 1318210446));
   return String_var(echo(a0));
   ;
 }

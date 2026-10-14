@@ -24,8 +24,8 @@ static void raise_caught(void);
 
 static void raise_empty(void){
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "raise_empty",.line = 4};
-    x2c_error_raise_n(& _x2c_error_site_0, 1269496097575876, 0);
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "raise_empty",.line = 4};
+    x2c_error_raise_n(& _x2c_gensym_error_site_0, 1269496097575876, 0);
   }
 
 }
@@ -37,11 +37,11 @@ int main(void){
   Error_policy_set(1269496097575876, 7475046632);
   int bytes = 64, mark = Error_mark();
   {
-    Var _x2c_literal_part_0 = int_var(bytes);
-    Var _x2c_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("raise-probe")), NULL)));
+    Var _x2c_gensym_literal_part_0 = int_var(bytes);
+    Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("raise-probe")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "main",.line = 12};
-      x2c_error_raise_n(& _x2c_error_site_1, 7654447751496, 2, Symbol_var(5874022), _x2c_literal_part_0, Symbol_var(34096809266140), _x2c_literal_part_1);
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "main",.line = 12};
+      x2c_error_raise_n(& _x2c_gensym_error_site_1, 7654447751496, 2, Symbol_var(5874022), _x2c_gensym_literal_part_0, Symbol_var(34096809266140), _x2c_gensym_literal_part_1);
     }
 
   }
@@ -59,8 +59,8 @@ int main(void){
 
 _Noreturn static void raise_terminal(void){
   {
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "raise_terminal",.line = 34};
-    x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 0);
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "raise_terminal",.line = 34};
+    x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 0);
     __builtin_unreachable();
   }
 
@@ -69,8 +69,8 @@ _Noreturn static void raise_terminal(void){
 static void raise_after_return(int code){
   if(! code) return;
   {
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "raise_after_return",.line = 39};
-    x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 0);
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "raise_after_return",.line = 39};
+    x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 0);
     __builtin_unreachable();
   }
 
@@ -78,33 +78,33 @@ static void raise_after_return(int code){
 
 static void raise_caught(void){
   {
-    ExceptionFrame _x2c_exception_frame_0;
-    static MatchCaptureSite _x2c_macro_arms_0[1];
-    Var _x2c_macro_patterns_0[1];
-    static ErrorCatchSite _x2c_macro_site_0 ={
-      _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
+    ExceptionFrame _x2c_gensym_exception_frame_0;
+    static MatchCaptureSite _x2c_gensym_macro_arms_0[1];
+    Var _x2c_gensym_macro_patterns_0[1];
+    static ErrorCatchSite _x2c_gensym_macro_site_0 ={
+      _x2c_gensym_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
-      _x2c_macro_patterns_0[0] = List_var(cons(Symbol_var(4372499598), NULL));
+    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_0)){
+      _x2c_gensym_macro_patterns_0[0] = List_var(cons(Symbol_var(4372499598), NULL));
     }
-    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);
-    x2c_exception_push(& _x2c_exception_frame_0);
-    if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
+    volatile ErrorHandler _x2c_gensym_error_handler_0 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_0, & _x2c_gensym_macro_site_0, _x2c_gensym_macro_patterns_0);
+    x2c_exception_push(& _x2c_gensym_exception_frame_0);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)){
       {
-        static const X2CErrorSite _x2c_error_site_4 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "raise_caught",.line = 44};
-        x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 0);
+        static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "unittest/compiler-fixtures/raise-statement.x",.function = "raise_caught",.line = 44};
+        x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 0);
         __builtin_unreachable();
       }
 
     }
     else{
-      x2c_exception_landed(& _x2c_exception_frame_0);
-      if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
-        int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
-        x2c_error_catch_detach(_x2c_error_handler_0);
-        x2c_exception_mark_handled(& _x2c_exception_frame_0);
-        if(_x2c_macro_selected_0 == 0){
+      x2c_exception_landed(& _x2c_gensym_exception_frame_0);
+      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_0)){
+        int _x2c_gensym_macro_selected_0 = x2c_error_catch_selected(_x2c_gensym_error_handler_0);
+        x2c_error_catch_detach(_x2c_gensym_error_handler_0);
+        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_0);
+        if(_x2c_gensym_macro_selected_0 == 0){
           {
 
           }
@@ -113,16 +113,16 @@ static void raise_caught(void){
 
       }
       else{
-        x2c_error_catch_close(_x2c_error_handler_0);
-        _x2c_error_handler_0 = NULL;
-        x2c_exception_leave(& _x2c_exception_frame_0);
+        x2c_error_catch_close(_x2c_gensym_error_handler_0);
+        _x2c_gensym_error_handler_0 = NULL;
+        x2c_exception_leave(& _x2c_gensym_exception_frame_0);
         __builtin_unreachable();
       }
 
     }
-    x2c_error_catch_close(_x2c_error_handler_0);
-    _x2c_error_handler_0 = NULL;
-    x2c_exception_leave(& _x2c_exception_frame_0);
+    x2c_error_catch_close(_x2c_gensym_error_handler_0);
+    _x2c_gensym_error_handler_0 = NULL;
+    x2c_exception_leave(& _x2c_gensym_exception_frame_0);
   }
 
 }

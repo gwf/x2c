@@ -116,7 +116,7 @@ List Compiler.pattern_binder_declarations(
       (call "x2c_error_catch_capture"
         (args (expr ("ErrorHandler") (ident $handle))
               (expr (int) (literal (int) ${%"$index"})))))
-      : %(expr $type (${%"_x2c_match_${
+      : %(expr $type (${%"_x2c_gensym_match_${
           row.car().is_list_binder() ? "list" : "value"}_$index"}));
     index++;
     if (handle && row.car().is_list_binder())

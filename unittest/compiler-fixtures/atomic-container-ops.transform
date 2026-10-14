@@ -438,7 +438,7 @@
   (at 82 
    (stmnt 
     (expr ("Text") 
-     (call "_x2c_proto_string_add_update" 
+     (call "_x2c_gensym_proto_string_add_update" 
       (args (expr (* "Text") 
              (op & (parens (expr ("Text") (ident (binding 49 "text")))))) 
        (expr ("Symbol") "56") (expr ("String") (cache 7))))))) 
@@ -545,19 +545,21 @@
   (at 84 (return (expr (int) (literal (int) "0"))))))
 
 (function (static "String") 
- (bind (binding 54 "_x2c_proto_string_add_update") 
+ (bind (binding 54 "_x2c_gensym_proto_string_add_update") 
   ((fnmod 
     (params 
-     (param (volatile "String") (bind (binding 55 "_x2c_macro_lhs_0") (*))) 
-     (param ("Symbol") (bind (binding 56 "_x2c_macro_op_0") ())) 
-     (param ("String") (bind (binding 57 "_x2c_macro_rhs_0") ())))))) 
+     (param (volatile "String") 
+      (bind (binding 55 "_x2c_gensym_macro_lhs_0") 
+       (*))) (param ("Symbol") (bind (binding 56 "_x2c_gensym_macro_op_0") ())) 
+     (param ("String") (bind (binding 57 "_x2c_gensym_macro_rhs_0") ())))))) 
  (block 
   (at 86 
    (stmnt 
     (expr (volatile "String") 
      (op = (expr (volatile "String") 
             (index 
-             (expr (* volatile "String") (ident (binding 55 "_x2c_macro_lhs_0"))) 
+             (expr (* volatile "String") 
+              (ident (binding 55 "_x2c_gensym_macro_lhs_0"))) 
              (expr (int) (literal (int) "0")))) 
       (expr ("String") 
        (call (expr ((func (("String") ("String"))) "String") 
@@ -565,11 +567,12 @@
         (args (expr (volatile "String") 
                (index 
                 (expr (* volatile "String") 
-                 (ident (binding 55 "_x2c_macro_lhs_0"))) 
+                 (ident (binding 55 "_x2c_gensym_macro_lhs_0"))) 
                 (expr (int) (literal (int) "0")))) 
-         (expr ("String") (ident (binding 57 "_x2c_macro_rhs_0")))))))))) 
+         (expr ("String") (ident (binding 57 "_x2c_gensym_macro_rhs_0")))))))))) 
   (at 87 
    (return 
     (expr (volatile "String") 
-     (index (expr (* volatile "String") (ident (binding 55 "_x2c_macro_lhs_0"))) 
+     (index 
+      (expr (* volatile "String") (ident (binding 55 "_x2c_gensym_macro_lhs_0"))) 
       (expr (int) (literal (int) "0"))))))))

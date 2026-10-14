@@ -95,30 +95,30 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 }
 
 static int bound(List form){
-  List bindings =({ static MatchCaptureSite _x2c_match_site_0;
-  x2c_match_site_match(& _x2c_match_site_0, form, List_var(_5)); });
+  List bindings =({ static MatchCaptureSite _x2c_gensym_match_site_0;
+  x2c_match_site_match(& _x2c_gensym_match_site_0, form, List_var(_5)); });
   if(! List_truth(bindings)) return - 1;
   return List_len(Var_list(List_assoc(bindings, Symbol_var(60920294))));
 }
 
 static int sentinel(List form){
-  return List_truth(({ static MatchCaptureSite _x2c_match_site_1;  x2c_match_site_match(& _x2c_match_site_1, form, List_var(_9)); })) ? 1 : 0;
+  return List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_1;  x2c_match_site_match(& _x2c_gensym_match_site_1, form, List_var(_9)); })) ? 1 : 0;
 }
 
 static List renamed(List form){
-  return({ static MatchCaptureSite _x2c_match_site_2;
-  x2c_match_site_match_replace(& _x2c_match_site_2, form, List_var(_5), List_var(_11)); });
+  return({ static MatchCaptureSite _x2c_gensym_match_site_2;
+  x2c_match_site_match_replace(& _x2c_gensym_match_site_2, form, List_var(_5), List_var(_11)); });
 }
 
 static List retagged(List form){
-  return({ static MatchCaptureSite _x2c_match_site_3;
-  x2c_match_site_search_replace(& _x2c_match_site_3, form, List_var(_15), List_var(_17)); });
+  return({ static MatchCaptureSite _x2c_gensym_match_site_3;
+  x2c_match_site_search_replace(& _x2c_gensym_match_site_3, form, List_var(_15), List_var(_17)); });
 }
 
 static int first_call(List form){
   Var found;
   List bindings;
-  if(!({ static MatchCaptureSite _x2c_match_site_4;  x2c_match_site_try_search(& _x2c_match_site_4, form, List_var(_21), &(found), &(bindings)); })) return 0;
+  if(!({ static MatchCaptureSite _x2c_gensym_match_site_4;  x2c_match_site_try_search(& _x2c_gensym_match_site_4, form, List_var(_21), &(found), &(bindings)); })) return 0;
   return x2c_var_equal(List_assoc(bindings, Symbol_var(62481260874)), Symbol_var(12));
 }
 

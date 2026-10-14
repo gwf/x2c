@@ -198,7 +198,7 @@
    (block (declare ("Symbol") (bindings (bind (binding 16 "symbol") ()))) 
     (declare ("Iter") 
      (bindings 
-      (op = (bind (binding 17 "_x2c_macro_iterator_0") ()) 
+      (op = (bind (binding 17 "_x2c_gensym_macro_iterator_0") ()) 
        (expr ("Iter") 
         (call (expr ((func (("SymbolSet") ("Iter"))) "Iter") 
                (ident (binding 18 "SymbolSet_iter"))) 
@@ -213,22 +213,24 @@
                        (call (expr ((func ((int))) "Var") 
                               (ident (binding 19 "int_var"))) 
                         (args (expr (int) (literal (int) "0")))))))))))))))))) 
-    (declare ("Var") (bindings (bind (binding 20 "_x2c_macro_item_0") ()))) 
+    (declare ("Var") 
+     (bindings (bind (binding 20 "_x2c_gensym_macro_item_0") ()))) 
     (at 36 
      (while 
       (expr (int) 
        (call (expr ((func (("Iter") (opt-ref "Var"))) int) 
               (ident (binding 21 "Iter_try_next"))) 
-        (args (expr ("Iter") (ident (binding 17 "_x2c_macro_iterator_0"))) 
+        (args (expr ("Iter") (ident (binding 17 "_x2c_gensym_macro_iterator_0"))) 
          (expr (opt-ref "Var") 
-          (op & (parens (expr ("Var") (ident (binding 20 "_x2c_macro_item_0"))))))))) 
+          (op & (parens 
+                 (expr ("Var") (ident (binding 20 "_x2c_gensym_macro_item_0"))))))))) 
       (block 
        (stmnt 
         (expr ("Symbol") 
          (op = (expr ("Symbol") (ident (binding 16 "symbol"))) 
           (expr ("Symbol") 
            (call "Var_symbol" 
-            (args (expr ("Var") (ident (binding 20 "_x2c_macro_item_0"))))))))) 
+            (args (expr ("Var") (ident (binding 20 "_x2c_gensym_macro_item_0"))))))))) 
        (stmnt 
         (expr (int) 
          (op += (expr (int) (ident (binding 15 "iteration"))) 

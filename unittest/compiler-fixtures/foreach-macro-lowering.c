@@ -31,9 +31,9 @@ static int initial_value(void);
 
 static void record_cleanup(void);
 
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
 
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1);
 
 #include "exception.h"
 
@@ -103,11 +103,11 @@ int main(void){
   int existing = 0, existing_total = 0;
   {
     int current;
-    List _x2c_macro_object_0 = values;
-    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
-    Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      current = Var_int(Var_convert(_x2c_macro_cursor_output_0, 3453797));
+    List _x2c_gensym_macro_object_0 = values;
+    List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
+    Var _x2c_gensym_macro_cursor_output_0;
+    while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+      current = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_0, 3453797));
       {
         existing = current;
         existing_total += existing;
@@ -119,12 +119,12 @@ int main(void){
   int value_total = 0;
   {
     Var volatile value;
-    Map _x2c_macro_object_1 = counts;
-    unsigned _x2c_macro_cursor_1 = 0;
-    Var _x2c_macro_cursor_output_1;
-    Var _x2c_macro_cursor_output_2;
-    while(Map_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1), &(_x2c_macro_cursor_output_2))){
-      value = _x2c_macro_cursor_output_2;
+    Map _x2c_gensym_macro_object_1 = counts;
+    unsigned _x2c_gensym_macro_cursor_1 = 0;
+    Var _x2c_gensym_macro_cursor_output_1;
+    Var _x2c_gensym_macro_cursor_output_2;
+    while(Map_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1), &(_x2c_gensym_macro_cursor_output_2))){
+      value = _x2c_gensym_macro_cursor_output_2;
       value_total += Var_integer(value);
     }
 
@@ -132,12 +132,12 @@ int main(void){
   int typed_total = 0;
   {
     int volatile value = initial_value();
-    Map _x2c_macro_object_2 = counted_map(counts);
-    unsigned _x2c_macro_cursor_2 = 0;
-    Var _x2c_macro_cursor_output_3;
-    Var _x2c_macro_cursor_output_4;
-    while(Map_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_3), &(_x2c_macro_cursor_output_4))){
-      value = Var_int(Var_convert(_x2c_macro_cursor_output_4, 3453797));
+    Map _x2c_gensym_macro_object_2 = counted_map(counts);
+    unsigned _x2c_gensym_macro_cursor_2 = 0;
+    Var _x2c_gensym_macro_cursor_output_3;
+    Var _x2c_gensym_macro_cursor_output_4;
+    while(Map_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_3), &(_x2c_gensym_macro_cursor_output_4))){
+      value = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_4, 3453797));
       typed_total += value;
     }
 
@@ -146,12 +146,12 @@ int main(void){
   int existing_map_total = 0;
   {
     Var current;
-    Map _x2c_macro_object_3 = counts;
-    unsigned _x2c_macro_cursor_3 = 0;
-    Var _x2c_macro_cursor_output_5;
-    Var _x2c_macro_cursor_output_6;
-    while(Map_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_5), &(_x2c_macro_cursor_output_6))){
-      current = _x2c_macro_cursor_output_6;
+    Map _x2c_gensym_macro_object_3 = counts;
+    unsigned _x2c_gensym_macro_cursor_3 = 0;
+    Var _x2c_gensym_macro_cursor_output_5;
+    Var _x2c_gensym_macro_cursor_output_6;
+    while(Map_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_5), &(_x2c_gensym_macro_cursor_output_6))){
+      current = _x2c_gensym_macro_cursor_output_6;
       {
         entry = current;
         existing_map_total += Var_integer(entry);
@@ -163,13 +163,13 @@ int main(void){
   int key_bytes = 0, destructured_total = 0;
   {
     Var name, count;
-    Map _x2c_macro_object_4 = counts;
-    unsigned _x2c_macro_cursor_4 = 0;
-    Var _x2c_macro_cursor_output_7;
-    Var _x2c_macro_cursor_output_8;
-    while(Map_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_7), &(_x2c_macro_cursor_output_8))){
-      name = _x2c_macro_cursor_output_7;
-      count = _x2c_macro_cursor_output_8;
+    Map _x2c_gensym_macro_object_4 = counts;
+    unsigned _x2c_gensym_macro_cursor_4 = 0;
+    Var _x2c_gensym_macro_cursor_output_7;
+    Var _x2c_gensym_macro_cursor_output_8;
+    while(Map_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_7), &(_x2c_gensym_macro_cursor_output_8))){
+      name = _x2c_gensym_macro_cursor_output_7;
+      count = _x2c_gensym_macro_cursor_output_8;
       {
         key_bytes += String_len(Var_string(name));
         destructured_total += Var_integer(count);
@@ -182,26 +182,26 @@ int main(void){
   int converted_total = 0, key_total = 0;
   {
     int key, count;
-    Map _x2c_macro_object_5 = numbers;
-    unsigned _x2c_macro_cursor_5 = 0;
-    Var _x2c_macro_cursor_output_9;
-    Var _x2c_macro_cursor_output_10;
-    while(Map_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_9), &(_x2c_macro_cursor_output_10))){
-      key = Var_int(Var_convert(_x2c_macro_cursor_output_9, 3453797));
-      count = Var_int(Var_convert(_x2c_macro_cursor_output_10, 3453797));
+    Map _x2c_gensym_macro_object_5 = numbers;
+    unsigned _x2c_gensym_macro_cursor_5 = 0;
+    Var _x2c_gensym_macro_cursor_output_9;
+    Var _x2c_gensym_macro_cursor_output_10;
+    while(Map_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_9), &(_x2c_gensym_macro_cursor_output_10))){
+      key = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_9, 3453797));
+      count = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_10, 3453797));
       converted_total += key + count;
     }
 
   }
   {
     int key;
-    Iter _x2c_macro_iterator_6 = Map_keys(numbers, &(struct Iter){
+    Iter _x2c_gensym_macro_iterator_6 = Map_keys(numbers, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_macro_item_6;
-    while(Iter_try_next(_x2c_macro_iterator_6, &(_x2c_macro_item_6))){
-      key = Var_int(Var_convert(_x2c_macro_item_6, 3453797));
+    Var _x2c_gensym_macro_item_6;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_6, &(_x2c_gensym_macro_item_6))){
+      key = Var_int(Var_convert(_x2c_gensym_macro_item_6, 3453797));
       key_total += key;
     }
 
@@ -209,12 +209,12 @@ int main(void){
   int skipped = 0, stopped = 0;
   {
     Var volatile value;
-    Map _x2c_macro_object_7 = counts;
-    unsigned _x2c_macro_cursor_7 = 0;
-    Var _x2c_macro_cursor_output_11;
-    Var _x2c_macro_cursor_output_12;
-    while(Map_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_11), &(_x2c_macro_cursor_output_12))){
-      value = _x2c_macro_cursor_output_12;
+    Map _x2c_gensym_macro_object_7 = counts;
+    unsigned _x2c_gensym_macro_cursor_7 = 0;
+    Var _x2c_gensym_macro_cursor_output_11;
+    Var _x2c_gensym_macro_cursor_output_12;
+    while(Map_try_next(_x2c_gensym_macro_object_7, &(_x2c_gensym_macro_cursor_7), &(_x2c_gensym_macro_cursor_output_11), &(_x2c_gensym_macro_cursor_output_12))){
+      value = _x2c_gensym_macro_cursor_output_12;
       {
         if(Var_integer(value) == 2) continue;
         skipped += Var_integer(value);
@@ -225,12 +225,12 @@ int main(void){
   }
   {
     Var volatile value;
-    Map _x2c_macro_object_8 = counts;
-    unsigned _x2c_macro_cursor_8 = 0;
-    Var _x2c_macro_cursor_output_13;
-    Var _x2c_macro_cursor_output_14;
-    while(Map_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_13), &(_x2c_macro_cursor_output_14))){
-      value = _x2c_macro_cursor_output_14;
+    Map _x2c_gensym_macro_object_8 = counts;
+    unsigned _x2c_gensym_macro_cursor_8 = 0;
+    Var _x2c_gensym_macro_cursor_output_13;
+    Var _x2c_gensym_macro_cursor_output_14;
+    while(Map_try_next(_x2c_gensym_macro_object_8, &(_x2c_gensym_macro_cursor_8), &(_x2c_gensym_macro_cursor_output_13), &(_x2c_gensym_macro_cursor_output_14))){
+      value = _x2c_gensym_macro_cursor_output_14;
       {
         if(Var_truth(value)) stopped ++;
         break;
@@ -243,24 +243,24 @@ int main(void){
   {
     Var name;
     Var volatile value;
-    Map _x2c_macro_object_9 = counts;
-    unsigned _x2c_macro_cursor_9 = 0;
-    Var _x2c_macro_cursor_output_15;
-    Var _x2c_macro_cursor_output_16;
-    while(Map_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_15), &(_x2c_macro_cursor_output_16))){
-      name = _x2c_macro_cursor_output_15;
-      value = _x2c_macro_cursor_output_16;
+    Map _x2c_gensym_macro_object_9 = counts;
+    unsigned _x2c_gensym_macro_cursor_9 = 0;
+    Var _x2c_gensym_macro_cursor_output_15;
+    Var _x2c_gensym_macro_cursor_output_16;
+    while(Map_try_next(_x2c_gensym_macro_object_9, &(_x2c_gensym_macro_cursor_9), &(_x2c_gensym_macro_cursor_output_15), &(_x2c_gensym_macro_cursor_output_16))){
+      name = _x2c_gensym_macro_cursor_output_15;
+      value = _x2c_gensym_macro_cursor_output_16;
       {
         {
-          X2CCleanup _x2c_defer_record_0 ={
-            .fn = _x2c_defer_cleanup_0, .env = 0
+          X2CCleanup _x2c_gensym_defer_record_0 ={
+            .fn = _x2c_gensym_defer_cleanup_0, .env = 0
           }
           ;
-          x2c_cleanup_push(& _x2c_defer_record_0);
+          x2c_cleanup_push(& _x2c_gensym_defer_record_0);
           {
             if(String_truth(Var_string(name)) && Var_truth(value)) deferred_keys ++;
           }
-          x2c_cleanup_leave(& _x2c_defer_record_0);
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
         }
 
       }
@@ -271,20 +271,20 @@ int main(void){
   int nested = 0;
   {
     Var outer;
-    Map _x2c_macro_object_11 = counts;
-    unsigned _x2c_macro_cursor_11 = 0;
-    Var _x2c_macro_cursor_output_19;
-    Var _x2c_macro_cursor_output_20;
-    while(Map_try_next(_x2c_macro_object_11, &(_x2c_macro_cursor_11), &(_x2c_macro_cursor_output_19), &(_x2c_macro_cursor_output_20))){
-      outer = _x2c_macro_cursor_output_20;
+    Map _x2c_gensym_macro_object_11 = counts;
+    unsigned _x2c_gensym_macro_cursor_11 = 0;
+    Var _x2c_gensym_macro_cursor_output_19;
+    Var _x2c_gensym_macro_cursor_output_20;
+    while(Map_try_next(_x2c_gensym_macro_object_11, &(_x2c_gensym_macro_cursor_11), &(_x2c_gensym_macro_cursor_output_19), &(_x2c_gensym_macro_cursor_output_20))){
+      outer = _x2c_gensym_macro_cursor_output_20;
       {
         Var inner;
-        Map _x2c_macro_object_10 = counts;
-        unsigned _x2c_macro_cursor_10 = 0;
-        Var _x2c_macro_cursor_output_17;
-        Var _x2c_macro_cursor_output_18;
-        while(Map_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_17), &(_x2c_macro_cursor_output_18))){
-          inner = _x2c_macro_cursor_output_18;
+        Map _x2c_gensym_macro_object_10 = counts;
+        unsigned _x2c_gensym_macro_cursor_10 = 0;
+        Var _x2c_gensym_macro_cursor_output_17;
+        Var _x2c_gensym_macro_cursor_output_18;
+        while(Map_try_next(_x2c_gensym_macro_object_10, &(_x2c_gensym_macro_cursor_10), &(_x2c_gensym_macro_cursor_output_17), &(_x2c_gensym_macro_cursor_output_18))){
+          inner = _x2c_gensym_macro_cursor_output_18;
           nested += Var_integer(outer) * Var_integer(inner);
         }
 
@@ -295,46 +295,46 @@ int main(void){
   }
   int volatile caught = 0;
   {
-    ExceptionFrame _x2c_exception_frame_0;
-    static MatchCaptureSite _x2c_macro_arms_0[1];
-    Var _x2c_macro_patterns_0[1];
-    static ErrorCatchSite _x2c_macro_site_0 ={
-      _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
+    ExceptionFrame _x2c_gensym_exception_frame_0;
+    static MatchCaptureSite _x2c_gensym_macro_arms_0[1];
+    Var _x2c_gensym_macro_patterns_0[1];
+    static ErrorCatchSite _x2c_gensym_macro_site_0 ={
+      _x2c_gensym_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
-      _x2c_macro_patterns_0[0] = List_var(cons(Symbol_var(20800632064936), NULL));
+    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_0)){
+      _x2c_gensym_macro_patterns_0[0] = List_var(cons(Symbol_var(20800632064936), NULL));
     }
-    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);
-    x2c_exception_push(& _x2c_exception_frame_0);
-    if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
+    volatile ErrorHandler _x2c_gensym_error_handler_0 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_0, & _x2c_gensym_macro_site_0, _x2c_gensym_macro_patterns_0);
+    x2c_exception_push(& _x2c_gensym_exception_frame_0);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)){
       {
         Var volatile value;
-        Map _x2c_macro_object_12 = counts;
-        unsigned _x2c_macro_cursor_12 = 0;
-        x2c_exception_escaped = & _x2c_macro_cursor_12;
-        Var _x2c_macro_cursor_output_21;
-        x2c_exception_escaped = & _x2c_macro_cursor_output_21;
-        Var _x2c_macro_cursor_output_22;
-        x2c_exception_escaped = & _x2c_macro_cursor_output_22;
-        while(Map_try_next(_x2c_macro_object_12, &(_x2c_macro_cursor_12), &(_x2c_macro_cursor_output_21), &(_x2c_macro_cursor_output_22))){
-          value = _x2c_macro_cursor_output_22;
+        Map _x2c_gensym_macro_object_12 = counts;
+        unsigned _x2c_gensym_macro_cursor_12 = 0;
+        x2c_exception_escaped = & _x2c_gensym_macro_cursor_12;
+        Var _x2c_gensym_macro_cursor_output_21;
+        x2c_exception_escaped = & _x2c_gensym_macro_cursor_output_21;
+        Var _x2c_gensym_macro_cursor_output_22;
+        x2c_exception_escaped = & _x2c_gensym_macro_cursor_output_22;
+        while(Map_try_next(_x2c_gensym_macro_object_12, &(_x2c_gensym_macro_cursor_12), &(_x2c_gensym_macro_cursor_output_21), &(_x2c_gensym_macro_cursor_output_22))){
+          value = _x2c_gensym_macro_cursor_output_22;
           {
             {
-              X2CCleanup _x2c_defer_record_1 ={
-                .fn = _x2c_defer_cleanup_1, .env = 0
+              X2CCleanup _x2c_gensym_defer_record_1 ={
+                .fn = _x2c_gensym_defer_cleanup_1, .env = 0
               }
               ;
-              x2c_cleanup_push(& _x2c_defer_record_1);
+              x2c_cleanup_push(& _x2c_gensym_defer_record_1);
               {
                 if(Var_truth(value)){
-                  static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/foreach-macro-lowering.x",.function = "main",.line = 93};
-                  x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 0);
+                  static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/foreach-macro-lowering.x",.function = "main",.line = 93};
+                  x2c_error_raise_n(& _x2c_gensym_error_site_0, 20800632064936, 0);
                   __builtin_unreachable();
                 }
 
               }
-              x2c_cleanup_leave(& _x2c_defer_record_1);
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
             }
 
           }
@@ -345,36 +345,36 @@ int main(void){
 
     }
     else{
-      x2c_exception_landed(& _x2c_exception_frame_0);
-      if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
-        int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
-        x2c_error_catch_detach(_x2c_error_handler_0);
-        x2c_exception_mark_handled(& _x2c_exception_frame_0);
-        if(_x2c_macro_selected_0 == 0){
+      x2c_exception_landed(& _x2c_gensym_exception_frame_0);
+      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_0)){
+        int _x2c_gensym_macro_selected_0 = x2c_error_catch_selected(_x2c_gensym_error_handler_0);
+        x2c_error_catch_detach(_x2c_gensym_error_handler_0);
+        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_0);
+        if(_x2c_gensym_macro_selected_0 == 0){
           caught = 1;
         }
 
       }
       else{
-        x2c_error_catch_close(_x2c_error_handler_0);
-        _x2c_error_handler_0 = NULL;
-        x2c_exception_leave(& _x2c_exception_frame_0);
+        x2c_error_catch_close(_x2c_gensym_error_handler_0);
+        _x2c_gensym_error_handler_0 = NULL;
+        x2c_exception_leave(& _x2c_gensym_exception_frame_0);
         __builtin_unreachable();
       }
 
     }
-    x2c_error_catch_close(_x2c_error_handler_0);
-    _x2c_error_handler_0 = NULL;
-    x2c_exception_leave(& _x2c_exception_frame_0);
+    x2c_error_catch_close(_x2c_gensym_error_handler_0);
+    _x2c_gensym_error_handler_0 = NULL;
+    x2c_exception_leave(& _x2c_gensym_exception_frame_0);
   }
   int word_bytes = 0;
   {
     String word;
-    Split _x2c_macro_object_13 = String_words(_9);
-    int _x2c_macro_cursor_13 = 0;
-    String _x2c_macro_cursor_output_23;
-    while(Split_try_next(_x2c_macro_object_13, &(_x2c_macro_cursor_13), &(_x2c_macro_cursor_output_23))){
-      word = _x2c_macro_cursor_output_23;
+    Split _x2c_gensym_macro_object_13 = String_words(_9);
+    int _x2c_gensym_macro_cursor_13 = 0;
+    String _x2c_gensym_macro_cursor_output_23;
+    while(Split_try_next(_x2c_gensym_macro_object_13, &(_x2c_gensym_macro_cursor_13), &(_x2c_gensym_macro_cursor_output_23))){
+      word = _x2c_gensym_macro_cursor_output_23;
       word_bytes += String_len(word);
     }
 
@@ -382,11 +382,11 @@ int main(void){
   int line_count = 0, line_bytes = 0;
   {
     String line;
-    Split _x2c_macro_object_14 = String_lines(_10);
-    int _x2c_macro_cursor_14 = 0;
-    String _x2c_macro_cursor_output_24;
-    while(Split_try_next(_x2c_macro_object_14, &(_x2c_macro_cursor_14), &(_x2c_macro_cursor_output_24))){
-      line = _x2c_macro_cursor_output_24;
+    Split _x2c_gensym_macro_object_14 = String_lines(_10);
+    int _x2c_gensym_macro_cursor_14 = 0;
+    String _x2c_gensym_macro_cursor_output_24;
+    while(Split_try_next(_x2c_gensym_macro_object_14, &(_x2c_gensym_macro_cursor_14), &(_x2c_gensym_macro_cursor_output_24))){
+      line = _x2c_gensym_macro_cursor_output_24;
       {
         line_count ++;
         line_bytes += String_len(line);
@@ -398,11 +398,11 @@ int main(void){
   int fields = 0, empty_fields = 0;
   {
     String field;
-    Split _x2c_macro_object_15 = String_splits(_11, _12);
-    int _x2c_macro_cursor_15 = 0;
-    String _x2c_macro_cursor_output_25;
-    while(Split_try_next(_x2c_macro_object_15, &(_x2c_macro_cursor_15), &(_x2c_macro_cursor_output_25))){
-      field = _x2c_macro_cursor_output_25;
+    Split _x2c_gensym_macro_object_15 = String_splits(_11, _12);
+    int _x2c_gensym_macro_cursor_15 = 0;
+    String _x2c_gensym_macro_cursor_output_25;
+    while(Split_try_next(_x2c_gensym_macro_object_15, &(_x2c_gensym_macro_cursor_15), &(_x2c_gensym_macro_cursor_output_25))){
+      field = _x2c_gensym_macro_cursor_output_25;
       {
         fields ++;
         if(! String_len(field)) empty_fields ++;
@@ -415,11 +415,11 @@ int main(void){
   int scanned_bytes = 0;
   {
     String current;
-    Split _x2c_macro_object_16 = counted_words(_13);
-    int _x2c_macro_cursor_16 = 0;
-    String _x2c_macro_cursor_output_26;
-    while(Split_try_next(_x2c_macro_object_16, &(_x2c_macro_cursor_16), &(_x2c_macro_cursor_output_26))){
-      current = _x2c_macro_cursor_output_26;
+    Split _x2c_gensym_macro_object_16 = counted_words(_13);
+    int _x2c_gensym_macro_cursor_16 = 0;
+    String _x2c_gensym_macro_cursor_output_26;
+    while(Split_try_next(_x2c_gensym_macro_object_16, &(_x2c_gensym_macro_cursor_16), &(_x2c_gensym_macro_cursor_output_26))){
+      current = _x2c_gensym_macro_cursor_output_26;
       {
         word = current;
         scanned_bytes += String_len(word);
@@ -431,18 +431,18 @@ int main(void){
   int pairs = 0;
   {
     String left;
-    Split _x2c_macro_object_18 = String_words(_14);
-    int _x2c_macro_cursor_18 = 0;
-    String _x2c_macro_cursor_output_28;
-    while(Split_try_next(_x2c_macro_object_18, &(_x2c_macro_cursor_18), &(_x2c_macro_cursor_output_28))){
-      left = _x2c_macro_cursor_output_28;
+    Split _x2c_gensym_macro_object_18 = String_words(_14);
+    int _x2c_gensym_macro_cursor_18 = 0;
+    String _x2c_gensym_macro_cursor_output_28;
+    while(Split_try_next(_x2c_gensym_macro_object_18, &(_x2c_gensym_macro_cursor_18), &(_x2c_gensym_macro_cursor_output_28))){
+      left = _x2c_gensym_macro_cursor_output_28;
       {
         String right;
-        Split _x2c_macro_object_17 = String_words(_15);
-        int _x2c_macro_cursor_17 = 0;
-        String _x2c_macro_cursor_output_27;
-        while(Split_try_next(_x2c_macro_object_17, &(_x2c_macro_cursor_17), &(_x2c_macro_cursor_output_27))){
-          right = _x2c_macro_cursor_output_27;
+        Split _x2c_gensym_macro_object_17 = String_words(_15);
+        int _x2c_gensym_macro_cursor_17 = 0;
+        String _x2c_gensym_macro_cursor_output_27;
+        while(Split_try_next(_x2c_gensym_macro_object_17, &(_x2c_gensym_macro_cursor_17), &(_x2c_gensym_macro_cursor_output_27))){
+          right = _x2c_gensym_macro_cursor_output_27;
           if(String_truth(left) && String_truth(right)) pairs ++;
         }
 
@@ -454,11 +454,11 @@ int main(void){
   int boxed = 0;
   {
     Var field;
-    Split _x2c_macro_object_19 = String_words(_16);
-    int _x2c_macro_cursor_19 = 0;
-    String _x2c_macro_cursor_output_29;
-    while(Split_try_next(_x2c_macro_object_19, &(_x2c_macro_cursor_19), &(_x2c_macro_cursor_output_29))){
-      field = String_var(_x2c_macro_cursor_output_29);
+    Split _x2c_gensym_macro_object_19 = String_words(_16);
+    int _x2c_gensym_macro_cursor_19 = 0;
+    String _x2c_gensym_macro_cursor_output_29;
+    while(Split_try_next(_x2c_gensym_macro_object_19, &(_x2c_gensym_macro_cursor_19), &(_x2c_gensym_macro_cursor_output_29))){
+      field = String_var(_x2c_gensym_macro_cursor_output_29);
       boxed += String_len(Var_string(field));
     }
 
@@ -470,12 +470,12 @@ int main(void){
   int zipped_total = 0;
   {
     Var text, number;
-    Iter _x2c_macro_iterator_20 = zipped;
-    Var _x2c_macro_item_20;
-    while(Iter_try_next(_x2c_macro_iterator_20, &(_x2c_macro_item_20))){
-      List _x2c_macro_pair_20 = Var_list_payload(_x2c_macro_item_20);
-      text = List_getindex(_x2c_macro_pair_20, 0);
-      number = List_getindex(_x2c_macro_pair_20, 1);
+    Iter _x2c_gensym_macro_iterator_20 = zipped;
+    Var _x2c_gensym_macro_item_20;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_20, &(_x2c_gensym_macro_item_20))){
+      List _x2c_gensym_macro_pair_20 = Var_list_payload(_x2c_gensym_macro_item_20);
+      text = List_getindex(_x2c_gensym_macro_pair_20, 0);
+      number = List_getindex(_x2c_gensym_macro_pair_20, 1);
       zipped_total += String_len(Var_string(text)) * Var_integer(number);
     }
 
@@ -486,12 +486,12 @@ int main(void){
   int native_values = 0, native_pairs = 0;
   {
     int volatile value;
-    MapIntInt _x2c_macro_object_21 = counted;
-    unsigned _x2c_macro_cursor_21 = 0;
-    int _x2c_macro_cursor_output_30;
-    int _x2c_macro_cursor_output_31;
-    while(MapIntInt_try_next(_x2c_macro_object_21, &(_x2c_macro_cursor_21), &(_x2c_macro_cursor_output_30), &(_x2c_macro_cursor_output_31))){
-      value = _x2c_macro_cursor_output_31;
+    MapIntInt _x2c_gensym_macro_object_21 = counted;
+    unsigned _x2c_gensym_macro_cursor_21 = 0;
+    int _x2c_gensym_macro_cursor_output_30;
+    int _x2c_gensym_macro_cursor_output_31;
+    while(MapIntInt_try_next(_x2c_gensym_macro_object_21, &(_x2c_gensym_macro_cursor_21), &(_x2c_gensym_macro_cursor_output_30), &(_x2c_gensym_macro_cursor_output_31))){
+      value = _x2c_gensym_macro_cursor_output_31;
       native_values += value;
     }
 
@@ -499,13 +499,13 @@ int main(void){
   {
     int key;
     int volatile value;
-    MapIntInt _x2c_macro_object_22 = counted;
-    unsigned _x2c_macro_cursor_22 = 0;
-    int _x2c_macro_cursor_output_32;
-    int _x2c_macro_cursor_output_33;
-    while(MapIntInt_try_next(_x2c_macro_object_22, &(_x2c_macro_cursor_22), &(_x2c_macro_cursor_output_32), &(_x2c_macro_cursor_output_33))){
-      key = _x2c_macro_cursor_output_32;
-      value = _x2c_macro_cursor_output_33;
+    MapIntInt _x2c_gensym_macro_object_22 = counted;
+    unsigned _x2c_gensym_macro_cursor_22 = 0;
+    int _x2c_gensym_macro_cursor_output_32;
+    int _x2c_gensym_macro_cursor_output_33;
+    while(MapIntInt_try_next(_x2c_gensym_macro_object_22, &(_x2c_gensym_macro_cursor_22), &(_x2c_gensym_macro_cursor_output_32), &(_x2c_gensym_macro_cursor_output_33))){
+      key = _x2c_gensym_macro_cursor_output_32;
+      value = _x2c_gensym_macro_cursor_output_33;
       native_pairs += key * value;
     }
 
@@ -515,12 +515,12 @@ int main(void){
   int native_bytes = 0;
   {
     String volatile value;
-    MapStringString _x2c_macro_object_23 = named;
-    unsigned _x2c_macro_cursor_23 = 0;
-    String _x2c_macro_cursor_output_34;
-    String _x2c_macro_cursor_output_35;
-    while(MapStringString_try_next(_x2c_macro_object_23, &(_x2c_macro_cursor_23), &(_x2c_macro_cursor_output_34), &(_x2c_macro_cursor_output_35))){
-      value = _x2c_macro_cursor_output_35;
+    MapStringString _x2c_gensym_macro_object_23 = named;
+    unsigned _x2c_gensym_macro_cursor_23 = 0;
+    String _x2c_gensym_macro_cursor_output_34;
+    String _x2c_gensym_macro_cursor_output_35;
+    while(MapStringString_try_next(_x2c_gensym_macro_object_23, &(_x2c_gensym_macro_cursor_23), &(_x2c_gensym_macro_cursor_output_34), &(_x2c_gensym_macro_cursor_output_35))){
+      value = _x2c_gensym_macro_cursor_output_35;
       native_bytes += String_len(value);
     }
 
@@ -531,11 +531,11 @@ int main(void){
   return value_total == 6 && typed_total == 6 && key_bytes == 3 && destructured_total == 6 && converted_total == 33 && skipped == 4 && stopped == 1 && deferred_keys == 3 && nested == 36 && caught == 1 && cleanups == 4 && map_evaluations == 1 && initializer_evaluations == 1 && word_bytes == 14 && line_count == 3 && line_bytes == 11 && fields == 4 && empty_fields == 2 && scanned_bytes == 11 && split_evaluations == 1 && pairs == 6 && boxed == 2 && zipped_total == 5 && native_values == 30 && native_pairs == 50 && native_bytes == 8 && key_total == 3 && existing == 3 && existing_total == 6 && existing_map_total == 6 && ! Var_is_void(entry) && String_equal(word, _24) && value == 7 ? 0 : 1;
 }
 
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
   record_cleanup();
 }
 
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
+static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
   record_cleanup();
 }
 

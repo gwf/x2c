@@ -20,10 +20,8 @@ Expression syntax and its resolution.
 | [`Compiler.convert_segment_to_string`](#Compiler.convert_segment_to_string) | Converts a resolved interpolation segment to `String` when available. |
 | [`Compiler.converter_call`](#Compiler.converter_call) | The call to the converter that `type`, or the first of its typedef names that declares one, provides for `target`, applied to `expr`, or NULL when none declares one. |
 | [`Compiler.func_call_parts`](#Compiler.func_call_parts) | Returns the callee and arguments of a typed `Func` call, or NULL for any other expression. |
-| [`Compiler.indexed_builtin_helper`](#Compiler.indexed_builtin_helper) | Identifies the Array or Map helper family for built-in indexed mutation. |
 | [`Compiler.is_builtin_converter_call`](#Compiler.is_builtin_converter_call) | The global builtin boxers and scalar formatters only observe their arguments. |
 | [`Compiler.needs_resolution`](#Compiler.needs_resolution) | True when syntax still needs ordinary binding or macro substitution. |
-| [`Compiler.nominal_getindex`](#Compiler.nominal_getindex) | Resolves the exact nominal getter shared by bracket admission and lowering. |
 | [`Compiler.parse_assignment`](#Compiler.parse_assignment) | Parses one right-associative assignment expression. |
 | [`Compiler.parse_conditional`](#Compiler.parse_conditional) | Parses a binary expression and its optional conditional tail. |
 | [`Compiler.parse_expression`](#Compiler.parse_expression) | Parses an assignment expression and any following comma expressions. |
@@ -155,15 +153,6 @@ that takes the callee's own type.
 
 Source: `src/expressions.x:2117`
 
-<a id="Compiler.indexed_builtin_helper"></a>
-#### Compiler.indexed_builtin_helper
-
-`Symbol Compiler.indexed_builtin_helper(Compiler c, Type type)`
-
-Identifies the Array or Map helper family for built-in indexed mutation.
-
-Source: `src/expressions.x:2387`
-
 <a id="Compiler.is_builtin_converter_call"></a>
 #### Compiler.is_builtin_converter_call
 
@@ -182,16 +171,6 @@ Source: `src/expressions.x:3688`
 True when syntax still needs ordinary binding or macro substitution.
 
 Source: `src/expressions.x:972`
-
-<a id="Compiler.nominal_getindex"></a>
-#### Compiler.nominal_getindex
-
-`List Compiler.nominal_getindex(Compiler c, Type type)`
-
-Resolves the exact nominal getter shared by bracket admission and lowering.
-A collection getter's own body uses the inherited implementation instead.
-
-Source: `src/expressions.x:1473`
 
 <a id="Compiler.parse_assignment"></a>
 #### Compiler.parse_assignment

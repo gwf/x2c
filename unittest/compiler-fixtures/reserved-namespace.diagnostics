@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/reserved-namespace.x:8:21: parse: '_x2c_lambda_0' is reserved for compiler-generated names
-    int _x2c_lambda_0 = 2;
-                      ^
+unittest/compiler-fixtures/reserved-namespace.x:8:28: parse: '_x2c_gensym_lambda_0' is reserved for compiler-generated names
+    int _x2c_gensym_lambda_0 = 2;
+                             ^
 

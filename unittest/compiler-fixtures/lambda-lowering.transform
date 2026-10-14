@@ -17,7 +17,7 @@
        (call (expr ((func (("List") ("Func"))) ("List")) 
               (ident (binding 4 "List_map"))) 
         (args (expr ("List") (ident (binding 2 "values"))) 
-         (expr ("Func") (ident (binding 5 "_x2c_func_handle_0")))))))))) 
+         (expr ("Func") (ident (binding 5 "_x2c_gensym_func_handle_0")))))))))) 
   (at 19 
    (declare ("List") 
     (bindings 
@@ -31,7 +31,7 @@
        (call (expr ((func (("List") ("Func"))) ("List")) 
               (ident (binding 4 "List_map"))) 
         (args (expr ("List") (ident (binding 6 "nested"))) 
-         (expr ("Func") (ident (binding 8 "_x2c_func_handle_1")))))))))) 
+         (expr ("Func") (ident (binding 8 "_x2c_gensym_func_handle_1")))))))))) 
   (at 21 
    (stmnt 
     (expr () 
@@ -80,7 +80,7 @@
   (at 26 (return (expr (int) (literal (int) "0"))))))
 
 (function (static "Var") 
- (bind (binding 12 "_x2c_lambda_0") 
+ (bind (binding 12 "_x2c_gensym_lambda_0") 
   ((fnmod (params (param ("Var") (bind (binding 13 "value") ())))))) 
  (block 
   (at 18 
@@ -96,10 +96,10 @@
                (expr (int) (literal (int) "2"))))))))))))
 
 (function (static "Var") 
- (bind (binding 15 "_x2c_func_adapt_0") 
+ (bind (binding 15 "_x2c_gensym_func_adapt_0") 
   ((fnmod 
-    (params (param ("Func") (bind (binding 16 "_x2c_func_binding_0") ())) 
-     (param (const "FuncArg") (bind (binding 17 "_x2c_func_argv_0") (*))))))) 
+    (params (param ("Func") (bind (binding 16 "_x2c_gensym_func_binding_0") ())) 
+     (param (const "FuncArg") (bind (binding 17 "_x2c_gensym_func_argv_0") (*))))))) 
  (block 
   (declare ("Var") 
    (bindings 
@@ -107,26 +107,27 @@
      (expr ("Var") 
       (call (expr ((func (("Func") (* const "FuncArg") (unsigned) ("Symbol"))) 
                    "Var") (ident (binding 19 "x2c_func_value_argument"))) 
-       (args (expr ("Func") (ident (binding 16 "_x2c_func_binding_0"))) 
-        (expr (* const "FuncArg") (ident (binding 17 "_x2c_func_argv_0"))) 
+       (args (expr ("Func") (ident (binding 16 "_x2c_gensym_func_binding_0"))) 
+        (expr (* const "FuncArg") (ident (binding 17 "_x2c_gensym_func_argv_0"))) 
         (expr (int) (literal (int) "0")) (expr ("Symbol") "45156"))))))) 
   (stmnt 
    (return 
     (expr ("Var") 
-     (call (expr ((func (("Var"))) "Var") (ident (binding 12 "_x2c_lambda_0"))) 
+     (call (expr ((func (("Var"))) "Var") 
+            (ident (binding 12 "_x2c_gensym_lambda_0"))) 
       (args (expr ("Var") (ident (binding 18 "a0"))))))))))
 
 (declare (static "Func") 
  (bindings 
-  (op = (bind (binding 5 "_x2c_func_handle_0") ()) 
+  (op = (bind (binding 5 "_x2c_gensym_func_handle_0") ()) 
    (expr ("Func") 
     (call (expr ((func (("FuncAdapter") ("List"))) "Func") 
            (ident (binding 20 "x2c_func_shared"))) 
-     (args (expr ("FuncAdapter") (ident (binding 15 "_x2c_func_adapt_0"))) 
+     (args (expr ("FuncAdapter") (ident (binding 15 "_x2c_gensym_func_adapt_0"))) 
       (expr ("List") (expr ("List") (cache 24)))))))))
 
 (function (static "Var") 
- (bind (binding 21 "_x2c_lambda_1") 
+ (bind (binding 21 "_x2c_gensym_lambda_1") 
   ((fnmod (params (param ("Var") (bind (binding 22 "value") ())))))) 
  (block 
   (at 27 
@@ -142,10 +143,10 @@
         (expr (int) (literal (int) "0"))))))))))
 
 (function (static "Var") 
- (bind (binding 24 "_x2c_func_adapt_1") 
+ (bind (binding 24 "_x2c_gensym_func_adapt_1") 
   ((fnmod 
-    (params (param ("Func") (bind (binding 25 "_x2c_func_binding_1") ())) 
-     (param (const "FuncArg") (bind (binding 26 "_x2c_func_argv_1") (*))))))) 
+    (params (param ("Func") (bind (binding 25 "_x2c_gensym_func_binding_1") ())) 
+     (param (const "FuncArg") (bind (binding 26 "_x2c_gensym_func_argv_1") (*))))))) 
  (block 
   (declare ("Var") 
    (bindings 
@@ -153,20 +154,21 @@
      (expr ("Var") 
       (call (expr ((func (("Func") (* const "FuncArg") (unsigned) ("Symbol"))) 
                    "Var") (ident (binding 19 "x2c_func_value_argument"))) 
-       (args (expr ("Func") (ident (binding 25 "_x2c_func_binding_1"))) 
-        (expr (* const "FuncArg") (ident (binding 26 "_x2c_func_argv_1"))) 
+       (args (expr ("Func") (ident (binding 25 "_x2c_gensym_func_binding_1"))) 
+        (expr (* const "FuncArg") (ident (binding 26 "_x2c_gensym_func_argv_1"))) 
         (expr (int) (literal (int) "0")) (expr ("Symbol") "45156"))))))) 
   (stmnt 
    (return 
     (expr ("Var") 
-     (call (expr ((func (("Var"))) "Var") (ident (binding 21 "_x2c_lambda_1"))) 
+     (call (expr ((func (("Var"))) "Var") 
+            (ident (binding 21 "_x2c_gensym_lambda_1"))) 
       (args (expr ("Var") (ident (binding 27 "a0"))))))))))
 
 (declare (static "Func") 
  (bindings 
-  (op = (bind (binding 8 "_x2c_func_handle_1") ()) 
+  (op = (bind (binding 8 "_x2c_gensym_func_handle_1") ()) 
    (expr ("Func") 
     (call (expr ((func (("FuncAdapter") ("List"))) "Func") 
            (ident (binding 20 "x2c_func_shared"))) 
-     (args (expr ("FuncAdapter") (ident (binding 24 "_x2c_func_adapt_1"))) 
+     (args (expr ("FuncAdapter") (ident (binding 24 "_x2c_gensym_func_adapt_1"))) 
       (expr ("List") (expr ("List") (cache 24)))))))))

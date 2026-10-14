@@ -73,26 +73,26 @@ int main(void){
   int inherited_total = 0, overridden_total = 0;
   {
     int value;
-    Iter _x2c_macro_iterator_0 = IterParent_iter(inherited, &(struct Iter){
+    Iter _x2c_gensym_macro_iterator_0 = IterParent_iter(inherited, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, &(_x2c_macro_item_0))){
-      value = Var_int(Var_convert(_x2c_macro_item_0, 3453797));
+    Var _x2c_gensym_macro_item_0;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_0, &(_x2c_gensym_macro_item_0))){
+      value = Var_int(Var_convert(_x2c_gensym_macro_item_0, 3453797));
       inherited_total += value;
     }
 
   }
   {
     int value;
-    Iter _x2c_macro_iterator_1 = IterOverride_iter(overridden, &(struct Iter){
+    Iter _x2c_gensym_macro_iterator_1 = IterOverride_iter(overridden, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_macro_item_1;
-    while(Iter_try_next(_x2c_macro_iterator_1, &(_x2c_macro_item_1))){
-      value = Var_int(Var_convert(_x2c_macro_item_1, 3453797));
+    Var _x2c_gensym_macro_item_1;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_1, &(_x2c_gensym_macro_item_1))){
+      value = Var_int(Var_convert(_x2c_gensym_macro_item_1, 3453797));
       overridden_total += value;
     }
 

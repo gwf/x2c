@@ -99,7 +99,7 @@ _Static_assert(_Generic(& rewind, void(*)(File) : 1, default: 0), "native alias 
 _Static_assert(_Generic(& setbuf, void(*)(File, char *) : 1, default: 0), "native alias File_setbuf does not match setbuf");
 #endif
 #define File_setbuf setbuf
-void File_cleanup(File _x2c_macro_value_0);
+void File_cleanup(File _x2c_gensym_macro_value_0);
 String File_string(File file);
 String File_readline(File file);
 String File_readblock(File file, long size);

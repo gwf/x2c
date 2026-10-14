@@ -2121,4 +2121,4 @@
       (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))
 
 (declare (static "VarMethods") 
- (bindings (bind (binding 70 "_x2c__x2c_protocol_methods_0") ())))
+ (bindings (bind (binding 70 "_x2c_gensym_protocol_methods_0") ())))

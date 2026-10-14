@@ -147,13 +147,13 @@ Public functions:
 `Compiler.shallow_parse_overlay`, `Compiler.start_collection`,
 `Compiler.collect_compile_time_definition`,
 `Compiler.finish_collected_declaration`, `Compiler.record_inline_function`,
-`Compiler.at_function_arrow`, `Compiler.skip_shallow_expression`,
+`_x2c_at_function_arrow`, `_x2c_skip_shallow_expression`,
 `Compiler.full_parse`, `Compiler.skip_collected_script_statement`,
 `Compiler.skip_script_statement`, `Compiler.tokenize`, `Compiler.peek`,
 `Token.skip_trivia`, `Compiler.require_input`, `Compiler.expect`,
 `Compiler.next`, `Compiler.test`, `Compiler.at_word`, `Compiler.take_word`,
 `Symbol.group_step`, `Token.group_close`, `Token.after_group`,
-`Compiler.mark_completion`, `Compiler.at_completion`, `Compiler.complete_here`,
+`Compiler.mark_completion`, `Compiler.at_completion`, `_x2c_complete_here`,
 `Compiler.queue_declaration_effect`, `Compiler.run_declaration_effects`,
 `Compiler.collect_unit_macro`, `Compiler.replay_declaration_source`,
 `Compiler.freeze_declaration_syntax`, `Compiler.thaw_declaration_syntax`,
@@ -207,7 +207,7 @@ interpolated Strings.
 
 Public functions:
 
-`interpolation`
+`interpolation_lowering`
 
 ### [src/component-lambdas.x](../src/component-lambdas.x)
 
@@ -289,7 +289,7 @@ Public functions:
 
 `Diagnostics.new`, `Diagnostics.reset`, `Diagnostics.hold`,
 `Diagnostics.release`, `Diagnostics.entries`, `Diagnostics.reached_limit`,
-`Diagnostics.report`, `Diagnostics.write_json`, `Compiler.print_diagnostic`,
+`Diagnostics.report`, `diagnostics_write_json`, `Compiler.print_diagnostic`,
 `Compiler.origin_location`, `Compiler.display_path`, `Compiler.token_location`,
 `Compiler.token_source`, `Compiler.token_column`, `Compiler.text_source`,
 `Compiler.source_token`, `Compiler.report_error`, `Compiler.report_problem`,
@@ -332,10 +332,10 @@ Public functions:
 `Compiler.parse_macro_expression_target`, `Compiler.apply_macro_value`,
 `Compiler.parse_primary`, `Compiler.parse_variable`,
 `Compiler.resolve_expression`, `Compiler.needs_resolution`,
-`Compiler.nominal_getindex`, `Compiler.resolve_postfix_member`,
+`_x2c_nominal_getindex`, `Compiler.resolve_postfix_member`,
 `Compiler.postfix_completions`, `x2c_func_call_arguments`,
 `Compiler.func_call_parts`, `Compiler.complete_iter_chain`,
-`Compiler.indexed_builtin_helper`, `Compiler.require_var_tag`,
+`_x2c_indexed_builtin_helper`, `Compiler.require_var_tag`,
 `Compiler.var_tag_expression`, `Compiler.resolve_map_entry`,
 `Compiler.check_explicit_converter`, `List.printf_family`,
 `Compiler.printf_static_format`, `Compiler.promote_string_literal`,
@@ -348,7 +348,7 @@ statements that copy or set named fields.
 
 Public functions:
 
-`field_copies`, `field_sets`
+`_x2c_field_copies`, `_x2c_field_sets`
 
 ### [src/format.x](../src/format.x)
 
@@ -393,7 +393,7 @@ Public functions:
 `source_postfix_expression`, `source_content_pattern`, `source_call_content`,
 `source_return_content`, `source_block_content`, `source_identifier_content`,
 `source_literal_content`, `source_declarator_row`, `source_expression`,
-`catch_handle`, `retain_catch_handle`
+`source_catch_handle`, `source_retain_catch_handle`
 
 ### [src/initializers.x](../src/initializers.x)
 
@@ -784,7 +784,7 @@ Public functions:
 `ToolAction.as_program`, `Toolchain.compile_action`,
 `Toolchain.preprocess_action`, `Toolchain.archive_action`,
 `Toolchain.link_action`, `Toolchain.module_action`, `ToolAction.run`,
-`ToolAction.start`, `ToolRun.ready`, `ToolRun.wait`, `ToolAction.capture`,
+`ToolAction.start`, `ToolRun.ready`, `ToolRun.wait`, `tool_capture`,
 `Toolchain.preprocess`, `Toolchain.search_directories`
 
 ### [src/transform.x](../src/transform.x)

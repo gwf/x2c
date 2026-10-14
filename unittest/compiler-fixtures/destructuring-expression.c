@@ -30,10 +30,10 @@ int main(void){
   Values values = _3;
   Var a, b, c, d;
   Values result =({
-    Values _x2c_destructure_result_0 =({
-      Values _x2c_destructure_result_1 = values;  List _x2c_destructure_1 = _x2c_destructure_result_1;  a = List_getindex(_x2c_destructure_1, 0);  b = List_getindex(_x2c_destructure_1, 1);  _x2c_destructure_result_1;
+    Values _x2c_gensym_destructure_result_0 =({
+      Values _x2c_gensym_destructure_result_1 = values;  List _x2c_gensym_destructure_1 = _x2c_gensym_destructure_result_1;  a = List_getindex(_x2c_gensym_destructure_1, 0);  b = List_getindex(_x2c_gensym_destructure_1, 1);  _x2c_gensym_destructure_result_1;
     }
-    );  List _x2c_destructure_0 = _x2c_destructure_result_0;  c = List_getindex(_x2c_destructure_0, 0);  d = List_getindex(_x2c_destructure_0, 1);  _x2c_destructure_result_0;
+    );  List _x2c_gensym_destructure_0 = _x2c_gensym_destructure_result_0;  c = List_getindex(_x2c_gensym_destructure_0, 0);  d = List_getindex(_x2c_gensym_destructure_0, 1);  _x2c_gensym_destructure_result_0;
   }
   );
   printf("%ld %ld %ld %ld %d\n", Var_integer(a), Var_integer(b), Var_integer(c), Var_integer(d), result == values);

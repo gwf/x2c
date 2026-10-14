@@ -87,7 +87,7 @@ that the walk replaces in CODE and in later rows with what the row lowered:
 a fresh binding, bound exits, or a region that runs the exits bound before
 it on every transfer out of it. The finalizer's region leaves the frame,
 and the body and each arm run the try's exits. The walk applies the rows in
-order and then binds CODE. `catch_handle` reads the handler the parser
+order and then binds CODE. `source_catch_handle` reads the handler the parser
 introduced, which no source form writes.
 
 ```x2c
@@ -101,7 +101,7 @@ meta static Code _try_landing(
   Atom exits = Atom.intern("?__try_exits");
   Atom lowered = Atom.intern("?__try_body");
   Atom finished = NULL;
-  List handle = arms ? catch_handle(node) : NULL;
+  List handle = arms ? source_catch_handle(node) : NULL;
   Array rows = [%(new-name $frame "exception_frame")];
   if (finalizer) {
     Atom departure = Atom.intern("?__try_departure");

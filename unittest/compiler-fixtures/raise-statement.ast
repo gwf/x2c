@@ -222,5 +222,5 @@
                 (call (expr ((func (("Symbol"))) "Var") 
                        (ident (binding 30 "Symbol_var"))) 
                  (args (expr ("Symbol") (literal ("Symbol") "bad-arg" bad-arg))))) 
-          (nil)))) (block (block)))) (binding 31 "_x2c_error_handler_0")) 
+          (nil)))) (block (block)))) (binding 31 "_x2c_gensym_error_handler_0")) 
     ()))))

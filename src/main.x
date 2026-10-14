@@ -827,7 +827,7 @@ int main(int argc, char **argv) {
   if (argc > 1) _run_external(argc, argv);
   CliRequest request = CliRequest.parse(argc, argv);
   String diagnostics = request.diagnostics_file;
-  if (diagnostics && !Diagnostics.write_json(diagnostics))
+  if (diagnostics && !diagnostics_write_json(diagnostics))
     $report.main.diagnostics_unwritable(diagnostics);
   if (request.command == <script> && request.prepare_script()) return 0;
   report_configure(

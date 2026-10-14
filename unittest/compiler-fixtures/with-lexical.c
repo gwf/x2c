@@ -143,22 +143,22 @@ int main(void){
   }
   helper(& box.points[0]);
   contextual_as(& box.points[1]);
-  Point _x2c_macro___0 ={
+  Point _x2c_gensym_macro___0 ={
     0
   }
   ;
   {
     (box.points[1]).x += 1;
     {
-      Point _x2c_macro___1 ={
+      Point _x2c_gensym_macro___1 ={
         0
       }
       ;
-      _x2c_macro___1.x = 2;
+      _x2c_gensym_macro___1.x = 2;
     }
     (box.points[1]).y += 1;
   }
-  _x2c_macro___0.z = 3;
+  _x2c_gensym_macro___0.z = 3;
   {
     (box.point).x += 1;
   }

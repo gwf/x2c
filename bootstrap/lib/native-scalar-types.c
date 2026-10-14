@@ -178,11 +178,11 @@ List _scalar_access_units(Macro access){
   List rows = List_sort(Map_list(native_scalar_types()));
   {
     List row;
-    List _x2c_macro_object_0 = rows;
-    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
-    Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      row = Var_list_payload(_x2c_macro_cursor_output_0);
+    List _x2c_gensym_macro_object_0 = rows;
+    List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
+    Var _x2c_gensym_macro_cursor_output_0;
+    while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+      row = Var_list_payload(_x2c_gensym_macro_cursor_output_0);
       {
         Type type = Var_list_payload(List_car(row));
         Array_push(units, List_var(Macro_apply(access, cons(List_var(type), NULL))));

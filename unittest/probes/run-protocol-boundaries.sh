@@ -146,12 +146,12 @@ cp "$SOURCE/relative-adoption.x" "$RELATIVE/src/main.x"
 
 "$X2C" translate --out-dir "$BUILD/protocol-owner" \
   "$SOURCE/protocol-owner.x" "$SOURCE/protocol-consumer.x"
-grep -q '_x2c_proto_vec_str' "$BUILD/protocol-owner/protocol-owner.c" ||
+grep -q '_x2c_gensym_proto_vec_str' "$BUILD/protocol-owner/protocol-owner.c" ||
   fail "forward-converter owner omitted its descriptor thunk"
 grep -q 'x2c_register_descriptor' \
   "$BUILD/protocol-owner/protocol-owner.c" ||
   fail "forward-converter owner omitted descriptor registration"
-if grep -q '_x2c_proto_vec_str\\|x2c_register_descriptor' \
+if grep -q '_x2c_gensym_proto_vec_str\\|x2c_register_descriptor' \
     "$BUILD/protocol-owner/protocol-consumer.c"; then
   fail "protocol consumer claimed owner-local runtime artifacts"
 fi

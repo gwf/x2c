@@ -45,7 +45,7 @@ int Diagnostics_reached_limit(Diagnostics diag);
 
 void Diagnostics_report(Diagnostics diag, Symbol code, String message, List location, List notes);
 
-int Diagnostics_write_json(String path);
+int diagnostics_write_json(String path);
 
 void Compiler_print_diagnostic(Compiler compiler, List entry);
 

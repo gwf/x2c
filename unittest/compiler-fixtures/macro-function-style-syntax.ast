@@ -44,17 +44,17 @@
   (at 39 
    (declare (int) 
     (bindings 
-     (op = (bind (binding 6 "_x2c_macro_temporary_0") ()) 
+     (op = (bind (binding 6 "_x2c_gensym_macro_temporary_0") ()) 
       (expr (int) (literal (int) "5")))))) 
   (at 40 
    (stmnt 
     (expr (int) 
      (op = (expr (int) (ident (binding 5 "result"))) 
-      (expr (int) (ident (binding 6 "_x2c_macro_temporary_0"))))))) 
+      (expr (int) (ident (binding 6 "_x2c_gensym_macro_temporary_0"))))))) 
   (at 42 
    (declare (int) 
     (bindings 
-     (op = (bind (binding 7 "_x2c_macro_temporary_1") ()) 
+     (op = (bind (binding 7 "_x2c_gensym_macro_temporary_1") ()) 
       (expr (int) 
        (op + (expr (int) (ident (binding 5 "result"))) 
         (expr (int) (literal (int) "1")))))))) 
@@ -62,7 +62,7 @@
    (stmnt 
     (expr (int) 
      (op = (expr (int) (ident (binding 5 "result"))) 
-      (expr (int) (ident (binding 7 "_x2c_macro_temporary_1"))))))) 
+      (expr (int) (ident (binding 7 "_x2c_gensym_macro_temporary_1"))))))) 
   (at 48 
    (stmnt 
     (expr () 

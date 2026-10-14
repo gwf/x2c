@@ -515,8 +515,9 @@ name, know, or refuse anything. Spell the language `x2c`.
 `_snake_case` for an ordinary static function, `snake_case` for locals and
 parameters, `UPPER_CASE` for constants and enumerators, and bare PascalCase
 for types and private records. A dotted method never has a leading
-underscore. A function that other files call is an ordinary `Type.method`;
-a helper used only in its own file is a `static` `_snake_case` function.
+underscore. A public operation uses `Type.method` when it has a natural
+type owner. An ordinary helper local to one translation unit is a `static`
+`_snake_case` function; module members share that translation unit.
 Static helpers have no dotted owner, including helpers that accept owner
 state and factories that accept no receiver. Keep the existing signature,
 ownership, and mutation behavior.
@@ -532,12 +533,22 @@ such as converters, protocol members, operators, lifecycle hooks, and native
 bindings. Verify each exception against the name producer and its consumers;
 dotted spelling alone is not evidence. For example, `Fact.var` and `Var.fact`
 in `src/regions.x` serve conversion and protocol lookup.
+`Job.new` and `Regex.new` remain static dotted constructors: class expansion
+looks for an owned `new` before synthesizing a constructor that requires
+`init`. Their names therefore participate in class lookup.
 
-A helper shared across files or macro expansions is a plain `Type.method`.
-Give it a semantic qualifier that keeps it apart from the public operation
-it serves.
+A shared implementation helper that needs external linkage is a free
+`_x2c_operation` function, with explicit context arguments and no dotted owner.
+The prefix means private by design, public by necessity; it does not enforce
+access control. Keep its contract in an ordinary comment rather than a public
+API doc comment. Cross-file use alone does not make an operation public.
 
-Generated Array and Map family helpers are dotted for two reasons. Typed-alias
+Request execution methods may orchestrate installation or script execution:
+the request owns their selected operation and configuration. Process-global
+diagnostic configuration and standalone tool capture are module services,
+`diagnostics_write_json` and `tool_capture`.
+
+Generated Array and Map family helpers remain lookup exceptions. Typed-alias
 consumers inherit core helpers through typedef method lookup
 (`_next_method_type` in `src/expressions.x`). Other consumers need a stable
 name outside the defining macro expansion: Map `find_hashed` and `reinsert`
@@ -582,10 +593,10 @@ Locals used only to save and restore state become `$let`, including
 
 **NM-6** Use an `x2c_*` name only for the intentional C interface: functions
 generated code calls, native callers, and process setup. An `x2c_*` name
-without `static` enters generated headers. The `_x2c_` prefix belongs to
-compiler-generated names only; the compiler rejects a source declaration
-that uses it. Never use a `__x2c_` name, because C reserves identifiers that
-begin with two underscores. Verify the generated-code and native callers of
+without `static` enters generated headers. Authored shared internals use
+`_x2c_*`; its `_x2c_gensym_*` subspace belongs to compiler-generated names
+and is rejected in source declarations. Never use a `__x2c_` name.
+Verify the generated-code and native callers of
 a retained C entry before renaming it. The registry
 `Compiler.builtin_targets` in `src/builtins.x` stays non-static because
 `src/macros.x` calls it across units; making it static fails translation
@@ -1197,7 +1208,7 @@ that is not selected is not checked for a matching finding.
 | subject parameter name that wraps lines | NM-2 | `subject-parameter-name` |
 | forward declaration | FI-6 | `forward-declaration`, `src-forward-declaration`, `runtime-forward-declaration`, `same-file-forward-declaration` |
 | non-static `x2c_*` without a C caller | NM-6 | none |
-| source declaration spelled `_x2c_*` | NM-6 | compiler error "reserved for compiler-generated names" |
+| source declaration spelled `_x2c_gensym_*` | NM-6 | compiler error "reserved for compiler-generated names" |
 | name spelled `__x2c_*` | NM-6 | none |
 | dotted method spelled `Type._name` | NM-1 | none |
 | dotted name on a hand-written `static` helper | NM-1 | none |

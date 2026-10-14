@@ -45,7 +45,7 @@ List Compiler_resolve_expression(Compiler c, List input, Token origin);
 
 int Compiler_needs_resolution(Compiler c, Var value);
 
-List Compiler_nominal_getindex(Compiler c, Type type);
+List _x2c_nominal_getindex(Compiler c, Type type);
 
 List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field, Symbol access, int call_context);
 
@@ -57,7 +57,7 @@ List Compiler_func_call_parts(Compiler c, Var content);
 
 List Compiler_complete_iter_chain(Compiler c, List expression);
 
-Symbol Compiler_indexed_builtin_helper(Compiler c, Type type);
+Symbol _x2c_indexed_builtin_helper(Compiler c, Type type);
 
 Symbol Compiler_require_var_tag(Compiler c, Type target, Token origin);
 

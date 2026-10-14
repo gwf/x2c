@@ -19,7 +19,6 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.add_translation_dependency`](#Compiler.add_translation_dependency) | Records a path dependency not embedded in generated C. |
 | [`Compiler.anchor_origin`](#Compiler.anchor_origin) | Wraps a parsed node in the source location of its opening token. |
 | [`Compiler.at_completion`](#Compiler.at_completion) | Reports whether the parser is at the private REPL completion marker. |
-| [`Compiler.at_function_arrow`](#Compiler.at_function_arrow) | Reports whether the current two tokens are `=>`. |
 | [`Compiler.at_word`](#Compiler.at_word) | Reports whether the current token is the identifier `word`. |
 | [`Compiler.cache`](#Compiler.cache) | Interns a constant key and returns its stable `(cache id)` reference. |
 | [`Compiler.cache_cons_cell`](#Compiler.cache_cons_cell) | Caches a cons cell when both parts have immutable cache forms. |
@@ -29,7 +28,6 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.close_child`](#Compiler.close_child) | Retains a child's final diagnostics and closes its owned Lisp session. |
 | [`Compiler.collect_compile_time_definition`](#Compiler.collect_compile_time_definition) | Collects macro definitions or keyword aliases before the full source parse. |
 | [`Compiler.collect_unit_macro`](#Compiler.collect_unit_macro) | Expands the file-scope unit macro at the cursor for collection and reports whether it did. |
-| [`Compiler.complete_here`](#Compiler.complete_here) | Raises `<replcomp>` at the completion marker with the visible symbols, grammar `role`, and available `keywords`. |
 | [`Compiler.copy_source_declaration`](#Compiler.copy_source_declaration) | Carries declaration metadata with one actual symbol contribution. |
 | [`Compiler.define_pattern_binders`](#Compiler.define_pattern_binders) | Declares pattern locals and returns their capture-token/binding pairs. |
 | [`Compiler.emitted_binding_name`](#Compiler.emitted_binding_name) | Returns a binding's selected emitted spelling. |
@@ -75,7 +73,6 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.share_meta_group`](#Compiler.share_meta_group) | Shares `owner`'s pending `meta` group and the definitions it reads, which belong with the Lisp session that holds the group's stubs. |
 | [`Compiler.skip_collected_script_statement`](#Compiler.skip_collected_script_statement) | Skips a collected script statement, or diagnoses one beside `main`. |
 | [`Compiler.skip_script_statement`](#Compiler.skip_script_statement) | Moves past one run of a script unit's statement tokens, through a `;` or a closing `}` outside every bracket. |
-| [`Compiler.skip_shallow_expression`](#Compiler.skip_shallow_expression) | Skips a balanced shallow expression without consuming its terminator. |
 | [`Compiler.start_collection`](#Compiler.start_collection) | Starts a collection pass with the built-in macros. |
 | [`Compiler.take_unit_state`](#Compiler.take_unit_state) | Takes over `owner`'s macro, object-like `#define`, include, keyword, literal cache, and Lisp state for one segment of a collected file. |
 | [`Compiler.take_word`](#Compiler.take_word) | Consumes the identifier `word` when current and reports whether it matched. |
@@ -168,15 +165,6 @@ Source: `src/compiler/source-locations.x:29`
 Reports whether the parser is at the private REPL completion marker.
 
 Source: `src/compiler/parsing/tokens.x:257`
-
-<a id="Compiler.at_function_arrow"></a>
-#### Compiler.at_function_arrow
-
-`int Compiler.at_function_arrow(Compiler c)`
-
-Reports whether the current two tokens are `=>`.
-
-Source: `src/compiler/parsing/collection.x:151`
 
 <a id="Compiler.at_word"></a>
 #### Compiler.at_word
@@ -276,16 +264,6 @@ expansion that fails keeps nothing and leaves the cursor at the
 invocation, so collection skips it and the full parse reports it.
 
 Source: `src/compiler/declarations/production.x:66`
-
-<a id="Compiler.complete_here"></a>
-#### Compiler.complete_here
-
-`void Compiler.complete_here(Compiler c, Symbol role, List keywords)`
-
-Raises `<replcomp>` at the completion marker with the visible symbols,
-grammar `role`, and available `keywords`. Does nothing elsewhere.
-
-Source: `src/compiler/parsing/tokens.x:261`
 
 <a id="Compiler.copy_source_declaration"></a>
 #### Compiler.copy_source_declaration
@@ -756,17 +734,6 @@ a closing `}` outside every bracket. A statement that ends early this
 way leaves its remainder as the next run, and runs are rejoined in order.
 
 Source: `src/compiler/parsing/scripts.x:23`
-
-<a id="Compiler.skip_shallow_expression"></a>
-#### Compiler.skip_shallow_expression
-
-`void Compiler.skip_shallow_expression(Compiler c, int stop_at_comma)`
-
-Skips a balanced shallow expression without consuming its terminator.
-A top-level comma also terminates the expression when `stop_at_comma` is
-nonzero.
-
-Source: `src/compiler/parsing/collection.x:158`
 
 <a id="Compiler.start_collection"></a>
 #### Compiler.start_collection

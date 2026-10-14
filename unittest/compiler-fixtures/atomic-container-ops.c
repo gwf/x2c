@@ -36,7 +36,7 @@ static Var next_key(String value);
 
 static Var next_rhs(int value);
 
-static String _x2c_proto_string_add_update(volatile String * _x2c_macro_lhs_0, Symbol _x2c_macro_op_0, String _x2c_macro_rhs_0);
+static String _x2c_gensym_proto_string_add_update(volatile String * _x2c_gensym_macro_lhs_0, Symbol _x2c_gensym_macro_op_0, String _x2c_gensym_macro_rhs_0);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -101,7 +101,7 @@ int main(void){
   Var sum = Var_binary(dynamic, 56, String_var(_4));
   x2c_var_update_volatile(&(dynamic), 56, String_var(_5));
   Text text = _6;
-  _x2c_proto_string_add_update(&(text), 56, _7);
+  _x2c_gensym_proto_string_add_update(&(text), 56, _7);
   int native[2] ={
     1, 2
   }
@@ -114,8 +114,8 @@ int main(void){
   return 0;
 }
 
-static String _x2c_proto_string_add_update(volatile String * _x2c_macro_lhs_0, Symbol _x2c_macro_op_0, String _x2c_macro_rhs_0){
-  _x2c_macro_lhs_0[0] = String_add(_x2c_macro_lhs_0[0], _x2c_macro_rhs_0);
-  return _x2c_macro_lhs_0[0];
+static String _x2c_gensym_proto_string_add_update(volatile String * _x2c_gensym_macro_lhs_0, Symbol _x2c_gensym_macro_op_0, String _x2c_gensym_macro_rhs_0){
+  _x2c_gensym_macro_lhs_0[0] = String_add(_x2c_gensym_macro_lhs_0[0], _x2c_gensym_macro_rhs_0);
+  return _x2c_gensym_macro_lhs_0[0];
 }
 

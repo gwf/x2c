@@ -29,8 +29,8 @@ static void bump(int * n){
 _Noreturn static void set_and_raise(int * n, int value){
   (* n) = value;
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/try-reference-escape.x",.function = "set_and_raise",.line = 12};
-    x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 0);
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/try-reference-escape.x",.function = "set_and_raise",.line = 12};
+    x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 0);
     __builtin_unreachable();
   }
 
@@ -39,8 +39,8 @@ _Noreturn static void set_and_raise(int * n, int value){
 _Noreturn static void advance(const char * * cursor){
   * cursor = * cursor + 1;
   {
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "unittest/compiler-fixtures/try-reference-escape.x",.function = "advance",.line = 17};
-    x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 0);
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "unittest/compiler-fixtures/try-reference-escape.x",.function = "advance",.line = 17};
+    x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 0);
     __builtin_unreachable();
   }
 
@@ -49,44 +49,44 @@ _Noreturn static void advance(const char * * cursor){
 static void parameter(int n){
   x2c_exception_escaped = & n;
   {
-    ExceptionFrame _x2c_exception_frame_0;
-    static MatchCaptureSite _x2c_macro_arms_0[1];
-    Var _x2c_macro_patterns_0[1];
-    static ErrorCatchSite _x2c_macro_site_0 ={
-      _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
+    ExceptionFrame _x2c_gensym_exception_frame_0;
+    static MatchCaptureSite _x2c_gensym_macro_arms_0[1];
+    Var _x2c_gensym_macro_patterns_0[1];
+    static ErrorCatchSite _x2c_gensym_macro_site_0 ={
+      _x2c_gensym_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
-      _x2c_macro_patterns_0[0] = List_var(cons(Symbol_var(4372499598), cons(Symbol_var(54), NULL)));
+    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_0)){
+      _x2c_gensym_macro_patterns_0[0] = List_var(cons(Symbol_var(4372499598), cons(Symbol_var(54), NULL)));
     }
-    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);
-    x2c_exception_push(& _x2c_exception_frame_0);
-    if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
+    volatile ErrorHandler _x2c_gensym_error_handler_0 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_0, & _x2c_gensym_macro_site_0, _x2c_gensym_macro_patterns_0);
+    x2c_exception_push(& _x2c_gensym_exception_frame_0);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)){
       n = 1;
       set_and_raise(&(n), 4);
     }
     else{
-      x2c_exception_landed(& _x2c_exception_frame_0);
-      if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
-        int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
-        x2c_error_catch_detach(_x2c_error_handler_0);
-        x2c_exception_mark_handled(& _x2c_exception_frame_0);
-        if(_x2c_macro_selected_0 == 0){
+      x2c_exception_landed(& _x2c_gensym_exception_frame_0);
+      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_0)){
+        int _x2c_gensym_macro_selected_0 = x2c_error_catch_selected(_x2c_gensym_error_handler_0);
+        x2c_error_catch_detach(_x2c_gensym_error_handler_0);
+        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_0);
+        if(_x2c_gensym_macro_selected_0 == 0){
           printf("parameter %d\n", n);
         }
 
       }
       else{
-        x2c_error_catch_close(_x2c_error_handler_0);
-        _x2c_error_handler_0 = NULL;
-        x2c_exception_leave(& _x2c_exception_frame_0);
+        x2c_error_catch_close(_x2c_gensym_error_handler_0);
+        _x2c_gensym_error_handler_0 = NULL;
+        x2c_exception_leave(& _x2c_gensym_exception_frame_0);
         __builtin_unreachable();
       }
 
     }
-    x2c_error_catch_close(_x2c_error_handler_0);
-    _x2c_error_handler_0 = NULL;
-    x2c_exception_leave(& _x2c_exception_frame_0);
+    x2c_error_catch_close(_x2c_gensym_error_handler_0);
+    _x2c_gensym_error_handler_0 = NULL;
+    x2c_exception_leave(& _x2c_gensym_exception_frame_0);
   }
 
 }
@@ -97,165 +97,165 @@ int main(void){
   int volatile plain = 0;
   x2c_exception_escaped = & status;
   {
-    ExceptionFrame _x2c_exception_frame_1;
-    static MatchCaptureSite _x2c_macro_arms_1[1];
-    Var _x2c_macro_patterns_1[1];
-    static ErrorCatchSite _x2c_macro_site_1 ={
-      _x2c_macro_arms_1, -1, 1, ERROR_CATCH_PENDING, - 1
+    ExceptionFrame _x2c_gensym_exception_frame_1;
+    static MatchCaptureSite _x2c_gensym_macro_arms_1[1];
+    Var _x2c_gensym_macro_patterns_1[1];
+    static ErrorCatchSite _x2c_gensym_macro_site_1 ={
+      _x2c_gensym_macro_arms_1, -1, 1, ERROR_CATCH_PENDING, - 1
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_macro_site_1)){
-      _x2c_macro_patterns_1[0] = List_var(cons(Symbol_var(4372499598), cons(Symbol_var(54), NULL)));
+    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_1)){
+      _x2c_gensym_macro_patterns_1[0] = List_var(cons(Symbol_var(4372499598), cons(Symbol_var(54), NULL)));
     }
-    volatile ErrorHandler _x2c_error_handler_1 = x2c_error_catch_site_push(& _x2c_exception_frame_1, & _x2c_macro_site_1, _x2c_macro_patterns_1);
-    x2c_exception_push(& _x2c_exception_frame_1);
-    if(! sigsetjmp(_x2c_exception_frame_1.env, 0)){
+    volatile ErrorHandler _x2c_gensym_error_handler_1 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_1, & _x2c_gensym_macro_site_1, _x2c_gensym_macro_patterns_1);
+    x2c_exception_push(& _x2c_gensym_exception_frame_1);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_1.env, 0)){
       status = 1;
       plain = 1;
       bump(&(status));
       set_and_raise(&(status), status + 1);
     }
     else{
-      x2c_exception_landed(& _x2c_exception_frame_1);
-      if(x2c_exception_is_error_target(& _x2c_exception_frame_1)){
-        int _x2c_macro_selected_1 = x2c_error_catch_selected(_x2c_error_handler_1);
-        x2c_error_catch_detach(_x2c_error_handler_1);
-        x2c_exception_mark_handled(& _x2c_exception_frame_1);
-        if(_x2c_macro_selected_1 == 0){
+      x2c_exception_landed(& _x2c_gensym_exception_frame_1);
+      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_1)){
+        int _x2c_gensym_macro_selected_1 = x2c_error_catch_selected(_x2c_gensym_error_handler_1);
+        x2c_error_catch_detach(_x2c_gensym_error_handler_1);
+        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_1);
+        if(_x2c_gensym_macro_selected_1 == 0){
           printf("status %d %d\n", status, plain);
         }
 
       }
       else{
-        x2c_error_catch_close(_x2c_error_handler_1);
-        _x2c_error_handler_1 = NULL;
-        x2c_exception_leave(& _x2c_exception_frame_1);
+        x2c_error_catch_close(_x2c_gensym_error_handler_1);
+        _x2c_gensym_error_handler_1 = NULL;
+        x2c_exception_leave(& _x2c_gensym_exception_frame_1);
         __builtin_unreachable();
       }
 
     }
-    x2c_error_catch_close(_x2c_error_handler_1);
-    _x2c_error_handler_1 = NULL;
-    x2c_exception_leave(& _x2c_exception_frame_1);
+    x2c_error_catch_close(_x2c_gensym_error_handler_1);
+    _x2c_gensym_error_handler_1 = NULL;
+    x2c_exception_leave(& _x2c_gensym_exception_frame_1);
   }
   int written = 0;
   x2c_exception_escaped = & written;
   {
-    ExceptionFrame _x2c_exception_frame_2;
-    static MatchCaptureSite _x2c_macro_arms_2[1];
-    Var _x2c_macro_patterns_2[1];
-    static ErrorCatchSite _x2c_macro_site_2 ={
-      _x2c_macro_arms_2, -1, 1, ERROR_CATCH_PENDING, - 1
+    ExceptionFrame _x2c_gensym_exception_frame_2;
+    static MatchCaptureSite _x2c_gensym_macro_arms_2[1];
+    Var _x2c_gensym_macro_patterns_2[1];
+    static ErrorCatchSite _x2c_gensym_macro_site_2 ={
+      _x2c_gensym_macro_arms_2, -1, 1, ERROR_CATCH_PENDING, - 1
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_macro_site_2)){
-      _x2c_macro_patterns_2[0] = List_var(cons(Symbol_var(4372499598), cons(Symbol_var(54), NULL)));
+    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_2)){
+      _x2c_gensym_macro_patterns_2[0] = List_var(cons(Symbol_var(4372499598), cons(Symbol_var(54), NULL)));
     }
-    volatile ErrorHandler _x2c_error_handler_2 = x2c_error_catch_site_push(& _x2c_exception_frame_2, & _x2c_macro_site_2, _x2c_macro_patterns_2);
-    x2c_exception_push(& _x2c_exception_frame_2);
-    if(! sigsetjmp(_x2c_exception_frame_2.env, 0)) set_and_raise(&(written), 3);
+    volatile ErrorHandler _x2c_gensym_error_handler_2 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_2, & _x2c_gensym_macro_site_2, _x2c_gensym_macro_patterns_2);
+    x2c_exception_push(& _x2c_gensym_exception_frame_2);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_2.env, 0)) set_and_raise(&(written), 3);
     else{
-      x2c_exception_landed(& _x2c_exception_frame_2);
-      if(x2c_exception_is_error_target(& _x2c_exception_frame_2)){
-        int _x2c_macro_selected_2 = x2c_error_catch_selected(_x2c_error_handler_2);
-        x2c_error_catch_detach(_x2c_error_handler_2);
-        x2c_exception_mark_handled(& _x2c_exception_frame_2);
-        if(_x2c_macro_selected_2 == 0){
+      x2c_exception_landed(& _x2c_gensym_exception_frame_2);
+      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_2)){
+        int _x2c_gensym_macro_selected_2 = x2c_error_catch_selected(_x2c_gensym_error_handler_2);
+        x2c_error_catch_detach(_x2c_gensym_error_handler_2);
+        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_2);
+        if(_x2c_gensym_macro_selected_2 == 0){
           printf("written %d\n", written);
         }
 
       }
       else{
-        x2c_error_catch_close(_x2c_error_handler_2);
-        _x2c_error_handler_2 = NULL;
-        x2c_exception_leave(& _x2c_exception_frame_2);
+        x2c_error_catch_close(_x2c_gensym_error_handler_2);
+        _x2c_gensym_error_handler_2 = NULL;
+        x2c_exception_leave(& _x2c_gensym_exception_frame_2);
         __builtin_unreachable();
       }
 
     }
-    x2c_error_catch_close(_x2c_error_handler_2);
-    _x2c_error_handler_2 = NULL;
-    x2c_exception_leave(& _x2c_exception_frame_2);
+    x2c_error_catch_close(_x2c_gensym_error_handler_2);
+    _x2c_gensym_error_handler_2 = NULL;
+    x2c_exception_leave(& _x2c_gensym_exception_frame_2);
   }
   parameter(0);
   const char * tail = "abc";
   x2c_exception_escaped = & tail;
   {
-    ExceptionFrame _x2c_exception_frame_3;
-    static MatchCaptureSite _x2c_macro_arms_3[1];
-    Var _x2c_macro_patterns_3[1];
-    static ErrorCatchSite _x2c_macro_site_3 ={
-      _x2c_macro_arms_3, -1, 1, ERROR_CATCH_PENDING, - 1
+    ExceptionFrame _x2c_gensym_exception_frame_3;
+    static MatchCaptureSite _x2c_gensym_macro_arms_3[1];
+    Var _x2c_gensym_macro_patterns_3[1];
+    static ErrorCatchSite _x2c_gensym_macro_site_3 ={
+      _x2c_gensym_macro_arms_3, -1, 1, ERROR_CATCH_PENDING, - 1
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_macro_site_3)){
-      _x2c_macro_patterns_3[0] = List_var(cons(Symbol_var(4372499598), cons(Symbol_var(54), NULL)));
+    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_3)){
+      _x2c_gensym_macro_patterns_3[0] = List_var(cons(Symbol_var(4372499598), cons(Symbol_var(54), NULL)));
     }
-    volatile ErrorHandler _x2c_error_handler_3 = x2c_error_catch_site_push(& _x2c_exception_frame_3, & _x2c_macro_site_3, _x2c_macro_patterns_3);
-    x2c_exception_push(& _x2c_exception_frame_3);
-    if(! sigsetjmp(_x2c_exception_frame_3.env, 0)) advance(& tail);
+    volatile ErrorHandler _x2c_gensym_error_handler_3 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_3, & _x2c_gensym_macro_site_3, _x2c_gensym_macro_patterns_3);
+    x2c_exception_push(& _x2c_gensym_exception_frame_3);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_3.env, 0)) advance(& tail);
     else{
-      x2c_exception_landed(& _x2c_exception_frame_3);
-      if(x2c_exception_is_error_target(& _x2c_exception_frame_3)){
-        int _x2c_macro_selected_3 = x2c_error_catch_selected(_x2c_error_handler_3);
-        x2c_error_catch_detach(_x2c_error_handler_3);
-        x2c_exception_mark_handled(& _x2c_exception_frame_3);
-        if(_x2c_macro_selected_3 == 0){
+      x2c_exception_landed(& _x2c_gensym_exception_frame_3);
+      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_3)){
+        int _x2c_gensym_macro_selected_3 = x2c_error_catch_selected(_x2c_gensym_error_handler_3);
+        x2c_error_catch_detach(_x2c_gensym_error_handler_3);
+        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_3);
+        if(_x2c_gensym_macro_selected_3 == 0){
           printf("tail %s\n", tail);
         }
 
       }
       else{
-        x2c_error_catch_close(_x2c_error_handler_3);
-        _x2c_error_handler_3 = NULL;
-        x2c_exception_leave(& _x2c_exception_frame_3);
+        x2c_error_catch_close(_x2c_gensym_error_handler_3);
+        _x2c_gensym_error_handler_3 = NULL;
+        x2c_exception_leave(& _x2c_gensym_exception_frame_3);
         __builtin_unreachable();
       }
 
     }
-    x2c_error_catch_close(_x2c_error_handler_3);
-    _x2c_error_handler_3 = NULL;
-    x2c_exception_leave(& _x2c_exception_frame_3);
+    x2c_error_catch_close(_x2c_gensym_error_handler_3);
+    _x2c_gensym_error_handler_3 = NULL;
+    x2c_exception_leave(& _x2c_gensym_exception_frame_3);
   }
   {
     int i = 0;
     x2c_exception_escaped = & i;
     for(;  i < 1;  i ++){
-      ExceptionFrame _x2c_exception_frame_4;
-      static MatchCaptureSite _x2c_macro_arms_4[1];
-      Var _x2c_macro_patterns_4[1];
-      static ErrorCatchSite _x2c_macro_site_4 ={
-        _x2c_macro_arms_4, -1, 1, ERROR_CATCH_PENDING, - 1
+      ExceptionFrame _x2c_gensym_exception_frame_4;
+      static MatchCaptureSite _x2c_gensym_macro_arms_4[1];
+      Var _x2c_gensym_macro_patterns_4[1];
+      static ErrorCatchSite _x2c_gensym_macro_site_4 ={
+        _x2c_gensym_macro_arms_4, -1, 1, ERROR_CATCH_PENDING, - 1
       }
       ;
-      if(x2c_error_catch_site_pending(& _x2c_macro_site_4)){
-        _x2c_macro_patterns_4[0] = List_var(cons(Symbol_var(4372499598), cons(Symbol_var(54), NULL)));
+      if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_4)){
+        _x2c_gensym_macro_patterns_4[0] = List_var(cons(Symbol_var(4372499598), cons(Symbol_var(54), NULL)));
       }
-      volatile ErrorHandler _x2c_error_handler_4 = x2c_error_catch_site_push(& _x2c_exception_frame_4, & _x2c_macro_site_4, _x2c_macro_patterns_4);
-      x2c_exception_push(& _x2c_exception_frame_4);
-      if(! sigsetjmp(_x2c_exception_frame_4.env, 0)) set_and_raise(&(i), 5);
+      volatile ErrorHandler _x2c_gensym_error_handler_4 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_4, & _x2c_gensym_macro_site_4, _x2c_gensym_macro_patterns_4);
+      x2c_exception_push(& _x2c_gensym_exception_frame_4);
+      if(! sigsetjmp(_x2c_gensym_exception_frame_4.env, 0)) set_and_raise(&(i), 5);
       else{
-        x2c_exception_landed(& _x2c_exception_frame_4);
-        if(x2c_exception_is_error_target(& _x2c_exception_frame_4)){
-          int _x2c_macro_selected_4 = x2c_error_catch_selected(_x2c_error_handler_4);
-          x2c_error_catch_detach(_x2c_error_handler_4);
-          x2c_exception_mark_handled(& _x2c_exception_frame_4);
-          if(_x2c_macro_selected_4 == 0){
+        x2c_exception_landed(& _x2c_gensym_exception_frame_4);
+        if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_4)){
+          int _x2c_gensym_macro_selected_4 = x2c_error_catch_selected(_x2c_gensym_error_handler_4);
+          x2c_error_catch_detach(_x2c_gensym_error_handler_4);
+          x2c_exception_mark_handled(& _x2c_gensym_exception_frame_4);
+          if(_x2c_gensym_macro_selected_4 == 0){
             printf("loop %d\n", i);
           }
 
         }
         else{
-          x2c_error_catch_close(_x2c_error_handler_4);
-          _x2c_error_handler_4 = NULL;
-          x2c_exception_leave(& _x2c_exception_frame_4);
+          x2c_error_catch_close(_x2c_gensym_error_handler_4);
+          _x2c_gensym_error_handler_4 = NULL;
+          x2c_exception_leave(& _x2c_gensym_exception_frame_4);
           __builtin_unreachable();
         }
 
       }
-      x2c_error_catch_close(_x2c_error_handler_4);
-      _x2c_error_handler_4 = NULL;
-      x2c_exception_leave(& _x2c_exception_frame_4);
+      x2c_error_catch_close(_x2c_gensym_error_handler_4);
+      _x2c_gensym_error_handler_4 = NULL;
+      x2c_exception_leave(& _x2c_gensym_exception_frame_4);
     }
 
   }

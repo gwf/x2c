@@ -71,20 +71,20 @@ static inline PrivateRight PrivateRight_shift(PrivateRight a0);
 
 static inline int PrivateParticipant_read(PrivateParticipant a0);
 
-static inline String _x2c_proto_privatebox_str_0(Var a0);
+static inline String _x2c_gensym_proto_privatebox_str_0(Var a0);
 
-static VarMethods _x2c__x2c_protocol_methods_0;
+static VarMethods _x2c_gensym_protocol_methods_0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _x2c__x2c_protocol_methods_0 =(VarMethods){
-    .str = _x2c_proto_privatebox_str_0
+  _x2c_gensym_protocol_methods_0 =(VarMethods){
+    .str = _x2c_gensym_proto_privatebox_str_0
   }
   ;
-  if(! x2c_register_builtin_descriptor(1166148154758128, _x2c__x2c_protocol_methods_0)){
-    x2c_register_descriptor(String_new("privatebox"), _x2c__x2c_protocol_methods_0);
+  if(! x2c_register_builtin_descriptor(1166148154758128, _x2c_gensym_protocol_methods_0)){
+    x2c_register_descriptor(String_new("privatebox"), _x2c_gensym_protocol_methods_0);
   }
   _0 = String_new("private:");
 }
@@ -172,7 +172,7 @@ static inline int PrivateParticipant_read(PrivateParticipant a0){
   return PublicBase_read(PrivateParticipant_publicbase(a0));
 }
 
-static inline String _x2c_proto_privatebox_str_0(Var a0){
+static inline String _x2c_gensym_proto_privatebox_str_0(Var a0){
   return PrivateBox_str(Var_privatebox(a0));
 }
 

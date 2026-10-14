@@ -208,7 +208,7 @@ grep -q '"src/bar.x"' "$FAKE/warm/hdr.xi" ||
 (cd "$FAKE" && ./builds/0/x2c translate --out-dir warm src/unit.x)
 cmp -s "$FAKE/cold/unit.c" "$FAKE/warm/unit.c" ||
   fail "interface replay diverged from cold compile"
-grep -q "_x2c_macro_" "$FAKE/cold/unit.c" ||
+grep -q "_x2c_gensym_macro_" "$FAKE/cold/unit.c" ||
   fail "macro name stability probe emitted no generated name"
 grep -q "CacheSelfLeaf_only(CacheSelfBase_rest(value))" \
   "$FAKE/cold/unit.c" ||
@@ -293,7 +293,7 @@ EOF
 grep -q '(("gen_next") ((func ((long))) long))' \
   "$FAKE/genwarm/gen-owner.xi" ||
   fail "interface is missing a macro-generated function"
-grep -Eq '\(\("unit-static" "_x2c_macro_step_[0-9]+"\)' \
+grep -Eq '\(\("unit-static" "_x2c_gensym_macro_step_[0-9]+"\)' \
   "$FAKE/genwarm/gen-owner.xi" ||
   fail "interface publishes a macro-generated static function"
 (cd "$FAKE" && ./builds/0/x2c translate --out-dir genwarm src/gen-use.x)
@@ -332,7 +332,7 @@ EOF
 "$FAKE/cellcold/cells" || fail "units with file-scope template names ran wrong"
 (cd "$FAKE" && ./builds/0/x2c translate --out-dir cellcold src/cell-b.x)
 (cd "$FAKE" && ./builds/0/x2c translate --out-dir cellwarm src/cell-a.x)
-long_typedef=$(sed -n 's/^typedef long \(_x2c_macro_S_[0-9a-f]*\);$/\1/p' \
+long_typedef=$(sed -n 's/^typedef long \(_x2c_gensym_macro_S_[0-9a-f]*\);$/\1/p' \
   "$FAKE/cellwarm/cell-a.h")
 [[ -n $long_typedef ]] &&
   grep -Fq "((typedef \"$long_typedef\") (long))" "$FAKE/cellwarm/cell-a.xi" ||
@@ -440,7 +440,7 @@ mkdir -p "$BUILD/anon-escape/out"
 (cd "$BUILD/anon-escape" && "$X2C" translate --out-dir out anon.x)
 grep -q "AnonEscape" "$BUILD/anon-escape/out/anon.h" ||
   fail "anon-escape probe is vacuous: anon.h has no anonymous typedef"
-grep -r "_x2c_gensym" "$BUILD/anon-escape/out" &&
+grep -Er "(struct|union|enum) _x2c_gensym" "$BUILD/anon-escape/out" &&
   fail "generated name leaked into emitted C" || true
 
 # Case 8: macro-generated names are reproducible across complete compiler
@@ -467,10 +467,10 @@ mv "$BUILD/macro-stability/edit.tmp" \
   "$BUILD/macro-stability/edit.x"
 "$X2C" translate --out-dir "$BUILD/macro-stability/after" \
   "$BUILD/macro-stability/edit.x"
-grep -o '_x2c_macro_[[:alnum:]_]*' \
+grep -o '_x2c_gensym_macro_[[:alnum:]_]*' \
   "$BUILD/macro-stability/before/edit.c" |
   LC_ALL=C sort -u >"$BUILD/macro-stability/before.names"
-grep -o '_x2c_macro_[[:alnum:]_]*' \
+grep -o '_x2c_gensym_macro_[[:alnum:]_]*' \
   "$BUILD/macro-stability/after/edit.c" |
   LC_ALL=C sort -u >"$BUILD/macro-stability/after.names"
 test -s "$BUILD/macro-stability/before.names" ||

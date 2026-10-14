@@ -52,11 +52,11 @@ typedef union GeneratedUnion{
 }
 GeneratedUnion;
 
-static inline int generated_inline(int _x2c_macro_value_1){
-  return _x2c_macro_value_1 + 1;
+static inline int generated_inline(int _x2c_gensym_macro_value_1){
+  return _x2c_gensym_macro_value_1 + 1;
 }
 
-int generated_function(int _x2c_macro_value_2);
+int generated_function(int _x2c_gensym_macro_value_2);
 
 int main(void);
 

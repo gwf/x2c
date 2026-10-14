@@ -256,9 +256,9 @@ void Compiler.mark_completion(Compiler c, int position) {
 /** Reports whether the parser is at the private REPL completion marker. */
 int Compiler.at_completion(Compiler c) => c.token.type == <replcomp>;
 
-/** Raises `<replcomp>` at the completion marker with the visible symbols,
+/* Raises `<replcomp>` at the completion marker with the visible symbols,
     grammar `role`, and available `keywords`. Does nothing elsewhere. */
-void Compiler.complete_here(Compiler c, Symbol role, List keywords) {
+void _x2c_complete_here(Compiler c, Symbol role, List keywords) {
   if (!c.at_completion()) return;
   List rows = c.sym.visible_symbols();
   raise %(replcomp (kind $role) (rows $rows) (keywords $keywords));

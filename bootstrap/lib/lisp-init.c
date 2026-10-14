@@ -60,11 +60,11 @@ String Var_as_string(Var);
 
 static String _string(Var value, String operation){
   if(! Var_is_row(value, 11, 7, 1)){
-    Var _x2c_literal_part_0 = String_var(operation);
-    Var _x2c_literal_part_1 = Symbol_var(Var_tag(value));
+    Var _x2c_gensym_literal_part_0 = String_var(operation);
+    Var _x2c_gensym_literal_part_1 = Symbol_var(Var_tag(value));
     {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/lisp-init.x",.function = "_string",.line = 26};
-      x2c_error_raise_n(& _x2c_error_site_0, 4477479911782, 3, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(74754136), _x2c_literal_part_1, Symbol_var(1510312), Symbol_var(1318210446));
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/lisp-init.x",.function = "_string",.line = 26};
+      x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(74754136), _x2c_gensym_literal_part_1, Symbol_var(1510312), Symbol_var(1318210446));
       __builtin_unreachable();
     }
 
@@ -76,11 +76,11 @@ static List Var_list_payload(Var);
 
 static List _list(Var value, String operation){
   if(! Var_is_row(value, 9, 7, 4)){
-    Var _x2c_literal_part_2 = String_var(operation);
-    Var _x2c_literal_part_3 = Symbol_var(Var_tag(value));
+    Var _x2c_gensym_literal_part_2 = String_var(operation);
+    Var _x2c_gensym_literal_part_3 = Symbol_var(Var_tag(value));
     {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/lisp-init.x",.function = "_list",.line = 33};
-      x2c_error_raise_n(& _x2c_error_site_1, 4477479911782, 3, Symbol_var(34096809266140), _x2c_literal_part_2, Symbol_var(74754136), _x2c_literal_part_3, Symbol_var(1510312), Symbol_var(806120));
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/lisp-init.x",.function = "_list",.line = 33};
+      x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(74754136), _x2c_gensym_literal_part_3, Symbol_var(1510312), Symbol_var(806120));
       __builtin_unreachable();
     }
 
@@ -128,11 +128,11 @@ static Var _append2(Var left, Var right){
   List tail = _list(right, _0);
   {
     Var value;
-    List _x2c_macro_object_0 = items;
-    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
-    Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      value = _x2c_macro_cursor_output_0;
+    List _x2c_gensym_macro_object_0 = items;
+    List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
+    Var _x2c_gensym_macro_cursor_output_0;
+    while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+      value = _x2c_gensym_macro_cursor_output_0;
       tail = cons(value, tail);
     }
 
@@ -153,11 +153,11 @@ Var lisp_append(List lists){
   Var result = List_car(reversed);
   {
     Var left;
-    List _x2c_macro_object_1 = List_cdr(reversed);
-    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
-    Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      left = _x2c_macro_cursor_output_1;
+    List _x2c_gensym_macro_object_1 = List_cdr(reversed);
+    List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
+    Var _x2c_gensym_macro_cursor_output_1;
+    while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
+      left = _x2c_gensym_macro_cursor_output_1;
       result = _append2(left, result);
     }
 
@@ -286,11 +286,11 @@ Var lisp_binders(Var pat){
     List binders = Var_list_payload(lisp_binders(lisp_car(parts)));
     {
       Var binder;
-      List _x2c_macro_object_2 = binders;
-      List _x2c_macro_cursor_2 = _x2c_macro_object_2;
-      Var _x2c_macro_cursor_output_2;
-      while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-        binder = _x2c_macro_cursor_output_2;
+      List _x2c_gensym_macro_object_2 = binders;
+      List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
+      Var _x2c_gensym_macro_cursor_output_2;
+      while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
+        binder = _x2c_gensym_macro_cursor_output_2;
         reversed = cons(binder, reversed);
       }
 
@@ -306,10 +306,10 @@ Var lisp_binder_lets(Var bindings, Var binders){
   for(;  ! _nil(binders);  binders = lisp_cdr(binders)){
     Var name = lisp_car(binders);
     reversed = cons(List_var(({
-      Var _x2c_literal_part_6 = name;  Var _x2c_literal_part_7 = List_var(({
-        Var _x2c_literal_part_4 = bindings;  Var _x2c_literal_part_5 = List_var(cons(_2, cons(name, NULL)));  cons(_3, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL)));
+      Var _x2c_gensym_literal_part_6 = name;  Var _x2c_gensym_literal_part_7 = List_var(({
+        Var _x2c_gensym_literal_part_4 = bindings;  Var _x2c_gensym_literal_part_5 = List_var(cons(_2, cons(name, NULL)));  cons(_3, cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, NULL)));
       }
-      ));  cons(_x2c_literal_part_6, cons(_x2c_literal_part_7, NULL));
+      ));  cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, NULL));
     }
     )), reversed);
   }
@@ -321,11 +321,11 @@ Var lisp_string_append_all(List strings){
   Var text = String_var(0);
   {
     Var s;
-    List _x2c_macro_object_3 = strings;
-    List _x2c_macro_cursor_3 = _x2c_macro_object_3;
-    Var _x2c_macro_cursor_output_3;
-    while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
-      s = _x2c_macro_cursor_output_3;
+    List _x2c_gensym_macro_object_3 = strings;
+    List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
+    Var _x2c_gensym_macro_cursor_output_3;
+    while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
+      s = _x2c_gensym_macro_cursor_output_3;
       text = lisp_string_append(Var_as_string(text), _string(s, _4));
     }
 

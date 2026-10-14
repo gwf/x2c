@@ -208,11 +208,11 @@ int main(void){
   long one_total = 0;
   {
     long value;
-    DirectOne _x2c_macro_object_0 = direct_one;
-    unsigned _x2c_macro_cursor_0 = 0;
-    int _x2c_macro_cursor_output_0;
-    while(DirectOne_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
-      value = _x2c_macro_cursor_output_0;
+    DirectOne _x2c_gensym_macro_object_0 = direct_one;
+    unsigned _x2c_gensym_macro_cursor_0 = 0;
+    int _x2c_gensym_macro_cursor_output_0;
+    while(DirectOne_try_next(_x2c_gensym_macro_object_0, & _x2c_gensym_macro_cursor_0, & _x2c_gensym_macro_cursor_output_0)){
+      value = _x2c_gensym_macro_cursor_output_0;
       one_total += value;
     }
 
@@ -222,13 +222,13 @@ int main(void){
   int two_total = 0;
   {
     int key, value;
-    DirectTwo _x2c_macro_object_1 = direct_two;
-    unsigned _x2c_macro_cursor_1 = 0;
-    int _x2c_macro_cursor_output_1;
-    int _x2c_macro_cursor_output_2;
-    while(DirectTwo_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1, & _x2c_macro_cursor_output_2)){
-      key = _x2c_macro_cursor_output_1;
-      value = _x2c_macro_cursor_output_2;
+    DirectTwo _x2c_gensym_macro_object_1 = direct_two;
+    unsigned _x2c_gensym_macro_cursor_1 = 0;
+    int _x2c_gensym_macro_cursor_output_1;
+    int _x2c_gensym_macro_cursor_output_2;
+    while(DirectTwo_try_next(_x2c_gensym_macro_object_1, & _x2c_gensym_macro_cursor_1, & _x2c_gensym_macro_cursor_output_1, & _x2c_gensym_macro_cursor_output_2)){
+      key = _x2c_gensym_macro_cursor_output_1;
+      value = _x2c_gensym_macro_cursor_output_2;
       two_total += key + value;
     }
 
@@ -250,13 +250,13 @@ int main(void){
   int three_total = 0;
   {
     int value;
-    DirectThree _x2c_macro_object_2 = direct_three;
-    unsigned _x2c_macro_cursor_2 = 0;
-    int _x2c_macro_cursor_output_3;
-    int _x2c_macro_cursor_output_4;
-    int _x2c_macro_cursor_output_5;
-    while(DirectThree_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_3, & _x2c_macro_cursor_output_4, & _x2c_macro_cursor_output_5)){
-      value = _x2c_macro_cursor_output_5;
+    DirectThree _x2c_gensym_macro_object_2 = direct_three;
+    unsigned _x2c_gensym_macro_cursor_2 = 0;
+    int _x2c_gensym_macro_cursor_output_3;
+    int _x2c_gensym_macro_cursor_output_4;
+    int _x2c_gensym_macro_cursor_output_5;
+    while(DirectThree_try_next(_x2c_gensym_macro_object_2, & _x2c_gensym_macro_cursor_2, & _x2c_gensym_macro_cursor_output_3, & _x2c_gensym_macro_cursor_output_4, & _x2c_gensym_macro_cursor_output_5)){
+      value = _x2c_gensym_macro_cursor_output_5;
       three_total += value;
     }
 
@@ -264,78 +264,78 @@ int main(void){
   int fallback_total = 0;
   {
     int value;
-    Iter _x2c_macro_iterator_3 = ValueCursor_iter(value_cursor, &(struct Iter){
+    Iter _x2c_gensym_macro_iterator_3 = ValueCursor_iter(value_cursor, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_macro_item_3;
-    while(Iter_try_next(_x2c_macro_iterator_3, &(_x2c_macro_item_3))){
-      value = Var_int(Var_convert(_x2c_macro_item_3, 3453797));
+    Var _x2c_gensym_macro_item_3;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_3, &(_x2c_gensym_macro_item_3))){
+      value = Var_int(Var_convert(_x2c_gensym_macro_item_3, 3453797));
       fallback_total += value;
     }
 
   }
   {
     int value;
-    Iter _x2c_macro_iterator_4 = FloatCursor_iter(float_cursor, &(struct Iter){
+    Iter _x2c_gensym_macro_iterator_4 = FloatCursor_iter(float_cursor, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_macro_item_4;
-    while(Iter_try_next(_x2c_macro_iterator_4, &(_x2c_macro_item_4))){
-      value = Var_int(Var_convert(_x2c_macro_item_4, 3453797));
+    Var _x2c_gensym_macro_item_4;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_4, &(_x2c_gensym_macro_item_4))){
+      value = Var_int(Var_convert(_x2c_gensym_macro_item_4, 3453797));
       fallback_total += value;
     }
 
   }
   {
     int value;
-    Iter _x2c_macro_iterator_5 = StringCursor_iter(string_cursor, &(struct Iter){
+    Iter _x2c_gensym_macro_iterator_5 = StringCursor_iter(string_cursor, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_macro_item_5;
-    while(Iter_try_next(_x2c_macro_iterator_5, &(_x2c_macro_item_5))){
-      value = Var_int(Var_convert(_x2c_macro_item_5, 3453797));
+    Var _x2c_gensym_macro_item_5;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_5, &(_x2c_gensym_macro_item_5))){
+      value = Var_int(Var_convert(_x2c_gensym_macro_item_5, 3453797));
       fallback_total += value;
     }
 
   }
   {
     int value;
-    Iter _x2c_macro_iterator_6 = VoidCursor_iter(void_cursor, &(struct Iter){
+    Iter _x2c_gensym_macro_iterator_6 = VoidCursor_iter(void_cursor, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_macro_item_6;
-    while(Iter_try_next(_x2c_macro_iterator_6, &(_x2c_macro_item_6))){
-      value = Var_int(Var_convert(_x2c_macro_item_6, 3453797));
+    Var _x2c_gensym_macro_item_6;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_6, &(_x2c_gensym_macro_item_6))){
+      value = Var_int(Var_convert(_x2c_gensym_macro_item_6, 3453797));
       fallback_total += value;
     }
 
   }
   {
     int value;
-    Iter _x2c_macro_iterator_7 = ValueOutput_iter(value_output, &(struct Iter){
+    Iter _x2c_gensym_macro_iterator_7 = ValueOutput_iter(value_output, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_macro_item_7;
-    while(Iter_try_next(_x2c_macro_iterator_7, &(_x2c_macro_item_7))){
-      value = Var_int(Var_convert(_x2c_macro_item_7, 3453797));
+    Var _x2c_gensym_macro_item_7;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_7, &(_x2c_gensym_macro_item_7))){
+      value = Var_int(Var_convert(_x2c_gensym_macro_item_7, 3453797));
       fallback_total += value;
     }
 
   }
   {
     int value;
-    Iter _x2c_macro_iterator_8 = WrongReturn_iter(wrong_return, &(struct Iter){
+    Iter _x2c_gensym_macro_iterator_8 = WrongReturn_iter(wrong_return, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_macro_item_8;
-    while(Iter_try_next(_x2c_macro_iterator_8, &(_x2c_macro_item_8))){
-      value = Var_int(Var_convert(_x2c_macro_item_8, 3453797));
+    Var _x2c_gensym_macro_item_8;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_8, &(_x2c_gensym_macro_item_8))){
+      value = Var_int(Var_convert(_x2c_gensym_macro_item_8, 3453797));
       fallback_total += value;
     }
 

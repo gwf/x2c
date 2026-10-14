@@ -12,7 +12,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static String suffix(void);
 
-static String _x2c_proto_string_add_update(volatile String * _x2c_macro_lhs_0, Symbol _x2c_macro_op_0, String _x2c_macro_rhs_0);
+static String _x2c_gensym_proto_string_add_update(volatile String * _x2c_gensym_macro_lhs_0, Symbol _x2c_gensym_macro_op_0, String _x2c_gensym_macro_rhs_0);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -39,14 +39,14 @@ int main(void){
   String joined = String_add(left, right);
   String mixed = String_add(left, _3);
   String constant = _6;
-  _x2c_proto_string_add_update(&(joined), 56, suffix());
+  _x2c_gensym_proto_string_add_update(&(joined), 56, suffix());
   printf("%s %s %s\n", joined, mixed, constant);
   Scope_release();
   return 0;
 }
 
-static String _x2c_proto_string_add_update(volatile String * _x2c_macro_lhs_0, Symbol _x2c_macro_op_0, String _x2c_macro_rhs_0){
-  _x2c_macro_lhs_0[0] = String_add(_x2c_macro_lhs_0[0], _x2c_macro_rhs_0);
-  return _x2c_macro_lhs_0[0];
+static String _x2c_gensym_proto_string_add_update(volatile String * _x2c_gensym_macro_lhs_0, Symbol _x2c_gensym_macro_op_0, String _x2c_gensym_macro_rhs_0){
+  _x2c_gensym_macro_lhs_0[0] = String_add(_x2c_gensym_macro_lhs_0[0], _x2c_gensym_macro_rhs_0);
+  return _x2c_gensym_macro_lhs_0[0];
 }
 

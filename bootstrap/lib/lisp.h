@@ -26,7 +26,7 @@ NativeScalarAccess native_scalar_access(List exact_type);
 
 typedef struct Lisp * Lisp;
 
-void Lisp_cleanup(Lisp _x2c_macro_value_28);
+void Lisp_cleanup(Lisp _x2c_gensym_macro_value_28);
 
 #define LISP_NATIVE_ARG_MAX  8
 #define LISP_STACK_BYTES_MAX (6L << 20)

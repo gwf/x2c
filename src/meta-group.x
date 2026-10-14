@@ -87,7 +87,7 @@ String Compiler.meta_cc_identity(String cc) {
     `directory` when a group's C is the cause. */
 String Compiler.meta_cc_run(List arguments, String directory) {
   String printed = NULL, errors = NULL;
-  if (!ToolAction.capture(arguments, printed, errors)) return NULL;
+  if (!tool_capture(arguments, printed, errors)) return NULL;
   String failure = _cc_error(errors);
   return !directory || directory in failure ? failure
     : %"$failure; the group's C is in $directory";
@@ -260,7 +260,8 @@ static void _name_provider_bindings(
     if (_function_identity(item, identity, name) &&
         _public_native(c, item, name)) {
       List binding = item.caddr().cadr();
-      c.set_fact(%(emitted $binding), %"_x2c_meta_group_${index}_$name");
+      c.set_fact(
+        %(emitted $binding), %"_x2c_gensym_meta_group_${index}_$name");
     }
 }
 
@@ -656,7 +657,8 @@ static Map _initial_copies(Compiler c, Array units) {
                      (!c.meta_build || type.tag().car() is <list>);
         if (!c.meta_build && !copied) continue;
         List copy = copied
-          ? c.sym.introduce(%"${binding.list().last()}_x2c_initial") : NULL;
+          ? c.sym.introduce(
+            %"_x2c_gensym_meta_initial_${binding.list().last()}") : NULL;
         for (int i = 0; i < (int) units.len(); i++)
           if (units[i] == declaration) {
             List original = c.meta_build ? bound : %(op = $bound $initializer);

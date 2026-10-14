@@ -938,7 +938,7 @@ static List _value_adapter(
   Compiler c, List source, List converted) {
   Type from = _adapter_type(c, source.cadr());
   Type result = _adapter_type(c, converted.cadr());
-  List formal = %(expr ${source.cadr()} "_x2c_initializer_argument");
+  List formal = %(expr ${source.cadr()} "_x2c_gensym_initializer_argument");
   List body = converted.search_replace(%(!quote $source), formal);
   List key = %(iadapt $from $result $body), adapter = NULL;
   $adapter.memo(c, key, adapter) {

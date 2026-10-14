@@ -11,7 +11,7 @@
 
 /** Joins an interpolated String's parts. */
 $rewrite(%(expr ("String") (segments *)))
-meta Code interpolation(Code code) {
+meta Code interpolation_lowering(Code code) {
   match (code) case %(expr ? (segments *segments)): {
     Array parts = [];
     foreach (List segment, segments) match (segment) {

@@ -12,12 +12,11 @@ The source forms that lowering recognizes.
 
 | Function | Summary |
 | --- | --- |
-| [`catch_handle`](#catch_handle) | Returns the error handler the parser introduced for the catch arms of the parsed try `node`, or NULL for a try without catches. |
-| [`retain_catch_handle`](#retain_catch_handle) | Restores the binder's handler after a caught template rebuild. |
 | [`source_any_lambda`](#source_any_lambda) | Returns a pattern for either lambda form, with or without captures. |
 | [`source_block_content`](#source_block_content) | Builds block content with its complete source-ordered statements. |
 | [`source_call_content`](#source_call_content) | Returns bare call content with the supplied callee and argument patterns. |
 | [`source_cast_content`](#source_cast_content) | Builds cast content with its children unchanged. |
+| [`source_catch_handle`](#source_catch_handle) | Returns the error handler the parser introduced for the catch arms of the parsed try `node`, or NULL for a try without catches. |
 | [`source_commas_content`](#source_commas_content) | Builds comma sequence content from its ordered rows. |
 | [`source_composite_content`](#source_composite_content) | Builds braced initializer content from its ordered comma rows. |
 | [`source_conditional_statement`](#source_conditional_statement) | Returns the canonical pattern for conditional statements. |
@@ -31,6 +30,7 @@ The source forms that lowering recognizes.
 | [`source_operator_expression`](#source_operator_expression) | Builds a typed operator expression from its content children. |
 | [`source_postfix_content`](#source_postfix_content) | Builds postfix update content with its token and operand. |
 | [`source_postfix_expression`](#source_postfix_expression) | Builds a typed postfix update expression from its content children. |
+| [`source_retain_catch_handle`](#source_retain_catch_handle) | Restores the binder's handler after a caught template rebuild. |
 | [`source_return_content`](#source_return_content) | Builds return content with all bound and normalized fields. |
 | [`source_return_type`](#source_return_type) | Returns a return node's target type, or NULL for another form. |
 | [`source_slice_content`](#source_slice_content) | Builds slice content while retaining omitted bounds. |
@@ -38,25 +38,6 @@ The source forms that lowering recognizes.
 | [`source_va_arg_content`](#source_va_arg_content) | Builds va-arg content with its declaration and operand. |
 
 ### Functions
-
-#### catch_handle
-
-`meta List catch_handle(List node)`
-
-Returns the error handler the parser introduced for the catch arms of
-the parsed try `node`, or NULL for a try without catches. The arms read
-their captures through it, and no source form writes it.
-
-Source: `src/grammar.x:222`
-
-#### retain_catch_handle
-
-`meta List retain_catch_handle(List rebuilt, List handle)`
-
-Restores the binder's handler after a caught template rebuild.
-The source form has no hole for this derived identity.
-
-Source: `src/grammar.x:229`
 
 #### source_any_lambda
 
@@ -91,6 +72,16 @@ Builds cast content with its children unchanged.
 The first child is a declaration or a semantic type at different stages.
 
 Source: `src/grammar.x:136`
+
+#### source_catch_handle
+
+`meta List source_catch_handle(List node)`
+
+Returns the error handler the parser introduced for the catch arms of
+the parsed try `node`, or NULL for a try without catches. The arms read
+their captures through it, and no source form writes it.
+
+Source: `src/grammar.x:222`
 
 #### source_commas_content
 
@@ -201,6 +192,15 @@ Source: `src/grammar.x:164`
 Builds a typed postfix update expression from its content children.
 
 Source: `src/grammar.x:167`
+
+#### source_retain_catch_handle
+
+`meta List source_retain_catch_handle(List rebuilt, List handle)`
+
+Restores the binder's handler after a caught template rebuild.
+The source form has no hole for this derived identity.
+
+Source: `src/grammar.x:229`
 
 #### source_return_content
 

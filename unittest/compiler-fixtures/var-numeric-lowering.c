@@ -135,38 +135,38 @@ int main(void){
   }
   ;
   {
-    ExceptionFrame _x2c_exception_frame_0;
-    static MatchCaptureSite _x2c_macro_arms_0[1];
-    Var _x2c_macro_patterns_0[1];
-    static ErrorCatchSite _x2c_macro_site_0 ={
-      _x2c_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
+    ExceptionFrame _x2c_gensym_exception_frame_0;
+    static MatchCaptureSite _x2c_gensym_macro_arms_0[1];
+    Var _x2c_gensym_macro_patterns_0[1];
+    static ErrorCatchSite _x2c_gensym_macro_site_0 ={
+      _x2c_gensym_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
     }
     ;
-    if(x2c_error_catch_site_pending(& _x2c_macro_site_0)){
-      _x2c_macro_patterns_0[0] = List_var(cons(Symbol_var(20800632064936), NULL));
+    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_0)){
+      _x2c_gensym_macro_patterns_0[0] = List_var(cons(Symbol_var(20800632064936), NULL));
     }
-    volatile ErrorHandler _x2c_error_handler_0 = x2c_error_catch_site_push(& _x2c_exception_frame_0, & _x2c_macro_site_0, _x2c_macro_patterns_0);
-    x2c_exception_push(& _x2c_exception_frame_0);
-    if(! sigsetjmp(_x2c_exception_frame_0.env, 0)){
+    volatile ErrorHandler _x2c_gensym_error_handler_0 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_0, & _x2c_gensym_macro_site_0, _x2c_gensym_macro_patterns_0);
+    x2c_exception_push(& _x2c_gensym_exception_frame_0);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)){
       x2c_var_update_i32(&(preserved), 56, b);
       x2c_var_update_i32(&(preserved_box.value), 56, b);
       x2c_var_update_i32(&(preserved_values[0]), 56, b);
       x2c_var_update_i32(&(*(& addressed)), 56, b);
       x2c_var_update_i32(&((& addressed_box) -> value), 56, b);
       {
-        static const X2CErrorSite _x2c_error_site_0 = {.file = "unittest/compiler-fixtures/var-numeric-lowering.x",.function = "main",.line = 103};
-        x2c_error_raise_n(& _x2c_error_site_0, 20800632064936, 0);
+        static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/var-numeric-lowering.x",.function = "main",.line = 103};
+        x2c_error_raise_n(& _x2c_gensym_error_site_0, 20800632064936, 0);
         __builtin_unreachable();
       }
 
     }
     else{
-      x2c_exception_landed(& _x2c_exception_frame_0);
-      if(x2c_exception_is_error_target(& _x2c_exception_frame_0)){
-        int _x2c_macro_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
-        x2c_error_catch_detach(_x2c_error_handler_0);
-        x2c_exception_mark_handled(& _x2c_exception_frame_0);
-        if(_x2c_macro_selected_0 == 0){
+      x2c_exception_landed(& _x2c_gensym_exception_frame_0);
+      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_0)){
+        int _x2c_gensym_macro_selected_0 = x2c_error_catch_selected(_x2c_gensym_error_handler_0);
+        x2c_error_catch_detach(_x2c_gensym_error_handler_0);
+        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_0);
+        if(_x2c_gensym_macro_selected_0 == 0){
           {
             branch ++;
           }
@@ -175,28 +175,28 @@ int main(void){
 
       }
       else{
-        if(x2c_exception_claim(& _x2c_exception_frame_0)){
-          x2c_error_catch_close(_x2c_error_handler_0);
-          _x2c_error_handler_0 = NULL;
+        if(x2c_exception_claim(& _x2c_gensym_exception_frame_0)){
+          x2c_error_catch_close(_x2c_gensym_error_handler_0);
+          _x2c_gensym_error_handler_0 = NULL;
           {
             branch ++;
           }
 
         }
-        x2c_exception_leave(& _x2c_exception_frame_0);
+        x2c_exception_leave(& _x2c_gensym_exception_frame_0);
         __builtin_unreachable();
       }
 
     }
-    if(x2c_exception_claim(& _x2c_exception_frame_0)){
-      x2c_error_catch_close(_x2c_error_handler_0);
-      _x2c_error_handler_0 = NULL;
+    if(x2c_exception_claim(& _x2c_gensym_exception_frame_0)){
+      x2c_error_catch_close(_x2c_gensym_error_handler_0);
+      _x2c_gensym_error_handler_0 = NULL;
       {
         branch ++;
       }
 
     }
-    x2c_exception_leave(& _x2c_exception_frame_0);
+    x2c_exception_leave(& _x2c_gensym_exception_frame_0);
   }
   printf("ops=%ld,%ld,%ld,%ld,%.1f converted=%.1f\n", Var_long(sum), Var_long(product), Var_long(shifted), Var_long(bits), Var_double(quotient), converted);
   printf("compound=%d,%d,%d,%ld indexed=%d boxed=%d calls=%d,%d,%d\n", native, compound_result, signed_byte, Var_long(dynamic), values[1], box.value, base_calls, index_calls, rhs_calls);

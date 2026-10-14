@@ -1393,6 +1393,11 @@ object has one definition in the generated C and an `extern` declaration in
 the header. An object of an anonymous `struct`, `union`, or `enum` type has no
 repeatable declaration to publish.
 
+The compiler reserves `_x2c_gensym_*` identifiers for generated support.
+Source declarations may use `_x2c_*` outside that subspace. The repository
+uses those names for shared implementation functions, but the prefix does
+not change linkage or enforce private access. `static` controls visibility.
+
 Standalone types are public by default. `static typedef`, `static struct`,
 `static union`, `static enum`, and `static class` declare private types. A type
 needed by a public declaration becomes public automatically. Its complete

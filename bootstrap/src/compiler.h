@@ -219,9 +219,9 @@ void Compiler_finish_collected_declaration(Compiler c, List declaration, Token m
 
 void Compiler_record_inline_function(Compiler c, List declaration);
 
-int Compiler_at_function_arrow(Compiler c);
+int _x2c_at_function_arrow(Compiler c);
 
-void Compiler_skip_shallow_expression(Compiler c, int stop_at_comma);
+void _x2c_skip_shallow_expression(Compiler c, int stop_at_comma);
 
 List Compiler_full_parse(Compiler c, Map globs, int generated_symbols);
 
@@ -261,7 +261,7 @@ void Compiler_mark_completion(Compiler c, int position);
 
 int Compiler_at_completion(Compiler c);
 
-void Compiler_complete_here(Compiler c, Symbol role, List keywords);
+void _x2c_complete_here(Compiler c, Symbol role, List keywords);
 
 void Compiler_queue_declaration_effect(Compiler c, String form, Token first, Token after);
 

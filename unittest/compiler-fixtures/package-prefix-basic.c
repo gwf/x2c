@@ -26,22 +26,22 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static int _vec_next(Iter iter, Var * out);
 
-static inline Iter _x2c_proto_geo__vec_iter_0(Var a0, Iter a1);
+static inline Iter _x2c_gensym_proto_geo__vec_iter_0(Var a0, Iter a1);
 
-static inline Var _x2c_proto_geo__vec_mul_0(Var a0, Var a1);
+static inline Var _x2c_gensym_proto_geo__vec_mul_0(Var a0, Var a1);
 
-static VarMethods _x2c__x2c_protocol_methods_0;
+static VarMethods _x2c_gensym_protocol_methods_0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _x2c__x2c_protocol_methods_0 =(VarMethods){
-    .iter = _x2c_proto_geo__vec_iter_0, .mul = _x2c_proto_geo__vec_mul_0
+  _x2c_gensym_protocol_methods_0 =(VarMethods){
+    .iter = _x2c_gensym_proto_geo__vec_iter_0, .mul = _x2c_gensym_proto_geo__vec_mul_0
   }
   ;
-  if(! x2c_register_builtin_descriptor(492847477062, _x2c__x2c_protocol_methods_0)){
-    x2c_register_descriptor(String_new("geo__vec"), _x2c__x2c_protocol_methods_0);
+  if(! x2c_register_builtin_descriptor(492847477062, _x2c_gensym_protocol_methods_0)){
+    x2c_register_descriptor(String_new("geo__vec"), _x2c_gensym_protocol_methods_0);
   }
 
 }
@@ -101,11 +101,11 @@ Iter geo__Vec_iter(geo__Vec v, Iter dest){
   return Iter_init(dest, geo__Vec_var(v), _vec_next, int_var(0));
 }
 
-static inline Iter _x2c_proto_geo__vec_iter_0(Var a0, Iter a1){
+static inline Iter _x2c_gensym_proto_geo__vec_iter_0(Var a0, Iter a1){
   return geo__Vec_iter(geo__Var_vec(a0), a1);
 }
 
-static inline Var _x2c_proto_geo__vec_mul_0(Var a0, Var a1){
+static inline Var _x2c_gensym_proto_geo__vec_mul_0(Var a0, Var a1){
   return geo__Vec_var(geo__Vec_mul(geo__Var_vec(a0), geo__Var_vec(a1)));
 }
 

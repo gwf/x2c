@@ -264,7 +264,7 @@ meta static Code _try_landing(
   Atom exits = Atom.intern("?__try_exits");
   Atom lowered = Atom.intern("?__try_body");
   Atom finished = NULL;
-  List handle = arms ? catch_handle(node) : NULL;
+  List handle = arms ? source_catch_handle(node) : NULL;
   Array rows = [%(new-name $frame "exception_frame")];
   if (finalizer) {
     Atom departure = Atom.intern("?__try_departure");

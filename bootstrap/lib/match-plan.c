@@ -181,12 +181,12 @@ static int _inner_keys(List rest, MatchKeys * inner);
 
 static int _add(MatchKeys * keys, MatchKey key);
 
-typedef struct _x2c_defer_env_0{
-  const void * _x2c_defer_capture_0;
+typedef struct _x2c_gensym_defer_env_0{
+  const void * _x2c_gensym_defer_capture_0;
 }
-_x2c_defer_env_0;
+_x2c_gensym_defer_env_0;
 
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
 
 static Var Symbol_var(Symbol);
 
@@ -241,16 +241,16 @@ static void _lower(MatchPlan plan, Var pattern){
   }
   ;
   {
-    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
       0
     }
     ;
-    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & l;
-    X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
+    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & l;
+    X2CCleanup _x2c_gensym_defer_record_0 ={
+      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_0);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
       for(int i = 0;  i < plan -> layout -> binder_count;  i ++) if(MachineBuilder_binder(&(l.b), plan -> layout -> binders[i]) != i) break;
       l.b.root = l.b.status == MACHINE_PREPARED ? _compile_value(&(l), pattern) : - 1;
@@ -260,7 +260,7 @@ static void _lower(MatchPlan plan, Var pattern){
       if(plan -> status == MACHINE_PREPARED) plan -> program = MachineBuilder_freeze(&(l.b));
       if(l.sites) Scope_free(l.sites);
     }
-    x2c_cleanup_leave(& _x2c_defer_record_0);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
   }
 
 }
@@ -337,11 +337,11 @@ static int _bits_unique(Var value){
     case 806120 :{
       {
         Var part;
-        List _x2c_macro_object_0 =(List) Var_pointer(value);
-        List _x2c_macro_cursor_0 = _x2c_macro_object_0;
-        Var _x2c_macro_cursor_output_0;
-        while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-          part = _x2c_macro_cursor_output_0;
+        List _x2c_gensym_macro_object_0 =(List) Var_pointer(value);
+        List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
+        Var _x2c_gensym_macro_cursor_output_0;
+        while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+          part = _x2c_gensym_macro_cursor_output_0;
           if(! _bits_unique(part)) return 0;
         }
 
@@ -368,11 +368,11 @@ static int _emit_literal(MatchLower * l, Var pattern){
 static int _is_list_literal(List pat){
   {
     Var head;
-    List _x2c_macro_object_1 = pat;
-    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
-    Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, &(_x2c_macro_cursor_1), &(_x2c_macro_cursor_output_1))){
-      head = _x2c_macro_cursor_output_1;
+    List _x2c_gensym_macro_object_1 = pat;
+    List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
+    Var _x2c_gensym_macro_cursor_output_1;
+    while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
+      head = _x2c_gensym_macro_cursor_output_1;
       {
         if(Var_is_binder(head) || Var_is_match_op(head)) return 0;
         if(Var_is_row(head, 9, 7, 4) && ! _is_list_literal(Var_list_payload(head))) return 0;
@@ -465,11 +465,11 @@ static int _guard_parts(MatchLower * l, List args, MatchParts * parts){
   int n = 0;
   {
     Var part;
-    List _x2c_macro_object_2 = args;
-    List _x2c_macro_cursor_2 = _x2c_macro_object_2;
-    Var _x2c_macro_cursor_output_2;
-    while(List_try_next(_x2c_macro_object_2, &(_x2c_macro_cursor_2), &(_x2c_macro_cursor_output_2))){
-      part = _x2c_macro_cursor_output_2;
+    List _x2c_gensym_macro_object_2 = args;
+    List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
+    Var _x2c_gensym_macro_cursor_output_2;
+    while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
+      part = _x2c_gensym_macro_cursor_output_2;
       {
         if(n >= MATCH_SEGMENT_MAX) return _fail(&((* l)), "guard-width") + 1;
         (* parts).elements[n] = part;
@@ -537,9 +537,9 @@ static int _compile_not(MatchLower * l, List args){
 static int _compile_set(MatchLower * l, List args){
   if(! _set_binds(args)) return _compile_or(&((* l)), args);
   Var binder, test;
-  List _x2c_destructure_0 = args;
-  binder = List_getindex(_x2c_destructure_0, 0);
-  test = List_getindex(_x2c_destructure_0, 1);
+  List _x2c_gensym_destructure_0 = args;
+  binder = List_getindex(_x2c_gensym_destructure_0, 0);
+  test = List_getindex(_x2c_gensym_destructure_0, 1);
   int child = Var_is_row(test, 9, 7, 4) ? _compile_child(&((* l)), test) : - 1;
   if(Var_is_row(test, 9, 7, 4) && child < 0) return - 1;
   int entry =(* l).b.length, base =(* l).site_count;
@@ -657,11 +657,11 @@ static int _inline_descend_ok(List child, int reg){
   if(reg + 1 >= MACHINE_CURSOR_REGS || ! List_truth(child) || Var_is_match_op(List_car(child)) || _is_list_literal(child)) return 0;
   {
     Var part;
-    List _x2c_macro_object_3 = child;
-    List _x2c_macro_cursor_3 = _x2c_macro_object_3;
-    Var _x2c_macro_cursor_output_3;
-    while(List_try_next(_x2c_macro_object_3, &(_x2c_macro_cursor_3), &(_x2c_macro_cursor_output_3))){
-      part = _x2c_macro_cursor_output_3;
+    List _x2c_gensym_macro_object_3 = child;
+    List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
+    Var _x2c_gensym_macro_cursor_output_3;
+    while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
+      part = _x2c_gensym_macro_cursor_output_3;
       if(Var_is_list_binder(part)) return 0;
     }
 
@@ -672,11 +672,11 @@ static int _inline_descend_ok(List child, int reg){
 static int _compile_nested(MatchLower * l, List pattern, int reg, MatchInlinePlan * nested){
   {
     Var part;
-    List _x2c_macro_object_4 = pattern;
-    List _x2c_macro_cursor_4 = _x2c_macro_object_4;
-    Var _x2c_macro_cursor_output_4;
-    while(List_try_next(_x2c_macro_object_4, &(_x2c_macro_cursor_4), &(_x2c_macro_cursor_output_4))){
-      part = _x2c_macro_cursor_output_4;
+    List _x2c_gensym_macro_object_4 = pattern;
+    List _x2c_gensym_macro_cursor_4 = _x2c_gensym_macro_object_4;
+    Var _x2c_gensym_macro_cursor_output_4;
+    while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
+      part = _x2c_gensym_macro_cursor_output_4;
       {
         if(! Var_is_row(part, 9, 7, 4)) continue;
         List child = Var_list_payload(part);
@@ -719,11 +719,11 @@ static int _segment_star(MatchLower * l, MatchStar * star){
 static int _pattern_contains_binder(List pat, Var binder){
   {
     Var part;
-    List _x2c_macro_object_5 = pat;
-    List _x2c_macro_cursor_5 = _x2c_macro_object_5;
-    Var _x2c_macro_cursor_output_5;
-    while(List_try_next(_x2c_macro_object_5, &(_x2c_macro_cursor_5), &(_x2c_macro_cursor_output_5))){
-      part = _x2c_macro_cursor_output_5;
+    List _x2c_gensym_macro_object_5 = pat;
+    List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;
+    Var _x2c_gensym_macro_cursor_output_5;
+    while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_5))){
+      part = _x2c_gensym_macro_cursor_output_5;
       {
         if(x2c_var_equal(part, binder)) return 1;
         if(Var_is_row(part, 9, 7, 4)){
@@ -751,11 +751,11 @@ static int _find_fixed_anchor(List pat, Var * anchor, int * offset){
   int width = 0;
   {
     Var part;
-    List _x2c_macro_object_6 = pat;
-    List _x2c_macro_cursor_6 = _x2c_macro_object_6;
-    Var _x2c_macro_cursor_output_6;
-    while(List_try_next(_x2c_macro_object_6, &(_x2c_macro_cursor_6), &(_x2c_macro_cursor_output_6))){
-      part = _x2c_macro_cursor_output_6;
+    List _x2c_gensym_macro_object_6 = pat;
+    List _x2c_gensym_macro_cursor_6 = _x2c_gensym_macro_object_6;
+    Var _x2c_gensym_macro_cursor_output_6;
+    while(List_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_6))){
+      part = _x2c_gensym_macro_cursor_output_6;
       {
         if(Var_is_list_binder(part)) return 0;
         if((! Var_is_row(part, 9, 7, 4) && ! Var_is_binder(part)) ||(Var_is_row(part, 9, 7, 4) && _is_list_literal(Var_list_payload(part)) && _bits_unique(part))){
@@ -808,11 +808,11 @@ static int _emit_framed(MatchLower * l, int entry, int reg){
 static int _emit_inline_segment(MatchLower * l, List pattern, int reg, MatchInlinePlan * nested){
   {
     Var part;
-    List _x2c_macro_object_7 = pattern;
-    List _x2c_macro_cursor_7 = _x2c_macro_object_7;
-    Var _x2c_macro_cursor_output_7;
-    while(List_try_next(_x2c_macro_object_7, &(_x2c_macro_cursor_7), &(_x2c_macro_cursor_output_7))){
-      part = _x2c_macro_cursor_output_7;
+    List _x2c_gensym_macro_object_7 = pattern;
+    List _x2c_gensym_macro_cursor_7 = _x2c_gensym_macro_object_7;
+    Var _x2c_gensym_macro_cursor_output_7;
+    while(List_try_next(_x2c_gensym_macro_object_7, &(_x2c_gensym_macro_cursor_7), &(_x2c_gensym_macro_cursor_output_7))){
+      part = _x2c_gensym_macro_cursor_output_7;
       {
         if(! Var_is_row(part, 9, 7, 4)){
           if(! _emit_head_leaf(&((* l)), part, reg)) return 0;
@@ -963,11 +963,11 @@ static int _keys(Var pattern, int mode, MatchKeys * keys){
   if(x2c_var_equal(op, Symbol_var(62436)) || x2c_var_equal(op, Symbol_var(2005352))){
     {
       Var arm;
-      List _x2c_macro_object_8 = args;
-      List _x2c_macro_cursor_8 = _x2c_macro_object_8;
-      Var _x2c_macro_cursor_output_8;
-      while(List_try_next(_x2c_macro_object_8, &(_x2c_macro_cursor_8), &(_x2c_macro_cursor_output_8))){
-        arm = _x2c_macro_cursor_output_8;
+      List _x2c_gensym_macro_object_8 = args;
+      List _x2c_gensym_macro_cursor_8 = _x2c_gensym_macro_object_8;
+      Var _x2c_gensym_macro_cursor_output_8;
+      while(List_try_next(_x2c_gensym_macro_object_8, &(_x2c_gensym_macro_cursor_8), &(_x2c_gensym_macro_cursor_output_8))){
+        arm = _x2c_gensym_macro_cursor_output_8;
         if(! _keys(arm, mode, &((* keys)))) return 0;
       }
 
@@ -978,11 +978,11 @@ static int _keys(Var pattern, int mode, MatchKeys * keys){
   int count =(* keys).count;
   {
     Var operand;
-    List _x2c_macro_object_9 = args;
-    List _x2c_macro_cursor_9 = _x2c_macro_object_9;
-    Var _x2c_macro_cursor_output_9;
-    while(List_try_next(_x2c_macro_object_9, &(_x2c_macro_cursor_9), &(_x2c_macro_cursor_output_9))){
-      operand = _x2c_macro_cursor_output_9;
+    List _x2c_gensym_macro_object_9 = args;
+    List _x2c_gensym_macro_cursor_9 = _x2c_gensym_macro_object_9;
+    Var _x2c_gensym_macro_cursor_output_9;
+    while(List_try_next(_x2c_gensym_macro_object_9, &(_x2c_gensym_macro_cursor_9), &(_x2c_gensym_macro_cursor_output_9))){
+      operand = _x2c_gensym_macro_cursor_output_9;
       {
         if(_keys(operand, mode, &((* keys)))) return 1;
         (* keys).count = count;
@@ -1026,11 +1026,11 @@ static int _inner_keys(List rest, MatchKeys * inner){
   int index = 1;
   {
     Var part;
-    List _x2c_macro_object_10 = rest;
-    List _x2c_macro_cursor_10 = _x2c_macro_object_10;
-    Var _x2c_macro_cursor_output_10;
-    while(List_try_next(_x2c_macro_object_10, &(_x2c_macro_cursor_10), &(_x2c_macro_cursor_output_10))){
-      part = _x2c_macro_cursor_output_10;
+    List _x2c_gensym_macro_object_10 = rest;
+    List _x2c_gensym_macro_cursor_10 = _x2c_gensym_macro_object_10;
+    Var _x2c_gensym_macro_cursor_output_10;
+    while(List_try_next(_x2c_gensym_macro_object_10, &(_x2c_gensym_macro_cursor_10), &(_x2c_gensym_macro_cursor_output_10))){
+      part = _x2c_gensym_macro_cursor_output_10;
       {
         if(Var_is_list_binder(part)) return 0;
         if(_keys(part, MATCH_KEY_VALUE, &((* inner)))) return index;
@@ -1054,8 +1054,8 @@ static int _add(MatchKeys * keys, MatchKey key){
 
 void MachineBuilder_free(MachineBuilder *);
 
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
-  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  MachineBuilder_free(&((*(MatchLower *) _x2c_defer_data_0->_x2c_defer_capture_0).b));
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
+  _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
+  MachineBuilder_free(&((*(MatchLower *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0).b));
 }
 

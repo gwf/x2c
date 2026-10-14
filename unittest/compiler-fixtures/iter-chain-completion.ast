@@ -99,7 +99,7 @@
    (block (declare (int) (bindings (bind (binding 20 "left") ()))) 
     (declare ("Iter") 
      (bindings 
-      (op = (bind (binding 21 "_x2c_macro_iterator_1") ()) 
+      (op = (bind (binding 21 "_x2c_gensym_macro_iterator_1") ()) 
        (expr ("Iter") 
         (call (expr ((func (("Iter") ("Func") ("Iter"))) ("Iter")) 
                (ident (binding 14 "Iter_map"))) 
@@ -120,14 +120,15 @@
                   (cast (decl (struct "Iter") (bindings (bind () ()))) 
                    (expr () 
                     (composite (commas (expr (int) (literal (int) "0"))))))))))))))) 
-    (declare ("Var") (bindings (bind (binding 22 "_x2c_macro_item_1") ()))) 
+    (declare ("Var") 
+     (bindings (bind (binding 22 "_x2c_gensym_macro_item_1") ()))) 
     (at 35 
      (while 
       (expr (int) 
        (call (expr ((func (("Iter") (opt-ref "Var"))) int) 
               (ident (binding 23 "Iter_try_next"))) 
-        (args (expr ("Iter") (ident (binding 21 "_x2c_macro_iterator_1"))) 
-         (expr ("Var") (ident (binding 22 "_x2c_macro_item_1")))))) 
+        (args (expr ("Iter") (ident (binding 21 "_x2c_gensym_macro_iterator_1"))) 
+         (expr ("Var") (ident (binding 22 "_x2c_gensym_macro_item_1")))))) 
       (block 
        (stmnt 
         (expr (int) 
@@ -136,12 +137,13 @@
            (call "Var_int" 
             (args (expr ("Var") 
                    (call "Var_convert" 
-                    (args (expr ("Var") (ident (binding 22 "_x2c_macro_item_1"))) 
+                    (args (expr ("Var") 
+                           (ident (binding 22 "_x2c_gensym_macro_item_1"))) 
                      (expr ("Symbol") "3453797")))))))))) 
        (block (declare (int) (bindings (bind (binding 24 "right") ()))) 
         (declare ("Iter") 
          (bindings 
-          (op = (bind (binding 25 "_x2c_macro_iterator_0") ()) 
+          (op = (bind (binding 25 "_x2c_gensym_macro_iterator_0") ()) 
            (expr ("Iter") 
             (call (expr ((func (("Iter") (int) ("Iter"))) ("Iter")) 
                    (ident (binding 26 "Iter_head"))) 
@@ -164,14 +166,16 @@
                       (cast (decl (struct "Iter") (bindings (bind () ()))) 
                        (expr () 
                         (composite (commas (expr (int) (literal (int) "0"))))))))))))))) 
-        (declare ("Var") (bindings (bind (binding 27 "_x2c_macro_item_0") ()))) 
+        (declare ("Var") 
+         (bindings (bind (binding 27 "_x2c_gensym_macro_item_0") ()))) 
         (at 28 
          (while 
           (expr (int) 
            (call (expr ((func (("Iter") (opt-ref "Var"))) int) 
                   (ident (binding 23 "Iter_try_next"))) 
-            (args (expr ("Iter") (ident (binding 25 "_x2c_macro_iterator_0"))) 
-             (expr ("Var") (ident (binding 27 "_x2c_macro_item_0")))))) 
+            (args (expr ("Iter") 
+                   (ident (binding 25 "_x2c_gensym_macro_iterator_0"))) 
+             (expr ("Var") (ident (binding 27 "_x2c_gensym_macro_item_0")))))) 
           (block 
            (stmnt 
             (expr (int) 
@@ -181,7 +185,7 @@
                 (args (expr ("Var") 
                        (call "Var_convert" 
                         (args (expr ("Var") 
-                               (ident (binding 27 "_x2c_macro_item_0"))) 
+                               (ident (binding 27 "_x2c_gensym_macro_item_0"))) 
                          (expr ("Symbol") "3453797")))))))))) 
            (stmnt 
             (expr (int) 

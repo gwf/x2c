@@ -5,7 +5,7 @@
 #include "x2c.x"
 
 int main(void) {
-  int _x2c_lambda_0 = 2;
-  printf("%d\n", _x2c_lambda_0);
+  int _x2c_gensym_lambda_0 = 2;
+  printf("%d\n", _x2c_gensym_lambda_0);
   return 0;
 }

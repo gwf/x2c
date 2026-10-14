@@ -9,17 +9,17 @@ struct Public{
 }
 ;
 
-struct _x2c_macro_Node_0c4b38f1{
+struct _x2c_gensym_macro_Node_0c4b38f1{
   int value;
 }
 ;
 
-enum _x2c_macro_Choice_8d084394{
-  _x2c_macro_Option_2b696d32 = 1
+enum _x2c_gensym_macro_Choice_8d084394{
+  _x2c_gensym_macro_Option_2b696d32 = 1
 }
 ;
 
-typedef int _x2c_macro_Scalar_65d9c473;
+typedef int _x2c_gensym_macro_Scalar_65d9c473;
 
 static String _0;
 
@@ -27,17 +27,17 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-struct _x2c_macro_Node_4f65fd50{
+struct _x2c_gensym_macro_Node_4f65fd50{
   int value;
 }
 ;
 
-enum _x2c_macro_Choice_b798c844{
-  _x2c_macro_Option_1555b65d = 1
+enum _x2c_gensym_macro_Choice_b798c844{
+  _x2c_gensym_macro_Option_1555b65d = 1
 }
 ;
 
-typedef int _x2c_macro_Scalar_0e265834;
+typedef int _x2c_gensym_macro_Scalar_0e265834;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -48,76 +48,76 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 int first(void){
   if(! _init_guard_) _file_init_();
-  struct _x2c_macro_Node_0c4b38f1 _x2c_macro_outside_0 ={
+  struct _x2c_gensym_macro_Node_0c4b38f1 _x2c_gensym_macro_outside_0 ={
     3
   }
   ;
-  struct Public _x2c_macro_retained_0 ={
+  struct Public _x2c_gensym_macro_retained_0 ={
     2
   }
   ;
-  int _x2c_macro_Node_0 = 1;
-  int _x2c_macro_value_0 = 4;
-  int _x2c_macro_total_0 = 0;
+  int _x2c_gensym_macro_Node_0 = 1;
+  int _x2c_gensym_macro_value_0 = 4;
+  int _x2c_gensym_macro_total_0 = 0;
   {
-    struct _x2c_macro_Node_1{
+    struct _x2c_gensym_macro_Node_1{
       String value;
     }
     ;
-    struct _x2c_macro_Node_1 _x2c_macro_inside_0 ={
+    struct _x2c_gensym_macro_Node_1 _x2c_gensym_macro_inside_0 ={
       _0
     }
     ;
-    String _x2c_macro_value_1 = _0;
-    _x2c_macro_total_0 = String_len(_x2c_macro_inside_0.value) + String_len(_x2c_macro_value_1);
+    String _x2c_gensym_macro_value_1 = _0;
+    _x2c_gensym_macro_total_0 = String_len(_x2c_gensym_macro_inside_0.value) + String_len(_x2c_gensym_macro_value_1);
   }
   {
-    typedef int _x2c_local_typedef_0;
-    int _x2c_macro_value_2 =(int) 5;
-    enum _x2c_macro_Choice_0{
-      _x2c_macro_Option_0 = 2
+    typedef int _x2c_gensym_local_typedef_0;
+    int _x2c_gensym_macro_value_2 =(int) 5;
+    enum _x2c_gensym_macro_Choice_0{
+      _x2c_gensym_macro_Option_0 = 2
     }
     ;
-    _x2c_macro_total_0 +=(int) _x2c_macro_value_2 + _x2c_macro_Option_0;
+    _x2c_gensym_macro_total_0 +=(int) _x2c_gensym_macro_value_2 + _x2c_gensym_macro_Option_0;
   }
-  return _x2c_macro_total_0 + _x2c_macro_outside_0.value + _x2c_macro_retained_0.value + _x2c_macro_Node_0 + _x2c_macro_value_0 + _x2c_macro_Option_2b696d32;
+  return _x2c_gensym_macro_total_0 + _x2c_gensym_macro_outside_0.value + _x2c_gensym_macro_retained_0.value + _x2c_gensym_macro_Node_0 + _x2c_gensym_macro_value_0 + _x2c_gensym_macro_Option_2b696d32;
 }
 
 int second(void){
   if(! _init_guard_) _file_init_();
-  struct _x2c_macro_Node_4f65fd50 _x2c_macro_outside_1 ={
+  struct _x2c_gensym_macro_Node_4f65fd50 _x2c_gensym_macro_outside_1 ={
     3
   }
   ;
-  struct Public _x2c_macro_retained_1 ={
+  struct Public _x2c_gensym_macro_retained_1 ={
     2
   }
   ;
-  int _x2c_macro_Node_2 = 1;
-  int _x2c_macro_value_3 = 4;
-  int _x2c_macro_total_1 = 0;
+  int _x2c_gensym_macro_Node_2 = 1;
+  int _x2c_gensym_macro_value_3 = 4;
+  int _x2c_gensym_macro_total_1 = 0;
   {
-    struct _x2c_macro_Node_3{
+    struct _x2c_gensym_macro_Node_3{
       String value;
     }
     ;
-    struct _x2c_macro_Node_3 _x2c_macro_inside_1 ={
+    struct _x2c_gensym_macro_Node_3 _x2c_gensym_macro_inside_1 ={
       _0
     }
     ;
-    String _x2c_macro_value_4 = _0;
-    _x2c_macro_total_1 = String_len(_x2c_macro_inside_1.value) + String_len(_x2c_macro_value_4);
+    String _x2c_gensym_macro_value_4 = _0;
+    _x2c_gensym_macro_total_1 = String_len(_x2c_gensym_macro_inside_1.value) + String_len(_x2c_gensym_macro_value_4);
   }
   {
-    typedef long _x2c_local_typedef_1;
-    long _x2c_macro_value_5 =(long) 5;
-    enum _x2c_macro_Choice_1{
-      _x2c_macro_Option_1 = 2
+    typedef long _x2c_gensym_local_typedef_1;
+    long _x2c_gensym_macro_value_5 =(long) 5;
+    enum _x2c_gensym_macro_Choice_1{
+      _x2c_gensym_macro_Option_1 = 2
     }
     ;
-    _x2c_macro_total_1 +=(int) _x2c_macro_value_5 + _x2c_macro_Option_1;
+    _x2c_gensym_macro_total_1 +=(int) _x2c_gensym_macro_value_5 + _x2c_gensym_macro_Option_1;
   }
-  return _x2c_macro_total_1 + _x2c_macro_outside_1.value + _x2c_macro_retained_1.value + _x2c_macro_Node_2 + _x2c_macro_value_3 + _x2c_macro_Option_1555b65d;
+  return _x2c_gensym_macro_total_1 + _x2c_gensym_macro_outside_1.value + _x2c_gensym_macro_retained_1.value + _x2c_gensym_macro_Node_2 + _x2c_gensym_macro_value_3 + _x2c_gensym_macro_Option_1555b65d;
 }
 
 int main(void){

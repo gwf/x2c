@@ -41,20 +41,25 @@
        (composite 
         (commas 
          (dotinit ("owner") 
-          (expr ("StringCallback") (ident (binding 13 "_x2c_callback_adapt_0")))) 
+          (expr ("StringCallback") 
+           (ident (binding 13 "_x2c_gensym_callback_adapt_0")))) 
          (dotinit ("free") 
-          (expr ("StringCallback") (ident (binding 14 "_x2c_callback_adapt_1")))) 
+          (expr ("StringCallback") 
+           (ident (binding 14 "_x2c_gensym_callback_adapt_1")))) 
          (dotinit ("symbol_compare") 
-          (expr ("CompareCallback") (ident (binding 15 "_x2c_callback_adapt_2")))) 
+          (expr ("CompareCallback") 
+           (ident (binding 15 "_x2c_gensym_callback_adapt_2")))) 
          (dotinit ("file_equal") 
-          (expr ("CompareCallback") (ident (binding 16 "_x2c_callback_adapt_3")))) 
+          (expr ("CompareCallback") 
+           (ident (binding 16 "_x2c_gensym_callback_adapt_3")))) 
          (dotinit ("iter") 
-          (expr ("IterCallback") (ident (binding 17 "_x2c_callback_adapt_4")))))))))))))
+          (expr ("IterCallback") 
+           (ident (binding 17 "_x2c_gensym_callback_adapt_4")))))))))))))
 
 (declare (static "StringCallback") 
  (bindings 
   (op = (bind (binding 18 "duplicate") ()) 
-   (expr ("StringCallback") (ident (binding 13 "_x2c_callback_adapt_0"))))))
+   (expr ("StringCallback") (ident (binding 13 "_x2c_gensym_callback_adapt_0"))))))
 
 (function (int) 
  (bind (binding 19 "main") ((fnmod (params (param (void) (bind () ())))))) 
@@ -195,7 +200,7 @@
   (at 43 (return (expr (int) (literal (int) "0"))))))
 
 (function (static "String") 
- (bind (binding 13 "_x2c_callback_adapt_0") 
+ (bind (binding 13 "_x2c_gensym_callback_adapt_0") 
   ((fnmod (params (param ("Var") (bind (binding 42 "a0") ())))))) 
  (block 
   (return 
@@ -208,7 +213,7 @@
              (args (expr ("Var") (ident (binding 42 "a0"))))))))))))
 
 (function (static "String") 
- (bind (binding 14 "_x2c_callback_adapt_1") 
+ (bind (binding 14 "_x2c_gensym_callback_adapt_1") 
   ((fnmod (params (param ("Var") (bind (binding 45 "a0") ())))))) 
  (block 
   (return 
@@ -220,7 +225,7 @@
              (args (expr ("Var") (ident (binding 45 "a0"))))))))))))
 
 (function (static int) 
- (bind (binding 15 "_x2c_callback_adapt_2") 
+ (bind (binding 15 "_x2c_gensym_callback_adapt_2") 
   ((fnmod 
     (params (param ("Var") (bind (binding 46 "a0") ())) 
      (param ("Var") (bind (binding 47 "a1") ())))))) 
@@ -235,7 +240,7 @@
        (call "Var_symbol" (args (expr ("Var") (ident (binding 47 "a1"))))))))))))
 
 (function (static int) 
- (bind (binding 16 "_x2c_callback_adapt_3") 
+ (bind (binding 16 "_x2c_gensym_callback_adapt_3") 
   ((fnmod 
     (params (param ("Var") (bind (binding 49 "a0") ())) 
      (param ("Var") (bind (binding 50 "a1") ())))))) 
@@ -254,7 +259,7 @@
         (args (expr ("Var") (ident (binding 50 "a1"))))))))))))
 
 (function (static "Iter") 
- (bind (binding 17 "_x2c_callback_adapt_4") 
+ (bind (binding 17 "_x2c_gensym_callback_adapt_4") 
   ((fnmod 
     (params (param ("Var") (bind (binding 53 "a0") ())) 
      (param ("Iter") (bind (binding 54 "a1") ())))))) 

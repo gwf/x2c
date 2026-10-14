@@ -18,9 +18,9 @@ typedef struct Block{
 }
 * Block;
 
-void Block_cleanup(Block _x2c_macro_value_0);
+void Block_cleanup(Block _x2c_gensym_macro_value_0);
 
-void Bytes_cleanup(Bytes _x2c_macro_value_1);
+void Bytes_cleanup(Bytes _x2c_gensym_macro_value_1);
 
 static inline Block Bytes_block(Bytes bytes){
   if(bytes == NULL) return NULL;

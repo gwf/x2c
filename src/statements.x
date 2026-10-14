@@ -76,7 +76,7 @@ List Compiler.parse_statement(Compiler c) => _statement(c, AST_STATEMENT);
 /* A meta call written as the whole statement binds its result at
    `position`. */
 static List _statement(Compiler c, AstPos position) {
-  c.complete_here(<statement>, _statement_keywords());
+  _x2c_complete_here(c, <statement>, _statement_keywords());
   List slot = c.try_parse_macro_slot(<statement>);
   if (slot) return slot;
   if (c.at_word("with")) return _with_statement(c);
@@ -254,7 +254,7 @@ static List _paren_expr(Compiler c) {
 /* Directives before an `else` follow the arm it continues. */
 static List _then_arm(Compiler c) {
   List arm = c.parse_governed(AST_STATEMENT);
-  c.complete_here(<continue>, %("else"));
+  _x2c_complete_here(c, <continue>, %("else"));
   return c.peek(0) == <else> ? _continued(c, arm) : arm;
 }
 
@@ -286,7 +286,7 @@ static List _for_clause(Compiler c, Symbol end) {
 
 static List _return_statement(Compiler c) {
   c.expect(<return>);
-  c.complete_here(<expr>, %());
+  _x2c_complete_here(c, <expr>, %());
   if (c.peek(0) == <;>) {
     c.next();
     return c.finish_return_statement(NULL);
@@ -543,7 +543,7 @@ static List _capture_locals(Compiler c, Array locals) {
 
 /* A `try` needs a `catch` or a `finally` after its body. */
 static List _catches(Compiler c) {
-  c.complete_here(<continue>, %("catch" "finally"));
+  _x2c_complete_here(c, <continue>, %("catch" "finally"));
   if (c.test(<catch>)) return _catch_cases(c);
   if (c.peek(0) != <finally>)
     $report.parse.try_handler(c);
@@ -551,7 +551,7 @@ static List _catches(Compiler c) {
 }
 
 static List _finally(Compiler c) {
-  c.complete_here(<continue>, %("finally"));
+  _x2c_complete_here(c, <continue>, %("finally"));
   return c.test(<finally>) ? c.parse_governed(AST_STATEMENT) : NULL;
 }
 
@@ -593,7 +593,7 @@ static List _catch_arm(Compiler c, int &is_default, List handle) {
 /* Directives before a later `catch` or `finally` follow the arm. */
 static List _catch_body(Compiler c) {
   List body = c.parse_governed(AST_STATEMENT);
-  c.complete_here(<continue>, %("catch" "finally"));
+  _x2c_complete_here(c, <continue>, %("catch" "finally"));
   return c.peek(0) == <catch> || c.peek(0) == <finally>
        ? _continued(c, body) : body;
 }
@@ -700,7 +700,7 @@ static List _continued(Compiler c, List statement) {
     `(seq ...)` node containing several block items.
 */
 List Compiler.parse_block_item(Compiler c) {
-  c.complete_here(<block>, _block_keywords());
+  _x2c_complete_here(c, <block>, _block_keywords());
   if (c.test_static_assert()) return c.parse_static_assert();
   List slot = c.try_parse_macro_slot(<block>);
   if (slot) return slot;
@@ -756,7 +756,7 @@ static List _block_items(Compiler c, int anchor_items) {
   List present_before = c.present_references();
   defer c.restore_reference_presence(present_before);
   loop {
-    c.complete_here(<block>, _block_keywords());
+    _x2c_complete_here(c, <block>, _block_keywords());
     if (c.token != c.directives_taken)
       foreach (Var directive, c.leading_preproc()) block.push(directive);
     if (c.peek(0) == <"}">) break;

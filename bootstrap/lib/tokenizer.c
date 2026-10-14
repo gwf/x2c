@@ -197,82 +197,82 @@ static inline int _conditional(Token t);
 
 static int _is_label(String word);
 
-static inline String _x2c_proto_token_str_0(Var a0);
+static inline String _x2c_gensym_proto_token_str_0(Var a0);
 
-static inline String _x2c_proto_token_repr_0(Var a0);
+static inline String _x2c_gensym_proto_token_repr_0(Var a0);
 
-static inline unsigned _x2c_proto_token_hash_0(Var a0);
+static inline unsigned _x2c_gensym_proto_token_hash_0(Var a0);
 
-static inline int _x2c_proto_token_equal_0(Var a0, Var a1);
+static inline int _x2c_gensym_proto_token_equal_0(Var a0, Var a1);
 
-static VarMethods _x2c__x2c_protocol_methods_0;
+static VarMethods _x2c_gensym_protocol_methods_0;
 
-static inline String _x2c_proto_tokenizer_str_0(Var a0);
+static inline String _x2c_gensym_proto_tokenizer_str_0(Var a0);
 
-static inline String _x2c_proto_tokenizer_repr_0(Var a0);
+static inline String _x2c_gensym_proto_tokenizer_repr_0(Var a0);
 
-static inline Buffer _x2c_proto_tokenizer_write_str_0(Var a0, Buffer a1);
+static inline Buffer _x2c_gensym_proto_tokenizer_write_str_0(Var a0, Buffer a1);
 
-static inline Buffer _x2c_proto_tokenizer_write_repr_0(Var a0, Buffer a1);
+static inline Buffer _x2c_gensym_proto_tokenizer_write_repr_0(Var a0, Buffer a1);
 
-static inline unsigned _x2c_proto_tokenizer_hash_0(Var a0);
+static inline unsigned _x2c_gensym_proto_tokenizer_hash_0(Var a0);
 
-static inline int _x2c_proto_tokenizer_equal_0(Var a0, Var a1);
+static inline int _x2c_gensym_proto_tokenizer_equal_0(Var a0, Var a1);
 
-static VarMethods _x2c__x2c_protocol_methods_1;
+static VarMethods _x2c_gensym_protocol_methods_1;
 
-typedef struct _x2c_defer_env_0{
-  const void * _x2c_defer_capture_0;
+typedef struct _x2c_gensym_defer_env_0{
+  const void * _x2c_gensym_defer_capture_0;
 }
-_x2c_defer_env_0;
+_x2c_gensym_defer_env_0;
 
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
 
-typedef struct _x2c_defer_env_1{
-  const void * _x2c_defer_capture_1;
+typedef struct _x2c_gensym_defer_env_1{
+  const void * _x2c_gensym_defer_capture_1;
 }
-_x2c_defer_env_1;
+_x2c_gensym_defer_env_1;
 
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1);
 
-typedef struct _x2c_defer_env_2{
-  const void * _x2c_defer_capture_2;
+typedef struct _x2c_gensym_defer_env_2{
+  const void * _x2c_gensym_defer_capture_2;
 }
-_x2c_defer_env_2;
+_x2c_gensym_defer_env_2;
 
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
+static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2);
 
-typedef struct _x2c_defer_env_3{
-  const void * _x2c_defer_capture_3;
-  const void * _x2c_defer_capture_4;
+typedef struct _x2c_gensym_defer_env_3{
+  const void * _x2c_gensym_defer_capture_3;
+  const void * _x2c_gensym_defer_capture_4;
 }
-_x2c_defer_env_3;
+_x2c_gensym_defer_env_3;
 
-static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
+static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3);
 
-typedef struct _x2c_defer_env_4{
-  const void * _x2c_defer_capture_5;
+typedef struct _x2c_gensym_defer_env_4{
+  const void * _x2c_gensym_defer_capture_5;
 }
-_x2c_defer_env_4;
+_x2c_gensym_defer_env_4;
 
-static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
+static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _x2c__x2c_protocol_methods_0 =(VarMethods){
-    .str = _x2c_proto_token_str_0, .repr = _x2c_proto_token_repr_0, .hash = _x2c_proto_token_hash_0, .equal = _x2c_proto_token_equal_0
+  _x2c_gensym_protocol_methods_0 =(VarMethods){
+    .str = _x2c_gensym_proto_token_str_0, .repr = _x2c_gensym_proto_token_repr_0, .hash = _x2c_gensym_proto_token_hash_0, .equal = _x2c_gensym_proto_token_equal_0
   }
   ;
-  if(! x2c_register_builtin_descriptor(42948956, _x2c__x2c_protocol_methods_0)){
-    x2c_register_descriptor(String_new("token"), _x2c__x2c_protocol_methods_0);
+  if(! x2c_register_builtin_descriptor(42948956, _x2c_gensym_protocol_methods_0)){
+    x2c_register_descriptor(String_new("token"), _x2c_gensym_protocol_methods_0);
   }
-  _x2c__x2c_protocol_methods_1 =(VarMethods){
-    .str = _x2c_proto_tokenizer_str_0, .repr = _x2c_proto_tokenizer_repr_0, .write_str = _x2c_proto_tokenizer_write_str_0, .write_repr = _x2c_proto_tokenizer_write_repr_0, .hash = _x2c_proto_tokenizer_hash_0, .equal = _x2c_proto_tokenizer_equal_0
+  _x2c_gensym_protocol_methods_1 =(VarMethods){
+    .str = _x2c_gensym_proto_tokenizer_str_0, .repr = _x2c_gensym_proto_tokenizer_repr_0, .write_str = _x2c_gensym_proto_tokenizer_write_str_0, .write_repr = _x2c_gensym_proto_tokenizer_write_repr_0, .hash = _x2c_gensym_proto_tokenizer_hash_0, .equal = _x2c_gensym_proto_tokenizer_equal_0
   }
   ;
-  x2c_register_tagged_descriptor(224890660808, String_new("Tokenizer"), _x2c__x2c_protocol_methods_1);
+  x2c_register_tagged_descriptor(224890660808, String_new("Tokenizer"), _x2c_gensym_protocol_methods_1);
   _0 = String_new("{{text:");
   _1 = String_new(", type:");
   _2 = String_new("line:");
@@ -322,8 +322,8 @@ Tokenizer Tokenizer_new(char * argument_0, Symbol argument_1){
 void * Scope_calloc(size_t, size_t);
 
 Tokenizer Tokenizer_alloc(void){
-  Tokenizer _x2c_macro_value_0 = Scope_calloc(1, sizeof(* _x2c_macro_value_0));
-  return _x2c_macro_value_0;
+  Tokenizer _x2c_gensym_macro_value_0 = Scope_calloc(1, sizeof(* _x2c_gensym_macro_value_0));
+  return _x2c_gensym_macro_value_0;
 }
 
 void Scope_free(void *);
@@ -365,31 +365,31 @@ Buffer Buffer_new(size_t);
 String Buffer_str(Buffer);
 
 String Tokenizer_str(Tokenizer value){
-  Buffer _x2c_macro_out_0 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_0 = Buffer_new(0);
   {
-    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
       0
     }
     ;
-    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & _x2c_macro_out_0;
-    X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
+    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_out_0;
+    X2CCleanup _x2c_gensym_defer_record_0 ={
+      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_0);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
-      Tokenizer_write_str(value, _x2c_macro_out_0);
+      Tokenizer_write_str(value, _x2c_gensym_macro_out_0);
       {
-        String _x2c_return_value_0 = Buffer_str(_x2c_macro_out_0);
+        String _x2c_gensym_return_value_0 = Buffer_str(_x2c_gensym_macro_out_0);
         {
-          x2c_cleanup_leave(& _x2c_defer_record_0);
-          return _x2c_return_value_0;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+          return _x2c_gensym_return_value_0;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_0);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
   }
 
 }
@@ -408,19 +408,19 @@ static Var int_var(int);
 
 Buffer Tokenizer_write_repr(Tokenizer value, Buffer out){
   if((void *) value ==(void *) 0) return Buffer_printf(out, "<Tokenizer: 0x%012lX>", (long) value);
-  RenderPath _x2c_macro_path_0;
-  if(! RenderPath_enter(&(_x2c_macro_path_0), value)) return Buffer_printf(out, "<Tokenizer: 0x%012lX>", (long) value);
+  RenderPath _x2c_gensym_macro_path_0;
+  if(! RenderPath_enter(&(_x2c_gensym_macro_path_0), value)) return Buffer_printf(out, "<Tokenizer: 0x%012lX>", (long) value);
   {
-    _x2c_defer_env_1 _x2c_macro_environment_1 ={
+    _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
       0
     }
     ;
-    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & _x2c_macro_path_0;
-    X2CCleanup _x2c_defer_record_1 ={
-      .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
+    _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_path_0;
+    X2CCleanup _x2c_gensym_defer_record_1 ={
+      .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_1
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_1);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_1);
     {
       Buffer_write(out, "Tokenizer { ");
       Buffer_write(out, "tokens: ");
@@ -450,46 +450,46 @@ Buffer Tokenizer_write_repr(Tokenizer value, Buffer out){
       Buffer_write(out, "layout: ");
       Var_write_repr((int_var(value -> layout)), out);
       {
-        Buffer _x2c_return_value_1 = Buffer_write(out, " }");
+        Buffer _x2c_gensym_return_value_1 = Buffer_write(out, " }");
         {
-          x2c_cleanup_leave(& _x2c_defer_record_1);
-          return _x2c_return_value_1;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+          return _x2c_gensym_return_value_1;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_1);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
   }
 
 }
 
 String Tokenizer_repr(Tokenizer value){
-  Buffer _x2c_macro_out_1 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_1 = Buffer_new(0);
   {
-    _x2c_defer_env_2 _x2c_macro_environment_2 ={
+    _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0
     }
     ;
-    _x2c_macro_environment_2._x2c_defer_capture_2 =(const void *) & _x2c_macro_out_1;
-    X2CCleanup _x2c_defer_record_2 ={
-      .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_2
+    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_2 =(const void *) & _x2c_gensym_macro_out_1;
+    X2CCleanup _x2c_gensym_defer_record_2 ={
+      .fn = _x2c_gensym_defer_cleanup_2, .env = & _x2c_gensym_macro_environment_2
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_2);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_2);
     {
-      Tokenizer_write_repr(value, _x2c_macro_out_1);
+      Tokenizer_write_repr(value, _x2c_gensym_macro_out_1);
       {
-        String _x2c_return_value_2 = Buffer_str(_x2c_macro_out_1);
+        String _x2c_gensym_return_value_2 = Buffer_str(_x2c_gensym_macro_out_1);
         {
-          x2c_cleanup_leave(& _x2c_defer_record_2);
-          return _x2c_return_value_2;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
+          return _x2c_gensym_return_value_2;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_2);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
   }
 
 }
@@ -521,7 +521,7 @@ static String int_str(int);
 String Token_repr(Token token){
   if(! _init_guard_) _file_init_();
   String head =({
-    Var _x2c_literal_part_0 = String_var(Token_str(token));  Var _x2c_literal_part_1 = String_var(Symbol_str(token -> type));  String_join(NULL, cons(String_var(_0), cons(_x2c_literal_part_0, cons(String_var(_1), cons(_x2c_literal_part_1, NULL)))));
+    Var _x2c_gensym_literal_part_0 = String_var(Token_str(token));  Var _x2c_gensym_literal_part_1 = String_var(Symbol_str(token -> type));  String_join(NULL, cons(String_var(_0), cons(_x2c_gensym_literal_part_0, cons(String_var(_1), cons(_x2c_gensym_literal_part_1, NULL)))));
   }
   );
   String location = String_join(NULL, cons(String_var(_2), cons(String_var(int_str(token -> line)), cons(String_var(_3), cons(String_var(int_str(token -> col)), NULL)))));
@@ -909,32 +909,32 @@ static int _operator(Tokenizer t, int len){
   if(push) _push_mode(t, push);
   int mode_committed = ! push;
   {
-    _x2c_defer_env_3 _x2c_macro_environment_3 ={
+    _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
       0
     }
     ;
-    _x2c_macro_environment_3._x2c_defer_capture_3 =(const void *) & mode_committed;
-    _x2c_macro_environment_3._x2c_defer_capture_4 =(const void *) & t;
-    X2CCleanup _x2c_defer_record_3 ={
-      .fn = _x2c_defer_cleanup_3, .env = & _x2c_macro_environment_3
+    _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_3 =(const void *) & mode_committed;
+    _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_4 =(const void *) & t;
+    X2CCleanup _x2c_gensym_defer_record_3 ={
+      .fn = _x2c_gensym_defer_cleanup_3, .env = & _x2c_gensym_macro_environment_3
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_3);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_3);
     {
       Tokenizer_tokenize(t, token_len, token_type);
       mode_committed = 1;
       if(pop) _pop_mode(t);
       {
-        int _x2c_return_value_3 = 1;
+        int _x2c_gensym_return_value_3 = 1;
         {
-          x2c_cleanup_leave(& _x2c_defer_record_3);
-          return _x2c_return_value_3;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+          return _x2c_gensym_return_value_3;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_3);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
   }
 
 }
@@ -1062,23 +1062,23 @@ static Token _significant_before(Tokenizer tokenizer, Token token){
 static void _layout(Tokenizer t){
   _Layout l = _layout_open(t);
   {
-    _x2c_defer_env_4 _x2c_macro_environment_4 ={
+    _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_4 ={
       0
     }
     ;
-    _x2c_macro_environment_4._x2c_defer_capture_5 =(const void *) & l;
-    X2CCleanup _x2c_defer_record_4 ={
-      .fn = _x2c_defer_cleanup_4, .env = & _x2c_macro_environment_4
+    _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_5 =(const void *) & l;
+    X2CCleanup _x2c_gensym_defer_record_4 ={
+      .fn = _x2c_gensym_defer_cleanup_4, .env = & _x2c_gensym_macro_environment_4
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_4);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_4);
     {
       _split_lines(&(l));
       for(int i = 0;  i < l.nlines;  i ++) _edit_line(&(l), i);
       if(l.error_at) t -> scan_status = 633613224;
       t -> tokens = _emit(&(l));
     }
-    x2c_cleanup_leave(& _x2c_defer_record_4);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
   }
 
 }
@@ -1169,7 +1169,7 @@ static void _edit_line(_Layout * l, int i){
   if(String_equal((* l).sig[line.last] -> text, _13) && !(* l).ternary[line.last] && next > line.indent) _open_block(&((* l)), line, j, next);
   else suffix = _end_statement(&((* l)), line);
   while((* l).top && next <(* l).indents[(* l).top]) suffix =({
-    Var _x2c_literal_part_2 = String_var(suffix);  Var _x2c_literal_part_3 = String_var((* l).closers[(* l).top --]);  String_join(NULL, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL)));
+    Var _x2c_gensym_literal_part_2 = String_var(suffix);  Var _x2c_gensym_literal_part_3 = String_var((* l).closers[(* l).top --]);  String_join(NULL, cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, NULL)));
   }
   );
   if(next !=(* l).indents[(* l).top] && !(* l).error_at && j <(* l).nlines)(* l).error_at =(* l).sig[(* l).lines[j].first];
@@ -1372,72 +1372,72 @@ Symbol Tokenizer_status(Tokenizer t){
   return t ? t -> scan_status : 28682226919752;
 }
 
-static inline String _x2c_proto_token_str_0(Var a0){
+static inline String _x2c_gensym_proto_token_str_0(Var a0){
   return Token_str(Var_token(a0));
 }
 
-static inline String _x2c_proto_token_repr_0(Var a0){
+static inline String _x2c_gensym_proto_token_repr_0(Var a0){
   return Token_repr(Var_token(a0));
 }
 
-static inline unsigned _x2c_proto_token_hash_0(Var a0){
+static inline unsigned _x2c_gensym_proto_token_hash_0(Var a0){
   return Token_hash(Var_token(a0));
 }
 
-static inline int _x2c_proto_token_equal_0(Var a0, Var a1){
+static inline int _x2c_gensym_proto_token_equal_0(Var a0, Var a1){
   return Token_equal(Var_token(a0), Var_token(a1));
 }
 
-static inline String _x2c_proto_tokenizer_str_0(Var a0){
+static inline String _x2c_gensym_proto_tokenizer_str_0(Var a0){
   return Tokenizer_str(Var_tokenizer(a0));
 }
 
-static inline String _x2c_proto_tokenizer_repr_0(Var a0){
+static inline String _x2c_gensym_proto_tokenizer_repr_0(Var a0){
   return Tokenizer_repr(Var_tokenizer(a0));
 }
 
-static inline Buffer _x2c_proto_tokenizer_write_str_0(Var a0, Buffer a1){
+static inline Buffer _x2c_gensym_proto_tokenizer_write_str_0(Var a0, Buffer a1){
   return Tokenizer_write_str(Var_tokenizer(a0), a1);
 }
 
-static inline Buffer _x2c_proto_tokenizer_write_repr_0(Var a0, Buffer a1){
+static inline Buffer _x2c_gensym_proto_tokenizer_write_repr_0(Var a0, Buffer a1){
   return Tokenizer_write_repr(Var_tokenizer(a0), a1);
 }
 
-static inline unsigned _x2c_proto_tokenizer_hash_0(Var a0){
+static inline unsigned _x2c_gensym_proto_tokenizer_hash_0(Var a0){
   return Tokenizer_hash(Var_tokenizer(a0));
 }
 
-static inline int _x2c_proto_tokenizer_equal_0(Var a0, Var a1){
+static inline int _x2c_gensym_proto_tokenizer_equal_0(Var a0, Var a1){
   return Tokenizer_equal(Var_tokenizer(a0), Var_tokenizer(a1));
 }
 
 void Buffer_free(Buffer);
 
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
-  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  Buffer_free((*(Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
+  _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
+  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
 }
 
 void RenderPath_leave(RenderPath *);
 
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
-  RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_1->_x2c_defer_capture_1)));
+static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
+  _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;
+  RenderPath_leave(&((*(RenderPath *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1)));
 }
 
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
-  Buffer_free((*(Buffer *) _x2c_defer_data_2->_x2c_defer_capture_2));
+static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
+  _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_2;
+  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2));
 }
 
-static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
-  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
-  if(!(*(int *) _x2c_defer_data_3->_x2c_defer_capture_3)) _pop_mode((*(Tokenizer *) _x2c_defer_data_3->_x2c_defer_capture_4));
+static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
+  _x2c_gensym_defer_env_3 * _x2c_gensym_defer_data_3 =(_x2c_gensym_defer_env_3 *) _x2c_gensym_defer_opaque_3;
+  if(!(*(int *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_3)) _pop_mode((*(Tokenizer *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_4));
 }
 
-static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
-  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;
-  _close(&((*(_Layout *) _x2c_defer_data_4->_x2c_defer_capture_5)));
+static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
+  _x2c_gensym_defer_env_4 * _x2c_gensym_defer_data_4 =(_x2c_gensym_defer_env_4 *) _x2c_gensym_defer_opaque_4;
+  _close(&((*(_Layout *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_5)));
 }
 

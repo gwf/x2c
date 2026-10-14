@@ -18,7 +18,7 @@ typedef struct Buffer{
 }
 * Buffer;
 
-void Buffer_cleanup(Buffer _x2c_macro_value_0);
+void Buffer_cleanup(Buffer _x2c_gensym_macro_value_0);
 
 Buffer Buffer_write_len(Buffer buf, const char * text, size_t length);
 

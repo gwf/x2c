@@ -12,39 +12,39 @@
      (op = (bind (binding 3 "value") ()) (expr (int) (literal (int) "7")))))) 
   (at 27 
    (block 
-    (declare ("_x2c_defer_env_0") 
+    (declare ("_x2c_gensym_defer_env_0") 
      (bindings 
-      (op = (bind (binding 4 "_x2c_macro_environment_0") ()) 
+      (op = (bind (binding 4 "_x2c_gensym_macro_environment_0") ()) 
        (expr () (composite (commas (expr (int) (literal (int) "0")))))))) 
     (stmnt 
      (expr (* const void) 
       (op = (expr (* const void) 
-             (op . (expr ("_x2c_defer_env_0") 
-                    (ident (binding 4 "_x2c_macro_environment_0"))) 
-              ("_x2c_defer_capture_0"))) 
+             (op . (expr ("_x2c_gensym_defer_env_0") 
+                    (ident (binding 4 "_x2c_gensym_macro_environment_0"))) 
+              ("_x2c_gensym_defer_capture_0"))) 
        (expr (* const void) 
         (cast (decl (const void) (bindings (bind () (*)))) 
          (expr (* int) (op & (expr (int) (ident (binding 3 "value")))))))))) 
     (declare ("X2CCleanup") 
      (bindings 
-      (op = (bind (binding 5 "_x2c_defer_record_0") ()) 
+      (op = (bind (binding 5 "_x2c_gensym_defer_record_0") ()) 
        (expr () 
         (composite 
          (commas 
           (dotinit ("fn") 
            (expr ((func ((* void))) void) 
-            (ident (binding 6 "_x2c_defer_cleanup_0")))) 
+            (ident (binding 6 "_x2c_gensym_defer_cleanup_0")))) 
           (dotinit ("env") 
-           (expr (* "_x2c_defer_env_0") 
-            (op & (expr ("_x2c_defer_env_0") 
-                   (ident (binding 4 "_x2c_macro_environment_0")))))))))))) 
+           (expr (* "_x2c_gensym_defer_env_0") 
+            (op & (expr ("_x2c_gensym_defer_env_0") 
+                   (ident (binding 4 "_x2c_gensym_macro_environment_0")))))))))))) 
     (stmnt 
      (expr (void) 
       (call (expr ((func ((* "X2CCleanup"))) void) 
              (ident (binding 7 "x2c_cleanup_push"))) 
        (args (expr (* "X2CCleanup") 
               (op & (expr ("X2CCleanup") 
-                     (ident (binding 5 "_x2c_defer_record_0"))))))))) 
+                     (ident (binding 5 "_x2c_gensym_defer_record_0"))))))))) 
     (block 
      (at 19 
       (stmnt 
@@ -55,7 +55,7 @@
       (block 
        (declare (int) 
         (bindings 
-         (op = (bind (binding 8 "_x2c_return_value_0") ()) 
+         (op = (bind (binding 8 "_x2c_gensym_return_value_0") ()) 
           (expr (int) (ident (binding 3 "value")))))) 
        (block 
         (stmnt 
@@ -64,15 +64,15 @@
                  (ident (binding 9 "x2c_cleanup_leave"))) 
            (args (expr (* ("X2CCleanup")) 
                   (op & (expr (("X2CCleanup")) 
-                         (ident (binding 5 "_x2c_defer_record_0"))))))))) 
-        (return (expr (int) (ident (binding 8 "_x2c_return_value_0")))))))) 
+                         (ident (binding 5 "_x2c_gensym_defer_record_0"))))))))) 
+        (return (expr (int) (ident (binding 8 "_x2c_gensym_return_value_0")))))))) 
     (stmnt 
      (expr (void) 
       (call (expr ((func ((* "X2CCleanup"))) void) 
              (ident (binding 9 "x2c_cleanup_leave"))) 
        (args (expr (* ("X2CCleanup")) 
               (op & (expr (("X2CCleanup")) 
-                     (ident (binding 5 "_x2c_defer_record_0")))))))))))))
+                     (ident (binding 5 "_x2c_gensym_defer_record_0")))))))))))))
 
 (function (static int) 
  (bind (binding 10 "global_only") ((fnmod (params (param (void) (bind () ())))))) 
@@ -81,13 +81,13 @@
    (block 
     (declare ("X2CCleanup") 
      (bindings 
-      (op = (bind (binding 11 "_x2c_defer_record_1") ()) 
+      (op = (bind (binding 11 "_x2c_gensym_defer_record_1") ()) 
        (expr () 
         (composite 
          (commas 
           (dotinit ("fn") 
            (expr ((func ((* void))) void) 
-            (ident (binding 12 "_x2c_defer_cleanup_1")))) 
+            (ident (binding 12 "_x2c_gensym_defer_cleanup_1")))) 
           (dotinit ("env") (expr (int) (literal (int) "0"))))))))) 
     (stmnt 
      (expr (void) 
@@ -95,13 +95,13 @@
              (ident (binding 7 "x2c_cleanup_push"))) 
        (args (expr (* "X2CCleanup") 
               (op & (expr ("X2CCleanup") 
-                     (ident (binding 11 "_x2c_defer_record_1"))))))))) 
+                     (ident (binding 11 "_x2c_gensym_defer_record_1"))))))))) 
     (block 
      (at 28 
       (block 
        (declare (int) 
         (bindings 
-         (op = (bind (binding 13 "_x2c_return_value_1") ()) 
+         (op = (bind (binding 13 "_x2c_gensym_return_value_1") ()) 
           (expr (int) (ident (binding 1 "observed")))))) 
        (block 
         (stmnt 
@@ -110,15 +110,15 @@
                  (ident (binding 9 "x2c_cleanup_leave"))) 
            (args (expr (* ("X2CCleanup")) 
                   (op & (expr (("X2CCleanup")) 
-                         (ident (binding 11 "_x2c_defer_record_1"))))))))) 
-        (return (expr (int) (ident (binding 13 "_x2c_return_value_1")))))))) 
+                         (ident (binding 11 "_x2c_gensym_defer_record_1"))))))))) 
+        (return (expr (int) (ident (binding 13 "_x2c_gensym_return_value_1")))))))) 
     (stmnt 
      (expr (void) 
       (call (expr ((func ((* "X2CCleanup"))) void) 
              (ident (binding 9 "x2c_cleanup_leave"))) 
        (args (expr (* ("X2CCleanup")) 
               (op & (expr (("X2CCleanup")) 
-                     (ident (binding 11 "_x2c_defer_record_1")))))))))))))
+                     (ident (binding 11 "_x2c_gensym_defer_record_1")))))))))))))
 
 (function (int) 
  (bind (binding 14 "main") ((fnmod (params (param (void) (bind () ())))))) 
@@ -161,22 +161,23 @@
       (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))
 
 (typedef 
- (static struct (binding 18 "_x2c_defer_env_0") 
+ (static struct (binding 18 "_x2c_gensym_defer_env_0") 
   (fields 
    (declare (const void) 
-    (bindings (bind (binding 19 "_x2c_defer_capture_0") (*)))))) 
- (bindings (bind (binding 18 "_x2c_defer_env_0") ())))
+    (bindings (bind (binding 19 "_x2c_gensym_defer_capture_0") (*)))))) 
+ (bindings (bind (binding 18 "_x2c_gensym_defer_env_0") ())))
 
 (function (static void) 
- (bind (binding 6 "_x2c_defer_cleanup_0") 
-  ((fnmod (params (param (void) (bind (binding 20 "_x2c_defer_opaque_0") (*))))))) 
+ (bind (binding 6 "_x2c_gensym_defer_cleanup_0") 
+  ((fnmod 
+    (params (param (void) (bind (binding 20 "_x2c_gensym_defer_opaque_0") (*))))))) 
  (block 
-  (declare ("_x2c_defer_env_0") 
+  (declare ("_x2c_gensym_defer_env_0") 
    (bindings 
-    (op = (bind (binding 21 "_x2c_defer_data_0") (*)) 
-     (expr (* "_x2c_defer_env_0") 
-      (cast (* "_x2c_defer_env_0") 
-       (expr (* void) (ident (binding 20 "_x2c_defer_opaque_0")))))))) 
+    (op = (bind (binding 21 "_x2c_gensym_defer_data_0") (*)) 
+     (expr (* "_x2c_gensym_defer_env_0") 
+      (cast (* "_x2c_gensym_defer_env_0") 
+       (expr (* void) (ident (binding 20 "_x2c_gensym_defer_opaque_0")))))))) 
   (stmnt 
    (expr (int) 
     (op = (expr (int) (ident (binding 1 "observed"))) 
@@ -185,10 +186,12 @@
        (expr (int) 
         (op * (expr (* int) 
                (cast (* int) 
-                (expr (* const void) "_x2c_defer_data_0->_x2c_defer_capture_0"))))))))))))
+                (expr (* const void) 
+                 "_x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0"))))))))))))
 
 (function (static void) 
- (bind (binding 12 "_x2c_defer_cleanup_1") 
-  ((fnmod (params (param (void) (bind (binding 22 "_x2c_defer_opaque_1") (*))))))) 
+ (bind (binding 12 "_x2c_gensym_defer_cleanup_1") 
+  ((fnmod 
+    (params (param (void) (bind (binding 22 "_x2c_gensym_defer_opaque_1") (*))))))) 
  (block 
   (stmnt (expr (int) (postfix ++ (expr (int) (ident (binding 1 "observed"))))))))

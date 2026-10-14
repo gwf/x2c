@@ -35,20 +35,20 @@ static int _splits_next(Split split, int * cursor, String * out);
 
 static int _iter_next(Iter iter, Var * out);
 
-static inline Iter _x2c_proto_split_iter_0(Var a0, Iter a1);
+static inline Iter _x2c_gensym_proto_split_iter_0(Var a0, Iter a1);
 
-static VarMethods _x2c__x2c_protocol_methods_0;
+static VarMethods _x2c_gensym_protocol_methods_0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _x2c__x2c_protocol_methods_0 =(VarMethods){
-    .iter = _x2c_proto_split_iter_0
+  _x2c_gensym_protocol_methods_0 =(VarMethods){
+    .iter = _x2c_gensym_proto_split_iter_0
   }
   ;
-  if(! x2c_register_builtin_descriptor(40919656, _x2c__x2c_protocol_methods_0)){
-    x2c_register_descriptor(String_new("split"), _x2c__x2c_protocol_methods_0);
+  if(! x2c_register_builtin_descriptor(40919656, _x2c_gensym_protocol_methods_0)){
+    x2c_register_descriptor(String_new("split"), _x2c_gensym_protocol_methods_0);
   }
 
 }
@@ -206,7 +206,7 @@ Iter Split_iter(Split split, Iter dest){
   return Iter_init(dest, Var_new(3683441, (void *) split), split ? _iter_next : NULL, int_var(0));
 }
 
-static inline Iter _x2c_proto_split_iter_0(Var a0, Iter a1){
+static inline Iter _x2c_gensym_proto_split_iter_0(Var a0, Iter a1){
   return Split_iter(Var_split(a0), a1);
 }
 

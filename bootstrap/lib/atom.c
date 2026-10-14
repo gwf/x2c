@@ -155,8 +155,8 @@ void Atom_initialize(void){
   }
   ;
   if(! x2c_try_register_descriptor(_0, methods)){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/atom.x",.function = "Atom_initialize",.line = 179};
-    x2c_error_raise_n(& _x2c_error_site_0, 20774016911960, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Atom")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/atom.x",.function = "Atom_initialize",.line = 179};
+    x2c_error_raise_n(& _x2c_gensym_error_site_0, 20774016911960, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Atom")), NULL))));
     __builtin_unreachable();
   }
   initialized = 1;
@@ -168,11 +168,11 @@ static Symbol _exact_7bit(String spelling){
   Symbol result = 0;
   {
     int byte;
-    String _x2c_macro_object_0 = spelling;
-    int _x2c_macro_cursor_0 = 0;
-    int _x2c_macro_cursor_output_0;
-    while(String_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      byte = _x2c_macro_cursor_output_0;
+    String _x2c_gensym_macro_object_0 = spelling;
+    int _x2c_gensym_macro_cursor_0 = 0;
+    int _x2c_gensym_macro_cursor_output_0;
+    while(String_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+      byte = _x2c_gensym_macro_cursor_output_0;
       {
         unsigned char ch = byte;
         if(ch > 0x7f) return 0;
@@ -195,8 +195,8 @@ static int _decodes_to(Symbol compact, String canonical, int length){
 Atom Atom_intern(String spelling){
   if(! _init_guard_) Atom_initialize();
   if(! String_truth(spelling) || ! * spelling){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/atom.x",.function = "Atom_intern",.line = 220};
-    x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Atom.intern")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/atom.x",.function = "Atom_intern",.line = 220};
+    x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Atom.intern")), NULL))));
     __builtin_unreachable();
   }
   String canonical = String_new(spelling);

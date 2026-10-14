@@ -82,7 +82,7 @@ int main(void){
   List index = cons(int_var(Var_int(Array_getindex(array, 0))), NULL);
   List ternary = cons(int_var(base == 40 ? 42 : 0), NULL);
   List literals =({
-    Var _x2c_literal_part_0 = Array_var(Array_update_n(Array_new(), 1, int_var(42)));  Var _x2c_literal_part_1 = Map_var(Map_update_n(Map_new(), 1, Symbol_var(97761636), int_var(42)));  cons(_19, cons(String_var(_20), cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL))));
+    Var _x2c_gensym_literal_part_0 = Array_var(Array_update_n(Array_new(), 1, int_var(42)));  Var _x2c_gensym_literal_part_1 = Map_var(Map_update_n(Map_new(), 1, Symbol_var(97761636), int_var(42)));  cons(_19, cons(String_var(_20), cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL))));
   }
   );
   if(! List_equal(insert, _21) || ! List_equal(splice, _24)) return 1;

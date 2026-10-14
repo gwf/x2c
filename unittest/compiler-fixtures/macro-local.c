@@ -45,12 +45,12 @@ static int local_macros(int base){
     }
     restored = base + offset + 7 + 1;
     replaced = base + 9;
-    int _x2c_macro_temporary_0 = base + 8;
-    int _x2c_macro_generated_0 = _x2c_macro_temporary_0;
-    assigned = _x2c_macro_generated_0;
-    int _x2c_macro_temporary_1 = base + 9;
-    int _x2c_macro_generated_1 = _x2c_macro_temporary_1;
-    assigned_again = _x2c_macro_generated_1;
+    int _x2c_gensym_macro_temporary_0 = base + 8;
+    int _x2c_gensym_macro_generated_0 = _x2c_gensym_macro_temporary_0;
+    assigned = _x2c_gensym_macro_generated_0;
+    int _x2c_gensym_macro_temporary_1 = base + 9;
+    int _x2c_gensym_macro_generated_1 = _x2c_gensym_macro_temporary_1;
+    assigned_again = _x2c_gensym_macro_generated_1;
     generated_value = base + 12;
     generated_inline = base + 13;
     repeated ++;

@@ -545,7 +545,7 @@ static String _compile_support(
   String source = %"$directory/meta-helper.x";
   Path.write_text(source, text);
   String printed = NULL, errors = NULL;
-  if (ToolAction.capture(
+  if (tool_capture(
     %(${x2c_get_executable()} "translate" "--out-dir" $directory $source),
     printed, errors))
     return %"cannot translate $source: ${errors.strip(NULL)}";

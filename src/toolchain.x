@@ -295,7 +295,7 @@ int ToolRun.wait(ToolRun execution) {
     and returns its shell-style status. A tool that cannot start returns 127
     and leaves the reason in `errors`.
 */
-int ToolAction.capture(List arguments, String &output, String &errors) =>
+int tool_capture(List arguments, String &output, String &errors) =>
   _capture(_captured(arguments), arguments.car(), output, errors);
 
 static int _capture(
@@ -375,7 +375,7 @@ int Toolchain.preprocess(
 static int _keeps_system_includes(String cc) {
   String output = NULL, errors = NULL;
   List probe = %($cc "-E" "-x" "c" "-fkeep-system-includes" "/dev/null");
-  return ToolAction.capture(probe, output, errors) == 0 ? 1 : -1;
+  return tool_capture(probe, output, errors) == 0 ? 1 : -1;
 }
 
 static List _cpp_arguments(
@@ -410,10 +410,10 @@ List Toolchain.search_directories(Toolchain t) {
   List flags = t.cc_args;
   String output = NULL, errors = NULL;
   List search = %(${t.cc} @flags "-E" "-v" "-x" "c" "/dev/null");
-  if (!ToolAction.capture(search, output, errors))
+  if (!tool_capture(search, output, errors))
     _add_include_directories(directories, errors);
   List arguments = %(${t.cc} @flags "-print-search-dirs");
-  if (!ToolAction.capture(arguments, output, errors))
+  if (!tool_capture(arguments, output, errors))
     _add_library_directories(directories, output);
   return directories.list_free();
 }

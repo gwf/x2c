@@ -21,13 +21,13 @@ double first_component(double x, double y){
   double total = roundtrip -> x;
   {
     Var part;
-    Iter _x2c_macro_iterator_0 = geo__Vec_iter(v, &(struct Iter){
+    Iter _x2c_gensym_macro_iterator_0 = geo__Vec_iter(v, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, &(_x2c_macro_item_0))){
-      part = _x2c_macro_item_0;
+    Var _x2c_gensym_macro_item_0;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_0, &(_x2c_gensym_macro_item_0))){
+      part = _x2c_gensym_macro_item_0;
       total += Var_floating(part);
     }
 

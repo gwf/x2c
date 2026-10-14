@@ -5,15 +5,15 @@
 
 static void add(int * value, int amount);
 
-static void macro_add(int * _x2c_macro_value_0);
+static void macro_add(int * _x2c_gensym_macro_value_0);
 
 static void add(int * value, int amount){
   (* value) += amount;
 }
 
-static void macro_add(int * _x2c_macro_value_0){
-  (* _x2c_macro_value_0) += 5;
-  add(&((* _x2c_macro_value_0)), 1);
+static void macro_add(int * _x2c_gensym_macro_value_0){
+  (* _x2c_gensym_macro_value_0) += 5;
+  add(&((* _x2c_gensym_macro_value_0)), 1);
 }
 
 int main(void){

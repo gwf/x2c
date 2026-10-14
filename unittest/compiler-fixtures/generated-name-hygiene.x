@@ -19,9 +19,11 @@ static int apply_int(int (*fn)(int)) {
   return fn(1);
 }
 
+int _x2c_lambda_0(int value) => value + 1;
+
 int main(void) {
   struct { int value; } item = { .value = user_gensym_12 };
-  int mapped = apply_int(%!(value) => value.int() + 1);
+  int mapped = apply_int(%!(value) => _x2c_lambda_0(value.int()));
   try {
     defer record_cleanup();
     raise %(invariant);

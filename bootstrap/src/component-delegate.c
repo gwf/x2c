@@ -66,11 +66,11 @@ List type_base_suffix(List);
 static String _delegate_type_name(Type type){
   List base = type_base_suffix(type);
   {
-    List _x2c_match_expr = base; Var _x2c_match_values[1]; MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+    List _x2c_gensym_match_expr = base; Var _x2c_gensym_match_values[1]; MatchCaptureBuffer _x2c_gensym_match_capture = { .values = _x2c_gensym_match_values, .capacity = 1 };
     switch(0){
         default: ;
-       static MatchCaptureSite _x2c_match_site_0; if (x2c_match_site_try_capture(&_x2c_match_site_0, _x2c_match_expr, List_var(_35), &_x2c_match_capture)) { Var _x2c_match_value_0 = _x2c_match_values[0]; {
-        Var tag;  tag = _x2c_match_value_0;  return Var_str(tag);
+       static MatchCaptureSite _x2c_gensym_match_site_0; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_0, _x2c_gensym_match_expr, List_var(_35), &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; {
+        Var tag;  tag = _x2c_gensym_match_value_0;  return Var_str(tag);
       }
        break; }
     }
@@ -81,8 +81,8 @@ static String _delegate_type_name(Type type){
 
 static String _delegate_path(Type type, List fields, String member){
   Array parts = Array_update_n(Array_new(), 1, String_var(_delegate_type_name(type))); {
-    String field;  List _x2c_macro_object_0 = fields;  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, &(_x2c_macro_cursor_0), &(_x2c_macro_cursor_output_0))){
-      field = Var_as_string(_x2c_macro_cursor_output_0);  Array_push(parts, String_var(field));
+    String field;  List _x2c_gensym_macro_object_0 = fields;  List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;  Var _x2c_gensym_macro_cursor_output_0;  while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+      field = Var_as_string(_x2c_gensym_macro_cursor_output_0);  Array_push(parts, String_var(field));
     }
 
   }

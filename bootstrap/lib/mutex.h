@@ -10,7 +10,7 @@
 #include "common.h"
 typedef struct Mutex * Mutex;
 
-void Mutex_cleanup(Mutex _x2c_macro_value_0);
+void Mutex_cleanup(Mutex _x2c_gensym_macro_value_0);
 
 void Mutex_recursive_initialize(pthread_mutex_t * mutex, const char * failure);
 

@@ -113,26 +113,29 @@
 (declare (int) 
  (bindings 
   (bind (binding 25 "generated_function") 
-   ((fnmod (params (param (int) (bind (binding 26 "_x2c_macro_value_0") ()))))))))
+   ((fnmod 
+     (params (param (int) (bind (binding 26 "_x2c_gensym_macro_value_0") ()))))))))
 
 (function (inline int) 
  (bind (binding 27 "generated_inline") 
-  ((fnmod (params (param (int) (bind (binding 28 "_x2c_macro_value_1") ())))))) 
+  ((fnmod 
+    (params (param (int) (bind (binding 28 "_x2c_gensym_macro_value_1") ())))))) 
  (block 
   (at 45 
    (return 
     (expr (int) 
-     (op + (expr (int) (ident (binding 28 "_x2c_macro_value_1"))) 
+     (op + (expr (int) (ident (binding 28 "_x2c_gensym_macro_value_1"))) 
       (expr (int) (literal (int) "1"))))))))
 
 (function (int) 
  (bind (binding 25 "generated_function") 
-  ((fnmod (params (param (int) (bind (binding 29 "_x2c_macro_value_2") ())))))) 
+  ((fnmod 
+    (params (param (int) (bind (binding 29 "_x2c_gensym_macro_value_2") ())))))) 
  (block 
   (at 46 
    (return 
     (expr (int) 
-     (op + (expr (int) (ident (binding 29 "_x2c_macro_value_2"))) 
+     (op + (expr (int) (ident (binding 29 "_x2c_gensym_macro_value_2"))) 
       (expr (int) (literal (int) "3"))))))))
 
 (macrodef <macro generated_read>)

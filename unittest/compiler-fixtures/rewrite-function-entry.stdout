@@ -2,13 +2,13 @@ enter run
 first statement
 leave run
 6
-enter _x2c_lambda_0
-leave _x2c_lambda_0
-enter _x2c_lambda_0
-leave _x2c_lambda_0
+enter _x2c_gensym_lambda_0
+leave _x2c_gensym_lambda_0
+enter _x2c_gensym_lambda_0
+leave _x2c_gensym_lambda_0
 1 2
-enter _x2c_lambda_1
-leave _x2c_lambda_1
-enter _x2c_lambda_1
-leave _x2c_lambda_1
+enter _x2c_gensym_lambda_1
+leave _x2c_gensym_lambda_1
+enter _x2c_gensym_lambda_1
+leave _x2c_gensym_lambda_1
 101 102

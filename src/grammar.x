@@ -219,14 +219,14 @@ meta Var source_expression(Var value) {
 /** Returns the error handler the parser introduced for the catch arms of
     the parsed try `node`, or NULL for a try without catches. The arms read
     their captures through it, and no source form writes it. */
-meta List catch_handle(List node) {
+meta List source_catch_handle(List node) {
   match (node) case %(try ? (catchcases ? ?handle) ?): return handle;
   return NULL;
 }
 
 /** Restores the binder's handler after a caught template rebuild.
     The source form has no hole for this derived identity. */
-meta List retain_catch_handle(List rebuilt, List handle) {
+meta List source_retain_catch_handle(List rebuilt, List handle) {
   Var marker = rebuilt.caddr().caddr();
   return rebuilt.search_replace(%(!quote $marker), handle);
 }

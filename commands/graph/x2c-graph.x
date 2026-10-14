@@ -320,7 +320,7 @@ static void _collect_walk_calls(
        cursor loop, so the copy's initializer is the walked value. */
     case %(op = (bind (binding ? ?spelling) ?) ?collection): {
       List root = _walk_argument_root(collection);
-      if (root && spelling.str().startswith("_x2c_macro_object_"))
+      if (root && spelling.str().startswith("_x2c_gensym_macro_object_"))
         calls.push(
           %(foreach ${project_location(compiler, path, origin)} $root));
     }

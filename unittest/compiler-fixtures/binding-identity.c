@@ -15,7 +15,7 @@ binding_phase5_Box;
 
 binding_phase5_Value binding_phase5_global = 1;
 
-static Var _x2c_lambda_0(Var value);
+static Var _x2c_gensym_lambda_0(Var value);
 
 binding_phase5_Value binding_phase5_shadow(binding_phase5_Value value){
   binding_phase5_Value result = value;
@@ -37,14 +37,14 @@ int main(void){
   }
   ;
   binding_phase5_Value value = binding_phase5_shadow(4);
-  Var lambda =(_x2c_lambda_0)(int_var(5));
+  Var lambda =(_x2c_gensym_lambda_0)(int_var(5));
   if(value != 11) return 1;
   if(binding_phase5_Box_bump(box, 2) != 5) return 2;
   if(Var_int(lambda) != 6) return 3;
   return 0;
 }
 
-static Var _x2c_lambda_0(Var value){
+static Var _x2c_gensym_lambda_0(Var value){
   return int_var(Var_int(value) + 1);
   ;
 }

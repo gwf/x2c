@@ -3,29 +3,29 @@
 
 /*  fields.x -- statements that copy or set named fields */
 
-/** Returns `to.field = from.field;` for each of `fields`. */
-meta List field_copies(List to, List from, List fields) {
+/* Returns `to.field = from.field;` for each of `fields`. */
+meta List _x2c_field_copies(List to, List from, List fields) {
   if (!fields) return NULL;
   Var field = fields.car();
   return %(${$!{ $to.$field = $from.$field; }}
-           @{field_copies(to, from, fields.cdr())});
+           @{_x2c_field_copies(to, from, fields.cdr())});
 }
 
-/** Returns `to.field = value;` for each of `fields`, evaluating `value`
+/* Returns `to.field = value;` for each of `fields`, evaluating `value`
     each time. */
-meta List field_sets(List to, List value, List fields) {
+meta List _x2c_field_sets(List to, List value, List fields) {
   if (!fields) return NULL;
   Var field = fields.car();
   return %(${$!{ $to.$field = $value; }}
-           @{field_sets(to, value, fields.cdr())});
+           @{_x2c_field_sets(to, value, fields.cdr())});
 }
 
 macro Stmt $copy_fields(Expr $to, Expr $from, Name @fields) {
-  @field_copies($to, $from, $fields)
+  @_x2c_field_copies($to, $from, $fields)
 }
 
 macro Stmt $set_fields(Expr $to, Expr $value, Name @fields) {
-  @field_sets($to, $value, $fields)
+  @_x2c_field_sets($to, $value, $fields)
 }
 
 /* The macro, import, keyword, and Lisp state a segment takes from its

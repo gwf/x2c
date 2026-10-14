@@ -57,37 +57,37 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _36 = Symbol_var(123);
 }
 
-List field_copies(List to, List from, List fields){
+List _x2c_field_copies(List to, List from, List fields){
   if(! _init_guard_) _file_init_();
   if(! List_truth(fields)) return NULL;
   Var field = List_car(fields);
   return({
-    Var _x2c_literal_part_6 = List_var(cons(_1, cons(_2, cons(List_var(cons(_3, cons(List_var(cons(_4, cons(List_var(cons(_5, cons(_8, cons(List_var(({
-      Var _x2c_literal_part_4 = List_var(cons(_5, cons(_8, cons(List_var(({
-        Var _x2c_literal_part_0 = List_var(cons(_10, cons(_24, cons(_25, cons(List_var(to), NULL)))));  Var _x2c_literal_part_1 = List_var(cons(List_var(cons(_10, cons(_32, cons(_33, cons(field, NULL))))), NULL));  cons(_34, cons(_35, cons(_x2c_literal_part_0, cons(_x2c_literal_part_1, NULL))));
+    Var _x2c_gensym_literal_part_6 = List_var(cons(_1, cons(_2, cons(List_var(cons(_3, cons(List_var(cons(_4, cons(List_var(cons(_5, cons(_8, cons(List_var(({
+      Var _x2c_gensym_literal_part_4 = List_var(cons(_5, cons(_8, cons(List_var(({
+        Var _x2c_gensym_literal_part_0 = List_var(cons(_10, cons(_24, cons(_25, cons(List_var(to), NULL)))));  Var _x2c_gensym_literal_part_1 = List_var(cons(List_var(cons(_10, cons(_32, cons(_33, cons(field, NULL))))), NULL));  cons(_34, cons(_35, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL))));
       }
-      )), NULL))));  Var _x2c_literal_part_5 = List_var(cons(_5, cons(_8, cons(List_var(({
-        Var _x2c_literal_part_2 = List_var(cons(_10, cons(_24, cons(_25, cons(List_var(from), NULL)))));  Var _x2c_literal_part_3 = List_var(cons(List_var(cons(_10, cons(_32, cons(_33, cons(field, NULL))))), NULL));  cons(_34, cons(_35, cons(_x2c_literal_part_2, cons(_x2c_literal_part_3, NULL))));
+      )), NULL))));  Var _x2c_gensym_literal_part_5 = List_var(cons(_5, cons(_8, cons(List_var(({
+        Var _x2c_gensym_literal_part_2 = List_var(cons(_10, cons(_24, cons(_25, cons(List_var(from), NULL)))));  Var _x2c_gensym_literal_part_3 = List_var(cons(List_var(cons(_10, cons(_32, cons(_33, cons(field, NULL))))), NULL));  cons(_34, cons(_35, cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, NULL))));
       }
-      )), NULL))));  cons(_34, cons(_36, cons(_x2c_literal_part_4, cons(_x2c_literal_part_5, NULL))));
+      )), NULL))));  cons(_34, cons(_36, cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, NULL))));
     }
-    )), NULL)))), NULL))), NULL))), NULL))));  List _x2c_literal_part_7 = field_copies(to, from, List_cdr(fields));  cons(_x2c_literal_part_6, List_append(_x2c_literal_part_7, NULL));
+    )), NULL)))), NULL))), NULL))), NULL))));  List _x2c_gensym_literal_part_7 = _x2c_field_copies(to, from, List_cdr(fields));  cons(_x2c_gensym_literal_part_6, List_append(_x2c_gensym_literal_part_7, NULL));
   }
   );
 }
 
-List field_sets(List to, List value, List fields){
+List _x2c_field_sets(List to, List value, List fields){
   if(! _init_guard_) _file_init_();
   if(! List_truth(fields)) return NULL;
   Var field = List_car(fields);
   return({
-    Var _x2c_literal_part_12 = List_var(cons(_1, cons(_2, cons(List_var(cons(_3, cons(List_var(cons(_4, cons(List_var(cons(_5, cons(_8, cons(List_var(({
-      Var _x2c_literal_part_10 = List_var(cons(_5, cons(_8, cons(List_var(({
-        Var _x2c_literal_part_8 = List_var(cons(_10, cons(_24, cons(_25, cons(List_var(to), NULL)))));  Var _x2c_literal_part_9 = List_var(cons(List_var(cons(_10, cons(_32, cons(_33, cons(field, NULL))))), NULL));  cons(_34, cons(_35, cons(_x2c_literal_part_8, cons(_x2c_literal_part_9, NULL))));
+    Var _x2c_gensym_literal_part_12 = List_var(cons(_1, cons(_2, cons(List_var(cons(_3, cons(List_var(cons(_4, cons(List_var(cons(_5, cons(_8, cons(List_var(({
+      Var _x2c_gensym_literal_part_10 = List_var(cons(_5, cons(_8, cons(List_var(({
+        Var _x2c_gensym_literal_part_8 = List_var(cons(_10, cons(_24, cons(_25, cons(List_var(to), NULL)))));  Var _x2c_gensym_literal_part_9 = List_var(cons(List_var(cons(_10, cons(_32, cons(_33, cons(field, NULL))))), NULL));  cons(_34, cons(_35, cons(_x2c_gensym_literal_part_8, cons(_x2c_gensym_literal_part_9, NULL))));
       }
-      )), NULL))));  Var _x2c_literal_part_11 = List_var(cons(_10, cons(_24, cons(_25, cons(List_var(value), NULL)))));  cons(_34, cons(_36, cons(_x2c_literal_part_10, cons(_x2c_literal_part_11, NULL))));
+      )), NULL))));  Var _x2c_gensym_literal_part_11 = List_var(cons(_10, cons(_24, cons(_25, cons(List_var(value), NULL)))));  cons(_34, cons(_36, cons(_x2c_gensym_literal_part_10, cons(_x2c_gensym_literal_part_11, NULL))));
     }
-    )), NULL)))), NULL))), NULL))), NULL))));  List _x2c_literal_part_13 = field_sets(to, value, List_cdr(fields));  cons(_x2c_literal_part_12, List_append(_x2c_literal_part_13, NULL));
+    )), NULL)))), NULL))), NULL))), NULL))));  List _x2c_gensym_literal_part_13 = _x2c_field_sets(to, value, List_cdr(fields));  cons(_x2c_gensym_literal_part_12, List_append(_x2c_gensym_literal_part_13, NULL));
   }
   );
 }

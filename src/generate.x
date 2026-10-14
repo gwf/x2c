@@ -72,8 +72,9 @@ static List _generated_code(Compiler c, List ast, String basename) {
   String hash = Path.identifier_hash(c.filename);
   Map bindings;
   (header, source, bindings) = c.setup_cache_init(
-    header, source, %"_x2c_hcache_${hash}_", %"_x2c_hcache_guard_$hash",
-    %"_x2c_hcache_init_$hash");
+    header, source, %"_x2c_gensym_hcache_${hash}_",
+    %"_x2c_gensym_hcache_guard_$hash",
+    %"_x2c_gensym_hcache_init_$hash");
   defer bindings.cleanup();
   List hcode = _emit_header(c, header);
   List ccode = _emit_source(c, source, bindings, inline_bodies);
@@ -1022,7 +1023,7 @@ static List _replace_body(
    constructor can create a String- or List-backed cache. */
 static List _protocol_initializer(
   Compiler c, List function, List body) {
-  List guard = c.sym.introduce("_x2c_protocol_guard_");
+  List guard = c.sym.introduce("_x2c_gensym_protocol_guard_");
   List declaration = c.initialization_guard(guard);
   List queued = c.init_statements(<protocol>).append(body);
   return _replace_body(

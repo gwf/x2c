@@ -52,9 +52,9 @@ List source_declarator_row(List fields);
 
 Var source_expression(Var value);
 
-List catch_handle(List node);
+List source_catch_handle(List node);
 
-List retain_catch_handle(List rebuilt, List handle);
+List source_retain_catch_handle(List rebuilt, List handle);
 
 
 #endif /* __GUARD_0xF07C83E6__ */

@@ -48,13 +48,13 @@ typedef UnzipColumn * UnzipColumnRef;
 typedef UnzipShared * UnzipSharedRef;
 
 #include "var-adapters.h"
-static inline Var UnzipColumnRef_var(UnzipColumnRef _x2c_macro_pointer_0);
+static inline Var UnzipColumnRef_var(UnzipColumnRef _x2c_gensym_macro_pointer_0);
 
-static inline UnzipColumnRef Var_unzipcolumnref(Var _x2c_macro_value_1);
+static inline UnzipColumnRef Var_unzipcolumnref(Var _x2c_gensym_macro_value_1);
 
-static inline Var UnzipSharedRef_var(UnzipSharedRef _x2c_macro_pointer_1);
+static inline Var UnzipSharedRef_var(UnzipSharedRef _x2c_gensym_macro_pointer_1);
 
-static inline UnzipSharedRef Var_unzipsharedref(Var _x2c_macro_value_3);
+static inline UnzipSharedRef Var_unzipsharedref(Var _x2c_gensym_macro_value_3);
 
 static int _range_up_next(Iter iter, Var * out);
 
@@ -102,24 +102,24 @@ static void _unzip_buffer_push(UnzipShared * shared, Var pair);
 
 static void _unzip_compact(UnzipShared * shared, int column);
 
-static inline Var UnzipColumnRef_var(UnzipColumnRef _x2c_macro_pointer_0){
-  Var _x2c_macro_value_0;
-  _x2c_macro_value_0.p64 = _x2c_macro_pointer_0;
-  return _x2c_macro_value_0;
+static inline Var UnzipColumnRef_var(UnzipColumnRef _x2c_gensym_macro_pointer_0){
+  Var _x2c_gensym_macro_value_0;
+  _x2c_gensym_macro_value_0.p64 = _x2c_gensym_macro_pointer_0;
+  return _x2c_gensym_macro_value_0;
 }
 
-static inline UnzipColumnRef Var_unzipcolumnref(Var _x2c_macro_value_1){
-  return _x2c_macro_value_1.p64;
+static inline UnzipColumnRef Var_unzipcolumnref(Var _x2c_gensym_macro_value_1){
+  return _x2c_gensym_macro_value_1.p64;
 }
 
-static inline Var UnzipSharedRef_var(UnzipSharedRef _x2c_macro_pointer_1){
-  Var _x2c_macro_value_2;
-  _x2c_macro_value_2.p64 = _x2c_macro_pointer_1;
-  return _x2c_macro_value_2;
+static inline Var UnzipSharedRef_var(UnzipSharedRef _x2c_gensym_macro_pointer_1){
+  Var _x2c_gensym_macro_value_2;
+  _x2c_gensym_macro_value_2.p64 = _x2c_gensym_macro_pointer_1;
+  return _x2c_gensym_macro_value_2;
 }
 
-static inline UnzipSharedRef Var_unzipsharedref(Var _x2c_macro_value_3){
-  return _x2c_macro_value_3.p64;
+static inline UnzipSharedRef Var_unzipsharedref(Var _x2c_gensym_macro_value_3){
+  return _x2c_gensym_macro_value_3.p64;
 }
 
 Iter Iter_init(Iter iter, Var obj, IterNextFn next, Var state){
@@ -148,8 +148,8 @@ int Iter_try_next(Iter iter, Var * out){
     return 0;
   }
   if(Var_is_void((* out))){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/iter.x",.function = "Iter_try_next",.line = 185};
-    x2c_error_raise_n(& _x2c_error_site_0, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Iter.try_next")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/iter.x",.function = "Iter_try_next",.line = 185};
+    x2c_error_raise_n(& _x2c_gensym_error_site_0, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Iter.try_next")), NULL))));
     __builtin_unreachable();
   }
   return 1;
@@ -168,10 +168,10 @@ Iter Iter_iter(Iter x, Iter dest){
 Iter range(int start, int end, int step, Iter iter){
   if(! Iter_truth(iter)) return NULL;
   if(! step){
-    Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("range")), NULL)));
+    Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("range")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/iter.x",.function = "range",.line = 229};
-      x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(1286496), int_var(step));
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/iter.x",.function = "range",.line = 229};
+      x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1286496), int_var(step));
       __builtin_unreachable();
     }
 
@@ -265,10 +265,10 @@ static int _filter_next(Iter iter, Var * out){
   if(! Iter_truth(source) || ! func) return 0;
   {
     Var value;
-    Iter _x2c_macro_iterator_0 = source;
-    Var _x2c_macro_item_0;
-    while(Iter_try_next(_x2c_macro_iterator_0, &(_x2c_macro_item_0))){
-      value = _x2c_macro_item_0;
+    Iter _x2c_gensym_macro_iterator_0 = source;
+    Var _x2c_gensym_macro_item_0;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_0, &(_x2c_gensym_macro_item_0))){
+      value = _x2c_gensym_macro_item_0;
       {
         if(Var_truth(Func_apply_value(func, value))){
           * out = value;
@@ -478,30 +478,30 @@ static int _unzip_ensure(UnzipShared * shared, int column){
 
 static void _unzip_buffer_push(UnzipShared * shared, Var pair){
   if(! Var_is_row(pair, 9, 7, 4)){
-    Var _x2c_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL)));
-    Var _x2c_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL)));
+    Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL)));
+    Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 702};
-      x2c_error_raise_n(& _x2c_error_site_2, 4477479911782, 3, Symbol_var(34096809266140), _x2c_literal_part_1, Symbol_var(1510312), _x2c_literal_part_2, Symbol_var(46228810), pair);
+      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 702};
+      x2c_error_raise_n(& _x2c_gensym_error_site_2, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(1510312), _x2c_gensym_literal_part_2, Symbol_var(46228810), pair);
       __builtin_unreachable();
     }
 
   }
   List list = Var_list_payload(pair);
   if(! List_truth(list) || ! List_truth(List_cdr(list)) || List_truth(List_cdr(List_cdr(list)))){
-    Var _x2c_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL)));
-    Var _x2c_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL)));
+    Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL)));
+    Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 706};
-      x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 3, Symbol_var(34096809266140), _x2c_literal_part_3, Symbol_var(1510312), _x2c_literal_part_4, Symbol_var(46228810), pair);
+      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 706};
+      x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(1510312), _x2c_gensym_literal_part_4, Symbol_var(46228810), pair);
       __builtin_unreachable();
     }
 
   }
   Var first, second;
-  List _x2c_destructure_0 = list;
-  first = List_getindex(_x2c_destructure_0, 0);
-  second = List_getindex(_x2c_destructure_0, 1);
+  List _x2c_gensym_destructure_0 = list;
+  first = List_getindex(_x2c_gensym_destructure_0, 0);
+  second = List_getindex(_x2c_gensym_destructure_0, 1);
   Array_push(shared -> buffers[0], first);
   Array_push(shared -> buffers[1], second);
 }
@@ -537,10 +537,10 @@ int Iter_any(Iter iter, Func pred){
   if(! pred) return 0;
   {
     Var item;
-    Iter _x2c_macro_iterator_1 = iter;
-    Var _x2c_macro_item_1;
-    while(Iter_try_next(_x2c_macro_iterator_1, &(_x2c_macro_item_1))){
-      item = _x2c_macro_item_1;
+    Iter _x2c_gensym_macro_iterator_1 = iter;
+    Var _x2c_gensym_macro_item_1;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_1, &(_x2c_gensym_macro_item_1))){
+      item = _x2c_gensym_macro_item_1;
       if(Var_truth(Func_apply_value(pred, item))) return 1;
     }
 
@@ -562,10 +562,10 @@ Var Iter_find(Iter iter, Func pred){
   if(! pred) return((void) 0, Void);
   {
     Var item;
-    Iter _x2c_macro_iterator_2 = iter;
-    Var _x2c_macro_item_2;
-    while(Iter_try_next(_x2c_macro_iterator_2, &(_x2c_macro_item_2))){
-      item = _x2c_macro_item_2;
+    Iter _x2c_gensym_macro_iterator_2 = iter;
+    Var _x2c_gensym_macro_item_2;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_2, &(_x2c_gensym_macro_item_2))){
+      item = _x2c_gensym_macro_item_2;
       if(Var_truth(Func_apply_value(pred, item))) return item;
     }
 
@@ -584,10 +584,10 @@ Var Iter_sum(Iter iter){
   Var total = int_var(0);
   {
     Var item;
-    Iter _x2c_macro_iterator_3 = iter;
-    Var _x2c_macro_item_3;
-    while(Iter_try_next(_x2c_macro_iterator_3, &(_x2c_macro_item_3))){
-      item = _x2c_macro_item_3;
+    Iter _x2c_gensym_macro_iterator_3 = iter;
+    Var _x2c_gensym_macro_item_3;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_3, &(_x2c_gensym_macro_item_3))){
+      item = _x2c_gensym_macro_item_3;
       total = Var_binary(total, 56, item);
     }
 
@@ -599,10 +599,10 @@ Var Iter_product(Iter iter){
   Var total = int_var(1);
   {
     Var item;
-    Iter _x2c_macro_iterator_4 = iter;
-    Var _x2c_macro_item_4;
-    while(Iter_try_next(_x2c_macro_iterator_4, &(_x2c_macro_item_4))){
-      item = _x2c_macro_item_4;
+    Iter _x2c_gensym_macro_iterator_4 = iter;
+    Var _x2c_gensym_macro_item_4;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_4, &(_x2c_gensym_macro_item_4))){
+      item = _x2c_gensym_macro_item_4;
       total = Var_binary(total, 54, item);
     }
 
@@ -615,10 +615,10 @@ Var Iter_max(Iter iter){
   if(! Iter_try_next(iter, &(best))) return((void) 0, Void);
   {
     Var item;
-    Iter _x2c_macro_iterator_5 = iter;
-    Var _x2c_macro_item_5;
-    while(Iter_try_next(_x2c_macro_iterator_5, &(_x2c_macro_item_5))){
-      item = _x2c_macro_item_5;
+    Iter _x2c_gensym_macro_iterator_5 = iter;
+    Var _x2c_gensym_macro_item_5;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_5, &(_x2c_gensym_macro_item_5))){
+      item = _x2c_gensym_macro_item_5;
       if(Var_compare(item, best) > 0) best = item;
     }
 
@@ -631,10 +631,10 @@ Var Iter_min(Iter iter){
   if(! Iter_try_next(iter, &(best))) return((void) 0, Void);
   {
     Var item;
-    Iter _x2c_macro_iterator_6 = iter;
-    Var _x2c_macro_item_6;
-    while(Iter_try_next(_x2c_macro_iterator_6, &(_x2c_macro_item_6))){
-      item = _x2c_macro_item_6;
+    Iter _x2c_gensym_macro_iterator_6 = iter;
+    Var _x2c_gensym_macro_item_6;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_6, &(_x2c_gensym_macro_item_6))){
+      item = _x2c_gensym_macro_item_6;
       if(Var_compare(item, best) < 0) best = item;
     }
 

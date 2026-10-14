@@ -651,7 +651,7 @@ static String _file_scope_name(
   c.names.counters[key] = count + 1;
   c.names.issued++;
   String digest = "%08x".printf(%"$key:$count".hash());
-  return %"_x2c_macro_${source}_$digest";
+  return %"_x2c_gensym_macro_${source}_$digest";
 }
 
 /* The unit's owner spelling, cached per file and package. */
@@ -3442,7 +3442,7 @@ int Compiler.skip_named_type_declaration(Compiler c) {
   List definition = _peek_invocation(c);
   if (!definition || definition.assoc(<target>) != <named-type>) return 0;
   c.skip_macro_invocation();
-  c.skip_shallow_expression(0);
+  _x2c_skip_shallow_expression(c, 0);
   c.expect(<;>);
   return 1;
 }
@@ -4325,7 +4325,7 @@ static List _bind_references(
     if (!pair) continue;
     Var (binder, syntax) = pair;
     String spelling = binder.str()[1:];
-    String temporary = %"_x2c_meta_${serial}_$spelling";
+    String temporary = %"_x2c_gensym_meta_${serial}_$spelling";
     Var unwrapped;
     if (!_source_capture_parts(syntax, NULL, unwrapped))
       unwrapped = _source_unwrap(syntax);
@@ -4367,7 +4367,7 @@ static String _rewrite_references(String form, List references) {
    requirement. */
 static String _with_construction(
   Compiler c, unsigned long serial, String form, Var construction) {
-  String temporary = %"_x2c_meta_${serial}_construction";
+  String temporary = %"_x2c_gensym_meta_${serial}_construction";
   c.macro_lisp.set_global(temporary, construction);
   return %"(let ((x2c.ident (lambda (name)
       (list $temporary name)))) $form)";

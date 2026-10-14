@@ -1113,7 +1113,7 @@ static int _match_nesting(String text) {
 }
 
 static String _match_cursor(int depth) =>
-  depth ? %"_x2c_match_cursor$depth" : "_x2c_match_cursor";
+  depth ? %"_x2c_gensym_match_cursor$depth" : "_x2c_gensym_match_cursor";
 
 static Symbol _match_head(Var value) {
   if (value is not <list> || !value.list()) return 0;
@@ -1156,7 +1156,7 @@ static void _match_bind(
   int index = seen.len() - 1;
   int list = binder.is_list_binder();
   b.printf(
-    " %s _x2c_match_%s_%d = %s;",
+    " %s _x2c_gensym_match_%s_%d = %s;",
     list ? "List" : "Var", list ? "list" : "value", index, cell);
 }
 
@@ -1198,7 +1198,7 @@ static int _match_nested(
   int mark = out.len(), testing = 0, braces = 0, step = 0, deepest = 0;
   List rest = value;
   String path = "";
-  b.write(" _x2c_match_cursor = _x2c_match_expr;");
+  b.write(" _x2c_gensym_match_cursor = _x2c_gensym_match_expr;");
   for (;;) {
     int levels = rests.len();
     String cursor = _match_cursor(levels);
@@ -1267,7 +1267,7 @@ static void _match_captures(Buffer b, List binders) {
   foreach (Var binder, binders) {
     int list = binder.is_list_binder();
     b.printf(
-      " %s _x2c_match_%s_%d = %s_x2c_match_values[%d]%s;",
+      " %s _x2c_gensym_match_%s_%d = %s_x2c_gensym_match_values[%d]%s;",
       list ? "List" : "Var", list ? "list" : "value", index,
       list ? "Var_list_payload(" : "", index, list ? ")" : "");
     index++;
@@ -1280,25 +1280,27 @@ static int _match_test(Buffer b, Array out, List pattern, int &sites) {
                         (args ?template ?labels))): {
       int site = sites++;
       b.printf(
-        " static MacroCaseSite _x2c_macro_site_%d; "
-        "if (Macro_case_capture_at(&_x2c_macro_site_%d, _x2c_match_expr, ",
+        " static MacroCaseSite _x2c_gensym_macro_site_%d; "
+        "if (Macro_case_capture_at(&_x2c_gensym_macro_site_%d, "
+        "_x2c_gensym_match_expr, ",
         site, site);
       _match_place(b, out, template);
       b.write(", ");
       _match_place(b, out, labels);
-      b.write(", &_x2c_match_capture)) {");
+      b.write(", &_x2c_gensym_match_capture)) {");
       return 1;
     }
   if (((Code) pattern).is_static_pattern()) {
     int site = sites++;
     b.printf(
-      " static MatchCaptureSite _x2c_match_site_%d; "
-      "if (x2c_match_site_try_capture(&_x2c_match_site_%d, ", site, site);
+      " static MatchCaptureSite _x2c_gensym_match_site_%d; "
+      "if (x2c_match_site_try_capture(&_x2c_gensym_match_site_%d, ",
+      site, site);
   }
   else b.write(" if (x2c_match_try_capture(");
-  b.write("_x2c_match_expr, List_var(");
+  b.write("_x2c_gensym_match_expr, List_var(");
   _match_place(b, out, pattern);
-  b.write("), &_x2c_match_capture)) {");
+  b.write("), &_x2c_gensym_match_capture)) {");
   return 1;
 }
 
@@ -1335,10 +1337,12 @@ static String _match_locals(int depths, int values) {
   if (depths >= 0) b.write(";");
   if (values > 0)
     b.printf(
-      " Var _x2c_match_values[%d]; MatchCaptureBuffer _x2c_match_capture = "
-      "{ .values = _x2c_match_values, .capacity = %d };", values, values);
+      " Var _x2c_gensym_match_values[%d]; "
+      "MatchCaptureBuffer _x2c_gensym_match_capture = "
+      "{ .values = _x2c_gensym_match_values, .capacity = %d };",
+      values, values);
   else if (!values)
-    b.write(" MatchCaptureBuffer _x2c_match_capture = { 0 };");
+    b.write(" MatchCaptureBuffer _x2c_gensym_match_capture = { 0 };");
   return b.str_free();
 }
 
@@ -1363,7 +1367,7 @@ static Code _match_lowered(Code subject, List rows) {
     if (label && depth) out.insert(opening++, label);
     else if (label) b.write(label);
     int guarded = dynamic && !otherwise;
-    if (guarded) b.write(" if (!_x2c_match_none) {");
+    if (guarded) b.write(" if (!_x2c_gensym_match_none) {");
     int braces =
       otherwise ? 0 : _match_nested(b, out, pattern, value, depths);
     if (braces < 0) {
@@ -1377,12 +1381,12 @@ static Code _match_lowered(Code subject, List rows) {
   if (labelling) b.write(" default: break;");
   _match_flush(b, out);
   String selector = heads.len()
-    ? "_x2c_match_expr ? _x2c_match_expr->car.u64 : 0" : "0";
+    ? "_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0" : "0";
   List items = _match_items(out);
   String locals = _match_locals(depths, values);
   List prologue = dynamic
     ? _match_dynamic_read(subject, locals)
-    : %("List _x2c_match_expr =" ${subject.convert(%("List"))} $locals);
+    : %("List _x2c_gensym_match_expr =" ${subject.convert(%("List"))} $locals);
   return Code.lowered(
     %(block $prologue
             (switch (expr ("uint64_t") ($selector)) (block @items))));
@@ -1390,10 +1394,11 @@ static Code _match_lowered(Code subject, List rows) {
 
 static List _match_dynamic_read(Code subject, String locals) {
   Symbol list = <list>;
-  String tested = "; int _x2c_match_none = !Var_is(_x2c_match_var, %lu);"
+  String tested = "; int _x2c_gensym_match_none = "
+    "!Var_is(_x2c_gensym_match_var, %lu);"
     .printf((unsigned long) list);
-  return %("Var _x2c_match_var =" $subject $tested
-           "List _x2c_match_expr = Var_list_payload(_x2c_match_var)" $locals);
+  return %("Var _x2c_gensym_match_var =" $subject $tested
+           "List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var)" $locals);
 }
 
 /** Lowers the bound match `node` to C text around its subject, patterns,
@@ -1980,7 +1985,7 @@ static Code _try_landing(
   Atom exits = Atom.intern("?__try_exits");
   Atom lowered = Atom.intern("?__try_body");
   Atom finished = NULL;
-  List handle = arms ? catch_handle(node) : NULL;
+  List handle = arms ? source_catch_handle(node) : NULL;
   Array rows = [%(new-name $frame "exception_frame")];
   if (finalizer) {
     Atom departure = Atom.intern("?__try_departure");
@@ -2241,15 +2246,15 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_tag_constant_rows", _tag_constant_rows);
   $linked.row(rows, "_tag_group_top", _tag_group_top);
   $linked.row(rows, "_tag_types", _tag_types);
-  $linked.row(rows, "interpolation", interpolation);
+  $linked.row(rows, "interpolation_lowering", interpolation_lowering);
   $linked.row(rows, "array_literal", array_literal);
   $linked.row(rows, "map_literal", map_literal);
   $linked.row(rows, "try_catch_patterns", try_catch_patterns);
   $linked.row(rows, "try_catch_site", try_catch_site);
   $linked.row(rows, "try_landing", try_landing);
   $linked.row(rows, "try_exits_placement", try_exits_placement);
-  $linked.row(rows, "field_copies", field_copies);
-  $linked.row(rows, "field_sets", field_sets);
+  $linked.row(rows, "_x2c_field_copies", _x2c_field_copies);
+  $linked.row(rows, "_x2c_field_sets", _x2c_field_sets);
   $linked.row(rows, "source_return_type", source_return_type);
   $linked.row(rows, "source_conditional_statement", source_conditional_statement);
   $linked.row(rows, "source_any_lambda", source_any_lambda);
@@ -2272,8 +2277,8 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "source_literal_content", source_literal_content);
   $linked.row(rows, "source_declarator_row", source_declarator_row);
   $linked.row(rows, "source_expression", source_expression);
-  $linked.row(rows, "catch_handle", catch_handle);
-  $linked.row(rows, "retain_catch_handle", retain_catch_handle);
+  $linked.row(rows, "source_catch_handle", source_catch_handle);
+  $linked.row(rows, "source_retain_catch_handle", source_retain_catch_handle);
   return rows;
 }
 

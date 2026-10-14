@@ -287,7 +287,7 @@
          (block 
           (declare ("Var") 
            (bindings 
-            (op = (bind (binding 38 "_x2c_literal_part_0") ()) 
+            (op = (bind (binding 38 "_x2c_gensym_literal_part_0") ()) 
              (expr ("Var") 
               (call (expr ((func (("Array"))) "Var") 
                      (ident (binding 39 "Array_var"))) 
@@ -305,7 +305,7 @@
                           (args (expr (int) (literal (int) "42")))))))))))))) 
           (declare ("Var") 
            (bindings 
-            (op = (bind (binding 40 "_x2c_literal_part_1") ()) 
+            (op = (bind (binding 40 "_x2c_gensym_literal_part_1") ()) 
              (expr ("Var") 
               (call (expr ((func (("Map"))) "Var") 
                      (ident (binding 41 "Map_var"))) 
@@ -335,9 +335,11 @@
                             (ident (binding 14 "String_var"))) 
                       (args (expr ("String") (cache 19))))) 
                (expr ("List") 
-                (cons (expr ("Var") (ident (binding 38 "_x2c_literal_part_0"))) 
+                (cons (expr ("Var") 
+                       (ident (binding 38 "_x2c_gensym_literal_part_0"))) 
                  (expr ("List") 
-                  (cons (expr ("Var") (ident (binding 40 "_x2c_literal_part_1"))) 
+                  (cons (expr ("Var") 
+                         (ident (binding 40 "_x2c_gensym_literal_part_1"))) 
                    (nil)))))))))))))))))) 
   (at 63 
    (if (expr (int) 

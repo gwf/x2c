@@ -223,50 +223,50 @@ static inline void MachineBuilder_cleanup(MachineBuilder b){
   MachineBuilder_drop(&(b));
 }
 
-static inline String _x2c_proto_machineprogram_str_0(Var a0);
+static inline String _x2c_gensym_proto_machineprogram_str_0(Var a0);
 
-static inline String _x2c_proto_machineprogram_repr_0(Var a0);
+static inline String _x2c_gensym_proto_machineprogram_repr_0(Var a0);
 
-static inline Buffer _x2c_proto_machineprogram_write_str_0(Var a0, Buffer a1);
+static inline Buffer _x2c_gensym_proto_machineprogram_write_str_0(Var a0, Buffer a1);
 
-static inline Buffer _x2c_proto_machineprogram_write_repr_0(Var a0, Buffer a1);
+static inline Buffer _x2c_gensym_proto_machineprogram_write_repr_0(Var a0, Buffer a1);
 
-static inline unsigned _x2c_proto_machineprogram_hash_0(Var a0);
+static inline unsigned _x2c_gensym_proto_machineprogram_hash_0(Var a0);
 
-static inline int _x2c_proto_machineprogram_equal_0(Var a0, Var a1);
+static inline int _x2c_gensym_proto_machineprogram_equal_0(Var a0, Var a1);
 
-static VarMethods _x2c__x2c_protocol_methods_0;
+static VarMethods _x2c_gensym_protocol_methods_0;
 
-typedef struct _x2c_defer_env_0{
-  const void * _x2c_defer_capture_0;
+typedef struct _x2c_gensym_defer_env_0{
+  const void * _x2c_gensym_defer_capture_0;
 }
-_x2c_defer_env_0;
+_x2c_gensym_defer_env_0;
 
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
 
-typedef struct _x2c_defer_env_1{
-  const void * _x2c_defer_capture_1;
+typedef struct _x2c_gensym_defer_env_1{
+  const void * _x2c_gensym_defer_capture_1;
 }
-_x2c_defer_env_1;
+_x2c_gensym_defer_env_1;
 
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1);
 
-typedef struct _x2c_defer_env_2{
-  const void * _x2c_defer_capture_2;
+typedef struct _x2c_gensym_defer_env_2{
+  const void * _x2c_gensym_defer_capture_2;
 }
-_x2c_defer_env_2;
+_x2c_gensym_defer_env_2;
 
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
+static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _x2c__x2c_protocol_methods_0 =(VarMethods){
-    .str = _x2c_proto_machineprogram_str_0, .repr = _x2c_proto_machineprogram_repr_0, .write_str = _x2c_proto_machineprogram_write_str_0, .write_repr = _x2c_proto_machineprogram_write_repr_0, .hash = _x2c_proto_machineprogram_hash_0, .equal = _x2c_proto_machineprogram_equal_0
+  _x2c_gensym_protocol_methods_0 =(VarMethods){
+    .str = _x2c_gensym_proto_machineprogram_str_0, .repr = _x2c_gensym_proto_machineprogram_repr_0, .write_str = _x2c_gensym_proto_machineprogram_write_str_0, .write_repr = _x2c_gensym_proto_machineprogram_write_repr_0, .hash = _x2c_gensym_proto_machineprogram_hash_0, .equal = _x2c_gensym_proto_machineprogram_equal_0
   }
   ;
-  x2c_register_tagged_descriptor(230845831880, String_new("MachineProgram"), _x2c__x2c_protocol_methods_0);
+  x2c_register_tagged_descriptor(230845831880, String_new("MachineProgram"), _x2c_gensym_protocol_methods_0);
 }
 
 MachineProgram MachineProgram_new(int field_length, int field_const_count, int field_binder_count, int field_root){
@@ -278,8 +278,8 @@ MachineProgram MachineProgram_new(int field_length, int field_const_count, int f
 }
 
 MachineProgram MachineProgram_alloc(void){
-  MachineProgram _x2c_macro_value_0 = Scope_calloc(1, sizeof(* _x2c_macro_value_0));
-  return _x2c_macro_value_0;
+  MachineProgram _x2c_gensym_macro_value_0 = Scope_calloc(1, sizeof(* _x2c_gensym_macro_value_0));
+  return _x2c_gensym_macro_value_0;
 }
 
 void MachineProgram_free(MachineProgram value){
@@ -315,31 +315,31 @@ Buffer MachineProgram_write_str(MachineProgram value, Buffer out){
 Buffer Buffer_new(size_t);
 
 String MachineProgram_str(MachineProgram value){
-  Buffer _x2c_macro_out_0 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_0 = Buffer_new(0);
   {
-    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
       0
     }
     ;
-    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & _x2c_macro_out_0;
-    X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
+    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_out_0;
+    X2CCleanup _x2c_gensym_defer_record_0 ={
+      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_0);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
-      MachineProgram_write_str(value, _x2c_macro_out_0);
+      MachineProgram_write_str(value, _x2c_gensym_macro_out_0);
       {
-        String _x2c_return_value_0 = Buffer_str(_x2c_macro_out_0);
+        String _x2c_gensym_return_value_0 = Buffer_str(_x2c_gensym_macro_out_0);
         {
-          x2c_cleanup_leave(& _x2c_defer_record_0);
-          return _x2c_return_value_0;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+          return _x2c_gensym_return_value_0;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_0);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
   }
 
 }
@@ -350,19 +350,19 @@ Buffer Var_write_repr(Var, Buffer);
 
 Buffer MachineProgram_write_repr(MachineProgram value, Buffer out){
   if((void *) value ==(void *) 0) return Buffer_printf(out, "<MachineProgram: 0x%012lX>", (long) value);
-  RenderPath _x2c_macro_path_0;
-  if(! RenderPath_enter(&(_x2c_macro_path_0), value)) return Buffer_printf(out, "<MachineProgram: 0x%012lX>", (long) value);
+  RenderPath _x2c_gensym_macro_path_0;
+  if(! RenderPath_enter(&(_x2c_gensym_macro_path_0), value)) return Buffer_printf(out, "<MachineProgram: 0x%012lX>", (long) value);
   {
-    _x2c_defer_env_1 _x2c_macro_environment_1 ={
+    _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
       0
     }
     ;
-    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & _x2c_macro_path_0;
-    X2CCleanup _x2c_defer_record_1 ={
-      .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
+    _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_path_0;
+    X2CCleanup _x2c_gensym_defer_record_1 ={
+      .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_1
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_1);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_1);
     {
       Buffer_write(out, "MachineProgram { ");
       Buffer_write(out, "length: ");
@@ -377,46 +377,46 @@ Buffer MachineProgram_write_repr(MachineProgram value, Buffer out){
       Buffer_write(out, "root: ");
       Var_write_repr((int_var(value -> root)), out);
       {
-        Buffer _x2c_return_value_1 = Buffer_write(out, " }");
+        Buffer _x2c_gensym_return_value_1 = Buffer_write(out, " }");
         {
-          x2c_cleanup_leave(& _x2c_defer_record_1);
-          return _x2c_return_value_1;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+          return _x2c_gensym_return_value_1;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_1);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
   }
 
 }
 
 String MachineProgram_repr(MachineProgram value){
-  Buffer _x2c_macro_out_1 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_1 = Buffer_new(0);
   {
-    _x2c_defer_env_2 _x2c_macro_environment_2 ={
+    _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0
     }
     ;
-    _x2c_macro_environment_2._x2c_defer_capture_2 =(const void *) & _x2c_macro_out_1;
-    X2CCleanup _x2c_defer_record_2 ={
-      .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_2
+    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_2 =(const void *) & _x2c_gensym_macro_out_1;
+    X2CCleanup _x2c_gensym_defer_record_2 ={
+      .fn = _x2c_gensym_defer_cleanup_2, .env = & _x2c_gensym_macro_environment_2
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_2);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_2);
     {
-      MachineProgram_write_repr(value, _x2c_macro_out_1);
+      MachineProgram_write_repr(value, _x2c_gensym_macro_out_1);
       {
-        String _x2c_return_value_2 = Buffer_str(_x2c_macro_out_1);
+        String _x2c_gensym_return_value_2 = Buffer_str(_x2c_gensym_macro_out_1);
         {
-          x2c_cleanup_leave(& _x2c_defer_record_2);
-          return _x2c_return_value_2;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
+          return _x2c_gensym_return_value_2;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_2);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
   }
 
 }
@@ -477,10 +477,10 @@ int MachineBuilder_binder(MachineBuilder * b, Atom binder){
 void MachineBuilder_set_target(MachineBuilder * b, int site, int target){
   if(target ==(* b).length &&(* b).length == MACHINE_CODE_MAX) _fail(&((* b)), "code-capacity");
   else if(target < 0 || target >= MACHINE_CODE_MAX){
-    Var _x2c_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("MachineBuilder.set_target")), NULL)));
+    Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("MachineBuilder.set_target")), NULL)));
     {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/machine.x",.function = "MachineBuilder_set_target",.line = 388};
-      x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_literal_part_0, Symbol_var(1345468776), int_var(target));
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/machine.x",.function = "MachineBuilder_set_target",.line = 388};
+      x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1345468776), int_var(target));
       __builtin_unreachable();
     }
 
@@ -561,44 +561,44 @@ void MachineBuilder_free(MachineBuilder * b){
   MachineBuilder_drop(&((* b)));
 }
 
-static inline String _x2c_proto_machineprogram_str_0(Var a0){
+static inline String _x2c_gensym_proto_machineprogram_str_0(Var a0){
   return MachineProgram_str(Var_machineprogram(a0));
 }
 
-static inline String _x2c_proto_machineprogram_repr_0(Var a0){
+static inline String _x2c_gensym_proto_machineprogram_repr_0(Var a0){
   return MachineProgram_repr(Var_machineprogram(a0));
 }
 
-static inline Buffer _x2c_proto_machineprogram_write_str_0(Var a0, Buffer a1){
+static inline Buffer _x2c_gensym_proto_machineprogram_write_str_0(Var a0, Buffer a1){
   return MachineProgram_write_str(Var_machineprogram(a0), a1);
 }
 
-static inline Buffer _x2c_proto_machineprogram_write_repr_0(Var a0, Buffer a1){
+static inline Buffer _x2c_gensym_proto_machineprogram_write_repr_0(Var a0, Buffer a1){
   return MachineProgram_write_repr(Var_machineprogram(a0), a1);
 }
 
-static inline unsigned _x2c_proto_machineprogram_hash_0(Var a0){
+static inline unsigned _x2c_gensym_proto_machineprogram_hash_0(Var a0){
   return MachineProgram_hash(Var_machineprogram(a0));
 }
 
-static inline int _x2c_proto_machineprogram_equal_0(Var a0, Var a1){
+static inline int _x2c_gensym_proto_machineprogram_equal_0(Var a0, Var a1){
   return MachineProgram_equal(Var_machineprogram(a0), Var_machineprogram(a1));
 }
 
 void Buffer_free(Buffer);
 
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
-  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  Buffer_free((*(Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
+  _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
+  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
 }
 
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
-  RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_1->_x2c_defer_capture_1)));
+static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
+  _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;
+  RenderPath_leave(&((*(RenderPath *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1)));
 }
 
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
-  Buffer_free((*(Buffer *) _x2c_defer_data_2->_x2c_defer_capture_2));
+static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
+  _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_2;
+  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2));
 }
 

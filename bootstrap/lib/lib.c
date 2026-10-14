@@ -11,40 +11,40 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static inline String _x2c_proto_disjointset_str_0(Var a0);
+static inline String _x2c_gensym_proto_disjointset_str_0(Var a0);
 
-static inline String _x2c_proto_disjointset_repr_0(Var a0);
+static inline String _x2c_gensym_proto_disjointset_repr_0(Var a0);
 
-static inline Buffer _x2c_proto_disjointset_write_str_0(Var a0, Buffer a1);
+static inline Buffer _x2c_gensym_proto_disjointset_write_str_0(Var a0, Buffer a1);
 
-static inline Buffer _x2c_proto_disjointset_write_repr_0(Var a0, Buffer a1);
+static inline Buffer _x2c_gensym_proto_disjointset_write_repr_0(Var a0, Buffer a1);
 
-static inline unsigned _x2c_proto_disjointset_hash_0(Var a0);
+static inline unsigned _x2c_gensym_proto_disjointset_hash_0(Var a0);
 
-static inline int _x2c_proto_disjointset_equal_0(Var a0, Var a1);
+static inline int _x2c_gensym_proto_disjointset_equal_0(Var a0, Var a1);
 
-static VarMethods _x2c__x2c_protocol_methods_0;
+static VarMethods _x2c_gensym_protocol_methods_0;
 
-typedef struct _x2c_defer_env_0{
-  const void * _x2c_defer_capture_0;
+typedef struct _x2c_gensym_defer_env_0{
+  const void * _x2c_gensym_defer_capture_0;
 }
-_x2c_defer_env_0;
+_x2c_gensym_defer_env_0;
 
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
 
-typedef struct _x2c_defer_env_1{
-  const void * _x2c_defer_capture_1;
+typedef struct _x2c_gensym_defer_env_1{
+  const void * _x2c_gensym_defer_capture_1;
 }
-_x2c_defer_env_1;
+_x2c_gensym_defer_env_1;
 
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1);
 
-typedef struct _x2c_defer_env_2{
-  const void * _x2c_defer_capture_2;
+typedef struct _x2c_gensym_defer_env_2{
+  const void * _x2c_gensym_defer_capture_2;
 }
-_x2c_defer_env_2;
+_x2c_gensym_defer_env_2;
 
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
+static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2);
 
 #include "exception.h"
 
@@ -55,11 +55,11 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _x2c__x2c_protocol_methods_0 =(VarMethods){
-    .str = _x2c_proto_disjointset_str_0, .repr = _x2c_proto_disjointset_repr_0, .write_str = _x2c_proto_disjointset_write_str_0, .write_repr = _x2c_proto_disjointset_write_repr_0, .hash = _x2c_proto_disjointset_hash_0, .equal = _x2c_proto_disjointset_equal_0
+  _x2c_gensym_protocol_methods_0 =(VarMethods){
+    .str = _x2c_gensym_proto_disjointset_str_0, .repr = _x2c_gensym_proto_disjointset_repr_0, .write_str = _x2c_gensym_proto_disjointset_write_str_0, .write_repr = _x2c_gensym_proto_disjointset_write_repr_0, .hash = _x2c_gensym_proto_disjointset_hash_0, .equal = _x2c_gensym_proto_disjointset_equal_0
   }
   ;
-  x2c_register_tagged_descriptor(222658595144, String_new("DisjointSet"), _x2c__x2c_protocol_methods_0);
+  x2c_register_tagged_descriptor(222658595144, String_new("DisjointSet"), _x2c_gensym_protocol_methods_0);
 }
 
 DisjointSet DisjointSet_alloc(void);
@@ -75,8 +75,8 @@ DisjointSet DisjointSet_new(int argument_0){
 void * Scope_calloc(size_t, size_t);
 
 DisjointSet DisjointSet_alloc(void){
-  DisjointSet _x2c_macro_value_0 = Scope_calloc(1, sizeof(* _x2c_macro_value_0));
-  return _x2c_macro_value_0;
+  DisjointSet _x2c_gensym_macro_value_0 = Scope_calloc(1, sizeof(* _x2c_gensym_macro_value_0));
+  return _x2c_gensym_macro_value_0;
 }
 
 void DisjointSet_drop(DisjointSet set);
@@ -129,31 +129,31 @@ String Buffer_str(Buffer);
 void x2c_cleanup_leave(X2CCleanup *);
 
 String DisjointSet_str(DisjointSet value){
-  Buffer _x2c_macro_out_0 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_0 = Buffer_new(0);
   {
-    _x2c_defer_env_0 _x2c_macro_environment_0 ={
+    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
       0
     }
     ;
-    _x2c_macro_environment_0._x2c_defer_capture_0 =(const void *) & _x2c_macro_out_0;
-    X2CCleanup _x2c_defer_record_0 ={
-      .fn = _x2c_defer_cleanup_0, .env = & _x2c_macro_environment_0
+    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_out_0;
+    X2CCleanup _x2c_gensym_defer_record_0 ={
+      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_0);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
-      DisjointSet_write_str(value, _x2c_macro_out_0);
+      DisjointSet_write_str(value, _x2c_gensym_macro_out_0);
       {
-        String _x2c_return_value_0 = Buffer_str(_x2c_macro_out_0);
+        String _x2c_gensym_return_value_0 = Buffer_str(_x2c_gensym_macro_out_0);
         {
-          x2c_cleanup_leave(& _x2c_defer_record_0);
-          return _x2c_return_value_0;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+          return _x2c_gensym_return_value_0;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_0);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
   }
 
 }
@@ -168,19 +168,19 @@ static Var int_var(int);
 
 Buffer DisjointSet_write_repr(DisjointSet value, Buffer out){
   if((void *) value ==(void *) 0) return Buffer_printf(out, "<DisjointSet: 0x%012lX>", (long) value);
-  RenderPath _x2c_macro_path_0;
-  if(! RenderPath_enter(&(_x2c_macro_path_0), value)) return Buffer_printf(out, "<DisjointSet: 0x%012lX>", (long) value);
+  RenderPath _x2c_gensym_macro_path_0;
+  if(! RenderPath_enter(&(_x2c_gensym_macro_path_0), value)) return Buffer_printf(out, "<DisjointSet: 0x%012lX>", (long) value);
   {
-    _x2c_defer_env_1 _x2c_macro_environment_1 ={
+    _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
       0
     }
     ;
-    _x2c_macro_environment_1._x2c_defer_capture_1 =(const void *) & _x2c_macro_path_0;
-    X2CCleanup _x2c_defer_record_1 ={
-      .fn = _x2c_defer_cleanup_1, .env = & _x2c_macro_environment_1
+    _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_path_0;
+    X2CCleanup _x2c_gensym_defer_record_1 ={
+      .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_1
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_1);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_1);
     {
       Buffer_write(out, "DisjointSet { ");
       Buffer_write(out, "parent: ");
@@ -195,46 +195,46 @@ Buffer DisjointSet_write_repr(DisjointSet value, Buffer out){
       Buffer_write(out, "ncmpnts: ");
       Var_write_repr((int_var(value -> ncmpnts)), out);
       {
-        Buffer _x2c_return_value_1 = Buffer_write(out, " }");
+        Buffer _x2c_gensym_return_value_1 = Buffer_write(out, " }");
         {
-          x2c_cleanup_leave(& _x2c_defer_record_1);
-          return _x2c_return_value_1;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+          return _x2c_gensym_return_value_1;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_1);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
   }
 
 }
 
 String DisjointSet_repr(DisjointSet value){
-  Buffer _x2c_macro_out_1 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_1 = Buffer_new(0);
   {
-    _x2c_defer_env_2 _x2c_macro_environment_2 ={
+    _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0
     }
     ;
-    _x2c_macro_environment_2._x2c_defer_capture_2 =(const void *) & _x2c_macro_out_1;
-    X2CCleanup _x2c_defer_record_2 ={
-      .fn = _x2c_defer_cleanup_2, .env = & _x2c_macro_environment_2
+    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_2 =(const void *) & _x2c_gensym_macro_out_1;
+    X2CCleanup _x2c_gensym_defer_record_2 ={
+      .fn = _x2c_gensym_defer_cleanup_2, .env = & _x2c_gensym_macro_environment_2
     }
     ;
-    x2c_cleanup_push(& _x2c_defer_record_2);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_2);
     {
-      DisjointSet_write_repr(value, _x2c_macro_out_1);
+      DisjointSet_write_repr(value, _x2c_gensym_macro_out_1);
       {
-        String _x2c_return_value_2 = Buffer_str(_x2c_macro_out_1);
+        String _x2c_gensym_return_value_2 = Buffer_str(_x2c_gensym_macro_out_1);
         {
-          x2c_cleanup_leave(& _x2c_defer_record_2);
-          return _x2c_return_value_2;
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
+          return _x2c_gensym_return_value_2;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_2);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
   }
 
 }
@@ -295,7 +295,7 @@ Array Array_sort(Array);
 List DisjointSet_sizes(DisjointSet set){
   Array sizes = Array_new();
   for(int i = 0, n = set -> length;  i < n;  i ++) if(set -> parent[i] == i) Array_push(sizes, List_var(({
-    Var _x2c_literal_part_0 = int_var(set -> size[i]);  cons(_x2c_literal_part_0, cons(int_var(i), NULL));
+    Var _x2c_gensym_literal_part_0 = int_var(set -> size[i]);  cons(_x2c_gensym_literal_part_0, cons(int_var(i), NULL));
   }
   )));
   return Array_list_free(Array_sort(sizes));
@@ -305,46 +305,46 @@ int DisjointSet_num_components(DisjointSet set){
   return set -> ncmpnts;
 }
 
-static inline String _x2c_proto_disjointset_str_0(Var a0){
+static inline String _x2c_gensym_proto_disjointset_str_0(Var a0){
   return DisjointSet_str(Var_disjointset(a0));
 }
 
-static inline String _x2c_proto_disjointset_repr_0(Var a0){
+static inline String _x2c_gensym_proto_disjointset_repr_0(Var a0){
   return DisjointSet_repr(Var_disjointset(a0));
 }
 
-static inline Buffer _x2c_proto_disjointset_write_str_0(Var a0, Buffer a1){
+static inline Buffer _x2c_gensym_proto_disjointset_write_str_0(Var a0, Buffer a1){
   return DisjointSet_write_str(Var_disjointset(a0), a1);
 }
 
-static inline Buffer _x2c_proto_disjointset_write_repr_0(Var a0, Buffer a1){
+static inline Buffer _x2c_gensym_proto_disjointset_write_repr_0(Var a0, Buffer a1){
   return DisjointSet_write_repr(Var_disjointset(a0), a1);
 }
 
-static inline unsigned _x2c_proto_disjointset_hash_0(Var a0){
+static inline unsigned _x2c_gensym_proto_disjointset_hash_0(Var a0){
   return DisjointSet_hash(Var_disjointset(a0));
 }
 
-static inline int _x2c_proto_disjointset_equal_0(Var a0, Var a1){
+static inline int _x2c_gensym_proto_disjointset_equal_0(Var a0, Var a1){
   return DisjointSet_equal(Var_disjointset(a0), Var_disjointset(a1));
 }
 
 void Buffer_free(Buffer);
 
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
-  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  Buffer_free((*(Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
+  _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
+  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
 }
 
 void RenderPath_leave(RenderPath *);
 
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
-  RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_1->_x2c_defer_capture_1)));
+static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
+  _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;
+  RenderPath_leave(&((*(RenderPath *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1)));
 }
 
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
-  Buffer_free((*(Buffer *) _x2c_defer_data_2->_x2c_defer_capture_2));
+static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
+  _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_2;
+  Buffer_free((*(Buffer *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2));
 }
 
