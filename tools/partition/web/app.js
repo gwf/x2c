@@ -105,7 +105,7 @@ function enter(id) {
   selected = new Set([id]);
   picked.clear();
   fn = null;
-  render();
+  openResponsibilityResult();
   $("workspace").scrollTop = 0;
 }
 function project() {
@@ -130,7 +130,7 @@ function render(skipInspector = false) {
   $("undo").disabled = !history.length;
   $("redo").disabled = !future.length;
   $("heading").innerHTML =
-    `<div class="eyebrow">${scope ? "PARTITION WORKSPACE" : "GLOBAL CALL GRAPH"}</div><h1>${esc(scope ? scope.name : "Every file is a starting group.")}</h1><p style="margin-bottom:0">${scope ? (view === "responsibilities" ? "Describe public operations and reconcile their private dependencies." : "Split, combine, or move functions. The rest of the project stays connected.") : "Choose a group to explore its structure. Select several groups to combine them."}</p>`;
+    `<div class="eyebrow">${scope ? "PARTITION WORKSPACE" : "GLOBAL CALL GRAPH"}</div><h1>${esc(scope ? scope.name : "Every file is a starting group.")}</h1><p style="margin-bottom:0">${scope ? (view === "responsibilities" ? "Analyze source, inspect the proposed responsibilities, and adjust their boundaries." : "Split, combine, or move functions. The rest of the project stays connected.") : "Choose a group to explore its structure. Select several groups to combine them."}</p>`;
   let internal = 0,
     scopeCut = 0;
   const map = Engine.membership(gs, D.functions.length);
@@ -144,7 +144,7 @@ function render(skipInspector = false) {
     metric("Groups in " + (scope ? "view" : "project"), scoped.length) +
     metric("Global crossing call sites", fmt(m.cut), m.cut - base.cut) +
     metric(
-      "New private boundaries",
+      preview?.moduleArrangement ? "Private helpers shared across members" : "New private boundaries",
       m.exposed.filter((v) => !base.exposed.includes(v)).length,
     ) +
     (scope
@@ -188,7 +188,7 @@ function render(skipInspector = false) {
   } else renderMap(gs);
   if (!skipInspector) renderInspector(m, current);
   $("status").textContent = preview
-    ? "Preview only \u00b7 accept to change the plan"
+    ? (preview.moduleArrangement ? "Module-member proposal: private symbols stay in one translation unit" : "Preview only \u00b7 accept to change the plan")
     : `${S.groups.length} groups \u00b7 ${S.ties.length} keep-together sets \u00b7 saved in this browser`;
   $("snapshot").textContent =
     `Snapshot ${D.revision} \u00b7 static calls, not runtime traffic`;
@@ -474,7 +474,7 @@ function renderInspector(m, current) {
   }
   if (scope && view === "responsibilities") {
     $("inspector").innerHTML =
-      '<div class="paneltag">RESPONSIBILITY WORKSPACE</div><h2>Decide by purpose</h2><p>Describe public operations, assign responsibilities, then reconcile private dependencies.</p><p>Graph views remain available for tracing callers and helpers.</p><p>Export the manifest to preserve descriptions, constraints, and merge reasons in version control.</p>';
+      '<div class="paneltag">RESPONSIBILITY WORKSPACE</div><h2>Decide by purpose</h2><p>Select Analyze source. The agent reads bodies and callers, proposes responsibilities, and checks private dependencies. Inspect or adjust the result.</p><p>Graph views remain available for tracing callers and helpers.</p><p>Export the manifest to preserve descriptions, constraints, and merge reasons in version control.</p>';
     return;
   }
   if (fn !== null) {
@@ -505,7 +505,7 @@ function renderInspector(m, current) {
   }
   const chosen = S.groups.filter((g) => selected.has(g.id));
   $("inspector").innerHTML =
-    `<div class="paneltag">${chosen.length ? "GROUP INSPECTOR" : "START WITH STRUCTURE"}</div><h2>${chosen.length === 1 ? esc(chosen[0].name) : chosen.length ? chosen.length + " groups selected" : "Files become editable groups"}</h2><p>${chosen.length ? "Describe responsibilities for one group, or select several groups to merge them." : "Open a file to describe its public operations and build responsibility groups."}</p>${chosen.length === 1 ? `<button id="inspect-split" class="primary wide">Build responsibilities \u2192</button>` : ""}${chosen.length > 1 ? '<button id="inspect-merge" class="primary wide">Merge selected groups</button>' : ""}<h3>Current plan vs. original files</h3><div class="costrow"><span>Crossing call sites</span><strong>${fmt(m.cut)}</strong></div><div class="costrow"><span>Original crossing call sites</span><strong>${fmt(base.cut)}</strong></div><div class="costrow"><span>Directed crossing pairs</span><strong>${fmt(m.pairs)}</strong></div><div class="costrow"><span>New private boundaries</span><strong>${m.exposed.filter((v) => !base.exposed.includes(v)).length}</strong></div>${chosen.length === 1 ? groupConnections(chosen[0]) : `<h3>A reversible workflow</h3><p class="note">1. Describe public operations.<br>2. Assign responsibilities with source evidence.<br>3. Reconcile shared private components.<br>4. Export the reviewable manifest.</p>`}<div class="hint note">${chosen.length === 1 ? "Check functions to keep an API and its helper together. That choice survives later splits." : "Group boundaries are tentative file boundaries. No source files are changed."}</div><h3>Graph coverage</h3><p class="note">${fmt(D.stats.externalCalls)} unresolved/external and ${fmt(D.stats.indirectCalls)} indirect calls are outside the resolved graph. Cut cost counts static call sites, not execution frequency.</p>`;
+    `<div class="paneltag">${chosen.length ? "GROUP INSPECTOR" : "START WITH STRUCTURE"}</div><h2>${chosen.length === 1 ? esc(chosen[0].name) : chosen.length ? chosen.length + " groups selected" : "Files become editable groups"}</h2><p>${chosen.length ? "Analyze one group, or select several groups to merge them." : "Open a file and select Analyze source to get a proposed decomposition."}</p>${chosen.length === 1 ? `<button id="inspect-split" class="primary wide">Build responsibilities \u2192</button>` : ""}${chosen.length > 1 ? '<button id="inspect-merge" class="primary wide">Merge selected groups</button>' : ""}<h3>Current plan vs. original files</h3><div class="costrow"><span>Crossing call sites</span><strong>${fmt(m.cut)}</strong></div><div class="costrow"><span>Original crossing call sites</span><strong>${fmt(base.cut)}</strong></div><div class="costrow"><span>Directed crossing pairs</span><strong>${fmt(m.pairs)}</strong></div><div class="costrow"><span>New private boundaries</span><strong>${m.exposed.filter((v) => !base.exposed.includes(v)).length}</strong></div>${chosen.length === 1 ? groupConnections(chosen[0]) : `<h3>A reversible workflow</h3><p class="note">1. Ask the agent to analyze a file.<br>2. Inspect its proposed responsibilities.<br>3. Adjust names, membership, and boundaries.<br>4. Export the proposal and evidence.</p>`}<div class="hint note">${chosen.length === 1 ? "Check functions to keep an API and its helper together. That choice survives later splits." : "Group boundaries are tentative file boundaries. No source files are changed."}</div><h3>Graph coverage</h3><p class="note">${fmt(D.stats.externalCalls)} unresolved/external and ${fmt(D.stats.indirectCalls)} indirect calls are outside the resolved graph. Cut cost counts static call sites, not execution frequency.</p>`;
   $("inspect-split")?.addEventListener("click", startPreview);
   $("inspect-merge")?.addEventListener("click", merge);
   wireFunctions();
@@ -680,6 +680,7 @@ fetch("graph.json", { cache: "no-store" })
       S = initial;
     }
     render();
+    watchAnalysisJobs();
   })
   .catch((e) => {
     $("workspace").textContent =

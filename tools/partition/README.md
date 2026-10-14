@@ -18,44 +18,33 @@ source graph through `commands/graph`, and atomically replaces ignored
 
 ## Build responsibilities
 
-Open a file or group. The responsibility workspace is the main decomposition
-workflow, with four steps:
+Open a file or group and select **Analyze source**. The local server uses the
+installed, signed-in `codex` CLI to read the graph snapshot's source bodies,
+comments, callers, and dependencies. It produces operation descriptions and
+responsibility assignments; you do not need to fill in forms first.
 
-1. Describe each public operation: its work, state owner, lifecycle, source
-   section, and body/caller evidence. Source peek provides the snapshot source
-   with line numbers and search; callers link to their own source.
-2. Assign operations to named responsibilities with descriptions and evidence.
-   Combine small responsibilities by a common task, state owner, or lifecycle.
-   A combination records the affected component identities and concrete reason.
-3. Reconcile private components. Same-file callers and static targets stay
-   together, transitively. Recorded function-value references and explicit
-   private declaration constraints also bind functions. Public calls do not.
-   Conflicts show exact undirected helper paths. Merge the responsibilities
-   under a broader name, or retain them as module members in one translation
-   unit. Helpers never silently become public.
-4. Review exact membership, static crossings, existing public crossings, and
-   non-function constraints separately. Each function belongs to one proposed
-   container. Results distinguish translation-unit candidates, module-member
-   candidates, and unassigned/unresolved work. A helper-only component needs an
-   execution/accessibility explanation and a responsibility attachment.
+Analysis opens the proposed graph arrangement directly. Reopening an analyzed
+file also opens that arrangement. **Evidence and adjustments** provides optional
+details without a sequence of workflow tabs. Inspect public operations,
+attached helpers, shared components, and unresolved constraints. Rename or
+combine responsibilities, edit assignments on demand, and use the graph to
+inspect calls or move functions. Evidence and manifests remain available in a
+collapsed disclosure. Reanalysis preserves an existing proposal until you
+explicitly replace it.
 
-A proposal with unresolved work can be inspected in the graph. Accepting its
-arrangement requires complete assignments and resolved recorded constraints.
-Acceptance changes the tentative graph plan, not source code. An unresolved
-constraint with no known consumer list conservatively affects the whole scope.
+Agent analysis runs read-only against temporary snapshot files. The existing
+dependency engine checks the resulting manifest and keeps private components
+intact. Conflicting responsibilities remain module members in one translation
+unit. An incomplete agent response is reported as unfinished analysis, not as
+homework for the user. Unresolved source dependencies remain visible; an agent
+proposal is not an extraction proof.
 
-Use **Dependency constraints** to record private types, macros, file-local
-state, and function-value references. Record source evidence before marking a
-constraint reviewed or selecting functions that must stay together. The call
-exporter does not supply exhaustive non-call dependencies; the workflow makes
-those gaps explicit rather than claiming extraction safety.
-
-**Export manifest** preserves operation records, stable function/component
-identities, constraints, boundary decisions, and assignment/merge history.
-Commit this JSON alongside the project being analyzed. **Import manifest**
-requires the same snapshot and scope. The ordinary plan export also includes
-responsibility workspaces. Browser storage retains work across reloads;
-existing graph plans are preserved. Export remains necessary for versioning.
+This prototype runs one analysis at a time. The sidebar lists running, finished,
+and failed analyses and links directly to each result. Reloading reconnects to
+the server. Completed results are also retained in ignored data/analyses.json;
+a server restart marks interrupted jobs unfinished instead of leaving them busy.
+Proposals opened in the browser can be exported. The CLI uses its existing configured
+model and account. Compiler and runtime sources are not edited.
 
 ## Reviewed examples and reproduction
 

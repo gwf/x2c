@@ -283,6 +283,12 @@ const Responsibilities = (() => {
       .map((r) =>
         r.id === id ? { ...r, name, description, evidence: reason } : r,
       );
+    if (manifest.moduleArrangement) {
+      const combined = manifest.moduleArrangement.filter(g => ids.includes(g.responsibility));
+      manifest.moduleArrangement = manifest.moduleArrangement.filter(g => !ids.includes(g.responsibility));
+      if (combined.length) manifest.moduleArrangement.push({responsibility:id,
+        members:combined.flatMap(g => g.members), evidence:reason});
+    }
     for (const o of Object.values(manifest.operations))
       if (ids.includes(o.responsibility)) o.responsibility = id;
     for (const resolution of Object.values(manifest.resolutions))
@@ -296,6 +302,21 @@ const Responsibilities = (() => {
       reason,
     });
   }
-  return { key, create, analyze, merge };
+  function moduleUnits(data, manifest) {
+    if (!manifest.moduleArrangement) return null;
+    const ids = new Map(data.functions.map((_, v) => [key(data, v), v]));
+    const roles = new Map(manifest.responsibilities.map(r => [r.id, r]));
+    const assigned = manifest.moduleArrangement.flatMap(g => g.members);
+    if (assigned.length !== manifest.scope.length || new Set(assigned).size !== assigned.length ||
+        assigned.some(k => !manifest.scope.includes(k)))
+      throw Error('Module arrangement must assign every function exactly once.');
+    return manifest.moduleArrangement.map(g => {
+      const r = roles.get(g.responsibility);
+      if (!r || !g.evidence?.trim()) throw Error('Module ownership requires a responsibility and evidence.');
+      return {id:r.id, name:r.name, description:r.description, evidence:g.evidence,
+        extraction:g.extraction || "", members:g.members.map(k => ids.get(k)), classification:'Module-member candidate (same translation unit)', moduleMembers:[]};
+    });
+  }
+  return { key, create, analyze, merge, moduleUnits };
 })();
 if (typeof module !== "undefined") module.exports = Responsibilities;

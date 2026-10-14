@@ -1128,7 +1128,8 @@ pre {
   border-color: #b5dba0;
 }
 .workflow-stage > summary {
-  display: none;
+  cursor: pointer;
+  padding: 12px 0;
 }
 .workflow-stage[hidden] {
   display: none;
@@ -1140,3 +1141,9 @@ pre {
 .responsibility-workspace small {
   overflow-wrap: anywhere;
 }
+
+#analysis-jobs { margin: 10px 0; max-height: 32vh; overflow: auto; flex-shrink: 0; }
+#analysis-jobs summary { cursor: pointer; font-weight: 600; }
+.analysis-job { padding: 10px 0; border-bottom: 1px solid #344047; display: grid; gap: 5px; }
+.analysis-job strong, .analysis-job small { overflow-wrap: anywhere; }
+.analysis-job small { color: #a2b1b9; }

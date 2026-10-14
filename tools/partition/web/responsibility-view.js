@@ -1,6 +1,6 @@
 /* Main decomposition workflow. The graph remains an inspection surface. */
-let responsibilityKey = null,
-  responsibilityStep = "operations";
+let responsibilityKey = null;
+const responsibilityJobs = new Map();
 function responsibilityManifest() {
   S.responsibilities ||= {};
   responsibilityKey = scope.members
@@ -33,26 +33,15 @@ function renderResponsibilities() {
     labels = new Map(m.responsibilities.map((r) => [r.id, r]));
   $("workspace").classList.remove("graph-workspace");
   $("workspace").innerHTML =
-    `<div class="responsibility-workspace"><p>Build groups by shared work. Keep private dependencies intact.</p><details class="analysis-tools" ${Object.keys(m.operations).length ? "" : "open"}><summary>Source analysis and manifests</summary><div class="responsibility-actions"><button id="load-analysis">Load reviewed source analysis</button><button id="import-responsibilities">Import manifest</button><button id="export-responsibilities">Export manifest</button></div></details><p>${a.unreviewed.length} public operations need descriptions or assignments. ${a.components.length} private dependency components. ${m.constraints.length} non-function constraints.</p>
-    <div class="workflow-steps">${[
-      ["operations", "1. Describe operations"],
-      ["responsibilities", "2. Build responsibilities"],
-      ["components", "3. Resolve boundaries"],
-      ["proposal", "4. Review proposal"],
-    ]
-      .map(
-        ([id, label]) =>
-          `<button data-step="${id}" aria-pressed="${responsibilityStep === id}">${label}</button>`,
-      )
-      .join("")}</div>
-    <details class="workflow-stage" data-stage="operations" open><summary>1. Public operations (${a.members.filter((v) => !D.functions[v].s && !D.functions[v].k).length})</summary><div class="operation-list">${a.members
+    `<div class="responsibility-workspace"><p>Inspect a source-informed proposal, then adjust the responsibilities.</p><div class="responsibility-actions"><button id="show-arrangement" class="primary" ${m.responsibilities.length ? "" : "hidden"}>Show proposed arrangement</button><button id="analyze-source">Analyze source</button><span id="analysis-status" role="status"></span></div><details class="analysis-tools"><summary>Evidence, saved analyses, and manifests</summary><div class="responsibility-actions"><button id="load-analysis">Load reviewed source analysis</button><button id="import-responsibilities">Import manifest</button><button id="export-responsibilities">Export manifest</button></div></details><p>${a.unreviewed.length ? `${a.unreviewed.length} public operations await agent analysis.` : "Public operations have source evidence."} ${a.components.length} private dependency components. ${m.constraints.length} non-function constraints.</p>
+    <details class="workflow-stage" data-stage="operations"><summary>Public operations (${a.members.filter((v) => !D.functions[v].s && !D.functions[v].k).length})</summary><div class="operation-list">${a.members
       .filter((v) => !D.functions[v].s && !D.functions[v].k)
       .map((v) => {
         const o = m.operations[Responsibilities.key(D, v)];
-        return `<button class="operation-row" data-operation="${v}"><strong>${esc(D.functions[v].n)}</strong><span>${esc(o?.operation || "Describe this operation")}</span><small>${esc(labels.get(o?.responsibility)?.name || "Unassigned")}</small></button>`;
+        return `<button class="operation-row" data-operation="${v}"><strong>${esc(D.functions[v].n)}</strong><span>${esc(o?.operation || "Awaiting source analysis")}</span><small>${esc(labels.get(o?.responsibility)?.name || "Unassigned")}</small></button>`;
       })
       .join("")}</div></details>
-    <details class="workflow-stage" data-stage="responsibilities" open><summary>2. Responsibilities and attached helpers</summary><div class="responsibility-actions"><button id="add-responsibility">New responsibility</button><button id="merge-responsibilities">Combine responsibilities</button></div>${
+    <details class="workflow-stage" data-stage="responsibilities"><summary>Responsibilities and attached helpers</summary><div class="responsibility-actions"><button id="add-responsibility">New responsibility</button><button id="merge-responsibilities">Combine responsibilities</button></div>${
       m.responsibilities
         .map((r) => {
           const ops = a.members.filter(
@@ -61,12 +50,12 @@ function renderResponsibilities() {
                 r.id,
             ),
             cs = a.components.filter((c) => c.roles.includes(r.id));
-          return `<section><h3>${esc(r.name)} <button data-edit-role="${esc(r.id)}">Edit</button></h3><p>${esc(r.description)}</p><p class="note">Evidence: ${esc(r.evidence)}</p><p>${ops.length} public operations; ${new Set(cs.flatMap((c) => c.helpers)).size} attached helpers (shared components listed below).</p><details><summary>Operations and helpers</summary>${memberRows([...new Set([...ops, ...cs.flatMap((c) => c.helpers)])])}</details></section>`;
+          return `<section><h3>${esc(r.name)} <button data-edit-role="${esc(r.id)}">Edit</button></h3><p>${esc(r.description)}</p><p class="note">Evidence: ${esc(r.evidence)}</p><p>${ops.length} public operations; ${new Set(cs.flatMap((c) => c.helpers)).size} attached helpers; ${cs.filter(c => c.roles.length > 1).length} shared dependency components.</p>${m.constraints.filter(c => c.status === "unresolved" && (!c.functions?.length || cs.some(component => component.members.some(v => c.functions.includes(Responsibilities.key(D, v)))))).map(c => `<p class="hint">Unresolved ${esc(c.kind)}: ${esc(c.symbol)}. ${esc(c.evidence)}</p>`).join("")}<details><summary>Operations and helpers</summary>${memberRows([...new Set([...ops, ...cs.flatMap((c) => c.helpers)])])}</details></section>`;
         })
         .join("") ||
-      "<p>No responsibilities yet. Describe operations before naming groups.</p>"
+      "<p>Select Analyze source to have the agent read this scope and propose responsibility groups. You do not need to describe functions or create groups first.</p>"
     }</details>
-    <details class="workflow-stage" data-stage="components" open><summary>3. Reconcile private components</summary><button id="dependency-review">Dependency constraints</button>${
+    <details class="workflow-stage" data-stage="components"><summary>Shared dependencies and boundary decisions</summary><button id="dependency-review">Dependency constraints</button>${
       a.components
         .filter((c) => c.conflicts.length || c.unresolved || c.helperOnly)
         .map(
@@ -75,19 +64,8 @@ function renderResponsibilities() {
         )
         .join("") || "<p>Each component has one documented responsibility.</p>"
     }</details>
-    <details class="workflow-stage" data-stage="proposal" open><summary>4. Review the proposal</summary><p>${a.valid ? "Every function is assigned exactly once." : "Assignment error."} ${a.metrics.privateEdges.length} static crossing pairs; ${a.metrics.publicEdges.length} existing public crossing pairs (${a.metrics.publicEdges.reduce((n, e) => n + e[2], 0)} call sites).</p><p>${a.metrics.unresolved} unresolved/external calls; ${a.metrics.indirect} indirect calls. ${a.unresolvedConstraints.length} unresolved non-function constraints.</p><p class="note">${esc(m.coverage)}</p>${a.units.map((u) => `<section><h3>${esc(u.name)}</h3><p>${esc(u.classification)}: ${u.members.length} functions</p>${u.moduleMembers.map((r) => `<p>Module-member candidate: ${esc(labels.get(r.responsibility).name)} (retained in this translation unit)</p>`).join("")}<details><summary>Exact membership</summary>${memberRows(u.members)}</details></section>`).join("")}<p class="hint">Candidates are not extraction proofs. Private types, macros, file-local state, function values, and unresolved uses must be reviewed before moving source.</p><button id="preview-responsibilities" ${a.valid ? "" : "disabled"}>Preview responsibility arrangement</button><button id="compare-reference">Compare compiler reference</button></details>
+    <details class="workflow-stage" data-stage="proposal"><summary>Assignment details</summary><p>${a.valid ? "Every function is assigned exactly once." : "Assignment error."} ${a.metrics.privateEdges.length} static crossing pairs; ${a.metrics.publicEdges.length} existing public crossing pairs (${a.metrics.publicEdges.reduce((n, e) => n + e[2], 0)} call sites).</p><p>${a.metrics.unresolved} unresolved/external calls; ${a.metrics.indirect} indirect calls. ${a.unresolvedConstraints.length} unresolved non-function constraints.</p><p class="note">${esc(m.coverage)}</p>${a.units.map((u) => `<section><h3>${esc(u.name)}</h3><p>${esc(u.classification)}: ${u.members.length} functions</p>${u.moduleMembers.map((r) => `<p>Module-member candidate: ${esc(labels.get(r.responsibility).name)} (retained in this translation unit)</p>`).join("")}<details><summary>Exact membership</summary>${memberRows(u.members)}</details></section>`).join("")}<p class="hint">Candidates are not extraction proofs. Private types, macros, file-local state, function values, and unresolved uses must be reviewed before moving source.</p><button id="preview-responsibilities" ${a.valid ? "" : "disabled"}>Preview responsibility arrangement</button><button id="compare-reference">Compare compiler reference</button></details>
     <details><summary>Assignment and merge history (${m.history.length})</summary>${m.history.map((h) => `<p><strong>${esc(h.action)}</strong>: ${esc(h.reason || h.name || "")}<br><small>${esc((h.components || []).join("\n"))}</small></p>`).join("") || "No decisions recorded."}</details></div>`;
-  document
-    .querySelectorAll("[data-stage]")
-    .forEach((e) => (e.hidden = e.dataset.stage !== responsibilityStep));
-  document.querySelectorAll("[data-step]").forEach(
-    (e) =>
-      (e.onclick = () => {
-        responsibilityStep = e.dataset.step;
-        render();
-        $("workspace").scrollTop = 0;
-      }),
-  );
   document
     .querySelectorAll("[data-operation]")
     .forEach((e) => (e.onclick = () => editOperation(+e.dataset.operation)));
@@ -108,6 +86,9 @@ function renderResponsibilities() {
         $("source").showModal();
       }),
   );
+  $("show-arrangement").onclick = () => previewResponsibilities(m, a);
+  $("analyze-source").onclick = analyzeResponsibilitySource;
+  updateResponsibilityJob();
   $("add-responsibility").onclick = () => editResponsibility();
   $("merge-responsibilities").onclick = mergeResponsibilities;
   $("load-analysis").onclick = loadResponsibilityAnalysis;
@@ -229,7 +210,7 @@ function resolveResponsibilityComponent(c) {
           }
           $("source").close();
           save();
-          render();
+          openResponsibilityResult();
         } catch (error) {
           $("resolve-error").textContent = error.message;
         }
@@ -352,7 +333,7 @@ function mergeResponsibilities() {
           );
           $("source").close();
           save();
-          render();
+          openResponsibilityResult();
         } catch (error) {
           $("merge-role-error").textContent = error.message;
         }
@@ -398,7 +379,7 @@ function importResponsibilityManifest() {
           S.responsibilities[responsibilityKey] = m;
           $("source").close();
           save();
-          render();
+          openResponsibilityResult();
         } catch (error) {
           $("import-error").textContent = error.message;
         }
@@ -428,7 +409,7 @@ async function loadResponsibilityAnalysis() {
     );
     if (!response.ok)
       throw Error(
-        "No reviewed analysis is supplied for this file. Describe its operations in this workspace.",
+        "No saved analysis is supplied for this file. Select Analyze source to produce one.",
       );
     const m = await response.json();
     Responsibilities.analyze(D, m, S.ties);
@@ -448,14 +429,14 @@ async function loadResponsibilityAnalysis() {
     S.responsibilities[responsibilityKey] ||= m;
     if (!Object.keys(S.responsibilities[responsibilityKey].operations).length)
       S.responsibilities[responsibilityKey] = m;
-    responsibilityStep = "responsibilities";
     save();
-    render();
+    openResponsibilityResult();
   } catch (error) {
     toast(error.message);
   }
 }
 function previewResponsibilities(m, a) {
+  const modules = Responsibilities.moduleUnits(D, m), units = modules || a.units;
   previewGroup = null;
   fn = null;
   picked.clear();
@@ -463,8 +444,9 @@ function previewResponsibilities(m, a) {
   preview = {
     responsibility: true,
     manifestKey: responsibilityKey,
-    canApply: a.canApply,
-    parts: a.units.map((u) => u.members),
+    moduleArrangement: !!modules,
+    canApply: !modules && a.canApply,
+    parts: units.map((u) => u.members),
     groups: S.groups
       .map((g) => ({
         ...g,
@@ -477,7 +459,7 @@ function previewResponsibilities(m, a) {
             0,
       )
       .concat(
-        a.units.map((u, i) => ({
+        units.map((u, i) => ({
           id: "preview-" + i,
           name: u.name,
           members: u.members,
@@ -485,13 +467,14 @@ function previewResponsibilities(m, a) {
           moduleMembers: u.moduleMembers,
         })),
       ),
-    units: a.units,
+    units,
   };
   render();
 }
 function renderResponsibilityPreview() {
+  if (preview.moduleArrangement) { renderModuleArrangement(); return; }
   $("inspector").innerHTML =
-    `<div class="paneltag">RESPONSIBILITY PREVIEW</div><h2>${preview.parts.length} proposed groups</h2><p>${preview.canApply ? "Assignments and recorded constraints are complete." : "Review only: unresolved operations or dependencies remain. Return to responsibilities to resolve them."}</p><p>Shared private components remain intact. Module members remain in the same translation unit.</p>${preview.units.map((u) => `<p><strong>${esc(u.name)}</strong><br>${esc(u.classification)}; ${u.members.length} functions; ${u.moduleMembers.length} module members</p>`).join("")}<button id="accept-responsibilities" class="primary wide" ${preview.canApply ? "" : "disabled"}>Accept arrangement</button><button id="edit-responsibilities">Return to responsibilities</button><button id="responsibility-crossings">Inspect crossings</button>`;
+    `<div class="paneltag">RESPONSIBILITY PREVIEW</div><h2>${preview.parts.length} proposed groups</h2><p>${preview.canApply ? "Assignments and recorded constraints are complete." : "Review only: unresolved operations or dependencies remain. Inspect boundary details when you need them."}</p><p>Shared private components remain intact. Module members remain in the same translation unit.</p>${preview.units.map((u) => `<p><strong>${esc(u.name)}</strong><br>${esc(u.classification)}; ${u.members.length} functions; ${u.moduleMembers.length} module members</p>`).join("")}<button id="accept-responsibilities" class="primary wide" ${preview.canApply ? "" : "disabled"}>Accept arrangement</button><button id="edit-responsibilities">Evidence and adjustments</button><button id="responsibility-crossings">Inspect crossings</button>`;
   $("accept-responsibilities").onclick = () => {
     const p = preview;
     change("Accepted responsibility arrangement", () => {
@@ -546,4 +529,134 @@ async function compareResponsibilityReference() {
       .join("")}`,
     () => {},
   );
+}
+
+function updateResponsibilityJob() {
+  const job = responsibilityJobs.get(responsibilityKey);
+  const status = $("analysis-status"), button = $("analyze-source");
+  if (!status || !button) return;
+  status.textContent = job?.message || "Uses the local agent; source files stay unchanged.";
+  const running = [...responsibilityJobs.values()].find(j => j.status === 'running');
+  button.disabled = !!running;
+  if (running && running !== job && running.id !== job?.id) {
+    status.textContent = `Analyzing ${[...new Set(running.scope.map(k => k.split(':')[0]))].join(', ')}. Follow it under Source analyses in the sidebar.`;
+    button.textContent = 'Analysis in progress';
+    return;
+  }
+  if (job?.manifest) {
+    button.onclick = () => offerResponsibilityAnalysis(responsibilityKey, job);
+    button.textContent = "Review new analysis";
+    return;
+  }
+  button.textContent = job?.status === "running" ? "Analyzing source..." : "Analyze source";
+}
+async function analyzeResponsibilitySource() {
+  const current = responsibilityManifest(), key = responsibilityKey, initial = JSON.stringify(current);
+  const job = {status: "running", message: "Starting source analysis..."};
+  responsibilityJobs.set(key, job);
+  updateResponsibilityJob();
+  try {
+    const response = await fetch("/api/analysis", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({scope: current.scope, revision: D.revision}),
+    });
+    const started = await response.json();
+    if (!response.ok) { await refreshAnalysisJobs(); throw Error(started.message); }
+    job.id = started.id;
+    job.initial = initial;
+    await refreshAnalysisJobs();
+
+  } catch (error) {
+    Object.assign(job, {status: "failed", message: "Agent analysis unfinished: " + error.message});
+    if (responsibilityKey === key) updateResponsibilityJob();
+  }
+}
+function offerResponsibilityAnalysis(key, job) {
+  responsibilityDialog(`<h2>New source analysis is ready</h2><p>Your existing proposal is preserved until you choose to replace it.</p><button id="save-old-analysis">Export existing proposal</button><button id="use-new-analysis">Use new proposal</button>`, () => {
+    $("save-old-analysis").onclick = () => downloadResponsibilityManifest(S.responsibilities[key], Responsibilities.analyze(D, S.responsibilities[key], S.ties));
+    $("use-new-analysis").onclick = () => {
+      S.responsibilityArchive ||= [];
+      S.responsibilityArchive.push({scope:key, manifest:clone(S.responsibilities[key])});
+      S.responsibilities[key] = job.manifest;
+      delete job.manifest;
+      $("source").close(); save(); openResponsibilityResult();
+    };
+  });
+}
+
+function openResponsibilityResult() {
+  const m = responsibilityManifest();
+  if (m.responsibilities.length)
+    previewResponsibilities(m, Responsibilities.analyze(D, m, S.ties));
+  else render();
+}
+
+let analysisRefreshBusy = false;
+async function refreshAnalysisJobs() {
+  if (analysisRefreshBusy) return;
+  analysisRefreshBusy = true;
+  try {
+    const response = await fetch('/api/analyses');
+    if (!response.ok) throw Error('Cannot reconnect to the analysis server.');
+    const jobs = await response.json();
+    const relevant = Object.entries(jobs).filter(([id, j]) => (j.revision || j.manifest?.revision) === D.revision);
+    for (const [id, result] of relevant) {
+      const key = result.scope.slice().sort().join('|');
+      const existing = responsibilityJobs.get(key);
+      const job = {...existing, ...result, id};
+      responsibilityJobs.set(key, job);
+      if (result.status === 'complete' && existing?.status === 'running' && existing.initial) {
+        S.responsibilities ||= {};
+        const current = S.responsibilities[key];
+        if (current && JSON.stringify(current) === existing.initial && !current.responsibilities.length) {
+          Responsibilities.analyze(D, result.manifest, S.ties);
+          S.responsibilities[key] = result.manifest;
+          save();
+          if (responsibilityKey === key && view === 'responsibilities') openResponsibilityResult();
+        }
+      }
+    }
+    $('analysis-jobs-list').innerHTML = relevant.reverse().map(([id,j]) => {
+      const name = [...new Set(j.scope.map(k => k.split(':')[0]))].join(', ');
+      const elapsed = j.started && j.status === 'running' ? ` (${Math.floor((Date.now()/1000-j.started)/60)} min elapsed)` : '';
+      return `<div class="analysis-job"><strong>${esc(j.label || name)}</strong><span>${j.status === 'complete' ? 'Ready' : j.status === 'running' ? 'Running' : 'Unfinished'}${elapsed}</span><small>${esc(j.message)}</small><button data-analysis-job="${id}">${j.status === 'complete' ? 'Open result' : 'Open workspace'}</button></div>`;
+    }).join('') || '<p>No source analyses yet.</p>';
+    $('analysis-jobs-list').querySelectorAll('[data-analysis-job]').forEach(button => button.onclick = () => {
+      const job = jobs[button.dataset.analysisJob];
+      const ids = new Map(D.functions.map((_,v) => [Responsibilities.key(D,v),v]));
+      scope = {name:[...new Set(job.scope.map(k => k.split(':')[0]))].join(', '), members:job.scope.map(k => ids.get(k))};
+      preview = null; previewGroup = null; view = 'responsibilities'; selected.clear(); picked.clear(); fn = null;
+      const current = responsibilityManifest();
+      if (job.status === 'complete') {
+        Responsibilities.analyze(D, job.manifest, S.ties);
+        if (!current.responsibilities.length || JSON.stringify(current) === JSON.stringify(job.manifest)) {
+          S.responsibilities[responsibilityKey] = job.manifest; save(); openResponsibilityResult();
+        } else { render(); offerResponsibilityAnalysis(responsibilityKey, job); }
+      } else render();
+    });
+    updateResponsibilityJob();
+  } catch (error) {
+    $('analysis-jobs-list').textContent = error.message + ' Retrying automatically.';
+  } finally { analysisRefreshBusy = false; }
+}
+function watchAnalysisJobs() {
+  refreshAnalysisJobs();
+  setInterval(refreshAnalysisJobs, 3000);
+}
+
+function renderModuleArrangement() {
+  const chosen = previewGroup ? preview.units[+previewGroup.replace('preview-', '')] : null;
+  const units = preview.units;
+  let detail = '<p>These are source-file responsibilities within one translation unit. Private symbols stay private. Select a group to inspect its public operations and exact private dependencies.</p>';
+  if (chosen) {
+    const inside = new Set(chosen.members);
+    const crossing = D.edges.filter(([a,b]) => inside.has(a) !== inside.has(b) && D.functions[b].s && (inside.has(a) || inside.has(b)));
+    const incoming = crossing.filter(([a,b]) => inside.has(b));
+    const outgoing = crossing.filter(([a,b]) => inside.has(a));
+    detail = `<h2>${esc(chosen.name)}</h2><p>${esc(chosen.description)}</p>${chosen.extraction ? `<p class="hint">${esc(chosen.extraction)}</p>` : ""}<h3>Public operations</h3>${chosen.members.filter(v => !D.functions[v].s && !D.functions[v].k).map(v => `<p><button data-module-source="${v}">${esc(D.functions[v].n)}</button></p>`).join('')}<p>${chosen.members.filter(v => D.functions[v].s && !D.functions[v].k).length} owned helpers</p><h3>Private dependencies across this boundary</h3><p>${outgoing.length} outgoing pairs; ${incoming.length} incoming pairs. These are legal between module members; separate compilation needs an explicit interface decision.</p><details ${crossing.length <= 5 ? 'open' : ''}><summary>Exact helper calls</summary>${crossing.map(([a,b,w]) => `<p>${esc(D.functions[a].n)} → ${esc(D.functions[b].n)} (${w} call sites)</p>`).join('')}</details><details><summary>Why this responsibility?</summary><p>${esc(chosen.evidence)}</p></details>`;
+  }
+  $('inspector').innerHTML = `<div class="paneltag">RESPONSIBILITY ARRANGEMENT</div>${chosen ? '' : `<h2>${units.length} module members</h2>`}${detail}<h3>Responsibilities</h3>${units.map((u,i) => `<button class="wide" data-module-group="${i}">${esc(u.name)} · ${u.members.length}</button>`).join('')}<button id="module-evidence">Evidence and adjustments</button>`;
+  document.querySelectorAll('[data-module-group]').forEach(b => b.onclick = () => { previewGroup = 'preview-' + b.dataset.moduleGroup; render(); });
+  document.querySelectorAll('[data-module-source]').forEach(b => b.onclick = () => { showSource(+b.dataset.moduleSource); $('source').showModal(); });
+  $('module-evidence').onclick = () => { preview=null; view='responsibilities'; render(); };
 }
