@@ -11,9 +11,9 @@
 
     `Compiler.cache` in compiler/literal-cache.x decides cache-key equality
     and assigns the `(cache id)` nodes whose ids index `Compiler.id_keys`;
-    this module trusts that mapping. Header and source regions may materialize the same
-    immutable value in separate static slots; `String` and `List`
-    canonicalization preserves value identity across them.
+    this module trusts that mapping. Header and source regions may
+    materialize the same immutable value in separate static slots; `String`
+    and `List` canonicalization preserves value identity across them.
 */
 #pragma once
 #include "compiler.x"
