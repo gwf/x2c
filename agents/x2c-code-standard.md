@@ -533,16 +533,15 @@ bindings. Verify each exception against the name producer and its consumers;
 dotted spelling alone is not evidence. For example, `Fact.var` and `Var.fact`
 in `src/regions.x` serve conversion and protocol lookup.
 
-Generated Array and Map family helpers are `static` dotted methods. Other
+Generated Array and Map family helpers are dotted methods because other
 expansions of the same family call them: the public members, the observation
-members, and handwritten callers such as `Map.get_hashed` and the pool table
-in `lib/pool.x`. Typed-alias consumers inherit them through typedef method
-lookup (`_next_method_type` in `src/expressions.x`). Their names have no
-leading underscore and differ from the public members they serve: Array
-`compare_elements` and `write_elements` beside `compare` and `write_repr`,
-and Map `find_hashed_bucket` and `reinsert_entry` beside `get_hashed`. Use
-the existing method lookup instead of encoding type spellings into free
-names. Keep ordinary callbacks and expansion-local helpers undotted.
+members, and handwritten callers in `lib/map.x` and `lib/pool.x`. Typed-alias
+consumers inherit them through typedef method lookup (`_next_method_type` in
+`src/expressions.x`). Like every dotted method, their names have no leading
+underscore, and they must differ from the public members they serve, such as
+`Array.compare` and `Map.compare`. Use the existing method lookup instead of
+encoding type spellings into free names. Keep ordinary callbacks and
+expansion-local helpers undotted.
 
 Ordinary helpers need no forwarding wrapper or compatibility alias.
 
