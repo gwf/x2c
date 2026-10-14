@@ -57,6 +57,8 @@ List Compiler_token_location(Compiler compiler, Token token);
 
 String Compiler_token_source(Compiler c, Token token, int * line);
 
+String Compiler_file_prefix(Compiler c);
+
 int Compiler_token_column(Compiler c, Token token);
 
 String Compiler_text_source(Compiler c, int position, int * offset);

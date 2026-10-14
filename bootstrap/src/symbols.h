@@ -101,6 +101,14 @@ Var Compiler_aggregate_name(Compiler c, Symbol kind, Var name, int definition);
 
 void Compiler_record_declaration_visibility(Compiler c, List declaration);
 
+String Compiler_private_prefix(Compiler c, Type type);
+
+String Compiler_scoped_spelling(Compiler c, String prefix, String name);
+
+List Compiler_file_prefixes(Compiler c);
+
+String Compiler_unprefixed(Compiler c, String name);
+
 String Compiler_package_spelling(Compiler c, String name);
 
 void Compiler_register_package_alias(Compiler c, String name, String alias, Token token);

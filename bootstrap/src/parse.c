@@ -149,7 +149,7 @@ static int _is_scalar_specifier(Symbol symbol);
 
 static List _typedef_name(Compiler c);
 
-static String _package_type_reference(Compiler c, Symbol tag, String name);
+static String _type_reference(Compiler c, Symbol tag, String name);
 
 static List _struct_or_union(Compiler c);
 
@@ -157,7 +157,7 @@ static void _skip_attributes(Compiler c);
 
 static List _tag_name(Compiler c);
 
-static List _package_aggregate_name(Compiler c, Symbol tag, List name);
+static List _scoped_aggregate_name(Compiler c, Symbol tag, List name);
 
 static List _publish_aggregate_type(Compiler c, Symbol tag, Var name, List members, Token first);
 
@@ -4146,7 +4146,7 @@ static List _method_self_signature(Compiler c, List binding){
 static Type _self_owner_type(Compiler c, List method){
   String source = Var_as_string(List_car(method));
   Type declared = List_type(Sym_get(c -> sym, cons(String_var(source), NULL)));
-  if(Type_is_typedef(declared)) return List_type(cons(String_var(_package_type_reference(c, 0, source)), NULL));
+  if(Type_is_typedef(declared)) return List_type(cons(String_var(_type_reference(c, 0, source)), NULL));
   Symbol builtin = Var_symbol(Atom_intern(source));
   return Symbol_is_builtin_type(builtin) ? List_type(cons(Symbol_var(builtin), NULL)) : NULL;
 }
@@ -4396,15 +4396,21 @@ static List _typedef_name(Compiler c){
   if(! String_truth(name)) name = Compiler_package_member_spelling(c, c -> token -> text);
   if(! String_truth(name)) name = c -> token -> text;
   Compiler_next(c);
-  if(String_truth(c -> package)) name = _package_type_reference(c, 0, name);
+  if(String_truth(c -> package) || Array_truth(c -> line_markers)) name = _type_reference(c, 0, name);
   return cons(String_var(name), NULL);
 }
 
-String Compiler_package_spelling(Compiler, String);
+String Compiler_scoped_spelling(Compiler, String, String);
+
+String Compiler_file_prefix(Compiler);
 
 List Sym_get_exact(Sym, List);
 
-static String _package_type_reference(Compiler c, Symbol tag, String name){
+String Compiler_package_spelling(Compiler, String);
+
+static String _type_reference(Compiler c, Symbol tag, String name){
+  String own = Compiler_scoped_spelling(c, Compiler_file_prefix(c), name);
+  if(! String_equal(own, name) && List_truth(Sym_get_exact(c -> sym, tag ? cons(Symbol_var(tag), cons(String_var(own), NULL)) : cons(String_var(own), NULL)))) return own;
   String prefixed = Compiler_package_spelling(c, name);
   if(String_equal(prefixed, name)) return name;
   List bare = tag ? cons(Symbol_var(tag), cons(String_var(name), NULL)) : cons(String_var(name), NULL);
@@ -4423,7 +4429,7 @@ static List _struct_or_union(Compiler c){
   Compiler_next(c);
   _skip_attributes(c);
   List name = _tag_name(c);
-  if(List_truth(name) && String_truth(c -> package)) name = _package_aggregate_name(c, tag, name);
+  if(List_truth(name) &&(String_truth(c -> package) || Array_truth(c -> line_markers))) name = _scoped_aggregate_name(c, tag, name);
   List usedname = List_truth(name) ? name : Compiler_gensym(c);
   usedname = cons(Compiler_aggregate_name(c, tag, List_car(usedname), Compiler_peek(c, 0) == 247 || Compiler_peek(c, 0) == 119), NULL);
   List type = cons(Symbol_var(tag), usedname), fields = NULL;
@@ -4455,11 +4461,13 @@ static List _tag_name(Compiler c){
   return List_truth(slot) ? cons(List_var(slot), NULL) : Compiler_parse_optional_identifier(c);
 }
 
-static List _package_aggregate_name(Compiler c, Symbol tag, List name){
+String Compiler_private_prefix(Compiler, Type);
+
+static List _scoped_aggregate_name(Compiler c, Symbol tag, List name){
   if(! Var_is_row(List_car(name), 11, 7, 1)) return name;
   String spelling = Var_as_string(List_car(name));
-  if(Compiler_peek(c, 0) == 247) return cons(String_var(Compiler_package_spelling(c, spelling)), NULL);
-  return cons(String_var(_package_type_reference(c, tag, spelling)), NULL);
+  if(Compiler_peek(c, 0) == 247) return cons(String_var(Compiler_scoped_spelling(c, Compiler_private_prefix(c, NULL), spelling)), NULL);
+  return cons(String_var(_type_reference(c, tag, spelling)), NULL);
 }
 
 List Sym_bind_identity(Sym, List, List, List);
@@ -4699,7 +4707,7 @@ List Compiler_parse_named_type(Compiler c){
   List slot = Compiler_try_parse_macro_slot(c, 988265867168778);
   if(List_truth(slot)) return slot;
   Token start = c -> token;
-  String name = Compiler_package_spelling(c, c -> token -> text);
+  String name = Compiler_scoped_spelling(c, Compiler_private_prefix(c, NULL), c -> token -> text);
   Compiler_expect(c, 19147688);
   List key = cons(String_var(name), NULL);
   if(! List_truth(Sym_get_exact(c -> sym, key))) Sym_define(c -> sym, key, cons(_76, cons(String_var(name), NULL)));
@@ -4766,7 +4774,7 @@ static List _enum(Compiler c){
   Compiler_expect(c, 357722);
   _skip_attributes(c);
   List name = _tag_name(c);
-  if(List_truth(name) && String_truth(c -> package)) name = _package_aggregate_name(c, 357722, name);
+  if(List_truth(name) &&(String_truth(c -> package) || Array_truth(c -> line_markers))) name = _scoped_aggregate_name(c, 357722, name);
   if(List_truth(name) && Map_truth(c -> macro_holes)) name = cons(Compiler_aggregate_name(c, 357722, List_car(name), Compiler_peek(c, 0) == 247 || Compiler_peek(c, 0) == 119), NULL);
   List usedname = List_truth(name) ? name : Compiler_gensym(c);
   List type = cons(Symbol_var(357722), usedname), enums = NULL;
