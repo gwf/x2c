@@ -37,7 +37,8 @@ int Compiler.write_depfile(
     %"${output_dir.rstrip("/")}/${Path.stem(input)}.d";
   long error = 0;
   try {
-    Path.publish_files(%($path ${_contents(request, compiler, input, output_dir)}));
+    String text = _contents(request, compiler, input, output_dir);
+    Path.publish_files(%($path $text));
     return 1;
   }
   catch %((!or not-found io-fail) *failure): error = failure.assoc(<"errno">);

@@ -845,7 +845,7 @@ replacement template and fill steps are the remaining driver cost.
   rule writes (defer callbacks, lifted lambdas and adapters, protocol
   forwarding members and thunks, a shipped rule's replacement of a
   definition) carries the `kernel` mark, `(function RT DECL BODY kernel)`,
-  added by `written_definitions` on `Compiler.add_early` and by
+  added by `Ast.written_definitions` on `Compiler.add_early` and by
   `Compiler.written_support` when the applying rule is builtin; `_step`
   strips it and `_function_rewrite` dispatches under a `shipped` watch,
   which `_rewrite` now honors at the function point. A program rule's own

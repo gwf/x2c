@@ -57,7 +57,8 @@ static String _converter_name(Var node) {
 int Compiler.match_value_is_static(Var value) {
   if (value == <x2c-dyn>) return 0;
   if (value is not <list>) return 1;
-  foreach (Var part, value.list()) if (!Compiler.match_value_is_static(part)) return 0;
+  foreach (Var part, value.list())
+    if (!Compiler.match_value_is_static(part)) return 0;
   return 1;
 }
 

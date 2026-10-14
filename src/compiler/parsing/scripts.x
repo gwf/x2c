@@ -52,7 +52,8 @@ static void _push_conditionals(
   Token tokens = c.tokenizer.tokens;
   for (int i = first; i < end; i++) {
     Token token = tokens + i;
-    if (token.type != <preproc> || !Compiler.preproc_conditional_kind(token.text))
+    if (token.type != <preproc> ||
+        !Compiler.preproc_conditional_kind(token.text))
       continue;
     statements.push(i);
     statements.push(i + 1);

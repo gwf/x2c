@@ -1101,7 +1101,8 @@ static int _linked_texts_match(
   else if (!(name in linked) && !(name in c.native_meta)) return 0;
   c.meta_calls.try_get(name, names);
   if (names is <string>)
-    return c.linked_meta_definitions_current(Compiler.absolute_home_path(names));
+    return c.linked_meta_definitions_current(
+      Compiler.absolute_home_path(names));
   if (names is <list>)
     foreach (String callee, names.list())
       if (!_linked_texts_match(c, callee, linked, reached)) return 0;

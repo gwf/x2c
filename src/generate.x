@@ -1068,7 +1068,8 @@ static List _within_definitions(List found, List statements) {
   if (!found) return statements;
   Array out = [];
   foreach (List arms, found)
-    foreach (List item, Compiler.preproc_within_arms(arms, statements)) out.push(item);
+    foreach (List item, Compiler.preproc_within_arms(arms, statements))
+      out.push(item);
   return out.list_free();
 }
 
@@ -1258,7 +1259,8 @@ static void _place_bodies(Array out, Array bodies, List arms) {
       continue;
     }
     List reopened = written.head(written.len() - open);
-    foreach (List item, Compiler.preproc_within_arms(reopened, %(${pending.car()})))
+    List statement = %(${pending.car()});
+    foreach (List item, Compiler.preproc_within_arms(reopened, statement))
       out.push(item);
   }
   bodies.resize(kept);

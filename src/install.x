@@ -99,8 +99,8 @@ static macro Expression $report.install.start_failed(
 // the packages lock
 
 /* The packages lock this process holds, and the staging directory it is
-   filling. `Diagnostics.driver_error` exits without running deferred cleanup, so
-   every failing exit below releases both first. */
+   filling. `Diagnostics.driver_error` exits without running deferred cleanup,
+   so every failing exit below releases both first. */
 static int _packages_lock = -1;
 static String _staging = NULL;
 

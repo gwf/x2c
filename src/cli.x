@@ -11,9 +11,9 @@
 #include "sourceview.x"
 
 /** Holds one compiler command and its command-specific inputs and options.
-    `List`s produced by `CliRequest.parse` preserve CLI order. Copies are shallow:
-    request storage and referenced canonical values keep their producing
-    `Scope` and pool lifetimes.
+    `List`s produced by `CliRequest.parse` preserve CLI order. Copies are
+    shallow: request storage and referenced canonical values keep their
+    producing `Scope` and pool lifetimes.
 */
 typedef struct CliRequest {
   Symbol command, List inputs, run_args, include_dirs, package_dirs, cpp_args;
@@ -401,7 +401,8 @@ CliRequest CliRequest.parse(int argc, char **argv) {
   _read_arguments(args, argc, argv);
   if (!args.len()) _help_exit(0, 2);
   String first = args[0];
-  if (!first) Diagnostics.driver_error("expected a command, found an empty argument");
+  if (!first)
+    Diagnostics.driver_error("expected a command, found an empty argument");
   CliCommand *command = _command_row(first);
   if (command) return _parse_command(args, *command);
   if (first == "--help" || first == "-h") _help_exit(0, 0);
@@ -499,11 +500,14 @@ static void _check(CliRequest r, int mask) {
   if (mask == CLI_TRANSLATE && !inputs)
     Diagnostics.driver_error("translate requires at least one input");
   if (inputs.cdr() && (r.dep_file || r.dep_target))
-    Diagnostics.driver_error("--dep-file and --dep-target require exactly one input");
+    Diagnostics.driver_error(
+      "--dep-file and --dep-target require exactly one input");
   if (r.no_deps && (r.dep_file || r.dep_target || r.no_phony_deps))
-    Diagnostics.driver_error("--no-deps conflicts with dependency output options");
+    Diagnostics.driver_error(
+      "--no-deps conflicts with dependency output options");
   if (r.compile_only && r.kind != <executable>)
-    Diagnostics.driver_error("--compile-only conflicts with a library target kind");
+    Diagnostics.driver_error(
+      "--compile-only conflicts with a library target kind");
   if (mask == CLI_ENV && inputs.cdr())
     Diagnostics.driver_error("env accepts at most one name");
   if ((mask == CLI_INSTALL || mask == CLI_REMOVE || mask == CLI_NEW) &&
@@ -517,7 +521,8 @@ static void _check(CliRequest r, int mask) {
 
 static void _help_command(Array args) {
   if (args.len() == 1) _help_exit(0, 0);
-  if (args.len() > 2) Diagnostics.driver_error("help accepts at most one command");
+  if (args.len() > 2)
+    Diagnostics.driver_error("help accepts at most one command");
   String name = args[1];
   if (name == "help" || name == "--help" || name == "-h")
     _help_exit(<help>, 0);
@@ -553,7 +558,8 @@ static void _option(Parse &p, String arg, int &i) {
 static void _save_temps_dir(CliRequest r, String arg) {
   r.save_temps = 1;
   r.temps_dir = arg.remove_prefix("--save-temps=");
-  if (!r.temps_dir) Diagnostics.driver_error("--save-temps= requires a directory");
+  if (!r.temps_dir)
+    Diagnostics.driver_error("--save-temps= requires a directory");
 }
 
 /* Reads the option at `i` for `mask`, advancing `i` past a separate value.
@@ -636,7 +642,8 @@ static void _apply(Parse &p, Given given) {
 }
 
 static Symbol _color_mode(String value) {
-  if (!value) Diagnostics.driver_error("--color requires auto, always, or never");
+  if (!value)
+    Diagnostics.driver_error("--color requires auto, always, or never");
   if (value == "auto") return <auto>;
   if (value == "always") return <always>;
   if (value == "never") return <never>;
@@ -791,7 +798,8 @@ static void _expand_argument(Array out, String arg, List stack) {
     out.push(arg[1:]);
     return;
   }
-  if (arg.len() == 1) Diagnostics.driver_error("empty response-file reference '@'");
+  if (arg.len() == 1)
+    Diagnostics.driver_error("empty response-file reference '@'");
   String path = arg[1:], identity = Path.absolute(path);
   if (identity in stack)
     _fail(%"recursive response-file inclusion: $path", NULL);

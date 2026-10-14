@@ -5144,7 +5144,8 @@ void Compiler.parse_macro_lisp_shallow(Compiler c) {
   String requested = NULL;
   if (_import_path(c, requested)) {
     if (!c.source_private) {
-      String path = Compiler.portable_path(_canonical_path(c, requested, c.token));
+      String path =
+        Compiler.portable_path(_canonical_path(c, requested, c.token));
       c.record_compile_time_effect(
         %(compile-time import $path ${_effect_source(c, c.token)}), c.token);
     }
@@ -5372,7 +5373,8 @@ String Compiler.source_path(Compiler c, String file) {
 /* An absolute path; the definition keeps the home-portable spelling. */
 static String _definition_file(List definition) {
   String file = definition.assoc(<file>);
-  return !file || file.startswith("<") ? file : Compiler.absolute_home_path(file);
+  return !file || file.startswith("<")
+    ? file : Compiler.absolute_home_path(file);
 }
 
 /* Reads a compile-time source and records its content hash as a

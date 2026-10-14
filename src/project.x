@@ -11,8 +11,8 @@
 #include "build.x"
 
 /** Links native build requests in dependency-first order.
-    `ProjectBuild.plan` returns the head. Each node and copied `CliRequest` struct
-    is owned by the current `Scope` and needs no individual cleanup; its
+    `ProjectBuild.plan` returns the head. Each node and copied `CliRequest`
+    struct is owned by the current `Scope` and needs no individual cleanup; its
     `String` and `List` fields retain their canonical pool lifetimes and may
     share values with the command request.
 */
@@ -69,7 +69,8 @@ static macro Stmt $report.project.name_invalid(Expr $name) {
 }
 
 static macro Stmt $report.project.directory_occupied(Expr $dir) {
-  Diagnostics.driver_error(%"new: ${$dir} exists and is not an empty directory");
+  Diagnostics.driver_error(
+    %"new: ${$dir} exists and is not an empty directory");
 }
 
 // the manifest model

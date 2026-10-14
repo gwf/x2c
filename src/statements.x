@@ -586,7 +586,8 @@ static List _catch_arm(Compiler c, int &is_default, List handle) {
   List pattern = NULL;
   if (c.test(<:>)) is_default = 1;
   else pattern = _catch_filter(c);
-  return c.bind_catch_arm(pattern, Compiler.source_clause(<catch>), start, handle);
+  return c.bind_catch_arm(
+    pattern, Compiler.source_clause(<catch>), start, handle);
 }
 
 /* Directives before a later `catch` or `finally` follow the arm. */

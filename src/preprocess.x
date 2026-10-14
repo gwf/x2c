@@ -165,7 +165,8 @@ static void _directive(ArmScan &s, Token token, size_t i) {
     s.stack.push(%(${++s.serial} 0 ${Compiler.preproc_open_state(token.text)}));
   else if (kind == <branch> && s.stack.len()) {
     Var (id, arm, state) = s.stack[-1];
-    s.stack[-1] = %($id ${arm.integer() + 1} ${Compiler.preproc_branch_state(state)});
+    Var branch = Compiler.preproc_branch_state(state);
+    s.stack[-1] = %($id ${arm.integer() + 1} $branch);
   }
   else if (kind == <close> && s.stack.len()) s.stack.take_last();
   else if (!s.hidden) _note_layout_macro(s, token.text);
@@ -418,8 +419,8 @@ List Compiler.preproc_track_arms(List arms, String text) {
 }
 
 /** Returns `items` inside the conditional arms `arms` tracked by
-    `Compiler.preproc_track_arms`: the directives that reopen each group, outermost
-    first, then `items`, then one `#endif` per group.
+    `Compiler.preproc_track_arms`: the directives that reopen each group,
+    outermost first, then `items`, then one `#endif` per group.
 */
 List Compiler.preproc_within_arms(List arms, List items) {
   Array out = [];

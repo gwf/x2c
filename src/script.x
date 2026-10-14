@@ -23,7 +23,8 @@ static macro Stmt $report.script.source_missing(Expr $script) {
 }
 
 static macro Stmt $report.script.execute_failed(Expr $executable) {
-  Diagnostics.driver_error(%"cannot run ${$executable}: ${String.new(strerror(errno))}");
+  Diagnostics.driver_error(
+    %"cannot run ${$executable}: ${String.new(strerror(errno))}");
 }
 
 /* cache entries
@@ -46,8 +47,8 @@ String Compiler.cache_root(void) {
     executable when it is current; that path does not return. Otherwise it
     locks the directory against concurrent builds of the same script, removes
     the entries of scripts that no longer exist, and returns 0; the caller
-    builds `request` and calls `CliRequest.run_script`. A `--clean` request removes the
-    script's entry and returns 1.
+    builds `request` and calls `CliRequest.run_script`. A `--clean` request
+    removes the script's entry and returns 1.
 */
 int CliRequest.prepare_script(CliRequest c) {
   String root = Compiler.cache_root();
@@ -125,8 +126,8 @@ static void _prune(String scripts) {
 
 // running a script
 
-/** Executes a script that `CliRequest.prepare_script` pointed at the cache and the
-    caller built; that path does not return. A dry run prints the action and
+/** Executes a script that `CliRequest.prepare_script` pointed at the cache and
+    the caller built; that path does not return. A dry run prints the action and
     returns zero.
 */
 int CliRequest.run_script(CliRequest c) {

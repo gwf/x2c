@@ -615,7 +615,8 @@ static int _build_inputs(CliRequest request, Array commands) {
 
 static int _build_manifest(CliRequest request, Array commands) {
   if (request.compile_only)
-    Diagnostics.driver_error("--compile-only needs input operands, not a manifest");
+    Diagnostics.driver_error(
+      "--compile-only needs input operands, not a manifest");
   for (ProjectBuild node = ProjectBuild.plan(request); node; node = node.next) {
     int status = _build_target(node.request, commands);
     if (status) return status;

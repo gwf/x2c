@@ -51,7 +51,8 @@ static macro Stmt $report.build.input_unsupported(Expr $input) =>
   Diagnostics.driver_error(%"unsupported build input: ${$input}");
 
 static macro Stmt $report.build.archive_nested(Expr $input) =>
-  Diagnostics.driver_error(%"cannot nest an archive in a static library: ${$input}");
+  Diagnostics.driver_error(
+    %"cannot nest an archive in a static library: ${$input}");
 
 static macro Stmt $report.build.input_not_file(Expr $input) =>
   Diagnostics.driver_error(%"input is not a regular file: ${$input}");
@@ -117,7 +118,8 @@ static macro Stmt $report.build.cleanup_failed(Expr $directory) =>
     $directory);
 
 static macro Stmt $report.build.output_ambiguous() =>
-  Diagnostics.driver_error("--output is ambiguous with multiple compile-only inputs");
+  Diagnostics.driver_error(
+    "--output is ambiguous with multiple compile-only inputs");
 
 // source templates
 
@@ -182,7 +184,8 @@ static String _process_suffix(void) => "tmp.%ld".printf((long) getpid());
 Build CliRequest.prepare(CliRequest request) {
   _add_extensions(request);
   if (!request.inputs)
-    Diagnostics.driver_error("build requires input operands or a project manifest");
+    Diagnostics.driver_error(
+      "build requires input operands or a project manifest");
   Build b = Scope.calloc(1, sizeof(struct Build));
   *b = (struct Build) {
     .request = request, .c_sources = [], .gen_dirs = [], .units = [],
@@ -255,7 +258,8 @@ static void _check_compile_only(Build b) {
   if (inputs.cdr() && b.request.output)
     $report.build.output_ambiguous();
   if (inputs.cdr() && !b.request.build_dir)
-    Diagnostics.driver_error("multiple compile-only inputs require --build-dir");
+    Diagnostics.driver_error(
+      "multiple compile-only inputs require --build-dir");
 }
 
 /* The selected compiler and archiver go back to the request. */
@@ -490,7 +494,8 @@ static void _link_package(Build b, String package) {
 */
 CliRequest Build.module_entry(Build b) {
   String stamp = Compiler.module_stamp();
-  if (!stamp) Diagnostics.driver_error("cannot read the running compiler to stamp");
+  if (!stamp)
+    Diagnostics.driver_error("cannot read the running compiler to stamp");
   Path entry = %"${b.work_dir}/module/x2c_module.x";
   _write_entry(entry, b.units, $source.build.module(stamp));
   return _entry_request(b, %($entry));

@@ -412,7 +412,8 @@ List Toolchain.search_directories(Toolchain t) {
   List search = %(${t.cc} @flags "-E" "-v" "-x" "c" "/dev/null");
   if (!ToolAction.capture(search, output, errors))
     _add_include_directories(directories, errors);
-  if (!ToolAction.capture(%(${t.cc} @flags "-print-search-dirs"), output, errors))
+  List arguments = %(${t.cc} @flags "-print-search-dirs");
+  if (!ToolAction.capture(arguments, output, errors))
     _add_library_directories(directories, output);
   return directories.list_free();
 }

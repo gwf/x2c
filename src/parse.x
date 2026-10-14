@@ -3687,22 +3687,25 @@ List Compiler.bind_source_statement(Compiler c) {
   switch (keyword) {
     case <if>:
       return _bind_if_else(
-        c,
-        Compiler.source_clause(<test>), Compiler.source_clause(<then>), Compiler.source_clause(<else>));
+        c, Compiler.source_clause(<test>), Compiler.source_clause(<then>),
+        Compiler.source_clause(<else>));
     case <while>:
-      return _bind_while(c, Compiler.source_clause(<test>), Compiler.source_clause(<body>));
+      return _bind_while(
+        c, Compiler.source_clause(<test>), Compiler.source_clause(<body>));
     case <do>:
-      return _bind_do(c, Compiler.source_clause(<do>), Compiler.source_clause(<test>));
+      return _bind_do(
+        c, Compiler.source_clause(<do>), Compiler.source_clause(<test>));
     case <match>:
-      return _bind_match(c, Compiler.source_clause(<test>), Compiler.source_clause(<arms>));
+      return _bind_match(
+        c, Compiler.source_clause(<test>), Compiler.source_clause(<arms>));
     case <try>:
       return _bind_try(
         c, Compiler.source_clause(<try>), Compiler.source_clause(<catches>),
         Compiler.source_clause(<finally>));
   }
   return _bind_for(
-    c, Compiler.source_clause(<init>), Compiler.source_clause(<cond>), Compiler.source_clause(<next>),
-    Compiler.source_clause(<body>));
+    c, Compiler.source_clause(<init>), Compiler.source_clause(<cond>),
+    Compiler.source_clause(<next>), Compiler.source_clause(<body>));
 }
 
 static List _bind_do(Compiler c, Var body, Var condition) {

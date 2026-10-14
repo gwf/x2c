@@ -578,7 +578,8 @@ static void _split(FileWalk &w, Token first) {
 /* An include ends the segment unless its conditional arm is never taken. */
 static void _directive(FileWalk &w, Token token, int hidden) {
   int angle = 0;
-  String target = hidden ? NULL : Compiler.preproc_include_target(token.text, angle);
+  String target =
+    hidden ? NULL : Compiler.preproc_include_target(token.text, angle);
   if (!target) return;
   _flush(w, w.text[w.pos:token.pos]);
   _include_file(w, target, angle);
@@ -1101,7 +1102,8 @@ static int _linked_provider_current(
   if (linked_providers.try_get(path, current)) return current;
   if (path in seen) return 1;
   seen[path] = 1;
-  List source = Compiler.linked_meta_provider_source(Compiler.portable_path(path));
+  List source =
+    Compiler.linked_meta_provider_source(Compiler.portable_path(path));
   match (source)
     case %(source ?hash ?(List dependencies) *): {
       if (!_hash_matches(c, path, hash)) return 0;
@@ -1111,7 +1113,8 @@ static int _linked_provider_current(
       foreach (Var (dependency, expected), found)
         if (Path.is_x2c_source(dependency) && expected is <string> &&
             !String.startswith(expected, "search:") &&
-            Compiler.linked_meta_provider_source(Compiler.portable_path(dependency)) &&
+            Compiler.linked_meta_provider_source(
+              Compiler.portable_path(dependency)) &&
             !_linked_provider_current(c, dependency, seen)) return 0;
       return 1;
     }
@@ -1975,7 +1978,8 @@ void Compiler.replay_package_imports(
 
 /* An import the unit itself wrote stays at its own source site. */
 static int _imported_here(Compiler c, String path) =>
-  _canonical_path(Compiler.absolute_home_path(path)) == _canonical_path(c.filename);
+  _canonical_path(Compiler.absolute_home_path(path)) ==
+    _canonical_path(c.filename);
 
 /* The shadow reads the imports as a segment of the unit reads its own. */
 static void _import_all(
@@ -2138,7 +2142,8 @@ static List _interface_read(Compiler c, String canonical) {
    directory by stem, its sibling that mirrors a home file's directory, the
    home mirror, and a package's `builds/` beside or above the source. */
 static List _interface_candidates(String canonical) {
-  String stem = Path.stem(canonical), relative = Compiler.portable_path(canonical);
+  String stem = Path.stem(canonical);
+  String relative = Compiler.portable_path(canonical);
   String dir = Path.dirname(canonical), Array paths = [];
   if (interface_out_dir) paths.push(%"$interface_out_dir/$stem.xi");
   if (relative != canonical) {
@@ -2393,8 +2398,8 @@ static List _interface_include_dirs(
   String package = root && Compiler.is_package_source(root, canonical)
                  ? Path.basename(root)
                  : _package_owns(c, canonical) ? c.package : NULL;
-  dirs.push(
-    Path.is_x2c_source(canonical) && package ? %(package $package) : %(package));
+  int source = Path.is_x2c_source(canonical);
+  dirs.push(source && package ? %(package $package) : %(package));
   return dirs.list_free();
 }
 

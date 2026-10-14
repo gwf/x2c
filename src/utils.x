@@ -69,9 +69,9 @@ static List default_includes = NULL, cpp_includes = NULL;
     `include/` and `etc/compiler-sdk.xlisp`, a source checkout or an
     installed prefix alike. The root is kept absolute with symbolic links
     resolved, the one spelling every path below the home is compared in.
-    Without a home the root is the current directory and `Compiler.home_dir` reports
-    none. The compiler identity is taken here, before any later work could
-    observe a replaced executable. An already configured root leaves all
+    Without a home the root is the current directory and `Compiler.home_dir`
+    reports none. The compiler identity is taken here, before any later work
+    could observe a replaced executable. An already configured root leaves all
     state unchanged.
 */
 void x2c_initialize_environment(const char *argv0) {
@@ -409,8 +409,9 @@ void Diagnostics.driver_error(const char *message) {
   _exit(2);
 }
 
-/** Reports a caught `<not-found>` or `<io-fail>` through `Diagnostics.driver_error`
-    as its operation, path or program, and system reason.
+/** Reports a caught `<not-found>` or `<io-fail>` through
+    `Diagnostics.driver_error` as its operation, path or program, and system
+    reason.
 */
 void Diagnostics.host_error(List detail) {
   Var subject = detail.assoc(<path>);
