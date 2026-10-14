@@ -25,6 +25,9 @@ are needed rather than maintaining another copy.
 
 - [plan-x2c-change](skills/plan-x2c-change/SKILL.md) - answer a question about
   current behavior, or decide a design before implementation.
+- [proposed-module-layout](skills/proposed-module-layout/SKILL.md) - propose
+  module components, symbol owners, and private storage changes from source
+  responsibilities without implementing the split.
 - [execute-x2c-plan](skills/execute-x2c-plan/SKILL.md) - implement, verify, and
   deliver an already-decided change.
 - [fix-x2c-bug](skills/fix-x2c-bug/SKILL.md) - reproduce a defect, repair its

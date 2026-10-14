@@ -1,0 +1,4 @@
+interface:
+  display_name: "Proposed Module Layout"
+  short_description: "Propose module components and private symbol ownership"
+  default_prompt: "Use $proposed-module-layout to propose a responsibility-based module layout for the selected source files."
