@@ -598,9 +598,10 @@ static void _resolve_dependencies(Project p) {
   List locked = _read_lock(path);
   if (_lock_satisfies(p, locked)) return;
   Array rows = [];
-  for (ProjectDependency entry = p.dependencies; entry; entry = entry.next)
-    rows.push(request.require_package(entry.name, entry.version,
-                                      _locked_row(locked, entry)));
+  for (ProjectDependency entry = p.dependencies; entry; entry = entry.next) {
+    List row = _locked_row(locked, entry);
+    rows.push(request.require_package(entry.name, entry.version, row));
+  }
   _write_lock(path, rows.list_free());
 }
 
