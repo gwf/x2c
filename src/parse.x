@@ -1499,11 +1499,11 @@ static List _typedef_name(Compiler c) {
   return %($name);
 }
 
-/* Module and package files spell their own file-scope type names bare.
-   A block-scope typedef or tag of the name shadows every file-scope one; then the
-   current module file's static of that name comes first. In package mode a
-   bare-key miss with a prefixed hit re-spells the reference. ASTs carry
-   raw strings and emit literally. */
+/* Module and package files spell their own file-scope type names bare. A
+   block-scope typedef or tag of the name shadows every file-scope one;
+   then the current module file's static of that name comes first. In
+   package mode a bare-key miss with a prefixed hit re-spells the
+   reference. ASTs carry raw strings and emit literally. */
 static String _type_reference(Compiler c, Symbol tag, String name) {
   List bare = tag ? %($tag $name) : %($name);
   if (c.sym.has_local(bare)) return name;
