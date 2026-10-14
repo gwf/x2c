@@ -117,6 +117,7 @@ typedef struct Compiler{
   int meta_build;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int public_bodies;
+  int module_declaration;
   int interface_provider, signature_only;
   int collection_native;
   Map collection_native_files;
