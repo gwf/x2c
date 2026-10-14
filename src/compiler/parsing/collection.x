@@ -57,7 +57,7 @@ void Compiler.start_collection(Compiler c) {
   c.shallow = 1;
 }
 
-static void _debug_tokens(Token start, Token end) {
+module void _debug_tokens(Token start, Token end) {
   if (!log_should_log(<debug>, <tokenizer>)) return;
   for (Token tok = start; tok < end; tok++)
     if (tok.type != <space> && tok.type != <comment> && tok.type != <preproc>)

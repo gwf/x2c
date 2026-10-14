@@ -6,7 +6,7 @@
    reported at `site`, the form's first token, or at the cursor for a form
    without one. */
 
-static void _record_top_level(Compiler c, List node, Token site) {
+module void _record_top_level(Compiler c, List node, Token site) {
   match (node) {
     case %(declare (!set ?declared (*)) (bindings *bindings)): {
       Type type = declared;
@@ -54,7 +54,7 @@ static void _report_redefinition(
    produced it, and whether that form is private, for the definition walk.
    A typedef or declaration may repeat its name, so each statement keys its
    own range. */
-static void _record_span(Compiler c, List node, int start, int end) {
+module void _record_span(Compiler c, List node, int start, int end) {
   List key = NULL;
   match (node) {
     case %(function ? (bind ?binding ?) ?): key = binding;
@@ -235,7 +235,7 @@ static void _collect_references(Var value, Map references, Array ordered) {
   foreach (Var child, node) _collect_references(child, references, ordered);
 }
 
-static void _check_static_inits(Compiler c) {
+module void _check_static_inits(Compiler c) {
   Map statics = c.sym.file_statics();
   foreach (Var (key, value), c.static_init_deps) {
     List binding = key, dependencies = value;

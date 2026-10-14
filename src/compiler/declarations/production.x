@@ -138,7 +138,7 @@ List Compiler.replay_declaration_source(Compiler c) {
 
 /* Register only this production's identities. Shared macro frames are
    visited once, and later source declarations keep their ordinary order. */
-static void _restore_declaration_bindings(
+module void _restore_declaration_bindings(
   Compiler c, Var syntax, Map facts, Map seen) {
   if (syntax is not <list> || syntax in seen) return;
   seen[syntax] = 1;
