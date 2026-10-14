@@ -162,7 +162,8 @@ static void _directive(ArmScan &s, Token token, size_t i) {
   Symbol kind = Compiler.preproc_conditional_kind(token.text);
   int conditional = kind == <open> || (kind && s.stack.len());
   if (kind == <open>)
-    s.stack.push(%(${++s.serial} 0 ${Compiler.preproc_open_state(token.text)}));
+    s.stack.push(
+      %(${++s.serial} 0 ${Compiler.preproc_open_state(token.text)}));
   else if (kind == <branch> && s.stack.len()) {
     Var (id, arm, state) = s.stack[-1];
     Var branch = Compiler.preproc_branch_state(state);

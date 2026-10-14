@@ -126,9 +126,9 @@ static void _prune(String scripts) {
 
 // running a script
 
-/** Executes a script that `CliRequest.prepare_script` pointed at the cache and
-    the caller built; that path does not return. A dry run prints the action and
-    returns zero.
+/** Executes a script that `CliRequest.prepare_script` pointed at the cache
+    and the caller built; that path does not return. A dry run prints the
+    action and returns zero.
 */
 int CliRequest.run_script(CliRequest c) {
   if (!c.dry_run) _exec(c);

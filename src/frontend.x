@@ -543,7 +543,8 @@ Frontend Frontend.new(CliRequest request) {
   Frontend.load_support(request);
   Frontend f = Scope.calloc(1, sizeof(struct Frontend));
   f.request = request;
-  f.include_dirs = request.include_dirs.append(Compiler.default_include_dirs());
+  f.include_dirs =
+    request.include_dirs.append(Compiler.default_include_dirs());
   f.toolchain = Toolchain.new(request);
   Compiler.use_meta_toolchain(
     Toolchain.meta_cc(request.meta_cc), f.toolchain.include_dir);

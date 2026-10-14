@@ -438,7 +438,8 @@ static typedef struct Parse {
 
 static CliRequest _parse_command(Array args, CliCommand &command) {
   Parse p = {
-    .request = CliRequest.new(command.name), .args = args, .mask = command.mask,
+    .request = CliRequest.new(command.name), .args = args,
+    .mask = command.mask,
     .inputs = [], .run_args = [], .include_dirs = [], .cpp_args = [],
     .cc_args = [], .ld_args = []};
   for (int i = 1; i < args.len(); i++) _word(p, i);

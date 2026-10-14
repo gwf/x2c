@@ -260,8 +260,8 @@ static int _marker(Token token) {
 /* The resolved entry follows the ordinary source-provider path. */
 static int _package(Scan &s, Tokenizer tokens) {
   String name = _quoted(tokens.next()), root = NULL;
-  String entry = name ? SourceView.package_entry(
-    s.request.sources, s.request.package_roots(), name, root) : NULL;
+  String entry = name ? s.request.sources.package_entry(
+    s.request.package_roots(), name, root) : NULL;
   if (!entry) return 0;
   s.packages[root] = 1;
   int meta = _file(s, entry);
@@ -274,8 +274,8 @@ static int _include(Scan &s, String directive, String directory) {
   int angle = 0;
   String target = Compiler.preproc_include_target(directive, angle);
   if (!target || !(target.endswith(".x") || target.endswith(".xp"))) return 0;
-  String file = SourceView.resolve_include(
-    s.request.sources, s.request.include_dirs, directory, target, angle);
+  String file = s.request.sources.resolve_include(
+    s.request.include_dirs, directory, target, angle);
   if (!file) return 0;
   String path = Path.absolute(file);
   int rooted = _compiler_owns(path);

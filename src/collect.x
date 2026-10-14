@@ -963,11 +963,10 @@ static Array _include_dirs(
 /** The file the include of `target` from `includer_dir` names, searched as
     collection searches `dirs`, or NULL. */
 String SourceView.resolve_include(
-  SourceView sources, List dirs, String includer_dir, String target,
-  int angle) {
+  SourceView s, List dirs, String includer_dir, String target, int angle) {
   int covered = 0;
   return _resolve_include(
-    sources, dirs, includer_dir, target, angle, covered, NULL);
+    s, dirs, includer_dir, target, angle, covered, NULL);
 }
 
 /** The typedef names published by the files that the current unit's
@@ -978,8 +977,8 @@ String SourceView.resolve_include(
     module adds nothing the prelude has not declared. */
 List Compiler.include_typedef_names(
   Compiler c, String target, int angle, Map seen) {
-  String path = SourceView.resolve_include(
-    c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
+  String path = c.sources.resolve_include(
+    c.include_dirs, Path.dirname(c.filename), target, angle);
   if (!path || !Path.is_x2c_source(path)) return NULL;
   Array names = [];
   _add_typedef_names(c, names, _canonical_path(path), seen);
@@ -991,8 +990,8 @@ List Compiler.include_typedef_names(
     through a cycle back to its own still-open header. */
 List Compiler.include_type_dependencies(
   Compiler c, String target, int angle, Map seen) {
-  String path = SourceView.resolve_include(
-    c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
+  String path = c.sources.resolve_include(
+    c.include_dirs, Path.dirname(c.filename), target, angle);
   if (!path || !Path.is_x2c_source(path)) return NULL;
   seen[_canonical_path(c.filename)] = 1;
   Array types = [];
@@ -1031,8 +1030,8 @@ static void _add_type_dependencies(
     them. */
 void Compiler.include_function_declarations(
   Compiler c, String target, int angle, Map available) {
-  String path = SourceView.resolve_include(
-    c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
+  String path = c.sources.resolve_include(
+    c.include_dirs, Path.dirname(c.filename), target, angle);
   if (path) _add_function_declarations(c, _canonical_path(path), available);
 }
 
@@ -2079,8 +2078,8 @@ void Compiler.install_included_effects(Compiler c) {
     String target = token.type == <preproc>
                   ? Compiler.preproc_include_target(token.text, angle) : NULL;
     if (!target) continue;
-    String path = SourceView.resolve_include(
-      c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
+    String path = c.sources.resolve_include(
+      c.include_dirs, Path.dirname(c.filename), target, angle);
     if (!path) continue;
     String canonical = _canonical_path(path);
     Var exports = c.included_effects[canonical];
@@ -2379,8 +2378,8 @@ static List _stored_record(String canonical, List entry) {
   Map identities = {}, Array parts = [];
   foreach (Var part, cached_parts) parts.push(_stored_part(part, identities));
   return %(
-    ${Compiler.portable_path(canonical)} $hash ${parts.list_free()} $definitions
-    ${_stored_dependencies(dependencies)} $include_dirs);
+    ${Compiler.portable_path(canonical)} $hash ${parts.list_free()}
+    $definitions ${_stored_dependencies(dependencies)} $include_dirs);
 }
 
 /* Search roots and the file's package mode must match before replay. */

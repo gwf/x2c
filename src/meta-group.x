@@ -421,8 +421,8 @@ static Var _group_include(Compiler c, Var node, String lib) {
     int angle = 0;
     String target = Compiler.preproc_include_target(text, angle);
     if (!target || !Path.is_x2c_source(target)) break;
-    String path = SourceView.resolve_include(
-      c.sources, c.include_dirs, Path.dirname(c.filename), target, angle);
+    String path = c.sources.resolve_include(
+      c.include_dirs, Path.dirname(c.filename), target, angle);
     Var index;
     if (path && meta_build_tables.try_get(Path.absolute(path), index))
       return %(preproc ${%"#include \"meta_group_$index.h\""});
