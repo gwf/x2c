@@ -78,6 +78,10 @@ static void _write_json_location(Compiler c, Buffer out, List location);
 
 static void _write_heading(Compiler c, Symbol code, String message, List location);
 
+static Token _unit_token(Compiler c);
+
+static int _in_unit(Compiler c, Token token);
+
 static List _token_region(Compiler c, Token token);
 
 static List _region(Compiler c, int position);
@@ -539,14 +543,15 @@ String Compiler_token_source(Compiler c, Token token, int * line){
 String Compiler_file_prefix(Compiler c){
   if(! _init_guard_) _file_init_();
   Array markers = c -> line_markers;
-  if(! Array_truth(markers) || ! c -> token) return NULL;
+  Token token = _unit_token(c);
+  if(! Array_truth(markers) || ! token) return NULL;
   {
     Var _x2c_gensym_match_var = Array_getindex(markers, 0); int _x2c_gensym_match_none = !Var_is(_x2c_gensym_match_var, 806120);
     List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var); List _x2c_gensym_match_cursor;
     switch(0){
         default: ; if (!_x2c_gensym_match_none) { _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
         {
-          List _x2c_gensym_match_expr = _token_region(c, c -> token); List _x2c_gensym_match_cursor;
+          List _x2c_gensym_match_expr = _token_region(c, token); List _x2c_gensym_match_cursor;
           switch(0){
               default: ;
              _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 1318210446)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
@@ -573,6 +578,38 @@ String Compiler_file_prefix(Compiler c){
 
   }
   return NULL;
+}
+
+static Token _unit_token(Compiler c){
+  Token site = NULL;
+  if(List_truth(c -> macro_stack)){
+    List active;
+    List _x2c_gensym_macro_object_0 = c -> macro_stack;
+    List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
+    Var _x2c_gensym_macro_cursor_output_0;
+    while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+      active = Var_list_payload(_x2c_gensym_macro_cursor_output_0);
+      {
+        List _x2c_gensym_destructure_1 = active;
+        Var definition = List_getindex(_x2c_gensym_destructure_1, 0);
+        Var input = List_getindex(_x2c_gensym_destructure_1, 1);
+        Var bindings = List_getindex(_x2c_gensym_destructure_1, 2);
+        Token invocation = Var_token(List_getindex(_x2c_gensym_destructure_1, 3));
+        (void) definition, (void) input, (void) bindings;
+        if(_in_unit(c, invocation)) site = invocation;
+      }
+
+    }
+
+  }
+  if(site) return site;
+  return _in_unit(c, c -> token) ? c -> token : NULL;
+}
+
+static int _in_unit(Compiler c, Token token){
+  if(! token || ! c -> tokenizer) return 0;
+  Token first = c -> tokenizer -> tokens;
+  return token >= first && token < first + Bytes_len(c -> tokenizer -> tokens);
 }
 
 int Compiler_token_column(Compiler c, Token token){
@@ -674,11 +711,11 @@ static List _region(Compiler c, int position){
   List region = NULL;
   if(Array_truth(c -> line_markers)){
     List row;
-    Array _x2c_gensym_macro_object_0 = c -> line_markers;
-    int _x2c_gensym_macro_cursor_0 = 0;
-    Var _x2c_gensym_macro_cursor_output_0;
-    while(Array_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
-      row = Var_list_payload(_x2c_gensym_macro_cursor_output_0);
+    Array _x2c_gensym_macro_object_1 = c -> line_markers;
+    int _x2c_gensym_macro_cursor_1 = 0;
+    Var _x2c_gensym_macro_cursor_output_1;
+    while(Array_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
+      row = Var_list_payload(_x2c_gensym_macro_cursor_output_1);
       {
         if(Var_int(List_car(row)) > position) break;
         region = row;
@@ -711,17 +748,17 @@ _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String mess
   Compiler_report_problem(compiler, code, message, token, notes);
   Diagnostics diag = compiler -> diagnostics;
   if(compiler -> recovery_depth > 0){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 478};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 501};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));
     __builtin_unreachable();
   }
   if(! diag -> printer){
     Var held;
-    List _x2c_gensym_macro_object_1 = Diagnostics_entries(diag);
-    List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
-    Var _x2c_gensym_macro_cursor_output_1;
-    while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
-      held = _x2c_gensym_macro_cursor_output_1;
+    List _x2c_gensym_macro_object_2 = Diagnostics_entries(diag);
+    List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
+    Var _x2c_gensym_macro_cursor_output_2;
+    while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
+      held = _x2c_gensym_macro_cursor_output_2;
       Compiler_print_diagnostic(compiler, Var_list_payload(held));
     }
 
@@ -795,11 +832,11 @@ static int _text_line(Compiler c, int position){
   int line = 0;
   {
     Var start;
-    Array _x2c_gensym_macro_object_2 = _line_starts(c);
-    int _x2c_gensym_macro_cursor_2 = 0;
-    Var _x2c_gensym_macro_cursor_output_2;
-    while(Array_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
-      start = _x2c_gensym_macro_cursor_output_2;
+    Array _x2c_gensym_macro_object_3 = _line_starts(c);
+    int _x2c_gensym_macro_cursor_3 = 0;
+    Var _x2c_gensym_macro_cursor_output_3;
+    while(Array_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
+      start = _x2c_gensym_macro_cursor_output_3;
       {
         if(Var_int(start) > position) break;
         line ++;
@@ -858,11 +895,11 @@ void Compiler_take_diagnostics(Compiler c, Compiler child){
   if(target == source) return;
   {
     List entry;
-    Array _x2c_gensym_macro_object_3 = source -> entries;
-    int _x2c_gensym_macro_cursor_3 = 0;
-    Var _x2c_gensym_macro_cursor_output_3;
-    while(Array_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
-      entry = Var_list_payload(_x2c_gensym_macro_cursor_output_3);
+    Array _x2c_gensym_macro_object_4 = source -> entries;
+    int _x2c_gensym_macro_cursor_4 = 0;
+    Var _x2c_gensym_macro_cursor_output_4;
+    while(Array_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
+      entry = Var_list_payload(_x2c_gensym_macro_cursor_output_4);
       _store(target, entry);
     }
 
@@ -917,13 +954,13 @@ void Compiler_dump_symbol_table(Compiler compiler, Map map){
   if(! _init_guard_) _file_init_();
   {
     Var key, value;
-    Map _x2c_gensym_macro_object_4 = map;
-    unsigned _x2c_gensym_macro_cursor_4 = 0;
-    Var _x2c_gensym_macro_cursor_output_4;
+    Map _x2c_gensym_macro_object_5 = map;
+    unsigned _x2c_gensym_macro_cursor_5 = 0;
     Var _x2c_gensym_macro_cursor_output_5;
-    while(Map_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4), &(_x2c_gensym_macro_cursor_output_5))){
-      key = _x2c_gensym_macro_cursor_output_4;
-      value = _x2c_gensym_macro_cursor_output_5;
+    Var _x2c_gensym_macro_cursor_output_6;
+    while(Map_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_5), &(_x2c_gensym_macro_cursor_output_6))){
+      key = _x2c_gensym_macro_cursor_output_5;
+      value = _x2c_gensym_macro_cursor_output_6;
       printf("%s ==>\n%s\n", Var_str(key), Var_str(value));
     }
 
@@ -935,13 +972,13 @@ void Compiler_dump_cache(Compiler compiler){
   if(! _init_guard_) _file_init_();
   {
     Var key, value;
-    Map _x2c_gensym_macro_object_5 = compiler -> key_ids;
-    unsigned _x2c_gensym_macro_cursor_5 = 0;
-    Var _x2c_gensym_macro_cursor_output_6;
+    Map _x2c_gensym_macro_object_6 = compiler -> key_ids;
+    unsigned _x2c_gensym_macro_cursor_6 = 0;
     Var _x2c_gensym_macro_cursor_output_7;
-    while(Map_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_6), &(_x2c_gensym_macro_cursor_output_7))){
-      key = _x2c_gensym_macro_cursor_output_6;
-      value = _x2c_gensym_macro_cursor_output_7;
+    Var _x2c_gensym_macro_cursor_output_8;
+    while(Map_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_7), &(_x2c_gensym_macro_cursor_output_8))){
+      key = _x2c_gensym_macro_cursor_output_7;
+      value = _x2c_gensym_macro_cursor_output_8;
       printf("%s\t==>\t%s\n", Var_repr(value), Var_repr(key));
     }
 
