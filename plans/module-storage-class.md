@@ -1,8 +1,18 @@
-> Status: active; specification and implementation plan recorded
-> 2026-10-14 against `origin/dev` `ffb542b9b`. Not started. Supersedes the
-> paused `codex/nested-modules-spike` design (separate generated C per
-> member, nested ancestor access) on the shipped text-splicing base; that
-> spike remains a saved experiment and is not integrated.
+> Status: active; implemented 2026-10-14 on branch
+> `gwf/module-declaration-keyword-08ad8c` from `origin/dev` `b5f200025`,
+> submitted as a PR to the shared integrator. Both steps are on the branch
+> with two bootstrap refresh rounds; stages 0 and 1 agree. Known limits:
+> a private class's repr heading shows the prefixed name
+> (`second__Node { ... }`), because `_class_write_fields` in `src/builtins.x`
+> has no compiler access; a standalone `static struct Foo {...};` tag is not
+> prefixed, only tags under `static typedef` or `static class`; and
+> `Compiler.scoped_spelling` leaves a name that already contains its file
+> prefix unchanged, which is how generated class names avoid a double
+> prefix. The step 2 worker also fixed an existing defect: a `static class`
+> in a member got different Var tags for boxing and its descriptor
+> (`_canonical_file` in `src/protocol.x` now maps a member to its unit).
+> Supersedes the paused `codex/nested-modules-spike` design on the shipped
+> text-splicing base; that spike stays a saved experiment.
 
 # `module` storage class and file-private `static` in module units
 
