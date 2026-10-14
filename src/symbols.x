@@ -567,7 +567,7 @@ List Sym.declare(Sym s, List context, List key, List ast) {
     s.set(ctxkey, (List) type);
     _local_typedef(s, type, binding);
   }
-  if (!context && !s.at_file_scope())
+  if (!context && !s.at_file_scope() && _names_local_object(declared_type))
     _local_object(s, key, binding, declared_type);
   return binding;
 }
@@ -662,6 +662,11 @@ static void _local_typedef(Sym s, Type type, List binding) {
   s.put(
     s.binding_facts, %(emitted $binding), s.c.fresh_name("local_typedef"));
 }
+
+/* A block-scope `extern` declaration or function prototype names an
+   external symbol, so it is never a local object and keeps C's spelling. */
+static int _names_local_object(Type declared) =>
+  !declared.is_extern() && !declared.is_function();
 
 /* A local object records its automatic storage and declared type, and
    joins the locals of its spelling unless it is a template's own local,
