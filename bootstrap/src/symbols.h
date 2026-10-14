@@ -93,6 +93,8 @@ List Sym_reference_global(Sym s, List key);
 
 List Sym_declare(Sym s, List context, List key, List ast);
 
+List Sym_declared_key(Sym s, List context, List key, List ast);
+
 void Sym_join_locals(Sym s, List binding);
 
 void Sym_unshadow_global(Sym s, String spelling);

@@ -12729,7 +12729,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _11834 = List_var(_11833);
   _11835 = String_new("src/compiler/parsing/scripts.x");
   _11836 = String_var(_11835);
-  _11837 = String_new("37ace108");
+  _11837 = String_new("ed12a796");
   _11838 = String_var(_11837);
   _11839 = cons(_11838, NULL);
   _11840 = cons(_11836, _11839);
@@ -12771,7 +12771,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _11876 = List_var(_11875);
   _11877 = String_new("src/diagnostics.x");
   _11878 = String_var(_11877);
-  _11879 = String_new("f236aa89");
+  _11879 = String_new("6685a8b8");
   _11880 = String_var(_11879);
   _11881 = cons(_11880, NULL);
   _11882 = cons(_11878, _11881);
@@ -12810,7 +12810,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _11915 = List_var(_11914);
   _11916 = String_new("src/parse.x");
   _11917 = String_var(_11916);
-  _11918 = String_new("5ff51971");
+  _11918 = String_new("25b513db");
   _11919 = String_var(_11918);
   _11920 = cons(_11919, NULL);
   _11921 = cons(_11917, _11920);
@@ -12842,7 +12842,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _11947 = List_var(_11946);
   _11948 = String_new("src/symbols.x");
   _11949 = String_var(_11948);
-  _11950 = String_new("4d75f359");
+  _11950 = String_new("54e77d2b");
   _11951 = String_var(_11950);
   _11952 = cons(_11951, NULL);
   _11953 = cons(_11949, _11952);
@@ -12920,7 +12920,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _12025 = cons(_503, _12024);
   _12026 = String_new("src/collect.x");
   _12027 = String_var(_12026);
-  _12028 = String_new("12c253c1");
+  _12028 = String_new("a4476cd9");
   _12029 = String_var(_12028);
   _12030 = cons(_12029, NULL);
   _12031 = cons(_12027, _12030);
@@ -13339,7 +13339,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12441 = String_var(_12440);
   _12442 = String_new("src/generate.x");
   _12443 = String_var(_12442);
-  _12444 = String_new("e4268947");
+  _12444 = String_new("40967416");
   _12445 = String_var(_12444);
   _12446 = cons(_12445, NULL);
   _12447 = cons(_12443, _12446);
