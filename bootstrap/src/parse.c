@@ -4400,6 +4400,8 @@ static List _typedef_name(Compiler c){
   return cons(String_var(name), NULL);
 }
 
+int Sym_has_local(Sym, List);
+
 String Compiler_scoped_spelling(Compiler, String, String);
 
 String Compiler_file_prefix(Compiler);
@@ -4409,11 +4411,12 @@ List Sym_get_exact(Sym, List);
 String Compiler_package_spelling(Compiler, String);
 
 static String _type_reference(Compiler c, Symbol tag, String name){
+  List bare = tag ? cons(Symbol_var(tag), cons(String_var(name), NULL)) : cons(String_var(name), NULL);
+  if(! tag && Sym_has_local(c -> sym, bare)) return name;
   String own = Compiler_scoped_spelling(c, Compiler_file_prefix(c), name);
   if(! String_equal(own, name) && List_truth(Sym_get_exact(c -> sym, tag ? cons(Symbol_var(tag), cons(String_var(own), NULL)) : cons(String_var(own), NULL)))) return own;
   String prefixed = Compiler_package_spelling(c, name);
   if(String_equal(prefixed, name)) return name;
-  List bare = tag ? cons(Symbol_var(tag), cons(String_var(name), NULL)) : cons(String_var(name), NULL);
   if(List_truth(Sym_get_exact(c -> sym, bare))) return name;
   List hit = tag ? cons(Symbol_var(tag), cons(String_var(prefixed), NULL)) : cons(String_var(prefixed), NULL);
   return List_truth(Sym_get_exact(c -> sym, hit)) ? prefixed : name;
@@ -4461,12 +4464,14 @@ static List _tag_name(Compiler c){
   return List_truth(slot) ? cons(List_var(slot), NULL) : Compiler_parse_optional_identifier(c);
 }
 
+String Compiler_declared_spelling(Compiler, String, String);
+
 String Compiler_private_prefix(Compiler, Type);
 
 static List _scoped_aggregate_name(Compiler c, Symbol tag, List name){
   if(! Var_is_row(List_car(name), 11, 7, 1)) return name;
   String spelling = Var_as_string(List_car(name));
-  if(Compiler_peek(c, 0) == 247) return cons(String_var(Compiler_scoped_spelling(c, Compiler_private_prefix(c, NULL), spelling)), NULL);
+  if(Compiler_peek(c, 0) == 247) return cons(String_var(Compiler_declared_spelling(c, Compiler_private_prefix(c, NULL), spelling)), NULL);
   return cons(String_var(_type_reference(c, tag, spelling)), NULL);
 }
 
@@ -4707,7 +4712,7 @@ List Compiler_parse_named_type(Compiler c){
   List slot = Compiler_try_parse_macro_slot(c, 988265867168778);
   if(List_truth(slot)) return slot;
   Token start = c -> token;
-  String name = Compiler_scoped_spelling(c, Compiler_private_prefix(c, NULL), c -> token -> text);
+  String name = Compiler_declared_spelling(c, Compiler_private_prefix(c, NULL), c -> token -> text);
   Compiler_expect(c, 19147688);
   List key = cons(String_var(name), NULL);
   if(! List_truth(Sym_get_exact(c -> sym, key))) Sym_define(c -> sym, key, cons(_76, cons(String_var(name), NULL)));

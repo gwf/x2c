@@ -972,7 +972,7 @@ static int _derived_spelling(Sym s, String name) {
   if (!s.prefixed.len()) return 0;
   if (name in s.prefixed) return 1;
   if (name.startswith("Var_") && name[4:] in s.prefixed) return 1;
-  for (int at = 1; at < (int) name.len() - 1; at++)
+  for (int at = 1; at < name.len() - 1; at++)
     if (name[at] == '_' && name[:at] in s.prefixed) return 1;
   return 0;
 }

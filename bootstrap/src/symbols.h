@@ -81,6 +81,8 @@ List Sym_get(Sym s, List key);
 
 List Sym_get_exact(Sym s, List key);
 
+int Sym_has_local(Sym s, List key);
+
 List Sym_lookup(Sym s, List key, Type * type);
 
 List Sym_reference(Sym s, List key, Type * type);
@@ -104,6 +106,8 @@ void Compiler_record_declaration_visibility(Compiler c, List declaration);
 String Compiler_private_prefix(Compiler c, Type type);
 
 String Compiler_scoped_spelling(Compiler c, String prefix, String name);
+
+String Compiler_declared_spelling(Compiler c, String prefix, String name);
 
 List Compiler_file_prefixes(Compiler c);
 
