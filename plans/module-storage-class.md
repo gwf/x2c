@@ -6,12 +6,23 @@
 > (`second__Node { ... }`), because `_class_write_fields` in `src/builtins.x`
 > has no compiler access, and a standalone `static struct Foo {...};` tag is
 > not prefixed, only tags under `static typedef` or `static class`. Review
-> fixes 2026-10-14: a block-scope typedef shadows a file-private type; the
-> names the compiler derives from a prefixed spelling (`Node_new`,
-> `Var_node`) are recognized from the unit's recorded prefixed declarations
-> (`Sym.prefixed`, written by `Compiler.declared_spelling`, with replayed
-> collected declarations recorded as final) instead of a substring test on
-> source names; and the shadow diagnostic covers typedefs in either order.
+> fixes 2026-10-14: a block-scope typedef or tag shadows a file-private
+> type; the names the compiler derives from a prefixed spelling
+> (`Node_new`, `Var_node`) are recognized from the unit's recorded prefixed
+> declarations (`Sym.prefixed`, written by `Compiler.declared_spelling`,
+> with replayed collected declarations recorded as final) instead of a
+> substring test on source names; the shadow diagnostic covers typedefs and
+> tags in either order within each C namespace; a free name in a macro body
+> binds at the expansion site (`_file_key` skips templates); enumerators of
+> a static enum are file-private; the file prefix ends in `___` so a package
+> entry's statics never share a spelling with `pkg__` public names;
+> `--dump-definitions` displays the source name; and a file-scope typedef
+> named `module` keeps the word an identifier. Remaining limits: a type name
+> in a macro body is spelled where the macro is defined (template type
+> names are raw strings by design); diagnostics and editor hover print the
+> prefixed key, as package mode does; `Sym.prefixed` is not transaction
+> undone, which only matters for a rolled-back declaration whose spelling a
+> later source name repeats.
 > The step 2 worker also fixed an existing defect: a `static class`
 > in a member got different Var tags for boxing and its descriptor
 > (`_canonical_file` in `src/protocol.x` now maps a member to its unit).
@@ -49,9 +60,10 @@ C with an opaque handle.
 
 The prefix is the member's path relative to the entry's directory with the
 extension dropped and every non-identifier character mapped to `_`, then
-`__`. `parser/statements/loops.x` under entry `parser.x` gives
-`statements_loops__advance`. The entry's own statics use the entry stem,
-`parser__advance`, so the rule is one rule for every file of the unit.
+`___`. `parser/statements/loops.x` under entry `parser.x` gives
+`statements_loops___advance`. The entry's own statics use the entry stem,
+`parser___advance`, so the rule is one rule for every file of the unit. A
+package prefix ends in `__`, so the two never coincide.
 Generated names are compiler details; source never spells them.
 
 Outside a module unit nothing changes. A file without a block, including a
