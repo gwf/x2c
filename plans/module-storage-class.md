@@ -4,11 +4,15 @@
 > with two bootstrap refresh rounds; stages 0 and 1 agree. Known limits:
 > a private class's repr heading shows the prefixed name
 > (`second__Node { ... }`), because `_class_write_fields` in `src/builtins.x`
-> has no compiler access; a standalone `static struct Foo {...};` tag is not
-> prefixed, only tags under `static typedef` or `static class`; and
-> `Compiler.scoped_spelling` leaves a name that already contains its file
-> prefix unchanged, which is how generated class names avoid a double
-> prefix. The step 2 worker also fixed an existing defect: a `static class`
+> has no compiler access, and a standalone `static struct Foo {...};` tag is
+> not prefixed, only tags under `static typedef` or `static class`. Review
+> fixes 2026-10-14: a block-scope typedef shadows a file-private type; the
+> names the compiler derives from a prefixed spelling (`Node_new`,
+> `Var_node`) are recognized from the unit's recorded prefixed declarations
+> (`Sym.prefixed`, written by `Compiler.declared_spelling`, with replayed
+> collected declarations recorded as final) instead of a substring test on
+> source names; and the shadow diagnostic covers typedefs in either order.
+> The step 2 worker also fixed an existing defect: a `static class`
 > in a member got different Var tags for boxing and its descriptor
 > (`_canonical_file` in `src/protocol.x` now maps a member to its unit).
 > Supersedes the paused `codex/nested-modules-spike` design on the shipped
@@ -224,7 +228,7 @@ before `src/` uses it, and `src/` must use it before statics go private.
   beside `_static_interface_form`, the existing contextual-word pattern.
 - **Diagnostics and negative fixtures.** Prefix collision at splice
   (silent merge of two files' statics into one key: wrong output). Static
-  shadowing a module name (breaks the deliberate `module` promise: wrong
-  binding). Duplicate adopted class tag across members (runtime merges two
-  descriptors: corrupted dispatch). Each has one negative fixture. No other
-  validators.
+  shadowing a module name, for objects, functions, and typedefs in either
+  order (breaks the deliberate `module` promise: wrong binding). Duplicate
+  adopted class tag across members (runtime merges two descriptors:
+  corrupted dispatch). Each has one negative fixture. No other validators.

@@ -188,7 +188,8 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 - File-private statics: each marker row carries its file's prefix from
   `_file_prefix` in `src/collect.x`; `_declared_key` in `src/symbols.x`
   respells a static's key with `Compiler.private_prefix` and
-  `Compiler.scoped_spelling`, `Sym.get` and `_lookup_from` try the current
+  `Compiler.declared_spelling`, which records prefixed spellings so derived
+  names keep theirs; `Sym.get` and `_lookup_from` try the current
   file's key first, and `Compiler.unprefixed` restores the short name for
   Var tags and descriptors
 - Tests: the `module-block` and `module-storage-class` compiler fixtures
