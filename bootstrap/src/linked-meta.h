@@ -80,7 +80,7 @@ Code protocol_conformance(Code node);
 
 Code raise_lowering(Code node);
 
-List try_catch_cases(List selected, List arms);
+List _x2c_try_catch_cases(List selected, List arms);
 
 Code try_lowering(Code node);
 

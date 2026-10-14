@@ -21,9 +21,9 @@
 
 // catch sites
 
-/** Returns the statement that prepares each of `items` into its slot of
+/* Returns the statement that prepares each of `items` into its slot of
     the catch site's `patterns`; `$x2c.try.site` calls this in a slot. */
-meta List try_catch_patterns(List patterns, List items) {
+meta List _x2c_try_catch_patterns(List patterns, List items) {
   Array prepared = [];
   int index = 0;
   foreach (List pattern, items) {
@@ -42,16 +42,16 @@ macro Stmt $x2c.try.site(
   Var patterns[$count];
   static ErrorCatchSite site = {arms, $fallback, $count, $state, -1};
   if (x2c_error_catch_site_pending(&site)) {
-    @try_catch_patterns(patterns, $patterns)
+    @_x2c_try_catch_patterns(patterns, $patterns)
   }
   volatile ErrorHandler $handle =
     x2c_error_catch_site_push(&$frame, &site, patterns);
 }
 
-/** Returns the catch site `frame` pushes for the clause `clause`
+/* Returns the catch site `frame` pushes for the clause `clause`
     describes, or nothing for a try without one; `$x2c.try.frame` calls this in
     a slot. */
-meta List try_catch_site(List frame, List clause) {
+meta List _x2c_try_catch_site(List frame, List clause) {
   Macro site = $x2c.try.site;
   match (clause)
     case %(?handle ?(String state) ?(List arms) *patterns): {
@@ -76,14 +76,14 @@ meta static int _try_arm_exits(List arm) {
   return 0;
 }
 
-/** Returns each lowered arm of `arms` chosen by its index in `selected`;
+/* Returns each lowered arm of `arms` chosen by its index in `selected`;
     `$x2c.try.handled` calls this in a slot. Each arm is its own
     statement, so a `break` or `continue` in it still reaches the enclosing
     loop, and only one test holds because `selected` does not change. When
     every arm returns or raises, control cannot leave them, and a final
     unreachable mark tells C so that a function ending in such a `try`
     needs no return after it. */
-meta List try_catch_cases(List selected, List arms) {
+meta List _x2c_try_catch_cases(List selected, List arms) {
   Array cases = [];
   int index = 0, exits = 1;
   foreach (List arm, arms) {
@@ -102,16 +102,16 @@ macro Stmt $x2c.try.handled(
     int selected = x2c_error_catch_selected($handle);
     x2c_error_catch_detach($handle);
     x2c_exception_mark_handled(&$frame);
-    @try_catch_cases(selected, $arms)
+    @_x2c_try_catch_cases(selected, $arms)
   }
   else $unhandled
 }
 
-/** Returns what runs when `frame` lands: the catch arm the clause's
+/* Returns what runs when `frame` lands: the catch arm the clause's
     handler selected, or `exits` and no return; `$x2c.try.frame` calls this in
     a slot. A landing no catch arm handles runs the region's exits, and
     control does not come back. */
-meta List try_landing(List frame, List clause, List exits) {
+meta List _x2c_try_landing(List frame, List clause, List exits) {
   Macro landing = $x2c.try.handled;
   List otherwise = $!{ { $exits __builtin_unreachable(); } };
   match (clause)
@@ -122,10 +122,10 @@ meta List try_landing(List frame, List clause, List exits) {
 
 // the frame
 
-/** Places the lowered exits of a try after its regions, with the effect
+/* Places the lowered exits of a try after its regions, with the effect
     that marks the unit as needing exception support; `$x2c.try.frame` calls
     this in a slot. */
-meta List try_exits_placement(List exits) {
+meta List _x2c_try_exits_placement(List exits) {
   Atom token = Atom.intern("?__try_cleanup");
   match (exits)
     case %(code-value ? ?statements ?):
@@ -138,14 +138,14 @@ macro Stmt $x2c.try.frame(
   Name $frame, Expr $clause, Stmt $body, Stmt $exits) {
   {
     ExceptionFrame $frame;
-    @try_catch_site($frame, $clause)
+    @_x2c_try_catch_site($frame, $clause)
     x2c_exception_push(&$frame);
     if (!sigsetjmp($frame.env, 0)) $body
     else {
       x2c_exception_landed(&$frame);
-      @try_landing($frame, $clause, $exits)
+      @_x2c_try_landing($frame, $clause, $exits)
     }
-    @try_exits_placement($exits)
+    @_x2c_try_exits_placement($exits)
   }
 }
 

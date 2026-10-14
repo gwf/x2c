@@ -1208,9 +1208,9 @@ static List _parse_flow_units(
   if (!_analyze_inputs(
     frontend, inputs,
     %!(ParsedUnit *parsed, String input, String path) =>
-      Flow_analyze_unit(parsed.compiler, parsed.ast, path),
+      _x2c_flow_analyze_unit(parsed.compiler, parsed.ast, path),
     functions)) return NULL;
-  return Flow_finish(functions, producer, consumer);
+  return _x2c_flow_finish(functions, producer, consumer);
 }
 
 static List _parse_tail_units(Frontend frontend, Array inputs) {

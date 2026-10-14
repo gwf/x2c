@@ -205,7 +205,7 @@ static List _cursor_assignments(List targets, List outputs) {
 static List _with_iter(Foreach &f, List converter) {
   List constructor = _iter_constructor(f, converter);
   List item_expression = _expr(%("Var"), f.item);
-  List initializer = Code.complete_iterator(
+  List initializer = _x2c_complete_iterator(
     constructor ? _iter_call(constructor, f.collection) : f.collection);
   Code next = MetaContext.function_reference("Iter_try_next");
   List output = next.type().parameters()[1];

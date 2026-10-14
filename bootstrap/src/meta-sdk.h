@@ -144,7 +144,7 @@ List MetaContext_type_description(Var value);
 
 List MetaContext_source_description(Var value);
 
-List Code_complete_iterator(List expression);
+List _x2c_complete_iterator(List expression);
 
 _Noreturn void MetaContext_reject(String message, List notes);
 

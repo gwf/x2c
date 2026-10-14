@@ -12,7 +12,7 @@
 meta Code interpolation_lowering(Code code) => $!String{ String.new("program's") };
 
 /* Spelled like the try component's landing helper. */
-meta List try_landing(List frame, List clause, List exits) => frame;
+meta List _x2c_try_landing(List frame, List clause, List exits) => frame;
 
 /* Spelled like the access component's read translator. */
 meta Code access_read(Code code) => code;

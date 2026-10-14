@@ -29,7 +29,6 @@ The compiler's answers to `lib/meta.x` operations.
 | [`Code.binding_spelling`](#Code.binding_spelling) | Answers `Code.binding_spelling`, declared in `lib/meta.x`. |
 | [`Code.body`](#Code.body) | Answers `Code.body`, declared in `lib/meta.x`. |
 | [`Code.call_in_order`](#Code.call_in_order) | Answers `Code.call_in_order`, declared in `lib/meta.x`. |
-| [`Code.complete_iterator`](#Code.complete_iterator) | Returns `expression` with the iterator chain `foreach` reads completed. |
 | [`Code.convert`](#Code.convert) | Answers `Code.convert`, declared in `lib/meta.x`. |
 | [`Code.declared_bindings`](#Code.declared_bindings) | Returns an expression reading each binding `declaration` declares. |
 | [`Code.exits`](#Code.exits) | Answers `Code.exits`, declared in `lib/meta.x`. |
@@ -223,15 +222,6 @@ its temporaries here, so the result is a carrier that binds no
 further.
 
 Source: `src/meta-sdk.x:267`
-
-<a id="Code.complete_iterator"></a>
-#### Code.complete_iterator
-
-`List Code.complete_iterator(List expression)`
-
-Returns `expression` with the iterator chain `foreach` reads completed.
-
-Source: `src/meta-sdk.x:1049`
 
 <a id="Code.convert"></a>
 #### Code.convert
