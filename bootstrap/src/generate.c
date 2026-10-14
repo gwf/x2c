@@ -3445,6 +3445,7 @@ static List _function_row(Compiler c, List type, List binding, List modifiers, i
   );
 }
 
+String Compiler_unprefixed(Compiler, String);
 static String _display(Compiler c, List binding, String name){
   {
     Var _x2c_gensym_match_var = Map_getindex(Compiler_semantic_binding_facts(c), List_var(cons(_942, cons(List_var(binding), NULL)))); int _x2c_gensym_match_none = !Var_is(_x2c_gensym_match_var, 806120);  List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var); List _x2c_gensym_match_cursor;  switch(0){
@@ -3461,7 +3462,7 @@ static String _display(Compiler c, List binding, String name){
     }
 
   }
-  return name;
+  return Compiler_unprefixed(c, name);
 }
 
 static List _span(Compiler c, List key){

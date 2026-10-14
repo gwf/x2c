@@ -1599,7 +1599,7 @@ static List _function_row(
 static String _display(Compiler c, List binding, String name) {
   match (c.semantic_binding_facts()[%(method $binding)])
     case %(?(String owner) ?(String member)): return %"$owner.$member";
-  return name;
+  return c.unprefixed(name);
 }
 
 static List _span(Compiler c, List key) {

@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/module-block-shadow-namespace/b.x:1:25: parse: 'depth' is a module name and a static of one file in this unit
+  static typedef int depth;
+                          ^
+  note: a module declaration's name means one thing in every file of the unit; rename one of them
+

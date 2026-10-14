@@ -373,7 +373,7 @@ static int _static_interface_form(Compiler c) {
 static int _module_storage_form(Compiler c) {
   Symbol word = c.peek(0);
   if (c.module_declaration || (word != <ident> && word != <static>) ||
-      c.token.text != "module") return 0;
+      c.token.text != "module" || c.sym.get(%("module"))) return 0;
   Symbol next = Token.skip_trivia(c.token + 1).type;
   return next == <ident> || next == <typedef> || next == <inline> ||
          next.is_type_qualifier() || next.is_builtin_type();
@@ -1499,14 +1499,14 @@ static List _typedef_name(Compiler c) {
   return %($name);
 }
 
-/* Module and package files spell their own file-scope type names bare.
-   A block-scope typedef of the name shadows every file-scope one; then the
-   current module file's static of that name comes first. In package mode a
-   bare-key miss with a prefixed hit re-spells the reference. ASTs carry
-   raw strings and emit literally. */
+/* Module and package files spell their own file-scope type names bare. A
+   block-scope typedef or tag of the name shadows every file-scope one;
+   then the current module file's static of that name comes first. In
+   package mode a bare-key miss with a prefixed hit re-spells the
+   reference. ASTs carry raw strings and emit literally. */
 static String _type_reference(Compiler c, Symbol tag, String name) {
   List bare = tag ? %($tag $name) : %($name);
-  if (!tag && c.sym.has_local(bare)) return name;
+  if (c.sym.has_local(bare)) return name;
   String own = c.scoped_spelling(c.file_prefix(), name);
   if (own != name && c.sym.get_exact(tag ? %($tag $own) : %($own)))
     return own;
@@ -1888,6 +1888,7 @@ static List _publish_enumerator(
   if (!spelling)
     $report.parse.syntax_position(c, origin);
   List key = %($spelling);
+  if (exact) key = c.sym.declared_key(NULL, key, context);
   Symbol prior = c.sym.enumerator_owner(key);
   if (prior && binding) {
     List existing = c.sym.lookup(key, NULL);

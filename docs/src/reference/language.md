@@ -159,24 +159,31 @@ the file that declares it and in no other file of the unit. That holds for
 objects, functions, `static typedef`, `static class`, and the `struct`,
 `union`, or `enum` tag such a typedef declares. Two members may each declare
 `static int counter` or `static typedef struct Node { ... } Node`, and each
-file sees its own. A file's statics take a prefix in the generated C: the
-file's path under the entry's companion directory without its extension,
-with each character that cannot continue a C identifier made `_`, then
-`__`. Under the entry `parser.x`, a static `advance` in
-`parser/statements/loops.x` emits as `statements_loops__advance`, and one in
-the entry itself as `parser__advance`. Generated names are compiler details;
-source never spells them. A static type adopted as a class keeps its short
-name as its Var tag and descriptor name, so two files of one unit cannot
-each adopt a class under the same short name. Compile-time declarations,
-`static macro`, `static $(`, `static protocol`, and `meta` functions, keep
-their unit-wide behavior.
+file sees its own, and so do the enumerators of a `static` enum. A file's
+statics take a prefix in the generated C: the file's path under the entry's
+companion directory without its extension, with each character that cannot
+continue a C identifier made `_`, then `___`; a path that starts with a
+digit gets a leading `x`. Under the entry `parser.x`, a static `advance` in
+`parser/statements/loops.x` emits as `statements_loops___advance`, and one
+in the entry itself as `parser___advance`. A package prefix ends in `__`,
+so a package entry's statics stay apart from the package's public names.
+Generated names are compiler details; source never spells them, and
+`--dump-definitions` displays the source name. A static type adopted as a
+class keeps its short name as its Var tag and descriptor name, so two files
+of one unit cannot each adopt a class under the same short name.
+Compile-time declarations, `static macro`, `static $(`, `static protocol`,
+and `meta` functions, keep their unit-wide behavior. A free name in a macro
+body binds where the expansion lands, so it reaches the expanding file's
+static; a type name in a macro body is spelled where the macro is defined.
 
-Three cases are errors. Two members whose paths give one prefix, such as
-`a_b.x` and `a/b.x`, are a driver error at the block. A `static` whose name
-is a `module` name of the unit, in either order of declaration, is a parse
-error at the later declaration, because a `module` name means one thing in
-every file. Two files adopting a class under one short name is a parse
-error at the second.
+Three cases are errors. Two files whose paths give one prefix, such as
+`a_b.x` and `a/b.x`, or a member named like its entry, are a driver error
+at the block. A `static` object, function, typedef, or tag whose name is a
+`module` name of the same C namespace, in either order of declaration, is a
+parse error at the later declaration, because a `module` name means one
+thing in every file. Two files adopting a class under one short name is a
+parse error at the second. A file-scope typedef named `module` keeps that
+word an identifier.
 
 A quoted include in a member that names a file beside the member reaches that
 file, in collection and in the generated C. Any other include resolves as it
