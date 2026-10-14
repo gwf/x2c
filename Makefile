@@ -337,11 +337,10 @@ PANDOC ?= pandoc
 TYPST ?= typst
 
 doc-pdf:						## Typeset the book as a PDF (Pandoc 3.12+, Typst 0.15+)
-	@mkdir -p docs/book
 	cd docs/src && $(PANDOC) SUMMARY.md --from=commonmark_x --to=typst \
 		--lua-filter=../../tools/book-pdf.lua --template=../book.typ \
 		--syntax-highlighting=none --pdf-engine=$(TYPST) \
-		--output=../book/x2c-book.pdf
+		--output=../x2c-book.pdf
 
 doc-serve: site/node_modules/.package-lock.json		## Serve the book with live reload
 	@command -v mdbook >/dev/null 2>&1 || { \

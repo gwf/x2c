@@ -17,7 +17,7 @@ brew install pandoc typst
 make doc-pdf
 ```
 
-The result is `docs/book/x2c-book.pdf`. This optional target does not build
+The result is the tracked `docs/x2c-book.pdf`. This optional target does not build
 the compiler, run the website highlighter, or change the Markdown sources.
 It includes the entire book, including the generated API reference.
 

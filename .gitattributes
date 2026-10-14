@@ -11,3 +11,4 @@ unittest/compiler-fixtures/*.c whitespace=-blank-at-eof
 unittest/compiler-fixtures/*.emit whitespace=-blank-at-eof
 unittest/compiler-fixtures/**/*.c whitespace=-blank-at-eof
 bootstrap/**/*.c whitespace=-blank-at-eof
+*.pdf binary
