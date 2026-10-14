@@ -493,7 +493,8 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   */
   $element $array.remove($array array, int index) {
     $element value = $zero;
-    if (array && array.length <= INT_MAX && array.remove_element(index, &value))
+    if (array && array.length <= INT_MAX &&
+        array.remove_element(index, &value))
       return value;
     if (array && array.length > INT_MAX)
       _size_limit($owner, array.length);
