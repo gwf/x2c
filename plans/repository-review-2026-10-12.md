@@ -126,15 +126,20 @@ function rules seeing compiler-written definitions are fixed as the plan
 records; a macro-built `with` (macro body and `$!{}` quotation) behaves like
 the handwritten form (`with-probe/with-macro.x` prints `3 4` and `7 8`).
 
-## B. Decisions recorded but not implemented
+## B. Decisions as recorded, behavior before delivery
 
-These change observable behavior. Each row gives current behavior at
-`2ec6ea71`, the owners, and the size, from `semantics/` probes.
+These change observable behavior. Each row gives the behavior at
+`2ec6ea71`, before delivery, with the owners and the size, from
+`semantics/` probes. Delivery (2026-10-14 note): the
+[execution log](#execution-log) records non-List match in batch 2, Var to
+String in batches 3 and 10, and numeric comparisons in batch 4. The wide
+index row was superseded by decision 2: indices stay 32-bit `int`, and the
+book states it.
 
 | Decision | Current behavior | Owners and dependents | Size |
 | --- | --- | --- | --- |
 | Numeric `==` by C rules; value `===` needs equal type | `3 == 3L` is false; equality requires the same tag; two boxes of `3L` give `== 1`, `=== 0`. The Var hash is per tag: keys `3`, `3L`, `3.0`, `3.0f`, `(char) 3`, `3u` make six Map entries and `{3: x}[3L]` is void. `sort` orders equal values by type rank. | `_comparison` (src/transform.x:1079); `Var.equal`, `Var.same`, `Var.compare`, `Var.hash` (lib/dispatch.x:329-514); `lib/var.x:1086-1228`; `lib/varops.x:181-209`. Dependents: Map and Pool key equality (lib/map-generics.x:16-32), `List.equal` and `List.hash` under pool interning (lib/list.x:109-130, lib/pool.x), `Array` sorting, `Iter` min and max, `lisp_eq`. | Large. C equality is not transitive (`-1 == 4294967295u`, `-1 == ULONG_MAX`, `4294967295u != ULONG_MAX`), so no hash fits it; NaN and signed zero change; sorting must keep a total order. Six assertions in `unittest/test-var.x:570-579` and two fixtures assert the old behavior. A Map key policy is unavoidable. |
-| Wide indices never wrap | `a[4294967297L]` reads, writes, and updates element 1 for Array, List, String, and Var receivers; `a[2^31:]` returns the whole Array because the bound narrows to the `INT_MIN` omitted-bound marker; `a[::2^32]` raises `<bad-arg>`. Map keys and native arrays are correct. | Narrowing happens at `int` parameters and in the generated Var adapters (`src/component-protocols.x:47-62`); shared normalizers take `int` (lib/common.x:867, 887); `src/component-access.x:51-217`; the slice marker at src/transform.x:430. `List.get` (lib/list.x:495-502) already rejects a non-`int` index. | One conversion owner plus the slice marker collision; two fixture C phases. |
+| Wide indices never wrap (superseded by decision 2: indices stay 32-bit `int`, documented) | `a[4294967297L]` reads, writes, and updates element 1 for Array, List, String, and Var receivers; `a[2^31:]` returns the whole Array because the bound narrows to the `INT_MIN` omitted-bound marker; `a[::2^32]` raises `<bad-arg>`. Map keys and native arrays are correct. | Narrowing happens at `int` parameters and in the generated Var adapters (`src/component-protocols.x:47-62`); shared normalizers take `int` (lib/common.x:867, 887); `src/component-access.x:51-217`; the slice marker at src/transform.x:430. `List.get` (lib/list.x:495-502) already rejects a non-`int` index. | One conversion owner plus the slice marker collision; two fixture C phases. |
 | Non-List match rejects its input | A Map, String, number, Array, or Symbol subject matches `case %():` and binds an empty `*rest`; fixed patterns fall to `default`. | `src/component-match.x:378` emits `Var_list(value)`, which returns NULL for any other tag. `_match_element` and `lib/lisp-init.x:115-119` already reject non-Lists. | One function; two fixture C phases. Guide wording at `docs/src/guide/match.md:264-268`. |
 | Implicit Var to String calls `.str()` | `String s = v` emits `Var_string(v)`, NULL for every non-String payload, with no error; `.string()` emits the same call. | `_read_var` and `_var_exact_reader` (src/expressions.x:3463-3519); `Var.string` (lib/common.x:668); `Var.str` (lib/dispatch.x:74-89). Dependents: the unnecessary-conversion lint (src/expressions.x:3066-3099), NULL used as a tag test in `Var.hash` and Map key equality, 32 adapter call sites that must stay exact. | Medium. Three fixtures change; `docs/src/guide/values.md:131-146` prints `text=0` under the output check. |
 
@@ -317,7 +322,9 @@ components.
   `2557fd72`, `71e933b0`) carry `Co-Authored-By` and `Claude-Session`
   trailers and the author `Claude <noreply@anthropic.com>`, from a web
   session that did not load the attribution rule. History is not rewritten;
-  the rule needs to reach that session type.
+  the rule needs to reach that session type. Added 2026-10-14: a sixth
+  commit on 2026-10-12, `30c07c61` ("refresh generated sources and docs"),
+  has the same author but no trailers.
 - `.context/language-components/performance.json` is tracked inside the
   ignored `.context/` directory.
 - 92 of the 296 commits since the foundation are refresh commits. A cleanup

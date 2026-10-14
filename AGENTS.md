@@ -108,8 +108,10 @@ commits need not rebuild from their own bootstrap.
 - `src/` - the compiler: `main` (dispatch) -> `cli` (CLI) ->
   `frontend` (configured source units) -> `meta-project` (project meta
   helper build) and `meta-helper-client` (its calls) -> `compiler`
-  (translation state, + `symbols`, its symbol table, and `fields`, which
-  copies named fields) ->
+  (translation state, with members under `src/compiler/` for parsing,
+  declarations, generated names, lifecycle, binding facts, the literal cache,
+  match patterns, and source files and locations; + `symbols`, its symbol
+  table, and `fields`, which copies named fields) ->
   shared runtime `lib/tokenizer.x` (+ `preprocess`, which reads its
   directives) ->
   `parse` (+ `parse-report-macros`, package and alias diagnostics)/
@@ -163,6 +165,8 @@ commits need not rebuild from their own bootstrap.
 - `docs/` - the user-facing book (mdBook); `make doc-build` renders it.
 - `unittest/`, `examples/`, `plans/`; `etc/` holds build tooling, the
   external Lisp bootstrap, and the compile-time Lisp SDK.
+- `experiments/` - optional language component examples and their case
+  runner (`experiments/language-components/run.py`); outside `make check`.
 - `packages/` - optional adapters for third-party C libraries; they need
   network-fetched sources and are outside `make check`.
 - `site/` - the public website; `make site-build` renders it with the book

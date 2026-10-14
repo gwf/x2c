@@ -82,6 +82,8 @@ static Type _stored_type(Type type, Type key, List ast);
 
 static void _local_typedef(Sym s, Type type, List binding);
 
+static int _names_local_object(Type declared);
+
 static void _local_object(Sym s, List key, List binding, Type type);
 
 static List _locals(Sym s, String spelling);
@@ -930,7 +932,7 @@ List Sym_declare(Sym s, List context, List key, List ast){
     Sym_set(s, Type_list(ctxkey), (List) type);
     _local_typedef(s, type, binding);
   }
-  if(! List_truth(context) && ! Sym_at_file_scope(s)) _local_object(s, key, binding, declared_type);
+  if(! List_truth(context) && ! Sym_at_file_scope(s) && _names_local_object(declared_type)) _local_object(s, key, binding, declared_type);
   return binding;
 }
 
@@ -1028,6 +1030,14 @@ static void _local_typedef(Sym s, Type type, List binding){
   if(Sym_at_file_scope(s)) return;
   if(Type_is_aggregate_tag(type)) Sym_put(s, s -> binding_facts, List_var(cons(_67, cons(List_var(binding), NULL))), List_var(type));
   Sym_put(s, s -> binding_facts, List_var(cons(_68, cons(List_var(binding), NULL))), String_var(Compiler_fresh_name(s -> c, _69)));
+}
+
+int Type_is_extern(Type);
+
+int Type_is_function(Type);
+
+static int _names_local_object(Type declared){
+  return ! Type_is_extern(declared) && ! Type_is_function(declared);
 }
 
 void Sym_join_locals(Sym s, List binding);
@@ -1188,9 +1198,7 @@ void Compiler_record_declaration_visibility(Compiler c, List declaration){
 
 }
 
-int Type_is_extern(Type);
 int Path_is_x2c_source(String);
-int Type_is_function(Type);
 static void _record_native_objects(Compiler c, Type spec, List rows){
   if(! c -> shallow || c -> source_private < 0 || Type_is_extern(spec) || ! Path_is_x2c_source(c -> filename)) return;  String path = Compiler_portable_path(Compiler_canonical_path(c, c -> filename)); {
     List row;  List _x2c_gensym_macro_object_7 = rows;  List _x2c_gensym_macro_cursor_7 = _x2c_gensym_macro_object_7;  Var _x2c_gensym_macro_cursor_output_12;  while(List_try_next(_x2c_gensym_macro_object_7, &(_x2c_gensym_macro_cursor_7), &(_x2c_gensym_macro_cursor_output_12))){

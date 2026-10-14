@@ -77,9 +77,9 @@ String Var.string(Var value) {
 static macro Unit $var.tag.exact(
   Type $type, Name $method, Name $payload, Literal $tag, Literal $name) {
   /** Extracts the `$type` payload of `value`.
-      Raises: `<no-convert>` for any other tag. A `$type` destination
-      converts a `Var` implicitly through `Var.$payload`, which reads the
-      payload or NULL without raising.
+      Raises: `<no-convert>` for any other tag. An implicit conversion
+      from `Var` to `$type` uses `Var.$payload`, which reads the payload or
+      NULL without raising.
   */
   $type Var.$method(Var value) {
     if (value is not $tag) $error.no_convert(value.tag(), $name);

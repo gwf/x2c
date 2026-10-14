@@ -86,7 +86,7 @@ positions. Therefore:
   and 64-bit constants such as `VAR_NULL_BITS` are not portable enumerators.
 - Ordinary include collection terminates cycles. Raw `.x` include cycles used
   with `--cpp-symbols` or `--live-symbols` need source guards, as described in
-  [source files and pragmas](../docs/src/reference/language.md#source-files-and-pragmas).
+  [source files and visibility](../docs/src/reference/language.md#source-files-and-visibility).
 - The compiler never reads system headers. Declare compiler-visible types in
   `.x` source or the runtime library.
 

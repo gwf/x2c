@@ -11,6 +11,13 @@
 > `gwf/language-components` 5b7a7769, is archived there as
 > `plans/archive/compiler-kernel-hypotheses.md`; this version supersedes
 > it. No source changes. Gary selects what to execute.
+> Note added 2026-10-14: this catalog predates delivery. The foundation has
+> been on `dev` since 2026-10-09, and
+> [the foundation plan](language-components-foundation.md#log) records what
+> landed. Several proposals here did not land or were decided against:
+> `_cell_declaration`, the `early` carrier effect (deleted in `ed35a035d`),
+> `convert_at`, the `unit-anchor` and `before-statement` placements, and the
+> deletion of `lambda_scopes`, which stays in `src/compiler.x`.
 
 ## Answer
 
@@ -67,12 +74,13 @@ Recovered at 8b78c595, against dev:
   macro's pattern into `binary` by operator, `member` by canonical
   receiver type, `access` by use (`read`, an assignment operator,
   `prefix`, `postfix`), `node` for `switch`, and `decl`/`init`.
-- `Compiler._rewrite` in `src/macros.x`: per candidate, a prepared
+- static `_rewrite` in `src/macros.x`: per candidate, a prepared
   `MacroMatcher`, `apply_meta_function`, a deep-equality decline test,
   then `bind_syntax`, `convert_expression`, and `normalize`.
-- Dispatch sites: `_binary_expression`, `CallSite._method` on a miss,
-  `_access_rewrite` before read or update lowering, `_statement_rewrite`
-  for `switch`, and `finish_initializers` for postludes.
+- Dispatch sites: `_binary_expression`, static `_method` in
+  src/expressions.x on a miss, `_access_rewrite` before read or update
+  lowering, `_statement_rewrite` for `switch`, and `finish_initializers`
+  for postludes.
 - `Code.type`, `Code.value`, `Type.is_named`, `Type.numeric`,
   `Type.is_text`, `Type.protocol_member`; pure Type algorithms in
   `lib/type.x` (617 lines moved out of `src/type.x`).
@@ -160,7 +168,7 @@ and probes `families[family][key]`.
 | binary | operator, then left type | `_binary_expression` | protocol operators later |
 | unary | operator, then operand type | `_operator`, `_postfix` | dynamic operators |
 | access | use, then base type | `_access_rewrite` | collection access (done) |
-| member | receiver type | `CallSite._method` on a miss | delegate |
+| member | receiver type | static `_method` (src/expressions.x) on a miss | delegate |
 | call | callee binding | `_call` | printf families |
 | literal | head | `_step_tag` literal arms | collection literals, interpolation |
 | statement | head | `_step_tag`, `_statement_rewrite` | switch, match, raise, with |

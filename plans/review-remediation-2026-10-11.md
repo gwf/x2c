@@ -255,6 +255,9 @@ int parameter ordinarily permit conversion; that is different from a library
 promise to reject an out-of-range index. Before changing APIs, decide whether
 bracket syntax promises range-preserving conversion. Recommended behavior is
 that an index outside the representable domain cannot alias a valid element.
+Superseded 2026-10-12 by decision 2 of
+[the repository review](repository-review-2026-10-12.md#decisions-recorded-2026-10-12):
+indices stay 32-bit `int`, and the book states it.
 
 For that decision, inventory String/List/Array reads, writes, compound writes,
 and slices, including Var-index dispatch and direct methods. Reuse the existing
@@ -592,9 +595,14 @@ against these boundaries before publication validation.
 ## Implementation checkpoint, 2026-10-11
 
 The confirmed repairs below are implemented against `9004c40b`. This checkpoint
-records focused evidence before the final integrated publication gate and
-performance measurements. Those final results belong to the delivery report.
+records focused evidence before the final integrated publication gate.
 No recurring gate or validation order was expanded.
+Delivery, recorded 2026-10-14: these repairs went directly to dev on
+2026-10-11, ending at `cdd73a7a8`. This record has no gate result for that
+publication. PR #193 (`4d4c7aa9d`, 2026-10-13) later recorded
+`tools/gate-state.py ensure agent-pr-check` passing on `900640f7`, a tree
+that contains these repairs. No separate delivery report or performance
+report was produced.
 
 | Scope | Implemented result and focused evidence |
 | --- | --- |
@@ -640,8 +648,10 @@ use explicit late-bound defer. Existing Array and closure warnings remain
 unchanged. Focused fixtures cover replacement values, conditional aliases,
 Scope slot population, ownership moves, const and volatile locals, aggregate
 snapshots, and lazy allocation. No general alias analysis or gate is added.
-Final validation and performance results belong to the follow-up delivery
-report.
+Delivery, recorded 2026-10-14: the acquired-cleanup commits `c4d52d5b6` and
+`e7b2be431` went directly to dev on 2026-10-12, not through a PR. PR #193
+later recorded an `agent-pr-check` pass on `900640f7`, a tree that contains
+them. No separate delivery report or performance report was produced.
 
 Wide indexing, cross-tag numeric equality, class unboxing checks, rewrite
 visibility policy, additional platform guarantees, and expanded gates remained

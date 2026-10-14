@@ -36,8 +36,8 @@ static double walk(double x, double y, int n){
 }
 
 static double walk_grad(double x, double y, int n, double * x_grad, double * y_grad){
-  ArrayDbl _x2c_macro_tape_0 = ArrayDbl_new();
-  double _x2c_macro_result_0 = 0.0, _x2c_macro_seed_0 = 0.0, _x2c_macro_code_0 = 0.0;
+  ArrayDbl _x2c_gensym_macro_tape_0 = ArrayDbl_new();
+  double _x2c_gensym_macro_result_0 = 0.0, _x2c_gensym_macro_seed_0 = 0.0, _x2c_gensym_macro_code_0 = 0.0;
   double s = 0.0;
   int i = 0;
   int _ad_trip3 = 0;
@@ -49,84 +49,84 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
   double y_bar = 0.0;
   double s_bar = 0.0;
   double t_bar = 0.0;
-  ArrayDbl_push(_x2c_macro_tape_0, s);
+  ArrayDbl_push(_x2c_gensym_macro_tape_0, s);
   s = 0.0;
-  ArrayDbl_push(_x2c_macro_tape_0, i);
+  ArrayDbl_push(_x2c_gensym_macro_tape_0, i);
   i = 0;
   _ad_trip3 = 0;
   while(i < n){
     _ad_trip3 = _ad_trip3 + 1;
     if(i == 2){
-      ArrayDbl_push(_x2c_macro_tape_0, i);
+      ArrayDbl_push(_x2c_gensym_macro_tape_0, i);
       i = i + 1;
-      ArrayDbl_push(_x2c_macro_tape_0, 1.0);
+      ArrayDbl_push(_x2c_gensym_macro_tape_0, 1.0);
       continue;
-      ArrayDbl_push(_x2c_macro_tape_0, 1.0);
+      ArrayDbl_push(_x2c_gensym_macro_tape_0, 1.0);
     }
     else{
-      ArrayDbl_push(_x2c_macro_tape_0, 0.0);
+      ArrayDbl_push(_x2c_gensym_macro_tape_0, 0.0);
     }
     if(s > 40.0){
-      ArrayDbl_push(_x2c_macro_tape_0, 2.0);
+      ArrayDbl_push(_x2c_gensym_macro_tape_0, 2.0);
       break;
-      ArrayDbl_push(_x2c_macro_tape_0, 1.0);
+      ArrayDbl_push(_x2c_gensym_macro_tape_0, 1.0);
     }
     else{
-      ArrayDbl_push(_x2c_macro_tape_0, 0.0);
+      ArrayDbl_push(_x2c_gensym_macro_tape_0, 0.0);
     }
-    ArrayDbl_push(_x2c_macro_tape_0, s);
+    ArrayDbl_push(_x2c_gensym_macro_tape_0, s);
     s = s +(x * x *(double) i + fabs(y) * hypot(x, y));
-    ArrayDbl_push(_x2c_macro_tape_0, i);
+    ArrayDbl_push(_x2c_gensym_macro_tape_0, i);
     i = i + 1;
-    ArrayDbl_push(_x2c_macro_tape_0, 0.0);
+    ArrayDbl_push(_x2c_gensym_macro_tape_0, 0.0);
   }
-  ArrayDbl_push(_x2c_macro_tape_0, _ad_trip3);
-  ArrayDbl_push(_x2c_macro_tape_0, t);
+  ArrayDbl_push(_x2c_gensym_macro_tape_0, _ad_trip3);
+  ArrayDbl_push(_x2c_gensym_macro_tape_0, t);
   t = x * y + 3.0;
   if(t > 100.0){
-    _x2c_macro_result_0 = t * s;
-    ArrayDbl_push(_x2c_macro_tape_0, 4.0);
-    goto _x2c_macro_reverse_0;
-    ArrayDbl_push(_x2c_macro_tape_0, 1.0);
+    _x2c_gensym_macro_result_0 = t * s;
+    ArrayDbl_push(_x2c_gensym_macro_tape_0, 4.0);
+    goto _x2c_gensym_macro_reverse_0;
+    ArrayDbl_push(_x2c_gensym_macro_tape_0, 1.0);
   }
   else{
-    ArrayDbl_push(_x2c_macro_tape_0, 0.0);
+    ArrayDbl_push(_x2c_gensym_macro_tape_0, 0.0);
   }
-  ArrayDbl_push(_x2c_macro_tape_0, j);
+  ArrayDbl_push(_x2c_gensym_macro_tape_0, j);
   j = 0;
   _ad_first5 = 1;
   _ad_trip6 = 0;
   while(_ad_first5 || j < 2){
     _ad_trip6 = _ad_trip6 + 1;
-    ArrayDbl_push(_x2c_macro_tape_0, _ad_first5);
+    ArrayDbl_push(_x2c_gensym_macro_tape_0, _ad_first5);
     _ad_first5 = 0;
-    ArrayDbl_push(_x2c_macro_tape_0, s);
+    ArrayDbl_push(_x2c_gensym_macro_tape_0, s);
     s = s - sin(t) / x;
-    ArrayDbl_push(_x2c_macro_tape_0, j);
+    ArrayDbl_push(_x2c_gensym_macro_tape_0, j);
     j = j + 1;
-    ArrayDbl_push(_x2c_macro_tape_0, 0.0);
+    ArrayDbl_push(_x2c_gensym_macro_tape_0, 0.0);
   }
-  ArrayDbl_push(_x2c_macro_tape_0, _ad_trip6);
-  _x2c_macro_result_0 = s * atan2(y, x) + fmax(x, y);
-  ArrayDbl_push(_x2c_macro_tape_0, 7.0);
-  goto _x2c_macro_reverse_0;
-  _x2c_macro_reverse_0 : _x2c_macro_code_0 = ArrayDbl_take_last(_x2c_macro_tape_0);
-  if(_x2c_macro_code_0 == 4.0){
+  ArrayDbl_push(_x2c_gensym_macro_tape_0, _ad_trip6);
+  _x2c_gensym_macro_result_0 = s * atan2(y, x) + fmax(x, y);
+  ArrayDbl_push(_x2c_gensym_macro_tape_0, 7.0);
+  goto _x2c_gensym_macro_reverse_0;
+  _x2c_gensym_macro_reverse_0 : _x2c_gensym_macro_code_0 = ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
+  if(_x2c_gensym_macro_code_0 == 4.0){
     t_bar += s;
     s_bar += t;
-    t = ArrayDbl_take_last(_x2c_macro_tape_0);
-    _x2c_macro_seed_0 = t_bar;
+    t = ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
+    _x2c_gensym_macro_seed_0 = t_bar;
     t_bar = 0.0;
-    x_bar += _x2c_macro_seed_0 * y;
-    y_bar += _x2c_macro_seed_0 * x;
-    _ad_trip3 =(int) ArrayDbl_take_last(_x2c_macro_tape_0);
+    x_bar += _x2c_gensym_macro_seed_0 * y;
+    y_bar += _x2c_gensym_macro_seed_0 * x;
+    _ad_trip3 =(int) ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
     while(_ad_trip3 > 0){
-      _x2c_macro_code_0 = ArrayDbl_take_last(_x2c_macro_tape_0);
-      if(_x2c_macro_code_0 == 1.0){
-        i =(int) ArrayDbl_take_last(_x2c_macro_tape_0);
+      _x2c_gensym_macro_code_0 = ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
+      if(_x2c_gensym_macro_code_0 == 1.0){
+        i =(int) ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
       }
-      else if(_x2c_macro_code_0 == 2.0){
-        if(ArrayDbl_take_last(_x2c_macro_tape_0) != 0.0){
+      else if(_x2c_gensym_macro_code_0 == 2.0){
+        if(ArrayDbl_take_last(_x2c_gensym_macro_tape_0) != 0.0){
 
         }
         else{
@@ -135,23 +135,23 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
 
       }
       else{
-        i =(int) ArrayDbl_take_last(_x2c_macro_tape_0);
-        s = ArrayDbl_take_last(_x2c_macro_tape_0);
-        _x2c_macro_seed_0 = s_bar;
+        i =(int) ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
+        s = ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
+        _x2c_gensym_macro_seed_0 = s_bar;
         s_bar = 0.0;
-        s_bar += _x2c_macro_seed_0;
-        x_bar += _x2c_macro_seed_0 *(double) i * x;
-        x_bar += _x2c_macro_seed_0 *(double) i * x;
-        y_bar += _x2c_macro_seed_0 * hypot(x, y) *(y < 0.0 ? -1.0 : 1.0);
-        x_bar += _x2c_macro_seed_0 * fabs(y) *(x / hypot(x, y));
-        y_bar += _x2c_macro_seed_0 * fabs(y) *(y / hypot(x, y));
-        if(ArrayDbl_take_last(_x2c_macro_tape_0) != 0.0){
+        s_bar += _x2c_gensym_macro_seed_0;
+        x_bar += _x2c_gensym_macro_seed_0 *(double) i * x;
+        x_bar += _x2c_gensym_macro_seed_0 *(double) i * x;
+        y_bar += _x2c_gensym_macro_seed_0 * hypot(x, y) *(y < 0.0 ? -1.0 : 1.0);
+        x_bar += _x2c_gensym_macro_seed_0 * fabs(y) *(x / hypot(x, y));
+        y_bar += _x2c_gensym_macro_seed_0 * fabs(y) *(y / hypot(x, y));
+        if(ArrayDbl_take_last(_x2c_gensym_macro_tape_0) != 0.0){
 
         }
         else{
 
         }
-        if(ArrayDbl_take_last(_x2c_macro_tape_0) != 0.0){
+        if(ArrayDbl_take_last(_x2c_gensym_macro_tape_0) != 0.0){
 
         }
         else{
@@ -161,52 +161,52 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
       }
       _ad_trip3 = _ad_trip3 - 1;
     }
-    i =(int) ArrayDbl_take_last(_x2c_macro_tape_0);
-    s = ArrayDbl_take_last(_x2c_macro_tape_0);
-    _x2c_macro_seed_0 = s_bar;
+    i =(int) ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
+    s = ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
+    _x2c_gensym_macro_seed_0 = s_bar;
     s_bar = 0.0;
   }
-  else if(_x2c_macro_code_0 == 7.0){
+  else if(_x2c_gensym_macro_code_0 == 7.0){
     s_bar += atan2(y, x);
     y_bar += s *(x /(y * y + x * x));
     x_bar += s * -(y /(y * y + x * x));
     x_bar += y <= x ? 1.0 : 0.0;
     y_bar += x < y ? 1.0 : 0.0;
-    _ad_trip6 =(int) ArrayDbl_take_last(_x2c_macro_tape_0);
+    _ad_trip6 =(int) ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
     while(_ad_trip6 > 0){
-      _x2c_macro_code_0 = ArrayDbl_take_last(_x2c_macro_tape_0);
+      _x2c_gensym_macro_code_0 = ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
       {
-        j =(int) ArrayDbl_take_last(_x2c_macro_tape_0);
-        s = ArrayDbl_take_last(_x2c_macro_tape_0);
-        _x2c_macro_seed_0 = s_bar;
+        j =(int) ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
+        s = ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
+        _x2c_gensym_macro_seed_0 = s_bar;
         s_bar = 0.0;
-        s_bar += _x2c_macro_seed_0;
-        t_bar += - _x2c_macro_seed_0 / x * cos(t);
-        x_bar += -(- _x2c_macro_seed_0 * sin(t) /(x * x));
-        _ad_first5 =(int) ArrayDbl_take_last(_x2c_macro_tape_0);
+        s_bar += _x2c_gensym_macro_seed_0;
+        t_bar += - _x2c_gensym_macro_seed_0 / x * cos(t);
+        x_bar += -(- _x2c_gensym_macro_seed_0 * sin(t) /(x * x));
+        _ad_first5 =(int) ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
       }
       _ad_trip6 = _ad_trip6 - 1;
     }
-    j =(int) ArrayDbl_take_last(_x2c_macro_tape_0);
-    if(ArrayDbl_take_last(_x2c_macro_tape_0) != 0.0){
+    j =(int) ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
+    if(ArrayDbl_take_last(_x2c_gensym_macro_tape_0) != 0.0){
 
     }
     else{
 
     }
-    t = ArrayDbl_take_last(_x2c_macro_tape_0);
-    _x2c_macro_seed_0 = t_bar;
+    t = ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
+    _x2c_gensym_macro_seed_0 = t_bar;
     t_bar = 0.0;
-    x_bar += _x2c_macro_seed_0 * y;
-    y_bar += _x2c_macro_seed_0 * x;
-    _ad_trip3 =(int) ArrayDbl_take_last(_x2c_macro_tape_0);
+    x_bar += _x2c_gensym_macro_seed_0 * y;
+    y_bar += _x2c_gensym_macro_seed_0 * x;
+    _ad_trip3 =(int) ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
     while(_ad_trip3 > 0){
-      _x2c_macro_code_0 = ArrayDbl_take_last(_x2c_macro_tape_0);
-      if(_x2c_macro_code_0 == 1.0){
-        i =(int) ArrayDbl_take_last(_x2c_macro_tape_0);
+      _x2c_gensym_macro_code_0 = ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
+      if(_x2c_gensym_macro_code_0 == 1.0){
+        i =(int) ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
       }
-      else if(_x2c_macro_code_0 == 2.0){
-        if(ArrayDbl_take_last(_x2c_macro_tape_0) != 0.0){
+      else if(_x2c_gensym_macro_code_0 == 2.0){
+        if(ArrayDbl_take_last(_x2c_gensym_macro_tape_0) != 0.0){
 
         }
         else{
@@ -215,23 +215,23 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
 
       }
       else{
-        i =(int) ArrayDbl_take_last(_x2c_macro_tape_0);
-        s = ArrayDbl_take_last(_x2c_macro_tape_0);
-        _x2c_macro_seed_0 = s_bar;
+        i =(int) ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
+        s = ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
+        _x2c_gensym_macro_seed_0 = s_bar;
         s_bar = 0.0;
-        s_bar += _x2c_macro_seed_0;
-        x_bar += _x2c_macro_seed_0 *(double) i * x;
-        x_bar += _x2c_macro_seed_0 *(double) i * x;
-        y_bar += _x2c_macro_seed_0 * hypot(x, y) *(y < 0.0 ? -1.0 : 1.0);
-        x_bar += _x2c_macro_seed_0 * fabs(y) *(x / hypot(x, y));
-        y_bar += _x2c_macro_seed_0 * fabs(y) *(y / hypot(x, y));
-        if(ArrayDbl_take_last(_x2c_macro_tape_0) != 0.0){
+        s_bar += _x2c_gensym_macro_seed_0;
+        x_bar += _x2c_gensym_macro_seed_0 *(double) i * x;
+        x_bar += _x2c_gensym_macro_seed_0 *(double) i * x;
+        y_bar += _x2c_gensym_macro_seed_0 * hypot(x, y) *(y < 0.0 ? -1.0 : 1.0);
+        x_bar += _x2c_gensym_macro_seed_0 * fabs(y) *(x / hypot(x, y));
+        y_bar += _x2c_gensym_macro_seed_0 * fabs(y) *(y / hypot(x, y));
+        if(ArrayDbl_take_last(_x2c_gensym_macro_tape_0) != 0.0){
 
         }
         else{
 
         }
-        if(ArrayDbl_take_last(_x2c_macro_tape_0) != 0.0){
+        if(ArrayDbl_take_last(_x2c_gensym_macro_tape_0) != 0.0){
 
         }
         else{
@@ -241,9 +241,9 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
       }
       _ad_trip3 = _ad_trip3 - 1;
     }
-    i =(int) ArrayDbl_take_last(_x2c_macro_tape_0);
-    s = ArrayDbl_take_last(_x2c_macro_tape_0);
-    _x2c_macro_seed_0 = s_bar;
+    i =(int) ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
+    s = ArrayDbl_take_last(_x2c_gensym_macro_tape_0);
+    _x2c_gensym_macro_seed_0 = s_bar;
     s_bar = 0.0;
   }
   else{
@@ -251,8 +251,8 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
   }
   * x_grad = x_bar;
   * y_grad = y_bar;
-  ArrayDbl_free(_x2c_macro_tape_0);
-  return _x2c_macro_result_0;
+  ArrayDbl_free(_x2c_gensym_macro_tape_0);
+  return _x2c_gensym_macro_result_0;
 }
 
 static double replay(double x, double y, int n){
@@ -265,8 +265,8 @@ static double replay(double x, double y, int n){
 }
 
 static double replay_grad(double x, double y, int n, double * x_grad, double * y_grad){
-  ArrayDbl _x2c_macro_tape_1 = ArrayDbl_new();
-  double _x2c_macro_result_1 = 0.0, _x2c_macro_seed_1 = 0.0, _x2c_macro_code_1 = 0.0;
+  ArrayDbl _x2c_gensym_macro_tape_1 = ArrayDbl_new();
+  double _x2c_gensym_macro_result_1 = 0.0, _x2c_gensym_macro_seed_1 = 0.0, _x2c_gensym_macro_code_1 = 0.0;
   double s = 0.0;
   int i = 0;
   int _ad_trip2 = 0;
@@ -277,37 +277,37 @@ static double replay_grad(double x, double y, int n, double * x_grad, double * y
   double x_bar = 0.0;
   double y_bar = 0.0;
   double s_bar = 0.0;
-  ArrayDbl_push(_x2c_macro_tape_1, s);
+  ArrayDbl_push(_x2c_gensym_macro_tape_1, s);
   s = 0.0;
-  ArrayDbl_push(_x2c_macro_tape_1, i);
+  ArrayDbl_push(_x2c_gensym_macro_tape_1, i);
   i = 0;
   _ad_total3 = 0;
   _ad_blocks4 = 0;
   for(;  i < n;  i ++){
     if(_ad_total3 % 4 == 0){
-      ArrayDbl_push(_x2c_macro_tape_1, i);
-      ArrayDbl_push(_x2c_macro_tape_1, s);
+      ArrayDbl_push(_x2c_gensym_macro_tape_1, i);
+      ArrayDbl_push(_x2c_gensym_macro_tape_1, s);
       _ad_blocks4 = _ad_blocks4 + 1;
     }
     _ad_total3 = _ad_total3 + 1;
     if(i == 2) continue;
     s += x * x *(double) i + fabs(y) * hypot(x, y);
   }
-  ArrayDbl_push(_x2c_macro_tape_1, _ad_total3);
-  ArrayDbl_push(_x2c_macro_tape_1, _ad_blocks4);
-  _x2c_macro_result_1 = s * atan2(y, x);
-  ArrayDbl_push(_x2c_macro_tape_1, 7.0);
-  goto _x2c_macro_reverse_1;
-  _x2c_macro_reverse_1 : _x2c_macro_code_1 = ArrayDbl_take_last(_x2c_macro_tape_1);
-  if(_x2c_macro_code_1 == 7.0){
+  ArrayDbl_push(_x2c_gensym_macro_tape_1, _ad_total3);
+  ArrayDbl_push(_x2c_gensym_macro_tape_1, _ad_blocks4);
+  _x2c_gensym_macro_result_1 = s * atan2(y, x);
+  ArrayDbl_push(_x2c_gensym_macro_tape_1, 7.0);
+  goto _x2c_gensym_macro_reverse_1;
+  _x2c_gensym_macro_reverse_1 : _x2c_gensym_macro_code_1 = ArrayDbl_take_last(_x2c_gensym_macro_tape_1);
+  if(_x2c_gensym_macro_code_1 == 7.0){
     s_bar += atan2(y, x);
     y_bar += s *(x /(y * y + x * x));
     x_bar += s * -(y /(y * y + x * x));
-    _ad_blocks4 =(int) ArrayDbl_take_last(_x2c_macro_tape_1);
-    _ad_total3 =(int) ArrayDbl_take_last(_x2c_macro_tape_1);
+    _ad_blocks4 =(int) ArrayDbl_take_last(_x2c_gensym_macro_tape_1);
+    _ad_total3 =(int) ArrayDbl_take_last(_x2c_gensym_macro_tape_1);
     while(_ad_blocks4 > 0){
-      s = ArrayDbl_take_last(_x2c_macro_tape_1);
-      i =(int) ArrayDbl_take_last(_x2c_macro_tape_1);
+      s = ArrayDbl_take_last(_x2c_gensym_macro_tape_1);
+      i =(int) ArrayDbl_take_last(_x2c_gensym_macro_tape_1);
       _ad_remaining5 = _ad_total3 -(_ad_blocks4 - 1) * 4;
       _ad_replay6 = 0;
       _ad_trip2 = 0;
@@ -315,38 +315,38 @@ static double replay_grad(double x, double y, int n, double * x_grad, double * y
         _ad_replay6 = _ad_replay6 + 1;
         _ad_trip2 = _ad_trip2 + 1;
         if(i == 2){
-          ArrayDbl_push(_x2c_macro_tape_1, i);
+          ArrayDbl_push(_x2c_gensym_macro_tape_1, i);
           i = i + 1;
-          ArrayDbl_push(_x2c_macro_tape_1, 1.0);
+          ArrayDbl_push(_x2c_gensym_macro_tape_1, 1.0);
           continue;
-          ArrayDbl_push(_x2c_macro_tape_1, 1.0);
+          ArrayDbl_push(_x2c_gensym_macro_tape_1, 1.0);
         }
         else{
-          ArrayDbl_push(_x2c_macro_tape_1, 0.0);
+          ArrayDbl_push(_x2c_gensym_macro_tape_1, 0.0);
         }
-        ArrayDbl_push(_x2c_macro_tape_1, s);
+        ArrayDbl_push(_x2c_gensym_macro_tape_1, s);
         s = s +(x * x *(double) i + fabs(y) * hypot(x, y));
-        ArrayDbl_push(_x2c_macro_tape_1, i);
+        ArrayDbl_push(_x2c_gensym_macro_tape_1, i);
         i = i + 1;
-        ArrayDbl_push(_x2c_macro_tape_1, 0.0);
+        ArrayDbl_push(_x2c_gensym_macro_tape_1, 0.0);
       }
       while(_ad_trip2 > 0){
-        _x2c_macro_code_1 = ArrayDbl_take_last(_x2c_macro_tape_1);
-        if(_x2c_macro_code_1 == 1.0){
-          i =(int) ArrayDbl_take_last(_x2c_macro_tape_1);
+        _x2c_gensym_macro_code_1 = ArrayDbl_take_last(_x2c_gensym_macro_tape_1);
+        if(_x2c_gensym_macro_code_1 == 1.0){
+          i =(int) ArrayDbl_take_last(_x2c_gensym_macro_tape_1);
         }
         else{
-          i =(int) ArrayDbl_take_last(_x2c_macro_tape_1);
-          s = ArrayDbl_take_last(_x2c_macro_tape_1);
-          _x2c_macro_seed_1 = s_bar;
+          i =(int) ArrayDbl_take_last(_x2c_gensym_macro_tape_1);
+          s = ArrayDbl_take_last(_x2c_gensym_macro_tape_1);
+          _x2c_gensym_macro_seed_1 = s_bar;
           s_bar = 0.0;
-          s_bar += _x2c_macro_seed_1;
-          x_bar += _x2c_macro_seed_1 *(double) i * x;
-          x_bar += _x2c_macro_seed_1 *(double) i * x;
-          y_bar += _x2c_macro_seed_1 * hypot(x, y) *(y < 0.0 ? -1.0 : 1.0);
-          x_bar += _x2c_macro_seed_1 * fabs(y) *(x / hypot(x, y));
-          y_bar += _x2c_macro_seed_1 * fabs(y) *(y / hypot(x, y));
-          if(ArrayDbl_take_last(_x2c_macro_tape_1) != 0.0){
+          s_bar += _x2c_gensym_macro_seed_1;
+          x_bar += _x2c_gensym_macro_seed_1 *(double) i * x;
+          x_bar += _x2c_gensym_macro_seed_1 *(double) i * x;
+          y_bar += _x2c_gensym_macro_seed_1 * hypot(x, y) *(y < 0.0 ? -1.0 : 1.0);
+          x_bar += _x2c_gensym_macro_seed_1 * fabs(y) *(x / hypot(x, y));
+          y_bar += _x2c_gensym_macro_seed_1 * fabs(y) *(y / hypot(x, y));
+          if(ArrayDbl_take_last(_x2c_gensym_macro_tape_1) != 0.0){
 
           }
           else{
@@ -359,9 +359,9 @@ static double replay_grad(double x, double y, int n, double * x_grad, double * y
       _ad_total3 = _ad_total3 - _ad_remaining5;
       _ad_blocks4 = _ad_blocks4 - 1;
     }
-    i =(int) ArrayDbl_take_last(_x2c_macro_tape_1);
-    s = ArrayDbl_take_last(_x2c_macro_tape_1);
-    _x2c_macro_seed_1 = s_bar;
+    i =(int) ArrayDbl_take_last(_x2c_gensym_macro_tape_1);
+    s = ArrayDbl_take_last(_x2c_gensym_macro_tape_1);
+    _x2c_gensym_macro_seed_1 = s_bar;
     s_bar = 0.0;
   }
   else{
@@ -369,8 +369,8 @@ static double replay_grad(double x, double y, int n, double * x_grad, double * y
   }
   * x_grad = x_bar;
   * y_grad = y_bar;
-  ArrayDbl_free(_x2c_macro_tape_1);
-  return _x2c_macro_result_1;
+  ArrayDbl_free(_x2c_gensym_macro_tape_1);
+  return _x2c_gensym_macro_result_1;
 }
 
 int main(void){

@@ -128,18 +128,18 @@ payload readers, `Var.integer`, `Var.floating`, and the wide `*_value`
 readers, are silent low-level decoders that return zero for a tag they do
 not handle.
 
-A crossing to a pointer-shaped runtime type has nothing to convert. The
-payload either has that tag or it does not. Assigning to `List`, `Map`,
-`Array`, `Symbol`, or a type with a declared `protocol Var(T)` conversion
-uses that type's exact reader, and a wrong tag yields NULL. An alias of such
-a type, declared with `class` or `typedef`, uses the reader of its nearest
-ancestor that has one. A `String` destination reads a `String` payload as
-itself, displays any other value through `.str()`, and reads `void` as
-NULL. The explicit readers `.list()`, `.map()`, `.array()`, `.block()`,
-`.buffer()`, `.bytes()`, `.file()`, `.as_iter()`, and `.string()` extract
-their payload and raise `<no-convert>` for any other tag. Their
-`_payload` forms, such as `.list_payload()`, read the payload or NULL
-without raising, as an assignment does:
+A crossing to a pointer-shaped runtime type has nothing to convert. The payload
+either has that tag or it does not. Assigning to `List`, `Map`, `Array`,
+`Symbol`, or a type with a declared `protocol Var(T)` conversion uses that
+type's exact reader, and a wrong tag yields NULL. An alias of such a type,
+declared with `class` or `typedef`, uses the reader of its nearest ancestor
+that has one. A `String` destination reads a `String` payload as itself,
+displays any other value through `.str()`, and reads `void` and `Null` as NULL.
+The explicit readers `.list()`, `.map()`, `.array()`, `.block()`, `.buffer()`,
+`.bytes()`, `.file()`, `.as_iter()`, and `.string()` extract their payload and
+raise `<no-convert>` for any other tag. Their `_payload` forms, such as
+`.list_payload()`, read the payload or NULL without raising, as an assignment
+does:
 
 ```x2c
 Var listy = %(1 2 3);

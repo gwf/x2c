@@ -356,8 +356,8 @@ protocol FeedItemIndex(T) {
 protocol FeedItemIndex(FeedItem);
 
 String FeedItem.getindex(FeedItem item, Var key) {
-  return key.is_integer()
-    ? ((List) item).getindex(key.int()).string() : NULL;
+  if (!key.is_integer()) return NULL;
+  return ((List) item).getindex(key.int());
 }
 ```
 

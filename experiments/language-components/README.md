@@ -30,8 +30,9 @@ uses lower only their captured values and fill that skeleton.
 The [post-initialization boundary](sequences/README.md) keeps declarations,
 bindings, and initialization in the compiler. A component contributes following
 statements. It is not a complete replacement for initializer-only `$auto`.
-The delegation example is also not a replacement for recursive lookup,
-ambiguity handling, or completion. Those features retain dev's implementations.
+The delegation example is also not a replacement for the compiler's
+delegate fields. `src/component-delegate.x` lowers those: it searches nested
+delegate fields and reports ambiguous paths and cycles.
 
 `src/component-access.x` is the first active builtin migration. Array/Map
 mutations use the same authoring facilities as these examples. Native array

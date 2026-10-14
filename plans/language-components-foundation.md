@@ -5,8 +5,18 @@
 > `7e946b86663f9f069fe14e284c41e2aed73c57e0`, is history. Gary authorized
 > publication to `dev` on 2026-10-09 after Milestone 0, the three component
 > cases, `try`, and the driver work. This plan records what landed and owns
-> the recorded decisions below; the rewrite-rule and template boundaries
-> remain open.
+> the recorded decisions below.
+> Updated 2026-10-14: the three recorded boundaries hold on `dev`. PR #193
+> (`4d4c7aa9d`, 2026-10-13) delivered two of them. Shipped support calls
+> stay away from program rules (fixture `rewrite-support-calls`). Template
+> free names bind at the author's file scope (fixtures
+> `macro-author-binding`, `macro-author-binding-scopes`, and
+> `macro-forward-name-later-global`). The constructed `with` boundary needed
+> no change: a `with` in a macro body behaves like the handwritten form
+> (fixture `with-lexical`), and the
+> [repository review](repository-review-2026-10-12.md#a-reproduced-defects)
+> reproduced the `$!{}` quotation form with an uncommitted probe. No
+> checked-in fixture covers the quotation form.
 
 ## Recorded decisions
 
@@ -325,7 +335,7 @@ with slots when that lowering was pure (no introduced binding, name, origin,
 placement, or diagnostic), and fills the skeleton on later uses after
 lowering only the slot values. The memo key is the position, the expected
 type, and the template with each slot reduced to its type and a small shape
-(`Compiler._slot_shape` in src/macros.x): a literal's value, an identifier
+(static `_slot_shape` in src/macros.x): a literal's value, an identifier
 with its lambda-snapshot status, the head of a call, index, postfix, or
 cast, an operator with a unary operand's shape, a member access with its
 base's shape, or a group's inner shape; a conditional, comma, composite,
@@ -498,10 +508,11 @@ assembly, and the rule driver, with every language feature a file under
 | truthiness, getindex, dynamic operators | unary, binary, access; delivered in wave 1 | 410 | 620 |
 | lambda lowering | lambda rules; unit-support and function-entry placements; delivered in wave 5 | 1,500 | 586 |
 | protocols: adapter synthesis only, per `plans/archive/protocols-component.md` | `conform` node rule; unit-support and unit-init placements; delivered in wave 6 | 300 | 153 |
+| match, per `plans/archive/match-component.md` | `match` statement rule; delivered in wave 2 | 340 | 407 in src |
 
 Runtime static locals and class defaults stay in the kernel; the log of
-2026-10-10 records why. `match` moves from the research list to the table
-once `plans/archive/match-component.md` is accepted.
+2026-10-10 records why. `match` joined the table after
+`plans/archive/match-component.md` was accepted.
 
 Kernel deletions no feature blocks: none remain; the `function-entry`
 placement now works at transform time for lambdas, and destructuring needed
@@ -511,31 +522,23 @@ replacement template and fill steps are the remaining driver cost.
 
 ### Open, needing research before a decision
 
-- `match`: delivered in wave 2 as `src/component-match.x` per
-  `plans/archive/match-component.md`; verbatim C text in a lowered carrier is now a
-  documented kernel service.
-- Kernel lowerings in the component form: the try and defer templates, the
-  `Func` call construct-and-recognize pair, wrapper synthesis, and scope cells
-  build AST by hand. Rewriting them as quotations needs the open-template
-  rule, free names resolving at the insertion site, which is undesigned.
-- Shipped components and the meta builders: a component cannot call
-  `lib/meta.x` builders without failing its linked-copy check in meta builds
-  (delegate built lists instead). A linked-meta provenance fix comes first.
-- `defer` and the landing form: `defer` lowers to a runtime cleanup record
-  and thunk while try's exits are lexical. Whether `defer` should become a
-  lexical client of the same form is unmeasured for generated C and runtime.
-- Conformance facts across interfaces: answered 2026-10-10 in
-  `plans/archive/protocols-component.md`. Declarations and adoptions already cross
-  interfaces as source-node rows; no conformance row crosses units, each unit
-  re-derives conformance (about 38 M per unit), and a generic component fact
-  row would replace nothing. Resolution, owners, and the operator ledger stay
-  in the kernel; only adapter synthesis is worth moving, at about +1 M per
-  conformance and +38 total lines, awaiting Gary's choice.
-- `with`: no constructed form, so unifying or extracting it adds
-  macro-visible syntax, a language decision.
-- The linked prelude's future: with the cheap reader it pays only in
-  installed homes; shipping the component interfaces in the home may replace
-  it, and folding `lib/x2c.x` is no longer the prize it looked like.
+Note added 2026-10-14: this list now holds only open items. The earlier
+items are settled. `match` was delivered in wave 2. The template binding
+rule was decided 2026-10-12 and delivered in PR #193. Conformance was
+delivered in wave 6 and then recorded across interfaces. Constructed `with`
+already behaves like the handwritten form. The recorded decisions withdraw
+lexical `defer` and the linked prelude's packaging. Rewriting the kernel's
+hand-built lowerings as quotations is not selected work.
+
+- Constructed `with` in a quotation: the macro-body form is covered by
+  fixture `with-lexical`, but the `$!{}` quotation form was checked only by
+  the repository review's uncommitted probe at `2ec6ea71`.
+- Shipped components and the meta builders: on 2026-10-10 a component could
+  not call `lib/meta.x` builders without failing its linked-copy check in
+  meta builds. `feddf6913` later resolved shipped rule and template names
+  through the linked copies; the builder case was not rechecked.
+- A prelude component rule lost during collection is still silent at
+  collection (see the wave 2 log entry).
 
 ### Log
 
@@ -573,12 +576,12 @@ replacement template and fill steps are the remaining driver cost.
   native -1.2%, access -0.9%, self-translation -0.8%.
 - 2026-10-10, raise follow-up: the component is kept at +24 over the kernel
   arm it replaced and is scheduled for a deliberate simplification.
-- 2026-10-10, raise simplified: `component-raise.x` went from 97 lines to
-  61. The static check keeps the flat type test and drops the walk over List
-  contents and `*_var` boxing calls, which repeated the runtime's
-  `ErrorRegion._copy_value` check at the `<bad-types>` floor. The book now
-  says a value's own invalid type is a compiler error and invalid contents of
-  a List or Var value reach the floor when the raise runs; the
+- 2026-10-10, raise simplified: `component-raise.x` went from 97 lines to 61.
+  The static check keeps the flat type test and drops the walk over List
+  contents and `*_var` boxing calls, which repeated the runtime's `_copy_value`
+  check (now static in lib/error.x) at the `<bad-types>` floor. The book now
+  says a value's own invalid type is a compiler error and invalid contents of a
+  List or Var value reach the floor when the raise runs; the
   `raise-invalid-nested` fixture is gone, and a probe confirmed the floor
   message for its program.
 - 2026-10-10, match research (`plans/archive/match-component.md`, branch
@@ -600,7 +603,7 @@ replacement template and fill steps are the remaining driver cost.
     stacks instead of recursion, rollback when a pattern leaves the nested
     subset, and declaring cursors and the buffer only when used. The one
     SDK addition is `Code.pattern_value`; the plan's fresh-binding
-    operation was not needed because the `_x2c_match_*` names are scoped to
+    operation was not needed because the `_x2c_gensym_match_*` names are scoped to
     the match's block. Translation per use: W3 4.63 M -> 4.81 M (move 1)
     -> 4.26 M (move 2); W4 12.32 M -> 10.98 M -> 8.95 M; self-translation
     of expressions.x 24.66 G -> 24.71 G -> 22.66 G. Runtime: W3 1.39 s ->
@@ -728,29 +731,28 @@ replacement template and fill steps are the remaining driver cost.
   hand-built adapter, and cell declarations built without rebinding;
   `watched_step` scans every source expression once per lowering step, so
   a large lambda body costs quadratically.
-- 2026-10-11, wave 6, protocol adapters (`kernel/protocols-component`,
-  move 1 of `plans/archive/protocols-component.md`): adapter synthesis is
+- 2026-10-11, wave 6, protocol adapters (`kernel/protocols-component`, move 1
+  of `plans/archive/protocols-component.md`): adapter synthesis is
   `src/component-protocols.x`, 199 lines, a rule on the `conform` form
-  `(conform BASE PARTICIPANT FORWARD REVERSE BINDER DESCRIPTOR (ROW...))`
-  that the kernel presents for each resolved conformance whose forward
-  converter the unit defines; rows carry bound names so generated members
-  keep their method display, and `Compiler._generated_support` keeps a
-  documented prototype's prose. The component writes forwarding members,
-  descriptor thunks, method tables, and registration through unit-support
-  and unit-init placements; `Compiler.shipped_support` binds a rule's
-  result into the unit's support and reports `no rule lowers this protocol
-  conformance` when none answers. Kernel -259/+109 (net -150): the
-  `AdapterFunction` and `ProtocolAdapters` generation, the render guard,
-  descriptor registration and its helpers. No SDK operation; the `conform`
-  head joins `Code.register_rewrite`. Generated C byte-identical for the
-  plan's workloads, lib/common.x, and every fixture. Cost: +1.28 M per
-  conformance (W1 minus W0: 11.1 M -> 13.7 M per type with two
-  conformances) against the plan's +1.0 M; member resolution per use
-  unchanged; lib/common.x +76 M (+1.9%); src/protocol.x -416 M. Sampling
-  puts the cost in `bind_syntax` under `Compiler.place`, about 30% of it
-  landing and thawing quotations. Fixtures: `rewrite-conform` (a user rule
-  on the head) and `protocol-documented-member`, with a new `definitions`
-  fixture phase that runs `--dump-definitions`.
+  `(conform BASE PARTICIPANT FORWARD REVERSE BINDER DESCRIPTOR (ROW...))` that
+  the kernel presents for each resolved conformance whose forward converter the
+  unit defines; rows carry bound names so generated members keep their method
+  display, and static `_generated_support` in src/protocol.x keeps a documented
+  prototype's prose. The component writes forwarding members, descriptor
+  thunks, method tables, and registration through unit-support and unit-init
+  placements; `Compiler.shipped_support` binds a rule's result into the unit's
+  support and reports `no rule lowers this protocol conformance` when none
+  answers. Kernel -259/+109 (net -150): the `AdapterFunction` and
+  `ProtocolAdapters` generation, the render guard, descriptor registration and
+  its helpers. No SDK operation; the `conform` head joins
+  `Code.register_rewrite`. Generated C byte-identical for the plan's workloads,
+  lib/common.x, and every fixture. Cost: +1.28 M per conformance (W1 minus W0:
+  11.1 M -> 13.7 M per type with two conformances) against the plan's +1.0 M;
+  member resolution per use unchanged; lib/common.x +76 M (+1.9%);
+  src/protocol.x -416 M. Sampling puts the cost in `bind_syntax` under
+  `Compiler.place`, about 30% of it landing and thawing quotations. Fixtures:
+  `rewrite-conform` (a user rule on the head) and `protocol-documented-member`,
+  with a new `definitions` fixture phase that runs `--dump-definitions`.
 - 2026-10-11, three rule-driver defects fixed (`kernel/rule-defects-2`):
   a statement that a shipped rule's lowered carrier writes is not source,
   so only shipped rules see it (`SlotWatch.shipped`; the match component's
@@ -826,7 +828,7 @@ replacement template and fill steps are the remaining driver cost.
   and reach only shipped rules, now stated in agents/lowering-with-
   macros.md. +36/-10 in src; fixture `rewrite-try-defer-landing` (program
   try count 9 -> 2). Open: a program function rule is offered the defer
-  callback `_x2c_defer_cleanup_N` that `_callable_defer` writes, and
+  callback `_x2c_gensym_defer_cleanup_N` that `_callable_defer` writes, and
   lambda-lifted functions raise the same question for kernel-written
   definitions.
 - 2026-10-11, lambda long-function gap (`kernel/lambda-gap`): the cells
@@ -902,19 +904,19 @@ replacement template and fill steps are the remaining driver cost.
 - 2026-10-11, `make proof-raw-symbols` passes (`kernel/raw-sweep`): the
   cpp-mode shallow parse bound no `meta` stubs for included definitions
   (`install_collected_meta_function` returned at once when `source_private <
-  0`), so an included file's own `$thirty()` found no binding and a
-  shadowing unit's `$forty()` reached the wrong helper table; the new
-  `Compiler._install_included_meta` binds a public included definition
-  through `install_project_meta_effect` with its file as provider, and the
-  unit's own and static definitions take the ordinary path. The sweep now
-  follows quoted includes from every fixture and classifies a companion that
-  only negative fixtures include as not expected to translate (four
+  0`), so an included file's own `$thirty()` found no binding and a shadowing
+  unit's `$forty()` reached the wrong helper table; the new static
+  `_install_included_meta` in src/meta-native.x binds a public included
+  definition through `install_project_meta_effect` with its file as provider,
+  and the unit's own and static definitions take the ordinary path. The sweep
+  now follows quoted includes from every fixture and classifies a companion
+  that only negative fixtures include as not expected to translate (four
   companions that failed and two that happened to pass). The probe
-  `source-call-projection.x` called `$source_pattern`, removed 2026-10-02,
-  and nothing ran it; deleted. +20/-1 in meta-native.x, +33 in the sweep.
-  Proofs: raw-symbols 0 failures of 927 required, conformance 141 units,
-  cold-collection 426 files. The remaining cpp-mode gap is the prelude's
-  unit macros, recorded above.
+  `source-call-projection.x` called `$source_pattern`, removed 2026-10-02, and
+  nothing ran it; deleted. +20/-1 in meta-native.x, +33 in the sweep. Proofs:
+  raw-symbols 0 failures of 927 required, conformance 141 units,
+  cold-collection 426 files. The remaining cpp-mode gap is the prelude's unit
+  macros, recorded above.
 - 2026-10-10, facts learned: `function-entry` placement is parse-time, so
   lambda cells need a transform-time entry placement before lambdas move; a
   plain `make build` after editing a shipped component leaves a degraded
@@ -949,6 +951,14 @@ replacement template and fill steps are the remaining driver cost.
   call at `-O0` and none at `-O2`, where the C compiler inlines it, and moving
   the body into the adapter would place function-entry code ahead of the
   lambda's parameters.
+- 2026-10-14, open items closed: every earlier "Open:" item in this log is
+  closed on `dev` except the silent loss of a prelude component rule at
+  collection, recorded in the wave 2 entry. The closing commits are
+  `bff20a02f`, `94bd9f200`, `fac2d421a`, `9312cb627`, `f0e50bbe9`,
+  `963eb2d24`, `049d254ee`, `863f166ab`, `feddf6913`, `5b81dec4f`,
+  `2c6f501a7`, `4c8be46d1`, `01856950d`, `79d5bed9c`, `f64e9c292`,
+  `30810f69c`, `1d7779357`, `26fcdf263`, and `ed35a035d`, dated 2026-10-10
+  through 2026-10-12.
 
 ## Initial milestone sequence (superseded by the delivered log)
 
