@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 64
+- Compiler modules: 63
 - Runtime modules: 77
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -425,22 +425,6 @@ Public functions:
 `Compiler.bind_lambda_expression`, `Compiler.begin_lambda_captures`,
 `Compiler.end_lambda_captures`, `Compiler.lambda_capture_required`,
 `Compiler.capture_lambda_identifier`, `Compiler.check_lambda_captures`
-
-### [src/linked-meta.x](../src/linked-meta.x)
-
-shipped `meta` code compiled into the compiler.
-
-Public functions:
-
-`register_rewrite`, `_dedent_expand`, `_macros_location`, `_tag_decode_group`,
-`_tag_decode_groups`, `_tag_id_checks`, `access_read`, `access_store`,
-`access_update`, `access_prefix`, `access_postfix`, `delegate_member`,
-`destructure_declaration`, `destructure_statement`, `destructure_value`,
-`lambda_lift`, `lambda_closure`, `lambda_cells`, `match_lowering`,
-`dynamic_binary`, `dynamic_compound`, `dynamic_change`, `dynamic_unary`,
-`printf_values`, `protocol_conformance`, `raise_lowering`,
-`_x2c_try_catch_cases`, `try_lowering`, `linked_meta_targets`,
-`linked_meta_hashes`
 
 ### [src/literals.x](../src/literals.x)
 
