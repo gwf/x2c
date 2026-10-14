@@ -66,7 +66,7 @@ module void _push_conditionals(
    function, so the `try` that reports an uncaught error leaves their locals
    ordinary. A failed command's status becomes the exit status; any other
    uncaught error exits with 1. */
-module const char *script_main =
+static const char *script_main =
   "static int x2c_script(int argc, char **argv, List args) {\n"
   "  (void) argc, (void) argv, (void) args;\n"
   "  x2c_script_statements\n"

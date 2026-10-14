@@ -387,12 +387,35 @@ String Compiler.token_source(Compiler c, Token token, int &?line) {
     marks the start of its text, so other units return before any scan. */
 String Compiler.file_prefix(Compiler c) {
   Array markers = c.line_markers;
-  if (!markers || !c.token) return NULL;
+  Token token = _unit_token(c);
+  if (!markers || !token) return NULL;
   match (markers[0]) case %(? ? ? ? ? ? ?): {
-    match (_token_region(c, c.token))
+    match (_token_region(c, token))
       case %(? ? ? ? ? ? ?(String prefix)): return prefix;
   }
   return NULL;
+}
+
+/* The outermost active macro invocation, else the current token when it
+   lies in the unit's text. A template's tokens hold positions in the file
+   that defined the macro, which may be another file of this unit, and a
+   free name in its body binds where the expansion lands. */
+static Token _unit_token(Compiler c) {
+  Token site = NULL;
+  if (c.macro_stack)
+    foreach (List active, c.macro_stack) {
+      (Var definition, Var input, Var bindings, Token invocation) = active;
+      (void) definition, (void) input, (void) bindings;
+      if (_in_unit(c, invocation)) site = invocation;
+    }
+  if (site) return site;
+  return _in_unit(c, c.token) ? c.token : NULL;
+}
+
+static int _in_unit(Compiler c, Token token) {
+  if (!token || !c.tokenizer) return 0;
+  Token first = c.tokenizer.tokens;
+  return token >= first && token < first + c.tokenizer.tokens.len();
 }
 
 /** Returns `token`'s column in the file that holds it. A module region
