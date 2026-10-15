@@ -5032,7 +5032,7 @@ void Compiler.place(Compiler c, List where, Var code) {
     case %(unit-support): _place_support(c, code);
     case %(unit-support ?key): {
       Var placed;
-      $adapter.memo(c, key, placed) {
+      $adapter.memo(c, %(unit-support $key), placed) {
         _place_support(c, code);
         placed = 1;
       }
