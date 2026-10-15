@@ -42,9 +42,9 @@ record_failure() {
 
 # A raise or a protocol note inside `lib/` reports the runtime source line it
 # came from. That line belongs to the runtime, not to the fixture, so editing
-# any runtime module would otherwise rewrite these artifacts. Replace it the
-# way binding numbers and elapsed times are replaced above; the file and
-# function still name the raising operation.
+# any runtime module would otherwise rewrite these artifacts. Replace it as
+# elapsed times are replaced below; the file and function still name the
+# raising operation.
 normalize_runtime_lines() {
   local file=$1
   sed -E \
@@ -112,10 +112,6 @@ run_dump() {
     record_failure "$name/$phase compiler invocation failed"
     return
   fi
-  # Binding numbers depend on every declaration the unit's includes add, so
-  # renumber them by first appearance, as elapsed times are normalized below.
-  perl -pi -e 's/\(binding (-?\d+)/"(binding " . ($id{$1} \/\/= ++$n)/ge' \
-    "$actual"
   check_artifact "$phase" "$actual"
 }
 

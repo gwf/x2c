@@ -8,7 +8,7 @@
  (bind (binding 2 "add_to") 
   ((fnmod (params (param (int) (bind (binding 3 "bias") ())))))) 
  (block 
-  (at 32 
+  (at 24 
    (return 
     (expr ("Func") 
      (parens 
@@ -46,7 +46,7 @@
     (params (param (int) (bind (binding 10 "left") ())) 
      (param (int) (bind (binding 11 "right") ())))))) 
  (block 
-  (at 33 
+  (at 25 
    (return 
     (expr ("Func") 
      (parens 
@@ -90,7 +90,7 @@
  (bind (binding 17 "nest") 
   ((fnmod (params (param (int) (bind (binding 18 "first") ())))))) 
  (block 
-  (at 34 
+  (at 26 
    (return 
     (expr ("Func") 
      (parens 
@@ -141,7 +141,7 @@
                          (composite 
                           (commas (expr (int) (ident (binding 24 "value")))))))))))) 
         (expr ("size_t") (sizeof (parens (decl (int) (bindings (bind () ())))))))))))) 
-  (at 35 
+  (at 27 
    (return 
     (expr ("Func") 
      (parens 
@@ -180,14 +180,14 @@
 (function (int) 
  (bind (binding 31 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 21 
+  (at 13 
    (declare ("Func") 
     (bindings 
      (op = (bind (binding 32 "add_three") ()) 
       (expr ("Func") 
        (call (expr ((func ((int))) "Func") (ident (binding 2 "add_to"))) 
         (args (expr (int) (literal (int) "3"))))))))) 
-  (at 22 
+  (at 14 
    (declare ("Func") 
     (bindings 
      (op = (bind (binding 33 "combined") ()) 
@@ -195,14 +195,14 @@
        (call (expr ((func ((int) (int))) "Func") (ident (binding 9 "combine"))) 
         (args (expr (int) (literal (int) "10")) 
          (expr (int) (literal (int) "20"))))))))) 
-  (at 23 
+  (at 15 
    (declare ("Func") 
     (bindings 
      (op = (bind (binding 34 "middle") ()) 
       (expr ("Func") 
        (call (expr ((func ((int))) "Func") (ident (binding 17 "nest"))) 
         (args (expr (int) (literal (int) "4"))))))))) 
-  (at 36 
+  (at 28 
    (declare ("Func") 
     (bindings 
      (op = (bind (binding 35 "inner") ()) 
@@ -268,21 +268,21 @@
                      (expr (int) (literal (int) "1")) 
                      (expr ((dim (expr (macro-expr) ("1"))) "FuncArg") 
                       (ident (binding 38 "_x2c_gensym_macro_storage_0"))))))))))))))))) 
-  (at 25 
+  (at 17 
    (declare ("Func") 
     (bindings 
      (op = (bind (binding 44 "count") ()) 
       (expr ("Func") 
        (call (expr ((func ((int))) "Func") (ident (binding 23 "counter"))) 
         (args (expr (int) (literal (int) "0"))))))))) 
-  (at 26 
+  (at 18 
    (declare (int) 
     (bindings 
      (op = (bind (binding 45 "direct_bias") ()) 
       (expr (int) (literal (int) "2"))) 
      (op = (bind (binding 46 "zero_value") ()) 
       (expr (int) (literal (int) "11")))))) 
-  (at 37 
+  (at 29 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 47 "direct") ()) 
@@ -312,22 +312,19 @@
                      (composite 
                       (commas 
                        (expr ("Var") 
-                        (ident 
-                         (binding 49 "_x2c_gensym_lambda_capture_value_5"))))))))) 
+                        (ident (binding 49 "_x2c_gensym_lambda_capture_value_5"))))))))) 
                  (stmnt 
                   (expr ("Func") 
                    (call "Func_new_context" 
                     (args (expr () (ident (binding 52 "_x2c_gensym_lambda_9"))) 
                      (expr ("List") (expr ("List") (cache 12))) 
-                     (expr (* struct 
-                            (binding 50 "_x2c_gensym_lambda_context_8")) 
+                     (expr (* struct (binding 50 "_x2c_gensym_lambda_context_8")) 
                       (op & (expr (struct 
                                    (binding 50 "_x2c_gensym_lambda_context_8")) 
                              (ident (binding 51 "_x2c_gensym_lambda_context_9"))))) 
                      (expr ("size_t") 
                       (sizeof 
-                       (expr (struct 
-                              (binding 50 "_x2c_gensym_lambda_context_8")) 
+                       (expr (struct (binding 50 "_x2c_gensym_lambda_context_8")) 
                         (ident (binding 51 "_x2c_gensym_lambda_context_9"))))))))))))))))) 
          (declare ("FuncArg") 
           (bindings 
@@ -379,7 +376,7 @@
              (expr (int) (literal (int) "1")) 
              (expr ((dim (expr (macro-expr) ("1"))) "FuncArg") 
               (ident (binding 53 "_x2c_gensym_macro_storage_1")))))))))))))) 
-  (at 38 
+  (at 30 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 54 "zero") ()) 
@@ -404,8 +401,7 @@
                     (bindings 
                      (op = (bind (binding 57 "_x2c_gensym_lambda_context_11") 
                             ()) 
-                      (expr (struct 
-                             (binding 56 "_x2c_gensym_lambda_context_10")) 
+                      (expr (struct (binding 56 "_x2c_gensym_lambda_context_10")) 
                        (composite 
                         (commas 
                          (expr ("Var") 
@@ -420,8 +416,7 @@
                        (expr (* struct 
                               (binding 56 "_x2c_gensym_lambda_context_10")) 
                         (op & (expr (struct 
-                                     (binding 56 
-                                      "_x2c_gensym_lambda_context_10")) 
+                                     (binding 56 "_x2c_gensym_lambda_context_10")) 
                                (ident 
                                 (binding 57 "_x2c_gensym_lambda_context_11"))))) 
                        (expr ("size_t") 
@@ -430,12 +425,12 @@
                                 (binding 56 "_x2c_gensym_lambda_context_10")) 
                           (ident (binding 57 "_x2c_gensym_lambda_context_11")))))))))))))) 
          (expr (int) (literal (int) "0")) (expr (int) (literal (int) "0"))))))))) 
-  (at 29 
+  (at 21 
    (stmnt 
     (expr (int) 
      (op = (expr (int) (ident (binding 1 "live"))) 
       (expr (int) (literal (int) "7")))))) 
-  (at 39 
+  (at 31 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 59 "printf"))) 
@@ -649,7 +644,7 @@
                  (args (expr ("Func") (ident (binding 44 "count"))) 
                   (expr (int) (literal (int) "0")) 
                   (expr (int) (literal (int) "0"))))))))))))) 
-  (at 40 (return (expr (int) (literal (int) "0"))))))
+  (at 32 (return (expr (int) (literal (int) "0"))))))
 
 (typedef 
  (static struct (binding 6 "_x2c_gensym_lambda_context_0") 
@@ -662,16 +657,15 @@
     (params (param (int) (bind (binding 68 "value") ())) 
      (param (int) (bind (binding 69 "bias") ())))))) 
  (block 
-  (at 17 
-   (stmnt 
-    (return 
-     (expr ("Var") 
-      (call (expr ((func ((int))) "Var") (ident (binding 5 "int_var"))) 
-       (args (expr (int) 
-              (op + (expr (int) 
-                     (op + (expr (int) (ident (binding 68 "value"))) 
-                      (expr (int) (ident (binding 69 "bias"))))) 
-               (expr (int) (ident (binding 1 "live")))))))))))))
+  (at 9 (stmnt 
+         (return 
+          (expr ("Var") 
+           (call (expr ((func ((int))) "Var") (ident (binding 5 "int_var"))) 
+            (args (expr (int) 
+                   (op + (expr (int) 
+                          (op + (expr (int) (ident (binding 68 "value"))) 
+                           (expr (int) (ident (binding 69 "bias"))))) 
+                    (expr (int) (ident (binding 1 "live")))))))))))))
 
 (function (static "Var") 
  (bind (binding 8 "_x2c_gensym_lambda_1") 
@@ -739,7 +733,7 @@
      (param (int) (bind (binding 75 "right") ())) 
      (param (int) (bind (binding 76 "left") ())))))) 
  (block 
-  (at 18 
+  (at 10 
    (stmnt 
     (return 
      (expr ("Var") 
@@ -773,8 +767,7 @@
                                           (unsigned) ("Symbol"))) "Var") 
                              (ident (binding 72 "x2c_func_value_argument"))) 
                        (args (expr ("Func") 
-                              (ident 
-                               (binding 77 "_x2c_gensym_lambda_closure_1"))) 
+                              (ident (binding 77 "_x2c_gensym_lambda_closure_1"))) 
                         (expr (* const "FuncArg") 
                          (ident (binding 78 "_x2c_gensym_lambda_argv_1"))) 
                         (expr (int) (literal (int) "0")) 
@@ -828,7 +821,7 @@
     (params (param (int) (bind (binding 80 "second") ())) 
      (param (int) (bind (binding 81 "first") ())))))) 
  (block 
-  (at 41 
+  (at 33 
    (stmnt 
     (return 
      (expr ("Var") 
@@ -867,15 +860,13 @@
                   (call "Func_new_context" 
                    (args (expr () (ident (binding 87 "_x2c_gensym_lambda_13"))) 
                     (expr ("List") (expr ("List") (cache 12))) 
-                    (expr (* struct 
-                           (binding 85 "_x2c_gensym_lambda_context_12")) 
+                    (expr (* struct (binding 85 "_x2c_gensym_lambda_context_12")) 
                      (op & (expr (struct 
                                   (binding 85 "_x2c_gensym_lambda_context_12")) 
                             (ident (binding 86 "_x2c_gensym_lambda_context_13"))))) 
                     (expr ("size_t") 
                      (sizeof 
-                      (expr (struct 
-                             (binding 85 "_x2c_gensym_lambda_context_12")) 
+                      (expr (struct (binding 85 "_x2c_gensym_lambda_context_12")) 
                        (ident (binding 86 "_x2c_gensym_lambda_context_13"))))))))))))))))))))
 
 (function (static "Var") 
@@ -899,8 +890,7 @@
                                           (unsigned) ("Symbol"))) "Var") 
                              (ident (binding 72 "x2c_func_value_argument"))) 
                        (args (expr ("Func") 
-                              (ident 
-                               (binding 88 "_x2c_gensym_lambda_closure_2"))) 
+                              (ident (binding 88 "_x2c_gensym_lambda_closure_2"))) 
                         (expr (* const "FuncArg") 
                          (ident (binding 89 "_x2c_gensym_lambda_argv_2"))) 
                         (expr (int) (literal (int) "0")) 
@@ -941,7 +931,7 @@
  (bind (binding 90 "_x2c_gensym_lambda_6") 
   ((fnmod (params (param (int) (bind (binding 91 "value") (&))))))) 
  (block 
-  (at 20 
+  (at 12 
    (stmnt 
     (return 
      (expr ("Var") 
@@ -994,7 +984,7 @@
     (params (param (int) (bind (binding 95 "value") ())) 
      (param (int) (bind (binding 96 "direct_bias") ())))))) 
  (block 
-  (at 27 
+  (at 19 
    (stmnt 
     (return 
      (expr ("Var") 
@@ -1024,8 +1014,7 @@
                                           (unsigned) ("Symbol"))) "Var") 
                              (ident (binding 72 "x2c_func_value_argument"))) 
                        (args (expr ("Func") 
-                              (ident 
-                               (binding 97 "_x2c_gensym_lambda_closure_4"))) 
+                              (ident (binding 97 "_x2c_gensym_lambda_closure_4"))) 
                         (expr (* const "FuncArg") 
                          (ident (binding 98 "_x2c_gensym_lambda_argv_4"))) 
                         (expr (int) (literal (int) "0")) 
@@ -1066,7 +1055,7 @@
  (bind (binding 99 "_x2c_gensym_lambda_10") 
   ((fnmod (params (param (int) (bind (binding 100 "zero_value") ())))))) 
  (block 
-  (at 28 
+  (at 20 
    (stmnt 
     (return 
      (expr ("Var") 
@@ -1119,7 +1108,7 @@
      (param (int) (bind (binding 105 "first") ())) 
      (param (int) (bind (binding 106 "second") ())))))) 
  (block 
-  (at 19 
+  (at 11 
    (stmnt 
     (return 
      (expr ("Var") 

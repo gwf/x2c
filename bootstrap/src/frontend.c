@@ -97,23 +97,23 @@ static void _share_session(Compiler cpp, Compiler c);
 static int _preload_meta_surface(Frontend frontend, Lisp shared);
 
 typedef struct _x2c_gensym_defer_env_0{
-  const void * _x2c_gensym_defer_capture_0;
   const void * _x2c_gensym_defer_capture_1;
+  const void * _x2c_gensym_defer_capture_2;
 }
 _x2c_gensym_defer_env_0;
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
 
 typedef struct _x2c_gensym_defer_env_1{
-  const void * _x2c_gensym_defer_capture_2;
   const void * _x2c_gensym_defer_capture_3;
+  const void * _x2c_gensym_defer_capture_4;
 }
 _x2c_gensym_defer_env_1;
 
 static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1);
 
 typedef struct _x2c_gensym_defer_env_2{
-  const void * _x2c_gensym_defer_capture_4;
+  const void * _x2c_gensym_defer_capture_5;
 }
 _x2c_gensym_defer_env_2;
 
@@ -277,63 +277,101 @@ int Compiler_error_count(Compiler);
 int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend){
   if(! _init_guard_) _file_init_();
   Compiler c =(* unit).compiler;
+  size_t origins = Array_len(c -> origins);
   {
     ExceptionFrame _x2c_gensym_exception_frame_0;
-    static MatchCaptureSite _x2c_gensym_macro_arms_0[1];
-    Var _x2c_gensym_macro_patterns_0[1];
-    static ErrorCatchSite _x2c_gensym_macro_site_0 ={
-      _x2c_gensym_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
-    }
-    ;
-    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_0)){
-      _x2c_gensym_macro_patterns_0[0] = List_var(cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL)));
-    }
-    volatile ErrorHandler _x2c_gensym_error_handler_0 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_0, & _x2c_gensym_macro_site_0, _x2c_gensym_macro_patterns_0);
     x2c_exception_push(& _x2c_gensym_exception_frame_0);
     if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)){
-      (* unit).globals = _preprocess_input(frontend, &((* unit)));
-      if((* unit).preprocessor) Compiler_take_diagnostics(c, (* unit).preprocessor);
-      Sym_seed_var_tags(c -> sym, (* unit).globals);
-    }
-    else{
-      x2c_exception_landed(& _x2c_gensym_exception_frame_0);
-      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_0)){
-        int _x2c_gensym_macro_selected_0 = x2c_error_catch_selected(_x2c_gensym_error_handler_0);
-        x2c_error_catch_detach(_x2c_gensym_error_handler_0);
-        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_0);
-        if(_x2c_gensym_macro_selected_0 == 0){
-          {
-            if((* unit).preprocessor) Compiler_close_child(c, (* unit).preprocessor);
-            (* unit).preprocessor = NULL;
-            {
-              int _x2c_gensym_return_value_0 = 0;
+      {
+        ExceptionFrame _x2c_gensym_exception_frame_1;
+        static MatchCaptureSite _x2c_gensym_macro_arms_0[1];
+        Var _x2c_gensym_macro_patterns_0[1];
+        static ErrorCatchSite _x2c_gensym_macro_site_0 ={
+          _x2c_gensym_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
+        }
+        ;
+        if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_0)){
+          _x2c_gensym_macro_patterns_0[0] = List_var(cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL)));
+        }
+        volatile ErrorHandler _x2c_gensym_error_handler_0 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_1, & _x2c_gensym_macro_site_0, _x2c_gensym_macro_patterns_0);
+        x2c_exception_push(& _x2c_gensym_exception_frame_1);
+        if(! sigsetjmp(_x2c_gensym_exception_frame_1.env, 0)){
+          (* unit).globals = _preprocess_input(frontend, &((* unit)));
+          if((* unit).preprocessor) Compiler_take_diagnostics(c, (* unit).preprocessor);
+          Sym_seed_var_tags(c -> sym, (* unit).globals);
+        }
+        else{
+          x2c_exception_landed(& _x2c_gensym_exception_frame_1);
+          if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_1)){
+            int _x2c_gensym_macro_selected_0 = x2c_error_catch_selected(_x2c_gensym_error_handler_0);
+            x2c_error_catch_detach(_x2c_gensym_error_handler_0);
+            x2c_exception_mark_handled(& _x2c_gensym_exception_frame_1);
+            if(_x2c_gensym_macro_selected_0 == 0){
               {
-                x2c_error_catch_close(_x2c_gensym_error_handler_0);
-                _x2c_gensym_error_handler_0 = NULL;
-                x2c_exception_leave(& _x2c_gensym_exception_frame_0);
-                return _x2c_gensym_return_value_0;
+                if((* unit).preprocessor) Compiler_close_child(c, (* unit).preprocessor);
+                (* unit).preprocessor = NULL;
+                {
+                  int _x2c_gensym_return_value_0 = 0;
+                  {
+                    x2c_error_catch_close(_x2c_gensym_error_handler_0);
+                    _x2c_gensym_error_handler_0 = NULL;
+                    x2c_exception_leave(& _x2c_gensym_exception_frame_1);
+                    if(x2c_exception_claim(& _x2c_gensym_exception_frame_0)){
+                      Array_resize(c -> origins, origins);
+                    }
+                    x2c_exception_leave(& _x2c_gensym_exception_frame_0);
+                    return _x2c_gensym_return_value_0;
+                  }
+
+                }
+
               }
 
             }
-
+            __builtin_unreachable();
+          }
+          else{
+            x2c_error_catch_close(_x2c_gensym_error_handler_0);
+            _x2c_gensym_error_handler_0 = NULL;
+            x2c_exception_leave(& _x2c_gensym_exception_frame_1);
+            __builtin_unreachable();
           }
 
         }
-        __builtin_unreachable();
-      }
-      else{
         x2c_error_catch_close(_x2c_gensym_error_handler_0);
         _x2c_gensym_error_handler_0 = NULL;
+        x2c_exception_leave(& _x2c_gensym_exception_frame_1);
+      }
+      {
+        int _x2c_gensym_return_value_1 = ! Compiler_error_count(c);
+        {
+          if(x2c_exception_claim(& _x2c_gensym_exception_frame_0)){
+            Array_resize(c -> origins, origins);
+          }
+          x2c_exception_leave(& _x2c_gensym_exception_frame_0);
+          return _x2c_gensym_return_value_1;
+        }
+
+      }
+
+    }
+    else{
+      x2c_exception_landed(& _x2c_gensym_exception_frame_0);
+      {
+        if(x2c_exception_claim(& _x2c_gensym_exception_frame_0)){
+          Array_resize(c -> origins, origins);
+        }
         x2c_exception_leave(& _x2c_gensym_exception_frame_0);
         __builtin_unreachable();
       }
 
     }
-    x2c_error_catch_close(_x2c_gensym_error_handler_0);
-    _x2c_gensym_error_handler_0 = NULL;
+    if(x2c_exception_claim(& _x2c_gensym_exception_frame_0)){
+      Array_resize(c -> origins, origins);
+    }
     x2c_exception_leave(& _x2c_gensym_exception_frame_0);
   }
-  return ! Compiler_error_count(c);
+
 }
 
 int ParsedUnit_parse(ParsedUnit * p){
@@ -341,7 +379,7 @@ int ParsedUnit_parse(ParsedUnit * p){
   Compiler c =(* p).compiler;
   if(Compiler_error_count(c)) return 0;
   {
-    ExceptionFrame _x2c_gensym_exception_frame_1;
+    ExceptionFrame _x2c_gensym_exception_frame_2;
     static MatchCaptureSite _x2c_gensym_macro_arms_1[1];
     Var _x2c_gensym_macro_patterns_1[1];
     static ErrorCatchSite _x2c_gensym_macro_site_1 ={
@@ -351,23 +389,23 @@ int ParsedUnit_parse(ParsedUnit * p){
     if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_1)){
       _x2c_gensym_macro_patterns_1[0] = List_var(cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL)));
     }
-    volatile ErrorHandler _x2c_gensym_error_handler_1 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_1, & _x2c_gensym_macro_site_1, _x2c_gensym_macro_patterns_1);
-    x2c_exception_push(& _x2c_gensym_exception_frame_1);
-    if(! sigsetjmp(_x2c_gensym_exception_frame_1.env, 0))(* p).ast = Compiler_full_parse(c, (* p).globals, (* p).generated_symbols);
+    volatile ErrorHandler _x2c_gensym_error_handler_1 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_2, & _x2c_gensym_macro_site_1, _x2c_gensym_macro_patterns_1);
+    x2c_exception_push(& _x2c_gensym_exception_frame_2);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_2.env, 0))(* p).ast = Compiler_full_parse(c, (* p).globals, (* p).generated_symbols);
     else{
-      x2c_exception_landed(& _x2c_gensym_exception_frame_1);
-      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_1)){
+      x2c_exception_landed(& _x2c_gensym_exception_frame_2);
+      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_2)){
         int _x2c_gensym_macro_selected_1 = x2c_error_catch_selected(_x2c_gensym_error_handler_1);
         x2c_error_catch_detach(_x2c_gensym_error_handler_1);
-        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_1);
+        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_2);
         if(_x2c_gensym_macro_selected_1 == 0){
           {
-            int _x2c_gensym_return_value_1 = 0;
+            int _x2c_gensym_return_value_2 = 0;
             {
               x2c_error_catch_close(_x2c_gensym_error_handler_1);
               _x2c_gensym_error_handler_1 = NULL;
-              x2c_exception_leave(& _x2c_gensym_exception_frame_1);
-              return _x2c_gensym_return_value_1;
+              x2c_exception_leave(& _x2c_gensym_exception_frame_2);
+              return _x2c_gensym_return_value_2;
             }
 
           }
@@ -378,14 +416,14 @@ int ParsedUnit_parse(ParsedUnit * p){
       else{
         x2c_error_catch_close(_x2c_gensym_error_handler_1);
         _x2c_gensym_error_handler_1 = NULL;
-        x2c_exception_leave(& _x2c_gensym_exception_frame_1);
+        x2c_exception_leave(& _x2c_gensym_exception_frame_2);
         __builtin_unreachable();
       }
 
     }
     x2c_error_catch_close(_x2c_gensym_error_handler_1);
     _x2c_gensym_error_handler_1 = NULL;
-    x2c_exception_leave(& _x2c_gensym_exception_frame_1);
+    x2c_exception_leave(& _x2c_gensym_exception_frame_2);
   }
   return ! Compiler_error_count(c);
 }
@@ -415,7 +453,7 @@ void Compiler_begin_meta_unit(String);
 static int _start(Frontend frontend, String filename, ParsedUnit * unit, Context context, String source){
   Compiler c = _begin_unit(frontend, &((* unit)), context);
   {
-    ExceptionFrame _x2c_gensym_exception_frame_2;
+    ExceptionFrame _x2c_gensym_exception_frame_3;
     static MatchCaptureSite _x2c_gensym_macro_arms_2[1];
     Var _x2c_gensym_macro_patterns_2[1];
     static ErrorCatchSite _x2c_gensym_macro_site_2 ={
@@ -425,9 +463,9 @@ static int _start(Frontend frontend, String filename, ParsedUnit * unit, Context
     if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_2)){
       _x2c_gensym_macro_patterns_2[0] = List_var(cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL)));
     }
-    volatile ErrorHandler _x2c_gensym_error_handler_2 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_2, & _x2c_gensym_macro_site_2, _x2c_gensym_macro_patterns_2);
-    x2c_exception_push(& _x2c_gensym_exception_frame_2);
-    if(! sigsetjmp(_x2c_gensym_exception_frame_2.env, 0)){
+    volatile ErrorHandler _x2c_gensym_error_handler_2 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_3, & _x2c_gensym_macro_site_2, _x2c_gensym_macro_patterns_2);
+    x2c_exception_push(& _x2c_gensym_exception_frame_3);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_3.env, 0)){
       if(! String_truth(filename)) _tokenize_session(frontend, c, source);
       else{
         c -> package_dirs = CliRequest_package_roots(frontend -> request);
@@ -439,19 +477,19 @@ static int _start(Frontend frontend, String filename, ParsedUnit * unit, Context
 
     }
     else{
-      x2c_exception_landed(& _x2c_gensym_exception_frame_2);
-      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_2)){
+      x2c_exception_landed(& _x2c_gensym_exception_frame_3);
+      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_3)){
         int _x2c_gensym_macro_selected_2 = x2c_error_catch_selected(_x2c_gensym_error_handler_2);
         x2c_error_catch_detach(_x2c_gensym_error_handler_2);
-        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_2);
+        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_3);
         if(_x2c_gensym_macro_selected_2 == 0){
           {
-            int _x2c_gensym_return_value_2 = 0;
+            int _x2c_gensym_return_value_3 = 0;
             {
               x2c_error_catch_close(_x2c_gensym_error_handler_2);
               _x2c_gensym_error_handler_2 = NULL;
-              x2c_exception_leave(& _x2c_gensym_exception_frame_2);
-              return _x2c_gensym_return_value_2;
+              x2c_exception_leave(& _x2c_gensym_exception_frame_3);
+              return _x2c_gensym_return_value_3;
             }
 
           }
@@ -462,14 +500,14 @@ static int _start(Frontend frontend, String filename, ParsedUnit * unit, Context
       else{
         x2c_error_catch_close(_x2c_gensym_error_handler_2);
         _x2c_gensym_error_handler_2 = NULL;
-        x2c_exception_leave(& _x2c_gensym_exception_frame_2);
+        x2c_exception_leave(& _x2c_gensym_exception_frame_3);
         __builtin_unreachable();
       }
 
     }
     x2c_error_catch_close(_x2c_gensym_error_handler_2);
     _x2c_gensym_error_handler_2 = NULL;
-    x2c_exception_leave(& _x2c_gensym_exception_frame_2);
+    x2c_exception_leave(& _x2c_gensym_exception_frame_3);
   }
   return ! Compiler_error_count(c);
 }
@@ -611,8 +649,8 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
         0
       }
       ;
-      _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_address_0;
-      _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_previous_0;
+      _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_address_0;
+      _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_2 =(const void *) & _x2c_gensym_macro_previous_0;
       X2CCleanup _x2c_gensym_defer_record_0 ={
         .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
       }
@@ -699,8 +737,8 @@ static Map _collect_input(Frontend frontend, ParsedUnit * unit){
         0
       }
       ;
-      _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_2 =(const void *) & _x2c_gensym_macro_address_1;
-      _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_3 =(const void *) & _x2c_gensym_macro_previous_1;
+      _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_3 =(const void *) & _x2c_gensym_macro_address_1;
+      _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_4 =(const void *) & _x2c_gensym_macro_previous_1;
       X2CCleanup _x2c_gensym_defer_record_1 ={
         .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_1
       }
@@ -711,10 +749,10 @@ static Map _collect_input(Frontend frontend, ParsedUnit * unit){
         {
           _enter_package(frontend, c);
           {
-            Map _x2c_gensym_return_value_3 = Compiler_collect_symbols(c, (* unit).globals);
+            Map _x2c_gensym_return_value_4 = Compiler_collect_symbols(c, (* unit).globals);
             {
               x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
-              return _x2c_gensym_return_value_3;
+              return _x2c_gensym_return_value_4;
             }
 
           }
@@ -857,7 +895,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
       0
     }
     ;
-    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_4 =(const void *) & unit;
+    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_5 =(const void *) & unit;
     X2CCleanup _x2c_gensym_defer_record_2 ={
       .fn = _x2c_gensym_defer_cleanup_2, .env = & _x2c_gensym_macro_environment_2
     }
@@ -877,10 +915,10 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
 
       }
       if(! started || ! ParsedUnit_collect(&(unit), & session) || ! ParsedUnit_parse(&(unit))){
-        int _x2c_gensym_return_value_4 = 0;
+        int _x2c_gensym_return_value_5 = 0;
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
-          return _x2c_gensym_return_value_4;
+          return _x2c_gensym_return_value_5;
         }
 
       }
@@ -902,10 +940,10 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
 
       }
       {
-        int _x2c_gensym_return_value_5 = 1;
+        int _x2c_gensym_return_value_6 = 1;
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
-          return _x2c_gensym_return_value_5;
+          return _x2c_gensym_return_value_6;
         }
 
       }
@@ -939,17 +977,17 @@ Frontend Frontend_new(CliRequest request){
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
   _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
-  *(*(Map * *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0) =(*(Map *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_1);
+  *(*(Map * *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_1) =(*(Map *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_2);
 }
 
 static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
   _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;
-  *(*(String * *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_2) =(*(String *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_3);
+  *(*(String * *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_3) =(*(String *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_4);
 }
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
   _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_2;
-  ParsedUnit_close(&((*(ParsedUnit *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_4)));
+  ParsedUnit_close(&((*(ParsedUnit *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_5)));
 }
 
 String Compiler_load_native_module(String);

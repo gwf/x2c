@@ -136,6 +136,11 @@ int Frontend.start(Frontend frontend, String filename, ParsedUnit &unit) =>
 */
 int ParsedUnit.collect(ParsedUnit &unit, Frontend frontend) {
   Compiler c = unit.compiler;
+  /* Collection's origins locate only its own parses, and exported syntax
+     freezes its locations, so the full parse numbers origins from where
+     collection began, whether the includes replayed or walked cold. */
+  size_t origins = c.origins.len();
+  defer c.origins.resize(origins);
   try {
     unit.globals = _preprocess_input(frontend, unit);
     if (unit.preprocessor) c.take_diagnostics(unit.preprocessor);

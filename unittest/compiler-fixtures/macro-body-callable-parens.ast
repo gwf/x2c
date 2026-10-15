@@ -5,11 +5,10 @@
  (bind (binding 1 "increment") 
   ((fnmod (params (param (int) (bind (binding 2 "value") ())))))) 
  (block 
-  (at 20 
-   (return (int) 
-    (expr (int) 
-     (op + (expr (int) (ident (binding 2 "value"))) 
-      (expr (int) (literal (int) "1"))))))))
+  (at 9 (return (int) 
+         (expr (int) 
+          (op + (expr (int) (ident (binding 2 "value"))) 
+           (expr (int) (literal (int) "1"))))))))
 
 (macrodef <macro define_body_callers>)
 
@@ -21,7 +20,7 @@
     (params 
      (param (int) (bind (binding 4 "_x2c_gensym_macro_parens_value_0") ())))))) 
  (block 
-  (at 23 
+  (at 12 
    (return (int) 
     (expr (int) 
      (call (expr ((func ((int))) int) 
@@ -34,7 +33,7 @@
     (params 
      (param (int) (bind (binding 6 "_x2c_gensym_macro_direct_value_0") ())))))) 
  (block 
-  (at 24 
+  (at 13 
    (return (int) 
     (expr (int) 
      (call (expr ((func ((int))) int) (ident (binding 1 "increment"))) 
@@ -44,7 +43,7 @@
  (bind (binding 7 "ordinary_parens") 
   ((fnmod (params (param (int) (bind (binding 8 "value") ())))))) 
  (block 
-  (at 25 
+  (at 14 
    (return (int) 
     (expr (int) 
      (call (expr ((func ((int))) int) 
@@ -54,18 +53,16 @@
 (function (int) 
  (bind (binding 9 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 27 
+  (at 16 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 10 "printf"))) 
       (args (expr (* char) (literal (* char) "\"%d %d %d %d\\n\"")) 
        (expr (int) 
-        (call (expr ((func ((int))) int) 
-               (ident (binding 3 "macro_body_parens"))) 
+        (call (expr ((func ((int))) int) (ident (binding 3 "macro_body_parens"))) 
          (args (expr (int) (literal (int) "41"))))) 
        (expr (int) 
-        (call (expr ((func ((int))) int) 
-               (ident (binding 5 "macro_body_direct"))) 
+        (call (expr ((func ((int))) int) (ident (binding 5 "macro_body_direct"))) 
          (args (expr (int) (literal (int) "41"))))) 
        (expr (int) 
         (call (expr ((func ((int))) int) (ident (binding 7 "ordinary_parens"))) 
@@ -75,4 +72,4 @@
                (parens 
                 (expr ((func ((int))) int) (ident (binding 1 "increment"))))) 
          (args (expr (int) (literal (int) "41")))))))))) 
-  (at 28 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 17 (return (int) (expr (int) (literal (int) "0"))))))

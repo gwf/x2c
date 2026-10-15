@@ -5,16 +5,16 @@
  (bind (binding 1 "filtered") 
   ((fnmod (params (param (int) (bind (binding 2 "mode") ())))))) 
  (block 
-  (at 21 
+  (at 13 
    (try (block 
-         (at 17 
-          (if (expr (int) 
-               (op == (expr (int) (ident (binding 2 "mode"))) 
-                (expr (int) (literal (int) "1")))) 
-           (raise (expr ("Symbol") (literal ("Symbol") "alloc-fail" alloc-fail)) 
-            (args (expr ("Symbol") (literal ("Symbol") "bytes" bytes)) 
-             (expr (int) (ident (binding 2 "mode"))))))) 
-         (at 18 
+         (at 9 (if (expr (int) 
+                    (op == (expr (int) (ident (binding 2 "mode"))) 
+                     (expr (int) (literal (int) "1")))) 
+                (raise 
+                 (expr ("Symbol") (literal ("Symbol") "alloc-fail" alloc-fail)) 
+                 (args (expr ("Symbol") (literal ("Symbol") "bytes" bytes)) 
+                  (expr (int) (ident (binding 2 "mode"))))))) 
+         (at 10 
           (if (expr (int) 
                (op == (expr (int) (ident (binding 2 "mode"))) 
                 (expr (int) (literal (int) "2")))) 
@@ -95,16 +95,15 @@
                             (ident (binding 6 "_x2c_gensym_error_handler_0"))) 
                       (expr (int) (literal (int) "0"))))))))))) 
         (block 
-         (at 19 
+         (at 11 
           (return (int) 
            (expr (int) 
-            (call (expr ((func (("List"))) (int)) 
-                   (ident (binding 9 "List_len"))) 
+            (call (expr ((func (("List"))) (int)) (ident (binding 9 "List_len"))) 
              (args (expr ("List") (ident (binding 8 "rest"))))))))))) 
       (() (block 
            (return (int) (expr (int) (op - (expr (int) (literal (int) "1")))))))) 
      (binding 6 "_x2c_gensym_error_handler_0")) 
     (block 
-     (at 20 
+     (at 12 
       (stmnt (expr (int) (postfix ++ (expr (int) (ident (binding 2 "mode")))))))))) 
-  (at 22 (return (int) (expr (int) (literal (int) "0"))))))
+  (at 14 (return (int) (expr (int) (literal (int) "0"))))))

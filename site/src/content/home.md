@@ -55,8 +55,8 @@ as well as in the finished program. Write ordinary x2c to compute values and
 construct code while the compiler builds your program.
 
 x2c's main features are summarized in the table on the right. Everything is
-optional and works with plain C as well. Hence, you can take existing C code and
-adopt x2c capabilities incrementally.
+optional and works with plain C as well. Hence, you can
+[take existing C code](#from-c) and adopt x2c capabilities incrementally.
 
 The compiler, library, and runtime are all written in x2c, with no third-party
 dependencies. You can read the source to learn the language, then change the
