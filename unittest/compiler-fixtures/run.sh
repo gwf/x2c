@@ -61,11 +61,15 @@ normalize_runtime_lines() {
 normalize_cc_warnings() {
   local file=$1
   sed -E \
-    -e 's|^(.*/)?([^/]+):[0-9]+:[0-9]+: |\2: |' \
-    -e 's|^(.*/)?([^/]+):[0-9]+: |\2: |' \
     -e '/^[[:space:]]*[0-9]*[[:space:]]*\|/d' \
     -e '/^[0-9]+ (warning|error)s?( and [0-9]+ (warning|error)s?)? generated\.$/d' \
-    "$file" >"$file.normalized"
+    "$file" | perl -pe '
+      s{^(.*?):[0-9]+(?::[0-9]+)?: }{
+        my $file = $1;
+        $file =~ s{.*/}{};
+        "$file: ";
+      }e;
+    ' >"$file.normalized"
   mv "$file.normalized" "$file"
 }
 

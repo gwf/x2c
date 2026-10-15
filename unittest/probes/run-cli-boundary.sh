@@ -143,16 +143,18 @@ wrapper.chmod(0o755)
 env = dict(os.environ, X2C=compiler, CC=str(wrapper),
            FIXTURE_DIR=str(fixtures),
            FIXTURE_BUILD=str(build / 'warning build'))
-warning = f'{fixtures}/sample.c:3:7: warning: retained warning'
-env['FIXTURE_WARNING'] = warning + '\n    3 | source\n      | ^\n1 warning generated.'
+message = 'warning: refer to /other/file.c:4:9: trouble'
+warning = f'{fixtures}/sample.c:3:7: {message}'
+env['FIXTURE_WARNING'] = (warning + '\n    3 | #warning refer to /other/file.c:4:9: trouble'
+                          '\n      | ^\n1 warning generated.')
 runner = [str(root / 'unittest/compiler-fixtures/run.sh'), 'check', '--fixture', 'sample']
 def run():
     return subprocess.run(runner, env=env, capture_output=True, text=True)
 result = run()
 assert result.returncode != 0, result
-assert 'sample.c: warning: retained warning' in result.stderr, result
+assert f'sample.c: {message}' in result.stderr, result
 (fixtures / 'sample.phases').write_text('status cc-stderr\n')
-(fixtures / 'sample.cc-stderr').write_text('sample.c: warning: retained warning\n')
+(fixtures / 'sample.cc-stderr').write_text(f'sample.c: {message}\n')
 result = run()
 assert result.returncode == 0, result
 env['FIXTURE_WARNING'] = 'unrecognized compiler diagnostic'
