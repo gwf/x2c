@@ -75,6 +75,7 @@ packages/*/deps
 # Archived documentation - outdated and should not be indexed
 docs/notes/archive/
 docs/book/
+docs/x2c-book.pdf
 dist/
 site/.astro/
 site/node_modules/

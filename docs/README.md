@@ -17,7 +17,10 @@ brew install pandoc typst
 make doc-pdf
 ```
 
-The result is the tracked `docs/x2c-book.pdf`. This optional target does not build
+The result is `docs/x2c-book.pdf`, a local build product that Git ignores;
+it is not tracked or published. The target stops with an install hint when
+either tool is missing or Pandoc is too old. It sets no document date and
+takes `SOURCE_DATE_EPOCH` from the last commit. This optional target does not build
 the compiler, run the website highlighter, or change the Markdown sources.
 It includes the entire book, including the generated API reference.
 

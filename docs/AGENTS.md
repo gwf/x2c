@@ -20,7 +20,8 @@ authority for language and library semantics. Keep repository workflow in
   and compares it, and the sample must exit 0; tag the fence `text,status=N`
   when the sample exits with N on purpose.
 - `make doc-build` renders generated, untracked `docs/book/`;
-  `make doc-serve` serves it with live reload.
+  `make doc-serve` serves it with live reload. `make doc-pdf` writes the
+  untracked local build product `docs/x2c-book.pdf`; never commit it.
 
 ## The generated API reference
 
