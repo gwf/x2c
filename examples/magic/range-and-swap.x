@@ -16,7 +16,7 @@ macro Stmt $control.swap(
   Expr $left,
   Expr $right
 ) {
-  $(Code.type $left) temporary = $left;
+  $Code.type($left) temporary = $left;
   $left = $right;
   $right = temporary;
 }

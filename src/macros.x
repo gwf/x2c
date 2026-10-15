@@ -1470,8 +1470,9 @@ List Compiler.try_parse_macro_slot(Compiler c, Symbol role) {
   if (!c.macro_holes) return NULL;
   if (c.peek(0) == <@> && !c.peek_macro_hole())
     return _meta_call_slot(c, role);
+  String name;
   if (role != <expression> && role != <statement> &&
-      c.peek(0) == <$> && c.peek(2) == <(> &&
+      c.peek(0) == <$> && _scan_name(c, name).type == <(> &&
       !c.peek_macro_hole() && !_peek_invocation(c))
     return _meta_call_slot(c, role);
   if (c.peek(0) == <"$("> || c.peek(0) == <"@(">)
@@ -2076,7 +2077,8 @@ int Compiler.macro_lisp_starts_declaration(Compiler c) {
   Token opening = c.token;
   if (opening.type == <$>) {
     if (_peek_invocation(c)) return 0;
-    opening = Token.skip_trivia(Token.skip_trivia(opening + 1) + 1);
+    String name;
+    opening = _scan_name(c, name);
     if (opening.type != <(>) return 0;
   }
   Token token = opening.after_group();
@@ -3254,17 +3256,31 @@ static int _claims(Compiler c, List definition, AstPos position) {
   if (kind == _position(position).kind) return 1;
   if (position == AST_STATEMENT || position == AST_MAP_ENTRY) return 0;
   if (!definition) {
-    if (c.peek(0) == <$> && (position == AST_BLOCK || c.macro_holes)) {
-      String name;
-      _scan_name(c, name);
-      Type type = name ? c.sym.get(%($name)) : NULL;
-      if (type.is_function()) return 0;
-    }
+    if (c.peek(0) == <$> && (position == AST_BLOCK || c.macro_holes) &&
+        _meta_callee(c).is_function())
+      return 0;
     return c.peek(0) == <$>;
   }
   return !_bare(c.token, definition) &&
     (position != AST_BLOCK || kind != <expression> ||
      !definition.assoc(<local>).int());
+}
+
+/* Returns the type of the identifier a `$` meta call reads, as in
+   `$Code.type(value)`, when that identifier spans the whole `$` name.
+   Consumes no tokens. A missing package member is left to the invocation
+   diagnostic. */
+static Type _meta_callee(Compiler c) {
+  Token start = c.token;
+  String name;
+  Token end = _scan_name(c, name);
+  c.next();
+  String member = c.package_alias_spelling();
+  List callee = name && (!member || c.sym.get_exact(%($member)))
+              ? c.parse_complex_identifier() : NULL;
+  Type type = callee && c.token == end ? c.sym.get(callee) : NULL;
+  c.token = start;
+  return type;
 }
 
 static typedef struct MacroPos {
