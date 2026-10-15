@@ -1,16 +1,8 @@
 # The C on-ramp
 
-> Status: active - remaining landing-page examples recorded on 2026-10-12.
-> Parser and corpus work is delivered. Section 4b owns the existing website work.
-> Earlier linkage and _Generic designs below are historical, not new implementation requirements.
-
-## Current remaining work, 2026-10-12
-
-Finish the existing landing-page examples for two adoption directions: rename
-C source to `.x`, and call an x2c file from a C main through its generated header.
-Show accepted code, the commands, and the result. The parser and corpus campaign
-is delivered; do not repeat it or invent four new examples as a prerequisite.
-
+> Status: retired - campaign ended by Gary on 2026-10-15.
+> Parser and corpus work (4a) was delivered. The 4b landing-page examples were
+> delivered as `7116a026e` and reverted as `85d787e79`; they are not planned.
 
 ## The result
 

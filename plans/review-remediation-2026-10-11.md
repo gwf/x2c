@@ -553,7 +553,7 @@ not a new ABI promise or portability campaign.
 
 The [foundation plan](language-components-foundation.md#recorded-decisions)
 owns rewrite visibility, template binding, and constructed `with`. The
-[String switch plan](string-switch.md) owns that selected feature. The
+[String switch plan](archive/string-switch.md) owns that selected feature. The
 [quotation plan](quotation-adoption-audit-2026-10-03.md#remaining-work)
 owns `_Alignof` and the scalar generator cleanup. Historical coverage ledgers
 are evidence, not additional task queues.

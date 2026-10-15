@@ -147,9 +147,8 @@ book states it.
 
 Also recorded and open: the self-meta discrepancy (A8); String `switch`
 (`plans/string-switch.md`, a feature); typed `_Alignof` with the scalar
-generator cleanup; lint phase 8; and the C on-ramp landing examples, which
-are documentation. The constructed `with` decision is already satisfied in
-both documented forms.
+generator cleanup; and lint phase 8. The constructed `with` decision is
+already satisfied in both documented forms.
 
 ## C. Design seams to settle before freezing
 
