@@ -353,6 +353,13 @@ static uint64_t _translation_fingerprint(
   uint64_t hash = _state_base(request, b.toolchain.cc, ok);
   hash = _state_text(hash, "translate");
   hash = _state_text(hash, input);
+  hash = _translation_options(hash, request, ok);
+  return _state_dependencies(hash, _unit_file(directory, input, ".d"), ok);
+}
+
+/* Translation and script reuse share the options and tools that produce C. */
+static uint64_t _translation_options(
+  uint64_t hash, CliRequest request, int &ok) {
   hash = _state_list(hash, request.include_dirs);
   hash = _state_list(hash, request.package_roots());
   hash = _state_list(hash, request.cpp_args);
@@ -367,7 +374,7 @@ static uint64_t _translation_fingerprint(
   // A loaded module's functions can compute what the translation emits.
   foreach (String module, request.native_modules)
     hash = _state_file(hash, module, ok);
-  return _state_dependencies(hash, _unit_file(directory, input, ".d"), ok);
+  return hash;
 }
 
 /** Starts translation reporting for `input` and initializes timing when unset.
@@ -1130,8 +1137,9 @@ static Map _script_members(Build b, List candidates) {
     `executable` and records what it was built from, so
     `CliRequest.script_current` can reuse it. The record lists the script's
     translation and compile prerequisites, package archives, and the runtime
-    archive. A file changed while the build ran records nothing, so the
-    executable is never reused for source it was not built from.
+    archive. Unresolved library selections and files changed during the
+    build record nothing, so those executables rebuild through retained
+    translation and object state.
     Raises: `<io-fail>` when the executable cannot be moved.
 */
 void Build.publish_script(Build b, String executable) {
@@ -1141,6 +1149,11 @@ void Build.publish_script(Build b, String executable) {
     symbols.remove_tree();
     Path.move_to(%"${b.output}.dSYM", symbols);
   }
+  unlink(%"${b.state_root}/script");
+  // Unknown -l selections follow the ordinary retained build's relink policy.
+  foreach (String arg, b.toolchain.ld_args)
+    foreach (String part, arg.split(","))
+      if (part.startswith("-l")) return;
   List files = _script_files(b);
   List paths = files.append(_script_directories(b, files));
   int ok = 1;
@@ -1158,6 +1171,8 @@ static List _script_files(Build b) {
     foreach (String path, _depfile_inputs(%"${b.dep_root}/${_key(source)}.d"))
       files.push(path);
   foreach (Var path, b.native_inputs) files.push(path);
+  foreach (String arg, b.toolchain.ld_args)
+    if (Path.is_file(arg)) files.push(Path.absolute(arg));
   files.push(b.toolchain.runtime_lib);
   return files.list_free();
 }
@@ -1230,13 +1245,8 @@ static uint64_t _script_fingerprint(
   uint64_t hash = _state_base(request, cc, ok);
   hash = _state_text(hash, "script");
   hash = _state_list(hash, request.inputs);
-  hash = _state_list(hash, request.include_dirs);
-  hash = _state_list(hash, request.package_roots());
-  hash = _state_list(hash, request.cpp_args);
-  hash = _state_list(hash, request.cc_args);
+  hash = _translation_options(hash, request, ok);
   hash = _state_list(hash, request.ld_args);
-  hash = _state_text(
-    hash, request.source_map ? "source-map" : "generated-lines");
   foreach (String name, %("CPATH" "C_INCLUDE_PATH" "LIBRARY_PATH" "SDKROOT"))
     hash = _state_text(hash, Env.get(name));
   foreach (String path, prerequisites) hash = _state_entry(hash, path, ok);

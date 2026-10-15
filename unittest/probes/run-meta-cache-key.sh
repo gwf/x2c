@@ -133,6 +133,74 @@ rebuilt "a host C compiler change" --meta-cc "$BUILD/bin/host-cc"
 
 rebuilt "a meta C compiler flag" -O0
 
+# A script skips translation on an executable hit, so its fingerprint must
+# include the same meta compiler selection as ordinary translation.
+mkdir -p scripts script-lib host
+cat > scripts/char.x <<'EOF'
+meta int negative(void) => (char) 255 < 0;
+int main(void) { printf("%d\n", $negative()); return 0; }
+EOF
+for mode in signed unsigned; do
+  printf '#!/bin/sh\nexec cc "$@" -f%s-char\n' "$mode" >"bin/$mode-cc"
+  chmod +x "bin/$mode-cc"
+done
+script_value() {
+  local expected=$1
+  shift
+  local actual
+  actual=$("$X2C" script "$@") || fail "script build failed"
+  [ "$actual" = "$expected" ] ||
+    fail "script expected $expected, got $actual"
+}
+script_value 1 --meta-cc "$BUILD/bin/signed-cc" scripts/char.x
+script_value 0 --meta-cc "$BUILD/bin/unsigned-cc" scripts/char.x
+X2C_META_CC="$BUILD/bin/signed-cc" script_value 1 scripts/char.x
+X2C_META_CC="$BUILD/bin/unsigned-cc" script_value 0 scripts/char.x
+META_CC="$BUILD/bin/signed-cc" script_value 1 scripts/char.x
+META_CC="$BUILD/bin/unsigned-cc" script_value 0 scripts/char.x
+META_CC="$BUILD/bin/unsigned-cc" \
+  "$X2C" script -v scripts/char.x >out.log 2>script-warm.log
+if grep -Eq '^x2c: (translate|preprocess|compile|link) ' script-warm.log; then
+  fail "unchanged ordinary script rebuilt"
+fi
+
+# Replace archive contents without changing its directory's modification
+# time. Unknown -l selections relink, while translation and objects stay cached.
+cat > scripts/library.x <<'EOF'
+int library_value(void);
+int main(void) { printf("%d\n", library_value()); return 0; }
+EOF
+for value in 1 2; do
+  printf 'int library_value(void) { return %s; }\n' "$value" >host/value.c
+  cc -c host/value.c -o host/value.o
+  ar rcs host/libvalue.a host/value.o
+  cat host/libvalue.a >script-lib/libvalue.a
+  script_value "$value" -v -L "$BUILD/script-lib" -lvalue \
+    scripts/library.x 2>script-library.log
+  if [ "$value" = 2 ]; then
+    grep -q '^x2c: up-to-date translate ' script-library.log ||
+      fail "library replacement repeated translation"
+    grep -q '^x2c: up-to-date compile ' script-library.log ||
+      fail "library replacement repeated compilation"
+    grep -q '^x2c: link ' script-library.log ||
+      fail "library replacement skipped linking"
+  fi
+done
+# An explicitly resolved linker file is recorded and can reuse the executable.
+script_value 2 -Xlinker "$BUILD/script-lib/libvalue.a" scripts/library.x
+"$X2C" script -v -Xlinker "$BUILD/script-lib/libvalue.a" scripts/library.x \
+  >out.log 2>script-warm.log
+if grep -Eq '^x2c: (translate|preprocess|compile|link) ' script-warm.log; then
+  fail "script with a recorded library rebuilt"
+fi
+cat >host/value.c <<'EOF'
+int library_value(void) { return 3; }
+EOF
+cc -c host/value.c -o host/value.o
+ar rcs host/libvalue.a host/value.o
+cat host/libvalue.a >script-lib/libvalue.a
+script_value 3 -Xlinker "$BUILD/script-lib/libvalue.a" scripts/library.x
+
 # A different compiler binary is a different helper.
 cp "$X2C" bin/x2c
 printf 'x' >> bin/x2c
