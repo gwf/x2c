@@ -3559,9 +3559,15 @@ static List _collected_function(
         c.sym.mark_static(%(function $name));
       else c.fn_defs[name] = 1;
       c.record_declaration_visibility(declaration);
-      // A method's binding keeps its resolved owner and full spelling.
       List method = _method_identity(c, binding);
-      if (!method) {
+      if (method) {
+        // Replay the resolved owner with this declaration's own member.
+        String member = method.cadr();
+        String owner = name[:name.len() - member.len() - 1];
+        declaration = %(declare $type
+          (bindings (bind (($owner) $member) $modifiers)));
+      }
+      else {
         /* Renamed locals keep their identity; exact names complete
            prototypes. */
         Var source;
