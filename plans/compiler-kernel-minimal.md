@@ -78,9 +78,9 @@ Recovered at 8b78c595, against dev:
   `MacroMatcher`, `apply_meta_function`, a deep-equality decline test,
   then `bind_syntax`, `convert_expression`, and `normalize`.
 - Dispatch sites: `_binary_expression`, static `_method` in
-  src/expressions.x on a miss, `_access_rewrite` before read or update
-  lowering, `_statement_rewrite` for `switch`, and `finish_initializers`
-  for postludes.
+  src/expressions.x on a miss, `_expression_rewrite` in src/transform.x
+  before read or update lowering, `_statement_rewrite` for `switch`, and
+  `finish_initializers` for postludes.
 - `Code.type`, `Code.value`, `Type.is_named`, `Type.numeric`,
   `Type.is_text`, `Type.protocol_member`; pure Type algorithms in
   `lib/type.x` (617 lines moved out of `src/type.x`).
@@ -167,7 +167,7 @@ and probes `families[family][key]`.
 | --- | --- | --- | --- |
 | binary | operator, then left type | `_binary_expression` | protocol operators later |
 | unary | operator, then operand type | `_operator`, `_postfix` | dynamic operators |
-| access | use, then base type | `_access_rewrite` | collection access (done) |
+| access | use, then base type | `_expression_rewrite` | collection access (done) |
 | member | receiver type | static `_method` (src/expressions.x) on a miss | delegate |
 | call | callee binding | `_call` | printf families |
 | literal | head | `_step_tag` literal arms | collection literals, interpolation |

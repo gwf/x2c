@@ -9,7 +9,9 @@
 > binding leak (A6), the reserved component macro names, and the lambda
 > component's carrier placements (decision 9); batch 10 carried out the
 > unboxer decision. String `switch` and typed `_Alignof` are deferred past
-> the cleanup phase (decision 11).
+> the cleanup phase (decision 11). A10, a C literal cast to `String`, has
+> no decision and still reproduces at `ef772117` (a garbage read rather
+> than `<bad-arg>`); it remains open.
 
 ## Decisions recorded 2026-10-12
 

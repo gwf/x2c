@@ -2,9 +2,9 @@
 #pragma once
 #include "lisp.x"
 
-macro Expression $repl._values() =>
+macro Expression $repl.values() =>
   $(x2c.literal.string (x2c.embed.text "../../etc/lisp-values.xlisp"));
-macro Expression $repl._runtime() =>
+macro Expression $repl.runtime() =>
   $(x2c.literal.string (x2c.embed.text "repl-runtime.xlisp"));
 
 /* Raw evaluation slots transport terminal values without storing them in
@@ -240,7 +240,7 @@ void repl_runtime_initialize(Lisp lisp) {
     x2c_func_value_argument);
   $lisp.bind(lisp, "repl.native.x2c_func_pointer_argument",
     x2c_func_pointer_argument);
-  lisp.eval_string($repl._values());
-  lisp.eval_string($repl._runtime());
+  lisp.eval_string($repl.values());
+  lisp.eval_string($repl.runtime());
   lisp.eval_string("(def C.globals (Map.new))");
 }

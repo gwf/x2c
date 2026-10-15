@@ -30,6 +30,7 @@ static int shadow(void) {
 }
 
 int main(void) {
-  printf("%d %d %d %d\n", use_extern(), local_proto(), shadow(), leaked);
+  int bumped = use_extern(), proto = local_proto(), shadowed = shadow();
+  printf("%d %d %d %d\n", bumped, proto, shadowed, leaked);
   return 0;
 }
