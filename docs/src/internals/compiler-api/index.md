@@ -32,6 +32,7 @@ Functions and types exposed by each compiler module.
 | [`src/component-printf.x`](component-printf.md) | Var values in printf-family formats. |
 | [`src/component-protocols.x`](component-protocols.md) | protocol adapters and Var descriptors. |
 | [`src/component-raise.x`](component-raise.md) | raise. |
+| [`src/component-string-switch.x`](component-string-switch.md) | switches on a String. |
 | [`src/component-try.x`](component-try.md) | try, catch, and finally. |
 | [`src/deps.x`](deps.md) | Make dependency output for x2c translation units. |
 | [`src/diagnostics.x`](diagnostics.md) | compiler diagnostic storage and rendering. |

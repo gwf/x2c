@@ -125,6 +125,7 @@
   - [src/component-printf.x](internals/compiler-api/component-printf.md)
   - [src/component-protocols.x](internals/compiler-api/component-protocols.md)
   - [src/component-raise.x](internals/compiler-api/component-raise.md)
+  - [src/component-string-switch.x](internals/compiler-api/component-string-switch.md)
   - [src/component-try.x](internals/compiler-api/component-try.md)
   - [src/deps.x](internals/compiler-api/deps.md)
   - [src/diagnostics.x](internals/compiler-api/diagnostics.md)

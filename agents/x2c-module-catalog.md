@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 63
+- Compiler modules: 64
 - Runtime modules: 77
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -261,6 +261,14 @@ None. This module has no non-static function definitions.
 ### [src/component-raise.x](../src/component-raise.x)
 
 raise.
+
+Public functions:
+
+None. This module has no non-static function definitions.
+
+### [src/component-string-switch.x](../src/component-string-switch.x)
+
+switches on a String.
 
 Public functions:
 
@@ -567,7 +575,7 @@ Public functions:
 `MetaContext.function_reference`, `Type.element`, `Type.parameters`,
 `Type.return_type`, `Type.reverse_name`, `Type.resolve`, `Type.layout`,
 `Type.is_value`, `Type.tag_name`, `Type.members`, `Type.fields`,
-`Code.binding_spelling`, `x2c_ident`, `x2c_binding_fresh`,
+`Code.binding_spelling`, `x2c_ident`, `x2c_binding_fresh`, `x2c_binding_for`,
 `MetaContext.fresh_binding`, `x2c_meta_definition_hashes`, `Code.name`,
 `Code.body`, `Code.arguments`, `Code.parameter`, `Code.native_signature`,
 `MetaContext.literal_list`, `Code.source_text`, `x2c_embed_text`,
