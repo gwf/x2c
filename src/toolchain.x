@@ -18,7 +18,7 @@
 */
 typedef struct Toolchain {
   String cc, ar, include_dir, runtime_lib, List cpp_args, cc_args, ld_args;
-  int verbose, dry_run, keep_system_includes;
+  int verbose, dry_run, keep_system_includes, inline_macro_expansions;
 } *Toolchain;
 
 /** Describes one `Scope`-owned host-tool argv action and its reporting policy.
@@ -352,7 +352,9 @@ int Toolchain.preprocess(
   output = NULL; errors = NULL; dependencies = NULL;
   if (!fname) return -1;
   if (!t.keep_system_includes)
-    t.keep_system_includes = _keeps_system_includes(t.cc);
+    t.keep_system_includes = _accepts(t.cc, "-fkeep-system-includes");
+  if (!t.inline_macro_expansions)
+    t.inline_macro_expansions = _accepts(t.cc, "-ftrack-macro-expansion=0");
   Path scratch = Path.temp_dir();
   String depfile = %"$scratch/cpp.d";
   List arguments = _cpp_arguments(t, include_dirs, imacros, depfile, fname);
@@ -370,11 +372,13 @@ int Toolchain.preprocess(
   return status;
 }
 
-/* 1 when the host preprocessor accepts `-fkeep-system-includes`, which keeps
-   system include directives, and -1 otherwise. */
-static int _keeps_system_includes(String cc) {
+/* 1 when the host preprocessor accepts the GCC `option`, and -1
+   otherwise. `-fkeep-system-includes` keeps system include directives;
+   `-ftrack-macro-expansion=0` keeps a system macro's expansion on its
+   source line, so line markers do not split a symbol such as `<stdout>`. */
+static int _accepts(String cc, String option) {
   String output = NULL, errors = NULL;
-  List probe = %($cc "-E" "-x" "c" "-fkeep-system-includes" "/dev/null");
+  List probe = %($cc "-E" "-x" "c" $option "/dev/null");
   return tool_capture(probe, output, errors) == 0 ? 1 : -1;
 }
 
@@ -388,6 +392,7 @@ static List _cpp_arguments(
     "-D__restrict=" "-D__extension__=" "-Wno-unicode"
     "-Wno-invalid-pp-token"
     @{t.keep_system_includes > 0 ? %("-fkeep-system-includes") : NULL}
+    @{t.inline_macro_expansions > 0 ? %("-ftrack-macro-expansion=0") : NULL}
     "-I" "." @{_includes("-I", Compiler.cpp_include_dirs())}
     @{_includes("-I", include_dirs)}
     @{_includes("-idirafter", Compiler.default_include_dirs())}
