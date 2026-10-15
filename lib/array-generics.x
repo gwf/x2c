@@ -421,7 +421,8 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   }
 
   /** Removes and returns the last element.
-      Raises: `<bad-arg>` for a null or empty array.
+      Boxed `Array` returns `void` for a null or empty array.
+      Raises: `<bad-arg>` for a null or empty typed array.
   */
   $element $array.take_last($array array) {
     $element value = $zero;
@@ -431,9 +432,10 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   }
 
   /** Removes and returns the first element, shifting the remainder left.
-      This operation is O(n).
-      Raises: `<bad-arg>` for a null or empty array, or `<size-limit>` when the
-      length exceeds the integer index domain. These failures do not return.
+      This operation is O(n). Boxed `Array` returns `void` for a null or
+      empty array.
+      Raises: `<bad-arg>` for a null or empty typed array, or `<size-limit>`
+      when the length exceeds the integer index domain in either family.
   */
   $element $array.shift($array array) {
     $element value = $zero;
@@ -461,9 +463,10 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   /** Inserts `value` at normalized `index` and returns it.
       The accepted range includes the position after the last element;
       negative indices are normalized against that wider range.
-      Raises: `<bad-arg>` for a null array or out-of-range index,
-      `<size-limit>` at the integer index limit, or `<alloc-fail>` when storage
-      cannot grow.
+      Boxed `Array` returns `void` for an out-of-range index without mutation.
+      Raises: `<bad-arg>` for a null array in either family or an out-of-range
+      typed-array index, `<size-limit>` at the integer index limit, or
+      `<alloc-fail>` when storage cannot grow.
   */
   $element $array.insert($array array, int index, $element value) {
     if ($boxed) {
@@ -489,8 +492,10 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
 
   /** Removes and returns the element at normalized `index`.
       Negative indices count from the end; following elements shift left.
-      Raises: `<bad-arg>` for a null array or out-of-range index, or
-      `<size-limit>` when the length exceeds the integer index domain.
+      Boxed `Array` returns `void` for a null array or out-of-range index.
+      Raises: `<bad-arg>` for a null typed array or out-of-range typed-array
+      index, or `<size-limit>` when the length exceeds the integer index
+      domain in either family.
   */
   $element $array.remove($array array, int index) {
     $element value = $zero;

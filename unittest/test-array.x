@@ -136,6 +136,24 @@ static void array_null_writes_report_bad_arg(void) {
   EXPECT_INT_EQ(caught, 3);
 }
 
+static void array_absent_elements_return_void(void) {
+  $test.scoped();
+  Array missing = NULL, empty = [], values = [7];
+
+  EXPECT_TRUE(missing.take_last() is void);
+  EXPECT_TRUE(empty.take_last() is void);
+  EXPECT_TRUE(missing.shift() is void);
+  EXPECT_TRUE(empty.shift() is void);
+  EXPECT_TRUE(missing.remove(0) is void);
+  EXPECT_TRUE(empty.remove(0) is void);
+  EXPECT_TRUE(values.remove(1) is void);
+  EXPECT_TRUE(values.remove(-2) is void);
+  EXPECT_TRUE(values.insert(2, 9) is void);
+  EXPECT_TRUE(values.insert(-3, 9) is void);
+  EXPECT_INT_EQ(values.len(), 1);
+  EXPECT_INT_EQ(values[0].int(), 7);
+}
+
 
 static void array_map_transfer_releases_temporary_scope(void) {
   $test.scoped();
@@ -665,6 +683,7 @@ void array_suite(void) {
   $test.run(array_push_pop);
   $test.run(array_void_writes_transfer_before_mutation);
   $test.run(array_null_writes_report_bad_arg);
+  $test.run(array_absent_elements_return_void);
   $test.run(array_map_transfer_releases_temporary_scope);
   $test.run(array_map2_transfer_releases_temporary_scope);
   $test.run(array_reports_slice_domain_failures);
