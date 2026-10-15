@@ -677,6 +677,17 @@ List x2c_binding_fresh(String role) {
   return c.sym.introduce(c.fresh_name(role));
 }
 
+/** Answers `x2c.binding.for`, declared in `lib/meta.x`. */
+List x2c_binding_for(Var key, String role) {
+  _require_expansion("x2c.binding.for");
+  if (!role.is_identifier()) $report.sdk.binding_role(role);
+  Compiler c = active.expander;
+  List binding = NULL;
+  $adapter.memo(c, %(binding $key), binding)
+    binding = c.sym.introduce(c.fresh_name(role));
+  return binding;
+}
+
 /** Returns a fresh binding whose spelling starts with `stem`. */
 Var MetaContext.fresh_binding(String stem) {
   _require_expansion("_x2c.name.unique");
