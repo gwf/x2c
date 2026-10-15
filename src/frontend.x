@@ -1,4 +1,4 @@
-/*  frontend.x -- configured compiler sessions and sequential source units
+/*  frontend.x -- configured compiler sessions and source units
 
     Copyright (c) 2025 Gary William Flake
 
@@ -17,7 +17,7 @@
 typedef void (*FrontendErrorSink)(String text);
 
 /** Borrows a configured request and owns shared native-preprocessor setup.
-    Units open sequentially; process caches must outlive the session.
+    Nested units close in reverse order; process caches outlive the session.
     The optional stderr sink runs synchronously; units also retain that text.
 */
 typedef struct Frontend {
@@ -33,7 +33,7 @@ typedef struct Frontend {
 typedef struct ParsedUnit {
   Context context;
   Compiler compiler, preprocessor;
-  Map globals;
+  Map globals, enclosing_var_tags;
   List ast;
   String preprocessor_output, preprocessor_errors;
   int source_lines, generated_symbols;
@@ -173,7 +173,7 @@ void ParsedUnit.close(ParsedUnit &unit) {
   Compiler c = unit.compiler;
   if (unit.preprocessor) c.close_child(unit.preprocessor);
   c.free_lisp();
-  Type.end_unit();
+  Type.end_unit(unit.enclosing_var_tags);
   unit.context.close();
   unit = (ParsedUnit) { 0 };
 }
@@ -183,8 +183,8 @@ void ParsedUnit.close(ParsedUnit &unit) {
 /* Opens and tokenizes a source unit in `context` without printing
    diagnostics: the file `filename`, or the session text `source` when
    `filename` is NULL. A failed unit remains open so its diagnostics can be
-   inspected. Close it before opening the next unit; Type and collection
-   caches are process-global. */
+   inspected. A nested unit restores the enclosing unit's type registrations
+   when it closes. */
 static int _start(
   Frontend frontend, String filename, ParsedUnit &unit, Context context,
   String source) {
@@ -196,7 +196,7 @@ static int _start(
       c.configure_package(c.package_source_dirs, filename);
       _tokenize_input(frontend, unit, filename);
       c.inherited_lisp = Compiler.inherits_import(Path.absolute(filename));
-      Compiler.begin_meta_unit(c.filename);
+      c.begin_meta_unit(c.filename);
     }
   }
   catch %(malformed *): return 0;
@@ -215,7 +215,7 @@ static Compiler _begin_unit(
   unit.generated_symbols = !request.no_cpp &&
     (!request.dump || request.dump == <dump-defs>);
   unit.context = context;
-  Type.begin_unit();
+  unit.enclosing_var_tags = Type.begin_unit();
   unit.compiler = Compiler.new();
   Compiler c = unit.compiler;
   c.diagnostics.limit = request.max_errors;

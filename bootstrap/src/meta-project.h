@@ -17,5 +17,7 @@
 #include <unistd.h>
 void Frontend_prepare_meta(Frontend f, List inputs);
 
+MetaHelper Frontend_build_meta(Frontend f, List inputs);
+
 
 #endif /* __GUARD_0xD04FB246__ */

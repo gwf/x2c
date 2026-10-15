@@ -15,7 +15,7 @@ X2c semantic types.
 | [`List.type_from_ast`](#List.type_from_ast) | Returns the semantic `Type` represented by a complete `(declare ...)` AST. |
 | [`Type.begin_unit`](#Type.begin_unit) | Starts an empty set of source-declared `Var` rows for one translation unit. |
 | [`Type.declaration_ast`](#Type.declaration_ast) | Returns a complete `(declare ...)` AST for `type` and `binding`. |
-| [`Type.end_unit`](#Type.end_unit) | Ends the source-declared `Var`-row lifetime before the unit `Scope` is released. |
+| [`Type.end_unit`](#Type.end_unit) | Restores the enclosing unit's source-declared `Var` rows before the current unit's `Scope` is released. |
 | [`Type.fixed_var_tag`](#Type.fixed_var_tag) | Returns the process-lifetime `Var` tag fixed for `type`, or zero. |
 | [`Type.parameter_ast`](#Type.parameter_ast) | Returns a complete `(param ...)` AST for `type` and `binding`. |
 | [`Type.parts`](#Type.parts) | Answers `Type.parts`, declared in `lib/meta.x`, through `type_declaration_parts`, which a project's helper shares. |
@@ -43,10 +43,10 @@ Source: `src/type.x:27`
 <a id="Type.begin_unit"></a>
 #### Type.begin_unit
 
-`void Type.begin_unit(void)`
+`Map Type.begin_unit(void)`
 
 Starts an empty set of source-declared `Var` rows for one translation
-unit.
+unit. Returns the enclosing unit's rows for restoration at close.
 
 Source: `src/type.x:274`
 
@@ -63,12 +63,12 @@ Source: `src/type.x:173`
 <a id="Type.end_unit"></a>
 #### Type.end_unit
 
-`void Type.end_unit(void)`
+`void Type.end_unit(Map enclosing)`
 
-Ends the source-declared `Var`-row lifetime before the unit `Scope` is
-released.
+Restores the enclosing unit's source-declared `Var` rows before the
+current unit's `Scope` is released.
 
-Source: `src/type.x:281`
+Source: `src/type.x:283`
 
 <a id="Type.fixed_var_tag"></a>
 #### Type.fixed_var_tag

@@ -105,6 +105,7 @@ typedef struct Compiler{
   Pending pending;
   int prelude;
   Map meta_comptime, meta_regions, meta_hashes, meta_calls;
+  struct MetaHelper * meta_helper;
   Map native_meta;
   Map project_meta;
   Array unit_nodes, meta_group;

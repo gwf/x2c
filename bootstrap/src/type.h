@@ -35,9 +35,9 @@ void Type_register_var_tag(Type t, String name, String converter);
 
 void Type_register_var_adoption(Type type, Type representation, Symbol tag);
 
-void Type_begin_unit(void);
+Map Type_begin_unit(void);
 
-void Type_end_unit(void);
+void Type_end_unit(Map enclosing);
 
 
 #endif /* __GUARD_0x2B6ED6EF__ */

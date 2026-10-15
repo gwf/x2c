@@ -57,6 +57,7 @@ static macro Stmt $report.utils.host_failed(
    `root_found` is set and the current directory otherwise. */
 static String executable_path = NULL, root_path = NULL;
 static String active_identity = NULL;
+static int external_command = 0;
 static int root_found = 0;
 static List default_includes = NULL, cpp_includes = NULL;
 
@@ -97,6 +98,7 @@ static void _initialize_environment(
   if (root_path) return;
   _default_search_path();
   executable_path = _executable(argv0);
+  external_command = embedded_identity != NULL;
   active_identity = embedded_identity ? embedded_identity : _identity();
   String home = Env.get("X2C_HOME");
   if (home && !home[0]) home = NULL;
@@ -180,6 +182,21 @@ String x2c_get_root(void) => root_path;
 
 /** Returns the borrowed resolved executable path, or NULL when unavailable. */
 String x2c_get_executable(void) => executable_path;
+
+/** Returns the matching compiler executable for a recursive translation.
+    External commands use the driver's X2C path or their adjacent installed
+    compiler. An unavailable or changed compiler returns NULL. */
+String Compiler.driver_executable(void) {
+  if (!external_command) return executable_path;
+  String path = Env.get("X2C");
+  if (!path) {
+    String parent = Path.dirname(executable_path);
+    String stage = Path.dirname(parent);
+    path = Path.dirname(stage) == %"$root_path/builds"
+      ? %"$stage/x2c" : %"$root_path/bin/x2c";
+  }
+  return Path.content_identity(path) == active_identity ? path : NULL;
+}
 
 /** Returns the discovered or configured home, or NULL when there is none. */
 String Compiler.home_dir(void) => root_found ? root_path : NULL;

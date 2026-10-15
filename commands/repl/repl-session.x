@@ -13,12 +13,13 @@ typedef struct ReplSession {
   Compiler compiler;
   Lisp evaluator;
   ReplLower lowering;
+  Array helpers;
   // Published name -> (value), (type), (native), or
   // (function (typed ...) (lowered ...)).
   Map names;
 } *ReplSession;
 
-/** status is incomplete, rejected, defined, executed, value, or failed.
+/** status is incomplete, rejected, defined, loaded, executed, value, or failed.
     diagnostics are ordinary compiler reports; message/cause describe the
     adapter or evaluator failure. source retains diagnostic source text;
     syntax and lowered support optional tracing. */
@@ -77,6 +78,7 @@ ReplSession ReplSession.new(Compiler compiler) {
   ReplSession session = Scope.calloc(1, sizeof(struct ReplSession));
   session.compiler = compiler;
   session.names = {};
+  session.helpers = [];
   session.evaluator = Lisp.new();
   repl_runtime_initialize(session.evaluator);
   session.lowering = ReplLower.new(compiler, session.evaluator);
@@ -537,6 +539,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     }
     result.status = <failed>;
     result.cause = cons(cause, details);
+    result.diagnostics = c.diagnostics();
     return result;
   }
   if (function_name || added.len()) {
@@ -547,6 +550,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
         : %(value);
   }
   result.name = function_name;
+  result.diagnostics = c.diagnostics();
   result.status = function_name ? <defined> : prints ? <value> : <executed>;
   return result;
 }
@@ -557,4 +561,7 @@ void ReplSession.close(ReplSession session) {
   session.lowering = NULL;
   session.evaluator.destroy();
   session.evaluator = NULL;
+  foreach (void *helper, session.helpers) MetaHelper.close(helper);
+  session.helpers.free();
+  session.helpers = NULL;
 }

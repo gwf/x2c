@@ -125,13 +125,14 @@ Public functions:
 `Compiler.linked_meta_definitions_current`, `Compiler.complete_meta_hashes`,
 `Compiler.meta_provider_hashes`, `Compiler.add_linked_meta_provider_hashes`,
 `Compiler.name_meta_provider_bindings`, `Compiler.publishes_typedef`,
-`Compiler.publishes_type_family`, `Compiler.inline_type_dependencies`,
-`Compiler.publish_inline_types`, `Compiler.record_generated_symbol`,
-`Compiler.record_conformance_rows`, `Compiler.declared_adoptions`,
-`Compiler.collect_package`, `Compiler.replay_package_imports`,
-`Compiler.included_compile_time_effects`, `Compiler.install_included_effects`,
-`Compiler.configure_interfaces`, `Compiler.prelude_interface`,
-`Compiler.interface_text`, `Compiler.linked_prelude_records`,
+`Compiler.publishes_type_family`, `Compiler.callable_symbols`,
+`Compiler.inline_type_dependencies`, `Compiler.publish_inline_types`,
+`Compiler.record_generated_symbol`, `Compiler.record_conformance_rows`,
+`Compiler.declared_adoptions`, `Compiler.collect_package`,
+`Compiler.replay_package_imports`, `Compiler.included_compile_time_effects`,
+`Compiler.install_included_effects`, `Compiler.configure_interfaces`,
+`Compiler.prelude_interface`, `Compiler.interface_text`,
+`Compiler.linked_prelude_records`, `Compiler.refresh_source_collections`,
 `Compiler.forget_provisional_entries`
 
 ### [src/compiler.x](../src/compiler.x)
@@ -362,7 +363,7 @@ Public functions:
 
 ### [src/frontend.x](../src/frontend.x)
 
-configured compiler sessions and sequential source units.
+configured compiler sessions and source units.
 
 Public functions:
 
@@ -514,9 +515,9 @@ the compiler's side of the project meta helper.
 
 Public functions:
 
-`Compiler.report_meta_error`, `Compiler.meta_helper_call`,
-`Compiler.use_meta_helper`, `Compiler.begin_meta_unit`,
-`Compiler.stop_meta_helper`
+`Compiler.report_meta_error`, `Compiler.meta_helper_call`, `MetaHelper.new`,
+`MetaHelper.retain_executable`, `Compiler.use_meta_helper`, `MetaHelper.check`,
+`Compiler.begin_meta_unit`, `Compiler.stop_meta_helper`, `MetaHelper.close`
 
 ### [src/meta-native.x](../src/meta-native.x)
 
@@ -548,7 +549,7 @@ the project meta build.
 
 Public functions:
 
-`Frontend.prepare_meta`
+`Frontend.prepare_meta`, `Frontend.build_meta`
 
 ### [src/meta-sdk.x](../src/meta-sdk.x)
 
@@ -814,8 +815,9 @@ System utilities for environment discovery and workers.
 Public functions:
 
 `x2c_initialize_environment`, `x2c_initialize_command_environment`,
-`x2c_set_root`, `x2c_get_root`, `x2c_get_executable`, `Compiler.home_dir`,
-`Compiler.stage_dir`, `Compiler.home_packages`, `Compiler.home_libexec`,
+`x2c_set_root`, `x2c_get_root`, `x2c_get_executable`,
+`Compiler.driver_executable`, `Compiler.home_dir`, `Compiler.stage_dir`,
+`Compiler.home_packages`, `Compiler.home_libexec`,
 `Compiler.default_include_dirs`, `Compiler.cpp_include_dirs`,
 `Env.find_program`, `Path.is_x2c_source`, `Path.is_layout_source`,
 `Compiler.package_directory`, `SourceView.package_entry`,

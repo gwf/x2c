@@ -20,13 +20,31 @@
 #include <unistd.h>
 void Compiler_report_meta_error(Compiler c, Var node, Symbol category, String message, Token site, List notes, int fatal);
 
+typedef struct MetaHelper{
+  String path, snapshot;
+  Map failures, units;
+  Scope scope;
+  pid_t pid, owner;
+  int to, from, table, reset, status;
+  Buffer input;
+}
+* MetaHelper;
+
 Var Compiler_meta_helper_call(Compiler c, String name, Token site, List arguments, String provider);
 
-void Compiler_use_meta_helper(String path, Map failures, Map units);
+MetaHelper MetaHelper_new(String path, Map failures, Map units);
 
-void Compiler_begin_meta_unit(String filename);
+void MetaHelper_retain_executable(MetaHelper helper);
+
+void Compiler_use_meta_helper(MetaHelper helper);
+
+void MetaHelper_check(MetaHelper m, Compiler c, String name, String provider);
+
+void Compiler_begin_meta_unit(Compiler c, String filename);
 
 void Compiler_stop_meta_helper(void);
+
+void MetaHelper_close(MetaHelper helper);
 
 
 #endif /* __GUARD_0xB1CED777__ */

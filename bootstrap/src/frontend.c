@@ -23,7 +23,7 @@ typedef struct Frontend{
 typedef struct ParsedUnit{
   Context context;
   Compiler compiler, preprocessor;
-  Map globals;
+  Map globals, enclosing_var_tags;
   List ast;
   String preprocessor_output, preprocessor_errors;
   int source_lines, generated_symbols;
@@ -428,7 +428,7 @@ int ParsedUnit_parse(ParsedUnit * p){
   return ! Compiler_error_count(c);
 }
 
-void Type_end_unit(void);
+void Type_end_unit(Map);
 
 void ParsedUnit_close(ParsedUnit * unit){
   if(! _init_guard_) _file_init_();
@@ -436,7 +436,7 @@ void ParsedUnit_close(ParsedUnit * unit){
   Compiler c =(* unit).compiler;
   if((* unit).preprocessor) Compiler_close_child(c, (* unit).preprocessor);
   Compiler_free_lisp(c);
-  Type_end_unit();
+  Type_end_unit((* unit).enclosing_var_tags);
   Context_close((* unit).context);
   (* unit) =(ParsedUnit){
     0
@@ -448,7 +448,7 @@ int Compiler_inherits_import(String);
 
 Path Path_absolute(Path);
 
-void Compiler_begin_meta_unit(String);
+void Compiler_begin_meta_unit(Compiler, String);
 
 static int _start(Frontend frontend, String filename, ParsedUnit * unit, Context context, String source){
   Compiler c = _begin_unit(frontend, &((* unit)), context);
@@ -472,7 +472,7 @@ static int _start(Frontend frontend, String filename, ParsedUnit * unit, Context
         Compiler_configure_package(c, c -> package_source_dirs, filename);
         _tokenize_input(frontend, &((* unit)), filename);
         c -> inherited_lisp = Compiler_inherits_import(Path_absolute(filename));
-        Compiler_begin_meta_unit(c -> filename);
+        Compiler_begin_meta_unit(c, c -> filename);
       }
 
     }
@@ -516,7 +516,7 @@ static Context _unit_context(void){
   return Context_open_isolated_named("translation unit");
 }
 
-void Type_begin_unit(void);
+Map Type_begin_unit(void);
 
 static Compiler _begin_unit(Frontend frontend, ParsedUnit * unit, Context context){
   CliRequest request = frontend -> request;
@@ -526,7 +526,7 @@ static Compiler _begin_unit(Frontend frontend, ParsedUnit * unit, Context contex
   ;
   (* unit).generated_symbols = ! request -> no_cpp &&(! request -> dump || request -> dump == 10268258347430);
   (* unit).context = context;
-  Type_begin_unit();
+  (* unit).enclosing_var_tags = Type_begin_unit();
   (* unit).compiler = Compiler_new();
   Compiler c =(* unit).compiler;
   c -> diagnostics -> limit = request -> max_errors;

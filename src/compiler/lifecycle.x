@@ -111,7 +111,7 @@ static void _share_unit(Compiler c, Compiler owner) {
                source_map, recovery_depth, sources, declaration_produced,
                source_facts, source_occurrences, source_definitions,
                source_declarations, source_texts, unit_script, include_dirs,
-               meta_build, evaluated_effects, pending_inline_bodies,
+               meta_build, meta_helper, evaluated_effects, pending_inline_bodies,
                collection_native_files);
 }
 

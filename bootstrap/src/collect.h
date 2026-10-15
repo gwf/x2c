@@ -54,6 +54,8 @@ int Compiler_publishes_typedef(Compiler c, String name);
 
 int Compiler_publishes_type_family(Compiler c, List family);
 
+Map Compiler_callable_symbols(Compiler c, List names);
+
 Map Compiler_inline_type_dependencies(Compiler c, List ast);
 
 void Compiler_publish_inline_types(Compiler c, List ast);
@@ -79,6 +81,8 @@ String Compiler_prelude_interface(void);
 String Compiler_interface_text(Compiler c);
 
 Map Compiler_linked_prelude_records(Compiler c);
+
+void Compiler_refresh_source_collections(void);
 
 void Compiler_forget_provisional_entries(void);
 

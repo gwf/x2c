@@ -22,7 +22,7 @@ typedef struct Frontend{
 typedef struct ParsedUnit{
   Context context;
   Compiler compiler, preprocessor;
-  Map globals;
+  Map globals, enclosing_var_tags;
   List ast;
   String preprocessor_output, preprocessor_errors;
   int source_lines, generated_symbols;

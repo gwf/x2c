@@ -83,3 +83,4 @@ cmp "$tmp/interrupt-expected" "$tmp/interrupt-out"
 grep -q 'evaluation failed: (interrupt ' "$tmp/interrupt-err"
 
 echo "REPL command checks passed"
+sh commands/repl/tests/load.sh

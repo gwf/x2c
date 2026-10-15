@@ -33,6 +33,8 @@ String x2c_get_root(void);
 
 String x2c_get_executable(void);
 
+String Compiler_driver_executable(void);
+
 String Compiler_home_dir(void);
 
 String Compiler_stage_dir(void);

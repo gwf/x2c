@@ -110,6 +110,7 @@ typedef struct Compiler{
   Pending pending;
   int prelude;
   Map meta_comptime, meta_regions, meta_hashes, meta_calls;
+  struct MetaHelper * meta_helper;
   Map native_meta;
   Map project_meta;
   Array unit_nodes, meta_group;
@@ -1252,6 +1253,7 @@ static void f9_lifecycle____share_unit(Compiler c, Compiler owner){
   c -> unit_script = owner -> unit_script;
   c -> include_dirs = owner -> include_dirs;
   c -> meta_build = owner -> meta_build;
+  c -> meta_helper = owner -> meta_helper;
   c -> evaluated_effects = owner -> evaluated_effects;
   c -> pending_inline_bodies = owner -> pending_inline_bodies;
   c -> collection_native_files = owner -> collection_native_files;

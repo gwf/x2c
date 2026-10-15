@@ -16,19 +16,23 @@ The compiler's side of the project meta helper.
 | [`Compiler.meta_helper_call`](#Compiler.meta_helper_call) | Calls the project `meta` function `name` in the helper with the values `arguments`, for the call at `site`, and returns its result. |
 | [`Compiler.report_meta_error`](#Compiler.report_meta_error) | Reports a meta function's error `message` with `notes` under `category` at the position recorded first in or around `node`, or at `site` when it has none. |
 | [`Compiler.stop_meta_helper`](#Compiler.stop_meta_helper) | Stops the helper this process runs, which a translation worker does when its units are done and every process does as it ends. |
-| [`Compiler.use_meta_helper`](#Compiler.use_meta_helper) | Uses the helper at `path`, or none when it is NULL, whose tables named in `failures` could not be built, each with why, and whose table for each input or included file path is in `units`. |
+| [`Compiler.use_meta_helper`](#Compiler.use_meta_helper) | Uses `helper` for ordinary translation, retaining its configuration through process shutdown. |
+| [`MetaHelper.check`](#MetaHelper.check) | Checks that this helper built the provider table needed by `name`. |
+| [`MetaHelper.close`](#MetaHelper.close) | Stops this helper and releases its pipe buffer and configuration maps. |
+| [`MetaHelper.new`](#MetaHelper.new) | Creates an independent helper at `path`, with failures by table index and source paths mapped to their table indices. |
+| [`MetaHelper.retain_executable`](#MetaHelper.retain_executable) | Retains this helper's executable independently of later cache rebuilds. |
 
 ### `Compiler`
 
 <a id="Compiler.begin_meta_unit"></a>
 #### Compiler.begin_meta_unit
 
-`void Compiler.begin_meta_unit(String filename)`
+`void Compiler.begin_meta_unit(Compiler c, String filename)`
 
 Selects the table of the unit at `filename` for the calls that follow,
 and resets the unit's `meta static` values before the first one.
 
-Source: `src/meta-helper-client.x:440`
+Source: `src/meta-helper-client.x:480`
 
 <a id="Compiler.meta_helper_call"></a>
 #### Compiler.meta_helper_call
@@ -44,7 +48,7 @@ call. The call runs in the table of the file that wrote it: an included
 file's own, which runs the constants it computes as its own translation
 does, or else the unit's.
 
-Source: `src/meta-helper-client.x:104`
+Source: `src/meta-helper-client.x:102`
 
 <a id="Compiler.report_meta_error"></a>
 #### Compiler.report_meta_error
@@ -65,18 +69,76 @@ Source: `src/meta-helper-client.x:47`
 Stops the helper this process runs, which a translation worker does
 when its units are done and every process does as it ends.
 
-Source: `src/meta-helper-client.x:454`
+Source: `src/meta-helper-client.x:498`
 
 <a id="Compiler.use_meta_helper"></a>
 #### Compiler.use_meta_helper
 
-`void Compiler.use_meta_helper(String path, Map failures, Map units)`
+`void Compiler.use_meta_helper(MetaHelper helper)`
 
-Uses the helper at `path`, or none when it is NULL, whose tables named
-in `failures` could not be built, each with why, and whose table for
-each input or included file path is in `units`.
+Uses `helper` for ordinary translation, retaining its configuration
+through process shutdown. Replaces and closes the preceding helper.
 
-Source: `src/meta-helper-client.x:427`
+Source: `src/meta-helper-client.x:455`
+
+### `MetaHelper`
+
+<a id="MetaHelper.check"></a>
+#### MetaHelper.check
+
+`void MetaHelper.check(MetaHelper m, Compiler c, String name, String provider)`
+
+Checks that this helper built the provider table needed by `name`.
+Does not invoke the function or reset native state.
+
+Source: `src/meta-helper-client.x:468`
+
+<a id="MetaHelper.close"></a>
+#### MetaHelper.close
+
+`void MetaHelper.close(MetaHelper helper)`
+
+Stops this helper and releases its pipe buffer and configuration maps.
+A later close is harmless.
+
+Source: `src/meta-helper-client.x:508`
+
+<a id="MetaHelper.new"></a>
+#### MetaHelper.new
+
+`MetaHelper MetaHelper.new(String path, Map failures, Map units)`
+
+Creates an independent helper at `path`, with failures by table index
+and source paths mapped to their table indices. No process starts until
+a call needs it. The caller keeps the canonical configuration values.
+
+Source: `src/meta-helper-client.x:432`
+
+<a id="MetaHelper.retain_executable"></a>
+#### MetaHelper.retain_executable
+
+`void MetaHelper.retain_executable(MetaHelper helper)`
+
+Retains this helper's executable independently of later cache rebuilds.
+The copy lasts until close, including across helper restarts.
+
+Source: `src/meta-helper-client.x:446`
+
+## Public types
+
+| Type | Kind | Summary |
+| --- | --- | --- |
+| [`MetaHelper`](#MetaHelper) | struct | Owns one compiled helper's configuration and process. |
+
+<a id="MetaHelper"></a>
+### MetaHelper
+
+`typedef struct MetaHelper { String path, snapshot; Map failures, units; Scope scope; pid_t pid, owner; int to, from, table, reset, status; Buffer input; } *MetaHelper`
+
+Owns one compiled helper's configuration and process. Callers close it
+after its last call; closing again is harmless.
+
+Source: `src/meta-helper-client.x:71`
 
 ## Design notes
 

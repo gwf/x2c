@@ -191,6 +191,8 @@ typedef struct Compiler {
      share. Collection hashes this unit's bodies before they are parsed;
      `meta_calls` lists each parsed definition's referenced names. */
   Map meta_comptime, meta_regions, meta_hashes, meta_calls;
+  // An independently loaded source can keep its own compiled helper.
+  struct MetaHelper *meta_helper;
   /* Native functions that included units advertise with `meta`, by name,
      holding each declared signature. A function binds into the macro
      session the first time compile-time code calls it. */

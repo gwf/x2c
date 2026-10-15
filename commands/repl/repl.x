@@ -10,6 +10,7 @@ typedef struct ReplOptions {
 } ReplOptions;
 
 #include "repl-session.x"
+#include "repl-load.x"
 
 #include "repl-output.x"
 #include "repl-input.x"
@@ -37,6 +38,8 @@ static const struct ReplCommand _commands[] = {
     <statmode>, <stats> },
   { ":symbols", ":symbols", "List session-defined names and kinds.",
     <none>, <symbols> },
+  { ":load", ":load \"file.x\"", "Compile and load public meta functions.",
+    <path>, <load> },
   { ":ast", ":ast NAME", "Show a session function's typed AST.",
     <function>, <ast> },
   { ":lowered", ":lowered NAME", "Show a session function's lowered Lisp.",
@@ -261,6 +264,28 @@ static int _inspect(
   return 0;
 }
 
+static int _load_source(
+  ReplSession session, Frontend frontend, String argument) {
+  Tokenizer tokens = $auto(Tokenizer.new(argument, <x2c>));
+  tokens.scan();
+  Token path = tokens.next();
+  if (tokens.status() != <ok> || path.type != <lit-char*> ||
+      tokens.next().type != <eof>) {
+    $report.repl.usage(":load \"file.x\"");
+    return 0;
+  }
+  ReplResult result = session.load(frontend, path.text.parse());
+  $let(session.compiler.text, result.source)
+    foreach (Var entry, result.diagnostics)
+      session.compiler.print_diagnostic(entry);
+  if (result.status == <loaded>) {
+    printf("loaded %s\n", result.value.repr());
+    return 1;
+  }
+  if (result.message) fprintf(stderr, "load failed: %s\n", result.message);
+  return 0;
+}
+
 /** Runs the experimental REPL on stdin. Piped input continues after errors
     and exits with status one if any submission or command failed. Interactive
     errors leave the session usable; SIGINT stops a running submission. */
@@ -321,6 +346,9 @@ int repl_run(CliRequest request, ReplOptions options) {
       else if (descriptor->dispatch == <quit>) { pending = ""; break; }
       else if (descriptor->dispatch == <cancel>) pending = "";
       else if (descriptor->dispatch == <help>) _help();
+      else if (descriptor->dispatch == <load>) {
+        if (!_load_source(session, frontend, command[end:])) failed = 1;
+      }
       else if (descriptor->dispatch == <stats>) {
         int verbose;
         if (!_stats_mode(command, verbose)) {

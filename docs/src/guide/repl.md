@@ -84,6 +84,7 @@ incomplete submission continues at a fresh `... ` prompt.
 | `:help` | Show session commands. |
 | `:stats [verbose]` | Show concise or detailed runtime statistics. |
 | `:symbols` | List successfully defined names and their kinds. |
+| `:load "file.x"` | Compile and load the file's public bodied meta functions. |
 | `:ast plus` | Show `plus`'s typed x2c AST. |
 | `:lowered plus` | Show the Lisp forms used to execute `plus`. |
 | `:cancel` | Discard incomplete input. |
@@ -112,6 +113,69 @@ process-wide runtime values; requested bytes count public managed payload.
 Pool active and depot bytes partition retained backing capacity. Scope and
 Pool figures overlap and must not be summed. Verbose reports add Scope and
 Pool traffic and capacity details. There is no Lisp wordcode or AUTO tier.
+
+## Load functions from a file
+
+Save this source as `numbers.x`:
+
+```x2c
+static int twice(int n) { return 2 * n; }
+meta static int calls = 0;
+meta int answer(int n) { calls++; return twice(n + 1); }
+meta int call_count(void) { return calls; }
+```
+
+Load it and call its functions with ordinary prompt expressions:
+
+```text
+x2c> :load "numbers.x"
+loaded ("answer" "call_count")
+x2c> answer(20);
+=> 42
+x2c> call_count();
+=> 1
+x2c> int plus_answer(int n) { return answer(n) + 1; }
+defined plus_answer
+x2c> plus_answer(20);
+=> 43
+```
+
+`:load` compiles native code through the project meta helper builder. It
+uses the ordinary include, module, package, and native dependency handling.
+For example, `answer` can call a public meta function from an included `.x`
+file. Ordinary functions such as `twice` can support compiled bodies. Only
+public bodied meta functions defined by the loaded unit become prompt
+functions. Public type declarations accompany them. Global variables and
+enumerator constants are not imported. Source macros remain with the
+compiled source; loading does not install them in the prompt.
+
+Compilation happens on `:load`. Prompt definitions, statements, and
+expressions still lower to Lisp, including `plus_answer` above. Loading needs
+a matching x2c compiler, the host C compiler, and its runtime. A dependency
+that the project meta builder cannot compile or link makes the load fail.
+`meta` selects the compiled entry points; it does not supply missing native
+libraries or implementations.
+
+Each successful load keeps a separate helper process and its compiled
+executable until the session closes. Native static values persist between
+calls, and another load does not reset them. Calls exchange data values:
+numbers, Strings, Symbols, Lists, and independent Arrays and Maps. Arrays
+and Maps are copied across the boundary. Mutating a collection argument in
+the helper does not mutate the prompt's collection; return the changed
+collection to use it. Pointers, references, callbacks, records, cycles, and
+shared mutable collection identity cannot cross this boundary.
+
+A failed load publishes no names and preserves earlier functions. Fix a
+rejected file and load it again. Redefinition remains disabled, so loading
+a file whose functions are already present fails. Editing that file or
+attempting a rejected reload does not change its earlier compiled functions.
+Start a new session to replace them. Loaded names appear as `native` in
+`:symbols`; they have no prompt AST or lowered Lisp for inspection.
+
+A native call that exits, crashes, or exceeds `X2C_META_TIMEOUT` fails that
+submission. The next call restarts that load's helper from its retained
+executable, resetting that helper's native state. Other loaded helpers keep
+their state. Ordinary errors raised by a function leave its helper running.
 
 ## Supported subset
 
@@ -156,7 +220,7 @@ Function replacement and mutually recursive forward declarations are not
 supported. Names beginning `__repl_` are reserved.
 
 Arbitrary C libraries, unions, enums, imports, protocols, user macro/meta
-definitions, preprocessor
+definitions entered at the prompt, preprocessor
 directives, and direct Lisp input are outside this subset. A bodyless `meta`
 prototype is accepted: it makes a function the compiler links, or one from a
 [native module](meta-functions.md#native-modules) loaded with

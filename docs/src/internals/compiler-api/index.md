@@ -41,7 +41,7 @@ Functions and types exposed by each compiler module.
 | [`src/expressions.x`](expressions.md) | expression syntax and its resolution. |
 | [`src/fields.x`](fields.md) | statements that copy or set named fields. |
 | [`src/format.x`](format.md) | code formatting helpers for the x2c compiler. |
-| [`src/frontend.x`](frontend.md) | configured compiler sessions and sequential source units. |
+| [`src/frontend.x`](frontend.md) | configured compiler sessions and source units. |
 | [`src/generate.x`](generate.md) | the generated header and source of one unit. |
 | [`src/grammar.x`](grammar.md) | the source forms that lowering recognizes. |
 | [`src/initializers.x`](initializers.md) | brace initializer conversion. |

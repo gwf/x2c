@@ -73,21 +73,24 @@ static typedef struct Helper {
     calls. Inputs that reach none use no helper. A group or helper that
     does not build is reported at the first call that needs it. */
 void Frontend.prepare_meta(Frontend f, List inputs) {
+  Compiler.use_meta_helper(f.build_meta(inputs));
+}
+
+/** Builds an independent helper for the meta functions `inputs` reach.
+    The caller owns its lifetime. Uses the ordinary source, include,
+    package, native object, and cache dependency handling. */
+MetaHelper Frontend.build_meta(Frontend f, List inputs) {
   Helper h = {
     .frontend = f, .owners = [],
     .packages = {}, .deps = {}, .before = {}, .groups = [], .built = [],
     .failures = [], .objects = []};
-  if (_support_unit(inputs)) {
-    Compiler.use_meta_helper(NULL, NULL, NULL);
-    return;
-  }
+  if (_support_unit(inputs))
+    return MetaHelper.new(NULL, NULL, NULL);
   _scan(h, inputs);
   String include = NULL, cc = Compiler.meta_cc(include);
   String root = Compiler.cache_root(), stamp = Compiler.module_stamp();
-  if (!h.owners.len() || !cc || !root || !stamp) {
-    Compiler.use_meta_helper(NULL, NULL, NULL);
-    return;
-  }
+  if (!h.owners.len() || !cc || !root || !stamp)
+    return MetaHelper.new(NULL, NULL, NULL);
   h.toolchain = Toolchain.for_meta(cc);
   String compiler = Compiler.meta_cc_identity(cc);
   h.include = include;
@@ -95,7 +98,7 @@ void Frontend.prepare_meta(Frontend f, List inputs) {
   h.modules = _modules(f.request, h.packages);
   h.identity = _identify(h, stamp, compiler);
   h.directory = _directory(root, h.identity, h.owners);
-  _use(h, _manifest(h));
+  return _use(h, _manifest(h));
 }
 
 /* Whether `inputs` is the helper's own loop unit, which `_support`
@@ -122,7 +125,7 @@ static List _manifest(Helper &h) {
 
 /* Each owner with a group calls its table, and a table or a helper that
    does not build keeps its reason for the first call that needs it. */
-static void _use(Helper &h, List manifest) {
+static MetaHelper _use(Helper &h, List manifest) {
   Map failures = {}, units = {}, groups = {};
   foreach (Var index, manifest.assoc(<groups>)) groups[index] = 1;
   foreach (List row, manifest.assoc(<failures>))
@@ -134,7 +137,7 @@ static void _use(Helper &h, List manifest) {
   }
   String failure = manifest.assoc(<failure>);
   if (failure.len()) failures[-1] = failure;
-  Compiler.use_meta_helper(
+  return MetaHelper.new(
     failure.len() ? NULL : %"${h.directory}/helper", failures, units);
 }
 
@@ -544,9 +547,11 @@ static String _compile_support(
   Helper &h, String text, String directory, String object) {
   String source = %"$directory/meta-helper.x";
   Path.write_text(source, text);
+  String driver = Compiler.driver_executable();
+  if (!driver) return "the matching x2c compiler is unavailable";
   String printed = NULL, errors = NULL;
   if (tool_capture(
-    %(${x2c_get_executable()} "translate" "--out-dir" $directory $source),
+    %($driver "translate" "--out-dir" $directory $source),
     printed, errors))
     return %"cannot translate $source: ${errors.strip(NULL)}";
   Toolchain t = h.toolchain;

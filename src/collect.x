@@ -1589,6 +1589,31 @@ static void _gather_declarations(Compiler c, String path, Gathered &into) {
   }
 }
 
+/** Returns the collected source's public type families and the declarations
+    of `names`, including their receiver rows. Includes contribute their
+    selected declarations, without replaying compile-time effects. Ordinary
+    variables and unselected functions do not enter the result.
+*/
+Map Compiler.callable_symbols(Compiler c, List names) {
+  Gathered view = {.symbols = {}, .definitions = {}, .visited = {}};
+  _gather_declarations(c, _canonical_path(c.filename), view);
+  Map selected = {};
+  foreach (Var (key, value), view.symbols) {
+    if (key is not <list> || value is not <list>) continue;
+    if (_type_family(key)) {
+      selected[key] = value;
+      continue;
+    }
+    match (key) {
+      case %(?name):
+        if (name in names || %(typedef $name) in view.symbols)
+          selected[key] = value;
+      case %(self ?name): if (name in names) selected[key] = value;
+    }
+  }
+  return selected;
+}
+
 /* Sorted so that an entry does not depend on Map order. */
 static List _sorted_names(Map definitions) {
   Array names = [];
@@ -2567,6 +2592,24 @@ static String _record_text(List record) {
 }
 
 // cache lifecycle
+
+/** Makes the next collection recheck source files and interfaces after an
+    interactive edit. Drops cache indexes, retaining their backing rows:
+    already-open units may still use those declarations. */
+void Compiler.refresh_source_collections(void) {
+  _reset_cache(process_cache);
+  _reset_cache(provisional_entries);
+  _reset_cache(cold_providers);
+  _reset_cache(declared_functions);
+  _reset_cache(source_hashes);
+  _reset_cache(linked_providers);
+}
+
+static void _reset_cache(Map &cache) {
+  if (!cache) return;
+  cache.cleanup();
+  cache = _cache_map();
+}
 
 /** Drops the entries collected without declaration defaults while the shared
     compile-time session was filled, or by a project meta build. Call once

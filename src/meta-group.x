@@ -128,7 +128,7 @@ void Compiler.stage_meta_in_process(void) { meta_in_process = 1; }
     parses the unit or a session stages it. */
 int Compiler.groups_meta(Compiler c) =>
   meta_cc && !c.macro_holes && (void *) c.meta_group &&
-  (c.meta_build || (X2C_NATIVE_MODULES && meta_in_process));
+  (c.meta_build || (!c.meta_helper && X2C_NATIVE_MODULES && meta_in_process));
 
 /** Records the bodied `meta` function `fn` in the unit's group. */
 void Compiler.group_meta_function(Compiler c, List fn) {

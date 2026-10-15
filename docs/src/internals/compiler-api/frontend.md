@@ -6,7 +6,7 @@
 
 # `src/frontend.x`
 
-Configured compiler sessions and sequential source units.
+Configured compiler sessions and source units.
 
 ## Functions
 
@@ -148,7 +148,7 @@ Source: `src/frontend.x:160`
 `typedef struct Frontend { CliRequest request; List include_dirs; Toolchain toolchain; FrontendErrorSink preprocessor_errors; } *Frontend`
 
 Borrows a configured request and owns shared native-preprocessor setup.
-Units open sequentially; process caches must outlive the session.
+Nested units close in reverse order; process caches outlive the session.
 The optional stderr sink runs synchronously; units also retain that text.
 
 Source: `src/frontend.x:23`
@@ -166,7 +166,7 @@ Source: `src/frontend.x:17`
 <a id="ParsedUnit"></a>
 ### ParsedUnit
 
-`typedef struct ParsedUnit { Context context; Compiler compiler, preprocessor; Map globals; List ast; String preprocessor_output, preprocessor_errors; int source_lines, generated_symbols; } ParsedUnit`
+`typedef struct ParsedUnit { Context context; Compiler compiler, preprocessor; Map globals, enclosing_var_tags; List ast; String preprocessor_output, preprocessor_errors; int source_lines, generated_symbols; } ParsedUnit`
 
 Owns one isolated source lifetime, including unsuccessful diagnostics.
 Results remain borrowed until close; export values that must survive it.

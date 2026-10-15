@@ -285,12 +285,12 @@ void Type_register_var_adoption(Type type, Type representation, Symbol tag){
   )));
 }
 
-void Type_begin_unit(void){
-  if(! _init_guard_) _file_init_();  declared_typetags = Map_new();
+Map Type_begin_unit(void){
+  if(! _init_guard_) _file_init_();  Map enclosing = declared_typetags;  declared_typetags = Map_new();  return enclosing;
 }
 
-void Type_end_unit(void){
-  if(! _init_guard_) _file_init_();  declared_typetags = NULL;
+void Type_end_unit(Map enclosing){
+  if(! _init_guard_) _file_init_();  declared_typetags = enclosing;
 }
 
 #undef _x2c_gensym_initializer_choice_2B6ED6EF_0_expanded

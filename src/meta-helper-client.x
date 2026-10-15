@@ -66,21 +66,19 @@ static int _syntax_origin(Var node) {
   return 0;
 }
 
-/* The project's helper, its tables' failures by index, and the table of
-   each input and included file with one, which last for the process; a
-   forked translation worker inherits them. */
-static String helper_path = NULL;
-static Map helper_failures = NULL, helper_units = NULL;
-static Scope helper_scope = NULL;
+/** Owns one compiled helper's configuration and process. Callers close it
+    after its last call; closing again is harmless. */
+typedef struct MetaHelper {
+  String path, snapshot;
+  Map failures, units;
+  Scope scope;
+  pid_t pid, owner;
+  int to, from, table, reset, status;
+  Buffer input;
+} *MetaHelper;
 
-/* The helper this process runs, its ends of the two pipes, the reply bytes
-   read so far, the table the unit being translated calls, whether that
-   unit's reset is still to be sent, and the helper's wait status once it
-   has been reaped, or -1. */
-static pid_t helper_pid = 0, helper_owner = 0;
-static int helper_to = -1, helper_from = -1, helper_table = 0;
-static int helper_reset = 0, helper_status = -1;
-static Buffer helper_input = NULL;
+static MetaHelper primary = NULL, active = NULL;
+static Scope primary_scope = NULL;
 
 // calls
 
@@ -103,12 +101,17 @@ static typedef struct Call {
     does, or else the unit's. */
 Var Compiler.meta_helper_call(
   Compiler c, String name, Token site, List arguments, String provider) {
+  MetaHelper previous = active;
+  active = c.meta_helper ? c.meta_helper : primary;
+  defer active = previous;
+  if (!active)
+    c.refuse_meta_call(name, site, "the project meta module was not built");
   if (c.shallow) c.collection_native = 1;
   String file = provider ? Path.real(Compiler.absolute_home_path(provider))
                          : Path.real(c.token_source(site, NULL));
   Call call = {
     .compiler = c, .name = name, .site = site,
-    .table = _table_of(file, helper_table)};
+    .table = _table_of(file, active.table)};
   _check(call);
   _set_deadline(call);
   if (!_start()) _refuse(call, "the compile-time helper did not start");
@@ -154,22 +157,23 @@ static void _answer(Call &c, String operation, List operands) {
    build, or when the function returns a struct or union. */
 static void _check(Call &call) {
   Var failure;
-  if (!helper_path && helper_failures && helper_failures.try_get(-1, failure))
+  if (!active.path && active.failures && active.failures.try_get(-1, failure))
     _refuse(call, failure);
-  if (!helper_path) _refuse(call, "the project meta module was not built");
-  if (helper_failures && helper_failures.try_get(call.table, failure))
+  if (!active.path) _refuse(call, "the project meta module was not built");
+  if (active.failures && active.failures.try_get(call.table, failure))
     _refuse(call, failure);
   call.compiler.refuse_record_meta_call(call.name, call.site);
 }
 
 /* Sends the call, after the unit's reset when that is still to be sent. */
 static void _send(Call &c, List arguments) {
-  if (helper_reset) {
+  if (active.reset) {
     _send_frame(c, %(reset));
-    helper_reset = 0;
+    active.reset = 0;
   }
-  _send_frame(
-    c, %(call ${c.table} ${c.name} $arguments ${Macro.subject()}));
+  Var subject = Macro.subject();
+  if (subject is void) subject = %();
+  _send_frame(c, %(call ${c.table} ${c.name} $arguments $subject));
 }
 
 static void _send_frame(Call &call, List message) {
@@ -212,7 +216,7 @@ static Var _next_reply(Call &call) {
    helper runs. */
 static int _start(void) {
   if (_running()) return 1;
-  helper_pid = 0;
+  active.pid = 0;
   int requests[2], replies[2];
   if (pipe(requests)) return 0;
   if (pipe(replies)) {
@@ -242,12 +246,12 @@ static int _start(void) {
     return 0;
   }
   setpgid(pid, pid);
-  helper_pid = pid;
-  helper_owner = getpid();
-  helper_to = requests[1];
-  helper_from = replies[0];
-  if (helper_input) helper_input.clear();
-  helper_reset = 1;
+  active.pid = pid;
+  active.owner = getpid();
+  active.to = requests[1];
+  active.from = replies[0];
+  if (active.input) active.input.clear();
+  active.reset = 1;
   return 1;
 }
 
@@ -261,21 +265,22 @@ static void _exec(int requests, int replies) {
   dup2(in, 3);
   dup2(out, 4);
   setpgid(0, 0);
-  execl(helper_path, helper_path, (char *) NULL);
+  execl(active.path, active.path, (char *) NULL);
   _exit(127);
 }
 
-/* Whether this process started the helper `helper_pid` names. A worker
+/* Whether this process started the active helper. A worker
    forked from a process that runs one starts its own. */
-static int _running(void) => helper_pid > 0 && helper_owner == getpid();
+static int _running(void) =>
+  active && active.pid > 0 && active.owner == getpid();
 
 /* Whether the helper has ended, which reaps it and keeps its status. */
 static int _reaped(void) {
   int status;
-  if (helper_status < 0 &&
-      waitpid(helper_pid, &status, WNOHANG) == helper_pid)
-    helper_status = status;
-  return helper_status >= 0;
+  if (active.status < 0 &&
+      waitpid(active.pid, &status, WNOHANG) == active.pid)
+    active.status = status;
+  return active.status >= 0;
 }
 
 /* Ends the helper this process started, if any, and forgets it: asks it
@@ -287,18 +292,18 @@ static int _reaped(void) {
 static int _stop(int signal) {
   int status = 0;
   if (_running()) {
-    if (signal) killpg(helper_pid, signal);
+    if (signal) killpg(active.pid, signal);
     else _write_frame(%(quit), 0);
-    close(helper_to);
-    close(helper_from);
-    if (helper_status < 0) waitpid(helper_pid, &helper_status, 0);
-    killpg(helper_pid, SIGKILL);
-    status = helper_status;
+    close(active.to);
+    close(active.from);
+    if (active.status < 0) waitpid(active.pid, &active.status, 0);
+    killpg(active.pid, SIGKILL);
+    status = active.status;
   }
-  helper_pid = 0;
-  helper_status = -1;
-  helper_to = helper_from = -1;
-  if (helper_input) helper_input.clear();
+  active.pid = 0;
+  active.status = -1;
+  active.to = active.from = -1;
+  if (active.input) active.input.clear();
   return status;
 }
 
@@ -331,11 +336,11 @@ static int _write_frame(List message, double deadline) {
       if (left <= 0) { status = -1; break; }
       if (left < 0.1) wait = (int) (left * 1000) + 1;
     }
-    ssize_t n = write(helper_to, (char *) frame + done, size - done);
+    ssize_t n = write(active.to, (char *) frame + done, size - done);
     if (n > 0) { done += n; continue; }
     if (n < 0 && errno == EINTR) continue;
     if (n < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-      struct pollfd ready = { .fd = helper_to, .events = POLLOUT };
+      struct pollfd ready = { .fd = active.to, .events = POLLOUT };
       int polled = poll(&ready, 1, wait);
       if ((polled < 0 && errno != EINTR) || _reaped() ||
           (ready.revents & (POLLERR | POLLHUP | POLLNVAL))) {
@@ -367,12 +372,12 @@ static int _read_reply(double deadline, Var &reply) {
 /* Moves the first frame of the reply bytes read so far into `reply`, or
    returns 0 while they hold no complete frame. */
 static int _take_frame(Var &reply) {
-  String input = helper_input;
+  String input = active.input;
   size_t used = 0;
   if (!datum_unframe(input, used, reply)) return 0;
   String rest = input[used:];
-  helper_input.clear();
-  if (rest) helper_input.write(rest);
+  active.input.clear();
+  if (rest) active.input.write(rest);
   return 1;
 }
 
@@ -389,15 +394,15 @@ static int _read_input(double deadline) {
     if (left <= 0) return -1;
     if (left < 0.1) wait = (int) (left * 1000) + 1;
   }
-  struct pollfd ready = { .fd = helper_from, .events = POLLIN };
+  struct pollfd ready = { .fd = active.from, .events = POLLIN };
   int polled = poll(&ready, 1, wait);
   if (polled < 0 && errno == EINTR) return 1;
   if (polled == 0) return _reaped() ? 0 : 1;
   char bytes[65536];
-  ssize_t n = read(helper_from, bytes, sizeof bytes);
+  ssize_t n = read(active.from, bytes, sizeof bytes);
   if (n < 0 && errno == EINTR) return 1;
   if (n <= 0) return 0;
-  helper_input.write(String.new_len(bytes, n));
+  active.input.write(String.new_len(bytes, n));
   return 1;
 }
 
@@ -421,43 +426,107 @@ static void _stopped(Call &call, String reason) {
 
 // lifecycle
 
-/** Uses the helper at `path`, or none when it is NULL, whose tables named
-    in `failures` could not be built, each with why, and whose table for
-    each input or included file path is in `units`. */
-void Compiler.use_meta_helper(String path, Map failures, Map units) {
-  if (!path && !failures) return;
-  if (!helper_scope) Scope.shutdown_hook(_shutdown);
-  $scope(&helper_scope) {
-    helper_path = path ? String.new(path) : NULL;
-    helper_failures = failures ? failures.copy() : NULL;
-    helper_units = units ? units.copy() : NULL;
-    helper_input = Buffer.new(0);
+/** Creates an independent helper at `path`, with failures by table index
+    and source paths mapped to their table indices. No process starts until
+    a call needs it. The caller keeps the canonical configuration values. */
+MetaHelper MetaHelper.new(String path, Map failures, Map units) {
+  MetaHelper helper = Scope.malloc_finalized(sizeof(struct MetaHelper), _drop);
+  *helper = (struct MetaHelper) {
+    .path = path, .to = -1, .from = -1, .status = -1};
+  $scope(&helper.scope) {
+    helper.failures = failures ? failures.copy() : NULL;
+    helper.units = units ? units.copy() : NULL;
+    helper.input = Buffer.new(0);
   }
+  return helper;
+}
+
+/** Retains this helper's executable independently of later cache rebuilds.
+    The copy lasts until close, including across helper restarts. */
+void MetaHelper.retain_executable(MetaHelper helper) {
+  helper.snapshot = Path.temp_dir();
+  String path = %"${helper.snapshot}/helper";
+  Path.copy_file(helper.path, path);
+  helper.path = path;
+}
+
+/** Uses `helper` for ordinary translation, retaining its configuration
+    through process shutdown. Replaces and closes the preceding helper. */
+void Compiler.use_meta_helper(MetaHelper helper) {
+  if (primary) primary.close();
+  if (!primary_scope) Scope.shutdown_hook(_shutdown);
+  primary = helper;
+  if (!helper) return;
+  Scope.move(helper, &primary_scope);
+  helper.path.try_own();
+  foreach (Var (key, value), helper.failures) value.string().try_own();
+  foreach (Var (key, value), helper.units) key.string().try_own();
+}
+
+/** Checks that this helper built the provider table needed by `name`.
+    Does not invoke the function or reset native state. */
+void MetaHelper.check(MetaHelper m, Compiler c, String name, String provider) {
+  MetaHelper previous = active;
+  active = m;
+  defer active = previous;
+  Call call = {
+    .compiler = c, .name = name, .site = c.token,
+    .table = _table_of(Path.real(provider), 0)};
+  _check(call);
 }
 
 /** Selects the table of the unit at `filename` for the calls that follow,
     and resets the unit's `meta static` values before the first one. */
-void Compiler.begin_meta_unit(String filename) {
-  helper_table = filename ? _table_of(Path.absolute(filename), 0) : 0;
-  helper_reset = 1;
+void Compiler.begin_meta_unit(Compiler c, String filename) {
+  MetaHelper previous = active;
+  active = c.meta_helper ? c.meta_helper : primary;
+  defer active = previous;
+  if (!active) return;
+  active.table = filename ? _table_of(Path.absolute(filename), 0) : 0;
+  active.reset = 1;
 }
 
 /* The table of the file at `path`, or `otherwise`. */
 static int _table_of(String path, int otherwise) {
   Var table;
-  return helper_units && path && helper_units.try_get(path, table)
+  return active.units && path && active.units.try_get(path, table)
     ? table.integer() : otherwise;
 }
 
 /** Stops the helper this process runs, which a translation worker does
     when its units are done and every process does as it ends. */
-void Compiler.stop_meta_helper(void) { _stop(0); }
+void Compiler.stop_meta_helper(void) {
+  if (!primary) return;
+  MetaHelper previous = active;
+  active = primary;
+  defer active = previous;
+  _stop(0);
+}
+
+/** Stops this helper and releases its pipe buffer and configuration maps.
+    A later close is harmless. */
+void MetaHelper.close(MetaHelper helper) {
+  if (!helper || !helper.scope) return;
+  MetaHelper previous = active;
+  active = helper;
+  defer active = previous;
+  _stop(0);
+  if (helper.snapshot) {
+    unlink(%"${helper.snapshot}/helper");
+    rmdir(helper.snapshot);
+    helper.snapshot = NULL;
+  }
+  helper.scope.destroy();
+  helper.scope = NULL;
+  helper.path = NULL;
+  helper.failures = helper.units = NULL;
+  helper.input = NULL;
+}
+
+static void _drop(void *raw) { MetaHelper.close(raw); }
 
 static void _shutdown(void) {
-  _stop(0);
-  helper_scope.destroy();
-  helper_scope = NULL;
-  helper_path = NULL;
-  helper_failures = helper_units = NULL;
-  helper_input = NULL;
+  primary_scope.destroy();
+  primary_scope = NULL;
+  primary = NULL;
 }

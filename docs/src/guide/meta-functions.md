@@ -722,7 +722,10 @@ shipped meta code of the compiler's own source modules and of
 `lib/meta.x` is linked into the compiler and runs without a helper. The
 REPL evaluates its supported submissions through Lisp. It accepts bodyless
 `meta` prototypes for linked or explicitly loaded native functions; user
-`meta` function definitions are outside its supported subset.
+`meta` function definitions entered at the prompt are outside its supported
+subset. Its [`:load` command](repl.md#load-functions-from-a-file) compiles a
+source file's public bodied meta functions into a separate project helper
+and makes them callable from interpreted submissions.
 
 Inside a `meta` body the whole body runs at compile time, so `$f(x)` there
 is an ordinary call of `f`. `$` keeps its meaning only where program code

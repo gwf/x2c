@@ -269,15 +269,17 @@ void Type.register_var_adoption(Type type, Type representation, Symbol tag) {
 }
 
 /** Starts an empty set of source-declared `Var` rows for one translation
-    unit.
+    unit. Returns the enclosing unit's rows for restoration at close.
 */
-void Type.begin_unit(void) {
+Map Type.begin_unit(void) {
+  Map enclosing = declared_typetags;
   declared_typetags = {};
+  return enclosing;
 }
 
-/** Ends the source-declared `Var`-row lifetime before the unit `Scope` is
-    released.
+/** Restores the enclosing unit's source-declared `Var` rows before the
+    current unit's `Scope` is released.
 */
-void Type.end_unit(void) {
-  declared_typetags = NULL;
+void Type.end_unit(Map enclosing) {
+  declared_typetags = enclosing;
 }
