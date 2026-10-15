@@ -21,10 +21,9 @@ Delivery is one orchestrator-owned, validated batch to dev. Do not advance main.
   existing missing-value diagnostic, and preserve compiler warnings with path
   spaces and unfamiliar diagnostic text in the fixture harness.
 
-Boxed Array absence behavior is unresolved: take_last, shift, remove, and
-invalid-index insert return void while shared documentation promises errors.
-Gary has been asked to choose between preserving sentinels with corrected
-documentation and changing the operations to raise. Independent repairs proceed.
+Gary confirmed that boxed take_last, shift, remove, and invalid-index insert
+preserve void sentinels. Correct family-specific documentation to distinguish
+that behavior from typed Array exceptions.
 
 ## Verification and delivery
 
