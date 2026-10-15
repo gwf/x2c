@@ -145,7 +145,8 @@ env = dict(os.environ, X2C=compiler, CC=str(wrapper),
            FIXTURE_BUILD=str(build / 'warning build'))
 message = 'warning: refer to /other/file.c:4:9: trouble'
 warning = f'{fixtures}/sample.c:3:7: {message}'
-env['FIXTURE_WARNING'] = (warning + '\n    3 | #warning refer to /other/file.c:4:9: trouble'
+env['FIXTURE_WARNING'] = (f"{fixtures}/sample.c: In function 'main':\n" + warning +
+                          '\n    3 | #warning refer to /other/file.c:4:9: trouble'
                           '\n      | ^\n1 warning generated.')
 runner = [str(root / 'unittest/compiler-fixtures/run.sh'), 'check', '--fixture', 'sample']
 def run():

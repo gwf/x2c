@@ -63,6 +63,7 @@ normalize_cc_warnings() {
   sed -E \
     -e '/^[[:space:]]*[0-9]*[[:space:]]*\|/d' \
     -e '/^[0-9]+ (warning|error)s?( and [0-9]+ (warning|error)s?)? generated\.$/d' \
+    -e "/^[^:]+: (In function '[^']*'|At top level):$/d" \
     "$file" | perl -pe '
       s{^(.*?):[0-9]+(?::[0-9]+)?: }{
         my $file = $1;
