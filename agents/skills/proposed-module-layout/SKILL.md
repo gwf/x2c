@@ -24,28 +24,18 @@ changes. Use source and graph data from the same snapshot. Canonical graph keys
 identify functions; display names alone are not identities. Do not reuse a
 saved proposal after source changes without reconciling membership and evidence.
 
-Read the current book's [module blocks](../../../docs/src/reference/language.md#module-blocks)
-and relevant implementation. The intended storage distinction is described in
-[PR 196](https://github.com/gwf/x2c/pull/196). Distinguish intended behavior from
+Read the book's [module blocks](../../../docs/src/reference/language.md#module-blocks)
+section, which owns the `static` and `module` storage classes and the
+compile-time declarations that keep their own rules, and the relevant
+implementation. Distinguish documented behavior from
 what the current compiler supports; check the current status of known defects
 before treating a candidate as implementable. Do not preserve an implementation
 bug as a layout rule or repair the compiler during this analysis.
 
 Design for one module entry and its component files, flattened into one
-translation unit:
-
-- A public declaration retains its external interface unless a separate,
-  evidence-backed visibility reduction is proposed.
-- `static` is private to its declaring component. Its identifiers receive
-  compiler-generated file prefixes. Source uses short names; never generate
-  or manually insert those prefixes in the proposal.
-- `module` shares a declaration privately across the module, by its short
-  name. Functions and objects emit as unprefixed C statics; they are not
-  exported. Changing `static` to `module` changes storage spelling, not the
-  source identifier. A module name must have one meaning throughout the unit.
-- Compile-time declarations, including static macros, static Lisp forms,
-  static protocols, and meta functions, retain their own unit-wide rules.
-  Do not blanket-convert them to `module`.
+translation unit. A public declaration retains its external interface unless
+a separate, evidence-backed visibility reduction is proposed. Source uses short
+names; never generate or insert compiler file prefixes in the proposal.
 
 Respect companion-directory and nested-member rules, declaration order, and
 include resolution. Functions collected ahead of bodies do not imply that
@@ -67,7 +57,8 @@ state symbol, name its actual readers and writers. A common data format or
 shutdown ordering contract is not by itself a same-file constraint.
 
 The existing graph exporter and Partition's
-[offline analysis prompt](../../../tools/partition/analysis.py) can supply
+[source analysis](../../../tools/partition/analysis.py), which runs the local
+`codex` CLI over the captured source, can supply
 identities, call edges, and an operation inventory. Inspect the source behind
 claims. Partition's old static keep-together components describe constraints
 for separate translation units; they are not indivisible component files under
