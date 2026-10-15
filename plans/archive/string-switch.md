@@ -1,9 +1,10 @@
 # Ordinary switch over String
 
-> Status: active - feature selected by Gary on 2026-10-12.
-> A private implementation exists on independent-case-design; it is not on dev.
-> Review and resume it against current quotation and add_early APIs.
-> This planning update does not start implementation.
+> Status: done - delivered to dev on 2026-10-15 by "lower String switches
+> through a shared helper". `_string_switch` in src/transform.x lowers the
+> switch after any registered rewrite rule declines it. Fixtures
+> `string-switch` and `string-switch-label` cover the validation list; the
+> diagnostic records each bad label and the translation fails at its end.
 
 ## Result
 
@@ -25,7 +26,7 @@ int classify(String color) {
 A label matches exactly when `color == "label"` holds under ordinary x2c
 comparison. A string literal opposite a `String` already converts to that
 type and compares through its `equal` member
-([language reference](../docs/src/reference/language.md), operator
+([language reference](../../docs/src/reference/language.md), operator
 comparisons), so the switch adds no new equality rule. `case ""` matches the
 empty `String`, which is null. Everything else is C `switch`: adjacent
 labels, `default` in any position, fallthrough, `break`, an enclosing loop's
@@ -33,7 +34,7 @@ labels, `default` in any position, fallthrough, `break`, an enclosing loop's
 
 This is not `match`, and `$switch` in `lib/system-macros.x` is unchanged.
 It also serves as the second design check from the archived
-[unit initialization plan](archive/unit-initialization-and-assembly.md): the
+[unit initialization plan](unit-initialization-and-assembly.md): the
 feature contributes one helper to unit support and its literals to the
 literal cache, through existing owners only.
 
@@ -73,9 +74,9 @@ integer constants.
 ## Implementation
 
 1. **Recognize.** Add `case <switch>:` to static `_step_tag`
-   ([transform.x](../src/transform.x)), beside `<match>`, calling
+   ([transform.x](../../src/transform.x)), beside `<match>`, calling
    `Compiler._switch_node`. Recognize the input with the `switched` grammar
-   macro ([grammar.x](../src/grammar.x)). Return the node unchanged unless
+   macro ([grammar.x](../../src/grammar.x)). Return the node unchanged unless
    the selector's type reaches `String`.
 2. **Collect owned labels.** Walk the body with `$ast.rewrite_children`,
    looking through `at` wrappers and stopping at a nested `switch`. Each
@@ -84,7 +85,7 @@ integer constants.
    distinct label content in source order, and rewrite each label to
    `(case EXPR)` with an ordinary integer quotation, such as `$!int{ $index }`.
 3. **Contribute the helper.** Under `$adapter.memo`
-   ([adapter-memo.x](../src/adapter-memo.x)) keyed by
+   ([adapter-memo.x](../../src/adapter-memo.x)) keyed by
    `(string-switch TYPE LABELS)`, introduce a fresh name, build
    `static int NAME(TYPE s) { if (s == LABEL) return N; ... return 0; }` with
    a `$!Unit` template whose tests are a spliced statement sequence, bind it
@@ -98,7 +99,7 @@ integer constants.
    ordinary integer switch, so static `_rewrite_switch` (src/cleanup.x)
    bounds `break` and emit writes it natively.
 5. **Document.** Add the rule and the example above to "C control flow" in
-   [language.md](../docs/src/reference/language.md).
+   [language.md](../../docs/src/reference/language.md).
 6. Review and fix the completed authored diff before publication
    validation.
 

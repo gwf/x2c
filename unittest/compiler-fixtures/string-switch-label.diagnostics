@@ -1,0 +1,10 @@
+unittest/compiler-fixtures/string-switch-label.x:5:5: xform: a case in a String switch takes a string literal
+      case other: return 2;
+      ^^^^
+  note: compare computed values with an if chain or match
+
+unittest/compiler-fixtures/string-switch-label.x:13:5: xform: a case in a String switch takes a string literal
+      case 2: return 2;
+      ^^^^
+  note: compare computed values with an if chain or match
+

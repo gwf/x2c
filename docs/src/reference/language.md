@@ -3678,6 +3678,41 @@ function handles have file-static lifetime.
 x2c accepts C-style `if`, `switch`, `while`, `do`, classic `for`, labels,
 `goto`, `return`, `break`, and `continue` statements.
 
+A `switch` whose selector has static type `String`, or an alias of
+`String`, selects its case by content. Each case it owns is a string
+literal, including adjacent literals and a native macro that expands to one;
+any other label is an error. A label matches when `selector == "label"`
+holds under the ordinary `String` comparison, so `case ""` matches the
+empty `String`, which is null. The selector is evaluated once. Adjacent
+labels, `default` in any position, fallthrough, `break`, an enclosing
+loop's `continue`, nested switches, and labels inside nested blocks behave
+as in an integer switch. A `char *`, `const char *`, or `Var` selector keeps
+C's integer `switch`.
+
+```x2c
+typedef String Color;
+
+int classify(Color color) {
+  switch (color) {
+    case "red": return 1;
+    case "green":
+    case "blue": return 2;
+    case "": return 3;
+    default: return 0;
+  }
+}
+
+int main(void) {
+  printf("%d %d %d %d\n", classify("red"), classify("blue"), classify(NULL),
+         classify("purple"));
+  return 0;
+}
+```
+
+```text
+1 2 3 0
+```
+
 ### System block decorators
 
 The built-in macro module installs `$scope`, `$let`, and `$lock` without a
