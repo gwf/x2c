@@ -74,6 +74,10 @@ Focused evidence before final publication validation:
   repair. This is elapsed time for one unchanged script using -L/-lvalue,
   including conservative relinking; it is not a full-build measurement.
 - REPL worker: full command tests and 14 native/REPL parity cases pass.
+- Lambda worker: 63 lambda, enum, and function-rewrite fixtures pass. The
+  local-type fixture covers nested definitions, anonymous members, escaped
+  cells, public-inline headers, and original source-rule input. Independent
+  final review confirms traversal order and existing writer/cell ownership.
 - Orchestrator: complete CLI boundary and scratch-home package-install
   harnesses pass; the original guide example exits 139 and its corrected
   replacement exits 0.
@@ -95,3 +99,9 @@ Focused negative cases protect typed null-argument errors and CLI behavior,
 existing invalid linkage order, and warnings that the harness must not erase.
 The implementation review will remove duplicated checks and unnecessary helpers
 before the existing publication proof.
+
+The completed authored diff has been reviewed. Local type lifting reuses
+binding facts, native aliases, declaration order, and the existing builtin
+writer context. It adds no public meta SDK operation, persistent registry,
+validation framework, or new gate. The final combined publication proof and
+performance checkpoint remain pending.
