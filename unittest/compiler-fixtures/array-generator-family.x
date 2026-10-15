@@ -43,6 +43,6 @@ int main(void) {
   values.unshift(1);
   ProbeArrayInt copy = values.concat(values);
   copy.reverse();
-  printf("%d %d %d %d\n", values.len(), copy.len(), copy[0], copy[5]);
+  printf("%zu %zu %d %d\n", values.len(), copy.len(), copy[0], copy[5]);
   return 0;
 }
