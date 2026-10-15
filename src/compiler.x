@@ -142,6 +142,10 @@ typedef struct Compiler {
   int expansion_floor;
   SymScope params;
   Map key_ids, macros, kw_aliases;
+  /* The `$lisp.binding` rows of the unit's macro state, each
+     `(group name function type)`, newest first, and the groups
+     `$lisp.install` has installed. */
+  List binding_rows, binding_sealed;
   /* `#define` names this unit has passed, for the literal warning and for
      declaration prefixes: the `List` of specifier words of a body made of
      specifiers and attributes, `<string>` for a string literal,

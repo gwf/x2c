@@ -5650,10 +5650,8 @@ static void _use_lisp_bindings(Compiler c, int install) {
     c, loaded, %"${c.root_dir}/etc/lisp-bindings.xlisp",
     "cannot open the native Lisp macro support");
   if (loaded) return;
-  /* Signature imports may preload into the shared parent; group state starts
-     only when this unit installs the binding macros. */
-  c.macro_lisp.eval(
-    %(begin (def lisp.binding.rows ()) (def lisp.binding.sealed ())));
+  // Binding groups start with the macro state that installs their macros.
+  c.binding_rows = c.binding_sealed = NULL;
   _install_source(
     c,
     lisp_binding_macros, "<builtin:lisp-bindings>", lisp_bindings_marker, 0);

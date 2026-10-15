@@ -789,28 +789,29 @@ static List _default(
 
 /* native Lisp bindings
 
-   `$lisp.bind` records `(group name function type)` rows while a unit
-   parses and installs a group's rows as `Lisp_bind` statements. Each
-   function here is `_x2c.binding_*` in the compile-time Lisp. */
+   `$lisp.binding` records `(group name function type)` rows on the
+   expanding compiler while a unit parses, and `$lisp.install` seals a
+   group and writes its rows as `Lisp_bind` statements. Each function here
+   is `_x2c.binding_*` in the compile-time Lisp. */
 
-static List _binding_record(
-  Var group, Var name, List function, List all_rows, List sealed) {
+static List _binding_record(Var group, Var name, List function) {
+  Compiler c = Compiler.expanding();
   String group_name = Code.binding_spelling(group);
   String lisp_name = _binding_name(name);
   String function_name = Code.name(function);
   List type = Code.native_signature(function);
-  List rows = _binding_rows_for(group_name, all_rows);
-  foreach (Var installed, sealed)
-    if (installed == group_name)
-      x2c_diagnostic_fail(
-        "native Lisp binding appears after its group was installed",
-        %("group: $group_name"));
-  foreach (List row, rows)
+  if (group_name in c.binding_sealed)
+    x2c_diagnostic_fail(
+      "native Lisp binding appears after its group was installed",
+      %("group: $group_name"));
+  foreach (List row, _binding_rows_for(group_name, c.binding_rows))
     if (row[1] == lisp_name)
       x2c_diagnostic_fail(
         "duplicate native Lisp binding name",
         %("group: $group_name" "name: $lisp_name"));
-  return %(($group_name $lisp_name $function_name $type) @all_rows);
+  c.binding_rows =
+    %(($group_name $lisp_name $function_name $type) @{c.binding_rows});
+  return NULL;
 }
 
 static String _binding_name(Var node) {
@@ -828,15 +829,15 @@ static List _binding_rows_for(String group, List rows) {
   return selected.list_free();
 }
 
-static List _binding_install_rows(String group, List all_rows) {
-  List rows = _binding_rows_for(group, all_rows).reverse();
+static List _binding_install(List lisp, Var group) {
+  Compiler c = Compiler.expanding();
+  String group_name = Code.binding_spelling(group);
+  List rows = _binding_rows_for(group_name, c.binding_rows).reverse();
   if (!rows)
     x2c_diagnostic_fail(
-      "unknown native Lisp binding group", %("group: $group"));
-  return rows;
-}
-
-static List _binding_statements(List lisp, List rows) {
+      "unknown native Lisp binding group", %("group: $group_name"));
+  if (!(group_name in c.binding_sealed))
+    c.binding_sealed = cons(group_name, c.binding_sealed);
   Array statements = [];
   foreach (List row, rows) statements.push(_binding_statement(lisp, row));
   return statements.list_free();
@@ -915,8 +916,7 @@ Map Compiler.builtin_targets(void) {
   $builtin.row(rows, "builtin_class_expand", _class_expand);
   $builtin.row(rows, "builtin_class_defaults", _class_defaults);
   $builtin.row(rows, "binding_record", _binding_record);
-  $builtin.row(rows, "binding_install_rows", _binding_install_rows);
-  $builtin.row(rows, "binding_statements", _binding_statements);
+  $builtin.row(rows, "binding_install", _binding_install);
   $builtin.row(rows, "binding_targets", _binding_targets);
   return rows;
 }
