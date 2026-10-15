@@ -65,7 +65,7 @@ Returns a report-order snapshot of all collected diagnostics.
 Snapshot cells are canonicalized through the active pool hierarchy and
 share entry values; each retains its actual producing-pool lifetime.
 
-Source: `src/diagnostics.x:624`
+Source: `src/diagnostics.x:647`
 
 <a id="Compiler.display_path"></a>
 #### Compiler.display_path
@@ -84,7 +84,7 @@ Source: `src/diagnostics.x:338`
 
 Prints each cached numeric identifier and its key to stdout.
 
-Source: `src/diagnostics.x:660`
+Source: `src/diagnostics.x:683`
 
 <a id="Compiler.dump_symbol_table"></a>
 #### Compiler.dump_symbol_table
@@ -93,7 +93,7 @@ Source: `src/diagnostics.x:660`
 
 Prints every entry in `map` to stdout in `Map` iteration order.
 
-Source: `src/diagnostics.x:655`
+Source: `src/diagnostics.x:678`
 
 <a id="Compiler.dump_tokens"></a>
 #### Compiler.dump_tokens
@@ -103,7 +103,7 @@ Source: `src/diagnostics.x:655`
 Prints every non-EOF token with its position and visible content.
 `Compiler.tokenize` must have populated the compiler's tokenizer.
 
-Source: `src/diagnostics.x:645`
+Source: `src/diagnostics.x:668`
 
 <a id="Compiler.error_count"></a>
 #### Compiler.error_count
@@ -113,7 +113,7 @@ Source: `src/diagnostics.x:645`
 Returns the number of counted diagnostics accepted since the last reset.
 Warnings and the generated limit notice are excluded.
 
-Source: `src/diagnostics.x:618`
+Source: `src/diagnostics.x:641`
 
 <a id="Compiler.file_prefix"></a>
 #### Compiler.file_prefix
@@ -164,7 +164,7 @@ before the current token. NULL message defaults to `"compiler error"`.
 **Raises:** `<malformed>` with the supplied category while a recovery boundary
 is active. Without one, exits the process with status 1.
 
-Source: `src/diagnostics.x:473`
+Source: `src/diagnostics.x:496`
 
 <a id="Compiler.report_problem"></a>
 #### Compiler.report_problem
@@ -175,7 +175,7 @@ Records and emits a located compiler error, then returns so the
 translation continues; it fails when it finishes. Location and the
 message default match `Compiler.report_error`.
 
-Source: `src/diagnostics.x:490`
+Source: `src/diagnostics.x:513`
 
 <a id="Compiler.report_warning"></a>
 #### Compiler.report_warning
@@ -187,7 +187,7 @@ Location selection matches `Compiler.report_error`; NULL code becomes
 `<warning>` and NULL message becomes `"compiler warning"`. This operation
 returns without raising or changing the process exit status.
 
-Source: `src/diagnostics.x:501`
+Source: `src/diagnostics.x:524`
 
 <a id="Compiler.report_warning_at"></a>
 #### Compiler.report_warning_at
@@ -198,7 +198,7 @@ Records and emits a warning at a location built earlier by
 `Compiler.token_location`, for a report raised after its token has been
 consumed. Defaults match `Compiler.report_warning`.
 
-Source: `src/diagnostics.x:510`
+Source: `src/diagnostics.x:533`
 
 <a id="Compiler.source_token"></a>
 #### Compiler.source_token
@@ -210,7 +210,7 @@ own text of the file that holds it, and sets `file` to that file. The
 host preprocessor's rows record no offsets, so a token of its output
 keeps its merged offset.
 
-Source: `src/diagnostics.x:425`
+Source: `src/diagnostics.x:448`
 
 <a id="Compiler.take_diagnostics"></a>
 #### Compiler.take_diagnostics
@@ -221,7 +221,7 @@ Moves collected child reports into the caller's store without re-emitting.
 Shared stores already contain their entries. The child's separate store
 remains configured and empty after its reports have been transferred.
 
-Source: `src/diagnostics.x:606`
+Source: `src/diagnostics.x:629`
 
 <a id="Compiler.text_source"></a>
 #### Compiler.text_source
@@ -233,7 +233,7 @@ the compiler's text, and sets `offset` to that byte's offset in the file.
 Without such a marker, the file is the compiler's own and `offset` is
 `position`.
 
-Source: `src/diagnostics.x:411`
+Source: `src/diagnostics.x:434`
 
 <a id="Compiler.token_column"></a>
 #### Compiler.token_column
@@ -243,7 +243,7 @@ Source: `src/diagnostics.x:411`
 Returns `token`'s column in the file that holds it. A module region
 that begins inside a line of its file continues that line's columns.
 
-Source: `src/diagnostics.x:400`
+Source: `src/diagnostics.x:423`
 
 <a id="Compiler.token_location"></a>
 #### Compiler.token_location

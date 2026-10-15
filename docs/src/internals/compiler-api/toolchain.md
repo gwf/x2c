@@ -261,7 +261,7 @@ without explicit options, as it reports them, plus the `lib` directory
 beside each reported `include` directory. A compiler that reports none
 contributes none.
 
-Source: `src/toolchain.x:408`
+Source: `src/toolchain.x:413`
 
 ## Public types
 
@@ -297,7 +297,7 @@ Source: `src/toolchain.x:37`
 <a id="Toolchain"></a>
 ### Toolchain
 
-`typedef struct Toolchain { String cc, ar, include_dir, runtime_lib, List cpp_args, cc_args, ld_args; int verbose, dry_run, keep_system_includes; } *Toolchain`
+`typedef struct Toolchain { String cc, ar, include_dir, runtime_lib, List cpp_args, cc_args, ld_args; int verbose, dry_run, keep_system_includes, inline_macro_expansions; } *Toolchain`
 
 Holds resolved host tools, native layout, and borrowed option `List`s.
 The record returned by `Toolchain.new` is `Scope`-owned. Its `String`s

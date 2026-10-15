@@ -1526,24 +1526,39 @@ the file that declares it and in no other file of the unit. That holds for
 objects, functions, `static typedef`, `static class`, and the `struct`,
 `union`, or `enum` tag such a typedef declares. Two members may each declare
 `static int counter` or `static typedef struct Node { ... } Node`, and each
-file sees its own. A file's statics take a prefix in the generated C: the
-file's path under the entry's companion directory without its extension,
-with each character that cannot continue a C identifier made `_`, then
-`__`. Under the entry `parser.x`, a static `advance` in
-`parser/statements/loops.x` emits as `statements_loops__advance`, and one in
-the entry itself as `parser__advance`. Generated names are compiler details;
-source never spells them. A static type adopted as a class keeps its short
-name as its Var tag and descriptor name, so two files of one unit cannot
-each adopt a class under the same short name. Compile-time declarations,
-`static macro`, `static $(`, `static protocol`, and `meta` functions, keep
-their unit-wide behavior.
+file sees its own, and so do the enumerators of a `static typedef enum`.
+The enumerators of an enum declared without a typedef stay unit-wide, even
+under `static`. A later declaration of a static without `static`, such as
+the definition after a `static` prototype, or a block-scope `extern`
+declaration or function prototype, names the file's static as C links it.
+A file's statics take a prefix in the generated C: the file's path under the entry's
+companion directory without its extension, with each character that cannot
+continue a C identifier made `_`, then `___`; a path that starts with a
+digit gets a leading `x`. Under the entry `parser.x`, a static `advance` in
+`parser/statements/loops.x` emits as `statements_loops___advance`, and one
+in the entry itself as `parser___advance`. Trailing `_` of the path's
+spelling are dropped first, so `a.x` and `a-.x` give one prefix. A package
+prefix ends in `__`, so a package entry's statics stay apart from the
+package's public names, except a public name that begins with `_`, which
+can spell like a static of an entry named for the package and is then
+reported as defined twice.
+Generated names are compiler details; source never spells them, and
+`--dump-definitions` displays the source name. A static type adopted as a
+class keeps its short name as its Var tag and descriptor name, so two files
+of one unit cannot each adopt a class under the same short name.
+Compile-time declarations, `static macro`, `static $(`, `static protocol`,
+and `meta` functions, keep their unit-wide behavior. A free name in a macro
+body binds where the expansion lands, so it reaches the expanding file's
+static; a type name in a macro body is spelled where the macro is defined.
 
-Three cases are errors. Two members whose paths give one prefix, such as
-`a_b.x` and `a/b.x`, are a driver error at the block. A `static` whose name
-is a `module` name of the unit, in either order of declaration, is a parse
-error at the later declaration, because a `module` name means one thing in
-every file. Two files adopting a class under one short name is a parse
-error at the second.
+Three cases are errors. Two files whose paths give one prefix, such as
+`a_b.x` and `a/b.x`, or a member named like its entry, are a driver error
+at the block. A `static` object, function, typedef, or tag whose name is a
+`module` name of the same C namespace, in either order of declaration, is a
+parse error at the later declaration, because a `module` name means one
+thing in every file. Two files adopting a class under one short name is a
+parse error at the second. A file-scope typedef named `module` keeps that
+word an identifier.
 
 A quoted include in a member that names a file beside the member reaches that
 file, in collection and in the generated C. Any other include resolves as it
@@ -3197,13 +3212,16 @@ enumerator of that file or of a header it includes, or a native name such as
 a C library function. The expansion reads that declaration with its type. A
 caller's local of the same spelling receives a separate generated C
 spelling, so the expansion still reaches the file-scope name, and so does
-code a rewrite rule's quotation returns into a function body. Any other name
-the body reads resolves where the expansion lands, like any name written
-there: a caller's declaration of that spelling supplies it, including a
-local, and a local macro reads the locals around it. A name that nothing
-declares anywhere is left to C, as a native macro such as `errno` is. To
-read a caller's binding of a name, take the name as a `Name` argument; that
-argument is the explicit request for lookup where the expansion lands.
+code a rewrite rule's quotation returns into a function body. Only the
+locals visible where the expansion lands are respelled, so a native macro
+that names one of them there reads the file-scope name, while locals of
+other scopes keep their C spellings. Any other name the body reads resolves
+where the expansion lands, like any name written there: a caller's
+declaration of that spelling supplies it, including a local, and a local
+macro reads the locals around it. A name that nothing declares anywhere is
+left to C, as a native macro such as `errno` is. To read a caller's binding
+of a name, take the name as a `Name` argument; that argument is the explicit
+request for lookup where the expansion lands.
 
 ```x2c
 macro Stmt $repeat(Name $i, Expr $count, Expr $value, Name $sum) {

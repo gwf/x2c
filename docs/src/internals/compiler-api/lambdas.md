@@ -20,6 +20,7 @@ Lambda parsing and capture resolution.
 | [`Compiler.lambda_capture_required`](#Compiler.lambda_capture_required) | Reports whether the active lambda still needs to capture a binding. |
 | [`Compiler.lambda_param_types`](#Compiler.lambda_param_types) | The parameter types of a lambda's function signature, keeping typed declarators; a bare parameter is a `Var`. |
 | [`Compiler.parse_lambda_literal`](#Compiler.parse_lambda_literal) | Parses a `%!(...) => ...` literal and returns its typed lambda expression. |
+| [`Compiler.respell_captures`](#Compiler.respell_captures) | Gives the captures of `binding` that the enclosing lambdas already recorded the C spelling `binding` emits under. |
 
 ### `Compiler`
 
@@ -67,7 +68,7 @@ Rejects writes and reference access to read-only snapshot bindings.
 The body has already resolved identifiers and call arguments. Templates
 defer this check until expansion; nested lambdas check their own bodies.
 
-Source: `src/lambdas.x:519`
+Source: `src/lambdas.x:544`
 
 <a id="Compiler.end_lambda_captures"></a>
 #### Compiler.end_lambda_captures
@@ -109,6 +110,16 @@ Capturing lambdas have type `Func`; noncapturing lambdas retain a native
 function type.
 
 Source: `src/lambdas.x:59`
+
+<a id="Compiler.respell_captures"></a>
+#### Compiler.respell_captures
+
+`void Compiler.respell_captures(Compiler c, List binding)`
+
+Gives the captures of `binding` that the enclosing lambdas already
+recorded the C spelling `binding` emits under.
+
+Source: `src/lambdas.x:526`
 
 ## Design notes
 
