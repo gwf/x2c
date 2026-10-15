@@ -29,7 +29,7 @@ Calls the typed callable `callee` with `arguments`, each converted to
 its parameter and evaluated once, in source order, as a statement
 expression.
 
-Source: `src/transform.x:1182`
+Source: `src/transform.x:1302`
 
 <a id="Compiler.lower_lambda_expr"></a>
 #### Compiler.lower_lambda_expr
@@ -42,7 +42,7 @@ other expressions pass through. A noncapturing lambda typed `Func`,
 which only a meta body leaves unlifted, lifts to a `Func` of its native
 signature.
 
-Source: `src/transform.x:192`
+Source: `src/transform.x:198`
 
 <a id="Compiler.normalize"></a>
 #### Compiler.normalize
@@ -53,7 +53,7 @@ Normalizes one bound and typed node. Newly constructed syntax is
 normalized where it is produced; children enter the same operation, so
 completed units do not require another unit walk.
 
-Source: `src/transform.x:103`
+Source: `src/transform.x:108`
 
 <a id="Compiler.shipped_support"></a>
 #### Compiler.shipped_support
@@ -65,7 +65,7 @@ the form `source` of `kind`, bound and lowered with the support. The
 kernel has no lowering of its own for `source`, so no rule ends the
 translation as `_shipped_lowering` does.
 
-Source: `src/transform.x:221`
+Source: `src/transform.x:227`
 
 <a id="Compiler.transform"></a>
 #### Compiler.transform
@@ -80,7 +80,7 @@ support declarations are lowered and appended after the input units. Their
 storage determines their interface visibility. The call may add
 generated origins or diagnostics to `c`.
 
-Source: `src/transform.x:83`
+Source: `src/transform.x:88`
 
 ## Design notes
 
