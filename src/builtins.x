@@ -369,7 +369,7 @@ static List _release(Shape &s) {
   List drop = _own_method(s.owner, "drop");
   List release = drop
     ? $!{
-        if (value) ${_ref(((Code) drop).binding_spelling())}(value);
+        if (value) ${x2c_ident(((Code) drop).binding_spelling())}(value);
         Scope_free((void *) value);
       }
     : $!{ Scope_free((void *) value); };
@@ -493,7 +493,7 @@ static List _positional_new(
   foreach (List field, named) {
     String name = %"field_${field[0]}";
     parameters.push(_param(_value_type(field[1]), name));
-    arguments.push(_ref(name));
+    arguments.push($!( ${x2c_ident(name)} ));
   }
   List value = x2c_ident("value");
   List declaration =
@@ -512,7 +512,7 @@ static List _initialized_new(
     parameters.push(_param(extra, %"argument_${parameters.len()}"));
   List value = x2c_ident("value");
   List declaration =
-    heap ? $!{ $type $value = ${_ref(%"${owner}_alloc")}(); }
+    heap ? $!{ $type $value = ${x2c_ident(%"${owner}_alloc")}(); }
          : $!{ $type $value = { 0 }; };
   Var heap_value = %();
   if (heap) heap_value = <true>;
@@ -547,7 +547,7 @@ static List _class_initializer(String owner, Var heap_value) {
     List parameters = cons(receiver, declared.cdr());
     int refusable = heap && signature == %((func $parameters) int);
     if (refusable || signature == %((func $parameters) void)) {
-      List init = _ref(method.binding_spelling());
+      List init = x2c_ident(method.binding_spelling());
       List arguments = _init_arguments(parameters);
       List call = heap || reference ? $!( $init(value, @arguments) )
                                     : $!( $init(&value, @arguments) );
@@ -566,7 +566,7 @@ static List _class_initializer(String owner, Var heap_value) {
 static List _init_arguments(List parameters) {
   Array arguments = [];
   foreach (List parameter, parameters.cdr())
-    arguments.push(_ref(%"argument_${arguments.len()}"));
+    arguments.push($!( ${x2c_ident(%"argument_${arguments.len()}")} ));
   return arguments.list_free();
 }
 
@@ -596,7 +596,7 @@ static List _equal(String owner, int heap, List fields) {
 }
 
 static List _fields_equal(List fields) {
-  List left = _ref("left"), right = _ref("right");
+  List left = x2c_ident("left"), right = x2c_ident("right");
   Array body = [];
   foreach (List field, fields) {
     body.push(
@@ -769,9 +769,7 @@ static List _field_on(List field, List receiver) {
   return $!( $receiver.$name );
 }
 
-static List _field_value(List field) => _field_on(field, _ref("value"));
-
-static List _ref(String name) => %(expr () (ident ($name)));
+static List _field_value(List field) => _field_on(field, x2c_ident("value"));
 
 static List _param(Type type, String name) => type.parameter_ast(%($name));
 
@@ -916,15 +914,9 @@ Map Compiler.builtin_targets(void) {
   $builtin.row(rows, "builtin_class_write_fields", _class_write_fields);
   $builtin.row(rows, "builtin_class_expand", _class_expand);
   $builtin.row(rows, "builtin_class_defaults", _class_defaults);
-  $builtin.row(rows, "binding_call", _binding_call);
-  $builtin.row(rows, "binding_name", _binding_name);
-  $builtin.row(rows, "binding_rows_for", _binding_rows_for);
   $builtin.row(rows, "binding_record", _binding_record);
-  $builtin.row(rows, "binding_statement", _binding_statement);
   $builtin.row(rows, "binding_install_rows", _binding_install_rows);
   $builtin.row(rows, "binding_statements", _binding_statements);
-  $builtin.row(rows, "binding_target", _binding_target);
-  $builtin.row(rows, "binding_target_row", _binding_target_row);
   $builtin.row(rows, "binding_targets", _binding_targets);
   return rows;
 }

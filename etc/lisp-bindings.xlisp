@@ -1,18 +1,12 @@
 // Native Lisp binding entry points. The algorithms are compiler functions
 // (src/builtins.x) under `_x2c.binding_*`; state starts at macro installation.
 
-(defun lisp.native.call (name . arguments)
-  (_x2c.binding_call name arguments))
-(def lisp.binding.name _x2c.binding_name)
-(defun lisp.binding.rows-for (group)
-  (_x2c.binding_rows_for group lisp.binding.rows))
 (defun lisp.binding.record (group name function)
   (begin
     (def lisp.binding.rows
       (_x2c.binding_record group name function lisp.binding.rows
                            lisp.binding.sealed))
     nil))
-(def lisp.binding.call _x2c.binding_statement)
 (defun lisp.binding.install (lisp group)
   (let* ((group-name (Code.binding_spelling group))
          (rows (_x2c.binding_install_rows group-name lisp.binding.rows)))
@@ -20,7 +14,6 @@
       (if (member group-name lisp.binding.sealed) nil
         (def lisp.binding.sealed (cons group-name lisp.binding.sealed)))
       (_x2c.binding_statements lisp rows))))
-(def lisp.native.target _x2c.binding_target_row)
 (def lisp.native.targets _x2c.binding_targets)
 
 // The compiler supplies the bodyless `meta` prototypes of `lib/meta.x`: its

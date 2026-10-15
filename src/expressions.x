@@ -2227,13 +2227,8 @@ static int _exact_iter_type(Var value) {
   return type.canonicalize() == %("Iter");
 }
 
-static List _iter_destination(void) {
-  List values = source_commas_content(%(${$!int{ 0 }}));
-  return %(expr (* struct "Iter")
-    (op & (expr (struct "Iter")
-      (cast (decl (struct "Iter") (bindings (bind () ())))
-        (expr () (composite $values))))));
-}
+static List _iter_destination(void) =>
+  $!(struct Iter *){ &(struct Iter){ 0 } };
 
 // operators
 
@@ -2569,7 +2564,7 @@ static List _protocol_operator_expression(
   List callee = %(expr $signature (ident $binding));
   List call = c.rebuild_expression(result, called(callee, arguments));
   if (!derived) return call;
-  if (derived == <equal>) return %(expr (int) (op ! $call));
+  if (derived == <equal>) return $!int{ !$call };
   List zero = $!int{ 0 };
   return %(expr (int) (op $op $call $zero));
 }

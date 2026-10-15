@@ -240,7 +240,7 @@ static Var _meta_stub(Func function, const FuncArg *argv) {
       if (c.shallow && !_linked_copy(c, name, linked))
         c.complete_meta_hashes();
       if (_linked_copy(c, name, linked))
-        return _meta_apply(c, linked[name], values.list_free());
+        return c.macro_lisp.apply(linked[name], values.list_free());
     }
   }
   if (c.meta_build) raise %(meta-later (name $name));
@@ -253,7 +253,7 @@ static Var _meta_stub(Func function, const FuncArg *argv) {
   c.bind_meta_group(name, site);
   Var bound;
   c.macro_lisp.try_get(name, bound);
-  return _meta_apply(c, bound, values.list_free());
+  return c.macro_lisp.apply(bound, values.list_free());
 }
 
 static Array _stub_arguments(Func function, const FuncArg *argv) {
@@ -304,13 +304,6 @@ static void _subject_globals(
       continue;
     }
   }
-}
-
-/* Calls the session value `function` with the evaluated `arguments`. */
-static Var _meta_apply(Compiler c, Var function, List arguments) {
-  Array quoted = [%(quote $function)];
-  foreach (Var argument, arguments) quoted.push(%(quote $argument));
-  return c.macro_lisp.eval(quoted.list_free());
 }
 
 /** Applies a contextual `meta` marker to one initialized file-static value.
@@ -465,7 +458,7 @@ static Var _meta_named_value(
   meta_call_form = cons(Atom.intern(name), arguments);
   if (function === _linked_module()[name])
     return _apply_linked(function.pointer(), arguments);
-  return _meta_apply(c, function, arguments);
+  return c.macro_lisp.apply(function, arguments);
 }
 
 /* The compiler's linked copy of `name` when shipped code calls it, or

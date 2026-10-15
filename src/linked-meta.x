@@ -97,8 +97,8 @@ Code register_rewrite(Code function, Code pattern, List holes) {
 
 /* --- lib/system-macros.x ------------------------------------------------- */
 
-List _dedent_expand(List node) {
-  String source = Code.source_text(node);
+List _dedent_expand(Source text) {
+  String source = Code.source_text(text);
   int length = source.len(), open = 0;
   if (length >= 3 && source.startswith("%\""))
     open = 2;
@@ -106,13 +106,16 @@ List _dedent_expand(List node) {
     open = 1;
   if (open == 0 || !source.endswith("\"") || "\\" in source ||
       "$" in source)
-    return $!( $node.dedent() );
+    return $!( ${text.assoc(<syntax>)}.dedent() );
   String body = source.getslice(open, length - 1, 1);
   return $!String{ ${body.dedent()} };
 }
 
 List _macros_location(void) =>
   $!String{ ${x2c_invocation_file() + ":" + x2c_invocation_line().str()} };
+
+List _macros_source(Source code) =>
+  $!String{ ${Code.source_text(code)} };
 
 /* --- lib/var-tags.x ------------------------------------------------------ */
 
@@ -157,34 +160,20 @@ List _tag_id_checks(void) {
 /* --- lib/varops.x -------------------------------------------------------- */
 
 static List _update_rows(void) => %(
-  (char    (i8 "Var_box_i8" "Var_integer"
-            (expr (int) (literal (int) "0")) (() (char))))
-  (schar   (i8 "Var_box_i8" "Var_integer"
-            (expr (int) (literal (int) "0")) ((char) (signed char))))
-  (u8      (u8 "Var_box_u8" "Var_integer"
-            (expr (int) (literal (int) "0")) (() ("uchar"))))
-  (i16     (i16 "Var_box_i16" "Var_integer"
-            (expr (int) (literal (int) "0")) (() (short))))
-  (u16     (u16 "Var_box_u16" "Var_integer"
-            (expr (int) (literal (int) "0")) (() ("ushort"))))
-  (i32     (i32 "Var_box_i32_bits" "Var_integer"
-            (expr (int) (literal (int) "0")) ((unsigned) (int))))
-  (u32     (u32 "Var_box_u32" "Var_integer"
-            (expr (int) (literal (int) "0")) (() ("uint"))))
-  (long    (long "Var_box_long" "Var_long_value"
-            (expr (int) (literal (int) "0")) (() ())))
-  (ulong   (ulong "Var_box_ulong" "Var_ulong_value"
-            (expr (int) (literal (int) "0")) (() ())))
-  (llong   (llong "Var_box_long_long" "Var_long_long_value"
-            (expr (int) (literal (int) "0")) (() ())))
-  (ullong  (ullong "Var_box_ulong_long" "Var_ulong_long_value"
-            (expr (int) (literal (int) "0")) (() ())))
-  (f32     (f32 "Var_box_f32" "Var_decode_f32"
-            (expr (float) (literal (float) "0.0f")) (() ())))
-  (f64     (f64 "Var_box_f64" "Var_decode_f64"
-            (expr (double) (literal (double) "0.0")) (() ())))
-  (ldouble (ldouble "Var_box_long_double" "Var_long_double_value"
-            (expr (long double) (literal (long double) "0.0L")) (() ())))
+  (char    (i8 "Var_box_i8" "Var_integer" (() (char))))
+  (schar   (i8 "Var_box_i8" "Var_integer" ((char) (signed char))))
+  (u8      (u8 "Var_box_u8" "Var_integer" (() ("uchar"))))
+  (i16     (i16 "Var_box_i16" "Var_integer" (() (short))))
+  (u16     (u16 "Var_box_u16" "Var_integer" (() ("ushort"))))
+  (i32     (i32 "Var_box_i32_bits" "Var_integer" ((unsigned) (int))))
+  (u32     (u32 "Var_box_u32" "Var_integer" (() ("uint"))))
+  (long    (long "Var_box_long" "Var_long_value" (() ())))
+  (ulong   (ulong "Var_box_ulong" "Var_ulong_value" (() ())))
+  (llong   (llong "Var_box_long_long" "Var_long_long_value" (() ())))
+  (ullong  (ullong "Var_box_ulong_long" "Var_ulong_long_value" (() ())))
+  (f32     (f32 "Var_box_f32" "Var_decode_f32" (() ())))
+  (f64     (f64 "Var_box_f64" "Var_decode_f64" (() ())))
+  (ldouble (ldouble "Var_box_long_double" "Var_long_double_value" (() ())))
 );
 
 static List _update_row(List id) {
@@ -199,11 +188,9 @@ static String _update_boxer(List id)   => _update_row(id)[1];
 
 static String _update_decoder(List id) => _update_row(id)[2];
 
-static List _update_zero(List id)      => _update_row(id)[3];
+static List _update_cast_in(List id)  => _update_row(id)[3].car();
 
-static List _update_cast_in(List id)  => _update_row(id)[4].car();
-
-static List _update_cast_out(List id) => _update_row(id)[4].cdr().car();
+static List _update_cast_out(List id) => _update_row(id)[3].cdr().car();
 
 static List _update_box(List id, List lhs) {
   List value = $!( $lhs[0] );
@@ -225,9 +212,6 @@ static int _collection_family(Code base) {
   Type type = base.type();
   return type.is_named("Array") ? 1 : type.is_named("Map") ? 2 : 0;
 }
-
-static List _access_symbol(Symbol op) =>
-  %(expr ("Symbol") "${(unsigned long) op}");
 
 /** Calls the getter bracket admission selected. */
 Code access_read(Code code) {
@@ -273,7 +257,7 @@ static Code _participant_update(
       NULL, <xform>,
       %"type ${type.repr()} does not support indexed $what", NULL);
   }
-  List operation = _access_symbol(op);
+  List operation = $!Symbol{ $op };
   List arguments = value
     ? %($base $key $operation $value) : %($base $key $operation);
   return member.call_in_order(arguments, code.cadr());
@@ -340,9 +324,8 @@ Code access_update(Code code) {
 
 static Code _access_step(Code code, Code base, Code key, Symbol op) {
   if (!_collection_family(base))
-    return _participant_update(
-      code, base, key, op, %(expr (int) (literal (int) "1")));
-  return _access_update(code, base, key, $!int{1}, op);
+    return _participant_update(code, base, key, op, $!int{ 1 });
+  return _access_update(code, base, key, $!int{ 1 }, op);
 }
 
 /** Stores and returns the incremented or decremented element. */
@@ -647,21 +630,19 @@ static List _lambda_targets(List node) {
   return targets.list_free();
 }
 
-static Code _lambda_kept(Code code) => %(code-value "lowered" $code ());
-
 static List _lambda_kept_items(
   Array items, List original, Map declaring) {
   Array out = [], run = [];
   foreach (Var item, items) {
     if (item === original.car()) run.push(item);
     else {
-      if (run.len()) out.push(_lambda_kept(%(seq @{run.list()})));
+      if (run.len()) out.push(Code.lowered(%(seq @{run.list()})));
       run.truncate(0);
-      out.push(item in declaring ? item : _lambda_kept(item));
+      out.push(item in declaring ? item : Code.lowered(item));
     }
     original = original.cdr();
   }
-  if (run.len()) out.push(_lambda_kept(%(seq @{run.list()})));
+  if (run.len()) out.push(Code.lowered(%(seq @{run.list()})));
   return out.list_free();
 }
 
@@ -687,10 +668,10 @@ static Var _lambda_declare_cells(List node, Map cells) {
         }
         celled |= !!cell;
         items.push(
-          cell ? cell : _lambda_kept(%(declare $base (bindings $item))));
+          cell ? cell : Code.lowered(%(declare $base (bindings $item))));
       }
     case %(dstrdecl *): {
-      items.push(_lambda_kept(node));
+      items.push(Code.lowered(node));
       foreach (List binding, _lambda_targets(node)) {
         Code copy = _lambda_copied_cell(binding, cells);
         if (copy) items.push(copy);
@@ -702,7 +683,7 @@ static Var _lambda_declare_cells(List node, Map cells) {
         _lambda_declare_cells(%(declare $base $bindings), cells);
       match (declaration) case %(seq *initial):
         return %(block @initial
-                 ${_lambda_kept(%(for () $test $next $body))});
+                 ${Code.lowered(%(for () $test $next $body))});
     }
   }
   return celled ? %(seq @{items.list_free()}) : node;
@@ -757,9 +738,6 @@ static Var _lambda_rebuild(
   return done[0];
 }
 
-static List _lambda_none(void) =>
-  %(return ("Var") (expr ("Var") (literal ("Var") "void")));
-
 static List _lambda_returning(List items, List none) {
   List node;
   $ast.walk(items, node) {
@@ -772,9 +750,10 @@ static List _lambda_returning(List items, List none) {
 
 static List _lambda_items(Code body) {
   match (body) case %(block *items):
-    return %(@{_lambda_returning(items, _lambda_none())} ${_lambda_none()});
+    return %(@{_lambda_returning(items, source_return_none())}
+             ${source_return_none()});
   List items = body.match(%(expr (void) ?))
-    ? %((stmnt $body) ${_lambda_none()})
+    ? %((stmnt $body) ${source_return_none()})
     : %((stmnt (return ${body.convert(%("Var"))})));
   match (x2c_enclosing(<statement>)) case %(at ?origin ?):
     return %((at $origin ${items.car()}) @{items.cdr()});
@@ -814,7 +793,7 @@ static List _lambda_closure_params(
 
 static Code _lambda_function(List name, List params, Code body) {
   if (!params) params = %((param (void) (bind () ())));
-  List lowered = %(code-value "lowered" (seq @{_lambda_items(body)}) ());
+  List lowered = Code.lowered(%(seq @{_lambda_items(body)}));
   return %(function (static "Var") (bind $name ((fnmod (params @params))))
            (block $lowered));
 }
@@ -1446,14 +1425,11 @@ static Symbol _dynamic_operation(Symbol assignment) {
   return 0;
 }
 
-static List _dynamic_symbol(Symbol op) =>
-  %(expr ("Symbol") "${(unsigned long) op}");
-
 static Code _dynamic_update(
   Type type, Code target, Symbol op, Code value, String helper) {
   Type target_type = target.cadr(), address_type = %(* @target_type);
   List address = %(expr $address_type (op & (parens $target)));
-  List operation = _dynamic_symbol(op);
+  List operation = $!Symbol{ $op };
   List call = value
     ? %(call $helper (args $address $operation $value))
     : %(call $helper (args $address $operation));
@@ -1507,7 +1483,7 @@ Code dynamic_compound(Code code) {
 Code dynamic_change(Code code) {
   match (code) {
     case %(expr ? (op ?(Symbol op) ?(Code target))): {
-      Code one = %(expr (int) (literal (int) "1"));
+      Code one = $!int{ 1 };
       return _dynamic_update(
         target.cadr(), target, op == <++> ? <+> : <->,
         one.convert(%("Var")), "x2c_var_update_volatile");
@@ -1837,7 +1813,7 @@ static Code _raise_value(Code value) {
       NULL, <type>, %"raise detail type ${type.repr()} is not immutable",
       %("use a numeric value, enum, Symbol, Atom, String, List, or Var"));
   }
-  return %(expr ("Var") (call "Var_null" (args)));
+  return $!Var{ Var_null() };
 }
 
 /** Converts a raise's code and details, or declines a raise whose parts
@@ -2064,6 +2040,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "register_rewrite", register_rewrite);
   $linked.row(rows, "_dedent_expand", _dedent_expand);
   $linked.row(rows, "_macros_location", _macros_location);
+  $linked.row(rows, "_macros_source", _macros_source);
   $linked.row(rows, "_tag_decode_group", _tag_decode_group);
   $linked.row(rows, "_tag_decode_groups", _tag_decode_groups);
   $linked.row(rows, "_tag_id_checks", _tag_id_checks);
@@ -2072,13 +2049,11 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_update_tag", _update_tag);
   $linked.row(rows, "_update_boxer", _update_boxer);
   $linked.row(rows, "_update_decoder", _update_decoder);
-  $linked.row(rows, "_update_zero", _update_zero);
   $linked.row(rows, "_update_cast_in", _update_cast_in);
   $linked.row(rows, "_update_cast_out", _update_cast_out);
   $linked.row(rows, "_update_box", _update_box);
   $linked.row(rows, "_update_decode", _update_decode);
   $linked.row(rows, "_collection_family", _collection_family);
-  $linked.row(rows, "_access_symbol", _access_symbol);
   $linked.row(rows, "access_read", access_read);
   $linked.row(rows, "_participant_store", _participant_store);
   $linked.row(rows, "_participant_update", _participant_update);
@@ -2110,12 +2085,10 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_lambda_declared_cell", _lambda_declared_cell);
   $linked.row(rows, "_lambda_copied_cell", _lambda_copied_cell);
   $linked.row(rows, "_lambda_targets", _lambda_targets);
-  $linked.row(rows, "_lambda_kept", _lambda_kept);
   $linked.row(rows, "_lambda_kept_items", _lambda_kept_items);
   $linked.row(rows, "_lambda_mentions", _lambda_mentions);
   $linked.row(rows, "_lambda_declare_cells", _lambda_declare_cells);
   $linked.row(rows, "_lambda_rebuild", _lambda_rebuild);
-  $linked.row(rows, "_lambda_none", _lambda_none);
   $linked.row(rows, "_lambda_returning", _lambda_returning);
   $linked.row(rows, "_lambda_items", _lambda_items);
   $linked.row(rows, "_lambda_params", _lambda_params);
@@ -2158,7 +2131,6 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_dynamic_operand", _dynamic_operand);
   $linked.row(rows, "dynamic_binary", dynamic_binary);
   $linked.row(rows, "_dynamic_operation", _dynamic_operation);
-  $linked.row(rows, "_dynamic_symbol", _dynamic_symbol);
   $linked.row(rows, "_dynamic_update", _dynamic_update);
   $linked.row(rows, "_dynamic_helper", _dynamic_helper);
   $linked.row(rows, "dynamic_compound", dynamic_compound);
@@ -2249,6 +2221,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_x2c_field_copies", _x2c_field_copies);
   $linked.row(rows, "_x2c_field_sets", _x2c_field_sets);
   $linked.row(rows, "source_return_type", source_return_type);
+  $linked.row(rows, "source_return_none", source_return_none);
   $linked.row(rows, "source_conditional_statement", source_conditional_statement);
   $linked.row(rows, "source_any_lambda", source_any_lambda);
   $linked.row(rows, "source_cast_content", source_cast_content);

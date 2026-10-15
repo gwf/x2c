@@ -47,10 +47,6 @@ meta static int _collection_family(Code base) {
 
 // participants
 
-/* The `Symbol` argument an update member takes, as its integer value. */
-meta static List _access_symbol(Symbol op) =>
-  %(expr ("Symbol") "${(unsigned long) op}");
-
 $rewrite($indexed)
 /** Calls the getter bracket admission selected. */
 meta Code access_read(Code code) {
@@ -103,7 +99,7 @@ meta static Code _participant_update(
       NULL, <xform>,
       %"type ${type.repr()} does not support indexed $what", NULL);
   }
-  List operation = _access_symbol(op);
+  List operation = $!Symbol{ $op };
   List arguments = value
     ? %($base $key $operation $value) : %($base $key $operation);
   return member.call_in_order(arguments, code.cadr());
@@ -185,9 +181,8 @@ meta Code access_update(Code code) {
    converts the integer to its operand. */
 meta static Code _access_step(Code code, Code base, Code key, Symbol op) {
   if (!_collection_family(base))
-    return _participant_update(
-      code, base, key, op, %(expr (int) (literal (int) "1")));
-  return _access_update(code, base, key, $!int{1}, op);
+    return _participant_update(code, base, key, op, $!int{ 1 });
+  return _access_update(code, base, key, $!int{ 1 }, op);
 }
 
 $rewrite($x2c.collection.increment)

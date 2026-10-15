@@ -131,17 +131,14 @@ static macro Expression $func_size(Expr $value) => sizeof $value;
 static List _helper_body(Compiler c, List body) {
   match (body) {
     case $source_block_content(%(*items)):
-      return source_block_content(%(@items ${_no_value_return()}));
+      return source_block_content(%(@items ${source_return_none()}));
     case %(expr (void) ?):
-      return source_block_content(%((stmnt $body) ${_no_value_return()}));
+      return source_block_content(
+        %((stmnt $body) ${source_return_none()}));
   }
   List result = c.convert_expression(body, %("Var"));
   return source_block_content(%((stmnt (return $result))));
 }
-
-static List _no_value_return(void) => %(
-    return ("Var") (expr ("Var") (literal ("Var") "void"))
-  );
 
 /** Binds the file-static context type `name` with the field rows `fields`,
     for callable defers. The complete typedef is bound at once, so each
