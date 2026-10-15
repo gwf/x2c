@@ -43,6 +43,11 @@ STRICT_X2C_FLAGS = --fatal-warnings
 STRICT_X2C_ENV   = X2C_CC=false
 endif
 CFLAGS           += $(BUILD_CFLAGS) $(STRICT_CFLAGS)
+# The bootstrap compiles each file from its own directory. Spelling __FILE__
+# the same way, as glibc's assert does, lets stage 0 reproduce the bootstrap
+# executable, whose identity the interfaces it wrote here carry.
+CFLAGS           += -fmacro-prefix-map=$(LIB_BUILD)/=
+CFLAGS           += -fmacro-prefix-map=$(BIN_BUILD)/=
 CFLAGS           += $(EXTRA_CFLAGS)
 X2C_FLAGS        ?=
 # A translation batch must finish before the compiles it feeds start, so it
