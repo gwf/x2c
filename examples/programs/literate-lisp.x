@@ -466,7 +466,7 @@ typedef struct Reader {
   unsigned base, start;                                                         // C offsets into source bytes.
 } Reader;
 
-static Var Reader._error(Reader &self, Symbol cause, unsigned at) {
+static Var Reader.error(Reader &self, Symbol cause, unsigned at) {
   int line = 1, column = 1;
   scan_next_line_col(self.source, (int) at, &line, &column);                    // C addresses for output parameters.
   if (cause == <incomplete>)                                                    // Integer comparison; no text scan.
@@ -475,21 +475,21 @@ static Var Reader._error(Reader &self, Symbol cause, unsigned at) {
   raise %(malformed (source ${self.source}) (line $line) (column $column));     // Expression and identifier insertion.
 }
 
-static Var Reader._form(Reader &self, Token token) {
+static Var Reader.form(Reader &self, Token token) {
   if (!token || token.type == <eof>)                                            // Constant-time integer Symbol test.
-    return self._error(<incomplete>, self.start);                               // Symbol literal as a call argument.
+    return self.error(<incomplete>, self.start);                                // Symbol literal as a call argument.
   String text = token.text, prefix = NULL;                                      // Immutable String handle.
   switch (token.type) {                                                         // C switch dispatches on Symbols.
     case <error>:                                                               // Symbol constant in C switch.
       if (self.tokens.status() == <incomplete>)                                 // Method call and Symbol comparison.
-        return self._error(<incomplete>, self.start);                           // Receiver call builds a source error.
+        return self.error(<incomplete>, self.start);                            // Receiver call builds a source error.
       break;
     case <"(">: {                                                               // Quoted Symbol in a switch.
       Array elements = $auto([]);                                               // Array literal; cleanup on exit.
       while (1) {
         Token next = self.tokens.next();                                        // Pull a token with receiver syntax.
         if (next && next.type == <")">) return elements.list();                 // List result boxes as Var.
-        elements.push(self._form(next));                                        // Compose two receiver-style calls.
+        elements.push(self.form(next));                                         // Compose two receiver-style calls.
       }
     }
     case <"'">:  prefix = "quote";      break;                                  // C literal promotes to String.
@@ -520,10 +520,10 @@ static Var Reader._form(Reader &self, Token token) {
       return Atom.intern(text.unescape());                                      // Intern exact short or long names.
   }
   if (prefix) {                                                                 // Canonical empty String is NULL.
-    Var name = Atom.intern(prefix), inner = self._form(self.tokens.next());     // Atom and Var results in Var locals.
+    Var name = Atom.intern(prefix), inner = self.form(self.tokens.next());      // Atom and Var results in Var locals.
     return %($name $inner);                                                     // $name/$inner insert named values.
   }
-  return self._error(<malformed>, self.base + token.pos);                       // C offset math inside a method call.
+  return self.error(<malformed>, self.base + token.pos);                        // C offset math inside a method call.
 }
 
 /* Tokens describe one source batch and may be discarded after it is read. The
@@ -548,7 +548,7 @@ static Var Reader.read(Reader &self) {
   Token first = self.tokens.next();                                             // Receiver-style token access.
   if (!first || first.type == <eof>) return void;                             // void differs from the empty List.
   self.start = self.base + first.pos;                                           // C arithmetic on source offsets.
-  return self._form(first);                                                     // C pointer supports x2c dot calls.
+  return self.form(first);                                                      // C pointer supports x2c dot calls.
 }
 
 /* Native functions ---------------------------------------------------------------------------------------------------

@@ -159,14 +159,22 @@ the file that declares it and in no other file of the unit. That holds for
 objects, functions, `static typedef`, `static class`, and the `struct`,
 `union`, or `enum` tag such a typedef declares. Two members may each declare
 `static int counter` or `static typedef struct Node { ... } Node`, and each
-file sees its own, and so do the enumerators of a `static` enum. A file's
-statics take a prefix in the generated C: the file's path under the entry's
+file sees its own, and so do the enumerators of a `static typedef enum`.
+The enumerators of an enum declared without a typedef stay unit-wide, even
+under `static`. A later declaration of a static without `static`, such as
+the definition after a `static` prototype, or a block-scope `extern`
+declaration or function prototype, names the file's static as C links it.
+A file's statics take a prefix in the generated C: the file's path under the entry's
 companion directory without its extension, with each character that cannot
 continue a C identifier made `_`, then `___`; a path that starts with a
 digit gets a leading `x`. Under the entry `parser.x`, a static `advance` in
 `parser/statements/loops.x` emits as `statements_loops___advance`, and one
-in the entry itself as `parser___advance`. A package prefix ends in `__`,
-so a package entry's statics stay apart from the package's public names.
+in the entry itself as `parser___advance`. Trailing `_` of the path's
+spelling are dropped first, so `a.x` and `a-.x` give one prefix. A package
+prefix ends in `__`, so a package entry's statics stay apart from the
+package's public names, except a public name that begins with `_`, which
+can spell like a static of an entry named for the package and is then
+reported as defined twice.
 Generated names are compiler details; source never spells them, and
 `--dump-definitions` displays the source name. A static type adopted as a
 class keeps its short name as its Var tag and descriptor name, so two files

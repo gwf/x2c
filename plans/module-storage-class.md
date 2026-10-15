@@ -1,7 +1,5 @@
-> Status: active; implemented 2026-10-14 on branch
-> `gwf/module-declaration-keyword-08ad8c` from `origin/dev` `b5f200025`,
-> submitted as a PR to the shared integrator. Both steps are on the branch
-> with two bootstrap refresh rounds; stages 0 and 1 agree. Known limits:
+> Status: active; landed on `dev` in #196 (`bd63bc6f`) and its second
+> review round in #197 (`ef772117`). Stages 0 and 1 agree. Known limits:
 > a private class's repr heading shows the prefixed name
 > (`second__Node { ... }`), because `_class_write_fields` in `src/builtins.x`
 > has no compiler access, and a standalone `static struct Foo {...};` tag is
@@ -14,7 +12,8 @@
 > substring test on source names; the shadow diagnostic covers typedefs and
 > tags in either order within each C namespace; a free name in a macro body
 > binds at the expansion site (`_file_key` skips templates); enumerators of
-> a static enum are file-private; the file prefix ends in `___` so a package
+> a `static typedef enum` are file-private (a plain `static enum`'s stay
+> unit-wide); the file prefix ends in `___` so a package
 > entry's statics never share a spelling with `pkg__` public names;
 > `--dump-definitions` displays the source name; and a file-scope typedef
 > named `module` keeps the word an identifier. Remaining limits: a type name
@@ -26,6 +25,11 @@
 > The step 2 worker also fixed an existing defect: a `static class`
 > in a member got different Var tags for boxing and its descriptor
 > (`_canonical_file` in `src/protocol.x` now maps a member to its unit).
+> Post-merge review 2026-10-14: a later declaration of a static without
+> `static` (a definition after a `static` prototype) and a block-scope
+> `extern` or function prototype now take the static's key, as C links
+> them, where both failed to link; trailing `_` of a path's spelling are
+> dropped before `___`, so `a.x` and `a-.x` report one prefix.
 > Supersedes the paused `codex/nested-modules-spike` design on the shipped
 > text-splicing base; that spike stays a saved experiment.
 
@@ -58,9 +62,9 @@ file sees only its own. A `module` function may take or return a file-private
 type; other files can call it without being able to spell the type, as in
 C with an opaque handle.
 
-The prefix is the member's path relative to the entry's directory with the
-extension dropped and every non-identifier character mapped to `_`, then
-`___`. `parser/statements/loops.x` under entry `parser.x` gives
+The prefix is the member's path under the entry's companion directory
+with the extension dropped and every non-identifier character mapped to
+`_`, then `___`. `parser/statements/loops.x` under entry `parser.x` gives
 `statements_loops___advance`. The entry's own statics use the entry stem,
 `parser___advance`, so the rule is one rule for every file of the unit. A
 package prefix ends in `__`, so the two never coincide.
