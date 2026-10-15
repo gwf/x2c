@@ -166,15 +166,14 @@ the definition after a `static` prototype, or a block-scope `extern`
 declaration or function prototype, names the file's static as C links it.
 A file's statics take a prefix in the generated C: the file's path under the entry's
 companion directory without its extension, with each character that cannot
-continue a C identifier made `_`, then `___`; a path that starts with a
-digit gets a leading `x`. Under the entry `parser.x`, a static `advance` in
-`parser/statements/loops.x` emits as `statements_loops___advance`, and one
-in the entry itself as `parser___advance`. Trailing `_` of the path's
+continue a C identifier made `_`, then `___`. The prefix starts with `f`,
+the normalized path's length, and `_`; a path that starts with a digit
+gets a leading `x` before its length is measured. Under the entry `parser.x`,
+a static `advance` in `parser/statements/loops.x` emits as `f16_statements_loops___advance`, and one
+in the entry itself as `f6_parser___advance`. Trailing `_` of the path's
 spelling are dropped first, so `a.x` and `a-.x` give one prefix. A package
 prefix ends in `__`, so a package entry's statics stay apart from the
-package's public names, except a public name that begins with `_`, which
-can spell like a static of an entry named for the package and is then
-reported as defined twice.
+package's public names.
 Generated names are compiler details; source never spells them, and
 `--dump-definitions` displays the source name. A static type adopted as a
 class keeps its short name as its Var tag and descriptor name, so two files

@@ -159,8 +159,12 @@ static List _source_projection(
         }
         else node = %(function $type $declarator $body);
       }
-      case %(declare ? (bindings (bind ?binding ?))):
-        if (_completed_prototype(c, binding)) continue;
+      case %(declare ?type (bindings *declarators)): {
+        List kept = declarators.filter(%!(item) =>
+          !_completed_prototype(c, _declaration_binding(item)));
+        if (!kept && !_body_tag(type)) continue;
+        node = %(declare $type (bindings @kept));
+      }
     }
     node = _without_static_type(node);
     source.push(node);
@@ -285,14 +289,14 @@ static int _publishes_typedefs(Partition &p, List names) {
   return 0;
 }
 
-/* `static` on a type has no C storage role. Objects retain the specifier
-   because it controls their storage. */
+/* Bare types have no C storage role. Object and function declarations
+   retain `static` because it controls their linkage. */
 static List _without_static_type(List node) {
   match (node) {
     case %(typedef ?type ?bindings):
       return %(typedef ${_without_static(type)} $bindings);
     case %(declare ?type (!set ?bindings (bindings *))):
-      if (!_declares_object(bindings))
+      if (!_declared_bindings(bindings))
         return %(declare ${_without_static(type)} $bindings);
   }
   return node;
@@ -483,9 +487,16 @@ static void _forward_tags(Partition &p, List node) {
 static void _add_declaration(
   Partition &p, List decl, Type type, List bindings) {
   if (type.is_static()) _add_statics(p, bindings.cdr());
-  match (bindings)
-    case %(bindings (bind (!set ?binding (*)) ?))
-      if (_completed_prototype(p.c, binding)): return;
+  if (!type.is_static()) {
+    Compiler c = p.c;
+    Map statics = p.statics;
+    List public = bindings.cdr().filter(%!(item) =>
+      !_names_static(item, statics) &&
+      !_completed_prototype(c, _declaration_binding(item)));
+    if (!public && !_body_tag(type)) return;
+    bindings = %(bindings @public);
+    decl = %(declare $type $bindings);
+  }
   if ((type.is_static() && !_body_tag(type)) ||
       (_anonymous_body(type) && _declares_object(bindings))) {
     _keep(p);
@@ -584,14 +595,19 @@ static List _runtime_without_const(Compiler c, List bindings) {
   return %(bindings @{declarators.list_free()});
 }
 
-/* A binding list with a named object declarator, as opposed to a bare tag
-   body or a function prototype. A prototype names no storage, so it stays
-   whole in the header. */
+/* Objects and functions have linkage; a bare type declaration does not. */
+static int _declared_bindings(List bindings) {
+  foreach (List declarator, bindings.cdr())
+    if (_declaration_binding(declarator)) return 1;
+  return 0;
+}
+
+/* A binding list with an object declarator owns storage. */
 static int _declares_object(List bindings) {
   match (bindings) case %(bindings *declarators):
     foreach (List declarator, declarators)
       match (declarator) {
-        case %(bind ? ((fnmod *) *)): return 0;
+        case %(bind ? ((fnmod *) *)): continue;
         case %(bind ?name *): if (name) return 1;
         case %(op = * *): return 1;
       }

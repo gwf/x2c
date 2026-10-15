@@ -3,10 +3,14 @@
 #include <stdio.h>
 
 static int helper(void);
+extern int helper(void);
+int helper(void), independent(void);
 
 int use(void) { return helper(); }
 
 int helper(void) { return 7; }
+
+int independent(void) { return 3; }
 
 int main(void) {
   printf("%d\n", use());

@@ -93,6 +93,7 @@ static void _record_prototype(
     List state = stored;
     Var (state_kind, prior_contract) = state;
     if (state_kind == <definition> || state_kind == <completed>) return;
+    contract = _inherited_contract(prior_contract, contract);
     if (state_kind != <prototype> || !List.equal(prior_contract, contract)) {
       c.set_fact(%(completion $binding), %(conflict));
       return;
@@ -138,16 +139,21 @@ static void _record_definition(
    prototype's internal linkage in C. */
 static void _complete_prototype(
   Compiler c, List binding, List prior_contract, List contract, Token site) {
-  match (prior_contract)
-    case %(function-contract ?a ?b static ?d)
-      if (contract == %(function-contract $a $b extern $d)):
-        contract = prior_contract;
+  contract = _inherited_contract(prior_contract, contract);
   if (prior_contract != contract) {
     String spelling = Ast.binding_spelling(binding);
     $report.type.decl_prototype(c, site, spelling, prior_contract, contract);
   }
   c.set_fact(%(completion $binding), %(completed $contract));
   c.set_fact(%(arms $binding), c.arms);
+}
+
+static List _inherited_contract(List prior, List current) {
+  match (prior)
+    case %(function-contract ?a ?b static ?d)
+      if (current == %(function-contract $a $b extern $d)):
+        return prior;
+  return current;
 }
 
 static List _contract(Compiler c, Type type, List binding) =>

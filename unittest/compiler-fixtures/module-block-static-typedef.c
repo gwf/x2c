@@ -16,7 +16,7 @@
 #include "x2c.h"
 
 #include <stdio.h>
-static int module_block_static_typedef___counter;
+static int f27_module_block_static_typedef___counter;
 
 static int _init_guard_ = 0;
 
@@ -27,57 +27,57 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 
 
-_x2c_gensym_initializer_choice_5F277027_0((module_block_static_typedef___counter = 100))
-typedef struct first___Node{
+_x2c_gensym_initializer_choice_5F277027_0((f27_module_block_static_typedef___counter = 100))
+typedef struct f5_first___Node{
   int value;
-  struct first___Node * next;
+  struct f5_first___Node * next;
 }
-first___Node;
+f5_first___Node;
 
-static int first___counter;
+static int f5_first___counter;
 
-_x2c_gensym_initializer_choice_5F277027_1((first___counter = 1))
-static int first___sum(first___Node * node);
+_x2c_gensym_initializer_choice_5F277027_1((f5_first___counter = 1))
+static int f5_first___sum(f5_first___Node * node);
 
-typedef struct second___Node{
+typedef struct f6_second___Node{
   int value;
 }
-second___Node;
+f6_second___Node;
 
-static second___Node second___Node_new(int field_value);
+static f6_second___Node f6_second___Node_new(int field_value);
 
-static Var second___Node_var(second___Node value);
+static Var f6_second___Node_var(f6_second___Node value);
 
-static second___Node Var_second___node(Var value);
+static f6_second___Node Var_f6_second___node(Var value);
 
-static int second___Node_equal(second___Node left, second___Node right);
+static int f6_second___Node_equal(f6_second___Node left, f6_second___Node right);
 
-static unsigned second___Node_hash(second___Node value);
+static unsigned f6_second___Node_hash(f6_second___Node value);
 
-static Buffer second___Node_write_str(second___Node value, Buffer out);
+static Buffer f6_second___Node_write_str(f6_second___Node value, Buffer out);
 
-static String second___Node_str(second___Node value);
+static String f6_second___Node_str(f6_second___Node value);
 
-static Buffer second___Node_write_repr(second___Node value, Buffer out);
+static Buffer f6_second___Node_write_repr(f6_second___Node value, Buffer out);
 
-static String second___Node_repr(second___Node value);
+static String f6_second___Node_repr(f6_second___Node value);
 
-static int second___counter;
+static int f6_second___counter;
 
-_x2c_gensym_initializer_choice_5F277027_2((second___counter = 10))
-static int second___sum(second___Node node);
+_x2c_gensym_initializer_choice_5F277027_2((f6_second___counter = 10))
+static int f6_second___sum(f6_second___Node node);
 
-static inline String _x2c_gensym_proto_second___node_str_0(Var a0);
+static inline String _x2c_gensym_proto_f6_second___node_str_0(Var a0);
 
-static inline String _x2c_gensym_proto_second___node_repr_0(Var a0);
+static inline String _x2c_gensym_proto_f6_second___node_repr_0(Var a0);
 
-static inline Buffer _x2c_gensym_proto_second___node_write_str_0(Var a0, Buffer a1);
+static inline Buffer _x2c_gensym_proto_f6_second___node_write_str_0(Var a0, Buffer a1);
 
-static inline Buffer _x2c_gensym_proto_second___node_write_repr_0(Var a0, Buffer a1);
+static inline Buffer _x2c_gensym_proto_f6_second___node_write_repr_0(Var a0, Buffer a1);
 
-static inline unsigned _x2c_gensym_proto_second___node_hash_0(Var a0);
+static inline unsigned _x2c_gensym_proto_f6_second___node_hash_0(Var a0);
 
-static inline int _x2c_gensym_proto_second___node_equal_0(Var a0, Var a1);
+static inline int _x2c_gensym_proto_f6_second___node_equal_0(Var a0, Var a1);
 
 static VarMethods _x2c_gensym_protocol_methods_0;
 
@@ -128,64 +128,64 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   if(_init_guard_) return;
   _init_guard_ = 1;
   _x2c_gensym_protocol_methods_0 =(VarMethods){
-    .str = _x2c_gensym_proto_second___node_str_0, .repr = _x2c_gensym_proto_second___node_repr_0, .write_str = _x2c_gensym_proto_second___node_write_str_0, .write_repr = _x2c_gensym_proto_second___node_write_repr_0, .hash = _x2c_gensym_proto_second___node_hash_0, .equal = _x2c_gensym_proto_second___node_equal_0
+    .str = _x2c_gensym_proto_f6_second___node_str_0, .repr = _x2c_gensym_proto_f6_second___node_repr_0, .write_str = _x2c_gensym_proto_f6_second___node_write_str_0, .write_repr = _x2c_gensym_proto_f6_second___node_write_repr_0, .hash = _x2c_gensym_proto_f6_second___node_hash_0, .equal = _x2c_gensym_proto_f6_second___node_equal_0
   }
   ;
-  x2c_register_tagged_descriptor(256414078278, String_new("Node"), _x2c_gensym_protocol_methods_0);
+  x2c_register_tagged_descriptor(250241411784, String_new("f6_second___Node"), _x2c_gensym_protocol_methods_0);
   _x2c_gensym_static_initialize_0();
   _x2c_gensym_static_initialize_1();
   _x2c_gensym_static_initialize_2();
 }
 
-static int first___sum(first___Node * node){
-  return node ? node -> value + first___sum(node -> next) : 0;
+static int f5_first___sum(f5_first___Node * node){
+  return node ? node -> value + f5_first___sum(node -> next) : 0;
 }
 
 int first_total(void){
   if(! _init_guard_) _file_init_();
-  first___Node tail ={
+  f5_first___Node tail ={
     .value = 2
   }
   , head ={
     .value = 3, .next = & tail
   }
   ;
-  first___counter += first___sum(& head);
-  return first___counter;
+  f5_first___counter += f5_first___sum(& head);
+  return f5_first___counter;
 }
 
-static second___Node second___Node_new(int field_value){
-  struct second___Node value ={
+static f6_second___Node f6_second___Node_new(int field_value){
+  struct f6_second___Node value ={
     field_value
   }
   ;
   return value;
 }
 
-static Var second___Node_var(second___Node value){
-  return Var_box_record(256414078278, & value, sizeof(value));
+static Var f6_second___Node_var(f6_second___Node value){
+  return Var_box_record(250241411784, & value, sizeof(value));
 }
 
-static second___Node Var_second___node(Var value){
-  return *(second___Node *) Var_pointer(value);
+static f6_second___Node Var_f6_second___node(Var value){
+  return *(f6_second___Node *) Var_pointer(value);
 }
 
-static int second___Node_equal(second___Node left, second___Node right){
+static int f6_second___Node_equal(f6_second___Node left, f6_second___Node right){
   if(! Var_equal(int_var(left.value), int_var(right.value))) return 0;
   return 1;
 }
 
-static unsigned second___Node_hash(second___Node value){
+static unsigned f6_second___Node_hash(f6_second___Node value){
   unsigned hash = 0;
   hash = x2c_hash_word(hash ^ Var_hash(int_var(value.value)));
   return hash;
 }
 
-static Buffer second___Node_write_str(second___Node value, Buffer out){
-  return second___Node_write_repr(value, out);
+static Buffer f6_second___Node_write_str(f6_second___Node value, Buffer out){
+  return f6_second___Node_write_repr(value, out);
 }
 
-static String second___Node_str(second___Node value){
+static String f6_second___Node_str(f6_second___Node value){
   Buffer _x2c_gensym_macro_out_0 = Buffer_new(0);
   {
     _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
@@ -199,7 +199,7 @@ static String second___Node_str(second___Node value){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
-      second___Node_write_str(value, _x2c_gensym_macro_out_0);
+      f6_second___Node_write_str(value, _x2c_gensym_macro_out_0);
       {
         String _x2c_gensym_return_value_0 = Buffer_str(_x2c_gensym_macro_out_0);
         {
@@ -215,14 +215,14 @@ static String second___Node_str(second___Node value){
 
 }
 
-static Buffer second___Node_write_repr(second___Node value, Buffer out){
-  Buffer_write(out, "second___Node { ");
+static Buffer f6_second___Node_write_repr(f6_second___Node value, Buffer out){
+  Buffer_write(out, "f6_second___Node { ");
   Buffer_write(out, "value: ");
   Var_write_repr((int_var(value.value)), out);
   return Buffer_write(out, " }");
 }
 
-static String second___Node_repr(second___Node value){
+static String f6_second___Node_repr(f6_second___Node value){
   Buffer _x2c_gensym_macro_out_1 = Buffer_new(0);
   {
     _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
@@ -236,7 +236,7 @@ static String second___Node_repr(second___Node value){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_1);
     {
-      second___Node_write_repr(value, _x2c_gensym_macro_out_1);
+      f6_second___Node_write_repr(value, _x2c_gensym_macro_out_1);
       {
         String _x2c_gensym_return_value_1 = Buffer_str(_x2c_gensym_macro_out_1);
         {
@@ -252,32 +252,32 @@ static String second___Node_repr(second___Node value){
 
 }
 
-static int second___sum(second___Node node){
+static int f6_second___sum(f6_second___Node node){
   return node.value;
 }
 
 int second_total(void){
   if(! _init_guard_) _file_init_();
-  second___counter += second___sum(second___Node_new(5));
-  return second___counter;
+  f6_second___counter += f6_second___sum(f6_second___Node_new(5));
+  return f6_second___counter;
 }
 
 int second_boxed(void){
   if(! _init_guard_) _file_init_();
-  Var boxed = second___Node_var(second___Node_new(7));
-  second___Node node = Var_second___node(boxed);
+  Var boxed = f6_second___Node_var(f6_second___Node_new(7));
+  f6_second___Node node = Var_f6_second___node(boxed);
   return node.value;
 }
 
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  printf("%d %d %d\n", module_block_static_typedef___counter, first_total(), second_total());
+  printf("%d %d %d\n", f27_module_block_static_typedef___counter, first_total(), second_total());
   printf("%d\n", second_boxed());
   return 0;
 }
 
-static inline String _x2c_gensym_proto_second___node_str_0(Var a0){
+static inline String _x2c_gensym_proto_f6_second___node_str_0(Var a0){
   RenderPath _x2c_gensym_macro_render_path_0;
   if(! RenderPath_enter(& _x2c_gensym_macro_render_path_0, Var_pointer(a0))) return Var_pointer_string(a0);
   {
@@ -293,7 +293,7 @@ static inline String _x2c_gensym_proto_second___node_str_0(Var a0){
     x2c_cleanup_push(& _x2c_gensym_defer_record_2);
     {
       {
-        String _x2c_gensym_return_value_2 = second___Node_str(Var_second___node(a0));
+        String _x2c_gensym_return_value_2 = f6_second___Node_str(Var_f6_second___node(a0));
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
           return _x2c_gensym_return_value_2;
@@ -307,7 +307,7 @@ static inline String _x2c_gensym_proto_second___node_str_0(Var a0){
 
 }
 
-static inline String _x2c_gensym_proto_second___node_repr_0(Var a0){
+static inline String _x2c_gensym_proto_f6_second___node_repr_0(Var a0){
   RenderPath _x2c_gensym_macro_render_path_1;
   if(! RenderPath_enter(& _x2c_gensym_macro_render_path_1, Var_pointer(a0))) return Var_pointer_string(a0);
   {
@@ -323,7 +323,7 @@ static inline String _x2c_gensym_proto_second___node_repr_0(Var a0){
     x2c_cleanup_push(& _x2c_gensym_defer_record_3);
     {
       {
-        String _x2c_gensym_return_value_3 = second___Node_repr(Var_second___node(a0));
+        String _x2c_gensym_return_value_3 = f6_second___Node_repr(Var_f6_second___node(a0));
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
           return _x2c_gensym_return_value_3;
@@ -337,7 +337,7 @@ static inline String _x2c_gensym_proto_second___node_repr_0(Var a0){
 
 }
 
-static inline Buffer _x2c_gensym_proto_second___node_write_str_0(Var a0, Buffer a1){
+static inline Buffer _x2c_gensym_proto_f6_second___node_write_str_0(Var a0, Buffer a1){
   RenderPath _x2c_gensym_macro_render_path_2;
   if(! RenderPath_enter(& _x2c_gensym_macro_render_path_2, Var_pointer(a0))) return Var_write_pointer_repr(a0, a1);
   {
@@ -353,7 +353,7 @@ static inline Buffer _x2c_gensym_proto_second___node_write_str_0(Var a0, Buffer 
     x2c_cleanup_push(& _x2c_gensym_defer_record_4);
     {
       {
-        Buffer _x2c_gensym_return_value_4 = second___Node_write_str(Var_second___node(a0), a1);
+        Buffer _x2c_gensym_return_value_4 = f6_second___Node_write_str(Var_f6_second___node(a0), a1);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
           return _x2c_gensym_return_value_4;
@@ -367,7 +367,7 @@ static inline Buffer _x2c_gensym_proto_second___node_write_str_0(Var a0, Buffer 
 
 }
 
-static inline Buffer _x2c_gensym_proto_second___node_write_repr_0(Var a0, Buffer a1){
+static inline Buffer _x2c_gensym_proto_f6_second___node_write_repr_0(Var a0, Buffer a1){
   RenderPath _x2c_gensym_macro_render_path_3;
   if(! RenderPath_enter(& _x2c_gensym_macro_render_path_3, Var_pointer(a0))) return Var_write_pointer_repr(a0, a1);
   {
@@ -383,7 +383,7 @@ static inline Buffer _x2c_gensym_proto_second___node_write_repr_0(Var a0, Buffer
     x2c_cleanup_push(& _x2c_gensym_defer_record_5);
     {
       {
-        Buffer _x2c_gensym_return_value_5 = second___Node_write_repr(Var_second___node(a0), a1);
+        Buffer _x2c_gensym_return_value_5 = f6_second___Node_write_repr(Var_f6_second___node(a0), a1);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
           return _x2c_gensym_return_value_5;
@@ -397,12 +397,12 @@ static inline Buffer _x2c_gensym_proto_second___node_write_repr_0(Var a0, Buffer
 
 }
 
-static inline unsigned _x2c_gensym_proto_second___node_hash_0(Var a0){
-  return second___Node_hash(Var_second___node(a0));
+static inline unsigned _x2c_gensym_proto_f6_second___node_hash_0(Var a0){
+  return f6_second___Node_hash(Var_f6_second___node(a0));
 }
 
-static inline int _x2c_gensym_proto_second___node_equal_0(Var a0, Var a1){
-  return second___Node_equal(Var_second___node(a0), Var_second___node(a1));
+static inline int _x2c_gensym_proto_f6_second___node_equal_0(Var a0, Var a1){
+  return f6_second___Node_equal(Var_f6_second___node(a0), Var_f6_second___node(a1));
 }
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){

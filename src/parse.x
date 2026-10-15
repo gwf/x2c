@@ -1194,13 +1194,13 @@ void Compiler.check_reference_placement(Compiler c, Type type) {
     $report.type.reference_placement(c);
 }
 
-/* A file-scope function declared again without a storage class keeps the
+/* A file-scope function declared again with `extern` or no storage keeps the
    internal linkage of its earlier `static` declaration, as in C, so the
    declaration emits `static`. An object so declared has external linkage
    and conflicts, which C reports. */
 static List _linked_static_base(Compiler c, List base, List declarators) {
   Type type = base;
-  if (!c.sym.at_file_scope() || type.is_static() || type.is_extern() ||
+  if (!c.sym.at_file_scope() || type.is_static() ||
       !declarators)
     return base;
   foreach (List declarator, declarators) {
@@ -1210,7 +1210,7 @@ static List _linked_static_base(Compiler c, List base, List declarators) {
     if (!declared.is_function() || !c.sym.is_file_static(bound.cadr()))
       return base;
   }
-  return %(static @base);
+  return %(static @{base.filter(%!(item) => item != <extern>)});
 }
 
 static List _finish_declaration(
@@ -1613,7 +1613,7 @@ static List _publish_aggregate_type(
   if (name is <list> && name.car() == <binding>)
     c.sym.bind_identity(%($tag), name, %($tag $body));
   else
-    c.sym.declare(NULL, type, tag == <enum> ? %(enum) : %($tag $body));
+    c.sym.declare_resolved(NULL, type, tag == <enum> ? %(enum) : %($tag $body));
   if (tag != <enum>) {
     c.sym.declare_field_order(type, members);
     if (layout) c.sym.set(%(@type "layout-attribute"), %(unknown));
@@ -1788,7 +1788,7 @@ static Type _declare_named_type(
   c.expect(<;>);
   Type type = %(declare $base (bindings (bind () $modifiers)))
                 .type_from_ast();
-  if (!c.macro_holes) c.sym.declare(%(typedef), key, type);
+  if (!c.macro_holes) c.sym.declare_resolved(%(typedef), key, type);
   Type specifier = base.type().base_type();
   if (specifier.is_aggregate_tag_body())
     type = type.list()[:type.len() - type.base_type().len()]
@@ -1916,7 +1916,7 @@ static List _publish_enumerator(
   }
   if (prior)
     $report.parse.enum_bound(c, spelling, origin);
-  if (exact) binding = c.sym.declare(NULL, key, context);
+  if (exact) binding = c.sym.declare(NULL, %($exact), context);
   else
     c.sym.bind_identity(NULL, binding, context.declaration_ast(binding));
   c.sym.declare_enumerator(key, <enumerator>);
@@ -3558,11 +3558,9 @@ static List _collected_function(
         c.sym.mark_static(%(function $name));
       else c.fn_defs[name] = 1;
       c.record_declaration_visibility(declaration);
+      // A method's binding keeps its resolved owner and full spelling.
       List method = _method_identity(c, binding);
-      if (method)
-        declaration = %(declare $type
-          (bindings (bind ((${method.car()}) ${method.cadr()}) $modifiers)));
-      else {
+      if (!method) {
         /* Renamed locals keep their identity; exact names complete
            prototypes. */
         Var source;

@@ -474,7 +474,8 @@ static void _member(Splice &s, String spelling, Token site) {
 /* The prefix of a file's statics: its path under the entry's companion
    directory, or the entry's stem, without the extension, with each
    character that cannot continue a C identifier made `_` and trailing `_`
-   dropped, then `___`. Dropping them keeps `foo_` and `foo` on one prefix,
+   dropped, then `___`. The spelling starts with `f`, its length, and `_`.
+   Dropping trailing underscores keeps `foo_` and `foo` on one prefix,
    so their statics cannot meet past the separator unreported. A package
    prefix ends in `__`, so a package entry's statics never share a spelling
    with the package's public names. A leading digit gets a leading `x`,
@@ -488,7 +489,7 @@ static String _file_prefix(String path) {
   String stem = spelling;
   int keep = stem.len();
   while (keep > 1 && stem[keep - 1] == '_') keep--;
-  return %"${stem[:keep]}___";
+  return %"f${keep}_${stem[:keep]}___";
 }
 
 /* Appends the file's text from byte `start` to `end`, which begins its

@@ -618,8 +618,15 @@ static List _scope_find(Sym s, SymScope &scope, List key, Type &?type) {
     facts. Stored types discard storage and `inline` while retaining `const`,
     `restrict`, and `volatile`.
 */
-List Sym.declare(Sym s, List context, List key, List ast) {
-  List declared = s.declared_key(context, key, ast);
+List Sym.declare(Sym s, List context, List key, List ast) =>
+  _declare(s, context, key, ast, s.declared_key(context, key, ast));
+
+/** Installs an aggregate or named type whose parser resolved its spelling. */
+List Sym.declare_resolved(Sym s, List context, List key, List ast) =>
+  _declare(s, context, key, ast, key);
+
+static List _declare(
+  Sym s, List context, List key, List ast, List declared) {
   if (!s.at_file_scope() && !List.equal(declared, key))
     _link_local(s, declared);
   key = declared;
@@ -643,7 +650,7 @@ List Sym.declare(Sym s, List context, List key, List ast) {
 
 /** Returns the key a declaration of `key` with type `ast` takes in this
     unit: its file-private or package spelling at file scope, else `key`.
-    Declaring the result again returns it unchanged. */
+    Retained declarations keep their already resolved spelling. */
 List Sym.declared_key(Sym s, List context, List key, List ast) {
   if (!s.c.package && !s.c.line_markers) return key;
   return _declared_key(s, context, key, ast);
@@ -720,7 +727,8 @@ static void _check_module_shadow(
   Sym s, List contexts, String prefix, String name, List ast) {
   Compiler c = s.c;
   foreach (List context, contexts) {
-    if (prefix && %(@context $name) in s.statics)
+    if (prefix && !(name in s.prefixed) &&
+        %(@context $name) in s.statics)
       $report.parse.module_shadow(c, name);
     if (!c.module_declaration ||
         !(c.source_private > 0 || ast.type().is_static())) continue;
@@ -869,7 +877,8 @@ List Sym.unshadow_visible(Sym s, String spelling) {
   for (int i = s.base_scopes; i < (int) s.scopes.len(); i++) {
     SymScope *scope = _scope_at(s, i);
     Var binding;
-    if (key in scope.symbols && scope.bindings.try_get(key, binding)) {
+    if (key in scope.symbols && scope.bindings.try_get(key, binding) &&
+        %(automatic $binding) in s.binding_facts) {
       _unshadow_local(s, binding, alias);
       visible = cons(binding, visible);
     }
@@ -916,7 +925,7 @@ Var Compiler.aggregate_name(
   if (s.at_file_scope()) {
     /* Only a definition or standalone forward owns this package tag.
        A field or prototype may merely refer to a tag from a C header. */
-    if (definition && !s.get_exact(type)) s.declare(NULL, type, type);
+    if (definition && !s.get_exact(type)) s.declare_resolved(NULL, type, type);
     return name;
   }
   if (!definition && s.get_exact(type)) return s.local_type(type).cadr();
@@ -1019,10 +1028,12 @@ String Compiler.private_prefix(Compiler c, Type type) {
     from a spelling this unit already prefixed, such as `second__Node_new`
     or `Var_second__node` for a private class `second__Node`, stays
     unchanged; it is unique in the unit, so code generated outside the file
-    still reaches it. */
+    still reaches it. Ordinary source spellings always take their file's
+    prefix, even when they resemble another generated spelling. */
 String Compiler.scoped_spelling(Compiler c, String prefix, String name) {
   if (!prefix) return c.package_spelling(name);
-  if (!name || _derived_spelling(c.sym, name)) return name;
+  if (!name || (c.macro_stack && _derived_spelling(c.sym, name)))
+    return name;
   return %"$prefix$name";
 }
 

@@ -14,13 +14,13 @@ macro Expression $helped() => helper();
 
 static int use_extern(void) {
   extern int leaked;
-  leaked += 1;
+  leaked = $leaked() + 1;
   return leaked;
 }
 
 static int local_proto(void) {
   int helper(void);
-  return helper();
+  return $helped();
 }
 
 static int shadow(void) {

@@ -9,6 +9,8 @@
 #include <stdio.h>
 int use(void);
 
+int independent(void);
+
 int main(void);
 
 
