@@ -29,7 +29,7 @@ Calls the typed callable `callee` with `arguments`, each converted to
 its parameter and evaluated once, in source order, as a statement
 expression.
 
-Source: `src/transform.x:1302`
+Source: `src/transform.x:1301`
 
 <a id="Compiler.lower_lambda_expr"></a>
 #### Compiler.lower_lambda_expr
