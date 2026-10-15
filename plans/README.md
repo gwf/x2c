@@ -57,7 +57,6 @@ Their impact was reviewed against `2b5ee957`; no executable reproduction was rer
 | [Quotation adoption](quotation-adoption-audit-2026-10-03.md#typed-_alignof-and-scalar-generator-cleanup) | `_Alignof($type)` accepts a typed Type hole and emits target C alignment. Simplify the scalar generator while preserving exact native behavior. | Deferred past the cleanup phase (repository review decision 11). Then pair the missing quotation form with its current scalar caller. |
 | [String switch](string-switch.md) | Ordinary switch accepts String selectors and string-literal cases, with the plan's C control-flow behavior. | Deferred past the cleanup phase (repository review decision 11). Then resume the existing private implementation against current APIs. |
 | [Lint and format](x2c-lint-and-format.md#current-remaining-work-2026-10-12) | Finish already-approved structured List findings and compiler consumption. Keep lint optional. | Continue phase 8 and the existing optional editor workflow; add no recurring gate. |
-| [C on-ramp](x2c-c-on-ramp.md#current-remaining-work-2026-10-12) | Show both existing adoption directions: rename C source to `.x`, and call x2c from C through its generated header. | Finish the worked landing-page examples. Parser and corpus work is delivered. |
 
 The [repository review](repository-review-2026-10-12.md#decisions-recorded-2026-10-12)
 delivered the remediation decisions for numeric comparisons, non-List match,
@@ -109,6 +108,13 @@ owners. Unselected consolidation, formatting, Match, descriptor, Torch, numeric
 table, and arbitrary script-port experiments remain reference material.
 
 ### Decisions and completed records
+
+Archived 2026-10-15:
+
+- [C on-ramp](archive/x2c-c-on-ramp.md): done; both adoption directions
+  delivered 2026-10-15 as checked `examples/from-c/` programs shown on the
+  landing page, recorded by "show both C adoption directions on the landing
+  page".
 
 Archived 2026-10-09 to 2026-10-11:
 

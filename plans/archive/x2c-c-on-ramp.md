@@ -1,16 +1,8 @@
 # The C on-ramp
 
-> Status: active - remaining landing-page examples recorded on 2026-10-12.
-> Parser and corpus work is delivered. Section 4b owns the existing website work.
+> Status: done - landing-page examples delivered on 2026-10-15.
+> Parser and corpus work is delivered. Section 4b records the website work.
 > Earlier linkage and _Generic designs below are historical, not new implementation requirements.
-
-## Current remaining work, 2026-10-12
-
-Finish the existing landing-page examples for two adoption directions: rename
-C source to `.x`, and call an x2c file from a C main through its generated header.
-Show accepted code, the commands, and the result. The parser and corpus campaign
-is delivered; do not repeat it or invent four new examples as a prerequisite.
-
 
 ## The result
 
@@ -218,6 +210,17 @@ maps slide markdown to a standalone example and
 `tools/check-gallery-examples` rejects any difference. So each new sample
 lands first as an example under `examples/`, with a row in
 `examples/manifest.txt`, and the page references it.
+
+Delivered on 2026-10-15. The landing page's "Bring your C." block, at the
+end of the hero, reads its code and output from `examples/from-c/` and
+`examples/expected/` when Astro renders the page, so the page cannot differ
+from the checked examples:
+
+- `from-c/points` is an unchanged C program, renamed to `.x`; the page shows
+  `mv points.c points.x` and `x2c run points.x`.
+- `from-c/words` is an x2c function with a C prototype. Its `.flags` file adds
+  `main.c` to the build, so `make examples` runs the page's command,
+  `x2c build --output count main.c words.x`, and compares the output.
 
 ## Validation
 
