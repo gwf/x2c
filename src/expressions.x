@@ -302,6 +302,15 @@ static List _finish_cast(
       _casts_to_template_typedef(c, decl))
     type = %(<macro-expr>);
   _warn_unnecessary_cast(c, operand, type, origin);
+  return _cast_expression(c, decl, type, operand);
+}
+
+/* A C string literal cast to `String` is promoted as an assignment
+   promotes it; C would reinterpret the literal's bytes as a header. */
+static List _cast_expression(
+  Compiler c, List decl, Type type, List operand) {
+  if (c.sym.is_string_type(type) && _is_raw_string_literal(operand))
+    return c.convert_expression(operand, type);
   return %(expr $type ${source_cast_content(%($decl $operand))});
 }
 
@@ -2808,7 +2817,7 @@ static List _cast(Resolve &r, List declaration, List operand) {
   Type type = operand.cadr() === %(<macro-expr>) ||
               _casts_to_template_typedef(r.c, declaration)
             ? %(<macro-expr>) : typed.type_from_ast();
-  return %(expr $type (cast $declaration $operand));
+  return _cast_expression(r.c, declaration, type, operand);
 }
 
 static List _tadapt(Resolve &r, List target, List source) {
