@@ -794,7 +794,7 @@ static void _track_static(Sym s, List key, List ast) {
 // A tagged definition also publishes its tag unless the key is that tag.
 static Type _stored_type(Type type, Type key, List ast) {
   if ((type.is_aggregate_tag_body() && !key.is_aggregate_tag()) ||
-      (type.is_enum_tag_body() && !key.is_enum_tag())) {
+      (type.is_enum_tag_body() && !key.is_enum_tag() && !key.is_typedef())) {
     Var (aggregate, tag) = ast;
     type = %( $aggregate $tag );
   }

@@ -33,7 +33,8 @@ static int typedef_reference(void) {
 }
 
 static int enum_snapshot(void) {
-  enum Mode { ready = 41 } value = ready;
+  typedef enum Mode { ready = 41 } Mode;
+  Mode value = ready;
   Func f = %!() => value + 1;
   return f().int();
 }
