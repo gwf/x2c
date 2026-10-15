@@ -76,6 +76,10 @@ static List _scope_find(Sym s, SymScope * scope, List key, Type * type);
 
 static List _declared_key(Sym s, List context, List key, List ast);
 
+static List _linked_key(Sym s, List key);
+
+static int _global_key(Sym s, List key);
+
 static void _check_module_shadow(Sym s, List contexts, String prefix, String name, List ast);
 
 static String _declared_spelling(List key);
@@ -1034,7 +1038,7 @@ String Compiler_declared_spelling(Compiler c, String prefix, String name);
 
 static List _declared_key(Sym s, List context, List key, List ast){
   Compiler c = s -> c;
-  if((int) Block_len(s -> scopes) != s -> base_scopes) return key;
+  if(! Sym_at_file_scope(s)) return List_truth(context) || _names_local_object(List_type(ast)) ? key : _linked_key(s, key);
   if(List_truth(context) && !(context == _68)) return key;
   String prefix = Compiler_private_prefix(c, List_type(ast));
   Var head, tag;
@@ -1045,6 +1049,11 @@ static List _declared_key(Sym s, List context, List key, List ast){
   int tagged =(x2c_var_equal(head, Symbol_var(1318234344)) || x2c_var_equal(head, Symbol_var(44977116)) || x2c_var_equal(head, Symbol_var(357722))) && List_truth(List_cdr(key)) && ! List_truth(List_cddr(key)) && Var_is_row(tag, 11, 7, 1);
   if(plain) _check_module_shadow(s, _72, prefix, Var_as_string(head), ast);
   if(tagged) _check_module_shadow(s, cons(List_var(cons(head, NULL)), NULL), prefix, Var_as_string(tag), ast);
+  if(plain && ! List_truth(context) && ! String_truth(prefix) && ! c -> module_declaration){
+    List own = _file_key(s, key);
+    if(! List_truth(own)) own = key;
+    if(Map_contains(s -> statics, List_var(own))) return own;
+  }
   if(! String_truth(prefix) &&(! String_truth(c -> package) || Type_is_static(List_type(ast)))) return key;
   if(plain) return cons(String_var(Compiler_declared_spelling(c, prefix, Var_as_string(head))), NULL);
   if(tagged) return({
@@ -1052,6 +1061,19 @@ static List _declared_key(Sym s, List context, List key, List ast){
   }
   );
   return key;
+}
+
+static List _linked_key(Sym s, List key){
+  if(Sym_has_local(s, key)) return key;
+  List own = _file_key(s, key), package = _package_retry_key(s, key);
+  if(List_truth(own) && _global_key(s, own)) return own;
+  if(List_truth(package) && ! _global_key(s, key) && _global_key(s, package)) return package;
+  return key;
+}
+
+static int _global_key(Sym s, List key){
+  for(int i = 0;  i < s -> base_scopes;  i ++) if(Map_contains(_scope_at(s, i) -> symbols, List_var(key))) return 1;
+  return 0;
 }
 
 static void _check_module_shadow(Sym s, List contexts, String prefix, String name, List ast){
@@ -1138,7 +1160,6 @@ static String _package_reserved_owner(Compiler c, String spelling){
 
 static void _track_static(Sym s, List key, List ast){
   if(Type_is_static(List_type(ast))) Sym_put(s, s -> statics, List_var(key), int_var(1));
-  else Sym_drop(s, s -> statics, List_var(key));
 }
 
 int Type_is_aggregate_tag_body(Type);
