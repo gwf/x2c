@@ -10,39 +10,37 @@
 (function (static "Var") 
  (bind (binding 3 "next_value") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 17 
-   (stmnt 
-    (expr (int) (postfix ++ (expr (int) (ident (binding 1 "value_calls"))))))) 
-  (at 18 (return ("Var") (expr (int) (literal (int) "7"))))))
+  (at 9 (stmnt 
+         (expr (int) (postfix ++ (expr (int) (ident (binding 1 "value_calls"))))))) 
+  (at 10 (return ("Var") (expr (int) (literal (int) "7"))))))
 
 (function (static "Symbol") 
  (bind (binding 4 "next_other_tag") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 19 
+  (at 11 
    (stmnt (expr (int) (postfix ++ (expr (int) (ident (binding 2 "tag_calls"))))))) 
-  (at 20 (return ("Symbol") (expr ("Symbol") (literal ("Symbol") "<f64>" f64))))))
+  (at 12 (return ("Symbol") (expr ("Symbol") (literal ("Symbol") "<f64>" f64))))))
 
 (function (int) 
  (bind (binding 5 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 21 
+  (at 13 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 6 "value") ()) (expr (int) (literal (int) "7"))) 
      (op = (bind (binding 7 "absent") ()) 
       (expr ("Var") (literal ("Var") "void")))))) 
-  (at 22 
+  (at 14 
    (declare ("Symbol") 
     (bindings 
      (op = (bind (binding 8 "other_tag") ()) 
       (expr ("Symbol") (literal ("Symbol") "<f64>" f64)))))) 
-  (at 23 
+  (at 15 
    (declare (int) 
-    (bindings 
-     (op = (bind (binding 9 "is") ()) (expr (int) (literal (int) "1"))) 
+    (bindings (op = (bind (binding 9 "is") ()) (expr (int) (literal (int) "1"))) 
      (op = (bind (binding 10 "not") ()) (expr (int) (literal (int) "1")))))) 
-  (at 24 
+  (at 16 
    (declare (int) 
     (bindings 
      (op = (bind (binding 11 "ok") ()) 
@@ -82,8 +80,7 @@
                          (op ! (expr (int) 
                                 (call (expr ((func (("Var") ("Symbol"))) int) 
                                        (ident (binding 12 "Var_is"))) 
-                                 (args (expr ("Var") 
-                                        (ident (binding 6 "value"))) 
+                                 (args (expr ("Var") (ident (binding 6 "value"))) 
                                   (expr ("Symbol") 
                                    (literal ("Symbol") "<f64>" f64))))))))) 
                       (expr (int) 
@@ -91,8 +88,7 @@
                               (call (expr ((func (("Var") ("Symbol"))) int) 
                                      (ident (binding 12 "Var_is"))) 
                                (args (expr ("Var") (ident (binding 6 "value"))) 
-                                (expr ("Symbol") 
-                                 (ident (binding 8 "other_tag")))))))))) 
+                                (expr ("Symbol") (ident (binding 8 "other_tag")))))))))) 
                     (expr (int) 
                      (op ! (expr (int) 
                             (call (expr ((func (("Var") ("Symbol"))) int) 
@@ -127,7 +123,7 @@
               (expr (int) (literal (int) "1")))))) 
           (expr (int) (ident (binding 9 "is"))))) 
         (expr (int) (ident (binding 10 "not"))))))))) 
-  (at 25 
+  (at 17 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 14 "printf"))) 
@@ -135,7 +131,7 @@
        (expr (int) (ident (binding 11 "ok"))) 
        (expr (int) (ident (binding 1 "value_calls"))) 
        (expr (int) (ident (binding 2 "tag_calls")))))))) 
-  (at 26 
+  (at 18 
    (return (int) 
     (expr (int) 
      (op ? (expr (int) (ident (binding 11 "ok"))) 

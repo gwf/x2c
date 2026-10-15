@@ -1420,7 +1420,18 @@ static void _bind_pending_inline_bodies(
   visited[unit] = 1;
   Array effects = [];
   List entry = _entry(c, unit);
-  if (entry) _replay_cached(c, entry, unit, globs, visited, effects);
+  if (!entry) return;
+  _replay_cached(c, entry, unit, globs, visited, effects);
+  _forget_own_statics(globs, entry);
+}
+
+/* A unit's entry marks its static functions for the units that include it.
+   The unit's own walk keeps those markers out of its symbols. */
+static void _forget_own_statics(Map globs, List entry) {
+  foreach (Var part, entry.car())
+    if (part is <map>)
+      foreach (Var key, part.map().keys())
+        match (key) case %("unit-static" ?): globs.del(key);
 }
 
 static int _produces(FileWalk &w) {

@@ -182,7 +182,28 @@ static void _print_conformance(Compiler c, String filename, Map globals) {
 }
 
 static void _print_ast(List ast) {
-  foreach (List node, ast) printf("\n%s\n", _node_repr(node));
+  foreach (List node, _renumbered_bindings(ast))
+    printf("\n%s\n", _node_repr(node));
+}
+
+/* A binding number counts every binding the unit has issued, collection's
+   included, so it depends on whether the includes replayed or were parsed
+   cold. A dump numbers bindings by their first appearance in its text. */
+static List _renumbered_bindings(List ast) {
+  Map numbers = {}, replaced = {};
+  Array pending = $auto([ast]);
+  while (pending.len()) {
+    Var node = pending.take_last();
+    if (node is not <list> || node.is_nil()) continue;
+    match (node.list()) case %(binding ?identity ?spelling): {
+      if (!(identity in numbers)) numbers[identity] = (int) numbers.len() + 1;
+      replaced[(void *) node.list()] =
+        %(binding ${numbers[identity]} $spelling);
+      continue;
+    }
+    foreach (Var child, node.list().reverse()) pending.push(child);
+  }
+  return Ast.replace_nodes(ast, replaced);
 }
 
 static String _node_repr(List node) {
