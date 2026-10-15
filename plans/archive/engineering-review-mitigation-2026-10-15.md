@@ -1,6 +1,7 @@
-> Status: active
-> Implementation starts from origin/dev 53061627eaf5ecc4b45525a536b8c02b0d10ae67.
-> The prior review baseline was 8bfeb6a79e94f9ac12c7dbec4a88bd01dbd79098.
+> Status: done
+> Published to dev on 2026-10-15 at 5372f3e44aa3da1efa180a3f1117509a69a30540.
+> Implementation baseline: 53061627eaf5ecc4b45525a536b8c02b0d10ae67.
+> Review baseline: 8bfeb6a79e94f9ac12c7dbec4a88bd01dbd79098.
 
 # Engineering review repairs
 
@@ -97,19 +98,45 @@ file/local-name boundary without restricting legal source identifiers.
 Per-declarator projections retain source order and shared definitions.
 Focused negative cases protect typed null-argument errors and CLI behavior,
 existing invalid linkage order, and warnings that the harness must not erase.
-The implementation review will remove duplicated checks and unnecessary helpers
+The implementation review removed duplicated checks and unnecessary helpers
 before the existing publication proof.
 
 The completed authored diff has been reviewed. Local type lifting reuses
 binding facts, native aliases, declaration order, and the existing builtin
 writer context. It adds no public meta SDK operation, persistent registry,
 validation framework, or new gate. The final combined publication proof and
-performance checkpoint remain pending.
+performance checkpoint completed before publication.
 
 Publication preparation integrated origin/dev at
 46b9c18fdbbadd6e555da4449b30286b5e339868, including its String switch work.
-The first API-generation attempt exposed lost retained method/Self facts.
-Replay now restores those existing facts beside the resolved binding.
-Ten focused fixtures and the dependency-free package consumer pass; complete
-API generation now writes all 119 pages successfully. The integrated bootstrap
-was rebuilt safely before further compiler use.
+Replay preserves each declaration's resolved method owner and member in its
+canonical syntax. A temporary shared-fact restoration incorrectly accepted
+conflicting owners; the final implementation removes that restoration.
+All 16 focused method fixtures pass with the original owner-conflict rejection.
+Complete API generation writes all 119 pages. The integrated bootstrap was
+rebuilt safely before further compiler use.
+
+## Final evidence and delivery
+
+The exact code candidate 5372f3e44aa3da1efa180a3f1117509a69a30540 passed
+agent-pr-check, including bootstrap convergence, artifact atomicity, fixtures,
+951 unit tests with 26,010 assertions, documentation, cold collection, and
+command checks. Final PCRE2 acceptance passed 20 tests/118 assertions; SQLite
+passed 15 tests/133 assertions. The libcurl consumer compiled and linked.
+Generated source and documentation changes were reviewed before publication.
+The remote dev reference was verified at the published candidate.
+
+Performance snapshot 20261015T144738Z-5372f3e44aa3 completed successfully on
+that committed candidate. Against today's earlier 8bfeb6a79 snapshot, the build
+cost score moved from 70.2454 to 72.1322; sequential stage CPU time moved from
+45.5052 to 46.8967 seconds. Stage-0 default translation of the representative
+seven-source workload moved from 1.94753 to 2.11516 seconds; elapsed build
+through stage 3 moved from 17.9389 to 20.4125 seconds. These observations include
+intervening upstream changes, including String switch work. They do not isolate
+the authored repairs and have not been confirmed by a same-host rerun.
+The earlier paired warm-library script measurement records the intended
+conservative relinking cost separately above.
+
+Native CPP binding remains outside supported behavior under Gary's decision.
+Actual GCC and Linux execution were not attempted; GCC warning context was
+checked synthetically. No release promotion or main update was performed.
