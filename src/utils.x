@@ -95,6 +95,7 @@ void x2c_initialize_command_environment(
 static void _initialize_environment(
   const char *argv0, String embedded_identity) {
   if (root_path) return;
+  _default_search_path();
   executable_path = _executable(argv0);
   active_identity = embedded_identity ? embedded_identity : _identity();
   String home = Env.get("X2C_HOME");
@@ -104,6 +105,16 @@ static void _initialize_environment(
   root_found = root != NULL;
   root_path = Path.absolute(root ? root : ".");
   _prepare_include_dirs();
+}
+
+/* Without PATH, `execvp` searches the C library's default path, but a host
+   tool it starts that way, such as the GCC driver looking for `cc1`, finds
+   nothing. Setting that path lets the tools search where `execvp` does. */
+static void _default_search_path(void) {
+  if (Env.get("PATH")) return;
+  char buffer[PATH_MAX];
+  size_t length = confstr(_CS_PATH, buffer, sizeof(buffer));
+  if (length && length <= sizeof(buffer)) setenv("PATH", buffer, 1);
 }
 
 static String _executable(const char *argv0) {
