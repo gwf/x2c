@@ -3160,7 +3160,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2586 = List_var(_2585);
   _2587 = cons(_2586, _712);
   _2588 = List_var(_2587);
-  _2589 = String_new("x2c_func_call_arguments");
+  _2589 = String_new("_x2c_func_call_arguments");
   _2590 = String_var(_2589);
   _2591 = cons(_2590, NULL);
   _2592 = cons(_1367, _2591);
@@ -3243,11 +3243,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2669 = List_var(_2668);
   _2670 = cons(_205, _87);
   _2671 = List_var(_2670);
-  _2672 = int_var(2085);
+  _2672 = int_var(2084);
   _2673 = cons(_2672, NULL);
   _2674 = cons(_245, _2673);
   _2675 = List_var(_2674);
-  _2676 = int_var(78475);
+  _2676 = int_var(78472);
   _2677 = cons(_2676, NULL);
   _2678 = cons(_258, _2677);
   _2679 = List_var(_2678);
@@ -5670,7 +5670,7 @@ static int _null_literal(List expr){
 
 Compiler Compiler_expanding(void);
 Symbol Sym_var_tag_for_type(Sym, Type, Type *);
-List x2c_func_call_arguments(List function, List storage, List arguments){
+List _x2c_func_call_arguments(List function, List storage, List arguments){
   if(! _init_guard_) _file_init_();  Compiler c = Compiler_expanding();  Macro prepare = _1994, absent = _2182, boxed = _2299, opaque = _2397;  List count =({
     int _x2c_gensym_hole_0 = List_len(arguments);  Macro_typed(_2057, int_var(_x2c_gensym_hole_0));
   }
