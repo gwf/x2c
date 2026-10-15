@@ -2040,12 +2040,11 @@ static int _null_literal(List expr) =>
   expr.match(
     %(expr ? ${$source_identifier_content(%((binding ? "NULL")))}));
 
-/** Returns one `$func_argument` or `$func_null_argument` application for
-    each of `arguments`, preparing it into `storage` for the call through
-    `function`; the `$func_call` template calls this in a slot. The choice
-    of address, type and by-value alternative follows the argument's type.
-*/
-List x2c_func_call_arguments(List function, List storage, List arguments) {
+/* Returns one `$func_argument` or `$func_null_argument` application for
+   each of `arguments`, preparing it into `storage` for the call through
+   `function`; the `$func_call` template calls this in a slot. The choice
+   of address, type and by-value alternative follows the argument's type. */
+List _x2c_func_call_arguments(List function, List storage, List arguments) {
   Compiler c = Compiler.expanding();
   Macro prepare = $func_argument, absent = $func_null_argument,
         boxed = $func_value, opaque = $func_opaque;
@@ -2086,7 +2085,7 @@ static macro Expression $func_call(Expr $callee, Expr $count,
     Expr @arguments) => ({
   Func function = $callee;
   FuncArg storage[$count];
-  @x2c_func_call_arguments(function, storage, $arguments)
+  @_x2c_func_call_arguments(function, storage, $arguments)
   Func_apply(function, $count, storage);
 });
 
