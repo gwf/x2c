@@ -1,4 +1,4 @@
-#set document(title: "The x2c Book", author: "The x2c authors")
+#set document(title: "The x2c Book", author: "The x2c authors", date: none)
 #set page(paper: "a4", margin: (x: 22mm, top: 22mm, bottom: 23mm))
 #set text(font: "Libertinus Serif", size: 10.5pt, lang: "en")
 #set par(justify: true, leading: 0.65em, spacing: 0.8em)

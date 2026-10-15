@@ -337,7 +337,13 @@ PANDOC ?= pandoc
 TYPST ?= typst
 
 doc-pdf:						## Typeset the book as a PDF (Pandoc 3.12+, Typst 0.15+)
-	cd docs/src && $(PANDOC) SUMMARY.md --from=commonmark_x --to=typst \
+	@command -v $(PANDOC) >/dev/null 2>&1 && command -v $(TYPST) >/dev/null 2>&1 || { \
+		echo "doc-pdf needs Pandoc 3.12+ and Typst 0.15+; on macOS run: brew install pandoc typst (see docs/README.md)" >&2; \
+		exit 1; \
+	}
+	@$(PANDOC) --version | awk 'NR == 1 { split($$2, v, "."); if (v[1] < 3 || (v[1] == 3 && v[2] < 12)) { \
+		print "doc-pdf needs Pandoc 3.12 or newer, found " $$2 "; see docs/README.md" > "/dev/stderr"; exit 1 } }'
+	cd docs/src && SOURCE_DATE_EPOCH=$$(git log -1 --format=%ct) $(PANDOC) SUMMARY.md --from=commonmark_x --to=typst \
 		--lua-filter=../../tools/book-pdf.lua --template=../book.typ \
 		--syntax-highlighting=none --pdf-engine=$(TYPST) \
 		--output=../x2c-book.pdf
