@@ -429,6 +429,44 @@ static void _reference_arguments(ReplSession s) {
   _expect(s, "1+2;", <value>, 3);
 }
 
+static void _truth_values(ReplSession s) {
+  int i = 0;
+  foreach (String declaration, %(
+    "String value=\"\";" "String value=%\"\";"
+    "Symbol value=0;" "List value=%();" "String value=\"yes\";")) {
+    String name = %"truth_case_${i}";
+    String body = "if (value) hits+=1; if (!value) hits+=2; "
+      "int a=value && ++hits; int b=value || ++hits; "
+      "return hits*100+a*10+b+(value ? 1000 : 0);";
+    _expect(s, %"int $name(void) { $declaration int hits=0; $body }",
+            <defined>, void);
+    _expect(s, %"$name();", <value>, i == 4 ? 1211 : 301);
+    i++;
+  }
+}
+
+static void _pointer_updates(ReplSession s) {
+  int i = 0;
+  foreach (String operation, %(
+    "p++;" "++p;" "p+=1;" "p=p+1;"
+    "p--;" "--p;" "p-=1;")) {
+    String name = %"pointer_case_${i}";
+    String body = %"int *p=data+1; $operation return *p;";
+    _expect(s, %"int $name(void) { int data[3]={10,20,30}; $body }",
+            <defined>, void);
+    _expect(s, %"$name();", <value>, i < 4 ? 30 : 10);
+    i++;
+  }
+  _expect(s,
+    "int pointer_nested(void) { int data[3]={10,20,30}; "
+    "int *p=data; int *q=(p+=1); return *q+*++p; }", <defined>, void);
+  _expect(s, "pointer_nested();", <value>, 50);
+  _expect(s,
+    "int pointer_addressed(void) { int data[3]={10,20,30}; "
+    "int *p=data; int **slot=&p; p+=1; return **slot; }", <defined>, void);
+  _expect(s, "pointer_addressed();", <value>, 20);
+}
+
 int main(int argc, char **argv) {
   (void) argc;
   x2c_initialize_environment(argv[0]);
@@ -458,6 +496,8 @@ int main(int argc, char **argv) {
         _meta_records(session);
         _interpreter_ownership(session);
         _reference_arguments(session);
+        _truth_values(session);
+        _pointer_updates(session);
         _delegate_completion(session);
         _completion_does_not_publish_meta(session);
         session.close();

@@ -17,18 +17,9 @@
          (tag (if (member sum '(+inf -inf nan)) 'f64 sum)))
     (_binary (C.conv a tag) op (C.conv b tag))))
 
-// x2c truth: nil is false, a number is false at zero, a C pointer is false
-// at the null address, and anything else is true. The zero reaches the
-// value's own type first: `eq?` compares a `Var` by identity, so a `double`
-// zero is not the `int` zero it was tested against.
-(defun C.nonzero? (a) (not (eq? (C.compare a '!= 0) 0)))
-
+// A terminal void is false here; ordinary values use their native truth rule.
 (defun C.true? (a)
-  (cond ((eq? a (C.void)) nil)
-        ((null? a) nil)
-        ((number? a) (C.nonzero? a))
-        ((eq? (Var.kind a) 'pointer) (not (eq? (Var.truth a) 0)))
-        (true true)))
+  (if (eq? a (C.void)) nil (not (eq? (Var.truth a) 0))))
 
 (defun C.not (a) (if (C.true? a) 0 1))
 

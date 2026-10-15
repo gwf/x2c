@@ -897,6 +897,11 @@ static Var _lower_pointer_step(
   List layout = _lower_step_layout(l, pointer);
   if (!layout || !_lower_numeric_type(l, _lower_type_of(count)))
     return void;
+  return _lower_pointer_move(l, layout, operator, left, right);
+}
+
+static Var _lower_pointer_move(
+  Lowering &l, List layout, Var operator, Var left, Var right) {
   (Var size) = layout.cddr();
   Var offset = %(_binary $right (quote <*>) $size);
   if (operator == <->) offset = %(_binary 0 (quote <->) $offset);
@@ -1421,8 +1426,7 @@ static int _lower_pure(Var form) {
   String name = head.str();
   if (name == "quote") return 1;
   if (name != "_binary" && name != "C.conv" && name != "C.compare" &&
-      name != "C.nonzero?" && name != "C.true?" && name != "C.not" &&
-      name != "C.neg" &&
+      name != "C.true?" && name != "C.not" && name != "C.neg" &&
       name != "C.and" && name != "C.or" && name != "C.ternary" &&
       name != "not" && name != "eq?")
     return 0;
@@ -2196,6 +2200,17 @@ static Var _lower_assign_expr(Lowering &l, Var target, Var rhs) {
   return $decline.assignment.storage(l);
 }
 
+/* Pointer updates step by elements; scalar updates convert the promoted
+   result back to the destination type. */
+static Var _lower_update_value(
+  Lowering &l, Var target, Var operator, Var left, Var right) {
+  List layout = _lower_step_layout(l, target);
+  Var value = layout && (operator == <+> || operator == <->) ?
+    _lower_pointer_move(l, layout, operator, left, right) :
+    %(_binary $left (quote $operator) $right);
+  return _lower_to_type(l, _lower_type_of(target), value);
+}
+
 /* A compound update evaluates the place once and returns its new value. */
 static Var _lower_update_expr(
   Lowering &l, Var target, Symbol operator, Var right) {
@@ -2207,8 +2222,7 @@ static Var _lower_update_expr(
   Var slot = _lower_name(l, "place");
   Var old = _lower_name(l, "old");
   Var loaded = _lower_load(l, want, slot);
-  Var combined = _lower_to_type(
-    l, want, %(_binary $old (quote $operator) $right));
+  Var combined = _lower_update_value(l, target, operator, old, right);
   Var store = _lower_poke(l, want, slot, combined);
   return %((lambda ($slot) ((lambda ($old) $store) $loaded)) $place);
 }
@@ -2252,22 +2266,20 @@ static Var _lower_update(
   if (place is not void) {
     Var slot = _lower_name(l, "place");
     Var loaded = _lower_load(l, want, slot);
-    Var combined = _lower_to_type(
-      l, want, %(_binary $loaded (quote $operator) $right));
+    Var combined = _lower_update_value(l, target, operator, loaded, right);
     return _lower_effect(
       l, %((lambda ($slot) ${_lower_poke(l, want, slot, combined)}) $place),
       rest, k);
   }
   if (id < 0) return $decline.update.computed(l);
   if (!l.locals.contains(id)) {
-    Var combined = _lower_to_type(
-      l, want, %(_binary (C.gread $id) (quote $operator) $right));
+    Var combined = _lower_update_value(
+      l, target, operator, %(C.gread $id), right);
     return _lower_effect(l, %(C.gwrite $id $combined), rest, k);
   }
   Var current = _lower_value(l, id);
   if (_lower_failed(l, current)) return void;
-  Var combined = _lower_to_type(
-    l, want, %(_binary $current (quote $operator) $right));
+  Var combined = _lower_update_value(l, target, operator, current, right);
   return _lower_bind_value(l, id, combined, rest, k);
 }
 
