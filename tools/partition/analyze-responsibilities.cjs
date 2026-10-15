@@ -27,9 +27,23 @@ if (!Array.isArray(answer.operations) || answer.operations.length !== expected.l
   throw Error('Agent analysis must describe every selected public operation exactly once.');
 m.responsibilities = answer.responsibilities;
 m.operations = Object.fromEntries(answer.operations.map(o => [o.key, o]));
-m.constraints = [...answer.constraints];
+m.constraints = [];
+for (const constraint of answer.constraints || []) {
+  const unknown = (constraint.functions || []).filter(k => !ids.has(k));
+  if (!unknown.length) {
+    m.constraints.push(constraint);
+    continue;
+  }
+  // An absent symbol is uncertainty; keep the constraint visible as unresolved.
+  m.constraints.push({
+    ...constraint,
+    functions: constraint.functions.filter(k => ids.has(k)),
+    status: 'unresolved',
+    evidence: `The source analysis named functions absent from this snapshot: ${unknown.join(', ')}. Source evidence: ${constraint.evidence || 'not supplied'}`,
+  });
+}
 m.references = [];
-for (const reference of answer.references) {
+for (const reference of answer.references || []) {
   const endpoints = [reference.from, reference.to];
   if (endpoints.every(k => ids.has(k))) {
     m.references.push(reference);

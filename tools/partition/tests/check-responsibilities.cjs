@@ -163,6 +163,24 @@ try {
   assert.match(analyzed.unresolvedConstraints[0].evidence, /registration line 12/);
   assert.equal(R.moduleUnits(D, converted).flatMap(g => g.members).length, 5);
   console.log('PASS: unknown agent references remain visible without losing assignments or known private constraints');
+  // Unknown constraint functions become unresolved evidence, and omitted lists default to empty.
+  const convert = answer => {
+    fs.writeFileSync(path.join(directory, 'answer.json'), JSON.stringify(answer));
+    return JSON.parse(execFileSync(process.execPath, [path.join(__dirname, '../analyze-responsibilities.cjs'), ...['graph','scope','answer'].map(n => path.join(directory,n+'.json'))], {encoding:'utf8'}));
+  };
+  const constrained = convert({...proposal, references: restored.references, constraints: [
+    {kind: 'static', symbol: 'table', status: 'keep-together', functions: [R.key(D, 0), 'src/gone.x:missing'], evidence: 'shared table line 7'},
+  ]});
+  const kept = R.analyze(D, constrained);
+  assert(kept.valid);
+  assert.equal(kept.unresolvedConstraints.length, 1);
+  assert.deepEqual(kept.unresolvedConstraints[0].functions, [R.key(D, 0)]);
+  assert.match(kept.unresolvedConstraints[0].evidence, /src\/gone\.x:missing.*shared table line 7/);
+  const {constraints, references, ...bare} = proposal;
+  const omitted = R.analyze(D, convert(bare));
+  assert(omitted.valid);
+  assert.equal(omitted.unresolvedConstraints.length, 0);
+  console.log('PASS: unknown constraint functions stay visible as unresolved; omitted constraints and references are empty');
 } finally {
   fs.rmSync(directory, {recursive:true, force:true});
   fs.rmSync(path.join(__dirname, '../data/analysis-responses', path.basename(directory)), {recursive:true, force:true});

@@ -1,5 +1,6 @@
 """Local, read-only agent analysis of a captured graph and its source files."""
 import json
+import re
 import shutil
 import subprocess
 import tempfile
@@ -105,7 +106,7 @@ class Analyses:
                     text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30,
                 )
                 if checked.returncode:
-                    detail = next((line.removeprefix('Error: ') for line in checked.stderr.splitlines() if line.startswith('Error: ')), 'See the saved validation log.')
+                    detail = next((match.group(1) for line in checked.stderr.splitlines() if (match := re.match(r'\w*Error: (.*)', line))), 'See the saved validation log.')
                     archive = HERE / 'data' / 'analysis-responses' / root.name
                     archive.mkdir(parents=True, exist_ok=True)
                     (archive / 'validation.log').write_text(checked.stderr)
