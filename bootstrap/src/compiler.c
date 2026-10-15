@@ -2108,7 +2108,7 @@ static void parsing_definitions____record_objects(Compiler c, List bindings, Tok
 }
 
 static void parsing_definitions____report_redefinition(Compiler c, String kind, List binding, Token site){
-  Var arms;  if(! Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_126, cons(List_var(binding), NULL))), &(arms)) || ! List_equal(Var_list_payload(arms), c -> arms)) return;  String spelling = Ast_binding_spelling(binding);  Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(kind), cons(String_var(_127), cons(String_var(spelling), cons(String_var(_128), NULL))))), site, cons(String_var(String_join(NULL, cons(String_var(_129), cons(String_var(spelling), cons(String_var(_72), NULL))))), NULL));
+  Var arms;  if(! Map_try_get(Compiler_semantic_binding_facts(c), List_var(cons(_126, cons(List_var(binding), NULL))), &(arms)) || ! List_equal(Var_list_payload(arms), c -> arms)) return;  String spelling = Compiler_unprefixed(c, Ast_binding_spelling(binding));  Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(kind), cons(String_var(_127), cons(String_var(spelling), cons(String_var(_128), NULL))))), site, cons(String_var(String_join(NULL, cons(String_var(_129), cons(String_var(spelling), cons(String_var(_72), NULL))))), NULL));
 }
 
 static void _record_span(Compiler c, List node, int start, int end){

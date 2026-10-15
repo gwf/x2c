@@ -1767,7 +1767,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1457 = cons(_839, _1456);
   _1458 = List_var(_1457);
   _1459 = cons(_1458, _467);
-  _1460 = String_new("x2c_func_call_arguments");
+  _1460 = String_new("_x2c_func_call_arguments");
   _1461 = cons(_468, _1454);
   _1462 = List_var(_1461);
   _1463 = cons(_1462, NULL);
@@ -3150,13 +3150,13 @@ static Var _x2c_gensym_func_adapt_5(Func _x2c_gensym_func_binding_5, const FuncA
   ;
 }
 
-List x2c_func_call_arguments(List, List, List);
+List _x2c_func_call_arguments(List, List, List);
 
 static Var _x2c_gensym_func_adapt_6(Func _x2c_gensym_func_binding_6, const FuncArg * _x2c_gensym_func_argv_6){
   List a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_6, _x2c_gensym_func_argv_6, 0, 806120));
   List a1 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_6, _x2c_gensym_func_argv_6, 1, 806120));
   List a2 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_6, _x2c_gensym_func_argv_6, 2, 806120));
-  return List_var(x2c_func_call_arguments(a0, a1, a2));
+  return List_var(_x2c_func_call_arguments(a0, a1, a2));
   ;
 }
 

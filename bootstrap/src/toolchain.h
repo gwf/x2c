@@ -12,7 +12,7 @@
 typedef struct Toolchain{
   String cc, ar, include_dir, runtime_lib;
   List cpp_args, cc_args, ld_args;
-  int verbose, dry_run, keep_system_includes;
+  int verbose, dry_run, keep_system_includes, inline_macro_expansions;
 }
 * Toolchain;
 

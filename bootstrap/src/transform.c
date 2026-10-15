@@ -783,7 +783,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _462 = cons(_447, _25);
   _463 = List_var(_462);
   _464 = cons(_463, NULL);
-  _465 = cons(_6, _464);
+  _465 = cons(_450, _464);
   _466 = cons(_22, _465);
   _467 = String_new("x2c_slice_bound");
   _468 = String_var(_467);

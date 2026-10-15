@@ -95,9 +95,13 @@ List Sym_declare(Sym s, List context, List key, List ast);
 
 List Sym_declared_key(Sym s, List context, List key, List ast);
 
+int Sym_is_file_static(Sym s, Var binding);
+
 void Sym_join_locals(Sym s, List binding);
 
 void Sym_unshadow_global(Sym s, String spelling);
+
+List Sym_unshadow_visible(Sym s, String spelling);
 
 List Sym_bind_identity(Sym s, List context, List binding, List ast);
 

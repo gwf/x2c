@@ -78,6 +78,8 @@ static List _declared_key(Sym s, List context, List key, List ast);
 
 static List _linked_key(Sym s, List key);
 
+static void _link_local(Sym s, List key);
+
 static int _global_key(Sym s, List key);
 
 static void _check_module_shadow(Sym s, List contexts, String prefix, String name, List ast);
@@ -1007,7 +1009,9 @@ static List Type_list(Type);
 
 List Sym_declare(Sym s, List context, List key, List ast){
   if(! _init_guard_) _file_init_();
-  key = Sym_declared_key(s, context, key, ast);
+  List declared = Sym_declared_key(s, context, key, ast);
+  if(! Sym_at_file_scope(s) && ! List_equal(declared, key)) _link_local(s, declared);
+  key = declared;
   _check_spelling(s -> c, _declared_spelling(key));
   Type ctxkey = List_type(List_append(context, List_append(key, NULL))), type = List_type_from_ast(ast);
   Type declared_type = type;
@@ -1038,7 +1042,7 @@ String Compiler_declared_spelling(Compiler c, String prefix, String name);
 
 static List _declared_key(Sym s, List context, List key, List ast){
   Compiler c = s -> c;
-  if(! Sym_at_file_scope(s)) return List_truth(context) || _names_local_object(List_type(ast)) ? key : _linked_key(s, key);
+  if(! Sym_at_file_scope(s)) return List_truth(context) || _names_local_object(List_type_from_ast(ast)) ? key : _linked_key(s, key);
   if(List_truth(context) && !(context == _68)) return key;
   String prefix = Compiler_private_prefix(c, List_type(ast));
   Var head, tag;
@@ -1069,6 +1073,20 @@ static List _linked_key(Sym s, List key){
   if(List_truth(own) && _global_key(s, own)) return own;
   if(List_truth(package) && ! _global_key(s, key) && _global_key(s, package)) return package;
   return key;
+}
+
+static void _link_local(Sym s, List key){
+  Sym_put(s, _scope_at(s, - 1) -> bindings, List_var(key), List_var(Sym_resolve_global(s, key, NULL)));
+}
+
+int Ast_try_binding(List, int *, String *);
+
+String Ast_binding_spelling(List);
+
+int Sym_is_file_static(Sym s, Var binding){
+  if(! _init_guard_) _file_init_();
+  if(! Var_is_row(binding, 9, 7, 4) || ! Ast_try_binding(Var_list_payload(binding), NULL, NULL)) return 0;
+  return Map_contains(s -> statics, List_var(cons(String_var(Ast_binding_spelling(Var_list_payload(binding))), NULL)));
 }
 
 static int _global_key(Sym s, List key){
@@ -1203,8 +1221,6 @@ static void _local_object(Sym s, List key, List binding, Type type){
   if(String_truth(_var_converter_owner(key, Type_list(global_type))) && !(Map_contains(s -> binding_facts, List_var(cons(_88, cons(List_var(binding), NULL)))))) Sym_put(s, s -> binding_facts, List_var(cons(_88, cons(List_var(binding), NULL))), String_var(Compiler_fresh_name(s -> c, _90)));
 }
 
-String Ast_binding_spelling(List);
-
 void Sym_join_locals(Sym s, List binding){
   if(! _init_guard_) _file_init_();
   String spelling = Ast_binding_spelling(binding);
@@ -1240,6 +1256,22 @@ void Sym_unshadow_global(Sym s, String spelling){
 
   }
 
+}
+
+List Sym_unshadow_visible(Sym s, String spelling){
+  if(! _init_guard_) _file_init_();
+  List key = cons(String_var(spelling), NULL), visible = NULL;
+  String alias = Compiler_fresh_name(s -> c, _94);
+  for(int i = s -> base_scopes;  i <(int) Block_len(s -> scopes);  i ++){
+    SymScope * scope = _scope_at(s, i);
+    Var binding;
+    if(Map_contains(scope -> symbols, List_var(key)) && Map_try_get(scope -> bindings, List_var(key), &(binding))){
+      _unshadow_local(s, Var_list_payload(binding), alias);
+      visible = cons(binding, visible);
+    }
+
+  }
+  return visible;
 }
 
 static void _unshadow_local(Sym s, List binding, String alias){

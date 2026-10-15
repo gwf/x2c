@@ -51,7 +51,7 @@ List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field,
 
 List Compiler_postfix_completions(Compiler c, Type receiver, Symbol access);
 
-List x2c_func_call_arguments(List function, List storage, List arguments);
+List _x2c_func_call_arguments(List function, List storage, List arguments);
 
 List Compiler_func_call_parts(Compiler c, Var content);
 
