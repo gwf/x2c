@@ -3,9 +3,9 @@
     Copyright (c) 2026 Gary William Flake.
 
     The built-in macros expand through these functions, which run as native
-    code inside the compiler. The compile-time Lisp in
-    `etc/builtin-core.xlisp` and `etc/lisp-bindings.xlisp` calls them by
-    name, and `Compiler.builtin_targets` binds each into the shared session.
+    code inside the compiler. `Compiler.builtin_targets` binds each into
+    the shared session under the name its callers use, such as
+    `etc/builtin-macros.x` and `etc/lisp-bindings.x`.
 */
 #pragma once
 #include "x2c.x"
@@ -905,18 +905,18 @@ static macro Stmt $builtin.row(Expr $rows, Expr $name, Expr $function) {
     with. */
 Map Compiler.builtin_targets(void) {
   Map rows = {};
-  $builtin.row(rows, "builtin_scope_expand", _scope_expand);
+  $builtin.row(rows, "scope.expand", _scope_expand);
   $builtin.row(rows, "_x2c_func_call_arguments", _x2c_func_call_arguments);
   $builtin.row(rows, "Ast_defer_captures", Ast.defer_captures);
-  $builtin.row(rows, "builtin_foreach_expand", _foreach_expand);
-  $builtin.row(rows, "builtin_auto_expand", _auto_expand);
-  $builtin.row(rows, "builtin_auto_release", _auto_release);
-  $builtin.row(rows, "builtin_class_initializer", _class_initializer);
-  $builtin.row(rows, "builtin_class_write_fields", _class_write_fields);
-  $builtin.row(rows, "builtin_class_expand", _class_expand);
-  $builtin.row(rows, "builtin_class_defaults", _class_defaults);
-  $builtin.row(rows, "binding_record", _binding_record);
-  $builtin.row(rows, "binding_install", _binding_install);
-  $builtin.row(rows, "binding_targets", _binding_targets);
+  $builtin.row(rows, "foreach.expand", _foreach_expand);
+  $builtin.row(rows, "auto.expand", _auto_expand);
+  $builtin.row(rows, "auto.release", _auto_release);
+  $builtin.row(rows, "class.initializer", _class_initializer);
+  $builtin.row(rows, "class.write-fields", _class_write_fields);
+  $builtin.row(rows, "class.expand", _class_expand);
+  $builtin.row(rows, "class.defaults", _class_defaults);
+  $builtin.row(rows, "_x2c.binding_record", _binding_record);
+  $builtin.row(rows, "_x2c.binding_install", _binding_install);
+  $builtin.row(rows, "_x2c.binding_targets", _binding_targets);
   return rows;
 }

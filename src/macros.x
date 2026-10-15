@@ -5478,7 +5478,7 @@ static Lisp _fill_library(Compiler c, Lisp shared) {
   return shared;
 }
 
-/* The four libraries' paths in the home and the message each failure
+/* The three libraries' paths in the home and the message each failure
    reports, in the order a session needs them. Every use of a session
    records them, so the paths are joined once per process. */
 static List library_files = NULL;
@@ -5489,8 +5489,7 @@ static List _library_files(void) {
   foreach (Var (relative, message), %(
       ("etc/init.xlisp" "cannot open the compile-time Lisp environment")
       ("etc/lisp-values.xlisp" "cannot open the compile-time value operations")
-      ("etc/compiler-sdk.xlisp" "cannot open the compile-time Lisp SDK")
-      ("etc/builtin-core.xlisp" "cannot open the built-in macro support")))
+      ("etc/compiler-sdk.xlisp" "cannot open the compile-time Lisp SDK")))
     rows.push(%(${%"${x2c_get_root()}/$relative"} $message));
   List files = rows.list_free();
   _require_owned(files.try_own());
@@ -5678,15 +5677,10 @@ static void _bind_primitives(Lisp lisp) {
 }
 
 /* Binds the built-in macro algorithms into `lisp` under the names its
-   compile-time Lisp calls; the native Lisp binding algorithms carry the
-   `_x2c.` prefix of internal primitives. */
+   compile-time Lisp calls. */
 static void _install_builtins(Lisp lisp) {
-  foreach (Var (name, function), Compiler.builtin_targets()) {
-    String spelling = name;
-    lisp.set_global(
-      spelling.startswith("binding_") ? %"_x2c.$spelling" : spelling,
-      function);
-  }
+  foreach (Var (name, function), Compiler.builtin_targets())
+    lisp.set_global(name, function);
 }
 
 /** Binds `function`, the operation `lib/meta.x` declares as `name`, under
