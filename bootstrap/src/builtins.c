@@ -656,7 +656,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _370 = cons(_367, _369);
   _371 = List_var(_370);
   _372 = Symbol_var(1133019155420);
-  _373 = int_var(1012);
+  _373 = int_var(997);
   _374 = cons(_373, NULL);
   _375 = cons(_372, _374);
   _376 = List_var(_375);
@@ -1741,7 +1741,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1449 = String_new("Func_new_rest");
   _1450 = String_new("String_var");
   _1451 = String_new("Func_var");
-  _1452 = String_new("builtin_scope_expand");
+  _1452 = String_new("scope.expand");
   _1453 = cons(_468, NULL);
   _1454 = cons(_468, _1453);
   _1455 = List_var(_1454);
@@ -1757,7 +1757,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1465 = List_var(_1464);
   _1466 = cons(_1465, _467);
   _1467 = String_new("Ast_defer_captures");
-  _1468 = String_new("builtin_foreach_expand");
+  _1468 = String_new("foreach.expand");
   _1469 = cons(_700, NULL);
   _1470 = cons(_700, _1469);
   _1471 = cons(_700, _1470);
@@ -1771,13 +1771,13 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1479 = cons(_839, _1478);
   _1480 = List_var(_1479);
   _1481 = cons(_1480, _467);
-  _1482 = String_new("builtin_auto_expand");
+  _1482 = String_new("auto.expand");
   _1483 = List_var(_1453);
   _1484 = cons(_1483, NULL);
   _1485 = cons(_839, _1484);
   _1486 = List_var(_1485);
   _1487 = cons(_1486, _467);
-  _1488 = String_new("builtin_auto_release");
+  _1488 = String_new("auto.release");
   _1489 = String_new("Code");
   _1490 = String_var(_1489);
   _1491 = cons(_1490, NULL);
@@ -1791,7 +1791,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1499 = String_var(_1498);
   _1500 = cons(_1499, NULL);
   _1501 = cons(_1497, _1500);
-  _1502 = String_new("builtin_class_initializer");
+  _1502 = String_new("class.initializer");
   _1503 = List_var(_1345);
   _1504 = cons(_1503, _1469);
   _1505 = List_var(_1504);
@@ -1799,22 +1799,22 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1507 = cons(_839, _1506);
   _1508 = List_var(_1507);
   _1509 = cons(_1508, _467);
-  _1510 = String_new("builtin_class_write_fields");
+  _1510 = String_new("class.write-fields");
   _1511 = cons(_1503, _1453);
   _1512 = List_var(_1511);
   _1513 = cons(_1512, NULL);
   _1514 = cons(_839, _1513);
   _1515 = List_var(_1514);
   _1516 = cons(_1515, _467);
-  _1517 = String_new("builtin_class_expand");
-  _1518 = String_new("builtin_class_defaults");
+  _1517 = String_new("class.expand");
+  _1518 = String_new("class.defaults");
   _1519 = cons(_1503, _1454);
   _1520 = List_var(_1519);
   _1521 = cons(_1520, NULL);
   _1522 = cons(_839, _1521);
   _1523 = List_var(_1522);
   _1524 = cons(_1523, _467);
-  _1525 = String_new("binding_record");
+  _1525 = String_new("_x2c.binding_record");
   _1526 = cons(_700, _1453);
   _1527 = cons(_700, _1526);
   _1528 = List_var(_1527);
@@ -1822,7 +1822,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1530 = cons(_839, _1529);
   _1531 = List_var(_1530);
   _1532 = cons(_1531, _467);
-  _1533 = String_new("binding_install");
+  _1533 = String_new("_x2c.binding_install");
   _1534 = cons(_468, _1469);
   _1535 = List_var(_1534);
 }
@@ -1832,7 +1832,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _1537 = cons(_839, _1536);
   _1538 = List_var(_1537);
   _1539 = cons(_1538, _467);
-  _1540 = String_new("binding_targets");
+  _1540 = String_new("_x2c.binding_targets");
   _1541 = List_var(_1500);
   _1542 = cons(_1541, NULL);
   _1543 = List_var(_1542);
