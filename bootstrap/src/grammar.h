@@ -10,8 +10,6 @@
 #include "macro-value.h"
 List source_return_type(List node);
 
-List source_return_none(void);
-
 List source_conditional_statement(void);
 
 List source_any_lambda(void);

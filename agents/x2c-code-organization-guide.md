@@ -33,7 +33,8 @@ Files below are relative to `src/` unless a path is shown.
   (Array and Map literals), `component-match.x` (match statements),
   `component-operators.x` (dynamic operators), `component-printf.x` (Var
   values in printf-family formats), `component-protocols.x` (protocol
-  adapters and Var descriptors), `component-raise.x` (raise), and
+  adapters and Var descriptors), `component-raise.x` (raise),
+  `component-string-switch.x` (switches on a String), and
   `component-try.x` (try, catch, and finally);
 - output: `cache.x`, `generate.x`, `emit.x`, `format.x`;
 - native and project driver: `build.x`, `project.x`, `toolchain.x`,

@@ -32,6 +32,7 @@
 #include "component-printf.x"
 #include "component-protocols.x"
 #include "component-raise.x"
+#include "component-string-switch.x"
 #include "component-try.x"
 #include "fields.x"
 #include "grammar.x"
@@ -1835,6 +1836,101 @@ Code raise_lowering(Code node) {
   return node;
 }
 
+/* --- src/component-string-switch.x --------------------------------------- */
+
+static String _string_case_bytes(String spelling) {
+  const char *p = spelling;
+  String bytes = "\"";
+  while ((p = strchr(p, '"'))) {
+    const char *start = ++p;
+    while (*p != '"') p += *p == '\\' ? 2 : 1;
+    bytes += String.new_len(start, p - start).unescape();
+    p++;
+  }
+  return bytes + "\"";
+}
+
+static int _string_case_text(Type type) =>
+  type.match(%((!or (dim *) (!quote *)) char)) ||
+  type.match(%((!or (dim *) (!quote *)) const char));
+
+static String _string_case_key(List label) {
+  match (label) {
+    case %(expr ? ${$grouped(?inner)}): return _string_case_key(inner);
+    case %(expr ? (literal ?type ?text)): {
+      String spelling = text;
+      if (_string_case_text(type))
+        return "\"" in spelling ? _string_case_bytes(spelling) : spelling;
+    }
+  }
+  return NULL;
+}
+
+static List _string_case_index(
+  List label, Map indices, Array labels, List site) {
+  String key = _string_case_key(label);
+  if (!key) {
+    x2c_diagnostic_error_at(
+      site, <xform>, "a case in a String switch takes a string literal",
+      %("compare computed values with an if chain or match"));
+    return label;
+  }
+  if (!(key in indices)) {
+    labels.push(label);
+    indices[key] = labels.len();
+  }
+  int index = indices[key];
+  return $!int{ $index };
+}
+
+static Var _string_cases(
+  Var node, Map indices, Array labels, List site) {
+  if (node is not <list> || node.is_nil()) return node;
+  match (node) {
+    case %((!or expr switch match) *): return node;
+    case %(at ? ?inner):
+      return %(at ${node.cadr()}
+               ${_string_cases(inner, indices, labels, node)});
+    case %(case ?label):
+      return %(case ${_string_case_index(label, indices, labels, site)});
+  }
+  Var child;
+  $ast.rewrite_children(
+    node, child, _string_cases(child, indices, labels, site));
+}
+
+static Code _string_switch_helper(Type type, List labels) {
+  List key = %(string-switch $type $labels);
+  List name = x2c_binding_for(key, "string_switch"), s = x2c_ident("s");
+  Array tests = [];
+  int index = 0;
+  foreach (List label, labels) {
+    List value = $!int{ ${++index} };
+    tests.push($!{ if ($s == $label) return $value; });
+  }
+  List body = tests.list_free();
+  x2c_place(
+    %(unit-support $key),
+    $!Unit{ static int $name($type $s) { @body return 0; } });
+  Type callable = %((func ($type)) int);
+  return $!($callable){ $name };
+}
+
+/** Lowers a switch on a String to an integer switch on its selector's
+    index among the labels it owns, or declines another switch. */
+Code string_switch_lowering(Code node) {
+  match (node) case $switched(?selector, ?body): {
+    Type type = selector.cadr();
+    if (!type.is_named("String")) return node;
+    Map indices = {};
+    Array labels = [];
+    List numbered = _string_cases(body, indices, labels, NULL);
+    Code helper = _string_switch_helper(type, labels.list_free());
+    return Code.lowered(%(switch ${$!int{ $helper($selector) }} $numbered));
+  }
+  return node;
+}
+
 /* --- src/component-try.x ------------------------------------------------- */
 
 static int _try_arm_exits(List arm) {
@@ -2160,6 +2256,13 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_raise_immutable", _raise_immutable);
   $linked.row(rows, "_raise_value", _raise_value);
   $linked.row(rows, "raise_lowering", raise_lowering);
+  $linked.row(rows, "_string_case_bytes", _string_case_bytes);
+  $linked.row(rows, "_string_case_text", _string_case_text);
+  $linked.row(rows, "_string_case_key", _string_case_key);
+  $linked.row(rows, "_string_case_index", _string_case_index);
+  $linked.row(rows, "_string_cases", _string_cases);
+  $linked.row(rows, "_string_switch_helper", _string_switch_helper);
+  $linked.row(rows, "string_switch_lowering", string_switch_lowering);
   $linked.row(rows, "_try_arm_exits", _try_arm_exits);
   $linked.row(rows, "_x2c_try_catch_cases", _x2c_try_catch_cases);
   $linked.row(rows, "_try_finalizer_label", _try_finalizer_label);

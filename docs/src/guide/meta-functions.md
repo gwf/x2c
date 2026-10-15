@@ -1555,7 +1555,10 @@ rule that places it while the finalizer lowers is rejected, because the
 finalizer runs as its own callback. A failed expansion leaves none of it
 behind. Placed code that declares a name takes it from
 `x2c_binding_fresh(role)`, which returns a binding the compiler names, so
-the result can refer to the same binding.
+the result can refer to the same binding. Code placed once under
+`%(unit-support KEY)` takes its name from `x2c_binding_for(KEY, role)`,
+which returns the same binding for the same key in a unit, so every result
+that refers to it agrees.
 Here the counter runs after each statement that traces a value:
 
 ```x2c

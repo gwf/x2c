@@ -24,17 +24,16 @@
 #include "component-printf.h"
 #include "component-protocols.h"
 #include "component-raise.h"
+#include "component-string-switch.h"
 #include "component-try.h"
 #include "fields.h"
 #include "grammar.h"
 #include "operator-ledger.h"
 Code register_rewrite(Code function, Code pattern, List holes);
 
-List _dedent_expand(Source text);
+List _dedent_expand(List node);
 
 List _macros_location(void);
-
-List _macros_source(Source code);
 
 List _tag_decode_group(List rows, Map counts, int top);
 
@@ -81,6 +80,8 @@ Code printf_values(Code code);
 Code protocol_conformance(Code node);
 
 Code raise_lowering(Code node);
+
+Code string_switch_lowering(Code node);
 
 List _x2c_try_catch_cases(List selected, List arms);
 

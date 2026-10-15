@@ -77,7 +77,8 @@ static void copy_support(Path destination) {
             "component-operators.x" "component-raise.x"
             "component-match.x" "component-interpolation.x"
             "component-destructuring.x" "component-lambdas.x"
-            "component-protocols.x" "grammar.x") ("src"))
+            "component-protocols.x" "component-string-switch.x"
+            "grammar.x") ("src"))
     ("builds/0/lib" ("*.h") ("include/x2c"))
     ("etc" ("*.xlisp" "*.x") ("etc"))
     ("LICENSES" ("*.txt") ("licenses"))

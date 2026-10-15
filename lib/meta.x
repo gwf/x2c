@@ -308,6 +308,12 @@ meta List x2c_ident(String spelling);
     `role` is not an identifier. */
 meta List x2c_binding_fresh(String role);
 
+/** Returns the binding the unit gave `key`, or the first time a new one
+    the compiler names from `role`, so that code placed once for `key` and
+    each result that refers to it agree. Fails the expansion when `role`
+    is not an identifier. */
+meta List x2c_binding_for(Var key, String role);
+
 /* the invocation site
 
    Where the macro was written and what is beside it. A macro that reports

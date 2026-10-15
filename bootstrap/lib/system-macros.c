@@ -140,8 +140,8 @@ List _cases_split(List items, int labelled){
 List _cases_switch(List condition, List body){
   if(! _init_guard_) _file_init_();
   List selected =({
-    List _x2c_gensym_hole_2 = _cases_split(List_cdr(body), 0);  cons(_4, cons(_5, cons(List_var(cons(_6, cons(List_var(({
-      Var _x2c_gensym_literal_part_6 = List_var(cons(_8, cons(_23, cons(_24, cons(List_var(condition), NULL)))));  Var _x2c_gensym_literal_part_7 = List_var(cons(_2, cons(List_var(cons(_8, cons(_35, cons(_36, cons(List_var(_x2c_gensym_hole_2), NULL))))), NULL)));  cons(_37, cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, NULL)));
+    List _x2c_gensym_hole_1 = _cases_split(List_cdr(body), 0);  cons(_4, cons(_5, cons(List_var(cons(_6, cons(List_var(({
+      Var _x2c_gensym_literal_part_6 = List_var(cons(_8, cons(_23, cons(_24, cons(List_var(condition), NULL)))));  Var _x2c_gensym_literal_part_7 = List_var(cons(_2, cons(List_var(cons(_8, cons(_35, cons(_36, cons(List_var(_x2c_gensym_hole_1), NULL))))), NULL)));  cons(_37, cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, NULL)));
     }
     )), NULL))), NULL)));
   }

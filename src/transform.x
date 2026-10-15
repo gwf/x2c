@@ -61,11 +61,6 @@ static macro Stmt $report.xform.string_compound(Expr $c) =>
     <xform>, "String compound assignment supports only String +=",
     NULL, NULL);
 
-static macro Stmt $report.xform.string_case(Expr $c) =>
-  $c.report_problem(
-    <xform>, "a case in a String switch takes a string literal",
-    NULL, %("compare computed values with an if chain or match"));
-
 static macro Stmt $report.xform.container_compound(Expr $c, Expr $lhs_type) {
   {
     String type = $lhs_type.repr();
@@ -156,8 +151,7 @@ static Ast _step_tag(Compiler c, Ast ast, Symbol tag) {
     case <raise>: return _raise_node(c, ast);
     case <switch>: {
       List rewritten = _statement_rewrite(c, ast, tag);
-      if (rewritten !== ast) return rewritten;
-      next = _string_switch(c, ast); break;
+      return rewritten !== ast ? rewritten : _default_node(c, ast);
     }
     case <if>: case <while>: case <do>: case <for>:
       next = _truthy(c, ast); break;
@@ -907,119 +901,6 @@ static List _return(Compiler c, List ast) {
       return source_return_content(%($value));
     }
   return ast;
-}
-
-/* string switches
-
-   A switch on a String selects its case by content. Each label the switch
-   owns becomes its index, so the body stays an ordinary integer switch on
-   a helper's result. The helper returns the index of the first label equal
-   to the selector under ordinary `==`, or 0. */
-
-static typedef struct StringCases {
-  Compiler c;
-  Map indices;
-  Array labels;
-  int origin;
-} StringCases;
-
-static List _string_switch(Compiler c, List ast) {
-  Macro switched = $switched, called = $called;
-  match (ast) case switched(?selector, ?body): {
-    Type type = selector.cadr();
-    if (!c.sym.is_string_type(type)) return ast;
-    StringCases cases = {
-      .c = c, .indices = {}, .labels = [], .origin = c.origin };
-    body = cases.number(body);
-    List helper = _string_cases_helper(c, type, cases.labels);
-    List dispatch = c.rebuild_expression(%(int), called(helper, %($selector)));
-    return c.rebuild_statement(switched(dispatch, body)).cadr();
-  }
-  return ast;
-}
-
-/* Numbers the labels this switch owns. A nested switch owns its labels,
-   and an expression holds none. */
-static Var StringCases.number(StringCases &s, Var node) {
-  if (node is not <list> || node.is_nil()) return node;
-  match (node) {
-    case %((!or expr switch match) *): return node;
-    case %(at ?(int origin) ?inner): {
-      int outer = s.origin;
-      s.origin = origin;
-      List numbered = %(at $origin ${s.number(inner)});
-      s.origin = outer;
-      return numbered;
-    }
-    case %(case ?label): return %(case ${s.index(label)});
-  }
-  Var child;
-  $ast.rewrite_children(node, child, s.number(child));
-}
-
-/* Equal labels share an index, so C rejects a duplicate as it rejects a
-   duplicate integer label. Another label is reported, and the translation
-   continues to report the rest. */
-static List StringCases.index(StringCases &s, List label) {
-  String key = _case_key(label);
-  if (!key) {
-    $let(s.c.origin, s.origin) $report.xform.string_case(s.c);
-    return label;
-  }
-  if (!(key in s.indices)) {
-    s.labels.push(label);
-    s.indices[key] = s.labels.len();
-  }
-  int index = s.indices[key];
-  return $!int{ $index };
-}
-
-/* A label's content: the bytes its literals spell, in quotes, or the name
-   of a native macro x2c types as a string literal. NULL for any other
-   label. */
-static String _case_key(List label) {
-  match (label) {
-    case %(expr ? ${$grouped(?inner)}): return _case_key(inner);
-    case %(expr ? ${$source_literal_content(%(?type ?text))}): {
-      String spelling = text;
-      if (Type.is_char_pointer_like(type))
-        return "\"" in spelling ? _literal_bytes(spelling) : spelling;
-    }
-  }
-  return NULL;
-}
-
-/* Adjacent literals join after each decodes its own escapes, as in C. */
-static String _literal_bytes(const char *p) {
-  String bytes = "\"";
-  while ((p = strchr(p, '"'))) {
-    const char *start = ++p;
-    while (*p != '"') p += *p == '\\' ? 2 : 1;
-    bytes += String.new_len(start, p - start).unescape();
-    p++;
-  }
-  return bytes + "\"";
-}
-
-/* The helper shared by switches on `type` with the same `labels`. */
-static List _string_cases_helper(Compiler c, Type type, List labels) {
-  List key = %(string-switch $type $labels), helper = NULL;
-  $adapter.memo(c, key, helper) {
-    List name = c.sym.introduce(c.fresh_name("string_switch"));
-    List s = c.sym.introduce("s");
-    Array tests = [];
-    int index = 0;
-    foreach (List label, labels) {
-      List value = $!int{ ${++index} };
-      tests.push($!{ if ($s == $label) return $value; });
-    }
-    List body = tests.list_free();
-    List unit = $!Unit{ static int $name($type $s) { @body return 0; } };
-    c.add_early(c.bind_syntax(unit, AST_UNIT, NULL));
-    Type callable = %((func ($type)) int);
-    helper = $!($callable){ $name };
-  }
-  return helper;
 }
 
 // calls

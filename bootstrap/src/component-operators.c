@@ -4,15 +4,19 @@
 #include "x2c.h"
 
 #include "rewrite.h"
-static List _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _48, _47, _43, _42, _38, _37, _33, _32, _28, _27, _23, _22, _18, _17, _13, _12, _8, _7, _3, _2;
+static List _63, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _48, _47, _43, _42, _38, _37, _33, _32, _28, _27, _23, _22, _18, _17, _13, _12, _8, _7, _3, _2;
 
-static Var _49, _46, _45, _44, _41, _40, _39, _36, _35, _34, _31, _30, _29, _26, _25, _24, _21, _20, _19, _16, _15, _14, _11, _10, _9, _6, _5, _4, _1, _0;
+static String _61;
+
+static Var _64, _62, _60, _49, _46, _45, _44, _41, _40, _39, _36, _35, _34, _31, _30, _29, _26, _25, _24, _21, _20, _19, _16, _15, _14, _11, _10, _9, _6, _5, _4, _1, _0;
 
 static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Symbol _dynamic_operation(Symbol assignment);
+
+static List _dynamic_symbol(Symbol op);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -78,6 +82,11 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _57 = cons(_14, _56);
   _58 = cons(_9, _57);
   _59 = cons(_4, _58);
+  _60 = Symbol_var(377892);
+  _61 = String_new("Symbol");
+  _62 = String_var(_61);
+  _63 = cons(_62, NULL);
+  _64 = List_var(_63);
 }
 
 static Symbol _dynamic_operation(Symbol assignment){
@@ -93,5 +102,9 @@ static Symbol _dynamic_operation(Symbol assignment){
 
   }
   return 0;
+}
+
+static List _dynamic_symbol(Symbol op){
+  return cons(_60, cons(_64, cons(String_var(String_join(NULL, cons(String_var(Var_str(Var_box_ulong((unsigned long) op))), NULL))), NULL)));
 }
 
