@@ -100,6 +100,8 @@ List x2c_ident(String spelling);
 
 List x2c_binding_fresh(String role);
 
+List x2c_binding_for(Var key, String role);
+
 Var MetaContext_fresh_binding(String stem);
 
 Map x2c_meta_definition_hashes(void);

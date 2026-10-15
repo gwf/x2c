@@ -6046,7 +6046,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_10(void
   _5190 = String_var(_5189);
   _5191 = String_new("lib/meta.x");
   _5192 = String_var(_5191);
-  _5193 = String_new("ade94d8e");
+  _5193 = String_new("8ffb58ee");
   _5194 = String_var(_5193);
   _5195 = cons(_5194, NULL);
   _5196 = cons(_5192, _5195);
@@ -13185,7 +13185,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
 __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void){
   _12288 = String_new("src/meta-sdk.x");
   _12289 = String_var(_12288);
-  _12290 = String_new("fb4b1efb");
+  _12290 = String_new("634be874");
   _12291 = String_var(_12290);
   _12292 = cons(_12291, NULL);
   _12293 = cons(_12289, _12292);

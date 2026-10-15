@@ -105,6 +105,8 @@ List x2c_ident(String spelling);
 
 List x2c_binding_fresh(String role);
 
+List x2c_binding_for(Var key, String role);
+
 String x2c_invocation_file(void);
 
 int x2c_invocation_line(void);
