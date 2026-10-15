@@ -619,7 +619,10 @@ static List _scope_find(Sym s, SymScope &scope, List key, Type &?type) {
     `restrict`, and `volatile`.
 */
 List Sym.declare(Sym s, List context, List key, List ast) {
-  key = s.declared_key(context, key, ast);
+  List declared = s.declared_key(context, key, ast);
+  if (!s.at_file_scope() && !List.equal(declared, key))
+    _link_local(s, declared);
+  key = declared;
   _check_spelling(s.c, _declared_spelling(key));
   Type ctxkey = %( @context @key ), type = ast.type_from_ast();
   Type declared_type = type;
@@ -657,8 +660,8 @@ List Sym.declared_key(Sym s, List context, List key, List ast) {
 static List _declared_key(Sym s, List context, List key, List ast) {
   Compiler c = s.c;
   if (!s.at_file_scope())
-    return context || _names_local_object(ast.type()) ? key
-                                                      : _linked_key(s, key);
+    return context || _names_local_object(ast.type_from_ast())
+      ? key : _linked_key(s, key);
   if (context && !(context === %(typedef))) return key;
   String prefix = c.private_prefix(ast);
   Var (head, tag) = key;
@@ -689,6 +692,20 @@ static List _linked_key(Sym s, List key) {
   if (package && !_global_key(s, key) && _global_key(s, package))
     return package;
   return key;
+}
+
+/* A block-scope declaration linked to a file-scope binding of another
+   spelling declares that binding, so it takes the binding's identity. */
+static void _link_local(Sym s, List key) {
+  List global = s.resolve_global(key, NULL);
+  if (global) s.put(_scope_at(s, -1).bindings, key, global);
+}
+
+/** Reports whether `binding` names a file-scope static of this unit. */
+int Sym.is_file_static(Sym s, Var binding) {
+  if (binding is not <list> || !Ast.try_binding(binding, NULL, NULL))
+    return 0;
+  return %(${Ast.binding_spelling(binding)}) in s.statics;
 }
 
 static int _global_key(Sym s, List key) {
