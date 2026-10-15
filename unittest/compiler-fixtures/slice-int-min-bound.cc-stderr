@@ -1,0 +1,1 @@
+slice-int-min-bound.c: warning: implicit conversion from 'long' to 'int' changes value from 2147483648 to -2147483648 [-Wconstant-conversion]

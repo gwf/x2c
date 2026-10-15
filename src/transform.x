@@ -442,11 +442,11 @@ static Ast _slice_node(
   return _step(c, %(call "$fnname" (args $expression $start $stop $step)));
 }
 
-/* INT_MIN marks an omitted bound, so a computed bound passes through
-   `x2c_slice_bound` to keep its own meaning. */
+/* INT_MIN marks an omitted bound, so any bound but an int literal passes
+   through `x2c_slice_bound` to keep its own meaning. */
 static List _slice_bound(List bound) {
   if (!bound) return %(literal (int) "-2147483648");
-  if (bound.match(%(expr ? (literal *)))) return bound;
+  if (bound.match(%(expr (int) (literal *)))) return bound;
   return %(expr (int) (call "x2c_slice_bound" (args $bound)));
 }
 
