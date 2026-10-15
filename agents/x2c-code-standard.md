@@ -901,7 +901,12 @@ measured hot paths. Never parse code from a String.
 **MA-7** Recognize a source form with its grammar macro when one exists:
 `case if_then(?condition, ?ontrue):`. Shared input forms live in
 `src/grammar.x`. Keep raw `case %(...)` patterns for internal nodes,
-typed shells, resolved forms, and measured hot paths.
+typed shells, resolved forms, and measured hot paths. A macro case is not
+its raw pattern. It also matches through `(at ...)` and `(src ...)`
+wrappers, a one-element `(seq ...)`, and a retained invocation of the
+macro. It costs about nine times as much per call (1,410 against 153
+instructions). A conversion therefore changes what matches, and on a
+per-node path it needs an A/B measurement.
 
 **MA-8** A lowering recognizes its input with a source form, gathers facts
 in ordinary named functions, and builds its output with one template beside
