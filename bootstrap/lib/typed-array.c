@@ -182,6 +182,8 @@ static inline char ArrayChar_postfixindex(ArrayChar _x2c_gensym_macro_array_43, 
   return _x2c_gensym_macro_old_0;
 }
 
+Iter ArrayChar_iter(ArrayChar, Iter);
+
 Var Var_new(Symbol, ...);
 
 static inline Var ArrayChar_var(ArrayChar _x2c_gensym_macro_array_44){
@@ -199,6 +201,8 @@ static inline ArrayChar Var_arraychar(Var _x2c_gensym_macro_value_14){
 }
 
 static ArrayChar ArrayChar_export_context(ArrayChar _x2c_gensym_macro_array_46, Context _x2c_gensym_macro_source_1);
+
+Iter ArrayChar_iter(ArrayChar, Iter);
 
 static int _x2c_gensym_macro__next_0(Iter _x2c_gensym_macro_iter_0, Var * _x2c_gensym_macro_out_12);
 
@@ -319,6 +323,8 @@ static inline short ArrayShort_postfixindex(ArrayShort _x2c_gensym_macro_array_9
   return _x2c_gensym_macro_old_1;
 }
 
+Iter ArrayShort_iter(ArrayShort, Iter);
+
 static inline Var ArrayShort_var(ArrayShort _x2c_gensym_macro_array_93){
   return Var_new(111191978966184, _x2c_gensym_macro_array_93);
 }
@@ -332,6 +338,8 @@ static inline ArrayShort Var_arrayshort(Var _x2c_gensym_macro_value_29){
 }
 
 static ArrayShort ArrayShort_export_context(ArrayShort _x2c_gensym_macro_array_95, Context _x2c_gensym_macro_source_3);
+
+Iter ArrayShort_iter(ArrayShort, Iter);
 
 static int _x2c_gensym_macro__next_1(Iter _x2c_gensym_macro_iter_1, Var * _x2c_gensym_macro_out_25);
 
@@ -452,6 +460,8 @@ static inline int ArrayInt_postfixindex(ArrayInt _x2c_gensym_macro_array_141, in
   return _x2c_gensym_macro_old_2;
 }
 
+Iter ArrayInt_iter(ArrayInt, Iter);
+
 static inline Var ArrayInt_var(ArrayInt _x2c_gensym_macro_array_142){
   return Var_new(108585896872, _x2c_gensym_macro_array_142);
 }
@@ -465,6 +475,8 @@ static inline ArrayInt Var_arrayint(Var _x2c_gensym_macro_value_44){
 }
 
 static ArrayInt ArrayInt_export_context(ArrayInt _x2c_gensym_macro_array_144, Context _x2c_gensym_macro_source_5);
+
+Iter ArrayInt_iter(ArrayInt, Iter);
 
 static int _x2c_gensym_macro__next_2(Iter _x2c_gensym_macro_iter_2, Var * _x2c_gensym_macro_out_38);
 
@@ -585,6 +597,8 @@ static inline long ArrayLong_postfixindex(ArrayLong _x2c_gensym_macro_array_190,
   return _x2c_gensym_macro_old_3;
 }
 
+Iter ArrayLong_iter(ArrayLong, Iter);
+
 static inline Var ArrayLong_var(ArrayLong _x2c_gensym_macro_array_191){
   return Var_new(3474748898190, _x2c_gensym_macro_array_191);
 }
@@ -598,6 +612,8 @@ static inline ArrayLong Var_arraylong(Var _x2c_gensym_macro_value_59){
 }
 
 static ArrayLong ArrayLong_export_context(ArrayLong _x2c_gensym_macro_array_193, Context _x2c_gensym_macro_source_7);
+
+Iter ArrayLong_iter(ArrayLong, Iter);
 
 static int _x2c_gensym_macro__next_3(Iter _x2c_gensym_macro_iter_3, Var * _x2c_gensym_macro_out_51);
 
@@ -677,6 +693,8 @@ static inline float ArrayFloat_postfixindex(ArrayFloat _x2c_gensym_macro_array_2
   return _x2c_gensym_macro_old_4;
 }
 
+Iter ArrayFloat_iter(ArrayFloat, Iter);
+
 static inline Var ArrayFloat_var(ArrayFloat _x2c_gensym_macro_array_240){
   return Var_new(111191951964264, _x2c_gensym_macro_array_240);
 }
@@ -690,6 +708,8 @@ static inline ArrayFloat Var_arrayfloat(Var _x2c_gensym_macro_value_74){
 }
 
 static ArrayFloat ArrayFloat_export_context(ArrayFloat _x2c_gensym_macro_array_242, Context _x2c_gensym_macro_source_9);
+
+Iter ArrayFloat_iter(ArrayFloat, Iter);
 
 static int _x2c_gensym_macro__next_4(Iter _x2c_gensym_macro_iter_4, Var * _x2c_gensym_macro_out_64);
 
@@ -769,6 +789,8 @@ static inline double ArrayDbl_postfixindex(ArrayDbl _x2c_gensym_macro_array_288,
   return _x2c_gensym_macro_old_5;
 }
 
+Iter ArrayDbl_iter(ArrayDbl, Iter);
+
 static inline Var ArrayDbl_var(ArrayDbl _x2c_gensym_macro_array_289){
   return Var_new(108585885848, _x2c_gensym_macro_array_289);
 }
@@ -782,6 +804,8 @@ static inline ArrayDbl Var_arraydbl(Var _x2c_gensym_macro_value_89){
 }
 
 static ArrayDbl ArrayDbl_export_context(ArrayDbl _x2c_gensym_macro_array_291, Context _x2c_gensym_macro_source_11);
+
+Iter ArrayDbl_iter(ArrayDbl, Iter);
 
 static int _x2c_gensym_macro__next_5(Iter _x2c_gensym_macro_iter_5, Var * _x2c_gensym_macro_out_77);
 
@@ -851,6 +875,8 @@ static _Noreturn inline String ArrayString_postfixindex(ArrayString _x2c_gensym_
 
 }
 
+Iter ArrayString_iter(ArrayString, Iter);
+
 static inline Var ArrayString_var(ArrayString _x2c_gensym_macro_array_338){
   return Var_new(108585917732, _x2c_gensym_macro_array_338);
 }
@@ -864,6 +890,8 @@ static inline ArrayString Var_arraystring(Var _x2c_gensym_macro_value_104){
 }
 
 static ArrayString ArrayString_export_context(ArrayString _x2c_gensym_macro_array_340, Context _x2c_gensym_macro_source_13);
+
+Iter ArrayString_iter(ArrayString, Iter);
 
 static int _x2c_gensym_macro__next_6(Iter _x2c_gensym_macro_iter_6, Var * _x2c_gensym_macro_out_90);
 

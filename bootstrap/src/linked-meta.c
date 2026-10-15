@@ -12673,7 +12673,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _11778 = List_var(_11777);
   _11779 = String_new("src/compiler/declarations/production.x");
   _11780 = String_var(_11779);
-  _11781 = String_new("c7cdc9d6");
+  _11781 = String_new("fcea7c93");
   _11782 = String_var(_11781);
   _11783 = cons(_11782, NULL);
   _11784 = cons(_11780, _11783);
@@ -12810,7 +12810,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _11915 = List_var(_11914);
   _11916 = String_new("src/parse.x");
   _11917 = String_var(_11916);
-  _11918 = String_new("9fee1851");
+  _11918 = String_new("9e04bfb0");
   _11919 = String_var(_11918);
   _11920 = cons(_11919, NULL);
   _11921 = cons(_11917, _11920);
