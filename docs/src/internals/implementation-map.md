@@ -420,10 +420,9 @@ Lisp names remain replaceable. In particular, rebinding `car`, `cdr`, or
 `cons` does not change `filter`.
 
 The compiler's built-in macro algorithms are compiler functions in
-`src/builtins.x`, bound into the shared compile-time session before
-`etc/builtin-core.xlisp`, which names them for the built-in macros. It
-loads at the compiler-only boundary after the SDK; it is not part of
-`Lisp.new()`. Scope expansion, foreach lowering, and deferred class defaults
+`src/builtins.x`, bound into the shared compile-time session under the
+names the built-in macros call. They are bound at the compiler-only
+boundary; they are not part of `Lisp.new()`. Scope expansion, foreach lowering, and deferred class defaults
 reuse the ordinary compiler queries and syntax builders.
 
 Native Lisp signature and binding algorithms are compiler functions in

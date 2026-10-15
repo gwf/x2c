@@ -24,11 +24,11 @@ The built-in macros' compile-time algorithms.
 Returns each built-in algorithm by the name compile-time code calls it
 with.
 
-Source: `src/builtins.x:907`
+Source: `src/builtins.x:906`
 
 ## Design notes
 
 The built-in macros expand through these functions, which run as native
-code inside the compiler. The compile-time Lisp in
-`etc/builtin-core.xlisp` and `etc/lisp-bindings.xlisp` calls them by
-name, and `Compiler.builtin_targets` binds each into the shared session.
+code inside the compiler. `Compiler.builtin_targets` binds each into
+the shared session under the name its callers use, such as
+`etc/builtin-macros.x` and `etc/lisp-bindings.x`.

@@ -1774,8 +1774,8 @@ Use the x2c calls above for ordinary meta work. The following notes apply
 when importing or calling Lisp helpers, or working with the compiler session.
 
 The compiler loads Lisp support into an embedded evaluator. The built-in
-macros' algorithms are compiler functions (`src/builtins.x`); the Lisp in
-`etc/builtin-core.xlisp` and `etc/lisp-bindings.xlisp` only names them.
+macros' algorithms are compiler functions (`src/builtins.x`), bound under
+the names `etc/builtin-macros.x` and `etc/lisp-bindings.x` call.
 
 ### One table for compiled code and Lisp
 
