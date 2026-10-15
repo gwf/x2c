@@ -147,8 +147,13 @@ $(LIB_BUILD)/.translated: LIB-FORCE-TRANSLATE
 LIB-FORCE-TRANSLATE:
 endif
 # compile library object files
+# The bootstrap compiles these files inside its lib/, so `__FILE__` (in
+# `assert`) is spelled without the directory there. Spelling it the same way
+# here keeps a converged stage 0 byte-identical to bin/x2c, whose identity
+# stamps the interfaces stage 0 replays; ELF objects otherwise differ.
 $(LIB_BUILD)/%.o: $(LIB_BUILD)/%.c | $(LIB_H_FILES)
-	$(CC) $(CFLAGS) -iquote $(LIB_BUILD) -MMD -MP \
+	$(CC) $(CFLAGS) -fmacro-prefix-map=$(LIB_BUILD)/= \
+		-iquote $(LIB_BUILD) -MMD -MP \
 		-MF $(LIB_BUILD)/$*.c.d -MT $@ -c $< -o $@
 
 # create library archive
