@@ -50,7 +50,9 @@ Use the [agent directory](../agents/README.md) for task routing and the
   warning. A fixture whose generated C warns on purpose declares `cc-stderr`
   and owns the warnings in `<name>.cc-stderr`; every other fixture fails on
   any warning, in check and update alike, so a new one is declared
-  deliberately.
+  deliberately. `<name>.cc-stderr` records clang's text; a gcc run checks
+  `<name>.cc-stderr.gcc` instead when it exists, and an update writes that
+  file only when gcc's text differs.
 - `make verify-fixtures` checks expectations and never rewrites them.
 - `make verify-fixtures-update` rewrites declared sidecars. Use it only for
   an intentional compiler change and review every resulting diff.

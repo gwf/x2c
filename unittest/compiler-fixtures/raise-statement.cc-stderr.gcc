@@ -1,0 +1,1 @@
+raise-statement.c: warning: format '%ld' expects argument of type 'long int', but argument 8 has type 'int' [-Wformat=]

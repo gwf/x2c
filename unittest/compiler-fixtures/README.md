@@ -12,6 +12,8 @@ the fixture checks. Supported phases are:
 - `h`, `c` - final generated files
 - `compile-status`, `diagnostics` - compiler failure status and stderr
 - `stdout`, `stderr`, `status` - generated program behavior
+- `cc-stderr` - the C compiler's warnings about the generated C, in clang's
+  text; a fixture adds `<name>.cc-stderr.gcc` where gcc's text differs
 
 An optional one-line `<name>.flags` file appends its whitespace-separated
 contents to every translate invocation for that fixture. The package-prefix

@@ -1,0 +1,2 @@
+designated-composite-elements.c: warning: excess elements in array initializer
+designated-composite-elements.c: note: (near initialization for 'excess')
