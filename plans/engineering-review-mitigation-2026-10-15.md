@@ -56,6 +56,26 @@ changes, unchanged script executable reuse, and warm library-run measurements.
 Runtime and CLI acceptance cover the named public operations and exact option
 forms through their existing suites and harnesses.
 
+Focused evidence before final publication validation:
+
+- Compiler worker: 38 fixtures passed; PCRE2 20 tests/118 assertions;
+  SQLite 15 tests/133 assertions; libcurl consumer compiled and linked.
+  Orchestrator probes confirm static redeclaration and same-scope external
+  declarations link, and separate static storage now prints 0 instead of 9.
+- Array worker: 52 Array/typed Array tests, 563 assertions, pass under the
+  latest boxed-null sentinel decision.
+- Cache worker: complete meta-cache harness passes, including archive
+  replacement, explicit/environment meta compiler identity, executable hits,
+  and retained translation/object reuse.
+- Nine alternating paired warm library-script runs, after three warmups,
+  have medians 0.015352 seconds before repair and 0.080126 seconds after
+  repair. This is elapsed time for one unchanged script using -L/-lvalue,
+  including conservative relinking; it is not a full-build measurement.
+- REPL worker: full command tests and 14 native/REPL parity cases pass.
+- Orchestrator: complete CLI boundary and scratch-home package-install
+  harnesses pass; the original guide example exits 139 and its corrected
+  replacement exits 0.
+
 Do not reopen extreme-integer slices, the synthetic failed-compiler/object-cache
 experiment, or expand into vulnerability auditing or a hardening campaign.
 No recurring gate, framework, or validation requirement is added.
@@ -64,11 +84,12 @@ No recurring gate, framework, or validation requirement is added.
 
 Resolved bindings, established linkage, and selected dependency files remain
 producer-owned facts. Consumers preserve those facts rather than adding a
-parallel registry or linker search implementation. Existing error and option
-diagnostics own the deliberate public boundaries. File prefixes encode the
+parallel registry or linker search implementation. Existing typed Array errors,
+boxed absence sentinels, and option diagnostics own the public boundaries.
+File prefixes encode the
 file/local-name boundary without restricting legal source identifiers.
 Per-declarator projections retain source order and shared definitions.
-Focused negative cases protect documented null-argument and CLI behavior,
+Focused negative cases protect typed null-argument errors and CLI behavior,
 existing invalid linkage order, and warnings that the harness must not erase.
 The implementation review will remove duplicated checks and unnecessary helpers
 before the existing publication proof.

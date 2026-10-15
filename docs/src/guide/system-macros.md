@@ -394,8 +394,8 @@ printf("%s\n", text.str());
 ```
 
 Each declaration initializes the local and registers cleanup for the acquired
-value in the same enclosing block. The initializer runs
-once, and cleanup is registered only after it succeeds. Compound declarations
+value in the same enclosing block. The initializer runs once, and cleanup is
+registered only after it succeeds. Compound declarations
 preserve acquisition order, with each successful acquisition protected before
 the next initializer runs. Cleanup runs in reverse registration order.
 
@@ -426,8 +426,8 @@ current = replacement;
 
 Both Arrays are cleaned up at block exit. Reassignment neither releases the
 first Array early nor transfers its cleanup to the replacement.
-Returning or storing an alias
-does not cancel cleanup; the caller must choose an appropriate lifetime.
+Returning or storing an alias does not cancel cleanup; the caller must choose
+an appropriate lifetime.
 There is no move or recursive ownership system. Var itself has no owning
 cleanup contract, and Pool's `free` operation requires a separate allocation
 argument.
