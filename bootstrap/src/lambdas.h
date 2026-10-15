@@ -12,6 +12,8 @@
 #include "parse.h"
 #include "type.h"
 #include "expressions.h"
+List Compiler_lift_lambda_types(Compiler c, List function);
+
 List Compiler_parse_lambda_literal(Compiler c);
 
 List Compiler_lambda_param_types(Compiler c, List entries);

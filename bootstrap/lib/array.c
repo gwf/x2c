@@ -443,7 +443,10 @@ Var Array_push(Array _x2c_gensym_macro_array_16, Var _x2c_gensym_macro_value_3){
     x2c_error_raise_n(& _x2c_gensym_error_site_5, 48270474208, 0);
     __builtin_unreachable();
   }
-  if(! 1 && _x2c_gensym_macro_array_16 == NULL) _bad_operation(0, 1092816);
+  if(_x2c_gensym_macro_array_16 == NULL){
+    if(1) return((void) 0, Void);
+    _bad_operation(0, 1092816);
+  }
   if(_x2c_gensym_macro_array_16 -> length >= INT_MAX) _size_limit(0, _x2c_gensym_macro_array_16 -> length);
   Block_append((Block) _x2c_gensym_macro_array_16, & _x2c_gensym_macro_value_3, 1);
   return _x2c_gensym_macro_value_3;
@@ -474,7 +477,10 @@ Var Array_unshift(Array _x2c_gensym_macro_array_20, Var _x2c_gensym_macro_value_
     x2c_error_raise_n(& _x2c_gensym_error_site_6, 48270474208, 0);
     __builtin_unreachable();
   }
-  if(! 1 && _x2c_gensym_macro_array_20 == NULL) _bad_operation(0, 46077069736);
+  if(_x2c_gensym_macro_array_20 == NULL){
+    if(1) return((void) 0, Void);
+    _bad_operation(0, 46077069736);
+  }
   if(_x2c_gensym_macro_array_20 -> length >= INT_MAX) _size_limit(0, _x2c_gensym_macro_array_20 -> length);
   Array_insert_element(_x2c_gensym_macro_array_20, 0, _x2c_gensym_macro_value_6);
   return _x2c_gensym_macro_value_6;
@@ -482,6 +488,7 @@ Var Array_unshift(Array _x2c_gensym_macro_array_20, Var _x2c_gensym_macro_value_
 
 Var Array_insert(Array _x2c_gensym_macro_array_21, int _x2c_gensym_macro_index_4, Var _x2c_gensym_macro_value_7){
   if(1){
+    if(_x2c_gensym_macro_array_21 == NULL) return((void) 0, Void);
     if(_x2c_gensym_macro_array_21 -> length > INT_MAX) _size_limit(0, _x2c_gensym_macro_array_21 -> length);
     int _x2c_gensym_macro_n_8 =(int) _x2c_gensym_macro_array_21 -> length;
     if(_x2c_gensym_macro_index_4 < 0) _x2c_gensym_macro_index_4 += _x2c_gensym_macro_n_8 + 1;

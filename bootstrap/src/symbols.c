@@ -74,6 +74,8 @@ static List _lookup_from(Sym s, List key, Type * type, int first, int forward);
 
 static List _scope_find(Sym s, SymScope * scope, List key, Type * type);
 
+static List _declare(Sym s, List context, List key, List ast, List declared);
+
 static List _declared_key(Sym s, List context, List key, List ast);
 
 static List _linked_key(Sym s, List key);
@@ -1003,13 +1005,21 @@ static List _scope_find(Sym s, SymScope * scope, List key, Type * type){
 
 List Sym_declared_key(Sym s, List context, List key, List ast);
 
+List Sym_declare(Sym s, List context, List key, List ast){
+  if(! _init_guard_) _file_init_();
+  return _declare(s, context, key, ast, Sym_declared_key(s, context, key, ast));
+}
+
+List Sym_declare_resolved(Sym s, List context, List key, List ast){
+  if(! _init_guard_) _file_init_();
+  return _declare(s, context, key, ast, key);
+}
+
 Type List_type_from_ast(List);
 
 static List Type_list(Type);
 
-List Sym_declare(Sym s, List context, List key, List ast){
-  if(! _init_guard_) _file_init_();
-  List declared = Sym_declared_key(s, context, key, ast);
+static List _declare(Sym s, List context, List key, List ast, List declared){
   if(! Sym_at_file_scope(s) && ! List_equal(declared, key)) _link_local(s, declared);
   key = declared;
   _check_spelling(s -> c, _declared_spelling(key));
@@ -1104,7 +1114,7 @@ static void _check_module_shadow(Sym s, List contexts, String prefix, String nam
     while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_9))){
       context = Var_list_payload(_x2c_gensym_macro_cursor_output_9);
       {
-        if(String_truth(prefix) && Map_contains(s -> statics, List_var(List_append(context, cons(String_var(name), NULL))))) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_73), cons(String_var(name), cons(String_var(_74), NULL)))), c -> token, _80);
+        if(String_truth(prefix) && !(Map_contains(s -> prefixed, String_var(name))) && Map_contains(s -> statics, List_var(List_append(context, cons(String_var(name), NULL))))) Compiler_report_error(c, 33658058, String_join(NULL, cons(String_var(_73), cons(String_var(name), cons(String_var(_74), NULL)))), c -> token, _80);
         if(! c -> module_declaration || !(c -> source_private > 0 || Type_is_static(List_type(ast)))) continue;
         {
           String other;
@@ -1184,10 +1194,14 @@ int Type_is_aggregate_tag_body(Type);
 
 int Type_is_aggregate_tag(Type);
 
+int Type_is_enum_tag_body(Type);
+
+int Type_is_enum_tag(Type);
+
 Type Type_declared(Type);
 
 static Type _stored_type(Type type, Type key, List ast){
-  if(Type_is_aggregate_tag_body(type) && ! Type_is_aggregate_tag(key)){
+  if((Type_is_aggregate_tag_body(type) && ! Type_is_aggregate_tag(key)) ||(Type_is_enum_tag_body(type) && ! Type_is_enum_tag(key))){
     Var aggregate, tag;
     List _x2c_gensym_destructure_3 = ast;
     aggregate = List_getindex(_x2c_gensym_destructure_3, 0);
@@ -1265,7 +1279,7 @@ List Sym_unshadow_visible(Sym s, String spelling){
   for(int i = s -> base_scopes;  i <(int) Block_len(s -> scopes);  i ++){
     SymScope * scope = _scope_at(s, i);
     Var binding;
-    if(Map_contains(scope -> symbols, List_var(key)) && Map_try_get(scope -> bindings, List_var(key), &(binding))){
+    if(Map_contains(scope -> symbols, List_var(key)) && Map_try_get(scope -> bindings, List_var(key), &(binding)) && Map_contains(s -> binding_facts, List_var(cons(_93, cons(binding, NULL))))){
       _unshadow_local(s, Var_list_payload(binding), alias);
       visible = cons(binding, visible);
     }
@@ -1309,7 +1323,7 @@ Var Compiler_aggregate_name(Compiler c, Symbol kind, Var name, int definition){
   }
   Type type = List_type(cons(Symbol_var(kind), cons(name, NULL)));
   if(Sym_at_file_scope(s)){
-    if(definition && ! List_truth(Sym_get_exact(s, Type_list(type)))) Sym_declare(s, NULL, Type_list(type), Type_list(type));
+    if(definition && ! List_truth(Sym_get_exact(s, Type_list(type)))) Sym_declare_resolved(s, NULL, Type_list(type), Type_list(type));
     return name;
   }
   if(! definition && List_truth(Sym_get_exact(s, Type_list(type)))) return List_cadr(Type_list(Sym_local_type(s, type)));
@@ -1453,7 +1467,7 @@ String Compiler_private_prefix(Compiler c, Type type){
 }
 
 String Compiler_scoped_spelling(Compiler c, String prefix, String name){
-  if(! _init_guard_) _file_init_();  if(! String_truth(prefix)) return Compiler_package_spelling(c, name);  if(! String_truth(name) || _derived_spelling(c -> sym, name)) return name;  return String_join(NULL, cons(String_var(prefix), cons(String_var(name), NULL)));
+  if(! _init_guard_) _file_init_();  if(! String_truth(prefix)) return Compiler_package_spelling(c, name);  if(! String_truth(name) ||(List_truth(c -> macro_stack) && _derived_spelling(c -> sym, name))) return name;  return String_join(NULL, cons(String_var(prefix), cons(String_var(name), NULL)));
 }
 
 String Compiler_declared_spelling(Compiler c, String prefix, String name){
@@ -1753,7 +1767,7 @@ int Type_is_bare_typedef_name(Type);
 Type Sym_local_type(Sym s, Type type){
   if(! _init_guard_) _file_init_();
   Type base = Type_base_type(type);
-  if(Type_is_aggregate_tag(base) && Var_is_row(List_cadr(Type_list(base)), 11, 7, 1)) return _local_tag(s, type, base);
+  if((Type_is_aggregate_tag(base) || Type_is_enum_tag(base)) && Var_is_row(List_cadr(Type_list(base)), 11, 7, 1)) return _local_tag(s, type, base);
   return Type_is_bare_typedef_name(base) ? _local_alias(s, type, base) : type;
 }
 

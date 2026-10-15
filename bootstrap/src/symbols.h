@@ -93,6 +93,8 @@ List Sym_reference_global(Sym s, List key);
 
 List Sym_declare(Sym s, List context, List key, List ast);
 
+List Sym_declare_resolved(Sym s, List context, List key, List ast);
+
 List Sym_declared_key(Sym s, List context, List key, List ast);
 
 int Sym_is_file_static(Sym s, Var binding);

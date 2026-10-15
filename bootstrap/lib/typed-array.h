@@ -166,8 +166,6 @@ static inline char ArrayChar_postfixindex(ArrayChar _x2c_gensym_macro_array_43, 
   return _x2c_gensym_macro_old_0;
 }
 
-Iter ArrayChar_iter(ArrayChar, Iter);
-
 Var Var_new(Symbol, ...);
 
 static inline Var ArrayChar_var(ArrayChar _x2c_gensym_macro_array_44){
@@ -185,8 +183,6 @@ static inline ArrayChar Var_arraychar(Var _x2c_gensym_macro_value_14){
 }
 
 ArrayChar Array_arraychar(Array _x2c_gensym_macro_values_4);
-
-Iter ArrayChar_iter(ArrayChar, Iter);
 
 Iter ArrayChar_iter(ArrayChar _x2c_gensym_macro_array_48, Iter _x2c_gensym_macro_dest_0);
 
@@ -329,8 +325,6 @@ static inline short ArrayShort_postfixindex(ArrayShort _x2c_gensym_macro_array_9
   return _x2c_gensym_macro_old_1;
 }
 
-Iter ArrayShort_iter(ArrayShort, Iter);
-
 static inline Var ArrayShort_var(ArrayShort _x2c_gensym_macro_array_93){
   return Var_new(111191978966184, _x2c_gensym_macro_array_93);
 }
@@ -344,8 +338,6 @@ static inline ArrayShort Var_arrayshort(Var _x2c_gensym_macro_value_29){
 }
 
 ArrayShort Array_arrayshort(Array _x2c_gensym_macro_values_9);
-
-Iter ArrayShort_iter(ArrayShort, Iter);
 
 Iter ArrayShort_iter(ArrayShort _x2c_gensym_macro_array_97, Iter _x2c_gensym_macro_dest_1);
 
@@ -488,8 +480,6 @@ static inline int ArrayInt_postfixindex(ArrayInt _x2c_gensym_macro_array_141, in
   return _x2c_gensym_macro_old_2;
 }
 
-Iter ArrayInt_iter(ArrayInt, Iter);
-
 static inline Var ArrayInt_var(ArrayInt _x2c_gensym_macro_array_142){
   return Var_new(108585896872, _x2c_gensym_macro_array_142);
 }
@@ -503,8 +493,6 @@ static inline ArrayInt Var_arrayint(Var _x2c_gensym_macro_value_44){
 }
 
 ArrayInt Array_arrayint(Array _x2c_gensym_macro_values_14);
-
-Iter ArrayInt_iter(ArrayInt, Iter);
 
 Iter ArrayInt_iter(ArrayInt _x2c_gensym_macro_array_146, Iter _x2c_gensym_macro_dest_2);
 
@@ -647,8 +635,6 @@ static inline long ArrayLong_postfixindex(ArrayLong _x2c_gensym_macro_array_190,
   return _x2c_gensym_macro_old_3;
 }
 
-Iter ArrayLong_iter(ArrayLong, Iter);
-
 static inline Var ArrayLong_var(ArrayLong _x2c_gensym_macro_array_191){
   return Var_new(3474748898190, _x2c_gensym_macro_array_191);
 }
@@ -662,8 +648,6 @@ static inline ArrayLong Var_arraylong(Var _x2c_gensym_macro_value_59){
 }
 
 ArrayLong Array_arraylong(Array _x2c_gensym_macro_values_19);
-
-Iter ArrayLong_iter(ArrayLong, Iter);
 
 Iter ArrayLong_iter(ArrayLong _x2c_gensym_macro_array_195, Iter _x2c_gensym_macro_dest_3);
 
@@ -765,8 +749,6 @@ static inline float ArrayFloat_postfixindex(ArrayFloat _x2c_gensym_macro_array_2
   return _x2c_gensym_macro_old_4;
 }
 
-Iter ArrayFloat_iter(ArrayFloat, Iter);
-
 static inline Var ArrayFloat_var(ArrayFloat _x2c_gensym_macro_array_240){
   return Var_new(111191951964264, _x2c_gensym_macro_array_240);
 }
@@ -780,8 +762,6 @@ static inline ArrayFloat Var_arrayfloat(Var _x2c_gensym_macro_value_74){
 }
 
 ArrayFloat Array_arrayfloat(Array _x2c_gensym_macro_values_24);
-
-Iter ArrayFloat_iter(ArrayFloat, Iter);
 
 Iter ArrayFloat_iter(ArrayFloat _x2c_gensym_macro_array_244, Iter _x2c_gensym_macro_dest_4);
 
@@ -883,8 +863,6 @@ static inline double ArrayDbl_postfixindex(ArrayDbl _x2c_gensym_macro_array_288,
   return _x2c_gensym_macro_old_5;
 }
 
-Iter ArrayDbl_iter(ArrayDbl, Iter);
-
 static inline Var ArrayDbl_var(ArrayDbl _x2c_gensym_macro_array_289){
   return Var_new(108585885848, _x2c_gensym_macro_array_289);
 }
@@ -898,8 +876,6 @@ static inline ArrayDbl Var_arraydbl(Var _x2c_gensym_macro_value_89){
 }
 
 ArrayDbl Array_arraydbl(Array _x2c_gensym_macro_values_29);
-
-Iter ArrayDbl_iter(ArrayDbl, Iter);
 
 Iter ArrayDbl_iter(ArrayDbl _x2c_gensym_macro_array_293, Iter _x2c_gensym_macro_dest_5);
 
@@ -991,8 +967,6 @@ static _Noreturn inline String ArrayString_postfixindex(ArrayString _x2c_gensym_
 
 }
 
-Iter ArrayString_iter(ArrayString, Iter);
-
 static inline Var ArrayString_var(ArrayString _x2c_gensym_macro_array_338){
   return Var_new(108585917732, _x2c_gensym_macro_array_338);
 }
@@ -1006,8 +980,6 @@ static inline ArrayString Var_arraystring(Var _x2c_gensym_macro_value_104){
 }
 
 ArrayString Array_arraystring(Array _x2c_gensym_macro_values_34);
-
-Iter ArrayString_iter(ArrayString, Iter);
 
 Iter ArrayString_iter(ArrayString _x2c_gensym_macro_array_342, Iter _x2c_gensym_macro_dest_6);
 

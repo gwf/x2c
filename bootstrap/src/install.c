@@ -584,6 +584,8 @@ static void _install_package(Install * i){
 
 int Path_is_dir(Path);
 
+Path Path_absolute(Path);
+
 static String _unpacked(Install * i){
   String source =(* i).source;
   if(String_truth((* i).url)){
@@ -591,10 +593,8 @@ static String _unpacked(Install * i){
     _verify(source, (* i).sha256);
   }
   else if(String_truth((* i).sha256) && ! Path_is_dir(source)) _verify(source, (* i).sha256);
-  return Path_is_dir(source) ? source : _unpack(source, (* i).work);
+  return Path_is_dir(source) ? Path_absolute(source) : _unpack(source, (* i).work);
 }
-
-Path Path_absolute(Path);
 
 String Compiler_version(void);
 

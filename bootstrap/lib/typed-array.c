@@ -182,8 +182,6 @@ static inline char ArrayChar_postfixindex(ArrayChar _x2c_gensym_macro_array_43, 
   return _x2c_gensym_macro_old_0;
 }
 
-Iter ArrayChar_iter(ArrayChar, Iter);
-
 Var Var_new(Symbol, ...);
 
 static inline Var ArrayChar_var(ArrayChar _x2c_gensym_macro_array_44){
@@ -201,8 +199,6 @@ static inline ArrayChar Var_arraychar(Var _x2c_gensym_macro_value_14){
 }
 
 static ArrayChar ArrayChar_export_context(ArrayChar _x2c_gensym_macro_array_46, Context _x2c_gensym_macro_source_1);
-
-Iter ArrayChar_iter(ArrayChar, Iter);
 
 static int _x2c_gensym_macro__next_0(Iter _x2c_gensym_macro_iter_0, Var * _x2c_gensym_macro_out_12);
 
@@ -323,8 +319,6 @@ static inline short ArrayShort_postfixindex(ArrayShort _x2c_gensym_macro_array_9
   return _x2c_gensym_macro_old_1;
 }
 
-Iter ArrayShort_iter(ArrayShort, Iter);
-
 static inline Var ArrayShort_var(ArrayShort _x2c_gensym_macro_array_93){
   return Var_new(111191978966184, _x2c_gensym_macro_array_93);
 }
@@ -338,8 +332,6 @@ static inline ArrayShort Var_arrayshort(Var _x2c_gensym_macro_value_29){
 }
 
 static ArrayShort ArrayShort_export_context(ArrayShort _x2c_gensym_macro_array_95, Context _x2c_gensym_macro_source_3);
-
-Iter ArrayShort_iter(ArrayShort, Iter);
 
 static int _x2c_gensym_macro__next_1(Iter _x2c_gensym_macro_iter_1, Var * _x2c_gensym_macro_out_25);
 
@@ -460,8 +452,6 @@ static inline int ArrayInt_postfixindex(ArrayInt _x2c_gensym_macro_array_141, in
   return _x2c_gensym_macro_old_2;
 }
 
-Iter ArrayInt_iter(ArrayInt, Iter);
-
 static inline Var ArrayInt_var(ArrayInt _x2c_gensym_macro_array_142){
   return Var_new(108585896872, _x2c_gensym_macro_array_142);
 }
@@ -475,8 +465,6 @@ static inline ArrayInt Var_arrayint(Var _x2c_gensym_macro_value_44){
 }
 
 static ArrayInt ArrayInt_export_context(ArrayInt _x2c_gensym_macro_array_144, Context _x2c_gensym_macro_source_5);
-
-Iter ArrayInt_iter(ArrayInt, Iter);
 
 static int _x2c_gensym_macro__next_2(Iter _x2c_gensym_macro_iter_2, Var * _x2c_gensym_macro_out_38);
 
@@ -597,8 +585,6 @@ static inline long ArrayLong_postfixindex(ArrayLong _x2c_gensym_macro_array_190,
   return _x2c_gensym_macro_old_3;
 }
 
-Iter ArrayLong_iter(ArrayLong, Iter);
-
 static inline Var ArrayLong_var(ArrayLong _x2c_gensym_macro_array_191){
   return Var_new(3474748898190, _x2c_gensym_macro_array_191);
 }
@@ -612,8 +598,6 @@ static inline ArrayLong Var_arraylong(Var _x2c_gensym_macro_value_59){
 }
 
 static ArrayLong ArrayLong_export_context(ArrayLong _x2c_gensym_macro_array_193, Context _x2c_gensym_macro_source_7);
-
-Iter ArrayLong_iter(ArrayLong, Iter);
 
 static int _x2c_gensym_macro__next_3(Iter _x2c_gensym_macro_iter_3, Var * _x2c_gensym_macro_out_51);
 
@@ -693,8 +677,6 @@ static inline float ArrayFloat_postfixindex(ArrayFloat _x2c_gensym_macro_array_2
   return _x2c_gensym_macro_old_4;
 }
 
-Iter ArrayFloat_iter(ArrayFloat, Iter);
-
 static inline Var ArrayFloat_var(ArrayFloat _x2c_gensym_macro_array_240){
   return Var_new(111191951964264, _x2c_gensym_macro_array_240);
 }
@@ -708,8 +690,6 @@ static inline ArrayFloat Var_arrayfloat(Var _x2c_gensym_macro_value_74){
 }
 
 static ArrayFloat ArrayFloat_export_context(ArrayFloat _x2c_gensym_macro_array_242, Context _x2c_gensym_macro_source_9);
-
-Iter ArrayFloat_iter(ArrayFloat, Iter);
 
 static int _x2c_gensym_macro__next_4(Iter _x2c_gensym_macro_iter_4, Var * _x2c_gensym_macro_out_64);
 
@@ -789,8 +769,6 @@ static inline double ArrayDbl_postfixindex(ArrayDbl _x2c_gensym_macro_array_288,
   return _x2c_gensym_macro_old_5;
 }
 
-Iter ArrayDbl_iter(ArrayDbl, Iter);
-
 static inline Var ArrayDbl_var(ArrayDbl _x2c_gensym_macro_array_289){
   return Var_new(108585885848, _x2c_gensym_macro_array_289);
 }
@@ -804,8 +782,6 @@ static inline ArrayDbl Var_arraydbl(Var _x2c_gensym_macro_value_89){
 }
 
 static ArrayDbl ArrayDbl_export_context(ArrayDbl _x2c_gensym_macro_array_291, Context _x2c_gensym_macro_source_11);
-
-Iter ArrayDbl_iter(ArrayDbl, Iter);
 
 static int _x2c_gensym_macro__next_5(Iter _x2c_gensym_macro_iter_5, Var * _x2c_gensym_macro_out_77);
 
@@ -875,8 +851,6 @@ static _Noreturn inline String ArrayString_postfixindex(ArrayString _x2c_gensym_
 
 }
 
-Iter ArrayString_iter(ArrayString, Iter);
-
 static inline Var ArrayString_var(ArrayString _x2c_gensym_macro_array_338){
   return Var_new(108585917732, _x2c_gensym_macro_array_338);
 }
@@ -890,8 +864,6 @@ static inline ArrayString Var_arraystring(Var _x2c_gensym_macro_value_104){
 }
 
 static ArrayString ArrayString_export_context(ArrayString _x2c_gensym_macro_array_340, Context _x2c_gensym_macro_source_13);
-
-Iter ArrayString_iter(ArrayString, Iter);
 
 static int _x2c_gensym_macro__next_6(Iter _x2c_gensym_macro_iter_6, Var * _x2c_gensym_macro_out_90);
 
@@ -1812,7 +1784,10 @@ char ArrayChar_push(ArrayChar _x2c_gensym_macro_array_16, char _x2c_gensym_macro
     x2c_error_raise_n(& _x2c_gensym_error_site_49, 48270474208, 0);
     __builtin_unreachable();
   }
-  if(! 0 && _x2c_gensym_macro_array_16 == NULL) _bad_operation(_0, 1092816);
+  if(_x2c_gensym_macro_array_16 == NULL){
+    if(0) return 0;
+    _bad_operation(_0, 1092816);
+  }
   if(_x2c_gensym_macro_array_16 -> length >= INT_MAX) _size_limit(_0, _x2c_gensym_macro_array_16 -> length);
   Block_append((Block) _x2c_gensym_macro_array_16, & _x2c_gensym_macro_value_3, 1);
   return _x2c_gensym_macro_value_3;
@@ -1848,7 +1823,10 @@ char ArrayChar_unshift(ArrayChar _x2c_gensym_macro_array_20, char _x2c_gensym_ma
     x2c_error_raise_n(& _x2c_gensym_error_site_50, 48270474208, 0);
     __builtin_unreachable();
   }
-  if(! 0 && _x2c_gensym_macro_array_20 == NULL) _bad_operation(_0, 46077069736);
+  if(_x2c_gensym_macro_array_20 == NULL){
+    if(0) return 0;
+    _bad_operation(_0, 46077069736);
+  }
   if(_x2c_gensym_macro_array_20 -> length >= INT_MAX) _size_limit(_0, _x2c_gensym_macro_array_20 -> length);
   ArrayChar_insert_element(_x2c_gensym_macro_array_20, 0, _x2c_gensym_macro_value_6);
   return _x2c_gensym_macro_value_6;
@@ -1857,6 +1835,7 @@ char ArrayChar_unshift(ArrayChar _x2c_gensym_macro_array_20, char _x2c_gensym_ma
 char ArrayChar_insert(ArrayChar _x2c_gensym_macro_array_21, int _x2c_gensym_macro_index_4, char _x2c_gensym_macro_value_7){
   if(! _init_guard_) _file_init_();
   if(0){
+    if(_x2c_gensym_macro_array_21 == NULL) return 0;
     if(_x2c_gensym_macro_array_21 -> length > INT_MAX) _size_limit(_0, _x2c_gensym_macro_array_21 -> length);
     int _x2c_gensym_macro_n_8 =(int) _x2c_gensym_macro_array_21 -> length;
     if(_x2c_gensym_macro_index_4 < 0) _x2c_gensym_macro_index_4 += _x2c_gensym_macro_n_8 + 1;
@@ -2447,7 +2426,10 @@ short ArrayShort_push(ArrayShort _x2c_gensym_macro_array_65, short _x2c_gensym_m
     x2c_error_raise_n(& _x2c_gensym_error_site_53, 48270474208, 0);
     __builtin_unreachable();
   }
-  if(! 0 && _x2c_gensym_macro_array_65 == NULL) _bad_operation(_1, 1092816);
+  if(_x2c_gensym_macro_array_65 == NULL){
+    if(0) return 0;
+    _bad_operation(_1, 1092816);
+  }
   if(_x2c_gensym_macro_array_65 -> length >= INT_MAX) _size_limit(_1, _x2c_gensym_macro_array_65 -> length);
   Block_append((Block) _x2c_gensym_macro_array_65, & _x2c_gensym_macro_value_18, 1);
   return _x2c_gensym_macro_value_18;
@@ -2481,7 +2463,10 @@ short ArrayShort_unshift(ArrayShort _x2c_gensym_macro_array_69, short _x2c_gensy
     x2c_error_raise_n(& _x2c_gensym_error_site_54, 48270474208, 0);
     __builtin_unreachable();
   }
-  if(! 0 && _x2c_gensym_macro_array_69 == NULL) _bad_operation(_1, 46077069736);
+  if(_x2c_gensym_macro_array_69 == NULL){
+    if(0) return 0;
+    _bad_operation(_1, 46077069736);
+  }
   if(_x2c_gensym_macro_array_69 -> length >= INT_MAX) _size_limit(_1, _x2c_gensym_macro_array_69 -> length);
   ArrayShort_insert_element(_x2c_gensym_macro_array_69, 0, _x2c_gensym_macro_value_21);
   return _x2c_gensym_macro_value_21;
@@ -2490,6 +2475,7 @@ short ArrayShort_unshift(ArrayShort _x2c_gensym_macro_array_69, short _x2c_gensy
 short ArrayShort_insert(ArrayShort _x2c_gensym_macro_array_70, int _x2c_gensym_macro_index_17, short _x2c_gensym_macro_value_22){
   if(! _init_guard_) _file_init_();
   if(0){
+    if(_x2c_gensym_macro_array_70 == NULL) return 0;
     if(_x2c_gensym_macro_array_70 -> length > INT_MAX) _size_limit(_1, _x2c_gensym_macro_array_70 -> length);
     int _x2c_gensym_macro_n_19 =(int) _x2c_gensym_macro_array_70 -> length;
     if(_x2c_gensym_macro_index_17 < 0) _x2c_gensym_macro_index_17 += _x2c_gensym_macro_n_19 + 1;
@@ -3048,7 +3034,10 @@ int ArrayInt_push(ArrayInt _x2c_gensym_macro_array_114, int _x2c_gensym_macro_va
     x2c_error_raise_n(& _x2c_gensym_error_site_57, 48270474208, 0);
     __builtin_unreachable();
   }
-  if(! 0 && _x2c_gensym_macro_array_114 == NULL) _bad_operation(_2, 1092816);
+  if(_x2c_gensym_macro_array_114 == NULL){
+    if(0) return 0;
+    _bad_operation(_2, 1092816);
+  }
   if(_x2c_gensym_macro_array_114 -> length >= INT_MAX) _size_limit(_2, _x2c_gensym_macro_array_114 -> length);
   Block_append((Block) _x2c_gensym_macro_array_114, & _x2c_gensym_macro_value_33, 1);
   return _x2c_gensym_macro_value_33;
@@ -3082,7 +3071,10 @@ int ArrayInt_unshift(ArrayInt _x2c_gensym_macro_array_118, int _x2c_gensym_macro
     x2c_error_raise_n(& _x2c_gensym_error_site_58, 48270474208, 0);
     __builtin_unreachable();
   }
-  if(! 0 && _x2c_gensym_macro_array_118 == NULL) _bad_operation(_2, 46077069736);
+  if(_x2c_gensym_macro_array_118 == NULL){
+    if(0) return 0;
+    _bad_operation(_2, 46077069736);
+  }
   if(_x2c_gensym_macro_array_118 -> length >= INT_MAX) _size_limit(_2, _x2c_gensym_macro_array_118 -> length);
   ArrayInt_insert_element(_x2c_gensym_macro_array_118, 0, _x2c_gensym_macro_value_36);
   return _x2c_gensym_macro_value_36;
@@ -3091,6 +3083,7 @@ int ArrayInt_unshift(ArrayInt _x2c_gensym_macro_array_118, int _x2c_gensym_macro
 int ArrayInt_insert(ArrayInt _x2c_gensym_macro_array_119, int _x2c_gensym_macro_index_30, int _x2c_gensym_macro_value_37){
   if(! _init_guard_) _file_init_();
   if(0){
+    if(_x2c_gensym_macro_array_119 == NULL) return 0;
     if(_x2c_gensym_macro_array_119 -> length > INT_MAX) _size_limit(_2, _x2c_gensym_macro_array_119 -> length);
     int _x2c_gensym_macro_n_30 =(int) _x2c_gensym_macro_array_119 -> length;
     if(_x2c_gensym_macro_index_30 < 0) _x2c_gensym_macro_index_30 += _x2c_gensym_macro_n_30 + 1;
@@ -3651,7 +3644,10 @@ long ArrayLong_push(ArrayLong _x2c_gensym_macro_array_163, long _x2c_gensym_macr
     x2c_error_raise_n(& _x2c_gensym_error_site_61, 48270474208, 0);
     __builtin_unreachable();
   }
-  if(! 0 && _x2c_gensym_macro_array_163 == NULL) _bad_operation(_3, 1092816);
+  if(_x2c_gensym_macro_array_163 == NULL){
+    if(0) return 0L;
+    _bad_operation(_3, 1092816);
+  }
   if(_x2c_gensym_macro_array_163 -> length >= INT_MAX) _size_limit(_3, _x2c_gensym_macro_array_163 -> length);
   Block_append((Block) _x2c_gensym_macro_array_163, & _x2c_gensym_macro_value_48, 1);
   return _x2c_gensym_macro_value_48;
@@ -3685,7 +3681,10 @@ long ArrayLong_unshift(ArrayLong _x2c_gensym_macro_array_167, long _x2c_gensym_m
     x2c_error_raise_n(& _x2c_gensym_error_site_62, 48270474208, 0);
     __builtin_unreachable();
   }
-  if(! 0 && _x2c_gensym_macro_array_167 == NULL) _bad_operation(_3, 46077069736);
+  if(_x2c_gensym_macro_array_167 == NULL){
+    if(0) return 0L;
+    _bad_operation(_3, 46077069736);
+  }
   if(_x2c_gensym_macro_array_167 -> length >= INT_MAX) _size_limit(_3, _x2c_gensym_macro_array_167 -> length);
   ArrayLong_insert_element(_x2c_gensym_macro_array_167, 0, _x2c_gensym_macro_value_51);
   return _x2c_gensym_macro_value_51;
@@ -3694,6 +3693,7 @@ long ArrayLong_unshift(ArrayLong _x2c_gensym_macro_array_167, long _x2c_gensym_m
 long ArrayLong_insert(ArrayLong _x2c_gensym_macro_array_168, int _x2c_gensym_macro_index_43, long _x2c_gensym_macro_value_52){
   if(! _init_guard_) _file_init_();
   if(0){
+    if(_x2c_gensym_macro_array_168 == NULL) return 0L;
     if(_x2c_gensym_macro_array_168 -> length > INT_MAX) _size_limit(_3, _x2c_gensym_macro_array_168 -> length);
     int _x2c_gensym_macro_n_41 =(int) _x2c_gensym_macro_array_168 -> length;
     if(_x2c_gensym_macro_index_43 < 0) _x2c_gensym_macro_index_43 += _x2c_gensym_macro_n_41 + 1;
@@ -4252,7 +4252,10 @@ float ArrayFloat_push(ArrayFloat _x2c_gensym_macro_array_212, float _x2c_gensym_
     x2c_error_raise_n(& _x2c_gensym_error_site_65, 48270474208, 0);
     __builtin_unreachable();
   }
-  if(! 0 && _x2c_gensym_macro_array_212 == NULL) _bad_operation(_4, 1092816);
+  if(_x2c_gensym_macro_array_212 == NULL){
+    if(0) return 0.0f;
+    _bad_operation(_4, 1092816);
+  }
   if(_x2c_gensym_macro_array_212 -> length >= INT_MAX) _size_limit(_4, _x2c_gensym_macro_array_212 -> length);
   Block_append((Block) _x2c_gensym_macro_array_212, & _x2c_gensym_macro_value_63, 1);
   return _x2c_gensym_macro_value_63;
@@ -4286,7 +4289,10 @@ float ArrayFloat_unshift(ArrayFloat _x2c_gensym_macro_array_216, float _x2c_gens
     x2c_error_raise_n(& _x2c_gensym_error_site_66, 48270474208, 0);
     __builtin_unreachable();
   }
-  if(! 0 && _x2c_gensym_macro_array_216 == NULL) _bad_operation(_4, 46077069736);
+  if(_x2c_gensym_macro_array_216 == NULL){
+    if(0) return 0.0f;
+    _bad_operation(_4, 46077069736);
+  }
   if(_x2c_gensym_macro_array_216 -> length >= INT_MAX) _size_limit(_4, _x2c_gensym_macro_array_216 -> length);
   ArrayFloat_insert_element(_x2c_gensym_macro_array_216, 0, _x2c_gensym_macro_value_66);
   return _x2c_gensym_macro_value_66;
@@ -4295,6 +4301,7 @@ float ArrayFloat_unshift(ArrayFloat _x2c_gensym_macro_array_216, float _x2c_gens
 float ArrayFloat_insert(ArrayFloat _x2c_gensym_macro_array_217, int _x2c_gensym_macro_index_56, float _x2c_gensym_macro_value_67){
   if(! _init_guard_) _file_init_();
   if(0){
+    if(_x2c_gensym_macro_array_217 == NULL) return 0.0f;
     if(_x2c_gensym_macro_array_217 -> length > INT_MAX) _size_limit(_4, _x2c_gensym_macro_array_217 -> length);
     int _x2c_gensym_macro_n_52 =(int) _x2c_gensym_macro_array_217 -> length;
     if(_x2c_gensym_macro_index_56 < 0) _x2c_gensym_macro_index_56 += _x2c_gensym_macro_n_52 + 1;
@@ -4853,7 +4860,10 @@ double ArrayDbl_push(ArrayDbl _x2c_gensym_macro_array_261, double _x2c_gensym_ma
     x2c_error_raise_n(& _x2c_gensym_error_site_69, 48270474208, 0);
     __builtin_unreachable();
   }
-  if(! 0 && _x2c_gensym_macro_array_261 == NULL) _bad_operation(_5, 1092816);
+  if(_x2c_gensym_macro_array_261 == NULL){
+    if(0) return 0.0;
+    _bad_operation(_5, 1092816);
+  }
   if(_x2c_gensym_macro_array_261 -> length >= INT_MAX) _size_limit(_5, _x2c_gensym_macro_array_261 -> length);
   Block_append((Block) _x2c_gensym_macro_array_261, & _x2c_gensym_macro_value_78, 1);
   return _x2c_gensym_macro_value_78;
@@ -4887,7 +4897,10 @@ double ArrayDbl_unshift(ArrayDbl _x2c_gensym_macro_array_265, double _x2c_gensym
     x2c_error_raise_n(& _x2c_gensym_error_site_70, 48270474208, 0);
     __builtin_unreachable();
   }
-  if(! 0 && _x2c_gensym_macro_array_265 == NULL) _bad_operation(_5, 46077069736);
+  if(_x2c_gensym_macro_array_265 == NULL){
+    if(0) return 0.0;
+    _bad_operation(_5, 46077069736);
+  }
   if(_x2c_gensym_macro_array_265 -> length >= INT_MAX) _size_limit(_5, _x2c_gensym_macro_array_265 -> length);
   ArrayDbl_insert_element(_x2c_gensym_macro_array_265, 0, _x2c_gensym_macro_value_81);
   return _x2c_gensym_macro_value_81;
@@ -4896,6 +4909,7 @@ double ArrayDbl_unshift(ArrayDbl _x2c_gensym_macro_array_265, double _x2c_gensym
 double ArrayDbl_insert(ArrayDbl _x2c_gensym_macro_array_266, int _x2c_gensym_macro_index_69, double _x2c_gensym_macro_value_82){
   if(! _init_guard_) _file_init_();
   if(0){
+    if(_x2c_gensym_macro_array_266 == NULL) return 0.0;
     if(_x2c_gensym_macro_array_266 -> length > INT_MAX) _size_limit(_5, _x2c_gensym_macro_array_266 -> length);
     int _x2c_gensym_macro_n_63 =(int) _x2c_gensym_macro_array_266 -> length;
     if(_x2c_gensym_macro_index_69 < 0) _x2c_gensym_macro_index_69 += _x2c_gensym_macro_n_63 + 1;
@@ -5456,7 +5470,10 @@ String ArrayString_push(ArrayString _x2c_gensym_macro_array_310, String _x2c_gen
     x2c_error_raise_n(& _x2c_gensym_error_site_73, 48270474208, 0);
     __builtin_unreachable();
   }
-  if(! 0 && _x2c_gensym_macro_array_310 == NULL) _bad_operation(_6, 1092816);
+  if(_x2c_gensym_macro_array_310 == NULL){
+    if(0) return 0;
+    _bad_operation(_6, 1092816);
+  }
   if(_x2c_gensym_macro_array_310 -> length >= INT_MAX) _size_limit(_6, _x2c_gensym_macro_array_310 -> length);
   Block_append((Block) _x2c_gensym_macro_array_310, & _x2c_gensym_macro_value_93, 1);
   return _x2c_gensym_macro_value_93;
@@ -5490,7 +5507,10 @@ String ArrayString_unshift(ArrayString _x2c_gensym_macro_array_314, String _x2c_
     x2c_error_raise_n(& _x2c_gensym_error_site_74, 48270474208, 0);
     __builtin_unreachable();
   }
-  if(! 0 && _x2c_gensym_macro_array_314 == NULL) _bad_operation(_6, 46077069736);
+  if(_x2c_gensym_macro_array_314 == NULL){
+    if(0) return 0;
+    _bad_operation(_6, 46077069736);
+  }
   if(_x2c_gensym_macro_array_314 -> length >= INT_MAX) _size_limit(_6, _x2c_gensym_macro_array_314 -> length);
   ArrayString_insert_element(_x2c_gensym_macro_array_314, 0, _x2c_gensym_macro_value_96);
   return _x2c_gensym_macro_value_96;
@@ -5499,6 +5519,7 @@ String ArrayString_unshift(ArrayString _x2c_gensym_macro_array_314, String _x2c_
 String ArrayString_insert(ArrayString _x2c_gensym_macro_array_315, int _x2c_gensym_macro_index_82, String _x2c_gensym_macro_value_97){
   if(! _init_guard_) _file_init_();
   if(0){
+    if(_x2c_gensym_macro_array_315 == NULL) return 0;
     if(_x2c_gensym_macro_array_315 -> length > INT_MAX) _size_limit(_6, _x2c_gensym_macro_array_315 -> length);
     int _x2c_gensym_macro_n_74 =(int) _x2c_gensym_macro_array_315 -> length;
     if(_x2c_gensym_macro_index_82 < 0) _x2c_gensym_macro_index_82 += _x2c_gensym_macro_n_74 + 1;

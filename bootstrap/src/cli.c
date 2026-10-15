@@ -1308,6 +1308,7 @@ static Given _take_option(Array args, int * i, int mask){
     if(++(* i) == Array_len(args)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_93), cons(String_var(arg), cons(String_var(_84), NULL)))));
     given.value = Var_as_string(Array_getindex(args, (* i)));
   }
+  if(! String_truth(given.value) &&(given.option -> id == 1052018024 || given.option -> id == 33665524324)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_93), cons(String_var(written), cons(String_var(_84), NULL)))));
   return given;
 }
 

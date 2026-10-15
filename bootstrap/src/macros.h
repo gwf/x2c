@@ -16,6 +16,7 @@
 #include "builtins.h"
 #include "linked-meta.h"
 #include "literals.h"
+#include "lambdas.h"
 #include "stage.h"
 #include "meta-group.h"
 #include "meta-helper-client.h"
