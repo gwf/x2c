@@ -91,7 +91,7 @@ Source: `src/parse.x:2699`
 Binds a callable's outer block in its active parameter scope. Ordinary
 constructed blocks open their own scope before using this operation.
 
-Source: `src/parse.x:3996`
+Source: `src/parse.x:4002`
 
 <a id="Compiler.bind_catch_arm"></a>
 #### Compiler.bind_catch_arm
@@ -104,7 +104,7 @@ Binder diagnostics use `start`. A source arm's body parses here, and a
 template's declares its binders where its expansion binds it. A parsed
 arm's body already begins with them, so it binds unchanged.
 
-Source: `src/parse.x:3851`
+Source: `src/parse.x:3857`
 
 <a id="Compiler.bind_match_arm"></a>
 #### Compiler.bind_match_arm
@@ -116,7 +116,7 @@ definite binders of `pattern` when the arm `binds`. Binder diagnostics
 use `start`. A source arm's body parses here with the typed captures
 `types` that its pattern recorded.
 
-Source: `src/parse.x:3952`
+Source: `src/parse.x:3958`
 
 <a id="Compiler.bind_parameter"></a>
 #### Compiler.bind_parameter
@@ -136,7 +136,7 @@ Source: `src/parse.x:2465`
 Binds the source `if`, `while`, `do`, `for`, `match`, or `try` at the
 cursor through the same binders as constructed syntax.
 
-Source: `src/parse.x:3730`
+Source: `src/parse.x:3736`
 
 <a id="Compiler.bind_syntax"></a>
 #### Compiler.bind_syntax
@@ -263,7 +263,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:4141`
+Source: `src/parse.x:4147`
 
 <a id="Compiler.finish_initializers"></a>
 #### Compiler.finish_initializers
@@ -663,7 +663,7 @@ Source: `src/parse.x:411`
 
 The source clause `kind`, which the binder parses when it reaches it.
 
-Source: `src/parse.x:3712`
+Source: `src/parse.x:3718`
 
 <a id="Compiler.take_meta_marker"></a>
 #### Compiler.take_meta_marker
