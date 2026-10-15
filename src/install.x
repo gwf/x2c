@@ -264,7 +264,7 @@ static String _unpacked(Install &i) {
     _verify(source, i.sha256);
   }
   else if (i.sha256 && !Path.is_dir(source)) _verify(source, i.sha256);
-  return Path.is_dir(source) ? source : _unpack(source, i.work);
+  return Path.is_dir(source) ? Path.absolute(source) : _unpack(source, i.work);
 }
 
 /* SOURCE.json records where a source package came from. A local path

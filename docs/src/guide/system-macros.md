@@ -393,8 +393,8 @@ printf("%s\n", text.str());
 ~}
 ```
 
-Each declaration lowers to the original initialization followed by
-`defer local.cleanup()` in the same enclosing block. The initializer runs
+Each declaration initializes the local and registers cleanup for the acquired
+value in the same enclosing block. The initializer runs
 once, and cleanup is registered only after it succeeds. Compound declarations
 preserve acquisition order, with each successful acquisition protected before
 the next initializer runs. Cleanup runs in reverse registration order.
@@ -412,20 +412,21 @@ the existing typedef/protocol ancestry, and keeps ordinary method precedence:
 | Generated heap classes | Their selected `free` operation |
 | Other types | An explicitly adopted compatible cleanup method |
 
-The deferred call observes the binding at cleanup time. For example, assigning
-a new Array to an `$auto` local does not free the earlier Array:
+Cleanup releases the acquired value even if the local is reassigned. Each
+`$auto` below protects its own Array:
 
 ```x2c
 ~int main(void) {
 Array current = $auto([]);
-Array earlier = current;
-current = [];
-earlier.free();
+Array replacement = $auto([]);
+current = replacement;
 ~  return 0;
 ~}
 ```
 
-The second Array is cleaned up at block exit. Returning or storing an alias
+Both Arrays are cleaned up at block exit. Reassignment neither releases the
+first Array early nor transfers its cleanup to the replacement.
+Returning or storing an alias
 does not cancel cleanup; the caller must choose an appropriate lifetime.
 There is no move or recursive ownership system. Var itself has no owning
 cleanup contract, and Pool's `free` operation requires a separate allocation

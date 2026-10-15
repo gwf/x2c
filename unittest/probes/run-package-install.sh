@@ -53,6 +53,14 @@ SOURCE
 "$x2c" run -q "$BUILD/xp-client.x" || fail "installed .xp entry import"
 "$x2c" remove -q xppkg
 
+# Directory operands derive the same package name after normalization.
+for directory in . "$BUILD/src/xppkg/."; do
+  (cd "$BUILD/src/xppkg" && "$x2c" install -q "$directory")
+  [[ "$("$x2c" list)" == "xppkg - source" ]] || fail "normalized package name"
+  "$x2c" run -q "$BUILD/xp-client.x" || fail "normalized package import"
+  "$x2c" remove -q xppkg
+done
+
 # The existing .x entry still wins when both source spellings exist.
 printf 'int answer(void) { return 11; }\n' >"$BUILD/src/xppkg/src/xppkg.x"
 printf 'int alternate(void):\n  return 7\n' >"$BUILD/src/xppkg/src/xppkg.xp"

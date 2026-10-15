@@ -15,15 +15,29 @@ Delivery is one orchestrator-owned, validated batch to dev. Do not advance main.
 - Cache worker: reuse ordinary translation fingerprints for scripts; decline
   executable reuse when selected user or package libraries are unrecorded.
   Preserve translation and object reuse and measure warm relinking cost.
-- Runtime worker: reject null boxed Array push, unshift, and insert receivers
-  through the existing bad-arg owner before reading fields.
+- Runtime worker: return void for null boxed Array push, unshift, and insert
+  receivers before reading fields. Preserve typed Array error contracts.
 - Orchestrator: reject explicit empty output and out-dir values through the
   existing missing-value diagnostic, and preserve compiler warnings with path
   spaces and unfamiliar diagnostic text in the fixture harness.
 
-Gary confirmed that boxed take_last, shift, remove, and invalid-index insert
-preserve void sentinels. Correct family-specific documentation to distinguish
-that behavior from typed Array exceptions.
+Gary's latest decision preserves void for boxed Array absence, including null
+push, unshift, and insert receivers. This supersedes the earlier bad-arg
+decision. Correct family-specific documentation and focused tests; preserve
+typed Array exceptions and unrelated void-element, allocation, and size errors.
+
+Additional retained findings use the same selected baseline:
+
+- Runtime worker, after Array work: preserve function-local record, typedef,
+  and enum identity through lambda capture cells and lifted functions.
+- Cache worker, after cache work: repair REPL truth conversion for empty
+  Strings and zero Symbols, and pointer increments/compound updates through
+  the existing pointer-step operation. Add native/REPL parity coverage.
+- Compiler worker: investigate native macro references to file-private
+  module statics against the documented native preprocessor-text boundary.
+  Resolve any actual semantic conflict before changing that boundary.
+- Orchestrator: normalize local install directories before deriving names,
+  and correct and execute the guide's acquired-value $auto example.
 
 ## Verification and delivery
 
