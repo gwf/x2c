@@ -5,7 +5,7 @@ import "geo" as g;
 macro Unit $check_imported(Type $type) {
   @(let ((actual (Type.fields $type)))
      (if (equal? actual
-           '(("a" (struct "geo__VecData"))
+           `(("a" (struct "geo__VecData"))
              ("b" (struct "geo__VecData"))))
          nil
          (x2c.diagnostic.fail "imported fields differ"

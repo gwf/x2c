@@ -10,7 +10,7 @@ macro Field $generated_field() {
 macro Unit $check_record(Type $type) {
   @(let ((actual (Type.fields $type)))
      (if (equal? actual
-           '(("first" (int))
+           `(("first" (int))
              ("second" (int))
              ("counts" ((dim ("3")) const unsigned long))
              ("name" (* const char))
@@ -23,14 +23,14 @@ macro Unit $check_record(Type $type) {
 macro Unit $check_union(Type $type) {
   @(let ((actual (Type.fields $type)))
      (if (equal? actual
-           '(("integer" (int)) ("floating" (float))))
+           `(("integer" (int)) ("floating" (float))))
          nil
          (x2c.diagnostic.fail "union fields differ" (list (repr actual)))))
 }
 
 macro Unit $check_included(Type $type) {
   @(let ((actual (Type.fields $type)))
-     (if (equal? actual '(("included" (short))))
+     (if (equal? actual `(("included" (short))))
          nil
          (x2c.diagnostic.fail "included fields differ"
                               (list (repr actual)))))
