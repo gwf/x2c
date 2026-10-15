@@ -101,6 +101,66 @@ cmp "$BUILD/quoted.h" "$BUILD/out/quoted.h"
 [[ -f "$BUILD/quoted.d" ]] || exit 1
 [[ ! -e "$BUILD/space dir/quoted.c" ]] || exit 1
 
+# Explicit empty destinations are missing values, in both option forms.
+python3 - "$X2C" "$BUILD" <<'PY'
+import subprocess
+import sys
+from pathlib import Path
+
+compiler, build = sys.argv[1], Path(sys.argv[2])
+for command, option in [('build', '--output'), ('translate', '--out-dir')]:
+    for value in [[option + '='], [option, '']]:
+        result = subprocess.run(
+            [compiler, command, *value, str(build / 'space dir/quoted.x')],
+            cwd=build, capture_output=True, text=True)
+        assert result.returncode == 2, (value, result)
+        assert result.stderr == f"x2c: error: option requires a value '{option}'\n", result
+assert not (build / 'a.out').exists()
+PY
+
+# Fixture warnings survive spaces in paths and unfamiliar compiler output.
+python3 - "$ROOT" "$X2C" "$BUILD" <<'PY'
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+root, compiler, build = Path(sys.argv[1]), sys.argv[2], Path(sys.argv[3])
+fixtures = build / 'warning fixtures'
+fixtures.mkdir()
+(fixtures / 'sample.x').write_text('int main(void) { return 0; }\n')
+(fixtures / 'sample.phases').write_text('status\n')
+(fixtures / 'sample.status').write_text('0\n')
+wrapper = fixtures / 'cc'
+wrapper.write_text('''#!/usr/bin/env bash
+set -e
+"${REAL_CC:-cc}" "$@"
+if [[ "$1" != --version ]]; then
+  printf '%s\\n' "$FIXTURE_WARNING" >&2
+fi
+''')
+wrapper.chmod(0o755)
+env = dict(os.environ, X2C=compiler, CC=str(wrapper),
+           FIXTURE_DIR=str(fixtures),
+           FIXTURE_BUILD=str(build / 'warning build'))
+warning = f'{fixtures}/sample.c:3:7: warning: retained warning'
+env['FIXTURE_WARNING'] = warning + '\n    3 | source\n      | ^\n1 warning generated.'
+runner = [str(root / 'unittest/compiler-fixtures/run.sh'), 'check', '--fixture', 'sample']
+def run():
+    return subprocess.run(runner, env=env, capture_output=True, text=True)
+result = run()
+assert result.returncode != 0, result
+assert 'sample.c: warning: retained warning' in result.stderr, result
+(fixtures / 'sample.phases').write_text('status cc-stderr\n')
+(fixtures / 'sample.cc-stderr').write_text('sample.c: warning: retained warning\n')
+result = run()
+assert result.returncode == 0, result
+env['FIXTURE_WARNING'] = 'unrecognized compiler diagnostic'
+result = run()
+assert result.returncode != 0, result
+assert 'unrecognized compiler diagnostic' in result.stdout + result.stderr, result
+PY
+
 
 printf '#include "x2c.x"\n' >"$BUILD/space dir/hash#name.x"
 printf "translate --out-dir %s '%s/space dir/hash#name.x'\n" \

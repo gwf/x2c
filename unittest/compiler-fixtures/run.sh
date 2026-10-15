@@ -56,12 +56,16 @@ normalize_runtime_lines() {
 
 # The C compiler's own warnings about the generated C. Keep the diagnostic
 # text and drop the build path, the line and column, the echoed source, and
-# the per-run summary, so an expectation survives an unrelated line shift and
-# never records this checkout's directory.
+# the per-run summary. Preserve other text so an unfamiliar diagnostic cannot
+# silently turn a warning-producing compile into a clean one.
 normalize_cc_warnings() {
   local file=$1
-  sed -E 's|^[^ ]*/([^/ ]+):[0-9]+:[0-9]+: |\1: |' "$file" \
-    | grep -E '^[^ ]+: (warning|note|error): ' >"$file.normalized" || true
+  sed -E \
+    -e 's|^(.*/)?([^/]+):[0-9]+:[0-9]+: |\2: |' \
+    -e 's|^(.*/)?([^/]+):[0-9]+: |\2: |' \
+    -e '/^[[:space:]]*[0-9]*[[:space:]]*\|/d' \
+    -e '/^[0-9]+ (warning|error)s?( and [0-9]+ (warning|error)s?)? generated\.$/d' \
+    "$file" >"$file.normalized"
   mv "$file.normalized" "$file"
 }
 

@@ -584,6 +584,9 @@ static Given _take_option(Array args, int &i, int mask) {
     if (++i == args.len()) $report.cli.option_value_required(arg);
     given.value = args[i];
   }
+  if (!given.value &&
+      (given.option.id == <output> || given.option.id == <out-dir>))
+    $report.cli.option_value_required(written);
   return given;
 }
 
