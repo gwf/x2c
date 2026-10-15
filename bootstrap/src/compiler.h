@@ -84,6 +84,7 @@ typedef struct Compiler{
   int expansion_floor;
   SymScope params;
   Map key_ids, macros, kw_aliases;
+  List binding_rows, binding_sealed;
   Map object_macros;
   List arms;
   Map arm_stacks;
