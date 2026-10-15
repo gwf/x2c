@@ -78,8 +78,7 @@ code:not(pre code) {
 }
 
 .landing-section:nth-of-type(odd) code:not(pre code),
-.feature-carousel code:not(pre code),
-.from-c-note code:not(pre code) {
+.feature-carousel code:not(pre code) {
   border-color: var(--coral-chip-border);
   background: var(--coral-chip-bg);
   color: var(--coral);
@@ -346,68 +345,6 @@ main:focus {
 .hero-prose {
   grid-column: 1;
   grid-row: 2;
-}
-
-/* Two checked From C examples span the hero below its prose and table. */
-.from-c {
-  display: grid;
-  grid-column: 1 / -1;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: stretch;
-  gap: 24px;
-  margin-top: clamp(40px, 5vw, 68px);
-  scroll-margin-top: 90px;
-}
-
-.from-c-heading {
-  grid-column: 1 / -1;
-}
-
-.from-c-heading h2 {
-  margin: 0 0 16px;
-  color: var(--dark);
-  font:
-    400 clamp(40px, 6.1vw, 64px) / 1 "Instrument Serif",
-    Georgia,
-    serif;
-  letter-spacing: -0.045em;
-}
-
-.from-c-heading p {
-  max-width: 72ch;
-  margin: 0;
-}
-
-.from-c-example {
-  display: flex;
-  flex-direction: column;
-}
-
-.from-c-file small {
-  display: block;
-  padding: 14px 18px 0;
-  color: var(--muted-light);
-  font:
-    500 11px/1 "JetBrains Mono",
-    monospace;
-}
-
-.from-c-file .install-code {
-  padding: 8px 18px 6px;
-  line-height: 1.6;
-}
-
-.from-c-output {
-  white-space: pre;
-}
-
-.from-c-note {
-  margin: auto 0 0;
-  padding: 14px 18px 16px;
-  border-top: 1px solid var(--hairline-on-dark);
-  color: var(--muted-light);
-  font-size: 13px;
-  line-height: 1.5;
 }
 
 .hero-heading h1 {
@@ -1336,10 +1273,6 @@ a.docs-card:hover {
   .hero-prose {
     grid-column: auto;
     grid-row: auto;
-  }
-
-  .from-c {
-    grid-template-columns: minmax(0, 1fr);
   }
 
   .section-feature-grid {

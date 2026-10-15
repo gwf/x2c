@@ -1,7 +1,6 @@
 ---
 import { Code } from "astro:components";
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
 import { absoluteSiteUrl } from "../../site-config.mjs";
 import { destination, installExample } from "../../release-destination.mjs";
 import { coreSetup, corePrerequisites } from "../content/core-setup";
@@ -34,10 +33,6 @@ import {
 import {
   frontmatter as install,
 } from "../content/install.md";
-import {
-  Content as FromCCopy,
-  frontmatter as fromC,
-} from "../content/from-c.md";
 
 const base = import.meta.env.BASE_URL;
 const local = (path: string) => `${base}${path.replace(/^\/+/, "")}`;
@@ -54,24 +49,6 @@ const [titleHtml, kickerHtml] = await Promise.all([
   inlineMarkdown(home.title),
   inlineMarkdown(home.kicker),
 ]);
-// The From C panels show the checked examples and their expected output.
-const repositoryFile = (path: string) =>
-  readFileSync(`${import.meta.env.X2C_REPOSITORY_ROOT}/${path}`, "utf8");
-const x2cLang = {
-  ...JSON.parse(repositoryFile("etc/vsc-extension/syntaxes/x2c.tmLanguage.json")),
-  name: "x2c",
-};
-const fromCExamples = await Promise.all(fromC.examples.map(
-  async (example: any) => ({
-    ...example,
-    files: example.files.map((path: string) => ({
-      name: path.split("/").pop(),
-      code: repositoryFile(path).trimEnd(),
-      lang: path.endsWith(".c") ? "c" : x2cLang,
-    })),
-    output: repositoryFile(example.output).trimEnd(),
-    noteHtml: await inlineMarkdown(example.note),
-  })));
 ---
 
 <BaseLayout
@@ -101,39 +78,6 @@ const fromCExamples = await Promise.all(fromC.examples.map(
       <FeatureTable intro={home.featureIntro} features={home.features} />
       <div class="hero-prose">
         <HomeCopy />
-      </div>
-      <div id="from-c" class="from-c">
-        <header class="from-c-heading">
-          <h2>{fromC.title}</h2>
-          <FromCCopy />
-        </header>
-        {fromCExamples.map(example => (
-          <figure class="install-window from-c-example"
-            id={`from-c-${example.slug}`}>
-            <figcaption>{example.caption}</figcaption>
-            {example.files.map(file => (
-              <div class="from-c-file">
-                <small>{file.name}</small>
-                <div class="install-code">
-                  <Code code={file.code} lang={file.lang}
-                    theme={x2cDarkTheme} />
-                </div>
-              </div>
-            ))}
-            <div class="from-c-file">
-              <small>shell</small>
-              <div class="install-code">
-                <Code code={example.run.trim()} lang="sh"
-                  theme={x2cDarkTheme} />
-              </div>
-            </div>
-            <div class="from-c-file">
-              <small>output</small>
-              <pre class="install-code from-c-output">{example.output}</pre>
-            </div>
-            <p class="from-c-note" set:html={example.noteHtml} />
-          </figure>
-        ))}
       </div>
     </section>
   </div>

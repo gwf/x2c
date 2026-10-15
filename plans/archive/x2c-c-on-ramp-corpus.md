@@ -1,7 +1,7 @@
 # The C on-ramp corpus
 
 > Status: done - 2026-09-16 in f6f029f and 84fa6f8, after Gary's yes to
-> both decisions. Follows `plans/archive/x2c-c-on-ramp.md` (4a landed as `f94f034`
+> both decisions. Follows `plans/x2c-c-on-ramp.md` (4a landed as `f94f034`
 > and `76b27c0`). The first round of fixes exposed a second and third layer
 > of failures behind them; those are recorded under "What the corpus
 > established" and "Implementation" as well. Result: 14 of 22 units
@@ -178,7 +178,7 @@ real duplicate at the function's own binding token instead of `c.token`.
 declaration-prefix macros, trailing attributes, and GNU qualifier
 spellings are accepted in units. `packages/FOREIGN-C-QUALIFIERS.md:57`
 drops the attribute limit. Update the stale status header in
-`plans/archive/x2c-c-on-ramp.md`.
+`plans/x2c-c-on-ramp.md`.
 
 ## Validation
 

@@ -1,7 +1,5 @@
 # name|category|check|arguments|stdout|note
 foreach|showcase|run||expected/foreach.stdout|Basic List iteration.
-from-c/points|showcase|run||expected/from-c-points.stdout|A C source file renamed to .x, compiled unchanged.
-from-c/words|showcase|run||expected/from-c-words.stdout|A C main calling one x2c file through its generated header.
 love/arrays|showcase|run||expected/love-arrays.stdout|Standalone love arrays gallery example.
 love/basic-literals|showcase|run||expected/static-test.stdout|Runtime collection and String literals.
 love/conversions|showcase|run||expected/type-conversion-matrix.stdout|Verified numeric and typed nonnumeric Var crossings.

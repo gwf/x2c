@@ -42,19 +42,6 @@ replace the executable paths below with absolute paths too:
 ./examples/build/power-exceptions/exceptions /absolute/path/to/fixtures
 ```
 
-## From C: bring existing code
-
-- [Points](from-c/points.x): an unchanged C program, renamed from `points.c`.
-- [Words](from-c/words.x): an x2c function called from the C program
-  [main.c](from-c/main.c) through the generated `words.h`.
-
-```sh
-cd examples/from-c
-x2c run points.x
-x2c build --output /tmp/count main.c words.x
-/tmp/count
-```
-
 ## Love: values, data, and methods
 
 - [Values](love/values.x): dynamic values, operators, type inspection, and C calls.
