@@ -2523,7 +2523,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _1955 = cons(_1954, NULL);
   _1956 = cons(_253, _1955);
   _1957 = List_var(_1956);
-  _1958 = int_var(75317);
+  _1958 = int_var(75305);
   _1959 = cons(_1958, NULL);
   _1960 = cons(_258, _1959);
   _1961 = List_var(_1960);
@@ -2725,7 +2725,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2154 = cons(_2153, NULL);
   _2155 = cons(_245, _2154);
   _2156 = List_var(_2155);
-  _2157 = int_var(75679);
+  _2157 = int_var(75667);
   _2158 = cons(_2157, NULL);
   _2159 = cons(_258, _2158);
   _2160 = List_var(_2159);
@@ -2842,7 +2842,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2271 = cons(_2270, NULL);
   _2272 = cons(_245, _2271);
   _2273 = List_var(_2272);
-  _2274 = int_var(76091);
+  _2274 = int_var(76079);
   _2275 = cons(_2274, NULL);
   _2276 = cons(_258, _2275);
   _2277 = List_var(_2276);
@@ -2940,7 +2940,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2369 = cons(_2368, NULL);
   _2370 = cons(_245, _2369);
   _2371 = List_var(_2370);
-  _2372 = int_var(76175);
+  _2372 = int_var(76163);
   _2373 = cons(_2372, NULL);
   _2374 = cons(_258, _2373);
   _2375 = List_var(_2374);
@@ -3032,7 +3032,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2461 = cons(_2460, NULL);
   _2462 = cons(_245, _2461);
   _2463 = List_var(_2462);
-  _2464 = int_var(76382);
+  _2464 = int_var(76370);
   _2465 = cons(_2464, NULL);
   _2466 = cons(_258, _2465);
   _2467 = List_var(_2466);
@@ -3247,7 +3247,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2673 = cons(_2672, NULL);
   _2674 = cons(_245, _2673);
   _2675 = List_var(_2674);
-  _2676 = int_var(78475);
+  _2676 = int_var(78463);
   _2677 = cons(_2676, NULL);
   _2678 = cons(_258, _2677);
   _2679 = List_var(_2678);
@@ -5049,12 +5049,13 @@ static void _capture_identifier(Compiler c, List binding){
   if(c -> local_macro_captures == NULL || ! List_truth(binding) || ! Sym_binding_is_local_before(c -> sym, binding, c -> local_macro_capture_scopes) || Map_contains(c -> local_macro_captures, List_var(binding))) return;  Var order = Map_getindex(c -> local_macro_captures, Symbol_var(32645476));  Map_setindex(c -> local_macro_captures, Symbol_var(32645476), List_var(cons(List_var(binding), Var_is_row(order, 9, 7, 4) ? Var_list_payload(order) : NULL)));  Map_setindex(c -> local_macro_captures, List_var(binding), int_var(1));
 }
 
+void Sym_unshadow_enclosing(Sym, String);
 void Compiler_set_fact(Compiler, Var, Var);
 static int _shadow_identifier(Compiler c, List * binding, Type type, String spelling, Map binding_facts, int kept){
   if(! String_truth(spelling)) return 0;  Type visible_type = NULL;  List visible = Sym_lookup(c -> sym, cons(String_var(spelling), NULL), &(visible_type));  if(! List_truth(visible) || List_equal(visible, (* binding))) return 0;  if((Sym_binding_is_local(c -> sym, (* binding)) && !(Map_contains(binding_facts, List_var(cons(_1022, cons(List_var((* binding)), NULL)))))) ||(! kept && List_truth(Type_list(visible_type)) && _expansion_introduced(c, visible))){
     (* binding) = visible;  return 1;
   }
-  if(! List_truth(Type_list(visible_type)) ||(List_truth(Type_list(type)) && ! List_truth(Sym_resolve_global(c -> sym, cons(String_var(spelling), NULL), NULL)))) return 0;  Sym_unshadow_global(c -> sym, spelling);  if(!(Map_contains(binding_facts, List_var(cons(_1388, cons(List_var(visible), NULL)))))) Compiler_set_fact(c, List_var(cons(_1388, cons(List_var(visible), NULL))), String_var(Compiler_fresh_name(c, _1389)));  return 0;
+  if(! List_truth(Type_list(visible_type)) ||(List_truth(Type_list(type)) && ! List_truth(Sym_resolve_global(c -> sym, cons(String_var(spelling), NULL), NULL)))) return 0;  Sym_unshadow_enclosing(c -> sym, spelling);  if(!(Map_contains(binding_facts, List_var(cons(_1388, cons(List_var(visible), NULL)))))) Compiler_set_fact(c, List_var(cons(_1388, cons(List_var(visible), NULL))), String_var(Compiler_fresh_name(c, _1389)));  return 0;
 }
 
 static int _expansion_introduced(Compiler c, List binding){

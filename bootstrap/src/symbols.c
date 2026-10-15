@@ -1221,6 +1221,18 @@ void Sym_unshadow_global(Sym s, String spelling){
 
 }
 
+void Sym_unshadow_enclosing(Sym s, String spelling){
+  if(! _init_guard_) _file_init_();
+  Var alias;
+  if(! Map_try_get(s -> binding_facts, List_var(cons(_91, cons(String_var(spelling), NULL))), &(alias))) alias = String_var(Compiler_fresh_name(s -> c, _94));
+  List locals = _locals(s, spelling), key = cons(String_var(spelling), NULL);
+  for(int i =(int) Block_len(s -> scopes) - 1;  i >= s -> base_scopes;  i --){
+    Var local;
+    if(Map_try_get(_scope_at(s, i) -> bindings, List_var(key), &(local)) && List_contains(locals, local)) _unshadow_local(s, Var_list_payload(local), Var_as_string(alias));
+  }
+
+}
+
 static void _unshadow_local(Sym s, List binding, String alias){
   if(!(Map_contains(s -> binding_facts, List_var(cons(_88, cons(List_var(binding), NULL)))))) Sym_put(s, s -> binding_facts, List_var(cons(_88, cons(List_var(binding), NULL))), String_var(alias));
 }

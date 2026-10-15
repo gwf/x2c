@@ -1306,8 +1306,8 @@ static void _capture_identifier(Compiler c, List binding) {
    as it would where the expansion lands. Both return 1, since the
    identifier's type is the new binding's. Any other file-scope identity
    that a visible declaration hides, such as a name a template keeps,
-   gives every local of its spelling, the enclosing ones too, an emitted
-   alias, and the visible declaration one if it has none. */
+   gives every enclosing local of its spelling an emitted alias, and the
+   visible declaration one if it has none. */
 static int _shadow_identifier(
   Compiler c, List &binding, Type type, String spelling, Map binding_facts,
   int kept) {
@@ -1323,7 +1323,7 @@ static int _shadow_identifier(
   }
   if (!visible_type || (type && !c.sym.resolve_global(%($spelling), NULL)))
     return 0;
-  c.sym.unshadow_global(spelling);
+  c.sym.unshadow_enclosing(spelling);
   if (!(%(emitted $visible) in binding_facts))
     c.set_fact(%(emitted $visible), c.fresh_name("binding_shadow"));
   return 0;

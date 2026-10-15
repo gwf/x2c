@@ -99,6 +99,8 @@ void Sym_join_locals(Sym s, List binding);
 
 void Sym_unshadow_global(Sym s, String spelling);
 
+void Sym_unshadow_enclosing(Sym s, String spelling);
+
 List Sym_bind_identity(Sym s, List context, List binding, List ast);
 
 Var Compiler_aggregate_name(Compiler c, Symbol kind, Var name, int definition);
