@@ -1,17 +1,13 @@
 
 macro Decorator $trace(Function $function, Expr $label) {
-  printf(
-    "[%s] enter %s\n",
-    $label,
-    $(x2c.literal.string (Code.name $function))
-  );
+  printf("[%s] enter %s\n", $label, $Code.name($function));
   defer printf("[%s] leave\n", $label);
-  @(Code.body $function)
+  @Code.body($function)
 }
 
 macro Decorator $require_parameter(Function $function, Name $parameter) {
-  if (!$(Code.parameter $function $parameter)) return -1;
-  @(Code.body $function)
+  if (!$Code.parameter($function, $parameter)) return -1;
+  @Code.body($function)
 }
 
 macro Decorator $increment(Expr $target) => $target + 1;

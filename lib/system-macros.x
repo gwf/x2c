@@ -6,11 +6,11 @@
 #pragma once
 #include "meta.x"
 
-/* Dedents the literal `node` was written as when its spelling is exact.
+/* Dedents the literal `text` was written as when its spelling is exact.
    Escaped, interpolated and computed values keep their meaning by calling
    String.dedent at run time. */
-meta List _dedent_expand(List node) {
-  String source = Code.source_text(node);
+meta List _dedent_expand(Source text) {
+  String source = Code.source_text(text);
   int length = source.len(), open = 0;
   if (length >= 3 && source.startswith("%\""))
     open = 2;
@@ -18,7 +18,7 @@ meta List _dedent_expand(List node) {
     open = 1;
   if (open == 0 || !source.endswith("\"") || "\\" in source ||
       "$" in source)
-    return $!( $node.dedent() );
+    return $!( ${text.assoc(<syntax>)}.dedent() );
   String body = source.getslice(open, length - 1, 1);
   return $!String{ ${body.dedent()} };
 }
@@ -27,7 +27,7 @@ meta List _dedent_expand(List node) {
    is dedented during translation when its spelling carries no escape and no
    interpolation hole; every other form calls String.dedent at run time, so
    both spellings mean the same thing. */
-macro Expression $dedent(Expr $text) => $(_dedent_expand $text);
+macro Expression $dedent(Expr $text) => $_dedent_expand($text);
 
 /* Reports how long the following statement took on stderr. The caller
    includes <time.h>. The stop clock and the report run from a `defer`, so
@@ -92,23 +92,26 @@ meta List _cases_switch(List condition, List body) {
 /* Gives every case run its own block and its own break. Deliberate
    fallthrough is written by nesting an ordinary switch. */
 macro Decorator $switch(Stmt $body, Expr $condition) {
-  @(_cases_switch $condition $body)
+  @_cases_switch($condition, $body)
 }
 
 meta List _macros_location(void) =>
   $!String{ ${x2c_invocation_file() + ":" + x2c_invocation_line().str()} };
 
+meta List _macros_source(Source code) =>
+  $!String{ ${Code.source_text(code)} };
+
 /* Marks a path that is not written yet. Reaching it raises `<invariant>`
    naming the note and the source line the macro was written on. */
 macro Stmt $todo(Expr $note) {
   raise %(invariant (note ${$note})
-    (at ${$(_macros_location)}));
+    (at ${$_macros_location()}));
 }
 
 /* Marks a path the surrounding logic excludes. */
 macro Stmt $unreachable() {
   raise %(invariant (note "unreachable")
-    (at ${$(_macros_location)}));
+    (at ${$_macros_location()}));
 }
 
 /* Checks an invariant and reports the failing expression as it was written.
@@ -117,8 +120,8 @@ macro Stmt $assert(Expr $check) {
   {
     if (!($check)) {
       raise %(invariant
-        (check ${$(x2c.literal.string (Code.source_text $check))})
-        (at ${$(_macros_location)}));
+        (check ${$_macros_source($check)})
+        (at ${$_macros_location()}));
     }
   }
 }

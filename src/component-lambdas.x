@@ -113,10 +113,6 @@ meta static List _lambda_targets(List node) {
   return targets.list_free();
 }
 
-/* The bound `code`, kept as it is when the function that holds it binds
-   again. */
-meta static Code _lambda_kept(Code code) => %(code-value "lowered" $code ());
-
 /* The block items `items`, rebuilt from `original`, each kept unless
    `declaring` holds it. A run of items that `original` holds unchanged is
    kept as one sequence, so the function binds one carrier for the run and
@@ -127,13 +123,13 @@ meta static List _lambda_kept_items(
   foreach (Var item, items) {
     if (item === original.car()) run.push(item);
     else {
-      if (run.len()) out.push(_lambda_kept(%(seq @{run.list()})));
+      if (run.len()) out.push(Code.lowered(%(seq @{run.list()})));
       run.truncate(0);
-      out.push(item in declaring ? item : _lambda_kept(item));
+      out.push(item in declaring ? item : Code.lowered(item));
     }
     original = original.cdr();
   }
-  if (run.len()) out.push(_lambda_kept(%(seq @{run.list()})));
+  if (run.len()) out.push(Code.lowered(%(seq @{run.list()})));
   return out.list_free();
 }
 
@@ -166,10 +162,10 @@ meta static Var _lambda_declare_cells(List node, Map cells) {
         }
         celled |= !!cell;
         items.push(
-          cell ? cell : _lambda_kept(%(declare $base (bindings $item))));
+          cell ? cell : Code.lowered(%(declare $base (bindings $item))));
       }
     case %(dstrdecl *): {
-      items.push(_lambda_kept(node));
+      items.push(Code.lowered(node));
       foreach (List binding, _lambda_targets(node)) {
         Code copy = _lambda_copied_cell(binding, cells);
         if (copy) items.push(copy);
@@ -181,7 +177,7 @@ meta static Var _lambda_declare_cells(List node, Map cells) {
         _lambda_declare_cells(%(declare $base $bindings), cells);
       match (declaration) case %(seq *initial):
         return %(block @initial
-                 ${_lambda_kept(%(for () $test $next $body))});
+                 ${Code.lowered(%(for () $test $next $body))});
     }
   }
   return celled ? %(seq @{items.list_free()}) : node;
@@ -242,10 +238,6 @@ meta static Var _lambda_rebuild(
   return done[0];
 }
 
-/* The return of a lambda that returns no value. */
-meta static List _lambda_none(void) =>
-  %(return ("Var") (expr ("Var") (literal ("Var") "void")));
-
 /* The block `items` with each bare return returning `none`, rebuilt only
    when one returns outside the body of a lambda the items hold. */
 meta static List _lambda_returning(List items, List none) {
@@ -263,9 +255,10 @@ meta static List _lambda_returning(List items, List none) {
    lowering it later reports there. */
 meta static List _lambda_items(Code body) {
   match (body) case %(block *items):
-    return %(@{_lambda_returning(items, _lambda_none())} ${_lambda_none()});
+    return %(@{_lambda_returning(items, source_return_none())}
+             ${source_return_none()});
   List items = body.match(%(expr (void) ?))
-    ? %((stmnt $body) ${_lambda_none()})
+    ? %((stmnt $body) ${source_return_none()})
     : %((stmnt (return ${body.convert(%("Var"))})));
   match (x2c_enclosing(<statement>)) case %(at ?origin ?):
     return %((at $origin ${items.car()}) @{items.cdr()});
@@ -311,7 +304,7 @@ meta static List _lambda_closure_params(
    bound already, so it is not bound again. */
 meta static Code _lambda_function(List name, List params, Code body) {
   if (!params) params = %((param (void) (bind () ())));
-  List lowered = %(code-value "lowered" (seq @{_lambda_items(body)}) ());
+  List lowered = Code.lowered(%(seq @{_lambda_items(body)}));
   return %(function (static "Var") (bind $name ((fnmod (params @params))))
            (block $lowered));
 }

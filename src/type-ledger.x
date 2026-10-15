@@ -13,21 +13,21 @@
 
 /* Each native pointer type's tag; the ledger adds every boxed class and a
    pointer to it. */
-static Map typetags = $(_tag_types '(
-  ((* void) p48)                   ((* unsigned char) u8*)
-  ((* signed char) i8*)            ((* unsigned short) u16*)
-  ((* short) i16*)                 ((* unsigned) u32*)
-  ((* int) i32*)                   ((* float) f32*)
-  ((* unsigned long) ulong*)       ((* long) long*)
-  ((* double) f64*)                ((* unsigned long long) ullong*)
-  ((* long long) llong*)           ((* long double) ldouble*)
-  ((* * void) p48*)                ((* * unsigned char) u8**)
-  ((* * signed char) i8**)         ((* * unsigned short) u16**)
-  ((* * short) i16**)              ((* * unsigned) u32**)
-  ((* * int) i32**)                ((* * float) f32**)
-  ((* * unsigned long) ulong**)    ((* * long) long**)
-  ((* * double) f64**)             ((* * unsigned long long) ullong**)
-  ((* * long long) llong**)        ((* * long double) ldouble**)
+static Map typetags = $_tag_types(%(
+  ((* void) <p48>)                 ((* unsigned char) <u8*>)
+  ((* signed char) <i8*>)          ((* unsigned short) <u16*>)
+  ((* short) <i16*>)               ((* unsigned) <u32*>)
+  ((* int) <i32*>)                 ((* float) <f32*>)
+  ((* unsigned long) <ulong*>)     ((* long) <long*>)
+  ((* double) <f64*>)              ((* unsigned long long) <ullong*>)
+  ((* long long) <llong*>)         ((* long double) <ldouble*>)
+  ((* * void) <p48*>)              ((* * unsigned char) <u8**>)
+  ((* * signed char) <i8**>)       ((* * unsigned short) <u16**>)
+  ((* * short) <i16**>)            ((* * unsigned) <u32**>)
+  ((* * int) <i32**>)              ((* * float) <f32**>)
+  ((* * unsigned long) <ulong**>)  ((* * long) <long**>)
+  ((* * double) <f64**>)           ((* * unsigned long long) <ullong**>)
+  ((* * long long) <llong**>)      ((* * long double) <ldouble**>)
 ));
 
 /* The encoding rows a statically known tag can be tested against without a

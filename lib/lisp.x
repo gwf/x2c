@@ -1856,14 +1856,13 @@ static Var _bad_session(String operation) {
 }
 
 static macro Decorator $lisp.entry(Function $function, Expr $operation) {
-  if (!$(Code.parameter $function "lisp"))
-    return _bad_session($operation);
-  Scope.push(&$(Code.parameter $function "lisp").user);
+  if (!lisp) return _bad_session($operation);
+  Scope.push(&lisp.user);
   defer Scope.pop();
   Lisp prior_lisp = lisp_active;
-  lisp_active = $(Code.parameter $function "lisp");
+  lisp_active = lisp;
   defer lisp_active = prior_lisp;
-  @(Code.body $function)
+  @Code.body($function)
 }
 
 /** Reads one Lisp form and returns `<value>` or `<eof>`.

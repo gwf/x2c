@@ -16,42 +16,27 @@
 #include "varconvert.x"
 
 /* One row per native integer and floating family. Each $native.update
-   invocation reads its Var tag, boxing operations, delegated zero, and
-   the casts for its two representation crossings. */
+   invocation reads its Var tag, boxing operations, and the casts for its
+   two representation crossings. */
 
 /* Keyed by the tag the invocation names. A row is the `Var` tag, the boxer,
-   the decoder, the zero expression, and the cast pair: into the boxer's
-   parameter type and back to the storage type, each empty where the two
-   types already agree. */
+   the decoder, and the cast pair: into the boxer's parameter type and back
+   to the storage type, each empty where the two types already agree. */
 meta static List _update_rows(void) => %(
-  (char    (i8 "Var_box_i8" "Var_integer"
-            (expr (int) (literal (int) "0")) (() (char))))
-  (schar   (i8 "Var_box_i8" "Var_integer"
-            (expr (int) (literal (int) "0")) ((char) (signed char))))
-  (u8      (u8 "Var_box_u8" "Var_integer"
-            (expr (int) (literal (int) "0")) (() ("uchar"))))
-  (i16     (i16 "Var_box_i16" "Var_integer"
-            (expr (int) (literal (int) "0")) (() (short))))
-  (u16     (u16 "Var_box_u16" "Var_integer"
-            (expr (int) (literal (int) "0")) (() ("ushort"))))
-  (i32     (i32 "Var_box_i32_bits" "Var_integer"
-            (expr (int) (literal (int) "0")) ((unsigned) (int))))
-  (u32     (u32 "Var_box_u32" "Var_integer"
-            (expr (int) (literal (int) "0")) (() ("uint"))))
-  (long    (long "Var_box_long" "Var_long_value"
-            (expr (int) (literal (int) "0")) (() ())))
-  (ulong   (ulong "Var_box_ulong" "Var_ulong_value"
-            (expr (int) (literal (int) "0")) (() ())))
-  (llong   (llong "Var_box_long_long" "Var_long_long_value"
-            (expr (int) (literal (int) "0")) (() ())))
-  (ullong  (ullong "Var_box_ulong_long" "Var_ulong_long_value"
-            (expr (int) (literal (int) "0")) (() ())))
-  (f32     (f32 "Var_box_f32" "Var_decode_f32"
-            (expr (float) (literal (float) "0.0f")) (() ())))
-  (f64     (f64 "Var_box_f64" "Var_decode_f64"
-            (expr (double) (literal (double) "0.0")) (() ())))
-  (ldouble (ldouble "Var_box_long_double" "Var_long_double_value"
-            (expr (long double) (literal (long double) "0.0L")) (() ())))
+  (char    (i8 "Var_box_i8" "Var_integer" (() (char))))
+  (schar   (i8 "Var_box_i8" "Var_integer" ((char) (signed char))))
+  (u8      (u8 "Var_box_u8" "Var_integer" (() ("uchar"))))
+  (i16     (i16 "Var_box_i16" "Var_integer" (() (short))))
+  (u16     (u16 "Var_box_u16" "Var_integer" (() ("ushort"))))
+  (i32     (i32 "Var_box_i32_bits" "Var_integer" ((unsigned) (int))))
+  (u32     (u32 "Var_box_u32" "Var_integer" (() ("uint"))))
+  (long    (long "Var_box_long" "Var_long_value" (() ())))
+  (ulong   (ulong "Var_box_ulong" "Var_ulong_value" (() ())))
+  (llong   (llong "Var_box_long_long" "Var_long_long_value" (() ())))
+  (ullong  (ullong "Var_box_ulong_long" "Var_ulong_long_value" (() ())))
+  (f32     (f32 "Var_box_f32" "Var_decode_f32" (() ())))
+  (f64     (f64 "Var_box_f64" "Var_decode_f64" (() ())))
+  (ldouble (ldouble "Var_box_long_double" "Var_long_double_value" (() ())))
 );
 
 /* The row the invocation's `<tag>` literal names. The capture is a literal,
@@ -65,12 +50,11 @@ meta static List _update_row(List id) {
 meta static Symbol _update_tag(List id)     => _update_row(id)[0];
 meta static String _update_boxer(List id)   => _update_row(id)[1];
 meta static String _update_decoder(List id) => _update_row(id)[2];
-meta static List _update_zero(List id)      => _update_row(id)[3];
 
 /* Empty stands for "no cast", so these two tests read emptiness rather than
    absence, which is what an empty entry in the row's cast pair means. */
-meta static List _update_cast_in(List id)  => _update_row(id)[4].car();
-meta static List _update_cast_out(List id) => _update_row(id)[4].cdr().car();
+meta static List _update_cast_in(List id)  => _update_row(id)[3].car();
+meta static List _update_cast_out(List id) => _update_row(id)[3].cdr().car();
 
 /* The destination's current value, boxed in the family the row names. */
 meta static List _update_box(List id, List lhs) {
@@ -113,10 +97,10 @@ static macro Unit $native.update(Type $type, Name $function, Literal $row) {
       }));
     }
     Var $converted = _native_update(
-      $(_update_box $row (x2c.ident "lhs")),
-      $(_update_tag $row), $(x2c.ident "op"), $(x2c.ident "rhs"));
-    if ($converted is void) return $(_update_zero $row);
-    $type value = $(_update_decode $row `(expr () (ident ,$converted)));
+      $_update_box($row, $x2c_ident("lhs")),
+      $_update_tag($row), $(x2c.ident "op"), $(x2c.ident "rhs"));
+    if ($converted is void) return 0;
+    $type value = $_update_decode($row, $converted);
     ($(x2c.ident "lhs"))[0] = value;
     return value;
   }
