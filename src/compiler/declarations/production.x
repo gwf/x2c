@@ -152,6 +152,11 @@ module void _restore_declaration_bindings(
     c.set_fact(
       %(source-spelling $syntax),
       facts.getdefault(%(source-spelling $syntax), spelling));
+    foreach (Symbol kind, %(method self)) {
+      Var value;
+      if (facts.try_get(%($kind $syntax), value))
+        c.set_fact(%($kind $syntax), value);
+    }
     return;
   }
   foreach (Var child, syntax.list())
