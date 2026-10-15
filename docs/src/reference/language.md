@@ -471,6 +471,12 @@ x2c keeps C declarations, expressions, operators, functions, structs, unions,
 enums, pointers, arrays, and control flow. It adds language forms around that
 foundation and keeps C's object model.
 
+Use `#include` to include source and headers. Avoid other C preprocessor
+constructs in x2c source; use x2c macros and language features instead.
+Intermixing `#define` with x2c transformations is unsupported. The compiler
+preserves some native macro behavior on a best-effort basis, but does not
+guarantee that native macro text follows renamed or file-private bindings.
+
 Member access uses `.` wherever x2c parsed the struct, whether the receiver is
 a value or a pointer, and whether the declaration came from x2c source or from
 a C header x2c reads. `->` remains accepted and is required where the compiler

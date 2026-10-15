@@ -33,9 +33,11 @@ Additional retained findings use the same selected baseline:
 - Cache worker, after cache work: repair REPL truth conversion for empty
   Strings and zero Symbols, and pointer increments/compound updates through
   the existing pointer-step operation. Add native/REPL parity coverage.
-- Compiler worker: investigate native macro references to file-private
-  module statics against the documented native preprocessor-text boundary.
-  Resolve any actual semantic conflict before changing that boundary.
+- Native macro references to file-private statics reproduce the reported
+  mismatch. Gary closed this finding as outside supported behavior:
+  intermixing #define with x2c is best effort, and CPP beyond #include is
+  discouraged. The book states this boundary; no macro-binding repair is
+  commissioned.
 - Orchestrator: normalize local install directories before deriving names,
   and correct and execute the guide's acquired-value $auto example.
 
