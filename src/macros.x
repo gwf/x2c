@@ -21,6 +21,7 @@ static keyword loop $private.loop;
 #include "builtins.x"
 #include "linked-meta.x"
 #include "literals.x"
+#include "lambdas.x"
 #include "stage.x"
 #include "meta-group.x"
 #include "meta-helper-client.x"
@@ -2739,6 +2740,12 @@ static List _rewrite(
   foreach (RewriteRule rule, _rewrite_candidates(c, point, kind)) {
     if (c.active_rewrites.contains(rule) || (shipped && !rule.builtin))
       continue;
+    if (lower > 0 && rule.builtin && point == <function>) {
+      List lifted = c.lift_lambda_types(source);
+      if (lifted !== source)
+        $let(c.applying, cons(rule, c.active_rewrites))
+          return _lowered_definition(c, lifted);
+    }
     MacroMatcher *matcher = _prepared_matcher(rule);
     if (matcher.shape ? !c.matches_macro(*matcher, source)
                       : !source.match(matcher.pattern)) continue;

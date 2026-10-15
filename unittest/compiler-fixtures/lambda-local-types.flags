@@ -1,0 +1,1 @@
+-I unittest/compiler-fixtures/lambda-local-types unittest/compiler-fixtures/lambda-local-types/first.x unittest/compiler-fixtures/lambda-local-types/second.x

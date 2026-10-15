@@ -16,6 +16,100 @@
 #include "type.x"
 #include "expressions.x"
 
+// local types used by lifted functions
+
+/** Moves a function's local type definitions reached by a lambda before
+    that function, before cells and functions lower. Their semantic tags
+    stay the same; emitted names keep lexical scopes distinct. */
+List Compiler.lift_lambda_types(Compiler c, List function) {
+  if (!Ast.contains_head(function, <lambda>)) return function;
+  Map definitions = {}, needed = {};
+  List node, ordered = NULL;
+  $ast.walk(function.cadddr(), node)
+    match (node) {
+      case %((!or declare typedef) ?(Type base) (bindings *bindings)): {
+        Type type = base.base_type();
+        int anonymous_member =
+          type.match(%((!or struct union) (gensym ? ?) ?)) &&
+          (!bindings || bindings === %((bind () ())));
+        if (!anonymous_member &&
+            (type.is_aggregate_tag_body() || type.is_enum_tag_body())) {
+          definitions[%(${type.car()} ${type.cadr()})] = type;
+          ordered = cons(type, ordered);
+        }
+      }
+    }
+  if (!definitions.len()) return function;
+  $ast.walk(function.cadddr(), node)
+    if (node.car() == <lambda>)
+      _lambda_needed_types(node, definitions, needed);
+  if (!needed.len()) return function;
+  Map replaced = {};
+  $ast.walk(function.cadddr(), node) {
+    match (node) {
+      case %((!or struct union enum) ? ?): {
+        List tag = %(${node.car()} ${node.cadr()});
+        if (tag in needed) replaced[(void *) node] = tag;
+      }
+      case %(declare ?(Type base) (bindings *bindings)): {
+        Type type = base.base_type();
+        if (!type.is_aggregate() && !type.is_enum()) continue;
+        List tag = %(${type.car()} ${type.cadr()});
+        if (tag in needed &&
+            (!bindings || bindings === %((bind () ()))))
+          replaced[(void *) node] = %(seq);
+      }
+    }
+  }
+  Type signature = function.cadr();
+  int public = signature.is_inline() && !signature.is_static();
+  Array declarations = [];
+  foreach (Type type, ordered)
+    if (%(${type.car()} ${type.cadr()}) in needed) {
+      Type body = (Type) Ast.rewrite_children((Ast) type,
+        %!(List child) => Ast.replace_nodes(child, replaced));
+      declarations.push(_lambda_type_declaration(c, body, public));
+    }
+  return %(seq @{declarations.list_free()}
+           (code-value "bound" ${Ast.replace_nodes(function, replaced)} ()));
+}
+
+/* Finds referenced definitions and their dependencies. Emission retains
+   declaration order, which already satisfies complete-type requirements. */
+static void _lambda_needed_types(
+  List syntax, Map definitions, Map needed) {
+  List node;
+  $ast.walk(syntax, node)
+    match (node) case %((!or struct union enum) ?name *): {
+      List tag = %(${node.car()} $name);
+      Var definition;
+      if (!(tag in needed) && definitions.try_get(tag, definition)) {
+        needed[tag] = 1;
+        _lambda_needed_types(definition, definitions, needed);
+      }
+    }
+}
+
+/* Anonymous types gain a private typedef that the ordinary native alias
+   emitter uses. Named local tags and enumerators retain their bindings. */
+static Code _lambda_type_declaration(Compiler c, Type type, int public) {
+  List name = type.cadr();
+  String role = "lambda_type";
+  if (public) role = %"lambda_type_${Path.identifier_hash(c.filename)}";
+  List alias = c.sym.introduce(c.fresh_name(role));
+  c.set_fact(%(ntype $alias), %(${type.car()} $name));
+  Type base = public ? type : cons(<static>, type);
+  Code declaration = %(typedef $base (bindings (bind $alias ())));
+  if (name.car() != <gensym>)
+    c.set_fact(%(emitted $name), c.fresh_name(role));
+  if (type.is_enum())
+    foreach (List member, type.caddr()) {
+      List binding = member.car() == <op> ? member.caddr() : member;
+      c.set_fact(%(emitted $binding), c.fresh_name(%"${role}_enumerator"));
+    }
+  return %(code-value "bound" $declaration ());
+}
+
 // diagnostics
 
 static macro Stmt $report.parse.param_ident(Expr $c) {

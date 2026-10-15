@@ -793,7 +793,8 @@ static void _track_static(Sym s, List key, List ast) {
 
 // A tagged definition also publishes its tag unless the key is that tag.
 static Type _stored_type(Type type, Type key, List ast) {
-  if (type.is_aggregate_tag_body() && !key.is_aggregate_tag()) {
+  if ((type.is_aggregate_tag_body() && !key.is_aggregate_tag()) ||
+      (type.is_enum_tag_body() && !key.is_enum_tag())) {
     Var (aggregate, tag) = ast;
     type = %( $aggregate $tag );
   }
@@ -1347,7 +1348,8 @@ static Type _replace_type_base(Type type, Type base, Type replacement) {
 */
 Type Sym.local_type(Sym s, Type type) {
   Type base = type.base_type();
-  if (base.is_aggregate_tag() && base.cadr() is <string>)
+  if ((base.is_aggregate_tag() || base.is_enum_tag()) &&
+      base.cadr() is <string>)
     return _local_tag(s, type, base);
   return base.is_bare_typedef_name() ? _local_alias(s, type, base) : type;
 }

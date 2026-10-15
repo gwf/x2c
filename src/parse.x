@@ -1805,10 +1805,10 @@ static List _enum(Compiler c) {
   List name = _tag_name(c);
   if (name && (c.package || c.line_markers))
     name = _scoped_aggregate_name(c, <enum>, name);
-  if (name && c.macro_holes)
-    name = %(${c.aggregate_name(
-      <enum>, name.car(), c.peek(0) == <"{"> || c.peek(0) == <;>)});
   List usedname = name ? name : c.gensym();
+  usedname = %(${c.aggregate_name(
+    <enum>, usedname.car(),
+    c.peek(0) == <"{"> || (c.macro_holes && c.peek(0) == <;>))});
   List type = cons(<enum>, usedname), enums = NULL;
   if (c.test(<"{">)) {
     enums = c.parse_enumerators(type);

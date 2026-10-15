@@ -78,7 +78,7 @@ int Type.is_enum(Type type) => !!type.match(%(enum *));
 
 /** Returns whether `type` is a body-free enum tag reference. */
 int Type.is_enum_tag(Type type) =>
-  !!type.match(%(enum (!or (!not (*)) (gensym ? ?))));
+  !!type.match(%(enum (!or (!not (*)) (gensym ? ?) (binding ? ?))));
 
 static int _is_enum_body(Type type) => !!type.match(%(enum (*)));
 
@@ -100,6 +100,7 @@ List Type.tag(Type type) {
     Tag references and `Type`s without a stored body return `NULL`.
 */
 List Type.body(Type t) {
+  if (t.is_enum_tag() || t.is_aggregate_tag()) return NULL;
   if (_is_enum_body(t) || _is_aggregate_body(t)) return cdr(t);
   if (t.is_enum_tag_body() || t.is_aggregate_tag_body()) return t.cddr();
   return NULL;
