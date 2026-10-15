@@ -1115,7 +1115,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _652 = cons(_649, _651);
   _653 = List_var(_652);
   _654 = Symbol_var(1133019155420);
-  _655 = int_var(36507);
+  _655 = int_var(36520);
   _656 = cons(_655, NULL);
   _657 = cons(_654, _656);
   _658 = List_var(_657);
@@ -1206,7 +1206,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _743 = cons(_742, NULL);
   _744 = cons(_641, _743);
   _745 = List_var(_744);
-  _746 = int_var(36417);
+  _746 = int_var(36430);
   _747 = cons(_746, NULL);
   _748 = cons(_654, _747);
   _749 = List_var(_748);

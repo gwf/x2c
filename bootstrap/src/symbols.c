@@ -1198,10 +1198,12 @@ int Type_is_enum_tag_body(Type);
 
 int Type_is_enum_tag(Type);
 
+int Type_is_typedef(Type);
+
 Type Type_declared(Type);
 
 static Type _stored_type(Type type, Type key, List ast){
-  if((Type_is_aggregate_tag_body(type) && ! Type_is_aggregate_tag(key)) ||(Type_is_enum_tag_body(type) && ! Type_is_enum_tag(key))){
+  if((Type_is_aggregate_tag_body(type) && ! Type_is_aggregate_tag(key)) ||(Type_is_enum_tag_body(type) && ! Type_is_enum_tag(key) && ! Type_is_typedef(key))){
     Var aggregate, tag;
     List _x2c_gensym_destructure_3 = ast;
     aggregate = List_getindex(_x2c_gensym_destructure_3, 0);
@@ -1661,8 +1663,6 @@ Type Sym_resolve_key(Sym s, Type key){
 }
 
 int Type_is_typedef_name(Type);
-
-int Type_is_typedef(Type);
 
 List Sym_field_order(Sym s, Type type);
 

@@ -12471,7 +12471,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_22(void
   _11579 = cons(_503, _11578);
   _11580 = String_new("src/build.x");
   _11581 = String_var(_11580);
-  _11582 = String_new("affa8192");
+  _11582 = String_new("a9cf3683");
   _11583 = String_var(_11582);
   _11584 = String_new("cwd:./json.x");
   _11585 = String_var(_11584);
@@ -12810,7 +12810,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _11915 = List_var(_11914);
   _11916 = String_new("src/parse.x");
   _11917 = String_var(_11916);
-  _11918 = String_new("b149e7bd");
+  _11918 = String_new("9fee1851");
   _11919 = String_var(_11918);
   _11920 = cons(_11919, NULL);
   _11921 = cons(_11917, _11920);
@@ -12842,7 +12842,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _11947 = List_var(_11946);
   _11948 = String_new("src/symbols.x");
   _11949 = String_var(_11948);
-  _11950 = String_new("769adb58");
+  _11950 = String_new("d89fcb6c");
   _11951 = String_var(_11950);
   _11952 = cons(_11951, NULL);
   _11953 = cons(_11949, _11952);
@@ -13154,7 +13154,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _12259 = List_var(_12258);
   _12260 = String_new("src/lambdas.x");
   _12261 = String_var(_12260);
-  _12262 = String_new("b3af9ae5");
+  _12262 = String_new("eee1ee42");
   _12263 = String_var(_12262);
   _12264 = cons(_12263, NULL);
   _12265 = cons(_12261, _12264);
@@ -13347,7 +13347,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12449 = String_var(_12448);
   _12450 = String_new("src/generate.x");
   _12451 = String_var(_12450);
-  _12452 = String_new("874c0500");
+  _12452 = String_new("492cce4c");
   _12453 = String_var(_12452);
   _12454 = cons(_12453, NULL);
   _12455 = cons(_12451, _12454);
