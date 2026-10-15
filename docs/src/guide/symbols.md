@@ -1,20 +1,13 @@
 # Symbols and Atoms
 
-C gives you two ways to spell a name in data: an `enum` constant, which is
-fast to compare but has no text; and a `char *`, which has text but costs a
-`strcmp` every time you ask whether two names match. x2c adds two types that
-give you both halves at once.
+In C, a name in data is an `enum` constant or a `char *`. An `enum`
+constant compares quickly and has no text. A `char *` has text, and each
+comparison costs a `strcmp`. x2c adds two name types that have text and
+compare with one machine comparison:
 
-- A `Symbol` is a **short** name packed directly into a 64-bit integer.
-- An `Atom` is an **exact** name of any length, canonicalized so that equal
-  spellings are the same value.
-
-Both compare names with a single machine comparison. They differ in which
-spellings they preserve.
-
-The literal and representation rules are in
-[the language reference](../reference/language.md), and the runtime rules
-are in [the standard library overview](../library/overview.md).
+- A `Symbol` is a short name packed into a 64-bit integer.
+- An `Atom` is an exact name of any length. Equal spellings produce the
+  same value.
 
 ## A Symbol is a name packed into an integer
 
@@ -58,25 +51,17 @@ static const char *explain(Symbol outcome) {
 Zero is the empty symbol. Construction returns it for empty or missing
 input, it is falsy in a condition, and its representation is `<>`.
 
-## What interning solves, and how a Symbol avoids it
+## How a Symbol is encoded
 
-Interning is the classic fix for name comparison: push every spelling
-through one table so that a given spelling always yields the same object,
-then compare objects instead of bytes. You get cheap identity comparison and
-a name that stays valid as long as the table does.
+A `Symbol` stores its characters in the integer. Two `<ready>` literals are
+equal for the same reason two `42`s are equal, and comparing them is one
+integer comparison. An integer holds a limited number of characters, so the
+spelling selects one of two encodings:
 
-A `Symbol` gets there another way. It is **not** interned and never enters a
-table. It is *encoded*, and the characters are the value. Two `<ready>`
-literals are equal for the same reason two `42`s are equal, and comparing
-them is one integer compare.
-
-The limit is capacity: an integer holds only so many characters. The payload
-selects between two encodings.
-
-- A restricted 5-bit alphabet holds up to **ten** characters. It covers the
+- A restricted 5-bit alphabet holds up to ten characters. It covers the
   letters, `*`, `+`, `?`, `!`, and a separator. Uppercase folds to lowercase,
   and `-` and `_` are the same separator.
-- The general 7-bit encoding holds up to **seven** ASCII characters and
+- The general 7-bit encoding holds up to seven ASCII characters and
   preserves each byte.
 
 A source literal must reproduce its spelling when decoded. The compiler
@@ -102,16 +87,17 @@ printf("raw integers say b < abc: %d\n", <b> < <abc>);
 printf("Symbol.compare says b > abc: %d\n", <b>.compare(<abc>) > 0);
 ```
 
-`Symbol.str` returns the canonical `String` for the decoded text, so
-calling it twice gives you the same pointer. Call it, or `Symbol.repr`, when
-you need the text. The symbol is already the identity.
+`Symbol.str` decodes the value and returns the canonical `String`, so two
+calls return the same pointer. Call `Symbol.str` or `Symbol.repr` only
+when you need the text.
 
 ## An Atom is an exact name
 
 Use an `Atom` when the spelling must survive intact. `Atom` is a `Var`, and
 `Atom.intern` turns a spelling into one. Interning one spelling twice
-produces identical `Var` bits, so equality is a bit comparison, and nothing
-was folded, truncated, or case-mapped on the way in.
+produces identical `Var` bits, so equality is a bit comparison. Interning
+keeps the spelling exactly: it does not fold case or separators, and it does
+not truncate.
 
 ```x2c
 Atom exact = Atom.intern("VeryLongIdentifierName");
@@ -126,7 +112,7 @@ printf("case matters: %d\n", exact == lower);
 The source literal `<VeryLongIdentifierName>` is rejected because its
 encoded value would decode as `verylongid`.
 `Symbol.new("VeryLongIdentifierName")` is the lossy runtime operation, and
-it does return `verylongid`. Side by side:
+it returns `verylongid`.
 
 | | `Symbol` | `Atom` |
 | --- | --- | --- |
@@ -139,35 +125,32 @@ it does return `verylongid`. Side by side:
 `Atom.intern` requires a non-empty spelling. A null or empty spelling is a
 programming error and terminates the process.
 
-### Two representations, one identity
+### How an Atom is stored
 
-An `Atom` is not a wrapper object. `Atom.intern` picks one of two
-representations:
+`Atom.intern` stores an atom in one of two forms:
 
-- if `Symbol` encoding round-trips every byte of the spelling, the atom *is*
-  that compact immediate symbol;
-- otherwise the atom is a private `<lsym>` value pointing straight at the
+- If `Symbol` encoding reproduces every byte of the spelling, the atom is
+  that compact immediate symbol and needs no storage.
+- Otherwise the atom is a private `<lsym>` value that points to the
   canonical `String`.
 
 `Atom.intern("alpha")` is an immediate with no storage, while
-`Atom.intern("Mixed_Case_Identifier")` points at a canonical `String`. You
-can see which one you have: `value.is_atom()` accepts both, and
-`value is Symbol` tells them apart. Most code does not need to. Because
-canonicalization happens once, in one place, `Atom.str` returns the exact
-bytes without copying. The Atom descriptor's hash operation uses the cached
-String hash for a String-backed Atom.
+`Atom.intern("Mixed_Case_Identifier")` points at a canonical `String`. Most
+code does not need to know which form it has. When it does,
+`value.is_atom()` is true for both, and `value is Symbol` is true only for
+the compact form. `Atom.str` returns the exact bytes without copying. For a
+`String`-backed atom, hashing uses the `String`'s cached hash.
 
 ## Identity and equality
 
-Equality and identity agree for both types, but for different reasons.
+For both types, equal values are identical.
 
-**`Symbol`.** It is an integer, so `==` is the right operator and means "the
-same encoded value". That is a claim about the *encoding*, not about your
-source spelling: `Symbol.new("Alpha") == <alpha>`.
+A `Symbol` is an integer, so `==` compares encoded values. Two different
+runtime spellings can have one encoding, so `Symbol.new("Alpha") == <alpha>`
+is true.
 
-**`Atom`.** `Atom`s are `Var`, so `==` uses value equality and `===` uses
-identity. For atoms the two agree, and that agreement is what interning
-gives you:
+An `Atom` is a `Var`, so `==` compares values and `===` compares identity.
+Interning makes the two agree:
 
 ```x2c
 ~Atom left = Atom.intern("VeryLongIdentifierName");
@@ -177,30 +160,30 @@ printf("identical: %d\n", left === right);
 printf("raw bits:  %d\n", left.u64 == right.u64);
 ```
 
-All three print `1`. Structural equality and bit identity coincide for
-atoms, so an equality test costs one comparison even for a long name.
+All three print `1`. An equality test is one comparison, even for a long
+name.
 
 Two cautions:
 
 - Equality is exact-spelling equality. `Atom`s differing only in case are
   different atoms.
-- Ordering is narrower than equality. `compare` orders two long atoms by
-  their spellings and two compact atoms by their decoded text, but ordering
-  *across* the two representations does not follow the spelling. For a text
+- `compare` orders two long atoms by their spellings and two compact atoms
+  by their decoded text. Between a long atom and a compact atom, the order
+  does not follow the spelling. For a text
   order over a mixed set, compare `Atom.str` values.
 
 ## Where each one belongs
 
-The question is who chose the names.
+Choose the type by who wrote the names.
 
-**Use a `Symbol` for a closed set of names that you wrote.** Outcome and
-lifecycle values are the common case. `Lisp.read` reports `<value>`,
+Use a `Symbol` for a closed set of names that you wrote, such as outcome and
+lifecycle values. `Lisp.read` reports `<value>`,
 `<eof>`, `<incomplete>`, or `<malformed>`, and `Error` causes include
 `<bad-sig>`, `<no-symbol>`, `<bad-arity>`, `<bad-types>`, and
-`<bad-result>`. Each one describes itself in a debugger, where an `enum`
-constant prints as `3`. The compiler does the same thing internally: AST
-node heads and the match operator and predicate names are compact symbols,
-because the compiler chose them.
+`<bad-result>`. A debugger shows each one by name, where an `enum` constant
+prints as `3`. The compiler uses symbols the same way: AST node heads and
+the match operator and predicate names are compact symbols, because the
+compiler chose them.
 
 `Symbol`s also make good map keys for fixed configuration:
 
@@ -209,16 +192,16 @@ Map config = {host: "localhost", port: 8080};
 printf("%s:%d\n", config[<host>].string(), config[<port>].int());
 ```
 
-Keep numeric enums where the number is the point: indexes, packed fields,
+Keep numeric enums where the numeric value matters: indexes, packed fields,
 arithmetic, and external encodings.
 
-**Use an `Atom` for names that come from outside your code.** Identifiers
+Use an `Atom` for names that come from outside your code: identifiers
 read from source text, keys in serialized data, user-supplied tags, anything
 where truncating to ten characters or folding case would corrupt the data.
 Bare elements of a `%()` [list literal](collections.md) are atoms for that
-reason. Do not add brackets to request a compact value. A bare `Atom` is
-already the compact `Symbol` when its spelling fits. Brackets inside a `%()`
-`List` literal quote text that would otherwise be another kind of element:
+reason. A bare element is already the compact `Symbol` when its spelling
+fits. Brackets inside a `%()` `List` literal only quote text that would
+otherwise parse as another kind of element:
 
 ```x2c
 List names = %(alpha Mixed_Case_Identifier 1 <1>);
@@ -229,50 +212,35 @@ printf("number then Symbol: %d %d\n",
        names.getindex(2) is <i32>, names.getindex(3) is <symbol>);
 ```
 
-`alpha` is short and lowercase, so its exact spelling round-trips through the
-compact encoding and the `Atom` is that `Symbol`. The mixed-case name cannot
-round-trip, so it keeps its canonical `String`. The brackets on `<1>` quote a
-`Symbol` spelling that bare `1` would parse as an integer. `<"">` is the empty
-`Symbol` and has no bare `Atom` spelling. [Pattern matching](match.md) splits
-the same way. `Match` operators are compact symbols, and named binder keys
-such as `?name` are canonical atoms, so long and case-sensitive binder names
-work.
+`alpha` is short and lowercase, so the compact encoding reproduces it and
+the `Atom` is that `Symbol`. The compact encoding cannot reproduce the
+mixed-case name, so that `Atom` points to its canonical `String`. The
+brackets on `<1>` quote a `Symbol` spelling that bare `1` would parse as an
+integer. `<"">` is the empty `Symbol` and has no bare `Atom` spelling.
+[Pattern matching](match.md) uses both types. `Match` operators are compact
+symbols, and named binder keys such as `?name` are canonical atoms, so long
+and case-sensitive binder names work.
 
 `Atom` representation escapes delimiters, comment openers, numeric-looking
 prefixes, whitespace, control bytes, and backslashes, so a printed atom reads
 back as the same value through `%()` and through the Lisp reader.
 
-## Speed and capacity
+## Cost
 
-`Symbol`:
+A `Symbol` literal is a compile-time constant. A `Symbol` needs no
+allocation, table, or lifetime management. `Symbol.str` and `Symbol.repr`
+are its only costly operations.
 
-- construction from a literal is free; it is a compile-time constant;
-- comparison is one integer comparison;
-- there is no allocation, table, or lifetime to manage;
-- the limit is capacity: ten restricted or seven general characters. A source
-  literal that would truncate, fold case, or fold separators is rejected,
-  since it would not reproduce its spelling;
-- runtime `Symbol.new` is lossy. It truncates past the selected encoding's
-  capacity and folds case and separators in the 5-bit form;
-- `Symbol.str` and `Symbol.repr` are the expensive operations, because they
-  decode and then canonicalize a `String`.
+`Atom.intern` canonicalizes the spelling through the `String` pool: a hash,
+a pool lookup, and an allocation the first time the spelling is seen. It
+then tries the compact encoding. Intern a name once and pass the atom
+around. After interning, equality and identity are one bit comparison.
+Hashing a `String`-backed atom reads the `String`'s cached hash. Interning
+uses the `String` pool and has no separate atom table.
 
-`Atom`:
-
-- `Atom.intern` is not free. It canonicalizes the spelling through the
-  `String` canonicalizer, a hash plus a pool lookup, and an allocation the
-  first time a spelling is seen, and then tries the compact encoding. Intern
-  once and pass the atom around; do not re-intern in a loop;
-- after that, equality, identity, and hashing are cheap: a bit comparison,
-  and the `String`'s cached hash;
-- the atom value needs no storage. A compact atom is an immediate, and a
-  long atom points at the canonical `String` that interning already
-  produced. There is no wrapper object and no second intern table;
-- long atoms live as long as their canonical `String`, as described below.
-
-Neither type replaces `String`. Text you slice or concatenate, such as a
-message or a file's contents, belongs in a `String`. Use a name type when the
-main task is recognizing and comparing names.
+Use a `String` for text you slice or concatenate, such as a message or a
+file's contents. Use a name type when the main task is recognizing and
+comparing names.
 
 ## Lifetime of long atoms
 
@@ -297,6 +265,6 @@ atom. See [Scopes and Lifetime](memory.md) for the lifetime rules.
 ## Where to look next
 
 - [The language reference](../reference/language.md) has the literal
-  and representation rules. [The standard library
-  overview](../library/overview.md) has the identity and equality rules
-  for the other types.
+  and representation rules.
+- [The standard library overview](../library/overview.md) has the runtime
+  rules, including identity and equality for the other types.
