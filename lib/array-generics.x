@@ -400,12 +400,16 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   }
 
   /** Appends `value` and returns it.
-      Raises: `<bad-arg>` for a null array, `<size-limit>` at the integer index
-      limit, or `<alloc-fail>` when storage cannot grow.
+      Boxed `Array` returns `void` for a null array.
+      Raises: `<bad-arg>` for a null typed array, `<size-limit>` at the integer
+      index limit, or `<alloc-fail>` when storage cannot grow.
   */
   $element $array.push($array array, $element value) {
     if ($boxed && (Var) value is void) raise %(void-op);
-    if (array == NULL) _bad_operation($owner, <push>);
+    if (array == NULL) {
+      if ($boxed) return $zero;
+      _bad_operation($owner, <push>);
+    }
     if (array.length >= INT_MAX) _size_limit($owner, array.length);
     Block_append((Block) array, &value, 1);
     return value;
@@ -449,12 +453,16 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
 
   /** Inserts `value` at the front and returns it, shifting elements right.
       This operation is O(n).
-      Raises: `<bad-arg>` for a null array, `<size-limit>` at the integer index
-      limit, or `<alloc-fail>` when storage cannot grow.
+      Boxed `Array` returns `void` for a null array.
+      Raises: `<bad-arg>` for a null typed array, `<size-limit>` at the integer
+      index limit, or `<alloc-fail>` when storage cannot grow.
   */
   $element $array.unshift($array array, $element value) {
     if ($boxed && (Var) value is void) raise %(void-op);
-    if (array == NULL) _bad_operation($owner, <unshift>);
+    if (array == NULL) {
+      if ($boxed) return $zero;
+      _bad_operation($owner, <unshift>);
+    }
     if (array.length >= INT_MAX) _size_limit($owner, array.length);
     array.insert_element(0, value);
     return value;
@@ -463,14 +471,15 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   /** Inserts `value` at normalized `index` and returns it.
       The accepted range includes the position after the last element;
       negative indices are normalized against that wider range.
-      Boxed `Array` returns `void` for an out-of-range index without mutation.
-      Raises: `<bad-arg>` for a null array in either family or an out-of-range
-      typed-array index, `<size-limit>` at the integer index limit, or
+      Boxed `Array` returns `void` for a null array or out-of-range index
+      without mutation.
+      Raises: `<bad-arg>` for a null typed array or out-of-range typed-array
+      index, `<size-limit>` at the integer index limit, or
       `<alloc-fail>` when storage cannot grow.
   */
   $element $array.insert($array array, int index, $element value) {
     if ($boxed) {
-      if (array == NULL) _bad_operation($owner, <insert>);
+      if (array == NULL) return $zero;
       if (array.length > INT_MAX) _size_limit($owner, array.length);
       int n = (int) array.length;
       if (index < 0) index += n + 1;

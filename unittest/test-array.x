@@ -120,20 +120,19 @@ static void array_void_writes_transfer_before_mutation(void) {
   EXPECT_INT_EQ(array[0].int(), 1);
 }
 
-static void array_null_writes_report_bad_arg(void) {
+static void array_null_writes_return_void(void) {
   $test.scoped();
   Array array = NULL;
   int caught = 0;
 
-  try array.push(1);
-  catch %(bad-arg (operation "Array") (action push)): caught++;
-  EXPECT_INT_EQ(caught, 1);
-  try array.unshift(1);
-  catch %(bad-arg (operation "Array") (action unshift)): caught++;
+  EXPECT_TRUE(array.push(1) is void);
+  EXPECT_TRUE(array.unshift(1) is void);
+  EXPECT_TRUE(array.insert(0, 1) is void);
+  try array.push(void);
+  catch %(void-op *): caught++;
+  try array.unshift(void);
+  catch %(void-op *): caught++;
   EXPECT_INT_EQ(caught, 2);
-  try array.insert(0, 1);
-  catch %(bad-arg (operation "Array") (action insert)): caught++;
-  EXPECT_INT_EQ(caught, 3);
 }
 
 static void array_absent_elements_return_void(void) {
@@ -682,7 +681,7 @@ void array_suite(void) {
   $test.run(array_bare_literal_evaluates_elements);
   $test.run(array_push_pop);
   $test.run(array_void_writes_transfer_before_mutation);
-  $test.run(array_null_writes_report_bad_arg);
+  $test.run(array_null_writes_return_void);
   $test.run(array_absent_elements_return_void);
   $test.run(array_map_transfer_releases_temporary_scope);
   $test.run(array_map2_transfer_releases_temporary_scope);
