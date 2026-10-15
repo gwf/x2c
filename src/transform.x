@@ -1014,9 +1014,8 @@ static List _string_cases_helper(Compiler c, Type type, List labels) {
       tests.push($!{ if ($s == $label) return $value; });
     }
     List body = tests.list_free();
-    c.add_early(c.bind_syntax(
-      $!Unit{ static int $name($type $s) { @body return 0; } },
-      AST_UNIT, NULL));
+    List unit = $!Unit{ static int $name($type $s) { @body return 0; } };
+    c.add_early(c.bind_syntax(unit, AST_UNIT, NULL));
     Type callable = %((func ($type)) int);
     helper = $!($callable){ $name };
   }
