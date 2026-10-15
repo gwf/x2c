@@ -42,7 +42,7 @@ meta Map native_scalar_types(void) => {
 };
 
 $(defun native.scalar.list (items)
-  (if (null? items) '(expr ("List") (nil))
+  (if (null? items) `(expr ("List") (nil))
       `(expr ("List")
         (cons ,(car items) ,(native.scalar.list (cdr items))))))
 

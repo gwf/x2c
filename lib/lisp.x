@@ -1695,7 +1695,7 @@ $x2c.foreign.alias(lisp_native_targets)
 static Map _library_targets(void);
 
 static $(import "../etc/lisp-bindings.xlisp")
-static macro Expression $lisp.callback.target.map() => $(lisp.native.targets '(
+static macro Expression $lisp.callback.target.map() => $(lisp.native.targets `(
   (_list_map (as List_map))
   (_list_filter (as List_filter))
   (_list_any (as List_any))
