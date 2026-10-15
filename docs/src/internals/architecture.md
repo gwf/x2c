@@ -543,6 +543,9 @@ The modules under `src/` divide ownership as follows:
 - `src/component-protocols.x` -- protocol forwarding members, `Var`
   descriptor thunks, and descriptor registration, registered as a rewrite
   of the conformance form;
+- `src/component-string-switch.x` -- switches on a String, lowered to an
+  integer switch on a shared helper's result, registered as a statement
+  rewrite;
 - `src/operator-ledger.x` -- operator precedence, compound assignment,
   and protocol-member mappings from one compile-time ledger;
 - `src/cli.x`, `src/main.x` -- option metadata and parsing, dispatch, logging,
@@ -848,6 +851,18 @@ holds. The transform and
 the cleanup walk step into the nodes the text holds, and the parts of the
 match lower outside its rule, so a nested match applies it again. The
 `switch` is the barrier that an arm's `break` leaves.
+
+`src/component-string-switch.x` registers `switch` on the statement family
+keyed by the `switch` head and declines a selector whose type is not
+`String` or an alias of it. Its translator replaces each label the switch
+owns by the label's index, leaving nested switches and expressions alone,
+and reports a label that is not a string literal with
+`x2c_diagnostic_error_at`. It answers a lowered carrier of the integer
+switch on a call of a static helper that returns the selector's index among
+the labels, or 0. The helper is placed once per selector type and label
+list under `(unit-support KEY)`, named by `x2c_binding_for` with the same
+key, so switches with the same labels share it. A program's `switch` rule
+sees the source switches but not the integer switch the rule writes.
 
 `src/component-interpolation.x` registers a `%"..."` literal on the literal
 family keyed by the `segments` head. The transform first converts each `$`

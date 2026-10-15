@@ -334,6 +334,14 @@ inline-lisp example
 - Tests: match suites and checked nested example
 - See also: [pattern matching](../guide/match.md)
 
+### String switch
+
+- Parse: `src/statements.x`
+- Lower: `src/component-string-switch.x` numbers the labels a switch on a
+  `String` owns and switches on a shared helper's result
+- Tests: the `string-switch` and `rewrite-string-switch` compiler fixtures
+- See also: [C control flow](../reference/language.md#c-control-flow)
+
 ### Raise, filtered catch, finally, and defer
 
 - Parse: `src/statements.x`
