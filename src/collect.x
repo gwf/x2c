@@ -273,7 +273,7 @@ List Compiler.prelude_sources(void) => %(
   "src/component-raise.x" "src/component-match.x"
   "src/component-interpolation.x" "src/component-destructuring.x"
   "src/component-lambdas.x"
-  "src/component-protocols.x");
+  "src/component-protocols.x" "src/component-string-switch.x");
 
 /** Reports whether the canonical `path` is a compiler prelude source. */
 int Compiler.is_prelude_source(String path) =>
