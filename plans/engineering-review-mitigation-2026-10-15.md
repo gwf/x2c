@@ -105,3 +105,11 @@ binding facts, native aliases, declaration order, and the existing builtin
 writer context. It adds no public meta SDK operation, persistent registry,
 validation framework, or new gate. The final combined publication proof and
 performance checkpoint remain pending.
+
+Publication preparation integrated origin/dev at
+46b9c18fdbbadd6e555da4449b30286b5e339868, including its String switch work.
+The first API-generation attempt exposed lost retained method/Self facts.
+Replay now restores those existing facts beside the resolved binding.
+Ten focused fixtures and the dependency-free package consumer pass; complete
+API generation now writes all 119 pages successfully. The integrated bootstrap
+was rebuilt safely before further compiler use.

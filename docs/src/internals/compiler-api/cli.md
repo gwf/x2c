@@ -34,7 +34,7 @@ Returns whether `s` contains a driver-owned dependency option.
 Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
 comma-delimited pass-through argument; `NULL` returns zero.
 
-Source: `src/cli.x:728`
+Source: `src/cli.x:731`
 
 <a id="CliRequest.inspects"></a>
 #### CliRequest.inspects
@@ -43,7 +43,7 @@ Source: `src/cli.x:728`
 
 Returns whether `request` selects a terminating inspection or dump mode.
 
-Source: `src/cli.x:1287`
+Source: `src/cli.x:1290`
 
 <a id="CliRequest.is_builtin"></a>
 #### CliRequest.is_builtin
@@ -52,7 +52,7 @@ Source: `src/cli.x:1287`
 
 Reports whether a raw command name belongs to the built-in parser.
 
-Source: `src/cli.x:1280`
+Source: `src/cli.x:1283`
 
 <a id="CliRequest.new"></a>
 #### CliRequest.new
@@ -61,7 +61,7 @@ Source: `src/cli.x:1280`
 
 Constructs a request with the command's ordinary CLI defaults.
 
-Source: `src/cli.x:1254`
+Source: `src/cli.x:1257`
 
 <a id="CliRequest.package_options"></a>
 #### CliRequest.package_options
@@ -75,7 +75,7 @@ and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
 `cc_args` and `ld_args` serve native actions; no source-preprocessing
 options are returned.
 
-Source: `src/cli.x:756`
+Source: `src/cli.x:759`
 
 <a id="CliRequest.package_roots"></a>
 #### CliRequest.package_roots
@@ -88,7 +88,7 @@ when it exists. A root named twice is searched twice and resolves the
 same entries. Explicit directories are borrowed; the result is a fresh
 `List` only when the home directory is appended.
 
-Source: `src/cli.x:1295`
+Source: `src/cli.x:1298`
 
 <a id="CliRequest.parse"></a>
 #### CliRequest.parse
@@ -115,7 +115,7 @@ Source: `src/cli.x:399`
 
 Returns the version line `--version` prints, without a newline.
 
-Source: `src/cli.x:1284`
+Source: `src/cli.x:1287`
 
 ### `TargetKind`
 
@@ -128,7 +128,7 @@ Returns the target kind spelled `spelling`, or 0 when no kind has that
 spelling. `refusal` says why this compiler refuses a known spelling, and
 is NULL otherwise.
 
-Source: `src/cli.x:674`
+Source: `src/cli.x:677`
 
 <a id="TargetKind.of"></a>
 #### TargetKind.of
@@ -138,7 +138,7 @@ Source: `src/cli.x:674`
 Returns the row of target kind `kind`; any other kind reads as an
 executable.
 
-Source: `src/cli.x:684`
+Source: `src/cli.x:687`
 
 ## Public types
 

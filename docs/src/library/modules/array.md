@@ -179,10 +179,12 @@ Source: `lib/array.x:72`
 Inserts `value` at normalized `index` and returns it.
 The accepted range includes the position after the last element;
 negative indices are normalized against that wider range.
+Boxed `Array` returns `void` for a null array or out-of-range index
+without mutation.
 
-**Raises:** `<bad-arg>` for a null array or out-of-range index,
-`<size-limit>` at the integer index limit, or `<alloc-fail>` when storage
-cannot grow.
+**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
+index, `<size-limit>` at the integer index limit, or
+`<alloc-fail>` when storage cannot grow.
 
 Source: `lib/array.x:72`
 
@@ -287,9 +289,10 @@ Source: `lib/array.x:152`
 `Var Array.push(Array array, Var value)`
 
 Appends `value` and returns it.
+Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
-limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/array.x:72`
 
@@ -300,9 +303,11 @@ Source: `lib/array.x:72`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
+Boxed `Array` returns `void` for a null array or out-of-range index.
 
-**Raises:** `<bad-arg>` for a null array or out-of-range index, or
-`<size-limit>` when the length exceeds the integer index domain.
+**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
+index, or `<size-limit>` when the length exceeds the integer index
+domain in either family.
 
 Source: `lib/array.x:72`
 
@@ -365,10 +370,11 @@ Source: `lib/array.x:72`
 `Var Array.shift(Array array)`
 
 Removes and returns the first element, shifting the remainder left.
-This operation is O(n).
+This operation is O(n). Boxed `Array` returns `void` for a null or
+empty array.
 
-**Raises:** `<bad-arg>` for a null or empty array, or `<size-limit>` when the
-length exceeds the integer index domain. These failures do not return.
+**Raises:** `<bad-arg>` for a null or empty typed array, or `<size-limit>`
+when the length exceeds the integer index domain in either family.
 
 Source: `lib/array.x:72`
 
@@ -448,8 +454,9 @@ Source: `lib/array.x:72`
 `Var Array.take_last(Array array)`
 
 Removes and returns the last element.
+Boxed `Array` returns `void` for a null or empty array.
 
-**Raises:** `<bad-arg>` for a null or empty array.
+**Raises:** `<bad-arg>` for a null or empty typed array.
 
 Source: `lib/array.x:72`
 
@@ -484,9 +491,10 @@ Source: `lib/array.x:72`
 
 Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
+Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
-limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/array.x:72`
 

@@ -825,9 +825,9 @@ printf("%s\n", text.str());
 }
 ```
 
-Each declaration lowers to the original initialization followed by
-`defer local.cleanup()` in the same enclosing block. The initializer runs
-once, and cleanup is registered only after it succeeds. Compound declarations
+Each declaration initializes the local and registers cleanup for the acquired
+value in the same enclosing block. The initializer runs once, and cleanup is
+registered only after it succeeds. Compound declarations
 preserve acquisition order, with each successful acquisition protected before
 the next initializer runs. Cleanup runs in reverse registration order.
 
@@ -844,21 +844,22 @@ the existing typedef/protocol ancestry, and keeps ordinary method precedence:
 | Generated heap classes | Their selected `free` operation |
 | Other types | An explicitly adopted compatible cleanup method |
 
-The deferred call observes the binding at cleanup time. For example, assigning
-a new Array to an `$auto` local does not free the earlier Array:
+Cleanup releases the acquired value even if the local is reassigned. Each
+`$auto` below protects its own Array:
 
 ```x2c
 int main(void) {
 Array current = $auto([]);
-Array earlier = current;
-current = [];
-earlier.free();
+Array replacement = $auto([]);
+current = replacement;
   return 0;
 }
 ```
 
-The second Array is cleaned up at block exit. Returning or storing an alias
-does not cancel cleanup; the caller must choose an appropriate lifetime.
+Both Arrays are cleaned up at block exit. Reassignment neither releases the
+first Array early nor transfers its cleanup to the replacement.
+Returning or storing an alias does not cancel cleanup; the caller must choose
+an appropriate lifetime.
 There is no move or recursive ownership system. Var itself has no owning
 cleanup contract, and Pool's `free` operation requires a separate allocation
 argument.
@@ -1533,15 +1534,14 @@ the definition after a `static` prototype, or a block-scope `extern`
 declaration or function prototype, names the file's static as C links it.
 A file's statics take a prefix in the generated C: the file's path under the entry's
 companion directory without its extension, with each character that cannot
-continue a C identifier made `_`, then `___`; a path that starts with a
-digit gets a leading `x`. Under the entry `parser.x`, a static `advance` in
-`parser/statements/loops.x` emits as `statements_loops___advance`, and one
-in the entry itself as `parser___advance`. Trailing `_` of the path's
+continue a C identifier made `_`, then `___`. The prefix starts with `f`,
+the normalized path's length, and `_`; a path that starts with a digit
+gets a leading `x` before its length is measured. Under the entry `parser.x`,
+a static `advance` in `parser/statements/loops.x` emits as `f16_statements_loops___advance`, and one
+in the entry itself as `f6_parser___advance`. Trailing `_` of the path's
 spelling are dropped first, so `a.x` and `a-.x` give one prefix. A package
 prefix ends in `__`, so a package entry's statics stay apart from the
-package's public names, except a public name that begins with `_`, which
-can spell like a static of an entry named for the package and is then
-reported as defined twice.
+package's public names.
 Generated names are compiler details; source never spells them, and
 `--dump-definitions` displays the source name. A static type adopted as a
 class keeps its short name as its Var tag and descriptor name, so two files
@@ -1838,6 +1838,12 @@ is reserved for imported package 'geo'`.
 x2c keeps C declarations, expressions, operators, functions, structs, unions,
 enums, pointers, arrays, and control flow. It adds language forms around that
 foundation and keeps C's object model.
+
+Use `#include` to include source and headers. Avoid other C preprocessor
+constructs in x2c source; use x2c macros and language features instead.
+Intermixing `#define` with x2c transformations is unsupported. The compiler
+preserves some native macro behavior on a best-effort basis, but does not
+guarantee that native macro text follows renamed or file-private bindings.
 
 Member access uses `.` wherever x2c parsed the struct, whether the receiver is
 a value or a pointer, and whether the declaration came from x2c source or from

@@ -502,10 +502,12 @@ Source: `lib/typed-array.x:104`
 Inserts `value` at normalized `index` and returns it.
 The accepted range includes the position after the last element;
 negative indices are normalized against that wider range.
+Boxed `Array` returns `void` for a null array or out-of-range index
+without mutation.
 
-**Raises:** `<bad-arg>` for a null array or out-of-range index,
-`<size-limit>` at the integer index limit, or `<alloc-fail>` when storage
-cannot grow.
+**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
+index, `<size-limit>` at the integer index limit, or
+`<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x:104`
 
@@ -556,9 +558,10 @@ Source: `lib/typed-array.x:107`
 `char ArrayChar.push(ArrayChar array, char value)`
 
 Appends `value` and returns it.
+Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
-limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x:104`
 
@@ -569,9 +572,11 @@ Source: `lib/typed-array.x:104`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
+Boxed `Array` returns `void` for a null array or out-of-range index.
 
-**Raises:** `<bad-arg>` for a null array or out-of-range index, or
-`<size-limit>` when the length exceeds the integer index domain.
+**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
+index, or `<size-limit>` when the length exceeds the integer index
+domain in either family.
 
 Source: `lib/typed-array.x:104`
 
@@ -641,10 +646,11 @@ Source: `lib/typed-array.x:104`
 `char ArrayChar.shift(ArrayChar array)`
 
 Removes and returns the first element, shifting the remainder left.
-This operation is O(n).
+This operation is O(n). Boxed `Array` returns `void` for a null or
+empty array.
 
-**Raises:** `<bad-arg>` for a null or empty array, or `<size-limit>` when the
-length exceeds the integer index domain. These failures do not return.
+**Raises:** `<bad-arg>` for a null or empty typed array, or `<size-limit>`
+when the length exceeds the integer index domain in either family.
 
 Source: `lib/typed-array.x:104`
 
@@ -677,8 +683,9 @@ Source: `lib/typed-array.x:105`
 `char ArrayChar.take_last(ArrayChar array)`
 
 Removes and returns the last element.
+Boxed `Array` returns `void` for a null or empty array.
 
-**Raises:** `<bad-arg>` for a null or empty array.
+**Raises:** `<bad-arg>` for a null or empty typed array.
 
 Source: `lib/typed-array.x:104`
 
@@ -726,9 +733,10 @@ Source: `lib/typed-array.x:104`
 
 Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
+Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
-limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x:104`
 
@@ -922,10 +930,12 @@ Source: `lib/typed-array.x:149`
 Inserts `value` at normalized `index` and returns it.
 The accepted range includes the position after the last element;
 negative indices are normalized against that wider range.
+Boxed `Array` returns `void` for a null array or out-of-range index
+without mutation.
 
-**Raises:** `<bad-arg>` for a null array or out-of-range index,
-`<size-limit>` at the integer index limit, or `<alloc-fail>` when storage
-cannot grow.
+**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
+index, `<size-limit>` at the integer index limit, or
+`<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x:149`
 
@@ -976,9 +986,10 @@ Source: `lib/typed-array.x:152`
 `double ArrayDbl.push(ArrayDbl array, double value)`
 
 Appends `value` and returns it.
+Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
-limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x:149`
 
@@ -989,9 +1000,11 @@ Source: `lib/typed-array.x:149`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
+Boxed `Array` returns `void` for a null array or out-of-range index.
 
-**Raises:** `<bad-arg>` for a null array or out-of-range index, or
-`<size-limit>` when the length exceeds the integer index domain.
+**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
+index, or `<size-limit>` when the length exceeds the integer index
+domain in either family.
 
 Source: `lib/typed-array.x:149`
 
@@ -1061,10 +1074,11 @@ Source: `lib/typed-array.x:149`
 `double ArrayDbl.shift(ArrayDbl array)`
 
 Removes and returns the first element, shifting the remainder left.
-This operation is O(n).
+This operation is O(n). Boxed `Array` returns `void` for a null or
+empty array.
 
-**Raises:** `<bad-arg>` for a null or empty array, or `<size-limit>` when the
-length exceeds the integer index domain. These failures do not return.
+**Raises:** `<bad-arg>` for a null or empty typed array, or `<size-limit>`
+when the length exceeds the integer index domain in either family.
 
 Source: `lib/typed-array.x:149`
 
@@ -1097,8 +1111,9 @@ Source: `lib/typed-array.x:150`
 `double ArrayDbl.take_last(ArrayDbl array)`
 
 Removes and returns the last element.
+Boxed `Array` returns `void` for a null or empty array.
 
-**Raises:** `<bad-arg>` for a null or empty array.
+**Raises:** `<bad-arg>` for a null or empty typed array.
 
 Source: `lib/typed-array.x:149`
 
@@ -1146,9 +1161,10 @@ Source: `lib/typed-array.x:149`
 
 Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
+Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
-limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x:149`
 
@@ -1340,10 +1356,12 @@ Source: `lib/typed-array.x:140`
 Inserts `value` at normalized `index` and returns it.
 The accepted range includes the position after the last element;
 negative indices are normalized against that wider range.
+Boxed `Array` returns `void` for a null array or out-of-range index
+without mutation.
 
-**Raises:** `<bad-arg>` for a null array or out-of-range index,
-`<size-limit>` at the integer index limit, or `<alloc-fail>` when storage
-cannot grow.
+**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
+index, `<size-limit>` at the integer index limit, or
+`<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x:140`
 
@@ -1394,9 +1412,10 @@ Source: `lib/typed-array.x:143`
 `float ArrayFloat.push(ArrayFloat array, float value)`
 
 Appends `value` and returns it.
+Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
-limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x:140`
 
@@ -1407,9 +1426,11 @@ Source: `lib/typed-array.x:140`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
+Boxed `Array` returns `void` for a null array or out-of-range index.
 
-**Raises:** `<bad-arg>` for a null array or out-of-range index, or
-`<size-limit>` when the length exceeds the integer index domain.
+**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
+index, or `<size-limit>` when the length exceeds the integer index
+domain in either family.
 
 Source: `lib/typed-array.x:140`
 
@@ -1479,10 +1500,11 @@ Source: `lib/typed-array.x:140`
 `float ArrayFloat.shift(ArrayFloat array)`
 
 Removes and returns the first element, shifting the remainder left.
-This operation is O(n).
+This operation is O(n). Boxed `Array` returns `void` for a null or
+empty array.
 
-**Raises:** `<bad-arg>` for a null or empty array, or `<size-limit>` when the
-length exceeds the integer index domain. These failures do not return.
+**Raises:** `<bad-arg>` for a null or empty typed array, or `<size-limit>`
+when the length exceeds the integer index domain in either family.
 
 Source: `lib/typed-array.x:140`
 
@@ -1515,8 +1537,9 @@ Source: `lib/typed-array.x:141`
 `float ArrayFloat.take_last(ArrayFloat array)`
 
 Removes and returns the last element.
+Boxed `Array` returns `void` for a null or empty array.
 
-**Raises:** `<bad-arg>` for a null or empty array.
+**Raises:** `<bad-arg>` for a null or empty typed array.
 
 Source: `lib/typed-array.x:140`
 
@@ -1564,9 +1587,10 @@ Source: `lib/typed-array.x:140`
 
 Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
+Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
-limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x:140`
 
@@ -1758,10 +1782,12 @@ Source: `lib/typed-array.x:122`
 Inserts `value` at normalized `index` and returns it.
 The accepted range includes the position after the last element;
 negative indices are normalized against that wider range.
+Boxed `Array` returns `void` for a null array or out-of-range index
+without mutation.
 
-**Raises:** `<bad-arg>` for a null array or out-of-range index,
-`<size-limit>` at the integer index limit, or `<alloc-fail>` when storage
-cannot grow.
+**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
+index, `<size-limit>` at the integer index limit, or
+`<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x:122`
 
@@ -1812,9 +1838,10 @@ Source: `lib/typed-array.x:125`
 `int ArrayInt.push(ArrayInt array, int value)`
 
 Appends `value` and returns it.
+Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
-limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x:122`
 
@@ -1825,9 +1852,11 @@ Source: `lib/typed-array.x:122`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
+Boxed `Array` returns `void` for a null array or out-of-range index.
 
-**Raises:** `<bad-arg>` for a null array or out-of-range index, or
-`<size-limit>` when the length exceeds the integer index domain.
+**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
+index, or `<size-limit>` when the length exceeds the integer index
+domain in either family.
 
 Source: `lib/typed-array.x:122`
 
@@ -1897,10 +1926,11 @@ Source: `lib/typed-array.x:122`
 `int ArrayInt.shift(ArrayInt array)`
 
 Removes and returns the first element, shifting the remainder left.
-This operation is O(n).
+This operation is O(n). Boxed `Array` returns `void` for a null or
+empty array.
 
-**Raises:** `<bad-arg>` for a null or empty array, or `<size-limit>` when the
-length exceeds the integer index domain. These failures do not return.
+**Raises:** `<bad-arg>` for a null or empty typed array, or `<size-limit>`
+when the length exceeds the integer index domain in either family.
 
 Source: `lib/typed-array.x:122`
 
@@ -1933,8 +1963,9 @@ Source: `lib/typed-array.x:123`
 `int ArrayInt.take_last(ArrayInt array)`
 
 Removes and returns the last element.
+Boxed `Array` returns `void` for a null or empty array.
 
-**Raises:** `<bad-arg>` for a null or empty array.
+**Raises:** `<bad-arg>` for a null or empty typed array.
 
 Source: `lib/typed-array.x:122`
 
@@ -1982,9 +2013,10 @@ Source: `lib/typed-array.x:122`
 
 Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
+Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
-limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x:122`
 
@@ -2178,10 +2210,12 @@ Source: `lib/typed-array.x:131`
 Inserts `value` at normalized `index` and returns it.
 The accepted range includes the position after the last element;
 negative indices are normalized against that wider range.
+Boxed `Array` returns `void` for a null array or out-of-range index
+without mutation.
 
-**Raises:** `<bad-arg>` for a null array or out-of-range index,
-`<size-limit>` at the integer index limit, or `<alloc-fail>` when storage
-cannot grow.
+**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
+index, `<size-limit>` at the integer index limit, or
+`<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x:131`
 
@@ -2232,9 +2266,10 @@ Source: `lib/typed-array.x:134`
 `long ArrayLong.push(ArrayLong array, long value)`
 
 Appends `value` and returns it.
+Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
-limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x:131`
 
@@ -2245,9 +2280,11 @@ Source: `lib/typed-array.x:131`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
+Boxed `Array` returns `void` for a null array or out-of-range index.
 
-**Raises:** `<bad-arg>` for a null array or out-of-range index, or
-`<size-limit>` when the length exceeds the integer index domain.
+**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
+index, or `<size-limit>` when the length exceeds the integer index
+domain in either family.
 
 Source: `lib/typed-array.x:131`
 
@@ -2317,10 +2354,11 @@ Source: `lib/typed-array.x:131`
 `long ArrayLong.shift(ArrayLong array)`
 
 Removes and returns the first element, shifting the remainder left.
-This operation is O(n).
+This operation is O(n). Boxed `Array` returns `void` for a null or
+empty array.
 
-**Raises:** `<bad-arg>` for a null or empty array, or `<size-limit>` when the
-length exceeds the integer index domain. These failures do not return.
+**Raises:** `<bad-arg>` for a null or empty typed array, or `<size-limit>`
+when the length exceeds the integer index domain in either family.
 
 Source: `lib/typed-array.x:131`
 
@@ -2353,8 +2391,9 @@ Source: `lib/typed-array.x:132`
 `long ArrayLong.take_last(ArrayLong array)`
 
 Removes and returns the last element.
+Boxed `Array` returns `void` for a null or empty array.
 
-**Raises:** `<bad-arg>` for a null or empty array.
+**Raises:** `<bad-arg>` for a null or empty typed array.
 
 Source: `lib/typed-array.x:131`
 
@@ -2402,9 +2441,10 @@ Source: `lib/typed-array.x:131`
 
 Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
+Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
-limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x:131`
 
@@ -2598,10 +2638,12 @@ Source: `lib/typed-array.x:113`
 Inserts `value` at normalized `index` and returns it.
 The accepted range includes the position after the last element;
 negative indices are normalized against that wider range.
+Boxed `Array` returns `void` for a null array or out-of-range index
+without mutation.
 
-**Raises:** `<bad-arg>` for a null array or out-of-range index,
-`<size-limit>` at the integer index limit, or `<alloc-fail>` when storage
-cannot grow.
+**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
+index, `<size-limit>` at the integer index limit, or
+`<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x:113`
 
@@ -2652,9 +2694,10 @@ Source: `lib/typed-array.x:116`
 `short ArrayShort.push(ArrayShort array, short value)`
 
 Appends `value` and returns it.
+Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
-limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x:113`
 
@@ -2665,9 +2708,11 @@ Source: `lib/typed-array.x:113`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
+Boxed `Array` returns `void` for a null array or out-of-range index.
 
-**Raises:** `<bad-arg>` for a null array or out-of-range index, or
-`<size-limit>` when the length exceeds the integer index domain.
+**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
+index, or `<size-limit>` when the length exceeds the integer index
+domain in either family.
 
 Source: `lib/typed-array.x:113`
 
@@ -2737,10 +2782,11 @@ Source: `lib/typed-array.x:113`
 `short ArrayShort.shift(ArrayShort array)`
 
 Removes and returns the first element, shifting the remainder left.
-This operation is O(n).
+This operation is O(n). Boxed `Array` returns `void` for a null or
+empty array.
 
-**Raises:** `<bad-arg>` for a null or empty array, or `<size-limit>` when the
-length exceeds the integer index domain. These failures do not return.
+**Raises:** `<bad-arg>` for a null or empty typed array, or `<size-limit>`
+when the length exceeds the integer index domain in either family.
 
 Source: `lib/typed-array.x:113`
 
@@ -2773,8 +2819,9 @@ Source: `lib/typed-array.x:114`
 `short ArrayShort.take_last(ArrayShort array)`
 
 Removes and returns the last element.
+Boxed `Array` returns `void` for a null or empty array.
 
-**Raises:** `<bad-arg>` for a null or empty array.
+**Raises:** `<bad-arg>` for a null or empty typed array.
 
 Source: `lib/typed-array.x:113`
 
@@ -2822,9 +2869,10 @@ Source: `lib/typed-array.x:113`
 
 Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
+Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
-limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x:113`
 
@@ -3018,10 +3066,12 @@ Source: `lib/typed-array.x:158`
 Inserts `value` at normalized `index` and returns it.
 The accepted range includes the position after the last element;
 negative indices are normalized against that wider range.
+Boxed `Array` returns `void` for a null array or out-of-range index
+without mutation.
 
-**Raises:** `<bad-arg>` for a null array or out-of-range index,
-`<size-limit>` at the integer index limit, or `<alloc-fail>` when storage
-cannot grow.
+**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
+index, `<size-limit>` at the integer index limit, or
+`<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x:158`
 
@@ -3069,9 +3119,10 @@ Source: `lib/typed-array.x:161`
 `String ArrayString.push(ArrayString array, String value)`
 
 Appends `value` and returns it.
+Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
-limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x:158`
 
@@ -3082,9 +3133,11 @@ Source: `lib/typed-array.x:158`
 
 Removes and returns the element at normalized `index`.
 Negative indices count from the end; following elements shift left.
+Boxed `Array` returns `void` for a null array or out-of-range index.
 
-**Raises:** `<bad-arg>` for a null array or out-of-range index, or
-`<size-limit>` when the length exceeds the integer index domain.
+**Raises:** `<bad-arg>` for a null typed array or out-of-range typed-array
+index, or `<size-limit>` when the length exceeds the integer index
+domain in either family.
 
 Source: `lib/typed-array.x:158`
 
@@ -3154,10 +3207,11 @@ Source: `lib/typed-array.x:158`
 `String ArrayString.shift(ArrayString array)`
 
 Removes and returns the first element, shifting the remainder left.
-This operation is O(n).
+This operation is O(n). Boxed `Array` returns `void` for a null or
+empty array.
 
-**Raises:** `<bad-arg>` for a null or empty array, or `<size-limit>` when the
-length exceeds the integer index domain. These failures do not return.
+**Raises:** `<bad-arg>` for a null or empty typed array, or `<size-limit>`
+when the length exceeds the integer index domain in either family.
 
 Source: `lib/typed-array.x:158`
 
@@ -3190,8 +3244,9 @@ Source: `lib/typed-array.x:159`
 `String ArrayString.take_last(ArrayString array)`
 
 Removes and returns the last element.
+Boxed `Array` returns `void` for a null or empty array.
 
-**Raises:** `<bad-arg>` for a null or empty array.
+**Raises:** `<bad-arg>` for a null or empty typed array.
 
 Source: `lib/typed-array.x:158`
 
@@ -3239,9 +3294,10 @@ Source: `lib/typed-array.x:158`
 
 Inserts `value` at the front and returns it, shifting elements right.
 This operation is O(n).
+Boxed `Array` returns `void` for a null array.
 
-**Raises:** `<bad-arg>` for a null array, `<size-limit>` at the integer index
-limit, or `<alloc-fail>` when storage cannot grow.
+**Raises:** `<bad-arg>` for a null typed array, `<size-limit>` at the integer
+index limit, or `<alloc-fail>` when storage cannot grow.
 
 Source: `lib/typed-array.x:158`
 

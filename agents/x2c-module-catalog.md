@@ -422,11 +422,11 @@ lambda parsing and capture resolution.
 
 Public functions:
 
-`Compiler.parse_lambda_literal`, `Compiler.lambda_param_types`,
-`Compiler.bind_lambda_expression`, `Compiler.begin_lambda_captures`,
-`Compiler.end_lambda_captures`, `Compiler.lambda_capture_required`,
-`Compiler.capture_lambda_identifier`, `Compiler.respell_captures`,
-`Compiler.check_lambda_captures`
+`Compiler.lift_lambda_types`, `Compiler.parse_lambda_literal`,
+`Compiler.lambda_param_types`, `Compiler.bind_lambda_expression`,
+`Compiler.begin_lambda_captures`, `Compiler.end_lambda_captures`,
+`Compiler.lambda_capture_required`, `Compiler.capture_lambda_identifier`,
+`Compiler.respell_captures`, `Compiler.check_lambda_captures`
 
 ### [src/literals.x](../src/literals.x)
 
@@ -746,22 +746,22 @@ Public functions:
 `Compiler.semantic_binding_facts`, `Compiler.set_fact`, `Compiler.drop_fact`,
 `Sym.get`, `Sym.get_exact`, `Sym.has_local`, `Sym.lookup`, `Sym.reference`,
 `Sym.resolve_global`, `Sym.reference_global`, `Sym.declare`,
-`Sym.declared_key`, `Sym.is_file_static`, `Sym.join_locals`,
-`Sym.unshadow_global`, `Sym.unshadow_visible`, `Sym.bind_identity`,
-`Compiler.aggregate_name`, `Compiler.record_declaration_visibility`,
-`Compiler.private_prefix`, `Compiler.scoped_spelling`,
-`Compiler.declared_spelling`, `Compiler.file_prefixes`, `Compiler.unprefixed`,
-`Compiler.package_spelling`, `Compiler.register_package_alias`,
-`Compiler.register_package_member`, `Compiler.package_member_spelling`,
-`Compiler.imported_providers`, `Compiler.imported_spelling`,
-`Sym.define_macro`, `Sym.has_local_macros`, `Sym.lookup_macro`,
-`Compiler.macro_definition_locals`, `Compiler.macro_template_local`,
-`Sym.resolve_key`, `Sym.next_typedef`, `Sym.sole_typedef`,
-`Sym.normalize_declared_type`, `Sym.local_type`, `Sym.resolve_numeric_type`,
-`Sym.var_tag_for_type`, `Sym.is_var_type`, `Sym.is_string_type`,
-`Sym.is_array_type`, `Sym.is_map_type`, `Sym.is_named_value_type`,
-`Sym.lookup_field`, `Sym.declare_field_order`, `Sym.field_order`,
-`Sym.mark_field`, `Sym.marked_fields`, `Sym.aggregate_of`,
+`Sym.declare_resolved`, `Sym.declared_key`, `Sym.is_file_static`,
+`Sym.join_locals`, `Sym.unshadow_global`, `Sym.unshadow_visible`,
+`Sym.bind_identity`, `Compiler.aggregate_name`,
+`Compiler.record_declaration_visibility`, `Compiler.private_prefix`,
+`Compiler.scoped_spelling`, `Compiler.declared_spelling`,
+`Compiler.file_prefixes`, `Compiler.unprefixed`, `Compiler.package_spelling`,
+`Compiler.register_package_alias`, `Compiler.register_package_member`,
+`Compiler.package_member_spelling`, `Compiler.imported_providers`,
+`Compiler.imported_spelling`, `Sym.define_macro`, `Sym.has_local_macros`,
+`Sym.lookup_macro`, `Compiler.macro_definition_locals`,
+`Compiler.macro_template_local`, `Sym.resolve_key`, `Sym.next_typedef`,
+`Sym.sole_typedef`, `Sym.normalize_declared_type`, `Sym.local_type`,
+`Sym.resolve_numeric_type`, `Sym.var_tag_for_type`, `Sym.is_var_type`,
+`Sym.is_string_type`, `Sym.is_array_type`, `Sym.is_map_type`,
+`Sym.is_named_value_type`, `Sym.lookup_field`, `Sym.declare_field_order`,
+`Sym.field_order`, `Sym.mark_field`, `Sym.marked_fields`, `Sym.aggregate_of`,
 `Compiler.begin_semantic_transaction`, `SymTxn.local_macros_changed`,
 `Sym.transacting`, `Sym.end_log`, `SymTxn.commit`, `SymTxn.commit_transient`,
 `SymTxn.rollback`
