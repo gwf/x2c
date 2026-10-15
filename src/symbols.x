@@ -619,7 +619,10 @@ static List _scope_find(Sym s, SymScope &scope, List key, Type &?type) {
     `restrict`, and `volatile`.
 */
 List Sym.declare(Sym s, List context, List key, List ast) {
-  key = s.declared_key(context, key, ast);
+  List declared = s.declared_key(context, key, ast);
+  if (!s.at_file_scope() && !List.equal(declared, key))
+    _link_local(s, declared);
+  key = declared;
   _check_spelling(s.c, _declared_spelling(key));
   Type ctxkey = %( @context @key ), type = ast.type_from_ast();
   Type declared_type = type;
@@ -650,12 +653,15 @@ List Sym.declared_key(Sym s, List context, List key, List ast) {
    a module file takes the file's prefix, so each file's statics have their
    own keys; package mode puts other declarations in the package's `name__`
    space. Binding spellings, aggregate tags, and derived Var converters then
-   carry the prefix everywhere they are read. Other statics keep their
-   spellings; anonymous aggregate gensyms are not source spellings and stay
-   in the compiler's space. */
+   carry the prefix everywhere they are read. A later declaration of a
+   static without `static` names that static, as C links it. Other statics
+   keep their spellings; anonymous aggregate gensyms are not source
+   spellings and stay in the compiler's space. */
 static List _declared_key(Sym s, List context, List key, List ast) {
   Compiler c = s.c;
-  if ((int) s.scopes.len() != s.base_scopes) return key;
+  if (!s.at_file_scope())
+    return context || _names_local_object(ast.type_from_ast())
+      ? key : _linked_key(s, key);
   if (context && !(context === %(typedef))) return key;
   String prefix = c.private_prefix(ast);
   Var (head, tag) = key;
@@ -664,10 +670,46 @@ static List _declared_key(Sym s, List context, List key, List ast) {
                key.cdr() && !key.cddr() && tag is <string>;
   if (plain) _check_module_shadow(s, %(() (typedef)), prefix, head, ast);
   if (tagged) _check_module_shadow(s, %(($head)), prefix, tag, ast);
+  if (plain && !context && !prefix && !c.module_declaration) {
+    List own = _file_key(s, key);
+    if (!own) own = key;
+    if (own in s.statics) return own;
+  }
   if (!prefix && (!c.package || ast.type().is_static())) return key;
   if (plain) return %(${c.declared_spelling(prefix, head)});
   if (tagged) return %($head ${c.declared_spelling(prefix, tag)});
   return key;
+}
+
+/* A block-scope `extern` or function declaration names the file-scope
+   binding it sees, so it takes that binding's key: the file's static, the
+   unit's name, or the package's name. A local of the spelling hides them,
+   and the declaration then keeps its own spelling. */
+static List _linked_key(Sym s, List key) {
+  if (s.has_local(key)) return key;
+  List own = _file_key(s, key), package = _package_retry_key(s, key);
+  if (own && _global_key(s, own)) return own;
+  if (package && !_global_key(s, key) && _global_key(s, package))
+    return package;
+  return key;
+}
+
+/* A block-scope declaration linked to a file-scope binding of another
+   spelling declares that binding, so it takes the binding's identity. */
+static void _link_local(Sym s, List key) =>
+  s.put(_scope_at(s, -1).bindings, key, s.resolve_global(key, NULL));
+
+/** Reports whether `binding` names a file-scope static of this unit. */
+int Sym.is_file_static(Sym s, Var binding) {
+  if (binding is not <list> || !Ast.try_binding(binding, NULL, NULL))
+    return 0;
+  return %(${Ast.binding_spelling(binding)}) in s.statics;
+}
+
+static int _global_key(Sym s, List key) {
+  for (int i = 0; i < s.base_scopes; i++)
+    if (key in _scope_at(s, i).symbols) return 1;
+  return 0;
 }
 
 /* A `module` name has one meaning across the unit, so no file's static may
@@ -735,10 +777,10 @@ static String _package_reserved_owner(Compiler c, String spelling) {
 
 /* File-local globals are tracked for protocol and static initializer
    checks. The storage class is only visible here, before canonicalization
-   strips it. */
+   strips it. A later declaration without `static` keeps the internal
+   linkage, as in C. */
 static void _track_static(Sym s, List key, List ast) {
   if (ast.type().is_static()) s.put(s.statics, key, 1);
-  else s.drop(s.statics, key);
 }
 
 // A tagged definition also publishes its tag unless the key is that tag.

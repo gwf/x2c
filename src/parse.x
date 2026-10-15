@@ -1194,11 +1194,31 @@ void Compiler.check_reference_placement(Compiler c, Type type) {
     $report.type.reference_placement(c);
 }
 
+/* A file-scope function declared again without a storage class keeps the
+   internal linkage of its earlier `static` declaration, as in C, so the
+   declaration emits `static`. An object so declared has external linkage
+   and conflicts, which C reports. */
+static List _linked_static_base(Compiler c, List base, List declarators) {
+  Type type = base;
+  if (!c.sym.at_file_scope() || type.is_static() || type.is_extern() ||
+      !declarators)
+    return base;
+  foreach (List declarator, declarators) {
+    Type declared = %(declare $base (bindings $declarator)).type_from_ast();
+    List bound = declarator;
+    match (declarator) case %(op = ?target ?): bound = target;
+    if (!declared.is_function() || !c.sym.is_file_static(bound.cadr()))
+      return base;
+  }
+  return %(static @base);
+}
+
 static List _finish_declaration(
   Compiler c, Symbol tag, List base, List declarators,
   int preserved_self) {
   if (tag == <typedef> && c.source_private > 0 &&
       !base.type().is_static()) base = %(static @base);
+  if (tag == <declare>) base = _linked_static_base(c, base, declarators);
   List modifiers = NULL;
   base = _declaration_base(base, modifiers);
   if (modifiers) {

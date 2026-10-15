@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/module-static-redefinition/first.x:2:1: type: variable 'count' is already defined in this scope
+  int count = 2;
+  ^^^
+  note: prior definition: 'count'
+

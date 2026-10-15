@@ -46,7 +46,7 @@ static void _report_redefinition(
   if (!c.semantic_binding_facts().try_get(%(arms $binding), arms) ||
       !List.equal(arms, c.arms))
     return;
-  String spelling = Ast.binding_spelling(binding);
+  String spelling = c.unprefixed(Ast.binding_spelling(binding));
   $report.type.decl_duplicate(c, site, kind, spelling);
 }
 
