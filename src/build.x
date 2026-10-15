@@ -357,7 +357,6 @@ static uint64_t _translation_fingerprint(
   return _state_dependencies(hash, _unit_file(directory, input, ".d"), ok);
 }
 
-/* Translation and script reuse share the options and tools that produce C. */
 static uint64_t _translation_options(
   uint64_t hash, CliRequest request, int &ok) {
   hash = _state_list(hash, request.include_dirs);

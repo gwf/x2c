@@ -160,8 +160,8 @@ static List _source_projection(
         else node = %(function $type $declarator $body);
       }
       case %(declare ?type (bindings *declarators)): {
-        List kept = declarators.filter(%!(item) =>
-          !_completed_prototype(c, _declaration_binding(item)));
+        List kept = declarators.filter(
+          %!(item) => !_completed_prototype(c, _declaration_binding(item)));
         if (!kept && !_body_tag(type)) continue;
         node = %(declare $type (bindings @kept));
       }
@@ -490,9 +490,9 @@ static void _add_declaration(
   if (!type.is_static()) {
     Compiler c = p.c;
     Map statics = p.statics;
-    List public = bindings.cdr().filter(%!(item) =>
-      !_names_static(item, statics) &&
-      !_completed_prototype(c, _declaration_binding(item)));
+    List public = bindings.cdr().filter(
+      %!(item) => !_names_static(item, statics) &&
+                 !_completed_prototype(c, _declaration_binding(item)));
     if (!public && !_body_tag(type)) return;
     bindings = %(bindings @public);
     decl = %(declare $type $bindings);

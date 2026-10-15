@@ -1613,7 +1613,8 @@ static List _publish_aggregate_type(
   if (name is <list> && name.car() == <binding>)
     c.sym.bind_identity(%($tag), name, %($tag $body));
   else
-    c.sym.declare_resolved(NULL, type, tag == <enum> ? %(enum) : %($tag $body));
+    c.sym.declare_resolved(
+      NULL, type, tag == <enum> ? %(enum) : %($tag $body));
   if (tag != <enum>) {
     c.sym.declare_field_order(type, members);
     if (layout) c.sym.set(%(@type "layout-attribute"), %(unknown));

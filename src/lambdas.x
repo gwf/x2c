@@ -66,8 +66,8 @@ List Compiler.lift_lambda_types(Compiler c, List function) {
   Array declarations = [];
   foreach (Type type, ordered)
     if (%(${type.car()} ${type.cadr()}) in needed) {
-      Type body = (Type) Ast.rewrite_children((Ast) type,
-        %!(List child) => Ast.replace_nodes(child, replaced));
+      Type body = (Type) Ast.rewrite_children(
+        (Ast) type, %!(List child) => Ast.replace_nodes(child, replaced));
       declarations.push(_lambda_type_declaration(c, body, public));
     }
   return %(seq @{declarations.list_free()}
