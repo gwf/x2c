@@ -55,17 +55,13 @@ meta static Symbol _dynamic_operation(Symbol assignment) {
   return 0;
 }
 
-/* The `Symbol` argument the update helpers take, as its integer value. */
-meta static List _dynamic_symbol(Symbol op) =>
-  %(expr ("Symbol") "${(unsigned long) op}");
-
 /* A call of the update `helper` with the address of `target`, which the
    cleanup walk recognizes as a write to `target`. */
 meta static Code _dynamic_update(
   Type type, Code target, Symbol op, Code value, String helper) {
   Type target_type = target.cadr(), address_type = %(* @target_type);
   List address = %(expr $address_type (op & (parens $target)));
-  List operation = _dynamic_symbol(op);
+  List operation = $!Symbol{ $op };
   List call = value
     ? %(call $helper (args $address $operation $value))
     : %(call $helper (args $address $operation));
@@ -125,7 +121,7 @@ $rewrite(%(expr ("Var") (postfix (!or ++ --) ?)))
 meta Code dynamic_change(Code code) {
   match (code) {
     case %(expr ? (op ?(Symbol op) ?(Code target))): {
-      Code one = %(expr (int) (literal (int) "1"));
+      Code one = $!int{ 1 };
       return _dynamic_update(
         target.cadr(), target, op == <++> ? <+> : <->,
         one.convert(%("Var")), "x2c_var_update_volatile");

@@ -37,7 +37,7 @@ meta static Code _raise_value(Code value) {
       NULL, <type>, %"raise detail type ${type.repr()} is not immutable",
       %("use a numeric value, enum, Symbol, Atom, String, List, or Var"));
   }
-  return %(expr ("Var") (call "Var_null" (args)));
+  return $!Var{ Var_null() };
 }
 
 $rewrite($raised)

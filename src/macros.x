@@ -4411,10 +4411,8 @@ Var Compiler.evaluate_declaration_recipe(
   Token invocation = c.token;
   match (c.macro_stack)
     case %((? ? ? ?token) *): invocation = token;
-  return _eval_template_form(
-    c, "(apply (eval $callback) $arguments)",
-    %((?callback $callback) (?arguments $arguments)),
-    invocation, c.filename, void);
+  c.run_declaration_effects();
+  return c.apply_meta_function(callback.str(), arguments, invocation);
 }
 
 /* template calls and rebuilds

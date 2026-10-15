@@ -2009,11 +2009,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_2(void)
   _1212 = cons(_1211, NULL);
   _1213 = cons(_563, _1212);
   _1214 = List_var(_1213);
-  _1215 = int_var(91);
+  _1215 = int_var(95);
   _1216 = cons(_1215, NULL);
   _1217 = cons(_600, _1216);
   _1218 = List_var(_1217);
-  _1219 = int_var(2856);
+  _1219 = int_var(3032);
   _1220 = cons(_1219, NULL);
   _1221 = cons(_613, _1220);
   _1222 = List_var(_1221);

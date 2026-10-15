@@ -81,6 +81,10 @@ meta List source_return_type(List node) {
   return NULL;
 }
 
+/** Returns the return of no value that ends a function returning `Var`. */
+meta List source_return_none(void) =>
+  %(return ("Var") (expr ("Var") (literal ("Var") "void")));
+
 /** Returns the canonical pattern for conditional statements.
     With is normally parsed away; foreach and finally remain accepted
     canonical compatibility heads. */

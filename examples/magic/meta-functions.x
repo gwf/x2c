@@ -38,7 +38,7 @@ macro Expression $shape.names(Expr $value) => $field_names($value);
 macro Expression $shape.reads(Expr $value) => $field_reads($value, $value);
 
 // A `meta` function that reaches no compiler operation keeps both of its
-// forms: `$(tag ...)` runs during translation and `tag(...)` at run time.
+// forms: `$tag(...)` runs during translation and `tag(...)` at run time.
 meta static String tag(String name, int n) => %"$name-$n";
 
 int main(void) {
@@ -48,7 +48,7 @@ int main(void) {
   Response copy = $shape.reads(found);
   printf("copy    %d %s\n", copy.code, copy.label);
 
-  printf("tag     %s %s\n", $(tag "row" 4), tag("row", 4));
+  printf("tag     %s %s\n", $tag("row", 4), tag("row", 4));
 
   assert(String.equal($shape.names(found), "code, label"));
   assert(copy.code == 200);

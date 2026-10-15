@@ -31,9 +31,11 @@
 #include "operator-ledger.h"
 Code register_rewrite(Code function, Code pattern, List holes);
 
-List _dedent_expand(List node);
+List _dedent_expand(Source text);
 
 List _macros_location(void);
+
+List _macros_source(Source code);
 
 List _tag_decode_group(List rows, Map counts, int top);
 
