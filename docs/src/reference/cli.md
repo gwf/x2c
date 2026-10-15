@@ -122,6 +122,8 @@ Inspection modes print an intermediate result and stop translation:
 - `--dump-tokens` prints source tokens and stops.
 - `--dump-ast` prints the parsed, bound AST after macro expansion and stops.
 - `--dump-transforms` prints the transformed AST and stops.
+- Both AST dumps number bindings from 1 in order of first appearance, so a
+  dump does not depend on how many bindings collection issued.
 - `--dump-definitions` prints each definition's location and documentation
   and stops.
 - `--dump-code` prints unformatted generated code and stops.

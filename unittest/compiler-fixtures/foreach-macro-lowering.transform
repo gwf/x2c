@@ -7,8 +7,7 @@
 
 (declare (static int) (bindings (bind (binding 2 "split_evaluations") ())))
 
-(declare (static int) 
- (bindings (bind (binding 3 "initializer_evaluations") ())))
+(declare (static int) (bindings (bind (binding 3 "initializer_evaluations") ())))
 
 (declare (static int) (bindings (bind (binding 4 "cleanups") ())))
 
@@ -16,20 +15,20 @@
  (bind (binding 5 "counted_map") 
   ((fnmod (params (param ("Map") (bind (binding 6 "map") ())))))) 
  (block 
-  (at 17 
-   (stmnt 
-    (expr (int) (postfix ++ (expr (int) (ident (binding 1 "map_evaluations"))))))) 
-  (at 334 (return (expr ("Map") (ident (binding 6 "map")))))))
+  (at 9 (stmnt 
+         (expr (int) 
+          (postfix ++ (expr (int) (ident (binding 1 "map_evaluations"))))))) 
+  (at 326 (return (expr ("Map") (ident (binding 6 "map")))))))
 
 (function (static "Split") 
  (bind (binding 7 "counted_words") 
   ((fnmod (params (param ("String") (bind (binding 8 "text") ())))))) 
  (block 
-  (at 19 
+  (at 11 
    (stmnt 
     (expr (int) 
      (postfix ++ (expr (int) (ident (binding 2 "split_evaluations"))))))) 
-  (at 335 
+  (at 327 
    (return 
     (expr ("Split") 
      (call (expr ((func (("String"))) ("Split")) 
@@ -40,23 +39,23 @@
  (bind (binding 10 "initial_value") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 21 
+  (at 13 
    (stmnt 
     (expr (int) 
      (postfix ++ (expr (int) (ident (binding 3 "initializer_evaluations"))))))) 
-  (at 336 (return (expr (int) (literal (int) "99"))))))
+  (at 328 (return (expr (int) (literal (int) "99"))))))
 
 (function (static void) 
  (bind (binding 11 "record_cleanup") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 23 
+  (at 15 
    (stmnt (expr (int) (postfix ++ (expr (int) (ident (binding 4 "cleanups")))))))))
 
 (function (int) 
  (bind (binding 12 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 337 
+  (at 329 
    (declare ("Map") 
     (bindings 
      (op = (bind (binding 13 "counts") ()) 
@@ -88,18 +87,18 @@
          (expr ("Var") 
           (call (expr ((func ((int))) "Var") (ident (binding 17 "int_var"))) 
            (args (expr (int) (literal (int) "3")))))))))))) 
-  (at 25 
+  (at 17 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 18 "values") ()) 
       (expr ("List") (expr ("List") (cache 8))))))) 
-  (at 26 
+  (at 18 
    (declare (int) 
     (bindings 
      (op = (bind (binding 19 "existing") ()) (expr (int) (literal (int) "0"))) 
      (op = (bind (binding 20 "existing_total") ()) 
       (expr (int) (literal (int) "0")))))) 
-  (at 339 
+  (at 331 
    (block (declare (int) (bindings (bind (binding 21 "current") ()))) 
     (declare ("List") 
      (bindings 
@@ -111,7 +110,7 @@
        (expr ("List") (ident (binding 22 "_x2c_gensym_macro_object_0")))))) 
     (declare ("Var") 
      (bindings (bind (binding 24 "_x2c_gensym_macro_cursor_output_0") ()))) 
-    (at 338 
+    (at 330 
      (while 
       (expr (int) 
        (call (expr ((func (("List") (opt-ref "List") (opt-ref "Var"))) int) 
@@ -138,22 +137,22 @@
                             (binding 24 "_x2c_gensym_macro_cursor_output_0"))) 
                      (expr ("Symbol") "3453797")))))))))) 
        (block 
-        (at 27 
+        (at 19 
          (stmnt 
           (expr (int) 
            (op = (expr (int) (ident (binding 19 "existing"))) 
             (expr (int) (ident (binding 21 "current"))))))) 
-        (at 28 
+        (at 20 
          (stmnt 
           (expr (int) 
            (op += (expr (int) (ident (binding 20 "existing_total"))) 
             (expr (int) (ident (binding 19 "existing"))))))))))))) 
-  (at 38 
+  (at 30 
    (declare (int) 
     (bindings 
      (op = (bind (binding 26 "value_total") ()) 
       (expr (int) (literal (int) "0")))))) 
-  (at 341 
+  (at 333 
    (block (declare ("Var") (bindings (bind (binding 27 "value") (volatile)))) 
     (declare ("Map") 
      (bindings 
@@ -167,7 +166,7 @@
      (bindings (bind (binding 30 "_x2c_gensym_macro_cursor_output_1") ()))) 
     (declare ("Var") 
      (bindings (bind (binding 31 "_x2c_gensym_macro_cursor_output_2") ()))) 
-    (at 340 
+    (at 332 
      (while 
       (expr (int) 
        (call (expr ((func (("Map") (opt-ref unsigned) 
@@ -198,12 +197,12 @@
            (call (expr ((func (("Var"))) (long)) 
                   (ident (binding 33 "Var_integer"))) 
             (args (expr ("Var") (ident (binding 27 "value")))))))))))))) 
-  (at 50 
+  (at 42 
    (declare (int) 
     (bindings 
      (op = (bind (binding 34 "typed_total") ()) 
       (expr (int) (literal (int) "0")))))) 
-  (at 343 
+  (at 335 
    (block 
     (declare (int) 
      (bindings 
@@ -225,7 +224,7 @@
      (bindings (bind (binding 38 "_x2c_gensym_macro_cursor_output_3") ()))) 
     (declare ("Var") 
      (bindings (bind (binding 39 "_x2c_gensym_macro_cursor_output_4") ()))) 
-    (at 342 
+    (at 334 
      (while 
       (expr (int) 
        (call (expr ((func (("Map") (opt-ref unsigned) 
@@ -260,17 +259,17 @@
         (expr (int) 
          (op += (expr (int) (ident (binding 34 "typed_total"))) 
           (expr (int) (ident (binding 35 "value"))))))))))) 
-  (at 62 
+  (at 54 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 40 "entry") ()) 
       (expr ("Var") (literal ("Var") "void")))))) 
-  (at 63 
+  (at 55 
    (declare (int) 
     (bindings 
      (op = (bind (binding 41 "existing_map_total") ()) 
       (expr (int) (literal (int) "0")))))) 
-  (at 345 
+  (at 337 
    (block (declare ("Var") (bindings (bind (binding 42 "current") ()))) 
     (declare ("Map") 
      (bindings 
@@ -284,7 +283,7 @@
      (bindings (bind (binding 45 "_x2c_gensym_macro_cursor_output_5") ()))) 
     (declare ("Var") 
      (bindings (bind (binding 46 "_x2c_gensym_macro_cursor_output_6") ()))) 
-    (at 344 
+    (at 336 
      (while 
       (expr (int) 
        (call (expr ((func (("Map") (opt-ref unsigned) 
@@ -309,12 +308,12 @@
          (op = (expr ("Var") (ident (binding 42 "current"))) 
           (expr ("Var") (ident (binding 46 "_x2c_gensym_macro_cursor_output_6")))))) 
        (block 
-        (at 64 
+        (at 56 
          (stmnt 
           (expr ("Var") 
            (op = (expr ("Var") (ident (binding 40 "entry"))) 
             (expr ("Var") (ident (binding 42 "current"))))))) 
-        (at 65 
+        (at 57 
          (stmnt 
           (expr (int) 
            (op += (expr (int) (ident (binding 41 "existing_map_total"))) 
@@ -322,14 +321,14 @@
              (call (expr ((func (("Var"))) (long)) 
                     (ident (binding 33 "Var_integer"))) 
               (args (expr ("Var") (ident (binding 40 "entry")))))))))))))))) 
-  (at 77 
+  (at 69 
    (declare (int) 
     (bindings 
      (op = (bind (binding 47 "key_bytes") ()) 
       (expr (int) (literal (int) "0"))) 
      (op = (bind (binding 48 "destructured_total") ()) 
       (expr (int) (literal (int) "0")))))) 
-  (at 347 
+  (at 339 
    (block 
     (declare ("Var") 
      (bindings (bind (binding 49 "name") ()) (bind (binding 50 "count") ()))) 
@@ -345,7 +344,7 @@
      (bindings (bind (binding 53 "_x2c_gensym_macro_cursor_output_7") ()))) 
     (declare ("Var") 
      (bindings (bind (binding 54 "_x2c_gensym_macro_cursor_output_8") ()))) 
-    (at 346 
+    (at 338 
      (while 
       (expr (int) 
        (call (expr ((func (("Map") (opt-ref unsigned) 
@@ -374,7 +373,7 @@
          (op = (expr ("Var") (ident (binding 50 "count"))) 
           (expr ("Var") (ident (binding 54 "_x2c_gensym_macro_cursor_output_8")))))) 
        (block 
-        (at 78 
+        (at 70 
          (stmnt 
           (expr (int) 
            (op += (expr (int) (ident (binding 47 "key_bytes"))) 
@@ -385,7 +384,7 @@
                      (call (expr ((func (("Var"))) ("String")) 
                             (ident (binding 56 "Var_string"))) 
                       (args (expr ("Var") (ident (binding 49 "name"))))))))))))) 
-        (at 79 
+        (at 71 
          (stmnt 
           (expr (int) 
            (op += (expr (int) (ident (binding 48 "destructured_total"))) 
@@ -393,7 +392,7 @@
              (call (expr ((func (("Var"))) (long)) 
                     (ident (binding 33 "Var_integer"))) 
               (args (expr ("Var") (ident (binding 50 "count")))))))))))))))) 
-  (at 348 
+  (at 340 
    (declare ("Map") 
     (bindings 
      (op = (bind (binding 57 "numbers") ()) 
@@ -416,14 +415,14 @@
          (expr ("Var") 
           (call (expr ((func ((int))) "Var") (ident (binding 17 "int_var"))) 
            (args (expr (int) (literal (int) "20")))))))))))) 
-  (at 93 
+  (at 85 
    (declare (int) 
     (bindings 
      (op = (bind (binding 58 "converted_total") ()) 
       (expr (int) (literal (int) "0"))) 
      (op = (bind (binding 59 "key_total") ()) 
       (expr (int) (literal (int) "0")))))) 
-  (at 350 
+  (at 342 
    (block 
     (declare (int) 
      (bindings (bind (binding 60 "key") ()) (bind (binding 61 "count") ()))) 
@@ -439,7 +438,7 @@
      (bindings (bind (binding 64 "_x2c_gensym_macro_cursor_output_9") ()))) 
     (declare ("Var") 
      (bindings (bind (binding 65 "_x2c_gensym_macro_cursor_output_10") ()))) 
-    (at 349 
+    (at 341 
      (while 
       (expr (int) 
        (call (expr ((func (("Map") (opt-ref unsigned) 
@@ -487,7 +486,7 @@
           (expr (int) 
            (op + (expr (int) (ident (binding 60 "key"))) 
             (expr (int) (ident (binding 61 "count"))))))))))))) 
-  (at 352 
+  (at 344 
    (block (declare (int) (bindings (bind (binding 66 "key") ()))) 
     (declare ("Iter") 
      (bindings 
@@ -508,7 +507,7 @@
                         (args (expr (int) (literal (int) "0")))))))))))))))))) 
     (declare ("Var") 
      (bindings (bind (binding 69 "_x2c_gensym_macro_item_6") ()))) 
-    (at 351 
+    (at 343 
      (while 
       (expr (int) 
        (call (expr ((func (("Iter") (opt-ref "Var"))) int) 
@@ -532,12 +531,12 @@
         (expr (int) 
          (op += (expr (int) (ident (binding 59 "key_total"))) 
           (expr (int) (ident (binding 66 "key"))))))))))) 
-  (at 114 
+  (at 106 
    (declare (int) 
     (bindings 
      (op = (bind (binding 71 "skipped") ()) (expr (int) (literal (int) "0"))) 
      (op = (bind (binding 72 "stopped") ()) (expr (int) (literal (int) "0")))))) 
-  (at 354 
+  (at 346 
    (block (declare ("Var") (bindings (bind (binding 73 "value") (volatile)))) 
     (declare ("Map") 
      (bindings 
@@ -551,7 +550,7 @@
      (bindings (bind (binding 76 "_x2c_gensym_macro_cursor_output_11") ()))) 
     (declare ("Var") 
      (bindings (bind (binding 77 "_x2c_gensym_macro_cursor_output_12") ()))) 
-    (at 353 
+    (at 345 
      (while 
       (expr (int) 
        (call (expr ((func (("Map") (opt-ref unsigned) 
@@ -577,7 +576,7 @@
           (expr ("Var") 
            (ident (binding 77 "_x2c_gensym_macro_cursor_output_12")))))) 
        (block 
-        (at 115 
+        (at 107 
          (if (expr (int) 
               (op == 
                (expr (long) 
@@ -585,7 +584,7 @@
                        (ident (binding 33 "Var_integer"))) 
                  (args (expr ("Var") (ident (binding 73 "value")))))) 
                (expr (int) (literal (int) "2")))) (continue))) 
-        (at 116 
+        (at 108 
          (stmnt 
           (expr (int) 
            (op += (expr (int) (ident (binding 71 "skipped"))) 
@@ -593,7 +592,7 @@
              (call (expr ((func (("Var"))) (long)) 
                     (ident (binding 33 "Var_integer"))) 
               (args (expr ("Var") (ident (binding 73 "value")))))))))))))))) 
-  (at 357 
+  (at 349 
    (block (declare ("Var") (bindings (bind (binding 78 "value") (volatile)))) 
     (declare ("Map") 
      (bindings 
@@ -607,7 +606,7 @@
      (bindings (bind (binding 81 "_x2c_gensym_macro_cursor_output_13") ()))) 
     (declare ("Var") 
      (bindings (bind (binding 82 "_x2c_gensym_macro_cursor_output_14") ()))) 
-    (at 356 
+    (at 348 
      (while 
       (expr (int) 
        (call (expr ((func (("Map") (opt-ref unsigned) 
@@ -633,20 +632,20 @@
           (expr ("Var") 
            (ident (binding 82 "_x2c_gensym_macro_cursor_output_14")))))) 
        (block 
-        (at 355 
+        (at 347 
          (if (expr (int) 
               (call (expr ((func (("Var"))) int) 
                      (ident (binding 83 "Var_truth"))) 
                (args (expr ("Var") (ident (binding 78 "value")))))) 
           (stmnt 
            (expr (int) (postfix ++ (expr (int) (ident (binding 72 "stopped")))))))) 
-        (at 129 (break)))))))) 
-  (at 141 
+        (at 121 (break)))))))) 
+  (at 133 
    (declare (int) 
     (bindings 
      (op = (bind (binding 84 "deferred_keys") ()) 
       (expr (int) (literal (int) "0")))))) 
-  (at 362 
+  (at 354 
    (block (declare ("Var") (bindings (bind (binding 85 "name") ()))) 
     (declare ("Var") (bindings (bind (binding 86 "value") (volatile)))) 
     (declare ("Map") 
@@ -661,7 +660,7 @@
      (bindings (bind (binding 89 "_x2c_gensym_macro_cursor_output_15") ()))) 
     (declare ("Var") 
      (bindings (bind (binding 90 "_x2c_gensym_macro_cursor_output_16") ()))) 
-    (at 361 
+    (at 353 
      (while 
       (expr (int) 
        (call (expr ((func (("Map") (opt-ref unsigned) 
@@ -692,7 +691,7 @@
           (expr ("Var") 
            (ident (binding 90 "_x2c_gensym_macro_cursor_output_16")))))) 
        (block 
-        (at 360 
+        (at 352 
          (block 
           (declare ("X2CCleanup") 
            (bindings 
@@ -712,9 +711,9 @@
                     (op & (expr ("X2CCleanup") 
                            (ident (binding 91 "_x2c_gensym_defer_record_0"))))))))) 
           (block 
-           (at 359 
+           (at 351 
             (if (expr (int) 
-                 (at 358 
+                 (at 350 
                   (op && 
                    (expr (int) 
                     (call (expr ((func (("String"))) int) 
@@ -737,11 +736,11 @@
              (args (expr (* ("X2CCleanup")) 
                     (op & (expr (("X2CCleanup")) 
                            (ident (binding 91 "_x2c_gensym_defer_record_0"))))))))))))))))) 
-  (at 157 
+  (at 149 
    (declare (int) 
     (bindings 
      (op = (bind (binding 96 "nested") ()) (expr (int) (literal (int) "0")))))) 
-  (at 365 
+  (at 357 
    (block (declare ("Var") (bindings (bind (binding 97 "outer") ()))) 
     (declare ("Map") 
      (bindings 
@@ -755,7 +754,7 @@
      (bindings (bind (binding 100 "_x2c_gensym_macro_cursor_output_19") ()))) 
     (declare ("Var") 
      (bindings (bind (binding 101 "_x2c_gensym_macro_cursor_output_20") ()))) 
-    (at 364 
+    (at 356 
      (while 
       (expr (int) 
        (call (expr ((func (("Map") (opt-ref unsigned) 
@@ -793,7 +792,7 @@
          (bindings (bind (binding 105 "_x2c_gensym_macro_cursor_output_17") ()))) 
         (declare ("Var") 
          (bindings (bind (binding 106 "_x2c_gensym_macro_cursor_output_18") ()))) 
-        (at 363 
+        (at 355 
          (while 
           (expr (int) 
            (call (expr ((func (("Map") (opt-ref unsigned) 
@@ -831,12 +830,12 @@
                  (call (expr ((func (("Var"))) (long)) 
                         (ident (binding 33 "Var_integer"))) 
                   (args (expr ("Var") (ident (binding 102 "inner")))))))))))))))))))) 
-  (at 179 
+  (at 171 
    (declare (int) 
     (bindings 
      (op = (bind (binding 107 "caught") (volatile)) 
       (expr (int) (literal (int) "0")))))) 
-  (at 370 
+  (at 362 
    (block 
     (declare ("ExceptionFrame") 
      (bindings (bind (binding 108 "_x2c_gensym_exception_frame_0") ()))) 
@@ -914,7 +913,7 @@
                                 (binding 108 "_x2c_gensym_exception_frame_0"))) 
                          ("env"))) (expr (int) (literal (int) "0"))))))) 
      (block 
-      (at 369 
+      (at 361 
        (block 
         (declare ("Var") (bindings (bind (binding 119 "value") (volatile)))) 
         (declare ("Map") 
@@ -950,7 +949,7 @@
            (expr (* "Var") 
             (op & (expr ("Var") 
                    (ident (binding 124 "_x2c_gensym_macro_cursor_output_22")))))))) 
-        (at 368 
+        (at 360 
          (while 
           (expr (int) 
            (call (expr ((func (("Map") (opt-ref unsigned) 
@@ -977,7 +976,7 @@
               (expr ("Var") 
                (ident (binding 124 "_x2c_gensym_macro_cursor_output_22")))))) 
            (block 
-            (at 367 
+            (at 359 
              (block 
               (declare ("X2CCleanup") 
                (bindings 
@@ -997,7 +996,7 @@
                         (op & (expr ("X2CCleanup") 
                                (ident (binding 125 "_x2c_gensym_defer_record_1"))))))))) 
               (block 
-               (at 366 
+               (at 358 
                 (if (expr (int) 
                      (call (expr ((func (("Var"))) int) 
                             (ident (binding 83 "Var_truth"))) 
@@ -1098,12 +1097,12 @@
        (args (expr (* ("ExceptionFrame")) 
               (op & (expr (("ExceptionFrame")) 
                      (ident (binding 108 "_x2c_gensym_exception_frame_0"))))))))))) 
-  (at 194 
+  (at 186 
    (declare (int) 
     (bindings 
      (op = (bind (binding 137 "word_bytes") ()) 
       (expr (int) (literal (int) "0")))))) 
-  (at 372 
+  (at 364 
    (block (declare ("String") (bindings (bind (binding 138 "word") ()))) 
     (declare ("Split") 
      (bindings 
@@ -1118,7 +1117,7 @@
        (expr (int) (literal (int) "0"))))) 
     (declare ("String") 
      (bindings (bind (binding 141 "_x2c_gensym_macro_cursor_output_23") ()))) 
-    (at 371 
+    (at 363 
      (while 
       (expr (int) 
        (call (expr ((func (("Split") (opt-ref int) (opt-ref "String"))) int) 
@@ -1145,14 +1144,14 @@
            (call (expr ((func (("String"))) (int)) 
                   (ident (binding 55 "String_len"))) 
             (args (expr ("String") (ident (binding 138 "word")))))))))))))) 
-  (at 205 
+  (at 197 
    (declare (int) 
     (bindings 
      (op = (bind (binding 143 "line_count") ()) 
       (expr (int) (literal (int) "0"))) 
      (op = (bind (binding 144 "line_bytes") ()) 
       (expr (int) (literal (int) "0")))))) 
-  (at 374 
+  (at 366 
    (block (declare ("String") (bindings (bind (binding 145 "line") ()))) 
     (declare ("Split") 
      (bindings 
@@ -1167,7 +1166,7 @@
        (expr (int) (literal (int) "0"))))) 
     (declare ("String") 
      (bindings (bind (binding 149 "_x2c_gensym_macro_cursor_output_24") ()))) 
-    (at 373 
+    (at 365 
      (while 
       (expr (int) 
        (call (expr ((func (("Split") (opt-ref int) (opt-ref "String"))) int) 
@@ -1188,11 +1187,11 @@
           (expr ("String") 
            (ident (binding 149 "_x2c_gensym_macro_cursor_output_24")))))) 
        (block 
-        (at 206 
+        (at 198 
          (stmnt 
           (expr (int) 
            (postfix ++ (expr (int) (ident (binding 143 "line_count"))))))) 
-        (at 207 
+        (at 199 
          (stmnt 
           (expr (int) 
            (op += (expr (int) (ident (binding 144 "line_bytes"))) 
@@ -1200,13 +1199,13 @@
              (call (expr ((func (("String"))) (int)) 
                     (ident (binding 55 "String_len"))) 
               (args (expr ("String") (ident (binding 145 "line")))))))))))))))) 
-  (at 218 
+  (at 210 
    (declare (int) 
     (bindings 
      (op = (bind (binding 150 "fields") ()) (expr (int) (literal (int) "0"))) 
      (op = (bind (binding 151 "empty_fields") ()) 
       (expr (int) (literal (int) "0")))))) 
-  (at 376 
+  (at 368 
    (block (declare ("String") (bindings (bind (binding 152 "field") ()))) 
     (declare ("Split") 
      (bindings 
@@ -1221,7 +1220,7 @@
        (expr (int) (literal (int) "0"))))) 
     (declare ("String") 
      (bindings (bind (binding 156 "_x2c_gensym_macro_cursor_output_25") ()))) 
-    (at 375 
+    (at 367 
      (while 
       (expr (int) 
        (call (expr ((func (("Split") (opt-ref int) (opt-ref "String"))) int) 
@@ -1242,10 +1241,10 @@
           (expr ("String") 
            (ident (binding 156 "_x2c_gensym_macro_cursor_output_25")))))) 
        (block 
-        (at 219 
+        (at 211 
          (stmnt 
           (expr (int) (postfix ++ (expr (int) (ident (binding 150 "fields"))))))) 
-        (at 220 
+        (at 212 
          (if (expr (int) 
               (op ! (expr (int) 
                      (call (expr ((func (("String"))) (int)) 
@@ -1254,16 +1253,16 @@
           (stmnt 
            (expr (int) 
             (postfix ++ (expr (int) (ident (binding 151 "empty_fields")))))))))))))) 
-  (at 231 
+  (at 223 
    (declare ("String") 
     (bindings 
      (op = (bind (binding 157 "word") ()) (expr () (ident (binding 158 "NULL"))))))) 
-  (at 232 
+  (at 224 
    (declare (int) 
     (bindings 
      (op = (bind (binding 159 "scanned_bytes") ()) 
       (expr (int) (literal (int) "0")))))) 
-  (at 378 
+  (at 370 
    (block (declare ("String") (bindings (bind (binding 160 "current") ()))) 
     (declare ("Split") 
      (bindings 
@@ -1278,7 +1277,7 @@
        (expr (int) (literal (int) "0"))))) 
     (declare ("String") 
      (bindings (bind (binding 163 "_x2c_gensym_macro_cursor_output_26") ()))) 
-    (at 377 
+    (at 369 
      (while 
       (expr (int) 
        (call (expr ((func (("Split") (opt-ref int) (opt-ref "String"))) int) 
@@ -1299,12 +1298,12 @@
           (expr ("String") 
            (ident (binding 163 "_x2c_gensym_macro_cursor_output_26")))))) 
        (block 
-        (at 233 
+        (at 225 
          (stmnt 
           (expr ("String") 
            (op = (expr ("String") (ident (binding 157 "word"))) 
             (expr ("String") (ident (binding 160 "current"))))))) 
-        (at 234 
+        (at 226 
          (stmnt 
           (expr (int) 
            (op += (expr (int) (ident (binding 159 "scanned_bytes"))) 
@@ -1312,11 +1311,11 @@
              (call (expr ((func (("String"))) (int)) 
                     (ident (binding 55 "String_len"))) 
               (args (expr ("String") (ident (binding 157 "word")))))))))))))))) 
-  (at 245 
+  (at 237 
    (declare (int) 
     (bindings 
      (op = (bind (binding 164 "pairs") ()) (expr (int) (literal (int) "0")))))) 
-  (at 381 
+  (at 373 
    (block (declare ("String") (bindings (bind (binding 165 "left") ()))) 
     (declare ("Split") 
      (bindings 
@@ -1331,7 +1330,7 @@
        (expr (int) (literal (int) "0"))))) 
     (declare ("String") 
      (bindings (bind (binding 168 "_x2c_gensym_macro_cursor_output_28") ()))) 
-    (at 380 
+    (at 372 
      (while 
       (expr (int) 
        (call (expr ((func (("Split") (opt-ref int) (opt-ref "String"))) int) 
@@ -1365,7 +1364,7 @@
            (expr (int) (literal (int) "0"))))) 
         (declare ("String") 
          (bindings (bind (binding 172 "_x2c_gensym_macro_cursor_output_27") ()))) 
-        (at 379 
+        (at 371 
          (while 
           (expr (int) 
            (call (expr ((func (("Split") (opt-ref int) (opt-ref "String"))) int) 
@@ -1398,11 +1397,11 @@
                    (args (expr ("String") (ident (binding 169 "right")))))))) 
             (stmnt 
              (expr (int) (postfix ++ (expr (int) (ident (binding 164 "pairs")))))))))))))))) 
-  (at 265 
+  (at 257 
    (declare (int) 
     (bindings 
      (op = (bind (binding 173 "boxed") ()) (expr (int) (literal (int) "0")))))) 
-  (at 383 
+  (at 375 
    (block (declare ("Var") (bindings (bind (binding 174 "field") ()))) 
     (declare ("Split") 
      (bindings 
@@ -1417,7 +1416,7 @@
        (expr (int) (literal (int) "0"))))) 
     (declare ("String") 
      (bindings (bind (binding 177 "_x2c_gensym_macro_cursor_output_29") ()))) 
-    (at 382 
+    (at 374 
      (while 
       (expr (int) 
        (call (expr ((func (("Split") (opt-ref int) (opt-ref "String"))) int) 
@@ -1450,12 +1449,12 @@
                    (call (expr ((func (("Var"))) ("String")) 
                           (ident (binding 56 "Var_string"))) 
                     (args (expr ("Var") (ident (binding 174 "field"))))))))))))))))) 
-  (at 276 
+  (at 268 
    (declare (struct "Iter") 
     (bindings (bind (binding 178 "zip_left_storage") ()) 
      (bind (binding 179 "zip_right_storage") ()) 
      (bind (binding 180 "zip_storage") ())))) 
-  (at 277 
+  (at 269 
    (declare ("Iter") 
     (bindings 
      (op = (bind (binding 181 "zip_left") ()) 
@@ -1465,7 +1464,7 @@
         (args (expr ("List") (expr ("List") (cache 21))) 
          (expr (* struct "Iter") 
           (op & (expr (struct "Iter") (ident (binding 178 "zip_left_storage")))))))))))) 
-  (at 278 
+  (at 270 
    (declare ("Iter") 
     (bindings 
      (op = (bind (binding 183 "zip_right") ()) 
@@ -1476,7 +1475,7 @@
          (expr (int) (literal (int) "1")) 
          (expr (* struct "Iter") 
           (op & (expr (struct "Iter") (ident (binding 179 "zip_right_storage")))))))))))) 
-  (at 279 
+  (at 271 
    (declare ("Iter") 
     (bindings 
      (op = (bind (binding 185 "zipped") ()) 
@@ -1487,12 +1486,12 @@
          (expr ("Iter") (ident (binding 183 "zip_right"))) 
          (expr (* struct "Iter") 
           (op & (expr (struct "Iter") (ident (binding 180 "zip_storage")))))))))))) 
-  (at 280 
+  (at 272 
    (declare (int) 
     (bindings 
      (op = (bind (binding 187 "zipped_total") ()) 
       (expr (int) (literal (int) "0")))))) 
-  (at 385 
+  (at 377 
    (block 
     (declare ("Var") 
      (bindings (bind (binding 188 "text") ()) 
@@ -1503,7 +1502,7 @@
        (expr ("Iter") (ident (binding 185 "zipped")))))) 
     (declare ("Var") 
      (bindings (bind (binding 191 "_x2c_gensym_macro_item_20") ()))) 
-    (at 384 
+    (at 376 
      (while 
       (expr (int) 
        (call (expr ((func (("Iter") (opt-ref "Var"))) int) 
@@ -1555,35 +1554,35 @@
              (call (expr ((func (("Var"))) (long)) 
                     (ident (binding 33 "Var_integer"))) 
               (args (expr ("Var") (ident (binding 189 "number")))))))))))))))) 
-  (at 289 
+  (at 281 
    (declare ("MapIntInt") 
     (bindings 
      (op = (bind (binding 195 "counted") ()) 
       (expr ("MapIntInt") 
        (call (expr ((func ((void))) "MapIntInt") 
               (ident (binding 196 "MapIntInt_new"))) (args (expr (void) ())))))))) 
-  (at 290 
+  (at 282 
    (stmnt 
     (expr (void) 
      (call (expr ((func (("MapIntInt") (int) (int))) (void)) 
             (ident (binding 197 "MapIntInt_set"))) 
       (args (expr ("MapIntInt") (ident (binding 195 "counted"))) 
        (expr (int) (literal (int) "1")) (expr (int) (literal (int) "10"))))))) 
-  (at 291 
+  (at 283 
    (stmnt 
     (expr (void) 
      (call (expr ((func (("MapIntInt") (int) (int))) (void)) 
             (ident (binding 197 "MapIntInt_set"))) 
       (args (expr ("MapIntInt") (ident (binding 195 "counted"))) 
        (expr (int) (literal (int) "2")) (expr (int) (literal (int) "20"))))))) 
-  (at 292 
+  (at 284 
    (declare (int) 
     (bindings 
      (op = (bind (binding 198 "native_values") ()) 
       (expr (int) (literal (int) "0"))) 
      (op = (bind (binding 199 "native_pairs") ()) 
       (expr (int) (literal (int) "0")))))) 
-  (at 387 
+  (at 379 
    (block (declare (int) (bindings (bind (binding 200 "value") (volatile)))) 
     (declare ("MapIntInt") 
      (bindings 
@@ -1597,7 +1596,7 @@
      (bindings (bind (binding 203 "_x2c_gensym_macro_cursor_output_30") ()))) 
     (declare (int) 
      (bindings (bind (binding 204 "_x2c_gensym_macro_cursor_output_31") ()))) 
-    (at 386 
+    (at 378 
      (while 
       (expr (int) 
        (call (expr ((func (("MapIntInt") (opt-ref unsigned) 
@@ -1626,7 +1625,7 @@
         (expr (int) 
          (op += (expr (int) (ident (binding 198 "native_values"))) 
           (expr (int) (ident (binding 200 "value"))))))))))) 
-  (at 389 
+  (at 381 
    (block (declare (int) (bindings (bind (binding 206 "key") ()))) 
     (declare (int) (bindings (bind (binding 207 "value") (volatile)))) 
     (declare ("MapIntInt") 
@@ -1641,7 +1640,7 @@
      (bindings (bind (binding 210 "_x2c_gensym_macro_cursor_output_32") ()))) 
     (declare (int) 
      (bindings (bind (binding 211 "_x2c_gensym_macro_cursor_output_33") ()))) 
-    (at 388 
+    (at 380 
      (while 
       (expr (int) 
        (call (expr ((func (("MapIntInt") (opt-ref unsigned) 
@@ -1676,7 +1675,7 @@
           (expr (int) 
            (op * (expr (int) (ident (binding 206 "key"))) 
             (expr (int) (ident (binding 207 "value"))))))))))))) 
-  (at 316 
+  (at 308 
    (declare ("MapStringString") 
     (bindings 
      (op = (bind (binding 212 "named") ()) 
@@ -1684,19 +1683,19 @@
        (call (expr ((func ((void))) "MapStringString") 
               (ident (binding 213 "MapStringString_new"))) 
         (args (expr (void) ())))))))) 
-  (at 317 
+  (at 309 
    (stmnt 
     (expr (void) 
      (call (expr ((func (("MapStringString") ("String") ("String"))) (void)) 
             (ident (binding 214 "MapStringString_set"))) 
       (args (expr ("MapStringString") (ident (binding 212 "named"))) 
        (expr ("String") (cache 22)) (expr ("String") (cache 23))))))) 
-  (at 318 
+  (at 310 
    (declare (int) 
     (bindings 
      (op = (bind (binding 215 "native_bytes") ()) 
       (expr (int) (literal (int) "0")))))) 
-  (at 391 
+  (at 383 
    (block 
     (declare ("String") (bindings (bind (binding 216 "value") (volatile)))) 
     (declare ("MapStringString") 
@@ -1711,7 +1710,7 @@
      (bindings (bind (binding 219 "_x2c_gensym_macro_cursor_output_34") ()))) 
     (declare ("String") 
      (bindings (bind (binding 220 "_x2c_gensym_macro_cursor_output_35") ()))) 
-    (at 390 
+    (at 382 
      (while 
       (expr (int) 
        (call (expr ((func (("MapStringString") (opt-ref unsigned) 
@@ -1744,12 +1743,12 @@
            (call (expr ((func (("String"))) (int)) 
                   (ident (binding 55 "String_len"))) 
             (args (expr ("String") (ident (binding 216 "value")))))))))))))) 
-  (at 330 
+  (at 322 
    (declare (int) 
     (bindings 
      (op = (bind (binding 222 "value") (volatile)) 
       (expr (int) (literal (int) "7")))))) 
-  (at 331 
+  (at 323 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 223 "printf"))) 
@@ -1776,7 +1775,7 @@
        (expr (int) (ident (binding 151 "empty_fields"))) 
        (expr (int) (ident (binding 159 "scanned_bytes"))) 
        (expr (int) (ident (binding 2 "split_evaluations")))))))) 
-  (at 332 
+  (at 324 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 223 "printf"))) 
@@ -1792,7 +1791,7 @@
        (expr (int) (ident (binding 19 "existing"))) 
        (expr (int) (ident (binding 20 "existing_total"))) 
        (expr (int) (ident (binding 41 "existing_map_total")))))))) 
-  (at 392 
+  (at 384 
    (return 
     (expr (int) 
      (op ? (expr (int) 
@@ -1877,7 +1876,7 @@
                                                                                 
                                                                                 binding 
                                                                                 
-                                                                                37 
+                                                                                26 
                                                                                 
                                                                                 "value_total"))) 
                                                                              (
@@ -1909,7 +1908,7 @@
                                                                                 
                                                                                 binding 
                                                                                 
-                                                                                49 
+                                                                                34 
                                                                                 
                                                                                 "typed_total"))) 
                                                                              (
@@ -1934,7 +1933,7 @@
                                                                              ident 
                                                                              (
                                                                               binding 
-                                                                              68 
+                                                                              47 
                                                                               
                                                                               "key_bytes"))) 
                                                                            (expr 
@@ -1952,7 +1951,7 @@
                                                                           (ident 
                                                                            (
                                                                             binding 
-                                                                            69 
+                                                                            48 
                                                                             
                                                                             "destructured_total"))) 
                                                                          (expr 
@@ -1968,7 +1967,7 @@
                                                                         (ident 
                                                                          (
                                                                           binding 
-                                                                          82 
+                                                                          58 
                                                                           "converted_total"))) 
                                                                        (expr (
                                                                               int) 
@@ -1980,7 +1979,7 @@
                                                                      (expr (int) 
                                                                       (ident 
                                                                        (binding 
-                                                                        101 
+                                                                        71 
                                                                         "skipped"))) 
                                                                      (expr (int) 
                                                                       (literal 
@@ -1989,8 +1988,7 @@
                                                                   (op == 
                                                                    (expr (int) 
                                                                     (ident 
-                                                                     (binding 
-                                                                      102 
+                                                                     (binding 72 
                                                                       "stopped"))) 
                                                                    (expr (int) 
                                                                     (literal 
@@ -2086,8 +2084,7 @@
                                        (expr (int) 
                                         (op == 
                                          (expr (int) 
-                                          (ident 
-                                           (binding 2 "split_evaluations"))) 
+                                          (ident (binding 2 "split_evaluations"))) 
                                          (expr (int) (literal (int) "1")))))) 
                                      (expr (int) 
                                       (op == 

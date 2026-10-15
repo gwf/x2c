@@ -328,13 +328,13 @@ macro grammar or post-expansion validation pass.
 
 ```text
 (function ("String")
- (bind (binding 2 "greet")
-  ((fnmod (params (param ("String") (bind (binding 1 "name") ()))))))
+ (bind (binding 1 "greet")
+  ((fnmod (params (param ("String") (bind (binding 2 "name") ()))))))
  (block
   (at 1 (return ("String")
          (expr ("String")
           (segments (cache 0)
-           (segvar (expr ("String") (ident (binding 1 "name"))))))))))
+           (segvar (expr ("String") (ident (binding 2 "name"))))))))))
 ```
 
 Types are attached as the tree is built. The function, its parameter, the
@@ -405,8 +405,8 @@ lambda normalization within the function.
 
 ```text
 (function ("String")
- (bind (binding 2 "greet")
-  ((fnmod (params (param ("String") (bind (binding 1 "name") ()))))))
+ (bind (binding 1 "greet")
+  ((fnmod (params (param ("String") (bind (binding 2 "name") ()))))))
  (block
   (at 2 (return
          (expr ("String")
@@ -414,12 +414,12 @@ lambda normalization within the function.
            (expr ("List")
             (cons (expr ("Var")
                    (call (expr ((func (("String"))) "Var")
-                          (ident (binding 15 "String_var")))
+                          (ident (binding 3 "String_var")))
                     (args (expr ("String") (cache 0)))))
              (cons (expr ("Var")
                     (call (expr ((func (("String"))) "Var")
-                           (ident (binding 15 "String_var")))
-                     (args (expr ("String") (ident (binding 1 "name"))))))
+                           (ident (binding 3 "String_var")))
+                     (args (expr ("String") (ident (binding 2 "name"))))))
               (nil)))) ")"))))))
 ```
 

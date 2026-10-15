@@ -15,7 +15,7 @@
 (function (int) 
  (bind (binding 3 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
-  (at 21 
+  (at 11 
    (declare ("MacroMemberName") 
     (bindings 
      (op = (bind (binding 4 "record") ()) 
@@ -24,28 +24,28 @@
      (op = (bind (binding 5 "pointer") (*)) 
       (expr (* "MacroMemberName") 
        (op & (expr ("MacroMemberName") (ident (binding 4 "record"))))))))) 
-  (at 23 
+  (at 13 
    (declare (int) 
     (bindings 
      (op = (bind (binding 6 "direct") ()) 
       (expr (int) 
        (op . (expr ("MacroMemberName") (ident (binding 4 "record"))) 
         ("value"))))))) 
-  (at 25 
+  (at 15 
    (declare (int) 
     (bindings 
      (op = (bind (binding 7 "indirect") ()) 
       (expr (int) 
        (op -> (expr (* "MacroMemberName") (ident (binding 5 "pointer"))) 
         ("value"))))))) 
-  (at 26 
+  (at 16 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 8 "printf"))) 
       (args (expr (* char) (literal (* char) "\"%d %d\\n\"")) 
        (expr (int) (ident (binding 6 "direct"))) 
        (expr (int) (ident (binding 7 "indirect")))))))) 
-  (at 27 
+  (at 17 
    (return (int) 
     (expr (int) 
      (op ? (expr (int) 

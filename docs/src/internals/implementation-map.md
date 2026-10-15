@@ -38,22 +38,22 @@ Ask for the AST after parsing and macro expansion:
 ```
 
 ```text
-(block (declare ("Var") (bindings (bind (binding 5798 "n") ())))
+(block (declare ("Var") (bindings (bind (binding 4 "n") ())))
  (declare ("List")
   (bindings
-   (op = (bind (binding 5802 "_x2c_gensym_macro_object_0") ())
-    (expr ("List") (ident (binding 5795 "numbers"))))))
+   (op = (bind (binding 5 "_x2c_gensym_macro_object_0") ())
+    (expr ("List") (ident (binding 2 "numbers"))))))
  (declare ("List")
   (bindings
-   (op = (bind (binding 5803 "_x2c_gensym_macro_cursor_0") ())
-    (expr ("List") (ident (binding 5802 "_x2c_gensym_macro_object_0"))))))
+   (op = (bind (binding 6 "_x2c_gensym_macro_cursor_0") ())
+    (expr ("List") (ident (binding 5 "_x2c_gensym_macro_object_0"))))))
  (declare ("Var")
-  (bindings (bind (binding 5806 "_x2c_gensym_macro_cursor_output_0") ())))
- (at 398
+  (bindings (bind (binding 7 "_x2c_gensym_macro_cursor_output_0") ())))
+ (at 20
   (while
    (expr (int)
-    (call ... (ident (binding 5805 "List_try_next")))
-     (args (expr ("List") (ident (binding 5802 "_x2c_gensym_macro_object_0")))
+    (call ... (ident (binding 8 "List_try_next")))
+     (args (expr ("List") (ident (binding 5 "_x2c_gensym_macro_object_0")))
       (expr (opt-ref "List") (op & ...))
       (expr (opt-ref "Var") (op & ...)))))
    (block ...))))
