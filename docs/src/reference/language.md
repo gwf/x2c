@@ -1845,13 +1845,16 @@ enumerator of that file or of a header it includes, or a native name such as
 a C library function. The expansion reads that declaration with its type. A
 caller's local of the same spelling receives a separate generated C
 spelling, so the expansion still reaches the file-scope name, and so does
-code a rewrite rule's quotation returns into a function body. Any other name
-the body reads resolves where the expansion lands, like any name written
-there: a caller's declaration of that spelling supplies it, including a
-local, and a local macro reads the locals around it. A name that nothing
-declares anywhere is left to C, as a native macro such as `errno` is. To
-read a caller's binding of a name, take the name as a `Name` argument; that
-argument is the explicit request for lookup where the expansion lands.
+code a rewrite rule's quotation returns into a function body. Only the
+locals visible where the expansion lands are respelled, so a native macro
+that names one of them there reads the file-scope name, while locals of
+other scopes keep their C spellings. Any other name the body reads resolves
+where the expansion lands, like any name written there: a caller's
+declaration of that spelling supplies it, including a local, and a local
+macro reads the locals around it. A name that nothing declares anywhere is
+left to C, as a native macro such as `errno` is. To read a caller's binding
+of a name, take the name as a `Name` argument; that argument is the explicit
+request for lookup where the expansion lands.
 
 ```x2c
 macro Stmt $repeat(Name $i, Expr $count, Expr $value, Name $sum) {

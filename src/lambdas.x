@@ -503,11 +503,36 @@ static List _record(
   c.set_fact(%(type $captured), captured_type);
   c.set_fact(%(lambda-depth $captured), k.depth);
   if (!c.macro_holes) c.sym.join_locals(captured);
+  _inherit_spelling(c, k.binding, captured);
   if (reference) c.set_fact(%(reference-param $captured), 1);
   else c.set_fact(%(lambda-snapshot $captured), 1);
   List order = %(lambda-order ${k.scope});
   c.set_fact(order, cons(row, k.facts.getdefault(order, %())));
   return row;
+}
+
+/* A capture is the lifted function's copy of `source` under its spelling,
+   so it takes the C spelling `source` emits under, unless it has one. */
+static void _inherit_spelling(Compiler c, List source, List captured) {
+  Map facts = c.semantic_binding_facts();
+  Var spelling;
+  if (facts.try_get(%(emitted $source), spelling) &&
+      !(%(emitted $captured) in facts))
+    c.set_fact(%(emitted $captured), spelling);
+}
+
+/** Gives the captures of `binding` that the enclosing lambdas already
+    recorded the C spelling `binding` emits under. */
+void Compiler.respell_captures(Compiler c, List binding) {
+  Map facts = c.semantic_binding_facts();
+  foreach (List frame, c.lambda_scopes.reverse())
+    match (frame)
+      case %(lambda-scope ?scope * *):
+        match (facts.getdefault(%(lambda-capture $scope $binding), NULL))
+          case %(capture ?captured * *): {
+            _inherit_spelling(c, binding, captured);
+            binding = captured;
+          }
 }
 
 // capture checks

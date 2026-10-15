@@ -858,6 +858,25 @@ void Sym.unshadow_global(Sym s, String spelling) {
   foreach (List local, _locals(s, spelling)) _unshadow_local(s, local, alias);
 }
 
+/** Emits every local object spelled `spelling` that the current scope
+    sees, the enclosing ones too, under one fresh spelling, so a file-scope
+    name a template keeps reaches the global there, and returns them.
+    Locals of other scopes keep their spellings for the native macros that
+    name them. */
+List Sym.unshadow_visible(Sym s, String spelling) {
+  List key = %($spelling), visible = NULL;
+  String alias = s.c.fresh_name("binding_shadow");
+  for (int i = s.base_scopes; i < (int) s.scopes.len(); i++) {
+    SymScope *scope = _scope_at(s, i);
+    Var binding;
+    if (key in scope.symbols && scope.bindings.try_get(key, binding)) {
+      _unshadow_local(s, binding, alias);
+      visible = cons(binding, visible);
+    }
+  }
+  return visible;
+}
+
 static void _unshadow_local(Sym s, List binding, String alias) {
   if (!(%(emitted $binding) in s.binding_facts))
     s.put(s.binding_facts, %(emitted $binding), alias);
