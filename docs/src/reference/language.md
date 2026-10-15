@@ -1834,10 +1834,14 @@ declaration of the enclosing body.
 A name the body reads without declaring keeps the file-scope declaration
 that supplies it where the macro is written: a function, object, or
 enumerator of that file or of a header it includes, or a native name such as
-a C library function. The expansion reads that declaration with its type. A
-caller's local of the same spelling receives a separate generated C
-spelling, so the expansion still reaches the file-scope name, and so does
-code a rewrite rule's quotation returns into a function body. Any other name
+a C library function. The expansion reads that declaration with its type.
+Each caller's local of the same spelling that encloses the expansion
+receives a separate generated C spelling, so the expansion still reaches the
+file-scope name, and so does code a rewrite rule's quotation returns into a
+function body; such a quotation renames every local of that spelling in the
+unit. A macro expansion leaves other locals of that spelling with their C
+spelling. A native `#define` is passed to C unchanged, so one that names a
+renamed local reads the file-scope name instead. Any other name
 the body reads resolves where the expansion lands, like any name written
 there: a caller's declaration of that spelling supplies it, including a
 local, and a local macro reads the locals around it. A name that nothing

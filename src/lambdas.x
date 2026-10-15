@@ -491,8 +491,9 @@ static List _resolve_outside(Compiler c, List frame, Var value) {
 }
 
 /* The captured copy is a fresh automatic binding: a reference parameter or
-   a snapshot, which joins the locals of its spelling outside a template.
-   Rows join the lambda's order newest first. */
+   a snapshot, which joins the locals of its spelling outside a template
+   and keeps its source's emitted spelling. Rows join the lambda's order
+   newest first. */
 static List _record(
   Capture &k, Type captured_type, List expression, int reference) {
   Compiler c = k.c;
@@ -502,12 +503,29 @@ static List _record(
   c.set_fact(%(automatic $captured), 1);
   c.set_fact(%(type $captured), captured_type);
   c.set_fact(%(lambda-depth $captured), k.depth);
+  Var emitted;
+  if (k.facts.try_get(%(emitted ${k.binding}), emitted))
+    c.set_fact(%(emitted $captured), emitted);
   if (!c.macro_holes) c.sym.join_locals(captured);
   if (reference) c.set_fact(%(reference-param $captured), 1);
   else c.set_fact(%(lambda-snapshot $captured), 1);
   List order = %(lambda-order ${k.scope});
   c.set_fact(order, cons(row, k.facts.getdefault(order, %())));
   return row;
+}
+
+/** Emits each capture spelled `spelling` in the open lambdas under a fresh
+    spelling, so a template's kept name expanded in a lambda body reaches
+    the file-scope declaration. */
+void Compiler.unshadow_captures(Compiler c, String spelling) {
+  Map facts = c.semantic_binding_facts();
+  foreach (List frame, c.lambda_scopes)
+    match (frame) case %(lambda-scope ?scope ? ? ?):
+      foreach (List row, facts.getdefault(%(lambda-order $scope), %()))
+        match (row) case %(capture ?captured ? ?)
+          if (Ast.binding_spelling(captured) == spelling &&
+              !(%(emitted $captured) in facts)):
+            c.set_fact(%(emitted $captured), c.fresh_name("binding_shadow"));
 }
 
 // capture checks

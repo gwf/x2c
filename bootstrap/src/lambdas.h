@@ -26,6 +26,8 @@ int Compiler_lambda_capture_required(Compiler c, List binding);
 
 List Compiler_capture_lambda_identifier(Compiler c, List binding, Type type);
 
+void Compiler_unshadow_captures(Compiler c, String spelling);
+
 void Compiler_check_lambda_captures(Compiler c, List ast);
 
 

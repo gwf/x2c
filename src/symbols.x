@@ -816,6 +816,25 @@ void Sym.unshadow_global(Sym s, String spelling) {
   foreach (List local, _locals(s, spelling)) _unshadow_local(s, local, alias);
 }
 
+/** Emits each local object spelled `spelling` in the enclosing scopes,
+    innermost to outermost, under a private spelling, so a template's kept
+    name expanded here reaches the file-scope declaration. Locals elsewhere
+    in the unit keep their spelling. A native `#define` that one of these
+    scopes uses still writes the C spelling, so it reads the file-scope
+    declaration too. */
+void Sym.unshadow_enclosing(Sym s, String spelling) {
+  Var alias;
+  if (!s.binding_facts.try_get(%(unshadowed $spelling), alias))
+    alias = s.c.fresh_name("binding_shadow");
+  List key = %($spelling);
+  for (int i = s.scopes.len() - 1; i >= s.base_scopes; i--) {
+    Var found;
+    if (!_scope_at(s, i).bindings.try_get(key, found)) continue;
+    foreach (List local, _locals(s, spelling))
+      if (local == found) _unshadow_local(s, local, alias);
+  }
+}
+
 static void _unshadow_local(Sym s, List binding, String alias) {
   if (!(%(emitted $binding) in s.binding_facts))
     s.put(s.binding_facts, %(emitted $binding), alias);
