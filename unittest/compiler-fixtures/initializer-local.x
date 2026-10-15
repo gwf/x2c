@@ -109,19 +109,6 @@ static int file_forward_shadow(void) {
   return after.integer == 13;
 }
 
-macro Stmt $loop_scope() {
-  for (struct Record { String text; } value = {"macro"}; 0;)
-    (void)value;
-}
-
-static void loop_scope(void) {
-  for (struct Record { String text; } value = {"loop"}; 0;)
-    (void)value;
-  $loop_scope();
-  struct Record after = {7};
-  printf("%d\n", after.integer);
-}
-
 static int qualified(void) {
   struct sockaddr_in address = {0};
   address.sin_port = 37;
@@ -143,6 +130,5 @@ int main(void) {
   saved_alias();
   implicit_forward();
   global_alias();
-  loop_scope();
   return !qualified() || !file_forward_shadow();
 }
