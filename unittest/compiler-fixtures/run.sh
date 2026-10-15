@@ -65,6 +65,20 @@ normalize_cc_warnings() {
   mv "$file.normalized" "$file"
 }
 
+# `<name>.cc-stderr` records clang's wording. gcc words the same warnings
+# differently, so a gcc run checks `<name>.cc-stderr.gcc` when the fixture
+# has one, and an update writes it only when gcc's text differs.
+cc_stderr_phase() {
+  local actual=$1 base="$fixture_dir/$name.cc-stderr"
+  if [[ "$("$cc" --version 2>/dev/null)" == *"Free Software Foundation"* ]] &&
+      { [[ -f "$base.gcc" ]] ||
+        { [[ "$mode" == update ]] && ! cmp -s "$base" "$actual"; }; }; then
+    echo cc-stderr.gcc
+  else
+    echo cc-stderr
+  fi
+}
+
 check_artifact() {
   local phase=$1
   local actual=$2
@@ -278,7 +292,8 @@ run_fixture() {
     [[ "$generated" == "$output/$name.c" ]] || \
       generated_sources+=("$generated")
   done
-  if ! "$cc" -fsigned-char "${build_cflags[@]}" \
+  # The C locale keeps the compiler's quotes in its warnings ASCII.
+  if ! LC_ALL=C "$cc" -fsigned-char "${build_cflags[@]}" \
       -iquote "$root/include/x2c" -iquote "$fixture_dir" \
       "${generated_sources[@]}" \
       -L"$root/builds/0" -lx2c -lm -o "$program" \
@@ -292,7 +307,8 @@ run_fixture() {
   # provokes; every other fixture is expected to compile silently.
   normalize_cc_warnings "$case_build/cc.stderr"
   if has_phase cc-stderr; then
-    check_artifact cc-stderr "$case_build/cc.stderr"
+    check_artifact "$(cc_stderr_phase "$case_build/cc.stderr")" \
+      "$case_build/cc.stderr"
   elif [[ -s "$case_build/cc.stderr" ]]; then
     cat "$case_build/cc.stderr" >&2
     record_failure "$name generated C compiled with warnings"
