@@ -1,13 +1,12 @@
 # Pattern Matching
 
-A `match` statement takes a `List` apart by describing the shape you expect.
-Instead of a run of `List_car`, `List_cdr`, length checks, and tag tests, you
-write a pattern that looks like the data, name the pieces you care about, and
-use those names as ordinary local variables.
+A `match` statement takes a `List` apart by its shape. You write a pattern
+that looks like the data and name the pieces you need. The names become
+ordinary local variables. One pattern replaces a chain of `List_car`,
+`List_cdr`, length checks, and tag tests.
 
-The `match` statement and the runtime matcher share one pattern language.
-The exhaustive rules are in
-[the language reference](../reference/language.md).
+The `match` statement and the runtime matcher share one pattern language. The
+exhaustive rules are in [the language reference](../reference/language.md).
 
 ## The match statement
 
@@ -28,7 +27,7 @@ match (reply) {
 ```
 
 The subject is evaluated once. Arms are then tried in source order, and the
-**first** one that matches runs. The second arm above would also have matched,
+first one that matches runs. The second arm above would also have matched,
 but it is never tried. If no arm matches and there is no
 `default`, the whole statement does nothing.
 
@@ -390,27 +389,28 @@ printf("%d assignment(s)\n", assignments);
 
 Use a plain `if` chain instead when there is no shape to state: one tag test,
 one length check, one comparison. A `match` with a single arm whose pattern is
-`%(?x)` buys nothing over the test you would have written. Use
+`%(?x)` is no clearer than the test it replaces. Use
 [iteration](iteration.md) when order, accumulated state, or early exit
 matters. A loop and a pattern can each do part of the work.
 
-A binder does not check the captured value's type. `?value` captures whatever
-was in that position. If the arm's body depends on the type, say so in the
-pattern with `(!is type string)` or check the type before the `match`.
+A plain binder does not check the captured value's type. `?value` captures
+whatever is in that position. When the arm's body depends on the type, use a
+typed capture such as `?(String value)`, which fails the arm on a tag
+mismatch.
 
-## Limitations to know up front
+## Limitations
 
-**`default` must be the last arm.** The compiler diagnoses a later arm. A final
+`default` must be the last arm. The compiler diagnoses a later arm. A final
 `default` runs only when every earlier case failed. Each branch of a
 conditional group may end with its own `default`, as long as no arm follows
 the group.
 
-**A `case` pattern must be a `%(...)` `List` literal.** The runtime matcher
+A `case` pattern must be a `%(...)` `List` literal. The runtime matcher
 accepts a standalone `Symbol` pattern such as `<?whole>`, but the statement
 form does not. The compiler rejects any other case pattern with a positioned
 x2c diagnostic before generating C.
 
-**Source guard operators must be literal.** Runtime-built patterns may
+Source guard operators must be literal. Runtime-built patterns may
 interpolate an interned operator `Symbol`, but a source arm needs a literal
 operator so definite binder assignment can be checked. The `?binder?` family
 is reserved and is not a working predicate.

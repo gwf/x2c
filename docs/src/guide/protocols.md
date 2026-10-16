@@ -99,25 +99,15 @@ and must be unique across the process. `tag` registers the participant's own
 descriptor; `as` reuses another type's descriptor. The two modifiers cannot
 be combined.
 
-Any concrete adoption may be translation-unit-local:
+Any adoption may be local to its translation unit:
 
 <!-- ignore: adoption excerpt; Prepared and LocalPlan are application-defined types -->
 ```x2c,ignore
 static protocol Prepared(LocalPlan);
 ```
 
-`static` makes an adoption local to its translation unit, even when all its
-dependencies are public. It is also valid when the protocol, participant, or
-converters are already private; then it states explicitly what the compiler
-would infer. The resulting linkage is the same. A protocol body can also be
-`static`, which keeps its declaration private to the source file.
-
-An adoption marked `meta`, such as `meta protocol Iter(List);`, also makes
-that conformance's witnesses available to compile-time code, as described in
-[native C functions](meta-functions.md#native-c-functions). Only an adoption
-can be `meta`, so availability stays explicit for each conformance.
-
-Three visibility patterns cover most code:
+A protocol body may also be `static`, which keeps it private to its source
+file. Three visibility patterns cover most code:
 
 | Protocol | Participant | Typical spelling |
 | --- | --- | --- |
@@ -135,91 +125,25 @@ static LocalPlan Var.localplan(Var value) => (LocalPlan) value.pointer();
 protocol Var(LocalPlan);
 ```
 
-A protocol body declared as `static protocol Prepared(T) { ... }` is private
-to its source file. A concrete adoption may also be static. A local ordinary adapter is emitted as `static inline` in the
-participant's C file. Local native aliases and their signature checks also
-stay in that file; none of these names appears in the generated header.
+An adoption marked `meta`, such as `meta protocol Iter(List);`, also makes
+that conformance's witnesses available to compile-time code, as described in
+[native C functions](meta-functions.md#native-c-functions).
 
-The same linkage rules apply to `Var(T)` adapters and descriptor thunks.
-Descriptor registration is separate and process-wide. The participant's unit
-registers either its lowercase type name or its explicit `tag` for boxed
-dispatch. Keep that tag unique, including across private types in different
-translation units. The compiler retains the full lowercase name to diagnose
-two types claiming the same encoded tag. `Var(T) as R` reuses `R`'s descriptor
-and registers nothing for `T`.
+### Placement
 
-A generated method cannot have both local and external linkage. If a
-participant requires both, the compiler reports an error at the source
-location. Local native aliases and local descriptor registration are still
-allowed.
+Put an adoption beside its converters. The compiler resolves it in the
+declaring unit, which must see the protocol, the participant, the
+converters, and the participant methods that fix its associated types. A
+unit that includes the declaring unit reuses that result. The reference
+gives the [linkage and visibility rules](../reference/language.md#protocols).
 
-Protocol declarations and adoptions appear at the top level. Neither creates
-a runtime object. The compiler retains their declaration AST nodes and collects
-them with surrounding declarations for each translation unit. Reading source, cached declarations,
-or a unit interface gives the same result. Repeating a byte-identical
-declaration has no effect. Conflicting declarations produce errors at their
-source locations.
+## Conversions
 
-### Placement and visibility
-
-The compiler resolves an adoption in the translation unit that declares it.
-That unit must include the protocol, participant type, required converters,
-and any participant methods needed to determine associated types. Put the
-adoption beside its converters. A shared protocol module is suitable only
-when it already includes these declarations.
-
-A unit that includes the declaring unit uses the conformance the declaring
-unit resolved. A participant method that only the including unit can see,
-such as its own `P.member` definition, does not change how that member
-resolves. The declaring unit's interface carries the conformance. When no
-current interface exists, collection resolves the adoption from the
-declaring unit's own declarations, so the answer does not depend on build
-order. A declaring unit that imports a package records no conformance, and
-a unit that includes it resolves those adoptions from what it sees.
-
-The runtime keeps built-in protocol bodies in `lib/protocols.x` and native
-protocols and adoptions beside the participant typedef. User modules have no
-required filename. A fully public native adoption emits aliases in the header;
-a private adoption or one with a private dependency keeps them in the
-participant's C file.
-
-Two private typedefs may adopt a private protocol in one translation unit:
-`static protocol PrivateA(PrivateB);`. Omitting `static` has the same effect
-because the dependencies are private. If the selected methods need
-conversions in both directions, define `PrivateB.privatea` and
-`PrivateA.privateb`. The entire relationship stays within the translation
-unit.
-
-## Conversions are demanded by adapters
-
-The selected methods determine which conversions an adoption needs. The
-compiler generates adapters for those methods and requires only the
-conversions each adapter uses:
-
-| Adapter | Required conversion |
-| --- | --- |
-| Ordinary default parameter exactly `T` | participant to base |
-| Ordinary default result exactly `T` | base to participant |
-| Dispatcher thunk parameter of `T` | base to participant |
-| Dispatcher thunk result of `T` | participant to base |
-| Native alias occurrence of `T` | the implicit C direction at that position |
-
-For a participant `P` and base `Base`, name the forward conversion:
-
-<!-- ignore: signature notation; Base and P stand for arbitrary types -->
-```x2c,ignore
-Base P.base(P)
-```
-
-The forward converter is a **total view**: every value of the declared
-participant must produce a valid base value. A reverse converter has the
-conventional spelling `P Base.p(Base)`, with `Base.as_p` reserved for a real
-name collision. It may be checked and partial because not every base value
-must contain a `P`. Signatures cannot express this totality distinction, so it
-is part of the protocol's rules.
-
-For example, `Var(T)` descriptor thunks both unbox arguments and box results,
-so most object participants need both directions:
+An adoption needs only the conversions that its generated adapters use. Name
+the forward conversion `Base P.base(P)` and the reverse `P Base.p(Base)`. The
+forward conversion must accept every participant value. The reverse may fail
+for a base value that holds no `P`. `Var(T)` descriptor thunks both unbox
+arguments and box results, so most object participants need both:
 
 ```x2c
 ~typedef struct Vec *Vec;
@@ -228,168 +152,45 @@ Vec Var.vec(Var value);
 protocol Var(Vec);
 ```
 
-A forwarding protocol whose defaults use `T` only as a parameter may need
-only the forward conversion. A default returning `T` also needs the reverse
-conversion to turn its base result into the participant type. The adapter
-generator does not convert `T` inside compound parameter or result types, so
-those types are rejected. A missing or unsupported conversion produces an
-error at the adoption, naming the method that needs it. For an ordinary
-protocol, a member the participant implements needs no adapter, so its
-signature may use `T` inside a compound type, as in `int T_area(T *self)`.
+A missing conversion is an error at the adoption, naming the method that needs
+it. The reference lists [which adapter needs which
+conversion](../reference/language.md#conversions-required-by-adapters).
 
-## Member resolution
+## How members are chosen
 
-Each adopted member resolves independently. Omitting one does not prevent the
-others from working.
-
-| Resolution | Dot call | Mapped punctuation | Descriptor-backed box |
-| --- | --- | --- | --- |
-| `implemented` | participant member | participant member | typed thunk |
-| `native` | checked native alias | checked native alias | not implied |
-| ordinary `base-default` | generated forwarding member | forwarding member | routes through the same winner |
-| `no-member` | no | no | another protocol's owner, else the base fallback |
-| `sig-conflict` | compile error | compile error | compile error |
-
-An ordinary base default calls a base implementation after converting the
-participant through its total forward view. Dot syntax and punctuation use that
-same semantic member, and `Var(T)` publishes it on `T`'s descriptor even
-though `Var(T)` itself resolves the member as `no-member`. A `Var` fallback
-such as `Var.fallback_truth` is only last-resort boxed behavior: a descriptor
-slot that no protocol filled reaches it directly and does not grant a static
-participant method or replace native C punctuation.
-
-An explicit adoption can use a compatible method inherited through the
-participant's typedef chain:
+Each adopted member resolves on its own. The participant's own method wins,
+then the nearest inherited method, then the protocol's default. An explicit
+adoption can use a method inherited through the participant's typedef chain:
 
 ```x2c
 typedef List Domain;
 protocol Iter(Domain);
 ```
 
-`Domain` can already iterate through its inherited `List` adoption. The
-explicit adoption resolves `Iter` again and selects `List.iter`. Iteration
-therefore calls `List_iter` directly, with no `Domain.iter` forwarding method
-or participant-to-base adapter.
+`Domain` already iterates through its inherited `List` adoption. The
+explicit adoption selects `List.iter`, so iteration calls `List_iter`
+directly, with no `Domain.iter` forwarding method.
 
-Selection tries the participant's own method first, then the nearest inherited
-method, then an ordinary base default. Reaching the protocol base uses the
-same default rule. When checking a method, the compiler treats parameters
-with the method's exact receiver type as participant parameters. Thus
-`List.equal(List, List)` can satisfy `int T.equal(T, T)` for a `List` typedef.
-A concrete result keeps its declared type; a `Self` result preserves the
-participant's static typedef.
+`associated Name = Default;` declares a type that each participant binds from
+its own signatures. `Array` binds an index `Key` to `int`, while `Map` binds
+it to `Var`. [Member resolution](../reference/language.md#member-resolution)
+gives the full rules, including signature conflicts and `Var(T)`.
 
-`Var(T)` normally remains exact: an ordinary adoption does not search the
-participant's typedef chain. `protocol Var(P) as R` is the exception. When
-`P` inherits from the explicitly named representation `R`, compatible
-methods owned by `R` satisfy the adoption without `P` forwarding methods.
-Boxed values already use `R`'s descriptor, so compile-time conformance uses
-the same implementation without changing runtime dispatch.
+## Operators
 
-A participant method with the right name but an incompatible signature is a
-`sig-conflict`. The compiler reports an error at the adoption and identifies
-the protocol member and conflicting definition. It does not treat the method
-as omitted or issue only a warning.
-
-### Associated types
-
-`associated Name = Default;` declares a type variable local to the protocol.
-The compiler infers a participant's binding by unifying the member signatures
-the participant declares. Every occurrence must resolve to one type, and the
-default applies only when no declared member constrains the name.
-
-This lets one protocol preserve different static APIs. For example, `Array` can
-bind an index `Key` to `int`, while `Map` binds it to `Var`. Calls through a
-boxed value pass associated arguments and results as `Var`; the generated thunk
-converts each exactly once. Direct calls keep the participant's static
-signature.
-
-## Punctuation
-
-Operators call the same resolved methods as dot syntax. The mappings include:
-
-| Syntax | Member |
-| --- | --- |
-| `+ - * / %` | `add sub mul div mod` |
-| direct `+= -= *= /= %=` | `add sub mul div mod` |
-| direct prefix/postfix `++ --` | `add sub` with a converted `1` |
-| unary `-` | `neg` |
-| `== !=` | `equal` |
-| `< <= > >=` | `compare` against zero |
-| conditions, `!`, `&&`, `||`, `?:` | `truth` |
-| `needle in value` | `contains`, with the right operand as receiver |
-| indexing and indexed mutation | `getindex`, `setindex`, `updateindex`, `postfixindex` |
-
-Matrix multiplication uses the ordinary `left.matmul(right)` method.
-`Var.matmul` dispatches a registered `matmul` witness. The `@` prefix
-splices macro syntax; `@` and `@=` are not arithmetic operators.
-
-An operand with no x2c type, such as a preprocessor macro's name, cannot
-convert for a participant that implements the operator; `images - MEAN`
-with `#define MEAN 0.1307` is a compile-time type error rather than C the
-host compiler rejects. Cast the macro, `(double) MEAN`, or bind its value
-to a local.
-
-A participant may also declare `void T.discard(T)`. The compiler calls it on
-an unnamed temporary it made for one operator, such as the product in
-`a * b + c` or the converted `2.0` in `2.0 * x`, immediately after the
-operator that consumes the temporary returns. A value bound to a name is
-never discarded. A handle type whose values own native storage uses this to
-release each intermediate of a long operator chain before the enclosing
-scope ends; a value type needs no such member.
-
-A method or function returning a scalar or `void` also discards such arguments
-after the call. An ordinary call returning a pointer or aggregate may borrow
-its input, return an interior pointer, or contain a borrowed handle. Unless
-the callee is a known fresh operator or numeric converter, its temporary
-arguments remain alive in their enclosing scope. The call's result does not
-acquire fresh ownership just because one of its arguments was temporary.
-
-An implemented or native member is eligible. An ordinary base default is also
-eligible because it is an inherited member reached through a total view. An
-empty `Var` descriptor slot is not a resolved static member. If no eligible
-member exists, valid native C behavior still applies; otherwise the compiler
-reports the ordinary operator error. When exactly one operand of a binary
-operator is a struct or union participant with the member, or a handle
-typedef pointing at one, the other operand converts to that type through
-its declared converter, so `meters + 2.0` and `10.0 - meters` resolve when
-`double.meters` exists. Scalar pointers and numeric participants keep
-native C behavior for a mixed operand, so `text + 1` remains pointer
-arithmetic. The runtime uses the
-same rows itself:
-`String.add` implements `add` for `protocol Var(String)`, so `String` `+` and
-`+=` are ordinary resolved punctuation, not compiler special cases.
-
-Logical operators preserve C short-circuit evaluation: each operand's `truth`
-method runs only when C would evaluate that operand. Indexed compound and
-postfix operations evaluate the receiver, key, and value once, then call the
-update method once.
-
-A direct participant update requires a resolved binary member with signature
-`Participant member(Participant, RHS)`. Compound assignment converts its
-right operand to `RHS`. Increment and decrement convert the integer `1` to
-`RHS` and use `add` or `sub`. The addressable participant lvalue is evaluated
-once, its current value is passed to the member once, and the returned
-`Participant` is stored once. Compound assignment and prefix forms return the
-stored value; postfix forms return the value from before the call.
-
-Plain `=`, `===`, and `!==` are never overloaded. `===` and `!==` retain
-native identity for static participants. Boxed values are identical when
-their `Var` bits are, and two numbers are identical when they have the same
-type and the same bits.
+Operators call the same members as dot syntax: `+` calls `add`, `==` calls
+`equal`, `<` compares through `compare`, conditions call `truth`, and indexing
+calls `getindex`. A participant may also declare `void T.discard(T)` to
+release each unnamed temporary in an operator chain. The reference lists
+[every operator and its member](../reference/language.md#operators), with the
+rules for mixed operands and updates.
 
 ## When protocols share a method
 
-A participant implementation satisfies every adopted protocol that declares
-the same compatible member, and no protocol generates that member.
-
-Two ordinary defaults are an error. The diagnostic names both protocols.
-Implement the member on the participant to choose its semantics. Declaration
-order does not decide.
-
-A `Var(T)` adoption puts that same generated member on `T`'s descriptor when
-`Var(T)` declares the member and `T` does not implement it, so static and
-boxed behavior agree on one generated C name.
+A participant method satisfies every protocol that declares the same
+compatible member. Two protocol defaults for one member are an error;
+implement the member on the participant to choose. The reference gives
+[the full rule](../reference/language.md#members-shared-by-several-protocols).
 
 Before adding a protocol member, inspect the conformance dump for every
 participant homonym and its signature:
@@ -505,7 +306,7 @@ a hard error at `protocol Cartesian(Polar);`.
 
 The built-in manifest declares `protocol Block(Bytes);` centrally. The
 `Bytes.block` forward view is declared in `common.x` and implemented in
-`block.x`; no reverse `Block.as_bytes` adapter is needed. Members such as
+`block.x`; no reverse `Block.bytes` adapter is needed. Members such as
 `len`, `truth`, `pop`, `free`, and `truncate` forward through that view.
 
 ```x2c
@@ -548,5 +349,5 @@ The participant's translation unit emits a `_Generic`/`_Static_assert`
 signature check and an alias such as `#define Handle_release free`. A fully
 public adoption places them in the participant's generated header. If the
 protocol, participant, native target, or adoption is private, both remain in
-the participant's C file.
-Variadic native targets and unsafe conversion directions are rejected.
+the participant's C file. Variadic native targets and unsafe conversion
+directions are rejected.

@@ -1216,9 +1216,9 @@ meta static List counter(String name) {
 
 A `Type` spells C type keywords such as `unsigned` and `char`, and the `*`
 of a pointer, as Symbols. It spells every other type name as a String:
-`%("String")`, `%(* "Point")`, `%(struct "Tag")`. A Symbol does not keep
-the case of its spelling, so `%(String)` is an error where it fills a
-type.
+`%("String")`, `%(* "Point")`, `%(struct "Tag")`. `%(String)` holds an
+`Atom`, so it is an error where it fills a type. The compiler reports
+`type name 'String' must be a String: write %("String")`.
 
 ### Holes that name an expression
 

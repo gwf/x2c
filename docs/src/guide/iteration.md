@@ -66,6 +66,9 @@ key in the active scope. The generated families in `lib/typed-map.x`
 publish the same three iterators, so a `MapIntInt` iterates as a `Map` does.
 Traversal follows the table's internal slot order, so do not depend on the
 sequence. Inserting or deleting an entry invalidates live traversal state.
+Two binders over a `Var` that holds a `Map` yield its keys and values the
+same way. A `Var` that holds a typed `Map` does not support two binders;
+iterate the typed `Map` itself.
 
 The explicit destination keeps ordinary local traversal allocation-free. When
 an iterator itself must be stored or returned, `Iter.new()` allocates zeroed
@@ -124,9 +127,9 @@ That combination appears at the end of this chapter.
 
 The general `Iter` path yields a `Var`. The declared loop type selects the
 conversion applied to each element as it arrives. It does not filter the
-elements.
-`foreach(int value, values)` means "unbox each element with `Var.int`" on
-that path. Cursor-backed collections deliver their typed outputs directly.
+elements. `foreach(int value, values)` means "unbox each element with
+`Var.int`" on that path. Cursor-backed collections deliver their typed outputs
+directly.
 
 The conversions available for a loop variable are the `Var` conversions:
 `char`, `short`, `int`, `uint`, `long`, `ulong`, `float`, `double`,

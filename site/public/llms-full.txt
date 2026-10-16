@@ -499,9 +499,10 @@ Scalar classes retain their underlying type's comparison, hashing, and output
 operations. Aliases of existing named types inherit supporting operations,
 including cleanup, rather than generating a second implementation. Explicit
 methods replace applicable defaults; the output methods can be customized
-independently, as described under [Boxing and readable output](https://x2c-lang.dev/docs/guide/system-macros.html#boxing-and-readable-output).
+independently, as described under [Boxing and readable
+output](https://x2c-lang.dev/docs/guide/system-macros.html#boxing-and-readable-output).
 
-`init` is **not generated**. Some constructors require you to supply it.
+`init` is not generated. Some constructors require you to supply it.
 Generated cleanup releases the object's allocation; ownership of resources
 stored in its fields requires your own cleanup code.
 
@@ -617,9 +618,9 @@ history.items.push(42);
 
 A heap class's `init` may return `int` instead of `void`. When it returns
 zero, `new` releases the storage with `Scope.free` and returns NULL; `drop` is
-not called, so an `init` that refuses releases whatever it acquired first. A
-class that replaces `alloc` so the object lives outside its Scope allocation
-also replaces `free`.
+not called, so an `init` that returns zero must first release whatever it
+acquired. A class that replaces `alloc` so the object lives outside its Scope
+allocation also replaces `free`.
 
 An explicit `new` replaces the default and may take different arguments. It
 also replaces the default constructor's obligation to call `init`. An explicit
@@ -674,20 +675,20 @@ containing addresses is not a serialization format.
 Class boxing uses the existing Var descriptor registry. Every record and heap
 class declares its descriptor at startup, and declaration freezes when worker
 startup freezes registration. A class takes a `Var` row only when a value of
-it is first boxed, which may happen on any thread. The first 30 classes boxed
-get direct rows; later heap classes box through a small process-lifetime
-cell, one per class and address, and later records carry their descriptor
-in front of the boxed copy, so a program can box any number of classes. Scalar and alias classes declare
-nothing. Class tags derive from
-the canonical source file and full name, keeping private classes in different
-files distinct. Tags use deterministic compact spellings, while diagnostics
-retain the full name.
+it is first boxed, which may happen on any thread. The first 30 custom tags
+boxed in a process get direct rows; these include classes and `protocol
+Var(T)` participants. Later heap classes box through a small process-lifetime
+cell, one per class and address, and later records carry their descriptor in
+front of the boxed copy, so a program can box any number of classes. Scalar
+and alias classes declare nothing. Class tags derive from the canonical source
+file and full name, keeping private classes in different files distinct. Tags
+use deterministic compact spellings, while diagnostics retain the full name.
 Tag collisions are errors.
 
 ## Retain or select a Scope
 
 Without an argument, `$scope()` retains one region around the following
-statement. Its expansion deliberately keeps the body inside the deferred
+statement. Its expansion keeps the body inside the deferred
 release:
 
 ```x2c
@@ -857,12 +858,11 @@ current = replacement;
 ```
 
 Both Arrays are cleaned up at block exit. Reassignment neither releases the
-first Array early nor transfers its cleanup to the replacement.
-Returning or storing an alias does not cancel cleanup; the caller must choose
-an appropriate lifetime.
-There is no move or recursive ownership system. Var itself has no owning
-cleanup contract, and Pool's `free` operation requires a separate allocation
-argument.
+first Array early nor transfers its cleanup to the replacement. Returning or
+storing an alias does not cancel cleanup; the caller must choose an
+appropriate lifetime. There is no move or recursive ownership system. Var
+itself has no owning cleanup contract, and Pool's `free` operation requires a
+separate allocation argument.
 
 Only an initialized automatic local that is a compound-statement item accepts
 `$auto`. Parentheses and macro construction preserve that position. Static or
@@ -913,8 +913,8 @@ Both cases declare `shared`, which plain C rejects without hand-written
 braces. A run that already transfers gets no added `break`, so a case ending
 in `return` stays free of unreachable code. Items that are not labels pass
 through untouched, including a declaration before the first case, a `goto`
-label, and a preprocessor directive. Deliberate fallthrough is written by
-nesting an ordinary `switch`.
+label, and a preprocessor directive. To fall through, nest an ordinary
+`switch`.
 
 ### Write indented text without indenting the text
 
@@ -1268,7 +1268,7 @@ materializing a collection.
 
 ## Keep lambdas small
 
-An expression lambda is ideal for a short operation with a few captured
+An expression lambda suits a short operation with a few captured
 values. Use a block lambda when the operation needs local declarations,
 branches, or `defer`:
 
@@ -1281,17 +1281,17 @@ List magnitudes = values.map(%!(Var item) => {
 });
 ```
 
-Captured scalars are read-only snapshots by default. Use `using &name` in
-each lambda that needs to share the binding, including readers and enclosing
-lambdas. Use a named function and an explicit state object when the operation
-grows beyond one local task. The collection methods above accept `Func`, including capturing
-lambdas. APIs that explicitly take C function pointers still require a
-noncapturing lambda; see [Lambdas](https://x2c-lang.dev/docs/reference/language.html#lambdas).
+Captured automatic values are read-only snapshots unless a lambda shares the
+binding with `using &name`. When the operation grows beyond one local task,
+use a named function and an explicit state object. The collection methods
+accept capturing lambdas; a C function-pointer API needs a noncapturing one.
+The reference gives the [capture rules](https://x2c-lang.dev/docs/reference/language.html#lambdas).
 
 ## Separate absence from data
 
-Prefer `try_*` operations when the full value domain includes `Null` or when a
-fallback would lose information:
+Prefer a `try_*` operation when the result alone cannot represent every
+outcome, as with `Map.try_get` for presence, `Iter.try_next` for exhaustion,
+or `String.try_long` for parse success:
 
 ```x2c
 Map map = {"name": "x2c"};
@@ -1318,10 +1318,9 @@ $scope() {
 }
 ```
 
-Both lower to `defer`, which runs on ordinary block exit and on early
-transfer. Reach for `defer` directly where no macro fits: a native release,
-a conditional rollback, a consuming parameter, or cleanup that writes a
-result rather than releasing storage.
+Both lower to `defer`. Use `defer` directly where no macro fits: a native
+release, a conditional rollback, a consuming parameter, or cleanup that
+writes a result.
 
 ```x2c
 int main(void) {
@@ -1331,10 +1330,10 @@ defer free(buffer);
 }
 ```
 
-`$auto` requires the type to participate in `Cleanup(T)`; the runtime's owning
-types already do. It saves the acquired value for cleanup; later reassignment
-does not change what it releases. Use an explicit `defer` when cleanup must
-read a binding at exit, including a Scope slot populated lazily:
+`$auto` needs a type that adopts `Cleanup(T)`, directly or through its typedef
+ancestry, as the runtime's owning types do. It releases the value it acquired,
+even after the local is reassigned. Use `defer` when cleanup must read a
+binding at exit, such as a `Scope` slot filled later:
 
 ```x2c
 int main(void) {
@@ -1347,8 +1346,8 @@ $scope(&work) { Array items = []; items.push(1); }
 
 ## Raise failures; return ordinary outcomes
 
-Do not turn EOF, a missing `Map` key, or numeric parse failure into an `Error`.
-Those operations already report those outcomes in their results. Use `raise`
+Report EOF, a missing `Map` key, or a numeric parse failure through the
+result, as the library operations do. Use `raise`
 for a failure cause that may cross several frames, and put a filtered `catch`
 where recovery or reporting belongs. Every intermediate resource owner must
 have `defer` or `finally` cleanup in place.
@@ -1788,14 +1787,14 @@ is written out in full.
 A package may publish a method on a type it does not define, such as
 `Var.json`, or on a type its own vendored header defines. At each receiver
 type, method lookup tries an ordinary method first, then a method from the
-imported packages, then a protocol method before continuing through typedef
-parents. The receiverless form `Type.member(...)` and protocol punctuation
-resolve through the same imported names, so a package that adopts one of its
-own protocols for a foreign type gives the consumer that operator. One
-imported match is callable. More than one is an error at the call, with the
-packages listed by name; imports that are never called do not conflict. An
-alias-qualified function call such as `json.Var_json(value)` selects one
-package explicitly.
+imported packages, then a protocol member; [dot-call lookup](https://x2c-lang.dev/docs/reference/language.html#dot-call-lookup)
+gives the complete order. The receiverless form `Type.member(...)` and
+protocol punctuation resolve through the same imported names, so a package
+that adopts one of its own protocols for a foreign type gives the consumer
+that operator. One imported match is callable. More than one is an error at
+the call, with the packages listed by name; imports that are never called do
+not conflict. An alias-qualified function call such as `json.Var_json(value)`
+selects one package explicitly.
 
 A package's own sources are `<dir>/src/**` and the single-file
 `<dir>/<name>.x`. Other files in the package directory, including its tests
@@ -1853,21 +1852,19 @@ such as one declared in a system header or in a third-party header reached
 through an include x2c does not resolve; and a `#define` body, which is
 preprocessor text. A member of an anonymous union or struct belongs to its
 enclosing aggregate, and `.` reaches it through a pointer like any other
-member.
-`.` reaches through one pointer level, so a pointer to a pointer typedef keeps
-`(*pointer).field`.
-x2c also recognizes method-style calls such as `list.len()`. The namespaced
-function is selected from the static receiver type. When that function
-declares its first parameter `T *` and the receiver is an addressable `T`, the
-receiver's address is passed, so `rec.bump(4)` reaches
-`void Rec.bump(Rec *rec, int by)` without an explicit `&`. A receiver that is
-a pointer to the declared parameter is one level too far and is a type error;
-write `(*pointer).method()`. Normal pointer
-conversion rules still apply, including preservation of `const` and other
-qualifiers. A qualifier on the receiver itself does not change which methods
-and operators the type has, so a `const String` answers `len()` and `+` the
-way an unqualified one does. Method syntax does not make every value
-dynamically dispatchable; only registered callbacks define custom behavior.
+member. `.` reaches through one pointer level, so a pointer to a pointer
+typedef keeps `(*pointer).field`. x2c also recognizes method-style calls such
+as `list.len()`. The namespaced function is selected from the static receiver
+type. When that function declares its first parameter `T *` and the receiver
+is an addressable `T`, the receiver's address is passed, so `rec.bump(4)`
+reaches `void Rec.bump(Rec *rec, int by)` without an explicit `&`. A receiver
+that is a pointer to the declared parameter is one level too far and is a type
+error; write `(*pointer).method()`. Normal pointer conversion rules still
+apply, including preservation of `const` and other qualifiers. A qualifier on
+the receiver itself does not change which methods and operators the type has,
+so a `const String` answers `len()` and `+` the way an unqualified one does.
+Method syntax does not make every value dynamically dispatchable; only
+registered callbacks define custom behavior.
 
 A receiver spelled `struct T` or `union T` uses the methods of the typedef
 that names the same aggregate. A same-named typedef takes precedence;
@@ -2201,13 +2198,26 @@ One generated C method cannot have incompatible local and external linkage. The
 compiler reports that conflict at its source location. A protocol whose
 dependencies are all public retains its public behavior.
 
+Protocol declarations and adoptions appear at the top level. A declaration
+creates no runtime interface object; a `Var(T)` adoption still emits thunks
+and registers a descriptor. Each translation unit collects them with its
+other declarations, and reading source, cached declarations, or a unit
+interface gives the same result. A byte-identical repeat has no effect, and
+a conflicting declaration is an error at its location. A fully public native
+adoption emits its aliases in the header; a local one keeps them in the
+participant's C file.
+
 Participation must be declared; conversion names and matching typedefs do not
 imply it. The compiler then determines the adoption's visibility. An adoption
 resolves in the unit that contains it, so the protocol, participant, required
 converters, native targets, and constraining participant members must be
 visible there. A unit that includes it reuses that conformance from the
 declaring unit's interface; members visible only to the including unit do
-not change it. Ordinary runtime protocol bodies under `lib/` belong in
+not change it. When no current interface exists, collection resolves the
+adoption from the declaring unit's own declarations, so the result does not
+depend on build order. A declaring unit that imports a package records no
+conformance, and a unit that includes it resolves those adoptions from what
+it sees. Ordinary runtime protocol bodies under `lib/` belong in
 `lib/protocols.x`; native declarations and their adoptions sit beside the
 participant typedef.
 
@@ -2226,38 +2236,201 @@ crosses `Var`, and an explicit `static protocol PrivateBase(PrivateType);` for
 a fully private relationship. The latter would also be inferred local; `static`
 states it directly.
 
-Each member resolves independently as implemented, native, an ordinary base
-default, missing, or a signature conflict. Dot syntax and punctuation accept
-implemented and native members plus ordinary base defaults reached through a
-total participant-to-base view. A missing `Var` member grants no static
-participant method; its descriptor slot carries another protocol's generated
-owner when one exists, and is otherwise empty so dynamic boxed use takes the
-`Var` fallback directly. Signature conflicts are located errors at the adoption
-row.
+#### Member resolution
+
+Each adopted member resolves independently. Omitting one does not prevent the
+others from working.
+
+| Resolution | Dot call | Mapped punctuation | Descriptor-backed box |
+| --- | --- | --- | --- |
+| `implemented` | participant member | participant member | typed thunk |
+| `native` | checked native alias | checked native alias | not implied |
+| ordinary `base-default` | generated forwarding member | forwarding member | routes through the same winner |
+| `no-member` | no | no | another protocol's owner, else the base fallback |
+| `sig-conflict` | compile error | compile error | compile error |
+
+An ordinary base default calls a base implementation after converting the
+participant through its total forward view. Dot syntax and punctuation use that
+same semantic member, and `Var(T)` publishes it on `T`'s descriptor even
+though `Var(T)` itself resolves the member as `no-member`. A `Var` fallback
+such as `Var.fallback_truth` is only last-resort boxed behavior: a descriptor
+slot that no protocol filled reaches it directly and does not grant a static
+participant method or replace native C punctuation.
 
 An explicit adoption may resolve an ordinary implementation through the
 participant's typedef chain. For example,
 `typedef List Domain; protocol Iter(Domain);` selects `List.iter` directly;
-it does not require a forwarding `Domain.iter` method. The participant's own
-method wins, followed by the nearest inherited method, and then a protocol
-default. Reaching the protocol base uses that default path
-instead. Every parameter whose exact type is the method owner is viewed as
-the participant type. Concrete result types remain unchanged unless the
-method declares them as `Self`.
+it does not require a forwarding `Domain.iter` method.
 
-An ordinary `Var(P)` adoption does not search `P`'s typedef chain. When
-`protocol Var(P) as R` names an `R` that occurs in that chain, compatible
-methods owned by that exact representation may satisfy the adoption. No
-other ancestor is considered. Boxed dispatch already uses `R`'s descriptor.
+An adoption selects each member in this order: the participant's own or
+imported-package method, then the nearest ancestor's own or imported-package
+method, then an ordinary base default. Reaching the protocol base uses the
+same default rule. When checking a method, the compiler treats parameters
+with the method's exact receiver type as participant parameters. Thus
+`List.equal(List, List)` can satisfy `int T.equal(T, T)` for a `List` typedef.
+A concrete result keeps its declared type; a `Self` result preserves the
+participant's static typedef.
 
-Associated types unify from the participant's declared member signatures and
-use their declared default only when unconstrained. A generated member has one
-owner. Incompatible generated signatures or two defaults conflict. A compatible
-participant implementation resolves the competition.
+`Var(T)` normally remains exact: an ordinary adoption does not search the
+participant's typedef chain. `protocol Var(P) as R` is the exception. When
+`P` inherits from the explicitly named representation `R`, compatible
+methods owned by `R` satisfy the adoption without `P` forwarding methods.
+Boxed values already use `R`'s descriptor, so compile-time conformance uses
+the same implementation without changing runtime dispatch.
 
-The normative [protocols chapter](https://x2c-lang.dev/docs/guide/protocols.html) specifies converter
-totality, adapter-derived conversion directions, punctuation, generated
-ownership, boxed dispatch, native aliases, and complete examples.
+A participant method with the right name but an incompatible signature is a
+`sig-conflict`. The compiler reports an error at the adoption and identifies
+the protocol member and conflicting definition. It does not treat the method
+as omitted or issue only a warning.
+
+#### Associated types
+
+`associated Name = Default;` declares a type variable local to the protocol.
+A generated member has one owner. The compiler infers a participant's
+binding by unifying the member signatures
+the participant declares. Every occurrence must resolve to one type, and the
+default applies only when no declared member constrains the name.
+
+Calls through a boxed value pass associated arguments and results as `Var`;
+the generated thunk converts each exactly once. Direct calls keep the
+participant's static signature.
+
+
+#### Dot-call lookup
+
+A dot call visits the receiver's static type, then each typedef parent. At
+each type it tries the type's ordinary method, then a method an imported
+package adds to that type, then the member that the type's protocol
+conformance selects. When the nearest adopted conformance, exact or
+inherited, resolves the member as anything other than `implemented`, lookup
+skips that type's ordinary and imported methods and uses the conformance's
+member.
+
+#### Conversions required by adapters
+
+The selected methods determine which conversions an adoption needs. The
+compiler generates adapters for those methods and requires only the
+conversions each adapter uses:
+
+| Adapter | Required conversion |
+| --- | --- |
+| Ordinary default parameter exactly `T` | participant to base |
+| Ordinary default result exactly `T` | base to participant |
+| Dispatcher thunk parameter of `T` | base to participant |
+| Dispatcher thunk result of `T` | participant to base |
+| Native alias occurrence of `T` | the implicit C direction at that position |
+
+For a participant `P` and base `Base`, name the forward conversion:
+
+<!-- ignore: signature notation; Base and P stand for arbitrary types -->
+```x2c,ignore
+Base P.base(P)
+```
+
+The forward converter is a total view: every value of the declared
+participant must produce a valid base value. A reverse converter has the
+conventional spelling `P Base.p(Base)`, with `Base.as_p` reserved for a real
+name collision. It may be checked and partial because not every base value
+must contain a `P`. Signatures cannot express this totality distinction, so it
+is part of the protocol's rules.
+
+`Var(T)` descriptor thunks both unbox arguments and box results, so most
+object participants need both directions.
+
+A forwarding protocol whose defaults use `T` only as a parameter may need
+only the forward conversion. A default returning `T` also needs the reverse
+conversion to turn its base result into the participant type. The adapter
+generator does not convert `T` inside compound parameter or result types, so
+those types are rejected. A missing or unsupported conversion produces an
+error at the adoption, naming the method that needs it. For an ordinary
+protocol, a member the participant implements needs no adapter, so its
+signature may use `T` inside a compound type, as in `int T_area(T *self)`.
+
+#### Operators
+
+Operators call the same resolved methods as dot syntax. The mappings include:
+
+| Syntax | Member |
+| --- | --- |
+| `+ - * / %` | `add sub mul div mod` |
+| direct `+= -= *= /= %=` | `add sub mul div mod` |
+| direct prefix/postfix `++ --` | `add sub` with a converted `1` |
+| unary `-` | `neg` |
+| `== !=` | `equal` |
+| `< <= > >=` | `compare` against zero |
+| conditions, `!`, `&&`, `||`, `?:` | `truth` |
+| `needle in value` | `contains`, with the right operand as receiver |
+| indexing and indexed mutation | `getindex`, `setindex`, `updateindex`, `postfixindex` |
+
+Matrix multiplication uses the ordinary `left.matmul(right)` method.
+`Var.matmul` dispatches a registered `matmul` witness. The `@` prefix
+splices macro syntax; `@` and `@=` are not arithmetic operators.
+
+An operand with no x2c type, such as a preprocessor macro's name, cannot
+convert for a participant that implements the operator; `images - MEAN`
+with `#define MEAN 0.1307` is a compile-time type error rather than C the
+host compiler rejects. Cast the macro, `(double) MEAN`, or bind its value
+to a local.
+
+A participant may also declare `void T.discard(T)`. The compiler calls it on
+an unnamed temporary it made for one operator, such as the product in
+`a * b + c` or the converted `2.0` in `2.0 * x`, immediately after the
+operator that consumes the temporary returns. A value bound to a name is
+never discarded. A handle type whose values own native storage uses this to
+release each intermediate of a long operator chain before the enclosing
+scope ends; a value type needs no such member.
+
+A method or function returning a scalar or `void` also discards such arguments
+after the call. An ordinary call returning a pointer or aggregate may borrow
+its input, return an interior pointer, or contain a borrowed handle. Unless
+the callee is a known fresh operator or numeric converter, its temporary
+arguments remain alive in their enclosing scope. The call's result does not
+acquire fresh ownership just because one of its arguments was temporary.
+
+An implemented or native member is eligible. An ordinary base default is also
+eligible because it is an inherited member reached through a total view. An
+empty `Var` descriptor slot is not a resolved static member. If no eligible
+member exists, valid native C behavior still applies; otherwise the compiler
+reports the ordinary operator error. When exactly one operand of a binary
+operator is a struct or union participant with the member, or a handle typedef
+pointing at one, the other operand converts to that type through its declared
+converter, so `meters + 2.0` and `10.0 - meters` resolve when `double.meters`
+exists. Scalar pointers and numeric participants keep native C behavior for a
+mixed operand, so `text + 1` remains pointer arithmetic. The runtime uses the
+same rows itself: `String.add` implements `add` for `protocol Var(String)`, so
+`String` `+` and `+=` are ordinary resolved punctuation, not compiler special
+cases.
+
+Logical operators preserve C short-circuit evaluation: each operand's `truth`
+method runs only when C would evaluate that operand. Indexed compound and
+postfix operations evaluate the receiver, key, and value once, then call the
+update method once.
+
+A direct participant update requires a resolved binary member with signature
+`Participant member(Participant, RHS)`. Compound assignment converts its
+right operand to `RHS`. Increment and decrement convert the integer `1` to
+`RHS` and use `add` or `sub`. The addressable participant lvalue is evaluated
+once, its current value is passed to the member once, and the returned
+`Participant` is stored once. Compound assignment and prefix forms return the
+stored value; postfix forms return the value from before the call.
+
+Plain `=`, `===`, and `!==` are never overloaded. `===` and `!==` retain
+native identity for static participants. Boxed values are identical when
+their `Var` bits are, and two numbers are identical when they have the same
+type and the same bits.
+
+#### Members shared by several protocols
+
+A participant implementation satisfies every adopted protocol that declares
+the same compatible member, and no protocol generates that member.
+
+Two ordinary defaults are an error. The diagnostic names both protocols.
+Implement the member on the participant to choose its semantics. Declaration
+order does not decide.
+
+A `Var(T)` adoption puts that same generated member on `T`'s descriptor when
+`Var(T)` declares the member and `T` does not implement it, so static and
+boxed behavior agree on one generated C name.
 
 ### C initializers and static assertions
 
