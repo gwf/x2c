@@ -257,6 +257,7 @@ static void lisp_canonical_names_outlive_initial_context(void) {
 static Symbol _raised_code(Lisp lisp, const char *text) {
   Symbol code = 0;
   try _ev(lisp, text);
+  catch %(bad-arg *): code = <bad-arg>;
   catch %(bad-arity *): code = <bad-arity>;
   catch %(bad-sig *): code = <bad-sig>;
   catch %(bad-state *): code = <bad-state>;
@@ -1704,8 +1705,18 @@ static void lisp_value_layer_uses_library_operations(void) {
       "(List.foldl '(1 2 3) (no-value) (lambda (a b) (+ a b)))")),
     6);
   EXPECT_TRUE(_ev(lisp, "(List.foldl '() (no-value) nil)") is void);
+  EXPECT_INT_EQ(_raised_code(
+    lisp, "(List.foldl '(4 5) (no-value) nil)"), <bad-arg>);
   EXPECT_INT_EQ(Var.integer(
-    _ev(lisp, "(List.foldl '(4 5) (no-value) nil)")), 4);
+    _ev(lisp, "(List.foldl '(4) (no-value) nil)")), 4);
+  EXPECT_INT_EQ(_raised_code(lisp, "(String.map \"abc\" nil)"), <bad-arg>);
+  EXPECT_INT_EQ(_raised_code(lisp, "(String.filter \"abc\" nil)"), <bad-arg>);
+  EXPECT_INT_EQ(_raised_code(
+    lisp, "(Iter.next (Iter.map (range 1 3 1) nil))"), <bad-arg>);
+  EXPECT_INT_EQ(_raised_code(
+    lisp, "(Iter.next (Iter.filter (range 1 3 1) nil))"), <bad-arg>);
+  EXPECT_INT_EQ(_raised_code(
+    lisp, "(Iter.foldl (range 1 3 1) 0 nil)"), <bad-arg>);
   EXPECT_INT_EQ(Var.integer(
     _ev(lisp, "(List.find '(0 2) (lambda (x) x))")), 0);
   EXPECT_VAR_EQ(

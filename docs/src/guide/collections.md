@@ -640,6 +640,14 @@ printf("%s %s %s\n", doubled.repr(), big.repr(), total.repr());
 (2 4 6 8) (3 4) 10
 ```
 
+For `map`, `filter`, and `foldl`, a callback is required when an element
+needs an invocation. A null callback then raises `<bad-arg>` through `Func`.
+Empty inputs make no call. A fold with a `void` seed also makes no call for
+a singleton: its only element becomes the result. This rule applies to
+these operations on `List`, `Array`, `String`, and `Iter` where provided.
+Lisp nil callbacks follow the same rule. Other operations, including
+`zip_with`, queries, `map2`, and `scan`, retain their own callback contracts.
+
 Transformations and folds keep the callback's `Var` result. The predicates
 `List.filter`, `List.find`, `List.any`, and `List.all` apply `Var`
 truthiness, so they accept more than an `int` result. Direct functions,

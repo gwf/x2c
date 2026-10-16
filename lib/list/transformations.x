@@ -35,13 +35,13 @@ Self List.filter(Self lst, Func pred) {
     `fn` receives the accumulator and then the next element, and returns the
     next accumulator. A `void` seed means "no seed": the first element becomes
     the initial accumulator and the fold starts at the second, and folding
-    `nil` that way returns `void`. A null `fn` returns the accumulator
-    untouched, which for a `void` seed is the head.
+    `nil` that way returns `void`. Empty input and a singleton with a `void`
+    seed do not invoke `fn`. A null `fn` raises `<bad-arg>` when combining
+    an element with the accumulator.
 
     Any cause raised by `fn` propagates.
 */
 Var List.foldl(List lst, Var seed, Func fn) {
-  if (!fn) return seed is void && lst ? lst.car : seed;
   struct Iter storage;
   return lst.iter(&storage).foldl(seed, fn);
 }

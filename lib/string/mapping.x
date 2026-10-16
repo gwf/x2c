@@ -71,14 +71,15 @@ static macro Stmt $string.select(
 }
 
 /** Returns the bytes of `str` accepted by ordinary `Var` truthiness of `fn`.
-    Each byte is boxed from `char` and passed by value. A null or empty `str`,
-    or a null `fn`, returns `str` without invoking the callback. Otherwise `fn`
+    Each byte is boxed from `char` and passed by value. A null or empty `str`
+    returns `str` without invoking the callback. Otherwise `fn`
     is called once per byte from left to right and is not retained.
+    A null `fn` raises `<bad-arg>` on the first invocation.
     Raises: whatever `Func.apply`, `fn`, or the returned `Var`'s truth
     operation raises, or `<alloc-fail>` when the result cannot be allocated.
 */
 String String.filter(String str, Func fn) {
-  if (!str || !fn || !*str) return str;
+  if (!str || !*str) return str;
   $string.select(str, i, fn.apply_value((char) str[i]));
 }
 
@@ -87,15 +88,16 @@ String String.filter(String str, Func fn) {
     converted to `int` and truncated to the byte that is stored, and that byte
     is what is checked, so a result such as 256 raises because its stored byte
     would be NUL.
-    A null or empty `str`, or a null `fn`, returns `str` without invoking the
-    callback. Otherwise `fn` is called once per byte from left to right and is
+    A null or empty `str` returns `str` without invoking the callback.
+    Otherwise `fn` is called once per byte from left to right and is
     not retained. Each result must convert to a non-NUL byte.
+    A null `fn` raises `<bad-arg>` on the first invocation.
     Raises: whatever `Func.apply`, `fn`, or result conversion raises,
     `<bad-result>` when the converted result is zero, or `<alloc-fail>` when
     the result cannot be allocated.
 */
 String String.map(String str, Func fn) {
-  if (!str || !fn || !*str) return str;
+  if (!str || !*str) return str;
   int n = str.len(), done = 0;
   String string = String.malloc(n + 1);
   defer if (!done) string.free();

@@ -309,6 +309,19 @@ parameter is rejected when it is first invoked, and it never receives an
 alias into source storage. An empty source does not invoke or arity-check
 its callback.
 
+`map`, `filter`, and `foldl` reject a null callback only when they invoke it.
+Lazy `map` and `filter` construction does not pull the source. Their first
+pull consumes one source element before a missing callback raises
+`<bad-arg>`. A seeded fold consumes one element before that failure; a
+seedless fold consumes its seed and the next element. Consumed inputs are
+not restored, just as when a callback itself raises. Empty inputs and
+seedless singleton folds need no invocation.
+
+This replaces the earlier null-callback identity behavior of `map`, immediate
+exhaustion of `filter`, and drain-without-combining behavior of `foldl`.
+The corresponding String identity and List accumulator-preservation defaults
+also end; Lisp nil callbacks use the same native contract.
+
 - `range(start, end, step)`: each `int` in the range.
 - `iter.filter(pred)`: elements accepted by `Var` truthiness.
 - `iter.map(fn)`: `fn(element)`.

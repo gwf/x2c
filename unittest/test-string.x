@@ -567,8 +567,16 @@ static void string_func_rejects_invalid_callbacks_on_invocation(void) {
   String empty = NULL;
   EXPECT_NULL(empty.filter(wrong_arity));
   EXPECT_NULL(empty.map(wrong_arity));
-  EXPECT_TRUE("abc".filter(NULL) === %"abc");
-  EXPECT_TRUE("abc".map(NULL) === %"abc");
+  int missing = 0;
+  try "abc".filter(NULL);
+  catch %(bad-arg *): missing++;
+  try "abc".map(NULL);
+  catch %(bad-arg *): missing++;
+  EXPECT_INT_EQ(missing, 2);
+  EXPECT_NULL(empty.filter(NULL));
+  EXPECT_NULL(empty.map(NULL));
+  EXPECT_NULL("".filter(NULL));
+  EXPECT_NULL("".map(NULL));
 }
 
 static void string_byte_escaping(void) {

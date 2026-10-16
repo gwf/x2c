@@ -295,7 +295,8 @@ static int _range_raw_high(Var value) {
     result is used. Elements are passed as values. Nothing runs until an
     element is pulled, and each pull travels back up the chain for exactly one
     element per stage, so taking two elements from a map over a range calls
-    `func` twice. A null `func` passes elements through unchanged.
+    `func` twice. A null `func` raises `<bad-arg>` on the first invocation,
+    after the source element has been consumed.
 
     ```x2c
     ~static Var _square(Var value) {
@@ -326,7 +327,7 @@ meta native Iter Iter.map(Iter iter, Func func, Iter dest) {
 static int _map_next(Iter iter, Var *out) {
   Iter source = iter.obj;
   if (!source.try_next(*out)) return 0;
-  if (iter.aux) *out = iter.aux.apply_value(*out);
+  *out = iter.aux.apply_value(*out);
   return 1;
 }
 
@@ -338,8 +339,9 @@ static int _map_next(Iter iter, Var *out) {
     Elements are passed as values. Both `iter` and its storage, `dest`, and any
     dynamic or captured `func` must remain valid while the result is used.
 
-    A null `dest` returns NULL, and a null `func` yields an exhausted
-    iterator. An empty source does not invoke or check `func`.
+    A null `dest` returns NULL. A null `func` raises `<bad-arg>` on the
+    first invocation, after the source element has been consumed.
+    An empty source does not invoke or check `func`.
     Raises: whatever the source, `Func.apply`, or `func` raises while pulling.
 */
 meta native Iter Iter.filter(Iter iter, Func func, Iter dest) {
@@ -352,7 +354,7 @@ meta native Iter Iter.filter(Iter iter, Func func, Iter dest) {
 static int _filter_next(Iter iter, Var *out) {
   Iter source = iter.obj;
   Func func = iter.aux;
-  if (!source || !func) return 0;
+  if (!source) return 0;
   foreach (Var value, source) {
     if (func.apply_value(value)) {
       *out = value;
@@ -725,7 +727,8 @@ static void _unzip_compact(UnzipShared *shared, int column) {
     accumulator. Consumes the whole iterator. A `void` `seed` means "use the
     first element as the seed", so folding an empty iterator from `void`
     returns `void`; any other `seed` is returned unchanged when there is
-    nothing to fold. A null `fn` drains the iterator and returns the seed.
+    nothing to fold. A null `fn` raises `<bad-arg>` on the first combining
+    invocation. Inputs pulled before a failure stay consumed.
     The accumulator and elements are passed as values. Empty input, or one
     element with a `void` seed, does not invoke or check `fn`.
     Raises: whatever the source, `Func.apply`, or `fn` raises.
@@ -737,10 +740,6 @@ Var Iter.foldl(Iter iter, Var seed, Func fn) {
     if (!has_item) return void;
     acc = item;
     has_item = iter.try_next(item);
-  }
-  if (!fn) {
-    while (has_item) has_item = iter.try_next(item);
-    return acc;
   }
   while (has_item) {
     acc = fn.apply_values(acc, item);
