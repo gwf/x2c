@@ -25,6 +25,8 @@ Code Code.promoted(Code value) => _ask("Code_promoted", %($value));
 Code Code.call_in_order(Code member, List arguments, Type type) =>
   _ask("Code_call_in_order", %($member $arguments $type));
 Code Code.lowered(Code code) => _ask("Code_lowered", %($code));
+Code Code.bound(Code code, List effects) =>
+  _ask("Code_bound", %($code $effects));
 List Code.func_parameters(Code parameters, Code fn, Code argv) =>
   _ask("Code_func_parameters", %($parameters $fn $argv));
 Code Code.register_rewrite(Code function, List pattern, List holes) =>

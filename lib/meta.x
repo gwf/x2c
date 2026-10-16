@@ -154,6 +154,13 @@ meta Code Code.call_in_order(Code member, List arguments, Type type);
     lowered again. */
 meta Code Code.lowered(Code code);
 
+/** Returns `code`, which is already bound and typed, marked so that a
+    translator's result or placed code is lowered without being bound
+    again. Each of `effects` applies first, in order; a
+    `(new-name TOKEN ROLE)` row replaces TOKEN in `code` with a fresh
+    binding. */
+meta Code Code.bound(Code code, List effects);
+
 /** Returns `(SIGNATURE (TYPE READ)...)` for a `Func` adapter of a `Var`
     function that takes `parameters`, a lambda's parameters: its signature
     as a constant `List`, and for each parameter, the expression that reads
