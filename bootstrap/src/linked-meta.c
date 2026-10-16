@@ -12160,7 +12160,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _11250 = List_var(_11249);
   _11251 = String_new("lib/lisp/native.x");
   _11252 = String_var(_11251);
-  _11253 = String_new("6111720c");
+  _11253 = String_new("958e010b");
   _11254 = String_var(_11253);
   _11255 = cons(_11254, NULL);
   _11256 = cons(_11252, _11255);
