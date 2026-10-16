@@ -116,7 +116,7 @@ static List _hole_local(Compiler c, Map holes, int position) {
 }
 
 /* Returns NULL if the quotation registered no expression at this offset. */
-static List _expression_hole(Compiler c, Token prefix) {
+module List _expression_hole(Compiler c, Token prefix) {
   Var name;
   if (!c.macro_holes ||
       !c.macro_holes.try_get(%(expression ${prefix.pos}), name))
@@ -401,7 +401,7 @@ static List _hole_value(Compiler c, List hole, Token start) =>
    annotation can give it. A hole that a declarator follows is a parameter's
    type, and one that an operator, `;`, or a postfix form follows is an
    expression. */
-static int _quoted_role(Compiler c, Symbol role) {
+module int _quoted_role(Compiler c, Symbol role) {
   if (!(%(quotation) in c.macro_holes) || !(role in quoted_roles)) return 0;
   if (role == <name>) return 1;
   Token after = c.after_hole();
@@ -413,7 +413,7 @@ static int _quoted_role(Compiler c, Symbol role) {
 /* A `$name` or `@name` in a quotation's body that names a visible local
    declares a singular or sequence hole. A local declared `Type` fills a type
    hole, which no position can tell from a statement before a name. */
-static List _quoted_hole(
+module List _quoted_hole(
   Compiler c, String spelling, Token prefix) {
   if (!c.macro_holes || !(%(quotation) in c.macro_holes)) return NULL;
   Type type = NULL;
@@ -429,7 +429,7 @@ static List _quoted_hole(
 }
 
 /* A quotation's holes in the order its body first names them. */
-static List _quoted_holes(Compiler c) {
+module List _quoted_holes(Compiler c) {
   Var quoted = c.macro_holes[%(quoted)];
   return quoted is <list> ? quoted.list().reverse() : NULL;
 }

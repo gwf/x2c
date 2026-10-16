@@ -10,7 +10,7 @@
    template, which stays syntax until the template's expansion binds it.
    `locals` holds the template's own declarations, newest first under
    `<order>`, and `captures` the outer names a local macro's body reads. */
-static typedef struct Definition {
+module typedef struct Definition {
   Compiler c, Token start;
   Atom name, Symbol kind;
   List target, parameters, template, fresh, captures, pattern, rebuild, type;

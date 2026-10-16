@@ -7,7 +7,7 @@
    Spellings match without regard to case. `named` marks the row whose
    spelling names its hole or result kind in diagnostics. */
 
-static typedef struct MacroCategory {
+module typedef struct MacroCategory {
   const char *spelling;
   Symbol hole, result;
   int target, Symbol named;
@@ -56,14 +56,14 @@ static void _head(Definition &d) {
   d.kind = _result_kind_token(c, token);
 }
 
-static Symbol _result_kind_token(Compiler c, Token token) {
+module Symbol _result_kind_token(Compiler c, Token token) {
   const MacroCategory *category = _category(token.text);
   if (!category || !category.result)
     $fail.macros_macro_unknown_kind(c, token, token.text);
   return category.result;
 }
 
-static void _naming(Definition &d) {
+module void _naming(Definition &d) {
   Compiler c = d.c;
   if (d.anonymous) d.name = Atom.intern(c.fresh_name("anonymous_macro"));
   else if (d.local) {
@@ -162,7 +162,7 @@ static int _has_expression_body(Definition &d) =>
   d.kind == <expression> ||
   (d.kind == <decorator> && _target_kind(d) == <expr>);
 
-static Symbol _target_kind(Definition &d) {
+module Symbol _target_kind(Definition &d) {
   if (!d.target) return 0;
   return d.target.assoc(<kind>);
 }
@@ -177,7 +177,7 @@ static void _body_error(Definition &d) {
 
 /* Records where the definition stands and shows its signature, so an
    invocation inside the body names this macro. */
-static void _announce(Definition &d) {
+module void _announce(Definition &d) {
   Compiler c = d.c;
   (void) c.record_origin(d.start);
   d.origin = c.token_location(d.start);
@@ -190,7 +190,7 @@ static void _announce(Definition &d) {
    the body is typed where the expansion lands, as at file scope; a
    retained rebuild keeps the type a `return` records. Collection reads the
    whole template, initializers included, as the full parse does. */
-static void _body(Definition &d) {
+module void _body(Definition &d) {
   Compiler c = d.c;
   $let(c.shallow, 0)
   $let(c.return_type, NULL)
@@ -268,7 +268,7 @@ static Symbol _body_kind(Definition &d) {
 }
 
 /* The entries a map lists under `<order>`, oldest first, or NULL. */
-static List _recorded(Map m) {
+module List _recorded(Map m) {
   Var order = m != NULL ? m[<order>] : void;
   return order is <list> ? order.list().reverse() : NULL;
 }
@@ -300,7 +300,7 @@ static Symbol _hole_kind(Compiler c) {
   return kind;
 }
 
-static Token _hole_name_token(Compiler c, Symbol prefix) {
+module Token _hole_name_token(Compiler c, Symbol prefix) {
   c.expect(prefix);
   if (c.peek(0) != <ident>)
     $fail.macros_hole_name(c, c.token);
@@ -317,7 +317,7 @@ static List _declare_hole(
   return _record_hole(c, spelling, kind, sequence);
 }
 
-static List _record_hole(
+module List _record_hole(
   Compiler c, String spelling, Symbol kind, int sequence) {
   List hole = _hole(
     Atom.intern(sequence ? %"*$spelling" : %"?$spelling"),
@@ -354,7 +354,7 @@ static List _parameter_rows(Compiler c, List parameters) {
   return rows.list_free();
 }
 
-static Atom _hole_name(List hole) {
+module Atom _hole_name(List hole) {
   String binder = hole.assoc(<binder>).str();
   return Atom.intern(binder[1:]);
 }
@@ -385,7 +385,7 @@ static const MacroCategory macro_categories[] = {
 static const int MACRO_CATEGORY_COUNT =
   (int) (sizeof(macro_categories) / sizeof(macro_categories[0]));
 
-static const MacroCategory *_category(String spelling) {
+module const MacroCategory *_category(String spelling) {
   String key = spelling.lower();
   for (int i = 0; i < MACRO_CATEGORY_COUNT; i++)
     if (key == String.new(macro_categories[i].spelling).lower())
@@ -482,7 +482,7 @@ static int _legacy_expression_body(Compiler c) {
 /* A leading parenthesized group is the complete legacy expression body when
    the following token cannot extend that expression. A semicolon always
    selects the canonical form. */
-static int _extends_expression(Token token) {
+module int _extends_expression(Token token) {
   Symbol type = token.type;
   return type.binary_precedence() || type.is_assignment_op() ||
          type in operand_continuations ||

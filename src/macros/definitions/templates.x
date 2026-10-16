@@ -9,7 +9,7 @@
    and pattern an invocation needs. Parsed literal names carry
    definition-only identities, so the template stores binders instead and
    each expansion allocates one fresh identity per literal spelling. */
-static void _finish(Definition &d) {
+module void _finish(Definition &d) {
   d.template = _slot_binders(_wrap(d));
   Map bindings = {};
   if (_target_kind(d) == <unit>) _constructed_names(d, bindings);
@@ -191,7 +191,7 @@ static int _uses_holes_once(Definition &d, Map uses) {
 }
 
 /* Makes the finished definition visible in place of its signature. */
-static List _publish(Definition &d) {
+module List _publish(Definition &d) {
   List node = _definition_node(d);
   $let(d.c.token, d.start) _show(d, node);
   return node;
@@ -199,12 +199,12 @@ static List _publish(Definition &d) {
 
 /* A named local macro is visible in its scope, and a global one unless a
    template holds it. */
-static void _show(Definition &d, List node) {
+module void _show(Definition &d, List node) {
   if (d.local && !d.anonymous) d.c.sym.define_macro(d.name, node);
   else if (!d.local && !d.nested) d.c.publish_macro_definition_node(node);
 }
 
-static List _definition_node(Definition &d) {
+module List _definition_node(Definition &d) {
   Compiler c = d.c;
   List definition = %(
     macrodef
