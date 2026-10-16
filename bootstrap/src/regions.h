@@ -18,6 +18,8 @@ int Compiler_region_wrapper(String name);
 
 int Compiler_has_region_row(String name);
 
+Var Compiler_region_effect(String name);
+
 void Compiler_check_regions(Compiler c, List ast);
 
 void Compiler_check_meta_regions(Compiler c, List fn);
