@@ -1,10 +1,11 @@
 # Syntax specifications
 
 x2c's syntax is specified here as a token grammar plus lexical transition
-rules. It describes the current parser and introduces no language change.
-The first extraction matched revision `48715bde` on `dev`; later repairs
-update these pages with the parser. `tools/syntax-spec check` compares only
-the generated outputs with their data, not the data with the parser. The
+rules that describe the current parser. The first extraction matched revision
+`48715bde` on `dev`. Parser changes update these pages and `etc/syntax/` by
+hand. `tools/syntax-spec check` verifies grammar references and reports
+generated files that differ from their data. It does not compare the data
+with the parser, and no gate runs it. The
 [language reference](../language.md) supplies the meaning and constraints of
 the forms.
 
@@ -22,14 +23,14 @@ the forms.
 The grammar describes source after tokenization and indentation rewriting.
 It is not a claim that a context-free recognizer can decide whether an x2c
 program is valid. Names, types, macro signatures, and preprocessor state
-participate in parsing. The grammar names these dependencies explicitly.
-Constructed macro ASTs also enter binding without passing through source
-text; source productions do not restrict their provenance.
+participate in parsing. The grammar marks these dependencies as external
+recognizers.
 
 ## Catalog of existing material
 
-This catalog records what existed before this extraction. Paths below are
-repository-relative. Function names locate the rules even when lines move.
+This catalog lists the existing sources of syntax rules. Paths below are
+repository-relative. The table gives function names because line numbers
+change.
 
 | Material | Location | What it specifies | Limits |
 | --- | --- | --- | --- |
@@ -57,11 +58,6 @@ repository-relative. Function names locate the rules even when lines move.
 | Bootstrap copies | `bootstrap/lib/scan.{c,h}`, `bootstrap/lib/tokenizer.{c,h}` | Generated C implementation of lexical rules | Derived copies, not independent owners |
 | Executable examples | `examples/manifest.txt` and its programs | Working uses of the language with recorded checks | Demonstrations, not exhaustive syntax rules |
 
-No standalone BNF, EBNF, PEG, yacc/lex, or tree-sitter source grammar was
-found in the tracked tree at the extraction revision. The parser and
-scanners were the closest executable specifications; the book was the
-principal prose specification.
-
 ## Status and boundaries
 
 The extraction has three layers:
@@ -72,9 +68,9 @@ The extraction has three layers:
 3. Context and semantic constraints in the grammar chapter and language
    reference.
 
-This is a manually reviewed descriptive specification, not a generated
-parser, a proof of equivalence, or a replacement implementation. Named
-external recognizers cover the deliberately extensible macro surface and
+This specification is written and reviewed by hand. No parser is generated
+from it, and nothing proves it equal to the compiler. Named external
+recognizers cover the macro syntax, which definitions extend, and
 host-specific syntax. The lexical chapter identifies observed implementation
 edges separately from the supported spelling described by the book.
 
@@ -83,22 +79,3 @@ ownership, overload/protocol resolution, macro evaluation, AST lowering,
 and emitted C are outside the source grammar. The host compiler still
 checks the generated C. Resource limits and diagnostic wording are not
 productions.
-
-## Possible later uses
-
-These are possible consumers, not work implemented by this extraction:
-
-- Generate positive and negative source cases, with environments for typedefs,
-  macro signatures, and imports rather than only random terminal strings.
-- Compare token streams across scanner implementations and test each mode
-  transition, numeric boundary, and indentation rewrite.
-- Check documentation and editor highlighting against shared terminal and
-  precedence inventories.
-- Prototype a parser or code generator for a selected syntax category, then
-  compare it with the existing compiler on the same corpus.
-- State proof obligations for recognition, normalization, or AST round trips,
-  keeping lexical, syntactic, and semantic claims separate.
-
-There is no new recurring check or generation pipeline. Future consumers
-must choose their own executable representation and demonstrate agreement
-with the compiler before relying on this extraction as an oracle.

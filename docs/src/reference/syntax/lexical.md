@@ -1,16 +1,13 @@
 # Lexical specification
 
-This is an operational specification of `lib/scan.x`, `lib/tokenizer.x`,
-and the token reclassification in `src/compiler.x` at the
-[extraction revision](index.md). Rules are ordered where order affects
-recognition. The [source grammar](grammar.md) consumes their output.
-The same rules are available as [structured List data](data.md), with a
-[generated inventory](lexical-data.md).
+This is an operational specification of `lib/scan.x`, `lib/tokenizer.x`, and
+the keyword retagging in `src/compiler/parsing/tokens.x`. Rules are ordered
+where order affects recognition. The [source grammar](grammar.md) consumes
+their output. The same rules are available as [structured List data](data.md),
+with a [generated inventory](lexical-data.md).
 
-Before ordinary unit parsing, collection scans active file-scope `module`
-blocks and splices member text. This contextual source-assembly pass uses
-`src/collect.x`; it does not add a tokenizer keyword or parser production.
-See [module collection](grammar.md#notation-and-entry-points).
+File-scope `module` blocks are spliced before tokenizing; see
+[module collection](grammar.md#notation-and-entry-points).
 
 ## Input and output
 
@@ -71,6 +68,11 @@ associated auto break case catch char const continue default defer delegate
  static struct switch threaded try typedef union unsigned void volatile while
 ```
 
+The scanner emits `in` and `match` as keywords. After scanning, the compiler
+retags each to `ident` unless its context is the operator or statement form;
+see [compiler reclassification](#compiler-reclassification-and-preprocessing).
+
+
 Matching is case-sensitive. The following spellings normalize token type
 while retaining original token text:
 
@@ -104,7 +106,7 @@ roles in different modes.
 ## Numeric tokens
 
 Numeric recognition first chooses a radix, then scans the selected form.
-It is not simply the union of C numeric regular expressions.
+The rules below differ from C in the cases listed.
 
 1. An explicit `0x`/`0X`, `0b`/`0B`, or `0o`/`0O` selects hexadecimal,
    binary, or octal.
@@ -144,8 +146,7 @@ hex-float = ( "0x" | "0X" ) ,
 A hexadecimal point requires a `p`/`P` exponent. Integer suffix letters can
 mix case. `1f` is malformed; `1.f` is a float. `08`, `09`, and `00` take
 the decimal path, `018` is malformed, and `017e3` is decimal floating.
-These are scanner facts, not promises that every spelling is valid native C
-or fits its eventual value type.
+The native C compiler still checks each spelling and its range.
 
 The numeric helper accepts an optional leading sign. Code mode emits `+`
 and `-` as operators. List, Lisp, and quoted Array/Map modes invoke signed
@@ -185,7 +186,7 @@ A simple Symbol spelling is `<` followed by one or more non-whitespace,
 non-NUL bytes, through the first `>`. A quoted spelling is `<"` followed by
 quoted-Symbol contents, then `">`. Quoted Symbols permit raw line breaks
 and x2c byte escapes. Compact-Symbol representability and exact round trips
-are checked by literal processing, not this scanner.
+are checked later, by literal processing.
 
 ## Atom boundaries
 
@@ -206,8 +207,8 @@ leading comment, digit, apostrophe, or `#` before the set-atom scanner runs.
 Maintain a stack with root mode `x2c` for source or `lisp` for a standalone
 Lisp reader. At each position, first test for NUL. Otherwise apply the first
 matching successful rule in the current mode. Recognition of a malformed
-prefix records failure. Some failure callbacks return zero, so chained
-dispatch can still append later tokens; the first EOF ends semantic traversal.
+prefix records failure. See [failure edges](#failure-and-implementation-edges)
+for how scanning stops.
 
 **Common rules**, in order of starting byte, recognize whitespace, `#`
 directives, `//` or `/*` comments, C characters at apostrophe, numbers at
@@ -244,7 +245,7 @@ a Symbol literal. Standalone Lisp `$` scanning does not provide the data-mode
 In String mode a segment stops before a closing quote or a single unescaped
 `$`. Inside a segment, `$$` is consumed as literal content. Dispatch handles
 a `$` at the beginning of a segment before calling the segment scanner;
-see the implementation edges below.
+see the `string` row of the table above.
 
 ## Mode transitions
 
@@ -347,11 +348,11 @@ Apply the following transformation in order:
    Close all outstanding blocks at EOF.
 
 The pass checks tabs after the last LF in the whitespace token immediately
-before a new statement line. That describes the current detector; the
-supported spelling uses spaces for indentation. New punctuation has zero
+before a new statement line. Indentation uses spaces. New punctuation has zero
 width at its neighboring token's start or end. Reclassified source punctuation
-retains its source extent. See `_Layout` in `lib/tokenizer.x` for the transition
-owners and the [indentation guide](../../guide/indentation.md) for examples.
+retains its source extent. See `_Layout` in `lib/tokenizer.x` for the
+transitions and the [indentation guide](../../guide/indentation.md) for
+examples.
 
 ## Compiler reclassification and preprocessing
 
@@ -395,10 +396,6 @@ that first EOF because failure callbacks return zero to chained dispatch.
 Consumers must not equate lexical
 success with balanced delimiters or a valid program.
 
-One detection detail needs care in a future independent lexer: the tab
-detector examines the immediately preceding whitespace token only when it
-contains LF. This is narrower than a universal scan for indentation tabs,
-although the documented source convention requires spaces.
 
-These are source-derived implementation observations. They do not silently
-change the language contract or claim a repaired implementation.
+
+

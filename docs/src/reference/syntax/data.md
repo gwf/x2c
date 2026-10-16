@@ -4,11 +4,11 @@ The source grammar and lexical rules are ordinary x2c `List` values. A tool
 can compile them, inspect their structure, and generate another representation
 without first parsing the prose specification.
 
-Three modules under `etc/syntax/` own the data:
+Three modules under `etc/syntax/` hold the data:
 
 | Module | Accessor | Contents |
 | --- | --- | --- |
-| `grammar.x` | `syntax_grammar()` | Entry point and 186 source productions |
+| `grammar.x` | `syntax_grammar()` | Entry point and 187 productions |
 | `lexical.x` | `syntax_lexical()` | Byte patterns, ordered scanning, modes, transitions, predicates, token passes, failures |
 | `extensions.x` | `syntax_extensions()` | Reviewed C11 comparison, feature groups, affected rule names, example spellings, documentation links |
 
@@ -26,13 +26,13 @@ printf("%s\n", grammar.repr());
 Save this example at the repository root. `x2c script` builds and links its
 included local module. An ordinary `x2c build` invocation must list the module
 as a build input. The accessors construct descriptive values; the compiler's
-production parser and tokenizer do not consult them yet.
+production parser and tokenizer do not consult them.
 
 ## Grammar model
 
 The root has the shape `(grammar (start NAME) (rules RULE...))`. Each rule
 is `(rule NAME EXPRESSION)`. Names are atoms and terminal spellings are Strings.
-The current expression algebra is deliberately small:
+Rule expressions use these forms:
 
 | Expression | Meaning |
 | --- | --- |
@@ -54,20 +54,20 @@ List rule = %(rule function-body
     (seq (token "=") (token ">") (ref expression) (token ";"))));
 ```
 
-The [EBNF](x2c.ebnf) is generated from this value. The [grammar chapter](grammar.md)
-explains binding, macro signatures, precedence, and other contextual contracts.
-An external leaf is an explicit boundary, not an instruction to accept arbitrary
-text. A parser generator would need implementations for those contracts.
+The [EBNF](x2c.ebnf) is generated from this value. The [grammar
+chapter](grammar.md) explains binding, macro signatures, precedence, and other
+contextual contracts. An external leaf marks a rule that the grammar chapter
+describes in prose. A parser generator would need code for each one.
 
 ## Lexical model
 
-Lexing needs more than character regular expressions. A quoted List, for
+Character regular expressions cannot describe the lexer. A quoted List, for
 example, changes the significance of punctuation and signed numbers. Braced
 interpolation temporarily returns to code scanning.
 
 The [generated inventory](lexical-data.md) exposes every record. The
 [lexical specification](lexical.md) explains the operations and boundary cases.
-These sections carry different parts of the operation:
+The sections are:
 
 | Section | Meaning |
 | --- | --- |
@@ -83,18 +83,18 @@ These sections carry different parts of the operation:
 | `sources` | Implementation owners used for the extraction |
 
 Byte-pattern primitives are `byte`, `bytes`, inclusive `range`, and
-`one-of-bytes`. `ref` names a class or rule. `seq`, `choice`, `optional`, and
-`repeat MINIMUM` compose patterns. `ordered` tries children in dispatch order;
-`until` records whether a closing delimiter is consumed; `except` excludes
-listed byte patterns or prefixes. Guards such as `when-prefix` and `when-mode` select the applicable
-pattern. They are structured records, not regular-expression strings.
+`one-of-bytes`. `ref` refers to a class or rule. `seq`, `choice`, `optional`,
+and `repeat MINIMUM` compose patterns. `ordered` tries children in dispatch
+order; `until` records whether a closing delimiter is consumed; `except`
+excludes listed byte patterns or prefixes. Guards such as `when-prefix` and
+`when-mode` select the applicable pattern. They are structured records.
 
-Actions record `emit`, consumed width, failure behavior, and `transition`.
-A transition's `push` stores a new mode; `pop` restores the previous stack mode.
+Actions record `emit`, consumed width, failure behavior, and `transition`. A
+transition's `push` stores a new mode; `pop` restores the previous stack mode.
 The transition table's `defaults` record applies unless a row overrides it.
 Predicates record Boolean conditions and token-history operations. Passes
-record ordered transformations and the state they use. `external` explicitly
-names work owned elsewhere.
+record ordered transformations and the state they use. `external` marks work
+done by other code.
 
 This is a descriptive operational model. The tool validates named references
 and renders records; it does not interpret every lexical operation. Building
@@ -119,22 +119,18 @@ builds/0/x2c script tools/syntax-spec check
 representation for inspection. `uses` finds direct callers of a production.
 `graph` emits a Mermaid production-dependency graph. `modes` emits a Mermaid
 graph of stack-push transitions; ordered dispatch and predicates still apply,
-and closing delimiters return to the previous stack mode. These graphs show
-dependencies and transitions, not complete railroad diagrams or acceptance
-proofs.
+and closing delimiters return to the previous stack mode.
 
 `write` generates the EBNF, lexical inventory, and the table in the
 [x2c syntax map](../../guide/x2c-syntax-map.md). `check` validates references and
 reports stale generated outputs without changing them. These are optional
 commands; no recurring build or publication check was added.
 
-The extension data identifies affected productions and the additions within
-them. Its grouping is reviewed metadata. It does not claim that subtracting
-production names computes the difference between C and x2c.
+The extension data lists the productions that x2c adds to or changes from C.
 
 ## Further uses and limits
 
-These values make several bounded next steps possible:
+These values could support:
 
 - Generate railroad diagrams for productions with no external leaves.
 - Produce candidate token sequences from bounded derivations, then filter them
@@ -143,9 +139,4 @@ These values make several bounded next steps possible:
 - Generate highlighting tables from keyword and operator spellings.
 - Select documentation examples and diagrams by extension family.
 
-The data is manually extracted from the implementation. Reference checks and
-generated-output checks prevent some forms of drift; they do not establish
-language equivalence. Type validity, macro expansion, binding, native C rules,
-and deliberately opaque recognition contracts remain outside a context-free
-production tree. Corpus comparison and differential tests would provide
-additional evidence before any generated recognizer replaces existing code.
+
