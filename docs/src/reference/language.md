@@ -1954,12 +1954,13 @@ private variable. Declarations in nested blocks may shadow same-spelled body
 locals and tags; references use the nearest lexical declaration. A tag the
 body only references keeps its outside meaning.
 To publish a tag, spell it
-through a `Name` hole or `x2c.ident`:
+through a `Name` hole or an `$x2c_ident` call:
 
 ```x2c
+#include "meta.x"
 macro Unit $handler_type(name $tag) {
   struct $tag { int depth; };
-  typedef struct $(x2c.ident "Frame") { int line; } $(x2c.ident "Frame");
+  typedef struct $x2c_ident("Frame") { int line; } $x2c_ident("Frame");
 }
 
 $handler_type(Handler);
@@ -1978,7 +1979,12 @@ receive different bindings. A generated name may not duplicate an argument
 hole or another generated name and takes no kind annotation or `@` prefix. The
 directives must precede all other body items.
 
-Compile-time Lisp uses `x2c.ident` to mark an exact public spelling. In a
+A body marks an exact public spelling with a call such as
+`$x2c_ident("Frame")`, which `meta.x` declares; compile-time Lisp spells it
+`$(x2c.ident "Frame")`. A body that declares a public parameter writes the
+call at the declaration and at each reference, as in
+`int $function(int *$x2c_ident("values"))` with
+`$x2c_ident("values")[0]` in its body. In a
 declarator slot that spelling creates a declaration and is normally rejected if
 it is already bound in the same target scope. The one completion case is a
 function definition produced by a `Unit` macro after a same-scope prototype,
@@ -1987,8 +1993,8 @@ qualifiers, linkage, and any method owner/member identity must match exactly.
 The definition reuses that prototype's binding once; a mismatch, a second
 definition, or a collision with another binding kind is rejected at the
 invocation. A nested scope may still shadow an outer declaration normally. In
-an identifier expression `x2c.ident` resolves the existing spelling and rejects
-an unknown one. Use a body `using` hole for a compiler-private name that cannot
+an identifier expression the spelling resolves to the existing declaration,
+with its type, and an unknown one is rejected. Use a body `using` hole for a compiler-private name that cannot
 collide when no ordinary declaration introduces it first. A bare Lisp `String`
 does not become a name when returned into a name-capable position.
 

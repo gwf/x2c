@@ -5236,7 +5236,8 @@ List Compiler.lift_macro_lisp_expression(
   List literal = c.meta_value_expression(NULL, value, invocation);
   if (literal) return literal;
   Var identifier = _sdk_identifier_result(value);
-  if (identifier is not void) return %(expr () (ident $identifier));
+  if (identifier is not void)
+    return c.resolve_expression(%(expr () (ident $identifier)), invocation);
   if (value is <list> && !value.is_nil())
     return c.bind_syntax(_helper_result(c, value), AST_EXPRESSION, NULL);
   $report.macro.lisp_expr(c, invocation, value);
