@@ -403,7 +403,7 @@ static List _build_indirect_func_adapter(
   List target = $!($pointer_type){ $context->$field_name };
   List adapter = _build_func_adapter(
     c, diagnostic_type, pointer_type, target, fn_binding,
-    %($context_declaration));
+    %($context_declaration), NULL);
   return %(indirect-adapter $adapter $context_type $field_binding);
 }
 
@@ -562,14 +562,14 @@ static List _direct_func_adapter(
   $adapter.memo(c, key, adapter) {
     List target = _func_bound(source_type, source_binding);
     adapter = _build_func_adapter(
-      c, diagnostic_type, source_type, target, NULL, NULL);
+      c, diagnostic_type, source_type, target, NULL, NULL, NULL);
   }
   return adapter;
 }
 
 static List _build_func_adapter(
   Compiler c, Type diagnostic_type, Type source_type,
-  List target, List supplied_fn_binding, List prefix) {
+  List target, List supplied_fn_binding, List prefix, List leading) {
   List params = NULL, Type return_type = NULL;
   source_type.function_parts(params, return_type);
   if (_typed_params_variadic(params)) {
@@ -592,13 +592,23 @@ static List _build_func_adapter(
     c, diagnostic_type, params, names, fn_binding, argv_binding);
   List arguments = params.zip_with(
     names, _func_bound);
-  List call = _func_call(c, return_type, target, arguments);
+  List call = _func_call(c, return_type, target, %(@leading @arguments));
   Type resolved_result = c.sym.resolve_key(return_type);
   if (resolved_result && resolved_result.car() == <struct>)
     call = _func_record_call(c, return_type, call);
   _publish_func_adapter(
     c, adapter_binding, fn_binding, argv_binding, call, %(@prefix @locals));
   return adapter_binding;
+}
+
+/** Builds an adapter with `type`'s public signature that passes its own
+    Func as the first argument of `target`, before the declared arguments.
+    The target can read per-instance bindings with `Func.context`. */
+List Compiler.context_func_adapter(Compiler c, Type type, List target) {
+  List self = c.sym.introduce(c.fresh_name("func_binding"));
+  return _build_func_adapter(
+    c, %("Func"), type, target, self, NULL,
+    %(${_func_bound(%("Func"), self)}));
 }
 
 static void _require_func_readers(

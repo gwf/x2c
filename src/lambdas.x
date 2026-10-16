@@ -71,7 +71,7 @@ List Compiler.lift_lambda_types(Compiler c, List function) {
       declarations.push(_lambda_type_declaration(c, body, public));
     }
   return %(seq @{declarations.list_free()}
-           (code-value "bound" ${Ast.replace_nodes(function, replaced)} ()));
+           ${Code.bound(Ast.replace_nodes(function, replaced), NULL)});
 }
 
 /* Finds referenced definitions and their dependencies. Emission retains
@@ -107,7 +107,7 @@ static Code _lambda_type_declaration(Compiler c, Type type, int public) {
       List binding = member.car() == <op> ? member.caddr() : member;
       c.set_fact(%(emitted $binding), c.fresh_name(%"${role}_enumerator"));
     }
-  return %(code-value "bound" $declaration ());
+  return Code.bound(declaration, NULL);
 }
 
 // diagnostics

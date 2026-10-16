@@ -782,9 +782,8 @@ static Array _forward_candidates(List items, int complete_enums) {
 static List _typedef_forward(Type type, List bindings) {
   Type core = type.base_type();
   match (core)
-    case %((!or struct union) ?name (fields *)):
-      if (name)
-        return %(typedef ${_tag_only(type, core, name)} $bindings);
+    case %((!or struct union) ?(String name) (fields *)):
+      return %(typedef ${_tag_only(type, core, name)} $bindings);
   return NULL;
 }
 
@@ -1221,16 +1220,17 @@ static List _move_bodies(List source, Map inline_bodies) {
   foreach (List node, source) {
     if (position in undefs) _place_bodies(out, bodies, arms);
     position++;
-    match (node) case %(function ?type ?signature ?): {
-      if (signature.cadr() in inline_bodies) {
-        out.push(node);
+    match (node)
+      case %(function ?type (!set ?signature (bind ?binding *)) ?): {
+        if (binding in inline_bodies) {
+          out.push(node);
+          continue;
+        }
+        bodies.push(%($node @arms));
+        if (type.list().type().is_static())
+          out.push(_prototype(type, signature));
         continue;
       }
-      bodies.push(%($node @arms));
-      if (type.list().type().is_static())
-        out.push(_prototype(type, signature));
-      continue;
-    }
     match (node) case %(preproc ?content):
       arms = Compiler.preproc_track_arms(arms, content);
     out.push(node);
@@ -1296,9 +1296,14 @@ static void _collect_declared(Var value, Map available) {
     case %(declare ? (!set ?declarator (bind (binding ? ?) ?))):
       if (node.type_from_ast().is_function())
         _set_function(available, _declaration_binding(declarator), 1);
-    case %((!or declare typedef) (*) (bindings *declarators)):
+    case %(declare (*) (bindings *declarators)):
+      foreach (List declarator, declarators) {
+        List binding = _declaration_binding(declarator);
+        if (binding) available[binding] = 1;
+      }
+    case %(typedef (*) (bindings *declarators)):
       foreach (List declarator, declarators)
-        _set_declared(available, node, declarator);
+        _set_typedef(available, _declaration_binding(declarator), 1);
     default: foreach (Var child, node) _collect_declared(child, available);
   }
 }
@@ -1309,12 +1314,11 @@ static void _set_function(Map names, Var binding, Var value) {
   names[%(native ${Ast.binding_spelling(binding)})] = value;
 }
 
-static void _set_declared(Map available, List node, List declarator) {
-  List binding = _declaration_binding(declarator);
+/* A typedef is found by its binding and by its spelling. */
+static void _set_typedef(Map names, List binding, Var value) {
   if (!binding) return;
-  available[binding] = 1;
-  if (node.car() == <typedef>)
-    available[Ast.binding_spelling(binding)] = 1;
+  names[binding] = value;
+  names[Ast.binding_spelling(binding)] = value;
 }
 
 static List _declaration_binding(List declarator) {
@@ -1333,23 +1337,22 @@ static void _source_declarations(Var value, Map statics) {
   match (node) {
     case %(function ?type (!set ?signature (bind ?binding ?)) ?):
       _set_function(statics, binding, _prototype(type, signature));
-    case %((!or declare typedef) ?base (bindings *declarators)):
-      if (base.list().type().is_static() || node.car() == <typedef>)
+    case %(declare ?base (bindings *declarators)):
+      if (base.list().type().is_static())
         foreach (List declarator, declarators)
-          _set_static(statics, node, declarator);
+          _set_static(statics, base, declarator);
+    case %(typedef ? (bindings *declarators)):
+      foreach (List declarator, declarators)
+        _set_typedef(statics, _declaration_binding(declarator), node);
     default: foreach (Var child, node) _source_declarations(child, statics);
   }
 }
 
-static void _set_static(Map statics, List node, List declarator) {
+static void _set_static(Map statics, Var base, List declarator) {
   List binding = _declaration_binding(declarator);
   if (!binding) return;
   match (declarator) case %(op = ?target ?): declarator = target;
-  List declaration = node.car() == <typedef>
-    ? node : %(declare ${node.cadr()} (bindings $declarator));
-  statics[binding] = declaration;
-  if (node.car() == <typedef>)
-    statics[Ast.binding_spelling(binding)] = declaration;
+  statics[binding] = %(declare $base (bindings $declarator));
 }
 
 /* forward declarations
@@ -1475,12 +1478,9 @@ static List _include_guard(Compiler c, List content) {
 }
 
 static int _has_runtime_include(List content) {
-  foreach (List node, content) {
-    if (!node) continue;
-    Var (kind, payload) = node;
-    if (kind != <preproc>) continue;
-    String text = payload.string().strip(" \t\r\n");
-    if (text == "#include \"x2c.x\"" || text == "#include <x2c.x>") return 1;
+  foreach (List node, content) match (node) case %(preproc ?(String text)): {
+    int angle = 0;
+    if (Compiler.preproc_include_target(text, angle) == "x2c.x") return 1;
   }
   return 0;
 }

@@ -29,8 +29,6 @@
 #include "fields.h"
 #include "grammar.h"
 #include "operator-ledger.h"
-List _scalar_access_record(Type type);
-
 Code register_rewrite(Code function, Code pattern, List holes);
 
 List _dedent_expand(Source text);

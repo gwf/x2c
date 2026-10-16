@@ -85,8 +85,9 @@ Public functions:
 
 `Compiler.capture_environment`, `Compiler.prepend_setup`,
 `Compiler.lift_func_expression`, `Compiler.maybe_adapt_func_arg`,
-`Compiler.func_parameters`, `Compiler.func_signature`,
-`Compiler.lower_typed_adapter_expr`, `Compiler.adapt_lambda_arg`
+`Compiler.context_func_adapter`, `Compiler.func_parameters`,
+`Compiler.func_signature`, `Compiler.lower_typed_adapter_expr`,
+`Compiler.adapt_lambda_arg`
 
 ### [src/cleanup.x](../src/cleanup.x)
 
@@ -515,7 +516,8 @@ Public functions:
 `Compiler.meta_reaches_compile_time`, `Compiler.finish_meta_functions`,
 `Compiler.meta_call_missing`, `Compiler.refuse_meta_call`,
 `Compiler.refuse_record_meta_call`, `Compiler.use_meta_build_directory`,
-`Compiler.write_meta_build`, `Compiler.bind_meta_group`
+`Compiler.write_meta_build`, `Compiler.bind_meta_group`,
+`Compiler.stage_session_function`
 
 ### [src/meta-helper-client.x](../src/meta-helper-client.x)
 
@@ -568,13 +570,13 @@ Public functions:
 `MetaContext.current`, `Compiler.expanding`, `Type.is_named`, `Type.numeric`,
 `Type.is_text`, `Type.aggregate`, `Type.marked_fields`, `Type.resolve_member`,
 `Type.protocol_member`, `Type.getter`, `Type.update_helper`, `Code.type`,
-`Code.value`, `Code.call_in_order`, `Code.lowered`, `Code.func_parameters`,
-`Code.exits`, `Code.convert`, `Code.format`, `Code.is_static_pattern`,
-`Code.pattern_value`, `Code.promoted`, `Code.register_rewrite`,
-`Code.register_after_initialization`, `Code.declared_bindings`,
-`MetaContext.function_reference`, `Type.element`, `Type.parameters`,
-`Type.return_type`, `Type.reverse_name`, `Type.resolve`, `Type.layout`,
-`Type.is_value`, `Type.tag_name`, `Type.members`, `Type.fields`,
+`Code.value`, `Code.call_in_order`, `Code.lowered`, `Code.bound`,
+`Code.func_parameters`, `Code.exits`, `Code.convert`, `Code.format`,
+`Code.is_static_pattern`, `Code.pattern_value`, `Code.promoted`,
+`Code.register_rewrite`, `Code.register_after_initialization`,
+`Code.declared_bindings`, `MetaContext.function_reference`, `Type.element`,
+`Type.parameters`, `Type.return_type`, `Type.reverse_name`, `Type.resolve`,
+`Type.layout`, `Type.is_value`, `Type.tag_name`, `Type.members`, `Type.fields`,
 `Code.binding_spelling`, `x2c_ident`, `x2c_binding_fresh`, `x2c_binding_for`,
 `MetaContext.fresh_binding`, `x2c_meta_definition_hashes`, `Code.name`,
 `Code.body`, `Code.arguments`, `Code.parameter`, `Code.native_signature`,

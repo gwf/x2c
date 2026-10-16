@@ -89,7 +89,7 @@ Source: `src/generate.x:61`
 
 Returns the statements queued for `phase`, in the order they were added.
 
-Source: `src/generate.x:1094`
+Source: `src/generate.x:1093`
 
 <a id="Compiler.initializer_function"></a>
 #### Compiler.initializer_function
@@ -98,7 +98,7 @@ Source: `src/generate.x:1094`
 
 Returns the function `type name(void)` running `body`.
 
-Source: `src/generate.x:821`
+Source: `src/generate.x:820`
 
 <a id="Compiler.place_source_prelude"></a>
 #### Compiler.place_source_prelude
@@ -111,7 +111,7 @@ conditional containing that first use follows the declarations. A unit
 without such a use gets them at its end, after the declarations they
 may assign.
 
-Source: `src/generate.x:916`
+Source: `src/generate.x:915`
 
 <a id="Compiler.run_once_body"></a>
 #### Compiler.run_once_body
@@ -121,7 +121,7 @@ Source: `src/generate.x:916`
 Returns a run-once initializer body: `before`, then a return when
 `guard` is set that sets it otherwise, then `after`.
 
-Source: `src/generate.x:827`
+Source: `src/generate.x:826`
 
 ### `Init`
 
@@ -134,7 +134,7 @@ Returns `function` with its entry setup: the protocol initializer and
 the type initializer run once, and a `guarded` entry calls the region's
 initializer unless its guard is set.
 
-Source: `src/generate.x:881`
+Source: `src/generate.x:880`
 
 ## Public types
 
@@ -154,7 +154,7 @@ the unit's shutdown function, `synthetic` is the synthetic initializer or
 NULL, and `reachable` holds the entries a cache-only file guards, or is
 NULL when every public entry is guarded.
 
-Source: `src/generate.x:845`
+Source: `src/generate.x:844`
 
 ## Design notes
 

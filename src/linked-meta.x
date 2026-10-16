@@ -507,7 +507,7 @@ static List _destructure_writes(List targets, Atom values) {
 static Code _destructure_bound(List code, Atom values, Atom result) {
   List names = %((new-name $values "destructure"));
   if (result) names = cons(%(new-name $result "destructure_result"), names);
-  return %(code-value "bound" $code $names);
+  return Code.bound(code, names);
 }
 
 /** Declares the names of `T (a, b) = source;` and then reads the source
@@ -819,7 +819,7 @@ Code lambda_lift(Code node) {
     List name = x2c_binding_fresh("lambda");
     x2c_place(
       %(unit-support), _lambda_function(name, _lambda_params(params), body));
-    return %(code-value "bound" (expr $type (ident $name)) ());
+    return Code.bound(%(expr $type (ident $name)), NULL);
   }
   return node;
 }
@@ -841,8 +841,10 @@ static List _lambda_field(int index) => x2c_ident(%"c$index");
 
 static List _lambda_member(int index) => %(${%"c$index"});
 
-static Type _lambda_field_type(Type type) =>
-  type.car() == <&> ? cons(<*>, type.cdr()) : %("Var");
+static Type _lambda_field_type(Type type) {
+  if (type.car() == <&>) return cons(<*>, type.cdr());
+  return type.resolve().car() == <struct> ? type : %("Var");
+}
 
 static Code _lambda_record(List context, List types) {
   Array fields = [];
@@ -851,10 +853,10 @@ static Code _lambda_record(List context, List types) {
     List name = _lambda_member(fields.len());
     fields.push(%(declare $base (bindings (bind $name $modifiers))));
   }
-  return %(code-value "bound"
-           (typedef (static struct $context (fields @{fields.list_free()}))
-             (bindings (bind $context ())))
-           ());
+  return Code.bound(
+    %(typedef (static struct $context (fields @{fields.list_free()}))
+       (bindings (bind $context ()))),
+    NULL);
 }
 
 static Code _lambda_adapter(
@@ -896,13 +898,13 @@ static Code _lambda_adapter(
     (call (expr ((func $declared) "Var") (ident $lifted))
       (args @{arguments.list_free()})));
   items.push(%(return $call));
-  return %(code-value "bound"
-           (function (static "Var")
-             (bind $adapter
-               ((fnmod (params (param ("Func") (bind $closure ()))
-                               (param (const "FuncArg") (bind $argv (*)))))))
-             (block @{items.list_free()}))
-           ());
+  return Code.bound(
+    %(function (static "Var")
+       (bind $adapter
+         ((fnmod (params (param ("Func") (bind $closure ()))
+                         (param (const "FuncArg") (bind $argv (*)))))))
+       (block @{items.list_free()})),
+    NULL);
 }
 
 static Code _lambda_bridge(
@@ -970,6 +972,7 @@ static Code _lambda_value(
 Code lambda_closure(Code node) {
   match (node)
     case %(expr ? ${$lambda_captured(?body, *captures, *params)}): {
+      if (params == %((param (void) (bind () ())))) params = NULL;
       List lifted = x2c_binding_fresh("lambda");
       List adapter = x2c_binding_fresh("lambda");
       List closure = x2c_binding_fresh("lambda_closure");
@@ -992,7 +995,7 @@ Code lambda_closure(Code node) {
       x2c_place(%(unit-support), function);
       x2c_place(%(unit-support), adapter_function);
       Code value = _lambda_value(adapter, context, adapted.car(), captures);
-      return %(code-value "bound" $value ());
+      return Code.bound(value, NULL);
     }
   return node;
 }

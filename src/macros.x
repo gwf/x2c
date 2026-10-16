@@ -2448,9 +2448,9 @@ int Compiler.keyword_form_is_definition(Compiler c) {
 
 /** Parses and installs one source-local `keyword` alias.
     The named macro must already be visible; the alias captures that definition
-    and consumes its terminating semicolon.
+    and consumes its terminating semicolon. Returns the alias.
 */
-void Compiler.parse_keyword_definition(Compiler c) {
+Atom Compiler.parse_keyword_definition(Compiler c) {
   Token declaration = c.token;
   int storage = c.test(<static>) || c.source_private;
   c.expect(<ident>);
@@ -2475,6 +2475,7 @@ void Compiler.parse_keyword_definition(Compiler c) {
     c.record_compile_time_effect(
       %(compile-time keyword $alias
         ${c.freeze_declaration_syntax(definition)}), declaration);
+  return alias;
 }
 
 /* Only the built-in sources define `with` or replace a built-in alias. */
@@ -2491,11 +2492,7 @@ static const SymbolSet alias_kinds =
 
 /* Parses one keyword alias of `c`'s source into `aliases`. */
 static void _record_alias(Compiler c, Map aliases) {
-  Token token = c.token;
-  if (token.type == <static>) token = Token.skip_trivia(token + 1);
-  token = Token.skip_trivia(token + 1);
-  Atom alias = Atom.intern(token.text);
-  c.parse_keyword_definition();
+  Atom alias = c.parse_keyword_definition();
   aliases[alias] = c.kw_aliases[alias];
 }
 
@@ -3054,32 +3051,27 @@ static Var _template(
   Compiler c, Var node, Array sources, Array values, int &refused) {
   if (node is not <list> || node.is_nil()) return node;
   List syntax = node;
-  if (syntax.car() == <expr>)
+  match (syntax) case %(expr ?type ?content):
     foreach (List value, sources)
-      if (value === syntax) return _capture_slot(c, syntax, values, refused);
-  return _template_items(c, syntax, sources, values, refused);
-}
-
-static List _template_items(
-  Compiler c, List items, Array sources, Array values, int &refused) {
-  if (!items) return NULL;
-  Var head = _template(c, items.car(), sources, values, refused);
-  List tail = _template_items(c, items.cdr(), sources, values, refused);
-  return head === items.car() && tail === items.cdr()
-    ? items : cons(head, tail);
+      if (value === syntax)
+        return _capture_slot(c, syntax, type, content, values, refused);
+  Var child;
+  $ast.rewrite_children(
+    syntax, child, _template(c, child, sources, values, refused));
 }
 
 static Var _capture_slot(
-  Compiler c, List value, Array values, int &refused) {
-  if (value.caddr().list().car() == <literal>) return value;
-  Var shape = _slot_shape(c, value.caddr());
+  Compiler c, List value, Var type, Var content, Array values,
+  int &refused) {
+  match (content) case %(literal *): return value;
+  Var shape = _slot_shape(c, content);
   foreach (List prior, values) if (prior === value) shape = void;
   if (shape is void) {
     refused = 1;
     return value;
   }
   values.push(value);
-  return %("x2c.slot" ${value.cadr()} $shape);
+  return %("x2c.slot" $type $shape);
 }
 
 /* What conversion and lowering read of a slot value's content besides its
@@ -3088,31 +3080,26 @@ static Var _capture_slot(
    group's content, or else the content's head. Void for content they read
    further, such as a conditional or a composite. */
 static Var _slot_shape(Compiler c, Var content) {
-  if (content is not <list>) return void;
-  List parts = content;
-  Var head = parts.car();
-  if (head == <literal>) return content;
-  if (head == <ident>)
-    return %(lambda-snapshot ${parts.cadr()}) in c.semantic_binding_facts()
-      ? %(ident snapshot) : head;
-  if (head == <call> || head == <index> || head == <getindex> ||
-      head == <postfix> || head == <cast> || head == <cache>)
-    return head;
-  List operands = parts.cdr().cdr();
-  if (head == <parens> && parts.cadr().list().car() == <expr>)
-    return _nested_shape(c, head, parts.cadr());
-  if (head != <op>) return void;
-  Var op = parts.cadr();
-  if (op == <.>) return _nested_shape(c, %(op .), operands.car());
-  if (op == <?> || op == <,>) return void;
-  if (!operands.cdr()) return _nested_shape(c, %(op $op), operands.car());
-  return %(op $op);
+  match (content) {
+    case %(literal *): return content;
+    case %(ident ?binding):
+      return %(lambda-snapshot $binding) in c.semantic_binding_facts()
+        ? %(ident snapshot) : <ident>;
+    case %((!set ?head (!or call index getindex postfix cast cache)) *):
+      return head;
+    case %(parens (expr ? ?inner)): return _nested_shape(c, <parens>, inner);
+    case %(op . (expr ? ?base) ?): return _nested_shape(c, %(op .), base);
+    case %(op ?operator (expr ? ?operand)):
+      return _nested_shape(c, %(op $operator), operand);
+    case %(op ?operator ? ?):
+      return operator == <,> ? void : %(op $operator);
+  }
+  return void;
 }
 
-/* `prefix` followed by the shape of the typed expression `operand`'s
-   content, or void when that content has none. */
-static Var _nested_shape(Compiler c, Var prefix, Var operand) {
-  Var shape = _slot_shape(c, operand.list().caddr());
+/* `prefix` followed by the shape of `content`, or void when it has none. */
+static Var _nested_shape(Compiler c, Var prefix, Var content) {
+  Var shape = _slot_shape(c, content);
   return shape is void ? void : %($prefix $shape);
 }
 
@@ -3172,15 +3159,8 @@ static Var _filled(Var node, Array lowered) {
   Var head = syntax.car();
   if (head is <string> && head == "x2c.slot")
     return lowered[syntax.cadr().int()];
-  return _filled_items(syntax, lowered);
-}
-
-static List _filled_items(List items, Array lowered) {
-  if (!items) return NULL;
-  Var head = _filled(items.car(), lowered);
-  List tail = _filled_items(items.cdr(), lowered);
-  return head === items.car() && tail === items.cdr()
-    ? items : cons(head, tail);
+  Var child;
+  $ast.rewrite_children(syntax, child, _filled(child, lowered));
 }
 
 /* The index of `ast` among the values `watch` watches, or -1. A statement
