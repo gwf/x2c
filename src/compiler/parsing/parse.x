@@ -3,16 +3,6 @@
    A full parse reads the unit's top-level forms in source order. A form
    that fails is skipped whole, so one error does not hide the next. */
 
-/* One full parse of a unit. A script unit that does not define `main`
-   hoists its statements: `statements` holds each run's first and
-   past-the-end token index, `runs` counts the runs, `first` is where the
-   first one starts, and `gap` is the index after the last form, where the
-   next form's conditional directives begin. */
-static typedef struct FullParse {
-  Compiler c, Array nodes, statements;
-  int hoisting, gap, runs, first;
-} FullParse;
-
 /** Parses and types the positioned source against `globs`.
 
     The result is a source-ordered top-level AST. This resets macro state
@@ -23,14 +13,15 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   Array nodes = [];
   c.unit_nodes = nodes;
   _reset_parse(c, globs, generated_symbols);
-  Token conflict = NULL;
-  $let(c.recovery_depth, c.recovery_depth + 1)
-    conflict = _parse_forms(c, nodes);
-  if (conflict) {
-    c.token = conflict;
-    _report_script_statement(c);
+  if (c.script) _parse_script(c, nodes);
+  else $let(c.recovery_depth, c.recovery_depth + 1) {
+    _append_preproc(c, nodes);
+    _parse_forms(c, nodes);
   }
   List ast = _finish_parse(c, nodes);
+  if (c.script) _finish_script(c, ast);
+  _check_unmatched_braces(c);
+  if (!c.error_count()) _check_static_inits(c);
   if (!c.public_bodies) c.publish_inline_types(ast);
   return ast;
 }
@@ -73,89 +64,58 @@ static void _reset_macros(Compiler c) {
   c.source_private = 0;
 }
 
-/* Parses every form, then the `main` that a script's statement runs
-   become. Returns the first hoisted statement when a macro defined `main`
-   where the token scan saw none, and NULL otherwise. */
-static Token _parse_forms(Compiler c, Array nodes) {
-  _append_preproc(c, nodes);
-  Array statements = [];
-  FullParse p = {
-    .c = c, .nodes = nodes, .statements = statements,
-    .hoisting = c.script && !c.script.defines_main};
-  loop {
-    while (c.peek(0) != <eof>) if (!_form(p)) break;
-    if (!p.runs) return NULL;
-    Token tokens = c.tokenizer.tokens;
-    if ("main" in c.fn_defs) return tokens + p.first;
-    _push_conditionals(c, statements, p.gap, c.token - tokens);
-    _append_script_main(c, statements);
-    p.hoisting = p.runs = 0;
-  }
+// Reads ordinary top-level forms, including generated script functions.
+module void _parse_forms(Compiler c, Array nodes) {
+  while (c.peek(0) != <eof>) if (!_form(c, nodes)) break;
 }
 
-/* Parses one form, or skips a failed one whole. Returns 0 when the parse
-   stops: the error limit is reached, or the skip reached the end. */
-static int _form(FullParse &p) {
-  Compiler c = p.c;
+// Parses one form, or recovers at the next whole form.
+static int _form(Compiler c, Array nodes) {
   Token start = c.token;
   int braces = c.braces.len();
   try {
-    _parse(p, start);
+    _top_level(c, nodes);
+    _append_preproc(c, nodes);
+    _debug_tokens(start, c.token);
   }
   catch %(malformed (category ?category) *): {
     (void) category;
-    if (c.diagnostics.reached_limit()) return 0;
-    _sync_top_level(c, start, braces);
-    p.gap = _end_index(c, c.tokenizer.tokens);
-    _append_preproc(c, p.nodes);
+    if (!_recover_form(c, start, braces)) return 0;
+    _append_preproc(c, nodes);
     return c.peek(0) != <eof>;
   }
   return 1;
 }
 
-static void _parse(FullParse &p, Token start) {
-  Compiler c = p.c;
-  Token tokens = c.tokenizer.tokens;
-  int begin = start - tokens;
-  if (p.hoisting) _push_conditionals(c, p.statements, p.gap, begin);
-  if (p.hoisting && c.script_statement_starts()) _hoist(p, begin, tokens);
-  else _top_level(p, begin, tokens);
-  p.gap = _end_index(c, tokens);
-  _append_preproc(c, p.nodes);
-  _debug_tokens(start, c.token);
-}
-
-// A script statement joins the runs that `main` executes.
-static void _hoist(FullParse &p, int begin, Token tokens) {
-  p.c.skip_script_statement();
-  int end = _end_index(p.c, tokens);
-  p.statements.push(begin);
-  p.statements.push(end);
-  if (!p.runs++) p.first = begin;
-}
-
 // A retained declaration bundle replays; any other form parses.
-static void _top_level(FullParse &p, int begin, Token tokens) {
-  Compiler c = p.c;
-  _reject_statement(c);
+module void _top_level(Compiler c, Array nodes) {
+  Token tokens = c.tokenizer.tokens;
+  int begin = c.token - tokens;
   Ast node = c.replay_declaration_source();
   if (!node) node = c.parse_top_level();
   int end = _end_index(c, tokens);
   if (node && node.car() == <seq>)
-    foreach (List item, node.cdr()) _add(p, item, begin, end);
-  else if (node) _add(p, node, begin, end);
+    foreach (List item, node.cdr()) _add(c, nodes, item, begin, end);
+  else if (node) _add(c, nodes, node, begin, end);
 }
 
-static void _add(FullParse &p, List node, int begin, int end) {
-  Token tokens = p.c.tokenizer.tokens;
-  _record_top_level(p.c, node, tokens + begin);
-  _record_span(p.c, node, begin, end);
-  p.nodes.push(node);
+static void _add(Compiler c, Array nodes, List node, int begin, int end) {
+  Token tokens = c.tokenizer.tokens;
+  _record_top_level(c, node, tokens + begin);
+  _record_span(c, node, begin, end);
+  nodes.push(node);
+}
+
+// Stops at the error limit; otherwise restores the next form's cursor.
+module int _recover_form(Compiler c, Token start, int braces) {
+  if (c.diagnostics.reached_limit()) return 0;
+  _sync_top_level(c, start, braces);
+  return 1;
 }
 
 /* Directives join the nodes in source order, after they record native
    macro names and includes deliver their public compile-time effects. */
-static void _append_preproc(Compiler c, Array nodes) {
+module void _append_preproc(Compiler c, Array nodes) {
   List directives = c.leading_preproc();
   c.note_preprocessor_macros(directives);
   if (c.included_effects.len()) c.install_included_effects();
@@ -195,10 +155,5 @@ static List _finish_parse(Compiler c, Array nodes) {
   if (c.load_source && !c.error_count()) c.prepare_loaded_functions(nodes);
   if (c.meta_build) c.write_meta_build();
   c.unit_nodes = NULL;
-  List ast = nodes.list_free();
-  if (c.script && !c.script.defines_main && !c.error_count())
-    _check_script_locals(c, ast);
-  _check_unmatched_braces(c);
-  if (!c.error_count()) _check_static_inits(c);
-  return ast;
+  return nodes.list_free();
 }

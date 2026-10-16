@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/script-generated-main.x:3:1: parse: a script that defines main cannot have top-level statements
+  puts("statement");
+  ^^^^
+  note: move the statement into main, or remove main so the statements run
+

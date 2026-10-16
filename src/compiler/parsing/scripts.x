@@ -3,6 +3,80 @@
    A script unit that defines `main` rejects top-level statements; one that
    does not runs them, in source order, inside a generated `main`. */
 
+/* Retained token runs and the gap whose conditional directives precede the
+   next form. `first` is the first statement, distinct from copied directives.
+   A negative first index means no statement has been retained. */
+static typedef struct ScriptParse {
+  Compiler c;
+  Array nodes, statements;
+  int gap, first;
+} ScriptParse;
+
+/* File-scope forms establish effects before the retained statements parse.
+   A macro may define main where the initial token scan saw none. Report that
+   conflict outside recovery, as for the original script's entry point. */
+module void _parse_script(Compiler c, Array nodes) {
+  ScriptParse p = {.c = c, .nodes = nodes, .statements = [], .first = -1};
+  Token conflict = NULL;
+  $let(c.recovery_depth, c.recovery_depth + 1) {
+    _append_preproc(c, nodes);
+    while (c.peek(0) != <eof>) if (!_script_form(p)) break;
+    if (p.first >= 0) {
+      Token tokens = c.tokenizer.tokens;
+      if ("main" in c.fn_defs) conflict = tokens + p.first;
+      else {
+        _push_conditionals(c, p.statements, p.gap, c.token - tokens);
+        _append_script_main(c, p.statements);
+        _parse_forms(c, nodes);
+      }
+    }
+  }
+  if (conflict) {
+    c.token = conflict;
+    _report_script_statement(c);
+  }
+}
+
+// Script policy selects retained statements; ordinary parsing owns grammar.
+static int _script_form(ScriptParse &p) {
+  Compiler c = p.c;
+  Token start = c.token, tokens = c.tokenizer.tokens;
+  int begin = start - tokens, braces = c.braces.len();
+  try {
+    if (!c.script.defines_main) {
+      _push_conditionals(c, p.statements, p.gap, begin);
+      if (c.script_statement_starts()) _hoist(p, begin, tokens);
+      else _top_level(c, p.nodes);
+    }
+    else {
+      _reject_statement(c);
+      _top_level(c, p.nodes);
+    }
+    p.gap = _end_index(c, tokens);
+    _append_preproc(c, p.nodes);
+    _debug_tokens(start, c.token);
+  }
+  catch %(malformed (category ?category) *): {
+    (void) category;
+    if (!_recover_form(c, start, braces)) return 0;
+    p.gap = _end_index(c, c.tokenizer.tokens);
+    _append_preproc(c, p.nodes);
+    return c.peek(0) != <eof>;
+  }
+  return 1;
+}
+
+static void _hoist(ScriptParse &p, int begin, Token tokens) {
+  p.c.skip_script_statement();
+  p.statements.push(begin);
+  p.statements.push(_end_index(p.c, tokens));
+  if (p.first < 0) p.first = begin;
+}
+
+module void _finish_script(Compiler c, List ast) {
+  if (!c.script.defines_main && !c.error_count()) _check_script_locals(c, ast);
+}
+
 /** Skips a collected script statement, or diagnoses one beside `main`.
     Called after top-level directives establish source visibility.
 */
