@@ -7,24 +7,42 @@ entry through one compiler.
 
 ## Local report catalogues
 
-Named report macros collect wording and diagnostic construction separately
-from the algorithm that selects a case. Small groups appear near the top of
-their source file; shared groups live in a sibling `*-reports.x` included
-there. Compiler and driver calls use `$report.<category>.<case>`. Runtime
-formatting and Regex catalogues also provide `$reason` expression macros for
-reason strings, leaving their shared failure helpers responsible for payloads.
-Runtime, package, and command error macros live with their raising owner
-or in shared `*-errors.x` modules. Their first part says what the call does:
-`$error` raises,
-`$refusal` refuses REPL input, `$decline` declines a REPL lowering, and
-`$reason` returns message text. The parts after it name the condition, as in
-`$error.read.end(r)`.
+Named diagnostics keep wording and construction with the code that owns the
+condition. A catalogue used by one file stays near its top as static macros.
+Several call sites may share one definition. Actual shared consumers include
+an owner's `*-reports.x` directly; those definitions remain nonstatic.
+A large local catalogue may use a sibling file, but separation is optional.
+Do not share unrelated conditions merely because their wording matches.
 
-These are compile-time expansions, not runtime message registries. Reports
-still run at their call sites through the existing reporting owners. Guards,
-severity selection, deferred collection, and cleanup remain in those owners.
-Generic renderers, native error-floor messages, and short structured raises
-retain their existing representation.
+Compiler catalogue macros use one dot: `$action.owner_condition`. The owner
+names the responsibility, not the diagnostic category. `$fail` reports and
+transfers or terminates; `$report` records or emits an error and returns;
+`$warn` records or emits a warning. `$note` constructs note text or a notes
+List, and `$reason` constructs a reason String. `$progress` and `$debug`
+distinguish ordinary status and debug output in mixed catalogues. Existing
+structured Error raises retain `$error` and their runtime conventions.
+
+Arguments are context, explicit source site when applicable, then semantic
+operands. A site may be a Token, recorded location, or analysis origin, as
+required by the existing reporter. Preserve NULL fallback versus an explicit
+current token. The caller selects the condition; the definition owns its
+message, category, and notes. Use an expression body for one reporting call
+and a scoped block for temporary construction.
+
+Keep typed helpers when they calculate context or notes. Do not add forwarding
+macros around them. Generic renderers, pass-through reporters, native failure
+floors, and short structured raises keep their existing representation.
+Reporting owners retain guards, severity, recovery, cleanup, and deferred
+collection. A returning stderr error must not acquire terminating behavior.
+
+Component diagnostic macros also used by generated `linked-meta.x` remain
+nonstatic in their owning component files. The linked-meta generator's
+operation discovery does not expand macros; a direct report needed to identify
+a compiler-dependent meta body remains direct rather than changing discovery.
+
+These are ordinary compile-time expansions, not runtime message registries or
+catalogue installers. Runtime, package, and command catalogues keep their
+existing action prefixes, including `$refusal` and `$decline` for REPL actions.
 
 ## Logger contract
 

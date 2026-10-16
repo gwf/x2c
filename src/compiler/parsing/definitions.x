@@ -47,7 +47,7 @@ static void _report_redefinition(
       !List.equal(arms, c.arms))
     return;
   String spelling = c.unprefixed(Ast.binding_spelling(binding));
-  $report.type.decl_duplicate(c, site, kind, spelling);
+  $fail.compiler_decl_duplicate(c, site, kind, spelling);
 }
 
 /* A definition remembers the token range of the top-level form that
@@ -142,7 +142,7 @@ static void _complete_prototype(
   contract = _inherited_contract(prior_contract, contract);
   if (prior_contract != contract) {
     String spelling = Ast.binding_spelling(binding);
-    $report.type.decl_prototype(c, site, spelling, prior_contract, contract);
+    $fail.compiler_decl_prototype(c, site, spelling, prior_contract, contract);
   }
   c.set_fact(%(completion $binding), %(completed $contract));
   c.set_fact(%(arms $binding), c.arms);
@@ -249,7 +249,7 @@ module void _check_static_inits(Compiler c) {
       String name = Ast.binding_spelling(reference);
       if (!name || %($name) in statics) continue;
       String target = Ast.binding_spelling(binding);
-      $report.parse.static_dependency(
+      $fail.compiler_static_dependency(
         c, _init_token(c, binding), name, target);
     }
   }

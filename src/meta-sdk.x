@@ -39,106 +39,124 @@ typedef struct MetaContext {
 
 /* Compile-time SDK rejection messages and notes. */
 
-static macro Stmt $report.sdk.fields_type(Expr $value) =>
+static macro Stmt $fail.meta_sdk_fields_type(Expr $value) =>
   _reject_value(
     "Type.fields requires a struct or union Type", $value);
 
-static macro Stmt $report.sdk.fields_complete(Expr $value) =>
+static macro Stmt $fail.meta_sdk_fields_complete(Expr $value) =>
   _reject_value(
     "Type.fields requires a complete struct or union Type", $value);
 
-static macro Stmt $report.sdk.binding_spelling(Expr $syntax) =>
+static macro Stmt $fail.meta_sdk_binding_spelling(Expr $syntax) =>
   _reject_value(
     "Code.binding_spelling requires an identifier spelling", $syntax);
 
-static macro Stmt $report.sdk.binding_syntax(Expr $syntax) =>
+static macro Stmt $fail.meta_sdk_binding_syntax(Expr $syntax) =>
   _reject_value(
     "Code.binding_spelling requires binding syntax", $syntax);
 
-static macro Stmt $report.sdk.binding_known(Expr $value) =>
+static macro Stmt $fail.meta_sdk_binding_known(Expr $value) =>
   MetaContext.reject(
     "Code.binding_spelling requires a known binding",
     %("binding: ${$value.repr()}"));
 
-static macro Stmt $report.sdk.binding_identifier(Expr $syntax) =>
+static macro Stmt $fail.meta_sdk_binding_identifier(Expr $syntax) =>
   _reject_value(
     "Code.binding_spelling requires an identifier or binding", $syntax);
 
-static macro Stmt $report.sdk.identifier(Expr $spelling) =>
+static macro Stmt $fail.meta_sdk_identifier(Expr $spelling) =>
   _reject_value(
     "x2c.ident requires an identifier spelling", $spelling);
 
-static macro Stmt $report.sdk.binding_role(Expr $role) =>
+static macro Stmt $fail.meta_sdk_binding_role(Expr $role) =>
   _reject_value("x2c.binding.fresh requires an identifier role", $role);
 
-static macro Stmt $report.sdk.unique_stem(Expr $stem) =>
+static macro Stmt $fail.meta_sdk_unique_stem(Expr $stem) =>
   _reject_value(
     "_x2c.name.unique requires an identifier stem", $stem);
 
-static macro Stmt $report.sdk.parameter_missing(
+static macro Stmt $fail.meta_sdk_parameter_missing(
   Expr $function, Expr $wanted) =>
   MetaContext.reject(
     %"Code.parameter cannot find '${$wanted}'",
     %("function: ${Code.name($function).repr()}"));
 
-static macro Stmt $report.sdk.symbol_set_value(Expr $value) =>
+static macro Stmt $fail.meta_sdk_symbol_set_value(Expr $value) =>
   MetaContext.reject(
     "_x2c.symbol-set requires Symbols", %("value:" ${$value.repr()}));
 
-static macro Stmt $report.sdk.symbol_set_duplicate(
+static macro Stmt $fail.meta_sdk_symbol_set_duplicate(
   Expr $values, Expr $duplicate) =>
   MetaContext.reject(
     "_x2c.symbol-set requires distinct Symbols",
     %("symbol:" ${$values[$duplicate].repr()}));
 
-static macro Stmt $report.sdk.native_declarations() =>
+static macro Stmt $fail.meta_sdk_native_declarations() =>
   MetaContext.reject(
     "native module sources declare no meta function",
     %("declare each exported function with a bodyless meta prototype"));
 
-static macro Stmt $report.sdk.source_capture(Expr $value) =>
+static macro Stmt $fail.meta_sdk_source_capture(Expr $value) =>
   MetaContext.reject(
     "Code.source_text requires complete captured syntax",
     active.has_bindings ? NULL : %("value: ${$value.repr()}"));
 
-static macro Stmt $report.sdk.embed_path_empty() =>
+static macro Stmt $fail.meta_sdk_embed_path_empty() =>
   MetaContext.reject("x2c.embed.text requires a non-empty path", NULL);
 
-static macro Stmt $report.sdk.embed_literal(Expr $requested) =>
+static macro Stmt $fail.meta_sdk_embed_literal(Expr $requested) =>
   _reject_value(
     "x2c.embed.text requires a String or captured String literal",
     $requested);
 
-static macro Stmt $report.sdk.embed_read(Expr $c, Expr $path) =>
+static macro Stmt $fail.meta_sdk_embed_read(Expr $c, Expr $path) =>
   _embed_reject($c, "cannot read embedded text", $path);
 
-static macro Stmt $report.sdk.embed_nul(Expr $c, Expr $path) =>
+static macro Stmt $fail.meta_sdk_embed_nul(Expr $c, Expr $path) =>
   _embed_reject($c, "embedded text contains an embedded NUL", $path);
 
-static macro Stmt $report.sdk.embed_size(Expr $c, Expr $path) =>
+static macro Stmt $fail.meta_sdk_embed_size(Expr $c, Expr $path) =>
   _embed_reject($c, "embedded text exceeds the String size limit", $path);
 
-static macro Stmt $report.sdk.embed_file(Expr $c, Expr $path) =>
+static macro Stmt $fail.meta_sdk_embed_file(Expr $c, Expr $path) =>
   _embed_reject($c, "embedded text is not a regular file", $path);
 
-static macro Stmt $report.sdk.embed_open(Expr $c, Expr $path) =>
+static macro Stmt $fail.meta_sdk_embed_open(Expr $c, Expr $path) =>
   _embed_reject($c, "cannot open embedded text", $path);
 
-static macro Stmt $report.sdk.invocation_missing() =>
+static macro Stmt $fail.meta_sdk_invocation_missing() =>
   MetaContext.reject(
     "x2c invocation location used outside macro expansion", NULL);
 
-static macro Stmt $report.sdk.notes_string(Expr $operation, Expr $note) =>
+static macro Stmt $fail.meta_sdk_notes_string(Expr $operation, Expr $note) =>
   _reject_value(%"${$operation} notes must be Strings", $note);
 
-static macro Stmt $report.sdk.expansion_required(Expr $operation) =>
+static macro Stmt $fail.meta_sdk_expansion_required(Expr $operation) =>
   MetaContext.reject(%"${$operation} used outside macro expansion", NULL);
 
-static macro Expression $report.sdk.path_notes(Expr $c, Expr $path) =>
+static macro Expression $note.meta_sdk_path_notes(Expr $c, Expr $path) =>
   %("path: ${$c.display_path($path)}");
 
-static macro Expression $report.sdk.value_notes(Expr $value) =>
+static macro Expression $note.meta_sdk_value_notes(Expr $value) =>
   %("value: ${$value.repr()}");
+
+static macro Stmt $fail.meta_sdk_constant() =>
+  MetaContext.reject("captured code is not a compile-time constant", NULL);
+
+static macro Stmt $fail.meta_sdk_rewrite_pattern() =>
+  MetaContext.reject("unsupported rewrite pattern", NULL);
+
+static macro Stmt $fail.meta_sdk_initialization_pattern() =>
+  MetaContext.reject("after-initialization requires a declaration pattern", NULL);
+
+static macro Stmt $fail.meta_sdk_members_type(Expr $value) =>
+  _reject_value("Type.members requires an enum Type", $value);
+
+static macro Stmt $fail.meta_sdk_members_entry(Expr $value) =>
+  _reject_value("Type.members found an unreadable member", $value);
+
+static macro Stmt $fail.meta_sdk_enclosing_role(Expr $value) =>
+  _reject_value("x2c.enclosing names declarator, statement, function, or unit", $value);
 
 // the running call
 
@@ -257,7 +275,7 @@ Var Code.value(Code code) {
   }
   Var value = compiler.folded_constant(code);
   if (value is void)
-    MetaContext.reject("captured code is not a compile-time constant", NULL);
+    $fail.meta_sdk_constant();
   return value;
 }
 
@@ -471,7 +489,7 @@ Code Code.register_rewrite(Code function, List pattern, List holes) {
     case %(!or (api-source ? ? (function ?type *)) (function ?type *)):
       { point = <function>; kinds = %(${_function_rule_key(type)}); }
   }
-  if (!point) MetaContext.reject("unsupported rewrite pattern", NULL);
+  if (!point) $fail.meta_sdk_rewrite_pattern();
   return _rewrite_registration(
     function, shape ? shape : pattern, holes, point, kinds);
 }
@@ -484,7 +502,7 @@ Code Code.register_after_initialization(Code c, Macro shape, List holes) {
   List pattern = shape.pattern(holes);
   match (pattern) case %(declare *):
     return _rewrite_registration(c, shape, holes, <decl>, %(init));
-  MetaContext.reject("after-initialization requires a declaration pattern", NULL);
+  $fail.meta_sdk_initialization_pattern();
 }
 
 static Type _binding_type(List binding) =>
@@ -592,7 +610,7 @@ Symbol Type.tag_name(String name) {
 List Type.members(Type type) {
   Type resolved = type.resolve();
   if (resolved.car() != <enum>)
-    _reject_value("Type.members requires an enum Type", type);
+    $fail.meta_sdk_members_type(type);
   Array rows = [];
   foreach (List member, resolved.last()) rows.push(_enum_member(member));
   return rows.list_free();
@@ -607,7 +625,7 @@ static List _enum_member(List member) {
     case %(op = (?name) ?value): return %($name $value);
     case %(?name): return %($name ());
   }
-  _reject_value("Type.members found an unreadable member", member);
+  $fail.meta_sdk_members_entry(member);
   return %();
 }
 
@@ -616,10 +634,10 @@ List Type.fields(Type type) {
   _require_expansion("Type.fields");
   Type resolved = active.expander.sym.resolve_key(type.canonicalize());
   if (!resolved || !resolved.is_aggregate_tag())
-    $report.sdk.fields_type(type);
+    $fail.meta_sdk_fields_type(type);
   List metadata = active.expander.sym.field_order(resolved);
   if (!metadata)
-    $report.sdk.fields_complete(type);
+    $fail.meta_sdk_fields_complete(type);
   Array named = [];
   foreach (List row, metadata.cdr()) if (row.car()) named.push(row);
   return named.list_free();
@@ -633,10 +651,10 @@ String Code.binding_spelling(Var syntax) {
   if (syntax is <string>) {
     String spelling = syntax;
     if (spelling.is_identifier()) return spelling;
-    $report.sdk.binding_spelling(syntax);
+    $fail.meta_sdk_binding_spelling(syntax);
   }
   if (syntax is not <list> || syntax.is_nil())
-    $report.sdk.binding_syntax(syntax);
+    $fail.meta_sdk_binding_syntax(syntax);
   List value = syntax;
   match (value)
     case %(expr ? (!set ?content (? *))): value = content;
@@ -655,13 +673,13 @@ static String _binding_spelling(List value, Var syntax) {
   match (value)
     case %(binding ?id (!is ? type string)):
       if (!id.is_integer() || id.integer() > INT_MAX)
-        $report.sdk.binding_known(value);
+        $fail.meta_sdk_binding_known(value);
   if (!Ast.try_binding(value, identity, spelling))
-    $report.sdk.binding_identifier(syntax);
+    $fail.meta_sdk_binding_identifier(syntax);
   Var registered =
     active.expander.semantic_binding_facts()[%(known $identity)];
   if (registered is not <string> || registered.string() != spelling)
-    $report.sdk.binding_known(value);
+    $fail.meta_sdk_binding_known(value);
   return spelling;
 }
 
@@ -669,14 +687,14 @@ static String _binding_spelling(List value, Var syntax) {
 List x2c_ident(String spelling) {
   _require_expansion("x2c.ident");
   if (!spelling.is_identifier())
-    $report.sdk.identifier(spelling);
+    $fail.meta_sdk_identifier(spelling);
   return %("x2c.ident" $spelling);
 }
 
 /** Answers `x2c.binding.fresh`, declared in `lib/meta.x`. */
 List x2c_binding_fresh(String role) {
   _require_expansion("x2c.binding.fresh");
-  if (!role.is_identifier()) $report.sdk.binding_role(role);
+  if (!role.is_identifier()) $fail.meta_sdk_binding_role(role);
   Compiler c = active.expander;
   return c.sym.introduce(c.fresh_name(role));
 }
@@ -684,7 +702,7 @@ List x2c_binding_fresh(String role) {
 /** Answers `x2c.binding.for`, declared in `lib/meta.x`. */
 List x2c_binding_for(Var key, String role) {
   _require_expansion("x2c.binding.for");
-  if (!role.is_identifier()) $report.sdk.binding_role(role);
+  if (!role.is_identifier()) $fail.meta_sdk_binding_role(role);
   Compiler c = active.expander;
   List binding = NULL;
   $adapter.memo(c, %(binding $key), binding)
@@ -696,7 +714,7 @@ List x2c_binding_for(Var key, String role) {
 Var MetaContext.fresh_binding(String stem) {
   _require_expansion("_x2c.name.unique");
   if (!stem.is_identifier())
-    $report.sdk.unique_stem(stem);
+    $fail.meta_sdk_unique_stem(stem);
   String spelling = active.expander.fresh_name(%"macro_$stem");
   return active.expander.sym.introduce(spelling);
 }
@@ -773,7 +791,7 @@ Code Code.parameter(Code function, String wanted) {
         }
     }
   }
-  $report.sdk.parameter_missing(function, wanted);
+  $fail.meta_sdk_parameter_missing(function, wanted);
 }
 
 /** Returns the `Func` signature of the function syntax `syntax`. A native
@@ -795,11 +813,11 @@ static Var _symbol_set(List values) {
   _require_expansion("_x2c.symbol-set");
   foreach (Var value, values)
     if (value is not <symbol>)
-      $report.sdk.symbol_set_value(value);
+      $fail.meta_sdk_symbol_set_value(value);
   int duplicate = -1;
   List expression = active.expander.symbol_set_expression(values, duplicate);
   if (duplicate >= 0)
-    $report.sdk.symbol_set_duplicate(values, duplicate);
+    $fail.meta_sdk_symbol_set_duplicate(values, duplicate);
   return expression;
 }
 
@@ -810,7 +828,7 @@ static List _native_targets(void) => Compiler.native_meta_targets(NULL);
 static List _declared_targets(List paths) {
   List rows = Compiler.native_meta_targets(paths);
   if (!rows)
-    $report.sdk.native_declarations();
+    $fail.meta_sdk_native_declarations();
   return rows;
 }
 
@@ -823,7 +841,7 @@ String Code.source_text(Var value) {
   Var stored = void;
   if (!active.captures ||
       !active.captures.try_get(((ulong) value.u64), stored))
-    $report.sdk.source_capture(value);
+    $fail.meta_sdk_source_capture(value);
   List source = stored;
   int begin = source.caddr(), end = source.last();
   return String.new_len(active.expander.text + begin, end - begin);
@@ -837,7 +855,7 @@ String x2c_embed_text(Var requested) {
   if (requested is <string>) requested_path = requested;
   else requested_path = _embed_literal(requested, source_file);
   if (!requested_path.len())
-    $report.sdk.embed_path_empty();
+    $fail.meta_sdk_embed_path_empty();
   String path = _embed_path(c, source_file, requested_path);
   String text = c.sources ? _embed_source(c, path) : _embed_file(c, path);
   c.deps.merge_translation_dependency(path, "%08x".printf(text.hash()));
@@ -862,7 +880,7 @@ static String _embed_literal(Var requested, String &source_file) {
     active.captures.try_get(((ulong) requested.u64), stored);
   String requested_path = NULL;
   if (stored is void || !_literal_string(syntax, requested_path))
-    $report.sdk.embed_literal(requested);
+    $fail.meta_sdk_embed_literal(requested);
   List source = stored;
   source_file = source.cadr();
   return requested_path;
@@ -871,7 +889,7 @@ static String _embed_literal(Var requested, String &source_file) {
 static String _embed_source(Compiler c, String path) {
   String text;
   if (!c.read_source(path, text))
-    $report.sdk.embed_read(c, path);
+    $fail.meta_sdk_embed_read(c, path);
   return text;
 }
 
@@ -879,35 +897,35 @@ static String _embed_file(Compiler c, String path) {
   File file = _open_embed_file(c, path);
   String text = NULL;
   try text = file.string_close();
-  catch %(io-fail *): $report.sdk.embed_read(c, path);
+  catch %(io-fail *): $fail.meta_sdk_embed_read(c, path);
   catch %(bad-arg *):
-    $report.sdk.embed_nul(c, path);
+    $fail.meta_sdk_embed_nul(c, path);
   catch %(size-limit *):
-    $report.sdk.embed_size(c, path);
+    $fail.meta_sdk_embed_size(c, path);
   return text;
 }
 
 static File _open_embed_file(Compiler c, String path) {
   struct stat info;
   if (!stat(path, &info) && !S_ISREG(info.st_mode))
-    $report.sdk.embed_file(c, path);
+    $fail.meta_sdk_embed_file(c, path);
   File file = NULL;
   try file = path.open("r");
   catch %((!or not-found io-fail) *):
-    $report.sdk.embed_open(c, path);
+    $fail.meta_sdk_embed_open(c, path);
   if (file.stat(&info) || !S_ISREG(info.st_mode)) {
     file.close();
-    $report.sdk.embed_file(c, path);
+    $fail.meta_sdk_embed_file(c, path);
   }
   if ((uintmax_t) info.st_size >= INT_MAX) {
     file.close();
-    $report.sdk.embed_size(c, path);
+    $fail.meta_sdk_embed_size(c, path);
   }
   return file;
 }
 
 static void _embed_reject(Compiler c, String message, String path) {
-  MetaContext.reject(message, $report.sdk.path_notes(c, path));
+  MetaContext.reject(message, $note.meta_sdk_path_notes(c, path));
 }
 
 static int _literal_string(Var syntax, String &value) {
@@ -932,7 +950,7 @@ static int _literal_string(Var syntax, String &value) {
 /** Returns the location of the active macro invocation. */
 List MetaContext.invocation_location(void) {
   if (!active.expander || !active.site)
-    $report.sdk.invocation_missing();
+    $fail.meta_sdk_invocation_missing();
   return active.expander.token_location(active.site);
 }
 
@@ -982,7 +1000,7 @@ static void _check_notes(String operation, List notes) {
   _require_expansion(operation);
   foreach (Var note, notes)
     if (note is not <string>)
-      $report.sdk.notes_string(operation, note);
+      $fail.meta_sdk_notes_string(operation, note);
 }
 
 // ancestry and placement
@@ -991,8 +1009,7 @@ static void _check_notes(String operation, List notes) {
 Code x2c_enclosing(Symbol what) {
   _require_expansion("x2c.enclosing");
   if (!(what in %<<declarator statement function unit>>))
-    _reject_value(
-      "x2c.enclosing names declarator, statement, function, or unit", what);
+    $fail.meta_sdk_enclosing_role(what);
   return active.expander.enclosing(what);
 }
 
@@ -1080,11 +1097,11 @@ void MetaContext.reject(String message, List notes) {
 // SDK operations reject use outside an active expansion.
 static void _require_expansion(String operation) {
   if (!active.expander)
-    $report.sdk.expansion_required(operation);
+    $fail.meta_sdk_expansion_required(operation);
 }
 
 static void _reject_value(String message, Var value) {
-  MetaContext.reject(message, $report.sdk.value_notes(value));
+  MetaContext.reject(message, $note.meta_sdk_value_notes(value));
 }
 
 // lisp primitives

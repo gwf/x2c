@@ -11,43 +11,45 @@
 */
 #pragma once
 #include "compiler.x"
-#include "parse-report-macros.x"
+#include "parse-reports.x"
 #include "grammar.x"
 
 // diagnostics
 
-static macro Stmt $report.parse.name_package(
-  Expr $c, Expr $spelling, Expr $owner) {
+static macro Stmt $fail.symbols_name_package(
+  Expr $c, Expr $site, Expr $spelling, Expr $owner) {
   $c.report_error(
     <parse>,
     %"'${$spelling}' is reserved for imported package '${$owner}'",
-    $c.token, NULL);
+    $site, NULL);
 }
 
-static macro Stmt $report.parse.module_shadow(Expr $c, Expr $name) {
+static macro Stmt $fail.symbols_module_shadow(
+  Expr $c, Expr $site, Expr $name) {
   $c.report_error(
     <parse>,
     %"'${$name}' is a module name and a static of one file in this unit",
-    $c.token, %("a module declaration's name means one thing in every file"
+    $site, %("a module declaration's name means one thing in every file"
     "of the unit; rename one of them"));
 }
 
-static macro Stmt $report.parse.module_tag(Expr $c, Expr $name) {
+static macro Stmt $fail.symbols_module_tag(Expr $c, Expr $site, Expr $name) {
   $c.report_error(
     <parse>,
     %"two files of this module unit give a type named '${$name}' a Var tag",
-    $c.token, %("a type's Var tag comes from its name without the file prefix,"
+    $site, %("a type's Var tag comes from its name without the file prefix,"
     "so it must be unique in the unit; rename one of the types"));
 }
 
-static macro Stmt $report.parse.name_reserved(Expr $c, Expr $spelling) {
+static macro Stmt $fail.symbols_name_reserved(
+  Expr $c, Expr $site, Expr $spelling) {
   $c.report_error(
     <parse>,
     %"'${$spelling}' is reserved for compiler-generated names",
-    $c.token, NULL);
+    $site, NULL);
 }
 
-static macro Stmt $report.parse.package_collision(
+static macro Stmt $fail.symbols_package_collision(
   Expr $c, Expr $site, Expr $kind, Expr $local) {
   $c.report_error(
     <parse>,
@@ -55,7 +57,7 @@ static macro Stmt $report.parse.package_collision(
     $site, NULL);
 }
 
-static macro Stmt $report.parse.package_bound(
+static macro Stmt $fail.symbols_package_bound(
   Expr $c, Expr $site, Expr $kind, Expr $local, Expr $bound) {
   $c.report_error(
     <parse>,
@@ -63,11 +65,12 @@ static macro Stmt $report.parse.package_bound(
     $site, %( "bound to: ${$bound}" ));
 }
 
-static macro Stmt $report.type.typedef_depth(Expr $c, Expr $origin) {
+static macro Stmt $fail.symbols_typedef_depth(
+  Expr $c, Expr $site, Expr $origin) {
   $c.report_error(
     <type>,
     %"typedef chain too deep (possible cycle) resolving ${$origin.repr()}",
-    NULL, NULL);
+    $site, NULL);
 }
 
 // symbol scopes
@@ -343,7 +346,7 @@ static void _claim_class_tag(Sym s, String name, String owner) {
   List fact = %(class-tag ${name.lower()});
   Var claimed;
   if (s.binding_facts.try_get(fact, claimed) && claimed != owner)
-    $report.parse.module_tag(s.c, name);
+    $fail.symbols_module_tag(s.c, s.c.token, name);
   s.put(s.binding_facts, fact, owner);
 }
 
@@ -736,12 +739,12 @@ static void _check_module_shadow(
   foreach (List context, contexts) {
     if (prefix && !(name in s.prefixed) &&
         %(@context $name) in s.statics)
-      $report.parse.module_shadow(c, name);
+      $fail.symbols_module_shadow(c, c.token, name);
     if (!c.module_declaration ||
         !(c.source_private > 0 || ast.type().is_static())) continue;
     foreach (String other, c.file_prefixes())
       if (%(@context "$other$name") in s.statics)
-        $report.parse.module_shadow(c, name);
+        $fail.symbols_module_shadow(c, c.token, name);
   }
 }
 
@@ -761,10 +764,10 @@ static String _declared_spelling(List key) {
    generated spellings are the compiler's own output. */
 static void _check_spelling(Compiler c, String spelling) {
   if (!c.shallow && _is_reserved_spelling(spelling))
-    $report.parse.name_reserved(c, spelling);
+    $fail.symbols_name_reserved(c, c.token, spelling);
   String owner = _package_reserved_owner(c, spelling);
   if (owner)
-    $report.parse.name_package(c, spelling, owner);
+    $fail.symbols_name_package(c, c.token, spelling, owner);
 }
 
 // Checked once per declaration, with no prepass over the token stream.
@@ -1128,7 +1131,7 @@ void Compiler.register_package_member(
   if (bound is not void && bound.list() === binding) return;
   String spelling = %"${name}__$member";
   if (!c.sym.get_exact(%($spelling)))
-    $report.parse.package_member(c, member_token, name, member);
+    $fail.parse_package_member(c, member_token, name, member);
   _check_package_binding(c, "name", local, local_token);
   c.package_members[local] = binding;
 }
@@ -1147,9 +1150,9 @@ static void _check_package_binding(
     bound = %"$package.$member_name";
   }
   if (bound)
-    $report.parse.package_bound(c, token, kind, local, bound);
+    $fail.symbols_package_bound(c, token, kind, local, bound);
   if (c.sym.get_exact(%($local)))
-    $report.parse.package_collision(c, token, kind, local);
+    $fail.symbols_package_collision(c, token, kind, local);
 }
 
 /** Returns a visible `with` name's package-prefixed spelling, or `NULL`.
@@ -1282,7 +1285,7 @@ static Type _resolve_chain(
    legal C; it binds ("Color") to (typedef "Color") and back, so cycles are
    real. */
 static void _typedef_budget_error(Sym s, Type origin) {
-  $report.type.typedef_depth(s.c, origin);
+  $fail.symbols_typedef_depth(s.c, NULL, origin);
 }
 
 /* Semantic types contain no local aliases. A retained file type's spelling

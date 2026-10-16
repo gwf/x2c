@@ -9,12 +9,13 @@
 static typedef struct Anchors { int function, error; } Anchors;
 // diagnostics
 
-static macro Stmt $report.emit.file_write(Expr $c, Expr $failure) {
+static macro Stmt $fail.generate_file_write(
+  Expr $c, Expr $site, Expr $failure) {
   {
     String reason = String.new(strerror((int) $failure.assoc(<"errno">)));
     $c.report_error(
       <emit>, "failed to write generated file",
-      $c.token, %("file: ${$failure.assoc(<path>)}" "reason: $reason"));
+      $site, %("file: ${$failure.assoc(<path>)}" "reason: $reason"));
   }
 }
 
@@ -89,7 +90,7 @@ static void _publish_files(Compiler c, List outputs) {
   try Path.publish_files(outputs);
   catch %((!or not-found io-fail) *detail): failure = Error.snapshot(detail);
   if (!failure) return;
-  $report.emit.file_write(c, failure);
+  $fail.generate_file_write(c, c.token, failure);
 }
 
 /** Places generated `declarations` after source types and includes, before

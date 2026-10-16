@@ -36,7 +36,7 @@ static void _report_malformed_token(Compiler c) {
   if (status != <malformed> && status != <indent>) return;
   for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {
     Token token = &((struct Token *) c.tokenizer.tokens)[i];
-    if (token.type == <error>) $report.parse.token_malformed(c, token, status);
+    if (token.type == <error>) $fail.compiler_token_malformed(c, token, status);
   }
 }
 
@@ -149,7 +149,7 @@ void Compiler.require_input(Compiler c) {
 Symbol Compiler.expect(Compiler c, Symbol type) {
   if (c.token.type != type) {
     c.require_input();
-    $report.parse.token_expected(c, type);
+    $fail.compiler_token_expected(c, c.token, type);
   }
   c.next();
   return type;
@@ -176,7 +176,7 @@ static void _update_brace_stack(Compiler c, Token consumed) {
     case <"}">:
       if (c.braces.len()) c.braces.take_last();
       else
-        $report.parse.brace_unexpected(c, consumed);
+        $fail.compiler_brace_unexpected(c, consumed);
       break;
   }
 }
@@ -204,7 +204,7 @@ int Compiler.take_word(Compiler c, String word) {
 
 module void _check_unmatched_braces(Compiler c) {
   if (!c.braces.len()) return;
-  $report.parse.brace_missing(c, c.braces[-1]);
+  $fail.compiler_brace_missing(c, c.braces[-1]);
 }
 
 /** Returns 1 for a token type that opens a delimited group, -1 for one that

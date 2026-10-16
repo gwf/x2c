@@ -582,7 +582,7 @@ The modules under `src/` divide ownership as follows:
   the directives before each form;
 - `src/parse.x`, `src/expressions.x`, `src/statements.x`, `src/literals.x` --
   grammar and AST construction;
-- `src/parse-report-macros.x`, `src/expressions-reports.x` -- package and
+- `src/parse-reports.x`, `src/expressions-reports.x` -- package and
   alias diagnostics, and expression typing diagnostics;
 - `src/initializers.x` -- brace initializer conversion by C's
   initialization order;

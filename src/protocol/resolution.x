@@ -39,72 +39,79 @@ module typedef struct ProtocolAdapters {
   int shares_var_tag, central_initializer;
 } ProtocolAdapters;
 
-static macro Expression $report.protocols.conformance_prefix(
+static macro Expression $reason.protocol_conformance_prefix(
   Expr $participant, Expr $owner) =>
   %"${$participant} does not satisfy ${$owner}: ";
 
-static macro Expression $report.protocols.native_alias(
+static macro Expression $reason.protocol_native_alias(
   Expr $prefix, Expr $base) =>
   %"${$prefix}its typedef is not a native alias of ${$base}";
 
-static macro Expression $report.protocols.forward_conversion(
+static macro Expression $reason.protocol_forward_conversion(
   Expr $prefix, Expr $forward) =>
   %"${$prefix}no forward conversion '${$forward}'";
 
-static macro Expression $report.protocols.reverse_conversion(
+static macro Expression $reason.protocol_reverse_conversion(
   Expr $prefix, Expr $base, Expr $lowered) =>
   %"${$prefix}no reverse conversion '${$base}.${$lowered}' " +
     %"or '${$base}.as_${$lowered}'";
 
-static macro Expression $report.protocols.fallback_nested(
+static macro Expression $reason.protocol_fallback_nested(
   Expr $prefix, Expr $member, Expr $position) =>
   %"${$prefix}member '${$member}' uses T inside a compound " +
     %"${$position} type, which protocol fallback adapters " +
     "do not support";
 
-static macro Expression $report.protocols.fallback_reverse(
+static macro Expression $reason.protocol_fallback_reverse(
   Expr $prefix, Expr $member, Expr $owner, Expr $base, Expr $lowered) =>
   %"${$prefix}member '${$member}' returns T, so ${$owner} needs " +
     %"'${$base}.${$lowered}' or '${$base}.as_${$lowered}'";
 
-static macro Expression $report.protocols.fallback_forward(
+static macro Expression $reason.protocol_fallback_forward(
   Expr $prefix, Expr $member, Expr $participant, Expr $base) =>
   %"${$prefix}member '${$member}' fallback requires forward " +
     %"conversion '${$participant}.${$base.lower()}'";
 
-static macro Expression $report.protocols.thunk_nested(
+static macro Expression $reason.protocol_thunk_nested(
   Expr $prefix, Expr $member, Expr $position) =>
   %"${$prefix}member '${$member}' uses T inside a compound " +
     %"${$position} type, which protocol descriptor thunks " +
     "do not support";
 
-static macro Expression $report.protocols.thunk_parameter(
+static macro Expression $reason.protocol_thunk_parameter(
   Expr $prefix, Expr $member, Expr $owner, Expr $base, Expr $lowered) =>
   %"${$prefix}member '${$member}' has a T parameter, so " +
     %"${$owner} needs '${$base}.${$lowered}' or '${$base}.as_${$lowered}'";
 
-static macro Expression $report.protocols.thunk_result(
+static macro Expression $reason.protocol_thunk_result(
   Expr $prefix, Expr $member, Expr $owner, Expr $participant, Expr $base) =>
   %"${$prefix}member '${$member}' returns T, so ${$owner} needs " +
     %"'${$participant}.${$base.lower()}'";
 
-static macro Expression $report.protocols.native_parameter(
+static macro Expression $reason.protocol_native_parameter(
   Expr $prefix, Expr $member, Expr $base) =>
   %"${$prefix}native member '${$member}' has a T parameter " +
     %"that is not implicitly convertible to ${$base}";
 
-static macro Expression $report.protocols.native_result(
+static macro Expression $reason.protocol_native_result(
   Expr $prefix, Expr $member, Expr $base) =>
   %"${$prefix}native member '${$member}' returns T, which is " +
     %"not implicitly convertible from ${$base}";
 
-static macro Expression $report.protocols.native_member_alias(
+static macro Expression $reason.protocol_native_member_alias(
   Expr $prefix, Expr $member) =>
   %"${$prefix}native member '${$member}' cannot be aliased";
 
-static macro Stmt $report.protocols.signature_conflict(
-  Expr $c, Expr $member, Expr $owner, Expr $declaration_site,
-  Expr $binding, Expr $actual, Expr $expected, Expr $location) {
+static macro Stmt $report.protocol_base_missing(
+  Expr $c, Expr $site, Expr $base) =>
+  $c.diagnostics.report(
+    <protocol>,
+    %"adoption base ${_type_spelling($base)} names no visible protocol",
+    $site, NULL);
+
+static macro Stmt $report.protocol_signature_conflict(
+  Expr $c, Expr $location, Expr $member, Expr $owner, Expr $declaration_site,
+  Expr $binding, Expr $actual, Expr $expected) {
   {
     String protocol_note =
       %"protocol member '${$member}' declared by ${$owner}";
@@ -314,10 +321,7 @@ module void _resolve_adoption(
   List record = _record(c, base);
   if (!record) {
     if (!location) return;
-    c.diagnostics.report(
-      <protocol>,
-      %"adoption base ${_type_spelling(base)} names no visible protocol",
-      location, NULL);
+    $report.protocol_base_missing(c, location, base);
     return;
   }
   match (record)
@@ -361,20 +365,20 @@ static String _missing_detail(
   Compiler c, Type base, Type participant, int native, List failure) {
   String base_repr = _type_spelling(base);
   String participant_repr = _type_spelling(participant);
-  String prefix = $report.protocols.conformance_prefix(
+  String prefix = $reason.protocol_conformance_prefix(
     participant_repr, _adoption_spelling(base, participant));
   if (failure) return _requirement_detail(base, participant, failure);
   if (native)
-    return $report.protocols.native_alias(prefix, base_repr);
+    return $reason.protocol_native_alias(prefix, base_repr);
   String base_name = _base_name(base);
   Type forward = base_name
     ? _declared(c, _member_spelling(participant, base_name.lower())) : NULL;
   if (base_name && !_exact_conversion(forward, participant, base))
-    return $report.protocols.forward_conversion(
+    return $reason.protocol_forward_conversion(
       prefix, %"$participant_repr.${base_name.lower()}");
   String lowered = participant.is_bare_typedef_name()
     ? participant.car().str().lower() : participant_repr;
-  return $report.protocols.reverse_conversion(prefix, base_repr, lowered);
+  return $reason.protocol_reverse_conversion(prefix, base_repr, lowered);
 }
 
 module String _requirement_detail(Type base, Type participant, List failure) {
@@ -384,29 +388,28 @@ module String _requirement_detail(Type base, Type participant, List failure) {
   String lowered = participant.is_bare_typedef_name()
     ? participant.car().str().lower() : participant_repr;
   String owner = _adoption_spelling(base, participant);
-  String prefix = $report.protocols.conformance_prefix(
-    participant_repr, owner);
+  String prefix = $reason.protocol_conformance_prefix(participant_repr, owner);
   if (adapter == <fallback> && direction == <nested>)
-    return $report.protocols.fallback_nested(prefix, member, position);
+    return $reason.protocol_fallback_nested(prefix, member, position);
   if (adapter == <fallback> && direction == <reverse>)
-    return $report.protocols.fallback_reverse(
+    return $reason.protocol_fallback_reverse(
       prefix, member, owner, base_repr, lowered);
   if (adapter == <fallback>)
-    return $report.protocols.fallback_forward(
+    return $reason.protocol_fallback_forward(
       prefix, member, participant_repr, base_repr);
   if (adapter == <thunk> && direction == <nested>)
-    return $report.protocols.thunk_nested(prefix, member, position);
+    return $reason.protocol_thunk_nested(prefix, member, position);
   if (adapter == <thunk> && position == <parameter>)
-    return $report.protocols.thunk_parameter(
+    return $reason.protocol_thunk_parameter(
       prefix, member, owner, base_repr, lowered);
   if (adapter == <thunk>)
-    return $report.protocols.thunk_result(
+    return $reason.protocol_thunk_result(
       prefix, member, owner, participant_repr, base_repr);
   if (position == <parameter>)
-    return $report.protocols.native_parameter(prefix, member, base_repr);
+    return $reason.protocol_native_parameter(prefix, member, base_repr);
   if (position == <result>)
-    return $report.protocols.native_result(prefix, member, base_repr);
-  return $report.protocols.native_member_alias(prefix, member);
+    return $reason.protocol_native_result(prefix, member, base_repr);
+  return $reason.protocol_native_member_alias(prefix, member);
 }
 
 static void _report_sig_conflicts(
@@ -421,9 +424,9 @@ static void _report_sig_conflicts(
         if (dedupe in c.protocol_helpers) continue;
         c.protocol_helpers[dedupe] = 1;
         Type actual = _declared(c, binding);
-        $report.protocols.signature_conflict(
-          c, member, owner, declaration_site, binding, actual,
-          expected, location);
+        $report.protocol_signature_conflict(
+          c, location, member, owner, declaration_site, binding, actual,
+          expected);
       }
 }
 

@@ -41,7 +41,7 @@ module void _reject_statement(Compiler c) {
 }
 
 module void _report_script_statement(Compiler c) {
-  $report.parse.script_main(c);
+  $fail.compiler_script_main(c, c.token);
 }
 
 /* A file-scope conditional directive also governs the statements it
@@ -169,6 +169,6 @@ static void _check_local_uses(Compiler c, List items, Map locals) {
         found, bindings);
       if (!present) continue;
       c.origin = origin;
-      $report.type.script_local(c, name);
+      $fail.compiler_script_local(c, NULL, name);
     }
 }

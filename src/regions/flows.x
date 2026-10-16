@@ -1,38 +1,38 @@
 /*  flows.x -- value escapes and diagnostic findings */
 
-static macro Stmt $report.region.use_ended(
-  Expr $f, Expr $subject, Expr $region) =>
+static macro Stmt $warn.region_use_ended(
+  Expr $f, Expr $site, Expr $subject, Expr $region) =>
   _warn(
-    (*$f.w), <region>, $f.w.origin,
+    (*$f.w), <region>, $site,
     %"${$subject} is used after the region that allocated it ended",
     _opened((*$f.w), $region));
 
-static macro Stmt $report.region.local_escape(
-  Expr $f, Expr $subject, Expr $exit) {
+static macro Stmt $warn.region_local_escape(
+  Expr $f, Expr $site, Expr $subject, Expr $exit) {
   String message =
     %"${$subject} can outlive the local storage it points into when ${$exit}";
   _warn(
-    (*$f.w), <region>, $f.w.origin, message,
+    (*$f.w), <region>, $site, message,
     %("local storage ends when the function returns"));
 }
 
-static macro Stmt $report.region.escape(
-  Expr $f, Expr $subject, Expr $exit, Expr $region) =>
+static macro Stmt $warn.region_escape(
+  Expr $f, Expr $site, Expr $subject, Expr $exit, Expr $region) =>
   _warn(
-    (*$f.w), <region>, $f.w.origin,
+    (*$f.w), <region>, $site,
     %"${$subject} can outlive the region it was allocated in when ${$exit}",
     _opened((*$f.w), $region));
 
-static macro Expression $region.reason.returned() => "returned";
-static macro Expression $region.reason.static_store() => "stored into a static";
-static macro Expression $region.reason.local() =>
+static macro Expression $reason.region_returned() => "returned";
+static macro Expression $reason.region_static_store() => "stored into a static";
+static macro Expression $reason.region_local() =>
   "assigned to a local declared outside the region";
-static macro Expression $region.reason.pointer() =>
+static macro Expression $reason.region_pointer() =>
   "stored through an unknown pointer";
-static macro Expression $region.reason.parameter() => "stored through a parameter";
-static macro Expression $region.reason.other() =>
+static macro Expression $reason.region_parameter() => "stored through a parameter";
+static macro Expression $reason.region_other() =>
   "stored into an object of another region";
-static macro Expression $region.reason.outer() =>
+static macro Expression $reason.region_outer() =>
   "stored into an object of an outer region";
 
 // flows
@@ -129,7 +129,7 @@ static int _check(
   String subject = _subject((*f.w), f.value, f.named, f.fact);
   if (region.closed) {
     if (report)
-      $report.region.use_ended(f, subject, region);
+      $warn.region_use_ended(f, f.w.origin, subject, region);
     return 1;
   }
   if (region.kind == <local>) return 0;
@@ -138,24 +138,24 @@ static int _check(
   if (report) {
     // lint: allow one-statement-braces ST-1: macro emits declaration and call
     if (region == f.w.frame) {
-      $report.region.local_escape(f, subject, exit);
+      $warn.region_local_escape(f, f.w.origin, subject, exit);
     }
     else
-      $report.region.escape(f, subject, exit, region);
+      $warn.region_escape(f, f.w.origin, subject, exit, region);
   }
   return 1;
 }
 
 static String _exit_reason(Flow &f, Fact target, Region region) {
   switch (f.sink) {
-    case <return>: return $region.reason.returned();
-    case <static>: return $region.reason.static_store();
+    case <return>: return $reason.region_returned();
+    case <static>: return $reason.region_static_store();
     case <local>:
       return target.depth < region.depth
-        ? $region.reason.local() : NULL;
+        ? $reason.region_local() : NULL;
     default:
-      if (!target) return $region.reason.pointer();
-      if (target.param >= 0) return $region.reason.parameter();
+      if (!target) return $reason.region_pointer();
+      if (target.param >= 0) return $reason.region_parameter();
       if (target.region == region) return NULL;
       if (_cleanup(target.acquired) == region ||
           (target.region && _cleanup(target.region.acquired) == region))
@@ -163,8 +163,8 @@ static String _exit_reason(Flow &f, Fact target, Region region) {
       /* Every region a function opens ends before its own storage. */
       if (target.region)
         return region == f.w.frame ? NULL
-          : $region.reason.other();
-      return $region.reason.outer();
+          : $reason.region_other();
+      return $reason.region_outer();
   }
 }
 

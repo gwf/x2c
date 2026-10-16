@@ -193,7 +193,7 @@ static void _forward(Defaults &d) {
       d.sources[index] = %($declarations $key $end $rows);
     }
     if (remaining && remaining == previous)
-      $report.type.ctor_parent(d.c);
+      $fail.compiler_ctor_parent(d.c, d.c.token);
   }
 }
 
@@ -253,7 +253,7 @@ static List _forwarder(
   Array forwarded = [];
   foreach (Var type, types) {
     if (type == <...>)
-      $report.type.ctor_variadic(c, name);
+      $fail.compiler_ctor_variadic(c, c.token, name);
     if (type != %(void)) forwarded.push(type);
   }
   (List params, List args) = c.forward_parameters(forwarded.list_free());

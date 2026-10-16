@@ -44,7 +44,7 @@ Files below are relative to `src/` unless a path is shown.
 
 - shared source fields: `fields.x`;
 - report wording: static macros in their owner or the shared
-  `expressions-reports.x` and `parse-report-macros.x`.
+  `expressions-reports.x` and `parse-reports.x`.
 
 `tools/gen-linked-meta.sh` generates `linked-meta.x`, the shipped `meta`
 code compiled into the compiler. Style censuses and these maps exclude it.

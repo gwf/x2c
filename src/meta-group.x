@@ -31,7 +31,12 @@
 
 // diagnostics
 
-static macro Stmt $report.macro.function_unavailable(
+static macro Stmt $fail.meta_group_main_signature(Expr $c, Expr $site) =>
+  $c.report_error(
+    <type>, "loaded main must take void or (int, char **) and return int",
+    $site, NULL);
+
+static macro Stmt $fail.meta_group_function_unavailable(
   Expr $c, Expr $site, Expr $name, Expr $why) {
   $c.report_error(
     <macro>,
@@ -164,9 +169,7 @@ static int _main_arity(Compiler c, Type type) {
 static List _loaded_entry(Compiler c, List binding, Type type) {
   int arity = _main_arity(c, type);
   if (arity < 0)
-    c.report_error(
-      <type>, "loaded main must take void or (int, char **) and return int",
-      NULL, NULL);
+    $fail.meta_group_main_signature(c, NULL);
   c.ensure_macro_lisp();
   List entry = c.sym.introduce(c.fresh_name("loaded_entry"));
   List target = %(expr $type (ident $binding));
@@ -1139,7 +1142,7 @@ String Compiler.meta_call_missing(Compiler c, String name) {
     time, and `why`. */
 void Compiler.refuse_meta_call(
   Compiler c, String name, Token site, String why) {
-  $report.macro.function_unavailable(c, site, name, why);
+  $fail.meta_group_function_unavailable(c, site, name, why);
 }
 
 /** Reports at `site` that the group function `name` cannot run at compile
