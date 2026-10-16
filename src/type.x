@@ -167,6 +167,27 @@ static Type _modify(Type type, List mods) => %( @mods @type );
     `type_declaration_parts`, which a project's helper shares. */
 List Type.parts(Type type) => type_declaration_parts(type);
 
+/** Returns the declaration specifiers `t` without the pointer, array, or
+    function modifiers an alias in them contributes, and sets `modifiers`
+    to those modifiers, for `Ast.append_modifiers` to give each declarator.
+    Storage and source specifier text, such as `("_Noreturn")`, stay on
+    the base. */
+List Type.declaration_base(Type t, List &modifiers) {
+  Array storage = [], text = [], typed = [];
+  defer { storage.free(); text.free(); typed.free(); }
+  foreach (Var item, t)
+    if (item is <list> && car(item) is <string>) text.push(item);
+    else typed.push(item);
+  List (base, mods) = typed.list().type().declared().parts();
+  modifiers = mods;
+  if (!mods) return t;
+  foreach (Var item, t)
+    if (item is <symbol> &&
+        (Symbol.is_storage_class(item) || Symbol.is_inline(item)))
+      storage.push(item);
+  return %( @{storage.list()} @{text.list()} @base );
+}
+
 /** Returns a complete `(declare ...)` AST for `type` and `binding`.
     A `NULL` binding produces an abstract declaration.
 */

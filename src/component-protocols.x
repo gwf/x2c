@@ -112,11 +112,6 @@ meta static Code _protocol_prototype(List name, Type expected) {
   return $!Unit{ $result $name(@declared); };
 }
 
-/* The `result` call of the runtime function `name` with `arguments`,
-   which calls it by name, as written. */
-meta static Code _protocol_runtime(Type result, String name, List arguments) =>
-  %(expr $result (call $name (args @arguments)));
-
 /* Places the method table `methods`, its assignment from `slots`, and the
    registration of the descriptor `name`. */
 meta static void _protocol_descriptor(List descriptor, List slots) {
@@ -133,23 +128,21 @@ meta static void _protocol_descriptor(List descriptor, List slots) {
         (expr (* char) (literal (* char) ${%"\"$name\""})))));
       if (explicit) {
         Code tag = $!Symbol{ ${explicit.car()} };
-        Code tagged = _protocol_runtime(
-          %(void), "x2c_register_tagged_descriptor", %($tag $text $table));
-        x2c_place(init, Code.lowered(%(stmnt $tagged)));
+        x2c_place(
+          init, $!{ x2c_register_tagged_descriptor($tag, $text, $table); });
         return;
       }
       Code symbol = %(expr ("Symbol") (literal ("Symbol") $name $var_tag));
-      Code early = _protocol_runtime(
-        %(int), "x2c_register_builtin_descriptor", %($symbol $table));
       if (area == <protocol>) {
-        x2c_place(init, Code.lowered(%(stmnt $early)));
+        x2c_place(
+          init, $!{ x2c_register_builtin_descriptor($symbol, $table); });
         return;
       }
-      Code fallback = _protocol_runtime(
-        %(void), "x2c_register_descriptor", %($text $table));
-      Code missing = %(expr (int) (op ${<!>} $early));
-      Code registration = %(if $missing (block (stmnt $fallback)));
-      x2c_place(init, Code.lowered(registration));
+      x2c_place(init, $!{
+        if (!x2c_register_builtin_descriptor($symbol, $table)) {
+          x2c_register_descriptor($text, $table);
+        }
+      });
     }
 }
 

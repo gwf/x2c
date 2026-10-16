@@ -3103,8 +3103,9 @@ static void _check_noted_converter(
   if (target.declared() != target.canonicalize() ||
       c.sym.resolve_key(call.cadr()) != c.sym.resolve_key(target))
     return;
-  List receiver = call.caddr().caddr().cadr();
-  Type source = receiver.cadr();
+  List receiver = NULL;
+  match (call) case %(expr ? ${$called(?, %(?first *))}): receiver = first;
+  Type source = receiver ? receiver.cadr() : NULL;
   if (!source) return;
   int source_is_var = c.sym.is_var_type(source);
   /* A hole and a format render a Var through `Var.str`, so there `.str()`
@@ -3417,13 +3418,13 @@ static List _convert_untyped(
   Compiler c, List expr, Type declared_target, int target_is_var) {
   List generic = _convert_generic_arms(c, expr, declared_target);
   if (generic) return generic;
-  if (target_is_var && expr.match(
-    %(expr () ${$source_identifier_content(%((binding ? ?)))}))) {
-    List binding = expr.caddr().cadr();
-    if (Ast.binding_spelling(binding) == "NULL")
-      return %(expr ("Var") (call "Var_null" (args)));
-    $report.type.var_unresolved(c, NULL);
-  }
+  if (target_is_var)
+    match (expr) {
+      case %(expr () ${$source_identifier_content(%((binding ? "NULL")))}):
+        return %(expr ("Var") (call "Var_null" (args)));
+      case %(expr () ${$source_identifier_content(%((binding ? ?)))}):
+        $report.type.var_unresolved(c, NULL);
+    }
   return expr;
 }
 
@@ -3739,10 +3740,8 @@ static List _converted_temporary(
 static void _check_null_reference(
   Compiler c, List expr, Type target) {
   if (target.car() != <&>) return;
-  if (_integer_literal_kind(expr, NULL) == <zero> ||
-      (expr.match(
-        %(expr () ${$source_identifier_content(%((binding ? ?)))})) &&
-       Ast.binding_spelling(expr.caddr().cadr()) == "NULL"))
+  if (_integer_literal_kind(expr, NULL) == <zero> || expr.match(
+        %(expr () ${$source_identifier_content(%((binding ? "NULL")))})))
     $report.type.ref_null(c, target);
 }
 

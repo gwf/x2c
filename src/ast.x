@@ -65,6 +65,20 @@ String Ast.binding_spelling(List binding) {
 
 // declarators
 
+/** Returns `declarator` with `modifiers` after its own, as a declaration
+    whose base contributes modifiers declares each name. */
+List Ast.append_modifiers(List declarator, List modifiers) {
+  if (!modifiers) return declarator;
+  match (declarator) {
+    case %(bind ?binding ?mods):
+      return %(bind $binding (@{mods} @modifiers));
+    case %(op = ?binding ?initializer):
+      return %(op = ${Ast.append_modifiers(binding, modifiers)}
+               $initializer);
+  }
+  return declarator;
+}
+
 /** Returns `declarator` with the outermost `volatile` removed from each of
     its parameters. C ignores a parameter's top-level qualifier when it
     compares a prototype with its definition, and the qualifier the error

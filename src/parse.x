@@ -774,9 +774,8 @@ static void _record_meta_hash(
   match (definition) {
     case %(seq *rows):
       _record_meta_rows(c, rows, first, collected_body);
-    case %(declare ?spec (bindings ?one *more)) if (more):
-      _record_meta_bindings(
-        c, spec, definition.caddr().list().cdr(), first, collected_body);
+    case %(declare ?spec (bindings *rows)) if (rows.cdr()):
+      _record_meta_bindings(c, spec, rows, first, collected_body);
     case %(function ? (bind (binding ? ?(String own)) *) ?content):
       _store_meta_hash(c, own, content, first);
     case %(declare ?spec (bindings
@@ -1220,11 +1219,11 @@ static List _finish_declaration(
       !base.type().is_static()) base = %(static @base);
   if (tag == <declare>) base = _linked_static_base(c, base, declarators);
   List modifiers = NULL;
-  base = _declaration_base(base, modifiers);
+  base = Type.declaration_base(base, modifiers);
   if (modifiers) {
     Array bound = [];
     foreach (List declarator, declarators)
-      bound.push(_append_modifiers(declarator, modifiers));
+      bound.push(Ast.append_modifiers(declarator, modifiers));
     declarators = bound.list_free();
   }
   if (tag == <declare> || tag == <decl>)
@@ -1238,47 +1237,17 @@ static List _finish_declaration(
     : declaration;
 }
 
-/* An expanded alias may contribute pointer, array, or function modifiers.
-   Keep parsed modifiers (and parameter bindings) intact and append only the
-   alias's declarators. Storage still belongs on the declaration's base. */
-static List _declaration_base(Type t, List &modifiers) {
-  // Source specifier text, such as `("_Noreturn")`, follows the storage.
-  Array storage = [], text = [], typed = [];
-  defer { storage.free(); text.free(); typed.free(); }
-  foreach (Var item, t)
-    if (item is <list> && car(item) is <string>) text.push(item);
-    else typed.push(item);
-  List (base, mods) = typed.list().type().declared().parts();
-  modifiers = mods;
-  if (!mods) return t;
-  foreach (Var item, t)
-    if (item is <symbol> &&
-        (Symbol.is_storage_class(item) || Symbol.is_inline(item)))
-      storage.push(item);
-  return %( @{storage.list()} @{text.list()} @base );
-}
-
-static List _append_modifiers(List declarator, List modifiers) {
-  if (!modifiers) return declarator;
-  match (declarator) {
-    case %(bind ?binding ?mods):
-      return %(bind $binding (@{mods} @modifiers));
-    case %(op = ?binding ?initializer):
-      return %(op = ${_append_modifiers(binding, modifiers)}
-               $initializer);
-  }
-  return declarator;
-}
-
 /* Keep Self only in method metadata. The binding and AST receive the
    declaring owner, so direct calls and generated C retain the existing
    function signature. */
 static List _lower_self_declaration(Compiler c, List declaration) {
-  List items = declaration.caddr().cdr();
-  if (!items || items.cdr()) return declaration;
-  List target = items.car();
-  if (target.car() == <op>) target = target.caddr();
-  List binding = target.cadr(), method = _method_identity(c, binding);
+  List binding = NULL;
+  match (declaration) {
+    case %(? ? (bindings (op = (? ?name *) ?))): binding = name;
+    case %(? ? (bindings (? ?name *))): binding = name;
+  }
+  if (!binding) return declaration;
+  List method = _method_identity(c, binding);
   if (!method) return declaration;
   Type owner = _self_owner_type(c, method);
   if (!owner) return declaration;
@@ -2478,8 +2447,8 @@ static List _finish_parameter(
     method_identity, preserved_self);
   c.record_source_declaration(declarator.cadr(), source_first, source_after);
   List modifiers = NULL;
-  base = _declaration_base(base, modifiers);
-  declarator = _append_modifiers(declarator, modifiers);
+  base = Type.declaration_base(base, modifiers);
+  declarator = Ast.append_modifiers(declarator, modifiers);
   List parameter = %(param $base $declarator);
   match (declarator)
     case %(bind ?binding ?):

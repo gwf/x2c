@@ -112,12 +112,7 @@ static macro Expression $callable.note.source(Expr $source) =>
 #include "transform.x"
 #include "lambdas.x"
 
-/* Helper syntax shared by every lowering below. A declarator row reuses an
-   issued binding without binding it again. */
-
-static macro Stmt $func_local(Type $type, DeclaratorRow $row) {
-  $type $row;
-}
+/* Helper syntax shared by every lowering below. */
 
 static macro Expression $func_address(Expr $value) => &$value;
 
@@ -423,10 +418,7 @@ static List _context_local(
     c, $!Type{ const void * }, _func_bound(helper_type, helper),
     %(${_func_bound(%("Func"), fn)}));
   List cast = %(expr $pointer (cast $pointer $call));
-  Macro shape = $func_local;
-  return c.rebuild_statement(
-    shape(
-      $!Type{ const $value_type }, %(op = (bind $local (*)) $cast))).cadr();
+  return c.rebuild_statement($!{ $pointer $local = $cast; }).cadr();
 }
 
 static void _func_pointer_context(
@@ -450,9 +442,7 @@ static void _func_pointer_context(
 static List _func_context_declaration(
   Compiler c, Type context_type, List context, List expression) {
   List value = $!($context_type){ { $expression } };
-  Macro storage_shape = $func_local;
-  return c.rebuild_statement(
-    storage_shape(context_type, %(op = (bind $context ()) $value))).cadr();
+  return c.rebuild_statement($!{ $context_type $context = $value; }).cadr();
 }
 
 /* `Func.new_context(adapter, signature, &context, sizeof context)`, with
@@ -509,15 +499,6 @@ static List _deref_func_lift(
 }
 
 // Func adapters
-
-/* A record result is copied into a Var after the native call completes. */
-static macro Stmt $func_record_result(
-    Type $type, DeclaratorRow $row, Expr $boxed) {
-  {
-    $type $row;
-    return $boxed;
-  }
-}
 
 /* The argument readers of one adapter, with its `Func` and argument vector
    parameters read as expressions. */
@@ -641,14 +622,12 @@ static List _func_argument_locals(
     c, diagnostic_type, types, $!Func{ $fn_binding },
     $!(const FuncArg *){ $argv_binding });
   Array locals = [];
-  Macro local = $func_local;
   foreach (List read, reads) {
     (Type storage_type, List value) = read;
     List binding = names.car();
     names = names.cdr();
-    List (base, mods) = storage_type.parts();
-    List row = %(op = (bind $binding $mods) $value);
-    locals.push(c.rebuild_statement(local(base, row)).cadr());
+    locals.push(
+      c.rebuild_statement($!{ $storage_type $binding = $value; }).cadr());
   }
   return locals.list_free();
 }
@@ -773,7 +752,6 @@ static List _func_record_call(
   List result_helper = _adapter_helper(
     c, "x2c_func_record_result", result_type);
   List result = c.sym.introduce(c.fresh_name("func_record"));
-  List (base, mods) = return_type.parts();
   List value = _func_bound(return_type, result);
   Macro address_shape = $func_address, size_shape = $func_size;
   List address = c.rebuild_expression(
@@ -781,9 +759,9 @@ static List _func_record_call(
   List size = c.rebuild_expression(%(unsigned long), size_shape(value));
   List helper = _func_bound(result_type, result_helper);
   List boxed = _func_call(c, %("Var"), helper, %($address $size));
-  Macro record = $func_record_result;
-  List row = %(op = (bind $result $mods) $call);
-  return c.rebuild_statement(record(base, row, boxed)).cadr();
+  /* The record is copied into a Var after the native call completes. */
+  return c.rebuild_statement(
+    $!{ { $return_type $result = $call; return $boxed; } }).cadr();
 }
 
 /** Returns the canonical signature shared by native and meta Func adapters. */
