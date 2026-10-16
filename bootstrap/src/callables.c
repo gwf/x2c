@@ -86,7 +86,7 @@ static int _is_func_adapter_target(Compiler c, Type type);
 
 static List _direct_func_adapter(Compiler c, Type diagnostic_type, List source_binding, Type source_type);
 
-static List _build_func_adapter(Compiler c, Type diagnostic_type, Type source_type, List target, List supplied_fn_binding, List prefix);
+static List _build_func_adapter(Compiler c, Type diagnostic_type, Type source_type, List target, List supplied_fn_binding, List prefix, List leading);
 
 static void _require_func_readers(Compiler c, Type diagnostic_type, Type source_type);
 
@@ -1563,7 +1563,7 @@ static List _build_indirect_func_adapter(Compiler c, Type diagnostic_type, Type 
     ));  cons(_70, cons(_x2c_gensym_literal_part_21, cons(_x2c_gensym_literal_part_22, NULL)));
   }
   );
-  List adapter = _build_func_adapter(c, diagnostic_type, pointer_type, target, fn_binding, cons(List_var(context_declaration), NULL));
+  List adapter = _build_func_adapter(c, diagnostic_type, pointer_type, target, fn_binding, cons(List_var(context_declaration), NULL), NULL);
   return cons(_511, cons(List_var(adapter), cons(List_var(context_type), cons(List_var(field_binding), NULL))));
 }
 
@@ -1737,7 +1737,7 @@ static int _is_func_adapter_target(Compiler c, Type type){
 static List _direct_func_adapter(Compiler c, Type diagnostic_type, List source_binding, Type source_type){
   Type key_type = Type_canonicalize(source_type);  List key = cons(_670, cons(List_var(source_binding), cons(List_var(key_type), NULL)));  List adapter = NULL;  Var _x2c_gensym_macro_cached_4;  if(Map_try_get(c -> names -> adapters, List_var(key), &(_x2c_gensym_macro_cached_4))) adapter = Var_list_payload(_x2c_gensym_macro_cached_4);  else{
     {
-      List target = _func_bound(source_type, source_binding);  adapter = _build_func_adapter(c, diagnostic_type, source_type, target, NULL, NULL);
+      List target = _func_bound(source_type, source_binding);  adapter = _build_func_adapter(c, diagnostic_type, source_type, target, NULL, NULL, NULL);
     }
     ;  Map_setindex(c -> names -> adapters, List_var(key), List_var(adapter));
   }
@@ -1745,11 +1745,15 @@ static List _direct_func_adapter(Compiler c, Type diagnostic_type, List source_b
 }
 
 int Type_function_parts(Type, List *, Type *);
-static List _build_func_adapter(Compiler c, Type diagnostic_type, Type source_type, List target, List supplied_fn_binding, List prefix){
+static List _build_func_adapter(Compiler c, Type diagnostic_type, Type source_type, List target, List supplied_fn_binding, List prefix, List leading){
   List params = NULL;  Type return_type = NULL;  Type_function_parts(source_type, &(params), &(return_type));  if(_typed_params_variadic(params)){
     Type func_type = Sym_resolve_key(c -> sym, List_type(_306));  String _x2c_gensym_macro_message_0 = List_equal(Type_list(Sym_resolve_key(c -> sym, diagnostic_type)), Type_list(func_type)) ? _671 : _672;  _adapter_error(c, _x2c_gensym_macro_message_0, diagnostic_type, source_type, NULL);
   }
-  source_type = Type_canonicalize(source_type);  return_type = Type_canonicalize(return_type);  _require_func_readers(c, diagnostic_type, source_type);  String name = Compiler_fresh_name(c, _673);  List adapter_binding = Sym_introduce(c -> sym, name);  List fn_binding = List_truth(supplied_fn_binding) ? supplied_fn_binding : Sym_introduce(c -> sym, Compiler_fresh_name(c, _509));  List argv_binding = Sym_introduce(c -> sym, Compiler_fresh_name(c, _674));  List names = _auto_names(c, List_len(params));  List locals = _func_argument_locals(c, diagnostic_type, params, names, fn_binding, argv_binding);  List arguments = List_zip_with(params, names, _x2c_gensym_func_handle_0);  List call = _func_call(c, return_type, target, arguments);  Type resolved_result = Sym_resolve_key(c -> sym, return_type);  if(List_truth(Type_list(resolved_result)) && x2c_var_equal(List_car(Type_list(resolved_result)), Symbol_var(1318234344))) call = _func_record_call(c, return_type, call);  _publish_func_adapter(c, adapter_binding, fn_binding, argv_binding, call, List_append(prefix, List_append(locals, NULL)));  return adapter_binding;
+  source_type = Type_canonicalize(source_type);  return_type = Type_canonicalize(return_type);  _require_func_readers(c, diagnostic_type, source_type);  String name = Compiler_fresh_name(c, _673);  List adapter_binding = Sym_introduce(c -> sym, name);  List fn_binding = List_truth(supplied_fn_binding) ? supplied_fn_binding : Sym_introduce(c -> sym, Compiler_fresh_name(c, _509));  List argv_binding = Sym_introduce(c -> sym, Compiler_fresh_name(c, _674));  List names = _auto_names(c, List_len(params));  List locals = _func_argument_locals(c, diagnostic_type, params, names, fn_binding, argv_binding);  List arguments = List_zip_with(params, names, _x2c_gensym_func_handle_0);  List call = _func_call(c, return_type, target, List_append(leading, List_append(arguments, NULL)));  Type resolved_result = Sym_resolve_key(c -> sym, return_type);  if(List_truth(Type_list(resolved_result)) && x2c_var_equal(List_car(Type_list(resolved_result)), Symbol_var(1318234344))) call = _func_record_call(c, return_type, call);  _publish_func_adapter(c, adapter_binding, fn_binding, argv_binding, call, List_append(prefix, List_append(locals, NULL)));  return adapter_binding;
+}
+
+List Compiler_context_func_adapter(Compiler c, Type type, List target){
+  if(! _init_guard_) _file_init_();  List self = Sym_introduce(c -> sym, Compiler_fresh_name(c, _509));  return _build_func_adapter(c, List_type(_306), type, target, self, NULL, cons(List_var(_func_bound(List_type(_306), self)), NULL));
 }
 
 static void _require_func_readers(Compiler c, Type diagnostic_type, Type source_type){

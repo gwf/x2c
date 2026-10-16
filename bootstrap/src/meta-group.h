@@ -52,5 +52,7 @@ void Compiler_write_meta_build(Compiler c);
 
 void Compiler_bind_meta_group(Compiler c, String name, Token site);
 
+Map Compiler_stage_session_function(Compiler c, List declarations, Func prepare, String * failure);
+
 
 #endif /* __GUARD_0xBF7298EC__ */
