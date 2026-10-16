@@ -331,6 +331,7 @@ int Compiler_run_command(String name, List arguments){
   if(! _init_guard_) _file_init_();
   String path = Compiler_command_path(name);
   if(! String_truth(path)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_22), cons(String_var(name), cons(String_var(_23), NULL)))));
+  Map options = Map_update_n(Map_new(), 2, Symbol_var(11180), Map_var(Compiler_command_environment()), Symbol_var(1317305704), Symbol_var(20284019304));
   {
     ExceptionFrame _x2c_gensym_exception_frame_0;
     static MatchCaptureSite _x2c_gensym_macro_arms_0[1];
@@ -345,7 +346,7 @@ int Compiler_run_command(String name, List arguments){
     volatile ErrorHandler _x2c_gensym_error_handler_0 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_0, & _x2c_gensym_macro_site_0, _x2c_gensym_macro_patterns_0);
     x2c_exception_push(& _x2c_gensym_exception_frame_0);
     if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)){
-      int _x2c_gensym_return_value_0 = Job_status(Job_options(List_job(cons(String_var(path), List_append(arguments, NULL))), Map_update_n(Map_new(), 2, Symbol_var(11180), Map_var(Compiler_command_environment()), Symbol_var(1317305704), Symbol_var(20284019304))));
+      int _x2c_gensym_return_value_0 = Job_status(Job_options(List_job(cons(String_var(path), List_append(arguments, NULL))), options));
       {
         x2c_error_catch_close(_x2c_gensym_error_handler_0);
         _x2c_gensym_error_handler_0 = NULL;

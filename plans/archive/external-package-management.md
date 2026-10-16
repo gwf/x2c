@@ -19,6 +19,10 @@ for its exit status. The command owns package resolution and `x2c.lock`.
 No response document, RPC service, manifest reparser, or new package format
 is needed.
 
+The development install also copies matching shipped commands through
+`etc/x2c-payload.x`; `build-install` builds commands before copying the compiler.
+The prefix installer and development installer share command-copy ownership.
+
 ## Current evidence
 
 - `src/install.x` owns fetching, digest checks, extraction, package markers,

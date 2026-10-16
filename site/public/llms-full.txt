@@ -6317,8 +6317,8 @@ defaults to unsigned plain `char`.
 
 The built-in commands are listed by `x2c help`. External commands are separate
 programs named `x2c-<name>` in the directory printed by `x2c env libexec`.
-In a source checkout this is `builds/0/libexec`; in an installed home it is
-`<home>/libexec/x2c`. The driver does not search `PATH` for them.
+For the stage 0 checkout compiler this is `builds/0/libexec`. A development
+install in `bin/` and an installed prefix use `<home>/libexec/x2c`. The driver does not search `PATH` for them.
 `x2c help` lists their summaries from that directory's `commands.txt`.
 
 The driver passes arguments after an external command name directly to its

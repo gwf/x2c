@@ -1,5 +1,5 @@
 #!/usr/bin/env -S x2c script
-/*  x2c-payload.x -- install or remove a native dedicated prefix
+/*  x2c-payload.x -- install a native prefix or development commands
 
     An installed prefix is an x2c home: bin, include, lib, etc, packages,
     examples, and licenses.
@@ -289,7 +289,8 @@ root = Path.absolute(argv[0]).dirname().dirname();
 String program = Path.basename(argv[0]);
 List commands = %(
   (install (--prefix (value path) required) (--destdir (value dir)))
-  (uninstall (--prefix (value path) required)));
+  (uninstall (--prefix (value path) required))
+  (commands (--prefix (value path) required)));
 String command = args ? args.car().str() : NULL;
 List spec = NULL;
 foreach (List row, commands)
@@ -313,6 +314,8 @@ catch %(bad-arg *detail): {
 try {
   if (command == "install")
     install(normal(options["prefix"]), options["destdir"]);
+  else if (command == "commands")
+    copy_shipped_commands(normal(options["prefix"]));
   else uninstall(normal(options["prefix"]));
 }
 catch %(?code *detail): {

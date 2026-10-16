@@ -252,9 +252,8 @@ int Compiler.run_command(String name, List arguments) {
   if (!path)
     Diagnostics.driver_error(
       %"missing x2c-$name command; install the matching x2c commands");
-  try return %($path @arguments).job().options({
-    env: Compiler.command_environment(), stdout: <inherit>
-  }).status();
+  Map options = {env: Compiler.command_environment(), stdout: <inherit>};
+  try return %($path @arguments).job().options(options).status();
   catch %((!or not-found io-fail) *detail): Diagnostics.host_error(detail);
   return 2;
 }
