@@ -437,26 +437,26 @@ the compiler's answers to `lib/meta.x` operations.
 
 Public functions:
 
-`MetaContext.current`, `Compiler.expanding`, `Type.is_named`, `Type.numeric`,
+`MetaContext.current`, `Compiler.expanding`, `MetaContext.invocation_location`,
+`x2c_invocation_file`, `x2c_invocation_line`, `x2c_invocation_column`,
+`x2c_diagnostic_fail`, `x2c_diagnostic_fail_at`, `x2c_diagnostic_error_at`,
+`x2c_diagnostic_warn`, `MetaContext.reject`, `Type.is_named`, `Type.numeric`,
 `Type.is_text`, `Type.aggregate`, `Type.marked_fields`, `Type.resolve_member`,
-`Type.protocol_member`, `Type.getter`, `Type.update_helper`, `Code.type`,
-`Code.value`, `Code.call_in_order`, `Code.lowered`, `Code.bound`,
-`Code.func_parameters`, `Code.exits`, `Code.convert`, `Code.format`,
-`Code.is_static_pattern`, `Code.pattern_value`, `Code.promoted`,
-`Code.register_rewrite`, `Code.register_after_initialization`,
-`Code.declared_bindings`, `MetaContext.function_reference`, `Type.element`,
+`Type.protocol_member`, `Type.getter`, `Type.update_helper`, `Type.element`,
 `Type.parameters`, `Type.return_type`, `Type.reverse_name`, `Type.resolve`,
 `Type.layout`, `Type.is_value`, `Type.tag_name`, `Type.members`, `Type.fields`,
-`Code.binding_spelling`, `x2c_ident`, `x2c_binding_fresh`, `x2c_binding_for`,
-`MetaContext.fresh_binding`, `x2c_meta_definition_hashes`, `Code.name`,
-`Code.body`, `Code.arguments`, `Code.parameter`, `Code.native_signature`,
-`MetaContext.literal_list`, `Code.source_text`, `x2c_embed_text`,
-`MetaContext.invocation_location`, `x2c_invocation_file`,
-`x2c_invocation_line`, `x2c_invocation_column`, `x2c_diagnostic_fail`,
-`x2c_diagnostic_fail_at`, `x2c_diagnostic_error_at`, `x2c_diagnostic_warn`,
-`x2c_enclosing`, `x2c_place`, `MetaContext.type_description`,
-`MetaContext.source_description`, `_x2c_complete_iterator`,
-`MetaContext.reject`, `Compiler.bind_sdk_primitives`
+`MetaContext.type_description`, `Code.type`, `Code.value`,
+`Code.call_in_order`, `Code.lowered`, `Code.bound`, `Code.func_parameters`,
+`Code.exits`, `Code.convert`, `Code.format`, `Code.is_static_pattern`,
+`Code.pattern_value`, `Code.promoted`, `Code.declared_bindings`,
+`MetaContext.function_reference`, `Code.binding_spelling`, `x2c_ident`,
+`x2c_binding_fresh`, `x2c_binding_for`, `MetaContext.fresh_binding`,
+`Code.name`, `Code.body`, `Code.arguments`, `Code.parameter`,
+`Code.native_signature`, `x2c_enclosing`, `x2c_place`,
+`_x2c_complete_iterator`, `Code.register_rewrite`,
+`Code.register_after_initialization`, `Code.source_text`, `x2c_embed_text`,
+`MetaContext.source_description`, `x2c_meta_definition_hashes`,
+`MetaContext.literal_list`, `Compiler.bind_sdk_primitives`
 
 ### [src/operator-ledger.x](../src/operator-ledger.x)
 
