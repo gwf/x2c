@@ -174,8 +174,8 @@ x2c run examples/programs/lisp.x -- program.xlisp
 It loads `etc/init.xlisp` by default; `--init FILE` or `X2C_LISP_INIT` selects
 another environment. `etc/lisp-values.xlisp` names the core
 `List`, `Array`, `Map`, `String`, `Var`, and `Symbol` operations, and
-`etc/lisp-extras.xlisp` and `etc/lisp-io.xlisp` provide optional algorithms
-and file operations.
+`etc/lisp-io.xlisp` provides optional file operations and small list
+algorithms.
 
 [programs/mandelbrot.x](programs/mandelbrot.x) renders a deep zoom on native
 threads. [tours/language.x](tours/language.x) is a broader language tour;
