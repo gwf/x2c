@@ -528,7 +528,7 @@ x2c project manifests.
 
 Public functions:
 
-`ProjectBuild.plan`, `CliRequest.project_manifest`, `ProjectBuild.valid_name`
+`ProjectBuild.valid_name`, `ProjectBuild.plan`, `CliRequest.project_manifest`
 
 ### [src/protocol.x](../src/protocol.x)
 
