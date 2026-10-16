@@ -656,8 +656,8 @@ x2c AST transformation pipeline.
 
 Public functions:
 
-`Compiler.transform`, `Compiler.normalize`, `Compiler.lower_lambda_expr`,
-`Compiler.shipped_support`, `Compiler.call_in_order`
+`Compiler.transform`, `Compiler.normalize`, `Compiler.shipped_support`,
+`Compiler.lower_lambda_expr`, `Compiler.call_in_order`
 
 ### [src/translation.x](../src/translation.x)
 
