@@ -200,7 +200,7 @@ static void _match_and(Buffer b, int * testing){
 
 static int _match_bind(Buffer b, Var binder, String cell, Array seen, Array binders, int * testing, int * braces){
   int list = Var_is_list_binder(binder);
-  if(Array_truth(binders)){
+  if(binders != NULL){
     int slot = Array_find(binders, binder);
     if(slot < 0) return 0;
     _match_and(b, &((* testing)));
@@ -259,8 +259,8 @@ static int _match_element(Buffer b, Var part, String cell, Array seen, Array bin
   }
   List list = Var_is_row(part, 9, 7, 4) ? Var_list(part) : NULL;
   if(Var_is_binder(part) || Var_is_match_op(part) || x2c_var_equal(part, Symbol_var(1059020478773725)) ||(List_truth(list) && Var_is_match_op(List_car(list)))) return - 1;
-  if(! Var_is(part, 1328354264) && ! List_truth(list)) return Array_truth(binders) ? - 1 : 2;
-  if(List_truth(list) && Array_truth(binders)) return 1;
+  if(Var_is_row(part, 9, 7, 4) && binders != NULL) return 1;
+  if(! Var_is(part, 1328354264) && ! List_truth(list)) return binders != NULL ? - 1 : 2;
   Symbol tested = 806120;
   _match_and(b, &((* testing)));
   if(List_truth(list)) Buffer_printf(b, "Var_is(%s, %lu)", cell, (unsigned long) tested);
@@ -269,14 +269,15 @@ static int _match_element(Buffer b, Var part, String cell, Array seen, Array bin
 }
 
 static int _match_nested(Buffer b, Array out, List pattern, Var value, Array binders, int * depths){
-  if((! Array_truth(binders) && ! List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_0;  x2c_match_site_match(& _x2c_gensym_match_site_0, pattern, List_var(_23)); }))) || ! Var_is_row(value, 9, 7, 4)) return - 1;
+  int viewed = binders != NULL;
+  if((! viewed && ! List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_0;  x2c_match_site_match(& _x2c_gensym_match_site_0, pattern, List_var(_23)); }))) || ! Var_is_row(value, 9, 7, 4)) return - 1;
   _match_flush(b, out);
   Array rests = Array_new(), paths = Array_new(), seen = Array_new();
-  int mark = Array_len(out), testing = ! ! Array_truth(binders), braces = 0, step = 0;
+  int mark = Array_len(out), testing = viewed, braces = 0, step = 0;
   int deepest = 0;
   List rest = Var_list_payload(value);
   String path = _24;
-  if(! Array_truth(binders)) Buffer_write(b, " _x2c_gensym_match_cursor = _x2c_gensym_match_expr;");
+  if(! viewed) Buffer_write(b, " _x2c_gensym_match_cursor = _x2c_gensym_match_expr;");
   for(; ; ){
     int levels = Array_len(rests);
     String cursor = _match_cursor(levels);
@@ -289,7 +290,7 @@ static int _match_nested(Buffer b, Array out, List pattern, Var value, Array bin
       if(step == 1){
         _match_and(b, &(testing));
         String next = _match_cursor(levels + 1);
-        if(Array_truth(binders)) Buffer_printf(b, "Macro_case_enter(%s, &%s)", cell, next);
+        if(viewed) Buffer_printf(b, "Macro_case_enter(%s, &%s)", cell, next);
         else Buffer_printf(b, "(%s = Var_list_payload(%s), 1)", next, cell);
         Array_push(rests, List_var(rest));
         Array_push(paths, String_var(path));
@@ -329,13 +330,13 @@ static int _match_nested(Buffer b, Array out, List pattern, Var value, Array bin
     rest = List_cdr(rest);
     path = String_add(path, _27);
   }
-  if(Array_truth(binders) && Array_len(seen) < Array_len(binders)) step = - 1;
+  if(viewed && Array_len(seen) < Array_len(binders)) step = - 1;
   if(step < 0){
     while(Array_len(out) > mark) Array_take_last(out);
     Buffer_clear(b);
     return - 1;
   }
-  if(testing && ! Array_truth(binders)){
+  if(testing && ! viewed){
     Buffer_write(b, ") {");
     braces ++;
   }
