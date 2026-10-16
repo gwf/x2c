@@ -915,15 +915,15 @@ static void _print_help_row(const char * label, const char * description, int in
 
 _Noreturn static void _fail(String message, String note);
 
-static void _removed_output(void);
+static void _cli_fail_removed_output(void);
 
-static void _expected_command(String arg);
+static void _cli_fail_expected_command(String arg);
 
 static void _unknown_option(String arg, Symbol command);
 
 static String _two_dash(String arg);
 
-static void _one_dash_removed(String arg, String use);
+static void _cli_fail_one_dash_removed(String arg, String use);
 
 _Noreturn static void _response_error(String path, int line, const char * message);
 
@@ -1156,10 +1156,10 @@ CliRequest CliRequest_parse(int argc, char * * argv){
         exit(0);
       }
       if(String_equal(first, _79)) _help_command(args);
-      if(String_equal(first, _80)) _removed_output();
+      if(String_equal(first, _80)) _cli_fail_removed_output();
       String spelling = _two_dash(first);
-      if(String_truth(spelling)) _one_dash_removed(first, String_join(NULL, cons(String_var(_81), cons(String_var(spelling), cons(String_var(_82), NULL)))));
-      if(String_getindex(first, 0) != '-') _expected_command(first);
+      if(String_truth(spelling)) _cli_fail_one_dash_removed(first, String_join(NULL, cons(String_var(_81), cons(String_var(spelling), cons(String_var(_82), NULL)))));
+      if(String_getindex(first, 0) != '-') _cli_fail_expected_command(first);
       Diagnostics_driver_error(String_join(NULL, cons(String_var(_83), cons(String_var(first), cons(String_var(_84), NULL)))));
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
@@ -1252,7 +1252,7 @@ static void _help_command(Array args){
 }
 
 static void _option(Parse * p, String arg, int * i){
-  if(String_equal(arg, _80)) _removed_output();
+  if(String_equal(arg, _80)) _cli_fail_removed_output();
   if((SymbolSet_contains((SymbolSet) "\001\000\000\000\002\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\001\000\000\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", (* p).request -> command)) && String_startswith(arg, _90)){
     _save_temps_dir((* p).request, arg);
     return;
@@ -1822,17 +1822,17 @@ _Noreturn static void _fail(String message, String note){
   exit(2);
 }
 
-static void _removed_output(void){
+static void _cli_fail_removed_output(void){
   _fail(_149, _150);
 }
 
-static void _expected_command(String arg){
+static void _cli_fail_expected_command(String arg){
   _fail(String_join(NULL, cons(String_var(_151), cons(String_var(arg), cons(String_var(_84), NULL)))), String_join(NULL, cons(String_var(_152), cons(String_var(arg), cons(String_var(_84), NULL)))));
 }
 
 static void _unknown_option(String arg, Symbol command){
   String spelling = command == 45220543335690 ? _two_dash(arg) : NULL;
-  if(String_truth(spelling)) _one_dash_removed(arg, spelling);
+  if(String_truth(spelling)) _cli_fail_one_dash_removed(arg, spelling);
   Diagnostics_driver_error(String_join(NULL, cons(String_var(_153), cons(String_var(arg), cons(String_var(_84), NULL)))));
 }
 
@@ -1842,7 +1842,7 @@ static String _two_dash(String arg){
   return _find_option(spelling, 45220543335690, &(attached)) ? spelling : NULL;
 }
 
-static void _one_dash_removed(String arg, String use){
+static void _cli_fail_one_dash_removed(String arg, String use){
   _fail(String_join(NULL, cons(String_var(_155), cons(String_var(arg), cons(String_var(_156), NULL)))), String_join(NULL, cons(String_var(_157), cons(String_var(use), cons(String_var(_84), NULL)))));
 }
 

@@ -812,7 +812,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _391 = String_var(_390);
   _392 = List_var(NULL);
   _393 = Symbol_var(106239471489226);
-  _394 = int_var(2163);
+  _394 = int_var(2178);
   _395 = String_new("");
   _396 = String_var(_395);
   _397 = String_new("x2c.hole");
@@ -890,7 +890,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _469 = cons(_461, _468);
   _470 = cons(_455, _469);
   _471 = List_var(_470);
-  _472 = int_var(2224);
+  _472 = int_var(2239);
   _473 = Symbol_var(1544849476362);
   _474 = List_var(_44);
   _475 = cons(_474, NULL);
@@ -1002,7 +1002,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _578 = cons(_461, _577);
   _579 = cons(_455, _578);
   _580 = List_var(_579);
-  _581 = int_var(2231);
+  _581 = int_var(2246);
   _582 = cons(_495, NULL);
   _583 = cons(_528, _571);
   _584 = cons(_547, _583);
@@ -1559,7 +1559,10 @@ static void f8_registry____check_previous(f8_registry___AdoptionDraft * a){
   );  Var previous;  if(! Map_try_get(c -> protocol_helpers, List_var(key), &(previous))){
     Map_setindex(c -> protocol_helpers, List_var(key), List_var(f8_registry____node(&((* a)))));  return;
   }
-  List row = Var_list_payload(previous);  if(List_equal(Type_list(_adoption_representation(row)), Type_list((* a).representation)) && List_equal(_adoption_tag(row), (* a).tag_expression)) return;  String first = String_join(NULL, cons(String_var(_91), cons(String_var(_location_string(_adoption_location(row))), NULL)));  String second = String_join(NULL, cons(String_var(_92), cons(String_var(_location_string((* a).location)), NULL)));  String spelling = _adoption_spelling((* a).base, (* a).participant);  Diagnostics_report(c -> diagnostics, 1139215899608, String_join(NULL, cons(String_var(_116), cons(String_var(spelling), NULL))), (* a).location, cons(String_var(first), cons(String_var(second), NULL)));
+  List row = Var_list_payload(previous);  if(List_equal(Type_list(_adoption_representation(row)), Type_list((* a).representation)) && List_equal(_adoption_tag(row), (* a).tag_expression)) return; {
+    String _x2c_gensym_macro_first_1 = String_join(NULL, cons(String_var(_91), cons(String_var(_location_string(_adoption_location(row))), NULL)));  String _x2c_gensym_macro_second_1 = String_join(NULL, cons(String_var(_92), cons(String_var(_location_string((* a).location)), NULL)));  String _x2c_gensym_macro_spelling_0 = _adoption_spelling((* a).base, (* a).participant);  Diagnostics_report(c -> diagnostics, 1139215899608, String_join(NULL, cons(String_var(_116), cons(String_var(_x2c_gensym_macro_spelling_0), NULL))), (* a).location, cons(String_var(_x2c_gensym_macro_first_1), cons(String_var(_x2c_gensym_macro_second_1), NULL)));
+  }
+
 }
 
 void Type_register_var_adoption(Type, Type, Symbol);
@@ -1574,7 +1577,7 @@ static void f8_registry____install(f8_registry___AdoptionDraft * a){
     Map_setindex(c -> adoptions, List_var(key), List_var(row));  return;
   }
   List existing = Var_list_payload(stored);  if(List_equal(existing, row)) return;  List first_location = _adoption_location(existing);  if(String_equal(_canonical_file(c, first_location), path)) return; {
-    String _x2c_gensym_macro_first_1 = String_join(NULL, cons(String_var(_91), cons(String_var(_location_string(first_location)), NULL)));  String _x2c_gensym_macro_second_1 = String_join(NULL, cons(String_var(_92), cons(String_var(_location_string((* a).location)), NULL)));  String _x2c_gensym_macro_spelling_0 = _adoption_spelling((* a).base, (* a).participant);  Compiler_report_error(c, 1139215899608, String_join(NULL, cons(String_var(_116), cons(String_var(_x2c_gensym_macro_spelling_0), NULL))), c -> token, cons(String_var(_x2c_gensym_macro_first_1), cons(String_var(_x2c_gensym_macro_second_1), NULL)));
+    String _x2c_gensym_macro_first_2 = String_join(NULL, cons(String_var(_91), cons(String_var(_location_string(first_location)), NULL)));  String _x2c_gensym_macro_second_2 = String_join(NULL, cons(String_var(_92), cons(String_var(_location_string((* a).location)), NULL)));  String _x2c_gensym_macro_spelling_1 = _adoption_spelling((* a).base, (* a).participant);  Compiler_report_error(c, 1139215899608, String_join(NULL, cons(String_var(_116), cons(String_var(_x2c_gensym_macro_spelling_1), NULL))), c -> token, cons(String_var(_x2c_gensym_macro_first_2), cons(String_var(_x2c_gensym_macro_second_2), NULL)));
   }
 
 }
