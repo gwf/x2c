@@ -269,7 +269,8 @@ static List _loaded_length(List target) =>
 /* Snapshot traversal consumes one shared budget, including containers.
    Unsupported fields stay visible without exposing their native storage. */
 static List _loaded_snapshot(
-  Compiler c, Type type, List target, List budget, int root, Array statements) {
+  Compiler c, Type type, List target,
+  List budget, int root, Array statements) {
   Type scalar = _loaded_scalar(c, type);
   if (scalar) return $!($scalar){ ($scalar) $target };
   if (!_loaded_aggregate(c, type, root))
@@ -317,14 +318,15 @@ static void _loaded_snapshot_fields(
     List selected = %(expr $field (op . $target ($name)));
     Array items = $auto([]);
     List item = _loaded_snapshot(c, field, selected, budget, 0, items);
-    fields.push($!{
-      if ($budget > 0) {
-        $budget--;
-        @{items.list()}
-        $value[$name] = $item;
-      }
-      else $value["..."] = "...";
-    });
+    fields.push(
+      $!{
+        if ($budget > 0) {
+          $budget--;
+          @{items.list()}
+          $value[$name] = $item;
+        }
+        else $value["..."] = "...";
+      });
   }
 }
 
@@ -361,8 +363,10 @@ static void _loaded_path(LoadedPath path, Type type, List target, int root) {
     bridge = %("Var");
     List budget = c.sym.introduce(c.fresh_name("remaining"));
     Array statements = $auto([]);
-    List snapshot = _loaded_snapshot(c, type, target, budget, root, statements);
-    _loaded_accessor(path, bridge,
+    List snapshot = _loaded_snapshot(
+      c, type, target, budget, root, statements);
+    _loaded_accessor(
+      path, bridge,
       $!{ int $budget = 100; @{statements.list()} return $snapshot; }, 0);
   }
   path.descriptions.push(
@@ -380,8 +384,8 @@ static void _loaded_path(LoadedPath path, Type type, List target, int root) {
     }});
     path.name += "[]";
     Type element = c.sym.normalize_declared_type(type).dereference();
-    _loaded_path(path, element,
-      %(expr $element (index $target $argument)), 0);
+    _loaded_path(
+      path, element, %(expr $element (index $target $argument)), 0);
   }
   else if (shape.match(%(struct ?)))
     _loaded_fields(path, type, target);
@@ -399,8 +403,8 @@ static void _loaded_fields(LoadedPath path, Type type, List target) {
     }
     LoadedPath selected = path;
     selected.name += "." + name;
-    _loaded_path(selected, field,
-      %(expr $field (op . $target ($name))), 0);
+    _loaded_path(
+      selected, field, %(expr $field (op . $target ($name))), 0);
   }
 }
 
@@ -416,7 +420,8 @@ static void _loaded_global(Compiler c, Type spec, List row, Map present) {
         !_loaded_aggregate(c, type, initialized)) return;
     c.ensure_macro_lisp();
     LoadedPath path = {.compiler = c, .descriptions = [], .name = name};
-    _loaded_path(path, type,
+    _loaded_path(
+      path, type,
       %(expr ${type.declared()} (ident $binding)), initialized);
     c.meta_group.push(%(global $name ${path.descriptions.list_free()}));
     present[name] = 1;

@@ -93,8 +93,8 @@ static List _indices(ReplSession session, List entry, Array setup) {
   Array arguments = $auto([]);
   foreach (List value, entry.caddr().list()) {
     List temporary = c.sym.introduce(c.fresh_name("repl_index"));
-    setup.push(c.rebuild_statement(
-      $!{ long long $temporary = $value; }).cadr());
+    setup.push(
+      c.rebuild_statement($!{ long long $temporary = $value; }).cadr());
     arguments.push($!(long long){ $temporary });
   }
   return %(${entry.car()} ${entry.cadr()} ${arguments.list()});
