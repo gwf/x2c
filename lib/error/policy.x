@@ -9,10 +9,10 @@
    emission. Error locks every listed policy to abort: observing handlers may
    inspect but cannot consume one, while a matching compiler catch transfers
    control without returning to its raising call. */
-static const SymbolSet error_nonreturning_causes =
+module const SymbolSet error_nonreturning_causes =
   $error.nonreturning.causes();
 
-static int _never_returns(Symbol code) => code in error_nonreturning_causes;
+module int _never_returns(Symbol code) => code in error_nonreturning_causes;
 
 /** Sets the default disposition for `code`.
     Supported policy values are `<abort>`, `<collect>`, `<log>`, and

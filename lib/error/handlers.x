@@ -16,7 +16,7 @@
    newest record's `(code @detail)`. The selected arm's captures and the
    records above the watermark then belong to the handle. */
 
-static Symbol _catch_match(ErrorHandler h) {
+module Symbol _catch_match(ErrorHandler h) {
   if (Error.count() <= h.watermark) return <declined>;
   ErrorRecord *record = _record_at(Error.count() - 1);
   Symbol code = record.entry.car().list().cadr();
@@ -166,7 +166,7 @@ void Error.pop(ErrorHandler handle) {
   _free(handle);
 }
 
-static void _free(ErrorHandler handle) {
+module void _free(ErrorHandler handle) {
   if (!handle) return;
   // a per-call site has no static arm storage and belongs to this handler
   if (handle.site && !handle.site.arms) Scope.free(handle.site);
@@ -188,7 +188,7 @@ static void _plans_free(Block plans) {
    the records above every popped handler's watermark; a Context closed by an
    unwinding exception keeps those for its outer handler and is the one caller
    that passes zero. */
-static void _unwind_to(
+module void _unwind_to(
   ErrorThreadState state, ErrorHandler stop, int truncate) {
   while (state.handler_top && state.handler_top != stop) {
     ErrorHandler removed = state.handler_top;
@@ -201,7 +201,7 @@ static void _unwind_to(
 /* Returns the handler that leaves exactly `depth` registered, or the current
    head when the stack is already that shallow. The height is measured once
    here so an unwind does not re-measure it per cleanup record. */
-static ErrorHandler _handler_at_depth(
+module ErrorHandler _handler_at_depth(
   ErrorThreadState state, int depth) {
   ErrorHandler stop = state.handler_top;
   for (int height = Error.handler_depth(); height > depth && stop; height--)

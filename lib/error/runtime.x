@@ -4,7 +4,7 @@
 
 static threaded struct ErrorThreadState error_thread;
 
-static ErrorThreadState _thread(void) {
+module ErrorThreadState _thread(void) {
   ErrorThreadState state = &error_thread;
   if (!state.bound) state.bound = ERROR_DEFAULT_BOUND;
   return state;
@@ -17,7 +17,7 @@ static ErrorThreadState _thread(void) {
    raising has re-entered itself, so it allocates nothing and calls nothing
    that can. */
 
-static void _floor(Symbol code, const char *why) {
+module void _floor(Symbol code, const char *why) {
   char spelling[SYMBOL_MAX_5BIT + 1] = { 0 };
   code.decode(spelling);
   fprintf(
@@ -28,7 +28,7 @@ static void _floor(Symbol code, const char *why) {
 
 /* Pushes the thread's error scope unless it is already on top, and answers
    whether the caller must pop it. */
-static int _scope_push(Symbol code, const char *message) {
+module int _scope_push(Symbol code, const char *message) {
   ErrorThreadState state = _thread();
   if (Scope.top() == &state.scope) return 0;
   Scope.push(&state.scope);

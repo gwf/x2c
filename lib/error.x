@@ -86,12 +86,22 @@ String Atom.str(Atom atom);
    entry List with the region that owns its values; error-private.x
    declares the record and handler layouts, which a unit test shares. */
 
-$error.private.types();
+module typedef struct ErrorRegion {
+  $error.private.region.fields();
+} ErrorRegion;
+
+module typedef struct ErrorRecord {
+  $error.private.record.fields();
+} ErrorRecord;
+
+module struct ErrorHandler {
+  $error.private.handler.fields();
+};
 
 
 /* One `Context`'s overlay: the policies and bound it sets, and the handler
    depth and record height its close returns to. */
-static typedef struct ErrorContextState {
+module typedef struct ErrorContextState {
   struct ErrorContextState *prev, Map policy, int bound, handler_depth;
   int stack_height;
 } *ErrorContextState;
@@ -102,16 +112,16 @@ static typedef struct ErrorContextState {
    complete chain and `dispatch_running` the handler offered the error. A
    raise reaches the floor while `floor_only` is nonzero, and
    `rendered[depth]` marks a dispatch whose error Logger rendered. */
-static typedef struct ErrorThreadState {
+module typedef struct ErrorThreadState {
   Scope scope, Block stack, Map policy, int shutdown_done;
   ErrorHandler handler_top, dispatch_saved, dispatch_running, running_top;
   int bound, ErrorContextState context_top, int depth, floor_only, rendered[5];
 } *ErrorThreadState;
 
 module {
+  "error/dispatch.x",
   "error/policy.x",
   "error/records.x",
   "error/handlers.x",
-  "error/dispatch.x",
   "error/runtime.x",
 }

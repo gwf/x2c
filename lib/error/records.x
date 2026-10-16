@@ -6,7 +6,7 @@
    `((code C) (detail D) (location L))`, so a handler can match on it. Its
    detail is copied into the record's own region. */
 
-static void _record(const X2CErrorSite *site, Symbol code, List detail) {
+module void _record(const X2CErrorSite *site, Symbol code, List detail) {
   if (Error.count() >= Error.bound())
     _floor(code, "error stack exceeded its bound");
   ErrorThreadState state = _thread();
@@ -18,7 +18,7 @@ static void _record(const X2CErrorSite *site, Symbol code, List detail) {
   state.floor_only--;
 }
 
-static void _record_n(
+module void _record_n(
   const X2CErrorSite *site, Symbol code, unsigned pair_count, va_list args) {
   if (Error.count() >= Error.bound())
     _floor(code, "error stack exceeded its bound");
@@ -85,15 +85,15 @@ static List _field(
 static List _pair(ErrorRegion *region, Var key, Var value) =>
   _cons(region, key, _cons(region, value, NULL));
 
-static List _cons(ErrorRegion *region, Var head, List tail) =>
+module List _cons(ErrorRegion *region, Var head, List tail) =>
   List.cons_in(region.pool, head, tail);
 
-static ErrorRecord *_record_at(int index) {
+module ErrorRecord *_record_at(int index) {
   ErrorRecord *records = _thread().stack.bytes;
   return &records[index];
 }
 
-static void _truncate(int mark) {
+module void _truncate(int mark) {
   if (!Error.ready() || mark < 0) return;
   while (Error.count() > mark) {
     ErrorRecord *record = _record_at(Error.count() - 1);
@@ -107,7 +107,7 @@ static void _truncate(int mark) {
 /* A NULL region requests an ordinary snapshot: construct in the active
    canonical pool, then promote that same object. An explicit region copies
    into its pool instead. Both policies traverse the same immutable shape. */
-static Var _copy_value(ErrorRegion *region, Var value) {
+module Var _copy_value(ErrorRegion *region, Var value) {
   if (value is void)
     _floor(
       <bad-types>, region ? "void is not an admissible error detail"
@@ -171,7 +171,7 @@ static List _copy_list(ErrorRegion *region, List source) {
   return owned;
 }
 
-static ErrorRegion _region_new(void) {
+module ErrorRegion _region_new(void) {
   ErrorRegion region = { 0 };
   region.values = Scope.new_named("Error record values");
   region.pool = Pool.retain_named(NULL, "Error record canonical values");
@@ -180,7 +180,7 @@ static ErrorRegion _region_new(void) {
 
 /* Release canonical values before their borrowed wide scalar boxes.
    No region value survives this operation. */
-static void _destroy(ErrorRegion *region) {
+module void _destroy(ErrorRegion *region) {
   if (region.pool) region.pool = Pool.release(region.pool);
   if (region.values) {
     Scope.destroy(region.values);
@@ -222,7 +222,7 @@ List Error.since(int mark) {
 }
 
 /* Copies errors oldest first, using an explicit region or active pools. */
-static List _view_since(ErrorRegion *region, int mark) {
+module List _view_since(ErrorRegion *region, int mark) {
   List out = NULL;
   for (int i = Error.count() - 1; i >= mark; i--) {
     ErrorRecord *record = _record_at(i);
