@@ -290,7 +290,7 @@ manifest, including the deterministic Lisp showcase.
 - Type conversion: `src/type.x`, `src/expressions.x`, `src/transform.x`,
   `lib/varconvert.x`, and `lib/varops.x`.
 - C token emission and formatting: `src/emit.x` and `src/format.x`.
-- Native actions and project lowering: `src/toolchain.x`, `src/build.x`, and
+- Native actions and project lowering: `src/toolchain.x`, `commands/build/build.x`, and
   `src/project.x`.
 - Shared scanning and tokenization: `lib/scan.x` and `lib/tokenizer.x`.
 

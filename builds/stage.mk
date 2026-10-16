@@ -26,6 +26,10 @@ LIB_BUILD        = lib
 # Library and binary names
 LIBRARY          = libx2c.a
 BINARY           = x2c
+COMPILER_LIBRARY = libx2c-dev.a
+COMMAND_BUILD    = commands/build
+BUILD_COMMAND    = libexec/x2c-build
+COMMAND_IDENTITY = commands/identity.x
 CC               ?= cc
 AR               ?= ar
 ARFLAGS          ?= rv
@@ -100,7 +104,7 @@ BIN_X_DEPS   = $(patsubst %.x,$(BIN_BUILD)/%.d,$(BIN_X_NAMES))
 BIN_C_DEPS   = $(patsubst %.x,$(BIN_BUILD)/%.c.d,$(BIN_X_NAMES))
 ###############################################################################
 # Default action
-target: $(LIBRARY) $(BINARY)
+target: $(LIBRARY) $(BINARY) $(BUILD_COMMAND)
 
 # Generate all headers first
 headers: $(LIB_H_FILES) $(BIN_H_FILES)
@@ -196,12 +200,70 @@ $(BIN_BUILD)/%.o: $(BIN_BUILD)/%.c | $(LIB_H_FILES)
 $(BINARY): $(BIN_OBJECTS) $(LIBRARY)
 	$(CC) $(BIN_OBJECTS) -L. $(LDFLAGS) -lm -o $(BINARY)
 ###############################################################################
+# The build command cannot build itself. Translate it with this stage's newly
+# linked compiler, then use the same native flags and archives as the driver.
+# Other commands reuse this archive and embedded identity from the root Makefile.
+COMMAND_X_FILES = $(wildcard $(ROOT)/commands/build/*.x) $(COMMAND_IDENTITY)
+COMMAND_NAMES = $(notdir $(basename $(COMMAND_X_FILES)))
+COMMAND_C_FILES = $(addprefix $(COMMAND_BUILD)/,$(addsuffix .c,$(COMMAND_NAMES)))
+COMMAND_H_FILES = $(COMMAND_C_FILES:.c=.h)
+COMMAND_XI_FILES = $(COMMAND_C_FILES:.c=.xi)
+COMMAND_OBJECTS = $(COMMAND_C_FILES:.c=.o)
+COMMAND_X_DEPS = $(COMMAND_C_FILES:.c=.d)
+COMMAND_C_DEPS = $(COMMAND_C_FILES:.c=.c.d)
+COMMAND_MISSING_GENERATED = $(filter-out \
+	$(wildcard $(COMMAND_BUILD)/*.c $(COMMAND_BUILD)/*.h $(COMMAND_BUILD)/*.xi), \
+	$(COMMAND_C_FILES) $(COMMAND_H_FILES) $(COMMAND_XI_FILES))
+
+$(COMPILER_LIBRARY): $(filter-out $(BIN_BUILD)/main.o,$(BIN_OBJECTS)) ../stage.mk
+	$(RM) $@
+	$(AR) $(ARFLAGS) $@ $(filter-out $(BIN_BUILD)/main.o,$(BIN_OBJECTS))
+
+$(COMMAND_IDENTITY): $(BINARY)
+	@mkdir -p commands
+	@set -e; identity=`./$(BINARY) env identity`; \
+	  printf 'String x2c_embedded_identity(void) => "%s";\n' \
+	    "$$identity" > $@.tmp; \
+	  if ! cmp -s $@.tmp $@; then mv $@.tmp $@; \
+	  else rm $@.tmp; fi
+
+$(COMMAND_BUILD):
+	mkdir -p $@
+
+$(COMMAND_BUILD)/.translated: $(BINARY) $(COMMAND_X_FILES) $(BIN_X_INPUTS) \
+		$(LIB_X_FILES) $(X2C_TRANSLATE_DEPS) ../stage.mk | $(COMMAND_BUILD)
+	$(STRICT_X2C_ENV) ./$(BINARY) translate -j $(BUILD_JOBS) \
+		$(STRICT_X2C_FLAGS) $(X2C_FLAGS) --out-dir $(COMMAND_BUILD) \
+		--x-include-dir $(ROOT) --x-include-dir $(BIN_SOURCE) \
+		$(COMMAND_X_FILES)
+	@touch $@
+
+$(COMMAND_C_FILES) $(COMMAND_H_FILES): $(COMMAND_BUILD)/.translated
+
+ifneq ($(strip $(COMMAND_MISSING_GENERATED)),)
+$(COMMAND_BUILD)/.translated: COMMAND-FORCE-TRANSLATE
+.PHONY: COMMAND-FORCE-TRANSLATE
+COMMAND-FORCE-TRANSLATE:
+endif
+
+$(COMMAND_OBJECTS): $(COMMAND_BUILD)/.translated
+
+$(COMMAND_BUILD)/%.o: $(COMMAND_BUILD)/%.c | $(COMMAND_H_FILES) $(BIN_H_FILES) $(LIB_H_FILES)
+	$(CC) $(CFLAGS) -iquote $(COMMAND_BUILD) -iquote $(BIN_BUILD) \
+		-iquote $(LIB_BUILD) -iquote $(ROOT)/include/x2c \
+		-MMD -MP -MF $(COMMAND_BUILD)/$*.c.d -MT $@ -c $< -o $@
+
+$(BUILD_COMMAND): $(COMMAND_OBJECTS) $(COMPILER_LIBRARY) $(LIBRARY)
+	@mkdir -p libexec
+	$(CC) $(COMMAND_OBJECTS) $(COMPILER_LIBRARY) -L. $(LDFLAGS) -lm -o $@
+###############################################################################
 # clean build directories
 clean:
-	rm -rf $(LIB_BUILD) $(BIN_BUILD)
+	rm -rf $(LIB_BUILD) $(BIN_BUILD) commands libexec
 # remove all build files
 realclean: clean
-	rm -rf $(LIBRARY) $(BINARY)
+	rm -rf $(LIBRARY) $(BINARY) $(COMPILER_LIBRARY)
 ###############################################################################
 # Include dependency files
--include $(LIB_X_DEPS) $(LIB_C_DEPS) $(BIN_X_DEPS) $(BIN_C_DEPS)
+-include $(LIB_X_DEPS) $(LIB_C_DEPS) $(BIN_X_DEPS) $(BIN_C_DEPS) \
+	$(COMMAND_X_DEPS) $(COMMAND_C_DEPS)

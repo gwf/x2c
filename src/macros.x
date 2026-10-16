@@ -32,9 +32,8 @@ static keyword loop $private.loop;
 #include "regions.x"
 #include "statements.x"
 #include "digest.x"
-#include "script.x"
-#include "toolchain.x"
 #include "utils.x"
+#include "toolchain.x"
 #include <dlfcn.h>
 #include <unistd.h>
 #include <errno.h>

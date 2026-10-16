@@ -4,7 +4,7 @@
 
     Direct operands and project targets reach a build as the same
     `CliRequest`. This module places the target's native artifacts and lowers
-    them to toolchain actions; translation remains with the compiler driver.
+    them to toolchain actions; translation uses the shared compiler service.
 */
 
 #pragma once
@@ -54,9 +54,6 @@ static macro Stmt $report.build.archive_nested(Expr $input) =>
   Diagnostics.driver_error(
     %"cannot nest an archive in a static library: ${$input}");
 
-static macro Stmt $report.build.input_not_file(Expr $input) =>
-  Diagnostics.driver_error(%"input is not a regular file: ${$input}");
-
 static macro Stmt $report.build.runtime_missing(Expr $runtime) =>
   Diagnostics.driver_error(%"matching x2c runtime is unavailable: ${$runtime}");
 
@@ -80,16 +77,6 @@ static macro Stmt $report.build.debug_symbols(Expr $b) =>
 
 static macro Stmt $report.build.running(Expr $b) =>
   report_line(<phase>, %"Running ${$b.output}");
-
-static macro Stmt $report.build.input_directory(Expr $input) {
-  fprintf(stderr, "x2c: error: input is a directory: %s\n", $input);
-  fputs(
-    "note: pass source files, use a shell wildcard, or define a "
-    "manifest target\n", stderr);
-}
-
-static macro Stmt $report.build.input_missing(Expr $input) =>
-  fprintf(stderr, "x2c: error: input does not exist: %s\n", $input);
 
 static macro Stmt $report.build.translation_cached(Expr $input) =>
   fprintf(stderr, "x2c: up-to-date translate %s\n", $input);
@@ -220,7 +207,7 @@ static void _add_inputs(Build b) {
   foreach (String input, request.inputs) {
     // A dry run runs nothing and reads nothing, and a planned target's
     // archive exists only after the build it is printing would run.
-    if (!request.dry_run) Build.require_input(input);
+    if (!request.dry_run) CliRequest.require_input(input);
     if (Path.is_x2c_source(input)) b.xlat_n++;
     else if (input.endswith(".c")) b.c_sources.push(input);
     else if (input.endswith(".o") || input.endswith(".a"))
@@ -231,23 +218,7 @@ static void _add_inputs(Build b) {
   }
 }
 
-/** Exits with a driver error unless `input` names a regular file.
-    A wildcard or directory operand adds a note on what to pass instead.
-*/
-void Build.require_input(String input) {
-  if (!input) Diagnostics.driver_error("input path is empty");
-  if (Path.is_file(input)) return;
-  if (Path.is_dir(input)) {
-    $report.build.input_directory(input);
-    exit(2);
-  }
-  if (Path.exists(input))
-    $report.build.input_not_file(input);
-  $report.build.input_missing(input);
-  if (strpbrk(input, "*?["))
-    fputs("note: x2c does not expand wildcard operands\n", stderr);
-  exit(2);
-}
+
 
 /* Compile-only builds make one object per source, so every input compiles
    and several objects need a build directory. */
@@ -858,7 +829,7 @@ static ToolAction _final_action(Build b, String output, List inputs) {
   if (b.request.kind == <static-lib>)
     return b.toolchain.archive_action(output, inputs);
   if (b.request.kind == <module>)
-    return b.toolchain.module_action(output, inputs);
+    return b.toolchain.module_action(output, inputs, Compiler.driver_executable());
   return b.toolchain.link_action(output, inputs);
 }
 
@@ -1284,6 +1255,8 @@ static uint64_t _state_base(CliRequest request, String tool, int &ok) {
   String compiler = Compiler.identity();
   if (!compiler) ok = 0;
   hash = _state_text(hash, compiler);
+  if (!_command_identity) ok = 0;
+  hash = _state_text(hash, _command_identity);
   hash = _state_tool(hash, tool, ok);
   return hash;
 }
@@ -1393,4 +1366,12 @@ static double _wall_seconds(void) {
   struct timespec now;
   if (clock_gettime(CLOCK_REALTIME, &now)) return 0;
   return (double) now.tv_sec + (double) now.tv_nsec / 1e9;
+}
+
+/* Captured above command and target Contexts, once per process. */
+static String _command_identity;
+
+/** Captures the workflow executable whose behavior participates in reuse. */
+void Build.initialize(void) {
+  _command_identity = Path.content_identity(x2c_get_executable());
 }

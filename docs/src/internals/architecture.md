@@ -552,8 +552,9 @@ the same flat output directory.
   rewrite;
 - `src/operator-ledger.x` -- operator precedence, compound assignment,
   and protocol-member mappings from one compile-time ledger;
-- `src/cli.x`, `src/main.x` -- option metadata and parsing, dispatch, logging,
-  the per-file translation loop, and output/exit policy;
+- `src/cli.x`, `src/main.x` -- option metadata, parsing, and dispatch;
+- `src/translation.x` -- synchronous translation, inspections, worker
+  scheduling, ordered diagnostics, and signal forwarding;
 - `src/frontend.x` -- configured source stages, process translation support,
   and sequential unit Context/Type lifetimes;
 - `src/meta-project.x` -- the project meta build: the helper program that
@@ -562,16 +563,15 @@ the same flat output directory.
   request and one reply per call, with its timeout and failures;
 - `commands/repl/` -- terminal interaction, inline editing and history,
   persistent submissions, and named inspection over the compiler session API;
-- `src/project.x`, `src/build.x`, `src/toolchain.x` -- manifest membership and
-  target relationships, typed native build requests and incremental state,
-  and host compile/archive/link actions;
+- `src/project.x`, `src/toolchain.x` -- shared manifest membership, target
+  relationships, and host compile/archive/link primitives;
+- `commands/build/` -- application build and run orchestration, incremental
+  state, script executable caching, locking, and execution;
 - `src/report.x` -- dependency-free terminal progress and stable completion
   receipts on standard error;
 - `commands/package/` -- package installation, removal, and listing under the
   x2c home, project lockfile preparation, and source-package builds through
   the matching compiler; fetch, digest, and extraction use host tools;
-- `src/script.x` -- `x2c script`: the per-user executable cache, its lock,
-  and executing a current or freshly built script;
 - `src/deps.x` -- x2c dependency parsing and atomic depfile publication;
 - `src/compiler.x` -- shared compiler state, with members under
   `src/compiler/` for parsing (tokens, collection, the full parse, top-level

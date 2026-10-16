@@ -192,9 +192,12 @@ String Compiler.driver_executable(void) {
   if (!path) {
     String parent = Path.dirname(executable_path);
     String stage = Path.dirname(parent);
+    String prefix = Path.basename(parent) == "x2c"
+      ? Path.dirname(stage) : root_path;
     path = Path.dirname(stage) == %"$root_path/builds"
-      ? %"$stage/x2c" : %"$root_path/bin/x2c";
+      ? %"$stage/x2c" : %"$prefix/bin/x2c";
   }
+  path = Path.absolute(path);
   return Path.content_identity(path) == active_identity ? path : NULL;
 }
 
@@ -205,8 +208,9 @@ String Compiler.home_dir(void) => root_found ? root_path : NULL;
     or NULL for any other compiler.
 */
 String Compiler.stage_dir(void) {
-  if (!executable_path) return NULL;
-  String stage = Path.dirname(executable_path);
+  String driver = Compiler.driver_executable();
+  if (!driver) return NULL;
+  String stage = Path.dirname(driver);
   return Path.dirname(stage) == %"$root_path/builds" ? stage : NULL;
 }
 
@@ -221,6 +225,10 @@ String Compiler.home_libexec(void) {
   String stage = Compiler.stage_dir();
   if (stage) return %"$stage/libexec";
   String home = Compiler.home_dir();
+  if (!home) {
+    String driver = Compiler.driver_executable();
+    if (driver) home = Path.dirname(Path.dirname(driver));
+  }
   return home ? %"$home/libexec/x2c" : NULL;
 }
 
@@ -481,4 +489,14 @@ void Diagnostics.host_error(List detail) {
   // Quoted, the key survives a host preprocessor that expands `errno`.
   long error = detail.assoc(<"errno">);
   $report.utils.host_failed(detail, subject, error);
+}
+
+/** Returns the per-user cache root: `X2C_CACHE_DIR`, `XDG_CACHE_HOME/x2c`,
+    or `~/.cache/x2c`, whichever is set first, or NULL when none is.
+*/
+String Compiler.cache_root(void) {
+  String explicit = Env.get("X2C_CACHE_DIR"), xdg = Env.get("XDG_CACHE_HOME");
+  String home = Env.get("HOME");
+  return explicit ? explicit : xdg ? %"$xdg/x2c" :
+         home ? %"$home/.cache/x2c" : NULL;
 }

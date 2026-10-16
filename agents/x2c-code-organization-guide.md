@@ -9,7 +9,7 @@ These maps list the current owners. The generated
 
 Files below are relative to `src/` unless a path is shown.
 
-- entry and shared state: `main.x`, `cli.x`, `frontend.x`, `compiler.x`
+- entry and shared state: `main.x`, `cli.x`, `translation.x`, `frontend.x`, `compiler.x`
   (its members in `compiler/` hold parsing, declarations, generated names,
   lifecycle, binding facts, the literal cache, match patterns, and source
   files and locations), `symbols.x`, `diagnostics.x`, `sourceview.x`,
@@ -38,8 +38,9 @@ Files below are relative to `src/` unless a path is shown.
   `component-string-switch.x` (switches on a String), and
   `component-try.x` (try, catch, and finally);
 - output: `cache.x`, `generate.x`, `emit.x`, `format.x`;
-- native and project driver: `build.x`, `project.x`, `toolchain.x`,
-  `script.x`; the editor adapter lives in `commands/editor/`;
+- project planning and native primitives: `project.x`, `toolchain.x`;
+  build/run/script workflows live in `commands/build/`, and the editor
+  adapter lives in `commands/editor/`;
 - external package management: `commands/package/` owns installation, removal,
   listing, and project dependency lockfiles.
 

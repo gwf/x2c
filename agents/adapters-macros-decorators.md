@@ -322,7 +322,7 @@ repeats its exact technical reason.
 `$error.fallback` is defined for user-defined resumable causes; a shared cause
 must not use it because shared causes never return to the raise.
 
-`src/build.x` reaches the runtime's own
+`commands/build/build.x` reaches the runtime's own
 `Path.make_dirs` and `Path.remove_tree` rather than keeping compiler-local
 filesystem helpers. The Lisp evaluator's local target
 rows in `lib/lisp-targets.x` produce the native-target Map. Use macros,

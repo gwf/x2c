@@ -706,8 +706,11 @@ printf '#include "x2c.x"\nint library_value(void) { return 9; }\n' \
 
 # A static-library build does not link x2c and must not require a matching
 # runtime beside the invoking compiler.
-mkdir -p "$BUILD/standalone/bin"
+mkdir -p "$BUILD/standalone/bin" "$BUILD/standalone/libexec/x2c" \
+  "$BUILD/standalone/include" "$BUILD/standalone/etc"
+cp "$ROOT/etc/compiler-sdk.xlisp" "$BUILD/standalone/etc/"
 cp "$X2C" "$BUILD/standalone/bin/x2c"
+cp "$(dirname "$X2C")/libexec/x2c-build" "$BUILD/standalone/libexec/x2c/"
 (
   cd "$BUILD/standalone"
   ./bin/x2c build --kind static-library \

@@ -116,7 +116,7 @@ static String _recorded_tool(String name) {
 */
 static void _layout(Toolchain t) {
   String home = Compiler.home_dir(), stage = Compiler.stage_dir();
-  String executable = x2c_get_executable(), prefix = home;
+  String executable = Compiler.driver_executable(), prefix = home;
   if (!prefix)
     prefix = Path.dirname(executable ? Path.dirname(executable) : ".");
   t.include_dir = %"$prefix/include/x2c";
@@ -211,22 +211,23 @@ ToolAction Toolchain.link_action(Toolchain t, String output, List inputs) =>
     %(${t.cc} @inputs @{t.ld_args} ${t.runtime_lib} "-lm" "-o" $output));
 
 /** Builds but does not start the link of a native module. The module leaves
-    the x2c runtime unresolved and uses the loading compiler's copy. macOS
-    links a bundle against the running compiler, so a runtime function the
-    compiler lacks fails this link. Other hosts link a shared object whose
+    the x2c runtime unresolved and uses the loading process's copy. macOS
+    links a bundle against `loader`, so a runtime function that executable
+    lacks fails this link. Other hosts link a shared object whose
     calls to its own functions never bind to a same-named compiler function;
     a missing runtime function fails when the compiler loads it.
 
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the action.
 */
-ToolAction Toolchain.module_action(Toolchain t, String output, List inputs) =>
+ToolAction Toolchain.module_action(
+  Toolchain t, String output, List inputs, String loader) =>
   _action(
     t,
-    <link>, %(${t.cc} @inputs @{t.ld_args} @{_module_shape()} "-o" $output));
+    <link>, %(${t.cc} @inputs @{t.ld_args} @{_module_shape(loader)} "-o" $output));
 
-static List _module_shape(void) {
+static List _module_shape(String loader) {
 #ifdef __APPLE__
-  return %("-bundle" "-bundle_loader" ${x2c_get_executable()});
+  return %("-bundle" "-bundle_loader" $loader);
 #else
   return %("-shared" "-Wl,-Bsymbolic-functions");
 #endif

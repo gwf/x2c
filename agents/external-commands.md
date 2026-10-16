@@ -31,6 +31,12 @@ its current owner before moving a tool or adding rules to a command.
    raw arguments after the command name, including `@` arguments, and does
    not search `PATH`. `x2c help <name>` runs the command's `--help`.
 
+`build` is the bootstrap exception: numeric stage Make rules translate and
+natively link `x2c-build` after that stage's compiler and runtime. Those rules
+also own the shared compiler archive and embedded identity used by all commands.
+The ordinary command loop excludes `build`, so constructing a stage never needs
+an existing build command. Its driver entry points retain the shared CLI parser.
+
 ## Check the result
 
 Put a smoke test at `commands/<name>/tests/run.sh`. Follow

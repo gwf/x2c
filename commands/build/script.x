@@ -33,16 +33,6 @@ static macro Stmt $report.script.execute_failed(Expr $executable) {
    include the executable `run`, the script's path in `source`, and `lock`,
    which one build of the script holds at a time. */
 
-/** Returns the per-user cache root: `X2C_CACHE_DIR`, `XDG_CACHE_HOME/x2c`,
-    or `~/.cache/x2c`, whichever is set first, or NULL when none is.
-*/
-String Compiler.cache_root(void) {
-  String explicit = Env.get("X2C_CACHE_DIR"), xdg = Env.get("XDG_CACHE_HOME");
-  String home = Env.get("HOME");
-  return explicit ? explicit : xdg ? %"$xdg/x2c" :
-         home ? %"$home/.cache/x2c" : NULL;
-}
-
 /** Points `request` at its script's cache directory and executes the cached
     executable when it is current; that path does not return. Otherwise it
     locks the directory against concurrent builds of the same script, removes

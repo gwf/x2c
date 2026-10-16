@@ -364,8 +364,12 @@ static CliCommand *_command_row(const char *word) {
     constructing request values.
 */
 CliRequest CliRequest.parse(int argc, char **argv) {
-  Array args = $auto([]);
-  _read_arguments(args, argc, argv);
+  Array args = $auto(CliRequest.read_arguments(argc, argv));
+  return CliRequest.parse_arguments(args);
+}
+
+/** Parses already-read arguments, preserving deferred script expansion. */
+CliRequest CliRequest.parse_arguments(Array args) {
   if (!args.len()) _help_exit(0, 2);
   String first = args[0];
   if (!first)
@@ -385,14 +389,17 @@ CliRequest CliRequest.parse(int argc, char **argv) {
   $report.cli.command_unknown(first);
 }
 
-/* A script's arguments are its own, so `script` expands response files
-   only while it parses its options. */
-static void _read_arguments(Array args, int argc, char **argv) {
+/** Reads initial arguments. Script options defer response-file expansion
+    until parsing, so program arguments remain literal. The caller owns
+    the returned Array. */
+Array CliRequest.read_arguments(int argc, char **argv) {
+  Array args = [];
   int script = argc > 1 && !strcmp(argv[1], "script");
   for (int i = 1; i < argc; i++) {
     if (script) args.push(String.new(argv[i]));
     else _expand_argument(args, String.new(argv[i]), NULL);
   }
+  return args;
 }
 
 /* One argument list read into a request. Options extend the argument lists
@@ -1267,4 +1274,36 @@ List CliRequest.package_roots(CliRequest request) {
   String home = Compiler.home_packages();
   if (!Path.is_dir(home)) return request.package_dirs;
   return request.package_dirs.append(cons(home, NULL));
+}
+
+
+static macro Stmt $report.cli.input_not_file(Expr $input) =>
+  Diagnostics.driver_error(%"input is not a regular file: ${$input}");
+
+static macro Stmt $report.cli.input_directory(Expr $input) {
+  fprintf(stderr, "x2c: error: input is a directory: %s\n", $input);
+  fputs(
+    "note: pass source files, use a shell wildcard, or define a "
+    "manifest target\n", stderr);
+}
+
+static macro Stmt $report.cli.input_missing(Expr $input) =>
+  fprintf(stderr, "x2c: error: input does not exist: %s\n", $input);
+
+/** Exits with a driver error unless `input` names a regular file.
+    A wildcard or directory operand adds a note on what to pass instead.
+*/
+void CliRequest.require_input(String input) {
+  if (!input) Diagnostics.driver_error("input path is empty");
+  if (Path.is_file(input)) return;
+  if (Path.is_dir(input)) {
+    $report.cli.input_directory(input);
+    exit(2);
+  }
+  if (Path.exists(input))
+    $report.cli.input_not_file(input);
+  $report.cli.input_missing(input);
+  if (strpbrk(input, "*?["))
+    fputs("note: x2c does not expand wildcard operands\n", stderr);
+  exit(2);
 }
