@@ -271,9 +271,10 @@ A group compiles into the unit that declares it. A package can therefore
 publish its bindings behind one public installer that a consumer calls after
 importing it. See [Wrapping a C Library](../guide/wrapping-c-libraries.md).
 
-`$lisp.bind` and grouped bindings accept the scalar and object types `Func`
-supports. Native functions are trusted host code. Pointers, structs,
-callbacks, and package-specific opaque objects cannot be passed this way.
+`$lisp.bind` and grouped bindings accept the parameter and result types
+`Func` supports, including untagged pointers and structs passed as `<p48>`
+addresses. Native functions are trusted host code. A package-specific opaque
+object needs its own `Var` adoption.
 
 Load a Lisp program with `Lisp.eval_file`, then evaluate runtime `List` forms
 with `Lisp.eval`. `$` inside `%(...)` inserts live x2c values; it is unrelated

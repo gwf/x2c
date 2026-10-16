@@ -148,8 +148,8 @@ and comparisons, casts, address and dereference, and array indexing;
 declarations, assignment through a name or an index, `i++` and `i--` as
 whole statements, blocks, `if`, `while`, and `return`; and direct calls to
 functions verified earlier in the same unit. The first construct outside
-that set stops the run with its source location. Nothing outside the set is
-treated as having no effect. Local `static` and `extern` declarations are
+that set stops the run with its source location; the run never skips an
+unsupported construct. Local `static` and `extern` declarations are
 refused because their persistent or external state is not modeled.
 
 The trusted base is HOL Light and its theory, the C* symbolic executor and

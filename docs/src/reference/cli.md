@@ -85,6 +85,8 @@ Symbol collection options apply to `translate`, `build`, and `run`:
 --cpp-symbols           Use CPP collection for this translation
 ```
 
+### Source mapping
+
 `--source-map` adds source locations to generated C for `translate`, `build`,
 and `run`. It is off by default. Combine it with native debug information to
 set breakpoints, step through statements, and read backtraces in the original
@@ -206,7 +208,7 @@ input may include another through a directory, as in
 `translate`, `build`, and `run` default to the host's online processor count
 for translation and native compilation. Detection failure falls back to one
 job. Under Make (`MAKELEVEL` greater than zero), the automatic default is one
-job so the outer build owns concurrency. An explicit `-j N` or `--jobs N`
+job so the outer `make` controls parallelism. An explicit `-j N` or `--jobs N`
 overrides either default. The online count does not account for Linux CPU
 affinity, container quotas, or memory limits; use `-j` to choose a smaller
 limit in those environments.
@@ -470,10 +472,10 @@ sources = ["src/*.x"]
 ```
 
 The directory may be missing or empty; `x2c new .` fills the current empty
-directory. `new` refuses any other existing path and never overwrites a
-file. The target name is the directory's last component and may contain
-letters, digits, `_`, and `-`. `-q` suppresses the `x2c: created <dir>`
-line.
+directory. `new` exits with an error for any other existing path and never
+overwrites a file. The target name is the directory's last component and may
+contain letters, digits, `_`, and `-`. `-q` suppresses the `x2c: created
+<dir>` line.
 
 ## Project manifests
 
@@ -560,7 +562,7 @@ rewritten to the manifest's pins. A version the index cannot supply stops the
 build with an error that includes both versions. A dry run installs nothing
 and writes no lockfile, and the editor adapter never installs.
 
-## Include and tool ownership
+## Include and package directories
 
 `-I <dir>` is the shared include option. Repeated paths keep command order,
 and the first matching path wins in x2c quote-include collection, any
@@ -699,9 +701,8 @@ describes which errors are reported together.
 Ordinary translation reports warnings without stopping the build. Warnings
 do not count against `--max-errors`. The internal self-host stage option
 `--fatal-warnings` makes warnings fail those builds; it is not a public
-per-warning suppression or escalation control. A warning describes
-something the compiler can see and you may have arranged deliberately, so
-code that means what it says can be left as written.
+per-warning suppression or escalation control. A warning reports code that
+may be deliberate; leave the code unchanged when it is.
 
 Eight codes are reported as warnings:
 
@@ -713,7 +714,7 @@ Eight codes are reported as warnings:
 - `bad-free` says `Scope.free` or `Scope.realloc` was given a literal, a
   local's address, or other storage no Scope allocator returned.
 - `literal` says a bare word inside a macro is a `Symbol` where a value was
-  probably meant, and names the unquoted spelling that inserts the value.
+  probably meant, and shows the unquoted spelling that inserts the value.
 - `macro` carries what a macro reported through `x2c.diagnostic.warn`, at the
   invocation, with the notes the macro supplied.
 - `conversion` says a cast or explicit converter call spells a conversion
@@ -724,7 +725,7 @@ Eight codes are reported as warnings:
   defines.
 
 [The Region Model](../guide/regions.md) explains what the first three cover
-and what they cannot see. [Scopes and Lifetime](../guide/memory.md) shows
+and what they do not detect. [Scopes and Lifetime](../guide/memory.md) shows
 the patterns that avoid them.
 
 `--diagnostics-file <file>` writes the same diagnostics to `<file>` as JSON
@@ -809,7 +810,7 @@ settings still rebuild the affected actions.
 
 External Make builds are supported. They can call `translate --out-dir`,
 include its `.d` files, and set their own C compiler and linker flags. The
-compiler driver does not replace a project that runs its own native build.
+A project can run its own native build instead of using the driver.
 
 For example, from the repository directory you can translate an example and
 compile its C output yourself:
