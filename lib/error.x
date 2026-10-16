@@ -19,14 +19,11 @@
 #include "match.x"
 #include "mutex.x"
 
-
-
 /** Names the structured-error runtime and its static operations.
     Programs do not construct `Error` values; automatic runtime initialization
     owns the per-thread handler, record, policy, and dispatch state.
 */
 typedef struct Error *Error;
-
 
 /** Identifies one `Error`-owned handler registration.
     An observing handle remains valid until `Error.pop`; a transferring-catch
@@ -34,7 +31,6 @@ typedef struct Error *Error;
     `Context` cleanup and `Error` shutdown may reclaim a registration first.
 */
 typedef struct ErrorHandler *ErrorHandler;
-
 
 /** Handles a borrowed oldest-first `List` of errors raised since registration.
     `Error` invokes callbacks synchronously from innermost registration
@@ -44,7 +40,6 @@ typedef struct ErrorHandler *ErrorHandler;
     contents expire on return.
 */
 typedef Symbol (*ErrorHandlerFn)(List errors, Var data);
-
 
 /** Holds the process-lifetime plans of one compiler-generated filtered catch.
     `arms` is a zero-initialized static array of `arm_count` `Match` sites and
@@ -56,7 +51,6 @@ typedef struct ErrorCatchSite {
   MatchCaptureSite *arms;
   int default_arm, arm_count, state, fenced_arm;
 } ErrorCatchSite;
-
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -98,14 +92,12 @@ module struct ErrorHandler {
   $error.private.handler.fields();
 };
 
-
 /* One `Context`'s overlay: the policies and bound it sets, and the handler
    depth and record height its close returns to. */
 module typedef struct ErrorContextState {
   struct ErrorContextState *prev, Map policy, int bound, handler_depth;
   int stack_height;
 } *ErrorContextState;
-
 
 /* `handler_top` heads the registered handlers and `running_top` the detached
    catches whose arms run; during dispatch, `dispatch_saved` holds the
