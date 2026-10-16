@@ -181,6 +181,25 @@ static void map_updateindex_hashes_existing_key_once(void) {
   EXPECT_INT_EQ(map[key].integer(), 13);
 }
 
+static void map_update_boundaries_preserve_failure_order(void) {
+  $test.scoped();
+  Map map = {};
+  EXPECT_INT_EQ(map.updateindex(<count>, <+>, 3).integer(), 3);
+  EXPECT_INT_EQ(map.postfixindex(<count>, <++>).integer(), 3);
+  int caught = 0;
+  try Map.updateindex(NULL, void, <+>, void);
+  catch %(bad-arg *): caught++;
+  try map.updateindex(<missing>, <+>, "text");
+  catch %(bad-arg (key missing)): caught++;
+  try map.postfixindex(<missing>, <==>);
+  catch %(bad-arg (key missing)): caught++;
+  try map.updateindex(<count>, <+>, void);
+  catch %(void-op *): caught++;
+  EXPECT_INT_EQ(caught, 4);
+  EXPECT_INT_EQ(map.len(), 1);
+  EXPECT_INT_EQ(map[<count>].integer(), 4);
+}
+
 static void map_reports_exhausted_probe_invariant(void) {
   $test.scoped();
   Map map = {};
@@ -650,6 +669,7 @@ void map_suite(void) {
   $test.run(map_update_counted_pairs);
   $test.run(map_update_avoids_growth);
   $test.run(map_updateindex_hashes_existing_key_once);
+  $test.run(map_update_boundaries_preserve_failure_order);
   $test.run(map_reports_exhausted_probe_invariant);
   $test.run(map_growth_preserves_entries);
   $test.run(map_growth_survives_a_nested_region);

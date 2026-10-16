@@ -363,15 +363,8 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
 }
 
 macro Unit $map.typed.operations(
-  Type $map, Type $key, Type $value, Name $update,
-  Name $bad_arg,
-  Name $bad_op,
-  Name $capacity_valid,
-  Name $value_at,
-  Literal $zero,
-  Literal $one,
-  Literal $postfix,
-  Literal $owner, Literal $boxed
+  Type $map, Type $key, Type $value, Name $bad_arg,
+  Name $capacity_valid, Literal $zero, Literal $owner, Literal $boxed
 ) {
   $map $map.new(void);
   $map $map.new_capacity(unsigned);
@@ -384,8 +377,6 @@ macro Unit $map.typed.operations(
   int $map.contains($map, $key);
   void $map.set($map, $key, $value);
   $value $map.setindex($map, $key, $value);
-  $value $map.updateindex($map, $key, Symbol, $value);
-  $value $map.postfixindex($map, $key, Symbol);
   int $map.try_del($map map, $key key, $value &?out);
   $value $map.del($map, $key);
   $map $map.copy($map);
@@ -503,69 +494,6 @@ macro Unit $map.typed.operations(
     return val;
   }
 
-  /** Applies `op` to the value for `key` and returns the stored result.
-      `+` inserts `rhs` when the key is absent; other operations require an
-      existing key. Supported operations depend on the generated value type.
-      Raises: `<bad-arg>` for a null map or missing required key, a cause from
-      the generated value operation, or an allocation, size, or invariant cause
-      while inserting. Invalid operations leave an existing value unchanged.
-      Allocation and size failures leave the table unchanged.
-  */
-  $value $map.updateindex($map map, $key key, Symbol op, $value rhs) {
-    if ((void *) map == 0) (void) $bad_arg($owner);
-    int insert = !$boxed;
-    if ($boxed) {
-      Var boxed_rhs = rhs;
-      X2CVarNumericInfo info;
-      insert = Var.encoding_valid(boxed_rhs) &&
-        Var.numeric_info(boxed_rhs.tag(), info);
-      if ((Var) key is void || boxed_rhs is void) raise %(void-op);
-    }
-    if (op == <+> && insert) {
-      int inserted;
-      $value *stored = map.get_or_insert(&key, &rhs, &inserted);
-      if (inserted) return rhs;
-      return $update(stored, op, rhs);
-    }
-    if ($boxed && (Var) key is void) raise %(void-op);
-    long index = map.find_index(&key);
-    if (index < 0) {
-      if ($boxed) raise %(bad-arg (key $key));
-      (void) $bad_arg($owner);
-    }
-    $value *stored = $value_at(map, (unsigned) index);
-    return $update(stored, op, rhs);
-  }
-
-  /** Applies postfix `++` or `--` and returns the previous value.
-      The key must already exist, and only generated numeric families support
-      these operations.
-      Raises: `<bad-arg>` for a null map or absent key, or `<bad-op>` for an
-      unsupported operation. These failures leave the value unchanged.
-  */
-  $value $map.postfixindex($map map, $key key, Symbol op) {
-    if ((void *) map == 0) (void) $bad_arg($owner);
-    if ($boxed && (Var) key is void) raise %(void-op);
-    long index = map.find_index(&key);
-    if (index < 0) {
-      if ($boxed) raise %(bad-arg (key $key));
-      (void) $bad_arg($owner);
-    }
-    $value *stored = $value_at(map, (unsigned) index);
-    $value old = stored[0];
-    if ($boxed) {
-      Var boxed_value = old;
-      Var.postfix(boxed_value, op);
-      stored[0] = boxed_value;
-      return old;
-    }
-    if (!$postfix) (void) $bad_op(op);
-    if (op == <++>) $update(stored, <+>, $one);
-    else if (op == <-->) $update(stored, <->, $one);
-    else (void) $bad_op(op);
-    return old;
-  }
-
   /** Removes `key`, writes its value to `out`, and returns one when present.
       A null map, null `out`, or absent key returns zero without writing or
       mutation. Successful removal invalidates live cursors and iterators.
@@ -627,6 +555,58 @@ macro Unit $map.typed.operations(
   int $map.equal($map a, $map b) {
     return a.equal_entries(b);
   }
+}
+
+/* Native value updates share lookup and insertion; Var updates belong to Map. */
+macro Unit $map.typed.updates(
+  Type $map, Type $key, Type $value, Name $update, Name $bad_arg,
+  Name $bad_op, Name $value_at, Literal $one, Literal $postfix,
+  Literal $owner
+) {
+  $value $map.updateindex($map, $key, Symbol, $value);
+  $value $map.postfixindex($map, $key, Symbol);
+
+  /** Applies `op` to the value for `key` and returns the stored result.
+      `+` inserts `rhs` when the key is absent; other operations require an
+      existing key. Supported operations depend on the generated value type.
+      Raises: `<bad-arg>` for a null map or missing required key, a cause from
+      the generated value operation, or an allocation, size, or invariant cause
+      while inserting. Invalid operations leave an existing value unchanged.
+      Allocation and size failures leave the table unchanged.
+  */
+  $value $map.updateindex($map map, $key key, Symbol op, $value rhs) {
+    if ((void *) map == 0) (void) $bad_arg($owner);
+    if (op == <+>) {
+      int inserted;
+      $value *stored = map.get_or_insert(&key, &rhs, &inserted);
+      if (inserted) return rhs;
+      return $update(stored, op, rhs);
+    }
+    long index = map.find_index(&key);
+    if (index < 0) (void) $bad_arg($owner);
+    $value *stored = $value_at(map, (unsigned) index);
+    return $update(stored, op, rhs);
+  }
+
+  /** Applies postfix `++` or `--` and returns the previous value.
+      The key must already exist, and only generated numeric families support
+      these operations.
+      Raises: `<bad-arg>` for a null map or absent key, or `<bad-op>` for an
+      unsupported operation. These failures leave the value unchanged.
+  */
+  $value $map.postfixindex($map map, $key key, Symbol op) {
+    if ((void *) map == 0) (void) $bad_arg($owner);
+    long index = map.find_index(&key);
+    if (index < 0) (void) $bad_arg($owner);
+    $value *stored = $value_at(map, (unsigned) index);
+    $value old = stored[0];
+    if (!$postfix) (void) $bad_op(op);
+    if (op == <++>) $update(stored, <+>, $one);
+    else if (op == <-->) $update(stored, <->, $one);
+    else (void) $bad_op(op);
+    return old;
+  }
+
 }
 
 macro Unit $map.core.observe(
@@ -956,8 +936,10 @@ macro Unit $map.typed.family(Type $family, Type $key, Type $value,
   Name $value_at, Name $unbox, Literal $zero, Literal $one,
   Literal $postfix, Literal $owner) {
   $map.typed.operations(
-    $family, $key, $value, $update, $bad_arg, $bad_op, $capacity_valid,
-    $value_at, $zero, $one, $postfix, $owner, 0);
+    $family, $key, $value, $bad_arg, $capacity_valid, $zero, $owner, 0);
+  $map.typed.updates(
+    $family, $key, $value, $update, $bad_arg, $bad_op, $value_at,
+    $one, $postfix, $owner);
   $map.typed.convert($family, $unbox);
 }
 
