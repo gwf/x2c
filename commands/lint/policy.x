@@ -7,10 +7,9 @@
 */
 #include "lint.x"
 
-
 static int _runtime(Lint l) =>
-  l.path.startswith("src/") || l.path.contains("/src/") ||
-  l.path.startswith("lib/") || l.path.contains("/lib/")
+  l.path.startswith("src/") || "/src/" in l.path ||
+  l.path.startswith("lib/") || "/lib/" in l.path
 
 static int _empty_constructor(Lint l, int at):
   String name = l.tokens[at].text
@@ -111,7 +110,7 @@ static void _metrics(Lint l):
   for (int at = 0; at < l.count; at++):
     Token t = l.at(at)
     if t.type != <comment> || t.col != 1 ||
-       !t.text.startswith("//") || t.text.contains("lint:"): continue
+       !t.text.startswith("//") || "lint:" in t.text: continue
     if t.line > 1 && l.first[t.line - 1] >= 0 ||
        l.first[t.line + 1] >= 0: continue
     String label = t.text[2:].strip(NULL)
@@ -190,8 +189,8 @@ static int _mentioned(Lint *lints, int count, int owner, List function):
       if index == owner && t.line >= start.int() && t.line <= end.int():
         continue
       if t.type == <space> || t.type == <comment>: continue
-      if t.text.contains(emitted) || t.text.contains(display) ||
-         member && t.text.contains(member): return 1
+      if emitted in t.text || display in t.text ||
+         member && member in t.text: return 1
   return 0
 
 /** Reports static definitions with no bound reference or corpus spelling. */

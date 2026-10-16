@@ -17,7 +17,6 @@
 #include <ctype.h>
 #include <string.h>
 
-
 #include "error-macros.x"
 #include "grammar.x"
 
@@ -47,7 +46,8 @@ static const List trust_boundaries = %(
 static const SymbolSet shared_causes = $error.nonreturning.causes()
 
 /* Bare conditional bodies have no inner anchor. Scoring counts their actual
-   report_error calls, even when a macro supplied the call's source spelling. */
+   report_error calls, even when a macro supplied the call's source
+   spelling. */
 static void _function_reports(Compiler c, List ast, List report, Map facts):
   if !report: return
   foreach List function in ast:
@@ -227,7 +227,7 @@ static int _growth_check(Lint l, int from, int to):
          !code.contains(%"$expected=$owner.$size+1;"):
         continue
       foreach String grow in %("append" "push" "insert"):
-        if code.contains(%"$owner.$grow("): return 1
+        if %"$owner.$grow(" in code: return 1
   return 0
 
 /* A fresh `[]` or `{}` assigned to a name that a later
@@ -427,7 +427,7 @@ static void _silent_guards(Lint l, List function, Map diagnostics):
   String name = lint_name(function)
   String text = name
   if text in trust_boundaries || text.startswith("_macro_sdk_") ||
-     l.path.endswith("src/collect.x") && text.contains("artifact"):
+     l.path.endswith("src/collect.x") && "artifact" in text:
     return
   int to = end.int()
   for (int at = start.int(); at < to; at = l.next(at)):

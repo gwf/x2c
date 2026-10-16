@@ -14,7 +14,6 @@
 #include <ctype.h>
 #include <string.h>
 
-
 static const List pair_words = %(
   ("acquire" "release") ("begin" "commit") ("begin" "rollback")
   ("pin" "unpin") ("open" "dispose")
@@ -82,7 +81,7 @@ static void _bookkeeping(Lint l, List function):
     for (int k = l.next(at); k < end.int() && l.tokens[k].type != <;> &&
          l.tokens[k].line == t.line; k = l.next(k)):
       String op = l.tokens[k].text
-      if lint_code(l.at(k)) && (op.contains("=") || op == "++" || op == "--"):
+      if lint_code(l.at(k)) && ("=" in op || op == "++" || op == "--"):
         last = k
     if last < 0: continue
     stats++

@@ -12,13 +12,12 @@
 #include <ctype.h>
 #include <string.h>
 
-
 static const SymbolSet qualifier_words =
   %<<const volatile restrict register struct union enum>>
 
 /* Whether `path` has a directory component named `name`. */
 static int _under(String path, String name) =>
-  path.startswith(%"$name/") || path.contains(%"/$name/")
+  path.startswith(%"$name/") || %"/$name/" in path
 
 /* The line of the first `(` among the compiler's tokens `start` to `end`.
    Returns 0 for a macro invocation, whose declarations are generated, and
@@ -387,7 +386,7 @@ void Lint.declaration_rules(Lint l, Compiler c, List ast):
   if "saved-local" in l.selected: _saved_locals(l, c, ast)
   if "uncalled-static-function" in l.selected:
     _unused_statics(l, c, ast)
-  if l.selected.contains("reference-parameter"):
+  if "reference-parameter" in l.selected:
     _reference_parameters(l, c, ast)
   foreach List row in c.definition_rows(ast):
     match row:
@@ -396,5 +395,5 @@ void Lint.declaration_rules(Lint l, Compiler c, List ast):
         // A script unit's generated entry points span tokens past the file.
         if l.layout || end >= l.count: continue
         l.functions.push(%($name $start $body $end))
-        if l.selected.contains("subject-parameter-name"):
+        if "subject-parameter-name" in l.selected:
           _subject(l, start, body, end)

@@ -50,7 +50,6 @@ typedef struct Lint:
   Array findings, edits, functions, unused
 *Lint
 
-
 static const Rule rules[] = {
   {"same-line-else", <style>, <violation>, "ST-1"},
   {"empty-constructor", <style>, <candidate>, "EX-1"},

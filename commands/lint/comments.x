@@ -10,7 +10,6 @@
 #include <ctype.h>
 #include <string.h>
 
-
 static typedef struct Comment:
   Symbol kind
   int start, end, first, last
@@ -222,15 +221,15 @@ static void _comment(
   String name = _declared(l, next, declarations)
   if _mentions(lower, history_phrases):
     l.add("comment-history", c.start, "history or unfinished work")
-  if lower.contains("prevent null pointer dereference") ||
-     lower.contains("check null") || lower.contains("check for null"):
+  if "prevent null pointer dereference" in lower ||
+     "check null" in lower || "check for null" in lower:
     l.add("comment-null-guard", c.start, "narrates an obvious null guard")
   int letters = 0, upper = 1
   for (char *ch = text ? text : ""; *ch; ch++):
     if isalpha((unsigned char) *ch):
       letters++
       if islower((unsigned char) *ch): upper = 0
-  int decorated = text.contains("----") || text.contains("====")
+  int decorated = "----" in text || "====" in text
   if c.kind == <line> && (decorated || letters >= 4 && upper && count <= 8):
     l.add("section-label", c.start, "decorative or all-capitals label")
   else if count <= 4 && lower in catalog_labels:
@@ -260,7 +259,7 @@ static void _comment(
   if (tier == "contract" || tier == "internal") &&
      declarations[next] != <template>:
     l.add("doc-comment-tier", c.start, %"doc comment in a $tier module")
-  if text.contains("@param") || text.contains("@return") ||
+  if "@param" in text || "@return" in text ||
      lint_phrase(text, "Parameters:") || lint_phrase(text, "Returns:"):
     l.add("doc-boilerplate", c.start, "parameter or return boilerplate")
   if declarations[next] != <type> && code && code.startswith("static") &&
