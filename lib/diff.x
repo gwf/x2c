@@ -13,9 +13,7 @@
 #include "x2c.x"
 
 /** The receiverless owner of the difference operations. */
-typedef enum Diff {
-  DIFF_NAMESPACE
-} Diff;
+typedef Symbol Diff;
 
 // line edits
 

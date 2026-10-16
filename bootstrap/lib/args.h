@@ -6,10 +6,7 @@
 #define __GUARD_0xBE511011__
 
 #include "x2c.h"
-typedef enum Args{
-  ARGS_NAMESPACE
-}
-Args;
+typedef Symbol Args;
 
 Map Args_parse(List args, List spec);
 

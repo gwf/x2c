@@ -6,10 +6,7 @@
 #define __GUARD_0xC2F02139__
 
 #include "x2c.h"
-typedef enum Diff{
-  DIFF_NAMESPACE
-}
-Diff;
+typedef Symbol Diff;
 
 List Diff_lines(String old, String new);
 

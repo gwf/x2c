@@ -8,10 +8,7 @@
 #include "private-keywords.h"
 #include "x2c.h"
 #include "path.h"
-typedef enum Json{
-  JSON_NAMESPACE
-}
-Json;
+typedef Symbol Json;
 
 typedef struct JsonBool * JsonBool;
 

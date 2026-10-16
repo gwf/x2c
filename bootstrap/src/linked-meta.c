@@ -11770,7 +11770,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _10853 = cons(_465, _10852);
   _10854 = String_new("lib/json.x");
   _10855 = String_var(_10854);
-  _10856 = String_new("22ee9d33");
+  _10856 = String_new("ef91c502");
   _10857 = String_var(_10856);
   _10858 = String_new("lib/path.x");
   _10859 = String_var(_10858);
@@ -12027,7 +12027,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _11110 = cons(_465, _11109);
   _11111 = String_new("lib/process.x");
   _11112 = String_var(_11111);
-  _11113 = String_new("f41559ae");
+  _11113 = String_new("2a2e4c9f");
   _11114 = String_var(_11113);
   _11115 = String_new("cwd:./fcntl.h");
   _11116 = String_var(_11115);

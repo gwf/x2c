@@ -25,7 +25,7 @@ each line's ending removed. Two equal texts give only `same` forms.
 Past 2,000 edits the differing middle is one run of deletions followed
 by one run of insertions.
 
-Source: `lib/diff.x:36`
+Source: `lib/diff.x:34`
 
 <a id="Diff.unified"></a>
 #### Diff.unified
@@ -36,18 +36,18 @@ Returns the unified difference between `old` and `new`, as `diff -u`
 prints it with `old_name` and `new_name` in the header and three lines
 of context, or NULL when the texts are equal line for line.
 
-Source: `lib/diff.x:181`
+Source: `lib/diff.x:179`
 
 ## Public types
 
 | Type | Kind | Summary |
 | --- | --- | --- |
-| [`Diff`](#Diff) | enum | The receiverless owner of the difference operations. |
+| [`Diff`](#Diff) | alias | The receiverless owner of the difference operations. |
 
 <a id="Diff"></a>
 ### Diff
 
-`typedef enum Diff { DIFF_NAMESPACE } Diff`
+`typedef Symbol Diff`
 
 The receiverless owner of the difference operations.
 

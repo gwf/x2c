@@ -2,10 +2,7 @@
 
 #define __GUARD_0xC2F02139__
 #include "x2c.h"
-typedef enum Diff{
-  DIFF_NAMESPACE
-}
-Diff;
+typedef Symbol Diff;
 
 static const int _LIMIT = 2000;
 

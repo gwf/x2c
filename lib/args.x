@@ -15,9 +15,7 @@
 /** The receiverless owner of `Args.parse` and the other argument
     operations.
 */
-typedef enum Args {
-  ARGS_NAMESPACE
-} Args;
+typedef Symbol Args;
 
 /* One spec row after its properties are read. An option is named by its
    first long spelling, or else its short one, without the dashes; `value`

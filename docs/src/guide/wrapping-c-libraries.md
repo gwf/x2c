@@ -152,12 +152,10 @@ file needs the layout. A public value type or inline field access would require
 that definition in the header.
 
 For functions with no receiver, a package can declare a type used only as a
-namespace. yyjson does this for `Json.parse`:
+namespace. The runtime does this for `Json.parse`:
 
 ```x2c
-typedef enum Json {
-  JSON_NAMESPACE
-} Json;
+typedef Symbol Json;
 ```
 
 ## Ownership and defer

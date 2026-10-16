@@ -46,9 +46,7 @@ meta Job Var.job(Var value);
 meta Var Job.var(Job job);
 
 /** The receiverless owner of `Env.get`. */
-typedef enum Env {
-  ENV_NAMESPACE
-} Env;
+typedef Symbol Env;
 
 #include "meta.x"
 

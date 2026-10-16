@@ -17,9 +17,7 @@ static keyword loop $private.loop;
 #include "path.x"
 
 /** The receiverless owner of `Json.parse` and the other JSON operations. */
-typedef enum Json {
-  JSON_NAMESPACE
-} Json;
+typedef Symbol Json;
 
 /** A JSON `true` or `false`, kept distinct from the numbers 1 and 0.
     The two values are process-lifetime singletons made by `Json.bool`.

@@ -48,10 +48,7 @@ Job Var_job(Var value);
 
 Var Job_var(Job job);
 
-typedef enum Env{
-  ENV_NAMESPACE
-}
-Env;
+typedef Symbol Env;
 
 extern char * * environ;
 
