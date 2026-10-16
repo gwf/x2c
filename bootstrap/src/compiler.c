@@ -428,8 +428,6 @@ static void f21_declarations_defaults____store(f21_declarations_defaults___Defau
 
 static List f16_source_locations____source_range(Compiler c, Token first, Token after);
 
-static List _fact(Compiler c, List key);
-
 static List f13_binding_facts____null_comparison(Compiler c, Var op, Var left, Var right, int * truth);
 
 static int f13_binding_facts____null_literal(List expr);
@@ -2293,7 +2291,7 @@ static List f19_parsing_definitions____inherited_contract(List prior, List curre
 }
 
 static List f19_parsing_definitions____contract(Compiler c, Type type, List binding){
-  return f19_parsing_definitions____completion_contract(type, _fact(c, cons(_161, cons(List_var(binding), NULL))), _fact(c, cons(_162, cons(List_var(binding), NULL))));
+  return f19_parsing_definitions____completion_contract(type, Compiler_fact(c, List_var(cons(_161, cons(List_var(binding), NULL)))), Compiler_fact(c, List_var(cons(_162, cons(List_var(binding), NULL)))));
 }
 
 static List f19_parsing_definitions____completion_contract(Type type, List method_identity, List self_signature){
@@ -3584,12 +3582,8 @@ String Compiler_emitted_binding_name(Compiler c, List binding){
   if(! _init_guard_) _file_init_();  Var renamed;  Map facts = Compiler_semantic_binding_facts(c);  if(Map_try_get(facts, List_var(cons(_461, cons(List_var(binding), NULL))), &(renamed))) return Var_as_string(renamed);  return Ast_binding_spelling(binding);
 }
 
-static List _fact(Compiler c, List key){
-  Var stored;  return Map_try_get(Compiler_semantic_binding_facts(c), List_var(key), &(stored)) ? Var_list_payload(stored) : NULL;
-}
-
 List Compiler_present_references(Compiler c){
-  if(! _init_guard_) _file_init_();  return _fact(c, _463);
+  if(! _init_guard_) _file_init_();  return Compiler_fact(c, List_var(_463));
 }
 
 void Compiler_mark_reference_present(Compiler c, List binding){
