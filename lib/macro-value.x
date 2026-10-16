@@ -55,8 +55,6 @@ typedef struct MacroCaseSite {
 #include "varconvert.x"
 #include <math.h>
 
-
-
 /** Starts a macro-valued `case` without `Macro_case_root` when `code` is
     its own view. `head`, the Symbol heading the derived pattern, is not a
     source wrapper or `seq`. Returns 2 after storing `code` in `*cursor`
@@ -74,7 +72,6 @@ inline int Macro_case_start(List code, Symbol head, List *cursor) {
     first != <seq> ? 0 : -1;
 }
 
-
 /** Whether an `expr` node whose content is `content` is its own view: the
     content is not a List headed by an Atom, as a retained invocation's is,
     or by the `expr` a template shell holds. */
@@ -85,13 +82,11 @@ inline int Macro_case_own(Var content) {
   return head && head != <expr>;
 }
 
-
 /** The short Symbol `value` holds, or 0 for any other value. */
 inline Symbol Macro_case_symbol(Var value) {
   Symbol symbol = value.u64 - VAR_SYMBOL_OFFSET;
   return symbol < 1ul << 51 ? symbol : 0;
 }
-
 
 /** Stores in `*cursor` the List a macro-valued `case` examines for
     `value`, beneath its source wrappers, and returns whether there is
@@ -105,7 +100,6 @@ inline int Macro_case_enter(Var value, List *cursor) {
   *cursor = node;
   return 1;
 }
-
 
 /** Retains a macro and hole patterns for repeated recognition. A pattern
     independent of subject bindings is derived once; contextual references
