@@ -479,9 +479,9 @@ static void _check(CliRequest r) {
     Diagnostics.driver_error("env accepts at most one name");
   if ((name in %<<install remove new>>) &&
       (!inputs || inputs.cdr()))
-    $report.cli.operand_required(name);
+    $fail.cli_operand_required(name);
   if (name == <list> && inputs)
-    $report.cli.operands_forbidden(name);
+    $fail.cli_operands_forbidden(name);
   if (name == <script> && !inputs)
     Diagnostics.driver_error("script requires a script file");
 }
