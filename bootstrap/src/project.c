@@ -75,7 +75,7 @@ typedef struct Project{
 
 static List _116, _114, _113, _111, _109, _108, _104, _103, _101, _99, _94;
 
-static String _136, _135, _134, _133, _132, _131, _130, _129, _128, _127, _126, _125, _124, _123, _122, _121, _120, _119, _118, _117, _106, _97, _95, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _124, _123, _122, _121, _120, _119, _118, _117, _106, _97, _95, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static Var _115, _112, _110, _107, _105, _102, _100, _98, _96, _93;
 
@@ -156,8 +156,6 @@ static int _bool_value(Project p, int line, String value);
 
 static int _array_open(String value);
 
-static int _name_ok(String name);
-
 static char * _skip_space(char * at);
 
 static ProjectTarget _target(Project p, String name);
@@ -222,20 +220,11 @@ _Noreturn static void _error(Project p, int line, String message);
 
 static void _error_name(Project p, int line, String message, String name);
 
-static String _starter_name(Path dir);
-
-static void _write_starter(Path dir, String name);
-
 static Var _x2c_gensym_lambda_0(Var library);
 
 static Var _x2c_gensym_func_adapt_0(Func _x2c_gensym_func_binding_0, const FuncArg * _x2c_gensym_func_argv_0);
 
 static Func _x2c_gensym_func_handle_0;
-
-#include "exception.h"
-
-
-
 
 _x2c_gensym_initializer_choice_05ED52D8_0((_x2c_gensym_func_handle_0 = x2c_func_shared(_x2c_gensym_func_adapt_0, _116)))
 static Var _x2c_gensym_lambda_1(String flag);
@@ -396,21 +385,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _119 = String_new("\'");
   _120 = String_new(": ");
   _121 = String_new(" \'");
-  _122 = String_new("..");
-  _123 = String_new("new: \'");
-  _124 = String_new("\' is not a target name; use letters, digits, \'_\', and \'-\'");
-  _125 = String_new("new: ");
-  _126 = String_new(" exists and is not an empty directory");
-  _127 = String_new("src");
-  _128 = String_new("[target.");
-  _129 = String_new("]\nsources = [\"src/*.x\"]\n");
-  _130 = String_new("src/main.x");
-  _131 = String_new("/*  main.x -- greet the name given on the command line */\n\n#include <stdio.h>\n\nint main(int argc, char **argv) {\n  String name = argc > 1 ? argv[1] : \"world\";\n  puts(%\"Hello, $name!\");\n  return 0;\n}\n");
-  _132 = String_new(".gitignore");
-  _133 = String_new(".x2c-build/\n");
-  _134 = String_new("-l");
-  _135 = String_new("-O");
-  _136 = String_new("-D");
+  _122 = String_new("-l");
+  _123 = String_new("-O");
+  _124 = String_new("-D");
   _x2c_gensym_static_initialize_0();
   _x2c_gensym_static_initialize_1();
   _x2c_gensym_static_initialize_2();
@@ -568,6 +545,8 @@ static void _enter_dependencies(Manifest * m){
   (* m).section = 273446;
 }
 
+int ProjectBuild_valid_name(String name);
+
 static void _target_header(Manifest * m, String header){
   Project p =(* m).project;
   String name = String_remove_prefix(header, _16), profile = NULL;
@@ -576,7 +555,7 @@ static void _target_header(Manifest * m, String header){
     profile = String_getslice(name, x2c_slice_bound(split + 9), (-2147483647 - 1), 1);
     name = String_getslice(name, (-2147483647 - 1), x2c_slice_bound(split), 1);
   }
-  if(! String_startswith(header, _16) || ! _name_ok(name) ||(split >= 0 && ! _name_ok(profile))) _error(p, (* m).line, _18);
+  if(! String_startswith(header, _16) || ! ProjectBuild_valid_name(name) ||(split >= 0 && ! ProjectBuild_valid_name(profile))) _error(p, (* m).line, _18);
   ProjectTarget target = _target(p, name);
   if(! target) target = _new_target(p, name);
   if(split < 0) _enter_target(&((* m)), target);
@@ -606,7 +585,7 @@ static void _field(Manifest * m, char * line){
   if(! equals) _error(p, (* m).line, _22);
   * equals = 0;
   String key = String_new(_trim(line)), value = String_new(_trim(equals + 1));
-  if(! _name_ok(key)) _error(p, (* m).line, _23);
+  if(! ProjectBuild_valid_name(key)) _error(p, (* m).line, _23);
   _claim(&((* m)), key);
   (* m).key = key;
   (* m).value = value;
@@ -772,7 +751,8 @@ static int _array_open(String value){
   return depth > 0;
 }
 
-static int _name_ok(String name){
+int ProjectBuild_valid_name(String name){
+  if(! _init_guard_) _file_init_();
   if(! String_truth(name) || ! String_getindex(name, 0)) return 0;
   {
     char raw;
@@ -1206,92 +1186,8 @@ static void _error_name(Project p, int line, String message, String name){
   _error(p, line, String_join(NULL, cons(String_var(message), cons(String_var(_121), cons(String_var(name), cons(String_var(_119), NULL))))));
 }
 
-void Diagnostics_driver_error(const char *);
-
-void Diagnostics_host_error(List);
-
-#include "error.h"
-
-
-
-
-int CliRequest_new_project(CliRequest request){
-  if(! _init_guard_) _file_init_();
-  Path dir = Var_as_string(List_car(request -> inputs));
-  if(! String_truth(dir)) Diagnostics_driver_error("new: the directory operand is empty");
-  String name = _starter_name(dir);
-  {
-    ExceptionFrame _x2c_gensym_exception_frame_0;
-    static MatchCaptureSite _x2c_gensym_macro_arms_0[1];
-    Var _x2c_gensym_macro_patterns_0[1];
-    static ErrorCatchSite _x2c_gensym_macro_site_0 ={
-      _x2c_gensym_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
-    }
-    ;
-    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_0)){
-      _x2c_gensym_macro_patterns_0[0] = List_var(cons(Symbol_var(20399393368), cons(Symbol_var(58262293080), NULL)));
-    }
-    volatile ErrorHandler _x2c_gensym_error_handler_0 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_0, & _x2c_gensym_macro_site_0, _x2c_gensym_macro_patterns_0);
-    x2c_exception_push(& _x2c_gensym_exception_frame_0);
-    if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)) _write_starter(dir, name);
-    else{
-      x2c_exception_landed(& _x2c_gensym_exception_frame_0);
-      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_0)){
-        int _x2c_gensym_macro_selected_0 = x2c_error_catch_selected(_x2c_gensym_error_handler_0);
-        x2c_error_catch_detach(_x2c_gensym_error_handler_0);
-        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_0);
-        if(_x2c_gensym_macro_selected_0 == 0){
-          List volatile detail;
-          detail = Var_list_payload(x2c_error_catch_capture(_x2c_gensym_error_handler_0, 0));
-          Diagnostics_host_error(detail);
-        }
-
-      }
-      else{
-        x2c_error_catch_close(_x2c_gensym_error_handler_0);
-        _x2c_gensym_error_handler_0 = NULL;
-        x2c_exception_leave(& _x2c_gensym_exception_frame_0);
-        __builtin_unreachable();
-      }
-
-    }
-    x2c_error_catch_close(_x2c_gensym_error_handler_0);
-    _x2c_gensym_error_handler_0 = NULL;
-    x2c_exception_leave(& _x2c_gensym_exception_frame_0);
-  }
-  if(! request -> quiet) fprintf(stderr, "x2c: created %s\n", dir);
-  return 0;
-}
-
-Path Path_basename(Path);
-
-static String _starter_name(Path dir){
-  String name = Path_basename(dir);
-  if(String_equal(name, _2) || String_equal(name, _122) || String_equal(name, _4)) name = Path_basename(Path_absolute(dir));
-  if(! _name_ok(name)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_123), cons(String_var(name), cons(String_var(_124), NULL)))));
-  return name;
-}
-
-int Path_exists(Path);
-
-int Path_is_dir(Path);
-
-List Path_list_dir(Path);
-
-void Path_make_dirs(Path);
-
-void Path_write_text(Path, String);
-
-static void _write_starter(Path dir, String name){
-  if(Path_exists(dir) &&(! Path_is_dir(dir) || List_truth(Path_list_dir(dir)))) Diagnostics_driver_error(String_join(NULL, cons(String_var(_125), cons(String_var(dir), cons(String_var(_126), NULL)))));
-  Path_make_dirs(Path_join(dir, _127));
-  Path_write_text(Path_join(dir, _3), String_join(NULL, cons(String_var(_128), cons(String_var(name), cons(String_var(_129), NULL)))));
-  Path_write_text(Path_join(dir, _130), _131);
-  Path_write_text(Path_join(dir, _132), _133);
-}
-
 static Var _x2c_gensym_lambda_0(Var library){
-  return String_var(String_join(NULL, cons(String_var(_134), cons(String_var(Var_str(library)), NULL))));
+  return String_var(String_join(NULL, cons(String_var(_122), cons(String_var(Var_str(library)), NULL))));
   ;
 }
 
@@ -1302,7 +1198,7 @@ static Var _x2c_gensym_func_adapt_0(Func _x2c_gensym_func_binding_0, const FuncA
 }
 
 static Var _x2c_gensym_lambda_1(String flag){
-  return int_var(String_startswith(flag, _135));
+  return int_var(String_startswith(flag, _123));
   ;
 }
 
@@ -1313,7 +1209,7 @@ static Var _x2c_gensym_func_adapt_1(Func _x2c_gensym_func_binding_1, const FuncA
 }
 
 static Var _x2c_gensym_lambda_2(Var value){
-  return String_var(String_join(NULL, cons(String_var(_136), cons(String_var(Var_str(value)), NULL))));
+  return String_var(String_join(NULL, cons(String_var(_124), cons(String_var(Var_str(value)), NULL))));
   ;
 }
 

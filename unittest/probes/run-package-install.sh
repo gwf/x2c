@@ -32,7 +32,7 @@ cp "$ROOT"/src/{component-access,component-try,component-delegate,component-lite
 cp "$ROOT/builds/0/libx2c.a" "$ROOT/builds/0/lib/"*.xi "$BUILD/home/lib/"
 cp "$X2C" "$BUILD/home/bin/x2c"
 mkdir -p "$BUILD/home/libexec/x2c"
-cp "$ROOT/builds/0/libexec/x2c-editor" "$ROOT/builds/0/libexec/x2c-package" "$BUILD/home/libexec/x2c/"
+cp "$ROOT/builds/0/libexec/"x2c-{editor,new,package} "$BUILD/home/libexec/x2c/"
 x2c="$BUILD/home/bin/x2c"
 [[ "$("$x2c" env home)" == "$BUILD/home" ]] || fail "home not resolved"
 

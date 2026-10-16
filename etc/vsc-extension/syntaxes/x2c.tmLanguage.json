@@ -3638,9 +3638,9 @@
 			"match": "(\\\\'.+'|\\\\[^\\\\]{1,10}\\\\)"
 		},
 		"x2c_keyword_alias": {
-			"match": "^\\s*(?:(static)(\\s+))?(keyword)(\\s+)([A-Za-z_][A-Za-z0-9_]*)(\\s+)(\\$)([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=\\s*;)",
+			"match": "^\\s*(?:(static|module)(\\s+))?(keyword)(\\s+)([A-Za-z_][A-Za-z0-9_]*)(\\s+)(\\$)([A-Za-z_][A-Za-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*)(?=\\s*;)",
 			"captures": {
-				"1": { "name": "storage.modifier.x2c" },
+				"1": { "name": "storage.modifier.x2c storage.modifier.$1.x2c" },
 				"3": { "name": "keyword.declaration.macro.x2c" },
 				"5": { "name": "entity.name.function.macro-alias.x2c" },
 				"7": { "name": "punctuation.definition.macro.sigil.x2c" },
@@ -3665,10 +3665,10 @@
 		},
 		"x2c_protocol_header": {
 			"name": "meta.declaration.protocol.x2c",
-			"begin": "^\\s*(?:(meta)\\s+)?(?:(static)\\s+)?(protocol)\\b",
+			"begin": "^\\s*(?:(meta)\\s+)?(?:(static|module)\\s+)?(protocol)\\b",
 			"beginCaptures": {
 				"1": { "name": "storage.modifier.meta.x2c" },
-				"2": { "name": "storage.modifier.x2c" },
+				"2": { "name": "storage.modifier.x2c storage.modifier.$2.x2c" },
 				"3": { "name": "keyword.declaration.protocol.x2c" }
 			},
 			"end": "(?=[{;])",
@@ -3849,6 +3849,18 @@
 		"x2c_keywords": {
 			"patterns": [
 				{
+					"match": "^[ \\t]*(module)\\b(?=[ \\t]*\\{)",
+					"captures": {
+						"1": { "name": "keyword.declaration.module.x2c" }
+					}
+				},
+				{
+					"match": "^[ \\t]*(module)\\b(?=\\s+[A-Za-z_]\\w*)",
+					"captures": {
+						"1": { "name": "storage.modifier.x2c storage.modifier.module.x2c" }
+					}
+				},
+				{
 					"match": "\\bclass\\b(?=\\s+[A-Za-z_][A-Za-z0-9_]*)",
 					"name": "keyword.declaration.class.x2c"
 				},
@@ -3893,7 +3905,7 @@
 			]
 		},
 		"x2c_prelude_types": {
-			"match": "\\b(Array|Atom|Block|Buffer|Bytes|Context|Error|ErrorHandler|File|Func|Iter|Lambda|Lisp|List|Logger|LogSink|Map|Mutex|Pool|Scope|Split|String|Symbol|SymbolSet|Thread|Token|Tokenizer|Var|Code|Macro|TypeInfo|Source|Expr|Expression|Stmt|Field|Entry|Enumerator|Unit|Declaration|Decorator|Function|NamedType|Type|Decl|DeclaratorRow|Name|Literal|Param|Catch|Captures|MatchRow)\\b",
+			"match": "\\b(Array|Atom|Block|Buffer|Bytes|Context|Error|ErrorHandler|File|Func|Iter|Lambda|Lisp|List|Logger|LogSink|Map|Mutex|Pool|Scope|Split|String|Symbol|SymbolSet|Thread|Token|Tokenizer|Var|Code|Macro|TypeInfo|Source|Expr|Expression|Stmt|Field|Entry|Enumerator|Unit|Declaration|Decorator|Function|NamedType|Type|Decl|DeclaratorRow|Name|Literal|Param|Catch|Captures|MatchRow|EXPR|EXPRESSION|STMT|FIELD|ENTRY|ENUMERATOR|UNIT|DECLARATION|DECORATOR|FUNCTION|NAMEDTYPE|TYPE|DECL|DECLARATORROW|NAME|LITERAL|PARAM|CATCH|CAPTURES|MATCHROW)\\b",
 			"name": "support.type.prelude.x2c"
 		},
 		"x2c_macro_definition": {

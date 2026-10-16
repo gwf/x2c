@@ -1,5 +1,6 @@
 """Exercise edited files in one live REPL, including a real source module."""
 
+import json
 import os
 import pathlib
 import queue
@@ -52,6 +53,14 @@ class Session:
     def value(self, expression, expected):
         self.run(expression + ";")
         self.expected.append("=> " + str(expected))
+
+    def snapshot(self, expression, expected):
+        start = len(self.output.read_text())
+        self.run(expression + ';')
+        shown = self.output.read_text()[start:].strip()
+        assert shown.startswith('=> '), shown
+        assert json.loads(shown[3:]) == expected, shown
+        self.expected.append(shown.splitlines()[0])
 
     def load(self, path, error=None):
         self.run(f':load "{path}"', error)
@@ -616,7 +625,8 @@ finally:
 for suffix in ['x', 'c']:
     scalars = scalar_root / ('only.' + suffix)
     scalars.write_text('extern int count;\nint count=3;\nint count;\n'
-                       'const int maximum=8;\nstatic int hidden=4;\n')
+                       'const int maximum=8;\nstatic int hidden=4;\n'
+                       'int items[2]={1,2};\nstruct Entry { int v; } item={3};\n')
     second = scalar_root / ('other.' + suffix)
     second.write_text('int other=11;\n')
     session = Session(scalar_root)
@@ -626,14 +636,146 @@ for suffix in ['x', 'c']:
         session.run('count = 7;\nother = 12;')
         session.value('count', 7)
         session.value('maximum', 8)
+        session.run('items[1]=7;\nitem.v=9;')
+        session.value('items[1]+item.v', 16)
         session.run('maximum = 1;', 'loaded const global is read-only')
         session.run('hidden;', 'unresolved identifier: hidden')
         session.load(scalars)
         session.value('count', 3)
         session.value('other', 12)
+        session.value('items[1]+item.v', 5)
         session.finish()
     finally:
         session.close()
+
+# Aggregate access stays in native storage; inspection returns data snapshots.
+aggregate_root = root / 'aggregates'
+aggregate_root.mkdir()
+aggregates = aggregate_root / 'objects.x'
+
+
+def aggregate_version(initial=10, size=3, field='int x;', extra=''):
+    return (f'typedef struct Point {{ {field} const int fixed; }} Point;\n'
+            f'int samples[{size}] = {{{initial}, 20, 30}};\n'
+            'Point point = {1, 2};\n'
+            'Point points[2] = {{3, 4}, {5, 6}};\n'
+            'int matrix[2][2] = {{1, 2}, {3, 4}};\n'
+            'typedef const int Row[2];\nRow locked = {7, 8};\n'
+            'typedef const Point Frozen;\nFrozen frozen = {9, 10};\n'
+            'struct Flex { int size; int tail[]; } flexible = {0};\n'
+            'struct Bits { unsigned bits:3; struct { int nested; }; } bits = {2,{3}};\n'
+            'union Choice { int n; double f; };\n'
+            'struct HasUnion { int n; union Choice choice; } tagged = {4,{5}};\n'
+            'static Point secret = {11, 12};\n'
+            'static Var private_value = void;\n'
+            'int inferred[] = {13, 14};\n'
+            'int incomplete[];\n'
+            'struct Mixed { int number; int *pointer; } mixed = {15, 0};\n'
+            'struct Holder { Point nested; int values[2]; };\n'
+            'struct Holder holder={{17,18},{19,20}};\n'
+            'const struct Holder fixed_holder={{21,22},{23,24}};\n'
+            'int large[1000];\n'
+            'int index_calls=0;\nint rhs_calls=0;\n'
+            'int next_index(void) { index_calls++; return 1; }\n'
+            'double half(void) { rhs_calls++; return 0.5; }\n'
+            'int read_sample(int i) { return samples[i]; }\n'
+            'int read_point(void) { return point.x; }\n' + extra)
+
+
+aggregates.write_text(aggregate_version())
+session = Session(aggregate_root)
+try:
+    session.run('int prompt_kept=42;')
+    session.load(aggregates)
+    session.value('samples[1]', 20)
+    session.run('samples[1] = 99;\npoint.x = 7;\npoints[1].x = 8;')
+    session.value('read_sample(1)', 99)
+    session.value('read_point()', 7)
+    session.value('points[1].x', 8)
+    session.run('samples[next_index()] *= half();')
+    session.value('samples[1]', 49)
+    session.value('index_calls == 1 && rhs_calls == 1', 1)
+    session.value('(++samples[next_index()])', 50)
+    session.value('index_calls', 2)
+    session.value('(samples[next_index()]++)', 50)
+    session.value('index_calls', 3)
+    session.run('matrix[next_index()][next_index()] += 5;')
+    session.value('matrix[1][1]', 9)
+    session.value('index_calls', 5)
+    session.run('int bump_point(int n) { points[1].x += n; '
+                'return ++samples[next_index()]; }\n'
+                'Func saved_aggregate = bump_point;')
+    session.value('bump_point(2)', 52)
+    session.value('points[1].x', 10)
+    session.value('index_calls', 6)
+    session.value('inferred[1]', 14)
+    session.value('mixed.number', 15)
+    session.value('flexible.size', 0)
+    session.value('bits.bits', '2u')
+    session.run('bits.bits=5;\nbits.nested=6;')
+    session.value('bits.bits', '5u')
+    session.value('bits.nested', 6)
+    session.value('tagged.n', 4)
+    session.run('holder.nested.x=25;\nholder.values[1]+=6;')
+    session.value('holder.nested.x + holder.values[1]', 51)
+    session.value('fixed_holder.values[1]', 24)
+    session.run('flexible.tail[0];', 'loaded field cannot cross')
+    session.run('tagged.choice.n;', 'loaded field cannot cross')
+    session.value('locked[1]', 8)
+    session.value('frozen.x', 9)
+    for expression in ['point.fixed=0;', 'points[1].fixed++;',
+                       'locked[0]=0;', 'frozen.x=0;',
+                       'fixed_holder.values[0]=0;',
+                       'int forbidden(void) { return frozen.x++; }']:
+        session.run(expression, 'loaded const global is read-only')
+    session.run('secret.x;', 'unresolved identifier: secret')
+    session.run('incomplete;', 'unresolved identifier: incomplete')
+    session.run('mixed.pointer;', 'loaded field cannot cross')
+    for expression in ['samples[-1];', 'samples[3]=0;', 'matrix[0][2];']:
+        session.run(expression, 'loaded array index out of bounds')
+    for expression in ['samples[1.5];', 'samples[1.5]=0;',
+                       'int bad_index(void) { return samples[1.5]; }']:
+        session.run(expression, 'loaded array indices must be integers')
+    session.value('samples[1]', 52)
+    session.run('&point.x;', 'loaded globals cannot supply addresses')
+    session.run('int ref_element(int &n) { return n; }')
+    session.run('ref_element(samples[0]);', 'loaded globals cannot supply')
+    session.run('int *escaped = samples;', 'loaded aggregates support')
+    session.run('Point copied = point;', 'loaded aggregates support')
+    session.run('int takes_point(Point p) { return p.x; }')
+    session.run('takes_point(point);', 'loaded aggregates support')
+    session.run('int takes_array(int *p) { return p[0]; }')
+    session.run('takes_array(samples);', 'loaded aggregates support')
+    session.value('samples', '[ 10, 52, 30 ]')
+    session.value('matrix[0]', '[ 1, 2 ]')
+    session.snapshot('point', {'x': 7, 'fixed': 2})
+    session.snapshot('points', [{'x': 3, 'fixed': 4}, {'x': 10, 'fixed': 6}])
+    session.snapshot('mixed', {'number': 15, 'pointer': '<unavailable>'})
+    session.snapshot('flexible', {'size': 0, 'tail': '<unavailable>'})
+    session.snapshot('holder', {'nested': {'x': 25, 'fixed': 18},
+                                'values': [19, 26]})
+    session.snapshot('large', [0] * 100 + ['...'])
+    aggregates.write_text(aggregate_version(40, extra='int added_array[2]={6,7};\n'))
+    session.load(aggregates)
+    session.value('samples[0]', 40)
+    session.value('saved_aggregate(3)', 21)
+    session.value('points[1].x', 8)
+    session.value('prompt_kept', 42)
+    session.value('added_array[1]', 7)
+    for changed in [aggregate_version(90, size=4),
+                    aggregate_version(90, field='long x;')]:
+        aggregates.write_text(changed)
+        session.load(aggregates, 'declaration changed or removed')
+        session.value('samples[1]', 21)
+        session.value('points[1].x', 8)
+        session.value('index_calls', 1)
+    aggregates.write_text(aggregate_version() + 'broken {')
+    session.load(aggregates, 'expected')
+    session.value('samples[1]', 21)
+    session.value('points[1].x', 8)
+    session.finish()
+finally:
+    session.close()
 
 # Exercise an existing package module without changing the checked-in source.
 autodiff = root / "autodiff-macros.x"

@@ -116,7 +116,7 @@ repl = subprocess.Popen(
     stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 repl.stdin.write(f':load "{source}"\n')
 repl.stdin.flush()
-assert "no public functions or scalar globals" in repl.stderr.readline()
+assert "no public functions or supported globals" in repl.stderr.readline()
 def version(number, parameter="void"):
     source.write_text(
         "#include <stdlib.h>\n"
