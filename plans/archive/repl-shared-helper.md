@@ -1,8 +1,8 @@
 # One native helper for the REPL
 
-> Status: active
-> Planned 2026-10-16; shared loading and object calls are implemented.
-> Combined verification and publication remain in progress.
+> Status: done
+> Implemented 2026-10-16 through `9051bcd1`; focused checks passed after
+> integration with current dev. The publication gate validates the final tree.
 > Gary selected resetting all loaded native state after every successful
 > load, including a first load of an additional file.
 > Adjacent meta/macro campaign notes were checked against `e057f9509` on
@@ -156,14 +156,14 @@ on a bounded set of unchanged submissions. New loaded-call forms can differ.
   plan's `src/meta-project.x` and related compiler changes. The existing
   publication gate owns generated refresh and bootstrap proof. Its
   shared-integrator direction belonged to that session; this session keeps
-  the normal individual/direct delivery unless Gary changes it.
+  session-owned direct delivery unless Gary changes it.
 
 ## Plan review
 
-The builder already links multiple providers. A temporary two-source probe
-passed an array and struct pointer inside one helper and observed shared
-mutations: consecutive calls returned 78 and 85. Multiple-load publication
-and prompt object-argument bridges remain unimplemented.
+The builder already linked multiple providers. The completed REPL checks
+load roots through ordinary C headers, prototypes, and extern declarations.
+They verify shared array and struct storage, object calls from interpreted
+input and compiled prompt functions, and replacement of the whole program.
 
 Trust compiler binding, canonical types, and provider identity. Reuse native
 initialization and transport; delete per-file helper ownership. The session
@@ -175,3 +175,30 @@ checks for unique definitions, and const/bounds/crossing checks for valid
 native access. Negative tests protect those rules and atomic replacement;
 add no duplicate validators or diagnostic-only checks. Resetting the entire
 helper avoids state serialization, pointer rebasing, and module hot swapping.
+
+## Implementation review and verification
+
+The session owns one helper. File records retain declarations and origins;
+existing callable adapters select the session's current helper. The builder
+rejects a failed required provider before publication, replacing repeated
+per-function availability checks. Provider declarations use ordinary binding
+and emission; they do not copy another file's type definitions. One calling
+type adjustment handles array parameters and outer parameter qualifiers for
+both native adapters and cross-file declaration comparison.
+
+Object selections contain paths, indices, and native carrier types. Addresses
+are resolved only inside the helper. Existing Func adapters perform the
+native call, including references, aliasing, and struct copies. The review
+corrected record-versus-array compatibility, C-header declarations, missing
+file failures, and inspection origins. It introduced no object registry,
+state migration, or second compiler.
+
+After integration, `make build-safe`, `make commands`,
+`sh commands/repl/tests/run.sh`, and
+`sh unittest/probes/run-meta-helper.sh` passed. Coverage includes the
+autodiff walkthrough, main and output, failed replacements preserving state,
+dependency edits and promotion, const and bounds, saved scalar callables,
+and shared reset after load or process exit. Argument-order checks use a
+compiled counter function where interpreted postfix value expressions are
+already unsupported. The match binder defect and performance comparison
+remain separate.
