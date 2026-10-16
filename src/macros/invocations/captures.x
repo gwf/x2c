@@ -7,7 +7,7 @@ static keyword loop $private.loop;
    Each parameter hole captures its arguments into one capture row, and a
    captured argument records the source span it was parsed from. */
 
-static List _invocation_arguments(
+module List _invocation_arguments(
   Compiler c, List definition, Token invocation) {
   if (_bare(invocation, definition)) return %(args);
   Array arguments = [];
@@ -116,7 +116,7 @@ static Var _literal_argument(Compiler c) {
   return c.parse_atomic_literal();
 }
 
-static Var _capture_source(
+module Var _capture_source(
   Compiler c, Var syntax, Token first, Token after) {
   if (c.macro_holes || syntax is not <list> ||
       syntax.is_nil() || !first) return syntax;

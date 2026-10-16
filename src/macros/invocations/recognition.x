@@ -2,7 +2,7 @@
 
 /*  invocations.x -- macro recognition and argument capture */
 
-static typedef struct MacroPos {
+module typedef struct MacroPos {
   Symbol kind, const char *description, int semicolon;
 } MacroPos;
 
@@ -222,7 +222,7 @@ static const MacroPos macro_position_info[] = {
   { <expression>, "an expression", 0 }
 };
 
-static const MacroPos *_position(Symbol position) =>
+module const MacroPos *_position(Symbol position) =>
   &macro_position_info[macro_positions.index(position)];
 
 module Symbol _result_kind(List definition) {
@@ -282,7 +282,7 @@ module Token _scan_name(Compiler c, String &spelling) {
 
 /* An identifier invoking a decorator without explicit parameters has no
    argument list. */
-static int _bare(Token invocation, List definition) =>
+module int _bare(Token invocation, List definition) =>
   invocation.type != <$> && invocation.type != <@> &&
   definition.assoc(<kind>) == <decorator> &&
   !definition.assoc(<parameters>).list();
@@ -291,7 +291,7 @@ static int _bare(Token invocation, List definition) =>
    definition, or returns NULL without consuming tokens. A `$` name that is
    neither visible nor followed by arguments is a replacement variable
    missing from a template. */
-static List _take_invocation(Compiler c, Symbol position) {
+module List _take_invocation(Compiler c, Symbol position) {
   List definition = _peek_invocation(c);
   if (!_claims(c, definition, position)) return NULL;
   if (c.peek(0) != <$> && c.peek(0) != <@>) {

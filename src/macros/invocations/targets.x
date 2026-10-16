@@ -102,7 +102,7 @@ static List _invoke_definition(
 /* Inside a template the node names its definition as the expansion will
    find it: a definition that is itself template syntax by value, a local
    macro by its local name, and any other macro by name. */
-static List _invocation_node(
+module List _invocation_node(
   Compiler c, List definition, List input, Token invocation) {
   Var stored = definition;
   Var site = invocation;
