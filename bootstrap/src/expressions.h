@@ -45,6 +45,12 @@ List Compiler_resolve_expression(Compiler c, List input, Token origin);
 
 int Compiler_needs_resolution(Compiler c, Var value);
 
+Symbol Compiler_require_var_tag(Compiler c, Type target, Token origin);
+
+List Compiler_var_tag_expression(Compiler c, Type target, Token origin);
+
+List Compiler_resolve_map_entry(Compiler c, List input, Token origin);
+
 List _x2c_nominal_getindex(Compiler c, Type type);
 
 List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field, Symbol access, int call_context);
@@ -57,19 +63,13 @@ List Compiler_func_call_parts(Compiler c, Var content);
 
 List Compiler_complete_iter_chain(Compiler c, List expression);
 
-Symbol _x2c_indexed_builtin_helper(Compiler c, Type type);
-
-Symbol Compiler_require_var_tag(Compiler c, Type target, Token origin);
-
-List Compiler_var_tag_expression(Compiler c, Type target, Token origin);
-
-List Compiler_resolve_map_entry(Compiler c, List input, Token origin);
-
-void Compiler_check_explicit_converter(Compiler c, List parsed, Type target, int context);
-
 const PrintfFn * List_printf_family(List l);
 
 String Compiler_printf_static_format(Compiler c, Var format);
+
+Symbol _x2c_indexed_builtin_helper(Compiler c, Type type);
+
+void Compiler_check_explicit_converter(Compiler c, List parsed, Type target, int context);
 
 List Compiler_promote_string_literal(Compiler c, List expr);
 

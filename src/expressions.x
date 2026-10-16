@@ -38,7 +38,6 @@ static macro Stmt $fail.expressions_dynamic_address(Expr $c, Expr $site) =>
 
 #include "expressions-reports.x"
 
-
 /* The semantic context of one expression resolution; handlers share its
    original input, expected type and diagnostic origin. */
 module typedef struct Resolve {
