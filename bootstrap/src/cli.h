@@ -53,19 +53,19 @@ CliRequest CliRequest_parse(int argc, char * * argv);
 
 CliRequest CliRequest_parse_arguments(Array args);
 
+int CliRequest_dependency_option(String s);
+
+CliRequest CliRequest_package_options(String path, String package);
+
+int CliRequest_is_builtin(const char * word);
+
 Array CliRequest_read_arguments(int argc, char * * argv);
 
 Symbol TargetKind_named(String spelling, String * refusal);
 
 TargetKind * TargetKind_of(Symbol kind);
 
-int CliRequest_dependency_option(String s);
-
-CliRequest CliRequest_package_options(String path, String package);
-
 CliRequest CliRequest_new(Symbol command);
-
-int CliRequest_is_builtin(const char * word);
 
 String Compiler_version(void);
 

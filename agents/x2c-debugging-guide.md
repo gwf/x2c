@@ -51,8 +51,8 @@ a pointer to the declared parameter is rejected with that spelling as the fix.
 
 ## 2. CLI Diagnostics
 
-`src/cli.x` owns the option table. These `translate` inspection switches print
-their selected result and stop:
+`src/cli/parsing.x` owns the option table. These `translate` inspection switches
+print their selected result and stop:
 
 - `--dump-tokens` / `--dump-cpp-tokens` — inspect lexer output
 - `--dump-ast` / `--dump-transforms` — observe initial and transformed ASTs

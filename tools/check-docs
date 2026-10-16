@@ -188,8 +188,8 @@ static List _flags(String text):
   return flags.list_free()
 
 static void _check_flags(void):
-  String source = _read("src/cli.x")
-  String table = source.partition("static CliOption cli_options[] = {")
+  String source = _read("src/cli/parsing.x")
+  String table = source.partition("module CliOption cli_options[] = {")
                    .caddr()
   table = table.partition("\n};").car()
   Map valid = {}

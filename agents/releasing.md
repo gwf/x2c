@@ -16,8 +16,8 @@ and their costs are unchanged.
 
 ## The pieces
 
-- `Compiler.version` in `src/cli.x` identifies the compiler version. The CLI
-  boundary probe and installer example carry corresponding version strings.
+- `Compiler.version` in `src/cli/requests.x` identifies the compiler version.
+  The CLI boundary probe and installer example carry corresponding version strings.
 - `candidate.yml` manually builds the selected full source SHA. It retains
   the existing four compiler platforms and 26 native package bundles, then
   assembles immutable archives, destination indexes and both complete sites.
@@ -49,8 +49,8 @@ pointer commits on `main`.
 ## Cut a release
 
 1. Land intended work and version preparation on `dev`, including generated
-   bootstrap updates and the existing source gate. Update `src/cli.x`, the
-   version expectations in `unittest/probes/run-cli-boundary.sh`, and the
+   bootstrap updates and the existing source gate. Update `src/cli/requests.x`,
+   the version expectations in `unittest/probes/run-cli-boundary.sh`, and the
    installer comment example when changing the version. Select a full source
    SHA containing that work and the published history.
 2. Dispatch the full candidate build at that exact SHA:

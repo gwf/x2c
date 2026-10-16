@@ -15,7 +15,7 @@
 - local Markdown links resolve across README and active top-level docs;
 - repository paths in the canonical entry-point set resolve, and a path that
   cites a line number names a line the file has;
-- compiler flags named by active docs exist in `src/cli.x`;
+- compiler flags named by active docs exist in `src/cli/parsing.x`;
 - canonical workflow docs do not reintroduce unsupported `V=1`, missing
   `OVERVIEW.md`, or bootstrap redirection before creating `debug/`;
 - example compile commands use quote-only runtime-header lookup so generated
