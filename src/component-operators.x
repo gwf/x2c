@@ -13,6 +13,40 @@
 #pragma once
 #include "rewrite.x"
 
+/* The linked meta copies include these diagnostics from this owner. */
+macro Stmt $fail.operators_numeric_operands(
+  Expr $site, Expr $left_type, Expr $right_type, Expr $op) {
+  {
+    String left_name = $left_type.repr(), right_name = $right_type.repr();
+    x2c_diagnostic_fail_at(
+      $site, <xform>, "dynamic numeric operators require numeric operands",
+      %("operator: $op left type: $left_name right type: $right_name"));
+  }
+}
+
+macro Stmt $fail.operators_enum_target(Expr $site) =>
+  x2c_diagnostic_fail_at(
+    $site, <xform>, "dynamic compound assignment cannot target an enum",
+    NULL);
+
+macro Stmt $fail.operators_numeric_target(Expr $site, Expr $type) =>
+  x2c_diagnostic_fail_at(
+    $site, <xform>, "dynamic compound assignment requires a numeric lvalue",
+    %("left type: ${$type.repr()}"));
+
+macro Stmt $fail.operators_bitfield_target(Expr $site) =>
+  x2c_diagnostic_fail_at(
+    $site, <xform>,
+    "dynamic compound assignment cannot target a bitfield", NULL);
+
+macro Stmt $fail.operators_operand(
+  Expr $site, Expr $operation, Expr $right_type) =>
+  x2c_diagnostic_fail_at(
+    $site, <xform>, $operation == <+>
+      ? "dynamic += requires a numeric, Var, or String operand"
+      : "dynamic compound assignment requires a numeric or Var operand",
+    %("right type: ${$right_type.repr()}"));
+
 // dynamic operators
 
 /* A `Var` operand, or a value `+` beside text or a number combines with. */
@@ -33,10 +67,7 @@ meta Code dynamic_binary(Code code) {
       _dynamic_operand(right_type, 1);
     if (!text && (!_dynamic_operand(left_type, 0) ||
                   !_dynamic_operand(right_type, 0))) {
-      String left_name = left_type.repr(), right_name = right_type.repr();
-      x2c_diagnostic_fail_at(
-        NULL, <xform>, "dynamic numeric operators require numeric operands",
-        %("operator: $op left type: $left_name right type: $right_name"));
+      $fail.operators_numeric_operands(NULL, left_type, right_type, op);
     }
     Code left_var = lhs.convert(%("Var")), right_var = rhs.convert(%("Var"));
     return Code.lowered($!Var{ Var_binary($left_var, $op, $right_var) }, NULL);
@@ -75,14 +106,10 @@ meta static String _dynamic_helper(Type type) {
   Type scalar = type.numeric();
   match (scalar)
     case %(enum *):
-      x2c_diagnostic_fail_at(
-        NULL, <xform>, "dynamic compound assignment cannot target an enum",
-        NULL);
+      $fail.operators_enum_target(NULL);
   String helper = type.update_helper();
   if (!helper)
-    x2c_diagnostic_fail_at(
-      NULL, <xform>, "dynamic compound assignment requires a numeric lvalue",
-      %("left type: ${type.repr()}"));
+    $fail.operators_numeric_target(NULL, type);
   return helper;
 }
 
@@ -97,16 +124,10 @@ meta Code dynamic_compound(Code code) {
     Symbol operation = _dynamic_operation(op);
     match (type)
       case %((bitfield *) *):
-        x2c_diagnostic_fail_at(
-          NULL, <xform>,
-          "dynamic compound assignment cannot target a bitfield", NULL);
+        $fail.operators_bitfield_target(NULL);
     if (!right_type.is_named("Var") && !right_type.numeric() &&
         !(operation == <+> && right_type.is_text()))
-      x2c_diagnostic_fail_at(
-        NULL, <xform>, operation == <+>
-          ? "dynamic += requires a numeric, Var, or String operand"
-          : "dynamic compound assignment requires a numeric or Var operand",
-        %("right type: ${right_type.repr()}"));
+      $fail.operators_operand(NULL, operation, right_type);
     String helper = _dynamic_helper(type);
     return _dynamic_update(
       type, target, operation, rhs.convert(%("Var")), helper);

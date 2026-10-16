@@ -27,6 +27,34 @@ meta static void _printf_fail(Code call, String message) {
       %("printf-family call: ${Code.binding_spelling(callee)}"));
 }
 
+/* The linked meta copies include these diagnostics from this owner. */
+macro Stmt $fail.printf_position(Expr $site) =>
+  _printf_fail($site, "positional formats cannot infer Var argument types");
+
+macro Stmt $fail.printf_missing_count(Expr $site) =>
+  _printf_fail($site, "format consumes a missing '*' argument");
+
+macro Stmt $fail.printf_incomplete(Expr $site) =>
+  _printf_fail($site, "incomplete format conversion");
+
+macro Stmt $fail.printf_conversion(Expr $site, Expr $spec) =>
+  _printf_fail($site, %"unsupported or malformed format conversion $spec");
+
+macro Stmt $fail.printf_missing_argument(Expr $site, Expr $spec) =>
+  _printf_fail($site, %"format conversion $spec consumes a missing argument");
+
+macro Stmt $fail.printf_native_argument(Expr $site, Expr $spec) =>
+  _printf_fail(
+    $site, %"cannot infer a native argument for Var at $spec; use an " +
+      "explicit converter for this format conversion");
+
+macro Stmt $fail.printf_static_format(Expr $site) =>
+  _printf_fail($site, "Var arguments require a single static format literal");
+
+macro Stmt $fail.printf_unused_argument(Expr $site) =>
+  _printf_fail(
+    $site, "Var argument has no corresponding format conversion");
+
 meta static int _printf_valid(String length, int conversion) {
   if (strchr("diouxXn", conversion)) return length != "L";
   if (strchr("fFeEgGaA", conversion))
@@ -68,7 +96,7 @@ meta static Code _printf_read(Code value, String length, int conversion) {
 meta static void _printf_position(Code call, const char *at) {
   while (isdigit(*at)) at++;
   if (*at == '$')
-    _printf_fail(call, "positional formats cannot infer Var argument types");
+    $fail.printf_position(call);
 }
 
 /* Steps over a width or precision at `at`. A `*` reads the next argument
@@ -81,7 +109,7 @@ meta static void _printf_count(
   }
   _printf_position(call, ++at);
   if (next >= arguments.len())
-    _printf_fail(call, "format consumes a missing '*' argument");
+    $fail.printf_missing_count(call);
   Code value = arguments[next];
   if (_printf_is_var(value)) arguments[next] = value.convert(%(int));
   next++;
@@ -108,18 +136,16 @@ meta static void _printf_conversion(
     _printf_count(call, at, arguments, next);
   }
   String length = _printf_length(at);
-  if (!*at) _printf_fail(call, "incomplete format conversion");
+  if (!*at) $fail.printf_incomplete(call);
   int conversion = *at++;
   String spec = "%%%c".printf(conversion);
   if (!_printf_valid(length, conversion))
-    _printf_fail(call, %"unsupported or malformed format conversion $spec");
+    $fail.printf_conversion(call, spec);
   if (next >= arguments.len())
-    _printf_fail(call, %"format conversion $spec consumes a missing argument");
+    $fail.printf_missing_argument(call, spec);
   Code read = _printf_read(arguments[next], length, conversion);
   if (!read)
-    _printf_fail(
-      call, %"cannot infer a native argument for Var at $spec; use an " +
-        "explicit converter for this format conversion");
+    $fail.printf_native_argument(call, spec);
   arguments[next++] = read;
 }
 
@@ -131,7 +157,7 @@ meta static void _printf_scan(
     int ch = *at++;
     if (ch == '\\' && *at) at++;
     if (ch != '%') continue;
-    if (!*at) _printf_fail(call, "incomplete format conversion");
+    if (!*at) $fail.printf_incomplete(call);
     if (*at == '%') at++;
     else _printf_conversion(call, at, arguments, next);
   }
@@ -146,15 +172,14 @@ meta static Code _printf_lowered(Code code, Code format, List values) {
   if (!has_var) return code;
   String spelling = format.format();
   if (!spelling)
-    _printf_fail(code, "Var arguments require a single static format literal");
+    $fail.printf_static_format(code);
   match (code) case %(expr ?type (call ?callee (args *given))): {
     Array arguments = given;
     int next = given.len() - values.len();
     _printf_scan(code, spelling[1:spelling.len() - 1], arguments, next);
     for (; next < arguments.len(); next++)
       if (_printf_is_var(arguments[next]))
-        _printf_fail(
-          code, "Var argument has no corresponding format conversion");
+        $fail.printf_unused_argument(code);
     return %(expr $type (call $callee (args @{arguments.list_free()})));
   }
   return code;

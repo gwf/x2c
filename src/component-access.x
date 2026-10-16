@@ -6,6 +6,48 @@
 #include "rewrite.x"
 #include "grammar.x"
 
+/* The linked meta copies include these diagnostics from this owner. */
+macro Stmt $fail.access_read(Expr $site, Expr $type) =>
+  x2c_diagnostic_fail_at(
+    $site, <xform>, %"type ${$type.repr()} does not support bracket indexing",
+    NULL);
+
+macro Stmt $fail.access_string_store(Expr $site) {
+  {
+    String note = "String is immutable: use the copy-producing "
+                  "String.withindex, or bind a char * to write a "
+                  "transient String.malloc buffer";
+    x2c_diagnostic_fail_at(
+      $site, <xform>, "String does not support bracket assignment",
+      %($note));
+  }
+}
+
+macro Stmt $fail.access_store(Expr $site, Expr $type) =>
+  x2c_diagnostic_fail_at(
+    $site, <xform>,
+    %"type ${$type.repr()} does not support bracket assignment",
+    %("use an explicit copy-producing method where available"));
+
+macro Stmt $fail.access_update(Expr $site, Expr $type, Expr $value) {
+  {
+    String what = $value ? "compound assignment" : "increment or decrement";
+    x2c_diagnostic_fail_at(
+      $site, <xform>,
+      %"type ${$type.repr()} does not support indexed $what", NULL);
+  }
+}
+
+macro Stmt $fail.access_operand(Expr $site, Expr $op, Expr $type) {
+  {
+    String message = $op == <+>
+      ? "indexed += requires a numeric, Var, or String operand"
+      : "indexed compound assignment requires a numeric or Var operand";
+    x2c_diagnostic_fail_at(
+      $site, <xform>, message, %("right type: ${$type.repr()}"));
+  }
+}
+
 macro Expression $x2c.collection.store(Expr $base, Expr $key, Expr $value) =>
   $base[$key] = $value;
 macro Expression $x2c.collection.add(Expr $base, Expr $key, Expr $value) =>
@@ -54,9 +96,7 @@ meta Code access_read(Code code) {
     Type type = base.cadr(), result = code.cadr();
     Code getter = type.getter();
     if (!getter)
-      x2c_diagnostic_fail_at(
-        NULL, <xform>, %"type ${type.repr()} does not support bracket indexing",
-        NULL);
+      $fail.access_read(NULL, type);
     return $!($result){ $getter($base, $key) };
   }
   return code;
@@ -71,19 +111,11 @@ meta static Code _participant_store(
   Code code, Code base, Code key, Code value) {
   Type type = base.cadr();
   if (type.is_named("String")) {
-    String note = "String is immutable: use the copy-producing "
-                  "String.withindex, or bind a char * to write a "
-                  "transient String.malloc buffer";
-    x2c_diagnostic_fail_at(
-      NULL, <xform>, "String does not support bracket assignment",
-      %($note));
+    $fail.access_string_store(NULL);
   }
   Code setter = type.protocol_member("setindex");
   if (!setter)
-    x2c_diagnostic_fail_at(
-      NULL, <xform>,
-      %"type ${type.repr()} does not support bracket assignment",
-      %("use an explicit copy-producing method where available"));
+    $fail.access_store(NULL, type);
   return setter.call_in_order(%($base $key $value), code.cadr());
 }
 
@@ -94,10 +126,7 @@ meta static Code _participant_update(
   Type type = base.cadr();
   Code member = type.protocol_member(value ? "updateindex" : "postfixindex");
   if (!member) {
-    String what = value ? "compound assignment" : "increment or decrement";
-    x2c_diagnostic_fail_at(
-      NULL, <xform>,
-      %"type ${type.repr()} does not support indexed $what", NULL);
+    $fail.access_update(NULL, type, value);
   }
   List operation = $!Symbol{ $op };
   List arguments = value
@@ -129,11 +158,7 @@ meta static Code _access_update(
   Type type = value.type();
   if (!type.is_named("Var") && !type.numeric() &&
       !(op == <+> && type.is_text())) {
-    String message = op == <+>
-      ? "indexed += requires a numeric, Var, or String operand"
-      : "indexed compound assignment requires a numeric or Var operand";
-    x2c_diagnostic_fail_at(
-      NULL, <xform>, message, %("right type: ${type.repr()}"));
+    $fail.access_operand(NULL, op, type);
   }
   if (family == 1) return $!Var{ Array_updateindex($base, $key, $op, $value) };
   return $!Var{ Map_updateindex($base, $key, $op, $value) };
