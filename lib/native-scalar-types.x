@@ -18,7 +18,7 @@
 
     C-EXTRACTOR and C-UPDATE retain the existing compiler emission
     spellings. `src/type.x` inserts the table with
-    `$native_scalar_types()`, and the Lisp helpers below call it during
+    `$native_scalar_types()`, and the meta functions below read it during
     expansion.
 */
 
@@ -41,23 +41,32 @@ meta Map native_scalar_types(void) => {
     %(ldouble "Var_long_double" "x2c_var_update_long_double"),
 };
 
-$(defun native.scalar.list (items)
-  (if (null? items) `(expr ("List") (nil))
-      `(expr ("List")
-        (cons ,(car items) ,(native.scalar.list (cdr items))))))
-
-/* The access record for TYPE is `_native_scalar_access` followed by each
-   word of TYPE, so `(unsigned long)` names
+/* The access record for `type` is `_native_scalar_access` followed by each
+   word of `type`, so `(unsigned long)` names
    `_native_scalar_access_unsigned_long`. */
-$(defun native.scalar.access-name (type)
-  (apply string-append (cons "_native_scalar_access"
-    (map (lambda (word) (string-append "_" (str word))) type))))
+meta List _scalar_access_record(Type type) {
+  String name = "_native_scalar_access";
+  foreach (Symbol word, (List) type) name = %"${name}_$word";
+  return x2c_ident(name);
+}
 
-/* x2c has no `_Alignof(type-name)` syntax, so a Type hole cannot be its
-   argument. */
-$(defun native.scalar.alignment (type)
-  `(expr (unsigned long)
-    (call "_Alignof" (args (decl ,type (bindings (bind () ())))))))
+meta Symbol _scalar_tag(Type type) =>
+  native_scalar_types()[type].list().car();
+
+/* x2c has no `_Alignof(type-name)` syntax, so this call keeps its native
+   callee as a String. */
+meta List _scalar_alignment(Type type) =>
+  %(expr (unsigned long)
+    (call "_Alignof" (args (decl $type (bindings (bind () ()))))));
+
+/* `type` as the List expression of its words, as the parser builds
+   `%(unsigned long)`. A quotation hole does not reach inside `%(...)`. */
+meta List _scalar_key(Type type) {
+  List key = %(expr ("List") (nil));
+  foreach (Symbol word, ((List) type).reverse())
+    key = %(expr ("List") (cons ${$!Symbol{ $word }} $key));
+  return key;
+}
 
 /* Native size, alignment, load, and store for one row's type. The
    importing unit declares NativeScalarAccess first. */
@@ -74,13 +83,14 @@ macro Unit $native.scalar.access(Type $type) {
     memcpy(bytes, &native, sizeof native);
   }
 
-  static struct NativeScalarAccess
-    $(x2c.ident (native.scalar.access-name $type)) = {
-      $(x2c.literal.symbol (car (Map.getindex (native_scalar_types) $type))),
-      sizeof($type), $(native.scalar.alignment $type), _load, _store
-    };
+  static struct NativeScalarAccess $_scalar_access_record($type) = {
+    $_scalar_tag($type), sizeof($type), $_scalar_alignment($type),
+    _load, _store
+  };
 }
 
+/* One template application per row, in sorted order so emission does not
+   depend on hash layout. */
 meta List _scalar_access_units(Macro access) {
   Array units = [];
   List rows = native_scalar_types().list().sort();
@@ -95,16 +105,12 @@ macro Unit $native.scalar.access.all() {
   @_scalar_access_units($native.scalar.access)
 }
 
-$(defun native.scalar.access-entry (entry)
-  `(map-entry ,(native.scalar.list (map x2c.literal.symbol (car entry)))
-    (expr (* void) (cast (decl (void) (bindings (bind () (*))))
-      (expr () (op & (expr () (ident
-        ,(x2c.ident (native.scalar.access-name (car entry)))))))))))
+/* One row of `native_scalar_access`'s lookup: the type to its access
+   record, which `$native.scalar.access.all` defines first. */
+macro Entry $native.scalar.access.entry(Type $type) {
+  $_scalar_key($type): (void *)&$_scalar_access_record($type)
+}
 
-/* `native_scalar_access`'s lookup, in sorted order so emission does not
-   depend on hash layout: each row's type to its access record,
-   which `$native.scalar.access.all` defines first. */
 macro Entry $native.scalar.access.entries() {
-  @(map native.scalar.access-entry
-        (List.sort (Map.list (native_scalar_types))))
+  @_scalar_access_units($native.scalar.access.entry)
 }
