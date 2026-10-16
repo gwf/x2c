@@ -4,11 +4,11 @@
 
 /* The rows `Macro.use_subject` set, or void when no call describes its
    subject. */
-static Var macro_subject = void;
+module Var macro_subject = void;
 
 /* Whether the pattern being derived resolved a free reference against the
    current call's subject, which ties it to that call. */
-static threaded int macro_subject_used;
+module int threaded macro_subject_used;
 
 /** Returns the table `Macro.use_subject` last set, or void. */
 Var Macro.subject(void) => macro_subject;
@@ -45,7 +45,7 @@ List Macro_pattern(Macro t, List names) {
   return _pattern(t, names, 0);
 }
 
-static List _pattern(Macro t, List names, int case_pattern) {
+module List _pattern(Macro t, List names, int case_pattern) {
   List rows = _binder_rows(t, names, case_pattern);
   List body = t.assoc(<template>);
   List pattern =
@@ -119,7 +119,7 @@ static Atom _key(List hole, String projection) =>
 
 /* The second slot of a Name's declaration and reference projection keeps
    exact binding identity when a member label reaches the first slot first. */
-static Atom _name_identity(List hole) =>
+module Atom _name_identity(List hole) =>
   Atom.intern(%"?__macro_identity_${hole.assoc(<binder>).str()[1:]}");
 
 static List _instantiate(Macro t, List values);

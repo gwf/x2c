@@ -12,7 +12,7 @@ HEADER_DIR = x2c
 LIB_X_SRCS = $(addprefix $(HEADER_DIR)/,\
   $(notdir $(wildcard $(LIB_SOURCE)/*.x)))
 LIB_H_HDRS = $(patsubst %.x,%.h, $(LIB_X_SRCS))
-LIB_X_DIRS = $(HEADER_DIR)/match $(HEADER_DIR)/string $(HEADER_DIR)/var $(HEADER_DIR)/list $(HEADER_DIR)/lisp
+LIB_X_DIRS = $(HEADER_DIR)/match $(HEADER_DIR)/string $(HEADER_DIR)/var $(HEADER_DIR)/list $(HEADER_DIR)/lisp $(HEADER_DIR)/macro-value
 
 # A link whose lib/ source was deleted is removed.
 all: $(LIB_X_SRCS) $(LIB_H_HDRS) $(LIB_X_DIRS)

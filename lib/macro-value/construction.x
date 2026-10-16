@@ -89,7 +89,7 @@ List Macro.typed(List type, Var value) {
 /* An expression parameter takes code, so a number, String, or Symbol
    argument becomes the literal expression that holds it, as the compiler
    lifts a compile-time value. */
-static Var _expr_value(Var value) {
+module Var _expr_value(Var value) {
   if (value is <string>)
     return %(expr (* char) (literal (* char) ${value.repr()}));
   if (value is <symbol>)
@@ -98,7 +98,7 @@ static Var _expr_value(Var value) {
   return type ? Macro.number_literal(type, type, value) : value;
 }
 
-static List _expr_values(List values) {
+module List _expr_values(List values) {
   Array lifted = [];
   foreach (Var item, values) lifted.push(_expr_value(item));
   return lifted.list_free();
