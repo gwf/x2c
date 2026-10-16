@@ -1762,13 +1762,13 @@ static int _function_parts(Type signature, List &parameters, Type &result) {
   return 0;
 }
 
+/* A type variable is the one-element Type `("T")`. In a compound Type such
+   as `(* "T")` it is the base suffix, so walking a Type by car and cdr
+   reaches it as a whole Type in that position too. */
 static String _type_variable(Var value, Map variables) {
-  String name = NULL;
-  if (value is <string>) name = value;
   match (value)
-    case %(?(String only)): name = only;
-  if (!name) return NULL;
-  return name in variables ? name : NULL;
+    case %(?(String name)) if (name in variables): return name;
+  return NULL;
 }
 
 static int _unify(Var pattern, Var actual, Map variables, Map bindings) {
@@ -1784,13 +1784,9 @@ static int _unify(Var pattern, Var actual, Map variables, Map bindings) {
   if (pattern is <list> != actual is <list>) return 0;
   if (pattern is not <list>) return pattern == actual;
   List left = pattern, right = actual;
-  while (left && right) {
-    if (!_unify(left.car(), right.car(), variables, bindings))
-      return 0;
-    left = left.cdr();
-    right = right.cdr();
-  }
-  return !left && !right;
+  if (!left || !right) return left == right;
+  return _unify(left.car(), right.car(), variables, bindings) &&
+         _unify(left.cdr(), right.cdr(), variables, bindings);
 }
 
 static int _unify_signature(
@@ -1816,11 +1812,10 @@ static int _unify_signature(
 static Var _substitute(Var value, Map variables, Map bindings) {
   String variable = _type_variable(value, variables);
   if (variable) return bindings[variable];
-  if (value is not <list>) return value;
-  Array output = [];
-  foreach (Var item, value.list())
-    output.push(_substitute(item, variables, bindings));
-  return output.list_free();
+  if (value is not <list> || !value.list()) return value;
+  List type = value;
+  return cons(_substitute(type.car(), variables, bindings),
+              _substitute(type.cdr(), variables, bindings));
 }
 
 static Type _substitute_signature(

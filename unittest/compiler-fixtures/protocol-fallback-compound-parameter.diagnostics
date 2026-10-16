@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/protocol-fallback-compound-parameter.x:13:1: protocol: Box does not satisfy Meters(Box): member 'area' uses T inside a compound parameter type, which protocol fallback adapters do not support
+  protocol Meters(Box);
+  ^^^^^^^^
+
