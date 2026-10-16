@@ -12,10 +12,22 @@ The project meta build.
 
 | Function | Summary |
 | --- | --- |
+| [`Frontend.build_loaded`](#Frontend.build_loaded) | Builds an independent source helper that also exposes the loaded file's main. |
 | [`Frontend.build_meta`](#Frontend.build_meta) | Builds an independent helper for the meta functions `inputs` reach. |
 | [`Frontend.prepare_meta`](#Frontend.prepare_meta) | Builds the helper that runs the project `meta` functions `inputs` reach, or finds it in the cache, and makes it the one their translation calls. |
 
 ### `Frontend`
+
+<a id="Frontend.build_loaded"></a>
+#### Frontend.build_loaded
+
+`MetaHelper Frontend.build_loaded(Frontend f, String filename)`
+
+Builds an independent source helper that also exposes the loaded
+file's main. Its native signature stays inside the helper; argc/argv
+calls accept an Array of argument Strings through the data protocol.
+
+Source: `src/meta-project.x:90`
 
 <a id="Frontend.build_meta"></a>
 #### Frontend.build_meta
@@ -26,7 +38,7 @@ Builds an independent helper for the meta functions `inputs` reach.
 The caller owns its lifetime. Uses the ordinary source, include,
 package, native object, and cache dependency handling.
 
-Source: `src/meta-project.x:82`
+Source: `src/meta-project.x:83`
 
 <a id="Frontend.prepare_meta"></a>
 #### Frontend.prepare_meta
@@ -38,7 +50,7 @@ reach, or finds it in the cache, and makes it the one their translation
 calls. Inputs that reach none use no helper. A group or helper that
 does not build is reported at the first call that needs it.
 
-Source: `src/meta-project.x:75`
+Source: `src/meta-project.x:76`
 
 ## Design notes
 

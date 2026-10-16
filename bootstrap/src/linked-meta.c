@@ -12935,7 +12935,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _12012 = List_var(_12011);
   _12013 = String_new("src/compiler.x");
   _12014 = String_var(_12013);
-  _12015 = String_new("3c4029a8");
+  _12015 = String_new("e417fc12");
   _12016 = String_var(_12015);
   _12017 = cons(_12016, NULL);
   _12018 = cons(_12014, _12017);
@@ -13109,7 +13109,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _12186 = List_var(_12185);
   _12187 = String_new("src/compiler/declarations/portable-syntax.x");
   _12188 = String_var(_12187);
-  _12189 = String_new("7ef7a8bb");
+  _12189 = String_new("057201db");
   _12190 = String_var(_12189);
   _12191 = cons(_12190, NULL);
   _12192 = cons(_12188, _12191);
@@ -13165,7 +13165,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _12242 = List_var(_12241);
   _12243 = String_new("src/compiler/parsing/parse.x");
   _12244 = String_var(_12243);
-  _12245 = String_new("cf72c8be");
+  _12245 = String_new("a7de5d02");
   _12246 = String_var(_12245);
   _12247 = cons(_12246, NULL);
   _12248 = cons(_12244, _12247);
@@ -13238,7 +13238,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12312 = List_var(_12311);
   _12313 = String_new("src/meta-group.x");
   _12314 = String_var(_12313);
-  _12315 = String_new("f55194d7");
+  _12315 = String_new("f0e265ae");
   _12316 = String_var(_12315);
   _12317 = cons(_12316, NULL);
   _12318 = cons(_12314, _12317);
@@ -13256,7 +13256,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12330 = List_var(_12329);
   _12331 = String_new("src/parse.x");
   _12332 = String_var(_12331);
-  _12333 = String_new("c18c1f46");
+  _12333 = String_new("00400405");
   _12334 = String_var(_12333);
   _12335 = cons(_12334, NULL);
   _12336 = cons(_12332, _12335);
@@ -13366,7 +13366,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12440 = cons(_465, _12439);
   _12441 = String_new("src/collect.x");
   _12442 = String_var(_12441);
-  _12443 = String_new("ec0d6f51");
+  _12443 = String_new("525bef93");
   _12444 = String_var(_12443);
   _12445 = cons(_12444, NULL);
   _12446 = cons(_12442, _12445);

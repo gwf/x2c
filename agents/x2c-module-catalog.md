@@ -513,11 +513,11 @@ Public functions:
 `Compiler.use_meta_toolchain`, `Compiler.meta_cc`, `Compiler.meta_cc_identity`,
 `Compiler.meta_cc_run`, `Compiler.stage_meta_in_process`,
 `Compiler.groups_meta`, `Compiler.group_meta_function`,
-`Compiler.meta_reaches_compile_time`, `Compiler.finish_meta_functions`,
-`Compiler.meta_call_missing`, `Compiler.refuse_meta_call`,
-`Compiler.refuse_record_meta_call`, `Compiler.use_meta_build_directory`,
-`Compiler.write_meta_build`, `Compiler.bind_meta_group`,
-`Compiler.stage_session_function`
+`Compiler.prepare_loaded_main`, `Compiler.meta_reaches_compile_time`,
+`Compiler.finish_meta_functions`, `Compiler.meta_call_missing`,
+`Compiler.refuse_meta_call`, `Compiler.refuse_record_meta_call`,
+`Compiler.use_meta_build_directory`, `Compiler.write_meta_build`,
+`Compiler.bind_meta_group`, `Compiler.stage_session_function`
 
 ### [src/meta-helper-client.x](../src/meta-helper-client.x)
 
@@ -559,7 +559,7 @@ the project meta build.
 
 Public functions:
 
-`Frontend.prepare_meta`, `Frontend.build_meta`
+`Frontend.prepare_meta`, `Frontend.build_meta`, `Frontend.build_loaded`
 
 ### [src/meta-sdk.x](../src/meta-sdk.x)
 

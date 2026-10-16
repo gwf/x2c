@@ -101,7 +101,7 @@ incomplete submission continues at a fresh `... ` prompt.
 | `:help` | Show session commands. |
 | `:stats [verbose]` | Show concise or detailed runtime statistics. |
 | `:symbols [PREFIX]` | List successfully defined names and kinds, optionally matching a name prefix. |
-| `:load "file.x"` | Compile and load public bodied meta functions; replace an earlier load of the same file. |
+| `:load "file.x"` | Compile and load public bodied meta functions and `main`; replace an earlier load of the same file. |
 | `:info NAME` | Show a session function's argument and return types, source, and execution mode. |
 | `:ast plus` | Show `plus`'s typed x2c AST. |
 | `:lowered plus` | Report that `plus` is compiled and has no Lisp body. |
@@ -168,8 +168,8 @@ x2c> plus_answer(20);
 `:load` compiles native code through the project meta helper builder. It
 uses the ordinary include, module, package, and native dependency handling.
 For example, `answer` can call a public meta function from an included `.x`
-file. Ordinary functions such as `twice` can support compiled bodies. Only
-public bodied meta functions defined by the loaded unit become prompt
+file. Ordinary functions such as `twice` can support compiled bodies. Public
+bodied meta functions and `main` defined by the loaded unit become prompt
 functions. Public type declarations accompany them. Global variables and
 enumerator constants are not imported. Source macros remain with the
 compiled source; loading does not install them in the prompt.
@@ -178,7 +178,7 @@ Compilation happens on `:load` and on each prompt function definition,
 including `plus_answer` above. Top-level input stays interpreted. Loading needs
 a matching x2c compiler, the host C compiler, and its runtime. A dependency
 that the project meta builder cannot compile or link makes the load fail.
-`meta` selects the compiled entry points; it does not supply missing native
+`meta` selects additional entry points; it does not supply missing native
 libraries or implementations.
 
 Each successful load keeps a separate helper process and its compiled
@@ -194,6 +194,53 @@ A failed load publishes no names and preserves earlier functions. Fix a
 rejected file and load it again. Loaded names appear as `native` in
 `:symbols`; `:info` shows their declarations and loaded file. They have no
 prompt AST or lowered Lisp for inspection.
+
+### Load a program with main
+
+`:load` also accepts a program with `main`, including a `.c` file. The source
+needs no `meta` annotation or renamed function. Save this as `hello.c`:
+
+```x2c
+#include <stdio.h>
+int main(int argc, char *argv[]) {
+  for (int i = 0; i < argc; i++) printf("%d: %s\n", i, argv[i]);
+  return 0;
+}
+```
+
+Pass an Array of Strings, including the program name as its first element:
+
+```text
+x2c> :load "hello.c"
+loaded ("main")
+x2c> main(["hello", "world"]);
+0: hello
+1: world
+=> 0
+```
+
+The adapter supplies `argc`, writable copies of the argument strings, and
+the final null pointer at `argv[argc]`. `main([])` passes zero arguments.
+Changes to `argv` do not change the prompt's Array or Strings.
+`:info main` shows the prompt signature `int main(Array);`.
+
+A program with `int main(void)` or `int main()` is called as `main()`.
+Both forms return zero if execution reaches the closing brace. Returning
+from `main` produces a prompt result and leaves the REPL running. Standard
+output and standard error appear on their usual streams, including output
+without a final newline. Loading alone does not execute `main`.
+
+The original function keeps its native calling convention inside the
+compiled program. Its ordinary helpers and references to `main` continue
+to work. The loader changes bound compiler syntax, not the source file.
+Other C dialect and dependency limitations still apply; loading does not
+provide missing libraries. Calling `exit` ends the helper, as described
+below under interrupted calls.
+
+`main` follows the same replacement rules as other loaded functions. Saved
+function values and compiled prompt callers use its replacement. Changing
+between the no-argument and argc/argv forms requires a new session. A second
+loaded file cannot publish another `main` in that session.
 
 ### Edit a loaded file
 

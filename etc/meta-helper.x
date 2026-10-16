@@ -311,6 +311,8 @@ $scope() static void _apply(Var target, String name, List arguments) {
   /* A catch binding is borrowed by the arm; the reply is written after. */
   catch %(?code *detail):
     failure = %(failure ${Error.snapshot(cons(code, detail))});
+  fflush(stdout);
+  fflush(stderr);
   foreach (List notice, helper_notices) _reply(notice);
   if (failure) {
     _reply(failure);
