@@ -489,11 +489,10 @@ static List _declaration_form(Compiler c, int skip_body) {
       c.install_collected_meta_function(decl, meta);
     return NULL;
   }
-  if (native && !decl.type_from_ast().is_function())
+  if (native && !type.is_function())
     $report.parse.meta_function(c, meta);
   if (c.test(<;>)) return _declared(c, decl, meta, first);
-  if (c.peek(0) == <"{"> || _x2c_at_function_arrow(c))
-    return _defined(c, decl, meta, native, first);
+  if (body) return _defined(c, decl, meta, native, first);
   c.require_input();
   Symbol unexpected = c.peek(0);
   $report.parse.body_expected(c, unexpected);
@@ -1278,7 +1277,7 @@ static List _lower_self_declaration(Compiler c, List declaration) {
   if (!items || items.cdr()) return declaration;
   List target = items.car();
   if (target.car() == <op>) target = target.caddr();
-  List binding = target.cadr(), method = _method_identity(c, binding);
+  List binding = target.cadr(), method = c.fact(%(method $binding));
   if (!method) return declaration;
   Type owner = _self_owner_type(c, method);
   if (!owner) return declaration;
@@ -1297,18 +1296,6 @@ static List _lower_self_declaration(Compiler c, List declaration) {
   c.sym.set(%(self $spelling), relative);
   _lower_parameter_self(c, owner.car());
   return lowered;
-}
-
-static List _method_identity(Compiler c, List binding) {
-  Var stored;
-  return c.semantic_binding_facts().try_get(
-    %(method $binding), stored) ? stored : NULL;
-}
-
-static List _method_self_signature(Compiler c, List binding) {
-  Var stored;
-  return c.semantic_binding_facts().try_get(
-    %(self $binding), stored) ? stored : NULL;
 }
 
 static Type _self_owner_type(Compiler c, List method) {
@@ -1466,10 +1453,8 @@ static List _type_specifier(Compiler c) {
   if (slot) return %($slot);
   List syntax = NULL;
   switch (c.peek(0)) {
-    case <struct>: case <union>:
-      syntax = _struct_or_union(c); break;
-    case <enum>:
-      syntax = _enum(c); break;
+    case <struct>: case <union>: case <enum>:
+      syntax = _tagged_type(c); break;
     case <ident>:
       if (c.token.text == "Self") {
         c.next();
@@ -1539,7 +1524,7 @@ static String _type_reference(Compiler c, Symbol tag, String name) {
 
 // aggregates
 
-static List _struct_or_union(Compiler c) {
+static List _tagged_type(Compiler c) {
   Token first = c.token;
   Symbol tag = c.peek(0);
   c.next();
@@ -1547,19 +1532,19 @@ static List _struct_or_union(Compiler c) {
   List name = _tag_name(c);
   if (name && (c.package || c.line_markers))
     name = _scoped_aggregate_name(c, tag, name);
-  List usedname = name ? name : c.gensym();
-  usedname = %(${c.aggregate_name(
-    tag, usedname.car(), c.peek(0) == <"{"> || c.peek(0) == <;>)});
-  List type = cons(tag, usedname), fields = NULL;
+  int defines = c.peek(0) == <"{"> ||
+    (c.peek(0) == <;> && (tag != <enum> || c.macro_holes));
+  Var used = c.aggregate_name(tag, (name ? name : c.gensym()).car(), defines);
+  List type = %($tag $used), members = NULL;
   if (c.test(<"{">)) {
-    fields = c.parse_fields(type);
+    members = tag == <enum> ? c.parse_enumerators(type) : c.parse_fields(type);
     c.expect(<"}">);
     _skip_attributes(c);
     if (!c.macro_holes)
-      return _publish_aggregate_type(c, tag, usedname.car(), fields, first);
-    fields = cons(<fields>, fields);
+      return _publish_aggregate_type(c, tag, used, members, first);
+    if (tag != <enum>) members = cons(<fields>, members);
   }
-  return fields ? type.append(%($fields)): type;
+  return members ? type.append(%($members)) : type;
 }
 
 /* C places an aggregate's own attributes after its keyword and after its
@@ -1660,11 +1645,7 @@ List Compiler.parse_fields(Compiler c, List context) {
     int delegated = c.test(<delegate>);
     List field = delegated
       ? _field(c, context, 1) : c.parse_field(context);
-    match (field) {
-      case %(seq *rows):
-        foreach (Var row, rows) fields.push(row);
-      default: fields.push(field);
-    }
+    _push_items(fields, field);
     if (c.peek(0) == <"}">) return fields.list_free();
   }
 }
@@ -1798,28 +1779,6 @@ static Type _declare_named_type(
 }
 
 // enumerations
-
-static List _enum(Compiler c) {
-  Token first = c.token;
-  c.expect(<enum>);
-  _skip_attributes(c);
-  List name = _tag_name(c);
-  if (name && (c.package || c.line_markers))
-    name = _scoped_aggregate_name(c, <enum>, name);
-  List usedname = name ? name : c.gensym();
-  usedname = %(${c.aggregate_name(
-    <enum>, usedname.car(),
-    c.peek(0) == <"{"> || (c.macro_holes && c.peek(0) == <;>))});
-  List type = cons(<enum>, usedname), enums = NULL;
-  if (c.test(<"{">)) {
-    enums = c.parse_enumerators(type);
-    c.expect(<"}">);
-    _skip_attributes(c);
-    if (!c.macro_holes)
-      return _publish_aggregate_type(c, <enum>, usedname.car(), enums, first);
-  }
-  return enums ? type.append(%($enums)): type;
-}
 
 /** Parses comma-separated enumerators up to the current closing brace.
     Returns their flat source-order `List` and leaves the brace unconsumed.
@@ -2289,8 +2248,8 @@ static List _install_declarator(
   List declaration = %(declare $base (bindings (bind () $mods)));
   List prior = name is <list> ? name : NULL;
   List method = method_identity ? method_identity
-              : prior ? _method_identity(c, prior) : NULL;
-  List self_signature = prior ? _method_self_signature(c, prior) : NULL;
+              : prior ? c.fact(%(method $prior)) : NULL;
+  List self_signature = prior ? c.fact(%(self $prior)) : NULL;
   Type declared_type = mods.append(base);
   name = _method_spelling(c, name, declared_type, method, exact_name);
   String exact = _syntax_exact_name(name);
@@ -2583,12 +2542,8 @@ List Compiler.parse_basic_identifier(Compiler c) {
 }
 
 /** Consumes and returns the current identifier, or NULL without consuming. */
-List Compiler.parse_optional_identifier(Compiler c) {
-  if (c.peek(0) != <ident>) return NULL;
-  String ident = c.token.text;
-  c.expect(<ident>);
-  return %($ident);
-}
+List Compiler.parse_optional_identifier(Compiler c) =>
+  c.peek(0) == <ident> ? c.parse_basic_identifier() : NULL;
 
 static String _syntax_exact_name(Var value) {
   if (value is <string>) return value;
@@ -2734,7 +2689,7 @@ static String _prepare_lifecycle(
 
 static String _lifecycle_owner(
   Compiler c, List binding, String member) {
-  List method = _method_identity(c, binding);
+  List method = c.fact(%(method $binding));
   if (!method) return NULL;
   match (method)
     case %(?name $member): {
@@ -3559,7 +3514,7 @@ static List _collected_function(
         c.sym.mark_static(%(function $name));
       else c.fn_defs[name] = 1;
       c.record_declaration_visibility(declaration);
-      List method = _method_identity(c, binding);
+      List method = c.fact(%(method $binding));
       if (method) {
         // Replay the resolved owner with this declaration's own member.
         String member = method.cadr();
