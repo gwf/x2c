@@ -667,7 +667,9 @@ def aggregate_version(initial=10, size=3, field='int x;', extra=''):
             'union Choice { int n; double f; };\n'
             'struct HasUnion { int n; union Choice choice; } tagged = {4,{5}};\n'
             'static Point secret = {11, 12};\n'
+            'static Var private_value = void;\n'
             'int inferred[] = {13, 14};\n'
+            'int incomplete[];\n'
             'struct Mixed { int number; int *pointer; } mixed = {15, 0};\n'
             'struct Holder { Point nested; int values[2]; };\n'
             'struct Holder holder={{17,18},{19,20}};\n'
@@ -727,6 +729,7 @@ try:
                        'int forbidden(void) { return frozen.x++; }']:
         session.run(expression, 'loaded const global is read-only')
     session.run('secret.x;', 'unresolved identifier: secret')
+    session.run('incomplete;', 'unresolved identifier: incomplete')
     session.run('mixed.pointer;', 'loaded field cannot cross')
     for expression in ['samples[-1];', 'samples[3]=0;', 'matrix[0][2];']:
         session.run(expression, 'loaded array index out of bounds')

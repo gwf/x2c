@@ -412,10 +412,12 @@ static void _loaded_global(Compiler c, Type spec, List row, Map present) {
     String name = Ast.binding_spelling(binding);
     if (!name || name in present || %($name) in c.sym.file_statics()) return;
     Type type = %(declare $spec (bindings $row)).type_from_ast();
-    if (!_loaded_scalar(c, type) && !_loaded_aggregate(c, type, 1)) return;
+    if (!_loaded_scalar(c, type) &&
+        !_loaded_aggregate(c, type, initialized)) return;
     c.ensure_macro_lisp();
     LoadedPath path = {.compiler = c, .descriptions = [], .name = name};
-    _loaded_path(path, type, %(expr ${type.declared()} (ident $binding)), 1);
+    _loaded_path(path, type,
+      %(expr ${type.declared()} (ident $binding)), initialized);
     c.meta_group.push(%(global $name ${path.descriptions.list_free()}));
     present[name] = 1;
   }

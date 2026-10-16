@@ -214,8 +214,9 @@ static List _defer_binding(
       }
       Type declared = object.canonicalize();
       Type resolved = c.sym.resolve_key(declared);
-      // C initializes constant aggregates in place, including const fields.
-      if ((resolved.is_array() || resolved.is_aggregate()) &&
+      // C initializes constant braces in place, including const fields.
+      if ((resolved.is_array() ||
+           (resolved.is_aggregate() && List.match(value, %(composite ?)))) &&
           !c.static_value_is_runtime(value, NULL)) return bound;
       if (resolved.is_array()) {
         match (value)
