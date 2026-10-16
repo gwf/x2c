@@ -120,7 +120,7 @@ Source: `src/macros/lisp.x:410`
 Returns the token after the named or expression hole at the cursor.
 Consumes neither its `$` or `@` prefix nor its optional braces.
 
-Source: `src/macros/definitions.x:851`
+Source: `src/macros/definitions/slots.x:109`
 
 <a id="Compiler.applying_shipped"></a>
 #### Compiler.applying_shipped
@@ -401,7 +401,7 @@ Source: `src/macros/invocations.x:95`
 Returns the current declaration's definition-local identity. An active
 macro-definition locals map is required.
 
-Source: `src/macros/definitions.x:1463`
+Source: `src/macros/definitions/templates.x:264`
 
 <a id="Compiler.macro_invocation_collection"></a>
 #### Compiler.macro_invocation_collection
@@ -436,7 +436,7 @@ Returns whether tokens after a Lisp form or explicit meta call continue
 a declaration. The balanced argument group is inspected without moving
 the compiler cursor; a visible source macro retains its own grammar.
 
-Source: `src/macros/definitions.x:1355`
+Source: `src/macros/definitions/slots.x:181`
 
 <a id="Compiler.macro_pattern_at"></a>
 #### Compiler.macro_pattern_at
@@ -470,7 +470,7 @@ declares is a template local, apart from ordinary names of the same
 spelling. A tag it only references keeps its public spelling unless the
 template later defines or declares it.
 
-Source: `src/macros/definitions.x:1476`
+Source: `src/macros/definitions/templates.x:277`
 
 <a id="Compiler.macro_targets_unit"></a>
 #### Compiler.macro_targets_unit
@@ -539,7 +539,7 @@ Parses the macro definition at the current token into a `macrodef` `List`.
 A source-level definition is published immediately; a definition inside a
 template remains syntax for later binding at its expansion site.
 
-Source: `src/macros/definitions.x:38`
+Source: `src/macros/definitions/reading.x:20`
 
 <a id="Compiler.parse_macro_lisp_expression"></a>
 #### Compiler.parse_macro_lisp_expression
@@ -580,7 +580,7 @@ Source: `src/macros/lisp.x:52`
 Parses a quotation at `$!` into the code it builds from the locals its
 body names.
 
-Source: `src/macros/definitions.x:872`
+Source: `src/macros/definitions/quotations.x:19`
 
 <a id="Compiler.peek_macro_hole"></a>
 #### Compiler.peek_macro_hole
@@ -591,7 +591,7 @@ Returns the registered hole descriptor for a named or expression hole.
 `$NAME` and `${expression}` insert one value; `@NAME` and `@{expression}`
 splice a sequence. Returns NULL without consuming a non-hole spelling.
 
-Source: `src/macros/definitions.x:837`
+Source: `src/macros/definitions/slots.x:95`
 
 <a id="Compiler.place"></a>
 #### Compiler.place
@@ -847,7 +847,7 @@ Source: `src/macros/invocations.x:982`
 Parses a member name in a template. A singular `Name` hole there
 supplies the spelling it captured, without hygienic renaming.
 
-Source: `src/macros/definitions.x:1371`
+Source: `src/macros/definitions/slots.x:197`
 
 <a id="Compiler.try_parse_macro_pattern"></a>
 #### Compiler.try_parse_macro_pattern
@@ -870,7 +870,7 @@ Returns role-shaped syntax containing `(macro-bind ...)` or
 `(macro-slot ...)`, or NULL when ordinary grammar owns the current tokens;
 successful parsing advances the cursor.
 
-Source: `src/macros/definitions.x:754`
+Source: `src/macros/definitions/slots.x:14`
 
 <a id="Compiler.try_parse_macro_subpattern"></a>
 #### Compiler.try_parse_macro_subpattern

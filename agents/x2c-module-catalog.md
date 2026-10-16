@@ -327,10 +327,10 @@ source macros and the compile-time Lisp they run.
 Public functions:
 
 `Compiler.report_lisp_failure`, `Compiler.parse_macro_definition`,
-`Compiler.try_parse_macro_slot`, `Compiler.peek_macro_hole`,
-`Compiler.after_hole`, `Compiler.parse_macro_quotation`,
-`Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_member`,
 `Compiler.macro_introduced_name`, `Compiler.macro_tag_name`,
+`Compiler.parse_macro_quotation`, `Compiler.try_parse_macro_slot`,
+`Compiler.peek_macro_hole`, `Compiler.after_hole`,
+`Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_member`,
 `Compiler.expand_macro_invocation_node`, `Compiler.macro_invocation_site`,
 `Compiler.marked_rewrite`, `Compiler.has_rewrites`, `Compiler.rewrite`,
 `Compiler.rewrite_lowered`, `Compiler.lower_replacement`,
