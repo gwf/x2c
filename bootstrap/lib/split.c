@@ -39,6 +39,10 @@ static inline Iter _x2c_gensym_proto_split_iter_0(Var a0, Iter a1);
 
 static VarMethods _x2c_gensym_protocol_methods_0;
 
+int x2c_register_builtin_descriptor(Symbol, VarMethods);
+
+void x2c_register_descriptor(String, VarMethods);
+
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;

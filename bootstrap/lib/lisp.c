@@ -868,6 +868,8 @@ typedef struct _x2c_gensym_defer_env_19{
 _x2c_gensym_defer_env_19;
 static void _x2c_gensym_defer_cleanup_27(void * _x2c_gensym_defer_opaque_27);
 static void _x2c_gensym_defer_cleanup_28(void * _x2c_gensym_defer_opaque_28);
+int x2c_register_builtin_descriptor(Symbol, VarMethods);
+void x2c_register_descriptor(String, VarMethods);
 List cons(Var, List);
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();

@@ -8,7 +8,7 @@
 #include "x2c.h"
 typedef String Path;
 
-Path Path_new(const char * argument0);
+Path Path_new(const char * a0);
 
 Path Path_join(Path base, Path name);
 

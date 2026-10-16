@@ -105,6 +105,10 @@ static Func _new(FuncAdapter adapter, List signature, int rest, const void * con
 
 static VarMethods _x2c_gensym_protocol_methods_0;
 
+int x2c_register_builtin_descriptor(Symbol, VarMethods);
+
+void x2c_register_descriptor(String, VarMethods);
+
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;

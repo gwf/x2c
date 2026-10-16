@@ -158,6 +158,10 @@ _x2c_gensym_defer_env_2;
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2);
 
+int x2c_register_builtin_descriptor(Symbol, VarMethods);
+
+void x2c_register_descriptor(String, VarMethods);
+
 static Var Symbol_var(Symbol);
 
 static Var String_var(String);

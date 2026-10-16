@@ -50,7 +50,21 @@ Map Type_var_tag_rows(void);
 
 static Map declared_typetags;
 
+#include "exception.h"
+
+
+
+
 _x2c_gensym_initializer_choice_2B6ED6EF_0((declared_typetags = NULL))
+typedef struct _x2c_gensym_defer_env_0{
+  const void * _x2c_gensym_defer_capture_0;
+  const void * _x2c_gensym_defer_capture_1;
+  const void * _x2c_gensym_defer_capture_2;
+}
+_x2c_gensym_defer_env_0;
+
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
+
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -237,16 +251,65 @@ List Type_parts(Type type){
   if(! _init_guard_) _file_init_();  return type_declaration_parts(Type_list(type));
 }
 
+List Type_declaration_base(Type t, List * modifiers){
+  if(! _init_guard_) _file_init_();  Array storage = Array_new(), text = Array_new(), typed = Array_new(); {
+    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
+      0
+    }
+    ;  _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & storage;  _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_1 =(const void *) & text;  _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_2 =(const void *) & typed;  X2CCleanup _x2c_gensym_defer_record_0 ={
+      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
+    }
+    ;  x2c_cleanup_push(& _x2c_gensym_defer_record_0); {
+      {
+        Var item;  Iter _x2c_gensym_macro_iterator_3 = List_iter(Type_list(t), &(struct Iter){
+          int_var(0)
+        }
+        );  Var _x2c_gensym_macro_item_4;  while(Iter_try_next(_x2c_gensym_macro_iterator_3, &(_x2c_gensym_macro_item_4))){
+          item = _x2c_gensym_macro_item_4;  if(Var_is_row(item, 9, 7, 4) && Var_is_row(car(Var_list_payload(item)), 11, 7, 1)) Array_push(text, item);  else Array_push(typed, item);
+        }
+
+      }
+      List base, mods;  List _x2c_gensym_destructure_0 = Type_parts(Type_declared(List_type(Array_list(typed))));  base = Var_list_payload(List_getindex(_x2c_gensym_destructure_0, 0));  mods = Var_list_payload(List_getindex(_x2c_gensym_destructure_0, 1)); (* modifiers) = mods;  if(! List_truth(mods)){
+        List _x2c_gensym_return_value_0 = Type_list(t); {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);  return _x2c_gensym_return_value_0;
+        }
+
+      }
+      {
+        Var item;  Iter _x2c_gensym_macro_iterator_4 = List_iter(Type_list(t), &(struct Iter){
+          int_var(0)
+        }
+        );  Var _x2c_gensym_macro_item_5;  while(Iter_try_next(_x2c_gensym_macro_iterator_4, &(_x2c_gensym_macro_item_5))){
+          item = _x2c_gensym_macro_item_5;  if(Var_is(item, 1328354264) &&(Symbol_is_storage_class(Var_symbol(item)) || Symbol_is_inline(Var_symbol(item)))) Array_push(storage, item);
+        }
+
+      }
+      {
+        List _x2c_gensym_return_value_1 =({
+          List _x2c_gensym_literal_part_4 = Array_list(storage);  List _x2c_gensym_literal_part_5 = Array_list(text);  List_append(_x2c_gensym_literal_part_4, List_append(_x2c_gensym_literal_part_5, List_append(base, NULL)));
+        }
+        ); {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);  return _x2c_gensym_return_value_1;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+  }
+
+}
+
 List Type_declaration_ast(Type type, List binding){
-  if(! _init_guard_) _file_init_();  List base, mods;  List _x2c_gensym_destructure_0 = Type_parts(type);  base = Var_list_payload(List_getindex(_x2c_gensym_destructure_0, 0));  mods = Var_list_payload(List_getindex(_x2c_gensym_destructure_0, 1));  return({
-    Var _x2c_gensym_literal_part_4 = List_var(base);  Var _x2c_gensym_literal_part_5 = List_var(cons(_19, cons(List_var(cons(_4, cons(List_var(binding), cons(List_var(mods), NULL)))), NULL)));  cons(_20, cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, NULL)));
+  if(! _init_guard_) _file_init_();  List base, mods;  List _x2c_gensym_destructure_1 = Type_parts(type);  base = Var_list_payload(List_getindex(_x2c_gensym_destructure_1, 0));  mods = Var_list_payload(List_getindex(_x2c_gensym_destructure_1, 1));  return({
+    Var _x2c_gensym_literal_part_6 = List_var(base);  Var _x2c_gensym_literal_part_7 = List_var(cons(_19, cons(List_var(cons(_4, cons(List_var(binding), cons(List_var(mods), NULL)))), NULL)));  cons(_20, cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, NULL)));
   }
   );
 }
 
 List Type_parameter_ast(Type type, List binding){
-  if(! _init_guard_) _file_init_();  List base, mods;  List _x2c_gensym_destructure_1 = Type_parts(type);  base = Var_list_payload(List_getindex(_x2c_gensym_destructure_1, 0));  mods = Var_list_payload(List_getindex(_x2c_gensym_destructure_1, 1));  return({
-    Var _x2c_gensym_literal_part_6 = List_var(base);  Var _x2c_gensym_literal_part_7 = List_var(cons(_4, cons(List_var(binding), cons(List_var(mods), NULL))));  cons(_21, cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, NULL)));
+  if(! _init_guard_) _file_init_();  List base, mods;  List _x2c_gensym_destructure_2 = Type_parts(type);  base = Var_list_payload(List_getindex(_x2c_gensym_destructure_2, 0));  mods = Var_list_payload(List_getindex(_x2c_gensym_destructure_2, 1));  return({
+    Var _x2c_gensym_literal_part_8 = List_var(base);  Var _x2c_gensym_literal_part_9 = List_var(cons(_4, cons(List_var(binding), cons(List_var(mods), NULL))));  cons(_21, cons(_x2c_gensym_literal_part_8, cons(_x2c_gensym_literal_part_9, NULL)));
   }
   );
 }
@@ -273,14 +336,14 @@ int Type_var_tag_row(Symbol tag, unsigned long * top, unsigned long * mask, unsi
 
 void Type_register_var_tag(Type t, String name, String converter){
   if(! _init_guard_) _file_init_();  if(declared_typetags == NULL || ! List_truth(Type_list(t)) || ! String_truth(name) || ! String_truth(converter)) return;  Type key = Type_canonicalize(t);  Var row = Map_getindex(declared_typetags, List_var(key));  if(Var_is_void(row)) Map_setindex(declared_typetags, List_var(key), List_var(({
-    Var _x2c_gensym_literal_part_8 = Symbol_var(String_symbol(String_lower(name)));  cons(_x2c_gensym_literal_part_8, cons(String_var(converter), NULL));
+    Var _x2c_gensym_literal_part_10 = Symbol_var(String_symbol(String_lower(name)));  cons(_x2c_gensym_literal_part_10, cons(String_var(converter), NULL));
   }
   )));
 }
 
 void Type_register_var_adoption(Type type, Type representation, Symbol tag){
   if(! _init_guard_) _file_init_();  if(declared_typetags == NULL || ! List_truth(Type_list(type))) return;  Type key = Type_canonicalize(type);  Var row = Map_getindex(declared_typetags, List_var(key));  if(! tag && List_truth(Type_list(representation))) tag = Type_fixed_var_tag(representation);  if(Var_is_void(row) || ! tag) return;  Map_setindex(declared_typetags, List_var(key), List_var(({
-    Var _x2c_gensym_literal_part_9 = Symbol_var(tag);  Var _x2c_gensym_literal_part_10 = List_cadr(Var_list(row));  cons(_x2c_gensym_literal_part_9, cons(_x2c_gensym_literal_part_10, NULL));
+    Var _x2c_gensym_literal_part_11 = Symbol_var(tag);  Var _x2c_gensym_literal_part_12 = List_cadr(Var_list(row));  cons(_x2c_gensym_literal_part_11, cons(_x2c_gensym_literal_part_12, NULL));
   }
   )));
 }
@@ -291,6 +354,13 @@ Map Type_begin_unit(void){
 
 void Type_end_unit(Map enclosing){
   if(! _init_guard_) _file_init_();  declared_typetags = enclosing;
+}
+
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
+  _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0; {
+    Array_free((*(Array *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));  Array_free((*(Array *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_1));  Array_free((*(Array *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_2));
+  }
+
 }
 
 #undef _x2c_gensym_initializer_choice_2B6ED6EF_0_expanded

@@ -257,6 +257,12 @@ _x2c_gensym_defer_env_4;
 
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4);
 
+int x2c_register_builtin_descriptor(Symbol, VarMethods);
+
+void x2c_register_descriptor(String, VarMethods);
+
+void x2c_register_tagged_descriptor(Symbol, String, VarMethods);
+
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
