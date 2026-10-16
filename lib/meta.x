@@ -154,7 +154,7 @@ meta Code Code.call_in_order(Code member, List arguments, Type type);
     lowered again. Each of `effects` applies first, in order; a
     `(cleanup TOKEN PLACED)` row replaces TOKEN in `code` with the lowered
     statements PLACED and marks the unit as needing exception support. */
-Code Code.lowered(Code code, List effects);
+meta Code Code.lowered(Code code, List effects);
 
 /** Returns `code`, which is already bound and typed, marked so that a
     translator's result or placed code is lowered without being bound
