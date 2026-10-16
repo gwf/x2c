@@ -41,6 +41,33 @@ meta Map native_scalar_types(void) => {
     %(ldouble "Var_long_double" "x2c_var_update_long_double"),
 };
 
+/* The access record for `type` is `_native_scalar_access` followed by each
+   word of `type`, so `(unsigned long)` names
+   `_native_scalar_access_unsigned_long`. */
+meta List _scalar_access_record(Type type) {
+  String name = "_native_scalar_access";
+  foreach (Symbol word, (List) type) name = %"${name}_$word";
+  return x2c_ident(name);
+}
+
+meta Symbol _scalar_tag(Type type) =>
+  native_scalar_types()[type].list().car();
+
+/* x2c has no `_Alignof(type-name)` syntax, so this call keeps its native
+   callee as a String. */
+meta List _scalar_alignment(Type type) =>
+  %(expr (unsigned long)
+    (call "_Alignof" (args (decl $type (bindings (bind () ()))))));
+
+/* `type` as the List expression of its words, as the parser builds
+   `%(unsigned long)`. A quotation hole does not reach inside `%(...)`. */
+meta List _scalar_key(Type type) {
+  List key = %(expr ("List") (nil));
+  foreach (Symbol word, ((List) type).reverse())
+    key = %(expr ("List") (cons ${$!Symbol{ $word }} $key));
+  return key;
+}
+
 $(defun native.scalar.list (items)
   (if (null? items) `(expr ("List") (nil))
       `(expr ("List")

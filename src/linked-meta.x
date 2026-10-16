@@ -86,6 +86,14 @@ static List _selector_units(List middles, Macro car, Macro cdr) {
 static List _selector_definitions(Macro car, Macro cdr) =>
   _selector_units(_selector_middles(), car, cdr);
 
+/* --- lib/native-scalar-types.x ------------------------------------------- */
+
+List _scalar_access_record(Type type) {
+  String name = "_native_scalar_access";
+  foreach (Symbol word, (List) type) name = %"${name}_$word";
+  return x2c_ident(name);
+}
+
 /* --- lib/rewrite.x ------------------------------------------------------- */
 
 /** Registers the decorated translator with its pattern and hole patterns. */
@@ -2198,6 +2206,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_selector_middles", _selector_middles);
   $linked.row(rows, "_selector_units", _selector_units);
   $linked.row(rows, "_selector_definitions", _selector_definitions);
+  $linked.row(rows, "_scalar_access_record", _scalar_access_record);
   $linked.row(rows, "register_rewrite", register_rewrite);
   $linked.row(rows, "_dedent_expand", _dedent_expand);
   $linked.row(rows, "_macros_location", _macros_location);
@@ -2342,6 +2351,9 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_operator_rows", _operator_rows);
   $linked.row(rows, "_operator_cases", _operator_cases);
   $linked.row(rows, "native_scalar_types", native_scalar_types);
+  $linked.row(rows, "_scalar_tag", _scalar_tag);
+  $linked.row(rows, "_scalar_alignment", _scalar_alignment);
+  $linked.row(rows, "_scalar_key", _scalar_key);
   $linked.row(rows, "_scalar_access_units", _scalar_access_units);
   $linked.row(rows, "_cases_label", _cases_label);
   $linked.row(rows, "_cases_transfers", _cases_transfers);
