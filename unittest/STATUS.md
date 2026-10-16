@@ -9,6 +9,16 @@ null-site invocation remains an unverified coverage gap, not a reproduced
 crash. The capture-clause fixture checks reconstruction of value and reference
 captures, expression and block bodies, and typed parameter sequences.
 
+## Thread allocation baseline follow-up
+
+On 2026-10-16, running `var_suite varops_suite protocols_suite scope_suite
+thread_suite` at `0a26b80a002610f929e55139f0f8665fab06773f` reports one failure:
+`thread_failed_join_export_releases_storage` expects 1679 live allocations
+and observes 1680. The same selection after the Var module split gives the
+same failure (108 passed, one failed, 8368 assertions). The allocation owner
+and whether this is retained state or leaked storage remain uninvestigated.
+Keep the assertion; investigate separately from the source split.
+
 ## Coverage
 
 - Retired component experiments leave focused compiler fixtures for indexed

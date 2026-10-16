@@ -48,8 +48,8 @@ record_failure() {
 normalize_runtime_lines() {
   local file=$1
   sed -E \
-    -e 's|(\(file "[^"]*lib/[A-Za-z0-9_-]+\.x"\) \(line )[0-9]+|\1<line>|g' \
-    -e 's|(lib/[A-Za-z0-9_-]+\.x):[0-9]+:[0-9]+|\1:<line>:<column>|g' \
+    -e 's|(\(file "[^"]*lib/[A-Za-z0-9_/-]+\.x"\) \(line )[0-9]+|\1<line>|g' \
+    -e 's|(lib/[A-Za-z0-9_/-]+\.x):[0-9]+:[0-9]+|\1:<line>:<column>|g' \
     "$file" >"$file.normalized"
   mv "$file.normalized" "$file"
 }
