@@ -52,7 +52,7 @@ void Compiler_refuse_meta_call(Compiler c, String name, Token site, String why);
 
 void Compiler_refuse_record_meta_call(Compiler c, String name, Token site);
 
-void Compiler_use_meta_build_directory(String directory, Array owners);
+void Compiler_use_meta_build_directory(String directory, Array owners, Map providers);
 
 void Compiler_write_meta_build(Compiler c);
 

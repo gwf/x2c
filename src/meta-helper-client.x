@@ -104,8 +104,8 @@ Var Compiler.meta_helper_call(
   Compiler c, String name, Token site, List arguments, String provider) =>
   _call_helper(c, name, site, arguments, provider, <call>);
 
-/** Calls a loaded function with data values and helper-owned object selections.
-    Object selectors resolve inside the helper; no address crosses its pipes. */
+/** Calls a loaded function with data values and helper-owned selections.
+    Selectors resolve inside the helper. No address crosses its pipes. */
 Var Compiler.loaded_helper_call(
   Compiler c, String name, Token site, List arguments, String provider) =>
   _call_helper(c, name, site, arguments, provider, <load-call>);

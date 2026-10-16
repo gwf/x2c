@@ -364,8 +364,9 @@ static void _loaded_address(LoadedPath path, Type type, List target) {
       }})), <unit>, NULL);
   Type signature = %(declare ${function.cadr()}
     (bindings ${function.caddr()})).type_from_ast();
-  c.meta_group.push(%(function $function ${"address global " + path.name}
-    ${c.func_signature(signature)}));
+  c.meta_group.push(
+    %(function $function ${"address global " + path.name}
+      ${c.func_signature(signature)}));
 }
 
 static void _loaded_path(LoadedPath path, Type type, List target, int root) {

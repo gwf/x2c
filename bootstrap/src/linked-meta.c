@@ -13266,14 +13266,14 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12350 = List_var(_12349);
   _12351 = String_new("src/meta-group.x");
   _12352 = String_var(_12351);
-  _12353 = String_new("46e8a2f6");
+  _12353 = String_new("3e506be9");
   _12354 = String_var(_12353);
   _12355 = cons(_12354, NULL);
   _12356 = cons(_12352, _12355);
   _12357 = List_var(_12356);
   _12358 = String_new("src/meta-helper-client.x");
   _12359 = String_var(_12358);
-  _12360 = String_new("14f5b9e4");
+  _12360 = String_new("ad7201de");
   _12361 = String_var(_12360);
   _12362 = cons(_12361, NULL);
   _12363 = cons(_12359, _12362);
@@ -13316,7 +13316,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12400 = List_var(_12399);
   _12401 = String_new("src/symbols.x");
   _12402 = String_var(_12401);
-  _12403 = String_new("2046182c");
+  _12403 = String_new("946b97e6");
   _12404 = String_var(_12403);
   _12405 = cons(_12404, NULL);
   _12406 = cons(_12402, _12405);
@@ -13394,7 +13394,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12478 = cons(_465, _12477);
   _12479 = String_new("src/collect.x");
   _12480 = String_var(_12479);
-  _12481 = String_new("daaa189f");
+  _12481 = String_new("372d19e6");
   _12482 = String_var(_12481);
   _12483 = cons(_12482, NULL);
   _12484 = cons(_12480, _12483);
