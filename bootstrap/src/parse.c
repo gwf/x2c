@@ -6495,13 +6495,13 @@ static List _bind_form(Compiler c, List input, AstPos context, int pending){
        break; } } } static MacroCaseSite _x2c_gensym_macro_site_4; if (Macro_case_capture_at(&_x2c_gensym_macro_site_4, _x2c_gensym_match_expr, return_empty, NULL, &_x2c_gensym_match_capture)) {if(statement){
         return Compiler_finish_return_statement(c, NULL);  break;
       }
-       } static MacroCaseSite _x2c_gensym_macro_site_5; if (Macro_case_capture_at(&_x2c_gensym_macro_site_5, _x2c_gensym_match_expr, _1015, _1016, &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; {
+       } { int _x2c_gensym_match_root = _x2c_gensym_match_expr && _x2c_gensym_match_expr->car.u64 == 9224497937981418652ULL ? (_x2c_gensym_match_cursor = _x2c_gensym_match_expr, 2) : Macro_case_root(_x2c_gensym_match_expr, _1015, _1016, 1, &_x2c_gensym_match_cursor, &_x2c_gensym_match_capture); if (_x2c_gensym_match_root == 1 || (_x2c_gensym_match_root == 2 && _x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497937981418652ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_values[0] = _x2c_gensym_match_cursor->car, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; {
         Var expr;  expr = _x2c_gensym_match_value_0;  if(statement){
           return Compiler_finish_return_statement(c, Var_list_payload(expr));  break;
         }
 
       }
-       } static MatchCaptureSite _x2c_gensym_match_site_6; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_6, _x2c_gensym_match_expr, List_var(_1027), &_x2c_gensym_match_capture)) {if(statement){
+       } } static MatchCaptureSite _x2c_gensym_match_site_5; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_5, _x2c_gensym_match_expr, List_var(_1027), &_x2c_gensym_match_capture)) {if(statement){
         return input;  break;
       }
        } _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761818314ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
@@ -6510,61 +6510,61 @@ static List _bind_form(Compiler c, List input, AstPos context, int pending){
         }
 
       }
-       } } static MatchCaptureSite _x2c_gensym_match_site_7; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_7, _x2c_gensym_match_expr, List_var(_1040), &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; Var _x2c_gensym_match_value_1 = _x2c_gensym_match_values[1]; {
+       } } static MatchCaptureSite _x2c_gensym_match_site_6; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_6, _x2c_gensym_match_expr, List_var(_1040), &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; Var _x2c_gensym_match_value_1 = _x2c_gensym_match_values[1]; {
         Var tag;  tag = _x2c_gensym_match_value_0;  Var name;  name = _x2c_gensym_match_value_1;  if(statement){
           return cons(tag, cons(name, NULL));  break;
         }
 
       }
-       } static MacroCaseSite _x2c_gensym_macro_site_8; if (Macro_case_capture_at(&_x2c_gensym_macro_site_8, _x2c_gensym_match_expr, _1092, _1016, &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; {
+       } { int _x2c_gensym_match_root = _x2c_gensym_match_expr && _x2c_gensym_match_expr->car.u64 == 9224497936802802600ULL ? (_x2c_gensym_match_cursor = _x2c_gensym_match_expr, 2) : Macro_case_root(_x2c_gensym_match_expr, _1092, _1016, 1, &_x2c_gensym_match_cursor, &_x2c_gensym_match_capture); if (_x2c_gensym_match_root == 1 || (_x2c_gensym_match_root == 2 && _x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936802802600ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_values[0] = _x2c_gensym_match_cursor->car, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; {
         Var expr;  expr = _x2c_gensym_match_value_0;  if(statement){
           return _bind_expression_statement(c, Var_list_payload(expr), context);  break;
         }
 
       }
-       } static MacroCaseSite _x2c_gensym_macro_site_9; if (Macro_case_capture_at(&_x2c_gensym_macro_site_9, _x2c_gensym_match_expr, _1154, _564, &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; {
+       } } { int _x2c_gensym_match_root = _x2c_gensym_match_expr && _x2c_gensym_match_expr->car.u64 == 9224497936770347364ULL ? (_x2c_gensym_match_cursor = _x2c_gensym_match_expr, 2) : Macro_case_root(_x2c_gensym_match_expr, _1154, _564, 1, &_x2c_gensym_match_cursor, &_x2c_gensym_match_capture); if (_x2c_gensym_match_root == 1 || (_x2c_gensym_match_root == 2 && _x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936770347364ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_values[0] = _x2c_gensym_match_cursor->car, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; {
         Var body;  body = _x2c_gensym_match_value_0;  if(statement){
           return cons(_1108, cons(List_var(_bind_statement(c, body)), NULL));  break;
         }
 
       }
-       } static MacroCaseSite _x2c_gensym_macro_site_10; if (Macro_case_capture_at(&_x2c_gensym_macro_site_10, _x2c_gensym_match_expr, _1255, _1258, &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; Var _x2c_gensym_match_value_1 = _x2c_gensym_match_values[1]; {
+       } } { int _x2c_gensym_match_root = _x2c_gensym_match_expr && _x2c_gensym_match_expr->car.u64 == 9224497936761618718ULL ? (_x2c_gensym_match_cursor = _x2c_gensym_match_expr, 2) : Macro_case_root(_x2c_gensym_match_expr, _1255, _1258, 1, &_x2c_gensym_match_cursor, &_x2c_gensym_match_capture); if (_x2c_gensym_match_root == 1 || (_x2c_gensym_match_root == 2 && _x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761618718ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_values[0] = _x2c_gensym_match_cursor->car, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_values[1] = _x2c_gensym_match_cursor->car, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; Var _x2c_gensym_match_value_1 = _x2c_gensym_match_values[1]; {
         Var body;  body = _x2c_gensym_match_value_0;  Var test;  test = _x2c_gensym_match_value_1;  if(statement){
           return _bind_do(c, body, test);  break;
         }
 
       }
-       } static MacroCaseSite _x2c_gensym_macro_site_11; if (Macro_case_capture_at(&_x2c_gensym_macro_site_11, _x2c_gensym_match_expr, _1327, _1328, &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; Var _x2c_gensym_match_value_1 = _x2c_gensym_match_values[1]; {
+       } } { int _x2c_gensym_match_root = _x2c_gensym_match_expr && _x2c_gensym_match_expr->car.u64 == 9224497936810396426ULL ? (_x2c_gensym_match_cursor = _x2c_gensym_match_expr, 2) : Macro_case_root(_x2c_gensym_match_expr, _1327, _1328, 1, &_x2c_gensym_match_cursor, &_x2c_gensym_match_capture); if (_x2c_gensym_match_root == 1 || (_x2c_gensym_match_root == 2 && _x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936810396426ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_values[0] = _x2c_gensym_match_cursor->car, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_values[1] = _x2c_gensym_match_cursor->car, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; Var _x2c_gensym_match_value_1 = _x2c_gensym_match_values[1]; {
         Var test;  test = _x2c_gensym_match_value_0;  Var body;  body = _x2c_gensym_match_value_1;  if(statement){
           return _bind_while(c, test, body);  break;
         }
 
       }
-       } static MacroCaseSite _x2c_gensym_macro_site_12; if (Macro_case_capture_at(&_x2c_gensym_macro_site_12, _x2c_gensym_match_expr, _1425, _1426, &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; Var _x2c_gensym_match_value_1 = _x2c_gensym_match_values[1]; {
+       } } { int _x2c_gensym_match_root = _x2c_gensym_match_expr && _x2c_gensym_match_expr->car.u64 == 9224497938085552336ULL ? (_x2c_gensym_match_cursor = _x2c_gensym_match_expr, 2) : Macro_case_root(_x2c_gensym_match_expr, _1425, _1426, 1, &_x2c_gensym_match_cursor, &_x2c_gensym_match_capture); if (_x2c_gensym_match_root == 1 || (_x2c_gensym_match_root == 2 && _x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497938085552336ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_values[0] = _x2c_gensym_match_cursor->car, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_values[1] = _x2c_gensym_match_cursor->car, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; Var _x2c_gensym_match_value_1 = _x2c_gensym_match_values[1]; {
         Var expr;  expr = _x2c_gensym_match_value_0;  Var body;  body = _x2c_gensym_match_value_1;  if(statement){
           return _bind_switch(c, expr, body);  break;
         }
 
       }
-       } static MacroCaseSite _x2c_gensym_macro_site_13; if (Macro_case_capture_at(&_x2c_gensym_macro_site_13, _x2c_gensym_match_expr, _1521, _1524, &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; Var _x2c_gensym_match_value_1 = _x2c_gensym_match_values[1]; {
+       } } { int _x2c_gensym_match_root = _x2c_gensym_match_expr && _x2c_gensym_match_expr->car.u64 == 9224497936761619020ULL ? (_x2c_gensym_match_cursor = _x2c_gensym_match_expr, 2) : Macro_case_root(_x2c_gensym_match_expr, _1521, _1524, 1, &_x2c_gensym_match_cursor, &_x2c_gensym_match_capture); if (_x2c_gensym_match_root == 1 || (_x2c_gensym_match_root == 2 && _x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761619020ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_values[0] = _x2c_gensym_match_cursor->car, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_values[1] = _x2c_gensym_match_cursor->car, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; Var _x2c_gensym_match_value_1 = _x2c_gensym_match_values[1]; {
         Var test;  test = _x2c_gensym_match_value_0;  Var ontrue;  ontrue = _x2c_gensym_match_value_1;  if(statement){
           return _bind_if(c, test, ontrue);  break;
         }
 
       }
-       } static MacroCaseSite _x2c_gensym_macro_site_14; if (Macro_case_capture_at(&_x2c_gensym_macro_site_14, _x2c_gensym_match_expr, _1622, _1626, &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; Var _x2c_gensym_match_value_1 = _x2c_gensym_match_values[1]; Var _x2c_gensym_match_value_2 = _x2c_gensym_match_values[2]; {
+       } } { int _x2c_gensym_match_root = _x2c_gensym_match_expr && _x2c_gensym_match_expr->car.u64 == 9224497936761619020ULL ? (_x2c_gensym_match_cursor = _x2c_gensym_match_expr, 2) : Macro_case_root(_x2c_gensym_match_expr, _1622, _1626, 1, &_x2c_gensym_match_cursor, &_x2c_gensym_match_capture); if (_x2c_gensym_match_root == 1 || (_x2c_gensym_match_root == 2 && _x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761619020ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_values[0] = _x2c_gensym_match_cursor->car, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_values[1] = _x2c_gensym_match_cursor->car, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_values[2] = _x2c_gensym_match_cursor->car, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; Var _x2c_gensym_match_value_1 = _x2c_gensym_match_values[1]; Var _x2c_gensym_match_value_2 = _x2c_gensym_match_values[2]; {
         Var test;  test = _x2c_gensym_match_value_0;  Var ontrue;  ontrue = _x2c_gensym_match_value_1;  Var onfalse;  onfalse = _x2c_gensym_match_value_2;  if(statement){
           return _bind_if_else(c, test, ontrue, onfalse);  break;
         }
 
       }
-       } static MacroCaseSite _x2c_gensym_macro_site_15; if (Macro_case_capture_at(&_x2c_gensym_macro_site_15, _x2c_gensym_match_expr, _1761, _1765, &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; Var _x2c_gensym_match_value_1 = _x2c_gensym_match_values[1]; Var _x2c_gensym_match_value_2 = _x2c_gensym_match_values[2]; Var _x2c_gensym_match_value_3 = _x2c_gensym_match_values[3]; {
+       } } { int _x2c_gensym_match_root = _x2c_gensym_match_expr && _x2c_gensym_match_expr->car.u64 == 9224497936761631716ULL ? (_x2c_gensym_match_cursor = _x2c_gensym_match_expr, 2) : Macro_case_root(_x2c_gensym_match_expr, _1761, _1765, 1, &_x2c_gensym_match_cursor, &_x2c_gensym_match_capture); if (_x2c_gensym_match_root == 1 || (_x2c_gensym_match_root == 2 && _x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761631716ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_values[0] = _x2c_gensym_match_cursor->car, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_values[1] = _x2c_gensym_match_cursor->car, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_values[2] = _x2c_gensym_match_cursor->car, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_values[3] = _x2c_gensym_match_cursor->car, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; Var _x2c_gensym_match_value_1 = _x2c_gensym_match_values[1]; Var _x2c_gensym_match_value_2 = _x2c_gensym_match_values[2]; Var _x2c_gensym_match_value_3 = _x2c_gensym_match_values[3]; {
         Var init;  init = _x2c_gensym_match_value_0;  Var test;  test = _x2c_gensym_match_value_1;  Var next;  next = _x2c_gensym_match_value_2;  Var body;  body = _x2c_gensym_match_value_3;  if(statement){
           return _bind_for(c, init, test, next, body);  break;
         }
 
       }
-       } _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936799452362ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && _x2c_gensym_match_cursor1 && _x2c_gensym_match_cursor1->car.u64 == 9224497936761721318ULL && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1)) { List _x2c_gensym_match_list_1 = _x2c_gensym_match_cursor1; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+       } } _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936799452362ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && _x2c_gensym_match_cursor1 && _x2c_gensym_match_cursor1->car.u64 == 9224497936761721318ULL && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1)) { List _x2c_gensym_match_list_1 = _x2c_gensym_match_cursor1; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
         Var code;  code = _x2c_gensym_match_value_0;  List details;  details = _x2c_gensym_match_list_1;  if(statement){
           return _bind_raise(c, code, details);  break;
         }
@@ -6576,25 +6576,25 @@ static List _bind_form(Compiler c, List input, AstPos context, int pending){
         }
 
       }
-       } } static MacroCaseSite _x2c_gensym_macro_site_16; if (Macro_case_capture_at(&_x2c_gensym_macro_site_16, _x2c_gensym_match_expr, caught, _1768, &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; Var _x2c_gensym_match_value_1 = _x2c_gensym_match_values[1]; List _x2c_gensym_match_list_2 = Var_list_payload(_x2c_gensym_match_values[2]); {
+       } } static MacroCaseSite _x2c_gensym_macro_site_7; if (Macro_case_capture_at(&_x2c_gensym_macro_site_7, _x2c_gensym_match_expr, caught, _1768, &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; Var _x2c_gensym_match_value_1 = _x2c_gensym_match_values[1]; List _x2c_gensym_match_list_2 = Var_list_payload(_x2c_gensym_match_values[2]); {
         Var body;  body = _x2c_gensym_match_value_0;  Var cleanup;  cleanup = _x2c_gensym_match_value_1;  List arms;  arms = _x2c_gensym_match_list_2;  if(statement){
           return _bind_try(c, body, List_caddr(input), cleanup);  break;
         }
 
       }
-       } static MacroCaseSite _x2c_gensym_macro_site_17; if (Macro_case_capture_at(&_x2c_gensym_macro_site_17, _x2c_gensym_match_expr, tried, _1770, &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; Var _x2c_gensym_match_value_1 = _x2c_gensym_match_values[1]; {
+       } static MacroCaseSite _x2c_gensym_macro_site_8; if (Macro_case_capture_at(&_x2c_gensym_macro_site_8, _x2c_gensym_match_expr, tried, _1770, &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; Var _x2c_gensym_match_value_1 = _x2c_gensym_match_values[1]; {
         Var body;  body = _x2c_gensym_match_value_0;  Var cleanup;  cleanup = _x2c_gensym_match_value_1;  if(statement){
           return _bind_try(c, body, Var_null(), cleanup);  break;
         }
 
       }
-       } static MacroCaseSite _x2c_gensym_macro_site_18; if (Macro_case_capture_at(&_x2c_gensym_macro_site_18, _x2c_gensym_match_expr, _1877, _1880, &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; List _x2c_gensym_match_list_1 = Var_list_payload(_x2c_gensym_match_values[1]); {
+       } { int _x2c_gensym_match_root = _x2c_gensym_match_expr && _x2c_gensym_match_expr->car.u64 == 9224497936788988112ULL ? (_x2c_gensym_match_cursor = _x2c_gensym_match_expr, 2) : Macro_case_root(_x2c_gensym_match_expr, _1877, _1880, 1, &_x2c_gensym_match_cursor, &_x2c_gensym_match_capture); if (_x2c_gensym_match_root == 1 || (_x2c_gensym_match_root == 2 && _x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936788988112ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_values[0] = _x2c_gensym_match_cursor->car, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Macro_case_enter(_x2c_gensym_match_cursor->car, &_x2c_gensym_match_cursor1) && (_x2c_gensym_match_values[1] = List_var(_x2c_gensym_match_cursor1), 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; List _x2c_gensym_match_list_1 = Var_list_payload(_x2c_gensym_match_values[1]); {
         Var subject;  subject = _x2c_gensym_match_value_0;  List cases;  cases = _x2c_gensym_match_list_1;  if(statement){
           return _bind_match(c, subject, List_var(cases));  break;
         }
 
       }
-       } _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936766630102ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1)) { List _x2c_gensym_match_list_0 = _x2c_gensym_match_cursor; {
+       } } _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936766630102ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1)) { List _x2c_gensym_match_list_0 = _x2c_gensym_match_cursor; {
         List children;  children = _x2c_gensym_match_list_0;  if(statement){
           return _bind_block(c, input);  break;
         }
