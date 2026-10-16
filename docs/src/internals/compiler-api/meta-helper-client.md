@@ -13,7 +13,7 @@ The compiler's side of the project meta helper.
 | Function | Summary |
 | --- | --- |
 | [`Compiler.begin_meta_unit`](#Compiler.begin_meta_unit) | Selects the table of the unit at `filename` for the calls that follow, and resets the unit's `meta static` values before the first one. |
-| [`Compiler.loaded_helper_call`](#Compiler.loaded_helper_call) | Calls a loaded function with data values and helper-owned object selections. |
+| [`Compiler.loaded_helper_call`](#Compiler.loaded_helper_call) | Calls a loaded function with data values and helper-owned selections. |
 | [`Compiler.meta_helper_call`](#Compiler.meta_helper_call) | Calls the project `meta` function `name` in the helper with the values `arguments`, for the call at `site`, and returns its result. |
 | [`Compiler.report_meta_error`](#Compiler.report_meta_error) | Reports a meta function's error `message` with `notes` under `category` at the position recorded first in or around `node`, or at `site` when it has none. |
 | [`Compiler.stop_meta_helper`](#Compiler.stop_meta_helper) | Stops the helper this process runs, which a translation worker does when its units are done and every process does as it ends. |
@@ -41,8 +41,8 @@ Source: `src/meta-helper-client.x:492`
 
 `Var Compiler.loaded_helper_call( Compiler c, String name, Token site, List arguments, String provider)`
 
-Calls a loaded function with data values and helper-owned object selections.
-Object selectors resolve inside the helper; no address crosses its pipes.
+Calls a loaded function with data values and helper-owned selections.
+Selectors resolve inside the helper. No address crosses its pipes.
 
 Source: `src/meta-helper-client.x:109`
 
