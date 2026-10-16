@@ -4100,8 +4100,10 @@ static List _parse_meta_call(Compiler c, Token invocation) {
   Array arguments = _meta_arguments(c, signature.car().list().cadr());
   Type result = c.macro_holes ? %(<macro-expr>) : signature.cdr();
   /* Inside a `meta` body the whole body runs at compile time, so a `$`
-     call there is an ordinary call. */
-  Symbol head = c.meta_body && !c.macro_holes ? <call> : <meta-call>;
+     call there is an ordinary call, except in a pattern, whose binders
+     come from its value. */
+  Symbol head = c.meta_body && !c.macro_holes && !c.in_pattern
+    ? <call> : <meta-call>;
   List call = %(expr $result ($head $callee
     (args @{arguments.list_free()})));
   return c.resolve_expression(call, invocation);

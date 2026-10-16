@@ -1154,7 +1154,8 @@ static List _source(Resolve &r, List content) {
 }
 
 static List _meta_call(Resolve &r) {
-  if (r.c.meta_body || r.c.macro_holes) return r.input;
+  if ((r.c.meta_body && !r.c.in_pattern) || r.c.macro_holes)
+    return r.input;
   if (r.origin == r.c.meta_statement && r.c.peek(0) == <;>) return r.input;
   return r.c.evaluate_meta_expression(r.input, r.origin);
 }
