@@ -395,7 +395,3 @@ that first EOF because failure callbacks return zero to chained dispatch.
 `Tokenizer.next` stops at the first EOF. Layout failure uses `indent`.
 Consumers must not equate lexical
 success with balanced delimiters or a valid program.
-
-
-
-

@@ -138,5 +138,3 @@ These values could support:
 - Compare scanner outputs against an interpreter of the lexical records.
 - Generate highlighting tables from keyword and operator spellings.
 - Select documentation examples and diagrams by extension family.
-
-

@@ -405,7 +405,7 @@ required.
 
 ## Complete production inventory
 
-The following is included directly from the standalone file. 
+The following is included directly from the standalone file.
 
 ```ebnf
 {{#include x2c.ebnf}}
