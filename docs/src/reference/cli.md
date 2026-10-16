@@ -589,6 +589,11 @@ sources with flat names, and consume package-compiled providers through
 
 ## Packages
 
+`install`, `remove`, and `list` dispatch to the shipped package command.
+Their options, help, and response-file expansion are handled by the driver.
+The equivalent `x2c package install`, `x2c package remove`, and
+`x2c package list` forms pass arguments literally, like other external commands.
+
 `install`, `remove`, and `list` manage `<home>/packages`; see
 [install packages](../guide/packages.md#install-packages). `install` takes
 one operand: a local directory, a local `.tar.gz`, a URL with `--sha256
