@@ -101,7 +101,7 @@ incomplete submission continues at a fresh `... ` prompt.
 | `:help` | Show session commands. |
 | `:stats [verbose]` | Show concise or detailed runtime statistics. |
 | `:symbols [PREFIX]` | List successfully defined names and kinds, optionally matching a name prefix. |
-| `:load "file.x"` | Compile and load public functions, including `main`; replace an earlier load of the same file. |
+| `:load "file.x"` | Compile and load public functions and scalar globals; replace an earlier load of the same file. |
 | `:info NAME` | Show a session function's argument and return types, source, and execution mode. |
 | `:ast plus` | Show `plus`'s typed x2c AST. |
 | `:lowered plus` | Report that `plus` is compiled and has no Lisp body. |
