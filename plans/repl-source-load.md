@@ -93,6 +93,8 @@ their current cache and helper behavior.
 Replacement compares the compiler's callable signatures, which omit
 parameter names, and complete public type rows. The comparison includes
 added metadata such as delegate fields and typedef layout attributes.
+The parser retains canonical enum members with the public type family so
+bare enums receive the same comparison as enums declared through typedefs.
 Anonymous types receive stable session identities through their named public
 declarations and referenced field families. Inserting an earlier anonymous
 typedef must not renumber a live prompt type; splitting a shared identity

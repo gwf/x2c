@@ -1622,9 +1622,12 @@ static List _publish_aggregate_type(
     if (c.source_private >= 0 && !c.filename.endswith(".h"))
       c.sym.set(%(@type "x2c-record"), %(x2c));
   }
-  else if (!layout && _enum_fits_int(type, members)) {
-    c.sym.set(%(@type "int-range"), %(int));
-    _record_enum_values(c, members);
+  else {
+    c.sym.set(%(@type "enumerators"), %(@type $members).type_from_ast());
+    if (!layout && _enum_fits_int(type, members)) {
+      c.sym.set(%(@type "int-range"), %(int));
+      _record_enum_values(c, members);
+    }
   }
   return %($tag $name $body);
 }

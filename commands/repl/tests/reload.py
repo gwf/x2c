@@ -1,5 +1,6 @@
 """Exercise edited files in one live REPL, including a real source module."""
 
+import os
 import pathlib
 import queue
 import subprocess
@@ -90,6 +91,7 @@ def version(multiplier=3, parameter="renamed", result="Count", extra="",
     text = ('#include "dependency.x"\n#include <stdlib.h>\n'
             f"typedef {count} Count;\n"
             "typedef struct Part { int value; } Part;\n"
+            "enum LoadMode { LOAD_FIRST = 1, LOAD_SECOND };\n"
             "meta static int calls = 0;\n"
             "meta int loaded_calls(void) { return calls; }\n"
             "meta int loaded_dependency_calls(void) { return dependency_calls(); }\n"
@@ -121,6 +123,7 @@ try:
     session.load(second)
     session.value("second_answer(1)", 2)
     session.run(":info loaded_answer\n:info through\n:symbols loaded_a")
+    session.value("loaded_calls()", 3)
 
     addition = "typedef int Added;\nmeta int added(void) { return 123; }\n"
     write_dependency(4)
@@ -140,7 +143,7 @@ try:
     session.value("new_value", 11)
 
     # Even an unchanged successful load starts the file's variables afresh.
-    session.load(native)
+    session.load(pathlib.Path(os.path.relpath(native)))
     session.value("loaded_calls()", 0)
     session.value("second_calls()", 2)
     session.value("saved(2)", 18)
@@ -158,20 +161,34 @@ try:
         (version(extra=addition).replace(
             "typedef int Count;", "typedef int Count __attribute__((aligned(16)));"),
          "declaration changed or removed"),
+        (version(extra=addition).replace("LOAD_FIRST = 1", "LOAD_FIRST = 100"),
+         "declaration changed or removed"),
+        (version(extra=addition).replace("LOAD_SECOND", "LOAD_RENAMED"),
+         "declaration changed or removed"),
         (version(extra=addition + "meta int second_answer(int n) { return n; }\n"),
          "name already defined: second_answer"),
         (version(extra=addition + "meta int through(int n) { return n; }\n"),
          "name already defined: through"),
+        (version(extra=addition + "struct through { int x; };\n"),
+         "name already defined: through"),
+        (version(extra=addition + "struct before { int x; };\n"),
+         "name already defined: before"),
+        (version(extra=addition + "struct added { int x; };\n"),
+         "name already defined: added"),
         (version(extra=addition + "int absent(void);\n"
                  "meta int unlinked(void) { return absent(); }\n"), "absent"),
     ]
+    calls = 1
     for text, error in rejected:
-        native.write_text(text)
+        native.write_text(text.replace("return 3 * offset", "return 19 * offset"))
         session.load(native, error)
-        session.value("loaded_calls()", 1)
+        session.value("loaded_calls()", calls)
         session.value("second_calls()", 2)
+        session.value("saved(2)", 18)
+        calls += 1
+        session.value("loaded_calls()", calls)
     session.value("saved(2)", 18)
-    session.value("loaded_calls()", 2)
+    session.value("loaded_calls()", calls + 1)
 
     native.write_text(version(4, extra=addition))
     session.load(native)

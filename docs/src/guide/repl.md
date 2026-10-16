@@ -181,8 +181,9 @@ prompt AST or lowered Lisp for inspection.
 
 After editing a file, use the same `:load "file.x"` command. A successful
 replacement prints `reloaded`. Calls use the new code, including calls from
-earlier prompt functions and saved `Func` values. Prompt variables and
-functions remain, as do other loaded files. Variables inside the replaced
+earlier prompt functions. Saved `Func` values use the replacement for calls
+the REPL already supports. Prompt variables and functions remain, as do
+other loaded files. Variables inside the replaced
 file and its compiled dependencies start over, even if the file did not
 change. Previously returned values remain ordinary prompt data.
 

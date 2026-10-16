@@ -145,6 +145,14 @@ static void _check_type_rows(Map before, Map after) {
   }
 }
 
+static String _type_name(List key, Type type) {
+  match (key) {
+    case %(?(String name)): if (type.is_typedef()) return name;
+    case %((!or struct union enum) ?(String name)): return name;
+  }
+  return NULL;
+}
+
 /* Source declarations cannot change the types or meanings of live values. */
 static void _check_names(
   ReplSession session, ReplLoadedFile file, Map visible,
@@ -158,8 +166,16 @@ static void _check_names(
       raise %(repl (reason ${%"name already defined: $name"}));
   }
   foreach (Var (key, value), symbols) {
-    if (file && key in file.symbols) continue;
     Var existing;
+    String name = _type_name(key, value);
+    if (name) {
+      List entry = session.inspect(name);
+      if (name in names || name.startswith("__repl_") ||
+          (entry && entry.car() != <type>) ||
+          (!entry && session.evaluator.try_get(name, existing)))
+        raise %(repl (reason ${%"name already defined: $name"}));
+    }
+    if (file && key in file.symbols) continue;
     if (visible.try_get(key, existing) && !existing.equal(value))
       raise %(repl (reason ${%"conflicting declaration: ${key.repr()}"}));
   }
@@ -256,12 +272,7 @@ static Var _call(Func function, const FuncArg *argv) {
 
 static void _publish_types(ReplSession session, Map symbols) {
   foreach (Var (key, value), symbols) {
-    String name = NULL;
-    match (key) {
-      case %(?(String spelling)):
-        if (value.list().type().is_typedef()) name = spelling;
-      case %((!or struct union enum) ?(String spelling)): name = spelling;
-    }
+    String name = _type_name(key, value);
     if (name) session.names[name] = %(type);
   }
 }
