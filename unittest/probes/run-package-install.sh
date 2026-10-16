@@ -32,7 +32,7 @@ cp "$ROOT"/src/{component-access,component-try,component-delegate,component-lite
 cp "$ROOT/builds/0/libx2c.a" "$ROOT/builds/0/lib/"*.xi "$BUILD/home/lib/"
 cp "$X2C" "$BUILD/home/bin/x2c"
 mkdir -p "$BUILD/home/libexec/x2c"
-cp "$ROOT/builds/0/libexec/"x2c-{editor,new,package} "$BUILD/home/libexec/x2c/"
+cp "$ROOT/builds/0/libexec/"x2c-{build,editor,new,package} "$BUILD/home/libexec/x2c/"
 x2c="$BUILD/home/bin/x2c"
 [[ "$("$x2c" env home)" == "$BUILD/home" ]] || fail "home not resolved"
 
@@ -444,11 +444,12 @@ cd "$ROOT"
 
 # The home is one path however it is spelled: a link, a relative name, and
 # the real path select the same stage, prelude, and runtime archive.
-mkdir -p "$BUILD/home/builds/1"
+mkdir -p "$BUILD/home/builds/1/libexec"
 cp "$BUILD/home/lib/libx2c.a" "$BUILD/home/builds/1/libx2c.a"
 mkdir -p "$BUILD/home/builds/1/lib"
 cp "$BUILD/home/lib/"*.xi "$BUILD/home/builds/1/lib/"
 cp "$x2c" "$BUILD/home/builds/1/x2c"
+cp "$BUILD/home/libexec/x2c/x2c-build" "$BUILD/home/builds/1/libexec/"
 real=$(cd "$BUILD/home" && pwd -P)
 ln -sfn "$real" "$BUILD/home-link"
 staged="$BUILD/home/builds/1/x2c"
