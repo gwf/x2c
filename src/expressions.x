@@ -3741,7 +3741,7 @@ static void _check_null_reference(
   Compiler c, List expr, Type target) {
   if (target.car() != <&>) return;
   if (_integer_literal_kind(expr, NULL) == <zero> || expr.match(
-      %(expr () ${$source_identifier_content(%((binding ? "NULL")))})))
+    %(expr () ${$source_identifier_content(%((binding ? "NULL")))})))
     $report.type.ref_null(c, target);
 }
 
