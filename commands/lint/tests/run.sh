@@ -90,6 +90,9 @@ run() {
   echo "# idiom fixes proven by the generated C"
   cp "$tests/src/idioms.x" "$work/idioms.x"
   (cd "$work" && run --all --fix idioms.x)
+  echo "# indentation membership fixes proven by the generated C"
+  cp "$tests/src/contains-indent.x" "$work/contains-indent.x"
+  (cd "$work" && run --rule contains-in --fix contains-indent.x)
   echo "# standard adoption token and declaration signals"
   run --rule same-line-else --rule empty-constructor --rule saved-local \
     --rule x2c-ident --rule lisp-defun --rule literal-report-error \
@@ -119,6 +122,7 @@ run() {
 } >"$out"
 diff -u "$tests/expected.txt" "$out"
 diff -u "$tests/fixed/idioms.x" "$work/idioms.x"
+diff -u "$tests/fixed/contains-indent.x" "$work/contains-indent.x"
 cmp "$tests/src/suppression-accepted.x" "$work/suppression.x"
 
 # The violation census includes zero-count rules from the current catalog.
