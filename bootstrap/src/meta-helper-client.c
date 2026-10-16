@@ -27,11 +27,11 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
-static List _17, _8, _5;
+static List _18, _9, _5;
 
-static String _20, _19, _18, _15, _14, _13, _12, _11, _10, _9, _6, _2, _1, _0;
+static String _21, _20, _19, _16, _15, _14, _13, _12, _11, _10, _7, _2, _1, _0;
 
-static Var _16, _7, _4, _3;
+static Var _17, _8, _6, _4, _3;
 
 static int _init_guard_ = 0;
 
@@ -67,11 +67,8 @@ typedef struct Call{
   Token site;
   int table;
   double limit, deadline;
-  Symbol operation;
 }
 Call;
-
-static Var _call_helper(Compiler c, String name, Token site, List arguments, String provider, Symbol operation);
 
 static void _answer(Call * c, String operation, List operands);
 
@@ -171,13 +168,6 @@ _x2c_gensym_defer_env_6;
 
 static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7);
 
-typedef struct _x2c_gensym_defer_env_7{
-  const void * _x2c_gensym_defer_capture_8;
-}
-_x2c_gensym_defer_env_7;
-
-static void _x2c_gensym_defer_cleanup_8(void * _x2c_gensym_defer_opaque_8);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -188,21 +178,22 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _3 = Symbol_var(97761636);
   _4 = Symbol_var(38115688);
   _5 = cons(_4, NULL);
-  _6 = String_new("X2C_META_TIMEOUT");
-  _7 = Symbol_var(1157736);
-  _8 = cons(_7, NULL);
-  _9 = String_new("the body exited with status ");
-  _10 = String_new("the body crashed or overflowed the stack (signal ");
-  _11 = String_new(": ");
-  _12 = String_new(")");
-  _13 = String_new("%s%g s");
-  _14 = String_new("function: ");
-  _15 = String_new("set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none");
-  _16 = String_var(_15);
-  _17 = cons(_16, NULL);
-  _18 = String_new("this meta call stopped the compile-time helper");
-  _19 = String_new("reason: ");
-  _20 = String_new("/helper");
+  _6 = Symbol_var(199448);
+  _7 = String_new("X2C_META_TIMEOUT");
+  _8 = Symbol_var(1157736);
+  _9 = cons(_8, NULL);
+  _10 = String_new("the body exited with status ");
+  _11 = String_new("the body crashed or overflowed the stack (signal ");
+  _12 = String_new(": ");
+  _13 = String_new(")");
+  _14 = String_new("%s%g s");
+  _15 = String_new("function: ");
+  _16 = String_new("set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none");
+  _17 = String_var(_16);
+  _18 = cons(_17, NULL);
+  _19 = String_new("this meta call stopped the compile-time helper");
+  _20 = String_new("reason: ");
+  _21 = String_new("/helper");
   _x2c_gensym_static_initialize_0();
   _x2c_gensym_static_initialize_1();
   _x2c_gensym_static_initialize_2();
@@ -287,21 +278,12 @@ static int _syntax_origin(Var node){
   return 0;
 }
 
-Var Compiler_meta_helper_call(Compiler c, String name, Token site, List arguments, String provider){
-  if(! _init_guard_) _file_init_();
-  return _call_helper(c, name, site, arguments, provider, 199448);
-}
-
-Var Compiler_loaded_helper_call(Compiler c, String name, Token site, List arguments, String provider){
-  if(! _init_guard_) _file_init_();
-  return _call_helper(c, name, site, arguments, provider, 27421552347928);
-}
-
 String Compiler_token_source(Compiler, Token, int *);
 
 void Compiler_report_warning(Compiler, Symbol, String, Token, List);
 
-static Var _call_helper(Compiler c, String name, Token site, List arguments, String provider, Symbol operation){
+Var Compiler_meta_helper_call(Compiler c, String name, Token site, List arguments, String provider){
+  if(! _init_guard_) _file_init_();
   MetaHelper previous = active;
   active = c -> meta_helper ? c -> meta_helper : primary;
   {
@@ -320,7 +302,7 @@ static Var _call_helper(Compiler c, String name, Token site, List arguments, Str
       if(c -> shallow) c -> collection_native = 1;
       String file = String_truth(provider) ? Path_real(Compiler_absolute_home_path(provider)) : Path_real(Compiler_token_source(c, site, NULL));
       Call call ={
-        .compiler = c, .name = name, .site = site, .operation = operation, .table = _table_of(file, active -> table)
+        .compiler = c, .name = name, .site = site, .table = _table_of(file, active -> table)
       }
       ;
       _check(&(call));
@@ -540,7 +522,7 @@ static void _send(Call * c, List arguments){
   Var subject = Macro_subject();
   if(Var_is_void(subject)) subject = List_var(NULL);
   _send_frame(&((* c)), ({
-    Var _x2c_gensym_literal_part_0 = Symbol_var((* c).operation);  Var _x2c_gensym_literal_part_1 = int_var((* c).table);  Var _x2c_gensym_literal_part_2 = String_var((* c).name);  cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, cons(_x2c_gensym_literal_part_2, cons(List_var(arguments), cons(subject, NULL)))));
+    Var _x2c_gensym_literal_part_0 = int_var((* c).table);  Var _x2c_gensym_literal_part_1 = String_var((* c).name);  cons(_6, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, cons(List_var(arguments), cons(subject, NULL)))));
   }
   ));
 }
@@ -554,7 +536,7 @@ static void _send_frame(Call * call, List message){
 String Env_get(String);
 
 static void _set_deadline(Call * call){
-  String text = Env_get(_6);
+  String text = Env_get(_7);
   (* call).limit = String_truth(text) ? atof(text) : 60.0;
   (* call).deadline =(* call).limit > 0 ? _now() +(* call).limit : 0;
 }
@@ -638,7 +620,7 @@ static int _stop(int signal){
   int status = 0;
   if(_running()){
     if(signal) killpg(active -> pid, signal);
-    else _write_frame(_8, 0);
+    else _write_frame(_9, 0);
     close(active -> to);
     close(active -> from);
     if(active -> status < 0) waitpid(active -> pid, & active -> status, 0);
@@ -656,9 +638,9 @@ int Job_decode_wait_status(int, int *);
 
 static String _exit_reason(void){
   int signal, code = Job_decode_wait_status(_stop(0), &(signal));
-  if(! signal) return String_join(NULL, cons(String_var(_9), cons(String_var(int_str(code)), NULL)));
+  if(! signal) return String_join(NULL, cons(String_var(_10), cons(String_var(int_str(code)), NULL)));
   String name = String_new(strsignal(signal));
-  return String_join(NULL, cons(String_var(_10), cons(String_var(int_str(signal)), cons(String_var(_11), cons(String_var(name), cons(String_var(_12), NULL))))));
+  return String_join(NULL, cons(String_var(_11), cons(String_var(int_str(signal)), cons(String_var(_12), cons(String_var(name), cons(String_var(_13), NULL))))));
 }
 
 static int _write_frame(List message, double deadline){
@@ -830,12 +812,12 @@ static void _refuse(Call * call, String why){
 
 static void _overdue(Call * c){
   _stop(SIGKILL);
-  Compiler_report_error((* c).compiler, 27335838, String_printf(_13, "this meta call ran longer than ", (* c).limit), (* c).site, cons(String_var(String_join(NULL, cons(String_var(_14), cons(String_var((* c).name), NULL)))), _17));
+  Compiler_report_error((* c).compiler, 27335838, String_printf(_14, "this meta call ran longer than ", (* c).limit), (* c).site, cons(String_var(String_join(NULL, cons(String_var(_15), cons(String_var((* c).name), NULL)))), _18));
 }
 
 static void _stopped(Call * call, String reason){
-  Compiler_report_error((* call).compiler, 27335838, _18, (* call).site, ({
-    Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(_14), cons(String_var((* call).name), NULL))));  Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(_19), cons(String_var(reason), NULL))));  cons(_x2c_gensym_literal_part_3, cons(_x2c_gensym_literal_part_4, NULL));
+  Compiler_report_error((* call).compiler, 27335838, _19, (* call).site, ({
+    Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(_15), cons(String_var((* call).name), NULL))));  Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(_20), cons(String_var(reason), NULL))));  cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, NULL));
   }
   ));
 }
@@ -880,7 +862,7 @@ void Path_copy_file(Path, Path);
 void MetaHelper_retain_executable(MetaHelper helper){
   if(! _init_guard_) _file_init_();
   helper -> snapshot = Path_temp_dir();
-  String path = String_join(NULL, cons(String_var(helper -> snapshot), cons(String_var(_20), NULL)));
+  String path = String_join(NULL, cons(String_var(helper -> snapshot), cons(String_var(_21), NULL)));
   Path_copy_file(helper -> path, path);
   helper -> path = path;
 }
@@ -1010,8 +992,9 @@ void Compiler_stop_meta_helper(void){
 
 }
 
-void MetaHelper_restart(MetaHelper helper){
+void MetaHelper_close(MetaHelper helper){
   if(! _init_guard_) _file_init_();
+  if(! helper || ! helper -> scope) return;
   MetaHelper previous = active;
   active = helper;
   {
@@ -1027,32 +1010,8 @@ void MetaHelper_restart(MetaHelper helper){
     x2c_cleanup_push(& _x2c_gensym_defer_record_7);
     {
       _stop(0);
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
-  }
-
-}
-
-void MetaHelper_close(MetaHelper helper){
-  if(! _init_guard_) _file_init_();
-  if(! helper || ! helper -> scope) return;
-  MetaHelper previous = active;
-  active = helper;
-  {
-    _x2c_gensym_defer_env_7 _x2c_gensym_macro_environment_7 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_7._x2c_gensym_defer_capture_8 =(const void *) & previous;
-    X2CCleanup _x2c_gensym_defer_record_8 ={
-      .fn = _x2c_gensym_defer_cleanup_8, .env = & _x2c_gensym_macro_environment_7
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_8);
-    {
-      _stop(0);
       if(String_truth(helper -> snapshot)){
-        unlink(String_join(NULL, cons(String_var(helper -> snapshot), cons(String_var(_20), NULL))));
+        unlink(String_join(NULL, cons(String_var(helper -> snapshot), cons(String_var(_21), NULL))));
         rmdir(helper -> snapshot);
         helper -> snapshot = NULL;
       }
@@ -1062,7 +1021,7 @@ void MetaHelper_close(MetaHelper helper){
       helper -> failures = helper -> units = NULL;
       helper -> input = NULL;
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_8);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
   }
 
 }
@@ -1114,11 +1073,6 @@ static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6){
 static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7){
   _x2c_gensym_defer_env_6 * _x2c_gensym_defer_data_6 =(_x2c_gensym_defer_env_6 *) _x2c_gensym_defer_opaque_7;
   active =(*(MetaHelper *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_7);
-}
-
-static void _x2c_gensym_defer_cleanup_8(void * _x2c_gensym_defer_opaque_8){
-  _x2c_gensym_defer_env_7 * _x2c_gensym_defer_data_7 =(_x2c_gensym_defer_env_7 *) _x2c_gensym_defer_opaque_8;
-  active =(*(MetaHelper *) _x2c_gensym_defer_data_7->_x2c_gensym_defer_capture_8);
 }
 
 #undef _x2c_gensym_initializer_choice_B1CED777_0_expanded

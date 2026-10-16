@@ -18,7 +18,7 @@ void Frontend_prepare_meta(Frontend f, List inputs);
 
 MetaHelper Frontend_build_meta(Frontend f, List inputs);
 
-MetaHelper Frontend_build_loaded(Frontend f, List filenames);
+MetaHelper Frontend_build_loaded(Frontend f, String filename);
 
 
 #endif /* __GUARD_0xD04FB246__ */
