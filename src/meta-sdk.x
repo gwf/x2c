@@ -630,14 +630,14 @@ static List _enum_member(List member) {
 }
 
 /** Answers `Type.fields`, declared in `lib/meta.x`. */
-List Type.fields(Type type) {
+List Type.fields(Type t) {
   _require_expansion("Type.fields");
-  Type resolved = active.expander.sym.resolve_key(type.canonicalize());
+  Type resolved = active.expander.sym.resolve_key(t.canonicalize());
   if (!resolved || !resolved.is_aggregate_tag())
-    $fail.meta_sdk_fields_type(type);
+    $fail.meta_sdk_fields_type(t);
   List metadata = active.expander.sym.field_order(resolved);
   if (!metadata)
-    $fail.meta_sdk_fields_complete(type);
+    $fail.meta_sdk_fields_complete(t);
   Array named = [];
   foreach (List row, metadata.cdr()) if (row.car()) named.push(row);
   return named.list_free();

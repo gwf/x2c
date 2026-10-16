@@ -48,7 +48,8 @@ static macro Stmt $report.protocol_adoption_conflict(
   {
     String first = %"first: ${_location_string(_adoption_location($previous))}";
     String second = %"second: ${_location_string($adoption.location)}";
-    String spelling = _adoption_spelling($adoption.base, $adoption.participant);
+    String spelling =
+      _adoption_spelling($adoption.base, $adoption.participant);
     $c.diagnostics.report(
       <protocol>, %"conflicting adoption declarations for $spelling",
       $site, %($first $second));

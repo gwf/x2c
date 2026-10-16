@@ -110,9 +110,8 @@ meta Code access_read(Code code) {
 meta static Code _participant_store(
   Code code, Code base, Code key, Code value) {
   Type type = base.cadr();
-  if (type.is_named("String")) {
+  if (type.is_named("String"))
     $fail.access_string_store(NULL);
-  }
   Code setter = type.protocol_member("setindex");
   if (!setter)
     $fail.access_store(NULL, type);
@@ -125,9 +124,8 @@ meta static Code _participant_update(
   Code code, Code base, Code key, Symbol op, Code value) {
   Type type = base.cadr();
   Code member = type.protocol_member(value ? "updateindex" : "postfixindex");
-  if (!member) {
+  if (!member)
     $fail.access_update(NULL, type, value);
-  }
   List operation = $!Symbol{ $op };
   List arguments = value
     ? %($base $key $operation $value) : %($base $key $operation);

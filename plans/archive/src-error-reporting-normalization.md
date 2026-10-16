@@ -143,8 +143,10 @@ NULL notes to empty Lists, or vice versa, as incidental cleanup. Do not move
 guards, cleanup, or fallback actions into catalogue definitions. In particular,
 component accumulating errors must still continue with their existing fallback.
 
-No wording improvements, new diagnostics, new validation, or expected-output
-updates are authorized by this normalization. Report unrelated defects for
+No wording improvements, new diagnostics, or new validation are authorized.
+On 2026-10-16 Gary approved one expected-output exception: the generated
+cleanup helper definition line changes from 1262 to 1272. Its user-source
+location, messages, and behavior are unchanged. Other expectations stay fixed. Report unrelated defects for
 separate work instead of silently incorporating them.
 
 ## Implementation

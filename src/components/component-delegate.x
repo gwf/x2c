@@ -78,7 +78,8 @@ meta static void _delegate_search(
 }
 
 /* Reports more than one delegate path that finds `member`. */
-meta static void _delegate_fail_ambiguous(Type outer, String member, List paths) {
+meta static void _delegate_fail_ambiguous(
+  Type outer, String member, List paths) {
   Array notes = [];
   foreach (List path, paths) {
     String spelling = Code.binding_spelling(path.cadr());

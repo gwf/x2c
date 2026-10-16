@@ -67,7 +67,8 @@ static void _report_collision(
   else if (incompatible_signatures)
     message += $reason.protocol_collision_signature(owners);
   else
-    message += $reason.protocol_collision_ambiguous(owners, participant_repr, member);
+    message += $reason.protocol_collision_ambiguous(
+      owners, participant_repr, member);
 
   List notes = _collision_notes(kind, first, second);
   List row = _visible_adoption(c, first_base, participant);

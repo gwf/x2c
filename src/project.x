@@ -31,7 +31,8 @@ typedef struct ProjectBuild {
 
 // command reports
 
-static macro Stmt $progress.project_source_excluded(Expr $path, Expr $target) =>
+static macro Stmt $progress.project_source_excluded(
+  Expr $path, Expr $target) =>
   fprintf(
     stderr, "x2c: excluded %s from target %s\n", $path, $target);
 
