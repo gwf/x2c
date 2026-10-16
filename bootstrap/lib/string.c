@@ -482,7 +482,7 @@ String String_capitalize(String str){
 }
 
 String String_filter(String str, Func fn){
-  if(! String_truth(str) || ! fn || ! * str) return str;  int _x2c_gensym_macro_length_3 = String_len(str);  String _x2c_gensym_macro_string_3 = String_malloc(_x2c_gensym_macro_length_3 + 1);  int _x2c_gensym_macro_done_0 = 0; {
+  if(! String_truth(str) || ! * str) return str;  int _x2c_gensym_macro_length_3 = String_len(str);  String _x2c_gensym_macro_string_3 = String_malloc(_x2c_gensym_macro_length_3 + 1);  int _x2c_gensym_macro_done_0 = 0; {
     _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
       0
     }
@@ -504,7 +504,7 @@ String String_filter(String str, Func fn){
 }
 
 String String_map(String str, Func fn){
-  if(! String_truth(str) || ! fn || ! * str) return str;  int n = String_len(str), done = 0;  String string = String_malloc(n + 1); {
+  if(! String_truth(str) || ! * str) return str;  int n = String_len(str), done = 0;  String string = String_malloc(n + 1); {
     _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
       0
     }
@@ -515,7 +515,7 @@ String String_map(String str, Func fn){
       char * out = string;  const char * src = str;  for(int i = 0;  i < n;  i ++){
         char ch = Var_char(Var_convert(Func_apply_value(fn, char_var(src[i])), 26993));  if(! ch){
           Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL))); {
-            static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/string/mapping.x",.function = "String_map",.line = 105};  x2c_error_raise_n(& _x2c_gensym_error_site_6, 143279181245224, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(19800432), int_var(i));  __builtin_unreachable();
+            static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/string/mapping.x",.function = "String_map",.line = 107};  x2c_error_raise_n(& _x2c_gensym_error_site_6, 143279181245224, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(19800432), int_var(i));  __builtin_unreachable();
           }
 
         }

@@ -38,38 +38,6 @@ MacroCaseSite;
 #include "string.h"
 #include "varconvert.h"
 #include <math.h>
-Macro Macro_close(Macro value, List captures);
-
-List Macro_apply(Macro t, List values);
-
-Var Macro_inserted(Var value, int lifts, int expression);
-
-Var Macro_declared(Var value);
-
-List Macro_inserted_items(List values);
-
-List Macro_typed(List type, Var value);
-
-Var Macro_subject(void);
-
-void Macro_use_subject(Var rows);
-
-List Macro_pattern(Macro t, List names);
-
-Atom Macro_binder(Var binder, String projection, int sequence);
-
-List Macro_number_type(Var value);
-
-List Macro_number_literal(List result, List type, Var value);
-
-List Macro_case_pattern(Macro t, List names);
-
-List Macro_case_shape(Macro t, List names, List shape);
-
-int Macro_case_capture_at(MacroCaseSite * site, List code, Macro t, List names, MatchCaptureBuffer * published);
-
-int Macro_case_root(List code, Macro t, List names, int statement, List * cursor, MatchCaptureBuffer * published);
-
 static int List_truth(List);
 
 static inline Symbol Macro_case_symbol(Var value);
@@ -112,13 +80,45 @@ static inline int Macro_case_enter(Var value, List * cursor){
   return 1;
 }
 
-int Macro_case_view(Var value, List * cursor);
-
 typedef struct MacroMatcher{
   Macro shape;
   List holes, pattern;
 }
 MacroMatcher;
+
+Macro Macro_close(Macro value, List captures);
+
+List Macro_apply(Macro t, List values);
+
+Var Macro_inserted(Var value, int lifts, int expression);
+
+Var Macro_declared(Var value);
+
+List Macro_inserted_items(List values);
+
+List Macro_typed(List type, Var value);
+
+List Macro_number_type(Var value);
+
+List Macro_number_literal(List result, List type, Var value);
+
+Var Macro_subject(void);
+
+void Macro_use_subject(Var rows);
+
+List Macro_pattern(Macro t, List names);
+
+Atom Macro_binder(Var binder, String projection, int sequence);
+
+List Macro_case_pattern(Macro t, List names);
+
+List Macro_case_shape(Macro t, List names, List shape);
+
+int Macro_case_capture_at(MacroCaseSite * site, List code, Macro t, List names, MatchCaptureBuffer * published);
+
+int Macro_case_root(List code, Macro t, List names, int statement, List * cursor, MatchCaptureBuffer * published);
+
+int Macro_case_view(Var value, List * cursor);
 
 MacroMatcher Macro_matcher(Macro shape, List holes);
 

@@ -1477,7 +1477,7 @@ static MapIntInt MapIntInt_copy_entries(MapIntInt _x2c_gensym_macro_map_20){
 
 }
 
-int MapIntInt_truth(MapIntInt _x2c_gensym_macro_map_44);
+int MapIntInt_truth(MapIntInt _x2c_gensym_macro_map_42);
 
 static MapIntInt MapIntInt_merge_entries(MapIntInt _x2c_gensym_macro_map_21, MapIntInt _x2c_gensym_macro_other_1){
   if(! MapIntInt_truth(_x2c_gensym_macro_other_1)) return _x2c_gensym_macro_map_21;
@@ -1620,115 +1620,65 @@ int MapIntInt_setindex(MapIntInt _x2c_gensym_macro_map_36, int _x2c_gensym_macro
   return _x2c_gensym_macro_val_6;
 }
 
-int Var_encoding_valid(Var);
+int MapIntInt_try_del(MapIntInt _x2c_gensym_macro_map_37, int _x2c_gensym_macro_key_20, int * _x2c_gensym_macro_out_7){
+  return MapIntInt_try_del_entry(_x2c_gensym_macro_map_37, & _x2c_gensym_macro_key_20, _x2c_gensym_macro_out_7);
+}
 
-int Var_numeric_info(Symbol, X2CVarNumericInfo *);
-
-Symbol Var_tag(Var);
-
-int MapIntInt_updateindex(MapIntInt _x2c_gensym_macro_map_37, int _x2c_gensym_macro_key_20, Symbol _x2c_gensym_macro_op_1, int _x2c_gensym_macro_rhs_0){
+int MapIntInt_del(MapIntInt _x2c_gensym_macro_map_38, int _x2c_gensym_macro_key_21){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_gensym_macro_map_37 == 0)(void) _bad_arg(_0);
-  int _x2c_gensym_macro_insert_0 = ! 0;
-  if(0){
-    Var _x2c_gensym_macro_boxed_rhs_0 = int_var(_x2c_gensym_macro_rhs_0);
-    X2CVarNumericInfo _x2c_gensym_macro_info_0;
-    _x2c_gensym_macro_insert_0 = Var_encoding_valid(_x2c_gensym_macro_boxed_rhs_0) && Var_numeric_info(Var_tag(_x2c_gensym_macro_boxed_rhs_0), &(_x2c_gensym_macro_info_0));
-    if(Var_is_void(int_var(_x2c_gensym_macro_key_20)) || Var_is_void(_x2c_gensym_macro_boxed_rhs_0)){
-      static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/typed-map.x",.function = "MapIntInt_updateindex",.line = 232};
-      x2c_error_raise_n(& _x2c_gensym_error_site_17, 48270474208, 0);
-      __builtin_unreachable();
-    }
+  int _x2c_gensym_macro_out_8 = 0;
+  if(MapIntInt_try_del(_x2c_gensym_macro_map_38, _x2c_gensym_macro_key_21, &(_x2c_gensym_macro_out_8))) return _x2c_gensym_macro_out_8;
+  if(0) return 0;
+  (void) _bad_arg(_0);
+}
 
-  }
-  if(_x2c_gensym_macro_op_1 == 56 && _x2c_gensym_macro_insert_0){
+MapIntInt MapIntInt_copy(MapIntInt _x2c_gensym_macro_map_39){
+  return MapIntInt_copy_entries(_x2c_gensym_macro_map_39);
+}
+
+MapIntInt MapIntInt_merge(MapIntInt _x2c_gensym_macro_map_40, MapIntInt _x2c_gensym_macro_other_2){
+  return MapIntInt_merge_entries(_x2c_gensym_macro_map_40, _x2c_gensym_macro_other_2);
+}
+
+int MapIntInt_try_next(MapIntInt _x2c_gensym_macro_map_41, unsigned * _x2c_gensym_macro_cursor_4, int * _x2c_gensym_macro_key_22, int * _x2c_gensym_macro_val_7){
+  return MapIntInt_try_next_entry(_x2c_gensym_macro_map_41, _x2c_gensym_macro_cursor_4, _x2c_gensym_macro_key_22, _x2c_gensym_macro_val_7);
+}
+
+int MapIntInt_truth(MapIntInt _x2c_gensym_macro_map_42){
+  return MapIntInt_has_entries(_x2c_gensym_macro_map_42);
+}
+
+int MapIntInt_equal(MapIntInt _x2c_gensym_macro_a_2, MapIntInt _x2c_gensym_macro_b_2){
+  return MapIntInt_equal_entries(_x2c_gensym_macro_a_2, _x2c_gensym_macro_b_2);
+}
+
+int MapIntInt_updateindex(MapIntInt _x2c_gensym_macro_map_43, int _x2c_gensym_macro_key_23, Symbol _x2c_gensym_macro_op_1, int _x2c_gensym_macro_rhs_0){
+  if(! _init_guard_) _file_init_();
+  if((void *) _x2c_gensym_macro_map_43 == 0)(void) _bad_arg(_0);
+  if(_x2c_gensym_macro_op_1 == 56){
     int _x2c_gensym_macro_inserted_3;
-    int * _x2c_gensym_macro_stored_5 = MapIntInt_get_or_insert(_x2c_gensym_macro_map_37, & _x2c_gensym_macro_key_20, & _x2c_gensym_macro_rhs_0, & _x2c_gensym_macro_inserted_3);
+    int * _x2c_gensym_macro_stored_5 = MapIntInt_get_or_insert(_x2c_gensym_macro_map_43, & _x2c_gensym_macro_key_23, & _x2c_gensym_macro_rhs_0, & _x2c_gensym_macro_inserted_3);
     if(_x2c_gensym_macro_inserted_3) return _x2c_gensym_macro_rhs_0;
     return _update_int(_x2c_gensym_macro_stored_5, _x2c_gensym_macro_op_1, _x2c_gensym_macro_rhs_0);
   }
-  if(0 && Var_is_void(int_var(_x2c_gensym_macro_key_20))){
-    static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/typed-map.x",.function = "MapIntInt_updateindex",.line = 232};
-    x2c_error_raise_n(& _x2c_gensym_error_site_18, 48270474208, 0);
-    __builtin_unreachable();
-  }
-  long _x2c_gensym_macro_index_14 = MapIntInt_find_index(_x2c_gensym_macro_map_37, & _x2c_gensym_macro_key_20);
-  if(_x2c_gensym_macro_index_14 < 0){
-    if(0){
-      static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../lib/typed-map.x",.function = "MapIntInt_updateindex",.line = 232};
-      x2c_error_raise_n(& _x2c_gensym_error_site_19, 4372499598, 1, Symbol_var(22898), int_var(_x2c_gensym_macro_key_20));
-      __builtin_unreachable();
-    }
-    (void) _bad_arg(_0);
-  }
-  int * _x2c_gensym_macro_stored_6 = _int_value(_x2c_gensym_macro_map_37, (unsigned) _x2c_gensym_macro_index_14);
+  long _x2c_gensym_macro_index_14 = MapIntInt_find_index(_x2c_gensym_macro_map_43, & _x2c_gensym_macro_key_23);
+  if(_x2c_gensym_macro_index_14 < 0)(void) _bad_arg(_0);
+  int * _x2c_gensym_macro_stored_6 = _int_value(_x2c_gensym_macro_map_43, (unsigned) _x2c_gensym_macro_index_14);
   return _update_int(_x2c_gensym_macro_stored_6, _x2c_gensym_macro_op_1, _x2c_gensym_macro_rhs_0);
 }
 
-Var Var_postfix(Var *, Symbol);
-
-int MapIntInt_postfixindex(MapIntInt _x2c_gensym_macro_map_38, int _x2c_gensym_macro_key_21, Symbol _x2c_gensym_macro_op_2){
+int MapIntInt_postfixindex(MapIntInt _x2c_gensym_macro_map_44, int _x2c_gensym_macro_key_24, Symbol _x2c_gensym_macro_op_2){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_gensym_macro_map_38 == 0)(void) _bad_arg(_0);
-  if(0 && Var_is_void(int_var(_x2c_gensym_macro_key_21))){
-    static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../lib/typed-map.x",.function = "MapIntInt_postfixindex",.line = 232};
-    x2c_error_raise_n(& _x2c_gensym_error_site_20, 48270474208, 0);
-    __builtin_unreachable();
-  }
-  long _x2c_gensym_macro_index_15 = MapIntInt_find_index(_x2c_gensym_macro_map_38, & _x2c_gensym_macro_key_21);
-  if(_x2c_gensym_macro_index_15 < 0){
-    if(0){
-      static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../lib/typed-map.x",.function = "MapIntInt_postfixindex",.line = 232};
-      x2c_error_raise_n(& _x2c_gensym_error_site_21, 4372499598, 1, Symbol_var(22898), int_var(_x2c_gensym_macro_key_21));
-      __builtin_unreachable();
-    }
-    (void) _bad_arg(_0);
-  }
-  int * _x2c_gensym_macro_stored_7 = _int_value(_x2c_gensym_macro_map_38, (unsigned) _x2c_gensym_macro_index_15);
+  if((void *) _x2c_gensym_macro_map_44 == 0)(void) _bad_arg(_0);
+  long _x2c_gensym_macro_index_15 = MapIntInt_find_index(_x2c_gensym_macro_map_44, & _x2c_gensym_macro_key_24);
+  if(_x2c_gensym_macro_index_15 < 0)(void) _bad_arg(_0);
+  int * _x2c_gensym_macro_stored_7 = _int_value(_x2c_gensym_macro_map_44, (unsigned) _x2c_gensym_macro_index_15);
   int _x2c_gensym_macro_old_0 = _x2c_gensym_macro_stored_7[0];
-  if(0){
-    Var _x2c_gensym_macro_boxed_value_0 = int_var(_x2c_gensym_macro_old_0);
-    Var_postfix(&(_x2c_gensym_macro_boxed_value_0), _x2c_gensym_macro_op_2);
-    _x2c_gensym_macro_stored_7[0] = Var_int(Var_convert(_x2c_gensym_macro_boxed_value_0, 3453797));
-    return _x2c_gensym_macro_old_0;
-  }
   if(! 1)(void) _bad_op(_x2c_gensym_macro_op_2);
   if(_x2c_gensym_macro_op_2 == 1848) _update_int(_x2c_gensym_macro_stored_7, 56, 1);
   else if(_x2c_gensym_macro_op_2 == 2046) _update_int(_x2c_gensym_macro_stored_7, 62, 1);
   else(void) _bad_op(_x2c_gensym_macro_op_2);
   return _x2c_gensym_macro_old_0;
-}
-
-int MapIntInt_try_del(MapIntInt _x2c_gensym_macro_map_39, int _x2c_gensym_macro_key_22, int * _x2c_gensym_macro_out_7){
-  return MapIntInt_try_del_entry(_x2c_gensym_macro_map_39, & _x2c_gensym_macro_key_22, _x2c_gensym_macro_out_7);
-}
-
-int MapIntInt_del(MapIntInt _x2c_gensym_macro_map_40, int _x2c_gensym_macro_key_23){
-  if(! _init_guard_) _file_init_();
-  int _x2c_gensym_macro_out_8 = 0;
-  if(MapIntInt_try_del(_x2c_gensym_macro_map_40, _x2c_gensym_macro_key_23, &(_x2c_gensym_macro_out_8))) return _x2c_gensym_macro_out_8;
-  if(0) return 0;
-  (void) _bad_arg(_0);
-}
-
-MapIntInt MapIntInt_copy(MapIntInt _x2c_gensym_macro_map_41){
-  return MapIntInt_copy_entries(_x2c_gensym_macro_map_41);
-}
-
-MapIntInt MapIntInt_merge(MapIntInt _x2c_gensym_macro_map_42, MapIntInt _x2c_gensym_macro_other_2){
-  return MapIntInt_merge_entries(_x2c_gensym_macro_map_42, _x2c_gensym_macro_other_2);
-}
-
-int MapIntInt_try_next(MapIntInt _x2c_gensym_macro_map_43, unsigned * _x2c_gensym_macro_cursor_4, int * _x2c_gensym_macro_key_24, int * _x2c_gensym_macro_val_7){
-  return MapIntInt_try_next_entry(_x2c_gensym_macro_map_43, _x2c_gensym_macro_cursor_4, _x2c_gensym_macro_key_24, _x2c_gensym_macro_val_7);
-}
-
-int MapIntInt_truth(MapIntInt _x2c_gensym_macro_map_44){
-  return MapIntInt_has_entries(_x2c_gensym_macro_map_44);
-}
-
-int MapIntInt_equal(MapIntInt _x2c_gensym_macro_a_2, MapIntInt _x2c_gensym_macro_b_2){
-  return MapIntInt_equal_entries(_x2c_gensym_macro_a_2, _x2c_gensym_macro_b_2);
 }
 
 int Map_try_next(Map, unsigned *, Var *, Var *);
@@ -1881,16 +1831,16 @@ static Buffer MapIntInt_write_entries(MapIntInt _x2c_gensym_macro_map_45, Buffer
       int _x2c_gensym_macro_first_0 = 1;
       while(MapIntInt_try_next(_x2c_gensym_macro_map_45, &(_x2c_gensym_macro_cursor_7), &(_x2c_gensym_macro_key_27), &(_x2c_gensym_macro_value_1))){
         if(! _x2c_gensym_macro_first_0) Buffer_write(_x2c_gensym_macro_out_9, ", ");
-        Var _x2c_gensym_macro_boxed_key_0 = _box_int(_x2c_gensym_macro_key_27), _x2c_gensym_macro_boxed_value_1 = _box_int(_x2c_gensym_macro_value_1);
+        Var _x2c_gensym_macro_boxed_key_0 = _box_int(_x2c_gensym_macro_key_27), _x2c_gensym_macro_boxed_value_0 = _box_int(_x2c_gensym_macro_value_1);
         if(_x2c_gensym_macro_mode_0 == 40228){
           Var_write_str(_x2c_gensym_macro_boxed_key_0, _x2c_gensym_macro_out_9);
           Buffer_write(_x2c_gensym_macro_out_9, ": ");
-          Var_write_str(_x2c_gensym_macro_boxed_value_1, _x2c_gensym_macro_out_9);
+          Var_write_str(_x2c_gensym_macro_boxed_value_0, _x2c_gensym_macro_out_9);
         }
         else{
           Var_write_repr(_x2c_gensym_macro_boxed_key_0, _x2c_gensym_macro_out_9);
           Buffer_write(_x2c_gensym_macro_out_9, ": ");
-          Var_write_repr(_x2c_gensym_macro_boxed_value_1, _x2c_gensym_macro_out_9);
+          Var_write_repr(_x2c_gensym_macro_boxed_value_0, _x2c_gensym_macro_out_9);
         }
         _x2c_gensym_macro_first_0 = 0;
       }
@@ -2023,8 +1973,8 @@ static int _x2c_gensym_macro__enumerate_next_0(Iter _x2c_gensym_macro_iter_3, Va
   int _x2c_gensym_macro_key_32;
   int _x2c_gensym_macro_val_12;
   if(! _x2c_gensym_macro_out_16 || ! _x2c_gensym_macro__step_0(_x2c_gensym_macro_iter_3, &(_x2c_gensym_macro_key_32), &(_x2c_gensym_macro_val_12))) return 0;
-  Var _x2c_gensym_macro_boxed_key_1 = _box_int(_x2c_gensym_macro_key_32), _x2c_gensym_macro_boxed_value_2 = _box_int(_x2c_gensym_macro_val_12);
-  * _x2c_gensym_macro_out_16 = List_var(cons(_x2c_gensym_macro_boxed_key_1, cons(_x2c_gensym_macro_boxed_value_2, NULL)));
+  Var _x2c_gensym_macro_boxed_key_1 = _box_int(_x2c_gensym_macro_key_32), _x2c_gensym_macro_boxed_value_1 = _box_int(_x2c_gensym_macro_val_12);
+  * _x2c_gensym_macro_out_16 = List_var(cons(_x2c_gensym_macro_boxed_key_1, cons(_x2c_gensym_macro_boxed_value_1, NULL)));
   return 1;
 }
 
@@ -2190,8 +2140,8 @@ static void _x2c_gensym_macro__expand_1(MapLongDouble _x2c_gensym_macro_map_64){
   struct MapLongDoubleRecord * _x2c_gensym_macro_entries_6 = _x2c_gensym_macro_map_64 -> entries;
   unsigned _x2c_gensym_macro_cap_6 = _x2c_gensym_macro_map_64 -> capacity;
   if(_x2c_gensym_macro_cap_6 > ~ 0u / 2){
-    static const X2CErrorSite _x2c_gensym_error_site_22 = {.file = "../../lib/typed-map.x",.function = "_x2c_gensym_macro__expand_1",.line = 245};
-    x2c_error_raise_n(& _x2c_gensym_error_site_22, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_gensym_macro_cap_6));
+    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/typed-map.x",.function = "_x2c_gensym_macro__expand_1",.line = 245};
+    x2c_error_raise_n(& _x2c_gensym_error_site_17, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_gensym_macro_cap_6));
     __builtin_unreachable();
   }
   unsigned _x2c_gensym_macro_capacity_12 = _x2c_gensym_macro_cap_6 * 2;
@@ -2387,7 +2337,7 @@ static MapLongDouble MapLongDouble_copy_entries(MapLongDouble _x2c_gensym_macro_
 
 }
 
-int MapLongDouble_truth(MapLongDouble _x2c_gensym_macro_map_94);
+int MapLongDouble_truth(MapLongDouble _x2c_gensym_macro_map_92);
 
 static MapLongDouble MapLongDouble_merge_entries(MapLongDouble _x2c_gensym_macro_map_71, MapLongDouble _x2c_gensym_macro_other_4){
   if(! MapLongDouble_truth(_x2c_gensym_macro_other_4)) return _x2c_gensym_macro_map_71;
@@ -2448,8 +2398,8 @@ MapLongDouble MapLongDouble_new_capacity(unsigned _x2c_gensym_macro_capacity_13)
     if(0){
       Var _x2c_gensym_literal_part_9 = String_var(String_join(NULL, cons(String_var(String_new("Map.new_capacity")), NULL)));
       {
-        static const X2CErrorSite _x2c_gensym_error_site_23 = {.file = "../../lib/typed-map.x",.function = "MapLongDouble_new_capacity",.line = 252};
-        x2c_error_raise_n(& _x2c_gensym_error_site_23, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_9, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_13));
+        static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/typed-map.x",.function = "MapLongDouble_new_capacity",.line = 252};
+        x2c_error_raise_n(& _x2c_gensym_error_site_18, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_9, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_13));
         __builtin_unreachable();
       }
 
@@ -2496,8 +2446,8 @@ double MapLongDouble_setdefault(MapLongDouble _x2c_gensym_macro_map_83, long _x2
   if(! _init_guard_) _file_init_();
   if((void *) _x2c_gensym_macro_map_83 == 0)(void) _bad_arg(_1);
   if(0 && Var_is_void(long_var(_x2c_gensym_macro_key_49))){
-    static const X2CErrorSite _x2c_gensym_error_site_24 = {.file = "../../lib/typed-map.x",.function = "MapLongDouble_setdefault",.line = 252};
-    x2c_error_raise_n(& _x2c_gensym_error_site_24, 48270474208, 0);
+    static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../lib/typed-map.x",.function = "MapLongDouble_setdefault",.line = 252};
+    x2c_error_raise_n(& _x2c_gensym_error_site_19, 48270474208, 0);
     __builtin_unreachable();
   }
   int _x2c_gensym_macro_inserted_6;
@@ -2513,8 +2463,8 @@ void MapLongDouble_set(MapLongDouble _x2c_gensym_macro_map_85, long _x2c_gensym_
   if(! _init_guard_) _file_init_();
   if((void *) _x2c_gensym_macro_map_85 == 0)(void) _bad_arg(_1);
   if(0 &&(Var_is_void(long_var(_x2c_gensym_macro_key_51)) || Var_is_void(double_var(_x2c_gensym_macro_val_18)))){
-    static const X2CErrorSite _x2c_gensym_error_site_25 = {.file = "../../lib/typed-map.x",.function = "MapLongDouble_set",.line = 252};
-    x2c_error_raise_n(& _x2c_gensym_error_site_25, 48270474208, 0);
+    static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../lib/typed-map.x",.function = "MapLongDouble_set",.line = 252};
+    x2c_error_raise_n(& _x2c_gensym_error_site_20, 48270474208, 0);
     __builtin_unreachable();
   }
   MapLongDouble_set_entry(_x2c_gensym_macro_map_85, & _x2c_gensym_macro_key_51, & _x2c_gensym_macro_val_18);
@@ -2526,107 +2476,65 @@ double MapLongDouble_setindex(MapLongDouble _x2c_gensym_macro_map_86, long _x2c_
   return _x2c_gensym_macro_val_19;
 }
 
-double MapLongDouble_updateindex(MapLongDouble _x2c_gensym_macro_map_87, long _x2c_gensym_macro_key_53, Symbol _x2c_gensym_macro_op_3, double _x2c_gensym_macro_rhs_1){
-  if(! _init_guard_) _file_init_();
-  if((void *) _x2c_gensym_macro_map_87 == 0)(void) _bad_arg(_1);
-  int _x2c_gensym_macro_insert_1 = ! 0;
-  if(0){
-    Var _x2c_gensym_macro_boxed_rhs_1 = double_var(_x2c_gensym_macro_rhs_1);
-    X2CVarNumericInfo _x2c_gensym_macro_info_1;
-    _x2c_gensym_macro_insert_1 = Var_encoding_valid(_x2c_gensym_macro_boxed_rhs_1) && Var_numeric_info(Var_tag(_x2c_gensym_macro_boxed_rhs_1), &(_x2c_gensym_macro_info_1));
-    if(Var_is_void(long_var(_x2c_gensym_macro_key_53)) || Var_is_void(_x2c_gensym_macro_boxed_rhs_1)){
-      static const X2CErrorSite _x2c_gensym_error_site_26 = {.file = "../../lib/typed-map.x",.function = "MapLongDouble_updateindex",.line = 252};
-      x2c_error_raise_n(& _x2c_gensym_error_site_26, 48270474208, 0);
-      __builtin_unreachable();
-    }
+int MapLongDouble_try_del(MapLongDouble _x2c_gensym_macro_map_87, long _x2c_gensym_macro_key_53, double * _x2c_gensym_macro_out_24){
+  return MapLongDouble_try_del_entry(_x2c_gensym_macro_map_87, & _x2c_gensym_macro_key_53, _x2c_gensym_macro_out_24);
+}
 
-  }
-  if(_x2c_gensym_macro_op_3 == 56 && _x2c_gensym_macro_insert_1){
+double MapLongDouble_del(MapLongDouble _x2c_gensym_macro_map_88, long _x2c_gensym_macro_key_54){
+  if(! _init_guard_) _file_init_();
+  double _x2c_gensym_macro_out_25 = 0.0;
+  if(MapLongDouble_try_del(_x2c_gensym_macro_map_88, _x2c_gensym_macro_key_54, &(_x2c_gensym_macro_out_25))) return _x2c_gensym_macro_out_25;
+  if(0) return 0.0;
+  (void) _bad_arg(_1);
+}
+
+MapLongDouble MapLongDouble_copy(MapLongDouble _x2c_gensym_macro_map_89){
+  return MapLongDouble_copy_entries(_x2c_gensym_macro_map_89);
+}
+
+MapLongDouble MapLongDouble_merge(MapLongDouble _x2c_gensym_macro_map_90, MapLongDouble _x2c_gensym_macro_other_5){
+  return MapLongDouble_merge_entries(_x2c_gensym_macro_map_90, _x2c_gensym_macro_other_5);
+}
+
+int MapLongDouble_try_next(MapLongDouble _x2c_gensym_macro_map_91, unsigned * _x2c_gensym_macro_cursor_14, long * _x2c_gensym_macro_key_55, double * _x2c_gensym_macro_val_20){
+  return MapLongDouble_try_next_entry(_x2c_gensym_macro_map_91, _x2c_gensym_macro_cursor_14, _x2c_gensym_macro_key_55, _x2c_gensym_macro_val_20);
+}
+
+int MapLongDouble_truth(MapLongDouble _x2c_gensym_macro_map_92){
+  return MapLongDouble_has_entries(_x2c_gensym_macro_map_92);
+}
+
+int MapLongDouble_equal(MapLongDouble _x2c_gensym_macro_a_7, MapLongDouble _x2c_gensym_macro_b_7){
+  return MapLongDouble_equal_entries(_x2c_gensym_macro_a_7, _x2c_gensym_macro_b_7);
+}
+
+double MapLongDouble_updateindex(MapLongDouble _x2c_gensym_macro_map_93, long _x2c_gensym_macro_key_56, Symbol _x2c_gensym_macro_op_3, double _x2c_gensym_macro_rhs_1){
+  if(! _init_guard_) _file_init_();
+  if((void *) _x2c_gensym_macro_map_93 == 0)(void) _bad_arg(_1);
+  if(_x2c_gensym_macro_op_3 == 56){
     int _x2c_gensym_macro_inserted_7;
-    double * _x2c_gensym_macro_stored_13 = MapLongDouble_get_or_insert(_x2c_gensym_macro_map_87, & _x2c_gensym_macro_key_53, & _x2c_gensym_macro_rhs_1, & _x2c_gensym_macro_inserted_7);
+    double * _x2c_gensym_macro_stored_13 = MapLongDouble_get_or_insert(_x2c_gensym_macro_map_93, & _x2c_gensym_macro_key_56, & _x2c_gensym_macro_rhs_1, & _x2c_gensym_macro_inserted_7);
     if(_x2c_gensym_macro_inserted_7) return _x2c_gensym_macro_rhs_1;
     return _update_double(_x2c_gensym_macro_stored_13, _x2c_gensym_macro_op_3, _x2c_gensym_macro_rhs_1);
   }
-  if(0 && Var_is_void(long_var(_x2c_gensym_macro_key_53))){
-    static const X2CErrorSite _x2c_gensym_error_site_27 = {.file = "../../lib/typed-map.x",.function = "MapLongDouble_updateindex",.line = 252};
-    x2c_error_raise_n(& _x2c_gensym_error_site_27, 48270474208, 0);
-    __builtin_unreachable();
-  }
-  long _x2c_gensym_macro_index_23 = MapLongDouble_find_index(_x2c_gensym_macro_map_87, & _x2c_gensym_macro_key_53);
-  if(_x2c_gensym_macro_index_23 < 0){
-    if(0){
-      static const X2CErrorSite _x2c_gensym_error_site_28 = {.file = "../../lib/typed-map.x",.function = "MapLongDouble_updateindex",.line = 252};
-      x2c_error_raise_n(& _x2c_gensym_error_site_28, 4372499598, 1, Symbol_var(22898), long_var(_x2c_gensym_macro_key_53));
-      __builtin_unreachable();
-    }
-    (void) _bad_arg(_1);
-  }
-  double * _x2c_gensym_macro_stored_14 = _double_value(_x2c_gensym_macro_map_87, (unsigned) _x2c_gensym_macro_index_23);
+  long _x2c_gensym_macro_index_23 = MapLongDouble_find_index(_x2c_gensym_macro_map_93, & _x2c_gensym_macro_key_56);
+  if(_x2c_gensym_macro_index_23 < 0)(void) _bad_arg(_1);
+  double * _x2c_gensym_macro_stored_14 = _double_value(_x2c_gensym_macro_map_93, (unsigned) _x2c_gensym_macro_index_23);
   return _update_double(_x2c_gensym_macro_stored_14, _x2c_gensym_macro_op_3, _x2c_gensym_macro_rhs_1);
 }
 
-double MapLongDouble_postfixindex(MapLongDouble _x2c_gensym_macro_map_88, long _x2c_gensym_macro_key_54, Symbol _x2c_gensym_macro_op_4){
+double MapLongDouble_postfixindex(MapLongDouble _x2c_gensym_macro_map_94, long _x2c_gensym_macro_key_57, Symbol _x2c_gensym_macro_op_4){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_gensym_macro_map_88 == 0)(void) _bad_arg(_1);
-  if(0 && Var_is_void(long_var(_x2c_gensym_macro_key_54))){
-    static const X2CErrorSite _x2c_gensym_error_site_29 = {.file = "../../lib/typed-map.x",.function = "MapLongDouble_postfixindex",.line = 252};
-    x2c_error_raise_n(& _x2c_gensym_error_site_29, 48270474208, 0);
-    __builtin_unreachable();
-  }
-  long _x2c_gensym_macro_index_24 = MapLongDouble_find_index(_x2c_gensym_macro_map_88, & _x2c_gensym_macro_key_54);
-  if(_x2c_gensym_macro_index_24 < 0){
-    if(0){
-      static const X2CErrorSite _x2c_gensym_error_site_30 = {.file = "../../lib/typed-map.x",.function = "MapLongDouble_postfixindex",.line = 252};
-      x2c_error_raise_n(& _x2c_gensym_error_site_30, 4372499598, 1, Symbol_var(22898), long_var(_x2c_gensym_macro_key_54));
-      __builtin_unreachable();
-    }
-    (void) _bad_arg(_1);
-  }
-  double * _x2c_gensym_macro_stored_15 = _double_value(_x2c_gensym_macro_map_88, (unsigned) _x2c_gensym_macro_index_24);
+  if((void *) _x2c_gensym_macro_map_94 == 0)(void) _bad_arg(_1);
+  long _x2c_gensym_macro_index_24 = MapLongDouble_find_index(_x2c_gensym_macro_map_94, & _x2c_gensym_macro_key_57);
+  if(_x2c_gensym_macro_index_24 < 0)(void) _bad_arg(_1);
+  double * _x2c_gensym_macro_stored_15 = _double_value(_x2c_gensym_macro_map_94, (unsigned) _x2c_gensym_macro_index_24);
   double _x2c_gensym_macro_old_1 = _x2c_gensym_macro_stored_15[0];
-  if(0){
-    Var _x2c_gensym_macro_boxed_value_3 = double_var(_x2c_gensym_macro_old_1);
-    Var_postfix(&(_x2c_gensym_macro_boxed_value_3), _x2c_gensym_macro_op_4);
-    _x2c_gensym_macro_stored_15[0] = Var_floating(Var_convert(_x2c_gensym_macro_boxed_value_3, 3356265));
-    return _x2c_gensym_macro_old_1;
-  }
   if(! 1)(void) _bad_op(_x2c_gensym_macro_op_4);
   if(_x2c_gensym_macro_op_4 == 1848) _update_double(_x2c_gensym_macro_stored_15, 56, 1.0);
   else if(_x2c_gensym_macro_op_4 == 2046) _update_double(_x2c_gensym_macro_stored_15, 62, 1.0);
   else(void) _bad_op(_x2c_gensym_macro_op_4);
   return _x2c_gensym_macro_old_1;
-}
-
-int MapLongDouble_try_del(MapLongDouble _x2c_gensym_macro_map_89, long _x2c_gensym_macro_key_55, double * _x2c_gensym_macro_out_24){
-  return MapLongDouble_try_del_entry(_x2c_gensym_macro_map_89, & _x2c_gensym_macro_key_55, _x2c_gensym_macro_out_24);
-}
-
-double MapLongDouble_del(MapLongDouble _x2c_gensym_macro_map_90, long _x2c_gensym_macro_key_56){
-  if(! _init_guard_) _file_init_();
-  double _x2c_gensym_macro_out_25 = 0.0;
-  if(MapLongDouble_try_del(_x2c_gensym_macro_map_90, _x2c_gensym_macro_key_56, &(_x2c_gensym_macro_out_25))) return _x2c_gensym_macro_out_25;
-  if(0) return 0.0;
-  (void) _bad_arg(_1);
-}
-
-MapLongDouble MapLongDouble_copy(MapLongDouble _x2c_gensym_macro_map_91){
-  return MapLongDouble_copy_entries(_x2c_gensym_macro_map_91);
-}
-
-MapLongDouble MapLongDouble_merge(MapLongDouble _x2c_gensym_macro_map_92, MapLongDouble _x2c_gensym_macro_other_5){
-  return MapLongDouble_merge_entries(_x2c_gensym_macro_map_92, _x2c_gensym_macro_other_5);
-}
-
-int MapLongDouble_try_next(MapLongDouble _x2c_gensym_macro_map_93, unsigned * _x2c_gensym_macro_cursor_14, long * _x2c_gensym_macro_key_57, double * _x2c_gensym_macro_val_20){
-  return MapLongDouble_try_next_entry(_x2c_gensym_macro_map_93, _x2c_gensym_macro_cursor_14, _x2c_gensym_macro_key_57, _x2c_gensym_macro_val_20);
-}
-
-int MapLongDouble_truth(MapLongDouble _x2c_gensym_macro_map_94){
-  return MapLongDouble_has_entries(_x2c_gensym_macro_map_94);
-}
-
-int MapLongDouble_equal(MapLongDouble _x2c_gensym_macro_a_7, MapLongDouble _x2c_gensym_macro_b_7){
-  return MapLongDouble_equal_entries(_x2c_gensym_macro_a_7, _x2c_gensym_macro_b_7);
 }
 
 MapLongDouble Map_maplongdouble(Map _x2c_gensym_macro_entries_9){
@@ -2763,16 +2671,16 @@ static Buffer MapLongDouble_write_entries(MapLongDouble _x2c_gensym_macro_map_95
       int _x2c_gensym_macro_first_1 = 1;
       while(MapLongDouble_try_next(_x2c_gensym_macro_map_95, &(_x2c_gensym_macro_cursor_17), &(_x2c_gensym_macro_key_60), &(_x2c_gensym_macro_value_5))){
         if(! _x2c_gensym_macro_first_1) Buffer_write(_x2c_gensym_macro_out_26, ", ");
-        Var _x2c_gensym_macro_boxed_key_2 = _box_long(_x2c_gensym_macro_key_60), _x2c_gensym_macro_boxed_value_4 = _box_double(_x2c_gensym_macro_value_5);
+        Var _x2c_gensym_macro_boxed_key_2 = _box_long(_x2c_gensym_macro_key_60), _x2c_gensym_macro_boxed_value_2 = _box_double(_x2c_gensym_macro_value_5);
         if(_x2c_gensym_macro_mode_1 == 40228){
           Var_write_str(_x2c_gensym_macro_boxed_key_2, _x2c_gensym_macro_out_26);
           Buffer_write(_x2c_gensym_macro_out_26, ": ");
-          Var_write_str(_x2c_gensym_macro_boxed_value_4, _x2c_gensym_macro_out_26);
+          Var_write_str(_x2c_gensym_macro_boxed_value_2, _x2c_gensym_macro_out_26);
         }
         else{
           Var_write_repr(_x2c_gensym_macro_boxed_key_2, _x2c_gensym_macro_out_26);
           Buffer_write(_x2c_gensym_macro_out_26, ": ");
-          Var_write_repr(_x2c_gensym_macro_boxed_value_4, _x2c_gensym_macro_out_26);
+          Var_write_repr(_x2c_gensym_macro_boxed_value_2, _x2c_gensym_macro_out_26);
         }
         _x2c_gensym_macro_first_1 = 0;
       }
@@ -2889,8 +2797,8 @@ static int _x2c_gensym_macro__enumerate_next_1(Iter _x2c_gensym_macro_iter_7, Va
   long _x2c_gensym_macro_key_65;
   double _x2c_gensym_macro_val_25;
   if(! _x2c_gensym_macro_out_33 || ! _x2c_gensym_macro__step_1(_x2c_gensym_macro_iter_7, &(_x2c_gensym_macro_key_65), &(_x2c_gensym_macro_val_25))) return 0;
-  Var _x2c_gensym_macro_boxed_key_3 = _box_long(_x2c_gensym_macro_key_65), _x2c_gensym_macro_boxed_value_5 = _box_double(_x2c_gensym_macro_val_25);
-  * _x2c_gensym_macro_out_33 = List_var(cons(_x2c_gensym_macro_boxed_key_3, cons(_x2c_gensym_macro_boxed_value_5, NULL)));
+  Var _x2c_gensym_macro_boxed_key_3 = _box_long(_x2c_gensym_macro_key_65), _x2c_gensym_macro_boxed_value_3 = _box_double(_x2c_gensym_macro_val_25);
+  * _x2c_gensym_macro_out_33 = List_var(cons(_x2c_gensym_macro_boxed_key_3, cons(_x2c_gensym_macro_boxed_value_3, NULL)));
   return 1;
 }
 
@@ -3048,8 +2956,8 @@ static void _x2c_gensym_macro__expand_2(MapStringString _x2c_gensym_macro_map_11
   struct MapStringStringRecord * _x2c_gensym_macro_entries_11 = _x2c_gensym_macro_map_114 -> entries;
   unsigned _x2c_gensym_macro_cap_10 = _x2c_gensym_macro_map_114 -> capacity;
   if(_x2c_gensym_macro_cap_10 > ~ 0u / 2){
-    static const X2CErrorSite _x2c_gensym_error_site_31 = {.file = "../../lib/typed-map.x",.function = "_x2c_gensym_macro__expand_2",.line = 266};
-    x2c_error_raise_n(& _x2c_gensym_error_site_31, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_gensym_macro_cap_10));
+    static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../lib/typed-map.x",.function = "_x2c_gensym_macro__expand_2",.line = 266};
+    x2c_error_raise_n(& _x2c_gensym_error_site_21, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_gensym_macro_cap_10));
     __builtin_unreachable();
   }
   unsigned _x2c_gensym_macro_capacity_15 = _x2c_gensym_macro_cap_10 * 2;
@@ -3245,7 +3153,7 @@ static MapStringString MapStringString_copy_entries(MapStringString _x2c_gensym_
 
 }
 
-int MapStringString_truth(MapStringString _x2c_gensym_macro_map_144);
+int MapStringString_truth(MapStringString _x2c_gensym_macro_map_142);
 
 static MapStringString MapStringString_merge_entries(MapStringString _x2c_gensym_macro_map_121, MapStringString _x2c_gensym_macro_other_7){
   if(! MapStringString_truth(_x2c_gensym_macro_other_7)) return _x2c_gensym_macro_map_121;
@@ -3306,8 +3214,8 @@ MapStringString MapStringString_new_capacity(unsigned _x2c_gensym_macro_capacity
     if(0){
       Var _x2c_gensym_literal_part_10 = String_var(String_join(NULL, cons(String_var(String_new("Map.new_capacity")), NULL)));
       {
-        static const X2CErrorSite _x2c_gensym_error_site_32 = {.file = "../../lib/typed-map.x",.function = "MapStringString_new_capacity",.line = 273};
-        x2c_error_raise_n(& _x2c_gensym_error_site_32, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_10, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_16));
+        static const X2CErrorSite _x2c_gensym_error_site_22 = {.file = "../../lib/typed-map.x",.function = "MapStringString_new_capacity",.line = 273};
+        x2c_error_raise_n(& _x2c_gensym_error_site_22, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_10, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_16));
         __builtin_unreachable();
       }
 
@@ -3354,8 +3262,8 @@ String MapStringString_setdefault(MapStringString _x2c_gensym_macro_map_133, Str
   if(! _init_guard_) _file_init_();
   if((void *) _x2c_gensym_macro_map_133 == 0)(void) _bad_arg(_2);
   if(0 && Var_is_void(String_var(_x2c_gensym_macro_key_82))){
-    static const X2CErrorSite _x2c_gensym_error_site_33 = {.file = "../../lib/typed-map.x",.function = "MapStringString_setdefault",.line = 273};
-    x2c_error_raise_n(& _x2c_gensym_error_site_33, 48270474208, 0);
+    static const X2CErrorSite _x2c_gensym_error_site_23 = {.file = "../../lib/typed-map.x",.function = "MapStringString_setdefault",.line = 273};
+    x2c_error_raise_n(& _x2c_gensym_error_site_23, 48270474208, 0);
     __builtin_unreachable();
   }
   int _x2c_gensym_macro_inserted_10;
@@ -3371,8 +3279,8 @@ void MapStringString_set(MapStringString _x2c_gensym_macro_map_135, String _x2c_
   if(! _init_guard_) _file_init_();
   if((void *) _x2c_gensym_macro_map_135 == 0)(void) _bad_arg(_2);
   if(0 &&(Var_is_void(String_var(_x2c_gensym_macro_key_84)) || Var_is_void(String_var(_x2c_gensym_macro_val_31)))){
-    static const X2CErrorSite _x2c_gensym_error_site_34 = {.file = "../../lib/typed-map.x",.function = "MapStringString_set",.line = 273};
-    x2c_error_raise_n(& _x2c_gensym_error_site_34, 48270474208, 0);
+    static const X2CErrorSite _x2c_gensym_error_site_24 = {.file = "../../lib/typed-map.x",.function = "MapStringString_set",.line = 273};
+    x2c_error_raise_n(& _x2c_gensym_error_site_24, 48270474208, 0);
     __builtin_unreachable();
   }
   MapStringString_set_entry(_x2c_gensym_macro_map_135, & _x2c_gensym_macro_key_84, & _x2c_gensym_macro_val_31);
@@ -3384,72 +3292,60 @@ String MapStringString_setindex(MapStringString _x2c_gensym_macro_map_136, Strin
   return _x2c_gensym_macro_val_32;
 }
 
-String MapStringString_updateindex(MapStringString _x2c_gensym_macro_map_137, String _x2c_gensym_macro_key_86, Symbol _x2c_gensym_macro_op_5, String _x2c_gensym_macro_rhs_2){
-  if(! _init_guard_) _file_init_();
-  if((void *) _x2c_gensym_macro_map_137 == 0)(void) _bad_arg(_2);
-  int _x2c_gensym_macro_insert_2 = ! 0;
-  if(0){
-    Var _x2c_gensym_macro_boxed_rhs_2 = String_var(_x2c_gensym_macro_rhs_2);
-    X2CVarNumericInfo _x2c_gensym_macro_info_2;
-    _x2c_gensym_macro_insert_2 = Var_encoding_valid(_x2c_gensym_macro_boxed_rhs_2) && Var_numeric_info(Var_tag(_x2c_gensym_macro_boxed_rhs_2), &(_x2c_gensym_macro_info_2));
-    if(Var_is_void(String_var(_x2c_gensym_macro_key_86)) || Var_is_void(_x2c_gensym_macro_boxed_rhs_2)){
-      static const X2CErrorSite _x2c_gensym_error_site_35 = {.file = "../../lib/typed-map.x",.function = "MapStringString_updateindex",.line = 273};
-      x2c_error_raise_n(& _x2c_gensym_error_site_35, 48270474208, 0);
-      __builtin_unreachable();
-    }
+int MapStringString_try_del(MapStringString _x2c_gensym_macro_map_137, String _x2c_gensym_macro_key_86, String * _x2c_gensym_macro_out_41){
+  return MapStringString_try_del_entry(_x2c_gensym_macro_map_137, & _x2c_gensym_macro_key_86, _x2c_gensym_macro_out_41);
+}
 
-  }
-  if(_x2c_gensym_macro_op_5 == 56 && _x2c_gensym_macro_insert_2){
+String MapStringString_del(MapStringString _x2c_gensym_macro_map_138, String _x2c_gensym_macro_key_87){
+  if(! _init_guard_) _file_init_();
+  String _x2c_gensym_macro_out_42 = 0;
+  if(MapStringString_try_del(_x2c_gensym_macro_map_138, _x2c_gensym_macro_key_87, &(_x2c_gensym_macro_out_42))) return _x2c_gensym_macro_out_42;
+  if(0) return 0;
+  (void) _bad_arg(_2);
+}
+
+MapStringString MapStringString_copy(MapStringString _x2c_gensym_macro_map_139){
+  return MapStringString_copy_entries(_x2c_gensym_macro_map_139);
+}
+
+MapStringString MapStringString_merge(MapStringString _x2c_gensym_macro_map_140, MapStringString _x2c_gensym_macro_other_8){
+  return MapStringString_merge_entries(_x2c_gensym_macro_map_140, _x2c_gensym_macro_other_8);
+}
+
+int MapStringString_try_next(MapStringString _x2c_gensym_macro_map_141, unsigned * _x2c_gensym_macro_cursor_24, String * _x2c_gensym_macro_key_88, String * _x2c_gensym_macro_val_33){
+  return MapStringString_try_next_entry(_x2c_gensym_macro_map_141, _x2c_gensym_macro_cursor_24, _x2c_gensym_macro_key_88, _x2c_gensym_macro_val_33);
+}
+
+int MapStringString_truth(MapStringString _x2c_gensym_macro_map_142){
+  return MapStringString_has_entries(_x2c_gensym_macro_map_142);
+}
+
+int MapStringString_equal(MapStringString _x2c_gensym_macro_a_12, MapStringString _x2c_gensym_macro_b_12){
+  return MapStringString_equal_entries(_x2c_gensym_macro_a_12, _x2c_gensym_macro_b_12);
+}
+
+String MapStringString_updateindex(MapStringString _x2c_gensym_macro_map_143, String _x2c_gensym_macro_key_89, Symbol _x2c_gensym_macro_op_5, String _x2c_gensym_macro_rhs_2){
+  if(! _init_guard_) _file_init_();
+  if((void *) _x2c_gensym_macro_map_143 == 0)(void) _bad_arg(_2);
+  if(_x2c_gensym_macro_op_5 == 56){
     int _x2c_gensym_macro_inserted_11;
-    String * _x2c_gensym_macro_stored_21 = MapStringString_get_or_insert(_x2c_gensym_macro_map_137, & _x2c_gensym_macro_key_86, & _x2c_gensym_macro_rhs_2, & _x2c_gensym_macro_inserted_11);
+    String * _x2c_gensym_macro_stored_21 = MapStringString_get_or_insert(_x2c_gensym_macro_map_143, & _x2c_gensym_macro_key_89, & _x2c_gensym_macro_rhs_2, & _x2c_gensym_macro_inserted_11);
     if(_x2c_gensym_macro_inserted_11) return _x2c_gensym_macro_rhs_2;
     return _update_string(_x2c_gensym_macro_stored_21, _x2c_gensym_macro_op_5, _x2c_gensym_macro_rhs_2);
   }
-  if(0 && Var_is_void(String_var(_x2c_gensym_macro_key_86))){
-    static const X2CErrorSite _x2c_gensym_error_site_36 = {.file = "../../lib/typed-map.x",.function = "MapStringString_updateindex",.line = 273};
-    x2c_error_raise_n(& _x2c_gensym_error_site_36, 48270474208, 0);
-    __builtin_unreachable();
-  }
-  long _x2c_gensym_macro_index_32 = MapStringString_find_index(_x2c_gensym_macro_map_137, & _x2c_gensym_macro_key_86);
-  if(_x2c_gensym_macro_index_32 < 0){
-    if(0){
-      static const X2CErrorSite _x2c_gensym_error_site_37 = {.file = "../../lib/typed-map.x",.function = "MapStringString_updateindex",.line = 273};
-      x2c_error_raise_n(& _x2c_gensym_error_site_37, 4372499598, 1, Symbol_var(22898), String_var(_x2c_gensym_macro_key_86));
-      __builtin_unreachable();
-    }
-    (void) _bad_arg(_2);
-  }
-  String * _x2c_gensym_macro_stored_22 = _string_value(_x2c_gensym_macro_map_137, (unsigned) _x2c_gensym_macro_index_32);
+  long _x2c_gensym_macro_index_32 = MapStringString_find_index(_x2c_gensym_macro_map_143, & _x2c_gensym_macro_key_89);
+  if(_x2c_gensym_macro_index_32 < 0)(void) _bad_arg(_2);
+  String * _x2c_gensym_macro_stored_22 = _string_value(_x2c_gensym_macro_map_143, (unsigned) _x2c_gensym_macro_index_32);
   return _update_string(_x2c_gensym_macro_stored_22, _x2c_gensym_macro_op_5, _x2c_gensym_macro_rhs_2);
 }
 
-String Var_as_string(Var);
-
-String MapStringString_postfixindex(MapStringString _x2c_gensym_macro_map_138, String _x2c_gensym_macro_key_87, Symbol _x2c_gensym_macro_op_6){
+String MapStringString_postfixindex(MapStringString _x2c_gensym_macro_map_144, String _x2c_gensym_macro_key_90, Symbol _x2c_gensym_macro_op_6){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_gensym_macro_map_138 == 0)(void) _bad_arg(_2);
-  if(0 && Var_is_void(String_var(_x2c_gensym_macro_key_87))){
-    static const X2CErrorSite _x2c_gensym_error_site_38 = {.file = "../../lib/typed-map.x",.function = "MapStringString_postfixindex",.line = 273};
-    x2c_error_raise_n(& _x2c_gensym_error_site_38, 48270474208, 0);
-    __builtin_unreachable();
-  }
-  long _x2c_gensym_macro_index_33 = MapStringString_find_index(_x2c_gensym_macro_map_138, & _x2c_gensym_macro_key_87);
-  if(_x2c_gensym_macro_index_33 < 0){
-    if(0){
-      static const X2CErrorSite _x2c_gensym_error_site_39 = {.file = "../../lib/typed-map.x",.function = "MapStringString_postfixindex",.line = 273};
-      x2c_error_raise_n(& _x2c_gensym_error_site_39, 4372499598, 1, Symbol_var(22898), String_var(_x2c_gensym_macro_key_87));
-      __builtin_unreachable();
-    }
-    (void) _bad_arg(_2);
-  }
-  String * _x2c_gensym_macro_stored_23 = _string_value(_x2c_gensym_macro_map_138, (unsigned) _x2c_gensym_macro_index_33);
+  if((void *) _x2c_gensym_macro_map_144 == 0)(void) _bad_arg(_2);
+  long _x2c_gensym_macro_index_33 = MapStringString_find_index(_x2c_gensym_macro_map_144, & _x2c_gensym_macro_key_90);
+  if(_x2c_gensym_macro_index_33 < 0)(void) _bad_arg(_2);
+  String * _x2c_gensym_macro_stored_23 = _string_value(_x2c_gensym_macro_map_144, (unsigned) _x2c_gensym_macro_index_33);
   String _x2c_gensym_macro_old_2 = _x2c_gensym_macro_stored_23[0];
-  if(0){
-    Var _x2c_gensym_macro_boxed_value_6 = String_var(_x2c_gensym_macro_old_2);
-    Var_postfix(&(_x2c_gensym_macro_boxed_value_6), _x2c_gensym_macro_op_6);
-    _x2c_gensym_macro_stored_23[0] = Var_as_string(_x2c_gensym_macro_boxed_value_6);
-    return _x2c_gensym_macro_old_2;
-  }
   if(! 0)(void) _bad_op(_x2c_gensym_macro_op_6);
   if(_x2c_gensym_macro_op_6 == 1848) _update_string(_x2c_gensym_macro_stored_23, 56, _3);
   else if(_x2c_gensym_macro_op_6 == 2046) _update_string(_x2c_gensym_macro_stored_23, 62, _3);
@@ -3457,37 +3353,7 @@ String MapStringString_postfixindex(MapStringString _x2c_gensym_macro_map_138, S
   return _x2c_gensym_macro_old_2;
 }
 
-int MapStringString_try_del(MapStringString _x2c_gensym_macro_map_139, String _x2c_gensym_macro_key_88, String * _x2c_gensym_macro_out_41){
-  return MapStringString_try_del_entry(_x2c_gensym_macro_map_139, & _x2c_gensym_macro_key_88, _x2c_gensym_macro_out_41);
-}
-
-String MapStringString_del(MapStringString _x2c_gensym_macro_map_140, String _x2c_gensym_macro_key_89){
-  if(! _init_guard_) _file_init_();
-  String _x2c_gensym_macro_out_42 = 0;
-  if(MapStringString_try_del(_x2c_gensym_macro_map_140, _x2c_gensym_macro_key_89, &(_x2c_gensym_macro_out_42))) return _x2c_gensym_macro_out_42;
-  if(0) return 0;
-  (void) _bad_arg(_2);
-}
-
-MapStringString MapStringString_copy(MapStringString _x2c_gensym_macro_map_141){
-  return MapStringString_copy_entries(_x2c_gensym_macro_map_141);
-}
-
-MapStringString MapStringString_merge(MapStringString _x2c_gensym_macro_map_142, MapStringString _x2c_gensym_macro_other_8){
-  return MapStringString_merge_entries(_x2c_gensym_macro_map_142, _x2c_gensym_macro_other_8);
-}
-
-int MapStringString_try_next(MapStringString _x2c_gensym_macro_map_143, unsigned * _x2c_gensym_macro_cursor_24, String * _x2c_gensym_macro_key_90, String * _x2c_gensym_macro_val_33){
-  return MapStringString_try_next_entry(_x2c_gensym_macro_map_143, _x2c_gensym_macro_cursor_24, _x2c_gensym_macro_key_90, _x2c_gensym_macro_val_33);
-}
-
-int MapStringString_truth(MapStringString _x2c_gensym_macro_map_144){
-  return MapStringString_has_entries(_x2c_gensym_macro_map_144);
-}
-
-int MapStringString_equal(MapStringString _x2c_gensym_macro_a_12, MapStringString _x2c_gensym_macro_b_12){
-  return MapStringString_equal_entries(_x2c_gensym_macro_a_12, _x2c_gensym_macro_b_12);
-}
+String Var_as_string(Var);
 
 MapStringString Map_mapstringstring(Map _x2c_gensym_macro_entries_14){
   if(! _init_guard_) _file_init_();
@@ -3623,16 +3489,16 @@ static Buffer MapStringString_write_entries(MapStringString _x2c_gensym_macro_ma
       int _x2c_gensym_macro_first_2 = 1;
       while(MapStringString_try_next(_x2c_gensym_macro_map_145, &(_x2c_gensym_macro_cursor_27), &(_x2c_gensym_macro_key_93), &(_x2c_gensym_macro_value_9))){
         if(! _x2c_gensym_macro_first_2) Buffer_write(_x2c_gensym_macro_out_43, ", ");
-        Var _x2c_gensym_macro_boxed_key_4 = _box_string(_x2c_gensym_macro_key_93), _x2c_gensym_macro_boxed_value_7 = _box_string(_x2c_gensym_macro_value_9);
+        Var _x2c_gensym_macro_boxed_key_4 = _box_string(_x2c_gensym_macro_key_93), _x2c_gensym_macro_boxed_value_4 = _box_string(_x2c_gensym_macro_value_9);
         if(_x2c_gensym_macro_mode_2 == 40228){
           Var_write_str(_x2c_gensym_macro_boxed_key_4, _x2c_gensym_macro_out_43);
           Buffer_write(_x2c_gensym_macro_out_43, ": ");
-          Var_write_str(_x2c_gensym_macro_boxed_value_7, _x2c_gensym_macro_out_43);
+          Var_write_str(_x2c_gensym_macro_boxed_value_4, _x2c_gensym_macro_out_43);
         }
         else{
           Var_write_repr(_x2c_gensym_macro_boxed_key_4, _x2c_gensym_macro_out_43);
           Buffer_write(_x2c_gensym_macro_out_43, ": ");
-          Var_write_repr(_x2c_gensym_macro_boxed_value_7, _x2c_gensym_macro_out_43);
+          Var_write_repr(_x2c_gensym_macro_boxed_value_4, _x2c_gensym_macro_out_43);
         }
         _x2c_gensym_macro_first_2 = 0;
       }
@@ -3803,8 +3669,8 @@ static int _x2c_gensym_macro__enumerate_next_2(Iter _x2c_gensym_macro_iter_11, V
   String _x2c_gensym_macro_key_98;
   String _x2c_gensym_macro_val_38;
   if(! _x2c_gensym_macro_out_50 || ! _x2c_gensym_macro__step_2(_x2c_gensym_macro_iter_11, &(_x2c_gensym_macro_key_98), &(_x2c_gensym_macro_val_38))) return 0;
-  Var _x2c_gensym_macro_boxed_key_5 = _box_string(_x2c_gensym_macro_key_98), _x2c_gensym_macro_boxed_value_8 = _box_string(_x2c_gensym_macro_val_38);
-  * _x2c_gensym_macro_out_50 = List_var(cons(_x2c_gensym_macro_boxed_key_5, cons(_x2c_gensym_macro_boxed_value_8, NULL)));
+  Var _x2c_gensym_macro_boxed_key_5 = _box_string(_x2c_gensym_macro_key_98), _x2c_gensym_macro_boxed_value_5 = _box_string(_x2c_gensym_macro_val_38);
+  * _x2c_gensym_macro_out_50 = List_var(cons(_x2c_gensym_macro_boxed_key_5, cons(_x2c_gensym_macro_boxed_value_5, NULL)));
   return 1;
 }
 
@@ -3962,8 +3828,8 @@ static void _x2c_gensym_macro__expand_3(MapStringInt _x2c_gensym_macro_map_164){
   struct MapStringIntRecord * _x2c_gensym_macro_entries_16 = _x2c_gensym_macro_map_164 -> entries;
   unsigned _x2c_gensym_macro_cap_14 = _x2c_gensym_macro_map_164 -> capacity;
   if(_x2c_gensym_macro_cap_14 > ~ 0u / 2){
-    static const X2CErrorSite _x2c_gensym_error_site_40 = {.file = "../../lib/typed-map.x",.function = "_x2c_gensym_macro__expand_3",.line = 304};
-    x2c_error_raise_n(& _x2c_gensym_error_site_40, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_gensym_macro_cap_14));
+    static const X2CErrorSite _x2c_gensym_error_site_25 = {.file = "../../lib/typed-map.x",.function = "_x2c_gensym_macro__expand_3",.line = 304};
+    x2c_error_raise_n(& _x2c_gensym_error_site_25, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_gensym_macro_cap_14));
     __builtin_unreachable();
   }
   unsigned _x2c_gensym_macro_capacity_18 = _x2c_gensym_macro_cap_14 * 2;
@@ -4159,7 +4025,7 @@ static MapStringInt MapStringInt_copy_entries(MapStringInt _x2c_gensym_macro_map
 
 }
 
-int MapStringInt_truth(MapStringInt _x2c_gensym_macro_map_194);
+int MapStringInt_truth(MapStringInt _x2c_gensym_macro_map_192);
 
 static MapStringInt MapStringInt_merge_entries(MapStringInt _x2c_gensym_macro_map_171, MapStringInt _x2c_gensym_macro_other_10){
   if(! MapStringInt_truth(_x2c_gensym_macro_other_10)) return _x2c_gensym_macro_map_171;
@@ -4220,8 +4086,8 @@ MapStringInt MapStringInt_new_capacity(unsigned _x2c_gensym_macro_capacity_19){
     if(0){
       Var _x2c_gensym_literal_part_11 = String_var(String_join(NULL, cons(String_var(String_new("Map.new_capacity")), NULL)));
       {
-        static const X2CErrorSite _x2c_gensym_error_site_41 = {.file = "../../lib/typed-map.x",.function = "MapStringInt_new_capacity",.line = 311};
-        x2c_error_raise_n(& _x2c_gensym_error_site_41, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_11, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_19));
+        static const X2CErrorSite _x2c_gensym_error_site_26 = {.file = "../../lib/typed-map.x",.function = "MapStringInt_new_capacity",.line = 311};
+        x2c_error_raise_n(& _x2c_gensym_error_site_26, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_11, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_19));
         __builtin_unreachable();
       }
 
@@ -4268,8 +4134,8 @@ int MapStringInt_setdefault(MapStringInt _x2c_gensym_macro_map_183, String _x2c_
   if(! _init_guard_) _file_init_();
   if((void *) _x2c_gensym_macro_map_183 == 0)(void) _bad_arg(_4);
   if(0 && Var_is_void(String_var(_x2c_gensym_macro_key_115))){
-    static const X2CErrorSite _x2c_gensym_error_site_42 = {.file = "../../lib/typed-map.x",.function = "MapStringInt_setdefault",.line = 311};
-    x2c_error_raise_n(& _x2c_gensym_error_site_42, 48270474208, 0);
+    static const X2CErrorSite _x2c_gensym_error_site_27 = {.file = "../../lib/typed-map.x",.function = "MapStringInt_setdefault",.line = 311};
+    x2c_error_raise_n(& _x2c_gensym_error_site_27, 48270474208, 0);
     __builtin_unreachable();
   }
   int _x2c_gensym_macro_inserted_14;
@@ -4285,8 +4151,8 @@ void MapStringInt_set(MapStringInt _x2c_gensym_macro_map_185, String _x2c_gensym
   if(! _init_guard_) _file_init_();
   if((void *) _x2c_gensym_macro_map_185 == 0)(void) _bad_arg(_4);
   if(0 &&(Var_is_void(String_var(_x2c_gensym_macro_key_117)) || Var_is_void(int_var(_x2c_gensym_macro_val_44)))){
-    static const X2CErrorSite _x2c_gensym_error_site_43 = {.file = "../../lib/typed-map.x",.function = "MapStringInt_set",.line = 311};
-    x2c_error_raise_n(& _x2c_gensym_error_site_43, 48270474208, 0);
+    static const X2CErrorSite _x2c_gensym_error_site_28 = {.file = "../../lib/typed-map.x",.function = "MapStringInt_set",.line = 311};
+    x2c_error_raise_n(& _x2c_gensym_error_site_28, 48270474208, 0);
     __builtin_unreachable();
   }
   MapStringInt_set_entry(_x2c_gensym_macro_map_185, & _x2c_gensym_macro_key_117, & _x2c_gensym_macro_val_44);
@@ -4298,107 +4164,65 @@ int MapStringInt_setindex(MapStringInt _x2c_gensym_macro_map_186, String _x2c_ge
   return _x2c_gensym_macro_val_45;
 }
 
-int MapStringInt_updateindex(MapStringInt _x2c_gensym_macro_map_187, String _x2c_gensym_macro_key_119, Symbol _x2c_gensym_macro_op_7, int _x2c_gensym_macro_rhs_3){
-  if(! _init_guard_) _file_init_();
-  if((void *) _x2c_gensym_macro_map_187 == 0)(void) _bad_arg(_4);
-  int _x2c_gensym_macro_insert_3 = ! 0;
-  if(0){
-    Var _x2c_gensym_macro_boxed_rhs_3 = int_var(_x2c_gensym_macro_rhs_3);
-    X2CVarNumericInfo _x2c_gensym_macro_info_3;
-    _x2c_gensym_macro_insert_3 = Var_encoding_valid(_x2c_gensym_macro_boxed_rhs_3) && Var_numeric_info(Var_tag(_x2c_gensym_macro_boxed_rhs_3), &(_x2c_gensym_macro_info_3));
-    if(Var_is_void(String_var(_x2c_gensym_macro_key_119)) || Var_is_void(_x2c_gensym_macro_boxed_rhs_3)){
-      static const X2CErrorSite _x2c_gensym_error_site_44 = {.file = "../../lib/typed-map.x",.function = "MapStringInt_updateindex",.line = 311};
-      x2c_error_raise_n(& _x2c_gensym_error_site_44, 48270474208, 0);
-      __builtin_unreachable();
-    }
+int MapStringInt_try_del(MapStringInt _x2c_gensym_macro_map_187, String _x2c_gensym_macro_key_119, int * _x2c_gensym_macro_out_58){
+  return MapStringInt_try_del_entry(_x2c_gensym_macro_map_187, & _x2c_gensym_macro_key_119, _x2c_gensym_macro_out_58);
+}
 
-  }
-  if(_x2c_gensym_macro_op_7 == 56 && _x2c_gensym_macro_insert_3){
+int MapStringInt_del(MapStringInt _x2c_gensym_macro_map_188, String _x2c_gensym_macro_key_120){
+  if(! _init_guard_) _file_init_();
+  int _x2c_gensym_macro_out_59 = 0;
+  if(MapStringInt_try_del(_x2c_gensym_macro_map_188, _x2c_gensym_macro_key_120, &(_x2c_gensym_macro_out_59))) return _x2c_gensym_macro_out_59;
+  if(0) return 0;
+  (void) _bad_arg(_4);
+}
+
+MapStringInt MapStringInt_copy(MapStringInt _x2c_gensym_macro_map_189){
+  return MapStringInt_copy_entries(_x2c_gensym_macro_map_189);
+}
+
+MapStringInt MapStringInt_merge(MapStringInt _x2c_gensym_macro_map_190, MapStringInt _x2c_gensym_macro_other_11){
+  return MapStringInt_merge_entries(_x2c_gensym_macro_map_190, _x2c_gensym_macro_other_11);
+}
+
+int MapStringInt_try_next(MapStringInt _x2c_gensym_macro_map_191, unsigned * _x2c_gensym_macro_cursor_34, String * _x2c_gensym_macro_key_121, int * _x2c_gensym_macro_val_46){
+  return MapStringInt_try_next_entry(_x2c_gensym_macro_map_191, _x2c_gensym_macro_cursor_34, _x2c_gensym_macro_key_121, _x2c_gensym_macro_val_46);
+}
+
+int MapStringInt_truth(MapStringInt _x2c_gensym_macro_map_192){
+  return MapStringInt_has_entries(_x2c_gensym_macro_map_192);
+}
+
+int MapStringInt_equal(MapStringInt _x2c_gensym_macro_a_17, MapStringInt _x2c_gensym_macro_b_17){
+  return MapStringInt_equal_entries(_x2c_gensym_macro_a_17, _x2c_gensym_macro_b_17);
+}
+
+int MapStringInt_updateindex(MapStringInt _x2c_gensym_macro_map_193, String _x2c_gensym_macro_key_122, Symbol _x2c_gensym_macro_op_7, int _x2c_gensym_macro_rhs_3){
+  if(! _init_guard_) _file_init_();
+  if((void *) _x2c_gensym_macro_map_193 == 0)(void) _bad_arg(_4);
+  if(_x2c_gensym_macro_op_7 == 56){
     int _x2c_gensym_macro_inserted_15;
-    int * _x2c_gensym_macro_stored_29 = MapStringInt_get_or_insert(_x2c_gensym_macro_map_187, & _x2c_gensym_macro_key_119, & _x2c_gensym_macro_rhs_3, & _x2c_gensym_macro_inserted_15);
+    int * _x2c_gensym_macro_stored_29 = MapStringInt_get_or_insert(_x2c_gensym_macro_map_193, & _x2c_gensym_macro_key_122, & _x2c_gensym_macro_rhs_3, & _x2c_gensym_macro_inserted_15);
     if(_x2c_gensym_macro_inserted_15) return _x2c_gensym_macro_rhs_3;
     return _update_int(_x2c_gensym_macro_stored_29, _x2c_gensym_macro_op_7, _x2c_gensym_macro_rhs_3);
   }
-  if(0 && Var_is_void(String_var(_x2c_gensym_macro_key_119))){
-    static const X2CErrorSite _x2c_gensym_error_site_45 = {.file = "../../lib/typed-map.x",.function = "MapStringInt_updateindex",.line = 311};
-    x2c_error_raise_n(& _x2c_gensym_error_site_45, 48270474208, 0);
-    __builtin_unreachable();
-  }
-  long _x2c_gensym_macro_index_41 = MapStringInt_find_index(_x2c_gensym_macro_map_187, & _x2c_gensym_macro_key_119);
-  if(_x2c_gensym_macro_index_41 < 0){
-    if(0){
-      static const X2CErrorSite _x2c_gensym_error_site_46 = {.file = "../../lib/typed-map.x",.function = "MapStringInt_updateindex",.line = 311};
-      x2c_error_raise_n(& _x2c_gensym_error_site_46, 4372499598, 1, Symbol_var(22898), String_var(_x2c_gensym_macro_key_119));
-      __builtin_unreachable();
-    }
-    (void) _bad_arg(_4);
-  }
-  int * _x2c_gensym_macro_stored_30 = _string_int_value(_x2c_gensym_macro_map_187, (unsigned) _x2c_gensym_macro_index_41);
+  long _x2c_gensym_macro_index_41 = MapStringInt_find_index(_x2c_gensym_macro_map_193, & _x2c_gensym_macro_key_122);
+  if(_x2c_gensym_macro_index_41 < 0)(void) _bad_arg(_4);
+  int * _x2c_gensym_macro_stored_30 = _string_int_value(_x2c_gensym_macro_map_193, (unsigned) _x2c_gensym_macro_index_41);
   return _update_int(_x2c_gensym_macro_stored_30, _x2c_gensym_macro_op_7, _x2c_gensym_macro_rhs_3);
 }
 
-int MapStringInt_postfixindex(MapStringInt _x2c_gensym_macro_map_188, String _x2c_gensym_macro_key_120, Symbol _x2c_gensym_macro_op_8){
+int MapStringInt_postfixindex(MapStringInt _x2c_gensym_macro_map_194, String _x2c_gensym_macro_key_123, Symbol _x2c_gensym_macro_op_8){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_gensym_macro_map_188 == 0)(void) _bad_arg(_4);
-  if(0 && Var_is_void(String_var(_x2c_gensym_macro_key_120))){
-    static const X2CErrorSite _x2c_gensym_error_site_47 = {.file = "../../lib/typed-map.x",.function = "MapStringInt_postfixindex",.line = 311};
-    x2c_error_raise_n(& _x2c_gensym_error_site_47, 48270474208, 0);
-    __builtin_unreachable();
-  }
-  long _x2c_gensym_macro_index_42 = MapStringInt_find_index(_x2c_gensym_macro_map_188, & _x2c_gensym_macro_key_120);
-  if(_x2c_gensym_macro_index_42 < 0){
-    if(0){
-      static const X2CErrorSite _x2c_gensym_error_site_48 = {.file = "../../lib/typed-map.x",.function = "MapStringInt_postfixindex",.line = 311};
-      x2c_error_raise_n(& _x2c_gensym_error_site_48, 4372499598, 1, Symbol_var(22898), String_var(_x2c_gensym_macro_key_120));
-      __builtin_unreachable();
-    }
-    (void) _bad_arg(_4);
-  }
-  int * _x2c_gensym_macro_stored_31 = _string_int_value(_x2c_gensym_macro_map_188, (unsigned) _x2c_gensym_macro_index_42);
+  if((void *) _x2c_gensym_macro_map_194 == 0)(void) _bad_arg(_4);
+  long _x2c_gensym_macro_index_42 = MapStringInt_find_index(_x2c_gensym_macro_map_194, & _x2c_gensym_macro_key_123);
+  if(_x2c_gensym_macro_index_42 < 0)(void) _bad_arg(_4);
+  int * _x2c_gensym_macro_stored_31 = _string_int_value(_x2c_gensym_macro_map_194, (unsigned) _x2c_gensym_macro_index_42);
   int _x2c_gensym_macro_old_3 = _x2c_gensym_macro_stored_31[0];
-  if(0){
-    Var _x2c_gensym_macro_boxed_value_9 = int_var(_x2c_gensym_macro_old_3);
-    Var_postfix(&(_x2c_gensym_macro_boxed_value_9), _x2c_gensym_macro_op_8);
-    _x2c_gensym_macro_stored_31[0] = Var_int(Var_convert(_x2c_gensym_macro_boxed_value_9, 3453797));
-    return _x2c_gensym_macro_old_3;
-  }
   if(! 1)(void) _bad_op(_x2c_gensym_macro_op_8);
   if(_x2c_gensym_macro_op_8 == 1848) _update_int(_x2c_gensym_macro_stored_31, 56, 1);
   else if(_x2c_gensym_macro_op_8 == 2046) _update_int(_x2c_gensym_macro_stored_31, 62, 1);
   else(void) _bad_op(_x2c_gensym_macro_op_8);
   return _x2c_gensym_macro_old_3;
-}
-
-int MapStringInt_try_del(MapStringInt _x2c_gensym_macro_map_189, String _x2c_gensym_macro_key_121, int * _x2c_gensym_macro_out_58){
-  return MapStringInt_try_del_entry(_x2c_gensym_macro_map_189, & _x2c_gensym_macro_key_121, _x2c_gensym_macro_out_58);
-}
-
-int MapStringInt_del(MapStringInt _x2c_gensym_macro_map_190, String _x2c_gensym_macro_key_122){
-  if(! _init_guard_) _file_init_();
-  int _x2c_gensym_macro_out_59 = 0;
-  if(MapStringInt_try_del(_x2c_gensym_macro_map_190, _x2c_gensym_macro_key_122, &(_x2c_gensym_macro_out_59))) return _x2c_gensym_macro_out_59;
-  if(0) return 0;
-  (void) _bad_arg(_4);
-}
-
-MapStringInt MapStringInt_copy(MapStringInt _x2c_gensym_macro_map_191){
-  return MapStringInt_copy_entries(_x2c_gensym_macro_map_191);
-}
-
-MapStringInt MapStringInt_merge(MapStringInt _x2c_gensym_macro_map_192, MapStringInt _x2c_gensym_macro_other_11){
-  return MapStringInt_merge_entries(_x2c_gensym_macro_map_192, _x2c_gensym_macro_other_11);
-}
-
-int MapStringInt_try_next(MapStringInt _x2c_gensym_macro_map_193, unsigned * _x2c_gensym_macro_cursor_34, String * _x2c_gensym_macro_key_123, int * _x2c_gensym_macro_val_46){
-  return MapStringInt_try_next_entry(_x2c_gensym_macro_map_193, _x2c_gensym_macro_cursor_34, _x2c_gensym_macro_key_123, _x2c_gensym_macro_val_46);
-}
-
-int MapStringInt_truth(MapStringInt _x2c_gensym_macro_map_194){
-  return MapStringInt_has_entries(_x2c_gensym_macro_map_194);
-}
-
-int MapStringInt_equal(MapStringInt _x2c_gensym_macro_a_17, MapStringInt _x2c_gensym_macro_b_17){
-  return MapStringInt_equal_entries(_x2c_gensym_macro_a_17, _x2c_gensym_macro_b_17);
 }
 
 MapStringInt Map_mapstringint(Map _x2c_gensym_macro_entries_19){
@@ -4535,16 +4359,16 @@ static Buffer MapStringInt_write_entries(MapStringInt _x2c_gensym_macro_map_195,
       int _x2c_gensym_macro_first_3 = 1;
       while(MapStringInt_try_next(_x2c_gensym_macro_map_195, &(_x2c_gensym_macro_cursor_37), &(_x2c_gensym_macro_key_126), &(_x2c_gensym_macro_value_13))){
         if(! _x2c_gensym_macro_first_3) Buffer_write(_x2c_gensym_macro_out_60, ", ");
-        Var _x2c_gensym_macro_boxed_key_6 = _box_string(_x2c_gensym_macro_key_126), _x2c_gensym_macro_boxed_value_10 = _box_int(_x2c_gensym_macro_value_13);
+        Var _x2c_gensym_macro_boxed_key_6 = _box_string(_x2c_gensym_macro_key_126), _x2c_gensym_macro_boxed_value_6 = _box_int(_x2c_gensym_macro_value_13);
         if(_x2c_gensym_macro_mode_3 == 40228){
           Var_write_str(_x2c_gensym_macro_boxed_key_6, _x2c_gensym_macro_out_60);
           Buffer_write(_x2c_gensym_macro_out_60, ": ");
-          Var_write_str(_x2c_gensym_macro_boxed_value_10, _x2c_gensym_macro_out_60);
+          Var_write_str(_x2c_gensym_macro_boxed_value_6, _x2c_gensym_macro_out_60);
         }
         else{
           Var_write_repr(_x2c_gensym_macro_boxed_key_6, _x2c_gensym_macro_out_60);
           Buffer_write(_x2c_gensym_macro_out_60, ": ");
-          Var_write_repr(_x2c_gensym_macro_boxed_value_10, _x2c_gensym_macro_out_60);
+          Var_write_repr(_x2c_gensym_macro_boxed_value_6, _x2c_gensym_macro_out_60);
         }
         _x2c_gensym_macro_first_3 = 0;
       }
@@ -4702,8 +4526,8 @@ static int _x2c_gensym_macro__enumerate_next_3(Iter _x2c_gensym_macro_iter_15, V
   String _x2c_gensym_macro_key_131;
   int _x2c_gensym_macro_val_51;
   if(! _x2c_gensym_macro_out_67 || ! _x2c_gensym_macro__step_3(_x2c_gensym_macro_iter_15, &(_x2c_gensym_macro_key_131), &(_x2c_gensym_macro_val_51))) return 0;
-  Var _x2c_gensym_macro_boxed_key_7 = _box_string(_x2c_gensym_macro_key_131), _x2c_gensym_macro_boxed_value_11 = _box_int(_x2c_gensym_macro_val_51);
-  * _x2c_gensym_macro_out_67 = List_var(cons(_x2c_gensym_macro_boxed_key_7, cons(_x2c_gensym_macro_boxed_value_11, NULL)));
+  Var _x2c_gensym_macro_boxed_key_7 = _box_string(_x2c_gensym_macro_key_131), _x2c_gensym_macro_boxed_value_7 = _box_int(_x2c_gensym_macro_val_51);
+  * _x2c_gensym_macro_out_67 = List_var(cons(_x2c_gensym_macro_boxed_key_7, cons(_x2c_gensym_macro_boxed_value_7, NULL)));
   return 1;
 }
 

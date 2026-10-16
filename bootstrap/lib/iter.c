@@ -248,7 +248,7 @@ Iter Iter_map(Iter iter, Func func, Iter dest){
 static int _map_next(Iter iter, Var * out){
   Iter source = Var_iter_payload(iter -> obj);
   if(! Iter_try_next(source, &(* out))) return 0;
-  if(iter -> aux) * out = Func_apply_value(iter -> aux, * out);
+  * out = Func_apply_value(iter -> aux, * out);
   return 1;
 }
 
@@ -262,7 +262,7 @@ Iter Iter_filter(Iter iter, Func func, Iter dest){
 static int _filter_next(Iter iter, Var * out){
   Iter source = Var_iter_payload(iter -> obj);
   Func func = iter -> aux;
-  if(! Iter_truth(source) || ! func) return 0;
+  if(! Iter_truth(source)) return 0;
   {
     Var value;
     Iter _x2c_gensym_macro_iterator_0 = source;
@@ -481,7 +481,7 @@ static void _unzip_buffer_push(UnzipShared * shared, Var pair){
     Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL)));
     Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 702};
+      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 704};
       x2c_error_raise_n(& _x2c_gensym_error_site_2, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(1510312), _x2c_gensym_literal_part_2, Symbol_var(46228810), pair);
       __builtin_unreachable();
     }
@@ -492,7 +492,7 @@ static void _unzip_buffer_push(UnzipShared * shared, Var pair){
     Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL)));
     Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 706};
+      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 708};
       x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(1510312), _x2c_gensym_literal_part_4, Symbol_var(46228810), pair);
       __builtin_unreachable();
     }
@@ -521,10 +521,6 @@ Var Iter_foldl(Iter iter, Var seed, Func fn){
     if(! has_item) return((void) 0, Void);
     acc = item;
     has_item = Iter_try_next(iter, &(item));
-  }
-  if(! fn){
-    while(has_item) has_item = Iter_try_next(iter, &(item));
-    return acc;
   }
   while(has_item){
     acc = Func_apply_values(fn, acc, item);

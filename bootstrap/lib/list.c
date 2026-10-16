@@ -1101,7 +1101,6 @@ List List_filter(List lst, Func pred){
 }
 
 Var List_foldl(List lst, Var seed, Func fn){
-  if(! fn) return Var_is_void(seed) && List_truth(lst) ? lst -> car : seed;
   struct Iter storage;
   return Iter_foldl(List_iter(lst, & storage), seed, fn);
 }
