@@ -74,7 +74,7 @@ int Compiler_local_macro_form_is_definition(Compiler c);
 
 int Compiler_keyword_form_is_definition(Compiler c);
 
-void Compiler_parse_keyword_definition(Compiler c);
+Atom Compiler_parse_keyword_definition(Compiler c);
 
 List Compiler_marked_rewrite(Compiler c, Type aggregate, List source, Token site);
 
