@@ -894,7 +894,7 @@ static List _binding_name_signature(String name) =>
 
    Each algorithm is bound into the compile-time Lisp session under the
    name its callers use, as are the slot functions that quotations in
-   `src/cleanup.x` call. */
+   `src/cleanup/cleanup.x` call. */
 
 static macro Stmt $builtin.row(Expr $rows, Expr $name, Expr $function) {
   $rows[$name] = Func.new(
