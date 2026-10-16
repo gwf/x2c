@@ -38,15 +38,12 @@ static void _record_call(
 
 static void _collect_calls(
   Compiler compiler, Map definitions, Var value, Map calls) {
-  if (value is not <list>) return;
-  List node = value;
-  match (node) {
-    case %(function *): return;
+  List node;
+  $ast.walk(value, node) match (node) {
+    case %(function *): continue;
     case %(expr ? (call ?callee (args *))):
       _record_call(compiler, definitions, callee, calls);
   }
-  foreach (Var child, node)
-    _collect_calls(compiler, definitions, child, calls);
 }
 
 static List _call_records(Map calls) {
@@ -340,29 +337,21 @@ static void _walk_mark_root(
 }
 
 static int _walk_has_exit(Var value) {
-  if (value is not <list>) return 0;
-  List node = value;
-  match (node) {
-    case %(function *): return 0;
+  List node;
+  $ast.walk(value, node) match (node) {
+    case %(function *): continue;
     case %((!or return break goto) *): return 1;
   }
-  foreach (Var child, node)
-    if (_walk_has_exit(child)) return 1;
   return 0;
 }
 
 static int _walk_loop_has_exit(Var value) {
-  if (value is not <list>) return 0;
-  List node = value;
-  match (node) {
-    case %(function *): return 0;
-    case %((!or while for) *parts): {
-      Var body = parts.last();
-      if (_walk_has_exit(body)) return 1;
-    }
+  List node;
+  $ast.walk(value, node) match (node) {
+    case %(function *): continue;
+    case %((!or while for) *parts):
+      if (_walk_has_exit(parts.last())) return 1;
   }
-  foreach (Var child, node)
-    if (_walk_loop_has_exit(child)) return 1;
   return 0;
 }
 
@@ -2108,14 +2097,11 @@ static void _write_datasets(
 /* Optional project lifetime proof from selected roots. */
 
 static int _certify_file_effect(Var value) {
-  if (value is not <list>) return 0;
-  List node = value;
-  match (node) {
-    case %(function *): return 0;
+  List node;
+  $ast.walk(value, node) match (node) {
+    case %(function *): continue;
     case %((!or call cons array map lambda) *): return 1;
   }
-  foreach (Var child, node)
-    if (_certify_file_effect(child)) return 1;
   return 0;
 }
 
