@@ -1956,7 +1956,7 @@ static List _declarator(
       c, context, method_identity, source_first,
       source_after).cdr();
   List sfx = _declarator_suffix(
-    c, c.load_main && !c.return_type && key == %("main"));
+    c, c.load_source && !c.return_type && key == %("main"));
   List modifiers = %( @infix @sfx @ptr );
   List ast = modifiers.append(type);
   // A parenthesized declarator is assembled twice. Preserve its raw key until

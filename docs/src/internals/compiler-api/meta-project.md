@@ -12,7 +12,7 @@ The project meta build.
 
 | Function | Summary |
 | --- | --- |
-| [`Frontend.build_loaded`](#Frontend.build_loaded) | Builds an independent source helper that also exposes the loaded file's main. |
+| [`Frontend.build_loaded`](#Frontend.build_loaded) | Builds an independent helper exposing the loaded file's public functions. |
 | [`Frontend.build_meta`](#Frontend.build_meta) | Builds an independent helper for the meta functions `inputs` reach. |
 | [`Frontend.prepare_meta`](#Frontend.prepare_meta) | Builds the helper that runs the project `meta` functions `inputs` reach, or finds it in the cache, and makes it the one their translation calls. |
 
@@ -23,9 +23,9 @@ The project meta build.
 
 `MetaHelper Frontend.build_loaded(Frontend f, String filename)`
 
-Builds an independent source helper that also exposes the loaded
-file's main. Its native signature stays inside the helper; argc/argv
-calls accept an Array of argument Strings through the data protocol.
+Builds an independent helper exposing the loaded file's public functions.
+Main's native signature stays inside the helper; argc/argv calls accept
+an Array of argument Strings through the data protocol.
 
 Source: `src/meta-project.x:90`
 

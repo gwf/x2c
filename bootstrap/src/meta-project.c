@@ -1060,7 +1060,7 @@ static void _parse_source(Helper * h, Frontend f, String path, int index){
     x2c_cleanup_push(& _x2c_gensym_defer_record_3);
     {
       unit.compiler -> meta_build = index + 1;
-      unit.compiler -> load_main = String_equal(path, (* h).entry);
+      unit.compiler -> load_source = String_equal(path, (* h).entry);
       unit.compiler -> diagnostics -> limit = 0;
       if(! started){
         x2c_cleanup_leave(& _x2c_gensym_defer_record_3);

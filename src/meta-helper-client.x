@@ -113,6 +113,7 @@ Var Compiler.meta_helper_call(
     .compiler = c, .name = name, .site = site,
     .table = _table_of(file, active.table)};
   _check(call);
+  c.refuse_record_meta_call(name, site);
   _set_deadline(call);
   if (!_start()) _refuse(call, "the compile-time helper did not start");
   _send(call, arguments);
@@ -162,7 +163,6 @@ static void _check(Call &call) {
   if (!active.path) _refuse(call, "the project meta module was not built");
   if (active.failures && active.failures.try_get(call.table, failure))
     _refuse(call, failure);
-  call.compiler.refuse_record_meta_call(call.name, call.site);
 }
 
 /* Sends the call, after the unit's reset when that is still to be sent. */
