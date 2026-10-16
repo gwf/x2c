@@ -13728,7 +13728,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_25(void
   _12807 = String_var(_12806);
   _12808 = String_new("src/generate.x");
   _12809 = String_var(_12808);
-  _12810 = String_new("1f0b5fcd");
+  _12810 = String_new("8da23321");
   _12811 = String_var(_12810);
   _12812 = cons(_12811, NULL);
   _12813 = cons(_12809, _12812);
@@ -13804,7 +13804,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_25(void
   _12883 = List_var(_12882);
   _12884 = String_new("src/emit.x");
   _12885 = String_var(_12884);
-  _12886 = String_new("a123d5b7");
+  _12886 = String_new("695a43f4");
   _12887 = String_var(_12886);
   _12888 = cons(_12887, NULL);
   _12889 = cons(_12885, _12888);
