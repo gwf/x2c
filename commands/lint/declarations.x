@@ -15,10 +15,6 @@
 static const SymbolSet qualifier_words =
   %<<const volatile restrict register struct union enum>>
 
-/* Whether `path` has a directory component named `name`. */
-static int _under(String path, String name) =>
-  path.startswith(%"$name/") || %"/$name/" in path
-
 /* The line of the first `(` among the compiler's tokens `start` to `end`.
    Returns 0 for a macro invocation, whose declarations are generated, and
    for a `meta` declaration, which declares a compile-time operation. */
@@ -35,14 +31,14 @@ static int _prototype_line(Compiler c, int start, int end):
    implementation and binding boundaries use explained local allowances;
    runtime co-recursion and shallow collection remain review candidates. */
 static void _prototype(Lint l, int line, int defined):
-  if defined && _under(l.path, "lib"):
+  if defined && lint_under(l.path, "lib"):
     l.add("same-file-forward-declaration", line,
           "retain only for genuine co-recursion or literal shallow "
           "collection")
   else if defined:
     l.add("forward-declaration", line,
           "retain only for a required same-unit binding boundary")
-  else if _under(l.path, "src"):
+  else if lint_under(l.path, "src"):
     l.add("src-forward-declaration", line,
           "retain only for a required implementation or binding boundary")
   else:

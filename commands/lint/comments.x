@@ -151,12 +151,6 @@ static String _declared(Lint l, int line, Map declarations):
       name = %"${l.tokens[at - 2].text}.$name"
   return NULL
 
-/* Whether any of `phrases` occurs in `text` as whole words. */
-static int _mentions(String text, List phrases):
-  foreach String phrase in phrases:
-    if lint_phrase(text, phrase): return 1
-  return 0
-
 /* The number of backquoted spans in `text`. */
 static int _code_spans(String text):
   int spans = 0
@@ -219,7 +213,7 @@ static void _comment(
   String code = next <= lines.len() ? lines[next - 1] : NULL
   code = code.strip(NULL)
   String name = _declared(l, next, declarations)
-  if _mentions(lower, history_phrases):
+  if lint_mentions(lower, history_phrases):
     l.add("comment-history", c.start, "history or unfinished work")
   if "prevent null pointer dereference" in lower ||
      "check null" in lower || "check for null" in lower:
@@ -278,8 +272,7 @@ static void _repeated_prose(Lint l, Comment *all, int n):
     foreach String part in parts:
       String normal = _normal(part).lower()
       if _words(normal).len() < 6: continue
-      if !(normal in owners): owners[normal] = []
-      Array starts = owners[normal]
+      Array starts = owners.setdefault(normal, [])
       starts.push(all[at].start)
   foreach Var (part, starts) in owners:
     Array each = starts

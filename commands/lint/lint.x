@@ -166,6 +166,16 @@ int lint_phrase(String text, String phrase):
       return 1
   return 0
 
+/** Whether lower-case `text` contains any of `phrases` as whole words. */
+int lint_mentions(String text, List phrases):
+  foreach String phrase in phrases:
+    if lint_phrase(text, phrase): return 1
+  return 0
+
+/** Whether `path` has a directory component named `name`. */
+int lint_under(String path, String name) =>
+  path.startswith(%"$name/") || %"/$name/" in path
+
 /** Whether `t` is written string text: a literal, a segment, or a quote. */
 int lint_string(Token t) =>
   t.type == <lit-char*> || t.type == <segment> || t.text == "\"" ||

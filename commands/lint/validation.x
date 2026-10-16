@@ -108,6 +108,13 @@ static int _then_return(Lint l, int at, int end):
   int semi = _semicolon(l, at, end)
   return semi < end && l.token_is(l.next(semi), "return")
 
+/* Whether the word at `at` is called as a member: `.word(`. */
+static int _method(Lint l, int at) =>
+  l.token_is(at - 1, ".") && l.token_is(l.next(at), "(")
+
+static int _if_header(Lint l, int at) =>
+  l.token_is(at, "if") && l.token_is(l.next(at), "(")
+
 /* Whether a `raise` at `at` names a shared cause. */
 static int _raised(Lint l, int at, Map diagnostics):
   if diagnostics[at] == <raise>: return 1
@@ -123,7 +130,7 @@ static int _shape(Lint l, int at):
   Token t = l.at(at)
   int open = l.next(at)
   if t.type != <ident>: return 0
-  if at && l.tokens[at - 1].text == "." && l.token_is(open, "("):
+  if _method(l, at):
     String name = t.text
     int n = name.len(), letters = n >= 3 && n <= 6 && name[0] == 'c' &&
       name[n - 1] == 'r'
@@ -140,8 +147,8 @@ static int _shape(Lint l, int at):
 /* Whether the tokens at `at` test a List's head tag: `.car()` then `==`,
    `!=`, `is`, or `is not`, then a Symbol literal. */
 static int _tag_check(Lint l, int at):
-  if !l.token_is(at, "car") || !l.token_is(at - 1, ".") ||
-     !l.token_is(l.next(at), "(") || !l.token_is(l.next(l.next(at)), ")"):
+  if !l.token_is(at, "car") || !_method(l, at) ||
+     !l.token_is(l.next(l.next(at)), ")"):
     return 0
   int op = l.next(l.next(l.next(at)))
   if l.token_is(op, "is") && l.token_is(l.next(op), "not"): op = l.next(op)
@@ -203,7 +210,7 @@ static String _compact(Lint l, int from, int to):
 static int _growth_check(Lint l, int from, int to):
   String code = _compact(l, from, l.prev(to))
   for (int at = from; at < to; at = l.next(at)):
-    if !l.token_is(at, "if") || !l.token_is(l.next(at), "("): continue
+    if !_if_header(l, at): continue
     int close = l.partner[l.next(at)]
     if close < 0 || !l.token_is(l.next(close), "return"): continue
     String test = _compact(l, l.next(at), close)
@@ -239,8 +246,7 @@ static int _fresh_null_guard(Lint l, int from, int to):
       continue
     String guard = %"if((void*)${t.text}==NULL)"
     for (int k = close; k < to; k = l.next(k)):
-      if l.token_is(k, "if") && l.token_is(l.next(k), "(") &&
-         _compact(l, k, l.partner[l.next(k)]) == guard:
+      if _if_header(l, k) && _compact(l, k, l.partner[l.next(k)]) == guard:
         return 1
   return 0
 
@@ -252,8 +258,7 @@ static int _statement_start(Lint l, int at):
 /* The reasons one function earns, with the score of each, as
    `(SCORE CODE MESSAGE)` rows. */
 static List _reasons(Lint l, List function, Map diagnostics):
-  (String name, int start, int body, int end) = function
-  int from = start, to = end
+  (String name, int from, int body, int to) = function
   Array rows = []
   int shapes = 0, branches = 0, reports = 0
   int report_return = 0, raise_return = 0, fallback = 0
@@ -261,9 +266,8 @@ static List _reasons(Lint l, List function, Map diagnostics):
     Token t = l.at(at)
     shapes += _shape(l, at)
     reports += _report(l, at, diagnostics)
-    if t.text == "if" && l.token_is(l.next(at), "("): branches++
-    if t.text == "report_error" && l.token_is(at - 1, ".") &&
-       l.token_is(l.next(at), "("):
+    if _if_header(l, at): branches++
+    if t.text == "report_error" && _method(l, at):
       int receiver = at
       while l.token_is(l.prev(receiver), "."):
         receiver = l.prev(l.prev(receiver))
@@ -392,8 +396,7 @@ static String _action(Lint l, int from, int to, Map diagnostics):
 static int _partial(Lint l, int from, int to):
   for (int at = from; at < to; at = l.next(at)):
     Token t = l.at(at)
-    if l.token_is(at - 1, ".") && t.text in %("push" "append" "insert") &&
-       l.token_is(l.next(at), "("):
+    if t.text in %("push" "append" "insert") && _method(l, at):
       return 1
     if t.text == "]" && l.tokens[l.next(at)].text[0] == '=' &&
        l.partner[at] >= 0 && l.partner[at] + 1 < at:
@@ -403,14 +406,12 @@ static int _partial(Lint l, int from, int to):
 /* Shape guards whose consequence continues, returns a fallback, or uses a
    default, outside the functions that trust external input. */
 static void _silent_guards(Lint l, List function, Map diagnostics):
-  (String name, int start, int body, int end) = function
-  String text = name
-  if text in trust_boundaries || text.startswith("_macro_sdk_") ||
-     l.path.endswith("src/collect.x") && "artifact" in text:
+  (String name, int start, int body, int to) = function
+  if name in trust_boundaries || name.startswith("_macro_sdk_") ||
+     l.path.endswith("src/collect.x") && "artifact" in name:
     return
-  int to = end
   for (int at = start; at < to; at = l.next(at)):
-    if !l.token_is(at, "if") || !l.token_is(l.next(at), "("): continue
+    if !_if_header(l, at): continue
     int open = l.next(at), close = l.partner[open], shape = 0
     if close < 0: continue
     for (int k = open; k < close; k = l.next(k)):
@@ -423,17 +424,17 @@ static void _silent_guards(Lint l, List function, Map diagnostics):
     if action == "continue" && _partial(l, start, to):
       action = "continue with partial state"
     l.add("silent-shape-guard", l.tokens[at].line,
-          %"impossible shape can silently $action in $text")
+          %"impossible shape can silently $action in $name")
 
 /* Static `List.match` results read through `assoc` in the same branch:
    `binding = ...match(%(...))` whose binding never escapes. */
 static void _static_match_captures(Lint l, List function):
-  (String name, int start, int body, int end) = function
-  int from = start, to = end, reads = 0, line = 0
+  (String name, int from, int body, int to) = function
+  int reads = 0, line = 0
   Map seen = {}
   for (int at = from; at < to; at = l.next(at)):
-    if !l.token_is(at, "match") || !l.token_is(at - 1, ".") ||
-       !l.token_is(l.next(at), "(") || !l.token_is(l.next(l.next(at)), "%("):
+    if !l.token_is(at, "match") || !_method(l, at) ||
+       !l.token_is(l.next(l.next(at)), "%("):
       continue
     int assign = at
     while assign > from && !l.token_is(assign, "=") &&

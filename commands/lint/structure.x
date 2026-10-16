@@ -376,8 +376,7 @@ void lint_corpus_rules(Lint *lints, int count):
       String text = _body_text(l, function)
       if text.len() < 80 || l.end_line(l.prev(end)) - l.at(start).line + 1 < 5:
         continue
-      if !(text in bodies): bodies[text] = []
-      Array owners = bodies[text]
+      Array owners = bodies.setdefault(text, [])
       owners.push(%($index $name ${l.at(start).line}))
   foreach Var (text, owners) in bodies:
     Array entries = owners
