@@ -38,7 +38,7 @@ original parameter types before calling it, then converts its `Var` result
 to the expected return type. Already compatible or unsupported shapes pass
 through unchanged.
 
-Source: `src/callables.x:973`
+Source: `src/callables.x:950`
 
 <a id="Compiler.capture_environment"></a>
 #### Compiler.capture_environment
@@ -49,7 +49,7 @@ Binds the file-static context type `name` with the field rows `fields`,
 for callable defers. The complete typedef is bound at once, so each
 field keeps its member type.
 
-Source: `src/callables.x:147`
+Source: `src/callables.x:142`
 
 <a id="Compiler.func_parameters"></a>
 #### Compiler.func_parameters
@@ -61,7 +61,7 @@ function taking the lambda parameter rows `entries`: its Func
 signature as a cached `List`, and each argument as `_func_reads`
 reads it from `argv` of the Func `fn`.
 
-Source: `src/callables.x:686`
+Source: `src/callables.x:664`
 
 <a id="Compiler.func_signature"></a>
 #### Compiler.func_signature
@@ -70,7 +70,7 @@ Source: `src/callables.x:686`
 
 Returns the canonical signature shared by native and meta Func adapters.
 
-Source: `src/callables.x:791`
+Source: `src/callables.x:768`
 
 <a id="Compiler.lift_func_expression"></a>
 #### Compiler.lift_func_expression
@@ -85,7 +85,7 @@ pointers producing null `Func`. Lambda expressions are lowered first, and
 unrelated expressions pass through unchanged. Public inline functions
 reach the queued helpers through generated bridge functions.
 
-Source: `src/callables.x:180`
+Source: `src/callables.x:175`
 
 <a id="Compiler.lower_typed_adapter_expr"></a>
 #### Compiler.lower_typed_adapter_expr
@@ -99,7 +99,7 @@ Compatible helpers are cached by source binding and target type, queued
 with `Compiler.add_early`, and returned as typed identifiers; other
 expressions pass through unchanged.
 
-Source: `src/callables.x:861`
+Source: `src/callables.x:838`
 
 <a id="Compiler.maybe_adapt_func_arg"></a>
 #### Compiler.maybe_adapt_func_arg
@@ -113,7 +113,7 @@ cast, or addressed; an indirect function-pointer value is rejected.
 A function already having the adapter's pointee type passes through,
 and new helpers are cached and queued with `Compiler.add_early`.
 
-Source: `src/callables.x:538`
+Source: `src/callables.x:518`
 
 <a id="Compiler.prepend_setup"></a>
 #### Compiler.prepend_setup
@@ -122,7 +122,7 @@ Source: `src/callables.x:538`
 
 Puts `setup` at the entry of a block or typed expression `body`.
 
-Source: `src/callables.x:158`
+Source: `src/callables.x:153`
 
 ## Design notes
 

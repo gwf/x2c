@@ -844,11 +844,12 @@ the bits of the subject's head, with a label on the first arm of each head.
 `Code.pattern_value` gives each arm's head and binders. A cached pattern of
 literals, unique binders, typed captures, nested Lists, and a final `*` is
 tested in place by nested `if` tests on cursors over the subject, each
-binder a local read from its cell. A macro-valued case calls
-`Macro_case_capture_at`, and any other pattern calls the Match runtime
-through the capture buffer, at a static site when `Code.is_static_pattern`
-holds. The transform and
-the cleanup walk step into the nodes the text holds, and the parts of the
+binder a local read from its cell. A case on a visible macro whose
+derived pattern has that form is tested the same way after
+`Macro_case_root` starts it on the subject's view; another macro-valued
+case calls `Macro_case_capture_at`, and any other pattern calls the Match
+runtime through the capture buffer, at a static site when
+`Code.is_static_pattern` holds. The transform and the cleanup walk step into the nodes the text holds, and the parts of the
 match lower outside its rule, so a nested match applies it again. The
 `switch` is the barrier that an arm's `break` leaves.
 

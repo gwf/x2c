@@ -46,6 +46,8 @@ _x2c_gensym_defer_env_2;
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2);
 
+void x2c_register_tagged_descriptor(Symbol, String, VarMethods);
+
 #include "exception.h"
 
 

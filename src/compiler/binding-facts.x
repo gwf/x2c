@@ -14,15 +14,9 @@ String Compiler.emitted_binding_name(Compiler c, List binding) {
   return Ast.binding_spelling(binding);
 }
 
-// The List a binding fact holds, or NULL when the fact is absent.
-module List _fact(Compiler c, List key) {
-  Var stored;
-  return c.semantic_binding_facts().try_get(key, stored) ? stored : NULL;
-}
-
 /** Returns the optional references proven present in this lexical path. */
 List Compiler.present_references(Compiler c) =>
-  _fact(c, %(present-references));
+  c.fact(%(present-references));
 
 /** Records a nonnull optional parameter for the current lexical path. */
 void Compiler.mark_reference_present(Compiler c, List binding) {

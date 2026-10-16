@@ -196,7 +196,7 @@ Caches a cons cell when both parts have immutable cache forms.
 Returns `NULL` when runtime literals are required or either part cannot
 be represented by the immutable cache graph.
 
-Source: `src/compiler/literal-cache.x:27`
+Source: `src/compiler/literal-cache.x:28`
 
 <a id="Compiler.cache_literal_list"></a>
 #### Compiler.cache_literal_list
@@ -208,7 +208,7 @@ Returns a runtime `List` expression for cached compiler-owned syntax.
 `values` may contain nested `List`s, `String`s, integer `Var`s, and
 `Symbol`s.
 
-Source: `src/compiler/literal-cache.x:89`
+Source: `src/compiler/literal-cache.x:90`
 
 <a id="Compiler.cache_literal_var"></a>
 #### Compiler.cache_literal_var
@@ -219,7 +219,7 @@ Interns an immutable value and returns its `(cache id)` reference.
 `value` is a `List` of such values, a `String`, a number with its tag, or
 a `Symbol`; any other value returns NULL.
 
-Source: `src/compiler/literal-cache.x:44`
+Source: `src/compiler/literal-cache.x:45`
 
 <a id="Compiler.canonical_path"></a>
 #### Compiler.canonical_path
@@ -393,7 +393,7 @@ Source: `src/compiler/parsing/tokens.x:246`
 
 Records a nonnull optional parameter for the current lexical path.
 
-Source: `src/compiler/binding-facts.x:28`
+Source: `src/compiler/binding-facts.x:22`
 
 <a id="Compiler.match_pattern_binders"></a>
 #### Compiler.match_pattern_binders
@@ -490,7 +490,7 @@ Returns the optional-reference parameter tested by `condition`, or NULL.
 `truth` is set to whether the condition's true arm proves that the caller
 supplied an object. Only a direct truth or null test proves presence.
 
-Source: `src/compiler/binding-facts.x:54`
+Source: `src/compiler/binding-facts.x:48`
 
 <a id="Compiler.own_diagnostics"></a>
 #### Compiler.own_diagnostics
@@ -545,7 +545,7 @@ Source: `src/compiler/source-files.x:71`
 
 Returns the optional references proven present in this lexical path.
 
-Source: `src/compiler/binding-facts.x:24`
+Source: `src/compiler/binding-facts.x:18`
 
 <a id="Compiler.queue_declaration_effect"></a>
 #### Compiler.queue_declaration_effect
@@ -638,7 +638,7 @@ Source: `src/compiler/parsing/tokens.x:140`
 
 Restores the optional-reference facts saved before a lexical path.
 
-Source: `src/compiler/binding-facts.x:44`
+Source: `src/compiler/binding-facts.x:38`
 
 <a id="Compiler.return_unit_state"></a>
 #### Compiler.return_unit_state
@@ -681,7 +681,7 @@ Marks the optional reference `binding` present after an `if` when the
 arm that runs without it cannot fall through: `no` when the true arm
 proves presence, `yes` otherwise. A missing `no` arm falls through.
 
-Source: `src/compiler/binding-facts.x:37`
+Source: `src/compiler/binding-facts.x:31`
 
 <a id="Compiler.shallow_parse"></a>
 #### Compiler.shallow_parse

@@ -489,11 +489,10 @@ static List _declaration_form(Compiler c, int skip_body) {
       c.install_collected_meta_function(decl, meta);
     return NULL;
   }
-  if (native && !decl.type_from_ast().is_function())
+  if (native && !type.is_function())
     $report.parse.meta_function(c, meta);
   if (c.test(<;>)) return _declared(c, decl, meta, first);
-  if (c.peek(0) == <"{"> || _x2c_at_function_arrow(c))
-    return _defined(c, decl, meta, native, first);
+  if (body) return _defined(c, decl, meta, native, first);
   c.require_input();
   Symbol unexpected = c.peek(0);
   $report.parse.body_expected(c, unexpected);
@@ -774,9 +773,8 @@ static void _record_meta_hash(
   match (definition) {
     case %(seq *rows):
       _record_meta_rows(c, rows, first, collected_body);
-    case %(declare ?spec (bindings ?one *more)) if (more):
-      _record_meta_bindings(
-        c, spec, definition.caddr().list().cdr(), first, collected_body);
+    case %(declare ?spec (bindings *rows)) if (rows.cdr()):
+      _record_meta_bindings(c, spec, rows, first, collected_body);
     case %(function ? (bind (binding ? ?(String own)) *) ?content):
       _store_meta_hash(c, own, content, first);
     case %(declare ?spec (bindings
@@ -1220,11 +1218,11 @@ static List _finish_declaration(
       !base.type().is_static()) base = %(static @base);
   if (tag == <declare>) base = _linked_static_base(c, base, declarators);
   List modifiers = NULL;
-  base = _declaration_base(base, modifiers);
+  base = Type.declaration_base(base, modifiers);
   if (modifiers) {
     Array bound = [];
     foreach (List declarator, declarators)
-      bound.push(_append_modifiers(declarator, modifiers));
+      bound.push(Ast.append_modifiers(declarator, modifiers));
     declarators = bound.list_free();
   }
   if (tag == <declare> || tag == <decl>)
@@ -1238,47 +1236,17 @@ static List _finish_declaration(
     : declaration;
 }
 
-/* An expanded alias may contribute pointer, array, or function modifiers.
-   Keep parsed modifiers (and parameter bindings) intact and append only the
-   alias's declarators. Storage still belongs on the declaration's base. */
-static List _declaration_base(Type t, List &modifiers) {
-  // Source specifier text, such as `("_Noreturn")`, follows the storage.
-  Array storage = [], text = [], typed = [];
-  defer { storage.free(); text.free(); typed.free(); }
-  foreach (Var item, t)
-    if (item is <list> && car(item) is <string>) text.push(item);
-    else typed.push(item);
-  List (base, mods) = typed.list().type().declared().parts();
-  modifiers = mods;
-  if (!mods) return t;
-  foreach (Var item, t)
-    if (item is <symbol> &&
-        (Symbol.is_storage_class(item) || Symbol.is_inline(item)))
-      storage.push(item);
-  return %( @{storage.list()} @{text.list()} @base );
-}
-
-static List _append_modifiers(List declarator, List modifiers) {
-  if (!modifiers) return declarator;
-  match (declarator) {
-    case %(bind ?binding ?mods):
-      return %(bind $binding (@{mods} @modifiers));
-    case %(op = ?binding ?initializer):
-      return %(op = ${_append_modifiers(binding, modifiers)}
-               $initializer);
-  }
-  return declarator;
-}
-
 /* Keep Self only in method metadata. The binding and AST receive the
    declaring owner, so direct calls and generated C retain the existing
    function signature. */
 static List _lower_self_declaration(Compiler c, List declaration) {
-  List items = declaration.caddr().cdr();
-  if (!items || items.cdr()) return declaration;
-  List target = items.car();
-  if (target.car() == <op>) target = target.caddr();
-  List binding = target.cadr(), method = _method_identity(c, binding);
+  List binding = NULL;
+  match (declaration) {
+    case %(? ? (bindings (op = (? ?name *) ?))): binding = name;
+    case %(? ? (bindings (? ?name *))): binding = name;
+  }
+  if (!binding) return declaration;
+  List method = c.fact(%(method $binding));
   if (!method) return declaration;
   Type owner = _self_owner_type(c, method);
   if (!owner) return declaration;
@@ -1297,18 +1265,6 @@ static List _lower_self_declaration(Compiler c, List declaration) {
   c.sym.set(%(self $spelling), relative);
   _lower_parameter_self(c, owner.car());
   return lowered;
-}
-
-static List _method_identity(Compiler c, List binding) {
-  Var stored;
-  return c.semantic_binding_facts().try_get(
-    %(method $binding), stored) ? stored : NULL;
-}
-
-static List _method_self_signature(Compiler c, List binding) {
-  Var stored;
-  return c.semantic_binding_facts().try_get(
-    %(self $binding), stored) ? stored : NULL;
 }
 
 static Type _self_owner_type(Compiler c, List method) {
@@ -1466,10 +1422,8 @@ static List _type_specifier(Compiler c) {
   if (slot) return %($slot);
   List syntax = NULL;
   switch (c.peek(0)) {
-    case <struct>: case <union>:
-      syntax = _struct_or_union(c); break;
-    case <enum>:
-      syntax = _enum(c); break;
+    case <struct>: case <union>: case <enum>:
+      syntax = _tagged_type(c); break;
     case <ident>:
       if (c.token.text == "Self") {
         c.next();
@@ -1539,7 +1493,7 @@ static String _type_reference(Compiler c, Symbol tag, String name) {
 
 // aggregates
 
-static List _struct_or_union(Compiler c) {
+static List _tagged_type(Compiler c) {
   Token first = c.token;
   Symbol tag = c.peek(0);
   c.next();
@@ -1547,19 +1501,19 @@ static List _struct_or_union(Compiler c) {
   List name = _tag_name(c);
   if (name && (c.package || c.line_markers))
     name = _scoped_aggregate_name(c, tag, name);
-  List usedname = name ? name : c.gensym();
-  usedname = %(${c.aggregate_name(
-    tag, usedname.car(), c.peek(0) == <"{"> || c.peek(0) == <;>)});
-  List type = cons(tag, usedname), fields = NULL;
+  int defines = c.peek(0) == <"{"> ||
+    (c.peek(0) == <;> && (tag != <enum> || c.macro_holes));
+  Var used = c.aggregate_name(tag, (name ? name : c.gensym()).car(), defines);
+  List type = %($tag $used), members = NULL;
   if (c.test(<"{">)) {
-    fields = c.parse_fields(type);
+    members = tag == <enum> ? c.parse_enumerators(type) : c.parse_fields(type);
     c.expect(<"}">);
     _skip_attributes(c);
     if (!c.macro_holes)
-      return _publish_aggregate_type(c, tag, usedname.car(), fields, first);
-    fields = cons(<fields>, fields);
+      return _publish_aggregate_type(c, tag, used, members, first);
+    if (tag != <enum>) members = cons(<fields>, members);
   }
-  return fields ? type.append(%($fields)): type;
+  return members ? type.append(%($members)) : type;
 }
 
 /* C places an aggregate's own attributes after its keyword and after its
@@ -1663,11 +1617,7 @@ List Compiler.parse_fields(Compiler c, List context) {
     int delegated = c.test(<delegate>);
     List field = delegated
       ? _field(c, context, 1) : c.parse_field(context);
-    match (field) {
-      case %(seq *rows):
-        foreach (Var row, rows) fields.push(row);
-      default: fields.push(field);
-    }
+    _push_items(fields, field);
     if (c.peek(0) == <"}">) return fields.list_free();
   }
 }
@@ -1801,28 +1751,6 @@ static Type _declare_named_type(
 }
 
 // enumerations
-
-static List _enum(Compiler c) {
-  Token first = c.token;
-  c.expect(<enum>);
-  _skip_attributes(c);
-  List name = _tag_name(c);
-  if (name && (c.package || c.line_markers))
-    name = _scoped_aggregate_name(c, <enum>, name);
-  List usedname = name ? name : c.gensym();
-  usedname = %(${c.aggregate_name(
-    <enum>, usedname.car(),
-    c.peek(0) == <"{"> || (c.macro_holes && c.peek(0) == <;>))});
-  List type = cons(<enum>, usedname), enums = NULL;
-  if (c.test(<"{">)) {
-    enums = c.parse_enumerators(type);
-    c.expect(<"}">);
-    _skip_attributes(c);
-    if (!c.macro_holes)
-      return _publish_aggregate_type(c, <enum>, usedname.car(), enums, first);
-  }
-  return enums ? type.append(%($enums)): type;
-}
 
 /** Parses comma-separated enumerators up to the current closing brace.
     Returns their flat source-order `List` and leaves the brace unconsumed.
@@ -2292,8 +2220,8 @@ static List _install_declarator(
   List declaration = %(declare $base (bindings (bind () $mods)));
   List prior = name is <list> ? name : NULL;
   List method = method_identity ? method_identity
-              : prior ? _method_identity(c, prior) : NULL;
-  List self_signature = prior ? _method_self_signature(c, prior) : NULL;
+              : prior ? c.fact(%(method $prior)) : NULL;
+  List self_signature = prior ? c.fact(%(self $prior)) : NULL;
   Type declared_type = mods.append(base);
   name = _method_spelling(c, name, declared_type, method, exact_name);
   String exact = _syntax_exact_name(name);
@@ -2478,8 +2406,8 @@ static List _finish_parameter(
     method_identity, preserved_self);
   c.record_source_declaration(declarator.cadr(), source_first, source_after);
   List modifiers = NULL;
-  base = _declaration_base(base, modifiers);
-  declarator = _append_modifiers(declarator, modifiers);
+  base = Type.declaration_base(base, modifiers);
+  declarator = Ast.append_modifiers(declarator, modifiers);
   List parameter = %(param $base $declarator);
   match (declarator)
     case %(bind ?binding ?):
@@ -2586,12 +2514,8 @@ List Compiler.parse_basic_identifier(Compiler c) {
 }
 
 /** Consumes and returns the current identifier, or NULL without consuming. */
-List Compiler.parse_optional_identifier(Compiler c) {
-  if (c.peek(0) != <ident>) return NULL;
-  String ident = c.token.text;
-  c.expect(<ident>);
-  return %($ident);
-}
+List Compiler.parse_optional_identifier(Compiler c) =>
+  c.peek(0) == <ident> ? c.parse_basic_identifier() : NULL;
 
 static String _syntax_exact_name(Var value) {
   if (value is <string>) return value;
@@ -2737,7 +2661,7 @@ static String _prepare_lifecycle(
 
 static String _lifecycle_owner(
   Compiler c, List binding, String member) {
-  List method = _method_identity(c, binding);
+  List method = c.fact(%(method $binding));
   if (!method) return NULL;
   match (method)
     case %(?name $member): {
@@ -3155,12 +3079,7 @@ static List _bind_enumerator(Compiler c, List input) {
    later ones while preserving whole-expansion rollback on failure. */
 static List _bind_form(
   Compiler c, List input, AstPos context, int pending) {
-  Macro if_then = $if_then, if_else = $if_else;
-  Macro while_loop = $while_loop, do_loop = $do_loop, for_loop = $for_loop;
-  Macro switched = $switched, expression_statement = $expression_statement;
-  Macro return_empty = $return_empty, return_value = $return_value;
-  Macro deferred = $deferred;
-  Macro matched = $matched;
+  Macro return_empty = $return_empty;
   Macro tried = $tried, caught = $caught;
   int unit = context == AST_UNIT, block = context == AST_BLOCK;
   int statement = block || context == AST_STATEMENT;
@@ -3218,26 +3137,26 @@ static List _bind_form(
     case %(at ?origin ?node):
       return _anchor(c, origin, c.bind_syntax(node, context, c.return_type));
     case return_empty() if (statement): return c.finish_return_statement(NULL);
-    case return_value(?expr) if (statement):
+    case $return_value(?expr) if (statement):
       return c.finish_return_statement(expr);
     case %((!or break continue default empty)) if (statement): return input;
     case %(case ?expr) if (statement): return %(case ${_resolve(c, expr)});
     case %((!set ?tag (!or goto label)) ?name) if (statement):
       return %($tag $name);
-    case expression_statement(?expr) if (statement):
+    case $expression_statement(?expr) if (statement):
       return _bind_expression_statement(c, expr, context);
-    case deferred(?body) if (statement):
+    case $deferred(?body) if (statement):
       return %(defer ${_bind_statement(c, body)});
-    case do_loop(?body, ?test) if (statement): return _bind_do(c, body, test);
-    case while_loop(?test, ?body) if (statement):
+    case $do_loop(?body, ?test) if (statement): return _bind_do(c, body, test);
+    case $while_loop(?test, ?body) if (statement):
       return _bind_while(c, test, body);
-    case switched(?expr, ?body) if (statement):
+    case $switched(?expr, ?body) if (statement):
       return _bind_switch(c, expr, body);
-    case if_then(?test, ?ontrue) if (statement):
+    case $if_then(?test, ?ontrue) if (statement):
       return _bind_if(c, test, ontrue);
-    case if_else(?test, ?ontrue, ?onfalse) if (statement):
+    case $if_else(?test, ?ontrue, ?onfalse) if (statement):
       return _bind_if_else(c, test, ontrue, onfalse);
-    case for_loop(?init, ?test, ?next, ?body) if (statement):
+    case $for_loop(?init, ?test, ?next, ?body) if (statement):
       return _bind_for(c, init, test, next, body);
     case %(raise ?code (args *details)) if (statement):
       return _bind_raise(c, code, details);
@@ -3247,7 +3166,7 @@ static List _bind_form(
       return _bind_try(c, body, input.caddr(), cleanup);
     case tried(?body, ?cleanup) if (statement):
       return _bind_try(c, body, NULL, cleanup);
-    case matched(?subject, *cases) if (statement):
+    case $matched(?subject, *cases) if (statement):
       return _bind_match(c, subject, cases);
     case $source_block_content(%(*children)) if (statement):
       return _bind_block(c, input);
@@ -3562,7 +3481,7 @@ static List _collected_function(
         c.sym.mark_static(%(function $name));
       else c.fn_defs[name] = 1;
       c.record_declaration_visibility(declaration);
-      List method = _method_identity(c, binding);
+      List method = c.fact(%(method $binding));
       if (method) {
         // Replay the resolved owner with this declaration's own member.
         String member = method.cadr();

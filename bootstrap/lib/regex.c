@@ -240,6 +240,8 @@ _x2c_gensym_defer_env_7;
 
 static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7);
 
+void x2c_register_tagged_descriptor(Symbol, String, VarMethods);
+
 static Var Symbol_var(Symbol);
 
 static Var String_var(String);

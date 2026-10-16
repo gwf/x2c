@@ -12,6 +12,7 @@ List Compiler.cache(Compiler c, List key) {
 static List _cache_alias(List key) {
   match (key) {
     case %(cache ?):                          return key;
+    case %(var (cache ?id)):                  return %(cache $id);
     case %(expr ? (cache ?id)):               return %(cache $id);
     case %(var (expr ("Var") (cache ?id))):   return %(cache $id);
     case %(expr ("List") (cache ?id)):        return %(cache $id);
