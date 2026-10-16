@@ -77,6 +77,7 @@ static void copy_support(Path destination) {
     ("lib/var" ("*.x") ("lib/var" "include/x2c/var"))
     ("lib/list" ("*.x") ("lib/list" "include/x2c/list"))
     ("lib/lisp" ("*.x") ("lib/lisp" "include/x2c/lisp"))
+    ("lib/scope" ("*.x") ("lib/scope" "include/x2c/scope"))
     ("lib/pool" ("*.x") ("lib/pool" "include/x2c/pool"))
     ("lib/error" ("*.x") ("lib/error" "include/x2c/error"))
     ("lib/macro-value" ("*.x") ("lib/macro-value" "include/x2c/macro-value"))

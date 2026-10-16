@@ -131,6 +131,7 @@ X2C_TRANSLATE_DEPS = $(X2C_COMPILER) $(LIB_X_FILES) \
 	$(wildcard $(LIB_SOURCE)/var/*.x) \
 	$(wildcard $(LIB_SOURCE)/list/*.x) \
 	$(wildcard $(LIB_SOURCE)/lisp/*.x) \
+	$(wildcard $(LIB_SOURCE)/scope/*.x) \
 	$(wildcard $(LIB_SOURCE)/pool/*.x) \
 	$(wildcard $(LIB_SOURCE)/error/*.x) \
 	$(wildcard $(LIB_SOURCE)/macro-value/*.x) \
