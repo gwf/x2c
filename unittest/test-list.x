@@ -221,8 +221,15 @@ static void list_fold_and_predicates(void) {
   Var found = numbers.find(greater_than_two);
   EXPECT_INT_EQ(found.integer(), 3);
   EXPECT_TRUE(numbers.find(NULL) is void);
-  EXPECT_INT_EQ(numbers.foldl(99, NULL).integer(), 99);
-  EXPECT_INT_EQ(numbers.foldl(void, NULL).integer(), 1);
+  int missing = 0;
+  try numbers.foldl(99, NULL);
+  catch %(bad-arg *): missing++;
+  try numbers.foldl(void, NULL);
+  catch %(bad-arg *): missing++;
+  EXPECT_INT_EQ(missing, 2);
+  EXPECT_INT_EQ(empty.foldl(99, NULL).integer(), 99);
+  EXPECT_TRUE(empty.foldl(void, NULL) is void);
+  EXPECT_INT_EQ((%(1)).foldl(void, NULL).integer(), 1);
   EXPECT_TRUE(empty.foldl(void, sum_pair) is void);
 }
 

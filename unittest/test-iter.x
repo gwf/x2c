@@ -706,6 +706,53 @@ static void iter_fold_predicates_and_zip_with(void) {
       NULL, &null_zip_storage) == NULL);
 }
 
+static void iter_required_callbacks_consume_only_their_inputs(void) {
+  $test.scoped();
+  for (int operation = 0; operation < 4; operation++) {
+    struct Iter source_storage, stage_storage;
+    Iter source = Iter.init(&source_storage, 5, counted_next, 0);
+    next_call_count = 0;
+    Iter stage = NULL;
+    if (operation == 0) stage = source.map(NULL, &stage_storage);
+    if (operation == 1) stage = source.filter(NULL, &stage_storage);
+    EXPECT_INT_EQ(next_call_count, 0);
+    int missing = 0;
+    try {
+      if (stage) stage.next();
+      else source.foldl(operation == 2 ? (Var) 9 : void, NULL);
+    } catch %(bad-arg *): missing++;
+    EXPECT_INT_EQ(missing, 1);
+    EXPECT_INT_EQ(next_call_count, operation == 3 ? 2 : 1);
+    if (stage) {
+      try stage.next();
+      catch %(bad-arg *): missing++;
+      EXPECT_INT_EQ(missing, 2);
+      EXPECT_INT_EQ(next_call_count, 2);
+    }
+    EXPECT_INT_EQ(source.next().int(), operation == 2 ? 1 : 2);
+  }
+
+  struct Iter empty_storage, map_storage, filter_storage;
+  Iter empty = Iter.init(&empty_storage, -1, counted_next, 0);
+  EXPECT_TRUE(empty.map(NULL, &map_storage).next() is void);
+  empty.init(-1, counted_next, 0);
+  EXPECT_TRUE(empty.filter(NULL, &filter_storage).next() is void);
+  empty.init(-1, counted_next, 0);
+  EXPECT_TRUE(empty.foldl(void, NULL) is void);
+  empty.init(-1, counted_next, 0);
+  EXPECT_TRUE(empty.foldl(7, NULL) == 7);
+  struct Iter single_storage;
+  Iter single = Iter.init(&single_storage, 0, counted_next, 0);
+  EXPECT_TRUE(single.foldl(void, NULL) == 0);
+
+  struct Iter invalid_storage, invalid_filter_storage;
+  Iter invalid = Iter.init(&invalid_storage, void, void_next, void);
+  int source_failure = 0;
+  try invalid.filter(NULL, &invalid_filter_storage).next();
+  catch %(void-op *): source_failure++;
+  EXPECT_INT_EQ(source_failure, 1);
+}
+
 static void iter_var_iter_into(void) {
   $test.scoped();
   Var seven = 7, eight = 8, nine = 9;
@@ -827,6 +874,7 @@ void iter_suite(void) {
   $test.run(iter_aggregates_preserve_var_semantics);
   $test.run(iter_scan_and_array_collector);
   $test.run(iter_fold_predicates_and_zip_with);
+  $test.run(iter_required_callbacks_consume_only_their_inputs);
   $test.run(iter_var_iter_into);
   $test.run(iter_descending_range);
   $test.run(iter_range_boundaries);
