@@ -186,11 +186,11 @@ static String _tier(String path):
   return tiers.try_get(path, tier) ? tier : NULL
 
 /* Parser facts that locate macros, published types, and function templates. */
-static Map _documented_declarations(Compiler c, List ast):
+static Map _documented_declarations(Compiler c, List ast, List rows):
   Map declarations = {}
   if !c: return declarations
   struct Token *tokens = c.tokenizer.tokens
-  foreach List row in c.definition_rows(ast):
+  foreach List row in rows:
     match row:
       case %(typedef ?name ? ? (?(int start) *)):
         if c.publishes_typedef(name):
@@ -288,14 +288,13 @@ static void _repeated_prose(Lint l, Comment *all, int n):
       l.add("repeated-prose", start.int(),
             "repeats prose elsewhere in the file")
 
-/** Runs the comment rules over `l`. */
-void Lint.comment_rules(Lint l, Compiler c, List ast):
-  Map declarations = _documented_declarations(c, ast)
+/** Runs the comment rules over `l`, with the compiler `c`, `ast`, and its
+    `Compiler.definition_rows` `rows` of a parsed unit, or NULLs. */
+void Lint.comment_rules(Lint l, Compiler c, List ast, List rows):
+  Map declarations = _documented_declarations(c, ast, rows)
   Comment *all = Scope.calloc(l.count + 1, sizeof(Comment))
   int n = _collect(l, all)
-  Array lines = []
-  foreach String line in l.text.split("\n"):
-    lines.push(line)
+  Array lines = l.text.split("\n")
   for (int at = 0; at < n; at++):
     int next = all[at].end + 1
     for (; next <= lines.len(); next++):

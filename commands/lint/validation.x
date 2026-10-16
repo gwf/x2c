@@ -53,10 +53,8 @@ static void _function_reports(Compiler c, List ast, List report, Map facts):
   foreach List function in ast:
     match (function):
       case %(function ? (bind ?binding ?) ?(List body)):
-        int count = 0
-        foreach List hit in body.search(%(call (expr ? (ident ?callee))
-                                           (args *))):
-          count += List.equal(hit.assoc(<?callee>), report)
+        int count =
+          body.search(%(call (expr ? (ident $report)) (args *))).len()
         String name = Ast.binding_spelling(binding)
         match (c.semantic_binding_facts()[%(method $binding)]):
           case %(?(String owner) ?(String member)):
@@ -71,12 +69,9 @@ static Map _macro_diagnostics(Lint l, Compiler c, List ast):
   for (int at = 0; at < l.count; at++):
     if l.token_is(at, "$"): positions[l.tokens[at].pos] = at
   List report = c.sym.lookup(%("Compiler_report_error"), NULL)
-  foreach List hit in ast.search(%(at ? ?)):
-    List anchor = hit.assoc(<*>)
-    (Var marker, Var origin, Var expanded) = anchor
-    if !origin.is_integer() || expanded is not <list>: continue
-    Ast statement = expanded
-    List location = c.origin_location(origin.int())
+  foreach List hit in ast.search(%(at ?(int origin) ?(List expanded))):
+    Ast statement = hit.assoc(<?expanded>)
+    List location = c.origin_location(hit.assoc(<?origin>).int())
     Var at
     if !location ||
        location.assoc(<file>).string() != c.display_path(c.filename) ||
@@ -257,9 +252,8 @@ static int _statement_start(Lint l, int at):
 /* The reasons one function earns, with the score of each, as
    `(SCORE CODE MESSAGE)` rows. */
 static List _reasons(Lint l, List function, Map diagnostics):
-  Var (key, start, body, end) = function
-  String name = lint_name(function)
-  int from = start.int(), to = end.int()
+  (String name, int start, int body, int end) = function
+  int from = start, to = end
   Array rows = []
   int shapes = 0, branches = 0, reports = 0
   int report_return = 0, raise_return = 0, fallback = 0
@@ -322,59 +316,45 @@ static List _reasons(Lint l, List function, Map diagnostics):
   else if validator && shapes >= 2:
     rows.push(%(1 "validator-shape"
                 "validator-like helper inspects structural shape"))
-  if reports && _calls(l, body.int(), to, name):
+  if reports && _calls(l, body, to, name):
     rows.push(%(3 "recursive-validator"
                 "diagnostic validator recursively walks its input"))
   return rows.list_free()
-
-static List _rows(Map reasons, String name):
-  Var rows
-  return reasons.try_get(name, rows) ? rows : NULL
 
 /* Validator helpers that call each other, joined into components; each
    component of 40 or more lines that is named like a validator and is
    either several functions or recursive is reported at its first line. */
 static void _frameworks(Lint l, Map reasons):
-  Array names = []
-  Map member = {}
+  Array members = []
   foreach List function in l.functions:
-    String name = lint_name(function)
-    foreach List row in _rows(reasons, name):
-      Var code = row.cadr()
-      if code in %("shape-diagnostics" "validator-diagnostics"
-                    "validator-shape" "recursive-validator"):
-        member[name] = function
-    if name in member: names.push(name)
-  Map component = {}
-  foreach String name in names:
-    component[name] = name
-  foreach String name in names:
-    List function = member[name]
-    Var (name2, start, body, end) = function
-    foreach String other in names:
-      if other == name || !_calls(l, start.int(), end.int(), other): continue
-      String a = component[name], b = component[other]
-      if a == b: continue
-      foreach String each in names:
-        if component[each].string() == b: component[each] = a
-  Map done = {}
-  foreach String name in names:
-    String root = component[name]
-    if root in done: continue
-    done[root] = 1
+    (String name) = function
+    foreach List row in reasons[name]:
+      if row.cadr() in %("shape-diagnostics" "validator-diagnostics"
+                         "validator-shape" "recursive-validator"):
+        members.push(function)
+        break
+  int n = members.len()
+  DisjointSet components = DisjointSet.new(n)
+  for (int i = 0; i < n; i++):
+    List function = members[i]
+    (String name, int start, int body, int end) = function
+    for (int j = 0; j < n; j++):
+      List other = members[j]
+      if j != i && _calls(l, start, end, other.car()): components.union(i, j)
+  for (int root = 0; root < n; root++):
     Array group = []
     int lines = 0, first = 0, recursive = 0, validator = 0
-    foreach String other in names:
-      if component[other].string() != root: continue
-      List function = member[other]
-      Var (name2, start, body, end) = function
+    for (int k = 0; k < n; k++):
+      if components.find(k) != root: continue
+      List function = members[k]
+      (String name, int start, int body, int end) = function
       int line = l.at(start).line
       lines += l.end_line(l.prev(end)) - line + 1
       if !first || line < first: first = line
-      validator |= _validator_name(other)
-      foreach List row in _rows(reasons, other):
+      validator |= _validator_name(name)
+      foreach List row in reasons[name]:
         recursive |= row.cadr().string() == "recursive-validator"
-      group.push(other)
+      group.push(name)
     if !validator || lines < 40 || group.len() < 2 && !recursive: continue
     l.add("validation-framework", first,
           %"$lines lines of connected validators: ${group.join(", ")}")
@@ -423,14 +403,13 @@ static int _partial(Lint l, int from, int to):
 /* Shape guards whose consequence continues, returns a fallback, or uses a
    default, outside the functions that trust external input. */
 static void _silent_guards(Lint l, List function, Map diagnostics):
-  Var (key, start, body, end) = function
-  String name = lint_name(function)
+  (String name, int start, int body, int end) = function
   String text = name
   if text in trust_boundaries || text.startswith("_macro_sdk_") ||
      l.path.endswith("src/collect.x") && "artifact" in text:
     return
-  int to = end.int()
-  for (int at = start.int(); at < to; at = l.next(at)):
+  int to = end
+  for (int at = start; at < to; at = l.next(at)):
     if !l.token_is(at, "if") || !l.token_is(l.next(at), "("): continue
     int open = l.next(at), close = l.partner[open], shape = 0
     if close < 0: continue
@@ -441,7 +420,7 @@ static void _silent_guards(Lint l, List function, Map diagnostics):
     if l.token_is(first, "{"): last = l.partner[first]
     String action = _action(l, first, last < 0 ? to : last, diagnostics)
     if !action: continue
-    if action == "continue" && _partial(l, start.int(), to):
+    if action == "continue" && _partial(l, start, to):
       action = "continue with partial state"
     l.add("silent-shape-guard", l.tokens[at].line,
           %"impossible shape can silently $action in $text")
@@ -449,9 +428,8 @@ static void _silent_guards(Lint l, List function, Map diagnostics):
 /* Static `List.match` results read through `assoc` in the same branch:
    `binding = ...match(%(...))` whose binding never escapes. */
 static void _static_match_captures(Lint l, List function):
-  Var (key, start, body, end) = function
-  String name = lint_name(function)
-  int from = start.int(), to = end.int(), reads = 0, line = 0
+  (String name, int start, int body, int end) = function
+  int from = start, to = end, reads = 0, line = 0
   Map seen = {}
   for (int at = from; at < to; at = l.next(at)):
     if !l.token_is(at, "match") || !l.token_is(at - 1, ".") ||
@@ -493,8 +471,7 @@ void Lint.validation_rules(Lint l, Compiler c, List ast):
   Map diagnostics = _macro_diagnostics(l, c, ast)
   Map reasons = {}
   foreach List function in l.functions:
-    String name = lint_name(function)
-    Var start = function.cadr()
+    (String name, int start) = function
     List rows = _reasons(l, function, diagnostics)
     reasons[name] = rows
     int score = 0

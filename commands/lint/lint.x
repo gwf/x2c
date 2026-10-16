@@ -347,9 +347,6 @@ String Lint.source(Lint l, int from, int to) =>
   String.new_len(l.text + l.tokens[from].pos,
                  l.tokens[to].pos + l.tokens[to].len - l.tokens[from].pos)
 
-/** Returns the name of a `Lint.functions` row. */
-String lint_name(List function) => function.car()
-
 /** Prints the findings in line order. */
 void Lint.print(Lint l):
   l.findings.sort()

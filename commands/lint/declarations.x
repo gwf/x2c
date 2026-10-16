@@ -204,11 +204,6 @@ static List _parameter_words(Lint l, int open, int close):
   parameters.push(words.list_free())
   return parameters.list_free()
 
-static Array _split(String text):
-  Array lines = []
-  foreach String line in text.split("\n"): lines.push(line)
-  return lines
-
 /* The subject's short name: the first letter of `owner`, lower case,
    repeated until no reference among the tokens `from` to `to` uses it. */
 static String _short_name(Lint l, String owner, int from, int to):
@@ -250,7 +245,7 @@ static void _subject(Lint l, int start, int body, int end):
     if _reference(l, at, old): after.write(name)
     else: after.write_len(l.text + t.pos, t.len)
   Lines lines = _lines(l, from, end, l.tokens[from].line)
-  int saved = _saved(lines, _split(before), _split(after))
+  int saved = _saved(lines, before.split("\n"), after.str().split("\n"))
   if saved <= 0: return
   String plural = saved > 1 ? "s" : ""
   l.add("subject-parameter-name", l.tokens[open].line,
@@ -294,9 +289,9 @@ static int _alias_arguments(List calls, int index, Map locals):
    variable always supplies and that the body only dereferences. Buffers
    (`char` and `void` pointees), functions used other than by a direct call,
    and functions other units can call keep their pointer spelling. */
-static void _reference_parameters(Lint l, Compiler c, List ast):
+static void _reference_parameters(Lint l, List ast, List rows):
   Map locals = _plain_locals(ast), lines = {}
-  foreach List row in c.definition_rows(ast):
+  foreach List row in rows:
     match row:
       case %(function ?name ? ? ? ?line *): lines[name] = line
   foreach List node in ast:
@@ -347,9 +342,9 @@ static void _saved_bindings(Lint l, Compiler c, List node, int line):
   foreach Var child in node:
     if child is <list>: _saved_bindings(l, c, child, line)
 
-static void _saved_locals(Lint l, Compiler c, List ast):
+static void _saved_locals(Lint l, Compiler c, List ast, List rows):
   Map lines = {}
-  foreach List row in c.definition_rows(ast):
+  foreach List row in rows:
     match row:
       case %(function ?name ? ? ? ?line ? ? source *): lines[name] = line
   foreach List node in ast:
@@ -359,7 +354,7 @@ static void _saved_locals(Lint l, Compiler c, List ast):
 
 /* Bound references include calls and function values. Source spans keep
    corpus spelling guards outside the authored definition. */
-static void _unused_statics(Lint l, Compiler c, List ast):
+static void _unused_statics(Lint l, Compiler c, List ast, List rows):
   Map referenced = {}, absent = {}
   Ast.collect_binding_references(ast, referenced)
   foreach List node in ast:
@@ -367,7 +362,7 @@ static void _unused_statics(Lint l, Compiler c, List ast):
       case %(function ?modifiers (bind (binding ?id ?name) ?) ?):
         if <static> in modifiers && !(id in referenced):
           absent[name] = c.emitted_binding_name(%(binding $id $name))
-  foreach List row in c.definition_rows(ast):
+  foreach List row in rows:
     match row:
       case %(function ?name ?display ? ? ?line ? ? source (?(int start) ?)
              (? ?(int end) *)):
@@ -378,17 +373,18 @@ static void _unused_statics(Lint l, Compiler c, List ast):
           int first = tokens[start].line, last = tokens[end - 1].line
           l.unused.push(%($name $display ${absent[name]} $line $first $last))
 
-/** Runs the rules that read the compiler's parse of the unit: `ast` and
-    the facts `c` recorded while parsing it.
+/** Runs the rules that read the compiler's parse of the unit: `ast`, its
+    `Compiler.definition_rows` `rows`, and the facts `c` recorded while
+    parsing it.
 */
-void Lint.declaration_rules(Lint l, Compiler c, List ast):
+void Lint.declaration_rules(Lint l, Compiler c, List ast, List rows):
   _prototypes(l, c, ast)
-  if "saved-local" in l.selected: _saved_locals(l, c, ast)
+  if "saved-local" in l.selected: _saved_locals(l, c, ast, rows)
   if "uncalled-static-function" in l.selected:
-    _unused_statics(l, c, ast)
+    _unused_statics(l, c, ast, rows)
   if "reference-parameter" in l.selected:
-    _reference_parameters(l, c, ast)
-  foreach List row in c.definition_rows(ast):
+    _reference_parameters(l, ast, rows)
+  foreach List row in rows:
     match row:
       case %(function ? ?name ? ? ? ? ? source (?(int start) ?(int body))
              (? ?(int end) *)):
