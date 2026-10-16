@@ -36,7 +36,6 @@ Functions and types exposed by each compiler module.
 | [`src/component-try.x`](component-try.md) | try, catch, and finally. |
 | [`src/deps.x`](deps.md) | Make dependency output for x2c translation units. |
 | [`src/diagnostics.x`](diagnostics.md) | compiler diagnostic storage and rendering. |
-| [`src/editor.x`](editor.md) | one-request semantic editor adapter. |
 | [`src/emit.x`](emit.md) | C tokens from normalized x2c ASTs. |
 | [`src/expressions-reports.x`](expressions-reports.md) | expression typing diagnostics. |
 | [`src/expressions.x`](expressions.md) | expression syntax and its resolution. |
@@ -46,7 +45,6 @@ Functions and types exposed by each compiler module.
 | [`src/generate.x`](generate.md) | the generated header and source of one unit. |
 | [`src/grammar.x`](grammar.md) | the source forms that lowering recognizes. |
 | [`src/initializers.x`](initializers.md) | brace initializer conversion. |
-| [`src/install.x`](install.md) | Package installation into the x2c home. |
 | [`src/lambdas.x`](lambdas.md) | lambda parsing and capture resolution. |
 | [`src/linked-meta.x`](linked-meta.md) | shipped `meta` code compiled into the compiler. |
 | [`src/literals.x`](literals.md) | x2c literal parsing. |

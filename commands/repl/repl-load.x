@@ -12,7 +12,7 @@
 
 static typedef struct LoadedSource {
   ReplResult result;
-  Map symbols, signatures;
+  Map symbols, signatures, globals;
   MetaHelper helper;
 } LoadedSource;
 
@@ -22,14 +22,20 @@ static typedef struct LoadedCall {
   String name;
 } LoadedCall;
 
-/* Collection already selected public declarations and complete type
-   families. Public bodied functions become prompt entries. */
-static List _public_functions(Compiler c, Map &symbols) {
+/* Collection selects the requested public names and complete type families.
+   Generated accessor functions remain private helper targets. */
+static List _public_definitions(Compiler c, Map &symbols, Map globals) {
   Array candidates = $auto([]), names = [];
   foreach (List entry, c.meta_group)
-    match (entry) case %(function ?fn ?(String name) ?):
-      if (name == "main" || c.public_native_function(fn, name))
+    match (entry) {
+      case %(function ?fn ?(String name) ?):
+        if (name == "main" || c.public_native_function(fn, name))
+          candidates.push(name);
+      case %(global ?(String name) ?paths): {
         candidates.push(name);
+        globals[name] = paths;
+      }
+    }
   symbols = c.callable_symbols(candidates);
   if (c.load_source)
     foreach (List entry, c.meta_group)
@@ -164,7 +170,7 @@ static void _check_names(
   ReplSession session, ReplLoadedFile file, Map visible,
   Map symbols, List names) {
   foreach (String name, names) {
-    if (file && name in file.signatures) continue;
+    if (file && %($name) in file.symbols) continue;
     Var existing;
     if (%($name) in visible || name in session.names ||
         name.startswith("__repl_") ||
@@ -217,13 +223,15 @@ static void _check_replacement(
 
 static Map _signatures(Compiler c, Map symbols, List names) {
   Map signatures = {};
-  foreach (String name, names)
-    signatures[name] = c.func_signature(symbols[%($name)]);
+  foreach (String name, names) {
+    Type type = symbols[%($name)];
+    if (type.is_function()) signatures[name] = c.func_signature(type);
+  }
   return signatures;
 }
 
-/* Each load keeps its own helper. Only declarations and diagnostics leave
-   the source Context; native results later cross the existing datum protocol. */
+/* Each load keeps its own helper. Declarations and diagnostics leave the
+   source Context; native results cross the existing datum protocol. */
 static LoadedSource _prepare(Frontend frontend, String filename) {
   Compiler.refresh_source_collections();
   LoadedSource loaded = {
@@ -241,11 +249,23 @@ static LoadedSource _prepare(Frontend frontend, String filename) {
   try {
     if (opened) {
       Map symbols = NULL;
-      List names = _public_functions(c, symbols);
+      Map globals = {};
+      List names = _public_definitions(c, symbols, globals);
       if (!names)
-        raise %(repl (reason "no public bodied functions found"));
-      foreach (String name, names)
-        MetaHelper.check(c.meta_helper, c, name, c.filename);
+        raise %(repl (reason "no public functions or supported globals found"));
+      foreach (String name, names) {
+        if (name in globals) {
+          foreach (List description, globals[name].list()) {
+            (String path, Type bridge, int writable, int dimensions) =
+              description;
+            MetaHelper.check(c.meta_helper, c, "get global " + path, c.filename);
+            if (writable) MetaHelper.check(
+              c.meta_helper, c, "set global " + path, c.filename);
+          }
+        }
+        else MetaHelper.check(c.meta_helper, c, name, c.filename);
+      }
+      loaded.globals = unit.context.export(globals);
       loaded.symbols = unit.context.export(symbols);
       loaded.result.value = unit.context.export(names);
       loaded.result.status = <loaded>;
@@ -284,7 +304,44 @@ static void _publish_types(ReplSession session, Map symbols) {
   }
 }
 
-/** Compiles a source file's public bodied functions and source
+static List _accessor(
+  ReplSession session, ReplLoadedFile file, String name, Type bridge,
+  int dimensions, int setter) {
+  Compiler c = session.compiler;
+  Array parameters = $auto([]);
+  for (int i = 0; i < dimensions; i++) parameters.push(%(long long));
+  if (setter) { parameters.push(bridge); parameters.push(%(int)); }
+  if (!parameters.len()) parameters.push(%(void));
+  Type type = %((func ${parameters.list()}) @bridge);
+  String request = (setter ? "set global " : "get global ") + name;
+  String hidden = %"__repl_global_${session.accessors.len()}";
+  c.sym.define_global(%($hidden), type);
+  List binding = c.sym.resolve_global(%($hidden), NULL);
+  LoadedCall call = {.compiler = c, .file = file, .name = request};
+  Func function = Func.new_context(
+    _call, c.func_signature(type), &call, sizeof call);
+  session.evaluator.set_global(hidden, function);
+  session.accessors[hidden] = 1;
+  return %(expr $type (ident $binding));
+}
+
+static void _publish_globals(
+  ReplSession session, ReplLoadedFile file, Map globals) {
+  foreach (Var (name, description), globals) {
+    if (session.inspect(name)) continue;
+    Map paths = {};
+    foreach (List row, description.list()) {
+      (String path, Type bridge, int writable, int dimensions) = row;
+      List get = _accessor(session, file, path, bridge, dimensions, 0);
+      List set = writable
+        ? _accessor(session, file, path, bridge, dimensions, 1) : NULL;
+      paths[path] = %($get $set);
+    }
+    session.names[name] = %(global (source ${file.path}) $paths);
+  }
+}
+
+/** Compiles a source file's public functions, supported globals, and source
     dependencies in an independent helper. Publishes their callable bindings
     and public types; prompt evaluation remains interpreted. Calls exchange
     values through the project meta helper's datum protocol. A rejected load
@@ -292,7 +349,7 @@ static void _publish_types(ReplSession session, Map symbols) {
     same resolved path replaces its helper after checking existing calling
     types and public declarations. Its native state restarts; adapters and
     prompt values keep their identity. The result is loaded or reloaded,
-    with the List of published function names as its value.
+    with the List of published names as its value.
 */
 ReplResult ReplSession.load(
   ReplSession session, Frontend frontend, String filename) {
@@ -301,6 +358,7 @@ ReplResult ReplSession.load(
   ReplLoadedFile file = session.files.try_get(filename, existing)
                        ? existing.pointer() : NULL;
   LoadedSource loaded = _prepare(frontend, filename);
+  defer if (loaded.globals) loaded.globals.cleanup();
   if (loaded.result.status != <loaded>) {
     Scope.free(loaded.helper);
     return loaded.result;
@@ -347,6 +405,7 @@ ReplResult ReplSession.load(
       session.compiler.sym.define_global(key, type);
   }
   _publish_types(session, loaded.symbols);
+  _publish_globals(session, file, loaded.globals);
   foreach (Var (name, signature), loaded.signatures) {
     if (replacing && name in file.signatures) continue;
     LoadedCall call = {

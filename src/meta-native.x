@@ -340,7 +340,7 @@ List Compiler.evaluate_meta_expression(
     `context`. A code List result binds there, so the call may return a
     statement as well as an expression. */
 List Compiler.evaluate_meta_statement(
-  Compiler c, List expression, AstPos context, Token site) {
+  Compiler c, List expression, Symbol context, Token site) {
   Var value = c.evaluate_meta_value(expression, site, 0);
   if (_code_result(c, value) && !value.is_nil())
     return c.bind_macro_lisp_statement(value, context);

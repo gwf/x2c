@@ -132,8 +132,8 @@ static void lisp_read_list_form(void) {
 static void lisp_read_matches_x2c_list_literal(void) {
   Lisp lisp = Lisp.kernel();
   Var actual = lisp.eval_string(
-    "'((enum \"FileReadStatus\") (struct (* int)) (op &&) (dim (8)))");
-  List expected = %((enum "FileReadStatus")
+    "'((enum \"TagId\") (struct (* int)) (op &&) (dim (8)))");
+  List expected = %((enum "TagId")
                     (struct (* int)) (op &&) (dim (8)));
   EXPECT_VAR_EQ(actual, expected.var());
   lisp.destroy();

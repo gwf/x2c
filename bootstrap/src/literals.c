@@ -1233,7 +1233,7 @@ static void _push_entry(Array entries, Ast entry){
   else if(List_truth(entry)) Array_push(entries, List_var(entry));
 }
 
-List Compiler_try_parse_macro_target_at(Compiler, AstPos);
+List Compiler_try_parse_macro_target_at(Compiler, Symbol);
 
 static List _parse_quoted_entry(Compiler c){
   Token origin = c -> token;
@@ -1242,7 +1242,7 @@ static List _parse_quoted_entry(Compiler c){
   if(Compiler_peek(c, 0) != 9463 || c -> token -> len != 2) return _entry_value(c, _parse_element(c), origin);
   Compiler_next(c);
   List entry = Compiler_try_parse_macro_slot(c, 28692473357490);
-  if(! List_truth(entry)) entry = Compiler_try_parse_macro_target_at(c, AST_MAP_ENTRY);
+  if(! List_truth(entry)) entry = Compiler_try_parse_macro_target_at(c, 28692473357490);
   if(List_truth(entry)){
     Compiler_expect(c, 251);
     return entry;
@@ -1275,7 +1275,7 @@ List Compiler_parse_map_entry(Compiler c){
   if(! _init_guard_) _file_init_();
   List slot = Compiler_try_parse_macro_slot(c, 28692473357490);
   if(List_truth(slot)) return slot;
-  List macro = Compiler_try_parse_macro_target_at(c, AST_MAP_ENTRY);
+  List macro = Compiler_try_parse_macro_target_at(c, 28692473357490);
   if(List_truth(macro)) return macro;
   Token origin = c -> token;
   List key = NULL;

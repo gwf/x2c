@@ -28,7 +28,8 @@ and installs its matching runtime, headers, compile-time Lisp SDK, unit
 interfaces written by the installed compiler, runnable examples, an empty
 package directory, and license. With no `PREFIX`, `make
 install` keeps its development behavior: it installs into the checkout's
-`bin/` under the current branch name.
+`bin/` under the current branch name, with matching shipped commands under
+`libexec/x2c/`.
 
 ### Upgrading from 0.14.0
 
@@ -146,7 +147,8 @@ releases. Start new development checkouts and branches from `dev`. A source
 checkout is the development install. After `make build-safe`, the
 checkout is a complete home with its own `packages/` directory, and `bin/x2c`
 is the bootstrap compiler. Run `make build-install` before putting `bin/` on
-`PATH`; it links `bin/x2c` to a copy of the current branch's compiler. A
+`PATH`; it links `bin/x2c` to a copy of the current branch's compiler and
+copies its shipped commands into `libexec/x2c/`. A
 compiler in the checkout's `bin/` links `builds/0/libx2c.a`, the runtime built
 with the headers in `include/x2c`. Select the checkout for one shell with
 `PATH`, or for one command with `X2C_HOME`:

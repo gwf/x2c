@@ -10,7 +10,6 @@
 #include <ctype.h>
 #include <string.h>
 
-
 static typedef struct Comment:
   Symbol kind
   int start, end, first, last
@@ -152,12 +151,6 @@ static String _declared(Lint l, int line, Map declarations):
       name = %"${l.tokens[at - 2].text}.$name"
   return NULL
 
-/* Whether any of `phrases` occurs in `text` as whole words. */
-static int _mentions(String text, List phrases):
-  foreach String phrase in phrases:
-    if lint_phrase(text, phrase): return 1
-  return 0
-
 /* The number of backquoted spans in `text`. */
 static int _code_spans(String text):
   int spans = 0
@@ -187,11 +180,11 @@ static String _tier(String path):
   return tiers.try_get(path, tier) ? tier : NULL
 
 /* Parser facts that locate macros, published types, and function templates. */
-static Map _documented_declarations(Compiler c, List ast):
+static Map _documented_declarations(Compiler c, List ast, List rows):
   Map declarations = {}
   if !c: return declarations
   struct Token *tokens = c.tokenizer.tokens
-  foreach List row in c.definition_rows(ast):
+  foreach List row in rows:
     match row:
       case %(typedef ?name ? ? (?(int start) *)):
         if c.publishes_typedef(name):
@@ -220,17 +213,17 @@ static void _comment(
   String code = next <= lines.len() ? lines[next - 1] : NULL
   code = code.strip(NULL)
   String name = _declared(l, next, declarations)
-  if _mentions(lower, history_phrases):
+  if lint_mentions(lower, history_phrases):
     l.add("comment-history", c.start, "history or unfinished work")
-  if lower.contains("prevent null pointer dereference") ||
-     lower.contains("check null") || lower.contains("check for null"):
+  if "prevent null pointer dereference" in lower ||
+     "check null" in lower || "check for null" in lower:
     l.add("comment-null-guard", c.start, "narrates an obvious null guard")
   int letters = 0, upper = 1
   for (char *ch = text ? text : ""; *ch; ch++):
     if isalpha((unsigned char) *ch):
       letters++
       if islower((unsigned char) *ch): upper = 0
-  int decorated = text.contains("----") || text.contains("====")
+  int decorated = "----" in text || "====" in text
   if c.kind == <line> && (decorated || letters >= 4 && upper && count <= 8):
     l.add("section-label", c.start, "decorative or all-capitals label")
   else if count <= 4 && lower in catalog_labels:
@@ -260,7 +253,7 @@ static void _comment(
   if (tier == "contract" || tier == "internal") &&
      declarations[next] != <template>:
     l.add("doc-comment-tier", c.start, %"doc comment in a $tier module")
-  if text.contains("@param") || text.contains("@return") ||
+  if "@param" in text || "@return" in text ||
      lint_phrase(text, "Parameters:") || lint_phrase(text, "Returns:"):
     l.add("doc-boilerplate", c.start, "parameter or return boilerplate")
   if declarations[next] != <type> && code && code.startswith("static") &&
@@ -279,8 +272,7 @@ static void _repeated_prose(Lint l, Comment *all, int n):
     foreach String part in parts:
       String normal = _normal(part).lower()
       if _words(normal).len() < 6: continue
-      if !(normal in owners): owners[normal] = []
-      Array starts = owners[normal]
+      Array starts = owners.setdefault(normal, [])
       starts.push(all[at].start)
   foreach Var (part, starts) in owners:
     Array each = starts
@@ -289,14 +281,13 @@ static void _repeated_prose(Lint l, Comment *all, int n):
       l.add("repeated-prose", start.int(),
             "repeats prose elsewhere in the file")
 
-/** Runs the comment rules over `l`. */
-void Lint.comment_rules(Lint l, Compiler c, List ast):
-  Map declarations = _documented_declarations(c, ast)
+/** Runs the comment rules over `l`, with the compiler `c`, `ast`, and its
+    `Compiler.definition_rows` `rows` of a parsed unit, or NULLs. */
+void Lint.comment_rules(Lint l, Compiler c, List ast, List rows):
+  Map declarations = _documented_declarations(c, ast, rows)
   Comment *all = Scope.calloc(l.count + 1, sizeof(Comment))
   int n = _collect(l, all)
-  Array lines = []
-  foreach String line in l.text.split("\n"):
-    lines.push(line)
+  Array lines = l.text.split("\n")
   for (int at = 0; at < n; at++):
     int next = all[at].end + 1
     for (; next <= lines.len(); next++):

@@ -38,7 +38,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include "expressions-reports.h"
-List Compiler_expand_macro_invocation_node(Compiler c, Var stored, List arguments, Token invocation, AstPos position);
+List Compiler_expand_macro_invocation_node(Compiler c, Var stored, List arguments, Token invocation, Symbol position);
 
 Token Compiler_macro_invocation_site(Compiler c, Var site);
 
@@ -80,15 +80,15 @@ List Compiler_marked_rewrite(Compiler c, Type aggregate, List source, Token site
 
 int Compiler_has_rewrites(Compiler c, Symbol point, Var kind);
 
-List Compiler_rewrite(Compiler c, Symbol point, Var kind, List source, AstPos position, Type expected, Token site);
+List Compiler_rewrite(Compiler c, Symbol point, Var kind, List source, Symbol position, Type expected, Token site);
 
-List Compiler_rewrite_lowered(Compiler c, Symbol point, Var kind, List source, AstPos position, Type expected, Token site);
+List Compiler_rewrite_lowered(Compiler c, Symbol point, Var kind, List source, Symbol position, Type expected, Token site);
 
 List Compiler_lower_replacement(Compiler c, List replacement, List source);
 
 List Compiler_rewrite_written(Compiler c, Symbol kind, List source, Type expected);
 
-List Compiler_lower_rewrite(Compiler c, Symbol point, Var kind, List source, AstPos position, Type expected, Token site);
+List Compiler_lower_rewrite(Compiler c, Symbol point, Var kind, List source, Symbol position, Type expected, Token site);
 
 List Compiler_written_support(Compiler c, List bound);
 
@@ -113,7 +113,7 @@ void Compiler_rebound(Compiler c, Var source, List bound);
 
 Ast Compiler_watched_step(Compiler c, Ast ast);
 
-int Compiler_macro_starts_target_at(Compiler c, AstPos position);
+int Compiler_macro_starts_target_at(Compiler c, Symbol position);
 
 Symbol Compiler_macro_invocation_collection(Compiler c);
 
@@ -123,7 +123,7 @@ int Compiler_skip_named_type_declaration(Compiler c);
 
 int Compiler_macro_targets_unit(Compiler c);
 
-List Compiler_try_parse_macro_target_at(Compiler c, AstPos position);
+List Compiler_try_parse_macro_target_at(Compiler c, Symbol position);
 
 List Compiler_try_parse_macro_expression(Compiler c);
 
@@ -145,7 +145,7 @@ List Compiler_rebuild_unit_function(Compiler c, List application);
 
 List Compiler_rebuild_function(Compiler c, List target, List application);
 
-List Compiler_land_quotation(Compiler c, List fresh, Var syntax, AstPos position, Type return_type);
+List Compiler_land_quotation(Compiler c, List fresh, Var syntax, Symbol position, Type return_type);
 
 List Compiler_macro_value_literal(Compiler c, List value);
 
@@ -161,7 +161,7 @@ int Compiler_take_code_value(Compiler c, Var input, Var * value, int * retained)
 
 void Compiler_place(Compiler c, List where, Var code);
 
-List Compiler_bind_code_value(Compiler c, List carrier, AstPos position, Type return_type);
+List Compiler_bind_code_value(Compiler c, List carrier, Symbol position, Type return_type);
 
 void Compiler_ensure_macro_lisp(Compiler c);
 
@@ -175,7 +175,7 @@ List Compiler_parse_macro_lisp_expression(Compiler c);
 
 List Compiler_lift_macro_lisp_expression(Compiler c, Var value, Token invocation);
 
-List Compiler_bind_macro_lisp_statement(Compiler c, List value, AstPos context);
+List Compiler_bind_macro_lisp_statement(Compiler c, List value, Symbol context);
 
 String Compiler_source_path(Compiler c, String file);
 

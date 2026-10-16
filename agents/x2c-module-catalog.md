@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 64
+- Compiler modules: 62
 - Runtime modules: 77
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -308,14 +308,6 @@ Public functions:
 `Compiler.error_count`, `Compiler.diagnostics`, `Compiler.dump_tokens`,
 `Compiler.dump_symbol_table`, `Compiler.dump_cache`
 
-### [src/editor.x](../src/editor.x)
-
-one-request semantic editor adapter.
-
-Public functions:
-
-`editor_request`
-
 ### [src/emit.x](../src/emit.x)
 
 C tokens from normalized x2c ASTs.
@@ -386,8 +378,8 @@ the generated header and source of one unit.
 Public functions:
 
 `Compiler.generate_code`, `Compiler.generate_code_text`,
-`Compiler.initializer_function`, `Compiler.run_once_body`, `Init.enter`,
-`Compiler.place_source_prelude`, `Compiler.init_statements`,
+`Compiler.place_source_prelude`, `Compiler.initializer_function`,
+`Compiler.run_once_body`, `Init.enter`, `Compiler.init_statements`,
 `Compiler.definition_rows`, `Compiler.dump_definitions`
 
 ### [src/grammar.x](../src/grammar.x)
@@ -415,15 +407,6 @@ Public functions:
 `Compiler.convert_initializer`, `Compiler.initializer_rows`,
 `Compiler.initializer_field_path`, `Compiler.initializer_slot`,
 `Compiler.convert_compound_literal`, `Compiler.initializer_native_types`
-
-### [src/install.x](../src/install.x)
-
-Package installation into the x2c home.
-
-Public functions:
-
-`CliRequest.install`, `CliRequest.require_package`, `install_version`,
-`install_rows`, `CliRequest.remove_package`, `CliRequest.list_packages`
 
 ### [src/lambdas.x](../src/lambdas.x)
 
@@ -658,7 +641,7 @@ x2c project manifests.
 
 Public functions:
 
-`ProjectBuild.plan`, `CliRequest.project_manifest`, `CliRequest.new_project`
+`ProjectBuild.plan`, `CliRequest.project_manifest`, `ProjectBuild.valid_name`
 
 ### [src/protocol.x](../src/protocol.x)
 
@@ -666,18 +649,17 @@ protocols from declaration to conform forms.
 
 Public functions:
 
-`Compiler.reverse_converter_spelling`, `Compiler.parse_protocol_declaration`,
-`Compiler.publish_protocol_node`, `Compiler.resolve_protocols`,
-`Compiler.conformance_rows`, `Compiler.resolve_as_declared`,
-`Compiler.protocol_members_for`, `Compiler.protocol_member_names`,
-`Compiler.protocol_rejects_direct_member`, `Compiler.dump_conformance`,
-`Compiler.resolve_protocol_member`, `Compiler.wrapper_function`,
-`Compiler.forward_parameters`, `Compiler.protocol_update_helper`,
-`Compiler.discard_helper`, `Compiler.protocol_discard_helper`,
-`Compiler.generate_protocol_adapters`,
+`Compiler.reverse_converter_spelling`, `Compiler.publish_protocol_node`,
+`Compiler.rebuild_protocols`, `Compiler.parse_protocol_declaration`,
+`Compiler.resolve_protocols`, `Compiler.conformance_rows`,
+`Compiler.resolve_as_declared`, `Compiler.protocol_members_for`,
+`Compiler.protocol_member_names`, `Compiler.protocol_rejects_direct_member`,
+`Compiler.dump_conformance`, `Compiler.resolve_protocol_member`,
+`Compiler.wrapper_function`, `Compiler.forward_parameters`,
+`Compiler.protocol_update_helper`, `Compiler.discard_helper`,
+`Compiler.protocol_discard_helper`, `Compiler.generate_protocol_adapters`,
 `Compiler.install_generated_protocol_symbols`,
-`Compiler.native_protocol_alias`, `Compiler.record_source_typedef`,
-`Compiler.rebuild_protocols`
+`Compiler.native_protocol_alias`, `Compiler.record_source_typedef`
 
 ### [src/regions.x](../src/regions.x)
 
@@ -828,7 +810,8 @@ Public functions:
 `x2c_initialize_environment`, `x2c_initialize_command_environment`,
 `x2c_set_root`, `x2c_get_root`, `x2c_get_executable`,
 `Compiler.driver_executable`, `Compiler.home_dir`, `Compiler.stage_dir`,
-`Compiler.home_packages`, `Compiler.home_libexec`,
+`Compiler.home_packages`, `Compiler.home_libexec`, `Compiler.command_path`,
+`Compiler.command_environment`, `Compiler.run_command`,
 `Compiler.default_include_dirs`, `Compiler.cpp_include_dirs`,
 `Env.find_program`, `Path.is_x2c_source`, `Path.is_layout_source`,
 `Compiler.package_directory`, `SourceView.package_entry`,

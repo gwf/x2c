@@ -25,7 +25,7 @@ List Compiler_parse_match_row_argument(Compiler c);
 
 List Compiler_parse_case_body(Compiler c, List types);
 
-List Compiler_parse_governed(Compiler c, AstPos position);
+List Compiler_parse_governed(Compiler c, Symbol position);
 
 List Compiler_parse_block_item(Compiler c);
 

@@ -5,7 +5,9 @@
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
-BUILD="$ROOT/unittest/build/package-install"
+BUILD=$(mktemp -d "${TMPDIR:-/tmp}/x2c-package-install.XXXXXX")
+BUILD=$(cd "$BUILD" && pwd -P)
+trap 'rm -rf "$BUILD"' EXIT
 X2C=${X2C:-"$ROOT/builds/0/x2c"}
 
 fail() { echo "package install: $*" >&2; exit 1; }
@@ -19,7 +21,6 @@ copy_runtime_sources() {
   return 0
 }
 
-rm -rf "$BUILD"
 mkdir -p "$BUILD/home/include/x2c" "$BUILD/home/etc" "$BUILD/home/lib" \
   "$BUILD/home/packages" "$BUILD/home/bin" "$BUILD/src"
 cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.x "$BUILD/home/etc/"
@@ -30,8 +31,34 @@ mkdir -p "$BUILD/home/src"
 cp "$ROOT"/src/{component-access,component-try,component-delegate,component-literals,component-printf,component-operators,component-raise,component-match,component-interpolation,component-destructuring,component-lambdas,component-protocols,component-string-switch,grammar}.x "$BUILD/home/src/"
 cp "$ROOT/builds/0/libx2c.a" "$ROOT/builds/0/lib/"*.xi "$BUILD/home/lib/"
 cp "$X2C" "$BUILD/home/bin/x2c"
+mkdir -p "$BUILD/home/libexec/x2c"
+cp "$ROOT/builds/0/libexec/"x2c-{editor,new,package} "$BUILD/home/libexec/x2c/"
 x2c="$BUILD/home/bin/x2c"
 [[ "$("$x2c" env home)" == "$BUILD/home" ]] || fail "home not resolved"
+
+# The command is shipped once, and both forms reach it. Legacy help does
+# not need the executable; package state does.
+package="$BUILD/home/libexec/x2c/x2c-package"
+"$x2c" package --help >"$BUILD/package.help"
+grep -q 'install|remove|list' "$BUILD/package.help" || fail "package help"
+[[ "$("$x2c" package list)" == "$("$x2c" list)" ]] || fail "list dispatch"
+set +e
+X2C_IDENTITY=wrong "$package" list >"$BUILD/mismatch.out" 2>"$BUILD/mismatch.err"
+[[ $? == 2 ]] || fail "mismatched package command accepted"
+set -e
+grep -q 'identity' "$BUILD/mismatch.err" || fail "identity diagnostic"
+mv "$package" "$package.saved"
+"$x2c" install --help >"$BUILD/install.help"
+"$x2c" remove --help >"$BUILD/remove.help"
+"$x2c" list --help >"$BUILD/list.help"
+set +e
+"$x2c" list >"$BUILD/missing.out" 2>"$BUILD/missing.err"
+[[ $? == 2 ]] || fail "missing package command accepted"
+set -e
+grep -q 'missing x2c-package command' "$BUILD/missing.err" || fail "missing diagnostic"
+"$x2c" new -q "$BUILD/empty-project"
+(cd "$BUILD/empty-project" && "$x2c" build -q)
+mv "$package.saved" "$package"
 
 # A failed removal names its own command and takes no lock.
 set +e
@@ -49,9 +76,11 @@ cat >"$BUILD/xp-client.x" <<'SOURCE'
 import "xppkg" as xp;
 int main(void) { return xp.answer() == 7 ? 0 : 1; }
 SOURCE
-"$x2c" install -q "$BUILD/src/xppkg"
+printf 'install -q "%s"\n' "$BUILD/src/xppkg" >"$BUILD/install.rsp"
+"$x2c" @"$BUILD/install.rsp" >"$BUILD/quiet.out" 2>"$BUILD/quiet.err"
+[[ ! -s "$BUILD/quiet.out" && ! -s "$BUILD/quiet.err" ]] || fail "quiet install"
 "$x2c" run -q "$BUILD/xp-client.x" || fail "installed .xp entry import"
-"$x2c" remove -q xppkg
+"$x2c" package remove -q xppkg
 
 # Directory operands derive the same package name after normalization.
 for directory in . "$BUILD/src/xppkg/."; do
@@ -217,7 +246,8 @@ wait "$remover" || fail "removal after the lock failed"
 [[ ! -e "$BUILD/home/packages/greet" ]] || fail "greet not removed"
 
 # The index resolves a name and records its version.
-"$x2c" install -q greet --index "$BUILD/index.txt"
+(cd "$BUILD" && cp index.txt @index.txt &&
+  "$x2c" install -q greet --index @@index.txt)
 [[ "$("$x2c" list)" == "greet 1.0 source" ]] || fail "index version"
 
 # A reinstall from a local path keeps the version the package it replaces
@@ -242,7 +272,7 @@ wait $second; two=$?
 set -e
 [[ $((one + two)) == 2 ]] ||
   fail "concurrent removals returned $one and $two"
-"$x2c" install -q greet --index "$BUILD/index.txt"
+"$x2c" package install -q greet --index "$BUILD/index.txt"
 
 # A bundle is checked against this compiler's version.
 mkdir -p "$BUILD/bundle/fake/builds" "$BUILD/bundle/fake/src"
@@ -347,10 +377,26 @@ cp "$ROOT/examples/power/greet-client.x" "$BUILD/project/src/client.x"
 rm -rf .x2c-build
 "$x2c" build -q --index "$BUILD/index.txt" --output "$BUILD/project/client"
 
+# An absent package manager stops a real build before its output is made,
+# but editor requests and dry runs never invoke it.
+mv "$package" "$package.saved"
+"$x2c" build -### --output "$BUILD/missing-client" >"$BUILD/dry.out" 2>&1
+"$x2c" editor "$BUILD/editor.json" "$BUILD/project/src/client.x" hover 0 0 -- build
+[[ -s "$BUILD/editor.json" ]] || fail "editor without package command"
+set +e
+"$x2c" build -q --output "$BUILD/missing-client" 2>"$BUILD/build-missing.err"
+[[ $? == 2 ]] || fail "build accepted missing package command"
+set -e
+[[ ! -e "$BUILD/missing-client" ]] || fail "build continued after package failure"
+grep -q 'missing x2c-package command' "$BUILD/build-missing.err" || fail "build missing diagnostic"
+mv "$package.saved" "$package"
+
 # A satisfied lockfile reaches no index, so an unreachable one still builds.
 rm -rf .x2c-build
+cp x2c.lock "$BUILD/offline.lock"
 "$x2c" build -q --index "file://$BUILD/absent/index.txt" \
   --output "$BUILD/project/client"
+cmp x2c.lock "$BUILD/offline.lock" || fail "offline build rewrote lock"
 
 # A pin the index cannot satisfy stops the build and names both versions.
 sed 's/greet = "1.0"/greet = "9.9"/' x2c.toml >x2c.toml.next

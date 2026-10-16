@@ -71,16 +71,16 @@ static macro Stmt $report.parse.catch_pattern(Expr $c) =>
     token. On return, the cursor follows the complete statement and any
     temporary `Sym` scopes opened by the statement have been closed.
 */
-List Compiler.parse_statement(Compiler c) => _statement(c, AST_STATEMENT);
+List Compiler.parse_statement(Compiler c) => _statement(c, <statement>);
 
 /* A meta call written as the whole statement binds its result at
    `position`. */
-static List _statement(Compiler c, AstPos position) {
+static List _statement(Compiler c, Symbol position) {
   _x2c_complete_here(c, <statement>, _statement_keywords());
   List slot = c.try_parse_macro_slot(<statement>);
   if (slot) return slot;
   if (c.at_word("with")) return _with_statement(c);
-  if (!c.with_binding() && c.macro_starts_target_at(AST_STATEMENT))
+  if (!c.with_binding() && c.macro_starts_target_at(<statement>))
     return _macro_statement(c);
   switch (c.peek(0)) {
     case <if>: case <while>: case <for>: case <do>: case <match>: case <try>:
@@ -110,7 +110,7 @@ static List _statement_keywords(void) => %(
    `;`. A template's `name` hole there parses as an ordinary expression. */
 static List _macro_statement(Compiler c) {
   List hole = c.peek_macro_hole();
-  List macro = c.try_parse_macro_target_at(AST_STATEMENT);
+  List macro = c.try_parse_macro_target_at(<statement>);
   if (macro) return macro;
   List expression = hole && hole.assoc(<kind>) == <name>
                   ? c.parse_expression() : c.try_parse_macro_expression();
@@ -123,7 +123,7 @@ static List _compound_statement(Compiler c) {
   return c.parse_compound_statement();
 }
 
-static List _expression_statement(Compiler c, AstPos position) {
+static List _expression_statement(Compiler c, Symbol position) {
   List label = _label_statement(c);
   if (label) return label;
   Token start = c.token;
@@ -225,18 +225,18 @@ List Compiler.parse_source_clause(Compiler c, Symbol kind) {
     case <test>: return _paren_expr(c);
     case <then>: return _then_arm(c);
     case <else>:
-      return c.test(<else>) ? c.parse_governed(AST_STATEMENT) : NULL;
+      return c.test(<else>) ? c.parse_governed(<statement>) : NULL;
     case <do>:   return _do_body(c);
     case <init>: return _for_init(c);
     case <cond>: return _for_clause(c, <;>);
     case <next>: return _for_clause(c, <)>);
     case <arms>: return _match_arms(c);
-    case <try>:  return _continued(c, c.parse_governed(AST_STATEMENT));
+    case <try>:  return _continued(c, c.parse_governed(<statement>));
     case <catches>: return _catches(c);
     case <catch>: return _catch_body(c);
     case <finally>: return _finally(c);
   }
-  return c.parse_governed(AST_STATEMENT);
+  return c.parse_governed(<statement>);
 }
 
 static List _keyword_paren_expr(Compiler c, Symbol keyword) {
@@ -253,13 +253,13 @@ static List _paren_expr(Compiler c) {
 
 /* Directives before an `else` follow the arm it continues. */
 static List _then_arm(Compiler c) {
-  List arm = c.parse_governed(AST_STATEMENT);
+  List arm = c.parse_governed(<statement>);
   _x2c_complete_here(c, <continue>, %("else"));
   return c.peek(0) == <else> ? _continued(c, arm) : arm;
 }
 
 static List _do_body(Compiler c) {
-  List body = _continued(c, c.parse_governed(AST_STATEMENT));
+  List body = _continued(c, c.parse_governed(<statement>));
   c.expect(<while>);
   return body;
 }
@@ -344,12 +344,12 @@ static List _raise_statement(Compiler c) {
 
 static List _defer_statement(Compiler c) {
   c.expect(<defer>);
-  return %(defer ${c.parse_governed(AST_STATEMENT)});
+  return %(defer ${c.parse_governed(<statement>)});
 }
 
 static List _switch_statement(Compiler c) {
   List expr = _keyword_paren_expr(c, <switch>);
-  List body = c.parse_governed(AST_STATEMENT);
+  List body = c.parse_governed(<statement>);
   return %(switch $expr $body);
 }
 
@@ -477,7 +477,7 @@ List Compiler.parse_case_body(Compiler c, List types) {
   List declarations = types ? _typed_captures(c, types, temporaries) : NULL;
   List guard = c.peek(0) == <if> ? _keyword_paren_expr(c, <if>) : NULL;
   c.expect(<:>);
-  List body = c.parse_governed(AST_STATEMENT);
+  List body = c.parse_governed(<statement>);
   if (guard) body = %(if $guard (block $body (break)));
   if (types) {
     body = %(block @temporaries (block @declarations $body));
@@ -526,7 +526,7 @@ static List _capture_declaration(
   return c.bind_syntax(
     %(declare $type
       (bindings (op = (bind $binding ()) $initializer))),
-    AST_BLOCK, c.return_type);
+    <block>, c.return_type);
 }
 
 static List _capture_locals(Compiler c, Array locals) {
@@ -552,7 +552,7 @@ static List _catches(Compiler c) {
 
 static List _finally(Compiler c) {
   _x2c_complete_here(c, <continue>, %("finally"));
-  return c.test(<finally>) ? c.parse_governed(AST_STATEMENT) : NULL;
+  return c.test(<finally>) ? c.parse_governed(<statement>) : NULL;
 }
 
 static List _catch_cases(Compiler c) {
@@ -592,7 +592,7 @@ static List _catch_arm(Compiler c, int &is_default, List handle) {
 
 /* Directives before a later `catch` or `finally` follow the arm. */
 static List _catch_body(Compiler c) {
-  List body = c.parse_governed(AST_STATEMENT);
+  List body = c.parse_governed(<statement>);
   _x2c_complete_here(c, <continue>, %("catch" "finally"));
   return c.peek(0) == <catch> || c.peek(0) == <finally>
        ? _continued(c, body) : body;
@@ -609,7 +609,7 @@ static List _catch_filter(Compiler c) {
 // governed statements
 
 /** Parses the statement a control keyword or statement macro governs, or a
-    block item at `AST_BLOCK`. Directives written before it stay in front of
+    block item at `<block>`. Directives written before it stay in front of
     it in a `(group DIRECTIVE... STATEMENT)`, which emits without braces, so
     each directive stays where C read it. A conditional group they open also
     takes the statement of each later arm and the closing directive, so a
@@ -617,13 +617,13 @@ static List _catch_filter(Compiler c) {
     inside them. A later statement in the same arm follows the governed one,
     as in C.
 */
-List Compiler.parse_governed(Compiler c, AstPos position) {
+List Compiler.parse_governed(Compiler c, Symbol position) {
   Array items = $auto([]);
   int depth = _take_directives(c, items);
   loop {
     Token start = c.token;
     items.push(
-      position == AST_BLOCK ? c.parse_block_item() : c.parse_statement());
+      position == <block> ? c.parse_block_item() : c.parse_statement());
     depth = _depth_after(c, start, depth);
     if (depth <= 0) break;
     Symbol end = _arm_end(c.leading_preproc());
@@ -708,10 +708,10 @@ List Compiler.parse_block_item(Compiler c) {
   if (c.at_word("with")) return c.parse_statement();
   // An identifier naming a live `with` expression is no macro target.
   int with_expression = !!c.with_binding();
-  List macro = with_expression ? NULL : c.try_parse_macro_target_at(AST_BLOCK);
+  List macro = with_expression ? NULL : c.try_parse_macro_target_at(<block>);
   if (macro) return macro;
   if (c.test_declaration()) return _declaration_item(c);
-  return _statement(c, AST_BLOCK);
+  return _statement(c, <block>);
 }
 
 static List _block_keywords(void) => %(
@@ -796,6 +796,6 @@ static void _push_item(Compiler c, Array block, int anchor_items) {
    the block: a macro target outside a template hole, or a local macro
    definition outside a template. */
 static int _expands(Compiler c) =>
-  (c.macro_starts_target_at(AST_BLOCK) &&
+  (c.macro_starts_target_at(<block>) &&
    !(c.macro_holes && c.peek_macro_hole())) ||
   (!c.macro_holes && c.local_macro_form_is_definition());

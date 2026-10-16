@@ -26,8 +26,8 @@ typedef struct ProjectBuild{
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include "buffer.h"
-#include "install.h"
 typedef struct ProjectProfile{
   String name, optimization;
   int debug;
@@ -73,11 +73,11 @@ typedef struct Project{
 }
 * Project;
 
-static List _113, _111, _110, _108, _106, _105, _101, _100, _98, _96, _91;
+static List _116, _114, _113, _111, _109, _108, _104, _103, _101, _99, _94;
 
-static String _133, _132, _131, _130, _129, _128, _127, _126, _125, _124, _123, _122, _121, _120, _119, _118, _117, _116, _115, _114, _103, _94, _92, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _124, _123, _122, _121, _120, _119, _118, _117, _106, _97, _95, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _112, _109, _107, _104, _102, _99, _97, _95, _93, _90;
+static Var _115, _112, _110, _107, _105, _102, _100, _98, _96, _93;
 
 static int _init_guard_ = 0;
 
@@ -156,8 +156,6 @@ static int _bool_value(Project p, int line, String value);
 
 static int _array_open(String value);
 
-static int _name_ok(String name);
-
 static char * _skip_space(char * at);
 
 static ProjectTarget _target(Project p, String name);
@@ -175,14 +173,6 @@ static List _prerequisites(ProjectTarget target);
 static ProjectProfile _selected_profile(Project p, ProjectTarget target, String name);
 
 static void _resolve_dependencies(Project p);
-
-static List _read_lock(String path);
-
-static int _lock_satisfies(Project p, List rows);
-
-static List _locked_row(List rows, ProjectDependency entry);
-
-static void _write_lock(String path, List rows);
 
 static void _plan_target(Project p, ProjectTarget target);
 
@@ -230,36 +220,27 @@ _Noreturn static void _error(Project p, int line, String message);
 
 static void _error_name(Project p, int line, String message, String name);
 
-static String _starter_name(Path dir);
-
-static void _write_starter(Path dir, String name);
-
 static Var _x2c_gensym_lambda_0(Var library);
 
 static Var _x2c_gensym_func_adapt_0(Func _x2c_gensym_func_binding_0, const FuncArg * _x2c_gensym_func_argv_0);
 
 static Func _x2c_gensym_func_handle_0;
 
-#include "exception.h"
-
-
-
-
-_x2c_gensym_initializer_choice_05ED52D8_0((_x2c_gensym_func_handle_0 = x2c_func_shared(_x2c_gensym_func_adapt_0, _113)))
+_x2c_gensym_initializer_choice_05ED52D8_0((_x2c_gensym_func_handle_0 = x2c_func_shared(_x2c_gensym_func_adapt_0, _116)))
 static Var _x2c_gensym_lambda_1(String flag);
 
 static Var _x2c_gensym_func_adapt_1(Func _x2c_gensym_func_binding_1, const FuncArg * _x2c_gensym_func_argv_1);
 
 static Func _x2c_gensym_func_handle_1;
 
-_x2c_gensym_initializer_choice_05ED52D8_1((_x2c_gensym_func_handle_1 = x2c_func_shared(_x2c_gensym_func_adapt_1, _106)))
+_x2c_gensym_initializer_choice_05ED52D8_1((_x2c_gensym_func_handle_1 = x2c_func_shared(_x2c_gensym_func_adapt_1, _109)))
 static Var _x2c_gensym_lambda_2(Var value);
 
 static Var _x2c_gensym_func_adapt_2(Func _x2c_gensym_func_binding_2, const FuncArg * _x2c_gensym_func_argv_2);
 
 static Func _x2c_gensym_func_handle_2;
 
-_x2c_gensym_initializer_choice_05ED52D8_2((_x2c_gensym_func_handle_2 = x2c_func_shared(_x2c_gensym_func_adapt_2, _113)))
+_x2c_gensym_initializer_choice_05ED52D8_2((_x2c_gensym_func_handle_2 = x2c_func_shared(_x2c_gensym_func_adapt_2, _116)))
 typedef struct _x2c_gensym_lambda_context_0{
   Var c0;
 }
@@ -343,79 +324,70 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _58 = String_new("unknown target dependency");
   _59 = String_new("target has no profile");
   _60 = String_new("/x2c.lock");
-  _61 = String_new("# x2c lockfile. Written by x2c build; keep it with the manifest.\n" "# name version kind platform url sha256\n");
-  _62 = String_new(" ");
-  _63 = String_new("\n");
-  _64 = String_new("\ntarget=");
-  _65 = String_new("\nprofile=");
-  _66 = String_new("/.x2c/");
-  _67 = String_new("/");
-  _68 = String_new("static-library target cannot contain target dependencies");
-  _69 = String_new("dependency target is not a static library");
-  _70 = String_new("native module target is not a meta-module");
-  _71 = String_new("target has no sources");
-  _72 = String_new("source");
-  _73 = String_new(".c");
-  _74 = String_new("manifest source is not .x or .c");
-  _75 = String_new("unmatched ");
-  _76 = String_new(" pattern");
-  _77 = String_new("\\");
-  _78 = String_new("\\\\");
-  _79 = String_new("*");
-  _80 = String_new("\\*");
-  _81 = String_new("?");
-  _82 = String_new("\\?");
-  _83 = String_new("[");
-  _84 = String_new("\\[");
-  _85 = String_new("-I");
-  _86 = String_new("-L");
-  _87 = String_new("-g");
-  _88 = String_new("-");
-  _89 = String_new("-g");
-  _90 = String_var(_89);
-  _91 = cons(_90, NULL);
-  _92 = String_new("C dependency option is driver-owned");
-  _93 = Symbol_var(437126);
-  _94 = String_new("String");
-  _95 = String_var(_94);
-  _96 = cons(_95, NULL);
-  _97 = List_var(_96);
-  _98 = cons(_97, NULL);
-  _99 = List_var(_98);
-  _100 = cons(_99, NULL);
-  _101 = cons(_93, _100);
+  _61 = String_new("ensure");
+  _62 = String_new("--lock");
+  _63 = String_new("--index");
+  _64 = String_new("--quiet");
+  _65 = String_new("--");
+  _66 = String_new("package");
+  _67 = String_new("\ntarget=");
+  _68 = String_new("\nprofile=");
+  _69 = String_new("/.x2c/");
+  _70 = String_new("/");
+  _71 = String_new("static-library target cannot contain target dependencies");
+  _72 = String_new("dependency target is not a static library");
+  _73 = String_new("native module target is not a meta-module");
+  _74 = String_new("target has no sources");
+  _75 = String_new("source");
+  _76 = String_new(".c");
+  _77 = String_new("manifest source is not .x or .c");
+  _78 = String_new("unmatched ");
+  _79 = String_new(" pattern");
+  _80 = String_new("\\");
+  _81 = String_new("\\\\");
+  _82 = String_new("*");
+  _83 = String_new("\\*");
+  _84 = String_new("?");
+  _85 = String_new("\\?");
+  _86 = String_new("[");
+  _87 = String_new("\\[");
+  _88 = String_new("-I");
+  _89 = String_new("-L");
+  _90 = String_new("-g");
+  _91 = String_new("-");
+  _92 = String_new("-g");
+  _93 = String_var(_92);
+  _94 = cons(_93, NULL);
+  _95 = String_new("C dependency option is driver-owned");
+  _96 = Symbol_var(437126);
+  _97 = String_new("String");
+  _98 = String_var(_97);
+  _99 = cons(_98, NULL);
+  _100 = List_var(_99);
+  _101 = cons(_100, NULL);
   _102 = List_var(_101);
-  _103 = String_new("Var");
-  _104 = String_var(_103);
-  _105 = cons(_104, NULL);
-  _106 = cons(_102, _105);
-  _107 = List_var(_105);
+  _103 = cons(_102, NULL);
+  _104 = cons(_96, _103);
+  _105 = List_var(_104);
+  _106 = String_new("Var");
+  _107 = String_var(_106);
   _108 = cons(_107, NULL);
-  _109 = List_var(_108);
-  _110 = cons(_109, NULL);
-  _111 = cons(_93, _110);
+  _109 = cons(_105, _108);
+  _110 = List_var(_108);
+  _111 = cons(_110, NULL);
   _112 = List_var(_111);
-  _113 = cons(_112, _105);
-  _114 = String_new(":%d");
-  _115 = String_new("manifest \'");
-  _116 = String_new("\'");
-  _117 = String_new(": ");
-  _118 = String_new(" \'");
-  _119 = String_new("..");
-  _120 = String_new("new: \'");
-  _121 = String_new("\' is not a target name; use letters, digits, \'_\', and \'-\'");
-  _122 = String_new("new: ");
-  _123 = String_new(" exists and is not an empty directory");
-  _124 = String_new("src");
-  _125 = String_new("[target.");
-  _126 = String_new("]\nsources = [\"src/*.x\"]\n");
-  _127 = String_new("src/main.x");
-  _128 = String_new("/*  main.x -- greet the name given on the command line */\n\n#include <stdio.h>\n\nint main(int argc, char **argv) {\n  String name = argc > 1 ? argv[1] : \"world\";\n  puts(%\"Hello, $name!\");\n  return 0;\n}\n");
-  _129 = String_new(".gitignore");
-  _130 = String_new(".x2c-build/\n");
-  _131 = String_new("-l");
-  _132 = String_new("-O");
-  _133 = String_new("-D");
+  _113 = cons(_112, NULL);
+  _114 = cons(_96, _113);
+  _115 = List_var(_114);
+  _116 = cons(_115, _108);
+  _117 = String_new(":%d");
+  _118 = String_new("manifest \'");
+  _119 = String_new("\'");
+  _120 = String_new(": ");
+  _121 = String_new(" \'");
+  _122 = String_new("-l");
+  _123 = String_new("-O");
+  _124 = String_new("-D");
   _x2c_gensym_static_initialize_0();
   _x2c_gensym_static_initialize_1();
   _x2c_gensym_static_initialize_2();
@@ -573,6 +545,8 @@ static void _enter_dependencies(Manifest * m){
   (* m).section = 273446;
 }
 
+int ProjectBuild_valid_name(String name);
+
 static void _target_header(Manifest * m, String header){
   Project p =(* m).project;
   String name = String_remove_prefix(header, _16), profile = NULL;
@@ -581,7 +555,7 @@ static void _target_header(Manifest * m, String header){
     profile = String_getslice(name, x2c_slice_bound(split + 9), (-2147483647 - 1), 1);
     name = String_getslice(name, (-2147483647 - 1), x2c_slice_bound(split), 1);
   }
-  if(! String_startswith(header, _16) || ! _name_ok(name) ||(split >= 0 && ! _name_ok(profile))) _error(p, (* m).line, _18);
+  if(! String_startswith(header, _16) || ! ProjectBuild_valid_name(name) ||(split >= 0 && ! ProjectBuild_valid_name(profile))) _error(p, (* m).line, _18);
   ProjectTarget target = _target(p, name);
   if(! target) target = _new_target(p, name);
   if(split < 0) _enter_target(&((* m)), target);
@@ -611,7 +585,7 @@ static void _field(Manifest * m, char * line){
   if(! equals) _error(p, (* m).line, _22);
   * equals = 0;
   String key = String_new(_trim(line)), value = String_new(_trim(equals + 1));
-  if(! _name_ok(key)) _error(p, (* m).line, _23);
+  if(! ProjectBuild_valid_name(key)) _error(p, (* m).line, _23);
   _claim(&((* m)), key);
   (* m).key = key;
   (* m).value = value;
@@ -777,7 +751,8 @@ static int _array_open(String value){
   return depth > 0;
 }
 
-static int _name_ok(String name){
+int ProjectBuild_valid_name(String name){
+  if(! _init_guard_) _file_init_();
   if(! String_truth(name) || ! String_getindex(name, 0)) return 0;
   {
     char raw;
@@ -869,219 +844,38 @@ static ProjectProfile _selected_profile(Project p, ProjectTarget target, String 
   return profile;
 }
 
-void Path_remove_file(Path);
-
-void Diagnostics_host_error(List);
-
-#include "error.h"
-
-
-
+int Compiler_run_command(String, List);
 
 static void _resolve_dependencies(Project p){
   CliRequest request = p -> command;
   if(p -> sources || request -> dry_run) return;
   String path = String_join(NULL, cons(String_var(p -> root), cons(String_var(_60), NULL)));
-  if(! p -> dependencies){
-    {
-      ExceptionFrame _x2c_gensym_exception_frame_0;
-      static MatchCaptureSite _x2c_gensym_macro_arms_0[1];
-      Var _x2c_gensym_macro_patterns_0[1];
-      static ErrorCatchSite _x2c_gensym_macro_site_0 ={
-        _x2c_gensym_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
-      }
-      ;
-      if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_0)){
-        _x2c_gensym_macro_patterns_0[0] = List_var(cons(Symbol_var(20399393368), cons(Symbol_var(58262293080), NULL)));
-      }
-      volatile ErrorHandler _x2c_gensym_error_handler_0 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_0, & _x2c_gensym_macro_site_0, _x2c_gensym_macro_patterns_0);
-      x2c_exception_push(& _x2c_gensym_exception_frame_0);
-      if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)) Path_remove_file(path);
-      else{
-        x2c_exception_landed(& _x2c_gensym_exception_frame_0);
-        if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_0)){
-          int _x2c_gensym_macro_selected_0 = x2c_error_catch_selected(_x2c_gensym_error_handler_0);
-          x2c_error_catch_detach(_x2c_gensym_error_handler_0);
-          x2c_exception_mark_handled(& _x2c_gensym_exception_frame_0);
-          if(_x2c_gensym_macro_selected_0 == 0){
-            List volatile detail;
-            detail = Var_list_payload(x2c_error_catch_capture(_x2c_gensym_error_handler_0, 0));
-            Diagnostics_host_error(detail);
-          }
-
-        }
-        else{
-          x2c_error_catch_close(_x2c_gensym_error_handler_0);
-          _x2c_gensym_error_handler_0 = NULL;
-          x2c_exception_leave(& _x2c_gensym_exception_frame_0);
-          __builtin_unreachable();
-        }
-
-      }
-      x2c_error_catch_close(_x2c_gensym_error_handler_0);
-      _x2c_gensym_error_handler_0 = NULL;
-      x2c_exception_leave(& _x2c_gensym_exception_frame_0);
-    }
-    return;
+  struct stat lock;
+  if(! p -> dependencies && lstat(path, & lock) && errno == ENOENT) return;
+  Array args = Array_update_n(Array_new(), 3, String_var(_61), String_var(_62), String_var(path));
+  if(String_truth(request -> index)){
+    Array_push(args, String_var(_63));
+    Array_push(args, String_var(request -> index));
   }
-  List locked = _read_lock(path);
-  if(_lock_satisfies(p, locked)) return;
-  Array rows = Array_new();
+  if(request -> quiet) Array_push(args, String_var(_64));
+  Array_push(args, String_var(_65));
   for(ProjectDependency entry = p -> dependencies;  entry;  entry = entry -> next){
-    List row = _locked_row(locked, entry);
-    Array_push(rows, List_var(CliRequest_require_package(request, entry -> name, entry -> version, row)));
+    Array_push(args, String_var(entry -> name));
+    Array_push(args, String_var(entry -> version));
   }
-  _write_lock(path, Array_list_free(rows));
-}
-
-String Path_read_text(Path);
-
-static List _read_lock(String path){
-  String volatile text = NULL;
-  {
-    ExceptionFrame _x2c_gensym_exception_frame_1;
-    static MatchCaptureSite _x2c_gensym_macro_arms_1[1];
-    Var _x2c_gensym_macro_patterns_1[1];
-    static ErrorCatchSite _x2c_gensym_macro_site_1 ={
-      _x2c_gensym_macro_arms_1, -1, 1, ERROR_CATCH_PENDING, - 1
-    }
-    ;
-    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_1)){
-      _x2c_gensym_macro_patterns_1[0] = List_var(cons(Symbol_var(31862161386376), cons(Symbol_var(54), NULL)));
-    }
-    volatile ErrorHandler _x2c_gensym_error_handler_1 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_1, & _x2c_gensym_macro_site_1, _x2c_gensym_macro_patterns_1);
-    x2c_exception_push(& _x2c_gensym_exception_frame_1);
-    if(! sigsetjmp(_x2c_gensym_exception_frame_1.env, 0)) text = Path_read_text(path);
-    else{
-      x2c_exception_landed(& _x2c_gensym_exception_frame_1);
-      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_1)){
-        int _x2c_gensym_macro_selected_1 = x2c_error_catch_selected(_x2c_gensym_error_handler_1);
-        x2c_error_catch_detach(_x2c_gensym_error_handler_1);
-        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_1);
-        if(_x2c_gensym_macro_selected_1 == 0){
-          {
-            List _x2c_gensym_return_value_0 = NULL;
-            {
-              x2c_error_catch_close(_x2c_gensym_error_handler_1);
-              _x2c_gensym_error_handler_1 = NULL;
-              x2c_exception_leave(& _x2c_gensym_exception_frame_1);
-              return _x2c_gensym_return_value_0;
-            }
-
-          }
-
-        }
-        __builtin_unreachable();
-      }
-      else{
-        x2c_error_catch_close(_x2c_gensym_error_handler_1);
-        _x2c_gensym_error_handler_1 = NULL;
-        x2c_exception_leave(& _x2c_gensym_exception_frame_1);
-        __builtin_unreachable();
-      }
-
-    }
-    x2c_error_catch_close(_x2c_gensym_error_handler_1);
-    _x2c_gensym_error_handler_1 = NULL;
-    x2c_exception_leave(& _x2c_gensym_exception_frame_1);
-  }
-  return install_rows(text);
-}
-
-static int _lock_satisfies(Project p, List rows){
-  if(! List_truth(rows)) return 0;
-  for(ProjectDependency entry = p -> dependencies;  entry;  entry = entry -> next){
-    if(! List_truth(_locked_row(rows, entry))) return 0;
-    if(! String_equal(install_version(entry -> name), entry -> version)) return 0;
-  }
-  return 1;
-}
-
-static List _locked_row(List rows, ProjectDependency entry){
-  List found = NULL;
-  {
-    List row;
-    List _x2c_gensym_macro_object_3 = rows;
-    List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
-    Var _x2c_gensym_macro_cursor_output_3;
-    while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
-      row = Var_list_payload(_x2c_gensym_macro_cursor_output_3);
-      if(x2c_var_equal(List_car(row), String_var(entry -> name)) && x2c_var_equal(List_cadr(row), String_var(entry -> version))) found = row;
-    }
-
-  }
-  return found;
-}
-
-void Path_publish_files(List);
-
-static void _write_lock(String path, List rows){
-  String text = _61;
-  {
-    List row;
-    List _x2c_gensym_macro_object_4 = rows;
-    List _x2c_gensym_macro_cursor_4 = _x2c_gensym_macro_object_4;
-    Var _x2c_gensym_macro_cursor_output_4;
-    while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
-      row = Var_list_payload(_x2c_gensym_macro_cursor_output_4);
-      text =({
-        Var _x2c_gensym_literal_part_2 = String_var(text);  Var _x2c_gensym_literal_part_3 = String_var(String_join(_62, row));  String_join(NULL, cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, cons(String_var(_63), NULL))));
-      }
-      );
-    }
-
-  }
-  {
-    ExceptionFrame _x2c_gensym_exception_frame_2;
-    static MatchCaptureSite _x2c_gensym_macro_arms_2[1];
-    Var _x2c_gensym_macro_patterns_2[1];
-    static ErrorCatchSite _x2c_gensym_macro_site_2 ={
-      _x2c_gensym_macro_arms_2, -1, 1, ERROR_CATCH_PENDING, - 1
-    }
-    ;
-    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_2)){
-      _x2c_gensym_macro_patterns_2[0] = List_var(cons(Symbol_var(20399393368), cons(Symbol_var(58262293080), NULL)));
-    }
-    volatile ErrorHandler _x2c_gensym_error_handler_2 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_2, & _x2c_gensym_macro_site_2, _x2c_gensym_macro_patterns_2);
-    x2c_exception_push(& _x2c_gensym_exception_frame_2);
-    if(! sigsetjmp(_x2c_gensym_exception_frame_2.env, 0)) Path_publish_files(cons(String_var(path), cons(String_var(text), NULL)));
-    else{
-      x2c_exception_landed(& _x2c_gensym_exception_frame_2);
-      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_2)){
-        int _x2c_gensym_macro_selected_2 = x2c_error_catch_selected(_x2c_gensym_error_handler_2);
-        x2c_error_catch_detach(_x2c_gensym_error_handler_2);
-        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_2);
-        if(_x2c_gensym_macro_selected_2 == 0){
-          List volatile detail;
-          detail = Var_list_payload(x2c_error_catch_capture(_x2c_gensym_error_handler_2, 0));
-          Diagnostics_host_error(detail);
-        }
-
-      }
-      else{
-        x2c_error_catch_close(_x2c_gensym_error_handler_2);
-        _x2c_gensym_error_handler_2 = NULL;
-        x2c_exception_leave(& _x2c_gensym_exception_frame_2);
-        __builtin_unreachable();
-      }
-
-    }
-    x2c_error_catch_close(_x2c_gensym_error_handler_2);
-    _x2c_gensym_error_handler_2 = NULL;
-    x2c_exception_leave(& _x2c_gensym_exception_frame_2);
-  }
-
+  int status = Compiler_run_command(_66, Array_list(args));
+  if(status) exit(status);
 }
 
 static void _plan_target(Project p, ProjectTarget target){
   if(target -> planned) return;
   {
     String name;
-    List _x2c_gensym_macro_object_5 = _prerequisites(target);
-    List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;
-    Var _x2c_gensym_macro_cursor_output_5;
-    while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_5))){
-      name = Var_as_string(_x2c_gensym_macro_cursor_output_5);
+    List _x2c_gensym_macro_object_3 = _prerequisites(target);
+    List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
+    Var _x2c_gensym_macro_cursor_output_3;
+    while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
+      name = Var_as_string(_x2c_gensym_macro_cursor_output_3);
       _plan_target(p, _target(p, name));
     }
 
@@ -1105,20 +899,20 @@ static CliRequest _target_request(Project p, ProjectTarget target){
   _set_product(p, target, request);
   request -> inputs = _target_inputs(p, target, request -> kind);
   request -> native_modules =({
-    List _x2c_gensym_literal_part_4 = command -> native_modules;  List _x2c_gensym_literal_part_5 = _target_modules(p, target);  List_append(_x2c_gensym_literal_part_4, List_append(_x2c_gensym_literal_part_5, NULL));
+    List _x2c_gensym_literal_part_2 = command -> native_modules;  List _x2c_gensym_literal_part_3 = _target_modules(p, target);  List_append(_x2c_gensym_literal_part_2, List_append(_x2c_gensym_literal_part_3, NULL));
   }
   );
   request -> include_dirs =({
-    List _x2c_gensym_literal_part_6 = command -> include_dirs;  List _x2c_gensym_literal_part_7 = _paths(p -> root, target -> include_dirs);  List_append(_x2c_gensym_literal_part_6, List_append(_x2c_gensym_literal_part_7, NULL));
+    List _x2c_gensym_literal_part_4 = command -> include_dirs;  List _x2c_gensym_literal_part_5 = _paths(p -> root, target -> include_dirs);  List_append(_x2c_gensym_literal_part_4, List_append(_x2c_gensym_literal_part_5, NULL));
   }
   );
   request -> package_dirs =({
-    List _x2c_gensym_literal_part_8 = command -> package_dirs;  List _x2c_gensym_literal_part_9 = _paths(p -> root, target -> package_dirs);  List_append(_x2c_gensym_literal_part_8, List_append(_x2c_gensym_literal_part_9, NULL));
+    List _x2c_gensym_literal_part_6 = command -> package_dirs;  List _x2c_gensym_literal_part_7 = _paths(p -> root, target -> package_dirs);  List_append(_x2c_gensym_literal_part_6, List_append(_x2c_gensym_literal_part_7, NULL));
   }
   );
   _set_flags(p, target, request);
   request -> label = target -> name;
-  request -> state_seed = String_join(NULL, cons(String_var(p -> path), cons(String_var(_64), cons(String_var(target -> name), cons(String_var(_65), cons(String_var(command -> profile), NULL))))));
+  request -> state_seed = String_join(NULL, cons(String_var(p -> path), cons(String_var(_67), cons(String_var(target -> name), cons(String_var(_68), cons(String_var(command -> profile), NULL))))));
   return request;
 }
 
@@ -1130,7 +924,7 @@ static void _set_product(Project p, ProjectTarget target, CliRequest request){
   request -> compile_only = 0;
   request -> kind = chosen && command -> kind_explicit ? command -> kind : target -> kind;
   request -> output = chosen && String_truth(command -> output) ? command -> output : _target_output(p, target, request -> kind);
-  request -> build_dir = String_join(NULL, cons(String_var(p -> build_root), cons(String_var(_66), cons(String_var(target -> name), NULL))));
+  request -> build_dir = String_join(NULL, cons(String_var(p -> build_root), cons(String_var(_69), cons(String_var(target -> name), NULL))));
   request -> save_temps = 0;
   request -> temps_dir = NULL;
 }
@@ -1140,22 +934,22 @@ TargetKind * TargetKind_of(Symbol);
 static String _target_output(Project p, ProjectTarget target, Symbol kind){
   if(String_truth(target -> output)) return Path_join(p -> root, target -> output);
   TargetKind * row = TargetKind_of(kind);
-  return String_join(NULL, cons(String_var(p -> build_root), cons(String_var(_67), cons(String_var(row -> prefix), cons(String_var(target -> name), cons(String_var(row -> suffix), NULL))))));
+  return String_join(NULL, cons(String_var(p -> build_root), cons(String_var(_70), cons(String_var(row -> prefix), cons(String_var(target -> name), cons(String_var(row -> suffix), NULL))))));
 }
 
 static List _target_inputs(Project p, ProjectTarget target, Symbol kind){
-  if(kind == 1381098885964356 && List_truth(target -> dependencies)) _error_name(p, 0, _68, target -> name);
+  if(kind == 1381098885964356 && List_truth(target -> dependencies)) _error_name(p, 0, _71, target -> name);
   Array inputs = _target_sources(p, target);
   {
     String name;
-    List _x2c_gensym_macro_object_6 = target -> dependencies;
-    List _x2c_gensym_macro_cursor_6 = _x2c_gensym_macro_object_6;
-    Var _x2c_gensym_macro_cursor_output_6;
-    while(List_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_6))){
-      name = Var_as_string(_x2c_gensym_macro_cursor_output_6);
+    List _x2c_gensym_macro_object_4 = target -> dependencies;
+    List _x2c_gensym_macro_cursor_4 = _x2c_gensym_macro_object_4;
+    Var _x2c_gensym_macro_cursor_output_4;
+    while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
+      name = Var_as_string(_x2c_gensym_macro_cursor_output_4);
       {
         ProjectTarget dependency = _target(p, name);
-        if(dependency -> kind != 1381098885964356) _error_name(p, 0, _69, dependency -> name);
+        if(dependency -> kind != 1381098885964356) _error_name(p, 0, _72, dependency -> name);
         Array_push(inputs, String_var(_target_output(p, dependency, dependency -> kind)));
       }
 
@@ -1169,14 +963,14 @@ static List _target_modules(Project p, ProjectTarget target){
   Array modules = Array_new();
   {
     String name;
-    List _x2c_gensym_macro_object_7 = target -> native_modules;
-    List _x2c_gensym_macro_cursor_7 = _x2c_gensym_macro_object_7;
-    Var _x2c_gensym_macro_cursor_output_7;
-    while(List_try_next(_x2c_gensym_macro_object_7, &(_x2c_gensym_macro_cursor_7), &(_x2c_gensym_macro_cursor_output_7))){
-      name = Var_as_string(_x2c_gensym_macro_cursor_output_7);
+    List _x2c_gensym_macro_object_5 = target -> native_modules;
+    List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;
+    Var _x2c_gensym_macro_cursor_output_5;
+    while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_5))){
+      name = Var_as_string(_x2c_gensym_macro_cursor_output_5);
       {
         ProjectTarget loaded = _target(p, name);
-        if(loaded -> kind != 904178442) _error_name(p, 0, _70, name);
+        if(loaded -> kind != 904178442) _error_name(p, 0, _73, name);
         Array_push(modules, String_var(_target_output(p, loaded, 904178442)));
       }
 
@@ -1189,17 +983,17 @@ static List _target_modules(Project p, ProjectTarget target){
 int Path_is_x2c_source(String);
 
 static Array _target_sources(Project p, ProjectTarget target){
-  if(! List_truth(target -> sources)) _error_name(p, 0, _71, target -> name);
-  Array sources = _expand_patterns(p, target -> sources, _72);
+  if(! List_truth(target -> sources)) _error_name(p, 0, _74, target -> name);
+  Array sources = _expand_patterns(p, target -> sources, _75);
   Array excluded = _expand_patterns(p, target -> exclude, _34);
   Array kept = Array_new();
   {
     Var path;
-    Array _x2c_gensym_macro_object_8 = sources;
-    int _x2c_gensym_macro_cursor_8 = 0;
-    Var _x2c_gensym_macro_cursor_output_8;
-    while(Array_try_next(_x2c_gensym_macro_object_8, &(_x2c_gensym_macro_cursor_8), &(_x2c_gensym_macro_cursor_output_8))){
-      path = _x2c_gensym_macro_cursor_output_8;
+    Array _x2c_gensym_macro_object_6 = sources;
+    int _x2c_gensym_macro_cursor_6 = 0;
+    Var _x2c_gensym_macro_cursor_output_6;
+    while(Array_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_6))){
+      path = _x2c_gensym_macro_cursor_output_6;
       {
         if(!(Array_contains(excluded, path))) Array_push(kept, path);
         else if(p -> command -> verbose) fprintf(stderr, "x2c: excluded %s from target %s\n", Var_string(path), target -> name);
@@ -1213,12 +1007,12 @@ static Array _target_sources(Project p, ProjectTarget target){
   Array_sort(kept);
   {
     String path;
-    Array _x2c_gensym_macro_object_9 = kept;
-    int _x2c_gensym_macro_cursor_9 = 0;
-    Var _x2c_gensym_macro_cursor_output_9;
-    while(Array_try_next(_x2c_gensym_macro_object_9, &(_x2c_gensym_macro_cursor_9), &(_x2c_gensym_macro_cursor_output_9))){
-      path = Var_as_string(_x2c_gensym_macro_cursor_output_9);
-      if(!(Path_is_x2c_source(path) || String_endswith(path, _73))) _error_name(p, 0, _74, path);
+    Array _x2c_gensym_macro_object_7 = kept;
+    int _x2c_gensym_macro_cursor_7 = 0;
+    Var _x2c_gensym_macro_cursor_output_7;
+    while(Array_try_next(_x2c_gensym_macro_object_7, &(_x2c_gensym_macro_cursor_7), &(_x2c_gensym_macro_cursor_output_7))){
+      path = Var_as_string(_x2c_gensym_macro_cursor_output_7);
+      if(!(Path_is_x2c_source(path) || String_endswith(path, _76))) _error_name(p, 0, _77, path);
     }
 
   }
@@ -1229,20 +1023,20 @@ static Array _expand_patterns(Project p, List patterns, String owner){
   Array files = Array_new();
   {
     String pattern;
-    List _x2c_gensym_macro_object_11 = patterns;
-    List _x2c_gensym_macro_cursor_11 = _x2c_gensym_macro_object_11;
-    Var _x2c_gensym_macro_cursor_output_11;
-    while(List_try_next(_x2c_gensym_macro_object_11, &(_x2c_gensym_macro_cursor_11), &(_x2c_gensym_macro_cursor_output_11))){
-      pattern = Var_as_string(_x2c_gensym_macro_cursor_output_11);
+    List _x2c_gensym_macro_object_9 = patterns;
+    List _x2c_gensym_macro_cursor_9 = _x2c_gensym_macro_object_9;
+    Var _x2c_gensym_macro_cursor_output_9;
+    while(List_try_next(_x2c_gensym_macro_object_9, &(_x2c_gensym_macro_cursor_9), &(_x2c_gensym_macro_cursor_output_9))){
+      pattern = Var_as_string(_x2c_gensym_macro_cursor_output_9);
       {
         Array expanded = _expand_pattern(p, pattern, owner);
         {
           Var path;
-          Array _x2c_gensym_macro_object_10 = expanded;
-          int _x2c_gensym_macro_cursor_10 = 0;
-          Var _x2c_gensym_macro_cursor_output_10;
-          while(Array_try_next(_x2c_gensym_macro_object_10, &(_x2c_gensym_macro_cursor_10), &(_x2c_gensym_macro_cursor_output_10))){
-            path = _x2c_gensym_macro_cursor_output_10;
+          Array _x2c_gensym_macro_object_8 = expanded;
+          int _x2c_gensym_macro_cursor_8 = 0;
+          Var _x2c_gensym_macro_cursor_output_8;
+          while(Array_try_next(_x2c_gensym_macro_object_8, &(_x2c_gensym_macro_cursor_8), &(_x2c_gensym_macro_cursor_output_8))){
+            path = _x2c_gensym_macro_cursor_output_8;
             if(!(Array_contains(files, path))) Array_push(files, path);
           }
 
@@ -1258,7 +1052,7 @@ static Array _expand_patterns(Project p, List patterns, String owner){
 
 static Array _expand_pattern(Project p, String pattern, String owner){
   Array matches = _has_glob(pattern) ? _glob(p, pattern) : _named_file(p, pattern);
-  if(! Array_len(matches)) _error_name(p, 0, String_join(NULL, cons(String_var(_75), cons(String_var(owner), cons(String_var(_76), NULL)))), pattern);
+  if(! Array_len(matches)) _error_name(p, 0, String_join(NULL, cons(String_var(_78), cons(String_var(owner), cons(String_var(_79), NULL)))), pattern);
   return Array_sort(matches);
 }
 
@@ -1271,7 +1065,7 @@ List Path_glob(Path);
 int Path_glob_match(Path, Path);
 
 static Array _glob(Project p, String pattern){
-  String prefix = String_equal(p -> root, _4) ? _4 : String_join(NULL, cons(String_var(p -> root), cons(String_var(_67), NULL)));
+  String prefix = String_equal(p -> root, _4) ? _4 : String_join(NULL, cons(String_var(p -> root), cons(String_var(_70), NULL)));
   List found = Path_glob(Path_join(_glob_literal(p -> root), pattern));
   if(p -> sources) found = List_append(found, Iter_list(Map_keys(p -> sources -> overlays, &(struct Iter){
     int_var(0)
@@ -1280,12 +1074,12 @@ static Array _glob(Project p, String pattern){
   Array matches = Array_new();
   {
     String path;
-    List _x2c_gensym_macro_object_12 = found;
-    List _x2c_gensym_macro_cursor_12 = _x2c_gensym_macro_object_12;
-    Var _x2c_gensym_macro_cursor_output_12;
-    while(List_try_next(_x2c_gensym_macro_object_12, &(_x2c_gensym_macro_cursor_12), &(_x2c_gensym_macro_cursor_output_12))){
-      path = Var_as_string(_x2c_gensym_macro_cursor_output_12);
-      if(String_startswith(path, prefix) && Path_glob_match(pattern, String_remove_prefix(path, prefix)) && !(String_truth(p -> build_root) && String_startswith(path, String_join(NULL, cons(String_var(p -> build_root), cons(String_var(_67), NULL))))) && SourceView_exists(p -> sources, path) && !(Array_contains(matches, String_var(path)))) Array_push(matches, String_var(path));
+    List _x2c_gensym_macro_object_10 = found;
+    List _x2c_gensym_macro_cursor_10 = _x2c_gensym_macro_object_10;
+    Var _x2c_gensym_macro_cursor_output_10;
+    while(List_try_next(_x2c_gensym_macro_object_10, &(_x2c_gensym_macro_cursor_10), &(_x2c_gensym_macro_cursor_output_10))){
+      path = Var_as_string(_x2c_gensym_macro_cursor_output_10);
+      if(String_startswith(path, prefix) && Path_glob_match(pattern, String_remove_prefix(path, prefix)) && !(String_truth(p -> build_root) && String_startswith(path, String_join(NULL, cons(String_var(p -> build_root), cons(String_var(_70), NULL))))) && SourceView_exists(p -> sources, path) && !(Array_contains(matches, String_var(path)))) Array_push(matches, String_var(path));
     }
 
   }
@@ -1293,7 +1087,7 @@ static Array _glob(Project p, String pattern){
 }
 
 static String _glob_literal(String text){
-  return String_replace(String_replace(String_replace(String_replace(text, _77, _78), _79, _80), _81, _82), _83, _84);
+  return String_replace(String_replace(String_replace(String_replace(text, _80, _81), _82, _83), _84, _85), _86, _87);
 }
 
 static Array _named_file(Project p, String pattern){
@@ -1315,11 +1109,11 @@ static void _set_flags(Project p, ProjectTarget target, CliRequest request){
   }
   request -> cpp_args = List_append(defines, List_append(profile_defines, List_append(command -> cpp_args, NULL)));
   request -> cc_args =({
-    List _x2c_gensym_literal_part_10 = defines;  List _x2c_gensym_literal_part_11 = _c_flags(p, target -> c_flags);  List _x2c_gensym_literal_part_12 = profile_defines;  List _x2c_gensym_literal_part_13 = compile;  List _x2c_gensym_literal_part_14 = command -> cc_args;  List _x2c_gensym_literal_part_15 = _path_options(p -> root, target -> include_dirs, _85);  List_append(_x2c_gensym_literal_part_10, List_append(_x2c_gensym_literal_part_11, List_append(_x2c_gensym_literal_part_12, List_append(_x2c_gensym_literal_part_13, List_append(_x2c_gensym_literal_part_14, List_append(_x2c_gensym_literal_part_15, NULL))))));
+    List _x2c_gensym_literal_part_8 = defines;  List _x2c_gensym_literal_part_9 = _c_flags(p, target -> c_flags);  List _x2c_gensym_literal_part_10 = profile_defines;  List _x2c_gensym_literal_part_11 = compile;  List _x2c_gensym_literal_part_12 = command -> cc_args;  List _x2c_gensym_literal_part_13 = _path_options(p -> root, target -> include_dirs, _88);  List_append(_x2c_gensym_literal_part_8, List_append(_x2c_gensym_literal_part_9, List_append(_x2c_gensym_literal_part_10, List_append(_x2c_gensym_literal_part_11, List_append(_x2c_gensym_literal_part_12, List_append(_x2c_gensym_literal_part_13, NULL))))));
   }
   );
   request -> ld_args =({
-    List _x2c_gensym_literal_part_16 = _path_options(p -> root, target -> library_dirs, _86);  List _x2c_gensym_literal_part_17 = List_map(target -> libraries, _x2c_gensym_func_handle_0);  List_append(_x2c_gensym_literal_part_16, List_append(_x2c_gensym_literal_part_17, List_append(target -> link_flags, List_append(link, List_append(command -> ld_args, NULL)))));
+    List _x2c_gensym_literal_part_14 = _path_options(p -> root, target -> library_dirs, _89);  List _x2c_gensym_literal_part_15 = List_map(target -> libraries, _x2c_gensym_func_handle_0);  List_append(_x2c_gensym_literal_part_14, List_append(_x2c_gensym_literal_part_15, List_append(target -> link_flags, List_append(link, List_append(command -> ld_args, NULL)))));
   }
   );
 }
@@ -1333,9 +1127,9 @@ static ProjectProfile _target_profile(Project p, ProjectTarget target){
 static List _profile_flags(Project p, ProjectProfile profile){
   List cc_args = p -> command -> cc_args;
   int optimized = List_any(cc_args, _x2c_gensym_func_handle_1);
-  int debug = profile -> debug && !(List_contains(cc_args, String_var(_87)));
+  int debug = profile -> debug && !(List_contains(cc_args, String_var(_90)));
   return({
-    List _x2c_gensym_literal_part_18 = _c_flags(p, profile -> c_flags);  List _x2c_gensym_literal_part_19 = String_truth(profile -> optimization) && ! optimized ? cons(String_var(String_join(NULL, cons(String_var(_88), cons(String_var(profile -> optimization), NULL)))), NULL) : NULL;  List _x2c_gensym_literal_part_20 = debug ? _91 : NULL;  List_append(_x2c_gensym_literal_part_18, List_append(_x2c_gensym_literal_part_19, List_append(_x2c_gensym_literal_part_20, NULL)));
+    List _x2c_gensym_literal_part_16 = _c_flags(p, profile -> c_flags);  List _x2c_gensym_literal_part_17 = String_truth(profile -> optimization) && ! optimized ? cons(String_var(String_join(NULL, cons(String_var(_91), cons(String_var(profile -> optimization), NULL)))), NULL) : NULL;  List _x2c_gensym_literal_part_18 = debug ? _94 : NULL;  List_append(_x2c_gensym_literal_part_16, List_append(_x2c_gensym_literal_part_17, List_append(_x2c_gensym_literal_part_18, NULL)));
   }
   );
 }
@@ -1345,12 +1139,12 @@ int CliRequest_dependency_option(String);
 static List _c_flags(Project p, List values){
   {
     String value;
-    List _x2c_gensym_macro_object_13 = values;
-    List _x2c_gensym_macro_cursor_13 = _x2c_gensym_macro_object_13;
-    Var _x2c_gensym_macro_cursor_output_13;
-    while(List_try_next(_x2c_gensym_macro_object_13, &(_x2c_gensym_macro_cursor_13), &(_x2c_gensym_macro_cursor_output_13))){
-      value = Var_as_string(_x2c_gensym_macro_cursor_output_13);
-      if(CliRequest_dependency_option(value)) _error_name(p, 0, _92, value);
+    List _x2c_gensym_macro_object_11 = values;
+    List _x2c_gensym_macro_cursor_11 = _x2c_gensym_macro_object_11;
+    Var _x2c_gensym_macro_cursor_output_11;
+    while(List_try_next(_x2c_gensym_macro_object_11, &(_x2c_gensym_macro_cursor_11), &(_x2c_gensym_macro_cursor_output_11))){
+      value = Var_as_string(_x2c_gensym_macro_cursor_output_11);
+      if(CliRequest_dependency_option(value)) _error_name(p, 0, _95, value);
     }
 
   }
@@ -1366,7 +1160,7 @@ static List _paths(String root, List values){
     Var _x2c_gensym_lambda_capture_value_0 = String_var(root);  struct _x2c_gensym_lambda_context_0 _x2c_gensym_lambda_context_1 ={
       _x2c_gensym_lambda_capture_value_0
     }
-    ;  Func_new_context(_x2c_gensym_lambda_4, _106, & _x2c_gensym_lambda_context_1, sizeof _x2c_gensym_lambda_context_1);
+    ;  Func_new_context(_x2c_gensym_lambda_4, _109, & _x2c_gensym_lambda_context_1, sizeof _x2c_gensym_lambda_context_1);
   }
   ));
 }
@@ -1376,101 +1170,24 @@ static List _path_options(String root, List values, String option){
     Var _x2c_gensym_lambda_capture_value_1 = String_var(option);  struct _x2c_gensym_lambda_context_2 _x2c_gensym_lambda_context_3 ={
       _x2c_gensym_lambda_capture_value_1
     }
-    ;  Func_new_context(_x2c_gensym_lambda_6, _113, & _x2c_gensym_lambda_context_3, sizeof _x2c_gensym_lambda_context_3);
+    ;  Func_new_context(_x2c_gensym_lambda_6, _116, & _x2c_gensym_lambda_context_3, sizeof _x2c_gensym_lambda_context_3);
   }
   )));
 }
 
 _Noreturn static void _error(Project p, int line, String message){
-  String at = line ? String_printf(_114, line) : NULL;
-  if(p && String_truth(p -> path)) message = String_join(NULL, cons(String_var(_115), cons(String_var(p -> path), cons(String_var(_116), cons(String_var(at), cons(String_var(_117), cons(String_var(message), NULL)))))));
+  String at = line ? String_printf(_117, line) : NULL;
+  if(p && String_truth(p -> path)) message = String_join(NULL, cons(String_var(_118), cons(String_var(p -> path), cons(String_var(_119), cons(String_var(at), cons(String_var(_120), cons(String_var(message), NULL)))))));
   fprintf(stderr, "x2c: error: %s\n", message);
   exit(2);
 }
 
 static void _error_name(Project p, int line, String message, String name){
-  _error(p, line, String_join(NULL, cons(String_var(message), cons(String_var(_118), cons(String_var(name), cons(String_var(_116), NULL))))));
-}
-
-void Diagnostics_driver_error(const char *);
-
-int CliRequest_new_project(CliRequest request){
-  if(! _init_guard_) _file_init_();
-  Path dir = Var_as_string(List_car(request -> inputs));
-  if(! String_truth(dir)) Diagnostics_driver_error("new: the directory operand is empty");
-  String name = _starter_name(dir);
-  {
-    ExceptionFrame _x2c_gensym_exception_frame_3;
-    static MatchCaptureSite _x2c_gensym_macro_arms_3[1];
-    Var _x2c_gensym_macro_patterns_3[1];
-    static ErrorCatchSite _x2c_gensym_macro_site_3 ={
-      _x2c_gensym_macro_arms_3, -1, 1, ERROR_CATCH_PENDING, - 1
-    }
-    ;
-    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_3)){
-      _x2c_gensym_macro_patterns_3[0] = List_var(cons(Symbol_var(20399393368), cons(Symbol_var(58262293080), NULL)));
-    }
-    volatile ErrorHandler _x2c_gensym_error_handler_3 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_3, & _x2c_gensym_macro_site_3, _x2c_gensym_macro_patterns_3);
-    x2c_exception_push(& _x2c_gensym_exception_frame_3);
-    if(! sigsetjmp(_x2c_gensym_exception_frame_3.env, 0)) _write_starter(dir, name);
-    else{
-      x2c_exception_landed(& _x2c_gensym_exception_frame_3);
-      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_3)){
-        int _x2c_gensym_macro_selected_3 = x2c_error_catch_selected(_x2c_gensym_error_handler_3);
-        x2c_error_catch_detach(_x2c_gensym_error_handler_3);
-        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_3);
-        if(_x2c_gensym_macro_selected_3 == 0){
-          List volatile detail;
-          detail = Var_list_payload(x2c_error_catch_capture(_x2c_gensym_error_handler_3, 0));
-          Diagnostics_host_error(detail);
-        }
-
-      }
-      else{
-        x2c_error_catch_close(_x2c_gensym_error_handler_3);
-        _x2c_gensym_error_handler_3 = NULL;
-        x2c_exception_leave(& _x2c_gensym_exception_frame_3);
-        __builtin_unreachable();
-      }
-
-    }
-    x2c_error_catch_close(_x2c_gensym_error_handler_3);
-    _x2c_gensym_error_handler_3 = NULL;
-    x2c_exception_leave(& _x2c_gensym_exception_frame_3);
-  }
-  if(! request -> quiet) fprintf(stderr, "x2c: created %s\n", dir);
-  return 0;
-}
-
-Path Path_basename(Path);
-
-static String _starter_name(Path dir){
-  String name = Path_basename(dir);
-  if(String_equal(name, _2) || String_equal(name, _119) || String_equal(name, _4)) name = Path_basename(Path_absolute(dir));
-  if(! _name_ok(name)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_120), cons(String_var(name), cons(String_var(_121), NULL)))));
-  return name;
-}
-
-int Path_exists(Path);
-
-int Path_is_dir(Path);
-
-List Path_list_dir(Path);
-
-void Path_make_dirs(Path);
-
-void Path_write_text(Path, String);
-
-static void _write_starter(Path dir, String name){
-  if(Path_exists(dir) &&(! Path_is_dir(dir) || List_truth(Path_list_dir(dir)))) Diagnostics_driver_error(String_join(NULL, cons(String_var(_122), cons(String_var(dir), cons(String_var(_123), NULL)))));
-  Path_make_dirs(Path_join(dir, _124));
-  Path_write_text(Path_join(dir, _3), String_join(NULL, cons(String_var(_125), cons(String_var(name), cons(String_var(_126), NULL)))));
-  Path_write_text(Path_join(dir, _127), _128);
-  Path_write_text(Path_join(dir, _129), _130);
+  _error(p, line, String_join(NULL, cons(String_var(message), cons(String_var(_121), cons(String_var(name), cons(String_var(_119), NULL))))));
 }
 
 static Var _x2c_gensym_lambda_0(Var library){
-  return String_var(String_join(NULL, cons(String_var(_131), cons(String_var(Var_str(library)), NULL))));
+  return String_var(String_join(NULL, cons(String_var(_122), cons(String_var(Var_str(library)), NULL))));
   ;
 }
 
@@ -1481,7 +1198,7 @@ static Var _x2c_gensym_func_adapt_0(Func _x2c_gensym_func_binding_0, const FuncA
 }
 
 static Var _x2c_gensym_lambda_1(String flag){
-  return int_var(String_startswith(flag, _132));
+  return int_var(String_startswith(flag, _123));
   ;
 }
 
@@ -1492,7 +1209,7 @@ static Var _x2c_gensym_func_adapt_1(Func _x2c_gensym_func_binding_1, const FuncA
 }
 
 static Var _x2c_gensym_lambda_2(Var value){
-  return String_var(String_join(NULL, cons(String_var(_133), cons(String_var(Var_str(value)), NULL))));
+  return String_var(String_join(NULL, cons(String_var(_124), cons(String_var(Var_str(value)), NULL))));
   ;
 }
 

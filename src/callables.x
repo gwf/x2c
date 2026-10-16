@@ -145,7 +145,7 @@ List Compiler.capture_environment(Compiler c, List name, List fields) {
   defer c.sym.reopen_scopes(local);
   return c.bind_syntax(
     $!Unit{ static typedef struct $name { @fields } $name; },
-    AST_UNIT, NULL);
+    <unit>, NULL);
 }
 
 /* A value computed after its setup statements. */

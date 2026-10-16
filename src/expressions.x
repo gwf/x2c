@@ -825,7 +825,7 @@ static List _parse_composite(Compiler c) {
 /* An entry that begins with a Map-entry macro, or whose first bracket-level
    `:` belongs to no conditional, makes a brace a Map literal. */
 static int _brace_starts_map(Compiler c) {
-  if (c.macro_starts_target_at(AST_MAP_ENTRY)) return 1;
+  if (c.macro_starts_target_at(<map-entry>)) return 1;
   Token token = c.token;
   for (int conditionals = 0;; token = token.after_group()) {
     switch (token.type) {
@@ -964,11 +964,11 @@ List Compiler.resolve_expression(Compiler c, List input, Token origin) {
   }
   match (input) {
     case %(decl *):
-      return c.bind_syntax(input, AST_BLOCK, c.return_type);
+      return c.bind_syntax(input, <block>, c.return_type);
     /* A quotation or macro value application that hand-built syntax holds
        expands where it is resolved, like one the binder meets directly. */
     case %((!or "x2c.template" "x2c.quoted" macro-invoke) *):
-      return c.bind_syntax(input, AST_EXPRESSION, c.return_type);
+      return c.bind_syntax(input, <expression>, c.return_type);
     case %(expr ?type ?(List content)): {
       if (type && !c.needs_resolution(input)) return input;
       return _resolve_content(c, input, type, content, origin);
@@ -1080,7 +1080,7 @@ static List _content(Resolve &r, List content) {
     case %(meta-cap *): return r.input;
     case %(macro-invoke *): return _invocation(r, content);
     case %("x2c.quoted" *):
-      return r.c.bind_syntax(content, AST_EXPRESSION, r.c.return_type);
+      return r.c.bind_syntax(content, <expression>, r.c.return_type);
     case %(macro-slot ? ? *): return _macro_slot(r, content);
     case $source_string_content(%(*items)): return _segments(r, items);
     case %(cons ?head ?tail): return _cons(r, head, tail);
@@ -1162,7 +1162,7 @@ static List _meta_call(Resolve &r) {
    except in a template, whose expansion expands it. */
 static List _invocation(Resolve &r, List content) {
   if (r.c.macro_holes) return r.input;
-  return r.c.bind_syntax(content, AST_EXPRESSION, r.c.return_type);
+  return r.c.bind_syntax(content, <expression>, r.c.return_type);
 }
 
 static List _macro_slot(Resolve &r, List content) {
@@ -1734,7 +1734,7 @@ static List _member_rewrite(CallSite &k) {
   List source = %(expr () (call
     (expr () (op . ${k.receiver} ${k.field})) (args @{k.supplied})));
   List rewritten = k.c.rewrite(
-    <member>, k.type.canonicalize(), source, AST_EXPRESSION, NULL, k.origin);
+    <member>, k.type.canonicalize(), source, <expression>, NULL, k.origin);
   Type aggregate = rewritten ? NULL : k.c.sym.aggregate_of(k.type);
   return aggregate
     ? k.c.marked_rewrite(aggregate, source, k.origin) : rewritten;
@@ -2076,7 +2076,7 @@ List _x2c_func_call_arguments(List function, List storage, List arguments) {
       c.sym.var_tag_for_type(type, NULL)
         ? boxed(c.convert_expression(argument, %("Var")))
         : opaque(function, index, source),
-      AST_EXPRESSION, NULL);
+      <expression>, NULL);
     if (_null_literal(argument)) {
       prepared.push(absent(function, storage, count, index, value));
       continue;
@@ -2115,11 +2115,11 @@ static List _resolve_func_call(
     case %((expr (void) ())): arguments = NULL;
   if (!arguments) {
     Macro apply = $func_apply;
-    return c.bind_syntax(apply(callee), AST_EXPRESSION, NULL);
+    return c.bind_syntax(apply(callee), <expression>, NULL);
   }
   Macro call = $func_call;
   return c.bind_syntax(
-    call(callee, arguments.len(), arguments), AST_EXPRESSION, NULL);
+    call(callee, arguments.len(), arguments), <expression>, NULL);
 }
 
 /** Returns the callee and arguments of a typed `Func` call, or NULL for any
@@ -2362,7 +2362,7 @@ static List _binary_expression(
   if (c.rewrite_rules && c.has_rewrites(<binary>, operator)) {
     List source = source_operator_expression(NULL, %($operator $lhs $rhs));
     List rewritten = c.rewrite(
-      <binary>, operator, source, AST_EXPRESSION, NULL, origin);
+      <binary>, operator, source, <expression>, NULL, origin);
     if (rewritten) return rewritten;
   }
   _convert_string_comparison(c, operator, lhs, rhs);
@@ -2810,7 +2810,7 @@ static int _deferred_type_test(Type target) {
 
 static List _cast(Resolve &r, List declaration, List operand) {
   operand = r.c.resolve_expression(operand, r.origin);
-  declaration = r.c.bind_syntax(declaration, AST_BLOCK, r.c.return_type);
+  declaration = r.c.bind_syntax(declaration, <block>, r.c.return_type);
   List typed = %(declare @{declaration.cdr()});
   Type type = operand.cadr() === %(<macro-expr>) ||
               _casts_to_template_typedef(r.c, declaration)
@@ -2963,7 +2963,7 @@ static List _resolve_initializer(
 static List _parens(Resolve &r, List inner) {
   if (Ast.without_origin(inner).car() == <block>)
     return _statement_expression(
-      r.c, r.c.bind_syntax(inner, AST_STATEMENT, r.c.return_type), r.origin);
+      r.c, r.c.bind_syntax(inner, <statement>, r.c.return_type), r.origin);
   inner = r.c.resolve_expression(inner, r.origin);
   Type type = inner.cadr();
   return %(expr $type (parens $inner));

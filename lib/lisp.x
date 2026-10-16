@@ -209,13 +209,43 @@ static macro Stmt $error.source.callable(Expr $callable) {
 
 #include <signal.h>
 
-// session state
+/* canonical names
 
-static enum LispSpecial {
-  LISP_BIND, LISP_EVAL, LISP_QUOTE, LISP_COND, LISP_DEF,
-  LISP_LAMBDA, LISP_MACRO, LISP_QUASIQUOTE, LISP_IMPORT,
-  LISP_APPLY, LISP_SPECIAL_COUNT
+   The reader and evaluator share one canonical value per special-form and
+   reader-prefix name, interned once per process. A long name is promoted to
+   the outermost String pool, so it outlives the pool that interned it. */
+
+static Var lsym_quote, lsym_quasiquote, lsym_unquote, lsym_splicing;
+static Var lsym_cond, lsym_def, lsym_bind, lsym_eval, lsym_lambda;
+static Var lsym_macro, lsym_import, lsym_apply;
+static pthread_once_t lisp_initialize_once =
+  (pthread_once_t) PTHREAD_ONCE_INIT;
+static int lisp_initialize_success;
+
+static typedef struct LispCanonicalName {
+  Symbol special, const char *spelling;
+  Var *value;
+} LispCanonicalName;
+
+static const LispCanonicalName lisp_canonical_names[] = {
+  { <quote>,      "quote",            &lsym_quote },
+  { <quasiquote>, "quasiquote",       &lsym_quasiquote },
+  { 0,            "unquote",          &lsym_unquote },
+  { 0,            "unquote-splicing", &lsym_splicing },
+  { <cond>,       "cond",             &lsym_cond },
+  { <def>,        "def",              &lsym_def },
+  { <bind>,       "bind",             &lsym_bind },
+  { <eval>,       "eval",             &lsym_eval },
+  { <lambda>,     "lambda",           &lsym_lambda },
+  { <macro>,      "macro",            &lsym_macro },
+  { <import>,     "import",           &lsym_import },
+  { <apply>,      "apply",            &lsym_apply }
 };
+
+static unsigned _canonical_count(void) =>
+  sizeof(lisp_canonical_names) / sizeof(lisp_canonical_names[0]);
+
+// session state
 
 /* Environment records are activation-local. A rest activation's `bindings`
    is a temporary frame-owned Map, while the captured pseudo-frame aliases
@@ -248,7 +278,8 @@ static struct Lisp {
   int frozen;
   Map globals;          // global bindings, Lisp name -> value
   Map reserved;         // reserved special forms, Lisp name -> <func> Var
-  Func specials[LISP_SPECIAL_COUNT];
+  Func specials[
+    sizeof(lisp_canonical_names) / sizeof(lisp_canonical_names[0])];
   int call_depth;       // evaluator calls nested on this session
   unsigned long stack_base; // C stack address at the outermost call
   unsigned long stack_allowance; // bytes below stack_base calls may use
@@ -287,49 +318,6 @@ static typedef struct Lambda {
 $var.pointer(Lambda, lambda, <lambda>);
 
 static protocol Var(Lambda);
-
-/* canonical names
-
-   The reader and evaluator share one canonical value per special-form and
-   reader-prefix name, interned once per process. A long name is promoted to
-   the outermost String pool, so it outlives the pool that interned it. */
-
-static Var lsym_quote, lsym_quasiquote, lsym_unquote, lsym_splicing;
-static Var lsym_cond, lsym_def, lsym_bind, lsym_eval, lsym_lambda;
-static Var lsym_macro, lsym_import, lsym_apply;
-static pthread_once_t lisp_initialize_once =
-  (pthread_once_t) PTHREAD_ONCE_INIT;
-static int lisp_initialize_success;
-
-static typedef struct LispCanonicalName {
-  int special, const char *spelling;
-  Var *value;
-} LispCanonicalName;
-
-static const LispCanonicalName lisp_canonical_names[] = {
-  { LISP_QUOTE,      "quote",            &lsym_quote },
-  { LISP_QUASIQUOTE, "quasiquote",       &lsym_quasiquote },
-  { -1,              "unquote",          &lsym_unquote },
-  { -1,              "unquote-splicing", &lsym_splicing },
-  { LISP_COND,       "cond",             &lsym_cond },
-  { LISP_DEF,        "def",              &lsym_def },
-  { LISP_BIND,       "bind",             &lsym_bind },
-  { LISP_EVAL,       "eval",             &lsym_eval },
-  { LISP_LAMBDA,     "lambda",           &lsym_lambda },
-  { LISP_MACRO,      "macro",            &lsym_macro },
-  { LISP_IMPORT,     "import",           &lsym_import },
-  { LISP_APPLY,      "apply",            &lsym_apply }
-};
-
-static unsigned _canonical_count(void) =>
-  sizeof(lisp_canonical_names) / sizeof(lisp_canonical_names[0]);
-
-static const LispCanonicalName *_special_name(int special) {
-  for (unsigned i = 0; i < _canonical_count(); i++)
-    if (lisp_canonical_names[i].special == special)
-      return &lisp_canonical_names[i];
-  return NULL;
-}
 
 static void _initialize_once(void) {
   Var values[sizeof(lisp_canonical_names) / sizeof(lisp_canonical_names[0])];
@@ -382,8 +370,8 @@ static Var _apply(Lisp lisp, Var callable, List raw, LispEnv *env) {
   if (callable is <lambda>) return _apply_lambda(lisp, callable, raw, env);
   if (callable is not <func>) $error.call.type(callable);
   Func fn = (Func) callable.pointer();
-  int special = _special_id(lisp, fn);
-  if (special >= 0) return _apply_special(lisp, special, raw, env);
+  Symbol special = _special_id(lisp, fn);
+  if (special) return _apply_special(lisp, special, raw, env);
   int count = raw.len();
   FuncArg narrow[LISP_NATIVE_ARG_MAX];
   FuncArg *argv = count <= LISP_NATIVE_ARG_MAX
@@ -395,11 +383,11 @@ static Var _apply(Lisp lisp, Var callable, List raw, LispEnv *env) {
 }
 
 /* The special form whose reserved Func is `function`, compared by
-   identity, or -1 for any other Func. */
-static int _special_id(Lisp lisp, Func fn) {
-  for (int i = 0; i < LISP_SPECIAL_COUNT; i++)
-    if (lisp.specials[i] == fn) return i;
-  return -1;
+   identity, or zero for any other Func. */
+static Symbol _special_id(Lisp lisp, Func fn) {
+  for (unsigned i = 0; i < _canonical_count(); i++)
+    if (lisp.specials[i] == fn) return lisp_canonical_names[i].special;
+  return 0;
 }
 
 /* Applies `callable` to evaluated `values`. A macro, or a special form other
@@ -413,9 +401,9 @@ static Var _apply_values(
   }
   if (callable is not <func>) $error.call.type(callable);
   Func fn = (Func) callable.pointer();
-  int special = _special_id(lisp, fn);
-  if (special < 0) return _call_native(lisp, fn, values);
-  if (special != LISP_APPLY) _not_procedure(callable);
+  Symbol special = _special_id(lisp, fn);
+  if (!special) return _call_native(lisp, fn, values);
+  if (special != <apply>) _not_procedure(callable);
   _arity(values, 2, "apply");
   List rest = _list_argument(values.cadr());
   return _apply_values(lisp, values.car(), rest, env);
@@ -437,17 +425,17 @@ static Var _call_native(Lisp lisp, Func fn, List values) {
    A special form receives its argument forms unevaluated and evaluates only
    the ones its rule selects. Each form checks its own shape first. */
 
-static Var _apply_special(Lisp lisp, int id, List args, LispEnv *env) {
+static Var _apply_special(Lisp lisp, Symbol id, List args, LispEnv *env) {
   switch (id) {
-    case LISP_QUOTE:      return _special_quote(args);
-    case LISP_DEF:        return _special_def(lisp, args, env);
-    case LISP_COND:       return _special_cond(lisp, args, env);
-    case LISP_LAMBDA:     return _make_lambda(lisp, args, env, 0);
-    case LISP_MACRO:      return _make_lambda(lisp, args, env, 1);
-    case LISP_QUASIQUOTE: return _special_quasiquote(lisp, args, env);
-    case LISP_EVAL:       return _special_eval(lisp, args, env);
-    case LISP_BIND:       return _special_bind(lisp, args, env);
-    case LISP_APPLY:      return _special_apply(lisp, args, env);
+    case <quote>:      return _special_quote(args);
+    case <def>:        return _special_def(lisp, args, env);
+    case <cond>:       return _special_cond(lisp, args, env);
+    case <lambda>:     return _make_lambda(lisp, args, env, 0);
+    case <macro>:      return _make_lambda(lisp, args, env, 1);
+    case <quasiquote>: return _special_quasiquote(lisp, args, env);
+    case <eval>:       return _special_eval(lisp, args, env);
+    case <bind>:       return _special_bind(lisp, args, env);
+    case <apply>:      return _special_apply(lisp, args, env);
   }
   return _special_import(lisp, args, env);
 }
@@ -684,15 +672,15 @@ static void _free_call(FreeNames &f, List items, List bound) {
     _all(f, items.cdr(), bound, -1);
     return;
   }
-  int special = callable is <func>
-    ? _special_id(f.lisp, (Func) callable.pointer()) : -1;
-  if (special == LISP_QUOTE) return;
-  if (special == LISP_LAMBDA || special == LISP_MACRO) {
+  Symbol special = callable is <func>
+    ? _special_id(f.lisp, (Func) callable.pointer()) : 0;
+  if (special == <quote>) return;
+  if (special == <lambda> || special == <macro>) {
     List rest = items.cdr(), params = _with_params(bound, rest);
     _all(f, rest.cdr(), params, 0);
     return;
   }
-  int inner = special == LISP_QUASIQUOTE ? 1 :
+  int inner = special == <quasiquote> ? 1 :
     callable is <lambda> && ((Lambda) callable).macro ? -1 : 0;
   _all(f, items.cdr(), bound, inner);
 }
@@ -854,7 +842,7 @@ static Var _eval_tail(Lisp lisp, Var expr, LispEnv *env) {
     Var callable = _eval(lisp, form.car(), env);
     List raw = form.cdr();
     if (callable is <func> &&
-        _special_id(lisp, (Func) callable.pointer()) == LISP_COND) {
+        _special_id(lisp, (Func) callable.pointer()) == <cond>) {
       expr = _cond_select(lisp, raw, env);
       if (expr is void) return %();
       continue;
@@ -1781,8 +1769,9 @@ Lisp Lisp.kernel(void) {
 /* A special form's reserved value is a distinct stub Func, which the
    evaluator recognizes by identity. */
 static void _install_specials(Lisp lisp) {
-  for (int i = 0; i < LISP_SPECIAL_COUNT; i++) {
-    const LispCanonicalName *info = _special_name(i);
+  for (unsigned i = 0; i < _canonical_count(); i++) {
+    const LispCanonicalName *info = &lisp_canonical_names[i];
+    if (!info.special) continue;
     lisp.specials[i] = Func.new(_special_stub, $!Type{ Var (void) });
     Atom name = Atom.intern(info.spelling);
     lisp.reserved[name] = lisp.specials[i];
@@ -1833,7 +1822,7 @@ void Lisp.adopt(Lisp lisp, Lisp parent) {
   if (!lisp || !parent) return;
   lisp.parent = parent;
   $scope(&lisp.scope) lisp.reserved = {};
-  for (int i = 0; i < LISP_SPECIAL_COUNT; i++)
+  for (unsigned i = 0; i < _canonical_count(); i++)
     lisp.specials[i] = parent.specials[i];
 }
 
@@ -1959,7 +1948,7 @@ Var Lisp.eval_string(Lisp lisp, String source) {
 Var Lisp.eval_file(Lisp l, File source) {
   if (!source) raise %(bad-arg (operation "Lisp.eval_file"));
   Block content = $auto(Block.new(sizeof(char)));
-  if (source.read_into(content) == FILE_READ_EOF) return l.eval_string(NULL);
+  if (source.read_into(content) == <eof>) return l.eval_string(NULL);
   if (content.length > INT_MAX) {
     size_t size = content.length, int limit = INT_MAX;
     raise %(size-limit (operation "Lisp.eval_file") (size $size)

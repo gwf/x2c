@@ -224,6 +224,40 @@ String Compiler.home_libexec(void) {
   return home ? %"$home/libexec/x2c" : NULL;
 }
 
+/** Returns an executable command in this compiler's libexec, or NULL. */
+String Compiler.command_path(String name) {
+  String libexec = Compiler.home_libexec();
+  if (!libexec) return NULL;
+  String path = %"$libexec/x2c-$name";
+  return Path.is_executable(path) ? path : NULL;
+}
+
+/** Returns the home, driver, and identity supplied to external commands. */
+Map Compiler.command_environment(void) {
+  Map environment = {};
+  String home = Compiler.home_dir(), driver = Compiler.driver_executable();
+  String identity = Compiler.identity();
+  if (home) environment["X2C_HOME"] = home;
+  if (driver) environment["X2C"] = driver;
+  if (identity) environment["X2C_IDENTITY"] = identity;
+  return environment;
+}
+
+/** Runs an external command with inherited streams and returns its status.
+    Resolves only this compiler's libexec and passes literal arguments without
+    a shell. An unavailable command reports an error and exits with status 2.
+*/
+int Compiler.run_command(String name, List arguments) {
+  String path = Compiler.command_path(name);
+  if (!path)
+    Diagnostics.driver_error(
+      %"missing x2c-$name command; install the matching x2c commands");
+  Map options = {env: Compiler.command_environment(), stdout: <inherit>};
+  try return %($path @arguments).job().options(options).status();
+  catch %((!or not-found io-fail) *detail): Diagnostics.host_error(detail);
+  return 2;
+}
+
 /** Returns the borrowed default include `List`, `<root>/include/x2c`.
     Returns NULL before environment setup.
 */

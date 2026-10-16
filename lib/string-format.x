@@ -51,7 +51,7 @@ static macro Expression $reason.range(Expr $label) => %"${$label} exceeds int ra
    none, the precision or a negative value for none, a length modifier, and
    the conversion byte. */
 static typedef struct Spec {
-  int flags, width, precision, modifier;
+  int flags, width, precision, Symbol modifier;
   char conversion;
 } Spec;
 
@@ -59,11 +59,10 @@ static typedef struct Spec {
 static const char _format_flags[] = "-+ #0";
 static enum { FORMAT_LEFT = 1 };
 
-// The length modifiers, spelled at their values; zero is none.
+// The length modifiers and their native spellings in the same order.
+static const SymbolSet format_modifiers =
+  %<<none char short long llong ldouble>>;
 static const char *const _format_modifiers[] = {"", "hh", "h", "l", "ll", "L"};
-static enum {
-  FORMAT_HH = 1, FORMAT_H = 2, FORMAT_L = 3, FORMAT_LL = 4, FORMAT_CAP_L = 5
-};
 
 /* One pass of `String.format`. The bytes from `literal` to `cursor` are
    text not yet written, `offset` is the `%` of the conversion being read,
@@ -202,18 +201,18 @@ static int _byte(Format &f) => f.fmt[f.cursor];
 
 static int _digit(Format &f) => _byte(f) >= '0' && _byte(f) <= '9';
 
-static int _modifier(Format &f) {
+static Symbol _modifier(Format &f) {
   switch (_byte(f)) {
-    case 'h': return _doubled(f, 'h', FORMAT_H, FORMAT_HH);
-    case 'l': return _doubled(f, 'l', FORMAT_L, FORMAT_LL);
-    case 'L': f.cursor++; return FORMAT_CAP_L;
+    case 'h': return _doubled(f, 'h', <short>, <char>);
+    case 'l': return _doubled(f, 'l', <long>, <llong>);
+    case 'L': f.cursor++; return <ldouble>;
     case 'j': case 'z': case 't': _fail(f, $reason.length());
   }
-  return 0;
+  return <none>;
 }
 
 /* `h` or `hh`, and `l` or `ll`. */
-static int _doubled(Format &f, char letter, int once, int twice) {
+static Symbol _doubled(Format &f, char letter, Symbol once, Symbol twice) {
   f.cursor++;
   if (_byte(f) != letter) return once;
   f.cursor++;
@@ -228,12 +227,12 @@ static void _check(Format &f, Spec spec) {
   int floating = strchr("fFeEgGaA", ch) != NULL, text = ch == 'c' || ch == 's';
   if (ch == '$') _fail(f, $reason.positional());
   if (!integer && !floating && !text) _fail(f, $reason.conversion());
-  if (integer && spec.modifier == FORMAT_CAP_L)
+  if (integer && spec.modifier == <ldouble>)
     _fail(f, $reason.integer_length());
-  if (floating && spec.modifier && spec.modifier != FORMAT_L &&
-      spec.modifier != FORMAT_CAP_L)
+  if (floating && spec.modifier != <none> && spec.modifier != <long> &&
+      spec.modifier != <ldouble>)
     _fail(f, $reason.floating_length());
-  if (text && spec.modifier)
+  if (text && spec.modifier != <none>)
     _fail(f, $reason.wide_text());
   if (text && (spec.flags & ~FORMAT_LEFT))
     _fail(f, $reason.flag());
@@ -272,7 +271,9 @@ static void _spell(Spec s, char *out) {
     if (s.flags & 1 << bit) out[n++] = _format_flags[bit];
   if (s.width) n += snprintf(out + n, 16, "%d", s.width);
   if (s.precision >= 0) n += snprintf(out + n, 16, ".%d", s.precision);
-  snprintf(out + n, 8, "%s%c", _format_modifiers[s.modifier], s.conversion);
+  snprintf(
+    out + n, 8, "%s%c",
+    _format_modifiers[format_modifiers.index(s.modifier)], s.conversion);
 }
 
 // The type each modifier converts an integer to, signed then unsigned.
@@ -285,9 +286,10 @@ static const Symbol _integer_targets[][2] = {
    long, which prints every narrower value as its own modifier would. */
 static Buffer _integer(Format &f, Spec spec, Var arg) {
   int is_unsigned = strchr("ouxX", spec.conversion) != NULL;
-  Var value = _number(f, arg, _integer_targets[spec.modifier][is_unsigned]);
+  int modifier = format_modifiers.index(spec.modifier);
+  Var value = _number(f, arg, _integer_targets[modifier][is_unsigned]);
   char text[48];
-  spec.modifier = FORMAT_LL;
+  spec.modifier = <llong>;
   _spell(spec, text);
   if (is_unsigned) return f.out.printf(text, value.ulong_long());
   return f.out.printf(text, value.long_long());
@@ -295,8 +297,8 @@ static Buffer _integer(Format &f, Spec spec, Var arg) {
 
 /* `L` prints a long double, and the other modifiers a double. */
 static Buffer _floating(
-  Format &f, const char *text, int modifier, Var arg) {
-  if (modifier == FORMAT_CAP_L)
+  Format &f, const char *text, Symbol modifier, Var arg) {
+  if (modifier == <ldouble>)
     return f.out.printf(text, _number(f, arg, <ldouble>).long_double_value());
   return f.out.printf(text, _number(f, arg, <f64>).floating());
 }

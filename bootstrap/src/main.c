@@ -8,8 +8,6 @@
 #include "project.h"
 #include "frontend.h"
 #include "meta-project.h"
-#include "editor.h"
-#include "install.h"
 #include "script.h"
 #include "toolchain.h"
 #include <ctype.h>
@@ -31,7 +29,7 @@
 #include "generate.h"
 #include "format.h"
 #include "protocol.h"
-static String _53, _52, _51, _50, _48, _46, _44, _42, _40, _38, _36, _34, _32, _30, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1;
+static String _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _48, _46, _44, _42, _40, _38, _36, _34, _32, _30, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1;
 
 static Var _49, _47, _45, _43, _41, _39, _37, _35, _33, _31, _29, _0;
 
@@ -167,6 +165,10 @@ static int _external_name(const char * name);
 
 static void _exec(String path, char * * args);
 
+static int _run_package(CliRequest request);
+
+static int _run_new(CliRequest request);
+
 static int _run_compiler(CliRequest request);
 
 static void _configure_logging(int debugging);
@@ -267,10 +269,16 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _47 = String_var(_46);
   _48 = String_new("cache_dir");
   _49 = String_var(_48);
-  _50 = String_new("/x2c-");
-  _51 = String_new("cannot run external command \'");
-  _52 = String_new("\': ");
-  _53 = String_new("cannot open diagnostics file \'");
+  _50 = String_new("cannot run external command \'");
+  _51 = String_new("\': ");
+  _52 = String_new("--quiet");
+  _53 = String_new("--force");
+  _54 = String_new("--index");
+  _55 = String_new("--sha256");
+  _56 = String_new("--");
+  _57 = String_new("package");
+  _58 = String_new("new");
+  _59 = String_new("cannot open diagnostics file \'");
 }
 
 void Compiler_dump_tokens(Compiler);
@@ -1321,17 +1329,9 @@ static void _run_external(int argc, char * * argv){
   if(String_truth(path)) _exec(path, args);
 }
 
-int Path_is_executable(Path);
-
 static String _external_path(const char * name){
   if(! _external_name(name) || CliRequest_is_builtin(name)) return NULL;
-  String libexec = Compiler_home_libexec();
-  if(! String_truth(libexec)) return NULL;
-  String path =({
-    Var _x2c_gensym_literal_part_14 = String_var(libexec);  Var _x2c_gensym_literal_part_15 = String_var(String_new(name));  String_join(NULL, cons(_x2c_gensym_literal_part_14, cons(String_var(_50), cons(_x2c_gensym_literal_part_15, NULL))));
-  }
-  );
-  return Path_is_executable(path) ? path : NULL;
+  return Compiler_command_path(String_new(name));
 }
 
 static int _external_name(const char * name){
@@ -1341,17 +1341,70 @@ static int _external_name(const char * name){
 }
 
 static void _exec(String path, char * * args){
-  String home = Compiler_home_dir(), executable = x2c_get_executable();
-  String identity = Compiler_identity();
-  if(String_truth(home)) setenv("X2C_HOME", home, 1);
-  if(String_truth(executable)) setenv("X2C", executable, 1);
-  if(String_truth(identity)) setenv("X2C_IDENTITY", identity, 1);
+  {
+    String name, value;
+    Map _x2c_gensym_macro_object_16 = Compiler_command_environment();
+    unsigned _x2c_gensym_macro_cursor_16 = 0;
+    Var _x2c_gensym_macro_cursor_output_15;
+    Var _x2c_gensym_macro_cursor_output_16;
+    while(Map_try_next(_x2c_gensym_macro_object_16, &(_x2c_gensym_macro_cursor_16), &(_x2c_gensym_macro_cursor_output_15), &(_x2c_gensym_macro_cursor_output_16))){
+      name = Var_as_string(_x2c_gensym_macro_cursor_output_15);
+      value = Var_as_string(_x2c_gensym_macro_cursor_output_16);
+      setenv(name, value, 1);
+    }
+
+  }
   args[0] = path;
   execv(path, args);
   Diagnostics_driver_error(({
-    Var _x2c_gensym_literal_part_16 = String_var(path);  Var _x2c_gensym_literal_part_17 = String_var(String_new(strerror(errno)));  String_join(NULL, cons(String_var(_51), cons(_x2c_gensym_literal_part_16, cons(String_var(_52), cons(_x2c_gensym_literal_part_17, NULL)))));
+    Var _x2c_gensym_literal_part_14 = String_var(path);  Var _x2c_gensym_literal_part_15 = String_var(String_new(strerror(errno)));  String_join(NULL, cons(String_var(_50), cons(_x2c_gensym_literal_part_14, cons(String_var(_51), cons(_x2c_gensym_literal_part_15, NULL)))));
   }
   ));
+}
+
+static int _run_package(CliRequest request){
+  Array args = Array_update_n(Array_new(), 1, String_var(Symbol_str(request -> command)));
+  if(request -> quiet) Array_push(args, String_var(_52));
+  if(request -> force) Array_push(args, String_var(_53));
+  if(String_truth(request -> index)){
+    Array_push(args, String_var(_54));
+    Array_push(args, String_var(request -> index));
+  }
+  if(String_truth(request -> sha256)){
+    Array_push(args, String_var(_55));
+    Array_push(args, String_var(request -> sha256));
+  }
+  Array_push(args, String_var(_56));
+  {
+    String input;
+    List _x2c_gensym_macro_object_17 = request -> inputs;
+    List _x2c_gensym_macro_cursor_17 = _x2c_gensym_macro_object_17;
+    Var _x2c_gensym_macro_cursor_output_17;
+    while(List_try_next(_x2c_gensym_macro_object_17, &(_x2c_gensym_macro_cursor_17), &(_x2c_gensym_macro_cursor_output_17))){
+      input = Var_as_string(_x2c_gensym_macro_cursor_output_17);
+      Array_push(args, String_var(input));
+    }
+
+  }
+  return Compiler_run_command(_57, Array_list(args));
+}
+
+static int _run_new(CliRequest request){
+  Array args = Array_new();
+  if(request -> quiet) Array_push(args, String_var(_52));
+  Array_push(args, String_var(_56));
+  {
+    String input;
+    List _x2c_gensym_macro_object_18 = request -> inputs;
+    List _x2c_gensym_macro_cursor_18 = _x2c_gensym_macro_object_18;
+    Var _x2c_gensym_macro_cursor_output_18;
+    while(List_try_next(_x2c_gensym_macro_object_18, &(_x2c_gensym_macro_cursor_18), &(_x2c_gensym_macro_cursor_output_18))){
+      input = Var_as_string(_x2c_gensym_macro_cursor_output_18);
+      Array_push(args, String_var(input));
+    }
+
+  }
+  return Compiler_run_command(_58, Array_list(args));
 }
 
 int diagnostics_write_json(String);
@@ -1360,22 +1413,16 @@ int main(int argc, char * * argv){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   x2c_initialize_environment(argv[0]);
-  if(argc > 1 && ! strcmp(argv[1], "editor")){
-    argv[1] = argv[0];
-    return editor_request(argc - 1, argv + 1);
-  }
   if(argc > 1) _run_external(argc, argv);
   CliRequest request = CliRequest_parse(argc, argv);
   String diagnostics = request -> diagnostics_file;
-  if(String_truth(diagnostics) && ! diagnostics_write_json(diagnostics)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_53), cons(String_var(diagnostics), cons(String_var(_26), NULL)))));
+  if(String_truth(diagnostics) && ! diagnostics_write_json(diagnostics)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_59), cons(String_var(diagnostics), cons(String_var(_26), NULL)))));
   if(request -> command == 1282559016 && CliRequest_prepare_script(request)) return 0;
   report_configure(request -> quiet, request -> plain, request -> color_mode, request -> verbose || request -> debugging, request -> dry_run, CliRequest_inspects(request));
   switch(request -> command){
     case 11180 : return _run_env(request);
-    case 20308036376 : return CliRequest_install(request);
-    case 1219329418 : return CliRequest_remove_package(request);
-    case 806120 : return CliRequest_list_packages(request);
-    case 29038 : return CliRequest_new_project(request);
+    case 20308036376 : case 1219329418 : case 806120 : return _run_package(request);
+    case 29038 : return _run_new(request);
   }
   return _run_compiler(request);
 }

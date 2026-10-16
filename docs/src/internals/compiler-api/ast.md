@@ -47,7 +47,7 @@ Shared helpers for x2c compiler AST nodes.
 
 Returns the name whose address an expression takes, or `NULL`.
 
-Source: `src/ast.x:152`
+Source: `src/ast.x:141`
 
 <a id="Ast.append_modifiers"></a>
 #### Ast.append_modifiers
@@ -57,7 +57,7 @@ Source: `src/ast.x:152`
 Returns `declarator` with `modifiers` after its own, as a declaration
 whose base contributes modifiers declares each name.
 
-Source: `src/ast.x:70`
+Source: `src/ast.x:59`
 
 <a id="Ast.binding"></a>
 #### Ast.binding
@@ -67,7 +67,7 @@ Source: `src/ast.x:70`
 Constructs a `(binding identity spelling)` node.
 The caller must supply a positive compiler-issued identity.
 
-Source: `src/ast.x:41`
+Source: `src/ast.x:30`
 
 <a id="Ast.binding_spelling"></a>
 #### Ast.binding_spelling
@@ -76,7 +76,7 @@ Source: `src/ast.x:41`
 
 Returns a valid binding node's source spelling, or `NULL`.
 
-Source: `src/ast.x:61`
+Source: `src/ast.x:50`
 
 <a id="Ast.collect_binding_references"></a>
 #### Ast.collect_binding_references
@@ -85,7 +85,7 @@ Source: `src/ast.x:61`
 
 Records in `referenced` the identity of every binding `node` names.
 
-Source: `src/ast.x:267`
+Source: `src/ast.x:256`
 
 <a id="Ast.contains_head"></a>
 #### Ast.contains_head
@@ -94,7 +94,7 @@ Source: `src/ast.x:267`
 
 Returns whether any list under `value` has `kind` as its head.
 
-Source: `src/ast.x:229`
+Source: `src/ast.x:218`
 
 <a id="Ast.designated"></a>
 #### Ast.designated
@@ -106,7 +106,7 @@ name the same object: an `expr` wrapper, parentheses, a member, and an
 index into an array. What remains is a name, a designation through a
 pointer, or another expression; a non-list designates nothing.
 
-Source: `src/ast.x:125`
+Source: `src/ast.x:114`
 
 <a id="Ast.direct_identifier"></a>
 #### Ast.direct_identifier
@@ -119,7 +119,7 @@ a dereference - or `NULL` when the expression designates no single name.
 A declaration qualifier that must reach one object, such as the `volatile`
 an error transfer requires, applies to this name.
 
-Source: `src/ast.x:171`
+Source: `src/ast.x:160`
 
 <a id="Ast.entry_call"></a>
 #### Ast.entry_call
@@ -128,7 +128,7 @@ Source: `src/ast.x:171`
 
 Returns the statement calling the `void (void)` function `entry`.
 
-Source: `src/ast.x:321`
+Source: `src/ast.x:310`
 
 <a id="Ast.indirect_identifier"></a>
 #### Ast.indirect_identifier
@@ -140,7 +140,7 @@ Returns the name of the pointer an expression designates through, or
 `pointer[index]`, and `pointer->member` all change the object the pointer
 holds, which `Ast.direct_identifier` reports as no name at all.
 
-Source: `src/ast.x:189`
+Source: `src/ast.x:178`
 
 <a id="Ast.initializer_cases"></a>
 #### Ast.initializer_cases
@@ -149,7 +149,7 @@ Source: `src/ast.x:189`
 
 Returns initializer alternatives and their optional native macro input.
 
-Source: `src/ast.x:399`
+Source: `src/ast.x:388`
 
 <a id="Ast.initializer_functions"></a>
 #### Ast.initializer_functions
@@ -160,7 +160,7 @@ Returns function alternatives when every initializer arm calls one shared
 input, and stores that input expression in `source`. Other forms return
 NULL.
 
-Source: `src/ast.x:413`
+Source: `src/ast.x:402`
 
 <a id="Ast.lvalue_binding"></a>
 #### Ast.lvalue_binding
@@ -171,7 +171,7 @@ Returns the binding whose stored object the lvalue `ast` names, or
 `NULL`. Pointer dereferences and pointer indexes name another object; an
 array field remains part of its containing aggregate.
 
-Source: `src/ast.x:144`
+Source: `src/ast.x:133`
 
 <a id="Ast.never_returns"></a>
 #### Ast.never_returns
@@ -184,7 +184,7 @@ calls, and blocks ending in either one when the block contains no
 `return`. Generation uses this fact to mark the enclosing function
 `_Noreturn`.
 
-Source: `src/ast.x:346`
+Source: `src/ast.x:335`
 
 <a id="Ast.prototype_declarator"></a>
 #### Ast.prototype_declarator
@@ -197,7 +197,7 @@ compares a prototype with its definition, and the qualifier the error
 transfer requires belongs to the definition that writes the parameter,
 not to the declaration its callers read.
 
-Source: `src/ast.x:88`
+Source: `src/ast.x:77`
 
 <a id="Ast.reference_guard_exits"></a>
 #### Ast.reference_guard_exits
@@ -206,7 +206,7 @@ Source: `src/ast.x:88`
 
 Returns whether `arm` ends with a return or non-returning raise.
 
-Source: `src/ast.x:327`
+Source: `src/ast.x:316`
 
 <a id="Ast.replace_nodes"></a>
 #### Ast.replace_nodes
@@ -219,7 +219,7 @@ to `replaced`. Only the ancestors of a swapped list are new, so `root`
 returns itself when nothing beneath it is swapped. The walk keeps deep
 expression chains off the C stack.
 
-Source: `src/ast.x:240`
+Source: `src/ast.x:229`
 
 <a id="Ast.rewrap_origin"></a>
 #### Ast.rewrap_origin
@@ -229,7 +229,7 @@ Source: `src/ast.x:240`
 Returns `replacement` under the anchors of `original`, the statement it
 replaces, so a rewrite does not lose the node's source position.
 
-Source: `src/ast.x:299`
+Source: `src/ast.x:288`
 
 <a id="Ast.rewrite_children"></a>
 #### Ast.rewrite_children
@@ -241,7 +241,7 @@ rebuilt from the results; non-list children pass through. When no child
 changed, no scratch storage is allocated and `ast` itself returns, so the
 fixed-point transform driver can compare unchanged-node identity.
 
-Source: `src/ast.x:223`
+Source: `src/ast.x:212`
 
 <a id="Ast.try_binding"></a>
 #### Ast.try_binding
@@ -252,7 +252,7 @@ Extracts a valid `(binding positive-integer string)` node.
 Returns one on success and writes only non-`NULL` outputs; failure returns
 zero without changing either output.
 
-Source: `src/ast.x:48`
+Source: `src/ast.x:37`
 
 <a id="Ast.without_origin"></a>
 #### Ast.without_origin
@@ -264,7 +264,7 @@ in. Every block statement carries one so that a transform-phase
 diagnostic can name its line; a pass that dispatches on a statement tag
 has to see the statement, not the anchor.
 
-Source: `src/ast.x:287`
+Source: `src/ast.x:276`
 
 <a id="Ast.written_definitions"></a>
 #### Ast.written_definitions
@@ -275,7 +275,7 @@ Returns `decl` with each function definition marked `kernel` as written.
 The transform strips the marker before it offers the definition only to
 shipped function rules.
 
-Source: `src/ast.x:311`
+Source: `src/ast.x:300`
 
 <a id="Ast.written_operand"></a>
 #### Ast.written_operand
@@ -286,7 +286,7 @@ Returns the operand a write `node` changes: the left operand of an
 assignment or prefix update, or the operand of a postfix update; `NULL`
 when `node` writes no operand.
 
-Source: `src/ast.x:206`
+Source: `src/ast.x:195`
 
 ### `Symbol`
 
@@ -297,7 +297,7 @@ Source: `src/ast.x:206`
 
 Returns whether `op` writes its left operand.
 
-Source: `src/ast.x:393`
+Source: `src/ast.x:382`
 
 <a id="Symbol.is_assignment_op"></a>
 #### Symbol.is_assignment_op
@@ -306,14 +306,13 @@ Source: `src/ast.x:393`
 
 Returns whether `op` is plain or compound assignment.
 
-Source: `src/ast.x:389`
+Source: `src/ast.x:378`
 
 ## Public types
 
 | Type | Kind | Summary |
 | --- | --- | --- |
 | [`Ast`](#Ast) | alias | Represents one compiler AST node as a canonical immutable `List`. |
-| [`AstPos`](#AstPos) | enum | Names the syntactic position in which an AST is parsed or bound. |
 
 <a id="Ast"></a>
 ### Ast
@@ -325,15 +324,6 @@ Represents one compiler AST node as a canonical immutable `List`.
 lifetime.
 
 Source: `src/ast.x:13`
-
-<a id="AstPos"></a>
-### AstPos
-
-`typedef enum AstPos { AST_UNIT, AST_BLOCK, AST_FIELD, AST_ENUMERATOR, AST_MAP_ENTRY, AST_STATEMENT, AST_EXPRESSION } AstPos`
-
-Names the syntactic position in which an AST is parsed or bound.
-
-Source: `src/ast.x:16`
 
 ## Design notes
 

@@ -1,6 +1,7 @@
 # Semantic editor worker
 
-The compiler owns semantic requests through private `x2c editor` dispatch.
+The shipped `x2c-editor` command owns semantic requests through private
+`x2c editor` dispatch and uses the shared compiler frontend.
 See the book's
 [VS Code setup and configuration](../../docs/src/reference/cli.md#vs-code-diagnostics-definitions-and-hover).
 
@@ -8,6 +9,7 @@ For users with an explicit legacy `x2c.semantic.workerPath`, this directory
 retains a thin compatibility launcher:
 
 ```sh
+make commands
 make -C tools/x2c-editor
 make -C tools/x2c-editor test
 ```

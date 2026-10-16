@@ -143,7 +143,7 @@ Source: `src/meta-native.x:334`
 <a id="Compiler.evaluate_meta_statement"></a>
 #### Compiler.evaluate_meta_statement
 
-`List Compiler.evaluate_meta_statement( Compiler c, List expression, AstPos context, Token site)`
+`List Compiler.evaluate_meta_statement( Compiler c, List expression, Symbol context, Token site)`
 
 Executes an explicit meta call written as a whole statement at
 `context`. A code List result binds there, so the call may return a

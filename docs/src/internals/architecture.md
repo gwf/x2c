@@ -563,8 +563,9 @@ The modules under `src/` divide ownership as follows:
   and host compile/archive/link actions;
 - `src/report.x` -- dependency-free terminal progress and stable completion
   receipts on standard error;
-- `src/install.x` -- package installation, removal, and listing under the
-  x2c home, with fetch, digest, and extraction as host child processes;
+- `commands/package/` -- package installation, removal, and listing under the
+  x2c home, project lockfile preparation, and source-package builds through
+  the matching compiler; fetch, digest, and extraction use host tools;
 - `src/script.x` -- `x2c script`: the per-user executable cache, its lock,
   and executing a current or freshly built script;
 - `src/deps.x` -- x2c dependency parsing and atomic depfile publication;
@@ -628,7 +629,7 @@ The modules under `src/` divide ownership as follows:
 - `src/format.x` -- C tokens to text;
 - `src/diagnostics.x` -- recorded diagnostics;
 - `src/sourceview.x` -- request-owned source overlays and logical file paths;
-- `src/editor.x` -- one-request diagnostics, definition, and hover transport
+- `commands/editor/editor.x` -- one-request diagnostics, definition, and hover transport
   over the configured frontend and source overlays.
 
 The internal frontend is shared by the CLI, editor, and source graph tool. A

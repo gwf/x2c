@@ -739,8 +739,8 @@ $fixtures/flows-ambiguous.x"
     "$tmp/flows-line"
   grep -q '(step local "produced" .* (step assignment "assigned"' \
     "$tmp/flows-line"
-  grep -q '(argument 1 (identifier "AST_FIELD"))' "$tmp/flows-line"
-  grep -q '(argument 1 (identifier "AST_MAP_ENTRY"))' "$tmp/flows-line"
+  grep -q '(argument 1 (literal "<field>"))' "$tmp/flows-line"
+  grep -q '(argument 1 (literal "<map-entry>"))' "$tmp/flows-line"
   for reason in ambiguous-call computed-call field-storage mutation; do
     grep -q "(unresolved \"$reason\"" "$tmp/flows-line"
   done
@@ -759,7 +759,7 @@ $fixtures/flows-ambiguous.x"
     "$tmp/flows-helper-line"
   grep -q '(step call "helper_consume_parameter"' \
     "$tmp/flows-helper-line"
-  grep -q '(argument 1 (identifier "AST_STATEMENT"))' \
+  grep -q '(argument 1 (literal "<statement>"))' \
     "$tmp/flows-helper-line"
 
   $tool flows alias_produce alias_consume \
@@ -776,7 +776,7 @@ $fixtures/flows-ambiguous.x"
     "$tmp/flows-control-line"
   grep -q '(step return .* (step call "control_try_return"' \
     "$tmp/flows-control-line"
-  grep -q '(argument 1 (identifier "AST_MAP_ENTRY"))' \
+  grep -q '(argument 1 (literal "<map-entry>"))' \
     "$tmp/flows-control-line"
   grep -q '(unresolved "alias-merge"' "$tmp/flows-control-line"
 

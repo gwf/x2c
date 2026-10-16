@@ -18,7 +18,7 @@ X2c statement parsing.
 | [`Compiler.parse_callable_body`](#Compiler.parse_callable_body) | Parses a callable's outer block in its active parameter scope. |
 | [`Compiler.parse_case_body`](#Compiler.parse_case_body) | Parses a source match arm's guard and body, declaring its typed `types` captures, inside the arm scope that the binder opened. |
 | [`Compiler.parse_compound_statement`](#Compiler.parse_compound_statement) | Parses a compound body after its opening brace and consumes the closing `}`, returning an origin-anchored `(block ...)` node. |
-| [`Compiler.parse_governed`](#Compiler.parse_governed) | Parses the statement a control keyword or statement macro governs, or a block item at `AST_BLOCK`. |
+| [`Compiler.parse_governed`](#Compiler.parse_governed) | Parses the statement a control keyword or statement macro governs, or a block item at `<block>`. |
 | [`Compiler.parse_match_row_argument`](#Compiler.parse_match_row_argument) | Parses one MatchRow macro argument with the ordinary match-arm owner. |
 | [`Compiler.parse_source_clause`](#Compiler.parse_source_clause) | Parses the clause `kind` of a source `if`, `while`, `do`, `for`, `match`, or `try`, with the punctuation after it, when the binder reaches that clause. |
 | [`Compiler.parse_statement`](#Compiler.parse_statement) | Parses and binds one statement or statement-position macro at the current token. |
@@ -90,10 +90,10 @@ Source: `src/statements.x:740`
 <a id="Compiler.parse_governed"></a>
 #### Compiler.parse_governed
 
-`List Compiler.parse_governed(Compiler c, AstPos position)`
+`List Compiler.parse_governed(Compiler c, Symbol position)`
 
 Parses the statement a control keyword or statement macro governs, or a
-block item at `AST_BLOCK`. Directives written before it stay in front of
+block item at `<block>`. Directives written before it stay in front of
 it in a `(group DIRECTIVE... STATEMENT)`, which emits without braces, so
 each directive stays where C read it. A conditional group they open also
 takes the statement of each later arm and the closing directive, so a

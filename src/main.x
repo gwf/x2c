@@ -13,8 +13,6 @@ static keyword loop $private.loop;
 #include "project.x"
 #include "frontend.x"
 #include "meta-project.x"
-#include "editor.x"
-#include "install.x"
 #include "script.x"
 #include "toolchain.x"
 
@@ -806,10 +804,7 @@ static void _run_external(int argc, char **argv) {
 
 static String _external_path(const char *name) {
   if (!_external_name(name) || CliRequest.is_builtin(name)) return NULL;
-  String libexec = Compiler.home_libexec();
-  if (!libexec) return NULL;
-  String path = %"$libexec/x2c-$name";
-  return Path.is_executable(path) ? path : NULL;
+  return Compiler.command_path(String.new(name));
 }
 
 static int _external_name(const char *name) {
@@ -820,14 +815,39 @@ static int _external_name(const char *name) {
 }
 
 static void _exec(String path, char **args) {
-  String home = Compiler.home_dir(), executable = x2c_get_executable();
-  String identity = Compiler.identity();
-  if (home) setenv("X2C_HOME", home, 1);
-  if (executable) setenv("X2C", executable, 1);
-  if (identity) setenv("X2C_IDENTITY", identity, 1);
+  foreach (String (name, value), Compiler.command_environment())
+    setenv(name, value, 1);
   args[0] = path;
   execv(path, args);
   $report.main.external_failed(path);
+}
+
+/* Legacy commands keep CLI parsing and response-file expansion here. The
+   package command receives literal values and owns every package operation. */
+static int _run_package(CliRequest request) {
+  Array args = [request.command.str()];
+  if (request.quiet) args.push("--quiet");
+  if (request.force) args.push("--force");
+  if (request.index) {
+    args.push("--index");
+    args.push(request.index);
+  }
+  if (request.sha256) {
+    args.push("--sha256");
+    args.push(request.sha256);
+  }
+  args.push("--");
+  foreach (String input, request.inputs) args.push(input);
+  return Compiler.run_command("package", args);
+}
+
+/* Project creation receives literal values after ordinary CLI parsing. */
+static int _run_new(CliRequest request) {
+  Array args = [];
+  if (request.quiet) args.push("--quiet");
+  args.push("--");
+  foreach (String input, request.inputs) args.push(input);
+  return Compiler.run_command("new", args);
 }
 
 // entry point
@@ -841,10 +861,6 @@ static void _exec(String path, char **args) {
 */
 int main(int argc, char **argv) {
   x2c_initialize_environment(argv[0]);
-  if (argc > 1 && !strcmp(argv[1], "editor")) {
-    argv[1] = argv[0];
-    return editor_request(argc - 1, argv + 1);
-  }
   if (argc > 1) _run_external(argc, argv);
   CliRequest request = CliRequest.parse(argc, argv);
   String diagnostics = request.diagnostics_file;
@@ -857,10 +873,9 @@ int main(int argc, char **argv) {
     request.dry_run, request.inspects());
   switch (request.command) {
     case <env>:     return _run_env(request);
-    case <install>: return request.install();
-    case <remove>:  return request.remove_package();
-    case <list>:    return request.list_packages();
-    case <new>:     return request.new_project();
+    case <install>: case <remove>: case <list>:
+      return _run_package(request);
+    case <new>:     return _run_new(request);
   }
   return _run_compiler(request);
 }

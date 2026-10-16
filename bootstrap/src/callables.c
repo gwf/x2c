@@ -453,7 +453,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _249 = cons(_246, _248);
   _250 = List_var(_249);
   _251 = Symbol_var(1133019155420);
-  _252 = int_var(5438);
+  _252 = int_var(5436);
   _253 = cons(_252, NULL);
   _254 = cons(_251, _253);
   _255 = List_var(_254);
@@ -1285,7 +1285,7 @@ List Compiler_capture_environment(Compiler c, List name, List fields){
           }
           ));  Var _x2c_gensym_literal_part_7 = List_var(cons(_43, cons(List_var(cons(_44, cons(List_var(cons(_10, cons(_25, cons(_26, cons(List_var(name), NULL))))), _45))), NULL)));  cons(_46, cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, NULL)));
         }
-        )), NULL))), NULL)))), AST_UNIT, NULL);
+        )), NULL))), NULL)))), 1405544, NULL);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
           return _x2c_gensym_return_value_0;

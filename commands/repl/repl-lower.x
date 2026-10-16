@@ -212,13 +212,12 @@ static int _lower_cursor(Var test, struct LowerCursor &walk) {
    Direct `try_next` loops whose outputs live after the loop keep their
    storage. */
 static int _lower_cursor_addressed(Var form, struct LowerCursor &walk) {
-  if (form is not <list>) return 0;
-  List items = form;
-  match (items)
-    case %(op & (expr ? (ident (binding ?(int id) ?)))):
-      return id == walk.cursor || id == walk.item || id == walk.value;
-  foreach (Var part, items)
-    if (_lower_cursor_addressed(part, walk)) return 1;
+  List node;
+  $ast.walk(form, node)
+    match (node) case %(op & (expr ? (ident (binding ?(int id) ?)))): {
+      if (id == walk.cursor || id == walk.item || id == walk.value) return 1;
+      continue;
+    }
   return 0;
 }
 
@@ -733,13 +732,35 @@ static Var _lower_native_call(
              ($callable @values));
 }
 
+/* Declaration prefixes bind temporaries before a final value expression.
+   General statement blocks retain their separate control-flow boundary. */
+static Var _lower_statement_value(Lowering &l, List content) {
+  match (content) case %(parens (block *items)) if (items): {
+    Array declarations = $auto([]);
+    while (items.cdr()) {
+      List item = Ast.without_origin(items.car());
+      if (!item.match(%(declare ? ?)))
+        return $decline.expression.statement(l);
+      declarations.push(item);
+      items = items.cdr();
+    }
+    match (Ast.without_origin(items.car())) case %(stmnt ?expression): {
+      Map previous = l.env;
+      l.env = _lower_env_copy(l, l.env);
+      defer l.env = previous;
+      return _lower_block(l, declarations, %(value $expression));
+    }
+  }
+  return $decline.expression.statement(l);
+}
+
 /* Prepare native carriers in source order, then dispatch through Func.apply.
    Each branch evaluates just the value or just the address. */
 static Var _lower_application(Lowering &l, Var content) {
   List parts = l.compiler.func_call_parts(content);
   if (!parts) {
     if (List.match(content, %(parens (block *))))
-      return $decline.expression.statement(l);
+      return _lower_statement_value(l, content);
     return $decline.func.dynamic(l);
   }
   Var callee = _lower_expr(l, parts.car());
@@ -950,7 +971,7 @@ static Var _lower_lambda(Lowering &l, List params, List held, Var body) {
     return $decline.lambda.block(l);
   int automatic = l.automatic;
   Map previous = l.env;
-  l.env = _lower_env_copy(l);
+  l.env = _lower_env_copy(l, l.env);
   l.automatic = 0;
   defer {
     l.env = previous;
@@ -1160,14 +1181,8 @@ static Var _lower_expr(Lowering &l, Var form) {
       return %(quote ${(Symbol) strtoul(code, NULL, 10)});
     case %(expr ?type ?content):
       return _lower_content(l, type, content);
-    /* A literal template builds its List with `cons`, and folding replaced
-       only its constant parts, so each part is lowered as an expression. */
-    case %(cons ?head ?tail):
-      return %(cons ${_lower_expr(l, head)} ${_lower_expr(l, tail)});
-    case %(append ?head ?tail):
-      return %(append ${_lower_expr(l, head)} ${_lower_expr(l, tail)});
-    case %(nil):     return %(quote ());
-    case %(cache ?): return _lower_quoted(l, form);
+    case %(!or (cons ? ?) (append ? ?) (nil) (cache ?)):
+      return _lower_content(l, NULL, form);
   }
   return $decline.expression.expected(l);
 }
@@ -1258,7 +1273,7 @@ static Var _lower_content(Lowering &l, List type, Var content) {
         if (_lower_failed(l, place)) return void;
         return _lower_load(l, type, place);
       }
-      Symbol applied = _lower_compound(operator);
+      Symbol applied = ((Symbol) operator).compound_operator();
       if (applied)
         return _lower_update_expr(
           l, target, applied, _lower_expr(l, rhs));
@@ -1300,6 +1315,8 @@ static Var _lower_content(Lowering &l, List type, Var content) {
       return _lower_lambda(l, params, held, body);
     case %(lambda (params *params) ?body):
       return _lower_lambda(l, params, %(), body);
+    /* A literal template builds its List with `cons`, and folding replaced
+       only its constant parts, so each part is lowered as an expression. */
     case %(cons ?head ?tail):
       return %(cons ${_lower_expr(l, head)} ${_lower_expr(l, tail)});
     case %(append ?head ?tail):
@@ -1315,14 +1332,18 @@ static Var _lower_content(Lowering &l, List type, Var content) {
 /* The continuation after a block is data, not a closure: either the end of
    the function, or one more turn of the loop it sits inside. */
 
-static Map _lower_env_copy(Lowering &l) {
+static Map _lower_env_copy(Lowering &l, Map from) {
   Map copy = _lower_scratch_map(l.scratch);
-  foreach (Var (id, form), l.env) copy[id] = form;
+  foreach (Var (id, form), from) copy[id] = form;
   return copy;
 }
 
-static void _lower_env_restore(Lowering &l, Map saved) {
+/* Lowers `items` in an environment its bindings do not leave. */
+static Var _lower_block_apart(Lowering &l, List items, List k) {
+  Map saved = _lower_env_copy(l, l.env);
+  Var lowered = _lower_block(l, items, k);
   l.env = saved;
+  return lowered;
 }
 
 /* The bound ids a function over the live locals carries, in id order, so
@@ -1346,8 +1367,7 @@ static List _lower_here(Lowering &l, List k) =>
 static Var _lower_leave(Lowering &l, int target, List k) {
   LowerCleanup here = l.pending;
   Map inner = l.env;
-  l.env = _lower_scratch_map(l.scratch);
-  foreach (Var (id, form), here.env) l.env[id] = form;
+  l.env = _lower_env_copy(l, here.env);
   l.pending = here.outer;
   Var code = _lower_apply_k(l, %(at-depth $target $k));
   l.pending = here;
@@ -1361,6 +1381,7 @@ static Var _lower_leave(Lowering &l, int target, List k) {
 static Var _lower_apply_k(Lowering &l, List k) {
   match (k) {
     case %(end): return %(C.void);
+    case %(value ?expression): return _lower_expr(l, expression);
     case %(at-depth ?(int target) ?(List next)):
       return target < _lower_depth(l) ? _lower_leave(l, target, next)
                                       : _lower_apply_k(l, next);
@@ -1465,15 +1486,12 @@ static Var _lower_returned(Lowering &l, Var value) {
 /* The compiler bound each `?name` to an ordinary local, so the arm's body
    refers to it by binding id. Those ids are what the environment needs. */
 static void _lower_arm_ids(Var form, String name, Array found) {
-  if (form is not <list>) return;
-  List items = form;
-  if (!items) return;
-  match (items)
-    case %(binding ?(int id) ?(String spelling)): {
+  List node;
+  $ast.walk(form, node)
+    match (node) case %(binding ?(int id) ?(String spelling)): {
       if (spelling == name) found.push(id);
-      return;
+      continue;
     }
-  foreach (Var part, items) _lower_arm_ids(part, name, found);
 }
 
 /* A `case` pattern was folded into the compiler cache, so it reads back as
@@ -1489,7 +1507,7 @@ static Var _lower_arms(
   Var value = _lower_expr(l, subject);
   if (_lower_failed(l, value)) return void;
   Var result = %(match $value (quote $pattern));
-  Map saved = _lower_env_copy(l);
+  Map saved = _lower_env_copy(l, l.env);
   foreach (Var binder, l.compiler.match_pattern_binders(arm.car(), NULL)) {
     String name = binder.str()[1:];
     Array ids = $auto([]);
@@ -1497,11 +1515,11 @@ static Var _lower_arms(
     foreach (Var id, ids) l.env[id] = %(bound $result (quote $binder));
   }
   Var taken = _lower_block(l, %(${arm.cadr()} @rest), k);
-  _lower_env_restore(l, saved);
+  l.env = saved;
   if (_lower_failed(l, taken)) return void;
-  Map second = _lower_env_copy(l);
+  Map second = _lower_env_copy(l, l.env);
   Var other = _lower_arms(l, subject, arms.cdr(), rest, k);
-  _lower_env_restore(l, second);
+  l.env = second;
   if (_lower_failed(l, other)) return void;
   return %(cond ($result $taken) (true $other));
 }
@@ -1512,13 +1530,9 @@ static Var _lower_branch(
   Lowering &l, Var test, List then, List alt, List rest, List k) {
   Var guard = _lower_truth(l, test);
   if (_lower_failed(l, guard)) return void;
-  Map saved = _lower_env_copy(l);
-  Var taken = _lower_block(l, %(@then @rest), k);
-  _lower_env_restore(l, saved);
+  Var taken = _lower_block_apart(l, %(@then @rest), k);
   if (_lower_failed(l, taken)) return void;
-  Map second = _lower_env_copy(l);
-  Var other = _lower_block(l, %(@alt @rest), k);
-  _lower_env_restore(l, second);
+  Var other = _lower_block_apart(l, %(@alt @rest), k);
   if (_lower_failed(l, other)) return void;
   return %(cond ($guard $taken) (true $other));
 }
@@ -1547,29 +1561,13 @@ static void _lower_loop_cells(Lowering &l, Var form, Array out) {
 /* A `break` binds to the nearest enclosing loop or `switch`, so this stops
    at one rather than counting a `break` that belongs to it. */
 static int _lower_breaks(Var form) {
-  if (form is not <list>) return 0;
-  List items = form;
-  if (!items) return 0;
-  Var head = items.car();
-  if (head == <break>) return 1;
-  if (head == <while> || head == <for> || head == <do> || head == <switch>)
-    return 0;
-  foreach (Var part, items) if (_lower_breaks(part)) return 1;
+  List node;
+  $ast.walk(form, node)
+    match (node) {
+      case %(break *): return 1;
+      case %((!or while for do switch) *): continue;
+    }
   return 0;
-}
-
-/* A loop carries the locals its forms read, the cells it declares, and
-   the values an enclosing continuation needs. */
-static void _lower_referenced(Var form, Map used) {
-  if (form is not <list>) return;
-  List items = form;
-  if (!items) return;
-  match (items) {
-    case %(ident (binding ?(int id) ?)):   used[id] = 1;
-    case %(bind (binding ?(int id) ?) *):  used[id] = 1;
-    case %(again ? (*ids)): foreach (Var id, ids) used[id] = 1;
-  }
-  foreach (Var part, items) _lower_referenced(part, used);
 }
 
 static Var _lower_loop(
@@ -1577,12 +1575,11 @@ static Var _lower_loop(
   Var name = _lower_name(l, "loop");
   Array boxes = $auto([]);
   _lower_loop_cells(l, body, boxes);
+  /* A loop carries the locals its forms read, the cells it declares, and
+     the values an enclosing continuation needs. */
   Map used = $auto({});
-  _lower_referenced(test, used);
-  _lower_referenced(body, used);
-  _lower_referenced(step, used);
-  _lower_referenced(rest, used);
-  _lower_referenced(k, used);
+  foreach (Var form, %($test $body $step $rest $k))
+    _lower_scan_names(form, used, used);
   /* The element is read where it is used, so the loop does not carry it. */
   struct LowerCursor walk;
   int walking = _lower_cursor(test, walk) && walk.cursor in l.cursors;
@@ -1646,9 +1643,7 @@ static Var _lower_loop(
   l.on_continue = _lower_here(l, turn);
   int was_on_loop = l.on_loop;
   l.on_loop = 1;
-  Map before = _lower_env_copy(l);
-  Var iterate = _lower_block(l, body, turn);
-  _lower_env_restore(l, before);
+  Var iterate = _lower_block_apart(l, body, turn);
   l.on_loop = was_on_loop;
   l.on_break = saved_break;
   l.on_continue = saved_continue;
@@ -1776,9 +1771,7 @@ static Var _lower_switch(
       if (_lower_failed(l, constant)) break;
       conditions.push(%(equal? $slot $constant));
     }
-    Map saved = _lower_env_copy(l);
-    Var taken = _lower_block(l, statements, exit);
-    _lower_env_restore(l, saved);
+    Var taken = _lower_block_apart(l, statements, exit);
     List tested = conditions.list_free();
     if (_lower_failed(l, taken)) break;
     if (!tested) {
@@ -1793,9 +1786,7 @@ static Var _lower_switch(
   if (l.declined) return void;
   Var chain = otherwise;
   if (chain is void) {
-    Map saved = _lower_env_copy(l);
-    chain = _lower_block(l, rest, k);
-    _lower_env_restore(l, saved);
+    chain = _lower_block_apart(l, rest, k);
     if (_lower_failed(l, chain)) return void;
   }
   clauses.push(%(true $chain));
@@ -2260,10 +2251,6 @@ static Var _lower_update(
   return _lower_bind_value(l, id, combined, rest, k);
 }
 
-/* The operator a compound assignment applies, or the zero Symbol. */
-static Symbol _lower_compound(Var operator) =>
-  ((Symbol) operator).compound_operator();
-
 /* A step of one in the target's own type: an `int` counter must not become
    a `double`, or the next bitwise operation on it has no meaning. */
 static Var _lower_step_of(Var target) {
@@ -2299,7 +2286,7 @@ static void _lower_scan_nested_writes(
   Var target = void;
   match (items) {
     case %(op ?operator ?operand ?): {
-      if (operator == <=> || _lower_compound(operator))
+      if (operator == <=> || ((Symbol) operator).compound_operator())
         target = operand;
     }
     case %(op ?operator ?operand): {
@@ -2315,15 +2302,16 @@ static void _lower_scan_nested_writes(
     _lower_scan_nested_writes(l, child, 0);
 }
 
-/* The ids `form` reads or writes, and the ids it declares. */
+/* The ids `form` reads or writes, including those a continuation carries,
+   and the ids it declares. */
 static void _lower_scan_names(Var form, Map named, Map declared) {
-  if (form is not <list>) return;
-  List items = form;
-  match (items) {
-    case %(ident (binding ?(int id) ?)): named[id] = 1;
-    case %(bind (binding ?(int id) ?) *): declared[id] = 1;
-  }
-  foreach (Var part, items) _lower_scan_names(part, named, declared);
+  List node;
+  $ast.walk(form, node)
+    match (node) {
+      case %(ident (binding ?(int id) ?)): named[id] = 1;
+      case %(bind (binding ?(int id) ?) *): declared[id] = 1;
+      case %(again ? (*ids)): foreach (Var id, ids) named[id] = 1;
+    }
 }
 
 /* The cleanup of a block and the statements after its `defer` run in
@@ -2366,7 +2354,7 @@ static Var _lower_expression_stmnt(
       return _lower_update(
         l, target, <->, _lower_step_of(target), rest, k);
     case %(expr ? (op ?operator ?target ?rhs)): {
-      Symbol applied = _lower_compound(operator);
+      Symbol applied = ((Symbol) operator).compound_operator();
       if (!applied)
         return $decline.statement.effect(l);
       return _lower_update(
@@ -2375,7 +2363,7 @@ static Var _lower_expression_stmnt(
   }
   match (e) {
     /* A call's result can be discarded: it runs for what it writes. */
-    case %(expr ? (call ? ?)):
+    case %(expr ? (!or (call ? ?) (parens (block *)))):
       return _lower_effect(l, _lower_expr(l, e), rest, k);
     /* A cast to `void` discards the result but not the work: `(void) x;`
        marks a local used and does nothing, while `(void) f();` still calls
@@ -2397,8 +2385,8 @@ static Var _lower_expression_stmnt(
    from inside the block calls its next turn from here, in tail position. */
 static Var _lower_defer(Lowering &l, Var cleanup, List rest, List k) {
   Map used = $auto({});
-  _lower_referenced(cleanup, used);
-  _lower_referenced(rest, used);
+  _lower_scan_names(cleanup, used, used);
+  _lower_scan_names(rest, used, used);
   Array entry = [];
   Array slots = $auto([]);
   Map inside = _lower_scratch_map(l.scratch);
@@ -2412,14 +2400,13 @@ static Var _lower_defer(Lowering &l, Var cleanup, List rest, List k) {
   }
   Array exits = $auto([]);
   struct LowerCleanup frame = {
-    .env = _lower_env_copy(l), .exits = exits,
+    .env = _lower_env_copy(l, l.env), .exits = exits,
     .depth = _lower_depth(l) + 1, .returns = 0, .outer = l.pending
   };
   Map outer = l.env;
   Var undo = void, body = void;
   $let(l.on_break, NULL) $let(l.on_continue, NULL) $let(l.pending, NULL) {
-    l.env = _lower_scratch_map(l.scratch);
-    foreach (Var (id, form), inside) l.env[id] = form;
+    l.env = _lower_env_copy(l, inside);
     undo = _lower_block(l, %($cleanup), %(end));
   }
   $let(l.pending, &frame) {

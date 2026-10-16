@@ -29,7 +29,7 @@ void Compiler_install_meta_declaration(Compiler c, List declaration, Token marke
 
 List Compiler_evaluate_meta_expression(Compiler c, List expression, Token site);
 
-List Compiler_evaluate_meta_statement(Compiler c, List expression, AstPos context, Token site);
+List Compiler_evaluate_meta_statement(Compiler c, List expression, Symbol context, Token site);
 
 Var Compiler_run_meta_call(Compiler c, List expression, Token site, int slot);
 

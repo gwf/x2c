@@ -314,7 +314,7 @@ macro file outside that input list, open its owning source or configure a
 included files still affect analysis of their owning source.
 
 Diagnostics, definition navigation, and type hover include unsaved source
-text. Each request runs in a fresh compiler process with snapshots of open
+text. Each request runs in a fresh `x2c-editor` process with snapshots of open
 files; editing cancels obsolete results without writing buffers to disk.
 Native CPP symbol modes cannot consume unsaved source snapshots and report
 that limitation. Macro-generated syntax may lack a physical definition or
@@ -324,8 +324,8 @@ Semantic execution requires a trusted local workspace because compilation can
 run macros. Untrusted and virtual workspaces retain syntax highlighting. Set
 `"x2c.semantic.enabled": false` to disable semantic execution. Completion,
 rename, workspace indexing, and general LSP support are separate features.
-The private `x2c editor` transport serves these providers; its argument and
-response formats are not a public compiler API.
+The shipped `x2c-editor` command serves these providers through `x2c editor`.
+Its argument and response formats are not a public compiler API.
 
 Shared libraries are unsupported. Supporting them requires platform-specific
 position-independent code, visibility, runtime linkage, library naming, and
@@ -450,7 +450,8 @@ literal operand `@name`.
 
 ## Start a project
 
-`new` creates a project that builds and runs as written:
+`new` invokes the shipped `x2c-new` command to create a project that builds
+and runs as written:
 
 ```sh
 x2c new hello
@@ -589,6 +590,11 @@ sources with flat names, and consume package-compiled providers through
 
 ## Packages
 
+`install`, `remove`, and `list` dispatch to the shipped package command.
+Their options, help, and response-file expansion are handled by the driver.
+The equivalent `x2c package install`, `x2c package remove`, and
+`x2c package list` forms pass arguments literally, like other external commands.
+
 `install`, `remove`, and `list` manage `<home>/packages`; see
 [install packages](../guide/packages.md#install-packages). `install` takes
 one operand: a local directory, a local `.tar.gz`, a URL with `--sha256
@@ -662,8 +668,8 @@ defaults to unsigned plain `char`.
 
 The built-in commands are listed by `x2c help`. External commands are separate
 programs named `x2c-<name>` in the directory printed by `x2c env libexec`.
-In a source checkout this is `builds/0/libexec`; in an installed home it is
-`<home>/libexec/x2c`. The driver does not search `PATH` for them.
+For the stage 0 checkout compiler this is `builds/0/libexec`. A development
+install in `bin/` and an installed prefix use `<home>/libexec/x2c`. The driver does not search `PATH` for them.
 `x2c help` lists their summaries from that directory's `commands.txt`.
 
 The driver passes arguments after an external command name directly to its

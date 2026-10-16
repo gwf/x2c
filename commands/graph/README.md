@@ -420,7 +420,7 @@ argument of another exact function. It follows direct consumption, local
 declarations and assignments, returns, uniquely resolved project helpers,
 and the narrow value-preserving wrappers shown in the result. Every proved
 path includes exact definitions, source sites, the consumer argument index,
-and compact summaries of the other arguments, including `AstPos` parameters
+and compact summaries of the other arguments, including position symbols
 or constants. Field storage, mutation, branch alias merging, callbacks,
 computed calls, and ambiguous calls remain unresolved.
 An empty path list means the analysis found no path; a runtime flow may still

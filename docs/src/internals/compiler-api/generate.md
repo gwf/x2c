@@ -39,7 +39,7 @@ token range and privacy of the top-level form that produced the
 definition; either is empty when the compiler made the definition.
 `LINE` is 1 and `DOC` empty for a definition without authored source.
 
-Source: `src/generate.x:1560`
+Source: `src/generate/definitions.x:15`
 
 <a id="Compiler.dump_definitions"></a>
 #### Compiler.dump_definitions
@@ -51,7 +51,7 @@ Prints the `--dump-definitions` projection of the lowered unit `ast`:
 with one, then one row per `Compiler.definition_rows` entry. The
 command-line reference in the book describes the fields.
 
-Source: `src/generate.x:1653`
+Source: `src/generate/definitions.x:108`
 
 <a id="Compiler.generate_code"></a>
 #### Compiler.generate_code
@@ -69,7 +69,7 @@ replaces none of them. It appends generated bindings and initialization
 work to the compiler and is not idempotent. Failures are reported as
 `emit` diagnostics.
 
-Source: `src/generate.x:49`
+Source: `src/generate/output.x:34`
 
 <a id="Compiler.generate_code_text"></a>
 #### Compiler.generate_code_text
@@ -80,7 +80,7 @@ Returns the generated header and source of the lowered `ast` as `(hfile
 htext cfile ctext)`, named from `basename`, without writing them. It
 affects the compiler as `Compiler.generate_code` does.
 
-Source: `src/generate.x:61`
+Source: `src/generate/output.x:46`
 
 <a id="Compiler.init_statements"></a>
 #### Compiler.init_statements
@@ -89,7 +89,7 @@ Source: `src/generate.x:61`
 
 Returns the statements queued for `phase`, in the order they were added.
 
-Source: `src/generate.x:1093`
+Source: `src/generate/initialization.x:199`
 
 <a id="Compiler.initializer_function"></a>
 #### Compiler.initializer_function
@@ -98,7 +98,7 @@ Source: `src/generate.x:1093`
 
 Returns the function `type name(void)` running `body`.
 
-Source: `src/generate.x:820`
+Source: `src/generate/initialization.x:6`
 
 <a id="Compiler.place_source_prelude"></a>
 #### Compiler.place_source_prelude
@@ -111,7 +111,7 @@ conditional containing that first use follows the declarations. A unit
 without such a use gets them at its end, after the declarations they
 may assign.
 
-Source: `src/generate.x:915`
+Source: `src/generate/output.x:101`
 
 <a id="Compiler.run_once_body"></a>
 #### Compiler.run_once_body
@@ -121,7 +121,7 @@ Source: `src/generate.x:915`
 Returns a run-once initializer body: `before`, then a return when
 `guard` is set that sets it otherwise, then `after`.
 
-Source: `src/generate.x:826`
+Source: `src/generate/initialization.x:12`
 
 ### `Init`
 
@@ -134,7 +134,7 @@ Returns `function` with its entry setup: the protocol initializer and
 the type initializer run once, and a `guarded` entry calls the region's
 initializer unless its guard is set.
 
-Source: `src/generate.x:880`
+Source: `src/generate/initialization.x:49`
 
 ## Public types
 
@@ -154,7 +154,7 @@ the unit's shutdown function, `synthetic` is the synthetic initializer or
 NULL, and `reachable` holds the entries a cache-only file guards, or is
 NULL when every public entry is guarded.
 
-Source: `src/generate.x:844`
+Source: `src/generate.x:37`
 
 ## Design notes
 

@@ -8,11 +8,6 @@
 #include "x2c.h"
 typedef List Ast;
 
-typedef enum AstPos{
-  AST_UNIT, AST_BLOCK, AST_FIELD, AST_ENUMERATOR, AST_MAP_ENTRY, AST_STATEMENT, AST_EXPRESSION
-}
-AstPos;
-
 #include "error-macros.h"
 #include "ast-rewrite.h"
 #include "grammar.h"

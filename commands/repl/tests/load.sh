@@ -57,7 +57,7 @@ ok
 ok
 => [ 1, 99 ]
 => 1
-loaded ("second_answer")
+loaded ("second_answer" "ordinary_color")
 => 5
 => "kept native text"
 => ("kept native list" 42)
@@ -92,7 +92,7 @@ grep -q 'usage: :load' "$tmp/err"
 grep -q 'cannot read input file' "$tmp/err"
 grep -q 'absent_native_body' "$tmp/err"
 grep -q 'name already defined: loaded_text' "$tmp/err"
-grep -q 'unresolved identifier: ordinary_color' "$tmp/err"
+grep -q '^=> 3$' "$tmp/out"
 grep -q 'unresolved identifier: LOAD_RED' "$tmp/err"
 grep -q 'arguments must be independent data values' "$tmp/err"
 grep -q 'the body exited with status 9' "$tmp/err"
@@ -116,7 +116,7 @@ repl = subprocess.Popen(
     stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 repl.stdin.write(f':load "{source}"\n')
 repl.stdin.flush()
-assert "no public bodied functions" in repl.stderr.readline()
+assert "no public functions or supported globals" in repl.stderr.readline()
 def version(number, parameter="void"):
     source.write_text(
         "#include <stdlib.h>\n"

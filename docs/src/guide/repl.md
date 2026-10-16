@@ -101,7 +101,7 @@ incomplete submission continues at a fresh `... ` prompt.
 | `:help` | Show session commands. |
 | `:stats [verbose]` | Show concise or detailed runtime statistics. |
 | `:symbols [PREFIX]` | List successfully defined names and kinds, optionally matching a name prefix. |
-| `:load "file.x"` | Compile and load public functions, including `main`; replace an earlier load of the same file. |
+| `:load "file.x"` | Compile and load public functions and globals; replace an earlier load of the same file. |
 | `:info NAME` | Show a session function's argument and return types, source, and execution mode. |
 | `:ast plus` | Show `plus`'s typed x2c AST. |
 | `:lowered plus` | Report that `plus` is compiled and has no Lisp body. |
@@ -171,9 +171,57 @@ Public functions with bodies in the loaded file become prompt functions,
 including `main`. No `meta` annotation is needed. Static helpers such as
 `twice` remain private. Functions from included files and declaration-only
 functions remain available to the compiled code but are not imported into
-the prompt. Public type declarations accompany the loaded functions. Global
-variables and enumerator constants are not imported. Source macros remain
+the prompt. Public type declarations accompany the loaded definitions.
+Enumerator constants are not imported. Source macros remain
 with the compiled source; loading does not install them in the prompt.
+
+Public scalar globals are also available without source changes. Reads and
+assignments use the same native storage as the file's functions:
+
+```x2c
+int counter = 10;
+const int limit = 100;
+static int private_counter;
+int read_counter(void) { return counter; }
+```
+
+After loading this file, `counter;` returns `10`. Entering `counter = 20;`
+makes `read_counter();` return `20`. Compound assignments and numeric prefix
+or postfix increments also work. Prompt functions can read and assign these
+globals, including functions saved before a reload. `limit` is read-only,
+and `private_counter` remains private. `:symbols` lists the public globals.
+
+Supported scalar values are numbers, booleans, enums, Strings, and Symbols,
+including typedef aliases. Enum values use the compiler's `int`
+representation. Fixed-size C arrays and structs also expose their scalar
+fields and elements, including nested arrays and structs:
+
+```x2c
+int samples[3] = {10, 20, 30};
+struct Point { int x; int y; };
+struct Point point = {1, 2};
+```
+
+After loading this file, `samples[1];` returns `20`. Assignments such as
+`samples[1] = 99;` and `point.x = 7;` change the file's native storage.
+Compound assignments and increments work too. Array indices are checked
+against the native array's extent and evaluated once per access. These
+operations also work inside compiled prompt functions.
+
+Enter `samples;` or `point;` to inspect the whole object. Arrays display as
+Arrays and structs as Maps keyed by field name. Inspection copies the data
+and visits at most 100 fields or elements, including nested containers;
+`"..."` marks truncated output. Unsupported fields display `"<unavailable>"`.
+Inspection is available for the final expression at the prompt. Native
+arrays and structs still cannot be passed or copied across the helper
+boundary as ordinary values. Assign fields and elements individually.
+
+Static globals stay private. Const objects and const fields are read-only.
+Raw pointers, unions, flexible array members, collections, `Var`, and
+callable globals do not gain accessors. Globals from included files remain
+private to the loaded file. A loaded global, field, or element cannot supply
+an address or a reference argument because its storage belongs to the helper
+process.
 
 Compilation happens on `:load` and on each prompt function definition,
 including `plus_answer` above. Top-level input stays interpreted. Loading needs
@@ -256,8 +304,10 @@ change. Previously returned values remain ordinary prompt data.
 
 Existing functions must keep their argument and return types. Parameter
 names may change. Existing public types must keep their definitions. New
-functions and types are allowed when their names do not conflict. Removing
-an existing function or type, or changing its type, requires a new session.
+functions, globals, and types are allowed when their names do not
+conflict. Existing globals must keep their declared types and qualifiers,
+including `const`. Removing an existing function, global, or type, or
+changing its type, requires a new session.
 A refused replacement leaves both the old code and its variables intact.
 Prompt definitions still cannot be redefined.
 
@@ -355,7 +405,9 @@ prototype is accepted: it makes a function the compiler links, or one from a
 `--native-module`, callable in the session. Variables need
 initializers; declarator modifiers, `const`, and `volatile` are rejected.
 Function-local `static`, `extern`, and `threaded` storage remain rejected.
-Top-level statement expressions such as `({ int n=3; n+4; })` are declined.
+Top-level statement expressions can contain local declarations followed by
+one value expression, such as `({ int n=3; n+4; })`. Other statement
+expression bodies are declined.
 Reference parameters use the ordinary compiler conversion: pass an
 addressable value, or write `*p` to pass a pointer's object. A pointer itself
 cannot substitute for the referenced object.

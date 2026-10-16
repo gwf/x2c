@@ -7,11 +7,6 @@
 */
 #include "lint.x"
 
-
-static int _runtime(Lint l) =>
-  l.path.startswith("src/") || l.path.contains("/src/") ||
-  l.path.startswith("lib/") || l.path.contains("/lib/")
-
 static int _empty_constructor(Lint l, int at):
   String name = l.tokens[at].text
   if name != "String" && name != "Array" && name != "Map": return 0
@@ -57,7 +52,8 @@ static void _spellings(Lint l):
       l.add("empty-constructor", t.line, "use the empty value literal")
     if t.text == "x2c.ident" && l.token_is(l.prev(at), "$("):
       l.add("x2c-ident", t.line, "review compile-time name construction")
-    if t.text == "defun" && l.token_is(l.prev(at), "$(") && _runtime(l):
+    if t.text == "defun" && l.token_is(l.prev(at), "$(") &&
+       (lint_under(l.path, "src") || lint_under(l.path, "lib")):
       l.add("lisp-defun", t.line, "review Lisp work in compiler or runtime")
     if t.text == "report_error" && !l.quoted[at] && at > report_end &&
        !l.path.endswith("-reports.x") && l.token_is(next, "("):
@@ -111,7 +107,7 @@ static void _metrics(Lint l):
   for (int at = 0; at < l.count; at++):
     Token t = l.at(at)
     if t.type != <comment> || t.col != 1 ||
-       !t.text.startswith("//") || t.text.contains("lint:"): continue
+       !t.text.startswith("//") || "lint:" in t.text: continue
     if t.line > 1 && l.first[t.line - 1] >= 0 ||
        l.first[t.line + 1] >= 0: continue
     String label = t.text[2:].strip(NULL)
@@ -190,8 +186,8 @@ static int _mentioned(Lint *lints, int count, int owner, List function):
       if index == owner && t.line >= start.int() && t.line <= end.int():
         continue
       if t.type == <space> || t.type == <comment>: continue
-      if t.text.contains(emitted) || t.text.contains(display) ||
-         member && t.text.contains(member): return 1
+      if emitted in t.text || display in t.text ||
+         member && member in t.text: return 1
   return 0
 
 /** Reports static definitions with no bound reference or corpus spelling. */

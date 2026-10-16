@@ -2,7 +2,7 @@ static List helper_produce(List value) {
   return value;
 }
 
-static void helper_consume(List value, AstPos position) {
+static void helper_consume(List value, Symbol position) {
   (void) value;
   (void) position;
 }
@@ -17,7 +17,7 @@ static List helper_return_producer(List value) {
 }
 
 static void helper_consume_parameter(List value) {
-  helper_consume(value, AST_STATEMENT);
+  helper_consume(value, <statement>);
 }
 
 static void helper_chain(List value) {

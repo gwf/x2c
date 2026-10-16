@@ -12,24 +12,11 @@ X2c project manifests.
 
 | Function | Summary |
 | --- | --- |
-| [`CliRequest.new_project`](#CliRequest.new_project) | Creates the starter project for `x2c new` in the directory named by `request`'s one operand and returns 0. |
 | [`CliRequest.project_manifest`](#CliRequest.project_manifest) | Returns the explicit or nearest readable project manifest, or NULL. |
 | [`ProjectBuild.plan`](#ProjectBuild.plan) | Parses a project manifest and returns its selected target's build plan. |
+| [`ProjectBuild.valid_name`](#ProjectBuild.valid_name) | Returns whether a target, profile, or manifest field name contains only letters, digits, underscores, and hyphens, and is not empty. |
 
 ### `CliRequest`
-
-<a id="CliRequest.new_project"></a>
-#### CliRequest.new_project
-
-`int CliRequest.new_project(CliRequest request)`
-
-Creates the starter project for `x2c new` in the directory named by
-`request`'s one operand and returns 0. The directory may be missing or
-empty, and its last component names the target. Any other directory, an
-unusable name, or a failed write prints a diagnostic and exits with
-status 2.
-
-Source: `src/project.x:891`
 
 <a id="CliRequest.project_manifest"></a>
 #### CliRequest.project_manifest
@@ -39,7 +26,7 @@ Source: `src/project.x:891`
 Returns the explicit or nearest readable project manifest, or NULL.
 Discovery uses the same request view as project parsing.
 
-Source: `src/project.x:152`
+Source: `src/project.x:115`
 
 ### `ProjectBuild`
 
@@ -55,7 +42,17 @@ manifest fields and command-line overrides to ordinary `CliRequest` values
 without executing build actions. Manifest discovery, parsing, validation,
 or target-selection failures print a diagnostic and exit with status 2.
 
-Source: `src/project.x:123`
+Source: `src/project.x:86`
+
+<a id="ProjectBuild.valid_name"></a>
+#### ProjectBuild.valid_name
+
+`int ProjectBuild.valid_name(String name)`
+
+Returns whether a target, profile, or manifest field name contains only
+letters, digits, underscores, and hyphens, and is not empty.
+
+Source: `src/project.x:469`
 
 ## Public types
 

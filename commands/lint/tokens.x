@@ -9,7 +9,6 @@
 #include <ctype.h>
 #include <string.h>
 
-
 static const SymbolSet type_words =
   %<<void char short int long float double signed unsigned>>
 static const SymbolSet qualifier_words =
@@ -116,8 +115,7 @@ static const List prose_phrases = %(
 
 static int _prose(String text):
   String lower = text.lower()
-  foreach String phrase in prose_phrases:
-    if lint_phrase(lower, phrase): return 1
+  if lint_mentions(lower, prose_phrases): return 1
   int only = lower.find("not only")
   return only >= 0 && lower.find_within("but also", only, -1) >= 0
 
@@ -344,8 +342,7 @@ static void _repeated_accessors(Lint l):
     String call = %"${t.text}.${l.tokens[at + 2].text}()"
     List key = %($line_depth $call)
     if key in reported: continue
-    if !seen.contains(key): seen[key] = []
-    Array lines = seen[key]
+    Array lines = seen.setdefault(key, [])
     lines.push(line)
     int count = lines.len()
     if count >= 3 && line - lines[count - 3].int() <= 12:

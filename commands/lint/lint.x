@@ -50,7 +50,6 @@ typedef struct Lint:
   Array findings, edits, functions, unused
 *Lint
 
-
 static const Rule rules[] = {
   {"same-line-else", <style>, <violation>, "ST-1"},
   {"empty-constructor", <style>, <candidate>, "EX-1"},
@@ -166,6 +165,16 @@ int lint_phrase(String text, String phrase):
        !lint_word_char((unsigned char) text[end]):
       return 1
   return 0
+
+/** Whether lower-case `text` contains any of `phrases` as whole words. */
+int lint_mentions(String text, List phrases):
+  foreach String phrase in phrases:
+    if lint_phrase(text, phrase): return 1
+  return 0
+
+/** Whether `path` has a directory component named `name`. */
+int lint_under(String path, String name) =>
+  path.startswith(%"$name/") || %"/$name/" in path
 
 /** Whether `t` is written string text: a literal, a segment, or a quote. */
 int lint_string(Token t) =>
@@ -347,9 +356,6 @@ void Lint.fix(Lint l, String code, int line, String message, int from,
 String Lint.source(Lint l, int from, int to) =>
   String.new_len(l.text + l.tokens[from].pos,
                  l.tokens[to].pos + l.tokens[to].len - l.tokens[from].pos)
-
-/** Returns the name of a `Lint.functions` row. */
-String lint_name(List function) => function.car()
 
 /** Prints the findings in line order. */
 void Lint.print(Lint l):

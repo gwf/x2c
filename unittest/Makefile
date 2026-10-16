@@ -90,7 +90,7 @@ expression-bodied-function-probes:
 
 # The probes and the fixture cases share no outputs, so under -j the cases
 # run beside the probes.
-compiler-fixtures: cli-probes package-install-probes preprocessor-probes \
+compiler-fixtures: cli-probes preprocessor-probes \
 		symbol-snapshot-probes header-cache-probes protocol-probes \
 		expression-bodied-function-probes meta-helper-probes \
 		compiler-fixture-cases

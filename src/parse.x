@@ -333,7 +333,7 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
     if (c.protocol_form_starts()) return c.parse_protocol_declaration();
     if (_skip_collected_form(c)) return NULL;
   }
-  List macro = skip_body ? NULL : c.try_parse_macro_target_at(AST_UNIT);
+  List macro = skip_body ? NULL : c.try_parse_macro_target_at(<unit>);
   if (macro) return macro;
   if (c.protocol_form_starts()) return c.parse_protocol_declaration();
   switch (c.peek(0)) {
@@ -437,13 +437,13 @@ static int _skip_collected_form(Compiler c) {
   }
   if ((!c.collect_protocols || c.signature_only) &&
       c.skip_named_type_declaration()) return 1;
-  if (!c.macro_starts_target_at(AST_UNIT)) return 0;
+  if (!c.macro_starts_target_at(<unit>)) return 0;
   if (!c.signature_only && c.collect_protocols &&
       c.collect_unit_macro()) return 1;
   do {
     c.skip_macro_invocation();
     if (c.test(<;>)) return 1;
-  } while (c.macro_starts_target_at(AST_UNIT));
+  } while (c.macro_starts_target_at(<unit>));
   return 0;
 }
 
@@ -560,7 +560,7 @@ int Compiler.script_statement_starts(Compiler c) {
       c.protocol_form_starts())
     return 0;
   if (c.at_word("with")) return 1;
-  if (c.macro_starts_target_at(AST_UNIT)) return !c.macro_targets_unit();
+  if (c.macro_starts_target_at(<unit>)) return !c.macro_targets_unit();
   return !c.test_declaration() || !_declaration_stays(c);
 }
 
@@ -1625,14 +1625,14 @@ List Compiler.parse_field(Compiler c, List context) {
   if (c.test_static_assert()) return c.parse_static_assert();
   List slot = c.try_parse_macro_slot(<field>);
   if (slot) return slot;
-  List macro = _member_macro(c, context, AST_FIELD);
+  List macro = _member_macro(c, context, <field>);
   if (macro) return macro;
   return _field(c, context, 0);
 }
 
 /* A macro invocation may stand for an aggregate member. It expands with
    the aggregate as the current aggregate type. */
-static List _member_macro(Compiler c, List context, AstPos position) {
+static List _member_macro(Compiler c, List context, Symbol position) {
   if (c.peek(0) != <$> && c.peek(0) != <ident>) return NULL;
   $let(c.aggregate_type, context)
     return c.try_parse_macro_target_at(position);
@@ -1753,7 +1753,7 @@ static Type _declare_named_type(
 List Compiler.parse_enumerators(Compiler c, List context) {
   Array enumerators = [];
   while (c.peek(0) != <"}">) {
-    if (c.shallow && c.macro_starts_target_at(AST_ENUMERATOR))
+    if (c.shallow && c.macro_starts_target_at(<enumerator>))
       c.skip_macro_invocation();
     else _push_items(enumerators, c.parse_enumerator(context));
     if (c.peek(0) == <"}">) break;
@@ -1776,7 +1776,7 @@ static void _push_items(Array out, List node) {
 List Compiler.parse_enumerator(Compiler c, Type context) {
   List slot = c.try_parse_macro_slot(<enumerator>);
   if (slot) return slot;
-  List macro = _member_macro(c, context, AST_ENUMERATOR);
+  List macro = _member_macro(c, context, <enumerator>);
   if (macro) return macro;
   if (c.macro_holes) return _template_enumerator(c, context);
   if (c.peek(0) != <ident>)
@@ -2541,7 +2541,7 @@ List Compiler.parse_function_definition(Compiler c) {
     an ordinary function definition is required.
 */
 List Compiler.parse_function_target(Compiler c) {
-  List macro = c.try_parse_macro_target_at(AST_UNIT);
+  List macro = c.try_parse_macro_target_at(<unit>);
   if (!macro) return c.parse_function_definition();
   match (macro) case %(seq ?function): return function;
   return macro;
@@ -2625,7 +2625,7 @@ Type Ast.declared_return(List declaration) {
 static List _entry_code(Compiler c, int depth) {
   Array items = [];
   foreach (List row, _take_placements(c, depth))
-    _push_items(items, c.bind_syntax(row[3], AST_BLOCK, c.return_type));
+    _push_items(items, c.bind_syntax(row[3], <block>, c.return_type));
   return items.list_free();
 }
 
@@ -2837,7 +2837,7 @@ List Compiler.leave_item(Compiler c) {
     if (binding)
       $let(c.origin, row.origin ? row.origin : c.origin)
         $report.parse.init_incomplete(c, row.token);
-    _push_items(items, c.bind_syntax(code, AST_BLOCK, c.return_type));
+    _push_items(items, c.bind_syntax(code, <block>, c.return_type));
   }
   return items.list_free();
 }
@@ -2929,7 +2929,7 @@ static List _after_declarator(
         return placed;
       }
       return c.rewrite(
-        <decl>, <init>, %(declare $base (bindings $declarator)), AST_BLOCK,
+        <decl>, <init>, %(declare $base (bindings $declarator)), <block>,
         c.return_type, origin);
     }
   return NULL;
@@ -2959,7 +2959,7 @@ static List _take_placed(
   c.placements = kept;
   Array items = [];
   foreach (Var item, code)
-    _push_items(items, c.bind_syntax(item, AST_BLOCK, c.return_type));
+    _push_items(items, c.bind_syntax(item, <block>, c.return_type));
   return %(seq @{items.list_free()});
 }
 
@@ -2983,7 +2983,7 @@ static Type _share_declaration_type(
   List name = c.sym.introduce(c.fresh_name("declaration_type"));
   Type value = base.declared();
   List alias =
-    c.bind_syntax($!{ typedef $value $name; }, AST_BLOCK, c.return_type);
+    c.bind_syntax($!{ typedef $value $name; }, <block>, c.return_type);
   _push_items(output, alias);
   Array storage = [];
   foreach (Var item, base)
@@ -2995,13 +2995,15 @@ static Type _share_declaration_type(
 // constructed syntax
 
 /** Binds parser-shaped `syntax` at `context` into current compiler state.
+    `context` is `<unit>`, `<block>`, `<field>`, `<enumerator>`, `<map-entry>`,
+    `<statement>`, or `<expression>`.
     The input must evaluate to a nonempty AST `List` valid for the requested
-    `AstPos`. Bindings, types, scopes, and expressions are resolved in source
+    position. Bindings, types, scopes, and expressions are resolved in source
     order; `return_type` applies only while descendants are bound. This method
     mutates `Sym` and does not open a semantic transaction.
 */
 List Compiler.bind_syntax(
-  Compiler c, Var syntax, AstPos context, Type return_type) {
+  Compiler c, Var syntax, Symbol context, Type return_type) {
   int pending = syntax is <list> && syntax.list().car() == "x2c.template";
   if (_take_staged(c, syntax)) return syntax;
   syntax = c.evaluate_macro_slot(syntax);
@@ -3013,9 +3015,9 @@ List Compiler.bind_syntax(
   List input = syntax;
   if (!input) $report.parse.syntax_expected(c);
   List enumerator =
-    context == AST_ENUMERATOR ? _bind_enumerator(c, input) : NULL;
+    context == <enumerator> ? _bind_enumerator(c, input) : NULL;
   if (enumerator) return enumerator;
-  if (context == AST_MAP_ENTRY && input.car() != <seq> &&
+  if (context == <map-entry> && input.car() != <seq> &&
       input.car() != Atom.intern("macro-invoke"))
     return c.resolve_map_entry(input, c.token);
   $let(c.return_type, return_type)
@@ -3061,18 +3063,18 @@ static List _bind_enumerator(Compiler c, List input) {
 
 /* Parsed templates and compile-time Lisp are the intended producers. There
    is no separate validation pass before or after expansion. The structural
-   match below enforces `AstPos`: a form that no arm admits at its position
-   leaves the match for `_construction_error`. Existing expression types and
+   match below enforces the position: a form that no arm admits there leaves
+   the match for `_construction_error`. Existing expression types and
    binding identities are trusted, and strings are never reparsed.
 
    Binding mutates the current `Sym` in visitation order. Macro invocation
    opens the surrounding `SymTxn`, allowing earlier siblings to be visible to
    later ones while preserving whole-expansion rollback on failure. */
 static List _bind_form(
-  Compiler c, List input, AstPos context, int pending) {
+  Compiler c, List input, Symbol context, int pending) {
   Macro caught = $caught;
-  int unit = context == AST_UNIT, block = context == AST_BLOCK;
-  int statement = block || context == AST_STATEMENT;
+  int unit = context == <unit>, block = context == <block>;
+  int statement = block || context == <statement>;
   match (input) {
     case %(macro-invoke ?def ?args ?site):
       return _bind_invocation(c, def, args, site, context, pending);
@@ -3100,13 +3102,13 @@ static List _bind_form(
     case %(declaration-initialized ?decl ?source) if (unit):
       return _bind_collected_initializers(c, input, decl, source);
     case %(seq *items): return _bind_items(c, items, context);
-    case %(args *args) if (context == AST_EXPRESSION):
+    case %(args *args) if (context == <expression>):
       return _bind_args(c, args);
-    case %(c-assert ?test ?message) if (unit || block || context == AST_FIELD):
+    case %(c-assert ?test ?message) if (unit || block || context == <field>):
       return _bind_assert(c, test, message);
     case %(falias ?decl ?native_syntax) if (unit):
       return _bind_alias(c, decl, native_syntax);
-    case %(!set ?expr (expr *)) if (context == AST_EXPRESSION):
+    case %(!set ?expr (expr *)) if (context == <expression>):
       return _resolve(c, expr);
     case %((!set ?tag (!or declare decl typedef))
            ?base (bindings *declarators)):
@@ -3151,7 +3153,7 @@ static List _bind_form(
       return _bind_for(c, init, test, next, body);
     case %(raise ?code (args *details)) if (statement):
       return _bind_raise(c, code, details);
-    case %(catchcases ?arms *handler) if (context == AST_STATEMENT):
+    case %(catchcases ?arms *handler) if (context == <statement>):
       return _bind_catchcases(c, arms, handler);
     case caught(?body, ?cleanup, *arms) if (statement):
       return _bind_try(c, body, input.caddr(), cleanup);
@@ -3174,7 +3176,7 @@ static List _construction_error(Compiler c) {
 
 /* A meta call written as a whole statement may return a statement. */
 static List _bind_expression_statement(
-  Compiler c, List expression, AstPos context) {
+  Compiler c, List expression, Symbol context) {
   match (expression) case %(expr ? (meta-call *)):
     if (!c.meta_body && !c.macro_holes)
       return c.evaluate_meta_statement(expression, context, c.token);
@@ -3188,7 +3190,7 @@ static List _resolve(Compiler c, List expr) =>
 static List _bind_statement(Compiler c, Var stmt) {
   Symbol kind = _source_clause_kind(stmt);
   if (kind) return c.parse_source_clause(kind);
-  List bound = c.bind_syntax(stmt, AST_STATEMENT, c.return_type);
+  List bound = c.bind_syntax(stmt, <statement>, c.return_type);
   c.rebound(stmt, bound);
   return bound;
 }
@@ -3204,7 +3206,7 @@ static List _bind_clause(Compiler c, Var expr) {
    recovery boundary it owns the transaction that covers the effects its
    producers request; outside one, an error exits and nothing rolls back. */
 static List _bind_invocation(
-  Compiler c, Var definition, Var arguments, Var invocation, AstPos context,
+  Compiler c, Var definition, Var arguments, Var invocation, Symbol context,
   int pending) {
   Token site = c.macro_invocation_site(invocation);
   if (invocation != <m-invoke>)
@@ -3218,8 +3220,8 @@ static List _bind_invocation(
     List bound = c.expand_macro_invocation_node(
       definition, arguments, site, context);
     transaction.commit();
-    if (pending && (context == AST_BLOCK || context == AST_STATEMENT ||
-                    context == AST_UNIT))
+    if (pending && (context == <block> || context == <statement> ||
+                    context == <unit>))
       match (bound) case %(seq ?item): return item;
     return bound;
   }
@@ -3238,7 +3240,7 @@ static List _bind_item(Compiler c, Var origin, List node) {
   int anchor = origin == <m-origin> ? c.origin : origin.int();
   c.enter((Ancestor){ .what = <statement>, .origin = anchor });
   List bound =
-    _anchor(c, origin, c.bind_syntax(node, AST_BLOCK, c.return_type));
+    _anchor(c, origin, c.bind_syntax(node, <block>, c.return_type));
   List after = c.leave_item();
   return after ? %(seq $bound @after) : bound;
 }
@@ -3249,7 +3251,7 @@ static List _bind_item(Compiler c, Var origin, List node) {
    or those of the invocation that expands it. */
 static List _bind_api_source(
   Compiler c, Var line, Var doc, Var syntax) {
-  List bound = c.bind_syntax(syntax, AST_UNIT, c.return_type);
+  List bound = c.bind_syntax(syntax, <unit>, c.return_type);
   Token invocation = c.macro_stack ? c.macro_stack.last().list()[3] : NULL;
   String invocation_doc = invocation ? c.definition_doc(invocation) : NULL;
   line = invocation ? invocation.line : line;
@@ -3315,7 +3317,7 @@ static List _bind_named_type(Compiler c, String name, Var type) {
   List declaration = type.type().declaration_ast(key);
   match (declaration)
     case %(declare ?base ?bindings):
-      return c.bind_syntax(%(typedef $base $bindings), AST_UNIT, NULL);
+      return c.bind_syntax(%(typedef $base $bindings), <unit>, NULL);
   return _construction_error(c);
 }
 
@@ -3328,7 +3330,7 @@ static List _bind_bundle(Compiler c, List rows) {
   }
   Array projected = [];
   foreach (List row, rows) {
-    List bound = c.bind_syntax(row, AST_UNIT, c.return_type);
+    List bound = c.bind_syntax(row, <unit>, c.return_type);
     _append_rows(projected, bound);
   }
   List items = projected.list_free();
@@ -3346,7 +3348,7 @@ static void _append_rows(Array output, List syntax) {
 }
 
 static List _bind_recipe(
-  Compiler c, Var callback, Var arguments, AstPos context) {
+  Compiler c, Var callback, Var arguments, Symbol context) {
   Var syntax = c.evaluate_declaration_recipe(callback, arguments);
   return c.bind_syntax(syntax, context, c.return_type);
 }
@@ -3358,27 +3360,27 @@ static List _bind_decl_recipe(
   if (c.shallow)
     return %(declaration-pending $callback $arguments
               ${c.macro_stack} ${c.source_private});
-  return _bind_recipe(c, callback, arguments, AST_UNIT);
+  return _bind_recipe(c, callback, arguments, <unit>);
 }
 
 static List _bind_default(Compiler c, Var function) {
   if (c.shallow)
     return %(declaration-default $function ${c.macro_stack}
               ${c.source_private});
-  return c.bind_syntax(function, AST_UNIT, c.return_type);
+  return c.bind_syntax(function, <unit>, c.return_type);
 }
 
 /* Binds a local macro definition in a block and publishes any other one
    at file scope. */
 static List _bind_macrodef(
-  Compiler c, Var definition, AstPos context) {
+  Compiler c, Var definition, Symbol context) {
   List macro = definition;
   int local = macro.assoc(<local>).int();
-  if (local && context == AST_BLOCK) {
+  if (local && context == <block>) {
     c.sym.define_macro(macro.assoc(<name>), macro);
     return %(seq);
   }
-  if (!local && context == AST_UNIT)
+  if (!local && context == <unit>)
     return c.publish_macro_definition_node(macro);
   return _construction_error(c);
 }
@@ -3389,7 +3391,7 @@ static List _bind_preproc(Compiler c, List directive) {
 }
 
 static List _bind_alias(Compiler c, Var declaration, Var native) {
-  List bound = c.bind_syntax(declaration, AST_UNIT, c.return_type);
+  List bound = c.bind_syntax(declaration, <unit>, c.return_type);
   return c.finish_foreign_alias(bound, native);
 }
 
@@ -3409,7 +3411,7 @@ static List _bind_collected_function(
     Token invocation = c.macro_stack ? c.macro_stack.last().list()[3] : NULL;
     $let(c.origin, invocation ? c.record_origin(invocation) : c.origin)
     return c.bind_syntax(
-      %(function $return_type $declarator $body), AST_UNIT, c.return_type);
+      %(function $return_type $declarator $body), <unit>, c.return_type);
   }
 }
 
@@ -3420,7 +3422,7 @@ static List _bind_collected_initializers(
   Compiler c, List input, Var declaration, Var construction) {
   if (c.shallow) return input;
   $let(c.macro_stack, construction) {
-    return c.bind_syntax(declaration, AST_UNIT, c.return_type);
+    return c.bind_syntax(declaration, <unit>, c.return_type);
   }
 }
 
@@ -3435,7 +3437,7 @@ static List _bind_function(
       ((fnmod (params @parameter_list)) @return_modifiers)
   );
   List declaration = c.bind_syntax(
-    %(declare $return_type (bindings $declarator)), AST_UNIT, c.return_type);
+    %(declare $return_type (bindings $declarator)), <unit>, c.return_type);
   if (c.shallow) return _collected_function(c, declaration, body);
   Type type = declaration.type_from_ast();
   if (c.public_bodies &&
@@ -3496,8 +3498,8 @@ static List _collected_function(
 
 /* A statement position admits a sequence of one statement. Elsewhere the
    items bind in order, and a nested sequence contributes its items. */
-static List _bind_items(Compiler c, List items, AstPos context) {
-  if (context == AST_STATEMENT) {
+static List _bind_items(Compiler c, List items, Symbol context) {
+  if (context == <statement>) {
     match (items) case %(?only):
       return c.bind_syntax(only, context, c.return_type);
     $report.parse.statement_single(c);
@@ -3522,20 +3524,20 @@ static List _bind_assert(Compiler c, Var condition, Var message) =>
    Collection keeps file-scope initializers for the full parse, with the
    macro stack that constructed them. */
 static List _bind_declaration(
-  Compiler c, Var tag, Var base, List declarators, AstPos context) {
+  Compiler c, Var tag, Var base, List declarators, Symbol context) {
   int shallow = c.shallow;
-  if (c.public_bodies && context == AST_UNIT) c.shallow = 1;
+  if (c.public_bodies && context == <unit>) c.shallow = 1;
   defer c.shallow = shallow;
   if (!_declaration_legal(tag, context)) return _construction_error(c);
   base = _finish_type(c, base);
-  List field_context = context == AST_FIELD ? c.aggregate_type : NULL;
+  List field_context = context == <field> ? c.aggregate_type : NULL;
   List declaration_context = tag == <typedef> ? %(typedef) : field_context;
   Array output = [];
   int preserved_self = 0, initializes = 0;
   foreach (Var value, declarators)
     foreach (List declarator, c.evaluate_macro_rows(value)) {
       declarator = _finish_fnmods(c, declarator);
-      if (context != AST_FIELD && _has_bitfield(declarator))
+      if (context != <field> && _has_bitfield(declarator))
         return _construction_error(c);
       match (declarator) case %(op = * *): initializes = 1;
       List installed = _install_declarator(
@@ -3544,20 +3546,20 @@ static List _bind_declaration(
     }
   List decl = _finish_declaration(
     c, tag, base, output.list_free(), preserved_self);
-  if (context == AST_UNIT) c.record_declaration_visibility(decl);
-  if (c.shallow && context == AST_UNIT && initializes)
+  if (context == <unit>) c.record_declaration_visibility(decl);
+  if (c.shallow && context == <unit> && initializes)
     return %(declaration-initialized $decl ${c.macro_stack});
-  if (context == AST_BLOCK && tag == <declare>)
+  if (context == <block> && tag == <declare>)
     return c.finish_initializers(decl, c.token);
   return decl;
 }
 
 /* A typedef stands in a unit or a block, a `decl` only in a block, and any
    other declaration also in an aggregate. */
-static int _declaration_legal(Var tag, AstPos context) {
-  if (tag == <typedef>) return context == AST_UNIT || context == AST_BLOCK;
-  if (tag == <decl>) return context == AST_BLOCK;
-  return context == AST_UNIT || context == AST_BLOCK || context == AST_FIELD;
+static int _declaration_legal(Var tag, Symbol context) {
+  if (tag == <typedef>) return context == <unit> || context == <block>;
+  if (tag == <decl>) return context == <block>;
+  return context == <unit> || context == <block> || context == <field>;
 }
 
 static int _has_bitfield(List declarator) {
@@ -3580,7 +3582,7 @@ static List _bind_targets(
   List declaration = c.bind_syntax(
     %(declare $base
         (bindings @{declarators.list_free()})),
-    AST_BLOCK, c.return_type
+    <block>, c.return_type
   );
   match (declaration)
     case %(declare ?bound_base (bindings *bindings)): {
@@ -3603,7 +3605,7 @@ static List _bind_typed_targets(
     match (parameter)
       case %(param ?base (!set ?declarator (bind ? ?))): {
         List declaration = c.bind_syntax(
-          %(declare $base (bindings $declarator)), AST_BLOCK, c.return_type);
+          %(declare $base (bindings $declarator)), <block>, c.return_type);
         match (declaration)
           case %(declare ?bound_base (bindings ?binding)):
             bound_parameters.push(%( param $bound_base $binding ));
@@ -3905,7 +3907,7 @@ static List _bind_block(Compiler c, List block) {
 static List _bind_group(Compiler c, List children) {
   Array items = [];
   foreach (Var child, children)
-    items.push(c.bind_syntax(child, AST_BLOCK, c.return_type));
+    items.push(c.bind_syntax(child, <block>, c.return_type));
   return %(group @{items.list_free()});
 }
 
@@ -3921,11 +3923,11 @@ List Compiler.bind_callable_body(Compiler c, List syntax, Type return_type) {
       List present_before = c.present_references();
       defer c.restore_reference_presence(present_before);
       foreach (Var child, children)
-        _push_items(stmts, c.bind_syntax(child, AST_BLOCK, return_type));
+        _push_items(stmts, c.bind_syntax(child, <block>, return_type));
       return %(block @{stmts.list_free()});
     }
   }
-  return c.bind_syntax(syntax, AST_BLOCK, return_type);
+  return c.bind_syntax(syntax, <block>, return_type);
 }
 
 // constructed types
@@ -4004,7 +4006,7 @@ static List _finish_aggregate_type(
   if (tag != <enum>) name = c.aggregate_name(tag, name, 1);
   List type = %($tag $name);
   Array bound = [];
-  AstPos position = tag == <enum> ? AST_ENUMERATOR : AST_FIELD;
+  Symbol position = tag == <enum> ? <enumerator> : <field>;
   $let(c.aggregate_type, type) {
     foreach (List member, members)
       foreach (Var row, c.evaluate_macro_rows(member))

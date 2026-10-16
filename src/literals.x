@@ -769,7 +769,7 @@ static List _parse_quoted_entry(Compiler c) {
     return _entry_value(c, _parse_element(c), origin);
   c.next();
   List entry = c.try_parse_macro_slot(<map-entry>);
-  if (!entry) entry = c.try_parse_macro_target_at(AST_MAP_ENTRY);
+  if (!entry) entry = c.try_parse_macro_target_at(<map-entry>);
   if (entry) {
     c.expect(<"}">);
     return entry;
@@ -806,7 +806,7 @@ List Compiler.parse_map_entries(Compiler c) {
 List Compiler.parse_map_entry(Compiler c) {
   List slot = c.try_parse_macro_slot(<map-entry>);
   if (slot) return slot;
-  List macro = c.try_parse_macro_target_at(AST_MAP_ENTRY);
+  List macro = c.try_parse_macro_target_at(<map-entry>);
   if (macro) return macro;
   Token origin = c.token;
   List key = NULL;

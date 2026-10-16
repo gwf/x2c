@@ -12,17 +12,6 @@
 */
 typedef List Ast;
 
-/** Names the syntactic position in which an AST is parsed or bound. */
-typedef enum AstPos {
-  AST_UNIT,
-  AST_BLOCK,
-  AST_FIELD,
-  AST_ENUMERATOR,
-  AST_MAP_ENTRY,
-  AST_STATEMENT,
-  AST_EXPRESSION
-} AstPos;
-
 #include "error-macros.x"
 #include "ast-rewrite.x"
 #include "grammar.x"

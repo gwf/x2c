@@ -1343,7 +1343,7 @@ List Compiler_evaluate_meta_expression(Compiler c, List expression, Token site){
   return _meta_result(c, expression, Compiler_evaluate_meta_value(c, expression, site, 0), site);
 }
 
-List Compiler_evaluate_meta_statement(Compiler c, List expression, AstPos context, Token site){
+List Compiler_evaluate_meta_statement(Compiler c, List expression, Symbol context, Token site){
   if(! _init_guard_) _file_init_();
   Var value = Compiler_evaluate_meta_value(c, expression, site, 0);
   if(_code_result(c, value) && ! Var_is_nil(value)) return Compiler_bind_macro_lisp_statement(c, Var_list_payload(value), context);

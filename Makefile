@@ -239,7 +239,8 @@ stats:							## Show repository statistics
 	@python3 tools/repo-metrics.py --summary --color="$(STATS_COLOR)"
 
 ##@ Build and stages
-build-install: build					## Install this compiler in bin
+build-install: commands					## Install this compiler in bin
+	$(STAGE0_X2C) script etc/x2c-payload.x commands --prefix "$(CURDIR)"
 	rm -f ./bin/x2c-$(BRANCH)
 	cp builds/0/x2c ./bin/x2c-$(BRANCH)
 	rm -f ./bin/x2c

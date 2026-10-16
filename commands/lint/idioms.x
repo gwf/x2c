@@ -10,7 +10,6 @@
 #include "lint.x"
 #include <string.h>
 
-
 /* The token types of neighbors that bind no tighter than a relational
    operator, so an operand placed between them needs no parentheses. The
    `>` of `=>` is a neighbor before. */
@@ -83,7 +82,7 @@ static void _contains_in(Lint l):
     if !(left in loose_before) || !(l.tokens[after].type in loose_after):
       continue
     String receiver = l.source(start, at - 2)
-    if receiver.contains("\n"): continue
+    if "\n" in receiver: continue
     l.fix("contains-in", t.line, "write the membership test with `in`",
           start, close, %"${l.source(first, last)} in $receiver")
 
@@ -128,7 +127,7 @@ static void _expression_bodies(Lint l):
       continue
     String value = l.source(l.next(ret), l.prev(semi))
     int indent = l.indent(l.tokens[first].line) + 2
-    if value.contains("\n") || indent + value.len() + 1 > 79: continue
+    if "\n" in value || indent + value.len() + 1 > 79: continue
     String text = %" =>\n${String.new_fill(' ', indent)}$value;"
     if l.tokens[head].col + 4 + value.len() + 1 <= 79:
       text = %" => $value;"

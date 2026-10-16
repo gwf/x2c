@@ -127,7 +127,7 @@ static void _carrier_rollback(Compiler c) {
       int retained;
       c.place(%(unit-support $key), support);
       c.take_code_value(carrier, value, retained);
-      c.bind_syntax(value, AST_STATEMENT, NULL);
+      c.bind_syntax(value, <statement>, NULL);
       transaction.commit();
     }
     catch %(malformed *): failed = 1;
@@ -434,7 +434,8 @@ static void _reference_arguments(ReplSession s) {
   _expect(s, "int ref_present(void) { int v=4; "
              "int n=ref_maybe(v); return n*10+v; }", <defined>, void);
   _expect(s, "ref_present();", <value>, 55);
-  ReplResult statement = s.submit("({ int local=3; local+4; });");
+  _expect(s, "({ int local=3; local+4; });", <value>, 7);
+  ReplResult statement = s.submit("({ int local=3; local++; local; });");
   if (statement.status != <rejected> ||
       statement.message != "unsupported: a statement expression") {
     fputs("statement expression refusal described a different form\n", stderr);

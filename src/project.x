@@ -25,52 +25,15 @@ typedef struct ProjectBuild {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include "buffer.x"
-#include "install.x"
-
-// source templates
-
-static macro Expression $source.project.manifest(Expr $name) =>
-  %"[target.${$name}]
-sources = [\"src/*.x\"]
-";
-
-static macro Expression $source.project.main() =>
-  %"/*  main.x -- greet the name given on the command line */
-
-#include <stdio.h>
-
-int main(int argc, char **argv) {
-  String name = argc > 1 ? argv[1] : \"world\";
-  puts(%\"Hello, \$name!\");
-  return 0;
-}
-";
-
-static macro Expression $source.project.ignore() =>
-  ".x2c-build/\n";
 
 // command reports
 
 static macro Stmt $report.project.source_excluded(Expr $path, Expr $target) {
   fprintf(
     stderr, "x2c: excluded %s from target %s\n", $path, $target);
-}
-
-static macro Stmt $report.project.created(Expr $directory) {
-  fprintf(stderr, "x2c: created %s\n", $directory);
-}
-
-static macro Stmt $report.project.name_invalid(Expr $name) {
-  Diagnostics.driver_error(
-    %"new: '${
-      $name}' is not a target name; use letters, digits, '_', and '-'");
-}
-
-static macro Stmt $report.project.directory_occupied(Expr $dir) {
-  Diagnostics.driver_error(
-    %"new: ${$dir} exists and is not an empty directory");
 }
 
 // the manifest model
@@ -284,8 +247,8 @@ static void _target_header(Manifest &m, String header) {
     profile = name[split + 9:];
     name = name[:split];
   }
-  if (!header.startswith("target.") || !_name_ok(name) ||
-      (split >= 0 && !_name_ok(profile)))
+  if (!header.startswith("target.") || !ProjectBuild.valid_name(name) ||
+      (split >= 0 && !ProjectBuild.valid_name(profile)))
     _error(p, m.line, "unknown manifest section");
   ProjectTarget target = _target(p, name);
   if (!target) target = _new_target(p, name);
@@ -322,7 +285,7 @@ static void _field(Manifest &m, char *line) {
   if (!equals) _error(p, m.line, "expected key = value");
   *equals = 0;
   String key = String.new(_trim(line)), value = String.new(_trim(equals + 1));
-  if (!_name_ok(key)) _error(p, m.line, "invalid field name");
+  if (!ProjectBuild.valid_name(key)) _error(p, m.line, "invalid field name");
   _claim(m, key);
   m.key = key;
   m.value = value;
@@ -500,7 +463,10 @@ static int _array_open(String value) {
   return depth > 0;
 }
 
-static int _name_ok(String name) {
+/** Returns whether a target, profile, or manifest field name contains only
+    letters, digits, underscores, and hyphens, and is not empty.
+*/
+int ProjectBuild.valid_name(String name) {
   if (!name || !name[0]) return 0;
   foreach (char raw, name) {
     unsigned char ch = raw;
@@ -574,68 +540,27 @@ static ProjectProfile _selected_profile(
 
 // package dependencies
 
-/* Installs whatever the manifest pins that the home does not already hold,
-   then records what was resolved beside the manifest. A pin the lockfile
-   already covers is installed from the archive the lockfile recorded, which
-   is what makes a later build reproduce the same packages; only a pin the
-   lockfile does not cover reaches the index. A manifest with no pins has
-   nothing to reproduce, so a lockfile left from an earlier `[dependencies]`
-   section goes. The editor reads a source view and never installs, and a dry
-   run creates nothing. */
+/* The package command owns lockfile and installation state. Editor source
+   views and dry runs do not prepare dependencies. */
 static void _resolve_dependencies(Project p) {
   CliRequest request = p.command;
   if (p.sources || request.dry_run) return;
   String path = %"${p.root}/x2c.lock";
-  if (!p.dependencies) {
-    try Path.remove_file(path);
-    catch %(io-fail *detail): Diagnostics.host_error(detail);
-    return;
+  struct stat lock;
+  if (!p.dependencies && lstat(path, &lock) && errno == ENOENT) return;
+  Array args = ["ensure", "--lock", path];
+  if (request.index) {
+    args.push("--index");
+    args.push(request.index);
   }
-  List locked = _read_lock(path);
-  if (_lock_satisfies(p, locked)) return;
-  Array rows = [];
+  if (request.quiet) args.push("--quiet");
+  args.push("--");
   for (ProjectDependency entry = p.dependencies; entry; entry = entry.next) {
-    List row = _locked_row(locked, entry);
-    rows.push(request.require_package(entry.name, entry.version, row));
+    args.push(entry.name);
+    args.push(entry.version);
   }
-  _write_lock(path, rows.list_free());
-}
-
-/* The lockfile's rows, or NULL when it is absent. */
-static List _read_lock(String path) {
-  String text = NULL;
-  try text = Path.read_text(path);
-  catch %(not-found *): return NULL;
-  return install_rows(text);
-}
-
-/* Every dependency is locked at its pinned version and already installed at
-   that version, so the build needs no index and no network. */
-static int _lock_satisfies(Project p, List rows) {
-  if (!rows) return 0;
-  for (ProjectDependency entry = p.dependencies; entry; entry = entry.next) {
-    if (!_locked_row(rows, entry)) return 0;
-    if (install_version(entry.name) != entry.version) return 0;
-  }
-  return 1;
-}
-
-/* The lockfile row that pins `entry` at its version, or NULL when the
-   lockfile has none and the index has to resolve it. */
-static List _locked_row(List rows, ProjectDependency entry) {
-  List found = NULL;
-  foreach (List row, rows)
-    if (row.car() == entry.name && row.cadr() == entry.version) found = row;
-  return found;
-}
-
-static void _write_lock(String path, List rows) {
-  String text =
-    "# x2c lockfile. Written by x2c build; keep it with the manifest.\n"
-    "# name version kind platform url sha256\n";
-  foreach (List row, rows) text = %"$text${" ".join(row)}\n";
-  try Path.publish_files(%($path $text));
-  catch %(io-fail *detail): Diagnostics.host_error(detail);
+  int status = Compiler.run_command("package", args);
+  if (status) exit(status);
 }
 
 // build plans
@@ -878,42 +803,4 @@ static void _error(Project p, int line, String message) {
 
 static void _error_name(Project p, int line, String message, String name) {
   _error(p, line, %"$message '$name'");
-}
-
-// new projects
-
-/** Creates the starter project for `x2c new` in the directory named by
-    `request`'s one operand and returns 0. The directory may be missing or
-    empty, and its last component names the target. Any other directory, an
-    unusable name, or a failed write prints a diagnostic and exits with
-    status 2.
-*/
-int CliRequest.new_project(CliRequest request) {
-  Path dir = request.inputs.car();
-  if (!dir) Diagnostics.driver_error("new: the directory operand is empty");
-  String name = _starter_name(dir);
-  try _write_starter(dir, name);
-  catch %(io-fail *detail): Diagnostics.host_error(detail);
-  if (!request.quiet) $report.project.created(dir);
-  return 0;
-}
-
-/* The operand's own last component names the target, so a symbolic link
-   is named for the link and not for what it points at. */
-static String _starter_name(Path dir) {
-  String name = dir.basename();
-  if (name == "." || name == ".." || name == "/")
-    name = Path.absolute(dir).basename();
-  if (!_name_ok(name))
-    $report.project.name_invalid(name);
-  return name;
-}
-
-static void _write_starter(Path dir, String name) {
-  if (dir.exists() && (!dir.is_dir() || dir.list_dir()))
-    $report.project.directory_occupied(dir);
-  dir.join("src").make_dirs();
-  dir.join("x2c.toml").write_text($source.project.manifest(name));
-  dir.join("src/main.x").write_text($source.project.main());
-  dir.join(".gitignore").write_text($source.project.ignore());
 }

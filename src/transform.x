@@ -140,9 +140,9 @@ static Ast _step_tag(Compiler c, Ast ast, Symbol tag) {
     case <var>: next = _to_var(c, ast.cadr()); break;
     case <segments>: return _interpolation(c, ast);
     case <declare>: case <decl>: next = _declaration(c, ast); break;
-    case <dstrdecl>: return _destructuring(c, ast, tag, AST_BLOCK);
+    case <dstrdecl>: return _destructuring(c, ast, tag, <block>);
     case <stmnt>:
-      return _destructures(ast) ? _destructuring(c, ast, tag, AST_STATEMENT)
+      return _destructures(ast) ? _destructuring(c, ast, tag, <statement>)
                                 : _default_node(c, ast);
     case <dstrasgn>: return _destructuring_value(c, ast);
     case <match>: return _shipped_statement(c, ast, tag);
@@ -167,7 +167,7 @@ static Ast _step_tag(Compiler c, Ast ast, Symbol tag) {
 /* Ordinary registered patterns may replace a typed statement. */
 static Ast _statement_rewrite(Compiler c, Ast ast, Symbol tag) {
   List rewritten = c.rewrite_rules ? c.lower_rewrite(
-    <node>, tag, ast, AST_STATEMENT, c.return_type, NULL) : NULL;
+    <node>, tag, ast, <statement>, c.return_type, NULL) : NULL;
   return rewritten ? rewritten : ast;
 }
 
@@ -176,7 +176,7 @@ static Ast _statement_rewrite(Compiler c, Ast ast, Symbol tag) {
    compiler does not link the component that owns the form, or its rule
    failed to register. */
 static List _shipped_lowering(
-  Compiler c, Symbol point, Var kind, List source, AstPos position,
+  Compiler c, Symbol point, Var kind, List source, Symbol position,
   Type expected, String form) {
   List lowered =
     c.lower_rewrite(point, kind, source, position, expected, NULL);
@@ -208,7 +208,7 @@ List Compiler.lower_lambda_expr(Compiler c, List expression) {
     }
     case $source_any_lambda():
       return _shipped_lowering(
-        c, <literal>, <lambda>, expression, AST_EXPRESSION, expression.cadr(),
+        c, <literal>, <lambda>, expression, <expression>, expression.cadr(),
         "lambda");
   }
   return expression;
@@ -220,18 +220,18 @@ List Compiler.lower_lambda_expr(Compiler c, List expression) {
     translation as `_shipped_lowering` does. */
 void Compiler.shipped_support(
   Compiler c, Symbol kind, List source, String form) {
-  List bound = c.rewrite(<node>, kind, source, AST_UNIT, NULL, NULL);
+  List bound = c.rewrite(<node>, kind, source, <unit>, NULL, NULL);
   if (!bound) $report.xform.no_shipped_rule(c, form);
   else c.add_support(bound);
 }
 
 static Ast _shipped_statement(Compiler c, Ast ast, Symbol tag) =>
   _shipped_lowering(
-    c, <node>, tag, ast, AST_STATEMENT, c.return_type, %"$tag statement");
+    c, <node>, tag, ast, <statement>, c.return_type, %"$tag statement");
 
 static Ast _destructuring(
-  Compiler c, Ast ast, Symbol tag, AstPos position) {
-  String form = position == AST_BLOCK
+  Compiler c, Ast ast, Symbol tag, Symbol position) {
+  String form = position == <block>
     ? "destructuring declaration" : "destructuring statement";
   // The implementation belongs to src/component-destructuring.x.
   return _shipped_lowering(
@@ -247,7 +247,7 @@ static int _destructures(List statement) {
 static Ast _destructuring_value(Compiler c, Ast ast) {
   Type type = ast.caddr().cadr();
   return _shipped_lowering(
-    c, <literal>, <dstrasgn>, %(expr $type $ast), AST_EXPRESSION, type,
+    c, <literal>, <dstrasgn>, %(expr $type $ast), <expression>, type,
     "destructuring assignment").caddr();
 }
 
@@ -363,9 +363,9 @@ static List _function_rewrite(
   struct SlotWatch shipped = {.shipped = 1};
   $let(c.slot_watch, written ? &shipped : c.slot_watch) {
     List replaced = c.lower_rewrite(
-      <function>, return_type, function, AST_UNIT, NULL, NULL);
+      <function>, return_type, function, <unit>, NULL, NULL);
     return replaced ? replaced : c.lower_rewrite(
-      <function>, <any>, function, AST_UNIT, NULL, NULL);
+      <function>, <any>, function, <unit>, NULL, NULL);
   }
 }
 
@@ -500,7 +500,7 @@ static List _expression_rewrite(Compiler c, List expression) {
     }
   }
   return kind ? c.lower_rewrite(
-    point, kind, source, AST_EXPRESSION, expression.cadr(), NULL) : NULL;
+    point, kind, source, <expression>, expression.cadr(), NULL) : NULL;
 }
 
 static Ast _expression_node(Compiler c, Ast ast) {
@@ -635,7 +635,7 @@ static Ast _collection_literal(Compiler c, Ast ast, Symbol tag) {
   Type type = map ? %("Map") : %("Array");
   Symbol head = map ? <map> : <array>;
   List lowered = _shipped_lowering(
-    c, <literal>, head, %(expr $type ($head @{ast.cdr()})), AST_EXPRESSION,
+    c, <literal>, head, %(expr $type ($head @{ast.cdr()})), <expression>,
     type, %"${type.repr()} literal");
   match (lowered) case %(expr ? (call ?callee (args *arguments))): {
     Array values = $auto([]), orders = $auto([]);
@@ -844,7 +844,7 @@ static Ast _interpolation(Compiler c, Ast ast) {
   }
   List source = source_string_content(rows.list_free());
   List lowered = _shipped_lowering(
-    c, <literal>, <segments>, %(expr ("String") $source), AST_EXPRESSION,
+    c, <literal>, <segments>, %(expr ("String") $source), <expression>,
     %("String"), "interpolated String");
   match (lowered)
     case %(expr ?type (call ?callee (args ?separator
@@ -1004,7 +1004,7 @@ static List _dynamic(
   List kind = operation.car() == <postfix>
     ? %(postfix ${operation.cadr()} ("Var")) : %(${operation.cadr()} ("Var"));
   List rewritten = c.rewrite(
-    point, kind, %(expr ("Var") $operation), AST_EXPRESSION, type, NULL);
+    point, kind, %(expr ("Var") $operation), <expression>, type, NULL);
   return rewritten ? rewritten.caddr() : operation;
 }
 
