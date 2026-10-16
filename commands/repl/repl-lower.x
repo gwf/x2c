@@ -1037,9 +1037,13 @@ static Var _lower_lambda(Lowering &l, List params, List held, Var body) {
     Var (id, value) = pair;
     l.env[id] = value;
   }
+  if (_lower_type_of(body).is_function())
+    body = l.compiler.convert_expression(body, %("Var"));
   Var lowered = _lower_expr(l, body);
-  if (!_lower_failed(l, lowered))
+  if (!_lower_failed(l, lowered)) {
     lowered = _lower_to_type(l, _lower_type_of(body), lowered);
+    lowered = _lower_coerce(l, %("Var"), body, lowered);
+  }
   if (_lower_failed(l, lowered)) return void;
   if (boxes.len())
     lowered = %((lambda ${boxes.list()} $lowered) @{values.list()});
