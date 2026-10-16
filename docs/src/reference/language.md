@@ -1694,11 +1694,11 @@ position that fits its target kind:
 - A bare block or function decorator can overlap a declaration that begins
   with a same-named typedef.
 
- A nonstatic `keyword` declaration becomes
-available to including files at the include position, together with the macro
-it names. `static keyword ALIAS $macro;` keeps the alias in its declaring file.
-A reusable ordinary `.x` module may hold both macro definitions and aliases;
-include that module wherever its syntax is needed.
+A nonstatic `keyword` declaration becomes available to including files at the
+include position, together with the macro it names. `static keyword ALIAS
+$macro;` keeps the alias in its declaring file. A reusable ordinary `.x` module
+may hold both macro definitions and aliases; include that module wherever its
+syntax is needed.
 
 Macro templates are parsed when defined, so a later alias does not reinterpret
 an earlier template. Generated `List`s and strings are not reparsed as
@@ -1756,10 +1756,10 @@ a complete function or declaration, but a public target must retain the same
 public binding and contract and cannot gain new public siblings. Private
 targets and hygienically private siblings may be rewritten freely.
 
- `Decorator` adjacency still collects the unchanged source
-target. A public target's captured source must participate in the
-decorator's `Match` replacement, and dropping it makes the match fail. Imported
-decorators work without an extra prototype.
+`Decorator` adjacency still collects the unchanged source target. A public
+target's captured source must participate in the decorator's `Match`
+replacement, and dropping it makes the match fail. Imported decorators work
+without an extra prototype.
 
 ### Macro values
 
@@ -2755,9 +2755,9 @@ include ordinary top-level syntax and these constructible forms:
 - `(syntax-recipe CALLBACK ARGUMENTS)` supplies syntax when a retained body is
   bound, allowing it to use the selected method signatures.
 
- Retained bodies also carry the usual macro
-bindings and source locations for diagnostics. A consumer cannot replace a
-provider's exported default by defining another function with its name.
+Retained bodies also carry the usual macro bindings and source locations for
+diagnostics. A consumer cannot replace a provider's exported default by
+defining another function with its name.
 
 ### Class declarations
 
