@@ -286,7 +286,7 @@ proof-raw-symbols: build				## Check raw symbol collection parity
 proof-cold-collection: stage-1				## Check stage 1 against a cold translation
 	./tools/check-cold-collection.sh
 
-proof-conformance: build ## Compare owned conformance rows between prelude and live symbol modes
+proof-conformance: build ## Optional runtime conformance comparison between prelude and live symbol modes
 	$(STAGE0_X2C) script tools/check-conformance-coherence
 
 check-native-modules: commands			## Build, load, and reject native modules
