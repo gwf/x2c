@@ -191,7 +191,7 @@ static uint64_t _index_value(CloneIndex &index, Var value, int origin) {
     );
     key = index.parsed.context.export(key);
     site = index.parsed.context.export(site);
-    List prior = index.sites.contains(key) ? index.sites[key].list() : NULL;
+    List prior = index.sites.getdefault(key, NULL);
     index.sites[key] = index.parsed.context.export(cons(site, prior));
   }
   return id;

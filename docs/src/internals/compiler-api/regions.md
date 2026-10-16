@@ -16,6 +16,7 @@ Values that can outlive the region that allocated them.
 | [`Compiler.check_meta_regions`](#Compiler.check_meta_regions) | Rejects a `meta` function whose body breaks the rule `Compiler.check_regions` warns about. |
 | [`Compiler.check_regions`](#Compiler.check_regions) | Warns about values that can outlive the region that allocated them. |
 | [`Compiler.has_region_row`](#Compiler.has_region_row) | Reports whether the runtime table proves the lifetime effects of the native function `name`. |
+| [`Compiler.region_effect`](#Compiler.region_effect) | The runtime table's effect row for the operation `name`, such as `(open scope)` or `(exit)`, or void when the table has no row. |
 | [`Compiler.region_result`](#Compiler.region_result) | The owner of the storage the runtime operation `name` returns: `<scope>` for the active Scope, `<slot>` for the Scope its first argument names, `<pool>` for the canonical-value pool, or 0 when nothing is known. |
 | [`Compiler.region_wrapper`](#Compiler.region_wrapper) | Reports whether the runtime operation `name` returns its argument's storage unchanged, as a `Var` box or its unboxing does. |
 
@@ -71,6 +72,16 @@ Reports whether the runtime table proves the lifetime effects of the
 native function `name`.
 
 Source: `src/regions/runtime.x:188`
+
+<a id="Compiler.region_effect"></a>
+#### Compiler.region_effect
+
+`Var Compiler.region_effect(String name)`
+
+The runtime table's effect row for the operation `name`, such as
+`(open scope)` or `(exit)`, or void when the table has no row.
+
+Source: `src/regions/runtime.x:192`
 
 <a id="Compiler.region_result"></a>
 #### Compiler.region_result

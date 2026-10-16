@@ -84,8 +84,29 @@ List project_call_target(
 void project_add_public(Map publics, List target) {
   match (target)
     case %(target ? ?name):
-      publics[name] = cons(
-        target, publics.contains(name) ? publics[name].list() : NULL);
+      publics[name] = cons(target, publics.getdefault(name, NULL));
+}
+
+/** Adds `value` to the front of the List stored under `key` unless that
+    List already contains it. Returns whether `value` was added. */
+int project_add_unique(Map lists, Var key, Var value) {
+  List values = lists.getdefault(key, NULL);
+  if (values.contains(value)) return 0;
+  lists[key] = cons(value, values);
+  return 1;
+}
+
+/** `<static>` for a definition of static `type`, otherwise `<public>`. */
+Symbol project_visibility(Type type) =>
+  type.is_static() ? <static> : <public>;
+
+/** Orders `records` by the key `key` builds for each one, keeps the first
+    `limit`, and returns them as a List. */
+List project_ranked_records(Array records, Func key, int limit) {
+  records.sort_by(key);
+  if ((int) records.len() > limit)
+    records.remslice(limit, records.len()).free();
+  return records.list_free();
 }
 
 /** Adds `amount` to the count stored under `key`, reading absence as zero. */
@@ -114,6 +135,24 @@ List project_location(Compiler compiler, String path, int origin) {
   int line = location.assoc(<line>).integer();
   int column = location.assoc(<column>).integer();
   return %(location $source $line $column);
+}
+
+/** The named parameters in a function's modifiers, in order, as
+    `(parameter POSITION BINDING TYPE)` rows. POSITION counts every
+    parameter, named or not. */
+List project_parameters(List modifiers) {
+  Array rows = [];
+  match (modifiers)
+    case %((fnmod (params *values)) *): {
+      int position = 0;
+      foreach (Var value, values) {
+        match (value)
+          case %(param ?type (bind (!set ?binding (binding ? ?)) ?)):
+            rows.push(%(parameter $position $binding $type));
+        position++;
+      }
+    }
+  return rows.list_free();
 }
 
 /** The binding a direct identifier names beneath expression, parenthesis,

@@ -186,3 +186,7 @@ int Compiler.region_wrapper(String name) => runtime[name] == %(wrap);
 /** Reports whether the runtime table proves the lifetime effects of the
     native function `name`. */
 int Compiler.has_region_row(String name) => name in runtime;
+
+/** The runtime table's effect row for the operation `name`, such as
+    `(open scope)` or `(exit)`, or void when the table has no row. */
+Var Compiler.region_effect(String name) => runtime[name];

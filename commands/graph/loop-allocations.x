@@ -10,207 +10,151 @@ typedef struct LoopAllocations *LoopAllocations;
 enum { LOOP_ALLOCATION_LIMIT = 25 };
 
 
+/* One unit's loop-allocation walk: the function being walked and the
+   direct allocations and helper calls found in its loops. */
+typedef struct LoopWalk LoopWalk;
+static struct LoopWalk {
+  Compiler compiler;
+  Map definitions;
+  String path, function;
+  Symbol visibility;
+  Array direct, pending;
+};
+
 static void _loop_collect(
-  Compiler compiler, Map definitions, Var value, String path, String function,
-  Symbol visibility, int origin, int loop_depth, Symbol use, Array direct,
-  Array pending) {
+  LoopWalk &walk, Var value, int origin, int loop_depth, Symbol use) {
   if (value is not <list>) return;
   List node = value;
   String operation = NULL;
   Symbol direct_kind = 0;
   if (loop_depth) {
-    direct_kind = Lifetime.loop_allocation_kind(compiler, node, operation);
-    if (direct_kind) {
-      List event = %(
-        direct-allocation $path $function $visibility
-        $direct_kind $operation $use
-        ${project_location(compiler, path, origin)} $loop_depth
-      );
-      direct.push(event);
-    }
+    direct_kind = Lifetime.loop_allocation_kind(
+      walk.compiler, node, operation);
+    if (direct_kind)
+      walk.direct.push(
+        %(direct $direct_kind ${walk.path} ${walk.function}
+          ${walk.visibility} $operation $use
+          ${project_location(walk.compiler, walk.path, origin)} $loop_depth));
   }
   match (node) {
     case %(function *): return;
     case %(at ?next_origin ?inner): {
-      _loop_collect(
-        compiler, definitions, inner, path, function, visibility,
-        next_origin.integer(), loop_depth, use, direct, pending);
+      _loop_collect(walk, inner, next_origin.integer(), loop_depth, use);
       return;
     }
     case %(while ?condition ?body): {
-      _loop_collect(
-        compiler, definitions, condition, path, function, visibility,
-        origin, loop_depth + 1, <condition>, direct, pending);
-      _loop_collect(
-        compiler, definitions, body, path, function, visibility,
-        origin, loop_depth + 1, <nested>, direct, pending);
+      _loop_collect(walk, condition, origin, loop_depth + 1, <condition>);
+      _loop_collect(walk, body, origin, loop_depth + 1, <nested>);
       return;
     }
     case %(do ?body ?condition): {
-      _loop_collect(
-        compiler, definitions, body, path, function, visibility,
-        origin, loop_depth + 1, <nested>, direct, pending);
-      _loop_collect(
-        compiler, definitions, condition, path, function, visibility,
-        origin, loop_depth + 1, <condition>, direct, pending);
+      _loop_collect(walk, body, origin, loop_depth + 1, <nested>);
+      _loop_collect(walk, condition, origin, loop_depth + 1, <condition>);
       return;
     }
     case %(for ?initial ?condition ?increment ?body): {
-      _loop_collect(
-        compiler, definitions, initial, path, function, visibility,
-        origin, loop_depth, <nested>, direct, pending);
-      _loop_collect(
-        compiler, definitions, condition, path, function, visibility,
-        origin, loop_depth + 1, <condition>, direct, pending);
-      _loop_collect(
-        compiler, definitions, increment, path, function, visibility,
-        origin, loop_depth + 1, <nested>, direct, pending);
-      _loop_collect(
-        compiler, definitions, body, path, function, visibility,
-        origin, loop_depth + 1, <nested>, direct, pending);
+      _loop_collect(walk, initial, origin, loop_depth, <nested>);
+      _loop_collect(walk, condition, origin, loop_depth + 1, <condition>);
+      _loop_collect(walk, increment, origin, loop_depth + 1, <nested>);
+      _loop_collect(walk, body, origin, loop_depth + 1, <nested>);
       return;
     }
     case %(return ? ?expression): {
-      _loop_collect(
-        compiler, definitions, expression, path, function, visibility,
-        origin, loop_depth, <returned>, direct, pending);
+      _loop_collect(walk, expression, origin, loop_depth, <returned>);
       return;
     }
     case %(stmnt ?expression): {
-      _loop_collect(
-        compiler, definitions, expression, path, function, visibility,
-        origin, loop_depth, <discarded>, direct, pending);
+      _loop_collect(walk, expression, origin, loop_depth, <discarded>);
       return;
     }
     case %(expr ? ?inner): {
-      _loop_collect(
-        compiler, definitions, inner, path, function, visibility,
-        origin, loop_depth, use, direct, pending);
+      _loop_collect(walk, inner, origin, loop_depth, use);
       return;
     }
     case %(parens ?inner): {
-      _loop_collect(
-        compiler, definitions, inner, path, function, visibility,
-        origin, loop_depth, use, direct, pending);
+      _loop_collect(walk, inner, origin, loop_depth, use);
       return;
     }
     case %(cast ?declaration ?expression): {
-      _loop_collect(
-        compiler, definitions, declaration, path, function, visibility,
-        origin, loop_depth, <nested>, direct, pending);
-      _loop_collect(
-        compiler, definitions, expression, path, function, visibility,
-        origin, loop_depth, use, direct, pending);
+      _loop_collect(walk, declaration, origin, loop_depth, <nested>);
+      _loop_collect(walk, expression, origin, loop_depth, use);
       return;
     }
     case %(op = ?left ?right): {
-      _loop_collect(
-        compiler, definitions, left, path, function, visibility,
-        origin, loop_depth, <nested>, direct, pending);
-      _loop_collect(
-        compiler, definitions, right, path, function, visibility,
-        origin, loop_depth, <assigned>, direct, pending);
+      _loop_collect(walk, left, origin, loop_depth, <nested>);
+      _loop_collect(walk, right, origin, loop_depth, <assigned>);
       return;
     }
     case %(call ?callee (!set ?arguments (args *))): {
       if (loop_depth && !direct_kind) {
         String name;
         List target = project_call_target(
-          compiler, definitions, node, name, NULL);
-        if (target && !List.equal(target, %(computed))) {
-          List event = %(
-            allocation-return $target $path $function $visibility
-            $name $use ${project_location(compiler, path, origin)}
-            $loop_depth
-          );
-          pending.push(event);
-        }
+          walk.compiler, walk.definitions, node, name, NULL);
+        if (target && !List.equal(target, %(computed)))
+          walk.pending.push(
+            %(allocation-return $target ${walk.path} ${walk.function}
+              ${walk.visibility} $name $use
+              ${project_location(walk.compiler, walk.path, origin)}
+              $loop_depth));
       }
-      _loop_collect(
-        compiler, definitions, callee, path, function, visibility,
-        origin, loop_depth, <nested>, direct, pending);
+      _loop_collect(walk, callee, origin, loop_depth, <nested>);
       foreach (Var argument, cdr(arguments))
-        _loop_collect(
-          compiler, definitions, argument, path, function, visibility,
-          origin, loop_depth, <argument>, direct, pending);
+        _loop_collect(walk, argument, origin, loop_depth, <argument>);
       return;
     }
   }
   foreach (Var child, node)
-    _loop_collect(
-      compiler, definitions, child, path, function, visibility,
-      origin, loop_depth, <nested>, direct, pending);
+    _loop_collect(walk, child, origin, loop_depth, <nested>);
 }
 
 List LoopAllocations.analyze_unit(Compiler compiler, List ast, String path) {
-  Map definitions = project_function_targets(compiler, ast, path);
-  Array direct = [], pending = [];
+  LoopWalk walk = {
+    .compiler = compiler,
+    .definitions = project_function_targets(compiler, ast, path),
+    .path = path, .direct = [], .pending = []
+  };
   foreach (List node, ast)
     match (node)
       case %(function ?type
              (bind (!set ?binding (binding ? ?)) ?)
              ?body): {
-        String function = compiler.emitted_binding_name(binding);
-        Symbol visibility = ((Type) type).is_static()
-                          ? <static> : <public>;
-        _loop_collect(
-          compiler, definitions, body, path, function, visibility,
-          0, 0, <nested>, direct, pending);
+        walk.function = compiler.emitted_binding_name(binding);
+        walk.visibility = project_visibility(type);
+        _loop_collect(walk, body, 0, 0, <nested>);
       }
-  direct.sort();
-  pending.sort();
+  walk.direct.sort();
+  walk.pending.sort();
   return %(
     loop-allocation-unit
-    (lifetime ${Lifetime.analyze_unit(compiler, ast, path, definitions)})
-    (direct @{direct.list_free()})
-    (pending @{pending.list_free()})
+    (lifetime ${
+      Lifetime.analyze_unit(compiler, ast, path, walk.definitions)})
+    (direct @{walk.direct.list_free()})
+    (pending @{walk.pending.list_free()})
   );
 }
 
+/* Groups a direct allocation or a resolved helper call by its site. Both
+   events list kind, unit, function, visibility, operation, use, location,
+   and loop depth. */
 static void _loop_add_event(
   Map groups, Map totals, Map functions, List event) {
-  String unit, function, operation;
-  Symbol visibility, source, kind, use;
-  List location;
-  int depth;
-  match (event) {
-    case %(
-      direct-allocation ?event_unit ?event_function ?event_visibility
-      ?event_kind ?event_operation ?event_use ?event_location ?event_depth
-    ): {
-      unit = event_unit, function = event_function;
-      visibility = event_visibility, source = <direct>;
-      kind = event_kind, operation = event_operation, use = event_use;
-      location = event_location, depth = event_depth.integer();
+  match (event)
+    case %((!set ?tag (!or direct allocation-return))
+           ?kind ?unit ?function ?visibility ?operation ?use ?location
+           ?depth): {
+      Symbol source = tag == <direct> ? <direct> : <helper>;
+      List key = %(site $unit $function $visibility $location);
+      groups[key] = cons(
+        %($source $kind $operation $use $depth),
+        groups.getdefault(key, NULL));
+      functions[%($unit $function $visibility)] = 1;
+      project_count(totals, %($source $kind), 1);
     }
-    case %(
-      allocation-return ?event_kind ?event_unit ?event_function
-      ?event_visibility ?event_operation ?event_use
-      ?event_location ?event_depth
-    ): {
-      unit = event_unit, function = event_function;
-      visibility = event_visibility, source = <helper>;
-      kind = event_kind, operation = event_operation, use = event_use;
-      location = event_location, depth = event_depth.integer();
-    }
-  }
-  List key = %(site $unit $function $visibility $location);
-  List events = groups.contains(key) ? groups[key].list() : NULL;
-  groups[key] = cons(%($source $kind $operation $use $depth), events);
-  functions[%($unit $function $visibility)] = 1;
-  project_count(totals, %($source $kind), 1);
 }
 
+/* The ranked record for the site `key`, `(site UNIT FUNCTION VISIBILITY
+   LOCATION)`, and its events. */
 static List _loop_candidate(List key, List events) {
-  String unit, function;
-  Symbol visibility;
-  List location;
-  match (key)
-    case %(site ?site_unit ?site_function ?site_visibility ?site_location): {
-      unit = site_unit, function = site_function;
-      visibility = site_visibility, location = site_location;
-    }
-
   Map counts = {};
   int loop_depth = 0;
   foreach (List event, events)
@@ -244,8 +188,8 @@ static List _loop_candidate(List key, List events) {
     }
   }
   operations.sort();
-  List record = %(
-    site $unit $function $visibility $location
+  return %(
+    @key
     (allocations
       (direct (pooled $direct_pooled) (scoped $direct_scoped))
       (helper-calls (pooled $helper_pooled) (scoped $helper_scoped)))
@@ -255,7 +199,6 @@ static List _loop_candidate(List key, List events) {
     (operations @{operations.list_free()})
     (loop-depth $loop_depth)
   );
-  return record;
 }
 
 /* Orders a candidate before another with fewer scoped allocations,
@@ -301,12 +244,12 @@ List LoopAllocations.finish(List units, int limit) {
   foreach (List event, resolved)
     _loop_add_event(groups, totals, functions, event);
 
-  Array ranked = [];
+  Array candidates = [];
   foreach (Var (raw_key, raw_events), groups)
-    ranked.push(_loop_candidate(raw_key, raw_events));
-  ranked.sort_by(%!(List candidate) => _loop_candidate_rank(candidate));
-  if (limit && (int) ranked.len() > limit)
-    ranked.remslice(limit, ranked.len()).free();
+    candidates.push(_loop_candidate(raw_key, raw_events));
+  List ranked = project_ranked_records(
+    candidates, %!(List candidate) => _loop_candidate_rank(candidate),
+    limit);
 
   int function_count = functions.len();
   int expression_count = groups.len();
@@ -322,6 +265,6 @@ List LoopAllocations.finish(List units, int limit) {
              (helper-calls (pooled $helper_pooled)
                            (scoped $helper_scoped))
              (reported $reported))
-    (candidates @{ranked.list_free()})
+    (candidates @ranked)
   );
 }
