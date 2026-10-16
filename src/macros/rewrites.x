@@ -38,12 +38,19 @@ static typedef struct Effects {
   int bindings, names, origins, pending, placements, diagnostics;
 } Effects;
 
-/** Records the values a replacement's lowering watches and what lowering
-    each produced, in the order lowering reached them. A watched value is
-    source the translator captured, so it lowers under the `outer` rules,
-    those active outside the translator's own. A first lowering `prepares`
-    a skeleton from what it records. A replacement lowered as written
-    within another's has that one as its `parent`, whose source it may hold
+/* A first lowering's outputs and effects, used only to prepare a skeleton. */
+static typedef struct Preparation {
+  Array outputs, order;
+  Effects inner;
+  int repeated;
+} Preparation;
+
+/** Records the source values a replacement's lowering watches. A watched
+    value is source the translator captured, so it lowers under the `outer` rules,
+    those active outside the translator's own. A first lowering's
+    `preparation` records the outputs for a reusable skeleton.
+    A replacement lowered as written within another's has that one as its
+    `parent`, whose source it may hold
     as well. A shipped rule's replacement, a statement the kernel wrote,
     and any replacement lowered within either are `shipped`, as is a
     written definition while its function rules are chosen: their own
@@ -52,9 +59,8 @@ static typedef struct Effects {
     lowered already has them `kept` as they are. */
 struct SlotWatch {
   List values;
-  Array outputs, order;
-  Effects inner;
-  int repeated, prepares, shipped, kept;
+  Preparation *preparation;
+  int shipped, kept;
   List outer;
   SlotWatch parent;
 };
@@ -249,7 +255,7 @@ List Compiler.rewrite_lowered(
 List Compiler.lower_replacement(Compiler c, List replacement, List source) {
   Array parts = $auto([]);
   _held_parts(source, <node>, parts);
-  struct SlotWatch kept = {parts.list(), [], []};
+  struct SlotWatch kept = {parts.list()};
   kept.kept = 1;
   $let(c.slot_watch, &kept) return c.normalize(replacement);
 }
@@ -504,21 +510,22 @@ static List _prepared(
   }
   if (c.sym.transacting())
     return _watched(c, result, sources, position, expected, site);
-  struct SlotWatch watch = {values.list(), [], []};
+  Preparation preparation = {[], []};
+  struct SlotWatch watch = {values.list(), &preparation};
   watch.outer = c.active_rewrites.cdr();
-  watch.prepares = 1;
   watch.shipped = rule.builtin;
-  foreach (Var value, values) watch.outputs.push(NULL);
+  foreach (Var value, values) preparation.outputs.push(NULL);
   Effects before = _effects(c);
   List lowered;
   $let(c.slot_watch, &watch)
     lowered = _lowered(c, result, position, expected, site);
   // A memo the template fills adds state only on its first lowering.
-  if (!_same(_since(_effects(c), before), watch.inner)) return lowered;
-  List skeleton = !watch.repeated && watch.order.len() == values.len()
-    ? _skeleton(lowered, watch.outputs) : NULL;
+  if (!_same(_since(_effects(c), before), preparation.inner)) return lowered;
+  List skeleton =
+    !preparation.repeated && preparation.order.len() == values.len()
+    ? _skeleton(lowered, preparation.outputs) : NULL;
   c.prepared_rewrites[key] =
-    skeleton ? %($skeleton ${watch.order.list()}) : 0;
+    skeleton ? %($skeleton ${preparation.order.list()}) : 0;
   return lowered;
 }
 
@@ -527,12 +534,11 @@ static List _prepared(
 static List _watched(
   Compiler c, Var result, Array sources, Symbol position, Type expected,
   Token site) {
-  struct SlotWatch watch = {sources.list(), [], []};
+  struct SlotWatch watch = {sources.list()};
   watch.outer = c.active_rewrites.cdr();
-  if (c.slot_watch && !c.slot_watch.prepares) watch.parent = c.slot_watch;
+  if (c.slot_watch && !c.slot_watch.preparation) watch.parent = c.slot_watch;
   RewriteRule rule = c.active_rewrites.car();
   watch.shipped = rule.builtin || (watch.parent && watch.parent.shipped);
-  foreach (Var value, sources) watch.outputs.push(NULL);
   $let(c.slot_watch, &watch)
     return _lowered(c, result, position, expected, site);
 }
@@ -687,15 +693,14 @@ static int _find_slot(SlotWatch watch, Ast ast) {
     else that identifies it when a binder it uses binds again. */
 void Compiler.rebound(Compiler c, Var source, List bound) {
   SlotWatch watch = c.slot_watch;
-  if (!watch || watch.prepares || bound === source ||
+  if (!watch || watch.preparation || bound === source ||
       _find_slot(watch, source) < 0)
     return;
   watch.values = watch.values.append(%($bound));
-  watch.outputs.push(NULL);
 }
 
-/** Lowers `ast` when it is a value the active first lowering watches and
-    records what its lowering produced; NULL otherwise. A value that an
+/** Lowers `ast` when it is a value the active lowering watches; NULL otherwise.
+    A preparing watch also records what lowering produced. A value that an
     enclosing replacement's source held as well lowers outside that
     replacement's rule too, and that replacement still watches its own
     values within it. */
@@ -706,13 +711,17 @@ Ast Compiler.watched_step(Compiler c, Ast ast) {
   while (owner.parent && _find_slot(owner.parent, ast) >= 0)
     owner = owner.parent;
   if (owner.kept) return ast;
-  Effects before = _effects(c);
+  Preparation *preparation = watch.preparation;
+  Effects before = {0};
+  if (preparation) before = _effects(c);
   Ast lowered;
   $let(c.slot_watch, owner.parent) $let(c.active_rewrites, owner.outer)
     lowered = c.normalize(ast);
-  watch.inner = _add(watch.inner, _since(_effects(c), before));
-  if (watch.outputs[slot].list_payload()) watch.repeated = 1;
-  watch.outputs[slot] = lowered;
-  watch.order.push(slot);
+  if (preparation) {
+    preparation.inner = _add(preparation.inner, _since(_effects(c), before));
+    if (preparation.outputs[slot].list_payload()) preparation.repeated = 1;
+    preparation.outputs[slot] = lowered;
+    preparation.order.push(slot);
+  }
   return lowered;
 }
