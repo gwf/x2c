@@ -197,6 +197,7 @@ String Compiler.driver_executable(void) {
     path = Path.dirname(stage) == %"$root_path/builds"
       ? %"$stage/x2c" : %"$prefix/bin/x2c";
   }
+  path = Path.absolute(path);
   return Path.content_identity(path) == active_identity ? path : NULL;
 }
 

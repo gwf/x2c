@@ -40,6 +40,10 @@ cp "$ROOT/builds/0/libx2c.a" home/builds/7/libx2c.a
 export X2C_HOME="$BUILD/home"
 stage="$BUILD/home/builds/7/x2c"
 [ "$("$stage" env runtime_lib)" = "$BUILD/home/builds/7/libx2c.a" ]
+printf 'int main(void) { return 0; }\n' > relative.c
+X2C=home/builds/7/x2c home/builds/7/libexec/x2c-build build -q \
+  --output relative relative.c
+./relative
 "$stage" build -q -v --build-dir bd --output staged @\@input.x 2>cold.log
 "$stage" build -q -v --build-dir bd --output staged @\@input.x 2>warm.log
 grep -q 'up-to-date translate' warm.log
