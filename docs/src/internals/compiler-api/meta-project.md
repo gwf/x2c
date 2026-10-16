@@ -27,7 +27,7 @@ Builds an independent helper exposing the loaded file's public functions.
 Main's native signature stays inside the helper; argc/argv calls accept
 an Array of argument Strings through the data protocol.
 
-Source: `src/meta-project.x:90`
+Source: `src/meta-project.x:89`
 
 <a id="Frontend.build_meta"></a>
 #### Frontend.build_meta
@@ -38,7 +38,7 @@ Builds an independent helper for the meta functions `inputs` reach.
 The caller owns its lifetime. Uses the ordinary source, include,
 package, native object, and cache dependency handling.
 
-Source: `src/meta-project.x:83`
+Source: `src/meta-project.x:82`
 
 <a id="Frontend.prepare_meta"></a>
 #### Frontend.prepare_meta
@@ -50,7 +50,7 @@ reach, or finds it in the cache, and makes it the one their translation
 calls. Inputs that reach none use no helper. A group or helper that
 does not build is reported at the first call that needs it.
 
-Source: `src/meta-project.x:76`
+Source: `src/meta-project.x:75`
 
 ## Design notes
 

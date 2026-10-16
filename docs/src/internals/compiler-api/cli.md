@@ -19,6 +19,9 @@ X2c command-line parsing and presentation.
 | [`CliRequest.package_options`](#CliRequest.package_options) | Reads a package's native response options, expanding literal `{package}` after tokenization. |
 | [`CliRequest.package_roots`](#CliRequest.package_roots) | Returns the package roots `request` searches: its explicit `--package-dir` and manifest directories in order, then the home's `packages/` directory when it exists. |
 | [`CliRequest.parse`](#CliRequest.parse) | Expands response files and parses `argv[1..]` into one validated request. |
+| [`CliRequest.parse_arguments`](#CliRequest.parse_arguments) | Parses already-read arguments, preserving deferred script expansion. |
+| [`CliRequest.read_arguments`](#CliRequest.read_arguments) | Reads initial arguments. |
+| [`CliRequest.require_input`](#CliRequest.require_input) | Exits with a driver error unless `input` names a regular file. |
 | [`Compiler.version`](#Compiler.version) | Returns the version line `--version` prints, without a newline. |
 | [`TargetKind.named`](#TargetKind.named) | Returns the target kind spelled `spelling`, or 0 when no kind has that spelling. |
 | [`TargetKind.of`](#TargetKind.of) | Returns the row of target kind `kind`; any other kind reads as an executable. |
@@ -34,7 +37,7 @@ Returns whether `s` contains a driver-owned dependency option.
 Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
 comma-delimited pass-through argument; `NULL` returns zero.
 
-Source: `src/cli.x:698`
+Source: `src/cli.x:705`
 
 <a id="CliRequest.inspects"></a>
 #### CliRequest.inspects
@@ -43,7 +46,7 @@ Source: `src/cli.x:698`
 
 Returns whether `request` selects a terminating inspection or dump mode.
 
-Source: `src/cli.x:1258`
+Source: `src/cli.x:1265`
 
 <a id="CliRequest.is_builtin"></a>
 #### CliRequest.is_builtin
@@ -52,7 +55,7 @@ Source: `src/cli.x:1258`
 
 Reports whether a raw command name belongs to the built-in parser.
 
-Source: `src/cli.x:1251`
+Source: `src/cli.x:1258`
 
 <a id="CliRequest.new"></a>
 #### CliRequest.new
@@ -61,7 +64,7 @@ Source: `src/cli.x:1251`
 
 Constructs a request with the command's ordinary CLI defaults.
 
-Source: `src/cli.x:1226`
+Source: `src/cli.x:1233`
 
 <a id="CliRequest.package_options"></a>
 #### CliRequest.package_options
@@ -75,7 +78,7 @@ and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
 `cc_args` and `ld_args` serve native actions; no source-preprocessing
 options are returned.
 
-Source: `src/cli.x:726`
+Source: `src/cli.x:733`
 
 <a id="CliRequest.package_roots"></a>
 #### CliRequest.package_roots
@@ -88,7 +91,7 @@ when it exists. A root named twice is searched twice and resolves the
 same entries. Explicit directories are borrowed; the result is a fresh
 `List` only when the home directory is appended.
 
-Source: `src/cli.x:1266`
+Source: `src/cli.x:1273`
 
 <a id="CliRequest.parse"></a>
 #### CliRequest.parse
@@ -106,6 +109,36 @@ constructing request values.
 
 Source: `src/cli.x:366`
 
+<a id="CliRequest.parse_arguments"></a>
+#### CliRequest.parse_arguments
+
+`CliRequest CliRequest.parse_arguments(Array args)`
+
+Parses already-read arguments, preserving deferred script expansion.
+
+Source: `src/cli.x:372`
+
+<a id="CliRequest.read_arguments"></a>
+#### CliRequest.read_arguments
+
+`Array CliRequest.read_arguments(int argc, char **argv)`
+
+Reads initial arguments. Script options defer response-file expansion
+until parsing, so program arguments remain literal. The caller owns
+the returned Array.
+
+Source: `src/cli.x:395`
+
+<a id="CliRequest.require_input"></a>
+#### CliRequest.require_input
+
+`void CliRequest.require_input(String input)`
+
+Exits with a driver error unless `input` names a regular file.
+A wildcard or directory operand adds a note on what to pass instead.
+
+Source: `src/cli.x:1296`
+
 ### `Compiler`
 
 <a id="Compiler.version"></a>
@@ -115,7 +148,7 @@ Source: `src/cli.x:366`
 
 Returns the version line `--version` prints, without a newline.
 
-Source: `src/cli.x:1255`
+Source: `src/cli.x:1262`
 
 ### `TargetKind`
 
@@ -128,7 +161,7 @@ Returns the target kind spelled `spelling`, or 0 when no kind has that
 spelling. `refusal` says why this compiler refuses a known spelling, and
 is NULL otherwise.
 
-Source: `src/cli.x:644`
+Source: `src/cli.x:651`
 
 <a id="TargetKind.of"></a>
 #### TargetKind.of
@@ -138,7 +171,7 @@ Source: `src/cli.x:644`
 Returns the row of target kind `kind`; any other kind reads as an
 executable.
 
-Source: `src/cli.x:654`
+Source: `src/cli.x:661`
 
 ## Public types
 

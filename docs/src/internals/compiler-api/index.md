@@ -13,7 +13,6 @@ Functions and types exposed by each compiler module.
 | [`src/adapter-memo.x`](adapter-memo.md) | memoized compiler adapter construction. |
 | [`src/ast-rewrite.x`](ast-rewrite.md) | rewrite immediate AST children through canonical Lists. |
 | [`src/ast.x`](ast.md) | shared helpers for x2c compiler AST nodes. |
-| [`src/build.x`](build.md) | the native build of one target. |
 | [`src/builtins.x`](builtins.md) | the built-in macros' compile-time algorithms. |
 | [`src/cache.x`](cache.md) | cached literal slots and deferred file-static initializers. |
 | [`src/callables.x`](callables.md) | callable values lowered to C helpers. |
@@ -50,13 +49,13 @@ Functions and types exposed by each compiler module.
 | [`src/protocol.x`](protocol.md) | protocols from declaration to conform forms. |
 | [`src/regions.x`](regions.md) | values that can outlive the region that allocated them. |
 | [`src/report.x`](report.md) | Command progress and completion receipts. |
-| [`src/script.x`](script.md) | Build-once execution of x2c scripts. |
 | [`src/sourceview.x`](sourceview.md) | request-owned source overlays. |
 | [`src/stage.x`](stage.md) | the values crossing between meta code and the program. |
 | [`src/statements.x`](statements.md) | x2c statement parsing. |
 | [`src/symbols.x`](symbols.md) | the compiler's semantic symbol table. |
 | [`src/toolchain.x`](toolchain.md) | Host preprocessing, compilation, archive, and link actions. |
 | [`src/transform.x`](transform.md) | x2c AST transformation pipeline. |
+| [`src/translation.x`](translation.md) | synchronous compiler translation requests. |
 | [`src/type-ledger.x`](type-ledger.md) | the compiler's Var tag tables, projected from the ledger. |
 | [`src/type.x`](type.md) | x2c semantic types. |
 | [`src/utils.x`](utils.md) | System utilities for environment discovery and workers. |

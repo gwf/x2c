@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 62
+- Compiler modules: 61
 - Runtime modules: 77
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -45,20 +45,6 @@ Public functions:
 `Ast.entry_call`, `Ast.reference_guard_exits`, `Ast.never_returns`,
 `Symbol.is_assignment_op`, `Symbol.changes_left_operand`,
 `Ast.initializer_cases`, `Ast.initializer_functions`
-
-### [src/build.x](../src/build.x)
-
-the native build of one target.
-
-Public functions:
-
-`CliRequest.prepare`, `Build.require_input`, `Build.generated_dir`,
-`Build.translation_current`, `Build.begin_translation`,
-`Build.end_translation`, `Build.record_translation`, `Build.add_generated`,
-`Build.module_entry`, `Build.extension_entries`, `Build.finish`,
-`Build.write_commands`, `Build.report_success`, `Build.run_program`,
-`Build.cleanup`, `Build.script_helpers`, `Build.publish_script`,
-`CliRequest.script_current`
 
 ### [src/builtins.x](../src/builtins.x)
 
@@ -105,10 +91,11 @@ x2c command-line parsing and presentation.
 
 Public functions:
 
-`CliRequest.parse`, `TargetKind.named`, `TargetKind.of`,
-`CliRequest.dependency_option`, `CliRequest.package_options`, `CliRequest.new`,
-`CliRequest.is_builtin`, `Compiler.version`, `CliRequest.inspects`,
-`CliRequest.package_roots`
+`CliRequest.parse`, `CliRequest.parse_arguments`, `CliRequest.read_arguments`,
+`TargetKind.named`, `TargetKind.of`, `CliRequest.dependency_option`,
+`CliRequest.package_options`, `CliRequest.new`, `CliRequest.is_builtin`,
+`Compiler.version`, `CliRequest.inspects`, `CliRequest.package_roots`,
+`CliRequest.require_input`
 
 ### [src/collect.x](../src/collect.x)
 
@@ -577,14 +564,6 @@ Public functions:
 `report_line`, `report_phase`, `report_generated`, `report_now_us`,
 `Path.regular_bytes`, `report_duration`, `report_size`
 
-### [src/script.x](../src/script.x)
-
-Build-once execution of x2c scripts.
-
-Public functions:
-
-`Compiler.cache_root`, `CliRequest.prepare_script`, `CliRequest.run_script`
-
 ### [src/sourceview.x](../src/sourceview.x)
 
 request-owned source overlays.
@@ -677,6 +656,14 @@ Public functions:
 `Compiler.transform`, `Compiler.normalize`, `Compiler.lower_lambda_expr`,
 `Compiler.shipped_support`, `Compiler.call_in_order`
 
+### [src/translation.x](../src/translation.x)
+
+synchronous compiler translation requests.
+
+Public functions:
+
+`translate_request`
+
 ### [src/type-ledger.x](../src/type-ledger.x)
 
 the compiler's Var tag tables, projected from the ledger.
@@ -714,7 +701,7 @@ Public functions:
 `Compiler.is_package_source`, `Compiler.identity`, `Compiler.module_stamp`,
 `Path.content_identity`, `fnv_file`, `fnv_bytes`, `Path.identifier_hash`,
 `Path.lock_file`, `Path.publish_files`, `Job.decode_wait_status`,
-`Diagnostics.driver_error`, `Diagnostics.host_error`
+`Diagnostics.driver_error`, `Diagnostics.host_error`, `Compiler.cache_root`
 
 ### [src/components/component-access.x](../src/components/component-access.x)
 
@@ -1316,16 +1303,17 @@ Public functions:
 `MatchCaptureLayout.index`, `MatchCaptureBuffer.has`,
 `MatchPlan.raise_ineligible`, `MatchPlan.execute_capture`,
 `MatchPlan.try_capture`, `MatchPlan.admits`, `MatchPlan.execute`,
-`MatchPlan.try_match`, `MatchPlan.try_search`, `MatchPlan.search`,
-`MatchPlan.search_replace`, `MatchPlan.try_match_replace`, `List.replace`,
+`MatchPlan.try_match`, `MatchPlan.try_match_replace`, `List.replace`,
+`MatchPlan.try_search`, `MatchPlan.search`, `MatchPlan.search_replace`,
 `MatchPlan.borrowable`, `x2c_match_site_try_capture`,
 `x2c_match_pattern_retainable`, `x2c_match_site_prepare`,
 `x2c_match_site_try_match`, `x2c_match_site_match`,
 `x2c_match_site_try_search`, `x2c_match_site_search`,
 `x2c_match_site_try_match_replace`, `x2c_match_site_match_replace`,
-`x2c_match_site_search_replace`, `x2c_match_try_capture`, `List.try_match`,
-`List.match`, `List.try_match_replace`, `List.match_replace`, `List.search`,
-`List.try_search`, `List.search_replace`, `x2c_match_initialize`
+`x2c_match_site_search_replace`, `x2c_match_initialize`,
+`x2c_match_try_capture`, `List.try_match`, `List.match`,
+`List.try_match_replace`, `List.match_replace`, `List.search`,
+`List.try_search`, `List.search_replace`
 
 ### [lib/meta.x](../lib/meta.x)
 

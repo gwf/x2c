@@ -40,7 +40,7 @@ Runs the host tool `arguments` without a shell, captures both streams,
 and returns its shell-style status. A tool that cannot start returns 127
 and leaves the reason in `errors`.
 
-Source: `src/toolchain.x:297`
+Source: `src/toolchain.x:298`
 
 ### `ToolAction`
 
@@ -75,7 +75,7 @@ Starts and waits for the action, returning its final status.
 **Raises:** the same construction and capture-reading causes as
 `ToolAction.start` and `ToolRun.wait`.
 
-Source: `src/toolchain.x:241`
+Source: `src/toolchain.x:242`
 
 <a id="ToolAction.start"></a>
 #### ToolAction.start
@@ -89,7 +89,7 @@ starts no child.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the execution
 or argv.
 
-Source: `src/toolchain.x:250`
+Source: `src/toolchain.x:251`
 
 ### `ToolRun`
 
@@ -101,7 +101,7 @@ Source: `src/toolchain.x:250`
 Checks whether an execution can be waited without blocking. A dry run
 and a tool that could not start are ready immediately.
 
-Source: `src/toolchain.x:268`
+Source: `src/toolchain.x:269`
 
 <a id="ToolRun.wait"></a>
 #### ToolRun.wait
@@ -116,7 +116,7 @@ stderr; program actions inherit standard streams.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 reading either capture as a `String`.
 
-Source: `src/toolchain.x:278`
+Source: `src/toolchain.x:279`
 
 ### `Toolchain`
 
@@ -184,12 +184,12 @@ Source: `src/toolchain.x:132`
 <a id="Toolchain.module_action"></a>
 #### Toolchain.module_action
 
-`ToolAction Toolchain.module_action(Toolchain t, String output, List inputs)`
+`ToolAction Toolchain.module_action( Toolchain t, String output, List inputs, String loader)`
 
 Builds but does not start the link of a native module. The module leaves
-the x2c runtime unresolved and uses the loading compiler's copy. macOS
-links a bundle against the running compiler, so a runtime function the
-compiler lacks fails this link. Other hosts link a shared object whose
+the x2c runtime unresolved and uses the loading process's copy. macOS
+links a bundle against `loader`, so a runtime function that executable
+lacks fails this link. Other hosts link a shared object whose
 calls to its own functions never bind to a same-named compiler function;
 a missing runtime function fails when the compiler loads it.
 
@@ -236,7 +236,7 @@ invalid arguments or local setup failure. This operation does not consult
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 constructing arguments or reading captured text.
 
-Source: `src/toolchain.x:348`
+Source: `src/toolchain.x:349`
 
 <a id="Toolchain.preprocess_action"></a>
 #### Toolchain.preprocess_action
@@ -261,7 +261,7 @@ without explicit options, as it reports them, plus the `lib` directory
 beside each reported `include` directory. A compiler that reports none
 contributes none.
 
-Source: `src/toolchain.x:412`
+Source: `src/toolchain.x:413`
 
 ## Public types
 
