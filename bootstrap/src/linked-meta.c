@@ -13205,7 +13205,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
 __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void){
   _12288 = String_new("src/protocol.x");
   _12289 = String_var(_12288);
-  _12290 = String_new("f4c6e4d0");
+  _12290 = String_new("69572933");
   _12291 = String_var(_12290);
   _12292 = cons(_12291, NULL);
   _12293 = cons(_12289, _12292);
