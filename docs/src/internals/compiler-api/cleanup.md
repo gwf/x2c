@@ -27,7 +27,7 @@ Cleanup regions and the transfers that leave them.
 
 Writes captured addresses in the order capture selection established.
 
-Source: `src/cleanup.x:756`
+Source: `src/cleanup/defer.x:17`
 
 ### `Compiler`
 
@@ -41,7 +41,7 @@ Lowers the cleanup regions and transfers of the completed top-level
 function completion. Expressions cannot contain an unlifted function, so
 no second unit-tree traversal is needed.
 
-Source: `src/cleanup.x:102`
+Source: `src/cleanup/transfers.x:49`
 
 <a id="Compiler.lower_defer_region"></a>
 #### Compiler.lower_defer_region
@@ -52,7 +52,7 @@ Returns the region that runs `finalizer` when `body` leaves. Ordinary
 cleanup statements take the callable chain; lexical transfers and
 unsupported capture types keep the landing-frame path.
 
-Source: `src/cleanup.x:1107`
+Source: `src/cleanup/defer.x:55`
 
 <a id="Compiler.rewrite_defer_list"></a>
 #### Compiler.rewrite_defer_list
@@ -62,7 +62,7 @@ Source: `src/cleanup.x:1107`
 Returns `stmts` with each `defer` statement and the statements after
 it replaced by one region; a list without `defer` returns unchanged.
 
-Source: `src/cleanup.x:1083`
+Source: `src/cleanup/defer.x:31`
 
 <a id="Compiler.static_value_is_runtime"></a>
 #### Compiler.static_value_is_runtime
@@ -74,7 +74,7 @@ because it calls, allocates, or reads an object other than a function
 name. `runtime` holds the function-local statics already known to run
 that way, or is `NULL` at file scope.
 
-Source: `src/cleanup.x:263`
+Source: `src/cleanup/statics.x:120`
 
 ## Design notes
 
