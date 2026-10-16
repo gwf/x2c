@@ -1747,8 +1747,9 @@ static Var _substitute(Var value, Map variables, Map bindings) {
   if (variable) return bindings[variable];
   if (value is not <list> || !value.list()) return value;
   List type = value;
-  return cons(_substitute(type.car(), variables, bindings),
-              _substitute(type.cdr(), variables, bindings));
+  return cons(
+    _substitute(type.car(), variables, bindings),
+    _substitute(type.cdr(), variables, bindings));
 }
 
 static Type _substitute_signature(
@@ -1956,8 +1957,8 @@ static void _dump_row(
         if (status == <implmntd> || status == <base-dflt> ||
             status == <native>)
           punctuation = "dot+punctuation";
-        printf(" (%s %s %s %s)", member, name, source ? source : "-",
-               punctuation);
+        printf(
+          " (%s %s %s %s)", member, name, source ? source : "-", punctuation);
       }
   printf(")\n");
 }
