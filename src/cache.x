@@ -214,8 +214,10 @@ static List _defer_binding(
       }
       Type declared = object.canonicalize();
       Type resolved = c.sym.resolve_key(declared);
+      // C initializes constant aggregates in place, including const fields.
+      if ((resolved.is_array() || resolved.is_aggregate()) &&
+          !c.static_value_is_runtime(value, NULL)) return bound;
       if (resolved.is_array()) {
-        if (!c.static_value_is_runtime(value, NULL)) return bound;
         match (value)
           case %(composite (commas *items)): {
             List target = $!($declared){ $name };

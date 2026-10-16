@@ -732,13 +732,35 @@ static Var _lower_native_call(
              ($callable @values));
 }
 
+/* Declaration prefixes bind temporaries before a final value expression.
+   General statement blocks retain their separate control-flow boundary. */
+static Var _lower_statement_value(Lowering &l, List content) {
+  match (content) case %(parens (block *items)) if (items): {
+    Array declarations = $auto([]);
+    while (items.cdr()) {
+      List item = Ast.without_origin(items.car());
+      if (!item.match(%(declare ? ?)))
+        return $decline.expression.statement(l);
+      declarations.push(item);
+      items = items.cdr();
+    }
+    match (Ast.without_origin(items.car())) case %(stmnt ?expression): {
+      Map previous = l.env;
+      l.env = _lower_env_copy(l, l.env);
+      defer l.env = previous;
+      return _lower_block(l, declarations, %(value $expression));
+    }
+  }
+  return $decline.expression.statement(l);
+}
+
 /* Prepare native carriers in source order, then dispatch through Func.apply.
    Each branch evaluates just the value or just the address. */
 static Var _lower_application(Lowering &l, Var content) {
   List parts = l.compiler.func_call_parts(content);
   if (!parts) {
     if (List.match(content, %(parens (block *))))
-      return $decline.expression.statement(l);
+      return _lower_statement_value(l, content);
     return $decline.func.dynamic(l);
   }
   Var callee = _lower_expr(l, parts.car());
@@ -1359,6 +1381,7 @@ static Var _lower_leave(Lowering &l, int target, List k) {
 static Var _lower_apply_k(Lowering &l, List k) {
   match (k) {
     case %(end): return %(C.void);
+    case %(value ?expression): return _lower_expr(l, expression);
     case %(at-depth ?(int target) ?(List next)):
       return target < _lower_depth(l) ? _lower_leave(l, target, next)
                                       : _lower_apply_k(l, next);
@@ -2340,7 +2363,7 @@ static Var _lower_expression_stmnt(
   }
   match (e) {
     /* A call's result can be discarded: it runs for what it writes. */
-    case %(expr ? (call ? ?)):
+    case %(expr ? (!or (call ? ?) (parens (block *)))):
       return _lower_effect(l, _lower_expr(l, e), rest, k);
     /* A cast to `void` discards the result but not the work: `(void) x;`
        marks a local used and does nothing, while `(void) f();` still calls

@@ -434,7 +434,8 @@ static void _reference_arguments(ReplSession s) {
   _expect(s, "int ref_present(void) { int v=4; "
              "int n=ref_maybe(v); return n*10+v; }", <defined>, void);
   _expect(s, "ref_present();", <value>, 55);
-  ReplResult statement = s.submit("({ int local=3; local+4; });");
+  _expect(s, "({ int local=3; local+4; });", <value>, 7);
+  ReplResult statement = s.submit("({ int local=3; local++; local; });");
   if (statement.status != <rejected> ||
       statement.message != "unsupported: a statement expression") {
     fputs("statement expression refusal described a different form\n", stderr);

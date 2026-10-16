@@ -31,9 +31,9 @@ static List _public_definitions(Compiler c, Map &symbols, Map globals) {
       case %(function ?fn ?(String name) ?):
         if (name == "main" || c.public_native_function(fn, name))
           candidates.push(name);
-      case %(global ?(String name) ?bridge ?writable): {
+      case %(global ?(String name) ?paths): {
         candidates.push(name);
-        globals[name] = %($bridge $writable);
+        globals[name] = paths;
       }
     }
   symbols = c.callable_symbols(candidates);
@@ -252,14 +252,16 @@ static LoadedSource _prepare(Frontend frontend, String filename) {
       Map globals = {};
       List names = _public_definitions(c, symbols, globals);
       if (!names)
-        raise %(repl (reason "no public functions or scalar globals found"));
+        raise %(repl (reason "no public functions or supported globals found"));
       foreach (String name, names) {
         if (name in globals) {
-          MetaHelper.check(c.meta_helper, c, "get global " + name, c.filename);
-          List description = globals[name];
-          if (description.cadr().int())
-            MetaHelper.check(
-              c.meta_helper, c, "set global " + name, c.filename);
+          foreach (List description, globals[name].list()) {
+            (String path, Type bridge, int writable, int dimensions) =
+              description;
+            MetaHelper.check(c.meta_helper, c, "get global " + path, c.filename);
+            if (writable) MetaHelper.check(
+              c.meta_helper, c, "set global " + path, c.filename);
+          }
         }
         else MetaHelper.check(c.meta_helper, c, name, c.filename);
       }
@@ -304,10 +306,13 @@ static void _publish_types(ReplSession session, Map symbols) {
 
 static List _accessor(
   ReplSession session, ReplLoadedFile file, String name, Type bridge,
-  int setter) {
+  int dimensions, int setter) {
   Compiler c = session.compiler;
-  Type type = setter ? %((func ($bridge (int))) @bridge)
-                     : %((func ((void))) @bridge);
+  Array parameters = $auto([]);
+  for (int i = 0; i < dimensions; i++) parameters.push(%(long long));
+  if (setter) { parameters.push(bridge); parameters.push(%(int)); }
+  if (!parameters.len()) parameters.push(%(void));
+  Type type = %((func ${parameters.list()}) @bridge);
   String request = (setter ? "set global " : "get global ") + name;
   String hidden = %"__repl_global_${session.accessors.len()}";
   c.sym.define_global(%($hidden), type);
@@ -324,14 +329,19 @@ static void _publish_globals(
   ReplSession session, ReplLoadedFile file, Map globals) {
   foreach (Var (name, description), globals) {
     if (session.inspect(name)) continue;
-    (Type bridge, int writable) = description;
-    List get = _accessor(session, file, name, bridge, 0);
-    List set = writable ? _accessor(session, file, name, bridge, 1) : NULL;
-    session.names[name] = %(global (source ${file.path}) $get $set);
+    Map paths = {};
+    foreach (List row, description.list()) {
+      (String path, Type bridge, int writable, int dimensions) = row;
+      List get = _accessor(session, file, path, bridge, dimensions, 0);
+      List set = writable
+        ? _accessor(session, file, path, bridge, dimensions, 1) : NULL;
+      paths[path] = %($get $set);
+    }
+    session.names[name] = %(global (source ${file.path}) $paths);
   }
 }
 
-/** Compiles a source file's public functions, scalar globals, and source
+/** Compiles a source file's public functions, supported globals, and source
     dependencies in an independent helper. Publishes their callable bindings
     and public types; prompt evaluation remains interpreted. Calls exchange
     values through the project meta helper's datum protocol. A rejected load
