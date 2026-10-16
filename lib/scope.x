@@ -56,25 +56,27 @@ protocol Cleanup(Scope);
 #include <stdio.h>
 #include <string.h>
 
+/* scope records
 
+   Each thread owns its root scope, the slot that allocation charges, the
+   stack of pushed slots, and one record per open retain. Named scopes share
+   one process-wide registry. */
 
-static typedef struct ScopeRetain {
+module typedef struct ScopeRetain {
   Scope scope, *slot;
 } ScopeRetain;
 
-
-static typedef struct ScopeThreadState {
+module typedef struct ScopeThreadState {
   Scope root, *active, **stack, int stack_size, stack_capacity;
   ScopeRetain *retains;
   int retain_count, retain_capacity;
 } *ScopeThreadState;
 
-static atomic_size_t scope_creations, scope_destructions;
-
+module atomic_size_t scope_creations, scope_destructions;
 
 // backing storage
 
-static atomic_size_t raw_alloc_count, raw_free_count;
+module atomic_size_t raw_alloc_count, raw_free_count;
 
 module {
   "scope/allocation.x",

@@ -342,7 +342,7 @@ static void _point_to(ScopeAlloc prev, ScopeAlloc alloc) {
 
 /* The block is already unlinked, so a drop that allocates or frees other
    storage sees a consistent list. */
-static void _release(ScopeAlloc alloc) {
+module void _release(ScopeAlloc alloc) {
   ScopeMetadata *meta = $scope.alloc_meta(alloc);
   void (*drop)(void *) = meta.drop;
   _record_free(meta.requested_size);
@@ -350,7 +350,7 @@ static void _release(ScopeAlloc alloc) {
   free(meta);
 }
 
-static void *_data_malloc(size_t size) {
+module void *_data_malloc(size_t size) {
   void *ptr = malloc(size);
   if (!ptr) raise %(alloc-fail);
   return ptr;

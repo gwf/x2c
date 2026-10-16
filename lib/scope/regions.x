@@ -2,7 +2,7 @@
 
 static threaded struct ScopeThreadState scope_thread;
 
-static ScopeThreadState _thread(void) {
+module ScopeThreadState _thread(void) {
   ScopeThreadState state = &scope_thread;
   if (!state.active) state.active = &state.root;
   return state;
@@ -276,7 +276,7 @@ meta native void Scope.destroy(Scope scope) {
 /** Ends the owned lifetime when a managed local leaves its block. */
 meta native void Scope.cleanup(Scope value) { value.destroy(); }
 
-static Scope _new_scope(const char *name) {
+module Scope _new_scope(const char *name) {
   Scope scope = _data_malloc(sizeof(struct Scope));
   scope.up = scope.down = NULL;
   scope.first = NULL;

@@ -1,11 +1,5 @@
 /*  accounting.x -- scope accounting */
 
-/* scope records
-
-   Each thread owns its root scope, the slot that allocation charges, the
-   stack of pushed slots, and one record per open retain. Named scopes share
-   one process-wide registry. */
-
 static typedef struct ScopeName {
   Scope scope, char *name, struct ScopeName *next;
 } *ScopeName;
@@ -33,7 +27,7 @@ static ScopeName scope_names;
 static pthread_mutex_t scope_metadata_mutex =
   (pthread_mutex_t) PTHREAD_MUTEX_INITIALIZER;
 
-static void _register_name(Scope scope, const char *name) {
+module void _register_name(Scope scope, const char *name) {
   if (!name) return;
   size_t length = strlen(name);
   if (length == SIZE_MAX) raise %(size-limit);
@@ -56,7 +50,7 @@ static ScopeName _find_name(Scope scope) {
   return node;
 }
 
-static void _unregister_name(Scope scope) {
+module void _unregister_name(Scope scope) {
   _metadata_lock();
   ScopeName *link = &scope_names;
   while (*link && (*link).scope != scope) link = &(*link).next;
@@ -132,20 +126,20 @@ ScopeStats Scope.stats(void) {
   return stats;
 }
 
-static void _record_allocation(size_t size) {
+module void _record_allocation(size_t size) {
   atomic_fetch_add(&scope_allocation_calls, 1);
   _record_request(size);
   _record_live_add(size);
 }
 
-static void _record_resize(size_t old_size, size_t size) {
+module void _record_resize(size_t old_size, size_t size) {
   atomic_fetch_add(&scope_reallocation_calls, 1);
   _record_request(size);
   if (size >= old_size) _record_live_add(size - old_size);
   else _record_live_remove(old_size - size);
 }
 
-static void _record_free(size_t size) {
+module void _record_free(size_t size) {
   atomic_fetch_add(&scope_free_calls, 1);
   _record_live_remove(size);
 }
@@ -171,7 +165,7 @@ static void _record_live_remove(size_t size) {
     &scope_live_requested_bytes, size, memory_order_relaxed);
 }
 
-static void _report_leaks(void) {
+module void _report_leaks(void) {
   ScopeStats stats = Scope.stats();
   if (!stats.live_scopes && !stats.live_allocations &&
       atomic_load(&raw_alloc_count) == atomic_load(&raw_free_count))
@@ -198,7 +192,7 @@ static size_t _allocation_count(Scope s) {
   return count;
 }
 
-static void _free_name_registry(void) {
+module void _free_name_registry(void) {
   while (scope_names) {
     ScopeName next = scope_names.next;
     _raw_free(scope_names.name);

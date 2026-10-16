@@ -1,6 +1,6 @@
 /*  runtime.x -- scope runtime */
 
-static void *_raw_malloc(size_t size) {
+module void *_raw_malloc(size_t size) {
   void *ptr = malloc(size);
   if (!ptr) raise %(alloc-fail);
   atomic_fetch_add(&raw_alloc_count, 1);
@@ -13,7 +13,7 @@ static void *_raw_realloc(void *ptr, size_t size) {
   return result;
 }
 
-static void _raw_free(void *ptr) {
+module void _raw_free(void *ptr) {
   if (!ptr) return;
   atomic_fetch_add(&raw_free_count, 1);
   free(ptr);
@@ -21,7 +21,7 @@ static void _raw_free(void *ptr) {
 
 /* Returns `items` with room for one element past `count`, starting at 16 and
    doubling `capacity` when full. */
-static void *_raw_grow(void *items, int count, int &capacity, size_t size) {
+module void *_raw_grow(void *items, int count, int &capacity, size_t size) {
   if (!items) {
     items = _raw_malloc(16 * size);
     capacity = 16;
@@ -34,7 +34,7 @@ static void *_raw_grow(void *items, int count, int &capacity, size_t size) {
   return items;
 }
 
-static void _raw_fatal(const char *message) {
+module void _raw_fatal(const char *message) {
   fprintf(stderr, "Scope: %s\n", message);
   abort();
 }
@@ -61,7 +61,7 @@ static void _initialize(void) {
     _raw_fatal("could not register shutdown handler");
 }
 
-static void _require_running(void) {
+module void _require_running(void) {
   if (scope_state != <running>) _ensure_running();
 }
 
