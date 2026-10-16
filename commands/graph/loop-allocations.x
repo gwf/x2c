@@ -151,8 +151,7 @@ List LoopAllocations.analyze_unit(Compiler compiler, List ast, String path) {
              (bind (!set ?binding (binding ? ?)) ?)
              ?body): {
         String function = compiler.emitted_binding_name(binding);
-        Symbol visibility = ((Type) type).is_static()
-                          ? <static> : <public>;
+        Symbol visibility = project_visibility(type);
         _loop_collect(
           compiler, definitions, body, path, function, visibility,
           0, 0, <nested>, direct, pending);
@@ -195,8 +194,8 @@ static void _loop_add_event(
     }
   }
   List key = %(site $unit $function $visibility $location);
-  List events = groups.contains(key) ? groups[key].list() : NULL;
-  groups[key] = cons(%($source $kind $operation $use $depth), events);
+  groups[key] = cons(
+    %($source $kind $operation $use $depth), groups.getdefault(key, NULL));
   functions[%($unit $function $visibility)] = 1;
   project_count(totals, %($source $kind), 1);
 }

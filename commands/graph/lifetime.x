@@ -171,8 +171,7 @@ static int _lifetime_allocation_id(Lifetime &lifetime, Var value) {
 static List _lifetime_summary_fact(Lifetime &lifetime, Var value) {
   List binding = project_direct_binding(value);
   if (binding)
-    return lifetime.return_bindings.contains(binding)
-         ? lifetime.return_bindings[binding].list() : %(other);
+    return lifetime.return_bindings.getdefault(binding, %(other));
   Var peeled = project_peel(value);
   if (peeled is not <list>) return %(other);
   List node = peeled, arguments;
@@ -288,12 +287,7 @@ static void _lifetime_unresolve(Lifetime &lifetime, int id, List cause) {
         unresolved $location
       );
   }
-  if (cause) {
-    List causes = lifetime.allocation_unresolved.contains(id)
-                ? lifetime.allocation_unresolved[id].list() : NULL;
-    if (!causes.contains(cause))
-      lifetime.allocation_unresolved[id] = cons(cause, causes);
-  }
+  if (cause) project_add_unique(lifetime.allocation_unresolved, id, cause);
 }
 
 static void _lifetime_replace_return_fact(
@@ -421,8 +415,7 @@ static void _lifetime_bind(Lifetime &lifetime, List binding, Var expression) {
         case %((!or kind call) *): lifetime.summary_unresolved = 1;
   }
   lifetime.return_bindings[binding] = return_fact;
-  int previous_allocation = lifetime.bindings.contains(binding)
-                          ? lifetime.bindings[binding].integer() : 0;
+  int previous_allocation = lifetime.bindings.getdefault(binding, 0).integer();
   int isolated = 0;
   if (_lifetime_context_open(lifetime, expression, isolated)) {
     int id = ++lifetime.next_region;
@@ -511,8 +504,7 @@ static void _lifetime_return(Lifetime &lifetime, Type target, Var expression) {
       pending-allocation ? ?target ?name ?scope ?pool
       ?status ?allocated
     ): {
-      List causes = lifetime.allocation_unresolved.contains(id)
-                  ? lifetime.allocation_unresolved[id].list() : NULL;
+      List causes = lifetime.allocation_unresolved.getdefault(id, NULL);
       Symbol final_status = lifetime.uncertain_allocations.contains(id)
                           ? <unresolved> : status.symbol();
       List pending = %(
@@ -718,8 +710,7 @@ List Lifetime.analyze_unit(
           return_facts.push(%(other));
         if (state.summary_unresolved)
           return_facts.push(%(unresolved));
-        Symbol visibility = ((Type) type).is_static()
-                          ? <static> : <public>;
+        Symbol visibility = project_visibility(type);
         List summary = %(
           function ${state.target} ${state.function} $visibility
           (returns @{return_facts.list_free()})

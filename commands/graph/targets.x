@@ -84,9 +84,21 @@ List project_call_target(
 void project_add_public(Map publics, List target) {
   match (target)
     case %(target ? ?name):
-      publics[name] = cons(
-        target, publics.contains(name) ? publics[name].list() : NULL);
+      publics[name] = cons(target, publics.getdefault(name, NULL));
 }
+
+/** Adds `value` to the front of the List stored under `key` unless that
+    List already contains it. Returns whether `value` was added. */
+int project_add_unique(Map lists, Var key, Var value) {
+  List values = lists.getdefault(key, NULL);
+  if (values.contains(value)) return 0;
+  lists[key] = cons(value, values);
+  return 1;
+}
+
+/** `<static>` for a definition of static `type`, otherwise `<public>`. */
+Symbol project_visibility(Type type) =>
+  type.is_static() ? <static> : <public>;
 
 /** Adds `amount` to the count stored under `key`, reading absence as zero. */
 void project_count(Map counts, List key, int amount) {

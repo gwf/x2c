@@ -493,8 +493,7 @@ List _x2c_flow_analyze_unit(Compiler compiler, List ast, String path) {
         returns.sort();
         calls.sort();
         unresolved.sort();
-        Symbol visibility = ((Type) type).is_static()
-                          ? <static> : <public>;
+        Symbol visibility = project_visibility(type);
         functions.push(
           %(function ${definitions[binding]}
             ${compiler.emitted_binding_name(binding)}

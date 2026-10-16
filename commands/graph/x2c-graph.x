@@ -89,8 +89,7 @@ static List _analyze_unit(Compiler compiler, List ast, String path) {
         _collect_calls(compiler, definitions, body, calls);
         String name = compiler.emitted_binding_name(binding);
         String source_name = _source_function_name(compiler, binding);
-        Symbol visibility = ((Type) type).is_static()
-                          ? <static> : <public>;
+        Symbol visibility = project_visibility(type);
         source_order++;
         functions.push(
           %(function $identity $name $visibility
@@ -262,8 +261,7 @@ static List _analyze_tail_unit(Compiler compiler, List ast, String path) {
           blocker_rows.push(blocker);
         blocker_rows.sort();
         sites.sort();
-        Symbol visibility = ((Type) type).is_static()
-                          ? <static> : <public>;
+        Symbol visibility = project_visibility(type);
         functions.push(
           %(function ${compiler.emitted_binding_name(binding)} $visibility
             (calls (tail $tail) (non-tail $non_tail))
@@ -357,14 +355,6 @@ static int _walk_root_parameter(List root, Map parameters) {
       if (parameters.try_get(binding, position)) return position.integer();
     }
   return -1;
-}
-
-static int _walk_add_summary(Map summaries, List target, List summary) {
-  List values = summaries.contains(target)
-              ? summaries[target].list() : NULL;
-  if (values.contains(summary)) return 0;
-  summaries[target] = cons(summary, values);
-  return 1;
 }
 
 static void _walk_mark_root(
@@ -474,8 +464,7 @@ static List _analyze_walk_unit(Compiler compiler, List ast, String path) {
           compiler, body, path, 0, definitions, calls);
         calls.sort();
         List call_list = calls.list_free();
-        Symbol visibility = ((Type) type).is_static()
-                          ? <static> : <public>;
+        Symbol visibility = project_visibility(type);
         functions.push(
           %(function $target ${compiler.emitted_binding_name(binding)}
             $visibility (parameters @parameter_list) (calls @call_list)
@@ -518,7 +507,7 @@ static List _walk_candidates(List functions) {
               walk ?position ?type ?path ?display ?kind
               (location ? ? ?)
             ):
-              _walk_add_summary(
+              project_add_unique(
                 walked, target,
                 %(walk $position $type $path $display $kind));
 
@@ -567,7 +556,7 @@ static List _walk_candidates(List functions) {
                     case %(root ? ? ?root_type (path *root_path) ?display):
                       if (caller_position >= 0 && !root_path &&
                           Var.equal(type, root_type))
-                        changed |= _walk_add_summary(
+                        changed |= project_add_unique(
                           walked, caller,
                           %(
                             walk $caller_position $type
@@ -603,10 +592,9 @@ static List _walk_candidates(List functions) {
                         group $caller $path $caller_name $visibility
                         $binding $spelling $type $root_path $display
                       );
-                      List sites = groups.contains(key)
-                                 ? groups[key].list() : NULL;
                       groups[key] = cons(
-                        %(site "<inline>" $location), sites);
+                        %(site "<inline>" $location),
+                        groups.getdefault(key, NULL));
                     }
             }
         foreach (List call, calls)
@@ -654,10 +642,9 @@ static List _walk_candidates(List functions) {
                       );
                       if (matched_groups.contains(key)) continue;
                       matched_groups[key] = 1;
-                      List sites = groups.contains(key)
-                                 ? groups[key].list() : NULL;
                       groups[key] = cons(
-                        %(site $callee_name $location), sites);
+                        %(site $callee_name $location),
+                        groups.getdefault(key, NULL));
                     }
                 }
             }
@@ -686,14 +673,12 @@ static List _walk_candidates(List functions) {
         group ? ?path ?caller_name ?visibility
         ? ? ?type ? ?display
       ): {
-        List candidates = by_unit.contains(path)
-                        ? by_unit[path].list() : NULL;
         by_unit[path] = cons(
           %(candidate $caller_name $visibility
             (argument $type $display)
             (walkers @{sorted_walkers.list_free()})
             (sites @{sorted_sites.list_free()})),
-          candidates);
+          by_unit.getdefault(path, NULL));
       }
   }
   Array units = [];
@@ -712,13 +697,6 @@ static String _site_direct_callee(Compiler compiler, List callee) {
   List binding;
   return project_callee(compiler, callee, binding) == <direct>
        ? compiler.emitted_binding_name(binding) : NULL;
-}
-
-static void _site_add_prior_write(
-  Map prior_writes, List binding, List summary) {
-  List prior = prior_writes.contains(binding)
-             ? prior_writes[binding].list() : NULL;
-  if (!prior.contains(summary)) prior_writes[binding] = cons(summary, prior);
 }
 
 static List _site_value_summary(
@@ -810,7 +788,7 @@ static void _collect_sites(
       _collect_sites(
         compiler, right, path, caller, visibility, wanted,
         parameters, prior_writes, sites);
-      _site_add_prior_write(
+      project_add_unique(
         prior_writes, binding,
         _site_value_summary(compiler, right, {}, {}));
       return;
@@ -830,7 +808,7 @@ static void _collect_sites(
           List summary = operator == <=> && right
                        ? _site_value_summary(compiler, right.car(), {}, {})
                        : %(operator $operator);
-          _site_add_prior_write(prior_writes, binding, summary);
+          project_add_unique(prior_writes, binding, summary);
         }
         return;
       }
@@ -840,7 +818,7 @@ static void _collect_sites(
         parameters, prior_writes, sites);
       List binding = project_direct_binding(target);
       if (binding)
-        _site_add_prior_write(
+        project_add_unique(
           prior_writes, binding, %(operator $operator));
       return;
     }
@@ -894,8 +872,7 @@ static List _analyze_sites_unit(
         Map parameters = {}, prior_writes = {};
         _site_collect_parameters(modifiers, parameters);
         String caller = compiler.emitted_binding_name(binding);
-        Symbol visibility = ((Type) type).is_static()
-                          ? <static> : <public>;
+        Symbol visibility = project_visibility(type);
         _collect_sites(
           compiler, body, path, caller, visibility, wanted,
           parameters, prior_writes, sites);
@@ -1056,7 +1033,7 @@ static List _analyze_field_sites_unit(
         _site_collect_parameters(modifiers, parameters);
         _collect_field_sites(
           compiler, body, path, compiler.emitted_binding_name(binding),
-          ((Type) type).is_static() ? <static> : <public>,
+          project_visibility(type),
           receiver_name, field_name, parameters, <read>, void, 0, sites);
         continue;
       }
@@ -1089,8 +1066,7 @@ static List _field_functions_from_sites(List sites) {
     match (key)
       case %(function ?caller ?visibility): {
         int reads_count = read_count.int();
-        int lvalue_count = lvalues.contains(key)
-                         ? lvalues[key].int() : 0;
+        int lvalue_count = lvalues.getdefault(key, 0).int();
         records.push(
           %(function $caller $visibility
             (reads $reads_count) (lvalues $lvalue_count)));
@@ -1348,7 +1324,7 @@ static int _reachable(String from, String target, Map adjacency, Map seen) {
   if (from == target) return 1;
   if (seen.contains(from)) return 0;
   seen[from] = 1;
-  List next = adjacency.contains(from) ? adjacency[from].list() : NULL;
+  List next = adjacency.getdefault(from, NULL);
   foreach (String path, next)
     if (_reachable(path, target, adjacency, seen)) return 1;
   return 0;
@@ -1702,12 +1678,6 @@ static List _architecture_dependency_width(List graph) {
     }, ARCHITECTURE_LIMIT);
 }
 
-static void _add_neighbor(Map adjacency, String from, String to) {
-  List neighbors = adjacency.contains(from)
-                 ? adjacency[from].list() : NULL;
-  if (!neighbors.contains(to)) adjacency[from] = cons(to, neighbors);
-}
-
 static List _unit_function_names(List functions) {
   Array names = [];
   foreach (List function, functions)
@@ -1726,8 +1696,8 @@ static Map _unit_adjacency(String path, List functions) {
           match (call)
             case %(call direct ?target ?callee ?):
               if (target == path && callee != name) {
-                _add_neighbor(adjacency, name, callee);
-                _add_neighbor(adjacency, callee, name);
+                project_add_unique(adjacency, name, callee);
+                project_add_unique(adjacency, callee, name);
               }
   return adjacency;
 }
@@ -1740,8 +1710,7 @@ static void _collect_component(
     return;
   seen[name] = 1;
   members.push(name);
-  List neighbors = adjacency.contains(name)
-                 ? adjacency[name].list() : NULL;
+  List neighbors = adjacency.getdefault(name, NULL);
   foreach (String neighbor, neighbors)
     _collect_component(
       neighbor, excluded, allowed, adjacency, seen, members);
@@ -2019,20 +1988,12 @@ static void _compare_indexes(List graph, Map by_target, Map by_name) {
                   by_target[target] = %(
                     function $path $name $visibility (calls @calls)
                   );
-                  List targets = by_name.contains(name)
-                               ? by_name[name].list() : NULL;
-                  by_name[name] = cons(target, targets);
+                  project_add_public(by_name, target);
                 }
 }
 
-static List _compare_exact_target(Map by_name, String name) {
-  if (!by_name.contains(name)) return NULL;
-  List targets = by_name[name];
-  return targets && !targets.cdr() ? targets.car().list() : NULL;
-}
-
 static List _compare_definition(Map by_target, Map by_name, String name) {
-  List target = _compare_exact_target(by_name, name);
+  List target = resolve_project_target(%(public $name), by_name);
   if (target) {
     List function = by_target[target];
     match (function)
@@ -2099,11 +2060,11 @@ static List _compare_result(
   List graph, String left_name, String right_name, List operations) {
   Map by_target = {}, by_name = {};
   _compare_indexes(graph, by_target, by_name);
-  List left = _compare_exact_target(by_name, left_name);
-  List right = _compare_exact_target(by_name, right_name);
+  List left = resolve_project_target(%(public $left_name), by_name);
+  List right = resolve_project_target(%(public $right_name), by_name);
   Array rows = [];
   foreach (String operation, operations) {
-    List destination = _compare_exact_target(by_name, operation);
+    List destination = resolve_project_target(%(public $operation), by_name);
     List left_path = _compare_shortest(left, destination, by_target);
     List right_path = _compare_shortest(right, destination, by_target);
     int left_proved = _compare_proved(left_path);
