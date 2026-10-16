@@ -38,4 +38,4 @@ Source: `src/components/collection-literals.x:32`
 A collection literal builds its container with the counted constructor,
 which receives each element converted to `Var`, in source order; an
 empty brace among the elements is an empty Map. The compiler keeps the
-elements in source order: see "literal order" in `src/transform/literals.x`.
+elements in source order; see `src/transform/literals.x`.
