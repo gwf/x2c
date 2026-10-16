@@ -6201,7 +6201,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_10(void
   _5325 = String_var(_5324);
   _5326 = String_new("lib/meta.x");
   _5327 = String_var(_5326);
-  _5328 = String_new("8ffb58ee");
+  _5328 = String_new("f98d8dd4");
   _5329 = String_var(_5328);
   _5330 = cons(_5329, NULL);
   _5331 = cons(_5327, _5330);
@@ -13531,7 +13531,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12613 = List_var(_12612);
   _12614 = String_new("src/lambdas.x");
   _12615 = String_var(_12614);
-  _12616 = String_new("eee1ee42");
+  _12616 = String_new("ed5348cf");
   _12617 = String_var(_12616);
   _12618 = cons(_12617, NULL);
   _12619 = cons(_12615, _12618);
@@ -13559,7 +13559,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12641 = List_var(_12640);
   _12642 = String_new("src/meta-sdk.x");
   _12643 = String_var(_12642);
-  _12644 = String_new("634be874");
+  _12644 = String_new("d60f1e58");
   _12645 = String_var(_12644);
   _12646 = cons(_12645, NULL);
   _12647 = cons(_12643, _12646);
