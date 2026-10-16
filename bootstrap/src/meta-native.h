@@ -19,50 +19,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-void Compiler_install_meta_function(Compiler c, List fn, Token marker);
-
-void Compiler_install_collected_meta_function(Compiler c, List declaration, Token marker);
-
-int Compiler_matches_macro(Compiler c, MacroMatcher * matcher, List code);
-
-void Compiler_install_meta_declaration(Compiler c, List declaration, Token marker);
-
-List Compiler_evaluate_meta_expression(Compiler c, List expression, Token site);
-
-List Compiler_evaluate_meta_statement(Compiler c, List expression, Symbol context, Token site);
-
-Var Compiler_run_meta_call(Compiler c, List expression, Token site, int slot);
-
-Var Compiler_apply_meta_function(Compiler c, String name, List arguments, Token site);
-
-void Compiler_record_project_meta_effect(Compiler c, List declaration, Token marker);
-
-void Compiler_install_project_meta_effect(Compiler c, List row);
-
-int Compiler_bind_project_meta(Compiler c, String name);
-
-int Compiler_project_meta_uses_linked(Compiler c, String name, String provider);
-
-void Compiler_record_native_meta_effect(Compiler c, List declaration, Token marker);
-
-void Compiler_install_native_meta_effects(Compiler c, Map globs);
-
-int Compiler_bind_native_meta(Compiler c, String name);
-
-void Compiler_install_native_meta_function(Compiler c, List declaration, Token marker);
-
-int Compiler_native_meta_accepts(Compiler c, Var function, List signature);
-
-String Compiler_native_meta_module(Compiler c, String name, Type * type);
-
-List Compiler_native_meta_targets(List paths);
-
-int Compiler_bind_linked_meta(Compiler c, List fn, Type type);
-
-int Compiler_links_meta_function(String name);
-
-List Compiler_linked_meta_provider_source(String provider);
-
 Map Compiler_compiler_targets(void);
 
 void Compiler_select_native_modules(List paths);
@@ -86,6 +42,50 @@ void x2c_register_extension(const char * name, Map(* targets)(void));
 int Compiler_links_extension(String name);
 
 String Compiler_extension_archive(void);
+
+int Compiler_project_meta_uses_linked(Compiler c, String name, String provider);
+
+int Compiler_bind_linked_meta(Compiler c, List fn, Type type);
+
+int Compiler_links_meta_function(String name);
+
+List Compiler_linked_meta_provider_source(String provider);
+
+void Compiler_install_meta_function(Compiler c, List fn, Token marker);
+
+void Compiler_install_collected_meta_function(Compiler c, List declaration, Token marker);
+
+int Compiler_matches_macro(Compiler c, MacroMatcher * matcher, List code);
+
+void Compiler_install_meta_declaration(Compiler c, List declaration, Token marker);
+
+void Compiler_record_project_meta_effect(Compiler c, List declaration, Token marker);
+
+void Compiler_install_project_meta_effect(Compiler c, List row);
+
+int Compiler_bind_project_meta(Compiler c, String name);
+
+List Compiler_evaluate_meta_expression(Compiler c, List expression, Token site);
+
+List Compiler_evaluate_meta_statement(Compiler c, List expression, Symbol context, Token site);
+
+Var Compiler_run_meta_call(Compiler c, List expression, Token site, int slot);
+
+Var Compiler_apply_meta_function(Compiler c, String name, List arguments, Token site);
+
+void Compiler_record_native_meta_effect(Compiler c, List declaration, Token marker);
+
+void Compiler_install_native_meta_effects(Compiler c, Map globs);
+
+int Compiler_bind_native_meta(Compiler c, String name);
+
+void Compiler_install_native_meta_function(Compiler c, List declaration, Token marker);
+
+int Compiler_native_meta_accepts(Compiler c, Var function, List signature);
+
+String Compiler_native_meta_module(Compiler c, String name, Type * type);
+
+List Compiler_native_meta_targets(List paths);
 
 
 #endif /* __GUARD_0x8AA1709E__ */
