@@ -218,8 +218,6 @@ static void _add_inputs(Build b) {
   }
 }
 
-
-
 /* Compile-only builds make one object per source, so every input compiles
    and several objects need a build directory. */
 static void _check_compile_only(Build b) {

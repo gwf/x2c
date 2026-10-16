@@ -95,7 +95,7 @@ A no-change conclusion is valid if the benefit does not justify a new contract.
 
 ## 3. native-build-reuse.md
 
-[Build._compile_fingerprint](../../src/build.x) synchronously preprocesses each
+[Build._compile_fingerprint](../../commands/build/build.x) synchronously preprocesses each
 source before its compile action enters the bounded job loop. Unchanged
 retained builds therefore serialize fingerprint work even with multiple jobs.
 This establishes the scheduling opportunity, not its performance value.

@@ -1276,7 +1276,6 @@ List CliRequest.package_roots(CliRequest request) {
   return request.package_dirs.append(cons(home, NULL));
 }
 
-
 static macro Stmt $fail.cli_input_not_file(Expr $input) =>
   Diagnostics.driver_error(%"input is not a regular file: ${$input}");
 

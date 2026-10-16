@@ -174,7 +174,7 @@ Build speed is a separate question. [stage.mk](../builds/stage.mk#L162) batches
 all compiler sources when its translation stamp invalidates. Native jobs use
 header depfiles. [Path.publish_files](../src/utils.x#L362) writes and renames generated
 files without preserving timestamps for equal content. The ordinary
-[Build path](../src/build.x#L641) can preprocess a scheduled job and then skip
+[Build path](../commands/build/build.x) can preprocess a scheduled job and then skip
 native compilation using its content record.
 
 Therefore include fanout alone does not predict translation work, native jobs,

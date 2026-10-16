@@ -297,6 +297,12 @@ cp "$ROOT"/src/components/*.x home/src/components/
 cp "$ROOT"/src/grammar.x home/src/
 cp "$ROOT"/lib/*.x "$(dirname "$X2C")"/lib/*.h \
   home/include/x2c/
+for source in "$ROOT"/lib/*; do
+  if [[ -d "$source" ]]; then
+    cp -R "$source" home/lib/
+    cp -R "$source" home/include/x2c/
+  fi
+done
 cp "$ROOT"/etc/*.xlisp "$ROOT"/etc/*.x \
   home/etc/
 cp "$X2C" home/bin/x2c

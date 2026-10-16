@@ -33,6 +33,9 @@ fail() {
 copy_runtime_sources() {
   local destination=$1 source
   cp "$ROOT"/lib/*.x "$destination"
+  for source in "$ROOT"/lib/*; do
+    [[ -d "$source" ]] && cp -R "$source" "$destination"
+  done
   for source in "$ROOT"/lib/*.xlisp; do
     [[ -e "$source" ]] && cp "$source" "$destination"
   done
