@@ -364,7 +364,7 @@ The result is a source-ordered top-level AST. This resets macro state
 and protocol resolution; origins live for the whole unit.
 `generated_symbols` publishes external adapter signatures before parsing.
 
-Source: `src/compiler/parsing/parse.x:22`
+Source: `src/compiler/parsing/parse.x:12`
 
 <a id="Compiler.gensym"></a>
 #### Compiler.gensym
@@ -732,7 +732,7 @@ Source: `src/compiler/lifecycle.x:34`
 Skips a collected script statement, or diagnoses one beside `main`.
 Called after top-level directives establish source visibility.
 
-Source: `src/compiler/parsing/scripts.x:9`
+Source: `src/compiler/parsing/scripts.x:83`
 
 <a id="Compiler.skip_script_statement"></a>
 #### Compiler.skip_script_statement
@@ -743,7 +743,7 @@ Moves past one run of a script unit's statement tokens, through a `;` or
 a closing `}` outside every bracket. A statement that ends early this
 way leaves its remainder as the next run, and runs are rejoined in order.
 
-Source: `src/compiler/parsing/scripts.x:23`
+Source: `src/compiler/parsing/scripts.x:97`
 
 <a id="Compiler.start_collection"></a>
 #### Compiler.start_collection

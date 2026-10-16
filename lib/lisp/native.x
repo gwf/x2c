@@ -55,7 +55,7 @@ static Var _call(Func fn, const FuncArg *args) {
   List values = NULL;
   for (unsigned i = context.arity; i--;)
     values = cons(x2c_func_value_argument(fn, args, i, <var>), values);
-  return _apply_values(context.lisp, context.callable, values, NULL);
+  return _apply_values(context.lisp, context.callable, values);
 }
 
 /* A call to _call here would add a C frame to every nested predicate
@@ -64,7 +64,7 @@ static Var _predicate_call(Func fn, const FuncArg *args) {
   LispCallback *context = _callback_context(fn);
   Var value = x2c_func_value_argument(fn, args, 0, <var>);
   return lisp_truth(
-    _apply_values(context.lisp, context.callable, %($value), NULL));
+    _apply_values(context.lisp, context.callable, %($value)));
 }
 
 static LispCallback *_callback_context(Func fn) {

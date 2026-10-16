@@ -255,6 +255,9 @@ static void array_setindex_bounds(void) {
   EXPECT_VAR_EQ(arr.getindex(-1), vworld);
   Var one = 1;
   EXPECT_TRUE(arr.setindex(5, one) is void);
+  EXPECT_TRUE(arr.setindex(5, void) is void);
+  EXPECT_TRUE(arr.setindex(-2, void) is void);
+  EXPECT_VAR_EQ(arr[0], vworld);
 }
 
 static void array_getslice_unit_step(void) {

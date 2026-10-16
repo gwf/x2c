@@ -66,11 +66,17 @@ typedef struct f8_rewrites___Effects{
 }
 f8_rewrites___Effects;
 
-struct SlotWatch{
-  List values;
+typedef struct f8_rewrites___Preparation{
   Array outputs, order;
   f8_rewrites___Effects inner;
-  int repeated, prepares, shipped, kept;
+  int repeated;
+}
+f8_rewrites___Preparation;
+
+struct SlotWatch{
+  List values;
+  f8_rewrites___Preparation * preparation;
+  int shipped, kept;
   List outer;
   SlotWatch parent;
 }

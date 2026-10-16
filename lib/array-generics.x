@@ -889,40 +889,6 @@ macro Unit $array.typed.index(Type $array, Type $element) {
   }
 }
 
-macro Unit $array.boxed.index(Type $array, Type $element,
-  Literal $zero, Literal $owner, Literal $boxed) {
-  $element $array.getindex($array, int);
-  $element $array.setindex($array, int, $element);
-  /** Reads `index` from a non-null array, counting negatives from the end.
-      Returns `void` when the normalized index is outside the array.
-      Raises: `<size-limit>` outside the integer index domain.
-  */
-  $element $array.getindex($array array, int index) {
-    if ($boxed) {
-      if (array.length > INT_MAX) _size_limit($owner, array.length);
-      index = x2c_normalize_index(index, (int) array.length);
-      if (index < 0) return $zero;
-    }
-    return (($element *) array.bytes)[index];
-  }
-
-  /** Stores and returns `value`, counting negatives from the end.
-      Requires a non-null array. Returns `void` for an out-of-range index.
-      Raises: `<size-limit>` outside the index domain or `<void-op>` when
-      storing `void` at a valid index.
-  */
-  $element $array.setindex($array array, int index, $element value) {
-    if ($boxed) {
-      if (array.length > INT_MAX) _size_limit($owner, array.length);
-      index = x2c_normalize_index(index, (int) array.length);
-      if (index < 0) return $zero;
-      if ((Var) value is void) raise %(void-op);
-    }
-    return (($element *) array.bytes)[index] = value;
-  }
-
-}
-
 macro Unit $array.typed.family(Type $family, Type $element, Literal $zero,
   Literal $owner
 ) {

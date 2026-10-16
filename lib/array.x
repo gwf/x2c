@@ -70,7 +70,8 @@ static void _bad_step(String owner, int step) {
 }
 
 $array.typed.operations(Array, Var, void, 0, 1);
-$array.boxed.index(Array, Var, void, 0, 1);
+Var Array.getindex(Array, int);
+Var Array.setindex(Array, int, Var);
 meta native Self Array.copy(Self);
 meta native Self Array.getslice(Self, int, int, int);
 meta native Self Array.setslice(Self, int, int, Self);
@@ -82,6 +83,30 @@ meta native int Array.indexof(Array, Var);
 meta native Self Array.concat(Self, Self);
 meta native Self Array.reverse(Self);
 meta native Var Array.unshift(Array, Var);
+
+/** Reads `index` from a non-null array, counting negatives from the end.
+    Returns `void` when the normalized index is outside the array.
+    Raises: `<size-limit>` outside the integer index domain.
+*/
+Var Array.getindex(Array array, int index) {
+  if (array.length > INT_MAX) _size_limit(0, array.length);
+  index = x2c_normalize_index(index, (int) array.length);
+  if (index < 0) return void;
+  return ((Var *) array.bytes)[index];
+}
+
+/** Stores and returns `value`, counting negatives from the end.
+    Requires a non-null array. Returns `void` for an out-of-range index.
+    Raises: `<size-limit>` outside the index domain or `<void-op>` when
+    storing `void` at a valid index.
+*/
+Var Array.setindex(Array array, int index, Var value) {
+  if (array.length > INT_MAX) _size_limit(0, array.length);
+  index = x2c_normalize_index(index, (int) array.length);
+  if (index < 0) return void;
+  if (value is void) raise %(void-op);
+  return ((Var *) array.bytes)[index] = value;
+}
 
 /** Returns the same object as a `Block` view; no copy or transfer occurs. */
 inline Block Array.block(Array x)         => (Block) x;
