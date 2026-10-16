@@ -782,9 +782,8 @@ static Array _forward_candidates(List items, int complete_enums) {
 static List _typedef_forward(Type type, List bindings) {
   Type core = type.base_type();
   match (core)
-    case %((!or struct union) ?name (fields *)):
-      if (name)
-        return %(typedef ${_tag_only(type, core, name)} $bindings);
+    case %((!or struct union) ?(String name) (fields *)):
+      return %(typedef ${_tag_only(type, core, name)} $bindings);
   return NULL;
 }
 

@@ -44,7 +44,7 @@ static const struct ReplCommand _commands[] = {
     <function>, <info> },
   { ":ast", ":ast NAME", "Show a session function's typed AST.",
     <function>, <ast> },
-  { ":lowered", ":lowered NAME", "Show a session function's lowered Lisp.",
+  { ":lowered", ":lowered NAME", "Show how a prompt function executes.",
     <function>, <lowered> },
   { ":cancel", ":cancel", "Discard incomplete input.", <none>, <cancel> },
   { ":quit", ":quit", "Leave the session.", <none>, <quit> }
@@ -271,10 +271,10 @@ static int _inspect(
       return 0;
     }
     match (session.inspect(name)) {
-      case %(function (typed ?syntax) (lowered ?forms)): {
+      case %(function (typed ?syntax) (execution native)): {
         if (descriptor->dispatch == <ast>)
           printf("typed: %%%s\n", syntax.repr());
-        else printf("lowered: %s\n", forms.repr());
+        else printf("compiled: native function; no Lisp body\n");
         return 1;
       }
     }
