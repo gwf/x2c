@@ -17,14 +17,6 @@
 #include "format.h"
 #include "emit.h"
 #include "utils.h"
-void Compiler_generate_code(Compiler c, List ast, String dir);
-
-List Compiler_generate_code_text(Compiler c, List ast, String basename);
-
-List Compiler_initializer_function(Compiler c, Type type, List name, List body);
-
-List Compiler_run_once_body(Compiler c, List before, List guard, List after);
-
 typedef struct Init{
   Compiler c;
   String initializer;
@@ -33,9 +25,17 @@ typedef struct Init{
 }
 Init;
 
-List Init_enter(Init * i, List function, int guarded);
+void Compiler_generate_code(Compiler c, List ast, String dir);
+
+List Compiler_generate_code_text(Compiler c, List ast, String basename);
 
 List Compiler_place_source_prelude(Compiler c, List source, List declarations);
+
+List Compiler_initializer_function(Compiler c, Type type, List name, List body);
+
+List Compiler_run_once_body(Compiler c, List before, List guard, List after);
+
+List Init_enter(Init * i, List function, int guarded);
 
 List Compiler_init_statements(Compiler c, Symbol phase);
 
