@@ -137,7 +137,7 @@ Source: `src/cli.x:395`
 Exits with a driver error unless `input` names a regular file.
 A wildcard or directory operand adds a note on what to pass instead.
 
-Source: `src/cli.x:1296`
+Source: `src/cli.x:1295`
 
 ### `Compiler`
 
