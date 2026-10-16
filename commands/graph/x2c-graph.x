@@ -427,9 +427,10 @@ static List _analyze_walk_unit(Compiler compiler, List ast, String path) {
         Array parameter_records = [];
         foreach (List parameter, project_parameters(modifiers))
           match (parameter)
-            case %(parameter ?position (binding ?identity ?spelling) ?type):
+            case %(parameter ?position (binding ?identity ?spelling)
+                   ?parameter_type):
               parameter_records.push(
-                %(parameter $position $identity $type $spelling));
+                %(parameter $position $identity $parameter_type $spelling));
         List parameter_list = parameter_records.list_free();
         Array calls = [];
         _collect_walk_calls(
@@ -1320,6 +1321,28 @@ static List _dependency_cycles(Array paths, Map adjacency) {
   return cycles.list_free();
 }
 
+/* Each resolved direct call in `graph`, in graph order, as
+   `(call PATH CALLER VISIBILITY TARGET CALLEE COUNT)`: the caller's unit,
+   name, and visibility, then the callee's unit and name. */
+static List _direct_calls(List graph) {
+  Array rows = [];
+  match (graph)
+    case %(graph *units):
+      foreach (List unit, units)
+        match (unit)
+          case %(unit ?path (functions *functions)):
+            foreach (List function, functions)
+              match (function)
+                case %(function ?caller ?visibility (calls *calls)):
+                  foreach (List call, calls)
+                    match (call)
+                      case %(call direct ?target ?callee ?count):
+                        rows.push(
+                          %(call $path $caller $visibility
+                            $target $callee $count));
+  return rows.list_free();
+}
+
 static List _digest(List graph) {
   Array units = [], paths = [];
   Map adjacency = {};
@@ -1401,7 +1424,7 @@ static void _architecture_call_counts(
   List graph, Map definitions, Map cross_units, Map units, Map functions,
   Map calls) {
   match (graph)
-    case %(graph *graph_units): {
+    case %(graph *graph_units):
       foreach (List unit, graph_units)
         match (unit)
           case %(unit ?path (functions *members)):
@@ -1409,38 +1432,28 @@ static void _architecture_call_counts(
               match (function)
                 case %(function ?name ?visibility (calls *)):
                   definitions[%($path $name)] = visibility;
-      Map seen_cross_units = {}, seen_units = {}, seen_functions = {};
-      foreach (List unit, graph_units)
-        match (unit)
-          case %(unit ?path (functions *members)):
-            foreach (List function, members)
-              match (function)
-                case %(function ?name ? (calls *outgoing)):
-                  foreach (List call, outgoing)
-                    match (call)
-                      case %(call direct ?target ?callee ?count): {
-                        List key = %($target $callee);
-                        if (!definitions.contains(key)) continue;
-                        project_count(calls, key, count);
-                        List unit_key = %($target $callee $path);
-                        if (!seen_units.contains(unit_key)) {
-                          seen_units[unit_key] = 1;
-                          project_count(units, key, 1);
-                        }
-                        if (target != path &&
-                            !seen_cross_units.contains(unit_key)) {
-                          seen_cross_units[unit_key] = 1;
-                          project_count(cross_units, key, 1);
-                        }
-                        List function_key = %(
-                          $target $callee $path $name
-                        );
-                        if (!seen_functions.contains(function_key)) {
-                          seen_functions[function_key] = 1;
-                          project_count(functions, key, 1);
-                        }
-                      }
-    }
+  Map seen_cross_units = {}, seen_units = {}, seen_functions = {};
+  foreach (List call, _direct_calls(graph))
+    match (call)
+      case %(call ?path ?name ? ?target ?callee ?count): {
+        List key = %($target $callee);
+        if (!definitions.contains(key)) continue;
+        project_count(calls, key, count);
+        List unit_key = %($target $callee $path);
+        if (!seen_units.contains(unit_key)) {
+          seen_units[unit_key] = 1;
+          project_count(units, key, 1);
+        }
+        if (target != path && !seen_cross_units.contains(unit_key)) {
+          seen_cross_units[unit_key] = 1;
+          project_count(cross_units, key, 1);
+        }
+        List function_key = %($target $callee $path $name);
+        if (!seen_functions.contains(function_key)) {
+          seen_functions[function_key] = 1;
+          project_count(functions, key, 1);
+        }
+      }
 }
 
 static List _architecture_choke_points(List graph) {
@@ -1480,19 +1493,10 @@ static List _architecture_choke_points(List graph) {
 
 static Map _unit_edges(List graph) {
   Map edges = {};
-  match (graph)
-    case %(graph *units):
-      foreach (List unit, units)
-        match (unit)
-          case %(unit ?path (functions *functions)):
-            foreach (List function, functions)
-              match (function)
-                case %(function ? ? (calls *calls)):
-                  foreach (List call, calls)
-                    match (call)
-                      case %(call direct ?target ? ?count):
-                        if (target != path)
-                          project_count(edges, %($path $target), count);
+  foreach (List call, _direct_calls(graph))
+    match (call)
+      case %(call ?path ? ? ?target ? ?count):
+        if (target != path) project_count(edges, %($path $target), count);
   return edges;
 }
 
@@ -1559,40 +1563,30 @@ static List _architecture_dependency_width(List graph) {
   Map pairs = {}, participants = {}, edges = {}, calls = {};
   Map callers = {}, callees = {}, seen_participants = {};
   Map seen_callers = {}, seen_callees = {};
-  match (graph)
-    case %(graph *units):
-      foreach (List unit, units)
-        match (unit)
-          case %(unit ?path (functions *functions)):
-            foreach (List function, functions)
-              match (function)
-                case %(function ?caller ? (calls *outgoing)):
-                  foreach (List call, outgoing)
-                    match (call)
-                      case %(call direct ?target ?callee ?count):
-                        if (target != path) {
-                          String source_path = path, target_path = target;
-                          String caller_name = caller, callee_name = callee;
-                          String left = strcmp(source_path, target_path) < 0
-                                      ? source_path : target_path;
-                          String right = left == source_path
-                                       ? target_path : source_path;
-                          List pair = %($left $right);
-                          List direction = %($source_path $target_path);
-                          pairs[pair] = 1;
-                          project_count(edges, direction, 1);
-                          project_count(calls, direction, count);
-                          _record_boundary_function(
-                            seen_callers, callers, direction, caller_name);
-                          _record_boundary_function(
-                            seen_callees, callees, direction, callee_name);
-                          _record_boundary_participant(
-                            seen_participants, participants,
-                            left, right, source_path, caller_name);
-                          _record_boundary_participant(
-                            seen_participants, participants,
-                            left, right, target_path, callee_name);
-                        }
+  foreach (List call, _direct_calls(graph))
+    match (call)
+      case %(call ?(String source_path) ?(String caller_name) ?
+             ?(String target_path) ?(String callee_name) ?count)
+        if (target_path != source_path): {
+        String left = strcmp(source_path, target_path) < 0
+                    ? source_path : target_path;
+        String right = left == source_path ? target_path : source_path;
+        List pair = %($left $right);
+        List direction = %($source_path $target_path);
+        pairs[pair] = 1;
+        project_count(edges, direction, 1);
+        project_count(calls, direction, count);
+        _record_boundary_function(
+          seen_callers, callers, direction, caller_name);
+        _record_boundary_function(
+          seen_callees, callees, direction, callee_name);
+        _record_boundary_participant(
+          seen_participants, participants,
+          left, right, source_path, caller_name);
+        _record_boundary_participant(
+          seen_participants, participants,
+          left, right, target_path, callee_name);
+      }
   Array ranked = [];
   foreach (Var (raw_pair, raw_value), pairs) {
     (void) raw_value;
@@ -1860,23 +1854,13 @@ static List _structure(List graph, String wanted) {
 static List _between_direction(List graph, String from, String to) {
   Array edges = [];
   int total = 0;
-  match (graph)
-    case %(graph *units):
-      foreach (List unit, units)
-        match (unit)
-          case %(unit ?path (functions *functions)):
-            if (path == from)
-              foreach (List function, functions)
-                match (function)
-                  case %(function ?caller ?visibility (calls *calls)):
-                    foreach (List call, calls)
-                      match (call)
-                        case %(call direct ?target ?callee ?count):
-                          if (target == to) {
-                            edges.push(
-                              %(call $caller $visibility $callee $count));
-                            total += count;
-                          }
+  foreach (List call, _direct_calls(graph))
+    match (call)
+      case %(call ?path ?caller ?visibility ?target ?callee ?count):
+        if (path == from && target == to) {
+          edges.push(%(call $caller $visibility $callee $count));
+          total += count;
+        }
   edges.sort();
   return %(
     direction $from $to (count $total)
@@ -1895,21 +1879,11 @@ static List _between(List graph, String left, String right) {
 
 static List _callers(List graph, String target_path, String target_name) {
   Array rows = [];
-  match (graph)
-    case %(graph *units):
-      foreach (List unit, units)
-        match (unit)
-          case %(unit ?path (functions *functions)):
-            foreach (List function, functions)
-              match (function)
-                case %(function ?name ?visibility (calls *calls)):
-                  foreach (List call, calls)
-                    match (call)
-                      case %(call direct ?destination ?callee ?count):
-                        if (destination == target_path &&
-                            callee == target_name)
-                          rows.push(
-                            %(function $path $name $visibility $count));
+  foreach (List call, _direct_calls(graph))
+    match (call)
+      case %(call ?path ?name ?visibility ?destination ?callee ?count):
+        if (destination == target_path && callee == target_name)
+          rows.push(%(function $path $name $visibility $count));
   rows.sort();
   return rows.list_free();
 }
