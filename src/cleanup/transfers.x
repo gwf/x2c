@@ -13,6 +13,21 @@ static typedef struct Walk {
 /* The runtime type of a defer region's record. */
 static String _record_type = "X2CCleanup";
 
+static macro Stmt $fail.cleanup_case_region(Expr $w, Expr $site) =>
+  _report_at(
+    $w, $site, "case label cannot enter a protected cleanup region",
+    %("open the region inside the case's own block"));
+
+static macro Stmt $fail.cleanup_goto_missing(Expr $w, Expr $site) =>
+  _report_at(
+    $w, $site, "goto target label is not defined in this function",
+    NULL);
+
+static macro Stmt $fail.cleanup_goto_region(Expr $w, Expr $site) =>
+  _report_at(
+    $w, $site, "goto cannot enter or cross a protected cleanup region",
+    %("jump only within the same region or outward"));
+
 /* Expressions may nest one level per operator. Visit blocks without
    recursing through the expression spine; each keeps its cleanup owner. */
 static Array _expression_blocks(List expression) {
@@ -273,9 +288,7 @@ static List _rewrite_switch(Walk &w, List subject, List body) {
 static List _case_label(Walk &w, List label) {
   for (int i = w.switch_stop; i < (int) w.regions.len(); i++)
     if (w.regions[i].list().car()) {
-      _report_at(
-        w, w.origin, "case label cannot enter a protected cleanup region",
-        %("open the region inside the case's own block"));
+      $fail.cleanup_case_region(w, w.origin);
       break;
     }
   return _rewrite_children(w, label);
@@ -331,8 +344,7 @@ static int _goto_stop(Walk &w, Var label) {
   String name = _label_spelling(label);
   Var stored;
   if (!name || !w.labels.try_get(name, stored)) {
-    _report_at(
-      w, w.origin, "goto target label is not defined in this function", NULL);
+    $fail.cleanup_goto_missing(w, w.origin);
     return (int) w.regions.len();
   }
   List target = stored, source = _region_path(w);
@@ -341,9 +353,7 @@ static int _goto_stop(Walk &w, Var label) {
   for (int i = source_depth; i > target_depth && suffix; i--)
     suffix = suffix.cdr();
   if (target_depth > source_depth || suffix !== target) {
-    _report_at(
-      w, w.origin, "goto cannot enter or cross a protected cleanup region",
-      %("jump only within the same region or outward"));
+    $fail.cleanup_goto_region(w, w.origin);
     return (int) w.regions.len();
   }
   return target_depth;

@@ -114,7 +114,7 @@ commits need not rebuild from their own bootstrap.
   table, and `fields`, which copies named fields) ->
   shared runtime `lib/tokenizer.x` (+ `preprocess`, which reads its
   directives) ->
-  `parse` (+ `parse-report-macros`, package and alias diagnostics)/
+  `parse` (+ `parse-reports`, package and alias diagnostics)/
   `expressions` (+ `expressions-reports`, typing diagnostics, and
   `initializers`, which converts brace initializers)/`statements`/`macros`
   (+ `meta-sdk`, which answers

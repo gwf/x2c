@@ -49,46 +49,42 @@ typedef struct ParsedUnit {
 
 // diagnostics
 
-static macro Stmt $report.driver.input_read(Expr $c, Expr $filename) {
+static macro Stmt $fail.frontend_input_read(
+  Expr $c, Expr $site, Expr $filename) =>
   $c.report_error(
     <driver>,
     "cannot read input file",
-    NULL, %("stage: driver" "file: ${$filename}" "reason: cannot open"));
-}
+    $site, %("stage: driver" "file: ${$filename}" "reason: cannot open"));
 
-static macro Stmt $report.driver.script_symbols(Expr $c, Expr $site) {
+static macro Stmt $fail.frontend_script_symbols(Expr $c, Expr $site) =>
   $c.report_error(
     <driver>,
     "script units use the default symbol collection",
     $site, %("the host preprocessor reads the #! line as C, so --cpp-symbols,"
     "--live-symbols, and the --dump-cpp modes cannot read a script"));
-}
 
-static macro Stmt $report.driver.indent_symbols(Expr $c, Expr $site) {
+static macro Stmt $fail.frontend_indent_symbols(Expr $c, Expr $site) =>
   $c.report_error(
     <driver>,
     "indented units use the default symbol collection",
     $site, %("the host preprocessor does not keep the indentation, so"
     "--cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read"
     "an indented unit"));
-}
 
-static macro Stmt $report.driver.module_symbols(Expr $c, Expr $site) {
+static macro Stmt $fail.frontend_module_symbols(Expr $c, Expr $site) =>
   $c.report_error(
     <driver>,
     "module units use the default symbol collection",
     $site, %("the host preprocessor reads a module block as C, so"
     "--cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read a"
     "module"));
-}
 
-static macro Stmt $report.driver.cpp_failed(
-  Expr $c, Expr $site, Expr $status) {
+static macro Stmt $fail.frontend_cpp_failed(
+  Expr $c, Expr $site, Expr $status) =>
   $c.report_error(
     <driver>,
     "failed to run C preprocessor",
     $site, %("stage: preprocess" "status: ${$status}"));
-}
 
 // source units
 
@@ -290,7 +286,7 @@ static int _inside(const char *path, const char *dir) {
 static String _read_input(Compiler c) {
   String filename = c.filename, text = NULL;
   if (c.read_source(filename, text)) return text;
-  $report.driver.input_read(c, filename);
+  $fail.frontend_input_read(c, NULL, filename);
 }
 
 /* A `#!` first line makes the file a script unit, and that line reads as an
@@ -396,11 +392,11 @@ static void _enter_package(Frontend frontend, Compiler c) {
    line, and it cannot splice a module. */
 static void _check_cpp_unit(Compiler c) {
   if (c.layout)
-    $report.driver.indent_symbols(c, _first_directive(c));
+    $fail.frontend_indent_symbols(c, _first_directive(c));
   if (c.script)
-    $report.driver.script_symbols(c, _first_directive(c));
+    $fail.frontend_script_symbols(c, _first_directive(c));
   if (c.unit_source)
-    $report.driver.module_symbols(c, _first_directive(c));
+    $fail.frontend_module_symbols(c, _first_directive(c));
 }
 
 static Token _first_directive(Compiler c) {
@@ -427,7 +423,7 @@ static Compiler _run_cpp(Frontend frontend, ParsedUnit &unit) {
   if (errors && frontend.preprocessor_errors)
     frontend.preprocessor_errors(errors);
   if (status)
-    $report.driver.cpp_failed(c, _first_directive(c), status);
+    $fail.frontend_cpp_failed(c, _first_directive(c), status);
   foreach (String dependency, translation_depfile_parse(dependency_text))
     c.add_translation_dependency(dependency);
   return cpp;

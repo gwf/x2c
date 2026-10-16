@@ -39,34 +39,36 @@
 
 /* transform diagnostics. */
 
-static macro Stmt $report.xform.slice_unsupported(
-  Expr $c, Expr $type, Expr $notes) =>
+static macro Stmt $fail.transform_slice_unsupported(
+  Expr $c, Expr $site, Expr $type, Expr $notes) =>
   $c.report_error(
     <xform>, %"type ${$type} does not support slicing",
-    NULL, $notes);
+    $site, $notes);
 
-static macro Stmt $report.xform.no_shipped_rule(Expr $c, Expr $form) =>
+static macro Stmt $fail.transform_no_shipped_rule(
+  Expr $c, Expr $site, Expr $form) =>
   $c.report_error(
     <xform>, %"no rule lowers this ${$form}",
-    NULL, %("the shipped component that owns it is not linked or failed to "
+    $site, %("the shipped component that owns it is not linked or failed to "
             "collect; rebuild the compiler from the current prelude sources"));
 
-static macro Stmt $report.xform.slice_assignment(Expr $c) =>
+static macro Stmt $fail.transform_slice_assignment(Expr $c, Expr $site) =>
   $c.report_error(
     <xform>, "slice expressions are not assignable",
-    NULL, %("call the collection's setslice method explicitly"));
+    $site, %("call the collection's setslice method explicitly"));
 
-static macro Stmt $report.xform.string_compound(Expr $c) =>
+static macro Stmt $fail.transform_string_compound(Expr $c, Expr $site) =>
   $c.report_error(
     <xform>, "String compound assignment supports only String +=",
-    NULL, NULL);
+    $site, NULL);
 
-static macro Stmt $report.xform.container_compound(Expr $c, Expr $lhs_type) {
+static macro Stmt $fail.transform_container_compound(
+  Expr $c, Expr $site, Expr $lhs_type) {
   {
     String type = $lhs_type.repr();
     $c.report_error(
       <xform>, %"container type $type does not support compound assignment",
-      NULL, %("update an indexed element instead"));
+      $site, %("update an indexed element instead"));
   }
 }
 
@@ -180,7 +182,7 @@ static List _shipped_lowering(
   Type expected, String form) {
   List lowered =
     c.lower_rewrite(point, kind, source, position, expected, NULL);
-  if (!lowered) $report.xform.no_shipped_rule(c, form);
+  if (!lowered) $fail.transform_no_shipped_rule(c, NULL, form);
   return lowered;
 }
 
@@ -222,7 +224,7 @@ List Compiler.lower_lambda_expr(Compiler c, List expression) {
 void Compiler.shipped_support(
   Compiler c, Symbol kind, List source, String form) {
   List bound = c.rewrite(<node>, kind, source, <unit>, NULL, NULL);
-  if (!bound) $report.xform.no_shipped_rule(c, form);
+  if (!bound) $fail.transform_no_shipped_rule(c, NULL, form);
   else c.add_support(bound);
 }
 
@@ -433,10 +435,10 @@ static Ast _slice_node(
   match (type)
     case %(?(String name)): nominal = name;
   if (!nominal)
-    $report.xform.slice_unsupported(c, type, NULL);
+    $fail.transform_slice_unsupported(c, NULL, type, NULL);
   String fnname = %"${nominal}_getslice";
   if (!c.sym.get(%($fnname)))
-    $report.xform.slice_unsupported(c, type, %());
+    $fail.transform_slice_unsupported(c, NULL, type, %());
   start = _slice_bound(start);
   stop = _slice_bound(stop);
   step = step ? step : %(literal (int) "1");
@@ -1064,7 +1066,7 @@ static List _symbol_expression(Symbol value) =>
 // Inject conversions so assignment RHS matches the annotated LHS type.
 static List _assignment(Compiler c, Symbol op, List lhs, List rhs) {
   if (lhs.match(%(expr ? (slice *))))
-    $report.xform.slice_assignment(c);
+    $fail.transform_slice_assignment(c, NULL);
   rhs = c.convert_expression(rhs, lhs.cadr());
   return %(op $op $lhs $rhs);
 }
@@ -1117,7 +1119,7 @@ static List _compound(
   Type rhs_type) {
   int lhs_is_var = c.sym.is_var_type(lhs_type);
   if (_x2c_indexed_builtin_helper(c, lhs_type))
-    $report.xform.container_compound(c, lhs_type);
+    $fail.transform_container_compound(c, NULL, lhs_type);
   /* Without this rejection a nonmatching String compound falls through to
      native pointer arithmetic on an interned String. Concatenation itself
      lowers through the protocol member below like any adopter, resolved
@@ -1126,7 +1128,7 @@ static List _compound(
   Type member_type = lhs_type;
   if (c.sym.is_string_type(lhs_type)) {
     if (op != <+> || !_string_operand(c, rhs_type))
-      $report.xform.string_compound(c);
+      $fail.transform_string_compound(c, NULL);
     member_type = %("String");
   }
   if (!lhs_is_var) {

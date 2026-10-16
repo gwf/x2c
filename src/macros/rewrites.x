@@ -447,7 +447,7 @@ static List _lowered(
     bound = c.convert_expression(bound, expected);
     Type actual = bound.cadr();
     if (actual.canonicalize() != expected.canonicalize())
-      $report.rewrite.result_type(c, site, expected, actual);
+      $fail.macros_result_type(c, site, expected, actual);
   }
   return c.normalize(bound);
 }

@@ -14,7 +14,7 @@
 #include "private-keywords.h"
 #include "compiler.h"
 #include "type.h"
-#include "parse-report-macros.h"
+#include "parse-reports.h"
 #include "grammar.h"
 #include "statements.h"
 #include "expressions.h"

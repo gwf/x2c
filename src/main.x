@@ -18,14 +18,14 @@
 #include <string.h>
 #include <unistd.h>
 
-static macro Stmt $report.main.env_unknown(Expr $wanted) =>
+static macro Stmt $fail.main_env_unknown(Expr $wanted) =>
   Diagnostics.driver_error(%"unknown env name '${$wanted}'");
 
-static macro Stmt $report.main.external_failed(Expr $path) =>
+static macro Stmt $fail.main_external_failed(Expr $path) =>
   Diagnostics.driver_error(
     %"cannot run external command '${$path}': ${String.new(strerror(errno))}");
 
-static macro Stmt $report.main.diagnostics_unwritable(Expr $diagnostics) =>
+static macro Stmt $fail.main_diagnostics_unwritable(Expr $diagnostics) =>
   Diagnostics.driver_error(%"cannot open diagnostics file '${$diagnostics}'");
 
 // environment
@@ -44,7 +44,7 @@ static int _run_env(CliRequest request) {
       return 0;
     }
   }
-  if (wanted) $report.main.env_unknown(wanted);
+  if (wanted) $fail.main_env_unknown(wanted);
   return 0;
 }
 
@@ -98,7 +98,7 @@ static void _exec(String path, char **args) {
     setenv(name, value, 1);
   args[0] = path;
   execv(path, args);
-  $report.main.external_failed(path);
+  $fail.main_external_failed(path);
 }
 
 /* Legacy commands keep CLI parsing and response-file expansion here. The
@@ -163,7 +163,7 @@ int main(int argc, char **argv) {
   CliRequest request = CliRequest.parse_arguments(arguments);
   String diagnostics = request.diagnostics_file;
   if (diagnostics && !diagnostics_write_json(diagnostics))
-    $report.main.diagnostics_unwritable(diagnostics);
+    $fail.main_diagnostics_unwritable(diagnostics);
   report_configure(
     request.quiet, request.plain, request.color_mode,
     request.verbose || request.debugging,

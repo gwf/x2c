@@ -8,7 +8,7 @@
 #include "project.x"
 #include "translation.x"
 
-static macro Stmt $report.main.translation_verbose(
+static macro Stmt $progress.main_translation_verbose(
   Expr $directory, Expr $input) =>
   fprintf(stderr, "x2c: translate --out-dir %s %s\n", $directory, $input);
 
@@ -146,7 +146,7 @@ static void _register_units(
     String directory = b.generated_dir(input);
     if (input in stale && request.dry_run) {
       b.begin_translation(input);
-      $report.main.translation_verbose(directory, input);
+      $progress.main_translation_verbose(directory, input);
       b.end_translation(input, 0);
     }
     else if (input in stale) b.record_translation(input, directory);

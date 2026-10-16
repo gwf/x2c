@@ -797,9 +797,14 @@ guarantee. Make callback-only objects invalid outside the callback.
 
 ## Diagnostics and messages
 
-**DG-1** Put diagnostic wording in named report macros near their callers:
-`$report.<category>.<case>(c, ...)` for compiler and driver reports, in a
-group at the top of the file or a sibling `*-reports.x`; one
+**DG-1** Keep diagnostic wording with its owner. Compiler and driver macros
+use `$action.owner_condition(context, site, ...)`: `$fail` transfers or
+terminates, `$report` records an error and returns, `$warn` records a warning,
+and `$note` or `$reason` constructs text or notes. Keep local definitions
+static near the file's top; shared consumers include an owner's `*-reports.x`
+with visible definitions. Retain typed helpers for substantial construction.
+See [catalogue conventions](logger-and-diagnostics-guide.md#local-report-catalogues)
+for location arguments, progress output, and generated consumers. Use one
 `$error.<area>.<condition>` macro per runtime, package, or command
 condition in the raising unit or a shared `*-errors.x`, with `$refusal`,
 `$decline`, and `$reason` for those verbs. A short structured raise such as

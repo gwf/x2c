@@ -133,19 +133,18 @@ Atom Compiler.parse_keyword_definition(Compiler c) {
   int storage = c.test(<static>) || c.source_private;
   c.expect(<ident>);
   if (c.peek(0) != <ident>)
-    $report.parse.keyword_name(c);
+    $fail.macros_keyword_name(c, c.token);
   Atom alias = Atom.intern(c.token.text);
   c.next();
   if (_fixed_alias(c, alias))
-    $report.macro.keyword_builtin(c, declaration);
+    $fail.macros_keyword_builtin(c, declaration);
   Token reference = c.token;
   List definition = _lookup(c, _name(c), reference);
   Symbol kind = definition.assoc(<kind>);
   if (!(kind in alias_kinds)) {
     String spelling = _kind_spelling(kind);
-    $report.macro.keyword_internal(
-      c,
-      spelling, declaration, _definition_note(definition));
+    $fail.macros_keyword_internal(
+      c, declaration, spelling, _definition_note(definition));
   }
   c.expect(<;>);
   c.kw_aliases[alias] = definition;
@@ -326,7 +325,7 @@ module Atom _name(Compiler c) {
   String spelling;
   Token end = _scan_name(c, spelling);
   if (!spelling)
-    $report.parse.macro_name(c, end);
+    $fail.macros_macro_name(c, end);
   c.token = end;
   return Atom.intern(spelling);
 }
@@ -335,7 +334,7 @@ module List _lookup(Compiler c, Atom name, Token invocation) {
   Var stored;
   String spelling = name.str();
   if (!_try_definition(c, name, 1, stored))
-    $report.parse.macro_unbound(c, spelling, invocation);
+    $fail.macros_macro_unbound(c, invocation, spelling);
   return stored;
 }
 
@@ -447,7 +446,7 @@ static List _invocation_arguments(
   }
   if (c.peek(0) != <)>) {
     if (c.peek(0) == <,>) c.next();
-    $report.parse.macro_extra_args(c);
+    $fail.macros_macro_extra_args(c, c.token);
   }
   c.expect(<)>);
   return %(args @{arguments.list_free()});
@@ -459,7 +458,7 @@ static List _argument_row(Compiler c, List hole, Symbol kind) {
   int sequence = hole.assoc(<sequence>);
   Array captured = [];
   if (c.peek(0) == <)> && !sequence)
-    $report.parse.macro_missing_args(c);
+    $fail.macros_macro_missing_args(c, c.token);
   if (c.peek(0) != <)>) loop {
     _row_directives(c, kind, captured);
     Token first = c.token;
@@ -507,7 +506,7 @@ static Var _parse_argument(Compiler c, Symbol kind) {
       case <name>:       return _name_argument(c);
       case <literal>:    return _literal_argument(c);
     }
-    $report.macro.argument_contract(c);
+    $fail.macros_argument_contract(c, c.token);
   }
 }
 
@@ -518,7 +517,7 @@ static Var _parse_argument(Compiler c, Symbol kind) {
 static Var _name_argument(Compiler c) {
   if (c.macro_holes && c.peek(0) == <$>) return _parse_hole(c, <name>);
   if (c.peek(0) != <ident>)
-    $report.parse.name_identifier(c);
+    $fail.macros_name_identifier(c, c.token);
   String spelling = c.token.text;
   c.next();
   if (!c.macro_holes) return spelling;
@@ -769,9 +768,8 @@ static void _check_position(
     return;
   Atom name = definition.assoc(<name>);
   String spelling = name.str(), result_kind = _kind_spelling(kind);
-  $report.macro.result_position(
-    c,
-    spelling, result_kind, place.description, invocation);
+  $fail.macros_result_position(
+    c, invocation, spelling, result_kind, place.description);
 }
 
 /* Invocation parsing and expansion share one semantic transaction. Empty
@@ -848,7 +846,7 @@ static int _on_body(Decoration &d) =>
 static void _misplaced(Decoration &d) {
   Atom name = d.definition.assoc(<name>);
   String spelling = name.str(), target = _kind_spelling(d.kind);
-  $report.macro.decorator_position(d.c, spelling, target, d.invocation);
+  $fail.macros_decorator_position(d.c, d.invocation, spelling, target);
 }
 
 static List _arguments(Decoration &d, int block_scope) {
@@ -857,15 +855,13 @@ static List _arguments(Decoration &d, int block_scope) {
   List arguments = _invocation_arguments(c, definition, d.invocation);
   if (block_scope) _bind_name_arguments(c, definition, arguments);
   if (c.peek(0) == <;>)
-    $report.macro.decorator_semicolon(
-      c,
-      d.invocation, _definition_note(definition));
+    $fail.macros_decorator_semicolon(
+      c, d.invocation, _definition_note(definition));
   if (c.peek(0) == <eof>) {
     Atom name = definition.assoc(<name>);
     String spelling = name.str();
-    $report.macro.decorator_target(
-      c,
-      spelling, d.invocation, _definition_note(definition));
+    $fail.macros_decorator_target(
+      c, d.invocation, spelling, _definition_note(definition));
   }
   return arguments;
 }
@@ -1104,9 +1100,8 @@ static void _not_expression(
   Compiler c, List definition, Token invocation) {
   Symbol kind = definition.assoc(<kind>);
   String spelling = definition.assoc(<name>).str();
-  $report.macro.result_expr(
-    c,
-    kind, spelling, invocation, _definition_note(definition));
+  $fail.macros_result_expr(
+    c, invocation, kind, spelling, _definition_note(definition));
 }
 
 static List _expression_decorator(
@@ -1114,9 +1109,8 @@ static List _expression_decorator(
   List arguments = _invocation_arguments(c, definition, invocation);
   if (c.peek(0) == <;> || c.peek(0) == <eof>) {
     String spelling = definition.assoc(<name>).str();
-    $report.macro.decorator_expr(
-      c,
-      spelling, invocation, _definition_note(definition));
+    $fail.macros_decorator_expr(
+      c, invocation, spelling, _definition_note(definition));
   }
   List target = c.parse_macro_expression_target();
   List input = %(

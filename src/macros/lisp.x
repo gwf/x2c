@@ -42,7 +42,7 @@ module Var _eval_string(Compiler c, String source, Token invocation) {
 module String _lisp_form(Compiler c) {
   Token start = c.token, close = start.group_close();
   if (close.type == <eof>)
-    $report.parse.lisp_unclosed(c, start);
+    $fail.macros_lisp_unclosed(c, start);
   c.token = close.after_group();
   int begin = start.pos + start.len;
   return %"(${String.new_len(c.text + begin, close.pos - begin)})";
@@ -145,7 +145,7 @@ List Compiler.lift_macro_lisp_expression(
     return c.resolve_expression(%(expr () (ident $identifier)), invocation);
   if (value is <list> && !value.is_nil())
     return c.bind_syntax(_helper_result(c, value), <expression>, NULL);
-  $report.macro.lisp_expr(c, invocation, value);
+  $fail.macros_lisp_expr(c, invocation, value);
 }
 
 /** Binds a compile-time Lisp code `value` returned to a statement at
@@ -203,9 +203,9 @@ module List _import(Compiler c, String requested, Token invocation) {
     return NULL;
   }
   if (path in c.import_stack)
-    $report.macro.import_cycle(c, path, invocation);
+    $fail.macros_import_cycle(c, invocation, path);
   if (!path.endswith(".xlisp"))
-    $report.macro.import_extension(c, invocation, _path_note(c, path));
+    $fail.macros_import_extension(c, invocation, _path_note(c, path));
   Map before = c.deps.copy();
   String text = _read_source(
     c, path, "cannot open compile-time Lisp import", invocation);
@@ -545,7 +545,7 @@ static Map _read_definitions(Compiler c) {
     if (c.keyword_form_is_definition()) _record_alias(c, aliases);
     else if (c.macro_form_is_definition()) c.parse_macro_definition();
     else
-      $report.macro.builtin_form(c);
+      $fail.macros_builtin_form(c, c.token);
   }
   return aliases;
 }

@@ -19,6 +19,13 @@
 #include "rewrite.x"
 #include "grammar.x"
 
+/* The linked meta copies include these diagnostics from this owner. */
+macro Stmt $fail.try_finalizer_label(Expr $site, Expr $label) =>
+  x2c_diagnostic_fail_at(
+    $site, <emit>, "a finally body cannot define a label",
+    %("a finalizer runs on every path that leaves its region, so '${
+      Code.binding_spelling($label)}' would be defined once for each"));
+
 // catch sites
 
 /* Returns the statement that prepares each of `items` into its slot of
@@ -191,10 +198,7 @@ meta static void _try_check_label(List finalizer) {
   List at = finalizer;
   Var label = _try_finalizer_label(finalizer, at);
   if (!label) return;
-  x2c_diagnostic_fail_at(
-    at, <emit>, "a finally body cannot define a label",
-    %("a finalizer runs on every path that leaves its region, so '${
-      Code.binding_spelling(label)}' would be defined once for each"));
+  $fail.try_finalizer_label(at, label);
 }
 
 meta static List _try_frame_address(Atom frame) {

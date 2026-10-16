@@ -8,7 +8,7 @@
 #include "x2c.h"
 #include "private-keywords.h"
 #include "compiler.h"
-#include "parse-report-macros.h"
+#include "parse-reports.h"
 #include "parse.h"
 #include "expressions.h"
 #include "literals.h"

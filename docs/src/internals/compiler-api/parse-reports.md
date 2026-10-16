@@ -4,6 +4,6 @@
 > **Provisional API:** This reference documents current compiler behavior.
 > Compatibility is not yet promised.
 
-# `src/parse-report-macros.x`
+# `src/parse-reports.x`
 
 Package, binding, and alias diagnostics.

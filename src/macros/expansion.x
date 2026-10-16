@@ -71,7 +71,7 @@ static void _check(Expansion &x) {
   if (c.macro_stack.len() >= 64) _too_deep(x);
   if (leaf || !x.invocation) return;
   if (c.macro_count >= 10000)
-    $report.macro.expansion_count(c, x.invocation);
+    $fail.macros_expansion_count(c, x.invocation);
   c.macro_count++;
 }
 
@@ -81,17 +81,16 @@ static void _recursion(Expansion &x) {
   List captured = x.input.search_replace(
     %(capture (source ?syntax) *), <?syntax>);
   Var shown = _source_unwrap(captured);
-  $report.macro.expansion_recursive(
-    x.c,
-    spelling, x.invocation, _definition_note(x.definition), shown);
+  $fail.macros_expansion_recursive(
+    x.c, x.invocation, spelling, _definition_note(x.definition), shown);
 }
 
 static void _too_deep(Expansion &x) {
   /* Compiler-generated applications can have no invocation token. */
   List first = x.c.macro_stack.last().list().car();
-  $report.macro.expansion_depth(
-    x.c,
-    x.invocation, _definition_note(x.definition), _definition_note(first));
+  $fail.macros_expansion_depth(
+    x.c, x.invocation, _definition_note(x.definition),
+    _definition_note(first));
 }
 
 /* Pushes this expansion's frame on the macro stack, fills the template,

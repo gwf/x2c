@@ -2,25 +2,26 @@
 
 /* Findings from statement and expression traversal. */
 
-static macro Stmt $report.region.bad_free(Expr $w, Expr $op, Expr $subject) =>
+static macro Stmt $warn.region_bad_free(
+  Expr $w, Expr $site, Expr $op, Expr $subject) =>
   _warn(
-    $w, <bad-free>, $w.origin,
+    $w, <bad-free>, $site,
     %"${$op} is given ${$subject}, which no Scope allocator returned",
     %("only Scope.malloc, calloc, memdup, and realloc storage can be"
       "freed or reallocated"));
 
-static macro Stmt $report.region.read_ended(Expr $w, Expr $name) =>
+static macro Stmt $warn.region_read_ended(Expr $w, Expr $site, Expr $name) =>
   _warn(
-    $w, <region>, $w.origin,
+    $w, <region>, $site,
     %"'${$name}' is read after its owning region ended", NULL);
 
-static macro Stmt $report.region.after_free(
-  Expr $w, Expr $name, Expr $ended) =>
+static macro Stmt $warn.region_after_free(
+  Expr $w, Expr $site, Expr $name, Expr $ended) =>
   _warn(
-    $w, <after-free>, $w.origin, %"'${$name}' is used after ${$ended}", NULL);
+    $w, <after-free>, $site, %"'${$name}' is used after ${$ended}", NULL);
 
-static macro Expression $region.reason.moved() => "Scope.realloc moved it";
-static macro Expression $region.reason.freed() => "it was freed";
+static macro Expression $reason.region_moved() => "Scope.realloc moved it";
+static macro Expression $reason.region_freed() => "it was freed";
 
 // statements
 
@@ -274,7 +275,7 @@ static void _end(Walk &w, Var argument, String op, Symbol how) {
       (storage.region == w.frame || storage.born == 2)))) {
     String subject = literal ? "a literal"
                              : _subject(w, argument, named, storage);
-    $report.region.bad_free(w, op, subject);
+    $warn.region_bad_free(w, w.origin, op, subject);
   }
   Fact fact = _fact_of(w, argument, NULL);
   if (!fact || fact.depth != w.depth) return;
@@ -360,14 +361,14 @@ static void _scan_ident(Walk &w, Var binding) {
   if (w.audit && (_closed(fact.region) || _closed(fact.other) ||
                   (cleanup && cleanup.closed))) {
     String name = Ast.binding_spelling(binding);
-    $report.region.read_ended(w, name);
+    $warn.region_read_ended(w, w.origin, name);
     return;
   }
   if (!fact.dead) return;
   String name = Ast.binding_spelling(binding);
-  String ended = fact.dead == <moved> ? $region.reason.moved()
-                                      : $region.reason.freed();
-  $report.region.after_free(w, name, ended);
+  String ended = fact.dead == <moved> ? $reason.region_moved()
+                                      : $reason.region_freed();
+  $warn.region_after_free(w, w.origin, name, ended);
   fact.dead = 0;
 }
 

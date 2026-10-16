@@ -61,7 +61,7 @@ module void _debug_tokens(Token start, Token end) {
   if (!log_should_log(<debug>, <tokenizer>)) return;
   for (Token tok = start; tok < end; tok++)
     if (tok.type != <space> && tok.type != <comment> && tok.type != <preproc>)
-      $report.debug.token(tok);
+      $debug.compiler_token(tok);
 }
 
 /** Collects macro definitions or keyword aliases before the full source parse.
@@ -168,7 +168,7 @@ static void _shallow_block(Compiler c) {
   c.next();
   for (Symbol peek = c.peek(0); peek != <"}">; peek = c.peek(0)) {
     if (peek == <eof>)
-      $report.parse.token_eof(c);
+      $fail.compiler_token_eof(c, c.token);
     if (peek == <"{"> || peek == <"%{"> || peek == <"${"> || peek == <"@{">)
       _shallow_block(c);
     else c.next();

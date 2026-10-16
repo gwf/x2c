@@ -36,7 +36,7 @@ meta static String _delegate_path(Type type, List fields, String member) {
 
 /* Reports a method that imported packages each provide on a delegate
    field's type. */
-meta static void _delegate_packages(
+meta static void _delegate_fail_packages(
   Type outer, Type type, String member, List fields, List packages) {
   Array notes = [%"delegate path: ${_delegate_path(outer, fields, NULL)}"];
   foreach (String package, packages) notes.push(%"package: '$package'");
@@ -70,7 +70,7 @@ meta static void _delegate_search(
       case %(method ?binding ?):
         found.push(%(${path.reverse()} $binding));
       case %(ambiguous *packages):
-        _delegate_packages(outer, type, member, path.reverse(), packages);
+        _delegate_fail_packages(outer, type, member, path.reverse(), packages);
     }
     if (!resolution)
       _delegate_search(outer, member, type, path, seen, found, cycle);
@@ -78,7 +78,8 @@ meta static void _delegate_search(
 }
 
 /* Reports more than one delegate path that finds `member`. */
-meta static void _delegate_ambiguous(Type outer, String member, List paths) {
+meta static void _delegate_fail_ambiguous(
+  Type outer, String member, List paths) {
   Array notes = [];
   foreach (List path, paths) {
     String spelling = Code.binding_spelling(path.cadr());
@@ -93,7 +94,7 @@ meta static void _delegate_ambiguous(Type outer, String member, List paths) {
 
 /* Reports a search that found no path and returned to an aggregate it
    passed through `fields`. */
-meta static void _delegate_cycle(Type outer, String member, List fields) {
+meta static void _delegate_fail_cycle(Type outer, String member, List fields) {
   String method = %"${_delegate_type_name(outer)}.$member";
   x2c_diagnostic_fail_at(
     NULL, <type>, %"delegation cycle resolving $method",
@@ -107,8 +108,8 @@ meta static List _delegate_fields(Type outer, String member) {
   List cycle = NULL;
   _delegate_search(outer, member, outer, NULL, NULL, found, cycle);
   List paths = found.list_free();
-  if (paths && paths.cdr()) _delegate_ambiguous(outer, member, paths);
-  if (!paths && cycle) _delegate_cycle(outer, member, cycle);
+  if (paths && paths.cdr()) _delegate_fail_ambiguous(outer, member, paths);
+  if (!paths && cycle) _delegate_fail_cycle(outer, member, cycle);
   return paths ? paths.car().car() : NULL;
 }
 

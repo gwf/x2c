@@ -31,31 +31,31 @@ static keyword loop $private.loop;
 #include "format.x"
 #include "protocol.x"
 
-static macro Stmt $report.main.stem_collision(
+static macro Stmt $report.main_stem_collision(
   Expr $stem, Expr $first, Expr $other, Expr $directory) =>
   fprintf(
     stderr, "x2c: error: inputs produce the same output stem '%s'\n"
     "  first input: %s\n  other input: %s\n  output: %s/%s.c\n",
     $stem, $first, $other, $directory, $stem);
 
-static macro Stmt $report.main.workers_started(Expr $jobs, Expr $total) =>
+static macro Stmt $progress.main_workers_started(Expr $jobs, Expr $total) =>
   fprintf(
     stderr, "x2c: translate with %d workers over %d files\n",
     $jobs, $total);
 
-static macro Stmt $report.main.input_not_x(Expr $input) =>
+static macro Stmt $fail.main_input_not_x(Expr $input) =>
   Diagnostics.driver_error(%"translation input is not an .x file: ${$input}");
 
-static macro Stmt $report.main.directory_missing(Expr $out_dir) =>
+static macro Stmt $fail.main_directory_missing(Expr $out_dir) =>
   Diagnostics.driver_error(%"output directory does not exist: ${$out_dir}");
 
-static macro Stmt $report.main.directory_not_dir(Expr $out_dir) =>
+static macro Stmt $fail.main_directory_not_dir(Expr $out_dir) =>
   Diagnostics.driver_error(%"output is not a directory: ${$out_dir}");
 
-static macro Stmt $report.main.directory_unwritable(Expr $out_dir) =>
+static macro Stmt $fail.main_directory_unwritable(Expr $out_dir) =>
   Diagnostics.driver_error(%"output directory is not writable: ${$out_dir}");
 
-static macro Stmt $report.main.translated(
+static macro Stmt $progress.main_translated(
   Expr $n, Expr $noun, Expr $out_dir, Expr $duration) =>
   report_line(
     <success>, %"Translated ${$n} x2c ${$noun} to ${$out_dir} in ${
@@ -240,7 +240,7 @@ static void _preflight(Translation &t) {
   foreach (String input, request.inputs) {
     CliRequest.require_input(input);
     if (!Path.is_x2c_source(input))
-      $report.main.input_not_x(input);
+      $fail.main_input_not_x(input);
     String stem = Path.stem(input);
     if (shared && stem in stems)
       _stem_collision(stem, stems[stem], input, request.out_dir);
@@ -250,16 +250,16 @@ static void _preflight(Translation &t) {
 
 static void _check_out_dir(String out_dir) {
   if (!Path.exists(out_dir))
-    $report.main.directory_missing(out_dir);
+    $fail.main_directory_missing(out_dir);
   if (!Path.is_dir(out_dir))
-    $report.main.directory_not_dir(out_dir);
+    $fail.main_directory_not_dir(out_dir);
   if (access(out_dir, W_OK | X_OK))
-    $report.main.directory_unwritable(out_dir);
+    $fail.main_directory_unwritable(out_dir);
 }
 
 static void _stem_collision(
   String stem, String first, String other, String out_dir) {
-  $report.main.stem_collision(stem, first, other, out_dir);
+  $report.main_stem_collision(stem, first, other, out_dir);
   exit(2);
 }
 
@@ -308,7 +308,7 @@ static void _report(Translation &t, unsigned long started_at) {
   String duration = report_duration(report_now_us() - started_at);
   int n = t.total;
   String noun = n == 1 ? "file" : "files";
-  $report.main.translated(n, noun, out_dir, duration);
+  $progress.main_translated(n, noun, out_dir, duration);
   report_generated(n, bytes);
 }
 
@@ -424,7 +424,7 @@ static int _run_workers(Translation &t, Array slices) {
   int jobs = t.request.jobs, count = slices.len();
   if (jobs > count) jobs = count;
   if (t.request.verbose)
-    $report.main.workers_started(jobs, t.total);
+    $progress.main_workers_started(jobs, t.total);
   _workers = (Workers) {
     .t = &t, .slices = slices, .pids = Scope.calloc(jobs, sizeof(long)),
     .carried = Scope.calloc(jobs, sizeof(int)),

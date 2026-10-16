@@ -10,7 +10,7 @@
 typedef struct Sym * Sym;
 
 #include "compiler.h"
-#include "parse-report-macros.h"
+#include "parse-reports.h"
 #include "grammar.h"
 typedef struct Sym{
   Block scopes;

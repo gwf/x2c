@@ -63,12 +63,12 @@ List Compiler.parse_macro_definition(Compiler c) {
 static void _head(Definition &d) {
   Compiler c = d.c;
   if (c.peek(0) == <$>)
-    $report.parse.macro_result(c);
+    $fail.macros_macro_result(c, c.token);
   d.anonymous = c.peek(0) == <ident> && c.peek(1) == <(>;
   d.local = d.anonymous || (c.peek(0) == <ident> &&
             c.peek(1) == <ident> && c.peek(2) == <(>);
   if (c.peek(0) != <ident> || (!d.local && c.peek(1) != <$>))
-    $report.parse.macro_kind(c);
+    $fail.macros_macro_kind(c, c.token);
   Token token = c.token;
   c.next();
   d.kind = _result_kind_token(c, token);
@@ -77,7 +77,7 @@ static void _head(Definition &d) {
 static Symbol _result_kind_token(Compiler c, Token token) {
   const MacroCategory *category = _category(token.text);
   if (!category || !category.result)
-    $report.parse.macro_unknown_kind(c, token.text, token);
+    $fail.macros_macro_unknown_kind(c, token, token.text);
   return category.result;
 }
 
@@ -91,10 +91,10 @@ static void _naming(Definition &d) {
   else d.name = _name(c);
   String spelling = d.name.str();
   if (d.local && d.name == <with>)
-    $report.macro.name_with(c, d.start);
+    $fail.macros_name_with(c, d.start);
   if (spelling.startswith("x2c.") && !c.builtin_defs &&
       !Compiler.is_prelude_source(c.source_path(c.filename)))
-    $report.parse.macro_reserved(c, spelling, d.start);
+    $fail.macros_macro_reserved(c, d.start, spelling);
 }
 
 /* Reads the parameter holes, then a `using` clause. A decorator's first
@@ -111,7 +111,7 @@ static void _signature(Definition &d) {
   _check_signature(d);
   if (c.take_word("using")) _using_clause(c, d.using);
   if (c.peek(0) == <:>)
-    $report.parse.macro_kind_order(c);
+    $fail.macros_macro_kind_order(c, c.token);
 }
 
 static void _parameter(Definition &d, Array params, List hole) {
@@ -119,7 +119,7 @@ static void _parameter(Definition &d, Array params, List hole) {
   if (d.kind == <decorator> && !d.target) _take_target(d, hole);
   else params.push(hole);
   if (hole.assoc(<sequence>).int() && c.peek(0) == <,>)
-    $report.parse.hole_final(c);
+    $fail.macros_hole_final(c, c.token);
 }
 
 /* A Unit target's source stays visible to compile-time Lisp, whose
@@ -127,9 +127,9 @@ static void _parameter(Definition &d, Array params, List hole) {
 static void _take_target(Definition &d, List hole) {
   Compiler c = d.c;
   if (!_decorator_target(hole.assoc(<kind>)))
-    $report.parse.decorator_kind(c, d.start);
+    $fail.macros_decorator_kind(c, d.start);
   if (hole.assoc(<sequence>).int())
-    $report.parse.decorator_singular(c, d.start);
+    $fail.macros_decorator_singular(c, d.start);
   d.target = hole;
   if (hole.assoc(<kind>) != <unit>) return;
   c.macro_holes[%(source ${hole.assoc(<binder>)})] = 1;
@@ -141,17 +141,17 @@ static void _take_target(Definition &d, List hole) {
 static void _check_signature(Definition &d) {
   Compiler c = d.c;
   if (d.kind == <decorator> && !d.target)
-    $report.parse.decorator_target(c, d.start);
+    $fail.macros_decorator_target_kind(c, d.start);
   if (!d.local) return;
   if (d.kind == <unit> || d.kind == <decl-unit>) {
     String result_spelling = _kind_spelling(d.kind);
-    $report.macro.local_result(c, result_spelling, d.start);
+    $fail.macros_local_result(c, d.start, result_spelling);
   }
   if (d.kind != <decorator>) return;
   Symbol kind = _target_kind(d);
   if (kind == <function> || kind == <unit> || kind == <named-type>) {
     String target = _kind_spelling(kind);
-    $report.macro.local_target(c, target, d.start);
+    $fail.macros_local_target(c, d.start, target);
   }
 }
 
@@ -172,7 +172,7 @@ static void _arrow(Definition &d) {
     if (d.kind == <block-item>) return;
   }
   if (c.peek(0) == <(>)
-    $report.parse.macro_paren_body(c);
+    $fail.macros_macro_paren_body(c, c.token);
   if (c.peek(0) != <"{">) _body_error(d);
 }
 
@@ -190,7 +190,7 @@ static void _body_error(Definition &d) {
   String form = _has_expression_body(d) ? "'=> expression;'"
               : d.kind == <block-item> ? "'{ ... }' or '=> expression;'"
               : "'{ ... }'";
-  $report.parse.macro_body(d.c, _kind_spelling(d.kind), form);
+  $fail.macros_macro_body(d.c, d.c.token, _kind_spelling(d.kind), form);
 }
 
 /* Records where the definition stands and shows its signature, so an
@@ -385,7 +385,7 @@ static void _check_kinds(Definition &d) {
   foreach (List hole, d.parameters)
     if (!hole.assoc(<kind>)) {
       String hole_spelling = hole.assoc(<binder>).str()[1:];
-      $report.parse.hole_untyped(d.c, hole_spelling, d.start);
+      $fail.macros_hole_untyped(d.c, d.start, hole_spelling);
     }
 }
 
@@ -540,7 +540,7 @@ static Symbol _hole_kind(Compiler c) {
   Symbol kind = category ? category.hole : 0;
   if (!kind) {
     String spelling = c.token.text;
-    $report.parse.hole_unknown_kind(c, spelling);
+    $fail.macros_hole_unknown_kind(c, c.token, spelling);
   }
   c.next();
   return kind;
@@ -549,7 +549,7 @@ static Symbol _hole_kind(Compiler c) {
 static Token _hole_name_token(Compiler c, Symbol prefix) {
   c.expect(prefix);
   if (c.peek(0) != <ident>)
-    $report.parse.hole_name(c);
+    $fail.macros_hole_name(c, c.token);
   Token name = c.token;
   c.next();
   return name;
@@ -559,7 +559,7 @@ static List _declare_hole(
   Compiler c, Token token, Symbol kind, int sequence) {
   String spelling = token.text;
   if (_hole_record(c, Atom.intern(spelling)))
-    $report.parse.hole_duplicate(c, spelling, token);
+    $fail.macros_hole_duplicate(c, token, spelling);
   return _record_hole(c, spelling, kind, sequence);
 }
 
@@ -769,7 +769,7 @@ List Compiler.try_parse_macro_slot(Compiler c, Symbol role) {
 static List _meta_call_slot(Compiler c, Symbol role) {
   int sequence = c.peek(0) == <@>;
   if (sequence && !(role in sequence_roles))
-    $report.parse.splice_position(c);
+    $fail.macros_splice_position(c, c.token);
   if (!sequence && (role == <block> || role in declaration_roles))
     return NULL;
   List definition = _peek_invocation(c);
@@ -789,7 +789,7 @@ static Symbol _slot_position(Symbol role) =>
 static List _lisp_slot(Compiler c, Symbol role) {
   int splice = c.peek(0) == <"@(">;
   if (splice && !(role in sequence_roles))
-    $report.parse.splice_position(c);
+    $fail.macros_splice_position(c, c.token);
   if (role in declaration_roles && !splice) return NULL;
   if (!splice && role == <block> && c.macro_lisp_starts_declaration())
     return NULL;
@@ -806,7 +806,7 @@ static List _hole_slot(Compiler c, Symbol role) {
       (role == <argument> && !hole.assoc(<sequence>).int()) ||
       (role == <statement> && c.after_hole().type == <(>)) return NULL;
   if (role == <expression> && hole.assoc(<sequence>).int())
-    $report.parse.splice_expr(c);
+    $fail.macros_splice_expr(c, c.token);
   if (!(role in untyped_roles)) {
     Symbol kind = hole.assoc(<kind>);
     if (!kind && c.peek(0) != <@> && c.peek(0) != <"@{"> &&
@@ -885,8 +885,8 @@ List Compiler.parse_macro_quotation(Compiler c) {
   List locals = NULL, type = NULL;
   if (typed) {
     if (c.macro_holes && %(quotation) in c.macro_holes)
-      $report.parse.typed_quotation_nested(c, start);
-    if (c.macro_holes) $report.parse.typed_quotation(c, start);
+      $fail.macros_typed_quotation_nested(c, start);
+    if (c.macro_holes) $fail.macros_typed_quotation(c, start);
     if (c.peek(0) == <(>) locals = _expression_holes(c, holes);
     type = _quoted_type(c, holes);
   }
@@ -955,7 +955,7 @@ static List _hole_local(Compiler c, Map holes, int position) {
   c.expect(<"{">);
   Token origin = c.token;
   List value = c.parse_expression();
-  if (!value.cadr()) $report.type.var_unresolved(c, origin);
+  if (!value.cadr()) $fail.expressions_var_unresolved(c, origin);
   c.expect(<"}">);
   String name = c.fresh_name("hole");
   holes[%(expression $position)] = name;
@@ -1187,7 +1187,7 @@ static List _part_construction(Definition &d) {
    quotation binds nothing, so it may declare no name and apply no
    template. */
 static Map _written_keys(Definition &d) {
-  if (!d.rebuild || d.fresh) $report.parse.typed_quotation(d.c, d.start);
+  if (!d.rebuild || d.fresh) $fail.macros_typed_quotation(d.c, d.start);
   Map keys = {};
   foreach (List hole, d.parameters)
     foreach (Symbol projection, %(source value expression splice member))
@@ -1207,7 +1207,7 @@ static List _typed_cells(
       %(expr ("List") ${_typed_cells(c, item, keys, start)}), tail);
   if (!item.is_binder() || !item.str()[1:].startswith("__macro_"))
     return c.literal_cell(c.cache_literal_var(item), tail);
-  if (!keys.try_get(item, row)) $report.parse.typed_quotation(c, start);
+  if (!keys.try_get(item, row)) $fail.macros_typed_quotation(c, start);
   (List hole, Symbol projection) = row.list();
   List value = _typed_hole(c, row, start);
   if (projection == <splice> || hole.assoc(<sequence>).int())
@@ -1299,7 +1299,7 @@ module List _parse_hole(Compiler c, Symbol role) {
   if (sequence != hole.assoc(<sequence>).int())
     _cardinality_error(c, name.str(), sequence, token);
   if (sequence && !(role in sequence_roles))
-    $report.parse.splice_position(c);
+    $fail.macros_splice_position(c, c.token);
   Symbol inferred = _role_kind(role), kind = hole.assoc(<kind>);
   if (!kind) {
     hole = hole.search_replace(%(kind ?prior), %(kind $inferred));
@@ -1307,9 +1307,8 @@ module List _parse_hole(Compiler c, Symbol role) {
   }
   else if (!_kind_accepts_role(kind, role)) {
     String spelling = name.str();
-    $report.parse.hole_ambiguous(
-      c,
-      spelling, token, _kind_spelling(kind), _kind_spelling(inferred));
+    $fail.macros_hole_ambiguous(
+      c, token, spelling, _kind_spelling(kind), _kind_spelling(inferred));
   }
   String projection = _hole_projection(c, hole, role, sequence);
   return %(macro-bind ${_hole_key(hole, projection)});
@@ -1317,7 +1316,7 @@ module List _parse_hole(Compiler c, Symbol role) {
 
 static void _cardinality_error(
   Compiler c, String spelling, int sequence, Token token) {
-  $report.parse.hole_cardinality(c, sequence, spelling, token);
+  $fail.macros_hole_cardinality(c, token, sequence, spelling);
 }
 
 static Symbol _role_kind(Symbol role) {

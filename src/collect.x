@@ -28,22 +28,23 @@
 
 // diagnostics
 
-static macro Stmt $report.driver.runtime_read(Expr $c, Expr $runtime) {
+static macro Stmt $fail.collect_runtime_read(
+  Expr $c, Expr $site, Expr $runtime) {
   $c.report_error(
     <driver>,
     "cannot read runtime source",
-    $c.token, %("path: ${$runtime}"));
+    $site, %("path: ${$runtime}"));
 }
 
-static macro Stmt $report.driver.include_read(
-  Expr $c, Expr $target, Expr $path) {
+static macro Stmt $fail.collect_include_read(
+  Expr $c, Expr $site, Expr $target, Expr $path) {
   $c.report_error(
     <driver>,
     "cannot read include",
-    $c.token, %("stage: collect" "include: ${$target}" "path: ${$path}"));
+    $site, %("stage: collect" "include: ${$target}" "path: ${$path}"));
 }
 
-static macro Stmt $report.driver.package_unknown(
+static macro Stmt $fail.collect_package_unknown(
   Expr $c, Expr $site, Expr $name) {
   $c.report_error(
     <driver>,
@@ -51,7 +52,7 @@ static macro Stmt $report.driver.package_unknown(
     $site, %( "searched: <root>/${$name}/src/${$name}.{x,xp}, <root>/${$name}/${$name}.{x,xp}" ));
 }
 
-static macro Stmt $report.driver.package_read(
+static macro Stmt $fail.collect_package_read(
   Expr $c, Expr $site, Expr $package, Expr $entry) {
   $c.report_error(
     <driver>,
@@ -59,7 +60,7 @@ static macro Stmt $report.driver.package_read(
     $site, %( "path: ${$entry}" ));
 }
 
-static macro Stmt $report.driver.package_prefix(
+static macro Stmt $fail.collect_package_prefix(
   Expr $c, Expr $site, Expr $name, Expr $spelling, Expr $unit, Expr $fix) {
   $c.report_error(
     <driver>,
@@ -67,7 +68,7 @@ static macro Stmt $report.driver.package_prefix(
     $site, %( "'${$unit}' is x2c source outside the package; include it ${$fix}" ));
 }
 
-static macro Stmt $report.driver.module_block(Expr $c, Expr $site) {
+static macro Stmt $fail.collect_module_block(Expr $c, Expr $site) {
   $c.report_error(
     <driver>,
     "malformed module block",
@@ -75,14 +76,14 @@ static macro Stmt $report.driver.module_block(Expr $c, Expr $site) {
     "commas, between braces"));
 }
 
-static macro Stmt $report.driver.module_second(Expr $c, Expr $site) {
+static macro Stmt $fail.collect_module_second(Expr $c, Expr $site) {
   $c.report_error(
     <driver>,
     "a file holds one module block",
     $site, NULL);
 }
 
-static macro Stmt $report.driver.module_member(
+static macro Stmt $fail.collect_module_member(
   Expr $c, Expr $site, Expr $member, Expr $stem) {
   $c.report_error(
     <driver>,
@@ -91,7 +92,7 @@ static macro Stmt $report.driver.module_member(
     "names it"));
 }
 
-static macro Stmt $report.driver.module_prefix(
+static macro Stmt $fail.collect_module_prefix(
   Expr $c, Expr $site, Expr $member, Expr $other) {
   $c.report_error(
     <driver>,
@@ -101,7 +102,7 @@ static macro Stmt $report.driver.module_prefix(
     "the files"));
 }
 
-static macro Stmt $report.driver.module_read(
+static macro Stmt $fail.collect_module_read(
   Expr $c, Expr $site, Expr $path) {
   $c.report_error(
     <driver>,
@@ -109,7 +110,7 @@ static macro Stmt $report.driver.module_read(
     $site, %("path: ${$path}"));
 }
 
-static macro Stmt $report.driver.module_cycle(
+static macro Stmt $fail.collect_module_cycle(
   Expr $c, Expr $site, Expr $member, Expr $path) {
   $c.report_error(
     <driver>,
@@ -117,11 +118,11 @@ static macro Stmt $report.driver.module_cycle(
     $site, %("path: ${$path}"));
 }
 
-static macro Stmt $report.emit.interface_write(Expr $c) {
+static macro Stmt $fail.collect_interface_write(Expr $c, Expr $site) {
   $c.report_error(
     <emit>,
     "failed to write interface file",
-    NULL, NULL);
+    $site, NULL);
 }
 
 // the process cache
@@ -324,7 +325,7 @@ static List _prelude_entry(
 static String _runtime_text(Compiler c, String runtime) {
   String text = NULL;
   if (c.read_source(runtime, text)) return text;
-  $report.driver.runtime_read(c, runtime);
+  $fail.collect_runtime_read(c, c.token, runtime);
 }
 
 /* Rows enter the unit's symbols and its source declarations together. */
@@ -422,7 +423,7 @@ static Token _block(Splice &s) {
     if (!depth && token.text == "module" &&
         Token.skip_trivia(token + 1).type == <"{"> &&
         !(previous && _is_word(previous.text))) {
-      if (block) $report.driver.module_second(s.c, token);
+      if (block) $fail.collect_module_second(s.c, token);
       block = token;
     }
     if (token.type == <"}">) depth--;
@@ -442,11 +443,11 @@ static List _members(Splice &s, Token block, Token &close) {
   Token token = Token.skip_trivia(Token.skip_trivia(block + 1) + 1);
   while (token.type != <"}">) {
     if (token.type != <"lit-char*"> || token.text[0] != '"')
-      $report.driver.module_block(s.c, token);
+      $fail.collect_module_block(s.c, token);
     members.push(token.text[1:token.len - 1].unescape());
     token = Token.skip_trivia(token + 1);
     if (token.type == <",">) token = Token.skip_trivia(token + 1);
-    else if (token.type != <"}">) $report.driver.module_block(s.c, token);
+    else if (token.type != <"}">) $fail.collect_module_block(s.c, token);
   }
   close = token;
   return members.list_free();
@@ -462,18 +463,18 @@ static void _member(Splice &s, String spelling, Token site) {
   String companion = Path.absolute(Path.join(dir, stem));
   String resolved = Path.absolute(path);
   if (!%"$resolved/".startswith(%"$companion/"))
-    $report.driver.module_member(s.c, site, spelling, stem);
+    $fail.collect_module_member(s.c, site, spelling, stem);
   if (resolved in s.splicing)
-    $report.driver.module_cycle(s.c, site, spelling, resolved);
+    $fail.collect_module_cycle(s.c, site, spelling, resolved);
   if (!s.c.read_source(path, text))
-    $report.driver.module_read(s.c, site, path);
+    $fail.collect_module_read(s.c, site, path);
   s.members[_canonical_path(path)] = _content_hash(text);
   String prefix = s.prefix ? Path.join(s.prefix, spelling) : spelling;
   String relative = resolved[s.root.len() + 1:];
   String own = _file_prefix(
     Path.join(Path.dirname(relative), Path.stem(relative)));
   if (own in s.prefixes)
-    $report.driver.module_prefix(s.c, site, spelling, s.prefixes[own]);
+    $fail.collect_module_prefix(s.c, site, spelling, s.prefixes[own]);
   s.prefixes[own] = spelling;
   s.splicing[resolved] = 1;
   _file(s, path, text, Path.dirname(prefix), own);
@@ -924,7 +925,7 @@ static String _walked_hash(
 static String _include_text(Compiler c, String target, String path) {
   String text = NULL;
   if (c.read_source(path, text)) return text;
-  $report.driver.include_read(c, target, path);
+  $fail.collect_include_read(c, c.token, target, path);
 }
 
 /** Selects a source file's own package, as its standalone translation does.
@@ -1911,7 +1912,7 @@ static String _find_package(
   Compiler c, String name, String &root, Token token) {
   String entry = c.sources.package_entry(c.package_dirs, name, root);
   if (entry) return entry;
-  $report.driver.package_unknown(c, token, name);
+  $fail.collect_package_unknown(c, token, name);
 }
 
 /* The package's files enter the cache from their entries, or from one cold
@@ -1927,7 +1928,7 @@ static void _walk_package(
   }
   String text = NULL;
   if (!package.read_source(entry, text))
-    $report.driver.package_read(c, token, package, entry);
+    $fail.collect_package_read(c, token, package, entry);
   _walk_apart(package, entry, text, globs, visited);
 }
 
@@ -1991,7 +1992,7 @@ static void _take(Surface &s, Map rows, List key, Var value) {
 static void _reject(Surface &s, String path, String spelling) {
   String name = s.name, unit = path.split("/").last();
   String fix = %"directly, or move it into '$name/src'";
-  $report.driver.package_prefix(s.c, s.token, name, spelling, unit, fix);
+  $fail.collect_package_prefix(s.c, s.token, name, spelling, unit, fix);
 }
 
 /* The merged rows enter the importing unit's symbols. */
@@ -2454,7 +2455,7 @@ String Compiler.interface_text(Compiler c) {
   if (cached is void) return NULL;
   Buffer out = $auto(Buffer.new(0));
   if (_write_interface_entry(out, canonical, cached)) return out;
-  $report.emit.interface_write(c);
+  $fail.collect_interface_write(c, NULL);
 }
 
 static int _write_interface_entry(

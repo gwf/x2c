@@ -70,7 +70,7 @@ Source: `src/utils.x:381`
 
 Returns the borrowed resolved executable path, or NULL when unavailable.
 
-Source: `src/utils.x:184`
+Source: `src/utils.x:185`
 
 #### x2c_get_root
 
@@ -80,7 +80,7 @@ Returns the borrowed repository root, or NULL before it is configured.
 The root is absolute with symbolic links resolved, the one spelling
 paths below the home are compared in.
 
-Source: `src/utils.x:181`
+Source: `src/utils.x:182`
 
 #### x2c_initialize_command_environment
 
@@ -89,7 +89,7 @@ Source: `src/utils.x:181`
 Initializes an external command with the compiler identity embedded when
 it was built. A driver-supplied identity must match that compiler.
 
-Source: `src/utils.x:85`
+Source: `src/utils.x:86`
 
 #### x2c_initialize_environment
 
@@ -107,7 +107,7 @@ reports none. The compiler identity is taken here, before any later work
 could observe a replaced executable. An already configured root leaves all
 state unchanged.
 
-Source: `src/utils.x:78`
+Source: `src/utils.x:79`
 
 #### x2c_set_root
 
@@ -118,7 +118,7 @@ The root is resolved as environment setup resolves it. The rebuilt values
 must remain valid until the next override or the process no longer uses
 them.
 
-Source: `src/utils.x:167`
+Source: `src/utils.x:168`
 
 ### `Compiler`
 
@@ -129,7 +129,7 @@ Source: `src/utils.x:167`
 
 Returns the home, driver, and identity supplied to external commands.
 
-Source: `src/utils.x:236`
+Source: `src/utils.x:237`
 
 <a id="Compiler.command_path"></a>
 #### Compiler.command_path
@@ -138,7 +138,7 @@ Source: `src/utils.x:236`
 
 Returns an executable command in this compiler's libexec, or NULL.
 
-Source: `src/utils.x:228`
+Source: `src/utils.x:229`
 
 <a id="Compiler.cpp_include_dirs"></a>
 #### Compiler.cpp_include_dirs
@@ -170,7 +170,7 @@ Returns the matching compiler executable for a recursive translation.
 External commands use the driver's X2C path or their adjacent installed
 compiler. An unavailable or changed compiler returns NULL.
 
-Source: `src/utils.x:189`
+Source: `src/utils.x:190`
 
 <a id="Compiler.home_dir"></a>
 #### Compiler.home_dir
@@ -179,7 +179,7 @@ Source: `src/utils.x:189`
 
 Returns the discovered or configured home, or NULL when there is none.
 
-Source: `src/utils.x:202`
+Source: `src/utils.x:203`
 
 <a id="Compiler.home_libexec"></a>
 #### Compiler.home_libexec
@@ -188,7 +188,7 @@ Source: `src/utils.x:202`
 
 Returns the command directory for this checkout or installed home.
 
-Source: `src/utils.x:220`
+Source: `src/utils.x:221`
 
 <a id="Compiler.home_packages"></a>
 #### Compiler.home_packages
@@ -197,7 +197,7 @@ Source: `src/utils.x:220`
 
 Returns `<home>/packages`, which may not exist, or NULL without a home.
 
-Source: `src/utils.x:214`
+Source: `src/utils.x:215`
 
 <a id="Compiler.identity"></a>
 #### Compiler.identity
@@ -252,7 +252,7 @@ Runs an external command with inherited streams and returns its status.
 Resolves only this compiler's libexec and passes literal arguments without
 a shell. An unavailable command reports an error and exits with status 2.
 
-Source: `src/utils.x:250`
+Source: `src/utils.x:251`
 
 <a id="Compiler.stage_dir"></a>
 #### Compiler.stage_dir
@@ -262,7 +262,7 @@ Source: `src/utils.x:250`
 Returns the directory of a compiler staged at `<home>/builds/<stage>/`,
 or NULL for any other compiler.
 
-Source: `src/utils.x:207`
+Source: `src/utils.x:208`
 
 ### `Diagnostics`
 

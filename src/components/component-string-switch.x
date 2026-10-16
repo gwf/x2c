@@ -15,6 +15,12 @@
 #include "grammar.x"
 #include "ast-rewrite.x"
 
+/* The linked meta copies include these diagnostics from this owner. */
+macro Stmt $report.string_switch_case(Expr $site) =>
+  x2c_diagnostic_error_at(
+    $site, <xform>, "a case in a String switch takes a string literal",
+    %("compare computed values with an if chain or match"));
+
 /* Adjacent literals join after each decodes its own escapes, as in C. */
 meta static String _string_case_bytes(String spelling) {
   const char *p = spelling;
@@ -58,9 +64,7 @@ meta static List _string_case_index(
   List label, Map indices, Array labels, List site) {
   String key = _string_case_key(label);
   if (!key) {
-    x2c_diagnostic_error_at(
-      site, <xform>, "a case in a String switch takes a string literal",
-      %("compare computed values with an if chain or match"));
+    $report.string_switch_case(site);
     return label;
   }
   if (!(key in indices)) {

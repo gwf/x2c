@@ -128,6 +128,8 @@ static Var _module_target(NativeBinding * n);
 
 static void _check(NativeBinding * n, Var function);
 
+static void _meta_native_warn_duplicate(Compiler c, Token site, NativeBinding * n, List suppliers);
+
 static void _install(NativeBinding * n, Var function);
 
 static List _native_signature_type(Compiler c, List signature);
@@ -602,12 +604,12 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _129 = Symbol_var(150408);
   _130 = String_new("the compiler's own function hides a native module's");
   _131 = String_new("name: ");
-  _132 = String_new("more than one native module defines this function");
-  _133 = String_new("supplied by: ");
-  _134 = String_new("also defined by: ");
-  _135 = String_new(", ");
-  _136 = String_new("native meta function declaration does not match its target");
-  _137 = String_new("signature: ");
+  _132 = String_new("native meta function declaration does not match its target");
+  _133 = String_new("signature: ");
+  _134 = String_new("more than one native module defines this function");
+  _135 = String_new("supplied by: ");
+  _136 = String_new("also defined by: ");
+  _137 = String_new(", ");
   _138 = Atom_intern(String_new("C.iterator.call"));
   _139 = String_new("Func");
   _140 = String_var(_139);
@@ -1112,7 +1114,7 @@ static Var _meta_stub(Func function, const FuncArg * argv){
 
   }
   if(c -> meta_build){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/meta-native.x",.function = "_meta_stub",.line = 246};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/meta-native.x",.function = "_meta_stub",.line = 253};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 927167433253220, 1, Symbol_var(920394), String_var(name));
   }
   List rows = _subject_rows(c, values);
@@ -1555,7 +1557,7 @@ static Var _run_meta(Compiler c, List expression, String name, List arguments, T
           Var volatile category;
           category = x2c_error_catch_capture(_x2c_gensym_error_handler_1, 0);
           {
-            static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/meta-native.x",.function = "_run_meta",.line = 420};
+            static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/meta-native.x",.function = "_run_meta",.line = 427};
             x2c_error_raise_n(& _x2c_gensym_error_site_1, 28682226919752, 1, Symbol_var(209659067570), category);
             __builtin_unreachable();
           }
@@ -1712,7 +1714,7 @@ static Var _meta_function(Compiler c, String name, Token site){
   if(! Lisp_try_get(c -> macro_lisp, name, &(function)) && Compiler_bind_project_meta(c, name)) Lisp_try_get(c -> macro_lisp, name, &(function));
   if(! Lisp_try_get(c -> macro_lisp, name, &(function)) && Compiler_bind_native_meta(c, name)) Lisp_try_get(c -> macro_lisp, name, &(function));
   if(Var_is_void(function) && c -> meta_build){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/meta-native.x",.function = "_meta_function",.line = 520};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/meta-native.x",.function = "_meta_function",.line = 527};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 927167433253220, 1, Symbol_var(920394), String_var(name));
   }
   if(Var_is_void(function)) Compiler_report_error(c, 27335838, _109, site, cons(String_var(String_join(NULL, cons(String_var(_114), cons(String_var(name), NULL)))), NULL));
@@ -2136,12 +2138,16 @@ static Var _module_target(NativeBinding * n){
 static void _check(NativeBinding * n, Var function){
   Compiler c =(* n).c;
   List suppliers =(* n).suppliers;
-  if(List_truth(List_cdr(suppliers)) && x2c_var_equal(function, _module_target(&((* n))))) Compiler_report_warning(c, 942951818, _132, (* n).marker, ({
-    Var _x2c_gensym_literal_part_13 = String_var(String_join(NULL, cons(String_var(_131), cons(String_var((* n).name), NULL))));  Var _x2c_gensym_literal_part_14 = String_var(String_join(NULL, cons(String_var(_133), cons(String_var(Var_str(List_car(suppliers))), NULL))));  Var _x2c_gensym_literal_part_15 = String_var(String_join(NULL, cons(String_var(_134), cons(String_var(String_join(_135, List_cdr(suppliers))), NULL))));  cons(_x2c_gensym_literal_part_13, cons(_x2c_gensym_literal_part_14, cons(_x2c_gensym_literal_part_15, NULL)));
+  if(List_truth(List_cdr(suppliers)) && x2c_var_equal(function, _module_target(&((* n))))) _meta_native_warn_duplicate(c, (* n).marker, &((* n)), suppliers);
+  if(! Compiler_native_meta_accepts(c, function, (* n).signature)) Compiler_report_error(c, 1362954, _132, (* n).marker, ({
+    Var _x2c_gensym_literal_part_13 = String_var(String_join(NULL, cons(String_var(_131), cons(String_var((* n).name), NULL))));  Var _x2c_gensym_literal_part_14 = String_var(String_join(NULL, cons(String_var(_133), cons(String_var(List_repr((* n).signature)), NULL))));  cons(_x2c_gensym_literal_part_13, cons(_x2c_gensym_literal_part_14, NULL));
   }
   ));
-  if(! Compiler_native_meta_accepts(c, function, (* n).signature)) Compiler_report_error(c, 1362954, _136, (* n).marker, ({
-    Var _x2c_gensym_literal_part_16 = String_var(String_join(NULL, cons(String_var(_131), cons(String_var((* n).name), NULL))));  Var _x2c_gensym_literal_part_17 = String_var(String_join(NULL, cons(String_var(_137), cons(String_var(List_repr((* n).signature)), NULL))));  cons(_x2c_gensym_literal_part_16, cons(_x2c_gensym_literal_part_17, NULL));
+}
+
+static void _meta_native_warn_duplicate(Compiler c, Token site, NativeBinding * n, List suppliers){
+  Compiler_report_warning(c, 942951818, _134, site, ({
+    Var _x2c_gensym_literal_part_15 = String_var(String_join(NULL, cons(String_var(_131), cons(String_var((* n).name), NULL))));  Var _x2c_gensym_literal_part_16 = String_var(String_join(NULL, cons(String_var(_135), cons(String_var(Var_str(List_car(suppliers))), NULL))));  Var _x2c_gensym_literal_part_17 = String_var(String_join(NULL, cons(String_var(_136), cons(String_var(String_join(_137, List_cdr(suppliers))), NULL))));  cons(_x2c_gensym_literal_part_15, cons(_x2c_gensym_literal_part_16, cons(_x2c_gensym_literal_part_17, NULL)));
   }
   ));
 }
@@ -2289,7 +2295,7 @@ static void _certify_native_meta(Compiler c, String name, List signature, Token 
     return;
   }
   if(marker) Compiler_report_error(c, 1362954, _157, marker, ({
-    Var _x2c_gensym_literal_part_22 = String_var(String_join(NULL, cons(String_var(_131), cons(String_var(name), NULL))));  Var _x2c_gensym_literal_part_23 = String_var(String_join(NULL, cons(String_var(_137), cons(String_var(List_repr(signature)), NULL))));  cons(_x2c_gensym_literal_part_22, cons(_x2c_gensym_literal_part_23, _160));
+    Var _x2c_gensym_literal_part_22 = String_var(String_join(NULL, cons(String_var(_131), cons(String_var(name), NULL))));  Var _x2c_gensym_literal_part_23 = String_var(String_join(NULL, cons(String_var(_133), cons(String_var(List_repr(signature)), NULL))));  cons(_x2c_gensym_literal_part_22, cons(_x2c_gensym_literal_part_23, _160));
   }
   ));
 }

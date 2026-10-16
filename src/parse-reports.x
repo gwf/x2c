@@ -1,14 +1,14 @@
-/*  parse-report-macros.x -- package, binding, and alias diagnostics
+/*  parse-reports.x -- package, binding, and alias diagnostics
 */
 
 #pragma once
 
-macro Stmt $report.parse.alias_name(Expr $c) =>
+macro Stmt $fail.parse_alias_name(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "expected an alias identifier after 'as'",
-    $c.token, NULL);
+    $site, NULL);
 
-macro Stmt $report.parse.package_member(
+macro Stmt $fail.parse_package_member(
   Expr $c, Expr $site, Expr $name, Expr $member) =>
   $c.report_error(
     <parse>,

@@ -112,29 +112,31 @@ static Code _lambda_type_declaration(Compiler c, Type type, int public) {
 
 // diagnostics
 
-static macro Stmt $report.parse.param_ident(Expr $c) {
+static macro Stmt $fail.lambdas_param_ident(Expr $c, Expr $site) {
   $c.report_error(
     <parse>, "expected identifier in parameter list",
-    $c.token, NULL);
+    $site, NULL);
 }
 
-static macro Stmt $report.type.ident_untyped(
-  Expr $c, Expr $spelling, Expr $origin) {
+static macro Stmt $fail.lambdas_ident_untyped(
+  Expr $c, Expr $origin, Expr $spelling) {
   $c.report_error(
     <type>, %"identifier '${$spelling}' has no semantic type",
     $origin, NULL);
 }
 
-static macro Stmt $report.type.capture_enclosing(Expr $c, Expr $original) {
+static macro Stmt $fail.lambdas_capture_enclosing(
+  Expr $c, Expr $site, Expr $original) {
   $c.report_error(
     <type>, "reference capture requires an enclosing reference capture",
-    $c.token, %("binding: ${Ast.binding_spelling($original)}"));
+    $site, %("binding: ${Ast.binding_spelling($original)}"));
 }
 
-static macro Stmt $report.type.capture_ref(Expr $c, Expr $binding) {
+static macro Stmt $fail.lambdas_capture_ref(
+  Expr $c, Expr $site, Expr $binding) {
   $c.report_error(
     <type>, "captured value requires 'using &name' for reference access",
-    $c.token, %("binding: ${Ast.binding_spelling($binding)}"));
+    $site, %("binding: ${Ast.binding_spelling($binding)}"));
 }
 
 /* lambda literals
@@ -214,7 +216,7 @@ static List _parse_bare_params(Compiler c) {
 /* A bare parameter is an automatic Var. */
 static List _parse_bare_param(Compiler c) {
   if (c.peek(0) != <ident>)
-    $report.parse.param_ident(c);
+    $fail.lambdas_param_ident(c, c.token);
   String name = c.token.text;
   List binding = c.sym.define(%($name), %("Var"));
   c.set_fact(%(parameter $binding), 1);
@@ -273,7 +275,7 @@ static List _shared_binding(Compiler c) {
   Type type = NULL;
   List binding = c.sym.lookup(%($spelling), type);
   if (!type)
-    $report.type.ident_untyped(c, spelling, origin);
+    $fail.lambdas_ident_untyped(c, origin, spelling);
   return binding;
 }
 
@@ -572,7 +574,7 @@ static List _add(Capture &k) {
   else if (type.car() == <&>)
     expression = $!($captured_type){ *$expression };
   if (reference && %(lambda-snapshot $binding) in k.facts)
-    $report.type.capture_enclosing(k.c, k.original);
+    $fail.lambdas_capture_enclosing(k.c, k.c.token, k.original);
   return _record(k, captured_type, expression, reference);
 }
 
@@ -656,7 +658,7 @@ static void _require_capture_lvalue(Compiler c, List target) {
   List binding = Ast.lvalue_binding(target);
   if (binding &&
       %(lambda-snapshot $binding) in c.semantic_binding_facts())
-    $report.type.capture_ref(c, binding);
+    $fail.lambdas_capture_ref(c, c.token, binding);
 }
 
 /* An argument bound to a reference parameter is reference access. */

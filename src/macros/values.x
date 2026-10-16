@@ -150,7 +150,7 @@ List Compiler.try_parse_macro_subpattern(Compiler c, int content) {
   List patterns = c.parse_macro_pattern_arguments();
   int expected = shape.assoc(<parameters>).list().len();
   if (patterns.len() != expected)
-    $report.parse.macro_pattern_arity(c, spelling, expected, start);
+    $fail.macros_macro_pattern_arity(c, start, spelling, expected);
   return c.cache_literal_list(_macro_subpattern(shape, patterns, content));
 }
 
@@ -288,9 +288,7 @@ static Map _code_effects(Compiler c, Var effects) {
         c.needs_exception = 1;
       }
       default:
-        c.report_error(
-          <macro>, "a meta call returned an unknown code effect", c.token,
-          %("effect: ${effect.repr()}"));
+        $fail.macros_code_effect(c, c.token, effect);
     }
   return replacements;
 }
@@ -324,7 +322,7 @@ void Compiler.place(Compiler c, List where, Var code) {
       c.add_init(<finish>, c.bind_syntax(code, <block>, NULL));
     case %(unit-init (!set ?area (!or protocol prepare statics finish))):
       c.add_init(area, c.bind_syntax(code, <block>, NULL));
-    default: $report.macro.placement(c, where);
+    default: $fail.macros_placement(c, c.token, where);
   }
 }
 

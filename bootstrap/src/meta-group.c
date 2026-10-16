@@ -322,7 +322,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _62 = List_var(NULL);
   _63 = Symbol_var(39266);
   _64 = Symbol_var(106239471489226);
-  _65 = int_var(175);
+  _65 = int_var(178);
   _66 = String_new("");
   _67 = String_var(_66);
   _68 = String_new("x2c.hole");
@@ -436,7 +436,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _176 = cons(_147, _175);
   _177 = cons(_141, _176);
   _178 = List_var(_177);
-  _179 = int_var(178);
+  _179 = int_var(181);
   _180 = String_new("Array");
   _181 = String_var(_180);
   _182 = cons(_181, NULL);

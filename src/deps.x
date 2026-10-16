@@ -18,6 +18,11 @@
 
 #include "buffer.x"
 
+static macro Stmt $report.deps_write(Expr $path, Expr $error) =>
+  fprintf(
+    stderr, "x2c: error: cannot write dependency file: %s\nnote: %s\n", $path,
+    strerror($error));
+
 /** Publishes the Make depfile for one completed translation.
     `compiler.deps` must reflect the translated `input`, and the selected
     depfile's parent directory must exist. Disabled dependency output and
@@ -42,9 +47,7 @@ int Compiler.write_depfile(
     return 1;
   }
   catch %((!or not-found io-fail) *failure): error = failure.assoc(<"errno">);
-  fprintf(
-    stderr, "x2c: error: cannot write dependency file: %s\nnote: %s\n", path,
-    strerror(error));
+  $report.deps_write(path, error);
   return 0;
 }
 

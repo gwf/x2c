@@ -29,64 +29,65 @@ static $(import "../etc/lisp-bindings.xlisp")
 
 /* meta-native diagnostics. */
 
-static macro Stmt $report.macro.function_install(
+static macro Stmt $fail.meta_native_function_install(
   Expr $c, Expr $site, Expr $cause) =>
   $c.report_error(
     <macro>,
     "this meta function could not be installed",
     $site, %("reason: ${$cause.repr()}"));
 
-static macro Stmt $report.parse.meta_decl(Expr $c, Expr $site) =>
+static macro Stmt $fail.meta_native_meta_decl(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>,
     "meta requires a function or one initialized static value",
     $site, NULL);
 
-static macro Stmt $report.parse.meta_storage(
+static macro Stmt $fail.meta_native_meta_storage(
   Expr $c, Expr $site, Expr $name) =>
   $c.report_error(
     <parse>,
     "a meta value must have file-static storage",
     $site, %("declaration: '${$name}'"));
 
-static macro Stmt $report.macro.call_depth(Expr $c, Expr $site) =>
+static macro Stmt $fail.meta_native_call_depth(Expr $c, Expr $site) =>
   $c.report_error(
     <macro>,
     "explicit meta call was stopped",
     $site, %("reason: its compile-time form nested too deep"));
 
-static macro Stmt $report.macro.call_deferred(Expr $c, Expr $site) =>
+static macro Stmt $fail.meta_native_call_deferred(Expr $c, Expr $site) =>
   $c.report_error(
     <macro>,
     "this meta call is left for the translation",
     $site, NULL);
 
-static macro Stmt $report.macro.call_target(Expr $c, Expr $site) =>
+static macro Stmt $fail.meta_native_call_target(Expr $c, Expr $site) =>
   $c.report_error(
     <macro>,
     "explicit meta call cannot be resolved",
     $site, %("only a call to a meta function runs at compile time"));
 
-static macro Stmt $report.macro.call_binding(
+static macro Stmt $fail.meta_native_call_binding(
   Expr $c, Expr $site, Expr $name) =>
   $c.report_error(
     <macro>,
     "explicit meta call cannot be resolved",
     $site, %("no binding for ${$name}"));
 
-static macro Stmt $report.parse.meta_name(Expr $c, Expr $site) =>
+static macro Stmt $fail.meta_native_meta_name(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>,
     "native meta function requires one direct name",
     $site, NULL);
 
-static macro Stmt $report.type.meta_signature(Expr $c, Expr $site, Expr $n) =>
+static macro Stmt $fail.meta_native_meta_signature(
+  Expr $c, Expr $site, Expr $n) =>
   $c.report_error(
     <type>,
     "native meta function declaration does not match its target",
     $site, %("name: ${$n.name}" "signature: ${$n.signature.repr()}"));
 
-static macro Stmt $report.type.meta_lifetime(
+static macro Stmt $fail.meta_native_meta_lifetime(
   Expr $c, Expr $site, Expr $name, Expr $signature) =>
   $c.report_error(
     <type>,
@@ -94,41 +95,47 @@ static macro Stmt $report.type.meta_lifetime(
     $site, %("name: ${$name}" "signature: ${$signature.repr()}"
     "it might return or keep its argument; ownership cannot be inferred"));
 
-static macro Stmt $report.driver.module_platform(
+static macro Stmt $fail.meta_native_package_platform(
   Expr $c, Expr $site, Expr $name, Expr $module) =>
   $c.report_error(
     <driver>,
     "native modules are not supported on this platform",
     $site, %("package: ${$name}" "module: ${$module}"));
 
-static macro Stmt $report.driver.module_compiler(
+static macro Stmt $fail.meta_native_package_compiler(
   Expr $c, Expr $site, Expr $name, Expr $module) =>
   $c.report_error(
     <driver>,
     %"package '${$name}' was built by another compiler; rebuild it",
     $site, %("module: ${$module}"));
 
-static macro Stmt $report.macro.outside_compilation(Expr $name) =>
+static macro Stmt $fail.meta_native_outside_compilation(Expr $name) =>
   MetaContext.reject(%"${$name} used outside compilation", NULL);
 
-static macro Stmt $report.native.module_platform() =>
+static macro Stmt $warn.meta_native_function_hidden(
+  Expr $c, Expr $site, Expr $binding) =>
+  $c.report_warning(
+    <native>, "the compiler's own function hides a native module's",
+    $site, %("name: ${$binding.name}"));
+
+static macro Stmt $fail.meta_native_module_platform() =>
   Diagnostics.driver_error("native modules are not supported on this platform");
 
-static macro Stmt $report.native.module_invalid(Expr $path) =>
+static macro Stmt $fail.meta_native_module_invalid(Expr $path) =>
   Diagnostics.driver_error(%"not an x2c native module: ${$path}");
 
-static macro Stmt $report.native.module_compiler(Expr $path) =>
+static macro Stmt $fail.meta_native_module_compiler(Expr $path) =>
   Diagnostics.driver_error(
     %"native module '${$path}' was built by another compiler; rebuild it");
 
-static macro Stmt $report.native.compiler_read(Expr $path) =>
+static macro Stmt $fail.meta_native_compiler_read(Expr $path) =>
   Diagnostics.driver_error(
     %"cannot read the running compiler to check native module '${$path}'");
 
-static macro Stmt $report.native.module_read(Expr $path, Expr $cause) =>
+static macro Stmt $fail.meta_native_module_read(Expr $path, Expr $cause) =>
   Diagnostics.driver_error(%"cannot read native module '${$path}': ${$cause}");
 
-static macro Stmt $report.native.module_load(Expr $path, Expr $cause) =>
+static macro Stmt $fail.meta_native_module_load(Expr $path, Expr $cause) =>
   Diagnostics.driver_error(%"cannot load native module '${$path}': ${$cause}");
 
 /* meta functions
@@ -217,7 +224,7 @@ static void _install_stub(
       (char *) context, context.len() + 1));
   catch %(?code *detail): {
     List cause = cons(code, detail);
-    $report.macro.function_install(c, marker, cause);
+    $fail.meta_native_function_install(c, marker, cause);
   }
 }
 
@@ -231,7 +238,7 @@ static Var _meta_stub(Func function, const FuncArg *argv) {
   int split = context.find("\n");
   String name = context[:split], provider = context[split + 1:];
   Compiler c = Compiler.expanding();
-  if (!c) $report.macro.outside_compilation(name);
+  if (!c) $fail.meta_native_outside_compilation(name);
   Token site = MetaContext.current().site;
   if (!site) site = c.token;
   if (!provider.len()) {
@@ -316,12 +323,12 @@ void Compiler.install_meta_declaration(
            (bindings
              (op = (bind (binding ? ?(String name)) *) ?))): {
       if (!spec.type().is_static())
-        $report.parse.meta_storage(c, marker, name);
+        $fail.meta_native_meta_storage(c, marker, name);
       if (c.groups_meta()) c.meta_group.push(%(static $declaration));
       return;
     }
   }
-  $report.parse.meta_decl(c, marker);
+  $fail.meta_native_meta_decl(c, marker);
 }
 
 /* explicit meta calls
@@ -422,12 +429,12 @@ static Var _run_meta(
   catch %(meta-later *): {
     value = void;
     if (slot)
-      $report.macro.call_deferred(c, site);
+      $fail.meta_native_call_deferred(c, site);
   }
   catch %(malformed (category ?category)):
     raise %(malformed (category $category));
   catch %(call-stack *):
-    $report.macro.call_depth(c, site);
+    $fail.meta_native_call_depth(c, site);
   catch %(?code *detail):
     c.report_lisp_failure(site, cons(code, detail), meta_call_form.repr());
   return value;
@@ -450,7 +457,7 @@ static Var _meta_call_value(Compiler c, List expression, Token site) {
       Array values = _meta_values(c, callee, arguments, site);
       return _meta_named_value(c, name, values.list_free(), site);
     }
-  $report.macro.call_target(c, site);
+  $fail.meta_native_call_target(c, site);
 }
 
 /* Applies the session's `name` to `arguments`, recorded as the call a
@@ -519,7 +526,7 @@ static Var _meta_function(Compiler c, String name, Token site) {
     c.macro_lisp.try_get(name, function);
   if (function is void && c.meta_build) raise %(meta-later (name $name));
   if (function is void)
-    $report.macro.call_binding(c, site, name);
+    $fail.meta_native_call_binding(c, site, name);
   return function;
 }
 
@@ -645,7 +652,7 @@ static String _native_meta_name(
     case %(declare ? (bindings (bind (binding ? ?(String spelling)) *))):
       name = spelling;
   if (!name)
-    $report.parse.meta_name(c, marker);
+    $fail.meta_native_meta_name(c, marker);
   return name;
 }
 
@@ -743,9 +750,7 @@ static Var _linked(NativeBinding &n) {
   Var function = c.macro_lisp.eval(
     %(bind ${n.target} (quote ${n.signature})));
   if (n.suppliers)
-    c.report_warning(
-      <native>, "the compiler's own function hides a native module's",
-      n.marker, %("name: ${n.name}"));
+    $warn.meta_native_function_hidden(c, n.marker, n);
   return function;
 }
 
@@ -760,12 +765,17 @@ static void _check(NativeBinding &n, Var function) {
   Compiler c = n.c;
   List suppliers = n.suppliers;
   if (suppliers.cdr() && function == _module_target(n))
-    c.report_warning(
-      <native>, "more than one native module defines this function",
-      n.marker, %("name: ${n.name}" "supplied by: ${suppliers.car()}"
-                  "also defined by: ${", ".join(suppliers.cdr())}"));
+    _meta_native_warn_duplicate(c, n.marker, n, suppliers);
   if (!c.native_meta_accepts(function, n.signature))
-    $report.type.meta_signature(c, n.marker, n);
+    $fail.meta_native_meta_signature(c, n.marker, n);
+}
+
+static void _meta_native_warn_duplicate(
+  Compiler c, Token site, NativeBinding &n, List suppliers) {
+  c.report_warning(
+    <native>, "more than one native module defines this function",
+    site, %("name: ${n.name}" "supplied by: ${suppliers.car()}"
+            "also defined by: ${", ".join(suppliers.cdr())}"));
 }
 
 /* An iterator operation binds through a call that allocates the
@@ -855,7 +865,7 @@ static void _certify_native_meta(
     return;
   }
   if (marker)
-    $report.type.meta_lifetime(c, marker, name, signature);
+    $fail.meta_native_meta_lifetime(c, marker, name, signature);
 }
 
 /* The region summary of a native function without a runtime row, from its
@@ -1174,7 +1184,7 @@ void Compiler.select_package_module(
   String module = %"$root/builds/$name.module";
   if (Compiler.links_extension(name) || !Path.is_file(module)) return;
   if (!X2C_NATIVE_MODULES)
-    $report.driver.module_platform(c, token, name, module);
+    $fail.meta_native_package_platform(c, token, name, module);
   c.add_translation_dependency(module);
   if (!Compiler.native_module_loaded(module))
     _load_package_module(c, name, module, token);
@@ -1188,7 +1198,7 @@ void Compiler.select_package_module(
 static void _load_package_module(
   Compiler c, String name, String module, Token token) {
   if (_module_stamp(module) != 1)
-    $report.driver.module_compiler(c, token, name, module);
+    $fail.meta_native_package_compiler(c, token, name, module);
   _open_native_module(module);
 }
 
@@ -1199,13 +1209,13 @@ static void _load_package_module(
 */
 String Compiler.load_native_module(String path) {
   if (!X2C_NATIVE_MODULES)
-    $report.native.module_platform();
+    $fail.meta_native_module_platform();
   String absolute = Path.absolute(path);
   if (Compiler.native_module_loaded(absolute)) return absolute;
   int stamp = _module_stamp(path);
-  if (stamp < 0) $report.native.module_invalid(path);
+  if (stamp < 0) $fail.meta_native_module_invalid(path);
   if (!stamp)
-    $report.native.module_compiler(path);
+    $fail.meta_native_module_compiler(path);
   _open_native_module(absolute);
   return absolute;
 }
@@ -1227,10 +1237,10 @@ void Compiler.preload_native_module(String path) {
 static int _module_stamp(String path) {
   String expected = Compiler.module_stamp();
   if (!expected)
-    $report.native.compiler_read(path);
+    $fail.meta_native_compiler_read(path);
   File input = fopen(path, "rb");
   if (!input)
-    $report.native.module_read(path, String.new(strerror(errno)));
+    $fail.meta_native_module_read(path, String.new(strerror(errno)));
   fseek(input, 0, SEEK_END);
   long end = ftell(input);
   rewind(input);
@@ -1264,9 +1274,9 @@ static void _open_native_module(String path) {
   void *handle = NULL;
   $scope(&native_module_scope) handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
   if (!handle)
-    $report.native.module_load(path, String.new(dlerror()));
+    $fail.meta_native_module_load(path, String.new(dlerror()));
   Map (*entry)(void) = (Map (*)(void)) dlsym(handle, "x2c_module_targets");
-  if (!entry) $report.native.module_invalid(path);
+  if (!entry) $fail.meta_native_module_invalid(path);
   Compiler.add_native_module(path, entry);
 }
 

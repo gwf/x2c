@@ -477,7 +477,7 @@ Public functions:
 `Symbol.compound_assignment`, `Compiler.operator_member`,
 `Compiler.derived_member`
 
-### [src/parse-report-macros.x](../src/parse-report-macros.x)
+### [src/parse-reports.x](../src/parse-reports.x)
 
 package, binding, and alias diagnostics.
 

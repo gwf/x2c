@@ -47,64 +47,64 @@ typedef struct Build {
 
 /* build command reports. */
 
-static macro Stmt $report.build.input_unsupported(Expr $input) =>
+static macro Stmt $fail.build_input_unsupported(Expr $input) =>
   Diagnostics.driver_error(%"unsupported build input: ${$input}");
 
-static macro Stmt $report.build.archive_nested(Expr $input) =>
+static macro Stmt $fail.build_archive_nested(Expr $input) =>
   Diagnostics.driver_error(
     %"cannot nest an archive in a static library: ${$input}");
 
-static macro Stmt $report.build.runtime_missing(Expr $runtime) =>
+static macro Stmt $fail.build_runtime_missing(Expr $runtime) =>
   Diagnostics.driver_error(%"matching x2c runtime is unavailable: ${$runtime}");
 
-static macro Stmt $report.build.package_missing(Expr $name, Expr $path) =>
+static macro Stmt $fail.build_package_missing(Expr $name, Expr $path) =>
   Diagnostics.driver_error(%"package '${$name}' is not built: ${$path}");
 
-static macro Stmt $report.build.database_written(Expr $path) =>
+static macro Stmt $progress.build_database_written(Expr $path) =>
   report_line(<muted>, %"  Compilation database ${$path}");
 
-static macro Stmt $report.build.compiler_used(Expr $b, Expr $jobs) =>
+static macro Stmt $progress.build_compiler_used(Expr $b, Expr $jobs) =>
   report_line(<muted>, %"  Compiled with ${$b.toolchain.cc} using ${$jobs}");
 
-static macro Stmt $report.build.intermediates(Expr $b) =>
+static macro Stmt $progress.build_intermediates(Expr $b) =>
   report_line(<muted>, %"  Intermediates ${$b.work_dir} (${_retention($b)})");
 
-static macro Stmt $report.build.output_size(Expr $b, Expr $size) =>
+static macro Stmt $progress.build_output_size(Expr $b, Expr $size) =>
   report_line(<muted>, %"  Output ${$b.output} (${$size})");
 
-static macro Stmt $report.build.debug_symbols(Expr $b) =>
+static macro Stmt $progress.build_debug_symbols(Expr $b) =>
   report_line(<muted>, %"  Debug symbols ${$b.output}.dSYM");
 
-static macro Stmt $report.build.running(Expr $b) =>
+static macro Stmt $progress.build_running(Expr $b) =>
   report_line(<phase>, %"Running ${$b.output}");
 
-static macro Stmt $report.build.translation_cached(Expr $input) =>
+static macro Stmt $progress.build_translation_cached(Expr $input) =>
   fprintf(stderr, "x2c: up-to-date translate %s\n", $input);
 
-static macro Stmt $report.build.database_unwritable(Expr $path) =>
+static macro Stmt $report.build_database_unwritable(Expr $path) =>
   fprintf(
     stderr, "x2c: error: cannot write compilation database: %s\n", $path);
 
-static macro Stmt $report.build.compilation_cached(Expr $source) =>
+static macro Stmt $progress.build_compilation_cached(Expr $source) =>
   fprintf(stderr, "x2c: up-to-date compile %s\n", $source);
 
-static macro Stmt $report.build.final_cached(Expr $phase, Expr $output) =>
+static macro Stmt $progress.build_final_cached(Expr $phase, Expr $output) =>
   fprintf(stderr, "x2c: up-to-date %s %s\n", $phase, $output);
 
-static macro Stmt $report.build.link_unchanged(Expr $output) =>
+static macro Stmt $progress.build_link_unchanged(Expr $output) =>
   fprintf(stderr, "x2c: unchanged link %s\n", $output);
 
-static macro Stmt $report.build.replace_failed(Expr $output, Expr $reason) =>
+static macro Stmt $report.build_replace_failed(Expr $output, Expr $reason) =>
   fprintf(
     stderr, "x2c: error: cannot replace %s: %s\n",
     $output, $reason);
 
-static macro Stmt $report.build.cleanup_failed(Expr $directory) =>
+static macro Stmt $warn.build_cleanup_failed(Expr $directory) =>
   fprintf(
     stderr, "x2c: warning: cannot remove temporary build directory: %s\n",
     $directory);
 
-static macro Stmt $report.build.output_ambiguous() =>
+static macro Stmt $fail.build_output_ambiguous() =>
   Diagnostics.driver_error(
     "--output is ambiguous with multiple compile-only inputs");
 
@@ -212,9 +212,9 @@ static void _add_inputs(Build b) {
     else if (input.endswith(".c")) b.c_sources.push(input);
     else if (input.endswith(".o") || input.endswith(".a"))
       b.native_inputs.push(input);
-    else $report.build.input_unsupported(input);
+    else $fail.build_input_unsupported(input);
     if (request.kind == <static-lib> && input.endswith(".a"))
-      $report.build.archive_nested(input);
+      $fail.build_archive_nested(input);
   }
 }
 
@@ -227,7 +227,7 @@ static void _check_compile_only(Build b) {
   if (b.native_inputs)
     Diagnostics.driver_error("compile-only accepts only .x and .c inputs");
   if (inputs.cdr() && b.request.output)
-    $report.build.output_ambiguous();
+    $fail.build_output_ambiguous();
   if (inputs.cdr() && !b.request.build_dir)
     Diagnostics.driver_error(
       "multiple compile-only inputs require --build-dir");
@@ -286,7 +286,7 @@ static void _check_runtime(Build b) {
   if (b.request.compile_only || b.request.kind != <executable>) return;
   String runtime = b.toolchain.runtime_lib;
   if (access(runtime, R_OK))
-    $report.build.runtime_missing(runtime);
+    $fail.build_runtime_missing(runtime);
 }
 
 // translated units
@@ -314,7 +314,7 @@ int Build.translation_current(Build b, String input, String directory) {
   uint64_t hash = _translation_fingerprint(b, input, directory, ok);
   int current = ok && _state_matches(_state_path(b, "x", input), hash);
   if (current && b.request.verbose)
-    $report.build.translation_cached(input);
+    $progress.build_translation_cached(input);
   return current;
 }
 
@@ -452,11 +452,11 @@ static void _link_package(Build b, String package) {
   if (b.request.kind == <static-lib>) return;
   String archive = %"$builds/lib$name.a";
   if (access(archive, R_OK))
-    $report.build.package_missing(name, archive);
+    $fail.build_package_missing(name, archive);
   // The response file carries the link inputs the archive needs, so a
   // package built before it existed is the same unbuilt-package mistake
   // and is rebuilt; dropping them leaves undefined symbols at link.
-  if (!native) $report.build.package_missing(name, response);
+  if (!native) $fail.build_package_missing(name, response);
   b.native_inputs.push(archive);
   b.toolchain.ld_args = b.toolchain.ld_args.append(native.ld_args);
 }
@@ -723,11 +723,11 @@ int Build.write_commands(String path, Array commands) {
   String text = %"[\n${",\n".join(commands)}\n]\n";
   try {
     Path.publish_files(%($path $text));
-    $report.build.database_written(path);
+    $progress.build_database_written(path);
     return 1;
   }
   catch %((!or not-found io-fail) *): {}
-  $report.build.database_unwritable(path);
+  $report.build_database_unwritable(path);
   return 0;
 }
 
@@ -811,7 +811,7 @@ static int _compile_current(Build b, CcJob &job) {
   if (access(job.object, R_OK) || access(job.depfile, R_OK)) return 0;
   if (!_state_matches(job.state_path, job.fingerprint)) return 0;
   if (b.request.verbose)
-    $report.build.compilation_cached(job.source);
+    $progress.build_compilation_cached(job.source);
   b.cc_cached++;
   return 1;
 }
@@ -843,7 +843,7 @@ static int _archive_current(
   if (!record || access(b.output, R_OK)) return 0;
   if (!_state_matches(record, hash)) return 0;
   if (b.request.verbose)
-    $report.build.final_cached(phase.str(), b.output);
+    $progress.build_final_cached(phase.str(), b.output);
   return 1;
 }
 
@@ -882,7 +882,7 @@ static int _publish(Build b, List inputs) {
   int status = _replace(b, _final_action(b, staged, inputs), staged);
   Path.remove_tree(staging);
   if (status < 0 && b.request.verbose)
-    $report.build.link_unchanged(b.output);
+    $progress.build_link_unchanged(b.output);
   return status;
 }
 
@@ -894,7 +894,7 @@ static int _replace(Build b, ToolAction action, String staged) {
   if (b.request.kind == <module> && _same_file_bytes(staged, b.output))
     return -1;
   if (!rename(staged, b.output)) return 0;
-  $report.build.replace_failed(b.output, strerror(errno));
+  $report.build_replace_failed(b.output, strerror(errno));
   return 1;
 }
 
@@ -993,15 +993,15 @@ void Build.report_success(Build b) {
   if (b.cc_n) {
     int n = b.request.jobs;
     String jobs = n == 1 ? "1 job" : %"$n jobs";
-    $report.build.compiler_used(b, jobs);
+    $progress.build_compiler_used(b, jobs);
   }
   if (!b.request.compile_only) report_line(<muted>, _final_tool(b));
-  $report.build.intermediates(b);
+  $progress.build_intermediates(b);
   if (b.request.compile_only) return;
   String size = report_size(Path.regular_bytes(b.output));
-  $report.build.output_size(b, size);
+  $progress.build_output_size(b, size);
   if (_mapped_debug(b))
-    $report.build.debug_symbols(b);
+    $progress.build_debug_symbols(b);
 }
 
 static String _headline(Build b) {
@@ -1039,7 +1039,7 @@ static String _retention(Build b) {
     A dry run prints the action without launching the program.
 */
 int Build.run_program(Build b) {
-  $report.build.running(b);
+  $progress.build_running(b);
   ToolAction action = ToolAction.new(
     <run>, %(${b.output} @{b.request.run_args}), b.request.verbose,
     b.request.dry_run);
@@ -1055,7 +1055,7 @@ void Build.cleanup(Build b, int success) {
   if (!success || !b.temporary || b.request.dry_run) return;
   try Path.remove_tree(b.work_dir);
   catch %(io-fail *):
-    $report.build.cleanup_failed(b.work_dir);
+    $warn.build_cleanup_failed(b.work_dir);
 }
 
 // scripts

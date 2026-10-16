@@ -25,14 +25,14 @@
 
 // diagnostics
 
-static macro Stmt $report.macro.argument_constant(Expr $c, Expr $site) {
+static macro Stmt $fail.stage_argument_constant(Expr $c, Expr $site) {
   $c.report_error(
     <macro>,
     "explicit meta call cannot be resolved",
     $site, %("an argument must be a constant, captured syntax, or a meta call"));
 }
 
-static macro Stmt $report.macro.function_only(
+static macro Stmt $fail.stage_function_only(
   Expr $c, Expr $site, Expr $name) {
   $c.report_error(
     <macro>,
@@ -117,7 +117,7 @@ static Var _captured_value(Compiler c, Var captured, Type want) {
 static Var _name_syntax(Compiler c, List node, Token site) {
   match (node)
     case %(expr ? ${$source_identifier_content(%(?))}): return node;
-  $report.macro.argument_constant(c, site);
+  $fail.stage_argument_constant(c, site);
 }
 
 /* A number passed to a numeric parameter takes the parameter's type. */
@@ -377,7 +377,7 @@ void Compiler.check_meta_call(Compiler c, List callee, Token origin) {
   match (callee)
     case %(expr ? ${$source_identifier_content(%((binding ? ?name)))})
       if (name is <string> && name in c.meta_comptime):
-        $report.macro.function_only(c, origin, name);
+        $fail.stage_function_only(c, origin, name);
 }
 
 /** Returns whether `fn` is a `meta` function this compiler recorded as

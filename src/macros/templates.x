@@ -293,7 +293,7 @@ static List _hole_row(
   int lifts = kind == <expr>;
   String error = kind == <type> && value is <list>
                ? type_name_error(value) : NULL;
-  if (error) $report.macro.type_name(c, error, invocation);
+  if (error) $fail.macros_type_name(c, invocation, error);
   if (!hole.assoc(<sequence>).int())
     return _capture_row_project(
       c,

@@ -6,31 +6,32 @@ static typedef struct AdoptionDraft {
   Token participant_token, modifier_token;
 } AdoptionDraft;
 
-static macro Stmt $report.macro.protocol_invalid(Expr $c) =>
+static macro Stmt $fail.protocol_protocol_invalid(Expr $c, Expr $site) =>
   $c.report_error(
     <macro>, "constructed protocol syntax is invalid",
-    $c.token, NULL);
+    $site, NULL);
 
-static macro Stmt $report.protocols.decl_conflict(
-  Expr $c, Expr $base, Expr $first_location, Expr $second_location) {
+static macro Stmt $fail.protocol_decl_conflict(
+  Expr $c, Expr $site, Expr $base, Expr $first_location,
+  Expr $second_location) {
   {
     String first = %"first: ${$first_location}";
     String second = %"second: ${$second_location}";
     $c.report_error(
       <protocol>, %"conflicting protocol declarations for ${$base.repr()}",
-      $c.token, %($first $second));
+      $site, %($first $second));
   }
 }
 
-static macro Stmt $report.protocols.type_undeclared(
-  Expr $c, Expr $spelling, Expr $origin) =>
+static macro Stmt $fail.protocol_type_undeclared(
+  Expr $c, Expr $origin, Expr $spelling) =>
   $c.report_error(
     <protocol>,
     %"adoption participant '${$spelling}' does not name a declared type",
     $origin, NULL);
 
-static macro Stmt $report.protocols.adoption_conflict(
-  Expr $c, Expr $adoption, Expr $first_location) {
+static macro Stmt $fail.protocol_adoption_conflict(
+  Expr $c, Expr $site, Expr $adoption, Expr $first_location) {
   {
     String first = %"first: ${_location_string($first_location)}";
     String second = %"second: ${_location_string($adoption.location)}";
@@ -38,7 +39,20 @@ static macro Stmt $report.protocols.adoption_conflict(
       _adoption_spelling($adoption.base, $adoption.participant);
     $c.report_error(
       <protocol>, %"conflicting adoption declarations for $spelling",
-      $c.token, %($first $second));
+      $site, %($first $second));
+  }
+}
+
+static macro Stmt $report.protocol_adoption_conflict(
+  Expr $c, Expr $site, Expr $adoption, Expr $previous) {
+  {
+    String first = %"first: ${_location_string(_adoption_location($previous))}";
+    String second = %"second: ${_location_string($adoption.location)}";
+    String spelling =
+      _adoption_spelling($adoption.base, $adoption.participant);
+    $c.diagnostics.report(
+      <protocol>, %"conflicting adoption declarations for $spelling",
+      $site, %($first $second));
   }
 }
 
@@ -269,7 +283,7 @@ static List _publish_adoption(
         .modifier_token = modifier_token};
       return _publish(draft);
     }
-  $report.macro.protocol_invalid(c);
+  $fail.protocol_protocol_invalid(c, c.token);
 }
 
 module List _publish_record(
@@ -336,7 +350,8 @@ static void _install_occurrence(
     first_location = second_location;
     second_location = swap;
   }
-  $report.protocols.decl_conflict(c, base, first_location, second_location);
+  $fail.protocol_decl_conflict(
+    c, c.token, base, first_location, second_location);
 }
 
 // adoption drafts
@@ -347,8 +362,7 @@ static List _publish(AdoptionDraft &a) {
   String spelling = a.participant.car().str();
   List declared = c.sym.get(%($spelling));
   if ((!declared || !declared.type().is_typedef()) && !c.shallow)
-    $report.protocols.type_undeclared(c, spelling,
-      a.participant_token);
+    $fail.protocol_type_undeclared(c, a.participant_token, spelling);
   a.tag = _check_modifiers(a);
   a.storage = _published_storage(a, spelling);
   _check_previous(a);
@@ -456,12 +470,7 @@ static void _check_previous(AdoptionDraft &a) {
   List row = previous;
   if (_adoption_representation(row) == a.representation &&
       _adoption_tag(row) == a.tag_expression) return;
-  String first = %"first: ${_location_string(_adoption_location(row))}";
-  String second = %"second: ${_location_string(a.location)}";
-  String spelling = _adoption_spelling(a.base, a.participant);
-  c.diagnostics.report(
-    <protocol>, %"conflicting adoption declarations for $spelling",
-    a.location, %($first $second));
+  $report.protocol_adoption_conflict(c, a.location, a, row);
 }
 
 static void _install(AdoptionDraft &a) {
@@ -482,7 +491,7 @@ static void _install(AdoptionDraft &a) {
   if (existing == row) return;
   List first_location = _adoption_location(existing);
   if (_canonical_file(c, first_location) == path) return;
-  $report.protocols.adoption_conflict(c, a, first_location);
+  $fail.protocol_adoption_conflict(c, c.token, a, first_location);
 }
 
 // registry lifecycle

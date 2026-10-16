@@ -16,6 +16,12 @@
 #include "rewrite.x"
 #include "grammar.x"
 
+/* The linked meta copies include these diagnostics from this owner. */
+macro Stmt $report.raise_mutable_detail(Expr $site, Expr $type) =>
+  x2c_diagnostic_error_at(
+    $site, <type>, %"raise detail type ${$type.repr()} is not immutable",
+    %("use a numeric value, enum, Symbol, Atom, String, List, or Var"));
+
 /* Whether a detail of type `type` holds no identity a caught Error could
    share with its raiser. */
 meta static int _raise_immutable(Type type) {
@@ -33,9 +39,7 @@ meta static Code _raise_value(Code value) {
   match (value) case %(expr ?matched ?): {
     Type type = matched;
     if (_raise_immutable(type)) return value;
-    x2c_diagnostic_error_at(
-      NULL, <type>, %"raise detail type ${type.repr()} is not immutable",
-      %("use a numeric value, enum, Symbol, Atom, String, List, or Var"));
+    $report.raise_mutable_detail(NULL, type);
   }
   return $!Var{ Var_null() };
 }

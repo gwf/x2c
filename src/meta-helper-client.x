@@ -25,7 +25,7 @@
 
 // diagnostics
 
-static macro Stmt $report.macro.helper_timeout(
+static macro Stmt $fail.meta_helper_client_helper_timeout(
   Expr $c, Expr $site, Expr $limit, Expr $name) {
   $c.report_error(
     <macro>,
@@ -33,7 +33,7 @@ static macro Stmt $report.macro.helper_timeout(
     $site, %("function: ${$name}" "set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none"));
 }
 
-static macro Stmt $report.macro.helper_stopped(
+static macro Stmt $fail.meta_helper_client_helper_stopped(
   Expr $c, Expr $site, Expr $name, Expr $reason) {
   $c.report_error(
     <macro>,
@@ -415,13 +415,12 @@ static void _refuse(Call &call, String why) =>
    call. */
 static void _overdue(Call &c) {
   _stop(SIGKILL);
-  $report.macro.helper_timeout(
-    c.compiler,
-    c.site, c.limit, c.name);
+  $fail.meta_helper_client_helper_timeout(c.compiler, c.site, c.limit, c.name);
 }
 
 static void _stopped(Call &call, String reason) {
-  $report.macro.helper_stopped(call.compiler, call.site, call.name, reason);
+  $fail.meta_helper_client_helper_stopped(
+    call.compiler, call.site, call.name, reason);
 }
 
 // lifecycle

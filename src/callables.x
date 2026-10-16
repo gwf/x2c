@@ -20,30 +20,30 @@
 
 /* Callable conversion failures retain the shared signature-note owner. */
 
-static macro Stmt $report.callable.shared(Expr $c, Expr $source) =>
+static macro Stmt $fail.callable_shared(Expr $c, Expr $source) =>
   _adapter_error(
     $c, "function conversion needs x2c_func_shared from lib/func.x",
     %("Func"), $source, NULL);
 
-static macro Stmt $report.callable.context(Expr $c, Expr $source) =>
+static macro Stmt $fail.callable_context(Expr $c, Expr $source) =>
   _adapter_error(
     $c, "function pointer conversion needs Func.new_context from lib/func.x",
     %("Func"), $source, NULL);
 
-static macro Stmt $report.callable.native_context(
+static macro Stmt $fail.callable_native_context(
   Expr $c, Expr $target, Expr $source) =>
   _adapter_error(
     $c, "native binding needs Func.context from lib/func.x",
     $target, $source, NULL);
 
-static macro Stmt $report.callable.direct(
+static macro Stmt $fail.callable_direct(
   Expr $c, Expr $target, Expr $source) =>
   _adapter_error(
     $c, "native binding target must be a direct function",
     $target, $source,
     %("supported: a free function or Type.method designator"));
 
-static macro Stmt $report.callable.variadic(
+static macro Stmt $fail.callable_variadic(
   Expr $c, Expr $target, Expr $source, Expr $func_type) {
   String message = $c.sym.resolve_key($target) == $func_type
     ? "function conversion to Func cannot be variadic"
@@ -51,57 +51,57 @@ static macro Stmt $report.callable.variadic(
   _adapter_error($c, message, $target, $source, NULL);
 }
 
-static macro Stmt $report.callable.readers(
+static macro Stmt $fail.callable_readers(
   Expr $c, Expr $target, Expr $source) =>
   _adapter_error(
     $c, "native binding needs Func argument readers from lib/func.x",
     $target, $source, NULL);
 
-static macro Stmt $report.callable.parameter(
+static macro Stmt $fail.callable_parameter(
   Expr $c, Expr $target, Expr $source) =>
   _adapter_error(
     $c, "native binding parameter type has no Var representation",
     $target, $source, NULL);
 
-static macro Stmt $report.callback.direct(Expr $cb) =>
+static macro Stmt $fail.callable_callback_direct(Expr $cb) =>
   _fail(
     $cb, "typed callback adapter source must be a direct function",
     %("supported: a free function or Type.method designator"));
 
-static macro Stmt $report.callback.target(Expr $cb) =>
+static macro Stmt $fail.callable_callback_target(Expr $cb) =>
   _fail($cb, "typed callback adapter target is incomplete", NULL);
 
-static macro Stmt $report.callback.source(Expr $cb) =>
+static macro Stmt $fail.callable_callback_source(Expr $cb) =>
   _fail($cb, "typed callback adapter source is incomplete", NULL);
 
-static macro Stmt $report.callback.variadic(Expr $cb) =>
+static macro Stmt $fail.callable_callback_variadic(Expr $cb) =>
   _fail($cb, "typed callback adapter cannot be variadic", NULL);
 
-static macro Stmt $report.callback.arity(
+static macro Stmt $fail.callable_callback_arity(
   Expr $cb, Expr $target_count, Expr $source_count) {
   String detail = "target has %d parameters; source has %d".printf(
     $target_count, $source_count);
   _fail($cb, "typed callback adapter arity mismatch", %($detail));
 }
 
-static macro Stmt $report.callback.void_return(Expr $cb) =>
+static macro Stmt $fail.callable_callback_void_return(Expr $cb) =>
   _fail($cb, "typed callback adapter does not support void return", NULL);
 
-static macro Stmt $report.callback.result(Expr $cb) =>
+static macro Stmt $fail.callable_callback_result(Expr $cb) =>
   _fail($cb, "typed callback adapter return type mismatch", NULL);
 
-static macro Stmt $report.callback.parameter(
+static macro Stmt $fail.callable_callback_parameter(
   Expr $cb, Expr $index, Expr $target, Expr $source) {
   String detail = "parameter %d: %s cannot adapt to %s".printf(
     $index + 1, $target.repr(), $source.repr());
   _fail($cb, "typed callback adapter parameter mismatch", %($detail));
 }
 
-static macro Expression $callable.note.target(Expr $target) =>
+static macro Expression $note.callable_target(Expr $target) =>
   $target ? %"target signature: ${$target.repr()}"
           : "target signature: unresolved";
 
-static macro Expression $callable.note.source(Expr $source) =>
+static macro Expression $note.callable_source(Expr $source) =>
   $source ? %"source signature: ${$source.repr()}"
           : "source signature: unresolved";
 
@@ -276,7 +276,7 @@ static List _direct_func_handle(
     List constructor = _adapter_helper(
       c, "x2c_func_shared", constructor_type);
     if (!constructor || !constructor_type)
-      $report.callable.shared(c, source_type);
+      $fail.callable_shared(c, source_type);
     handle = c.sym.introduce(c.fresh_name("func_handle"));
     List value = _func_call(
       c, %("Func"), _func_bound(constructor_type, constructor),
@@ -357,7 +357,7 @@ static List _indirect_func_value(
   Type constructor_type = NULL;
   List constructor = _adapter_helper(c, "Func_new_context", constructor_type);
   if (!constructor || !constructor_type)
-    $report.callable.context(c, pointer_type);
+    $fail.callable_context(c, pointer_type);
 
   List context = c.sym.introduce(c.fresh_name("func_pointer_context"));
   List declaration = _func_context_declaration(
@@ -397,7 +397,7 @@ static List _build_indirect_func_adapter(
   Type context_helper_type = NULL;
   if (!_adapter_helper(c, "Func_context", context_helper_type) ||
       !context_helper_type)
-    $report.callable.native_context(c, diagnostic_type, pointer_type);
+    $fail.callable_native_context(c, diagnostic_type, pointer_type);
   List fn_binding = c.sym.introduce(c.fresh_name("func_binding"));
   List context_local = c.sym.introduce(c.fresh_name("func_pointer_context"));
   List context_declaration = _context_local(
@@ -526,7 +526,7 @@ List Compiler.maybe_adapt_func_arg(
   if (_is_func_adapter(c, arg_type)) return argument;
   Type source_type = NULL, List source_binding = NULL;
   if (!_direct_func_source(arg_type, payload, 1, source_type, source_binding))
-    $report.callable.direct(c, expected_type, arg_type);
+    $fail.callable_direct(c, expected_type, arg_type);
   if (_is_func_adapter_target(c, source_type)) return argument;
   List adapter = _direct_func_adapter(
     c, expected_type, source_binding, source_type);
@@ -570,7 +570,7 @@ static List _build_func_adapter(
   source_type.function_parts(params, return_type);
   if (_typed_params_variadic(params)) {
     Type func_type = c.sym.resolve_key(%("Func"));
-    $report.callable.variadic(c, diagnostic_type, source_type, func_type);
+    $fail.callable_variadic(c, diagnostic_type, source_type, func_type);
   }
   source_type = source_type.canonicalize();
   return_type = return_type.canonicalize();
@@ -615,7 +615,7 @@ static void _require_func_readers(
     Type helper_type = NULL;
     List helper = _adapter_helper(c, helper_name, helper_type);
     if (!helper || !helper_type)
-      $report.callable.readers(c, diagnostic_type, source_type);
+      $fail.callable_readers(c, diagnostic_type, source_type);
   }
 }
 
@@ -722,7 +722,7 @@ static List _value(
   FuncReaders &r, Type parameter_type, Symbol tag, int index,
   Type &storage_type) {
   if (!tag)
-    $report.callable.parameter(r.c, r.diagnostic_type, parameter_type);
+    $fail.callable_parameter(r.c, r.diagnostic_type, parameter_type);
   List picked = _call(
     r, %("Var"), r.value, index, %(${_adapter_symbol_literal(tag)}));
   storage_type = parameter_type;
@@ -864,28 +864,28 @@ static void _split(Callback &c) {
   Type source = c.source;
   if (!c.source_binding || !source || source.is_pointer() ||
       !source.is_function())
-    $report.callback.direct(c);
+    $fail.callable_callback_direct(c);
   if (!c.target.function_parts(c.params, c.result))
-    $report.callback.target(c);
+    $fail.callable_callback_target(c);
   if (!source.function_parts(c.source_params, c.source_result))
-    $report.callback.source(c);
+    $fail.callable_callback_source(c);
   if (_typed_params_variadic(c.params) ||
       _typed_params_variadic(c.source_params))
-    $report.callback.variadic(c);
+    $fail.callable_callback_variadic(c);
 }
 
 static void _check_signature(Callback &cb) {
   int target_count = cb.params.len(), source_count = cb.source_params.len();
   // lint: allow one-statement-braces ST-1: macro emits declaration and call
   if (target_count != source_count) {
-    $report.callback.arity(cb, target_count, source_count);
+    $fail.callable_callback_arity(cb, target_count, source_count);
   }
   cb.result = cb.result.canonicalize();
   cb.source_result = cb.source_result.canonicalize();
   if (cb.result === %(void) || cb.source_result === %(void))
-    $report.callback.void_return(cb);
+    $fail.callable_callback_void_return(cb);
   if (cb.result != cb.source_result)
-    $report.callback.result(cb);
+    $fail.callable_callback_result(cb);
 }
 
 static void _check_params(Callback &cb) {
@@ -896,7 +896,7 @@ static void _check_params(Callback &cb) {
     Type target = targets.car();
     Type source = sources.car();
     if (_allows(cb, target, source)) continue;
-    $report.callback.parameter(cb, index, target, source);
+    $fail.callable_callback_parameter(cb, index, target, source);
   }
 }
 
@@ -1027,7 +1027,7 @@ static int _typed_params_variadic(List params) {
 
 static void _adapter_error(
   Compiler c, String message, Type target, Type source, List details) {
-  String target_note = $callable.note.target(target);
-  String source_note = $callable.note.source(source);
+  String target_note = $note.callable_target(target);
+  String source_note = $note.callable_source(source);
   c.report_error(<type>, message, NULL, %($target_note $source_note @details));
 }

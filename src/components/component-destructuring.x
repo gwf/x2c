@@ -13,6 +13,11 @@
 #pragma once
 #include "rewrite.x"
 
+/* The linked meta copies include these diagnostics from this owner. */
+macro Stmt $fail.destructure_list_source(Expr $site) =>
+  x2c_diagnostic_fail_at(
+    $site, <type>, "destructuring requires a List source", NULL);
+
 /* The List `source` holds, converted as a List destination converts it.
    A numeric source is reported before conversion, which would otherwise
    report an integer reaching a pointer. */
@@ -20,8 +25,7 @@ meta static Code _destructure_list(Code source) {
   Code converted =
     source.type().numeric() ? NULL : source.convert(%("List"));
   if (!converted || !converted.type().is_named("List"))
-    x2c_diagnostic_fail_at(
-      NULL, <type>, "destructuring requires a List source", NULL);
+    $fail.destructure_list_source(NULL);
   return converted;
 }
 

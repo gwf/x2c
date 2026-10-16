@@ -142,7 +142,7 @@
 - [src/meta-project.x](https://x2c-lang.dev/docs/internals/compiler-api/meta-project.html)
 - [src/meta-sdk.x](https://x2c-lang.dev/docs/internals/compiler-api/meta-sdk.html)
 - [src/operator-ledger.x](https://x2c-lang.dev/docs/internals/compiler-api/operator-ledger.html)
-- [src/parse-report-macros.x](https://x2c-lang.dev/docs/internals/compiler-api/parse-report-macros.html)
+- [src/parse-reports.x](https://x2c-lang.dev/docs/internals/compiler-api/parse-reports.html)
 - [src/parse.x](https://x2c-lang.dev/docs/internals/compiler-api/parse.html)
 - [src/preprocess.x](https://x2c-lang.dev/docs/internals/compiler-api/preprocess.html)
 - [src/project.x](https://x2c-lang.dev/docs/internals/compiler-api/project.html)

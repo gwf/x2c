@@ -11,7 +11,7 @@
 #include "private-keywords.x"
 static keyword loop $private.loop;
 #include "compiler.x"
-#include "parse-report-macros.x"
+#include "parse-reports.x"
 #include "parse.x"
 #include "expressions.x"
 #include "literals.x"
@@ -19,51 +19,51 @@ static keyword loop $private.loop;
 
 /* statements diagnostics. */
 
-static macro Stmt $report.parse.with_body(Expr $c) =>
+static macro Stmt $fail.statements_with_body(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "with requires a braced body",
-    $c.token, NULL);
+    $site, NULL);
 
-static macro Stmt $report.parse.with_expr(Expr $c) =>
+static macro Stmt $fail.statements_with_expr(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "with requires an expression",
-    $c.token, NULL);
+    $site, NULL);
 
-static macro Stmt $report.parse.raise_payload(Expr $c) =>
+static macro Stmt $fail.statements_raise_payload(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "raise requires a %() payload literal",
-    $c.token, %("use raise %(code (key value)...);"));
+    $site, %("use raise %(code (key value)...);"));
 
-static macro Stmt $report.parse.match_default(Expr $c) =>
+static macro Stmt $fail.statements_match_default(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "match default arm must be last",
-    $c.token, %("move default after every case arm"));
+    $site, %("move default after every case arm"));
 
-static macro Stmt $report.parse.match_arm(Expr $c) =>
+static macro Stmt $fail.statements_match_arm(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "expected 'case' or 'default' in match statement",
-    $c.token, %( "token:" ${$c.token.text} ));
+    $site, %( "token:" ${$c.token.text} ));
 
-static macro Stmt $report.parse.match_pattern(
+static macro Stmt $fail.statements_match_pattern(
   Expr $c, Expr $origin, Expr $pattern) =>
   $c.report_error(
     <parse>, "match case pattern must be a %() list literal",
     $origin, %( "pattern:" ${$pattern.repr()} ));
 
-static macro Stmt $report.parse.try_handler(Expr $c) =>
+static macro Stmt $fail.statements_try_handler(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "expected 'catch' or 'finally' after try block",
-    $c.token, NULL);
+    $site, NULL);
 
-static macro Stmt $report.parse.catch_default(Expr $c) =>
+static macro Stmt $fail.statements_catch_default(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "catch default arm must be last",
-    $c.token, %("move catch: after every filtered arm"));
+    $site, %("move catch: after every filtered arm"));
 
-static macro Stmt $report.parse.catch_pattern(Expr $c) =>
+static macro Stmt $fail.statements_catch_pattern(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "catch filter requires a %() pattern literal",
-    $c.token, %("use catch %(code (key pattern)...):"));
+    $site, %("use catch %(code (key pattern)...):"));
 
 // statements
 
@@ -159,11 +159,11 @@ static List _with_statement(Compiler c) {
   c.next();
   if ((c.peek(0) == <"{"> && c.peek(1) == <"}">) ||
       c.peek(0) == <;> || c.peek(0) == <eof>)
-    $report.parse.with_expr(c);
+    $fail.statements_with_expr(c, c.token);
   List expression = c.parse_expression();
   String alias = _with_alias(c);
   if (c.peek(0) != <"{">)
-    $report.parse.with_body(c);
+    $fail.statements_with_body(c, c.token);
   return _with_body(c, expression, alias);
 }
 
@@ -171,7 +171,7 @@ static List _with_statement(Compiler c) {
 static String _with_alias(Compiler c) {
   if (!c.take_word("as")) return "_";
   if (c.peek(0) != <ident>)
-    $report.parse.alias_name(c);
+    $fail.parse_alias_name(c, c.token);
   String alias = c.token.text;
   c.next();
   return alias;
@@ -336,7 +336,7 @@ static List _goto_statement(Compiler c) {
 static List _raise_statement(Compiler c) {
   c.expect(<raise>);
   if (c.peek(0) != <"%(">)
-    $report.parse.raise_payload(c);
+    $fail.statements_raise_payload(c, c.token);
   List stmt = c.parse_raise_literal();
   c.expect(<;>);
   return stmt;
@@ -386,7 +386,7 @@ static List _match_cases(Compiler c) {
     }
     if (peek != <case> && peek != <default>) break;
     if (saw_default)
-      $report.parse.match_default(c);
+      $fail.statements_match_default(c, c.token);
     if (peek == <default>) saw_default = 1;
     cases.push(_match_case(c));
     peek = c.peek(0);
@@ -434,7 +434,7 @@ static List _match_case(Compiler c) {
   if (c.test(<case>)) pattern = _case_pattern(c, start, types);
   else if (c.test(<default>)) pattern = %(*);
   else
-    $report.parse.match_arm(c);
+    $fail.statements_match_arm(c, c.token);
   return c.bind_match_arm(
     pattern, Compiler.source_clause(<arm>), start, peek == <case>, types);
 }
@@ -466,7 +466,7 @@ static void _require_list_literal(
   Compiler c, List pattern, Token start) {
   match (pattern)
     case %(!not (expr ("List") *)):
-      $report.parse.match_pattern(c, start, pattern);
+      $fail.statements_match_pattern(c, start, pattern);
 }
 
 /** Parses a source match arm's guard and body, declaring its typed
@@ -546,7 +546,7 @@ static List _catches(Compiler c) {
   _x2c_complete_here(c, <continue>, %("catch" "finally"));
   if (c.test(<catch>)) return _catch_cases(c);
   if (c.peek(0) != <finally>)
-    $report.parse.try_handler(c);
+    $fail.statements_try_handler(c, c.token);
   return NULL;
 }
 
@@ -571,7 +571,7 @@ static List _catch_cases(Compiler c) {
     if (is_default) saw_default = 1;
     if (!c.test(<catch>)) break;
     if (saw_default)
-      $report.parse.catch_default(c);
+      $fail.statements_catch_default(c, c.token);
   }
   return %(catchcases ${arms.list_free()} $handle);
 }
@@ -600,7 +600,7 @@ static List _catch_body(Compiler c) {
 
 static List _catch_filter(Compiler c) {
   if (c.peek(0) != <"%(">)
-    $report.parse.catch_pattern(c);
+    $fail.statements_catch_pattern(c, c.token);
   List pattern = c.parse_catch_pattern_literal();
   c.expect(<:>);
   return pattern;
