@@ -163,7 +163,7 @@ required sequence.
 | `make check` | Standalone extended non-mutating checks. |
 | `make verify-fixtures` | Check exact compiler fixture artifacts without rewriting them. |
 | `make verify-fixtures-update` | Accept an intentional, reviewed fixture-output change. |
-| `make proof-conformance` | Optional prelude/live protocol conformance comparison. |
+| `make proof-conformance` | Optional runtime protocol conformance comparison between prelude and live symbol modes. |
 | `make check-native-modules` | Optional native module build, load, and rejection checks. |
 | `make examples` | Check the curated executable examples manifest. |
 | `make examples-update` | Accept intentional, reviewed example-output changes. |
