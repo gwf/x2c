@@ -359,7 +359,7 @@ Block line = Block.new(1);
 File input = File.open("/etc/hosts", "r");
 defer input.close();
 try {
-  if (input.readline_into(line) == FILE_READ_EOF)
+  if (input.readline_into(line) == <eof>)
     printf("empty file\n");
 }
 catch %(io-fail *):

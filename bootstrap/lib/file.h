@@ -14,10 +14,7 @@ typedef FILE * File;
 
 extern File Stdin, Stdout, Stderr;
 
-typedef enum FileReadStatus{
-  FILE_READ_ERROR = - 1, FILE_READ_EOF = 0, FILE_READ_DATA = 1
-}
-FileReadStatus;
+typedef Symbol FileReadStatus;
 
 #ifndef X2CCPP
 _Static_assert(_Generic(& fclose, int(*)(File) : 1, default: 0), "native alias File_close does not match fclose");
