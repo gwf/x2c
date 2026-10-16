@@ -37,8 +37,8 @@ static List _flow_summary(
     case %(cons *): return %(list);
     case %(map *): return %(map);
     case %(array *): return %(array);
-    case %(op . ? (?member)): return %(field $member);
-    case %(op (!quote ->) ? (?member)): return %(field $member);
+    case %(op (!or (!quote .) (!quote ->)) ? (?member)):
+      return %(field $member);
   }
   return %(value);
 }
@@ -119,11 +119,7 @@ static List _flow_source(
         ${_flow_source(
           compiler, onfalse, path, origin, definitions, parameters, locals)}
       );
-    case %(op . ? (?)):
-      return %(
-        unknown "field-read" ${project_location(compiler, path, origin)}
-      );
-    case %(op (!quote ->) ? (?)):
+    case %(op (!or (!quote .) (!quote ->)) ? (?)):
       return %(
         unknown "field-read" ${project_location(compiler, path, origin)}
       );

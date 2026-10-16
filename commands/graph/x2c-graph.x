@@ -109,23 +109,13 @@ static List _analyze_unit(Compiler compiler, List ast, String path) {
   return functions.list_free();
 }
 
-static int _field_access_parts(
-  Var type, Var member, String receiver_name, String field_name) {
-  return type is <list> && member is <string> &&
-         List.equal(type, %($receiver_name)) &&
-         member.str() == field_name;
-}
-
 static int _field_access_matches(
   List node, String receiver_name, String field_name) {
-  match (node) {
-    case %(op . (expr ?type ?) (?member)):
-      return _field_access_parts(
-        type, member, receiver_name, field_name);
-    case %(op (!quote ->) (expr ?type ?) (?member)):
-      return _field_access_parts(
-        type, member, receiver_name, field_name);
-  }
+  match (node)
+    case %(op (!or (!quote .) (!quote ->)) (expr ?type ?) (?member)):
+      return type is <list> && member is <string> &&
+             List.equal(type, %($receiver_name)) &&
+             member.str() == field_name;
   return 0;
 }
 
@@ -720,9 +710,7 @@ static List _site_value_summary(
       if (project_automatic(compiler, binding)) return %(local $spelling);
       return %(global ${compiler.emitted_binding_name(binding)});
     }
-    case %(op . (expr ?type ?) (?member)):
-      return %(field $type $member);
-    case %(op (!quote ->) (expr ?type ?) (?member)):
+    case %(op (!or (!quote .) (!quote ->)) (expr ?type ?) (?member)):
       return %(field $type $member);
     case %(call ?callee (args *)): {
       String name = _site_direct_callee(compiler, callee);
