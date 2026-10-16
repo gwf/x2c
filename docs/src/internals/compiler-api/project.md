@@ -26,7 +26,7 @@ X2c project manifests.
 Returns the explicit or nearest readable project manifest, or NULL.
 Discovery uses the same request view as project parsing.
 
-Source: `src/project.x:114`
+Source: `src/project.x:115`
 
 ### `ProjectBuild`
 
@@ -42,7 +42,7 @@ manifest fields and command-line overrides to ordinary `CliRequest` values
 without executing build actions. Manifest discovery, parsing, validation,
 or target-selection failures print a diagnostic and exit with status 2.
 
-Source: `src/project.x:85`
+Source: `src/project.x:86`
 
 <a id="ProjectBuild.valid_name"></a>
 #### ProjectBuild.valid_name
@@ -52,7 +52,7 @@ Source: `src/project.x:85`
 Returns whether a target, profile, or manifest field name contains only
 letters, digits, underscores, and hyphens, and is not empty.
 
-Source: `src/project.x:468`
+Source: `src/project.x:469`
 
 ## Public types
 

@@ -536,7 +536,7 @@ Source: `src/meta-sdk.x:552`
 <a id="Type.fields"></a>
 #### Type.fields
 
-`List Type.fields(Type type)`
+`List Type.fields(Type t)`
 
 Answers `Type.fields`, declared in `lib/meta.x`.
 
