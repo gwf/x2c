@@ -103,26 +103,25 @@ source-ordered shallow symbol collection and replay.
 
 Public functions:
 
-`Compiler.collect_symbols`, `Compiler.prelude_sources`,
-`Compiler.is_prelude_source`, `Compiler.module_source`,
+`Compiler.refresh_source_collections`, `Compiler.forget_provisional_entries`,
+`Compiler.module_source`, `Compiler.collect_symbols`,
+`Compiler.prelude_sources`, `Compiler.is_prelude_source`,
 `Compiler.configure_package`, `SourceView.resolve_include`,
+`Compiler.included_compile_time_effects`, `Compiler.install_included_effects`,
 `Compiler.include_typedef_names`, `Compiler.include_type_dependencies`,
 `Compiler.include_function_declarations`,
-`Compiler.runtime_function_declarations`,
-`Compiler.linked_meta_provider_current`,
+`Compiler.runtime_function_declarations`, `Compiler.publishes_typedef`,
+`Compiler.publishes_type_family`, `Compiler.callable_symbols`,
+`Compiler.inline_type_dependencies`, `Compiler.publish_inline_types`,
+`Compiler.record_generated_symbol`, `Compiler.record_conformance_rows`,
+`Compiler.declared_adoptions`, `Compiler.linked_meta_provider_current`,
 `Compiler.linked_meta_definitions_current`, `Compiler.complete_meta_hashes`,
 `Compiler.meta_provider_hashes`, `Compiler.add_linked_meta_provider_hashes`,
 `Compiler.name_meta_provider_bindings`, `Compiler.loaded_provider`,
 `Compiler.loaded_call_type`, `Compiler.name_loaded_provider`,
-`Compiler.publishes_typedef`, `Compiler.publishes_type_family`,
-`Compiler.callable_symbols`, `Compiler.inline_type_dependencies`,
-`Compiler.publish_inline_types`, `Compiler.record_generated_symbol`,
-`Compiler.record_conformance_rows`, `Compiler.declared_adoptions`,
 `Compiler.collect_package`, `Compiler.replay_package_imports`,
-`Compiler.included_compile_time_effects`, `Compiler.install_included_effects`,
 `Compiler.configure_interfaces`, `Compiler.prelude_interface`,
-`Compiler.interface_text`, `Compiler.linked_prelude_records`,
-`Compiler.refresh_source_collections`, `Compiler.forget_provisional_entries`
+`Compiler.interface_text`, `Compiler.linked_prelude_records`
 
 ### [src/compiler.x](../src/compiler.x)
 
