@@ -337,12 +337,11 @@ List syntax_lexical(void) => %(lexical
       "(" "%(" "%[" "%{" "\$(" "\${" "\$" "!" "-" "*" "&" "~" "++" "--"))
   (passes
     (pass module-collection
-      (external "src/collect.x; active file-scope module blocks before unit parsing")
-      (enabled-by default-symbol-collection)
+      (external "src/collect.x; active file-scope module blocks before tokenizing")
       (splice member-text-in-order) (resolve under-containing-file-companion-directory)
       (recursive true) (word "module" ident))
-    (pass pipeline (ordered frontend-shebang scan layout lexical-diagnostics
-      conditionals keyword-retag parser))
+    (pass pipeline (ordered frontend-shebang module-collection scan
+      layout lexical-diagnostics conditionals keyword-retag parser))
     (pass frontend-shebang
       (external "src/frontend.x") (replace-with scripting-include)
       (preserve subsequent-line-numbers))

@@ -346,13 +346,14 @@ See [the lexical specification](lexical.md) for explanations and
 ```text
 (passes
  (pass module-collection
-  (external "src/collect.x; active file-scope module blocks before unit parsing")
-  (enabled-by default-symbol-collection) (splice member-text-in-order)
+  (external "src/collect.x; active file-scope module blocks before tokenizing")
+  (splice member-text-in-order)
   (resolve under-containing-file-companion-directory)
   (recursive true) (word "module" ident))
  (pass pipeline
-  (ordered frontend-shebang scan layout lexical-diagnostics
-   conditionals keyword-retag parser))
+  (ordered frontend-shebang module-collection
+   scan layout lexical-diagnostics conditionals
+   keyword-retag parser))
  (pass frontend-shebang (external "src/frontend.x")
   (replace-with scripting-include) (preserve subsequent-line-numbers))
  (pass layout
