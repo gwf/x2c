@@ -18,17 +18,25 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+void Compiler_refresh_source_collections(void);
+
+void Compiler_forget_provisional_entries(void);
+
+ModuleSource Compiler_module_source(Compiler c, String path, String text);
+
 Map Compiler_collect_symbols(Compiler c, Map globs);
 
 List Compiler_prelude_sources(void);
 
 int Compiler_is_prelude_source(String path);
 
-ModuleSource Compiler_module_source(Compiler c, String path, String text);
-
 void Compiler_configure_package(Compiler c, List roots, String filename);
 
 String SourceView_resolve_include(SourceView s, List dirs, String includer_dir, String target, int angle);
+
+Map Compiler_included_compile_time_effects(Compiler c, Map globs);
+
+void Compiler_install_included_effects(Compiler c);
 
 List Compiler_include_typedef_names(Compiler c, String target, int angle, Map seen);
 
@@ -37,6 +45,22 @@ List Compiler_include_type_dependencies(Compiler c, String target, int angle, Ma
 void Compiler_include_function_declarations(Compiler c, String target, int angle, Map available);
 
 void Compiler_runtime_function_declarations(Compiler c, Map available);
+
+int Compiler_publishes_typedef(Compiler c, String name);
+
+int Compiler_publishes_type_family(Compiler c, List family);
+
+Map Compiler_callable_symbols(Compiler c, List names);
+
+Map Compiler_inline_type_dependencies(Compiler c, List ast);
+
+void Compiler_publish_inline_types(Compiler c, List ast);
+
+void Compiler_record_generated_symbol(Compiler c, String name, Type signature);
+
+void Compiler_record_conformance_rows(Compiler c, Map rows);
+
+List Compiler_declared_adoptions(Compiler c);
 
 int Compiler_linked_meta_provider_current(Compiler c, String path);
 
@@ -56,29 +80,9 @@ Type Compiler_loaded_call_type(Compiler c, Type type);
 
 void Compiler_name_loaded_provider(Compiler c, String path, int index, List provider);
 
-int Compiler_publishes_typedef(Compiler c, String name);
-
-int Compiler_publishes_type_family(Compiler c, List family);
-
-Map Compiler_callable_symbols(Compiler c, List names);
-
-Map Compiler_inline_type_dependencies(Compiler c, List ast);
-
-void Compiler_publish_inline_types(Compiler c, List ast);
-
-void Compiler_record_generated_symbol(Compiler c, String name, Type signature);
-
-void Compiler_record_conformance_rows(Compiler c, Map rows);
-
-List Compiler_declared_adoptions(Compiler c);
-
 void Compiler_collect_package(Compiler c, String name, Token token);
 
 void Compiler_replay_package_imports(Compiler c, Map globs, Map rows, Array exports);
-
-Map Compiler_included_compile_time_effects(Compiler c, Map globs);
-
-void Compiler_install_included_effects(Compiler c);
 
 void Compiler_configure_interfaces(String out_dir, int cold);
 
@@ -87,10 +91,6 @@ String Compiler_prelude_interface(void);
 String Compiler_interface_text(Compiler c);
 
 Map Compiler_linked_prelude_records(Compiler c);
-
-void Compiler_refresh_source_collections(void);
-
-void Compiler_forget_provisional_entries(void);
 
 
 #endif /* __GUARD_0xAB8728A9__ */
