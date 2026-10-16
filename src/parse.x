@@ -3155,12 +3155,7 @@ static List _bind_enumerator(Compiler c, List input) {
    later ones while preserving whole-expansion rollback on failure. */
 static List _bind_form(
   Compiler c, List input, AstPos context, int pending) {
-  Macro if_then = $if_then, if_else = $if_else;
-  Macro while_loop = $while_loop, do_loop = $do_loop, for_loop = $for_loop;
-  Macro switched = $switched, expression_statement = $expression_statement;
-  Macro return_empty = $return_empty, return_value = $return_value;
-  Macro deferred = $deferred;
-  Macro matched = $matched;
+  Macro return_empty = $return_empty;
   Macro tried = $tried, caught = $caught;
   int unit = context == AST_UNIT, block = context == AST_BLOCK;
   int statement = block || context == AST_STATEMENT;
@@ -3218,26 +3213,26 @@ static List _bind_form(
     case %(at ?origin ?node):
       return _anchor(c, origin, c.bind_syntax(node, context, c.return_type));
     case return_empty() if (statement): return c.finish_return_statement(NULL);
-    case return_value(?expr) if (statement):
+    case $return_value(?expr) if (statement):
       return c.finish_return_statement(expr);
     case %((!or break continue default empty)) if (statement): return input;
     case %(case ?expr) if (statement): return %(case ${_resolve(c, expr)});
     case %((!set ?tag (!or goto label)) ?name) if (statement):
       return %($tag $name);
-    case expression_statement(?expr) if (statement):
+    case $expression_statement(?expr) if (statement):
       return _bind_expression_statement(c, expr, context);
-    case deferred(?body) if (statement):
+    case $deferred(?body) if (statement):
       return %(defer ${_bind_statement(c, body)});
-    case do_loop(?body, ?test) if (statement): return _bind_do(c, body, test);
-    case while_loop(?test, ?body) if (statement):
+    case $do_loop(?body, ?test) if (statement): return _bind_do(c, body, test);
+    case $while_loop(?test, ?body) if (statement):
       return _bind_while(c, test, body);
-    case switched(?expr, ?body) if (statement):
+    case $switched(?expr, ?body) if (statement):
       return _bind_switch(c, expr, body);
-    case if_then(?test, ?ontrue) if (statement):
+    case $if_then(?test, ?ontrue) if (statement):
       return _bind_if(c, test, ontrue);
-    case if_else(?test, ?ontrue, ?onfalse) if (statement):
+    case $if_else(?test, ?ontrue, ?onfalse) if (statement):
       return _bind_if_else(c, test, ontrue, onfalse);
-    case for_loop(?init, ?test, ?next, ?body) if (statement):
+    case $for_loop(?init, ?test, ?next, ?body) if (statement):
       return _bind_for(c, init, test, next, body);
     case %(raise ?code (args *details)) if (statement):
       return _bind_raise(c, code, details);
@@ -3247,7 +3242,7 @@ static List _bind_form(
       return _bind_try(c, body, input.caddr(), cleanup);
     case tried(?body, ?cleanup) if (statement):
       return _bind_try(c, body, NULL, cleanup);
-    case matched(?subject, *cases) if (statement):
+    case $matched(?subject, *cases) if (statement):
       return _bind_match(c, subject, cases);
     case $source_block_content(%(*children)) if (statement):
       return _bind_block(c, input);

@@ -1084,11 +1084,10 @@ static typedef struct DeferCaptures {
 /** Returns `stmts` with each `defer` statement and the statements after
     it replaced by one region; a list without `defer` returns unchanged. */
 List Compiler.rewrite_defer_list(Compiler c, List stmts) {
-  Macro deferred = $deferred;
   for (List suffix = stmts; suffix; suffix = suffix.cdr()) {
     List anchored = suffix.car();
     List head = Ast.without_origin(anchored);
-    match (head) case deferred(?final_stmt): {
+    match (head) case $deferred(?final_stmt): {
       List rest = c.rewrite_defer_list(suffix.cdr());
       List finalizer = final_stmt;
       if (c.source_map) finalizer = Ast.rewrap_origin(anchored, finalizer);

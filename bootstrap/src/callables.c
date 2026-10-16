@@ -1122,11 +1122,11 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _920 = cons(_919, NULL);
   _921 = cons(_194, _920);
   _922 = List_var(_921);
-  _923 = int_var(515);
+  _923 = int_var(514);
   _924 = cons(_923, NULL);
   _925 = cons(_238, _924);
   _926 = List_var(_925);
-  _927 = int_var(19072);
+  _927 = int_var(19047);
   _928 = cons(_927, NULL);
   _929 = cons(_251, _928);
   _930 = List_var(_929);
@@ -1557,9 +1557,9 @@ List Compiler_lift_func_expression(Compiler c, List expression){
     }
 
   }
-  if(! List_truth(Type_list(type))) return _deref_func_lift(c, expression, payload);  Type func_type = Sym_resolve_key(c -> sym, List_type(_306));  if(List_equal(Type_list(Sym_resolve_key(c -> sym, type)), Type_list(func_type))) return expression;  Macro lambda = _451; {
+  if(! List_truth(Type_list(type))) return _deref_func_lift(c, expression, payload);  Type func_type = Sym_resolve_key(c -> sym, List_type(_306));  if(List_equal(Type_list(Sym_resolve_key(c -> sym, type)), Type_list(func_type))) return expression; {
     List _x2c_gensym_match_expr = expression; Var _x2c_gensym_match_values[2]; MatchCaptureBuffer _x2c_gensym_match_capture = { .values = _x2c_gensym_match_values, .capacity = 2 };  switch(0){
-        default: ; static MacroCaseSite _x2c_gensym_macro_site_0; if (Macro_case_capture_at(&_x2c_gensym_macro_site_0, _x2c_gensym_match_expr, lambda, _452, &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; List _x2c_gensym_match_list_1 = Var_list_payload(_x2c_gensym_match_values[1]); {
+        default: ; static MacroCaseSite _x2c_gensym_macro_site_0; if (Macro_case_capture_at(&_x2c_gensym_macro_site_0, _x2c_gensym_match_expr, _451, _452, &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; List _x2c_gensym_match_list_1 = Var_list_payload(_x2c_gensym_match_values[1]); {
         Var body;  body = _x2c_gensym_match_value_0;  List params;  params = _x2c_gensym_match_list_1; {
           expression = Compiler_lower_lambda_expr(c, expression); {
             List _x2c_gensym_match_expr = expression; List _x2c_gensym_match_cursor;  switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
