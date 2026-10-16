@@ -144,8 +144,8 @@ commits need not rebuild from their own bootstrap.
   `generate`/`cache` -> `emit` -> `format`, with `diagnostics`, `collect`,
   `deps`, and `sourceview` in support; `project` lowers manifests
   to the same typed request that `build` owns, `toolchain` owns native actions,
-  `report` owns progress and receipts, `install` owns packages under the x2c
-  home, `script` owns build-once script execution, `editor` owns the
+  `report` owns progress and receipts, `script` owns build-once script
+  execution, `editor` owns the
   one-request semantic adapter, and `utils` owns environment discovery and
   translation workers.
 - `lib/` - representative runtime modules include string, list, array, map,
@@ -160,6 +160,7 @@ commits need not rebuild from their own bootstrap.
 - `commands/` - external commands built against the current compiler;
   `commands/manifest.txt` records maturity and help summaries. `repl` owns
   terminal interaction, editing, persistent submissions, and inspection.
+  `package` owns installation, removal, listing, and project lockfiles.
 - `agents/` - agent-facing documentation and project skills (`agents/skills/`,
   surfaced through `.agents/skills` for Codex and `.claude/skills` for Claude
   Code).
