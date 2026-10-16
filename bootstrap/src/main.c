@@ -29,7 +29,7 @@
 #include "generate.h"
 #include "format.h"
 #include "protocol.h"
-static String _58, _57, _56, _55, _54, _53, _52, _51, _50, _48, _46, _44, _42, _40, _38, _36, _34, _32, _30, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1;
+static String _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _48, _46, _44, _42, _40, _38, _36, _34, _32, _30, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1;
 
 static Var _49, _47, _45, _43, _41, _39, _37, _35, _33, _31, _29, _0;
 
@@ -167,6 +167,8 @@ static void _exec(String path, char * * args);
 
 static int _run_package(CliRequest request);
 
+static int _run_new(CliRequest request);
+
 static int _run_compiler(CliRequest request);
 
 static void _configure_logging(int debugging);
@@ -275,7 +277,8 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _55 = String_new("--sha256");
   _56 = String_new("--");
   _57 = String_new("package");
-  _58 = String_new("cannot open diagnostics file \'");
+  _58 = String_new("new");
+  _59 = String_new("cannot open diagnostics file \'");
 }
 
 void Compiler_dump_tokens(Compiler);
@@ -1386,6 +1389,24 @@ static int _run_package(CliRequest request){
   return Compiler_run_command(_57, Array_list(args));
 }
 
+static int _run_new(CliRequest request){
+  Array args = Array_new();
+  if(request -> quiet) Array_push(args, String_var(_52));
+  Array_push(args, String_var(_56));
+  {
+    String input;
+    List _x2c_gensym_macro_object_18 = request -> inputs;
+    List _x2c_gensym_macro_cursor_18 = _x2c_gensym_macro_object_18;
+    Var _x2c_gensym_macro_cursor_output_18;
+    while(List_try_next(_x2c_gensym_macro_object_18, &(_x2c_gensym_macro_cursor_18), &(_x2c_gensym_macro_cursor_output_18))){
+      input = Var_as_string(_x2c_gensym_macro_cursor_output_18);
+      Array_push(args, String_var(input));
+    }
+
+  }
+  return Compiler_run_command(_58, Array_list(args));
+}
+
 int diagnostics_write_json(String);
 
 int main(int argc, char * * argv){
@@ -1395,13 +1416,13 @@ int main(int argc, char * * argv){
   if(argc > 1) _run_external(argc, argv);
   CliRequest request = CliRequest_parse(argc, argv);
   String diagnostics = request -> diagnostics_file;
-  if(String_truth(diagnostics) && ! diagnostics_write_json(diagnostics)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_58), cons(String_var(diagnostics), cons(String_var(_26), NULL)))));
+  if(String_truth(diagnostics) && ! diagnostics_write_json(diagnostics)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_59), cons(String_var(diagnostics), cons(String_var(_26), NULL)))));
   if(request -> command == 1282559016 && CliRequest_prepare_script(request)) return 0;
   report_configure(request -> quiet, request -> plain, request -> color_mode, request -> verbose || request -> debugging, request -> dry_run, CliRequest_inspects(request));
   switch(request -> command){
     case 11180 : return _run_env(request);
     case 20308036376 : case 1219329418 : case 806120 : return _run_package(request);
-    case 29038 : return CliRequest_new_project(request);
+    case 29038 : return _run_new(request);
   }
   return _run_compiler(request);
 }

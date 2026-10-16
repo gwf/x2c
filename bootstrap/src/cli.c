@@ -1738,6 +1738,8 @@ static void _print_top_help(void){
   puts(_129);
 }
 
+int CliRequest_is_builtin(const char * word);
+
 static void _print_external_commands(void){
   String libexec = Compiler_home_libexec();
   File manifest = String_truth(libexec) ? fopen(String_join(NULL, cons(String_var(libexec), cons(String_var(_130), NULL))), "r") : NULL;
@@ -1748,6 +1750,7 @@ static void _print_external_commands(void){
     char * maturity = strchr(line, '|');
     if(! maturity) continue;
     * maturity ++ = 0;
+    if(CliRequest_is_builtin(line)) continue;
     char * summary = strchr(maturity, '|');
     if(! summary) continue;
     * summary ++ = 0;
