@@ -125,6 +125,7 @@ X2C_TRANSLATE_DEPS = $(X2C_COMPILER) $(LIB_X_FILES) \
 	$(wildcard $(LIB_SOURCE)/match/*.x) \
 	$(wildcard $(LIB_SOURCE)/string/*.x) \
 	$(wildcard $(LIB_SOURCE)/var/*.x) \
+	$(wildcard $(LIB_SOURCE)/list/*.x) \
 	$(wildcard $(ROOT)/etc/init.xlisp $(ROOT)/etc/compiler-sdk.xlisp \
 		$(ROOT)/etc/lisp-bindings.xlisp \
 		$(ROOT)/etc/lisp-values.xlisp) \
