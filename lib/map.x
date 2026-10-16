@@ -84,12 +84,9 @@ static void _bad_arg(String owner) {
   (void) owner;
   raise %(bad-arg);
 }
-static void _bad_op(Symbol op) { raise %(bad-op (op $op)); }
-static Var _update_var(Var *slot, Symbol op, Var rhs) =>
-  Var.update(slot[0], op, rhs);
-$map.typed.operations(
-  Map, Var, Var, _update_var, _bad_arg, _bad_op, _capacity_valid,
-  _record_value, void, 1, 1, 0, 1);
+$map.typed.operations(Map, Var, Var, _bad_arg, _capacity_valid, void, 0, 1);
+Var Map.updateindex(Map, Var, Symbol, Var);
+Var Map.postfixindex(Map, Var, Symbol);
 meta native Map Map.new_capacity(unsigned);
 meta native unsigned Map.len(Map);
 meta native Var Map.getdefault(Map, Var, Var);
@@ -97,6 +94,48 @@ meta native Var Map.setdefault(Map, Var, Var);
 meta native void Map.set(Map, Var, Var);
 meta native Self Map.copy(Self);
 meta native Self Map.merge(Self, Self);
+
+/** Applies `op` to the value for `key` and returns the stored result.
+    `+` inserts a numeric `rhs` when the key is absent; other updates require
+    an existing key. A failing value operation leaves the entry unchanged.
+    Raises: `<bad-arg>` for a null map or missing required key, `<void-op>`
+    for a void key or value, a cause from `Var.update`, or an allocation,
+    size, or invariant cause while inserting.
+*/
+Var Map.updateindex(Map map, Var key, Symbol op, Var rhs) {
+  if (map == NULL) raise %(bad-arg);
+  X2CVarNumericInfo info;
+  int insert = Var.encoding_valid(rhs) && Var.numeric_info(rhs.tag(), info);
+  if (key is void || rhs is void) raise %(void-op);
+  if (op == <+> && insert) {
+    int inserted;
+    Var *stored = map.get_or_insert(&key, &rhs, &inserted);
+    if (inserted) return rhs;
+    return Var.update(stored[0], op, rhs);
+  }
+  long index = map.find_index(&key);
+  if (index < 0) raise %(bad-arg (key $key));
+  Var *stored = _record_value(map, (unsigned) index);
+  return Var.update(stored[0], op, rhs);
+}
+
+/** Applies postfix `++` or `--` and returns the previous value.
+    The key must already exist. A failing value operation leaves the entry
+    unchanged.
+    Raises: `<bad-arg>` for a null map or absent key, `<void-op>` for a void
+    key, or a cause from `Var.postfix` for an unsupported value or operation.
+*/
+Var Map.postfixindex(Map map, Var key, Symbol op) {
+  if (map == NULL) raise %(bad-arg);
+  if (key is void) raise %(void-op);
+  long index = map.find_index(&key);
+  if (index < 0) raise %(bad-arg (key $key));
+  Var *stored = _record_value(map, (unsigned) index);
+  Var old = stored[0], value = old;
+  Var.postfix(value, op);
+  stored[0] = value;
+  return old;
+}
 
 /** Returns the value stored under `key`, or `void` when absent, probing with
     the caller's precomputed `key_hash`.

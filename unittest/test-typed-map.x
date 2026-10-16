@@ -386,6 +386,8 @@ static void typed_map_string_growth_traversal_and_errors(void) {
 
   try map.getindex("absent");
   catch %(bad-arg *): caught++;
+  try map.postfixindex("absent", <++>);
+  catch %(bad-arg *): caught++;
   try map.postfixindex("key-0", <++>);
   catch %(bad-op *): caught++;
   EXPECT_STR_EQ(map.getindex("key-0"), "value-0");
@@ -395,7 +397,7 @@ static void typed_map_string_growth_traversal_and_errors(void) {
   catch %(bad-op *): caught++;
   try MapStringString.set(NULL, "key", "value");
   catch %(bad-arg *): caught++;
-  EXPECT_INT_EQ(caught, 5);
+  EXPECT_INT_EQ(caught, 6);
 }
 
 static void typed_map_string_int_family(void) {
