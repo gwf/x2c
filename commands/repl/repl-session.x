@@ -15,6 +15,7 @@ typedef struct ReplLoadedFile {
   String path;
   MetaHelper helper;
   Map symbols, signatures;
+  List types;
 } *ReplLoadedFile;
 
 /** The caller keeps the compiler's unit Context open until every result and
@@ -23,9 +24,10 @@ typedef struct ReplSession {
   Compiler compiler;
   Lisp evaluator;
   ReplLower lowering;
+  Array declarations;
   Map files;
   // Published name -> (value), (type), (native [(source PATH)]), or
-  // (function (typed ...) (lowered ...)).
+  // (function (typed ...) (execution native)).
   Map names;
 } *ReplSession;
 
@@ -55,6 +57,7 @@ typedef struct ReplCompletion {
 #include "scope.x"
 #include "meta.x"
 #include "refusal-errors.x"
+#include "repl-native.x"
 #include <errno.h>
 #include <signal.h>
 #include <stdio.h>
@@ -90,6 +93,7 @@ ReplSession ReplSession.new(Compiler compiler) {
   session.compiler = compiler;
   session.names = {};
   session.files = {};
+  session.declarations = [];
   session.evaluator = Lisp.new();
   repl_runtime_initialize(session.evaluator);
   session.lowering = ReplLower.new(compiler, session.evaluator);
@@ -111,7 +115,7 @@ List ReplSession.symbols(ReplSession session) {
 }
 
 /** Returns (value), (type), (native [(source PATH)]),
-    (function (typed AST) (lowered FORMS)), or NULL if absent.
+    (function (typed AST) (execution native)), or NULL if absent.
     These are the original canonical Lists, borrowed until unit close. */
 List ReplSession.inspect(ReplSession session, String name) {
   Var entry;
@@ -136,7 +140,7 @@ String ReplSession.function_info(ReplSession session, String name) {
   List declaration = type.declaration_ast(%($name));
   String text = String.new(
     c.code_pretty_string(c.emit(%($declaration), NULL), NULL));
-  return %"${text.strip(NULL)}\nsource: $source";
+  return %"${text.strip(NULL)}\nsource: $source\nexecution: native";
 }
 
 /* The compiler's input state, which a submission or completion replaces
@@ -338,7 +342,7 @@ static void _tokenize(Compiler c, String source, Scope scratch) {
   $scope(&scratch) { c.tokenize(source); }
 }
 
-// Native name resolution and persistent local storage need native execution.
+// Prompt submissions require bound names and session-owned persistent state.
 static void _require_evaluable(Var syntax) {
   match (syntax) {
     case %(expr () (ident (binding ? ?name))):
@@ -505,6 +509,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
         if (name in names)
           $refusal.type.redefined();
       transaction.commit_transient();
+      session.declarations.push(node);
       foreach (String name, added) names[name] = %(type);
       result.syntax = node;
       result.name = added.len() ? added[0].str() : NULL;
@@ -533,8 +538,18 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
       }
     }
     result.syntax = fn;
-    $let(c.recovery_depth, c.recovery_depth + 1)
+    $let(c.recovery_depth, c.recovery_depth + 1) {
+      if (function_name) {
+        Func function = session.compile_function(fn);
+        transaction.commit_transient();
+        session.evaluator.set_global(function_name, function);
+        names[function_name] = %(function (typed $fn) (execution native));
+        result.name = function_name;
+        result.status = <defined>;
+        return result;
+      }
       forms = session.lowering.lower(fn);
+    }
     result.diagnostics = c.diagnostics();
   }
   catch %(incomplete *): {
@@ -570,23 +585,23 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     Var storage;
     if (session.evaluator.try_get("C.globals", storage)) {
       Map globals = storage;
-      foreach (Var id, ids) globals.del(id);
+      foreach (Var id, ids) {
+        Var address;
+        if (globals.try_get(id, address)) Scope.free(address.pointer());
+        globals.del(id);
+      }
     }
     result.status = <failed>;
     result.cause = cons(cause, details);
     result.diagnostics = c.diagnostics();
     return result;
   }
-  if (function_name || added.len()) {
+  if (added.len()) {
     transaction.commit_transient();
-    foreach (String name, added)
-      names[name] = function_name
-        ? %(function (typed ${result.syntax}) (lowered ${result.lowered}))
-        : %(value);
+    foreach (String name, added) names[name] = %(value);
   }
-  result.name = function_name;
   result.diagnostics = c.diagnostics();
-  result.status = function_name ? <defined> : prints ? <value> : <executed>;
+  result.status = prints ? <value> : <executed>;
   return result;
 }
 
@@ -594,6 +609,8 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
 void ReplSession.close(ReplSession session) {
   session.lowering.free();
   session.lowering = NULL;
+  session.declarations.free();
+  session.declarations = NULL;
   session.evaluator.destroy();
   session.evaluator = NULL;
   foreach (Var (path, value), session.files) {

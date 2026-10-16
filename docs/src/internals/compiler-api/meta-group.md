@@ -24,6 +24,7 @@ A unit's meta group, emitted as C.
 | [`Compiler.refuse_meta_call`](#Compiler.refuse_meta_call) | Reports at `site` that the `meta` function `name` cannot run at compile time, and `why`. |
 | [`Compiler.refuse_record_meta_call`](#Compiler.refuse_record_meta_call) | Reports at `site` that the group function `name` cannot run at compile time when its result is a struct or union, which its type alone decides. |
 | [`Compiler.stage_meta_in_process`](#Compiler.stage_meta_in_process) | Enables in-process staging of `meta` groups for compiler sessions. |
+| [`Compiler.stage_session_function`](#Compiler.stage_session_function) | Stages one session factory in an isolated native emission. |
 | [`Compiler.use_meta_build_directory`](#Compiler.use_meta_build_directory) | Directs each provider group into `directory`, using `owners` to name their headers by table, or stops that when `directory` is NULL. |
 | [`Compiler.use_meta_toolchain`](#Compiler.use_meta_toolchain) | Selects the C compiler `cc` that builds the `meta` code of the units this process translates, with the runtime headers this compiler was built with, found from its installed headers in `include_dir`. |
 | [`Compiler.write_meta_build`](#Compiler.write_meta_build) | Writes the group of a unit the project meta build parsed into the build directory as `group-K.c` and `group-K.h`, K being its table, with the x2c sources it read in `group-K.deps`, or its failure in `group-K.failure`. |
@@ -38,7 +39,7 @@ A unit's meta group, emitted as C.
 Binds the session's group function `name` when it is not bound yet, by
 staging the group, and reports at `site` a function that cannot run.
 
-Source: `src/meta-group.x:917`
+Source: `src/meta-group.x:930`
 
 <a id="Compiler.finish_meta_functions"></a>
 #### Compiler.finish_meta_functions
@@ -79,7 +80,7 @@ Source: `src/meta-group.x:129`
 Returns why the group function `name` has no compile-time entry, from
 its type.
 
-Source: `src/meta-group.x:806`
+Source: `src/meta-group.x:819`
 
 <a id="Compiler.meta_cc"></a>
 #### Compiler.meta_cc
@@ -131,7 +132,7 @@ Source: `src/meta-group.x:147`
 Reports at `site` that the `meta` function `name` cannot run at compile
 time, and `why`.
 
-Source: `src/meta-group.x:825`
+Source: `src/meta-group.x:838`
 
 <a id="Compiler.refuse_record_meta_call"></a>
 #### Compiler.refuse_record_meta_call
@@ -142,7 +143,7 @@ Reports at `site` that the group function `name` cannot run at compile
 time when its result is a struct or union, which its type alone
 decides.
 
-Source: `src/meta-group.x:833`
+Source: `src/meta-group.x:846`
 
 <a id="Compiler.stage_meta_in_process"></a>
 #### Compiler.stage_meta_in_process
@@ -153,6 +154,19 @@ Enables in-process staging of `meta` groups for compiler sessions.
 
 Source: `src/meta-group.x:124`
 
+<a id="Compiler.stage_session_function"></a>
+#### Compiler.stage_session_function
+
+`Map Compiler.stage_session_function( Compiler c, List declarations, Func prepare, String &failure)`
+
+Stages one session factory in an isolated native emission. `prepare`
+receives this compiler and returns the factory's typed definition; it
+can place supporting functions through the ordinary compiler APIs.
+`declarations` supplies session types. Returns the loaded module's
+targets, or NULL with `failure` set. Publishes no evaluator bindings.
+
+Source: `src/meta-group.x:968`
+
 <a id="Compiler.use_meta_build_directory"></a>
 #### Compiler.use_meta_build_directory
 
@@ -161,7 +175,7 @@ Source: `src/meta-group.x:124`
 Directs each provider group into `directory`, using `owners` to name
 their headers by table, or stops that when `directory` is NULL.
 
-Source: `src/meta-group.x:878`
+Source: `src/meta-group.x:891`
 
 <a id="Compiler.use_meta_toolchain"></a>
 #### Compiler.use_meta_toolchain
@@ -185,7 +199,7 @@ x2c sources it read in `group-K.deps`, or its failure in
 `group-K.failure`. Included native and type providers use the same
 group header and object even when they have no `meta` functions.
 
-Source: `src/meta-group.x:890`
+Source: `src/meta-group.x:903`
 
 ## Design notes
 

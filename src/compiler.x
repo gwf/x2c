@@ -250,6 +250,8 @@ typedef struct Compiler {
      `_install_imports` owns the installation. */
   int import_protocols;
   int in_pattern, match_is, runtime_literals, inline_header;
+  // In-process native modules retain their cached constants for the process.
+  int permanent_literals;
   int builtin_defs, in_proto, macro_count, recovery_depth;
   int declaration_produced;
   // Set when a cleanup region needs the exception runtime declarations.
