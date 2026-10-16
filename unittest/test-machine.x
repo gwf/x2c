@@ -89,7 +89,7 @@ static void machine_builder_value_cleanup_releases_shared_arrays(void) {
     EXPECT_INT_EQ(b.length, 0);
     EXPECT_INT_EQ(b.const_count, 0);
     EXPECT_INT_EQ(b.binder_count, 0);
-    EXPECT_INT_EQ(b.status, MACHINE_PREPARED);
+    EXPECT_TRUE(b.status == <prepared>);
     EXPECT_INT_EQ(b.emit(MW_JUMP, 0, 0, 0, 0, -1), 0);
     EXPECT_INT_EQ(b.constant(Var.new(<i32>, 7)), 0);
     MachineBuilder copy = b;
@@ -109,7 +109,7 @@ static void machine_builder_exhaustion_is_categorized(void) {
   for (int i = 0; i < MACHINE_CODE_MAX + 8 && site >= 0; i++)
     site = b.emit(MW_JUMP, 0, 0, 0, 0, 0);
   EXPECT_INT_EQ(site, -1);
-  EXPECT_INT_EQ(b.status, MACHINE_INELIGIBLE);
+  EXPECT_TRUE(b.status == <ineligible>);
   EXPECT_STR_EQ(String.new(b.reason), "code-capacity");
   EXPECT_NULL(b.freeze());
   b.free();
@@ -202,7 +202,7 @@ static void machine_nested_calls_return_and_rollback(void) {
 
   MachineSlot *slots = m.slots;
   EXPECT_TRUE(_run(m, program, %(ok ok)) == <ok>);
-  EXPECT_INT_EQ(slots[0].kind, MACHINE_SLOT_VALUE);
+  EXPECT_TRUE(slots[0].kind == <value>);
   EXPECT_VAR_EQ(slots[0].value, Var.new(<symbol>, <ok>));
   EXPECT_INT_EQ(stats.max_frames, 2);
   EXPECT_TRUE(stats.calls == 3 && stats.returns == 3);
@@ -210,7 +210,7 @@ static void machine_nested_calls_return_and_rollback(void) {
   EXPECT_TRUE(m.clean());
 
   EXPECT_TRUE(_run(m, program, %(ok other)) == <fail>);
-  EXPECT_INT_EQ(slots[0].kind, MACHINE_SLOT_INVALID);
+  EXPECT_TRUE(slots[0].kind == <invalid>);
   m.finish();
   EXPECT_TRUE(m.clean());
   m.dispose();
@@ -386,7 +386,7 @@ static void machine_scan_binds_lazy_spans_only_on_success(void) {
   EXPECT_TRUE(_run(m, program, %(a b mark c)) == <ok>);
   EXPECT_INT_EQ((int) stats.span_descriptors, 1);
   MachineSlot *slots = m.slots;
-  EXPECT_INT_EQ(slots[0].kind, MACHINE_SLOT_SPAN);
+  EXPECT_TRUE(slots[0].kind == <span>);
   EXPECT_INT_EQ(slots[0].span.length, 2);
   List prefix = m.materialize_span(slots[0].span);
   EXPECT_TRUE(prefix == %(a b));
@@ -436,7 +436,7 @@ static void machine_storage_reuse_and_dirty_begin(void) {
   EXPECT_TRUE(m.clean());
   MachineSlot *slots = m.slots;
   EXPECT_TRUE(_run(m, binder, Var.new(<i32>, 7)) == <ok>);
-  EXPECT_INT_EQ(slots[0].kind, MACHINE_SLOT_VALUE);
+  EXPECT_TRUE(slots[0].kind == <value>);
   m.finish();
   EXPECT_TRUE(m.clean());
 

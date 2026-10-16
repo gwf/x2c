@@ -186,16 +186,12 @@ static String _build_root(Project p) {
 
 // manifest lines
 
-static typedef enum ManifestSection {
-  NONE, PROJECT, TARGET, PROFILE, DEPENDENCIES
-} ManifestSection;
-
 /* The parser's place in a manifest: the line it reads and the section that
    line belongs to, with the section's target or profile. A field whose
    array spans lines keeps its key, its value so far, and the line it starts
    on until a bracket closes the array. */
 static typedef struct Manifest {
-  Project project, int line, ManifestSection section;
+  Project project, int line, Symbol section;
   ProjectTarget target, ProjectProfile profile;
   String key, value, int start;
 } Manifest;
@@ -266,7 +262,7 @@ static void _enter_project(Manifest &m) {
   Project p = m.project;
   if (p.declared) _error(p, m.line, "duplicate project section");
   p.declared = 1;
-  m.section = PROJECT;
+  m.section = <project>;
 }
 
 static void _enter_dependencies(Manifest &m) {
@@ -275,7 +271,7 @@ static void _enter_dependencies(Manifest &m) {
     _error(p, m.line, "duplicate dependencies section");
   p.dependency_declared = 1;
   p.dependency_seen = {};
-  m.section = DEPENDENCIES;
+  m.section = <deps>;
 }
 
 /* A profile header mentions its target too, so the target exists even
@@ -301,7 +297,7 @@ static void _enter_target(Manifest &m, ProjectTarget target) {
   if (target.declared)
     _error_name(m.project, m.line, "duplicate target section", target.name);
   target.declared = 1;
-  m.section = TARGET;
+  m.section = <target>;
   m.target = target;
 }
 
@@ -312,7 +308,7 @@ static void _enter_profile(
   if (profile.declared)
     _error_name(m.project, m.line, "duplicate profile section", name);
   profile.declared = 1;
-  m.section = PROFILE;
+  m.section = <profile>;
   m.profile = profile;
 }
 
@@ -321,7 +317,7 @@ static void _enter_profile(
 /* Associates `key = value` with the current section. */
 static void _field(Manifest &m, char *line) {
   Project p = m.project;
-  if (m.section == NONE) _error(p, m.line, "field appears before a section");
+  if (m.section == 0) _error(p, m.line, "field appears before a section");
   char *equals = strchr(line, '=');
   if (!equals) _error(p, m.line, "expected key = value");
   *equals = 0;
@@ -348,9 +344,9 @@ static void _claim(Manifest &m, String key) {
 }
 
 static Map _keys(Manifest &m) {
-  if (m.section == PROJECT) return m.project.seen;
-  if (m.section == DEPENDENCIES) return m.project.dependency_seen;
-  return m.section == TARGET ? m.target.seen : m.profile.seen;
+  if (m.section == <project>) return m.project.seen;
+  if (m.section == <deps>) return m.project.dependency_seen;
+  return m.section == <target> ? m.target.seen : m.profile.seen;
 }
 
 /* A field whose value leaves an array open waits for the line that closes
@@ -365,9 +361,9 @@ static void _set(Manifest &m) {
   Project p = m.project;
   int line = m.start;
   String key = m.key, value = m.value;
-  if (m.section == PROJECT) _set_project_field(p, line, key, value);
-  else if (m.section == DEPENDENCIES) _set_dependency(p, line, key, value);
-  else if (m.section == TARGET)
+  if (m.section == <project>) _set_project_field(p, line, key, value);
+  else if (m.section == <deps>) _set_dependency(p, line, key, value);
+  else if (m.section == <target>)
     _set_target_field(p, m.target, line, key, value);
   else _set_profile_field(p, m.profile, line, key, value);
 }

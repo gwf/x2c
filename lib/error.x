@@ -554,7 +554,7 @@ static int _catch_arm(
   Var *values = binders ? Scope.malloc(sizeof(Var) * binders) : NULL;
   MatchCaptureBuffer captures = {values, 0, binders};
   int matched = i == h.site.default_arm ||
-    (plan.status == MACHINE_PREPARED &&
+    (plan.status == <prepared> &&
      plan.execute_capture(projection, captures, NULL) == 1);
   if (matched) _commit_captures(h, record, layout, &captures);
   if (values) Scope.free(values);
@@ -960,7 +960,7 @@ static void _bind(ErrorCatchSite *site, Var *patterns) {
     for (int i = 0; i < site.arm_count; i++) {
       if (i == site.default_arm) continue;
       MatchPlan plan = x2c_match_site_prepare(&site.arms[i], patterns[i]);
-      if (plan.status == MACHINE_INELIGIBLE && site.fenced_arm < 0)
+      if (plan.status == <ineligible> && site.fenced_arm < 0)
         site.fenced_arm = i;
     }
   __atomic_store_n(
@@ -999,7 +999,7 @@ static const char *_prepare_plans(
     MatchPlan plan = i == site.default_arm || patterns[i] == <default>
                    ? NULL : MatchPlan.prepare(patterns[i]);
     h.plans.push(&plan);
-    if (plan && plan.status == MACHINE_INELIGIBLE && !fenced) {
+    if (plan && plan.status == <ineligible> && !fenced) {
       fenced = plan.reason;
       fenced_arm = i;
     }

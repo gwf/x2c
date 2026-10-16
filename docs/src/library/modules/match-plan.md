@@ -35,7 +35,7 @@ Source: `lib/match-plan.x:79`
 
 Compiles `pattern` into a reusable immutable `MatchPlan`.
 The caller owns the returned plan in the active `Scope`. Preparation
-records `MACHINE_PREPARED`, `MACHINE_MALFORMED`, or `MACHINE_INELIGIBLE`
+records `<prepared>`, `<malformed>`, or `<ineligible>`
 in the plan and raises for none of them; only a prepared plan has a
 program. `reason` is a borrowed static category string. The plan borrows
 pattern constants, which must outlive it.

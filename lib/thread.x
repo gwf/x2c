@@ -45,19 +45,13 @@ typedef struct Thread *Thread;
 #include <stdlib.h>
 #include <string.h>
 
-static enum ThreadState {
-  THREAD_RUNNING,
-  THREAD_JOINING,
-  THREAD_JOINED
-};
-
 static struct Thread {
   pthread_t native, ThreadFn function, size_t input_size, Scope result_scope;
   Pool result_pool;
   Var result;
   Var errors;
   void *policy;
-  int state;
+  Symbol state;
 };
 
 static int thread_live_count;
@@ -133,7 +127,7 @@ static Thread _new_handle(
   thread.input_size = input_size;
   thread.result = void;
   thread.errors = void;
-  __atomic_store_n(&thread.state, THREAD_RUNNING, __ATOMIC_SEQ_CST);
+  __atomic_store_n(&thread.state, <running>, __ATOMIC_SEQ_CST);
   if (input_size) memcpy(_input(thread), input, input_size);
   return thread;
 }
@@ -291,15 +285,15 @@ static void _worker_failed(Thread thread, int mark) {
 */
 Var Thread.join(Thread t) {
   if (!t) raise %(bad-arg (operation "Thread.join"));
-  int expected = THREAD_RUNNING;
+  Symbol expected = <running>;
   if (!__atomic_compare_exchange_n(
-    &t.state, &expected, THREAD_JOINING, 0,
+    &t.state, &expected, <joining>, 0,
     __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST)) {
     raise %(bad-state (operation "Thread.join"));
   }
   int error = pthread_join(t.native, NULL);
   if (error) {
-    __atomic_store_n(&t.state, THREAD_RUNNING, __ATOMIC_SEQ_CST);
+    __atomic_store_n(&t.state, <running>, __ATOMIC_SEQ_CST);
     _error("pthread_join", error);
   }
 
@@ -323,14 +317,14 @@ static void _finish_join(Thread thread) {
   thread.result_pool = NULL;
   if (thread.result_scope) Scope.destroy(thread.result_scope);
   thread.result_scope = NULL;
-  __atomic_store_n(&thread.state, THREAD_JOINED, __ATOMIC_SEQ_CST);
+  __atomic_store_n(&thread.state, <joined>, __ATOMIC_SEQ_CST);
 }
 
 /** Frees a `Thread` handle after its consuming join has completed.
     Raises: `<bad-state>` for NULL, running, or joining handles.
 */
 void Thread.free(Thread t) {
-  if (!t || __atomic_load_n(&t.state, __ATOMIC_SEQ_CST) != THREAD_JOINED)
+  if (!t || __atomic_load_n(&t.state, __ATOMIC_SEQ_CST) != <joined>)
     raise %(bad-state (operation "Thread.free"));
   free(t);
 }
