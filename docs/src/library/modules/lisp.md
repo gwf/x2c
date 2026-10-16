@@ -142,7 +142,7 @@ responsibility for `callable`, `values`, and their referents.
 or evaluator-only callable, `<bad-arity>` or `<bad-types>` at the call
 boundary, or a cause raised by the called procedure.
 
-Source: `lib/lisp/evaluate.x:771`
+Source: `lib/lisp/evaluate.x:770`
 
 <a id="Lisp.bind"></a>
 #### Lisp.bind
@@ -176,7 +176,7 @@ The budget belongs to the public entry. `Lisp.eval`, `Lisp.apply`, and
 `Lisp.eval_string` each open one, and a call that runs it out does not
 renew it, so one entry reports a runaway once however many calls follow.
 
-Source: `lib/lisp/evaluate.x:678`
+Source: `lib/lisp/evaluate.x:677`
 
 <a id="Lisp.eval"></a>
 #### Lisp.eval
@@ -190,7 +190,7 @@ ownership rule. Effects completed before a later failure are not rolled
 back. Raises: `<bad-arg>` for a null session, or any evaluator, imported
 operation, or called-procedure cause.
 
-Source: `lib/lisp/evaluate.x:754`
+Source: `lib/lisp/evaluate.x:753`
 
 <a id="Lisp.eval_file"></a>
 #### Lisp.eval_file
@@ -208,7 +208,7 @@ the stream has been consumed.
 `<size-limit>`, or `<alloc-fail>` while reading, or any cause from
 `Lisp.eval_string`.
 
-Source: `lib/lisp/evaluate.x:812`
+Source: `lib/lisp/evaluate.x:811`
 
 <a id="Lisp.eval_string"></a>
 #### Lisp.eval_string
@@ -226,7 +226,7 @@ session; borrowed referents keep their original lifetimes.
 **Raises:** `<bad-arg>` for a null session, `<incomplete>` or `<malformed>`
 while reading, or any cause from `Lisp.eval`.
 
-Source: `lib/lisp/evaluate.x:787`
+Source: `lib/lisp/evaluate.x:786`
 
 <a id="Lisp.freeze"></a>
 #### Lisp.freeze
@@ -281,7 +281,7 @@ made after a catch. The store is async-signal-safe, so a signal handler
 may interrupt a running evaluation; the owner clears the flag before the
 next one. `lisp` must be a live session.
 
-Source: `lib/lisp/evaluate.x:687`
+Source: `lib/lisp/evaluate.x:686`
 
 <a id="Lisp.try_get"></a>
 #### Lisp.try_get
@@ -581,7 +581,7 @@ Source: `lib/lisp/primitives.x:213`
 
 Marks the actual Lambda installed for one lowered source function.
 
-Source: `lib/lisp/evaluate.x:828`
+Source: `lib/lisp/evaluate.x:827`
 
 #### lisp_str
 

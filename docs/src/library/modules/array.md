@@ -125,7 +125,7 @@ then the next element and is not retained. It must not structurally mutate
 `array` during the walk. Any cause from `Func.apply` or `fn` propagates
 without changing `array`.
 
-Source: `lib/array.x:202`
+Source: `lib/array.x:227`
 
 <a id="Array.free"></a>
 #### Array.free
@@ -135,7 +135,7 @@ Source: `lib/array.x:202`
 Releases the `Array` and its backing storage, invalidating every alias.
 The `Block` protocol generates the definition.
 
-Source: `lib/array.x:94`
+Source: `lib/array.x:119`
 
 <a id="Array.getindex"></a>
 #### Array.getindex
@@ -147,7 +147,7 @@ Returns `void` when the normalized index is outside the array.
 
 **Raises:** `<size-limit>` outside the integer index domain.
 
-Source: `lib/array.x:73`
+Source: `lib/array.x:91`
 
 <a id="Array.getslice"></a>
 #### Array.getslice
@@ -204,7 +204,7 @@ pull requires its owning `Scope` to remain live.
 
 **Raises:** any cause from boxing an element.
 
-Source: `lib/array.x:215`
+Source: `lib/array.x:240`
 
 <a id="Array.join"></a>
 #### Array.join
@@ -222,7 +222,7 @@ receiver and the elements arrive as a `List`. Raises: `<alloc-fail>` or
 `<size-limit>` while rendering or canonicalizing the result, or a cause
 from an element's `write_str`.
 
-Source: `lib/array.x:414`
+Source: `lib/array.x:439`
 
 <a id="Array.map"></a>
 #### Array.map
@@ -239,7 +239,7 @@ callback is invoked front to back and is not retained. It must not mutate
 **Raises:** whatever `Func.apply` or `func` raises, or an allocation cause
 while constructing the result. The partial result is freed.
 
-Source: `lib/array.x:171`
+Source: `lib/array.x:196`
 
 <a id="Array.map2"></a>
 #### Array.map2
@@ -254,7 +254,7 @@ structurally mutated during the walk.
 **Raises:** whatever `Func.apply` or `func` raises, or an allocation cause
 while constructing the result. The partial result is freed.
 
-Source: `lib/array.x:185`
+Source: `lib/array.x:210`
 
 <a id="Array.new"></a>
 #### Array.new
@@ -281,7 +281,7 @@ the index or operation is invalid.
 its length cannot be indexed, or any cause from `Var.postfix`. The element
 is unchanged on failure.
 
-Source: `lib/array.x:152`
+Source: `lib/array.x:177`
 
 <a id="Array.push"></a>
 #### Array.push
@@ -322,7 +322,7 @@ Resizes `arr`, truncating or appending `Null` elements as needed.
 any cause from `Block` growth. Allocation and size failure do not return
 here. A growth failure leaves the length and existing elements unchanged.
 
-Source: `lib/array.x:101`
+Source: `lib/array.x:126`
 
 <a id="Array.reverse"></a>
 #### Array.reverse
@@ -345,7 +345,7 @@ Requires a non-null array. Returns `void` for an out-of-range index.
 **Raises:** `<size-limit>` outside the index domain or `<void-op>` when
 storing `void` at a valid index.
 
-Source: `lib/array.x:73`
+Source: `lib/array.x:103`
 
 <a id="Array.setslice"></a>
 #### Array.setslice
@@ -399,7 +399,7 @@ printf("%s %d\n", numbers.repr(), sorted == numbers);
 partially
 reordered when a catch receives the cause.
 
-Source: `lib/array.x:236`
+Source: `lib/array.x:261`
 
 <a id="Array.sort_by"></a>
 #### Array.sort_by
@@ -414,7 +414,7 @@ the callback is valid. Raises: allocation, key comparison, `Func.apply`,
 or callback causes. Failure leaves the original Array unchanged;
 callback side effects are not undone.
 
-Source: `lib/array.x:300`
+Source: `lib/array.x:325`
 
 <a id="Array.sort_with"></a>
 #### Array.sort_with
@@ -432,7 +432,7 @@ Null and fewer than two elements return unchanged without a callback.
 leaves the original Array unchanged; temporary storage is released.
 Callback side effects are not undone.
 
-Source: `lib/array.x:255`
+Source: `lib/array.x:280`
 
 <a id="Array.splice"></a>
 #### Array.splice
@@ -505,7 +505,7 @@ Source: `lib/array.x:72`
 
 Updates one boxed element while preserving its Var tag.
 
-Source: `lib/array.x:132`
+Source: `lib/array.x:157`
 
 <a id="Array.write_str"></a>
 #### Array.write_str
@@ -514,7 +514,7 @@ Source: `lib/array.x:132`
 
 Appends the packed-Array display text to `out`.
 
-Source: `lib/array.x:214`
+Source: `lib/array.x:239`
 
 ### `Block`
 
@@ -525,7 +525,7 @@ Source: `lib/array.x:214`
 
 Returns the same object as an `Array` view; mutations remain shared.
 
-Source: `lib/array.x:89`
+Source: `lib/array.x:114`
 
 ### `Iter`
 
@@ -536,7 +536,7 @@ Source: `lib/array.x:89`
 
 Drains `iter` into a fresh `Array`.
 
-Source: `lib/array.x:427`
+Source: `lib/array.x:452`
 
 ## Advanced and interop API
 
@@ -563,7 +563,7 @@ Source: `lib/array.x:427`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/array.x:435`
+Source: `lib/array.x:460`
 
 <a id="Array.compare"></a>
 #### Array.compare
@@ -573,7 +573,7 @@ Source: `lib/array.x:435`
 Compares packed Arrays lexicographically with the element family's
 ordering. Identical handles compare equal and NULL sorts first.
 
-Source: `lib/array.x:214`
+Source: `lib/array.x:239`
 
 <a id="Array.equal"></a>
 #### Array.equal
@@ -601,7 +601,7 @@ error. Call `Array.heapify` first if it was not built with
 **Raises:** any cause reported by element comparison while restoring the heap.
 The heap may already have removed its root when a catch receives the error.
 
-Source: `lib/array.x:380`
+Source: `lib/array.x:405`
 
 <a id="Array.heap_push"></a>
 #### Array.heap_push
@@ -633,7 +633,7 @@ cannot grow, or a cause from element comparison. A value or earlier swap
 may remain when comparison fails; pre-insertion failures leave the heap
 unchanged.
 
-Source: `lib/array.x:365`
+Source: `lib/array.x:390`
 
 <a id="Array.heapify"></a>
 #### Array.heapify
@@ -650,7 +650,7 @@ time.
 `Array.getindex` describes, or a cause from element comparison. Comparison
 failure may leave a partially rearranged `Array`.
 
-Source: `lib/array.x:399`
+Source: `lib/array.x:424`
 
 <a id="Array.remslice"></a>
 #### Array.remslice
@@ -673,7 +673,7 @@ Source: `lib/array.x:72`
 
 Returns the readable packed-Array representation.
 
-Source: `lib/array.x:214`
+Source: `lib/array.x:239`
 
 <a id="Array.str"></a>
 #### Array.str
@@ -682,7 +682,7 @@ Source: `lib/array.x:214`
 
 Returns the packed-Array display String.
 
-Source: `lib/array.x:214`
+Source: `lib/array.x:239`
 
 <a id="Array.update_n"></a>
 #### Array.update_n
@@ -694,7 +694,7 @@ Values appended before a later `<void-op>`, `<size-limit>`, or
 `<alloc-fail>` remain in `array`. The caller must supply that many `Var`
 arguments.
 
-Source: `lib/array.x:120`
+Source: `lib/array.x:145`
 
 <a id="Array.write_repr"></a>
 #### Array.write_repr
@@ -703,7 +703,7 @@ Source: `lib/array.x:120`
 
 Appends the readable packed-Array representation to `out`.
 
-Source: `lib/array.x:214`
+Source: `lib/array.x:239`
 
 ## Runtime-internal callables
 
@@ -723,7 +723,7 @@ for source readers but are not supported as user API.
 
 Returns the same object as a `Block` view; no copy or transfer occurs.
 
-Source: `lib/array.x:87`
+Source: `lib/array.x:112`
 
 ## Public types
 

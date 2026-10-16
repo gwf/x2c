@@ -85,7 +85,7 @@ Source macros and the compile-time Lisp they run.
 | [`Compiler.try_parse_macro_slot`](#Compiler.try_parse_macro_slot) | Parses a macro hole or Lisp slot for `role` while reading a template. |
 | [`Compiler.try_parse_macro_subpattern`](#Compiler.try_parse_macro_subpattern) | Parses `$NAME(P, ...)` in a pattern, where each argument is a pattern, into the pattern for code NAME builds with each argument pattern in its hole. |
 | [`Compiler.try_parse_macro_target_at`](#Compiler.try_parse_macro_target_at) | Parses a direct or keyword-alias macro at the requested syntax position. |
-| [`Compiler.watched_step`](#Compiler.watched_step) | Lowers `ast` when it is a value the active first lowering watches and records what its lowering produced; NULL otherwise. |
+| [`Compiler.watched_step`](#Compiler.watched_step) | Lowers `ast` when it is a value the active lowering watches; NULL otherwise. |
 | [`Compiler.written_support`](#Compiler.written_support) | The bound file-scope code `bound` that the rule now writing gives, written as the kernel's when that rule is shipped. |
 
 ### Functions
@@ -130,7 +130,7 @@ Source: `src/macros/definitions/slots.x:109`
 Whether the rule whose meta function now runs is shipped, so that the
 names it calls resolve to the copies the compiler links.
 
-Source: `src/macros/rewrites.x:437`
+Source: `src/macros/rewrites.x:443`
 
 <a id="Compiler.bind_code_value"></a>
 #### Compiler.bind_code_value
@@ -259,7 +259,7 @@ Source: `src/macros/expansion.x:22`
 
 Tests one operation's registry without invoking a translator.
 
-Source: `src/macros/rewrites.x:224`
+Source: `src/macros/rewrites.x:230`
 
 <a id="Compiler.inherit_library_comptime"></a>
 #### Compiler.inherit_library_comptime
@@ -362,7 +362,7 @@ Lowers `replacement`, which `Compiler.rewrite_lowered` bound for the
 lowered statement `source`, and keeps each part of `source` it holds as
 it is, so no statement rule is offered that part again.
 
-Source: `src/macros/rewrites.x:249`
+Source: `src/macros/rewrites.x:255`
 
 <a id="Compiler.lower_rewrite"></a>
 #### Compiler.lower_rewrite
@@ -381,7 +381,7 @@ already established for its parent. A replacement whose template and
 slot signatures an earlier use in the unit prepared lowers only its
 captured values.
 
-Source: `src/macros/rewrites.x:280`
+Source: `src/macros/rewrites.x:286`
 
 <a id="Compiler.macro_form_is_definition"></a>
 #### Compiler.macro_form_is_definition
@@ -502,7 +502,7 @@ Matches the member rules registered for each field keyword that
 `aggregate` declares a field with, as `Compiler.rewrite` matches those
 keyed by a receiver type.
 
-Source: `src/macros/rewrites.x:210`
+Source: `src/macros/rewrites.x:216`
 
 <a id="Compiler.open_macro_library"></a>
 #### Compiler.open_macro_library
@@ -640,7 +640,7 @@ a value the active lowering watches, so it watches `bound` as well. A
 statement without an origin, such as an unbraced body, keeps nothing
 else that identifies it when a binder it uses binds again.
 
-Source: `src/macros/rewrites.x:688`
+Source: `src/macros/rewrites.x:694`
 
 <a id="Compiler.rebuild_expression"></a>
 #### Compiler.rebuild_expression
@@ -736,7 +736,7 @@ Active rules cannot re-enter. A statement of the same kind that a
 statement replacement writes or copies, such as its source, takes the
 rules after the one that replaced it.
 
-Source: `src/macros/rewrites.x:232`
+Source: `src/macros/rewrites.x:238`
 
 <a id="Compiler.rewrite_lowered"></a>
 #### Compiler.rewrite_lowered
@@ -748,7 +748,7 @@ transform has lowered, then binds the first replacement as
 `Compiler.rewrite` does. Binding keeps the source, and each part of it
 the replacement holds, as lowered.
 
-Source: `src/macros/rewrites.x:241`
+Source: `src/macros/rewrites.x:247`
 
 <a id="Compiler.rewrite_written"></a>
 #### Compiler.rewrite_written
@@ -760,7 +760,7 @@ Binds the replacement a shipped rule gives the lowered statement
 `Compiler.rewrite_lowered` does. A statement the kernel writes is not
 source, so no program rule sees it.
 
-Source: `src/macros/rewrites.x:261`
+Source: `src/macros/rewrites.x:267`
 
 <a id="Compiler.shared_definitions"></a>
 #### Compiler.shared_definitions
@@ -904,13 +904,13 @@ Source: `src/macros/invocations.x:745`
 
 `Ast Compiler.watched_step(Compiler c, Ast ast)`
 
-Lowers `ast` when it is a value the active first lowering watches and
-records what its lowering produced; NULL otherwise. A value that an
+Lowers `ast` when it is a value the active lowering watches; NULL otherwise.
+A preparing watch also records what lowering produced. A value that an
 enclosing replacement's source held as well lowers outside that
 replacement's rule too, and that replacement still watches its own
 values within it.
 
-Source: `src/macros/rewrites.x:702`
+Source: `src/macros/rewrites.x:707`
 
 <a id="Compiler.written_support"></a>
 #### Compiler.written_support
@@ -923,7 +923,7 @@ its meta function runs, until a rule it reaches binds, and while its
 replacement binds and lowers. What a program writes, or a placement
 outside any rule, is source.
 
-Source: `src/macros/rewrites.x:428`
+Source: `src/macros/rewrites.x:434`
 
 ## Design notes
 
