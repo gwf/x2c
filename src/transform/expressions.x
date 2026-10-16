@@ -31,7 +31,7 @@ List Compiler.lower_lambda_expr(Compiler c, List expression) {
   return expression;
 }
 
-static Ast _slice_node(
+module Ast _slice_node(
   Compiler c, List expression, Type type, List start, List stop, List step) {
   String nominal = NULL;
   match (type)
@@ -108,7 +108,7 @@ static List _expression_rewrite(Compiler c, List expression) {
     point, kind, source, <expression>, expression.cadr(), NULL) : NULL;
 }
 
-static Ast _expression_node(Compiler c, Ast ast) {
+module Ast _expression_node(Compiler c, Ast ast) {
   Var content = ast.caddr();
   if (content is <list> && content.list().car() == <var>)
     return _step(c, _to_var(c, content.list().cadr()));
@@ -183,7 +183,7 @@ static Ast _op_chain(Compiler c, Ast ast) {
 
 // casts and bracket reads
 
-static List _cast(Compiler c, List ast) {
+module List _cast(Compiler c, List ast) {
   match (ast)
     case $source_cast_content(
         %((!set ?declarator (decl *parts))
@@ -219,7 +219,7 @@ static List _cast(Compiler c, List ast) {
 }
 
 // A `Var` subscript of a native pointer or array reads as an integer.
-static List _index(Compiler c, List ast) {
+module List _index(Compiler c, List ast) {
   Macro indexed = $indexed;
   match (ast)
     case ${$indexed(?base, %(!set ?selector (expr ?type ?)))}
@@ -232,7 +232,7 @@ static List _index(Compiler c, List ast) {
 
 // declarations and statements
 
-static List _declaration(Compiler c, List ast) {
+module List _declaration(Compiler c, List ast) {
   match (ast) {
     case %((!set ?head (!or declare decl)) ?target
            (bindings *bound_list)): {
@@ -262,7 +262,7 @@ static List _declaration(Compiler c, List ast) {
   return ast;
 }
 
-static List _return(Compiler c, List ast) {
+module List _return(Compiler c, List ast) {
   match (ast)
     case $return_value(?expression): {
       List value = c.convert_expression(expression, source_return_type(ast));
@@ -273,7 +273,7 @@ static List _return(Compiler c, List ast) {
 
 // calls
 
-static List _call(Compiler c, List ast) {
+module List _call(Compiler c, List ast) {
   match (ast)
     case ${$called(?callee, *arguments)}:
       match (callee.cadr()) {
@@ -322,5 +322,5 @@ static int _iter_immediate_consumer(String name) =>
          name == "Iter_product" || name == "Iter_min" ||
          name == "Iter_max";
 
-static List _to_var(Compiler c, List expr) =>
+module List _to_var(Compiler c, List expr) =>
   c.convert_expression(expr, %("Var"));

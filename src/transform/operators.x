@@ -2,7 +2,7 @@
 
 // operators
 
-static List _operator(Compiler c, List ast) {
+module List _operator(Compiler c, List ast) {
   List truthy = _truthy(c, ast);
   if (truthy != ast) return truthy;
   match (ast) {
@@ -24,7 +24,7 @@ static List _operator(Compiler c, List ast) {
   return ast;
 }
 
-static List _postfix(Compiler c, List ast) {
+module List _postfix(Compiler c, List ast) {
   match (ast)
     case $source_postfix_content(%(?operator
            (!set ?argument (expr ?argument_type ?)))):
@@ -62,7 +62,7 @@ static List _dynamic(
   return rewritten ? rewritten.caddr() : operation;
 }
 
-static List _truthy(Compiler c, List ast) {
+module List _truthy(Compiler c, List ast) {
   Macro if_then = $if_then, if_else = $if_else;
   Macro while_loop = $while_loop, do_loop = $do_loop;
   Macro for_loop = $for_loop;

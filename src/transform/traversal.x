@@ -32,7 +32,7 @@ List Compiler.transform(Compiler c, List ast) {
 */
 Ast Compiler.normalize(Compiler c, Ast ast) => _step(c, ast);
 
-static Ast _step(Compiler c, Ast ast) {
+module Ast _step(Compiler c, Ast ast) {
   if (!ast) return NULL;
   if (c.slot_watch) {
     Ast watched = c.watched_step(ast);
@@ -105,7 +105,7 @@ static Ast _statement_rewrite(Compiler c, Ast ast, Symbol tag) {
    itself. No replacement is an error that ends the translation: this
    compiler does not link the component that owns the form, or its rule
    failed to register. */
-static List _shipped_lowering(
+module List _shipped_lowering(
   Compiler c, Symbol point, Var kind, List source, Symbol position,
   Type expected, String form) {
   List lowered =
@@ -151,7 +151,7 @@ static Ast _destructuring_value(Compiler c, Ast ast) {
     "destructuring assignment").caddr();
 }
 
-static Ast _default_node(Compiler c, Ast ast) {
+module Ast _default_node(Compiler c, Ast ast) {
   Var head = ast.car();
   if (head == <seq> || head == <parens> || head == <block>)
     return _finish(c, ast);
@@ -160,7 +160,7 @@ static Ast _default_node(Compiler c, Ast ast) {
 
 /* Normalize synthesized sequences before their containing block absorbs
    pending defer markers. */
-static Ast _finish(Compiler c, Ast ast) {
+module Ast _finish(Compiler c, Ast ast) {
   match (ast) {
     case %(seq *items):
       return %(seq @{_sequence(c, items, 0)});

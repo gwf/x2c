@@ -1,6 +1,6 @@
 /*  literals.x -- AST transformation literals */
 
-static List _ordered_raise(
+module List _ordered_raise(
   Compiler c, List cause, List arguments) {
   Array values = [cause], orders = $auto([_part_order(c, cause)]);
   foreach (List argument, arguments) {
@@ -19,7 +19,7 @@ static List _ordered_raise(
    constructor call that rule returns receives the literal's parts as its
    `Var` arguments, or as C values with no x2c type, which pass as `Var`;
    they keep their source order. */
-static Ast _collection_literal(Compiler c, Ast ast, Symbol tag) {
+module Ast _collection_literal(Compiler c, Ast ast, Symbol tag) {
   int map = tag == <map> || tag == <vmap>;
   Type type = map ? %("Map") : %("Array");
   Symbol head = map ? <map> : <array>;
@@ -113,7 +113,7 @@ static List _ordered(List declarations, Type type, List content) =>
 /* A List chain's parts are its cons heads and spliced Lists in source
    order, then its final tail. Convert before classifying each part, so an
    implicit custom converter participates in the same ordering as a call. */
-static List _ordered_list(Compiler c, List chain) {
+module List _ordered_list(Compiler c, List chain) {
   Array kinds = $auto([]), values = $auto([]), orders = $auto([]);
   List node = chain;
   int spliced = 0;
@@ -170,7 +170,7 @@ static List _list_cell(List node) {
    string: it reuses the parsed literal's cache slot. Raise details are
    excluded: their cache slots would fill inside _file_init_ constructors,
    where re-entrant string-pool bootstrap can hand back NULL Strings. */
-static Ast _interpolation(Compiler c, Ast ast) {
+module Ast _interpolation(Compiler c, Ast ast) {
   match (ast)
     case $source_string_content(
         %((segexp (expr ("String") (literal ("String") ?text))))):
