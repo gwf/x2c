@@ -5,6 +5,11 @@ first.
 
 ## Unreleased
 
+- Highlight `module` declarations and member blocks, including private
+  macros, functions, protocols, keyword aliases, and types. Cover `static`
+  typedefs and aggregate types with scope tests. Color uppercase macro kinds
+  such as `STMT` and `EXPR` as built-in types outside macro signatures.
+
 - Color semantic macro types and all capitalized syntax kinds like prelude
   types outside macro signatures. Recognize anonymous macros and every
   quotation kind, standalone `$` unquotes, and qualified or pointer-returning

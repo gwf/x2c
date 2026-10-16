@@ -34,6 +34,52 @@ async function check(line, word, scope, present = true, offset) {
 const typeScope = 'support.type.prelude.x2c';
 const sigilScope = 'punctuation.definition.macro.sigil.x2c';
 
+test('module and static preserve private declaration scopes', async () => {
+  for (const modifier of ['static', 'module']) {
+    for (const declaration of [
+      'int counter;', 'inline int work(void) => 1;',
+      'typedef int Count;', 'typedef struct Node { int value; } Node;',
+      'typedef enum Color { red } Color;', 'struct Node { int value; };',
+      'union Value { int value; };', 'enum Color { red };', 'class Count int;',
+      'macro STMT $work(EXPR $value) { $value; }',
+      'keyword work $work;', 'protocol Reading(Count);'
+    ]) {
+      const line = `${modifier} ${declaration}`;
+      await check(line, modifier, 'storage.modifier.x2c');
+      if (modifier === 'module')
+        await check(line, modifier, 'storage.modifier.module.x2c');
+      if (declaration.startsWith('typedef'))
+        await check(line, 'typedef', 'keyword.other.typedef.x2c');
+      if (declaration.startsWith('class'))
+        await check(line, 'class', 'keyword.declaration.class.x2c');
+      if (declaration.startsWith('macro')) {
+        await check(line, 'macro', 'keyword.declaration.macro.x2c');
+        await check(line, 'STMT', 'storage.type.macro.result.x2c');
+        await check(line, 'EXPR', 'storage.type.macro.hole.x2c');
+      }
+      if (declaration.startsWith('keyword'))
+        await check(line, 'keyword', 'keyword.declaration.macro.x2c');
+      if (declaration.startsWith('protocol'))
+        await check(line, 'protocol', 'keyword.declaration.protocol.x2c');
+    }
+  }
+  await check('module {', 'module', 'keyword.declaration.module.x2c');
+  for (const line of ['int module = 0;', 'module();', 'module = 1;',
+    'object.module(value);', '// module int count;', 'char *s = "module int count;";'])
+    await check(line, 'module', 'storage.modifier.x2c', false);
+});
+
+test('uppercase syntax kinds have built-in type colors outside macro signatures', async () => {
+  for (const kind of new Set([...kinds('result-kind'), ...kinds('hole-kind')])) {
+    const name = kind.toUpperCase();
+    await check(`${name} value;`, name, typeScope);
+    await check(`// ${name}`, name, typeScope, false);
+    await check(`char *s = "${name}";`, name, typeScope, false);
+  }
+  for (const name of ['name', 'field', 'entry', 'statement', 'STMT_extra'])
+    await check(`int ${name} = 0;`, name, typeScope, false);
+});
+
 test('cataloged semantic types and every grammar kind have a special type scope', async () => {
   const types = ['Code', 'Macro', 'Type', 'TypeInfo', 'Source',
     ...kinds('result-kind'), ...kinds('hole-kind')];
