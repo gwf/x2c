@@ -48,6 +48,13 @@ static Scope *_lowered_owner(void) =>
 Var lisp_bytes(long size) =>
   Var.new(<p48>, Scope.calloc_in(_lowered_owner(), 1, (size_t) size));
 
+/** Keeps a captured local's allocation until the session ends, without
+    changing its address or the aliases that already refer to it. */
+Var lisp_retain(Var object) {
+  Scope.move(object.pointer(), Lisp.active().storage());
+  return object;
+}
+
 /** Returns `base` advanced by `offset` bytes, tagged as `tag`. */
 Var lisp_at(Var base, Var offset, Symbol tag) =>
   Var.new(tag, (char *) base.pointer() + offset.long_long());
@@ -227,6 +234,7 @@ void repl_runtime_initialize(Lisp lisp) {
   $lisp.bind(lisp, "repl.native.lisp_load", lisp_load);
   $lisp.bind(lisp, "repl.native.lisp_store", lisp_store);
   $lisp.bind(lisp, "repl.native.lisp_bytes", lisp_bytes);
+  $lisp.bind(lisp, "repl.native.lisp_retain", lisp_retain);
   $lisp.bind(lisp, "repl.native.lisp_at", lisp_at);
   $lisp.bind(lisp, "repl.native.lisp_zero", lisp_zero);
   $lisp.bind(lisp, "repl.native.lisp_copy", lisp_copy);

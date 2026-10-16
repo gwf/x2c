@@ -435,6 +435,9 @@ and length, List literals and indexing, and Array construction, mutation,
 and indexing are exercised by the focused checks. Captured `Func` values
 can be called directly or passed to supported native callbacks. A record
 captured by value retains a copy through later submissions.
+Reference captures share the original local or parameter, whose storage
+remains alive until the session ends. Capturing an existing reference parameter
+keeps its caller's alias and does not extend the caller object's lifetime.
 
 The whole interpreter exposes the fixed-signature
 `String.format(String fmt, List values)` operation. Call it as
