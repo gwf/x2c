@@ -98,7 +98,7 @@ static void _check_runtime_meta_calls(Compiler c, Var root) {
 /* The unit's definitions so far that the group can reach, in source order:
    directives, declarations, included providers, reached functions, and
    compile-time-only functions that the unit itself never emits. */
-static Array _units(Compiler c) {
+module Array _units(Compiler c) {
   String lib = %"${x2c_get_root()}/lib/";
   Array ordered = _runtime_includes(c, lib);
   _source_order(c, ordered, lib);
@@ -253,7 +253,7 @@ static Array _reachable(Compiler c, Array ordered, Map reached) {
   return units;
 }
 
-static int _function_identity(List fn, Var &identity, String &name) {
+module int _function_identity(List fn, Var &identity, String &name) {
   match (fn)
     case %(function ? (bind (binding ?id ?(String spelling)) *) ?): {
       identity = id;
@@ -309,7 +309,7 @@ void Compiler.refuse_record_meta_call(Compiler c, String name, Token site) {
 
 /* Why the group cannot link, or NULL: a function it calls is a bodyless
    `meta` prototype that nothing supplies. */
-static String _unbound(Compiler c) {
+module String _unbound(Compiler c) {
   foreach (List entry, c.meta_group)
     match (entry) case %(function ?fn *): {
       String name = _unbound_callee(c, fn);

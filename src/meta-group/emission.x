@@ -11,12 +11,12 @@
    borrows the unit's bindings and types and leaves the unit as it found
    it: generated names, literal caches, helpers, initializers, and semantic
    rows are its own. */
-static List _emit(
+module List _emit(
   Compiler c, String stamp, String stem, String suffix, String &failure) {
   return _emit_prepared(c, stamp, stem, suffix, NULL, NULL, failure);
 }
 
-static List _emit_prepared(
+module List _emit_prepared(
   Compiler c, String stamp, String stem, String suffix,
   List declarations, Func prepare, String &failure) {
   Array units = prepare ? NULL : _units(c);

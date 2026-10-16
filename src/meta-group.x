@@ -46,8 +46,8 @@ static macro Stmt $fail.meta_group_function_unavailable(
 // the meta toolchain
 
 /* The C compiler and x2c include directory that build meta code. */
-static String meta_cc = NULL, meta_include_dir = NULL;
-static Map meta_build_tables = NULL, meta_build_providers = NULL;
+module String meta_cc = NULL, meta_include_dir = NULL;
+module Map meta_build_tables = NULL, meta_build_providers = NULL;
 
 module {
   "meta-group/toolchain.x",
