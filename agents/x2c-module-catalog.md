@@ -386,8 +386,8 @@ the generated header and source of one unit.
 Public functions:
 
 `Compiler.generate_code`, `Compiler.generate_code_text`,
-`Compiler.initializer_function`, `Compiler.run_once_body`, `Init.enter`,
-`Compiler.place_source_prelude`, `Compiler.init_statements`,
+`Compiler.place_source_prelude`, `Compiler.initializer_function`,
+`Compiler.run_once_body`, `Init.enter`, `Compiler.init_statements`,
 `Compiler.definition_rows`, `Compiler.dump_definitions`
 
 ### [src/grammar.x](../src/grammar.x)
