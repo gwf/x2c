@@ -1295,7 +1295,7 @@ static int _match_viewed(
     }
   }
   Buffer tests = Buffer.new(0);
-  if (_match_nested(tests, [], NULL, derived, binders.array(), depths) < 0)
+  if (_match_nested(tests, [], NULL, derived, binders, depths) < 0)
     return -1;
   b.write(" { int _x2c_gensym_match_root = ");
   /* A subject headed by the pattern's own head is neither a retained
