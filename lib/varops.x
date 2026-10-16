@@ -89,19 +89,16 @@ static macro Unit $native.update(Type $type, Name $function, Literal $row) {
       also leaves it unchanged and returns the native zero for `$type`.
   */
   $type $function(
-    volatile $type *$(x2c.ident "lhs"), Symbol $(x2c.ident "op"),
-    Var $(x2c.ident "rhs")) {
-    if (!$(x2c.ident "lhs")) {
-      raise %(bad-arg (operation ${
-        $(x2c.literal.string (Code.binding_spelling $function))
-      }));
-    }
+    volatile $type *$x2c_ident("lhs"), Symbol $x2c_ident("op"),
+    Var $x2c_ident("rhs")) {
+    if (!$x2c_ident("lhs"))
+      raise %(bad-arg (operation ${$Code.binding_spelling($function)}));
     Var $converted = _native_update(
       $_update_box($row, $x2c_ident("lhs")),
-      $_update_tag($row), $(x2c.ident "op"), $(x2c.ident "rhs"));
+      $_update_tag($row), $x2c_ident("op"), $x2c_ident("rhs"));
     if ($converted is void) return 0;
     $type value = $_update_decode($row, $converted);
-    ($(x2c.ident "lhs"))[0] = value;
+    $x2c_ident("lhs")[0] = value;
     return value;
   }
 }
