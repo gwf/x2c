@@ -39,7 +39,45 @@ void Lisp_call_budget(Lisp lisp, long budget);
 
 void Lisp_set_interrupted(Lisp lisp, int interrupted);
 
+Var Lisp_eval(Lisp lisp, Var expression);
+
+Var Lisp_apply(Lisp lisp, Var callable, List values);
+
+Var Lisp_eval_string(Lisp lisp, String source);
+
+Var Lisp_eval_file(Lisp l, File source);
+
+Var lisp_source_function(Var callable);
+
+extern Map lisp_native_targets(void);
+
+Lisp Lisp_kernel(void);
+
+Lisp Lisp_new(void);
+
+void Lisp_destroy(Lisp lisp);
+
+void Lisp_adopt(Lisp lisp, Lisp parent);
+
+void Lisp_freeze(Lisp lisp);
+
+int Lisp_try_get(Lisp lisp, String name, Var * out);
+
+void Lisp_set_global(Lisp lisp, String name, Var value);
+
+void Lisp_bind(Lisp lisp, String name, Func function);
+
+Lisp Lisp_active(void);
+
+Scope * Lisp_storage(Lisp lisp);
+
+Scope * Lisp_automatic_storage(Lisp lisp);
+
+Scope * Lisp_result_storage(Lisp lisp);
+
 #define LISP_READ_DEPTH_MAX 1024
+Symbol Lisp_read(Lisp lisp, String source, unsigned * cursor, Var * out);
+
 Var lisp_truth(Var value);
 
 Var lisp_atom(Var value);
@@ -107,44 +145,6 @@ Var lisp_match_replace(List input, Var pat, Var template);
 Var lisp_read_file(String path);
 
 Var lisp_write_file(String path, String text);
-
-extern Map lisp_native_targets(void);
-
-Lisp Lisp_kernel(void);
-
-Lisp Lisp_new(void);
-
-void Lisp_destroy(Lisp lisp);
-
-void Lisp_adopt(Lisp lisp, Lisp parent);
-
-void Lisp_freeze(Lisp lisp);
-
-Symbol Lisp_read(Lisp lisp, String source, unsigned * cursor, Var * out);
-
-Var Lisp_eval(Lisp lisp, Var expression);
-
-Var Lisp_apply(Lisp lisp, Var callable, List values);
-
-Var Lisp_eval_string(Lisp lisp, String source);
-
-Var Lisp_eval_file(Lisp l, File source);
-
-int Lisp_try_get(Lisp lisp, String name, Var * out);
-
-void Lisp_set_global(Lisp lisp, String name, Var value);
-
-void Lisp_bind(Lisp lisp, String name, Func function);
-
-Lisp Lisp_active(void);
-
-Scope * Lisp_storage(Lisp lisp);
-
-Scope * Lisp_automatic_storage(Lisp lisp);
-
-Scope * Lisp_result_storage(Lisp lisp);
-
-Var lisp_source_function(Var callable);
 
 
 #endif /* __GUARD_0xD09CF48E__ */
