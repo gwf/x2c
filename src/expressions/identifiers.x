@@ -76,9 +76,8 @@ static List _capture_lambda_value(
    identity; global shadow handling instead gives the visible declaration an
    emitted alias so the original identity keeps its meaning. A template's
    free name arrives as `binding-name` and binds where the expansion lands;
-   a name declared at file scope where the template is written, or listed
-   with `using`, arrives as `binding-global` and keeps that declaration and
-   its type. */
+   a name listed with `using` arrives as `binding-global` and keeps its
+   file-scope declaration and type. */
 static List _identifier_binding(
   Compiler c, Var value, Type &type, Token origin, int &require_type) {
   require_type = value is <string>;
@@ -121,9 +120,9 @@ static List _identifier_binding(
 }
 
 /* A name a template reads without declaring it binds where the expansion
-   lands, unless a file-scope declaration supplies it where the template is
-   written. A `Macro` local is a compile-time template the body composes, so
-   an anonymous macro captures its value where it is written. */
+   lands unless the template keeps it with `using`. A `Macro` local is a
+   compile-time template the body composes, so an anonymous macro captures
+   its value where it is written. */
 static int _template_free_name(Compiler c, List binding) {
   if (!binding || c.macro_template_local(binding)) return 0;
   Var type = c.semantic_binding_facts()[%(type $binding)];
