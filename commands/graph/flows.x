@@ -14,169 +14,114 @@
 
 #include <string.h>
 
-static List _flow_producer_target;
-static Map _flow_public_index, _flow_tainted_parameters;
-static Map _flow_tainted_returns;
+/* One function's value-flow walk: the unit facts its calls resolve
+   against, its parameters, and the returns, calls, and unresolved stores
+   it finds. Locals vary by branch and travel beside the walk. */
+typedef struct FlowUnit FlowUnit;
+static struct FlowUnit {
+  Compiler compiler;
+  String path;
+  Map definitions, parameters;
+  Array returns, calls, unresolved;
+};
 
-static List _flow_summary(
-  Compiler compiler, Var value, Map parameters, Map locals) {
+static List _flow_location(FlowUnit &unit, int origin) =>
+  project_location(unit.compiler, unit.path, origin);
+
+static List _flow_summary(FlowUnit &unit, Var value, Map locals) {
   Var node = project_peel(value);
   match (node) {
     case %(ident (!set ?binding (binding ? ?spelling))): {
       Var position;
-      if (parameters.try_get(binding, position)) return position;
+      if (unit.parameters.try_get(binding, position)) return position;
       if (locals.contains(binding)) return %(local $spelling);
-      return %(identifier ${compiler.emitted_binding_name(binding)});
+      return %(identifier ${unit.compiler.emitted_binding_name(binding)});
     }
     case %(call ?callee (args *)): {
       String name;
-      project_call_target(compiler, {}, node, name, NULL);
+      project_call_target(unit.compiler, {}, node, name, NULL);
       return %(call $name);
     }
     case %(literal ? ?spelling *): return %(literal $spelling);
     case %(cons *): return %(list);
     case %(map *): return %(map);
     case %(array *): return %(array);
-    case %(op . ? (?member)): return %(field $member);
-    case %(op (!quote ->) ? (?member)): return %(field $member);
+    case %(op (!or (!quote .) (!quote ->)) ? (?member)):
+      return %(field $member);
   }
   return %(value);
 }
 
 static List _flow_arguments(
-  Compiler compiler, List values, String path, int origin, Map definitions,
-  Map parameters, Map locals) {
+  FlowUnit &unit, List values, int origin, Map locals) {
   Array arguments = [];
   int position = 0;
   foreach (Var value, values) {
     arguments.push(
-      %(argument $position
-        ${_flow_summary(compiler, value, parameters, locals)}
-        ${_flow_source(
-          compiler, value, path, origin, definitions, parameters, locals)}));
+      %(argument $position ${_flow_summary(unit, value, locals)}
+        ${_flow_source(unit, value, origin, locals)}));
     position++;
   }
   return arguments.list_free();
 }
 
-static List _flow_source(
-  Compiler compiler, Var value, String path, int origin, Map definitions,
-  Map parameters, Map locals) {
+static List _flow_source(FlowUnit &unit, Var value, int origin, Map locals) {
   if (value is not <list>)
-    return %(
-      unknown "value" ${project_location(compiler, path, origin)}
-    );
+    return %(unknown "value" ${_flow_location(unit, origin)});
   List node = value;
   match (node) {
     case %(at ?next_origin ?inner):
-      return _flow_source(
-        compiler, inner, path, next_origin.integer(), definitions,
-        parameters, locals);
-    case %(expr ? ?inner):
-      return _flow_source(
-        compiler, inner, path, origin, definitions, parameters, locals);
-    case %(parens ?inner):
-      return _flow_source(
-        compiler, inner, path, origin, definitions, parameters, locals);
-    case %(cast ? ?inner):
-      return _flow_source(
-        compiler, inner, path, origin, definitions, parameters, locals);
-    case %(op = ? ?right):
-      return _flow_source(
-        compiler, right, path, origin, definitions, parameters, locals);
+      return _flow_source(unit, inner, next_origin.integer(), locals);
+    case %(expr ? ?inner): return _flow_source(unit, inner, origin, locals);
+    case %(parens ?inner): return _flow_source(unit, inner, origin, locals);
+    case %(cast ? ?inner): return _flow_source(unit, inner, origin, locals);
+    case %(op = ? ?right): return _flow_source(unit, right, origin, locals);
     case %(ident (!set ?binding (binding ? ?spelling))): {
       Var position;
-      if (parameters.try_get(binding, position)) return position;
+      if (unit.parameters.try_get(binding, position)) return position;
       if (locals.contains(binding)) return locals[binding];
-      return %(value ${_flow_summary(compiler, node, parameters, locals)});
+      return %(value ${_flow_summary(unit, node, locals)});
     }
     case %(call ? (args *arguments)): {
       String name = NULL;
       List target = project_call_target(
-        compiler, definitions, node, name, NULL);
+        unit.compiler, unit.definitions, node, name, NULL);
       if (name == "List_var" && arguments && !arguments.cdr())
         return %(
-          wrapper $name ${project_location(compiler, path, origin)}
-          ${_flow_source(
-            compiler, arguments.car(), path, origin, definitions,
-            parameters, locals)}
+          wrapper $name ${_flow_location(unit, origin)}
+          ${_flow_source(unit, arguments.car(), origin, locals)}
         );
       return %(
-        call $target $name
-        ${project_location(compiler, path, origin)}
-        (arguments
-          @{_flow_arguments(
-            compiler, arguments, path, origin, definitions,
-            parameters, locals
-          )})
+        call $target $name ${_flow_location(unit, origin)}
+        (arguments @{_flow_arguments(unit, arguments, origin, locals)})
       );
     }
     case %(op ? ? ?ontrue ?onfalse):
       return %(
-        choice ${project_location(compiler, path, origin)}
-        ${_flow_source(
-          compiler, ontrue, path, origin, definitions, parameters, locals)}
-        ${_flow_source(
-          compiler, onfalse, path, origin, definitions, parameters, locals)}
+        choice ${_flow_location(unit, origin)}
+        ${_flow_source(unit, ontrue, origin, locals)}
+        ${_flow_source(unit, onfalse, origin, locals)}
       );
-    case %(op . ? (?)):
-      return %(
-        unknown "field-read" ${project_location(compiler, path, origin)}
-      );
-    case %(op (!quote ->) ? (?)):
-      return %(
-        unknown "field-read" ${project_location(compiler, path, origin)}
-      );
+    case %(op (!or (!quote .) (!quote ->)) ? (?)):
+      return %(unknown "field-read" ${_flow_location(unit, origin)});
   }
-  return %(
-    value ${_flow_summary(compiler, node, parameters, locals)}
-  );
-}
-
-static void _flow_collect_parameters(
-  List modifiers, Map parameters, Array records) {
-  match (modifiers)
-    case %((fnmod (params *values)) *): {
-      int position = 0;
-      foreach (Var value, values) {
-        match (value)
-          case %(
-            param ?type
-            (bind (!set ?binding (binding ? ?spelling)) ?)
-          ):
-            parameters[binding] = %(
-              parameter $position $spelling $type
-            );
-        match (value)
-          case %(param ?type (bind (binding ? ?spelling) ?)):
-            records.push(%(parameter $position $spelling $type));
-        position++;
-      }
-    }
+  return %(value ${_flow_summary(unit, node, locals)});
 }
 
 static void _flow_collect_calls(
-  Compiler compiler, Var value, String path, int origin, Map definitions,
-  Map parameters, Map locals, Array calls) {
+  FlowUnit &unit, Var value, int origin, Map locals) {
   if (value is not <list>) return;
   List node = value;
   match (node) {
     case %(function *): return;
     case %(at ?next_origin ?inner): {
-      _flow_collect_calls(
-        compiler, inner, path, next_origin.integer(), definitions,
-        parameters, locals, calls);
+      _flow_collect_calls(unit, inner, next_origin.integer(), locals);
       return;
     }
     case %(call ? (args *arguments)):
-      calls.push(
-        _flow_source(
-          compiler, node, path, origin, definitions, parameters, locals));
+      unit.calls.push(_flow_source(unit, node, origin, locals));
   }
-  foreach (Var child, node)
-    _flow_collect_calls(
-      compiler, child, path, origin, definitions, parameters, locals,
-      calls);
+  foreach (Var child, node) _flow_collect_calls(unit, child, origin, locals);
 }
 
 static List _flow_local_binding(Var value) {
@@ -193,14 +138,13 @@ static List _flow_local_binding(Var value) {
 }
 
 static void _flow_invalidate_addressed(
-  Compiler compiler, Var value, String path, int origin, Map locals) {
+  FlowUnit &unit, Var value, int origin, Map locals) {
   if (value is not <list>) return;
   List node = value;
   match (node) {
     case %(function *): return;
     case %(at ?next_origin ?inner): {
-      _flow_invalidate_addressed(
-        compiler, inner, path, next_origin.integer(), locals);
+      _flow_invalidate_addressed(unit, inner, next_origin.integer(), locals);
       return;
     }
     case %(op & ?inner): {
@@ -208,29 +152,24 @@ static void _flow_invalidate_addressed(
       if (binding && locals.contains(binding)) {
         List prior = locals[binding];
         locals[binding] = %(
-          unknown "address-mutation"
-          ${project_location(compiler, path, origin)} $prior
+          unknown "address-mutation" ${_flow_location(unit, origin)} $prior
         );
       }
       return;
     }
   }
   foreach (Var child, node)
-    _flow_invalidate_addressed(compiler, child, path, origin, locals);
+    _flow_invalidate_addressed(unit, child, origin, locals);
 }
 
 static void _flow_collect_effects(
-  Compiler compiler, Var value, String path, int origin, Map definitions,
-  Map parameters, Map locals, Array calls) {
-  _flow_collect_calls(
-    compiler, value, path, origin, definitions, parameters, locals,
-    calls);
-  _flow_invalidate_addressed(compiler, value, path, origin, locals);
+  FlowUnit &unit, Var value, int origin, Map locals) {
+  _flow_collect_calls(unit, value, origin, locals);
+  _flow_invalidate_addressed(unit, value, origin, locals);
 }
 
 static void _flow_merge_locals(
-  Compiler compiler, String path, int origin, Map locals, Map first,
-  Map second) {
+  FlowUnit &unit, int origin, Map locals, Map first, Map second) {
   foreach (Var (binding_value, source_value), locals) {
     List binding = binding_value;
     List first_source = first[binding];
@@ -240,198 +179,128 @@ static void _flow_merge_locals(
       continue;
     }
     locals[binding] = %(
-      unknown "alias-merge" ${project_location(compiler, path, origin)}
+      unknown "alias-merge" ${_flow_location(unit, origin)}
       $first_source $second_source
     );
   }
 }
 
 static void _flow_set_local(
-  Compiler compiler, List binding, String spelling, Var value, Symbol kind,
-  String path, int origin, Map definitions, Map parameters, Map locals) {
+  FlowUnit &unit, List binding, Var value, Symbol kind, int origin,
+  Map locals) {
   locals[binding] = %(
-    $kind $spelling ${project_location(compiler, path, origin)}
-    ${_flow_source(
-      compiler, value, path, origin, definitions, parameters, locals)}
+    $kind ${Ast.binding_spelling(binding)} ${_flow_location(unit, origin)}
+    ${_flow_source(unit, value, origin, locals)}
   );
 }
 
+/* Walks `branch` from a copy of `locals` and merges the result back. */
+static void _flow_branch(FlowUnit &unit, Var branch, int origin, Map locals) {
+  Map prior = locals.copy(), branch_locals = prior.copy();
+  _flow_statement(unit, branch, origin, branch_locals);
+  _flow_merge_locals(unit, origin, locals, prior, branch_locals);
+}
+
 static void _flow_statement(
-  Compiler compiler, Var value, String path, int origin, Map definitions,
-  Map parameters, Map locals, Array returns, Array calls, Array unresolved) {
+  FlowUnit &unit, Var value, int origin, Map locals) {
   if (value is not <list>) return;
   List node = value;
   match (node) {
     case %(function *): return;
     case %(at ?next_origin ?inner): {
-      _flow_statement(
-        compiler, inner, path, next_origin.integer(), definitions,
-        parameters, locals, returns, calls, unresolved);
+      _flow_statement(unit, inner, next_origin.integer(), locals);
       return;
     }
     case %(block *statements): {
       foreach (Var statement, statements)
-        _flow_statement(
-          compiler, statement, path, origin, definitions, parameters,
-          locals, returns, calls, unresolved);
+        _flow_statement(unit, statement, origin, locals);
       return;
     }
     case %(declare ? (bindings *bindings)): {
       foreach (Var entry, bindings) {
         List binding = _flow_local_binding(entry);
         if (!binding) continue;
-        String spelling = "local";
-        match (binding) case %(binding ? ?name): spelling = name.str();
         match (entry) {
           case %(op = ? ?initial):
-            _flow_set_local(
-              compiler, binding, spelling, initial, <local>, path,
-              origin, definitions, parameters, locals);
+            _flow_set_local(unit, binding, initial, <local>, origin, locals);
           default:
             locals[binding] = %(
-              unknown "uninitialized"
-              ${project_location(compiler, path, origin)}
+              unknown "uninitialized" ${_flow_location(unit, origin)}
             );
         }
       }
-      _flow_collect_effects(
-        compiler, node, path, origin, definitions, parameters, locals,
-        calls);
+      _flow_collect_effects(unit, node, origin, locals);
       return;
     }
     case %(stmnt (expr ? (op = ?left ?right))): {
       List binding = _flow_local_binding(left);
-      if (binding) {
-        String spelling = "local";
-        match (binding) case %(binding ? ?name): spelling = name.str();
-        _flow_set_local(
-          compiler, binding, spelling, right, <assignment>, path,
-          origin, definitions, parameters, locals);
-      }
+      if (binding)
+        _flow_set_local(unit, binding, right, <assignment>, origin, locals);
       else
-        unresolved.push(
-          %(unresolved "field-storage"
-            ${project_location(compiler, path, origin)}
-            ${_flow_source(
-              compiler, right, path, origin, definitions, parameters,
-              locals)}));
-      _flow_collect_effects(
-        compiler, right, path, origin, definitions, parameters, locals,
-        calls);
+        unit.unresolved.push(
+          %(unresolved "field-storage" ${_flow_location(unit, origin)}
+            ${_flow_source(unit, right, origin, locals)}));
+      _flow_collect_effects(unit, right, origin, locals);
       return;
     }
     case %(stmnt (expr ? (op ?operator ?left ?right))): {
       List binding = _flow_local_binding(left);
       if (binding && operator != <=>) {
-        String spelling = "local";
-        match (binding) case %(binding ? ?name): spelling = name.str();
         List prior = locals.contains(binding)
                    ? locals[binding].list()
-                   : %(
-                       unknown "prior"
-                       ${project_location(compiler, path, origin)}
-                     );
+                   : %(unknown "prior" ${_flow_location(unit, origin)});
         locals[binding] = %(
-          unknown "mutation" ${project_location(compiler, path, origin)}
-          $prior
+          unknown "mutation" ${_flow_location(unit, origin)} $prior
         );
       }
-      _flow_collect_effects(
-        compiler, node, path, origin, definitions, parameters, locals,
-        calls);
+      _flow_collect_effects(unit, node, origin, locals);
       return;
     }
     case %(return ? ?expression): {
-      returns.push(
-        %(return ${project_location(compiler, path, origin)}
-          ${_flow_source(
-            compiler, expression, path, origin, definitions, parameters,
-            locals)}));
-      _flow_collect_effects(
-        compiler, expression, path, origin, definitions, parameters,
-        locals, calls);
+      unit.returns.push(
+        %(return ${_flow_location(unit, origin)}
+          ${_flow_source(unit, expression, origin, locals)}));
+      _flow_collect_effects(unit, expression, origin, locals);
       return;
     }
     case %(if ?condition ?ontrue): {
-      _flow_collect_effects(
-        compiler, condition, path, origin, definitions, parameters,
-        locals, calls);
-      Map prior = locals.copy(), branch = prior.copy();
-      _flow_statement(
-        compiler, ontrue, path, origin, definitions, parameters,
-        branch, returns, calls, unresolved);
-      _flow_merge_locals(
-        compiler, path, origin, locals, prior, branch);
+      _flow_collect_effects(unit, condition, origin, locals);
+      _flow_branch(unit, ontrue, origin, locals);
       return;
     }
     case %(if ?condition ?ontrue ?onfalse): {
-      _flow_collect_effects(
-        compiler, condition, path, origin, definitions, parameters,
-        locals, calls);
+      _flow_collect_effects(unit, condition, origin, locals);
       Map prior = locals.copy();
       Map true_locals = prior.copy(), false_locals = prior.copy();
-      _flow_statement(
-        compiler, ontrue, path, origin, definitions, parameters,
-        true_locals, returns, calls, unresolved);
-      _flow_statement(
-        compiler, onfalse, path, origin, definitions, parameters,
-        false_locals, returns, calls, unresolved);
-      _flow_merge_locals(
-        compiler, path, origin, locals, true_locals, false_locals);
+      _flow_statement(unit, ontrue, origin, true_locals);
+      _flow_statement(unit, onfalse, origin, false_locals);
+      _flow_merge_locals(unit, origin, locals, true_locals, false_locals);
       return;
     }
     case %(while ?condition ?body): {
-      _flow_collect_effects(
-        compiler, condition, path, origin, definitions, parameters,
-        locals, calls);
-      Map prior = locals.copy(), branch = prior.copy();
-      _flow_statement(
-        compiler, body, path, origin, definitions, parameters, branch,
-        returns, calls, unresolved);
-      _flow_merge_locals(
-        compiler, path, origin, locals, prior, branch);
+      _flow_collect_effects(unit, condition, origin, locals);
+      _flow_branch(unit, body, origin, locals);
       return;
     }
     case %(do ?body ?condition): {
       Map prior = locals.copy(), branch = prior.copy();
-      _flow_statement(
-        compiler, body, path, origin, definitions, parameters, branch,
-        returns, calls, unresolved);
-      _flow_collect_effects(
-        compiler, condition, path, origin, definitions, parameters,
-        branch, calls);
-      _flow_merge_locals(
-        compiler, path, origin, locals, prior, branch);
+      _flow_statement(unit, body, origin, branch);
+      _flow_collect_effects(unit, condition, origin, branch);
+      _flow_merge_locals(unit, origin, locals, prior, branch);
       return;
     }
     case %(for ?initial ?condition ?increment ?body): {
       Map prior = locals.copy(), branch = prior.copy();
-      _flow_statement(
-        compiler, initial, path, origin, definitions, parameters,
-        branch, returns, calls, unresolved);
-      _flow_collect_effects(
-        compiler, condition, path, origin, definitions, parameters,
-        branch, calls);
-      _flow_statement(
-        compiler, body, path, origin, definitions, parameters, branch,
-        returns, calls, unresolved);
-      _flow_collect_effects(
-        compiler, increment, path, origin, definitions, parameters,
-        branch, calls);
-      _flow_merge_locals(
-        compiler, path, origin, locals, prior, branch);
+      _flow_statement(unit, initial, origin, branch);
+      _flow_collect_effects(unit, condition, origin, branch);
+      _flow_statement(unit, body, origin, branch);
+      _flow_collect_effects(unit, increment, origin, branch);
+      _flow_merge_locals(unit, origin, locals, prior, branch);
       return;
     }
     case %(switch ?expression ?body): {
-      _flow_collect_effects(
-        compiler, expression, path, origin, definitions, parameters,
-        locals, calls);
-      Map prior = locals.copy(), branch = prior.copy();
-      _flow_statement(
-        compiler, body, path, origin, definitions, parameters, branch,
-        returns, calls, unresolved);
-      _flow_merge_locals(
-        compiler, path, origin, locals, prior, branch);
+      _flow_collect_effects(unit, expression, origin, locals);
+      _flow_branch(unit, body, origin, locals);
       return;
     }
     case %(catchcases ?arms): {
@@ -440,37 +309,26 @@ static void _flow_statement(
         match (arm)
           case %(? ?body): {
             Map branch = prior.copy();
-            _flow_statement(
-              compiler, body, path, origin, definitions, parameters,
-              branch, returns, calls, unresolved);
+            _flow_statement(unit, body, origin, branch);
             Map accumulated = locals.copy();
-            _flow_merge_locals(
-              compiler, path, origin, locals, accumulated, branch);
+            _flow_merge_locals(unit, origin, locals, accumulated, branch);
           }
       return;
     }
     case %(try ?body ?catches ?cleanup): {
       Map prior = locals.copy();
       Map body_locals = prior.copy(), catch_locals = prior.copy();
-      _flow_statement(
-        compiler, body, path, origin, definitions, parameters,
-        body_locals, returns, calls, unresolved);
+      _flow_statement(unit, body, origin, body_locals);
       if (catches is <list>)
-        _flow_statement(
-          compiler, catches, path, origin, definitions, parameters,
-          catch_locals, returns, calls, unresolved);
+        _flow_statement(unit, catches, origin, catch_locals);
       _flow_merge_locals(
-        compiler, path, origin, locals, body_locals,
+        unit, origin, locals, body_locals,
         catches is <list> ? catch_locals : body_locals);
-      if (cleanup is <list>)
-        _flow_statement(
-          compiler, cleanup, path, origin, definitions, parameters,
-          locals, returns, calls, unresolved);
+      if (cleanup is <list>) _flow_statement(unit, cleanup, origin, locals);
       return;
     }
   }
-  _flow_collect_effects(
-    compiler, node, path, origin, definitions, parameters, locals, calls);
+  _flow_collect_effects(unit, node, origin, locals);
 }
 
 List _x2c_flow_analyze_unit(Compiler compiler, List ast, String path) {
@@ -481,28 +339,35 @@ List _x2c_flow_analyze_unit(Compiler compiler, List ast, String path) {
       case %(function ?type
              (bind (!set ?binding (binding ? ?)) ?modifiers)
              ?body): {
-        Map parameters = {}, locals = {};
-        Array parameter_records = [], returns = [], calls = [];
-        Array unresolved = [];
-        _flow_collect_parameters(
-          modifiers, parameters, parameter_records);
-        _flow_statement(
-          compiler, body, path, 0, definitions, parameters, locals,
-          returns, calls, unresolved);
+        FlowUnit unit = {
+          .compiler = compiler, .path = path, .definitions = definitions,
+          .parameters = {}, .returns = [], .calls = [], .unresolved = []
+        };
+        Array parameter_records = [];
+        foreach (List parameter, project_parameters(modifiers))
+          match (parameter)
+            case %(parameter ?position
+                   (!set ?parameter_binding (binding ? ?spelling))
+                   ?parameter_type): {
+              List record = %(
+                parameter $position $spelling $parameter_type
+              );
+              unit.parameters[parameter_binding] = record;
+              parameter_records.push(record);
+            }
+        _flow_statement(unit, body, 0, {});
         parameter_records.sort();
-        returns.sort();
-        calls.sort();
-        unresolved.sort();
-        Symbol visibility = ((Type) type).is_static()
-                          ? <static> : <public>;
+        unit.returns.sort();
+        unit.calls.sort();
+        unit.unresolved.sort();
         functions.push(
           %(function ${definitions[binding]}
             ${compiler.emitted_binding_name(binding)}
-            $visibility
+            ${project_visibility(type)}
             (parameters @{parameter_records.list_free()})
-            (returns @{returns.list_free()})
-            (calls @{calls.list_free()})
-            (unresolved @{unresolved.list_free()})));
+            (returns @{unit.returns.list_free()})
+            (calls @{unit.calls.list_free()})
+            (unresolved @{unit.unresolved.list_free()})));
       }
   functions.sort();
   return functions.list_free();
@@ -552,70 +417,82 @@ static List _flow_other_arguments(List arguments, int consumed) {
   return others.list_free();
 }
 
-static int _flow_is_tainted(List source, List current) {
+/* One producer-to-consumer query over the project's function records:
+   the resolved producer, the taint facts that reach it, the functions on
+   the current trace path, and the paths and unresolved chains found. */
+typedef struct FlowTrace FlowTrace;
+static struct FlowTrace {
+  List producer, functions;
+  Map by_target, publics, tainted_parameters, tainted_returns, active;
+  Array paths, unresolved;
+};
+
+static int _flow_is_tainted(FlowTrace &trace, List source, List current) {
   if (!source) return 0;
   match (source) {
     case %((!or local assignment return wrapper unknown) *parts):
       foreach (Var part, parts)
-        if (part is <list> && _flow_is_tainted(part, current))
+        if (part is <list> && _flow_is_tainted(trace, part, current))
           return 1;
     case %(choice ? ?ontrue ?onfalse):
-      return _flow_is_tainted(ontrue, current) ||
-             _flow_is_tainted(onfalse, current);
+      return _flow_is_tainted(trace, ontrue, current) ||
+             _flow_is_tainted(trace, onfalse, current);
     case %(parameter ?position ? ?):
-      return _flow_tainted_parameters.contains(
+      return trace.tainted_parameters.contains(
         %(parameter $current $position));
     case %(call ?raw ? ? (arguments *)): {
-      List target = resolve_project_target(raw, _flow_public_index);
+      List target = resolve_project_target(raw, trace.publics);
       if (target &&
-          (List.equal(target, _flow_producer_target) ||
-           _flow_tainted_returns.contains(target)))
+          (List.equal(target, trace.producer) ||
+           trace.tainted_returns.contains(target)))
         return 1;
     }
   }
   return 0;
 }
 
-static int _flow_carries_taint(List source, List current) {
-  if (_flow_is_tainted(source, current)) return 1;
+static int _flow_carries_taint(
+  FlowTrace &trace, List source, List current) {
+  if (_flow_is_tainted(trace, source, current)) return 1;
   match (source)
     case %(call ? ? ? (arguments *arguments)):
       foreach (List argument, arguments)
         match (argument)
           case %(argument ? ? ?argument_source):
-            if (_flow_carries_taint(argument_source, current)) return 1;
+            if (_flow_carries_taint(trace, argument_source, current))
+              return 1;
   return 0;
 }
 
-static void _flow_build_taint(List functions) {
+static void _flow_build_taint(FlowTrace &trace) {
   int changed;
   do {
     changed = 0;
-    foreach (List function, functions)
+    foreach (List function, trace.functions)
       match (function)
         case %(
           function ?target ? ? (parameters *) (returns *returns)
           (calls *calls) (unresolved *)
         ): {
-          if (!_flow_tainted_returns.contains(target))
+          if (!trace.tainted_returns.contains(target))
             foreach (List returned, returns)
-              if (_flow_is_tainted(returned, target)) {
-                _flow_tainted_returns[target] = 1;
+              if (_flow_is_tainted(trace, returned, target)) {
+                trace.tainted_returns[target] = 1;
                 changed = 1;
                 break;
               }
           foreach (List call, calls)
             match (call)
               case %(call ?raw ? ? (arguments *arguments)): {
-                List callee = resolve_project_target(raw, _flow_public_index);
+                List callee = resolve_project_target(raw, trace.publics);
                 if (!callee) continue;
                 foreach (List argument, arguments)
                   match (argument)
                     case %(argument ?position ? ?source): {
                       List key = %(parameter $callee $position);
-                      if (!_flow_tainted_parameters.contains(key) &&
-                          _flow_is_tainted(source, target)) {
-                        _flow_tainted_parameters[key] = 1;
+                      if (!trace.tainted_parameters.contains(key) &&
+                          _flow_is_tainted(trace, source, target)) {
+                        trace.tainted_parameters[key] = 1;
                         changed = 1;
                       }
                     }
@@ -624,86 +501,68 @@ static void _flow_build_taint(List functions) {
   } while (changed);
 }
 
-static List _flow_prepend(List step, List suffix) {
-  return cons(step, suffix);
-}
-
 static void _flow_record_result(
-  Array paths, Array unresolved, String blocked, List steps) {
+  FlowTrace &trace, String blocked, List steps) {
   if (blocked)
-    unresolved.push(%(unresolved $blocked (chain @steps)));
+    trace.unresolved.push(%(unresolved $blocked (chain @steps)));
   else
-    paths.push(%(path @steps));
+    trace.paths.push(%(path @steps));
 }
 
 static void _flow_trace_call_arguments(
-  List arguments, List current, Map environment, List suffix, String reason,
-  List producer, Map by_target, Map publics, List functions, Map active,
-  Array paths, Array unresolved) {
+  FlowTrace &trace, List arguments, List current, Map environment,
+  List suffix, String reason) {
   foreach (List argument, arguments)
     match (argument)
       case %(argument ? ? ?source):
-        if (_flow_carries_taint(source, current))
-          _flow_trace(
-            source, current, environment, suffix, reason, producer,
-            by_target, publics, functions, active, paths, unresolved);
+        if (_flow_carries_taint(trace, source, current))
+          _flow_trace(trace, source, current, environment, suffix, reason);
 }
 
+/* Follows `source` back toward the producer. `current` is the function
+   whose record holds `source`, `environment` maps its parameter positions
+   to the caller's argument sources, and `suffix` holds the steps already
+   taken toward the consumer. */
 static void _flow_trace(
-  List source, List current, Map environment, List suffix, String blocked,
-  List producer, Map by_target, Map publics, List functions, Map active,
-  Array paths, Array unresolved) {
+  FlowTrace &trace, List source, List current, Map environment,
+  List suffix, String blocked) {
   if (!source) return;
   match (source) {
     case %(wrapper ?name ?location ?inner):
       _flow_trace(
-        inner, current, environment,
-        _flow_prepend(%(step wrapper $name $location), suffix), blocked,
-        producer, by_target, publics, functions, active, paths,
-        unresolved);
+        trace, inner, current, environment,
+        cons(%(step wrapper $name $location), suffix), blocked);
     case %(choice ?location ?ontrue ?onfalse): {
       _flow_trace(
-        ontrue, current, environment,
-        _flow_prepend(%(step choice $location), suffix), blocked,
-        producer, by_target, publics, functions, active, paths,
-        unresolved);
+        trace, ontrue, current, environment,
+        cons(%(step choice $location), suffix), blocked);
       _flow_trace(
-        onfalse, current, environment,
-        _flow_prepend(%(step choice $location), suffix), blocked,
-        producer, by_target, publics, functions, active, paths,
-        unresolved);
+        trace, onfalse, current, environment,
+        cons(%(step choice $location), suffix), blocked);
     }
     case %((!or local assignment) ?spelling ?location ?inner):
       _flow_trace(
-        inner, current, environment,
-        _flow_prepend(%(step ${source.car()} $spelling $location), suffix),
-        blocked, producer, by_target, publics, functions, active,
-        paths, unresolved);
+        trace, inner, current, environment,
+        cons(%(step ${source.car()} $spelling $location), suffix), blocked);
     case %(return ?location ?inner):
       _flow_trace(
-        inner, current, environment,
-        _flow_prepend(%(step return $location), suffix), blocked,
-        producer, by_target, publics, functions, active, paths,
-        unresolved);
+        trace, inner, current, environment,
+        cons(%(step return $location), suffix), blocked);
     case %(unknown ?reason ?location *inners):
       foreach (List inner, inners)
         _flow_trace(
-          inner, current, environment, suffix,
-          blocked ? blocked : reason.str(), producer, by_target,
-          publics, functions, active, paths, unresolved);
+          trace, inner, current, environment, suffix,
+          blocked ? blocked : reason.str());
     case %(parameter ?position ?spelling ?type): {
       Var replacement;
       if (environment.try_get(position.integer(), replacement)) {
         _flow_trace(
-          replacement, current, {},
-          _flow_prepend(
-            %(step parameter $position $spelling $type), suffix),
-          blocked, producer, by_target, publics, functions, active,
-          paths, unresolved
-        );
+          trace, replacement, current, {},
+          cons(%(step parameter $position $spelling $type), suffix),
+          blocked);
         return;
       }
-      foreach (List caller, functions)
+      foreach (List caller, trace.functions)
         match (caller)
           case %(
             function ?caller_target ? ? (parameters *) (returns *)
@@ -715,84 +574,67 @@ static void _flow_trace(
                   call ?raw ?name ?location
                   (arguments *arguments)
                 ): {
-                  List target = resolve_project_target(raw, publics);
+                  List target = resolve_project_target(raw, trace.publics);
                   if (!target || !List.equal(target, current)) continue;
-                  if (active.contains(caller_target)) continue;
+                  if (trace.active.contains(caller_target)) continue;
                   List argument = _flow_argument(
                     arguments, position.integer());
                   if (argument &&
-                      _flow_carries_taint(argument, caller_target)) {
-                    Map next_active = active.copy();
-                    next_active[caller_target] = 1;
+                      _flow_carries_taint(trace, argument, caller_target)) {
+                    trace.active[caller_target] = 1;
                     _flow_trace(
-                      argument, caller_target, {},
-                      _flow_prepend(%(step call $name $location), suffix),
-                      blocked, producer, by_target, publics, functions,
-                      next_active, paths, unresolved);
+                      trace, argument, caller_target, {},
+                      cons(%(step call $name $location), suffix), blocked);
+                    trace.active.del(caller_target);
                   }
                 }
     }
     case %(
       call ?raw ?name ?location (arguments *arguments)
     ): {
-      List target = resolve_project_target(raw, publics);
-      if (target && List.equal(target, producer)) {
+      List target = resolve_project_target(raw, trace.publics);
+      if (target && List.equal(target, trace.producer)) {
         _flow_record_result(
-          paths, unresolved, blocked,
-          _flow_prepend(
-            %(step producer $target $location), suffix)
-        );
+          trace, blocked,
+          cons(%(step producer $target $location), suffix));
         return;
       }
-      if (!target) {
-        String reason = _flow_unresolved_call(raw, publics);
+      String reason = !target ? _flow_unresolved_call(raw, trace.publics)
+                    : trace.active.contains(target) ? "recursive-call"
+                    : !trace.by_target.contains(target) ? "external-call"
+                    : NULL;
+      if (reason) {
         _flow_trace_call_arguments(
-          arguments, current, environment, suffix,
-          blocked ? blocked : reason, producer, by_target, publics,
-          functions, active, paths, unresolved);
+          trace, arguments, current, environment, suffix,
+          blocked ? blocked : reason);
         return;
       }
-      if (active.contains(target)) {
-        _flow_trace_call_arguments(
-          arguments, current, environment, suffix,
-          blocked ? blocked : "recursive-call", producer, by_target,
-          publics, functions, active, paths, unresolved);
-        return;
-      }
-      if (!by_target.contains(target)) {
-        _flow_trace_call_arguments(
-          arguments, current, environment, suffix,
-          blocked ? blocked : "external-call", producer, by_target,
-          publics, functions, active, paths, unresolved);
-        return;
-      }
-      List function = by_target[target];
-      Map next_environment = {}, next_active = active.copy();
+      List function = trace.by_target[target];
+      Map next_environment = {};
       foreach (List argument, arguments)
         match (argument)
           case %(argument ?position ? ?argument_source):
             next_environment[position.integer()] = argument_source;
-      next_active[target] = 1;
       int returned = 0;
+      trace.active[target] = 1;
       match (function)
         case %(
           function ? ? ? (parameters *) (returns *returns)
           (calls *) (unresolved *)
         ):
           foreach (List returned_source, returns) {
-            if (!_flow_carries_taint(returned_source, target)) continue;
+            if (!_flow_carries_taint(trace, returned_source, target))
+              continue;
             returned = 1;
             _flow_trace(
-              returned_source, target, next_environment,
-              _flow_prepend(%(step call $name $location), suffix),
-              blocked, producer, by_target, publics, functions,
-              next_active, paths, unresolved);
+              trace, returned_source, target, next_environment,
+              cons(%(step call $name $location), suffix), blocked);
           }
+      trace.active.del(target);
       if (!returned)
         _flow_trace_call_arguments(
-          arguments, current, environment, suffix,
-          blocked ? blocked : "no-return-flow", producer, by_target,
-          publics, functions, active, paths, unresolved);
+          trace, arguments, current, environment, suffix,
+          blocked ? blocked : "no-return-flow");
     }
   }
 }
@@ -818,6 +660,15 @@ static List _flow_sorted_unique(Array values) {
   return sorted.list_free();
 }
 
+/* Traces each tainted argument source of one call site in `caller`. */
+static void _flow_trace_site(
+  FlowTrace &trace, List caller, List source, List terminal,
+  String blocked) {
+  trace.active = {};
+  trace.active[caller] = 1;
+  _flow_trace(trace, source, caller, {}, terminal, blocked);
+}
+
 List _x2c_flow_finish(
   List functions, String producer_name, String consumer_name) {
   Map by_target = {}, publics = {}, by_name = {};
@@ -826,23 +677,23 @@ List _x2c_flow_finish(
     %(public $producer_name), by_name);
   List consumer = resolve_project_target(
     %(public $consumer_name), by_name);
-  Array paths = [], unresolved = [];
+  FlowTrace trace = {
+    .producer = producer, .functions = functions, .by_target = by_target,
+    .publics = publics, .tainted_parameters = {}, .tainted_returns = {},
+    .paths = [], .unresolved = []
+  };
   if (!producer)
-    unresolved.push(
+    trace.unresolved.push(
       %(unresolved
         ${by_name.contains(producer_name)
           ? "ambiguous-producer" : "missing-producer"}));
   if (!consumer)
-    unresolved.push(
+    trace.unresolved.push(
       %(unresolved
         ${by_name.contains(consumer_name)
           ? "ambiguous-consumer" : "missing-consumer"}));
   if (producer && consumer) {
-    _flow_producer_target = producer;
-    _flow_public_index = publics;
-    _flow_tainted_parameters = {};
-    _flow_tainted_returns = {};
-    _flow_build_taint(functions);
+    _flow_build_taint(trace);
     foreach (List function, functions)
       match (function)
         case %(
@@ -861,54 +712,35 @@ List _x2c_flow_finish(
                     List source = NULL;
                     match (argument)
                       case %(argument ? ? ?value): source = value;
-                    if (!_flow_carries_taint(source, caller)) {
-                      position++;
-                      continue;
-                    }
-                    Map active = {};
-                    active[caller] = 1;
-                    List row = %(consumer $consumer $location
-                      (argument $position)
-                      (other-arguments
-                        @{_flow_other_arguments(arguments, position)}));
-                    List terminal = cons(row, NULL);
-                    _flow_trace(
-                      source, caller, {},
-                      terminal, NULL, producer, by_target, publics,
-                      functions, active, paths, unresolved);
+                    if (_flow_carries_taint(trace, source, caller))
+                      _flow_trace_site(
+                        trace, caller, source,
+                        %((consumer $consumer $location
+                           (argument $position)
+                           (other-arguments
+                             @{_flow_other_arguments(arguments, position)}))),
+                        NULL);
                     position++;
                   }
                 }
                 else if (!resolved) {
                   String reason = _flow_unresolved_call(raw, publics);
-                  Map active = {};
-                  active[caller] = 1;
                   foreach (List argument, arguments)
                     match (argument)
                       case %(argument ? ? ?source):
-                        if (_flow_carries_taint(source, caller)) {
-                          _flow_trace(
-                            source, caller, {},
-                            cons(%(site $location), NULL), reason,
-                            producer, by_target, publics, functions,
-                            active, paths, unresolved);
-                        }
+                        if (_flow_carries_taint(trace, source, caller))
+                          _flow_trace_site(
+                            trace, caller, source,
+                            %((site $location)), reason);
                 }
               }
           foreach (List barrier, barriers)
             match (barrier)
-              case %(unresolved ?reason ?location ?source): {
-                if (!_flow_carries_taint(source, caller))
-                  continue;
-                Map active = {};
-                active[caller] = 1;
-                List terminal = cons(%(site $location), NULL);
-                _flow_trace(
-                  source, caller, {},
-                  terminal, reason.str(), producer,
-                  by_target, publics, functions, active, paths,
-                  unresolved);
-              }
+              case %(unresolved ?reason ?location ?source):
+                if (_flow_carries_taint(trace, source, caller))
+                  _flow_trace_site(
+                    trace, caller, source, %((site $location)),
+                    reason.str());
         }
   }
   return %(
@@ -916,7 +748,7 @@ List _x2c_flow_finish(
     (definitions
       (producer ${_flow_definition(by_target, producer)})
       (consumer ${_flow_definition(by_target, consumer)}))
-    (paths @{_flow_sorted_unique(paths)})
-    (unresolved @{_flow_sorted_unique(unresolved)})
+    (paths @{_flow_sorted_unique(trace.paths)})
+    (unresolved @{_flow_sorted_unique(trace.unresolved)})
   );
 }
