@@ -10,11 +10,21 @@ typedef struct Lifetime Lifetime;
 
 #include <string.h>
 
+typedef struct LifetimeFacts LifetimeFacts;
+
+/* The facts a nested block or branch replaces with copies and restores:
+   allocation ids and return facts by local binding, regions, and
+   allocations. */
+static struct LifetimeFacts {
+  Map bindings, return_bindings, regions, allocations;
+};
+
 static struct Lifetime {
   Compiler compiler;
   String path, function;
   List target;
-  Map definitions, bindings, return_bindings, regions, allocations;
+  Map definitions;
+  LifetimeFacts facts;
   Map allocation_unresolved, uncertain_allocations;
   Array return_facts, allocation_returns, findings, unresolved;
   Array pending_allocations, pending_returns;
@@ -40,6 +50,15 @@ static int _lifetime_preserves_value(
   source = lifetime.compiler.sym.resolve_key(source);
   target = lifetime.compiler.sym.resolve_key(target);
   return source.is_pointer() && target.is_pointer();
+}
+
+/* The argument a runtime wrapper call passes through unchanged, or NULL
+   when `name` is not a wrapper. */
+static List _lifetime_wrapped(String name, List arguments) {
+  if (!name || !Compiler.region_wrapper(name) || !arguments ||
+      arguments.len() < 2)
+    return NULL;
+  return arguments[1];
 }
 
 static int _lifetime_candidate_type(Type type) {
@@ -113,8 +132,8 @@ static Symbol _lifetime_region_allocation_kind(
 
 static int _lifetime_region(Lifetime &lifetime, Symbol allocation_kind) {
   for (int id = lifetime.next_region; id; id--) {
-    if (!lifetime.regions.contains(id)) continue;
-    List row = lifetime.regions[id];
+    if (!lifetime.facts.regions.contains(id)) continue;
+    List row = lifetime.facts.regions[id];
     match (row)
       case %(region ? ?kind ?isolated ?alive ? ? ?):
         if (alive.integer() &&
@@ -127,8 +146,8 @@ static int _lifetime_region(Lifetime &lifetime, Symbol allocation_kind) {
 
 static int _lifetime_context_region(Lifetime &lifetime, List owner) {
   for (int id = lifetime.next_region; id; id--) {
-    if (!lifetime.regions.contains(id)) continue;
-    List row = lifetime.regions[id];
+    if (!lifetime.facts.regions.contains(id)) continue;
+    List row = lifetime.facts.regions[id];
     match (row)
       case %(region ? context ? ?alive ? ?binding ?):
         if (alive.integer() && binding is <list> &&
@@ -140,8 +159,8 @@ static int _lifetime_context_region(Lifetime &lifetime, List owner) {
 
 static int _lifetime_scope_region(Lifetime &lifetime) {
   for (int id = lifetime.next_region; id; id--) {
-    if (!lifetime.regions.contains(id)) continue;
-    List row = lifetime.regions[id];
+    if (!lifetime.facts.regions.contains(id)) continue;
+    List row = lifetime.facts.regions[id];
     match (row)
       case %(region ? scope ? ?alive ? ? ?):
         if (alive.integer()) return id;
@@ -150,12 +169,12 @@ static int _lifetime_scope_region(Lifetime &lifetime) {
 }
 
 static void _lifetime_end_region(Lifetime &lifetime, int id, int deferred) {
-  if (!id || !lifetime.regions.contains(id)) return;
-  List row = lifetime.regions[id];
+  if (!id || !lifetime.facts.regions.contains(id)) return;
+  List row = lifetime.facts.regions[id];
   match (row)
     case %(region ?identity ?kind ?isolated ?alive ? ?owner ?):
       if (alive.integer())
-        lifetime.regions[id] = %(
+        lifetime.facts.regions[id] = %(
           region $identity $kind $isolated ${deferred ? 1 : 0}
           $deferred $owner ${project_location(
             lifetime.compiler, lifetime.path, lifetime.origin)}
@@ -164,14 +183,14 @@ static void _lifetime_end_region(Lifetime &lifetime, int id, int deferred) {
 
 static int _lifetime_allocation_id(Lifetime &lifetime, Var value) {
   List binding = project_direct_binding(value);
-  if (!binding || !lifetime.bindings.contains(binding)) return 0;
-  return lifetime.bindings[binding].integer();
+  if (!binding || !lifetime.facts.bindings.contains(binding)) return 0;
+  return lifetime.facts.bindings[binding].integer();
 }
 
 static List _lifetime_summary_fact(Lifetime &lifetime, Var value) {
   List binding = project_direct_binding(value);
   if (binding)
-    return lifetime.return_bindings.getdefault(binding, %(other));
+    return lifetime.facts.return_bindings.getdefault(binding, %(other));
   Var peeled = project_peel(value);
   if (peeled is not <list>) return %(other);
   List node = peeled, arguments;
@@ -183,8 +202,8 @@ static List _lifetime_summary_fact(Lifetime &lifetime, Var value) {
   List target = project_call_target(
     lifetime.compiler, lifetime.definitions, node, name, arguments);
   if (!name) return %(other);
-  if (Compiler.region_wrapper(name) && arguments && arguments.len() > 1)
-    return _lifetime_summary_fact(lifetime, arguments[1]);
+  List wrapped = _lifetime_wrapped(name, arguments);
+  if (wrapped) return _lifetime_summary_fact(lifetime, wrapped);
   if (name == "Context_export") return %(other);
   return target && !List.equal(target, %(computed))
        ? %(call $target) : %(unresolved);
@@ -234,9 +253,8 @@ static int _lifetime_wrapped_allocation(Lifetime &lifetime, Var value) {
   String name;
   project_call_target(
     lifetime.compiler, lifetime.definitions, node, name, arguments);
-  return name && Compiler.region_wrapper(name) && arguments &&
-         arguments.len() > 1
-       ? _lifetime_wrapped_allocation(lifetime, arguments[1]) : 0;
+  List wrapped = _lifetime_wrapped(name, arguments);
+  return wrapped ? _lifetime_wrapped_allocation(lifetime, wrapped) : 0;
 }
 
 static int _lifetime_export_result(Lifetime &lifetime, Var value) {
@@ -250,8 +268,8 @@ static int _lifetime_export_result(Lifetime &lifetime, Var value) {
   project_call_target(
     lifetime.compiler, lifetime.definitions, node, name, arguments);
   if (!name) return 0;
-  if (Compiler.region_wrapper(name) && arguments && arguments.len() > 1)
-    return _lifetime_export_result(lifetime, arguments[1]);
+  List wrapped = _lifetime_wrapped(name, arguments);
+  if (wrapped) return _lifetime_export_result(lifetime, wrapped);
   if (name != "Context_export") return 0;
   lifetime.transfers++;
   return 1;
@@ -270,19 +288,19 @@ static int _lifetime_known_call(String name) {
 }
 
 static void _lifetime_unresolve(Lifetime &lifetime, int id, List cause) {
-  if (!id || !lifetime.allocations.contains(id)) return;
+  if (!id || !lifetime.facts.allocations.contains(id)) return;
   lifetime.uncertain_allocations[id] = 1;
-  List row = lifetime.allocations[id];
+  List row = lifetime.facts.allocations[id];
   match (row) {
     case %(allocation ?identity ?region ?operation known ?location):
-      lifetime.allocations[id] = %(
+      lifetime.facts.allocations[id] = %(
         allocation $identity $region $operation unresolved $location
       );
     case %(
       pending-allocation ?identity ?target ?name ?scope ?pool
       known ?location
     ):
-      lifetime.allocations[id] = %(
+      lifetime.facts.allocations[id] = %(
         pending-allocation $identity $target $name $scope $pool
         unresolved $location
       );
@@ -293,11 +311,11 @@ static void _lifetime_unresolve(Lifetime &lifetime, int id, List cause) {
 static void _lifetime_replace_return_fact(
   Lifetime &lifetime, Var value, List replacement) {
   List binding = project_direct_binding(value);
-  if (binding && lifetime.return_bindings.contains(binding)) {
-    List fact = lifetime.return_bindings[binding];
+  if (binding && lifetime.facts.return_bindings.contains(binding)) {
+    List fact = lifetime.facts.return_bindings[binding];
     match (fact)
       case %((!or kind call) *): lifetime.summary_unresolved = 1;
-    lifetime.return_bindings[binding] = replacement;
+    lifetime.facts.return_bindings[binding] = replacement;
     return;
   }
   if (value is not <list>) return;
@@ -305,9 +323,8 @@ static void _lifetime_replace_return_fact(
   String name;
   project_call_target(
     lifetime.compiler, lifetime.definitions, node, name, arguments);
-  if (name && Compiler.region_wrapper(name) && arguments &&
-      arguments.len() > 1)
-    _lifetime_replace_return_fact(lifetime, arguments[1], replacement);
+  List wrapped = _lifetime_wrapped(name, arguments);
+  if (wrapped) _lifetime_replace_return_fact(lifetime, wrapped, replacement);
 }
 
 static void _lifetime_scan_calls(Lifetime &lifetime, Var value) {
@@ -357,7 +374,7 @@ static int _lifetime_expression(Lifetime &lifetime, Var value) {
   if (region) {
     id = ++lifetime.next_allocation;
     lifetime.direct_allocations++;
-    lifetime.allocations[id] = %(
+    lifetime.facts.allocations[id] = %(
       allocation $id $region $operation known
       ${project_location(lifetime.compiler, lifetime.path, lifetime.origin)}
     );
@@ -367,9 +384,8 @@ static int _lifetime_expression(Lifetime &lifetime, Var value) {
   String name;
   List target = project_call_target(
     lifetime.compiler, lifetime.definitions, value, name, arguments);
-  if (name && Compiler.region_wrapper(name) && arguments &&
-      arguments.len() > 1)
-    return _lifetime_expression(lifetime, arguments[1]);
+  List wrapped = _lifetime_wrapped(name, arguments);
+  if (wrapped) return _lifetime_expression(lifetime, wrapped);
   if (arguments && !_lifetime_known_call(name)) {
     Type result_type = project_expression_type(value);
     int scope_region = _lifetime_region(lifetime, <scoped>);
@@ -377,7 +393,7 @@ static int _lifetime_expression(Lifetime &lifetime, Var value) {
     if (target && _lifetime_candidate_type(result_type) &&
         (scope_region || pool_region)) {
       id = ++lifetime.next_allocation;
-      lifetime.allocations[id] = %(
+      lifetime.facts.allocations[id] = %(
         pending-allocation $id $target $name
         $scope_region $pool_region known ${project_location(
           lifetime.compiler, lifetime.path, lifetime.origin)}
@@ -408,21 +424,22 @@ static void _lifetime_bind(Lifetime &lifetime, List binding, Var expression) {
   Type target = _lifetime_binding_type(lifetime, binding);
   List return_fact = _lifetime_typed_summary_fact(
     lifetime, expression, target);
-  if (lifetime.return_bindings.contains(binding)) {
-    List previous = lifetime.return_bindings[binding];
+  if (lifetime.facts.return_bindings.contains(binding)) {
+    List previous = lifetime.facts.return_bindings[binding];
     if (!List.equal(previous, return_fact))
       match (previous)
         case %((!or kind call) *): lifetime.summary_unresolved = 1;
   }
-  lifetime.return_bindings[binding] = return_fact;
-  int previous_allocation = lifetime.bindings.getdefault(binding, 0).integer();
+  lifetime.facts.return_bindings[binding] = return_fact;
+  int previous_allocation =
+    lifetime.facts.bindings.getdefault(binding, 0).integer();
   int isolated = 0;
   if (_lifetime_context_open(lifetime, expression, isolated)) {
     int id = ++lifetime.next_region;
-    lifetime.regions[id] = %(
+    lifetime.facts.regions[id] = %(
       region $id context $isolated 1 0 $binding none
     );
-    lifetime.bindings.del(binding);
+    lifetime.facts.bindings.del(binding);
     return;
   }
   int id = _lifetime_expression(lifetime, expression);
@@ -430,8 +447,8 @@ static void _lifetime_bind(Lifetime &lifetime, List binding, Var expression) {
     lifetime.uncertain_allocations[previous_allocation] = 1;
   Type source = project_expression_type(expression);
   if (id && _lifetime_preserves_value(lifetime, source, target))
-    lifetime.bindings[binding] = id;
-  else lifetime.bindings.del(binding);
+    lifetime.facts.bindings[binding] = id;
+  else lifetime.facts.bindings.del(binding);
 }
 
 static int _lifetime_owner_ended(List owner) {
@@ -442,8 +459,8 @@ static int _lifetime_owner_ended(List owner) {
 }
 
 static List _lifetime_owner(Lifetime &lifetime, int id) {
-  return id && lifetime.regions.contains(id)
-       ? lifetime.regions[id].list() : %(none);
+  return id && lifetime.facts.regions.contains(id)
+       ? lifetime.facts.regions[id].list() : %(none);
 }
 
 static void _lifetime_emit_unresolved(Lifetime &lifetime, int id) {
@@ -469,12 +486,12 @@ static void _lifetime_return(Lifetime &lifetime, Type target, Var expression) {
   Type source = project_expression_type(expression);
   if (!_lifetime_preserves_value(lifetime, source, target)) return;
   int id = _lifetime_expression(lifetime, expression);
-  if (!id || !lifetime.allocations.contains(id)) return;
-  List allocation = lifetime.allocations[id];
+  if (!id || !lifetime.facts.allocations.contains(id)) return;
+  List allocation = lifetime.facts.allocations[id];
   match (allocation) {
     case %(allocation ? ?region ?operation known ?allocated): {
-      if (!lifetime.regions.contains(region)) return;
-      List owner = lifetime.regions[region];
+      if (!lifetime.facts.regions.contains(region)) return;
+      List owner = lifetime.facts.regions[region];
       match (owner) {
         case %(region ? ?kind ? ? ? ? ?ended): {
           if (!_lifetime_owner_ended(owner)) return;
@@ -495,8 +512,8 @@ static void _lifetime_return(Lifetime &lifetime, Type target, Var expression) {
       return;
     }
     case %(allocation ? ?region ? unresolved ?): {
-      if (lifetime.regions.contains(region) &&
-          _lifetime_owner_ended(lifetime.regions[region]))
+      if (lifetime.facts.regions.contains(region) &&
+          _lifetime_owner_ended(lifetime.facts.regions[region]))
         _lifetime_emit_unresolved(lifetime, id);
       return;
     }
@@ -524,60 +541,48 @@ static void _lifetime_return(Lifetime &lifetime, Type target, Var expression) {
 }
 
 static void _lifetime_transfer(Lifetime &lifetime, int id) {
-  if (!id || !lifetime.allocations.contains(id)) return;
-  List allocation = lifetime.allocations[id];
+  if (!id || !lifetime.facts.allocations.contains(id)) return;
+  List allocation = lifetime.facts.allocations[id];
   match (allocation) {
     case %(allocation ?identity ?region ?operation ? ?location):
-      lifetime.allocations[id] = %(
+      lifetime.facts.allocations[id] = %(
         allocation $identity $region $operation transferred $location
       );
     case %(
       pending-allocation ?identity ?target ?name ?scope ?pool ? ?location
     ):
-      lifetime.allocations[id] = %(
+      lifetime.facts.allocations[id] = %(
         pending-allocation $identity $target $name $scope $pool
         moved $location
       );
   }
 }
 
+static LifetimeFacts _lifetime_copy(LifetimeFacts &facts) {
+  LifetimeFacts copy = {
+    .bindings = facts.bindings.copy(),
+    .return_bindings = facts.return_bindings.copy(),
+    .regions = facts.regions.copy(),
+    .allocations = facts.allocations.copy()
+  };
+  return copy;
+}
+
 static void _lifetime_block(Lifetime &lifetime, List statements, int nested) {
-  Map saved_bindings = lifetime.bindings;
-  Map saved_return_bindings = lifetime.return_bindings;
-  Map saved_regions = lifetime.regions;
-  Map saved_allocations = lifetime.allocations;
-  if (nested) {
-    lifetime.bindings = lifetime.bindings.copy();
-    lifetime.return_bindings = lifetime.return_bindings.copy();
-    lifetime.regions = lifetime.regions.copy();
-    lifetime.allocations = lifetime.allocations.copy();
-  }
+  LifetimeFacts saved = lifetime.facts;
+  if (nested) lifetime.facts = _lifetime_copy(saved);
   foreach (Var statement, statements)
     _lifetime_statement(lifetime, statement, nested + 1);
-  if (nested) {
-    lifetime.bindings = saved_bindings;
-    lifetime.return_bindings = saved_return_bindings;
-    lifetime.regions = saved_regions;
-    lifetime.allocations = saved_allocations;
-  }
+  if (nested) lifetime.facts = saved;
 }
 
 static void _lifetime_isolated_walk(Lifetime &lifetime, List node) {
-  Map saved_bindings = lifetime.bindings;
-  Map saved_return_bindings = lifetime.return_bindings;
-  Map saved_regions = lifetime.regions;
-  Map saved_allocations = lifetime.allocations;
+  LifetimeFacts saved = lifetime.facts;
   foreach (Var child, cdr(node)) {
-    lifetime.bindings = saved_bindings.copy();
-    lifetime.return_bindings = saved_return_bindings.copy();
-    lifetime.regions = saved_regions.copy();
-    lifetime.allocations = saved_allocations.copy();
+    lifetime.facts = _lifetime_copy(saved);
     _lifetime_statement(lifetime, child, 1);
   }
-  lifetime.bindings = saved_bindings;
-  lifetime.return_bindings = saved_return_bindings;
-  lifetime.regions = saved_regions;
-  lifetime.allocations = saved_allocations;
+  lifetime.facts = saved;
 }
 
 static void _lifetime_statement(Lifetime &lifetime, Var value, int nested) {
@@ -643,7 +648,7 @@ static void _lifetime_statement(Lifetime &lifetime, Var value, int nested) {
         lifetime.compiler, lifetime.definitions, expression, name, arguments);
       if (name == "Scope_retain") {
         int id = ++lifetime.next_region;
-        lifetime.regions[id] = %(region $id scope 0 1 0 none none);
+        lifetime.facts.regions[id] = %(region $id scope 0 1 0 none none);
         return;
       }
       if (name == "Scope_release") {
@@ -692,10 +697,10 @@ List Lifetime.analyze_unit(
           .function = compiler.emitted_binding_name(binding),
           .target = definitions[binding],
           .definitions = definitions,
-          .bindings = {},
-          .return_bindings = {},
-          .regions = {},
-          .allocations = {},
+          .facts = {
+            .bindings = {}, .return_bindings = {}, .regions = {},
+            .allocations = {}
+          },
           .allocation_unresolved = {},
           .uncertain_allocations = {},
           .return_facts = return_facts,
