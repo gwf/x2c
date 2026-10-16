@@ -35,15 +35,13 @@ static int _external_name(const char * name);
 
 static void _exec(String path, char * * args);
 
-static int _run_package(CliRequest request);
-
-static int _run_new(CliRequest request);
-
-static void _run_workflow(Array arguments);
+static void _run_command(Array arguments);
 
 static int _run_compiler(CliRequest request);
 
 static void _configure_logging(int debugging);
+
+static int _x2c_gensym_string_switch_0(String s);
 
 typedef struct _x2c_gensym_defer_env_0{
   const void * _x2c_gensym_defer_capture_0;
@@ -88,17 +86,17 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _24 = String_var(_23);
   _25 = String_new("cannot run external command \'");
   _26 = String_new("\': ");
-  _27 = String_new("--quiet");
-  _28 = String_new("--force");
-  _29 = String_new("--index");
-  _30 = String_new("--sha256");
-  _31 = String_new("--");
-  _32 = String_new("package");
-  _33 = String_new("new");
-  _34 = String_new("build");
-  _35 = String_new("run");
-  _36 = String_new("script");
-  _37 = String_new("cannot open diagnostics file \'");
+  _27 = String_new("build");
+  _28 = String_new("new");
+  _29 = String_new("package");
+  _30 = String_new("missing x2c-");
+  _31 = String_new(" command; install the matching x2c commands");
+  _32 = String_new("cannot open diagnostics file \'");
+  _33 = String_new("run");
+  _34 = String_new("script");
+  _35 = String_new("install");
+  _36 = String_new("remove");
+  _37 = String_new("list");
 }
 
 static int _run_env(CliRequest request){
@@ -192,57 +190,24 @@ static void _exec(String path, char * * args){
   ));
 }
 
-static int _run_package(CliRequest request){
-  Array args = Array_update_n(Array_new(), 1, String_var(Symbol_str(request -> command)));
-  if(request -> quiet) Array_push(args, String_var(_27));
-  if(request -> force) Array_push(args, String_var(_28));
-  if(String_truth(request -> index)){
-    Array_push(args, String_var(_29));
-    Array_push(args, String_var(request -> index));
-  }
-  if(String_truth(request -> sha256)){
-    Array_push(args, String_var(_30));
-    Array_push(args, String_var(request -> sha256));
-  }
-  Array_push(args, String_var(_31));
-  {
-    String input;
-    List _x2c_gensym_macro_object_2 = request -> inputs;
-    List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
-    Var _x2c_gensym_macro_cursor_output_3;
-    while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_3))){
-      input = Var_as_string(_x2c_gensym_macro_cursor_output_3);
-      Array_push(args, String_var(input));
-    }
-
-  }
-  return Compiler_run_command(_32, Array_list(args));
-}
-
-static int _run_new(CliRequest request){
-  Array args = Array_new();
-  if(request -> quiet) Array_push(args, String_var(_27));
-  Array_push(args, String_var(_31));
-  {
-    String input;
-    List _x2c_gensym_macro_object_3 = request -> inputs;
-    List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
-    Var _x2c_gensym_macro_cursor_output_4;
-    while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_4))){
-      input = Var_as_string(_x2c_gensym_macro_cursor_output_4);
-      Array_push(args, String_var(input));
-    }
-
-  }
-  return Compiler_run_command(_33, Array_list(args));
-}
-
-static void _run_workflow(Array arguments){
+static void _run_command(Array arguments){
   if(! Array_len(arguments)) return;
   String operation = Var_as_string(Array_getindex(arguments, 0));
-  if(! String_equal(operation, _34) && ! String_equal(operation, _35) && ! String_equal(operation, _36)) return;
-  String path = Compiler_command_path(_34);
-  if(! String_truth(path)) Diagnostics_driver_error("missing x2c-build command; install the matching x2c commands");
+  String command = NULL;
+  switch(_x2c_gensym_string_switch_0(operation)){
+    case 1 : case 2 : case 3 : command = _27;
+    break;
+    case 4 : command = _28;
+    break;
+    case 5 : case 6 : case 7 : command = _29;
+    break;
+    default: return;
+  }
+  String path = Compiler_command_path(command);
+  if(! String_truth(path)){
+    if(! String_equal(command, _27)) CliRequest_parse_arguments(arguments);
+    Diagnostics_driver_error(String_join(NULL, cons(String_var(_30), cons(String_var(command), cons(String_var(_31), NULL)))));
+  }
   char * * args = Scope_calloc(Array_len(arguments) + 3, sizeof(char *));
   args[1] = "--driver-arguments";
   for(int i = 0;  i < Array_len(arguments);  i ++){
@@ -275,43 +240,24 @@ int main(int argc, char * * argv){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
-      _run_workflow(arguments);
+      _run_command(arguments);
       CliRequest request = CliRequest_parse_arguments(arguments);
       String diagnostics = request -> diagnostics_file;
-      if(String_truth(diagnostics) && ! diagnostics_write_json(diagnostics)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_37), cons(String_var(diagnostics), cons(String_var(_1), NULL)))));
+      if(String_truth(diagnostics) && ! diagnostics_write_json(diagnostics)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_32), cons(String_var(diagnostics), cons(String_var(_1), NULL)))));
       report_configure(request -> quiet, request -> plain, request -> color_mode, request -> verbose || request -> debugging, request -> dry_run, CliRequest_inspects(request));
-      switch(request -> command){
-        case 11180 :{
-          int _x2c_gensym_return_value_0 = _run_env(request);
-          {
-            x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-            return _x2c_gensym_return_value_0;
-          }
-
-        }
-        case 20308036376 : case 1219329418 : case 806120 :{
-          int _x2c_gensym_return_value_1 = _run_package(request);
-          {
-            x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-            return _x2c_gensym_return_value_1;
-          }
-
-        }
-        case 29038 :{
-          int _x2c_gensym_return_value_2 = _run_new(request);
-          {
-            x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-            return _x2c_gensym_return_value_2;
-          }
-
+      if(request -> command == 11180){
+        int _x2c_gensym_return_value_0 = _run_env(request);
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+          return _x2c_gensym_return_value_0;
         }
 
       }
       {
-        int _x2c_gensym_return_value_3 = _run_compiler(request);
+        int _x2c_gensym_return_value_1 = _run_compiler(request);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-          return _x2c_gensym_return_value_3;
+          return _x2c_gensym_return_value_1;
         }
 
       }
@@ -338,6 +284,17 @@ static void _configure_logging(int debugging){
   if(! debugging) return;
   Logger_set_min_level(logger, 8721742);
   Logger_add_stderr_sink(logger);
+}
+
+static int _x2c_gensym_string_switch_0(String s){
+  if(String_equal(s, _27)) return 1;
+  if(String_equal(s, _33)) return 2;
+  if(String_equal(s, _34)) return 3;
+  if(String_equal(s, _28)) return 4;
+  if(String_equal(s, _35)) return 5;
+  if(String_equal(s, _36)) return 6;
+  if(String_equal(s, _37)) return 7;
+  return 0;
 }
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){

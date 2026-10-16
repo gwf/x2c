@@ -61,6 +61,8 @@ int CliRequest_is_builtin(const char * word);
 
 Array CliRequest_read_arguments(int argc, char * * argv);
 
+Array CliRequest_command_arguments(int argc, char * * argv);
+
 Symbol TargetKind_named(String spelling, String * refusal);
 
 TargetKind * TargetKind_of(Symbol kind);

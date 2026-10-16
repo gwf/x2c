@@ -1587,6 +1587,14 @@ Array CliRequest_read_arguments(int argc, char * * argv){
   return args;
 }
 
+Array CliRequest_command_arguments(int argc, char * * argv){
+  if(! _init_guard_) _file_init_();
+  if(argc < 2 || strcmp(argv[1], "--driver-arguments")) return NULL;
+  Array arguments = Array_new();
+  for(int i = 2;  i < argc;  i ++) Array_push(arguments, String_var(String_new(argv[i])));
+  return arguments;
+}
+
 Path Path_absolute(Path);
 
 static void _expand_argument(Array out, String arg, List stack){

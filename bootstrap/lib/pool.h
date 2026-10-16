@@ -58,6 +58,12 @@ void Pool_insert(Pool inner, Var object);
 
 int Pool_owns(Pool pool, Var key);
 
+Pool Pool_retain_named(Pool inner, const char * name);
+
+Pool Pool_retain(Pool inner);
+
+Pool Pool_release(Pool inner);
+
 void * Pool_malloc(Pool inner, size_t size);
 
 void Pool_free(Pool inner, void * alloc);
@@ -66,15 +72,9 @@ int Pool_promote(Pool inner, Var object, void * alloc);
 
 int Pool_own(Pool inner, Var object, void * alloc);
 
-void Pool_thread_start(void);
-
 PoolStats Pool_stats(Pool inner);
 
-Pool Pool_retain_named(Pool inner, const char * name);
-
-Pool Pool_retain(Pool inner);
-
-Pool Pool_release(Pool inner);
+void Pool_thread_start(void);
 
 Pool Pool_current(void);
 
