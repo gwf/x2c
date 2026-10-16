@@ -296,9 +296,7 @@ one
 A quotation is an anonymous macro applied at once to the locals its body
 names, so it follows the same rules as any template: arguments arrive as the
 syntax or values the locals hold, names the body declares are private to the
-expansion, a name that a file-scope declaration supplies where the
-quotation is written keeps that declaration, and other names resolve where
-the code lands. It keeps nothing
+expansion, and other names resolve where the code lands. It keeps nothing
 from the function once it has been applied. Inside a `%(...)` List, `$`
 inserts a value, so bind a quotation to a local first and insert the local.
 `$` inserts one value and `@` splices a sequence in templates and

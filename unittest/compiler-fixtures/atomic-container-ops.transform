@@ -285,7 +285,7 @@
          (expr ("Symbol") (literal ("Symbol") "+" +)) 
          (expr ("Var") 
           (at 62 
-           (call (expr (macro-expr) (ident (binding-global "Var_binary"))) 
+           (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 
             (args (expr ("Var") 
                    (call (expr ((func (("Array") (int))) "Var") 
                           (ident (binding 31 "Array_getindex"))) 
@@ -415,7 +415,7 @@
      (op = (bind (binding 48 "sum") ()) 
       (expr ("Var") 
        (at 71 
-        (call (expr (macro-expr) (ident (binding-global "Var_binary"))) 
+        (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 
          (args (expr ("Var") (ident (binding 46 "dynamic"))) 
           (expr ("Symbol") (literal ("Symbol") "+" +)) 
           (expr ("Var") (call "String_var" (args (expr ("String") (cache 6))))))))))))) 

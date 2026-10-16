@@ -2,8 +2,8 @@
 #include "rewrite.x"
 
 /* A macro's match binder and a converted Var local are shared by reference
-   with a lambda, the body reads a global declared later in the file under
-   a caller's same-named local, and its interpolation's support call stays
+   with a lambda, the body's `using` list keeps a global declared later in
+   the file under a caller's same-named local, and its interpolation's support call stays
    hidden from a program `String.join` rule. */
 static int joins = 0;
 
@@ -17,6 +17,7 @@ meta Code count_join(Code code) {
 }
 
 macro Stmt $celled(Expr $caller) {
+  using bias;
   match (%(5)) {
     case %(?n): {
       Var c = bias;

@@ -542,11 +542,15 @@ static List _generic(Resolve &r, List control, List associations) {
 
 /* A `sizeof` keeps its grouped or bare form around the resolved operand;
    an operand that is not syntax stays as written. */
+/* A template leaves `sizeof` of a typedef name untyped until it expands;
+   binding the operand there makes it the `size_t` it always is. */
 static List _sizeof(Resolve &r, Macro form, Var argument) {
   if (argument is not <list>) return r.input;
   List operand = argument;
+  Type type = r.input.cadr();
+  if (type === %(<macro-expr>)) type = %("size_t");
   return r.c.rebuild_expression(
-    r.input.cadr(), form(r.c.resolve_expression(operand, r.origin)));
+    type, form(r.c.resolve_expression(operand, r.origin)));
 }
 
 static List _va_arg(Resolve &r, List argument, List declaration) {

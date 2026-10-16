@@ -96,10 +96,10 @@ return scaled(value);
 The definition is visible from that point to the end of the block and through
 nested blocks. An inner definition of `scaled` temporarily shadows it; a later
 definition in the same block replaces it for following calls. A name the
-body reads without declaring keeps the file-scope declaration that supplies
-it where the macro is written, as in a global macro. Any other free name,
-such as a local `scale`, resolves where the macro is invoked. Names the
-caller writes in arguments resolve there too.
+body reads without declaring, such as `scale`, resolves where the macro is
+invoked, as in a global macro, unless the macro lists it with
+[`using`](#keep-a-file-scope-name-with-using). Names the caller writes in
+arguments resolve there too.
 
 The bare call shape belongs to the local macro before a file `keyword` alias or
 ordinary function. A use without parentheses is an ordinary identifier, and
@@ -283,7 +283,7 @@ statement, as shown under
 An expression macro is not a statement macro, and a unit macro cannot appear
 inside a function. The compiler diagnoses the mismatch at the invocation.
 
-### Generated names and `using`
+### Private names
 
 Declare scratch bindings normally. A declaration written literally in a macro
 body and every literal reference to it receive a private binding for each
@@ -314,19 +314,90 @@ macro Stmt $project.swap(
 The helper returns a type into the declaration's type slot. The same explicit
 call form also supplies expressions and generated names in their own slots.
 
-Each invocation receives a compiler-private binding for `temporary`, so
-generated names cannot collide with caller source. A name the body reads
-without declaring keeps the file-scope declaration that supplies it where
-the macro is written, even where a caller's local has the same spelling.
-That declaration can come later in the file, because file scope does not
-depend on declaration order.
-Other free names, and the names a caller writes in its arguments, resolve
-where the expansion lands. A macro that needs a caller's binding takes the
-name as a `Name` argument, as the
-[reference](../reference/language.md#hygiene-and-generated-names) shows.
+Each invocation receives a compiler-private binding for `temporary`, so a
+name the body declares never collides with caller source.
 
-Use a leading body directive only when compile-time Lisp or a nested macro
-needs a private `Name` hole before an ordinary declaration can introduce it:
+### Free names resolve where the expansion lands
+
+A name the body reads without declaring means what it would mean if the
+expansion were written by hand at the call site. A caller's declaration of
+that spelling supplies it, including a local:
+
+```x2c
+static int scale = 3;
+
+macro Expression $scaled(Expr $value) => $value * scale;
+
+int main(void) {
+  printf("%d\n", $scaled(2));
+  {
+    int scale = 10;
+    printf("%d\n", $scaled(2));
+  }
+  return 0;
+}
+```
+
+```text
+6
+20
+```
+
+The second call reads the block's `scale`, as `2 * scale` written there
+would. Names the caller writes in arguments resolve at the call site too. A
+macro that should reach a caller's variable by design takes the name as a
+`Name` argument, as `$repeat` does in the
+[reference](../reference/language.md#hygiene-and-generated-names).
+
+### Keep a file-scope name with `using`
+
+A macro that must reach a particular file-scope declaration, whatever the
+caller declares, lists that name with `using`. An `Expression` macro writes
+the list after its signature. A braced body writes it as its first item:
+
+```x2c
+static int scale = 3;
+static int bump(int value) => value + 1;
+
+macro Expression $scaled(Expr $value) using scale => $value * scale;
+
+macro Stmt $bumped(Name $target) {
+  using bump;
+  $target = bump($target);
+}
+
+int main(void) {
+  int scale = 10, bump = 0;
+  printf("%d\n", $scaled(2));
+  $bumped(bump);
+  printf("%d %d\n", scale, bump);
+  return 0;
+}
+```
+
+```text
+6
+10 1
+```
+
+Each listed name keeps the declaration that file scope supplies where the
+macro is written: a function, object, or enumerator of that file or of a
+header it includes, or a native name such as a C library function. The
+expansion reads that declaration with its type. A caller's local of the same
+spelling receives a separate generated C spelling, so the expansion still
+reaches the file-scope name. Only names, not types, can be listed; a type
+name in a body always resolves where the expansion lands.
+
+List every helper that a macro calls when the macro is meant for other
+files. A helper reached from another translation unit must be nonstatic, or
+`module` within a module unit, because a `static` function is private to
+its own unit.
+
+### Generated names with `using $name`
+
+Use a leading `using $name;` directive only when compile-time Lisp or a
+nested macro needs a private `Name` hole before an ordinary declaration can
+introduce it:
 
 <!-- ignore: project_generate is the external generator being illustrated -->
 ```x2c,ignore
@@ -338,9 +409,15 @@ macro Unit $project.generated() {
 
 The directive creates syntax identity, not runtime storage. It can therefore
 name a generated helper function or label as well as an automatic variable.
-All `using` directives must precede the body's ordinary items. A signature
-`using` clause can also supply names, including for an Expression macro's
-arrow body. Lambdas separately use `using &name` for reference capture.
+All `using` directives must precede the body's ordinary items.
+
+The three spellings of `using` do different things:
+
+| Spelling | Where | Effect |
+| --- | --- | --- |
+| `using name` | macro signature or first body item | keep the file-scope declaration of `name` where the macro is written |
+| `using $name` | first body item | create a fresh private name for each expansion |
+| `using &name` | lambda | share a captured local by reference |
 
 ## Put reusable macros in ordinary source modules
 

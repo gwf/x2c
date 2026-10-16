@@ -29,8 +29,7 @@ module List _resolve_identifier(
   if (c.macro_holes && binding) {
     String name = Ast.binding_spelling(binding);
     int free = _template_free_name(c, binding);
-    if (c.macro_holes[%(using $name)] is <list> ||
-        (free && type && !c.sym.binding_is_local(binding)))
+    if (c.macro_holes[%(using $name)] is <list>)
       return %(expr (<macro-expr>) (ident (binding-global $name)));
     if (free) return %(expr (<macro-expr>) (ident (binding-name $name)));
   }
@@ -44,7 +43,6 @@ module List _resolve_identifier(
   _capture_identifier(c, binding);
   int kept = 0;
   match (value) case %(binding-global *): kept = 1;
-  if (kept && c.lowering_body()) c.sym.unshadow_global(spelling);
   if (_shadow_identifier(c, binding, type, spelling, binding_facts, kept))
     type = NULL;
   if (!type) type = _identifier_type(

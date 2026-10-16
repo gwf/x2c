@@ -154,35 +154,33 @@ object and function are `static` in the generated C, the type stays private,
 and the unit's header and interface publish none of them. Outside a module
 unit `module` means `static`.
 
-Inside a module unit, `static` keeps its C meaning: the name is visible in
-the file that declares it and in no other file of the unit. That holds for
+Inside a module unit, `static` keeps its C meaning: the name is visible in the
+file that declares it and in no other file of the unit. That holds for
 objects, functions, `static typedef`, `static class`, and the `struct`,
 `union`, or `enum` tag such a typedef declares. Two members may each declare
 `static int counter` or `static typedef struct Node { ... } Node`, and each
-file sees its own, and so do the enumerators of a `static typedef enum`.
-The enumerators of an enum declared without a typedef stay unit-wide, even
-under `static`. A later declaration of a static without `static`, such as
-the definition after a `static` prototype, or a block-scope `extern`
-declaration or function prototype, names the file's static as C links it.
-A file's statics take a prefix in the generated C: the file's path under the entry's
-companion directory without its extension, with each character that cannot
-continue a C identifier made `_`, then `___`. The prefix starts with `f`,
-the normalized path's length, and `_`; a path that starts with a digit
-gets a leading `x` before its length is measured. Under the entry `parser.x`,
-a static `advance` in `parser/statements/loops.x` emits as `f16_statements_loops___advance`, and one
-in the entry itself as `f6_parser___advance`. Trailing `_` of the path's
+file sees its own, and so do the enumerators of a `static typedef enum`. The
+enumerators of an enum declared without a typedef stay unit-wide, even under
+`static`. A later declaration of a static without `static`, such as the
+definition after a `static` prototype, or a block-scope `extern` declaration
+or function prototype, names the file's static as C links it. A file's statics
+take a prefix in the generated C: the file's path under the entry's companion
+directory without its extension, with each character that cannot continue a C
+identifier made `_`, then `___`. The prefix starts with `f`, the normalized
+path's length, and `_`; a path that starts with a digit gets a leading `x`
+before its length is measured. Under the entry `parser.x`, a static `advance`
+in `parser/statements/loops.x` emits as `f16_statements_loops___advance`, and
+one in the entry itself as `f6_parser___advance`. Trailing `_` of the path's
 spelling are dropped first, so `a.x` and `a-.x` give one prefix. A package
 prefix ends in `__`, so a package entry's statics stay apart from the
-package's public names.
-Generated names are compiler details; source never spells them, and
-`--dump-definitions` displays the source name. A static type adopted as a
-class keeps its short name as its Var tag and descriptor name, so two files
-of one unit cannot each adopt a class under the same short name.
-Compile-time declarations, `static macro`, `static $(`, `static protocol`,
-and `meta` functions, keep their unit-wide behavior. A name a macro body
-reads that a file-scope declaration supplies where the macro is written
-keeps that declaration. Other free names, and type names in declarations,
-bind where the expansion lands.
+package's public names. Generated names are compiler details; source never
+spells them, and `--dump-definitions` displays the source name. A static type
+adopted as a class keeps its short name as its Var tag and descriptor name, so
+two files of one unit cannot each adopt a class under the same short name.
+Compile-time declarations, `static macro`, `static $(`, `static protocol`, and
+`meta` functions, keep their unit-wide behavior. A free name in a macro body
+binds where the expansion lands, unless the macro lists it with
+[`using`](#keeping-a-file-scope-name-with-using).
 
 Three cases are errors. Two files whose paths give one prefix, such as
 `a_b.x` and `a/b.x`, or a member named like its entry, are a driver error
@@ -1891,33 +1889,28 @@ name. See
 [Quoting code](../guide/generating-code.md#quoting-code-with-) for an
 example.
 
-A typed quotation is written `$!T{ expression }`, where `T` is one
-identifier that names a type, or `$!(T){ expression }`, where `T` is any
-type, a `Type` local, or a `${...}` hole of type `Type`. An identifier
-after `$!` that spells a macro kind in any case, such as `Unit` or `Type`,
-always names that kind, so a type with that spelling uses the
-parenthesized form. A `$!( ... )` group followed directly
-by `{` is a typed quotation; otherwise it is an expression quotation. A
-typed quotation builds `(expr T CONTENT)` where it is written. It binds
-nothing, counts no expansion, and opens no transaction. Its holes take the
-values a rebuild gives them: syntax unchanged, a binding identity or
-`x2c.ident` spelling as an identifier expression, an `x2c.ident` in a
-member position as its spelling and in a declarator as the name it
-declares, a number as a literal of its own type with its exact value, and
-a String or Symbol as a literal. Each number, String, or Symbol item of an
-expression sequence also becomes its literal. A String is a String
-literal when the whole expression is the hole and `T` is `String`; elsewhere
-it is a C string literal. Inner nodes keep the placeholder type of unbound
-syntax. A name that a file-scope declaration supplies where the quotation
-is written keeps that declaration, and other free names bind where the code
-is bound. A
-typed quotation may not declare a name that its own code spells or apply a
-template, and inside
-another quotation it is written as a hole, `${$!T{ ... }}`. The compiler
-accepts `T` as the expression's type without checking it. A typed quotation
-states the type the code has; it converts nothing, so write a cast inside
-the braces when the code needs one. See
-[Code that knows its type](../guide/generating-code.md#code-that-knows-its-type).
+A typed quotation is written `$!T{ expression }`, where `T` is one identifier
+that names a type, or `$!(T){ expression }`, where `T` is any type, a `Type`
+local, or a `${...}` hole of type `Type`. An identifier after `$!` that spells
+a macro kind in any case, such as `Unit` or `Type`, always names that kind, so
+a type with that spelling uses the parenthesized form. A `$!( ... )` group
+followed directly by `{` is a typed quotation; otherwise it is an expression
+quotation. A typed quotation builds `(expr T CONTENT)` where it is written. It
+binds nothing, counts no expansion, and opens no transaction. Its holes take
+the values a rebuild gives them: syntax unchanged, a binding identity or
+`x2c.ident` spelling as an identifier expression, an `x2c.ident` in a member
+position as its spelling and in a declarator as the name it declares, a number
+as a literal of its own type with its exact value, and a String or Symbol as a
+literal. Each number, String, or Symbol item of an expression sequence also
+becomes its literal. A String is a String literal when the whole expression is
+the hole and `T` is `String`; elsewhere it is a C string literal. Inner nodes
+keep the placeholder type of unbound syntax. Free names bind where the code is
+bound. A typed quotation may not declare a name that its own code spells or
+apply a template, and inside another quotation it is written as a hole,
+`${$!T{ ... }}`. The compiler accepts `T` as the expression's type without
+checking it. A typed quotation states the type the code has; it converts
+nothing, so write a cast inside the braces when the code needs one. See [Code
+that knows its type](../guide/generating-code.md#code-that-knows-its-type).
 
 `$!Type{ T }` builds the type `T`, written as a cast writes a type name.
 `$!Param{ P }` builds one parameter declaration. A `Type` local or a
@@ -1991,11 +1984,10 @@ invocations. One with a nested pattern among its arguments, such as
 
 ### Hygiene and generated names
 
-A macro keeps the file-scope bindings of the place it is written. An
-expansion means what the same code would mean if it were written where the
-expansion lands, with two exceptions: the names its body writes are private
-to that expansion, and a name its body reads that a file-scope declaration
-supplies where the macro is written keeps that declaration.
+An expansion means what the same code would mean if it were written where
+the expansion lands, with two exceptions: the names its body declares are
+private to that expansion, and a name the macro lists with `using` keeps the
+file-scope declaration where the macro is written.
 
 Arguments are parsed and typed where the invocation is written, and the
 names a caller writes in them also resolve where the expansion lands. A
@@ -2021,22 +2013,12 @@ lands. A local macro or an anonymous macro written inside a body shares the
 body's names the same way: its literal reference reaches a private
 declaration of the enclosing body.
 
-A name the body reads without declaring keeps the file-scope declaration
-that supplies it where the macro is written: a function, object, or
-enumerator of that file or of a header it includes, or a native name such as
-a C library function. The expansion reads that declaration with its type. A
-caller's local of the same spelling receives a separate generated C
-spelling, so the expansion still reaches the file-scope name, and so does
-code a rewrite rule's quotation returns into a function body. Only the
-locals visible where the expansion lands are respelled, so a native macro
-that names one of them there reads the file-scope name, while locals of
-other scopes keep their C spellings. Any other name the body reads resolves
-where the expansion lands, like any name written there: a caller's
-declaration of that spelling supplies it, including a local, and a local
-macro reads the locals around it. A name that nothing declares anywhere is
-left to C, as a native macro such as `errno` is. To read a caller's binding
-of a name, take the name as a `Name` argument; that argument is the explicit
-request for lookup where the expansion lands.
+A name the body reads without declaring resolves where the expansion lands,
+like any name written there: a caller's declaration of that spelling
+supplies it, including a local, and a local macro reads the locals around
+it. A name that nothing declares anywhere is left to C, as a native macro
+such as `errno` is. To read a caller's binding of a name by design, take the
+name as a `Name` argument.
 
 ```x2c
 macro Stmt $repeat(Name $i, Expr $count, Expr $value, Name $sum) {
@@ -2072,61 +2054,55 @@ from the body's literal `k`. In `$add_tens`, the caller's `k` arrives through
 `$target`; the loop variable comes from `$add_tens`'s own literal `k`, so the
 assignment reaches the caller's variable.
 
-Here `$scaled` reads the file-scope `scale`, although `main` declares its
-own:
+#### Keeping a file-scope name with `using`
+
+A macro keeps a file-scope declaration only when it lists the name with
+`using`. A braced body lists names as its first item, `using name, other;`.
+An `Expression` macro may write the list after its signature instead:
 
 ```x2c
 static int scale = 3;
 
-macro Expression $scaled(Expr $value) => $value * scale;
+macro Expression $scaled(Expr $value) using scale => $value * scale;
+macro Expression $landed(Expr $value) => $value * scale;
 
 int main(void) {
   int scale = 10;
-  printf("%d %d\n", $scaled(2), scale);
+  printf("%d %d %d\n", $scaled(2), $landed(2), scale);
   return 0;
 }
 ```
 
 ```text
-6 10
+6 20 10
 ```
 
-File scope is the whole file and does not depend on declaration order.
-A template therefore keeps a global that the file declares after the macro:
+Each listed name is a function, object, or enumerator that a file-scope
+declaration supplies where the macro is written, in that file or a header it
+includes, or a native name such as a C library function that no x2c
+declaration supplies. File scope is the whole file, so the declaration may
+follow the macro. The expansion reads the declaration with its type. A
+caller's local of the same spelling receives a separate generated C
+spelling, so the expansion still reaches the file-scope name. Only the
+locals visible where the expansion lands are respelled; locals of other
+scopes keep their C spellings for the native macros that name them. A listed
+name resolves to that declaration in every unit that applies the macro,
+including through a `Macro` value. A name with internal linkage, such as a
+`static` function, is reachable only from its own unit, so a macro applied
+in other units lists nonstatic names, or `module` names within a module
+unit. Type names cannot be listed; a type name in a body resolves where the
+expansion lands, in a declaration, a cast, `sizeof`, and `_Alignof` alike.
 
-```x2c
-macro Expression $read_later() => later + 1;
-
-int later = 3;
-
-int main(void) {
-  int later = 7;
-  printf("%d %d\n", $read_later(), later);
-  return 0;
-}
-```
-
-```text
-4 7
-```
-
-A `using` list at the start of the braced body, or after the signature of
-an `Expression` macro, such as `$scaled(Expr $value) using scale`, states
-such a binding explicitly. Each listed name is a function, object, or
-enumerator declared at file scope where the macro is written, or a native
-name such as a C library function that no x2c declaration supplies. A kept
-name, listed or not, resolves to that name in every unit that applies the
-macro, including through a `Macro` value. Type names are not kept; they
-resolve where the expansion lands.
+`using name` keeps a declaration; `using $name` (below) creates a fresh
+private name; a lambda's `using &name` shares a captured local by reference.
 
 An anonymous macro keeps one kind of value from where it is written: a
 `Macro` value that its body applies. Templates compose by value, so a later
 application applies the same children.
 
-A `case` on a macro recognizes a name the body keeps from a file-scope
-declaration, listed with `using` or not, only by that declaration, and any
-other free name by its spelling, since the code the macro builds binds that
-name where it lands.
+A `case` on a macro recognizes a name the macro lists with `using` only by its
+file-scope declaration, and any other free name by its spelling, since the
+code the macro builds binds that name where it lands.
 
 A `struct`, `union`, or `enum` tag that a body defines or declares is private
 to each expansion, like a typedef, and so are the enumerators it lists. Tags
