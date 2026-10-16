@@ -1,16 +1,14 @@
 #include "x2c.x"
 #include "meta.x"
 
-/* A free name keeps the file-scope declaration where the macro is written;
-   names a macro body writes are private to its expansion, including in
-   definitions nested inside it. */
+/* Names resolve where an expansion lands; names a macro body writes are
+   private to its expansion, including in definitions nested inside it. */
 static int target = 10;
 static int k = 100;
 static int temp = 100;
 
-/* A free name, listed with `using` or not, keeps the file-scope
-   declaration even when forwarded through another macro or where a caller
-   declares the same spelling. */
+/* A `using` name keeps the file-scope declaration even when forwarded
+   through another macro, whatever other macros read the same name. */
 macro Expression $free_target() => target;
 macro Expression $kept() using target => target;
 macro Expression $id(Expr $e) => $e;

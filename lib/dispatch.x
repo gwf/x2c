@@ -561,6 +561,17 @@ meta native Iter Var.iter(Var x, Iter dest) {
   return x.fallback_iter(dest);
 }
 
+/** Returns an iterator over what a two-name `foreach` destructures.
+    A boxed `Map` yields `(key value)` `List`s, as `Map.enumerate` does, and
+    any other value yields what `Var.iter` yields.
+    Raises: `<void-op>` for `void`. A null `dest` returns NULL without
+    raising.
+*/
+meta native Iter Var.enumerate(Var x, Iter dest) {
+  if (x is <map>) return Map.enumerate(x.map(), dest);
+  return Var.iter(x, dest);
+}
+
 /** Returns a non-dispatch iterator over `Var`.
     Raises: `<void-op>` for `void`. A null `dest` returns NULL without
     raising.

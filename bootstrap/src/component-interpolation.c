@@ -4,11 +4,11 @@
 #include "x2c.h"
 
 #include "rewrite.h"
-static List _70, _69, _68, _66, _65, _63, _62, _57, _56, _55, _53, _52, _50, _49, _44, _41, _37, _36, _35, _33, _32, _30, _29, _23, _19, _14, _13, _9, _8, _5, _4, _3;
+static List _69, _68, _67, _65, _64, _62, _61, _57, _56, _55, _53, _52, _50, _49, _44, _41, _37, _36, _35, _33, _32, _30, _29, _23, _19, _14, _13, _9, _8, _5, _4, _3;
 
-static String _60, _47, _42, _27, _17;
+static String _59, _47, _42, _27, _17;
 
-static Var _71, _67, _64, _61, _59, _58, _54, _51, _48, _46, _45, _43, _40, _39, _38, _34, _31, _28, _26, _25, _24, _22, _21, _20, _18, _16, _15, _12, _11, _10, _7, _6, _2, _1, _0;
+static Var _70, _66, _63, _60, _58, _54, _51, _48, _46, _45, _43, _40, _39, _38, _34, _31, _28, _26, _25, _24, _22, _21, _20, _18, _16, _15, _12, _11, _10, _7, _6, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -44,7 +44,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _23 = cons(_22, NULL);
   _24 = List_var(_23);
   _25 = Symbol_var(19147688);
-  _26 = Atom_intern(String_new("binding-global"));
+  _26 = Atom_intern(String_new("binding-name"));
   _27 = String_new("String_new");
   _28 = String_var(_27);
   _29 = cons(_28, NULL);
@@ -77,19 +77,18 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _56 = cons(_24, _55);
   _57 = cons(_10, _56);
   _58 = List_var(_57);
-  _59 = Atom_intern(String_new("binding-name"));
-  _60 = String_new("NULL");
-  _61 = String_var(_60);
-  _62 = cons(_61, NULL);
-  _63 = cons(_59, _62);
-  _64 = List_var(_63);
-  _65 = cons(_64, NULL);
-  _66 = cons(_25, _65);
-  _67 = List_var(_66);
-  _68 = cons(_67, NULL);
-  _69 = cons(_24, _68);
-  _70 = cons(_10, _69);
-  _71 = List_var(_70);
+  _59 = String_new("NULL");
+  _60 = String_var(_59);
+  _61 = cons(_60, NULL);
+  _62 = cons(_26, _61);
+  _63 = List_var(_62);
+  _64 = cons(_63, NULL);
+  _65 = cons(_25, _64);
+  _66 = List_var(_65);
+  _67 = cons(_66, NULL);
+  _68 = cons(_24, _67);
+  _69 = cons(_10, _68);
+  _70 = List_var(_69);
 }
 
 Code interpolation_lowering(Code code){
@@ -134,7 +133,7 @@ Code interpolation_lowering(Code code){
           Var chain = List_var(_41);  while(Array_len(parts)) chain = List_var(cons(_10, cons(_45, cons(List_var(({
             Var _x2c_gensym_literal_part_0 = Array_take_last(parts);  cons(_46, cons(_x2c_gensym_literal_part_0, cons(chain, NULL)));
           }
-          )), NULL))));  return cons(_10, cons(_20, cons(List_var(cons(_21, cons(_58, cons(List_var(cons(_39, cons(_71, cons(Macro_inserted(chain, 1, 1), NULL)))), NULL)))), NULL)));
+          )), NULL))));  return cons(_10, cons(_20, cons(List_var(cons(_21, cons(_58, cons(List_var(cons(_39, cons(_70, cons(Macro_inserted(chain, 1, 1), NULL)))), NULL)))), NULL)));
         }
 
       }

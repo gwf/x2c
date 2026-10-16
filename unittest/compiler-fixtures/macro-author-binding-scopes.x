@@ -1,12 +1,12 @@
 #include "x2c.x"
 #include <stdio.h>
 
-/* A template keeps the file-scope `leaked` under every enclosing local of
-   that spelling: nested blocks, a loop, and a lifted lambda's captures,
-   parameters, and locals. */
+/* A template that lists `leaked` with `using` keeps the file-scope `leaked`
+   under every enclosing local of that spelling: nested blocks, a loop, and a
+   lifted lambda's captures, parameters, and locals. */
 static int leaked = 100;
 
-macro Expression $leaked() => leaked;
+macro Expression $leaked() using leaked => leaked;
 
 static int nested(void) {
   int leaked = 5;

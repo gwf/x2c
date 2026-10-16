@@ -312,13 +312,13 @@ const char * Scope_name(Scope scope){
 
 void Scope_destroy(Scope scope){
   if(! _init_guard_) Scope_initialize();  if(! scope) return;  _require_running();  ScopeThreadState state = _thread();  if(scope == state -> root){
-    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/scope.x",.function = "Scope_destroy",.line = 707};  x2c_error_raise_n(& _x2c_gensym_error_site_10, 4477477457162, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/scope.x",.function = "Scope_destroy",.line = 706};  x2c_error_raise_n(& _x2c_gensym_error_site_10, 4477477457162, 0);  __builtin_unreachable();
   }
   for(int i = 0;  i < state -> stack_size;  i ++) if(scope == * state -> stack[i]){
-    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/scope.x",.function = "Scope_destroy",.line = 708};  x2c_error_raise_n(& _x2c_gensym_error_site_11, 4477477457162, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/scope.x",.function = "Scope_destroy",.line = 707};  x2c_error_raise_n(& _x2c_gensym_error_site_11, 4477477457162, 0);  __builtin_unreachable();
   }
   if(scope -> up){
-    static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/scope.x",.function = "Scope_destroy",.line = 710};  x2c_error_raise_n(& _x2c_gensym_error_site_12, 4477477457162, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/scope.x",.function = "Scope_destroy",.line = 709};  x2c_error_raise_n(& _x2c_gensym_error_site_12, 4477477457162, 0);  __builtin_unreachable();
   }
   _forget_retains(scope);  _destroy_chain(scope);
 }
@@ -337,7 +337,7 @@ static void _forget_retains(Scope scope){
 
 static void _register_name(Scope scope, const char * name){
   if(! name) return;  size_t length = strlen(name);  if(length == SIZE_MAX){
-    static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/scope.x",.function = "_register_name",.line = 749};  x2c_error_raise_n(& _x2c_gensym_error_site_13, 1358596898646632, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/scope.x",.function = "_register_name",.line = 748};  x2c_error_raise_n(& _x2c_gensym_error_site_13, 1358596898646632, 0);  __builtin_unreachable();
   }
   ScopeName node = _raw_malloc(sizeof(struct ScopeName));  char * copy = _raw_malloc(length + 1);  memcpy(copy, name, length + 1);  node -> scope = scope;  node -> name = copy;  _metadata_lock();  node -> next = scope_names;  scope_names = node;  _metadata_unlock();
 }
@@ -406,28 +406,28 @@ static void _record_live_remove(size_t size){
 
 static void * _data_malloc(size_t size){
   void * ptr = malloc(size);  if(! ptr){
-    static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/scope.x",.function = "_data_malloc",.line = 890};  x2c_error_raise_n(& _x2c_gensym_error_site_14, 97614135954008, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/scope.x",.function = "_data_malloc",.line = 889};  x2c_error_raise_n(& _x2c_gensym_error_site_14, 97614135954008, 0);  __builtin_unreachable();
   }
   return ptr;
 }
 
 static void * _data_realloc(void * ptr, size_t size){
   void * result = realloc(ptr, size);  if(! result){
-    static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/scope.x",.function = "_data_realloc",.line = 896};  x2c_error_raise_n(& _x2c_gensym_error_site_15, 97614135954008, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/scope.x",.function = "_data_realloc",.line = 895};  x2c_error_raise_n(& _x2c_gensym_error_site_15, 97614135954008, 0);  __builtin_unreachable();
   }
   return result;
 }
 
 static void * _raw_malloc(size_t size){
   void * ptr = malloc(size);  if(! ptr){
-    static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/scope.x",.function = "_raw_malloc",.line = 902};  x2c_error_raise_n(& _x2c_gensym_error_site_16, 97614135954008, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/scope.x",.function = "_raw_malloc",.line = 901};  x2c_error_raise_n(& _x2c_gensym_error_site_16, 97614135954008, 0);  __builtin_unreachable();
   }
   atomic_fetch_add(& raw_alloc_count, 1);  return ptr;
 }
 
 static void * _raw_realloc(void * ptr, size_t size){
   void * result = realloc(ptr, size);  if(! result){
-    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/scope.x",.function = "_raw_realloc",.line = 909};  x2c_error_raise_n(& _x2c_gensym_error_site_17, 97614135954008, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/scope.x",.function = "_raw_realloc",.line = 908};  x2c_error_raise_n(& _x2c_gensym_error_site_17, 97614135954008, 0);  __builtin_unreachable();
   }
   return result;
 }
@@ -442,7 +442,7 @@ static void * _raw_grow(void * items, int count, int * capacity, size_t size){
   }
   else if(count ==(* capacity)){
     if((* capacity) > INT_MAX / 2){
-      static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/scope.x",.function = "_raw_grow",.line = 927};  x2c_error_raise_n(& _x2c_gensym_error_site_18, 1358596898646632, 0);  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/scope.x",.function = "_raw_grow",.line = 926};  x2c_error_raise_n(& _x2c_gensym_error_site_18, 1358596898646632, 0);  __builtin_unreachable();
     }
     items = _raw_realloc(items, (* capacity) * 2 * size); (* capacity) *= 2;
   }
@@ -472,7 +472,7 @@ static void _ensure_running(void){
 
 void Scope_shutdown_hook(void(* hook)(void)){
   if(! _init_guard_) Scope_initialize();  _require_running();  if(! hook){
-    static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../lib/scope.x",.function = "Scope_shutdown_hook",.line = 982};  x2c_error_raise_n(& _x2c_gensym_error_site_19, 4372499598, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../lib/scope.x",.function = "Scope_shutdown_hook",.line = 981};  x2c_error_raise_n(& _x2c_gensym_error_site_19, 4372499598, 0);  __builtin_unreachable();
   }
   hooks = _raw_grow(hooks, hook_count, &(hook_capacity), sizeof(* hooks));  hooks[hook_count ++] = hook;
 }

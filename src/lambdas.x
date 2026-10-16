@@ -598,7 +598,6 @@ static List _record(
   c.set_fact(%(automatic $captured), 1);
   c.set_fact(%(type $captured), captured_type);
   c.set_fact(%(lambda-depth $captured), k.depth);
-  if (!c.macro_holes) c.sym.join_locals(captured);
   _inherit_spelling(c, k.binding, captured);
   if (reference) c.set_fact(%(reference-param $captured), 1);
   else c.set_fact(%(lambda-snapshot $captured), 1);

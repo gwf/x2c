@@ -1,7 +1,9 @@
-/* A template and a rule quotation keep the file-scope bindings where they
-   are written. A caller's local, parameter, or static local of the same
-   spelling neither captures the name nor lends it its type, and a `Name`
-   argument still reaches the caller's binding. */
+/* A template keeps the file-scope binding where it is written for each name
+   its `using` list names. A caller's local, parameter, or static local of
+   the same spelling neither captures a listed name nor lends it its type.
+   An unlisted name, such as the one the rule quotation reads, resolves
+   where the code lands, and a `Name` argument reaches the caller's
+   binding. */
 
 #include "x2c.x"
 #include "rewrite.x"
@@ -13,9 +15,9 @@ static String label = "author";
 
 static int helper(void) => 1;
 
-macro Expression $leaked() => leaked;
-macro Expression $helped() => helper();
-macro Expression $label_length() => label.len();
+macro Expression $leaked() using leaked => leaked;
+macro Expression $helped() using helper => helper();
+macro Expression $label_length() using label => label.len();
 macro Expression $named(Name $name) => $name;
 
 static int lookup(int unused) => unused;
@@ -23,7 +25,7 @@ static int lookup(int unused) => unused;
 macro Expression $looked(Expr $step) => lookup($step);
 
 $rewrite($looked)
-/* Reads the file-scope `leaked` where the call appears. */
+/* Reads whichever `leaked` is visible where the call appears. */
 meta Code read_leaked(Code node) {
   return $!int{ leaked };
 }

@@ -1,8 +1,8 @@
 # Packages
 
 x2c has one flat namespace, so an included `.x` library merges its names into
-yours. A package keeps its own space. It is compiled once into an archive,
-and an importing program reaches its names through an alias.
+yours. A package's public names carry its prefix. It is compiled once into an
+archive, and an importing program reaches its names through an alias.
 
 ## What a package looks like
 
@@ -19,7 +19,7 @@ packages/greet/
 ```
 
 That is the whole layout for a package with no native dependency. One that
-wraps a C library adds the pin, licence texts, and profile that
+wraps a C library adds the pin, license texts, and profile that
 [Wrapping a C Library](wrapping-c-libraries.md) covers.
 
 The entry unit needs no manifest and no export list:
@@ -103,12 +103,11 @@ int main(void) {
 x2c build --package-dir packages --output greeter greeter.x
 ```
 
-The driver reads the unit's recorded dependencies, adds the package's
-`builds` and `src` directories to the C include path, and links
-`libgreet.a` together with the arguments in `greet.native.rsp`. It never
-rebuilds the package. Build it once, and a read-only package tree still
-serves every consumer. A target in `x2c.toml` can set `package-dirs` instead
-of passing the flag.
+The driver reads the unit's recorded dependencies, adds the package's `builds`
+and `src` directories to the C include path, and links `libgreet.a` together
+with the arguments in `greet.native.rsp`. It never rebuilds the package, so
+consumers can use a read-only package tree. A target in `x2c.toml` can set
+`package-dirs` instead of passing the flag.
 
 `as` is optional; `import "greet";` binds the alias `greet`. The alias is
 only a way to spell names. The generated C always uses the package's own
@@ -144,7 +143,7 @@ does and does not cross an import.
 
 An imported package may add a method to an external type. PCRE2, for example,
 adds `Var.regexpmatch`, so `value.regexpmatch()` resolves after
-`import "pcre2"`. A method declared in the consumer still wins. If two
+`import "pcre2"`. A method declared in the consumer takes precedence. If two
 imported packages provide the same receiver method, the call is ambiguous;
 call the selected package function explicitly, such as
 `pcre2.Var_regexpmatch(value)`.
@@ -367,7 +366,7 @@ make -C packages/torch run
 
 ### SQLite rows and transactions
 
-The SQLite package keeps SQL visible while accepting ordinary x2c values.
+The SQLite package takes SQL text and binds ordinary x2c values.
 `Database.open` creates a file-backed or `":memory:"` connection. Prepare a
 statement once, bind a positional List or a Map of exact parameter names,
 and iterate copied row Lists. Rows preserve column order and duplicate names;
@@ -414,7 +413,7 @@ make -C packages/sqlite test run run-lisp
 
 ## Install packages
 
-Package management runs in the shipped `x2c-package` command. The familiar
+Package management runs in the shipped `x2c-package` command. The
 `x2c install`, `x2c remove`, and `x2c list` forms select its operations.
 Project builds use the same command to prepare declared dependencies and
 maintain `x2c.lock` before compilation starts.
@@ -436,12 +435,13 @@ A name resolves through the package index, `index.txt` at
 `https://x2c-lang.dev/packages/` unless `--index <url-or-path>` names
 another. Each index row is `name version kind platform url sha256`. The
 compiler takes the bundle row for its own platform, otherwise the source row,
-downloads the archive with `curl`, and refuses it when its digest differs. A
+downloads the archive with `curl`, and rejects it when its digest differs. A
 URL given directly needs `--sha256`.
 
 A bundle, the output of `make bundle` below, installs as built. Its
-`BUNDLE.json` names the x2c version that built it; another version refuses
-it unless `--force`, because a bundle carries no ABI promise across releases.
+`BUNDLE.json` records the x2c version that built it. Another compiler
+version rejects the bundle unless `--force` is given, because a bundle has no
+stable ABI across releases.
 A source package is a `<name>/src/<name>.x` tree with no `dependency*.json`.
 The compiler translates it in package mode and archives it, the same two
 commands `packages/package.mk` runs, and records the origin and digest in
@@ -459,7 +459,8 @@ prints a message while it waits.
 
 Upgrade x2c before installing packages by name. Each release publishes the
 index that `x2c install <name>` reads, which lists the bundles built by that
-release's compiler, and a bundle rejects a different compiler version.
+release's compiler. A bundle built by a different compiler version installs
+only with `--force`.
 
 ## Pin packages in a project
 
@@ -476,7 +477,7 @@ planning the build, then write `x2c.lock` beside the manifest recording what
 they resolved. Commit that file. A later build whose lockfile is already
 satisfied by the installed packages reads no index, so it works offline, and
 one that has to reinstall a package takes it from the archive the lockfile
-recorded, so everyone gets the same packages.
+recorded, so every build uses the same archives.
 
 To change a version, edit the manifest and build again; the lockfile is
 rewritten. `x2c remove` still deletes an installed package, and the next
@@ -501,9 +502,8 @@ register its parent with `--package-dir`. `BUNDLE_DIR=/path/to/output` changes
 the output parent. The directory and archive contain the same files. Move the
 whole package directory, keeping `src`, `builds`, `native`, and licenses
 together. Extracted bundle, compiler, header/archive, and consumer paths may
-contain spaces. Producing packages still follows the existing Make path
-restrictions; this does not promise arbitrary spaces in native build/cache
-paths.
+contain spaces. Paths used while producing a package must not contain
+spaces.
 
 A bundle is specific to its host platform, architecture, native profile, and
 matching x2c compiler/runtime. `BUNDLE.json` records those build identities.
@@ -526,9 +526,7 @@ compilation and ordered archives/system options during final linking.
 Arguments remain individual argv values even when an expanded path contains
 spaces. They are not shell commands and `@` does not expand another response
 file. Definitions do not change the preceding x2c source preprocessing.
-A package built before 0.15.0 carries the earlier `<name>.link` file instead;
-the compiler no longer reads it, so rebuild such a package with `make build`
-or reinstall it.
+
 
 Native bundle metadata covers yyjson, PCRE2, BLIS, libuv, termbox2,
 libcurl, raylib, and torch. Releases publish torch for macOS arm64 and Linux
@@ -539,8 +537,7 @@ manifest; their bundle carries an empty native response file. Distribute any
 other x2c package imports alongside them under the registered package root.
 
 Libcurl bundles include its pinned OpenSSL static inputs in link order. Host
-certificate configuration remains the admitted profile's system certificate
-bundle; native bundling does not introduce a certificate store.
+libcurl uses the host's system certificate bundle.
 
 Raylib also requires its native type declarations during x2c source discovery.
 Use the existing source include option for its bundled headers:
@@ -591,8 +588,8 @@ to the producer package. Destinations are relative to the bundle. An optional
 arguments retain `{package}` for consumer-time expansion. An optional
 `platform_args` object appends arguments keyed by the producer's platform
 (`darwin` or `linux`) when a shared dependency manifest has platform-specific
-system requirements. The manifest selected by the package Makefile remains
-the native profile owner. Unless `DEPENDENCY_MANIFEST` names one, the
+system requirements. The manifest that the package Makefile selects
+sets the native profile. Unless `DEPENDENCY_MANIFEST` names one, the
 Makefile uses the first manifest present among
 `dependency-<os>-<arch>.json`, `dependency-<os>.json`, and `dependency.json`,
 where `<os>` is `darwin` or `linux` and `<arch>` is the machine name, such as

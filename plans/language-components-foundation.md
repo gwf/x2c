@@ -33,14 +33,14 @@ the next work is limited to these existing language boundaries.
   [repository review decision 7](repository-review-2026-10-12.md#decisions-recorded-2026-10-12):
   a function rule rewrites the program's definitions, the copy the compiler
   runs is compiled as written, and no code change follows.
-- Ordinary templates bind external names at the author's definition. A template
-  referring to the author's `helper` keeps that binding when a caller has another
-  `helper`. Caller-site lookup requires an explicit request; it is not the default.
-  Preserve hygiene for introduced names.
-- Recorded 2026-10-13: "the author's definition" means x2c's
-  order-independent file scope, so a template keeps a global declared later
-  in the file. Evidence: fixture
-  `unittest/compiler-fixtures/macro-forward-name-later-global`.
+- Superseded 2026-10-16 by Gary: free names in a template resolve where the
+  expansion lands, as decided on 2026-10-02 (a1feadd91, f6815d5e5). A
+  template keeps a file-scope declaration only for a name it lists with
+  `using name`. Names the body declares stay private to each expansion.
+  The 2026-10-12/13 decision recorded here, that templates bind external
+  names at the author's definition by default (33e1a21f5, #193), was
+  reverted. Evidence: fixtures `macro-binding-landing`, `macro-author-binding`,
+  and `macro-type-names-land`.
 - A macro-constructed `with` form behaves like the same handwritten `with` form.
   Use the ordinary binding, placement, and lifecycle owners.
 

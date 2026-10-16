@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/protocol-hidden-method.x:12:38: type: method 'Child.hello' is hidden by an inherited protocol conformance; adopt the protocol for this type to use it
+  int greet(Child child) => child.hello();
+                                       ^
+

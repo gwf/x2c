@@ -18,7 +18,7 @@ The [compiler API reference](compiler-api/index.md) and
 [runtime module reference](../library/modules/index.md) describe individual
 functions and types.
 
-## Watching a feature get lowered
+## Inspecting a feature's lowering
 
 To see how a compiler stage transforms a feature, dump the AST before and after
 that stage. Take a `foreach` loop:
@@ -31,7 +31,7 @@ int sum(List numbers) {
 }
 ```
 
-Ask for the AST after parsing and macro expansion:
+Print the AST after lowering:
 
 ```sh
 ./builds/0/x2c translate --dump-transforms sum.x
@@ -74,7 +74,8 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 ### Collection and String literals
 
 - Parse: `src/literals.x`
-- Lower/generate: `src/components/component-literals.x`, `src/transform.x`, `src/cache.x`
+- Lower/generate: `src/components/component-literals.x`, `src/transform.x`,
+  `src/cache.x`
 - Runtime: `lib/list.x`, `lib/array.x`, `lib/map.x`, `lib/string.x`
 - Tests: literal-cache and mutable-empty fixtures, collection suites
 - See also: [collections](../guide/collections.md)
@@ -82,15 +83,15 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 ### String interpolation
 
 - Parse: `src/literals.x` for `$name` and `${expr}`, which are separate sites
-- Type/convert: `Compiler.convert_segment_to_string` in `src/expressions.x`
+- Type/convert: `Compiler.convert_segment_to_string` in `src/expressions/conversions.x`
   selects the conversion for each segment. A segment that is already a `Var`,
   canonical or aliased, renders through `Var_str` whatever its run-time tag; a
   numeric segment takes its nearest declared `T_str` converter when one exists
   and is
   boxed and rendered through `Var_str` otherwise
-- Lower/generate: `src/components/component-interpolation.x` joins the segments with
-  `String_join`, a literal rewrite on the `segments` head; `src/transform.x`
-  converts each insertion and moves ordered parts ahead of the join
+- Lower/generate: `src/transform.x` converts each insertion, then
+  `src/components/component-interpolation.x` joins them; see [builtin
+  components](architecture.md#builtin-components)
 - Runtime: `lib/string.x`, plus `Var.str` for the boxed segments
 - Tests: interpolation suite
 - See also: [values](../guide/values.md)
@@ -108,8 +109,8 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 ### Indexing and slicing
 
 - Parse/type: `src/expressions.x`, `src/type.x`
-- Lower: `src/components/component-access.x` with ordinary ordered-call and conversion
-  operations from `src/transform.x`
+- Lower: `src/components/component-access.x` with ordinary ordered-call and
+  conversion operations from `src/transform.x`
 - Runtime: collection helpers plus the shared bounds normalizer in
   `lib/common.x`
 - Tests: index/slice suite and checked indexing example
@@ -129,9 +130,8 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 - Parse, publish, and resolve declarations and adoptions, and choose each
   member's owner: `src/protocol.x`; operator mappings:
   `src/operator-ledger.x`
-- Write forwarding members, `Var` descriptor thunks, method tables, and
-  descriptor registration: `src/components/component-protocols.x`, on the `conform`
-  form `src/protocol.x` presents for each conformance
+- Write each conformance's adapters: `src/components/component-protocols.x`;
+  see [builtin components](architecture.md#builtin-components)
 - Runtime descriptors and their registration: `lib/dispatch.x`; built-in
   adoptions: `lib/protocols.x`
 - Tests: protocol, adoption, and conformance compiler fixtures and the
@@ -183,7 +183,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
   `Compiler.source_token`
 - Member dependencies and the entry's content hash: `FileWalk` in
   `src/collect.x`
-- The `module` storage class: `_module_storage_form` in `src/parse.x`
+- The `module` storage class: `_module_storage_form` in `src/parse/units.x`
   retypes the word as `static` under `Compiler.module_declaration`
 - File-private statics: each marker row carries its file's prefix from
   `_file_prefix` in `src/collect.x`; `_declared_key` in `src/symbols.x`
@@ -243,9 +243,9 @@ inline-lisp example
 - Typedefs: declarations are file-scope; direct and chained aliases of `Var`
   use the same conversions and operators as `Var`
 - Numeric conversion: all 15 numeric tags use one implementation that raises
-  the appropriate `Error` cause on failure; `long`/`ulong`, `llong`/`ullong`, and
-  `ldouble` name native `long`, `long long`, and `long double` families rather
-  than fixed widths
+  the appropriate `Error` cause on failure; `long`/`ulong`, `llong`/`ullong`,
+  and `ldouble` name native `long`, `long long`, and `long double` families
+  rather than fixed widths
 - Limits: numeric-to-`String` conversion remains partial; other nonnumeric
   values use their declared conversions; helper-backed collection, enum, and
   bit-field compound assignment are unsupported; the C compiler checks ordinary
@@ -273,7 +273,8 @@ inline-lisp example
 ### Lambdas
 
 - Parse and resolve captures: `src/literals.x`, `src/lambdas.x`
-- Lower: `src/components/component-lambdas.x`, dispatched from `src/transform.x`
+- Lower: `src/components/component-lambdas.x`, dispatched from
+  `src/transform.x`
 - Direct `Func` calls and conversions: `src/callables.x`,
   `src/expressions.x`
 - Runtime: `lib/func.x` and receiving callback APIs
@@ -285,15 +286,16 @@ inline-lisp example
   `etc/builtin-macros.x`; the expansion algorithm in
   `src/builtins.x`
 - Lower/generate the expanded loop: `src/transform.x`, `src/emit.x`
-- Runtime: `lib/iter.x` and collection adapters; `Iter.try_next` owns status
+- Runtime: `lib/iter.x` and collection adapters; `Iter.try_next` returns the
+  traversal status
 - Tests: `foreach` fixture, `Iter` suite, and checked example
 - See also: [iteration](../guide/iteration.md)
 
 ### Status-bearing Map operations
 
 - Runtime owner: `lib/map.x`
-- Literal boundary: `src/components/component-literals.x` builds counted
-  `Map.update_n` construction
+- Literal boundary: `src/components/component-literals.x`; see [builtin
+  components](architecture.md#builtin-components)
 - Generic routing: `lib/dispatch.x`
 - Value-returning wrappers: `Map.get` and `Map.del`
 - Cursor contract: structural mutation invalidates outstanding traversal state
@@ -304,8 +306,8 @@ inline-lisp example
 ### Counted Array construction
 
 - Runtime owner: `lib/array.x` through `Array.update_n` and `Array.push`
-- Literal boundary: `src/components/component-literals.x` builds counted
-  `Array.update_n` construction
+- Literal boundary: `src/components/component-literals.x`; see [builtin
+  components](architecture.md#builtin-components)
 - Value contract: raw `Null` is data; `void` is rejected
 - Tests: `Array` suite and the counted-literal compiler fixture
 - See also: [collections](../guide/collections.md)
@@ -313,8 +315,8 @@ inline-lisp example
 ### Var values in printf-family formats
 
 - Parse and type the call: `src/expressions.x`
-- Lower: `src/components/component-printf.x` reads the static format once and converts
-  each `Var` value a conversion consumes, one call pattern per family member
+- Lower: `src/components/component-printf.x`; see [builtin
+  components](architecture.md#builtin-components)
 - Runtime: `Var.convert` in `lib/varconvert.x` and `Var.str` in
   `lib/dispatch.x`
 - Tests: the `printf-var` compiler fixtures
@@ -323,34 +325,32 @@ inline-lisp example
 ### Match statement
 
 - Parse: `src/statements.x`
-- Lower: `src/components/component-match.x` emits direct tests for static patterns and
-  capture storage for runtime matching
+- Lower: `src/components/component-match.x`; see [builtin
+  components](architecture.md#builtin-components)
 - Native emission: `src/emit.x`
-- Runtime: `lib/match.x` owns pattern semantics; `lib/match-plan.x`
-  compiles patterns to plans, `lib/match-cache.x` retains them, and
-  `lib/match-machine.x` executes them over wordcode and state definitions
-  from `lib/machine.x`; patterns and binding sets are ordinary `List`s from
-  `lib/list.x`
+- Runtime: `lib/match.x` and the plan modules listed in [the runtime
+  boundary](architecture.md#the-runtime-boundary); patterns and binding sets
+  are ordinary `List`s from `lib/list.x`
 - Tests: match suites and checked nested example
 - See also: [pattern matching](../guide/match.md)
 
 ### String switch
 
 - Parse: `src/statements.x`
-- Lower: `src/components/component-string-switch.x` numbers the labels a switch on a
-  `String` owns and switches on a shared helper's result
+- Lower: `src/components/component-string-switch.x`; see [builtin
+  components](architecture.md#builtin-components)
 - Tests: the `string-switch` and `rewrite-string-switch` compiler fixtures
 - See also: [C control flow](../reference/language.md#c-control-flow)
 
 ### Raise, filtered catch, finally, and defer
 
 - Parse: `src/statements.x`
-- Lower/generate: `src/transform.x`; `src/components/component-raise.x` converts a
-  `raise`'s code and details; `src/components/component-try.x` lowers `try` to a
-  landing form; `src/cleanup.x` places cleanup on every exit from a region;
+- Lower/generate: `src/transform.x`, `src/components/component-raise.x`,
+  `src/components/component-try.x` (see [builtin
+  components](architecture.md#builtin-components)), `src/cleanup.x`,
   `src/emit.x`
-- Runtime: `lib/exception.x` owns the frame/jump engine for transfer and
-  cleanup; `lib/error.x` owns handlers, policy, watermarks, accumulated
+- Runtime: `lib/exception.x` implements the frames and jumps for transfer
+  and cleanup; `lib/error.x` owns handlers, policy, watermarks, accumulated
   records, matching, and transferring registration lifetime
 - Tests: optimized `defer`/try and filtered-catch compiler fixtures,
   exception/`defer`/`Error` suites, and fatal/floor subprocess probes
@@ -362,8 +362,9 @@ inline-lisp example
 - Parse: `src/parse.x`
 - Lower/generate: `src/generate.x`, `src/cache.x`
 - Runtime: generated guard plus `TYPE.initialize()`
-- Boundary: non-static functions enter the guard; static helpers trust their
-  guarded caller or the already-guarded initializer body
+- Boundary: [generation and cache
+  staging](architecture.md#generation-and-cache-staging) lists the functions
+  that check each guard
 - Tests: type-initializer fixtures
 
 ### Structured diagnostics
@@ -381,41 +382,10 @@ limit are documented in `agents/logger-and-diagnostics-guide.md`.
 
 ## Compiler phase boundaries
 
-The main translation steps are:
-
-1. `lib/tokenizer.x` turns scanner results into tokens.
-2. `src/parse.x` coordinates declarations and top-level source.
-3. `src/expressions.x`, `src/statements.x`, and `src/literals.x` construct
-   typed AST forms; `src/ast.x` owns the shared node contracts they build to.
-4. `src/type.x` supplies type facts and canonical forms.
-5. `src/transform.x` normalizes the typed forms and dispatches each
-   feature a shipped component owns to its rules, such as lambdas to
-   `src/components/component-lambdas.x`; `src/callables.x` owns `Func` adapter
-   synthesis.
-6. `src/cleanup.x` names each `defer` region's runtime record and each
-   landing's frame, and places cleanup statements on every exit that leaves
-   a region; `src/components/component-try.x` answers the landing form of a `try`.
-7. `src/generate.x` partitions the translation unit and installs init
-   scaffolding; `src/cache.x` owns literal-cache initialization.
-8. `src/emit.x` emits C tokens and `src/format.x` formats them.
-
-Global type information reaches the parser outside that
-pipeline. `src/collect.x` gathers global symbol types by shallow-parsing raw
-source and splicing quote-includes in preprocessor order, replays the
-runtime prelude from the runtime `x2c.xi` interface, and writes each unit's
-interface beside its generated C as Lisp data.
-
-`src/compiler.x` owns compiler state, with its members under
-`src/compiler/` for parsing, declarations, generated names, lifecycle, and
-source files; `src/symbols.x` owns its symbol scopes. `src/diagnostics.x` owns structured errors. `src/utils.x` owns host-environment and process
-helpers, including the C preprocessor process boundary. `src/frontend.x`
-shares configured source stages and sequential unit lifetimes with internal
-tools. `src/translation.x` owns the translation loop, inspections, workers,
-and ordered diagnostics. `commands/build/` owns builds, runs, and script
-caching. `src/main.x` dispatches those workflows to `x2c-build`; `src/cli.x` owns the option table, command selection, and help rendering.
-
-Each feature entry lists the relevant parser, transforms, runtime code, and
-tests so you can follow its complete implementation.
+[The compiler pipeline](architecture.md#the-compiler-pipeline) gives the
+phase order and the modules in each phase, and
+[module ownership](architecture.md#module-ownership) lists each module's
+responsibility.
 
 ## Shared Lisp initialization
 

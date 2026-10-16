@@ -100,8 +100,6 @@ void Compiler_enter(Compiler c, Ancestor row);
 
 List Compiler_enclosing(Compiler c, Symbol what);
 
-int Compiler_lowering_body(Compiler c);
-
 int Compiler_enter_function(Compiler c, List declaration, int callback);
 
 List Compiler_function_entry(Compiler c, int depth);

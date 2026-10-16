@@ -268,7 +268,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _235 = List_var(_234);
   _236 = Symbol_var(199448);
   _237 = Symbol_var(19147688);
-  _238 = Atom_intern(String_new("binding-global"));
+  _238 = Atom_intern(String_new("binding-name"));
   _239 = String_new("money_scale");
   _240 = String_var(_239);
   _241 = cons(_240, NULL);

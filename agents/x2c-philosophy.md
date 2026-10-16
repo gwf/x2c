@@ -611,7 +611,7 @@ evidence.
 
 ### Unit interfaces
 
-[Compiler Architecture](../docs/src/internals/architecture.md#shallow-parse-and-global-environment-discovery)
+[Compiler Architecture](../docs/src/internals/architecture.md#unit-interfaces)
 describes the interface file, its search order, and its hash validation.
 `collect.x` installs each process cache entry once: the first walk of a file
 fixes its contribution, so a later walk of the same text in a context whose

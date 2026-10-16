@@ -69,8 +69,8 @@ int main(void) {
     }
     catch %(bad-state (library "torch") *detail): {
       String operation = detail.assoc(<operation>);
-      String reason = detail.assoc(<reason>);
-      printf("%s", %"caught $operation: $reason\n");
+      String message = detail.assoc(<message>);
+      printf("%s", %"caught $operation: $message\n");
     }
     return 0;
   }

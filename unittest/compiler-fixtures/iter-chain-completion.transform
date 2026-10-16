@@ -7,7 +7,7 @@
    (return 
     (expr ("Var") 
      (at 44 
-      (call (expr (macro-expr) (ident (binding-global "Var_binary"))) 
+      (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 
        (args (expr ("Var") (ident (binding 2 "value"))) 
         (expr ("Symbol") (literal ("Symbol") "*" *)) 
         (expr ("Var") 
@@ -22,10 +22,10 @@
    (return 
     (expr (int) 
      (at 47 
-      (call (expr (macro-expr) (ident (binding-global "x2c_var_equal"))) 
+      (call (expr (macro-expr) (ident (binding-name "x2c_var_equal"))) 
        (args (expr ("Var") 
               (at 46 
-               (call (expr (macro-expr) (ident (binding-global "Var_binary"))) 
+               (call (expr (macro-expr) (ident (binding-name "Var_binary"))) 
                 (args (expr ("Var") (ident (binding 5 "value"))) 
                  (expr ("Symbol") (literal ("Symbol") "%" %)) 
                  (expr ("Var") 

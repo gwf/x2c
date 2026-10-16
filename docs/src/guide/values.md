@@ -7,7 +7,7 @@ Some code has to hold whatever the caller supplied. The element of a
 heterogeneous list, the value stored behind a map key, `Error` detail, the
 argument to a routine that prints anything: none of those have one static
 type. In plain C you would write a tagged union by hand and a switch for every
-operation. x2c gives you one: `Var`.
+operation. x2c provides that type: `Var`.
 
 ## A value that carries its own type
 
@@ -166,6 +166,20 @@ Var key = 23, val = 3.14, answer = "hello";
 puts(%"output: ($key: $val) = $answer");
 ```
 
+A numeric segment of an interpolated `String` renders through its nearest
+declared `T_str` converter when it has one and through `Var.str` otherwise.
+Converter lookup follows the source's typedef chain, and an exact converter
+wins. A segment already typed `Var` renders through `Var.str` whatever tag it
+holds:
+
+```x2c
+int count = 2;
+Var value = 3.14;
+
+String counted = %"processed $count items";  /* processed 2 items */
+String read = %"v = $value";                   /* v = 3.140000 */
+```
+
 A printf-family call with a single static format literal can use the format
 to request native numeric arguments:
 
@@ -189,21 +203,17 @@ containing only native arguments keep C's printf behavior.
 
 ## Null and void
 
-`Null` is data; `void` reports that no value is available.
+`Null` is the all-zero `Var`: the null pointer, or the external `nil`. It is
+ordinary data. You may store it in a `List`, an `Array`, or a `Map`, and
+iterating a collection can return it.
 
-**`Null`** is the all-zero `Var`. It is a *value*: the null pointer, the
-external `nil`. `Null` is data. You may store it in a `List`, an `Array`, or a
-`Map`, and iterating a collection can hand it back to you.
-
-**`void`** is the all-ones `Var`, and it is *not* a value. It is the
-sentinel an API returns to say "there is nothing here": out of range, key
-absent, iterator exhausted. It is excluded from every collection and
-iterator value domain. You cannot push it into an `Array`, store it as a `Map`
-key or value, or receive it as a successful iterator payload. In an
-expression, lowercase `void` is the literal for this sentinel. In a
-declaration, cast, `sizeof`, or parameter list, `void` keeps its C type
-meaning. `Null` says the value is zero or empty; `void` says there is no
-value.
+`void` is the all-ones `Var`. APIs return it to report that no value is
+available: an index out of range, an absent key, or an exhausted iterator.
+No collection or iterator holds it. You cannot push it into an `Array`,
+store it as a `Map` key or value, or receive it as a successful iterator
+payload. In an expression, lowercase `void` is the literal for this
+sentinel. In a declaration, cast, `sizeof`, or parameter list, `void` keeps
+its C meaning.
 
 You can inspect the sentinel without it becoming data. Two `void` operands
 are equal with `==` and identical with `===`, and `!=` and `!==` are their
@@ -212,7 +222,10 @@ apply to `Var.equal`, `Var.fallback_equal`, `Var.same`, and the four
 comparison operations accepted by `Var.binary`. Display and readable output
 both spell the sentinel `void`.
 
-`void` is what you get from an out-of-range indexed read:
+`void` is what you get from an out-of-range `Array` or `List` read and from
+a missing key in a plain `Map`. A `String` read out of range returns `-1`, a
+packed typed `Array` bracket is unchecked, and a typed `Map` raises
+`<bad-arg>` for a missing key:
 
 ```x2c
 List items = %(10 20 30);
@@ -261,9 +274,8 @@ printf("null=%d void=%d truthy=%d len=%d\n",
 null=1 void=0 truthy=0 len=2
 ```
 
-Conditions are where the distinction matters. `Null` is false. `void` is
-**not** false. A truthiness test on `void` raises `<void-op>` instead of taking
-the else branch. A [matching filtered `catch`](exceptions.md#catching-by-cause)
+In a condition, `Null` is false, and a truthiness test on `void` raises
+`<void-op>`. A [matching filtered `catch`](exceptions.md#catching-by-cause)
 receives that error; without one, the default abort terminates the program.
 Do not write `if (maybe_missing)` on a value that might be `void`. Test it
 with `Var.is_void`, or use the status-bearing API and never hold a `void`.
@@ -322,13 +334,12 @@ printf("total=%s scaled=%f\n", total, scaled);
 total=31 scaled=25.000000
 ```
 
-Expressions with no `Var` operand stay native C, so this costs nothing where
-you did not ask for it. Integer operands use integer promotion; arithmetic
-keeps the promoted type's low bits, so overflow wraps to that type's width.
-Floating operands work in the widest participating floating family with host
-behavior. Remainder, the shifts, and the bitwise
-operators reject a floating operand. There is no dynamic unary numeric
-operator, and no dynamic `++` or `--`.
+Expressions with no `Var` operand stay native C and make no runtime calls.
+Integer operands use integer promotion; arithmetic keeps the promoted type's
+low bits, so overflow wraps to that type's width. Floating operands work in
+the widest participating floating family with host behavior. Remainder, the
+shifts, and the bitwise operators reject a floating operand. There is no
+dynamic unary numeric operator, and no dynamic `++` or `--`.
 
 A statically nonnumeric peer is a compile-time error:
 
@@ -452,10 +463,10 @@ other indexed updates require an existing destination. `List` and `String`
 indices cannot be updated. The [language reference](../reference/language.md)
 describes the supported operations and conversion rules.
 
-## When Var is the wrong tool
+## When to use Var
 
-`Var` is not a better `int`. Use it when the dynamic type is part of the
-problem, and use a static type when it is not.
+Use `Var` when the dynamic type is part of the problem. Use a static type
+otherwise.
 
 Use `Var` when:
 
@@ -467,18 +478,17 @@ Use `Var` when:
 
 Prefer a plain C or runtime type when:
 
-- **The static type already says what the function takes.**
+- The static type already says what the function takes.
   `long checksum(String)` tells a reader more than `Var checksum(Var)`, and
-  the compiler checks it. With `Var` you have moved a class of type error
-  from translation time to run time, and that costs you.
-- **Cost matters in a hot path.** A dynamic operation calls into the shared
-  runtime, which validates the encoding and decodes both tags, where the
-  native version is one machine instruction. Boxing a `long` or a
-  `long double` also allocates a scope-owned box.
-- **The conversion is already proven.** If a call takes a `Var` parameter,
-  pass your `String`, `Symbol`, collection, or scalar straight in and let the
-  compiler insert the crossing. Declaring a local `Var` first only to hand
-  it over adds a name and hides the type.
+  the compiler checks it. A `Var` moves those type errors from translation
+  time to run time.
+- The code is on a hot path. A dynamic operation calls into the runtime,
+  which validates the encoding and decodes both tags. The native operation
+  is one machine instruction. Boxing a `long` or a `long double` also
+  allocates a box in the active scope.
+- A call already takes a `Var` parameter. Pass your `String`, `Symbol`,
+  collection, or scalar straight in, and the compiler converts it. A local
+  `Var` declared only to pass the value adds a name and hides the type.
 
 Written out, the two cases look like this:
 
@@ -492,27 +502,6 @@ String describe(Var value) {
 int clamp(int value, int low, int high) {
   return value < low ? low : value > high ? high : value;
 }
-```
-
-The numeric conversion matrix does *not* generalize to nonnumeric tags.
-`Symbol`, collection, and pointer crossings have their own typed readers.
-An assignment returns NULL when the tag does not match; test the tag or the
-returned value before using it. The explicit readers, such as `.list()`
-and `.string()`, raise `<no-convert>` instead. A `String` destination
-displays any value.
-
-`String` interpolation reads a value instead of demanding a tag, so it has no
-such limit. A numeric segment renders through its nearest declared `T_str`
-converter when it has one and through `Var.str` otherwise. Converter lookup
-follows the source's typedef chain, and an exact converter wins. A segment
-already typed `Var` renders through `Var.str` whatever tag it holds:
-
-```x2c
-int count = 2;
-Var value = 3.14;
-
-String counted = %"processed $count items";  /* processed 2 items */
-String read = %"v = $value";                   /* v = 3.140000 */
 ```
 
 ## Where to go next

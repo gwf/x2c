@@ -121,9 +121,11 @@ List Compiler.protocol_member_names(Compiler c, Type participant) {
   return names.list_free();
 }
 
-/** Reports whether conformance supersedes an ambient direct member.
-    The answer is cached for the canonical participant and includes the first
-    visible adopted ancestor that declares the member.
+/** Reports whether conformance supersedes an ambient direct member: 0 when
+    it does not, 1 when the participant's own adoption does, and 2 when an
+    ancestor's adoption does. The answer is cached for the canonical
+    participant and uses the first visible adopted ancestor that declares
+    the member.
 */
 int Compiler.protocol_rejects_direct_member(
   Compiler c, Type participant, String member) {
@@ -135,7 +137,7 @@ int Compiler.protocol_rejects_direct_member(
       List row = _member_row(c, protocols, ancestor, member);
       if (row) {
         Symbol status = row.cadr();
-        rejects = status != <implmntd>;
+        if (status != <implmntd>) rejects = ancestor == owner ? 1 : 2;
         break;
       }
     }

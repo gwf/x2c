@@ -33,9 +33,9 @@ foreach (String file, %(git diff --name-only).job().lines())
 reference describes which forms stay at file scope, how a script that
 defines `main` runs, and the exit status of an uncaught failure.
 
-`x2c script` runs the file the way an interpreter would. The first run
-builds it; later runs start the cached executable in a few milliseconds
-until the script or something it uses changes:
+`x2c script` builds the file once and then runs the cached executable. The
+first run builds it; later runs start the cached executable in a few
+milliseconds until the script or something it uses changes:
 
 ```sh
 x2c script tools/release-notes.x v0.12.0
@@ -68,11 +68,10 @@ meaning in collection syntax: a comma, `$`, `@`, or a redirection such as
 `2>&1`. Inside a string, `$` still interpolates; write `\$` for a literal
 dollar sign.
 
-`job` turns a command into a `Job`, and a `Job` destination calls it for you.
-The first request for a result starts
-the program, waits for it, and records what it did. Every later request
-reads that same record, so a job runs exactly once however many results you
-take from it.
+`job` turns a command into a `Job`, and a command converts to a `Job` where
+one is expected. The first request for a result starts the program, waits for
+it, and records what it did. Every later request reads that same record, so a
+job runs exactly once however many results you take from it.
 
 ### Reading results
 
@@ -654,8 +653,8 @@ place of each ill-formed byte sequence, the same text that Python and
 JavaScript produce when they decode those bytes, so the output is always
 UTF-8 that `Json.parse` accepts.
 
-The package keeps what a `Map` cannot: object order, duplicate names, and
-whether a number was signed, unsigned, or real. Its converted integers are
-`long long` or `unsigned long long` values, which do not compare equal to an
-`int` literal such as the 5 in `{n: 5}`. The package raises `<malformed>`
-for malformed text.
+The yyjson package preserves what a `Map` does not: object order, duplicate
+names, and whether a number was signed, unsigned, or real. Its converted
+integers are `long long` or `unsigned long long` values, which do not compare
+equal to an `int` literal such as the 5 in `{n: 5}`. The package raises
+`<malformed>` for malformed text.

@@ -66,8 +66,8 @@ meta static List increment(List code) {
 }
 macro Expression $inc_operand(Expr $code) => $increment_operand($code);
 
-/* A callee declared at file scope keeps that declaration, listed with
-   `using` or not, so recognition rejects a caller's local of its spelling. */
+/* A free callee resolves where its expansion lands. Recognition accepts
+   that same local, while an explicit `using` callee keeps the global. */
 static int decrement(int value) { return value - 1; }
 meta static List increment_hit(List code) {
   match (code) {

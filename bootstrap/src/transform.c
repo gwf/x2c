@@ -1901,7 +1901,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _1573 = cons(_1572, NULL);
   _1574 = Symbol_var(15739);
   _1575 = Symbol_var(8571);
-  _1576 = Atom_intern(String_new("binding-global"));
+  _1576 = Atom_intern(String_new("binding-name"));
   _1577 = String_new("x2c_var_equal");
   _1578 = String_var(_1577);
   _1579 = cons(_1578, NULL);

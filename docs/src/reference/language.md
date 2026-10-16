@@ -26,7 +26,8 @@ object has one definition in the generated C and an `extern` declaration in
 the header. An object of an anonymous `struct`, `union`, or `enum` type has no
 repeatable declaration to publish.
 
-The compiler reserves `_x2c_gensym_*` identifiers for generated support.
+The compiler reserves `_x2c_gensym_*`, `_init_guard_`, `_file_init_`, and
+`_` followed by digits for generated support.
 Source declarations may use `_x2c_*` outside that subspace. The repository
 uses those names for shared implementation functions, but the prefix does
 not change linkage or enforce private access. `static` controls visibility.
@@ -60,7 +61,9 @@ The advanced `--cpp-symbols` and `--live-symbols` modes run the host
 preprocessor over raw `.x` include graphs. A module used with those modes needs
 a source-level `#pragma once` only when its own `.x` includes form a cycle.
 Ordinary translation resolves includes itself and terminates cycles without
-it.
+it. These modes and `--dump-cpp` reject module units and indented units,
+because the host preprocessor reads them as C. `--cpp-symbols` and
+`--live-symbols` also reject script units, because the `#!` line is not C.
 
 Every ordinary `.x` translation unit implicitly loads the `x2c.x` standard
 runtime prelude. The compiler also emits `#include "x2c.h"` in its generated
@@ -74,13 +77,13 @@ uses the package `import` described below.
 ### Module blocks
 
 A module block splits one large source file across a directory without
-splitting the translation unit. The entry file names its member files, and
+splitting the translation unit. The entry file lists its member files, and
 the compiler reads each member's text in place of the block. The result
 translates as one unit with two private storage classes: `static` is visible
 in the file that declares it, and `module` is visible in every file of the
 unit.
 
-The entry `calculations.x` names members under its companion directory
+The entry `calculations.x` lists members under its companion directory
 `calculations/`:
 
 <!-- ignore: These two source files must be saved at the displayed paths. -->
@@ -154,34 +157,32 @@ object and function are `static` in the generated C, the type stays private,
 and the unit's header and interface publish none of them. Outside a module
 unit `module` means `static`.
 
-Inside a module unit, `static` keeps its C meaning: the name is visible in
-the file that declares it and in no other file of the unit. That holds for
+Inside a module unit, `static` keeps its C meaning: the name is visible in the
+file that declares it and in no other file of the unit. That holds for
 objects, functions, `static typedef`, `static class`, and the `struct`,
 `union`, or `enum` tag such a typedef declares. Two members may each declare
 `static int counter` or `static typedef struct Node { ... } Node`, and each
-file sees its own, and so do the enumerators of a `static typedef enum`.
-The enumerators of an enum declared without a typedef stay unit-wide, even
-under `static`. A later declaration of a static without `static`, such as
-the definition after a `static` prototype, or a block-scope `extern`
-declaration or function prototype, names the file's static as C links it.
-A file's statics take a prefix in the generated C: the file's path under the entry's
-companion directory without its extension, with each character that cannot
-continue a C identifier made `_`, then `___`. The prefix starts with `f`,
-the normalized path's length, and `_`; a path that starts with a digit
-gets a leading `x` before its length is measured. Under the entry `parser.x`,
-a static `advance` in `parser/statements/loops.x` emits as `f16_statements_loops___advance`, and one
+file sees its own, and so do the enumerators of a `static typedef enum`. The
+enumerators of an enum declared without a typedef stay unit-wide, even under
+`static`. A later declaration without `static` refers to the file's static, as
+in C. Examples are the definition after a `static` prototype and a block-scope
+`extern` declaration or prototype. A file's statics take a prefix in the
+generated C: the file's path under the entry's companion directory without its
+extension, with each character that cannot continue a C identifier made `_`,
+then `___`. The prefix starts with `f`, the normalized path's length, and `_`;
+a path that starts with a digit gets a leading `x` before its length is
+measured. Under the entry `parser.x`, a static `advance` in
+`parser/statements/loops.x` emits as `f16_statements_loops___advance`, and one
 in the entry itself as `f6_parser___advance`. Trailing `_` of the path's
 spelling are dropped first, so `a.x` and `a-.x` give one prefix. A package
 prefix ends in `__`, so a package entry's statics stay apart from the
-package's public names.
-Generated names are compiler details; source never spells them, and
-`--dump-definitions` displays the source name. A static type adopted as a
-class keeps its short name as its Var tag and descriptor name, so two files
-of one unit cannot each adopt a class under the same short name.
-Compile-time declarations, `static macro`, `static $(`, `static protocol`,
-and `meta` functions, keep their unit-wide behavior. A free name in a macro
-body binds where the expansion lands, so it reaches the expanding file's
-static; a type name in a macro body is spelled where the macro is defined.
+package's public names. Generated names are compiler details; source never
+spells them, and `--dump-definitions` displays the source name. A static type
+adopted as a class keeps its short name as its Var tag and descriptor name, so
+two files of one unit cannot each adopt a class under the same short name.
+Compile-time declarations, `static macro`, `static $(`, `static protocol`, and
+`meta` functions, keep their unit-wide behavior. Macro free names follow
+[hygiene](#hygiene-and-generated-names).
 
 Three cases are errors. Two files whose paths give one prefix, such as
 `a_b.x` and `a/b.x`, or a member named like its entry, are a driver error
@@ -192,23 +193,21 @@ thing in every file. Two files adopting a class under one short name is a
 parse error at the second. A file-scope typedef named `module` keeps that
 word an identifier.
 
-A quoted include in a member that names a file beside the member reaches that
-file, in collection and in the generated C. Any other include resolves as it
+A quoted include of a file beside the member includes that file, in
+collection and in the generated C. Any other include resolves as it
 would at the block's position in the entry.
 
 Members are not translation units. A build never lists them; the entry's
-generated C and header carry everything. The entry's depfile and interface
+generated C and header contain everything. The entry's depfile and interface
 depend on each member's content, so editing a member translates the entry
 again and changes what an including unit collects. Translated on its own, a
 member is an ordinary file.
 
 Diagnostics, `--source-map` line directives, dump locations, and editor
-positions name the member's file and its line there. A unit that includes the
-entry collects the public declarations of every member. A unit that includes a
-member directly collects only that member, as it would any file. The host
-preprocessor reads a block as C, so `--cpp-symbols`, `--live-symbols`, and the
-`--dump-cpp` modes report a module unit as an error. A file without a block
-reads exactly as before.
+positions report the member's file and line. A unit that includes the entry
+collects the public declarations of every member. A unit that includes a
+member directly collects only that member, as it would any file. A file
+without a block reads exactly as before.
 
 ### Script units
 
@@ -236,7 +235,8 @@ In the second form these top-level forms stay at file scope:
 - `macro` and `keyword` definitions, top-level `$(...)` Lisp, and
   invocations of macros and keyword aliases whose result is file-scope
   syntax, including decorators of functions and types;
-- `typedef`, `static`, and `extern` declarations and static assertions;
+- `typedef`, `static`, `module`, `extern`, and `meta` declarations and static
+  assertions;
 - type definitions such as `struct Point { int x; };` and classes;
 - function definitions, including expression-bodied ones, and prototypes,
   meaning declarations that end with a parameter list.
@@ -255,9 +255,7 @@ Falling off the end of the statements returns zero, and `return` among them
 sets the exit status. A `<cmd-fail>` that no statement catches prints the
 command and its status on standard error, and that status becomes the exit
 status. Any other uncaught `Error` prints its cause and details on standard
-error and exits with status 1. The `--cpp-symbols` and `--live-symbols`
-modes run the host preprocessor over the file as written, where the `#!`
-line is not C, so they report an error for a script unit.
+error and exits with status 1.
 
 ```x2c
 #!/usr/bin/env -S x2c script
@@ -359,16 +357,14 @@ indentation returns:
 | `#pragma indent` | nothing |
 
 Inserted tokens have no width and take the position of the token beside
-them, so diagnostics and source spans name lines of the indented file. At
+them, so diagnostics and source spans report lines of the indented file. At
 the start of a statement line, `%` and `<` begin a literal, as in
 `%(ls).job().run()` or `<done>`, even when the line before ends in an
 operand; on a deeper continuation line they keep their operator meaning.
 
 Indentation uses spaces. A tab in indentation, or a return to an
 indentation that matches no open block, is an `inconsistent indentation`
-error at that line. The host preprocessor does not keep indentation, so the
-`--cpp-symbols`, `--live-symbols`, and `--dump-cpp` modes reject an
-indented unit.
+error at that line.
 
 ## Packages and `import`
 
@@ -379,7 +375,7 @@ compile-time definitions are public. There is no manifest or export list.
 `--package-dir <root>` registers a directory of packages; a target in
 `x2c.toml` may set `package-dirs` instead.
 
-An `import` declaration names a package, binds a local alias, and may name
+An `import` declaration gives a package, binds a local alias, and may list
 individual members:
 
 ```text
@@ -401,15 +397,14 @@ prefix: `geo__Vec`, `geo__Vec_new`, `geo__span`. Two packages may therefore
 publish the same type or function name in one program. An existing local or
 file-scope binding takes precedence over an alias of the same name.
 
-An `import ... with` name renames what you type, never the C symbol.
-`Vec v = Vec.new(2.0, 3.0)` emits `geo__Vec` and `geo__Vec_new`. Any public
-name the package exports may be listed, including free functions. The alias
-is registered either way, and the clause only adds shortcuts. A name the
-package does not export is an error at that name, and a local spelling that
-another binding or a declaration already owns is reported as
-`package name 'V' is already bound` or
-`package name 'V' collides with a declared name`. A declaration shadows a
-`with` name as it shadows an alias.
+An `import ... with` name changes only the source spelling. The C symbol keeps
+its package prefix. `Vec v = Vec.new(2.0, 3.0)` emits `geo__Vec` and
+`geo__Vec_new`. Any public name the package exports may be listed, including
+free functions. The alias is registered either way, and the clause only adds
+shortcuts. A name the package does not export is an error at that name, and a
+local spelling that another binding or a declaration already uses is reported
+as `package name 'V' is already bound` or `package name 'V' collides with a
+declared name`. A declaration shadows a `with` name as it shadows an alias.
 
 Names derived from a package type carry the prefix as well. A `Var(T)`
 participant's tag is `<geo__vec>`, and its converters are `geo__Vec_var` and
@@ -418,16 +413,14 @@ compiler add the prefix. Only a `Symbol` literal, a global interned identity,
 is written out in full.
 
 A package may publish a method on a type it does not define, such as
-`Var.json`, or on a type its own vendored header defines. At each receiver
-type, method lookup tries an ordinary method first, then a method from the
-imported packages, then a protocol method before continuing through typedef
-parents. The receiverless form `Type.member(...)` and protocol punctuation
-resolve through the same imported names, so a package that adopts one of its
-own protocols for a foreign type gives the consumer that operator. One
-imported match is callable. More than one is an error at the call, with the
-packages listed by name; imports that are never called do not conflict. An
-alias-qualified function call such as `json.Var_json(value)` selects one
-package explicitly.
+`Var.json`, or on a type its own vendored header defines. Imported methods
+take part in [dot-call lookup](#dot-call-lookup). The receiverless form
+`Type.member(...)` and protocol punctuation resolve through the same imported
+names, so a package that adopts one of its own protocols for a foreign type
+gives the consumer that operator. One imported match is callable. More than
+one is an error at the call, with the packages listed by name; imports that
+are never called do not conflict. An alias-qualified function call such as
+`json.Var_json(value)` selects one package explicitly.
 
 A package's own sources are `<dir>/src/**` and the single-file
 `<dir>/<name>.x`. Other files in the package directory, including its tests
@@ -443,8 +436,8 @@ An import exposes:
 
 Compile-time definitions arrive in the order an include of the entry source
 would deliver them. Static declarations remain in their source files. Macro
-names retain their declared spellings; a package alias changes C names, not
-macro names. One program uses one version of a package.
+names retain their declared spellings. One program uses one version of a
+package.
 
 A public bodyless `meta` prototype crosses the import like any function
 declaration. When the package has built its native module,
@@ -455,7 +448,7 @@ an error at the import; see
 [packages with compile-time parts](../guide/packages.md#packages-with-compile-time-parts).
 
 Names from a C header remain unprefixed, as if the consumer included that
-header directly. A package renames what it declares, not what it includes.
+header directly. A package prefixes only the names it declares.
 
 An unprefixed public declaration from an x2c file outside the package directory
 would enter the consumer's namespace unchanged. The compiler rejects it as
@@ -479,27 +472,24 @@ guarantee that native macro text follows renamed or file-private bindings.
 
 Member access uses `.` wherever x2c parsed the struct, whether the receiver is
 a value or a pointer, and whether the declaration came from x2c source or from
-a C header x2c reads. `->` remains accepted and is required where the compiler
-cannot select the operator: a pointer to a struct whose layout x2c never sees,
-such as one declared in a system header or in a third-party header reached
-through an include x2c does not resolve; and a `#define` body, which is
-preprocessor text. A member of an anonymous union or struct belongs to its
-enclosing aggregate, and `.` reaches it through a pointer like any other
-member.
-`.` reaches through one pointer level, so a pointer to a pointer typedef keeps
-`(*pointer).field`.
-x2c also recognizes method-style calls such as `list.len()`. The namespaced
-function is selected from the static receiver type. When that function
-declares its first parameter `T *` and the receiver is an addressable `T`, the
-receiver's address is passed, so `rec.bump(4)` reaches
-`void Rec.bump(Rec *rec, int by)` without an explicit `&`. A receiver that is
-a pointer to the declared parameter is one level too far and is a type error;
-write `(*pointer).method()`. Normal pointer
-conversion rules still apply, including preservation of `const` and other
-qualifiers. A qualifier on the receiver itself does not change which methods
-and operators the type has, so a `const String` answers `len()` and `+` the
-way an unqualified one does. Method syntax does not make every value
-dynamically dispatchable; only registered callbacks define custom behavior.
+a C header x2c reads. `->` remains accepted. It is required in two places. One
+is a pointer to a struct whose layout x2c does not read, such as one from a
+system header or an unresolved third-party header. The other is a `#define`
+body. A member of an anonymous union or struct belongs to its enclosing
+aggregate, and `.` reaches it through a pointer like any other member. `.`
+reaches through one pointer level, so a pointer to a pointer typedef keeps
+`(*pointer).field`. x2c also recognizes method-style calls such as
+`list.len()`. The namespaced function is selected from the static receiver
+type. When that function declares its first parameter `T *` and the receiver
+is an addressable `T`, the receiver's address is passed, so `rec.bump(4)`
+reaches `void Rec.bump(Rec *rec, int by)` without an explicit `&`. A receiver
+that is a pointer to the declared parameter is one level too far and is a type
+error; write `(*pointer).method()`. Normal pointer conversion rules still
+apply, including preservation of `const` and other qualifiers. A qualifier on
+the receiver itself does not change which methods and operators the type has,
+so a `const String` has the same `len()` and `+` as a `String`. Method syntax
+does not make every value dynamically dispatchable; only registered callbacks
+define custom behavior.
 
 A receiver spelled `struct T` or `union T` uses the methods of the typedef
 that names the same aggregate. A same-named typedef takes precedence;
@@ -510,8 +500,8 @@ Another module may define methods for the type; this rule selects the
 receiver's type and does not restrict who can define its methods. Type
 inspection and member completion follow the same lookup.
 
-A method may use `Self` in its result and parameter types when it promises to
-preserve the receiver's static typedef:
+A method may use `Self` in its result and parameter types to keep the
+receiver's static typedef:
 
 ```x2c
 Self List.cdr(Self values);
@@ -601,13 +591,12 @@ and `({ $only })` are code; data with one element states its type, as in
 `(Point){ $x }`, or omits the parentheses where its destination gives the
 type.
 
-A `defer`, or a managed declaration, directly inside a statement expression
-is an error: its cleanup region would enclose the final statement, and C
-would lose the value. Either may stand in a block nested inside the
-statement expression. A `return`, `break`, `continue`, or `goto` that leaves
-a statement expression runs the cleanup of each region it leaves, as it does
-from any other statement. A statement expression is an ordinary `sizeof`
-operand, so `sizeof({ ...; })` measures its value's type.
+A `defer`, or a managed declaration, directly inside a statement expression is
+an error: its cleanup region would enclose the final statement, and C would
+lose the value. Either may stand in a block nested inside the statement
+expression. Leaving a statement expression runs cleanup as described in
+[Errors and cleanup](#errors-and-cleanup). A statement expression is an
+ordinary `sizeof` operand, so `sizeof({ ...; })` measures its value's type.
 
 ### Reference parameters
 
@@ -689,16 +678,14 @@ rules for `.` or `->`, addressability, qualifiers, conversions, and null
 values. Delegation emits the field access and direct call; it adds no wrapper,
 temporary, runtime check, symbol, or dispatch table.
 
-Normal method lookup remains first, including direct methods, imported methods,
-protocol-selected methods, and typedef ancestors in their existing order.
-Delegate fields are searched only if those lookups fail, and a member rewrite a
-program registers for the receiver's own type is tried before them. The search
-belongs to the shipped component `src/components/component-delegate.x`, a translator for
-missed calls that `$rewrite` registers with the receiver pattern
-`%(expr <delegate> *)`. It runs only for a receiver whose aggregate declares a
-delegate field. The search visits
-marked fields in source order to produce consistent diagnostics. One resolving
-path is used; two or more are an ambiguity error, regardless of field order. An
+Ordinary [dot-call lookup](#dot-call-lookup) runs first. Delegate fields are
+searched only if those lookups fail, and a member rewrite a program registers
+for the receiver's own type is tried before them. The shipped component
+`src/components/component-delegate.x` does this search. `$rewrite` registers
+it with the receiver pattern `%(expr <delegate> *)`. It runs only when the
+receiver's aggregate declares a delegate field. The search visits marked
+fields in source order to produce consistent diagnostics. One resolving path
+is used; two or more are an ambiguity error, regardless of field order. An
 explicit outer method therefore resolves an otherwise ambiguous pair.
 
 Delegate fields may chain without a numeric depth limit. Lookup tracks the
@@ -714,6 +701,8 @@ expose the field's fields, or forward punctuation, indexing, operators, or
 receiverless calls. `Type.resolve_member` is also direct-only. Its method
 result cannot represent a projected receiver path.
 
+### Thread-local storage
+
 `threaded` is x2c's spelling of C's thread-local storage class, and gives each
 thread its own copy of an object:
 
@@ -726,6 +715,8 @@ It pairs with `static` or `extern`, in either order, which is the only pairing
 C allows. `_Thread_local` and `thread_local` mean the same thing and are
 accepted, so C that already writes it either way passes through unchanged; all
 three emit `_Thread_local`.
+
+### Pointer type mismatches
 
 Where C reports a pointer type mismatch as a warning, x2c reports an error:
 passing a `struct Rec *` to a parameter declared `List`, `String`, `Map`, or
@@ -777,11 +768,11 @@ protocol Var(Row) as List;
 
 `Row` retains its own typed conversions, methods, signatures, and protocol
 participation. Compatible `List` methods inherited through its typedef chain
-may satisfy `Var(Row)` without `Row` forwarding methods. A boxed `Row` carries
-`<list>` and uses `List` for dynamic dispatch. Runtime tests therefore cannot
-distinguish it from another list: `value is Row` and `value is List` test the
-same tag. The type after `as` must be a scalar, pointer, or fixed runtime class
-that already has a compiler-known `Var` tag.
+may satisfy `Var(Row)` without `Row` forwarding methods. A boxed `Row` has the
+tag `<list>` and uses `List` for dynamic dispatch. Runtime tests therefore
+cannot distinguish it from another list: `value is Row` and `value is List`
+test the same tag. The type after `as` must be a scalar, pointer, or fixed
+runtime class that already has a compiler-known `Var` tag.
 
 The optional `tag` form also applies only to `Var`, but keeps a distinct
 descriptor under the supplied custom tag:
@@ -791,13 +782,12 @@ descriptor under the supplied custom tag:
 protocol Var(ArrayString) tag <arraystr>;
 ```
 
-The tag must be a Symbol literal, cannot be built in, and must be unique across
-the process. The compiler retains the full lowercase participant name so two
-types cannot silently claim the same restricted Symbol. `tag` and `as` are
-mutually exclusive: use `tag` for a distinct runtime class and `as` for a typed
-view of an existing representation.
+The tag must be a Symbol literal, cannot be built in, and must be unique
+across the process. The compiler records the full lowercase participant name
+and rejects a second type with the same tag. `tag` and `as` are mutually
+exclusive: use `tag` for a distinct runtime class and `as` for a typed view of
+an existing representation.
 
-Both forms are top-level compiler declarations and emit no program object.
 Associated declarations precede members. A declaration binder that shadows a
 visible type receives a warning; use the bodyless form to adopt that type.
 
@@ -813,35 +803,41 @@ valid when a private dependency already implies locality; it then records the
 same local relationship explicitly and does not change linkage.
 
 An adoption is local when its protocol body, participant typedef, required
-converter, required native target, or adoption row is private. A protocol
-body declared as `static protocol BASE(T) { ... }` is private to its source
-file. `static` may also mark a concrete adoption. Local
-ordinary adapters are `static inline`, appear only in generated C, and are
-omitted from generated headers. Local native aliases and their signature
+converter, required native target, or adoption row is private. A protocol body
+declared as `static protocol BASE(T) { ... }` is private to its source file.
+Local ordinary adapters are `static inline`, appear only in generated C, and
+are omitted from generated headers. Local native aliases and their signature
 checks are likewise source-only.
 
-Descriptor-producing adoptions such as `Var(T)` may be local. Their
-converters and generated thunks remain internal, but descriptor registration
-is process-wide so boxed dispatch still works. The author must keep the
-derived lowercase or explicit tag unique across the process. Two independent
-private registrations of the same tag in different translation units are
-unsupported
-by convention. A `Var(T) as R` adoption emits no descriptor for `T`; boxed
-dispatch uses `R`'s existing descriptor.
+Descriptor-producing adoptions such as `Var(T)` may be local. Their converters
+and generated thunks remain internal, but descriptor registration is
+process-wide so boxed dispatch still works. A `Var(T) as R` adoption emits no
+descriptor for `T`; boxed dispatch uses `R`'s existing descriptor.
 
 One generated C method cannot have incompatible local and external linkage. The
 compiler reports that conflict at its source location. A protocol whose
 dependencies are all public retains its public behavior.
+
+Protocol declarations and adoptions appear at the top level. A declaration
+creates no runtime interface object; a `Var(T)` adoption still emits thunks
+and registers a descriptor. Each translation unit collects them with its
+other declarations, and reading source, cached declarations, or a unit
+interface gives the same result. A byte-identical repeat has no effect, and
+a conflicting declaration is an error at its location. A fully public native
+adoption emits its aliases in the header; a local one keeps them in the
+participant's C file.
 
 Participation must be declared; conversion names and matching typedefs do not
 imply it. The compiler then determines the adoption's visibility. An adoption
 resolves in the unit that contains it, so the protocol, participant, required
 converters, native targets, and constraining participant members must be
 visible there. A unit that includes it reuses that conformance from the
-declaring unit's interface; members visible only to the including unit do
-not change it. Ordinary runtime protocol bodies under `lib/` belong in
-`lib/protocols.x`; native declarations and their adoptions sit beside the
-participant typedef.
+declaring unit's interface; members visible only to the including unit do not
+change it. When no current interface exists, collection resolves the adoption
+from the declaring unit's own declarations, so the result does not depend on
+build order. A declaring unit that imports a package records no conformance. A
+unit that includes it resolves those adoptions from its own visible
+declarations.
 
 A typedef descendant with no exact adoption may use the nearest visible
 ancestor's resolved conformance. It reuses the ancestor's methods, associated
@@ -855,41 +851,195 @@ only in translation units where that adoption is visible.
 Common source forms are a plain adoption for public protocols and public
 participants, a plain `protocol Var(PrivateType);` for an internal type that
 crosses `Var`, and an explicit `static protocol PrivateBase(PrivateType);` for
-a fully private relationship. The latter would also be inferred local; `static`
-states it directly.
+a fully private relationship.
 
-Each member resolves independently as implemented, native, an ordinary base
-default, missing, or a signature conflict. Dot syntax and punctuation accept
-implemented and native members plus ordinary base defaults reached through a
-total participant-to-base view. A missing `Var` member grants no static
-participant method; its descriptor slot carries another protocol's generated
-owner when one exists, and is otherwise empty so dynamic boxed use takes the
-`Var` fallback directly. Signature conflicts are located errors at the adoption
-row.
+#### Member resolution
+
+Each adopted member resolves independently. Omitting one does not prevent the
+others from working.
+
+| Resolution | Dot call | Mapped punctuation | Descriptor-backed box |
+| --- | --- | --- | --- |
+| `implemented` | participant member | participant member | typed thunk |
+| `native` | checked native alias | checked native alias | not implied |
+| ordinary `base-default` | generated forwarding member | forwarding member | routes through the same winner |
+| `no-member` | no | no | another protocol's owner, else the base fallback |
+| `sig-conflict` | compile error | compile error | compile error |
+
+An ordinary base default calls a base implementation after converting the
+participant through its total forward view. Dot syntax and punctuation use
+that same semantic member, and `Var(T)` publishes it on `T`'s descriptor even
+though `Var(T)` itself resolves the member as `no-member`. A `Var` fallback
+such as `Var.fallback_truth` runs only for a descriptor slot that no protocol
+filled. It adds no static participant method and does not change native C
+punctuation.
 
 An explicit adoption may resolve an ordinary implementation through the
 participant's typedef chain. For example,
 `typedef List Domain; protocol Iter(Domain);` selects `List.iter` directly;
-it does not require a forwarding `Domain.iter` method. The participant's own
-method wins, followed by the nearest inherited method, and then a protocol
-default. Reaching the protocol base uses that default path
-instead. Every parameter whose exact type is the method owner is viewed as
-the participant type. Concrete result types remain unchanged unless the
-method declares them as `Self`.
+it does not require a forwarding `Domain.iter` method.
 
-An ordinary `Var(P)` adoption does not search `P`'s typedef chain. When
-`protocol Var(P) as R` names an `R` that occurs in that chain, compatible
-methods owned by that exact representation may satisfy the adoption. No
-other ancestor is considered. Boxed dispatch already uses `R`'s descriptor.
+An adoption selects each member in this order: the participant's own or
+imported-package method, then the nearest ancestor's own or imported-package
+method, then an ordinary base default. Reaching the protocol base uses the
+same default rule. When checking a method, the compiler treats parameters
+with the method's exact receiver type as participant parameters. Thus
+`List.equal(List, List)` can satisfy `int T.equal(T, T)` for a `List` typedef.
+A concrete result keeps its declared type; a `Self` result preserves the
+participant's static typedef.
 
-Associated types unify from the participant's declared member signatures and
-use their declared default only when unconstrained. A generated member has one
-owner. Incompatible generated signatures or two defaults conflict. A compatible
-participant implementation resolves the competition.
+`Var(T)` normally remains exact: an ordinary adoption does not search the
+participant's typedef chain. `protocol Var(P) as R` is the exception. When `P`
+inherits from the explicitly named representation `R`, compatible methods of
+`R` satisfy the adoption without `P` forwarding methods. Boxed values already
+use `R`'s descriptor, so compile-time conformance uses the same implementation
+without changing runtime dispatch.
 
-The normative [protocols chapter](../guide/protocols.md) specifies converter
-totality, adapter-derived conversion directions, punctuation, generated
-ownership, boxed dispatch, native aliases, and complete examples.
+A participant method with the right name but an incompatible signature is a
+`sig-conflict`. The compiler reports an error at the adoption and identifies
+the protocol member and conflicting definition.
+
+#### Associated types
+
+`associated Name = Default;` declares a type variable local to the protocol.
+A generated member has one owner. The compiler infers a participant's
+binding by unifying the member signatures
+the participant declares. Every occurrence must resolve to one type, and the
+default applies only when no declared member constrains the name.
+
+Calls through a boxed value pass associated arguments and results as `Var`;
+the generated thunk converts each exactly once. Direct calls keep the
+participant's static signature.
+
+#### Dot-call lookup
+
+A dot call visits the receiver's static type, then each typedef parent. At
+each type it tries the type's ordinary method, then a method an imported
+package adds to that type, then the member that the type's protocol
+conformance selects. When the nearest adopted conformance, exact or
+inherited, resolves the member as anything other than `implemented`, the
+conformance's member is used, and the type's own method with that name is
+not. When that conformance is inherited from an ancestor, a call that the
+type's own method would otherwise answer is an error: adopt the protocol for
+that type so its own method is selected.
+
+#### Conversions required by adapters
+
+The selected methods determine which conversions an adoption needs. The
+compiler generates adapters for those methods and requires only the
+conversions each adapter uses:
+
+| Adapter | Required conversion |
+| --- | --- |
+| Ordinary default parameter exactly `T` | participant to base |
+| Ordinary default result exactly `T` | base to participant |
+| Dispatcher thunk parameter of `T` | base to participant |
+| Dispatcher thunk result of `T` | participant to base |
+| Native alias occurrence of `T` | the implicit C direction at that position |
+
+For a participant `P` and base `Base`, name the forward conversion:
+
+<!-- ignore: signature notation; Base and P stand for arbitrary types -->
+```x2c,ignore
+Base P.base(P)
+```
+
+The forward converter is a total view: every value of the declared
+participant must produce a valid base value. A reverse converter has the
+conventional spelling `P Base.p(Base)`, with `Base.as_p` reserved for a real
+name collision. It may be checked and partial because not every base value
+must contain a `P`. Signatures cannot express this totality distinction, so it
+is part of the protocol's rules.
+
+`Var(T)` descriptor thunks both unbox arguments and box results, so most
+object participants need both directions.
+
+A forwarding protocol whose defaults use `T` only as a parameter may need
+only the forward conversion. A default returning `T` also needs the reverse
+conversion to turn its base result into the participant type. The adapter
+generator does not convert `T` inside compound parameter or result types, so
+those types are rejected. A missing or unsupported conversion produces an
+error at the adoption, naming the method that needs it. For an ordinary
+protocol, a member the participant implements needs no adapter, so its
+signature may use `T` inside a compound type, as in `int T_area(T *self)`.
+
+#### Operators
+
+Operators call the same resolved methods as dot syntax. The mappings include:
+
+| Syntax | Member |
+| --- | --- |
+| `+ - * / %` | `add sub mul div mod` |
+| direct `+= -= *= /= %=` | `add sub mul div mod` |
+| direct prefix/postfix `++ --` | `add sub` with a converted `1` |
+| unary `-` | `neg` |
+| `== !=` | `equal` |
+| `< <= > >=` | `compare` against zero |
+| conditions, `!`, `&&`, `||`, `?:` | `truth` |
+| `needle in value` | `contains`, with the right operand as receiver |
+| indexing and indexed mutation | `getindex`, `setindex`, `updateindex`, `postfixindex` |
+
+Matrix multiplication uses the ordinary `left.matmul(right)` method.
+`Var.matmul` dispatches a registered `matmul` witness. The `@` prefix
+splices macro syntax; `@` and `@=` are not arithmetic operators.
+
+An operand with no x2c type, such as a preprocessor macro's name, cannot
+convert for a participant that implements the operator; `images - MEAN` with
+`#define MEAN 0.1307` is a compile-time type error. Cast the macro, `(double)
+MEAN`, or bind its value to a local.
+
+A participant may also declare `void T.discard(T)`. The compiler calls it on
+an unnamed temporary it made for one operator, such as the product in
+`a * b + c` or the converted `2.0` in `2.0 * x`, immediately after the
+operator that consumes the temporary returns. A value bound to a name is
+never discarded. A handle type whose values own native storage uses this to
+release each intermediate of a long operator chain before the enclosing
+scope ends; a value type needs no such member.
+
+A method or function returning a scalar or `void` also discards such arguments
+after the call. An ordinary call returning a pointer or aggregate may borrow
+its input, return an interior pointer, or contain a borrowed handle. Unless
+the callee is a known fresh operator or numeric converter, its temporary
+arguments remain alive in their enclosing scope. A temporary argument does not
+make the call's result fresh.
+
+An implemented or native member is eligible. An ordinary base default is also
+eligible because it is an inherited member reached through a total view. An
+empty `Var` descriptor slot is not a resolved static member. If no eligible
+member exists, valid native C behavior still applies; otherwise the compiler
+reports the ordinary operator error. When exactly one operand of a binary
+operator is a struct or union participant with the member, or a handle typedef
+pointing at one, the other operand converts to that type through its declared
+converter, so `meters + 2.0` and `10.0 - meters` resolve when `double.meters`
+exists. Scalar pointers and numeric participants keep native C behavior for a
+mixed operand, so `text + 1` remains pointer arithmetic. The runtime uses the
+same rows itself: `String.add` implements `add` for `protocol Var(String)`, so
+`String` `+` and `+=` are ordinary resolved punctuation.
+
+Logical operators preserve C short-circuit evaluation: each operand's `truth`
+method runs only when C would evaluate that operand. Indexed compound and
+postfix operations evaluate the receiver, key, and value once, then call the
+update method once.
+
+Direct compound assignment, `++`, and `--` follow
+[protocol-backed direct updates](#protocol-backed-direct-updates).
+
+Plain `=`, `===`, and `!==` are never overloaded. `===` and `!==` retain
+native identity for static participants. Boxed identity is in [dynamic
+truthiness and binary operators](#dynamic-truthiness-and-binary-operators).
+
+#### Members shared by several protocols
+
+A participant implementation satisfies every adopted protocol that declares
+the same compatible member, and no protocol generates that member.
+
+Two ordinary defaults are an error. The diagnostic names both protocols.
+Implement the member on the participant to choose its semantics. Declaration
+order does not decide.
+
+A `Var(T)` adoption puts that same generated member on `T`'s descriptor when
+`Var(T)` declares the member and `T` does not implement it, so static and
+boxed behavior agree on one generated C name.
 
 ### C initializers and static assertions
 
@@ -910,8 +1060,8 @@ ordinary conversion to `Var`. With `.names = "first", "second", "last"`,
 brace elision fills both array elements before continuing to `last`. Explicit
 braces delimit a nested initializer. Typedefs and compound literals retain
 the ordinary destination conversions, including C literals to `String`.
-The native compiler owns index constant expressions, array dimensions, and
-bounds diagnostics.
+The native compiler checks index constant expressions, array dimensions, and
+bounds.
 
 `_Static_assert(condition, "message");` is accepted at file scope, block scope,
 and within a struct or union. It emits an ordinary C static assertion and adds
@@ -921,9 +1071,10 @@ no field, binding, or runtime operation:
 _Static_assert(sizeof(int) >= 2, "int is at least 16 bits");
 ```
 
-A file-scope assertion stays in its implementation. An aggregate assertion
-travels with the aggregate definition. The native compiler rejects a false or
-nonconstant assertion. Translation and source analysis alone do not perform that check.
+A file-scope assertion stays in its implementation. An aggregate assertion is
+emitted with the aggregate definition. The native compiler rejects a false or
+nonconstant assertion. Translation and source analysis alone do not perform
+that check.
 
 ### Generic selection
 
@@ -984,13 +1135,13 @@ Var first, second;
 List copy = (first, second) = values;
 ```
 
-The leading declaration specifier in `int (start, stop, step)` applies to every
-name. The parenthesized typed form gives each target a type, written as it
-would be in a parameter declaration. Both forms declare their names in the
+The leading declaration specifier in `int (start, stop, step)` applies to
+every name. The parenthesized typed form gives each target a type, written as
+it would be in a parameter declaration. Both forms declare their names in the
 enclosing block. Storage classes and per-target initializers are not accepted
 inside the parentheses. Inside a `%()` `List` literal, use `${}` to insert a C
-character expression because bare single-quote syntax belongs to the `List`
-reader.
+character expression because the `List` reader reads a bare single quote as
+`quote`.
 
 The singleton assignment destructures. It assigns element zero; the left side
 is not a parenthesized scalar assignment.
@@ -1113,16 +1264,13 @@ lexical `with` statement.
 A bare `name(...)` selects the innermost local macro before a file-local
 `keyword` alias or an ordinary call or typedef-style cast. A bare `name`
 without parentheses remains an ordinary identifier. `(name)(arguments)` is an
-explicit ordinary call, while `$name(arguments)` selects only the global or
-global macro namespace. A local and global definition may therefore share a
-name without ambiguity.
+explicit ordinary call, while `$name(arguments)` selects only a global macro
+or a `meta` function. A local and global definition may therefore share a name
+without ambiguity.
 
-A local definition follows the [hygiene](#hygiene-and-generated-names) rule
-of every macro: a name its body reads without declaring resolves where the
-macro is invoked. `scale` above reads the parameter because `scaled(value)`
-is invoked inside `scaled_sum`; a declaration of `scale` in an inner block
-would supply an invocation inside that block instead. Declarations written in
-the body are private to each expansion.
+A local definition follows the [hygiene](#hygiene-and-generated-names) rules
+of every macro. `scale` above reads the parameter of `scaled_sum`, where the
+expansion lands.
 
 Local `Expression`, `Stmt`, `Field`, `Entry`, and `Enumerator`
 results use their usual positions. A local decorator may target any syntax
@@ -1183,7 +1331,7 @@ argument even though it is not an expression.
 An `Expr` argument stays one operand. With the argument `value > 0`, the body
 `!$condition` means `!(value > 0)`. The same holds for a macro's own result:
 `macro Expression $twice($value) => $value + $value;` makes `$twice(21) * 2`
-mean `(21 + 21) * 2`. Generated C carries these parentheses only where C
+mean `(21 + 21) * 2`. Generated C has these parentheses only where C
 precedence would otherwise regroup the expression.
 
 A `Decl` argument captures one declaration without a trailing semicolon. Its
@@ -1208,11 +1356,11 @@ int main(void) {
 ```
 
 An expression hole may be the receiver of ordinary postfix syntax in the body,
-including `$value.field`, `$value.method()`, and `$value[index]`. The hole ends
-at its registered identifier; this does not shorten qualified macro names such
-as `$project.logging.trace()`. A singular `Name` hole may also appear after `.`
-or `->`, as in `$value.$member` or `$pointer->$member`. It supplies the
-captured member spelling, not a hygienic generated name.
+including `$value.field`, `$value.method()`, and `$value[index]`. The hole
+ends at its registered identifier; this does not shorten qualified macro names
+such as `$project.logging.trace()`. A singular `Name` hole may also appear
+after `.` or `->`, as in `$value.$member` or `$pointer->$member`. It supplies
+the captured member spelling unchanged.
 
 A registered `Type` hole may likewise supply the type name before `.` in a
 method declaration in a `Unit` template, as in `inline Var $type.$method($type
@@ -1290,14 +1438,14 @@ inside an ordinary quoted `Array` still inserts one value.
 `Entry` holes capture one `key: value` row; `Entry @rows` captures and
 forwards zero or more complete rows.
 
-A `Captures` hole carries a complete lambda capture clause as one value.
+A `Captures` hole holds a complete lambda capture clause as one value.
 In a template, `%!(@params) using $captures => $body` preserves its
 value and reference capture rows, with `Param @params` as the trailing
 sequence. Apply this template as a macro value with the captured rows;
 recognition binds those rows with `*captures`. Like `Catch` rows, capture
 rows retain their canonical structure when supplied by compile-time code.
 
-`MatchRow @rows` carries complete `match` arms in a `Stmt` template:
+`MatchRow @rows` holds complete `match` arms in a `Stmt` template:
 `match ($subject) { @rows }`. Each captured row retains its pattern,
 guarded body, typed captures, and position; preprocessor directive rows stay
 interleaved with the arms. A `default` arm is one row. Source macro calls may
@@ -1319,21 +1467,16 @@ A macro has one result kind as well as argument kinds:
 | `Unit` | braced declarations and definitions | file scope |
 | `Declaration` | braced declarations with retained public signatures | file scope |
 
-The result kind is required between `macro` and the `$` name. `Stmt` is
-the canonical spelling for block-item results and `Expression` for expression
-results; `Expr` is a synonym. An arrow body requires `Expression` or
-`Stmt`. A `Stmt` arrow body is one statement: a `Stmt` macro or decorator
-invocation or an expression statement, and a `meta` call written there may
-return any statement that fits where the macro is invoked. An anonymous
-macro's arrow body omits that statement's final `;`, as in
-`macro Stmt(Expr $v) => $again() $hit($v)`. Braced bodies require
-`Stmt`, `Field`, `Entry`, `Enumerator`, `Unit`, or `Declaration`.
-Inside a compound statement, a `Stmt` macro may produce zero or
+The result kind is required between `macro` and the `$` name. An arrow body
+requires `Expression` or `Stmt`. An anonymous macro's arrow body omits that
+statement's final `;`, as in `macro Stmt(Expr $v) => $again() $hit($v)`.
+Braced bodies require `Stmt`, `Field`, `Entry`, `Enumerator`, `Unit`, or
+`Declaration`. Inside a compound statement, a `Stmt` macro may produce zero or
 more block items. Where the grammar requires one statement, such as an `if`,
 `else`, or loop body, the expansion must contain exactly one statement. An
 explicit `{ ... }` or `do { ... } while (0)` in the production satisfies that
-requirement; the compiler does not add braces. The invocation must occur in the
-matching position:
+requirement; the compiler does not add braces. The invocation must occur in
+the matching position:
 
 ```x2c
 #include "meta.x"
@@ -1411,7 +1554,7 @@ an entry macro body, ordinary expression grammar applies, so an expression
 macro may generate a key. `@(form)` inserts a `List` of explicit `(map-entry
 KEY VALUE)` nodes; singular `$(form): value` constructs a generated key.
 
-The semicolon belongs to the invocation context, not the definition.
+A `Stmt`, `Field`, or `Unit` invocation ends with its own `;`.
 `Enumerator` and entry invocations occupy comma-delimited positions and have no
 semicolon. A result used in the wrong position is rejected at the invocation.
 
@@ -1450,17 +1593,13 @@ singular, explicitly annotated, and one of:
 | `Unit` | one top-level declaration or definition | zero or more top-level items |
 | `NamedType` | name and type definition, ending in `;` | retained top-level declarations |
 
-Parameters after the target are explicit invocation arguments. When a braced
-macro needs a generated name before any declaration can introduce it, a
-leading `using $name;` directive in the body creates that expansion-private
-name. A signature `using` clause also supplies names, including for an
-Expression macro's arrow body.
-A decorator application has no semicolon; that omission pairs it with the
-following target.
-Only whitespace and comments may separate them. When a statement decorator
-appears where one statement is required, its production must likewise yield
-exactly one statement. A compound statement may contain the captured target
-plus any additional block items without requiring braces at the invocation.
+Parameters after the target are explicit invocation arguments. A decorator
+application has no semicolon; that omission pairs it with the following
+target. Only whitespace and comments may separate them. When a statement
+decorator appears where one statement is required, its production must
+likewise yield exactly one statement. A compound statement may contain the
+captured target plus any additional block items without requiring braces at
+the invocation.
 
 A `Stmt` decorator standing before a file-scope function
 definition decorates that function's body. The body is parsed as usual, the
@@ -1529,9 +1668,7 @@ parameter is a sequence, `ALIAS() TARGET` supplies an empty sequence; the
 parentheses distinguish the argument list from a parenthesized target.
 
 Aliases do not add a second argument grammar. Arguments remain comma-separated
-and are parsed by the macro's existing `Expr`, `Type`, `Decl`,
-`DeclaratorRow`, `Function`, `Name`, `Literal`, `Param`, `Stmt`,
-`Field`, `Entry`, `Enumerator`, or `Unit` parameters.
+and are parsed by the macro's own hole kinds.
 An alias cannot introduce a semicolon-separated control header or capture
 arbitrary tokens.
 
@@ -1555,7 +1692,7 @@ position compatible with its target kind; a bare expression decorator can
 capture a same-named expression read, and a bare block or function decorator
 can overlap a declaration beginning with a same-named typedef.
 
-Aliases are source ordered. A nonstatic `keyword` declaration becomes
+ A nonstatic `keyword` declaration becomes
 available to including files at the include position, together with the macro
 it names. `static keyword ALIAS $macro;` keeps the alias in its declaring file.
 A reusable ordinary `.x` module may hold both macro definitions and aliases;
@@ -1565,10 +1702,9 @@ Macro templates are parsed when defined, so a later alias does not reinterpret
 an earlier template. Generated `List`s and strings are not reparsed as
 alias-bearing source.
 
-An alias changes spelling, not decorator capability. x2c's current thread and
-lambda facilities cannot lift a local block with captured variables into a C
-callback. A decorator may wrap an existing callback or a noncapturing
-construct; captured thread blocks require a separate compiler feature.
+An alias adds only a spelling. A decorator cannot turn a block that reads
+local variables into a C callback. It may wrap an existing callback or a block
+that captures nothing.
 
 An `Expr` decorator has an arrow-expression body and is parsed as a prefix
 unary form. Its target is the following C cast expression, including primary
@@ -1618,10 +1754,7 @@ a complete function or declaration, but a public target must retain the same
 public binding and contract and cannot gain new public siblings. Private
 targets and hygienically private siblings may be rewritten freely.
 
-Declaration collection loads included macro definitions and lets unit macros
-publish their declarations and protocol rows. A declaration producer evaluates
-preceding Lisp effects once when it needs them. Runtime function bodies wait
-for the full parse. `Decorator` adjacency still collects the unchanged source
+ `Decorator` adjacency still collects the unchanged source
 target. A public target's captured source must participate in the
 decorator's `Match` replacement, and dropping it makes the match fail. Imported
 decorators work without an extra prototype.
@@ -1667,76 +1800,67 @@ as `case $sum(?left, ?right):` selects the macro directly. An anonymous
 `macro Kind(parameters) => body` or `macro Kind(parameters) { body }` is a
 value without a global name.
 
-A quotation is an anonymous macro applied where it is written:
-`$!( expression )` for an expression, `$!{ items }` for statements, and
-`$!Kind{ ... }` for another category, such as `$!Unit{ ... }`. Each `$name`
-in its body names the visible local `name`; its first use declares a hole
-whose kind its position gives, and the quotation applies to the locals'
-values in that order. `@name` is a sequence. A local declared `Type`,
-which `lib/meta.x` declares as a `List` of type syntax such as
-`%(double)`, fills a type hole, so `$!{ $type value = $initial; }`
-declares `value` with the type the local holds. Type syntax spells C type
-keywords and `*` as Symbols and every other type name as a String, as in
-`%(unsigned long)`, `%("String")`, and `%(* "Point")`. A type whose name
-is a Symbol, such as `%(String)`, is an error where it fills a type.
-A `String` local fills an
-expression hole as a string literal and an `int` local as an integer
-literal. A `$name` that names no local is a macro invocation or a `meta`
-call, as in a template, so `@rows($items)` splices a `meta` function's
-result where the quotation expands. A `${expression}`, with `{` directly
-after `$`, is a hole whose value is an expression of the function that
-contains the quotation. It means the same as a local declared just before
-the quotation and named with `$`. The function evaluates each such
-expression once, where the quotation is written, in the order the holes are
-written, before the quotation builds its code. Names in the braces resolve
-at the quotation; names the body declares are not visible there. The
-expression's declared type gives the hole its kind, as a local's type does:
-a `Type` fills a type, a `String`, `int`, or `Symbol` inserts a literal, and
-a `List` inserts its syntax. `@{expression}` splices a `List`. Each
-`${...}` or `@{...}` is a separate hole and belongs to the innermost quotation, so
-`${$!( ... )}` inserts a quotation built first. Inside a `%(...)`,
-`%[...]`, `%{...}`, or `%"..."` literal in the body, `${...}` keeps its
-literal meaning and inserts when the built code runs; `${${expression}}`
-there inserts a value computed at the quotation. For a template Array,
-`%[${@{items}}]` splices a sequence computed while the quotation is built.
-It does not add runtime Array splicing. In a List, `@{expression}` retains
-runtime splicing and does not evaluate during template construction.
-Literal strings such as `"$ @"`, percent strings such as `%"\$ @"` or
-`%"$$ @"`, and quoted atom escapes such as `%(\$ \@)` preserve sigils as data.
-After `case`,
-`${$name(...)}` is still a macro pattern. These holes exist only in
-quotations; in a named template's code, `${` still reports a missing macro
-name. See
-[Quoting code](../guide/meta-functions.md#quoting-code-with-) for an
-example.
+A quotation is an anonymous macro applied where it is written: `$!( expression
+)` for an expression, `$!{ items }` for statements, and `$!Kind{ ... }` for
+another category, such as `$!Unit{ ... }`. Each `$name` in its body refers to
+the visible local `name`. Its first use declares a hole, and the hole's
+position sets its kind. The quotation applies to the locals' values in that
+order. `@name` is a sequence. A local declared `Type`, which `lib/meta.x`
+declares as a `List` of type syntax such as `%(double)`, fills a type hole, so
+`$!{ $type value = $initial; }` declares `value` with the type the local
+holds. Type syntax spells C type keywords and `*` as Symbols and every other
+type name as a String, as in `%(unsigned long)`, `%("String")`, and `%(*
+"Point")`. A type whose name is a Symbol, such as `%(String)`, is an error
+where it fills a type. A `String` local fills an expression hole as a string
+literal and an `int` local as an integer literal. A `$name` that matches no
+local is a macro invocation or a `meta` call, as in a template, so
+`@rows($items)` splices a `meta` function's result where the quotation
+expands. A `${expression}`, with `{` directly after `$`, is a hole whose value
+is an expression of the function that contains the quotation. It means the
+same as a local declared just before the quotation and named with `$`. The
+function evaluates each such expression once, where the quotation is written,
+in the order the holes are written, before the quotation builds its code.
+Names in the braces resolve at the quotation; names the body declares are not
+visible there. The expression's declared type gives the hole its kind, as a
+local's type does: a `Type` fills a type, a `String`, `int`, or `Symbol`
+inserts a literal, and a `List` inserts its syntax. `@{expression}` splices a
+`List`. Each `${...}` or `@{...}` is a separate hole and belongs to the
+innermost quotation, so `${$!( ... )}` inserts a quotation built first. Inside
+a `%(...)`, `%[...]`, `%{...}`, or `%"..."` literal in the body, `${...}`
+keeps its literal meaning and inserts when the built code runs;
+`${${expression}}` there inserts a value computed at the quotation. For a
+template Array, `%[${@{items}}]` splices a sequence computed while the
+quotation is built. It does not add runtime Array splicing. In a List,
+`@{expression}` retains runtime splicing and does not evaluate during template
+construction. Literal strings such as `"$ @"`, percent strings such as `%"\$
+@"` or `%"$$ @"`, and quoted atom escapes such as `%(\$ \@)` preserve sigils
+as data. After `case`, `${$name(...)}` is still a macro pattern. These holes
+exist only in quotations; in a named template's code, `${` still reports a
+missing macro name. See [Quoting
+code](../guide/generating-code.md#quoting-code-with-) for an example.
 
-A typed quotation is written `$!T{ expression }`, where `T` is one
-identifier that names a type, or `$!(T){ expression }`, where `T` is any
-type, a `Type` local, or a `${...}` hole of type `Type`. An identifier
-after `$!` that spells a macro kind in any case, such as `Unit` or `Type`,
-always names that kind, so a type with that spelling uses the
-parenthesized form. A `$!( ... )` group followed directly
-by `{` is a typed quotation; otherwise it is an expression quotation. A
-typed quotation builds `(expr T CONTENT)` where it is written. It binds
-nothing, counts no expansion, and opens no transaction. Its holes take the
-values a rebuild gives them: syntax unchanged, a binding identity or
-`x2c.ident` spelling as an identifier expression, an `x2c.ident` in a
-member position as its spelling and in a declarator as the name it
-declares, a number as a literal of its own type with its exact value, and
-a String or Symbol as a literal. Each number, String, or Symbol item of an
-expression sequence also becomes its literal. A String is a String
-literal when the whole expression is the hole and `T` is `String`; elsewhere
-it is a C string literal. Inner nodes keep the placeholder type of unbound
-syntax. A name that a file-scope declaration supplies where the quotation
-is written keeps that declaration, and other free names bind where the code
-is bound. A
-typed quotation may not declare a name that its own code spells or apply a
-template, and inside
-another quotation it is written as a hole, `${$!T{ ... }}`. The compiler
-accepts `T` as the expression's type without checking it. A typed quotation
-states the type the code has; it converts nothing, so write a cast inside
-the braces when the code needs one. See
-[Code that knows its type](../guide/meta-functions.md#code-that-knows-its-type).
+A typed quotation is written `$!T{ expression }`, where `T` is one identifier
+that names a type, or `$!(T){ expression }`, where `T` is any type, a `Type`
+local, or a `${...}` hole of type `Type`. An identifier after `$!` that spells
+a macro kind in any case, such as `Unit` or `Type`, always names that kind, so
+a type with that spelling uses the parenthesized form. A `$!( ... )` group
+followed directly by `{` is a typed quotation; otherwise it is an expression
+quotation. A typed quotation builds `(expr T CONTENT)` where it is written. It
+binds nothing, counts no expansion, and opens no transaction. Its holes take
+the values a rebuild gives them: syntax unchanged, a binding identity or
+`x2c.ident` spelling as an identifier expression, an `x2c.ident` in a member
+position as its spelling and in a declarator as the name it declares, a number
+as a literal of its own type with its exact value, and a String or Symbol as a
+literal. Each number, String, or Symbol item of an expression sequence also
+becomes its literal. A String is a String literal when the whole expression is
+the hole and `T` is `String`; elsewhere it is a C string literal. Inner nodes
+keep the placeholder type of unbound syntax. Free names bind where the code is
+bound. A typed quotation may not declare a name that its own code spells or
+apply a template, and inside another quotation it is written as a hole,
+`${$!T{ ... }}`. The compiler accepts `T` as the expression's type without
+checking it. A typed quotation states the type the code has; it converts
+nothing, so write a cast inside the braces when the code needs one. See [Code
+that knows its type](../guide/generating-code.md#code-that-knows-its-type).
 
 `$!Type{ T }` builds the type `T`, written as a cast writes a type name.
 `$!Param{ P }` builds one parameter declaration. A `Type` local or a
@@ -1744,7 +1868,7 @@ the braces when the code needs one. See
 declarator modifies. Both build where they are written: they bind nothing,
 declare no name the braces spell, and apply no template. `Type` and `Param`
 after `$!` always name these kinds. `Decl` names a hole kind only. See
-[Types and parameters](../guide/meta-functions.md#types-and-parameters).
+[Types and parameters](../guide/generating-code.md#types-and-parameters).
 
 When one `Name` hole appears in a declaration, a reference, and a member
 selection, its case checks that the declaration and reference use the same
@@ -1810,20 +1934,18 @@ invocations. One with a nested pattern among its arguments, such as
 
 ### Hygiene and generated names
 
-A macro keeps the file-scope bindings of the place it is written. An
-expansion means what the same code would mean if it were written where the
-expansion lands, with two exceptions: the names its body writes are private
-to that expansion, and a name its body reads that a file-scope declaration
-supplies where the macro is written keeps that declaration.
+An expansion means what the same code would mean if it were written where
+the expansion lands, with two exceptions: the names its body declares are
+private to that expansion, and a name the macro lists with `using` keeps the
+file-scope declaration where the macro is written.
 
-Arguments are parsed and typed where the invocation is written, and the
-names a caller writes in them also resolve where the expansion lands. A
-`Name` argument is a spelling, so a `Name` hole can declare a new
-caller-visible variable or refer to an existing one; a declaration the
-expansion makes from the caller's own `Name` supplies the caller's other
-uses of that spelling, as `$repeat(k, 3, k * 2, total)` shows below when the
-caller writes it. A name the body writes is private, so it never supplies a
-caller's name.
+Arguments are parsed and typed where the invocation is written, and the names
+a caller writes in them also resolve where the expansion lands. A `Name`
+argument is a spelling. A `Name` hole can declare a new caller-visible
+variable or refer to an existing one. When the expansion declares the caller's
+`Name`, the caller's other uses of that spelling refer to that declaration.
+`$repeat(k, 3, k * 2, total)` below shows this. A name the body writes is
+private, so it never supplies a caller's name.
 
 A declaration written in a body receives a fresh binding identity and a
 private generated C spelling for each expansion. The spelling of a
@@ -1840,22 +1962,12 @@ lands. A local macro or an anonymous macro written inside a body shares the
 body's names the same way: its literal reference reaches a private
 declaration of the enclosing body.
 
-A name the body reads without declaring keeps the file-scope declaration
-that supplies it where the macro is written: a function, object, or
-enumerator of that file or of a header it includes, or a native name such as
-a C library function. The expansion reads that declaration with its type. A
-caller's local of the same spelling receives a separate generated C
-spelling, so the expansion still reaches the file-scope name, and so does
-code a rewrite rule's quotation returns into a function body. Only the
-locals visible where the expansion lands are respelled, so a native macro
-that names one of them there reads the file-scope name, while locals of
-other scopes keep their C spellings. Any other name the body reads resolves
-where the expansion lands, like any name written there: a caller's
-declaration of that spelling supplies it, including a local, and a local
-macro reads the locals around it. A name that nothing declares anywhere is
-left to C, as a native macro such as `errno` is. To read a caller's binding
-of a name, take the name as a `Name` argument; that argument is the explicit
-request for lookup where the expansion lands.
+A name the body reads without declaring resolves where the expansion lands,
+like any name written there: a caller's declaration of that spelling
+supplies it, including a local, and a local macro reads the locals around
+it. A name that nothing declares anywhere is left to C, as a native macro
+such as `errno` is. To read a caller's binding of a name by design, take the
+name as a `Name` argument.
 
 ```x2c
 macro Stmt $repeat(Name $i, Expr $count, Expr $value, Name $sum) {
@@ -1891,61 +2003,56 @@ from the body's literal `k`. In `$add_tens`, the caller's `k` arrives through
 `$target`; the loop variable comes from `$add_tens`'s own literal `k`, so the
 assignment reaches the caller's variable.
 
-Here `$scaled` reads the file-scope `scale`, although `main` declares its
-own:
+#### Keeping a file-scope name with `using`
+
+A macro keeps a file-scope declaration only when it lists the name with
+`using`. A braced body lists names as its first item, `using name, other;`.
+Any macro may write the list after its signature instead, and an arrow body
+must:
 
 ```x2c
 static int scale = 3;
 
-macro Expression $scaled(Expr $value) => $value * scale;
+macro Expression $scaled(Expr $value) using scale => $value * scale;
+macro Expression $landed(Expr $value) => $value * scale;
 
 int main(void) {
   int scale = 10;
-  printf("%d %d\n", $scaled(2), scale);
+  printf("%d %d %d\n", $scaled(2), $landed(2), scale);
   return 0;
 }
 ```
 
 ```text
-6 10
+6 20 10
 ```
 
-File scope is the whole file and does not depend on declaration order.
-A template therefore keeps a global that the file declares after the macro:
+Each listed name is a function, object, or enumerator. A file-scope
+declaration in the macro's file or a header it includes supplies it. A listed
+name may also be a native name, such as a C library function, that no x2c
+declaration supplies. File scope is the whole file, so the declaration may
+follow the macro. The expansion reads the declaration with its type. A
+caller's local of the same spelling receives a separate generated C
+spelling, so the expansion still reaches the file-scope name. Only the
+locals visible where the expansion lands are respelled; locals of other
+scopes keep their C spellings for the native macros that name them. A listed
+name resolves to that declaration in every unit that applies the macro,
+including through a `Macro` value. A name with internal linkage, such as a
+`static` function, is reachable only from its own unit, so a macro applied
+in other units lists nonstatic names, or `module` names within a module
+unit. Type names cannot be listed; a type name in a body resolves where the
+expansion lands, in a declaration, a cast, `sizeof`, and `_Alignof` alike.
 
-```x2c
-macro Expression $read_later() => later + 1;
-
-int later = 3;
-
-int main(void) {
-  int later = 7;
-  printf("%d %d\n", $read_later(), later);
-  return 0;
-}
-```
-
-```text
-4 7
-```
-
-A `using` list at the start of the braced body, or after the signature of
-an `Expression` macro, such as `$scaled(Expr $value) using scale`, states
-such a binding explicitly. Each listed name is a function, object, or
-enumerator declared at file scope where the macro is written, or a native
-name such as a C library function that no x2c declaration supplies. A kept
-name, listed or not, resolves to that name in every unit that applies the
-macro, including through a `Macro` value. Type names are not kept; they
-resolve where the expansion lands.
+`using name` keeps a declaration; `using $name` (below) creates a fresh
+private name; a lambda's `using &name` shares a captured local by reference.
 
 An anonymous macro keeps one kind of value from where it is written: a
 `Macro` value that its body applies. Templates compose by value, so a later
 application applies the same children.
 
-A `case` on a macro recognizes a name the body keeps from a file-scope
-declaration, listed with `using` or not, only by that declaration, and any
-other free name by its spelling, since the code the macro builds binds that
-name where it lands.
+A `case` on a macro recognizes a name the macro lists with `using` only by its
+file-scope declaration, and any other free name by its spelling, since the
+code the macro builds binds that name where it lands.
 
 A `struct`, `union`, or `enum` tag that a body defines or declares is private
 to each expansion, like a typedef, and so are the enumerators it lists. Tags
@@ -1994,8 +2101,7 @@ The definition reuses that prototype's binding once; a mismatch, a second
 definition, or a collision with another binding kind is rejected at the
 invocation. A nested scope may still shadow an outer declaration normally. In
 an identifier expression the spelling resolves to the existing declaration,
-with its type, and an unknown one is rejected. Use a body `using` hole for a compiler-private name that cannot
-collide when no ordinary declaration introduces it first. A bare Lisp `String`
+with its type, and an unknown one is rejected. A bare Lisp `String`
 does not become a name when returned into a name-capable position.
 
 The compiler parses and types arguments before expanding a macro. It then
@@ -2011,8 +2117,6 @@ statements retain their original source locations.
 
 Operators in a macro expansion use the same protocol dispatch as operators
 written directly, including derived `==`, `!=`, and relational operations.
-Generated enumerators are installed as they are constructed, so duplicate
-spellings fail before C generation.
 
 ### Compile-time Lisp and imports
 
@@ -2025,10 +2129,8 @@ literal, a semantic `Type` `List` fills a type slot, and a syntax sequence
 splices only at a sequence splice point. `String`s are values, never source
 text to be reparsed.
 
-Inside `%(...)` and `%"..."`, `$name` and `${expression}` are runtime literal
-unquote. To place a compile-time result there, the outer `${` first enters x2c
-expression grammar: `${$helper(...)}` calls a meta function, while
-`${$(...)}` enters Lisp.
+In a percent literal, `${$helper(...)}` and `${$(...)}` reach compile-time
+code; see [percent literals](#percent-literals-quote-and-unquote).
 
 ```text
 $(import "helpers.xlisp")
@@ -2043,12 +2145,12 @@ use `#include`. Lisp import paths are relative to the importing file,
 canonicalized, loaded once, and checked for cycles. Direct Lisp file operations
 remain available but are not tracked as compiler dependencies.
 
-A free name in a lambda or macro body reads the definitions the body was
-written next to, and then the session's globals. The environment the call was
-written in is not part of that chain, so a caller that binds the same name
-changes nothing about what the body reads. A lambda written inside a binding
-form reads that form's bindings and keeps the values it was made with. A macro
-that needs a value from its caller takes it as an argument.
+A free name in a Lisp `lambda` or `defmacro` body reads the definitions the
+body was written next to, and then the session's globals. The environment the
+call was written in is not part of that chain, so a caller that binds the same
+name changes nothing about what the body reads. A lambda written inside a
+binding form reads that form's bindings and keeps the values it was made with.
+A macro that needs a value from its caller takes it as an argument.
 
 A `let` binding is not visible inside its own initializer. A lambda a `let`
 binds therefore cannot call itself by that name, and the self-call reports
@@ -2079,16 +2181,8 @@ the form with the value in it when a local has to reach `eval`.
 
 Compile-time Lisp is trusted code. It runs with the compiler user's authority,
 including the existing native bindings and file operations; there is no
-sandbox. Lisp may also construct canonical AST `List`s directly, including
-static declarations. The compiler accepts a valid structure whether it came
-from the parser, a `Match` capture, a template, or handwritten Lisp. Shapes
-such as `src` and `construct(src)` are ordinary AST data.
-
-The compiler does not verify every type or binding annotation in a constructed
-`List` or reject it because of its origin. This is deliberately unsafe
-metaprogramming, much as C permits unsafe pointer operations. Prefer literal
-templates and the contextual `x2c.*` operations when you want the compiler to
-construct syntax for you.
+sandbox. Lisp may also construct canonical AST `List`s directly; see
+[macro-visible syntax](#macro-visible-syntax).
 
 The compiler supplies these contextual Lisp operations:
 
@@ -2126,6 +2220,8 @@ The compiler supplies these contextual Lisp operations:
 (x2c.enclosing what)
 (x2c.place where code)
 (x2c.diagnostic.fail message notes)
+(x2c.diagnostic.fail.at node category message notes)
+
 (x2c.diagnostic.warn message notes)
 ```
 
@@ -2159,18 +2255,18 @@ AST rather than its source spelling.
 `x2c.ident` returns the tagged name value described above and accepts a
 `String` that is a valid identifier spelling.
 
-`x2c.binding.fresh` returns a new binding that the compiler names from the
-identifier `role`, as it names its own generated declarations. Code that
+`x2c.binding.fresh` returns a new binding whose C spelling is built from the
+identifier `role`, as for the compiler's own generated declarations. Code that
 the macro places can declare the binding, and its result can refer to it.
-`x2c.binding.for` returns the binding the unit gave `key`, or the first time
-a new one named from `role`, so code placed once under `(unit-support KEY)`
-and each result that refers to it name the same binding.
+`x2c.binding.for` returns the binding the unit gave `key`, or the first time a
+new one named from `role`, so code placed once under `(unit-support KEY)` and
+each result that refers to it name the same binding.
 
 `x2c.invocation.file`, `.line`, and `.column` return the caller's x2c source
-location while a macro body is expanding. Lines and columns are one-based; an
-included macro still names its caller rather than its definition or generated
-C. For example, `$(x2c.invocation.line)` produces an integer expression for the
-invocation line.
+location while a macro body is expanding. Lines and columns are one-based. For
+an included macro, they still give the caller's location. For example,
+`$(x2c.invocation.line)` produces an integer expression for the invocation
+line.
 
 `Code.name`, `Code.parameter`, and `Code.body` inspect a decorator's captured
 function. `name` returns its free-function or dotted method name as written
@@ -2207,8 +2303,8 @@ result. `Type.element` returns a pointer or array element type, and
 `Type.is_integral` and `Type.is_pointer`, from `lib/type.x`, classify a
 type without resolving it.
 
-`Type.protocol_member` returns the callable that selects one member of the
-protocols a type adopts, or `nil` when the type does not adopt one.
+`Type.protocol_member` returns the protocol callable selected for member
+`name` of a type, or `nil` when none is available in the current function.
 
 `Code.value` returns a captured constant's value: for a literal, a `String`,
 a number, or a `Symbol`, according to the literal. It is the inverse of
@@ -2225,7 +2321,6 @@ with `string?` when both kinds can occur. A non-enum `Type` is rejected.
 
 The Lisp operation `x2c.diagnostic.warn` reports a macro warning at the
 invocation with `String` notes and returns `nil`, so expansion continues.
-`x2c.diagnostic.fail` does not return.
 
 `x2c.enclosing` answers the innermost syntax of one kind around the
 invocation, or `nil` when there is none. `<declarator>` is the initialized
@@ -2400,9 +2495,9 @@ Marking a function `meta` has three consequences.
 A dollar-prefixed function call requires compile-time evaluation. Each
 argument is a constant, arithmetic over constants, captured macro syntax, or
 another dollar call; any other expression, such as a program variable, is
-diagnosed. Visible macros retain precedence over meta
-functions with the same name. In a macro body, forwarding a captured hole
-directly passes its code rather than evaluating the future runtime expression.
+diagnosed. Visible macros retain precedence over meta functions with the same
+name. In a macro body, a captured hole passed directly to a `$` call passes
+its code. The runtime expression is not evaluated.
 
 A directly forwarded hole retains its declared capture kind, including
 `Function`, and complete captures retain their source text and path context.
@@ -2413,7 +2508,7 @@ the returned value for that position.
 Inside meta bodies, Unit and Stmt source macros used in expression
 positions construct deferred invocation Lists from computed arguments. Normal
 binding expands them when inserted into a program. Existing Expression macros
-still expand normally. See [source templates](../guide/meta-functions.md#source-templates-from-meta-functions).
+still expand normally. See [source templates](../guide/generating-code.md#source-templates-from-meta-functions).
 
 A `meta` body is ordinary x2c compiled as C, so every construct the unit
 can compile runs at compile time with its C meaning; see
@@ -2438,13 +2533,13 @@ returns to `int`; see
 Compile-time objects belong to the compiler. A file-scope variable that a
 `meta` body reads is the compiled group's own instance, initialized from the
 same source initializer; it is never the program's variable. A `meta static`
-value says so explicitly, and each unit gets its own instance.
+value lives in its provider's compiled group, and the helper re-initializes
+it for each translation unit, as described below.
 The project helper runs mutable `meta static` initializers when a compile-time
 call first reaches their provider in each translation unit. Including an
 unused provider does not run those initializers.
 
-Native execution replaced the earlier in-process staging and the Lisp
-lowering of `meta` bodies, with these consequences:
+A `meta` body runs as native code, with these consequences:
 
 - A `meta` function defined by a macro expansion or a `$` call is an
   error; one written in an ordinary `.x` file joins
@@ -2456,14 +2551,12 @@ lowering of `meta` bodies, with these consequences:
   compiler continues. The Lisp step and depth budgets do not apply to a
   native body; a call longer than `X2C_META_TIMEOUT` seconds (60 by
   default) is stopped instead.
-- The autodiff macros moved to the `autodiff` package; see
-  [Automatic Differentiation](../guide/autodiff.md).
+-
 
 A nonstatic `meta` function in an included `.x` module is callable during
-translation and has an ordinary runtime declaration. Its provider source owns
-the runtime definition. A `meta static` function stays in that provider, and
-its compile-time state belongs to the provider's compiled group. Repeated
-includes contribute the public declaration once.
+translation and has an ordinary runtime declaration. Its provider source
+contains the runtime definition. Repeated includes contribute the public
+declaration once.
 
 See [Meta Functions](../guide/meta-functions.md) for the authoring guide.
 
@@ -2475,7 +2568,7 @@ directly and a macro's implementation does not have to be written in Lisp. The
 declarations are the signatures; the semantics are the ones described above.
 A project `meta` function's queries, such as `Code.type` and `Type.fields`,
 ask the compiler while the call waits; see
-[What the compiler answers](../guide/meta-functions.md#what-the-compiler-answers).
+[What the compiler answers](../guide/generating-code.md#what-the-compiler-answers).
 
 The compiler binds each operation under its x2c name and derives the Lisp
 name from it. A method keeps its spelling: `Code.type` and `Type.is_value`
@@ -2501,14 +2594,10 @@ reaches through references, matches the copy's; an edited one, or one
 that reaches an edited definition, is compiled with the unit's group like
 any other.
 
-Operations declared without bodies exist only inside a compiler. A `meta`
-function that reaches one, directly or through another `meta` function, has
-no runtime form and none is emitted for it. The compiler infers this
-restriction; no additional annotation is needed. Explicit meta calls and
-source-template constructors also make their enclosing meta bodies
-compile-time-only. A call to one
-from a run-time body is diagnosed where it is written, naming the function and
-the reason.
+A `meta` function that makes an explicit `$` call or uses a source-template
+constructor is also compile-time-only. A run-time call to a compile-time-only
+function is diagnosed where it is written. The diagnostic gives the function
+and the reason.
 
 Compiler facilities load before author imports, and macro code cannot redefine
 them.
@@ -2592,36 +2681,39 @@ but their numeric IDs are opaque and must not be forged. Use
 `Code.binding_spelling` when text is required.
 
 The compiler records where syntax was written separately from its AST value.
-`Code.source_text` exposes it only for a complete captured argument or decorator
-target; arbitrary AST `List`s do not acquire source text by structural
-equality. Diagnostics retain the definition, invocation, import, and generated
-ancestry even after a macro returns a new `List`. Returned syntax must be valid
-for its expression, field, enumerator, block-item, or translation-unit
-position. A `meta` call written as a whole expression statement holds that
-statement's block-item or statement position, so it may return a statement
-as well as an expression. This holds in an ordinary function and in an
-expansion alike, such as the body of `macro Stmt $same(Stmt $code) =>
-$same_of($code);`. A `meta` call inside a larger expression holds an
-expression position. Inside an expansion every `List` result is code.
-Elsewhere a `List` result is code when it is an expression node, a macro
-application, a quotation, or an identifier; any other `List` remains a
-runtime value. Protocol declarations, macro definitions, preprocessor nodes,
-and other compile-time-only source items are retained at translation-unit
-position and apply their source-order effect. The compiler rejects forms that
-are malformed or invalid in that position. As with other constructed ASTs, it
-does not recursively verify annotations or check where a handwritten `List`
-came from.
+`Code.source_text` reads it, as described above. Diagnostics retain the
+definition, invocation, import, and generated ancestry even after a macro
+returns a new `List`. Returned syntax must be valid for its expression, field,
+enumerator, block-item, or translation-unit position. A `meta` call written as
+a whole expression statement holds that statement's block-item or statement
+position, so it may return a statement as well as an expression. This holds in
+an ordinary function and in an expansion alike, such as the body of `macro
+Stmt $same(Stmt $code) => $same_of($code);`. A `meta` call inside a larger
+expression holds an expression position. Inside an expansion every `List`
+result is code. Elsewhere a `List` result is code when it is an expression
+node, a macro application, a quotation, or an identifier; any other `List`
+remains a runtime value. Protocol declarations, macro definitions,
+preprocessor nodes, and other compile-time-only source items are retained at
+translation-unit position and apply their source-order effect. The compiler
+rejects forms that are malformed or invalid in that position. Lisp may
+construct canonical AST `List`s directly, including static declarations. The
+compiler accepts a valid structure whether it came from the parser, a `Match`
+capture, a template, or handwritten Lisp. It does not verify every type or
+binding annotation in a constructed `List` or reject it because of its origin.
+Like C pointer operations, this metaprogramming is unchecked. Prefer literal
+templates and the contextual `x2c.*` operations when you want the compiler to
+construct syntax for you.
 
 ### Named types and declaration production
 
 `NamedType` captures `NAME TYPE;` or the forward form `NAME;`. The name comes
-first, with no equals sign. `{ FIELDS }` abbreviates a value struct;
-`{ FIELDS } *` declares a pointer representation, with `struct` optional
-before the braces. Ordinary type and declarator grammar owns qualifiers,
-fields, arrays, and pointers.
-The name is reserved before its fields are parsed, and the complete definition
-supplies its representation. A forward declaration does not imply a pointer.
-Layout must be complete wherever the ordinary type rules require it.
+first, with no equals sign. `{ FIELDS }` abbreviates a value struct; `{ FIELDS
+} *` declares a pointer representation, with `struct` optional before the
+braces. Qualifiers, fields, arrays, and pointers use the ordinary type and
+declarator grammar. The name is reserved before its fields are parsed, and the
+complete definition supplies its representation. A forward declaration does
+not imply a pointer. Layout must be complete wherever the ordinary type rules
+require it.
 
 The captured form is `(named-type NAME TYPE)`, where NAME is a String and TYPE
 is the complete canonical type syntax; a forward uses an empty TYPE. This form
@@ -2652,8 +2744,7 @@ include ordinary top-level syntax and these constructible forms:
 - `(syntax-recipe CALLBACK ARGUMENTS)` supplies syntax when a retained body is
   bound, allowing it to use the selected method signatures.
 
-These rows express declaration and binding positions, without authenticating
-which producer constructed them. Retained bodies also carry the usual macro
+ Retained bodies also carry the usual macro
 bindings and source locations for diagnostics. A consumer cannot replace a
 provider's exported default by defining another function with its name.
 
@@ -2716,9 +2807,8 @@ Scope slot or a staging buffer cleared after ownership transfer.
 
 Static, external, or threaded storage, field initializers, for-header
 declarations, assignments, returns, call arguments, and forms nested inside
-operators are outside this enclosing-block position. These are syntax-position
-rules, independent of the producer of the AST. There is no runtime expression
-helper or expression-exit cleanup.
+operators are outside this enclosing-block position. There is no runtime
+expression helper or expression-exit cleanup.
 
 ### Checked foreign aliases
 
@@ -2795,7 +2885,7 @@ Map ages = {ada: 36, grace: n + 41, "text": 1, <sym>: 2, (name): 3};
 ```
 
 A Map entry is identified by its first `:` that is outside nested brackets
-and belongs to no `?:` conditional. A brace without such an entry remains a
+and is not part of a `?:` conditional. A brace without such an entry remains a
 C initializer. Inside an initializer, a bracketed index followed by
 `=`, `.`, or `[` remains a designator; any other bracket is an `Array`
 literal. Both literals build a fresh object at each evaluation, as `%[]` and
@@ -2826,10 +2916,10 @@ keys.
 ### Percent literals, quote, and unquote
 
 In operand position, `%` followed by a literal delimiter is the quoting sigil.
-The delimiter selects a literal grammar, which then decides how to read the
-contents. Quoting here means a parser-context change; it does not mean that
-every percent form contains unevaluated symbolic data. Binary `%` remains the
-modulo operator, and `%!` remains the lambda-literal prefix.
+The delimiter selects the literal grammar for the contents. Here, quoting
+means a change of parser context. Some percent forms evaluate their contents.
+Binary `%` remains the modulo operator, and `%!` remains the lambda-literal
+prefix.
 
 `%"`, `%[`, and `%<<` open literals after any token. Modulo by a string literal
 is invalid C, and neither `[` nor `<<` begins an expression, so a cast may
@@ -2893,8 +2983,7 @@ selects the first signed type among its suffix's choices that holds the
 signed value, in any radix, so `%(-0x80000001)` is the `long` value
 -2147483649 and `%(-2147483648)` is an `int`. A `u` suffix keeps the unsigned
 type C would choose and its modular negation, so `%(-1u)` is the `unsigned`
-value 4294967295. Lowercase `void` remains the absence sentinel and is rejected
-if collection construction tries to store it.
+value 4294967295.
 
 `$name` inserts one identifier expression into a quoted collection.
 `${expression}` inserts one arbitrary x2c expression, including calls, member
@@ -2937,14 +3026,13 @@ the same crossing but splices the evaluated `List`'s elements. Collection
 insertion converts to the representation required by the literal; `String`
 insertion accepts `String`, `Symbol`, declared converters, `Var`, aliases of
 `Var`, and supported numeric values under the existing conversion rules. The
-shipped component `src/components/component-interpolation.x` joins a `%""` literal's
-parts, a translator that `$rewrite(%(expr ("String") (segments *)))` registers
-on the literal's `segments` head; a rule a program registers there runs first.
-The `String.join` call the shipped rule writes is not program code, so a
-program's rule for `String.join` sees only the calls the program writes,
-including one inside a `$` insertion.
+shipped component `src/components/component-interpolation.x` joins a `%""`
+literal's parts, a translator that `$rewrite(%(expr ("String") (segments *)))`
+registers on the literal's `segments` head. A program's rule for `String.join`
+receives only the calls that the program writes, including one inside a `$`
+insertion. It does not receive the call that the shipped rule writes.
 
-The braces belong to the unquote and contain one complete x2c expression,
+The braces are part of the unquote and contain one complete x2c expression,
 including nested calls, indexing, casts, assignments, conditionals, comma
 expressions, and nested literals. In a collection, `$name(...)` instead inserts
 `$name` and then reads `(...)` as a nested symbolic `List`. In `%""`, the
@@ -2999,22 +3087,19 @@ converts when the expression is evaluated. The ordinary literal keeps its exact
 C escape spelling and decoding, and does not acquire percent-string escape
 rules.
 
-Cached `String`s, boxed `Var` values, and canonical `List` graphs are allocated
-eagerly during translation-unit initialization and retained for the process
-lifetime. A cached literal in a public inline function uses private storage in
-each C translation unit that includes the generated header; canonicalizers
-still make equal `String` and `List` values share their value identity. A
-guarded call on the inline entry is the fallback on hosts where eager
-constructors do not run. Consequently, an allocation failure may occur before
-`main` rather than at the source expression.
+Cached `String`s, boxed `Var` values, and canonical `List` graphs are
+allocated eagerly during translation-unit initialization and retained for the
+process lifetime. A cached literal in a public inline function uses private
+storage in each C translation unit that includes the generated header;
+canonicalizers still make equal `String` and `List` values share their value
+identity. A guarded call on the inline entry is the fallback on hosts where
+eager constructors do not run. Therefore, an allocation failure for a cached
+literal can occur before `main` runs.
 
 Caching does not change the other identity rules: `List`s and non-empty
 `String`s are canonical when constructed through their canonicalizers; `Array`s
 and `Map`s are mutable identity-bearing objects and are constructed at each
-evaluation. Non-empty `Array` and `Map` literals use counted construction. Raw
-`Null` remains valid collection data, while a dynamic expression that evaluates
-to `void` reaches the collection owner and is rejected rather than ending
-construction.
+evaluation. Non-empty `Array` and `Map` literals use counted construction.
 
 File-static `String`, `List`, `Array`, and `Map` declarations may use their
 percent literals directly. A file-static `Var` may likewise use one of those
@@ -3044,11 +3129,11 @@ once when control first reaches it. This includes aggregates containing
 `String` or `Var` values, function calls, and values from function arguments.
 Concurrent calls wait for the initializing call to publish the whole object.
 If initialization raises an Error, a later call retries; side effects already
-performed by the initializer remain. Recursive initialization, including a
-cycle between initializing threads, raises `bad-state` rather than waiting
-forever. A `static threaded` declaration follows the same rule separately in
-each thread. Native constant initializers retain native C static storage;
-a function name, including a `$x2c.callback.adapt` result, is constant.
+performed by the initializer remain. Recursive initialization raises
+`bad-state`. This includes a cycle between initializing threads. A `static
+threaded` declaration follows the same rule separately in each thread. Native
+constant initializers retain native C static storage; a function name,
+including a `$x2c.callback.adapt` result, is constant.
 
 Runtime-initialized local objects preserve their declared type, qualifiers,
 array shape, and address across calls. Their storage lasts until process
@@ -3091,11 +3176,11 @@ representation and leaves its output untouched when it does not. Equality
 compares the encoded value.
 
 `Symbol`s also name outcomes and states. For example, `Lisp.read` returns
-`<value>` or `<eof>`. It raises `<incomplete>` or `<malformed>`, and neither
-returns to the call. `Error` causes such as `<bad-sig>`, `<no-symbol>`,
-`<bad-arity>`, `<bad-types>`, and `<bad-result>` are `Symbol`s too. Numeric
-enums remain appropriate when their values are indexes, packed fields,
-arithmetic inputs, or external numeric encodings.
+`<value>` or `<eof>`. It raises `<incomplete>` or `<malformed>`. `Error`
+causes such as `<bad-sig>`, `<no-symbol>`, `<bad-arity>`, `<bad-types>`, and
+`<bad-result>` are `Symbol`s too. Numeric enums remain appropriate when their
+values are indexes, packed fields, arithmetic inputs, or external numeric
+encodings.
 
 For Lisp input, `<incomplete>` means more source can complete the current form:
 an open list, string, block comment, or symbol literal, a reader prefix without
@@ -3150,6 +3235,8 @@ separate success from payload bits. `Iter.next`, `Map.get`, and `Map.del`
 use `void` for exhaustion or absence. Malformed representations, including null
 wide boxes and null `Array` or `Map` values, are rejected. Every accepted
 nonnull pointer must name a live object established by its constructor.
+Collection construction, `Array.push`, and `Map.set` reject `void`; raw
+`Null` is valid collection data.
 
 Lowercase `void` is contextual. In a type position it retains C's no-result
 type, including function returns, `(void)` parameter lists, `void *`, casts,
@@ -3272,11 +3359,11 @@ An unregistered `Symbol` cannot match a valid `Var` tag, so the result is
 false. No other expression type is accepted on the right: numeric, pointer,
 object, and `Var`-valued expressions do not stand for types.
 
-Lowercase `void` is the one selector whose type spelling also names a value.
-It tests the all-ones absence sentinel through `Var.is_void`: `void is void`
-is true, while the sentinel does not match any ordinary tag or type. Raw `Null`
-has the pointer-family `<p48>` tag, so it matches `(void *)` and does not match
-`void`; there is no `Null` selector.
+Lowercase `void` is the only selector that is both a type spelling and a
+value. It tests the all-ones absence sentinel through `Var.is_void`: `void is
+void` is true, while the sentinel does not match any ordinary tag or type. Raw
+`Null` has the pointer-family `<p48>` tag, so it matches `(void *)` and does
+not match `void`; there is no `Null` selector.
 
 A `Type` hole or a `Symbol`-valued `Expr` hole in an `Expression` macro may
 occupy the selector position. An expanded type is resolved in the invocation
@@ -3298,16 +3385,15 @@ static int has_pointer_type(void) {
 
 The public numeric conversion domain contains all 15 `Var` families: `i8/u8`,
 `i16/u16`, `i32/u32`, `i48/u48`, `long/ulong`, `llong/ullong`, and
-`f32/f64/ldouble`.
-`Var.convert(value, tag)` returns the converted value and raises the specific
-`Error` cause when no conversion exists, the target is invalid, the value is
-out of range, or the `Var` encoding is invalid. None of those causes return to
-the call. Compiler-inserted `Var`-to-native numeric conversion passes through
-the same function before using the target extractor. The scalar-named readers
+`f32/f64/ldouble`. `Var.convert(value, tag)` returns the converted value and
+raises the specific `Error` cause when no conversion exists, the target is
+invalid, the value is out of range, or the `Var` encoding is invalid.
+Compiler-inserted `Var`-to-native numeric conversion passes through the same
+function before using the target extractor. The scalar-named readers
 `Var.int`, `Var.double`, and their siblings apply the same rules directly. A
 matching tag reads its payload, and any other numeric tag converts through
-`Var.convert`. The raw payload readers `Var.integer` and `Var.floating` and the
-wide `*_value` functions remain exact low-level decoders.
+`Var.convert`. The raw payload readers `Var.integer` and `Var.floating` and
+the wide `*_value` functions remain exact low-level decoders.
 
 Integer-to-integer conversion never uses a floating intermediary. It retains
 the destination-width low bits; signed destinations interpret those bits as
@@ -3349,9 +3435,7 @@ Truthiness is false for numeric or `Symbol` zero, `Null` and null pointers,
 canonical empty `String`/`List`, and empty `Array`, `Map`, `Block`, `Bytes`, or
 `Buffer` values. It is true for nonzero values, NaN, infinities, nonempty
 containers, and other nonnull objects. A nonnull `Iter` is true even when
-exhausted; the test does not probe its producer. `void` is outside the value
-domain, and a compiler-inserted `Var.truth` raises `<void-op>` for it. That
-raise does not return to the test.
+exhausted; the test does not probe its producer.
 
 If either operand of `+`, `-`, `*`, `/`, `%`, `<<`, `>>`, `&`, `^`, or
 `|` has static `Var` identity and the other operand is `Var` or statically numeric,
@@ -3405,19 +3489,20 @@ For `+`, when each operand is a `String`, an alias reaching `String`, a
 the result is the `String` that `String.add` returns, so `path + ".o"`
 concatenates.
 
-These lowerings, the dynamic compound assignments and increments below, and
-unary fallback rejection after protocol resolution belong to the shipped
-component `src/components/component-operators.x`. It registers each translator with
-`$rewrite` and a Match pattern typed `Var`, such as
+The shipped component `src/components/component-operators.x` implements these
+lowerings. It also implements the dynamic compound assignments and increments
+below, and unary fallback rejection after protocol resolution. It registers
+each translator with `$rewrite` and a Match pattern typed `Var`, such as
 `%(expr ("Var") (op (!or + - (!quote *) / % ...) ? ?))`, which keys the rule
 by each operator the pattern names and `Var`. A pattern that types the
 operation or an operand `Var`, or an alias of it, takes the dynamic
 operations. They run after protocol operators resolve, only when an operand
 has `Var` identity, so native operands never reach them; each operation
 arrives typed `Var`. A program's rule registered for the same operator is
-tried first. A macro pattern's holes decide which operands it takes, so a
-rule for `$!Money{...}` with `typedef Var Money` leaves other `Var` operands
-to the shipped rules.
+tried first. The holes in a macro pattern select the operands that its rule
+receives, so a rule for `$!Money{...}` with `typedef Var Money` leaves other
+`Var` operands to the shipped rules. The same order applies to every shipped
+component: a program's rule for the same head is tried first.
 
 Direct runtime calls to `Var.binary` additionally accept comparisons and eager
 `&&`/`||`. The compiler does not use that eager logical path. It converts each
@@ -3434,8 +3519,7 @@ converted to `RHS`.
 
 The lvalue is evaluated once. Its current value is passed to the member once,
 and the returned `Participant` is stored once. Compound assignment and prefix
-forms return the stored value; postfix forms return the original value. Plain
-`=` and the identity operators `===` and `!==` are not overloadable.
+forms return the stored value; postfix forms return the original value.
 
 ### Dynamic compound assignment
 
@@ -3479,18 +3563,16 @@ evaluation order remains unchanged.
 
 Dynamic conversion, operators, and updates do not have parallel error-code
 APIs. A failure raises its specific cause through the ambient `Error` channel.
-When a handler consumes that `Error`, a value-producing operation returns its
-documented sentinel and an update leaves its target unchanged. The sentinel
-says that no result or mutation was produced and does not encode why.
-`<alloc-fail>` and `<size-limit>` are exceptions: they may transfer to a
-matching filtered `catch`, but never return a sentinel or continue the update.
+Each of these causes is a shared cause, so it never returns to the operation.
+Only a matching filtered `catch` receives it, and an interrupted update leaves
+its target unchanged.
 
 The `try_*` prefix remains for status results whose payload alone cannot
-represent every successful result. Examples include `Map.try_get` for presence,
-`Iter.try_next` for exhaustion, `String.try_long` for parse success, and
-match/search operations for no-match. Those integer results answer whether a
-result exists or an operation applies. Failure causes still use the ambient
-`Error` channel rather than a status `Symbol` or error out-parameter.
+represent every successful result. Examples include `Map.try_get` for
+presence, `Iter.try_next` for exhaustion, `String.try_long` for parse success,
+and match/search operations for no-match. Those integer results answer whether
+a result exists or an operation applies. Failure causes still go through the
+ambient `Error` channel.
 
 ## Indexing and slicing
 
@@ -3514,10 +3596,7 @@ the collection's mutation operations; a read override does not replace them.
   represented as an `int`, not a one-byte `String`.
 - A missing `Map` key returns `void` through `get` and bracket reads;
   `Map.try_get` reports presence separately.
-- `Array` literal elements cannot be `void`; counted construction enforces the
-  same invariant as `Array.push`.
-- `Map` literal keys and values cannot be `void`; counted construction enforces
-  the same invariant as `Map.set`.
+
 - `Array` and `Map` indexed assignment are supported.
 - `Array` and `Map` indexed compound assignment and prefix/postfix `++`/`--`
 are supported as single-call updates.
@@ -3555,7 +3634,7 @@ instead of the container binding.
 
 Iterator sources and lazy operations take a final `Iter` destination pointer.
 That argument may be omitted for calls nested in an iterator expression that
-is consumed immediately by `try_next`, `next`, `done`, `list`, `array`,
+is consumed immediately by `try_next`, `next`, `list`, `array`,
 `foldl`, `any`, `all`, `find`, `count`, `sum`, `product`, `min`, `max`, or
 `foreach`.
 
@@ -3566,8 +3645,8 @@ destinations are preserved, including a mixture of explicit and omitted
 destinations in one chain. Calls nested in iterator-valued arguments, such as
 both inputs to `zip` or `map2`, are completed recursively.
 
-This is specific to iterator destinations, not general default-argument
-syntax. An iterator assigned to a local, returned from a function, boxed, or
+Only iterator destinations can be omitted. x2c has no general default
+arguments. An iterator assigned to a local, returned from a function, boxed, or
 passed to an arbitrary call still requires explicit storage at every stage.
 `unzip` also remains explicit because its two result iterators share one
 caller-owned `UnzipShared` buffer.
@@ -3650,12 +3729,11 @@ The same is true after a noncapturing lambda converts to `Func`. Successful
 effect-only calls and explicit `void` results produce `void` through either
 route. `Func.apply` preserves that no-value result. A value parameter declared
 as `Var` may receive it; a concrete typed value parameter rejects it. Rest
-bindings reject it before constructing their argument `List`, since ordinary
-collections exclude `void`.
-A `Func` cannot be passed as a context-free C callback because that ABI has
-nowhere to carry its captured values. `List`, `Array`, `String`, and `Iter`
-higher-order methods accept `Func` instead, so they can use captured callbacks
-without a second API.
+bindings reject it before constructing their argument `List`. A `Func` cannot
+be passed as a context-free C callback because that ABI has nowhere to carry
+its captured values. `List`, `Array`, `String`, and `Iter` higher-order
+methods accept `Func` instead, so they can use captured callbacks without a
+second API.
 
 Each snapshot conversion executes once, in body first-use order, when the
 `Func` is constructed. A reference capture uses a shared typed cell allocated
@@ -3690,16 +3768,16 @@ function handles have file-static lifetime.
 x2c accepts C-style `if`, `switch`, `while`, `do`, classic `for`, labels,
 `goto`, `return`, `break`, and `continue` statements.
 
-A `switch` whose selector has static type `String`, or an alias of
-`String`, selects its case by content. Each case it owns is a string
+A `switch` whose selector has static type `String`, or an alias of `String`,
+selects its case by content. Each case label of that switch is a string
 literal, including adjacent literals and a native macro that expands to one;
-any other label is an error. A label matches when `selector == "label"`
-holds under the ordinary `String` comparison, so `case ""` matches the
-empty `String`, which is null. The selector is evaluated once. Adjacent
-labels, `default` in any position, fallthrough, `break`, an enclosing
-loop's `continue`, nested switches, and labels inside nested blocks behave
-as in an integer switch. A `char *`, `const char *`, or `Var` selector keeps
-C's integer `switch`.
+any other label is an error. A label matches when `selector == "label"` holds
+under the ordinary `String` comparison, so `case ""` matches the empty
+`String`, which is null. The selector is evaluated once. Adjacent labels,
+`default` in any position, fallthrough, `break`, an enclosing loop's
+`continue`, nested switches, and labels inside nested blocks behave as in an
+integer switch. A `char *`, `const char *`, or `Var` selector keeps C's
+integer `switch`.
 
 ```x2c
 typedef String Color;
@@ -3747,8 +3825,7 @@ cause the original expression to name different storage.
 
 `$lock(mutex)` evaluates a Mutex expression once, calls `lock`, then defers
 `unlock` around its body. A failed acquisition registers no unlock. These
-forms add ordinary blocks and defers without hidden loops; break, continue,
-return, and error transfer retain their ordinary enclosing boundaries.
+forms add ordinary blocks and defers and no hidden loops.
 
 See [Classes and System Macros](../guide/system-macros.md) for examples and
 expansions.
@@ -3773,8 +3850,7 @@ with point {
 
 The expression may be any x2c expression. Each use acts as a parenthesized copy
 of that expression. A call used twice is called twice, and an unused expression
-is not evaluated. `with` does not introduce a hidden runtime temporary or
-promise single evaluation.
+is not evaluated.
 
 The name is available only in the required braced body and only in expression
 positions. It does not replace field names, labels, declaration names, type
@@ -3830,11 +3906,10 @@ values convert to `Iter`, and each yielded `Var` converts to the declared loop
 type when that conversion exists. [Iteration](../guide/iteration.md) covers
 the loop forms and the `Iter` protocol in tutorial order.
 
-Foreach uses `Iter.try_next`. Successful payloads exclude `void`,
-which is the terminal sentinel returned by `Iter.next`.
-A boxed `Var` without a registered iterator adapter produces an
-already-exhausted iterator. A receiver with a statically known type and no
-visible exact or inherited `Iter` conformance is rejected as not iterable.
+Foreach uses `Iter.try_next`. A boxed `Var` without a registered iterator
+adapter produces an already-exhausted iterator. A receiver with a statically
+known type and no visible exact or inherited `Iter` conformance is rejected as
+not iterable.
 
 ### Match
 
@@ -3887,33 +3962,31 @@ local declaration.
 An arm may place `if (expression)` before its colon. The expression runs
 after matching, with captures visible, and uses ordinary truth conversion.
 False tries the next arm; errors propagate normally. A successful guard runs
-the body once. Capture scopes and the existing `break`, `continue`, and
-cleanup rules apply to guarded arms too.
+the body once.
 
-The lowering belongs to the shipped component `src/components/component-match.x`, a
-translator that `$rewrite($matched)` registers on the `match` statement
-head; a rule a program registers there runs first. A `switch` rule a
-program registers sees the statements in the arms, but not the `switch` the
-lowering writes.
+The shipped component `src/components/component-match.x` lowers `match`.
+`$rewrite($matched)` registers it on the `match` statement head; a rule a
+program registers there runs first. A program's `switch` rule receives the
+statements in the arms. It does not receive the `switch` that the lowering
+writes.
 
 ### Errors and cleanup
 
 `try` requires a following filtered `catch`, `finally`, or both.
 
-`raise %(CODE (KEY VALUE)...);` records one structured `Error`. Every `KEY`
-is a bare `Symbol` read by this syntax, and `CODE` is either a bare `Symbol`
-or `$name`, a variable converted to `Symbol`; each `VALUE` is one
-expression. Values are restricted recursively to `Null`/`nil`, numeric and enum
-values, `Symbol`s, `Atom`s, `String`s, and `List`s of permitted values. `void`,
+`raise %(CODE (KEY VALUE)...);` records one structured `Error`. Every `KEY` is
+a bare `Symbol` read by this syntax, and `CODE` is either a bare `Symbol` or
+`$name`, a variable converted to `Symbol`; each `VALUE` is one expression.
+Values are restricted recursively to `Null`/`nil`, numeric and enum values,
+`Symbol`s, `Atom`s, `String`s, and `List`s of permitted values. `void`,
 pointers, mutable containers, resources, custom objects, and other
 identity-bearing values are invalid. A value whose own type is invalid is a
 compiler error; invalid contents of a `List` or `Var` value reach `Error`'s
-`<bad-types>` raw floor when the `raise` runs. The conversions and the check belong to the shipped
-component `src/components/component-raise.x`, a translator that `$rewrite($raised)`
-registers on the `raise` statement head; a rule a program registers there runs
-first. The compiler evaluates the converted code and values once each, left to
-right, and builds their literals when the `raise` runs. A `try` may have
-adjacent `catch` arms:
+`<bad-types>` raw floor when the `raise` runs. The shipped component
+`src/components/component-raise.x` performs the conversions and the check.
+`$rewrite($raised)` registers on the `raise` statement head. The compiler
+evaluates the converted code and values once each, left to right, and builds
+their literals when the `raise` runs. A `try` may have adjacent `catch` arms:
 
 <!-- ignore: illustrative `Block` and reporting callbacks are omitted -->
 ```x2c,ignore
@@ -3946,13 +4019,54 @@ Every cause in the shared table never returns to its raising call. `Error`
 keeps their policies at `<abort>` and observing handlers cannot consume them;
 only a matching filtered `catch` transfers control. For a literal `raise` of
 one of them, generated C places `__builtin_unreachable()` after the runtime
-`raise` call so C control flow has the same rule. [Errors and
-Cleanup](../guide/exceptions.md) lists the table.
+`raise` call so C control flow has the same rule.
+
+These are the shared causes. The policy of each is `<abort>`, and a process
+cannot change it:
+
+| Code | Cause |
+| --- | --- |
+| `<alloc-fail>` | allocation failed |
+| `<size-limit>` | a size, length, or capacity is unrepresentable |
+| `<invariant>` | an impossible internal state was reached |
+| `<bad-state>` | a valid object is in the wrong lifecycle state |
+| `<init-fail>` | process-owner initialization failed |
+| `<bad-arg>` | an API precondition failed with no better code |
+| `<bad-enc>` | a `Var` encoding is invalid |
+| `<void-op>` | `void` was used as a dynamic value |
+| `<bad-types>` | operand types do not support the operation |
+| `<bad-target>` | a requested conversion target is invalid |
+| `<no-convert>` | no requested conversion exists |
+| `<conv-range>` | conversion exists but the value is out of range |
+| `<bad-op>` | an operator is unsupported |
+| `<div-zero>` | integer division or remainder by zero |
+| `<bad-shift>` | a shift count is invalid |
+| `<no-member>` | a dynamic value has no such member |
+| `<bad-sig>` | a native or Lisp callable signature is invalid |
+| `<bad-arity>` | a callable received the wrong argument count |
+| `<no-symbol>` | a native symbol cannot be resolved |
+| `<bad-result>` | a native result cannot be represented |
+| `<not-call>` | a value cannot be called |
+| `<call-stack>` | evaluation exceeds its call budget or stack depth |
+| `<interrupt>` | the evaluation session has been interrupted |
+| `<unbound>` | a program name has no binding |
+| `<malformed>` | external syntax or serialized input is invalid |
+| `<incomplete>` | external input needs more data |
+| `<format>` | formatting failed without output |
+| `<not-found>` | an external resource does not exist |
+| `<io-fail>` | another external I/O operation failed |
+| `<cmd-fail>` | a command or pipeline exited with a nonzero status |
+| `<join-fail>` | a worker transferred captured errors at join |
+
+Unknown codes also default to `<abort>`. A process may set a policy only for
+unknown and user-defined codes.
 
 The `defer` statement schedules the statement for the current block exit.
 Multiple `defer` statements unwind in last-in, first-out order. Cleanup runs
-for normal scope exit, `return`, `goto`, and `Error` transfer, all the way out
-to the function boundary. `break` and `continue` unwind cleanups only up to the
+for normal scope exit, `return`, `goto`, and `Error` transfer to a selected
+`catch`, all the way out to the function boundary. It does not run when an
+uncaught `Error` aborts the program, or when native code calls `exit` or
+`longjmp`. `break` and `continue` unwind cleanups only up to the
 innermost enclosing loop or `switch` (whichever the jump targets) and stop
 there; a `defer` or cleanup frame registered outside that boundary is left for
 a later normal exit, `return`, or `Error` transfer to reach. The [errors and
@@ -3967,13 +4081,12 @@ would enter a region its `switch` body opened before it.
 
 Generated `Error` transfer preserves the automatic locals and parameters a
 protected body modifies under the repository's optimized build, whether the
-body assigns them by name or writes through a pointer it holds the address
-in. The compiler supplies the required volatile C representation for those
-values and for the transfer state its frames carry; source code does not need
+body assigns them by name or writes through a pointer it holds the address in.
+The compiler supplies the required volatile C representation for those values
+and for the transfer state its frames carry; source code does not need
 optimization-specific qualifiers for ordinary assignments in `try`, `catch`,
-or `finally`.
-`Error` transfer does not restore the process signal mask; code that changes a
-signal mask owns restoring it.
+or `finally`. `Error` transfer does not restore the process signal mask; code
+that changes a signal mask must restore it.
 
 ### Type-owned initialization
 
@@ -4038,12 +4151,12 @@ converters declared by their own ancestry.
 
 A typedef and the type it names may substitute for each other in either
 direction. An `Array` can therefore be used as a `Block`, and an `Ast` as a
-`List`, without conversion. Two typedefs of a common type cannot substitute for
-each other this way: they may describe different contents despite sharing a C
-representation. Thus `ArrayInt counts = someArrayDbl;` is a type error that
-names the required sibling converter, `ArrayDbl.arrayint`. The existing
-`Array.arrayint` instead converts from the common Array ancestor. A cast
-still permits reinterpretation.
+`List`, without conversion. Two typedefs of a common type cannot substitute
+for each other this way: they may describe different contents despite sharing
+a C representation. Thus `ArrayInt counts = someArrayDbl;` is a type error
+whose message gives the required sibling converter, `ArrayDbl.arrayint`. The
+existing `Array.arrayint` instead converts from the common Array ancestor. A
+cast still permits reinterpretation.
 
 The compiler warns with code `conversion` when source spells a
 conversion that its destination already performs. Translation continues.
@@ -4053,9 +4166,8 @@ included. The comparison uses the declared x2c type, so casts between a
 typedef and its underlying type, or between two typedefs of one C type, are
 not reported. Neither are `(void)` casts, or casts of an operand whose C type
 x2c does not track, such as a pointer difference or a character constant. A
-cast of a C string literal is not reported either: it is how source keeps the
-literal native where x2c would otherwise promote it to a `String`, so removing
-it changes what the surrounding operator does.
+cast of a C string literal is not reported. The cast keeps the literal native
+where x2c would otherwise promote it to a `String`.
 
 A converter call is reported when its destination would make the same call.
 A converter is a method that takes only its receiver and is named for its
@@ -4100,7 +4212,7 @@ as `long float` are structured type errors at the original source token.
 Numeric literal radix, magnitude, and suffix determine the annotated native
 family; integer promotions and the usual arithmetic conversions then operate
 on that canonical identity. A literal beyond the supported native integer
-families is a structured type error rather than a mismatched variadic value.
+families is a structured type error.
 
 Conversions remain context-sensitive outside the numeric domain. A source
 expression may be boxed to `Var`, converted through an established target
@@ -4135,25 +4247,25 @@ from the source's, because it also passes the same address on unchanged.
 ## Host preprocessing
 
 When preprocessing is required, x2c passes the source pathname and every
-include directory to the host `cc` as separate argv elements. Spaces and shell
-metacharacters in paths are data, not command syntax. The host process receives
-the source path, so quoted includes and its diagnostics retain source-file
-context.
+include directory to the host `cc` as separate argv elements. x2c does not
+interpret spaces or shell metacharacters in these paths. The host process
+receives the source path, so quoted includes and its diagnostics retain
+source-file context.
 
 The active preprocessed stream is shallow-parsed only to establish the global
 environment. Full parsing, diagnostics, and emitted source still come from the
-original token stream. Directives remain AST nodes in source order at top level
-and inside compound statements. This includes a trailing directive before
-`}`; a directive between `if (...)`, `else`, `while (...)`, `for (...)`,
-`do`, `switch (...)`, `defer`, `try`, `catch ...:`, `finally`, a match arm's
-`:`, or a statement macro such as `foreach` and the statement it governs; and
-a directive before the `else`, do-while `while`, `catch`, or `finally` that
-continues a statement. A conditional group opened there also takes the
-statement of each later arm and the closing directive, so `foreach` keeps a
-group of one statement per arm inside its loop. A later statement in the same
-arm follows the governed statement, as in C. Directives between match arms stay between those arms, so an arm
-inside a conditional group is present exactly when C compiles the branch that
-holds it.
+original token stream. Directives remain AST nodes in source order at top
+level and inside compound statements. This includes a trailing directive
+before `}`; a directive between `if (...)`, `else`, `while (...)`, `for
+(...)`, `do`, `switch (...)`, `defer`, `try`, `catch ...:`, `finally`, a match
+arm's `:`, or a statement macro such as `foreach` and the statement that
+follows it; and a directive before the `else`, do-while `while`, `catch`, or
+`finally` that continues a statement. A conditional group opened there also
+takes the statement of each later arm and the closing directive, so `foreach`
+keeps a group of one statement per arm inside its loop. A later statement in
+the same arm follows the governed statement, as in C. Directives between match
+arms stay between those arms, so an arm inside a conditional group is present
+exactly when C compiles the branch that holds it.
 
 An include that x2c cannot resolve remains in the emitted C. Translation
 without host preprocessing can therefore succeed with an active missing
@@ -4161,7 +4273,7 @@ header; native compilation rejects it. Explicit host preprocessing also
 rejects an active missing header. A missing include in an inactive branch
 such as `#if 0` does not prevent compilation.
 
-This is not full preprocessing of x2c source: the original tokens must still
+x2c does not fully preprocess its source. The original tokens must still
 form syntax that x2c can parse. Macro expansion that supplies grammar, or
 inactive branches containing otherwise unparseable source, can require
 adjustment even when the host C compiler accepts them.
@@ -4170,20 +4282,25 @@ A C source file renamed from `.c` to `.x` is an x2c translation unit. A C
 header stays a `.h` file reached with `#include`; x2c collects its
 declarations and the native compiler reads it from the generated C.
 
-Every branch of a conditional is parsed except the branches C never
-compiles. x2c output is compiled as C by a GNU-style compiler, so the branch
-under `#ifdef __cplusplus`, `#if defined(__cplusplus)` alone or first in a
-`&&` conjunction with no `||`, and `#ifdef _MSC_VER` or
-`#if defined(_MSC_VER)` likewise,
-the `#else` branch of `#ifndef __cplusplus` or `#if !defined(__cplusplus)`,
-and `#if 0` are skipped: their tokens are trivia, and the directives around
-them stay in place and are emitted. A compiler built for a host other than
-Windows treats `_WIN32`, `_WIN64`, and `__CYGWIN__` the same way. An
-`#include` in a skipped branch is not read. A function defined in two arms
-of one conditional is one definition. At file scope, `extern "C" {` opens a
-linkage group and a `}` closes it, even with an `#include` between them; the
-group's declarations belong to file scope, and its braces are not emitted. Any string literal is accepted as the
-linkage name. `extern "C"` before a single declaration is read as `extern`.
+Every branch of a conditional is parsed except the branches C never compiles.
+x2c output is compiled as C by a GNU-style compiler. Therefore x2c skips these
+branches:
+
+- the branch under `#ifdef __cplusplus`, or under `#if defined(__cplusplus)`
+  alone or first in a `&&` conjunction with no `||`;
+- the same forms for `_MSC_VER`;
+- the `#else` branch of `#ifndef __cplusplus` or `#if !defined(__cplusplus)`;
+- `#if 0`.
+
+Their tokens are trivia. The directives around them stay in place and are
+emitted. A compiler built for a host other than Windows treats `_WIN32`,
+`_WIN64`, and `__CYGWIN__` the same way. An `#include` in a skipped branch is
+not read. A function defined in two arms of one conditional is one definition.
+At file scope, `extern "C" {` opens a linkage group and a `}` closes it, even
+with an `#include` between them; the group's declarations are file-scope
+declarations, and its braces are not emitted. Any string literal is accepted
+as the linkage name. `extern "C"` before a single declaration is read as
+`extern`.
 
 A unit or a collected header may place a macro before or among a
 declaration's specifiers. The macro's definition determines what the name
@@ -4262,13 +4379,14 @@ the caret width.
 ### Region warnings
 
 Three codes come from the region check described in
-[Scopes and Lifetime](../guide/memory.md#warnings-when-a-value-outlives-its-region).
+[Scopes and Lifetime](../guide/memory.md#lifetime-warnings).
 Each is a warning: translation continues and the program still compiles.
 
 | Code | Reported for |
 | --- | --- |
 | `region` | A value allocated inside a region is reachable after the region ends. The message gives the way the value leaves, and the note gives the line that opened the region. |
-| `after-free` | A local is read after `Scope.free`, `Scope.realloc`, or `Array.list_free` consumed it. |
+| `after-free` | A local is read after a call freed it, such as `Scope.free`,
+`Scope.realloc`, `Array.free`, `Array.list_free`, or a `cleanup`. |
 | `bad-free` | `Scope.free` or `Scope.realloc` is given a literal, a local's address, or other storage no Scope allocator returned. |
 
 The check analyzes regions lexically and summarizes each function within its

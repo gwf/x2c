@@ -26,7 +26,7 @@ Destroys this thread's `Scope` chain and its push and retain stacks.
 It runs last in `x2c_thread_state_release` and repeats harmlessly; a
 thread that never created a `Scope` has nothing to destroy.
 
-Source: `lib/scope.x:1025`
+Source: `lib/scope.x:1024`
 
 ### `Scope`
 
@@ -177,7 +177,7 @@ Releases resources owned by `Scope`.
 `Scope` groups managed allocations by lifetime; balanced retain/release
 and push/pop boundaries remain caller responsibilities.
 
-Source: `lib/scope.x:991`
+Source: `lib/scope.x:990`
 
 ### `Scope`
 
@@ -221,7 +221,7 @@ Source: `lib/scope.x:240`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/scope.x:716`
+Source: `lib/scope.x:715`
 
 <a id="Scope.destroy"></a>
 #### Scope.destroy
@@ -235,18 +235,17 @@ discards its name; pointers into it are dangling afterwards, and nothing
 diagnoses their use. Any regions still linked below it, from retains that
 were never released, are destroyed with it.
 
-`Scope.destroy` refuses a scope that is still in use, so a double destroy
-or a mismatched push and pop raises instead of corrupting the allocation
-lists. The three refused cases are the active root scope, a slot still on
-the pushed stack (pop it first), and a scope that a later `Scope.retain`
-layered another region on top of, which the runtime reports as an attached
-lower scope.
+`Scope.destroy` refuses a scope that is still in use: the active root
+scope, a slot still on the pushed stack (pop it first), and a scope that
+a later `Scope.retain` layered another region on top of, which the
+runtime reports as an attached lower scope. The handle is a pointer into
+the destroyed scope, so destroying it again is undefined behavior.
 
 **Raises:** `<bad-state>` for the active root, a pushed slot, or an attached
 lower scope. The failure leaves the scope intact. A NULL `scope` does
 nothing. Before `Error` initialization it terminates at the error floor.
 
-Source: `lib/scope.x:703`
+Source: `lib/scope.x:702`
 
 <a id="Scope.free"></a>
 #### Scope.free
@@ -538,7 +537,7 @@ printf("reclaimed = %d\n", Scope.stats().live_allocations == before);
 ~}
 ```
 
-Source: `lib/scope.x:823`
+Source: `lib/scope.x:822`
 
 <a id="Scope.top"></a>
 #### Scope.top
@@ -575,7 +574,7 @@ for source readers but are not supported as user API.
 
 Initializes the process-wide `Scope` runtime owner.
 
-Source: `lib/scope.x:946`
+Source: `lib/scope.x:945`
 
 <a id="Scope.owner"></a>
 #### Scope.owner
@@ -604,7 +603,7 @@ running.
 **Raises:** `<bad-arg>` for a null hook, `<size-limit>` when the registry
 cannot grow, or `<alloc-fail>` when its storage cannot be allocated.
 
-Source: `lib/scope.x:980`
+Source: `lib/scope.x:979`
 
 ## Public types
 

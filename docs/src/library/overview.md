@@ -1,17 +1,9 @@
 # Standard Library by Task
 
-Every `.x` translation unit receives the x2c runtime prelude. This chapter
-shows which library functions to use for common tasks. The generated [module
-reference](modules/index.md) lists their signatures and behavior.
-
-The reference has four tiers:
-
-- **Primary** - what most programs use.
-- **Advanced** - storage, ABI, embedding, representation, and diagnostics.
-- **Convenience** - adapters with alternative result forms or names; their
-  descriptions identify the preferred operations.
-- **Internal** - functions used within the runtime, documented for source
-  readers.
+Every `.x` translation unit receives the x2c runtime prelude. Each section
+below names the type to use for one task. The generated
+[module reference](modules/index.md) lists every signature and its behavior,
+grouped by [API tier](../guide/idioms.md#prefer-the-primary-api-tier).
 
 The implicit prelude is the standard library. Optional x2c system modules are
 shipped, built, and tested with x2c, and need an explicit include. Runtime
@@ -53,7 +45,7 @@ allocated objects even when empty.
 
 [String](modules/string.md) does interpolation, search, split, replace,
 partition, case conversion, padding, escaping, slicing, joining, and checked
-numeric parsing. Its operations work on bytes, not Unicode characters.
+numeric parsing. Its operations work on bytes; they do not decode Unicode.
 
 Use [Buffer](modules/buffer.md) for incremental text:
 
@@ -132,8 +124,8 @@ Use [Block](modules/block.md) for fixed-width growable storage and `Buffer` for
 text construction. External resources such as `File`s still close explicitly or
 through `defer`.
 
-Each `Scope.release` must match a `Scope.retain` on the same active slot. An
-extra release aborts. It does not consume the surrounding process root.
+Each `Scope.release` must match a `Scope.retain` on the same active slot. See
+[scopes and lifetime](../guide/memory.md).
 
 ## Bound temporary work
 
@@ -150,16 +142,9 @@ work.close();
 printf("%s\n", result.repr());
 ```
 
-Closing reclaims everything that was not exported. Export walks supported
-`List`s, `Array`s, `Map`s, wide values, `Block`s, `Bytes`, and `Buffer`s,
-moving mutable storage when it can and canonicalizing `String`s and `List`s in
-the parent. A custom `Var` object can register an exporter for its own
-references and allocations.
-
-The optional name appears in `Scope` leak diagnostics. It does not change
-`Context` behavior and is not a runtime identifier. Close `Context`s in
-last-opened, first-closed order, usually with `defer work.close()` when no
-value is needed after the close.
+Closing reclaims everything that was not exported. Close `Context`s in
+last-opened, first-closed order. See
+[contexts and threads](../guide/contexts-and-threads.md).
 
 ## Run work on native threads
 
@@ -199,14 +184,13 @@ int main(void) {
 }
 ```
 
-Every successful start must be joined exactly once, and the handle can be freed
-only after join. Any object a worker accesses through a borrowed pointer must
-stay alive until the worker is joined. A worker result is exported only after the
-worker stops. `Thread` has no detach or cancellation.
+Every started `Thread` needs one successful `Thread.join`, then
+`Thread.free`. [Contexts and threads](../guide/contexts-and-threads.md#pass-shared-values-to-a-worker)
+gives the sharing and result rules.
 
 ## Handle absence and failure
 
-Use the operation that keeps the distinction you need:
+These operations report absence separately from data:
 
 - `Map.try_get` and `Map.try_del` report whether the key was present,
   separately from its value.
@@ -214,9 +198,9 @@ Use the operation that keeps the distinction you need:
 - `String.try_long` and `String.try_double` separate zero from parse failure.
 - raw `File` readers separate data, EOF, and error.
 
-An operation that fails raises its cause through `Error`. Filtered catches and
-the embedding application's error policy decide what happens next. Absence,
-exhaustion, and parse results come back as return values.
+An operation that fails raises its cause through `Error`, and a filtered
+`catch` or the cause's policy handles it. Absence, exhaustion, and parse
+results come back as return values.
 
 ## Use Error transfer and cleanup
 
@@ -235,13 +219,12 @@ converts implicitly where a `Func` is expected. Direct conversions reuse a
 file-static binding that lives for the program, so an operation that takes
 ownership of a `Func`, such as `Lisp.bind`, leaves it in place. Pointer
 conversions snapshot the pointer in a binding held by the current `Scope`.
-Call C functions directly when the compiler already knows which function you
-mean.
+Call a C function directly when its name is known at compile time.
 
 ## Log structured events
 
 [Logger](modules/logger.md) does level filtering and writes to ordered stderr,
-file, memory, and custom sinks. A category names an event and never suppresses
+file, memory, and custom sinks. A category labels an event; it never suppresses
 one. The global `log_*` functions are the simplest interface; use a `Logger`
 object to configure logging and manage its lifetime.
 
@@ -270,7 +253,7 @@ supplies `defun`, short-circuit control, higher-order `List` operations,
 numeric comparisons, basic `String` operations, and the pattern matching
 described in [the language reference][lisp]. `Lisp.kernel()` creates the
 evaluator primitives alone, for hosts that build their own environment.
-`etc/lisp-values.xlisp` names the core `List`, `Array`, `Map`, `String`,
+`etc/lisp-values.xlisp` binds the core `List`, `Array`, `Map`, `String`,
 `Var`, and `Symbol` operations; the compiler loads it into every compile-time
 session, and an embedding host loads it by name.
 `etc/lisp-io.xlisp` stays optional and must be loaded by name. It adds
@@ -288,9 +271,10 @@ A group compiles into the unit that declares it. A package can therefore
 publish its bindings behind one public installer that a consumer calls after
 importing it. See [Wrapping a C Library](../guide/wrapping-c-libraries.md).
 
-`$lisp.bind` and grouped bindings accept the scalar and object types `Func`
-supports. Native functions are trusted host code. Pointers, structs,
-callbacks, and package-specific opaque objects cannot be passed this way.
+`$lisp.bind` and grouped bindings accept the parameter and result types
+`Func` supports, including untagged pointers and structs passed as `<p48>`
+addresses. Native functions are trusted host code. A package-specific opaque
+object needs its own `Var` adoption.
 
 Load a Lisp program with `Lisp.eval_file`, then evaluate runtime `List` forms
 with `Lisp.eval`. `$` inside `%(...)` inserts live x2c values; it is unrelated
@@ -315,5 +299,4 @@ int limit;
 ## Look up an exact operation
 
 The [module reference](modules/index.md) is generated from runtime source and
-compiler-verified signatures. Begin with the primary tier. Use an advanced or
-convenience entry when its documented behavior is what you need.
+compiler-verified signatures.

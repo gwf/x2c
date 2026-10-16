@@ -237,6 +237,13 @@ static List _method_member(
   Type signature = c.sym.get(%($method));
   int rejected =
     c.protocol_rejects_direct_member(type, field.car().str());
+  if (signature && rejected == 2) {
+    String name = %"${type.base_type().car()}.${field.car()}";
+    String hidden = %"method '$name' is hidden by an inherited protocol";
+    c.report_error(<type>,
+      hidden + " conformance; adopt the protocol for this type to use it",
+      NULL, NULL);
+  }
   if (signature && rejected) signature = NULL;
   List binding = NULL;
   if (signature) binding = c.sym.reference(%($method), NULL);

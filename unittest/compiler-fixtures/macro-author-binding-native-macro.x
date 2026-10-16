@@ -1,11 +1,12 @@
-/* A name a template keeps reaches the file-scope declaration even where
-   locals of every enclosing scope hide it. Locals of other functions keep
-   their spellings, so a native macro there still reads them. */
+/* A name a template keeps with `using` reaches the file-scope declaration
+   even where locals of every enclosing scope hide it. Locals of other
+   functions keep their spellings, so a native macro there still reads
+   them. */
 #include "x2c.x"
 
 #define PLUS_ONE (bias + 1)
 
-macro Expression $get() => bias;
+macro Expression $get() using bias => bias;
 
 static int bias = 10;
 

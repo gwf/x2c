@@ -6216,10 +6216,6 @@ static List f9_placement____ancestor_code(Compiler c, Ancestor row){
   int origin = row.origin ? row.origin : Compiler_record_origin(c, row.token);  return cons(_457, cons(int_var(origin), _459));
 }
 
-int Compiler_lowering_body(Compiler c){
-  if(! _init_guard_) _file_init_();  Ancestor * rows = c -> ancestors -> bytes;  for(int i =(int) Block_len(c -> ancestors) - 1;  i >= 0;  i --) if(rows[i].what == 458361162716) return rows[i].lowering;  return 0;
-}
-
 int Compiler_enter_function(Compiler c, List declaration, int callback){
   if(! _init_guard_) _file_init_();  int depth = Block_len(c -> ancestors);  Ancestor row ={
     .what = 458361162716, .node = declaration, .lowering = 1, .callback = callback

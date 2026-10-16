@@ -1,8 +1,8 @@
 #include "x2c.x"
 
-/* A macro body reaches a global declared later in the file. File scope is
-   the author's whole file, so the name keeps that global, and a caller's
-   local of the same spelling does not supply it. */
+/* A macro body reaches a global declared after the definition. Its free
+   name resolves where the expansion lands, so a caller's local of the same
+   spelling supplies it there. */
 macro Expression $read_later() => later + 1;
 macro Stmt $write_later(Expr $value) {
   later = $value;
@@ -19,5 +19,5 @@ int main(void) {
     shadowed = $read_later() + later;
   }
   printf("%d %d %d\n", before, later, shadowed);
-  return before != 4 || later != 10 || shadowed != 18;
+  return before != 4 || later != 10 || shadowed != 15;
 }

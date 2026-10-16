@@ -67,8 +67,8 @@ completed source submissions for the current process; adjacent duplicates are
 stored once, and history is not written to disk. A rejected or failed
 submission remains available for correction.
 
-Tab completes names from the compiler's live session namespace. The parser's
-current grammar role filters that namespace: type positions offer types and
+Tab completes names from the compiler's live session namespace, offering
+only names that fit the grammar position: type positions offer types and
 type-producing macros, expression positions offer values and callable forms,
 and statement, block, and submission starts offer their legal union plus
 contextual keywords. Narrow continuation contexts offer `else`, `catch`, or
@@ -84,7 +84,7 @@ inserts the common prefix, and another Tab lists compact, grouped choices.
 Completion parses only through the cursor and rolls back its semantic work,
 so it can use locals from pending multiline input without publishing them.
 APIs become candidates when their ordinary declarations and compile-time
-bindings become visible; the REPL keeps no separate API or grammar model.
+bindings become visible.
 
 Long input wraps across terminal rows. Bracketed paste keeps embedded newlines
 inside one editable entry, so a pasted multiline submission can be accepted
@@ -137,7 +137,7 @@ the REPL opened. Scope allocation objects and live requested bytes are
 process-wide runtime values; requested bytes count public managed payload.
 Pool active and depot bytes partition retained backing capacity. Scope and
 Pool figures overlap and must not be summed. Verbose reports add Scope and
-Pool traffic and capacity details. There is no Lisp wordcode or AUTO tier.
+Pool traffic and capacity details.
 
 ## Load functions from a file
 
@@ -350,7 +350,7 @@ without a final newline. Loading alone does not execute `main`.
 
 The original function keeps its native calling convention inside the
 compiled program. Its ordinary helpers and references to `main` continue
-to work. The loader changes bound compiler syntax, not the source file.
+to work. Loading does not modify the source file.
 Other C dialect and dependency limitations still apply; loading does not
 provide missing libraries. Calling `exit` ends the helper, as described
 below under interrupted calls.
@@ -387,7 +387,7 @@ Relative paths, absolute paths, and symbolic links to the same file identify
 one load. If two loaded files include the same dependency, either load
 rebuilds both files with the dependency's current contents.
 
-For a real example, copy the autodiff module from a repository checkout:
+For example, copy the autodiff module from a repository checkout:
 
 ```sh
 cp packages/autodiff/src/autodiff-macros.x /tmp/autodiff-repl.x
@@ -450,9 +450,8 @@ nested();  // 3
 A returned noncapturing lambda or named function needs a `(Func)` cast,
 as in native code.
 
-The whole interpreter exposes the fixed-signature
-`String.format(String fmt, List values)` operation. Call it as
-`fmt.format(values)`:
+The REPL provides the fixed-signature `String.format(String fmt, List values)`
+operation. Call it as `fmt.format(values)`:
 
 ```x2c
 ~List values = %("answer" 42);
@@ -472,7 +471,7 @@ REPL sessions also provide `print(String)` and `println(String)`. `print`
 writes the String's bytes; `println` writes those bytes followed by one
 newline. Use String interpolation for formatting, such as
 `println(%"count=$count")`. Both functions are REPL-only, reserve their names
-in the session, and report `ok` rather than a synthetic value. They are not
+in the session, and report `ok`. They are not
 varargs aliases.
 
 A session also declares `Json`, `Diff` and `Path`, so `Json.parse`,
@@ -503,9 +502,8 @@ global scalar or record keeps its address until the session closes. Other
 top-level constructs depend on the existing lowering and may be declined.
 Native function bodies use ordinary compiler semantics; for example, `goto`
 is available there. Loaded public types can be used in prompt functions
-within the same native layout limits as interpreted objects. The interpreter
-does not provide full native parity:
-it loses the distinction between `Var void` and an empty List.
+within the same native layout limits as interpreted objects. Interpreted
+code does not distinguish `Var void` from an empty List.
 
 ## Failure and lifetime
 
@@ -520,17 +518,16 @@ canonical syntax, compiler caches, and evaluator allocations can accumulate.
 Long sessions do not have a bounded-memory guarantee. Compiled modules stay
 loaded for the process lifetime; captured bindings belong to their session.
 Each submission may make 40 million interpreted Lisp calls, the evaluator's
-default budget.
-SIGINT (Ctrl-C) during evaluation stops the submission with an
+default budget. SIGINT (Ctrl-C) during evaluation stops the submission with an
 `(interrupt ...)` evaluation error. Once the budget is exhausted or the
-submission is interrupted, no further interpreted code runs, including
-pending `defer` bodies. Ordinary evaluation failures
-still run those cleanups. The next submission gets a fresh budget. Native
-callbacks and compiled prompt functions are not a preemptible sandbox: an
-interrupt takes effect at the next interpreted call. Compiled function loops
-do not consume the Lisp budget. Their native crashes or nonterminating loops
-can end or block the REPL process. Loaded files share a helper process
-separate from the REPL, with the timeout behavior described above.
+submission is interrupted, no further interpreted code runs, including pending
+`defer` bodies. Ordinary evaluation failures still run those cleanups. The
+next submission gets a fresh budget. An interrupt cannot stop native callbacks
+or compiled prompt functions; it takes effect at the next interpreted call.
+Compiled function loops do not consume the Lisp budget. Their native crashes
+or nonterminating loops can end or block the REPL process. Loaded files share
+a helper process separate from the REPL, with the timeout behavior described
+above.
 
 EOF exits successfully unless input is incomplete, which exits with status
 1. With piped input, any submission or command error makes the final status

@@ -287,7 +287,7 @@ Prefer quotations. C text is for a lowering whose measured cost needs it.
 Compiler and `meta` code that builds C writes it as C. Take the first
 choice below that fits; a `%(...)` List of node tags is the last one. The
 book owns the semantics:
-[Quoting code with `$!`](../docs/src/guide/meta-functions.md#quoting-code-with-)
+[Quoting code with `$!`](../docs/src/guide/generating-code.md#quoting-code-with-)
 and [Macro values](../docs/src/reference/language.md#macro-values). The
 examples are excerpts from current source.
 

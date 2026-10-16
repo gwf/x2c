@@ -10,6 +10,7 @@ Typed descriptors for runtime `Var` behavior.
 | Function | Summary |
 | --- | --- |
 | [`Var.contains`](#Var.contains) | Tests dynamic membership through the receiver's registered protocol row. |
+| [`Var.enumerate`](#Var.enumerate) | Returns an iterator over what a two-name `foreach` destructures. |
 | [`Var.fallback_compare`](#Var.fallback_compare) | Compares without consulting a runtime descriptor. |
 | [`Var.fallback_equal`](#Var.fallback_equal) | Applies non-dispatch equality to `a` and `b`. |
 | [`Var.fallback_hash`](#Var.fallback_hash) | Returns the non-dispatch runtime hash of `Var`. |
@@ -37,7 +38,21 @@ Tests dynamic membership through the receiver's registered protocol row.
 **Raises:** `<bad-enc>`, `<void-op>`, or `<no-member>` when the dynamic
 receiver cannot perform membership.
 
-Source: `lib/dispatch.x:580`
+Source: `lib/dispatch.x:591`
+
+<a id="Var.enumerate"></a>
+#### Var.enumerate
+
+`meta native Iter Var.enumerate(Var x, Iter dest)`
+
+Returns an iterator over what a two-name `foreach` destructures.
+A boxed `Map` yields `(key value)` `List`s, as `Map.enumerate` does, and
+any other value yields what `Var.iter` yields.
+
+**Raises:** `<void-op>` for `void`. A null `dest` returns NULL without
+raising.
+
+Source: `lib/dispatch.x:570`
 
 <a id="Var.fallback_compare"></a>
 #### Var.fallback_compare
@@ -80,7 +95,7 @@ Returns a non-dispatch iterator over `Var`.
 **Raises:** `<void-op>` for `void`. A null `dest` returns NULL without
 raising.
 
-Source: `lib/dispatch.x:568`
+Source: `lib/dispatch.x:579`
 
 <a id="Var.fallback_repr"></a>
 #### Var.fallback_repr
@@ -130,7 +145,7 @@ Reads a dynamic indexed value through the receiver's protocol row.
 **Raises:** `<bad-enc>`, `<void-op>`, or `<no-member>` when the dynamic
 receiver cannot be indexed.
 
-Source: `lib/dispatch.x:595`
+Source: `lib/dispatch.x:606`
 
 <a id="Var.iter"></a>
 #### Var.iter
@@ -154,7 +169,7 @@ Applies a dynamic postfix update at `key` and returns its prior value.
 **Raises:** `<bad-enc>`, `<void-op>`, `<no-member>`, or a cause from the
 receiver's indexed update.
 
-Source: `lib/dispatch.x:644`
+Source: `lib/dispatch.x:655`
 
 <a id="Var.setindex"></a>
 #### Var.setindex
@@ -166,7 +181,7 @@ Stores and returns a dynamic indexed value through its protocol row.
 **Raises:** `<bad-enc>`, `<void-op>`, `<no-member>`, or a cause from the
 receiver's indexed assignment.
 
-Source: `lib/dispatch.x:610`
+Source: `lib/dispatch.x:621`
 
 <a id="Var.updateindex"></a>
 #### Var.updateindex
@@ -180,7 +195,7 @@ dispatch adds no thread or failure atomicity guarantee.
 **Raises:** `<bad-enc>`, `<void-op>`, `<no-member>`, or a cause from the
 receiver's indexed update.
 
-Source: `lib/dispatch.x:628`
+Source: `lib/dispatch.x:639`
 
 <a id="Var.write_str"></a>
 #### Var.write_str
@@ -237,7 +252,7 @@ later dispatch or replacement.
 
 **Raises:** `<bad-state>` after descriptor registration is frozen.
 
-Source: `lib/dispatch.x:771`
+Source: `lib/dispatch.x:782`
 
 #### x2c_register_descriptor
 
@@ -254,7 +269,7 @@ the same process-wide lifetime requirements.
 Distinct full names that encode one `Symbol` through `_`/`-` folding or
 truncation abort.
 
-Source: `lib/dispatch.x:818`
+Source: `lib/dispatch.x:829`
 
 #### x2c_register_tagged_descriptor
 
@@ -264,7 +279,7 @@ Registers an explicitly tagged type or raises `<bad-state>` for a null tag
 or name. Tag/name collisions follow the existing fatal descriptor
 diagnostic; registration still freezes at worker startup.
 
-Source: `lib/dispatch.x:849`
+Source: `lib/dispatch.x:860`
 
 #### x2c_register_type
 
@@ -282,7 +297,7 @@ use.
 Distinct full names that encode one `Symbol` through `_`/`-` folding or
 truncation abort.
 
-Source: `lib/dispatch.x:754`
+Source: `lib/dispatch.x:765`
 
 #### x2c_try_register_descriptor
 
@@ -301,7 +316,7 @@ Registration invokes no callback.
 Distinct full names that encode one `Symbol` through `_`/`-` folding or
 truncation abort.
 
-Source: `lib/dispatch.x:796`
+Source: `lib/dispatch.x:807`
 
 #### x2c_try_register_tagged_descriptor
 
@@ -318,7 +333,7 @@ distinct names for one tag abort.
 Explicit names retain case; ordinary inferred-tag registration still
 requires lowercase names. Raises: `<bad-state>` after registration freezes.
 
-Source: `lib/dispatch.x:833`
+Source: `lib/dispatch.x:844`
 
 ### `RenderPath`
 
@@ -381,7 +396,7 @@ A null `handled`, missing descriptor, or missing callback returns zero.
 Otherwise `handled` is set to one and the synchronous callback result is
 returned; an available `handled` is cleared before lookup.
 
-Source: `lib/dispatch.x:677`
+Source: `lib/dispatch.x:688`
 
 <a id="Var.equal"></a>
 #### Var.equal
@@ -455,7 +470,7 @@ Returns one and writes the synchronous callback result when available;
 otherwise returns zero and leaves `result` unchanged. A null `result`
 returns zero.
 
-Source: `lib/dispatch.x:693`
+Source: `lib/dispatch.x:704`
 
 <a id="Var.try_dispatch_unary"></a>
 #### Var.try_dispatch_unary
@@ -467,7 +482,7 @@ Returns one and writes the synchronous callback result when available;
 otherwise returns zero and leaves `result` unchanged. A null `result`
 returns zero.
 
-Source: `lib/dispatch.x:720`
+Source: `lib/dispatch.x:731`
 
 <a id="Var.write_pointer_repr"></a>
 #### Var.write_pointer_repr
@@ -507,7 +522,7 @@ for source readers but are not supported as user API.
 
 Reports under the descriptor lock whether registration is frozen.
 
-Source: `lib/dispatch.x:965`
+Source: `lib/dispatch.x:976`
 
 #### x2c_descriptor_thread_start_begin
 
@@ -517,7 +532,7 @@ Locks descriptor registration while a native worker starts.
 The caller must pair this on the same thread with
 `x2c_descriptor_thread_start_end`.
 
-Source: `lib/dispatch.x:951`
+Source: `lib/dispatch.x:962`
 
 #### x2c_descriptor_thread_start_end
 
@@ -527,7 +542,7 @@ Ends a native worker start and unlocks descriptor registration.
 A nonzero `success` permanently freezes subsequent registration; zero
 leaves it open for another attempt.
 
-Source: `lib/dispatch.x:959`
+Source: `lib/dispatch.x:970`
 
 ### `Var`
 
@@ -540,7 +555,7 @@ Calls the registered `Context` exporter for `value` when one exists.
 Returns nonzero when the descriptor registers an exporter, and writes its
 result to `out`. `Context` handles built-in value families directly.
 
-Source: `lib/dispatch.x:732`
+Source: `lib/dispatch.x:743`
 
 ## Design notes
 

@@ -2,18 +2,18 @@
 
 `autodiff-macros.x` differentiates ordinary `double` code four ways:
 
-- **Dual numbers** carry a derivative through operators at runtime.
-- **`$ad.forward()`** generates a tangent function beside a decorated
-  function, at compile time, from the typed AST.
-- **`$ad.reverse()`** generates a gradient function the same way, recording
-  a tape during the forward sweep. **`$ad.checkpoint(K)`** is the same
-  gradient with the tape shrunk by a factor of about `K`.
-- **`autodiff.x`** records a runtime tape for code whose shape the
-  decorators cannot see.
+- Dual numbers carry a derivative through operators at runtime.
+- `$ad.forward()` generates a tangent function beside a decorated function,
+  at compile time, from the typed AST.
+- `$ad.reverse()` generates a gradient function the same way, recording a
+  tape during the forward sweep. `$ad.checkpoint(K)` computes the same
+  gradient with a tape about `K` times smaller.
+- `autodiff.x` records a runtime tape for code that the decorators cannot
+  transform.
 
 All four are ordinary x2c: a macro file, a runtime unit, and the existing
-protocol and decorator machinery. Nothing in the compiler knows about
-derivatives. Both files belong to the optional `autodiff` package in
+protocol and decorator machinery. The compiler has no derivative support
+of its own. Both files belong to the optional `autodiff` package in
 `packages/autodiff`, which has no native dependency. `import "autodiff";`
 gives a unit the macros and the runtime tape, because the package's
 `autodiff.x` includes its macro module. A unit can also include that module
@@ -162,8 +162,8 @@ adjoints of the assignment that produced it, so every partial derivative
 is evaluated at the values the forward sweep saw. There is no renaming
 into single-assignment form; restoring values makes it unnecessary.
 
-For every exit the transformation knows statically which statements ran
-before it, and it generates the reverse of exactly that prefix. A loop's
+For every exit, the statements that ran before it are known at compile
+time, and the transformation generates the reverse of exactly that prefix. A loop's
 reverse pops the trip count and then, per iteration, the exit code that
 selects among those prefixes. Loops nest, `do` becomes a `while` with a
 first-iteration flag, and a `return` inside a loop reverses the partial

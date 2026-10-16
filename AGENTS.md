@@ -63,6 +63,11 @@ passing tests support that result rather than replace it.
   Preserve this deliberate behavior described under "Macro-visible syntax"
   in `docs/src/reference/language.md`; do not add origin tracking or a second
   validator to reject legal constructed syntax.
+- Free names in a macro body resolve where the expansion lands, as in C.
+  A macro keeps a file-scope declaration only for a name it lists with
+  `using name`; `using $name` creates a fresh private name. Do not make
+  definition-site binding a default. See "Keeping a file-scope name with
+  `using`" in `docs/src/reference/language.md`.
 - Trust facts established by the producing operation. Add validation or a
   dedicated diagnostic only to preserve deliberate public behavior or prevent
   wrong output, corrupted state, or an unsafe native crossing. Earlier or

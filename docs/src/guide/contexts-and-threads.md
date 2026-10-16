@@ -1,36 +1,35 @@
 # Contexts and Threads
 
 A `Context` gives a task its own `Scope`, `Error` state, and `Match` state. An
-isolated `Context` also gives it child `String` and `List` pools. Closing the
-`Context` restores the state that was active before it opened and reclaims
-everything that was not exported.
+isolated `Context` also gives it a child canonical-value pool, which its
+`String`s and `List`s share. Closing the `Context` restores the state that was
+active before it opened and reclaims everything that was not exported.
 
-If opening a `Context` cannot finish, the partial `Scope`, pools, `Error`
-state, and `Match` state are closed before the failure reaches an outer
-`catch`. A failed open therefore never changes `Context.current()` or leaves
-one of its pools active.
+If opening a `Context` fails, the parts already opened are closed before the
+failure reaches an outer `catch`. A failed open does not change
+`Context.current()` or leave a pool active.
 
 A `Thread` runs a callback in an isolated `Context` on a native worker thread.
 The worker may read parent values and may access shared mutable objects. The
-program is responsible for keeping those objects alive and coordinating any
-access that could race.
+program must keep those objects alive and coordinate any access that could
+race.
 
 ## Use a Context for bounded work
 
-`Context.open` and `Context.open_named` inherit the current `String` and `List`
-pools. They are useful when the work needs fresh `Scope`, `Error`, and `Match`
-state but its canonical immutable values should have the same lifetime as their
-caller.
+`Context.open` and `Context.open_named` use the current canonical-value
+pool. Use them when the work needs fresh `Scope`, `Error`, and `Match` state
+and its `String`s and `List`s should live as long as the caller's.
 
-`Context.open_isolated` and `Context.open_isolated_named` add child `String`
-and `List` pools. New temporary `String`s and `List`s can then be reclaimed
-when the `Context` closes. Values already present in a parent pool remain
-visible and keep their identity.
+`Context.open_isolated` and `Context.open_isolated_named` add a child pool.
+New temporary `String`s and `List`s are then reclaimed when the `Context`
+closes. Values already in a parent pool stay visible and keep their
+identity. The name given to a `_named` form appears only in `Scope` leak
+diagnostics.
 
 The following program builds a cyclic mutable result around a private `String`,
 exports it, and closes the `Context`. `Context.export` moves the `Array` and
 `Map` storage into the caller's `Scope`, copies the private immutable values
-into the caller's pools, and preserves the cycle:
+into the caller's pool, and preserves the cycle:
 
 ```x2c
 #include <stdio.h>
@@ -54,23 +53,23 @@ int main(void) {
 ```
 
 Always use the value returned by `Context.export`. Mutable `Array`s, `Map`s,
-`Block`s, `Buffer`s, and wide scalar boxes retain their identity when their
+`Block`s, `Bytes`, `Buffer`s, and wide scalar boxes retain their identity when their
 storage can be moved. Private `String`s, `Atom`s, and `List`s are canonicalized
-in the destination pools, so their pointers may change. Export walks nested
+in the destination pool, so their pointers may change. Export walks nested
 `Array`s, `Map`s, and `List`s, including repeated references and `Array`/`Map`
 cycles. A registered custom value can provide its own `Context` exporter.
 `void` exports as `void`.
 
-The six packed `Array`s from `typed-array.x` and the three packed `Map`s from
-`typed-map.x` follow the same rule. A container owned by the source `Context`
-keeps its pointer while its header and backing storage move together. A
-borrowed container is returned untouched. `MapIntInt` and `MapLongDouble`
-retain their native entries and continue growing in the destination `Scope`.
-`MapStringString` canonicalizes every key and value in the destination `String`
-pool before it moves; `String` pointers may therefore change. If unusual input
-contains two keys that become the same destination `String`, the entry visited
-later in source bucket order replaces the earlier one. `Map` traversal order
-remains unspecified.
+The seven packed `Array`s from `typed-array.x` and the four packed `Map`s
+from `typed-map.x` follow the same rule. A container owned by the source
+`Context` keeps its pointer, and its header and backing storage move
+together. A borrowed container is returned unchanged. The numeric families
+keep their native entries and continue growing in the destination `Scope`.
+`ArrayString` canonicalizes its elements, `MapStringString` its keys and
+values, and `MapStringInt` its keys, in the destination pool before the
+container moves, so their `String` pointers may change. If two keys become
+the same destination `String`, the entry visited later in source bucket
+order replaces the earlier one. `Map` traversal order is unspecified.
 
 A custom `protocol Var(T)` participant may implement `T.export_context` to
 move its mutable storage into another `Context`. The member is optional, like
@@ -134,38 +133,37 @@ int main(void) {
 }
 ```
 
-Each worker gets private `String` and `List` pools, so it can create large
-amounts of temporary immutable data without retaining that data for the process
-lifetime. A result cannot be exported before the join. The callback returns
-one `Var`; when the caller invokes
-`Thread.join`, the runtime waits for the worker and exports that result into
-the joining `Scope` and active `String` and `List` pools. Returned immutable
-values remain in sealed worker-private pools until the join, even after the
-callback finishes. Once the native join succeeds, the `Thread` consumes that
-sealed storage even if exporting the result raises. Call `Thread.free` after
-`Thread.join` returns or after catching an `Error` raised by the join; the
-failed export cannot be retried.
+Each worker gets a private canonical-value pool, so its temporary
+`String`s and `List`s are not kept for the life of the process. The
+callback returns one `Var`. `Thread.join` waits for the worker and exports
+that result into the joining `Scope` and active pool. Until the join, the
+result stays in the sealed worker pool, even after the callback finishes.
+Once the native join succeeds, the `Thread` consumes that storage, even if
+exporting the result raises. A failed export cannot be retried. Call
+`Thread.free` after `Thread.join` returns or after catching an `Error`
+raised by the join.
 
-Process shutdown rejects every started `Thread` until its native join succeeds,
-even when its callback has already finished. This ensures that the worker's
-result `Scope` and pools are reclaimed before the runtime shuts down.
+A `Thread` cannot be detached or cancelled. Join every started `Thread`
+before the process exits. If a worker is
+still unjoined at shutdown, even one whose callback has finished, the
+runtime prints a message and aborts. The join reclaims the worker's result
+`Scope` and pool.
 
-An `Error` that reaches the callback's outer `catch` makes `Thread.join` raise
-`<join-fail>` with the worker's captured errors. That `raise` does not return
-to the joiner. `Thread.join` yields the worker's exported result or transfers.
-A callback that returns `void` joins as `void`; a handled failure transfers
-instead of returning a sentinel. A worker adopts the starting thread's `Error`
-policy, so a cause set to `<collect>`, `<log>`, or `<ignore>` returns to its
-raise inside the callback and the callback keeps its result, exactly as on the
-starting thread. A cause whose policy is `<abort>`, which is every shared
-non-returning cause and every code no policy names, leaves the callback and
-becomes the `<join-fail>` above. Captured values use the
-same sealed worker storage as an ordinary result and enter the joining pools
-only during `Thread.join`. A worker `Error` whose policy is `<log>` also passes
-through the global `Logger` error handler. `Logger` serializes its sinks; in
-particular, a memory sink copies worker-private `String`s and `List`s into the
-pools captured when its `Logger` was created, so logged entries remain valid
-after the worker exits or a registration `Context` closes.
+A worker uses the starting thread's `Error` policy. A cause whose policy is
+`<collect>`, `<log>`, or `<ignore>` returns to its `raise` inside the
+callback, as it does on the starting thread. A cause whose policy is
+`<abort>` leaves the callback. That includes every shared cause and every
+code that no policy names. `Thread.join` then raises `<join-fail>` with the
+worker's captured errors, and that `raise` does not return to the joiner.
+So `Thread.join` either returns the worker's exported result or transfers.
+A callback that returns `void` joins as `void`.
+
+Captured errors stay in the sealed worker storage and enter the joining
+pool only during `Thread.join`. A worker `Error` whose policy is `<log>`
+also passes through the global `Logger` error handler. `Logger` serializes
+its sinks. A memory sink copies worker `String`s and `List`s into the pool
+captured when its `Logger` was created, so logged entries stay valid after
+the worker exits.
 
 The more complete `examples/power/threads.x` uses two workers, parent
 `String`s, private temporary `List`s and `String`s, a shared counter protected
@@ -174,10 +172,9 @@ by a `Mutex`, joined `Map` results, and a global memory `Logger` sink.
 All type and protocol registration must finish before the first successful
 `Thread.start`. Starting native execution freezes descriptor declaration.
 Boxing is not frozen: a worker may box the first value of a declared class,
-and every thread then sees that class's row fully written.
+and every thread then reads that class's complete row.
 
-`Thread.start` also turns on locking for the `String` and `List` interning
-pools. A process that has never started a worker needs no locks for those
-pools. Create native threads through `Thread`; one made by calling
-`pthread_create` directly can share interned values with no lock protecting
-them.
+`Thread.start` also turns on locking for the canonical-value pools. A process
+that has never started a worker does not lock them. Create native threads
+through `Thread`; one made by calling `pthread_create` directly can share
+interned values with no lock protecting them.

@@ -1,15 +1,11 @@
 # Errors and Cleanup
 
-The [system macros](system-macros.md) attach ordinary defer cleanup to
-managed locals and to `$scope`, `$let`, and `$lock` bodies. Their cleanup
-follows the same control-transfer rules described here.
-
-C gives you `return`, `goto`, and `longjmp`. x2c adds structured failure
-recording and non-local transfer through `raise`, `try`, and filtered `catch`.
-`finally` and `defer` run cleanup even when a block exits early.
-
-The exhaustive grammar is in
-[the language reference](../reference/language.md).
+x2c adds structured errors to C. `raise` records an `Error`, a filtered
+`catch` selects it by cause, and `finally` and `defer` run cleanup when a
+block exits early. The [system macros](system-macros.md) attach the same
+`defer` cleanup to managed locals and to `$scope`, `$let`, and `$lock`
+bodies. The [language reference](../reference/language.md#errors-and-cleanup)
+gives the full statement rules.
 
 ## One error protocol
 
@@ -21,75 +17,36 @@ raise %(size-limit (operation "Block.reserve") (bytes $requested));
 ```
 
 The first item is a compact `Symbol` naming the cause. The remaining items are
-`(key value)` detail pairs. `Error` also records the source location. Codes
-classify causes that a handler might reasonably branch on; they do not name
-the reporting mechanism, recovery action, or module that detected them.
+`(key value)` detail pairs. `Error` also records the source location. A code
+identifies a cause that a handler can branch on. Put the reporting mechanism
+and the module that found the cause in the details.
 
 Use the most specific shared cause. For example, `<bad-arity>` identifies an
 argument count, `<bad-types>` identifies unsupported dynamic operand types,
 `<not-found>` identifies a missing external resource, and `<invariant>`
-identifies an impossible internal state. Detail keys are open-ended, so a
-raiser may add context without changing the code's identity. Detail values are
-value-like: `Null`/`nil`, numeric and enum values, `Symbol`s, `Atom`s,
-`String`s, and `List`s recursively containing only those values. Pointers,
-`void`, `Array`s, `Map`s, resources, custom objects, and other identity-bearing
-values are rejected. The compiler diagnoses invalid statically known values; a
-bad value hidden in a dynamic `Var` terminates with `<bad-types>` without
-re-entering error handling.
+identifies an impossible internal state. A raiser may add any detail keys
+without changing the code. Detail values must be immutable data: `Null`,
+numbers, enum values, `Symbol`s, `Atom`s, `String`s, and `List`s of those.
+The [reference](../reference/language.md#errors-and-cleanup) gives the full
+rule.
 
 When an Array failure reports both a type and a method action, `operation`
 is the Array type String, and `action` is the method Symbol. For example,
 a push to a null `ArrayInt` raises
 `(bad-arg (operation "ArrayInt") (action push))`. The action `<take-last>`
-names the public method `take_last`.
+means the public method `take_last`.
 
-Choose codes in this order when several seem plausible: callable shape,
+When several codes seem to fit, choose in this order: callable shape,
 dynamic operation, resource or external operation, API contract, then
-`<invariant>` for an impossible internal state. The shared codes are:
+`<invariant>` for an impossible internal state. The
+[reference](../reference/language.md#errors-and-cleanup) lists the 31
+shared codes.
 
-| Code | Cause | Default |
-| --- | --- | --- |
-| `<alloc-fail>` | allocation failed | `<abort>` |
-| `<size-limit>` | a size, length, or capacity is unrepresentable | `<abort>` |
-| `<invariant>` | an impossible internal state was reached | `<abort>` |
-| `<bad-state>` | a valid object is in the wrong lifecycle state | `<abort>` |
-| `<init-fail>` | process-owner initialization failed | `<abort>` |
-| `<bad-arg>` | an API precondition failed with no better code | `<abort>` |
-| `<bad-enc>` | a `Var` encoding is invalid | `<abort>` |
-| `<void-op>` | `void` was used as a dynamic value | `<abort>` |
-| `<bad-types>` | operand types do not support the operation | `<abort>` |
-| `<bad-target>` | a requested conversion target is invalid | `<abort>` |
-| `<no-convert>` | no requested conversion exists | `<abort>` |
-| `<conv-range>` | conversion exists but the value is out of range | `<abort>` |
-| `<bad-op>` | an operator is unsupported | `<abort>` |
-| `<div-zero>` | integer division or remainder by zero | `<abort>` |
-| `<bad-shift>` | a shift count is invalid | `<abort>` |
-| `<no-member>` | a dynamic value has no such member | `<abort>` |
-| `<bad-sig>` | a native or Lisp callable signature is invalid | `<abort>` |
-| `<bad-arity>` | a callable received the wrong argument count | `<abort>` |
-| `<no-symbol>` | a native symbol cannot be resolved | `<abort>` |
-| `<bad-result>` | a native result cannot be represented | `<abort>` |
-| `<not-call>` | a value cannot be called | `<abort>` |
-| `<call-stack>` | evaluation exceeds its call budget or stack depth | `<abort>` |
-| `<interrupt>` | the evaluation session has been interrupted | `<abort>` |
-| `<unbound>` | a program name has no binding | `<abort>` |
-| `<malformed>` | external syntax or serialized input is invalid | `<abort>` |
-| `<incomplete>` | external input needs more data | `<abort>` |
-| `<format>` | formatting failed without output | `<abort>` |
-| `<not-found>` | an external resource does not exist | `<abort>` |
-| `<io-fail>` | another external I/O operation failed | `<abort>` |
-| `<cmd-fail>` | a command or pipeline exited with a nonzero status | `<abort>` |
-| `<join-fail>` | a worker transferred captured errors at join | `<abort>` |
-
-Every spelling shown is the compact `Symbol` identity. Unknown codes default to
-`<abort>`, and no shared code defaults to `<log>`.
-
-Every cause whose default is `<abort>` above is non-returning. Such a cause
-may transfer to a matching filtered `catch`, after running intervening
-cleanup, but it can never resume after the raising call. Constructors whose
-preconditions are satisfied therefore return initialized objects, and a
-failed open, read, write, or format does not produce a null, `void`, or
-unchanged-value fallback.
+Every shared cause aborts by default and never returns to the raising call.
+It can transfer to a matching filtered `catch`, after the cleanup between
+them runs. So a constructor whose preconditions hold returns an initialized
+object, and a failed open, read, write, or format returns no null, `void`,
+or fallback value.
 
 Return values still carry ordinary results. Clean EOF, a missing `Map` key,
 iterator exhaustion, and numeric text that does not parse are not `Error`s.
@@ -187,7 +144,7 @@ error raised by its own body.
 
 A filtered `catch` transfers control out of the raising call. Embedders may
 also install observing handlers with `Error.push`. An observing handler runs
-inside the raising call, sees the errors accumulated since its registration,
+inside the raising call, receives the errors accumulated since its registration,
 and returns:
 
 - `<handled>` to consume those errors and stop;
@@ -207,7 +164,7 @@ including declined or collected `Error`s. Use
 caller's ordinary `Scope` and canonical `List` and `String` pools.
 `Error.since(mark)` also returns a snapshot in the caller's scope and pools.
 
-If every handler declines, the code's policy decides what happens:
+If every handler declines, the code's policy selects the result:
 
 | Policy | Result |
 | --- | --- |
@@ -232,11 +189,13 @@ declines. `Error` then transfers control or consumes the errors as required.
 
 ## `finally` and `defer`
 
-Both forms run cleanup on every exit path. They differ in what they attach to.
+Both forms run cleanup when control leaves their region: on normal exit, on
+`return`, `break`, `continue`, or an outward `goto`, and when an `Error`
+transfers through the region to a selected `catch`. They do not run when an
+uncaught `Error` aborts the program, or when native code calls `exit` or
+`longjmp`. The two forms differ in what they attach to.
 
-`finally` attaches to one `try` and runs after its body or selected handler,
-on normal completion, on a propagating `Error`, and on `return`, `break`, or
-`continue` out of the body:
+`finally` attaches to one `try` and runs after its body or selected handler:
 
 ```x2c
 static String first_line(String path) {
@@ -264,12 +223,14 @@ static String first_line(String path) {
 }
 ```
 
-Prefer `defer` when a block owns a resource but has no handler. It keeps the
-release next to the acquisition. Use `finally` when cleanup belongs to an
-existing `try` statement. Use either for cleanup, not recovery.
+Prefer `defer` when a block owns a resource but has no handler. The
+release then sits next to the acquisition, so a reader can compare them.
+Keep the deferred statement small. Use `finally` when cleanup belongs to an
+existing `try` statement.
 
-Both forms hook into the `Error` transfer stack. If a callee raises, every
-intervening cleanup frame runs before control reaches the selected `catch`.
+Use either form to release resources. Recovery belongs in a `catch`. Keep
+expected absence, exhaustion, and parse outcomes in return values, and let
+`Error`s propagate.
 
 A `finally` body cannot define a label. Its statements run on every path
 that leaves the region, so the generated C repeats them, and a label among

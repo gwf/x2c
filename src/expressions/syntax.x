@@ -266,7 +266,7 @@ static List _parse_cast(Compiler c) {
 static List _finish_cast(
   Compiler c, List decl, Type type, List operand, Token origin) {
   if (operand.cadr() === %(<macro-expr>) ||
-      _casts_to_template_typedef(c, decl))
+      _casts_to_template_typedef(c, decl) || _casts_to_typedef_name(c, decl))
     type = %(<macro-expr>);
   _warn_unnecessary_cast(c, operand, type, origin);
   return _cast_expression(c, decl, type, operand);
@@ -315,6 +315,19 @@ static int _cast_operand_follows(Symbol s) =>
 module int _casts_to_template_typedef(Compiler c, List declaration) {
   List base = declaration.cadr();
   return c.macro_holes && !!base.match(%(* (binding ? ?)));
+}
+
+/* A template body binds any other typedef name where it expands too, so
+   when the body is defined, a cast to one is left for the expansion to
+   type. A typedef base ends in its String spelling; a C type word does not,
+   and an aggregate tag keeps its spelling after `struct`, `union`, or
+   `enum`. */
+static int _casts_to_typedef_name(Compiler c, List declaration) {
+  List base = declaration.cadr();
+  if (!c.macro_holes || !base.match(%(* ?(String name)))) return 0;
+  foreach (Var word, base)
+    if (word == <struct> || word == <union> || word == <enum>) return 0;
+  return 1;
 }
 
 /* A cast whose operand already has the cast type, qualifiers included,
@@ -375,14 +388,14 @@ static List _parse_sizeof(Compiler c) {
   c.expect(<sizeof>);
   Token head = c.token;
   int parens = c.test(<(>);
-  List arg = NULL;
+  List arg = NULL, declaration = NULL;
   // `sizeof (T){...}` measures a compound literal, which parses as a cast
   if (parens && c.test_declaration() && head.after_group().type == <{>) {
     c.token = head;
     arg = _parse_cast(c);
   }
   else if (c.test_declaration()) {
-    arg = c.parse_type_operand(NULL);
+    arg = declaration = c.parse_type_operand(NULL);
     if (parens) {
       c.expect(<)>);
       arg = %(parens $arg);
@@ -393,7 +406,11 @@ static List _parse_sizeof(Compiler c) {
     arg = _parse_unary_op(c);
     match (arg) case %(expr ? (parens ?inner)): arg = %(parens $inner);
   }
-  return %(expr ("size_t") (sizeof $arg));
+  /* A template binds a typedef name where it expands, as a declaration
+     does, so `sizeof` of one is typed there too. */
+  int named = declaration && _casts_to_typedef_name(c, declaration);
+  Type type = named ? %(<macro-expr>) : %("size_t");
+  return %(expr $type (sizeof $arg));
 }
 
 /* `offsetof` names its member with a C member designator: a field, then

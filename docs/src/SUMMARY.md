@@ -4,6 +4,7 @@
 
 # Language guide
 
+- [Install a Native Compiler](guide/installation.md)
 - [From C to x2c](guide/from-c.md)
 - [x2c Syntax Map](guide/x2c-syntax-map.md)
 - [Values and Var](guide/values.md)
@@ -18,6 +19,7 @@
 - [Classes and System Macros](guide/system-macros.md)
 - [Compile-time Macros](guide/macros.md)
 - [Meta Functions](guide/meta-functions.md)
+- [Generating Code](guide/generating-code.md)
 - [Packages](guide/packages.md)
 - [Wrapping a C Library](guide/wrapping-c-libraries.md)
 - [Commands and Files](guide/scripting.md)
@@ -34,7 +36,6 @@
   - [Syntax as Data](reference/syntax/data.md)
   - [Lexical Data Inventory](reference/syntax/lexical-data.md)
 - [Compiler Options](reference/cli.md)
-- [Install a Native Compiler](guide/installation.md)
 
 # Libraries and Packages
 

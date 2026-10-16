@@ -6,8 +6,8 @@ This chapter explains how to design one around a C library.
 Provide an x2c API for ordinary use, with strings, collections, indexing,
 iteration, `defer`, and `Error` where they simplify the caller's work. Keep the
 pinned C API available under its own names for features the wrapper does not
-expose. A raw header makes the library callable; the wrapper makes it pleasant
-to use without hiding it behind unrelated names.
+expose. The raw header exposes every C function; the wrapper adds x2c types
+and keeps the C names recognizable.
 
 PCRE2 and yyjson illustrate the choices. Their packages are in
 `packages/pcre2/` and `packages/yyjson/`.
@@ -50,12 +50,12 @@ Also check for conditions this library does not have: process-global or
 thread-local state, callbacks on threads the caller did not start, and bytes
 that `String` cannot hold, such as embedded NUL.
 
-## Start with the tasks, not with the header
+## Start with the tasks
 
 Start by listing the tasks a developer brings to this kind of library. Then
 ask whether the imported x2c API can perform each task without requiring the
-raw C header or a hand-written loop over lower-level operations. This gives
-you a better measure of usefulness than the fraction of entry points wrapped.
+raw C header or a hand-written loop over lower-level operations. Measure the
+wrapper by the tasks the x2c API performs.
 
 For a regular-expression library such as PCRE2, the list might be:
 
@@ -125,7 +125,7 @@ Publish the shim when a public method takes one of the library's own types.
 The generated header needs that foreign declaration before it can publish a
 wrapper type that uses it.
 
-## The entry unit and its two halves
+## The entry unit
 
 The entry unit holds the public types and method definitions together.
 Nonstatic declarations are public; static helpers stay in the source.
@@ -160,10 +160,9 @@ typedef Symbol Json;
 
 ## Ownership and defer
 
-The acquisition function and the release function are one design decision, so
-write them together. Release should be idempotent and return `NULL`, which
-makes a double close harmless and lets the caller clear their handle in the
-same expression.
+Write the acquisition and release functions together. Release should be
+idempotent and return `NULL`, which makes a double close harmless and lets the
+caller clear their handle in the same expression.
 
 ```x2c
 ~typedef struct feed_parser feed_parser;
@@ -190,15 +189,14 @@ Feed Feed.close(Feed feed) {
 
 `Regexp.free` and `JsonDocument.free` are both shaped this way.
 
-`Scope` owns the small x2c record. With `Scope.calloc` it releases the
-`struct Feed` when its scope ends and knows nothing about `feed_close`, so
-the caller must release the native resource. With `Scope.malloc_finalized`
-the record carries a finalizer that calls `feed_close` when the scope
-reclaims it, so temporaries a library creates faster than a caller can name
-them, such as the results of operator expressions, are released with the
-region. Keep the explicit `free` method either way: it clears the native
-field, so an early release leaves the finalizer nothing to do. See
-[attaching a finalizer](memory.md#attaching-a-finalizer).
+`Scope` owns the small x2c record. With `Scope.calloc` it releases the `struct
+Feed` when its scope ends and does not call `feed_close`, so the caller must
+release the native resource. With `Scope.malloc_finalized` the record carries
+a finalizer that calls `feed_close` when the scope reclaims it, so unnamed
+temporaries, such as the results of operator expressions, are released with
+the region. Keep the explicit `free` method either way: it clears the native
+field, so after an early release the finalizer does nothing. See [attaching a
+finalizer](memory.md#attaching-a-finalizer).
 
 Adopt `Cleanup(T)` beside the type so a caller can write `$auto`. Without it
 the managed initializer is refused and every caller repeats the release.
@@ -258,17 +256,16 @@ static int count_titles(String document) {
 }
 ```
 
-A `defer` in a function that *returns* the handle closes it before the caller
+A `defer` in a function that returns the handle closes it before the caller
 ever sees it. The release belongs to whoever will finish with it. A handle
-whose operations reuse internal state is not reentrant: say so in the README
-rather than letting silence imply that concurrent calls are safe. One `Regexp`
-cannot be shared across threads for this reason.
+whose operations reuse internal state is not reentrant: state that in the
+README. One `Regexp` cannot be shared across threads for this reason.
 
 ## Copy, borrow, convert, or stay raw
 
-Four choices, each selected by a question.
+### Copy results a later call invalidates
 
-**Will another native call invalidate this result?** Then copy it, or retain a
+Copy a result that another native call will invalidate, or retain a
 separate owner for it. `feed_next` hands back a pointer into storage the next
 call reuses, so the wrapper copies each title into an immutable `String` as it
 goes:
@@ -297,7 +294,9 @@ PCRE2 reuses match data on the next call. The wrapper copies captures into
 immutable `List`s so later matches do not change earlier results. The copied
 results have the lifetime of their canonical pools.
 
-**Is the native graph large, ordered, duplicated, or lazily walked?** Then own
+### Borrow views into an owned document
+
+When the native graph is large, ordered, duplicated, or lazily walked, own
 the document and hand out borrowed views, with an explicit invalidation rule. A
 view keeps a reference to its owner and checks it:
 
@@ -329,10 +328,14 @@ signed, unsigned, and real numbers. Its wrapper owns the native document and
 returns borrowed views that retain those distinctions. Call `to_x2c`
 explicitly when that information is unnecessary.
 
-**Does conversion cover the native value's whole domain?** If not, name the
+### Make lossy conversion opt-in
+
+When conversion does not cover the native value's whole domain, name the
 loss and make conversion opt-in.
 
-**Can x2c represent the bytes at all?** If not, keep that path raw. `String`
+### Keep bytes x2c cannot hold on the raw API
+
+When x2c cannot represent the bytes, keep that path raw. `String`
 excludes embedded NUL, so PCRE2's explicit-length binary matching stays on the
 raw header.
 
@@ -364,7 +367,7 @@ feature. An operator that creates native resources must also give its
 intermediate results an automatic lifetime; concise syntax must not hide
 manual cleanup.
 
-## Errors keep the library's own codes
+## Errors carry the library's codes
 
 A failure raises one structured `Error` carrying the library name, the
 operation, the library's own numeric code, its own message, and a location when
@@ -384,7 +387,8 @@ static void _feed_error(String operation, int code) {
 Pick the cause from the shared codes described in
 [Exceptions and Cleanup](exceptions.md): `<malformed>` for bad external input,
 `<bad-state>` for a stale or released handle, `<alloc-fail>` for a failed
-native allocation.
+native allocation. When the library reports only a message and no code, raise
+one documented cause with the text under `(message ...)` and no `code`.
 
 An error helper shared by several callers must take the operation name as an
 argument. Otherwise a failed file write, for example, could be reported as a
@@ -443,7 +447,7 @@ Array Feed.scan(Feed feed) {
 Check which thread invokes each callback. It must be safe to use the x2c
 runtime on that thread before the callback calls into it.
 
-## Two examples decide the design
+## Write two example applications first
 
 Sketch two applications before implementing the wrapper: one short and one
 more complete. Read the short one first.
@@ -471,7 +475,7 @@ If the applications still require the same setup, conversion, and cleanup as
 the C API, revise the wrapper around those tasks. Keep exhaustive tests of
 malformed input, limits, and cleanup separate from the examples.
 
-The four in this repository are worth reading in this order:
+Read the four in this repository in this order:
 `packages/pcre2/examples/parse-log.x` (35 lines),
 `packages/yyjson/examples/service-health.x` (24 lines), then
 `packages/pcre2/examples/request-report.x` and
@@ -555,7 +559,7 @@ A test must check the effect rather than a round trip. Writing a document with
 a pretty-print flag and then re-reading and re-serializing it compactly passes
 identically with the flag absent. Assert on the bytes in between.
 
-## How you know you are done
+## Completion checklist
 
 - The imported x2c API supports every task on your list.
 - Everything left off it is reachable through the shim and documented as such.
@@ -566,8 +570,8 @@ identically with the flag absent. Assert on the bytes in between.
 - Lisp bindings, if provided, are in the package.
 - The source version, build options, hashes, and licenses are recorded.
 
-Reread the short application as a new reader would. Passing tests do not
-make an awkward first page acceptable.
+Reread the short application as a new reader would, and revise it until a
+new reader can follow it.
 
 See `packages/pcre2/README.md` and `packages/yyjson/README.md` for complete
 examples of package documentation.

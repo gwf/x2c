@@ -97,7 +97,8 @@ The definition is visible from that point to the end of the block and through
 nested blocks. An inner definition of `scaled` temporarily shadows it; a later
 definition in the same block replaces it for following calls. A name the
 body reads without declaring, such as `scale`, resolves where the macro is
-invoked, like every macro's free names. Names the caller writes in
+invoked, as in a global macro, unless the macro lists it with
+[`using`](#keep-a-file-scope-name-with-using). Names the caller writes in
 arguments resolve there too.
 
 The bare call shape belongs to the local macro before a file `keyword` alias or
@@ -134,6 +135,11 @@ Every hole has a syntax kind:
 | `Entry` | one `Map` `key: value` row |
 | `Enumerator` | one enum member |
 | `Unit` | one translation-unit item |
+| `Literal` | one literal, such as `42` or `<char>` |
+
+The reference lists [every hole kind](../reference/language.md#holes-and-sequences),
+including the less common `NamedType`, `DeclaratorRow`, `Catch`,
+`Captures`, and `MatchRow`.
 
 An `@` prefix makes the final hole a sequence. The replacement uses the
 same prefix to splice the captured sequence:
@@ -277,7 +283,7 @@ statement, as shown under
 An expression macro is not a statement macro, and a unit macro cannot appear
 inside a function. The compiler diagnoses the mismatch at the invocation.
 
-### Generated names and `using`
+### Private names
 
 Declare scratch bindings normally. A declaration written literally in a macro
 body and every literal reference to it receive a private binding for each
@@ -308,19 +314,90 @@ macro Stmt $project.swap(
 The helper returns a type into the declaration's type slot. The same explicit
 call form also supplies expressions and generated names in their own slots.
 
-Each invocation receives a compiler-private binding for `temporary`, so
-generated names cannot collide with caller source. A name the body reads
-without declaring keeps the file-scope declaration that supplies it where
-the macro is written, even where a caller's local has the same spelling.
-That declaration can come later in the file, because file scope does not
-depend on declaration order.
-Other free names, and the names a caller writes in its arguments, resolve
-where the expansion lands. A macro that needs a caller's binding takes the
-name as a `Name` argument, as the
-[reference](../reference/language.md#hygiene-and-generated-names) shows.
+Each invocation receives a compiler-private binding for `temporary`, so a
+name the body declares never collides with caller source.
 
-Use a leading body directive only when compile-time Lisp or a nested macro
-needs a private `Name` hole before an ordinary declaration can introduce it:
+### Free names resolve where the expansion lands
+
+A name the body reads without declaring means what it would mean if the
+expansion were written by hand at the call site. A caller's declaration of
+that spelling supplies it, including a local:
+
+```x2c
+static int scale = 3;
+
+macro Expression $scaled(Expr $value) => $value * scale;
+
+int main(void) {
+  printf("%d\n", $scaled(2));
+  {
+    int scale = 10;
+    printf("%d\n", $scaled(2));
+  }
+  return 0;
+}
+```
+
+```text
+6
+20
+```
+
+The second call reads the block's `scale`, as `2 * scale` written there
+would. Names the caller writes in arguments resolve at the call site too. A
+macro that should reach a caller's variable by design takes the name as a
+`Name` argument, as `$repeat` does in the
+[reference](../reference/language.md#hygiene-and-generated-names).
+
+### Keep a file-scope name with `using`
+
+A macro that must reach a particular file-scope declaration, whatever the
+caller declares, lists that name with `using`. An `Expression` macro writes
+the list after its signature. A braced body writes it as its first item:
+
+```x2c
+static int scale = 3;
+static int bump(int value) => value + 1;
+
+macro Expression $scaled(Expr $value) using scale => $value * scale;
+
+macro Stmt $bumped(Name $target) {
+  using bump;
+  $target = bump($target);
+}
+
+int main(void) {
+  int scale = 10, bump = 0;
+  printf("%d\n", $scaled(2));
+  $bumped(bump);
+  printf("%d %d\n", scale, bump);
+  return 0;
+}
+```
+
+```text
+6
+10 1
+```
+
+Each listed name keeps the declaration that file scope supplies where the
+macro is written: a function, object, or enumerator of that file or of a
+header it includes, or a native name such as a C library function. The
+expansion reads that declaration with its type. A caller's local of the same
+spelling receives a separate generated C spelling, so the expansion still
+reaches the file-scope name. Only names, not types, can be listed; a type
+name in a body always resolves where the expansion lands.
+
+List every helper that a macro calls when the macro is meant for other
+files. A helper reached from another translation unit must be nonstatic, or
+`module` within a module unit, because a `static` function is private to
+its own unit.
+
+### Generated names with `using $name`
+
+Use a leading `using $name;` directive only when compile-time Lisp or a
+nested macro needs a private `Name` hole before an ordinary declaration can
+introduce it:
 
 <!-- ignore: project_generate is the external generator being illustrated -->
 ```x2c,ignore
@@ -332,9 +409,15 @@ macro Unit $project.generated() {
 
 The directive creates syntax identity, not runtime storage. It can therefore
 name a generated helper function or label as well as an automatic variable.
-All `using` directives must precede the body's ordinary items. A signature
-`using` clause can also supply names, including for an Expression macro's
-arrow body. Lambdas separately use `using &name` for reference capture.
+All `using` directives must precede the body's ordinary items.
+
+The three spellings of `using` do different things:
+
+| Spelling | Where | Effect |
+| --- | --- | --- |
+| `using name` | macro signature or first body item | keep the file-scope declaration of `name` where the macro is written |
+| `using $name` | first body item | create a fresh private name for each expansion |
+| `using &name` | lambda | share a captured local by reference |
 
 ## Put reusable macros in ordinary source modules
 
@@ -545,112 +628,10 @@ The [meta-function guide](meta-functions.md) introduces these operations;
 the [language reference](../reference/language.md#the-same-operations-from-x2c)
 specifies them.
 
-A `Stmt` macro can also call its helper with the arrow form. The helper
-receives captured statements as code and may return any statement that fits
-where the macro is invoked. `$!{ ... }` quotes statements the way
-`$!( ... )` quotes an expression:
-
-```x2c
-#include "meta.x"
-meta static List project_logged(List code) =>
-  $!{ { puts("before"); $code puts("after"); } };
-
-macro Stmt $project.logged(Stmt $code) => $project_logged($code);
-
-int main(void) {
-  int ready = 1;
-  $project.logged(if (ready) puts("ready"););
-  return 0;
-}
-```
-
-```text
-before
-ready
-after
-```
-
-A `meta` parameter declared `TypeInfo` receives a description of the
-argument's type, including a struct or union's fields in declaration
-order. Pass the hole twice to receive both its code and its type. A quotation
-uses each field name to build a member read:
-
-```x2c
-#include "meta.x"
-meta static List project_fields(List receiver, TypeInfo type) {
-  Array reads = [];
-  foreach (List field, type.assoc(<fields>)) {
-    String member = field.car();
-    reads.push($!( $receiver.$member ));
-  }
-  List items = reads.list_free();
-  return $!( { @items } );
-}
-macro Expression $project.fields(Expr $value) =>
-  $project_fields($value, $value);
-~typedef struct Point { int x, y; } Point;
-~int main(void) {
-~  Point p = { 2, 3 };
-~  int values[2] = $project.fields(p);
-~  return values[0] != 2 || values[1] != 3;
-~}
-```
-
-A `TypeInfo` parameter's `methods` part names the type's direct dotted methods.
-A generator can test for one and build the dotted call, which the compiler
-resolves as it would the same call in source:
-
-```x2c
-#include "meta.x"
-meta static List project_write(TypeInfo type, List receiver, List value) {
-  List methods = type.assoc(<methods>);
-  if (!methods.contains("write")) return %();
-  return $!( $receiver.write($value) );
-}
-```
-
-The list does not search delegate fields. A delegated result would also need the
-field-projected receiver, which this operation does not return. Generated
-dotted calls still use delegation during ordinary expression resolution.
-
-To read the exact source text of a complete captured argument, declare
-the parameter `Source` and use `Code.source_text`:
-
-```x2c
-#include "meta.x"
-meta static String project_text(Source value) => Code.source_text(value);
-macro Expression $project.source(Expr $value) => $project_text($value);
-
-int main(void) {
-  return strcmp($project.source(1 /* kept */ + 2),
-                "1 /* kept */ + 2");
-}
-```
-
-Passing a complete capture to a meta helper preserves the source information
-for this query. Forwarding it through another source macro does too.
-Constructing or selecting an AST subtree does not invent source text; use
-`List.repr()` to render code data.
-
-`x2c_embed_text` reads a regular text file into a compile-time String and
-records it as a build dependency. A captured String literal retains the
-caller's file location for resolving a relative path:
-
-<!-- ignore: notice.txt is the external file being illustrated -->
-```x2c,ignore
-#include "meta.x"
-meta static String project_notice(Source path) => x2c_embed_text(path);
-macro Expression $project.notice(Literal $path) => $project_notice($path);
-
-String notice = $project.notice("notice.txt");
-```
-
-A captured path stays relative to its caller even when the macro is defined
-in an imported file. A project meta function also accepts an absolute
-String path; a relative one needs the `Source` that locates it.
-
-Empty files are valid. Directories, embedded NUL bytes, unreadable files and
-files too large for a String are rejected.
+A helper can also receive a captured statement, a description of a type
+(`TypeInfo`), or the exact source text of an argument (`Source`).
+[Generating Code](generating-code.md#calling-a-meta-function-from-a-macro-body)
+shows each.
 
 Prefer source templates for generated code and meta functions for the
 calculations that supply their arguments. Use the optional `$(...)` Lisp

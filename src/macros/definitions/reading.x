@@ -475,13 +475,16 @@ static List _unit_items(Compiler c) {
 
 static int _legacy_expression_body(Compiler c) {
   if (c.peek(0) != <(>) return 0;
-  Token after = c.token.after_group();
-  return after.type != <;> && !_extends_expression(after);
+  Token head = c.token, after = head.after_group();
+  c.next();
+  int type_name = c.test_declaration();
+  c.token = head;
+  return !type_name && after.type != <;> && !_extends_expression(after);
 }
 
 /* A leading parenthesized group is the complete legacy expression body when
    the following token cannot extend that expression. A semicolon always
-   selects the canonical form. */
+   selects the canonical form, and a parenthesized type name starts a cast. */
 module int _extends_expression(Token token) {
   Symbol type = token.type;
   return type.binary_precedence() || type.is_assignment_op() ||

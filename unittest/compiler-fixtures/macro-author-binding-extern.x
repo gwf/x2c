@@ -1,6 +1,7 @@
-/* A template that keeps a file-scope name does not rename block-scope
-   `extern` declarations or function prototypes of that spelling: they name
-   the external symbol, so only the shadowing locals get a fresh spelling. */
+/* A template that keeps a file-scope name with `using` does not rename
+   block-scope `extern` declarations or function prototypes of that
+   spelling: they name the external symbol, so only the shadowing locals get
+   a fresh spelling. */
 
 #include "x2c.x"
 
@@ -9,8 +10,8 @@
 int leaked = 100;
 int helper(void) { return 7; }
 
-macro Expression $leaked() => leaked;
-macro Expression $helped() => helper();
+macro Expression $leaked() using leaked => leaked;
+macro Expression $helped() using helper => helper();
 
 static int use_extern(void) {
   extern int leaked;

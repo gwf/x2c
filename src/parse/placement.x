@@ -53,14 +53,6 @@ static List _ancestor_code(Compiler c, Ancestor row) {
   return %(at $origin (seq));
 }
 
-/** Reports whether the transform is lowering a function body, whose
-    local scopes the symbol table no longer holds. */
-int Compiler.lowering_body(Compiler c) {
-  Ancestor *rows = c.ancestors.bytes;
-  for (int i = (int) c.ancestors.len() - 1; i >= 0; i--)
-    if (rows[i].what == <function>) return rows[i].lowering;
-  return 0;
-}
 
 /** Enters the function definition `declaration`, whose body the
     transform lowers next, so a rule lowering that body places code at its

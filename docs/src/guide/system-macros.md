@@ -67,9 +67,10 @@ Scalar classes retain their underlying type's comparison, hashing, and output
 operations. Aliases of existing named types inherit supporting operations,
 including cleanup, rather than generating a second implementation. Explicit
 methods replace applicable defaults; the output methods can be customized
-independently, as described under [Boxing and readable output](#boxing-and-readable-output).
+independently, as described under [Boxing and readable
+output](#boxing-and-readable-output).
 
-`init` is **not generated**. Some constructors require you to supply it.
+`init` is not generated. Some constructors require you to supply it.
 Generated cleanup releases the object's allocation; ownership of resources
 stored in its fields requires your own cleanup code.
 
@@ -185,9 +186,9 @@ history.items.push(42);
 
 A heap class's `init` may return `int` instead of `void`. When it returns
 zero, `new` releases the storage with `Scope.free` and returns NULL; `drop` is
-not called, so an `init` that refuses releases whatever it acquired first. A
-class that replaces `alloc` so the object lives outside its Scope allocation
-also replaces `free`.
+not called, so an `init` that returns zero must first release whatever it
+acquired. A class that replaces `alloc` so the object lives outside its Scope
+allocation also replaces `free`.
 
 An explicit `new` replaces the default and may take different arguments. It
 also replaces the default constructor's obligation to call `init`. An explicit
@@ -242,20 +243,20 @@ containing addresses is not a serialization format.
 Class boxing uses the existing Var descriptor registry. Every record and heap
 class declares its descriptor at startup, and declaration freezes when worker
 startup freezes registration. A class takes a `Var` row only when a value of
-it is first boxed, which may happen on any thread. The first 30 classes boxed
-get direct rows; later heap classes box through a small process-lifetime
-cell, one per class and address, and later records carry their descriptor
-in front of the boxed copy, so a program can box any number of classes. Scalar and alias classes declare
-nothing. Class tags derive from
-the canonical source file and full name, keeping private classes in different
-files distinct. Tags use deterministic compact spellings, while diagnostics
-retain the full name.
+it is first boxed, which may happen on any thread. The first 30 custom tags
+boxed in a process get direct rows; these include classes and `protocol
+Var(T)` participants. Later heap classes box through a small process-lifetime
+cell, one per class and address, and later records carry their descriptor in
+front of the boxed copy, so a program can box any number of classes. Scalar
+and alias classes declare nothing. Class tags derive from the canonical source
+file and full name, keeping private classes in different files distinct. Tags
+use deterministic compact spellings, while diagnostics retain the full name.
 Tag collisions are errors.
 
 ## Retain or select a Scope
 
 Without an argument, `$scope()` retains one region around the following
-statement. Its expansion deliberately keeps the body inside the deferred
+statement. Its expansion keeps the body inside the deferred
 release:
 
 ```x2c
@@ -425,12 +426,11 @@ current = replacement;
 ```
 
 Both Arrays are cleaned up at block exit. Reassignment neither releases the
-first Array early nor transfers its cleanup to the replacement.
-Returning or storing an alias does not cancel cleanup; the caller must choose
-an appropriate lifetime.
-There is no move or recursive ownership system. Var itself has no owning
-cleanup contract, and Pool's `free` operation requires a separate allocation
-argument.
+first Array early nor transfers its cleanup to the replacement. Returning or
+storing an alias does not cancel cleanup; the caller must choose an
+appropriate lifetime. There is no move or recursive ownership system. Var
+itself has no owning cleanup contract, and Pool's `free` operation requires a
+separate allocation argument.
 
 Only an initialized automatic local that is a compound-statement item accepts
 `$auto`. Parentheses and macro construction preserve that position. Static or
@@ -481,8 +481,8 @@ Both cases declare `shared`, which plain C rejects without hand-written
 braces. A run that already transfers gets no added `break`, so a case ending
 in `return` stays free of unreachable code. Items that are not labels pass
 through untouched, including a declaration before the first case, a `goto`
-label, and a preprocessor directive. Deliberate fallthrough is written by
-nesting an ordinary `switch`.
+label, and a preprocessor directive. To fall through, nest an ordinary
+`switch`.
 
 ### Write indented text without indenting the text
 
