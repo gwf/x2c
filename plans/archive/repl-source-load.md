@@ -1,8 +1,9 @@
 # Load compiled definitions into the REPL
 
-> Status: active. Source loading is published at `7273078dd`.
-> Inspection and replacement of edited files are implemented; final validation
-> and delivery are in progress.
+> Status: done, 2026-10-15. Source loading was published at `7273078dd`.
+> Inspection and replacement of edited files are implemented through
+> `efd9c77c3`, with the focused REPL checks passing. The publication gate
+> and direct delivery follow the repository workflow.
 
 ## Result
 
