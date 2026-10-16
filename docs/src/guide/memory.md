@@ -65,7 +65,7 @@ surrounding work finishes.
 
 The runtime checks each release against the active slot. An empty retained
 region releases normally. An extra release, or a release from a different
-pushed slot, raises `<bad-state>` and leaves the process root scope intact.
+pushed slot, raises `<bad-state>` and leaves the active region intact.
 A matching `catch` can handle the error. Without one, the default policy
 aborts the program.
 
@@ -109,11 +109,15 @@ you can check that a routine leaves no allocations behind.
 
 When several operations should allocate in the same scope without passing a
 slot to every call, `Scope.push` makes a slot active and `Scope.pop`
-restores the previous one. `Scope.destroy` raises `<bad-state>` when the
-scope is still in use: the active root, a slot still on the pushed stack, or
-a region with another region attached below it. The allocation lists are
-left unchanged. A mismatched push/pop or a double destroy raises the same
-cause. Uncaught, it aborts the program.
+restores the previous one. `Scope.pop` with no push outstanding raises
+`<bad-state>`. `Scope.destroy` raises the same cause when the scope is still
+in use: the active root, a slot still on the pushed stack, or a scope that a
+later `Scope.retain` layered another region on top of. The scope is left
+intact. Uncaught, `<bad-state>` aborts the program.
+
+To release a region on every exit from a block, write it as `$scope()` or put
+the release in a `defer`. [Errors and
+Cleanup](exceptions.md#finally-and-defer) gives the exit rules.
 
 ## Bounding temporary canonical Lists
 
@@ -305,33 +309,6 @@ the region release free every byte the builder used. Most x2c code follows
 this pattern: mutable storage inside a region, a canonical result outside
 it.
 
-## `defer` for cleanup
-
-`defer statement` schedules a statement for the exit of the enclosing block.
-It runs on normal exit, on lexical transfers such as `return` and `break`,
-and when an `Error` passes through the block to a selected `catch`. Multiple
-`defer` statements run last-in, first-out. Deferred statements do not run
-when an uncaught `Error` aborts the program, or when native code calls
-`exit` or `longjmp`.
-
-```x2c
-FILE *log = fopen("/dev/null", "a");
-if (log) {
-  defer fclose(log);
-  fprintf(log, "started\n");
-}
-```
-
-Keep the deferred statement small. Use `defer` to release something the
-block owns. The release then sits next to the acquisition, so a reader can
-compare them.
-
-Do not use `defer` to suppress failures. Let `Error`s propagate and keep
-expected absence, exhaustion, and parse outcomes in the return value. The
-interaction with `raise`, `try`, filtered `catch`, and `finally` is described
-in [Errors and Cleanup](exceptions.md), and the exact statement rules in [the
-language reference](../reference/language.md).
-
 ## Choosing when to free storage
 
 Free storage when the work that needs it is finished: a request has ended, a
@@ -369,35 +346,22 @@ To avoid dangling pointers:
 - When unsure, let the caller create the scope and pass the slot down. The
   lifetime is then chosen where the caller can see it.
 
-## The region model
+## Lifetime warnings
 
 Every allocation in this chapter belongs to a region: a part of the program
-that owns storage and ends at a known point. A `$scope()` block is a
-region, and so are a `Scope.retain` and `Scope.release` pair, a
-`$scope(&slot)` push, an `$auto` local, and a `Scope` local that
-`Scope.destroy` ends. A `Pool.open` bracket is a region over the
-pool, so a `List` cell consed inside one belongs to that bracket and is
-freed when the bracket closes.
+that owns storage and ends at a known point. Regions are `$scope()` blocks,
+`Scope.retain` and `Scope.release` pairs, `$scope(&slot)` pushes, `$auto`
+locals, `Scope` locals that `Scope.destroy` ends, `Pool.open` brackets, and
+the function's own locals and parameters.
 
 The rule is: a value allocated inside a region must not be reachable after
-that region ends. A value breaks the rule when it reaches one of four places
-that outlive the region: the function's
-result, storage declared outside the region, an object owned by an outer or
-sibling region, and any pointer whose target the compiler cannot identify.
-The advice in this chapter follows from that rule. `Scope.move` and
-`Context.export` work because they change which region owns the storage, and
-returning a `String`, `List`, or `Symbol` works because the pool owns it and
-no region end frees it.
+that region ends. `Scope.move`, `Context.export`, `List.promote`, and
+returning a canonical value all follow the rule, because each gives the
+storage an owner that outlives the region.
 
-The compiler warns where code breaks this rule.
-[The Region Model](regions.md) states the invariant precisely, lists what
-the check does not cover, and explains how it works.
-
-## Warnings when a value outlives its region
-
-Translation warns when a value allocated inside a region can still be reached
-after the region ends. The warning includes the value's name and the way the
-value leaves, and its note gives the line that opened the region:
+Translation warns when code breaks the rule. The warning includes the
+value's name and the way it leaves, and a note gives the line that opened
+the region. A value leaves when it is:
 
 - returned;
 - assigned to a local declared outside the region;
@@ -408,17 +372,13 @@ value leaves, and its note gives the line that opened the region:
 - handed to a function in the same unit, or to a runtime operation such as
   `Array.push`, that stores it in one of those places.
 
-A function's own locals and parameters form a region that ends when the
-function returns. The address of one, or a pointer that holds it, is
-reported when it is returned, stored into a static, or stored through a
-parameter, through an unknown pointer, or into an object that outlives the
-function. A `meta` function with such an escape is rejected instead; see
-[Meta Functions](meta-functions.md).
-
-Two more warnings come from the same pass. `after-free` reports a local read
-after `Scope.free`, `Scope.realloc`, or `Array.list_free` consumed it.
-`bad-free` reports `Scope.free` or `Scope.realloc` given a literal, a local's
-address, or other storage no Scope allocator returned.
+The address of a local or parameter is reported the same way when it
+outlives the function. Two more warnings come from the same check.
+`after-free` reports a local read after `Scope.free`, `Scope.realloc`, or
+`Array.list_free` consumed it. `bad-free` reports `Scope.free` or
+`Scope.realloc` given a literal, a local's address, or other storage no
+`Scope` allocator returned. In a `meta` function, each of these findings is
+an error; see [Meta Functions](meta-functions.md).
 
 Code that follows the patterns in this chapter compiles without warnings:
 
@@ -445,23 +405,16 @@ static String label(void) {
 }
 ```
 
-`Scope.move` moves the storage into a scope the caller owns, and the `String`
+`Scope.move` moves the storage into a scope the caller owns. The `String`
 return destination calls `Buffer.str`, which produces a canonical `String`
-owned by its pool.
-`Context.export` and `List.promote` end tracking the same way.
+that its pool owns.
 
-These warnings cover the lexical pattern only. They do not cover storage
-from plain `malloc` or a C library, raw pointer arithmetic and casts, values
-reached through a field of a stack `struct`, callbacks and function
-pointers, entry points a Lisp binding calls, `Context` regions, or `$auto`
-cleanups of types other than the runtime's containers and `Scope`. Each of
-those can still produce a dangling pointer that translates without a
-warning. To observe the dangling read itself, link the program against
-`libx2c.a` and compile with `cc -fsanitize=address,undefined`.
-
-Translation continues after a warning, and the program still compiles. When
-a warning describes a lifetime you have arranged some other way, you may
-keep the code as written.
+A warning does not stop translation. When a warning describes a lifetime
+you arranged another way, you may keep the code. The warnings cover one
+lexical pattern. [The Region Model](regions.md) lists what they do not
+cover, the exemptions, and how the check works. To observe a dangling read
+at run time, link the program against `libx2c.a` and compile with
+`cc -fsanitize=address,undefined`.
 
 ## Ordinary C storage still works
 

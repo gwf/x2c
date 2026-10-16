@@ -246,21 +246,21 @@ comparing names.
 
 A compact atom is an immediate value and has no lifetime. A long atom holds
 the canonical `String` and follows that `String`'s pool lifetime. If you
-intern inside a child string pool and the atom must outlive it, promote the
-spelling first:
+intern inside a child pool and the atom must outlive it, call `Atom.promote`
+before the pool closes:
 
 ```x2c
 Pool.open_named("scratch-names");
 Atom row = Atom.intern(String.printf("row-%d", 314159));
-String.promote(row.str());
+Atom.promote(row);
 Pool.close();
 
 printf("%s\n", row);
 ```
 
 `List.promote` promotes the long atoms inside a list, so a promoted list
-keeps every identity it contains. The promotion above is for a standalone
-atom. See [Scopes and Lifetime](memory.md) for the lifetime rules.
+keeps every identity it contains. `Atom.promote` is for a standalone atom.
+See [Scopes and Lifetime](memory.md) for the lifetime rules.
 
 ## Where to look next
 

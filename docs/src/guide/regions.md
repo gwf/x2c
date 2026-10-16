@@ -21,13 +21,13 @@ that closes it.
 
 The pass exempts these ways of leaving a region.
 
-A `List` pool owns each canonical value, so ending a Scope region does not
-free it. A value made inside a `Pool.open` bracket belongs to that bracket's
-pool and is tracked like scope-born storage. This includes `String.new`,
-`String.malloc`, and List cells returned by a helper. `cons(a, rest)` and
-`%($a)` retain their arguments in the cell's pool: a value from that same
-pool stays there, while a value from a shorter-lived region reports at the
-store.
+A canonical-value pool owns each canonical `String` and `List`, so ending a
+`Scope` region does not free it. A value made inside a `Pool.open` bracket
+belongs to that bracket's pool and is tracked like scope-born storage. This
+includes `String.new`, `String.malloc`, and List cells returned by a helper.
+`cons(a, rest)` and `%($a)` retain their arguments in the cell's pool: a value
+from that same pool stays there, while a value from a shorter-lived region
+reports at the store.
 
 `Scope.move` and `Context.export` change the storage's owner. After the
 move, the region the pass was tracking no longer holds the allocation, so
@@ -50,7 +50,7 @@ Every region a function opens ends before the function's own storage. The
 address of a local can therefore be stored into another local, or into an
 object of a region the function opens, without a warning. A reference
 capture, `using &name`, moves the local into a cell of the active region, so
-the closure holds that cell rather than the function's storage.
+the closure holds that cell, which the active region owns.
 
 A store into a place that an earlier `defer` in the same block writes
 back, as `$let` does, is undone before the block ends and is not reported.
@@ -80,6 +80,9 @@ cover:
   out is not followed;
 - callbacks and function pointers, including entry points a Lisp binding
   calls;
+- calls into functions defined in other units, except the runtime
+  operations the pass knows; such a call is assumed to keep none of its
+  arguments and to return no tracked storage;
 - other aliases of storage that `Scope.free` or `Scope.realloc` ended; the
   pass ends only the local passed to the call, and it reports a free only
   of storage it can see is not from a Scope allocator: a literal, the
@@ -90,9 +93,8 @@ cover:
 - a release inside a branch, which leaves the region open for the
   statements after that branch.
 
-Each of these can still produce a dangling pointer that translates without a
-warning. The pass reports one pattern. A program without warnings is not
-shown to be memory safe.
+Each of these can produce a dangling pointer with no warning. A program
+without warnings is not proven memory safe.
 
 ## Optional lifetime proof
 
@@ -102,7 +104,7 @@ and parameter-effect rules as the compiler's local pass, then asks whether
 every reachable memory effect is covered. A `proved` result establishes the
 scoped lifetime invariant for those paths under the native effect assumptions
 listed in the report. If a root hands storage to its caller or another owner,
-the report names the remaining release obligation.
+the report lists the remaining release obligation.
 
 The audit distinguishes a proven lifetime violation from an incomplete
 proof. An unknown call, pointer cast or arithmetic, indirect storage access,
@@ -130,17 +132,17 @@ warnings are the ones reported.
 
 An address taken with `&` belongs to the storage it names. The address of a
 local, a parameter, or a compound literal belongs to the function's own
-storage. An address reached through a pointer, such as `&box->value`,
-belongs to whatever that pointer holds, so an address inside a parameter's
-object counts as that parameter in the summary. A caller of a function that
-returns `&box->value` therefore sees its own borrow come back. An argument
-to a reference parameter is the address of the object it names, so
+storage. An address reached through a pointer, such as `&box->value`, belongs
+to whatever that pointer holds, so an address inside a parameter's object
+counts as that parameter in the summary. A caller of a function that returns
+`&box->value` therefore receives its own borrowed address as the result. An
+argument to a reference parameter is the address of the object it names, so
 `bind(object)` with `T &` is checked as `bind(&object)` with `T *`.
 
 A `meta` function is walked the same way when it is defined, against the
 summaries of the `meta` functions defined before it. A compile-time call
 frees its locals when it returns, so a finding in a `meta` body is an error
-that rejects the definition rather than a warning; see
+and the definition is rejected; see
 [Meta Functions](meta-functions.md). A native function outside the runtime table
 described below takes a summary its signature implies; see
 [Native modules](meta-functions.md#native-modules).
@@ -157,7 +159,7 @@ to a function in another unit that stores its argument into a static.
 
 ## Where the design sits
 
-The region check descends from the ML Kit and Cyclone. The ML Kit inferred
+The region check is based on the ML Kit and Cyclone. The ML Kit inferred
 regions and a region-annotated program from an unannotated one. Cyclone made
 regions part of the type system of a C-like language and checked pointer
 lifetimes against them. From the ML Kit, x2c takes the idea that regions are

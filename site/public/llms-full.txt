@@ -5314,13 +5314,54 @@ Every cause in the shared table never returns to its raising call. `Error`
 keeps their policies at `<abort>` and observing handlers cannot consume them;
 only a matching filtered `catch` transfers control. For a literal `raise` of
 one of them, generated C places `__builtin_unreachable()` after the runtime
-`raise` call so C control flow has the same rule. [Errors and
-Cleanup](https://x2c-lang.dev/docs/guide/exceptions.html) lists the table.
+`raise` call so C control flow has the same rule.
+
+These are the shared causes. The policy of each is `<abort>`, and a process
+cannot change it:
+
+| Code | Cause |
+| --- | --- |
+| `<alloc-fail>` | allocation failed |
+| `<size-limit>` | a size, length, or capacity is unrepresentable |
+| `<invariant>` | an impossible internal state was reached |
+| `<bad-state>` | a valid object is in the wrong lifecycle state |
+| `<init-fail>` | process-owner initialization failed |
+| `<bad-arg>` | an API precondition failed with no better code |
+| `<bad-enc>` | a `Var` encoding is invalid |
+| `<void-op>` | `void` was used as a dynamic value |
+| `<bad-types>` | operand types do not support the operation |
+| `<bad-target>` | a requested conversion target is invalid |
+| `<no-convert>` | no requested conversion exists |
+| `<conv-range>` | conversion exists but the value is out of range |
+| `<bad-op>` | an operator is unsupported |
+| `<div-zero>` | integer division or remainder by zero |
+| `<bad-shift>` | a shift count is invalid |
+| `<no-member>` | a dynamic value has no such member |
+| `<bad-sig>` | a native or Lisp callable signature is invalid |
+| `<bad-arity>` | a callable received the wrong argument count |
+| `<no-symbol>` | a native symbol cannot be resolved |
+| `<bad-result>` | a native result cannot be represented |
+| `<not-call>` | a value cannot be called |
+| `<call-stack>` | evaluation exceeds its call budget or stack depth |
+| `<interrupt>` | the evaluation session has been interrupted |
+| `<unbound>` | a program name has no binding |
+| `<malformed>` | external syntax or serialized input is invalid |
+| `<incomplete>` | external input needs more data |
+| `<format>` | formatting failed without output |
+| `<not-found>` | an external resource does not exist |
+| `<io-fail>` | another external I/O operation failed |
+| `<cmd-fail>` | a command or pipeline exited with a nonzero status |
+| `<join-fail>` | a worker transferred captured errors at join |
+
+Unknown codes also default to `<abort>`. A process may set a policy only for
+unknown and user-defined codes.
 
 The `defer` statement schedules the statement for the current block exit.
 Multiple `defer` statements unwind in last-in, first-out order. Cleanup runs
-for normal scope exit, `return`, `goto`, and `Error` transfer, all the way out
-to the function boundary. `break` and `continue` unwind cleanups only up to the
+for normal scope exit, `return`, `goto`, and `Error` transfer to a selected
+`catch`, all the way out to the function boundary. It does not run when an
+uncaught `Error` aborts the program, or when native code calls `exit` or
+`longjmp`. `break` and `continue` unwind cleanups only up to the
 innermost enclosing loop or `switch` (whichever the jump targets) and stop
 there; a `defer` or cleanup frame registered outside that boundary is left for
 a later normal exit, `return`, or `Error` transfer to reach. The [errors and
@@ -5630,7 +5671,7 @@ the caret width.
 ### Region warnings
 
 Three codes come from the region check described in
-[Scopes and Lifetime](https://x2c-lang.dev/docs/guide/memory.html#warnings-when-a-value-outlives-its-region).
+[Scopes and Lifetime](https://x2c-lang.dev/docs/guide/memory.html#lifetime-warnings).
 Each is a warning: translation continues and the program still compiles.
 
 | Code | Reported for |
