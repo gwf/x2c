@@ -1645,7 +1645,6 @@ static void lisp_optional_layers_are_explicit(void) {
 
   if (_load_lisp_layer(lisp, "../etc/lisp-io.xlisp")) {
     EXPECT_INT_EQ(Var.integer(_ev(lisp, "(fib 8)")), 21);
-    EXPECT_VAR_EQ(_ev(lisp, "(range 4)"), _ev(lisp, "'(0 1 2 3)"));
     EXPECT_VAR_EQ(_ev(lisp, "(sort '(3 1 2))"), _ev(lisp, "'(1 2 3)"));
     EXPECT_VAR_EQ(_ev(lisp, "(subst 'x 'a '(a (b a)))"),
                   _ev(lisp, "'(x (b x))"));

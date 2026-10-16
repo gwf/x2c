@@ -272,7 +272,7 @@ _cases();
 _case("showcase",
       root.join("examples/data/reference-lisp/showcase.xlisp").read_text());
 Path io = root.join("etc/lisp-io.xlisp");
-_case("algorithms", %"(import \"$io\") (list (range 2 6) (sort '(3 1 2)) " +
+_case("algorithms", %"(import \"$io\") (list (sort '(3 1 2)) " +
                     "(fib 8) (subst 'x 'a '(a (b a))))");
 Path temp = Path.temp_dir();
 Path imported = temp.join("module.xlisp");

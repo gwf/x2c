@@ -8,15 +8,6 @@
 (def sort (bind "List_sort" nil))
 (def List_sort sort)
 
-(defun range (. args)
-  (match-case args
-    ((?stop) (range 0 ?stop))
-    ((?start ?stop)
-     (if (= ?start ?stop)
-         nil
-         (cons ?start (range (+ 1 ?start) ?stop))))
-    (else (sub))))
-
 (defun fib (value)
   (if (or (= value 0) (= value 1))
       value

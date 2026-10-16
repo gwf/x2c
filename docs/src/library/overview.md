@@ -274,7 +274,7 @@ evaluator primitives alone, for hosts that build their own environment.
 `Var`, and `Symbol` operations; the compiler loads it into every compile-time
 session, and an embedding host loads it by name.
 `etc/lisp-io.xlisp` stays optional and must be loaded by name. It adds
-`read-file`, `write-file`, `sort`, `range`, `fib`, and `subst`.
+`read-file`, `write-file`, `sort`, `fib`, and `subst`.
 
 [lisp]: ../reference/language.md#compile-time-lisp-and-imports
 
