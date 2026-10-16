@@ -42,6 +42,8 @@ List Compiler_parse_import_declaration(Compiler c);
 
 String Compiler_definition_doc(Compiler c, Token start);
 
+List Compiler_finish_foreign_alias(Compiler c, List declaration, List native_syntax);
+
 List Compiler_parse_declaration_row(Compiler c);
 
 List Compiler_parse_simple_declaration(Compiler c);
@@ -127,8 +129,6 @@ List Compiler_bind_catch_arm(Compiler c, List pattern, Var body, Token start, Li
 List Compiler_bind_match_arm(Compiler c, List pattern, Var body, Token start, int binds, List types);
 
 List Compiler_bind_callable_body(Compiler c, List syntax, Type return_type);
-
-List Compiler_finish_foreign_alias(Compiler c, List declaration, List native_syntax);
 
 
 #endif /* __GUARD_0x46021D32__ */
