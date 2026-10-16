@@ -267,6 +267,12 @@ run_fixture() {
   has_phase compile-status && \
     check_artifact compile-status "$case_build/compile-status.actual"
   normalize_runtime_lines "$compile_stderr"
+  # This fixture changes a real binding's spelling; its allocated ID is incidental.
+  if [[ "$name" == macro-binding-spelling-mismatch ]]; then
+    sed -E 's/(note: binding: \(binding )[0-9]+ /\1<id> /' \
+      "$compile_stderr" >"$compile_stderr.normalized"
+    mv "$compile_stderr.normalized" "$compile_stderr"
+  fi
   has_phase diagnostics && check_artifact diagnostics "$compile_stderr"
 
   if ((compile_status != 0)); then
