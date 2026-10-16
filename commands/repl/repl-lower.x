@@ -61,6 +61,7 @@ static typedef struct Lowering {
   ReplLower owner;
   Scope scratch;
   Map env, locals, cells, arrays, records, cursors;
+  Map match_values;
   Map lambda_signatures;
   Array definitions;
   String own;
@@ -1173,6 +1174,8 @@ static Var _lower_sizeof(Lowering &l, Type type, List operand) {
    decision tree, so reading the productions costs nothing extra. */
 static Var _lower_expr(Lowering &l, Var form) {
   if (l.declined) return void;
+  Var capture;
+  if (l.match_values && l.match_values.try_get(form, capture)) return capture;
   match (form) {
     case %(at ? ?node):                   return _lower_expr(l, node);
     /* A tag the compiler supplies to a `Var` conversion, such as the one a
@@ -1483,45 +1486,42 @@ static Var _lower_returned(Lowering &l, Var value) {
 
 /* --- match -------------------------------------------------------------- */
 
-/* The compiler bound each `?name` to an ordinary local, so the arm's body
-   refers to it by binding id. Those ids are what the environment needs. */
-static void _lower_arm_ids(Var form, String name, Array found) {
-  List node;
-  $ast.walk(form, node)
-    match (node) case %(binding ?(int id) ?(String spelling)): {
-      if (spelling == name) found.push(id);
-      continue;
-    }
-}
-
-/* A `case` pattern was folded into the compiler cache, so it reads back as
-   the List the source wrote and goes straight to the matcher. A binder
-   repeats the match rather than naming its result: matching is pure, and an
-   arm free of a binding form stays usable on a loop's iteration path. */
+/* Capture assignments keep the compiler's ordinary local bindings. Only
+   their native slot reads change to reads of this arm's Lisp match result. */
 static Var _lower_arms(
-  Lowering &l, Var subject, List arms, List rest, List k) {
+  Lowering &l, Var value, List arms, List rest, List k) {
   if (!arms) return _lower_block(l, rest, k);
   List arm = arms.car();
   Var pattern = l.compiler.folded_constant(arm.car());
   if (pattern is void) return $decline.case.unfolded(l);
+  Var result = _lower_name(l, "matched");
+  Map captures = _lower_scratch_map(l.scratch);
+  int index = 0;
+  foreach (Var binder, l.compiler.match_pattern_binders(arm.car(), NULL)) {
+    List slot = Compiler.match_capture_value(binder, index++);
+    captures[slot] = %(bound $result (quote $binder));
+  }
+  Var taken;
+  $let(l.match_values, captures)
+    taken = _lower_block_apart(l, %(${arm.cadr()} @rest), k);
+  if (_lower_failed(l, taken)) return void;
+  Map saved = _lower_env_copy(l, l.env);
+  Var other = _lower_arms(l, value, arms.cdr(), rest, k);
+  l.env = saved;
+  if (_lower_failed(l, other)) return void;
+  return %((lambda ($result) (cond ($result $taken) (true $other)))
+           (match $value (quote $pattern)));
+}
+
+/* The subject runs once, before any arm or capture reads it. */
+static Var _lower_match(
+  Lowering &l, Var subject, List arms, List rest, List k) {
   Var value = _lower_expr(l, subject);
   if (_lower_failed(l, value)) return void;
-  Var result = %(match $value (quote $pattern));
-  Map saved = _lower_env_copy(l, l.env);
-  foreach (Var binder, l.compiler.match_pattern_binders(arm.car(), NULL)) {
-    String name = binder.str()[1:];
-    Array ids = $auto([]);
-    _lower_arm_ids(arm.cadr(), name, ids);
-    foreach (Var id, ids) l.env[id] = %(bound $result (quote $binder));
-  }
-  Var taken = _lower_block(l, %(${arm.cadr()} @rest), k);
-  l.env = saved;
-  if (_lower_failed(l, taken)) return void;
-  Map second = _lower_env_copy(l, l.env);
-  Var other = _lower_arms(l, subject, arms.cdr(), rest, k);
-  l.env = second;
-  if (_lower_failed(l, other)) return void;
-  return %(cond ($result $taken) (true $other));
+  Var held = _lower_name(l, "subject");
+  Var body = _lower_arms(l, held, arms, rest, k);
+  if (_lower_failed(l, body)) return void;
+  return %((lambda ($held) $body) $value);
 }
 
 /* Both arms continue with the same remaining statements, so the rest of the
@@ -2487,7 +2487,7 @@ static Var _lower_stmnt(Lowering &l, Var form, List rest, List k) {
     case %(while ?test ?body):
       return _lower_loop(l, test, %($body), %(), rest, k);
     case %(match ?subject ?arms):
-      return _lower_arms(l, subject, arms, rest, k);
+      return _lower_match(l, subject, arms, rest, k);
     case %(switch ?subject (block *items)):
       return _lower_switch(l, subject, items, rest, k);
     case %(break): {

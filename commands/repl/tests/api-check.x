@@ -516,6 +516,79 @@ static void _compiled_functions(ReplSession s) {
   _expect(s, "jumped();", <value>, 11);
 }
 
+static void _match_binders(ReplSession s) {
+  _expect(s, "List match_pair = %(point 1 2);", <executed>, void);
+  _expect(s, "int match_result = 0;", <executed>, void);
+  _expect(
+    s, "match (match_pair) case %(point ?x ?y): match_result = 7;",
+    <executed>, void);
+  _expect(s, "match_result;", <value>, 7);
+  _expect(
+    s, "match (match_pair) case %(point ?x ?y): "
+       "match_result = x.int() + y.int();", <executed>, void);
+  _expect(s, "match_result;", <value>, 3);
+
+  _expect(s, "List match_tail = %();", <executed>, void);
+  _expect(
+    s, "match (match_pair) case %(point *tail): match_tail = tail;",
+    <executed>, void);
+  _expect(s, "match_tail;", <value>, %(1 2));
+  _expect(
+    s, "match (match_pair) case %(point ?(int x) ?(int y)): "
+       "match_result = x * 10 + y;", <executed>, void);
+  _expect(s, "match_result;", <value>, 12);
+
+  _expect(
+    s, "match (match_pair) case %(point ?x ?y): { "
+       "match_result = x.int(); { int x = 40; match_result += x; } "
+       "match_result += x.int() + y.int(); }", <executed>, void);
+  _expect(s, "match_result;", <value>, 44);
+  _expect(
+    s, "match (match_pair) case %(point ?x ?y): { "
+       "match (%(inner 5)) case %(inner ?x): match_result = x.int(); "
+       "match_result += x.int() + y.int(); }", <executed>, void);
+  _expect(s, "match_result;", <value>, 8);
+  _expect(s, "x;", <rejected>, void);
+  _expect(s, "tail;", <rejected>, void);
+
+  _expect(
+    s, "match (match_pair) case %(point ?x ?y): { "
+       "x = 9; match_result = x.int() + y.int(); }", <executed>, void);
+  _expect(s, "match_result;", <value>, 11);
+  _expect(
+    s, "int match_bump(int &value) { value += 5; return value; }",
+    <defined>, void);
+  _expect(
+    s, "match (match_pair) case %(point ?(int x) ?(int y)): { "
+       "match_bump(x); match_result = x + y; }", <executed>, void);
+  _expect(s, "match_result;", <value>, 8);
+
+  _expect(s, "Func match_kept = %!() => 0;", <executed>, void);
+  _expect(
+    s, "match (match_pair) case %(point ?x ?y): "
+       "match_kept = %!() => x.int() + y.int();", <executed>, void);
+  _expect(s, "match_kept();", <value>, 3);
+
+  _expect(s, "match_result = 0;", <executed>, void);
+  _expect(
+    s, "for (int i = 0; i < 3; i++) "
+       "match (match_pair) case %(point ?x ?y): "
+       "match_result += x.int() + y.int();", <executed>, void);
+  _expect(s, "match_result;", <value>, 9);
+
+  _expect(s, "int match_calls = 0;", <executed>, void);
+  _expect(
+    s, "List match_subject(void) { match_calls++; return match_pair; }",
+    <defined>, void);
+  _expect(
+    s, "match (match_subject()) { "
+       "case %(missing ?x ?y): match_result = 99; "
+       "case %(point ?x ?y): match_result = x.int() + x.int() + "
+       "y.int(); }", <executed>, void);
+  _expect(s, "match_result;", <value>, 4);
+  _expect(s, "match_calls;", <value>, 1);
+}
+
 static void _truth_values(ReplSession s) {
   int i = 0;
   foreach (String declaration, %(
@@ -626,6 +699,7 @@ int main(int argc, char **argv) {
         _interpreter_ownership(session);
         _reference_arguments(session);
         _compiled_functions(session);
+        _match_binders(session);
         _truth_values(session);
         _pointer_updates(session);
         _delegate_completion(session);

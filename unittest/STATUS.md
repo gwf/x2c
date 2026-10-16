@@ -188,6 +188,20 @@ passed six repeated nested-Make probes, and help output remains byte-identical.
 
 ## Outstanding Items
 
+An interpreted REPL lambda that captures a block local by reference can fail
+when called by a later submission. This reproduces without a match statement:
+
+```x2c
+Func kept = %!() => 0;
+{ Var x = 1; kept = %!() using &x => x.int(); x = 9; }
+kept();
+```
+
+The last submission reports `no-convert` with a `p48` source instead of
+returning `9`. The lowered lambda retains an address in the submission's
+automatic storage. This lifetime defect remains separate from match capture
+initialization; the REPL API checks cover captures by value across submissions.
+
 Adding `List cached = %("stack-check"); (void) cached;` at the start of
 `static-local-flat-chain`'s `main` makes translation of its 4,000 additions
 crash with a 256 KiB stack limit. The same augmented source fails before

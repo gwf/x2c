@@ -104,6 +104,12 @@ List Compiler.define_pattern_binders(Compiler c, List pattern) {
 static List _binder_type(Var binder) =>
   binder.is_list_binder() ? %("List") : %("Var");
 
+/** Returns the typed expression reading one native match capture slot. */
+List Compiler.match_capture_value(Var binder, int index) =>
+  %(expr ${_binder_type(binder)}
+    (${%"_x2c_gensym_match_${
+      binder.is_list_binder() ? "list" : "value"}_$index"}));
+
 /** Builds ordinary declarations from a pattern scope's issued bindings.
     A catch reads through its handler; a match reads its capture slots. */
 List Compiler.pattern_binder_declarations(
@@ -116,8 +122,7 @@ List Compiler.pattern_binder_declarations(
       (call "x2c_error_catch_capture"
         (args (expr ("ErrorHandler") (ident $handle))
               (expr (int) (literal (int) ${%"$index"})))))
-      : %(expr $type (${%"_x2c_gensym_match_${
-          row.car().is_list_binder() ? "list" : "value"}_$index"}));
+      : Compiler.match_capture_value(row.car(), index);
     index++;
     if (handle && row.car().is_list_binder())
       value = %(expr $type (call "Var_list_payload" (args $value)));
