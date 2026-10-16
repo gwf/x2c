@@ -500,11 +500,8 @@ static List _lower_return(Walk &w, List node, List expression) {
 static List _return_value(Walk &w, List expression, List cleanup) {
   List binding = _region_binding(w.c, "return_value");
   Type type = w.c.return_type;
-  /* The declarator carries the type's pointer and array modifiers, so the
-     saved value declares the way the function's result is spelled. */
-  List (base, mods) = type.parts();
-  List declaration = %(declare $base
-    (bindings (op = (bind $binding $mods) $expression)));
+  List declaration =
+    w.c.rebuild_statement($!{ $type $binding = $expression; }).cadr();
   List returned = source_return_content(%((expr $type (ident $binding))));
   List statement = source_block_content(%(@cleanup $returned));
   return source_block_content(%($declaration $statement));

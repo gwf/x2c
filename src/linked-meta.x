@@ -1785,9 +1785,6 @@ static Code _protocol_prototype(List name, Type expected) {
   return $!Unit{ $result $name(@declared); };
 }
 
-static Code _protocol_runtime(Type result, String name, List arguments) =>
-  %(expr $result (call $name (args @arguments)));
-
 static void _protocol_descriptor(List descriptor, List slots) {
   match (descriptor)
     case %(?(List methods) ?(String name) ?(Symbol var_tag) ?(Symbol area)
@@ -1802,23 +1799,21 @@ static void _protocol_descriptor(List descriptor, List slots) {
         (expr (* char) (literal (* char) ${%"\"$name\""})))));
       if (explicit) {
         Code tag = $!Symbol{ ${explicit.car()} };
-        Code tagged = _protocol_runtime(
-          %(void), "x2c_register_tagged_descriptor", %($tag $text $table));
-        x2c_place(init, Code.lowered(%(stmnt $tagged)));
+        x2c_place(
+          init, $!{ x2c_register_tagged_descriptor($tag, $text, $table); });
         return;
       }
       Code symbol = %(expr ("Symbol") (literal ("Symbol") $name $var_tag));
-      Code early = _protocol_runtime(
-        %(int), "x2c_register_builtin_descriptor", %($symbol $table));
       if (area == <protocol>) {
-        x2c_place(init, Code.lowered(%(stmnt $early)));
+        x2c_place(
+          init, $!{ x2c_register_builtin_descriptor($symbol, $table); });
         return;
       }
-      Code fallback = _protocol_runtime(
-        %(void), "x2c_register_descriptor", %($text $table));
-      Code missing = %(expr (int) (op ${<!>} $early));
-      Code registration = %(if $missing (block (stmnt $fallback)));
-      x2c_place(init, Code.lowered(registration));
+      x2c_place(init, $!{
+        if (!x2c_register_builtin_descriptor($symbol, $table)) {
+          x2c_register_descriptor($text, $table);
+        }
+      });
     }
 }
 
@@ -2322,7 +2317,6 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_protocol_renders", _protocol_renders);
   $linked.row(rows, "_protocol_guarded", _protocol_guarded);
   $linked.row(rows, "_protocol_prototype", _protocol_prototype);
-  $linked.row(rows, "_protocol_runtime", _protocol_runtime);
   $linked.row(rows, "_protocol_descriptor", _protocol_descriptor);
   $linked.row(rows, "protocol_conformance", protocol_conformance);
   $linked.row(rows, "_raise_immutable", _raise_immutable);

@@ -4706,7 +4706,23 @@ static Var _fill_syntax(Landing &l, Var syntax) {
     else if ((void *) items) items.push(filled);
     index++;
   }
-  return (void *) items ? items.list_free().var() : syntax;
+  Var filled = (void *) items ? items.list_free().var() : syntax;
+  return l.retain && node.car() == <declare>
+    ? _retained_declaration(filled) : filled;
+}
+
+/* A retained declaration with its base's pointer, array, and function
+   modifiers moved onto each declarator, as parsing moves them. */
+static Var _retained_declaration(List declaration) {
+  match (declaration) case %(declare ?specifiers (bindings *rows)): {
+    List modifiers = NULL;
+    List base = Type.declaration_base(specifiers, modifiers);
+    if (!modifiers) return declaration;
+    Array moved = [];
+    foreach (List row, rows) moved.push(Ast.append_modifiers(row, modifiers));
+    return %(declare $base (bindings @{moved.list_free()}));
+  }
+  return declaration;
 }
 
 /* Whether `item` is a sequence or splice hole, whose items it sets. */
