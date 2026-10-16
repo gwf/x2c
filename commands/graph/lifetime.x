@@ -887,10 +887,9 @@ static void _lifetime_finish_return(
       }
       match (owner)
         case %(region ? ?region_kind ? ? ? ? ?ended):
-          findings.push(%(
-            finding dangling-return $path $function $region_kind $name
-            (allocated $allocated) (ended $ended) (returned $returned)
-          ));
+          findings.push(
+            %(finding dangling-return $path $function $region_kind $name
+              (allocated $allocated) (ended $ended) (returned $returned)));
     }
 }
 

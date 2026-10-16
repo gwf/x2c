@@ -31,11 +31,10 @@ static void _loop_collect(
     direct_kind = Lifetime.loop_allocation_kind(
       walk.compiler, node, operation);
     if (direct_kind)
-      walk.direct.push(%(
-        direct $direct_kind ${walk.path} ${walk.function}
-        ${walk.visibility} $operation $use
-        ${project_location(walk.compiler, walk.path, origin)} $loop_depth
-      ));
+      walk.direct.push(
+        %(direct $direct_kind ${walk.path} ${walk.function}
+          ${walk.visibility} $operation $use
+          ${project_location(walk.compiler, walk.path, origin)} $loop_depth));
   }
   match (node) {
     case %(function *): return;
@@ -92,11 +91,11 @@ static void _loop_collect(
         List target = project_call_target(
           walk.compiler, walk.definitions, node, name, NULL);
         if (target && !List.equal(target, %(computed)))
-          walk.pending.push(%(
-            allocation-return $target ${walk.path} ${walk.function}
-            ${walk.visibility} $name $use
-            ${project_location(walk.compiler, walk.path, origin)} $loop_depth
-          ));
+          walk.pending.push(
+            %(allocation-return $target ${walk.path} ${walk.function}
+              ${walk.visibility} $name $use
+              ${project_location(walk.compiler, walk.path, origin)}
+              $loop_depth));
       }
       _loop_collect(walk, callee, origin, loop_depth, <nested>);
       foreach (Var argument, cdr(arguments))
