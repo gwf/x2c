@@ -749,13 +749,7 @@ static int _lifetime_combine_kind(Symbol &kind, Symbol next) {
 }
 
 static int _lifetime_resolve_summary(
-  List function, Map publics, Map summaries, Symbol &resolved) {
-  List self, facts;
-  match (function)
-    case %(
-      function (!set ?target ?) ? ? (returns *return_facts)
-    ):
-      self = target, facts = return_facts;
+  List self, List facts, Map publics, Map summaries, Symbol &resolved) {
   Symbol kind = 0;
   foreach (List fact, facts)
     match (fact) {
@@ -789,18 +783,17 @@ static Map _lifetime_summaries(List functions, Map publics) {
         project_add_public(publics, target);
   for (int pass = 0; pass < functions.len(); pass++) {
     int changed = 0;
-    foreach (List function, functions) {
-      List target;
+    foreach (List function, functions)
       match (function)
-        case %(function (!set ?function_target ?) ? ? (returns *)):
-          target = function_target;
-      if (summaries.contains(target)) continue;
-      Symbol kind;
-      if (_lifetime_resolve_summary(function, publics, summaries, kind)) {
-        summaries[target] = kind;
-        changed = 1;
-      }
-    }
+        case %(function ?target ? ? (returns *facts))
+          if (!summaries.contains(target)): {
+          Symbol kind;
+          if (_lifetime_resolve_summary(
+                target, facts, publics, summaries, kind)) {
+            summaries[target] = kind;
+            changed = 1;
+          }
+        }
     if (!changed) break;
   }
   return summaries;
@@ -869,47 +862,35 @@ static List _lifetime_pending_owner(Symbol kind, List scoped, List pooled) {
 
 static void _lifetime_finish_return(
   List pending, Map publics, Map summaries, Array findings, Array unresolved) {
-  String path, function, name;
-  List target, scoped, pooled, allocated, returned, causes;
-  Symbol status;
   match (pending)
     case %(
-      pending-return ?return_path ?return_function
-      ?return_target ?callee ?return_status
-      (!set ?scope_owner (scope ?)) (!set ?pool_owner (pool ?))
-      (allocated ?allocation_location) (returned ?return_location)
-      (causes *return_causes)
+      pending-return ?path ?function ?target ?name ?status
+      (!set ?scoped (scope ?)) (!set ?pooled (pool ?))
+      (allocated ?allocated) (returned ?returned) (causes *causes)
     ): {
-      path = return_path, function = return_function;
-      target = return_target, name = callee;
-      status = return_status;
-      scoped = scope_owner, pooled = pool_owner;
-      allocated = allocation_location, returned = return_location;
-      causes = return_causes;
-    }
-  Symbol allocation_kind = _lifetime_resolved_kind(target, publics, summaries);
-  if (!allocation_kind) {
-    List scoped_owner = _lifetime_pending_owner(<scoped>, scoped, pooled);
-    List pooled_owner = _lifetime_pending_owner(<pooled>, scoped, pooled);
-    if (_lifetime_owner_ended(scoped_owner) ||
-        _lifetime_owner_ended(pooled_owner))
-      unresolved.push(%(call $path $function $name $allocated));
-    return;
-  }
-  List owner = _lifetime_pending_owner(allocation_kind, scoped, pooled);
-  if (!_lifetime_owner_ended(owner) || status == <moved>) return;
-  if (status == <unresolved> || causes) {
-    foreach (List cause, causes)
-      if (!unresolved.contains(cause)) unresolved.push(cause);
-    return;
-  }
-  match (owner)
-    case %(region ? ?region_kind ? ? ? ? ?ended): {
-      List finding = %(
-        finding dangling-return $path $function $region_kind $name
-        (allocated $allocated) (ended $ended) (returned $returned)
-      );
-      findings.push(finding);
+      Symbol allocation_kind = _lifetime_resolved_kind(
+        target, publics, summaries);
+      if (!allocation_kind) {
+        List scoped_owner = _lifetime_pending_owner(<scoped>, scoped, pooled);
+        List pooled_owner = _lifetime_pending_owner(<pooled>, scoped, pooled);
+        if (_lifetime_owner_ended(scoped_owner) ||
+            _lifetime_owner_ended(pooled_owner))
+          unresolved.push(%(call $path $function $name $allocated));
+        return;
+      }
+      List owner = _lifetime_pending_owner(allocation_kind, scoped, pooled);
+      if (!_lifetime_owner_ended(owner) || status == <moved>) return;
+      if (status == <unresolved> || causes) {
+        foreach (List cause, causes)
+          if (!unresolved.contains(cause)) unresolved.push(cause);
+        return;
+      }
+      match (owner)
+        case %(region ? ?region_kind ? ? ? ? ?ended):
+          findings.push(%(
+            finding dangling-return $path $function $region_kind $name
+            (allocated $allocated) (ended $ended) (returned $returned)
+          ));
     }
 }
 

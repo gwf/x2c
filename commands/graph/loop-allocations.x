@@ -32,8 +32,8 @@ static void _loop_collect(
       walk.compiler, node, operation);
     if (direct_kind)
       walk.direct.push(%(
-        direct-allocation ${walk.path} ${walk.function} ${walk.visibility}
-        $direct_kind $operation $use
+        direct $direct_kind ${walk.path} ${walk.function}
+        ${walk.visibility} $operation $use
         ${project_location(walk.compiler, walk.path, origin)} $loop_depth
       ));
   }
@@ -134,50 +134,28 @@ List LoopAllocations.analyze_unit(Compiler compiler, List ast, String path) {
   );
 }
 
+/* Groups a direct allocation or a resolved helper call by its site. Both
+   events list kind, unit, function, visibility, operation, use, location,
+   and loop depth. */
 static void _loop_add_event(
   Map groups, Map totals, Map functions, List event) {
-  String unit, function, operation;
-  Symbol visibility, source, kind, use;
-  List location;
-  int depth;
-  match (event) {
-    case %(
-      direct-allocation ?event_unit ?event_function ?event_visibility
-      ?event_kind ?event_operation ?event_use ?event_location ?event_depth
-    ): {
-      unit = event_unit, function = event_function;
-      visibility = event_visibility, source = <direct>;
-      kind = event_kind, operation = event_operation, use = event_use;
-      location = event_location, depth = event_depth.integer();
+  match (event)
+    case %((!set ?tag (!or direct allocation-return))
+           ?kind ?unit ?function ?visibility ?operation ?use ?location
+           ?depth): {
+      Symbol source = tag == <direct> ? <direct> : <helper>;
+      List key = %(site $unit $function $visibility $location);
+      groups[key] = cons(
+        %($source $kind $operation $use $depth),
+        groups.getdefault(key, NULL));
+      functions[%($unit $function $visibility)] = 1;
+      project_count(totals, %($source $kind), 1);
     }
-    case %(
-      allocation-return ?event_kind ?event_unit ?event_function
-      ?event_visibility ?event_operation ?event_use
-      ?event_location ?event_depth
-    ): {
-      unit = event_unit, function = event_function;
-      visibility = event_visibility, source = <helper>;
-      kind = event_kind, operation = event_operation, use = event_use;
-      location = event_location, depth = event_depth.integer();
-    }
-  }
-  List key = %(site $unit $function $visibility $location);
-  groups[key] = cons(
-    %($source $kind $operation $use $depth), groups.getdefault(key, NULL));
-  functions[%($unit $function $visibility)] = 1;
-  project_count(totals, %($source $kind), 1);
 }
 
+/* The ranked record for the site `key`, `(site UNIT FUNCTION VISIBILITY
+   LOCATION)`, and its events. */
 static List _loop_candidate(List key, List events) {
-  String unit, function;
-  Symbol visibility;
-  List location;
-  match (key)
-    case %(site ?site_unit ?site_function ?site_visibility ?site_location): {
-      unit = site_unit, function = site_function;
-      visibility = site_visibility, location = site_location;
-    }
-
   Map counts = {};
   int loop_depth = 0;
   foreach (List event, events)
@@ -211,8 +189,8 @@ static List _loop_candidate(List key, List events) {
     }
   }
   operations.sort();
-  List record = %(
-    site $unit $function $visibility $location
+  return %(
+    @key
     (allocations
       (direct (pooled $direct_pooled) (scoped $direct_scoped))
       (helper-calls (pooled $helper_pooled) (scoped $helper_scoped)))
@@ -222,7 +200,6 @@ static List _loop_candidate(List key, List events) {
     (operations @{operations.list_free()})
     (loop-depth $loop_depth)
   );
-  return record;
 }
 
 /* Orders a candidate before another with fewer scoped allocations,
