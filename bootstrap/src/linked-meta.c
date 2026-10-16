@@ -13260,7 +13260,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12334 = List_var(_12333);
   _12335 = String_new("src/meta-group.x");
   _12336 = String_var(_12335);
-  _12337 = String_new("35994816");
+  _12337 = String_new("f7f33b8b");
   _12338 = String_var(_12337);
   _12339 = cons(_12338, NULL);
   _12340 = cons(_12336, _12339);
@@ -13388,7 +13388,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12462 = cons(_465, _12461);
   _12463 = String_new("src/collect.x");
   _12464 = String_var(_12463);
-  _12465 = String_new("29055daa");
+  _12465 = String_new("3bd51775");
   _12466 = String_var(_12465);
   _12467 = cons(_12466, NULL);
   _12468 = cons(_12464, _12467);
