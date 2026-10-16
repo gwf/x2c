@@ -66,6 +66,8 @@ static List _freeze_rows(Compiler c, List syntax) {
 Var Compiler.thaw_declaration_syntax(Compiler c, Var syntax) {
   if (syntax is not <list> || syntax.is_nil()) return syntax;
   match (syntax) {
+    /* A quotation's hole holds a live value, which was never frozen. */
+    case %("x2c.hole" *): return syntax;
     case %(declaration-binding ?binding ?source): {
       c.set_fact(%(source-spelling $binding), source);
       return binding;
