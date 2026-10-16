@@ -34,9 +34,20 @@ meta Code managed_binding(Code declaration) {
   return NULL;
 }
 
+static Tracked fail(void) { raise %(later); return make(0); }
+
 int main(void) {
   Tracked first = make(2), second = make(first.value + 1);
   int plain = 3;
   printf("%d %d %d\n", first.value, second.value, plain);
+  {
+    Tracked first = make(6), *borrowed = &first,
+      second = make(borrowed->value + 1);
+    printf("borrowed %d %d\n", borrowed->value, second.value);
+  }
+  try {
+    Tracked first = make(5), second = fail();
+    printf("unreachable %d %d\n", first.value, second.value);
+  } catch %(later): puts("caught later");
   return 0;
 }

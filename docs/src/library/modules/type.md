@@ -557,4 +557,4 @@ resolution and translation-unit registrations belong to the compiler.
 
 ## Tests and examples
 
-`experiments/language-components/run.py` (`types/values`).
+`make verify` (`meta-type-values` compiler fixture).

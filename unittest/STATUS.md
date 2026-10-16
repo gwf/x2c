@@ -11,6 +11,12 @@ captures, expression and block bodies, and typed parameter sequences.
 
 ## Coverage
 
+- Retired component experiments leave focused compiler fixtures for indexed
+  rewrite entry points and rule order, independent rule composition, local
+  binding recognition, runtime/meta Type operations, and Array alias adoption.
+  Post-initialization fixtures cover mixed declarators, shared anonymous types,
+  and cleanup when a later initializer raises.
+
 - Native module probes reuse a constructor's cached Func across isolated
   units. REPL API checks preserve shared definitions through a second preload.
 - Linked extension probes build with parallel translation, so registration

@@ -166,8 +166,6 @@ commits need not rebuild from their own bootstrap.
 - `docs/` - the user-facing book (mdBook); `make doc-build` renders it.
 - `unittest/`, `examples/`, `plans/`; `etc/` holds build tooling, the
   external Lisp bootstrap, and the compile-time Lisp SDK.
-- `experiments/` - optional language component examples and their case
-  runner (`experiments/language-components/run.py`); outside `make check`.
 - `packages/` - optional adapters for third-party C libraries; they need
   network-fetched sources and are outside `make check`.
 - `site/` - the public website; `make site-build` renders it with the book

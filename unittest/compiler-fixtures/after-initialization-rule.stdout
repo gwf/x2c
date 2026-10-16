@@ -1,3 +1,8 @@
 2 3 3
+borrowed 6 7
+cleanup 7
+cleanup 6
+cleanup 5
+caught later
 cleanup 3
 cleanup 2
