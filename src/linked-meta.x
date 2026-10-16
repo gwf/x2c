@@ -220,9 +220,7 @@ Code access_read(Code code) {
     Type type = base.cadr(), result = code.cadr();
     Code getter = type.getter();
     if (!getter)
-      x2c_diagnostic_fail_at(
-        NULL, <xform>, %"type ${type.repr()} does not support bracket indexing",
-        NULL);
+      $fail.access_read(NULL, type);
     return $!($result){ $getter($base, $key) };
   }
   return code;
@@ -232,19 +230,11 @@ static Code _participant_store(
   Code code, Code base, Code key, Code value) {
   Type type = base.cadr();
   if (type.is_named("String")) {
-    String note = "String is immutable: use the copy-producing "
-                  "String.withindex, or bind a char * to write a "
-                  "transient String.malloc buffer";
-    x2c_diagnostic_fail_at(
-      NULL, <xform>, "String does not support bracket assignment",
-      %($note));
+    $fail.access_string_store(NULL);
   }
   Code setter = type.protocol_member("setindex");
   if (!setter)
-    x2c_diagnostic_fail_at(
-      NULL, <xform>,
-      %"type ${type.repr()} does not support bracket assignment",
-      %("use an explicit copy-producing method where available"));
+    $fail.access_store(NULL, type);
   return setter.call_in_order(%($base $key $value), code.cadr());
 }
 
@@ -253,10 +243,7 @@ static Code _participant_update(
   Type type = base.cadr();
   Code member = type.protocol_member(value ? "updateindex" : "postfixindex");
   if (!member) {
-    String what = value ? "compound assignment" : "increment or decrement";
-    x2c_diagnostic_fail_at(
-      NULL, <xform>,
-      %"type ${type.repr()} does not support indexed $what", NULL);
+    $fail.access_update(NULL, type, value);
   }
   List operation = $!Symbol{ $op };
   List arguments = value
@@ -285,11 +272,7 @@ static Code _access_update(
   Type type = value.type();
   if (!type.is_named("Var") && !type.numeric() &&
       !(op == <+> && type.is_text())) {
-    String message = op == <+>
-      ? "indexed += requires a numeric, Var, or String operand"
-      : "indexed compound assignment requires a numeric or Var operand";
-    x2c_diagnostic_fail_at(
-      NULL, <xform>, message, %("right type: ${type.repr()}"));
+    $fail.access_operand(NULL, op, type);
   }
   if (family == 1) return $!Var{ Array_updateindex($base, $key, $op, $value) };
   return $!Var{ Map_updateindex($base, $key, $op, $value) };
@@ -376,7 +359,7 @@ static String _delegate_path(Type type, List fields, String member) {
   return ".".join(parts.list_free());
 }
 
-static void _delegate_packages(
+static void _delegate_fail_packages(
   Type outer, Type type, String member, List fields, List packages) {
   Array notes = [%"delegate path: ${_delegate_path(outer, fields, NULL)}"];
   foreach (String package, packages) notes.push(%"package: '$package'");
@@ -406,14 +389,14 @@ static void _delegate_search(
       case %(method ?binding ?):
         found.push(%(${path.reverse()} $binding));
       case %(ambiguous *packages):
-        _delegate_packages(outer, type, member, path.reverse(), packages);
+        _delegate_fail_packages(outer, type, member, path.reverse(), packages);
     }
     if (!resolution)
       _delegate_search(outer, member, type, path, seen, found, cycle);
   }
 }
 
-static void _delegate_ambiguous(Type outer, String member, List paths) {
+static void _delegate_fail_ambiguous(Type outer, String member, List paths) {
   Array notes = [];
   foreach (List path, paths) {
     String spelling = Code.binding_spelling(path.cadr());
@@ -426,7 +409,7 @@ static void _delegate_ambiguous(Type outer, String member, List paths) {
     notes.list_free());
 }
 
-static void _delegate_cycle(Type outer, String member, List fields) {
+static void _delegate_fail_cycle(Type outer, String member, List fields) {
   String method = %"${_delegate_type_name(outer)}.$member";
   x2c_diagnostic_fail_at(
     NULL, <type>, %"delegation cycle resolving $method",
@@ -438,8 +421,8 @@ static List _delegate_fields(Type outer, String member) {
   List cycle = NULL;
   _delegate_search(outer, member, outer, NULL, NULL, found, cycle);
   List paths = found.list_free();
-  if (paths && paths.cdr()) _delegate_ambiguous(outer, member, paths);
-  if (!paths && cycle) _delegate_cycle(outer, member, cycle);
+  if (paths && paths.cdr()) _delegate_fail_ambiguous(outer, member, paths);
+  if (!paths && cycle) _delegate_fail_cycle(outer, member, cycle);
   return paths ? paths.car().car() : NULL;
 }
 
@@ -464,8 +447,7 @@ static Code _destructure_list(Code source) {
   Code converted =
     source.type().numeric() ? NULL : source.convert(%("List"));
   if (!converted || !converted.type().is_named("List"))
-    x2c_diagnostic_fail_at(
-      NULL, <type>, "destructuring requires a List source", NULL);
+    $fail.destructure_list_source(NULL);
   return converted;
 }
 
@@ -1474,10 +1456,7 @@ Code dynamic_binary(Code code) {
       _dynamic_operand(right_type, 1);
     if (!text && (!_dynamic_operand(left_type, 0) ||
                   !_dynamic_operand(right_type, 0))) {
-      String left_name = left_type.repr(), right_name = right_type.repr();
-      x2c_diagnostic_fail_at(
-        NULL, <xform>, "dynamic numeric operators require numeric operands",
-        %("operator: $op left type: $left_name right type: $right_name"));
+      $fail.operators_numeric_operands(NULL, left_type, right_type, op);
     }
     Code left_var = lhs.convert(%("Var")), right_var = rhs.convert(%("Var"));
     return Code.lowered($!Var{ Var_binary($left_var, $op, $right_var) }, NULL);
@@ -1509,14 +1488,10 @@ static String _dynamic_helper(Type type) {
   Type scalar = type.numeric();
   match (scalar)
     case %(enum *):
-      x2c_diagnostic_fail_at(
-        NULL, <xform>, "dynamic compound assignment cannot target an enum",
-        NULL);
+      $fail.operators_enum_target(NULL);
   String helper = type.update_helper();
   if (!helper)
-    x2c_diagnostic_fail_at(
-      NULL, <xform>, "dynamic compound assignment requires a numeric lvalue",
-      %("left type: ${type.repr()}"));
+    $fail.operators_numeric_target(NULL, type);
   return helper;
 }
 
@@ -1529,16 +1504,10 @@ Code dynamic_compound(Code code) {
     Symbol operation = _dynamic_operation(op);
     match (type)
       case %((bitfield *) *):
-        x2c_diagnostic_fail_at(
-          NULL, <xform>,
-          "dynamic compound assignment cannot target a bitfield", NULL);
+        $fail.operators_bitfield_target(NULL);
     if (!right_type.is_named("Var") && !right_type.numeric() &&
         !(operation == <+> && right_type.is_text()))
-      x2c_diagnostic_fail_at(
-        NULL, <xform>, operation == <+>
-          ? "dynamic += requires a numeric, Var, or String operand"
-          : "dynamic compound assignment requires a numeric or Var operand",
-        %("right type: ${right_type.repr()}"));
+      $fail.operators_operand(NULL, operation, right_type);
     String helper = _dynamic_helper(type);
     return _dynamic_update(
       type, target, operation, rhs.convert(%("Var")), helper);
@@ -1616,7 +1585,7 @@ static Code _printf_read(Code value, String length, int conversion) {
 static void _printf_position(Code call, const char *at) {
   while (isdigit(*at)) at++;
   if (*at == '$')
-    _printf_fail(call, "positional formats cannot infer Var argument types");
+    $fail.printf_position(call);
 }
 
 static void _printf_count(
@@ -1627,7 +1596,7 @@ static void _printf_count(
   }
   _printf_position(call, ++at);
   if (next >= arguments.len())
-    _printf_fail(call, "format consumes a missing '*' argument");
+    $fail.printf_missing_count(call);
   Code value = arguments[next];
   if (_printf_is_var(value)) arguments[next] = value.convert(%(int));
   next++;
@@ -1650,18 +1619,16 @@ static void _printf_conversion(
     _printf_count(call, at, arguments, next);
   }
   String length = _printf_length(at);
-  if (!*at) _printf_fail(call, "incomplete format conversion");
+  if (!*at) $fail.printf_incomplete(call);
   int conversion = *at++;
   String spec = "%%%c".printf(conversion);
   if (!_printf_valid(length, conversion))
-    _printf_fail(call, %"unsupported or malformed format conversion $spec");
+    $fail.printf_conversion(call, spec);
   if (next >= arguments.len())
-    _printf_fail(call, %"format conversion $spec consumes a missing argument");
+    $fail.printf_missing_argument(call, spec);
   Code read = _printf_read(arguments[next], length, conversion);
   if (!read)
-    _printf_fail(
-      call, %"cannot infer a native argument for Var at $spec; use an " +
-        "explicit converter for this format conversion");
+    $fail.printf_native_argument(call, spec);
   arguments[next++] = read;
 }
 
@@ -1671,7 +1638,7 @@ static void _printf_scan(
     int ch = *at++;
     if (ch == '\\' && *at) at++;
     if (ch != '%') continue;
-    if (!*at) _printf_fail(call, "incomplete format conversion");
+    if (!*at) $fail.printf_incomplete(call);
     if (*at == '%') at++;
     else _printf_conversion(call, at, arguments, next);
   }
@@ -1683,15 +1650,14 @@ static Code _printf_lowered(Code code, Code format, List values) {
   if (!has_var) return code;
   String spelling = format.format();
   if (!spelling)
-    _printf_fail(code, "Var arguments require a single static format literal");
+    $fail.printf_static_format(code);
   match (code) case %(expr ?type (call ?callee (args *given))): {
     Array arguments = given;
     int next = given.len() - values.len();
     _printf_scan(code, spelling[1:spelling.len() - 1], arguments, next);
     for (; next < arguments.len(); next++)
       if (_printf_is_var(arguments[next]))
-        _printf_fail(
-          code, "Var argument has no corresponding format conversion");
+        $fail.printf_unused_argument(code);
     return %(expr $type (call $callee (args @{arguments.list_free()})));
   }
   return code;
@@ -1872,9 +1838,7 @@ static Code _raise_value(Code value) {
   match (value) case %(expr ?matched ?): {
     Type type = matched;
     if (_raise_immutable(type)) return value;
-    x2c_diagnostic_error_at(
-      NULL, <type>, %"raise detail type ${type.repr()} is not immutable",
-      %("use a numeric value, enum, Symbol, Atom, String, List, or Var"));
+    $report.raise_mutable_detail(NULL, type);
   }
   return $!Var{ Var_null() };
 }
@@ -1933,9 +1897,7 @@ static List _string_case_index(
   List label, Map indices, Array labels, List site) {
   String key = _string_case_key(label);
   if (!key) {
-    x2c_diagnostic_error_at(
-      site, <xform>, "a case in a String switch takes a string literal",
-      %("compare computed values with an if chain or match"));
+    $report.string_switch_case(site);
     return label;
   }
   if (!(key in indices)) {
@@ -2060,10 +2022,7 @@ static void _try_check_label(List finalizer) {
   List at = finalizer;
   Var label = _try_finalizer_label(finalizer, at);
   if (!label) return;
-  x2c_diagnostic_fail_at(
-    at, <emit>, "a finally body cannot define a label",
-    %("a finalizer runs on every path that leaves its region, so '${
-      Code.binding_spelling(label)}' would be defined once for each"));
+  $fail.try_finalizer_label(at, label);
 }
 
 static List _try_frame_address(Atom frame) {
@@ -2235,10 +2194,10 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "access_postfix", access_postfix);
   $linked.row(rows, "_delegate_type_name", _delegate_type_name);
   $linked.row(rows, "_delegate_path", _delegate_path);
-  $linked.row(rows, "_delegate_packages", _delegate_packages);
+  $linked.row(rows, "_delegate_fail_packages", _delegate_fail_packages);
   $linked.row(rows, "_delegate_search", _delegate_search);
-  $linked.row(rows, "_delegate_ambiguous", _delegate_ambiguous);
-  $linked.row(rows, "_delegate_cycle", _delegate_cycle);
+  $linked.row(rows, "_delegate_fail_ambiguous", _delegate_fail_ambiguous);
+  $linked.row(rows, "_delegate_fail_cycle", _delegate_fail_cycle);
   $linked.row(rows, "_delegate_fields", _delegate_fields);
   $linked.row(rows, "delegate_member", delegate_member);
   $linked.row(rows, "_destructure_list", _destructure_list);
