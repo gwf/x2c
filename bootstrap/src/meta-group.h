@@ -38,9 +38,13 @@ void Compiler_group_meta_function(Compiler c, List fn);
 
 void Compiler_prepare_loaded_main(Compiler c, Array nodes);
 
+void Compiler_prepare_loaded_functions(Compiler c, Array nodes);
+
 int Compiler_meta_reaches_compile_time(Compiler c, Var node);
 
 void Compiler_finish_meta_functions(Compiler c, Array nodes);
+
+int Compiler_public_native_function(Compiler c, List function, String name);
 
 String Compiler_meta_call_missing(Compiler c, String name);
 

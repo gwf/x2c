@@ -12953,7 +12953,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _12030 = List_var(_12029);
   _12031 = String_new("src/compiler.x");
   _12032 = String_var(_12031);
-  _12033 = String_new("e417fc12");
+  _12033 = String_new("fb4bd263");
   _12034 = String_var(_12033);
   _12035 = cons(_12034, NULL);
   _12036 = cons(_12032, _12035);
@@ -13183,7 +13183,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _12260 = List_var(_12259);
   _12261 = String_new("src/compiler/parsing/parse.x");
   _12262 = String_var(_12261);
-  _12263 = String_new("a7de5d02");
+  _12263 = String_new("f760334e");
   _12264 = String_var(_12263);
   _12265 = cons(_12264, NULL);
   _12266 = cons(_12262, _12265);
@@ -13256,14 +13256,14 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12330 = List_var(_12329);
   _12331 = String_new("src/meta-group.x");
   _12332 = String_var(_12331);
-  _12333 = String_new("f0e265ae");
+  _12333 = String_new("35994816");
   _12334 = String_var(_12333);
   _12335 = cons(_12334, NULL);
   _12336 = cons(_12332, _12335);
   _12337 = List_var(_12336);
   _12338 = String_new("src/meta-helper-client.x");
   _12339 = String_var(_12338);
-  _12340 = String_new("bdc7ff6a");
+  _12340 = String_new("14f5b9e4");
   _12341 = String_var(_12340);
   _12342 = cons(_12341, NULL);
   _12343 = cons(_12339, _12342);
@@ -13274,7 +13274,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12348 = List_var(_12347);
   _12349 = String_new("src/parse.x");
   _12350 = String_var(_12349);
-  _12351 = String_new("00400405");
+  _12351 = String_new("03380318");
   _12352 = String_var(_12351);
   _12353 = cons(_12352, NULL);
   _12354 = cons(_12350, _12353);
@@ -13384,7 +13384,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12458 = cons(_465, _12457);
   _12459 = String_new("src/collect.x");
   _12460 = String_var(_12459);
-  _12461 = String_new("525bef93");
+  _12461 = String_new("29055daa");
   _12462 = String_var(_12461);
   _12463 = cons(_12462, NULL);
   _12464 = cons(_12460, _12463);
