@@ -1421,10 +1421,6 @@ A decorator is a macro whose required first parameter is supplied implicitly
 from the expression or source item following its application:
 
 ```x2c
-#include "meta.x"
-meta static String trace_name(List fn) => Code.name(fn);
-meta static List trace_body(List fn) => Code.body(fn);
-
 macro Decorator $trace(
   Function $function,
   Expr $channel
@@ -1432,9 +1428,9 @@ macro Decorator $trace(
   printf(
     "[%s] %s\n",
     $channel,
-    $trace_name($function)
+    $Code.name($function)
   );
-  @trace_body($function)
+  @Code.body($function)
 }
 
 $trace("request")
