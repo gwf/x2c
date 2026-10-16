@@ -3070,8 +3070,7 @@ static List _bind_enumerator(Compiler c, List input) {
    later ones while preserving whole-expansion rollback on failure. */
 static List _bind_form(
   Compiler c, List input, AstPos context, int pending) {
-  Macro return_empty = $return_empty;
-  Macro tried = $tried, caught = $caught;
+  Macro caught = $caught;
   int unit = context == AST_UNIT, block = context == AST_BLOCK;
   int statement = block || context == AST_STATEMENT;
   match (input) {
@@ -3127,7 +3126,8 @@ static List _bind_form(
     case %(at ?origin ?node) if (block): return _bind_item(c, origin, node);
     case %(at ?origin ?node):
       return _anchor(c, origin, c.bind_syntax(node, context, c.return_type));
-    case return_empty() if (statement): return c.finish_return_statement(NULL);
+    case $return_empty() if (statement):
+      return c.finish_return_statement(NULL);
     case $return_value(?expr) if (statement):
       return c.finish_return_statement(expr);
     case %((!or break continue default empty)) if (statement): return input;
@@ -3155,7 +3155,7 @@ static List _bind_form(
       return _bind_catchcases(c, arms, handler);
     case caught(?body, ?cleanup, *arms) if (statement):
       return _bind_try(c, body, input.caddr(), cleanup);
-    case tried(?body, ?cleanup) if (statement):
+    case $tried(?body, ?cleanup) if (statement):
       return _bind_try(c, body, NULL, cleanup);
     case $matched(?subject, *cases) if (statement):
       return _bind_match(c, subject, cases);
