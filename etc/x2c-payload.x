@@ -73,6 +73,7 @@ static void copy_support(Path destination) {
   List rows = %(
     ("lib" ("*.x") ("lib" "include/x2c"))
     ("lib/match" ("*.x") ("lib/match" "include/x2c/match"))
+    ("lib/string" ("*.x") ("lib/string" "include/x2c/string"))
     ("src" ("grammar.x") ("src"))
     ("src/components" ("*.x") ("src/components"))
     ("builds/0/lib" ("*.h") ("include/x2c"))
