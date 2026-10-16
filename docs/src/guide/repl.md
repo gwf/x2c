@@ -83,8 +83,9 @@ incomplete submission continues at a fresh `... ` prompt.
 | --- | --- |
 | `:help` | Show session commands. |
 | `:stats [verbose]` | Show concise or detailed runtime statistics. |
-| `:symbols` | List successfully defined names and their kinds. |
-| `:load "file.x"` | Compile and load the file's public bodied meta functions. |
+| `:symbols [PREFIX]` | List successfully defined names and kinds, optionally matching a name prefix. |
+| `:load "file.x"` | Compile and load public bodied meta functions; replace an earlier load of the same file. |
+| `:info NAME` | Show a session function's argument and return types and its source. |
 | `:ast plus` | Show `plus`'s typed x2c AST. |
 | `:lowered plus` | Show the Lisp forms used to execute `plus`. |
 | `:cancel` | Discard incomplete input. |
@@ -95,6 +96,12 @@ For the example above, `:symbols` prints the list template
 `typed: %(`; lowered Lisp is separately labeled `lowered:`. Inspection does
 not execute the function, and earlier functions remain inspectable after
 later submissions. Values have symbol entries but no function AST.
+
+`:symbols pl` lists only names beginning with `pl`. `:info plus` prints a
+declaration and `source: prompt`. For a loaded function, the source is the
+loaded file's resolved absolute path. Parameter names are omitted from the
+printed declaration; argument and return types remain. Tab completion for
+`:info` includes both prompt functions and loaded functions.
 
 Help and inspection commands preserve incomplete input, including when a
 command reports an error. Colon commands are recognized on separate lines
@@ -166,11 +173,64 @@ collection to use it. Pointers, references, callbacks, records, cycles, and
 shared mutable collection identity cannot cross this boundary.
 
 A failed load publishes no names and preserves earlier functions. Fix a
-rejected file and load it again. Redefinition remains disabled, so loading
-a file whose functions are already present fails. Editing that file or
-attempting a rejected reload does not change its earlier compiled functions.
-Start a new session to replace them. Loaded names appear as `native` in
-`:symbols`; they have no prompt AST or lowered Lisp for inspection.
+rejected file and load it again. Loaded names appear as `native` in
+`:symbols`; `:info` shows their declarations and loaded file. They have no
+prompt AST or lowered Lisp for inspection.
+
+### Edit a loaded file
+
+After editing a file, use the same `:load "file.x"` command. A successful
+replacement prints `reloaded`. Calls use the new code, including calls from
+earlier prompt functions and saved `Func` values. Prompt variables and
+functions remain, as do other loaded files. Variables inside the replaced
+file and its compiled dependencies start over, even if the file did not
+change. Previously returned values remain ordinary prompt data.
+
+Existing functions must keep their argument and return types. Parameter
+names may change. Existing public types must keep their definitions. New
+functions and types are allowed when their names do not conflict. Removing
+an existing function or type, or changing its type, requires a new session.
+A refused replacement leaves both the old code and its variables intact.
+Prompt definitions still cannot be redefined.
+
+Relative paths, absolute paths, and symbolic links to the same file identify
+one load. Each loaded file has its own compiled dependencies. If two loaded
+files include the same dependency, loading one again updates only that
+file's copy. Load the other file again to update its copy too.
+
+For a real example, copy the autodiff module from a repository checkout:
+
+```sh
+cp packages/autodiff/src/autodiff-macros.x /tmp/autodiff-repl.x
+x2c repl
+```
+
+At the prompt, load and inspect the copy:
+
+```text
+:load "/tmp/autodiff-repl.x"
+:symbols ad_do
+:info ad_dot
+```
+
+The filtered list contains `ad_dot`. Its declaration is
+`String ad_dot(String);`, followed by the loaded file's absolute path.
+Keep some test data and a prompt function:
+
+```text
+x2c> String label = "loss";
+ok
+x2c> String derive(void) { return ad_dot(label); }
+defined derive
+x2c> derive();
+=> "loss_dot"
+```
+
+Edit the copy's `ad_dot` definition to append `"_derivative"` instead of
+`"_dot"`. Run `:load "/tmp/autodiff-repl.x"` again, then call `derive()`.
+The result is `"loss_derivative"`; the earlier `label` and `derive` still
+work. This module also exposes syntax helpers such as `ad_unbind` and
+`ad_mutates`, which can be called with List values from the prompt.
 
 A native call that exits, crashes, or exceeds `X2C_META_TIMEOUT` fails that
 submission. The next call restarts that load's helper from its retained

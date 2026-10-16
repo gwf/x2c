@@ -1609,6 +1609,8 @@ Map Compiler.callable_symbols(Compiler c, List names) {
         if (name in names || %(typedef $name) in view.symbols)
           selected[key] = value;
       case %(self ?name): if (name in names) selected[key] = value;
+      case %(?name "layout-attribute"):
+        if (%(typedef $name) in view.symbols) selected[key] = value;
     }
   }
   return selected;
