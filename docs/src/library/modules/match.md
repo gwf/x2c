@@ -399,7 +399,7 @@ Analyzes one `Match` pattern into its canonical positional layout.
 Distinct named binders receive slots in lexical preorder. `!quote` is
 opaque; alternatives contribute possible binders, while only binders in
 every alternative are definite. The caller owns the returned layout,
-including when `status` is `MACHINE_MALFORMED`.
+including when `status` is `<malformed>`.
 
 **Raises:** `<alloc-fail>` while normalizing or allocating the layout.
 
@@ -624,7 +624,7 @@ Source: `lib/match.x:42`
 <a id="MatchCaptureLayout"></a>
 ### MatchCaptureLayout
 
-`typedef struct MatchCaptureLayout { Atom *binders; Var normalized; unsigned long definite, possible; int binder_count, MachinePrepare status, const char *reason; } *MatchCaptureLayout`
+`typedef struct MatchCaptureLayout { Atom *binders; Var normalized; unsigned long definite, possible; int binder_count, Symbol status, const char *reason; } *MatchCaptureLayout`
 
 Describes the canonical binder slots and preparation status of a pattern.
 `binders` points into the layout allocation and lists each distinct named
@@ -662,7 +662,7 @@ Source: `lib/match.x:53`
 <a id="MatchPlan"></a>
 ### MatchPlan
 
-`typedef struct MatchPlan { MachineProgram program; MatchCaptureLayout layout; MachinePrepare status, const char *reason; int key_count, key_bits; MatchKey keys[MATCH_KEY_MAX]; } *MatchPlan`
+`typedef struct MatchPlan { MachineProgram program; MatchCaptureLayout layout; Symbol status, const char *reason; int key_count, key_bits; MatchKey keys[MATCH_KEY_MAX]; } *MatchPlan`
 
 Holds one reusable immutable compiled `Match` pattern.
 A prepared plan owns `program` and `layout`; malformed and ineligible plans

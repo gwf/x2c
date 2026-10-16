@@ -210,7 +210,7 @@ It does not authorize production extraction or publication to `dev` or `main`.
 
 ## Current iteration
 
-The [executable revision](../../experiments/language-components/README.md) is the
+The [executable revision](https://github.com/gwf/x2c/blob/e2f9b12a9007682fce187a68b763a4dcdd860bb2/experiments/language-components/README.md) is the
 review entry point. It removes access constructor wrappers and the component's
 raw declaration splitter, moves pure Type operations to `lib/type.x`, and uses
 compiler-backed Code methods. Ordinary source operations activate the included
@@ -778,7 +778,7 @@ and negative fixtures continue to protect their established public behavior.
   Local checkpoints: `eccd5fa6` moves pure Type operations and retains complete
   pattern dispatch; `2ef2114e` exercises ordinary source and typed patterns;
   `a3b2e215` reuses macro recognition with binding identity and source views.
-  Review entry: `experiments/language-components/README.md`; start with
+  Review entry: [historical experiment README](https://github.com/gwf/x2c/blob/e2f9b12a9007682fce187a68b763a4dcdd860bb2/experiments/language-components/README.md); start with
   `combined.x` and its four included components.
 
   Removed access constructor wrappers, component AST splitting, local Type
@@ -833,7 +833,7 @@ and negative fixtures continue to protect their established public behavior.
 
 - 2026-10-08: first builtin collection-access candidate, checkpoints
   `fa68a538` and `bdcbfea1`, against `a56da260`. The
-  [measurement report](../../experiments/language-components/builtin/README.md)
+  [measurement report](https://github.com/gwf/x2c/blob/e2f9b12a9007682fce187a68b763a4dcdd860bb2/experiments/language-components/builtin/README.md)
   records the implementation, kernel boundary, source counts, and evidence.
   Explicit protocol adoption, self-call suppression, user-before-builtin
   ordering, installed payload, and script dependency classification were

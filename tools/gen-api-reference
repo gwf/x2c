@@ -762,8 +762,10 @@ static const char *evidence_rows[][2] = {
   {"meta", "`make verify` (`meta-comptime-only-call`, "
            "`meta-builder-compiler-only`, and `meta-literal-arguments` "
            "compiler fixtures)."},
-  {"type", "`experiments/language-components/run.py` (`types/values`)."},
-  {"rewrite", "`experiments/language-components/run.py` (component examples)."},
+  {"type", "`make verify` (`meta-type-values` compiler fixture)."},
+  {"rewrite", "`make verify` (`rewrite-index-entry-points`, "
+              "`rewrite-independent-rules`, and `rewrite-typed-operator` "
+              "compiler fixtures)."},
   {"match", "`make verify` (`unittest/test-match.x`) and `make examples` "
             "(`match-nested`)."},
   {"match-cache", "`make verify` (`unittest/test-match-cache.x`)."},

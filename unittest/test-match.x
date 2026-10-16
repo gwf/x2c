@@ -542,21 +542,21 @@ static void match_rejects_malformed_binder_names(void) {
   EXPECT_TRUE(input.search_replace(malformed, %(changed)) == input);
 
   MatchPlan plan = MatchPlan.prepare(malformed);
-  EXPECT_INT_EQ(plan.status, MACHINE_MALFORMED);
+  EXPECT_TRUE(plan.status == <malformed>);
   EXPECT_STR_EQ(String.new(plan.reason), "binder-name");
   plan.free();
 
   plan = MatchPlan.prepare(%(node *9bad));
-  EXPECT_INT_EQ(plan.status, MACHINE_MALFORMED);
+  EXPECT_TRUE(plan.status == <malformed>);
   EXPECT_STR_EQ(String.new(plan.reason), "binder-name");
   plan.free();
 
   plan = MatchPlan.prepare(%(!quote ?bad-name));
-  EXPECT_INT_EQ(plan.status, MACHINE_PREPARED);
+  EXPECT_TRUE(plan.status == <prepared>);
   plan.free();
 
   plan = MatchPlan.prepare(%(!is (?v) ?binder?));
-  EXPECT_TRUE(plan.status != MACHINE_MALFORMED);
+  EXPECT_TRUE(plan.status != <malformed>);
   plan.free();
 }
 
@@ -573,12 +573,11 @@ static void match_binder_bytes_keep_identifier_rules(void) {
     EXPECT_INT_EQ(atom.is_list_binder(), kinds[i] == '*');
     EXPECT_INT_EQ(atom.is_binder(), kinds[i] > 0);
     MatchCaptureLayout layout = MatchCaptureLayout.analyze(atom);
-    EXPECT_INT_EQ(layout.status,
-                  kinds[i] < 0 ? MACHINE_MALFORMED : MACHINE_PREPARED);
+    EXPECT_TRUE(layout.status == (kinds[i] < 0 ? <malformed> : <prepared>));
     if (kinds[i] < 0) EXPECT_STR_EQ(String.new(layout.reason), "binder-name");
     layout.free();
     layout = MatchCaptureLayout.analyze(%(!quote $atom));
-    EXPECT_INT_EQ(layout.status, MACHINE_PREPARED);
+    EXPECT_TRUE(layout.status == <prepared>);
     EXPECT_INT_EQ(layout.binder_count, 0);
     layout.free();
   }

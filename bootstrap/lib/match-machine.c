@@ -178,9 +178,9 @@ static void _execute(MatchMachine * m, const MachineWord * w){
     break;
     case MW_ROLLBACK : _restore(&((* m)), &((* w)));
     break;
-    case MW_SLOT_VALID : if((* m).slots[(* w).a].kind != MACHINE_SLOT_INVALID)(* m).pc =(* w).target;
+    case MW_SLOT_VALID : if((* m).slots[(* w).a].kind != 20313104968)(* m).pc =(* w).target;
     break;
-    case MW_SLOT_IS_SPAN : if((* m).slots[(* w).a].kind == MACHINE_SLOT_SPAN)(* m).pc =(* w).target;
+    case MW_SLOT_IS_SPAN : if((* m).slots[(* w).a].kind == 1278044)(* m).pc =(* w).target;
     break;
     case MW_SLOT_SET_VALUE : _set_value(&((* m)), (* w).a, (* m).value, (* w).b);
     break;
@@ -353,10 +353,10 @@ static void _pop_frame(MatchMachine * m){
 
 static void _set_value(MatchMachine * m, int index, Var value, int replace_span){
   MachineSlot capture ={
-    .kind = MACHINE_SLOT_VALUE, .value = value
+    .kind = 46228810, .value = value
   }
   ;
-  MachineSlotKind expected = replace_span ? MACHINE_SLOT_SPAN : MACHINE_SLOT_INVALID;
+  Symbol expected = replace_span ? 1278044 : 20313104968;
   if((* m).slots[index].kind != expected) _error(&((* m)), 1364470281800970);
   else _journal(&((* m)), index, capture);
 }
@@ -364,14 +364,14 @@ static void _set_value(MatchMachine * m, int index, Var value, int replace_span)
 static void _set_span(MatchMachine * m, const MachineWord * w){
   int length = * _distance(&((* m)), (* w).c) - * _distance(&((* m)), (* w).b);
   MachineSlot capture ={
-    .kind = MACHINE_SLOT_SPAN, .span =(MachineSpan){
+    .kind = 1278044, .span =(MachineSpan){
       * _cursor(&((* m)), (* w).b), * _cursor(&((* m)), (* w).c), length
     }
 
   }
   ;
   if((* m).stats)(* m).stats -> span_descriptors ++;
-  if((* m).slots[(* w).a].kind != MACHINE_SLOT_INVALID) _error(&((* m)), 1364470281800970);
+  if((* m).slots[(* w).a].kind != 20313104968) _error(&((* m)), 1364470281800970);
   else _journal(&((* m)), (* w).a, capture);
 }
 
@@ -401,7 +401,7 @@ static void _restore(MatchMachine * m, const MachineWord * w){
 
 static int _value_equal(MatchMachine * m, int index, Var value){
   MachineSlot * slot = &(* m).slots[index];
-  if(slot -> kind != MACHINE_SLOT_VALUE) return 0;
+  if(slot -> kind != 46228810) return 0;
   if((* m).relation) return(* m).relation(&(* m), index, slot -> value, value, (* m).relation_context);
   return Var_equal(slot -> value, value);
 }
@@ -420,7 +420,7 @@ List Array_list_free(Array);
 static int _sequence_equal(MatchMachine * m, int index, List input, int length, int final){
   MachineSlot * slot = &(* m).slots[index];
   if(!(* m).relation) return final ? MachineSlot_final_equal(slot, input, (* m).stats) : MachineSlot_prefix_equal(slot, input, length, (* m).stats);
-  List expected = slot -> kind == MACHINE_SLOT_SPAN ? MatchMachine_materialize_span(&((* m)), slot -> span) : Var_list(slot -> value);
+  List expected = slot -> kind == 1278044 ? MatchMachine_materialize_span(&((* m)), slot -> span) : Var_list(slot -> value);
   if((* m).status == 11703268) return 0;
   if(final) return(* m).relation(&(* m), index, List_var(expected), List_var(input), (* m).relation_context);
   Array items = Array_new();
@@ -441,7 +441,7 @@ static void _eq_head(MatchMachine * m, const MachineWord * w){
 static void _bind_head(MatchMachine * m, const MachineWord * w){
   List at = * _cursor(&((* m)), (* w).b);
   if(! List_truth(at))(* m).pc =(* w).target;
-  else if((* m).slots[(* w).a].kind == MACHINE_SLOT_INVALID){
+  else if((* m).slots[(* w).a].kind == 20313104968){
     _set_value(&((* m)), (* w).a, List_car(at), 0);
     if((* m).status != 11703268) _skip(&((* m)), (* w).b, at);
   }
@@ -569,7 +569,7 @@ String String_join(String, List);
 
 void MatchMachine_finish(MatchMachine * m){
   if((* m).running){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/match-machine.x",.function = "MatchMachine_finish",.line = 514};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/match-machine.x",.function = "MatchMachine_finish",.line = 513};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchMachine.finish")), NULL))));
     __builtin_unreachable();
   }
@@ -602,7 +602,7 @@ void MatchMachine_dispose(MatchMachine * m){
 MatchMachine * MatchMachine_acquire(MachineStats * stats){
   MatchMachine * m = machine_thread.count ? machine_thread.spares[-- machine_thread.count] : calloc(1, sizeof(MatchMachine));
   if(! m){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/match-machine.x",.function = "MatchMachine_acquire",.line = 567};
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/match-machine.x",.function = "MatchMachine_acquire",.line = 566};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchMachine.acquire")), NULL))));
     __builtin_unreachable();
   }
@@ -624,7 +624,7 @@ void MatchMachine_release_spares(void){
 static void _clear_slots(MatchMachine * m){
   for(int i = 0;  i <(* m).slot_count;  i ++){
     memset(&(* m).slots[i], 0, sizeof(MachineSlot));
-    (* m).slots[i].kind = MACHINE_SLOT_INVALID;
+    (* m).slots[i].kind = 20313104968;
   }
 
 }

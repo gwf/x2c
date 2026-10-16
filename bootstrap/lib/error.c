@@ -648,7 +648,7 @@ static int _catch_arm(ErrorHandler h, ErrorRecord * record, List projection, int
     values, 0, binders
   }
   ;
-  int matched = i == h -> site -> default_arm ||(plan -> status == MACHINE_PREPARED && MatchPlan_execute_capture(plan, List_var(projection), &(captures), NULL) == 1);
+  int matched = i == h -> site -> default_arm ||(plan -> status == 1138535534920 && MatchPlan_execute_capture(plan, List_var(projection), &(captures), NULL) == 1);
   if(matched) _commit_captures(h, record, layout, & captures);
   if(values) Scope_free(values);
   return matched;
@@ -957,7 +957,7 @@ static void _bind(ErrorCatchSite * site, Var * patterns){
       if(retainable) for(int i = 0;  i < site -> arm_count;  i ++){
         if(i == site -> default_arm) continue;
         MatchPlan plan = x2c_match_site_prepare(& site -> arms[i], patterns[i]);
-        if(plan -> status == MACHINE_INELIGIBLE && site -> fenced_arm < 0) site -> fenced_arm = i;
+        if(plan -> status == 664475009618698 && site -> fenced_arm < 0) site -> fenced_arm = i;
       }
       __atomic_store_n(& site -> state, retainable ? ERROR_CATCH_STATIC : ERROR_CATCH_TRANSIENT, __ATOMIC_RELEASE);
     }
@@ -988,7 +988,7 @@ static const char * _prepare_plans(ErrorHandler h, Var * patterns, int * fenced_
   for(int i = 0;  i < site -> arm_count;  i ++){
     MatchPlan plan = i == site -> default_arm || x2c_var_equal(patterns[i], Symbol_var(8938171176)) ? NULL : MatchPlan_prepare(patterns[i]);
     Block_push(h -> plans, & plan);
-    if(plan && plan -> status == MACHINE_INELIGIBLE && ! fenced){
+    if(plan && plan -> status == 664475009618698 && ! fenced){
       fenced = plan -> reason;
       (* fenced_arm) = i;
     }

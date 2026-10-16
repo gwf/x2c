@@ -229,7 +229,7 @@ static List _bindings(RecursiveMatchState &state) {
 
 static int _try_capture(
   MatchCaptureLayout layout, Var input, MatchCaptureBuffer *captures) {
-  if (!layout || !captures || layout.status == MACHINE_MALFORMED ||
+  if (!layout || !captures || layout.status == <malformed> ||
       captures.capacity < layout.binder_count ||
       (layout.binder_count && !captures.values))
     return 0;
@@ -254,7 +254,7 @@ static int _try_capture(
 static int _try_value(Var input, Var pattern, List *out_bindings) {
   if (!out_bindings) return 0;
   MatchCaptureLayout layout = MatchCaptureLayout.analyze(pattern);
-  if (layout.status == MACHINE_MALFORMED) {
+  if (layout.status == <malformed>) {
     layout.free();
     return 0;
   }

@@ -3,7 +3,6 @@
 #define __GUARD_0xEC6B1D5A__
 #include "error-macros.h"
 #include "match.h"
-#define MATCH_CACHE_PRESSURE 3
 typedef struct MatchCache * MatchCache;
 
 typedef struct MatchLease{
@@ -38,7 +37,7 @@ struct MatchCache{
 }
 ;
 
-static int _transient(MatchCache cache, Var pattern, MatchLease * lease, const char * owner);
+static Symbol _transient(MatchCache cache, Var pattern, MatchLease * lease, const char * owner);
 
 static MatchPlan _prepare(MatchCache cache, Var pattern, const char * owner);
 
@@ -139,7 +138,7 @@ static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7);
 
 
 
-int MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char * owner){
+Symbol MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char * owner){
   (* lease) =(MatchLease){
     .slot = - 1
   }
@@ -153,7 +152,7 @@ int MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char
     return m -> entries[slot].plan -> status;
   }
   slot = m -> size < m -> capacity ? _free_slot(m) : _victim(m);
-  if(slot < 0) return MATCH_CACHE_PRESSURE;
+  if(slot < 0) return 1138543013002;
   MatchPlan plan = _prepare(m, pattern, owner);
   if(m -> entries[slot].occupied) _remove(m, slot);
   _insert(m, slot, key, plan);
@@ -163,7 +162,7 @@ int MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char
 
 MatchPlan MatchPlan_prepare(Var);
 
-static int _transient(MatchCache cache, Var pattern, MatchLease * lease, const char * owner){
+static Symbol _transient(MatchCache cache, Var pattern, MatchLease * lease, const char * owner){
   MatchPlan plan = _unfenced(MatchPlan_prepare(pattern), owner);
   lease -> cache = cache;
   lease -> transient_plan = plan;
@@ -205,7 +204,7 @@ static MatchPlan _prepare(MatchCache cache, Var pattern, const char * owner){
 void MatchPlan_free(MatchPlan);
 
 static MatchPlan _unfenced(MatchPlan plan, const char * owner){
-  if(plan -> status == MACHINE_INELIGIBLE){
+  if(plan -> status == 664475009618698){
     const char * reason = plan -> reason;
     MatchPlan_free(plan);
     MatchPlan_raise_ineligible(reason, owner);
@@ -351,14 +350,14 @@ String String_join(String, List);
 
 void MatchLease_release(MatchLease * lease){
   if(! lease){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/match-cache.x",.function = "MatchLease_release",.line = 298};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/match-cache.x",.function = "MatchLease_release",.line = 293};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
     __builtin_unreachable();
   }
   if(! lease -> active) return;
   if(lease -> transient_plan){
     if(! lease -> cache || lease -> cache -> active_leases <= 0){
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/match-cache.x",.function = "MatchLease_release",.line = 302};
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/match-cache.x",.function = "MatchLease_release",.line = 297};
       x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
       __builtin_unreachable();
     }
@@ -370,7 +369,7 @@ void MatchLease_release(MatchLease * lease){
   }
   MatchCacheEntry * entry = _entry(lease);
   if(! entry || lease -> cache -> active_leases <= 0 || entry -> pin_count <= 0){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/match-cache.x",.function = "MatchLease_release",.line = 312};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/match-cache.x",.function = "MatchLease_release",.line = 307};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
     __builtin_unreachable();
   }
@@ -393,7 +392,7 @@ static MatchCacheEntry * _entry(MatchLease * lease){
 int MatchCache_try_capture(MatchCache cache, List input, Var pattern, MatchCaptureBuffer * captures, const char * owner){
   MatchLease _x2c_gensym_macro_storage_0;
   MatchLease * _x2c_gensym_macro_lease_0 = & _x2c_gensym_macro_storage_0;
-  int _x2c_gensym_macro_status_0 = MatchCache_acquire(cache, pattern, &(* _x2c_gensym_macro_lease_0), owner);
+  Symbol _x2c_gensym_macro_status_0 = MatchCache_acquire(cache, pattern, &(* _x2c_gensym_macro_lease_0), owner);
   {
     _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
       0
@@ -406,7 +405,7 @@ int MatchCache_try_capture(MatchCache cache, List input, Var pattern, MatchCaptu
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_1);
     {
-      MatchPlan plan = _x2c_gensym_macro_status_0 == MACHINE_PREPARED ? MatchLease_plan(_x2c_gensym_macro_lease_0) : NULL;
+      MatchPlan plan = _x2c_gensym_macro_status_0 == 1138535534920 ? MatchLease_plan(_x2c_gensym_macro_lease_0) : NULL;
       {
         int _x2c_gensym_return_value_0 = plan && MatchPlan_try_capture(plan, input, captures) == 1;
         {
@@ -425,7 +424,7 @@ int MatchCache_try_capture(MatchCache cache, List input, Var pattern, MatchCaptu
 int MatchCache_try_match(MatchCache cache, List input, Var pattern, List * out_bindings, const char * owner){
   MatchLease _x2c_gensym_macro_storage_1;
   MatchLease * _x2c_gensym_macro_lease_1 = & _x2c_gensym_macro_storage_1;
-  int _x2c_gensym_macro_status_1 = MatchCache_acquire(cache, pattern, &(* _x2c_gensym_macro_lease_1), owner);
+  Symbol _x2c_gensym_macro_status_1 = MatchCache_acquire(cache, pattern, &(* _x2c_gensym_macro_lease_1), owner);
   {
     _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
       0
@@ -438,7 +437,7 @@ int MatchCache_try_match(MatchCache cache, List input, Var pattern, List * out_b
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_2);
     {
-      MatchPlan plan = _x2c_gensym_macro_status_1 == MACHINE_PREPARED ? MatchLease_plan(_x2c_gensym_macro_lease_1) : NULL;
+      MatchPlan plan = _x2c_gensym_macro_status_1 == 1138535534920 ? MatchLease_plan(_x2c_gensym_macro_lease_1) : NULL;
       {
         int _x2c_gensym_return_value_1 = plan && MatchPlan_try_match(plan, input, out_bindings) == 1;
         {
@@ -457,7 +456,7 @@ int MatchCache_try_match(MatchCache cache, List input, Var pattern, List * out_b
 int MatchCache_try_search(MatchCache cache, List input, Var pattern, Var * out_match, List * out_bindings, const char * owner){
   MatchLease _x2c_gensym_macro_storage_2;
   MatchLease * _x2c_gensym_macro_lease_2 = & _x2c_gensym_macro_storage_2;
-  int _x2c_gensym_macro_status_2 = MatchCache_acquire(cache, pattern, &(* _x2c_gensym_macro_lease_2), owner);
+  Symbol _x2c_gensym_macro_status_2 = MatchCache_acquire(cache, pattern, &(* _x2c_gensym_macro_lease_2), owner);
   {
     _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0
@@ -470,7 +469,7 @@ int MatchCache_try_search(MatchCache cache, List input, Var pattern, Var * out_m
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_3);
     {
-      MatchPlan plan = _x2c_gensym_macro_status_2 == MACHINE_PREPARED ? MatchLease_plan(_x2c_gensym_macro_lease_2) : NULL;
+      MatchPlan plan = _x2c_gensym_macro_status_2 == 1138535534920 ? MatchLease_plan(_x2c_gensym_macro_lease_2) : NULL;
       {
         int _x2c_gensym_return_value_2 = plan && MatchPlan_try_search(plan, input, out_match, out_bindings) == 1;
         {
@@ -489,7 +488,7 @@ int MatchCache_try_search(MatchCache cache, List input, Var pattern, Var * out_m
 int MatchCache_search(MatchCache cache, List input, Var pattern, List * out_results, const char * owner){
   MatchLease _x2c_gensym_macro_storage_3;
   MatchLease * _x2c_gensym_macro_lease_3 = & _x2c_gensym_macro_storage_3;
-  int _x2c_gensym_macro_status_3 = MatchCache_acquire(cache, pattern, &(* _x2c_gensym_macro_lease_3), owner);
+  Symbol _x2c_gensym_macro_status_3 = MatchCache_acquire(cache, pattern, &(* _x2c_gensym_macro_lease_3), owner);
   {
     _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
       0
@@ -502,7 +501,7 @@ int MatchCache_search(MatchCache cache, List input, Var pattern, List * out_resu
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_4);
     {
-      MatchPlan plan = _x2c_gensym_macro_status_3 == MACHINE_PREPARED ? MatchLease_plan(_x2c_gensym_macro_lease_3) : NULL;
+      MatchPlan plan = _x2c_gensym_macro_status_3 == 1138535534920 ? MatchLease_plan(_x2c_gensym_macro_lease_3) : NULL;
       List results = NULL;
       if(plan) MatchPlan_search(plan, input, &(results));
       (* out_results) = results;
@@ -524,7 +523,7 @@ int MatchCache_search(MatchCache cache, List input, Var pattern, List * out_resu
 int MatchCache_try_match_replace(MatchCache cache, List input, Var pattern, Var template, Var * out, const char * owner){
   MatchLease _x2c_gensym_macro_storage_4;
   MatchLease * _x2c_gensym_macro_lease_4 = & _x2c_gensym_macro_storage_4;
-  int _x2c_gensym_macro_status_4 = MatchCache_acquire(cache, pattern, &(* _x2c_gensym_macro_lease_4), owner);
+  Symbol _x2c_gensym_macro_status_4 = MatchCache_acquire(cache, pattern, &(* _x2c_gensym_macro_lease_4), owner);
   {
     _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_4 ={
       0
@@ -537,7 +536,7 @@ int MatchCache_try_match_replace(MatchCache cache, List input, Var pattern, Var 
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_5);
     {
-      MatchPlan plan = _x2c_gensym_macro_status_4 == MACHINE_PREPARED ? MatchLease_plan(_x2c_gensym_macro_lease_4) : NULL;
+      MatchPlan plan = _x2c_gensym_macro_status_4 == 1138535534920 ? MatchLease_plan(_x2c_gensym_macro_lease_4) : NULL;
       {
         int _x2c_gensym_return_value_4 = plan && MatchPlan_try_match_replace(plan, input, template, out) == 1;
         {
@@ -556,7 +555,7 @@ int MatchCache_try_match_replace(MatchCache cache, List input, Var pattern, Var 
 int MatchCache_search_replace(MatchCache cache, List input, Var pattern, Var template, List * out, const char * owner){
   MatchLease _x2c_gensym_macro_storage_5;
   MatchLease * _x2c_gensym_macro_lease_5 = & _x2c_gensym_macro_storage_5;
-  int _x2c_gensym_macro_status_5 = MatchCache_acquire(cache, pattern, &(* _x2c_gensym_macro_lease_5), owner);
+  Symbol _x2c_gensym_macro_status_5 = MatchCache_acquire(cache, pattern, &(* _x2c_gensym_macro_lease_5), owner);
   {
     _x2c_gensym_defer_env_5 _x2c_gensym_macro_environment_5 ={
       0
@@ -569,7 +568,7 @@ int MatchCache_search_replace(MatchCache cache, List input, Var pattern, Var tem
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_6);
     {
-      MatchPlan plan = _x2c_gensym_macro_status_5 == MACHINE_PREPARED ? MatchLease_plan(_x2c_gensym_macro_lease_5) : NULL;
+      MatchPlan plan = _x2c_gensym_macro_status_5 == 1138535534920 ? MatchLease_plan(_x2c_gensym_macro_lease_5) : NULL;
       List result = input;
       int answered = plan && MatchPlan_search_replace(plan, input, template, &(result)) >= 0;
       (* out) = result;
@@ -623,7 +622,7 @@ void MatchCache_context_close(void * token){
   MatchContextState state = token;
   if(! state) return;
   if(match_thread.context_top != state){
-    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/match-cache.x",.function = "MatchCache_context_close",.line = 511};
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/match-cache.x",.function = "MatchCache_context_close",.line = 506};
     x2c_error_raise_n(& _x2c_gensym_error_site_3, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.context_close")), NULL))));
     __builtin_unreachable();
   }
@@ -646,7 +645,7 @@ MatchCache MatchCache_new(int capacity){
   if(capacity <= 0){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/match-cache.x",.function = "MatchCache_new",.line = 543};
+      static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/match-cache.x",.function = "MatchCache_new",.line = 538};
       x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(209381969202), int_var(capacity));
       __builtin_unreachable();
     }
@@ -655,7 +654,7 @@ MatchCache MatchCache_new(int capacity){
   if(capacity >(INT_MAX - 1) / 2){
     Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/match-cache.x",.function = "MatchCache_new",.line = 545};
+      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/match-cache.x",.function = "MatchCache_new",.line = 540};
       x2c_error_raise_n(& _x2c_gensym_error_site_5, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(209381969202), int_var(capacity));
       __builtin_unreachable();
     }
@@ -698,7 +697,7 @@ MatchCache MatchCache_new(int capacity){
 void MatchCache_dispose(MatchCache cache){
   if(! cache) return;
   if(cache -> active_leases){
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/match-cache.x",.function = "MatchCache_dispose",.line = 572};
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/match-cache.x",.function = "MatchCache_dispose",.line = 567};
     x2c_error_raise_n(& _x2c_gensym_error_site_6, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.dispose")), NULL))));
     __builtin_unreachable();
   }

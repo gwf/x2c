@@ -30,7 +30,7 @@ typedef struct MatchCaptureLayout {
   Atom *binders;
   Var normalized;
   unsigned long definite, possible;
-  int binder_count, MachinePrepare status, const char *reason;
+  int binder_count, Symbol status, const char *reason;
 } *MatchCaptureLayout;
 
 /** Supplies caller-owned positional storage for one `Match` invocation.
@@ -68,7 +68,7 @@ enum { MATCH_KEY_MAX = 8 };
 typedef struct MatchPlan {
   MachineProgram program;
   MatchCaptureLayout layout;
-  MachinePrepare status, const char *reason;
+  Symbol status, const char *reason;
   int key_count, key_bits;
   MatchKey keys[MATCH_KEY_MAX];
 } *MatchPlan;
@@ -223,7 +223,7 @@ static typedef struct MatchSlots {
     Distinct named binders receive slots in lexical preorder. `!quote` is
     opaque; alternatives contribute possible binders, while only binders in
     every alternative are definite. The caller owns the returned layout,
-    including when `status` is `MACHINE_MALFORMED`.
+    including when `status` is `<malformed>`.
     Raises: `<alloc-fail>` while normalizing or allocating the layout.
 */
 MatchCaptureLayout MatchCaptureLayout.analyze(Var pattern) {
@@ -304,7 +304,7 @@ static MatchCaptureLayout _layout(
   layout.binders =
     (Atom *) ((char *) layout + sizeof(struct MatchCaptureLayout));
   layout.binder_count = b.count;
-  layout.status = malformed ? MACHINE_MALFORMED : MACHINE_PREPARED;
+  layout.status = malformed ? <malformed> : <prepared>;
   layout.reason = malformed ? malformed : "prepared";
   layout.normalized = normalized;
   if (b.count) memcpy(layout.binders, b.binders, sizeof(Atom) * b.count);
@@ -459,9 +459,9 @@ void MatchPlan.raise_ineligible(const char *reason, const char *owner) {
 /* Entry-point guard over an already prepared plan; `plan` stays owned by
    its caller. Malformed patterns keep their categorized no-match. */
 static int _prepared(MatchPlan plan, const char *owner) {
-  if (plan && plan.status == MACHINE_INELIGIBLE)
+  if (plan && plan.status == <ineligible>)
     MatchPlan.raise_ineligible(plan.reason, owner);
-  return plan && plan.status == MACHINE_PREPARED;
+  return plan && plan.status == <prepared>;
 }
 
 static int _buffer_valid(
@@ -571,9 +571,9 @@ static int _commit(
   unsigned long present = 0;
   for (int i = 0; i < view.binder_count; i++) {
     MachineSlot *slot = &m.slots[i];
-    if (slot.kind == MACHINE_SLOT_INVALID) continue;
+    if (slot.kind == <invalid>) continue;
     values[i] = slot.value;
-    if (slot.kind == MACHINE_SLOT_SPAN)
+    if (slot.kind == <span>)
       values[i] = m.materialize_span(slot.span);
     if (m.status == <error>) break;
     present |= 1UL << i;
@@ -1079,7 +1079,7 @@ int x2c_match_site_try_capture(
   MatchPlan plan = _published(site, pattern);
   // a pattern the site cannot retain takes the ordinary runtime route
   if (!plan) return x2c_match_try_capture(input, pattern, captures);
-  if (plan.status == MACHINE_MALFORMED) return 0;
+  if (plan.status == <malformed>) return 0;
   return _prepared(plan, "match") &&
          _buffer_valid(plan.layout, captures) &&
          _capture(plan, input, captures, NULL) == 1;
@@ -1176,7 +1176,7 @@ MatchPlan x2c_match_site_prepare(MatchCaptureSite *site, Var pattern) =>
    the ordinary runtime route. */
 static MatchPlan _plan(MatchCaptureSite *site, Var pattern) {
   MatchPlan plan = _published(site, pattern);
-  return plan && plan.status != MACHINE_INELIGIBLE ? plan : NULL;
+  return plan && plan.status != <ineligible> ? plan : NULL;
 }
 
 /** Matches through one compiler-owned site, writing bindings on success.

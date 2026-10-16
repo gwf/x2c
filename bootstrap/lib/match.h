@@ -15,7 +15,7 @@ typedef struct MatchCaptureLayout{
   Var normalized;
   unsigned long definite, possible;
   int binder_count;
-  MachinePrepare status;
+  Symbol status;
   const char * reason;
 }
 * MatchCaptureLayout;
@@ -41,7 +41,7 @@ enum{
 typedef struct MatchPlan{
   MachineProgram program;
   MatchCaptureLayout layout;
-  MachinePrepare status;
+  Symbol status;
   const char * reason;
   int key_count, key_bits;
   MatchKey keys[MATCH_KEY_MAX];

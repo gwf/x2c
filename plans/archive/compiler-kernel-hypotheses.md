@@ -71,7 +71,7 @@ A claim-free `$auto` prototype that intercepts the initializer before
 expansion was rejected by its own report: forwarding macros expand the
 inner `$auto` first. The branch's measurements, fixture state (five known
 failures shared with the baseline), and generated-C condition are recorded
-in `experiments/language-components/builtin/README.md`. This worktree holds
+in [historical builtin report](https://github.com/gwf/x2c/blob/e2f9b12a9007682fce187a68b763a4dcdd860bb2/experiments/language-components/builtin/README.md). This worktree holds
 the earlier salvage proofs under `.context/language-components/`.
 
 ## The kernel today

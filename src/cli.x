@@ -144,11 +144,9 @@ static typedef struct CliOption {
   Symbol id, int commands, Symbol group, String spelling;
   const char *value, *description, int hidden;
   String alias, label, int prefix;
-  int apply, package_native;
+  Symbol apply, int package_native;
   size_t offset;
 } CliOption;
-
-static enum { FIELD_FLAG = 1, FIELD_TEXT, FIELD_LIST };
 
 /* A command's help lists its option groups in this order. */
 static typedef struct CliGroup { Symbol group, const char *title; } CliGroup;
@@ -166,11 +164,7 @@ static CliGroup cli_groups[] = {
   { 0 }
 };
 
-#define CLI_FIELD_FLAG(field) .apply = FIELD_FLAG, \
-  .offset = offsetof(struct CliRequest, field)
-#define CLI_FIELD_TEXT(field) .apply = FIELD_TEXT, \
-  .offset = offsetof(struct CliRequest, field)
-#define CLI_FIELD_LIST(field) .apply = FIELD_LIST, \
+#define CLI_FIELD(kind, field) .apply = kind, \
   .offset = offsetof(struct CliRequest, field)
 
 static CliOption cli_options[] = {
@@ -183,93 +177,93 @@ static CliOption cli_options[] = {
   { <verbose>, CLI_TRANSLATE | CLI_NATIVE,
     <general>, "-v", NULL,
     "Show commands as they are executed", 0, .alias = "--verbose",
-    CLI_FIELD_FLAG(verbose) },
+    CLI_FIELD(<flag>, verbose) },
   { <dry-run>, CLI_TRANSLATE | CLI_NATIVE,
     <general>, "-###", NULL, "Show commands without executing them", 0,
-    CLI_FIELD_FLAG(dry_run) },
+    CLI_FIELD(<flag>, dry_run) },
   { <quiet>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN |
     CLI_INSTALL | CLI_REMOVE | CLI_NEW,
     <general>, "-q", NULL,
     "Suppress successful progress and receipts", 0, .alias = "--quiet",
-    CLI_FIELD_FLAG(quiet) },
+    CLI_FIELD(<flag>, quiet) },
   { <plain>, CLI_TRANSLATE | CLI_NATIVE,
     <general>, "--plain", NULL,
-    "Use stable output without terminal rendering", 0, CLI_FIELD_FLAG(plain) },
+    "Use stable output without terminal rendering", 0, CLI_FIELD(<flag>, plain) },
   { <color>, CLI_TRANSLATE | CLI_NATIVE,
     <general>, "--color", "<auto|always|never>", "Control terminal color", 0 },
   { <debug>, CLI_TRANSLATE | CLI_NATIVE,
     <general>, "--debug", NULL, "Enable compiler debug logging", 0,
-    CLI_FIELD_FLAG(debugging) },
+    CLI_FIELD(<flag>, debugging) },
   { <max-errors>, CLI_TRANSLATE | CLI_NATIVE, <general>, "--max-errors",
     "<count>", "Stop after <count> errors per unit (default: 20)", 0 },
   { <diag-file>, CLI_TRANSLATE | CLI_NATIVE, <general>,
     "--diagnostics-file", "<file>",
     "Write compiler diagnostics to <file> as JSON Lines", 0,
-    CLI_FIELD_TEXT(diagnostics_file) },
+    CLI_FIELD(<text>, diagnostics_file) },
   { <fatal-warn>, CLI_TRANSLATE, <general>, "--fatal-warnings", NULL,
-    "Fail a unit that reports a warning", 1, CLI_FIELD_FLAG(fatal_warnings) },
+    "Fail a unit that reports a warning", 1, CLI_FIELD(<flag>, fatal_warnings) },
   { <no-iface>, CLI_TRANSLATE, <source>, "--no-interfaces", NULL,
     "Collect every unit cold without reading .xi interfaces", 1,
-    CLI_FIELD_FLAG(no_interfaces) },
+    CLI_FIELD(<flag>, no_interfaces) },
   { <out-dir>, CLI_TRANSLATE, <output>, "--out-dir", "<dir>",
     "Write generated files under <dir> (default: .)", 0,
-    CLI_FIELD_TEXT(out_dir) },
+    CLI_FIELD(<text>, out_dir) },
   { <src-map>, CLI_TRANSLATE | CLI_NATIVE, <output>, "--source-map",
     NULL, "Map generated C locations to original x2c sources", 0,
-    CLI_FIELD_FLAG(source_map) },
+    CLI_FIELD(<flag>, source_map) },
   { <no-deps>, CLI_TRANSLATE, <output>, "--no-deps", NULL,
-    "Do not write x2c dependency files", 0, CLI_FIELD_FLAG(no_deps) },
+    "Do not write x2c dependency files", 0, CLI_FIELD(<flag>, no_deps) },
   { <dep-file>, CLI_TRANSLATE, <output>, "--dep-file", "<file>",
     "Override the depfile path (one input only)", 0,
-    CLI_FIELD_TEXT(dep_file) },
+    CLI_FIELD(<text>, dep_file) },
   { <dep-target>, CLI_TRANSLATE, <output>, "--dep-target",
     "<target>", "Override the depfile target (one input only)", 0,
-    CLI_FIELD_TEXT(dep_target) },
+    CLI_FIELD(<text>, dep_target) },
   { <no-phony>, CLI_TRANSLATE, <output>,
     "--no-phony-deps", NULL, "Omit phony rules for included files", 0,
-    CLI_FIELD_FLAG(no_phony_deps) },
+    CLI_FIELD(<flag>, no_phony_deps) },
   { <manifest>, CLI_BUILD | CLI_RUN, <target>, "--manifest-path",
     "<file>", "Use <file> instead of discovering x2c.toml", 0,
-    CLI_FIELD_TEXT(manifest) },
+    CLI_FIELD(<text>, manifest) },
   { <target>, CLI_BUILD | CLI_RUN, <target>, "--target", "<name>",
-    "Build the named manifest target", 0, CLI_FIELD_TEXT(target) },
+    "Build the named manifest target", 0, CLI_FIELD(<text>, target) },
   { <profile>, CLI_BUILD | CLI_RUN, <target>, "--profile", "<name>",
-    "Apply the named manifest build profile", 0, CLI_FIELD_TEXT(profile) },
+    "Apply the named manifest build profile", 0, CLI_FIELD(<text>, profile) },
   { <kind>, CLI_BUILD, <target>, "--kind", "<kind>",
     "executable, static-library, or meta-module", 0 },
   { <compile>, CLI_BUILD, <target>, "-c",
     NULL, "Produce object files without linking", 0,
-    .alias = "--compile-only", CLI_FIELD_FLAG(compile_only) },
+    .alias = "--compile-only", CLI_FIELD(<flag>, compile_only) },
   { <jobs>, CLI_TRANSLATE | CLI_NATIVE, <target>, "-j",
     "<count>", "Maximum parallel translation and compilation jobs", 0,
     .alias = "--jobs" },
   { <output>, CLI_BUILD | CLI_RUN, <output>, "--output", "<file>",
     "Name the executable, library, or single object", 0,
-    CLI_FIELD_TEXT(output) },
+    CLI_FIELD(<text>, output) },
   { <rebuild>, CLI_SCRIPT, <output>, "--rebuild", NULL,
     "Build the script even when its cached executable is current", 0,
-    CLI_FIELD_FLAG(rebuild) },
+    CLI_FIELD(<flag>, rebuild) },
   { <clean>, CLI_SCRIPT, <output>, "--clean", NULL,
     "Remove the script's cached build and exit without running it", 0,
-    CLI_FIELD_FLAG(clean) },
+    CLI_FIELD(<flag>, clean) },
   { <build-dir>, CLI_BUILD | CLI_RUN, <output>, "--build-dir",
     "<dir>", "Store generated C, objects, deps, and state here", 0,
-    CLI_FIELD_TEXT(build_dir) },
+    CLI_FIELD(<text>, build_dir) },
   { <cc-db>, CLI_BUILD | CLI_RUN, <output>, "--compile-commands",
     "<file>", "Write native compile commands and retain generated files", 0 },
   { <save-temp>, CLI_BUILD | CLI_RUN, <output>,
     "--save-temps", NULL,
     "Keep generated C and other intermediate files", 0,
-    .label = "--save-temps[=<dir>]", CLI_FIELD_FLAG(save_temps) },
+    .label = "--save-temps[=<dir>]", CLI_FIELD(<flag>, save_temps) },
   { <sha256>, CLI_INSTALL, <package>, "--sha256", "<hex>",
     "Require this digest of a downloaded or local archive", 0,
-    CLI_FIELD_TEXT(sha256) },
+    CLI_FIELD(<text>, sha256) },
   { <index>, CLI_INSTALL | CLI_BUILD | CLI_RUN, <package>, "--index",
     "<url-or-path>",
-    "Resolve package names through this index", 0, CLI_FIELD_TEXT(index) },
+    "Resolve package names through this index", 0, CLI_FIELD(<text>, index) },
   { <force>, CLI_INSTALL, <package>, "--force", NULL,
     "Install a bundle built for another x2c version", 0,
-    CLI_FIELD_FLAG(force) },
+    CLI_FIELD(<flag>, force) },
   { <include>, CLI_TRANSLATE | CLI_NATIVE, <source>,
     "-I", "<dir>", "Add a shared x2c/C include directory", 0,
     .package_native = 1 },
@@ -283,35 +277,35 @@ static CliOption cli_options[] = {
     .package_native = 1 },
   { <pkg-dir>, CLI_TRANSLATE | CLI_NATIVE | CLI_ENV, <source>,
     "--package-dir", "<dir>", "Add a directory of x2c packages", 0,
-    CLI_FIELD_LIST(package_dirs) },
+    CLI_FIELD(<list>, package_dirs) },
   { <native>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
     "--native-module", "<file>",
     "Load a native module for compile-time calls", 0,
-    CLI_FIELD_LIST(native_modules) },
+    CLI_FIELD(<list>, native_modules) },
   { <extension>, CLI_BUILD, <source>,
     "--extension", "<dir>",
     "Link a package's compile-time part into a compiler", 0,
-    CLI_FIELD_LIST(extensions) },
+    CLI_FIELD(<list>, extensions) },
   { <no-cpp>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
     "--no-cpp", NULL, "Skip symbol collection and preprocessing", 0,
-    CLI_FIELD_FLAG(no_cpp) },
+    CLI_FIELD(<flag>, no_cpp) },
   { <live-syms>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
     "--live-symbols", NULL,
     "Collect symbols through the host preprocessor", 0,
-    CLI_FIELD_FLAG(live_symbols) },
+    CLI_FIELD(<flag>, live_symbols) },
   { <cpp-syms>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
     "--cpp-symbols", NULL, "Use CPP collection for this translation", 0,
-    CLI_FIELD_FLAG(cpp_symbols) },
+    CLI_FIELD(<flag>, cpp_symbols) },
   { <cc>, CLI_NATIVE | CLI_ENV, <c-compiler>,
     "--cc", "<program>",
-    "Use <program> as the host C compiler", 0, CLI_FIELD_TEXT(cc) },
+    "Use <program> as the host C compiler", 0, CLI_FIELD(<text>, cc) },
   { <meta-cc>, CLI_TRANSLATE | CLI_NATIVE, <c-compiler>,
     "--meta-cc", "<program>",
     "Use <program> to build meta code, whatever --cc is", 0,
-    CLI_FIELD_TEXT(meta_cc) },
+    CLI_FIELD(<text>, meta_cc) },
   { <ar>, CLI_BUILD | CLI_ENV, <c-compiler>,
     "--ar", "<program>",
-    "Use <program> as the static-library archiver", 0, CLI_FIELD_TEXT(ar) },
+    "Use <program> as the static-library archiver", 0, CLI_FIELD(<text>, ar) },
   { <opt>, CLI_NATIVE,
     <c-compiler>,
     "-O", NULL, "Set C optimization", 0,
@@ -741,9 +735,9 @@ static void _set_field(
   char *field = (char *) r + option.offset;
   $switch(option.apply)
   {
-    case FIELD_FLAG: *(int *) field = 1;
-    case FIELD_TEXT: *(String *) field = value;
-    case FIELD_LIST: *(List *) field = cons(value, *(List *) field);
+    case <flag>: *(int *) field = 1;
+    case <text>: *(String *) field = value;
+    case <list>: *(List *) field = cons(value, *(List *) field);
   }
 }
 

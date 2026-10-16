@@ -106,42 +106,6 @@ static Var _slot_view(int splice, Var form);
 
 static Var _slot_binder(Var form);
 
-static inline Symbol Macro_case_symbol(Var value);
-
-static inline int Macro_case_own(Var content);
-
-static inline int Macro_case_start(List code, Symbol head, List * cursor){
-  if(! List_truth(code)) return 0;
-  Symbol first = Macro_case_symbol(code -> car);
-  if(first == head &&(head != 377892 || Macro_case_own(List_caddr(code)))){
-    * cursor = code;
-    return 2;
-  }
-  return first && first != 104 && first != 40070 && first != 377892 && first != 39266 ? 0 : - 1;
-}
-
-static inline int Macro_case_own(Var content){
-  List node = Var_list_payload(content);
-  if(! List_truth(node)) return 1;
-  Symbol head = Macro_case_symbol(node -> car);
-  return head && head != 377892;
-}
-
-static inline Symbol Macro_case_symbol(Var value){
-  Symbol symbol = value.u64 - VAR_SYMBOL_OFFSET;
-  return symbol < 1ul << 51 ? symbol : 0;
-}
-
-int Macro_case_view(Var value, List * cursor);
-
-static inline int Macro_case_enter(Var value, List * cursor){
-  List node = Var_list_payload(value);
-  Symbol head = List_truth(node) ? Macro_case_symbol(node -> car) : 0;
-  if(! head || head == 104 || head == 40070 || head == 377892) return Macro_case_view(value, cursor);
-  * cursor = node;
-  return 1;
-}
-
 typedef struct MacroMatcher{
   Macro shape;
   List holes, pattern;
@@ -969,6 +933,8 @@ int Macro_case_capture_at(MacroCaseSite * site, List code, Macro t, List names, 
   return _derived_capture(site, code, t, names, published);
 }
 
+int Macro_case_enter(Var value, List * cursor);
+
 int Macro_case_root(List code, Macro t, List names, int statement, List * cursor, MatchCaptureBuffer * published){
   if(! _init_guard_) _file_init_();
   List grouped = NULL;
@@ -991,7 +957,7 @@ int Macro_case_root(List code, Macro t, List names, int statement, List * cursor
   return 2;
 }
 
-int Macro_case_view(Var value, List * cursor){
+int Macro_case_enter(Var value, List * cursor){
   if(! _init_guard_) _file_init_();
   Var seen = _unwrap(value);
   if(! Var_is_row(seen, 9, 7, 4)) return 0;
@@ -1043,7 +1009,7 @@ int MacroMatcher_matches(MacroMatcher * m, List code){
   if(! _init_guard_) _file_init_();
   List pattern = List_truth((* m).pattern) ?(* m).pattern : _case_shape((* m).shape, (* m).holes);
   MatchLease lease;
-  int status = MatchCache_acquire(MatchCache_current(), List_var(pattern), &(lease), "Macro.matches");
+  Symbol status = MatchCache_acquire(MatchCache_current(), List_var(pattern), &(lease), "Macro.matches");
   {
     _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
       0
@@ -1056,7 +1022,7 @@ int MacroMatcher_matches(MacroMatcher * m, List code){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_1);
     {
-      if(status != MACHINE_PREPARED){
+      if(status != 1138535534920){
         int _x2c_gensym_return_value_1 = 0;
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
@@ -1215,7 +1181,7 @@ static int _derived_capture(MacroCaseSite * site, List code, Macro t, List names
 
 static int _keep(MacroCaseSite * site, Macro t, List names, List pattern, MacroPublishing * route){
   MatchPlan kept = site && ! macro_subject_used && List_try_own(pattern) ? x2c_match_site_prepare(& site -> match, List_var(pattern)) : NULL;
-  if(! kept || kept -> status != MACHINE_PREPARED) return 0;
+  if(! kept || kept -> status != 1138535534920) return 0;
   site -> policy = _fixed_slots(t, names, kept);
   site -> route =(* route);
   __atomic_store_n(& site -> ready, 1, __ATOMIC_RELEASE);
@@ -1307,7 +1273,7 @@ static Var _view(Var value){
 static MacroFixedSlots _fixed_slots(Macro t, List names, MatchPlan plan){
   MacroFixedSlots policy;
   policy.count = policy.names = 0;
-  if(plan -> status != MACHINE_PREPARED) return policy;
+  if(plan -> status != 1138535534920) return policy;
   int ordinal = 0;
   {
     List fresh;
@@ -1348,7 +1314,7 @@ static MacroFixedSlots _fixed_slots(Macro t, List names, MatchPlan plan){
 MachineView MachineProgram_view(MachineProgram);
 
 static int _case_match(List code, MatchPlan plan, MacroFixedSlots * policy, MatchCaptureBuffer * captured){
-  if(plan -> status != MACHINE_PREPARED) return MatchPlan_execute_capture(plan, List_var(code), &(* captured), NULL) == 1;
+  if(plan -> status != 1138535534920) return MatchPlan_execute_capture(plan, List_var(code), &(* captured), NULL) == 1;
   if(! MatchPlan_admits(plan, List_var(code), _unwrap)) return 0;
   MatchMachine machine;
   MatchMachine_open(&(machine));
@@ -1366,8 +1332,8 @@ static int _case_match(List code, MatchPlan plan, MacroFixedSlots * policy, Matc
 static int _take_slots(MatchMachine * machine, MatchCaptureBuffer * captured){
   for(int i = 0;  i <(* machine).slot_count;  i ++){
     MachineSlot * slot = &(* machine).slots[i];
-    if(slot -> kind == MACHINE_SLOT_INVALID) continue;
-    captured -> values[i] = slot -> kind == MACHINE_SLOT_SPAN ? List_var(MatchMachine_materialize_span(&((* machine)), slot -> span)) : slot -> value;
+    if(slot -> kind == 20313104968) continue;
+    captured -> values[i] = slot -> kind == 1278044 ? List_var(MatchMachine_materialize_span(&((* machine)), slot -> span)) : slot -> value;
     captured -> present |= 1UL << i;
   }
   return(* machine).status == 982;
@@ -1457,7 +1423,7 @@ static String _source_spelling(Var value){
 static int _held_elsewhere(MatchMachine * machine, MacroFixedSlots * policy, int slot, Var value){
   for(int i = 0;  i < policy -> count;  i ++){
     int other = policy -> slots[i];
-    if(other != slot &&(* machine).slots[other].kind == MACHINE_SLOT_VALUE && Var_equal((* machine).slots[other].value, value)) return 1;
+    if(other != slot &&(* machine).slots[other].kind == 46228810 && Var_equal((* machine).slots[other].value, value)) return 1;
   }
   return 0;
 }

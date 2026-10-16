@@ -184,7 +184,8 @@ already satisfied in both documented forms.
    and 12 `x2c_` operations, 3 Lisp-only `x2c.literal.*` operations, and 3
    snake_case helpers (`type_base_suffix` is called by component-delegate.x:21
    although `Type.base_type` wraps it). `Code.register_after_initialization`
-   and its `(decl init)` rule family have no user outside `experiments/`;
+   and its `(decl init)` rule family have only compiler-fixture users
+   after removal of the completed component experiments;
    `x2c_meta_definition_hashes` has one test user; `Type.members` has only
    test users. Components pass a NULL node in 16 of 18 `x2c_diagnostic_*_at`
    calls only to choose a category. Public SDK removals are Gary's call.
