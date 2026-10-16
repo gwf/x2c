@@ -4783,9 +4783,26 @@ List Compiler.try_parse_macro_pattern(Compiler c) {
     c.token = saved;
     return c.try_parse_macro_subpattern(0);
   }
-  List labels = c.cache_literal_list(_pattern_labels(c));
+  List names = _pattern_labels(c);
+  List labels = c.cache_literal_list(names);
+  List shape = _case_shape(c, saved, names);
+  if (shape)
+    return c.resolve_expression(
+      $!( Macro_case_shape($expression, $labels, $shape) ), saved);
   return c.resolve_expression(
     $!( Macro_case_pattern($expression, $labels) ), saved);
+}
+
+/* The pattern a `case` on the macro `$NAME` at `at` tests for `names`,
+   cached, or NULL for a `Macro` variable or a pattern that resolves a
+   reference against the subject of each call. */
+static List _case_shape(Compiler c, Token at, List names) {
+  String spelling = NULL;
+  Var stored;
+  if (!c.macro_pattern_at(at, spelling, stored)) return NULL;
+  Macro shape = _macro_value_names(stored);
+  List derived = shape.matcher(names).pattern;
+  return derived ? c.cache_literal_list(derived) : NULL;
 }
 
 /* The Macro value a `$name` or a `Macro` variable at the cursor names. */
