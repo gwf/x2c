@@ -36,10 +36,12 @@ static const struct ReplCommand _commands[] = {
   { ":help", ":help", "Show this help.", <none>, <help> },
   { ":stats", ":stats [verbose]", "Show live runtime statistics.",
     <statmode>, <stats> },
-  { ":symbols", ":symbols", "List session-defined names and kinds.",
-    <none>, <symbols> },
+  { ":symbols", ":symbols [PREFIX]", "List session-defined names and kinds.",
+    <prefix>, <symbols> },
   { ":load", ":load \"file.x\"", "Compile and load public meta functions.",
     <path>, <load> },
+  { ":info", ":info NAME", "Show a session function's declaration and source.",
+    <function>, <info> },
   { ":ast", ":ast NAME", "Show a session function's typed AST.",
     <function>, <ast> },
   { ":lowered", ":lowered NAME", "Show a session function's lowered Lisp.",
@@ -94,7 +96,7 @@ static ReplInputCompletion _complete_command(
   String prefix = String.new_len(text + start, cursor - start);
   return (ReplInputCompletion) {
     .start = start, .end = cursor,
-    .candidates = session.complete_functions(prefix)
+    .candidates = session.complete_functions(prefix, command->dispatch == <info>)
   };
 }
 
@@ -237,20 +239,37 @@ static int _inspect(
   Array words = $auto([]);
   foreach (String word, command.words()) words.push(word);
   if (descriptor->dispatch == <symbols>) {
-    if (words.len() != 1)
+    if (words.len() > 2)
       $report.repl.usage(descriptor->synopsis);
     else {
-      printf("%%%s\n", session.symbols().repr());
+      List symbols = session.symbols();
+      if (words.len() == 2) {
+        String prefix = words[1];
+        Array matching = [];
+        foreach (List entry, symbols)
+          if (entry.cadr().str().startswith(prefix)) matching.push(entry);
+        symbols = matching.list_free();
+      }
+      printf("%%%s\n", symbols.repr());
       return 1;
     }
   }
-  else if (descriptor->dispatch == <ast> ||
+  else if (descriptor->dispatch == <info> || descriptor->dispatch == <ast> ||
            descriptor->dispatch == <lowered>) {
     if (words.len() != 2) {
       $report.repl.usage(descriptor->synopsis);
       return 0;
     }
     String name = words[1];
+    if (descriptor->dispatch == <info>) {
+      String info = session.function_info(name);
+      if (info) {
+        printf("%s\n", info);
+        return 1;
+      }
+      $report.repl.function(name);
+      return 0;
+    }
     match (session.inspect(name)) {
       case %(function (typed ?syntax) (lowered ?forms)): {
         if (descriptor->dispatch == <ast>)
@@ -278,8 +297,8 @@ static int _load_source(
   $let(session.compiler.text, result.source)
     foreach (Var entry, result.diagnostics)
       session.compiler.print_diagnostic(entry);
-  if (result.status == <loaded>) {
-    printf("loaded %s\n", result.value.repr());
+  if (result.status == <loaded> || result.status == <reloaded>) {
+    printf("%s %s\n", result.status.str(), result.value.repr());
     return 1;
   }
   if (result.message) fprintf(stderr, "load failed: %s\n", result.message);
