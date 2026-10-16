@@ -269,8 +269,9 @@ static String _name_list(Array names):
 
 static void _check_module_counts(void):
   Array sources = []
-  foreach String name in root.join("src").list_dir():
-    if name.endswith(".x"): sources.push(name.remove_suffix(".x"))
+  foreach String folder in %("src" "src/components"):
+    foreach String name in root.join(folder).list_dir():
+      if name.endswith(".x"): sources.push(name.remove_suffix(".x"))
   int src_count = sources.len(), lib_count = 0
   foreach String name in root.join("lib").list_dir():
     if name.endswith(".x") && name != "x2c.x": lib_count++
@@ -289,7 +290,8 @@ static void _check_module_counts(void):
         errors.push(%"${_where(relative, text, start)}: '${found[0]}' says " +
                     %"$count but expected $expected")
   Regex quoted = Regex.compile("`([^`]+)`")
-  Regex module = Regex.compile("^(?:src/)?([a-z][a-z0-9-]*)(?:\\.x)?$")
+  Regex module = Regex.compile(
+    "^(?:src/(?:components/)?)?([a-z][a-z0-9-]*)(?:\\.x)?$")
   foreach List entry in _src_module_lists():
     (String relative, String start_marker, String end_marker) = entry
     String text = _read(relative)
@@ -309,7 +311,8 @@ static void _check_module_counts(void):
       if name != "src" && !sources.contains(name): extra.push(name)
     if missing.len() || extra.len():
       errors.push(%"${_where(relative, text, start)}: src module list " +
-                  %"differs from src/*.x; missing=${_name_list(missing)}, " +
+                  "differs from compiler source units; " +
+                  %"missing=${_name_list(missing)}, " +
                   %"extra=${_name_list(extra)}")
 
 static String _collapsed(String text) =>

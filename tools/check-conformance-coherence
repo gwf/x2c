@@ -24,6 +24,8 @@ static String _dump(List mode):
     Array sources = []
     foreach String source in Path.glob(units):
       if source != "lib/x2c.x": sources.push(source)
+    if units == "src/*.x":
+      foreach String source in Path.glob("src/components/*.x"): sources.push(source)
     List batch = sources.list_free()
     dump += %($x2c translate @mode --dump-conformance @batch).job().output()
   return dump

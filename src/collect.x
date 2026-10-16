@@ -270,13 +270,20 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
 /** Returns the compiler-owned prelude sources relative to its home. Their
     runtime implementations are already linked into the shipped binaries. */
 List Compiler.prelude_sources(void) => %(
-  "lib/x2c.x" "src/grammar.x" "src/component-access.x" "src/component-try.x"
-  "src/component-delegate.x" "src/component-literals.x"
-  "src/component-printf.x" "src/component-operators.x"
-  "src/component-raise.x" "src/component-match.x"
-  "src/component-interpolation.x" "src/component-destructuring.x"
-  "src/component-lambdas.x"
-  "src/component-protocols.x" "src/component-string-switch.x");
+  "lib/x2c.x" "src/grammar.x"
+  "src/components/component-access.x"
+  "src/components/component-try.x"
+  "src/components/component-delegate.x"
+  "src/components/component-literals.x"
+  "src/components/component-printf.x"
+  "src/components/component-operators.x"
+  "src/components/component-raise.x"
+  "src/components/component-match.x"
+  "src/components/component-interpolation.x"
+  "src/components/component-destructuring.x"
+  "src/components/component-lambdas.x"
+  "src/components/component-protocols.x"
+  "src/components/component-string-switch.x");
 
 /** Reports whether the canonical `path` is a compiler prelude source. */
 int Compiler.is_prelude_source(String path) =>

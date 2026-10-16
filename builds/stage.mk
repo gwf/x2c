@@ -87,15 +87,17 @@ LIB_X_DEPS   = $(patsubst $(LIB_SOURCE)/%.x,$(LIB_BUILD)/%.d,$(LIB_X_FILES))
 LIB_C_DEPS   = $(patsubst $(LIB_SOURCE)/%.x,$(LIB_BUILD)/%.c.d,$(LIB_X_FILES))
 ###############################################################################
 # Binary source files and generated files
-BIN_X_FILES  = $(wildcard $(BIN_SOURCE)/*.x)
+BIN_X_FILES  = $(wildcard $(BIN_SOURCE)/*.x $(BIN_SOURCE)/components/*.x)
+# Components are independent units; keep their unique artifact names flat.
+BIN_X_NAMES  = $(sort $(notdir $(BIN_X_FILES)))
 # Module members trigger the batch but are not separate translation units.
 BIN_X_INPUTS := $(shell find $(BIN_SOURCE) -type f -name '*.x')
-BIN_H_FILES  = $(patsubst $(BIN_SOURCE)/%.x,$(BIN_BUILD)/%.h,$(BIN_X_FILES))
-BIN_C_FILES  = $(patsubst $(BIN_SOURCE)/%.x,$(BIN_BUILD)/%.c,$(BIN_X_FILES))
-BIN_XI_FILES = $(patsubst $(BIN_SOURCE)/%.x,$(BIN_BUILD)/%.xi,$(BIN_X_FILES))
-BIN_OBJECTS  = $(patsubst $(BIN_SOURCE)/%.x,$(BIN_BUILD)/%.o,$(BIN_X_FILES))
-BIN_X_DEPS   = $(patsubst $(BIN_SOURCE)/%.x,$(BIN_BUILD)/%.d,$(BIN_X_FILES))
-BIN_C_DEPS   = $(patsubst $(BIN_SOURCE)/%.x,$(BIN_BUILD)/%.c.d,$(BIN_X_FILES))
+BIN_H_FILES  = $(patsubst %.x,$(BIN_BUILD)/%.h,$(BIN_X_NAMES))
+BIN_C_FILES  = $(patsubst %.x,$(BIN_BUILD)/%.c,$(BIN_X_NAMES))
+BIN_XI_FILES = $(patsubst %.x,$(BIN_BUILD)/%.xi,$(BIN_X_NAMES))
+BIN_OBJECTS  = $(patsubst %.x,$(BIN_BUILD)/%.o,$(BIN_X_NAMES))
+BIN_X_DEPS   = $(patsubst %.x,$(BIN_BUILD)/%.d,$(BIN_X_NAMES))
+BIN_C_DEPS   = $(patsubst %.x,$(BIN_BUILD)/%.c.d,$(BIN_X_NAMES))
 ###############################################################################
 # Default action
 target: $(LIBRARY) $(BINARY)
@@ -167,8 +169,6 @@ $(BIN_BUILD):
 BIN_MISSING_GENERATED = $(filter-out \
 	$(wildcard $(BIN_BUILD)/*.c $(BIN_BUILD)/*.h $(BIN_BUILD)/*.xi), \
 	$(BIN_C_FILES) $(BIN_H_FILES) $(BIN_XI_FILES))
-BIN_MISSING_X = $(sort $(patsubst $(BIN_BUILD)/%,$(BIN_SOURCE)/%.x, \
-	$(basename $(BIN_MISSING_GENERATED))))
 
 $(BIN_BUILD)/.translated: $(BIN_X_INPUTS) $(X2C_TRANSLATE_DEPS) \
 		| $(BIN_BUILD)
@@ -178,12 +178,12 @@ $(BIN_BUILD)/.translated: $(BIN_X_INPUTS) $(X2C_TRANSLATE_DEPS) \
 $(BIN_C_FILES) $(BIN_H_FILES): $(BIN_BUILD)/.translated
 
 # See the library rule above: the batch stamp owns every generated file.
-$(BIN_BUILD)/%.c: $(BIN_SOURCE)/%.x
+$(BIN_BUILD)/%.c:
 	@:
 
 $(BIN_BUILD)/%.h: $(BIN_BUILD)/%.c
 
-ifneq ($(strip $(BIN_MISSING_X)),)
+ifneq ($(strip $(BIN_MISSING_GENERATED)),)
 $(BIN_BUILD)/.translated: BIN-FORCE-TRANSLATE
 .PHONY: BIN-FORCE-TRANSLATE
 BIN-FORCE-TRANSLATE:

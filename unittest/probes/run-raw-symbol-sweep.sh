@@ -146,7 +146,8 @@ exclusions["$ROOT/unittest/compiler-fixtures/meta-import-included.x"]=$(
 )
 
 sources=()
-for src in "$ROOT"/src/*.x "$ROOT"/lib/*.x "$ROOT"/examples/*.x \
+for src in "$ROOT"/src/*.x "$ROOT"/src/components/*.x \
+    "$ROOT"/lib/*.x "$ROOT"/examples/*.x \
     "$ROOT"/unittest/*.x "$ROOT"/unittest/compiler-fixtures/*.x \
     "$ROOT"/unittest/probes/*.x "$ROOT"/unittest/benchmarks/*.x; do
   total=$((total + 1))

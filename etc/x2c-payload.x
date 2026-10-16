@@ -72,13 +72,8 @@ static void copy(Path source, Path target) {
 static void copy_support(Path destination) {
   List rows = %(
     ("lib" ("*.x") ("lib" "include/x2c"))
-    ("src" ("component-access.x" "component-try.x" "component-delegate.x"
-            "component-literals.x" "component-printf.x"
-            "component-operators.x" "component-raise.x"
-            "component-match.x" "component-interpolation.x"
-            "component-destructuring.x" "component-lambdas.x"
-            "component-protocols.x" "component-string-switch.x"
-            "grammar.x") ("src"))
+    ("src" ("grammar.x") ("src"))
+    ("src/components" ("*.x") ("src/components"))
     ("builds/0/lib" ("*.h") ("include/x2c"))
     ("etc" ("*.xlisp" "*.x") ("etc"))
     ("LICENSES" ("*.txt") ("licenses"))
