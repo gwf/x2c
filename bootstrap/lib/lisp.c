@@ -3960,7 +3960,7 @@ Var Lisp_eval_file(Lisp l, File source){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_27);
     {
-      if(File_read_into(source, content) == FILE_READ_EOF){
+      if(File_read_into(source, content) == 11212){
         Var _x2c_gensym_return_value_20 = Lisp_eval_string(l, NULL);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_27);
