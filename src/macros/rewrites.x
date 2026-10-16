@@ -32,7 +32,7 @@ module typedef struct RewriteRule {
    pending code or a carrier, lowers as written on every use. A lowered
    carrier holds no template to prepare, so it lowers as written at once. */
 
-/** Counts compiler state that lowering adds and a skipped lowering would
+/* Counts compiler state that lowering adds and a skipped lowering would
     not add. A name a scope resolves binds once, so it is not counted. */
 static typedef struct Effects {
   int bindings, names, origins, pending, placements, diagnostics;
