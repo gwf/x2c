@@ -18,7 +18,7 @@ static macro Expression $note.meta_sdk_value_notes(Expr $value) =>
 
 // the running call
 
-static MetaContext active;
+module MetaContext active;
 
 /** Returns the context of the running compile-time call, which an
     evaluation changes with `$let` for its own extent. */
@@ -99,11 +99,11 @@ void MetaContext.reject(String message, List notes) {
 }
 
 // SDK operations reject use outside an active expansion.
-static void _require_expansion(String operation) {
+module void _require_expansion(String operation) {
   if (!active.expander)
     $fail.meta_sdk_expansion_required(operation);
 }
 
-static void _reject_value(String message, Var value) {
+module void _reject_value(String message, Var value) {
   MetaContext.reject(message, $note.meta_sdk_value_notes(value));
 }
