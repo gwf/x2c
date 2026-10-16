@@ -49,7 +49,8 @@ static List _session_value(PromptFunction &p, Type type, List binding) {
   if (!global || !global.equal(binding)) return NULL;
   List entry = p.session.inspect(name);
   if (type.is_function()) {
-    if (!entry && name != "print" && name != "println") return NULL;
+    if (!entry && !(name in p.session.accessors) &&
+        name != "print" && name != "println") return NULL;
     Var callable;
     if (!p.session.evaluator.try_get(name, callable) || callable is not <func>)
       raise %(repl (reason ${%"function has no native binding: $name"}));

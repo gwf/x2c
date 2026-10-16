@@ -213,7 +213,7 @@ void Compiler.prepare_loaded_main(Compiler c, Array nodes) {
       }
 }
 
-/** Adds a loaded unit's ordinary public definitions to its helper targets.
+/** Adds a loaded unit's public functions and scalar accessors to its targets.
     Meta closure must finish first so these entries retain runtime semantics.
     Existing meta entries and the adapted main keep their original targets. */
 void Compiler.prepare_loaded_functions(Compiler c, Array nodes) {
@@ -227,6 +227,74 @@ void Compiler.prepare_loaded_functions(Compiler c, Array nodes) {
       c.group_meta_function(node);
       present[name] = 1;
     }
+  foreach (List node, nodes)
+    match (node) case %(declare ?spec (bindings *rows)):
+      foreach (List row, rows) _loaded_global(c, spec, row, present);
+}
+
+/* Only independent scalar values cross the helper boundary. Semantic
+   String and Symbol handles retain their data representation. */
+static Type _loaded_scalar(Compiler c, Type type) {
+  if (c.sym.is_string_type(type)) return %("String");
+  if (c.sym.is_named_value_type(type, "Symbol")) return %("Symbol");
+  if (c.sym.is_named_value_type(type, "bool") ||
+      c.sym.is_named_value_type(type, "_Bool")) return %(int);
+  Type numeric = c.sym.resolve_numeric_type(type);
+  if (!numeric || !numeric.is_number()) return NULL;
+  return numeric.is_enum() ? numeric.promote() : numeric.canonicalize();
+}
+
+/* Accessor request names are stable across independent helper and inspection
+   parses. Their C bindings remain private generated names. */
+static void _loaded_global(Compiler c, Type spec, List row, Map present) {
+  int initialized = 0;
+  match (row) case %(op = ?bound ?): { row = bound; initialized = 1; }
+  if (spec.is_static() || (spec.is_extern() && !initialized)) return;
+  match (row) case %(bind ?binding ?): {
+    String name = Ast.binding_spelling(binding);
+    if (!name || name in present || %($name) in c.sym.file_statics()) return;
+    Type type = %(declare $spec (bindings $row)).type_from_ast();
+    Type bridge = _loaded_scalar(c, type);
+    if (!bridge) return;
+    c.ensure_macro_lisp();
+    List target = %(expr ${type.declared()} (ident $binding));
+    List getter = c.sym.introduce(c.fresh_name("loaded_get"));
+    List get = c.bind_syntax(
+      $!Unit{ static $bridge $getter(void) { return ($bridge) $target; } },
+      AST_UNIT, NULL);
+    c.meta_group.push(
+      %(function $get ${"get global " + name}
+        ${c.func_signature(%((func ((void))) @bridge))}));
+    int writable = !(<const> in c.sym.normalize_declared_type(type));
+    if (writable) {
+      List setter = c.sym.introduce(c.fresh_name("loaded_set"));
+      List set = _loaded_setter(c, bridge, setter, target);
+      c.meta_group.push(
+        %(function $set ${"set global " + name}
+          ${c.func_signature(%((func ($bridge (int))) @bridge))}));
+    }
+    c.meta_group.push(%(global $name $bridge $writable));
+    present[name] = 1;
+  }
+}
+
+/* Native postfix updates read and write once, including volatile objects.
+   Ordinary assignment returns its converted value without reading again. */
+static List _loaded_setter(
+  Compiler c, Type bridge, List setter, List target) {
+  List function = bridge.is_number() ? $!Unit{
+    static $bridge $setter($bridge value, int operation) {
+      if (operation == 1) return ($bridge) $target++;
+      if (operation == 2) return ($bridge) $target--;
+      return ($bridge) ($target = value);
+    }
+  } : $!Unit{
+    static $bridge $setter($bridge value, int operation) {
+      (void) operation;
+      return ($bridge) ($target = value);
+    }
+  };
+  return c.bind_syntax(function, AST_UNIT, NULL);
 }
 
 /** Answers whether a `meta` body reaches the compiler itself: it names a

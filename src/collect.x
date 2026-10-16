@@ -1596,8 +1596,8 @@ static void _gather_declarations(Compiler c, String path, Gathered &into) {
 
 /** Returns the collected source's public type families and the declarations
     of `names`, including their receiver rows. Includes contribute their
-    selected declarations, without replaying compile-time effects. Ordinary
-    variables and unselected functions do not enter the result.
+    selected declarations, without replaying compile-time effects.
+    Unselected functions and variables do not enter the result.
 */
 Map Compiler.callable_symbols(Compiler c, List names) {
   Gathered view = {.symbols = {}, .definitions = {}, .visited = {}};
