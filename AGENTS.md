@@ -158,7 +158,8 @@ commits need not rebuild from their own bootstrap.
   change `.x` sources and regenerate through the publication command below.
 - `builds/` - staged toolchains (`builds/0` drives local builds).
 - `commands/` - external commands built against the current compiler;
-  `commands/manifest.txt` records maturity and help summaries. `repl` owns
+  `commands/manifest.txt` records maturity and help summaries. `new` owns
+  starter-project creation. `repl` owns
   terminal interaction, editing, persistent submissions, and inspection.
   `package` owns installation, removal, listing, and project lockfiles.
 - `agents/` - agent-facing documentation and project skills (`agents/skills/`,

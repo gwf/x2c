@@ -841,6 +841,15 @@ static int _run_package(CliRequest request) {
   return Compiler.run_command("package", args);
 }
 
+/* Project creation receives literal values after ordinary CLI parsing. */
+static int _run_new(CliRequest request) {
+  Array args = [];
+  if (request.quiet) args.push("--quiet");
+  args.push("--");
+  foreach (String input, request.inputs) args.push(input);
+  return Compiler.run_command("new", args);
+}
+
 // entry point
 
 /** Initializes x2c and dispatches one command from `argv`.
@@ -866,7 +875,7 @@ int main(int argc, char **argv) {
     case <env>:     return _run_env(request);
     case <install>: case <remove>: case <list>:
       return _run_package(request);
-    case <new>:     return request.new_project();
+    case <new>:     return _run_new(request);
   }
   return _run_compiler(request);
 }
