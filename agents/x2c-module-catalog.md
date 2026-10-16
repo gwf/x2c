@@ -377,9 +377,9 @@ a unit's meta group, emitted as C.
 Public functions:
 
 `Compiler.use_meta_toolchain`, `Compiler.meta_cc`, `Compiler.meta_cc_identity`,
-`Compiler.meta_cc_run`, `Compiler.stage_meta_in_process`,
+`Compiler.meta_cc_run`, `Compiler.prepare_loaded_main`,
+`Compiler.prepare_loaded_functions`, `Compiler.stage_meta_in_process`,
 `Compiler.groups_meta`, `Compiler.group_meta_function`,
-`Compiler.prepare_loaded_main`, `Compiler.prepare_loaded_functions`,
 `Compiler.meta_reaches_compile_time`, `Compiler.finish_meta_functions`,
 `Compiler.public_native_function`, `Compiler.meta_call_missing`,
 `Compiler.refuse_meta_call`, `Compiler.refuse_record_meta_call`,
