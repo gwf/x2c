@@ -95,14 +95,14 @@ static macro Stmt $fail.meta_native_meta_lifetime(
     $site, %("name: ${$name}" "signature: ${$signature.repr()}"
     "it might return or keep its argument; ownership cannot be inferred"));
 
-static macro Stmt $fail.meta_native_module_platform(
+static macro Stmt $fail.meta_native_package_platform(
   Expr $c, Expr $site, Expr $name, Expr $module) =>
   $c.report_error(
     <driver>,
     "native modules are not supported on this platform",
     $site, %("package: ${$name}" "module: ${$module}"));
 
-static macro Stmt $fail.meta_native_module_compiler(
+static macro Stmt $fail.meta_native_package_compiler(
   Expr $c, Expr $site, Expr $name, Expr $module) =>
   $c.report_error(
     <driver>,
@@ -118,24 +118,24 @@ static macro Stmt $warn.meta_native_function_hidden(
     <native>, "the compiler's own function hides a native module's",
     $site, %("name: ${$binding.name}"));
 
-static macro Stmt $fail.native_module_platform() =>
+static macro Stmt $fail.meta_native_module_platform() =>
   Diagnostics.driver_error("native modules are not supported on this platform");
 
-static macro Stmt $fail.native_module_invalid(Expr $path) =>
+static macro Stmt $fail.meta_native_module_invalid(Expr $path) =>
   Diagnostics.driver_error(%"not an x2c native module: ${$path}");
 
-static macro Stmt $fail.native_module_compiler(Expr $path) =>
+static macro Stmt $fail.meta_native_module_compiler(Expr $path) =>
   Diagnostics.driver_error(
     %"native module '${$path}' was built by another compiler; rebuild it");
 
-static macro Stmt $fail.native_compiler_read(Expr $path) =>
+static macro Stmt $fail.meta_native_compiler_read(Expr $path) =>
   Diagnostics.driver_error(
     %"cannot read the running compiler to check native module '${$path}'");
 
-static macro Stmt $fail.native_module_read(Expr $path, Expr $cause) =>
+static macro Stmt $fail.meta_native_module_read(Expr $path, Expr $cause) =>
   Diagnostics.driver_error(%"cannot read native module '${$path}': ${$cause}");
 
-static macro Stmt $fail.native_module_load(Expr $path, Expr $cause) =>
+static macro Stmt $fail.meta_native_module_load(Expr $path, Expr $cause) =>
   Diagnostics.driver_error(%"cannot load native module '${$path}': ${$cause}");
 
 /* meta functions
@@ -1184,7 +1184,7 @@ void Compiler.select_package_module(
   String module = %"$root/builds/$name.module";
   if (Compiler.links_extension(name) || !Path.is_file(module)) return;
   if (!X2C_NATIVE_MODULES)
-    $fail.meta_native_module_platform(c, token, name, module);
+    $fail.meta_native_package_platform(c, token, name, module);
   c.add_translation_dependency(module);
   if (!Compiler.native_module_loaded(module))
     _load_package_module(c, name, module, token);
@@ -1198,7 +1198,7 @@ void Compiler.select_package_module(
 static void _load_package_module(
   Compiler c, String name, String module, Token token) {
   if (_module_stamp(module) != 1)
-    $fail.meta_native_module_compiler(c, token, name, module);
+    $fail.meta_native_package_compiler(c, token, name, module);
   _open_native_module(module);
 }
 
@@ -1209,13 +1209,13 @@ static void _load_package_module(
 */
 String Compiler.load_native_module(String path) {
   if (!X2C_NATIVE_MODULES)
-    $fail.native_module_platform();
+    $fail.meta_native_module_platform();
   String absolute = Path.absolute(path);
   if (Compiler.native_module_loaded(absolute)) return absolute;
   int stamp = _module_stamp(path);
-  if (stamp < 0) $fail.native_module_invalid(path);
+  if (stamp < 0) $fail.meta_native_module_invalid(path);
   if (!stamp)
-    $fail.native_module_compiler(path);
+    $fail.meta_native_module_compiler(path);
   _open_native_module(absolute);
   return absolute;
 }
@@ -1237,10 +1237,10 @@ void Compiler.preload_native_module(String path) {
 static int _module_stamp(String path) {
   String expected = Compiler.module_stamp();
   if (!expected)
-    $fail.native_compiler_read(path);
+    $fail.meta_native_compiler_read(path);
   File input = fopen(path, "rb");
   if (!input)
-    $fail.native_module_read(path, String.new(strerror(errno)));
+    $fail.meta_native_module_read(path, String.new(strerror(errno)));
   fseek(input, 0, SEEK_END);
   long end = ftell(input);
   rewind(input);
@@ -1274,9 +1274,9 @@ static void _open_native_module(String path) {
   void *handle = NULL;
   $scope(&native_module_scope) handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
   if (!handle)
-    $fail.native_module_load(path, String.new(dlerror()));
+    $fail.meta_native_module_load(path, String.new(dlerror()));
   Map (*entry)(void) = (Map (*)(void)) dlsym(handle, "x2c_module_targets");
-  if (!entry) $fail.native_module_invalid(path);
+  if (!entry) $fail.meta_native_module_invalid(path);
   Compiler.add_native_module(path, entry);
 }
 
