@@ -500,6 +500,14 @@ static Var _slot_binder(Var form) {
    call of this to `Macro_case_capture_at` over the match subject. */
 List Macro_case_pattern(Macro t, List names) => Macro_pattern(t, names);
 
+/** The pattern a macro-valued `case` compiles to when the compiler derived
+   `shape`, the pattern the case tests, while compiling it. Generated
+   `match` code tests `shape` in place through `Macro_case_root` when it
+   can, and otherwise lowers a call of this as it lowers
+   `Macro_case_pattern`. */
+List Macro_case_shape(Macro t, List names, List shape) =>
+  Macro_pattern(t, names);
+
 /** Recognizes code built by `t` for the `case` whose site is `site`, which
     may be NULL, and publishes the captures under `names`. A pattern that
     does not depend on the current call's subject is prepared once and kept
@@ -515,6 +523,38 @@ int Macro_case_capture_at(
     return _capture(
       code, site.match.plan, &site.policy, &site.route, published);
   return _derived_capture(site, code, t, names, published);
+}
+
+/** Starts a macro-valued `case` whose derived pattern generated `match`
+    code tests in place. Returns 1 when `code` is a retained invocation of
+    `t` and its arguments captured under `names` into `published`, 0 when
+    `code` cannot match, and 2 after storing in `*cursor` the List the
+    pattern tests: the view of `code` or, for a `statement` body, of the one
+    statement a `seq` holds. */
+int Macro_case_root(
+  List code, Macro t, List names, int statement, List *cursor,
+  MatchCaptureBuffer *published) {
+  List grouped = NULL;
+  Var head = code ? code.car() : NULL;
+  /* Only an `expr` shell, an Atom, or a String heads a retained
+     invocation, so another Symbol head skips the Atom comparisons. */
+  if ((head is not <symbol> || head == <expr>) &&
+      _pending_parts(t, code, grouped))
+    return _pending_capture(t, grouped, names, published);
+  if (!Macro_case_enter(code, cursor)) return 0;
+  if (statement) match (*cursor) case %(seq ?only):
+    return Macro_case_enter(only, cursor) ? 2 : 0;
+  return 2;
+}
+
+/** Stores in `*cursor` the List a macro-valued `case` examines for
+    `value`, beneath its source wrappers, and returns whether there is
+    one. */
+int Macro_case_enter(Var value, List *cursor) {
+  Var seen = _unwrap(value);
+  if (seen is not <list>) return 0;
+  *cursor = seen;
+  return 1;
 }
 
 /** Retains a macro and hole patterns for repeated recognition. A pattern
@@ -559,22 +599,29 @@ int Macro.matches(Macro t, List code, List holes) {
 }
 
 /* A retained invocation of this same definition matches by its arguments,
-   without expanding it. */
+   without expanding it. Each form is its own case, so every macro-valued
+   case tests them in place. */
 static int _pending_parts(Macro t, List code, List &grouped) {
   match (code) {
+    case %(macro-invoke ?descriptor (args *rows) ?):
+      return _invoked_parts(t, descriptor, rows, grouped);
+    case %(expr ? (macro-invoke ?descriptor (args *rows) ?)):
+      return _invoked_parts(t, descriptor, rows, grouped);
     case %("x2c.template" ?descriptor ?arguments): {
       if (!_same(t, descriptor)) return 0;
       grouped = arguments;
       return 1;
     }
-    case %(!or (macro-invoke ?descriptor (args *rows) ?)
-               (expr ? (macro-invoke ?descriptor (args *rows) ?))): {
-      if (!_same(t, descriptor)) return 0;
-      grouped = _invoke_values(t, rows);
-      return 1;
-    }
   }
   return 0;
+}
+
+/* The arguments of a `macro-invoke` of this same definition. */
+static int _invoked_parts(
+  Macro t, Var descriptor, List rows, List &grouped) {
+  if (!_same(t, descriptor)) return 0;
+  grouped = _invoke_values(t, rows);
+  return 1;
 }
 
 /* A retained invocation may name its macro, carry its stored definition,
@@ -846,7 +893,14 @@ static Var _unwrap(Var value) {
     match (node) {
       case %(at ? ?body): value = body;
       case %(src ? ?body): value = body;
-      case %(expr (<macro-expr>) (!set ?inner (expr *))): value = inner;
+      case %(expr (<macro-expr>) ?inner): {
+        /* A nested match keeps both tests in place on this hot path. */
+        match (inner) case %(expr *): {
+          value = inner;
+          continue;
+        }
+        return value;
+      }
       default: return value;
     }
   }

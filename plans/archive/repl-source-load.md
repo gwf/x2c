@@ -1,6 +1,9 @@
 # Load compiled definitions into the REPL
 
-> Status: implemented, with focused checks passed.
+> Status: done, 2026-10-15. Source loading was published at `7273078dd`.
+> Inspection and replacement of edited files are implemented through
+> `efd9c77c3`, with the focused REPL checks passing. The publication gate
+> and direct delivery follow the repository workflow.
 
 ## Result
 
@@ -36,9 +39,22 @@ records, cycles, and shared mutable collection identity do not cross it.
    Cache rebuilds, including those made by rejected reloads, cannot replace
    its code. The session closes helpers and removes those copies. A helper
    crash restarts that load's retained executable with fresh native state.
-6. Preserve no-redefinition semantics. Loading another file leaves earlier
-   helpers and prompt definitions usable. A failed load publishes no names.
-7. Verify executable transcripts, edit/retry recovery, native literal and
+6. Keep one persistent record per resolved file path. A repeated `:load`
+   prepares a replacement and checks existing function signatures and public
+   type declarations before publishing. Parameter names may change; names
+   may be added. Removing functions or types, or changing their types,
+   requires a new session. A rejected load preserves the old helper and state.
+7. Retain the replacement executable, publish additions, switch the file
+   record, and close its old helper. Existing adapters and saved function
+   values borrow that record. Prompt data and other loaded files remain;
+   the replaced file and its compiled dependencies start with fresh state.
+   Different loaded files keep independent copies of shared dependencies.
+8. Add `:symbols [PREFIX]` and `:info NAME`. Use compiler declaration
+   formatting and report prompt origin or the resolved loaded file path.
+   Inspection preserves pending input and never calls the inspected function.
+   Prompt submissions continue to lower to Lisp; `:ast` and `:lowered` retain
+   their prompt-function meaning.
+9. Verify executable transcripts, edit/retry recovery, native literal and
    static lifetimes, independent loads, public typedefs, private helpers,
    included meta dependencies, collection copying, unsafe argument rejection,
    compile/link failures, duplicate names, helper restart, and cleanup.
@@ -75,6 +91,28 @@ helper restart. These are
 interactive-lifetime requirements; ordinary compiler invocations retain
 their current cache and helper behavior.
 
+Replacement compares the compiler's callable signatures, which omit
+parameter names, and complete public type rows. The comparison includes
+added metadata such as delegate fields and typedef layout attributes.
+The parser retains canonical enum members with the public type family so
+bare enums receive the same comparison as enums declared through typedefs.
+Anonymous types receive stable session identities through their named public
+declarations and referenced field families. Inserting an earlier anonymous
+typedef must not renumber a live prompt type; splitting a shared identity
+or changing a field still fails. The existing AST walker and node replacement
+operation perform traversal and rewriting.
+
+The file record replaces the bare helper list. It is the only indirection
+needed for old calls to use new code. No old executable versions or native
+state migration are retained. The declaration checks protect live prompt
+values and their calling types; the compiler still owns parsing, dependency
+building, helper transport, and canonical type representations.
+
+The real-module exercise copies `packages/autodiff/src/autodiff-macros.x`,
+loads it, inspects `ad_dot`, and calls it through an existing prompt function.
+Changing its suffix from `_dot` to `_derivative` and loading it again updates
+both direct and earlier prompt calls. Performance comparison is separate work.
+
 ## Focused validation
 
 - `make commands` builds the compiler services and external REPL command.
@@ -86,3 +124,8 @@ their current cache and helper behavior.
 Source-load tests also check that an enum-typed global is not accidentally
 imported as a type-family member. Public type rows are copied without
 transplanting binding IDs or enumerator evaluation facts.
+
+Replacement tests cover dependency edits, independent helpers, reset native
+counters, preserved prompt data and saved integer functions, new names,
+equivalent paths, unchanged reloads, and rejected edits. Failed replacements
+must preserve old counters and results, including after a helper restart.

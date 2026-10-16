@@ -244,28 +244,25 @@ static List _forwarded(
   return _bind_default(c, _forwarder(c, name, child, binding, signature));
 }
 
-// The forwarding constructor passes each argument on and casts the result.
+/* The forwarding constructor passes each argument on and casts the result.
+   It is static in a private source, as `_bind_default` makes a default. */
 static List _forwarder(
   Compiler c, String name, Type child, List binding, Type signature) {
   List types = NULL;
   match (signature) case %((func ?parameters) *): types = parameters;
-  Array parameters = [], arguments = [];
-  int index = 0;
+  Array forwarded = [];
   foreach (Var type, types) {
     if (type == <...>)
       $report.type.ctor_variadic(c, name);
-    if (type == %(void)) continue;
-    String argument = %"argument$index";
-    index++;
-    parameters.push(%(param $type (bind ($argument) ())));
-    arguments.push(%(expr $type (ident ($argument))));
+    if (type != %(void)) forwarded.push(type);
   }
-  if (!parameters.len()) parameters.push(%(param (void) (bind () ())));
-  List call = %(expr ()
-    (call (expr $signature (ident $binding)) (args @{arguments.list_free()})));
-  List body = %(block (return () (expr () (cast $child $call))));
-  return %(function $child
-    (bind ($name) ((fnmod (params @{parameters.list_free()})))) $body);
+  (List params, List args) = c.forward_parameters(forwarded.list_free());
+  if (!params) params = %((param (void) (bind () ())));
+  Type result = c.source_private ? %(static @child) : child;
+  List function = %($name), callee = $!($signature){ $binding };
+  return c.rebuild_unit_function($!Unit{
+    $result $function(@params) { return ($child)$callee(@args); }
+  });
 }
 
 /* The selected rows replace each production's bundle in its part and in

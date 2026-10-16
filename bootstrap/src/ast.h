@@ -23,6 +23,8 @@ int Ast_try_binding(List binding, int * identity, String * spelling);
 
 String Ast_binding_spelling(List binding);
 
+List Ast_append_modifiers(List declarator, List modifiers);
+
 List Ast_prototype_declarator(List declarator);
 
 List Ast_designated(Var value);

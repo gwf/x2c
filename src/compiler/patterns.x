@@ -30,8 +30,8 @@ Var Compiler.match_pattern_value(Compiler c, Var node) {
    computed; typed builtin boxers were recognized with their expression. */
 static Var _call_value(Compiler c, Var callee, Var args) {
   String converter = _converter_name(callee);
-  if (converter == "Macro_case_pattern")
-    match (args) case %(args ? ?names): {
+  if (converter == "Macro_case_pattern" || converter == "Macro_case_shape")
+    match (args) case %(args ? ?names *): {
       List labels = c.match_pattern_value(names);
       return %(!and x2c-dyn @labels);
     }

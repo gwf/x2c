@@ -886,17 +886,9 @@ static List _declaration(Compiler c, List ast) {
   return ast;
 }
 
-static List _value_declaration(Type type, List binding, List value) {
-  (List base, List mods) = type.parts();
-  return value
-    ? %(declare $base (bindings (op = (bind $binding $mods) $value)))
-    : %(declare $base (bindings (bind $binding $mods)));
-}
-
 static List _return(Compiler c, List ast) {
-  Macro returned = $return_value;
   match (ast)
-    case returned(?expression): {
+    case $return_value(?expression): {
       List value = c.convert_expression(expression, source_return_type(ast));
       return source_return_content(%($value));
     }
@@ -1021,19 +1013,19 @@ static List _truthy(Compiler c, List ast) {
   Macro while_loop = $while_loop, do_loop = $do_loop;
   Macro for_loop = $for_loop;
   match (ast) {
-    case if_then(?condition, ?yes):
+    case $if_then(?condition, ?yes):
       return c.rebuild_statement(
         if_then(_truthy_expression(c, condition), yes)).cadr();
-    case if_else(?condition, ?yes, ?no):
+    case $if_else(?condition, ?yes, ?no):
       return c.rebuild_statement(
         if_else(_truthy_expression(c, condition), yes, no)).cadr();
-    case while_loop(?condition, ?body):
+    case $while_loop(?condition, ?body):
       return c.rebuild_statement(
         while_loop(_truthy_expression(c, condition), body)).cadr();
-    case do_loop(?body, ?condition):
+    case $do_loop(?body, ?condition):
       return c.rebuild_statement(
         do_loop(body, _truthy_expression(c, condition))).cadr();
-    case for_loop(?init, ?condition, ?increment, ?body):
+    case $for_loop(?init, ?condition, ?increment, ?body):
       return c.rebuild_statement(
         for_loop(
           init, _truthy_expression(c, condition), increment,
@@ -1161,7 +1153,8 @@ static List _sequenced(
   Compiler c, List value, String stem, Array declarations) {
   Type type = value.cadr();
   List temporary = c.sym.introduce(c.fresh_name(stem));
-  declarations.push(_value_declaration(type, temporary, value));
+  declarations.push(
+    c.rebuild_statement($!{ $type $temporary = $value; }).cadr());
   return $!($type){ $temporary };
 }
 

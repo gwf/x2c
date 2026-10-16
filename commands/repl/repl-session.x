@@ -6,6 +6,16 @@
 #include "frontend.x"
 #include "repl-lower.x"
 #include "repl-runtime.x"
+#include "emit.x"
+#include "format.x"
+
+/** One loaded file's current executable and published declarations.
+    Callable adapters borrow this record until the session closes. */
+typedef struct ReplLoadedFile {
+  String path;
+  MetaHelper helper;
+  Map symbols, signatures;
+} *ReplLoadedFile;
 
 /** The caller keeps the compiler's unit Context open until every result and
     this session are finished. Results borrow that Context's storage. */
@@ -13,13 +23,14 @@ typedef struct ReplSession {
   Compiler compiler;
   Lisp evaluator;
   ReplLower lowering;
-  Array helpers;
-  // Published name -> (value), (type), (native), or
+  Map files;
+  // Published name -> (value), (type), (native [(source PATH)]), or
   // (function (typed ...) (lowered ...)).
   Map names;
 } *ReplSession;
 
-/** status is incomplete, rejected, defined, loaded, executed, value, or failed.
+/** status is incomplete, rejected, defined, loaded, reloaded, executed,
+    value, or failed.
     diagnostics are ordinary compiler reports; message/cause describe the
     adapter or evaluator failure. source retains diagnostic source text;
     syntax and lowered support optional tracing. */
@@ -78,7 +89,7 @@ ReplSession ReplSession.new(Compiler compiler) {
   ReplSession session = Scope.calloc(1, sizeof(struct ReplSession));
   session.compiler = compiler;
   session.names = {};
-  session.helpers = [];
+  session.files = {};
   session.evaluator = Lisp.new();
   repl_runtime_initialize(session.evaluator);
   session.lowering = ReplLower.new(compiler, session.evaluator);
@@ -99,12 +110,33 @@ List ReplSession.symbols(ReplSession session) {
   return entries.list_free();
 }
 
-/** Returns (value), (type), (native), (function (typed AST) (lowered
-    FORMS)), or NULL if absent.
+/** Returns (value), (type), (native [(source PATH)]),
+    (function (typed AST) (lowered FORMS)), or NULL if absent.
     These are the original canonical Lists, borrowed until unit close. */
 List ReplSession.inspect(ReplSession session, String name) {
   Var entry;
   return session.names.try_get(name, entry) ? entry.list() : NULL;
+}
+
+/** Returns a session function's declaration and source, or NULL for another
+    name. Formatting uses the compiler's declaration emitter without calling
+    the function. Loaded files supply their current declaration. */
+String ReplSession.function_info(ReplSession session, String name) {
+  List entry = session.inspect(name);
+  if (!entry || (entry.car() != <function> && entry.car() != <native>))
+    return NULL;
+  Compiler c = session.compiler;
+  Type type = c.sym.get_exact(%($name));
+  String source = "prompt";
+  match (entry) case %(native (source ?(String path))): {
+    ReplLoadedFile file = session.files[path];
+    type = file.symbols[%($name)];
+    source = path;
+  }
+  List declaration = type.declaration_ast(%($name));
+  String text = String.new(
+    c.code_pretty_string(c.emit(%($declaration), NULL), NULL));
+  return %"${text.strip(NULL)}\nsource: $source";
 }
 
 /* The compiler's input state, which a submission or completion replaces
@@ -183,14 +215,17 @@ static List _completion_filter(
   return candidates.sort().list_free();
 }
 
-/** Returns sorted published session functions matching `prefix`. */
-List ReplSession.complete_functions(ReplSession session, String prefix) {
+/** Returns sorted published session functions matching `prefix`.
+    `native` also includes loaded functions and bound native prototypes. */
+List ReplSession.complete_functions(
+  ReplSession session, String prefix, int native) {
   Array names = $auto([]), candidates = [];
   foreach (Var (candidate, stored), session.names) {
     if (candidate is not <string> || stored is not <list>) continue;
     String name = candidate;
     List entry = stored;
-    if (entry.car() == <function> && name.startswith(prefix)) names.push(name);
+    if ((entry.car() == <function> || (native && entry.car() == <native>)) &&
+        name.startswith(prefix)) names.push(name);
   }
   foreach (String name, names.sort())
     candidates.push(%(<session> $name));
@@ -561,7 +596,13 @@ void ReplSession.close(ReplSession session) {
   session.lowering = NULL;
   session.evaluator.destroy();
   session.evaluator = NULL;
-  foreach (void *helper, session.helpers) MetaHelper.close(helper);
-  session.helpers.free();
-  session.helpers = NULL;
+  foreach (Var (path, value), session.files) {
+    ReplLoadedFile file = value;
+    Scope.free(file.helper);
+    file.symbols.cleanup();
+    file.signatures.cleanup();
+    Scope.free(file);
+  }
+  session.files.cleanup();
+  session.files = NULL;
 }

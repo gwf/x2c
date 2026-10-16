@@ -30,6 +30,9 @@ macro Decorator $scope(Stmt $body, Expr @destination) {
   @(scope.expand $body $destination)
 }
 
+/* Built-in macros install before any declaration of a unit, including the
+   unit that reads `lib/meta.x`, so `$Code.type` has no prototype here. The
+   Lisp form reaches the compiler's binding when the macro expands. */
 macro Decorator $let(Stmt $body, Expr $place, Expr $value) {
   {
     $(Code.type $place) *address = &$place;

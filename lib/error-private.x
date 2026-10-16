@@ -4,17 +4,17 @@
 #pragma once
 
 macro Unit $error.private.types() {
-  static typedef struct $(x2c.ident "ErrorRegion") {
+  static typedef struct $x2c_ident("ErrorRegion") {
     Scope values;
     Pool pool;
-  } $(x2c.ident "ErrorRegion");
+  } $x2c_ident("ErrorRegion");
 
-  static typedef struct $(x2c.ident "ErrorRecord") {
+  static typedef struct $x2c_ident("ErrorRecord") {
     struct ErrorRegion region;
     List entry;
-  } $(x2c.ident "ErrorRecord");
+  } $x2c_ident("ErrorRecord");
 
-  static struct $(x2c.ident "ErrorHandler") {
+  static struct $x2c_ident("ErrorHandler") {
     struct ErrorHandler *prev;
     struct ErrorHandler *running;
     struct ErrorRegion view;
