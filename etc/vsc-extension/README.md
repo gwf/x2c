@@ -73,6 +73,8 @@ Dark backgrounds:
         "storage.modifier.threaded.x2c",
         "storage.modifier.meta.x2c",
         "storage.modifier.native.x2c",
+        "storage.modifier.module.x2c",
+        "keyword.declaration.module.x2c",
         "keyword.control.import.x2c",
         "keyword.control.with.x2c",
         "keyword.declaration.protocol.x2c",
@@ -129,6 +131,8 @@ Light backgrounds:
         "storage.modifier.threaded.x2c",
         "storage.modifier.meta.x2c",
         "storage.modifier.native.x2c",
+        "storage.modifier.module.x2c",
+        "keyword.declaration.module.x2c",
         "keyword.control.import.x2c",
         "keyword.control.with.x2c",
         "keyword.declaration.protocol.x2c",
@@ -201,7 +205,8 @@ declares the semantic macro types.
 
 `Stmt` replaced `Statement`. `Name` and the other syntax kinds are grammar
 categories, not additional runtime typedefs. Outside result and hole
-positions, capitalized kinds use `support.type.prelude.x2c`, like the reserved
+positions, capitalized and uppercase kinds (such as `Stmt` and `STMT`) use
+`support.type.prelude.x2c`, like the reserved
 runtime types. Result and hole positions retain their existing specific
 scopes and italic type color.
 
@@ -209,6 +214,12 @@ Declarations use `meta`, `meta static`, `meta native`, or `meta native static`.
 The `meta` and `native` tokens have distinct modifier scopes. A `static macro`
 uses the ordinary `static` modifier and the macro declaration scope. Named,
 local, and anonymous macro definitions share the macro declaration scope.
+
+`module` before a declaration uses `storage.modifier.x2c` and
+`storage.modifier.module.x2c`. This includes macros, functions, typedefs,
+classes, and aggregate types. A `module { ... }` member block uses
+`keyword.declaration.module.x2c`. Private `static` type declarations keep the
+ordinary `static` modifier scope.
 
 `$!`, `$name`, `${expression}`, `$(form)`, and a standalone `$` use pronounced
 sigil styling with the settings above. `@` sequence forms share that styling.
