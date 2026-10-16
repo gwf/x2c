@@ -152,11 +152,6 @@ static macro Stmt $report.parse.dimension_close(
     <parse>, "expected ']'",
     $c.token, %("dimension:" ${$expr.str()} "symbol:" ${$unexpected.str()}));
 
-static macro Stmt $report.parse.method_name(Expr $c) =>
-  $c.report_error(
-    <parse>, "expected method name",
-    $c.token, NULL);
-
 static macro Stmt $report.parse.macro_member(Expr $c) =>
   $c.report_error(
     <parse>, "macro method declaration requires a member name",
@@ -1983,7 +1978,9 @@ static List _pointer(Compiler c) {
       if (optional) c.next();
       continue;
     }
-    Array quals = [];
+    if (c.peek(0) != <ident> || !(c.token.text in c.object_macros))
+      return ptr;
+    Array quals = $auto([]);
     if (!_prefix_macro_words(c, 1, quals)) return ptr;
     foreach (Var qualifier, quals) ptr = cons(qualifier, ptr);
   }
@@ -2146,16 +2143,7 @@ static List _literal_method(Compiler c) {
       (c.peek(2) != <$> && c.peek(2) != <ident>))
     return NULL;
   c.next();
-  c.expect(<.>);
-  Var member;
-  if (c.peek(0) == <$>) member = c.try_parse_macro_slot(<name>);
-  else {
-    if (!c.token.text.is_identifier())
-      $report.parse.method_name(c);
-    member = c.token.text;
-    c.next();
-  }
-  return %(bind (($owner_spelling) $member) ());
+  return %(bind (($owner_spelling) ${_method_member(c)}) ());
 }
 
 // `$T.member`, where `$T` is a type hole.
@@ -2165,16 +2153,17 @@ static List _hole_method(Compiler c) {
       c.after_hole().type != <.>)
     return NULL;
   List owner = c.try_parse_macro_slot(<type>);
+  return %(bind (($owner) ${_method_member(c)}) ());
+}
+
+// The member after a method owner's `.`: a Name hole or an identifier.
+static Var _method_member(Compiler c) {
   c.expect(<.>);
-  Var member;
-  if (c.peek(0) == <$>) member = c.try_parse_macro_slot(<name>);
-  else if (c.token.text.is_identifier()) {
-    member = c.token.text;
-    c.next();
-  }
-  else
-    $report.parse.macro_member(c);
-  return %(bind (($owner) $member) ());
+  if (c.peek(0) == <$>) return c.try_parse_macro_slot(<name>);
+  if (!c.token.text.is_identifier()) $report.parse.macro_member(c);
+  String member = c.token.text;
+  c.next();
+  return member;
 }
 
 /** Installs a definition-local template binding or typedef provisionally.

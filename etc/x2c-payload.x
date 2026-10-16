@@ -84,8 +84,8 @@ static void copy_support(Path destination) {
     ("LICENSES" ("*.txt") ("licenses"))
     ("." ("LICENSE") ("licenses")));
   foreach (List row, rows) {
-    String folder = row.car();
-    foreach (Var pattern, row.cadr()) {
+    (String folder, List patterns, List outputs) = row;
+    foreach (Var pattern, patterns) {
       List matches = root.join(folder).join(pattern).glob();
       if (!matches) {
         String message =
@@ -93,7 +93,7 @@ static void copy_support(Path destination) {
         raise %(not-found (reason $message));
       }
       foreach (Path source, matches)
-        foreach (Var output, row.caddr())
+        foreach (Var output, outputs)
           copy(source, destination.join(output)
                          .join(source.basename()));
     }

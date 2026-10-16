@@ -731,7 +731,11 @@ static List _cache_assignment(
   List binding = bindings[id];
   List rhs = c.convert_expression(
     _cache_value(c, value, header ? bindings : NULL), type);
-  return _assignment(binding, type, rhs);
+  List assignment = _assignment(binding, type, rhs);
+  if (!c.permanent_literals || type == %("Var")) return assignment;
+  String own = type == %("List") ? "List_try_own" : "String_try_own";
+  return %(block $assignment
+    (stmnt (expr (int) (call $own (args (expr $type (ident $binding)))))));
 }
 
 static List _cache_value(Compiler c, List expr, Map bindings) {

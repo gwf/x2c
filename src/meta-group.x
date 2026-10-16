@@ -214,7 +214,13 @@ static void _check_runtime_meta_calls(Compiler c, Var root) {
    rows are its own. */
 static List _emit(
   Compiler c, String stamp, String stem, String suffix, String &failure) {
-  Array units = _units(c);
+  return _emit_prepared(c, stamp, stem, suffix, NULL, NULL, failure);
+}
+
+static List _emit_prepared(
+  Compiler c, String stamp, String stem, String suffix,
+  List declarations, Func prepare, String &failure) {
+  Array units = prepare ? NULL : _units(c);
   String provider = c.filename;
   /* The backend reads more of the unit's compiler than a child from
      `Compiler.new_shared` inherits, such as its tokenizer, runtime header
@@ -226,6 +232,12 @@ static List _emit(
   _isolate(c, saved, names, stem);
   List code = NULL;
   try {
+    if (prepare) {
+      c.meta_group = [];
+      c.unit_nodes = declarations;
+      c.group_meta_function(prepare(c));
+      units = _units(c);
+    }
     if (c.meta_build) _name_provider_bindings(c, provider, units, saved.deps);
     List lowered = _lower(c, units, stamp, suffix);
     /* The unit's protocol adapters and their registration belong to the
@@ -302,6 +314,7 @@ static void _isolate(
     _.macro_stack = NULL;
     _.macro_holes = NULL;
     _.meta_body = 0;
+    _.permanent_literals = !c.meta_build;
     _.return_type = NULL;
     _.lambda_scopes = NULL;
     _.source_facts = 0;
@@ -927,7 +940,7 @@ void Compiler.bind_meta_group(Compiler c, String name, Token site) {
    or NULL with `failure` set when the group does not stage. */
 static String _stage(Compiler c, String &failure) {
   failure = c.groups_meta() ? _unbound(c) : "native modules are unavailable";
-  String module = failure ? NULL : _module(c, failure);
+  String module = failure ? NULL : _module(c, NULL, NULL, failure);
   if (!module) return NULL;
   module = Compiler.load_native_module(module);
   Map targets = Compiler.native_module_targets(module);
@@ -947,18 +960,33 @@ static String _stage(Compiler c, String &failure) {
   return module;
 }
 
+/** Stages one session factory in an isolated native emission. `prepare`
+    receives this compiler and returns the factory's typed definition; it
+    can place supporting functions through the ordinary compiler APIs.
+    `declarations` supplies session types. Returns the loaded module's
+    targets, or NULL with `failure` set. Publishes no evaluator bindings. */
+Map Compiler.stage_session_function(
+  Compiler c, List declarations, Func prepare, String &failure) {
+  failure = c.groups_meta() ? NULL : "native modules are unavailable";
+  String module = failure ? NULL : _module(c, declarations, prepare, failure);
+  if (!module) return NULL;
+  return Compiler.native_module_targets(Compiler.load_native_module(module));
+}
+
 /* The group's native module under the cache root, named by the SHA-256 of
    its emitted C, the compiler stamp, the C compiler's identity, and the
    runtime headers' directory: one an earlier submission built, or else a
    new build. Returns its path, or NULL with `failure` set when there is no
    cache or the group does not build. */
-static String _module(Compiler c, String &failure) {
+static String _module(
+  Compiler c, List declarations, Func prepare, String &failure) {
   String root = Compiler.cache_root(), stamp = Compiler.module_stamp();
   if (!root || !stamp) {
     failure = "native modules need a cache directory and a known compiler";
     return NULL;
   }
-  List code = _emit(c, stamp, "group", "", failure);
+  List code = _emit_prepared(
+    c, stamp, "group", "", declarations, prepare, failure);
   if (!code) return NULL;
   (String hfile, String header, String cfile, String source) = code;
   String key = String.sha256(
