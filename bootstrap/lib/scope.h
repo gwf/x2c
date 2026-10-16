@@ -72,11 +72,13 @@ Scope Scope_new(void);
 
 Scope Scope_new_named(const char * name);
 
-const char * Scope_name(Scope scope);
-
 void Scope_destroy(Scope scope);
 
 void Scope_cleanup(Scope value);
+
+void x2c_scope_thread_release(void);
+
+const char * Scope_name(Scope scope);
 
 ScopeStats Scope_stats(void);
 
@@ -85,8 +87,6 @@ void Scope_initialize(void);
 void Scope_shutdown_hook(void(* hook)(void));
 
 void Scope_shutdown(void);
-
-void x2c_scope_thread_release(void);
 
 
 #endif /* __GUARD_0xAAD89034__ */
