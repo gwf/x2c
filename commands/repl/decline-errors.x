@@ -3,9 +3,6 @@
 /* REPL lowering conditions. Declines return through the existing sink;
    scan reasons remain text and keep their separate status precedence. */
 
-macro Expression $decline.address.global(Expr $l) =>
-  _lower_decline($l, "the address of file-scope state");
-
 macro Expression $decline.address.storage(Expr $l) =>
   _lower_decline($l, "an address of a value with no storage");
 

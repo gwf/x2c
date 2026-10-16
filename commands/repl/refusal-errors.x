@@ -6,7 +6,8 @@ macro Stmt $refusal.binding.unresolved(Expr $name) =>
   _refuse(%"unresolved identifier: ${$name}");
 
 macro Stmt $refusal.storage.native() =>
-  _refuse("static, extern, and threaded storage need native execution");
+  _refuse(
+    "static, extern, and threaded storage are unsupported at the prompt");
 
 macro Stmt $refusal.binding.redefined() =>
   _refuse("redeclaration is disabled; use assignment");

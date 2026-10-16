@@ -330,9 +330,15 @@ ReplResult ReplSession.load(
     file = Scope.calloc(1, sizeof(struct ReplLoadedFile));
     file.path = filename;
   }
-  foreach (Var (key, type), loaded.symbols)
+  Map visible = $auto(session.compiler.sym.unit_symbols());
+  foreach (Var (key, type), loaded.symbols) {
+    if (!(key in visible))
+      match (key)
+        case %((!or typedef struct union enum) ?):
+          file.types = cons(key, file.types);
     if (!replacing || !(key in file.symbols))
       session.compiler.sym.define_global(key, type);
+  }
   _publish_types(session, loaded.symbols);
   foreach (Var (name, signature), loaded.signatures) {
     if (replacing && name in file.signatures) continue;

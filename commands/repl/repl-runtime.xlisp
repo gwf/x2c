@@ -74,20 +74,10 @@
 (defun C.index.set (p i size layout value)
   (C.poke p (* i size) layout value))
 
-// Persistent submission values, keyed by compiler binding id. The table
-// belongs to this interpreter; records hold their own session-owned bytes.
-
-(defun C.gread (id)
-  (if (eq? (Map.contains C.globals id) 0) 0
-      (Map.getindex C.globals id)))
-
-(defun C.gwrite (id value)
-  (Map.setindex C.globals id
-    (if (eq? (Var_is_wide value) 0) value (C.session-copy value 0))))
-(defun C.grecord.write (id value size)
-  (if (eq? (Map.contains C.globals id) 0)
-      (C.gwrite id (C.session-copy value size))
-      (C.copy (Map.getindex C.globals id) value size)))
+// Persistent native objects, keyed by compiler binding id.
+(defun C.gaddress (id) (Map.getindex C.globals id))
+(defun C.ginit (id layout value)
+  (repl.native.lisp_global_init C.globals id layout value))
 
 // The library operations a lowered call resolves against, under the names
 // the typed AST already uses.

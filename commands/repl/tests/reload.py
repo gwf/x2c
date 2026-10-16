@@ -114,8 +114,17 @@ session = Session(root)
 try:
     session.run("int before = 7;\nArray data = [4, 5];")
     session.load(native)
+    session.run("int loaded_layout(void) { return sizeof(Count)==sizeof(int) "
+                "&& offsetof(LoadShape,part)==sizeof(int); }")
+    session.value("loaded_layout()", 1)
     session.run("Func saved = loaded_answer;\n"
-                "int through(int n) { return loaded_answer(n) + before; }")
+                "Count through(Count n) { return loaded_answer(n) + before; }\n"
+                "LoadShape shape={8,{9}};\n"
+                "int change_shape(int n) { shape.part.value=n; return shape.x; }\n"
+                "int load_mode(void) { enum LoadMode m=(enum LoadMode)2; return m; }")
+    session.value("change_shape(10)", 8)
+    session.value("shape.part.value", 10)
+    session.value("load_mode()", 2)
     session.value("loaded_answer(20)", 42)
     session.value("saved(4)", 10)
     session.value("through(2)", 13)
@@ -186,6 +195,8 @@ try:
         session.value("second_calls()", 2)
         session.value("saved(2)", 18)
         calls += 1
+        session.value("through(2)", 25)
+        calls += 1
         session.value("loaded_calls()", calls)
     session.value("saved(2)", 18)
     session.value("loaded_calls()", calls + 1)
@@ -210,7 +221,7 @@ try:
     assert output.count('reloaded (') == 3, output
     assert '%((native "loaded_answer"))' in output, output
     assert 'Count loaded_answer(Count);' in output, output
-    assert 'int through(int);' in output and 'source: prompt' in output, output
+    assert 'Count through(Count);' in output and 'source: prompt' in output, output
     assert f'source: {native}' in output and f'source: {alias}' not in output, output
 finally:
     session.close()
@@ -227,8 +238,11 @@ session = Session(types_root)
 try:
     session.load(types_file)
     session.run("Point p = {8, 9};\nSame s = {10, 11};")
+    session.run("int point_sum(void) { return p.x+s.y; }")
+    session.value("point_sum()", 19)
     types_file.write_text(extra + point + ping)
     session.load(types_file)
+    session.value("point_sum()", 19)
     session.value("p.x", 8)
     session.value("p.y", 9)
     session.value("s.x", 10)
@@ -238,6 +252,8 @@ try:
     shared = types_root / "shared.x"
     shared.write_text(point + "meta int shared_ping(void) { return 8; }\n")
     session.load(shared)
+    session.run("int three_points(void) { return p.y+q.x+e.added; }")
+    session.value("three_points()", 34)
     session.value("shared_ping()", 8)
     for changed in [
             "typedef struct { long x; int y; } Point;\ntypedef Point Same;\n",
@@ -251,6 +267,25 @@ try:
     types_file.write_text(extra + split + ping)
     session.load(types_file, "declaration changed or removed")
     session.value("ping()", 7)
+    session.finish()
+finally:
+    session.close()
+
+# Loaded aliases can refer to an anonymous type first declared at the prompt.
+owned_root = root / "prompt-types"
+owned_root.mkdir()
+owned_file = owned_root / "owned.x"
+owned_file.write_text(point + "typedef Point Mirror;\n"
+                      "typedef struct UsesPoint { Point point; } UsesPoint;\n" + ping)
+session = Session(owned_root)
+try:
+    session.run(point)
+    session.load(owned_file)
+    session.run("int owned_types(void) { Mirror p={9,10}; "
+                "UsesPoint v={{7,8}}; return p.x+v.point.x; }")
+    session.value("owned_types()", 16)
+    session.run("int point_size(void) { return sizeof(Point)==2*sizeof(int); }")
+    session.value("point_size()", 1)
     session.finish()
 finally:
     session.close()

@@ -833,8 +833,10 @@ static List _lambda_field(int index) => x2c_ident(%"c$index");
 
 static List _lambda_member(int index) => %(${%"c$index"});
 
-static Type _lambda_field_type(Type type) =>
-  type.car() == <&> ? cons(<*>, type.cdr()) : %("Var");
+static Type _lambda_field_type(Type type) {
+  if (type.car() == <&>) return cons(<*>, type.cdr());
+  return type.resolve().car() == <struct> ? type : %("Var");
+}
 
 static Code _lambda_record(List context, List types) {
   Array fields = [];
@@ -962,6 +964,7 @@ static Code _lambda_value(
 Code lambda_closure(Code node) {
   match (node)
     case %(expr ? ${$lambda_captured(?body, *captures, *params)}): {
+      if (params == %((param (void) (bind () ())))) params = NULL;
       List lifted = x2c_binding_fresh("lambda");
       List adapter = x2c_binding_fresh("lambda");
       List closure = x2c_binding_fresh("lambda_closure");

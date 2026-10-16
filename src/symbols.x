@@ -1628,8 +1628,8 @@ static void _save_sources(SymTxn &s) {
 }
 
 /* Rollback restores the active scope's maps, file statics, binding facts,
-   and declaration source metadata. A macro value application also restores
-   the other base scopes' bindings. Rows of other maps stay in the log for
+   and declaration source metadata. Base-scope identities also roll back
+   with their binding facts and counter. Rows of other maps stay in the log for
    an enclosing transaction. */
 static int _tracks(SymTxn &s, Map map) {
   if (_same(map, s.scope.symbols) || _same(map, s.scope.bindings) ||
@@ -1637,7 +1637,6 @@ static int _tracks(SymTxn &s, Map map) {
       _same(map, s.statics) || _same(map, s.binding_facts) ||
       _same(map, s.c.macros) || _same(map, s.c.kw_aliases)) return 1;
   if (s.c.source_facts && _same(map, s.c.source_declarations)) return 1;
-  if (!s.extended) return 0;
   Sym sym = s.c.sym;
   for (int i = 0; i < sym.base_scopes; i++)
     if (_same(map, _scope_at(sym, i).bindings)) return 1;

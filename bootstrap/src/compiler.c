@@ -140,6 +140,7 @@ typedef struct Compiler{
   Token meta_statement;
   int import_protocols;
   int in_pattern, match_is, runtime_literals, inline_header;
+  int permanent_literals;
   int builtin_defs, in_proto, macro_count, recovery_depth;
   int declaration_produced;
   int needs_exception;
@@ -974,7 +975,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _383 = String_var(_382);
   _384 = List_var(NULL);
   _385 = Symbol_var(106239471489226);
-  _386 = int_var(2248);
+  _386 = int_var(2250);
   _387 = String_new("");
   _388 = String_var(_387);
   _389 = String_new("x2c.hole");

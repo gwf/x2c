@@ -175,7 +175,8 @@ static void _lower_scan_each(Lowering &l, List items) {
    cursor and outputs can occupy frame slots instead of addressed cells. */
 static struct LowerCursor {
   Symbol kind;
-  int object, cursor, item, value;
+  List object;
+  int cursor, item, value;
 };
 
 /* A cursor argument names its local directly when the parameter is a
@@ -191,7 +192,7 @@ static int _lower_cursor_local(Var argument) {
 static int _lower_cursor(Var test, struct LowerCursor &walk) {
   match (test)
     case %(expr ? (call (expr ? (ident (binding ? ?(String name))))
-          (args (expr ? (ident (binding ?(int object) ?))) *rest))): {
+          (args (!set ?object (expr ? (ident (binding ? ?)))) *rest))): {
       if (name == "List_try_next" || name == "Array_try_next")
         walk.kind = name == "List_try_next" ? <list> : <array>;
       else if (name == "Map_try_next") walk.kind = <map>;
@@ -417,7 +418,6 @@ static int _lower_failed(Lowering &l, Var value) =>
 static Var _lower_read(Lowering &l, int id) {
   Var form;
   if (l.env.try_get(id, form)) return form;
-  if (!l.locals.contains(id)) return %(C.gread $id);
   return $decline.local.unbound(l);
 }
 
@@ -455,22 +455,11 @@ static Var _lower_address(Lowering &l, int id) {
    An evaluator cell retags its raw `Var` slot. */
 static Var _lower_typed_address(Lowering &l, List type, int id) {
   Symbol tag = l.compiler.sym.var_tag_for_type(type, NULL);
-  Var slot = void;
-  List layout = NULL;
-  if (id in l.locals) layout = _lower_storage_layout(l, id);
-  else {
-    /* A REPL-persistent record is its session bytes; other file-scope
-       state has no address at compile time. */
-    Type pointer = l.compiler.sym.resolve_key(type);
-    Type record = pointer && pointer.is_pointer()
-                ? _lower_record_type(l, pointer.dereference()) : NULL;
-    if (!record)
-      return $decline.address.global(l);
-    slot = %(C.gread $id);
-    layout = l.owner.type_layout(record);
-  }
+  if (!(id in l.locals) && !(id in l.env))
+    return %(C.address (C.gaddress $id) (quote ${tag ? tag : <p48>}));
+  List layout = _lower_storage_layout(l, id);
   if (id in l.arrays) return _lower_value(l, id);
-  if (slot is void) slot = _lower_address(l, id);
+  Var slot = _lower_address(l, id);
   if (_lower_failed(l, slot)) return void;
   if (layout && (layout.car() != <record> || !tag)) return slot;
   if (!tag) return $decline.address.tag(l);
@@ -607,9 +596,10 @@ static Var _lower_place(Lowering &l, Var target) {
   match (target) {
     case %(parens ?inner): return _lower_place(l, inner);
     case %(expr ? (parens ?inner)): return _lower_place(l, inner);
-    case %(expr ? (ident (binding ?(int id) ?))):
-      if (id in l.locals && id in l.cells)
-        return _lower_address(l, id);
+    case %(expr ? (ident (binding ?(int id) ?))): {
+      if (!(id in l.locals) && !(id in l.env)) return %(C.gaddress $id);
+      if (id in l.cells) return _lower_address(l, id);
+    }
     case %(expr ? (op ?operator ?operand)):
       if (operator == <"*">) return _lower_expr(l, operand);
     case %(expr ?type (index ?receiver ?key)): {
@@ -823,7 +813,8 @@ static Var _lower_func_adapter(Lowering &l, Type type, Var callable) {
   Var call = cons(saved, arguments);
   call = _lower_to_type(l, result, call);
   return %((lambda ($saved)
-    (C.func.new (lambda ($fn $argv) $call) (quote $signature))) $callable);
+    (if (eq? (Var.tag $saved) (quote func)) $saved
+      (C.func.new (lambda ($fn $argv) $call) (quote $signature)))) $callable);
 }
 
 /* `Var.binary` applies the usual arithmetic conversions itself for the
@@ -1195,9 +1186,8 @@ static Var _lower_content(Lowering &l, List type, Var content) {
     case %(segments *parts):              return _lower_segments(l, parts);
     /* An empty `%""` is the null String, which reads as empty text. */
     case %(0):                            return "";
-    /* A function named where a value is wanted is the Lisp definition this
-       pass installed, and its own name names it. The scan established that
-       the session binds it. */
+    /* Function designators name the session's published callable. The scan
+       established that the evaluator binds it. */
     case %(ident (binding ?(int id) ?(String name))): {
       if (!l.locals.contains(id) && type.match(%((func *) *)))
         return Atom.intern(name);
@@ -1226,7 +1216,8 @@ static Var _lower_content(Lowering &l, List type, Var content) {
         if (name == "true") return 1;
         return $decline.name.declaration(l, name);
       }
-      return _lower_value(l, id);
+      return id in l.locals || id in l.env ? _lower_value(l, id)
+        : _lower_load(l, type, %(C.gaddress $id));
     }
     case %(parens (block *)):
       return _lower_application(l, content);
@@ -1606,7 +1597,7 @@ static Var _lower_loop(
   foreach (Var id, ids) {
     Var form = l.env[id];
     if (walking && walk.kind == <map> && id == walk.cursor) {
-      Var object = _lower_value(l, walk.object);
+      Var object = _lower_expr(l, walk.object);
       form = %(if (number? $form) (Map.list $object) $form);
     }
     entry.push(form);
@@ -1626,7 +1617,7 @@ static Var _lower_loop(
   if (walking && walk.cursor in inside) {
     Var cursor = inside[walk.cursor];
     if (walk.kind == <array>) {
-      Var object = _lower_value(l, walk.object);
+      Var object = _lower_expr(l, walk.object);
       guard = %(< $cursor (Array.len $object));
       l.env[walk.item] = %(Array.getindex $object $cursor);
       l.env[walk.cursor] = %(+ $cursor 1);
@@ -2192,11 +2183,9 @@ static Var _lower_assign_expr(Lowering &l, Var target, Var rhs) {
     case %(expr ? (index ?receiver ?key)):
       return _lower_setindex_value(l, receiver, key, 1, value);
   }
-  int id = _lower_target(target);
   Var place = _lower_place(l, target);
   if (l.declined || _lower_failed(l, value)) return void;
   if (place is not void) return _lower_poke(l, type, place, value);
-  if (id >= 0 && !l.locals.contains(id)) return %(C.gwrite $id $value);
   return $decline.assignment.storage(l);
 }
 
@@ -2242,13 +2231,6 @@ static Var _lower_store(
   if (place is not void)
     return _lower_effect(l, _lower_poke(l, type, place, value), rest, k);
   if (id < 0) return $decline.assignment.computed(l);
-  if (!l.locals.contains(id)) {
-    match (l.owner.type_layout(type))
-      case %(record ? ?size *):
-        return _lower_effect(
-          l, %(C.grecord.write $id $value $size), rest, k);
-    return _lower_effect(l, %(C.gwrite $id $value), rest, k);
-  }
   return _lower_bind_value(l, id, value, rest, k);
 }
 
@@ -2272,11 +2254,6 @@ static Var _lower_update(
       rest, k);
   }
   if (id < 0) return $decline.update.computed(l);
-  if (!l.locals.contains(id)) {
-    Var combined = _lower_update_value(
-      l, target, operator, %(C.gread $id), right);
-    return _lower_effect(l, %(C.gwrite $id $combined), rest, k);
-  }
   Var current = _lower_value(l, id);
   if (_lower_failed(l, current)) return void;
   Var combined = _lower_update_value(l, target, operator, current, right);
@@ -2499,12 +2476,9 @@ static Var _lower_stmnt(Lowering &l, Var form, List rest, List k) {
         .type_from_ast().declared();
       Var value = _lower_initializer(l, declared, id, initializer);
       if (_lower_failed(l, value)) return void;
-      match (_lower_record_type(l, declared)
-             ? l.owner.type_layout(declared) : NULL)
-        case %(? ? ?size *):
-          return _lower_effect(
-            l, %(C.grecord.write $id $value $size), rest, k);
-      return _lower_effect(l, %(C.gwrite $id $value), rest, k);
+      List layout = l.owner.type_layout(declared);
+      if (!layout) return $decline.layout.unsupported(l);
+      return _lower_effect(l, %(C.ginit $id (quote $layout) $value), rest, k);
     }
     case %(declare ?type (bindings ?declarator)):
       return _lower_declarator(l, type, declarator, rest, k);

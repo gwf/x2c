@@ -1986,10 +1986,12 @@ List Compiler.resolve_protocol_member(
   // adopts, so conformance is keyed on the unqualified participant.
   List resolved = _resolve_member(c, participant.canonicalize(), member_name);
   if (!resolved) return NULL;
-  String spelling = Ast.binding_spelling(resolved.car());
-  return spelling == c.fn_name ? NULL : resolved;
+  (String spelling, Type signature) = resolved;
+  if (spelling == c.fn_name) return NULL;
+  return %(${c.sym.reference(%($spelling), NULL)} $signature);
 }
 
+/* Cache the selected declaration, not a transaction-owned binding identity. */
 static List _resolve_member(
   Compiler c, Type participant, String member_name) {
   List key = %("protocol-member" $participant $member_name), selected = NULL;
@@ -2013,8 +2015,7 @@ static List _generated_member(
     match (decision)
       case %(owner ? ? ?signature ?): {
         String source = _member_spelling(current, member);
-        List binding = c.sym.reference(%($source), NULL);
-        return %($binding $signature);
+        return %($source $signature);
       }
   }
   return NULL;
@@ -2033,8 +2034,7 @@ static List _base_alias(
     String source = %"${base_name}_$member";
     Type signature = c.sym.get(%($source));
     if (!signature || !signature.is_function()) continue;
-    List binding = c.sym.reference(%($source), NULL);
-    return %($binding $signature);
+    return %($source $signature);
   }
   return NULL;
 }
@@ -2051,15 +2051,9 @@ static List _adopted_member(
     if (!row) continue;
     match (row)
       case %(? ?(Symbol status) ?(String source) ?(Type signature) ? ?): {
-        if (status == <implmntd>) {
-          List binding = c.sym.reference(%($source), NULL);
-          return %($binding $signature);
-        }
-        if (status == <native>) {
-          String binding_name = _member_spelling(current, member);
-          List binding = c.sym.reference(%($binding_name), NULL);
-          return %($binding $signature);
-        }
+        if (status == <implmntd>) return %($source $signature);
+        if (status == <native>)
+          return %(${_member_spelling(current, member)} $signature);
       }
     return %();
   }

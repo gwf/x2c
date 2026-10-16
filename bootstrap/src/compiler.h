@@ -131,6 +131,7 @@ typedef struct Compiler{
   Token meta_statement;
   int import_protocols;
   int in_pattern, match_is, runtime_literals, inline_header;
+  int permanent_literals;
   int builtin_defs, in_proto, macro_count, recovery_depth;
   int declaration_produced;
   int needs_exception;

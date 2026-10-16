@@ -39,6 +39,8 @@ static void _expect(
       (status == <value> && result.value != value)) {
     fprintf(stderr, "%s: expected %s, got %s (%s)\n",
             source, status.str(), result.status.str(), result.value.repr());
+    if (result.message) fprintf(stderr, "%s\n", result.message);
+    if (result.diagnostics) fprintf(stderr, "%s\n", result.diagnostics.repr());
     failures++;
   }
 }
@@ -191,13 +193,13 @@ static void _exercise(ReplSession s) {
   _expect(s, "n;", <value>, 2);
   _expect(s, "n+=3;", <executed>, void);
   _expect(s, "n;", <value>, 5);
-  _expect(s, "int rejected(void) { goto end; end: return 0; }",
+  _expect(s, "int rejected(void) { return sizeof(struct Incomplete); }",
           <rejected>, void);
   _expect(s, "int twice(int x) { return 99; }", <rejected>, void);
   _symbols(s, %((value "bad") (value "n") (function "next")
                (value "second") (function "twice")));
   if (s.inspect("rejected")) {
-    fputs("inspection published a function that failed lowering\n", stderr);
+    fputs("inspection published a function that failed compilation\n", stderr);
     failures++;
   }
 }
@@ -210,19 +212,19 @@ static void _retained_results(ReplSession s) {
   String inspected = entry.repr(), published = symbols.repr();
   int matched = 0;
   match (entry) {
-    case %(function (typed ?syntax) (lowered ?forms)):
+    case %(function (typed ?syntax) (execution native)):
       matched = definition.status == <defined> &&
                 syntax.repr() == definition.syntax.repr() &&
-                forms.repr() == definition.lowered.repr() &&
-                syntax.repr() != forms.repr();
+                !definition.lowered;
   }
   if (!matched) {
-    fputs("named inspection lost typed AST or lowered Lisp\n", stderr);
+    fputs("named inspection lost typed AST or native execution\n", stderr);
     failures++;
   }
   $lisp.bind(s.compiler.macro_lisp, "inspection_native", _inspection_native);
   _expect(s, "meta int inspection_native(int n);", <defined>, void);
-  if (s.function_info("wide") != "long wide(void);\nsource: prompt" ||
+  if (s.function_info("wide") !=
+      "long wide(void);\nsource: prompt\nexecution: native" ||
       s.function_info("n") || s.function_info("missing") ||
       !_has_completion(s.complete_functions("wi", 0), "wide") ||
       !_has_completion(s.complete_functions("inspection", 1),
@@ -312,7 +314,7 @@ static void _meta_records(ReplSession session) {
 static void _interpreter_ownership(ReplSession s) {
   _expect(s,
     "int trouble(void) { struct { int x; } p={1}; "
-    "goto end; end: return p.x; }", <rejected>, void);
+    "return sizeof(struct Missing); }", <rejected>, void);
   _expect(s,
     "int trouble(void) { struct { int x; int y; } p={2,3}; return p.y; }",
     <defined>, void);
@@ -336,7 +338,7 @@ static void _interpreter_ownership(ReplSession s) {
   _expect(s, "struct ReplPoint returned=make_point(23);", <executed>, void);
   _expect(s,
     "int storage_failure(void) { struct ReplPoint p={9}; "
-    "int *q=&p.x; return *q/0; }", <defined>, void);
+    "int *q=&p.x; raise %(probe (value ${*q})); }", <defined>, void);
   for (int i = 0; i < 20; i++) {
     _expect(s, "storage_failure();", <failed>, void);
     _expect(s, "make_point(99).x;", <value>, 99);
@@ -356,14 +358,12 @@ static void _interpreter_ownership(ReplSession s) {
     _expect(s, "%(1).map(captured_point);", <value>, %(43));
   }
   _expect(s, "int cleaned=0;", <executed>, void);
-  _expect(s, "int normal_cleanup(void) { defer cleaned+=1; return 1/0; }",
+  _expect(s, "int normal_cleanup(void) { defer cleaned+=1; raise %(probe); }",
           <defined>, void);
   _expect(s, "normal_cleanup();", <failed>, void);
   _expect(s, "cleaned;", <value>, 1);
-  _expect(s, "int budget_cleanup(void) { defer cleaned+=1; "
-             "while(1) {} return 0; }", <defined>, void);
   s.evaluator.call_budget(100);
-  _expect(s, "budget_cleanup();", <failed>, void);
+  _expect(s, "{ defer cleaned+=1; while(1) {} }", <failed>, void);
   s.evaluator.call_budget(1000000);
   _expect(s, "cleaned;", <value>, 1);
   _expect(s, "normal_cleanup();", <failed>, void);
@@ -412,8 +412,8 @@ static void _reference_arguments(ReplSession s) {
   _expect(s, "int RefValue.bump(RefValue &v) { v.n++; return v.n; }",
           <defined>, void);
   _expect(s, "int bad_ref(void) { RefValue v={4}; RefValue *p=&v; "
-             "return p.bump(); }", <rejected>, void);
-  _completion(s, "bad_ref", NULL, "bad_ref");
+             "return p.bump(); }", <defined>, void);
+  _expect(s, "bad_ref();", <failed>, void);
   _expect(s, "int good_ref(void) { RefValue v={4}; RefValue *p=&v; "
              "int n=(*p).bump(); return n*10+v.n; }", <defined>, void);
   _expect(s, "good_ref();", <value>, 55);
@@ -441,6 +441,78 @@ static void _reference_arguments(ReplSession s) {
     failures++;
   }
   _expect(s, "1+2;", <value>, 3);
+}
+
+static void _compiled_functions(ReplSession s) {
+  _expect(s, "int bias=1;", <executed>, void);
+  _expect(s, "int adjust(int n) { return n+bias; }", <defined>, void);
+  _expect(s, "int twice_adjust(int n) { return adjust(adjust(n)); }",
+          <defined>, void);
+  _expect(s, "Func saved_adjust=twice_adjust;", <executed>, void);
+  _expect(s, "bias=10;", <executed>, void);
+  _expect(s, "saved_adjust(2);", <value>, 22);
+  _expect(s, "Func address_adjust(void) { return &adjust; }", <defined>, void);
+  _expect(s, "Func group_adjust(void) { return (adjust); }", <defined>, void);
+  _expect(s, "Func deref_adjust(void) { return *adjust; }", <defined>, void);
+  _expect(s, "address_adjust()(2);", <value>, 12);
+  _expect(s, "group_adjust()(2);", <value>, 12);
+  _expect(s, "deref_adjust()(2);", <value>, 12);
+  _expect(s, "int grouped_adjust(int n) { return (adjust)(n) "
+             "+ (&adjust)(n) + (*(&adjust))(n); }", <defined>, void);
+  _expect(s, "grouped_adjust(2);", <value>, 36);
+  _expect(s, "Func choose_adjust(int flag) { "
+             "return flag ? adjust : twice_adjust; }", <defined>, void);
+  _expect(s, "choose_adjust(1)(2);", <value>, 12);
+  _expect(s, "choose_adjust(0)(2);", <value>, 22);
+  _expect(s, "int call_choice(int flag) { "
+             "return (flag ? adjust : twice_adjust)(2); }", <defined>, void);
+  _expect(s, "call_choice(0);", <value>, 22);
+  _expect(s, "int raw_adjust(int n) { int (*fn)(int)=adjust; return fn(n); }",
+          <rejected>, void);
+  _expect(s, "int cast_adjust(int n) { "
+             "int (*fn)(int)=(int (*)(int))adjust; return fn(n); }",
+          <rejected>, void);
+  _expect(s, "int *bias_address=&bias;", <executed>, void);
+  _expect(s, "int mutate_bias(int &n) { n+=bias; bias++; return n; }",
+          <defined>, void);
+  _expect(s, "int number=2;", <executed>, void);
+  _expect(s, "mutate_bias(number);", <value>, 12);
+  _expect(s, "number;", <value>, 12);
+  _expect(s, "*bias_address;", <value>, 11);
+  _expect(s, "int same_address(int *p) { return p==&bias; }", <defined>, void);
+  _expect(s, "same_address(bias_address);", <value>, 1);
+  _expect(s, "int *address(void) { return &bias; }", <defined>, void);
+  _expect(s, "address()==bias_address;", <value>, 1);
+  _expect(s, "Func later(void) { return %!(void) => bias; }", <defined>, void);
+  _expect(s, "Func read_later=later();", <executed>, void);
+  _expect(s, "bias+=1;", <executed>, void);
+  _expect(s, "read_later();", <value>, 12);
+  _expect(s, "bias-=1;", <executed>, void);
+  _expect(s, "int recurse(int n) { return n ? n+recurse(n-1) : bias; }",
+          <defined>, void);
+  _expect(s, "recurse(4);", <value>, 21);
+  _expect(s, "Func own_value(void) { return own_value; }", <defined>, void);
+  _expect(s, "Func own_saved=own_value();", <executed>, void);
+  _expect(s, "own_saved()==own_saved;", <value>, 1);
+  _expect(s, "Array shared_items=[];", <executed>, void);
+  _completion(s, "shared_items.pu", "push", NULL);
+  _expect(s, "Array append_shared(int n) { shared_items.push(n); "
+             "return shared_items; }", <defined>, void);
+  _expect(s, "append_shared(7)==shared_items;", <value>, 1);
+  _expect(s, "shared_items[0];", <value>, 7);
+  _expect(s, "shared_items.push(9);", <value>, 9);
+  _expect(s, "int shared_count(void) { return shared_items.len(); }",
+          <defined>, void);
+  _expect(s, "shared_count();", <value>, 2);
+  _expect(s, "int change_point(int n) { int old=kept_point.x; "
+             "kept_point.x=n; return old; }", <defined>, void);
+  _expect(s, "change_point(21);", <value>, 12);
+  _expect(s, "*kept_field;", <value>, 21);
+  _expect(s, "kept_point=replacement;", <executed>, void);
+  _expect(s, "change_point(27);", <value>, 12);
+  _expect(s, "int jumped(void) { goto end; end: return bias; }",
+          <defined>, void);
+  _expect(s, "jumped();", <value>, 11);
 }
 
 static void _truth_values(ReplSession s) {
@@ -481,6 +553,48 @@ static void _pointer_updates(ReplSession s) {
   _expect(s, "pointer_addressed();", <value>, 20);
 }
 
+static void _independent_sessions(Frontend frontend) {
+  ParsedUnit first;
+  if (!frontend.open_session(first)) { failures++; first.close(); return; }
+  defer first.close();
+  ReplSession a = ReplSession.new(first.compiler);
+  defer a.close();
+  String definition = "int session_add(int n) { shared+=n; return shared; }";
+  _expect(a, "int shared=1;", <executed>, void);
+  _expect(a, definition, <defined>, void);
+  Var saved;
+  a.evaluator.try_get("session_add", saved);
+  Func callable = saved;
+  {
+    ParsedUnit second;
+    if (!frontend.open_session(second)) { failures++; second.close(); return; }
+    defer second.close();
+    ReplSession b = ReplSession.new(second.compiler);
+    defer b.close();
+    _expect(b, "int shared=20;", <executed>, void);
+    _expect(b, definition, <defined>, void);
+    _expect(b, "session_add(2);", <value>, 22);
+    FuncArg argument = FuncArg.value(2);
+    if (callable.apply(1, &argument) != 3) {
+      fputs("compiled sessions share captured variables\n", stderr);
+      failures++;
+    }
+    _expect(b, "shared;", <value>, 22);
+    _expect(b, "String text(void) { return \"module text\"; }",
+            <defined>, void);
+    _expect(b, "List syntax(void) { return %(module (cached 7)); }",
+            <defined>, void);
+    _expect(b, "text();", <value>, "module text");
+    _expect(b, "syntax();", <value>, %(module (cached 7)));
+  }
+  _expect(a, "session_add(4);", <value>, 7);
+  _expect(a, "String text(void) { return \"module text\"; }", <defined>, void);
+  _expect(a, "List syntax(void) { return %(module (cached 7)); }",
+          <defined>, void);
+  _expect(a, "text();", <value>, "module text");
+  _expect(a, "syntax();", <value>, %(module (cached 7)));
+}
+
 int main(int argc, char **argv) {
   (void) argc;
   x2c_initialize_environment(argv[0]);
@@ -510,6 +624,7 @@ int main(int argc, char **argv) {
         _meta_records(session);
         _interpreter_ownership(session);
         _reference_arguments(session);
+        _compiled_functions(session);
         _truth_values(session);
         _pointer_updates(session);
         _delegate_completion(session);
@@ -535,6 +650,7 @@ int main(int argc, char **argv) {
       baseline = live;
     }
   }
+  _independent_sessions(frontend);
   if (!failures)
     printf("direct submission checks passed; teardown matches empty "
            "frontend baseline (+%zu allocations/round)\n", growth);

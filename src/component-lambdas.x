@@ -349,10 +349,12 @@ meta static List _lambda_field(int index) => x2c_ident(%"c$index");
 /* The spelling of record field `index`, which names no binding. */
 meta static List _lambda_member(int index) => %(${%"c$index"});
 
-/* The type of the record field that holds a capture of `type`: the
-   referent's address for a reference, and otherwise a `Var`. */
-meta static Type _lambda_field_type(Type type) =>
-  type.car() == <&> ? cons(<*>, type.cdr()) : %("Var");
+/* A reference stores its address. Records keep their native bytes because
+   Var cannot carry them; other captures use their Var representation. */
+meta static Type _lambda_field_type(Type type) {
+  if (type.car() == <&>) return cons(<*>, type.cdr());
+  return type.resolve().car() == <struct> ? type : %("Var");
+}
 
 /* The record `context`, with a field of each type in `types`, as bound
    code. */
@@ -494,6 +496,7 @@ $rewrite($lambda_captured)
 meta Code lambda_closure(Code node) {
   match (node)
     case %(expr ? ${$lambda_captured(?body, *captures, *params)}): {
+      if (params == %((param (void) (bind () ())))) params = NULL;
       List lifted = x2c_binding_fresh("lambda");
       List adapter = x2c_binding_fresh("lambda");
       List closure = x2c_binding_fresh("lambda_closure");

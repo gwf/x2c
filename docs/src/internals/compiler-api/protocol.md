@@ -59,7 +59,7 @@ its `discard` member may release what it owns before the enclosing scope
 ends. Returns null when no selected argument type has a `discard` member,
 or an ordinary pointer or aggregate result may borrow an argument.
 
-Source: `src/protocol.x:2313`
+Source: `src/protocol.x:2307`
 
 <a id="Compiler.dump_conformance"></a>
 #### Compiler.dump_conformance
@@ -82,7 +82,7 @@ Returns `(declarations arguments)` for a helper that forwards its
 parameters of `types`: each declaration names a fresh parameter `a0`,
 `a1`, ..., and each argument reads it.
 
-Source: `src/protocol.x:2203`
+Source: `src/protocol.x:2197`
 
 <a id="Compiler.generate_protocol_adapters"></a>
 #### Compiler.generate_protocol_adapters
@@ -97,7 +97,7 @@ the unit defines goes to the rule on the `conform` head, which
 pending support. The external conformances the unit declares are first
 recorded in its interface. Returns `ast` with native insertions applied.
 
-Source: `src/protocol.x:2397`
+Source: `src/protocol.x:2391`
 
 <a id="Compiler.install_generated_protocol_symbols"></a>
 #### Compiler.install_generated_protocol_symbols
@@ -107,7 +107,7 @@ Source: `src/protocol.x:2397`
 Publishes external native alias and ordinary adapter signatures.
 Protocols must already be resolved in the active symbol table.
 
-Source: `src/protocol.x:2436`
+Source: `src/protocol.x:2430`
 
 <a id="Compiler.native_protocol_alias"></a>
 #### Compiler.native_protocol_alias
@@ -117,7 +117,7 @@ Source: `src/protocol.x:2436`
 Reports whether a generated member names a native protocol host function.
 Its defining header supplies the alias instead of a C prototype.
 
-Source: `src/protocol.x:2477`
+Source: `src/protocol.x:2471`
 
 <a id="Compiler.parse_protocol_declaration"></a>
 #### Compiler.parse_protocol_declaration
@@ -140,7 +140,7 @@ Source: `src/protocol.x:491`
 
 The `discard_helper` for `participant`'s protocol `member`.
 
-Source: `src/protocol.x:2339`
+Source: `src/protocol.x:2333`
 
 <a id="Compiler.protocol_member_names"></a>
 #### Compiler.protocol_member_names
@@ -186,7 +186,7 @@ A matching helper is emitted once into the unit's pending support;
 `postfix` selects whether it returns the old or stored value. Returns null
 when the member cannot implement this update shape.
 
-Source: `src/protocol.x:2234`
+Source: `src/protocol.x:2228`
 
 <a id="Compiler.publish_protocol_node"></a>
 #### Compiler.publish_protocol_node
@@ -213,7 +213,7 @@ map leaves those registries empty. The conformance rows included
 interfaces recorded are kept for reuse. Conformance reset and resolution
 belong to `resolve_protocols`.
 
-Source: `src/protocol.x:2733`
+Source: `src/protocol.x:2727`
 
 <a id="Compiler.record_source_typedef"></a>
 #### Compiler.record_source_typedef
@@ -223,7 +223,7 @@ Source: `src/protocol.x:2733`
 Remembers a source typedef's declaration and visibility, which native
 alias insertion reads for its participant.
 
-Source: `src/protocol.x:2656`
+Source: `src/protocol.x:2650`
 
 <a id="Compiler.resolve_as_declared"></a>
 #### Compiler.resolve_as_declared
@@ -287,7 +287,7 @@ unit. `result` is the storage class and result type, so static, inline
 and external helpers share it; `params` are the parameter declarations,
 and `body` its lowered statements.
 
-Source: `src/protocol.x:2193`
+Source: `src/protocol.x:2187`
 
 ## Design notes
 

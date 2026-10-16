@@ -136,6 +136,17 @@ Var lisp_poke(Var pointer, Var offset, List layout, Var value) {
   return value;
 }
 
+/** Initializes one persistent object. The binding table holds its address;
+    later interpreted and compiled writes both use these same bytes. */
+Var lisp_global_init(Map globals, int id, List layout, Var value) {
+  (size_t size) = layout.cddr();
+  void *storage = Scope.calloc_in(Lisp.active().storage(), 1, size);
+  Var address = Var.new(<p48>, storage);
+  lisp_poke(address, 0, layout, value);
+  globals[id] = address;
+  return value;
+}
+
 /** Builds a local C array in live native storage, shared by indexing and
     references to its elements. Initializer values already have element
     type. */
@@ -224,6 +235,7 @@ void repl_runtime_initialize(Lisp lisp) {
   $lisp.bind(lisp, "repl.native.lisp_box", lisp_box);
   $lisp.bind(lisp, "repl.native.lisp_peek", lisp_peek);
   $lisp.bind(lisp, "repl.native.lisp_poke", lisp_poke);
+  $lisp.bind(lisp, "repl.native.lisp_global_init", lisp_global_init);
   $lisp.bind(lisp, "repl.native.lisp_array", lisp_array);
   $lisp.bind(lisp, "repl.native.lisp_unwind", lisp_unwind);
   $lisp.bind(lisp, "repl.native.lisp_func_new", lisp_func_new);

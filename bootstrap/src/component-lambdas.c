@@ -24,8 +24,6 @@ static List _lambda_params(List params);
 
 static List _lambda_member(int index);
 
-static Type _lambda_field_type(Type type);
-
 static List _lambda_designated(Var value);
 
 static Map _lambda_shared(List params, List items);
@@ -231,10 +229,6 @@ static List _lambda_params(List params){
 
 static List _lambda_member(int index){
   return cons(String_var(String_join(NULL, cons(String_var(_8), cons(String_var(int_str(index)), NULL)))), NULL);
-}
-
-static Type _lambda_field_type(Type type){
-  return x2c_var_equal(List_car(type), Symbol_var(77)) ? cons(Symbol_var(54), List_cdr(type)) : _3;
 }
 
 static List _lambda_designated(Var value){

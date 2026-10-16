@@ -85,8 +85,9 @@ Public functions:
 
 `Compiler.capture_environment`, `Compiler.prepend_setup`,
 `Compiler.lift_func_expression`, `Compiler.maybe_adapt_func_arg`,
-`Compiler.func_parameters`, `Compiler.func_signature`,
-`Compiler.lower_typed_adapter_expr`, `Compiler.adapt_lambda_arg`
+`Compiler.context_func_adapter`, `Compiler.func_parameters`,
+`Compiler.func_signature`, `Compiler.lower_typed_adapter_expr`,
+`Compiler.adapt_lambda_arg`
 
 ### [src/cleanup.x](../src/cleanup.x)
 
@@ -515,7 +516,8 @@ Public functions:
 `Compiler.meta_reaches_compile_time`, `Compiler.finish_meta_functions`,
 `Compiler.meta_call_missing`, `Compiler.refuse_meta_call`,
 `Compiler.refuse_record_meta_call`, `Compiler.use_meta_build_directory`,
-`Compiler.write_meta_build`, `Compiler.bind_meta_group`
+`Compiler.write_meta_build`, `Compiler.bind_meta_group`,
+`Compiler.stage_session_function`
 
 ### [src/meta-helper-client.x](../src/meta-helper-client.x)
 

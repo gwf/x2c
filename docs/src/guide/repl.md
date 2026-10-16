@@ -2,9 +2,10 @@
 
 `x2c repl` is a shipped external command that evaluates a supported subset
 of x2c in a persistent session.
-The command lowers the compiler's typed syntax to ordinary Lisp and runs it
-in its own evaluator session. Compiler macros continue to use native meta
-compilation and helper execution.
+The command compiles prompt function definitions to native code. Top-level
+initializers, statements, and expressions lower to ordinary Lisp and run in
+the session's evaluator. Compiler macros use native meta compilation and
+helper execution.
 
 ```sh
 x2c repl
@@ -37,6 +38,22 @@ The function calls display `=> 13` and `=> 23`: later calls read the current
 value of `total`. Definitions display `defined NAME`; initializations and
 statements display `ok`. A final expression displays its value using
 `Var.repr`, so character and unsigned values retain their printed tags.
+
+A function is compiled once, when its complete definition is submitted.
+Compilation needs the matching x2c compiler and host C toolchain. Later calls
+use the compiled code. Prompt variables have shared native storage: both
+compiled functions and interpreted input read and write the same objects.
+Assignment preserves each variable's address, including pointers to record
+fields. `&total` therefore refers to the same object from either path.
+
+Functions can call earlier functions and recurse directly. A saved `Func`
+keeps the same bindings, so changes to shared variables remain visible:
+
+```x2c
+Func saved = plus;
+total = 30;
+saved(3);  // 33
+```
 
 Submit one declaration or function at a time. Executable input may contain
 several statements. Semicolons are required. Incomplete input continues at
@@ -85,23 +102,24 @@ incomplete submission continues at a fresh `... ` prompt.
 | `:stats [verbose]` | Show concise or detailed runtime statistics. |
 | `:symbols [PREFIX]` | List successfully defined names and kinds, optionally matching a name prefix. |
 | `:load "file.x"` | Compile and load public bodied meta functions; replace an earlier load of the same file. |
-| `:info NAME` | Show a session function's argument and return types and its source. |
+| `:info NAME` | Show a session function's argument and return types, source, and execution mode. |
 | `:ast plus` | Show `plus`'s typed x2c AST. |
-| `:lowered plus` | Show the Lisp forms used to execute `plus`. |
+| `:lowered plus` | Report that `plus` is compiled and has no Lisp body. |
 | `:cancel` | Discard incomplete input. |
 | `:quit` | Exit, discarding incomplete input. |
 
 For the example above, `:symbols` prints the list template
 `%((function "plus") (value "total"))`. Typed AST output begins with
-`typed: %(`; lowered Lisp is separately labeled `lowered:`. Inspection does
-not execute the function, and earlier functions remain inspectable after
-later submissions. Values have symbol entries but no function AST.
+`typed: %(`; `:lowered plus` prints
+`compiled: native function; no Lisp body`. Inspection does not execute the
+function, and earlier functions remain inspectable after later submissions.
+Values have symbol entries but no function AST.
 
 `:symbols pl` lists only names beginning with `pl`. `:info plus` prints a
-declaration and `source: prompt`. For a loaded function, the source is the
-loaded file's resolved absolute path. Parameter names are omitted from the
-printed declaration; argument and return types remain. Tab completion for
-`:info` includes both prompt functions and loaded functions.
+declaration, `source: prompt`, and `execution: native`. For a loaded function,
+the source is the loaded file's resolved absolute path. Parameter names are
+omitted from the printed declaration; argument and return types remain.
+Tab completion for `:info` includes both prompt functions and loaded functions.
 
 Help and inspection commands preserve incomplete input, including when a
 command reports an error. Colon commands are recognized on separate lines
@@ -156,8 +174,8 @@ functions. Public type declarations accompany them. Global variables and
 enumerator constants are not imported. Source macros remain with the
 compiled source; loading does not install them in the prompt.
 
-Compilation happens on `:load`. Prompt definitions, statements, and
-expressions still lower to Lisp, including `plus_answer` above. Loading needs
+Compilation happens on `:load` and on each prompt function definition,
+including `plus_answer` above. Top-level input stays interpreted. Loading needs
 a matching x2c compiler, the host C compiler, and its runtime. A dependency
 that the project meta builder cannot compile or link makes the load fail.
 `meta` selects the compiled entry points; it does not supply missing native
@@ -183,8 +201,8 @@ After editing a file, use the same `:load "file.x"` command. A successful
 replacement prints `reloaded`. Calls use the new code, including calls from
 earlier prompt functions. Saved `Func` values use the replacement for calls
 the REPL already supports. Prompt variables and functions remain, as do
-other loaded files. Variables inside the replaced
-file and its compiled dependencies start over, even if the file did not
+other loaded files. Variables inside the replaced file and its compiled
+dependencies start over, even if the file did not
 change. Previously returned values remain ordinary prompt data.
 
 Existing functions must keep their argument and return types. Parameter
@@ -281,28 +299,27 @@ Function replacement and mutually recursive forward declarations are not
 supported. Names beginning `__repl_` are reserved.
 
 Arbitrary C libraries, unions, enums, imports, protocols, user macro/meta
-definitions entered at the prompt, preprocessor
-directives, and direct Lisp input are outside this subset. A bodyless `meta`
+definitions entered at the prompt, preprocessor directives, and direct Lisp
+input are outside this subset. A bodyless `meta`
 prototype is accepted: it makes a function the compiler links, or one from a
 [native module](meta-functions.md#native-modules) loaded with
 `--native-module`, callable in the session. Variables need
 initializers; declarator modifiers, `const`, and `volatile` are rejected.
-Function-local `static`, `extern`, and `threaded` storage are also rejected:
-the evaluator cannot provide their native lifetime or linkage semantics.
-Statement expressions such as `({ int n=3; n+4; })` are declined.
+Function-local `static`, `extern`, and `threaded` storage remain rejected.
+Top-level statement expressions such as `({ int n=3; n+4; })` are declined.
 Reference parameters use the ordinary compiler conversion: pass an
 addressable value, or write `*p` to pass a pointer's object. A pointer itself
 cannot substitute for the referenced object.
 Records, typedefs, addressed locals and pointer reads/writes use native
 storage with layouts derived from compiler types. Record assignment copies
 into existing storage, preserving pointers to its fields. A session
-global record has an address, but a session global scalar does not:
-`&count` for an `int count` entered earlier is declined as the address
-of file-scope state. Copy the value into a local to take its address. Other constructs
-depend on the existing lowering and may be declined. Full
-native execution and reference/lifecycle parity are not established; for
-example, the evaluator loses the distinction between `Var void` and an
-empty List.
+global scalar or record keeps its address until the session closes. Other
+top-level constructs depend on the existing lowering and may be declined.
+Native function bodies use ordinary compiler semantics; for example, `goto`
+is available there. Loaded public types can be used in prompt functions
+within the same native layout limits as interpreted objects. The interpreter
+does not provide full native parity:
+it loses the distinction between `Var void` and an empty List.
 
 ## Failure and lifetime
 
@@ -314,15 +331,20 @@ remain, both for failed initialization and failed statements.
 
 Session storage lives until exit. Submission scratch is reclaimed, but
 canonical syntax, compiler caches, and evaluator allocations can accumulate.
-Long sessions do not have a bounded-memory guarantee. Each submission may
-make 40 million interpreted Lisp calls, the evaluator's default budget.
+Long sessions do not have a bounded-memory guarantee. Compiled modules stay
+loaded for the process lifetime; captured bindings belong to their session.
+Each submission may make 40 million interpreted Lisp calls, the evaluator's
+default budget.
 SIGINT (Ctrl-C) during evaluation stops the submission with an
 `(interrupt ...)` evaluation error. Once the budget is exhausted or the
 submission is interrupted, no further interpreted code runs, including
 pending `defer` bodies. Ordinary evaluation failures
 still run those cleanups. The next submission gets a fresh budget. Native
-callbacks are not a preemptible sandbox: an interrupt takes effect at the
-next interpreted call.
+callbacks and compiled prompt functions are not a preemptible sandbox: an
+interrupt takes effect at the next interpreted call. Compiled function loops
+do not consume the Lisp budget. Their native crashes or nonterminating loops
+can end or block the REPL process. Loaded files retain their separate helper
+process and timeout behavior.
 
 EOF exits successfully unless input is incomplete, which exits with status
 1. With piped input, any submission or command error makes the final status
@@ -333,6 +355,7 @@ During interactive editing, Ctrl-C clears both the current edit buffer and any
 pending incomplete submission, then returns to the `x2c> ` prompt without a
 diagnostic. Ctrl-D on an empty edit buffer exits; pending incomplete source
 still makes that exit status 1. Terminal canonical mode is restored before a
-submission runs, and Ctrl-C during evaluation stops only that submission.
+submission runs. Ctrl-C during interpreted evaluation stops only that
+submission.
 Terminals without the required escape-sequence support use the basic line
 reader instead. Piped input retains the same output and exit behavior.
