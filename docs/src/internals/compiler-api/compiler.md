@@ -196,7 +196,7 @@ Caches a cons cell when both parts have immutable cache forms.
 Returns `NULL` when runtime literals are required or either part cannot
 be represented by the immutable cache graph.
 
-Source: `src/compiler/literal-cache.x:27`
+Source: `src/compiler/literal-cache.x:28`
 
 <a id="Compiler.cache_literal_list"></a>
 #### Compiler.cache_literal_list
@@ -208,7 +208,7 @@ Returns a runtime `List` expression for cached compiler-owned syntax.
 `values` may contain nested `List`s, `String`s, integer `Var`s, and
 `Symbol`s.
 
-Source: `src/compiler/literal-cache.x:89`
+Source: `src/compiler/literal-cache.x:90`
 
 <a id="Compiler.cache_literal_var"></a>
 #### Compiler.cache_literal_var
@@ -219,7 +219,7 @@ Interns an immutable value and returns its `(cache id)` reference.
 `value` is a `List` of such values, a `String`, a number with its tag, or
 a `Symbol`; any other value returns NULL.
 
-Source: `src/compiler/literal-cache.x:44`
+Source: `src/compiler/literal-cache.x:45`
 
 <a id="Compiler.canonical_path"></a>
 #### Compiler.canonical_path
