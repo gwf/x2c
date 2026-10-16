@@ -296,7 +296,6 @@ module struct Lisp {
 module Lisp threaded lisp_active;
 #include "var-adapters.x"
 
-
 static $(import "../etc/lisp-bindings.xlisp")
 
 module {

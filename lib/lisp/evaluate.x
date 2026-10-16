@@ -18,7 +18,6 @@ module typedef struct LispEnv {
   int value_count, struct LispEnv *parent;
 } LispEnv;
 
-
 module inline Var Lambda.var(Lambda value) {
   return Var.new(<lambda>, value);
 }
