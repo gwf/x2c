@@ -64,13 +64,7 @@ List Macro_number_literal(List result, List type, Var value);
 
 List Macro_case_pattern(Macro t, List names);
 
-List Macro_case_shape(Macro t, List names, List shape);
-
 int Macro_case_capture_at(MacroCaseSite * site, List code, Macro t, List names, MatchCaptureBuffer * published);
-
-int Macro_case_root(List code, Macro t, List names, int statement, List * cursor, MatchCaptureBuffer * published);
-
-int Macro_case_enter(Var value, List * cursor);
 
 typedef struct MacroMatcher{
   Macro shape;

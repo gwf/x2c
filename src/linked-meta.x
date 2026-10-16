@@ -207,6 +207,11 @@ static List _update_decode(List id, List value) {
   return decoded;
 }
 
+static List _update_operation(Var function) {
+  String spelling = Code.binding_spelling(function);
+  return $!(String){ String.new($spelling) };
+}
+
 /* --- src/component-access.x ---------------------------------------------- */
 
 static int _collection_family(Code base) {
@@ -2214,6 +2219,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_update_cast_out", _update_cast_out);
   $linked.row(rows, "_update_box", _update_box);
   $linked.row(rows, "_update_decode", _update_decode);
+  $linked.row(rows, "_update_operation", _update_operation);
   $linked.row(rows, "_collection_family", _collection_family);
   $linked.row(rows, "access_read", access_read);
   $linked.row(rows, "_participant_store", _participant_store);

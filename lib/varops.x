@@ -72,6 +72,13 @@ meta static List _update_decode(List id, List value) {
   return decoded;
 }
 
+/* The function's name for a raise payload. Built only when the raise runs,
+   so the update path needs no cached String and no initialization check. */
+meta static List _update_operation(Var function) {
+  String spelling = Code.binding_spelling(function);
+  return $!(String){ String.new($spelling) };
+}
+
 /* Each row supplies the storage boxer and decoder for its type, and
    `_native_update` performs the operation and the conversion back. Keeping
    both here makes compiler-lowered native lvalues and direct Var compound
@@ -89,19 +96,16 @@ static macro Unit $native.update(Type $type, Name $function, Literal $row) {
       also leaves it unchanged and returns the native zero for `$type`.
   */
   $type $function(
-    volatile $type *$(x2c.ident "lhs"), Symbol $(x2c.ident "op"),
-    Var $(x2c.ident "rhs")) {
-    if (!$(x2c.ident "lhs")) {
-      raise %(bad-arg (operation ${
-        $(x2c.literal.string (Code.binding_spelling $function))
-      }));
-    }
+    volatile $type *$x2c_ident("lhs"), Symbol $x2c_ident("op"),
+    Var $x2c_ident("rhs")) {
+    if (!$x2c_ident("lhs"))
+      raise %(bad-arg (operation ${$_update_operation($function)}));
     Var $converted = _native_update(
       $_update_box($row, $x2c_ident("lhs")),
-      $_update_tag($row), $(x2c.ident "op"), $(x2c.ident "rhs"));
+      $_update_tag($row), $x2c_ident("op"), $x2c_ident("rhs"));
     if ($converted is void) return 0;
     $type value = $_update_decode($row, $converted);
-    ($(x2c.ident "lhs"))[0] = value;
+    $x2c_ident("lhs")[0] = value;
     return value;
   }
 }

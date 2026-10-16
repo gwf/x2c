@@ -1259,7 +1259,6 @@ guards trustworthy.
 
 | Signal | Rules | Tool |
 | --- | --- | --- |
-| a macro used once through `Macro shape = $m;` | MA-5 | none |
 | raw `case %(` on a head with a grammar form | MA-7 | none |
 | new `.xlisp` | LI-1 | none |
 | `$(defun` in `src/` or `lib/` | LI-1 | `lisp-defun` |

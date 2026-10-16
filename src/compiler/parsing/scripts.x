@@ -66,27 +66,28 @@ module void _push_conditionals(
    function, so the `try` that reports an uncaught error leaves their locals
    ordinary. A failed command's status becomes the exit status; any other
    uncaught error exits with 1. */
-static const char *script_main =
-  "static int x2c_script(int argc, char **argv, List args) {\n"
-  "  (void) argc, (void) argv, (void) args;\n"
-  "  x2c_script_statements\n"
-  "  return 0;\n"
-  "}\n"
-  "int main(int argc, char **argv) {\n"
-  "  try {\n"
-  "    return x2c_script(argc, argv, Args.from_argv(argc, argv));\n"
-  "  }\n"
-  "  catch %(cmd-fail (command ?command) (status ?status) *): {\n"
-  "    fprintf(stderr, \"%s: command %s failed with status %ld\\n\",\n"
-  "            argv[0], command.repr().str(), status.integer());\n"
-  "    return (int) status.integer();\n"
-  "  }\n"
-  "  catch %(?code *detail): {\n"
-  "    fprintf(stderr, \"%s: %s %s\\n\",\n"
-  "            argv[0], code, detail.repr().str());\n"
-  "    return 1;\n"
-  "  }\n"
-  "}\n";
+static String script_main =
+%"static int x2c_script(int argc, char **argv, List args) {
+  (void) argc, (void) argv, (void) args;
+  x2c_script_statements
+  return 0;
+}
+int main(int argc, char **argv) {
+  try {
+    return x2c_script(argc, argv, Args.from_argv(argc, argv));
+  }
+  catch %(cmd-fail (command ?command) (status ?status) *): {
+    fprintf(stderr, \"%s: command %s failed with status %ld\\n\",
+            argv[0], command.repr().str(), status.integer());
+    return (int) status.integer();
+  }
+  catch %(?code *detail): {
+    fprintf(stderr, \"%s: %s %s\\n\",
+            argv[0], code, detail.repr().str());
+    return 1;
+  }
+}
+";
 
 /* Replaces the token stream with a copy that ends in the script's `main`.
    The copy keeps every consumed token at its index, so recorded token
@@ -98,7 +99,7 @@ module void _append_script_main(Compiler c, Array statements) {
   Token first = tokens + statements[0].integer();
   Bytes stream = Bytes.new(sizeof(struct Token));
   stream = stream.append(tokens, kept);
-  Tokenizer template = Tokenizer.new((char *) script_main, <x2c>);
+  Tokenizer template = Tokenizer.new(script_main, <x2c>);
   template.scan();
   for (Token token = template.tokens; token.type != <eof>; token++) {
     if (token.text == "x2c_script_statements")

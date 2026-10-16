@@ -202,6 +202,8 @@ static void _exercise(ReplSession s) {
   }
 }
 
+static int _inspection_native(int n) => n;
+
 static void _retained_results(ReplSession s) {
   ReplResult definition = s.submit("long wide(void) { return 5000000000; }");
   List entry = s.inspect("wide"), symbols = s.symbols();
@@ -216,6 +218,18 @@ static void _retained_results(ReplSession s) {
   }
   if (!matched) {
     fputs("named inspection lost typed AST or lowered Lisp\n", stderr);
+    failures++;
+  }
+  $lisp.bind(s.compiler.macro_lisp, "inspection_native", _inspection_native);
+  _expect(s, "meta int inspection_native(int n);", <defined>, void);
+  if (s.function_info("wide") != "long wide(void);\nsource: prompt" ||
+      s.function_info("n") || s.function_info("missing") ||
+      !_has_completion(s.complete_functions("wi", 0), "wide") ||
+      !_has_completion(s.complete_functions("inspection", 1),
+                       "inspection_native") ||
+      _has_completion(s.complete_functions("inspection", 0),
+                      "inspection_native")) {
+    fputs("function inspection or completion changed its contract\n", stderr);
     failures++;
   }
   _expect(s, "Func capture(int x) { return %!(int y) => x+y; }",

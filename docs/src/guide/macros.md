@@ -371,11 +371,6 @@ A decorator receives the following expression or source item as its required
 first parameter. Invocation arguments follow normally:
 
 ```x2c
-~
-#include "meta.x"
-meta static String project_name(List fn) => Code.name(fn);
-meta static List project_body(List fn) => Code.body(fn);
-
 macro Decorator $project.trace(
   Function $function,
   Expr $label
@@ -383,10 +378,10 @@ macro Decorator $project.trace(
   printf(
     "[%s] enter %s\n",
     $label,
-    $project_name($function)
+    $Code.name($function)
   );
   defer printf("[%s] leave\n", $label);
-  @project_body($function)
+  @Code.body($function)
 }
 
 $project.trace("request")
@@ -399,8 +394,9 @@ int answer(int value) {
 ~}
 ```
 
-The helpers receive the complete captured function. One returns its name;
-the other returns its body as the sequence inserted by `@`.
+`$Code.name` and `@Code.body` receive the complete captured function.
+`Code.name` returns its name, and `Code.body` returns its body as the
+sequence that `@` inserts.
 
 There is no semicolon after the decorator invocation. Decorators stack
 closest-first, and each expansion must leave exactly one target for the next.
