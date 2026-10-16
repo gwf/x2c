@@ -1810,15 +1810,15 @@ Public functions:
 `Var.kind`, `Var.is_floating`, `Var.is_integer`, `Var.is_pointer`,
 `Var.is_reference`, `Var.is_object`, `Var.is_void`, `Var.is_null`, `Var.null`,
 `Var.is_nil`, `Var.encoding_valid`, `x2c_var_descriptor_index`,
-`Var.custom_descriptor_index`, `x2c_var_custom_descriptor`,
-`x2c_var_tag_descriptor_index`, `Var.new`, `Var.parse`, `Var.box_record`,
+`Var.custom_descriptor_index`, `x2c_var_tag_descriptor_index`,
+`x2c_var_custom_descriptor`, `Var.box_record`, `Var.pointer`,
+`Var.register_object_tag`, `x2c_var_declare`, `Var.new`, `Var.parse`,
 `Var.box_long`, `Var.box_ulong`, `Var.box_long_long`, `Var.box_ulong_long`,
 `Var.box_long_double`, `Var.clone_wide`, `Var.move_wide_to`, `Var.wide_owner`,
 `Var.floating`, `Var.integer`, `Var.long_value`, `Var.ulong_value`,
 `Var.long_long_value`, `Var.ulong_long_value`, `Var.long_double_value`,
-`Var.pointer`, `Var.wide_hash`, `Var.wide_equal`, `Var.integer_compare`,
-`Var.integer_floating_compare`, `Var.wide_compare`, `Var.register_object_tag`,
-`x2c_var_declare`
+`Var.wide_hash`, `Var.wide_equal`, `Var.wide_compare`, `Var.integer_compare`,
+`Var.integer_floating_compare`
 
 ### [lib/varconvert.x](../lib/varconvert.x)
 
