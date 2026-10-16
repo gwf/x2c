@@ -73,6 +73,8 @@ int Sym_binding_is_local_before(Sym s, List binding, int scope_count);
 
 Map Compiler_semantic_binding_facts(Compiler c);
 
+List Compiler_fact(Compiler c, Var key);
+
 void Compiler_set_fact(Compiler c, Var key, Var value);
 
 void Compiler_drop_fact(Compiler c, Var key);

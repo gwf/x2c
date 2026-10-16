@@ -424,8 +424,8 @@ static List _array_input(
       %(composite (commas (expr (int) (literal (int) "0")))));
     initial = %(expr $type (op ? $applicable $source $zero));
   }
-  List declaration = %(declare $type
-    (bindings (op = (bind $binding ()) $initial)));
+  List declaration =
+    c.rebuild_statement($!{ $type $binding = $initial; }).cadr();
   return %($declaration @code);
 }
 

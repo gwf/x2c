@@ -4100,8 +4100,10 @@ static List _parse_meta_call(Compiler c, Token invocation) {
   Array arguments = _meta_arguments(c, signature.car().list().cadr());
   Type result = c.macro_holes ? %(<macro-expr>) : signature.cdr();
   /* Inside a `meta` body the whole body runs at compile time, so a `$`
-     call there is an ordinary call. */
-  Symbol head = c.meta_body && !c.macro_holes ? <call> : <meta-call>;
+     call there is an ordinary call, except in a pattern, whose binders
+     come from its value. */
+  Symbol head = c.meta_body && !c.macro_holes && !c.in_pattern
+    ? <call> : <meta-call>;
   List call = %(expr $result ($head $callee
     (args @{arguments.list_free()})));
   return c.resolve_expression(call, invocation);
@@ -4704,7 +4706,23 @@ static Var _fill_syntax(Landing &l, Var syntax) {
     else if ((void *) items) items.push(filled);
     index++;
   }
-  return (void *) items ? items.list_free().var() : syntax;
+  Var filled = (void *) items ? items.list_free().var() : syntax;
+  return l.retain && node.car() == <declare>
+    ? _retained_declaration(filled) : filled;
+}
+
+/* A retained declaration with its base's pointer, array, and function
+   modifiers moved onto each declarator, as parsing moves them. */
+static Var _retained_declaration(List declaration) {
+  match (declaration) case %(declare ?specifiers (bindings *rows)): {
+    List modifiers = NULL;
+    List base = Type.declaration_base(specifiers, modifiers);
+    if (!modifiers) return declaration;
+    Array moved = [];
+    foreach (List row, rows) moved.push(Ast.append_modifiers(row, modifiers));
+    return %(declare $base (bindings @{moved.list_free()}));
+  }
+  return declaration;
 }
 
 /* Whether `item` is a sequence or splice hole, whose items it sets. */
@@ -4783,9 +4801,26 @@ List Compiler.try_parse_macro_pattern(Compiler c) {
     c.token = saved;
     return c.try_parse_macro_subpattern(0);
   }
-  List labels = c.cache_literal_list(_pattern_labels(c));
+  List names = _pattern_labels(c);
+  List labels = c.cache_literal_list(names);
+  List shape = _case_shape(c, saved, names);
+  if (shape)
+    return c.resolve_expression(
+      $!( Macro_case_shape($expression, $labels, $shape) ), saved);
   return c.resolve_expression(
     $!( Macro_case_pattern($expression, $labels) ), saved);
+}
+
+/* The pattern a `case` on the macro `$NAME` at `at` tests for `names`,
+   cached, or NULL for a `Macro` variable or a pattern that resolves a
+   reference against the subject of each call. */
+static List _case_shape(Compiler c, Token at, List names) {
+  String spelling = NULL;
+  Var stored;
+  if (!c.macro_pattern_at(at, spelling, stored)) return NULL;
+  Macro shape = _macro_value_names(stored);
+  List derived = shape.matcher(names).pattern;
+  return derived ? c.cache_literal_list(derived) : NULL;
 }
 
 /* The Macro value a `$name` or a `Macro` variable at the cursor names. */

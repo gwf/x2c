@@ -868,14 +868,14 @@ typedef struct _x2c_gensym_defer_env_19{
 _x2c_gensym_defer_env_19;
 static void _x2c_gensym_defer_cleanup_27(void * _x2c_gensym_defer_opaque_27);
 static void _x2c_gensym_defer_cleanup_28(void * _x2c_gensym_defer_opaque_28);
+int x2c_register_builtin_descriptor(Symbol, VarMethods);
+void x2c_register_descriptor(String, VarMethods);
 List cons(Var, List);
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  if(! x2c_register_builtin_descriptor(808259842, _x2c_gensym_protocol_methods_0)){
-    x2c_register_descriptor(String_new("lambda"), _x2c_gensym_protocol_methods_0);
-  }
+  if(! x2c_register_builtin_descriptor(808259842, _x2c_gensym_protocol_methods_0)) x2c_register_descriptor(String_new("lambda"), _x2c_gensym_protocol_methods_0);
   _0 = String_new("apply");
   _1 = String_new("quote");
   _2 = String_new("x2c.");

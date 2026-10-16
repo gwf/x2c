@@ -885,6 +885,12 @@ Map Compiler_semantic_binding_facts(Compiler c){
   return c -> sym -> binding_facts;
 }
 
+List Compiler_fact(Compiler c, Var key){
+  if(! _init_guard_) _file_init_();
+  Var stored;
+  return Map_try_get(c -> sym -> binding_facts, key, &(stored)) ? Var_list_payload(stored) : NULL;
+}
+
 void Compiler_set_fact(Compiler c, Var key, Var value){
   if(! _init_guard_) _file_init_();
   Sym_put(c -> sym, c -> sym -> binding_facts, key, value);

@@ -899,14 +899,18 @@ source spelling, typed inner nodes, code queued before it can be bound, and
 measured hot paths. Never parse code from a String.
 
 **MA-7** Recognize a source form with its grammar macro when one exists:
-`case if_then(?condition, ?ontrue):`. Shared input forms live in
+`case $if_then(?condition, ?ontrue):`. Shared input forms live in
 `src/grammar.x`. Keep raw `case %(...)` patterns for internal nodes,
 typed shells, resolved forms, and measured hot paths. A macro case is not
 its raw pattern. It also matches through `(at ...)` and `(src ...)`
 wrappers, a one-element `(seq ...)`, and a retained invocation of the
-macro. It costs about nine times as much per call (1,410 against 153
-instructions). A conversion therefore changes what matches, and on a
-per-node path it needs an A/B measurement.
+macro. Name the macro in the case, not through a `Macro` variable: a
+`case $m(...)` tests the derived pattern in place, at about 344
+instructions per call against 153 for the raw pattern. A case through a
+variable, or on a pattern that repeats a hole, resolves a name, holds a
+literal other than a Symbol, or captures nothing, calls the runtime at
+about 1,410. A conversion from a raw pattern therefore changes what
+matches, and on a per-node path it needs an A/B measurement.
 
 **MA-8** A lowering recognizes its input with a source form, gathers facts
 in ordinary named functions, and builds its output with one template beside
