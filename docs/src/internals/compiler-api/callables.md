@@ -38,7 +38,7 @@ original parameter types before calling it, then converts its `Var` result
 to the expected return type. Already compatible or unsupported shapes pass
 through unchanged.
 
-Source: `src/callables.x:973`
+Source: `src/callables.x:972`
 
 <a id="Compiler.capture_environment"></a>
 #### Compiler.capture_environment
@@ -61,7 +61,7 @@ function taking the lambda parameter rows `entries`: its Func
 signature as a cached `List`, and each argument as `_func_reads`
 reads it from `argv` of the Func `fn`.
 
-Source: `src/callables.x:686`
+Source: `src/callables.x:685`
 
 <a id="Compiler.func_signature"></a>
 #### Compiler.func_signature
@@ -70,7 +70,7 @@ Source: `src/callables.x:686`
 
 Returns the canonical signature shared by native and meta Func adapters.
 
-Source: `src/callables.x:791`
+Source: `src/callables.x:790`
 
 <a id="Compiler.lift_func_expression"></a>
 #### Compiler.lift_func_expression
@@ -99,7 +99,7 @@ Compatible helpers are cached by source binding and target type, queued
 with `Compiler.add_early`, and returned as typed identifiers; other
 expressions pass through unchanged.
 
-Source: `src/callables.x:861`
+Source: `src/callables.x:860`
 
 <a id="Compiler.maybe_adapt_func_arg"></a>
 #### Compiler.maybe_adapt_func_arg
@@ -113,7 +113,7 @@ cast, or addressed; an indirect function-pointer value is rejected.
 A function already having the adapter's pointee type passes through,
 and new helpers are cached and queued with `Compiler.add_early`.
 
-Source: `src/callables.x:538`
+Source: `src/callables.x:537`
 
 <a id="Compiler.prepend_setup"></a>
 #### Compiler.prepend_setup

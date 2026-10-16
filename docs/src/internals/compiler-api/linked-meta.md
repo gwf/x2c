@@ -128,7 +128,7 @@ for `+` beside text, text. The call is returned lowered, because an
 operator chain applies this rule once for each term and binding would
 search the whole remaining chain each time.
 
-Source: `src/linked-meta.x:1402`
+Source: `src/linked-meta.x:1467`
 
 #### dynamic_change
 
@@ -137,7 +137,7 @@ Source: `src/linked-meta.x:1402`
 Adds or subtracts one through the `Var` update helpers; the postfix
 forms return the value before the change.
 
-Source: `src/linked-meta.x:1484`
+Source: `src/linked-meta.x:1549`
 
 #### dynamic_compound
 
@@ -146,7 +146,7 @@ Source: `src/linked-meta.x:1484`
 Updates a `Var` or numeric lvalue with a `Var` or numeric operand
 through the update helper of its storage.
 
-Source: `src/linked-meta.x:1458`
+Source: `src/linked-meta.x:1523`
 
 #### dynamic_unary
 
@@ -154,7 +154,7 @@ Source: `src/linked-meta.x:1458`
 
 Rejects a unary numeric operator on a `Var`.
 
-Source: `src/linked-meta.x:1500`
+Source: `src/linked-meta.x:1565`
 
 #### lambda_cells
 
@@ -195,7 +195,7 @@ Source: `src/linked-meta.x:804`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:2357`
+Source: `src/linked-meta.x:2423`
 
 #### linked_meta_targets
 
@@ -203,7 +203,7 @@ Source: `src/linked-meta.x:2357`
 
 Returns the linked copies, and the runtime builders, by name.
 
-Source: `src/linked-meta.x:2126`
+Source: `src/linked-meta.x:2191`
 
 #### match_lowering
 
@@ -212,7 +212,7 @@ Source: `src/linked-meta.x:2126`
 Lowers the bound match `node` to C text around its subject, patterns,
 and bodies.
 
-Source: `src/linked-meta.x:1386`
+Source: `src/linked-meta.x:1451`
 
 #### printf_values
 
@@ -220,7 +220,7 @@ Source: `src/linked-meta.x:1386`
 
 Reads the Var values a printf-family call's static format consumes.
 
-Source: `src/linked-meta.x:1640`
+Source: `src/linked-meta.x:1705`
 
 #### protocol_conformance
 
@@ -229,7 +229,7 @@ Source: `src/linked-meta.x:1640`
 Places the forwarding members, descriptor thunks, method table, and
 descriptor registration of one conformance.
 
-Source: `src/linked-meta.x:1757`
+Source: `src/linked-meta.x:1822`
 
 #### raise_lowering
 
@@ -238,7 +238,7 @@ Source: `src/linked-meta.x:1757`
 Converts a raise's code and details, or declines a raise whose parts
 already have their types.
 
-Source: `src/linked-meta.x:1822`
+Source: `src/linked-meta.x:1887`
 
 #### register_rewrite
 
@@ -255,7 +255,7 @@ Source: `src/linked-meta.x:92`
 Lowers a switch on a String to an integer switch on its selector's
 index among the labels it owns, or declines another switch.
 
-Source: `src/linked-meta.x:1921`
+Source: `src/linked-meta.x:1986`
 
 #### try_lowering
 
@@ -263,7 +263,7 @@ Source: `src/linked-meta.x:1921`
 
 Lowers the parsed try `node` to its landing form.
 
-Source: `src/linked-meta.x:2070`
+Source: `src/linked-meta.x:2135`
 
 ## Design notes
 
