@@ -149,16 +149,16 @@ maintenance cost.
 
 A `meta` function that returns code should show that code. A quotation
 shows the C that will land; a `%(...)` List of node tags hides it. Choose the
-first row that fits. [Meta Functions](meta-functions.md#quoting-code-with-)
+first row that fits. [Meta Functions](generating-code.md#quoting-code-with-)
 explains each form with examples.
 
 | To build | Write |
 | --- | --- |
-| Code with one shape at several sites | a named macro, applied from the function as in [source templates](meta-functions.md#source-templates-from-meta-functions) |
+| Code with one shape at several sites | a named macro, applied from the function as in [source templates](generating-code.md#source-templates-from-meta-functions) |
 | Code that one function builds | a quotation: `$!( expression )`, `$!{ statements }`, or `$!Unit{ ... }` |
-| Code that uses a field, an element, or a call result | a [`${expression}` hole](meta-functions.md#holes-that-name-an-expression), evaluated once where the quotation is written |
+| Code that uses a field, an element, or a call result | a [`${expression}` hole](generating-code.md#holes-that-name-an-expression), evaluated once where the quotation is written |
 | Code in which separate quotations share one name | `List name = x2c_ident("total");`, then `$name` in each quotation |
-| An expression whose type is read before it lands | a [typed quotation](meta-functions.md#code-that-knows-its-type), such as `$!double{ $value * 2 }` |
+| An expression whose type is read before it lands | a [typed quotation](generating-code.md#code-that-knows-its-type), such as `$!double{ $value * 2 }` |
 | Code the function inspects before it returns | a typed quotation, which builds the code where it is written |
 | A pattern, a data row, or a form with no source spelling | a `%(...)` List |
 

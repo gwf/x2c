@@ -179,9 +179,10 @@ Generated names are compiler details; source never spells them, and
 class keeps its short name as its Var tag and descriptor name, so two files
 of one unit cannot each adopt a class under the same short name.
 Compile-time declarations, `static macro`, `static $(`, `static protocol`,
-and `meta` functions, keep their unit-wide behavior. A free name in a macro
-body binds where the expansion lands, so it reaches the expanding file's
-static; a type name in a macro body is spelled where the macro is defined.
+and `meta` functions, keep their unit-wide behavior. A name a macro body
+reads that a file-scope declaration supplies where the macro is written
+keeps that declaration. Other free names, and type names in declarations,
+bind where the expansion lands.
 
 Three cases are errors. Two files whose paths give one prefix, such as
 `a_b.x` and `a/b.x`, or a member named like its entry, are a driver error
@@ -935,9 +936,11 @@ A dot call visits the receiver's static type, then each typedef parent. At
 each type it tries the type's ordinary method, then a method an imported
 package adds to that type, then the member that the type's protocol
 conformance selects. When the nearest adopted conformance, exact or
-inherited, resolves the member as anything other than `implemented`, lookup
-skips that type's ordinary and imported methods and uses the conformance's
-member.
+inherited, resolves the member as anything other than `implemented`, the
+conformance's member is used, and the type's own method with that name is
+not. When that conformance is inherited from an ancestor, a call that the
+type's own method would otherwise answer is an error: adopt the protocol for
+that type so its own method is selected.
 
 #### Conversions required by adapters
 
@@ -1881,7 +1884,7 @@ After `case`,
 `${$name(...)}` is still a macro pattern. These holes exist only in
 quotations; in a named template's code, `${` still reports a missing macro
 name. See
-[Quoting code](../guide/meta-functions.md#quoting-code-with-) for an
+[Quoting code](../guide/generating-code.md#quoting-code-with-) for an
 example.
 
 A typed quotation is written `$!T{ expression }`, where `T` is one
@@ -1910,7 +1913,7 @@ another quotation it is written as a hole, `${$!T{ ... }}`. The compiler
 accepts `T` as the expression's type without checking it. A typed quotation
 states the type the code has; it converts nothing, so write a cast inside
 the braces when the code needs one. See
-[Code that knows its type](../guide/meta-functions.md#code-that-knows-its-type).
+[Code that knows its type](../guide/generating-code.md#code-that-knows-its-type).
 
 `$!Type{ T }` builds the type `T`, written as a cast writes a type name.
 `$!Param{ P }` builds one parameter declaration. A `Type` local or a
@@ -1918,7 +1921,7 @@ the braces when the code needs one. See
 declarator modifies. Both build where they are written: they bind nothing,
 declare no name the braces spell, and apply no template. `Type` and `Param`
 after `$!` always name these kinds. `Decl` names a hole kind only. See
-[Types and parameters](../guide/meta-functions.md#types-and-parameters).
+[Types and parameters](../guide/generating-code.md#types-and-parameters).
 
 When one `Name` hole appears in a declaration, a reference, and a member
 selection, its case checks that the declaration and reference use the same
@@ -2587,7 +2590,7 @@ the returned value for that position.
 Inside meta bodies, Unit and Stmt source macros used in expression
 positions construct deferred invocation Lists from computed arguments. Normal
 binding expands them when inserted into a program. Existing Expression macros
-still expand normally. See [source templates](../guide/meta-functions.md#source-templates-from-meta-functions).
+still expand normally. See [source templates](../guide/generating-code.md#source-templates-from-meta-functions).
 
 A `meta` body is ordinary x2c compiled as C, so every construct the unit
 can compile runs at compile time with its C meaning; see
@@ -2612,7 +2615,8 @@ returns to `int`; see
 Compile-time objects belong to the compiler. A file-scope variable that a
 `meta` body reads is the compiled group's own instance, initialized from the
 same source initializer; it is never the program's variable. A `meta static`
-value says so explicitly, and each unit gets its own instance.
+value lives in its provider's compiled group, and the helper re-initializes
+it for each translation unit, as described below.
 The project helper runs mutable `meta static` initializers when a compile-time
 call first reaches their provider in each translation unit. Including an
 unused provider does not run those initializers.
@@ -2649,7 +2653,7 @@ directly and a macro's implementation does not have to be written in Lisp. The
 declarations are the signatures; the semantics are the ones described above.
 A project `meta` function's queries, such as `Code.type` and `Type.fields`,
 ask the compiler while the call waits; see
-[What the compiler answers](../guide/meta-functions.md#what-the-compiler-answers).
+[What the compiler answers](../guide/generating-code.md#what-the-compiler-answers).
 
 The compiler binds each operation under its x2c name and derives the Lisp
 name from it. A method keeps its spelling: `Code.type` and `Type.is_value`

@@ -63,7 +63,8 @@ int main(void):
 
 Conditions need no parentheses, except that a `for` header keeps its
 three clauses in them, and a short body can follow its colon on the same
-line. `foreach` separates its declaration from the collection with `in`. The enum keeps its commas, and its name after the dedent
+line. `foreach` separates its declaration from the collection with `in` or
+a comma, as in brace form. The enum keeps its commas, and its name after the dedent
 completes the `typedef`.
 
 ## Long lines
@@ -95,9 +96,10 @@ int main(void):
 ## Scopes and decorators
 
 `do:` opens a bare scope when its block is not followed by a `while` line,
-which is how an indented macro keeps its temporaries to itself. A decorator
-line starts with `@`, so the layout knows it wraps the next statement
-rather than ending with `;`:
+which is how an indented macro keeps its temporaries to itself. In
+indentation syntax a decorator line starts with `@`, so the layout wraps the
+next statement instead of ending the line with `;`. Brace form writes the
+decorator without `@`:
 
 ```x2c
 #pragma indent

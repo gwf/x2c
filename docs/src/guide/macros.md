@@ -96,9 +96,10 @@ return scaled(value);
 The definition is visible from that point to the end of the block and through
 nested blocks. An inner definition of `scaled` temporarily shadows it; a later
 definition in the same block replaces it for following calls. A name the
-body reads without declaring, such as `scale`, resolves where the macro is
-invoked, like every macro's free names. Names the caller writes in
-arguments resolve there too.
+body reads without declaring keeps the file-scope declaration that supplies
+it where the macro is written, as in a global macro. Any other free name,
+such as a local `scale`, resolves where the macro is invoked. Names the
+caller writes in arguments resolve there too.
 
 The bare call shape belongs to the local macro before a file `keyword` alias or
 ordinary function. A use without parentheses is an ordinary identifier, and
@@ -134,6 +135,11 @@ Every hole has a syntax kind:
 | `Entry` | one `Map` `key: value` row |
 | `Enumerator` | one enum member |
 | `Unit` | one translation-unit item |
+| `Literal` | one literal, such as `42` or `<char>` |
+
+The reference lists [every hole kind](../reference/language.md#holes-and-sequences),
+including the less common `NamedType`, `DeclaratorRow`, `Catch`,
+`Captures`, and `MatchRow`.
 
 An `@` prefix makes the final hole a sequence. The replacement uses the
 same prefix to splice the captured sequence:
@@ -545,112 +551,10 @@ The [meta-function guide](meta-functions.md) introduces these operations;
 the [language reference](../reference/language.md#the-same-operations-from-x2c)
 specifies them.
 
-A `Stmt` macro can also call its helper with the arrow form. The helper
-receives captured statements as code and may return any statement that fits
-where the macro is invoked. `$!{ ... }` quotes statements the way
-`$!( ... )` quotes an expression:
-
-```x2c
-#include "meta.x"
-meta static List project_logged(List code) =>
-  $!{ { puts("before"); $code puts("after"); } };
-
-macro Stmt $project.logged(Stmt $code) => $project_logged($code);
-
-int main(void) {
-  int ready = 1;
-  $project.logged(if (ready) puts("ready"););
-  return 0;
-}
-```
-
-```text
-before
-ready
-after
-```
-
-A `meta` parameter declared `TypeInfo` receives a description of the
-argument's type, including a struct or union's fields in declaration
-order. Pass the hole twice to receive both its code and its type. A quotation
-uses each field name to build a member read:
-
-```x2c
-#include "meta.x"
-meta static List project_fields(List receiver, TypeInfo type) {
-  Array reads = [];
-  foreach (List field, type.assoc(<fields>)) {
-    String member = field.car();
-    reads.push($!( $receiver.$member ));
-  }
-  List items = reads.list_free();
-  return $!( { @items } );
-}
-macro Expression $project.fields(Expr $value) =>
-  $project_fields($value, $value);
-~typedef struct Point { int x, y; } Point;
-~int main(void) {
-~  Point p = { 2, 3 };
-~  int values[2] = $project.fields(p);
-~  return values[0] != 2 || values[1] != 3;
-~}
-```
-
-A `TypeInfo` parameter's `methods` part names the type's direct dotted methods.
-A generator can test for one and build the dotted call, which the compiler
-resolves as it would the same call in source:
-
-```x2c
-#include "meta.x"
-meta static List project_write(TypeInfo type, List receiver, List value) {
-  List methods = type.assoc(<methods>);
-  if (!methods.contains("write")) return %();
-  return $!( $receiver.write($value) );
-}
-```
-
-The list does not search delegate fields. A delegated result would also need the
-field-projected receiver, which this operation does not return. Generated
-dotted calls still use delegation during ordinary expression resolution.
-
-To read the exact source text of a complete captured argument, declare
-the parameter `Source` and use `Code.source_text`:
-
-```x2c
-#include "meta.x"
-meta static String project_text(Source value) => Code.source_text(value);
-macro Expression $project.source(Expr $value) => $project_text($value);
-
-int main(void) {
-  return strcmp($project.source(1 /* kept */ + 2),
-                "1 /* kept */ + 2");
-}
-```
-
-Passing a complete capture to a meta helper preserves the source information
-for this query. Forwarding it through another source macro does too.
-Constructing or selecting an AST subtree does not invent source text; use
-`List.repr()` to render code data.
-
-`x2c_embed_text` reads a regular text file into a compile-time String and
-records it as a build dependency. A captured String literal retains the
-caller's file location for resolving a relative path:
-
-<!-- ignore: notice.txt is the external file being illustrated -->
-```x2c,ignore
-#include "meta.x"
-meta static String project_notice(Source path) => x2c_embed_text(path);
-macro Expression $project.notice(Literal $path) => $project_notice($path);
-
-String notice = $project.notice("notice.txt");
-```
-
-A captured path stays relative to its caller even when the macro is defined
-in an imported file. A project meta function also accepts an absolute
-String path; a relative one needs the `Source` that locates it.
-
-Empty files are valid. Directories, embedded NUL bytes, unreadable files and
-files too large for a String are rejected.
+A helper can also receive a captured statement, a description of a type
+(`TypeInfo`), or the exact source text of an argument (`Source`).
+[Generating Code](generating-code.md#calling-a-meta-function-from-a-macro-body)
+shows each.
 
 Prefer source templates for generated code and meta functions for the
 calculations that supply their arguments. Use the optional `$(...)` Lisp
