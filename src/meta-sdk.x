@@ -276,8 +276,7 @@ Code Code.lowered(Code code) => %(code-value "lowered" $code ());
 
 /** Answers `Code.bound`, declared in `lib/meta.x`, with the carrier
     `Compiler.take_code_value` consumes. */
-Code Code.bound(Code code, List effects) =>
-  %(code-value "bound" $code $effects);
+Code Code.bound(Code c, List effects) => %(code-value "bound" $c $effects);
 
 /** Answers `Code.func_parameters`, declared in `lib/meta.x`. */
 List Code.func_parameters(Code parameters, Code fn, Code argv) {
