@@ -12,9 +12,13 @@ Macros as values that build and recognize code.
 | [`Macro_apply`](#Macro_apply) | Applies a macro value to code values. |
 | [`Macro_case_capture_at`](#Macro_case_capture_at) | Recognizes code built by `t` for the `case` whose site is `site`, which may be NULL, and publishes the captures under `names`. |
 | [`Macro_case_enter`](#Macro_case_enter) | Stores in `*cursor` the List a macro-valued `case` examines for `value`, beneath its source wrappers, and returns whether there is one. |
+| [`Macro_case_own`](#Macro_case_own) | Whether an `expr` node whose content is `content` is its own view: the content is not a List headed by an Atom, as a retained invocation's is, or by the `expr` a template shell holds. |
 | [`Macro_case_pattern`](#Macro_case_pattern) | The pattern a macro-valued `case` compiles to; the compiler lowers a call of this to `Macro_case_capture_at` over the match subject. |
 | [`Macro_case_root`](#Macro_case_root) | Starts a macro-valued `case` whose derived pattern generated `match` code tests in place. |
 | [`Macro_case_shape`](#Macro_case_shape) | The pattern a macro-valued `case` compiles to when the compiler derived `shape`, the pattern the case tests, while compiling it. |
+| [`Macro_case_start`](#Macro_case_start) | Starts a macro-valued `case` without `Macro_case_root` when `code` is its own view. |
+| [`Macro_case_symbol`](#Macro_case_symbol) | The short Symbol `value` holds, or 0 for any other value. |
+| [`Macro_case_view`](#Macro_case_view) | `Macro_case_enter` for a `value` that may be wrapped or may hold no List. |
 | [`Macro_close`](#Macro_close) | Records the Macro values an anonymous macro captured where it was created, so applying it later applies the same children. |
 | [`Macro_pattern`](#Macro_pattern) | Derives the Match pattern that recognizes code this macro builds, capturing each parameter under the given binder. |
 | [`Macro.declared`](#Macro.declared) | Returns the name a typed quotation declares with a Name hole whose local holds `value`: the name form of an `x2c_ident` spelling or a String, or a binding as it is. |
@@ -56,13 +60,25 @@ Source: `lib/macro-value.x:516`
 <a id="Macro_case_enter"></a>
 #### Macro_case_enter
 
-`int Macro_case_enter(Var value, List *cursor)`
+`inline int Macro_case_enter(Var value, List *cursor)`
 
 Stores in `*cursor` the List a macro-valued `case` examines for
 `value`, beneath its source wrappers, and returns whether there is
-one.
+one. A List headed by another Symbol than a wrapper or `expr` is its
+own view.
 
-Source: `lib/macro-value.x:553`
+Source: `lib/macro-value.x:587`
+
+<a id="Macro_case_own"></a>
+#### Macro_case_own
+
+`inline int Macro_case_own(Var content)`
+
+Whether an `expr` node whose content is `content` is its own view: the
+content is not a List headed by an Atom, as a retained invocation's is,
+or by the `expr` a template shell holds.
+
+Source: `lib/macro-value.x:570`
 
 <a id="Macro_case_pattern"></a>
 #### Macro_case_pattern
@@ -100,6 +116,39 @@ can, and otherwise lowers a call of this as it lowers
 `Macro_case_pattern`.
 
 Source: `lib/macro-value.x:508`
+
+<a id="Macro_case_start"></a>
+#### Macro_case_start
+
+`inline int Macro_case_start(List code, Symbol head, List *cursor)`
+
+Starts a macro-valued `case` without `Macro_case_root` when `code` is
+its own view. `head`, the Symbol heading the derived pattern, is not a
+source wrapper or `seq`. Returns 2 after storing `code` in `*cursor`
+for a subject headed by `head`, 0 for an empty subject or one headed by
+another Symbol than a wrapper, `expr`, or `seq`, which cannot match,
+and -1 when `Macro_case_root` must decide.
+
+Source: `lib/macro-value.x:556`
+
+<a id="Macro_case_symbol"></a>
+#### Macro_case_symbol
+
+`inline Symbol Macro_case_symbol(Var value)`
+
+The short Symbol `value` holds, or 0 for any other value.
+
+Source: `lib/macro-value.x:578`
+
+<a id="Macro_case_view"></a>
+#### Macro_case_view
+
+`int Macro_case_view(Var value, List *cursor)`
+
+`Macro_case_enter` for a `value` that may be wrapped or may hold no
+List.
+
+Source: `lib/macro-value.x:598`
 
 <a id="Macro_close"></a>
 #### Macro_close
@@ -168,7 +217,7 @@ Source: `lib/macro-value.x:129`
 Prepares repeated recognition without retaining subject-specific
 bindings.
 
-Source: `lib/macro-value.x:571`
+Source: `lib/macro-value.x:616`
 
 <a id="Macro.matches"></a>
 #### Macro.matches
@@ -178,7 +227,7 @@ Source: `lib/macro-value.x:571`
 Tests complete code against a macro and its hole patterns. Repeated
 recognition can retain `Macro.matcher` so the pattern is derived once.
 
-Source: `lib/macro-value.x:596`
+Source: `lib/macro-value.x:641`
 
 <a id="Macro.number_literal"></a>
 #### Macro.number_literal
@@ -245,7 +294,7 @@ Source: `lib/macro-value.x:163`
 Tests code with the same source views and identity rules as a macro
 case.
 
-Source: `lib/macro-value.x:582`
+Source: `lib/macro-value.x:627`
 
 ## Runtime-internal callables
 
@@ -311,7 +360,7 @@ independent of subject bindings is derived once; contextual references
 are resolved against each subject. The caller keeps the source values
 alive as long as this record. Match plans use the active Match cache.
 
-Source: `lib/macro-value.x:564`
+Source: `lib/macro-value.x:609`
 
 <a id="MacroPublishing"></a>
 ### MacroPublishing

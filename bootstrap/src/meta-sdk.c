@@ -707,13 +707,13 @@ Var Code_value(Code code){
 }
 
 List Compiler_call_in_order(Compiler, List, List);
-Code Code_lowered(Code code, List effects);
+Code Code_lowered(Code c, List effects);
 Code Code_call_in_order(Code member, List arguments, Type type){
   if(! _init_guard_) _file_init_();  _require_expansion(_49);  List call = Compiler_call_in_order(active.expander, member, arguments);  return Code_lowered(cons(_38, cons(List_var(type), cons(List_var(call), NULL))), NULL);
 }
 
-Code Code_lowered(Code code, List effects){
-  if(! _init_guard_) _file_init_();  return cons(_50, cons(_52, cons(List_var(code), cons(List_var(effects), NULL))));
+Code Code_lowered(Code c, List effects){
+  if(! _init_guard_) _file_init_();  return cons(_50, cons(_52, cons(List_var(c), cons(List_var(effects), NULL))));
 }
 
 Code Code_bound(Code c, List effects){
@@ -1127,7 +1127,7 @@ int Type_is_function(Type);
 
 List MetaContext_function_reference(String name){
   if(! _init_guard_) _file_init_();  Compiler c = active.evaluator;  if(! c){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/meta-sdk.x",.function = "MetaContext_function_reference",.line = 525};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("_x2c.function.reference")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/meta-sdk.x",.function = "MetaContext_function_reference",.line = 524};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("_x2c.function.reference")), NULL))));  __builtin_unreachable();
   }
   Type type = NULL;  List binding = Sym_lookup(c -> sym, cons(String_var(name), NULL), &(type));  if(! List_truth(binding) || ! List_truth(Type_list(type)) || ! Type_is_function(type)) return NULL;  return({
     Var _x2c_gensym_literal_part_6 = List_var(type);  Var _x2c_gensym_literal_part_7 = List_var(cons(_25, cons(List_var(binding), NULL)));  cons(_38, cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, NULL)));
@@ -1774,7 +1774,7 @@ void Compiler_report_error(Compiler, Symbol, String, Token, List);
 _Noreturn void MetaContext_reject(String message, List notes){
   Compiler c = active.evaluator;  if(c) Compiler_report_error(c, 27335838, message, active.site, notes); {
     Var _x2c_gensym_literal_part_23 = String_var(String_join(NULL, cons(String_var(String_new("x2c SDK rejection")), NULL))); {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/meta-sdk.x",.function = "MetaContext_reject",.line = 1078};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477477457162, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_23, Symbol_var(1218550748), String_var(message));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/meta-sdk.x",.function = "MetaContext_reject",.line = 1077};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477477457162, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_23, Symbol_var(1218550748), String_var(message));  __builtin_unreachable();
     }
 
   }

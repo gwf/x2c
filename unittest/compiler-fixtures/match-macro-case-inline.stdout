@@ -2,8 +2,14 @@
 <"E"> (K V) | <"E"> (K V)
 none | none
 <"E"> (K V) | <"E"> (K V)
+<"E"> (K V) | <"E"> (K V)
+<"E"> (K) | <"E"> (K)
 (at P E) () | (at P E) ()
 <"E"> (K) | <"E"> (K)
+none | none
+none | none
+none | none
+none | none
 none | none
 none | none
 (expr ("int") (literal (int) "1")) () | (expr ("int") (literal (int) "1")) ()
@@ -11,4 +17,30 @@ none | none
 <"R"> <"S"> | <"R"> <"S">
 <"R"> <"S"> | <"R"> <"S">
 none | none
+none | none
+none | none
+none | none
+none | none
+none | none
+none | none
+none | none
+none | none
+<"R"> <"S"> | <"R"> <"S">
+none | none
+<"R"> <"S"> | <"R"> <"S">
+(expr T R) (expr T S) | (expr T R) (expr T S)
+return | return
+return | return
+return | return
+none | none
+none | none
+none | none
+none | none
+return | return
+<"B"> <"F"> | <"B"> <"F">
+<"B"> <"F"> | <"B"> <"F">
+<"B"> <"F"> | <"B"> <"F">
+none | none
+none | none
+(at Q B) <"F"> | (at Q B) <"F">
 none | none

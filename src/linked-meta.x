@@ -1146,7 +1146,7 @@ static int _match_bind(
   Buffer b, Var binder, String cell, Array seen, Array binders, int &testing,
   int &braces) {
   int list = binder.is_list_binder();
-  if (binders) {
+  if (binders != NULL) {
     int slot = binders.find(binder);
     if (slot < 0) return 0;
     _match_and(b, testing);
@@ -1192,8 +1192,8 @@ static int _match_element(
   if (part.is_binder() || part.is_match_op() || part == <x2c-dyn> ||
       (list && list.car().is_match_op()))
     return -1;
-  if (part is not <symbol> && !list) return binders ? -1 : 2;
-  if (list && binders) return 1;
+  if (part is <list> && binders != NULL) return 1;
+  if (part is not <symbol> && !list) return binders != NULL ? -1 : 2;
   Symbol tested = <list>;
   _match_and(b, testing);
   if (list) b.printf("Var_is(%s, %lu)", cell, (unsigned long) tested);
@@ -1203,17 +1203,18 @@ static int _match_element(
 
 static int _match_nested(
   Buffer b, Array out, List pattern, Var value, Array binders, int &depths) {
-  if ((!binders &&
+  int viewed = binders != NULL;
+  if ((!viewed &&
        !pattern.match(%(expr ? (!or (cache ?) (expr ? (cache ?)))))) ||
       value is not <list>)
     return -1;
   _match_flush(b, out);
   Array rests = [], paths = [], seen = [];
-  int mark = out.len(), testing = !!binders, braces = 0, step = 0;
+  int mark = out.len(), testing = viewed, braces = 0, step = 0;
   int deepest = 0;
   List rest = value;
   String path = "";
-  if (!binders)
+  if (!viewed)
     b.write(" _x2c_gensym_match_cursor = _x2c_gensym_match_expr;");
   for (;;) {
     int levels = rests.len();
@@ -1227,7 +1228,7 @@ static int _match_nested(
       if (step == 1) {
         _match_and(b, testing);
         String next = _match_cursor(levels + 1);
-        if (binders) b.printf("Macro_case_enter(%s, &%s)", cell, next);
+        if (viewed) b.printf("Macro_case_enter(%s, &%s)", cell, next);
         else b.printf("(%s = Var_list_payload(%s), 1)", next, cell);
         rests.push(rest);
         paths.push(path);
@@ -1267,13 +1268,13 @@ static int _match_nested(
     rest = rest.cdr();
     path = path + "->cdr";
   }
-  if (binders && seen.len() < binders.len()) step = -1;
+  if (viewed && seen.len() < binders.len()) step = -1;
   if (step < 0) {
     while (out.len() > mark) out.take_last();
     b.clear();
     return -1;
   }
-  if (testing && !binders) {
+  if (testing && !viewed) {
     b.write(") {");
     braces++;
   }
@@ -1309,15 +1310,13 @@ static int _match_viewed(
   if (_match_nested(tests, [], NULL, derived, binders, depths) < 0)
     return -1;
   b.write(" { int _x2c_gensym_match_root = ");
-  /* A subject headed by the pattern's own head is neither a retained
-     invocation nor a wrapper, so it is its own view. */
-  Var head = _match_head(derived);
-  if (head && !(head in %(at src expr seq)))
+  Symbol head = _match_head(derived);
+  if (head && !(head in %(at src seq)))
     b.printf(
-      "_x2c_gensym_match_expr && "
-      "_x2c_gensym_match_expr->car.u64 == %lluULL ? "
-      "(_x2c_gensym_match_cursor = _x2c_gensym_match_expr, 2) : ",
-      (unsigned long long) head.u64);
+      "Macro_case_start(_x2c_gensym_match_expr, %lluULL, "
+      "&_x2c_gensym_match_cursor); if (_x2c_gensym_match_root < 0) "
+      "_x2c_gensym_match_root = ",
+      (unsigned long long) head);
   b.write("Macro_case_root(_x2c_gensym_match_expr, ");
   _match_place(b, out, template);
   b.write(", ");

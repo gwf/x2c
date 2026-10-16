@@ -111,14 +111,15 @@ meta static void _match_and(Buffer b, int &testing) {
 }
 
 /* Saves a binder's capture from its cell after the open condition, or,
-   for a viewed pattern whose case publishes `binders`, in the binder's
-   slot of the capture buffer within the condition. Returns 0 for a binder
-   the case does not publish. */
+   for a viewed pattern whose case publishes `binders`, which a case that
+   captures nothing leaves empty, in the binder's slot of the capture
+   buffer within the condition. Returns 0 for a binder the case does not
+   publish. */
 meta static int _match_bind(
   Buffer b, Var binder, String cell, Array seen, Array binders, int &testing,
   int &braces) {
   int list = binder.is_list_binder();
-  if (binders) {
+  if (binders != NULL) {
     int slot = binders.find(binder);
     if (slot < 0) return 0;
     _match_and(b, testing);
@@ -144,7 +145,8 @@ meta static int _match_bind(
    pattern's own cell, or -1 outside the form the arm can test in place:
    an operator other than a quoted Symbol, a computed part, a repeated
    binder, or a binder the case does not publish. The caller of a viewed
-   pattern tests that a cell holds a List as it enters it. */
+   pattern tests that a cell's view is a List as it enters it, so an empty
+   List is walked like any other. */
 meta static int _match_element(
   Buffer b, Var part, String cell, Array seen, Array binders, int &testing,
   int &braces) {
@@ -171,8 +173,8 @@ meta static int _match_element(
   if (part.is_binder() || part.is_match_op() || part == <x2c-dyn> ||
       (list && list.car().is_match_op()))
     return -1;
-  if (part is not <symbol> && !list) return binders ? -1 : 2;
-  if (list && binders) return 1;
+  if (part is <list> && binders != NULL) return 1;
+  if (part is not <symbol> && !list) return binders != NULL ? -1 : 2;
   Symbol tested = <list>;
   _match_and(b, testing);
   if (list) b.printf("Var_is(%s, %lu)", cell, (unsigned long) tested);
@@ -188,23 +190,25 @@ meta static int _match_element(
    `rests` while its cursor walks it, and `path` reaches the List the
    cursor walks within the cached pattern, whose cells literals compare.
 
-   A viewed pattern, whose case publishes `binders`, continues the open
-   condition of a macro-valued case, whose cursor starts on the subject's
-   view. It enters each List through its view, captures each of `binders`
-   once into the capture buffer, and closes no braces. */
+   A viewed pattern, whose case publishes `binders`, empty when it
+   captures nothing, continues the open condition of a macro-valued case,
+   whose cursor starts on the subject's view. It enters each List through
+   its view, captures each of `binders` once into the capture buffer, and
+   closes no braces. */
 meta static int _match_nested(
   Buffer b, Array out, List pattern, Var value, Array binders, int &depths) {
-  if ((!binders &&
+  int viewed = binders != NULL;
+  if ((!viewed &&
        !pattern.match(%(expr ? (!or (cache ?) (expr ? (cache ?)))))) ||
       value is not <list>)
     return -1;
   _match_flush(b, out);
   Array rests = [], paths = [], seen = [];
-  int mark = out.len(), testing = !!binders, braces = 0, step = 0;
+  int mark = out.len(), testing = viewed, braces = 0, step = 0;
   int deepest = 0;
   List rest = value;
   String path = "";
-  if (!binders)
+  if (!viewed)
     b.write(" _x2c_gensym_match_cursor = _x2c_gensym_match_expr;");
   for (;;) {
     int levels = rests.len();
@@ -218,7 +222,7 @@ meta static int _match_nested(
       if (step == 1) {
         _match_and(b, testing);
         String next = _match_cursor(levels + 1);
-        if (binders) b.printf("Macro_case_enter(%s, &%s)", cell, next);
+        if (viewed) b.printf("Macro_case_enter(%s, &%s)", cell, next);
         else b.printf("(%s = Var_list_payload(%s), 1)", next, cell);
         rests.push(rest);
         paths.push(path);
@@ -258,13 +262,13 @@ meta static int _match_nested(
     rest = rest.cdr();
     path = path + "->cdr";
   }
-  if (binders && seen.len() < binders.len()) step = -1;
+  if (viewed && seen.len() < binders.len()) step = -1;
   if (step < 0) {
     while (out.len() > mark) out.take_last();
     b.clear();
     return -1;
   }
-  if (testing && !binders) {
+  if (testing && !viewed) {
     b.write(") {");
     braces++;
   }
@@ -294,7 +298,8 @@ meta static void _match_captures(Buffer b, List binders) {
    rules hold: `Macro_case_root` captures a retained invocation of the
    macro, or starts the tests on the subject's view, or on the one
    statement a `seq` holds when the body is a statement, and each List the
-   tests enter is viewed the same way. */
+   tests enter is viewed the same way. `Macro_case_start` first decides a
+   subject that is its own view without that call. */
 meta static int _match_viewed(
   Buffer b, Array out, List template, List labels, Code shape, List binders,
   int &depths) {
@@ -311,15 +316,13 @@ meta static int _match_viewed(
   if (_match_nested(tests, [], NULL, derived, binders, depths) < 0)
     return -1;
   b.write(" { int _x2c_gensym_match_root = ");
-  /* A subject headed by the pattern's own head is neither a retained
-     invocation nor a wrapper, so it is its own view. */
-  Var head = _match_head(derived);
-  if (head && !(head in %(at src expr seq)))
+  Symbol head = _match_head(derived);
+  if (head && !(head in %(at src seq)))
     b.printf(
-      "_x2c_gensym_match_expr && "
-      "_x2c_gensym_match_expr->car.u64 == %lluULL ? "
-      "(_x2c_gensym_match_cursor = _x2c_gensym_match_expr, 2) : ",
-      (unsigned long long) head.u64);
+      "Macro_case_start(_x2c_gensym_match_expr, %lluULL, "
+      "&_x2c_gensym_match_cursor); if (_x2c_gensym_match_root < 0) "
+      "_x2c_gensym_match_root = ",
+      (unsigned long long) head);
   b.write("Macro_case_root(_x2c_gensym_match_expr, ");
   _match_place(b, out, template);
   b.write(", ");

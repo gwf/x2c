@@ -70,7 +70,49 @@ int Macro_case_capture_at(MacroCaseSite * site, List code, Macro t, List names, 
 
 int Macro_case_root(List code, Macro t, List names, int statement, List * cursor, MatchCaptureBuffer * published);
 
-int Macro_case_enter(Var value, List * cursor);
+static int List_truth(List);
+
+static inline Symbol Macro_case_symbol(Var value);
+
+static inline int Macro_case_own(Var content);
+
+static Var List_caddr(List);
+
+static inline int Macro_case_start(List code, Symbol head, List * cursor){
+  if(! List_truth(code)) return 0;
+  Symbol first = Macro_case_symbol(code -> car);
+  if(first == head &&(head != 377892 || Macro_case_own(List_caddr(code)))){
+    * cursor = code;
+    return 2;
+  }
+  return first && first != 104 && first != 40070 && first != 377892 && first != 39266 ? 0 : - 1;
+}
+
+static List Var_list_payload(Var);
+
+static inline int Macro_case_own(Var content){
+  List node = Var_list_payload(content);
+  if(! List_truth(node)) return 1;
+  Symbol head = Macro_case_symbol(node -> car);
+  return head && head != 377892;
+}
+
+static inline Symbol Macro_case_symbol(Var value){
+  Symbol symbol = value.u64 - VAR_SYMBOL_OFFSET;
+  return symbol < 1ul << 51 ? symbol : 0;
+}
+
+int Macro_case_view(Var, List *);
+
+static inline int Macro_case_enter(Var value, List * cursor){
+  List node = Var_list_payload(value);
+  Symbol head = List_truth(node) ? Macro_case_symbol(node -> car) : 0;
+  if(! head || head == 104 || head == 40070 || head == 377892) return Macro_case_view(value, cursor);
+  * cursor = node;
+  return 1;
+}
+
+int Macro_case_view(Var value, List * cursor);
 
 typedef struct MacroMatcher{
   Macro shape;

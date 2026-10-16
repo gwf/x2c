@@ -272,8 +272,7 @@ Code Code.call_in_order(Code member, List arguments, Type type) {
 
 /** Answers `Code.lowered`, declared in `lib/meta.x`, with the carrier
     `Compiler.take_code_value` consumes. */
-Code Code.lowered(Code code, List effects) =>
-  %(code-value "lowered" $code $effects);
+Code Code.lowered(Code c, List effects) => %(code-value "lowered" $c $effects);
 
 /** Answers `Code.bound`, declared in `lib/meta.x`, with the carrier
     `Compiler.take_code_value` consumes. */
