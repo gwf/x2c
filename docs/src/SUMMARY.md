@@ -129,7 +129,6 @@
   - [src/component-try.x](internals/compiler-api/component-try.md)
   - [src/deps.x](internals/compiler-api/deps.md)
   - [src/diagnostics.x](internals/compiler-api/diagnostics.md)
-  - [src/editor.x](internals/compiler-api/editor.md)
   - [src/emit.x](internals/compiler-api/emit.md)
   - [src/expressions-reports.x](internals/compiler-api/expressions-reports.md)
   - [src/expressions.x](internals/compiler-api/expressions.md)

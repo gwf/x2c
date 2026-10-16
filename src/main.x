@@ -13,7 +13,6 @@ static keyword loop $private.loop;
 #include "project.x"
 #include "frontend.x"
 #include "meta-project.x"
-#include "editor.x"
 #include "script.x"
 #include "toolchain.x"
 
@@ -853,10 +852,6 @@ static int _run_package(CliRequest request) {
 */
 int main(int argc, char **argv) {
   x2c_initialize_environment(argv[0]);
-  if (argc > 1 && !strcmp(argv[1], "editor")) {
-    argv[1] = argv[0];
-    return editor_request(argc - 1, argv + 1);
-  }
   if (argc > 1) _run_external(argc, argv);
   CliRequest request = CliRequest.parse(argc, argv);
   String diagnostics = request.diagnostics_file;

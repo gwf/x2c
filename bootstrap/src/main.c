@@ -8,7 +8,6 @@
 #include "project.h"
 #include "frontend.h"
 #include "meta-project.h"
-#include "editor.h"
 #include "script.h"
 #include "toolchain.h"
 #include <ctype.h>
@@ -1393,10 +1392,6 @@ int main(int argc, char * * argv){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   x2c_initialize_environment(argv[0]);
-  if(argc > 1 && ! strcmp(argv[1], "editor")){
-    argv[1] = argv[0];
-    return editor_request(argc - 1, argv + 1);
-  }
   if(argc > 1) _run_external(argc, argv);
   CliRequest request = CliRequest_parse(argc, argv);
   String diagnostics = request -> diagnostics_file;

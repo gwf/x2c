@@ -239,14 +239,6 @@ EOF
   fail "an input's failing group did not fall back: $(cat clash.out)"
 grep -q "v = 6 + List_len(0)" out/clash.c || fail "fallback result missing"
 
-# An editor request mounts the helper as a translation does.
-"$X2C" editor "$BUILD/editor.json" "$BUILD/jobs/u1.x" hover 0 0 -- \
-  translate "$BUILD/jobs/u1.x" >editor.out 2>&1 ||
-  fail "editor request failed: $(cat editor.out)"
-grep -q '"diagnostics":\[\]' editor.json ||
-  fail "editor request reported: $(cat editor.json)"
-[ -z "$(helpers)" ] || fail "helper left running after an editor request"
-
 # A helper that cannot start is reported at the call. The first
 # translation builds the helper, so the second, limited to one process,
 # forks only to start it. The limit does not apply to root.

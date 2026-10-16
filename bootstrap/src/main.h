@@ -11,7 +11,6 @@
 #include "project.h"
 #include "frontend.h"
 #include "meta-project.h"
-#include "editor.h"
 #include "script.h"
 #include "toolchain.h"
 #include <ctype.h>

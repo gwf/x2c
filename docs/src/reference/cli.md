@@ -314,7 +314,7 @@ macro file outside that input list, open its owning source or configure a
 included files still affect analysis of their owning source.
 
 Diagnostics, definition navigation, and type hover include unsaved source
-text. Each request runs in a fresh compiler process with snapshots of open
+text. Each request runs in a fresh `x2c-editor` process with snapshots of open
 files; editing cancels obsolete results without writing buffers to disk.
 Native CPP symbol modes cannot consume unsaved source snapshots and report
 that limitation. Macro-generated syntax may lack a physical definition or
@@ -324,8 +324,8 @@ Semantic execution requires a trusted local workspace because compilation can
 run macros. Untrusted and virtual workspaces retain syntax highlighting. Set
 `"x2c.semantic.enabled": false` to disable semantic execution. Completion,
 rename, workspace indexing, and general LSP support are separate features.
-The private `x2c editor` transport serves these providers; its argument and
-response formats are not a public compiler API.
+The shipped `x2c-editor` command serves these providers through `x2c editor`.
+Its argument and response formats are not a public compiler API.
 
 Shared libraries are unsupported. Supporting them requires platform-specific
 position-independent code, visibility, runtime linkage, library naming, and
