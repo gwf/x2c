@@ -146,14 +146,15 @@ Source: `lib/string/search.x:142`
 `String String.filter(String str, Func fn)`
 
 Returns the bytes of `str` accepted by ordinary `Var` truthiness of `fn`.
-Each byte is boxed from `char` and passed by value. A null or empty `str`,
-or a null `fn`, returns `str` without invoking the callback. Otherwise `fn`
+Each byte is boxed from `char` and passed by value. A null or empty `str`
+returns `str` without invoking the callback. Otherwise `fn`
 is called once per byte from left to right and is not retained.
+A null `fn` raises `<bad-arg>` on the first invocation.
 
 **Raises:** whatever `Func.apply`, `fn`, or the returned `Var`'s truth
 operation raises, or `<alloc-fail>` when the result cannot be allocated.
 
-Source: `lib/string/mapping.x:80`
+Source: `lib/string/mapping.x:81`
 
 <a id="String.find"></a>
 #### String.find
@@ -288,7 +289,7 @@ Returns a canonical `String` containing only bytes found in `chars`.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/string/mapping.x:117`
+Source: `lib/string/mapping.x:119`
 
 <a id="String.len"></a>
 #### String.len
@@ -343,15 +344,16 @@ Each byte is boxed from `char` and passed by value. Each result is
 converted to `int` and truncated to the byte that is stored, and that byte
 is what is checked, so a result such as 256 raises because its stored byte
 would be NUL.
-A null or empty `str`, or a null `fn`, returns `str` without invoking the
-callback. Otherwise `fn` is called once per byte from left to right and is
+A null or empty `str` returns `str` without invoking the callback.
+Otherwise `fn` is called once per byte from left to right and is
 not retained. Each result must convert to a non-NUL byte.
+A null `fn` raises `<bad-arg>` on the first invocation.
 
 **Raises:** whatever `Func.apply`, `fn`, or result conversion raises,
 `<bad-result>` when the converted result is zero, or `<alloc-fail>` when
 the result cannot be allocated.
 
-Source: `lib/string/mapping.x:97`
+Source: `lib/string/mapping.x:99`
 
 <a id="String.new"></a>
 #### String.new
@@ -439,7 +441,7 @@ Returns a canonical `String` after removing bytes found in `chars`.
 
 **Raises:** `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string/mapping.x:128`
+Source: `lib/string/mapping.x:130`
 
 <a id="String.remove_prefix"></a>
 #### String.remove_prefix
@@ -572,7 +574,7 @@ Bytes outside `chars` are preserved even when repeated. `Null` or empty
 
 **Raises:** `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string/mapping.x:138`
+Source: `lib/string/mapping.x:140`
 
 <a id="String.startswith"></a>
 #### String.startswith

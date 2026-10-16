@@ -1234,13 +1234,13 @@ macros as values that build and recognize code.
 
 Public functions:
 
+`Macro_case_start`, `Macro_case_own`, `Macro_case_symbol`, `Macro_case_enter`,
 `Macro_close`, `Macro_apply`, `Macro.inserted`, `Macro.declared`,
-`Macro.inserted_items`, `Macro.typed`, `Macro.subject`, `Macro.use_subject`,
-`Macro_pattern`, `Macro.binder`, `Macro.number_type`, `Macro.number_literal`,
-`Macro_case_pattern`, `Macro_case_shape`, `Macro_case_capture_at`,
-`Macro_case_root`, `Macro_case_start`, `Macro_case_own`, `Macro_case_symbol`,
-`Macro_case_enter`, `Macro_case_view`, `Macro.matcher`, `MacroMatcher.matches`,
-`Macro.matches`
+`Macro.inserted_items`, `Macro.typed`, `Macro.number_type`,
+`Macro.number_literal`, `Macro.subject`, `Macro.use_subject`, `Macro_pattern`,
+`Macro.binder`, `Macro_case_pattern`, `Macro_case_shape`,
+`Macro_case_capture_at`, `Macro_case_root`, `Macro_case_view`, `Macro.matcher`,
+`MacroMatcher.matches`, `Macro.matches`
 
 ### [lib/map-generics.x](../lib/map-generics.x)
 
@@ -1258,11 +1258,11 @@ Public functions:
 
 `Map.new_capacity`, `Map.new`, `Map.len`, `Map.try_get`, `Map.get`,
 `Map.getindex`, `Map.getdefault`, `Map.setdefault`, `Map.contains`, `Map.set`,
-`Map.setindex`, `Map.updateindex`, `Map.postfixindex`, `Map.try_del`,
-`Map.del`, `Map.copy`, `Map.merge`, `Map.try_next`, `Map.truth`, `Map.equal`,
-`Map.get_hashed`, `Map.update_n`, `Map.export_to`, `Map.compare`,
-`Map.write_repr`, `Map.write_str`, `Map.str`, `Map.repr`, `Map.iter`,
-`Map.keys`, `Map.enumerate`, `Map.cleanup`
+`Map.setindex`, `Map.try_del`, `Map.del`, `Map.copy`, `Map.merge`,
+`Map.try_next`, `Map.truth`, `Map.equal`, `Map.updateindex`,
+`Map.postfixindex`, `Map.get_hashed`, `Map.update_n`, `Map.export_to`,
+`Map.compare`, `Map.write_repr`, `Map.write_str`, `Map.str`, `Map.repr`,
+`Map.iter`, `Map.keys`, `Map.enumerate`, `Map.cleanup`
 
 ### [lib/match-cache.x](../lib/match-cache.x)
 
@@ -1728,21 +1728,20 @@ Public functions:
 `MapIntInt.new_capacity`, `MapIntInt.new`, `MapIntInt.len`,
 `MapIntInt.try_get`, `MapIntInt.get`, `MapIntInt.getindex`,
 `MapIntInt.getdefault`, `MapIntInt.setdefault`, `MapIntInt.contains`,
-`MapIntInt.set`, `MapIntInt.setindex`, `MapIntInt.updateindex`,
-`MapIntInt.postfixindex`, `MapIntInt.try_del`, `MapIntInt.del`,
+`MapIntInt.set`, `MapIntInt.setindex`, `MapIntInt.try_del`, `MapIntInt.del`,
 `MapIntInt.copy`, `MapIntInt.merge`, `MapIntInt.try_next`, `MapIntInt.truth`,
-`MapIntInt.equal`, `Map.mapintint`, `MapIntInt.compare`,
-`MapIntInt.write_repr`, `MapIntInt.write_str`, `MapIntInt.str`,
-`MapIntInt.repr`, `MapIntInt.map`, `MapIntInt.var`, `Var.mapintint`,
-`MapIntInt.iter`, `MapIntInt.keys`, `MapIntInt.enumerate`, `MapIntInt.cleanup`,
-`MapLongDouble.new_capacity`, `MapLongDouble.new`, `MapLongDouble.len`,
-`MapLongDouble.try_get`, `MapLongDouble.get`, `MapLongDouble.getindex`,
-`MapLongDouble.getdefault`, `MapLongDouble.setdefault`,
-`MapLongDouble.contains`, `MapLongDouble.set`, `MapLongDouble.setindex`,
-`MapLongDouble.updateindex`, `MapLongDouble.postfixindex`,
-`MapLongDouble.try_del`, `MapLongDouble.del`, `MapLongDouble.copy`,
-`MapLongDouble.merge`, `MapLongDouble.try_next`, `MapLongDouble.truth`,
-`MapLongDouble.equal`, `Map.maplongdouble`, `MapLongDouble.compare`,
+`MapIntInt.equal`, `MapIntInt.updateindex`, `MapIntInt.postfixindex`,
+`Map.mapintint`, `MapIntInt.compare`, `MapIntInt.write_repr`,
+`MapIntInt.write_str`, `MapIntInt.str`, `MapIntInt.repr`, `MapIntInt.map`,
+`MapIntInt.var`, `Var.mapintint`, `MapIntInt.iter`, `MapIntInt.keys`,
+`MapIntInt.enumerate`, `MapIntInt.cleanup`, `MapLongDouble.new_capacity`,
+`MapLongDouble.new`, `MapLongDouble.len`, `MapLongDouble.try_get`,
+`MapLongDouble.get`, `MapLongDouble.getindex`, `MapLongDouble.getdefault`,
+`MapLongDouble.setdefault`, `MapLongDouble.contains`, `MapLongDouble.set`,
+`MapLongDouble.setindex`, `MapLongDouble.try_del`, `MapLongDouble.del`,
+`MapLongDouble.copy`, `MapLongDouble.merge`, `MapLongDouble.try_next`,
+`MapLongDouble.truth`, `MapLongDouble.equal`, `MapLongDouble.updateindex`,
+`MapLongDouble.postfixindex`, `Map.maplongdouble`, `MapLongDouble.compare`,
 `MapLongDouble.write_repr`, `MapLongDouble.write_str`, `MapLongDouble.str`,
 `MapLongDouble.repr`, `MapLongDouble.map`, `MapLongDouble.var`,
 `Var.maplongdouble`, `MapLongDouble.iter`, `MapLongDouble.keys`,
@@ -1751,25 +1750,26 @@ Public functions:
 `MapStringString.try_get`, `MapStringString.get`, `MapStringString.getindex`,
 `MapStringString.getdefault`, `MapStringString.setdefault`,
 `MapStringString.contains`, `MapStringString.set`, `MapStringString.setindex`,
-`MapStringString.updateindex`, `MapStringString.postfixindex`,
 `MapStringString.try_del`, `MapStringString.del`, `MapStringString.copy`,
 `MapStringString.merge`, `MapStringString.try_next`, `MapStringString.truth`,
-`MapStringString.equal`, `Map.mapstringstring`, `MapStringString.compare`,
-`MapStringString.write_repr`, `MapStringString.write_str`,
-`MapStringString.str`, `MapStringString.repr`, `MapStringString.map`,
-`MapStringString.var`, `Var.mapstringstring`, `MapStringString.iter`,
-`MapStringString.keys`, `MapStringString.enumerate`, `MapStringString.cleanup`,
-`MapStringInt.new_capacity`, `MapStringInt.new`, `MapStringInt.len`,
-`MapStringInt.try_get`, `MapStringInt.get`, `MapStringInt.getindex`,
-`MapStringInt.getdefault`, `MapStringInt.setdefault`, `MapStringInt.contains`,
-`MapStringInt.set`, `MapStringInt.setindex`, `MapStringInt.updateindex`,
-`MapStringInt.postfixindex`, `MapStringInt.try_del`, `MapStringInt.del`,
-`MapStringInt.copy`, `MapStringInt.merge`, `MapStringInt.try_next`,
-`MapStringInt.truth`, `MapStringInt.equal`, `Map.mapstringint`,
-`MapStringInt.compare`, `MapStringInt.write_repr`, `MapStringInt.write_str`,
-`MapStringInt.str`, `MapStringInt.repr`, `MapStringInt.map`,
-`MapStringInt.var`, `Var.mapstringint`, `MapStringInt.iter`,
-`MapStringInt.keys`, `MapStringInt.enumerate`, `MapStringInt.cleanup`
+`MapStringString.equal`, `MapStringString.updateindex`,
+`MapStringString.postfixindex`, `Map.mapstringstring`,
+`MapStringString.compare`, `MapStringString.write_repr`,
+`MapStringString.write_str`, `MapStringString.str`, `MapStringString.repr`,
+`MapStringString.map`, `MapStringString.var`, `Var.mapstringstring`,
+`MapStringString.iter`, `MapStringString.keys`, `MapStringString.enumerate`,
+`MapStringString.cleanup`, `MapStringInt.new_capacity`, `MapStringInt.new`,
+`MapStringInt.len`, `MapStringInt.try_get`, `MapStringInt.get`,
+`MapStringInt.getindex`, `MapStringInt.getdefault`, `MapStringInt.setdefault`,
+`MapStringInt.contains`, `MapStringInt.set`, `MapStringInt.setindex`,
+`MapStringInt.try_del`, `MapStringInt.del`, `MapStringInt.copy`,
+`MapStringInt.merge`, `MapStringInt.try_next`, `MapStringInt.truth`,
+`MapStringInt.equal`, `MapStringInt.updateindex`, `MapStringInt.postfixindex`,
+`Map.mapstringint`, `MapStringInt.compare`, `MapStringInt.write_repr`,
+`MapStringInt.write_str`, `MapStringInt.str`, `MapStringInt.repr`,
+`MapStringInt.map`, `MapStringInt.var`, `Var.mapstringint`,
+`MapStringInt.iter`, `MapStringInt.keys`, `MapStringInt.enumerate`,
+`MapStringInt.cleanup`
 
 ### [lib/var-adapters.x](../lib/var-adapters.x)
 

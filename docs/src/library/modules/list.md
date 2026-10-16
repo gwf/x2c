@@ -249,12 +249,13 @@ Folds `fn` over the elements of `lst` from the left, starting at `seed`.
 `fn` receives the accumulator and then the next element, and returns the
 next accumulator. A `void` seed means "no seed": the first element becomes
 the initial accumulator and the fold starts at the second, and folding
-`nil` that way returns `void`. A null `fn` returns the accumulator
-untouched, which for a `void` seed is the head.
+`nil` that way returns `void`. Empty input and a singleton with a `void`
+seed do not invoke `fn`. A null `fn` raises `<bad-arg>` when combining
+an element with the accumulator.
 
 Any cause raised by `fn` propagates.
 
-Source: `lib/list/transformations.x:43`
+Source: `lib/list/transformations.x:44`
 
 <a id="List.get"></a>
 #### List.get
