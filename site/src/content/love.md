@@ -3,8 +3,8 @@ title: Code is Love
 ---
 
 Part of the pleasure of programming is finding a clear way to express an idea.
-We love C because it puts us close to the machine, with little between us and
-what it can do. But that closeness comes at a cost: even simple ideas can take
+C earns that love by putting you close to the machine, with little between you
+and what it can do. But that closeness comes at a cost: even simple ideas can take
 a lot of housekeeping to express.
 
 x2c keeps that directness and lets you focus on what your program does.

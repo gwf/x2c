@@ -24,22 +24,47 @@ const rows = await Promise.all(
 
 <aside class="hero-feature-table" aria-labelledby="feature-table-title">
   <h2 id="feature-table-title" set:html={introHtml} />
-  <table>
-    <thead>
-      <tr>
-        <th scope="col">Feature</th>
-        <th scope="col">What x2c adds</th>
-      </tr>
-    </thead>
-    <tbody>
-      {
-        rows.map((feature) => (
+  <div class="feature-table-body">
+    <div class="feature-table-scroll" role="region"
+      aria-label="Feature table, scrollable" tabindex="0">
+      <table>
+        <thead>
           <tr>
-            <th scope="row" set:html={feature.name} />
-            <td set:html={feature.detail} />
+            <th scope="col">Feature</th>
+            <th scope="col">What x2c adds</th>
           </tr>
-        ))
-      }
-    </tbody>
-  </table>
+        </thead>
+        <tbody>
+          {
+            rows.map((feature) => (
+              <tr>
+                <th scope="row" set:html={feature.name} />
+                <td set:html={feature.detail} />
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
 </aside>
+
+<script>
+  const scroll = document.querySelector<HTMLElement>(".feature-table-scroll")!;
+  const body = scroll.parentElement!;
+  const table = scroll.querySelector("table")!;
+  const updateFade = () => {
+    body.toggleAttribute("data-more",
+      scroll.scrollHeight - scroll.clientHeight - scroll.scrollTop > 1);
+  };
+  const updateSize = () => {
+    body.style.setProperty("--feature-table-half",
+      `${Math.round(table.offsetHeight / 2)}px`);
+    updateFade();
+  };
+  scroll.addEventListener("scroll", updateFade, { passive: true });
+  const observer = new ResizeObserver(updateSize);
+  observer.observe(scroll);
+  observer.observe(table);
+  updateSize();
+</script>

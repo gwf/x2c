@@ -95,7 +95,7 @@ const [titleHtml, kickerHtml] = await Promise.all([
           slides={inSection("love")}
         />
         <p class="section-exit">
-          Explore the essentials:{" "}
+          More in the docs:{" "}
           <a href={local("docs/guide/values.html")}>values</a>,{" "}
           <a href={local("docs/guide/symbols.html")}>symbols</a>,{" "}
           <a href={local("docs/guide/collections.html")}>collections and literals</a>,{" "}
@@ -120,7 +120,7 @@ const [titleHtml, kickerHtml] = await Promise.all([
           slides={inSection("power")}
         />
         <p class="section-exit">
-          Put the pieces together:{" "}
+          More in the docs:{" "}
           <a href={local("docs/guide/collections.html")}>collections</a>,{" "}
           <a href={local("docs/guide/iteration.html")}>iteration</a>,{" "}
           <a href={local("docs/guide/memory.html")}>scopes</a>,{" "}
@@ -147,7 +147,7 @@ const [titleHtml, kickerHtml] = await Promise.all([
           slides={inSection("magic")}
         />
         <p class="section-exit">
-          Explore the language itself:{" "}
+          More in the docs:{" "}
           <a href={local("docs/guide/protocols.html")}>protocols</a>,{" "}
           <a href={local("docs/guide/macros.html")}>macros and compile-time Lisp</a>,{" "}
           <a href={local("docs/library/overview.html#embed-lisp")}>runtime Lisp</a>,{" "}
@@ -178,13 +178,15 @@ const [titleHtml, kickerHtml] = await Promise.all([
           <strong>Install a release.</strong>{" "}
           One command downloads the compiler, runtime, headers, and
           examples for your platform into <code>{destination.staging
-            ? "$X2C_PREFIX (fresh scratch directory)" : "~/.local/x2c"}</code>.
+            ? "$X2C_PREFIX" : "~/.local/x2c"}</code>{destination.staging
+            ? ", ideally a fresh scratch directory." : "."}{" "}
+          Then add packages from the{" "}
+          <a href={local("docs/guide/packages.html#install-packages")}>
+            package index</a> with{" "}
           <code>{destination.staging
             ? "x2c install <package> --index " +
               absoluteSiteUrl("/packages/index.txt")
-            : "x2c install <package>"}</code> then adds packages from
-          the <a href={local("docs/guide/packages.html#install-packages")}>
-          package index</a>.
+            : "x2c install <package>"}</code>.
         </p>
         <p>
           <strong>Or build from source.</strong>{" "}
@@ -230,7 +232,7 @@ const [titleHtml, kickerHtml] = await Promise.all([
             <div class="install-code" set:html={await packageBuildCode()} />
           </figure>
           <p class="package-note">
-            Packages need separate dependency preparation. Release bundles are
+            Packages need their native libraries prepared first. Release bundles are
             built on macOS and Linux, on both arm64 and x86_64.
           </p>
         </div>
@@ -248,7 +250,7 @@ const [titleHtml, kickerHtml] = await Promise.all([
     <div class="docs-shell">
       <div class="docs-grid">
         <header class="docs-copy">
-          <small>keep exploring</small>
+          <small>about, docs, and source</small>
           <h2>Go further.</h2>
           <p>
             <a href={local("about/")}>About x2c</a> tells its story.{" "}

@@ -1,7 +1,7 @@
 ---
 title: Programming is Dead.<br/>Long Live Programming.
 kicker: "x2c is a language for people who love to code."
-featureIntro: "x2c is C with superpowers that you can selectively enable."
+featureIntro: "Superpowers for C, each one optional."
 features:
   - name: Dynamic <br/> Values
     detail: "`Var` holds type-tagged values and pointers, with static typing and runtime introspection."
@@ -14,9 +14,9 @@ features:
   - name: Mutable <br/> Containers
     detail: "`Array`s and `Map`s store `Var`s, grow automatically, and have native syntax for all common operations."
   - name: Compound <br/> Literals
-    detail: "Containers: `[a, b]`, `{key: value}`, `%(a b)`. Strings: `%\"hi $name\"`. Quoted names are data; `$` inserts expressions, `@` splices Lists."
+    detail: "Arrays, Maps, Lists, and interpolated Strings have literal syntax, so nested data reads the way you wrote it. Splice values and expressions in anywhere."
   - name: Iteration <br/>& Loops
-    detail: "Chained functional iterators and `foreach` over anything sequence-like, including `File`s."
+    detail: "Chained functional iterators and `foreach` over anything sequence-like, including `File`s and `Slice`s."
   - name: Object <br/>Orientation
     detail: "Namespaced methods, `typedef` inheritance, `protocol`s, delegation, and static or dynamic dispatch."
   - name: Functional <br/>Tools
@@ -46,26 +46,21 @@ has legitimate applications, presumably, but is more about coding for the joy of
 it. Some users of x2c report heightened expressiveness, a sense of universality,
 with a touch of transcendence. Be sure to drink plenty of water.
 
-x2c is C with batteries and without the bullshit.
-It is a strict superset of C that compiles to C, keeping C's
-native performance, tooling, ecosystem, and portability while adding the
-conveniences of a modern language. x2c extends C's syntax with a few new
-keywords, but the real magic is in `meta`: functions that run at compile time
-as well as in the finished program. Write ordinary x2c to compute values and
-construct code while the compiler builds your program.
+Under the hood, x2c is a strict superset of C that compiles to C. You keep C's
+native performance, tooling, ecosystem, and portability, and gain the conveniences
+of a modern language. A few new keywords extend C's syntax, but the real magic
+is in `meta`: functions that run while the compiler builds your program as well
+as in the finished one, computing values and writing code.
 
-x2c's main features are summarized in the table on the right. Everything is
-optional and works with plain C as well. Hence, you can take existing C code and
-adopt x2c capabilities incrementally.
+Everything is optional and works with plain C, so you can adopt x2c one feature
+at a time in code you already have.
+The compiler, library, and runtime are themselves written in x2c, with no
+third-party library dependencies. Read the source to learn the language; edit
+it to change the language. The [repository counts](#source) show how much there
+is to read.
 
-The compiler, library, and runtime are all written in x2c, with no third-party
-dependencies. You can read the source to learn the language, then change the
-language by editing the source. The [repository counts](#source) give a sense
-of its size.
-
-At this point, you may be wondering: why learn a new programming
-language, let alone create and release one, in a post-AI world?
+Why learn a new language, let alone release one, in a post-AI world?
 Fair question. **Programming is not about making computers do things; it's
-about helping brains think things.** Now, more than ever, the best reason to
-code is to rewire your brain. So if programming is more than a career to
+about helping brains think things.** The best reason to code is still to
+rewire your brain. So if programming is more than a career to
 you---if you code for *love*, *power*, or *magic*---try a bit of x2c.

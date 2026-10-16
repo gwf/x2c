@@ -1,7 +1,7 @@
 ---
 slug: compile-time-lisp
 section: magic
-tab: compile-time
+tab: codegen
 ---
 
 ```x2c

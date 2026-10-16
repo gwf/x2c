@@ -1,7 +1,7 @@
 ---
 slug: runtime-lisp
 section: magic
-tab: runtime
+tab: scripting
 ---
 
 ```x2c

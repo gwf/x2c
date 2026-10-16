@@ -42,7 +42,7 @@ Set intersection = fruit * lunch;
 ~}
 ```
 
-`Set.new` reuses `Map` storage. `Set.add` and `Set.mul` define union
-and intersection; `protocol Map(Set)` connects them to `+` and `*`.
-The operators return new sets, leaving both inputs unchanged. Existing
-collections do the storage work while the new type supplies the meaning.
+Existing collections do the storage work; the new type supplies the
+meaning. `Set.new` reuses `Map` storage. `Set.add` and `Set.mul` define union
+and intersection, and `protocol Map(Set)` connects them to `+` and `*`.
+The operators return new sets, leaving both inputs unchanged.

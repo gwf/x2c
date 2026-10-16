@@ -62,12 +62,9 @@ printf("processed: %zu files\n", total);
 ~}
 ```
 
-The `Scope` module groups allocations by lifetime. `$scope()` retains one
-region around the statement it decorates and releases it on every exit,
-including a `return` or an `Error` crossing the release; it is
-`Scope.retain` and a deferred `Scope.release` in one construct. Decorating
-a loop body gives one region per iteration, so each file's working data is
-freed before the day's file list. No individual `free` calls are needed;
-application helpers save results before cleanup. Translation warns when a
-value allocated inside a region can still be reached after that region ends,
-so the rule is checked rather than only recommended.
+The `Scope` module frees memory by lifetime, not by pointer. `$scope()`
+retains a region around the statement it decorates and releases it on every
+exit, including a `return` or an `Error`. Decorating a loop body gives
+one region per iteration, so each file's working data is freed before the
+day's file list, with no individual `free` calls. The translator warns when
+a value can outlive its region, so the rule is checked, not just recommended.

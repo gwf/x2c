@@ -47,7 +47,7 @@ puts(preview(%"$directory/document.bin"));
 ~}
 ```
 
-`File.string` rejects embedded NUL bytes. A deferred `File.close` runs
-before `preview` handles that failure. Named `catch` clauses distinguish
-invalid text from a missing file; `catch:` handles other failures. The
-loader owns cleanup, while its caller chooses how to recover.
+`File.string` rejects embedded NUL bytes, and a deferred `File.close`
+runs before the caller, `preview`, handles that failure. Named `catch`
+clauses distinguish invalid text from a missing file; `catch:` handles
+everything else. The loader owns cleanup; its caller chooses how to recover.

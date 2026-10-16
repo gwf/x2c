@@ -1,7 +1,7 @@
 ---
 slug: ways-to-agree
 section: magic
-tab: agreement
+tab: same list
 ---
 
 ```x2c
