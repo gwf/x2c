@@ -89,15 +89,10 @@ static ProjectTarget _selected_target(Project p);
 
 static String _build_root(Project p);
 
-typedef enum ManifestSection{
-  NONE, PROJECT, TARGET, PROFILE, DEPENDENCIES
-}
-ManifestSection;
-
 typedef struct Manifest{
   Project project;
   int line;
-  ManifestSection section;
+  Symbol section;
   ProjectTarget target;
   ProjectProfile profile;
   String key, value;
@@ -567,7 +562,7 @@ static void _enter_project(Manifest * m){
   Project p =(* m).project;
   if(p -> declared) _error(p, (* m).line, _14);
   p -> declared = 1;
-  (* m).section = PROJECT;
+  (* m).section = 35599821032;
 }
 
 static void _enter_dependencies(Manifest * m){
@@ -575,7 +570,7 @@ static void _enter_dependencies(Manifest * m){
   if(p -> dependency_declared) _error(p, (* m).line, _15);
   p -> dependency_declared = 1;
   p -> dependency_seen = Map_new();
-  (* m).section = DEPENDENCIES;
+  (* m).section = 273446;
 }
 
 static void _target_header(Manifest * m, String header){
@@ -596,7 +591,7 @@ static void _target_header(Manifest * m, String header){
 static void _enter_target(Manifest * m, ProjectTarget target){
   if(target -> declared) _error_name((* m).project, (* m).line, _19, target -> name);
   target -> declared = 1;
-  (* m).section = TARGET;
+  (* m).section = 1345468776;
   (* m).target = target;
 }
 
@@ -605,13 +600,13 @@ static void _enter_profile(Manifest * m, ProjectTarget target, String name){
   if(! profile) profile = _new_profile(target, name);
   if(profile -> declared) _error_name((* m).project, (* m).line, _20, name);
   profile -> declared = 1;
-  (* m).section = PROFILE;
+  (* m).section = 35599567626;
   (* m).profile = profile;
 }
 
 static void _field(Manifest * m, char * line){
   Project p =(* m).project;
-  if((* m).section == NONE) _error(p, (* m).line, _21);
+  if((* m).section == 0) _error(p, (* m).line, _21);
   char * equals = strchr(line, '=');
   if(! equals) _error(p, (* m).line, _22);
   * equals = 0;
@@ -639,9 +634,9 @@ static void _claim(Manifest * m, String key){
 }
 
 static Map _keys(Manifest * m){
-  if((* m).section == PROJECT) return(* m).project -> seen;
-  if((* m).section == DEPENDENCIES) return(* m).project -> dependency_seen;
-  return(* m).section == TARGET ?(* m).target -> seen :(* m).profile -> seen;
+  if((* m).section == 35599821032) return(* m).project -> seen;
+  if((* m).section == 273446) return(* m).project -> dependency_seen;
+  return(* m).section == 1345468776 ?(* m).target -> seen :(* m).profile -> seen;
 }
 
 static void _settle(Manifest * m){
@@ -654,9 +649,9 @@ static void _set(Manifest * m){
   Project p =(* m).project;
   int line =(* m).start;
   String key =(* m).key, value =(* m).value;
-  if((* m).section == PROJECT) _set_project_field(p, line, key, value);
-  else if((* m).section == DEPENDENCIES) _set_dependency(p, line, key, value);
-  else if((* m).section == TARGET) _set_target_field(p, (* m).target, line, key, value);
+  if((* m).section == 35599821032) _set_project_field(p, line, key, value);
+  else if((* m).section == 273446) _set_dependency(p, line, key, value);
+  else if((* m).section == 1345468776) _set_target_field(p, (* m).target, line, key, value);
   else _set_profile_field(p, (* m).profile, line, key, value);
 }
 

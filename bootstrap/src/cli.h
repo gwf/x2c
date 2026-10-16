@@ -47,11 +47,7 @@ TargetKind;
 #include "buffer.h"
 #include "report.h"
 #include "utils.h"
-#define CLI_FIELD_FLAG(field) .apply = FIELD_FLAG, \
-  .offset = offsetof(struct CliRequest, field)
-#define CLI_FIELD_TEXT(field) .apply = FIELD_TEXT, \
-  .offset = offsetof(struct CliRequest, field)
-#define CLI_FIELD_LIST(field) .apply = FIELD_LIST, \
+#define CLI_FIELD(kind, field) .apply = kind, \
   .offset = offsetof(struct CliRequest, field)
 CliRequest CliRequest_parse(int argc, char * * argv);
 

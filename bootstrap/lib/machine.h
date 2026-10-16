@@ -5,11 +5,6 @@
 #ifndef __GUARD_0x857C07E7__
 #define __GUARD_0x857C07E7__
 
-typedef enum MachinePrepare{
-  MACHINE_PREPARED, MACHINE_INELIGIBLE, MACHINE_MALFORMED
-}
-MachinePrepare;
-
 typedef struct MachineView MachineView;
 
 typedef struct MachineProgram * MachineProgram;
@@ -57,11 +52,6 @@ enum MachineRollback{
   MACHINE_ROLLBACK_RESTORE, MACHINE_ROLLBACK_RETRY
 }
 ;
-
-typedef enum MachineSlotKind{
-  MACHINE_SLOT_INVALID, MACHINE_SLOT_VALUE, MACHINE_SLOT_SPAN
-}
-MachineSlotKind;
 
 typedef struct MachineWord{
   unsigned char op, b, c, d;
@@ -111,7 +101,7 @@ typedef struct MachineBuilder{
   Var * consts;
   Atom binders[MACHINE_BINDER_MAX];
   int length, code_capacity, const_count, const_capacity, binder_count, root;
-  MachinePrepare status;
+  Symbol status;
   const char * reason;
 }
 MachineBuilder;
@@ -123,7 +113,7 @@ typedef struct MachineSpan{
 MachineSpan;
 
 typedef struct MachineSlot{
-  MachineSlotKind kind;
+  Symbol kind;
   Var value;
   MachineSpan span;
 }
@@ -198,7 +188,7 @@ int List_equal(List, List);
 static inline int MachineSlot_prefix_equal(MachineSlot * slot, List input, int length, MachineStats * stats){
   if(stats) stats -> range_comparisons ++;
   List expected, end = NULL;
-  if(slot -> kind == MACHINE_SLOT_VALUE) expected = Var_list_payload(slot -> value);
+  if(slot -> kind == 46228810) expected = Var_list_payload(slot -> value);
   else{
     if(slot -> span.length != length) return 0;
     expected = slot -> span.begin;
@@ -209,11 +199,11 @@ static inline int MachineSlot_prefix_equal(MachineSlot * slot, List input, int l
     input = List_cdr(input);
     expected = List_cdr(expected);
   }
-  return slot -> kind == MACHINE_SLOT_SPAN ? List_equal(expected, end) : ! List_truth(expected);
+  return slot -> kind == 1278044 ? List_equal(expected, end) : ! List_truth(expected);
 }
 
 static inline int MachineSlot_final_equal(MachineSlot * slot, List input, MachineStats * stats){
-  if(slot -> kind == MACHINE_SLOT_VALUE){
+  if(slot -> kind == 46228810){
     List expected = Var_list_payload(slot -> value);
     if(List_equal(expected, input)) return 1;
     while(List_truth(expected) && List_truth(input)){

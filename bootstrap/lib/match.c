@@ -36,7 +36,7 @@ typedef struct MatchCaptureLayout{
   Var normalized;
   unsigned long definite, possible;
   int binder_count;
-  MachinePrepare status;
+  Symbol status;
   const char * reason;
 }
 * MatchCaptureLayout;
@@ -62,7 +62,7 @@ enum{
 typedef struct MatchPlan{
   MachineProgram program;
   MatchCaptureLayout layout;
-  MachinePrepare status;
+  Symbol status;
   const char * reason;
   int key_count, key_bits;
   MatchKey keys[MATCH_KEY_MAX];
@@ -485,7 +485,7 @@ static MatchCaptureLayout _layout(MatchLayoutBuilder * b, Var normalized, const 
   MatchCaptureLayout layout = Scope_calloc(1, bytes);
   layout -> binders =(Atom *)((char *) layout + sizeof(struct MatchCaptureLayout));
   layout -> binder_count =(* b).count;
-  layout -> status = malformed ? MACHINE_MALFORMED : MACHINE_PREPARED;
+  layout -> status = malformed ? 28682226919752 : 1138535534920;
   layout -> reason = malformed ? malformed : "prepared";
   layout -> normalized = normalized;
   if((* b).count) memcpy(layout -> binders, (* b).binders, sizeof(Atom) *(* b).count);
@@ -650,8 +650,8 @@ _Noreturn void MatchPlan_raise_ineligible(const char * reason, const char * owne
 }
 
 static int _prepared(MatchPlan plan, const char * owner){
-  if(plan && plan -> status == MACHINE_INELIGIBLE) MatchPlan_raise_ineligible(plan -> reason, owner);
-  return plan && plan -> status == MACHINE_PREPARED;
+  if(plan && plan -> status == 664475009618698) MatchPlan_raise_ineligible(plan -> reason, owner);
+  return plan && plan -> status == 1138535534920;
 }
 
 static int _buffer_valid(MatchCaptureLayout layout, MatchCaptureBuffer * captures){
@@ -731,9 +731,9 @@ static int _commit(MachineView view, MatchMachine * m, MatchCaptureBuffer * capt
   unsigned long present = 0;
   for(int i = 0;  i < view.binder_count;  i ++){
     MachineSlot * slot = &(* m).slots[i];
-    if(slot -> kind == MACHINE_SLOT_INVALID) continue;
+    if(slot -> kind == 20313104968) continue;
     values[i] = slot -> value;
-    if(slot -> kind == MACHINE_SLOT_SPAN) values[i] = List_var(MatchMachine_materialize_span(&((* m)), slot -> span));
+    if(slot -> kind == 1278044) values[i] = List_var(MatchMachine_materialize_span(&((* m)), slot -> span));
     if((* m).status == 11703268) break;
     present |= 1UL << i;
   }
@@ -1135,7 +1135,7 @@ int x2c_match_site_try_capture(MatchCaptureSite * site, List input, Var pattern,
   if(! captures) return 0;
   MatchPlan plan = _published(site, pattern);
   if(! plan) return x2c_match_try_capture(input, pattern, captures);
-  if(plan -> status == MACHINE_MALFORMED) return 0;
+  if(plan -> status == 28682226919752) return 0;
   return _prepared(plan, "match") && _buffer_valid(plan -> layout, captures) && _capture(plan, List_var(input), captures, NULL) == 1;
 }
 
@@ -1260,7 +1260,7 @@ MatchPlan x2c_match_site_prepare(MatchCaptureSite * site, Var pattern){
 
 static MatchPlan _plan(MatchCaptureSite * site, Var pattern){
   MatchPlan plan = _published(site, pattern);
-  return plan && plan -> status != MACHINE_INELIGIBLE ? plan : NULL;
+  return plan && plan -> status != 664475009618698 ? plan : NULL;
 }
 
 int List_try_match(List input, Var pat, List * out_bindings);
