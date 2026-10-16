@@ -12,6 +12,7 @@ X2c command-line parsing and presentation.
 
 | Function | Summary |
 | --- | --- |
+| [`CliRequest.command_arguments`](#CliRequest.command_arguments) | Copies the driver's already-read vector, or returns NULL for direct invocation. |
 | [`CliRequest.dependency_option`](#CliRequest.dependency_option) | Returns whether `s` contains a driver-owned dependency option. |
 | [`CliRequest.inspects`](#CliRequest.inspects) | Returns whether `request` selects a terminating inspection or dump mode. |
 | [`CliRequest.is_builtin`](#CliRequest.is_builtin) | Reports whether a raw command name belongs to the built-in parser. |
@@ -27,6 +28,16 @@ X2c command-line parsing and presentation.
 | [`TargetKind.of`](#TargetKind.of) | Returns the row of target kind `kind`; any other kind reads as an executable. |
 
 ### `CliRequest`
+
+<a id="CliRequest.command_arguments"></a>
+#### CliRequest.command_arguments
+
+`Array CliRequest.command_arguments(int argc, char **argv)`
+
+Copies the driver's already-read vector, or returns NULL for direct
+invocation. The caller owns the Array; no word is expanded again.
+
+Source: `src/cli/responses.x:21`
 
 <a id="CliRequest.dependency_option"></a>
 #### CliRequest.dependency_option

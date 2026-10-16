@@ -93,8 +93,9 @@ Public functions:
 
 `CliRequest.parse`, `CliRequest.parse_arguments`,
 `CliRequest.dependency_option`, `CliRequest.package_options`,
-`CliRequest.is_builtin`, `CliRequest.read_arguments`, `TargetKind.named`,
-`TargetKind.of`, `CliRequest.new`, `Compiler.version`, `CliRequest.inspects`,
+`CliRequest.is_builtin`, `CliRequest.read_arguments`,
+`CliRequest.command_arguments`, `TargetKind.named`, `TargetKind.of`,
+`CliRequest.new`, `Compiler.version`, `CliRequest.inspects`,
 `CliRequest.package_roots`, `CliRequest.require_input`
 
 ### [src/collect.x](../src/collect.x)
@@ -1014,13 +1015,13 @@ Public functions:
 `Error.raise`, `x2c_error_raise`, `x2c_error_raise_n`, `Error.depth`,
 `Error.note_rendered`, `Error.policy_set`, `Error.policy_get`, `Error.bound`,
 `Error.bound_set`, `Error.policy_capture`, `Error.policy_adopt`,
-`Error.policy_release`, `Error.push`, `Error.pop`, `Error.handler_depth`,
+`Error.policy_release`, `Error.context_open`, `Error.context_close`,
+`Error.count`, `Error.mark`, `Error.since`, `Error.since_in`, `Error.snapshot`,
+`Error.snapshot_in`, `Error.push`, `Error.pop`, `Error.handler_depth`,
 `Error.handler_head`, `x2c_error_catch_site_push`, `x2c_error_catch_push`,
 `x2c_error_catch_site_pending`, `x2c_error_catch_selected`,
 `x2c_error_catch_capture`, `x2c_error_catch_detach`, `x2c_error_catch_close`,
 `Error.unwind_head`, `Error.restore_landing`, `Error.trim`, `Error.restore`,
-`Error.context_open`, `Error.context_close`, `Error.count`, `Error.mark`,
-`Error.since`, `Error.since_in`, `Error.snapshot`, `Error.snapshot_in`,
 `Error.initialize_raw`, `Error.shutdown_raw`, `Error.ready`
 
 ### [lib/error_init.x](../lib/error_init.x)
@@ -1367,9 +1368,9 @@ nested interning pools with region-backed object storage.
 Public functions:
 
 `Pool.lookup`, `Pool.intern`, `Pool.intern_new`, `Pool.insert`, `Pool.owns`,
-`Pool.malloc`, `Pool.free`, `Pool.promote`, `Pool.own`, `Pool.thread_start`,
-`Pool.stats`, `Pool.retain_named`, `Pool.retain`, `Pool.release`,
-`Pool.current`, `Pool.initialize`, `Pool.thread_initialize`, `Pool.shutdown`,
+`Pool.retain_named`, `Pool.retain`, `Pool.release`, `Pool.malloc`, `Pool.free`,
+`Pool.promote`, `Pool.own`, `Pool.stats`, `Pool.thread_start`, `Pool.current`,
+`Pool.initialize`, `Pool.thread_initialize`, `Pool.shutdown`,
 `Pool.open_named`, `Pool.open`, `Pool.close`, `Pool.detach`,
 `Pool.is_permanent`, `Pool.epoch`
 
