@@ -9,26 +9,26 @@ export X2C_CACHE_DIR="$tmp/cache" TMPDIR="$tmp"
 
 cat >"$tmp/dependency.x" <<'EOF'
 #pragma once
-meta int offset(int n) { return n + 1; }
+int offset(int n) { return n + 1; }
 EOF
 cat >"$tmp/native.x" <<'EOF'
 #include "dependency.x"
 #include <stdlib.h>
 typedef int Count;
 static int double_of(int n) { return 2 * n; }
-meta static int calls = 0;
-meta Count loaded_answer(Count n) { calls++; return double_of(offset(n)); }
-meta int loaded_calls(void) { return calls; }
+static int calls = 0;
+Count loaded_answer(Count n) { calls++; return double_of(offset(n)); }
+int loaded_calls(void) { return calls; }
 meta String loaded_text(void) { return "kept native text"; }
 meta List loaded_list(void) { return %("kept native list" 42); }
-meta Array loaded_append(Array values) { values.push(99); return values; }
-meta void loaded_exit(void) { exit(9); }
+Array loaded_append(Array values) { values.push(99); return values; }
+void loaded_exit(void) { exit(9); }
 EOF
 cat >"$tmp/second.x" <<'EOF'
 #include "dependency.x"
 enum LoadColor { LOAD_RED = 3 };
 enum LoadColor ordinary_color = LOAD_RED;
-meta int second_answer(void) { return offset(LOAD_RED + 1); }
+int second_answer(void) { return offset(LOAD_RED + 1); }
 EOF
 
 # Run directly to exercise discovery of the adjacent compiler as well as
@@ -46,8 +46,8 @@ builds/0/libexec/x2c-repl <"$tmp/input" >"$tmp/out" 2>"$tmp/err"
 cat >"$tmp/expected" <<'EOF'
 ok
 defined plus
-loaded ("loaded_answer" "loaded_calls" "loaded_text"
- "loaded_list" "loaded_append" "loaded_exit")
+loaded ("loaded_text" "loaded_list" "loaded_answer"
+ "loaded_calls" "loaded_append" "loaded_exit")
 => 42
 => 1
 => "kept native text"
@@ -91,7 +91,7 @@ fi
 grep -q 'usage: :load' "$tmp/err"
 grep -q 'cannot read input file' "$tmp/err"
 grep -q 'absent_native_body' "$tmp/err"
-grep -q 'name already defined: loaded_answer' "$tmp/err"
+grep -q 'name already defined: loaded_text' "$tmp/err"
 grep -q 'unresolved identifier: ordinary_color' "$tmp/err"
 grep -q 'unresolved identifier: LOAD_RED' "$tmp/err"
 grep -q 'arguments must be independent data values' "$tmp/err"
@@ -110,18 +110,18 @@ import sys
 
 root = pathlib.Path(sys.argv[1])
 source = root / "edited.x"
-source.write_text("int old_name(void) { return 1; }\n")
+source.write_text("static int old_name(void) { return 1; }\n")
 repl = subprocess.Popen(
     ["builds/0/x2c", "repl"], text=True,
     stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 repl.stdin.write(f':load "{source}"\n')
 repl.stdin.flush()
-assert "no public bodied meta functions" in repl.stderr.readline()
+assert "no public bodied functions" in repl.stderr.readline()
 def version(number, parameter="void"):
     source.write_text(
         "#include <stdlib.h>\n"
-        f"meta int fresh_name({parameter}) {{ return {number}; }}\n"
-        "meta void end_helper(void) { exit(8); }\n")
+        f"int fresh_name({parameter}) {{ return {number}; }}\n"
+        "void end_helper(void) { exit(8); }\n")
 version(41)
 repl.stdin.write(f':load "{source}"\nunknown_sync;\n')
 repl.stdin.flush()

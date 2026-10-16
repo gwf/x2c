@@ -306,6 +306,7 @@ Var Compiler_meta_helper_call(Compiler c, String name, Token site, List argument
       }
       ;
       _check(&(call));
+      Compiler_refuse_record_meta_call(c, name, site);
       _set_deadline(&(call));
       if(! _start()) _refuse(&(call), _1);
       _send(&(call), arguments);
@@ -511,7 +512,6 @@ static void _check(Call * call){
   if(! String_truth(active -> path) && Map_truth(active -> failures) && Map_try_get(active -> failures, int_var(- 1), &(failure))) _refuse(&((* call)), Var_as_string(failure));
   if(! String_truth(active -> path)) _refuse(&((* call)), _0);
   if(Map_truth(active -> failures) && Map_try_get(active -> failures, int_var((* call).table), &(failure))) _refuse(&((* call)), Var_as_string(failure));
-  Compiler_refuse_record_meta_call((* call).compiler, (* call).name, (* call).site);
 }
 
 static void _send(Call * c, List arguments){

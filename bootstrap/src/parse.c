@@ -5019,7 +5019,7 @@ static List _declarator(Compiler c, List type, List context, List * method_ident
   List _x2c_gensym_destructure_4 = List_cdr(_direct_declarator(c, List_type(context), &(method_identity), &((* source_first)), &((* source_after))));
   key = Var_list_payload(List_getindex(_x2c_gensym_destructure_4, 0));
   infix = Var_list_payload(List_getindex(_x2c_gensym_destructure_4, 1));
-  List sfx = _declarator_suffix(c, c -> load_main && ! List_truth(c -> return_type) && List_equal(key, _199));
+  List sfx = _declarator_suffix(c, c -> load_source && ! List_truth(c -> return_type) && List_equal(key, _199));
   List modifiers = List_append(infix, List_append(sfx, List_append(ptr, NULL)));
   List ast = List_append(modifiers, type);
   List binding = key;

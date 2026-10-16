@@ -84,9 +84,9 @@ alias.symlink_to(native)
 
 def write_dependency(offset):
     dependency.write_text(
-        "#pragma once\nmeta static int calls = 0;\n"
-        f"meta int offset(int n) {{ calls++; return n + {offset}; }}\n"
-        "meta int dependency_calls(void) { return calls; }\n")
+        "#pragma once\nstatic int calls = 0;\n"
+        f"int offset(int n) {{ calls++; return n + {offset}; }}\n"
+        "int dependency_calls(void) { return calls; }\n")
 
 
 def version(multiplier=3, parameter="renamed", result="Count", extra="",
@@ -95,14 +95,14 @@ def version(multiplier=3, parameter="renamed", result="Count", extra="",
             f"typedef {count} Count;\n"
             "typedef struct Part { int value; } Part;\n"
             "enum LoadMode { LOAD_FIRST = 1, LOAD_SECOND };\n"
-            "meta static int calls = 0;\n"
-            "meta int loaded_calls(void) { return calls; }\n"
-            "meta int loaded_dependency_calls(void) { return dependency_calls(); }\n"
-            "meta void loaded_exit(void) { exit(8); }\n")
+            "static int calls = 0;\n"
+            "int loaded_calls(void) { return calls; }\n"
+            "int loaded_dependency_calls(void) { return dependency_calls(); }\n"
+            "void loaded_exit(void) { exit(8); }\n")
     if shape:
         text += f"typedef struct LoadShape {{ {fields} }} LoadShape;\n"
     if answer:
-        text += (f"meta {result} loaded_answer(Count {parameter}) {{ calls++; "
+        text += (f"{result} loaded_answer(Count {parameter}) {{ calls++; "
                  f"return {multiplier} * offset({parameter}); }}\n")
     return text + extra
 
@@ -111,8 +111,8 @@ write_dependency(1)
 native.write_text(version(2, "n"))
 second.write_text(
     '#include "dependency.x"\n'
-    "meta int second_answer(int n) { return offset(n); }\n"
-    "meta int second_calls(void) { return dependency_calls(); }\n")
+    "int second_answer(int n) { return offset(n); }\n"
+    "int second_calls(void) { return dependency_calls(); }\n")
 session = Session(root)
 try:
     session.run("int before = 7;\nArray data = [4, 5];")
@@ -137,7 +137,7 @@ try:
     session.run(":info loaded_answer\n:info through\n:symbols loaded_a")
     session.value("loaded_calls()", 3)
 
-    addition = "typedef int Added;\nmeta int added(void) { return 123; }\n"
+    addition = "typedef int Added;\nint added(void) { return 123; }\n"
     write_dependency(4)
     native.write_text(version(extra=addition))
     session.load(alias)
@@ -161,9 +161,12 @@ try:
     session.value("saved(2)", 18)
 
     rejected = [
-        (version(extra=addition) + "meta int broken( {", "expected"),
+        (version(extra=addition) + "int broken( {", "expected"),
         (version(result="long", extra=addition), "function type changed"),
         (version(answer=False, extra=addition), "function removed"),
+        (version(extra=addition).replace(
+            "Count loaded_answer", "static Count loaded_answer"),
+         "function removed"),
         (version(count="long", extra=addition), "declaration changed or removed"),
         (version(fields="int x; int y;", extra=addition),
          "declaration changed or removed"),
@@ -177,9 +180,9 @@ try:
          "declaration changed or removed"),
         (version(extra=addition).replace("LOAD_SECOND", "LOAD_RENAMED"),
          "declaration changed or removed"),
-        (version(extra=addition + "meta int second_answer(int n) { return n; }\n"),
+        (version(extra=addition + "int second_answer(int n) { return n; }\n"),
          "name already defined: second_answer"),
-        (version(extra=addition + "meta int through(int n) { return n; }\n"),
+        (version(extra=addition + "int through(int n) { return n; }\n"),
          "name already defined: through"),
         (version(extra=addition + "struct through { int x; };\n"),
          "name already defined: through"),
@@ -188,7 +191,7 @@ try:
         (version(extra=addition + "struct added { int x; };\n"),
          "name already defined: added"),
         (version(extra=addition + "int absent(void);\n"
-                 "meta int unlinked(void) { return absent(); }\n"), "absent"),
+                 "int unlinked(void) { return absent(); }\n"), "absent"),
     ]
     calls = 1
     for text, error in rejected:
@@ -226,6 +229,86 @@ try:
     assert 'Count loaded_answer(Count);' in output, output
     assert 'Count through(Count);' in output and 'source: prompt' in output, output
     assert f'source: {native}' in output and f'source: {alias}' not in output, output
+finally:
+    session.close()
+
+# Ordinary public entries do not expose statics, prototypes, or included
+# definitions. C sources use the same visibility boundary as x2c sources.
+for extension in ("x", "c"):
+    public_root = root / ("public-" + extension)
+    public_root.mkdir()
+    public_file = public_root / ("public." + extension)
+    other_file = public_root / ("other." + extension)
+    dependency_file = public_root / "dependency.x"
+    dependency_file.write_text(
+        "int public_dependency(int n) { return n + 1; }\n")
+    contents = ('#include "dependency.x"\n'
+                'static int private_twice(int n) { return 2*n; }\n'
+                'static int private_later(int n);\n'
+                'int private_later(int n) { return n+1; }\n'
+                'meta static int private_meta(int n) { return n+1; }\n'
+                'int public_prototype(int n);\n'
+                'int public_answer(int n) { return private_twice('
+                'private_later(private_meta(public_dependency(n)))); }\n'
+                'meta int public_meta(int n) { return public_answer(n); }\n')
+    public_file.write_text(contents)
+    other_file.write_text(
+        'static int private_twice(int n) { return 3*n; }\n'
+        '#if 1\n'
+        'int other_public(int n) { return private_twice(n); }\n'
+        '#else\nint other_public(int n) { return n; }\n#endif\n')
+    session = Session(public_root)
+    try:
+        session.load(public_file)
+        session.value("public_answer(18)", 42)
+        session.value("public_meta(18)", 42)
+        session.run(":symbols private_\n:info public_answer")
+        for hidden in ("private_twice", "private_later", "private_meta",
+                       "public_prototype", "public_dependency"):
+            session.run(":info " + hidden, "not a session function")
+            session.run(hidden + "(1);", "unresolved identifier")
+        session.run("Func public_saved=public_answer;\n"
+                    "int public_through(int n) { return public_answer(n); }")
+        session.load(other_file)
+        session.value("other_public(7)", 21)
+        # Changing private bodies is unrestricted and reaches existing calls.
+        public_file.write_text(contents.replace("return 2*n", "return 4*n"))
+        session.load(public_file)
+        session.value("public_saved(18)", 84)
+        session.value("public_through(18)", 84)
+        session.value("other_public(7)", 21)
+        output = session.finish()
+        assert 'loaded ("other_public")' in output, output
+        assert "int public_answer(int);" in output, output
+        assert all(f'"{name}"' not in output for name in
+                   ("private_twice", "private_later", "private_meta",
+                    "public_prototype", "public_dependency")), output
+    finally:
+        session.close()
+
+# Ordinary adapters preserve the existing independent-data boundary.
+crossing_root = root / "crossing"
+crossing_root.mkdir()
+crossing_file = crossing_root / "crossing.x"
+crossing_file.write_text(
+    "typedef struct LoadedRecord { int n; } LoadedRecord;\n"
+    "LoadedRecord loaded_record(void) { LoadedRecord r={42}; return r; }\n"
+    "int loaded_record_value(void) { return loaded_record().n; }\n"
+    "static int value=3;\n"
+    "int *loaded_pointer(void) { return &value; }\n"
+    "int loaded_deref(int *p) { return *p; }\n"
+    "int loaded_ref(int &n) { n++; return n; }\n")
+session = Session(crossing_root)
+try:
+    session.load(crossing_file)
+    session.value("loaded_record_value()", 42)
+    session.run("loaded_record();", "compile-time result is a compiler address")
+    session.run("int kept=7;")
+    session.run("loaded_pointer();", "compile-time result is a compiler address")
+    session.run("loaded_deref(&kept);", "arguments must be independent data values")
+    session.run("loaded_ref(kept);", "want value")
+    session.value("kept", 7)
+    session.finish()
 finally:
     session.close()
 
