@@ -105,23 +105,9 @@ commands: build					## Build checkout external commands
 .PHONY: command-artifacts
 command-artifacts:
 	@mkdir -p builds/0/libexec builds/0/commands
-	@set --; \
-	  for object in builds/0/src/*.o; do \
-	    [ "$$object" = builds/0/src/main.o ] || \
-	      set -- "$$@" "$$object"; \
-	  done; \
-	  $(STAGE0_X2C) build --plain --kind static-library \
-	    --output builds/0/libx2c-dev.a "$$@"
-	@set -e; identity=`$(STAGE0_X2C) env identity`; \
-	  printf 'String x2c_embedded_identity(void) => "%s";\n' \
-	    "$$identity" > builds/0/commands/identity.x.tmp; \
-	  if ! cmp -s builds/0/commands/identity.x.tmp \
-	      builds/0/commands/identity.x; then \
-	    mv builds/0/commands/identity.x.tmp builds/0/commands/identity.x; \
-	  else rm builds/0/commands/identity.x.tmp; fi
 	@cp commands/manifest.txt builds/0/libexec/commands.txt
 	@. commands/parallel.sh; \
-	  for name in $(COMMAND_NAMES); do \
+	  for name in $(filter-out build,$(COMMAND_NAMES)); do \
 	    parallel_start "x2c-$$name" $(STAGE0_X2C) build --plain \
 	      -j $(BUILD_JOBS) --build-dir "builds/0/commands/$$name-cc" \
 	      --output "builds/0/libexec/x2c-$$name" \
