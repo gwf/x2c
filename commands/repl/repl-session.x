@@ -27,7 +27,7 @@ typedef struct ReplSession {
   Array declarations;
   Map files, accessors;
   // Published name -> (value), (type), (native [(source PATH)]),
-  // (global (source PATH) GET SET), or
+  // (global (source PATH) PATHS), or
   // (function (typed ...) (execution native)).
   Map names;
 } *ReplSession;
@@ -118,8 +118,8 @@ List ReplSession.symbols(ReplSession session) {
 }
 
 /** Returns (value), (type), (native [(source PATH)]),
-    (global (source PATH) GET SET), (function (typed AST) (execution native)),
-    or NULL if absent. SET is NULL for a read-only global.
+    (global (source PATH) PATHS), (function (typed AST) (execution native)),
+    or NULL if absent. PATHS maps selections to getter/setter pairs.
     These are the original canonical Lists, borrowed until unit close. */
 List ReplSession.inspect(ReplSession session, String name) {
   Var entry;
@@ -389,7 +389,7 @@ static List _initializers(List node, Map names, Array added, Array ids) {
   return NULL;
 }
 
-static List _result_body(List fn, int &prints) {
+static List _result_body(ReplSession session, List fn, int &prints) {
   match (fn) {
     case %(function ? ? (block *body)): {
       Array items = $auto(body);
@@ -406,7 +406,8 @@ static List _result_body(List fn, int &prints) {
               case %(postfix *): effect = 1;
             }
             if (!effect) {
-              items[items.len() - 1] = %(return $spec (expr $spec $value));
+              List shown = session.inspect_global(%(expr $spec $value));
+              items[items.len() - 1] = %(return ${shown.cadr()} $shown);
               prints = 1;
             }
           }
@@ -522,7 +523,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
       return result;
     }
     if (!declaration) {
-      fn = _result_body(node, prints);
+      fn = _result_body(session, node, prints);
       execute = 1;
     }
     else {
