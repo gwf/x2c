@@ -291,7 +291,7 @@ field has the meaning its consumer expects.
 
 ### Match the node, then keep semantic probes in the case
 
-`_operator` in `src/transform.x` matches the operator
+`_operator` in `src/transform/operators.x` matches the operator
 and typed-expression forms, names `operator`, `lhs`, `rhs`, `argument`, and
 `argument_type`, and then performs the existing semantic resolution inside
 those cases.
