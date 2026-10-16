@@ -14,7 +14,5 @@ List _x2c_try_catch_site(List frame, List clause);
 
 List _x2c_try_landing(List frame, List clause, List exits);
 
-List _x2c_try_exits_placement(List exits);
-
 
 #endif /* __GUARD_0xB4F8DC6A__ */

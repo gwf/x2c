@@ -89,6 +89,8 @@ Code string_switch_lowering(Code node);
 
 List _x2c_try_catch_cases(List selected, List arms);
 
+List _x2c_try_exits_placement(List exits);
+
 Code try_lowering(Code node);
 
 Map linked_meta_targets(void);
