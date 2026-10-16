@@ -31,10 +31,9 @@ typedef struct ProjectBuild {
 
 // command reports
 
-static macro Stmt $report.project.source_excluded(Expr $path, Expr $target) {
+static macro Stmt $progress.project_source_excluded(Expr $path, Expr $target) =>
   fprintf(
     stderr, "x2c: excluded %s from target %s\n", $path, $target);
-}
 
 // the manifest model
 
@@ -671,7 +670,7 @@ static Array _target_sources(Project p, ProjectTarget target) {
   foreach (Var path, sources) {
     if (!(path in excluded)) kept.push(path);
     else if (p.command.verbose)
-      $report.project.source_excluded(path.string(), target.name);
+      $progress.project_source_excluded(path.string(), target.name);
   }
   sources.free();
   excluded.free();

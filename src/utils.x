@@ -35,20 +35,21 @@ typedef struct Diagnostics *Diagnostics;
 
 // command reports
 
-static macro Stmt $report.utils.identity_mismatch(Expr $detail) {
+static macro Stmt $fail.utils_identity_mismatch(Expr $detail) =>
   Diagnostics.driver_error(%"compiler identity mismatch: ${$detail}");
-}
 
-static macro Stmt $report.utils.lock_failed(Expr $p) {
+static macro Stmt $fail.utils_lock_failed(Expr $p) =>
   Diagnostics.driver_error(%"cannot lock ${$p}");
-}
 
-static macro Stmt $report.utils.host_failed(
-  Expr $detail, Expr $subject, Expr $error) {
+static macro Stmt $fail.utils_host_failed(
+  Expr $detail, Expr $subject, Expr $error) =>
   Diagnostics.driver_error(
     %"${$detail.assoc(<operation>)} ${$subject}: ${
       String.new(strerror($error))}");
-}
+
+static macro Stmt $fail.utils_command_missing(Expr $name) =>
+  Diagnostics.driver_error(
+    %"missing x2c-${$name} command; install the matching x2c commands");
 
 // environment state
 
@@ -87,7 +88,7 @@ void x2c_initialize_command_environment(
   String supplied = Env.get("X2C_IDENTITY");
   if (supplied && supplied != embedded_identity) {
     String detail = %"command $embedded_identity, driver $supplied";
-    $report.utils.identity_mismatch(detail);
+    $fail.utils_identity_mismatch(detail);
   }
   _initialize_environment(argv0, embedded_identity);
 }
@@ -250,8 +251,7 @@ Map Compiler.command_environment(void) {
 int Compiler.run_command(String name, List arguments) {
   String path = Compiler.command_path(name);
   if (!path)
-    Diagnostics.driver_error(
-      %"missing x2c-$name command; install the matching x2c commands");
+    $fail.utils_command_missing(name);
   Map options = {env: Compiler.command_environment(), stdout: <inherit>};
   try return %($path @arguments).job().options(options).status();
   catch %((!or not-found io-fail) *detail): Diagnostics.host_error(detail);
@@ -417,7 +417,7 @@ String Path.identifier_hash(String filename) {
 */
 int Path.lock_file(Path p, int wait) {
   int lock = open(p, O_RDWR | O_CREAT | O_CLOEXEC, 0666);
-  if (lock < 0) $report.utils.lock_failed(p);
+  if (lock < 0) $fail.utils_lock_failed(p);
   int operation = wait ? LOCK_EX : LOCK_EX | LOCK_NB;
   while (flock(lock, operation)) {
     if (errno == EINTR) continue;
@@ -480,5 +480,5 @@ void Diagnostics.host_error(List detail) {
   if (subject is void) subject = detail.assoc(<program>);
   // Quoted, the key survives a host preprocessor that expands `errno`.
   long error = detail.assoc(<"errno">);
-  $report.utils.host_failed(detail, subject, error);
+  $fail.utils_host_failed(detail, subject, error);
 }

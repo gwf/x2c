@@ -62,40 +62,40 @@ typedef struct TargetKind {
 
 /* cli command reports. */
 
-static macro Stmt $report.cli.command_unknown(Expr $first) =>
+static macro Stmt $fail.cli_command_unknown(Expr $first) =>
   Diagnostics.driver_error(%"unknown command or global option '${$first}'");
 
-static macro Stmt $report.cli.operand_required(Expr $name) =>
+static macro Stmt $fail.cli_operand_required(Expr $name) =>
   Diagnostics.driver_error(%"${$name} requires exactly one operand");
 
-static macro Stmt $report.cli.operands_forbidden(Expr $name) =>
+static macro Stmt $fail.cli_operands_forbidden(Expr $name) =>
   Diagnostics.driver_error(%"${$name} accepts no operands");
 
-static macro Stmt $report.cli.help_unknown(Expr $name) =>
+static macro Stmt $fail.cli_help_unknown(Expr $name) =>
   Diagnostics.driver_error(%"unknown help command '${$name}'");
 
-static macro Stmt $report.cli.option_value_forbidden(Expr $arg) =>
+static macro Stmt $fail.cli_option_value_forbidden(Expr $arg) =>
   Diagnostics.driver_error(%"option takes no value '${$arg}'");
 
-static macro Stmt $report.cli.option_value_required(Expr $arg) =>
+static macro Stmt $fail.cli_option_value_required(Expr $arg) =>
   Diagnostics.driver_error(%"option requires a value '${$arg}'");
 
-static macro Stmt $report.cli.color_invalid(Expr $value) =>
+static macro Stmt $fail.cli_color_invalid(Expr $value) =>
   Diagnostics.driver_error(%"invalid color mode '${$value}'");
 
-static macro Stmt $report.cli.target_unknown(Expr $value) =>
+static macro Stmt $fail.cli_target_unknown(Expr $value) =>
   Diagnostics.driver_error(%"unknown target kind '${$value}'");
 
-static macro Stmt $report.cli.value_invalid(Expr $noun, Expr $value) =>
+static macro Stmt $fail.cli_value_invalid(Expr $noun, Expr $value) =>
   Diagnostics.driver_error(%"invalid ${$noun} '${$value}'");
 
-static macro Stmt $report.cli.dependency_owned(Expr $value) =>
+static macro Stmt $fail.cli_dependency_owned(Expr $value) =>
   Diagnostics.driver_error(%"C dependency option is driver-owned '${$value}'");
 
-static macro Stmt $report.cli.native_unsupported(Expr $arg) =>
+static macro Stmt $fail.cli_native_unsupported(Expr $arg) =>
   Diagnostics.driver_error(%"unsupported package native argument '${$arg}'");
 
-static macro Stmt $report.cli.option_unknown(Expr $arg) =>
+static macro Stmt $fail.cli_option_unknown(Expr $arg) =>
   Diagnostics.driver_error(%"unknown option '${$arg}'");
 
 // commands and options
@@ -378,11 +378,11 @@ CliRequest CliRequest.parse(int argc, char **argv) {
     exit(0);
   }
   if (first == "help") _help_command(args);
-  if (first == "-o") _removed_output();
+  if (first == "-o") _cli_fail_removed_output();
   String spelling = _two_dash(first);
-  if (spelling) _one_dash_removed(first, %"x2c translate $spelling ...");
-  if (first[0] != '-') _expected_command(first);
-  $report.cli.command_unknown(first);
+  if (spelling) _cli_fail_one_dash_removed(first, %"x2c translate $spelling ...");
+  if (first[0] != '-') _cli_fail_expected_command(first);
+  $fail.cli_command_unknown(first);
 }
 
 /* A script's arguments are its own, so `script` expands response files
@@ -494,7 +494,7 @@ static void _help_command(Array args) {
   if (name == "help" || name == "--help" || name == "-h")
     _help_exit(<help>, 0);
   CliCommand *asked = name ? _command_row(name) : NULL;
-  if (!asked) $report.cli.help_unknown(name);
+  if (!asked) $fail.cli_help_unknown(name);
   _help_exit(asked.name, 0);
 }
 
@@ -510,7 +510,7 @@ static typedef struct Given {
 /* A dashed word is the removed `-o`, `--save-temps=<dir>`, or an option
    from the table. */
 static void _option(Parse &p, String arg, int &i) {
-  if (arg == "-o") _removed_output();
+  if (arg == "-o") _cli_fail_removed_output();
   if ((p.request.command in %<<build run>>) && arg.startswith("--save-temps=")) {
     _save_temps_dir(p.request, arg);
     return;
@@ -543,16 +543,16 @@ static Given _take_option(Array args, int &i, Symbol command) {
   Given given = {_find_option(written, command, suffix), written};
   if (!given.option) return given;
   if (equals > 2 && !given.option.value)
-    $report.cli.option_value_forbidden(arg);
+    $fail.cli_option_value_forbidden(arg);
   given.value = equals > 2 ? joined : suffix;
   given.attached = suffix != NULL;
   if (given.option.value && !given.value && equals <= 2) {
-    if (++i == args.len()) $report.cli.option_value_required(arg);
+    if (++i == args.len()) $fail.cli_option_value_required(arg);
     given.value = args[i];
   }
   if (!given.value &&
       (given.option.id == <output> || given.option.id == <out-dir>))
-    $report.cli.option_value_required(written);
+    $fail.cli_option_value_required(written);
   return given;
 }
 
@@ -618,14 +618,14 @@ static Symbol _color_mode(String value) {
   if (value == "auto") return <auto>;
   if (value == "always") return <always>;
   if (value == "never") return <never>;
-  $report.cli.color_invalid(value);
+  $fail.cli_color_invalid(value);
 }
 
 static Symbol _target_kind(String value) {
   String refusal = NULL;
   Symbol kind = TargetKind.named(value, refusal);
   if (refusal) Diagnostics.driver_error(refusal);
-  if (!kind) $report.cli.target_unknown(value);
+  if (!kind) $fail.cli_target_unknown(value);
   return kind;
 }
 
@@ -662,7 +662,7 @@ static int _count(String value, int minimum, String noun) {
   errno = 0;
   long count = value ? strtol(value, &end, 10) : 0;
   if (!value || errno || *end || count < minimum || count > INT_MAX)
-    $report.cli.value_invalid(noun, value);
+    $fail.cli_value_invalid(noun, value);
   return (int) count;
 }
 
@@ -687,7 +687,7 @@ static void _push_pair(Array out, String option, String value) {
 /* The driver owns C dependency output, so `-Xcc` cannot pass it. */
 static String _xcc_argument(String value) {
   if (CliRequest.dependency_option(value))
-    $report.cli.dependency_owned(value);
+    $fail.cli_dependency_owned(value);
   return value;
 }
 
@@ -751,7 +751,7 @@ static void _native(Parse &p, int &i) {
   }
   Given given = _take_option(p.args, i, p.request.command);
   if (!given.option || !given.option.package_native)
-    $report.cli.native_unsupported(arg);
+    $fail.cli_native_unsupported(arg);
   _apply(p, given);
 }
 
@@ -1105,7 +1105,7 @@ static HelpPage help_pages[] = {
 static HelpPage *_help_page(Symbol command) {
   for (HelpPage *page = help_pages; page.command; page++)
     if (page.command == command) return page;
-  $report.cli.help_unknown(command);
+  $fail.cli_help_unknown(command);
 }
 
 static void _print_page(HelpPage &page) {
@@ -1183,13 +1183,13 @@ static void _fail(String message, String note) {
   exit(2);
 }
 
-static void _removed_output(void) {
+static void _cli_fail_removed_output(void) {
   _fail(
     "option '-o' was removed",
     "use '--out-dir' with translate or '--output' with build and run");
 }
 
-static void _expected_command(String arg) {
+static void _cli_fail_expected_command(String arg) {
   _fail(
     %"expected a command before '$arg'",
     %"use 'x2c translate --out-dir <dir> $arg'");
@@ -1198,8 +1198,8 @@ static void _expected_command(String arg) {
 /* translate corrects a one-dash long option. */
 static void _unknown_option(String arg, Symbol command) {
   String spelling = command == <translate> ? _two_dash(arg) : NULL;
-  if (spelling) _one_dash_removed(arg, spelling);
-  $report.cli.option_unknown(arg);
+  if (spelling) _cli_fail_one_dash_removed(arg, spelling);
+  $fail.cli_option_unknown(arg);
 }
 
 /* The two-dash translate option that a one-dash spelling such as
@@ -1210,7 +1210,7 @@ static String _two_dash(String arg) {
   return _find_option(spelling, <translate>, attached) ? spelling : NULL;
 }
 
-static void _one_dash_removed(String arg, String use) {
+static void _cli_fail_one_dash_removed(String arg, String use) {
   _fail(%"one-dash long option '$arg' was removed", %"use '$use'");
 }
 
