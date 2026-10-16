@@ -13569,7 +13569,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12651 = List_var(_12650);
   _12652 = String_new("src/meta-sdk.x");
   _12653 = String_var(_12652);
-  _12654 = String_new("d60f1e58");
+  _12654 = String_new("06b26584");
   _12655 = String_var(_12654);
   _12656 = cons(_12655, NULL);
   _12657 = cons(_12653, _12656);
