@@ -1,5 +1,7 @@
 > Status: active
-> Implementation in progress. Delivery is one shared-integrator submission.
+> Implementation is ready for shared integration. Focused correctness checks
+> pass. Gary authorized deferring quiet-host timing to the shared integrator
+> on 2026-10-16 because other sessions kept the host under compilation load.
 
 # External build, run, and script workflows
 
@@ -64,3 +66,43 @@ reuse after command-only edits. Explicit loaders preserve native linking.
 No grammar, parser, persistent service, artifact registry, or fallback is added.
 Operation rejection protects the standalone command's deliberately limited
 public syntax. Existing input and identity diagnostics remain intact.
+
+## Implementation evidence (2026-10-16)
+
+The extraction is implemented. Script-language parsing and implicit entry-point
+construction were not changed. The authored diff was reviewed, including a
+separate review of the native Make rules and compiler/command boundaries.
+
+- A clean `make build-safe` constructed the command without an existing one.
+  Final `make build`, ordinary command construction, `make stage-1`, and
+  `make stage-diff-1` passed. Stage 0 and 1 have identical generated compiler
+  and runtime C/H files (280 files).
+- The existing CLI/build/run/script suite, meta-helper and meta-cache probes,
+  package installation, editor, and REPL inspection/reload/source-load checks
+  passed. Command smoke covers direct invocation, diagnostics files, response
+  expansion, stage runtime and nested command selection, relative driver paths,
+  command-only cache invalidation, and missing/mismatched commands.
+- The native-module probe passed through its custom-compiler fixture, which
+  exposed a missing generated-header search path. The saved baseline reproduced
+  the same `../lib/type.h` failure. Adding the stage compiler-header directory
+  repaired that fixture; rerunning its final custom-compiler section passed.
+- Direct run/script argument and exit-status checks passed. An interrupted
+  script link published no executable; its next invocation rebuilt and ran.
+- Development installation and an installed prefix ran the existing
+  hello-world example with identical output. The distribution archive contains
+  `libexec/x2c/x2c-build` and the shipped-command manifest.
+- Final stage and boundary checks were repeated after normalizing relative
+  driver paths. Linux native Make invocation was inspected by dry-run; runtime
+  execution was verified on macOS, not Linux.
+
+No timing results are claimed. The saved baseline is revision
+`3c537279f77db4a190ba605ff2829438168cc4dc`. A baseline toolchain and alternating
+cold-build, unchanged-build, and warm-script measurement script are retained in
+this workspace's temporary files and `.context/build-extraction/`. Both the
+baseline and candidate stage 1 report usable prelude interfaces. The shared
+integrator must take the quiet-host measurements and investigate regressions.
+
+Before final bootstrap refresh, the integrator must clean the stage through
+`make build-safe`. Incremental directories can retain generated `src/build.*`
+and `src/script.*` after their sources move; `bootstrap-refresh` copies stage
+C/H globs. Final bootstrap and generated documentation remain integrator-owned.
