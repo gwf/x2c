@@ -349,8 +349,8 @@ meta static List _lambda_field(int index) => x2c_ident(%"c$index");
 /* The spelling of record field `index`, which names no binding. */
 meta static List _lambda_member(int index) => %(${%"c$index"});
 
-/* A reference stores its address. A record keeps its native value because
-   a Var cannot carry its bytes; other captures use their Var representation. */
+/* A reference stores its address. Records keep their native bytes because
+   Var cannot carry them; other captures use their Var representation. */
 meta static Type _lambda_field_type(Type type) {
   if (type.car() == <&>) return cons(<*>, type.cdr());
   return type.resolve().car() == <struct> ? type : %("Var");

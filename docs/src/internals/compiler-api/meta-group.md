@@ -163,7 +163,7 @@ Stages one session factory in an isolated native emission. `prepare`
 receives this compiler and returns the factory's typed definition; it
 can place supporting functions through the ordinary compiler APIs.
 `declarations` supplies session types. Returns the loaded module's
-targets, or NULL with `failure` set. No evaluator bindings are published.
+targets, or NULL with `failure` set. Publishes no evaluator bindings.
 
 Source: `src/meta-group.x:968`
 

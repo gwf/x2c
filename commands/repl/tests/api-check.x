@@ -580,14 +580,17 @@ static void _independent_sessions(Frontend frontend) {
       failures++;
     }
     _expect(b, "shared;", <value>, 22);
-    _expect(b, "String text(void) { return \"module text\"; }", <defined>, void);
-    _expect(b, "List syntax(void) { return %(module (cached 7)); }", <defined>, void);
+    _expect(b, "String text(void) { return \"module text\"; }",
+            <defined>, void);
+    _expect(b, "List syntax(void) { return %(module (cached 7)); }",
+            <defined>, void);
     _expect(b, "text();", <value>, "module text");
     _expect(b, "syntax();", <value>, %(module (cached 7)));
   }
   _expect(a, "session_add(4);", <value>, 7);
   _expect(a, "String text(void) { return \"module text\"; }", <defined>, void);
-  _expect(a, "List syntax(void) { return %(module (cached 7)); }", <defined>, void);
+  _expect(a, "List syntax(void) { return %(module (cached 7)); }",
+          <defined>, void);
   _expect(a, "text();", <value>, "module text");
   _expect(a, "syntax();", <value>, %(module (cached 7)));
 }

@@ -964,7 +964,7 @@ static String _stage(Compiler c, String &failure) {
     receives this compiler and returns the factory's typed definition; it
     can place supporting functions through the ordinary compiler APIs.
     `declarations` supplies session types. Returns the loaded module's
-    targets, or NULL with `failure` set. No evaluator bindings are published. */
+    targets, or NULL with `failure` set. Publishes no evaluator bindings. */
 Map Compiler.stage_session_function(
   Compiler c, List declarations, Func prepare, String &failure) {
   failure = c.groups_meta() ? NULL : "native modules are unavailable";

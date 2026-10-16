@@ -1,9 +1,9 @@
 # Compile prompt-defined functions
 
-> Status: active
-> Proposed implementation plan, 2026-10-15. Planning only.
-> A temporary probe compiled an ordinary prompt function's existing typed AST
-> through session native staging and called its native Func successfully.
+> Status: done
+> Implemented 2026-10-15 in `d558503b7` and `0ac6242b`.
+> Prompt functions compile once and share session-owned native variables.
+> Top-level input remains interpreted; loaded adapters retain reload behavior.
 
 ## Result
 
@@ -110,3 +110,21 @@ validator, or recurring gate is proposed. Failure tests protect atomic
 publication and the existing reload contract; existing adapter checks protect
 native crossings. Implement these operations with normal x2c records, Funcs,
 Match patterns, and compiler APIs.
+
+## Implementation evidence
+
+`sh commands/repl/tests/run.sh` passes the direct API, command, source-load,
+reload, and real autodiff checks. Coverage includes shared scalar and record
+addresses, mutable collections, references, saved functions, recursion,
+nested lambdas, callable expressions, and independent sessions sharing code.
+Compiled callers follow successful reloads and retain the old helper after
+rejected replacements. Loaded aliases and anonymous public types work in
+native prompt bodies, including `sizeof` and `offsetof`.
+
+The implementation reuses native staging and Func adapters. Loaded type
+declarations come from canonical compiler symbols. Review also corrected
+transaction-owned bindings in the protocol member cache, anonymous typedef
+forward emission, native module constant lifetime, and captured record
+storage. Native prompt functions retain the existing native-callback
+interruption boundary. Performance measurements remain separate from the
+correctness publication gate.

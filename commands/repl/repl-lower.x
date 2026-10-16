@@ -814,7 +814,7 @@ static Var _lower_func_adapter(Lowering &l, Type type, Var callable) {
   call = _lower_to_type(l, result, call);
   return %((lambda ($saved)
     (if (eq? (Var.tag $saved) (quote func)) $saved
-        (C.func.new (lambda ($fn $argv) $call) (quote $signature)))) $callable);
+      (C.func.new (lambda ($fn $argv) $call) (quote $signature)))) $callable);
 }
 
 /* `Var.binary` applies the usual arithmetic conversions itself for the

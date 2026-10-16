@@ -140,7 +140,8 @@ Var lisp_poke(Var pointer, Var offset, List layout, Var value) {
     later interpreted and compiled writes both use these same bytes. */
 Var lisp_global_init(Map globals, int id, List layout, Var value) {
   (size_t size) = layout.cddr();
-  Var address = Var.new(<p48>, Scope.calloc_in(Lisp.active().storage(), 1, size));
+  void *storage = Scope.calloc_in(Lisp.active().storage(), 1, size);
+  Var address = Var.new(<p48>, storage);
   lisp_poke(address, 0, layout, value);
   globals[id] = address;
   return value;
