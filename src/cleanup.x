@@ -672,10 +672,10 @@ static List _lower_landing(Walk &w, Var code, List rows) {
       case %(new-name ?token ?(String role)):
         parts[token] = _region_binding(c, role);
       case %(outer ?token ?node):
-        parts[token] = Code.lowered(%(seq ${_rewrite(w, node)}));
+        parts[token] = Code.lowered(%(seq ${_rewrite(w, node)}), NULL);
       case %(exits ?token ?statements):
         parts[token] = exits =
-          Code.lowered(_bind_parts(c, statements, parts));
+          Code.lowered(_bind_parts(c, statements, parts), NULL);
       case %(region ?token ?node): parts[token] = _region(w, exits, node);
     }
   return _bind_parts(c, code, parts);
@@ -683,7 +683,7 @@ static List _lower_landing(Walk &w, Var code, List rows) {
 
 /* Lowers the body inside the scope that `cleanup` leaves. */
 static List _region(Walk &w, List cleanup, List body) =>
-  Code.lowered(_inside(w, cleanup, body, body));
+  Code.lowered(_inside(w, cleanup, body, body), NULL);
 
 /* Binds `code` with each token `parts` maps replaced. A template's
    definition holds none, so only the values it applies are searched. */
@@ -735,7 +735,7 @@ static List _defer_cleanup(Compiler c, List record) {
   List call = c.bind_syntax(
     $!{ x2c_cleanup_leave(${_address_of(_record_type, record)}); },
     AST_BLOCK, c.return_type);
-  return Code.lowered(%(seq $call));
+  return Code.lowered(%(seq $call), NULL);
 }
 
 /* Selects the record shape; captured records keep the environment beside
@@ -1250,7 +1250,7 @@ static List _defer_environment(
 static List _defer_callback(
   Compiler c, List callback, List opaque, List env_binding,
   List env_local, List rewritten) {
-  List body = Code.lowered(%(seq $rewritten));
+  List body = Code.lowered(%(seq $rewritten), NULL);
   if (env_binding) {
     Type type = %(${Ast.binding_spelling(env_binding)});
     return c.bind_syntax(

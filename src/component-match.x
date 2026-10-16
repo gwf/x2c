@@ -476,7 +476,7 @@ meta static Code _match_lowered(Code subject, List rows) {
     : %("List _x2c_gensym_match_expr =" ${subject.convert(%("List"))} $locals);
   return Code.lowered(
     %(block $prologue
-            (switch (expr ("uint64_t") ($selector)) (block @items))));
+            (switch (expr ("uint64_t") ($selector)) (block @items))), NULL);
 }
 
 /* The reads of a `Var` subject: once into a local, then as a List, with

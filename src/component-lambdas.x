@@ -123,13 +123,13 @@ meta static List _lambda_kept_items(
   foreach (Var item, items) {
     if (item === original.car()) run.push(item);
     else {
-      if (run.len()) out.push(Code.lowered(%(seq @{run.list()})));
+      if (run.len()) out.push(Code.lowered(%(seq @{run.list()}), NULL));
       run.truncate(0);
-      out.push(item in declaring ? item : Code.lowered(item));
+      out.push(item in declaring ? item : Code.lowered(item, NULL));
     }
     original = original.cdr();
   }
-  if (run.len()) out.push(Code.lowered(%(seq @{run.list()})));
+  if (run.len()) out.push(Code.lowered(%(seq @{run.list()}), NULL));
   return out.list_free();
 }
 
@@ -162,10 +162,10 @@ meta static Var _lambda_declare_cells(List node, Map cells) {
         }
         celled |= !!cell;
         items.push(
-          cell ? cell : Code.lowered(%(declare $base (bindings $item))));
+          cell ? cell : Code.lowered(%(declare $base (bindings $item)), NULL));
       }
     case %(dstrdecl *): {
-      items.push(Code.lowered(node));
+      items.push(Code.lowered(node, NULL));
       foreach (List binding, _lambda_targets(node)) {
         Code copy = _lambda_copied_cell(binding, cells);
         if (copy) items.push(copy);
@@ -177,7 +177,7 @@ meta static Var _lambda_declare_cells(List node, Map cells) {
         _lambda_declare_cells(%(declare $base $bindings), cells);
       match (declaration) case %(seq *initial):
         return %(block @initial
-                 ${Code.lowered(%(for () $test $next $body))});
+                 ${Code.lowered(%(for () $test $next $body), NULL)});
     }
   }
   return celled ? %(seq @{items.list_free()}) : node;
@@ -304,7 +304,7 @@ meta static List _lambda_closure_params(
    bound already, so it is not bound again. */
 meta static Code _lambda_function(List name, List params, Code body) {
   if (!params) params = %((param (void) (bind () ())));
-  List lowered = Code.lowered(%(seq @{_lambda_items(body)}));
+  List lowered = Code.lowered(%(seq @{_lambda_items(body)}), NULL);
   return %(function (static "Var") (bind $name ((fnmod (params @params))))
            (block $lowered));
 }

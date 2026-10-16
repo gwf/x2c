@@ -195,7 +195,7 @@ Source: `src/linked-meta.x:817`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:2438`
+Source: `src/linked-meta.x:2448`
 
 #### linked_meta_targets
 
@@ -203,7 +203,7 @@ Source: `src/linked-meta.x:2438`
 
 Returns the linked copies, and the runtime builders, by name.
 
-Source: `src/linked-meta.x:2202`
+Source: `src/linked-meta.x:2212`
 
 #### match_lowering
 
@@ -255,7 +255,7 @@ Source: `src/linked-meta.x:100`
 Lowers a switch on a String to an integer switch on its selector's
 index among the labels it owns, or declines another switch.
 
-Source: `src/linked-meta.x:1997`
+Source: `src/linked-meta.x:1998`
 
 #### try_lowering
 
@@ -263,7 +263,7 @@ Source: `src/linked-meta.x:1997`
 
 Lowers the parsed try `node` to its landing form.
 
-Source: `src/linked-meta.x:2146`
+Source: `src/linked-meta.x:2156`
 
 ## Design notes
 

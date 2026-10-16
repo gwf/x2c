@@ -119,7 +119,8 @@ meta Code string_switch_lowering(Code node) {
     Array labels = [];
     List numbered = _string_cases(body, indices, labels, NULL);
     Code helper = _string_switch_helper(type, labels.list_free());
-    return Code.lowered(%(switch ${$!int{ $helper($selector) }} $numbered));
+    return Code.lowered(
+      %(switch ${$!int{ $helper($selector) }} $numbered), NULL);
   }
   return node;
 }

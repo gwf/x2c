@@ -55,7 +55,8 @@ meta Code raise_lowering(Code node) {
       converted.push(value);
     }
     if (changed)
-      return Code.lowered(%(raise $symbol (args @{converted.list_free()})));
+      return Code.lowered(
+        %(raise $symbol (args @{converted.list_free()})), NULL);
   }
   return node;
 }

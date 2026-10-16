@@ -114,7 +114,7 @@ meta static Code _try_landing(
   List clause = _try_catch_clause(handle, arms, rows);
   Macro shape = $x2c.try.frame;
   List code = shape(frame, clause, lowered, exits);
-  return Code.lowered(%(landing $code ${rows.list_free()}));
+  return Code.lowered(%(landing $code ${rows.list_free()}), NULL);
 }
 ```
 
@@ -277,7 +277,7 @@ a default arm as text around its subject and body:
 
 ```x2c
 return Code.lowered(
-  %(block ("counted++; (void) (" $subject "); {" $body "}")));
+  %(block ("counted++; (void) (" $subject "); {" $body "}")), NULL);
 ```
 
 Prefer quotations. C text is for a lowering whose measured cost needs it.

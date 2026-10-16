@@ -151,8 +151,10 @@ meta Code Code.call_in_order(Code member, List arguments, Type type);
 
 /** Returns `code`, which is already bound, typed, and lowered, marked so
     that a translator's result is placed as written instead of bound and
-    lowered again. */
-meta Code Code.lowered(Code code);
+    lowered again. Each of `effects` applies first, in order; a
+    `(cleanup TOKEN PLACED)` row replaces TOKEN in `code` with the lowered
+    statements PLACED and marks the unit as needing exception support. */
+meta Code Code.lowered(Code code, List effects);
 
 /** Returns `code`, which is already bound and typed, marked so that a
     translator's result or placed code is lowered without being bound

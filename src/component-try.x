@@ -129,7 +129,7 @@ meta List _x2c_try_exits_placement(List exits) {
   Atom token = Atom.intern("?__try_cleanup");
   match (exits)
     case %(code-value ? ?statements ?):
-      return %(code-value "lowered" $token ((cleanup $token $statements)));
+      return Code.lowered(statements, %((cleanup $token $statements)));
   return NULL;
 }
 
@@ -277,7 +277,7 @@ meta static Code _try_landing(
   List clause = _try_catch_clause(handle, arms, rows);
   Macro shape = $x2c.try.frame;
   List code = shape(frame, clause, lowered, exits);
-  return Code.lowered(%(landing $code ${rows.list_free()}));
+  return Code.lowered(%(landing $code ${rows.list_free()}), NULL);
 }
 
 $rewrite($caught)

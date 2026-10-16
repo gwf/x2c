@@ -53,7 +53,7 @@ Code Code_promoted(Code value);
 
 Code Code_call_in_order(Code member, List arguments, Type type);
 
-Code Code_lowered(Code code);
+Code Code_lowered(Code code, List effects);
 
 Code Code_bound(Code code, List effects);
 

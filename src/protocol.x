@@ -2186,7 +2186,7 @@ static List _collision_notes(Symbol kind, List first, List second) {
     and `body` its lowered statements. */
 List Compiler.wrapper_function(
   Compiler c, Type result, List binding, List params, List body) {
-  List lowered = %(code-value "lowered" (seq @body) ());
+  List lowered = Code.lowered(%(seq @body), NULL);
   return _generated_function(
     c, binding, $!Unit{ $result $binding(@params) { $lowered } });
 }

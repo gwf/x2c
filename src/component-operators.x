@@ -39,7 +39,7 @@ meta Code dynamic_binary(Code code) {
         %("operator: $op left type: $left_name right type: $right_name"));
     }
     Code left_var = lhs.convert(%("Var")), right_var = rhs.convert(%("Var"));
-    return Code.lowered($!Var{ Var_binary($left_var, $op, $right_var) });
+    return Code.lowered($!Var{ Var_binary($left_var, $op, $right_var) }, NULL);
   }
   return code;
 }
@@ -65,7 +65,7 @@ meta static Code _dynamic_update(
   List call = value
     ? %(call $helper (args $address $operation $value))
     : %(call $helper (args $address $operation));
-  return Code.lowered(%(expr $type $call));
+  return Code.lowered(%(expr $type $call), NULL);
 }
 
 /* The update helper for a target of `type`, which must be numeric and not
