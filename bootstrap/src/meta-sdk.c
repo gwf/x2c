@@ -1233,8 +1233,8 @@ static List _enum_member(List member){
 }
 
 int Type_is_aggregate_tag(Type);
-List Type_fields(Type type){
-  if(! _init_guard_) _file_init_();  _require_expansion(_253);  Type resolved = Sym_resolve_key(active.expander -> sym, Type_canonicalize(type));  if(! List_truth(Type_list(resolved)) || ! Type_is_aggregate_tag(resolved)) _reject_value(_254, List_var(type));  List metadata = Sym_field_order(active.expander -> sym, resolved);  if(! List_truth(metadata)) _reject_value(_255, List_var(type));  Array named = Array_new(); {
+List Type_fields(Type t){
+  if(! _init_guard_) _file_init_();  _require_expansion(_253);  Type resolved = Sym_resolve_key(active.expander -> sym, Type_canonicalize(t));  if(! List_truth(Type_list(resolved)) || ! Type_is_aggregate_tag(resolved)) _reject_value(_254, List_var(t));  List metadata = Sym_field_order(active.expander -> sym, resolved);  if(! List_truth(metadata)) _reject_value(_255, List_var(t));  Array named = Array_new(); {
     List row;  List _x2c_gensym_macro_object_10 = List_cdr(metadata);  List _x2c_gensym_macro_cursor_10 = _x2c_gensym_macro_object_10;  Var _x2c_gensym_macro_cursor_output_9;  while(List_try_next(_x2c_gensym_macro_object_10, &(_x2c_gensym_macro_cursor_10), &(_x2c_gensym_macro_cursor_output_9))){
       row = Var_list_payload(_x2c_gensym_macro_cursor_output_9);  if(Var_truth(List_car(row))) Array_push(named, List_var(row));
     }

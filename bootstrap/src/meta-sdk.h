@@ -94,7 +94,7 @@ Symbol Type_tag_name(String name);
 
 List Type_members(Type type);
 
-List Type_fields(Type type);
+List Type_fields(Type t);
 
 String Code_binding_spelling(Var syntax);
 
