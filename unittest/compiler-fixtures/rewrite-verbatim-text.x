@@ -15,7 +15,7 @@ meta Code counted_default(Code node) {
     List (pattern, body) = rows.car();
     if (rows.len() == 1 && pattern.car() == <*>)
       return Code.lowered(
-        %(block ("counted++; (void) (" $subject "); {" $body "}")));
+        %(block ("counted++; (void) (" $subject "); {" $body "}")), NULL);
   }
   return node;
 }

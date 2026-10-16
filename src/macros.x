@@ -2833,9 +2833,8 @@ static List _bind_replacement(
 static Var _kept_lowered(Var result, List source, Array parts) {
   match (result) case %(code-value "lowered" *): return result;
   Map kept = $auto({});
-  kept[(void *) source] = %(code-value "lowered" $source ());
-  foreach (List part, parts)
-    kept[(void *) part] = %(code-value "lowered" $part ());
+  kept[(void *) source] = Code.lowered(source, NULL);
+  foreach (List part, parts) kept[(void *) part] = Code.lowered(part, NULL);
   return Ast.replace_nodes(result, kept);
 }
 

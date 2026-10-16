@@ -650,13 +650,13 @@ static List _lambda_kept_items(
   foreach (Var item, items) {
     if (item === original.car()) run.push(item);
     else {
-      if (run.len()) out.push(Code.lowered(%(seq @{run.list()})));
+      if (run.len()) out.push(Code.lowered(%(seq @{run.list()}), NULL));
       run.truncate(0);
-      out.push(item in declaring ? item : Code.lowered(item));
+      out.push(item in declaring ? item : Code.lowered(item, NULL));
     }
     original = original.cdr();
   }
-  if (run.len()) out.push(Code.lowered(%(seq @{run.list()})));
+  if (run.len()) out.push(Code.lowered(%(seq @{run.list()}), NULL));
   return out.list_free();
 }
 
@@ -682,10 +682,10 @@ static Var _lambda_declare_cells(List node, Map cells) {
         }
         celled |= !!cell;
         items.push(
-          cell ? cell : Code.lowered(%(declare $base (bindings $item))));
+          cell ? cell : Code.lowered(%(declare $base (bindings $item)), NULL));
       }
     case %(dstrdecl *): {
-      items.push(Code.lowered(node));
+      items.push(Code.lowered(node, NULL));
       foreach (List binding, _lambda_targets(node)) {
         Code copy = _lambda_copied_cell(binding, cells);
         if (copy) items.push(copy);
@@ -697,7 +697,7 @@ static Var _lambda_declare_cells(List node, Map cells) {
         _lambda_declare_cells(%(declare $base $bindings), cells);
       match (declaration) case %(seq *initial):
         return %(block @initial
-                 ${Code.lowered(%(for () $test $next $body))});
+                 ${Code.lowered(%(for () $test $next $body), NULL)});
     }
   }
   return celled ? %(seq @{items.list_free()}) : node;
@@ -807,7 +807,7 @@ static List _lambda_closure_params(
 
 static Code _lambda_function(List name, List params, Code body) {
   if (!params) params = %((param (void) (bind () ())));
-  List lowered = Code.lowered(%(seq @{_lambda_items(body)}));
+  List lowered = Code.lowered(%(seq @{_lambda_items(body)}), NULL);
   return %(function (static "Var") (bind $name ((fnmod (params @params))))
            (block $lowered));
 }
@@ -1450,7 +1450,7 @@ static Code _match_lowered(Code subject, List rows) {
     : %("List _x2c_gensym_match_expr =" ${subject.convert(%("List"))} $locals);
   return Code.lowered(
     %(block $prologue
-            (switch (expr ("uint64_t") ($selector)) (block @items))));
+            (switch (expr ("uint64_t") ($selector)) (block @items))), NULL);
 }
 
 static List _match_dynamic_read(Code subject, String locals) {
@@ -1494,7 +1494,7 @@ Code dynamic_binary(Code code) {
         %("operator: $op left type: $left_name right type: $right_name"));
     }
     Code left_var = lhs.convert(%("Var")), right_var = rhs.convert(%("Var"));
-    return Code.lowered($!Var{ Var_binary($left_var, $op, $right_var) });
+    return Code.lowered($!Var{ Var_binary($left_var, $op, $right_var) }, NULL);
   }
   return code;
 }
@@ -1515,7 +1515,7 @@ static Code _dynamic_update(
   List call = value
     ? %(call $helper (args $address $operation $value))
     : %(call $helper (args $address $operation));
-  return Code.lowered(%(expr $type $call));
+  return Code.lowered(%(expr $type $call), NULL);
 }
 
 static String _dynamic_helper(Type type) {
@@ -1907,7 +1907,8 @@ Code raise_lowering(Code node) {
       converted.push(value);
     }
     if (changed)
-      return Code.lowered(%(raise $symbol (args @{converted.list_free()})));
+      return Code.lowered(
+        %(raise $symbol (args @{converted.list_free()})), NULL);
   }
   return node;
 }
@@ -2002,7 +2003,8 @@ Code string_switch_lowering(Code node) {
     Array labels = [];
     List numbered = _string_cases(body, indices, labels, NULL);
     Code helper = _string_switch_helper(type, labels.list_free());
-    return Code.lowered(%(switch ${$!int{ $helper($selector) }} $numbered));
+    return Code.lowered(
+      %(switch ${$!int{ $helper($selector) }} $numbered), NULL);
   }
   return node;
 }
@@ -2139,7 +2141,7 @@ static Code _try_landing(
   List clause = _try_catch_clause(handle, arms, rows);
   Macro shape = $x2c.try.frame;
   List code = shape(frame, clause, lowered, exits);
-  return Code.lowered(%(landing $code ${rows.list_free()}));
+  return Code.lowered(%(landing $code ${rows.list_free()}), NULL);
 }
 
 /** Lowers the parsed try `node` to its landing form. */

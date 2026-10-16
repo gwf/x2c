@@ -267,12 +267,13 @@ Var Code.value(Code code) {
 Code Code.call_in_order(Code member, List arguments, Type type) {
   _require_expansion("Code.call_in_order");
   List call = active.expander.call_in_order(member, arguments);
-  return Code.lowered(%(expr $type $call));
+  return Code.lowered(%(expr $type $call), NULL);
 }
 
 /** Answers `Code.lowered`, declared in `lib/meta.x`, with the carrier
     `Compiler.take_code_value` consumes. */
-Code Code.lowered(Code code) => %(code-value "lowered" $code ());
+Code Code.lowered(Code code, List effects) =>
+  %(code-value "lowered" $code $effects);
 
 /** Answers `Code.bound`, declared in `lib/meta.x`, with the carrier
     `Compiler.take_code_value` consumes. */
