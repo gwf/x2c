@@ -405,23 +405,23 @@ meta functions and the native code they call.
 
 Public functions:
 
-`Compiler.install_meta_function`, `Compiler.install_collected_meta_function`,
-`Compiler.matches_macro`, `Compiler.install_meta_declaration`,
-`Compiler.evaluate_meta_expression`, `Compiler.evaluate_meta_statement`,
-`Compiler.run_meta_call`, `Compiler.apply_meta_function`,
-`Compiler.record_project_meta_effect`, `Compiler.install_project_meta_effect`,
-`Compiler.bind_project_meta`, `Compiler.project_meta_uses_linked`,
-`Compiler.record_native_meta_effect`, `Compiler.install_native_meta_effects`,
-`Compiler.bind_native_meta`, `Compiler.install_native_meta_function`,
-`Compiler.native_meta_accepts`, `Compiler.native_meta_module`,
-`Compiler.native_meta_targets`, `Compiler.bind_linked_meta`,
-`Compiler.links_meta_function`, `Compiler.linked_meta_provider_source`,
 `Compiler.compiler_targets`, `Compiler.select_native_modules`,
 `Compiler.select_package_module`, `Compiler.load_native_module`,
 `Compiler.preload_native_module`, `Compiler.add_native_module`,
 `Compiler.native_module_loaded`, `Compiler.native_module_targets`,
 `Compiler.supplies_native_meta`, `x2c_register_extension`,
-`Compiler.links_extension`, `Compiler.extension_archive`
+`Compiler.links_extension`, `Compiler.extension_archive`,
+`Compiler.project_meta_uses_linked`, `Compiler.bind_linked_meta`,
+`Compiler.links_meta_function`, `Compiler.linked_meta_provider_source`,
+`Compiler.install_meta_function`, `Compiler.install_collected_meta_function`,
+`Compiler.matches_macro`, `Compiler.install_meta_declaration`,
+`Compiler.record_project_meta_effect`, `Compiler.install_project_meta_effect`,
+`Compiler.bind_project_meta`, `Compiler.evaluate_meta_expression`,
+`Compiler.evaluate_meta_statement`, `Compiler.run_meta_call`,
+`Compiler.apply_meta_function`, `Compiler.record_native_meta_effect`,
+`Compiler.install_native_meta_effects`, `Compiler.bind_native_meta`,
+`Compiler.install_native_meta_function`, `Compiler.native_meta_accepts`,
+`Compiler.native_meta_module`, `Compiler.native_meta_targets`
 
 ### [src/meta-project.x](../src/meta-project.x)
 
