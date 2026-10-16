@@ -98,24 +98,6 @@ int List_try_next(List lst, List * cursor, Var * out);
 
 Iter List_iter(List lst, Iter dest);
 
-List Array_list(Array arr);
-
-List Array_list_free(Array arr);
-
-Array List_array(List lst);
-
-List Map_list(Map map);
-
-List Iter_list(Iter iter);
-
-List List_append(List a, List b);
-
-List List_concat_n(unsigned list_count, ...);
-
-List List_list_n(unsigned element_count, ...);
-
-List List_reverse(List lst);
-
 int List_len(List lst);
 
 Var List_last(List lst);
@@ -139,6 +121,28 @@ List List_tail(List list, unsigned count);
 List List_subseq(List list, int start, int stop, int step);
 
 List List_getslice(List list, int start, int stop, int step);
+
+int List_unpack_n(List src, unsigned destination_count, ...);
+
+int List_unpack_vars_n(List src, unsigned destination_count, ...);
+
+List Array_list(Array arr);
+
+List Array_list_free(Array arr);
+
+Array List_array(List lst);
+
+List Map_list(Map map);
+
+List Iter_list(Iter iter);
+
+List List_append(List a, List b);
+
+List List_concat_n(unsigned list_count, ...);
+
+List List_list_n(unsigned element_count, ...);
+
+List List_reverse(List lst);
 
 List List_map(List lst, Func fn);
 
@@ -169,10 +173,6 @@ List List_flatten(List lst);
 List List_flatten_all(List lst);
 
 List List_sublis(List alist, List tree);
-
-int List_unpack_n(List src, unsigned destination_count, ...);
-
-int List_unpack_vars_n(List src, unsigned destination_count, ...);
 
 String List_str(List lst);
 

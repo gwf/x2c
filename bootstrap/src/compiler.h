@@ -345,6 +345,8 @@ List Compiler_match_pattern_binders(Compiler c, List pattern, List * possible);
 
 List Compiler_define_pattern_binders(Compiler c, List pattern);
 
+List Compiler_match_capture_value(Var binder, int index);
+
 List Compiler_pattern_binder_declarations(Compiler c, List bindings, List handle);
 
 int Compiler_read_source(Compiler c, String path, String volatile * text);
