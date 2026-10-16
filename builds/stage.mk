@@ -133,6 +133,7 @@ X2C_TRANSLATE_DEPS = $(X2C_COMPILER) $(LIB_X_FILES) \
 	$(wildcard $(LIB_SOURCE)/lisp/*.x) \
 	$(wildcard $(LIB_SOURCE)/pool/*.x) \
 	$(wildcard $(LIB_SOURCE)/error/*.x) \
+	$(wildcard $(LIB_SOURCE)/macro-value/*.x) \
 	$(wildcard $(ROOT)/etc/init.xlisp $(ROOT)/etc/compiler-sdk.xlisp \
 		$(ROOT)/etc/lisp-bindings.xlisp \
 		$(ROOT)/etc/lisp-values.xlisp) \

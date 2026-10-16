@@ -79,6 +79,7 @@ static void copy_support(Path destination) {
     ("lib/lisp" ("*.x") ("lib/lisp" "include/x2c/lisp"))
     ("lib/pool" ("*.x") ("lib/pool" "include/x2c/pool"))
     ("lib/error" ("*.x") ("lib/error" "include/x2c/error"))
+    ("lib/macro-value" ("*.x") ("lib/macro-value" "include/x2c/macro-value"))
     ("src" ("grammar.x") ("src"))
     ("src/components" ("*.x") ("src/components"))
     ("builds/0/lib" ("*.h") ("include/x2c"))
