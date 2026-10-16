@@ -61,9 +61,7 @@ typedef struct PoolStats {
 #include "mutex.x"
 #include "map-generics.x"
 
-
 module unsigned long value_epoch;
-
 
 /* A process that has never started a worker cannot contend for a pool, and
    the compiler is such a process: locking added a seventh to translation
