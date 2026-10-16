@@ -12,18 +12,19 @@ HEADER_DIR = x2c
 LIB_X_SRCS = $(addprefix $(HEADER_DIR)/,\
   $(notdir $(wildcard $(LIB_SOURCE)/*.x)))
 LIB_H_HDRS = $(patsubst %.x,%.h, $(LIB_X_SRCS))
+LIB_X_DIRS = $(HEADER_DIR)/match
 
 # A link whose lib/ source was deleted is removed.
-all: $(LIB_X_SRCS) $(LIB_H_HDRS)
+all: $(LIB_X_SRCS) $(LIB_H_HDRS) $(LIB_X_DIRS)
 	@for link in $(HEADER_DIR)/*; do \
-	  case " $(LIB_X_SRCS) $(LIB_H_HDRS) " in \
+	  case " $(LIB_X_SRCS) $(LIB_H_HDRS) $(LIB_X_DIRS) " in \
 	    *" $$link "*) ;; \
 	    *) [ ! -L "$$link" ] || rm -f "$$link" ;; \
 	  esac; \
 	done
 
-$(LIB_X_SRCS): | $(HEADER_DIR)
-	@ln -sf ../$(LIB_SOURCE)/$(@F) $@
+$(LIB_X_SRCS) $(LIB_X_DIRS): | $(HEADER_DIR)
+	@ln -sfn ../$(LIB_SOURCE)/$(@F) $@
 
 $(LIB_H_HDRS): | $(HEADER_DIR)
 	@ln -sf ../$(LIB_BUILD)/$(@F) $@
