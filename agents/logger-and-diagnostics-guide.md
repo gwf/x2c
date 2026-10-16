@@ -206,7 +206,7 @@ the reporter exits with status 1.
 
 Tokenizer helpers must honor their scanner preconditions. In particular, the
 tokenizer calls `scan_identifier` only after checking for an identifier-start
-character. This lets malformed literal references reach `src/literals.x`,
+character. This lets malformed literal references reach `src/literals/literals.x`,
 which owns the structured parse error and syntax hint.
 
 ## Executable proof

@@ -408,7 +408,7 @@ static int _partial(Lint l, int from, int to):
 static void _silent_guards(Lint l, List function, Map diagnostics):
   (String name, int start, int body, int to) = function
   if name in trust_boundaries || name.startswith("_macro_sdk_") ||
-     l.path.endswith("src/collect.x") && "artifact" in name:
+     l.path.endswith("src/collect/collect.x") && "artifact" in name:
     return
   for (int at = start; at < to; at = l.next(at)):
     if !_if_header(l, at): continue

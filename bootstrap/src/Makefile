@@ -1,6 +1,6 @@
 ###############################################################################
 
-CFLAGS   =	-iquote ../lib $(FLAGS)
+CFLAGS   =	-iquote . -iquote ../lib $(FLAGS)
 LDFLAGS  =	-L../lib -lx2c -lm
 SRCS     =  $(wildcard *.c)
 OBJS     =  $(SRCS:%.c=%.o)
@@ -34,6 +34,7 @@ clean:
 
 realclean:
 	rm -f x2c *.[odch]
+	find . -type l -name '*.h' -delete
 
 .PHONY: clean realclean
 

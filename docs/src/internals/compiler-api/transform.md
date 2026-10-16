@@ -4,7 +4,7 @@
 > **Provisional API:** This reference documents current compiler behavior.
 > Compatibility is not yet promised.
 
-# `src/transform.x`
+# `src/transform/transform.x`
 
 X2c AST transformation pipeline.
 
@@ -13,7 +13,7 @@ X2c AST transformation pipeline.
 | Function | Summary |
 | --- | --- |
 | [`Compiler.call_in_order`](#Compiler.call_in_order) | Calls the typed callable `callee` with `arguments`, each converted to its parameter and evaluated once, in source order, as a statement expression. |
-| [`Compiler.lower_lambda_expr`](#Compiler.lower_lambda_expr) | Lowers a resolved lambda expression, under any position wrappers and parentheses, through the lambda rule of `src/components/component-lambdas.x`; other expressions pass through. |
+| [`Compiler.lower_lambda_expr`](#Compiler.lower_lambda_expr) | Lowers a resolved lambda expression, under any position wrappers and parentheses, through the lambda rule of `src/components/lambda-functions.x`; other expressions pass through. |
 | [`Compiler.normalize`](#Compiler.normalize) | Normalizes one bound and typed node. |
 | [`Compiler.shipped_support`](#Compiler.shipped_support) | Adds to the unit's pending support the file-scope code a rule gives the form `source` of `kind`, bound and lowered with the support. |
 | [`Compiler.transform`](#Compiler.transform) | Lowers a bound and typed top-level AST to the normalized form consumed by emission. |
@@ -38,7 +38,7 @@ Source: `src/transform/literals.x:225`
 
 Lowers a resolved lambda expression, under any position wrappers and
 parentheses, through the lambda rule of
-`src/components/component-lambdas.x`;
+`src/components/lambda-functions.x`;
 other expressions pass through. A noncapturing lambda typed `Func`,
 which only a meta body leaves unlifted, lifts to a `Func` of its native
 signature.

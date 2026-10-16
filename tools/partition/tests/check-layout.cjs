@@ -3,7 +3,7 @@ const assert = require("node:assert/strict"),
   E = require("../web/engine.js"),
   D = require(process.env.PARTITION_GRAPH || "../data/graph.json");
 const previousLayout = require("./layout-baseline.cjs");
-for (const file of ["src/transform.x", "src/compiler.x", "lib/typed-array.x"]) {
+for (const file of ["src/transform/transform.x", "src/compiler/compiler.x", "lib/typed-array.x"]) {
   const fi = D.files.findIndex((f) => f.id === file),
     members = D.functions.flatMap((f, i) => (f.f === fi ? [i] : [])),
     parts = [0, 1, 2].map(n => members.filter((_, i) => i % 3 === n)),

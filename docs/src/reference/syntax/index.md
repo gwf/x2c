@@ -36,12 +36,12 @@ change.
 | --- | --- | --- | --- |
 | Language reference | `docs/src/reference/language.md` | User-facing forms, examples, semantic constraints; a small protocol grammar under Protocols | No complete grammar or lexical rule inventory |
 | Syntax guides | `docs/src/guide/{from-c,indentation,macros,match,collections,symbols,protocols}.md` | Explanations and examples of individual forms | Examples do not define all accepted token sequences |
-| Declaration parser | `src/parse.x` | Recursive-descent rules for units, imports, types, declarations, declarators, parameters, fields, enumerators | Mixes recognition with name binding, collection, and semantic work |
-| Expression parser and precedence ledger | `src/expressions.x`, `src/operator-ledger.x` | Expression productions, ambiguity decisions, complete binary operator precedence rows | Depends on type and macro state |
+| Declaration parser | `src/parse/parse.x` | Recursive-descent rules for units, imports, types, declarations, declarators, parameters, fields, enumerators | Mixes recognition with name binding, collection, and semantic work |
+| Expression parser and precedence ledger | `src/expressions/expressions.x`, `src/operator-ledger.x` | Expression productions, ambiguity decisions, complete binary operator precedence rows | Depends on type and macro state |
 | Statement parser | `src/statements.x` | Statements, blocks, match/catch arms, directive-aware governed statements | Macro-produced statements also enter binding |
-| Literal and lambda parsers | `src/literals.x`, `src/lambdas.x` | Quoted data, interpolation, patterns, lambdas and captures | Token modes determine which spellings reach them |
-| Macro parser and built-ins | `src/macros.x`, `etc/builtin-macros.x` | Category table, definitions, invocations, quotations, typed holes, keyword aliases; built-in `class` and `foreach` | Grammar is extended by visible definitions; libraries such as `lib/system-macros.x` add more |
-| Protocol parser | `src/protocol.x` | Protocol definitions, associated types, members, adoptions | Witness resolution and type constraints are separate |
+| Literal and lambda parsers | `src/literals/literals.x`, `src/lambdas.x` | Quoted data, interpolation, patterns, lambdas and captures | Token modes determine which spellings reach them |
+| Macro parser and built-ins | `src/macros/macros.x`, `etc/builtin-macros.x` | Category table, definitions, invocations, quotations, typed holes, keyword aliases; built-in `class` and `foreach` | Grammar is extended by visible definitions; libraries such as `lib/system-macros.x` add more |
+| Protocol parser | `src/protocol/protocol.x` | Protocol definitions, associated types, members, adoptions | Witness resolution and type constraints are separate |
 | AST source patterns | `src/grammar.x` | Executable source-shaped macro patterns and AST accessors used by lowering | Despite the filename, not a complete source grammar |
 | Character scanners | `lib/scan.x` | Allocation-free byte recognizers, keywords, longest operator prefix, literal escapes, failure statuses | A scanner in isolation does not specify tokenizer dispatch or context |
 | Tokenizer and layout | `lib/tokenizer.x` | Ordered scanning, mode stack, operand context, keyword reclassification, indentation rewrite, positions | Contextual and stateful, not a single token regex table |

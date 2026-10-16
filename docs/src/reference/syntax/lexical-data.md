@@ -346,7 +346,7 @@ See [the lexical specification](lexical.md) for explanations and
 ```text
 (passes
  (pass module-collection
-  (external "src/collect.x; active file-scope module blocks before tokenizing")
+  (external "src/collect/collect.x; active file-scope module blocks before tokenizing")
   (splice member-text-in-order)
   (resolve under-containing-file-companion-directory)
   (recursive true) (word "module" ident))
@@ -483,16 +483,16 @@ See [the lexical specification](lexical.md) for explanations and
 ```text
 (sources (source "lib/scan.x") (source "lib/tokenizer.x")
  (source "src/compiler/parsing/tokens.x")
- (source "src/literals.x") (source "docs/src/reference/syntax/lexical.md"))
+ (source "src/literals/literals.x") (source "docs/src/reference/syntax/lexical.md"))
 ```
 
 ## boundaries
 
 ```text
 (boundaries
- (external percent-string-decoding "src/literals.x:_parse_text_segment"
+ (external percent-string-decoding "src/literals/literals.x:_parse_text_segment"
   (remove continuations) (normalize cr-and-crlf-to-lf)
-  (decode escapes)) (external symbol-representability "src/literals.x")
+  (decode escapes)) (external symbol-representability "src/literals/literals.x")
  (external host-preprocessing host-preprocessor)
  (external native-c-acceptance host-compiler))
 ```

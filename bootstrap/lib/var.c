@@ -40,11 +40,11 @@ extern const SymbolSet x2c_var_tags;
 
 extern const VarDecodeGroup x2c_var_decode_groups[];
 
-typedef struct f8_encoding___VarDecoded{
+typedef struct f12_var_encoding___VarDecoded{
   TagId id;
   int custom_id, valid;
 }
-f8_encoding___VarDecoded;
+f12_var_encoding___VarDecoded;
 
 static TagId _tag2id(Symbol tag);
 
@@ -58,13 +58,13 @@ static inline unsigned _bottom_bits(Var v);
 
 static void * _address(Var value);
 
-static f8_encoding___VarDecoded f8_encoding____decode(Var value);
+static f12_var_encoding___VarDecoded f12_var_encoding____decode(Var value);
 
-static inline int f8_encoding____group_id(unsigned top, unsigned mid, unsigned btm);
+static inline int f12_var_encoding____group_id(unsigned top, unsigned mid, unsigned btm);
 
 static inline unsigned _group_slot(unsigned top);
 
-static f8_encoding___VarDecoded f8_encoding____decode_builtin(TagId id, Var value);
+static f12_var_encoding___VarDecoded f12_var_encoding____decode_builtin(TagId id, Var value);
 
 #define VAR_CUSTOM_TAG_TOP     0x800C
 #define VAR_CUSTOM_TAG_COUNT   32
@@ -73,13 +73,13 @@ static f8_encoding___VarDecoded f8_encoding____decode_builtin(TagId id, Var valu
 #define VAR_RECORD_ROW         31
 #define VAR_CELL_MASK          0xFFFF000000000007ul
 #define VAR_CELL_BITS          0x800F000000000006ul
-static Scope f7_classes___class_scope;
+static Scope f11_var_classes___class_scope;
 
-static Map f7_classes___declared;
+static Map f11_var_classes___declared;
 
-static VarDescriptor * f7_classes___rows[VAR_DIRECT_ROWS];
+static VarDescriptor * f11_var_classes___rows[VAR_DIRECT_ROWS];
 
-static unsigned f7_classes___row_count;
+static unsigned f11_var_classes___row_count;
 
 typedef struct VarCell{
   VarDescriptor * descriptor;
@@ -88,12 +88,12 @@ typedef struct VarCell{
 }
 VarCell;
 
-static Map f7_classes___cells;
+static Map f11_var_classes___cells;
 
 #define RECORD_PREFIX sizeof(max_align_t)
 static VarDescriptor * _declared(Symbol tag);
 
-static unsigned f7_classes____row_count(void);
+static unsigned f11_var_classes____row_count(void);
 
 static VarDescriptor * _row_descriptor(int id, Var value);
 
@@ -105,82 +105,82 @@ static inline int _custom_valid(int id, Var value);
 
 static int _custom_row(Symbol tag, VarDescriptor * * descriptor);
 
-static int f7_classes____assign_row(VarDescriptor * descriptor);
+static int f11_var_classes____assign_row(VarDescriptor * descriptor);
 
 static VarCell * _cell(VarDescriptor * descriptor, void * pointer);
 
 static Var _new_custom_pointer(int id, void * ptr);
 
-static void f7_classes____classes_shutdown(void);
+static void f11_var_classes____classes_shutdown(void);
 
-static inline void f12_construction____require_aligned(Symbol tag, void * address, unsigned mask);
+static inline void f16_var_construction____require_aligned(Symbol tag, void * address, unsigned mask);
 
-_Noreturn static void f12_construction____misaligned(Symbol tag);
+_Noreturn static void f16_var_construction____misaligned(Symbol tag);
 
-static Var f12_construction____new_builtin(TagId id, Symbol tag, va_list ap);
+static Var f16_var_construction____new_builtin(TagId id, Symbol tag, va_list ap);
 
-static Var f12_construction____new_pointer(TagId id, void * ptr);
+static Var f16_var_construction____new_pointer(TagId id, void * ptr);
 
-static Var f12_construction____floating_arg(TagId id, Symbol tag, va_list ap);
+static Var f16_var_construction____floating_arg(TagId id, Symbol tag, va_list ap);
 
-static Var f12_construction____new_floating(TagId id, double d);
+static Var f16_var_construction____new_floating(TagId id, double d);
 
-static unsigned long f12_construction____prefix(TagId id);
+static unsigned long f16_var_construction____prefix(TagId id);
 
-static Var f12_construction____integer_arg(TagId id, Symbol tag, va_list ap);
+static Var f16_var_construction____integer_arg(TagId id, Symbol tag, va_list ap);
 
-static Var f12_construction____new_integer(TagId id, long value);
+static Var f16_var_construction____new_integer(TagId id, long value);
 
-static unsigned f12_construction____integer_width(TagId id);
+static unsigned f16_var_construction____integer_width(TagId id);
 
-static int f12_construction____integer_fits(TagId id, long value, unsigned bits);
+static int f16_var_construction____integer_fits(TagId id, long value, unsigned bits);
 
-static Var f12_construction____new_symbol(unsigned long u);
+static Var f16_var_construction____new_symbol(unsigned long u);
 
-typedef union f7_numbers___VarWideValue{
+typedef union f11_var_numbers___VarWideValue{
   long long_value;
   unsigned long ulong_value;
   long long long_long_value;
   unsigned long long ulong_long_value;
   long double long_double_value;
 }
-f7_numbers___VarWideValue;
+f11_var_numbers___VarWideValue;
 
-typedef struct f7_numbers___VarWideBox{
+typedef struct f11_var_numbers___VarWideBox{
   Symbol tag;
-  f7_numbers___VarWideValue value;
+  f11_var_numbers___VarWideValue value;
 }
-* f7_numbers___VarWideBox;
+* f11_var_numbers___VarWideBox;
 
-static f7_numbers___VarWideBox f7_numbers____wide_box(Var v);
+static f11_var_numbers___VarWideBox f11_var_numbers____wide_box(Var v);
 
 static int _wide_encoding_valid(Var value, Symbol tag);
 
-static Var f7_numbers____new_wide(TagId id, f7_numbers___VarWideValue value);
+static Var f11_var_numbers____new_wide(TagId id, f11_var_numbers___VarWideValue value);
 
-static double f7_numbers____f64_floating(Var v);
+static double f11_var_numbers____f64_floating(Var v);
 
-static long f7_numbers____i48_integer(Var v);
+static long f11_var_numbers____i48_integer(Var v);
 
-static long f7_numbers____wide_integer(Var v);
+static long f11_var_numbers____wide_integer(Var v);
 
-static unsigned f7_numbers____hash_wide(Symbol tag, f7_numbers___VarWideValue * value, size_t width);
+static unsigned f11_var_numbers____hash_wide(Symbol tag, f11_var_numbers___VarWideValue * value, size_t width);
 
-typedef struct f8_ordering___VarIntegerParts{
+typedef struct f12_var_ordering___VarIntegerParts{
   int negative;
   unsigned long long magnitude;
 }
-f8_ordering___VarIntegerParts;
+f12_var_ordering___VarIntegerParts;
 
-static f8_ordering___VarIntegerParts f8_ordering____integer_parts(Var v);
+static f12_var_ordering___VarIntegerParts f12_var_ordering____integer_parts(Var v);
 
-static f8_ordering___VarIntegerParts f8_ordering____unsigned_parts(unsigned long long magnitude);
+static f12_var_ordering___VarIntegerParts f12_var_ordering____unsigned_parts(unsigned long long magnitude);
 
-static f8_ordering___VarIntegerParts f8_ordering____signed_parts(long long value);
+static f12_var_ordering___VarIntegerParts f12_var_ordering____signed_parts(long long value);
 
-static unsigned long long f8_ordering____signed_magnitude(long long value);
+static unsigned long long f12_var_ordering____signed_magnitude(long long value);
 
-static int f8_ordering____magnitude_compare(unsigned long long integer, long double floating);
+static int f12_var_ordering____magnitude_compare(unsigned long long integer, long double floating);
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
 
@@ -258,40 +258,40 @@ unsigned long Var_tag_bottom(Symbol tag){
   return x2c_var_taginfo[id].bottom;
 }
 
-static f8_encoding___VarDecoded f8_encoding____decode(Var value){
+static f12_var_encoding___VarDecoded f12_var_encoding____decode(Var value){
   unsigned top = _top_bits(value), btm = _bottom_bits(value);
-  if(value.u64 == VAR_VOID_BITS) return(f8_encoding___VarDecoded){
+  if(value.u64 == VAR_VOID_BITS) return(f12_var_encoding___VarDecoded){
     _void_, - 1, 1
   }
   ;
-  if(value.u64 == VAR_F64_NEG_MAX_ESCAPE) return(f8_encoding___VarDecoded){
+  if(value.u64 == VAR_F64_NEG_MAX_ESCAPE) return(f12_var_encoding___VarDecoded){
     _f64_, - 1, 1
   }
   ;
-  int id = f8_encoding____group_id(top, _middle_bits(value), btm);
-  if(id != _invalid_) return f8_encoding____decode_builtin((TagId) id, value);
-  if(top >= 0x8004 && top <= 0x800B) return(f8_encoding___VarDecoded){
+  int id = f12_var_encoding____group_id(top, _middle_bits(value), btm);
+  if(id != _invalid_) return f12_var_encoding____decode_builtin((TagId) id, value);
+  if(top >= 0x8004 && top <= 0x800B) return(f12_var_encoding___VarDecoded){
     _symbol_, - 1, 1
   }
   ;
   if(_custom_top(top)){
     int custom = _custom_id(top, btm);
-    return(f8_encoding___VarDecoded){
+    return(f12_var_encoding___VarDecoded){
       _invalid_, custom, _custom_valid(custom, value)
     }
     ;
   }
-  if((top >= 0x0010 && top <= 0x7FFF) || top >= 0x8010) return(f8_encoding___VarDecoded){
+  if((top >= 0x0010 && top <= 0x7FFF) || top >= 0x8010) return(f12_var_encoding___VarDecoded){
     _f64_, - 1, 1
   }
   ;
-  return(f8_encoding___VarDecoded){
+  return(f12_var_encoding___VarDecoded){
     _f64_, - 1, 0
   }
   ;
 }
 
-static inline int f8_encoding____group_id(unsigned top, unsigned mid, unsigned btm){
+static inline int f12_var_encoding____group_id(unsigned top, unsigned mid, unsigned btm){
   unsigned slot = _group_slot(top);
   if(slot >= 32) return _invalid_;
   const VarDecodeGroup * group = & x2c_var_decode_groups[slot];
@@ -303,7 +303,7 @@ static inline unsigned _group_slot(unsigned top){
   return((top << 1) |(top >> 15)) & 0xFFFF;
 }
 
-static f8_encoding___VarDecoded f8_encoding____decode_builtin(TagId id, Var value){
+static f12_var_encoding___VarDecoded f12_var_encoding____decode_builtin(TagId id, Var value){
   int valid = 1;
   unsigned payload =(unsigned) value.u64;
   switch(id){
@@ -319,14 +319,14 @@ static f8_encoding___VarDecoded f8_encoding____decode_builtin(TagId id, Var valu
     break;
     default: break;
   }
-  return(f8_encoding___VarDecoded){
+  return(f12_var_encoding___VarDecoded){
     id, - 1, valid
   }
   ;
 }
 
 Symbol Var_tag(Var v){
-  f8_encoding___VarDecoded decoded = f8_encoding____decode(v);
+  f12_var_encoding___VarDecoded decoded = f12_var_encoding____decode(v);
   if(decoded.valid && decoded.custom_id >= 0) return _row_descriptor(decoded.custom_id, v) -> tag;
   return x2c_var_taginfo[decoded.valid ? decoded.id : _f64_].tag;
 }
@@ -336,7 +336,7 @@ int Var_is(Var var, Symbol tag){
 }
 
 Symbol Var_kind(Var v){
-  f8_encoding___VarDecoded decoded = f8_encoding____decode(v);
+  f12_var_encoding___VarDecoded decoded = f12_var_encoding____decode(v);
   if(decoded.valid && decoded.custom_id >= 0) return 1011493096;
   return x2c_var_taginfo[decoded.valid ? decoded.id : _f64_].kind;
 }
@@ -381,17 +381,17 @@ int Var_is_nil(Var v){
 }
 
 int Var_encoding_valid(Var value){
-  return f8_encoding____decode(value).valid;
+  return f12_var_encoding____decode(value).valid;
 }
 
 int x2c_var_descriptor_index(Var value){
-  f8_encoding___VarDecoded decoded = f8_encoding____decode(value);
+  f12_var_encoding___VarDecoded decoded = f12_var_encoding____decode(value);
   if(! decoded.valid || decoded.id < _array_ || decoded.id > _var_) return - 1;
   return decoded.id - _array_;
 }
 
 int Var_custom_descriptor_index(Var value){
-  f8_encoding___VarDecoded decoded = f8_encoding____decode(value);
+  f12_var_encoding___VarDecoded decoded = f12_var_encoding____decode(value);
   return decoded.valid ? decoded.custom_id : - 1;
 }
 
@@ -403,19 +403,19 @@ int x2c_var_tag_descriptor_index(Symbol tag){
 void * Var_pointer(Var v);
 
 static VarDescriptor * _declared(Symbol tag){
-  if(f7_classes___declared == NULL) return NULL;
-  Var found = Map_getindex(f7_classes___declared, Symbol_var(tag));
+  if(f11_var_classes___declared == NULL) return NULL;
+  Var found = Map_getindex(f11_var_classes___declared, Symbol_var(tag));
   return Var_is_void(found) ? NULL : Var_pointer(found);
 }
 
-static unsigned f7_classes____row_count(void){
-  return __atomic_load_n(& f7_classes___row_count, __ATOMIC_ACQUIRE);
+static unsigned f11_var_classes____row_count(void){
+  return __atomic_load_n(& f11_var_classes___row_count, __ATOMIC_ACQUIRE);
 }
 
 static VarDescriptor * _row_descriptor(int id, Var value){
   if(id == VAR_CELL_ROW) return((VarCell *) _address(value)) -> descriptor;
   if(id == VAR_RECORD_ROW) return *(VarDescriptor * *)((char *) _address(value) - RECORD_PREFIX);
-  return f7_classes___rows[id];
+  return f11_var_classes___rows[id];
 }
 
 static inline int _custom_top(unsigned top){
@@ -427,14 +427,14 @@ static inline int _custom_id(unsigned top, unsigned bottom){
 }
 
 static inline int _custom_valid(int id, Var value){
-  return id < VAR_DIRECT_ROWS ? id <(int) f7_classes____row_count() : _address(value) != NULL;
+  return id < VAR_DIRECT_ROWS ? id <(int) f11_var_classes____row_count() : _address(value) != NULL;
 }
 
 VarDescriptor * x2c_var_custom_descriptor(Var value){
   unsigned top = _top_bits(value);
   if(! _custom_top(top)) return NULL;
   int id = _custom_id(top, _bottom_bits(value));
-  if(id < VAR_DIRECT_ROWS) return id <(int) f7_classes____row_count() ? f7_classes___rows[id] : NULL;
+  if(id < VAR_DIRECT_ROWS) return id <(int) f11_var_classes____row_count() ? f11_var_classes___rows[id] : NULL;
   return _address(value) ? _row_descriptor(id, value) : NULL;
 }
 
@@ -458,13 +458,13 @@ Var Var_box_record(Symbol tag, const void * record, size_t size){
 }
 
 static int _custom_row(Symbol tag, VarDescriptor * * descriptor){
-  unsigned count = f7_classes____row_count();
-  for(unsigned i = 0;  i < count;  i ++) if(f7_classes___rows[i] -> tag == tag) return(int) i;
+  unsigned count = f11_var_classes____row_count();
+  for(unsigned i = 0;  i < count;  i ++) if(f11_var_classes___rows[i] -> tag == tag) return(int) i;
   (* descriptor) = _declared(tag);
-  return(* descriptor) ? f7_classes____assign_row((* descriptor)) : - 1;
+  return(* descriptor) ? f11_var_classes____assign_row((* descriptor)) : - 1;
 }
 
-static int f7_classes____assign_row(VarDescriptor * descriptor){
+static int f11_var_classes____assign_row(VarDescriptor * descriptor){
   int row = __atomic_load_n(& descriptor -> row, __ATOMIC_ACQUIRE);
   if(row >= 0) return row;
   x2c_descriptor_thread_start_begin();
@@ -484,11 +484,11 @@ static int f7_classes____assign_row(VarDescriptor * descriptor){
         }
 
       }
-      unsigned count = f7_classes___row_count;
+      unsigned count = f11_var_classes___row_count;
       row = count < VAR_DIRECT_ROWS ?(int) count : VAR_CELL_ROW;
       if(count < VAR_DIRECT_ROWS){
-        f7_classes___rows[count] = descriptor;
-        __atomic_store_n(& f7_classes___row_count, count + 1, __ATOMIC_RELEASE);
+        f11_var_classes___rows[count] = descriptor;
+        __atomic_store_n(& f11_var_classes___row_count, count + 1, __ATOMIC_RELEASE);
       }
       __atomic_store_n(& descriptor -> row, row, __ATOMIC_RELEASE);
       {
@@ -521,7 +521,7 @@ static VarCell * _cell(VarDescriptor * descriptor, void * pointer){
       ;
       VarCell * cell = NULL;
       {
-        Scope_push(& f7_classes___class_scope);
+        Scope_push(& f11_var_classes___class_scope);
         {
           {
             X2CCleanup _x2c_gensym_defer_record_2 ={
@@ -531,8 +531,8 @@ static VarCell * _cell(VarDescriptor * descriptor, void * pointer){
             x2c_cleanup_push(& _x2c_gensym_defer_record_2);
             {
               {
-                if(f7_classes___cells == NULL) f7_classes___cells = Map_new();
-                Var head = Map_getindex(f7_classes___cells, key);
+                if(f11_var_classes___cells == NULL) f11_var_classes___cells = Map_new();
+                Var head = Map_getindex(f11_var_classes___cells, key);
                 VarCell * first = Var_is_void(head) ? NULL : Var_pointer(head);
                 cell = first;
                 while(cell && cell -> descriptor != descriptor) cell = cell -> next;
@@ -542,7 +542,7 @@ static VarCell * _cell(VarDescriptor * descriptor, void * pointer){
                     descriptor, pointer, first
                   }
                   ;
-                  Map_setindex(f7_classes___cells, key, Var_new(3683441, (void *) cell));
+                  Map_setindex(f11_var_classes___cells, key, Var_new(3683441, (void *) cell));
                 }
 
               }
@@ -646,12 +646,12 @@ int Var_register_object_tag(Symbol tag){
 VarDescriptor * x2c_var_declare(Symbol tag){
   VarDescriptor * descriptor = _declared(tag);
   if(descriptor) return descriptor;
-  if(! f7_classes___class_scope){
-    f7_classes___class_scope = Scope_new_named("Var classes");
-    Scope_shutdown_hook(f7_classes____classes_shutdown);
+  if(! f11_var_classes___class_scope){
+    f11_var_classes___class_scope = Scope_new_named("Var classes");
+    Scope_shutdown_hook(f11_var_classes____classes_shutdown);
   }
   {
-    Scope_push(& f7_classes___class_scope);
+    Scope_push(& f11_var_classes___class_scope);
     {
       {
         X2CCleanup _x2c_gensym_defer_record_4 ={
@@ -661,11 +661,11 @@ VarDescriptor * x2c_var_declare(Symbol tag){
         x2c_cleanup_push(& _x2c_gensym_defer_record_4);
         {
           {
-            if(f7_classes___declared == NULL) f7_classes___declared = Map_new();
+            if(f11_var_classes___declared == NULL) f11_var_classes___declared = Map_new();
             descriptor = Scope_calloc(1, sizeof(VarDescriptor));
             descriptor -> tag = tag;
             descriptor -> row = - 1;
-            Map_setindex(f7_classes___declared, Symbol_var(tag), Var_new(3683441, (void *) descriptor));
+            Map_setindex(f11_var_classes___declared, Symbol_var(tag), Var_new(3683441, (void *) descriptor));
           }
 
         }
@@ -678,11 +678,11 @@ VarDescriptor * x2c_var_declare(Symbol tag){
   return descriptor;
 }
 
-static void f7_classes____classes_shutdown(void){
-  Scope_destroy(f7_classes___class_scope);
-  f7_classes___class_scope = NULL;
-  f7_classes___declared = f7_classes___cells = NULL;
-  f7_classes___row_count = 0;
+static void f11_var_classes____classes_shutdown(void){
+  Scope_destroy(f11_var_classes___class_scope);
+  f11_var_classes___class_scope = NULL;
+  f11_var_classes___declared = f11_var_classes___cells = NULL;
+  f11_var_classes___row_count = 0;
 }
 
 Var Var_new(Symbol tag, ...){
@@ -703,24 +703,24 @@ Var Var_new(Symbol tag, ...){
   if(row >= 0){
     void * pointer = va_arg(ap, void *);
     va_end(ap);
-    f12_construction____require_aligned(tag, pointer, 0x7);
+    f16_var_construction____require_aligned(tag, pointer, 0x7);
     if(row < VAR_DIRECT_ROWS) return _new_custom_pointer(row, pointer);
     return _new_custom_pointer(VAR_CELL_ROW, _cell(descriptor, pointer));
   }
-  Var v = f12_construction____new_builtin(id, tag, ap);
+  Var v = f16_var_construction____new_builtin(id, tag, ap);
   va_end(ap);
   return v;
 }
 
-static inline void f12_construction____require_aligned(Symbol tag, void * address, unsigned mask){
-  if((uintptr_t) address & mask) f12_construction____misaligned(tag);
+static inline void f16_var_construction____require_aligned(Symbol tag, void * address, unsigned mask){
+  if((uintptr_t) address & mask) f16_var_construction____misaligned(tag);
 }
 
-_Noreturn static void f12_construction____misaligned(Symbol tag){
+_Noreturn static void f16_var_construction____misaligned(Symbol tag){
   {
     Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/var/construction.x",.function = "f12_construction____misaligned",.line = 55};
+      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/var/construction.x",.function = "f16_var_construction____misaligned",.line = 55};
       x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372507526, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(1345468776), Symbol_var(tag));
       __builtin_unreachable();
     }
@@ -729,18 +729,18 @@ _Noreturn static void f12_construction____misaligned(Symbol tag){
 
 }
 
-static Var f12_construction____new_builtin(TagId id, Symbol tag, va_list ap){
+static Var f16_var_construction____new_builtin(TagId id, Symbol tag, va_list ap){
   switch(x2c_var_taginfo[id].kind){
-    case 35386204516 : case 39939274535114 : case 1011493096 : return f12_construction____new_pointer(id, va_arg(ap, void *));
-    case 439096724366 : return f12_construction____floating_arg(id, tag, ap);
-    case 20309162340 : return f12_construction____integer_arg(id, tag, ap);
-    case 1328354264 : return f12_construction____new_symbol(va_arg(ap, unsigned long));
+    case 35386204516 : case 39939274535114 : case 1011493096 : return f16_var_construction____new_pointer(id, va_arg(ap, void *));
+    case 439096724366 : return f16_var_construction____floating_arg(id, tag, ap);
+    case 20309162340 : return f16_var_construction____integer_arg(id, tag, ap);
+    case 1328354264 : return f16_var_construction____new_symbol(va_arg(ap, unsigned long));
     case 1473096 : return((void) 0, Void);
   }
   {
     Var _x2c_gensym_literal_part_5 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/var/construction.x",.function = "f12_construction____new_builtin",.line = 68};
+      static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/var/construction.x",.function = "f16_var_construction____new_builtin",.line = 68};
       x2c_error_raise_n(& _x2c_gensym_error_site_6, 20800632064936, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_5, Symbol_var(1345468776), Symbol_var(tag));
       __builtin_unreachable();
     }
@@ -749,14 +749,14 @@ static Var f12_construction____new_builtin(TagId id, Symbol tag, va_list ap){
 
 }
 
-static Var f12_construction____new_pointer(TagId id, void * ptr){
+static Var f16_var_construction____new_pointer(TagId id, void * ptr){
   unsigned long top = x2c_var_taginfo[id].top;
   if((id == _array_ || id == _map_) && ! ptr){
     Symbol tag = x2c_var_taginfo[id].tag;
     {
       Var _x2c_gensym_literal_part_6 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
       {
-        static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/var/construction.x",.function = "f12_construction____new_pointer",.line = 80};
+        static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/var/construction.x",.function = "f16_var_construction____new_pointer",.line = 80};
         x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_6, Symbol_var(1345468776), Symbol_var(tag));
         __builtin_unreachable();
       }
@@ -766,7 +766,7 @@ static Var f12_construction____new_pointer(TagId id, void * ptr){
   }
   if((uintptr_t) ptr & 0x7){
     unsigned mask = x2c_var_decode_groups[_group_slot(top)].mask;
-    f12_construction____require_aligned(x2c_var_taginfo[id].tag, ptr, mask);
+    f16_var_construction____require_aligned(x2c_var_taginfo[id].tag, ptr, mask);
   }
   Var v ={
     .p64 = ptr
@@ -779,31 +779,31 @@ static Var f12_construction____new_pointer(TagId id, void * ptr){
 
 Var Var_box_long_double(long double value);
 
-static Var f12_construction____floating_arg(TagId id, Symbol tag, va_list ap){
+static Var f16_var_construction____floating_arg(TagId id, Symbol tag, va_list ap){
   if(tag == 26071077642) return Var_box_long_double(va_arg(ap, long double));
-  return f12_construction____new_floating(id, va_arg(ap, double));
+  return f16_var_construction____new_floating(id, va_arg(ap, double));
 }
 
-static Var f12_construction____new_floating(TagId id, double d){
+static Var f16_var_construction____new_floating(TagId id, double d){
   if(id == _f32_){
     float f =(float) d;
     unsigned u;
     memcpy(& u, & f, sizeof u);
     return(Var){
-      .u64 = u | f12_construction____prefix(_f32_)
+      .u64 = u | f16_var_construction____prefix(_f32_)
     }
     ;
   }
   if(d != d) return(Var){
-    .u64 = f12_construction____prefix(_nan_)
+    .u64 = f16_var_construction____prefix(_nan_)
   }
   ;
   if(d > 0 && d == 1.0 / 0.0) return(Var){
-    .u64 = f12_construction____prefix(_posinf_)
+    .u64 = f16_var_construction____prefix(_posinf_)
   }
   ;
   if(d < 0 && d == - 1.0 / 0.0) return(Var){
-    .u64 = f12_construction____prefix(_neginf_)
+    .u64 = f16_var_construction____prefix(_neginf_)
   }
   ;
   unsigned long u;
@@ -818,7 +818,7 @@ static Var f12_construction____new_floating(TagId id, double d){
   ;
 }
 
-static unsigned long f12_construction____prefix(TagId id){
+static unsigned long f16_var_construction____prefix(TagId id){
   return x2c_var_taginfo[id].top << 48 | x2c_var_taginfo[id].middle << 32;
 }
 
@@ -830,12 +830,12 @@ Var Var_box_long_long(long long value);
 
 Var Var_box_ulong_long(unsigned long long value);
 
-static Var f12_construction____integer_arg(TagId id, Symbol tag, va_list ap){
+static Var f16_var_construction____integer_arg(TagId id, Symbol tag, va_list ap){
   switch(tag){
-    case 30065 : case 26993 : case 3846509 : case 3453293 : case 3453797 : return f12_construction____new_integer(id, va_arg(ap, int));
-    case 3847013 : return f12_construction____new_integer(id, (long) va_arg(ap, unsigned));
-    case 3847281 : return f12_construction____new_integer(id, (long) va_arg(ap, unsigned long));
-    case 3454065 : return f12_construction____new_integer(id, va_arg(ap, long));
+    case 30065 : case 26993 : case 3846509 : case 3453293 : case 3453797 : return f16_var_construction____new_integer(id, va_arg(ap, int));
+    case 3847013 : return f16_var_construction____new_integer(id, (long) va_arg(ap, unsigned));
+    case 3847281 : return f16_var_construction____new_integer(id, (long) va_arg(ap, unsigned long));
+    case 3454065 : return f16_var_construction____new_integer(id, va_arg(ap, long));
     case 818062 : return Var_box_long(va_arg(ap, long));
     case 44858254 : return Var_box_ulong(va_arg(ap, unsigned long));
     case 25983886 : return Var_box_long_long(va_arg(ap, long long));
@@ -844,7 +844,7 @@ static Var f12_construction____integer_arg(TagId id, Symbol tag, va_list ap){
   {
     Var _x2c_gensym_literal_part_7 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/var/construction.x",.function = "f12_construction____integer_arg",.line = 136};
+      static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/var/construction.x",.function = "f16_var_construction____integer_arg",.line = 136};
       x2c_error_raise_n(& _x2c_gensym_error_site_8, 20800632064936, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_7, Symbol_var(1345468776), Symbol_var(tag));
       __builtin_unreachable();
     }
@@ -853,14 +853,14 @@ static Var f12_construction____integer_arg(TagId id, Symbol tag, va_list ap){
 
 }
 
-static Var f12_construction____new_integer(TagId id, long value){
-  unsigned bits = f12_construction____integer_width(id);
-  if(! f12_construction____integer_fits(id, value, bits)){
+static Var f16_var_construction____new_integer(TagId id, long value){
+  unsigned bits = f16_var_construction____integer_width(id);
+  if(! f16_var_construction____integer_fits(id, value, bits)){
     Symbol target = x2c_var_taginfo[id].tag;
     {
       Var _x2c_gensym_literal_part_8 = String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL)));
       {
-        static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/var/construction.x",.function = "f12_construction____new_integer",.line = 145};
+        static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/var/construction.x",.function = "f16_var_construction____new_integer",.line = 145};
         x2c_error_raise_n(& _x2c_gensym_error_site_9, 245103016899018, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_8, Symbol_var(1345468776), Symbol_var(target));
         __builtin_unreachable();
       }
@@ -877,14 +877,14 @@ static Var f12_construction____new_integer(TagId id, long value){
   return v;
 }
 
-static unsigned f12_construction____integer_width(TagId id){
+static unsigned f16_var_construction____integer_width(TagId id){
   switch(id){
     case _u8_ : case _i8_ : return 8;
     case _u16_ : case _i16_ : return 16;
     case _u32_ : case _i32_ : return 32;
     case _u48_ : case _i48_ : return 48;
     default:{
-      static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/var/construction.x",.function = "f12_construction____integer_width",.line = 159};
+      static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/var/construction.x",.function = "f16_var_construction____integer_width",.line = 159};
       x2c_error_raise_n(& _x2c_gensym_error_site_10, 20800632064936, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))));
       __builtin_unreachable();
     }
@@ -893,7 +893,7 @@ static unsigned f12_construction____integer_width(TagId id){
 
 }
 
-static int f12_construction____integer_fits(TagId id, long value, unsigned bits){
+static int f16_var_construction____integer_fits(TagId id, long value, unsigned bits){
   if(id == _i8_ || id == _i16_ || id == _i32_ || id == _i48_){
     long long bound = 1ll <<(bits - 1);
     return value >= - bound && value < bound;
@@ -901,9 +901,9 @@ static int f12_construction____integer_fits(TagId id, long value, unsigned bits)
   return value >= 0 &&(unsigned long) value <= _bitmask(bits);
 }
 
-static Var f12_construction____new_symbol(unsigned long u){
+static Var f16_var_construction____new_symbol(unsigned long u){
   if(u >=(1ul << 51)){
-    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/var/construction.x",.function = "f12_construction____new_symbol",.line = 172};
+    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/var/construction.x",.function = "f16_var_construction____new_symbol",.line = 172};
     x2c_error_raise_n(& _x2c_gensym_error_site_11, 245103016899018, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.new")), NULL))), Symbol_var(1345468776), Symbol_var(1328354264));
     __builtin_unreachable();
   }
@@ -937,24 +937,24 @@ Var Var_parse(String str, Symbol kind){
 
 }
 
-static f7_numbers___VarWideBox f7_numbers____wide_box(Var v){
-  return(f7_numbers___VarWideBox) _address(v);
+static f11_var_numbers___VarWideBox f11_var_numbers____wide_box(Var v){
+  return(f11_var_numbers___VarWideBox) _address(v);
 }
 
 static int _wide_encoding_valid(Var value, Symbol tag){
-  f7_numbers___VarWideBox box = f7_numbers____wide_box(value);
+  f11_var_numbers___VarWideBox box = f11_var_numbers____wide_box(value);
   return box && box -> tag == tag;
 }
 
-static Var f7_numbers____new_wide(TagId id, f7_numbers___VarWideValue value){
-  f7_numbers___VarWideBox box = Scope_malloc(sizeof(struct f7_numbers___VarWideBox));
+static Var f11_var_numbers____new_wide(TagId id, f11_var_numbers___VarWideValue value){
+  f11_var_numbers___VarWideBox box = Scope_malloc(sizeof(struct f11_var_numbers___VarWideBox));
   box -> tag = x2c_var_taginfo[id].tag;
   box -> value = value;
   uintptr_t raw =(uintptr_t) box;
   if((raw & 0x7) != 0 || raw >=(1ul << 48)){
     Scope_free(box);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/var/numbers.x",.function = "f7_numbers____new_wide",.line = 37};
+      static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/var/numbers.x",.function = "f11_var_numbers____new_wide",.line = 37};
       x2c_error_raise_n(& _x2c_gensym_error_site_12, 4372507526, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.box")), NULL))));
       __builtin_unreachable();
     }
@@ -970,54 +970,54 @@ static Var f7_numbers____new_wide(TagId id, f7_numbers___VarWideValue value){
 }
 
 Var Var_box_long(long value){
-  f7_numbers___VarWideValue wide ={
+  f11_var_numbers___VarWideValue wide ={
     0
   }
   ;
   wide.long_value = value;
-  return f7_numbers____new_wide(_long_, wide);
+  return f11_var_numbers____new_wide(_long_, wide);
 }
 
 Var Var_box_ulong(unsigned long value){
-  f7_numbers___VarWideValue wide ={
+  f11_var_numbers___VarWideValue wide ={
     0
   }
   ;
   wide.ulong_value = value;
-  return f7_numbers____new_wide(_ulong_, wide);
+  return f11_var_numbers____new_wide(_ulong_, wide);
 }
 
 Var Var_box_long_long(long long value){
-  f7_numbers___VarWideValue wide ={
+  f11_var_numbers___VarWideValue wide ={
     0
   }
   ;
   wide.long_long_value = value;
-  return f7_numbers____new_wide(_llong_, wide);
+  return f11_var_numbers____new_wide(_llong_, wide);
 }
 
 Var Var_box_ulong_long(unsigned long long value){
-  f7_numbers___VarWideValue wide ={
+  f11_var_numbers___VarWideValue wide ={
     0
   }
   ;
   wide.ulong_long_value = value;
-  return f7_numbers____new_wide(_ullong_, wide);
+  return f11_var_numbers____new_wide(_ullong_, wide);
 }
 
 Var Var_box_long_double(long double value){
-  f7_numbers___VarWideValue wide ={
+  f11_var_numbers___VarWideValue wide ={
     0
   }
   ;
   wide.long_double_value = value;
-  return f7_numbers____new_wide(_ldouble_, wide);
+  return f11_var_numbers____new_wide(_ldouble_, wide);
 }
 
 Var Var_clone_wide(Var value){
   if(! Var_is_wide(value)) return((void) 0, Void);
-  f7_numbers___VarWideBox source = f7_numbers____wide_box(value);
-  f7_numbers___VarWideBox box = Scope_malloc(sizeof(struct f7_numbers___VarWideBox));
+  f11_var_numbers___VarWideBox source = f11_var_numbers____wide_box(value);
+  f11_var_numbers___VarWideBox box = Scope_malloc(sizeof(struct f11_var_numbers___VarWideBox));
   * box = * source;
   uintptr_t raw =(uintptr_t) box;
   if((raw & 0x7) != 0 || raw >=(1ul << 48)){
@@ -1037,27 +1037,27 @@ Var Var_clone_wide(Var value){
 
 Var Var_move_wide_to(Var value, Scope * scope){
   if(! Var_is_wide(value)) return value;
-  Scope_move(f7_numbers____wide_box(value), scope);
+  Scope_move(f11_var_numbers____wide_box(value), scope);
   return value;
 }
 
 Scope Var_wide_owner(Var v){
-  return Var_is_wide(v) ? Scope_owner(f7_numbers____wide_box(v)) : NULL;
+  return Var_is_wide(v) ? Scope_owner(f11_var_numbers____wide_box(v)) : NULL;
 }
 
 double Var_floating(Var v){
   switch(Var_tag(v)){
     case 3355493 : return Var_decode_f32(v);
-    case 3356265 : return f7_numbers____f64_floating(v);
+    case 3356265 : return f11_var_numbers____f64_floating(v);
     case 28764 : return 0.0 / 0.0;
     case 2050956 : return - 1.0 / 0.0;
     case 1854348 : return 1.0 / 0.0;
-    case 26071077642 : return(double) f7_numbers____wide_box(v) -> value.long_double_value;
+    case 26071077642 : return(double) f11_var_numbers____wide_box(v) -> value.long_double_value;
   }
   return 0.0;
 }
 
-static double f7_numbers____f64_floating(Var v){
+static double f11_var_numbers____f64_floating(Var v){
   unsigned long u = v.u64 == VAR_F64_NEG_MAX_ESCAPE ? VAR_F64_NEG_MAX_RAW : v.u64 - VAR_F64_SHIFT;
   double d;
   memcpy(& d, & u, sizeof d);
@@ -1067,7 +1067,7 @@ static double f7_numbers____f64_floating(Var v){
 long Var_integer(Var v){
   unsigned top = _top_bits(v);
   if(top == x2c_var_taginfo[_u48_].top) return v.u64 & _bitmask(48);
-  if(top == x2c_var_taginfo[_i48_].top) return f7_numbers____i48_integer(v);
+  if(top == x2c_var_taginfo[_i48_].top) return f11_var_numbers____i48_integer(v);
   if(top == x2c_var_taginfo[_u8_].top){
     switch(_middle_bits(v)){
       case 0x1 : return(unsigned char)(v.u64 & _bitmask(8));
@@ -1079,8 +1079,8 @@ long Var_integer(Var v){
     }
 
   }
-  if(top == 0x0005) return f7_numbers____wide_integer(v);
-  if(top == 0x0007 && _bottom_bits(v) == 0x6) return(long) f7_numbers____wide_box(v) -> value.ulong_long_value;
+  if(top == 0x0005) return f11_var_numbers____wide_integer(v);
+  if(top == 0x0007 && _bottom_bits(v) == 0x6) return(long) f11_var_numbers____wide_box(v) -> value.ulong_long_value;
   if(top >= 0x8004 && top <= 0x800B){
     unsigned long const offset = x2c_var_taginfo[_symbol_].top << 48;
     return(Symbol)(v.u64 - offset);
@@ -1088,56 +1088,56 @@ long Var_integer(Var v){
   return 0;
 }
 
-static long f7_numbers____i48_integer(Var v){
+static long f11_var_numbers____i48_integer(Var v){
   unsigned long mask = _bitmask(48), raw = v.u64 & mask;
   if(raw &(1ul << 47)) return -(long)((~ raw & mask) + 1ul);
   return(long) raw;
 }
 
-static long f7_numbers____wide_integer(Var v){
+static long f11_var_numbers____wide_integer(Var v){
   switch(_bottom_bits(v)){
-    case 0x5 : return f7_numbers____wide_box(v) -> value.long_value;
-    case 0x6 : return(long) f7_numbers____wide_box(v) -> value.ulong_value;
-    case 0x7 : return(long) f7_numbers____wide_box(v) -> value.long_long_value;
+    case 0x5 : return f11_var_numbers____wide_box(v) -> value.long_value;
+    case 0x6 : return(long) f11_var_numbers____wide_box(v) -> value.ulong_value;
+    case 0x7 : return(long) f11_var_numbers____wide_box(v) -> value.long_long_value;
   }
   return 0;
 }
 
 long Var_long_value(Var v){
-  return Var_is(v, 818062) ? f7_numbers____wide_box(v) -> value.long_value : 0;
+  return Var_is(v, 818062) ? f11_var_numbers____wide_box(v) -> value.long_value : 0;
 }
 
 unsigned long Var_ulong_value(Var v){
-  return Var_is(v, 44858254) ? f7_numbers____wide_box(v) -> value.ulong_value : 0;
+  return Var_is(v, 44858254) ? f11_var_numbers____wide_box(v) -> value.ulong_value : 0;
 }
 
 long long Var_long_long_value(Var v){
-  return Var_is(v, 25983886) ? f7_numbers____wide_box(v) -> value.long_long_value : 0;
+  return Var_is(v, 25983886) ? f11_var_numbers____wide_box(v) -> value.long_long_value : 0;
 }
 
 unsigned long long Var_ulong_long_value(Var v){
-  return Var_is(v, 1435270030) ? f7_numbers____wide_box(v) -> value.ulong_long_value : 0;
+  return Var_is(v, 1435270030) ? f11_var_numbers____wide_box(v) -> value.ulong_long_value : 0;
 }
 
 long double Var_long_double_value(Var v){
-  return Var_is(v, 26071077642) ? f7_numbers____wide_box(v) -> value.long_double_value : 0.0L;
+  return Var_is(v, 26071077642) ? f11_var_numbers____wide_box(v) -> value.long_double_value : 0.0L;
 }
 
 unsigned Var_wide_hash(Var v){
   if(! Var_is_wide(v)) return 0;
-  f7_numbers___VarWideValue * value = & f7_numbers____wide_box(v) -> value;
+  f11_var_numbers___VarWideValue * value = & f11_var_numbers____wide_box(v) -> value;
   Symbol tag = Var_tag(v);
   switch(tag){
-    case 818062 : return f7_numbers____hash_wide(tag, value, sizeof(long));
-    case 44858254 : return f7_numbers____hash_wide(tag, value, sizeof(unsigned long));
-    case 25983886 : return f7_numbers____hash_wide(tag, value, sizeof(long long));
-    case 1435270030 : return f7_numbers____hash_wide(tag, value, sizeof(unsigned long long));
-    case 26071077642 : return f7_numbers____hash_wide(tag, value, sizeof(long double));
+    case 818062 : return f11_var_numbers____hash_wide(tag, value, sizeof(long));
+    case 44858254 : return f11_var_numbers____hash_wide(tag, value, sizeof(unsigned long));
+    case 25983886 : return f11_var_numbers____hash_wide(tag, value, sizeof(long long));
+    case 1435270030 : return f11_var_numbers____hash_wide(tag, value, sizeof(unsigned long long));
+    case 26071077642 : return f11_var_numbers____hash_wide(tag, value, sizeof(long double));
   }
   return 0;
 }
 
-static unsigned f7_numbers____hash_wide(Symbol tag, f7_numbers___VarWideValue * value, size_t width){
+static unsigned f11_var_numbers____hash_wide(Symbol tag, f11_var_numbers___VarWideValue * value, size_t width){
   return x2c_hash_bytes((unsigned) tag, value, width);
 }
 
@@ -1145,7 +1145,7 @@ int Var_wide_equal(Var a, Var b){
   if(! Var_is_wide(a) || ! Var_is_wide(b)) return 0;
   Symbol tag = Var_tag(a);
   if(tag != Var_tag(b)) return 0;
-  f7_numbers___VarWideBox abox = f7_numbers____wide_box(a), bbox = f7_numbers____wide_box(b);
+  f11_var_numbers___VarWideBox abox = f11_var_numbers____wide_box(a), bbox = f11_var_numbers____wide_box(b);
   switch(tag){
     case 818062 : return abox -> value.long_value == bbox -> value.long_value;
     case 44858254 : return abox -> value.ulong_value == bbox -> value.ulong_value;
@@ -1166,62 +1166,62 @@ int Var_wide_compare(Var a, Var b){
   long double av = Var_long_double_value(a), bv = Var_long_double_value(b);
   if(av < bv) return - 1;
   if(av > bv) return 1;
-  int cmp = memcmp(& f7_numbers____wide_box(a) -> value.long_double_value, & f7_numbers____wide_box(b) -> value.long_double_value, sizeof(av));
+  int cmp = memcmp(& f11_var_numbers____wide_box(a) -> value.long_double_value, & f11_var_numbers____wide_box(b) -> value.long_double_value, sizeof(av));
   return cmp < 0 ? - 1 : cmp > 0 ? 1 : 0;
 }
 
 int Var_integer_compare(Var a, Var b){
-  f8_ordering___VarIntegerParts ap = f8_ordering____integer_parts(a), bp = f8_ordering____integer_parts(b);
+  f12_var_ordering___VarIntegerParts ap = f12_var_ordering____integer_parts(a), bp = f12_var_ordering____integer_parts(b);
   if(ap.negative != bp.negative) return ap.negative ? - 1 : 1;
   if(ap.magnitude == bp.magnitude) return 0;
   if(ap.negative) return ap.magnitude > bp.magnitude ? - 1 : 1;
   return ap.magnitude < bp.magnitude ? - 1 : 1;
 }
 
-static f8_ordering___VarIntegerParts f8_ordering____integer_parts(Var v){
+static f12_var_ordering___VarIntegerParts f12_var_ordering____integer_parts(Var v){
   switch(Var_tag(v)){
-    case 30065 : case 3846509 : case 3847013 : case 3847281 : return f8_ordering____unsigned_parts((unsigned long long) Var_integer(v));
-    case 44858254 : return f8_ordering____unsigned_parts(Var_ulong_value(v));
-    case 1435270030 : return f8_ordering____unsigned_parts(Var_ulong_long_value(v));
-    case 818062 : return f8_ordering____signed_parts(Var_long_value(v));
-    case 25983886 : return f8_ordering____signed_parts(Var_long_long_value(v));
+    case 30065 : case 3846509 : case 3847013 : case 3847281 : return f12_var_ordering____unsigned_parts((unsigned long long) Var_integer(v));
+    case 44858254 : return f12_var_ordering____unsigned_parts(Var_ulong_value(v));
+    case 1435270030 : return f12_var_ordering____unsigned_parts(Var_ulong_long_value(v));
+    case 818062 : return f12_var_ordering____signed_parts(Var_long_value(v));
+    case 25983886 : return f12_var_ordering____signed_parts(Var_long_long_value(v));
   }
-  return f8_ordering____signed_parts(Var_integer(v));
+  return f12_var_ordering____signed_parts(Var_integer(v));
 }
 
-static f8_ordering___VarIntegerParts f8_ordering____unsigned_parts(unsigned long long magnitude){
-  return(f8_ordering___VarIntegerParts){
+static f12_var_ordering___VarIntegerParts f12_var_ordering____unsigned_parts(unsigned long long magnitude){
+  return(f12_var_ordering___VarIntegerParts){
     0, magnitude
   }
   ;
 }
 
-static f8_ordering___VarIntegerParts f8_ordering____signed_parts(long long value){
-  return(f8_ordering___VarIntegerParts){
-    value < 0, f8_ordering____signed_magnitude(value)
+static f12_var_ordering___VarIntegerParts f12_var_ordering____signed_parts(long long value){
+  return(f12_var_ordering___VarIntegerParts){
+    value < 0, f12_var_ordering____signed_magnitude(value)
   }
   ;
 }
 
-static unsigned long long f8_ordering____signed_magnitude(long long value){
+static unsigned long long f12_var_ordering____signed_magnitude(long long value){
   if(value >= 0) return(unsigned long long) value;
   return(unsigned long long)(-(value + 1)) + 1;
 }
 
 int Var_integer_floating_compare(Var integer, Var floating){
-  f8_ordering___VarIntegerParts parts = f8_ordering____integer_parts(integer);
+  f12_var_ordering___VarIntegerParts parts = f12_var_ordering____integer_parts(integer);
   long double value = Var_is(floating, 26071077642) ? Var_long_double_value(floating) :(long double) Var_floating(floating);
   if(value != value || value == 1.0L / 0.0L) return - 1;
   if(value == - 1.0L / 0.0L) return 1;
   if(parts.negative){
     if(value >= 0.0L) return - 1;
-    return - f8_ordering____magnitude_compare(parts.magnitude, - value);
+    return - f12_var_ordering____magnitude_compare(parts.magnitude, - value);
   }
   if(value < 0.0L) return 1;
-  return f8_ordering____magnitude_compare(parts.magnitude, value);
+  return f12_var_ordering____magnitude_compare(parts.magnitude, value);
 }
 
-static int f8_ordering____magnitude_compare(unsigned long long integer, long double floating){
+static int f12_var_ordering____magnitude_compare(unsigned long long integer, long double floating){
   long double limit =(long double)(1ull << 63) * 2.0L;
   if(floating >= limit) return - 1;
   unsigned long long floating_integer =(unsigned long long) floating;

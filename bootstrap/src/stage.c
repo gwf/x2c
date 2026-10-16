@@ -3,7 +3,7 @@
 #define __GUARD_0x042BDEBD__
 #include "x2c.h"
 
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include "grammar.h"
 #include "type.h"
 #include "var.h"

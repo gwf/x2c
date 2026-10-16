@@ -4,7 +4,7 @@
 > **Provisional API:** This reference documents current compiler behavior.
 > Compatibility is not yet promised.
 
-# `src/regions.x`
+# `src/regions/regions.x`
 
 Values that can outlive the region that allocated them.
 

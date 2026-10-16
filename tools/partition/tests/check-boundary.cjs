@@ -39,7 +39,7 @@ assert.equal(merged.incoming, b.incoming);
 assert.equal(merged.outgoing, b.outgoing);
 const ids = new Set(
   D.functions.flatMap((f, i) =>
-    D.files[f.f].id === "src/macros.x" ? [i] : [],
+    D.files[f.f].id === "src/macros/macros.x" ? [i] : [],
   ),
 );
 const files = D.files.map((f, i) => ({

@@ -4,7 +4,7 @@
 > **Provisional API:** This reference documents current compiler behavior.
 > Compatibility is not yet promised.
 
-# `src/parse.x`
+# `src/parse/parse.x`
 
 X2c declarations, parsed from source or constructed.
 

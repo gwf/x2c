@@ -1,91 +1,91 @@
-#define _x2c_gensym_initializer_choice_28FCBFDC_0_expanded(_x2c_gensym_static_input_0) static void _x2c_gensym_static_initialize_0(void){\
+#define _x2c_gensym_initializer_choice_21BF4D8E_0_expanded(_x2c_gensym_static_input_0) static void _x2c_gensym_static_initialize_0(void){\
   _x2c_gensym_static_input_0;\
 }
-#define _x2c_gensym_initializer_choice_28FCBFDC_0(_x2c_gensym_static_input_0) _x2c_gensym_initializer_choice_28FCBFDC_0_expanded(_x2c_gensym_static_input_0)
-#define _x2c_gensym_initializer_choice_28FCBFDC_1_expanded(_x2c_gensym_static_input_1) static void _x2c_gensym_static_initialize_1(void){\
+#define _x2c_gensym_initializer_choice_21BF4D8E_0(_x2c_gensym_static_input_0) _x2c_gensym_initializer_choice_21BF4D8E_0_expanded(_x2c_gensym_static_input_0)
+#define _x2c_gensym_initializer_choice_21BF4D8E_1_expanded(_x2c_gensym_static_input_1) static void _x2c_gensym_static_initialize_1(void){\
   _x2c_gensym_static_input_1;\
 }
-#define _x2c_gensym_initializer_choice_28FCBFDC_1(_x2c_gensym_static_input_1) _x2c_gensym_initializer_choice_28FCBFDC_1_expanded(_x2c_gensym_static_input_1)
-#define _x2c_gensym_initializer_choice_28FCBFDC_2_expanded(_x2c_gensym_static_input_2) static void _x2c_gensym_static_initialize_2(void){\
+#define _x2c_gensym_initializer_choice_21BF4D8E_1(_x2c_gensym_static_input_1) _x2c_gensym_initializer_choice_21BF4D8E_1_expanded(_x2c_gensym_static_input_1)
+#define _x2c_gensym_initializer_choice_21BF4D8E_2_expanded(_x2c_gensym_static_input_2) static void _x2c_gensym_static_initialize_2(void){\
   _x2c_gensym_static_input_2;\
 }
-#define _x2c_gensym_initializer_choice_28FCBFDC_2(_x2c_gensym_static_input_2) _x2c_gensym_initializer_choice_28FCBFDC_2_expanded(_x2c_gensym_static_input_2)
-#define _x2c_gensym_initializer_choice_28FCBFDC_3_expanded(_x2c_gensym_static_input_3) static void _x2c_gensym_static_initialize_3(void){\
+#define _x2c_gensym_initializer_choice_21BF4D8E_2(_x2c_gensym_static_input_2) _x2c_gensym_initializer_choice_21BF4D8E_2_expanded(_x2c_gensym_static_input_2)
+#define _x2c_gensym_initializer_choice_21BF4D8E_3_expanded(_x2c_gensym_static_input_3) static void _x2c_gensym_static_initialize_3(void){\
   _x2c_gensym_static_input_3;\
 }
-#define _x2c_gensym_initializer_choice_28FCBFDC_3(_x2c_gensym_static_input_3) _x2c_gensym_initializer_choice_28FCBFDC_3_expanded(_x2c_gensym_static_input_3)
-#define _x2c_gensym_initializer_choice_28FCBFDC_4_expanded(_x2c_gensym_static_input_4) static void _x2c_gensym_static_initialize_4(void){\
+#define _x2c_gensym_initializer_choice_21BF4D8E_3(_x2c_gensym_static_input_3) _x2c_gensym_initializer_choice_21BF4D8E_3_expanded(_x2c_gensym_static_input_3)
+#define _x2c_gensym_initializer_choice_21BF4D8E_4_expanded(_x2c_gensym_static_input_4) static void _x2c_gensym_static_initialize_4(void){\
   _x2c_gensym_static_input_4;\
 }
-#define _x2c_gensym_initializer_choice_28FCBFDC_4(_x2c_gensym_static_input_4) _x2c_gensym_initializer_choice_28FCBFDC_4_expanded(_x2c_gensym_static_input_4)
-#define _x2c_gensym_initializer_choice_28FCBFDC_5_expanded(_x2c_gensym_static_input_5) static void _x2c_gensym_static_initialize_5(void){\
+#define _x2c_gensym_initializer_choice_21BF4D8E_4(_x2c_gensym_static_input_4) _x2c_gensym_initializer_choice_21BF4D8E_4_expanded(_x2c_gensym_static_input_4)
+#define _x2c_gensym_initializer_choice_21BF4D8E_5_expanded(_x2c_gensym_static_input_5) static void _x2c_gensym_static_initialize_5(void){\
   _x2c_gensym_static_input_5;\
 }
-#define _x2c_gensym_initializer_choice_28FCBFDC_5(_x2c_gensym_static_input_5) _x2c_gensym_initializer_choice_28FCBFDC_5_expanded(_x2c_gensym_static_input_5)
-#define _x2c_gensym_initializer_choice_28FCBFDC_6_expanded(_x2c_gensym_static_input_6) static void _x2c_gensym_static_initialize_6(void){\
+#define _x2c_gensym_initializer_choice_21BF4D8E_5(_x2c_gensym_static_input_5) _x2c_gensym_initializer_choice_21BF4D8E_5_expanded(_x2c_gensym_static_input_5)
+#define _x2c_gensym_initializer_choice_21BF4D8E_6_expanded(_x2c_gensym_static_input_6) static void _x2c_gensym_static_initialize_6(void){\
   _x2c_gensym_static_input_6;\
 }
-#define _x2c_gensym_initializer_choice_28FCBFDC_6(_x2c_gensym_static_input_6) _x2c_gensym_initializer_choice_28FCBFDC_6_expanded(_x2c_gensym_static_input_6)
-#define _x2c_gensym_initializer_choice_28FCBFDC_7_expanded(_x2c_gensym_static_input_7) static void _x2c_gensym_static_initialize_7(void){\
+#define _x2c_gensym_initializer_choice_21BF4D8E_6(_x2c_gensym_static_input_6) _x2c_gensym_initializer_choice_21BF4D8E_6_expanded(_x2c_gensym_static_input_6)
+#define _x2c_gensym_initializer_choice_21BF4D8E_7_expanded(_x2c_gensym_static_input_7) static void _x2c_gensym_static_initialize_7(void){\
   _x2c_gensym_static_input_7;\
 }
-#define _x2c_gensym_initializer_choice_28FCBFDC_7(_x2c_gensym_static_input_7) _x2c_gensym_initializer_choice_28FCBFDC_7_expanded(_x2c_gensym_static_input_7)
-#define _x2c_gensym_initializer_choice_28FCBFDC_8_expanded(_x2c_gensym_static_input_8) static void _x2c_gensym_static_initialize_8(void){\
+#define _x2c_gensym_initializer_choice_21BF4D8E_7(_x2c_gensym_static_input_7) _x2c_gensym_initializer_choice_21BF4D8E_7_expanded(_x2c_gensym_static_input_7)
+#define _x2c_gensym_initializer_choice_21BF4D8E_8_expanded(_x2c_gensym_static_input_8) static void _x2c_gensym_static_initialize_8(void){\
   _x2c_gensym_static_input_8;\
 }
-#define _x2c_gensym_initializer_choice_28FCBFDC_8(_x2c_gensym_static_input_8) _x2c_gensym_initializer_choice_28FCBFDC_8_expanded(_x2c_gensym_static_input_8)
-#define _x2c_gensym_initializer_choice_28FCBFDC_9_expanded(_x2c_gensym_static_input_9) static void _x2c_gensym_static_initialize_9(void){\
+#define _x2c_gensym_initializer_choice_21BF4D8E_8(_x2c_gensym_static_input_8) _x2c_gensym_initializer_choice_21BF4D8E_8_expanded(_x2c_gensym_static_input_8)
+#define _x2c_gensym_initializer_choice_21BF4D8E_9_expanded(_x2c_gensym_static_input_9) static void _x2c_gensym_static_initialize_9(void){\
   _x2c_gensym_static_input_9;\
 }
-#define _x2c_gensym_initializer_choice_28FCBFDC_9(_x2c_gensym_static_input_9) _x2c_gensym_initializer_choice_28FCBFDC_9_expanded(_x2c_gensym_static_input_9)
-#define _x2c_gensym_initializer_choice_28FCBFDC_10_expanded(_x2c_gensym_static_input_10) static void _x2c_gensym_static_initialize_10(void){\
+#define _x2c_gensym_initializer_choice_21BF4D8E_9(_x2c_gensym_static_input_9) _x2c_gensym_initializer_choice_21BF4D8E_9_expanded(_x2c_gensym_static_input_9)
+#define _x2c_gensym_initializer_choice_21BF4D8E_10_expanded(_x2c_gensym_static_input_10) static void _x2c_gensym_static_initialize_10(void){\
   _x2c_gensym_static_input_10;\
 }
-#define _x2c_gensym_initializer_choice_28FCBFDC_10(_x2c_gensym_static_input_10) _x2c_gensym_initializer_choice_28FCBFDC_10_expanded(_x2c_gensym_static_input_10)
-#define _x2c_gensym_initializer_choice_28FCBFDC_11_expanded(_x2c_gensym_static_input_11) static void _x2c_gensym_static_initialize_11(void){\
+#define _x2c_gensym_initializer_choice_21BF4D8E_10(_x2c_gensym_static_input_10) _x2c_gensym_initializer_choice_21BF4D8E_10_expanded(_x2c_gensym_static_input_10)
+#define _x2c_gensym_initializer_choice_21BF4D8E_11_expanded(_x2c_gensym_static_input_11) static void _x2c_gensym_static_initialize_11(void){\
   _x2c_gensym_static_input_11;\
 }
-#define _x2c_gensym_initializer_choice_28FCBFDC_11(_x2c_gensym_static_input_11) _x2c_gensym_initializer_choice_28FCBFDC_11_expanded(_x2c_gensym_static_input_11)
-#define _x2c_gensym_initializer_choice_28FCBFDC_12_expanded(_x2c_gensym_static_input_12) static void _x2c_gensym_static_initialize_12(void){\
+#define _x2c_gensym_initializer_choice_21BF4D8E_11(_x2c_gensym_static_input_11) _x2c_gensym_initializer_choice_21BF4D8E_11_expanded(_x2c_gensym_static_input_11)
+#define _x2c_gensym_initializer_choice_21BF4D8E_12_expanded(_x2c_gensym_static_input_12) static void _x2c_gensym_static_initialize_12(void){\
   _x2c_gensym_static_input_12;\
 }
-#define _x2c_gensym_initializer_choice_28FCBFDC_12(_x2c_gensym_static_input_12) _x2c_gensym_initializer_choice_28FCBFDC_12_expanded(_x2c_gensym_static_input_12)
-#define _x2c_gensym_initializer_choice_28FCBFDC_13_expanded(_x2c_gensym_static_input_13) static void _x2c_gensym_static_initialize_13(void){\
+#define _x2c_gensym_initializer_choice_21BF4D8E_12(_x2c_gensym_static_input_12) _x2c_gensym_initializer_choice_21BF4D8E_12_expanded(_x2c_gensym_static_input_12)
+#define _x2c_gensym_initializer_choice_21BF4D8E_13_expanded(_x2c_gensym_static_input_13) static void _x2c_gensym_static_initialize_13(void){\
   _x2c_gensym_static_input_13;\
 }
-#define _x2c_gensym_initializer_choice_28FCBFDC_13(_x2c_gensym_static_input_13) _x2c_gensym_initializer_choice_28FCBFDC_13_expanded(_x2c_gensym_static_input_13)
-#define _x2c_gensym_initializer_choice_28FCBFDC_14_expanded(_x2c_gensym_static_input_14) static void _x2c_gensym_static_initialize_14(void){\
+#define _x2c_gensym_initializer_choice_21BF4D8E_13(_x2c_gensym_static_input_13) _x2c_gensym_initializer_choice_21BF4D8E_13_expanded(_x2c_gensym_static_input_13)
+#define _x2c_gensym_initializer_choice_21BF4D8E_14_expanded(_x2c_gensym_static_input_14) static void _x2c_gensym_static_initialize_14(void){\
   _x2c_gensym_static_input_14;\
 }
-#define _x2c_gensym_initializer_choice_28FCBFDC_14(_x2c_gensym_static_input_14) _x2c_gensym_initializer_choice_28FCBFDC_14_expanded(_x2c_gensym_static_input_14)
-#define _x2c_gensym_initializer_choice_28FCBFDC_15_expanded(_x2c_gensym_static_input_15) static void _x2c_gensym_static_initialize_15(void){\
+#define _x2c_gensym_initializer_choice_21BF4D8E_14(_x2c_gensym_static_input_14) _x2c_gensym_initializer_choice_21BF4D8E_14_expanded(_x2c_gensym_static_input_14)
+#define _x2c_gensym_initializer_choice_21BF4D8E_15_expanded(_x2c_gensym_static_input_15) static void _x2c_gensym_static_initialize_15(void){\
   _x2c_gensym_static_input_15;\
 }
-#define _x2c_gensym_initializer_choice_28FCBFDC_15(_x2c_gensym_static_input_15) _x2c_gensym_initializer_choice_28FCBFDC_15_expanded(_x2c_gensym_static_input_15)
+#define _x2c_gensym_initializer_choice_21BF4D8E_15(_x2c_gensym_static_input_15) _x2c_gensym_initializer_choice_21BF4D8E_15_expanded(_x2c_gensym_static_input_15)
 /* auto-generated by x2c.  Do not edit! */
 
-#define __GUARD_0x28FCBFDC__
+#define __GUARD_0x21BF4D8E__
 #include "x2c.h"
 
 #include "private-keywords.h"
 #include "grammar.h"
 #include "ast-rewrite.h"
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include "adapter-memo.h"
 #include "fields.h"
-#include "expressions.h"
+#include "expressions/expressions.h"
 #include "builtins.h"
 #include "linked-meta.h"
-#include "literals.h"
+#include "literals/literals.h"
 #include "lambdas.h"
 #include "stage.h"
-#include "meta-group.h"
+#include "meta-group/meta-group.h"
 #include "meta-helper-client.h"
-#include "meta-native.h"
-#include "meta-sdk.h"
+#include "meta-native/meta-native.h"
+#include "meta-sdk/meta-sdk.h"
 #include "meta.h"
-#include "parse.h"
-#include "regions.h"
+#include "parse/parse.h"
+#include "regions/regions.h"
 #include "statements.h"
 #include "digest.h"
 #include "utils.h"
@@ -509,10 +509,10 @@ static Map f8_rewrites___shipped_rules;
 
 
 
-_x2c_gensym_initializer_choice_28FCBFDC_0((f8_rewrites___shipped_rules = NULL))
+_x2c_gensym_initializer_choice_21BF4D8E_0((f8_rewrites___shipped_rules = NULL))
 static Scope f8_rewrites___shipped_scope;
 
-_x2c_gensym_initializer_choice_28FCBFDC_1((f8_rewrites___shipped_scope = NULL))
+_x2c_gensym_initializer_choice_21BF4D8E_1((f8_rewrites___shipped_scope = NULL))
 static void f8_rewrites____shipped_shutdown(void);
 
 static void _install_rewrite(Compiler c, List row);
@@ -684,7 +684,7 @@ static List f20_invocations_captures____forwarded_prefix_list(void);
 
 static List f20_invocations_captures___forwarded_prefixes;
 
-_x2c_gensym_initializer_choice_28FCBFDC_2((f20_invocations_captures___forwarded_prefixes = f20_invocations_captures____forwarded_prefix_list()))
+_x2c_gensym_initializer_choice_21BF4D8E_2((f20_invocations_captures___forwarded_prefixes = f20_invocations_captures____forwarded_prefix_list()))
 static int _source_capture_parts(Var value, List * source, Var * syntax);
 
 static Var _source_unwrap(Var value);
@@ -767,7 +767,7 @@ static Var f9_templates____slot_rows(Var result);
 
 static unsigned long f9_templates___template_serial;
 
-_x2c_gensym_initializer_choice_28FCBFDC_3((f9_templates___template_serial = 0))
+_x2c_gensym_initializer_choice_21BF4D8E_3((f9_templates___template_serial = 0))
 static Var f9_templates____eval_template_form(Compiler c, String form, List bindings, Token invocation, String source_file, Var construction);
 
 static Map f9_templates____source_captures(List bindings);
@@ -864,46 +864,46 @@ static String f4_lisp____source_text(Compiler c, String path, String message, To
 
 static Map f4_lisp___library_imports;
 
-_x2c_gensym_initializer_choice_28FCBFDC_4((f4_lisp___library_imports = NULL))
+_x2c_gensym_initializer_choice_21BF4D8E_4((f4_lisp___library_imports = NULL))
 static int f4_lisp___library_filling;
 
-_x2c_gensym_initializer_choice_28FCBFDC_5((f4_lisp___library_filling = 0))
+_x2c_gensym_initializer_choice_21BF4D8E_5((f4_lisp___library_filling = 0))
 static Map f4_lisp___library_definitions;
 
-_x2c_gensym_initializer_choice_28FCBFDC_6((f4_lisp___library_definitions = NULL))
+_x2c_gensym_initializer_choice_21BF4D8E_6((f4_lisp___library_definitions = NULL))
 static Map f4_lisp___library_comptime;
 
-_x2c_gensym_initializer_choice_28FCBFDC_7((f4_lisp___library_comptime = NULL))
+_x2c_gensym_initializer_choice_21BF4D8E_7((f4_lisp___library_comptime = NULL))
 static Lisp f4_lisp___library_session;
 
-_x2c_gensym_initializer_choice_28FCBFDC_8((f4_lisp___library_session = NULL))
+_x2c_gensym_initializer_choice_21BF4D8E_8((f4_lisp___library_session = NULL))
 static Scope f4_lisp___library_scope;
 
-_x2c_gensym_initializer_choice_28FCBFDC_9((f4_lisp___library_scope = NULL))
+_x2c_gensym_initializer_choice_21BF4D8E_9((f4_lisp___library_scope = NULL))
 static int f4_lisp___library_hooked;
 
-_x2c_gensym_initializer_choice_28FCBFDC_10((f4_lisp___library_hooked = 0))
+_x2c_gensym_initializer_choice_21BF4D8E_10((f4_lisp___library_hooked = 0))
 static Lisp f4_lisp____fill_library(Compiler c, Lisp shared);
 
 static List f4_lisp___library_files;
 
-_x2c_gensym_initializer_choice_28FCBFDC_11((f4_lisp___library_files = NULL))
+_x2c_gensym_initializer_choice_21BF4D8E_11((f4_lisp___library_files = NULL))
 static List f4_lisp____library_files(void);
 
 static void f4_lisp____eval_library(Compiler c, int loaded, String path, String message);
 
 static String f4_lisp___lisp_binding_macros;
 
-_x2c_gensym_initializer_choice_28FCBFDC_12((f4_lisp___lisp_binding_macros = _965))
+_x2c_gensym_initializer_choice_21BF4D8E_12((f4_lisp___lisp_binding_macros = _965))
 static String f4_lisp___lisp_bindings_marker;
 
-_x2c_gensym_initializer_choice_28FCBFDC_13((f4_lisp___lisp_bindings_marker = NULL))
+_x2c_gensym_initializer_choice_21BF4D8E_13((f4_lisp___lisp_bindings_marker = NULL))
 static String f4_lisp___builtin_macros;
 
-_x2c_gensym_initializer_choice_28FCBFDC_14((f4_lisp___builtin_macros = _966))
+_x2c_gensym_initializer_choice_21BF4D8E_14((f4_lisp___builtin_macros = _966))
 static String f4_lisp___builtin_macros_marker;
 
-_x2c_gensym_initializer_choice_28FCBFDC_15((f4_lisp___builtin_macros_marker = NULL))
+_x2c_gensym_initializer_choice_21BF4D8E_15((f4_lisp___builtin_macros_marker = NULL))
 static void f4_lisp____install_source(Compiler c, String text, String filename, String marker, int builtin);
 
 static Map f4_lisp____read_definitions(Compiler c);
@@ -10293,35 +10293,35 @@ static Var _x2c_gensym_func_adapt_0(Func _x2c_gensym_func_binding_0, const FuncA
   ;
 }
 
-#undef _x2c_gensym_initializer_choice_28FCBFDC_0_expanded
-#undef _x2c_gensym_initializer_choice_28FCBFDC_0
-#undef _x2c_gensym_initializer_choice_28FCBFDC_1_expanded
-#undef _x2c_gensym_initializer_choice_28FCBFDC_1
-#undef _x2c_gensym_initializer_choice_28FCBFDC_2_expanded
-#undef _x2c_gensym_initializer_choice_28FCBFDC_2
-#undef _x2c_gensym_initializer_choice_28FCBFDC_3_expanded
-#undef _x2c_gensym_initializer_choice_28FCBFDC_3
-#undef _x2c_gensym_initializer_choice_28FCBFDC_4_expanded
-#undef _x2c_gensym_initializer_choice_28FCBFDC_4
-#undef _x2c_gensym_initializer_choice_28FCBFDC_5_expanded
-#undef _x2c_gensym_initializer_choice_28FCBFDC_5
-#undef _x2c_gensym_initializer_choice_28FCBFDC_6_expanded
-#undef _x2c_gensym_initializer_choice_28FCBFDC_6
-#undef _x2c_gensym_initializer_choice_28FCBFDC_7_expanded
-#undef _x2c_gensym_initializer_choice_28FCBFDC_7
-#undef _x2c_gensym_initializer_choice_28FCBFDC_8_expanded
-#undef _x2c_gensym_initializer_choice_28FCBFDC_8
-#undef _x2c_gensym_initializer_choice_28FCBFDC_9_expanded
-#undef _x2c_gensym_initializer_choice_28FCBFDC_9
-#undef _x2c_gensym_initializer_choice_28FCBFDC_10_expanded
-#undef _x2c_gensym_initializer_choice_28FCBFDC_10
-#undef _x2c_gensym_initializer_choice_28FCBFDC_11_expanded
-#undef _x2c_gensym_initializer_choice_28FCBFDC_11
-#undef _x2c_gensym_initializer_choice_28FCBFDC_12_expanded
-#undef _x2c_gensym_initializer_choice_28FCBFDC_12
-#undef _x2c_gensym_initializer_choice_28FCBFDC_13_expanded
-#undef _x2c_gensym_initializer_choice_28FCBFDC_13
-#undef _x2c_gensym_initializer_choice_28FCBFDC_14_expanded
-#undef _x2c_gensym_initializer_choice_28FCBFDC_14
-#undef _x2c_gensym_initializer_choice_28FCBFDC_15_expanded
-#undef _x2c_gensym_initializer_choice_28FCBFDC_15
+#undef _x2c_gensym_initializer_choice_21BF4D8E_0_expanded
+#undef _x2c_gensym_initializer_choice_21BF4D8E_0
+#undef _x2c_gensym_initializer_choice_21BF4D8E_1_expanded
+#undef _x2c_gensym_initializer_choice_21BF4D8E_1
+#undef _x2c_gensym_initializer_choice_21BF4D8E_2_expanded
+#undef _x2c_gensym_initializer_choice_21BF4D8E_2
+#undef _x2c_gensym_initializer_choice_21BF4D8E_3_expanded
+#undef _x2c_gensym_initializer_choice_21BF4D8E_3
+#undef _x2c_gensym_initializer_choice_21BF4D8E_4_expanded
+#undef _x2c_gensym_initializer_choice_21BF4D8E_4
+#undef _x2c_gensym_initializer_choice_21BF4D8E_5_expanded
+#undef _x2c_gensym_initializer_choice_21BF4D8E_5
+#undef _x2c_gensym_initializer_choice_21BF4D8E_6_expanded
+#undef _x2c_gensym_initializer_choice_21BF4D8E_6
+#undef _x2c_gensym_initializer_choice_21BF4D8E_7_expanded
+#undef _x2c_gensym_initializer_choice_21BF4D8E_7
+#undef _x2c_gensym_initializer_choice_21BF4D8E_8_expanded
+#undef _x2c_gensym_initializer_choice_21BF4D8E_8
+#undef _x2c_gensym_initializer_choice_21BF4D8E_9_expanded
+#undef _x2c_gensym_initializer_choice_21BF4D8E_9
+#undef _x2c_gensym_initializer_choice_21BF4D8E_10_expanded
+#undef _x2c_gensym_initializer_choice_21BF4D8E_10
+#undef _x2c_gensym_initializer_choice_21BF4D8E_11_expanded
+#undef _x2c_gensym_initializer_choice_21BF4D8E_11
+#undef _x2c_gensym_initializer_choice_21BF4D8E_12_expanded
+#undef _x2c_gensym_initializer_choice_21BF4D8E_12
+#undef _x2c_gensym_initializer_choice_21BF4D8E_13_expanded
+#undef _x2c_gensym_initializer_choice_21BF4D8E_13
+#undef _x2c_gensym_initializer_choice_21BF4D8E_14_expanded
+#undef _x2c_gensym_initializer_choice_21BF4D8E_14
+#undef _x2c_gensym_initializer_choice_21BF4D8E_15_expanded
+#undef _x2c_gensym_initializer_choice_21BF4D8E_15

@@ -74,7 +74,7 @@ integer constants.
 ## Implementation
 
 1. **Recognize.** Add `case <switch>:` to static `_step_tag`
-   ([transform.x](../../src/transform.x)), beside `<match>`, calling
+   ([transform.x](../../src/transform/transform.x)), beside `<match>`, calling
    `Compiler._switch_node`. Recognize the input with the `switched` grammar
    macro ([grammar.x](../../src/grammar.x)). Return the node unchanged unless
    the selector's type reaches `String`.

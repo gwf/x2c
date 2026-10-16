@@ -6,7 +6,7 @@
 #define __GUARD_0x1E27A9AE__
 
 #include "x2c.h"
-#include "cli.h"
+#include "cli/cli.h"
 #include "frontend.h"
 #include "translation.h"
 #include "toolchain.h"

@@ -4,7 +4,7 @@
 > **Provisional API:** This reference documents current compiler behavior.
 > Compatibility is not yet promised.
 
-# `src/meta-native.x`
+# `src/meta-native/meta-native.x`
 
 Meta functions and the native code they call.
 

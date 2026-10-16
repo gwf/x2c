@@ -5,7 +5,7 @@
 #include "repl-session.x"
 #include "lisp.x"
 #include "scope.x"
-#include "macros.x"
+#include "macros/macros.x"
 #include <stdio.h>
 
 static int failures;

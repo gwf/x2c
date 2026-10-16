@@ -65,7 +65,7 @@ deletions.
 | [typed-array.x](../../lib/typed-array.x) | 189 | 103-165 | 63 | Seven typed families compose storage, public operations, observation, update, publication, and iteration. |
 | [typed-list.x](../../lib/typed-list.x) | 102 | 23-102 | 80 | A typed List retains canonical List representation and inherits operations instead of generating storage algorithms. |
 | [typed-list.x](../../lib/typed-list.x) | 123 | 97-123 | 27 | Seven typed-list invocations state codecs and element tags explicitly. |
-| [regions.x](../../src/regions.x) | 1,455 | 165-180 | 16 | Four ordinary wrappers and eleven typed-container conversion pairs are explicit effects keyed by emitted C name. |
+| [regions.x](../../src/regions/regions.x) | 1,455 | 165-180 | 16 | Four ordinary wrappers and eleven typed-container conversion pairs are explicit effects keyed by emitted C name. |
 
 An initial survey called the Map operations signature fifteen arguments.
 The checked count is fourteen: three Type slots, six Name slots, and five

@@ -5,7 +5,7 @@
 
 #pragma once
 #include "build.x"
-#include "project.x"
+#include "project/project.x"
 #include "translation.x"
 
 static macro Stmt $progress.main_translation_verbose(

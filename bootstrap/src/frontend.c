@@ -7,8 +7,8 @@
 #define __GUARD_0x1A2A7247__
 #include "x2c.h"
 
-#include "cli.h"
-#include "compiler.h"
+#include "cli/cli.h"
+#include "compiler/compiler.h"
 #include "toolchain.h"
 typedef void(* FrontendErrorSink)(String text);
 
@@ -34,7 +34,7 @@ ParsedUnit;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "collect.h"
+#include "collect/collect.h"
 #include "deps.h"
 #include "utils.h"
 static List _74, _73, _69, _68, _66, _64, _49, _48, _47, _39, _38, _32, _31, _30, _21, _20, _13;

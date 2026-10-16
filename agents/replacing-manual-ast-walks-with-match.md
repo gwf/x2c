@@ -13,7 +13,7 @@ preserving source positions, issuing diagnostics, and ordering emission. A
 macro, Lisp function, or transform should not acquire a second implementation
 of those operations merely because it produced the AST differently.
 
-The macro path in `src/macros.x` is the current vertical example. An invocation
+The macro path in `src/macros/macros.x` is the current vertical example. An invocation
 parses typed capture rows, matches them against the definition, and performs
 one `template.replace(replacement_bindings)`. The resulting `constructed` AST
 then goes to `Compiler.bind_syntax` with its `AstPos` and return type. From

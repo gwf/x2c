@@ -13,7 +13,7 @@ A region is a `$scope()` block, a `Scope.retain` and `Scope.release` pair, a
 `$scope(&slot)` push, a `Pool.open` bracket, an `$auto` local, the
 storage of a `Scope` local that `Scope.destroy` ends, or the function's own
 locals and parameters, whose storage ends when the function returns.
-`src/regions.x` analyzes these forms before the transform driver lowers
+`src/regions/regions.x` analyzes these forms before the transform driver lowers
 them, so a region is still the call that opens it and the `defer` beside it
 that closes it.
 

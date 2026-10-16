@@ -6,11 +6,11 @@ BUILD="$ROOT/unittest/build/compiler-translation"
 SAMPLES=${SAMPLES:-5}
 
 sources=(
-  src/transform.x
-  src/emit.x
-  src/expressions.x
-  src/generate.x
-  src/parse.x
+  src/transform/transform.x
+  src/emit/emit.x
+  src/expressions/expressions.x
+  src/generate/generate.x
+  src/parse/parse.x
   src/type.x
 )
 if [[ -f "$ROOT/lib/tokenizer.x" ]]; then

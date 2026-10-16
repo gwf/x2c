@@ -9,7 +9,7 @@
 
 typedef struct Sym * Sym;
 
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include "parse-reports.h"
 #include "grammar.h"
 typedef struct Sym{

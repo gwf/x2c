@@ -127,8 +127,15 @@ cmp "$tests/src/suppression-accepted.x" "$work/suppression.x"
 
 # The violation census includes zero-count rules from the current catalog.
 "$tool" --rules >"$work/rules"
-git ls-files -z -- ':(glob)src/*.x' ':(glob)src/components/*.x' ':(glob)lib/*.x' \
-  ':(exclude)lib/x2c.x' ':(exclude)src/linked-meta.x' >"$work/census.files"
+python3 - <<'CENSUS' >"$work/census.files"
+import subprocess, sys
+from pathlib import Path
+sources = subprocess.check_output(['python3', 'tools/compiler-sources.py'], text=True).splitlines()
+sources += [str(p) for p in Path('lib').glob('*.x')]
+for path in sources:
+    if path not in ('lib/x2c.x', 'src/linked-meta.x'):
+        sys.stdout.buffer.write(path.encode() + b'\0')
+CENSUS
 xargs -0 "$tool" --all -I src -I lib <"$work/census.files" \
   >"$work/census"
 awk '

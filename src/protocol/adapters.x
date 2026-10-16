@@ -103,7 +103,7 @@ static List _collision_notes(Symbol kind, List first, List second) {
     `conform` forms. A native alias is inserted at the participant's inferred
     public or private boundary. Each other conformance whose forward converter
     the unit defines goes to the rule on the `conform` head, which
-    `src/components/component-protocols.x` registers to write its adapters into
+    `src/components/protocol-adapters.x` registers to write its adapters into
     the unit's
     pending support. The external conformances the unit declares are first
     recorded in its interface. Returns `ast` with native insertions applied.
@@ -214,7 +214,7 @@ static int _defines_function(Compiler c, String name) {
 }
 
 /* Presents one conformance to the rule on the `conform` head, which
-   `src/components/component-protocols.x` documents and ships. The owner of
+   `src/components/protocol-adapters.x` documents and ships. The owner of
    each
    member, its collisions and missing conversions, and the generated
    names are settled here; the rule writes the code. */

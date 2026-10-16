@@ -2,29 +2,29 @@
 
 #pragma once
 
-#ifndef __GUARD_0x28FCBFDC__
-#define __GUARD_0x28FCBFDC__
+#ifndef __GUARD_0x21BF4D8E__
+#define __GUARD_0x21BF4D8E__
 
 #include "x2c.h"
 #include "private-keywords.h"
 #include "grammar.h"
 #include "ast-rewrite.h"
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include "adapter-memo.h"
 #include "fields.h"
-#include "expressions.h"
+#include "expressions/expressions.h"
 #include "builtins.h"
 #include "linked-meta.h"
-#include "literals.h"
+#include "literals/literals.h"
 #include "lambdas.h"
 #include "stage.h"
-#include "meta-group.h"
+#include "meta-group/meta-group.h"
 #include "meta-helper-client.h"
-#include "meta-native.h"
-#include "meta-sdk.h"
+#include "meta-native/meta-native.h"
+#include "meta-sdk/meta-sdk.h"
 #include "meta.h"
-#include "parse.h"
-#include "regions.h"
+#include "parse/parse.h"
+#include "regions/regions.h"
 #include "statements.h"
 #include "digest.h"
 #include "utils.h"
@@ -209,4 +209,4 @@ void Compiler_bind_meta_operation(Lisp lisp, String name, Var function);
 void Compiler_reset_macro_library(void);
 
 
-#endif /* __GUARD_0x28FCBFDC__ */
+#endif /* __GUARD_0x21BF4D8E__ */

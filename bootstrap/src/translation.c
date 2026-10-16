@@ -16,16 +16,16 @@
 #include <signal.h>
 #include <unistd.h>
 #include "report.h"
-#include "collect.h"
-#include "cli.h"
-#include "compiler.h"
+#include "collect/collect.h"
+#include "cli/cli.h"
+#include "compiler/compiler.h"
 #include "deps.h"
 #include "logger.h"
 #include "utils.h"
-#include "emit.h"
-#include "generate.h"
+#include "emit/emit.h"
+#include "generate/generate.h"
 #include "format.h"
-#include "protocol.h"
+#include "protocol/protocol.h"
 static String _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1;
 
 static Var _0;

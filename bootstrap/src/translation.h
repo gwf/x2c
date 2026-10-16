@@ -19,16 +19,16 @@
 #include <signal.h>
 #include <unistd.h>
 #include "report.h"
-#include "collect.h"
-#include "cli.h"
-#include "compiler.h"
+#include "collect/collect.h"
+#include "cli/cli.h"
+#include "compiler/compiler.h"
 #include "deps.h"
 #include "logger.h"
 #include "utils.h"
-#include "emit.h"
-#include "generate.h"
+#include "emit/emit.h"
+#include "generate/generate.h"
 #include "format.h"
-#include "protocol.h"
+#include "protocol/protocol.h"
 int translate_request(CliRequest request, Map unit_dirs, void * context, void(* progress)(void * context, String input, int completed));
 
 

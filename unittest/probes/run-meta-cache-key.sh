@@ -317,7 +317,7 @@ grep -q "int n = 1;" installed/p.c || fail "installed meta call: wrong value"
 # stores translate, the helper's own loop translates with them, and the
 # edit shows only in a compiler built from it.
 sed -i.orig 's/Var, or String operand/Var, or String edited/' \
-  home/src/components/component-access.x
+  home/src/components/bracket-access.x
 cat > installed/store.x <<'EOF'
 meta int good(void) => 1;
 int main(void) {

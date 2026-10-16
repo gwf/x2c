@@ -6,7 +6,7 @@
 #define __GUARD_0xFCD96F31__
 
 #include "x2c.h"
-#include "compiler.h"
+#include "compiler/compiler.h"
 int Symbol_binary_precedence(Symbol op);
 
 Symbol Symbol_compound_operator(Symbol op);

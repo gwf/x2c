@@ -6,10 +6,10 @@
 #define __GUARD_0x0F07AB79__
 
 #include "x2c.h"
-#include "cli.h"
-#include "compiler.h"
+#include "cli/cli.h"
+#include "compiler/compiler.h"
 #include "utils.h"
-#include "collect.h"
+#include "collect/collect.h"
 #include <stdio.h>
 #include <string.h>
 #include "buffer.h"

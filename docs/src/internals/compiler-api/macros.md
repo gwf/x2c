@@ -4,7 +4,7 @@
 > **Provisional API:** This reference documents current compiler behavior.
 > Compatibility is not yet promised.
 
-# `src/macros.x`
+# `src/macros/macros.x`
 
 Source macros and the compile-time Lisp they run.
 

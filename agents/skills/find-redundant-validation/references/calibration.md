@@ -15,7 +15,7 @@ Revision `e3a2b51a` is the required static-match calibration. Run:
 
 ```sh
 git worktree add /tmp/x2c-e3a2b51a e3a2b51a
-builds/0/x2c lint --rule static-match-capture /tmp/x2c-e3a2b51a/src/parse.x
+builds/0/x2c lint --rule static-match-capture /tmp/x2c-e3a2b51a/src/parse/parse.x
 ```
 
 The report must include `_install_declarator`, where a static `List.match`
@@ -48,7 +48,7 @@ The same run must not report the following as consumers:
   of a canonical AST List returned by Lisp;
 - `Ast.try_sequence`, which recognizes constructed syntax before binding;
 - `Compiler.rebuild_protocols`, which decodes heterogeneous symbol rows;
-- artifact readers in `src/collect.x`; or
+- artifact readers in `src/collect/collect.x`; or
 - `_transform_cast`, `_transform_defer_stmt`, and `_transform_return`, which
   distinguish real pre- and post-lowered forms during fixed-point transforms.
 
@@ -60,8 +60,8 @@ positive case because it also silently skips an impossible candidate shape.
 ## Receiver-relative `Self`
 
 Commit `bba961dc` initially added receiver-relative `Self`. Before commit
-`414a15ed`, `src/parse.x` lost 109 lines and gained 18, while
-`src/compiler.x` lost 23 and gained 15. The reduced version retained valid
+`414a15ed`, `src/parse/parse.x` lost 109 lines and gained 18, while
+`src/compiler/compiler.x` lost 23 and gained 15. The reduced version retained valid
 `Self` lowering but removed the dedicated rejection paths for incompatible
 receivers and use outside methods. Their diagnostic sidecars and two complete
 negative fixture families disappeared.

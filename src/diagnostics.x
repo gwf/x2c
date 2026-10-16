@@ -6,7 +6,7 @@
 
 #pragma once
 #include "common.x"
-#include "compiler.x"
+#include "compiler/compiler.x"
 
 /** Collects diagnostic entries and optionally streams them.
     A value is valid after `Diagnostics.new`. The store and backing `Array` are

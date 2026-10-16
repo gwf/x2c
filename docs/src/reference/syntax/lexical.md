@@ -180,7 +180,7 @@ a prefix such as `L` is scanned separately as an identifier.
 Widths describe recognition. Unicode scalar validity, decoded numeric range,
 and host compiler acceptance are separate questions. Percent-string decoding
 removes continuations, normalizes raw CR and CRLF to LF, and decodes escapes.
-See `_parse_text_segment` in `src/literals.x`.
+See `_parse_text_segment` in `src/literals/literals.x`.
 
 A simple Symbol spelling is `<` followed by one or more non-whitespace,
 non-NUL bytes, through the first `>`. A quoted spelling is `<"` followed by

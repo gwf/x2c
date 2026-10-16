@@ -11,7 +11,7 @@ project skills own task execution.
 - Never hand-edit `lib/x2c.x`; `lib/Makefile` generates it. Never hand-edit
   `src/linked-meta.x` or `etc/meta-queries.x`; `tools/gen-linked-meta.sh`
   and `tools/gen-meta-queries.sh` generate them. A compiler operation is a
-  bodyless prototype in `lib/meta.x` and its answer in `src/meta-sdk.x`.
+  bodyless prototype in `lib/meta.x` and its answer in `src/meta-sdk/meta-sdk.x`.
 - Use `builds/0/x2c` for current behavior. `bin/x2c` remains the bootstrap
   compiler unless stage 0 was intentionally installed.
 - Keep temporary output in `/tmp` or `unittest/build/` and failure logs under
@@ -23,7 +23,7 @@ generated-header changes rebuild their consumers. A clean build is a recovery
 and diagnostic tool, not a substitute for dependency tracking.
 
 A shipped component, one of the prelude sources `Compiler.prelude_sources`
-lists, such as `src/components/component-access.x`, belongs to the compiler that links
+lists, such as `src/components/bracket-access.x`, belongs to the compiler that links
 it, as the kernel does. That compiler runs its linked copies of the
 component's translators even after the source changes. It also skips a
 prelude rule whose translator it does not link, so the form keeps its own

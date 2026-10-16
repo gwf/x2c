@@ -10,7 +10,7 @@
     leaves the table as it was.
 */
 #pragma once
-#include "compiler.x"
+#include "compiler/compiler.x"
 #include "parse-reports.x"
 #include "grammar.x"
 

@@ -23,7 +23,7 @@ foreign alias preserve declared qualifiers.
 
 Type lookup uses the unqualified form: a `const` receiver has the same
 aggregate, fields, methods, protocol conformance, and `Var` tag as its
-unqualified type. The func-landing thunk in `src/emit.x` also uses an
+unqualified type. The func-landing thunk in `src/emit/emit.x` also uses an
 unqualified result type because it declares a result variable and assigns to
 it afterwards. Unit interfaces (`.xi`) record the qualifiers, so a unit
 read from its interface and a unit collected from source have the same

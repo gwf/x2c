@@ -532,7 +532,7 @@ Preserve names required by established language or external lookup contracts,
 such as converters, protocol members, operators, lifecycle hooks, and native
 bindings. Verify each exception against the name producer and its consumers;
 dotted spelling alone is not evidence. For example, `Fact.var` and `Var.fact`
-in `src/regions.x` serve conversion and protocol lookup.
+in `src/regions/regions.x` serve conversion and protocol lookup.
 `Job.new` and `Regex.new` remain static dotted constructors: class expansion
 looks for an owned `new` before synthesizing a constructor that requires
 `init`. Their names therefore participate in class lookup.
@@ -550,7 +550,7 @@ diagnostic configuration and standalone tool capture are module services,
 
 Generated Array and Map family helpers remain lookup exceptions. Typed-alias
 consumers inherit core helpers through typedef method lookup
-(`_next_method_type` in `src/expressions.x`). Other consumers need a stable
+(`_next_method_type` in `src/expressions/expressions.x`). Other consumers need a stable
 name outside the defining macro expansion: Map `find_hashed` and `reinsert`
 have handwritten callers in `lib/map.x` and `lib/pool.x`, while Array
 `compare_elements` and `write_elements` and Map `compare_entries` and
@@ -599,8 +599,8 @@ and is rejected in source declarations. Never use a `__x2c_` name.
 Verify the generated-code and native callers of
 a retained C entry before renaming it. The registry
 `Compiler.builtin_targets` in `src/builtins.x` stays non-static because
-`src/macros.x` calls it across units; making it static fails translation
-of `src/macros.x`.
+`src/macros/macros.x` calls it across units; making it static fails translation
+of `src/macros/macros.x`.
 
 ### Module sets
 

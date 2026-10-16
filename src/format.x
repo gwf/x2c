@@ -8,7 +8,7 @@
 */
 
 #pragma once
-#include "compiler.x"
+#include "compiler/compiler.x"
 
 // pretty print formatting
 

@@ -12,8 +12,8 @@
 #include "meta.x"
 #include "grammar.x"
 #include "lisp.x"
-#include "macros.x"
-#include "transform.x"
+#include "macros/macros.x"
+#include "transform/transform.x"
 
 // $scope
 

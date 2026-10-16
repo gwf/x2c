@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x08246194__
-#define __GUARD_0x08246194__
+#ifndef __GUARD_0xDC21180E__
+#define __GUARD_0xDC21180E__
 
 #include "x2c.h"
 #include "private-keywords.h"
@@ -182,11 +182,11 @@ SymTxn;
 #include "preprocess.h"
 #include "grammar.h"
 #include "utils.h"
-#include "parse.h"
-#include "protocol.h"
-#include "macros.h"
+#include "parse/parse.h"
+#include "protocol/protocol.h"
+#include "macros/macros.h"
 #include "stage.h"
-#include "meta-group.h"
+#include "meta-group/meta-group.h"
 #include "meta-helper-client.h"
 #include <limits.h>
 #include <stdio.h>
@@ -368,4 +368,4 @@ void Compiler_add_translation_dependency(Compiler c, String path);
 void Compiler_merge_translation_dependencies(Compiler c, Map dependencies);
 
 
-#endif /* __GUARD_0x08246194__ */
+#endif /* __GUARD_0xDC21180E__ */

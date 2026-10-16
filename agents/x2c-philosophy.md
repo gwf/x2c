@@ -82,10 +82,10 @@ captures a value; by itself it does not establish that value's type.
 | Raw stream status and text conversion | verified | `File.*_into`, String adapters | File suite |
 | Lexical scanner contracts | verified | `scan_*`, `Tokenizer` | scanner suite and fixtures |
 | Source declaration collection | verified | `Compiler.collect_symbols`; prelude replay from the runtime `x2c.xi` interface; CPP oracle | raw sweep, process probes, fixtures |
-| Compiler-generated identifier space | verified | `_is_reserved_spelling` defines the set; minted by `Compiler.gensym`, `src/cache.x` (`_N`), `src/generate.x` (`_init_guard_`, `_file_init_`) | `reserved-namespace` and generated-name fixtures |
+| Compiler-generated identifier space | verified | `_is_reserved_spelling` defines the set; minted by `Compiler.gensym`, `src/cache.x` (`_N`), `src/generate/generate.x` (`_init_guard_`, `_file_init_`) | `reserved-namespace` and generated-name fixtures |
 | Typed static callback adaptation | verified | `$x2c.callback.adapt`; compiler-owned typed thunks | callback adapter fixtures and dispatch/runtime suites |
 | Source directive routing | verified | parser, generator, formatter | AST/C/runtime fixtures |
-| Source/generated expression resolution and declaration publication | verified | `Compiler.resolve_expression`; shared declaration helpers in `src/parse.x` | `macro-source-parity` and macro fixture corpus |
+| Source/generated expression resolution and declaration publication | verified | `Compiler.resolve_expression`; shared declaration helpers in `src/parse/parse.x` | `macro-source-parity` and macro fixture corpus |
 | Error protocol | verified | `Error`, plain `raise`, filtered `catch`; private record regions and handler watermarks own lifetime | Error/exception suites, compiler fixtures, allocation/floor/fatal probes, self-host convergence |
 | Allocation and size failure | verified | `Scope`, `Pool`, `Error`, and literal-raise emission | Error/exception suites, Scope and Error fatal probes, compiler fixtures |
 | Lisp read/eval failures | verified | `Lisp.read`, evaluator, `Func` Type boundary | Lisp/Func suites |
@@ -103,7 +103,7 @@ captures a value; by itself it does not establish that value's type.
 | Type-owned shutdown | verified | parser/generator and `Scope.shutdown_hook` | lifecycle fixtures and Scope probes |
 | Typedef method and converter inheritance | verified | postfix parser and conversion lowering | fixtures/example |
 | Numeric/`Var` String interpolation | verified | interpolation converter | interpolation suite/example |
-| Static printf-family `Var` conversion | verified | `src/components/component-printf.x` | compiler fixtures |
+| Static printf-family `Var` conversion | verified | `src/components/printf-format.x` | compiler fixtures |
 | Structural `Var` decoding | verified | `lib/var.x` | VarOps suite |
 | Cross-tag numeric conversion | verified | `Var.convert` | VarOps |
 | Dynamic numeric operations | verified | `Var.binary` | VarOps/fixture |
@@ -116,7 +116,7 @@ captures a value; by itself it does not establish that value's type.
 | Promoted immutable literal caching | verified | expression lowering, cache and generator | promoted-string-cache fixture |
 | Match transform dump | verified | `String.repr` | transform fixture |
 | Pooled interning | verified | `lib/pool.x` (`Pool.retain*`/`.release`/`.insert`/`.lookup`/`.owns`), `String.promote`, `List.promote` | Pool suite |
-| Unit interfaces | verified | `Compiler.interface_text`/`_interface_read` (`src/collect.x`), `<stem>.xi` beside generated C | `run-header-cache.sh`, `run-artifact-atomicity` |
+| Unit interfaces | verified | `Compiler.interface_text`/`_interface_read` (`src/collect/collect.x`), `<stem>.xi` beside generated C | `run-header-cache.sh`, `run-artifact-atomicity` |
 | Batch-compilation memory brackets | partial | `src/main.x` per-unit `Scope`/pool brackets, the per-unit `Context` in `src/frontend.x` | batch/solo output parity in `run-header-cache.sh`; no probe yet asserts the pool-release/no-leak discipline directly |
 
 ## Verified contracts
@@ -630,7 +630,7 @@ failure, out-of-home includes, and batch-vs-solo output parity;
 
 Generated `try` uses POSIX `sigsetjmp(env, 0)`/`siglongjmp`, so Error
 transfer preserves registers and stack state without restoring a signal mask.
-`src/cleanup.x` owns the C rule that automatic state changed across that
+`src/cleanup/cleanup.x` owns the C rule that automatic state changed across that
 boundary must be volatile. It qualifies directly modified named locals and
 parameters in the definition, and locals the body writes through a pointer it
 holds, along with that pointer's pointee type; a prototype drops the parameter
@@ -720,7 +720,7 @@ diagnostics, and the terminal boundary.
 Tokens establish one-based lines and columns. Compiler locations preserve
 `file`, `line`, `column`, `length`, and absolute `position`; the source
 renderer uses the token `length` as the caret width. The CLI records twenty
-ordinary errors by default (`src/cli.x`, applied in `src/frontend.x`) and then
+ordinary errors by default (`src/cli/cli.x`, applied in `src/frontend.x`) and then
 its limit notice; a bare `Compiler.new` records one until a caller raises the
 limit. Exact diagnostic fixtures own this output boundary.
 
@@ -779,7 +779,7 @@ also renders through `Var.str` for every runtime tag.
 The interpolation suite provides executable evidence.
 
 Static printf-family formats provide a separate presentation crossing for
-`Var`. `src/components/component-printf.x` recognizes `printf`, `fprintf`, `sprintf`,
+`Var`. `src/components/printf-format.x` recognizes `printf`, `fprintf`, `sprintf`,
 `snprintf`, and the `printf` methods on String, File, and Buffer. Numeric
 conversions use checked `Var.convert`, while `%s` uses `Var.str`; the
 compiler fixtures own the exact supported format grammar and its
@@ -838,7 +838,7 @@ exhaustion API use** row in the ledger above.
 
 ### Batch-compilation memory brackets
 
-A multi-file compile has two lifetimes. The process cache in `src/collect.x`
+A multi-file compile has two lifetimes. The process cache in `src/collect/collect.x`
 owns a Scope that survives the whole batch, so collected entries promote out
 of a unit's pools and stay live, while each translation unit runs inside its
 own isolated `Context` whose Scope and `String`/`List` pools release when the

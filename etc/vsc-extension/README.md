@@ -193,7 +193,7 @@ existing theme rules continue to apply when these settings are absent.
 
 `etc/syntax/grammar.x` is the machine-readable source grammar. Its
 `result-kind`, `hole-kind`, and `quotation-kind` rules describe the syntax
-kinds; `src/macros.x` owns their case-insensitive recognition. `lib/meta.x`
+kinds; `src/macros/macros.x` owns their case-insensitive recognition. `lib/meta.x`
 declares the semantic macro types.
 
 | Category | Names |

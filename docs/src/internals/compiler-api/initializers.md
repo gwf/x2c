@@ -4,7 +4,7 @@
 > **Provisional API:** This reference documents current compiler behavior.
 > Compatibility is not yet promised.
 
-# `src/initializers.x`
+# `src/initializers/initializers.x`
 
 Brace initializer conversion.
 

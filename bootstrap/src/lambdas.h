@@ -6,12 +6,12 @@
 #define __GUARD_0x57655C8B__
 
 #include "x2c.h"
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include "ast-rewrite.h"
 #include "grammar.h"
-#include "parse.h"
+#include "parse/parse.h"
 #include "type.h"
-#include "expressions.h"
+#include "expressions/expressions.h"
 List Compiler_lift_lambda_types(Compiler c, List function);
 
 List Compiler_parse_lambda_literal(Compiler c);

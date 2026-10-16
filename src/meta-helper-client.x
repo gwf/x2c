@@ -9,9 +9,9 @@
     body that fails, crashes, or runs too long.
 */
 #pragma once
-#include "compiler.x"
+#include "compiler/compiler.x"
 
-#include "meta-group.x"
+#include "meta-group/meta-group.x"
 #include "datum.x"
 #include <errno.h>
 #include <fcntl.h>

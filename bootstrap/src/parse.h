@@ -2,21 +2,21 @@
 
 #pragma once
 
-#ifndef __GUARD_0x46021D32__
-#define __GUARD_0x46021D32__
+#ifndef __GUARD_0x12E19616__
+#define __GUARD_0x12E19616__
 
 #include "x2c.h"
 #include "private-keywords.h"
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include "type.h"
 #include "parse-reports.h"
 #include "grammar.h"
 #include "statements.h"
-#include "expressions.h"
-#include "literals.h"
-#include "collect.h"
-#include "macros.h"
-#include "protocol.h"
+#include "expressions/expressions.h"
+#include "literals/literals.h"
+#include "collect/collect.h"
+#include "macros/macros.h"
+#include "protocol/protocol.h"
 #include "utils.h"
 List Compiler_parse_top_level_mode(Compiler c, int skip_body);
 
@@ -129,4 +129,4 @@ List Compiler_bind_match_arm(Compiler c, List pattern, Var body, Token start, in
 List Compiler_bind_callable_body(Compiler c, List syntax, Type return_type);
 
 
-#endif /* __GUARD_0x46021D32__ */
+#endif /* __GUARD_0x12E19616__ */

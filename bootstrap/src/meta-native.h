@@ -2,15 +2,15 @@
 
 #pragma once
 
-#ifndef __GUARD_0x8AA1709E__
-#define __GUARD_0x8AA1709E__
+#ifndef __GUARD_0x65953FEE__
+#define __GUARD_0x65953FEE__
 
 #include "x2c.h"
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include "grammar.h"
-#include "macros.h"
-#include "meta-group.h"
-#include "meta-sdk.h"
+#include "macros/macros.h"
+#include "meta-group/meta-group.h"
+#include "meta-sdk/meta-sdk.h"
 #include "meta.h"
 #include "stage.h"
 #include "utils.h"
@@ -88,4 +88,4 @@ String Compiler_native_meta_module(Compiler c, String name, Type * type);
 List Compiler_native_meta_targets(List paths);
 
 
-#endif /* __GUARD_0x8AA1709E__ */
+#endif /* __GUARD_0x65953FEE__ */

@@ -3,7 +3,7 @@
     Copyright (c) 2026 Gary William Flake.
 */
 #pragma once
-#include "compiler.x"
+#include "compiler/compiler.x"
 #include "lisp.x"
 
 /* Interpreter state belongs to one REPL session. */
@@ -34,7 +34,7 @@ void ReplLower.free(ReplLower self) {
 String ReplLower.declined(ReplLower self) => self.reason;
 #include "decline-errors.x"
 #include "type.x"
-#include "transform.x"
+#include "transform/transform.x"
 #include "var.x"
 #include "string.x"
 #include "lisp.x"

@@ -36,7 +36,7 @@ uses `Compiler.script_statement_starts`, `_declaration_stays`, and
 `defines_main`, defined in `src/parse/units.x`. File-level functions cannot refer
 to script locals.
 
-Module blocks are expanded by `src/collect.x` before `translation-unit`
+Module blocks are expanded by `src/collect/collect.x` before `translation-unit`
 parsing. `module-block` is spliced before parsing and is not a `unit-item`. It
 contains quoted member paths, separated by commas, with an optional trailing
 comma. Members are inserted in order from the containing file's companion
@@ -183,7 +183,7 @@ From lowest to highest:
 | Postfix | Call, index, slice, member selection, postfix update | Left |
 
 `src/operator-ledger.x` defines the binary rows except the contextual `is`
-handler in `src/expressions.x`. Assignment parses a conditional left side;
+handler in `src/expressions/expressions.x`. Assignment parses a conditional left side;
 whether that side is assignable is a semantic question. An expression-bodied
 function uses a full expression, while a lambda expression body uses an
 assignment expression. Calls and literal element lists permit a trailing
@@ -235,7 +235,7 @@ pattern. Its arguments are `?`/`*` binders with optional identifiers, nested
 macro patterns, or List patterns. `${$macro(...)}` embeds a derived pattern
 inside a List; in an `(expr TYPE CONTENT)` pattern its position can request
 only the content. Typed captures use `?(Type name)` and the type's Var tag.
-`src/literals.x` and `src/macros.x` implement these rules. `lib/match.x`
+`src/literals/literals.x` and `src/macros/macros.x` implement these rules. `lib/match.x`
 defines what a pattern means.
 
 Raise and catch payloads have narrower rules than an arbitrary List.
@@ -317,7 +317,7 @@ After a `Decl` argument, `in` may replace the separating comma, which is how
 | `Catch`, `Captures` | Structured template sequence positions; not generic invocation arguments |
 
 Result/argument kind spellings are case-insensitive; EBNF lists their usual
-capitalization. `macro_categories` in `src/macros.x` is the complete table.
+capitalization. `macro_categories` in `src/macros/macros.x` is the complete table.
 Expression, statement, field, entry, enumerator, unit, declaration, and
 decorator results must be applied in compatible positions. Local macro values
 and keyword aliases use their bound signatures too. `class` and `foreach`
@@ -349,7 +349,7 @@ A braced template can begin with `using` lines terminated by semicolons.
 A signature can also have a `using` clause. Sequence parameters must be last.
 Local definitions cannot produce Unit/Declaration results or decorate
 Function/Unit/NamedType targets. These restrictions are enforced by
-`Definition` in `src/macros.x`.
+`Definition` in `src/macros/macros.x`.
 
 ### M3. Decorators
 

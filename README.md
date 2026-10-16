@@ -2,194 +2,131 @@
 
 C with batteries, without bullshit.
 
-x2c extends C with dynamic values, collections, pattern matching, scoped
-allocation, exceptions, threads, and Lisp. It compiles to C and works with
-C libraries and native build tools. You can use the added features where
-they help and keep ordinary C elsewhere. The
-[C compatibility notes](docs/src/reference/language.md#host-preprocessing)
-describe the cases that need source changes.
+x2c extends C with collections, dynamic values, pattern matching, scoped
+allocation, exceptions, threads, and compile-time Lisp. It compiles to C and
+uses ordinary C compilers and libraries. You can use the added features where
+they help and keep ordinary C elsewhere.
 
-Arrays and maps are written `[a, b]` and `{key: value}`. Two characters
-introduce much of the other added syntax. `%` quotes lists and interpolated
-strings: `%(list)` and `%"text $name"`. `$` inserts expressions into quoted
-literals and introduces compile-time Lisp.
-These forms let you combine C code, structured data, and code generation
-in the same program.
+The compiler and runtime are written in x2c. You can read their source, change
+it, and rebuild the language itself.
 
-The compiler and runtime are written in x2c. Their source shows how the
-language is used in a substantial program, including how Lisp and macros
-help implement the compiler. You can study it, change it, and rebuild the
-language yourself.
+## A small example
 
-## Start here
+Save this as `hello.x`:
 
-The [book](docs/src/index.md) covers the language, standard library, and
-compiler internals. The [examples](examples/README.md) provide runnable
-introductions, and [packages](packages/README.md) add optional C libraries.
+```x2c
+int main(void) {
+  Array names = ["Ada", "Grace", "Linus"];
+  foreach (String name, names)
+    printf("Hello, %s!\n", name);
+  return 0;
+}
+```
 
-1. The website landing page is the short introduction and includes the
-   installation instructions. [Building the
-   compiler](docs/src/internals/building.md) covers the self-host stages
-   behind them.
-2. The language guide covers [values and `Var`](docs/src/guide/values.md),
-   [protocols](docs/src/guide/protocols.md),
-   [compile-time macros](docs/src/guide/macros.md),
-   [symbols and atoms](docs/src/guide/symbols.md),
-   [collections](docs/src/guide/collections.md),
-   [pattern matching](docs/src/guide/match.md),
-   [iteration](docs/src/guide/iteration.md),
-   [scopes and lifetime](docs/src/guide/memory.md),
-   [contexts and threads](docs/src/guide/contexts-and-threads.md),
-   [exceptions](docs/src/guide/exceptions.md), and
-   [idioms](docs/src/guide/idioms.md).
-3. [Language reference](docs/src/reference/language.md) and
-   [compiler options](docs/src/reference/cli.md) - implemented syntax with its
-   stated limitations, and every command-line flag.
-4. [Standard library overview](docs/src/library/overview.md) - values and
-   operations. [Architecture](docs/src/internals/architecture.md) and the
-   [implementation map](docs/src/internals/implementation-map.md) explain how a
-   `.x` file becomes C and where each feature is implemented.
+Array literals and iteration work alongside ordinary C functions. The runtime
+is available without an explicit include. The [language tour](examples/tours/language.x)
+shows more: maps, matching, memory scopes, exceptions, and macros.
 
 ## Build and run
 
-You need a GCC- or Clang-compatible C compiler, an archiver (`ar`), GNU Make,
-and Python 3. From the repository directory:
+From a checkout, you need a GCC- or Clang-compatible C compiler, `ar`, GNU Make,
+Python 3, and Bash. You do not need an existing x2c compiler: the checkout
+contains generated C for the bootstrap.
 
 ```sh
 make build-safe
-./x2c run examples/foreach.x
+./x2c run hello.x
 ```
 
-After the build, `./x2c` runs the working compiler through the repository
-link. `run` compiles and runs the example in one step. Try another file from the
-[example guide](examples/README.md) the same way.
-
-To keep an executable:
+`run` compiles and executes the program. To keep an executable instead:
 
 ```sh
-./x2c build examples/foreach.x
-./a.out
+./x2c build hello.x --output hello
+./hello
 ```
 
-Use `--output foreach` if you want to choose its name.
+For a ready-made program, try `./x2c run examples/foreach.x`. For installation
+outside the checkout, follow the [installation guide](docs/src/guide/installation.md).
+It covers release installation and building an installed compiler from source.
 
-To use x2c outside the checkout, install it into a dedicated prefix and put
-its `bin` on `PATH`; `x2c env` shows what the compiler resolved:
+## What to explore
 
-```sh
-make install PREFIX="$HOME/.local/x2c"
-export PATH="$HOME/.local/x2c/bin:$PATH"
-x2c env
-```
+- [Examples](examples/README.md): small programs and larger applications you
+  can run and modify.
+- [The book](docs/src/index.md): language guide, reference, standard library,
+  and compiler internals. Start with [values](docs/src/guide/values.md) and
+  [idioms](docs/src/guide/idioms.md).
+- [C libraries](packages/README.md): optional packages for databases, graphics,
+  networking, parsing, and other native libraries.
+- [Command-line reference](docs/src/reference/cli.md): compilation, projects,
+  scripts, inspection, and build options. `./x2c --help` lists commands.
+- [Performance examples](examples/shootout/README.md): programs, measurements,
+  and comparison methods. Results depend on the workload and machine.
 
-[Install a native compiler](docs/src/guide/installation.md) describes the
-prefix layout, packages, and the developer workflow.
+## Status and compatibility
 
-To build and check all curated examples, then try the Lisp shell from the
-repository root:
+x2c is experimental and actively developed. APIs and language details can
+change. It aims to keep C useful inside a higher-level language, but it does
+not accept every C preprocessing pattern unchanged. Read the
+[C compatibility notes](docs/src/reference/language.md#host-preprocessing)
+when bringing existing C source into x2c.
 
-```sh
-make examples
-./examples/build/programs-lisp/lisp
-```
+The [language reference](docs/src/reference/language.md) documents supported
+behavior and limitations. The repository checks runtime behavior, compiler
+fixtures, and self-hosted builds; those checks do not imply compatibility
+with every platform or C library.
 
-The last command opens the interactive Lisp shell; press Ctrl-D to exit.
+## Reading the implementation
 
-To build all optional packages and their examples, then try an
-animated Game of Life from the repository root:
+Start with the [source guide](src/README.md). It explains the compiler's flow,
+files, and module directories. Each module directory has its own guide to the
+entry file and implementation members.
 
-```sh
-make packages
-./packages/termbox2/builds/game-of-life
-```
+| Directory | What is there |
+| --- | --- |
+| [src/](src/README.md) | Compiler, driver, compile-time operations, and syntax lowering. |
+| [lib/](docs/src/library/overview.md) | Runtime values, collections, memory, IO, concurrency, and Lisp. |
+| [commands/](commands/manifest.txt) | External commands such as project creation, packages, and the REPL. |
+| [examples/](examples/README.md) | Executable language examples and applications. |
+| [packages/](packages/README.md) | Optional adapters for third-party C libraries. |
+| [unittest/](unittest/) | Runtime tests, compiler fixtures, and focused probes. |
+| [bootstrap/](bootstrap/) | Generated C used to build the first compiler. |
+| [builds/](builds/) | Working compiler stages and generated build outputs. |
+| [docs/](docs/src/index.md) | The book's source. |
+| [site/](site/) | The public website. |
 
-`make packages` reports missing build prerequisites before compiling. Run
-`make configure-packages` to get that report separately.
+[Compiler architecture](docs/src/internals/architecture.md) explains the
+phases. [Building the compiler](docs/src/internals/building.md) explains
+self-hosting and the available checks. Edit the `.x` sources; regenerate
+bootstrap C through the build targets.
 
-The first build prepares pinned dependencies and builds the example
-executables without running tests or requiring Expect. Game of Life starts
-each cell alive with 50% probability; press any key to quit. To build just one
-package instead, follow its
-[build instructions](packages/README.md).
+## Short glossary
 
-For help:
+| Term | Meaning in x2c |
+| --- | --- |
+| **Module** | A source unit with one responsibility. It can be one file, or an entry file with members listed in a `module { ... }` block. |
+| **Member** | An implementation file listed in a module block. It compiles as part of the entry's unit. See the [module visibility rules](docs/src/reference/language.md#module-blocks) for which declarations other files can use. |
+| **Translation unit** | The source compiled together into one generated C source file. A module's entry and all its members form one translation unit. |
+| **Component** | Here, an independent source unit in [src/components/](src/components/README.md) that implements a language feature, such as matching or exceptions. This is a repository term, not a language keyword. |
+| **Package** | A named directory with an entry source file and the sources it includes. Packages expose public names under a package prefix. The adapters in [packages/](packages/README.md) wrap third-party C libraries. |
+| **Include** | `#include "foo/foo.x"` makes a source unit's public declarations and compile-time definitions available. C headers use ordinary `#include` directives. |
+| **Import** | `import "geo";` finds a package through configured package directories and binds an alias, so callers can write `geo.Vec`. `as` changes the alias; `with` exposes selected names directly. |
+| **Runtime** | The library code used by compiled programs: collections, Strings, memory management, IO, and other facilities in `lib/`. |
+| **Prelude** | Definitions made available automatically when compiling a source unit, including the standard runtime and shipped syntax rules. |
+| **Bootstrap** | The checked-in generated C used to build x2c without an existing x2c compiler. Later builds use x2c to compile its own source. |
 
-```sh
-./x2c --help
-./x2c help build
-```
+See the language reference for [module blocks](docs/src/reference/language.md#module-blocks)
+and [packages and imports](docs/src/reference/language.md#packages-and-import).
 
-The [command-line guide](docs/src/reference/cli.md) covers translation to C,
-build options, and integration with your own build system. [Building the
-compiler](docs/src/internals/building.md) explains self-hosting and repository
-checks.
+## License and project policy
 
-## Performance examples
+x2c is available under the [Apache License 2.0](LICENSE). Forks are welcome.
+The project is not accepting external code contributions; see
+[CONTRIBUTING.md](CONTRIBUTING.md). Development follows the author's priorities,
+without a promised roadmap, release schedule, or support commitment.
 
-The [language shootout](examples/shootout/README.md#current-results) compares
-fourteen programs with C and Python references, including execution time and
-source size. In the September 6, 2026 local run, all fourteen x2c programs
-were faster than the saved Python references. The median x2c/C time ratio
-was 1.04; individual results vary substantially. CSV parsing was 2.35 times
-faster than Python, and binary trees was 1.68 times faster.
-
-See the table, source programs, and measurement details before drawing broader
-conclusions. Run the x2c comparisons from the repository root with:
-
-```sh
-make shoot-run
-```
-
-## Repository map
-
-- `src/` - the translator and native compiler driver.
-- `lib/` - runtime values, collections, matching, iteration, IO, contexts,
-  native threads, scopes, dispatch, and diagnostics support.
-- `unittest/` - the executable unit harness and compiler phase fixtures.
-- `bootstrap/` - generated C sources used to build the compiler from a fresh checkout.
-- `builds/` - staged self-hosted toolchains; stage 0 drives development.
-- `docs/` - the user-facing book: language guide, reference, library, and
-  compiler internals.
-- `agents/` - agent-facing documentation (philosophy, workflow, style,
-  debugging, generated inventory) and project skills in `agents/skills/`.
-- `plans/` - active plans and archived execution logs.
-- `examples/` - runnable language examples, larger programs, and the language shootout.
-- `packages/` - optional adapters for third-party C libraries.
-- `site/` - the public pages, rendered with the book by
-  `make site-build`.
-
-## Working on the compiler
-
-The [architecture](docs/src/internals/architecture.md) and
-[build guide](docs/src/internals/building.md) explain the compiler and its
-self-hosting stages. Change the `.x` sources rather than generated bootstrap
-C. The [development guide](agents/x2c-development-guide.md) covers repository
-builds, tests, and generated files; [AGENTS.md](AGENTS.md) contains instructions
-for coding agents. The current contribution policy is in
-[CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Project status
-
-x2c is experimental and actively developed. It compiles itself four times and
-compares the generated C and headers each time. Runtime tests and compiler
-fixtures check behavior and generated output. The [language reference](docs/src/reference/language.md)
-documents supported behavior and known limitations.
-
-## The deal
-
-The canonical project site is [x2c-lang.dev](https://x2c-lang.dev/).
-The source is available under the [Apache License 2.0](LICENSE). You can fork
-it. You do not get support, a roadmap, a release schedule, a vote on the
-design, or a Discord.
-
-I develop x2c according to my own priorities. File a bug if you like; I read
-them and fix the ones that interest me. The project is not accepting external
-code
-contributions - see [CONTRIBUTING.md](CONTRIBUTING.md) - so you are better off
-forking.
-
-See [THIRD_PARTY.md](THIRD_PARTY.md) for the current license inventory and
-notices. x2c is founder-led under the authority described in
-[GOVERNANCE.md](GOVERNANCE.md); the [trademark](TRADEMARKS.md),
-[security](SECURITY.md), and [support](SUPPORT.md) policies explain
-the terms for using the name, reporting vulnerabilities, and asking for help.
+See [THIRD_PARTY.md](THIRD_PARTY.md) for dependency notices,
+[SECURITY.md](SECURITY.md) for vulnerability reporting, and
+[SUPPORT.md](SUPPORT.md) for support policy. [GOVERNANCE.md](GOVERNANCE.md) and
+[TRADEMARKS.md](TRADEMARKS.md) describe project authority and use of the name.
+The project website is [x2c-lang.dev](https://x2c-lang.dev/).

@@ -15,60 +15,60 @@ Functions and types exposed by each compiler module.
 | [`src/ast.x`](ast.md) | shared helpers for x2c compiler AST nodes. |
 | [`src/builtins.x`](builtins.md) | the built-in macros' compile-time algorithms. |
 | [`src/cache.x`](cache.md) | cached literal slots and deferred file-static initializers. |
-| [`src/callables.x`](callables.md) | callable values lowered to C helpers. |
-| [`src/cleanup.x`](cleanup.md) | cleanup regions and the transfers that leave them. |
-| [`src/cli.x`](cli.md) | x2c command-line parsing and presentation. |
-| [`src/collect.x`](collect.md) | source-ordered shallow symbol collection and replay. |
-| [`src/compiler.x`](compiler.md) | one x2c unit's translation state and its two parses. |
 | [`src/deps.x`](deps.md) | Make dependency output for x2c translation units. |
 | [`src/diagnostics.x`](diagnostics.md) | compiler diagnostic storage and rendering. |
-| [`src/emit.x`](emit.md) | C tokens from normalized x2c ASTs. |
 | [`src/expressions-reports.x`](expressions-reports.md) | expression typing diagnostics. |
-| [`src/expressions.x`](expressions.md) | expression syntax and its resolution. |
 | [`src/fields.x`](fields.md) | statements that copy or set named fields. |
 | [`src/format.x`](format.md) | code formatting helpers for the x2c compiler. |
 | [`src/frontend.x`](frontend.md) | configured compiler sessions and source units. |
-| [`src/generate.x`](generate.md) | the generated header and source of one unit. |
 | [`src/grammar.x`](grammar.md) | the source forms that lowering recognizes. |
-| [`src/initializers.x`](initializers.md) | brace initializer conversion. |
 | [`src/lambdas.x`](lambdas.md) | lambda parsing and capture resolution. |
 | [`src/linked-meta.x`](linked-meta.md) | shipped `meta` code compiled into the compiler. |
-| [`src/literals.x`](literals.md) | x2c literal parsing. |
-| [`src/macros.x`](macros.md) | source macros and the compile-time Lisp they run. |
 | [`src/main.x`](main.md) | x2c command dispatch. |
-| [`src/meta-group.x`](meta-group.md) | a unit's meta group, emitted as C. |
 | [`src/meta-helper-client.x`](meta-helper-client.md) | the compiler's side of the project meta helper. |
-| [`src/meta-native.x`](meta-native.md) | meta functions and the native code they call. |
 | [`src/meta-project.x`](meta-project.md) | the project meta build. |
-| [`src/meta-sdk.x`](meta-sdk.md) | the compiler's answers to `lib/meta.x` operations. |
 | [`src/operator-ledger.x`](operator-ledger.md) | binary operator facts and case projections. |
 | [`src/parse-reports.x`](parse-reports.md) | package, binding, and alias diagnostics. |
-| [`src/parse.x`](parse.md) | x2c declarations, parsed from source or constructed. |
 | [`src/preprocess.x`](preprocess.md) | C preprocessor directives in x2c source. |
-| [`src/project.x`](project.md) | x2c project manifests. |
-| [`src/protocol.x`](protocol.md) | protocols from declaration to conform forms. |
-| [`src/regions.x`](regions.md) | values that can outlive the region that allocated them. |
 | [`src/report.x`](report.md) | Command progress and completion receipts. |
 | [`src/sourceview.x`](sourceview.md) | request-owned source overlays. |
 | [`src/stage.x`](stage.md) | the values crossing between meta code and the program. |
 | [`src/statements.x`](statements.md) | x2c statement parsing. |
 | [`src/symbols.x`](symbols.md) | the compiler's semantic symbol table. |
 | [`src/toolchain.x`](toolchain.md) | Host preprocessing, compilation, archive, and link actions. |
-| [`src/transform.x`](transform.md) | x2c AST transformation pipeline. |
 | [`src/translation.x`](translation.md) | synchronous compiler translation requests. |
 | [`src/type-ledger.x`](type-ledger.md) | the compiler's Var tag tables, projected from the ledger. |
 | [`src/type.x`](type.md) | x2c semantic types. |
 | [`src/utils.x`](utils.md) | System utilities for environment discovery and workers. |
-| [`src/components/component-access.x`](component-access.md) | Bracket access policy: Array and Map mutation through their typed helpers, and any other participant's read, store, and update through its indexing members, with each operand evaluated once, in order. Getter resolution remains with admission. |
-| [`src/components/component-delegate.x`](component-delegate.md) | delegate fields. |
-| [`src/components/component-destructuring.x`](component-destructuring.md) | flat List destructuring. |
-| [`src/components/component-interpolation.x`](component-interpolation.md) | interpolated Strings. |
-| [`src/components/component-lambdas.x`](component-lambdas.md) | lambda lowering. |
-| [`src/components/component-literals.x`](component-literals.md) | Array and Map literals. |
-| [`src/components/component-match.x`](component-match.md) | match statements. |
-| [`src/components/component-operators.x`](component-operators.md) | dynamic operators. |
-| [`src/components/component-printf.x`](component-printf.md) | Var values in printf-family formats. |
-| [`src/components/component-protocols.x`](component-protocols.md) | protocol adapters and Var descriptors. |
-| [`src/components/component-raise.x`](component-raise.md) | raise. |
-| [`src/components/component-string-switch.x`](component-string-switch.md) | switches on a String. |
-| [`src/components/component-try.x`](component-try.md) | try, catch, and finally. |
+| [`src/callables/callables.x`](callables.md) | callable values lowered to C helpers. |
+| [`src/cleanup/cleanup.x`](cleanup.md) | cleanup regions and the transfers that leave them. |
+| [`src/cli/cli.x`](cli.md) | x2c command-line parsing and presentation. |
+| [`src/collect/collect.x`](collect.md) | source-ordered shallow symbol collection and replay. |
+| [`src/compiler/compiler.x`](compiler.md) | one x2c unit's translation state and its two parses. |
+| [`src/components/bracket-access.x`](bracket-access.md) | Bracket access policy: Array and Map mutation through their typed helpers, and any other participant's read, store, and update through its indexing members, with each operand evaluated once, in order. Getter resolution remains with admission. |
+| [`src/components/collection-literals.x`](collection-literals.md) | Array and Map literals. |
+| [`src/components/delegate-members.x`](delegate-members.md) | delegate fields. |
+| [`src/components/destructuring.x`](destructuring.md) | flat List destructuring. |
+| [`src/components/dynamic-operators.x`](dynamic-operators.md) | dynamic operators. |
+| [`src/components/interpolation.x`](interpolation.md) | interpolated Strings. |
+| [`src/components/lambda-functions.x`](lambda-functions.md) | lambda lowering. |
+| [`src/components/pattern-match.x`](pattern-match.md) | match statements. |
+| [`src/components/printf-format.x`](printf-format.md) | Var values in printf-family formats. |
+| [`src/components/protocol-adapters.x`](protocol-adapters.md) | protocol adapters and Var descriptors. |
+| [`src/components/raise.x`](raise.md) | raise. |
+| [`src/components/string-switch.x`](string-switch.md) | switches on a String. |
+| [`src/components/try-catch.x`](try-catch.md) | try, catch, and finally. |
+| [`src/emit/emit.x`](emit.md) | C tokens from normalized x2c ASTs. |
+| [`src/expressions/expressions.x`](expressions.md) | expression syntax and its resolution. |
+| [`src/generate/generate.x`](generate.md) | the generated header and source of one unit. |
+| [`src/initializers/initializers.x`](initializers.md) | brace initializer conversion. |
+| [`src/literals/literals.x`](literals.md) | x2c literal parsing. |
+| [`src/macros/macros.x`](macros.md) | source macros and the compile-time Lisp they run. |
+| [`src/meta-group/meta-group.x`](meta-group.md) | a unit's meta group, emitted as C. |
+| [`src/meta-native/meta-native.x`](meta-native.md) | meta functions and the native code they call. |
+| [`src/meta-sdk/meta-sdk.x`](meta-sdk.md) | the compiler's answers to `lib/meta.x` operations. |
+| [`src/parse/parse.x`](parse.md) | x2c declarations, parsed from source or constructed. |
+| [`src/project/project.x`](project.md) | x2c project manifests. |
+| [`src/protocol/protocol.x`](protocol.md) | protocols from declaration to conform forms. |
+| [`src/regions/regions.x`](regions.md) | values that can outlive the region that allocated them. |
+| [`src/transform/transform.x`](transform.md) | x2c AST transformation pipeline. |

@@ -33,9 +33,9 @@ typedef struct List{
 #include <stdio.h>
 #include <stdarg.h>
 #include <limits.h>
-static void f5_cells____promote_node(Var node);
+static void f10_list_cells____promote_node(Var node);
 
-static int f5_cells____try_own_node(Var node);
+static int f10_list_cells____try_own_node(Var node);
 
 #include "exception.h"
 
@@ -90,53 +90,53 @@ static inline Var Var_caddr(Var var){
   return car(cdr(cdr(Var_list_payload(var))));
 }
 
-static int f9_traversal____next(Iter iter, Var * out);
+static int f14_list_traversal____next(Iter iter, Var * out);
 
-static List f9_traversal____collect_subseq(List list, int start, int step, int span);
+static List f14_list_traversal____collect_subseq(List list, int start, int step, int span);
 
-static int f9_traversal____is_active_canonical(List list);
+static int f14_list_traversal____is_active_canonical(List list);
 
-static int f9_traversal____unpack_va(List src, unsigned n, va_list ap, int lists);
+static int f14_list_traversal____unpack_va(List src, unsigned n, va_list ap, int lists);
 
-static List f8_building____prepend_array(Array values, List tail);
+static List f13_list_building____prepend_array(Array values, List tail);
 
-static List f8_building____concat_va(unsigned n, va_list ap);
+static List f13_list_building____concat_va(unsigned n, va_list ap);
 
-static List f8_building____concat_lists(Array lists);
+static List f13_list_building____concat_lists(Array lists);
 
-static List f8_building____list_va(unsigned n, va_list ap);
+static List f13_list_building____list_va(unsigned n, va_list ap);
 
-static void f15_transformations____flatten_into(Array values, List lst);
+static void f20_list_transformations____flatten_into(Array values, List lst);
 
-static Var f15_transformations____sublis_node(List alist, Var node);
+static Var f20_list_transformations____sublis_node(List alist, Var node);
 
-static const int f9_rendering____WIDTH = 80;
+static const int f14_list_rendering____WIDTH = 80;
 
-typedef struct f9_rendering___Render{
+typedef struct f14_list_rendering___Render{
   Buffer out;
   Symbol mode;
 }
-f9_rendering___Render;
+f14_list_rendering___Render;
 
-static void f9_rendering____value(f9_rendering___Render * r, Var elem);
+static void f14_list_rendering____value(f14_list_rendering___Render * r, Var elem);
 
-static void f9_rendering____leaf(f9_rendering___Render * r, Var elem);
+static void f14_list_rendering____leaf(f14_list_rendering___Render * r, Var elem);
 
-static void f9_rendering____nil(Buffer out);
+static void f14_list_rendering____nil(Buffer out);
 
-static int f9_rendering____fits(f9_rendering___Render * r, Var elem);
+static int f14_list_rendering____fits(f14_list_rendering___Render * r, Var elem);
 
-static void f9_rendering____items(f9_rendering___Render * r, Var elem);
+static void f14_list_rendering____items(f14_list_rendering___Render * r, Var elem);
 
-static void f9_rendering____flat(f9_rendering___Render * r, Var elem);
+static void f14_list_rendering____flat(f14_list_rendering___Render * r, Var elem);
 
-static void f9_rendering____flat_items(f9_rendering___Render * r, Var elem);
+static void f14_list_rendering____flat_items(f14_list_rendering___Render * r, Var elem);
 
-static void f9_rendering____write_leaf(f9_rendering___Render * r, Var elem);
+static void f14_list_rendering____write_leaf(f14_list_rendering___Render * r, Var elem);
 
-static void f9_rendering____open(List lst, Buffer out);
+static void f14_list_rendering____open(List lst, Buffer out);
 
-static void f9_rendering____close(Buffer out);
+static void f14_list_rendering____close(Buffer out);
 
 typedef struct _x2c_gensym_defer_env_0{
   const void * _x2c_gensym_defer_capture_0;
@@ -360,36 +360,36 @@ int List_compare(List a, List b){
 
 List List_promote(List lst){
   if(! List_truth(lst)) return lst;
-  f5_cells____promote_node(List_var(lst));
+  f10_list_cells____promote_node(List_var(lst));
   return lst;
 }
 
 String Var_as_string(Var);
 
-static void f5_cells____promote_node(Var node){
+static void f10_list_cells____promote_node(Var node){
   if(Var_is_row(node, 11, 7, 1)) return(void) String_promote(Var_as_string(node));
   if(Var_is(node, 826970)) return(void) Atom_promote(node);
   if(! Var_is_row(node, 9, 7, 4)) return;
   for(List cur = Var_list_payload(node);  List_truth(cur);  cur = cur -> cdr){
     if(! Pool_promote(Pool_current(), List_var(cur), cur)) break;
-    f5_cells____promote_node(cur -> car);
+    f10_list_cells____promote_node(cur -> car);
   }
 
 }
 
 int List_try_own(List lst){
-  return ! List_truth(lst) || f5_cells____try_own_node(List_var(lst));
+  return ! List_truth(lst) || f10_list_cells____try_own_node(List_var(lst));
 }
 
 String Var_string(Var);
 
-static int f5_cells____try_own_node(Var node){
+static int f10_list_cells____try_own_node(Var node){
   if(Var_is_row(node, 11, 7, 1)) return String_try_own(Var_string(node));
   if(Var_is(node, 826970)) return String_try_own(Var_str(node));
   if(! Var_is_row(node, 9, 7, 4)) return 1;
   for(List cur = Var_list_payload(node);  List_truth(cur);  cur = cur -> cdr){
     if(! Pool_own(Pool_current(), List_var(cur), cur)) return 0;
-    if(! f5_cells____try_own_node(cur -> car)) return 0;
+    if(! f10_list_cells____try_own_node(cur -> car)) return 0;
   }
   return 1;
 }
@@ -414,10 +414,10 @@ int List_try_next(List lst, List * cursor, Var * out){
 
 Iter List_iter(List lst, Iter dest){
   if(! Iter_truth(dest)) return NULL;
-  return Iter_init(dest, List_var(lst), f9_traversal____next, List_var(lst));
+  return Iter_init(dest, List_var(lst), f14_list_traversal____next, List_var(lst));
 }
 
-static int f9_traversal____next(Iter iter, Var * out){
+static int f14_list_traversal____next(Iter iter, Var * out){
   List lst = Var_list_payload(iter -> state);
   if(! List_truth(lst)) return 0;
   * out = List_car(lst);
@@ -574,10 +574,10 @@ List List_subseq(List list, int start, int stop, int step){
 
   }
   int span = x2c_normalize_slice(& start, & stop, step, List_len(list));
-  return f9_traversal____collect_subseq(list, start, step, span);
+  return f14_list_traversal____collect_subseq(list, start, step, span);
 }
 
-static List f9_traversal____collect_subseq(List list, int start, int step, int span){
+static List f14_list_traversal____collect_subseq(List list, int start, int step, int span){
   if(span <= 0) return NULL;
   for(int i = 0;  List_truth(list) && i < start;  i ++) list = List_cdr(list);
   Array values = Array_new();
@@ -626,8 +626,8 @@ List List_getslice(List list, int start, int stop, int step){
 
   }
   int len = List_len(list), span = x2c_normalize_slice(& start, & stop, step, len);
-  if(step == 1 && start == 0 && span == len &&(! List_truth(list) || f9_traversal____is_active_canonical(list))) return list;
-  if(step > 0) return f9_traversal____collect_subseq(list, start, step, span);
+  if(step == 1 && start == 0 && span == len &&(! List_truth(list) || f14_list_traversal____is_active_canonical(list))) return list;
+  if(step > 0) return f14_list_traversal____collect_subseq(list, start, step, span);
   if(span <= 0) return NULL;
   Array source = List_array(list);
   const Array _x2c_gensym_macro_acquired_2 = source;
@@ -678,14 +678,14 @@ List List_getslice(List list, int start, int stop, int step){
 
 }
 
-static int f9_traversal____is_active_canonical(List list){
+static int f14_list_traversal____is_active_canonical(List list){
   return x2c_var_identical(Pool_lookup(Pool_current(), List_var(list)), List_var(list));
 }
 
 int List_unpack_n(List src, unsigned destination_count, ...){
   va_list ap;
   va_start(ap, destination_count);
-  int count = f9_traversal____unpack_va(src, destination_count, ap, 1);
+  int count = f14_list_traversal____unpack_va(src, destination_count, ap, 1);
   va_end(ap);
   return count;
 }
@@ -693,16 +693,16 @@ int List_unpack_n(List src, unsigned destination_count, ...){
 int List_unpack_vars_n(List src, unsigned destination_count, ...){
   va_list ap;
   va_start(ap, destination_count);
-  int count = f9_traversal____unpack_va(src, destination_count, ap, 0);
+  int count = f14_list_traversal____unpack_va(src, destination_count, ap, 0);
   va_end(ap);
   return count;
 }
 
-static int f9_traversal____unpack_va(List src, unsigned n, va_list ap, int lists){
+static int f14_list_traversal____unpack_va(List src, unsigned n, va_list ap, int lists){
   if(n > INT_MAX){
     Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("List.unpack_n")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/list/traversal.x",.function = "f9_traversal____unpack_va",.line = 279};
+      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/list/traversal.x",.function = "f14_list_traversal____unpack_va",.line = 279};
       x2c_error_raise_n(& _x2c_gensym_error_site_3, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(7318440), unsigned_var(n));
       __builtin_unreachable();
     }
@@ -724,10 +724,10 @@ static int f9_traversal____unpack_va(List src, unsigned n, va_list ap, int lists
 }
 
 List Array_list(Array arr){
-  return f8_building____prepend_array(arr, NULL);
+  return f13_list_building____prepend_array(arr, NULL);
 }
 
-static List f8_building____prepend_array(Array values, List tail){
+static List f13_list_building____prepend_array(Array values, List tail){
   Var * items = values -> bytes;
   for(size_t i = Array_len(values);  i;  i --) tail = cons(items[i - 1], tail);
   return tail;
@@ -878,7 +878,7 @@ List List_append(List a, List b){
     x2c_cleanup_push(& _x2c_gensym_defer_record_7);
     {
       {
-        List _x2c_gensym_return_value_7 = f8_building____prepend_array(values, b);
+        List _x2c_gensym_return_value_7 = f13_list_building____prepend_array(values, b);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
           return _x2c_gensym_return_value_7;
@@ -895,16 +895,16 @@ List List_append(List a, List b){
 List List_concat_n(unsigned list_count, ...){
   va_list ap;
   va_start(ap, list_count);
-  List out = f8_building____concat_va(list_count, ap);
+  List out = f13_list_building____concat_va(list_count, ap);
   va_end(ap);
   return out;
 }
 
-static List f8_building____concat_va(unsigned n, va_list ap){
+static List f13_list_building____concat_va(unsigned n, va_list ap){
   if(n > INT_MAX){
     Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("List.concat_n")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/list/building.x",.function = "f8_building____concat_va",.line = 101};
+      static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/list/building.x",.function = "f13_list_building____concat_va",.line = 101};
       x2c_error_raise_n(& _x2c_gensym_error_site_4, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(7318440), unsigned_var(n));
       __builtin_unreachable();
     }
@@ -926,7 +926,7 @@ static List f8_building____concat_va(unsigned n, va_list ap){
     {
       for(unsigned i = 0;  i < n;  i ++) Array_push(lists, List_var(va_arg(ap, List)));
       {
-        List _x2c_gensym_return_value_8 = f8_building____concat_lists(lists);
+        List _x2c_gensym_return_value_8 = f13_list_building____concat_lists(lists);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_8);
           return _x2c_gensym_return_value_8;
@@ -940,7 +940,7 @@ static List f8_building____concat_va(unsigned n, va_list ap){
 
 }
 
-static List f8_building____concat_lists(Array lists){
+static List f13_list_building____concat_lists(Array lists){
   List tail = NULL;
   for(int i =(int) Array_len(lists) - 1;  i >= 0;  i --){
     List current = Var_list_payload(Array_getindex(lists, i));
@@ -952,12 +952,12 @@ static List f8_building____concat_lists(Array lists){
 List List_list_n(unsigned element_count, ...){
   va_list ap;
   va_start(ap, element_count);
-  List out = f8_building____list_va(element_count, ap);
+  List out = f13_list_building____list_va(element_count, ap);
   va_end(ap);
   return out;
 }
 
-static List f8_building____list_va(unsigned n, va_list ap){
+static List f13_list_building____list_va(unsigned n, va_list ap){
   Array values = Array_new();
   const Array _x2c_gensym_macro_acquired_7 = values;
   {
@@ -977,7 +977,7 @@ static List f8_building____list_va(unsigned n, va_list ap){
         if(Var_is_void(value)){
           Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("List.list_n")), NULL)));
           {
-            static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/list/building.x",.function = "f8_building____list_va",.line = 135};
+            static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/list/building.x",.function = "f13_list_building____list_va",.line = 135};
             x2c_error_raise_n(& _x2c_gensym_error_site_5, 48270474208, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(19800432), unsigned_var(i));
             __builtin_unreachable();
           }
@@ -1369,7 +1369,7 @@ List List_flatten_all(List lst){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_18);
     {
-      f15_transformations____flatten_into(values, lst);
+      f20_list_transformations____flatten_into(values, lst);
       {
         List _x2c_gensym_return_value_18 = Array_list(values);
         {
@@ -1385,7 +1385,7 @@ List List_flatten_all(List lst){
 
 }
 
-static void f15_transformations____flatten_into(Array values, List lst){
+static void f20_list_transformations____flatten_into(Array values, List lst){
   {
     Var head;
     List _x2c_gensym_macro_object_9 = lst;
@@ -1394,7 +1394,7 @@ static void f15_transformations____flatten_into(Array values, List lst){
     while(List_try_next(_x2c_gensym_macro_object_9, &(_x2c_gensym_macro_cursor_9), &(_x2c_gensym_macro_cursor_output_9))){
       head = _x2c_gensym_macro_cursor_output_9;
       {
-        if(Var_is_row(head, 9, 7, 4)) f15_transformations____flatten_into(values, Var_list_payload(head));
+        if(Var_is_row(head, 9, 7, 4)) f20_list_transformations____flatten_into(values, Var_list_payload(head));
         else Array_push(values, head);
       }
 
@@ -1406,10 +1406,10 @@ static void f15_transformations____flatten_into(Array values, List lst){
 
 List List_sublis(List alist, List tree){
   if(! List_truth(tree)) return NULL;
-  return Var_list_payload(f15_transformations____sublis_node(alist, List_var(tree)));
+  return Var_list_payload(f20_list_transformations____sublis_node(alist, List_var(tree)));
 }
 
-static Var f15_transformations____sublis_node(List alist, Var node){
+static Var f20_list_transformations____sublis_node(List alist, Var node){
   if(! Var_is_row(node, 9, 7, 4)){
     Var replacement = List_assoc(alist, node);
     return Var_is_void(replacement) ? node : replacement;
@@ -1437,7 +1437,7 @@ static Var f15_transformations____sublis_node(List alist, Var node){
         Var _x2c_gensym_macro_cursor_output_10;
         while(List_try_next(_x2c_gensym_macro_object_10, &(_x2c_gensym_macro_cursor_10), &(_x2c_gensym_macro_cursor_output_10))){
           source = _x2c_gensym_macro_cursor_output_10;
-          Array_push(items, f15_transformations____sublis_node(alist, source));
+          Array_push(items, f20_list_transformations____sublis_node(alist, source));
         }
 
       }
@@ -1490,7 +1490,7 @@ String List_str(List lst){
 }
 
 Buffer List_write_str(List lst, Buffer out){
-  f9_rendering___Render r ={
+  f14_list_rendering___Render r ={
     out, 40228
   }
   ;
@@ -1503,7 +1503,7 @@ Buffer List_write_str(List lst, Buffer out){
       x2c_exception_push(& _x2c_gensym_exception_frame_0);
       if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)){
         * _x2c_gensym_macro_address_0 = 1;
-        f9_rendering____value(&(r), List_var(lst));
+        f14_list_rendering____value(&(r), List_var(lst));
       }
       else{
         x2c_exception_landed(& _x2c_gensym_exception_frame_0);
@@ -1560,41 +1560,41 @@ String List_repr(List lst){
 }
 
 Buffer List_write_repr(List lst, Buffer out){
-  f9_rendering___Render r ={
+  f14_list_rendering___Render r ={
     out, 1190948
   }
   ;
-  f9_rendering____value(&(r), List_var(lst));
+  f14_list_rendering____value(&(r), List_var(lst));
   return out;
 }
 
 List Var_list(Var);
 
-static void f9_rendering____value(f9_rendering___Render * r, Var elem){
+static void f14_list_rendering____value(f14_list_rendering___Render * r, Var elem){
   Buffer out =(* r).out;
-  if(out -> pos >= f9_rendering____WIDTH - 1 || out -> pos - out -> _indent > 40) Buffer_newline_indent(out);
-  if(! Var_is_row(elem, 9, 7, 4)) f9_rendering____leaf(&((* r)), elem);
-  else if(! List_truth(Var_list(elem))) f9_rendering____nil(out);
-  else if(! f9_rendering____fits(&((* r)), elem)) f9_rendering____items(&((* r)), elem);
+  if(out -> pos >= f14_list_rendering____WIDTH - 1 || out -> pos - out -> _indent > 40) Buffer_newline_indent(out);
+  if(! Var_is_row(elem, 9, 7, 4)) f14_list_rendering____leaf(&((* r)), elem);
+  else if(! List_truth(Var_list(elem))) f14_list_rendering____nil(out);
+  else if(! f14_list_rendering____fits(&((* r)), elem)) f14_list_rendering____items(&((* r)), elem);
 }
 
-static void f9_rendering____leaf(f9_rendering___Render * r, Var elem){
+static void f14_list_rendering____leaf(f14_list_rendering___Render * r, Var elem){
   Buffer out =(* r).out;
   size_t before = out -> content -> length, position = out -> pos;
-  f9_rendering____write_leaf(&((* r)), elem);
+  f14_list_rendering____write_leaf(&((* r)), elem);
   size_t length = out -> content -> length - before;
-  if(position + length <= f9_rendering____WIDTH) return;
+  if(position + length <= f14_list_rendering____WIDTH) return;
   Buffer_unwrite(out, length);
   Buffer_newline_indent(out);
-  f9_rendering____write_leaf(&((* r)), elem);
+  f14_list_rendering____write_leaf(&((* r)), elem);
 }
 
-static void f9_rendering____nil(Buffer out){
-  if(out -> pos + 2 > f9_rendering____WIDTH) Buffer_newline_indent(out);
+static void f14_list_rendering____nil(Buffer out){
+  if(out -> pos + 2 > f14_list_rendering____WIDTH) Buffer_newline_indent(out);
   Buffer_write(out, "()");
 }
 
-static int f9_rendering____fits(f9_rendering___Render * r, Var elem){
+static int f14_list_rendering____fits(f14_list_rendering___Render * r, Var elem){
   Buffer line = Buffer_new((* r).out -> padding);
   const Buffer _x2c_gensym_macro_acquired_19 = line;
   {
@@ -1609,12 +1609,12 @@ static int f9_rendering____fits(f9_rendering___Render * r, Var elem){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_22);
     {
-      f9_rendering___Render flat ={
+      f14_list_rendering___Render flat ={
         line, (* r).mode
       }
       ;
-      f9_rendering____flat(&(flat), elem);
-      if((* r).out -> pos + line -> content -> length > f9_rendering____WIDTH){
+      f14_list_rendering____flat(&(flat), elem);
+      if((* r).out -> pos + line -> content -> length > f14_list_rendering____WIDTH){
         int _x2c_gensym_return_value_22 = 0;
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_22);
@@ -1638,50 +1638,50 @@ static int f9_rendering____fits(f9_rendering___Render * r, Var elem){
 
 }
 
-static void f9_rendering____items(f9_rendering___Render * r, Var elem){
+static void f14_list_rendering____items(f14_list_rendering___Render * r, Var elem){
   List lst = Var_list_payload(elem);
   Buffer out =(* r).out;
   if(out -> pos - Buffer_tabstop(out) > 5) Buffer_newline_indent(out);
-  f9_rendering____open(lst, out);
+  f14_list_rendering____open(lst, out);
   for(List l = lst;  List_truth(l);  l = List_cdr(l)){
-    f9_rendering____value(&((* r)), List_car(l));
+    f14_list_rendering____value(&((* r)), List_car(l));
     if(List_truth(List_cdr(l))) Buffer_write(out, " ");
   }
-  f9_rendering____close(out);
+  f14_list_rendering____close(out);
 }
 
-static void f9_rendering____flat(f9_rendering___Render * r, Var elem){
-  if(! Var_is_row(elem, 9, 7, 4)) f9_rendering____write_leaf(&((* r)), elem);
+static void f14_list_rendering____flat(f14_list_rendering___Render * r, Var elem){
+  if(! Var_is_row(elem, 9, 7, 4)) f14_list_rendering____write_leaf(&((* r)), elem);
   else if(! List_truth(Var_list(elem))) Buffer_write((* r).out, "()");
-  else f9_rendering____flat_items(&((* r)), elem);
+  else f14_list_rendering____flat_items(&((* r)), elem);
 }
 
-static void f9_rendering____flat_items(f9_rendering___Render * r, Var elem){
+static void f14_list_rendering____flat_items(f14_list_rendering___Render * r, Var elem){
   List lst = Var_list_payload(elem);
   Buffer out =(* r).out;
-  f9_rendering____open(lst, out);
+  f14_list_rendering____open(lst, out);
   for(List l = lst;  List_truth(l);  l = List_cdr(l)){
-    f9_rendering____flat(&((* r)), List_car(l));
+    f14_list_rendering____flat(&((* r)), List_car(l));
     if(List_truth(List_cdr(l))) Buffer_write(out, " ");
   }
-  f9_rendering____close(out);
+  f14_list_rendering____close(out);
 }
 
 Buffer Var_write_repr(Var, Buffer);
 
-static void f9_rendering____write_leaf(f9_rendering___Render * r, Var elem){
+static void f14_list_rendering____write_leaf(f14_list_rendering___Render * r, Var elem){
   if((* r).mode == 40228) Var_write_str(elem, (* r).out);
   else if(Var_is(elem, 1328354264)) Atom_write_repr(elem, (* r).out);
   else Var_write_repr(elem, (* r).out);
 }
 
-static void f9_rendering____open(List lst, Buffer out){
+static void f14_list_rendering____open(List lst, Buffer out){
   Buffer_write(out, "(");
   if(! Var_is_row(List_car(lst), 9, 7, 4)) Buffer_pad(out);
   Buffer_push(out);
 }
 
-static void f9_rendering____close(Buffer out){
+static void f14_list_rendering____close(Buffer out){
   if(Buffer_getindex(out, - 1) != ')') Buffer_pad(out);
   Buffer_write(out, ")");
   Buffer_pop(out);

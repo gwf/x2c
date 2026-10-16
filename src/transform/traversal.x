@@ -133,7 +133,7 @@ static Ast _destructuring(
   Compiler c, Ast ast, Symbol tag, Symbol position) {
   String form = position == <block>
     ? "destructuring declaration" : "destructuring statement";
-  // The implementation belongs to src/components/component-destructuring.x.
+  // The implementation belongs to src/components/destructuring.x.
   return _shipped_lowering(
     c, <node>, tag, ast, position, c.return_type, form);
 }

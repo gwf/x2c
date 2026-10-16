@@ -44,7 +44,7 @@ or refactor equivalence experiment was performed.
 
 Relevant boundaries are in [frontend.x](../src/frontend.x#L157),
 [sourceview.x](../src/sourceview.x#L13), [symbols.x](../src/symbols.x#L100),
-[collect.x](../src/collect.x#L1035), and [meta-native.x](../src/meta-native.x#L1138).
+[collect.x](../src/collect/collect.x#L1035), and [meta-native.x](../src/meta-native/meta-native.x#L1138).
 A replacement Session should not duplicate these owners.
 
 ## The central problem is nonuniform sharing
@@ -60,10 +60,10 @@ complexity. Moving their fields into uniformly shared component pointers would
 change behavior. The important question is which operation establishes each
 alias, detaches it, returns a replacement, or ends its lifetime.
 
-See [package registration](../src/collect.x#L576),
-[cold collection](../src/collect.x#L617),
-[segment transfer](../src/compiler.x#L2636), and
-[emission isolation](../src/meta-group.x#L283).
+See [package registration](../src/collect/collect.x#L576),
+[cold collection](../src/collect/collect.x#L617),
+[segment transfer](../src/compiler/compiler.x#L2636), and
+[emission isolation](../src/meta-group/meta-group.x#L283).
 
 For example, a new consumer of a unit's staged meta functions must currently
 associate `macro_lisp`, `borrowed_lisp`, and the matching meta group. Three
@@ -97,7 +97,7 @@ The controlling code is [transaction completion](../src/symbols.x#L1353),
 [REPL submission](../commands/repl/repl-session.x#L391).
 These callers do not have one universal publication policy.
 
-[Initializer speculation](../src/initializers.x#L735) separately snapshots
+[Initializer speculation](../src/initializers/initializers.x#L735) separately snapshots
 adapters, Pending, and the paired literal key/index state. Adapters and Pending
 overlap extended SymTxn, but this caller can run without extended capture.
 Removing its snapshots outright is incorrect. Factoring those two existing
@@ -110,7 +110,7 @@ mutation was reproduced; this remains a coverage question, not a defect claim.
 
 ### Temporary backend emission
 
-[Meta-group emission](../src/meta-group.x#L210) snapshots the whole Compiler and
+[Meta-group emission](../src/meta-group/meta-group.x#L210) snapshots the whole Compiler and
 GenNames records, opens SymTxn, copies selected mutable containers, and resets
 output state. It restores both records before transaction rollback.
 
@@ -126,7 +126,7 @@ it receives the backend environment currently borrowed from the owner.
 
 ### Portable declarations
 
-[Freeze/thaw](../src/compiler.x#L699) is declaration transport with relocation.
+[Freeze/thaw](../src/compiler/compiler.x#L699) is declaration transport with relocation.
 It converts token pointers to rows, origins to locations, local literal IDs to
 portable keys, and binding identities inside those keys to consumer-global
 references. It escapes marker-headed Lists and preserves source-spelling facts.
@@ -167,8 +167,8 @@ The placement candidate comprises `place_source_prelude`, `Anchors`, `_anchors`,
 reads Compiler fields. The walker also serves header/forward analysis. Keep
 one conditional-aware scan for both function placement and exception ABI
 placement; extracting one helper while duplicating that scan would worsen
-ownership. See [placement](../src/generate.x#L884) and
-[type spelling](../src/generate.x#L394).
+ownership. See [placement](../src/generate/generate.x#L884) and
+[type spelling](../src/generate/generate.x#L394).
 
 Build speed is a separate question. [stage.mk](../builds/stage.mk#L162) batches
 all compiler sources when its translation stamp invalidates. Native jobs use

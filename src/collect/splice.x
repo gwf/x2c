@@ -10,7 +10,7 @@
    appended, and `prefix` is its directory relative to the entry's, or NULL
    for the entry. `file_prefix` begins the spellings of that file's statics,
    and `prefixes` maps each file prefix taken to the name of its file.
-   `root` is the entry's resolved companion directory. `splicing` holds
+   `root` is the entry's resolved directory. `splicing` holds
    the resolved paths of the files being appended. */
 static typedef struct Splice {
   Compiler c, Buffer out, Array markers, Map members, splicing, prefixes;
@@ -20,11 +20,10 @@ static typedef struct Splice {
 
 /** Returns the x2c source at `path`, whose own text is `text`, with its
     file-scope `module` block replaced by the text of each member it names,
-    in order, or NULL when the text has no block. A member lies under the
-    companion directory of the file that names it, `NAME/` beside `NAME.x`,
-    and its own block is spliced in turn. A member's quoted include of a
-    file beside it is spelled from the entry's directory, so it names the
-    same file there.
+    in order, or NULL when the text has no block. Member paths are relative
+    to the file that names them, and their own blocks are spliced in turn.
+    A member's quoted include of a file beside it is spelled from the
+    entry's directory, so it names the same file there.
 */
 ModuleSource Compiler.module_source(Compiler c, String path, String text) {
   if (!_spells_block(text)) return NULL;
@@ -32,7 +31,7 @@ ModuleSource Compiler.module_source(Compiler c, String path, String text) {
   Splice s = {
     .c = c, .out = out, .markers = [], .members = {}, .splicing = {},
     .prefixes = {}, .line = 1,
-    .root = Path.absolute(Path.join(Path.dirname(path), Path.stem(path)))};
+    .root = Path.absolute(Path.dirname(path))};
   s.splicing[Path.absolute(path)] = 1;
   String own = _file_prefix(Path.stem(path));
   s.prefixes[own] = Path.basename(path);
@@ -122,24 +121,19 @@ static List _members(Splice &s, Token block, Token &close) {
   return members.list_free();
 }
 
-/* Appends the member `spelling` that the file's block at `site` names. The
-   member's resolved location, with links followed, must lie in the
-   resolved companion directory, and a file being spliced cannot be spliced
-   again inside itself. */
+/* Appends a member relative to the file that names it. A file being
+   spliced cannot be spliced again inside itself. */
 static void _member(Splice &s, String spelling, Token site) {
-  String stem = Path.stem(s.path), dir = Path.dirname(s.path), text = NULL;
-  String path = dir == "." ? spelling : Path.join(dir, spelling);
-  String companion = Path.absolute(Path.join(dir, stem));
+  String dir = Path.dirname(s.path), text = NULL;
+  String path = Path.join(dir, spelling);
   String resolved = Path.absolute(path);
-  if (!%"$resolved/".startswith(%"$companion/"))
-    $fail.collect_module_member(s.c, site, spelling, stem);
   if (resolved in s.splicing)
     $fail.collect_module_cycle(s.c, site, spelling, resolved);
   if (!s.c.read_source(path, text))
     $fail.collect_module_read(s.c, site, path);
   s.members[_canonical_path(path)] = _content_hash(text);
   String prefix = s.prefix ? Path.join(s.prefix, spelling) : spelling;
-  String relative = resolved[s.root.len() + 1:];
+  String relative = _relative_member(s.root, resolved);
   String own = _file_prefix(
     Path.join(Path.dirname(relative), Path.stem(relative)));
   if (own in s.prefixes)
@@ -151,7 +145,21 @@ static void _member(Splice &s, String spelling, Token site) {
   _end_line(s);
 }
 
-/* The prefix of a file's statics: its path under the entry's companion
+/* Spell a resolved member relative to the entry directory, including
+   members outside it, without putting the checkout path in C names. */
+static String _relative_member(String root, String path) {
+  String base = root.endswith("/") ? root : %"$root/";
+  int shared = 0;
+  for (int i = 0; i < base.len() && i < path.len() && base[i] == path[i]; i++)
+    if (base[i] == '/') shared = i + 1;
+  Buffer out = $auto(Buffer.new(0));
+  for (int i = shared; i < base.len(); i++)
+    if (base[i] == '/') out.write("../");
+  out.write(path[shared:]);
+  return out;
+}
+
+/* The prefix of a file's statics: its path relative to the entry's
    directory, or the entry's stem, without the extension, with each
    character that cannot continue a C identifier made `_` and trailing `_`
    dropped, then `___`. The spelling starts with `f`, its length, and `_`.

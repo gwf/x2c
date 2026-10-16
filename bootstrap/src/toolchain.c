@@ -7,7 +7,7 @@
 #define __GUARD_0x242786A8__
 #include "x2c.h"
 
-#include "cli.h"
+#include "cli/cli.h"
 #include "path.h"
 #include "process.h"
 typedef struct Toolchain{

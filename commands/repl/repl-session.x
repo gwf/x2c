@@ -6,7 +6,7 @@
 #include "frontend.x"
 #include "repl-lower.x"
 #include "repl-runtime.x"
-#include "emit.x"
+#include "emit/emit.x"
 #include "format.x"
 
 /** One loaded file's origin and published declarations.
@@ -52,7 +52,7 @@ typedef struct ReplCompletion {
   List candidates;
 } ReplCompletion;
 
-#include "parse.x"
+#include "parse/parse.x"
 #include "diagnostics.x"
 #include "lisp.x"
 #include "scope.x"

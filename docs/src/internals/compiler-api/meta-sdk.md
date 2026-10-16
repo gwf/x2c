@@ -4,7 +4,7 @@
 > **Provisional API:** This reference documents current compiler behavior.
 > Compatibility is not yet promised.
 
-# `src/meta-sdk.x`
+# `src/meta-sdk/meta-sdk.x`
 
 The compiler's answers to `lib/meta.x` operations.
 
@@ -708,7 +708,7 @@ a nested import changes without an expansion. Each evaluation installs
 its part with `$let`, so a captured entry is valid only while its
 expansion is active.
 
-Source: `src/meta-sdk.x:25`
+Source: `src/meta-sdk/meta-sdk.x:25`
 
 ## Design notes
 

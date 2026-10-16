@@ -7,12 +7,19 @@ The exporter owns parsing and call resolution; this adapter aggregates its TSVs.
 import csv, glob, hashlib, json, os, subprocess, sys
 from collections import defaultdict
 
+def compiler_sources(root):
+    paths = glob.glob(os.path.join(root, "src", "*.x"))
+    paths += [p for p in glob.glob(os.path.join(root, "src", "*", "*.x"))
+              if os.path.basename(os.path.dirname(p)) == "components"
+              or os.path.splitext(os.path.basename(p))[0] == os.path.basename(os.path.dirname(p))]
+    return paths
+
 def git_revision(root):
     try:
         revision = subprocess.check_output(["git", "-C", root, "rev-parse", "--short", "HEAD"], text=True, stderr=subprocess.DEVNULL).strip()
         dirty = subprocess.check_output(["git", "-C", root, "status", "--porcelain", "--", "src", "lib"], text=True)
         if dirty:
-            paths = sorted(glob.glob(os.path.join(root, "src", "*.x")) + glob.glob(os.path.join(root, "src", "components", "*.x")) + glob.glob(os.path.join(root, "lib", "*.x")))
+            paths = sorted(compiler_sources(root) + glob.glob(os.path.join(root, "lib", "*.x")))
             digest = hashlib.sha256()
             for path in paths:
                 if os.path.basename(path) == "x2c.x":
@@ -31,7 +38,7 @@ out_path = sys.argv[3] if len(sys.argv) > 3 else os.path.join(root, "explorer", 
 
 # ---- discover modules -------------------------------------------------------
 module_ids = []
-for p in sorted(glob.glob(os.path.join(root, "src", "*.x")) + glob.glob(os.path.join(root, "src", "components", "*.x"))):
+for p in sorted(compiler_sources(root)):
     module_ids.append(os.path.relpath(p, root))
 for p in sorted(glob.glob(os.path.join(root, "lib", "*.x"))):
     rel = os.path.relpath(p, root)

@@ -6,7 +6,7 @@
 #define __GUARD_0x23009D1A__
 
 #include "x2c.h"
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include "parse-reports.h"
 #include "grammar.h"
 typedef struct Sym * Sym;

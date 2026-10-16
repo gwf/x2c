@@ -9,8 +9,8 @@
 */
 
 #pragma once
-#include "cli.x"
-#include "compiler.x"
+#include "cli/cli.x"
+#include "compiler/compiler.x"
 
 /* Options owned by the package command, independent of a build request. */
 typedef struct PackageOptions {

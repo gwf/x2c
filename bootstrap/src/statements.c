@@ -4,12 +4,12 @@
 #include "x2c.h"
 
 #include "private-keywords.h"
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include "parse-reports.h"
-#include "parse.h"
-#include "expressions.h"
-#include "literals.h"
-#include "macros.h"
+#include "parse/parse.h"
+#include "expressions/expressions.h"
+#include "literals/literals.h"
+#include "macros/macros.h"
 static List _167, _165, _164, _163, _162, _161, _160, _159, _158, _157, _137, _131, _126, _125, _117, _110, _104, _98, _97, _95, _94, _92, _84, _82, _78, _76, _72, _67, _65, _62, _60, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33;
 
 static String _155, _153, _151, _149, _147, _145, _143, _141, _139, _135, _134, _133, _129, _128, _127, _123, _121, _113, _108, _107, _100, _99, _90, _86, _85, _80, _79, _70, _69, _58, _55, _54, _53, _52, _51, _31, _29, _27, _25, _23, _21, _19, _17, _15, _13, _11, _9, _7, _5, _3, _1, _0;

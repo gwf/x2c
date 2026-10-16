@@ -17,7 +17,7 @@ cd "$root"
 # definitions are discovered in the ordinary source modules that own them.
 sources=$(awk '/^meta / && !/^meta native / && !seen[FILENAME]++ {
     print FILENAME
-  }' lib/*.x src/*.x src/components/*.x |
+  }' lib/*.x $(python3 tools/compiler-sources.py) |
   sed '/^src\/linked-meta\.x$/d' | sort)
 
 tmp="$out.$$"
@@ -180,7 +180,7 @@ END {
   # Components are already supplied by the compiler prelude.
   for (i = 1; i <= ndef; i++)
     if (files[i] !~ /^src\/components\// && !included[files[i]]++) {
-      unit = files[i]; sub(/.*\//, "", unit)
+      unit = files[i]; sub(/^(src|lib)\//, "", unit)
       print "#include \"" unit "\""
     }
   last = ""

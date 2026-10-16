@@ -1,3 +1,0 @@
-unittest/compiler-fixtures/module-block-member-escape.x:3:1: driver: module member 'module-block-member-escape/../escaped.x' is outside 'module-block-member-escape/'
-  note: a member lies under the companion directory of the file that names it
-

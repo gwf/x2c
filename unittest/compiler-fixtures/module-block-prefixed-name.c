@@ -16,28 +16,28 @@
 #include "x2c.h"
 
 #include <stdio.h>
-static int f5_first___value;
+static int f32_module_block_prefixed_name_first___value;
 
 static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-_x2c_gensym_initializer_choice_0D5FC760_0((f5_first___value = 1))
-static int f5_first___f5_first___value;
+_x2c_gensym_initializer_choice_0D5FC760_0((f32_module_block_prefixed_name_first___value = 1))
+static int f32_module_block_prefixed_name_first___f5_first___value;
 
-_x2c_gensym_initializer_choice_0D5FC760_1((f5_first___f5_first___value = 3))
+_x2c_gensym_initializer_choice_0D5FC760_1((f32_module_block_prefixed_name_first___f5_first___value = 3))
 static int first_value(void);
 
-static int f6_second___f5_first___value;
+static int f33_module_block_prefixed_name_second___f5_first___value;
 
-_x2c_gensym_initializer_choice_0D5FC760_2((f6_second___f5_first___value = 2))
+_x2c_gensym_initializer_choice_0D5FC760_2((f33_module_block_prefixed_name_second___f5_first___value = 2))
 static int second_value(void);
 
-static int f1_a___b___value;
+static int f28_module_block_prefixed_name_a___b___value;
 
 static void set_a(int value);
 
-static int f5_a___b___value;
+static int f32_module_block_prefixed_name_a___b___value;
 
 static int read_b(void);
 
@@ -51,19 +51,19 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 }
 
 static int first_value(void){
-  return f5_first___value + f5_first___f5_first___value;
+  return f32_module_block_prefixed_name_first___value + f32_module_block_prefixed_name_first___f5_first___value;
 }
 
 static int second_value(void){
-  return f6_second___f5_first___value;
+  return f33_module_block_prefixed_name_second___f5_first___value;
 }
 
 static void set_a(int value){
-  f1_a___b___value = value;
+  f28_module_block_prefixed_name_a___b___value = value;
 }
 
 static int read_b(void){
-  return f5_a___b___value;
+  return f32_module_block_prefixed_name_a___b___value;
 }
 
 int main(void){

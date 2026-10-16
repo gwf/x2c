@@ -50,14 +50,6 @@ Code destructure_statement(Code node);
 
 Code destructure_value(Code node);
 
-Code lambda_lift(Code node);
-
-Code lambda_closure(Code node);
-
-Code lambda_cells(Code node);
-
-Code match_lowering(Code node);
-
 Code dynamic_binary(Code code);
 
 Code dynamic_compound(Code code);
@@ -65,6 +57,14 @@ Code dynamic_compound(Code code);
 Code dynamic_change(Code code);
 
 Code dynamic_unary(Code code);
+
+Code lambda_lift(Code node);
+
+Code lambda_closure(Code node);
+
+Code lambda_cells(Code node);
+
+Code match_lowering(Code node);
 
 Code printf_values(Code code);
 

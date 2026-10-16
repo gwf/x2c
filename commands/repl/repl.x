@@ -3,7 +3,7 @@
     Copyright (c) 2026 Gary William Flake.
 */
 #pragma once
-#include "cli.x"
+#include "cli/cli.x"
 
 typedef struct ReplOptions {
   int dump, stats, verbose_stats;

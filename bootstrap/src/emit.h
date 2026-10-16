@@ -2,19 +2,19 @@
 
 #pragma once
 
-#ifndef __GUARD_0x112A1548__
-#define __GUARD_0x112A1548__
+#ifndef __GUARD_0x8463958E__
+#define __GUARD_0x8463958E__
 
 #include "x2c.h"
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include "string.h"
 #include "var.h"
 #include "ast.h"
 #include "format.h"
-#include "cleanup.h"
+#include "cleanup/cleanup.h"
 List Compiler_emit(Compiler c, List ast, Map cache_bindings);
 
 
-#endif /* __GUARD_0x112A1548__ */
+#endif /* __GUARD_0x8463958E__ */

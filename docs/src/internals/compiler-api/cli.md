@@ -4,7 +4,7 @@
 > **Provisional API:** This reference documents current compiler behavior.
 > Compatibility is not yet promised.
 
-# `src/cli.x`
+# `src/cli/cli.x`
 
 X2c command-line parsing and presentation.
 
@@ -201,7 +201,7 @@ Holds one compiler command and its command-specific inputs and options.
 shallow: request storage and referenced canonical values keep their
 producing `Scope` and pool lifetimes.
 
-Source: `src/cli.x:18`
+Source: `src/cli/cli.x:18`
 
 <a id="TargetKind"></a>
 ### TargetKind
@@ -212,7 +212,7 @@ Describes one target kind: its spelling on the command line and in a
 manifest, the noun a report uses, and the default output file name
 around the target's name.
 
-Source: `src/cli.x:44`
+Source: `src/cli/cli.x:44`
 
 ## Design notes
 

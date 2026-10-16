@@ -6,8 +6,8 @@ a `case` on a macro whose body is the source form recognizes the input, and a
 template whose body is the C builds the output. This page shows the try
 lowering, which every later lowering copies, and states the rules a
 lowering meets. The try lowering is a shipped component,
-`src/components/component-try.x`, registered through `$rewrite` like
-`src/components/component-access.x`. The
+`src/components/try-catch.x`, registered through `$rewrite` like
+`src/components/bracket-access.x`. The
 [dual-macro contract](../plans/archive/compiler-dual-macro-contract.md) uses these
 rules as its acceptance test for later migrations. Any code that builds
 syntax follows [Choosing how to build syntax](#choosing-how-to-build-syntax).
@@ -365,7 +365,7 @@ examples are excerpts from current source.
    applications. `rebuild_statement` returns a `seq`; take its `.cdr()` or
    `.cadr()`. `rebuild_expression` applies a named template such as
    `$called`; for a one-off expression, a typed quotation does the same
-   work. `Compiler.run_once_body` in `src/generate.x`:
+   work. `Compiler.run_once_body` in `src/generate/generate.x`:
 
    ```x2c
    List flag = $!int{ $guard };
@@ -388,7 +388,7 @@ A hand-built `%(...)` List is still right in these cases:
 - **Parser productions.** The parser assembles nodes from children it has
   already parsed and bound, as in `%(while $cond $body)` in
   `src/statements.x`. A quotation would bind them again.
-- **Binder output.** Identifier resolution in `src/expressions.x` returns
+- **Binder output.** Identifier resolution in `src/expressions/expressions.x` returns
   `%(expr $type (ident $binding))`. A quotation would call the binder that
   is producing it.
 - **Forms with no source spelling.** Examples are a call whose native

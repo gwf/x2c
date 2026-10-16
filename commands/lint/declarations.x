@@ -7,7 +7,7 @@
     tokens for a unit in brace syntax are the tokens `Lint` scanned, so a
     span indexes both.
 */
-#include "generate.x"
+#include "generate/generate.x"
 #include "lint.x"
 #include <ctype.h>
 #include <string.h>

@@ -91,7 +91,7 @@ LIB_X_DEPS   = $(patsubst $(LIB_SOURCE)/%.x,$(LIB_BUILD)/%.d,$(LIB_X_FILES))
 LIB_C_DEPS   = $(patsubst $(LIB_SOURCE)/%.x,$(LIB_BUILD)/%.c.d,$(LIB_X_FILES))
 ###############################################################################
 # Binary source files and generated files
-BIN_X_FILES  = $(wildcard $(BIN_SOURCE)/*.x $(BIN_SOURCE)/components/*.x)
+BIN_X_FILES  = $(shell python3 $(ROOT)/tools/compiler-sources.py --root $(ROOT))
 # Components are independent units; keep their unique artifact names flat.
 BIN_X_NAMES  = $(sort $(notdir $(BIN_X_FILES)))
 # Module members trigger the batch but are not separate translation units.
@@ -200,8 +200,21 @@ $(BIN_BUILD)/.translated: BIN-FORCE-TRANSLATE
 .PHONY: BIN-FORCE-TRANSLATE
 BIN-FORCE-TRANSLATE:
 endif
+# Preserve explicit source include paths while keeping one flat artifact per unit.
+$(BIN_BUILD)/.module-headers: $(BIN_H_FILES)
+	@find $(BIN_BUILD) -type l -name '*.h' -delete
+	@for source in $(BIN_X_FILES); do \
+		relative=$${source#$(BIN_SOURCE)/}; \
+		case "$$relative" in */*) \
+			name=$${relative##*/}; directory=$${relative%/*}; \
+			mkdir -p "$(BIN_BUILD)/$$directory"; \
+			ln -sf "../$${name%.x}.h" "$(BIN_BUILD)/$${relative%.x}.h" ;; \
+		esac; \
+	done
+	@touch $@
+
 # compile binary object files
-$(BIN_BUILD)/%.o: $(BIN_BUILD)/%.c | $(LIB_H_FILES)
+$(BIN_BUILD)/%.o: $(BIN_BUILD)/%.c | $(LIB_H_FILES) $(BIN_BUILD)/.module-headers
 	$(CC) $(CFLAGS) -iquote $(LIB_BUILD) -iquote $(BIN_BUILD) \
 		-MMD -MP -MF $(BIN_BUILD)/$*.c.d -MT $@ -c $< -o $@
 # link binary executable

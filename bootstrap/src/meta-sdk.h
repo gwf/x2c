@@ -2,11 +2,11 @@
 
 #pragma once
 
-#ifndef __GUARD_0x200088A7__
-#define __GUARD_0x200088A7__
+#ifndef __GUARD_0x45505D6E__
+#define __GUARD_0x45505D6E__
 
 #include "x2c.h"
-#include "compiler.h"
+#include "compiler/compiler.h"
 typedef struct MetaContext{
   Compiler expander, evaluator;
   String definition_file;
@@ -17,7 +17,7 @@ typedef struct MetaContext{
 MetaContext;
 
 #include "grammar.h"
-#include "macros.h"
+#include "macros/macros.h"
 #include "meta.h"
 #include <limits.h>
 #include <stdint.h>
@@ -155,4 +155,4 @@ List MetaContext_literal_list(List values);
 void Compiler_bind_sdk_primitives(Lisp lisp);
 
 
-#endif /* __GUARD_0x200088A7__ */
+#endif /* __GUARD_0x45505D6E__ */

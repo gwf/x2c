@@ -28,56 +28,56 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 
 _x2c_gensym_initializer_choice_5F277027_0((f27_module_block_static_typedef___counter = 100))
-typedef struct f5_first___Node{
+typedef struct f33_module_block_static_typedef_first___Node{
   int value;
-  struct f5_first___Node * next;
+  struct f33_module_block_static_typedef_first___Node * next;
 }
-f5_first___Node;
+f33_module_block_static_typedef_first___Node;
 
-static int f5_first___counter;
+static int f33_module_block_static_typedef_first___counter;
 
-_x2c_gensym_initializer_choice_5F277027_1((f5_first___counter = 1))
-static int f5_first___sum(f5_first___Node * node);
+_x2c_gensym_initializer_choice_5F277027_1((f33_module_block_static_typedef_first___counter = 1))
+static int f33_module_block_static_typedef_first___sum(f33_module_block_static_typedef_first___Node * node);
 
-typedef struct f6_second___Node{
+typedef struct f34_module_block_static_typedef_second___Node{
   int value;
 }
-f6_second___Node;
+f34_module_block_static_typedef_second___Node;
 
-static f6_second___Node f6_second___Node_new(int field_value);
+static f34_module_block_static_typedef_second___Node f34_module_block_static_typedef_second___Node_new(int field_value);
 
-static Var f6_second___Node_var(f6_second___Node value);
+static Var f34_module_block_static_typedef_second___Node_var(f34_module_block_static_typedef_second___Node value);
 
-static f6_second___Node Var_f6_second___node(Var value);
+static f34_module_block_static_typedef_second___Node Var_f34_module_block_static_typedef_second___node(Var value);
 
-static int f6_second___Node_equal(f6_second___Node left, f6_second___Node right);
+static int f34_module_block_static_typedef_second___Node_equal(f34_module_block_static_typedef_second___Node left, f34_module_block_static_typedef_second___Node right);
 
-static unsigned f6_second___Node_hash(f6_second___Node value);
+static unsigned f34_module_block_static_typedef_second___Node_hash(f34_module_block_static_typedef_second___Node value);
 
-static Buffer f6_second___Node_write_str(f6_second___Node value, Buffer out);
+static Buffer f34_module_block_static_typedef_second___Node_write_str(f34_module_block_static_typedef_second___Node value, Buffer out);
 
-static String f6_second___Node_str(f6_second___Node value);
+static String f34_module_block_static_typedef_second___Node_str(f34_module_block_static_typedef_second___Node value);
 
-static Buffer f6_second___Node_write_repr(f6_second___Node value, Buffer out);
+static Buffer f34_module_block_static_typedef_second___Node_write_repr(f34_module_block_static_typedef_second___Node value, Buffer out);
 
-static String f6_second___Node_repr(f6_second___Node value);
+static String f34_module_block_static_typedef_second___Node_repr(f34_module_block_static_typedef_second___Node value);
 
-static int f6_second___counter;
+static int f34_module_block_static_typedef_second___counter;
 
-_x2c_gensym_initializer_choice_5F277027_2((f6_second___counter = 10))
-static int f6_second___sum(f6_second___Node node);
+_x2c_gensym_initializer_choice_5F277027_2((f34_module_block_static_typedef_second___counter = 10))
+static int f34_module_block_static_typedef_second___sum(f34_module_block_static_typedef_second___Node node);
 
-static inline String _x2c_gensym_proto_f6_second___node_str_0(Var a0);
+static inline String _x2c_gensym_proto_f34_module_block_static_typedef_second___node_str_0(Var a0);
 
-static inline String _x2c_gensym_proto_f6_second___node_repr_0(Var a0);
+static inline String _x2c_gensym_proto_f34_module_block_static_typedef_second___node_repr_0(Var a0);
 
-static inline Buffer _x2c_gensym_proto_f6_second___node_write_str_0(Var a0, Buffer a1);
+static inline Buffer _x2c_gensym_proto_f34_module_block_static_typedef_second___node_write_str_0(Var a0, Buffer a1);
 
-static inline Buffer _x2c_gensym_proto_f6_second___node_write_repr_0(Var a0, Buffer a1);
+static inline Buffer _x2c_gensym_proto_f34_module_block_static_typedef_second___node_write_repr_0(Var a0, Buffer a1);
 
-static inline unsigned _x2c_gensym_proto_f6_second___node_hash_0(Var a0);
+static inline unsigned _x2c_gensym_proto_f34_module_block_static_typedef_second___node_hash_0(Var a0);
 
-static inline int _x2c_gensym_proto_f6_second___node_equal_0(Var a0, Var a1);
+static inline int _x2c_gensym_proto_f34_module_block_static_typedef_second___node_equal_0(Var a0, Var a1);
 
 static VarMethods _x2c_gensym_protocol_methods_0;
 
@@ -128,64 +128,64 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   if(_init_guard_) return;
   _init_guard_ = 1;
   _x2c_gensym_protocol_methods_0 =(VarMethods){
-    .str = _x2c_gensym_proto_f6_second___node_str_0, .repr = _x2c_gensym_proto_f6_second___node_repr_0, .write_str = _x2c_gensym_proto_f6_second___node_write_str_0, .write_repr = _x2c_gensym_proto_f6_second___node_write_repr_0, .hash = _x2c_gensym_proto_f6_second___node_hash_0, .equal = _x2c_gensym_proto_f6_second___node_equal_0
+    .str = _x2c_gensym_proto_f34_module_block_static_typedef_second___node_str_0, .repr = _x2c_gensym_proto_f34_module_block_static_typedef_second___node_repr_0, .write_str = _x2c_gensym_proto_f34_module_block_static_typedef_second___node_write_str_0, .write_repr = _x2c_gensym_proto_f34_module_block_static_typedef_second___node_write_repr_0, .hash = _x2c_gensym_proto_f34_module_block_static_typedef_second___node_hash_0, .equal = _x2c_gensym_proto_f34_module_block_static_typedef_second___node_equal_0
   }
   ;
-  x2c_register_tagged_descriptor(250241411784, String_new("f6_second___Node"), _x2c_gensym_protocol_methods_0);
+  x2c_register_tagged_descriptor(224244540106, String_new("f34_module_block_static_typedef_second___Node"), _x2c_gensym_protocol_methods_0);
   _x2c_gensym_static_initialize_0();
   _x2c_gensym_static_initialize_1();
   _x2c_gensym_static_initialize_2();
 }
 
-static int f5_first___sum(f5_first___Node * node){
-  return node ? node -> value + f5_first___sum(node -> next) : 0;
+static int f33_module_block_static_typedef_first___sum(f33_module_block_static_typedef_first___Node * node){
+  return node ? node -> value + f33_module_block_static_typedef_first___sum(node -> next) : 0;
 }
 
 int first_total(void){
   if(! _init_guard_) _file_init_();
-  f5_first___Node tail ={
+  f33_module_block_static_typedef_first___Node tail ={
     .value = 2
   }
   , head ={
     .value = 3, .next = & tail
   }
   ;
-  f5_first___counter += f5_first___sum(& head);
-  return f5_first___counter;
+  f33_module_block_static_typedef_first___counter += f33_module_block_static_typedef_first___sum(& head);
+  return f33_module_block_static_typedef_first___counter;
 }
 
-static f6_second___Node f6_second___Node_new(int field_value){
-  struct f6_second___Node value ={
+static f34_module_block_static_typedef_second___Node f34_module_block_static_typedef_second___Node_new(int field_value){
+  struct f34_module_block_static_typedef_second___Node value ={
     field_value
   }
   ;
   return value;
 }
 
-static Var f6_second___Node_var(f6_second___Node value){
-  return Var_box_record(250241411784, & value, sizeof(value));
+static Var f34_module_block_static_typedef_second___Node_var(f34_module_block_static_typedef_second___Node value){
+  return Var_box_record(224244540106, & value, sizeof(value));
 }
 
-static f6_second___Node Var_f6_second___node(Var value){
-  return *(f6_second___Node *) Var_pointer(value);
+static f34_module_block_static_typedef_second___Node Var_f34_module_block_static_typedef_second___node(Var value){
+  return *(f34_module_block_static_typedef_second___Node *) Var_pointer(value);
 }
 
-static int f6_second___Node_equal(f6_second___Node left, f6_second___Node right){
+static int f34_module_block_static_typedef_second___Node_equal(f34_module_block_static_typedef_second___Node left, f34_module_block_static_typedef_second___Node right){
   if(! Var_equal(int_var(left.value), int_var(right.value))) return 0;
   return 1;
 }
 
-static unsigned f6_second___Node_hash(f6_second___Node value){
+static unsigned f34_module_block_static_typedef_second___Node_hash(f34_module_block_static_typedef_second___Node value){
   unsigned hash = 0;
   hash = x2c_hash_word(hash ^ Var_hash(int_var(value.value)));
   return hash;
 }
 
-static Buffer f6_second___Node_write_str(f6_second___Node value, Buffer out){
-  return f6_second___Node_write_repr(value, out);
+static Buffer f34_module_block_static_typedef_second___Node_write_str(f34_module_block_static_typedef_second___Node value, Buffer out){
+  return f34_module_block_static_typedef_second___Node_write_repr(value, out);
 }
 
-static String f6_second___Node_str(f6_second___Node value){
+static String f34_module_block_static_typedef_second___Node_str(f34_module_block_static_typedef_second___Node value){
   Buffer _x2c_gensym_macro_out_0 = Buffer_new(0);
   {
     _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
@@ -199,7 +199,7 @@ static String f6_second___Node_str(f6_second___Node value){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
-      f6_second___Node_write_str(value, _x2c_gensym_macro_out_0);
+      f34_module_block_static_typedef_second___Node_write_str(value, _x2c_gensym_macro_out_0);
       {
         String _x2c_gensym_return_value_0 = Buffer_str(_x2c_gensym_macro_out_0);
         {
@@ -215,14 +215,14 @@ static String f6_second___Node_str(f6_second___Node value){
 
 }
 
-static Buffer f6_second___Node_write_repr(f6_second___Node value, Buffer out){
-  Buffer_write(out, "f6_second___Node { ");
+static Buffer f34_module_block_static_typedef_second___Node_write_repr(f34_module_block_static_typedef_second___Node value, Buffer out){
+  Buffer_write(out, "f34_module_block_static_typedef_second___Node { ");
   Buffer_write(out, "value: ");
   Var_write_repr((int_var(value.value)), out);
   return Buffer_write(out, " }");
 }
 
-static String f6_second___Node_repr(f6_second___Node value){
+static String f34_module_block_static_typedef_second___Node_repr(f34_module_block_static_typedef_second___Node value){
   Buffer _x2c_gensym_macro_out_1 = Buffer_new(0);
   {
     _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
@@ -236,7 +236,7 @@ static String f6_second___Node_repr(f6_second___Node value){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_1);
     {
-      f6_second___Node_write_repr(value, _x2c_gensym_macro_out_1);
+      f34_module_block_static_typedef_second___Node_write_repr(value, _x2c_gensym_macro_out_1);
       {
         String _x2c_gensym_return_value_1 = Buffer_str(_x2c_gensym_macro_out_1);
         {
@@ -252,20 +252,20 @@ static String f6_second___Node_repr(f6_second___Node value){
 
 }
 
-static int f6_second___sum(f6_second___Node node){
+static int f34_module_block_static_typedef_second___sum(f34_module_block_static_typedef_second___Node node){
   return node.value;
 }
 
 int second_total(void){
   if(! _init_guard_) _file_init_();
-  f6_second___counter += f6_second___sum(f6_second___Node_new(5));
-  return f6_second___counter;
+  f34_module_block_static_typedef_second___counter += f34_module_block_static_typedef_second___sum(f34_module_block_static_typedef_second___Node_new(5));
+  return f34_module_block_static_typedef_second___counter;
 }
 
 int second_boxed(void){
   if(! _init_guard_) _file_init_();
-  Var boxed = f6_second___Node_var(f6_second___Node_new(7));
-  f6_second___Node node = Var_f6_second___node(boxed);
+  Var boxed = f34_module_block_static_typedef_second___Node_var(f34_module_block_static_typedef_second___Node_new(7));
+  f34_module_block_static_typedef_second___Node node = Var_f34_module_block_static_typedef_second___node(boxed);
   return node.value;
 }
 
@@ -277,7 +277,7 @@ int main(void){
   return 0;
 }
 
-static inline String _x2c_gensym_proto_f6_second___node_str_0(Var a0){
+static inline String _x2c_gensym_proto_f34_module_block_static_typedef_second___node_str_0(Var a0){
   RenderPath _x2c_gensym_macro_render_path_0;
   if(! RenderPath_enter(& _x2c_gensym_macro_render_path_0, Var_pointer(a0))) return Var_pointer_string(a0);
   {
@@ -293,7 +293,7 @@ static inline String _x2c_gensym_proto_f6_second___node_str_0(Var a0){
     x2c_cleanup_push(& _x2c_gensym_defer_record_2);
     {
       {
-        String _x2c_gensym_return_value_2 = f6_second___Node_str(Var_f6_second___node(a0));
+        String _x2c_gensym_return_value_2 = f34_module_block_static_typedef_second___Node_str(Var_f34_module_block_static_typedef_second___node(a0));
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
           return _x2c_gensym_return_value_2;
@@ -307,7 +307,7 @@ static inline String _x2c_gensym_proto_f6_second___node_str_0(Var a0){
 
 }
 
-static inline String _x2c_gensym_proto_f6_second___node_repr_0(Var a0){
+static inline String _x2c_gensym_proto_f34_module_block_static_typedef_second___node_repr_0(Var a0){
   RenderPath _x2c_gensym_macro_render_path_1;
   if(! RenderPath_enter(& _x2c_gensym_macro_render_path_1, Var_pointer(a0))) return Var_pointer_string(a0);
   {
@@ -323,7 +323,7 @@ static inline String _x2c_gensym_proto_f6_second___node_repr_0(Var a0){
     x2c_cleanup_push(& _x2c_gensym_defer_record_3);
     {
       {
-        String _x2c_gensym_return_value_3 = f6_second___Node_repr(Var_f6_second___node(a0));
+        String _x2c_gensym_return_value_3 = f34_module_block_static_typedef_second___Node_repr(Var_f34_module_block_static_typedef_second___node(a0));
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
           return _x2c_gensym_return_value_3;
@@ -337,7 +337,7 @@ static inline String _x2c_gensym_proto_f6_second___node_repr_0(Var a0){
 
 }
 
-static inline Buffer _x2c_gensym_proto_f6_second___node_write_str_0(Var a0, Buffer a1){
+static inline Buffer _x2c_gensym_proto_f34_module_block_static_typedef_second___node_write_str_0(Var a0, Buffer a1){
   RenderPath _x2c_gensym_macro_render_path_2;
   if(! RenderPath_enter(& _x2c_gensym_macro_render_path_2, Var_pointer(a0))) return Var_write_pointer_repr(a0, a1);
   {
@@ -353,7 +353,7 @@ static inline Buffer _x2c_gensym_proto_f6_second___node_write_str_0(Var a0, Buff
     x2c_cleanup_push(& _x2c_gensym_defer_record_4);
     {
       {
-        Buffer _x2c_gensym_return_value_4 = f6_second___Node_write_str(Var_f6_second___node(a0), a1);
+        Buffer _x2c_gensym_return_value_4 = f34_module_block_static_typedef_second___Node_write_str(Var_f34_module_block_static_typedef_second___node(a0), a1);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
           return _x2c_gensym_return_value_4;
@@ -367,7 +367,7 @@ static inline Buffer _x2c_gensym_proto_f6_second___node_write_str_0(Var a0, Buff
 
 }
 
-static inline Buffer _x2c_gensym_proto_f6_second___node_write_repr_0(Var a0, Buffer a1){
+static inline Buffer _x2c_gensym_proto_f34_module_block_static_typedef_second___node_write_repr_0(Var a0, Buffer a1){
   RenderPath _x2c_gensym_macro_render_path_3;
   if(! RenderPath_enter(& _x2c_gensym_macro_render_path_3, Var_pointer(a0))) return Var_write_pointer_repr(a0, a1);
   {
@@ -383,7 +383,7 @@ static inline Buffer _x2c_gensym_proto_f6_second___node_write_repr_0(Var a0, Buf
     x2c_cleanup_push(& _x2c_gensym_defer_record_5);
     {
       {
-        Buffer _x2c_gensym_return_value_5 = f6_second___Node_write_repr(Var_f6_second___node(a0), a1);
+        Buffer _x2c_gensym_return_value_5 = f34_module_block_static_typedef_second___Node_write_repr(Var_f34_module_block_static_typedef_second___node(a0), a1);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
           return _x2c_gensym_return_value_5;
@@ -397,12 +397,12 @@ static inline Buffer _x2c_gensym_proto_f6_second___node_write_repr_0(Var a0, Buf
 
 }
 
-static inline unsigned _x2c_gensym_proto_f6_second___node_hash_0(Var a0){
-  return f6_second___Node_hash(Var_f6_second___node(a0));
+static inline unsigned _x2c_gensym_proto_f34_module_block_static_typedef_second___node_hash_0(Var a0){
+  return f34_module_block_static_typedef_second___Node_hash(Var_f34_module_block_static_typedef_second___node(a0));
 }
 
-static inline int _x2c_gensym_proto_f6_second___node_equal_0(Var a0, Var a1){
-  return f6_second___Node_equal(Var_f6_second___node(a0), Var_f6_second___node(a1));
+static inline int _x2c_gensym_proto_f34_module_block_static_typedef_second___node_equal_0(Var a0, Var a1){
+  return f34_module_block_static_typedef_second___Node_equal(Var_f34_module_block_static_typedef_second___node(a0), Var_f34_module_block_static_typedef_second___node(a1));
 }
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){

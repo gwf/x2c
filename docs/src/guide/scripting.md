@@ -238,7 +238,7 @@ methods.
 ```x2c
 ~#include "path.x"
 ~int main(void) {
-Path source = "src/parse.x";
+Path source = "src/parse/parse.x";
 Path object = Path.join("build", %"${source.stem()}.o");
 ~  return object == "build/parse.o" ? 0 : 1;
 ~}

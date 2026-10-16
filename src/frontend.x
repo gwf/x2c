@@ -7,8 +7,8 @@
 */
 
 #pragma once
-#include "cli.x"
-#include "compiler.x"
+#include "cli/cli.x"
+#include "compiler/compiler.x"
 #include "toolchain.x"
 
 /** Receives borrowed native-preprocessor stderr synchronously during
@@ -43,7 +43,7 @@ typedef struct ParsedUnit {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "collect.x"
+#include "collect/collect.x"
 #include "deps.x"
 #include "utils.x"
 

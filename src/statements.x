@@ -10,12 +10,12 @@
 #pragma once
 #include "private-keywords.x"
 static keyword loop $private.loop;
-#include "compiler.x"
+#include "compiler/compiler.x"
 #include "parse-reports.x"
-#include "parse.x"
-#include "expressions.x"
-#include "literals.x"
-#include "macros.x"
+#include "parse/parse.x"
+#include "expressions/expressions.x"
+#include "literals/literals.x"
+#include "macros/macros.x"
 
 /* statements diagnostics. */
 

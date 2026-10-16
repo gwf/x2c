@@ -1,5 +1,4 @@
-/* A member path that leaves the companion directory through '..' lies
-   outside it, however the path begins. */
-module {
-  "module-block-member-escape/../escaped.x",
-}
+/* Parent traversal is resolved relative to the file containing the block. */
+#include <stdio.h>
+module { "module-block/../module-block/implementation.x", }
+int main(void) { printf("%d\n", helper(41)); return 0; }

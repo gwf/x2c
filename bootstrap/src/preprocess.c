@@ -3,7 +3,7 @@
 #define __GUARD_0x5295F561__
 #include "x2c.h"
 
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include <ctype.h>
 static List _42, _41, _38, _37, _36;
 

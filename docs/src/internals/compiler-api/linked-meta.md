@@ -128,7 +128,7 @@ for `+` beside text, text. The call is returned lowered, because an
 operator chain applies this rule once for each term and binding would
 search the whole remaining chain each time.
 
-Source: `src/linked-meta.x:1450`
+Source: `src/linked-meta.x:556`
 
 #### dynamic_change
 
@@ -137,7 +137,7 @@ Source: `src/linked-meta.x:1450`
 Adds or subtracts one through the `Var` update helpers; the postfix
 forms return the value before the change.
 
-Source: `src/linked-meta.x:1519`
+Source: `src/linked-meta.x:625`
 
 #### dynamic_compound
 
@@ -146,7 +146,7 @@ Source: `src/linked-meta.x:1519`
 Updates a `Var` or numeric lvalue with a `Var` or numeric operand
 through the update helper of its storage.
 
-Source: `src/linked-meta.x:1499`
+Source: `src/linked-meta.x:605`
 
 #### dynamic_unary
 
@@ -154,7 +154,7 @@ Source: `src/linked-meta.x:1499`
 
 Rejects a unary numeric operator on a `Var`.
 
-Source: `src/linked-meta.x:1535`
+Source: `src/linked-meta.x:641`
 
 #### lambda_cells
 
@@ -168,7 +168,7 @@ lambda's function moves its own. The function binds again only its
 cells and the statements that hold them; its other statements are kept
 as they are bound.
 
-Source: `src/linked-meta.x:1018`
+Source: `src/linked-meta.x:1120`
 
 #### lambda_closure
 
@@ -178,7 +178,7 @@ Lifts the capturing lambda `node` to a static function of its
 parameters and captures, and answers a `Func` of a record of the
 captured values and addresses.
 
-Source: `src/linked-meta.x:940`
+Source: `src/linked-meta.x:1042`
 
 #### lambda_lift
 
@@ -187,7 +187,7 @@ Source: `src/linked-meta.x:940`
 Lifts the noncapturing lambda `node` to a static function, whose name
 is its value.
 
-Source: `src/linked-meta.x:785`
+Source: `src/linked-meta.x:887`
 
 #### linked_meta_hashes
 
@@ -212,7 +212,7 @@ Source: `src/linked-meta.x:2156`
 Lowers the bound match `node` to C text around its subject, patterns,
 and bodies.
 
-Source: `src/linked-meta.x:1434`
+Source: `src/linked-meta.x:1536`
 
 #### printf_values
 

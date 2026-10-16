@@ -3,7 +3,7 @@
 #define __GUARD_0x4FB7A5AC__
 #include "x2c.h"
 
-#include "compiler.h"
+#include "compiler/compiler.h"
 typedef struct Pretty{
   Compiler c;
   Buffer buff;

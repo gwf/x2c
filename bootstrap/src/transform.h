@@ -2,30 +2,30 @@
 
 #pragma once
 
-#ifndef __GUARD_0x00CB812B__
-#define __GUARD_0x00CB812B__
+#ifndef __GUARD_0xC4D768C8__
+#define __GUARD_0xC4D768C8__
 
 #include "x2c.h"
 #ifndef X2C_TRANSFORM_SOURCE
 #ifdef X2CCPP
 #define X2C_TRANSFORM_SOURCE
 #endif
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include "ast-rewrite.h"
 #include "meta.h"
 #include "grammar.h"
 #include "ast.h"
 #include "type.h"
-#include "parse.h"
-#include "expressions.h"
+#include "parse/parse.h"
+#include "expressions/expressions.h"
 #include "string.h"
 #include "symbol.h"
 #include "var.h"
 #include "list.h"
-#include "protocol.h"
-#include "regions.h"
-#include "callables.h"
-#include "cleanup.h"
+#include "protocol/protocol.h"
+#include "regions/regions.h"
+#include "callables/callables.h"
+#include "cleanup/cleanup.h"
 List Compiler_transform(Compiler c, List ast);
 
 Ast Compiler_normalize(Compiler c, Ast ast);
@@ -38,4 +38,4 @@ List Compiler_call_in_order(Compiler c, List callee, List arguments);
 
 #endif
 
-#endif /* __GUARD_0x00CB812B__ */
+#endif /* __GUARD_0xC4D768C8__ */

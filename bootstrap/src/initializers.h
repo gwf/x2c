@@ -2,18 +2,18 @@
 
 #pragma once
 
-#ifndef __GUARD_0x63A6D8C6__
-#define __GUARD_0x63A6D8C6__
+#ifndef __GUARD_0x02D80C4E__
+#define __GUARD_0x02D80C4E__
 
 #include "x2c.h"
 #include "private-keywords.h"
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include "type.h"
 #include "grammar.h"
 #include "adapter-memo.h"
 #include "ast.h"
-#include "expressions.h"
-#include "macros.h"
+#include "expressions/expressions.h"
+#include "macros/macros.h"
 List Compiler_initializer_rows(Compiler c, Type root, List items, List target);
 
 List Compiler_initializer_field_path(Compiler c, Type type, List field);
@@ -27,4 +27,4 @@ List Compiler_convert_compound_literal(Compiler c, List value, Type type, Type n
 List Compiler_initializer_native_types(Compiler c, Type type);
 
 
-#endif /* __GUARD_0x63A6D8C6__ */
+#endif /* __GUARD_0x02D80C4E__ */

@@ -2,17 +2,17 @@
 
 #pragma once
 
-#ifndef __GUARD_0xD9CA694D__
-#define __GUARD_0xD9CA694D__
+#ifndef __GUARD_0xE20BB82E__
+#define __GUARD_0xE20BB82E__
 
 #include "x2c.h"
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include "grammar.h"
 #include "adapter-memo.h"
 #include <string.h>
-#include "collect.h"
-#include "expressions.h"
-#include "parse.h"
+#include "collect/collect.h"
+#include "expressions/expressions.h"
+#include "parse/parse.h"
 #include "meta.h"
 Symbol Compiler_operator_member(Compiler c, Symbol op);
 
@@ -63,4 +63,4 @@ int Compiler_native_protocol_alias(Compiler c, String name);
 void Compiler_record_source_typedef(Compiler c, String name, List declaration, int private);
 
 
-#endif /* __GUARD_0xD9CA694D__ */
+#endif /* __GUARD_0xE20BB82E__ */

@@ -51,7 +51,7 @@ instead of edited by hand. The compiler under development is `builds/0/x2c`; see
 ## The compiler pipeline
 
 The compiler lives under `src/`. `src/main.x` dispatches commands and runs the
-translation loop; `src/cli.x` parses the command line. `src/frontend.x` owns
+translation loop; `src/cli/cli.x` parses the command line. `src/frontend.x` owns
 configured source stages and isolated unit lifetimes shared with internal
 tools. Nested interning pools keep batch translation close to single-file peak
 memory. For each input file the translator runs one pipeline:
@@ -190,7 +190,7 @@ that come from C headers the compiler never parses in full.
 
 The default path does not run the C preprocessor. Every unit starts from the
 implicit runtime prelude, the declarations of `lib/x2c.x` and everything it
-includes. `src/collect.x` shallow-parses source text directly, splicing
+includes. `src/collect/collect.x` shallow-parses source text directly, splicing
 quote-includes inline at their include points in the same order the
 preprocessor would have produced them, resolving each through the same search
 order (the including file's directory, `.`, `src/`, `lib/`, then the `-I`
@@ -299,14 +299,14 @@ implicit runtime contributes a few thousand rows, so grep the output.
 The full parse reads tokens and the global environment and produces the parsed
 AST: immutable `List`s, tagged by node kind, annotated with resolved types.
 `Compiler.full_parse` in `src/compiler/parsing/parse.x` drives a
-recursive-descent grammar split across four modules -- `src/parse.x` for
+recursive-descent grammar split across four modules -- `src/parse/parse.x` for
 declarations and top-level forms, including initializer recognition and the
-function-body boundary, `src/expressions.x` for the C precedence ladder plus
+function-body boundary, `src/expressions/expressions.x` for the C precedence ladder plus
 dotted method sugar, `src/statements.x` for control flow, `match`,
-`try`/`catch`, and `defer`, and `src/literals.x` for collection, interpolated
-`String`, and lambda literals. `src/meta-group.x` stages a unit's bodied
+`try`/`catch`, and `defer`, and `src/literals/literals.x` for collection, interpolated
+`String`, and lambda literals. `src/meta-group/meta-group.x` stages a unit's bodied
 `meta` functions as native code, and `src/stage.x` carries values across that
-boundary. The built-in source macro in `src/macros.x`, `etc/builtin-macros.x`,
+boundary. The built-in source macro in `src/macros/macros.x`, `etc/builtin-macros.x`,
 and the algorithms in `src/builtins.x` expand `foreach` during this pass.
 `src/type.x` owns the `List`-backed `Type` representation those modules
 consult; `src/ast.x` owns sequence placement and binding helpers;
@@ -350,7 +350,7 @@ the top level and inside compound statements. The implicit runtime prelude is
 not a source token or AST node.
 
 The parser has already cached the literal. The literal segment `"hello, "` holds
-no dynamic references, so `src/literals.x` recorded it as a cacheable
+no dynamic references, so `src/literals/literals.x` recorded it as a cacheable
 constant and the AST refers to it by slot:
 
 ```sh
@@ -364,11 +364,11 @@ constant and the AST refers to it by slot:
 ### Lowering
 
 Lowering turns the parsed AST into a lowered AST that the emitter can walk
-without knowing about x2c. `src/transform.x` normalizes each node until its
+without knowing about x2c. `src/transform/transform.x` normalizes each node until its
 identity stops changing, because lowering one construct can expose another.
-`src/cleanup.x` places function cleanup within the shared driver.
-`src/components/component-lambdas.x` lowers each lambda the driver meets; see
-[builtin components](#builtin-components). `src/callables.x` converts callable
+`src/cleanup/cleanup.x` places function cleanup within the shared driver.
+`src/components/lambda-functions.x` lowers each lambda the driver meets; see
+[builtin components](#builtin-components). `src/callables/callables.x` converts callable
 values. It adds an adapter when a receiving callback type differs from a
 function's signature. A direct function gets one reusable file-static `Func`
 handle, and a function pointer is copied into a new `Func` context. A public
@@ -377,7 +377,7 @@ runs the owning unit's initializer. The helpers are queued as early
 declarations, normalized by the same driver, and appended to the unit.
 
 Cleanup lowering completes each function after its body is normalized. A `try`
-first takes the landing form that `src/components/component-try.x` returns;
+first takes the landing form that `src/components/try-catch.x` returns;
 see [builtin components](#builtin-components). A program's rule on `try`
 applies here as well. Binding and lowering its replacement keep the already
 lowered parts of the `try` as they are. The pass then assigns a name to the
@@ -419,7 +419,7 @@ expression and lambda normalization within the function.
 The interpolation is gone, replaced by a `String_join` call over a cons list
 of boxed `Var` values, each `String_var` call naming its callee as a resolved
 binding carrying that function's type.
-`src/components/component-interpolation.x` wrote the join; see [builtin
+`src/components/interpolation.x` wrote the join; see [builtin
 components](#builtin-components). The `return` no longer carries a type
 annotation; nothing downstream needs it. Some children are now raw C text.
 Lowering may produce emitter-ready fragments, so `"String_join(NULL, "` sits
@@ -429,7 +429,7 @@ in the tree as a `String` instead of a call node.
 
 Generation splits the lowered AST for one unit into two ASTs, one per output
 file, and adds the generated initialization that makes cached constants work.
-`src/generate.x` owns the sequence: drop whitespace and comment nodes,
+`src/generate/generate.x` owns the sequence: drop whitespace and comment nodes,
 partition declarations and functions into header and source halves, ask
 `src/cache.x` to materialize the cache slots as file statics with an
 initializer, fold every file-level initialization block into one guarded
@@ -470,7 +470,7 @@ load-time initialization instead of at the literal's source expression.
 
 ### C token emission
 
-Emission turns the lowered AST into a flat `List` of C tokens. `src/emit.x`
+Emission turns the lowered AST into a flat `List` of C tokens. `src/emit/emit.x`
 does this with one stack-local `Emitter` per translation unit, which holds the
 current function's name and static objects. Emission is therefore reentrant,
 and state from a failed unit does not reach the next unit. Lowering has
@@ -500,7 +500,7 @@ Formatting turns the C token `List` into text. `src/format.x` walks the tokens
 without reordering them: parenthesis depth suppresses statement breaks inside
 expressions, preprocessor tokens occupy their own lines, and a `Buffer`
 builds the final `String`. The result is valid C, with spacing determined by
-the emitter. `src/generate.x` then writes the `.h`, `.c`, and `.xi` files
+the emitter. `src/generate/generate.x` then writes the `.h`, `.c`, and `.xi` files
 together, named from the input basename inside the `--out-dir` directory. A
 write failure replaces none of them and becomes a diagnostic carrying the
 target path and the host error. `src/main.x` then writes the `.d` file
@@ -517,22 +517,22 @@ Each module under `src/` and `commands/` has these responsibilities.
 module block, so its files share no private scope.
 
 - the builtin components, described in [builtin
-  components](#builtin-components): `src/components/component-access.x`
-  (bracket access), `src/components/component-try.x` (try, catch, and finally),
-  `src/components/component-delegate.x` (delegate fields),
-  `src/components/component-literals.x` (Array and Map literals),
-  `src/components/component-printf.x` (printf formats),
-  `src/components/component-operators.x` (dynamic operators),
-  `src/components/component-raise.x` (raise),
-  `src/components/component-match.x` (match),
-  `src/components/component-interpolation.x` (interpolation),
-  `src/components/component-destructuring.x` (destructuring),
-  `src/components/component-lambdas.x` (lambdas),
-  `src/components/component-protocols.x` (protocol members and descriptors),
-  and `src/components/component-string-switch.x` (String switches);
+  components](#builtin-components): `src/components/bracket-access.x`
+  (bracket access), `src/components/try-catch.x` (try, catch, and finally),
+  `src/components/delegate-members.x` (delegate fields),
+  `src/components/collection-literals.x` (Array and Map literals),
+  `src/components/printf-format.x` (printf formats),
+  `src/components/dynamic-operators.x` (dynamic operators),
+  `src/components/raise.x` (raise),
+  `src/components/pattern-match.x` (match),
+  `src/components/interpolation.x` (interpolation),
+  `src/components/destructuring.x` (destructuring),
+  `src/components/lambda-functions.x` (lambdas),
+  `src/components/protocol-adapters.x` (protocol members and descriptors),
+  and `src/components/string-switch.x` (String switches);
 - `src/operator-ledger.x` -- operator precedence, compound assignment,
   and protocol-member mappings from one compile-time ledger;
-- `src/cli.x`, `src/main.x` -- option metadata, parsing, and dispatch;
+- `src/cli/cli.x`, `src/main.x` -- option metadata, parsing, and dispatch;
 - `src/translation.x` -- synchronous translation, inspections, worker
   scheduling, ordered diagnostics, and signal forwarding;
 - `src/frontend.x` -- configured source stages, process translation support,
@@ -543,7 +543,7 @@ module block, so its files share no private scope.
   request and one reply per call, with its timeout and failures;
 - `commands/repl/` -- terminal interaction, inline editing and history,
   persistent submissions, and named inspection over the compiler session API;
-- `src/project.x`, `src/toolchain.x` -- shared manifest membership, target
+- `src/project/project.x`, `src/toolchain.x` -- shared manifest membership, target
   relationships, and host compile/archive/link primitives;
 - `commands/build/` -- application build and run orchestration, incremental
   state, script executable caching, locking, and execution;
@@ -553,7 +553,7 @@ module block, so its files share no private scope.
   x2c home, project lockfile preparation, and source-package builds through
   the matching compiler; fetch, digest, and extraction use host tools;
 - `src/deps.x` -- x2c dependency parsing and atomic depfile publication;
-- `src/compiler.x` -- shared compiler state, with members under
+- `src/compiler/compiler.x` -- shared compiler state, with members under
   `src/compiler/` for parsing (tokens, collection, the full parse, top-level
   definitions, and scripts), declaration production, generated names,
   lifecycle, binding facts, the literal cache, match patterns, pending
@@ -564,23 +564,23 @@ module block, so its files share no private scope.
   resolution, and semantic transactions;
 - `src/preprocess.x` -- preprocessor directive lines, conditional arms, and
   the directives before each form;
-- `src/parse.x`, `src/expressions.x`, `src/statements.x`, `src/literals.x` --
+- `src/parse/parse.x`, `src/expressions/expressions.x`, `src/statements.x`, `src/literals/literals.x` --
   grammar and AST construction;
 - `src/parse-reports.x`, `src/expressions-reports.x` -- package and
   alias diagnostics, and expression typing diagnostics;
-- `src/initializers.x` -- brace initializer conversion by C's
+- `src/initializers/initializers.x` -- brace initializer conversion by C's
   initialization order;
 - `src/lambdas.x` -- lambda parsing and the capture resolution shared by
   source and constructed lambdas;
-- `src/macros.x` -- compile-time macro definitions, imports, Lisp lifting,
+- `src/macros/macros.x` -- compile-time macro definitions, imports, Lisp lifting,
   hygiene, and expansion;
-- `src/meta-sdk.x` -- the compiler's answers to `lib/meta.x` operations
+- `src/meta-sdk/meta-sdk.x` -- the compiler's answers to `lib/meta.x` operations
   and the context of the running compile-time call;
-- `src/meta-native.x` -- meta functions, explicit meta calls, native meta
+- `src/meta-native/meta-native.x` -- meta functions, explicit meta calls, native meta
   bindings and their lifetimes, and native modules;
 - `src/stage.x` -- the arguments and results that cross between meta code
   and program code;
-- `src/meta-group.x` -- a unit's meta group, its emission as C, and
+- `src/meta-group/meta-group.x` -- a unit's meta group, its emission as C, and
   in-process staging;
 - `src/builtins.x`, `src/linked-meta.x` -- the built-in macro algorithms and
   the shipped compile-time code compiled into the compiler;
@@ -588,29 +588,29 @@ module block, so its files share no private scope.
 - `src/ast-rewrite.x` -- AST child rewriting and iterative tree traversal;
 - `src/grammar.x` -- source-form patterns and parsed-node accessors used by
   lowering;
-- `src/type.x`, `src/protocol.x` -- type representation, conversions, protocol
+- `src/type.x`, `src/protocol/protocol.x` -- type representation, conversions, protocol
   declarations, conformance, and native aliases, with the conformance form that
   presents each conformance's adapters to
-  `src/components/component-protocols.x`;
+  `src/components/protocol-adapters.x`;
 - `src/type-ledger.x` -- the `Var` tag lookups projected from the tag ledger,
   kept in their own unit so the units that include `type.x` do not load it;
-- `src/collect.x` -- global environment discovery, unit interfaces, and the
+- `src/collect/collect.x` -- global environment discovery, unit interfaces, and the
   splicing of module blocks;
 - `src/utils.x` -- repository discovery, the driver's fatal error line, and
   forked translation workers;
-- `src/transform.x` -- lowering to emitter-ready AST;
-- `src/callables.x` -- typed callback adapters and `Func` conversions
+- `src/transform/transform.x` -- lowering to emitter-ready AST;
+- `src/callables/callables.x` -- typed callback adapters and `Func` conversions
   lowered to C helpers;
 - `src/adapter-memo.x` -- macros that cache compiler adapters and reuse
   each result by key;
-- `src/cleanup.x` -- which exits leave a cleanup region and which locals an
+- `src/cleanup/cleanup.x` -- which exits leave a cleanup region and which locals an
   error transfer preserves;
-- `src/regions.x` -- per-function region summaries and the warnings for a
+- `src/regions/regions.x` -- per-function region summaries and the warnings for a
   value that can outlive the region that allocated it;
 - `src/cache.x` -- cached constants and their generated initialization;
-- `src/generate.x` -- header/source partitioning, unit initialization,
+- `src/generate/generate.x` -- header/source partitioning, unit initialization,
   include guards, and output writes;
-- `src/emit.x` -- AST to C tokens;
+- `src/emit/emit.x` -- AST to C tokens;
 - `src/format.x` -- C tokens to text;
 - `src/diagnostics.x` -- recorded diagnostics;
 - `src/sourceview.x` -- request-owned source overlays and logical file paths;
@@ -745,7 +745,7 @@ same phase run twice has to produce the same bytes.
 
 ## Builtin components
 
-`src/components/component-access.x` registers bracket reads, stores, and
+`src/components/bracket-access.x` registers bracket reads, stores, and
 updates, the `$indexed` and `$x2c.collection.store` forms, through ordinary
 macro patterns and quotations. `lib/rewrite.x` supplies the decorator. Array
 and Map mutations call their typed helpers; any other protocol participant
@@ -754,7 +754,7 @@ calls its getter, `setindex`, `updateindex`, or `postfixindex` member through
 index admission, evaluation order, and cleanup remain compiler
 responsibilities.
 
-`src/components/component-try.x` registers the `$caught` and `$tried` source
+`src/components/try-catch.x` registers the `$caught` and `$tried` source
 forms from `src/grammar.x` through the same decorator, both on the `try` head.
 Its translator returns a landing form, `(landing CODE ROWS)`: the frame and
 catch-site template, the finalizer, the exits that close the catch site, claim
@@ -762,7 +762,7 @@ the finalizer, and leave the frame, and the body and each catch arm as
 regions. The finalizer is also a region. The cleanup walk described under
 [lowering](#lowering) lowers the rows in order.
 
-`src/components/component-delegate.x` registers a member call pattern whose
+`src/components/delegate-members.x` registers a member call pattern whose
 receiver hole is `%(expr <delegate> *)`, a field keyword where a type would go.
 The parser marks each `delegate` field of an aggregate; a method call that
 ordinary lookup misses tests the rules registered for the marks its receiver's
@@ -772,7 +772,7 @@ translator searches the delegate fields with `Type.marked_fields` and
 call through the field path as constructed syntax, which ordinary call
 resolution binds.
 
-`src/components/component-literals.x` registers the Array and Map literal
+`src/components/collection-literals.x` registers the Array and Map literal
 forms, `$array_value` and `$map_value` from `src/grammar.x`, on the literal
 family keyed by the `array` and `map` heads. Each translator returns the
 counted constructor, `Array.update_n` or `Map.update_n` on a new container,
@@ -783,15 +783,15 @@ more parts read state, the transform moves each part that reads state, through
 the last one that may change state, into a temporary ahead of the call, as
 "literal order" in `src/transform/literals.x` describes.
 
-`src/components/component-printf.x` registers one call pattern for each
+`src/components/printf-format.x` registers one call pattern for each
 printf-family member, on the call family keyed by the callee's spelling, so a
 call to any other function only looks its spelling up. The translator reads the
 static format with `Code.format`, walks it once, and has each `Var` value a
 conversion consumes converted with `Code.convert` to the C type that conversion
 reads, or displayed through `Var.str` for `%s`. The redundant `.str()` warning
-for those values stays with the conversion checks in `src/expressions.x`.
+for those values stays with the conversion checks in `src/expressions/expressions.x`.
 
-`src/components/component-operators.x` registers its translators with Match
+`src/components/dynamic-operators.x` registers its translators with Match
 patterns typed `Var` whose operator positions name a set, `(!or OP...)`, on the
 binary family for binary operators and compound assignments and the unary
 family for increments, decrements, and unary operators, keyed by each operator
@@ -809,7 +809,7 @@ replacement holds lower outside the active rule, so a store nested in another
 store's value applies the same rule again. A rule whose pattern was derived
 without the subject's bindings matches without collecting them.
 
-`src/components/component-raise.x` registers `raise` on the statement family
+`src/components/raise.x` registers `raise` on the statement family
 keyed by the `raise` head. Its translator converts the code to a `Symbol` and
 each detail key and value to a `Var` with `Code.convert`, promotes a C string
 literal value with `Code.promoted`, and reports a value whose type is not
@@ -818,7 +818,7 @@ on. It returns the converted raise as a lowered carrier, which binding leaves
 as it is. The compiler lowers that raise's parts in source order, moving them
 into temporaries as literal parts move, and builds its literals at run time.
 
-`src/components/component-match.x` registers `match` on the statement family
+`src/components/pattern-match.x` registers `match` on the statement family
 keyed by the `match` head. Its translator returns a lowered carrier of verbatim
 C text around the subject, the patterns, and the arm bodies: a block that
 converts the subject to a `List` once with `Code.convert` and switches on the
@@ -835,7 +835,7 @@ walk step into the nodes the text holds, and the parts of the match lower
 outside its rule, so a nested match applies it again. The generated `switch` is
 what an arm's `break` leaves.
 
-`src/components/component-string-switch.x` registers `switch` on the statement
+`src/components/string-switch.x` registers `switch` on the statement
 family keyed by the `switch` head and declines a selector whose type is not
 `String` or an alias of it. Its translator replaces each label the switch owns
 by the label's index, leaving nested switches and expressions alone, and
@@ -847,7 +847,7 @@ once per selector type and label list under `(unit-support KEY)`, named by
 A program's `switch` rule applies to source switches only, not to the integer
 switch the component writes.
 
-`src/components/component-interpolation.x` registers a `%"..."` literal on the
+`src/components/interpolation.x` registers a `%"..."` literal on the
 literal family keyed by the `segments` head. The transform first converts each
 `$` insertion to a `String` as the parser converts its own, and a constructed
 String of one constant text reuses the parsed literal's cache slot. The
@@ -856,7 +856,7 @@ cached text, a converted insertion, or `String.new` of the raw text that
 constructed syntax spells. The compiler boxes the chain's parts and evaluates
 them once each, left to right, moving them ahead of the join when they move.
 
-`src/components/component-destructuring.x` registers destructuring declarations
+`src/components/destructuring.x` registers destructuring declarations
 on the statement family keyed by the `dstrdecl` head, an assignment statement
 keyed by `stmnt`, and an assignment expression on the literal family keyed by
 `dstrasgn`. Its translators answer bound carriers: a `List` local read from the
@@ -866,7 +866,7 @@ form keeps the source in a result local as its value. The parser has already
 declared the targets, so binding leaves their declarations alone and they keep
 their scope and identity; the locals are `new-name` effects.
 
-`src/components/component-lambdas.x` registers both lambda forms on the
+`src/components/lambda-functions.x` registers both lambda forms on the
 literal family keyed by the `lambda` head, which the transform offers each
 lambda it meets. A noncapturing lambda returns a bound carrier: the name of a
 static function placed among the unit's support declarations, whose body is
@@ -889,7 +889,7 @@ the replacement is bound again. Capture bindings have separate identities from
 their source bindings, so moving a source into a shared cell cannot retarget a
 sibling snapshot.
 
-`src/components/component-protocols.x` registers on the `conform` head. Before
+`src/components/protocol-adapters.x` registers on the `conform` head. Before
 the transform, the compiler presents each conformance whose forward converter
 the unit defines, and whose participant is not numeric, as a form `(conform
 BASE PARTICIPANT FORWARD REVERSE BINDER DESCRIPTOR (ROW...))`. The compiler has

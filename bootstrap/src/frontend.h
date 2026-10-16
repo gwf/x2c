@@ -6,8 +6,8 @@
 #define __GUARD_0x1A2A7247__
 
 #include "x2c.h"
-#include "cli.h"
-#include "compiler.h"
+#include "cli/cli.h"
+#include "compiler/compiler.h"
 #include "toolchain.h"
 typedef void(* FrontendErrorSink)(String text);
 
@@ -33,7 +33,7 @@ ParsedUnit;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "collect.h"
+#include "collect/collect.h"
 #include "deps.h"
 #include "utils.h"
 int Frontend_open(Frontend f, String filename, ParsedUnit * unit);
