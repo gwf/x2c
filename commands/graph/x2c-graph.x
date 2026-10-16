@@ -2421,36 +2421,35 @@ static void _certify_scan(
       else if (!resolved && (!callee || !Compiler.has_region_row(callee)))
         scan.obstacles.push(%(obstacle $caller $location
           "call has no project body or lifetime effect contract" $callee));
-      if (callee in %("Scope_free" "Scope_realloc"))
-        scan.obstacles.push(%(obstacle $caller $location
-          "explicit free or realloc has untracked aliases" $callee));
       if (callee && callee.startswith("Context_"))
         scan.obstacles.push(%(obstacle $caller $location
           "Context lifetime is outside the region walk" $callee));
       if (callee in %("Scope_new" "Scope_new_named"))
         scan.obstacles.push(%(obstacle $caller $location
           "Scope object destruction is outside the proof subset" $callee));
-      if (callee in %("Scope_retain" "Scope_push" "Pool_open")) {
-        project_count(scan.scope_counts, %(open $callee), 1);
-        if (conditional)
+      match (callee ? Compiler.region_effect(callee) : void) {
+        case %(!or (free scope) (alloc moved)):
           scan.obstacles.push(%(obstacle $caller $location
-            "conditional region opening is outside the proof subset"
+            "explicit free or realloc has untracked aliases" $callee));
+        case %(open ?kind): {
+          project_count(scan.scope_counts, %(open $kind), 1);
+          if (conditional)
+            scan.obstacles.push(%(obstacle $caller $location
+              "conditional region opening is outside the proof subset"
+              $callee));
+        }
+        case %(close ?kind): {
+          project_count(scan.scope_counts, %(close $kind), 1);
+          if (!deferred || conditional)
+            scan.obstacles.push(%(obstacle $caller $location
+              "region closing is not an unconditional lexical defer"
+              $callee));
+        }
+        case %(!or (move) (exit)):
+          scan.obligations.push(%(caller $caller $location
+            "transferred storage must be released by its destination"
             $callee));
       }
-      if (callee in %("Scope_release" "Scope_pop" "Pool_close")) {
-        String open = callee == "Scope_release" ? "Scope_retain"
-                    : callee == "Scope_pop" ? "Scope_push" : "Pool_open";
-        project_count(scan.scope_counts, %(close $open), 1);
-        if (!deferred || conditional)
-          scan.obstacles.push(%(obstacle $caller $location
-            "region closing is not an unconditional lexical defer"
-            $callee));
-      }
-      if (callee in %("Scope_move" "Context_export" "List_promote"
-                      "String_promote" "Atom_promote"))
-        scan.obligations.push(%(caller $caller $location
-          "transferred storage must be released by its destination"
-          $callee));
     }
     case %(cast ?type ?inner): {
       Type target_type = type;
@@ -2525,12 +2524,13 @@ static int _certify_coverage(Frontend frontend, Array inputs, List graph,
         scan.caller = target;
         scan.scope_counts = {};
         _certify_scan(scan, body, 0, 0, 0);
-        foreach (String open, %("Scope_retain" "Scope_push" "Pool_open")) {
-          if (scan.scope_counts.getdefault(%(open $open), 0).int() !=
-              scan.scope_counts.getdefault(%(close $open), 0).int())
-            obstacles.push(%(obstacle $target (location $path 0 0)
-              "region opening and lexical closing do not match" $open));
-        }
+        foreach (String open, %("Scope_retain" "Scope_push" "Pool_open"))
+          match (Compiler.region_effect(open))
+            case %(open ?kind)
+              if (scan.scope_counts.getdefault(%(open $kind), 0).int() !=
+                  scan.scope_counts.getdefault(%(close $kind), 0).int()):
+              obstacles.push(%(obstacle $target (location $path 0 0)
+                "region opening and lexical closing do not match" $open));
         continue;
       }
       /* Executable file-scope forms are roots, but the region walk does
