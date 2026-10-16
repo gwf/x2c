@@ -145,7 +145,7 @@ commits need not rebuild from their own bootstrap.
   `deps`, and `sourceview` in support; `project` lowers manifests
   to the same typed request that `build` owns, `toolchain` owns native actions,
   `report` owns progress and receipts, `script` owns build-once script
-  execution, `editor` owns the
+  execution, `commands/editor` owns the
   one-request semantic adapter, and `utils` owns environment discovery and
   translation workers.
 - `lib/` - representative runtime modules include string, list, array, map,

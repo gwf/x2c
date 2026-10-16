@@ -629,7 +629,7 @@ The modules under `src/` divide ownership as follows:
 - `src/format.x` -- C tokens to text;
 - `src/diagnostics.x` -- recorded diagnostics;
 - `src/sourceview.x` -- request-owned source overlays and logical file paths;
-- `src/editor.x` -- one-request diagnostics, definition, and hover transport
+- `commands/editor/editor.x` -- one-request diagnostics, definition, and hover transport
   over the configured frontend and source overlays.
 
 The internal frontend is shared by the CLI, editor, and source graph tool. A

@@ -38,7 +38,7 @@ Files below are relative to `src/` unless a path is shown.
   `component-try.x` (try, catch, and finally);
 - output: `cache.x`, `generate.x`, `emit.x`, `format.x`;
 - native and project driver: `build.x`, `project.x`, `toolchain.x`,
-  `script.x`, `editor.x`;
+  `script.x`; the editor adapter lives in `commands/editor/`;
 - external package management: `commands/package/` owns installation, removal,
   listing, and project dependency lockfiles.
 
