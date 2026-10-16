@@ -23,7 +23,7 @@ Protocols from declaration to conform forms.
 | [`Compiler.protocol_discard_helper`](#Compiler.protocol_discard_helper) | The `discard_helper` for `participant`'s protocol `member`. |
 | [`Compiler.protocol_member_names`](#Compiler.protocol_member_names) | Returns unique member spellings from the participant's visible adopted conformances. |
 | [`Compiler.protocol_members_for`](#Compiler.protocol_members_for) | Returns the resolved conformance for `participant` and `base`, if any. |
-| [`Compiler.protocol_rejects_direct_member`](#Compiler.protocol_rejects_direct_member) | Reports whether conformance supersedes an ambient direct member. |
+| [`Compiler.protocol_rejects_direct_member`](#Compiler.protocol_rejects_direct_member) | Reports whether conformance supersedes an ambient direct member: 0 when it does not, 1 when the participant's own adoption does, and 2 when an ancestor's adoption does. |
 | [`Compiler.protocol_update_helper`](#Compiler.protocol_update_helper) | Returns a generated helper for a direct protocol-backed update. |
 | [`Compiler.publish_protocol_node`](#Compiler.publish_protocol_node) | Validates and installs one normalized protocol or adoption node. |
 | [`Compiler.rebuild_protocols`](#Compiler.rebuild_protocols) | Rebuilds the per-unit protocol and adoption registries from `symbols`. |
@@ -71,7 +71,7 @@ Rows are ordered by participant and protocol and identify whether each
 adoption is owned by this unit, so prelude and live symbol modes can be
 compared.
 
-Source: `src/protocol/lookup.x:161`
+Source: `src/protocol/lookup.x:163`
 
 <a id="Compiler.forward_parameters"></a>
 #### Compiler.forward_parameters
@@ -170,11 +170,13 @@ Source: `src/protocol/lookup.x:21`
 
 `int Compiler.protocol_rejects_direct_member( Compiler c, Type participant, String member)`
 
-Reports whether conformance supersedes an ambient direct member.
-The answer is cached for the canonical participant and includes the first
-visible adopted ancestor that declares the member.
+Reports whether conformance supersedes an ambient direct member: 0 when
+it does not, 1 when the participant's own adoption does, and 2 when an
+ancestor's adoption does. The answer is cached for the canonical
+participant and uses the first visible adopted ancestor that declares
+the member.
 
-Source: `src/protocol/lookup.x:128`
+Source: `src/protocol/lookup.x:130`
 
 <a id="Compiler.protocol_update_helper"></a>
 #### Compiler.protocol_update_helper
@@ -249,7 +251,7 @@ null when no eligible resolved member exists; positive and negative
 results are cached. Inside the selected implementation itself the result
 is null, so the member's own body keeps the native operation.
 
-Source: `src/protocol/lookup.x:214`
+Source: `src/protocol/lookup.x:216`
 
 <a id="Compiler.resolve_protocols"></a>
 #### Compiler.resolve_protocols
