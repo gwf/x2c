@@ -983,12 +983,13 @@ void Compiler.record_declaration_visibility(Compiler c, List declaration) {
    definition. An extern declaration only names its native supplier. */
 static void _record_native_objects(
   Compiler c, Type spec, List rows) {
-  if (!c.shallow || c.source_private < 0 || spec.is_extern() ||
+  if (!c.shallow || c.source_private < 0 ||
       !Path.is_x2c_source(c.filename)) return;
   String path = Compiler.portable_path(c.canonical_path(c.filename));
   foreach (List row, rows) {
     List declarator = row;
     match (row) case %(op = ?bound ?): declarator = bound;
+    if (spec.is_extern() && declarator == row) continue;
     match (declarator) case %(bind ?binding ?): {
       List declaration = %(declare $spec (bindings $declarator));
       if (declaration.type_from_ast().is_function()) continue;

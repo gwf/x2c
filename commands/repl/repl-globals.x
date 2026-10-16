@@ -6,6 +6,7 @@
 #include "repl-session.x"
 #include "ast-rewrite.x"
 #include "expressions.x"
+#include "collect.x"
 
 /* Follow only field and index selections rooted at the actual published
    binding. Locals with the same spelling remain ordinary objects. */
@@ -137,6 +138,115 @@ static void _check_arguments(
   }
 }
 
+/* Construct protocol Lists in source order. These are data expressions,
+   not pointers or evaluator forms sent to the helper. */
+static List _argument_list(Compiler c, List values) {
+  if (!values) return %(expr ("List") (nil));
+  List head = values.car(), tail = _argument_list(c, values.cdr());
+  return c.resolve_expression($!List{ cons($head, $tail) }, NULL);
+}
+
+static List _object_argument(
+  ReplSession session, Type parameter, List argument) {
+  Compiler c = session.compiler;
+  Type wanted = c.sym.normalize_declared_type(parameter);
+  while (wanted.car() is <symbol> &&
+         wanted.car().symbol().is_type_qualifier()) wanted = wanted.cdr();
+  Type source = c.sym.normalize_declared_type(argument.cadr());
+  int reference = wanted.is_reference();
+  int record = c.sym.resolve_key(wanted).canonicalize().is_aggregate();
+  List object = argument;
+  if (!reference && !record) {
+    if (!wanted.is_pointer()) return NULL;
+    match (argument) {
+      case %(expr ? (op & ?operand)): object = operand;
+      case %(expr ? (parens ?inner)):
+        return _object_argument(session, parameter, inner);
+      default: if (!source.is_array()) return NULL;
+    }
+  }
+  String path = NULL;
+  Array indices = $auto([]);
+  List entry = _path(session, object, path, indices);
+  if (!entry) return NULL;
+  Type object_type = object.cadr();
+  if (object_type.is_bitfield())
+    raise %(repl (reason "loaded bitfields cannot supply addresses"));
+  // Ordinary conversion checks pointer compatibility and const qualifiers.
+  List checked = argument;
+  if (!reference && source.is_array()) {
+    source = source.dereference().reference();
+    checked = %(expr $source ${argument.caddr()});
+  }
+  (void) c.convert_expression(checked, parameter);
+  if (record && c.sym.resolve_key(source).canonicalize() !=
+                c.sym.resolve_key(wanted).canonicalize())
+    raise %(repl (reason "loaded record argument has a different type"));
+  Array setup = $auto([]), values = $auto([]);
+  foreach (List index, indices) {
+    List temporary = c.sym.introduce(c.fresh_name("repl_index"));
+    setup.push(c.rebuild_statement($!{ long long $temporary = $index; }).cadr());
+    values.push(%(expr (long long) (ident $temporary)));
+  }
+  List selected = _argument_list(c, values);
+  Symbol tag = c.sym.var_tag_for_type(parameter, NULL);
+  if (!tag) tag = <p48>;
+  List descriptor = _argument_list(c, %(${ $!Symbol{ ${<object>} } }
+    ${$!String{ $path }} $selected ${$!int{ $reference }}
+    ${$!Symbol{ $tag }}));
+  return _with_indices(descriptor, setup);
+}
+
+/* A complete typed call is selected before its object arguments become
+   scalar getters. Its native callee and objects share the session helper. */
+static List _loaded_call(
+  ReplSession session, List callee, List arguments) {
+  Compiler c = session.compiler;
+  List binding = NULL;
+  match (callee) {
+    case %(expr ? (parens ?inner)):
+      return _loaded_call(session, inner, arguments);
+    case %(expr ? (ident ?found)): binding = found;
+  }
+  if (!binding) return NULL;
+  String name = Ast.binding_spelling(binding);
+  List entry = session.inspect(name);
+  if (!entry || entry.car() != <native> ||
+      binding != c.sym.resolve_global(%($name), NULL)) return NULL;
+  List adapter = entry.assoc(<objects>);
+  if (!adapter) return NULL;
+  Type type = c.loaded_call_type(callee.cadr());
+  List parameters = NULL;
+  type.function_parts(parameters, NULL);
+  if (parameters.len() != arguments.len()) return NULL;
+  Array selected = $auto([]);
+  int objects = 0;
+  List remaining = parameters;
+  foreach (List argument, arguments) {
+    List object = _object_argument(session, remaining.car(), argument);
+    remaining = remaining.cdr();
+    selected.push(object);
+    objects |= !!object;
+  }
+  if (!objects) return NULL;
+  Array values = $auto([]), setup = $auto([]);
+  int i = 0;
+  foreach (List argument, arguments) {
+    List value = selected[i++];
+    if (!value) {
+      List converted = c.convert_expression(_rewrite(session, argument), parameters.car());
+      value = _argument_list(c, %(${ $!Symbol{ ${<value>} } } $converted));
+    }
+    parameters = parameters.cdr();
+    List temporary = c.sym.introduce(c.fresh_name("repl_argument"));
+    setup.push(c.rebuild_statement($!{ List $temporary = $value; }).cadr());
+    values.push(%(expr ("List") (ident $temporary)));
+  }
+  List packed = _argument_list(c, values);
+  List call = c.resolve_expression(%(expr () (call $adapter (args $packed))), NULL);
+  return _with_indices(call, setup);
+}
+
 static List _increment(
   ReplSession session, List entry, Type type, Symbol operator, Symbol kind) {
   Type accessor = entry.car().list().cadr();
@@ -177,8 +287,12 @@ static Var _rewrite(ReplSession session, Var node) {
           _addressed_global(session, address)):
         return c.resolve_expression(
           %(expr () (call $callee (args ${$!int{ 0 }} ${$!int{ 0 }}))), NULL);
-    case %(expr ? (call (expr ?(Type type) ?) (args *arguments))):
+    case %(expr ? (call (!set ?callee (expr ?(Type type) ?))
+                              (args *arguments))): {
+      List call = _loaded_call(session, callee, arguments);
+      if (call) return call;
       _check_arguments(session, type, arguments);
+    }
     case %(expr ? (op & ?operand)):
       if (_global(session, operand))
         raise %(repl

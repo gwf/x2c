@@ -101,7 +101,7 @@ incomplete submission continues at a fresh `... ` prompt.
 | `:help` | Show session commands. |
 | `:stats [verbose]` | Show concise or detailed runtime statistics. |
 | `:symbols [PREFIX]` | List successfully defined names and kinds, optionally matching a name prefix. |
-| `:load "file.x"` | Compile and load public functions and globals; replace an earlier load of the same file. |
+| `:load "file.x"` | Rebuild all loaded files together, expose this file's public names, and reset loaded native state. |
 | `:info NAME` | Show a session function's argument and return types, source, and execution mode. |
 | `:ast plus` | Show `plus`'s typed x2c AST. |
 | `:lowered plus` | Report that `plus` is compiled and has no Lisp body. |
@@ -155,6 +155,7 @@ Load it and call its functions with ordinary prompt expressions:
 ```text
 x2c> :load "numbers.x"
 loaded ("answer" "call_count")
+reset all loaded native state
 x2c> answer(20);
 => 42
 x2c> call_count();
@@ -165,8 +166,8 @@ x2c> plus_answer(20);
 => 43
 ```
 
-`:load` compiles native code through the project meta helper builder. It
-uses the ordinary include, module, package, and native dependency handling.
+`:load` builds all loaded files into one native helper program. It uses the
+ordinary include, module, package, and native dependency handling.
 Public functions with bodies in the loaded file become prompt functions,
 including `main`. No `meta` annotation is needed. Static helpers such as
 `twice` remain private. Functions from included files and declaration-only
@@ -213,15 +214,16 @@ Arrays and structs as Maps keyed by field name. Inspection copies the data
 and visits at most 100 fields or elements, including nested containers;
 `"..."` marks truncated output. Unsupported fields display `"<unavailable>"`.
 Inspection is available for the final expression at the prompt. Native
-arrays and structs still cannot be passed or copied across the helper
-boundary as ordinary values. Assign fields and elements individually.
+arrays and structs are not copied across the helper boundary as ordinary
+values. They can be passed to loaded functions inside the helper, as shown
+below. Assign fields and elements individually.
 
 Static globals stay private. Const objects and const fields are read-only.
 Raw pointers, unions, flexible array members, collections, `Var`, and
-callable globals do not gain accessors. Globals from included files remain
-private to the loaded file. A loaded global, field, or element cannot supply
-an address or a reference argument because its storage belongs to the helper
-process.
+callable globals do not gain accessors. Included globals become visible at
+the prompt when their defining file is explicitly loaded. A loaded object
+can supply a pointer or reference argument to a loaded function; its address
+stays inside the helper. Taking that address as a prompt value is unsupported.
 
 Compilation happens on `:load` and on each prompt function definition,
 including `plus_answer` above. Top-level input stays interpreted. Loading needs
@@ -229,21 +231,86 @@ a matching x2c compiler, the host C compiler, and its runtime. A dependency
 that the project meta builder cannot compile or link makes the load fail.
 An explicit `meta` function remains callable under the same data limits.
 
-Each successful load keeps a separate helper process and its compiled
-executable until the session closes. Native static values persist between
-calls, and another load does not reset them. Calls exchange data values:
+The session keeps one helper process and its compiled executable. Native
+globals and static values persist between calls. Each successful `:load`
+replaces the helper and resets all of those values, including when loading
+an additional file or an unchanged file. Prompt variables and functions
+survive. Calls exchange data values:
 numbers, Strings, Symbols, Lists, and independent Arrays and Maps. Arrays
 and Maps are copied across the boundary. Mutating a collection argument in
 the helper does not mutate the prompt's collection; return the changed
-collection to use it. Pointers, references, callbacks, records, cycles, and
-shared mutable collection identity cannot cross this boundary. Functions
-with these signatures can still be used inside the compiled file; calls
-from the prompt must satisfy the data limits.
+collection to use it. Native pointers and records cannot be returned to the
+prompt. Prompt-owned native objects, callbacks, cycles, and shared mutable
+collection identity cannot cross this boundary. Selecting a loaded object
+as a function argument keeps that object inside the helper.
 
 A failed load publishes no names and preserves earlier functions. Fix a
 rejected file and load it again. Loaded names appear as `native` in
 `:symbols`; `:info` shows their declarations and loaded file. They have no
 prompt AST or lowered Lisp for inspection.
+
+### Use objects and functions from different files
+
+Save this as `objects.x`:
+
+```x2c
+struct Point { int x; int y; };
+int samples[3] = {10, 20, 30};
+struct Point point = {1, 2};
+int first(void) { return samples[0]; }
+```
+
+Save these declarations and functions as `operations.x`. The `extern`
+declaration and function prototype refer to definitions in `objects.x`:
+
+```x2c
+struct Point { int x; int y; };
+extern int samples[3];
+int first(void);
+
+int sum(const int *values, int count) {
+  int total = 0;
+  for (int i = 0; i < count; i++) total += values[i];
+  return total;
+}
+void shift(struct Point *p, int dx) { p->x += dx; }
+int score(struct Point p) { p.x += 100; return p.x + p.y; }
+int advance(void) { samples[0]++; return first(); }
+```
+
+Load both files in the same session, then use their objects and functions:
+
+```text
+:load "objects.x"
+:load "operations.x"
+sum(samples, 3);
+shift(&point, 5);
+point.x;
+score(point);
+point.x;
+advance();
+samples[0];
+```
+
+`sum` returns `60`. `shift` changes `point.x` to `6`. `score` returns `108`
+after changing its own by-value copy; `point.x` remains `6`. `advance`
+returns `11`, and `samples[0]` also reads `11`.
+
+The helper passes its own array and struct to these functions. No native
+address or struct bytes travel to the REPL process. Field and element
+selections also work, such as `sum(&samples[1], 2)`. Repeated selections
+of the same object alias that object. Const restrictions and array bounds
+remain checked. Scalar arguments and indices are evaluated once in source
+order. Compiled prompt functions can make these same calls.
+Call the loaded function by name for object arguments. Saved `Func` values
+retain their existing data-value calling limits.
+
+Use normal includes, prototypes, and `extern` declarations for references
+between source files. Larger programs usually keep common declarations in
+a header. A source dependency has one provider and one instance of its
+public storage. Loading that dependency explicitly exposes its public names
+without adding another instance. Distinct public definitions with the same
+name conflict; file-static declarations retain ordinary C privacy.
 
 ### Load a program with main
 
@@ -263,6 +330,7 @@ Pass an Array of Strings, including the program name as its first element:
 ```text
 x2c> :load "hello.c"
 loaded ("main")
+reset all loaded native state
 x2c> main(["hello", "world"]);
 0: hello
 1: world
@@ -297,10 +365,12 @@ loaded file cannot publish another `main` in that session.
 After editing a file, use the same `:load "file.x"` command. A successful
 replacement prints `reloaded`. Calls use the new code, including calls from
 earlier prompt functions. Saved `Func` values use the replacement for calls
-the REPL already supports. Prompt variables and functions remain, as do
-other loaded files. Variables inside the replaced file and its compiled
-dependencies start over, even if the file did not
-change. Previously returned values remain ordinary prompt data.
+the REPL already supports. Prompt variables and functions remain. All
+registered files are rebuilt from their current contents and dependencies,
+including files other than the one named by the command. Successful loads
+print `reset all loaded native state`: variables in every loaded file and
+dependency start over. Previously returned values remain ordinary prompt
+data.
 
 Existing functions must keep their argument and return types. Parameter
 names may change. Existing public types must keep their definitions. New
@@ -308,13 +378,14 @@ functions, globals, and types are allowed when their names do not
 conflict. Existing globals must keep their declared types and qualifiers,
 including `const`. Removing an existing function, global, or type, or
 changing its type, requires a new session.
-A refused replacement leaves both the old code and its variables intact.
+A refused replacement leaves the whole previous native program and its
+variables intact. This includes a compile, link, or compatibility failure
+in any loaded file, even when the command names a different file.
 Prompt definitions still cannot be redefined.
 
 Relative paths, absolute paths, and symbolic links to the same file identify
-one load. Each loaded file has its own compiled dependencies. If two loaded
-files include the same dependency, loading one again updates only that
-file's copy. Load the other file again to update its copy too.
+one load. If two loaded files include the same dependency, either load
+rebuilds both files with the dependency's current contents.
 
 For a real example, copy the autodiff module from a repository checkout:
 
@@ -351,9 +422,9 @@ work. This module also exposes syntax helpers such as `ad_unbind` and
 `ad_mutates`, which can be called with List values from the prompt.
 
 A native call that exits, crashes, or exceeds `X2C_META_TIMEOUT` fails that
-submission. The next call restarts that load's helper from its retained
-executable, resetting that helper's native state. Other loaded helpers keep
-their state. Ordinary errors raised by a function leave its helper running.
+submission. The next call restarts the shared helper from its retained
+executable, resetting all loaded native state. Ordinary errors raised by a
+function leave the helper and its state running.
 
 ## Supported subset
 
@@ -444,8 +515,8 @@ still run those cleanups. The next submission gets a fresh budget. Native
 callbacks and compiled prompt functions are not a preemptible sandbox: an
 interrupt takes effect at the next interpreted call. Compiled function loops
 do not consume the Lisp budget. Their native crashes or nonterminating loops
-can end or block the REPL process. Loaded files retain their separate helper
-process and timeout behavior.
+can end or block the REPL process. Loaded files share a helper process
+separate from the REPL, with the timeout behavior described above.
 
 EOF exits successfully unless input is incomplete, which exits with status
 1. With piped input, any submission or command error makes the final status

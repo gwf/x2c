@@ -45,7 +45,9 @@ class Session:
                 break
             messages.append(line)
         diagnostic = "".join(messages)
-        if error:
+        if error is True:
+            assert diagnostic, source
+        elif error:
             assert error in diagnostic, (source, diagnostic)
         else:
             assert not diagnostic, (source, diagnostic)
@@ -144,7 +146,7 @@ try:
     session.load(second)
     session.value("second_answer(1)", 2)
     session.run(":info loaded_answer\n:info through\n:symbols loaded_a")
-    session.value("loaded_calls()", 3)
+    session.value("loaded_calls()", 0)
 
     addition = "typedef int Added;\nint added(void) { return 123; }\n"
     write_dependency(4)
@@ -152,8 +154,8 @@ try:
     session.load(alias)
     session.value("loaded_calls()", 0)
     session.value("loaded_dependency_calls()", 0)
-    session.value("second_calls()", 1)
-    session.value("second_answer(1)", 2)
+    session.value("second_calls()", 0)
+    session.value("second_answer(1)", 5)
     session.value("loaded_answer(20)", 72)
     session.value("saved(4)", 24)
     session.value("through(2)", 25)
@@ -163,10 +165,10 @@ try:
     session.run("Added new_value = 11;")
     session.value("new_value", 11)
 
-    # Even an unchanged successful load starts the file's variables afresh.
+    # Even an unchanged load resets every provider's native state.
     session.load(pathlib.Path(os.path.relpath(native)))
     session.value("loaded_calls()", 0)
-    session.value("second_calls()", 2)
+    session.value("second_calls()", 0)
     session.value("saved(2)", 18)
 
     rejected = [
@@ -190,7 +192,7 @@ try:
         (version(extra=addition).replace("LOAD_SECOND", "LOAD_RENAMED"),
          "declaration changed or removed"),
         (version(extra=addition + "int second_answer(int n) { return n; }\n"),
-         "name already defined: second_answer"),
+         True),
         (version(extra=addition + "int through(int n) { return n; }\n"),
          "name already defined: through"),
         (version(extra=addition + "struct through { int x; };\n"),
@@ -207,7 +209,7 @@ try:
         native.write_text(text.replace("return 3 * offset", "return 19 * offset"))
         session.load(native, error)
         session.value("loaded_calls()", calls)
-        session.value("second_calls()", 2)
+        session.value("second_calls()", calls)
         session.value("saved(2)", 18)
         calls += 1
         session.value("through(2)", 25)
@@ -224,6 +226,7 @@ try:
     session.load(native, "function type changed")
     session.run("loaded_exit();", "the body exited with status 8")
     session.value("loaded_calls()", 0)
+    session.value("second_calls()", 0)
     session.value("saved(2)", 24)
     session.run(":info missing", "not a session function")
     session.run(":info before", "not a session function")
@@ -463,7 +466,7 @@ try:
     session.value('main_calls()', 0)
     session.value('saved_main(args)', 203)
     session.value('through_main(["program"])', 210)
-    session.value('other_offset()', 100)
+    session.value('other_offset()', 200)
     session.value('prompt_marker', 7)
     for changed, error in [
             (main_version() + 'broken {', 'expected'),
@@ -475,7 +478,8 @@ try:
         session.value('main_calls()', 2)
     conflict = main_root / 'conflict.c'
     conflict.write_text('int main(int n, char **v) { return n; }\n')
-    session.load(conflict, 'name already defined: main')
+    program.write_text(main_version())
+    session.load(conflict, True)
     session.value('saved_main(args)', 205)
     output = session.finish()
     assert 'int main(Array);' in output, output
@@ -621,7 +625,7 @@ finally:
     session.close()
 
 # Globals-only C files load without annotations, including tentative and
-# repeated declarations. Each loaded file still owns an independent helper.
+# repeated declarations. A successful load resets the entire native program.
 for suffix in ['x', 'c']:
     scalars = scalar_root / ('only.' + suffix)
     scalars.write_text('extern int count;\nint count=3;\nint count;\n'
@@ -642,7 +646,7 @@ for suffix in ['x', 'c']:
         session.run('hidden;', 'unresolved identifier: hidden')
         session.load(scalars)
         session.value('count', 3)
-        session.value('other', 12)
+        session.value('other', 11)
         session.value('items[1]+item.v', 5)
         session.finish()
     finally:
@@ -773,6 +777,197 @@ try:
     session.load(aggregates, 'expected')
     session.value('samples[1]', 21)
     session.value('points[1].x', 8)
+    session.finish()
+finally:
+    session.close()
+
+# Loaded roots link through ordinary prototypes and extern declarations.
+# Object arguments select storage inside their one shared native program.
+shared_root = root / 'shared'
+shared_root.mkdir()
+shared_header = shared_root / 'objects.h'
+shared_objects = shared_root / 'objects.x'
+shared_operations = shared_root / 'operations.x'
+shared_dependency = shared_root / 'dependency.x'
+shared_header.write_text(
+    '#pragma once\n'
+    'struct SharedPoint { int x; int y; };\n'
+    'struct SharedHolder { struct SharedPoint point; int values[2]; };\n'
+    'extern int shared_samples[3];\n'
+    'extern struct SharedPoint shared_point;\n'
+    'int shared_first(void);\n')
+
+
+def shared_dependency_version(initial=4):
+    return ('#pragma once\n'
+            f'int shared_dependency = {initial};\n'
+            'int dependency_next(void) { return ++shared_dependency; }\n')
+
+
+def shared_object_version(initial=10):
+    return ('#pragma once\n#include "objects.h"\n#include "dependency.x"\n'
+            f'int shared_samples[3] = {{{initial},20,30}};\n'
+            'struct SharedPoint shared_point = {1,2};\n'
+            'struct SharedPoint shared_points[2] = {{3,4},{5,6}};\n'
+            'struct SharedHolder shared_holder = {{5,6},{7,8}};\n'
+            'const struct SharedPoint shared_frozen = {9,10};\n'
+            'const int shared_locked[2] = {11,12};\n'
+            'static int private_shared = 40;\n'
+            'int shared_first(void) { return shared_samples[0]; }\n'
+            'int shared_head(const int values[3], const int n) { '
+            'return values[n]; }\n'
+            'int objects_next(void) { return dependency_next(); }\n')
+
+
+shared_operation_text = (
+    '#include "objects.h"\n#include "dependency.x"\n#include <stdlib.h>\n'
+    'int shared_head(const int *values, int n);\n'
+    'int shared_pick(void) { return shared_head(shared_samples,1); }\n'
+    'static int private_shared = 2;\n'
+    'int shared_calls;\n'
+    'int shared_sum(const int *values, int count) { '
+    'shared_calls++; int sum=0; for (int i=0; i<count; i++) sum+=values[i]; '
+    'return sum; }\n'
+    'void shared_shift(struct SharedPoint *p, int dx) { p->x+=dx; }\n'
+    'int shared_copy(struct SharedPoint p) { p.x+=100; return p.x+p.y; }\n'
+    'int shared_reference(struct SharedPoint &p, int dx) { '
+    'p.x+=dx; return p.x; }\n'
+    'int shared_alias(int *a, int *b) { *a+=2; *b+=3; return *a+*b; }\n'
+    'int shared_pair(const int *p, int n) { return *p*100+n; }\n'
+    'int shared_array(const int p[3]) { return p[2]; }\n'
+    'int shared_const_pointer(int *const p) { return p[0]; }\n'
+    'int shared_advance(void) { shared_samples[0]+=private_shared; '
+    'return shared_first(); }\n'
+    'int operations_next(void) { return dependency_next(); }\n'
+    'int *shared_address(void) { return shared_samples; }\n'
+    'struct SharedPoint shared_result(void) { return shared_point; }\n'
+    'void shared_exit(void) { exit(6); }\n')
+shared_dependency.write_text(shared_dependency_version())
+shared_objects.write_text(shared_object_version())
+shared_operations.write_text(shared_operation_text)
+session = Session(shared_root)
+try:
+    session.run('int shared_prompt=7;')
+    session.load(shared_objects)
+    session.run('Func shared_saved=shared_first;\n'
+                'int shared_before(void) { return shared_first()+shared_prompt; }')
+    session.run('shared_samples[0]=99;')
+    session.load(shared_operations)
+    session.value('shared_before()', 17)
+    session.value('shared_saved()', 10)
+    session.value('shared_sum(shared_samples,3)', 60)
+    session.value('shared_array(shared_samples)', 30)
+    session.value('shared_const_pointer(shared_samples)', 10)
+    session.value('shared_pick()', 20)
+    session.run('int shared_through(void) { '
+                'shared_shift(&shared_holder.point,1); '
+                'return shared_sum(shared_holder.values,2)+shared_prompt; }')
+    session.value('shared_through()', 22)
+    session.value('shared_holder.point.x', 6)
+    session.value('shared_copy(shared_point)', 103)
+    session.value('(shared_copy)(shared_point)', 103)
+    session.value('shared_point.x', 1)
+    session.run('shared_shift(&shared_point,5);')
+    session.value('shared_reference(shared_point,2)', 8)
+    session.value('shared_point.x', 8)
+    session.value('shared_copy(shared_points[1])', 111)
+    session.value('shared_sum(shared_locked,2)', 23)
+    session.value('shared_copy(shared_frozen)', 119)
+    session.value('shared_alias(&shared_samples[0],&shared_samples[0])', 30)
+    session.value('shared_samples[0]', 15)
+    session.value('shared_advance()', 17)
+    session.value('shared_saved()', 17)
+
+    # Both the selector and the later scalar argument run exactly once.
+    session.run('int shared_index=0;\n'
+                'int shared_next(void) { return shared_index++; }')
+    session.value('shared_pair(&shared_samples[shared_next()],shared_next())',
+                  1701)
+    session.value('shared_index', 2)
+    session.run('shared_index=0;')
+    session.value('shared_alias(&shared_samples[shared_next()],'
+                  '&shared_samples[shared_next()])', 42)
+    session.value('shared_index', 2)
+    session.value('shared_samples[0]', 19)
+    session.value('shared_samples[1]', 23)
+    session.run('int shared_once(void) { shared_index=0; '
+                'return shared_pair(&shared_samples[shared_index++],'
+                'shared_index++); }')
+    session.value('shared_once()', 1901)
+    session.value('shared_index', 2)
+
+    for expression in ['shared_shift(&shared_frozen,1);',
+                       'shared_alias(&shared_locked[0],&shared_samples[0]);',
+                       'shared_reference(shared_frozen,1);',
+                       'shared_copy(shared_holder);',
+                       'shared_copy(shared_points);',
+                       'shared_shift(&shared_samples[0],1);']:
+        session.run(expression, True)
+    for expression in ['shared_sum(&shared_samples[3],1);',
+                       'shared_copy(shared_points[-1]);',
+                       'shared_sum(&shared_holder.values[2],1);']:
+        session.run(expression, 'loaded array index out of bounds')
+    session.run('shared_sum(&shared_samples[1.5],1);',
+                'loaded array indices must be integers')
+    session.value('shared_calls', 3)
+    session.value('shared_samples[0]', 19)
+    session.value('shared_frozen.x', 9)
+    session.run('private_shared;', 'unresolved identifier')
+    session.run('shared_dependency;', 'unresolved identifier')
+    session.run('shared_address();', 'compile-time result is a compiler address')
+    session.run('shared_result();', 'compile-time result is a compiler address')
+    session.run('int shared_local=21;')
+    session.run('shared_sum(&shared_local,1);',
+                'arguments must be independent data values')
+    session.value('shared_local', 21)
+
+    session.value('objects_next()', 5)
+    session.value('operations_next()', 6)
+    # Exposing an already included source keeps one definition and resets it.
+    session.load(shared_dependency)
+    session.value('shared_dependency', 4)
+    session.value('shared_calls', 0)
+    session.value('shared_saved()', 10)
+    session.value('objects_next()', 5)
+    session.value('operations_next()', 6)
+    session.value('shared_dependency', 6)
+    session.value('dependency_next()', 7)
+    session.run('shared_dependency=20;\nshared_samples[0]=40;')
+    session.value('objects_next()', 21)
+    session.value('shared_sum(shared_samples,3)', 90)
+
+    # Loading one root validates current edits to every registered root.
+    shared_operations.write_text(shared_operation_text + 'broken {')
+    session.load(shared_objects, 'expected')
+    session.value('shared_saved()', 40)
+    session.value('shared_calls', 1)
+    session.value('operations_next()', 22)
+    shared_operations.write_text(shared_operation_text.replace(
+        'int shared_advance(void)', 'long shared_advance(void)'))
+    session.load(shared_objects, 'function type changed')
+    session.value('shared_calls', 1)
+    session.value('shared_dependency', 22)
+    session.value('shared_before()', 47)
+
+    shared_operations.write_text(shared_operation_text)
+    shared_dependency.write_text(shared_dependency_version(30))
+    shared_objects.write_text(shared_object_version(50))
+    session.load(shared_objects)
+    session.value('shared_calls', 0)
+    session.value('shared_saved()', 50)
+    session.value('shared_before()', 57)
+    session.value('shared_through()', 22)
+    session.value('shared_holder.point.x', 6)
+    session.value('objects_next()', 31)
+    session.value('operations_next()', 32)
+    session.value('shared_dependency', 32)
+    session.value('shared_prompt', 7)
+    session.value('shared_index', 2)
+    session.run('shared_exit();', 'the body exited with status 6')
+    session.value('shared_dependency', 30)
+    session.value('shared_calls', 0)
+    session.value('shared_holder.point.x', 5)
+    session.value('shared_saved()', 50)
     session.finish()
 finally:
     session.close()

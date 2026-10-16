@@ -350,10 +350,32 @@ static void _loaded_accessor(
   c.meta_group.push(%(function $function $request ${c.func_signature(type)}));
 }
 
+/* The selector is called only inside the helper. Its pointer-bearing List
+   never enters the datum transport. Native reference readers use its type. */
+static void _loaded_address(LoadedPath path, Type type, List target) {
+  if (type.is_bitfield()) return;
+  Compiler c = path.compiler;
+  List name = c.sym.introduce(c.fresh_name("loaded_address"));
+  List native_type = c.cache_literal_list(
+    c.sym.normalize_declared_type(type).declared());
+  List function = c.bind_syntax(
+    %(function (static "List")
+      (bind $name ((fnmod (params @{path.parameters}))))
+      (block @{path.checks} ${$!{
+        return cons($native_type, cons((void *) &$target, NULL));
+      }})), <unit>, NULL);
+  Type signature = %(declare ${function.cadr()}
+    (bindings ${function.caddr()})).type_from_ast();
+  c.meta_group.push(
+    %(function $function ${"address global " + path.name}
+      ${c.func_signature(signature)}));
+}
+
 static void _loaded_path(LoadedPath path, Type type, List target, int root) {
   Compiler c = path.compiler;
   Type bridge = _loaded_scalar(c, type);
   if (!bridge && !_loaded_aggregate(c, type, root)) return;
+  _loaded_address(path, type, target);
   int writable = bridge &&
     !(<const> in c.sym.normalize_declared_type(type));
   if (bridge) {
@@ -563,7 +585,9 @@ static List _emit_prepared(
 static void _name_provider_bindings(
   Compiler c, String provider, Array units, Map dependencies) {
   foreach (Var (path, index), meta_build_tables)
-    if (path != provider && path in dependencies)
+    if (meta_build_providers && path != provider)
+      c.name_loaded_provider(path, index, meta_build_providers[path]);
+    else if (path != provider && path in dependencies)
       c.name_meta_provider_bindings(path, index);
   int index = c.meta_build - 1;
   c.name_meta_provider_bindings(provider, index);
@@ -1095,9 +1119,8 @@ static List _named(Compiler c, List reset) {
   return named;
 }
 
-/* The Map `x2c_module_targets` returns, with a Func for each of `named`.
-   A function whose values have no Var form, such as C's `bool` or a
-   record pointer, is called only from other group code. */
+/* The target table uses ordinary Func adapters, including native object
+   parameters. Signatures without an adapter stay native-only. */
 static List _targets(Compiler c, List named, List functions) {
   Array entries = [];
   if (c.meta_build)
@@ -1106,6 +1129,7 @@ static List _targets(Compiler c, List named, List functions) {
         ${c.cache_literal_list(functions)}));
   foreach (List row, named) {
     (String name, List binding, Type type) = row;
+    if (c.load_source) type = c.loaded_call_type(type);
     List function = NULL;
     try function = c.convert_expression(
       %(expr $type (ident $binding)), %("Func"));
@@ -1188,13 +1212,15 @@ static String _unbound_callee(Compiler c, Var node) {
 
 /* Where the project meta build writes each unit's group, while it runs. */
 static String meta_build_directory = NULL;
-static Map meta_build_tables = NULL;
+static Map meta_build_tables = NULL, meta_build_providers = NULL;
 
 /** Directs each provider group into `directory`, using `owners` to name
     their headers by table, or stops that when `directory` is NULL. */
-void Compiler.use_meta_build_directory(String directory, Array owners) {
+void Compiler.use_meta_build_directory(
+  String directory, Array owners, Map providers) {
   meta_build_directory = directory;
   meta_build_tables = {};
+  meta_build_providers = providers;
   int index = 1;
   foreach (String owner, owners) meta_build_tables[owner] = index++;
 }

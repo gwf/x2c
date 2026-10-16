@@ -125,6 +125,13 @@ static macro Stmt $fail.collect_interface_write(Expr $c, Expr $site) {
     $site, NULL);
 }
 
+static macro Stmt $report.collect_loaded_declaration(
+  Expr $c, Expr $site, Expr $name, Expr $path) {
+  $c.report_error(
+    <type>, %"conflicting native declaration: ${$name}", $site,
+    %("provider: ${$path}"));
+}
+
 // the process cache
 
 /* Process cache: canonical path ->
@@ -1279,6 +1286,107 @@ void Compiler.name_meta_provider_bindings(
       match (value) case %(native-object ?(String name)):
         _name_meta_provider(c, name, index);
   }
+}
+
+/** Returns this source's native definitions with their canonical declarations
+    and the public type rows needed to check other units' declarations. */
+List Compiler.loaded_provider(Compiler c) {
+  List entry = _entry(c, _canonical_path(c.filename));
+  Array names = [];
+  foreach (String name, entry.caddr())
+    if (name != "main" || c.load_source) names.push(name);
+  foreach (Var part, entry.car())
+    if (part is <map>)
+      foreach (Var value, part.map())
+        match (value) case %(native-object ?(String name)):
+          names.push(name);
+  List owned = names.list_free();
+  Map symbols = c.callable_symbols(owned), declarations = {};
+  foreach (String name, owned)
+    declarations[name] = _loaded_declaration(c, symbols[%($name)]);
+  return %($declarations $symbols);
+}
+
+/** Returns the native calling type of a loaded function. Array parameters
+    decay to pointers, and a parameter's outer qualifiers affect only its
+    local copy. Keep the declared type for inspection and reload checks. */
+Type Compiler.loaded_call_type(Compiler c, Type type) {
+  List parameters = NULL;
+  Type result = NULL;
+  type.function_parts(parameters, result);
+  Array adjusted = [];
+  foreach (Type parameter, parameters) {
+    Type shape = c.sym.normalize_declared_type(parameter);
+    if (shape.is_array()) parameter = shape.dereference().reference();
+    while (parameter.car() is <symbol> &&
+           parameter.car().symbol().is_type_qualifier())
+      parameter = parameter.cdr();
+    adjusted.push(parameter);
+  }
+  return %((func ${adjusted.list_free()}) @result);
+}
+
+static Type _loaded_declaration(Compiler c, Type type) {
+  type = c.sym.normalize_declared_type(type);
+  if (!type.is_function()) return type;
+  List parameters = NULL;
+  Type result = NULL;
+  type.function_parts(parameters, result);
+  Array declared = [];
+  foreach (Type parameter, parameters)
+    declared.push(c.sym.normalize_declared_type(parameter));
+  List args = parameters ? declared.list_free() : %((void));
+  return c.loaded_call_type(
+    %((func $args) @{c.sym.normalize_declared_type(result)}));
+}
+
+/** Names declared bindings through one loaded provider. Its own source
+    declarations remain authoritative; private bindings never link out. */
+void Compiler.name_loaded_provider(
+  Compiler c, String path, int index, List provider) {
+  (Map declarations, Map symbols) = provider;
+  Map visible = $auto(c.sym.unit_symbols());
+  foreach (Var (name, expected), declarations) {
+    if (%($name) in c.sym.file_statics() ||
+        %(function $name) in c.sym.file_statics()) continue;
+    Type type = NULL;
+    List binding = c.sym.resolve_global(%($name), type);
+    if (!binding) continue;
+    if (!_loaded_types_equal(_loaded_declaration(c, type), expected) ||
+        !_loaded_type_rows(type, visible, symbols))
+      $report.collect_loaded_declaration(c, c.token, name, path);
+    _name_meta_provider(c, name, index);
+    // C headers keep their source spellings; declare the linked spelling too.
+    type = type.declared();
+    c.add_early(c.rebuild_statement($!{ extern $type $binding; }).cadr());
+  }
+}
+
+static int _loaded_types_equal(Type declared, Type defined) {
+  if (declared.equal(defined)) return 1;
+  return declared.is_array() && defined.is_array() &&
+    declared.car().list().len() == 1 && declared.cdr().equal(defined.cdr());
+}
+
+/* Compare complete type families actually named by the declaration. A
+   forward declaration can remain incomplete in the calling source. */
+static int _loaded_type_rows(Type type, Map visible, Map provider) {
+  Map needed = $auto({}), checked = $auto({});
+  _needed_types(type, visible, needed);
+  int changed = 1;
+  while (changed) {
+    changed = 0;
+    foreach (Var (key, value), visible) {
+      List family = _type_family(key);
+      if (!family || !(family in needed) || key in checked) continue;
+      Var expected;
+      if (provider.try_get(key, expected) && !value.equal(expected)) return 0;
+      checked[key] = 1;
+      if (value is <list>) _needed_types(value, visible, needed);
+      changed = 1;
+    }
+  }
+  return 1;
 }
 
 static void _name_meta_provider(

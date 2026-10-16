@@ -9,11 +9,10 @@
 #include "emit.x"
 #include "format.x"
 
-/** One loaded file's current executable and published declarations.
+/** One loaded file's origin and published declarations.
     Callable adapters borrow this record until the session closes. */
 typedef struct ReplLoadedFile {
   String path;
-  MetaHelper helper;
   Map symbols, signatures;
   List types;
 } *ReplLoadedFile;
@@ -26,7 +25,8 @@ typedef struct ReplSession {
   ReplLower lowering;
   Array declarations;
   Map files, accessors;
-  // Published name -> (value), (type), (native [(source PATH)]),
+  MetaHelper helper;
+  // Published name -> (value), (type), (native [(source PATH) (objects CALL)]),
   // (global (source PATH) PATHS), or
   // (function (typed ...) (execution native)).
   Map names;
@@ -117,7 +117,7 @@ List ReplSession.symbols(ReplSession session) {
   return entries.list_free();
 }
 
-/** Returns (value), (type), (native [(source PATH)]),
+/** Returns (value), (type), (native [(source PATH) (objects CALL)]),
     (global (source PATH) PATHS), (function (typed AST) (execution native)),
     or NULL if absent. PATHS maps selections to getter/setter pairs.
     These are the original canonical Lists, borrowed until unit close. */
@@ -136,7 +136,7 @@ String ReplSession.function_info(ReplSession session, String name) {
   Compiler c = session.compiler;
   Type type = c.sym.get_exact(%($name));
   String source = "prompt";
-  match (entry) case %(native (source ?(String path))): {
+  match (entry) case %(native (source ?(String path)) *): {
     ReplLoadedFile file = session.files[path];
     type = file.symbols[%($name)];
     source = path;
@@ -623,11 +623,12 @@ void ReplSession.close(ReplSession session) {
   session.evaluator = NULL;
   foreach (Var (path, value), session.files) {
     ReplLoadedFile file = value;
-    Scope.free(file.helper);
     file.symbols.cleanup();
     file.signatures.cleanup();
     Scope.free(file);
   }
+  Scope.free(session.helper);
+  session.helper = NULL;
   session.files.cleanup();
   session.files = NULL;
   session.accessors.cleanup();

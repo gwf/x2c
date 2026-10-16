@@ -32,6 +32,8 @@ typedef struct MetaHelper{
 
 Var Compiler_meta_helper_call(Compiler c, String name, Token site, List arguments, String provider);
 
+Var Compiler_loaded_helper_call(Compiler c, String name, Token site, List arguments, String provider);
+
 MetaHelper MetaHelper_new(String path, Map failures, Map units);
 
 void MetaHelper_retain_executable(MetaHelper helper);
@@ -43,6 +45,8 @@ void MetaHelper_check(MetaHelper m, Compiler c, String name, String provider);
 void Compiler_begin_meta_unit(Compiler c, String filename);
 
 void Compiler_stop_meta_helper(void);
+
+void MetaHelper_restart(MetaHelper helper);
 
 void MetaHelper_close(MetaHelper helper);
 

@@ -39,7 +39,7 @@ static const struct ReplCommand _commands[] = {
   { ":symbols", ":symbols [PREFIX]", "List session-defined names and kinds.",
     <prefix>, <symbols> },
   { ":load", ":load \"file.x\"",
-    "Compile and load public functions and globals.",
+    "Load into the shared native program; reset all loaded native state.",
     <path>, <load> },
   { ":info", ":info NAME", "Show a session function's declaration and source.",
     <function>, <info> },
@@ -300,6 +300,7 @@ static int _load_source(
       session.compiler.print_diagnostic(entry);
   if (result.status == <loaded> || result.status == <reloaded>) {
     printf("%s %s\n", result.status.str(), result.value.repr());
+    puts("reset all loaded native state");
     return 1;
   }
   if (result.message) fprintf(stderr, "load failed: %s\n", result.message);

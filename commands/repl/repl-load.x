@@ -13,11 +13,10 @@
 static typedef struct LoadedSource {
   ReplResult result;
   Map symbols, signatures, globals;
-  MetaHelper helper;
 } LoadedSource;
 
 static typedef struct LoadedCall {
-  Compiler compiler;
+  ReplSession session;
   ReplLoadedFile file;
   String name;
 } LoadedCall;
@@ -230,20 +229,17 @@ static Map _signatures(Compiler c, Map symbols, List names) {
   return signatures;
 }
 
-/* Each load keeps its own helper. Declarations and diagnostics leave the
-   source Context; native results cross the existing datum protocol. */
-static LoadedSource _prepare(Frontend frontend, String filename) {
-  Compiler.refresh_source_collections();
-  LoadedSource loaded = {
-    .result = {.status = <rejected>, .value = void},
-    .helper = frontend.build_loaded(filename)};
-  defer if (loaded.result.status != <loaded>) loaded.helper.close();
+/* Declarations leave the source Context; every file uses the candidate
+   helper while preparing the replacement session. */
+static LoadedSource _prepare(
+  Frontend frontend, String filename, MetaHelper helper) {
+  LoadedSource loaded = {.result = {.status = <rejected>, .value = void}};
   ParsedUnit unit;
   int opened = frontend.start(filename, unit);
   defer unit.close();
   Compiler c = unit.compiler;
   c.load_source = 1;
-  c.meta_helper = loaded.helper;
+  c.meta_helper = helper;
   c.begin_meta_unit(c.filename);
   opened = opened && unit.collect(frontend) && unit.parse();
   try {
@@ -253,18 +249,6 @@ static LoadedSource _prepare(Frontend frontend, String filename) {
       List names = _public_definitions(c, symbols, globals);
       if (!names)
         raise %(repl (reason "no public functions or supported globals found"));
-      foreach (String name, names) {
-        if (name in globals) {
-          foreach (List description, globals[name].list()) {
-            (String path, Type bridge, int writable, int dimensions) =
-              description;
-            MetaHelper.check(c.meta_helper, c, "get global " + path, c.filename);
-            if (writable) MetaHelper.check(
-              c.meta_helper, c, "set global " + path, c.filename);
-          }
-        }
-        else MetaHelper.check(c.meta_helper, c, name, c.filename);
-      }
       loaded.globals = unit.context.export(globals);
       loaded.symbols = unit.context.export(symbols);
       loaded.result.value = unit.context.export(names);
@@ -292,9 +276,39 @@ static Var _call(Func function, const FuncArg *argv) {
   if (problem)
     raise %(repl (reason "loaded function arguments must be independent data values")
                  (detail $problem));
-  Compiler c = call.compiler;
-  $let(c.meta_helper, call.file.helper)
+  Compiler c = call.session.compiler;
+  $let(c.meta_helper, call.session.helper)
     return c.meta_helper_call(call.name, c.token, arguments, call.file.path);
+}
+
+/* The prompt has already checked native argument types. Envelopes contain
+   only data; the helper supplies the addresses to its native adapters. */
+static Var _call_objects(Func function, const FuncArg *argv) {
+  const LoadedCall *call = Func.context(function);
+  List arguments = x2c_func_value_argument(function, argv, 0, <list>);
+  List problem = datum_result_problem(arguments, {});
+  if (problem)
+    raise %(repl (reason "loaded function arguments must be independent data values")
+                 (detail $problem));
+  Compiler c = call.session.compiler;
+  $let(c.meta_helper, call.session.helper)
+    return c.loaded_helper_call(call.name, c.token, arguments, call.file.path);
+}
+
+static List _object_adapter(
+  ReplSession session, ReplLoadedFile file, String name, Type signature) {
+  Compiler c = session.compiler;
+  Type result = signature.apply();
+  Type type = %((func (("List"))) @result);
+  String hidden = %"__repl_call_${session.accessors.len()}";
+  c.sym.define_global(%($hidden), type);
+  List binding = c.sym.resolve_global(%($hidden), NULL);
+  LoadedCall call = {.session = session, .file = file, .name = name};
+  Func function = Func.new_context(
+    _call_objects, c.func_signature(type), &call, sizeof call);
+  session.evaluator.set_global(hidden, function);
+  session.accessors[hidden] = 1;
+  return %(expr $type (ident $binding));
 }
 
 static void _publish_types(ReplSession session, Map symbols) {
@@ -317,7 +331,7 @@ static List _accessor(
   String hidden = %"__repl_global_${session.accessors.len()}";
   c.sym.define_global(%($hidden), type);
   List binding = c.sym.resolve_global(%($hidden), NULL);
-  LoadedCall call = {.compiler = c, .file = file, .name = request};
+  LoadedCall call = {.session = session, .file = file, .name = request};
   Func function = Func.new_context(
     _call, c.func_signature(type), &call, sizeof call);
   session.evaluator.set_global(hidden, function);
@@ -341,56 +355,10 @@ static void _publish_globals(
   }
 }
 
-/** Compiles a source file's public functions, supported globals, and source
-    dependencies in an independent helper. Publishes their callable bindings
-    and public types; prompt evaluation remains interpreted. Calls exchange
-    values through the project meta helper's datum protocol. A rejected load
-    leaves existing names and native static values unchanged. Loading the
-    same resolved path replaces its helper after checking existing calling
-    types and public declarations. Its native state restarts; adapters and
-    prompt values keep their identity. The result is loaded or reloaded,
-    with the List of published names as its value.
-*/
-ReplResult ReplSession.load(
-  ReplSession session, Frontend frontend, String filename) {
-  filename = Path.absolute(filename);
-  Var existing;
-  ReplLoadedFile file = session.files.try_get(filename, existing)
-                       ? existing.pointer() : NULL;
-  LoadedSource loaded = _prepare(frontend, filename);
-  defer if (loaded.globals) loaded.globals.cleanup();
-  if (loaded.result.status != <loaded>) {
-    Scope.free(loaded.helper);
-    return loaded.result;
-  }
-  int published = 0;
-  defer if (!published) {
-    Scope.free(loaded.helper);
-    loaded.symbols.cleanup();
-    if (loaded.signatures) loaded.signatures.cleanup();
-  }
-  try {
-    Map visible = $auto(session.compiler.sym.unit_symbols());
-    Map normalized = _stable_types(session.compiler, visible, loaded.symbols);
-    loaded.symbols.cleanup();
-    loaded.symbols = normalized;
-    List names = loaded.result.value;
-    loaded.signatures = _signatures(session.compiler, normalized, names);
-    if (file) _check_replacement(file, normalized, loaded.signatures);
-    _check_names(session, file, visible, normalized, names);
-    loaded.helper.retain_executable();
-  }
-  catch %(repl (reason ?why)): {
-    loaded.result.status = <rejected>;
-    loaded.result.message = why;
-    return loaded.result;
-  }
-  catch %((!or not-found io-fail) *detail): {
-    loaded.result.status = <rejected>;
-    loaded.result.message = %"cannot retain compiled helper: ${detail.repr()}";
-    return loaded.result;
-  }
-  int replacing = file != NULL;
+/* Publishes already checked declarations while preserving existing adapters. */
+static void _publish(
+  ReplSession session, String filename, LoadedSource &loaded) {
+  ReplLoadedFile file = session.files[filename].pointer();
   if (!file) {
     file = Scope.calloc(1, sizeof(struct ReplLoadedFile));
     file.path = filename;
@@ -401,32 +369,99 @@ ReplResult ReplSession.load(
       match (key)
         case %((!or typedef struct union enum) ?):
           file.types = cons(key, file.types);
-    if (!replacing || !(key in file.symbols))
+    if (!file.symbols || !(key in file.symbols))
       session.compiler.sym.define_global(key, type);
   }
   _publish_types(session, loaded.symbols);
   _publish_globals(session, file, loaded.globals);
   foreach (Var (name, signature), loaded.signatures) {
-    if (replacing && name in file.signatures) continue;
-    LoadedCall call = {
-      .compiler = session.compiler, .file = file, .name = name};
+    if (file.signatures && name in file.signatures) continue;
+    LoadedCall call = {.session = session, .file = file, .name = name};
     Func function = Func.new_context(_call, signature, &call, sizeof call);
     session.evaluator.set_global(name, function);
-    session.names[name] = %(native (source $filename));
+    List adapter = _object_adapter(session, file, name, signature);
+    session.names[name] = %(native (source $filename) (objects $adapter));
   }
-  MetaHelper previous = file.helper;
-  if (replacing) {
-    file.symbols.cleanup();
-    file.signatures.cleanup();
-  }
-  file.helper = loaded.helper;
+  if (file.symbols) file.symbols.cleanup();
+  if (file.signatures) file.signatures.cleanup();
   file.symbols = loaded.symbols;
   file.signatures = loaded.signatures;
+  loaded.symbols = loaded.signatures = NULL;
   session.files[filename] = (void *) file;
-  if (replacing) {
-    Scope.free(previous);
-    loaded.result.status = <reloaded>;
+}
+
+/** Builds all loaded files and dependencies in one replacement helper.
+    Successful loads reset all loaded native state and preserve prompt values
+    and callable adapters. Rejected loads preserve the running helper and its
+    state. Top-level prompt evaluation remains interpreted. */
+ReplResult ReplSession.load(
+  ReplSession session, Frontend frontend, String filename) {
+  session.compiler.diagnostics.reset();
+  filename = Path.absolute(filename);
+  int replacing = filename in session.files;
+  Array paths = $auto(session.files.keys());
+  if (!replacing) paths.push(filename);
+  paths.sort();
+  Compiler.refresh_source_collections();
+  MetaHelper helper = frontend.build_loaded(paths);
+  Map prepared = $auto({});
+  ReplResult result = {.status = <rejected>, .value = void};
+  defer {
+    if (helper) Scope.free(helper);
+    foreach (Var (path, value), prepared) {
+      LoadedSource *loaded = value.pointer();
+      if (loaded->globals) loaded->globals.cleanup();
+      if (loaded->symbols) loaded->symbols.cleanup();
+      if (loaded->signatures) loaded->signatures.cleanup();
+      Scope.free(loaded);
+    }
   }
-  published = 1;
-  return loaded.result;
+  try {
+    helper.check(session.compiler, ":load", filename);
+    Map visible = $auto(session.compiler.sym.unit_symbols());
+    foreach (String path, paths) {
+      LoadedSource *loaded = Scope.calloc(1, sizeof(LoadedSource));
+      prepared[path] = (void *) loaded;
+      *loaded = _prepare(frontend, path, helper);
+      if (loaded->result.status != <loaded>) return loaded->result;
+      if (path == filename) result = loaded->result;
+      ReplLoadedFile file = session.files[path].pointer();
+      Map normalized = _stable_types(session.compiler, visible, loaded->symbols);
+      loaded->symbols.cleanup();
+      loaded->symbols = normalized;
+      List names = loaded->result.value;
+      loaded->signatures = _signatures(session.compiler, normalized, names);
+      if (file) _check_replacement(file, normalized, loaded->signatures);
+      _check_names(session, file, visible, normalized, names);
+      foreach (Var (key, value), normalized) visible[key] = value;
+    }
+    helper.retain_executable();
+    // Declaration inspection may have called meta code. Runtime starts fresh.
+    helper.restart();
+  }
+  catch %(repl (reason ?why)): {
+    result.status = <rejected>;
+    result.message = why;
+    return result;
+  }
+  catch %(malformed *): {
+    result.status = <rejected>;
+    result.diagnostics = session.compiler.diagnostics();
+    return result;
+  }
+  catch %((!or not-found io-fail) *detail): {
+    result.status = <rejected>;
+    result.message = %"cannot retain compiled helper: ${detail.repr()}";
+    return result;
+  }
+  foreach (String path, paths) {
+    LoadedSource *loaded = prepared[path].pointer();
+    _publish(session, path, *loaded);
+  }
+  MetaHelper previous = session.helper;
+  session.helper = helper;
+  helper = NULL;
+  Scope.free(previous);
+  result.status = replacing ? <reloaded> : <loaded>;
+  return result;
 }
