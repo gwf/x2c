@@ -451,6 +451,27 @@ static void _compiled_functions(ReplSession s) {
   _expect(s, "Func saved_adjust=twice_adjust;", <executed>, void);
   _expect(s, "bias=10;", <executed>, void);
   _expect(s, "saved_adjust(2);", <value>, 22);
+  _expect(s, "Func address_adjust(void) { return &adjust; }", <defined>, void);
+  _expect(s, "Func group_adjust(void) { return (adjust); }", <defined>, void);
+  _expect(s, "Func deref_adjust(void) { return *adjust; }", <defined>, void);
+  _expect(s, "address_adjust()(2);", <value>, 12);
+  _expect(s, "group_adjust()(2);", <value>, 12);
+  _expect(s, "deref_adjust()(2);", <value>, 12);
+  _expect(s, "int grouped_adjust(int n) { return (adjust)(n) "
+             "+ (&adjust)(n) + (*(&adjust))(n); }", <defined>, void);
+  _expect(s, "grouped_adjust(2);", <value>, 36);
+  _expect(s, "Func choose_adjust(int flag) { "
+             "return flag ? adjust : twice_adjust; }", <defined>, void);
+  _expect(s, "choose_adjust(1)(2);", <value>, 12);
+  _expect(s, "choose_adjust(0)(2);", <value>, 22);
+  _expect(s, "int call_choice(int flag) { "
+             "return (flag ? adjust : twice_adjust)(2); }", <defined>, void);
+  _expect(s, "call_choice(0);", <value>, 22);
+  _expect(s, "int raw_adjust(int n) { int (*fn)(int)=adjust; return fn(n); }",
+          <rejected>, void);
+  _expect(s, "int cast_adjust(int n) { "
+             "int (*fn)(int)=(int (*)(int))adjust; return fn(n); }",
+          <rejected>, void);
   _expect(s, "int *bias_address=&bias;", <executed>, void);
   _expect(s, "int mutate_bias(int &n) { n+=bias; bias++; return n; }",
           <defined>, void);

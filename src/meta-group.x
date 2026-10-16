@@ -234,7 +234,7 @@ static List _emit_prepared(
   try {
     if (prepare) {
       c.meta_group = [];
-      c.unit_nodes = declarations.array();
+      c.unit_nodes = declarations;
       c.group_meta_function(prepare(c));
       units = _units(c);
     }

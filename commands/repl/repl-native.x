@@ -26,7 +26,8 @@ static List _local(Compiler c, List expression) => c.lambda_scopes
 
 /* Every capture is a pointer: either a native object's address or a Func.
    The factory copies these pointers into the new function's context. */
-static List _capture(PromptFunction &p, List binding, void *pointer, Type type) {
+static List _capture(
+  PromptFunction &p, List binding, void *pointer, Type type) {
   Var index;
   if (!p.captures.try_get(binding, index)) {
     index = (int) p.values.len();
@@ -60,7 +61,26 @@ static List _session_value(PromptFunction &p, Type type, List binding) {
   Map globals = stored;
   Var address = globals[binding.cadr()];
   Type pointer = type.reference();
-  return %(expr $type (op * ${_capture(p, binding, address.pointer(), pointer)}));
+  List captured = _capture(p, binding, address.pointer(), pointer);
+  return %(expr $type (op * $captured));
+}
+
+static List _rewrite_call(
+  PromptFunction &p, Type result, Var target, List arguments) {
+  Compiler c = p.session.compiler;
+  Array rewritten = $auto([]);
+  foreach (Var argument, arguments) rewritten.push(_rewrite(p, argument));
+  match (target)
+    case %(expr ? (ident ${p.original})):
+      return %(expr $result (call (expr ${p.body_type} (ident ${p.body}))
+        (args ${_local(c, p.self)} @{rewritten.list()})));
+  Var callee = _rewrite(p, target);
+  match (callee) case %(expr ("Func") ?): {
+    List call = c.resolve_expression(
+      %(expr () (call $callee (args @{rewritten.list()}))), NULL);
+    return c.convert_expression(call, result);
+  }
+  return %(expr $result (call $callee (args @{rewritten.list()})));
 }
 
 static Var _rewrite(PromptFunction &p, Var node) {
@@ -71,19 +91,28 @@ static Var _rewrite(PromptFunction &p, Var node) {
       return _rewrite_lambda(p, type, params, captures, body);
     case %(expr ?type (lambda ?params ?body)):
       return _rewrite_lambda(p, type, params, NULL, body);
-    case %(expr ?result (call (expr ? (ident ?binding)) (args *arguments))): {
-      Array rewritten = $auto([]);
-      foreach (Var argument, arguments) rewritten.push(_rewrite(p, argument));
-      if (binding == p.original)
-        return %(expr $result (call (expr ${p.body_type} (ident ${p.body}))
-          (args ${_local(c, p.self)} @{rewritten.list()})));
-      List callee = _rewrite(p, ((List) node).caddr().cadr());
-      if (callee.cadr() == %("Func")) {
-        List call = c.resolve_expression(
-          %(expr () (call $callee (args @{rewritten.list()}))), NULL);
-        return c.convert_expression(call, result);
+    case %(expr ?result (call ?target (args *arguments))):
+      return _rewrite_call(p, result, target, arguments);
+    case %(expr ? (parens (!set ?inner (expr ? ?)))): {
+      List rewritten = _rewrite(p, inner);
+      return %(expr ${rewritten.cadr()} (parens $rewritten));
+    }
+    case %(expr ?type (op & (expr ?(Type source) ?payload))): {
+      List operand = _rewrite(p, %(expr $source $payload));
+      if (source.is_function() && operand.cadr() == %("Func")) return operand;
+      return %(expr $type (op & $operand));
+    }
+    case %(expr ?type (op ?operator (expr ?source ?payload)))
+      if (operator == <"*">): {
+        List operand = _rewrite(p, %(expr $source $payload));
+        return source != %("Func") && operand.cadr() == %("Func") ? operand
+          : %(expr $type (op $operator $operand));
       }
-      return %(expr $result (call $callee (args @{rewritten.list()})));
+    case %(expr ?type (cast ?target (expr ?(Type source) ?payload))): {
+      List operand = _rewrite(p, %(expr $source $payload));
+      if (source != %("Func") && operand.cadr() == %("Func"))
+        return c.convert_expression(operand, target);
+      return %(expr $type (cast $target $operand));
     }
     case %(expr ?(Type type) (ident ?binding)): {
       if (binding == p.original) return _local(c, p.self);
@@ -91,6 +120,15 @@ static Var _rewrite(PromptFunction &p, Var node) {
       if (captured) return captured;
     }
   }
+  /* A conditional or comma expression can now yield a Func instead of a
+     native designator. Let the ordinary resolver infer that result. */
+  match (node) case %(expr ?(Type type) ?content)
+    if (type.is_function() ||
+        (type.is_pointer() && type.dereference().is_function())): {
+      List rewritten = _rewrite(p, content);
+      return rewritten == content ? node
+        : c.resolve_expression(%(expr () $rewritten), NULL);
+    }
   List child;
   $ast.rewrite_children(node, child, _rewrite(p, child));
 }
@@ -118,8 +156,8 @@ static List _rewrite_lambda(
 static List _prepare(Compiler c, PromptFunction &p) {
   p.session.native_type_declarations(p.syntax);
   match (p.syntax)
-    case %(function ?spec
-      (!set ?original (bind ?binding ((fnmod (params *params)) *mods))) ?body): {
+    case %(function ?spec (!set ?original
+      (bind ?binding ((fnmod (params *params)) *mods))) ?body): {
       p.original = binding;
       p.type = %(declare $spec (bindings $original)).type_from_ast();
       p.body = c.sym.introduce("__repl_body");

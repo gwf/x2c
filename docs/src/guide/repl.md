@@ -118,8 +118,8 @@ Values have symbol entries but no function AST.
 `:symbols pl` lists only names beginning with `pl`. `:info plus` prints a
 declaration, `source: prompt`, and `execution: native`. For a loaded function,
 the source is the loaded file's resolved absolute path. Parameter names are
-omitted from the printed declaration; argument and return types remain. Tab completion for
-`:info` includes both prompt functions and loaded functions.
+omitted from the printed declaration; argument and return types remain.
+Tab completion for `:info` includes both prompt functions and loaded functions.
 
 Help and inspection commands preserve incomplete input, including when a
 command reports an error. Colon commands are recognized on separate lines
