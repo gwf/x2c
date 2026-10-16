@@ -455,7 +455,7 @@ static void _push_promotion(Pool inner, PoolPromotion promotion) {
 
 /* Recorded promotions mark their slots first, so each block's keep count is
    complete before the block moves to the parent or the depot. */
-static void _release_blocks(Pool inner) {
+module void _release_blocks(Pool inner) {
   for (PoolPromotion p = inner.promotions; p; p = p.next)
     _mark_slot(p.block, p.slot);
   PoolBlock block = inner.blocks;
@@ -491,28 +491,28 @@ static int _slot_kept(PoolBlock block, unsigned slot) {
   return (block.keep[slot / 64] & mask) != 0;
 }
 
-static void _storage_lock(void) {
+module void _storage_lock(void) {
   if (pool_multithreaded && pthread_mutex_lock(&pool_storage_mutex))
     _fatal("could not lock storage mutex");
 }
 
-static void _storage_unlock(void) {
+module void _storage_unlock(void) {
   if (pool_multithreaded && pthread_mutex_unlock(&pool_storage_mutex))
     _fatal("could not unlock storage mutex");
 }
 
-static void _lock(Pool pool) {
+module void _lock(Pool pool) {
   if (pool_multithreaded && pool && pthread_mutex_lock(&pool.mutex))
     _fatal("could not lock branch mutex");
 }
 
-static void _unlock(Pool pool) {
+module void _unlock(Pool pool) {
   if (pool_multithreaded && pool && pthread_mutex_unlock(&pool.mutex))
     _fatal("could not unlock branch mutex");
 }
 
 /* Ends the process on a native failure that Error cannot report. */
-static void _fatal(const char *message) {
+module void _fatal(const char *message) {
   fprintf(stderr, "Pool: %s\n", message);
   abort();
 }
@@ -552,7 +552,7 @@ PoolStats Pool.stats(Pool inner) {
   return stats;
 }
 
-static void _storage_initialize(void) {
+module void _storage_initialize(void) {
   _storage_lock();
   defer _storage_unlock();
   if (pool_storage_ready) return;

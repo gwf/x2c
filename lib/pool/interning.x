@@ -30,7 +30,7 @@ static Var _get_hashed(
 }
 
 /* The stored value equal to `object`, which is installed when absent. */
-static Var _setdefault(
+module Var _setdefault(
   PoolTable table, Var object, int &inserted) {
   return *table.get_or_insert(&object, &object, &inserted);
 }
@@ -173,7 +173,7 @@ int Pool.owns(Pool pool, Var key) {
   return _owns_locked(pool, key);
 }
 
-static int _owns_locked(Pool pool, Var key) {
+module int _owns_locked(Pool pool, Var key) {
   Var found = _get_hashed(pool.table, key, key.hash());
   return found is not void && found.same(key);
 }

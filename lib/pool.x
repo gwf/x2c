@@ -62,7 +62,7 @@ typedef struct PoolStats {
 #include "map-generics.x"
 
 
-static unsigned long value_epoch;
+module unsigned long value_epoch;
 
 
 /* A process that has never started a worker cannot contend for a pool, and
@@ -70,7 +70,7 @@ static unsigned long value_epoch;
    time for nothing. `Thread.start` sets this before `pthread_create`, so the
    worker sees it and every lock taken afterwards is real. It never clears,
    because a value interned while it was clear was published without one. */
-static int pool_multithreaded;
+module int pool_multithreaded;
 
 module {
   "pool/interning.x",
