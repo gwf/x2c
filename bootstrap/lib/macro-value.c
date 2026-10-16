@@ -106,6 +106,42 @@ static Var _slot_view(int splice, Var form);
 
 static Var _slot_binder(Var form);
 
+static inline Symbol Macro_case_symbol(Var value);
+
+static inline int Macro_case_own(Var content);
+
+static inline int Macro_case_start(List code, Symbol head, List * cursor){
+  if(! List_truth(code)) return 0;
+  Symbol first = Macro_case_symbol(code -> car);
+  if(first == head &&(head != 377892 || Macro_case_own(List_caddr(code)))){
+    * cursor = code;
+    return 2;
+  }
+  return first && first != 104 && first != 40070 && first != 377892 && first != 39266 ? 0 : - 1;
+}
+
+static inline int Macro_case_own(Var content){
+  List node = Var_list_payload(content);
+  if(! List_truth(node)) return 1;
+  Symbol head = Macro_case_symbol(node -> car);
+  return head && head != 377892;
+}
+
+static inline Symbol Macro_case_symbol(Var value){
+  Symbol symbol = value.u64 - VAR_SYMBOL_OFFSET;
+  return symbol < 1ul << 51 ? symbol : 0;
+}
+
+int Macro_case_view(Var value, List * cursor);
+
+static inline int Macro_case_enter(Var value, List * cursor){
+  List node = Var_list_payload(value);
+  Symbol head = List_truth(node) ? Macro_case_symbol(node -> car) : 0;
+  if(! head || head == 104 || head == 40070 || head == 377892) return Macro_case_view(value, cursor);
+  * cursor = node;
+  return 1;
+}
+
 typedef struct MacroMatcher{
   Macro shape;
   List holes, pattern;
@@ -933,8 +969,6 @@ int Macro_case_capture_at(MacroCaseSite * site, List code, Macro t, List names, 
   return _derived_capture(site, code, t, names, published);
 }
 
-int Macro_case_enter(Var value, List * cursor);
-
 int Macro_case_root(List code, Macro t, List names, int statement, List * cursor, MatchCaptureBuffer * published){
   if(! _init_guard_) _file_init_();
   List grouped = NULL;
@@ -957,7 +991,7 @@ int Macro_case_root(List code, Macro t, List names, int statement, List * cursor
   return 2;
 }
 
-int Macro_case_enter(Var value, List * cursor){
+int Macro_case_view(Var value, List * cursor){
   if(! _init_guard_) _file_init_();
   Var seen = _unwrap(value);
   if(! Var_is_row(seen, 9, 7, 4)) return 0;
