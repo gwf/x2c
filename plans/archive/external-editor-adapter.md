@@ -1,6 +1,7 @@
-> Status: active
-> Planned on 2026-10-16 against `0a2df88b1`. Source investigation is complete;
-> implementation and executable validation have not started.
+> Status: done
+> Implemented on 2026-10-16 in `de9bbc8b`, integrated with current dev.
+> Focused semantic and transport checks passed; publication validation is
+> recorded with the delivery commit.
 
 # External editor adapter
 
@@ -116,8 +117,8 @@ No compiler-throughput improvement is claimed by this plan.
 Implement as one coherent change. Follow the root `AGENTS.md` delivery mode
 and existing publication validation, including bootstrap regeneration and
 self-host checks through `tools/gate-state.py ensure agent-pr-check`.
-Archive this plan with the delivered revision. This planning request stops
-at the plan; it does not authorize implementation or publication.
+Archive this plan with the delivered revision. Implementation was subsequently authorized. Delivery follows the root
+repository instructions.
 
 ## Plan review
 
@@ -136,3 +137,12 @@ shape checks protect the argv boundary; existing native-CPP rejection prevents
 analysis of saved text presented as unsaved text. Focused missing/mismatched
 command probes protect deliberate setup-failure behavior. The recurring editor
 smoke relocates existing coverage rather than adding a second semantic run.
+
+## Implementation evidence
+
+The nine worker tests passed through the driver, legacy launcher, and direct
+command. All 11 extension semantic/provider tests passed. Driver, command,
+and staged-prefix responses matched with literal metadata and compiler
+response-file arguments. Missing and mismatched commands failed as expected.
+The relocated helper-cleanup smoke passed. The rebuilt compiler and shared
+archive contain no editor adapter symbol or object.

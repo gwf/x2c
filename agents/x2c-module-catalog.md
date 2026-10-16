@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 63
+- Compiler modules: 62
 - Runtime modules: 77
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -307,14 +307,6 @@ Public functions:
 `Compiler.report_warning_at`, `Compiler.take_diagnostics`,
 `Compiler.error_count`, `Compiler.diagnostics`, `Compiler.dump_tokens`,
 `Compiler.dump_symbol_table`, `Compiler.dump_cache`
-
-### [src/editor.x](../src/editor.x)
-
-one-request semantic editor adapter.
-
-Public functions:
-
-`editor_request`
 
 ### [src/emit.x](../src/emit.x)
 

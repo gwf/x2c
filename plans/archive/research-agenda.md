@@ -111,7 +111,7 @@ complexity and unchanged builds still skip compilation correctly.
 ## 4. editor-semantic-reuse.md
 
 [SemanticService.analyze](../../etc/vsc-extension/semantic.js) launches a
-worker for each query; [editor_request](../../src/editor.x) opens a new
+worker for each query; [editor_request](../../commands/editor/editor.x) opens a new
 frontend each time. Prefer one response containing existing compiler-owned
 semantic facts, with hover/definition lookup in the adapter, over a persistent
 compiler daemon.

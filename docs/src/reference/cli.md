@@ -324,8 +324,8 @@ Semantic execution requires a trusted local workspace because compilation can
 run macros. Untrusted and virtual workspaces retain syntax highlighting. Set
 `"x2c.semantic.enabled": false` to disable semantic execution. Completion,
 rename, workspace indexing, and general LSP support are separate features.
-The shipped `x2c-editor` command serves these providers through `x2c editor`; its argument and
-response formats are not a public compiler API.
+The shipped `x2c-editor` command serves these providers through `x2c editor`.
+Its argument and response formats are not a public compiler API.
 
 Shared libraries are unsupported. Supporting them requires platform-specific
 position-independent code, visibility, runtime linkage, library naming, and
