@@ -51,10 +51,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
     .iter = _x2c_gensym_proto_split_iter_0
   }
   ;
-  if(! x2c_register_builtin_descriptor(40919656, _x2c_gensym_protocol_methods_0)){
-    x2c_register_descriptor(String_new("split"), _x2c_gensym_protocol_methods_0);
-  }
-
+  if(! x2c_register_builtin_descriptor(40919656, _x2c_gensym_protocol_methods_0)) x2c_register_descriptor(String_new("split"), _x2c_gensym_protocol_methods_0);
 }
 
 Var Split_var(Split split){

@@ -31,9 +31,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
     .str = _x2c_gensym_proto_staticdescriptor_str_0
   }
   ;
-  if(! x2c_register_builtin_descriptor(1381098884181190, _x2c_gensym_protocol_methods_0)){
-    x2c_register_descriptor(String_new("staticdescriptor"), _x2c_gensym_protocol_methods_0);
-  }
+  if(! x2c_register_builtin_descriptor(1381098884181190, _x2c_gensym_protocol_methods_0)) x2c_register_descriptor(String_new("staticdescriptor"), _x2c_gensym_protocol_methods_0);
   _0 = String_new("private:");
 }
 

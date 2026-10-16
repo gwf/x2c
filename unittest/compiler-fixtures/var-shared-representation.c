@@ -43,9 +43,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  if(! x2c_register_builtin_descriptor(1125368370158, _x2c_gensym_protocol_methods_0)){
-    x2c_register_descriptor(String_new("plainrow"), _x2c_gensym_protocol_methods_0);
-  }
+  if(! x2c_register_builtin_descriptor(1125368370158, _x2c_gensym_protocol_methods_0)) x2c_register_descriptor(String_new("plainrow"), _x2c_gensym_protocol_methods_0);
   _0 = String_new("row:");
   _1 = Symbol_var(31626);
   _2 = Symbol_var(42462);

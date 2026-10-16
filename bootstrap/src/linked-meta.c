@@ -8662,7 +8662,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_15(void
   _7771 = cons(_7760, _7770);
   _7772 = String_new("_protocol_descriptor");
   _7773 = String_var(_7772);
-  _7774 = String_new("c0f628f8b2fa772a");
+  _7774 = String_new("69f5b79be502e5be");
   _7775 = String_var(_7774);
   _7776 = String_new("descriptor");
   _7777 = String_var(_7776);
@@ -13524,7 +13524,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12606 = List_var(_12605);
   _12607 = String_new("src/expressions.x");
   _12608 = String_var(_12607);
-  _12609 = String_new("f085efdd");
+  _12609 = String_new("1fed3fcc");
   _12610 = String_var(_12609);
   _12611 = cons(_12610, NULL);
   _12612 = cons(_12608, _12611);
@@ -13538,7 +13538,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12620 = List_var(_12619);
   _12621 = String_new("src/linked-meta.x");
   _12622 = String_var(_12621);
-  _12623 = String_new("e4966c0d");
+  _12623 = String_new("b12fc68a");
   _12624 = String_var(_12623);
   _12625 = cons(_12624, NULL);
   _12626 = cons(_12622, _12625);
@@ -14195,9 +14195,9 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_25(void
   _13274 = cons(_463, _13273);
   _13275 = String_new("src/component-protocols.x");
   _13276 = String_var(_13275);
-  _13277 = String_new("13ba435e");
+  _13277 = String_new("ba41c60e");
   _13278 = String_var(_13277);
-  _13279 = String_new("1c5cc942");
+  _13279 = String_new("48feb581");
   _13280 = String_var(_13279);
   _13281 = cons(_13280, NULL);
   _13282 = cons(_5156, _13281);
@@ -14407,7 +14407,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_26(void
   _13483 = cons(_13365, _13482);
   _13484 = cons(_5060, _13483);
   _13485 = List_var(_13484);
-  _13486 = String_new("225977a6");
+  _13486 = String_new("ea9b3da6");
   _13487 = String_var(_13486);
   _13488 = cons(_13487, NULL);
   _13489 = cons(_13485, _13488);
@@ -17415,10 +17415,10 @@ static void _protocol_descriptor(List descriptor, List slots){
                 Var _x2c_gensym_literal_part_270 = List_var(cons(_3, cons(_6, cons(List_var(cons(_75, cons(_2929, cons(List_var(cons(_3, cons(_6, cons(List_var(cons(_7, cons(_3055, cons(List_var(({
                   Var _x2c_gensym_literal_part_266 = List_var(cons(_24, cons(_38, cons(_39, cons(List_var(symbol), NULL)))));  Var _x2c_gensym_literal_part_267 = List_var(cons(_24, cons(_38, cons(_39, cons(List_var(table), NULL)))));  cons(_22, cons(_x2c_gensym_literal_part_266, cons(_x2c_gensym_literal_part_267, NULL)));
                 }
-                )), NULL)))), NULL)))), NULL)))), NULL))));  Var _x2c_gensym_literal_part_271 = List_var(cons(_1936, cons(List_var(cons(_2106, cons(List_var(cons(_1924, cons(List_var(cons(_3, cons(_6, cons(List_var(cons(_7, cons(_3067, cons(List_var(({
+                )), NULL)))), NULL)))), NULL)))), NULL))));  Var _x2c_gensym_literal_part_271 = List_var(cons(_1924, cons(List_var(cons(_3, cons(_6, cons(List_var(cons(_7, cons(_3067, cons(List_var(({
                   Var _x2c_gensym_literal_part_268 = List_var(cons(_24, cons(_38, cons(_39, cons(List_var(text), NULL)))));  Var _x2c_gensym_literal_part_269 = List_var(cons(_24, cons(_38, cons(_39, cons(List_var(table), NULL)))));  cons(_22, cons(_x2c_gensym_literal_part_268, cons(_x2c_gensym_literal_part_269, NULL)));
                 }
-                )), NULL)))), NULL)))), NULL))), NULL))), NULL)));  cons(_2969, cons(_x2c_gensym_literal_part_270, cons(_x2c_gensym_literal_part_271, NULL)));
+                )), NULL)))), NULL)))), NULL)));  cons(_2969, cons(_x2c_gensym_literal_part_270, cons(_x2c_gensym_literal_part_271, NULL)));
               }
               )), NULL))), NULL))));
             }

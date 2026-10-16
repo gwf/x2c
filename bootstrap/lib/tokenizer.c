@@ -271,9 +271,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
     .str = _x2c_gensym_proto_token_str_0, .repr = _x2c_gensym_proto_token_repr_0, .hash = _x2c_gensym_proto_token_hash_0, .equal = _x2c_gensym_proto_token_equal_0
   }
   ;
-  if(! x2c_register_builtin_descriptor(42948956, _x2c_gensym_protocol_methods_0)){
-    x2c_register_descriptor(String_new("token"), _x2c_gensym_protocol_methods_0);
-  }
+  if(! x2c_register_builtin_descriptor(42948956, _x2c_gensym_protocol_methods_0)) x2c_register_descriptor(String_new("token"), _x2c_gensym_protocol_methods_0);
   _x2c_gensym_protocol_methods_1 =(VarMethods){
     .str = _x2c_gensym_proto_tokenizer_str_0, .repr = _x2c_gensym_proto_tokenizer_repr_0, .write_str = _x2c_gensym_proto_tokenizer_write_str_0, .write_repr = _x2c_gensym_proto_tokenizer_write_repr_0, .hash = _x2c_gensym_proto_tokenizer_hash_0, .equal = _x2c_gensym_proto_tokenizer_equal_0
   }

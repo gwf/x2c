@@ -178,9 +178,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
     .str = _x2c_gensym_proto_jsonbool_str_0, .repr = _x2c_gensym_proto_jsonbool_repr_0, .truth = _x2c_gensym_proto_jsonbool_truth_0
   }
   ;
-  if(! x2c_register_builtin_descriptor(729033112536, _x2c_gensym_protocol_methods_0)){
-    x2c_register_descriptor(String_new("jsonbool"), _x2c_gensym_protocol_methods_0);
-  }
+  if(! x2c_register_builtin_descriptor(729033112536, _x2c_gensym_protocol_methods_0)) x2c_register_descriptor(String_new("jsonbool"), _x2c_gensym_protocol_methods_0);
   _0 = String_new("true");
   _1 = String_new("false");
   _2 = String_new("unexpected text after the value");
