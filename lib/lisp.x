@@ -1948,7 +1948,7 @@ Var Lisp.eval_string(Lisp lisp, String source) {
 Var Lisp.eval_file(Lisp l, File source) {
   if (!source) raise %(bad-arg (operation "Lisp.eval_file"));
   Block content = $auto(Block.new(sizeof(char)));
-  if (source.read_into(content) == FILE_READ_EOF) return l.eval_string(NULL);
+  if (source.read_into(content) == <eof>) return l.eval_string(NULL);
   if (content.length > INT_MAX) {
     size_t size = content.length, int limit = INT_MAX;
     raise %(size-limit (operation "Lisp.eval_file") (size $size)

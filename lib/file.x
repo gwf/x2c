@@ -58,15 +58,11 @@ protocol FILE *(File);
 
 extern File Stdin, Stdout, Stderr;
 
-/** Reports whether a raw `File` read produced bytes, reached clean EOF, or
-    rejected its arguments. Host read failures transfer `<io-fail>` instead of
-    returning `FILE_READ_ERROR`.
+/** Reports `<data>` when a raw `File` read produced bytes, `<eof>` at clean
+    EOF, or `<error>` for invalid arguments. Host read failures transfer
+    `<io-fail>` instead of returning `<error>`.
 */
-typedef enum FileReadStatus {
-  FILE_READ_ERROR = -1,
-  FILE_READ_EOF = 0,
-  FILE_READ_DATA = 1
-} FileReadStatus;
+typedef Symbol FileReadStatus;
 
 $cleanup.by(File, close);
 
@@ -109,7 +105,7 @@ String File.string(File file) {
 }
 
 /** Reads one raw line into a canonical `String`.
-    Includes the newline when present. Clean EOF and `FILE_READ_ERROR` both map
+    Includes the newline when present. Clean EOF and `<error>` both map
     to NULL. Prefer `File.readline_into` or `File.iter` when raw status and
     bytes should remain separate.
     Raises: `<io-fail>` on a stream read error, `<bad-arg>` when returned bytes
@@ -120,7 +116,7 @@ String File.readline(File file) {
   Block line = $auto(Block.new(sizeof(char)));
   line.reserve(BUFSIZ);
   FileReadStatus status = file.readline_into(line);
-  return status == FILE_READ_DATA ? _text(line.bytes, line.length) : NULL;
+  return status == <data> ? _text(line.bytes, line.length) : NULL;
 }
 
 /** Reads up to `size` bytes into a canonical `String`.
@@ -237,14 +233,15 @@ static void _validate_text(const void *bytes, size_t length) {
 
 /** Reads one raw line into caller-owned byte storage.
     Valid inputs clear `dest`, then include the newline when one is read.
-    `Null` inputs or a `Block` width other than one report ERROR without
+    Returns `<data>` when bytes were read or `<eof>` at clean EOF.
+    `Null` inputs or a `Block` width other than one report `<error>` without
     raising and leave a nonnull `dest` unchanged; a read failure transfers
     instead, leaving its partial bytes in `dest`.
     Raises: `<io-fail>` on a stream read error, or `<size-limit>` or
     `<alloc-fail>` when the destination cannot grow.
 */
 FileReadStatus File.readline_into(File f, Block dest) {
-  if (!f || dest == NULL || dest.width != sizeof(char)) return FILE_READ_ERROR;
+  if (!f || dest == NULL || dest.width != sizeof(char)) return <error>;
   dest.clear();
   int failed, error;
   {
@@ -261,25 +258,26 @@ FileReadStatus File.readline_into(File f, Block dest) {
     error = failed ? errno : 0;
   }
   if (failed) _io_error(<read>, error);
-  return dest.length ? FILE_READ_DATA : FILE_READ_EOF;
+  return dest.length ? <data> : <eof>;
 }
 
 /** Reads the remaining stream bytes into caller-owned storage.
-    Valid inputs clear `dest` first. `Null` inputs or a `Block` width other
-    than one report ERROR without raising and leave a nonnull `dest`
+    Valid inputs clear `dest` first. Returns `<data>` when bytes were read or
+    `<eof>` at clean EOF. `Null` inputs or a `Block` width other than one
+    report `<error>` without raising and leave a nonnull `dest`
     unchanged; a read failure transfers instead, leaving its partial bytes in
     `dest`.
     Raises: `<io-fail>` on a stream read error, or the cause reported by
     `Block.append` when the destination cannot grow.
 */
 FileReadStatus File.read_into(File f, Block dest) {
-  if (!f || dest == NULL || dest.width != sizeof(char)) return FILE_READ_ERROR;
+  if (!f || dest == NULL || dest.width != sizeof(char)) return <error>;
   dest.clear();
   unsigned char bytes[BUFSIZ], size_t count;
   while ((count = fread(bytes, 1, sizeof(bytes), f)) > 0)
     dest.append(bytes, count);
   _check_read(f);
-  return dest.length ? FILE_READ_DATA : FILE_READ_EOF;
+  return dest.length ? <data> : <eof>;
 }
 
 static inline void _block_putc(Block block, unsigned char value) {
@@ -375,7 +373,7 @@ static int _next_line(Iter iter, Var *out) {
     iter.state = void;
   }
   FileReadStatus status = file.readline_into(line);
-  if (status != FILE_READ_DATA) return 0;
+  if (status != <data>) return 0;
   *out = _text(line.bytes, line.length);
   keep = 1;
   return 1;
