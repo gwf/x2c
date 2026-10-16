@@ -91,7 +91,7 @@ Source: `src/parse.x:2617`
 Binds a callable's outer block in its active parameter scope. Ordinary
 constructed blocks open their own scope before using this operation.
 
-Source: `src/parse.x:3915`
+Source: `src/parse.x:3917`
 
 <a id="Compiler.bind_catch_arm"></a>
 #### Compiler.bind_catch_arm
@@ -104,7 +104,7 @@ Binder diagnostics use `start`. A source arm's body parses here, and a
 template's declares its binders where its expansion binds it. A parsed
 arm's body already begins with them, so it binds unchanged.
 
-Source: `src/parse.x:3770`
+Source: `src/parse.x:3772`
 
 <a id="Compiler.bind_match_arm"></a>
 #### Compiler.bind_match_arm
@@ -116,7 +116,7 @@ definite binders of `pattern` when the arm `binds`. Binder diagnostics
 use `start`. A source arm's body parses here with the typed captures
 `types` that its pattern recorded.
 
-Source: `src/parse.x:3871`
+Source: `src/parse.x:3873`
 
 <a id="Compiler.bind_parameter"></a>
 #### Compiler.bind_parameter
@@ -136,20 +136,22 @@ Source: `src/parse.x:2387`
 Binds the source `if`, `while`, `do`, `for`, `match`, or `try` at the
 cursor through the same binders as constructed syntax.
 
-Source: `src/parse.x:3649`
+Source: `src/parse.x:3651`
 
 <a id="Compiler.bind_syntax"></a>
 #### Compiler.bind_syntax
 
-`List Compiler.bind_syntax( Compiler c, Var syntax, AstPos context, Type return_type)`
+`List Compiler.bind_syntax( Compiler c, Var syntax, Symbol context, Type return_type)`
 
 Binds parser-shaped `syntax` at `context` into current compiler state.
+`context` is `<unit>`, `<block>`, `<field>`, `<enumerator>`, `<map-entry>`,
+`<statement>`, or `<expression>`.
 The input must evaluate to a nonempty AST `List` valid for the requested
-`AstPos`. Bindings, types, scopes, and expressions are resolved in source
+position. Bindings, types, scopes, and expressions are resolved in source
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:3003`
+Source: `src/parse.x:3005`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local
@@ -263,7 +265,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:4060`
+Source: `src/parse.x:4062`
 
 <a id="Compiler.finish_initializers"></a>
 #### Compiler.finish_initializers
@@ -663,7 +665,7 @@ Source: `src/parse.x:406`
 
 The source clause `kind`, which the binder parses when it reaches it.
 
-Source: `src/parse.x:3631`
+Source: `src/parse.x:3633`
 
 <a id="Compiler.take_meta_marker"></a>
 #### Compiler.take_meta_marker

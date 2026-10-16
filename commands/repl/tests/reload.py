@@ -498,6 +498,143 @@ for name, text, expression, expected in [
     finally:
         session.close()
 
+# Public scalar objects share native storage and keep their bindings on reload.
+scalar_root = root / "scalars"
+scalar_root.mkdir()
+scalars = scalar_root / "globals.x"
+scalar_dependency = scalar_root / "dependency.x"
+scalar_dependency.write_text("int dependency_value = 4;\n")
+
+
+def scalar_version(initial=10, declaration="int counter", extra=""):
+    return ('#include <stdbool.h>\n#include "dependency.x"\n'
+            f'{declaration} = {initial};\n'
+            'typedef const int Limit;\nLimit limit = 100;\n'
+            'static int secret = 9;\n'
+            'bool enabled = 1;\nunsigned char small = 250;\n'
+            'double fraction = 1.25;\nvolatile int observed = 2;\n'
+            'enum Color { RED = 3 };\nenum Color color = RED;\n'
+            'String label = "start";\nSymbol mark = <start>;\n'
+            'int *pointer;\nArray collection;\n'
+            'int read_counter(void) { return counter; }\n'
+            'void write_counter(int n) { counter = n; }\n'
+            'int dep_value(void) { return dependency_value; }\n' + extra)
+
+
+scalars.write_text(scalar_version())
+session = Session(scalar_root)
+try:
+    session.run('int prompt_data=7;')
+    session.load(scalars)
+    session.value('counter', 10)
+    session.run('counter = 20;')
+    session.value('read_counter()', 20)
+    session.run('write_counter(30);')
+    session.value('counter', 30)
+    session.value('(counter = 32)', 32)
+    session.value('(counter++)', 32)
+    session.value('(++counter)', 34)
+    session.value('(counter *= 2)', 68)
+    session.run('int bump(int n) { counter += n; return counter++; }\n'
+                'Func saved_bump = bump;\n'
+                'int shadow(int counter) { return counter + 2; }')
+    session.value('bump(5)', 73)
+    session.value('counter', 74)
+    session.value('shadow(4)', 6)
+    session.run('Func identity = %!(int n) => n;')
+    session.value('identity(counter)', 74)
+    session.run('int through_value(void) { return identity(counter); }')
+    session.value('through_value()', 74)
+    session.value('limit', 100)
+    for statement in ['limit = 2;', 'limit++;',
+                      'int change_limit(void) { return limit = 2; }']:
+        session.run(statement, 'loaded const global is read-only')
+    for name in ['secret', 'dependency_value', 'pointer', 'collection']:
+        session.run(name + ';', 'unresolved identifier: ' + name)
+    session.run('enabled = 7;\nsmall = 257;\nfraction += 0.5;\n'
+                'color = 5;\nlabel = "changed";\nmark = <changed>;')
+    session.value('enabled == 1 && small == 1 && fraction == 1.75', 1)
+    session.value('(int) color', 5)
+    session.value('label', '"changed"')
+    session.value('mark', '<changed>')
+    session.run('&counter;', 'loaded globals cannot supply addresses')
+    session.run('int by_ref(int &n) { n=1; return n; }')
+    session.run('by_ref(counter);', 'loaded globals cannot supply addresses')
+    session.run('int remote_ref(void) { return by_ref(counter); }',
+                'loaded globals cannot supply addresses')
+    session.run('Func saved_ref = by_ref;')
+    session.run('saved_ref(counter);', 'evaluation failed')
+    session.value('counter', 74)
+    session.run('int optional(int &?n) { if (n) return n; return -1; }\n'
+                'Func optional_ref = optional;')
+    session.run('optional_ref(counter);', 'evaluation failed')
+    session.run('int shadow_ref(int (*FuncArg_reference)(int *, int)) '
+                '{ return FuncArg_reference(&counter, 7); }',
+                'loaded globals cannot supply addresses')
+    session.run('int destructure(void) { int local=0; '
+                '(counter, local) = %(41 2); return counter + local; }')
+    session.value('destructure()', 43)
+    session.value('counter', 41)
+    session.run('observed = 3;')
+    session.value('(observed++)', 3)
+    session.value('(--observed)', 3)
+    session.value('observed', 3)
+    session.value('sizeof counter == sizeof(int)', 1)
+    session.value('counter', 41)
+    alias = scalar_root / 'alias.x'
+    alias.symlink_to(scalars)
+    scalar_dependency.write_text('int dependency_value = 9;\n')
+    scalars.write_text(scalar_version(40, extra='int added = 6;\n'))
+    session.load(alias)
+    session.value('counter', 40)
+    session.value('saved_bump(2)', 42)
+    session.value('counter', 43)
+    session.value('through_value()', 43)
+    session.value('prompt_data', 7)
+    session.value('dep_value()', 9)
+    session.value('added', 6)
+    session.value('label', '"start"')
+    session.value('small == 250', 1)
+    for changed in [scalar_version(90, 'long counter', 'int added=6;'),
+                    scalar_version(90, 'const int counter', 'int added=6;'),
+                    scalar_version(90, 'static int counter', 'int added=6;')]:
+        scalars.write_text(changed.replace('counter = n;', '(void) n;'))
+        session.load(scalars, 'declaration changed or removed')
+        session.value('counter', 43)
+        session.value('read_counter()', 43)
+    scalars.write_text(scalar_version() + 'broken {')
+    session.load(scalars, 'expected')
+    session.value('counter', 43)
+    session.run(':symbols counter')
+    output = session.finish()
+    assert '%((global "counter"))' in output, output
+finally:
+    session.close()
+
+# Globals-only C files load without annotations, including tentative and
+# repeated declarations. Each loaded file still owns an independent helper.
+for suffix in ['x', 'c']:
+    scalars = scalar_root / ('only.' + suffix)
+    scalars.write_text('extern int count;\nint count=3;\nint count;\n'
+                       'const int maximum=8;\nstatic int hidden=4;\n')
+    second = scalar_root / ('other.' + suffix)
+    second.write_text('int other=11;\n')
+    session = Session(scalar_root)
+    try:
+        session.load(scalars)
+        session.load(second)
+        session.run('count = 7;\nother = 12;')
+        session.value('count', 7)
+        session.value('maximum', 8)
+        session.run('maximum = 1;', 'loaded const global is read-only')
+        session.run('hidden;', 'unresolved identifier: hidden')
+        session.load(scalars)
+        session.value('count', 3)
+        session.value('other', 12)
+        session.finish()
+    finally:
+        session.close()
+
 # Exercise an existing package module without changing the checked-in source.
 autodiff = root / "autodiff-macros.x"
 original = pathlib.Path("packages/autodiff/src/autodiff-macros.x").read_text()

@@ -386,8 +386,8 @@ the generated header and source of one unit.
 Public functions:
 
 `Compiler.generate_code`, `Compiler.generate_code_text`,
-`Compiler.initializer_function`, `Compiler.run_once_body`, `Init.enter`,
-`Compiler.place_source_prelude`, `Compiler.init_statements`,
+`Compiler.place_source_prelude`, `Compiler.initializer_function`,
+`Compiler.run_once_body`, `Init.enter`, `Compiler.init_statements`,
 `Compiler.definition_rows`, `Compiler.dump_definitions`
 
 ### [src/grammar.x](../src/grammar.x)
@@ -657,18 +657,17 @@ protocols from declaration to conform forms.
 
 Public functions:
 
-`Compiler.reverse_converter_spelling`, `Compiler.parse_protocol_declaration`,
-`Compiler.publish_protocol_node`, `Compiler.resolve_protocols`,
-`Compiler.conformance_rows`, `Compiler.resolve_as_declared`,
-`Compiler.protocol_members_for`, `Compiler.protocol_member_names`,
-`Compiler.protocol_rejects_direct_member`, `Compiler.dump_conformance`,
-`Compiler.resolve_protocol_member`, `Compiler.wrapper_function`,
-`Compiler.forward_parameters`, `Compiler.protocol_update_helper`,
-`Compiler.discard_helper`, `Compiler.protocol_discard_helper`,
-`Compiler.generate_protocol_adapters`,
+`Compiler.reverse_converter_spelling`, `Compiler.publish_protocol_node`,
+`Compiler.rebuild_protocols`, `Compiler.parse_protocol_declaration`,
+`Compiler.resolve_protocols`, `Compiler.conformance_rows`,
+`Compiler.resolve_as_declared`, `Compiler.protocol_members_for`,
+`Compiler.protocol_member_names`, `Compiler.protocol_rejects_direct_member`,
+`Compiler.dump_conformance`, `Compiler.resolve_protocol_member`,
+`Compiler.wrapper_function`, `Compiler.forward_parameters`,
+`Compiler.protocol_update_helper`, `Compiler.discard_helper`,
+`Compiler.protocol_discard_helper`, `Compiler.generate_protocol_adapters`,
 `Compiler.install_generated_protocol_symbols`,
-`Compiler.native_protocol_alias`, `Compiler.record_source_typedef`,
-`Compiler.rebuild_protocols`
+`Compiler.native_protocol_alias`, `Compiler.record_source_typedef`
 
 ### [src/regions.x](../src/regions.x)
 

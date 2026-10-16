@@ -25,8 +25,9 @@ typedef struct ReplSession {
   Lisp evaluator;
   ReplLower lowering;
   Array declarations;
-  Map files;
-  // Published name -> (value), (type), (native [(source PATH)]), or
+  Map files, accessors;
+  // Published name -> (value), (type), (native [(source PATH)]),
+  // (global (source PATH) GET SET), or
   // (function (typed ...) (execution native)).
   Map names;
 } *ReplSession;
@@ -58,6 +59,7 @@ typedef struct ReplCompletion {
 #include "meta.x"
 #include "refusal-errors.x"
 #include "repl-native.x"
+#include "repl-globals.x"
 #include <errno.h>
 #include <signal.h>
 #include <stdio.h>
@@ -93,6 +95,7 @@ ReplSession ReplSession.new(Compiler compiler) {
   session.compiler = compiler;
   session.names = {};
   session.files = {};
+  session.accessors = {};
   session.declarations = [];
   session.evaluator = Lisp.new();
   repl_runtime_initialize(session.evaluator);
@@ -115,7 +118,8 @@ List ReplSession.symbols(ReplSession session) {
 }
 
 /** Returns (value), (type), (native [(source PATH)]),
-    (function (typed AST) (execution native)), or NULL if absent.
+    (global (source PATH) GET SET), (function (typed AST) (execution native)),
+    or NULL if absent. SET is NULL for a read-only global.
     These are the original canonical Lists, borrowed until unit close. */
 List ReplSession.inspect(ReplSession session, String name) {
   Var entry;
@@ -189,7 +193,8 @@ static List _completion_filter(
       name = spelling;
       type = semantic;
     }
-    if (!name || !name.startswith(prefix)) continue;
+    if (!name || !name.startswith(prefix) || name in session.accessors)
+      continue;
     Type semantic_type = type is <list> ? type : NULL;
     if (kind == <type> && type != <typemacro> &&
         (!semantic_type || !semantic_type.is_typedef())) continue;
@@ -539,11 +544,13 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     }
     result.syntax = fn;
     $let(c.recovery_depth, c.recovery_depth + 1) {
+      fn = session.rewrite_globals(fn);
       if (function_name) {
         Func function = session.compile_function(fn);
         transaction.commit_transient();
         session.evaluator.set_global(function_name, function);
-        names[function_name] = %(function (typed $fn) (execution native));
+        names[function_name] =
+          %(function (typed ${result.syntax}) (execution native));
         result.name = function_name;
         result.status = <defined>;
         return result;
@@ -622,4 +629,6 @@ void ReplSession.close(ReplSession session) {
   }
   session.files.cleanup();
   session.files = NULL;
+  session.accessors.cleanup();
+  session.accessors = NULL;
 }

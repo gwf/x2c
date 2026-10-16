@@ -101,7 +101,7 @@ incomplete submission continues at a fresh `... ` prompt.
 | `:help` | Show session commands. |
 | `:stats [verbose]` | Show concise or detailed runtime statistics. |
 | `:symbols [PREFIX]` | List successfully defined names and kinds, optionally matching a name prefix. |
-| `:load "file.x"` | Compile and load public functions, including `main`; replace an earlier load of the same file. |
+| `:load "file.x"` | Compile and load public functions and scalar globals; replace an earlier load of the same file. |
 | `:info NAME` | Show a session function's argument and return types, source, and execution mode. |
 | `:ast plus` | Show `plus`'s typed x2c AST. |
 | `:lowered plus` | Report that `plus` is compiled and has no Lisp body. |
@@ -171,9 +171,32 @@ Public functions with bodies in the loaded file become prompt functions,
 including `main`. No `meta` annotation is needed. Static helpers such as
 `twice` remain private. Functions from included files and declaration-only
 functions remain available to the compiled code but are not imported into
-the prompt. Public type declarations accompany the loaded functions. Global
-variables and enumerator constants are not imported. Source macros remain
+the prompt. Public type declarations accompany the loaded definitions.
+Enumerator constants are not imported. Source macros remain
 with the compiled source; loading does not install them in the prompt.
+
+Public scalar globals are also available without source changes. Reads and
+assignments use the same native storage as the file's functions:
+
+```x2c
+int counter = 10;
+const int limit = 100;
+static int private_counter;
+int read_counter(void) { return counter; }
+```
+
+After loading this file, `counter;` returns `10`. Entering `counter = 20;`
+makes `read_counter();` return `20`. Compound assignments and numeric prefix
+or postfix increments also work. Prompt functions can read and assign these
+globals, including functions saved before a reload. `limit` is read-only,
+and `private_counter` remains private. `:symbols` lists the public globals.
+
+Supported globals are numeric scalars, booleans, enums, Strings, and Symbols,
+including typedef aliases. Enum values use the compiler's `int`
+representation. Raw pointers, records, collections, `Var`, and callable
+globals are not imported. Globals from included files remain private to
+the loaded file. A loaded global cannot supply an address or a reference
+argument because its storage belongs to the helper process.
 
 Compilation happens on `:load` and on each prompt function definition,
 including `plus_answer` above. Top-level input stays interpreted. Loading needs
@@ -256,8 +279,10 @@ change. Previously returned values remain ordinary prompt data.
 
 Existing functions must keep their argument and return types. Parameter
 names may change. Existing public types must keep their definitions. New
-functions and types are allowed when their names do not conflict. Removing
-an existing function or type, or changing its type, requires a new session.
+functions, scalar globals, and types are allowed when their names do not
+conflict. Existing globals must keep their declared types and qualifiers,
+including `const`. Removing an existing function, global, or type, or
+changing its type, requires a new session.
 A refused replacement leaves both the old code and its variables intact.
 Prompt definitions still cannot be redefined.
 

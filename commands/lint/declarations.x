@@ -12,13 +12,8 @@
 #include <ctype.h>
 #include <string.h>
 
-
 static const SymbolSet qualifier_words =
   %<<const volatile restrict register struct union enum>>
-
-/* Whether `path` has a directory component named `name`. */
-static int _under(String path, String name) =>
-  path.startswith(%"$name/") || path.contains(%"/$name/")
 
 /* The line of the first `(` among the compiler's tokens `start` to `end`.
    Returns 0 for a macro invocation, whose declarations are generated, and
@@ -36,14 +31,14 @@ static int _prototype_line(Compiler c, int start, int end):
    implementation and binding boundaries use explained local allowances;
    runtime co-recursion and shallow collection remain review candidates. */
 static void _prototype(Lint l, int line, int defined):
-  if defined && _under(l.path, "lib"):
+  if defined && lint_under(l.path, "lib"):
     l.add("same-file-forward-declaration", line,
           "retain only for genuine co-recursion or literal shallow "
           "collection")
   else if defined:
     l.add("forward-declaration", line,
           "retain only for a required same-unit binding boundary")
-  else if _under(l.path, "src"):
+  else if lint_under(l.path, "src"):
     l.add("src-forward-declaration", line,
           "retain only for a required implementation or binding boundary")
   else:
@@ -205,11 +200,6 @@ static List _parameter_words(Lint l, int open, int close):
   parameters.push(words.list_free())
   return parameters.list_free()
 
-static Array _split(String text):
-  Array lines = []
-  foreach String line in text.split("\n"): lines.push(line)
-  return lines
-
 /* The subject's short name: the first letter of `owner`, lower case,
    repeated until no reference among the tokens `from` to `to` uses it. */
 static String _short_name(Lint l, String owner, int from, int to):
@@ -251,7 +241,7 @@ static void _subject(Lint l, int start, int body, int end):
     if _reference(l, at, old): after.write(name)
     else: after.write_len(l.text + t.pos, t.len)
   Lines lines = _lines(l, from, end, l.tokens[from].line)
-  int saved = _saved(lines, _split(before), _split(after))
+  int saved = _saved(lines, before.split("\n"), after.str().split("\n"))
   if saved <= 0: return
   String plural = saved > 1 ? "s" : ""
   l.add("subject-parameter-name", l.tokens[open].line,
@@ -295,9 +285,9 @@ static int _alias_arguments(List calls, int index, Map locals):
    variable always supplies and that the body only dereferences. Buffers
    (`char` and `void` pointees), functions used other than by a direct call,
    and functions other units can call keep their pointer spelling. */
-static void _reference_parameters(Lint l, Compiler c, List ast):
+static void _reference_parameters(Lint l, List ast, List rows):
   Map locals = _plain_locals(ast), lines = {}
-  foreach List row in c.definition_rows(ast):
+  foreach List row in rows:
     match row:
       case %(function ?name ? ? ? ?line *): lines[name] = line
   foreach List node in ast:
@@ -348,9 +338,9 @@ static void _saved_bindings(Lint l, Compiler c, List node, int line):
   foreach Var child in node:
     if child is <list>: _saved_bindings(l, c, child, line)
 
-static void _saved_locals(Lint l, Compiler c, List ast):
+static void _saved_locals(Lint l, Compiler c, List ast, List rows):
   Map lines = {}
-  foreach List row in c.definition_rows(ast):
+  foreach List row in rows:
     match row:
       case %(function ?name ? ? ? ?line ? ? source *): lines[name] = line
   foreach List node in ast:
@@ -360,7 +350,7 @@ static void _saved_locals(Lint l, Compiler c, List ast):
 
 /* Bound references include calls and function values. Source spans keep
    corpus spelling guards outside the authored definition. */
-static void _unused_statics(Lint l, Compiler c, List ast):
+static void _unused_statics(Lint l, Compiler c, List ast, List rows):
   Map referenced = {}, absent = {}
   Ast.collect_binding_references(ast, referenced)
   foreach List node in ast:
@@ -368,7 +358,7 @@ static void _unused_statics(Lint l, Compiler c, List ast):
       case %(function ?modifiers (bind (binding ?id ?name) ?) ?):
         if <static> in modifiers && !(id in referenced):
           absent[name] = c.emitted_binding_name(%(binding $id $name))
-  foreach List row in c.definition_rows(ast):
+  foreach List row in rows:
     match row:
       case %(function ?name ?display ? ? ?line ? ? source (?(int start) ?)
              (? ?(int end) *)):
@@ -379,22 +369,23 @@ static void _unused_statics(Lint l, Compiler c, List ast):
           int first = tokens[start].line, last = tokens[end - 1].line
           l.unused.push(%($name $display ${absent[name]} $line $first $last))
 
-/** Runs the rules that read the compiler's parse of the unit: `ast` and
-    the facts `c` recorded while parsing it.
+/** Runs the rules that read the compiler's parse of the unit: `ast`, its
+    `Compiler.definition_rows` `rows`, and the facts `c` recorded while
+    parsing it.
 */
-void Lint.declaration_rules(Lint l, Compiler c, List ast):
+void Lint.declaration_rules(Lint l, Compiler c, List ast, List rows):
   _prototypes(l, c, ast)
-  if "saved-local" in l.selected: _saved_locals(l, c, ast)
+  if "saved-local" in l.selected: _saved_locals(l, c, ast, rows)
   if "uncalled-static-function" in l.selected:
-    _unused_statics(l, c, ast)
-  if l.selected.contains("reference-parameter"):
-    _reference_parameters(l, c, ast)
-  foreach List row in c.definition_rows(ast):
+    _unused_statics(l, c, ast, rows)
+  if "reference-parameter" in l.selected:
+    _reference_parameters(l, ast, rows)
+  foreach List row in rows:
     match row:
       case %(function ? ?name ? ? ? ? ? source (?(int start) ?(int body))
              (? ?(int end) *)):
         // A script unit's generated entry points span tokens past the file.
         if l.layout || end >= l.count: continue
         l.functions.push(%($name $start $body $end))
-        if l.selected.contains("subject-parameter-name"):
+        if "subject-parameter-name" in l.selected:
           _subject(l, start, body, end)

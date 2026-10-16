@@ -400,7 +400,7 @@ static typedef struct Expansion {
     not begin a semantic transaction.
 */
 List Compiler.expand_macro_invocation_node(
-  Compiler c, Var stored, List arguments, Token invocation, AstPos position) {
+  Compiler c, Var stored, List arguments, Token invocation, Symbol position) {
   Expansion x = {
     .c = c, .definition = _stored_definition(c, stored, invocation),
     .input = arguments, .invocation = invocation};
@@ -476,7 +476,7 @@ static void _too_deep(Expansion &x) {
 
 /* Pushes this expansion's frame on the macro stack, fills the template,
    and binds the result. A failed match binds nothing. */
-static List _bind_expansion(Expansion &x, AstPos position) {
+static List _bind_expansion(Expansion &x, Symbol position) {
   Compiler c = x.c;
   List old_stack = c.macro_stack;
   x.template = x.definition.assoc(<template>);
@@ -938,7 +938,7 @@ static List _read_body(Definition &d) {
    which ends the enclosing declaration, and so does a decorator's target
    there. */
 static List _arrow_statement(Compiler c, int open) {
-  List macro = _target_at(c, AST_STATEMENT, open);
+  List macro = _target_at(c, <statement>, open);
   if (macro) return macro;
   List expression = c.parse_expression();
   if (!open) c.expect(<;>);
@@ -1312,35 +1312,33 @@ static Atom _hole_name(List hole) {
    Spellings match without regard to case. `named` marks the row whose
    spelling names its hole or result kind in diagnostics. */
 
-static enum { CATEGORY_HOLE_NAME = 1, CATEGORY_RESULT_NAME = 2 };
-
 static typedef struct MacroCategory {
   const char *spelling;
   Symbol hole, result;
-  int target, named;
+  int target, Symbol named;
 } MacroCategory;
 
 static const MacroCategory macro_categories[] = {
-  { "Expr",          <expr>,       <expression>, 1, 1 },
-  { "Expression",    <expr>,       <expression>, 1, 2 },
-  { "Stmt",          <block>,      <block-item>, 1, 3 },
-  { "Field",         <field>,      <field>,      1, 3 },
-  { "Entry",         <map-entry>,  <map-entry>,  0, 3 },
-  { "Enumerator",    <enumerator>, <enumerator>, 0, 3 },
-  { "Unit",          <unit>,       <unit>,       1, 3 },
-  { "Declaration",   0,            <decl-unit>,  0, 2 },
-  { "Decorator",     0,            <decorator>,  0, 2 },
-  { "Function",      <function>,   0,            1, 1 },
-  { "NamedType",     <named-type>, 0,            1, 1 },
-  { "Type",          <type>,       0,            0, 1 },
-  { "Decl",          <decl>,       0,            0, 1 },
-  { "DeclaratorRow", <decl-row>,   0,            0, 1 },
-  { "Name",          <name>,       0,            0, 1 },
-  { "Literal",       <literal>,    0,            0, 1 },
-  { "Param",         <param>,      0,            0, 1 },
-  { "Catch",         <catch>,      0,            0, 1 },
-  { "Captures",      <captures>,   0,            0, 1 },
-  { "MatchRow",      <match-row>,  0,            0, 1 }
+  { "Expr",          <expr>,       <expression>, 1, <hole> },
+  { "Expression",    <expr>,       <expression>, 1, <result> },
+  { "Stmt",          <block>,      <block-item>, 1, <both> },
+  { "Field",         <field>,      <field>,      1, <both> },
+  { "Entry",         <map-entry>,  <map-entry>,  0, <both> },
+  { "Enumerator",    <enumerator>, <enumerator>, 0, <both> },
+  { "Unit",          <unit>,       <unit>,       1, <both> },
+  { "Declaration",   0,            <decl-unit>,  0, <result> },
+  { "Decorator",     0,            <decorator>,  0, <result> },
+  { "Function",      <function>,   0,            1, <hole> },
+  { "NamedType",     <named-type>, 0,            1, <hole> },
+  { "Type",          <type>,       0,            0, <hole> },
+  { "Decl",          <decl>,       0,            0, <hole> },
+  { "DeclaratorRow", <decl-row>,   0,            0, <hole> },
+  { "Name",          <name>,       0,            0, <hole> },
+  { "Literal",       <literal>,    0,            0, <hole> },
+  { "Param",         <param>,      0,            0, <hole> },
+  { "Catch",         <catch>,      0,            0, <hole> },
+  { "Captures",      <captures>,   0,            0, <hole> },
+  { "MatchRow",      <match-row>,  0,            0, <hole> }
 };
 
 #define MACRO_CATEGORY_COUNT \
@@ -1363,8 +1361,8 @@ static int _decorator_target(Symbol hole) {
 static String _kind_spelling(Symbol kind) {
   for (int i = 0; i < MACRO_CATEGORY_COUNT; i++) {
     const MacroCategory *category = &macro_categories[i];
-    if ((category.hole == kind && category.named & CATEGORY_HOLE_NAME) ||
-        (category.result == kind && category.named & CATEGORY_RESULT_NAME))
+    if ((category.hole == kind && category.named != <result>) ||
+        (category.result == kind && category.named != <hole>))
       return category.spelling;
   }
   return kind.str().capitalize();
@@ -1495,16 +1493,8 @@ static List _meta_call_slot(Compiler c, Symbol role) {
 }
 
 /* A result macro keeps the ordinary position's kind and decorator rules. */
-static AstPos _slot_position(Symbol role) {
-  switch (role) {
-    case <unit>:       return AST_UNIT;
-    case <block>:      return AST_BLOCK;
-    case <field>:      return AST_FIELD;
-    case <enumerator>: return AST_ENUMERATOR;
-    case <map-entry>:  return AST_MAP_ENTRY;
-    default:           return AST_EXPRESSION;
-  }
-}
+static Symbol _slot_position(Symbol role) =>
+  role in %<<unit block field enumerator map-entry>> ? role : <expression>;
 
 /* A Lisp slot fills a declaration slot only when @ splices it. A block
    item that continues into a declaration, and a statement, keep the
@@ -1685,7 +1675,7 @@ static List _hole_local(Compiler c, Map holes, int position) {
   return c.bind_syntax(
     %(declare ${value.cadr()}
       (bindings (op = (bind ${c.sym.introduce(name)} ()) $value))),
-    AST_BLOCK, c.return_type);
+    <block>, c.return_type);
 }
 
 /* Returns NULL if the quotation registered no expression at this offset. */
@@ -2658,7 +2648,7 @@ List Compiler.marked_rewrite(
   foreach (Var (mark, _), stored.map()) {
     if (mark is not <symbol> || !c.sym.get(%(@aggregate $mark))) continue;
     List rewritten = c.rewrite(
-      <member>, mark, source, AST_EXPRESSION, NULL, site);
+      <member>, mark, source, <expression>, NULL, site);
     if (rewritten) return rewritten;
   }
   return NULL;
@@ -2674,7 +2664,7 @@ int Compiler.has_rewrites(Compiler c, Symbol point, Var kind) =>
     statement replacement writes or copies, such as its source, takes the
     rules after the one that replaced it. */
 List Compiler.rewrite(
-  Compiler c, Symbol point, Var kind, List source, AstPos position,
+  Compiler c, Symbol point, Var kind, List source, Symbol position,
   Type expected, Token site) =>
   _rewrite(c, point, kind, source, position, expected, site, 0);
 
@@ -2683,7 +2673,7 @@ List Compiler.rewrite(
     `Compiler.rewrite` does. Binding keeps the source, and each part of it
     the replacement holds, as lowered. */
 List Compiler.rewrite_lowered(
-  Compiler c, Symbol point, Var kind, List source, AstPos position,
+  Compiler c, Symbol point, Var kind, List source, Symbol position,
   Type expected, Token site) =>
   _rewrite(c, point, kind, source, position, expected, site, -1);
 
@@ -2707,7 +2697,7 @@ List Compiler.rewrite_written(
   struct SlotWatch written = {.shipped = 1};
   $let(c.slot_watch, &written)
     return c.rewrite_lowered(
-      <node>, kind, source, AST_STATEMENT, expected, NULL);
+      <node>, kind, source, <statement>, expected, NULL);
 }
 
 /** Binds and lowers a replacement while its rule remains active. The
@@ -2722,14 +2712,14 @@ List Compiler.rewrite_written(
     slot signatures an earlier use in the unit prepared lowers only its
     captured values. */
 List Compiler.lower_rewrite(
-  Compiler c, Symbol point, Var kind, List source, AstPos position,
+  Compiler c, Symbol point, Var kind, List source, Symbol position,
   Type expected, Token site) =>
   _rewrite(c, point, kind, source, position, expected, site, 1);
 
 /* `lower` is 1 to lower the replacement, 0 to bind it, and -1 to bind it
    around a lowered source. */
 static List _rewrite(
-  Compiler c, Symbol point, Var kind, List source, AstPos position,
+  Compiler c, Symbol point, Var kind, List source, Symbol position,
   Type expected, Token site, int lower) {
   // A meta body still completes and formats the calls it makes.
   if (c.macro_holes || (c.meta_body && point != <member> && point != <call>))
@@ -2756,7 +2746,7 @@ static List _rewrite(
       if (lower <= 0)
         return _bound(
           c, point, kind, source, result, position, expected, site, lower);
-      if (position == AST_UNIT) return _lowered_definition(c, result);
+      if (position == <unit>) return _lowered_definition(c, result);
       int held = point == <node>;
       match (result) case %(code-value "lowered" *): held = 1;
       if (held) {
@@ -2803,14 +2793,14 @@ static void _held_parts(List source, Symbol point, Array found) {
    File-scope code that a shipped rule gives is written. */
 static List _bound(
   Compiler c, Symbol point, Var kind, List source, Var result,
-  AstPos position, Type expected, Token site, int lower) {
+  Symbol position, Type expected, Token site, int lower) {
   if (point != <node>)
     return _bind_replacement(c, result, position, expected);
   Array parts = $auto([]);
   _held_parts(source, point, parts);
   if (lower) result = _kept_lowered(result, source, parts);
   List bound = _bind_replacement(c, result, position, expected);
-  if (position == AST_UNIT) bound = c.written_support(bound);
+  if (position == <unit>) bound = c.written_support(bound);
   struct SlotWatch held = {parts.list()};
   return _bound_held(c, &held, kind, bound, position, expected, site, lower);
 }
@@ -2820,8 +2810,8 @@ static List _bound(
    declares its names in a scope of its own, so no other function sees
    them. */
 static List _bind_replacement(
-  Compiler c, Var result, AstPos position, Type expected) {
-  int own = position != AST_UNIT && c.sym.at_file_scope();
+  Compiler c, Var result, Symbol position, Type expected) {
+  int own = position != <unit> && c.sym.at_file_scope();
   if (own) c.sym.push_new_scope();
   defer if (own) c.sym.pop_scope();
   return c.bind_syntax(result, position, expected);
@@ -2839,7 +2829,7 @@ static Var _kept_lowered(Var result, List source, Array parts) {
 }
 
 static Var _bound_held(
-  Compiler c, SlotWatch held, Symbol kind, Var ast, AstPos position,
+  Compiler c, SlotWatch held, Symbol kind, Var ast, Symbol position,
   Type expected, Token site, int lower) {
   if (!Ast.contains_head(ast, kind) || _find_slot(held, ast) >= 0) return ast;
   List node = ast;
@@ -2858,7 +2848,7 @@ static Var _bound_held(
    unless it is a lowered carrier. It lowers outside the watch that chose
    its rule, as any definition does, and a shipped rule's is written. */
 static List _lowered_definition(Compiler c, Var result) {
-  List bound = c.bind_syntax(result, AST_UNIT, NULL);
+  List bound = c.bind_syntax(result, <unit>, NULL);
   match (bound) case %(seq ?only): bound = only;
   match (result) case %(code-value "lowered" *): return bound;
   $let(c.slot_watch, NULL) return c.normalize(c.written_support(bound));
@@ -2885,9 +2875,9 @@ int Compiler.applying_shipped(Compiler c) {
 
 /* Binds, converts, and lowers a replacement as written. */
 static List _lowered(
-  Compiler c, Var result, AstPos position, Type expected, Token site) {
+  Compiler c, Var result, Symbol position, Type expected, Token site) {
   List bound = _bind_replacement(c, result, position, expected);
-  if (position == AST_EXPRESSION) {
+  if (position == <expression>) {
     bound = c.convert_expression(bound, expected);
     Type actual = bound.cadr();
     if (actual.canonicalize() != expected.canonicalize())
@@ -2976,7 +2966,7 @@ static int _same(Effects a, Effects b) =>
    without it, so a rule applies again to a nested use. A carrier, such as
    a lowered result, never prepares and lowers as written. */
 static List _prepared(
-  Compiler c, List source, Var result, AstPos position, Type expected,
+  Compiler c, List source, Var result, Symbol position, Type expected,
   Token site) {
   Array sources = $auto([]), values = $auto([]);
   _expression_nodes(source, sources);
@@ -3020,7 +3010,7 @@ static List _prepared(
 /* Lowers `result` as written, with the source parts in it lowered outside
    the active rule. */
 static List _watched(
-  Compiler c, Var result, Array sources, AstPos position, Type expected,
+  Compiler c, Var result, Array sources, Symbol position, Type expected,
   Token site) {
   struct SlotWatch watch = {sources.list(), [], []};
   watch.outer = c.active_rewrites.cdr();
@@ -3222,7 +3212,7 @@ Ast Compiler.watched_step(Compiler c, Ast ast) {
     `position`. A bare keyword alias is claimed only where its result fits.
     This query does not consume tokens.
 */
-int Compiler.macro_starts_target_at(Compiler c, AstPos position) =>
+int Compiler.macro_starts_target_at(Compiler c, Symbol position) =>
   _claims(c, _peek_invocation(c), position);
 
 /* An invocation is claimed where its result fits. A statement or map entry
@@ -3230,18 +3220,18 @@ int Compiler.macro_starts_target_at(Compiler c, AstPos position) =>
    identifier with arguments, is claimed so that its target parser reports
    the position diagnostic; a local expression macro at block scope remains
    an expression statement. */
-static int _claims(Compiler c, List definition, AstPos position) {
+static int _claims(Compiler c, List definition, Symbol position) {
   Symbol kind = definition ? _result_kind(definition) : 0;
   if (kind == _position(position).kind) return 1;
-  if (position == AST_STATEMENT || position == AST_MAP_ENTRY) return 0;
+  if (position == <statement> || position == <map-entry>) return 0;
   if (!definition) {
-    if (c.peek(0) == <$> && (position == AST_BLOCK || c.macro_holes) &&
+    if (c.peek(0) == <$> && (position == <block> || c.macro_holes) &&
         _meta_callee(c).is_function())
       return 0;
     return c.peek(0) == <$>;
   }
   return !_bare(c.token, definition) &&
-    (position != AST_BLOCK || kind != <expression> ||
+    (position != <block> || kind != <expression> ||
      !definition.assoc(<local>).int());
 }
 
@@ -3266,6 +3256,9 @@ static typedef struct MacroPos {
   Symbol kind, const char *description, int semicolon;
 } MacroPos;
 
+static const SymbolSet macro_positions =
+  %<<unit block field enumerator map-entry statement expression>>;
+
 static const MacroPos macro_position_info[] = {
   { <unit>,       "file scope",    1 },
   { <block-item>, "block scope",   1 },
@@ -3276,8 +3269,8 @@ static const MacroPos macro_position_info[] = {
   { <expression>, "an expression", 0 }
 };
 
-static const MacroPos *_position(AstPos position) =>
-  &macro_position_info[position];
+static const MacroPos *_position(Symbol position) =>
+  &macro_position_info[macro_positions.index(position)];
 
 static Symbol _result_kind(List definition) {
   Symbol kind = definition.assoc(<kind>);
@@ -3345,7 +3338,7 @@ static int _bare(Token invocation, List definition) =>
    definition, or returns NULL without consuming tokens. A `$` name that is
    neither visible nor followed by arguments is a replacement variable
    missing from a template. */
-static List _take_invocation(Compiler c, AstPos position) {
+static List _take_invocation(Compiler c, Symbol position) {
   List definition = _peek_invocation(c);
   if (!_claims(c, definition, position)) return NULL;
   if (c.peek(0) != <$> && c.peek(0) != <@>) {
@@ -3782,12 +3775,12 @@ static Var _source_unwrap(Var value) {
     deferred `(seq (macro-invoke ...))`, and ordinary parsing returns the bound
     expansion.
 */
-List Compiler.try_parse_macro_target_at(Compiler c, AstPos position) =>
+List Compiler.try_parse_macro_target_at(Compiler c, Symbol position) =>
   _target_at(c, position, 0);
 
 /* An `open` statement omits its final `;`, as an anonymous Stmt arrow's
    statement does. */
-static List _target_at(Compiler c, AstPos position, int open) {
+static List _target_at(Compiler c, Symbol position, int open) {
   if (c.macro_holes && c.peek_macro_hole()) return NULL;
   Token invocation = c.token;
   List definition = _take_invocation(c, position);
@@ -3801,10 +3794,10 @@ static List _target_at(Compiler c, AstPos position, int open) {
 /* A macro's result must fit where it is invoked; a Declaration result also
    fits at file scope. */
 static void _check_position(
-  Compiler c, List definition, Token invocation, AstPos position) {
+  Compiler c, List definition, Token invocation, Symbol position) {
   Symbol kind = definition.assoc(<kind>);
   const MacroPos *place = _position(position);
-  if (kind == place.kind || (kind == <decl-unit> && position == AST_UNIT))
+  if (kind == place.kind || (kind == <decl-unit> && position == <unit>))
     return;
   Atom name = definition.assoc(<name>);
   String spelling = name.str(), result_kind = _kind_spelling(kind);
@@ -3817,7 +3810,7 @@ static void _check_position(
    generated syntax and raised diagnostics therefore cannot leave provisional
    bindings, enumerators, statics, or generated-name state behind. */
 static List _invoke_definition(
-  Compiler c, List definition, Token invocation, AstPos position, int open) {
+  Compiler c, List definition, Token invocation, Symbol position, int open) {
   int deferred = !!c.macro_holes;
   SymTxn transaction = c.begin_semantic_transaction();
   defer transaction.rollback();
@@ -3869,11 +3862,11 @@ static Var _stored_reference(Compiler c, List definition) {
    then. */
 static typedef struct Decoration {
   Compiler c, List definition, function, Token invocation, start;
-  AstPos position, Symbol kind, int open;
+  Symbol position, Symbol kind, int open;
 } Decoration;
 
 static List _decorate(
-  Compiler c, List definition, Token invocation, AstPos position, int open) {
+  Compiler c, List definition, Token invocation, Symbol position, int open) {
   Decoration d = {
     .c = c, .definition = definition, .invocation = invocation,
     .position = position, .kind = definition.assoc(<target>), .open = open};
@@ -3898,7 +3891,7 @@ static List _decorate(
 }
 
 static int _on_body(Decoration &d) =>
-  d.kind == <block> && d.position == AST_UNIT;
+  d.kind == <block> && d.position == <unit>;
 
 static void _misplaced(Decoration &d) {
   Atom name = d.definition.assoc(<name>);
@@ -3929,7 +3922,7 @@ static List _decoration_node(Decoration &d, List arguments) {
   Compiler c = d.c;
   d.start = c.token;
   List target = _target(d);
-  if (d.position == AST_STATEMENT) target = c.anchor_origin(target, d.start);
+  if (d.position == <statement>) target = c.anchor_origin(target, d.start);
   List target_capture = _capture(d, target);
   List input = %(
     target $arguments
@@ -3951,15 +3944,15 @@ static List _target(Decoration &d) {
   return _positional_target(c, d.position);
 }
 
-static List _positional_target(Compiler c, AstPos position) {
+static List _positional_target(Compiler c, Symbol position) {
   switch (position) {
-    case AST_UNIT:
+    case <unit>:
       $let(c.capture_unit, 1) return c.parse_top_level();
-    case AST_BLOCK: case AST_STATEMENT:
+    case <block>: case <statement>:
       return c.parse_governed(position);
-    case AST_FIELD:      return c.parse_field(c.aggregate_type);
-    case AST_ENUMERATOR: return c.parse_enumerator(c.aggregate_type);
-    case AST_MAP_ENTRY:  return c.parse_map_entry();
+    case <field>:      return c.parse_field(c.aggregate_type);
+    case <enumerator>: return c.parse_enumerator(c.aggregate_type);
+    case <map-entry>:  return c.parse_map_entry();
     default: __builtin_unreachable();
   }
 }
@@ -4009,7 +4002,7 @@ static List _bind_body(Compiler c, List node, List decorated) {
   Type declared = _declared_result(decorated);
   List result = NULL;
   $let(c.return_type, declared) {
-    result = c.bind_syntax(node, AST_BLOCK, c.return_type);
+    result = c.bind_syntax(node, <block>, c.return_type);
   }
   List items = result.car() == <seq> ? result.cdr() : %($result);
   match (decorated) case %(function ?rtype ?declarator ?):
@@ -4046,7 +4039,7 @@ List Compiler.try_parse_macro_expression(Compiler c) {
   }
   if ((c.peek(0) == <$> || c.peek(0) == <@>) && !_peek_invocation(c))
     return _parse_meta_call(c, invocation);
-  List definition = _take_invocation(c, AST_EXPRESSION);
+  List definition = _take_invocation(c, <expression>);
   if (!definition) return NULL;
   return c.resolve_expression(
     _expression_invocation(c, definition, invocation), invocation);
@@ -4613,7 +4606,7 @@ static typedef struct Landing {
 /** Binds quoted `syntax` with its `fresh` rows at `position`, as the
     expansion of its quotation would. */
 List Compiler.land_quotation(
-  Compiler c, List fresh, Var syntax, AstPos position, Type return_type) {
+  Compiler c, List fresh, Var syntax, Symbol position, Type return_type) {
   Token site = c.macro_invocation_site(<m-invoke>);
   Landing landing = {
     .c = c, .site = site ? site : c.token, .anchored = !!site};
@@ -4630,8 +4623,8 @@ List Compiler.land_quotation(
       bound = c.bind_syntax(filled, position, return_type);
     transaction.commit();
   }
-  if (position == AST_BLOCK || position == AST_STATEMENT ||
-      position == AST_UNIT)
+  if (position == <block> || position == <statement> ||
+      position == <unit>)
     match (bound) case %(seq ?item): return item;
   return bound;
 }
@@ -5052,9 +5045,9 @@ void Compiler.place(Compiler c, List where, Var code) {
       }
     }
     case %(unit-init):
-      c.add_init(<finish>, c.bind_syntax(code, AST_BLOCK, NULL));
+      c.add_init(<finish>, c.bind_syntax(code, <block>, NULL));
     case %(unit-init (!set ?area (!or protocol prepare statics finish))):
-      c.add_init(area, c.bind_syntax(code, AST_BLOCK, NULL));
+      c.add_init(area, c.bind_syntax(code, <block>, NULL));
     default: $report.macro.placement(c, where);
   }
 }
@@ -5064,14 +5057,14 @@ void Compiler.place(Compiler c, List where, Var code) {
 static void _place_support(Compiler c, Var code) {
   Block local = c.sym.close_local_scopes();
   defer c.sym.reopen_scopes(local);
-  c.add_support(c.written_support(c.bind_syntax(code, AST_UNIT, NULL)));
+  c.add_support(c.written_support(c.bind_syntax(code, <unit>, NULL)));
 }
 
 /** Binds a code-value carrier that a meta call returned outside a macro
     value application as an application binds it, under a transaction that
     also covers its effects. */
 List Compiler.bind_code_value(
-  Compiler c, List carrier, AstPos position, Type return_type) {
+  Compiler c, List carrier, Symbol position, Type return_type) {
   List bound = NULL;
   $let(c.macro_application, c.macro_application + 1) {
     SymTxn transaction = { 0 };
@@ -5253,14 +5246,14 @@ List Compiler.lift_macro_lisp_expression(
   if (identifier is not void)
     return c.resolve_expression(%(expr () (ident $identifier)), invocation);
   if (value is <list> && !value.is_nil())
-    return c.bind_syntax(_helper_result(c, value), AST_EXPRESSION, NULL);
+    return c.bind_syntax(_helper_result(c, value), <expression>, NULL);
   $report.macro.lisp_expr(c, invocation, value);
 }
 
 /** Binds a compile-time Lisp code `value` returned to a statement at
     `context`. */
 List Compiler.bind_macro_lisp_statement(
-  Compiler c, List value, AstPos context) {
+  Compiler c, List value, Symbol context) {
   value = _helper_result(c, value);
   return _statement_expression(c, value)
     ? %(stmnt ${c.lift_macro_lisp_expression(value, c.token)})

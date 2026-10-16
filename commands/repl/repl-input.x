@@ -477,6 +477,12 @@ static void _io_fail(Symbol operation) {
   raise %(io-fail (operation $operation) (errno $error));
 }
 
+/* The edit buffer never grows past its fixed limit. */
+static void _size_limit(void) {
+  int limit = LINENOISE_MAX_LINE;
+  raise %(size-limit (operation "ReplInput.read") (limit $limit));
+}
+
 static void _write_bytes(int fd, const char *bytes, size_t length) {
   size_t written = 0;
   while (written < length) {
@@ -993,8 +999,7 @@ static int _insert_raw(EditState &l, const char *c, size_t clen) {
 }
 
 static void _insert(EditState &l, const char *c, size_t clen) {
-  if (_insert_raw(l, c, clen) == -1)
-    raise %(size-limit (operation "ReplInput.read") (limit 1048576));
+  if (_insert_raw(l, c, clen) == -1) _size_limit();
   _refresh_line(l);
 }
 
@@ -1057,8 +1062,7 @@ static void _recall(EditState &l, int dir) {
     /* Copy the selected entry into the mutable history view. */
     src = l.history[l.history_len - 1 - l.history_index];
     len = strlen(src);
-    if (_grow(l, len) == -1)
-      raise %(size-limit (operation "ReplInput.read") (limit 1048576));
+    if (_grow(l, len) == -1) _size_limit();
     memcpy(l.buf,src,len);
     l.buf[len] = '\0';
     l.len = l.pos = len;
@@ -1252,9 +1256,7 @@ static void _paste(EditState &l) {
       overflowed = 1;
   }
 
-  if (overflowed)
-    raise %(size-limit (operation "ReplInput.read")
-                       (limit 1048576));
+  if (overflowed) _size_limit();
   if (buf == NULL) return;
 
   {
@@ -1273,9 +1275,7 @@ static void _paste(EditState &l) {
 
   if (_should_fold(buf,len)) {
     size_t start = l.pos;
-    if (_insert_raw(l, buf,len) == -1)
-      raise %(size-limit (operation "ReplInput.read")
-                         (limit 1048576));
+    if (_insert_raw(l, buf,len) == -1) _size_limit();
     _fold_add(l, start,start+len);
     _refresh_line(l);
   } else _insert(l, buf,len);
@@ -1285,8 +1285,7 @@ static void _replace_completion(
   EditState &l, size_t start, size_t end, String replacement) {
   size_t added = replacement.len(), removed = end - start;
   size_t length = l.len - removed + added;
-  if (_grow(l, length) == -1)
-    raise %(size-limit (operation "ReplInput.read") (limit 1048576));
+  if (_grow(l, length) == -1) _size_limit();
   memmove(l.buf + start + added, l.buf + end, l.len - end + 1);
   memcpy(l.buf + start, replacement, added);
   l.len = length;

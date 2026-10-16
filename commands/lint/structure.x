@@ -14,7 +14,6 @@
 #include <ctype.h>
 #include <string.h>
 
-
 static const List pair_words = %(
   ("acquire" "release") ("begin" "commit") ("begin" "rollback")
   ("pin" "unpin") ("open" "dispose")
@@ -42,10 +41,9 @@ static int _among_folded(String word, List words):
 /* Same-named field transfers `a.f = b.f;` and whole copies through a
    pointer, `*a = b;` or `a = *b;`. */
 static void _copies(Lint l, List function):
-  Var (key, start, body, end) = function
-  String name = lint_name(function)
+  (String name, int start, int body, int end) = function
   int transfers = 0, whole = 0
-  for (int at = body.int(); at < end.int(); at = l.next(at)):
+  for (int at = body; at < end; at = l.next(at)):
     int dot = l.next(at), field = l.next(dot), eq = l.next(field)
     int right = l.next(eq), dot2 = l.next(right), field2 = l.next(dot2)
     if l.tokens[at].type == <ident> && l.token_is(dot, ".") &&
@@ -70,19 +68,18 @@ static void _copies(Lint l, List function):
 /* The counter updates and cleanup calls in one function: a counter word
    before an assignment on its line, and a call to a release-like name. */
 static void _bookkeeping(Lint l, List function):
-  Var (key, start, body, end) = function
-  String name = lint_name(function)
+  (String name, int start, int body, int end) = function
   int stats = 0, cleanup = 0
-  for (int at = body.int(); at < end.int(); at = l.next(at)):
+  for (int at = body; at < end; at = l.next(at)):
     Token t = l.at(at)
     if !lint_word(t): continue
     if t.text in cleanup_words && l.token_is(l.next(at), "("): cleanup++
     if !_among_folded(t.text, stat_words): continue
     int last = -1
-    for (int k = l.next(at); k < end.int() && l.tokens[k].type != <;> &&
+    for (int k = l.next(at); k < end && l.tokens[k].type != <;> &&
          l.tokens[k].line == t.line; k = l.next(k)):
       String op = l.tokens[k].text
-      if lint_code(l.at(k)) && (op.contains("=") || op == "++" || op == "--"):
+      if lint_code(l.at(k)) && ("=" in op || op == "++" || op == "--"):
         last = k
     if last < 0: continue
     stats++
@@ -121,11 +118,11 @@ static int _parameter_count(Lint l, int start, int body):
    parameters, or whose name without its owner has 25 or more
    characters. */
 static void _shape(Lint l, List function):
-  Var (key, start, body, end) = function
-  String (owner, dot, name) = lint_name(function).rpartition(".")
+  (String display, int start, int body, int end) = function
+  String (owner, dot, name) = display.rpartition(".")
   int line = l.at(start).line, lines = l.end_line(l.prev(end)) - line + 1
-  int depth = _brace_depth(l, body.int(), end.int())
-  int parameters = _parameter_count(l, start.int(), body.int())
+  int depth = _brace_depth(l, body, end)
+  int parameters = _parameter_count(l, start, body)
   if lines > 40:
     l.add("long-function", line,
           %"function spans $lines lines; review above 40")
@@ -147,10 +144,9 @@ static int _id(Map ids, String word):
 /* The control words, then the called names, of one function body, as ids
    from `ids`. */
 static Array _route(Lint l, List function, Map ids):
-  Var (key, start, body, end) = function
-  String name = lint_name(function)
+  (String name, int start, int body, int end) = function
   Array controls = [], calls = []
-  for (int at = body.int(); at < end.int(); at = l.next(at)):
+  for (int at = body; at < end; at = l.next(at)):
     Token t = l.at(at)
     if !lint_word(t): continue
     if t.text in route_words: controls.push(_id(ids, t.text))
@@ -199,25 +195,19 @@ static void _routes(Lint l):
     functions.push(function)
     routes.push(route)
   int n = functions.len()
-  int *group = Scope.calloc(n + 1, sizeof(int))
-  for (int i = 0; i < n; i++): group[i] = i
+  DisjointSet groups = DisjointSet.new(n)
   for (int i = 0; i < n; i++):
     for (int j = i + 1; j < n; j++):
-      if group[i] == group[j] || !_similar(routes[i], routes[j]): continue
-      int from = group[j], to = group[i]
-      for (int k = 0; k < n; k++):
-        if group[k] == from: group[k] = to
+      if groups.find(i) != groups.find(j) && _similar(routes[i], routes[j]):
+        groups.union(i, j)
   for (int root = 0; root < n; root++):
     Array names = []
-    int first = 0, shortest = 0
+    int first = 0
     for (int k = 0; k < n; k++):
-      if group[k] != root: continue
+      if groups.find(k) != root: continue
       List function = functions[k]
-      Var (key, start, body, end) = function
-      String name = lint_name(function)
-      int lines = l.end_line(l.prev(end)) - l.at(body).line + 1
+      (String name, int start) = function
       if !first: first = l.at(start).line
-      if !shortest || lines < shortest: shortest = lines
       names.push(name)
     if names.len() < 3: continue
     l.add("repeated-routes", first,
@@ -229,11 +219,13 @@ static void _routes(Lint l):
 static void _lifecycles(Lint l):
   Map lowered = {}, seen = {}
   foreach List function in l.functions:
-    lowered[lint_name(function).lower()] = function
+    (String name) = function
+    lowered[name.lower()] = function
   foreach List pair in pair_words:
     String left = pair.car(), right = pair.cadr()
     foreach List function in l.functions:
-      String name = lint_name(function), low = name.lower()
+      (String name, int start) = function
+      String low = name.lower()
       int at = low.rfind(left)
       if at < 0: continue
       char *rest = low
@@ -241,12 +233,11 @@ static void _lifecycles(Lint l):
       String mate = String.new_len(low, at) + right + String.new(rest)
       if !(mate in lowered): continue
       List other = lowered[mate]
-      String other_name = lint_name(other)
+      (String other_name, int other_start) = other
       List key = name < other_name ? %($name $other_name) :
         %($other_name $name)
       if key in seen: continue
       seen[key] = 1
-      Var start = function.cadr(), other_start = other.cadr()
       int line = l.at(start).line, other_line = l.at(other_start).line
       l.add("lifecycle-pair", line < other_line ? line : other_line,
             %"paired $left/$right functions ${key.car()} and ${key.cadr()}")
@@ -339,9 +330,9 @@ void Lint.structure_rules(Lint l):
 /* A function body with comments and literals as spaces and each run of
    space as one, as the duplicate-body rule compares it. */
 static String _body_text(Lint l, List function):
-  Var (key, start, body, end) = function
+  (String name, int start, int body, int end) = function
   Buffer out = $auto(Buffer.new(0))
-  for (int at = body.int() + 1; at < end.int() - 1; at++):
+  for (int at = body + 1; at < end - 1; at++):
     Token t = l.at(at)
     int blank = t.type == <space> || t.type == <comment> || lint_text(t)
     if blank:
@@ -381,13 +372,11 @@ void lint_corpus_rules(Lint *lints, int count):
             %"$kind ${l.tokens[name].text} has $members members and no " +
             "use outside its file")
     foreach List function in l.functions:
-      Var (key, start, body, end) = function
-      String name = lint_name(function)
+      (String name, int start, int body, int end) = function
       String text = _body_text(l, function)
       if text.len() < 80 || l.end_line(l.prev(end)) - l.at(start).line + 1 < 5:
         continue
-      if !(text in bodies): bodies[text] = []
-      Array owners = bodies[text]
+      Array owners = bodies.setdefault(text, [])
       owners.push(%($index $name ${l.at(start).line}))
   foreach Var (text, owners) in bodies:
     Array entries = owners

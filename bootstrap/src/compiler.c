@@ -2790,7 +2790,7 @@ List Compiler_replay_declaration_source(Compiler c){
                   }
                   ;  x2c_cleanup_push(& _x2c_gensym_defer_record_7); {
                     * _x2c_gensym_macro_address_6 = 1; {
-                      _restore_declaration_bindings(c, syntax, Var_map_payload(facts), Map_new());  bound = Compiler_bind_syntax(c, syntax, AST_UNIT, NULL);
+                      _restore_declaration_bindings(c, syntax, Var_map_payload(facts), Map_new());  bound = Compiler_bind_syntax(c, syntax, 1405544, NULL);
                     }
 
                   }
@@ -3196,7 +3196,7 @@ static void f21_declarations_defaults____produce_rows(Compiler c, List rows, Arr
 }
 
 static List f21_declarations_defaults____generated_rows(Compiler c, Var callback, Var arguments){
-  List generated = Compiler_bind_syntax(c, Compiler_evaluate_declaration_recipe(c, callback, Var_list_payload(arguments)), AST_UNIT, NULL);  List additions = cons(List_var(generated), NULL); {
+  List generated = Compiler_bind_syntax(c, Compiler_evaluate_declaration_recipe(c, callback, Var_list_payload(arguments)), 1405544, NULL);  List additions = cons(List_var(generated), NULL); {
     List _x2c_gensym_match_expr = generated; List _x2c_gensym_match_cursor, _x2c_gensym_match_cursor1;  switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
         case 9224497936761657698ULL: ;  _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761657698ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1)) { List _x2c_gensym_match_list_0 = _x2c_gensym_match_cursor; {
         List children;  children = _x2c_gensym_match_list_0;  additions = children;
@@ -3357,7 +3357,7 @@ static List f21_declarations_defaults____bind_default(Compiler c, List syntax){
     }
 
   }
-  return Compiler_bind_syntax(c, List_var(syntax), AST_UNIT, NULL);
+  return Compiler_bind_syntax(c, List_var(syntax), 1405544, NULL);
 }
 
 static void f21_declarations_defaults____forward(f21_declarations_defaults___Defaults * d){

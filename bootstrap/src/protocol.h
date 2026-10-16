@@ -14,11 +14,17 @@
 #include "expressions.h"
 #include "parse.h"
 #include "meta.h"
+Symbol Compiler_operator_member(Compiler c, Symbol op);
+
+Symbol Compiler_derived_member(Compiler c, Symbol op);
+
 String Compiler_reverse_converter_spelling(Compiler c, String base_name, String infix, String participant);
 
-List Compiler_parse_protocol_declaration(Compiler c);
-
 List Compiler_publish_protocol_node(Compiler c, List node, Token participant_token, Token representation_token);
+
+void Compiler_rebuild_protocols(Compiler c, Map symbols);
+
+List Compiler_parse_protocol_declaration(Compiler c);
 
 void Compiler_resolve_protocols(Compiler c);
 
@@ -35,10 +41,6 @@ List Compiler_protocol_member_names(Compiler c, Type participant);
 int Compiler_protocol_rejects_direct_member(Compiler c, Type participant, String member);
 
 void Compiler_dump_conformance(Compiler c, Map globs);
-
-Symbol Compiler_operator_member(Compiler c, Symbol op);
-
-Symbol Compiler_derived_member(Compiler c, Symbol op);
 
 List Compiler_resolve_protocol_member(Compiler c, Type participant, String member_name);
 
@@ -59,8 +61,6 @@ void Compiler_install_generated_protocol_symbols(Compiler c);
 int Compiler_native_protocol_alias(Compiler c, String name);
 
 void Compiler_record_source_typedef(Compiler c, String name, List declaration, int private);
-
-void Compiler_rebuild_protocols(Compiler c, Map symbols);
 
 
 #endif /* __GUARD_0xD9CA694D__ */
