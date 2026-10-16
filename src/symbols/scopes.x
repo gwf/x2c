@@ -12,7 +12,7 @@ Sym Sym.new(Compiler c) {
   return s;
 }
 
-static SymScope *_scope_at(Sym s, int index) {
+module SymScope *_scope_at(Sym s, int index) {
   int count = s.scopes.len();
   if (index < 0) index += count;
   if (index < 0 || index >= count) return NULL;

@@ -44,7 +44,7 @@ static void _claim_class_tag(Sym s, String name, String owner) {
 /* A declared `Var T.var(T)` is the conformance marker that lets a named
    type box like a builtin. Keep its tag and exact converter in the active
    translation unit rather than the process-lifetime builtin table. */
-static String _var_converter_owner(List key, List type) {
+module String _var_converter_owner(List key, List type) {
   match (type)
     case %((func ((?(String named)))) "Var"):
       match (key)
@@ -227,7 +227,7 @@ static List _get_from(Sym s, List key, List own) {
 /* A plain key's spelling among the current module file's statics, or NULL
    outside a module unit. A template's free names bind where its expansion
    lands, so none resolves to a static of the file that defines the macro. */
-static List _file_key(Sym s, List key) {
+module List _file_key(Sym s, List key) {
   if (!s.c.line_markers || s.c.macro_holes || !key || key.cdr() ||
       key.car() is not <string>)
     return NULL;
@@ -238,7 +238,7 @@ static List _file_key(Sym s, List key) {
 /* Package files may reference their own file-scope names bare. A plain-key
    total miss retries the package-prefixed key; exact entries win, and
    units outside package mode never retry. */
-static List _package_retry_key(Sym s, List key) {
+module List _package_retry_key(Sym s, List key) {
   String package = s.c.package;
   if (!package || !key || key.cdr() || key.car() is not <string>) return NULL;
   String spelling = key.car();

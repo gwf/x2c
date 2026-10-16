@@ -119,7 +119,7 @@ static macro Stmt $fail.symbols_typedef_depth(
 /** Holds a compiler's declarations in nested scopes.
     The lowest `base_scopes` contain file-scope declarations. Active
     transactions retain the rows each write replaces in `undo`. */
-static typedef struct Sym {
+module typedef struct Sym {
   Block scopes, Map globals, statics, binding_facts, prefixed;
   int base_scopes, local_macro_names;
   Block undo, int transactions;
@@ -128,7 +128,7 @@ static typedef struct Sym {
 } *Sym;
 
 /* `map[key]` held `value` before a write, or nothing when it is void. */
-static typedef struct SymUndo { Map map, Var key, value; } SymUndo;
+module typedef struct SymUndo { Map map, Var key, value; } SymUndo;
 
 module {
   "symbols/scopes.x",
