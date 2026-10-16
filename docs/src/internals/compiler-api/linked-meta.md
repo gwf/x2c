@@ -46,7 +46,7 @@ Shipped `meta` code compiled into the compiler.
 
 Stores the updated element and returns its previous value.
 
-Source: `src/linked-meta.x:349`
+Source: `src/linked-meta.x:357`
 
 #### access_prefix
 
@@ -54,7 +54,7 @@ Source: `src/linked-meta.x:349`
 
 Stores and returns the incremented or decremented element.
 
-Source: `src/linked-meta.x:338`
+Source: `src/linked-meta.x:346`
 
 #### access_read
 
@@ -62,7 +62,7 @@ Source: `src/linked-meta.x:338`
 
 Calls the getter bracket admission selected.
 
-Source: `src/linked-meta.x:223`
+Source: `src/linked-meta.x:231`
 
 #### access_store
 
@@ -71,7 +71,7 @@ Source: `src/linked-meta.x:223`
 Selects the adopted collection setter for indexed assignment, or a
 participant's `setindex` member.
 
-Source: `src/linked-meta.x:274`
+Source: `src/linked-meta.x:282`
 
 #### access_update
 
@@ -80,7 +80,7 @@ Source: `src/linked-meta.x:274`
 Selects collection compound updates and checks accepted operands, or a
 participant's `updateindex` member.
 
-Source: `src/linked-meta.x:305`
+Source: `src/linked-meta.x:313`
 
 #### delegate_member
 
@@ -89,7 +89,7 @@ Source: `src/linked-meta.x:305`
 Rebuilds a call that finds no member on its receiver through the one
 delegate field path that provides the method.
 
-Source: `src/linked-meta.x:453`
+Source: `src/linked-meta.x:461`
 
 #### destructure_declaration
 
@@ -99,7 +99,7 @@ Declares the names of `T (a, b) = source;` and then reads the source
 into them, or declares each target of `(T1 a, T2 b) = source;`
 initialized from its element.
 
-Source: `src/linked-meta.x:508`
+Source: `src/linked-meta.x:516`
 
 #### destructure_statement
 
@@ -107,7 +107,7 @@ Source: `src/linked-meta.x:508`
 
 Reads the source of `(a, b) = source;` into its targets in a block.
 
-Source: `src/linked-meta.x:538`
+Source: `src/linked-meta.x:546`
 
 #### destructure_value
 
@@ -116,7 +116,7 @@ Source: `src/linked-meta.x:538`
 Reads the source of `(a, b) = source` into its targets, and keeps the
 source in a result local as the expression's value.
 
-Source: `src/linked-meta.x:552`
+Source: `src/linked-meta.x:560`
 
 #### dynamic_binary
 
@@ -128,7 +128,7 @@ for `+` beside text, text. The call is returned lowered, because an
 operator chain applies this rule once for each term and binding would
 search the whole remaining chain each time.
 
-Source: `src/linked-meta.x:1475`
+Source: `src/linked-meta.x:1483`
 
 #### dynamic_change
 
@@ -137,7 +137,7 @@ Source: `src/linked-meta.x:1475`
 Adds or subtracts one through the `Var` update helpers; the postfix
 forms return the value before the change.
 
-Source: `src/linked-meta.x:1557`
+Source: `src/linked-meta.x:1565`
 
 #### dynamic_compound
 
@@ -146,7 +146,7 @@ Source: `src/linked-meta.x:1557`
 Updates a `Var` or numeric lvalue with a `Var` or numeric operand
 through the update helper of its storage.
 
-Source: `src/linked-meta.x:1531`
+Source: `src/linked-meta.x:1539`
 
 #### dynamic_unary
 
@@ -154,7 +154,7 @@ Source: `src/linked-meta.x:1531`
 
 Rejects a unary numeric operator on a `Var`.
 
-Source: `src/linked-meta.x:1573`
+Source: `src/linked-meta.x:1581`
 
 #### lambda_cells
 
@@ -168,7 +168,7 @@ lambda's function moves its own. The function binds again only its
 cells and the statements that hold them; its other statements are kept
 as they are bound.
 
-Source: `src/linked-meta.x:1042`
+Source: `src/linked-meta.x:1050`
 
 #### lambda_closure
 
@@ -178,7 +178,7 @@ Lifts the capturing lambda `node` to a static function of its
 parameters and captures, and answers a `Func` of a record of the
 captured values and addresses.
 
-Source: `src/linked-meta.x:964`
+Source: `src/linked-meta.x:972`
 
 #### lambda_lift
 
@@ -187,7 +187,7 @@ Source: `src/linked-meta.x:964`
 Lifts the noncapturing lambda `node` to a static function, whose name
 is its value.
 
-Source: `src/linked-meta.x:809`
+Source: `src/linked-meta.x:817`
 
 #### linked_meta_hashes
 
@@ -195,7 +195,7 @@ Source: `src/linked-meta.x:809`
 
 Returns linked definition hashes and provider source dependencies.
 
-Source: `src/linked-meta.x:2426`
+Source: `src/linked-meta.x:2438`
 
 #### linked_meta_targets
 
@@ -203,7 +203,7 @@ Source: `src/linked-meta.x:2426`
 
 Returns the linked copies, and the runtime builders, by name.
 
-Source: `src/linked-meta.x:2194`
+Source: `src/linked-meta.x:2202`
 
 #### match_lowering
 
@@ -212,7 +212,7 @@ Source: `src/linked-meta.x:2194`
 Lowers the bound match `node` to C text around its subject, patterns,
 and bodies.
 
-Source: `src/linked-meta.x:1459`
+Source: `src/linked-meta.x:1467`
 
 #### printf_values
 
@@ -220,7 +220,7 @@ Source: `src/linked-meta.x:1459`
 
 Reads the Var values a printf-family call's static format consumes.
 
-Source: `src/linked-meta.x:1713`
+Source: `src/linked-meta.x:1721`
 
 #### protocol_conformance
 
@@ -229,7 +229,7 @@ Source: `src/linked-meta.x:1713`
 Places the forwarding members, descriptor thunks, method table, and
 descriptor registration of one conformance.
 
-Source: `src/linked-meta.x:1825`
+Source: `src/linked-meta.x:1833`
 
 #### raise_lowering
 
@@ -238,7 +238,7 @@ Source: `src/linked-meta.x:1825`
 Converts a raise's code and details, or declines a raise whose parts
 already have their types.
 
-Source: `src/linked-meta.x:1890`
+Source: `src/linked-meta.x:1898`
 
 #### register_rewrite
 
@@ -246,7 +246,7 @@ Source: `src/linked-meta.x:1890`
 
 Registers the decorated translator with its pattern and hole patterns.
 
-Source: `src/linked-meta.x:92`
+Source: `src/linked-meta.x:100`
 
 #### string_switch_lowering
 
@@ -255,7 +255,7 @@ Source: `src/linked-meta.x:92`
 Lowers a switch on a String to an integer switch on its selector's
 index among the labels it owns, or declines another switch.
 
-Source: `src/linked-meta.x:1989`
+Source: `src/linked-meta.x:1997`
 
 #### try_lowering
 
@@ -263,7 +263,7 @@ Source: `src/linked-meta.x:1989`
 
 Lowers the parsed try `node` to its landing form.
 
-Source: `src/linked-meta.x:2138`
+Source: `src/linked-meta.x:2146`
 
 ## Design notes
 
