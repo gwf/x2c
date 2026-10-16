@@ -22,6 +22,12 @@ printf 'build -q --output app @@input.x\n' > build.rsp
 ./app
 "$COMMAND" build -q --output direct @@input.x
 ./direct
+"$COMMAND" run -q @@input.x
+printf 'int main(void) { int n = ; }\n' > bad.x
+status=0
+"$X2C" build -c --diagnostics-file diagnostics.json bad.x >bad.log 2>&1 || status=$?
+[ "$status" = 1 ]
+grep -q '"code":"parse"' diagnostics.json
 
 # A matching synthetic stage must use its own runtime and command directory.
 mkdir -p home/builds/7/libexec
@@ -41,6 +47,7 @@ grep -q 'up-to-date translate' warm.log
 mkdir scripts
 printf '#!/usr/bin/env -S x2c script\nputs("ok");\n' > scripts/hello.x
 export X2C_CACHE_DIR="$BUILD/cache"
+[ "$(home/builds/7/libexec/x2c-build script scripts/hello.x)" = ok ]
 [ "$("$stage" script scripts/hello.x)" = ok ]
 "$stage" script -v scripts/hello.x >script.out 2>script-warm.log
 if grep -q '^x2c: link ' script-warm.log; then exit 1; fi
