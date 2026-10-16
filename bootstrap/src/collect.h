@@ -50,6 +50,12 @@ void Compiler_add_linked_meta_provider_hashes(Compiler c, Map rows);
 
 void Compiler_name_meta_provider_bindings(Compiler c, String path, int index);
 
+List Compiler_loaded_provider(Compiler c);
+
+Type Compiler_loaded_call_type(Compiler c, Type type);
+
+void Compiler_name_loaded_provider(Compiler c, String path, int index, List provider);
+
 int Compiler_publishes_typedef(Compiler c, String name);
 
 int Compiler_publishes_type_family(Compiler c, List family);

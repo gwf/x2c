@@ -43,14 +43,6 @@ unsigned long Var_tag_top(Symbol tag);
 
 unsigned long Var_tag_bottom(Symbol tag);
 
-#define VAR_CUSTOM_TAG_TOP     0x800C
-#define VAR_CUSTOM_TAG_COUNT   32
-#define VAR_DIRECT_ROWS        30
-#define VAR_CELL_ROW           30
-#define VAR_RECORD_ROW         31
-#define VAR_CELL_MASK          0xFFFF000000000007ul
-#define VAR_CELL_BITS          0x800F000000000006ul
-#define RECORD_PREFIX sizeof(max_align_t)
 Symbol Var_tag(Var v);
 
 int Var_is(Var var, Symbol tag);
@@ -81,15 +73,29 @@ int x2c_var_descriptor_index(Var value);
 
 int Var_custom_descriptor_index(Var value);
 
+int x2c_var_tag_descriptor_index(Symbol tag);
+
+#define VAR_CUSTOM_TAG_TOP     0x800C
+#define VAR_CUSTOM_TAG_COUNT   32
+#define VAR_DIRECT_ROWS        30
+#define VAR_CELL_ROW           30
+#define VAR_RECORD_ROW         31
+#define VAR_CELL_MASK          0xFFFF000000000007ul
+#define VAR_CELL_BITS          0x800F000000000006ul
+#define RECORD_PREFIX sizeof(max_align_t)
 VarDescriptor * x2c_var_custom_descriptor(Var value);
 
-int x2c_var_tag_descriptor_index(Symbol tag);
+Var Var_box_record(Symbol tag, const void * record, size_t size);
+
+void * Var_pointer(Var v);
+
+int Var_register_object_tag(Symbol tag);
+
+VarDescriptor * x2c_var_declare(Symbol tag);
 
 Var Var_new(Symbol tag, ...);
 
 Var Var_parse(String str, Symbol kind);
-
-Var Var_box_record(Symbol tag, const void * record, size_t size);
 
 Var Var_box_long(long value);
 
@@ -121,21 +127,15 @@ unsigned long long Var_ulong_long_value(Var v);
 
 long double Var_long_double_value(Var v);
 
-void * Var_pointer(Var v);
-
 unsigned Var_wide_hash(Var v);
 
 int Var_wide_equal(Var a, Var b);
 
+int Var_wide_compare(Var a, Var b);
+
 int Var_integer_compare(Var a, Var b);
 
 int Var_integer_floating_compare(Var integer, Var floating);
-
-int Var_wide_compare(Var a, Var b);
-
-int Var_register_object_tag(Symbol tag);
-
-VarDescriptor * x2c_var_declare(Symbol tag);
 
 
 #endif /* __GUARD_0x41126DC7__ */
