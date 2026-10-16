@@ -2771,7 +2771,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2198 = cons(_2197, NULL);
   _2199 = cons(_253, _2198);
   _2200 = List_var(_2199);
-  _2201 = int_var(88367);
+  _2201 = int_var(88366);
   _2202 = cons(_2201, NULL);
   _2203 = cons(_258, _2202);
   _2204 = List_var(_2203);
@@ -2967,7 +2967,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2394 = cons(_2393, NULL);
   _2395 = cons(_245, _2394);
   _2396 = List_var(_2395);
-  _2397 = int_var(88729);
+  _2397 = int_var(88728);
   _2398 = cons(_2397, NULL);
   _2399 = cons(_258, _2398);
   _2400 = List_var(_2399);
@@ -3084,7 +3084,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2511 = cons(_2510, NULL);
   _2512 = cons(_245, _2511);
   _2513 = List_var(_2512);
-  _2514 = int_var(89141);
+  _2514 = int_var(89140);
   _2515 = cons(_2514, NULL);
   _2516 = cons(_258, _2515);
   _2517 = List_var(_2516);
@@ -3185,7 +3185,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2609 = cons(_2608, NULL);
   _2610 = cons(_245, _2609);
   _2611 = List_var(_2610);
-  _2612 = int_var(89225);
+  _2612 = int_var(89224);
   _2613 = cons(_2612, NULL);
   _2614 = cons(_258, _2613);
   _2615 = List_var(_2614);
@@ -3277,7 +3277,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2701 = cons(_2700, NULL);
   _2702 = cons(_245, _2701);
   _2703 = List_var(_2702);
-  _2704 = int_var(89432);
+  _2704 = int_var(89431);
   _2705 = cons(_2704, NULL);
   _2706 = cons(_258, _2705);
   _2707 = List_var(_2706);
@@ -3489,7 +3489,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2913 = cons(_2912, NULL);
   _2914 = cons(_245, _2913);
   _2915 = List_var(_2914);
-  _2916 = int_var(91348);
+  _2916 = int_var(91347);
   _2917 = cons(_2916, NULL);
   _2918 = cons(_258, _2917);
   _2919 = List_var(_2918);
