@@ -44,7 +44,7 @@ Protocols from declaration to conform forms.
 Returns the interface rows of the resolved conformances `adoptions`
 declare.
 
-Source: `src/protocol/resolution.x:194`
+Source: `src/protocol/resolution.x:201`
 
 <a id="Compiler.discard_helper"></a>
 #### Compiler.discard_helper
@@ -98,7 +98,7 @@ the unit's
 pending support. The external conformances the unit declares are first
 recorded in its interface. Returns `ast` with native insertions applied.
 
-Source: `src/protocol/adapters.x:112`
+Source: `src/protocol/adapters.x:110`
 
 <a id="Compiler.install_generated_protocol_symbols"></a>
 #### Compiler.install_generated_protocol_symbols
@@ -108,7 +108,7 @@ Source: `src/protocol/adapters.x:112`
 Publishes external native alias and ordinary adapter signatures.
 Protocols must already be resolved in the active symbol table.
 
-Source: `src/protocol/adapters.x:151`
+Source: `src/protocol/adapters.x:149`
 
 <a id="Compiler.native_protocol_alias"></a>
 #### Compiler.native_protocol_alias
@@ -118,7 +118,7 @@ Source: `src/protocol/adapters.x:151`
 Reports whether a generated member names a native protocol host function.
 Its defining header supplies the alias instead of a C prototype.
 
-Source: `src/protocol/adapters.x:192`
+Source: `src/protocol/adapters.x:190`
 
 <a id="Compiler.parse_protocol_declaration"></a>
 #### Compiler.parse_protocol_declaration
@@ -132,7 +132,7 @@ for later binding; shallow parsing publishes only when protocol collection
 is enabled and otherwise returns the uninstalled node. A leading `meta`
 makes an adoption's witnesses available to compile-time code.
 
-Source: `src/protocol/declarations.x:118`
+Source: `src/protocol/declarations.x:122`
 
 <a id="Compiler.protocol_discard_helper"></a>
 #### Compiler.protocol_discard_helper
@@ -201,7 +201,7 @@ decisions and returns the canonical published node. Generated contexts may
 also retain that node in `Sym` for replay. A `(meta-protocol ADOPTION)`
 node publishes its adoption and marks it for compile-time code.
 
-Source: `src/protocol/registry.x:235`
+Source: `src/protocol/registry.x:248`
 
 <a id="Compiler.rebuild_protocols"></a>
 #### Compiler.rebuild_protocols
@@ -214,7 +214,7 @@ map leaves those registries empty. The conformance rows included
 interfaces recorded are kept for reuse. Conformance reset and resolution
 belong to `resolve_protocols`.
 
-Source: `src/protocol/registry.x:496`
+Source: `src/protocol/registry.x:504`
 
 <a id="Compiler.record_source_typedef"></a>
 #### Compiler.record_source_typedef
@@ -224,7 +224,7 @@ Source: `src/protocol/registry.x:496`
 Remembers a source typedef's declaration and visibility, which native
 alias insertion reads for its participant.
 
-Source: `src/protocol/adapters.x:372`
+Source: `src/protocol/adapters.x:370`
 
 <a id="Compiler.resolve_as_declared"></a>
 #### Compiler.resolve_as_declared
@@ -236,7 +236,7 @@ parse resolves its own: before the parse, and again, after the
 generated members are published, where the parse publishes each one.
 Their declaring units report their failures, so nothing is reported.
 
-Source: `src/protocol/resolution.x:210`
+Source: `src/protocol/resolution.x:217`
 
 <a id="Compiler.resolve_protocol_member"></a>
 #### Compiler.resolve_protocol_member
@@ -262,7 +262,7 @@ adoptions owned by the current translation unit. An adoption another
 unit declared and recorded keeps that conformance, which is installed
 when it is first used.
 
-Source: `src/protocol/resolution.x:138`
+Source: `src/protocol/resolution.x:145`
 
 <a id="Compiler.reverse_converter_spelling"></a>
 #### Compiler.reverse_converter_spelling
@@ -276,7 +276,7 @@ the package prefix sits at the front of the derived binding instead of
 inside it. The split is keyed on a known package because a foreign
 header may spell `__` in a type name.
 
-Source: `src/protocol/registry.x:211`
+Source: `src/protocol/registry.x:224`
 
 <a id="Compiler.wrapper_function"></a>
 #### Compiler.wrapper_function

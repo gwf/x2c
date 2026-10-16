@@ -41,7 +41,7 @@ Lowers the cleanup regions and transfers of the completed top-level
 function completion. Expressions cannot contain an unlifted function, so
 no second unit-tree traversal is needed.
 
-Source: `src/cleanup/transfers.x:49`
+Source: `src/cleanup/transfers.x:64`
 
 <a id="Compiler.lower_defer_region"></a>
 #### Compiler.lower_defer_region

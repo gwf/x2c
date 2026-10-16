@@ -30,7 +30,7 @@ the entries of scripts that no longer exist, and returns 0; the caller
 builds `request` and calls `CliRequest.run_script`. A `--clean` request
 removes the script's entry and returns 1.
 
-Source: `src/script.x:53`
+Source: `src/script.x:51`
 
 <a id="CliRequest.run_script"></a>
 #### CliRequest.run_script
@@ -41,7 +41,7 @@ Executes a script that `CliRequest.prepare_script` pointed at the cache
 and the caller built; that path does not return. A dry run prints the
 action and returns zero.
 
-Source: `src/script.x:133`
+Source: `src/script.x:131`
 
 ### `Compiler`
 
@@ -53,7 +53,7 @@ Source: `src/script.x:133`
 Returns the per-user cache root: `X2C_CACHE_DIR`, `XDG_CACHE_HOME/x2c`,
 or `~/.cache/x2c`, whichever is set first, or NULL when none is.
 
-Source: `src/script.x:39`
+Source: `src/script.x:37`
 
 ## Design notes
 

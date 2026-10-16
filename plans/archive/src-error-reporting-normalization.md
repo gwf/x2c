@@ -1,6 +1,6 @@
-> Status: active
-> Implementation complete; combined publication validation is pending.
-> Planned against `d12bd43ff`; implementation authorized 2026-10-16.
+> Status: done
+> Implemented 2026-10-16 through `28d1ceec`; definitions remain with their owners.
+> Publication requires the existing gate and generated-artifact review.
 
 # Normalize error reporting in src
 
@@ -213,7 +213,8 @@ include changed source metadata and extracted construction. Driver paired
 translation produced 16 files: 15 were identical and one differed only in three
 private helper names. These comparisons do not claim whole-tree byte parity.
 The component worker passed 33 existing fixtures without expectation changes.
-The final integrated gate remains pending.
+The final integrated publication proof is recorded by `gate-state` and
+`land-dev`; the comparisons above are focused evidence, not that proof.
 
 Two component constraints preserve existing behavior: generated linked-meta
 copies consume exported macros from their owners, and `dynamic_unary` keeps

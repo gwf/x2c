@@ -69,7 +69,7 @@ replaces none of them. It appends generated bindings and initialization
 work to the compiler and is not idempotent. Failures are reported as
 `emit` diagnostics.
 
-Source: `src/generate/output.x:34`
+Source: `src/generate/output.x:35`
 
 <a id="Compiler.generate_code_text"></a>
 #### Compiler.generate_code_text
@@ -80,7 +80,7 @@ Returns the generated header and source of the lowered `ast` as `(hfile
 htext cfile ctext)`, named from `basename`, without writing them. It
 affects the compiler as `Compiler.generate_code` does.
 
-Source: `src/generate/output.x:46`
+Source: `src/generate/output.x:47`
 
 <a id="Compiler.init_statements"></a>
 #### Compiler.init_statements
@@ -111,7 +111,7 @@ conditional containing that first use follows the declarations. A unit
 without such a use gets them at its end, after the declarations they
 may assign.
 
-Source: `src/generate/output.x:101`
+Source: `src/generate/output.x:102`
 
 <a id="Compiler.run_once_body"></a>
 #### Compiler.run_once_body

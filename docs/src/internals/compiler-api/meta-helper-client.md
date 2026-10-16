@@ -32,7 +32,7 @@ The compiler's side of the project meta helper.
 Selects the table of the unit at `filename` for the calls that follow,
 and resets the unit's `meta static` values before the first one.
 
-Source: `src/meta-helper-client.x:480`
+Source: `src/meta-helper-client.x:479`
 
 <a id="Compiler.meta_helper_call"></a>
 #### Compiler.meta_helper_call
@@ -69,7 +69,7 @@ Source: `src/meta-helper-client.x:47`
 Stops the helper this process runs, which a translation worker does
 when its units are done and every process does as it ends.
 
-Source: `src/meta-helper-client.x:498`
+Source: `src/meta-helper-client.x:497`
 
 <a id="Compiler.use_meta_helper"></a>
 #### Compiler.use_meta_helper
@@ -79,7 +79,7 @@ Source: `src/meta-helper-client.x:498`
 Uses `helper` for ordinary translation, retaining its configuration
 through process shutdown. Replaces and closes the preceding helper.
 
-Source: `src/meta-helper-client.x:455`
+Source: `src/meta-helper-client.x:454`
 
 ### `MetaHelper`
 
@@ -91,7 +91,7 @@ Source: `src/meta-helper-client.x:455`
 Checks that this helper built the provider table needed by `name`.
 Does not invoke the function or reset native state.
 
-Source: `src/meta-helper-client.x:468`
+Source: `src/meta-helper-client.x:467`
 
 <a id="MetaHelper.close"></a>
 #### MetaHelper.close
@@ -101,7 +101,7 @@ Source: `src/meta-helper-client.x:468`
 Stops this helper and releases its pipe buffer and configuration maps.
 A later close is harmless.
 
-Source: `src/meta-helper-client.x:508`
+Source: `src/meta-helper-client.x:507`
 
 <a id="MetaHelper.new"></a>
 #### MetaHelper.new
@@ -112,7 +112,7 @@ Creates an independent helper at `path`, with failures by table index
 and source paths mapped to their table indices. No process starts until
 a call needs it. The caller keeps the canonical configuration values.
 
-Source: `src/meta-helper-client.x:432`
+Source: `src/meta-helper-client.x:431`
 
 <a id="MetaHelper.retain_executable"></a>
 #### MetaHelper.retain_executable
@@ -122,7 +122,7 @@ Source: `src/meta-helper-client.x:432`
 Retains this helper's executable independently of later cache rebuilds.
 The copy lasts until close, including across helper restarts.
 
-Source: `src/meta-helper-client.x:446`
+Source: `src/meta-helper-client.x:445`
 
 ## Public types
 

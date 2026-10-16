@@ -136,7 +136,7 @@
   - [src/meta-project.x](internals/compiler-api/meta-project.md)
   - [src/meta-sdk.x](internals/compiler-api/meta-sdk.md)
   - [src/operator-ledger.x](internals/compiler-api/operator-ledger.md)
-  - [src/parse-report-macros.x](internals/compiler-api/parse-report-macros.md)
+  - [src/parse-reports.x](internals/compiler-api/parse-reports.md)
   - [src/parse.x](internals/compiler-api/parse.md)
   - [src/preprocess.x](internals/compiler-api/preprocess.md)
   - [src/project.x](internals/compiler-api/project.md)
