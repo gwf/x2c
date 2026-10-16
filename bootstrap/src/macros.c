@@ -581,36 +581,26 @@ static Var f8_rewrites____filled(Var node, Array lowered);
 
 static int f8_rewrites____find_slot(SlotWatch watch, Ast ast);
 
-typedef struct f11_invocations___MacroPos{
+typedef struct MacroPos{
   Symbol kind;
   const char * description;
   int semicolon;
 }
-f11_invocations___MacroPos;
+MacroPos;
 
-typedef struct f11_invocations___Decoration{
-  Compiler c;
-  List definition, function;
-  Token invocation, start;
-  Symbol position;
-  Symbol kind;
-  int open;
-}
-f11_invocations___Decoration;
+static int f23_invocations_recognition____fixed_alias(Compiler c, Atom alias);
 
-static int f11_invocations____fixed_alias(Compiler c, Atom alias);
-
-static const SymbolSet f11_invocations___alias_kinds =(SymbolSet) "\001\000\000\000\007\000\000\000\003\000\000\000\025\174\112\177\271\171\067\236\005\000\000\000\001\000\000\006\005\001\000\002\334\113\163\026\011\161\001\000\132\241\351\257\361\230\000\000\010\053\311\000\000\000\000\000\344\243\101\226\126\135\001\000\262\244\256\174\030\032\000\000\150\162\025\000\000\000\000\000\344\243\101\276\121\010\000\000";
+static const SymbolSet f23_invocations_recognition___alias_kinds =(SymbolSet) "\001\000\000\000\007\000\000\000\003\000\000\000\025\174\112\177\271\171\067\236\005\000\000\000\001\000\000\006\005\001\000\002\334\113\163\026\011\161\001\000\132\241\351\257\361\230\000\000\010\053\311\000\000\000\000\000\344\243\101\226\126\135\001\000\262\244\256\174\030\032\000\000\150\162\025\000\000\000\000\000\344\243\101\276\121\010\000\000";
 
 static void _record_alias(Compiler c, Map aliases);
 
-static int f11_invocations____claims(Compiler c, List definition, Symbol position);
+static int f23_invocations_recognition____claims(Compiler c, List definition, Symbol position);
 
-static Type f11_invocations____meta_callee(Compiler c);
+static Type f23_invocations_recognition____meta_callee(Compiler c);
 
-static const SymbolSet f11_invocations___macro_positions =(SymbolSet) "\001\000\000\000\007\000\000\000\003\000\000\000\036\103\003\364\121\130\127\023\000\000\000\003\000\001\004\004\007\004\006\000\150\162\025\000\000\000\000\000\326\170\114\000\000\000\000\000\010\053\311\000\000\000\000\000\344\243\101\226\126\135\001\000\262\244\256\174\030\032\000\000\250\053\255\320\100\047\000\000\334\113\163\026\011\161\001\000";
+static const SymbolSet f23_invocations_recognition___macro_positions =(SymbolSet) "\001\000\000\000\007\000\000\000\003\000\000\000\036\103\003\364\121\130\127\023\000\000\000\003\000\001\004\004\007\004\006\000\150\162\025\000\000\000\000\000\326\170\114\000\000\000\000\000\010\053\311\000\000\000\000\000\344\243\101\226\126\135\001\000\262\244\256\174\030\032\000\000\250\053\255\320\100\047\000\000\334\113\163\026\011\161\001\000";
 
-static const f11_invocations___MacroPos f11_invocations___macro_position_info[] ={
+static const MacroPos f23_invocations_recognition___macro_position_info[] ={
   {
     1405544, "file scope", 1
   }
@@ -636,7 +626,7 @@ static const f11_invocations___MacroPos f11_invocations___macro_position_info[] 
 }
 ;
 
-static const f11_invocations___MacroPos * f11_invocations____position(Symbol position);
+static const MacroPos * _position(Symbol position);
 
 static Symbol _result_kind(List definition);
 
@@ -644,9 +634,9 @@ static List _peek_invocation(Compiler c);
 
 static Token _scan_name(Compiler c, String * spelling);
 
-static int f11_invocations____bare(Token invocation, List definition);
+static int _bare(Token invocation, List definition);
 
-static List f11_invocations____take_invocation(Compiler c, Symbol position);
+static List _take_invocation(Compiler c, Symbol position);
 
 static Atom _name(Compiler c);
 
@@ -654,102 +644,112 @@ static List _lookup(Compiler c, Atom name, Token invocation);
 
 static int _try_definition(Compiler c, Atom name, int install_lisp, Var * stored);
 
-static int f11_invocations____try_macro(Compiler c, Map definitions, Atom name, Var * stored);
+static int f23_invocations_recognition____try_macro(Compiler c, Map definitions, Atom name, Var * stored);
 
-static Symbol f11_invocations____collection(List definition);
+static Symbol f23_invocations_recognition____collection(List definition);
 
-static List f11_invocations____invocation_arguments(Compiler c, List definition, Token invocation);
+static List _invocation_arguments(Compiler c, List definition, Token invocation);
 
-static List f11_invocations____argument_row(Compiler c, List hole, Symbol kind);
+static List f20_invocations_captures____argument_row(Compiler c, List hole, Symbol kind);
 
-static void f11_invocations____row_directives(Compiler c, Symbol kind, Array captured);
+static void f20_invocations_captures____row_directives(Compiler c, Symbol kind, Array captured);
 
-static void f11_invocations____argument_separator(Compiler c, Symbol kind);
+static void f20_invocations_captures____argument_separator(Compiler c, Symbol kind);
 
-static Var f11_invocations____parse_argument(Compiler c, Symbol kind);
+static Var f20_invocations_captures____parse_argument(Compiler c, Symbol kind);
 
-static Var f11_invocations____name_argument(Compiler c);
+static Var f20_invocations_captures____name_argument(Compiler c);
 
-static Var f11_invocations____literal_argument(Compiler c);
+static Var f20_invocations_captures____literal_argument(Compiler c);
 
-static Var f11_invocations____capture_source(Compiler c, Var syntax, Token first, Token after);
+static Var _capture_source(Compiler c, Var syntax, Token first, Token after);
 
-static Token f11_invocations____previous_source_token(Compiler c, Token after);
-
-static void f11_invocations____bind_name_arguments(Compiler c, List definition, List arguments);
+static Token f20_invocations_captures____previous_source_token(Compiler c, Token after);
 
 static List _capture_row_project(Compiler c, List hole, List sources, int retain);
 
-static List f11_invocations____sequence_row(Compiler c, List sources, int retain);
+static List f20_invocations_captures____sequence_row(Compiler c, List sources, int retain);
 
-static List f11_invocations____scalar_row(Compiler c, List sources, int retain);
+static List f20_invocations_captures____scalar_row(Compiler c, List sources, int retain);
 
-static Var f11_invocations____identifier_expression(Var value);
+static Var f20_invocations_captures____identifier_expression(Var value);
 
-static List f11_invocations____forwarded_capture(Compiler c, Var captured);
+static List f20_invocations_captures____forwarded_capture(Compiler c, Var captured);
 
-static List f11_invocations____forwarded_hole(Compiler c, Var captured);
+static List f20_invocations_captures____forwarded_hole(Compiler c, Var captured);
 
-static String f11_invocations____forwarded_prefix(String spelling);
+static String f20_invocations_captures____forwarded_prefix(String spelling);
 
-static List f11_invocations____forwarded_prefix_list(void);
+static List f20_invocations_captures____forwarded_prefix_list(void);
 
-static List f11_invocations___forwarded_prefixes;
+static List f20_invocations_captures___forwarded_prefixes;
 
-_x2c_gensym_initializer_choice_28FCBFDC_2((f11_invocations___forwarded_prefixes = f11_invocations____forwarded_prefix_list()))
+_x2c_gensym_initializer_choice_28FCBFDC_2((f20_invocations_captures___forwarded_prefixes = f20_invocations_captures____forwarded_prefix_list()))
 static int _source_capture_parts(Var value, List * source, Var * syntax);
 
 static Var _source_unwrap(Var value);
 
+typedef struct f19_invocations_targets___Decoration{
+  Compiler c;
+  List definition, function;
+  Token invocation, start;
+  Symbol position;
+  Symbol kind;
+  int open;
+}
+f19_invocations_targets___Decoration;
+
+static void f19_invocations_targets____bind_name_arguments(Compiler c, List definition, List arguments);
+
 static List _target_at(Compiler c, Symbol position, int open);
 
-static void f11_invocations____check_position(Compiler c, List definition, Token invocation, Symbol position);
+static void f19_invocations_targets____check_position(Compiler c, List definition, Token invocation, Symbol position);
 
-static List f11_invocations____invoke_definition(Compiler c, List definition, Token invocation, Symbol position, int open);
+static List f19_invocations_targets____invoke_definition(Compiler c, List definition, Token invocation, Symbol position, int open);
 
-static List f11_invocations____invocation_node(Compiler c, List definition, List input, Token invocation);
+static List _invocation_node(Compiler c, List definition, List input, Token invocation);
 
-static Var f11_invocations____stored_reference(Compiler c, List definition);
+static Var f19_invocations_targets____stored_reference(Compiler c, List definition);
 
-static List f11_invocations____decorate(Compiler c, List definition, Token invocation, Symbol position, int open);
+static List f19_invocations_targets____decorate(Compiler c, List definition, Token invocation, Symbol position, int open);
 
-static int f11_invocations____on_body(f11_invocations___Decoration * d);
+static int f19_invocations_targets____on_body(f19_invocations_targets___Decoration * d);
 
-static void f11_invocations____misplaced(f11_invocations___Decoration * d);
+static void f19_invocations_targets____misplaced(f19_invocations_targets___Decoration * d);
 
-static List f11_invocations____arguments(f11_invocations___Decoration * d, int block_scope);
+static List f19_invocations_targets____arguments(f19_invocations_targets___Decoration * d, int block_scope);
 
-static List f11_invocations____decoration_node(f11_invocations___Decoration * d, List arguments);
+static List f19_invocations_targets____decoration_node(f19_invocations_targets___Decoration * d, List arguments);
 
-static List f11_invocations____target(f11_invocations___Decoration * d);
+static List f19_invocations_targets____target(f19_invocations_targets___Decoration * d);
 
-static List f11_invocations____positional_target(Compiler c, Symbol position);
+static List f19_invocations_targets____positional_target(Compiler c, Symbol position);
 
-static List f11_invocations____capture(f11_invocations___Decoration * d, List target);
+static List f19_invocations_targets____capture(f19_invocations_targets___Decoration * d, List target);
 
-static int f11_invocations____private_target(Compiler c, List target);
+static int f19_invocations_targets____private_target(Compiler c, List target);
 
-static List f11_invocations____bind_decoration(f11_invocations___Decoration * d, List node);
+static List f19_invocations_targets____bind_decoration(f19_invocations_targets___Decoration * d, List node);
 
-static List f11_invocations____bind_body(Compiler c, List node, List decorated);
+static List f19_invocations_targets____bind_body(Compiler c, List node, List decorated);
 
-static Type f11_invocations____declared_result(List decorated);
+static Type f19_invocations_targets____declared_result(List decorated);
 
-static List f11_invocations____named_macro_value(Compiler c, Token invocation);
+static List f23_invocations_expressions____named_macro_value(Compiler c, Token invocation);
 
-static List f11_invocations____parse_meta_call(Compiler c, Token invocation);
+static List f23_invocations_expressions____parse_meta_call(Compiler c, Token invocation);
 
-static Array f11_invocations____meta_arguments(Compiler c, List parameters);
+static Array f23_invocations_expressions____meta_arguments(Compiler c, List parameters);
 
-static List f11_invocations____meta_argument(Compiler c);
+static List f23_invocations_expressions____meta_argument(Compiler c);
 
-static List f11_invocations____expression_invocation(Compiler c, List definition, Token invocation);
+static List f23_invocations_expressions____expression_invocation(Compiler c, List definition, Token invocation);
 
-static List f11_invocations____template_call(Compiler c, List definition);
+static List f23_invocations_expressions____template_call(Compiler c, List definition);
 
-static void f11_invocations____not_expression(Compiler c, List definition, Token invocation);
+static void f23_invocations_expressions____not_expression(Compiler c, List definition, Token invocation);
 
-static List f11_invocations____expression_decorator(Compiler c, List definition, Token invocation);
+static List f23_invocations_expressions____expression_decorator(Compiler c, List definition, Token invocation);
 
 typedef struct f9_templates___Landing{
   Compiler c;
@@ -6419,7 +6419,7 @@ int Compiler_keyword_form_is_definition(Compiler c){
 }
 
 Atom Compiler_parse_keyword_definition(Compiler c){
-  if(! _init_guard_) _file_init_();  Token declaration = c -> token;  int storage = Compiler_test(c, 1317118534) || c -> source_private;  Compiler_expect(c, 19147688);  if(Compiler_peek(c, 0) != 19147688) Compiler_report_error(c, 33658058, _561, c -> token, NULL);  Atom alias = Atom_intern(c -> token -> text);  Compiler_next(c);  if(f11_invocations____fixed_alias(c, alias)) Compiler_report_error(c, 27335838, _562, declaration, NULL);  Token reference = c -> token;  List definition = _lookup(c, _name(c), reference);  Symbol kind = Var_symbol(List_assoc(definition, Symbol_var(740232)));  if(!(SymbolSet_contains(f11_invocations___alias_kinds, kind))){
+  if(! _init_guard_) _file_init_();  Token declaration = c -> token;  int storage = Compiler_test(c, 1317118534) || c -> source_private;  Compiler_expect(c, 19147688);  if(Compiler_peek(c, 0) != 19147688) Compiler_report_error(c, 33658058, _561, c -> token, NULL);  Atom alias = Atom_intern(c -> token -> text);  Compiler_next(c);  if(f23_invocations_recognition____fixed_alias(c, alias)) Compiler_report_error(c, 27335838, _562, declaration, NULL);  Token reference = c -> token;  List definition = _lookup(c, _name(c), reference);  Symbol kind = Var_symbol(List_assoc(definition, Symbol_var(740232)));  if(!(SymbolSet_contains(f23_invocations_recognition___alias_kinds, kind))){
     String spelling = _kind_spelling(kind);  Compiler_report_error(c, 27335838, String_join(NULL, cons(String_var(_563), cons(String_var(spelling), cons(String_var(_7), NULL)))), declaration, cons(String_var(_definition_note(definition)), NULL));
   }
   Compiler_expect(c, 119);  Map_setindex(c -> kw_aliases, alias, List_var(definition));  if(! storage) Compiler_record_compile_time_effect(c, ({
@@ -6428,8 +6428,8 @@ Atom Compiler_parse_keyword_definition(Compiler c){
   ), declaration);  return alias;
 }
 
-static int f11_invocations____fixed_alias(Compiler c, Atom alias){
-  Var existing;  return ! c -> builtin_defs &&(x2c_var_equal(alias, Symbol_var(1527056)) ||(f11_invocations____try_macro(c, c -> kw_aliases, alias, &(existing)) && Var_int(List_assoc(Var_list(existing), Symbol_var(5723955804)))));
+static int f23_invocations_recognition____fixed_alias(Compiler c, Atom alias){
+  Var existing;  return ! c -> builtin_defs &&(x2c_var_equal(alias, Symbol_var(1527056)) ||(f23_invocations_recognition____try_macro(c, c -> kw_aliases, alias, &(existing)) && Var_int(List_assoc(Var_list(existing), Symbol_var(5723955804)))));
 }
 
 static void _record_alias(Compiler c, Map aliases){
@@ -6437,23 +6437,23 @@ static void _record_alias(Compiler c, Map aliases){
 }
 
 int Compiler_macro_starts_target_at(Compiler c, Symbol position){
-  if(! _init_guard_) _file_init_();  return f11_invocations____claims(c, _peek_invocation(c), position);
+  if(! _init_guard_) _file_init_();  return f23_invocations_recognition____claims(c, _peek_invocation(c), position);
 }
 
 int Type_is_function(Type);
-static int f11_invocations____claims(Compiler c, List definition, Symbol position){
-  Symbol kind = List_truth(definition) ? _result_kind(definition) : 0;  if(kind == f11_invocations____position(position) -> kind) return 1;  if(position == 43159332400040 || position == 28692473357490) return 0;  if(! List_truth(definition)){
-    if(Compiler_peek(c, 0) == 73 &&(position == 5011670 || Map_truth(c -> macro_holes)) && Type_is_function(f11_invocations____meta_callee(c))) return 0;  return Compiler_peek(c, 0) == 73;
+static int f23_invocations_recognition____claims(Compiler c, List definition, Symbol position){
+  Symbol kind = List_truth(definition) ? _result_kind(definition) : 0;  if(kind == _position(position) -> kind) return 1;  if(position == 43159332400040 || position == 28692473357490) return 0;  if(! List_truth(definition)){
+    if(Compiler_peek(c, 0) == 73 &&(position == 5011670 || Map_truth(c -> macro_holes)) && Type_is_function(f23_invocations_recognition____meta_callee(c))) return 0;  return Compiler_peek(c, 0) == 73;
   }
-  return ! f11_invocations____bare(c -> token, definition) &&(position != 5011670 || kind != 405758822009820 || ! Var_int(List_assoc(definition, Symbol_var(26155096))));
+  return ! _bare(c -> token, definition) &&(position != 5011670 || kind != 405758822009820 || ! Var_int(List_assoc(definition, Symbol_var(26155096))));
 }
 
-static Type f11_invocations____meta_callee(Compiler c){
+static Type f23_invocations_recognition____meta_callee(Compiler c){
   Token start = c -> token;  String name;  Token end = _scan_name(c, &(name));  Compiler_next(c);  String member = Compiler_package_alias_spelling(c);  List callee = String_truth(name) &&(! String_truth(member) || List_truth(Sym_get_exact(c -> sym, cons(String_var(member), NULL)))) ? Compiler_parse_complex_identifier(c) : NULL;  Type type = List_truth(callee) && c -> token == end ? List_type(Sym_get(c -> sym, callee)) : NULL;  c -> token = start;  return type;
 }
 
-static const f11_invocations___MacroPos * f11_invocations____position(Symbol position){
-  return & f11_invocations___macro_position_info[SymbolSet_index(f11_invocations___macro_positions, position)];
+static const MacroPos * _position(Symbol position){
+  return & f23_invocations_recognition___macro_position_info[SymbolSet_index(f23_invocations_recognition___macro_positions, position)];
 }
 
 static Symbol _result_kind(List definition){
@@ -6465,7 +6465,7 @@ static List _peek_invocation(Compiler c){
   Var stored;  if(Compiler_peek(c, 0) == 73 || Compiler_peek(c, 0) == 129){
     String spelling;  _scan_name(c, &(spelling));  if(! String_truth(spelling) || ! _try_definition(c, Atom_intern(spelling), ! c -> shallow, &(stored))) return NULL;  return Var_list_payload(stored);
   }
-  if(Compiler_peek(c, 0) != 19147688) return NULL;  Atom name = Atom_intern(c -> token -> text);  List definition = Sym_has_local_macros(c -> sym) ? Sym_lookup_macro(c -> sym, name) : NULL;  if(! List_truth(definition) && f11_invocations____try_macro(c, c -> kw_aliases, name, &(stored))) definition = Var_list_payload(stored);  return List_truth(definition) &&(Compiler_peek(c, 1) == 81 || f11_invocations____bare(c -> token, definition)) ? definition : NULL;
+  if(Compiler_peek(c, 0) != 19147688) return NULL;  Atom name = Atom_intern(c -> token -> text);  List definition = Sym_has_local_macros(c -> sym) ? Sym_lookup_macro(c -> sym, name) : NULL;  if(! List_truth(definition) && f23_invocations_recognition____try_macro(c, c -> kw_aliases, name, &(stored))) definition = Var_list_payload(stored);  return List_truth(definition) &&(Compiler_peek(c, 1) == 81 || _bare(c -> token, definition)) ? definition : NULL;
 }
 
 static Token _scan_name(Compiler c, String * spelling){
@@ -6478,12 +6478,12 @@ static Token _scan_name(Compiler c, String * spelling){
   while(token -> type == 93); ; (* spelling) = name;  return token;
 }
 
-static int f11_invocations____bare(Token invocation, List definition){
+static int _bare(Token invocation, List definition){
   return invocation -> type != 73 && invocation -> type != 129 && x2c_var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(9147177346020)) && ! List_truth(Var_list(List_assoc(definition, Symbol_var(1129338912386214))));
 }
 
-static List f11_invocations____take_invocation(Compiler c, Symbol position){
-  List definition = _peek_invocation(c);  if(! f11_invocations____claims(c, definition, position)) return NULL;  if(Compiler_peek(c, 0) != 73 && Compiler_peek(c, 0) != 129){
+static List _take_invocation(Compiler c, Symbol position){
+  List definition = _peek_invocation(c);  if(! f23_invocations_recognition____claims(c, definition, position)) return NULL;  if(Compiler_peek(c, 0) != 73 && Compiler_peek(c, 0) != 129){
     Compiler_next(c);  return definition;
   }
   Token invocation = c -> token;  Atom name = _name(c);  Var existing;  if(Map_truth(c -> macro_holes) && Compiler_peek(c, 0) != 81 && ! _try_definition(c, name, 1, &(existing))) _unbound(c, Atom_str(name), invocation);  return _lookup(c, name, invocation);
@@ -6498,11 +6498,11 @@ static List _lookup(Compiler c, Atom name, Token invocation){
 }
 
 static int _try_definition(Compiler c, Atom name, int install_lisp, Var * stored){
-  int found = f11_invocations____try_macro(c, c -> macros, name, &((* stored)));  String spelling = Atom_str(name);  if(! install_lisp || ! String_startswith(spelling, _568)) return found;  _use_lisp_bindings(c, ! found);  return found || f11_invocations____try_macro(c, c -> macros, name, &((* stored)));
+  int found = f23_invocations_recognition____try_macro(c, c -> macros, name, &((* stored)));  String spelling = Atom_str(name);  if(! install_lisp || ! String_startswith(spelling, _568)) return found;  _use_lisp_bindings(c, ! found);  return found || f23_invocations_recognition____try_macro(c, c -> macros, name, &((* stored)));
 }
 
 void Sym_put(Sym, Map, Var, Var);
-static int f11_invocations____try_macro(Compiler c, Map definitions, Atom name, Var * stored){
+static int f23_invocations_recognition____try_macro(Compiler c, Map definitions, Atom name, Var * stored){
   if(! Map_try_get(definitions, name, &((* stored)))) return 0; {
     Var _x2c_gensym_match_var =(* stored); int _x2c_gensym_match_none = !Var_is(_x2c_gensym_match_var, 806120);  List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var); List _x2c_gensym_match_cursor;  switch(0){
         default: ; if (!_x2c_gensym_match_none) { _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && Var_equal(_x2c_gensym_match_cursor->car, _569 ->car) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
@@ -6519,17 +6519,17 @@ static int f11_invocations____try_macro(Compiler c, Map definitions, Atom name, 
 }
 
 Symbol Compiler_macro_invocation_collection(Compiler c){
-  if(! _init_guard_) _file_init_();  return f11_invocations____collection(_peek_invocation(c));
+  if(! _init_guard_) _file_init_();  return f23_invocations_recognition____collection(_peek_invocation(c));
 }
 
-static Symbol f11_invocations____collection(List definition){
+static Symbol f23_invocations_recognition____collection(List definition){
   if(! List_truth(definition)) return 0;  if(x2c_var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(9147004580456)) || x2c_var_equal(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(988265867168778))) return 1248873517384;  if(x2c_var_equal(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(1405544))) return 43141448;  if(! x2c_var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(1405544))) return 0;  if(! Var_int(List_assoc(definition, Symbol_var(26155096)))) return 1248873517384;  List template = Var_list_payload(List_assoc(definition, Symbol_var(1386033712394))), bindings;  Var matched;  if(({ static MatchCaptureSite _x2c_gensym_match_site_5;  x2c_match_site_try_search(& _x2c_gensym_match_site_5, template, List_var(_578), &(matched), &(bindings)); })) return 1248873517384;
   return 43141448;
 }
 
 void Compiler_skip_macro_invocation(Compiler c){
   if(! _init_guard_) _file_init_();
-  int bare = f11_invocations____bare(c -> token, _peek_invocation(c));
+  int bare = _bare(c -> token, _peek_invocation(c));
   String spelling;
   if(Compiler_peek(c, 0) == 73) c -> token = _scan_name(c, &(spelling));
   else Compiler_next(c);
@@ -6554,8 +6554,8 @@ int Compiler_macro_targets_unit(Compiler c){
   return kind == 1405544 || kind == 9147004580456;
 }
 
-static List f11_invocations____invocation_arguments(Compiler c, List definition, Token invocation){
-  if(f11_invocations____bare(invocation, definition)) return _579;
+static List _invocation_arguments(Compiler c, List definition, Token invocation){
+  if(_bare(invocation, definition)) return _579;
   Array arguments = Array_new();
   int parameter_scope = 0;
   {
@@ -6580,8 +6580,8 @@ static List f11_invocations____invocation_arguments(Compiler c, List definition,
           Sym_push_new_scope(c -> sym);
           parameter_scope = 1;
         }
-        Array_push(arguments, List_var(f11_invocations____argument_row(c, hole, kind)));
-        if(List_truth(List_cdr(nodes)) && Compiler_peek(c, 0) != 83) f11_invocations____argument_separator(c, kind);
+        Array_push(arguments, List_var(f20_invocations_captures____argument_row(c, hole, kind)));
+        if(List_truth(List_cdr(nodes)) && Compiler_peek(c, 0) != 83) f20_invocations_captures____argument_separator(c, kind);
       }
       if(Compiler_peek(c, 0) != 83){
         if(Compiler_peek(c, 0) == 89) Compiler_next(c);
@@ -6603,23 +6603,23 @@ static List f11_invocations____invocation_arguments(Compiler c, List definition,
 
 }
 
-static List f11_invocations____argument_row(Compiler c, List hole, Symbol kind){
+static List f20_invocations_captures____argument_row(Compiler c, List hole, Symbol kind){
   int sequence = Var_int(Var_convert(List_assoc(hole, Symbol_var(1317592723658)), 3453797));
   Array captured = Array_new();
   if(Compiler_peek(c, 0) == 83 && ! sequence) Compiler_report_error(c, 33658058, _581, c -> token, NULL);
   if(Compiler_peek(c, 0) != 83) while(1){
-    f11_invocations____row_directives(c, kind, captured);
+    f20_invocations_captures____row_directives(c, kind, captured);
     Token first = c -> token;
-    Var argument = f11_invocations____parse_argument(c, kind);
-    if(kind != 920394) argument = f11_invocations____capture_source(c, argument, first, c -> token);
+    Var argument = f20_invocations_captures____parse_argument(c, kind);
+    if(kind != 920394) argument = _capture_source(c, argument, first, c -> token);
     Array_push(captured, argument);
     if(! sequence || ! Compiler_test(c, 89)) break;
   }
-  f11_invocations____row_directives(c, kind, captured);
+  f20_invocations_captures____row_directives(c, kind, captured);
   return _capture_row_project(c, hole, Array_list_free(captured), 0);
 }
 
-static void f11_invocations____row_directives(Compiler c, Symbol kind, Array captured){
+static void f20_invocations_captures____row_directives(Compiler c, Symbol kind, Array captured){
   if(kind == 28699191645166 && c -> token != c -> directives_taken){
     List directive;
     List _x2c_gensym_macro_object_46 = Compiler_leading_preproc(c);
@@ -6634,12 +6634,12 @@ static void f11_invocations____row_directives(Compiler c, Symbol kind, Array cap
 
 }
 
-static void f11_invocations____argument_separator(Compiler c, Symbol kind){
+static void f20_invocations_captures____argument_separator(Compiler c, Symbol kind){
   if(kind == 272600 &&(Compiler_peek(c, 0) == 604 || Compiler_at_word(c, _69))) Compiler_next(c);
   else Compiler_expect(c, 89);
 }
 
-static Var f11_invocations____parse_argument(Compiler c, Symbol kind){
+static Var f20_invocations_captures____parse_argument(Compiler c, Symbol kind){
   {
     int * _x2c_gensym_macro_address_29 = & c -> shallow;
     int _x2c_gensym_macro_previous_29 = * _x2c_gensym_macro_address_29;
@@ -6772,7 +6772,7 @@ static Var f11_invocations____parse_argument(Compiler c, Symbol kind){
 
             }
             case 920394 :{
-              Var _x2c_gensym_return_value_43 = f11_invocations____name_argument(c);
+              Var _x2c_gensym_return_value_43 = f20_invocations_captures____name_argument(c);
               {
                 x2c_cleanup_leave(& _x2c_gensym_defer_record_47);
                 return _x2c_gensym_return_value_43;
@@ -6780,7 +6780,7 @@ static Var f11_invocations____parse_argument(Compiler c, Symbol kind){
 
             }
             case 26416091224 :{
-              Var _x2c_gensym_return_value_44 = f11_invocations____literal_argument(c);
+              Var _x2c_gensym_return_value_44 = f20_invocations_captures____literal_argument(c);
               {
                 x2c_cleanup_leave(& _x2c_gensym_defer_record_47);
                 return _x2c_gensym_return_value_44;
@@ -6800,7 +6800,7 @@ static Var f11_invocations____parse_argument(Compiler c, Symbol kind){
 
 }
 
-static Var f11_invocations____name_argument(Compiler c){
+static Var f20_invocations_captures____name_argument(Compiler c){
   if(Map_truth(c -> macro_holes) && Compiler_peek(c, 0) == 73) return List_var(_parse_hole(c, 920394));
   if(Compiler_peek(c, 0) != 19147688) Compiler_report_error(c, 33658058, _583, c -> token, NULL);
   String spelling = c -> token -> text;
@@ -6814,14 +6814,14 @@ static Var f11_invocations____name_argument(Compiler c){
   return List_var(local);
 }
 
-static Var f11_invocations____literal_argument(Compiler c){
+static Var f20_invocations_captures____literal_argument(Compiler c){
   if(Map_truth(c -> macro_holes) && Compiler_peek(c, 0) == 73) return List_var(Compiler_parse_assignment(c));
   return List_var(Compiler_parse_atomic_literal(c));
 }
 
-static Var f11_invocations____capture_source(Compiler c, Var syntax, Token first, Token after){
+static Var _capture_source(Compiler c, Var syntax, Token first, Token after){
   if(Map_truth(c -> macro_holes) || ! Var_is_row(syntax, 9, 7, 4) || Var_is_nil(syntax) || ! first) return syntax;
-  Token last = f11_invocations____previous_source_token(c, after);
+  Token last = f20_invocations_captures____previous_source_token(c, after);
   if(! last || last < first) return syntax;
   int end = last -> pos + last -> len;
   String file = Compiler_source_path(c, String_truth(c -> filename) ? c -> filename : _584);
@@ -6829,7 +6829,7 @@ static Var f11_invocations____capture_source(Compiler c, Var syntax, Token first
   return List_var(cons(_363, cons(List_var(source), cons(syntax, NULL))));
 }
 
-static Token f11_invocations____previous_source_token(Compiler c, Token after){
+static Token f20_invocations_captures____previous_source_token(Compiler c, Token after){
   Token first =(void *) c -> tokenizer -> tokens;
   if(! after || after <= first) return NULL;
   Token token = after - 1;
@@ -6837,54 +6837,21 @@ static Token f11_invocations____previous_source_token(Compiler c, Token after){
   return token;
 }
 
-List Sym_reference(Sym, List, Type *);
-
-static void f11_invocations____bind_name_arguments(Compiler c, List definition, List arguments){
-  List parameters = Var_list_payload(List_assoc(definition, Symbol_var(1129338912386214)));
-  List captures = List_cdr(arguments);
-  while(List_truth(parameters)){
-    List parameter = Var_list_payload(List_car(parameters));
-    if(x2c_var_equal(List_assoc(parameter, Symbol_var(740232)), Symbol_var(920394))){
-      Var names = List_assoc(Var_list(List_car(captures)), Symbol_var(46228810));
-      List values = Var_list_payload(Var_int(List_assoc(parameter, Symbol_var(1317592723658))) ? names : List_var(cons(names, NULL)));
-      {
-        Var value;
-        List _x2c_gensym_macro_object_47 = values;
-        List _x2c_gensym_macro_cursor_55 = _x2c_gensym_macro_object_47;
-        Var _x2c_gensym_macro_cursor_output_48;
-        while(List_try_next(_x2c_gensym_macro_object_47, &(_x2c_gensym_macro_cursor_55), &(_x2c_gensym_macro_cursor_output_48))){
-          value = _x2c_gensym_macro_cursor_output_48;
-          {
-            String name = Var_as_string(Var_is_row(value, 9, 7, 4) ? String_var(Ast_binding_spelling(Var_list_payload(value))) : value);
-            Sym_reference(c -> sym, cons(String_var(name), NULL), NULL);
-          }
-
-        }
-
-      }
-
-    }
-    parameters = List_cdr(parameters);
-    captures = List_cdr(captures);
-  }
-
-}
-
 static List _capture_row_project(Compiler c, List hole, List sources, int retain){
-  return Var_int(List_assoc(hole, Symbol_var(1317592723658))) ? f11_invocations____sequence_row(c, sources, retain) : f11_invocations____scalar_row(c, sources, retain);
+  return Var_int(List_assoc(hole, Symbol_var(1317592723658))) ? f20_invocations_captures____sequence_row(c, sources, retain) : f20_invocations_captures____scalar_row(c, sources, retain);
 }
 
-static List f11_invocations____sequence_row(Compiler c, List sources, int retain){
+static List f20_invocations_captures____sequence_row(Compiler c, List sources, int retain){
   Array captured_sources = Array_new(), values = Array_new(), construction = Array_new();
   {
     Var captured;
-    List _x2c_gensym_macro_object_51 = sources;
-    List _x2c_gensym_macro_cursor_59 = _x2c_gensym_macro_object_51;
-    Var _x2c_gensym_macro_cursor_output_52;
-    while(List_try_next(_x2c_gensym_macro_object_51, &(_x2c_gensym_macro_cursor_59), &(_x2c_gensym_macro_cursor_output_52))){
-      captured = _x2c_gensym_macro_cursor_output_52;
+    List _x2c_gensym_macro_object_50 = sources;
+    List _x2c_gensym_macro_cursor_58 = _x2c_gensym_macro_object_50;
+    Var _x2c_gensym_macro_cursor_output_51;
+    while(List_try_next(_x2c_gensym_macro_object_50, &(_x2c_gensym_macro_cursor_58), &(_x2c_gensym_macro_cursor_output_51))){
+      captured = _x2c_gensym_macro_cursor_output_51;
       {
-        List forwarded = retain ? NULL : f11_invocations____forwarded_capture(c, captured);
+        List forwarded = retain ? NULL : f20_invocations_captures____forwarded_capture(c, captured);
         {
           List _x2c_gensym_match_expr = forwarded; List _x2c_gensym_match_cursor, _x2c_gensym_match_cursor1;
           switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
@@ -6900,33 +6867,33 @@ static List f11_invocations____sequence_row(Compiler c, List sources, int retain
               {
                 {
                   Var item;
-                  List _x2c_gensym_macro_object_48 = forwarded_sources;
-                  List _x2c_gensym_macro_cursor_56 = _x2c_gensym_macro_object_48;
-                  Var _x2c_gensym_macro_cursor_output_49;
-                  while(List_try_next(_x2c_gensym_macro_object_48, &(_x2c_gensym_macro_cursor_56), &(_x2c_gensym_macro_cursor_output_49))){
-                    item = _x2c_gensym_macro_cursor_output_49;
+                  List _x2c_gensym_macro_object_47 = forwarded_sources;
+                  List _x2c_gensym_macro_cursor_55 = _x2c_gensym_macro_object_47;
+                  Var _x2c_gensym_macro_cursor_output_48;
+                  while(List_try_next(_x2c_gensym_macro_object_47, &(_x2c_gensym_macro_cursor_55), &(_x2c_gensym_macro_cursor_output_48))){
+                    item = _x2c_gensym_macro_cursor_output_48;
                     Array_push(captured_sources, item);
                   }
 
                 }
                 {
                   Var item;
-                  List _x2c_gensym_macro_object_49 = forwarded_values;
-                  List _x2c_gensym_macro_cursor_57 = _x2c_gensym_macro_object_49;
-                  Var _x2c_gensym_macro_cursor_output_50;
-                  while(List_try_next(_x2c_gensym_macro_object_49, &(_x2c_gensym_macro_cursor_57), &(_x2c_gensym_macro_cursor_output_50))){
-                    item = _x2c_gensym_macro_cursor_output_50;
+                  List _x2c_gensym_macro_object_48 = forwarded_values;
+                  List _x2c_gensym_macro_cursor_56 = _x2c_gensym_macro_object_48;
+                  Var _x2c_gensym_macro_cursor_output_49;
+                  while(List_try_next(_x2c_gensym_macro_object_48, &(_x2c_gensym_macro_cursor_56), &(_x2c_gensym_macro_cursor_output_49))){
+                    item = _x2c_gensym_macro_cursor_output_49;
                     Array_push(values, item);
                   }
 
                 }
                 {
                   Var item;
-                  List _x2c_gensym_macro_object_50 = required;
-                  List _x2c_gensym_macro_cursor_58 = _x2c_gensym_macro_object_50;
-                  Var _x2c_gensym_macro_cursor_output_51;
-                  while(List_try_next(_x2c_gensym_macro_object_50, &(_x2c_gensym_macro_cursor_58), &(_x2c_gensym_macro_cursor_output_51))){
-                    item = _x2c_gensym_macro_cursor_output_51;
+                  List _x2c_gensym_macro_object_49 = required;
+                  List _x2c_gensym_macro_cursor_57 = _x2c_gensym_macro_object_49;
+                  Var _x2c_gensym_macro_cursor_output_50;
+                  while(List_try_next(_x2c_gensym_macro_object_49, &(_x2c_gensym_macro_cursor_57), &(_x2c_gensym_macro_cursor_output_50))){
+                    item = _x2c_gensym_macro_cursor_output_50;
                     Array_push(construction, item);
                   }
 
@@ -6949,21 +6916,21 @@ static List f11_invocations____sequence_row(Compiler c, List sources, int retain
   return _capture_layout(1, cons(_37, List_append(Array_list_free(captured_sources), NULL)), cons(_187, List_append(Array_list_free(values), NULL)), NULL, NULL, Array_list_free(construction));
 }
 
-static List f11_invocations____scalar_row(Compiler c, List sources, int retain){
+static List f20_invocations_captures____scalar_row(Compiler c, List sources, int retain){
   int singular = List_truth(sources) && ! List_truth(List_cdr(sources));
   Var source = singular ? List_car(sources) : List_var(sources);
   if(singular && ! retain){
-    List forwarded = f11_invocations____forwarded_capture(c, source);
+    List forwarded = f20_invocations_captures____forwarded_capture(c, source);
     if(List_truth(forwarded)) return forwarded;
   }
   Var value = retain ? source : _source_unwrap(source);
   List values = Var_is_row(value, 9, 7, 4) ? Var_list_payload(value) : NULL;
   if(! singular) return _capture_layout(1, cons(_37, List_append(sources, NULL)), cons(_187, List_append(values, NULL)), NULL, NULL, NULL);
-  Var expression = f11_invocations____identifier_expression(value);
+  Var expression = f20_invocations_captures____identifier_expression(value);
   return _capture_layout(0, cons(_37, cons(source, NULL)), cons(_187, cons(value, NULL)), cons(_188, cons(expression, NULL)), cons(_189, List_append(values, NULL)), NULL);
 }
 
-static Var f11_invocations____identifier_expression(Var value){
+static Var f20_invocations_captures____identifier_expression(Var value){
   if(Var_is_row(value, 11, 7, 1)) return List_var(cons(_70, cons(_62, cons(List_var(cons(_219, cons(value, NULL))), NULL))));
   {
     Var _x2c_gensym_match_var = value; int _x2c_gensym_match_none = !Var_is(_x2c_gensym_match_var, 806120);
@@ -6978,8 +6945,8 @@ static Var f11_invocations____identifier_expression(Var value){
   return value;
 }
 
-static List f11_invocations____forwarded_capture(Compiler c, Var captured){
-  List hole = f11_invocations____forwarded_hole(c, captured);
+static List f20_invocations_captures____forwarded_capture(Compiler c, Var captured){
+  List hole = f20_invocations_captures____forwarded_hole(c, captured);
   if(! List_truth(hole)) return NULL;
   Var source = _hole_key(hole, _182);
   Symbol kind = Var_symbol(List_assoc(hole, Symbol_var(740232)));
@@ -6988,7 +6955,7 @@ static List f11_invocations____forwarded_capture(Compiler c, Var captured){
   return _capture_layout(0, cons(_37, cons(source, NULL)), cons(_187, cons(_hole_key(hole, _92), NULL)), cons(_188, cons(_hole_key(hole, _128), NULL)), cons(_189, cons(_hole_key(hole, _183), NULL)), NULL);
 }
 
-static List f11_invocations____forwarded_hole(Compiler c, Var captured){
+static List f20_invocations_captures____forwarded_hole(Compiler c, Var captured){
   if(! Map_truth(c -> macro_holes) || ! Var_is_row(captured, 9, 7, 4) || Var_is_nil(captured)) return NULL;
   Var direct =((void) 0, Void);
   {
@@ -7006,19 +6973,19 @@ static List f11_invocations____forwarded_hole(Compiler c, Var captured){
 
   }
   if(Var_is_void(direct)) return NULL;
-  String spelling = Var_str(direct), prefix = f11_invocations____forwarded_prefix(spelling);
+  String spelling = Var_str(direct), prefix = f20_invocations_captures____forwarded_prefix(spelling);
   if(! String_truth(prefix)) return NULL;
   return _hole_record(c, Atom_intern(String_getslice(spelling, x2c_slice_bound(String_len(prefix)), (-2147483647 - 1), 1)));
 }
 
-static String f11_invocations____forwarded_prefix(String spelling){
+static String f20_invocations_captures____forwarded_prefix(String spelling){
   {
     String prefix;
-    List _x2c_gensym_macro_object_52 = f11_invocations___forwarded_prefixes;
-    List _x2c_gensym_macro_cursor_60 = _x2c_gensym_macro_object_52;
-    Var _x2c_gensym_macro_cursor_output_53;
-    while(List_try_next(_x2c_gensym_macro_object_52, &(_x2c_gensym_macro_cursor_60), &(_x2c_gensym_macro_cursor_output_53))){
-      prefix = Var_as_string(_x2c_gensym_macro_cursor_output_53);
+    List _x2c_gensym_macro_object_51 = f20_invocations_captures___forwarded_prefixes;
+    List _x2c_gensym_macro_cursor_59 = _x2c_gensym_macro_object_51;
+    Var _x2c_gensym_macro_cursor_output_52;
+    while(List_try_next(_x2c_gensym_macro_object_51, &(_x2c_gensym_macro_cursor_59), &(_x2c_gensym_macro_cursor_output_52))){
+      prefix = Var_as_string(_x2c_gensym_macro_cursor_output_52);
       if(String_startswith(spelling, prefix)) return prefix;
     }
 
@@ -7026,16 +6993,16 @@ static String f11_invocations____forwarded_prefix(String spelling){
   return NULL;
 }
 
-static List f11_invocations____forwarded_prefix_list(void){
+static List f20_invocations_captures____forwarded_prefix_list(void){
   Array prefixes = Array_new();
   Map seen = Map_new();
   {
     String projection;
-    List _x2c_gensym_macro_object_53 = _589;
-    List _x2c_gensym_macro_cursor_61 = _x2c_gensym_macro_object_53;
-    Var _x2c_gensym_macro_cursor_output_54;
-    while(List_try_next(_x2c_gensym_macro_object_53, &(_x2c_gensym_macro_cursor_61), &(_x2c_gensym_macro_cursor_output_54))){
-      projection = Var_as_string(_x2c_gensym_macro_cursor_output_54);
+    List _x2c_gensym_macro_object_52 = _589;
+    List _x2c_gensym_macro_cursor_60 = _x2c_gensym_macro_object_52;
+    Var _x2c_gensym_macro_cursor_output_53;
+    while(List_try_next(_x2c_gensym_macro_object_52, &(_x2c_gensym_macro_cursor_60), &(_x2c_gensym_macro_cursor_output_53))){
+      projection = Var_as_string(_x2c_gensym_macro_cursor_output_53);
       for(int sequence = 0;  sequence <= 1;  sequence ++){
         String prefix = Atom_str(Macro_binder(Symbol_var(58), projection, sequence));
         if(Map_contains(seen, String_var(prefix))) continue;
@@ -7088,16 +7055,36 @@ static Var _source_unwrap(Var value){
     }
 
   }
-  List child;  List _x2c_gensym_macro_original_5 = Var_list(value);  Array _x2c_gensym_macro_rewritten_5 = NULL;  for(List _x2c_gensym_macro_cursor_62 = _x2c_gensym_macro_original_5;  List_truth(_x2c_gensym_macro_cursor_62);  _x2c_gensym_macro_cursor_62 = List_cdr(_x2c_gensym_macro_cursor_62)){
-    Var _x2c_gensym_macro_item_59 = List_car(_x2c_gensym_macro_cursor_62), _x2c_gensym_macro_value_5 = _x2c_gensym_macro_item_59;  if(Var_is_row(_x2c_gensym_macro_item_59, 9, 7, 4)){
-      child = Var_list_payload(_x2c_gensym_macro_item_59);  _x2c_gensym_macro_value_5 = _source_unwrap(List_var(child));
+  List child;  List _x2c_gensym_macro_original_5 = Var_list(value);  Array _x2c_gensym_macro_rewritten_5 = NULL;  for(List _x2c_gensym_macro_cursor_61 = _x2c_gensym_macro_original_5;  List_truth(_x2c_gensym_macro_cursor_61);  _x2c_gensym_macro_cursor_61 = List_cdr(_x2c_gensym_macro_cursor_61)){
+    Var _x2c_gensym_macro_item_58 = List_car(_x2c_gensym_macro_cursor_61), _x2c_gensym_macro_value_5 = _x2c_gensym_macro_item_58;  if(Var_is_row(_x2c_gensym_macro_item_58, 9, 7, 4)){
+      child = Var_list_payload(_x2c_gensym_macro_item_58);  _x2c_gensym_macro_value_5 = _source_unwrap(List_var(child));
     }
-    if(!(void *) _x2c_gensym_macro_rewritten_5 && ! x2c_var_equal(_x2c_gensym_macro_value_5, _x2c_gensym_macro_item_59)){
-      _x2c_gensym_macro_rewritten_5 = Array_new();  for(List _x2c_gensym_macro_prefix_5 = _x2c_gensym_macro_original_5;  ! List_equal(_x2c_gensym_macro_prefix_5, _x2c_gensym_macro_cursor_62);  _x2c_gensym_macro_prefix_5 = List_cdr(_x2c_gensym_macro_prefix_5)) Array_push(_x2c_gensym_macro_rewritten_5, List_car(_x2c_gensym_macro_prefix_5));
+    if(!(void *) _x2c_gensym_macro_rewritten_5 && ! x2c_var_equal(_x2c_gensym_macro_value_5, _x2c_gensym_macro_item_58)){
+      _x2c_gensym_macro_rewritten_5 = Array_new();  for(List _x2c_gensym_macro_prefix_5 = _x2c_gensym_macro_original_5;  ! List_equal(_x2c_gensym_macro_prefix_5, _x2c_gensym_macro_cursor_61);  _x2c_gensym_macro_prefix_5 = List_cdr(_x2c_gensym_macro_prefix_5)) Array_push(_x2c_gensym_macro_rewritten_5, List_car(_x2c_gensym_macro_prefix_5));
     }
     if((void *) _x2c_gensym_macro_rewritten_5) Array_push(_x2c_gensym_macro_rewritten_5, _x2c_gensym_macro_value_5);
   }
   return List_var((void *) _x2c_gensym_macro_rewritten_5 ? Array_list_free(_x2c_gensym_macro_rewritten_5) : _x2c_gensym_macro_original_5);
+}
+
+List Sym_reference(Sym, List, Type *);
+static void f19_invocations_targets____bind_name_arguments(Compiler c, List definition, List arguments){
+  List parameters = Var_list_payload(List_assoc(definition, Symbol_var(1129338912386214)));  List captures = List_cdr(arguments);  while(List_truth(parameters)){
+    List parameter = Var_list_payload(List_car(parameters));  if(x2c_var_equal(List_assoc(parameter, Symbol_var(740232)), Symbol_var(920394))){
+      Var names = List_assoc(Var_list(List_car(captures)), Symbol_var(46228810));  List values = Var_list_payload(Var_int(List_assoc(parameter, Symbol_var(1317592723658))) ? names : List_var(cons(names, NULL))); {
+        Var value;  List _x2c_gensym_macro_object_53 = values;  List _x2c_gensym_macro_cursor_62 = _x2c_gensym_macro_object_53;  Var _x2c_gensym_macro_cursor_output_54;  while(List_try_next(_x2c_gensym_macro_object_53, &(_x2c_gensym_macro_cursor_62), &(_x2c_gensym_macro_cursor_output_54))){
+          value = _x2c_gensym_macro_cursor_output_54; {
+            String name = Var_as_string(Var_is_row(value, 9, 7, 4) ? String_var(Ast_binding_spelling(Var_list_payload(value))) : value);  Sym_reference(c -> sym, cons(String_var(name), NULL), NULL);
+          }
+
+        }
+
+      }
+
+    }
+    parameters = List_cdr(parameters);  captures = List_cdr(captures);
+  }
+
 }
 
 List Compiler_try_parse_macro_target_at(Compiler c, Symbol position){
@@ -7105,11 +7092,11 @@ List Compiler_try_parse_macro_target_at(Compiler c, Symbol position){
 }
 
 static List _target_at(Compiler c, Symbol position, int open){
-  if(Map_truth(c -> macro_holes) && List_truth(Compiler_peek_macro_hole(c))) return NULL;  Token invocation = c -> token;  List definition = f11_invocations____take_invocation(c, position);  if(! List_truth(definition)) return NULL;  if(x2c_var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(9147177346020))) return f11_invocations____decorate(c, definition, invocation, position, open);  f11_invocations____check_position(c, definition, invocation, position);  return f11_invocations____invoke_definition(c, definition, invocation, position, open);
+  if(Map_truth(c -> macro_holes) && List_truth(Compiler_peek_macro_hole(c))) return NULL;  Token invocation = c -> token;  List definition = _take_invocation(c, position);  if(! List_truth(definition)) return NULL;  if(x2c_var_equal(List_assoc(definition, Symbol_var(740232)), Symbol_var(9147177346020))) return f19_invocations_targets____decorate(c, definition, invocation, position, open);  f19_invocations_targets____check_position(c, definition, invocation, position);  return f19_invocations_targets____invoke_definition(c, definition, invocation, position, open);
 }
 
-static void f11_invocations____check_position(Compiler c, List definition, Token invocation, Symbol position){
-  Symbol kind = Var_symbol(List_assoc(definition, Symbol_var(740232)));  const f11_invocations___MacroPos * place = f11_invocations____position(position);  if(kind == place -> kind ||(kind == 9147004580456 && position == 1405544)) return;  Atom name = List_assoc(definition, Symbol_var(920394));  String spelling = Atom_str(name), result_kind = _kind_spelling(kind); {
+static void f19_invocations_targets____check_position(Compiler c, List definition, Token invocation, Symbol position){
+  Symbol kind = Var_symbol(List_assoc(definition, Symbol_var(740232)));  const MacroPos * place = _position(position);  if(kind == place -> kind ||(kind == 9147004580456 && position == 1405544)) return;  Atom name = List_assoc(definition, Symbol_var(920394));  String spelling = Atom_str(name), result_kind = _kind_spelling(kind); {
     String _x2c_gensym_macro_message_2 = String_add(String_join(NULL, cons(String_var(_594), cons(String_var(spelling), cons(String_var(_595), cons(String_var(result_kind), cons(String_var(_596), NULL)))))), String_join(NULL, cons(String_var(_597), cons(String_var(String_new(place -> description)), NULL))));  Compiler_report_error(c, 27335838, _x2c_gensym_macro_message_2, invocation, NULL);
   }
 
@@ -7118,7 +7105,7 @@ static void f11_invocations____check_position(Compiler c, List definition, Token
 SymTxn Compiler_begin_semantic_transaction(Compiler);
 int SymTxn_local_macros_changed(SymTxn *);
 void SymTxn_commit(SymTxn *);
-static List f11_invocations____invoke_definition(Compiler c, List definition, Token invocation, Symbol position, int open){
+static List f19_invocations_targets____invoke_definition(Compiler c, List definition, Token invocation, Symbol position, int open){
   int deferred = ! ! Map_truth(c -> macro_holes);  SymTxn transaction = Compiler_begin_semantic_transaction(c); {
     _x2c_gensym_defer_env_46 _x2c_gensym_macro_environment_46 ={
       0
@@ -7127,7 +7114,7 @@ static List f11_invocations____invoke_definition(Compiler c, List definition, To
       .fn = _x2c_gensym_defer_cleanup_48, .env = & _x2c_gensym_macro_environment_46
     }
     ;  x2c_cleanup_push(& _x2c_gensym_defer_record_48); {
-      List input = f11_invocations____invocation_arguments(c, definition, invocation);  if(f11_invocations____position(position) -> semicolon && ! open) Compiler_expect(c, 119);  List node = f11_invocations____invocation_node(c, definition, input, invocation);  List result = deferred ? cons(_50, cons(List_var(node), NULL)) : Compiler_bind_syntax(c, List_var(node), position, List_type(c -> return_type));  if(! x2c_var_equal(List_car(result), Symbol_var(39266)) || List_len(result) != 1 || SymTxn_local_macros_changed(&(transaction))) SymTxn_commit(&(transaction)); {
+      List input = _invocation_arguments(c, definition, invocation);  if(_position(position) -> semicolon && ! open) Compiler_expect(c, 119);  List node = _invocation_node(c, definition, input, invocation);  List result = deferred ? cons(_50, cons(List_var(node), NULL)) : Compiler_bind_syntax(c, List_var(node), position, List_type(c -> return_type));  if(! x2c_var_equal(List_car(result), Symbol_var(39266)) || List_len(result) != 1 || SymTxn_local_macros_changed(&(transaction))) SymTxn_commit(&(transaction)); {
         List _x2c_gensym_return_value_45 = result; {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_48);  return _x2c_gensym_return_value_45;
         }
@@ -7140,22 +7127,22 @@ static List f11_invocations____invoke_definition(Compiler c, List definition, To
 
 }
 
-static List f11_invocations____invocation_node(Compiler c, List definition, List input, Token invocation){
+static List _invocation_node(Compiler c, List definition, List input, Token invocation){
   Var stored = List_var(definition);  Var site = Token_var(invocation);  if(Map_truth(c -> macro_holes)){
-    stored = f11_invocations____stored_reference(c, definition);  site = Symbol_var(960560003786);
+    stored = f19_invocations_targets____stored_reference(c, definition);  site = Symbol_var(960560003786);
   }
   return cons(_104, cons(stored, cons(List_var(input), cons(site, NULL))));
 }
 
-static Var f11_invocations____stored_reference(Compiler c, List definition){
+static Var f19_invocations_targets____stored_reference(Compiler c, List definition){
   Atom name = List_assoc(definition, Symbol_var(920394));  if(Var_int(List_assoc(definition, Symbol_var(26155096))) && List_equal(Sym_lookup_macro(c -> sym, name), definition)) return List_var(cons(_318, cons(name, NULL)));  if(Var_truth(List_assoc(definition, Symbol_var(1386033712394)))) return List_var(cons(_372, cons(List_var(definition), NULL)));  return name;
 }
 
-static List f11_invocations____decorate(Compiler c, List definition, Token invocation, Symbol position, int open){
-  f11_invocations___Decoration d ={
+static List f19_invocations_targets____decorate(Compiler c, List definition, Token invocation, Symbol position, int open){
+  f19_invocations_targets___Decoration d ={
     .c = c, .definition = definition, .invocation = invocation, .position = position, .kind = Var_symbol(List_assoc(definition, Symbol_var(1345468776))), .open = open
   }
-  ;  int deferred = ! ! Map_truth(c -> macro_holes);  if(! f11_invocations____on_body(&(d)) && _result_kind(definition) != f11_invocations____position(position) -> kind) f11_invocations____misplaced(&(d));  SymTxn transaction = Compiler_begin_semantic_transaction(c); {
+  ;  int deferred = ! ! Map_truth(c -> macro_holes);  if(! f19_invocations_targets____on_body(&(d)) && _result_kind(definition) != _position(position) -> kind) f19_invocations_targets____misplaced(&(d));  SymTxn transaction = Compiler_begin_semantic_transaction(c); {
     _x2c_gensym_defer_env_48 _x2c_gensym_macro_environment_49 ={
       0
     }
@@ -7171,7 +7158,7 @@ static List f11_invocations____decorate(Compiler c, List definition, Token invoc
           .fn = _x2c_gensym_defer_cleanup_49, .env = & _x2c_gensym_macro_environment_48
         }
         ;  x2c_cleanup_push(& _x2c_gensym_defer_record_50); {
-          List node = f11_invocations____decoration_node(&(d), f11_invocations____arguments(&(d), block_scope));  if(deferred){
+          List node = f19_invocations_targets____decoration_node(&(d), f19_invocations_targets____arguments(&(d), block_scope));  if(deferred){
             SymTxn_commit(&(transaction)); {
               List _x2c_gensym_return_value_46 = cons(_50, cons(List_var(node), NULL)); {
                 x2c_cleanup_leave(& _x2c_gensym_defer_record_50);  x2c_cleanup_leave(& _x2c_gensym_defer_record_49);  return _x2c_gensym_return_value_46;
@@ -7180,7 +7167,7 @@ static List f11_invocations____decorate(Compiler c, List definition, Token invoc
             }
 
           }
-          List result = f11_invocations____bind_decoration(&(d), node); {
+          List result = f19_invocations_targets____bind_decoration(&(d), node); {
             Token * _x2c_gensym_macro_address_30 = & c -> token;  Token _x2c_gensym_macro_previous_30 = * _x2c_gensym_macro_address_30; {
               _x2c_gensym_defer_env_49 _x2c_gensym_macro_environment_47 ={
                 0
@@ -7215,27 +7202,27 @@ static List f11_invocations____decorate(Compiler c, List definition, Token invoc
 
 }
 
-static int f11_invocations____on_body(f11_invocations___Decoration * d){
+static int f19_invocations_targets____on_body(f19_invocations_targets___Decoration * d){
   return(* d).kind == 5011670 &&(* d).position == 1405544;
 }
 
-static void f11_invocations____misplaced(f11_invocations___Decoration * d){
+static void f19_invocations_targets____misplaced(f19_invocations_targets___Decoration * d){
   Atom name = List_assoc((* d).definition, Symbol_var(920394));  String spelling = Atom_str(name), target = _kind_spelling((* d).kind);  Compiler_report_error((* d).c, 27335838, String_join(NULL, cons(String_var(_598), cons(String_var(spelling), cons(String_var(_599), cons(String_var(target), cons(String_var(_600), NULL)))))), (* d).invocation, NULL);
 }
 
-static List f11_invocations____arguments(f11_invocations___Decoration * d, int block_scope){
-  Compiler c =(* d).c;  List definition =(* d).definition;  List arguments = f11_invocations____invocation_arguments(c, definition, (* d).invocation);  if(block_scope) f11_invocations____bind_name_arguments(c, definition, arguments);  if(Compiler_peek(c, 0) == 119) Compiler_report_error(c, 27335838, _601, (* d).invocation, cons(String_var(_definition_note(definition)), NULL));  if(Compiler_peek(c, 0) == 11212){
+static List f19_invocations_targets____arguments(f19_invocations_targets___Decoration * d, int block_scope){
+  Compiler c =(* d).c;  List definition =(* d).definition;  List arguments = _invocation_arguments(c, definition, (* d).invocation);  if(block_scope) f19_invocations_targets____bind_name_arguments(c, definition, arguments);  if(Compiler_peek(c, 0) == 119) Compiler_report_error(c, 27335838, _601, (* d).invocation, cons(String_var(_definition_note(definition)), NULL));  if(Compiler_peek(c, 0) == 11212){
     Atom name = List_assoc(definition, Symbol_var(920394));  String spelling = Atom_str(name);  Compiler_report_error(c, 27335838, String_join(NULL, cons(String_var(_598), cons(String_var(spelling), cons(String_var(_602), NULL)))), (* d).invocation, cons(String_var(_definition_note(definition)), NULL));
   }
   return arguments;
 }
 
-static List f11_invocations____decoration_node(f11_invocations___Decoration * d, List arguments){
-  Compiler c =(* d).c; (* d).start = c -> token;  List target = f11_invocations____target(&((* d)));  if((* d).position == 43159332400040) target = Compiler_anchor_origin(c, target, (* d).start);  List target_capture = f11_invocations____capture(&((* d)), target);  List input = cons(_38, cons(List_var(arguments), cons(List_var(target_capture), NULL)));  return f11_invocations____invocation_node(c, (* d).definition, input, (* d).invocation);
+static List f19_invocations_targets____decoration_node(f19_invocations_targets___Decoration * d, List arguments){
+  Compiler c =(* d).c; (* d).start = c -> token;  List target = f19_invocations_targets____target(&((* d)));  if((* d).position == 43159332400040) target = Compiler_anchor_origin(c, target, (* d).start);  List target_capture = f19_invocations_targets____capture(&((* d)), target);  List input = cons(_38, cons(List_var(arguments), cons(List_var(target_capture), NULL)));  return _invocation_node(c, (* d).definition, input, (* d).invocation);
 }
 
-static List f11_invocations____target(f11_invocations___Decoration * d){
-  Compiler c =(* d).c;  if(f11_invocations____on_body(&((* d)))){
+static List f19_invocations_targets____target(f19_invocations_targets___Decoration * d){
+  Compiler c =(* d).c;  if(f19_invocations_targets____on_body(&((* d)))){
     (* d).function = Compiler_parse_function_definition(c); {
       List _x2c_gensym_match_expr =(* d).function; List _x2c_gensym_match_cursor;  switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
           case 9224498395122781148ULL: ;  _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224498395122781148ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
@@ -7247,10 +7234,10 @@ static List f11_invocations____target(f11_invocations___Decoration * d){
     }
     return NULL;
   }
-  if((* d).kind == 458361162716) return Compiler_parse_function_target(c);  if((* d).kind == 988265867168778) return Compiler_parse_named_type(c);  if((* d).open) return _arrow_statement(c, 1);  return f11_invocations____positional_target(c, (* d).position);
+  if((* d).kind == 458361162716) return Compiler_parse_function_target(c);  if((* d).kind == 988265867168778) return Compiler_parse_named_type(c);  if((* d).open) return _arrow_statement(c, 1);  return f19_invocations_targets____positional_target(c, (* d).position);
 }
 
-static List f11_invocations____positional_target(Compiler c, Symbol position){
+static List f19_invocations_targets____positional_target(Compiler c, Symbol position){
   switch(position){
     case 1405544 :{
       int * _x2c_gensym_macro_address_31 = & c -> capture_unit;  int _x2c_gensym_macro_previous_31 = * _x2c_gensym_macro_address_31; {
@@ -7278,17 +7265,17 @@ static List f11_invocations____positional_target(Compiler c, Symbol position){
 
 }
 
-static List f11_invocations____capture(f11_invocations___Decoration * d, List target){
+static List f19_invocations_targets____capture(f19_invocations_targets___Decoration * d, List target){
   Compiler c =(* d).c;  List targets = x2c_var_equal(List_car(target), Symbol_var(39266)) ? List_cdr(target) : cons(List_var(target), NULL);  Array captured_targets = Array_new(); {
     Var item;  List _x2c_gensym_macro_object_54 = targets;  List _x2c_gensym_macro_cursor_63 = _x2c_gensym_macro_object_54;  Var _x2c_gensym_macro_cursor_output_55;  while(List_try_next(_x2c_gensym_macro_object_54, &(_x2c_gensym_macro_cursor_63), &(_x2c_gensym_macro_cursor_output_55))){
-      item = _x2c_gensym_macro_cursor_output_55;  Array_push(captured_targets, f11_invocations____capture_source(c, item, (* d).start, c -> token));
+      item = _x2c_gensym_macro_cursor_output_55;  Array_push(captured_targets, _capture_source(c, item, (* d).start, c -> token));
     }
 
   }
-  List captured = Array_list_free(captured_targets);  List target_capture = _capture_row_project(c, Var_list_payload(List_assoc((* d).definition, Symbol_var(43055000864))), captured, 0);  if((* d).kind == 1405544 && ! f11_invocations____private_target(c, target) && List_truth(captured) && ! List_truth(List_cdr(captured))) target_capture = List_append(target_capture, cons(List_var(cons(_603, cons(List_car(captured), NULL))), NULL));  return target_capture;
+  List captured = Array_list_free(captured_targets);  List target_capture = _capture_row_project(c, Var_list_payload(List_assoc((* d).definition, Symbol_var(43055000864))), captured, 0);  if((* d).kind == 1405544 && ! f19_invocations_targets____private_target(c, target) && List_truth(captured) && ! List_truth(List_cdr(captured))) target_capture = List_append(target_capture, cons(List_var(cons(_603, cons(List_car(captured), NULL))), NULL));  return target_capture;
 }
 
-static int f11_invocations____private_target(Compiler c, List target){
+static int f19_invocations_targets____private_target(Compiler c, List target){
   int private_target = c -> source_private > 0;  List visibility_target = target; {
     List _x2c_gensym_match_expr = visibility_target; List _x2c_gensym_match_cursor;  switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
         case 9224497936761657698ULL: ;  _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761657698ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
@@ -7319,12 +7306,12 @@ static int f11_invocations____private_target(Compiler c, List target){
   return private_target;
 }
 
-static List f11_invocations____bind_decoration(f11_invocations___Decoration * d, List node){
-  Compiler c =(* d).c;  if(! f11_invocations____on_body(&((* d)))) return Compiler_bind_syntax(c, List_var(node), (* d).position, List_type(c -> return_type));  return f11_invocations____bind_body(c, node, (* d).function);
+static List f19_invocations_targets____bind_decoration(f19_invocations_targets___Decoration * d, List node){
+  Compiler c =(* d).c;  if(! f19_invocations_targets____on_body(&((* d)))) return Compiler_bind_syntax(c, List_var(node), (* d).position, List_type(c -> return_type));  return f19_invocations_targets____bind_body(c, node, (* d).function);
 }
 
-static List f11_invocations____bind_body(Compiler c, List node, List decorated){
-  Type declared = f11_invocations____declared_result(decorated);  List result = NULL; {
+static List f19_invocations_targets____bind_body(Compiler c, List node, List decorated){
+  Type declared = f19_invocations_targets____declared_result(decorated);  List result = NULL; {
     List * _x2c_gensym_macro_address_32 = & c -> return_type;  List _x2c_gensym_macro_previous_32 = * _x2c_gensym_macro_address_32; {
       _x2c_gensym_defer_env_51 _x2c_gensym_macro_environment_51 ={
         0
@@ -7359,7 +7346,7 @@ static List f11_invocations____bind_body(Compiler c, List node, List decorated){
 
 Type List_type_from_ast(List);
 Type Type_declared(Type);
-static Type f11_invocations____declared_result(List decorated){
+static Type f19_invocations_targets____declared_result(List decorated){
   Type declared = NULL; {
     List _x2c_gensym_match_expr = decorated; List _x2c_gensym_match_cursor;  switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
         case 9224498395122781148ULL: ;  _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224498395122781148ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_1 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
@@ -7389,19 +7376,19 @@ static Type f11_invocations____declared_result(List decorated){
 
 List Compiler_try_parse_macro_expression(Compiler c){
   if(! _init_guard_) _file_init_();  Token invocation = c -> token;  if(Compiler_peek(c, 0) == 73){
-    List value = f11_invocations____named_macro_value(c, invocation);  if(List_truth(value)) return value;
+    List value = f23_invocations_expressions____named_macro_value(c, invocation);  if(List_truth(value)) return value;
   }
-  if((Compiler_peek(c, 0) == 73 || Compiler_peek(c, 0) == 129) && ! List_truth(_peek_invocation(c))) return f11_invocations____parse_meta_call(c, invocation);  List definition = f11_invocations____take_invocation(c, 405758822009820);  if(! List_truth(definition)) return NULL;  return Compiler_resolve_expression(c, f11_invocations____expression_invocation(c, definition, invocation), invocation);
+  if((Compiler_peek(c, 0) == 73 || Compiler_peek(c, 0) == 129) && ! List_truth(_peek_invocation(c))) return f23_invocations_expressions____parse_meta_call(c, invocation);  List definition = _take_invocation(c, 405758822009820);  if(! List_truth(definition)) return NULL;  return Compiler_resolve_expression(c, f23_invocations_expressions____expression_invocation(c, definition, invocation), invocation);
 }
 
-static List f11_invocations____named_macro_value(Compiler c, Token invocation){
+static List f23_invocations_expressions____named_macro_value(Compiler c, Token invocation){
   Atom name = _name(c);  if(Compiler_peek(c, 0) != 81){
     List value = _macro_value(c, name);  if(List_truth(value)) return value;
   }
   c -> token = invocation;  return NULL;
 }
 
-static List f11_invocations____parse_meta_call(Compiler c, Token invocation){
+static List f23_invocations_expressions____parse_meta_call(Compiler c, Token invocation){
   Compiler_next(c);  List callee = NULL; {
     Map * _x2c_gensym_macro_address_33 = & c -> macro_holes;  Map _x2c_gensym_macro_previous_33 = * _x2c_gensym_macro_address_33; {
       _x2c_gensym_defer_env_52 _x2c_gensym_macro_environment_52 ={
@@ -7420,7 +7407,7 @@ static List f11_invocations____parse_meta_call(Compiler c, Token invocation){
   Type signature = Var_type(List_cadr(callee));  if(! Type_is_function(signature)){
     c -> token = invocation;  Atom name = _name(c); (void) _lookup(c, name, invocation);
   }
-  Array arguments = f11_invocations____meta_arguments(c, Var_list_payload(List_cadr(Var_list(List_car(Type_list(signature))))));  Type result = Map_truth(c -> macro_holes) ? List_type(_72) : List_cdr(signature);  Symbol head = c -> meta_body && ! Map_truth(c -> macro_holes) && ! c -> in_pattern ? 199448 : 28973981698840;  List call =({
+  Array arguments = f23_invocations_expressions____meta_arguments(c, Var_list_payload(List_cadr(Var_list(List_car(Type_list(signature))))));  Type result = Map_truth(c -> macro_holes) ? List_type(_72) : List_cdr(signature);  Symbol head = c -> meta_body && ! Map_truth(c -> macro_holes) && ! c -> in_pattern ? 199448 : 28973981698840;  List call =({
     Var _x2c_gensym_literal_part_96 = List_var(result);  Var _x2c_gensym_literal_part_97 = List_var(({
       Var _x2c_gensym_literal_part_93 = Symbol_var(head);  Var _x2c_gensym_literal_part_94 = List_var(callee);  Var _x2c_gensym_literal_part_95 = List_var(cons(_181, List_append(Array_list_free(arguments), NULL)));  cons(_x2c_gensym_literal_part_93, cons(_x2c_gensym_literal_part_94, cons(_x2c_gensym_literal_part_95, NULL)));
     }
@@ -7429,14 +7416,14 @@ static List f11_invocations____parse_meta_call(Compiler c, Token invocation){
   );  return Compiler_resolve_expression(c, call, invocation);
 }
 
-static Array f11_invocations____meta_arguments(Compiler c, List parameters){
+static Array f23_invocations_expressions____meta_arguments(Compiler c, List parameters){
   Array arguments = Array_new();  Compiler_expect(c, 81);  if(Compiler_peek(c, 0) != 83) while(1){
-    List argument = f11_invocations____meta_argument(c);  if(List_truth(parameters) && ! Map_truth(c -> macro_holes)) argument = Compiler_convert_expression(c, argument, Var_type(List_car(parameters)));  parameters = List_cdr(parameters);  Array_push(arguments, List_var(argument));  if(! Compiler_test(c, 89)) break;
+    List argument = f23_invocations_expressions____meta_argument(c);  if(List_truth(parameters) && ! Map_truth(c -> macro_holes)) argument = Compiler_convert_expression(c, argument, Var_type(List_car(parameters)));  parameters = List_cdr(parameters);  Array_push(arguments, List_var(argument));  if(! Compiler_test(c, 89)) break;
   }
   Compiler_expect(c, 83);  return arguments;
 }
 
-static List f11_invocations____meta_argument(Compiler c){
+static List f23_invocations_expressions____meta_argument(Compiler c){
   List hole = Compiler_peek_macro_hole(c);  Symbol next = List_truth(hole) ? Compiler_after_hole(c) -> type : 0;  int direct = next == 89 || next == 83;  if(direct && Var_int(List_assoc(hole, Symbol_var(1317592723658)))){
     Compiler_expect(c, 73);  Compiler_next(c);  return cons(_70, cons(_207, cons(List_var(cons(_609, cons(List_var(cons(_hole_key(hole, _92), NULL)), NULL))), NULL)));
   }
@@ -7446,11 +7433,11 @@ static List f11_invocations____meta_argument(Compiler c){
   return argument;
 }
 
-static List f11_invocations____expression_invocation(Compiler c, List definition, Token invocation){
-  Symbol kind = Var_symbol(List_assoc(definition, Symbol_var(740232)));  if(kind == 9147177346020 && x2c_var_equal(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(377892))) return f11_invocations____expression_decorator(c, definition, invocation);  if(c -> meta_body &&(kind == 1405544 || kind == 168163805864282)) return f11_invocations____template_call(c, definition);  List arguments = f11_invocations____invocation_arguments(c, definition, invocation);  if(kind != 405758822009820) f11_invocations____not_expression(c, definition, invocation);  List node = f11_invocations____invocation_node(c, definition, arguments, invocation);  return cons(_70, cons(_73, cons(List_var(node), NULL)));
+static List f23_invocations_expressions____expression_invocation(Compiler c, List definition, Token invocation){
+  Symbol kind = Var_symbol(List_assoc(definition, Symbol_var(740232)));  if(kind == 9147177346020 && x2c_var_equal(List_assoc(definition, Symbol_var(1345468776)), Symbol_var(377892))) return f23_invocations_expressions____expression_decorator(c, definition, invocation);  if(c -> meta_body &&(kind == 1405544 || kind == 168163805864282)) return f23_invocations_expressions____template_call(c, definition);  List arguments = _invocation_arguments(c, definition, invocation);  if(kind != 405758822009820) f23_invocations_expressions____not_expression(c, definition, invocation);  List node = _invocation_node(c, definition, arguments, invocation);  return cons(_70, cons(_73, cons(List_var(node), NULL)));
 }
 
-static List f11_invocations____template_call(Compiler c, List definition){
+static List f23_invocations_expressions____template_call(Compiler c, List definition){
   Array arguments = Array_new();  Compiler_expect(c, 81); {
     List hole;  List _x2c_gensym_macro_object_55 = Var_list(List_assoc(definition, Symbol_var(1129338912386214)));  List _x2c_gensym_macro_cursor_64 = _x2c_gensym_macro_object_55;  Var _x2c_gensym_macro_cursor_output_56;  while(List_try_next(_x2c_gensym_macro_object_55, &(_x2c_gensym_macro_cursor_64), &(_x2c_gensym_macro_cursor_output_56))){
       hole = Var_list_payload(_x2c_gensym_macro_cursor_output_56); {
@@ -7466,21 +7453,21 @@ static List f11_invocations____template_call(Compiler c, List definition){
   )), NULL)));
 }
 
-static void f11_invocations____not_expression(Compiler c, List definition, Token invocation){
+static void f23_invocations_expressions____not_expression(Compiler c, List definition, Token invocation){
   Symbol kind = Var_symbol(List_assoc(definition, Symbol_var(740232)));  String spelling = Var_str(List_assoc(definition, Symbol_var(920394))); {
     String _x2c_gensym_macro_subject_0 = kind == 9147177346020 ? String_join(NULL, cons(String_var(_598), cons(String_var(spelling), cons(String_var(_7), NULL)))) : String_join(NULL, cons(String_var(_594), cons(String_var(spelling), cons(String_var(_7), NULL))));  Compiler_report_error(c, 27335838, String_join(NULL, cons(String_var(_x2c_gensym_macro_subject_0), cons(String_var(_615), NULL))), invocation, kind == 9147177346020 ? cons(String_var(_definition_note(definition)), NULL) : NULL);
   }
 
 }
 
-static List f11_invocations____expression_decorator(Compiler c, List definition, Token invocation){
-  List arguments = f11_invocations____invocation_arguments(c, definition, invocation);  if(Compiler_peek(c, 0) == 119 || Compiler_peek(c, 0) == 11212){
+static List f23_invocations_expressions____expression_decorator(Compiler c, List definition, Token invocation){
+  List arguments = _invocation_arguments(c, definition, invocation);  if(Compiler_peek(c, 0) == 119 || Compiler_peek(c, 0) == 11212){
     String spelling = Var_str(List_assoc(definition, Symbol_var(920394)));  Compiler_report_error(c, 27335838, String_join(NULL, cons(String_var(_598), cons(String_var(spelling), cons(String_var(_616), NULL)))), invocation, cons(String_var(_definition_note(definition)), NULL));
   }
   List target = Compiler_parse_macro_expression_target(c);  List input =({
     Var _x2c_gensym_literal_part_100 = List_var(arguments);  Var _x2c_gensym_literal_part_101 = List_var(_capture_row_project(c, Var_list_payload(List_assoc(definition, Symbol_var(43055000864))), cons(List_var(target), NULL), 0));  cons(_38, cons(_x2c_gensym_literal_part_100, cons(_x2c_gensym_literal_part_101, NULL)));
   }
-  );  List node = f11_invocations____invocation_node(c, definition, input, invocation);  return cons(_70, cons(_73, cons(List_var(node), NULL)));
+  );  List node = _invocation_node(c, definition, input, invocation);  return cons(_70, cons(_73, cons(List_var(node), NULL)));
 }
 
 Var Compiler_evaluate_macro_slot(Compiler c, Var value){
