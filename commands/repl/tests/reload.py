@@ -814,11 +814,15 @@ def shared_object_version(initial=10):
             'const int shared_locked[2] = {11,12};\n'
             'static int private_shared = 40;\n'
             'int shared_first(void) { return shared_samples[0]; }\n'
+            'int shared_head(const int values[3], const int n) { '
+            'return values[n]; }\n'
             'int objects_next(void) { return dependency_next(); }\n')
 
 
 shared_operation_text = (
     '#include "objects.h"\n#include "dependency.x"\n#include <stdlib.h>\n'
+    'int shared_head(const int *values, int n);\n'
+    'int shared_pick(void) { return shared_head(shared_samples,1); }\n'
     'static int private_shared = 2;\n'
     'int shared_calls;\n'
     'int shared_sum(const int *values, int count) { '
@@ -830,6 +834,8 @@ shared_operation_text = (
     'p.x+=dx; return p.x; }\n'
     'int shared_alias(int *a, int *b) { *a+=2; *b+=3; return *a+*b; }\n'
     'int shared_pair(const int *p, int n) { return *p*100+n; }\n'
+    'int shared_array(const int p[3]) { return p[2]; }\n'
+    'int shared_const_pointer(int *const p) { return p[0]; }\n'
     'int shared_advance(void) { shared_samples[0]+=private_shared; '
     'return shared_first(); }\n'
     'int operations_next(void) { return dependency_next(); }\n'
@@ -850,6 +856,9 @@ try:
     session.value('shared_before()', 17)
     session.value('shared_saved()', 10)
     session.value('shared_sum(shared_samples,3)', 60)
+    session.value('shared_array(shared_samples)', 30)
+    session.value('shared_const_pointer(shared_samples)', 10)
+    session.value('shared_pick()', 20)
     session.run('int shared_through(void) { '
                 'shared_shift(&shared_holder.point,1); '
                 'return shared_sum(shared_holder.values,2)+shared_prompt; }')

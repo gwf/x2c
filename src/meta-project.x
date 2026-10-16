@@ -448,6 +448,7 @@ static String _loaded_providers(Helper &h) {
   int index = 1;
   foreach (String path, h.owners) {
     List provider = _loaded_provider(h, path, index++);
+    match (provider) case %(failure ?(String message)): return message;
     h.providers[path] = provider;
     Map declarations = provider.car();
     foreach (String name, declarations.keys()) {
@@ -479,7 +480,8 @@ static List _collect_provider(
   c.meta_build = index + 1;
   c.load_source = path in h.entries;
   c.diagnostics.limit = 0;
-  if (started) unit.collect(f);
+  if (!started || !unit.collect(f))
+    return unit.context.export(%(failure ${c.diagnostics().repr()}));
   c.sym.reset(unit.globals);
   return unit.context.export(c.loaded_provider());
 }

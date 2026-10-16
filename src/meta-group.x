@@ -1126,6 +1126,7 @@ static List _targets(Compiler c, List named, List functions) {
         ${c.cache_literal_list(functions)}));
   foreach (List row, named) {
     (String name, List binding, Type type) = row;
+    if (c.load_source) type = c.loaded_call_type(type);
     List function = NULL;
     try function = c.convert_expression(
       %(expr $type (ident $binding)), %("Func"));

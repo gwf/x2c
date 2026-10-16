@@ -302,6 +302,8 @@ selections also work, such as `sum(&samples[1], 2)`. Repeated selections
 of the same object alias that object. Const restrictions and array bounds
 remain checked. Scalar arguments and indices are evaluated once in source
 order. Compiled prompt functions can make these same calls.
+Call the loaded function by name for object arguments. Saved `Func` values
+retain their existing data-value calling limits.
 
 Use normal includes, prototypes, and `extern` declarations for references
 between source files. Larger programs usually keep common declarations in

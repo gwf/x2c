@@ -6,6 +6,7 @@
 #include "repl-session.x"
 #include "ast-rewrite.x"
 #include "expressions.x"
+#include "collect.x"
 
 /* Follow only field and index selections rooted at the actual published
    binding. Locals with the same spelling remain ordinary objects. */
@@ -186,7 +187,7 @@ static List _object_argument(
     values.push(%(expr (long long) (ident $temporary)));
   }
   List selected = _argument_list(c, values);
-  Symbol tag = c.sym.var_tag_for_type(wanted, NULL);
+  Symbol tag = c.sym.var_tag_for_type(parameter, NULL);
   if (!tag) tag = <p48>;
   List descriptor = _argument_list(c, %(${ $!Symbol{ ${<object>} } }
     ${$!String{ $path }} $selected ${$!int{ $reference }}
@@ -212,10 +213,9 @@ static List _loaded_call(
       binding != c.sym.resolve_global(%($name), NULL)) return NULL;
   List adapter = entry.assoc(<objects>);
   if (!adapter) return NULL;
-  Type type = callee.cadr();
+  Type type = c.loaded_call_type(callee.cadr());
   List parameters = NULL;
   type.function_parts(parameters, NULL);
-  if (parameters == %((void))) parameters = NULL;
   if (parameters.len() != arguments.len()) return NULL;
   Array selected = $auto([]);
   int objects = 0;

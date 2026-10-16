@@ -475,19 +475,6 @@ void Compiler.use_meta_helper(MetaHelper helper) {
   foreach (Var (key, value), helper.units) key.string().try_own();
 }
 
-/** Checks every provider before publishing a loaded program. */
-void MetaHelper.check_all(MetaHelper m, Compiler c) {
-  MetaHelper previous = active;
-  active = m;
-  defer active = previous;
-  Call call = {.compiler = c, .name = ":load", .site = c.token};
-  _check(call);
-  foreach (Var (index, failure), m.failures) {
-    call.table = index;
-    _refuse(call, failure);
-  }
-}
-
 /** Checks that this helper built the provider table needed by `name`.
     Does not invoke the function or reset native state. */
 void MetaHelper.check(MetaHelper m, Compiler c, String name, String provider) {

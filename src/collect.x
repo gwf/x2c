@@ -1299,9 +1299,29 @@ List Compiler.loaded_provider(Compiler c) {
   return %($declarations $symbols);
 }
 
+/** Returns the native calling type of a loaded function. Array parameters
+    decay to pointers, and a parameter's outer qualifiers affect only its
+    local copy. Keep the declared type for inspection and reload checks. */
+Type Compiler.loaded_call_type(Compiler c, Type type) {
+  List parameters = NULL;
+  Type result = NULL;
+  type.function_parts(parameters, result);
+  Array adjusted = [];
+  foreach (Type parameter, parameters) {
+    Type shape = c.sym.normalize_declared_type(parameter);
+    if (shape.is_array()) parameter = shape.dereference().reference();
+    while (parameter.car() is <symbol> &&
+           parameter.car().symbol().is_type_qualifier())
+      parameter = parameter.cdr();
+    adjusted.push(parameter);
+  }
+  return %((func ${adjusted.list_free()}) @result);
+}
+
 static Type _loaded_declaration(Compiler c, Type type) {
   type = c.sym.normalize_declared_type(type);
   if (!type.is_function()) return type;
+  type = c.loaded_call_type(type);
   List parameters = NULL;
   Type result = NULL;
   type.function_parts(parameters, result);

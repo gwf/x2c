@@ -1,7 +1,8 @@
 # One native helper for the REPL
 
 > Status: active
-> Planned 2026-10-16; implementation has not started.
+> Planned 2026-10-16; shared loading and object calls are implemented.
+> Combined verification and publication remain in progress.
 > Gary selected resetting all loaded native state after every successful
 > load, including a first load of an additional file.
 > Adjacent meta/macro campaign notes were checked against `e057f9509` on

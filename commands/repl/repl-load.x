@@ -249,18 +249,6 @@ static LoadedSource _prepare(
       List names = _public_definitions(c, symbols, globals);
       if (!names)
         raise %(repl (reason "no public functions or supported globals found"));
-      foreach (String name, names) {
-        if (name in globals) {
-          foreach (List description, globals[name].list()) {
-            (String path, Type bridge, int writable, int dimensions) =
-              description;
-            MetaHelper.check(c.meta_helper, c, "get global " + path, c.filename);
-            if (writable) MetaHelper.check(
-              c.meta_helper, c, "set global " + path, c.filename);
-          }
-        }
-        else MetaHelper.check(c.meta_helper, c, name, c.filename);
-      }
       loaded.globals = unit.context.export(globals);
       loaded.symbols = unit.context.export(symbols);
       loaded.result.value = unit.context.export(names);
@@ -408,6 +396,7 @@ static void _publish(
     state. Top-level prompt evaluation remains interpreted. */
 ReplResult ReplSession.load(
   ReplSession session, Frontend frontend, String filename) {
+  session.compiler.diagnostics.reset();
   filename = Path.absolute(filename);
   int replacing = filename in session.files;
   Array paths = $auto(session.files.keys());
@@ -428,7 +417,7 @@ ReplResult ReplSession.load(
     }
   }
   try {
-    helper.check_all(session.compiler);
+    helper.check(session.compiler, ":load", filename);
     Map visible = $auto(session.compiler.sym.unit_symbols());
     foreach (String path, paths) {
       LoadedSource *loaded = Scope.calloc(1, sizeof(LoadedSource));

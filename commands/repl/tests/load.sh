@@ -94,7 +94,7 @@ fi
 grep -q 'usage: :load' "$tmp/err"
 grep -q 'cannot read input file' "$tmp/err"
 grep -q 'absent_native_body' "$tmp/err"
-grep -q 'loaded_text' "$tmp/err"
+grep -q 'duplicate native definition:' "$tmp/err"
 grep -q '^=> 3$' "$tmp/out"
 grep -q 'unresolved identifier: LOAD_RED' "$tmp/err"
 grep -q 'arguments must be independent data values' "$tmp/err"
