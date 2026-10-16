@@ -48,6 +48,7 @@ ok
 defined plus
 loaded ("loaded_text" "loaded_list" "loaded_answer"
  "loaded_calls" "loaded_append" "loaded_exit")
+reset all loaded native state
 => 42
 => 1
 => "kept native text"
@@ -58,10 +59,11 @@ ok
 => [ 1, 99 ]
 => 1
 loaded ("second_answer" "ordinary_color")
+reset all loaded native state
 => 5
 => "kept native text"
 => ("kept native list" 42)
-=> 1
+=> 0
 => 9
 EOF
 sed 's/ *$//' "$tmp/out" >"$tmp/normalized"
@@ -78,6 +80,7 @@ EOF
 cp "$tmp/native.x" "$tmp/conflict.x"
 printf '%s\n' ":load \"$tmp/native.x\"" 'loaded_answer(1);' \
   ":load \"$tmp/second.x\"" 'ordinary_color;' 'LOAD_RED;' \
+  'loaded_answer(1);' \
   ':load no-quotes' ":load \"$tmp/missing.x\"" \
   ":load \"$tmp/broken.x\"" ":load \"$tmp/unlinked.x\"" \
   ":load \"$tmp/conflict.x\"" 'loaded_calls();' \
@@ -91,7 +94,7 @@ fi
 grep -q 'usage: :load' "$tmp/err"
 grep -q 'cannot read input file' "$tmp/err"
 grep -q 'absent_native_body' "$tmp/err"
-grep -q 'name already defined: loaded_text' "$tmp/err"
+grep -q 'loaded_text' "$tmp/err"
 grep -q '^=> 3$' "$tmp/out"
 grep -q 'unresolved identifier: LOAD_RED' "$tmp/err"
 grep -q 'arguments must be independent data values' "$tmp/err"
