@@ -14,7 +14,7 @@
    process_cache_scope. */
 static Map process_cache = NULL;
 
-static Map _process_cache(void) {
+module Map _process_cache(void) {
   if (process_cache != NULL) return process_cache;
   $scope(&process_cache_scope) {
     Scope.shutdown_hook(_cache_shutdown);
@@ -33,16 +33,16 @@ static void _cache_shutdown(void) {
   linked_records = NULL;
 }
 
-static Map _cache_map(void) {
+module Map _cache_map(void) {
   $scope(&process_cache_scope) return {};
 }
 
-static Map _cache_copy(Map map) {
+module Map _cache_copy(Map map) {
   $scope(&process_cache_scope) return map.copy();
 }
 
 /* A file's entry: collected in this process, or read from its interface. */
-static List _entry(Compiler c, String canonical) {
+module List _entry(Compiler c, String canonical) {
   Var cached = _process_cache()[canonical];
   if (cached is <list>) {
     if (List.equal(cached.list()[4], _interface_include_dirs(c, canonical)))
@@ -54,7 +54,7 @@ static List _entry(Compiler c, String canonical) {
 
 /* Native declaration calls can change provider state. Only their cold walk
    reproduces both the signatures and effects in the provider's own session. */
-static List _collection_entry(Compiler c, String path) {
+module List _collection_entry(Compiler c, String path) {
   List entry = _entry(c, path);
   if (!entry || path in c.collection_native_files) return entry;
   foreach (Var part, entry.car())
@@ -65,26 +65,26 @@ static List _collection_entry(Compiler c, String path) {
   return entry;
 }
 
-static String _content_hash(String text) => "%08x".printf(text.hash());
+module String _content_hash(String text) => "%08x".printf(text.hash());
 
-static void _cache_dependency(Map dependencies, String path, Var hash) {
+module void _cache_dependency(Map dependencies, String path, Var hash) {
   _retain(path);
   _retain(hash);
   dependencies.merge_translation_dependency(path, hash);
 }
 
-static void _cache_dependencies(Map dependencies, Map additions) {
+module void _cache_dependencies(Map dependencies, Map additions) {
   foreach (Var (path, hash), additions)
     _cache_dependency(dependencies, path, hash);
 }
 
 /* A value the cache keeps must be owned beyond every unit's pools. */
-static void _retain(Var value) {
+module void _retain(Var value) {
   if (value is <list>) _require_retained(value.list().try_own());
   if (value is <string>) _require_retained(value.string().try_own());
 }
 
-static void _require_retained(int owned) {
+module void _require_retained(int owned) {
   if (owned) return;
   fprintf(stderr, "x2c: could not retain process cache entry\n");
   abort();
@@ -94,7 +94,7 @@ static void _require_retained(int owned) {
    `Compiler.canonical_path` without a source view: an unsaved file keeps
    the spelling the include search built, which keys its process-cache
    entry, and `SourceView.resolve_include` searches with no Compiler. */
-static String _canonical_path(String path) {
+module String _canonical_path(String path) {
   String real = Path.real(path);
   return real ? real : path;
 }
@@ -106,30 +106,30 @@ static String _cached_canonical(char *cache, String dir) {
   return cache;
 }
 
-static String _canonical_lib(void) {
+module String _canonical_lib(void) {
   static char cache[PATH_MAX];
   if (*cache) return cache;
   return _cached_canonical(cache, %"${x2c_get_root()}/lib");
 }
 
-static String _canonical_include(void) {
+module String _canonical_include(void) {
   static char cache[PATH_MAX];
   if (*cache) return cache;
   return _cached_canonical(cache, %"${x2c_get_root()}/include/x2c");
 }
 
-static String _canonical_src(void) {
+module String _canonical_src(void) {
   static char cache[PATH_MAX];
   if (*cache) return cache;
   return _cached_canonical(cache, %"${x2c_get_root()}/src");
 }
 
-static String _canonical_cwd(void) {
+module String _canonical_cwd(void) {
   static char cache[PATH_MAX];
   return _cached_canonical(cache, ".");
 }
 
-static void _retain_rows(List parts) {
+module void _retain_rows(List parts) {
   foreach (Var part, parts) {
     if (part is not <map>) continue;
     foreach (Var (key, value), part.map()) {

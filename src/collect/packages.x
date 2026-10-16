@@ -146,7 +146,7 @@ static void _install(Surface &s) {
 static int _keeps_spellings(String path) =>
   !Path.is_x2c_source(path) || _in_runtime(path);
 
-static int _in_runtime(String path) =>
+module int _in_runtime(String path) =>
   path.startswith(%"${_canonical_lib()}/") ||
   path.startswith(%"${_canonical_include()}/");
 

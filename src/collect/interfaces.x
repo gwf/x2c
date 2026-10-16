@@ -35,7 +35,7 @@ void Compiler.configure_interfaces(String out_dir, int cold) {
    record linked into the compiler for a prelude component, else its `.xi`.
    A source under inspection through a SourceView, or a cold process, reads
    neither. */
-static List _interface_read(Compiler c, String canonical) {
+module List _interface_read(Compiler c, String canonical) {
   if (c.source_facts || !interface_mirror) return NULL;
   List record = _linked_record(canonical);
   if (record) {
@@ -120,7 +120,7 @@ static List _read_record(String source) {
   return record;
 }
 
-static Lisp _interface_lisp(void) {
+module Lisp _interface_lisp(void) {
   if (interface_reader) return interface_reader;
   _process_cache();
   $scope(&process_cache_scope) {
@@ -139,7 +139,7 @@ static void _interface_shutdown(void) {
   linked_providers = NULL;
 }
 
-static int _hash_matches(Compiler c, String path, Var expected) {
+module int _hash_matches(Compiler c, String path, Var expected) {
   if (expected is not <string>) return 0;
   String hash = String.startswith(expected, "search:") ?
     _include_search_hash(c, path) : _source_hash(c, path);
@@ -218,7 +218,7 @@ static Map _read_rows(List stored) {
 
 /* Each dependency still hashes as it did when the interface was written; a
    hash of 1 marks a file that is not hashed. */
-static Map _read_dependencies(Compiler c, List stored) {
+module Map _read_dependencies(Compiler c, List stored) {
   Map dependencies = _cache_map();
   foreach (Var dependency, stored) {
     if (dependency is not <list>) return NULL;
@@ -295,7 +295,7 @@ static List _stored_record(String canonical, List entry) {
 }
 
 /* Search roots and the file's package mode must match before replay. */
-static List _interface_include_dirs(
+module List _interface_include_dirs(
   Compiler c, String canonical) {
   Array dirs = [];
   foreach (String dir, c.include_dirs) {
@@ -324,7 +324,7 @@ static Var _stored_part(Var part, Map identities) {
   return _renumber_bindings(rows.list_free(), identities);
 }
 
-static List _stored_dependencies(Map dependencies) {
+module List _stored_dependencies(Map dependencies) {
   Array rows = [];
   foreach (Var (path, hash), dependencies)
     rows.push(%(${Compiler.portable_path(path)} $hash));
@@ -332,7 +332,7 @@ static List _stored_dependencies(Map dependencies) {
   return rows.list_free();
 }
 
-static List _stored_meta_hashes(Map hashes) {
+module List _stored_meta_hashes(Map hashes) {
   Array rows = [];
   foreach (Var (spelling, hash), hashes) rows.push(%($spelling $hash));
   rows.sort();

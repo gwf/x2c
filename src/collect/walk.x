@@ -100,14 +100,14 @@ static List _prelude_entry(
   return _process_cache()[canonical];
 }
 
-static String _runtime_text(Compiler c, String runtime) {
+module String _runtime_text(Compiler c, String runtime) {
   String text = NULL;
   if (c.read_source(runtime, text)) return text;
   $fail.collect_runtime_read(c, c.token, runtime);
 }
 
 /* Rows enter the unit's symbols and its source declarations together. */
-static void _merge_rows(Compiler c, Map globs, Map rows) {
+module void _merge_rows(Compiler c, Map globs, Map rows) {
   globs.merge(rows);
   c.merge_source_declarations(globs, rows);
 }
@@ -118,7 +118,7 @@ static void _merge_rows(Compiler c, Map globs, Map rows) {
    and `line` and `pos` locate the current segment's
    first token. `deferred` marks an entry collected without its declaration
    defaults. A module's walk reads its spliced text. */
-static typedef struct FileWalk {
+module typedef struct FileWalk {
   Compiler c, String path, text, dir, ModuleSource module, Map globs, visited;
   Array parts, Map definitions, dependencies, statics, hashes;
   int unit, linkage, line, pos, deferred;
@@ -282,7 +282,7 @@ static void _shift_tokens(Tokenizer t, int line, int pos) {
    under its root takes its prefix. A C header, a runtime module, or foreign
    x2c source keeps its own spellings, as including that file directly gives
    them, so the collected entry is the same whichever unit walks it first. */
-static int _package_owns(Compiler c, String path) {
+module int _package_owns(Compiler c, String path) {
   if (!c.package) return 0;
   Var root = c.package_roots[c.package];
   return root is not void &&
@@ -345,7 +345,7 @@ static void _include_search_dependency(
   w.c.deps.merge_translation_dependency(candidate, hash);
 }
 
-static String _include_search_hash(Compiler c, String path) {
+module String _include_search_hash(Compiler c, String path) {
   if (path.startswith("cwd:")) path = path[4:];
   return c.sources.exists(path) ?
     %"search:${Compiler.portable_path(Path.absolute(path))}" : "search:absent";
@@ -384,7 +384,7 @@ void Compiler.configure_package(Compiler c, List roots, String filename) {
    there. It runs in a compiler of its own, with the macro, import, keyword,
    and Lisp state the file's own translation starts with. The includer
    replays the selected public definitions as any later unit would. */
-static List _walk_cold(
+module List _walk_cold(
   Compiler c, String target, String canonical, Map globs, Map visited) {
   String text = _include_text(c, target, canonical);
   Compiler file = Compiler.new_shared(c);
@@ -412,7 +412,7 @@ static List _walk_cold(
 
 /* A cold included file has its own generated spellings. Binding identities
    remain unique across the unit and its pending inline-body parses. */
-static void _walk_apart(
+module void _walk_apart(
   Compiler c, String path, String text, Map globs, Map visited) {
   ModuleSource module = c.module_source(path, text);
   $let(c.names.counters, {})
@@ -567,7 +567,7 @@ static void _publish(FileWalk &w) {
    entries have the same shape and take this same path. Source traversal
    keeps its processed prefix as a cold walk does. An effects array marks
    completed-provider replay for full parsing. */
-static void _replay_cached(
+module void _replay_cached(
   Compiler c, List entry, String path, Map globs, Map visited,
   Array effects) {
   Array prefix = effects != NULL ? NULL : [];

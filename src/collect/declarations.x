@@ -6,7 +6,7 @@
 /* Type rows keep their complete family: the tag, its fields and field
    order, or a typedef and its ordinary-name row. A public declaration can
    require an otherwise static family, including through an alias chain. */
-static List _type_family(List key) {
+module List _type_family(List key) {
   match (key) {
     case %((!set ?kind (!or typedef struct union enum)) ?name *):
       return %($kind $name);
@@ -34,7 +34,7 @@ static int _private_row(Map statics, List key, List family) {
 
 /* Only names that this file declares are candidates. Includes already
    contribute their selected interface at their recorded source position. */
-static void _needed_types(List syntax, Map rows, Map needed) {
+module void _needed_types(List syntax, Map rows, Map needed) {
   Array pending = $auto([syntax]);
   while (pending.len()) {
     Var item = pending.take_last();
@@ -63,7 +63,7 @@ static void _needed_types(List syntax, Map rows, Map needed) {
   }
 }
 
-static void _select_public(FileWalk &w) {
+module void _select_public(FileWalk &w) {
   if (!w.unit) return;
   Map rows = {}, needed = {}, selected = {};
   foreach (Var part, w.parts) if (part is <map>) rows.merge(part);
@@ -103,7 +103,7 @@ static void _select_public(FileWalk &w) {
    object defines. The file is spelled home-portably, as interfaces spell
    paths. Only `.x` units publish markers; a C header's static inline
    functions belong to every file that includes it. */
-static void _publish_unit_statics(Map statics, Map overlay, String path) {
+module void _publish_unit_statics(Map statics, Map overlay, String path) {
   List owner = %(${Compiler.portable_path(path)});
   foreach (Var key, statics.keys())
     match (%($key)) case %((function ?(String name))): {
@@ -253,7 +253,7 @@ static void _add_typedef_names(
    Included signatures come from the completed graph; effects still install
    at the provider's ordinary include positions. Remove the work before
    replay, because a cold dependency can complete more pending providers. */
-static void _bind_pending_inline_bodies(
+module void _bind_pending_inline_bodies(
   Compiler c, Map globs, String unit) {
   Array pending = c.pending_inline_bodies;
   if (!pending.len()) return;
@@ -296,7 +296,7 @@ static void _forget_own_statics(Map globs, List entry) {
         match (key) case %("unit-static" ?): globs.del(key);
 }
 
-static int _declares_adoption(List parts) {
+module int _declares_adoption(List parts) {
   foreach (Var part, parts)
     if (part is <map>)
       foreach (Var value, part.map())
@@ -322,7 +322,7 @@ static typedef struct ColdConformances {
    translation does, so a unit that includes it reuses the same answer
    whether or not the file's interface was current. The file's own unit
    records them when it translates. */
-static void _record_cold_conformances(
+module void _record_cold_conformances(
   Compiler c, Map globs, Map visited, String unit) {
   ColdConformances cold = {.c = c};
   defer if (cold.prelude_session) c.close_child(cold.prelude_session);
@@ -427,7 +427,7 @@ Map Compiler.callable_symbols(Compiler c, List names) {
 }
 
 /* Sorted so that an entry does not depend on Map order. */
-static List _sorted_names(Map definitions) {
+module List _sorted_names(Map definitions) {
   Array names = [];
   foreach (Var name, definitions.keys()) names.push(name);
   names.sort();

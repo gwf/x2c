@@ -132,30 +132,30 @@ static macro Stmt $report.collect_loaded_declaration(
     %("provider: ${$path}"));
 }
 
-static Scope process_cache_scope = NULL;
+module Scope process_cache_scope = NULL;
 
 /* Paths whose entries a later unit collects again: those collected without
    their declaration defaults while the shared compile-time session was
    being filled, and those a project meta build collected with placeholders
    for its meta calls. */
-static Map provisional_entries = NULL;
+module Map provisional_entries = NULL;
 
 /* Files collected cold in this process whose entries declare adoptions and
    do not yet record their conformances. */
-static Map cold_providers = NULL;
+module Map cold_providers = NULL;
 
 /* Each entry's declared function names; see `_declared_functions`. */
-static Map declared_functions = NULL;
+module Map declared_functions = NULL;
 
 /* Interfaces name the same sources many times, so a process hashes each
    source once. */
-static Map source_hashes = NULL;
+module Map source_hashes = NULL;
 
-static Map linked_providers = NULL;
+module Map linked_providers = NULL;
 
 /* The record texts this compiler was translated with, by home-portable
    path. */
-static Map linked_records = NULL;
+module Map linked_records = NULL;
 
 module {
   "collect/cache.x",
