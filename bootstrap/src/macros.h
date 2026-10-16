@@ -41,21 +41,21 @@ void Compiler_report_lisp_failure(Compiler c, Token invocation, List error, Stri
 
 List Compiler_parse_macro_definition(Compiler c);
 
+List Compiler_macro_introduced_name(Compiler c, String spelling);
+
+List Compiler_macro_tag_name(Compiler c, Symbol kind, String name, int definition);
+
+List Compiler_parse_macro_quotation(Compiler c);
+
 List Compiler_try_parse_macro_slot(Compiler c, Symbol role);
 
 List Compiler_peek_macro_hole(Compiler c);
 
 Token Compiler_after_hole(Compiler c);
 
-List Compiler_parse_macro_quotation(Compiler c);
-
 int Compiler_macro_lisp_starts_declaration(Compiler c);
 
 List Compiler_try_parse_macro_member(Compiler c);
-
-List Compiler_macro_introduced_name(Compiler c, String spelling);
-
-List Compiler_macro_tag_name(Compiler c, Symbol kind, String name, int definition);
 
 List Compiler_expand_macro_invocation_node(Compiler c, Var stored, List arguments, Token invocation, Symbol position);
 
