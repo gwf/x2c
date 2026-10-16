@@ -141,6 +141,78 @@ void Compiler.group_meta_function(Compiler c, List fn) {
     }
 }
 
+// loaded program entries
+
+/* Parameter arrays have pointer calling conventions, and typedef spellings
+   do not change the two standard main signatures. */
+static int _main_arity(Compiler c, Type type) {
+  List parameters = NULL;
+  Type result = NULL;
+  type.function_parts(parameters, result);
+  if (c.sym.normalize_declared_type(result).canonicalize() != %(int))
+    return -1;
+  if (!parameters) return 0;
+  if (parameters.len() != 2) return -1;
+  Type count = c.sym.normalize_declared_type(parameters.car()).canonicalize();
+  Type values = c.sym.normalize_declared_type(parameters.cadr());
+  if (values.is_array()) values = values.dereference().reference();
+  return count == %(int) && values.canonicalize() == %(* * char) ? 2 : -1;
+}
+
+/* Keep the source binding and calling convention for recursion and other
+   native callers. Only the helper's public entry takes independent data. */
+static List _loaded_entry(Compiler c, List binding, Type type) {
+  int arity = _main_arity(c, type);
+  if (arity < 0)
+    c.report_error(
+      <type>, "loaded main must take void or (int, char **) and return int",
+      NULL, NULL);
+  c.ensure_macro_lisp();
+  List entry = c.sym.introduce(c.fresh_name("loaded_entry"));
+  List target = %(expr $type (ident $binding));
+  if (!arity)
+    return c.bind_syntax(
+      $!Unit{ static int $entry(void) { return $target(); } }, AST_UNIT, NULL);
+  return c.bind_syntax(
+    $!Unit{
+      static int $entry(Array values) {
+        int count = values.len();
+        char **argv = Scope.calloc((size_t) count + 1, sizeof(char *));
+        for (int i = 0; i < count; i++) {
+          String text = values[i];
+          size_t size = text.len();
+          argv[i] = Scope.calloc(size + 1, 1);
+          if (size) memcpy(argv[i], (char *) text, size);
+        }
+        return $target(count, argv);
+      }
+    }, AST_UNIT, NULL);
+}
+
+/** Exposes a loaded unit's main through the ordinary helper target table.
+    Native calls retain its declared signature; the public argc/argv entry
+    takes an Array of Strings. A renamed main still returns zero on falling
+    through its closing brace. Source text and tokens are unchanged. */
+void Compiler.prepare_loaded_main(Compiler c, Array nodes) {
+  for (int i = 0; i < nodes.len(); i++)
+    match (nodes[i])
+      case %(function ?spec (!set ?declarator
+              (bind (!set ?binding (binding ? "main")) *)) (block *body)): {
+        Type type = %(declare $spec (bindings $declarator)).type_from_ast();
+        List entry = _loaded_entry(c, binding, type);
+        nodes[i] = %(function $spec $declarator
+          (block @body (return (int) ${$!int{ 0 }})));
+        for (int j = c.meta_group.len() - 1; j >= 0; j--)
+          if (List.match(c.meta_group[j], %(function ? "main" ?)))
+            c.meta_group.remove(j);
+        Type adapted = %(declare ${entry.cadr()}
+          (bindings ${entry.caddr()})).type_from_ast();
+        c.meta_group.push(
+          %(function $entry "main" ${c.func_signature(adapted)}));
+        return;
+      }
+}
+
 /** Answers whether a `meta` body reaches the compiler itself: it names a
     compile-time-only function or a compiler operation, or constructs a
     template. Such a function has no runtime form. */
@@ -270,7 +342,8 @@ static void _name_provider_bindings(
   Var identity, String name;
   foreach (List item, units)
     if (_function_identity(item, identity, name) &&
-        _public_native(c, item, name)) {
+        (_public_native(c, item, name) ||
+         (c.load_main && name == "main"))) {
       List binding = item.caddr().cadr();
       c.set_fact(
         %(emitted $binding), %"_x2c_gensym_meta_group_${index}_$name");
@@ -383,7 +456,7 @@ static Array _units(Compiler c) {
   _source_order(c, ordered, lib);
   Map reached = _roots(c, ordered);
   _close(ordered, reached);
-  return _reachable(ordered, reached);
+  return _reachable(c, ordered, reached);
 }
 
 /* The runtime prelude declares more than `x2c.h` includes, and a body can
@@ -518,12 +591,12 @@ static void _close(Array ordered, Map reached) {
 /* An unreached function keeps its prototype, which code generated for
    the unit's types, such as a protocol adapter, may name; the optimizer
    drops what nothing calls. */
-static Array _reachable(Array ordered, Map reached) {
+static Array _reachable(Compiler c, Array ordered, Map reached) {
   Array units = [];
   Var identity, String name;
   foreach (List item, ordered) {
     if (!_function_identity(item, identity, name) ||
-        (identity in reached && name != "main"))
+        (identity in reached && (name != "main" || c.load_main)))
       units.push(item);
     else if (name != "main")
       match (item) case %(function ?spec ?declarator ?):

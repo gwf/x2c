@@ -190,6 +190,7 @@ static void _sync_top_level(Compiler c, Token start, int braces) {
 }
 
 static List _finish_parse(Compiler c, Array nodes) {
+  if (c.load_main && !c.error_count()) c.prepare_loaded_main(nodes);
   c.finish_meta_functions(nodes);
   if (c.meta_build) c.write_meta_build();
   c.unit_nodes = NULL;

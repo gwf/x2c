@@ -37,7 +37,10 @@ class Session:
         while True:
             line = self.errors.get(timeout=120)
             assert line is not None, (source, messages)
-            if f"not a session function: {marker}" in line:
+            prefix, found, _ = line.partition(
+                f"not a session function: {marker}")
+            if found:
+                messages.append(prefix)
                 break
             messages.append(line)
         diagnostic = "".join(messages)
@@ -289,6 +292,128 @@ try:
     session.finish()
 finally:
     session.close()
+
+# An ordinary C entry owns native state and can print without a newline.
+main_root = root / "main"
+main_root.mkdir()
+program = main_root / "program.c"
+original_main = (
+    '#include <stdio.h>\n'
+    'static int calls;\n'
+    'static int _original_main(void) { return 40; }\n'
+    'int main() {\n'
+    '  calls++; printf("out%d", calls); fprintf(stderr, "err%d", calls);\n'
+    '  return _original_main() + calls;\n'
+    '}\n')
+program.write_text(original_main)
+session = Session(main_root)
+try:
+    session.load(program)
+    assert "out1" not in session.output.read_text()
+    session.run("main();", "err1")
+    assert "out1=> 41\n" in session.output.read_text()
+    session.run("main();", "err2")
+    assert "out2=> 42\n" in session.output.read_text()
+    session.run(":info main")
+    assert program.read_text() == original_main
+    program.write_text(
+        '#include <stdio.h>\nint main(void) { '
+        'printf("out-fail"); fprintf(stderr, "err-fail"); '
+        'raise %(bad-arg (message "main failed")); }\n')
+    session.load(program)
+    session.run("main();", "err-fail")
+    assert session.output.read_text().endswith("out-fail")
+    output = session.finish()
+    assert "int main(void);" in output, output
+finally:
+    session.close()
+
+# argc/argv uses the normal stable adapter, including its reload checks.
+dependency = main_root / "program.h"
+program = main_root / "program.x"
+second = main_root / "second.x"
+dependency.write_text("static int offset(void) { return 100; }\n")
+second.write_text('#include "program.h"\n'
+                  'meta int other_offset(void) { return offset(); }\n')
+
+
+def main_version(parameters="int argc, char *argv[]", body=None):
+    if body is None:
+        body = ("if (argv[argc] != 0) return -1; "
+                "for (int i=0; i<argc; i++) { "
+                "if (!argv[i]) return -2; "
+                "if (argv[i][0]) argv[i][0]='X'; } "
+                "return offset() + argc + ++calls;")
+    return ('#include "program.h"\nstatic int calls;\n'
+            'meta int main_calls(void) { return calls; }\n'
+            f'int main({parameters}) {{ {body} }}\n')
+
+
+program.write_text(main_version())
+session = Session(main_root)
+try:
+    session.run('int prompt_marker=7;\nArray args=["program", ""];')
+    session.load(program)
+    session.load(second)
+    session.run('Func saved_main=main;\n'
+                'int through_main(Array a) { return main(a)+prompt_marker; }')
+    session.value('main(args)', 103)
+    session.value('args[0]', '"program"')
+    session.value('saved_main(args)', 104)
+    session.value('through_main(["program"])', 111)
+    session.value('main([])', 104)
+    session.value('main_calls()', 4)
+    session.run(':info main')
+    dependency.write_text("static int offset(void) { return 200; }\n")
+    program.write_text(main_version("int count, char **values").replace(
+        "argv", "values").replace("argc", "count"))
+    session.load(program)
+    session.value('main_calls()', 0)
+    session.value('saved_main(args)', 203)
+    session.value('through_main(["program"])', 210)
+    session.value('other_offset()', 100)
+    session.value('prompt_marker', 7)
+    for changed, error in [
+            (main_version() + 'broken {', 'expected'),
+            (main_version('void', 'return 9;'), 'function type changed: main'),
+            ('meta int main_calls(void) { return 99; }\n',
+             'function removed: main')]:
+        program.write_text(changed)
+        session.load(program, error)
+        session.value('main_calls()', 2)
+    conflict = main_root / 'conflict.c'
+    conflict.write_text('int main(int n, char **v) { return n; }\n')
+    session.load(conflict, 'name already defined: main')
+    session.value('saved_main(args)', 205)
+    output = session.finish()
+    assert 'int main(Array);' in output, output
+    assert 'reloaded ("main_calls" "main")' in output, output
+finally:
+    session.close()
+
+# Native references keep the original signature. Both ordinary and explicit
+# meta definitions work, and a renamed main retains C's implicit return zero.
+for name, text, expression, expected in [
+        ('recursive.c', 'int main(void) { static int calls; calls++; '
+         'int (*again)(void)=main; return calls<3 ? again() : calls; }',
+         'main()', 3),
+        ('fallthrough.c', 'int main() {}', 'main()', 0),
+        ('fallthrough.x', 'int main() {}', 'main()', 0),
+        ('alias.c', 'typedef int Count; typedef char **Args; '
+         'Count main(Count n, Args v) { return n + (v[n]==0); }',
+         'main(["p"])', 2),
+        ('meta.x', 'meta int main(int n, char **v) { return n; }',
+         'main(["p"])', 1)]:
+    program = main_root / name
+    program.write_text(text)
+    session = Session(main_root)
+    try:
+        session.load(program)
+        session.value(expression, expected)
+        session.finish()
+        assert program.read_text() == text
+    finally:
+        session.close()
 
 # Exercise an existing package module without changing the checked-in source.
 autodiff = root / "autodiff-macros.x"

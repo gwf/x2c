@@ -121,6 +121,7 @@ typedef struct Compiler{
   Array unit_nodes, meta_group;
   Map meta_group_bound;
   int meta_build;
+  int load_main;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int module_declaration;
   int replaying_declaration;
@@ -975,7 +976,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _383 = String_var(_382);
   _384 = List_var(NULL);
   _385 = Symbol_var(106239471489226);
-  _386 = int_var(2250);
+  _386 = int_var(2252);
   _387 = String_new("");
   _388 = String_var(_387);
   _389 = String_new("x2c.hole");
@@ -1913,6 +1914,7 @@ static void f13_parsing_parse____sync_top_level(Compiler c, Token start, int bra
 }
 
 static List f13_parsing_parse____finish_parse(Compiler c, Array nodes){
+  if(c -> load_main && ! Compiler_error_count(c)) Compiler_prepare_loaded_main(c, nodes);
   Compiler_finish_meta_functions(c, nodes);
   if(c -> meta_build) Compiler_write_meta_build(c);
   c -> unit_nodes = NULL;

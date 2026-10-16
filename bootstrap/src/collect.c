@@ -2110,6 +2110,7 @@ static void _parse(FileWalk * w, String segment, Map overlay){
 static void _prepare(FileWalk * w, Compiler shadow, String segment){
   if(!(* w).unit || ! _package_owns((* w).c, (* w).path)) shadow -> package = NULL;
   shadow -> filename =(* w).path;
+  shadow -> load_main =(* w).c -> load_main && String_equal((* w).path, Path_absolute((* w).c -> filename));
   shadow -> meta_hashes =(* w).hashes;
   shadow -> layout =(* w).c -> layout;
   shadow -> source_private = 0;

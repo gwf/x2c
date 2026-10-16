@@ -38,7 +38,7 @@ static const struct ReplCommand _commands[] = {
     <statmode>, <stats> },
   { ":symbols", ":symbols [PREFIX]", "List session-defined names and kinds.",
     <prefix>, <symbols> },
-  { ":load", ":load \"file.x\"", "Compile and load public meta functions.",
+  { ":load", ":load \"file.x\"", "Compile and load meta functions and main.",
     <path>, <load> },
   { ":info", ":info NAME", "Show a session function's declaration and source.",
     <function>, <info> },
