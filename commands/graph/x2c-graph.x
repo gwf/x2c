@@ -167,65 +167,61 @@ static int _walk_candidate_type(Var type) {
          List.equal(value, %("Var"));
 }
 
+/* One function's tail-call walk: its own binding and the self-call
+   counts, cleanup blockers, and sites the walk finds. */
+typedef struct TailWalk TailWalk;
+static struct TailWalk {
+  Compiler compiler;
+  List self;
+  String path;
+  Map counts, blockers;
+  Array sites;
+};
+
 static void _collect_tail_calls(
-  Compiler compiler, Var value, List self, String path, int origin, int tail,
-  Map counts, Map blockers, Array sites) {
+  TailWalk &walk, Var value, int origin, int tail) {
   if (value is not <list>) return;
   List node = value;
   match (node) {
     case %(function *): return;
     case %(at ?next_origin ?inner): {
-      _collect_tail_calls(
-        compiler, inner, self, path, next_origin.integer(), tail,
-        counts, blockers, sites);
+      _collect_tail_calls(walk, inner, next_origin.integer(), tail);
       return;
     }
     case %(return ? ?expression): {
-      _collect_tail_calls(
-        compiler, expression, self, path, origin, 1,
-        counts, blockers, sites);
+      _collect_tail_calls(walk, expression, origin, 1);
       return;
     }
     case %(expr ? ?inner): {
-      _collect_tail_calls(
-        compiler, inner, self, path, origin, tail,
-        counts, blockers, sites);
+      _collect_tail_calls(walk, inner, origin, tail);
       return;
     }
     case %(parens ?inner): {
-      _collect_tail_calls(
-        compiler, inner, self, path, origin, tail,
-        counts, blockers, sites);
+      _collect_tail_calls(walk, inner, origin, tail);
       return;
     }
     case %(op (!quote ?) ?condition ?ontrue ?onfalse): {
-      _collect_tail_calls(
-        compiler, condition, self, path, origin, 0,
-        counts, blockers, sites);
+      _collect_tail_calls(walk, condition, origin, 0);
       foreach (Var arm, %($ontrue $onfalse))
-        _collect_tail_calls(
-          compiler, arm, self, path, origin, tail,
-          counts, blockers, sites);
+        _collect_tail_calls(walk, arm, origin, tail);
       return;
     }
-    case %(defer *): blockers[<cleanup>] = 1;
-    case %(try *): blockers[<cleanup>] = 1;
+    case %(defer *): walk.blockers[<cleanup>] = 1;
+    case %(try *): walk.blockers[<cleanup>] = 1;
     case %(call
            (expr ?
              (ident (!set ?callee (binding ? ?))))
            (args *)): {
-      if (List.equal(callee, self)) {
+      if (List.equal(callee, walk.self)) {
         Symbol kind = tail ? <tail> : <non-tail>;
-        project_count(counts, %(kind $kind), 1);
-        sites.push(
-          %(site $kind ${project_location(compiler, path, origin)}));
+        project_count(walk.counts, %(kind $kind), 1);
+        walk.sites.push(
+          %(site $kind
+            ${project_location(walk.compiler, walk.path, origin)}));
       }
     }
   }
-  foreach (Var child, node)
-    _collect_tail_calls(
-      compiler, child, self, path, origin, 0,
-      counts, blockers, sites);
+  foreach (Var child, node) _collect_tail_calls(walk, child, origin, 0);
 }
 
 static List _analyze_tail_unit(Compiler compiler, List ast, String path) {
@@ -235,25 +231,25 @@ static List _analyze_tail_unit(Compiler compiler, List ast, String path) {
       case %(function ?type
              (bind (!set ?binding (binding ? ?)) ?)
              ?body): {
-        Map counts = {}, blockers = {};
-        Array sites = [];
-        _collect_tail_calls(
-          compiler, body, binding, path, 0, 0,
-          counts, blockers, sites);
-        int tail = counts.getdefault(%(kind tail), 0).int();
-        int non_tail = counts.getdefault(%(kind non-tail), 0).int();
+        TailWalk walk = {
+          .compiler = compiler, .self = binding, .path = path,
+          .counts = {}, .blockers = {}, .sites = []
+        };
+        _collect_tail_calls(walk, body, 0, 0);
+        int tail = walk.counts.getdefault(%(kind tail), 0).int();
+        int non_tail = walk.counts.getdefault(%(kind non-tail), 0).int();
         if (!tail) continue;
         Array blocker_rows = [];
-        foreach (Var (blocker, present), blockers)
+        foreach (Var (blocker, present), walk.blockers)
           blocker_rows.push(blocker);
         blocker_rows.sort();
-        sites.sort();
-        Symbol visibility = project_visibility(type);
+        walk.sites.sort();
         functions.push(
-          %(function ${compiler.emitted_binding_name(binding)} $visibility
+          %(function ${compiler.emitted_binding_name(binding)}
+            ${project_visibility(type)}
             (calls (tail $tail) (non-tail $non_tail))
             (blockers @{blocker_rows.list_free()})
-            (sites @{sites.list_free()})));
+            (sites @{walk.sites.list_free()})));
       }
   functions.sort();
   return functions.list_free();
@@ -736,63 +732,62 @@ static Map _site_parameters(List modifiers) {
   return parameters;
 }
 
-static void _collect_sites(
-  Compiler compiler, Var value, String path, String caller, Symbol visibility,
-  String wanted, Map parameters, Map prior_writes, Map sites) {
+/* One function's or the file scope's call-site walk: the caller, its
+   parameters, the local writes seen so far, and the sites found. */
+typedef struct SiteWalk SiteWalk;
+static struct SiteWalk {
+  Compiler compiler;
+  String path, caller, wanted;
+  Symbol visibility;
+  Map parameters, prior_writes, sites;
+};
+
+static void _collect_sites(SiteWalk &walk, Var value) {
   if (value is not <list>) return;
   List node = value;
   match (node) {
     case %(function *): return;
     case %(op = (bind (!set ?binding (binding ? ?)) ?) ?right): {
-      _collect_sites(
-        compiler, right, path, caller, visibility, wanted,
-        parameters, prior_writes, sites);
+      _collect_sites(walk, right);
       project_add_unique(
-        prior_writes, binding,
-        _site_value_summary(compiler, right, {}, {}));
+        walk.prior_writes, binding,
+        _site_value_summary(walk.compiler, right, {}, {}));
       return;
     }
     case %(op ?operator ?left *right):
       if (operator is <symbol> &&
           Symbol.changes_left_operand(operator)) {
-        _collect_sites(
-          compiler, left, path, caller, visibility, wanted,
-          parameters, prior_writes, sites);
-        foreach (Var child, right)
-          _collect_sites(
-            compiler, child, path, caller, visibility, wanted,
-            parameters, prior_writes, sites);
+        _collect_sites(walk, left);
+        foreach (Var child, right) _collect_sites(walk, child);
         List binding = project_direct_binding(left);
         if (binding) {
-          List summary = operator == <=> && right
-                       ? _site_value_summary(compiler, right.car(), {}, {})
-                       : %(operator $operator);
-          project_add_unique(prior_writes, binding, summary);
+          List summary =
+            operator == <=> && right
+            ? _site_value_summary(walk.compiler, right.car(), {}, {})
+            : %(operator $operator);
+          project_add_unique(walk.prior_writes, binding, summary);
         }
         return;
       }
     case %(postfix ?operator ?target): {
-      _collect_sites(
-        compiler, target, path, caller, visibility, wanted,
-        parameters, prior_writes, sites);
+      _collect_sites(walk, target);
       List binding = project_direct_binding(target);
       if (binding)
-        project_add_unique(
-          prior_writes, binding, %(operator $operator));
+        project_add_unique(walk.prior_writes, binding, %(operator $operator));
       return;
     }
     case %(expr ? (call ?callee (args *arguments))): {
-      String name = _site_direct_callee(compiler, callee);
-      if (name == wanted) {
+      String name = _site_direct_callee(walk.compiler, callee);
+      if (name == walk.wanted) {
         Array summaries = [];
         foreach (Var argument, arguments)
           summaries.push(
             _site_argument_summary(
-              compiler, argument, parameters, prior_writes));
+              walk.compiler, argument, walk.parameters, walk.prior_writes));
         project_count(
-          sites,
+          walk.sites,
           %(
-            call $path $caller $visibility
+            call ${walk.path} ${walk.caller} ${walk.visibility}
             (args @{summaries.list_free()})
           ),
           1
@@ -800,10 +795,7 @@ static void _collect_sites(
       }
     }
   }
-  foreach (Var child, node)
-    _collect_sites(
-      compiler, child, path, caller, visibility, wanted,
-      parameters, prior_writes, sites);
+  foreach (Var child, node) _collect_sites(walk, child);
 }
 
 static List _site_records(Map sites) {
@@ -822,25 +814,27 @@ static List _site_records(Map sites) {
 
 static List _analyze_sites_unit(
   Compiler compiler, List ast, String path, String wanted) {
-  Map sites = {}, top_level_writes = {};
+  SiteWalk top = {
+    .compiler = compiler, .path = path, .caller = "<top-level>",
+    .wanted = wanted, .visibility = <static>, .parameters = {},
+    .prior_writes = {}, .sites = {}
+  };
   foreach (List node, ast) {
     match (node)
       case %(function ?type
              (bind (!set ?binding (binding ? ?)) ?modifiers)
              ?body): {
-        Map parameters = _site_parameters(modifiers), prior_writes = {};
-        String caller = compiler.emitted_binding_name(binding);
-        Symbol visibility = project_visibility(type);
-        _collect_sites(
-          compiler, body, path, caller, visibility, wanted,
-          parameters, prior_writes, sites);
+        SiteWalk walk = top;
+        walk.caller = compiler.emitted_binding_name(binding);
+        walk.visibility = project_visibility(type);
+        walk.parameters = _site_parameters(modifiers);
+        walk.prior_writes = {};
+        _collect_sites(walk, body);
         continue;
       }
-    _collect_sites(
-      compiler, node, path, "<top-level>", <static>, wanted,
-      {}, top_level_writes, sites);
+    _collect_sites(top, node);
   }
-  return _site_records(sites);
+  return _site_records(top.sites);
 }
 
 static int _field_whole_target(
@@ -850,26 +844,33 @@ static int _field_whole_target(
          _field_access_matches(node, receiver_name, field_name);
 }
 
+/* One function's or the file scope's walk for one receiver field. */
+typedef struct FieldWalk FieldWalk;
+static struct FieldWalk {
+  Compiler compiler;
+  String path, caller, receiver_name, field_name;
+  Symbol visibility;
+  Map parameters, sites;
+};
+
 static void _collect_field_sites(
-  Compiler compiler, Var value, String path, String caller, Symbol visibility,
-  String receiver_name, String field_name, Map parameters, Symbol access,
-  Var replacement, int origin, Map sites) {
+  FieldWalk &walk, Var value, Symbol access, Var replacement, int origin) {
   if (value is not <list>) return;
   List node = value;
-  if (_field_access_matches(node, receiver_name, field_name)) {
+  if (_field_access_matches(node, walk.receiver_name, walk.field_name)) {
     List detail;
     if (access == <replace>) {
       Var type = project_expression_type(replacement);
       List summary = _site_value_summary(
-        compiler, replacement, parameters, {});
+        walk.compiler, replacement, walk.parameters, {});
       detail = %(access replace (value $type $summary));
     }
     else detail = %(access $access);
     project_count(
-      sites,
+      walk.sites,
       %(
-        site $path $caller $visibility
-        ${project_location(compiler, path, origin)}
+        site ${walk.path} ${walk.caller} ${walk.visibility}
+        ${project_location(walk.compiler, walk.path, origin)}
         $detail
       ),
       1
@@ -879,89 +880,52 @@ static void _collect_field_sites(
   match (node) {
     case %(at ?next_origin ?inner): {
       _collect_field_sites(
-        compiler, inner, path, caller, visibility,
-        receiver_name, field_name, parameters, access, replacement,
-        next_origin.integer(), sites);
+        walk, inner, access, replacement, next_origin.integer());
       return;
     }
     case %(expr ? ?inner): {
-      _collect_field_sites(
-        compiler, inner, path, caller, visibility,
-        receiver_name, field_name, parameters, access, replacement,
-        origin, sites);
+      _collect_field_sites(walk, inner, access, replacement, origin);
       return;
     }
     case %(parens ?inner): {
-      _collect_field_sites(
-        compiler, inner, path, caller, visibility,
-        receiver_name, field_name, parameters, access, replacement,
-        origin, sites);
+      _collect_field_sites(walk, inner, access, replacement, origin);
       return;
     }
     case %(op = ?left ?right): {
       Symbol left_access = _field_whole_target(
-        left, receiver_name, field_name) ? <replace> : <mutate>;
-      _collect_field_sites(
-        compiler, left, path, caller, visibility,
-        receiver_name, field_name, parameters, left_access, right,
-        origin, sites);
-      _collect_field_sites(
-        compiler, right, path, caller, visibility,
-        receiver_name, field_name, parameters, <read>, void,
-        origin, sites);
+        left, walk.receiver_name, walk.field_name) ? <replace> : <mutate>;
+      _collect_field_sites(walk, left, left_access, right, origin);
+      _collect_field_sites(walk, right, <read>, void, origin);
       return;
     }
     case %(op ?operator ?left *right):
       if (operator is <symbol> &&
           Symbol.changes_left_operand(operator)) {
-        _collect_field_sites(
-          compiler, left, path, caller, visibility,
-          receiver_name, field_name, parameters, <mutate>, void,
-          origin, sites);
+        _collect_field_sites(walk, left, <mutate>, void, origin);
         foreach (Var child, right)
-          _collect_field_sites(
-            compiler, child, path, caller, visibility,
-            receiver_name, field_name, parameters, <read>, void,
-            origin, sites);
+          _collect_field_sites(walk, child, <read>, void, origin);
         return;
       }
     case %(postfix ? ?target): {
-      _collect_field_sites(
-        compiler, target, path, caller, visibility,
-        receiver_name, field_name, parameters, <mutate>, void,
-        origin, sites);
+      _collect_field_sites(walk, target, <mutate>, void, origin);
       return;
     }
     case %((!or vcompound vpostfix) ?target *rest): {
-      _collect_field_sites(
-        compiler, target, path, caller, visibility,
-        receiver_name, field_name, parameters, <mutate>, void,
-        origin, sites);
+      _collect_field_sites(walk, target, <mutate>, void, origin);
       foreach (Var child, rest)
-        _collect_field_sites(
-          compiler, child, path, caller, visibility,
-          receiver_name, field_name, parameters, <read>, void,
-          origin, sites);
+        _collect_field_sites(walk, child, <read>, void, origin);
       return;
     }
     case %((!or index getindex) ?target ?selector): {
       _collect_field_sites(
-        compiler, target, path, caller, visibility,
-        receiver_name, field_name, parameters,
-        access == <read> ? <read> : <mutate>, void, origin, sites);
-      _collect_field_sites(
-        compiler, selector, path, caller, visibility,
-        receiver_name, field_name, parameters, <read>, void,
-        origin, sites);
+        walk, target, access == <read> ? <read> : <mutate>, void, origin);
+      _collect_field_sites(walk, selector, <read>, void, origin);
       return;
     }
     case %(function *): return;
   }
   foreach (Var child, node)
-    _collect_field_sites(
-      compiler, child, path, caller, visibility,
-      receiver_name, field_name, parameters, access, replacement,
-      origin, sites);
+    _collect_field_sites(walk, child, access, replacement, origin);
 }
 
 static List _field_site_records(Map sites) {
@@ -981,24 +945,26 @@ static List _field_site_records(Map sites) {
 static List _analyze_field_sites_unit(
   Compiler compiler, List ast, String path, String receiver_name,
   String field_name) {
-  Map sites = {};
+  FieldWalk top = {
+    .compiler = compiler, .path = path, .caller = "<top-level>",
+    .receiver_name = receiver_name, .field_name = field_name,
+    .visibility = <static>, .parameters = {}, .sites = {}
+  };
   foreach (List node, ast) {
     match (node)
       case %(function ?type
              (bind (!set ?binding (binding ? ?)) ?modifiers)
              ?body): {
-        _collect_field_sites(
-          compiler, body, path, compiler.emitted_binding_name(binding),
-          project_visibility(type),
-          receiver_name, field_name, _site_parameters(modifiers), <read>,
-          void, 0, sites);
+        FieldWalk walk = top;
+        walk.caller = compiler.emitted_binding_name(binding);
+        walk.visibility = project_visibility(type);
+        walk.parameters = _site_parameters(modifiers);
+        _collect_field_sites(walk, body, <read>, void, 0);
         continue;
       }
-    _collect_field_sites(
-      compiler, node, path, "<top-level>", <static>,
-      receiver_name, field_name, {}, <read>, void, 0, sites);
+    _collect_field_sites(top, node, <read>, void, 0);
   }
-  return _field_site_records(sites);
+  return _field_site_records(top.sites);
 }
 
 static List _field_functions_from_sites(List sites) {
@@ -2387,50 +2353,52 @@ static int _certify_printf_format(String callee, List arguments) {
   return 1;
 }
 
-static void _certify_scan(Compiler compiler, Map definitions, Map publics,
-                          Var value, String path, String name, int origin,
-                          Map reached, Map contracts, Map assumptions,
-                          Map scope_counts, Array obligations,
-                          Array obstacles, int conditional, int deferred) {
+/* One reached function's coverage scan within one parsed unit: the
+   project facts it resolves calls against, the native assumptions it
+   uses, its region opening and closing counts, and what it reports. */
+typedef struct CertifyScan CertifyScan;
+static struct CertifyScan {
+  Compiler compiler;
+  Map definitions, publics, contracts, assumptions, scope_counts;
+  String path;
+  List caller;
+  Array obligations, obstacles;
+};
+
+static void _certify_scan(
+  CertifyScan &scan, Var value, int origin, int conditional, int deferred) {
   if (value is not <list>) return;
   List node = value;
   match (node) case %(at ?(int at) ?inner): {
-    _certify_scan(compiler, definitions, publics, inner, path, name, at,
-                  reached, contracts, assumptions, scope_counts,
-                  obligations, obstacles, conditional, deferred);
+    _certify_scan(scan, inner, at, conditional, deferred);
     return;
   }
-  List caller = %(target $path $name);
-  if (!reached.contains(caller)) return;
-  List location = project_location(compiler, path, origin);
+  List caller = scan.caller;
+  List location = project_location(scan.compiler, scan.path, origin);
   match (node) {
     case %(defer ?body *): {
-      _certify_scan(compiler, definitions, publics, body, path, name,
-        origin, reached, contracts, assumptions, scope_counts, obligations,
-        obstacles, conditional, 1);
+      _certify_scan(scan, body, origin, conditional, 1);
       return;
     }
     case %((!or if while do for switch try with match foreach finally)
            *children): {
       foreach (Var child, children)
-        _certify_scan(compiler, definitions, publics, child, path, name,
-          origin, reached, contracts, assumptions, scope_counts,
-          obligations, obstacles, 1, deferred);
+        _certify_scan(scan, child, origin, 1, deferred);
       return;
     }
     case %((!or goto label) *):
-      obstacles.push(%(obstacle $caller $location
+      scan.obstacles.push(%(obstacle $caller $location
         "nonlocal control flow is outside the proof subset"));
   }
   match (node) {
     case %(expr ?type ?inner): {
-      if (_certify_indirect_result(compiler, type))
+      if (_certify_indirect_result(scan.compiler, type))
         match (inner) {
           case %(op (!or (!quote .) (!quote ->)) *):
-            obstacles.push(%(obstacle $caller $location
+            scan.obstacles.push(%(obstacle $caller $location
               "pointer-bearing field access is outside the proof subset"));
           case %((!or getindex index) *):
-            obstacles.push(%(obstacle $caller $location
+            scan.obstacles.push(%(obstacle $caller $location
               "pointer-bearing indexed access is outside the proof subset"));
         }
     }
@@ -2438,48 +2406,49 @@ static void _certify_scan(Compiler compiler, Map definitions, Map publics,
       String callee = NULL;
       List arguments = NULL;
       List target = project_call_target(
-        compiler, definitions, node, callee, arguments);
-      List resolved = target ? resolve_project_target(target, publics) : NULL;
-      if (!resolved && callee && contracts.contains(callee)) {
-        foreach (String declared, contracts.keys())
+        scan.compiler, scan.definitions, node, callee, arguments);
+      List resolved = target
+                    ? resolve_project_target(target, scan.publics) : NULL;
+      if (!resolved && callee && scan.contracts.contains(callee)) {
+        foreach (String declared, scan.contracts.keys())
           if (declared == callee) {
-            assumptions[declared] = contracts[declared];
+            scan.assumptions[declared] = scan.contracts[declared];
             break;
           }
       }
       else if (!resolved && _certify_printf_format(callee, arguments))
-        assumptions[callee] = %(summary 0 ());
+        scan.assumptions[callee] = %(summary 0 ());
       else if (!resolved && (!callee || !Compiler.has_region_row(callee)))
-        obstacles.push(%(obstacle $caller $location
+        scan.obstacles.push(%(obstacle $caller $location
           "call has no project body or lifetime effect contract" $callee));
       if (callee in %("Scope_free" "Scope_realloc"))
-        obstacles.push(%(obstacle $caller $location
+        scan.obstacles.push(%(obstacle $caller $location
           "explicit free or realloc has untracked aliases" $callee));
       if (callee && callee.startswith("Context_"))
-        obstacles.push(%(obstacle $caller $location
+        scan.obstacles.push(%(obstacle $caller $location
           "Context lifetime is outside the region walk" $callee));
       if (callee in %("Scope_new" "Scope_new_named"))
-        obstacles.push(%(obstacle $caller $location
+        scan.obstacles.push(%(obstacle $caller $location
           "Scope object destruction is outside the proof subset" $callee));
       if (callee in %("Scope_retain" "Scope_push" "Pool_open")) {
-        project_count(scope_counts, %(open $caller $callee), 1);
+        project_count(scan.scope_counts, %(open $callee), 1);
         if (conditional)
-          obstacles.push(%(obstacle $caller $location
+          scan.obstacles.push(%(obstacle $caller $location
             "conditional region opening is outside the proof subset"
             $callee));
       }
       if (callee in %("Scope_release" "Scope_pop" "Pool_close")) {
         String open = callee == "Scope_release" ? "Scope_retain"
                     : callee == "Scope_pop" ? "Scope_push" : "Pool_open";
-        project_count(scope_counts, %(close $caller $open), 1);
+        project_count(scan.scope_counts, %(close $open), 1);
         if (!deferred || conditional)
-          obstacles.push(%(obstacle $caller $location
+          scan.obstacles.push(%(obstacle $caller $location
             "region closing is not an unconditional lexical defer"
             $callee));
       }
       if (callee in %("Scope_move" "Context_export" "List_promote"
                       "String_promote" "Atom_promote"))
-        obligations.push(%(caller $caller $location
+        scan.obligations.push(%(caller $caller $location
           "transferred storage must be released by its destination"
           $callee));
     }
@@ -2489,7 +2458,7 @@ static void _certify_scan(Compiler compiler, Map definitions, Map publics,
       match (inner) case %(expr ?source ?): source_type = source;
       if ((target_type && target_type.is_pointer()) ||
           (source_type && source_type.is_pointer()))
-        obstacles.push(%(obstacle $caller $location
+        scan.obstacles.push(%(obstacle $caller $location
           "pointer cast is outside the lifetime model"));
     }
     case %(op ?operator ?left ?right): {
@@ -2499,42 +2468,34 @@ static void _certify_scan(Compiler compiler, Map definitions, Map publics,
         match (right) case %(expr ?t ?): right_type = t;
         if ((left_type && left_type.is_pointer()) ||
             (right_type && right_type.is_pointer()))
-          obstacles.push(%(obstacle $caller $location
+          scan.obstacles.push(%(obstacle $caller $location
             "pointer arithmetic is outside the lifetime model"));
       }
-      if (operator == <=> && _certify_aggregate(compiler, right))
-        obstacles.push(%(obstacle $caller $location
+      if (operator == <=> && _certify_aggregate(scan.compiler, right))
+        scan.obstacles.push(%(obstacle $caller $location
           "aggregate copy may hide a borrowed pointer"));
       /* The region walk checks an indexed store against its base owner. */
       Var indexed = NULL;
       if (operator == <=>)
         match (left) case %(expr ? ?inner): indexed = inner;
       match (indexed) case %((!or getindex index) ?base ?key): {
-        _certify_scan(compiler, definitions, publics, base, path, name,
-          origin, reached, contracts, assumptions, scope_counts,
-          obligations, obstacles, conditional, deferred);
-        _certify_scan(compiler, definitions, publics, key, path, name,
-          origin, reached, contracts, assumptions, scope_counts,
-          obligations, obstacles, conditional, deferred);
-        _certify_scan(compiler, definitions, publics, right, path, name,
-          origin, reached, contracts, assumptions, scope_counts,
-          obligations, obstacles, conditional, deferred);
+        _certify_scan(scan, base, origin, conditional, deferred);
+        _certify_scan(scan, key, origin, conditional, deferred);
+        _certify_scan(scan, right, origin, conditional, deferred);
         return;
       }
     }
     case %(op (!quote *) ?):
-      obstacles.push(%(obstacle $caller $location
+      scan.obstacles.push(%(obstacle $caller $location
         "pointer dereference is outside the proof subset"));
     case %(return ? ?result): {
-      if (_certify_aggregate(compiler, result))
-        obstacles.push(%(obstacle $caller $location
+      if (_certify_aggregate(scan.compiler, result))
+        scan.obstacles.push(%(obstacle $caller $location
           "aggregate return may hide a borrowed pointer"));
     }
   }
   foreach (Var child, node)
-    _certify_scan(compiler, definitions, publics, child, path, name,
-                  origin, reached, contracts, assumptions, scope_counts,
-                  obligations, obstacles, conditional, deferred);
+    _certify_scan(scan, child, origin, conditional, deferred);
 }
 
 static int _certify_coverage(Frontend frontend, Array inputs, List graph,
@@ -2549,21 +2510,24 @@ static int _certify_coverage(Frontend frontend, Array inputs, List graph,
     List ast = parsed.ast;
     String path = compiler.display_path(input);
     int first_obstacle = obstacles.len(), first_obligation = obligations.len();
-    Map definitions = project_function_targets(
-      compiler, ast, path
-    );
+    CertifyScan scan = {
+      .compiler = compiler,
+      .definitions = project_function_targets(compiler, ast, path),
+      .publics = publics, .contracts = contracts, .assumptions = assumptions,
+      .path = path, .obligations = obligations, .obstacles = obstacles
+    };
     foreach (List node, ast) {
       match (node) case %(function ?
           (bind (!set ?binding (binding ? ?)) ?) ?body): {
-        String name = compiler.emitted_binding_name(binding);
-        List target = %(target $path $name);
-        Map scope_counts = {};
-        _certify_scan(compiler, definitions, publics, body, path,
-          name, 0, reached, contracts, assumptions, scope_counts,
-          obligations, obstacles, 0, 0);
+        List target = %(
+          target $path ${compiler.emitted_binding_name(binding)});
+        if (!reached.contains(target)) continue;
+        scan.caller = target;
+        scan.scope_counts = {};
+        _certify_scan(scan, body, 0, 0, 0);
         foreach (String open, %("Scope_retain" "Scope_push" "Pool_open")) {
-          if (scope_counts.getdefault(%(open $target $open), 0).int() !=
-              scope_counts.getdefault(%(close $target $open), 0).int())
+          if (scan.scope_counts.getdefault(%(open $open), 0).int() !=
+              scan.scope_counts.getdefault(%(close $open), 0).int())
             obstacles.push(%(obstacle $target (location $path 0 0)
               "region opening and lexical closing do not match" $open));
         }

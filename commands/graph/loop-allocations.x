@@ -10,159 +10,127 @@ typedef struct LoopAllocations *LoopAllocations;
 enum { LOOP_ALLOCATION_LIMIT = 25 };
 
 
+/* One unit's loop-allocation walk: the function being walked and the
+   direct allocations and helper calls found in its loops. */
+typedef struct LoopWalk LoopWalk;
+static struct LoopWalk {
+  Compiler compiler;
+  Map definitions;
+  String path, function;
+  Symbol visibility;
+  Array direct, pending;
+};
+
 static void _loop_collect(
-  Compiler compiler, Map definitions, Var value, String path, String function,
-  Symbol visibility, int origin, int loop_depth, Symbol use, Array direct,
-  Array pending) {
+  LoopWalk &walk, Var value, int origin, int loop_depth, Symbol use) {
   if (value is not <list>) return;
   List node = value;
   String operation = NULL;
   Symbol direct_kind = 0;
   if (loop_depth) {
-    direct_kind = Lifetime.loop_allocation_kind(compiler, node, operation);
-    if (direct_kind) {
-      List event = %(
-        direct-allocation $path $function $visibility
+    direct_kind = Lifetime.loop_allocation_kind(
+      walk.compiler, node, operation);
+    if (direct_kind)
+      walk.direct.push(%(
+        direct-allocation ${walk.path} ${walk.function} ${walk.visibility}
         $direct_kind $operation $use
-        ${project_location(compiler, path, origin)} $loop_depth
-      );
-      direct.push(event);
-    }
+        ${project_location(walk.compiler, walk.path, origin)} $loop_depth
+      ));
   }
   match (node) {
     case %(function *): return;
     case %(at ?next_origin ?inner): {
-      _loop_collect(
-        compiler, definitions, inner, path, function, visibility,
-        next_origin.integer(), loop_depth, use, direct, pending);
+      _loop_collect(walk, inner, next_origin.integer(), loop_depth, use);
       return;
     }
     case %(while ?condition ?body): {
-      _loop_collect(
-        compiler, definitions, condition, path, function, visibility,
-        origin, loop_depth + 1, <condition>, direct, pending);
-      _loop_collect(
-        compiler, definitions, body, path, function, visibility,
-        origin, loop_depth + 1, <nested>, direct, pending);
+      _loop_collect(walk, condition, origin, loop_depth + 1, <condition>);
+      _loop_collect(walk, body, origin, loop_depth + 1, <nested>);
       return;
     }
     case %(do ?body ?condition): {
-      _loop_collect(
-        compiler, definitions, body, path, function, visibility,
-        origin, loop_depth + 1, <nested>, direct, pending);
-      _loop_collect(
-        compiler, definitions, condition, path, function, visibility,
-        origin, loop_depth + 1, <condition>, direct, pending);
+      _loop_collect(walk, body, origin, loop_depth + 1, <nested>);
+      _loop_collect(walk, condition, origin, loop_depth + 1, <condition>);
       return;
     }
     case %(for ?initial ?condition ?increment ?body): {
-      _loop_collect(
-        compiler, definitions, initial, path, function, visibility,
-        origin, loop_depth, <nested>, direct, pending);
-      _loop_collect(
-        compiler, definitions, condition, path, function, visibility,
-        origin, loop_depth + 1, <condition>, direct, pending);
-      _loop_collect(
-        compiler, definitions, increment, path, function, visibility,
-        origin, loop_depth + 1, <nested>, direct, pending);
-      _loop_collect(
-        compiler, definitions, body, path, function, visibility,
-        origin, loop_depth + 1, <nested>, direct, pending);
+      _loop_collect(walk, initial, origin, loop_depth, <nested>);
+      _loop_collect(walk, condition, origin, loop_depth + 1, <condition>);
+      _loop_collect(walk, increment, origin, loop_depth + 1, <nested>);
+      _loop_collect(walk, body, origin, loop_depth + 1, <nested>);
       return;
     }
     case %(return ? ?expression): {
-      _loop_collect(
-        compiler, definitions, expression, path, function, visibility,
-        origin, loop_depth, <returned>, direct, pending);
+      _loop_collect(walk, expression, origin, loop_depth, <returned>);
       return;
     }
     case %(stmnt ?expression): {
-      _loop_collect(
-        compiler, definitions, expression, path, function, visibility,
-        origin, loop_depth, <discarded>, direct, pending);
+      _loop_collect(walk, expression, origin, loop_depth, <discarded>);
       return;
     }
     case %(expr ? ?inner): {
-      _loop_collect(
-        compiler, definitions, inner, path, function, visibility,
-        origin, loop_depth, use, direct, pending);
+      _loop_collect(walk, inner, origin, loop_depth, use);
       return;
     }
     case %(parens ?inner): {
-      _loop_collect(
-        compiler, definitions, inner, path, function, visibility,
-        origin, loop_depth, use, direct, pending);
+      _loop_collect(walk, inner, origin, loop_depth, use);
       return;
     }
     case %(cast ?declaration ?expression): {
-      _loop_collect(
-        compiler, definitions, declaration, path, function, visibility,
-        origin, loop_depth, <nested>, direct, pending);
-      _loop_collect(
-        compiler, definitions, expression, path, function, visibility,
-        origin, loop_depth, use, direct, pending);
+      _loop_collect(walk, declaration, origin, loop_depth, <nested>);
+      _loop_collect(walk, expression, origin, loop_depth, use);
       return;
     }
     case %(op = ?left ?right): {
-      _loop_collect(
-        compiler, definitions, left, path, function, visibility,
-        origin, loop_depth, <nested>, direct, pending);
-      _loop_collect(
-        compiler, definitions, right, path, function, visibility,
-        origin, loop_depth, <assigned>, direct, pending);
+      _loop_collect(walk, left, origin, loop_depth, <nested>);
+      _loop_collect(walk, right, origin, loop_depth, <assigned>);
       return;
     }
     case %(call ?callee (!set ?arguments (args *))): {
       if (loop_depth && !direct_kind) {
         String name;
         List target = project_call_target(
-          compiler, definitions, node, name, NULL);
-        if (target && !List.equal(target, %(computed))) {
-          List event = %(
-            allocation-return $target $path $function $visibility
-            $name $use ${project_location(compiler, path, origin)}
-            $loop_depth
-          );
-          pending.push(event);
-        }
+          walk.compiler, walk.definitions, node, name, NULL);
+        if (target && !List.equal(target, %(computed)))
+          walk.pending.push(%(
+            allocation-return $target ${walk.path} ${walk.function}
+            ${walk.visibility} $name $use
+            ${project_location(walk.compiler, walk.path, origin)} $loop_depth
+          ));
       }
-      _loop_collect(
-        compiler, definitions, callee, path, function, visibility,
-        origin, loop_depth, <nested>, direct, pending);
+      _loop_collect(walk, callee, origin, loop_depth, <nested>);
       foreach (Var argument, cdr(arguments))
-        _loop_collect(
-          compiler, definitions, argument, path, function, visibility,
-          origin, loop_depth, <argument>, direct, pending);
+        _loop_collect(walk, argument, origin, loop_depth, <argument>);
       return;
     }
   }
   foreach (Var child, node)
-    _loop_collect(
-      compiler, definitions, child, path, function, visibility,
-      origin, loop_depth, <nested>, direct, pending);
+    _loop_collect(walk, child, origin, loop_depth, <nested>);
 }
 
 List LoopAllocations.analyze_unit(Compiler compiler, List ast, String path) {
-  Map definitions = project_function_targets(compiler, ast, path);
-  Array direct = [], pending = [];
+  LoopWalk walk = {
+    .compiler = compiler,
+    .definitions = project_function_targets(compiler, ast, path),
+    .path = path, .direct = [], .pending = []
+  };
   foreach (List node, ast)
     match (node)
       case %(function ?type
              (bind (!set ?binding (binding ? ?)) ?)
              ?body): {
-        String function = compiler.emitted_binding_name(binding);
-        Symbol visibility = project_visibility(type);
-        _loop_collect(
-          compiler, definitions, body, path, function, visibility,
-          0, 0, <nested>, direct, pending);
+        walk.function = compiler.emitted_binding_name(binding);
+        walk.visibility = project_visibility(type);
+        _loop_collect(walk, body, 0, 0, <nested>);
       }
-  direct.sort();
-  pending.sort();
+  walk.direct.sort();
+  walk.pending.sort();
   return %(
     loop-allocation-unit
-    (lifetime ${Lifetime.analyze_unit(compiler, ast, path, definitions)})
-    (direct @{direct.list_free()})
-    (pending @{pending.list_free()})
+    (lifetime ${
+      Lifetime.analyze_unit(compiler, ast, path, walk.definitions)})
+    (direct @{walk.direct.list_free()})
+    (pending @{walk.pending.list_free()})
   );
 }
 
