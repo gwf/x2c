@@ -34,7 +34,7 @@ Returns whether `s` contains a driver-owned dependency option.
 Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
 comma-delimited pass-through argument; `NULL` returns zero.
 
-Source: `src/cli.x:725`
+Source: `src/cli.x:698`
 
 <a id="CliRequest.inspects"></a>
 #### CliRequest.inspects
@@ -43,7 +43,7 @@ Source: `src/cli.x:725`
 
 Returns whether `request` selects a terminating inspection or dump mode.
 
-Source: `src/cli.x:1285`
+Source: `src/cli.x:1258`
 
 <a id="CliRequest.is_builtin"></a>
 #### CliRequest.is_builtin
@@ -52,7 +52,7 @@ Source: `src/cli.x:1285`
 
 Reports whether a raw command name belongs to the built-in parser.
 
-Source: `src/cli.x:1278`
+Source: `src/cli.x:1251`
 
 <a id="CliRequest.new"></a>
 #### CliRequest.new
@@ -61,7 +61,7 @@ Source: `src/cli.x:1278`
 
 Constructs a request with the command's ordinary CLI defaults.
 
-Source: `src/cli.x:1252`
+Source: `src/cli.x:1226`
 
 <a id="CliRequest.package_options"></a>
 #### CliRequest.package_options
@@ -75,7 +75,7 @@ and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
 `cc_args` and `ld_args` serve native actions; no source-preprocessing
 options are returned.
 
-Source: `src/cli.x:753`
+Source: `src/cli.x:726`
 
 <a id="CliRequest.package_roots"></a>
 #### CliRequest.package_roots
@@ -88,7 +88,7 @@ when it exists. A root named twice is searched twice and resolves the
 same entries. Explicit directories are borrowed; the result is a fresh
 `List` only when the home directory is appended.
 
-Source: `src/cli.x:1293`
+Source: `src/cli.x:1266`
 
 <a id="CliRequest.parse"></a>
 #### CliRequest.parse
@@ -104,7 +104,7 @@ canonical-pool lifetimes described by `CliRequest`.
 **Raises:** `<alloc-fail>` or `<size-limit>` while expanding response files or
 constructing request values.
 
-Source: `src/cli.x:393`
+Source: `src/cli.x:366`
 
 ### `Compiler`
 
@@ -115,7 +115,7 @@ Source: `src/cli.x:393`
 
 Returns the version line `--version` prints, without a newline.
 
-Source: `src/cli.x:1282`
+Source: `src/cli.x:1255`
 
 ### `TargetKind`
 
@@ -128,7 +128,7 @@ Returns the target kind spelled `spelling`, or 0 when no kind has that
 spelling. `refusal` says why this compiler refuses a known spelling, and
 is NULL otherwise.
 
-Source: `src/cli.x:671`
+Source: `src/cli.x:644`
 
 <a id="TargetKind.of"></a>
 #### TargetKind.of
@@ -138,7 +138,7 @@ Source: `src/cli.x:671`
 Returns the row of target kind `kind`; any other kind reads as an
 executable.
 
-Source: `src/cli.x:681`
+Source: `src/cli.x:654`
 
 ## Public types
 
