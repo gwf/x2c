@@ -1147,18 +1147,18 @@ the Lisp runtime: reader, session, and evaluator.
 Public functions:
 
 `native_scalar_access`, `Lisp.cleanup`, `Lisp.call_budget`,
-`Lisp.set_interrupted`, `lisp_truth`, `lisp_atom`, `lisp_car`, `lisp_cdr`,
-`lisp_eq`, `lisp_pair`, `lisp_list`, `lisp_number`, `lisp_string`,
+`Lisp.set_interrupted`, `Lisp.eval`, `Lisp.apply`, `Lisp.eval_string`,
+`Lisp.eval_file`, `lisp_source_function`, `Lisp.kernel`, `Lisp.new`,
+`Lisp.destroy`, `Lisp.adopt`, `Lisp.freeze`, `Lisp.try_get`, `Lisp.set_global`,
+`Lisp.bind`, `Lisp.active`, `Lisp.storage`, `Lisp.automatic_storage`,
+`Lisp.result_storage`, `Lisp.read`, `lisp_truth`, `lisp_atom`, `lisp_car`,
+`lisp_cdr`, `lisp_eq`, `lisp_pair`, `lisp_list`, `lisp_number`, `lisp_string`,
 `lisp_symbol`, `lisp_procedure`, `lisp_type`, `lisp_compare`, `lisp_add`,
 `lisp_plus`, `lisp_minus`, `lisp_times`, `lisp_divide`, `lisp_eq_chain`,
 `lisp_lt_chain`, `lisp_le_chain`, `lisp_gt_chain`, `lisp_ge_chain`, `lisp_str`,
 `lisp_repr`, `lisp_string_append`, `lisp_substring`, `lisp_string_downcase`,
 `lisp_string_strip`, `lisp_string_lstrip`, `lisp_string_rstrip`,
-`lisp_match_replace`, `lisp_read_file`, `lisp_write_file`, `Lisp.kernel`,
-`Lisp.new`, `Lisp.destroy`, `Lisp.adopt`, `Lisp.freeze`, `Lisp.read`,
-`Lisp.eval`, `Lisp.apply`, `Lisp.eval_string`, `Lisp.eval_file`,
-`Lisp.try_get`, `Lisp.set_global`, `Lisp.bind`, `Lisp.active`, `Lisp.storage`,
-`Lisp.automatic_storage`, `Lisp.result_storage`, `lisp_source_function`
+`lisp_match_replace`, `lisp_read_file`, `lisp_write_file`
 
 ### [lib/list-selectors.x](../lib/list-selectors.x)
 
