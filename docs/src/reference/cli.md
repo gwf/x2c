@@ -593,7 +593,8 @@ sources with flat names, and consume package-compiled providers through
 ## Packages
 
 `install`, `remove`, and `list` dispatch to the shipped package command.
-Their options, help, and response-file expansion are handled by the driver.
+The driver expands response files once. The package command handles their
+options and help with the legacy CLI parser.
 The equivalent `x2c package install`, `x2c package remove`, and
 `x2c package list` forms pass arguments literally, like other external commands.
 

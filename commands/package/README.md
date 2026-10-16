@@ -1,8 +1,8 @@
 # Package management
 
-`x2c install`, `x2c remove`, and `x2c list` keep their driver-owned options,
-help, and response files. The driver forwards their parsed values to this
-shipped command. `x2c package install`, `remove`, and `list` also invoke the
+`x2c install`, `x2c remove`, and `x2c list` keep their legacy options, help,
+and response files. The driver expands response files once and forwards
+the argument vector to this command for legacy CLI parsing. `x2c package install`, `remove`, and `list` also invoke the
 same operations; like other external commands, they receive literal arguments.
 
 The command owns installed package markers, indexes, downloads, digest

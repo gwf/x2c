@@ -78,6 +78,11 @@ static void _write_starter(Path dir, String name) {
 
 int main(int argc, char **argv) {
   x2c_initialize_command_environment(argv[0], x2c_embedded_identity());
+  Array arguments = $auto(CliRequest.command_arguments(argc, argv));
+  if (arguments) {
+    CliRequest request = CliRequest.parse_arguments(arguments);
+    return _create(request.inputs.car(), request.quiet);
+  }
   List args = Args.from_argv(argc, argv);
   List spec = %(
     (-q --quiet (help "Suppress the successful receipt"))

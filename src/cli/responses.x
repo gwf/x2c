@@ -16,6 +16,15 @@ Array CliRequest.read_arguments(int argc, char **argv) {
   return args;
 }
 
+/** Copies the driver's already-read vector, or returns NULL for direct
+    invocation. The caller owns the Array; no word is expanded again. */
+Array CliRequest.command_arguments(int argc, char **argv) {
+  if (argc < 2 || strcmp(argv[1], "--driver-arguments")) return NULL;
+  Array arguments = [];
+  for (int i = 2; i < argc; i++) arguments.push(String.new(argv[i]));
+  return arguments;
+}
+
 // response files
 
 /* `@file` expands to the file's words, recursively, and `@@word` is the

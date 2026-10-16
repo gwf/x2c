@@ -4,6 +4,7 @@
 */
 #include "package.x"
 #include "args.x"
+#include "cli.x"
 
 String x2c_embedded_identity(void);
 
@@ -27,6 +28,15 @@ static List _spec(String operation) {
 
 int main(int argc, char **argv) {
   x2c_initialize_command_environment(argv[0], x2c_embedded_identity());
+  Array arguments = $auto(CliRequest.command_arguments(argc, argv));
+  if (arguments) {
+    CliRequest parsed = CliRequest.parse_arguments(arguments);
+    PackageOptions request = {
+      .inputs = parsed.inputs, .index = parsed.index, .sha256 = parsed.sha256,
+      .quiet = parsed.quiet, .force = parsed.force
+    };
+    return _run(parsed.command.str(), request);
+  }
   List args = Args.from_argv(argc, argv);
   String operation = args ? args.car() : "--help";
   if (operation == "--help" || operation == "-h") {
@@ -55,18 +65,20 @@ int main(int argc, char **argv) {
     .index = parsed["index"], .sha256 = parsed["sha256"],
     .quiet = parsed["quiet"].integer(), .force = parsed["force"].integer()
   };
+  if (operation == "install") request.inputs = %(${parsed["package"]});
+  else if (operation == "remove") request.inputs = %(${parsed["name"]});
+  else if (operation == "ensure") {
+    request.lock = parsed["lock"];
+    request.inputs = parsed["pins"];
+    if (request.inputs.len() % 2)
+      Diagnostics.driver_error("package ensure: expected name/version pairs");
+  }
+  return _run(operation, request);
+}
+
+static int _run(String operation, PackageOptions request) {
   if (operation == "list") return request.list_packages();
-  if (operation == "install") {
-    request.inputs = %(${parsed["package"]});
-    return request.install();
-  }
-  if (operation == "remove") {
-    request.inputs = %(${parsed["name"]});
-    return request.remove_package();
-  }
-  request.lock = parsed["lock"];
-  request.inputs = parsed["pins"];
-  if (request.inputs.len() % 2)
-    Diagnostics.driver_error("package ensure: expected name/version pairs");
+  if (operation == "install") return request.install();
+  if (operation == "remove") return request.remove_package();
   return request.ensure();
 }
