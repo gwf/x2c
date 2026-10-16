@@ -557,7 +557,7 @@ macro Unit $map.typed.operations(
   }
 }
 
-/* Native value updates share lookup and insertion; Var updates belong to Map. */
+/* Native updates share lookup and insertion; Var updates belong to Map. */
 macro Unit $map.typed.updates(
   Type $map, Type $key, Type $value, Name $update, Name $bad_arg,
   Name $bad_op, Name $value_at, Literal $one, Literal $postfix,

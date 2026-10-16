@@ -57,13 +57,16 @@ meta int folds(void) {
 }
 
 meta int void_consumers(void) {
-  return %().foldl(void, (Func) 0).is_void() &&
+  int missing = 0;
+  try %(4 5).foldl(void, (Func) 0);
+  catch %(bad-arg *): missing = 1;
+  return missing && %().foldl(void, (Func) 0).is_void() &&
     range(1, 0, 1).foldl(void, (Func) 0).is_void() &&
     range(1, 0, 1).next().is_void() &&
     range(1, 0, 1).find(%!(Var value) => value).is_void() &&
     range(1, 0, 1).min().is_void() &&
     range(1, 0, 1).max().is_void() &&
-    %(4 5).foldl(void, (Func) 0).integer() == 4;
+    %(4).foldl(void, (Func) 0).integer() == 4;
 }
 
 meta int found(void) {
