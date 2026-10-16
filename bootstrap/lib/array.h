@@ -65,9 +65,9 @@ Array Array_reverse(Array _x2c_gensym_macro_array_32);
 
 int Array_equal(Array _x2c_gensym_macro_a_3, Array _x2c_gensym_macro_b_3);
 
-Var Array_getindex(Array _x2c_gensym_macro_array_33, int _x2c_gensym_macro_index_7);
+Var Array_getindex(Array array, int index);
 
-Var Array_setindex(Array _x2c_gensym_macro_array_34, int _x2c_gensym_macro_index_8, Var _x2c_gensym_macro_value_13);
+Var Array_setindex(Array array, int index, Var value);
 
 static inline Block Array_block(Array x){
   return(Block) x;
@@ -95,15 +95,15 @@ Var Array_foldl(Array array, Var seed, Func fn);
 
 int Array_compare(Array _x2c_gensym_macro_a_4, Array _x2c_gensym_macro_b_4);
 
-Buffer Array_write_repr(Array _x2c_gensym_macro_array_35, Buffer _x2c_gensym_macro_out_6);
+Buffer Array_write_repr(Array _x2c_gensym_macro_array_33, Buffer _x2c_gensym_macro_out_6);
 
-Buffer Array_write_str(Array _x2c_gensym_macro_array_36, Buffer _x2c_gensym_macro_out_7);
+Buffer Array_write_str(Array _x2c_gensym_macro_array_34, Buffer _x2c_gensym_macro_out_7);
 
-String Array_str(Array _x2c_gensym_macro_array_37);
+String Array_str(Array _x2c_gensym_macro_array_35);
 
-String Array_repr(Array _x2c_gensym_macro_array_38);
+String Array_repr(Array _x2c_gensym_macro_array_36);
 
-Iter Array_iter(Array _x2c_gensym_macro_array_41, Iter _x2c_gensym_macro_dest_0);
+Iter Array_iter(Array _x2c_gensym_macro_array_39, Iter _x2c_gensym_macro_dest_0);
 
 Array Array_sort(Array array);
 
