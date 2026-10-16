@@ -7,7 +7,7 @@ static pthread_once_t lisp_initialize_once =
   (pthread_once_t) PTHREAD_ONCE_INIT;
 static int lisp_initialize_success;
 
-static unsigned _canonical_count(void) =>
+module unsigned _canonical_count(void) =>
   sizeof(lisp_canonical_names) / sizeof(lisp_canonical_names[0]);
 
 static void _initialize_once(void) {
@@ -29,7 +29,7 @@ static int _initialize(void) {
   return lisp_initialize_success;
 }
 
-static int _global_lookup(Lisp lisp, Var name, Var &out) {
+module int _global_lookup(Lisp lisp, Var name, Var &out) {
   for (Lisp s = lisp; s; s = s.parent)
     if (_binding_get(s.globals, name, out)) return 1;
   return 0;
@@ -38,27 +38,27 @@ static int _global_lookup(Lisp lisp, Var name, Var &out) {
 /* A reserved special form, from this session or the nearest parent. A child
    that inherits its parent's specials also inherits their identity, which is
    what `_special_id` compares. */
-static int _reserved_lookup(Lisp lisp, Var name, Var &out) {
+module int _reserved_lookup(Lisp lisp, Var name, Var &out) {
   for (Lisp s = lisp; s; s = s.parent)
     if (s.reserved.try_get(name, out)) return 1;
   return 0;
 }
 
 /* A child may define new names but cannot replace inherited definitions. */
-static int _inherited(Lisp lisp, Var name) {
+module int _inherited(Lisp lisp, Var name) {
   for (Lisp s = lisp.parent; s; s = s.parent)
     if (name in s.globals || name in s.reserved) return 1;
   return 0;
 }
 
-static int _binding_get(Map bindings, Var name, Var &out) {
+module int _binding_get(Map bindings, Var name, Var &out) {
   Var slot;
   if (!bindings || !bindings.try_get(name, slot)) return 0;
   out = _cell_load(slot);
   return 1;
 }
 
-static void _binding_set(Scope *owner, Map bindings, Var name, Var value) {
+module void _binding_set(Scope *owner, Map bindings, Var name, Var value) {
   Var slot;
   if (bindings.try_get(name, slot)) _cell_store(slot, value);
   else bindings[name] = _cell(owner, value);

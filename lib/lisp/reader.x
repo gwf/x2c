@@ -15,7 +15,7 @@ static keyword loop $private.loop;
    when no token remains. `cursor` ends past the form, or at the length of
    `source` at EOF; a failure raises with `cursor` at the form's first
    token. */
-static Symbol _read_form(
+module Symbol _read_form(
   Tokenizer tokenizer, String source, unsigned base, unsigned &cursor,
   Var &?out) {
   Token token = tokenizer.next();
@@ -146,7 +146,7 @@ static Var _incomplete(String source, unsigned at) {
   raise %(incomplete (source $source) (line $line) (column $column));
 }
 
-static Tokenizer _scan_lisp_tokens(String source, Scope *scope) {
+module Tokenizer _scan_lisp_tokens(String source, Scope *scope) {
   Tokenizer tokenizer = NULL;
   $scope(scope) {
     tokenizer = Tokenizer.new(source, <lisp>);

@@ -12,14 +12,20 @@ static keyword loop $private.loop;
    its Lambda's session-owned capture Map. Parameter names, captured
    Vars, argument arrays, and parent records are borrowed for the activation,
    and the environment records stay on the C stack until the call returns. */
-static typedef struct LispEnv {
+module typedef struct LispEnv {
   Map bindings, List params;
   const Var *values;
   int value_count, struct LispEnv *parent;
 } LispEnv;
 
 
-$var.pointer(Lambda, lambda, <lambda>);
+module inline Var Lambda.var(Lambda value) {
+  return Var.new(<lambda>, value);
+}
+
+module inline Lambda Var.lambda(Var value) {
+  return value.pointer();
+}
 
 static protocol Var(Lambda);
 
@@ -77,7 +83,7 @@ static Symbol _special_id(Lisp lisp, Func fn) {
 
 /* Applies `callable` to evaluated `values`. A macro, or a special form other
    than `apply`, is not a procedure. */
-static Var _apply_values(
+module Var _apply_values(
   Lisp lisp, Var callable, List values, LispEnv *env) {
   if (callable is <lambda>) {
     Lambda lambda = callable;

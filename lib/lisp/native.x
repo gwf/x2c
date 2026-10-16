@@ -232,7 +232,7 @@ static macro Expression $lisp.callback.target.map() => $(lisp.native.targets `(
 
 static Map callback_targets = $lisp.callback.target.map();
 
-static Func _native_target(String name) {
+module Func _native_target(String name) {
   Var target;
   if (!callback_targets.try_get(name, target) &&
       !_library_targets().try_get(name, target)) return NULL;

@@ -215,16 +215,16 @@ static macro Stmt $error.source.callable(Expr $callable) {
    reader-prefix name, interned once per process. A long name is promoted to
    the outermost String pool, so it outlives the pool that interned it. */
 
-static Var lsym_quote, lsym_quasiquote, lsym_unquote, lsym_splicing;
+module Var lsym_quote, lsym_quasiquote, lsym_unquote, lsym_splicing;
 static Var lsym_cond, lsym_def, lsym_bind, lsym_eval, lsym_lambda;
 static Var lsym_macro, lsym_import, lsym_apply;
 
-static typedef struct LispCanonicalName {
+module typedef struct LispCanonicalName {
   Symbol special, const char *spelling;
   Var *value;
 } LispCanonicalName;
 
-static const LispCanonicalName lisp_canonical_names[] = {
+module const LispCanonicalName lisp_canonical_names[] = {
   { <quote>,      "quote",            &lsym_quote },
   { <quasiquote>, "quasiquote",       &lsym_quasiquote },
   { 0,            "unquote",          &lsym_unquote },
@@ -243,14 +243,14 @@ static const LispCanonicalName lisp_canonical_names[] = {
    Parameter and body Lists and captured Var referents are borrowed: capture
    copies Var identity, not the referenced object or canonical graph. Their
    owners must outlive the Lambda. */
-static typedef struct Lambda {
+module typedef struct Lambda {
   List params;
   Var body;
   Map captures;
   int macro, source_function;
 } *Lambda;
 
-static struct Lisp {
+module struct Lisp {
   Scope scope;          // semantic session scope
   /* The slot user code allocates in while the session evaluates. Code that
      retains, releases, pushes, or pops a Scope acts on this slot, so it
@@ -293,7 +293,7 @@ static struct Lisp {
 /* Native value bindings may adapt an interpreted callable to Func. Public
    entries set this thread-local for the whole evaluation. Nested entries
    restore their caller. */
-static threaded Lisp lisp_active;
+module Lisp threaded lisp_active;
 #include "var-adapters.x"
 
 
