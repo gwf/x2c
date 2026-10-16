@@ -13982,7 +13982,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_25(void
   _13063 = cons(_465, _13062);
   _13064 = String_new("src/cli.x");
   _13065 = String_var(_13064);
-  _13066 = String_new("aae0ef52");
+  _13066 = String_new("12709ca0");
   _13067 = String_var(_13066);
   _13068 = String_new("cwd:./buffer.x");
   _13069 = String_var(_13068);
