@@ -37,7 +37,7 @@ Returns whether `s` contains a driver-owned dependency option.
 Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
 comma-delimited pass-through argument; `NULL` returns zero.
 
-Source: `src/cli.x:705`
+Source: `src/cli/parsing.x:553`
 
 <a id="CliRequest.inspects"></a>
 #### CliRequest.inspects
@@ -46,7 +46,7 @@ Source: `src/cli.x:705`
 
 Returns whether `request` selects a terminating inspection or dump mode.
 
-Source: `src/cli.x:1265`
+Source: `src/cli/requests.x:65`
 
 <a id="CliRequest.is_builtin"></a>
 #### CliRequest.is_builtin
@@ -55,7 +55,7 @@ Source: `src/cli.x:1265`
 
 Reports whether a raw command name belongs to the built-in parser.
 
-Source: `src/cli.x:1258`
+Source: `src/cli/parsing.x:655`
 
 <a id="CliRequest.new"></a>
 #### CliRequest.new
@@ -64,7 +64,7 @@ Source: `src/cli.x:1258`
 
 Constructs a request with the command's ordinary CLI defaults.
 
-Source: `src/cli.x:1233`
+Source: `src/cli/requests.x:37`
 
 <a id="CliRequest.package_options"></a>
 #### CliRequest.package_options
@@ -78,7 +78,7 @@ and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
 `cc_args` and `ld_args` serve native actions; no source-preprocessing
 options are returned.
 
-Source: `src/cli.x:733`
+Source: `src/cli/parsing.x:581`
 
 <a id="CliRequest.package_roots"></a>
 #### CliRequest.package_roots
@@ -91,7 +91,7 @@ when it exists. A root named twice is searched twice and resolves the
 same entries. Explicit directories are borrowed; the result is a fresh
 `List` only when the home directory is appended.
 
-Source: `src/cli.x:1273`
+Source: `src/cli/requests.x:73`
 
 <a id="CliRequest.parse"></a>
 #### CliRequest.parse
@@ -107,7 +107,7 @@ canonical-pool lifetimes described by `CliRequest`.
 **Raises:** `<alloc-fail>` or `<size-limit>` while expanding response files or
 constructing request values.
 
-Source: `src/cli.x:366`
+Source: `src/cli/parsing.x:255`
 
 <a id="CliRequest.parse_arguments"></a>
 #### CliRequest.parse_arguments
@@ -116,7 +116,7 @@ Source: `src/cli.x:366`
 
 Parses already-read arguments, preserving deferred script expansion.
 
-Source: `src/cli.x:372`
+Source: `src/cli/parsing.x:261`
 
 <a id="CliRequest.read_arguments"></a>
 #### CliRequest.read_arguments
@@ -127,7 +127,7 @@ Reads initial arguments. Script options defer response-file expansion
 until parsing, so program arguments remain literal. The caller owns
 the returned Array.
 
-Source: `src/cli.x:395`
+Source: `src/cli/responses.x:9`
 
 <a id="CliRequest.require_input"></a>
 #### CliRequest.require_input
@@ -137,7 +137,7 @@ Source: `src/cli.x:395`
 Exits with a driver error unless `input` names a regular file.
 A wildcard or directory operand adds a note on what to pass instead.
 
-Source: `src/cli.x:1295`
+Source: `src/cli/requests.x:95`
 
 ### `Compiler`
 
@@ -148,7 +148,7 @@ Source: `src/cli.x:1295`
 
 Returns the version line `--version` prints, without a newline.
 
-Source: `src/cli.x:1262`
+Source: `src/cli/requests.x:62`
 
 ### `TargetKind`
 
@@ -161,7 +161,7 @@ Returns the target kind spelled `spelling`, or 0 when no kind has that
 spelling. `refusal` says why this compiler refuses a known spelling, and
 is NULL otherwise.
 
-Source: `src/cli.x:651`
+Source: `src/cli/requests.x:18`
 
 <a id="TargetKind.of"></a>
 #### TargetKind.of
@@ -171,7 +171,7 @@ Source: `src/cli.x:651`
 Returns the row of target kind `kind`; any other kind reads as an
 executable.
 
-Source: `src/cli.x:661`
+Source: `src/cli/requests.x:28`
 
 ## Public types
 

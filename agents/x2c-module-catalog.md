@@ -91,11 +91,11 @@ x2c command-line parsing and presentation.
 
 Public functions:
 
-`CliRequest.parse`, `CliRequest.parse_arguments`, `CliRequest.read_arguments`,
-`TargetKind.named`, `TargetKind.of`, `CliRequest.dependency_option`,
-`CliRequest.package_options`, `CliRequest.new`, `CliRequest.is_builtin`,
-`Compiler.version`, `CliRequest.inspects`, `CliRequest.package_roots`,
-`CliRequest.require_input`
+`CliRequest.parse`, `CliRequest.parse_arguments`,
+`CliRequest.dependency_option`, `CliRequest.package_options`,
+`CliRequest.is_builtin`, `CliRequest.read_arguments`, `TargetKind.named`,
+`TargetKind.of`, `CliRequest.new`, `Compiler.version`, `CliRequest.inspects`,
+`CliRequest.package_roots`, `CliRequest.require_input`
 
 ### [src/collect.x](../src/collect.x)
 
