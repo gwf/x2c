@@ -15,6 +15,7 @@ X2c semantic types.
 | [`List.type_from_ast`](#List.type_from_ast) | Returns the semantic `Type` represented by a complete `(declare ...)` AST. |
 | [`Type.begin_unit`](#Type.begin_unit) | Starts an empty set of source-declared `Var` rows for one translation unit. |
 | [`Type.declaration_ast`](#Type.declaration_ast) | Returns a complete `(declare ...)` AST for `type` and `binding`. |
+| [`Type.declaration_base`](#Type.declaration_base) | Returns the declaration specifiers `t` without the pointer, array, or function modifiers an alias in them contributes, and sets `modifiers` to those modifiers, for `Ast.append_modifiers` to give each declarator. |
 | [`Type.end_unit`](#Type.end_unit) | Restores the enclosing unit's source-declared `Var` rows before the current unit's `Scope` is released. |
 | [`Type.fixed_var_tag`](#Type.fixed_var_tag) | Returns the process-lifetime `Var` tag fixed for `type`, or zero. |
 | [`Type.parameter_ast`](#Type.parameter_ast) | Returns a complete `(param ...)` AST for `type` and `binding`. |
@@ -48,7 +49,7 @@ Source: `src/type.x:27`
 Starts an empty set of source-declared `Var` rows for one translation
 unit. Returns the enclosing unit's rows for restoration at close.
 
-Source: `src/type.x:274`
+Source: `src/type.x:295`
 
 <a id="Type.declaration_ast"></a>
 #### Type.declaration_ast
@@ -58,7 +59,20 @@ Source: `src/type.x:274`
 Returns a complete `(declare ...)` AST for `type` and `binding`.
 A `NULL` binding produces an abstract declaration.
 
-Source: `src/type.x:173`
+Source: `src/type.x:194`
+
+<a id="Type.declaration_base"></a>
+#### Type.declaration_base
+
+`List Type.declaration_base(Type t, List &modifiers)`
+
+Returns the declaration specifiers `t` without the pointer, array, or
+function modifiers an alias in them contributes, and sets `modifiers`
+to those modifiers, for `Ast.append_modifiers` to give each declarator.
+Storage and source specifier text, such as `("_Noreturn")`, stay on
+the base.
+
+Source: `src/type.x:175`
 
 <a id="Type.end_unit"></a>
 #### Type.end_unit
@@ -68,7 +82,7 @@ Source: `src/type.x:173`
 Restores the enclosing unit's source-declared `Var` rows before the
 current unit's `Scope` is released.
 
-Source: `src/type.x:283`
+Source: `src/type.x:304`
 
 <a id="Type.fixed_var_tag"></a>
 #### Type.fixed_var_tag
@@ -77,7 +91,7 @@ Source: `src/type.x:283`
 
 Returns the process-lifetime `Var` tag fixed for `type`, or zero.
 
-Source: `src/type.x:213`
+Source: `src/type.x:234`
 
 <a id="Type.parameter_ast"></a>
 #### Type.parameter_ast
@@ -87,7 +101,7 @@ Source: `src/type.x:213`
 Returns a complete `(param ...)` AST for `type` and `binding`.
 A `NULL` binding produces an unnamed parameter.
 
-Source: `src/type.x:181`
+Source: `src/type.x:202`
 
 <a id="Type.parts"></a>
 #### Type.parts
@@ -108,7 +122,7 @@ Replaces a registered type's inferred `Var` tag with `tag`, or with the
 fixed tag of `representation` when `tag` is zero. Missing rows and
 untagged representations leave the table unchanged.
 
-Source: `src/type.x:262`
+Source: `src/type.x:283`
 
 <a id="Type.register_var_tag"></a>
 #### Type.register_var_tag
@@ -119,7 +133,7 @@ Registers one named type's unit-local `Var` tag and exact forward
 converter. The first row for a canonical `Type` wins. A `NULL` type,
 name, or converter, or no active unit, leaves the table unchanged.
 
-Source: `src/type.x:250`
+Source: `src/type.x:271`
 
 <a id="Type.var_converter"></a>
 #### Type.var_converter
@@ -129,7 +143,7 @@ Source: `src/type.x:250`
 Returns the unit-local forward `Var` converter for the canonical form of
 `type`, or `NULL`.
 
-Source: `src/type.x:224`
+Source: `src/type.x:245`
 
 <a id="Type.var_tag"></a>
 #### Type.var_tag
@@ -139,7 +153,7 @@ Source: `src/type.x:224`
 Returns the unit-local `Var` tag for `type`, falling back to its fixed
 tag.
 
-Source: `src/type.x:203`
+Source: `src/type.x:224`
 
 <a id="Type.var_tag_row"></a>
 #### Type.var_tag_row
@@ -150,7 +164,7 @@ Reads the encoding row of `tag` into `top`, `mask`, and `bottom` and
 reports whether one exists. A tag whose decoded form carries a validity
 clause, an immediate width, or a user registration has no constant row.
 
-Source: `src/type.x:235`
+Source: `src/type.x:256`
 
 ## Design notes
 
