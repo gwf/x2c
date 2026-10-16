@@ -16,7 +16,7 @@ iterator operation.
 
 ## Foreach
 
-The loop header declares the loop variable and names the collection:
+The loop header declares the loop variable and gives the collection:
 
 ```x2c
 List values = %(10 20 30);
@@ -57,16 +57,15 @@ foreach(char ch, word)
   printf("char = %c\n", ch);
 ```
 
-A `Map` yields its values, like every other collection. Two binders ask for
-the key as well, and the loop reads both out of the table without
-allocating. When you need an iterator there are three: `map.iter(&storage)`
-yields the values, `map.keys(&storage)` yields the keys, and
-`map.enumerate(&storage)` yields `(key value)` `List`s and is the only one
-that allocates. The generated families in `lib/typed-map.x` publish the same
-three, so a `MapIntInt` iterates as a `Map` does. `Map` traversal follows
-internal slot order, so do not depend on the sequence, and do not insert or
-delete entries while a traversal is live. Structural mutation invalidates
-outstanding traversal state.
+A `Map` yields its values, like every other collection. Two binders yield
+the key as well; with native loop types the loop does not allocate. For an
+iterator, `map.iter(&storage)` yields the values, `map.keys(&storage)`
+yields the keys, and `map.enumerate(&storage)` yields `(key value)` `List`s,
+allocating on each pull. For `MapLongDouble`, `keys` also boxes each `long`
+key in the active scope. The generated families in `lib/typed-map.x`
+publish the same three iterators, so a `MapIntInt` iterates as a `Map` does.
+Traversal follows the table's internal slot order, so do not depend on the
+sequence. Inserting or deleting an entry invalidates live traversal state.
 
 The explicit destination keeps ordinary local traversal allocation-free. When
 an iterator itself must be stored or returned, `Iter.new()` allocates zeroed
@@ -104,8 +103,8 @@ strips the endings.
 These cursors allocate one scope-owned traversal descriptor. There is no
 `List` and no object per field. Each yielded field is a canonical `String`.
 After a field has been interned once, finding an equal field of at most 256
-bytes needs no heap allocation. Distinct fields remain in the active `String`
-pool. For a large input, use `Pool.open()` and
+bytes needs no heap allocation. Distinct fields remain in the active
+canonical-value pool. For a large input, use `Pool.open()` and
 `Pool.close()` to reclaim temporary fields, and promote the values
 that must survive.
 
@@ -123,9 +122,9 @@ That combination appears at the end of this chapter.
 
 ### What the loop variable's type means
 
-The general `Iter` path yields a `Var`. The declared loop type names the
-conversion applied to each element as it arrives. It does not filter, and it
-does not claim anything about what the collection holds.
+The general `Iter` path yields a `Var`. The declared loop type selects the
+conversion applied to each element as it arrives. It does not filter the
+elements.
 `foreach(int value, values)` means "unbox each element with `Var.int`" on
 that path. Cursor-backed collections deliver their typed outputs directly.
 
@@ -151,9 +150,12 @@ converting type or take a `Var` and convert in the body.
 The collection expression's static type selects the traversal.
 Cursor-backed collections use their typed `try_next` member. A `Var`
 dispatches through its runtime descriptor, and an `Iter` is used as it
-stands. Foreach stores the traversal state for you and converts each output
-to the declared loop type. There is no heap allocation and nothing to clean
-up.
+stands. Foreach keeps the traversal state in local variables and converts
+each output to the declared loop type, so the loop itself allocates nothing
+and needs no cleanup. The collection expression can still allocate, as the
+lazy `String` field cursors do. Converting a `long`, `unsigned long`,
+`long long`, `unsigned long long`, or `long double` element to a `Var` loop
+variable boxes it in the active scope.
 
 ## Iterators by hand
 

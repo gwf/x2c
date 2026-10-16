@@ -1,22 +1,20 @@
 # Strings, Lists, Arrays, and Maps
 
-C gives you `char *`, `struct`, and `malloc`. x2c keeps all of that and adds
-four runtime data types: `String`, `List`, `Array`, and `Map`. Much of the
-compiler and runtime is built with these four types.
+x2c keeps C's `char *`, `struct`, and `malloc`, and adds four runtime data
+types: `String`, `List`, `Array`, and `Map`. Much of the compiler and runtime
+is built with them.
 
-Four ideas run through everything below:
+Four rules apply throughout this chapter:
 
-- **Brackets and braces evaluate.** `[a, b]` builds an `Array` and
-  `{key: value}` builds a `Map` from ordinary x2c expressions; only a bare
+- Brackets and braces evaluate. `[a, b]` builds an `Array` and
+  `{key: value}` builds a `Map` from ordinary x2c expressions. Only a bare
   identifier key is quoted, as an `Atom`.
-- **Percent is the quoting sigil.** A following delimiter selects which
-  literal grammar reads the contents: `%"..."`, `%(...)`, `%[...]`,
-  `%{...}`, or `%<<...>>`.
-- **Dollar unquotes.** Inside quoted `List`, `String`, `Array`, or `Map`
-  content, `$name` or `${expression}` returns to ordinary x2c expression
-  grammar for one value.
-- **`String` and `List` are immutable and canonical**: equal values share
-  storage. **`Array` and `Map` are mutable**: each object has its own identity,
+- Percent quotes. The delimiter after `%` selects the literal grammar for
+  the contents: `%"..."`, `%(...)`, `%[...]`, `%{...}`, or `%<<...>>`.
+- Dollar unquotes. Inside quoted `List`, `String`, `Array`, or `Map`
+  content, `$name` or `${expression}` inserts one ordinary x2c value.
+- `String` and `List` are immutable and canonical: equal values share
+  storage. `Array` and `Map` are mutable: each object has its own identity,
   even when its contents equal another's.
 
 All four are represented by C pointers and can be boxed into `Var`, so they
@@ -45,9 +43,11 @@ printf("%s %s %d\n", ports.repr(), server[<host>].repr(), empty.len());
 ```
 
 A symbol value is written `<public>`, and a computed key is parenthesized, as
-in `{(host): port}`. `[]` is always a fresh `Array`. `{}` is a fresh `Map`
-when it initializes or is assigned to a `Map` or a `Var`. A plain string literal is a `String` wherever one is
-expected, and `String` methods apply to it directly: `"x2c".len()` is `3`.
+in `{(host): port}`. `[]` is always a fresh `Array`. `{}` is a fresh empty
+`Map` when its destination is a `Map` or a `Var`, and a fresh empty `Array`
+when its destination is an `Array`. For a struct or scalar destination, `{}`
+is the C zero initializer. A plain string literal is a `String` wherever one
+is expected, and `String` methods apply to it directly: `"x2c".len()` is `3`.
 
 The percent forms below quote their contents. Use them for symbolic data
 such as ASTs, patterns, and configuration trees, where the names are the
@@ -89,7 +89,7 @@ each type, and the `List` form round-trips through the same reader the Lisp
 showcase uses.
 
 A number's `repr` prints its own value and, where C has one, the suffix that
-names the width it was boxed at: `5u` for an `unsigned`, `5l` for a `long`,
+gives the width it was boxed at: `5u` for an `unsigned`, `5l` for a `long`,
 `0.1f` for a `float`. Floating text is the shortest decimal that reads back as
 the same value. The reader itself has no suffixes, so it is the `int` and
 `double` forms that read back unchanged; a suffixed form is for you to read,
@@ -97,7 +97,7 @@ not for the reader.
 
 ### Quoted data and x2c expressions
 
-Inside `%(...)`, `%[...]`, and `%{...}`, a bare spelling is an **`Atom`**,
+Inside `%(...)`, `%[...]`, and `%{...}`, a bare spelling is an `Atom`,
 an exact, case-sensitive name. Use `$name` to insert one identifier expression
 or `${expression}` to insert any other x2c expression.
 
@@ -182,7 +182,7 @@ That literal constructs the same data as
 `%(quasiquote (1 (unquote (+ 1 1)) (unquote-splicing tail)))` and evaluates
 to `%(1 2 3 4)`. `'` is `quote` the same way, so `%('foo)` is
 `%(quote foo)`. A `List` literal reads these prefixes as Lisp source does, and
-the evaluator decides what a form means. `$` and `@` are x2c interpolation
+evaluation gives each form its meaning. `$` and `@` are x2c interpolation
 and splicing, performed while constructing the `List`.
 
 Braces delimit the x2c expression being unquoted. Nested calls, indexing,
@@ -229,15 +229,15 @@ the private `<lsym>` representation otherwise. Do not write `<ready>` inside
 a `List`. `ready` produces the same compact value, and a long bare name keeps
 its full spelling.
 
-A C preprocessor macro name is a bare name too. The preprocessor never sees
-the inside of a literal, so after `#define ROWS 64` the List `%(ROWS 4)` is
-`(ROWS 4)`, and reading its first element as a number yields the `Symbol`'s
-numeric value rather than 64. Unquote a typed value, `%(${(long) ROWS} 4)`,
-to insert the macro's value; the bare `$ROWS` has no x2c type either,
-because the preprocessor's text never reaches the type checker. The
-compiler warns when a bare name in a literal matches an
-object-like `#define` it has already passed in the same unit; macros from
-included C headers are not seen and get no warning.
+A C preprocessor macro name is a bare name too. The preprocessor does not
+expand names inside a literal, so after `#define ROWS 64` the List `%(ROWS 4)`
+is `(ROWS 4)`, and reading its first element as a number yields the `Symbol`'s
+numeric value rather than 64. Unquote a typed value, `%(${(long) ROWS} 4)`, to
+insert the macro's value; the bare `$ROWS` has no x2c type either, because the
+preprocessor's text never reaches the type checker. The compiler warns when a
+bare name in a literal matches an object-like `#define` it has already passed
+in the same unit; macros from included C headers are not seen and get no
+warning.
 
 Angle brackets quote text that `List` syntax would read as another kind of
 value. `1` is an integer, `<1>` is the `Symbol` `1`, and `<"a b">` quotes a
@@ -427,9 +427,10 @@ you.
 
 ### Array and Map are objects
 
-`Array.new`, `Map.new`, `[]`, and `{}` each produce a **fresh allocated
-object** with its own identity. Two separately written empty literals are two
-different `Array`s. Assigning one to another variable aliases it.
+`Array.new`, `Map.new`, `[]`, and a `{}` whose destination is a collection
+each produce a fresh allocated object with its own identity. Two separately
+written empty literals are two different `Array`s. Assigning one to another
+variable aliases it.
 
 ```x2c
 Array a = [1, 2, 3];
@@ -566,7 +567,8 @@ constant-time test that works because cells are canonical. An element that
 lives inside the `Var` word compares by content: a small number, a `Symbol`, an
 `Atom`, a canonical `String`, or a nested `List`. An element that the `Var`
 word only points at compares by address: a wide number boxed in a `Scope`
-(`long`, `ulong`, `long long`, `long double`), an `Array`, or a `Map`. Two
+(`long`, `unsigned long`, `long long`, `unsigned long long`, or
+`long double`), an `Array`, or a `Map`. Two
 `List`s built from one `long` value hold two boxes, so they are different keys:
 
 ```x2c
@@ -700,8 +702,8 @@ and a walk never reconverts. `car` of `nil` is the element's zero, not `void`.
 There is no `long` family, because `Var.box_long` allocates a `Scope`-owned box:
 a cell would outlive its car and every `cons` would miss the pool.
 
-These types inherit List bracket reads: `values[0]` returns a `Var`.
-Use `car` for the family's native element type and `nth_cdr` for a tail. Predicate-only
+These types inherit List bracket reads: `values[0]` returns a `Var`. Use `car`
+for the family's native element type and `nth_cdr` for a tail. Predicate-only
 `filter` keeps the typed spelling, since it cannot replace an element.
 Operations such as `map`, whose callbacks can produce new values, need a
 widening assignment to `List`, as above.
@@ -709,8 +711,8 @@ widening assignment to `List`, as above.
 ## Working with Strings
 
 A canonical `String` is an interned `char *`. It is NUL-terminated, so it
-passes straight to `printf("%s", ...)` and to any C function that wants a
-string. Every operation works on **bytes**: lengths, indices, slices,
+passes straight to `printf("%s", ...)` and to any C function that takes a
+string. Every operation works on bytes: lengths, indices, slices,
 padding, case conversion, and iteration. `String` does not decode Unicode
 characters.
 
@@ -789,11 +791,12 @@ promote literals.
 Canonical `String`s are immutable, so repeated `+` in a loop allocates and
 interns at every step. There are two better tools.
 
-`String.malloc` creates a *transient mutable buffer*. It is not a canonical
-`String`. Bracket assignment on a `String` is rejected, because writing through
-a canonical `String` would corrupt every equal `String` that shares its
-storage. Bind the buffer to a `char *` to write it with native indexing, then
-finalize it with `String.intern_free`:
+`String.malloc` creates a transient mutable buffer in the active
+canonical-value pool. It becomes a canonical `String` only when
+`String.intern_free` finalizes it. Bracket assignment on a `String` is
+rejected, because writing through a canonical `String` would corrupt every
+equal `String` that shares its storage. Bind the buffer to a `char *` to write
+it with native indexing, then finalize it with `String.intern_free`:
 
 The byte count includes room for the terminating NUL, and nothing writes that
 NUL for you. `String.intern_free` measures the buffer with `strlen`, so an
@@ -959,10 +962,9 @@ element that is not a number raises `<no-convert>`.
 
 The bracket is where they differ. `numbers[i]` is native indexing on a
 concrete element pointer: no null test, no bounds test, and no negative-index
-normalization. An index outside the elements is undefined as it is for the
-equivalent C pointer, and the generated code is the same indexed load or
-store, so a loop over one of these runs at the speed of the C it compiles to.
-That is why the types exist.
+normalization. An index outside the elements is undefined, as it is for the
+equivalent C pointer. The generated code is the same indexed load or store
+that C would use.
 
 ```x2c
 #include "typed-array.x"
@@ -1020,10 +1022,9 @@ is raw. A typed `Array` boxes into a `Var` and iterates, so
 `foreach(Var item, numbers)` and dynamic indexing through a `Var` receiver
 both work. The dynamic bracket reaches the same raw member.
 
-All seven packed `Array`s can cross a `Context` or `Thread` boundary while boxed.
-An `Array` owned by the source keeps its pointer, and its `Block` header and
-backing allocation move together so it can continue growing after the source
-closes. An `Array` borrowed from an outer `Context` is returned untouched.
+Packed `Array`s cross a `Context` or `Thread` boundary like other values;
+[Contexts and Threads](contexts-and-threads.md#use-a-context-for-bounded-work)
+gives the export rules.
 
 Compound update is native as well. `values[i] += 1`, `values[i] <<= 2`, and
 `values[i]++` compute in the element type and compile to the one instruction
@@ -1145,7 +1146,7 @@ print when the order matters.
 these calls. `Map.set` and bracket writes are fail-fast and reject a `void`
 key or value.
 
-**Inserting or deleting invalidates outstanding cursors and iterators.**
+Inserting or deleting invalidates outstanding cursors and iterators.
 Finish traversing, or collect what you need first, before changing the table's
 structure. Missing values and exhaustion are reported differently across the
 library; check each operation's documented result before assuming `void`
@@ -1153,8 +1154,8 @@ means absent.
 
 ### Iterating a Map
 
-A `foreach` over a `Map` yields each value. Two binders ask for the key as
-well, and the loop reads both out of the table without allocating:
+A `foreach` over a `Map` yields each value. Two binders yield the key and
+the value. With native loop types, the loop does not allocate:
 
 ```x2c
 Map ages = {"ada": 36, "grace": 45};
@@ -1167,12 +1168,8 @@ grace -> 45
 ada -> 36
 ```
 
-`Map.iter` yields values, `Map.keys` yields keys, and `Map.enumerate` yields
-two-element key/value `List`s. The one- and two-binder `foreach` forms use the
-same paths and allocate no pair `List`s. [Iteration](iteration.md) covers
-`foreach`, the `Iter` protocol, and the lazy combinators.
-[The language reference](../reference/language.md) specifies the
-destructuring form.
+[Iteration](iteration.md#what-you-can-iterate) covers the `Map` iterators
+and traversal order.
 
 ### Packed typed Maps
 
@@ -1222,15 +1219,8 @@ with native arithmetic, and so does `MapStringInt`'s `int` value. For
 `<bad-op>`. In all four families `<+>` initializes an absent key from the
 right-hand side, and every other update requires an existing one.
 
-All four packed `Map`s can be boxed into a `Context` or returned from a
-`Thread`. An owned map keeps its pointer and can continue growing after the
-source `Context` closes or `Thread.join` returns. Numeric maps move their
-existing entries directly. `MapStringString` and `MapStringInt` rebuild their
-tables with `String` keys canonicalized in the destination pool; `String`
-pointers may change, and if two
-source keys become one destination `String`, the later entry in source bucket
-order wins. Traversal order is otherwise unspecified. A map borrowed from an
-outer `Context` is left untouched.
+Packed `Map`s cross a `Context` or `Thread` boundary under the same
+[export rules](contexts-and-threads.md#use-a-context-for-bounded-work).
 
 The element type has no `void`, so absence is reported another way. `get`,
 `getindex`, `del`, `postfixindex`, and the updates that require a destination
@@ -1243,9 +1233,8 @@ fallback.
 Native C arrays and pointers keep C indexing. `Array`, `List`, `String`, and
 `Map` also define `value[...]`.
 
-Their typedef aliases inherit bracket reads, so `typedef List Row;` permits
-`row[0]`. An alias's own `getindex` overrides the inherited read. Native C
-pointer aliases keep C indexing unless they define their own getter.
+A typedef alias such as `typedef List Row;` keeps its base type's bracket
+reads.
 
 ```x2c
 Array digits = [0, 1, 2, 3, 4, 5];
@@ -1265,10 +1254,7 @@ out of range: void
 ```
 
 `Array`, `List`, and `String` accept negative indices, counting from the end.
-An index is an `int`; a wider value is outside the supported domain and
-converts as any `Var`-to-`int` conversion does. Slice bounds and steps share
-that `int` domain; a wider value is truncated, so a step of 2^32 becomes 0. An
-out-of-range `Array` or `List` read returns `void`, and a missing `Map` key
+An out-of-range `Array` or `List` read returns `void`, and a missing `Map` key
 returns `void` through brackets. An out-of-range `String` read returns `-1`; a
 successful `String` read returns one byte as an `int` between 0 and 255, so
 `-1` means out of range on every platform and a high byte is never negative.
@@ -1280,10 +1266,10 @@ raw native indexing, with no bounds test and no negative-index rule. See
 Writing is where the immutable/mutable split shows up in the syntax:
 
 - `array[i] = value` and `map[key] = value` are supported.
-- `list[i] = value` is **not**. The compiler rejects it.
-- `string[i] = ch` is **not**, since a canonical `String` is immutable. Use the
-  copy-producing `String.withindex`, or bind a transient `String.malloc`
-  buffer to a `char *` and write through that native pointer.
+- `list[i] = value` is rejected by the compiler.
+- `string[i] = ch` is rejected, because a canonical `String` is immutable.
+  Use the copy-producing `String.withindex`, or bind a transient
+  `String.malloc` buffer to a `char *` and write through that pointer.
 
 <!-- ignore: `List` has no indexed assignment; this is a compile error -->
 ```x2c,ignore
@@ -1297,7 +1283,7 @@ Slicing is `value[start:stop:step]`, available on `Array`, `List`, and
 normalizes negative bounds and negative steps, so the rules are identical
 across the three types. A zero step is invalid.
 
-**A slice returns the same type as its receiver.** Slicing an `Array` gives a
+A slice returns the same type as its receiver. Slicing an `Array` gives a
 new `Array`, a `List` gives a new `List`, and a `String` gives a new `String`.
 The result is a fresh value, and slices do not alias.
 
@@ -1341,47 +1327,43 @@ printf("%s %s\n", region.repr(), digits.repr());
 [ 1, 2, 3, 4 ] [ 0, 9 ]
 ```
 
-A helper-backed indexed expression is not a general C lvalue. `Array` and `Map`
-assignment, compound assignment, and increment/decrement work through their
-collection update calls, but the expression cannot be addressed as native
-storage. `List` and `String` indexed updates are unsupported.
+The [reference](../reference/language.md#indexing-and-slicing) gives the
+full indexing and slicing rules, including the `int` index domain.
 
 ## Choosing between them
 
-Start from what the data *is*.
+Choose by what the data is.
 
-- **`List`**: symbolic and structural data, such as ASTs, patterns,
+- `List`: symbolic and structural data, such as ASTs, patterns,
   s-expressions, association lists, and anything you match over or want
   canonical identity for. Also the return type when a function produces a
   persistent value.
-- **`Array`**: indexed mutation, stacks, queues, priority queues, sorting,
+- `Array`: indexed mutation, stacks, queues, priority queues, sorting,
   and scratch accumulation. Also the fast path when you need O(1) length and
   random access.
-- **`Map`**: keyed lookup, counting, interning tables, and configuration
+- `Map`: keyed lookup, counting, interning tables, and configuration
   keyed by `Symbol` or `String`.
-- **`String`**: canonical text you compare, key on, or return.
-- **`Buffer`**: building text before you have a finished `String`.
-- **`Symbol`**: short immediate names, tags, and closed sets of status
+- `String`: canonical text you compare, key on, or return.
+- `Buffer`: building text before you have a finished `String`.
+- `Symbol`: short immediate names, tags, and closed sets of status
   values.
 
 Some guidelines:
 
-- **Building a sequence in a loop?** Accumulate into an `Array`, then call
-  `Array.list()` if the caller wants a `List`. That is what `List.map` and
-  `List.sort` do internally.
-- **Need to look something up by name?** `Map`, keyed by `String`, `Symbol`, or
-  `Atom`. Do not scan a `List` with `assoc` unless the `List` *is* the data.
-- **Need to compare two sequences for equality cheaply?** `List`. That
-  compare is a pointer compare. `Array` equality walks elements.
-- **Need to mutate an element in place?** `Array`. If you find yourself
-  wanting `list[i] = x`, you wanted an `Array`.
-- **Passing a sequence to many places that must not change it?** `List` or
-  `String`. There is no copy to make and none to forget.
-- **Using it as a `Map` key?** `String`, `Symbol`, `Atom`, number, or `List`.
-`Array` and `Map` hash by identity.
-- **Every element the same C scalar, and the loop is hot?** The typed
-  families above, a packed `Array` first, since it is the only one with a raw
-  bracket. Use these types for their type checking and shorter code; measure
+- To build a sequence in a loop, accumulate into an `Array`, then call
+  `Array.list()` if the caller wants a `List`. `List.map` and `List.sort`
+  do the same internally.
+- To look something up by name, use a `Map` keyed by `String`, `Symbol`, or
+  `Atom`. Scan a `List` with `assoc` only when the `List` is the data.
+- To compare two sequences cheaply, use `List`: equality is a pointer
+  compare. `Array` equality walks the elements.
+- To change an element in place, use an `Array`.
+- To pass a sequence to code that must not change it, use a `List` or a
+  `String`. No copy is needed.
+- For a `Map` key, use a `String`, `Symbol`, `Atom`, number, or `List`.
+  `Array` and `Map` hash by identity.
+- When every element is the same C scalar and the loop is hot, use a typed
+  family, preferably a packed `Array`, which has a raw bracket. Measure
   speed when it matters.
 
 A small program that uses each type for what it is good at: a `String` split

@@ -20,8 +20,8 @@ API reference.
 A `Var` is eight bytes. Integers that fit, doubles, pointers, `Symbol`s,
 `Null`, and `void` are stored in those bytes and allocate nothing. The wide
 scalars do not fit alongside a tag: `long`, `unsigned long`, `long long`,
-`unsigned long long`, and `long double`. Those go in an immutable box that
-the allocator owns, and the `Var` holds its address:
+`unsigned long long`, and `long double`. Those go in an immutable box
+allocated in the active scope, and the `Var` holds its address:
 
 ```x2c
 Var small = 42;
