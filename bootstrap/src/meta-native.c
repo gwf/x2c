@@ -52,11 +52,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-static List _442, _440, _439, _437, _435, _434, _431, _429, _427, _426, _422, _420, _419, _413, _411, _410, _407, _405, _404, _402, _401, _400, _398, _396, _394, _393, _391, _389, _387, _385, _383, _382, _380, _377, _375, _374, _372, _371, _370, _367, _361, _359, _358, _356, _355, _353, _349, _347, _345, _344, _342, _340, _338, _335, _333, _332, _328, _325, _323, _322, _320, _319, _317, _315, _314, _312, _311, _310, _308, _303, _301, _299, _298, _296, _293, _290, _288, _287, _285, _284, _282, _280, _278, _276, _275, _273, _271, _269, _268, _266, _265, _264, _262, _256, _254, _253, _251, _248, _247, _245, _244, _242, _240, _232, _231, _227, _226, _224, _223, _220, _219, _218, _216, _215, _212, _211, _210, _209, _205, _204, _203, _202, _201, _199, _198, _197, _195, _194, _193, _192, _186, _183, _181, _180, _179, _178, _177, _176, _175, _166, _164, _163, _160, _156, _154, _153, _151, _149, _144, _141, _124, _123, _122, _121, _112, _108, _107, _106, _104, _103, _102, _100, _99, _95, _94, _93, _91, _90, _88, _87, _86, _84, _82, _81, _80, _76, _75, _74, _67, _62, _61, _58, _57, _56, _55, _54, _53, _44, _43, _42, _40, _39, _38, _34, _33, _32, _30, _29, _28, _23, _12, _10;
+static List _449, _447, _446, _444, _442, _441, _438, _436, _434, _433, _429, _427, _426, _420, _418, _417, _414, _412, _411, _409, _408, _407, _405, _403, _401, _400, _398, _396, _394, _392, _390, _389, _387, _384, _382, _381, _379, _378, _377, _374, _368, _366, _365, _363, _362, _360, _356, _354, _352, _351, _349, _347, _345, _342, _340, _339, _335, _332, _330, _329, _327, _326, _324, _322, _321, _319, _318, _316, _311, _309, _307, _306, _304, _301, _298, _296, _295, _293, _292, _290, _288, _286, _284, _283, _281, _279, _277, _276, _274, _273, _272, _270, _266, _264, _263, _261, _260, _256, _254, _253, _251, _248, _247, _245, _244, _242, _240, _232, _231, _227, _226, _224, _223, _220, _219, _218, _216, _215, _212, _211, _210, _209, _205, _204, _203, _202, _201, _199, _198, _197, _195, _194, _193, _192, _186, _183, _181, _180, _179, _178, _177, _176, _175, _166, _164, _163, _160, _156, _154, _153, _151, _149, _144, _141, _124, _123, _122, _121, _112, _108, _107, _106, _104, _103, _102, _100, _99, _95, _94, _93, _91, _90, _88, _87, _86, _84, _82, _81, _80, _76, _75, _74, _67, _62, _61, _58, _57, _56, _55, _54, _53, _44, _43, _42, _40, _39, _38, _34, _33, _32, _30, _29, _28, _23, _12, _10;
 
-static String _459, _458, _457, _456, _455, _454, _453, _452, _451, _450, _449, _448, _447, _446, _445, _444, _443, _436, _433, _432, _430, _424, _423, _417, _416, _415, _414, _408, _399, _397, _390, _388, _386, _379, _378, _369, _368, _366, _365, _364, _363, _362, _352, _351, _350, _348, _341, _339, _337, _336, _330, _329, _327, _326, _318, _306, _305, _304, _302, _295, _294, _292, _291, _283, _281, _279, _272, _260, _258, _257, _249, _238, _237, _236, _235, _234, _233, _229, _221, _184, _173, _171, _169, _167, _158, _157, _147, _146, _142, _139, _137, _136, _135, _134, _133, _132, _131, _130, _127, _126, _116, _114, _113, _110, _109, _65, _64, _63, _51, _49, _47, _26, _18, _16, _15, _14, _8, _7, _6, _5, _4, _3, _1, _0;
+static String _466, _465, _464, _463, _462, _461, _460, _459, _458, _457, _456, _455, _454, _453, _452, _451, _450, _443, _440, _439, _437, _431, _430, _424, _423, _422, _421, _415, _406, _404, _397, _395, _393, _386, _385, _376, _375, _373, _372, _371, _370, _369, _359, _358, _357, _355, _348, _346, _344, _343, _337, _336, _334, _333, _325, _314, _313, _312, _310, _303, _302, _300, _299, _291, _289, _287, _280, _268, _267, _258, _257, _249, _238, _237, _236, _235, _234, _233, _229, _221, _184, _173, _171, _169, _167, _158, _157, _147, _146, _142, _139, _137, _136, _135, _134, _133, _132, _131, _130, _127, _126, _116, _114, _113, _110, _109, _65, _64, _63, _51, _49, _47, _26, _18, _16, _15, _14, _8, _7, _6, _5, _4, _3, _1, _0;
 
-static Var _441, _438, _428, _425, _421, _418, _412, _409, _406, _403, _395, _392, _384, _381, _376, _373, _360, _357, _354, _346, _343, _334, _331, _324, _321, _316, _313, _309, _307, _300, _297, _289, _286, _277, _274, _270, _267, _263, _261, _259, _255, _252, _250, _246, _243, _241, _239, _230, _228, _225, _222, _217, _214, _213, _208, _207, _206, _200, _196, _191, _190, _189, _188, _187, _185, _182, _174, _172, _170, _168, _165, _162, _161, _159, _155, _152, _150, _148, _145, _143, _140, _138, _129, _128, _125, _120, _119, _118, _117, _115, _111, _105, _101, _98, _97, _96, _92, _89, _85, _83, _79, _78, _77, _73, _72, _71, _70, _69, _68, _66, _60, _59, _52, _50, _48, _46, _45, _41, _37, _36, _35, _31, _27, _25, _24, _22, _21, _20, _19, _17, _13, _11, _9, _2;
+static Var _448, _445, _435, _432, _428, _425, _419, _416, _413, _410, _402, _399, _391, _388, _383, _380, _367, _364, _361, _353, _350, _341, _338, _331, _328, _323, _320, _317, _315, _308, _305, _297, _294, _285, _282, _278, _275, _271, _269, _265, _262, _259, _255, _252, _250, _246, _243, _241, _239, _230, _228, _225, _222, _217, _214, _213, _208, _207, _206, _200, _196, _191, _190, _189, _188, _187, _185, _182, _174, _172, _170, _168, _165, _162, _161, _159, _155, _152, _150, _148, _145, _143, _140, _138, _129, _128, _125, _120, _119, _118, _117, _115, _111, _105, _101, _98, _97, _96, _92, _89, _85, _83, _79, _78, _77, _73, _72, _71, _70, _69, _68, _66, _60, _59, _52, _50, _48, _46, _45, _41, _37, _36, _35, _31, _27, _25, _24, _22, _21, _20, _19, _17, _13, _11, _9, _2;
 
 static int _init_guard_ = 0;
 
@@ -458,6 +458,8 @@ static Var _x2c_gensym_func_adapt_51(Func _x2c_gensym_func_binding_51, const Fun
 
 static Var _x2c_gensym_func_adapt_52(Func _x2c_gensym_func_binding_52, const FuncArg * _x2c_gensym_func_argv_52);
 
+static Var _x2c_gensym_func_adapt_53(Func _x2c_gensym_func_binding_53, const FuncArg * _x2c_gensym_func_argv_53);
+
 static void _x2c_gensym_defer_cleanup_20(void * _x2c_gensym_defer_opaque_20);
 
 static void _x2c_gensym_defer_cleanup_21(void * _x2c_gensym_defer_opaque_21);
@@ -726,208 +728,215 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _255 = List_var(_254);
   _256 = cons(_255, _149);
   _257 = String_new("Code_body");
-  _258 = String_new("Code_call_in_order");
+  _258 = String_new("Code_bound");
   _259 = List_var(_247);
-  _260 = String_new("Type");
-  _261 = String_var(_260);
-  _262 = cons(_261, NULL);
-  _263 = List_var(_262);
-  _264 = cons(_263, NULL);
-  _265 = cons(_259, _264);
-  _266 = cons(_241, _265);
-  _267 = List_var(_266);
-  _268 = cons(_267, NULL);
-  _269 = cons(_145, _268);
-  _270 = List_var(_269);
-  _271 = cons(_270, _240);
-  _272 = String_new("Code_convert");
-  _273 = cons(_241, _264);
-  _274 = List_var(_273);
-  _275 = cons(_274, NULL);
-  _276 = cons(_145, _275);
-  _277 = List_var(_276);
-  _278 = cons(_277, _240);
-  _279 = String_new("Code_exits");
-  _280 = cons(_246, _23);
-  _281 = String_new("Code_format");
-  _282 = cons(_246, _149);
-  _283 = String_new("Code_func_parameters");
-  _284 = cons(_241, _242);
-  _285 = cons(_241, _284);
-  _286 = List_var(_285);
-  _287 = cons(_286, NULL);
-  _288 = cons(_145, _287);
-  _289 = List_var(_288);
-  _290 = cons(_289, _247);
-  _291 = String_new("Code_is_static_pattern");
-  _292 = String_new("Code_lowered");
-  _293 = cons(_246, _240);
-  _294 = String_new("Code_name");
-  _295 = String_new("Code_parameter");
-  _296 = cons(_241, _151);
+  _260 = cons(_259, NULL);
+  _261 = cons(_241, _260);
+  _262 = List_var(_261);
+  _263 = cons(_262, NULL);
+  _264 = cons(_145, _263);
+  _265 = List_var(_264);
+  _266 = cons(_265, _240);
+  _267 = String_new("Code_call_in_order");
+  _268 = String_new("Type");
+  _269 = String_var(_268);
+  _270 = cons(_269, NULL);
+  _271 = List_var(_270);
+  _272 = cons(_271, NULL);
+  _273 = cons(_259, _272);
+  _274 = cons(_241, _273);
+  _275 = List_var(_274);
+  _276 = cons(_275, NULL);
+  _277 = cons(_145, _276);
+  _278 = List_var(_277);
+  _279 = cons(_278, _240);
+  _280 = String_new("Code_convert");
+  _281 = cons(_241, _272);
+  _282 = List_var(_281);
+  _283 = cons(_282, NULL);
+  _284 = cons(_145, _283);
+  _285 = List_var(_284);
+  _286 = cons(_285, _240);
+  _287 = String_new("Code_exits");
+  _288 = cons(_246, _23);
+  _289 = String_new("Code_format");
+  _290 = cons(_246, _149);
+  _291 = String_new("Code_func_parameters");
+  _292 = cons(_241, _242);
+  _293 = cons(_241, _292);
+  _294 = List_var(_293);
+  _295 = cons(_294, NULL);
+  _296 = cons(_145, _295);
   _297 = List_var(_296);
-  _298 = cons(_297, NULL);
-  _299 = cons(_145, _298);
-  _300 = List_var(_299);
-  _301 = cons(_300, _240);
-  _302 = String_new("Code_pattern_value");
-  _303 = cons(_246, _144);
-  _304 = String_new("Code_promoted");
-  _305 = String_new("Code_register_after_initialization");
-  _306 = String_new("Macro");
-  _307 = String_var(_306);
-  _308 = cons(_307, NULL);
-  _309 = List_var(_308);
-  _310 = cons(_259, NULL);
-  _311 = cons(_309, _310);
-  _312 = cons(_241, _311);
-  _313 = List_var(_312);
-  _314 = cons(_313, NULL);
-  _315 = cons(_145, _314);
-  _316 = List_var(_315);
-  _317 = cons(_316, _240);
-  _318 = String_new("Code_register_rewrite");
-  _319 = cons(_259, _310);
-  _320 = cons(_241, _319);
-  _321 = List_var(_320);
-  _322 = cons(_321, NULL);
-  _323 = cons(_145, _322);
-  _324 = List_var(_323);
-  _325 = cons(_324, _240);
-  _326 = String_new("Code_source_text");
-  _327 = String_new("Code_type");
-  _328 = cons(_246, _262);
-  _329 = String_new("Code_value");
-  _330 = String_new("Type_aggregate");
-  _331 = List_var(_264);
-  _332 = cons(_331, NULL);
-  _333 = cons(_145, _332);
-  _334 = List_var(_333);
-  _335 = cons(_334, _262);
-  _336 = String_new("Type_element");
-  _337 = String_new("Type_fields");
-  _338 = cons(_334, _247);
-  _339 = String_new("Type_getter");
-  _340 = cons(_334, _240);
-  _341 = String_new("Type_is_named");
-  _342 = cons(_263, _151);
-  _343 = List_var(_342);
-  _344 = cons(_343, NULL);
-  _345 = cons(_145, _344);
-  _346 = List_var(_345);
-  _347 = cons(_346, _23);
-  _348 = String_new("Type_is_text");
-  _349 = cons(_334, _23);
-  _350 = String_new("Type_is_value");
-  _351 = String_new("Type_layout");
-  _352 = String_new("Type_marked_fields");
-  _353 = cons(_168, NULL);
-  _354 = List_var(_353);
-  _355 = cons(_354, NULL);
-  _356 = cons(_263, _355);
-  _357 = List_var(_356);
-  _358 = cons(_357, NULL);
-  _359 = cons(_145, _358);
-  _360 = List_var(_359);
-  _361 = cons(_360, _247);
-  _362 = String_new("Type_members");
-  _363 = String_new("Type_numeric");
-  _364 = String_new("Type_parameters");
-  _365 = String_new("Type_parts");
-  _366 = String_new("Type_protocol_member");
-  _367 = cons(_346, _240);
-  _368 = String_new("Type_resolve");
-  _369 = String_new("Type_resolve_member");
-  _370 = cons(_24, NULL);
-  _371 = cons(_150, _370);
-  _372 = cons(_263, _371);
-  _373 = List_var(_372);
-  _374 = cons(_373, NULL);
-  _375 = cons(_145, _374);
-  _376 = List_var(_375);
-  _377 = cons(_376, _247);
-  _378 = String_new("Type_return_type");
-  _379 = String_new("Type_reverse_name");
-  _380 = cons(_150, _151);
-  _381 = List_var(_380);
-  _382 = cons(_381, NULL);
-  _383 = cons(_145, _382);
-  _384 = List_var(_383);
-  _385 = cons(_384, _149);
-  _386 = String_new("Type_tag_name");
-  _387 = cons(_155, _353);
-  _388 = String_new("Type_update_helper");
-  _389 = cons(_334, _149);
-  _390 = String_new("x2c_binding_for");
-  _391 = cons(_250, _151);
-  _392 = List_var(_391);
-  _393 = cons(_392, NULL);
-  _394 = cons(_145, _393);
-  _395 = List_var(_394);
-  _396 = cons(_395, _247);
-  _397 = String_new("x2c_binding_fresh");
-  _398 = cons(_155, _247);
-  _399 = String_new("x2c_diagnostic_error_at");
-  _400 = cons(_150, _310);
-  _401 = cons(_354, _400);
-  _402 = cons(_250, _401);
-  _403 = List_var(_402);
-  _404 = cons(_403, NULL);
-  _405 = cons(_145, _404);
-  _406 = List_var(_405);
-  _407 = cons(_406, _10);
-  _408 = String_new("x2c_diagnostic_fail");
-  _409 = List_var(_400);
-  _410 = cons(_409, NULL);
-  _411 = cons(_145, _410);
-  _412 = List_var(_411);
-  _413 = cons(_412, _10);
-  _414 = String_new("x2c_diagnostic_fail_at");
-  _415 = String_new("x2c_diagnostic_warn");
-  _416 = String_new("x2c_embed_text");
-  _417 = String_new("x2c_enclosing");
-  _418 = List_var(_355);
-  _419 = cons(_418, NULL);
-  _420 = cons(_145, _419);
-  _421 = List_var(_420);
-  _422 = cons(_421, _240);
-  _423 = String_new("x2c_ident");
-  _424 = String_new("x2c_invocation_column");
-  _425 = List_var(_12);
+  _298 = cons(_297, _247);
+  _299 = String_new("Code_is_static_pattern");
+  _300 = String_new("Code_lowered");
+  _301 = cons(_246, _240);
+  _302 = String_new("Code_name");
+  _303 = String_new("Code_parameter");
+  _304 = cons(_241, _151);
+  _305 = List_var(_304);
+  _306 = cons(_305, NULL);
+  _307 = cons(_145, _306);
+  _308 = List_var(_307);
+  _309 = cons(_308, _240);
+  _310 = String_new("Code_pattern_value");
+  _311 = cons(_246, _144);
+  _312 = String_new("Code_promoted");
+  _313 = String_new("Code_register_after_initialization");
+  _314 = String_new("Macro");
+  _315 = String_var(_314);
+  _316 = cons(_315, NULL);
+  _317 = List_var(_316);
+  _318 = cons(_317, _260);
+  _319 = cons(_241, _318);
+  _320 = List_var(_319);
+  _321 = cons(_320, NULL);
+  _322 = cons(_145, _321);
+  _323 = List_var(_322);
+  _324 = cons(_323, _240);
+  _325 = String_new("Code_register_rewrite");
+  _326 = cons(_259, _260);
+  _327 = cons(_241, _326);
+  _328 = List_var(_327);
+  _329 = cons(_328, NULL);
+  _330 = cons(_145, _329);
+  _331 = List_var(_330);
+  _332 = cons(_331, _240);
+  _333 = String_new("Code_source_text");
+  _334 = String_new("Code_type");
+  _335 = cons(_246, _270);
+  _336 = String_new("Code_value");
+  _337 = String_new("Type_aggregate");
+  _338 = List_var(_272);
+  _339 = cons(_338, NULL);
+  _340 = cons(_145, _339);
+  _341 = List_var(_340);
+  _342 = cons(_341, _270);
+  _343 = String_new("Type_element");
+  _344 = String_new("Type_fields");
+  _345 = cons(_341, _247);
+  _346 = String_new("Type_getter");
+  _347 = cons(_341, _240);
+  _348 = String_new("Type_is_named");
+  _349 = cons(_271, _151);
+  _350 = List_var(_349);
+  _351 = cons(_350, NULL);
+  _352 = cons(_145, _351);
+  _353 = List_var(_352);
+  _354 = cons(_353, _23);
+  _355 = String_new("Type_is_text");
+  _356 = cons(_341, _23);
+  _357 = String_new("Type_is_value");
+  _358 = String_new("Type_layout");
+  _359 = String_new("Type_marked_fields");
+  _360 = cons(_168, NULL);
+  _361 = List_var(_360);
+  _362 = cons(_361, NULL);
+  _363 = cons(_271, _362);
+  _364 = List_var(_363);
+  _365 = cons(_364, NULL);
+  _366 = cons(_145, _365);
+  _367 = List_var(_366);
+  _368 = cons(_367, _247);
+  _369 = String_new("Type_members");
+  _370 = String_new("Type_numeric");
+  _371 = String_new("Type_parameters");
+  _372 = String_new("Type_parts");
+  _373 = String_new("Type_protocol_member");
+  _374 = cons(_353, _240);
+  _375 = String_new("Type_resolve");
+  _376 = String_new("Type_resolve_member");
+  _377 = cons(_24, NULL);
+  _378 = cons(_150, _377);
+  _379 = cons(_271, _378);
+  _380 = List_var(_379);
+  _381 = cons(_380, NULL);
+  _382 = cons(_145, _381);
+  _383 = List_var(_382);
+  _384 = cons(_383, _247);
+  _385 = String_new("Type_return_type");
+  _386 = String_new("Type_reverse_name");
+  _387 = cons(_150, _151);
+  _388 = List_var(_387);
+  _389 = cons(_388, NULL);
+  _390 = cons(_145, _389);
+  _391 = List_var(_390);
+  _392 = cons(_391, _149);
+  _393 = String_new("Type_tag_name");
+  _394 = cons(_155, _360);
+  _395 = String_new("Type_update_helper");
+  _396 = cons(_341, _149);
+  _397 = String_new("x2c_binding_for");
+  _398 = cons(_250, _151);
+  _399 = List_var(_398);
+  _400 = cons(_399, NULL);
+  _401 = cons(_145, _400);
+  _402 = List_var(_401);
+  _403 = cons(_402, _247);
+  _404 = String_new("x2c_binding_fresh");
+  _405 = cons(_155, _247);
+  _406 = String_new("x2c_diagnostic_error_at");
+  _407 = cons(_150, _260);
+  _408 = cons(_361, _407);
+  _409 = cons(_250, _408);
+  _410 = List_var(_409);
+  _411 = cons(_410, NULL);
+  _412 = cons(_145, _411);
+  _413 = List_var(_412);
+  _414 = cons(_413, _10);
+  _415 = String_new("x2c_diagnostic_fail");
+  _416 = List_var(_407);
+  _417 = cons(_416, NULL);
+  _418 = cons(_145, _417);
+  _419 = List_var(_418);
+  _420 = cons(_419, _10);
+  _421 = String_new("x2c_diagnostic_fail_at");
+  _422 = String_new("x2c_diagnostic_warn");
+  _423 = String_new("x2c_embed_text");
+  _424 = String_new("x2c_enclosing");
+  _425 = List_var(_362);
   _426 = cons(_425, NULL);
   _427 = cons(_145, _426);
   _428 = List_var(_427);
-  _429 = cons(_428, _23);
-  _430 = String_new("x2c_invocation_file");
-  _431 = cons(_428, _149);
-  _432 = String_new("x2c_invocation_line");
-  _433 = String_new("x2c_meta_definition_hashes");
-  _434 = cons(_174, NULL);
-  _435 = cons(_428, _434);
-  _436 = String_new("x2c_place");
-  _437 = cons(_259, _242);
-  _438 = List_var(_437);
-  _439 = cons(_438, NULL);
-  _440 = cons(_145, _439);
-  _441 = List_var(_440);
-  _442 = cons(_441, _10);
-  _443 = String_new("<");
-  _444 = String_new("/builds/");
-  _445 = String_new(".module");
-  _446 = String_new("native modules are not supported on this platform");
-  _447 = String_new("package: ");
-  _448 = String_new("module: ");
-  _449 = String_new("package \'");
-  _450 = String_new("\' was built by another compiler; rebuild it");
-  _451 = String_new("not an x2c native module: ");
-  _452 = String_new("native module \'");
-  _453 = String_new("cannot read the running compiler to check native module \'");
-  _454 = String_new("cannot read native module \'");
-  _455 = String_new("\': ");
-  _456 = String_new("x2c-module-stamp:");
-  _457 = String_new("cannot load native module \'");
-  _458 = String_new(".extensions/");
-  _459 = String_new(".a");
+  _429 = cons(_428, _240);
+  _430 = String_new("x2c_ident");
+  _431 = String_new("x2c_invocation_column");
+  _432 = List_var(_12);
+  _433 = cons(_432, NULL);
+  _434 = cons(_145, _433);
+  _435 = List_var(_434);
+  _436 = cons(_435, _23);
+  _437 = String_new("x2c_invocation_file");
+  _438 = cons(_435, _149);
+  _439 = String_new("x2c_invocation_line");
+  _440 = String_new("x2c_meta_definition_hashes");
+  _441 = cons(_174, NULL);
+  _442 = cons(_435, _441);
+  _443 = String_new("x2c_place");
+  _444 = cons(_259, _242);
+  _445 = List_var(_444);
+  _446 = cons(_445, NULL);
+  _447 = cons(_145, _446);
+  _448 = List_var(_447);
+  _449 = cons(_448, _10);
+  _450 = String_new("<");
+  _451 = String_new("/builds/");
+  _452 = String_new(".module");
+  _453 = String_new("native modules are not supported on this platform");
+  _454 = String_new("package: ");
+  _455 = String_new("module: ");
+  _456 = String_new("package \'");
+  _457 = String_new("\' was built by another compiler; rebuild it");
+  _458 = String_new("not an x2c native module: ");
+  _459 = String_new("native module \'");
+  _460 = String_new("cannot read the running compiler to check native module \'");
+  _461 = String_new("cannot read native module \'");
+  _462 = String_new("\': ");
+  _463 = String_new("x2c-module-stamp:");
+  _464 = String_new("cannot load native module \'");
+  _465 = String_new(".extensions/");
+  _466 = String_new(".a");
   _x2c_gensym_static_initialize_0();
   _x2c_gensym_static_initialize_1();
   _x2c_gensym_static_initialize_2();
@@ -2829,7 +2838,7 @@ static int _linked_texts_match(Compiler c, String name, Map linked, Map reached)
 }
 
 static Map _compiler_targets(void){
-  return Map_update_n(Map_new(), 53, String_var(_237), Func_var(Func_new(_x2c_gensym_func_adapt_0, _248)), String_var(_249), Func_var(Func_new(_x2c_gensym_func_adapt_1, _256)), String_var(_257), Func_var(Func_new(_x2c_gensym_func_adapt_2, _248)), String_var(_258), Func_var(Func_new(_x2c_gensym_func_adapt_3, _271)), String_var(_272), Func_var(Func_new(_x2c_gensym_func_adapt_4, _278)), String_var(_279), Func_var(Func_new(_x2c_gensym_func_adapt_5, _280)), String_var(_281), Func_var(Func_new(_x2c_gensym_func_adapt_6, _282)), String_var(_283), Func_var(Func_new(_x2c_gensym_func_adapt_7, _290)), String_var(_291), Func_var(Func_new(_x2c_gensym_func_adapt_8, _280)), String_var(_292), Func_var(Func_new(_x2c_gensym_func_adapt_9, _293)), String_var(_294), Func_var(Func_new(_x2c_gensym_func_adapt_10, _282)), String_var(_295), Func_var(Func_new(_x2c_gensym_func_adapt_11, _301)), String_var(_302), Func_var(Func_new(_x2c_gensym_func_adapt_12, _303)), String_var(_304), Func_var(Func_new(_x2c_gensym_func_adapt_13, _293)), String_var(_305), Func_var(Func_new(_x2c_gensym_func_adapt_14, _317)), String_var(_318), Func_var(Func_new(_x2c_gensym_func_adapt_15, _325)), String_var(_326), Func_var(Func_new(_x2c_gensym_func_adapt_16, _256)), String_var(_327), Func_var(Func_new(_x2c_gensym_func_adapt_17, _328)), String_var(_329), Func_var(Func_new(_x2c_gensym_func_adapt_18, _303)), String_var(_330), Func_var(Func_new(_x2c_gensym_func_adapt_19, _335)), String_var(_336), Func_var(Func_new(_x2c_gensym_func_adapt_20, _335)), String_var(_337), Func_var(Func_new(_x2c_gensym_func_adapt_21, _338)), String_var(_339), Func_var(Func_new(_x2c_gensym_func_adapt_22, _340)), String_var(_341), Func_var(Func_new(_x2c_gensym_func_adapt_23, _347)), String_var(_348), Func_var(Func_new(_x2c_gensym_func_adapt_24, _349)), String_var(_350), Func_var(Func_new(_x2c_gensym_func_adapt_25, _349)), String_var(_351), Func_var(Func_new(_x2c_gensym_func_adapt_26, _338)), String_var(_352), Func_var(Func_new(_x2c_gensym_func_adapt_27, _361)), String_var(_362), Func_var(Func_new(_x2c_gensym_func_adapt_28, _338)), String_var(_363), Func_var(Func_new(_x2c_gensym_func_adapt_29, _335)), String_var(_364), Func_var(Func_new(_x2c_gensym_func_adapt_30, _338)), String_var(_365), Func_var(Func_new(_x2c_gensym_func_adapt_31, _338)), String_var(_366), Func_var(Func_new(_x2c_gensym_func_adapt_32, _367)), String_var(_368), Func_var(Func_new(_x2c_gensym_func_adapt_33, _335)), String_var(_369), Func_var(Func_new(_x2c_gensym_func_adapt_34, _377)), String_var(_378), Func_var(Func_new(_x2c_gensym_func_adapt_35, _335)), String_var(_379), Func_var(Func_new(_x2c_gensym_func_adapt_36, _385)), String_var(_386), Func_var(Func_new(_x2c_gensym_func_adapt_37, _387)), String_var(_388), Func_var(Func_new(_x2c_gensym_func_adapt_38, _389)), String_var(_390), Func_var(Func_new(_x2c_gensym_func_adapt_39, _396)), String_var(_397), Func_var(Func_new(_x2c_gensym_func_adapt_40, _398)), String_var(_399), Func_var(Func_new(_x2c_gensym_func_adapt_41, _407)), String_var(_408), Func_var(Func_new(_x2c_gensym_func_adapt_42, _413)), String_var(_414), Func_var(Func_new(_x2c_gensym_func_adapt_43, _407)), String_var(_415), Func_var(Func_new(_x2c_gensym_func_adapt_44, _413)), String_var(_416), Func_var(Func_new(_x2c_gensym_func_adapt_45, _256)), String_var(_417), Func_var(Func_new(_x2c_gensym_func_adapt_46, _422)), String_var(_423), Func_var(Func_new(_x2c_gensym_func_adapt_47, _398)), String_var(_424), Func_var(Func_new(_x2c_gensym_func_adapt_48, _429)), String_var(_430), Func_var(Func_new(_x2c_gensym_func_adapt_49, _431)), String_var(_432), Func_var(Func_new(_x2c_gensym_func_adapt_50, _429)), String_var(_433), Func_var(Func_new(_x2c_gensym_func_adapt_51, _435)), String_var(_436), Func_var(Func_new(_x2c_gensym_func_adapt_52, _442)));
+  return Map_update_n(Map_new(), 54, String_var(_237), Func_var(Func_new(_x2c_gensym_func_adapt_0, _248)), String_var(_249), Func_var(Func_new(_x2c_gensym_func_adapt_1, _256)), String_var(_257), Func_var(Func_new(_x2c_gensym_func_adapt_2, _248)), String_var(_258), Func_var(Func_new(_x2c_gensym_func_adapt_3, _266)), String_var(_267), Func_var(Func_new(_x2c_gensym_func_adapt_4, _279)), String_var(_280), Func_var(Func_new(_x2c_gensym_func_adapt_5, _286)), String_var(_287), Func_var(Func_new(_x2c_gensym_func_adapt_6, _288)), String_var(_289), Func_var(Func_new(_x2c_gensym_func_adapt_7, _290)), String_var(_291), Func_var(Func_new(_x2c_gensym_func_adapt_8, _298)), String_var(_299), Func_var(Func_new(_x2c_gensym_func_adapt_9, _288)), String_var(_300), Func_var(Func_new(_x2c_gensym_func_adapt_10, _301)), String_var(_302), Func_var(Func_new(_x2c_gensym_func_adapt_11, _290)), String_var(_303), Func_var(Func_new(_x2c_gensym_func_adapt_12, _309)), String_var(_310), Func_var(Func_new(_x2c_gensym_func_adapt_13, _311)), String_var(_312), Func_var(Func_new(_x2c_gensym_func_adapt_14, _301)), String_var(_313), Func_var(Func_new(_x2c_gensym_func_adapt_15, _324)), String_var(_325), Func_var(Func_new(_x2c_gensym_func_adapt_16, _332)), String_var(_333), Func_var(Func_new(_x2c_gensym_func_adapt_17, _256)), String_var(_334), Func_var(Func_new(_x2c_gensym_func_adapt_18, _335)), String_var(_336), Func_var(Func_new(_x2c_gensym_func_adapt_19, _311)), String_var(_337), Func_var(Func_new(_x2c_gensym_func_adapt_20, _342)), String_var(_343), Func_var(Func_new(_x2c_gensym_func_adapt_21, _342)), String_var(_344), Func_var(Func_new(_x2c_gensym_func_adapt_22, _345)), String_var(_346), Func_var(Func_new(_x2c_gensym_func_adapt_23, _347)), String_var(_348), Func_var(Func_new(_x2c_gensym_func_adapt_24, _354)), String_var(_355), Func_var(Func_new(_x2c_gensym_func_adapt_25, _356)), String_var(_357), Func_var(Func_new(_x2c_gensym_func_adapt_26, _356)), String_var(_358), Func_var(Func_new(_x2c_gensym_func_adapt_27, _345)), String_var(_359), Func_var(Func_new(_x2c_gensym_func_adapt_28, _368)), String_var(_369), Func_var(Func_new(_x2c_gensym_func_adapt_29, _345)), String_var(_370), Func_var(Func_new(_x2c_gensym_func_adapt_30, _342)), String_var(_371), Func_var(Func_new(_x2c_gensym_func_adapt_31, _345)), String_var(_372), Func_var(Func_new(_x2c_gensym_func_adapt_32, _345)), String_var(_373), Func_var(Func_new(_x2c_gensym_func_adapt_33, _374)), String_var(_375), Func_var(Func_new(_x2c_gensym_func_adapt_34, _342)), String_var(_376), Func_var(Func_new(_x2c_gensym_func_adapt_35, _384)), String_var(_385), Func_var(Func_new(_x2c_gensym_func_adapt_36, _342)), String_var(_386), Func_var(Func_new(_x2c_gensym_func_adapt_37, _392)), String_var(_393), Func_var(Func_new(_x2c_gensym_func_adapt_38, _394)), String_var(_395), Func_var(Func_new(_x2c_gensym_func_adapt_39, _396)), String_var(_397), Func_var(Func_new(_x2c_gensym_func_adapt_40, _403)), String_var(_404), Func_var(Func_new(_x2c_gensym_func_adapt_41, _405)), String_var(_406), Func_var(Func_new(_x2c_gensym_func_adapt_42, _414)), String_var(_415), Func_var(Func_new(_x2c_gensym_func_adapt_43, _420)), String_var(_421), Func_var(Func_new(_x2c_gensym_func_adapt_44, _414)), String_var(_422), Func_var(Func_new(_x2c_gensym_func_adapt_45, _420)), String_var(_423), Func_var(Func_new(_x2c_gensym_func_adapt_46, _256)), String_var(_424), Func_var(Func_new(_x2c_gensym_func_adapt_47, _429)), String_var(_430), Func_var(Func_new(_x2c_gensym_func_adapt_48, _405)), String_var(_431), Func_var(Func_new(_x2c_gensym_func_adapt_49, _436)), String_var(_437), Func_var(Func_new(_x2c_gensym_func_adapt_50, _438)), String_var(_439), Func_var(Func_new(_x2c_gensym_func_adapt_51, _436)), String_var(_440), Func_var(Func_new(_x2c_gensym_func_adapt_52, _442)), String_var(_443), Func_var(Func_new(_x2c_gensym_func_adapt_53, _449)));
 }
 
 Map Compiler_compiler_targets(void){
@@ -2847,7 +2856,7 @@ void Compiler_select_native_modules(List paths){
   _load_compiler_module();
   Array linked = Array_new();
   for(struct Extension * e = extensions;  e;  e = e -> next){
-    String key = String_join(NULL, cons(String_var(_443), cons(String_var(String_new(e -> name)), cons(String_var(_1), NULL))));
+    String key = String_join(NULL, cons(String_var(_450), cons(String_var(String_new(e -> name)), cons(String_var(_1), NULL))));
     if(! Compiler_native_module_loaded(key)) Compiler_add_native_module(key, e -> targets);
     Array_push(linked, String_var(key));
   }
@@ -2865,10 +2874,10 @@ int Path_is_file(Path);
 
 void Compiler_select_package_module(Compiler c, String name, String root, Token token){
   if(! _init_guard_) _file_init_();
-  String module = String_join(NULL, cons(String_var(root), cons(String_var(_444), cons(String_var(name), cons(String_var(_445), NULL)))));
+  String module = String_join(NULL, cons(String_var(root), cons(String_var(_451), cons(String_var(name), cons(String_var(_452), NULL)))));
   if(Compiler_links_extension(name) || ! Path_is_file(module)) return;
-  if(! X2C_NATIVE_MODULES) Compiler_report_error(c, 306819428, _446, token, ({
-    Var _x2c_gensym_literal_part_35 = String_var(String_join(NULL, cons(String_var(_447), cons(String_var(name), NULL))));  Var _x2c_gensym_literal_part_36 = String_var(String_join(NULL, cons(String_var(_448), cons(String_var(module), NULL))));  cons(_x2c_gensym_literal_part_35, cons(_x2c_gensym_literal_part_36, NULL));
+  if(! X2C_NATIVE_MODULES) Compiler_report_error(c, 306819428, _453, token, ({
+    Var _x2c_gensym_literal_part_35 = String_var(String_join(NULL, cons(String_var(_454), cons(String_var(name), NULL))));  Var _x2c_gensym_literal_part_36 = String_var(String_join(NULL, cons(String_var(_455), cons(String_var(module), NULL))));  cons(_x2c_gensym_literal_part_35, cons(_x2c_gensym_literal_part_36, NULL));
   }
   ));
   Compiler_add_translation_dependency(c, module);
@@ -2900,7 +2909,7 @@ void Compiler_select_package_module(Compiler c, String name, String root, Token 
 }
 
 static void _load_package_module(Compiler c, String name, String module, Token token){
-  if(_module_stamp(module) != 1) Compiler_report_error(c, 306819428, String_join(NULL, cons(String_var(_449), cons(String_var(name), cons(String_var(_450), NULL)))), token, cons(String_var(String_join(NULL, cons(String_var(_448), cons(String_var(module), NULL)))), NULL));
+  if(_module_stamp(module) != 1) Compiler_report_error(c, 306819428, String_join(NULL, cons(String_var(_456), cons(String_var(name), cons(String_var(_457), NULL)))), token, cons(String_var(String_join(NULL, cons(String_var(_455), cons(String_var(module), NULL)))), NULL));
   _open_native_module(module);
 }
 
@@ -2910,8 +2919,8 @@ String Compiler_load_native_module(String path){
   String absolute = Path_absolute(path);
   if(Compiler_native_module_loaded(absolute)) return absolute;
   int stamp = _module_stamp(path);
-  if(stamp < 0) Diagnostics_driver_error(String_join(NULL, cons(String_var(_451), cons(String_var(path), NULL))));
-  if(! stamp) Diagnostics_driver_error(String_join(NULL, cons(String_var(_452), cons(String_var(path), cons(String_var(_450), NULL)))));
+  if(stamp < 0) Diagnostics_driver_error(String_join(NULL, cons(String_var(_458), cons(String_var(path), NULL))));
+  if(! stamp) Diagnostics_driver_error(String_join(NULL, cons(String_var(_459), cons(String_var(path), cons(String_var(_457), NULL)))));
   _open_native_module(absolute);
   return absolute;
 }
@@ -2923,10 +2932,10 @@ void Compiler_preload_native_module(String path){
 
 static int _module_stamp(String path){
   String expected = Compiler_module_stamp();
-  if(! String_truth(expected)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_453), cons(String_var(path), cons(String_var(_16), NULL)))));
+  if(! String_truth(expected)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_460), cons(String_var(path), cons(String_var(_16), NULL)))));
   File input = fopen(path, "rb");
   if(! input) Diagnostics_driver_error(({
-    Var _x2c_gensym_literal_part_37 = String_var(path);  Var _x2c_gensym_literal_part_38 = String_var(String_new(strerror(errno)));  String_join(NULL, cons(String_var(_454), cons(_x2c_gensym_literal_part_37, cons(String_var(_455), cons(_x2c_gensym_literal_part_38, NULL)))));
+    Var _x2c_gensym_literal_part_37 = String_var(path);  Var _x2c_gensym_literal_part_38 = String_var(String_new(strerror(errno)));  String_join(NULL, cons(String_var(_461), cons(_x2c_gensym_literal_part_37, cons(String_var(_462), cons(_x2c_gensym_literal_part_38, NULL)))));
   }
   ));
   fseek(input, 0, SEEK_END);
@@ -2941,7 +2950,7 @@ static int _module_stamp(String path){
 }
 
 static int _stamp_in(char * data, size_t size, String expected){
-  String marker = _456;
+  String marker = _463;
   int stamps = 0, current = 0, width = String_len(expected);
   for(size_t i = 0;  i + String_len(marker) <= size;  i ++) if(! memcmp(data + i, marker, String_len(marker))){
     stamps ++;
@@ -2971,11 +2980,11 @@ static void _open_native_module(String path){
 
   }
   if(! handle) Diagnostics_driver_error(({
-    Var _x2c_gensym_literal_part_39 = String_var(path);  Var _x2c_gensym_literal_part_40 = String_var(String_new(dlerror()));  String_join(NULL, cons(String_var(_457), cons(_x2c_gensym_literal_part_39, cons(String_var(_455), cons(_x2c_gensym_literal_part_40, NULL)))));
+    Var _x2c_gensym_literal_part_39 = String_var(path);  Var _x2c_gensym_literal_part_40 = String_var(String_new(dlerror()));  String_join(NULL, cons(String_var(_464), cons(_x2c_gensym_literal_part_39, cons(String_var(_462), cons(_x2c_gensym_literal_part_40, NULL)))));
   }
   ));
   Map(* entry)(void) =(Map(*)(void)) dlsym(handle, "x2c_module_targets");
-  if(! entry) Diagnostics_driver_error(String_join(NULL, cons(String_var(_451), cons(String_var(path), NULL))));
+  if(! entry) Diagnostics_driver_error(String_join(NULL, cons(String_var(_458), cons(String_var(path), NULL))));
   Compiler_add_native_module(path, entry);
 }
 
@@ -3071,7 +3080,7 @@ int Compiler_links_extension(String name){
 
 String Compiler_extension_archive(void){
   if(! _init_guard_) _file_init_();
-  return extensions ? String_add(String_join(NULL, cons(String_var(x2c_get_executable()), cons(String_var(_458), NULL))), String_join(NULL, cons(String_var(Compiler_identity()), cons(String_var(_459), NULL)))) : NULL;
+  return extensions ? String_add(String_join(NULL, cons(String_var(x2c_get_executable()), cons(String_var(_465), NULL))), String_join(NULL, cons(String_var(Compiler_identity()), cons(String_var(_466), NULL)))) : NULL;
 }
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
@@ -3204,321 +3213,328 @@ static Var _x2c_gensym_func_adapt_2(Func _x2c_gensym_func_binding_2, const FuncA
 static Var _x2c_gensym_func_adapt_3(Func _x2c_gensym_func_binding_3, const FuncArg * _x2c_gensym_func_argv_3){
   Code a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_3, _x2c_gensym_func_argv_3, 0, 806120));
   List a1 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_3, _x2c_gensym_func_argv_3, 1, 806120));
-  Type a2 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_3, _x2c_gensym_func_argv_3, 2, 806120));
-  return List_var(Code_call_in_order(a0, a1, a2));
+  return List_var(Code_bound(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_4(Func _x2c_gensym_func_binding_4, const FuncArg * _x2c_gensym_func_argv_4){
   Code a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_4, _x2c_gensym_func_argv_4, 0, 806120));
-  Type a1 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_4, _x2c_gensym_func_argv_4, 1, 806120));
-  return List_var(Code_convert(a0, a1));
+  List a1 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_4, _x2c_gensym_func_argv_4, 1, 806120));
+  Type a2 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_4, _x2c_gensym_func_argv_4, 2, 806120));
+  return List_var(Code_call_in_order(a0, a1, a2));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_5(Func _x2c_gensym_func_binding_5, const FuncArg * _x2c_gensym_func_argv_5){
   Code a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_5, _x2c_gensym_func_argv_5, 0, 806120));
-  return int_var(Code_exits(a0));
+  Type a1 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_5, _x2c_gensym_func_argv_5, 1, 806120));
+  return List_var(Code_convert(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_6(Func _x2c_gensym_func_binding_6, const FuncArg * _x2c_gensym_func_argv_6){
   Code a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_6, _x2c_gensym_func_argv_6, 0, 806120));
-  return String_var(Code_format(a0));
+  return int_var(Code_exits(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_7(Func _x2c_gensym_func_binding_7, const FuncArg * _x2c_gensym_func_argv_7){
   Code a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_7, _x2c_gensym_func_argv_7, 0, 806120));
-  Code a1 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_7, _x2c_gensym_func_argv_7, 1, 806120));
-  Code a2 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_7, _x2c_gensym_func_argv_7, 2, 806120));
-  return List_var(Code_func_parameters(a0, a1, a2));
+  return String_var(Code_format(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_8(Func _x2c_gensym_func_binding_8, const FuncArg * _x2c_gensym_func_argv_8){
   Code a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_8, _x2c_gensym_func_argv_8, 0, 806120));
-  return int_var(Code_is_static_pattern(a0));
+  Code a1 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_8, _x2c_gensym_func_argv_8, 1, 806120));
+  Code a2 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_8, _x2c_gensym_func_argv_8, 2, 806120));
+  return List_var(Code_func_parameters(a0, a1, a2));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_9(Func _x2c_gensym_func_binding_9, const FuncArg * _x2c_gensym_func_argv_9){
   Code a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_9, _x2c_gensym_func_argv_9, 0, 806120));
-  return List_var(Code_lowered(a0));
+  return int_var(Code_is_static_pattern(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_10(Func _x2c_gensym_func_binding_10, const FuncArg * _x2c_gensym_func_argv_10){
   Code a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_10, _x2c_gensym_func_argv_10, 0, 806120));
-  return String_var(Code_name(a0));
+  return List_var(Code_lowered(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_11(Func _x2c_gensym_func_binding_11, const FuncArg * _x2c_gensym_func_argv_11){
   Code a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_11, _x2c_gensym_func_argv_11, 0, 806120));
-  String a1 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_11, _x2c_gensym_func_argv_11, 1, 1318210446));
-  return List_var(Code_parameter(a0, a1));
+  return String_var(Code_name(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_12(Func _x2c_gensym_func_binding_12, const FuncArg * _x2c_gensym_func_argv_12){
   Code a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_12, _x2c_gensym_func_argv_12, 0, 806120));
-  return Code_pattern_value(a0);
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_12, _x2c_gensym_func_argv_12, 1, 1318210446));
+  return List_var(Code_parameter(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_13(Func _x2c_gensym_func_binding_13, const FuncArg * _x2c_gensym_func_argv_13){
   Code a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_13, _x2c_gensym_func_argv_13, 0, 806120));
-  return List_var(Code_promoted(a0));
+  return Code_pattern_value(a0);
   ;
 }
 
 static Var _x2c_gensym_func_adapt_14(Func _x2c_gensym_func_binding_14, const FuncArg * _x2c_gensym_func_argv_14){
   Code a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_14, _x2c_gensym_func_argv_14, 0, 806120));
-  Macro a1 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_14, _x2c_gensym_func_argv_14, 1, 806120));
-  List a2 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_14, _x2c_gensym_func_argv_14, 2, 806120));
-  return List_var(Code_register_after_initialization(a0, a1, a2));
+  return List_var(Code_promoted(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_15(Func _x2c_gensym_func_binding_15, const FuncArg * _x2c_gensym_func_argv_15){
   Code a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_15, _x2c_gensym_func_argv_15, 0, 806120));
-  List a1 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_15, _x2c_gensym_func_argv_15, 1, 806120));
+  Macro a1 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_15, _x2c_gensym_func_argv_15, 1, 806120));
   List a2 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_15, _x2c_gensym_func_argv_15, 2, 806120));
-  return List_var(Code_register_rewrite(a0, a1, a2));
+  return List_var(Code_register_after_initialization(a0, a1, a2));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_16(Func _x2c_gensym_func_binding_16, const FuncArg * _x2c_gensym_func_argv_16){
-  Var a0 = x2c_func_value_argument(_x2c_gensym_func_binding_16, _x2c_gensym_func_argv_16, 0, 45156);
-  return String_var(Code_source_text(a0));
+  Code a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_16, _x2c_gensym_func_argv_16, 0, 806120));
+  List a1 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_16, _x2c_gensym_func_argv_16, 1, 806120));
+  List a2 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_16, _x2c_gensym_func_argv_16, 2, 806120));
+  return List_var(Code_register_rewrite(a0, a1, a2));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_17(Func _x2c_gensym_func_binding_17, const FuncArg * _x2c_gensym_func_argv_17){
-  Code a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_17, _x2c_gensym_func_argv_17, 0, 806120));
-  return List_var(Code_type(a0));
+  Var a0 = x2c_func_value_argument(_x2c_gensym_func_binding_17, _x2c_gensym_func_argv_17, 0, 45156);
+  return String_var(Code_source_text(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_18(Func _x2c_gensym_func_binding_18, const FuncArg * _x2c_gensym_func_argv_18){
   Code a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_18, _x2c_gensym_func_argv_18, 0, 806120));
-  return Code_value(a0);
+  return List_var(Code_type(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_19(Func _x2c_gensym_func_binding_19, const FuncArg * _x2c_gensym_func_argv_19){
-  Type a0 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_19, _x2c_gensym_func_argv_19, 0, 806120));
-  return List_var(Type_aggregate(a0));
+  Code a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_19, _x2c_gensym_func_argv_19, 0, 806120));
+  return Code_value(a0);
   ;
 }
 
 static Var _x2c_gensym_func_adapt_20(Func _x2c_gensym_func_binding_20, const FuncArg * _x2c_gensym_func_argv_20){
   Type a0 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_20, _x2c_gensym_func_argv_20, 0, 806120));
-  return List_var(Type_element(a0));
+  return List_var(Type_aggregate(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_21(Func _x2c_gensym_func_binding_21, const FuncArg * _x2c_gensym_func_argv_21){
   Type a0 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_21, _x2c_gensym_func_argv_21, 0, 806120));
-  return List_var(Type_fields(a0));
+  return List_var(Type_element(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_22(Func _x2c_gensym_func_binding_22, const FuncArg * _x2c_gensym_func_argv_22){
   Type a0 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_22, _x2c_gensym_func_argv_22, 0, 806120));
-  return List_var(Type_getter(a0));
+  return List_var(Type_fields(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_23(Func _x2c_gensym_func_binding_23, const FuncArg * _x2c_gensym_func_argv_23){
   Type a0 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_23, _x2c_gensym_func_argv_23, 0, 806120));
-  String a1 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_23, _x2c_gensym_func_argv_23, 1, 1318210446));
-  return int_var(Type_is_named(a0, a1));
+  return List_var(Type_getter(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_24(Func _x2c_gensym_func_binding_24, const FuncArg * _x2c_gensym_func_argv_24){
   Type a0 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_24, _x2c_gensym_func_argv_24, 0, 806120));
-  return int_var(Type_is_text(a0));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_24, _x2c_gensym_func_argv_24, 1, 1318210446));
+  return int_var(Type_is_named(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_25(Func _x2c_gensym_func_binding_25, const FuncArg * _x2c_gensym_func_argv_25){
   Type a0 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_25, _x2c_gensym_func_argv_25, 0, 806120));
-  return int_var(Type_is_value(a0));
+  return int_var(Type_is_text(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_26(Func _x2c_gensym_func_binding_26, const FuncArg * _x2c_gensym_func_argv_26){
   Type a0 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_26, _x2c_gensym_func_argv_26, 0, 806120));
-  return List_var(Type_layout(a0));
+  return int_var(Type_is_value(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_27(Func _x2c_gensym_func_binding_27, const FuncArg * _x2c_gensym_func_argv_27){
   Type a0 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_27, _x2c_gensym_func_argv_27, 0, 806120));
-  Symbol a1 = Var_symbol(x2c_func_value_argument(_x2c_gensym_func_binding_27, _x2c_gensym_func_argv_27, 1, 1328354264));
-  return List_var(Type_marked_fields(a0, a1));
+  return List_var(Type_layout(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_28(Func _x2c_gensym_func_binding_28, const FuncArg * _x2c_gensym_func_argv_28){
   Type a0 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_28, _x2c_gensym_func_argv_28, 0, 806120));
-  return List_var(Type_members(a0));
+  Symbol a1 = Var_symbol(x2c_func_value_argument(_x2c_gensym_func_binding_28, _x2c_gensym_func_argv_28, 1, 1328354264));
+  return List_var(Type_marked_fields(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_29(Func _x2c_gensym_func_binding_29, const FuncArg * _x2c_gensym_func_argv_29){
   Type a0 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_29, _x2c_gensym_func_argv_29, 0, 806120));
-  return List_var(Type_numeric(a0));
+  return List_var(Type_members(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_30(Func _x2c_gensym_func_binding_30, const FuncArg * _x2c_gensym_func_argv_30){
   Type a0 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_30, _x2c_gensym_func_argv_30, 0, 806120));
-  return List_var(Type_parameters(a0));
+  return List_var(Type_numeric(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_31(Func _x2c_gensym_func_binding_31, const FuncArg * _x2c_gensym_func_argv_31){
   Type a0 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_31, _x2c_gensym_func_argv_31, 0, 806120));
-  return List_var(Type_parts(a0));
+  return List_var(Type_parameters(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_32(Func _x2c_gensym_func_binding_32, const FuncArg * _x2c_gensym_func_argv_32){
   Type a0 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_32, _x2c_gensym_func_argv_32, 0, 806120));
-  String a1 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_32, _x2c_gensym_func_argv_32, 1, 1318210446));
-  return List_var(Type_protocol_member(a0, a1));
+  return List_var(Type_parts(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_33(Func _x2c_gensym_func_binding_33, const FuncArg * _x2c_gensym_func_argv_33){
   Type a0 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_33, _x2c_gensym_func_argv_33, 0, 806120));
-  return List_var(Type_resolve(a0));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_33, _x2c_gensym_func_argv_33, 1, 1318210446));
+  return List_var(Type_protocol_member(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_34(Func _x2c_gensym_func_binding_34, const FuncArg * _x2c_gensym_func_argv_34){
   Type a0 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_34, _x2c_gensym_func_argv_34, 0, 806120));
-  String a1 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_34, _x2c_gensym_func_argv_34, 1, 1318210446));
-  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_34, _x2c_gensym_func_argv_34, 2, 3453797), 3453797));
-  return List_var(Type_resolve_member(a0, a1, a2));
+  return List_var(Type_resolve(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_35(Func _x2c_gensym_func_binding_35, const FuncArg * _x2c_gensym_func_argv_35){
   Type a0 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_35, _x2c_gensym_func_argv_35, 0, 806120));
-  return List_var(Type_return_type(a0));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_35, _x2c_gensym_func_argv_35, 1, 1318210446));
+  int a2 = Var_int(Var_convert(x2c_func_value_argument(_x2c_gensym_func_binding_35, _x2c_gensym_func_argv_35, 2, 3453797), 3453797));
+  return List_var(Type_resolve_member(a0, a1, a2));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_36(Func _x2c_gensym_func_binding_36, const FuncArg * _x2c_gensym_func_argv_36){
-  String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_36, _x2c_gensym_func_argv_36, 0, 1318210446));
-  String a1 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_36, _x2c_gensym_func_argv_36, 1, 1318210446));
-  return String_var(Type_reverse_name(a0, a1));
+  Type a0 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_36, _x2c_gensym_func_argv_36, 0, 806120));
+  return List_var(Type_return_type(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_37(Func _x2c_gensym_func_binding_37, const FuncArg * _x2c_gensym_func_argv_37){
   String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_37, _x2c_gensym_func_argv_37, 0, 1318210446));
-  return Symbol_var(Type_tag_name(a0));
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_37, _x2c_gensym_func_argv_37, 1, 1318210446));
+  return String_var(Type_reverse_name(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_38(Func _x2c_gensym_func_binding_38, const FuncArg * _x2c_gensym_func_argv_38){
-  Type a0 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_38, _x2c_gensym_func_argv_38, 0, 806120));
-  return String_var(Type_update_helper(a0));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_38, _x2c_gensym_func_argv_38, 0, 1318210446));
+  return Symbol_var(Type_tag_name(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_39(Func _x2c_gensym_func_binding_39, const FuncArg * _x2c_gensym_func_argv_39){
-  Var a0 = x2c_func_value_argument(_x2c_gensym_func_binding_39, _x2c_gensym_func_argv_39, 0, 45156);
-  String a1 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_39, _x2c_gensym_func_argv_39, 1, 1318210446));
-  return List_var(x2c_binding_for(a0, a1));
+  Type a0 = Var_type(x2c_func_value_argument(_x2c_gensym_func_binding_39, _x2c_gensym_func_argv_39, 0, 806120));
+  return String_var(Type_update_helper(a0));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_40(Func _x2c_gensym_func_binding_40, const FuncArg * _x2c_gensym_func_argv_40){
-  String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_40, _x2c_gensym_func_argv_40, 0, 1318210446));
-  return List_var(x2c_binding_fresh(a0));
+  Var a0 = x2c_func_value_argument(_x2c_gensym_func_binding_40, _x2c_gensym_func_argv_40, 0, 45156);
+  String a1 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_40, _x2c_gensym_func_argv_40, 1, 1318210446));
+  return List_var(x2c_binding_for(a0, a1));
   ;
 }
 
 static Var _x2c_gensym_func_adapt_41(Func _x2c_gensym_func_binding_41, const FuncArg * _x2c_gensym_func_argv_41){
-  Var a0 = x2c_func_value_argument(_x2c_gensym_func_binding_41, _x2c_gensym_func_argv_41, 0, 45156);
-  Symbol a1 = Var_symbol(x2c_func_value_argument(_x2c_gensym_func_binding_41, _x2c_gensym_func_argv_41, 1, 1328354264));
-  String a2 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_41, _x2c_gensym_func_argv_41, 2, 1318210446));
-  List a3 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_41, _x2c_gensym_func_argv_41, 3, 806120));
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_41, _x2c_gensym_func_argv_41, 0, 1318210446));
+  return List_var(x2c_binding_fresh(a0));
+  ;
+}
+
+static Var _x2c_gensym_func_adapt_42(Func _x2c_gensym_func_binding_42, const FuncArg * _x2c_gensym_func_argv_42){
+  Var a0 = x2c_func_value_argument(_x2c_gensym_func_binding_42, _x2c_gensym_func_argv_42, 0, 45156);
+  Symbol a1 = Var_symbol(x2c_func_value_argument(_x2c_gensym_func_binding_42, _x2c_gensym_func_argv_42, 1, 1328354264));
+  String a2 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_42, _x2c_gensym_func_argv_42, 2, 1318210446));
+  List a3 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_42, _x2c_gensym_func_argv_42, 3, 806120));
   x2c_diagnostic_error_at(a0, a1, a2, a3);
   return((void) 0, Void);
 }
 
-static Var _x2c_gensym_func_adapt_42(Func _x2c_gensym_func_binding_42, const FuncArg * _x2c_gensym_func_argv_42){
-  String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_42, _x2c_gensym_func_argv_42, 0, 1318210446));
-  List a1 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_42, _x2c_gensym_func_argv_42, 1, 806120));
+static Var _x2c_gensym_func_adapt_43(Func _x2c_gensym_func_binding_43, const FuncArg * _x2c_gensym_func_argv_43){
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_43, _x2c_gensym_func_argv_43, 0, 1318210446));
+  List a1 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_43, _x2c_gensym_func_argv_43, 1, 806120));
   x2c_diagnostic_fail(a0, a1);
   return((void) 0, Void);
 }
 
-static Var _x2c_gensym_func_adapt_43(Func _x2c_gensym_func_binding_43, const FuncArg * _x2c_gensym_func_argv_43){
-  Var a0 = x2c_func_value_argument(_x2c_gensym_func_binding_43, _x2c_gensym_func_argv_43, 0, 45156);
-  Symbol a1 = Var_symbol(x2c_func_value_argument(_x2c_gensym_func_binding_43, _x2c_gensym_func_argv_43, 1, 1328354264));
-  String a2 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_43, _x2c_gensym_func_argv_43, 2, 1318210446));
-  List a3 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_43, _x2c_gensym_func_argv_43, 3, 806120));
+static Var _x2c_gensym_func_adapt_44(Func _x2c_gensym_func_binding_44, const FuncArg * _x2c_gensym_func_argv_44){
+  Var a0 = x2c_func_value_argument(_x2c_gensym_func_binding_44, _x2c_gensym_func_argv_44, 0, 45156);
+  Symbol a1 = Var_symbol(x2c_func_value_argument(_x2c_gensym_func_binding_44, _x2c_gensym_func_argv_44, 1, 1328354264));
+  String a2 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_44, _x2c_gensym_func_argv_44, 2, 1318210446));
+  List a3 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_44, _x2c_gensym_func_argv_44, 3, 806120));
   x2c_diagnostic_fail_at(a0, a1, a2, a3);
   return((void) 0, Void);
 }
 
-static Var _x2c_gensym_func_adapt_44(Func _x2c_gensym_func_binding_44, const FuncArg * _x2c_gensym_func_argv_44){
-  String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_44, _x2c_gensym_func_argv_44, 0, 1318210446));
-  List a1 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_44, _x2c_gensym_func_argv_44, 1, 806120));
+static Var _x2c_gensym_func_adapt_45(Func _x2c_gensym_func_binding_45, const FuncArg * _x2c_gensym_func_argv_45){
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_45, _x2c_gensym_func_argv_45, 0, 1318210446));
+  List a1 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_45, _x2c_gensym_func_argv_45, 1, 806120));
   x2c_diagnostic_warn(a0, a1);
   return((void) 0, Void);
 }
 
-static Var _x2c_gensym_func_adapt_45(Func _x2c_gensym_func_binding_45, const FuncArg * _x2c_gensym_func_argv_45){
-  Var a0 = x2c_func_value_argument(_x2c_gensym_func_binding_45, _x2c_gensym_func_argv_45, 0, 45156);
+static Var _x2c_gensym_func_adapt_46(Func _x2c_gensym_func_binding_46, const FuncArg * _x2c_gensym_func_argv_46){
+  Var a0 = x2c_func_value_argument(_x2c_gensym_func_binding_46, _x2c_gensym_func_argv_46, 0, 45156);
   return String_var(x2c_embed_text(a0));
   ;
 }
 
-static Var _x2c_gensym_func_adapt_46(Func _x2c_gensym_func_binding_46, const FuncArg * _x2c_gensym_func_argv_46){
-  Symbol a0 = Var_symbol(x2c_func_value_argument(_x2c_gensym_func_binding_46, _x2c_gensym_func_argv_46, 0, 1328354264));
+static Var _x2c_gensym_func_adapt_47(Func _x2c_gensym_func_binding_47, const FuncArg * _x2c_gensym_func_argv_47){
+  Symbol a0 = Var_symbol(x2c_func_value_argument(_x2c_gensym_func_binding_47, _x2c_gensym_func_argv_47, 0, 1328354264));
   return List_var(x2c_enclosing(a0));
   ;
 }
 
-static Var _x2c_gensym_func_adapt_47(Func _x2c_gensym_func_binding_47, const FuncArg * _x2c_gensym_func_argv_47){
-  String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_47, _x2c_gensym_func_argv_47, 0, 1318210446));
+static Var _x2c_gensym_func_adapt_48(Func _x2c_gensym_func_binding_48, const FuncArg * _x2c_gensym_func_argv_48){
+  String a0 = Var_as_string(x2c_func_value_argument(_x2c_gensym_func_binding_48, _x2c_gensym_func_argv_48, 0, 1318210446));
   return List_var(x2c_ident(a0));
   ;
 }
 
-static Var _x2c_gensym_func_adapt_48(Func _x2c_gensym_func_binding_48, const FuncArg * _x2c_gensym_func_argv_48){
+static Var _x2c_gensym_func_adapt_49(Func _x2c_gensym_func_binding_49, const FuncArg * _x2c_gensym_func_argv_49){
   return int_var(x2c_invocation_column());
   ;
 }
 
-static Var _x2c_gensym_func_adapt_49(Func _x2c_gensym_func_binding_49, const FuncArg * _x2c_gensym_func_argv_49){
+static Var _x2c_gensym_func_adapt_50(Func _x2c_gensym_func_binding_50, const FuncArg * _x2c_gensym_func_argv_50){
   return String_var(x2c_invocation_file());
   ;
 }
 
-static Var _x2c_gensym_func_adapt_50(Func _x2c_gensym_func_binding_50, const FuncArg * _x2c_gensym_func_argv_50){
+static Var _x2c_gensym_func_adapt_51(Func _x2c_gensym_func_binding_51, const FuncArg * _x2c_gensym_func_argv_51){
   return int_var(x2c_invocation_line());
   ;
 }
 
-static Var _x2c_gensym_func_adapt_51(Func _x2c_gensym_func_binding_51, const FuncArg * _x2c_gensym_func_argv_51){
+static Var _x2c_gensym_func_adapt_52(Func _x2c_gensym_func_binding_52, const FuncArg * _x2c_gensym_func_argv_52){
   return Map_var(x2c_meta_definition_hashes());
   ;
 }
 
-static Var _x2c_gensym_func_adapt_52(Func _x2c_gensym_func_binding_52, const FuncArg * _x2c_gensym_func_argv_52){
-  List a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_52, _x2c_gensym_func_argv_52, 0, 806120));
-  Code a1 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_52, _x2c_gensym_func_argv_52, 1, 806120));
+static Var _x2c_gensym_func_adapt_53(Func _x2c_gensym_func_binding_53, const FuncArg * _x2c_gensym_func_argv_53){
+  List a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_53, _x2c_gensym_func_argv_53, 0, 806120));
+  Code a1 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_53, _x2c_gensym_func_argv_53, 1, 806120));
   x2c_place(a0, a1);
   return((void) 0, Void);
 }

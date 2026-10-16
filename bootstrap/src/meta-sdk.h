@@ -52,6 +52,8 @@ Code Code_call_in_order(Code member, List arguments, Type type);
 
 Code Code_lowered(Code code);
 
+Code Code_bound(Code code, List effects);
+
 List Code_func_parameters(Code parameters, Code fn, Code argv);
 
 int Code_exits(Code statement);

@@ -274,6 +274,11 @@ Code Code.call_in_order(Code member, List arguments, Type type) {
     `Compiler.take_code_value` consumes. */
 Code Code.lowered(Code code) => %(code-value "lowered" $code ());
 
+/** Answers `Code.bound`, declared in `lib/meta.x`, with the carrier
+    `Compiler.take_code_value` consumes. */
+Code Code.bound(Code code, List effects) =>
+  %(code-value "bound" $code $effects);
+
 /** Answers `Code.func_parameters`, declared in `lib/meta.x`. */
 List Code.func_parameters(Code parameters, Code fn, Code argv) {
   _require_expansion("Code.func_parameters");
@@ -335,7 +340,7 @@ static Code _rewrite_registration(
   Array rows = [];
   foreach (Var kind, kinds)
     rows.push(%(rewrite $point $kind $name $shape $holes));
-  return %((code-value "bound" $function ${rows.list_free()}));
+  return %(${Code.bound(function, rows.list_free())});
 }
 
 /* A function pattern is keyed by the return type it spells, or by `<any>`
