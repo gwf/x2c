@@ -5,7 +5,8 @@
     A callable value that C cannot spell directly becomes a static helper
     queued with `Compiler.add_early`. Every `Func` helper shares one
     `FuncAdapter` ABI: arguments are read in index order from the argument
-    vector, and the result is boxed into a `Var`. `src/component-lambdas.x`
+    vector, and the result is boxed into a `Var`.
+    `src/components/component-lambdas.x`
     lowers lambdas.
 */
 

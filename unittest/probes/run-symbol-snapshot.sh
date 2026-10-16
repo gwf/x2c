@@ -103,7 +103,9 @@ cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.x "$cold_root/etc/"
 cp -RL "$ROOT/include/." "$cold_root/include/"
 copy_runtime_sources "$cold_root/lib/"
 mkdir -p "$cold_root/src"
-cp "$ROOT"/src/{component-access,component-try,component-delegate,component-literals,component-printf,component-operators,component-raise,component-match,component-interpolation,component-destructuring,component-lambdas,component-protocols,component-string-switch,grammar}.x "$cold_root/src/"
+mkdir -p "$cold_root/src/components"
+cp "$ROOT"/src/components/*.x "$cold_root/src/components"/
+cp "$ROOT"/src/grammar.x "$cold_root/src/"
 [[ -z "$("$cold_root/bin/x2c" env prelude)" ]] || exit 1
 "$cold_root/bin/x2c" translate --out-dir "$BUILD/cold" "$ROOT/examples/foreach.x"
 diff -u "$BUILD/cold/foreach.c" "$BUILD/default/foreach.c"

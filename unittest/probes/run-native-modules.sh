@@ -431,7 +431,7 @@ int increment(int n) => n + 1;
 EOF
 "$X2C" build -q -j 2 --extension packages/tally \
   --extension packages/sibling --build-dir linked \
-  --output linked/x2c "$ROOT"/src/*.x
+  --output linked/x2c "$ROOT"/src/*.x "$ROOT"/src/components/*.x
 "$X2C" translate -q --package-dir packages --out-dir out app/main.x \
   2>/dev/null && fail "stale module accepted"
 # The helper links the implementation the compiler was built with, not the

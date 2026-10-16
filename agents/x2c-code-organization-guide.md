@@ -25,7 +25,8 @@ Files below are relative to `src/` unless a path is shown.
   normalization and dispatches to the shipped components, `callables.x`,
   which lowers only `Func` conversions, `cleanup.x`, `adapter-memo.x`,
   `regions.x`;
-- shipped components, each lowering one language feature on the rewrite
+- shipped components under `src/components/`, each lowering one language
+  feature on the rewrite
   primitives: `component-access.x` (bracket access policy),
   `component-delegate.x` (delegate fields), `component-destructuring.x`
   (flat List destructuring), `component-interpolation.x` (interpolated

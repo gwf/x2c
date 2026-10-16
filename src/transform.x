@@ -187,7 +187,8 @@ static List _shipped_lowering(
 }
 
 /** Lowers a resolved lambda expression, under any position wrappers and
-    parentheses, through the lambda rule of `src/component-lambdas.x`;
+    parentheses, through the lambda rule of
+    `src/components/component-lambdas.x`;
     other expressions pass through. A noncapturing lambda typed `Func`,
     which only a meta body leaves unlifted, lifts to a `Func` of its native
     signature. */
@@ -235,7 +236,7 @@ static Ast _destructuring(
   Compiler c, Ast ast, Symbol tag, Symbol position) {
   String form = position == <block>
     ? "destructuring declaration" : "destructuring statement";
-  // The implementation belongs to src/component-destructuring.x.
+  // The implementation belongs to src/components/component-destructuring.x.
   return _shipped_lowering(
     c, <node>, tag, ast, position, c.return_type, form);
 }
