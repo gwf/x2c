@@ -130,7 +130,7 @@ int Compiler.groups_meta(Compiler c) =>
   meta_cc && !c.macro_holes && (void *) c.meta_group &&
   (c.meta_build || (!c.meta_helper && X2C_NATIVE_MODULES && meta_in_process));
 
-/** Records the bodied `meta` function `fn` in the unit's group. */
+/** Records a native callable body `fn` in the unit's helper group. */
 void Compiler.group_meta_function(Compiler c, List fn) {
   match (fn)
     case %(function ?spec (!set ?declarator (bind (binding ? ?(String name))
@@ -211,6 +211,22 @@ void Compiler.prepare_loaded_main(Compiler c, Array nodes) {
           %(function $entry "main" ${c.func_signature(adapted)}));
         return;
       }
+}
+
+/** Adds a loaded unit's ordinary public definitions to its helper targets.
+    Meta closure must finish first so these entries retain runtime semantics.
+    Existing meta entries and the adapted main keep their original targets. */
+void Compiler.prepare_loaded_functions(Compiler c, Array nodes) {
+  Map present = {};
+  foreach (List entry, c.meta_group)
+    match (entry) case %(function ? ?name ?): present[name] = 1;
+  Var identity, String name;
+  foreach (List node, nodes)
+    if (_function_identity(node, identity, name) &&
+        c.public_native_function(node, name) && !(name in present)) {
+      c.group_meta_function(node);
+      present[name] = 1;
+    }
 }
 
 /** Answers whether a `meta` body reaches the compiler itself: it names a
@@ -342,8 +358,8 @@ static void _name_provider_bindings(
   Var identity, String name;
   foreach (List item, units)
     if (_function_identity(item, identity, name) &&
-        (_public_native(c, item, name) ||
-         (c.load_main && name == "main"))) {
+        (c.public_native_function(item, name) ||
+         (c.load_source && name == "main"))) {
       List binding = item.caddr().cadr();
       c.set_fact(
         %(emitted $binding), %"_x2c_gensym_meta_group_${index}_$name");
@@ -554,7 +570,7 @@ static Map _roots(Compiler c, Array ordered) {
   foreach (List item, ordered)
     if (_function_identity(item, identity, name)) {
       present[identity] = 1;
-      if (c.meta_build && _public_native(c, item, name))
+      if (c.meta_build && c.public_native_function(item, name))
         reached[identity] = 1;
     }
   foreach (List entry, c.meta_group)
@@ -596,7 +612,7 @@ static Array _reachable(Compiler c, Array ordered, Map reached) {
   Var identity, String name;
   foreach (List item, ordered) {
     if (!_function_identity(item, identity, name) ||
-        (identity in reached && (name != "main" || c.load_main)))
+        (identity in reached && (name != "main" || c.load_source)))
       units.push(item);
     else if (name != "main")
       match (item) case %(function ?spec ?declarator ?):
@@ -797,7 +813,7 @@ static void _native_entries(Compiler c, Array units, List start) {
   for (int i = 0; i < (int) units.len(); i++) {
     List item = units[i];
     if (!_function_identity(item, identity, name) ||
-        !_public_native(c, item, name)) continue;
+        !c.public_native_function(item, name)) continue;
     match (item) case %(function ?type ?declarator (block *body)): {
       List argument = $!String{ $name };
       List enter = c.rebuild_statement($!{ $start($argument); }).cadr();
@@ -813,12 +829,15 @@ static List _public_functions(Compiler c, Array units) {
   Var identity, String name;
   foreach (List item, units)
     if (_function_identity(item, identity, name) &&
-        _public_native(c, item, name))
+        c.public_native_function(item, name))
       functions.push(name);
   return functions.list_free();
 }
 
-static int _public_native(Compiler c, List function, String name) =>
+/** Answers whether a definition has public native linkage.
+    Main is excluded because its process entry needs a separate adapter. */
+int Compiler.public_native_function(
+  Compiler c, List function, String name) =>
   name != "main" && !(%(function $name) in c.sym.file_statics()) &&
   !%(declare ${function.cadr()} (bindings ${function.caddr()}))
      .type_from_ast().is_static();

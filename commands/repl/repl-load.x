@@ -23,13 +23,15 @@ static typedef struct LoadedCall {
 } LoadedCall;
 
 /* Collection already selected public declarations and complete type
-   families. Public bodied meta functions and main become prompt entries. */
+   families. Public bodied functions become prompt entries. */
 static List _public_functions(Compiler c, Map &symbols) {
   Array candidates = $auto([]), names = [];
   foreach (List entry, c.meta_group)
-    match (entry) case %(function ? ?name ?): candidates.push(name);
+    match (entry) case %(function ?fn ?(String name) ?):
+      if (name == "main" || c.public_native_function(fn, name))
+        candidates.push(name);
   symbols = c.callable_symbols(candidates);
-  if (c.load_main)
+  if (c.load_source)
     foreach (List entry, c.meta_group)
       match (entry) case %(function ? "main" ?type):
         symbols[%("main")] = type;
@@ -232,7 +234,7 @@ static LoadedSource _prepare(Frontend frontend, String filename) {
   int opened = frontend.start(filename, unit);
   defer unit.close();
   Compiler c = unit.compiler;
-  c.load_main = 1;
+  c.load_source = 1;
   c.meta_helper = loaded.helper;
   c.begin_meta_unit(c.filename);
   opened = opened && unit.collect(frontend) && unit.parse();
@@ -241,7 +243,7 @@ static LoadedSource _prepare(Frontend frontend, String filename) {
       Map symbols = NULL;
       List names = _public_functions(c, symbols);
       if (!names)
-        raise %(repl (reason "no public bodied meta functions or main found"));
+        raise %(repl (reason "no public bodied functions found"));
       foreach (String name, names)
         MetaHelper.check(c.meta_helper, c, name, c.filename);
       loaded.symbols = unit.context.export(symbols);
@@ -282,7 +284,7 @@ static void _publish_types(ReplSession session, Map symbols) {
   }
 }
 
-/** Compiles a source file's public bodied meta functions, main, and source
+/** Compiles a source file's public bodied functions and source
     dependencies in an independent helper. Publishes their callable bindings
     and public types; prompt evaluation remains interpreted. Calls exchange
     values through the project meta helper's datum protocol. A rejected load

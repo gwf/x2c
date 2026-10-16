@@ -7,7 +7,7 @@
 > This records executable authoring probes and the missing connections they
 > expose. It does not claim that automatic pattern registration or complete
 > feature extraction is implemented. This first study predates the executable
-> [second spike](../../experiments/language-components/README.md), which records
+> [second spike](https://github.com/gwf/x2c/blob/e2f9b12a9007682fce187a68b763a4dcdd860bb2/experiments/language-components/README.md), which records
 > subsequent compiler changes, successful clients, and corrected assumptions.
 
 ## What an author can already write

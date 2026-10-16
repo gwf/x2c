@@ -101,7 +101,7 @@ incomplete submission continues at a fresh `... ` prompt.
 | `:help` | Show session commands. |
 | `:stats [verbose]` | Show concise or detailed runtime statistics. |
 | `:symbols [PREFIX]` | List successfully defined names and kinds, optionally matching a name prefix. |
-| `:load "file.x"` | Compile and load public bodied meta functions and `main`; replace an earlier load of the same file. |
+| `:load "file.x"` | Compile and load public functions, including `main`; replace an earlier load of the same file. |
 | `:info NAME` | Show a session function's argument and return types, source, and execution mode. |
 | `:ast plus` | Show `plus`'s typed x2c AST. |
 | `:lowered plus` | Report that `plus` is compiled and has no Lisp body. |
@@ -145,9 +145,9 @@ Save this source as `numbers.x`:
 
 ```x2c
 static int twice(int n) { return 2 * n; }
-meta static int calls = 0;
-meta int answer(int n) { calls++; return twice(n + 1); }
-meta int call_count(void) { return calls; }
+static int calls = 0;
+int answer(int n) { calls++; return twice(n + 1); }
+int call_count(void) { return calls; }
 ```
 
 Load it and call its functions with ordinary prompt expressions:
@@ -167,19 +167,19 @@ x2c> plus_answer(20);
 
 `:load` compiles native code through the project meta helper builder. It
 uses the ordinary include, module, package, and native dependency handling.
-For example, `answer` can call a public meta function from an included `.x`
-file. Ordinary functions such as `twice` can support compiled bodies. Public
-bodied meta functions and `main` defined by the loaded unit become prompt
-functions. Public type declarations accompany them. Global variables and
-enumerator constants are not imported. Source macros remain with the
-compiled source; loading does not install them in the prompt.
+Public functions with bodies in the loaded file become prompt functions,
+including `main`. No `meta` annotation is needed. Static helpers such as
+`twice` remain private. Functions from included files and declaration-only
+functions remain available to the compiled code but are not imported into
+the prompt. Public type declarations accompany the loaded functions. Global
+variables and enumerator constants are not imported. Source macros remain
+with the compiled source; loading does not install them in the prompt.
 
 Compilation happens on `:load` and on each prompt function definition,
 including `plus_answer` above. Top-level input stays interpreted. Loading needs
 a matching x2c compiler, the host C compiler, and its runtime. A dependency
 that the project meta builder cannot compile or link makes the load fail.
-`meta` selects additional entry points; it does not supply missing native
-libraries or implementations.
+An explicit `meta` function remains callable under the same data limits.
 
 Each successful load keeps a separate helper process and its compiled
 executable until the session closes. Native static values persist between
@@ -188,7 +188,9 @@ numbers, Strings, Symbols, Lists, and independent Arrays and Maps. Arrays
 and Maps are copied across the boundary. Mutating a collection argument in
 the helper does not mutate the prompt's collection; return the changed
 collection to use it. Pointers, references, callbacks, records, cycles, and
-shared mutable collection identity cannot cross this boundary.
+shared mutable collection identity cannot cross this boundary. Functions
+with these signatures can still be used inside the compiled file; calls
+from the prompt must satisfy the data limits.
 
 A failed load publishes no names and preserves earlier functions. Fix a
 rejected file and load it again. Loaded names appear as `native` in

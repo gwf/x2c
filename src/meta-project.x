@@ -84,9 +84,9 @@ MetaHelper Frontend.build_meta(Frontend f, List inputs) {
   return _build_meta(f, inputs, NULL);
 }
 
-/** Builds an independent source helper that also exposes the loaded
-    file's main. Its native signature stays inside the helper; argc/argv
-    calls accept an Array of argument Strings through the data protocol. */
+/** Builds an independent helper exposing the loaded file's public functions.
+    Main's native signature stays inside the helper; argc/argv calls accept
+    an Array of argument Strings through the data protocol. */
 MetaHelper Frontend.build_loaded(Frontend f, String filename) =>
   _build_meta(f, %($filename), Path.absolute(filename));
 
@@ -463,7 +463,7 @@ static void _parse_source(
   int started = f.start(path, unit);
   defer unit.close();
   unit.compiler.meta_build = index + 1;
-  unit.compiler.load_main = path == h.entry;
+  unit.compiler.load_source = path == h.entry;
   unit.compiler.diagnostics.limit = 0;
   if (!started) return;
   /* A call of a project function the collection meets fails before the

@@ -1,5 +1,13 @@
 /* Distinct callback results prove each indexed interception point fires. */
-#include "component.x"
+#include "rewrite.x"
+
+macro Expression $at(Expr $base, Expr $key) => $base[$key];
+macro Expression $put(Expr $base, Expr $key, Expr $value) =>
+  $base[$key] = $value;
+macro Expression $add_at(Expr $base, Expr $key, Expr $value) =>
+  $base[$key] += $value;
+macro Expression $before_at(Expr $base, Expr $key) => ++$base[$key];
+macro Expression $after_at(Expr $base, Expr $key) => $base[$key]++;
 
 typedef struct Indexed { int value; } Indexed;
 int Indexed.getindex(Indexed value, int key) { (void) key; return value.value; }
@@ -18,12 +26,16 @@ meta Code probe_prefix(Code code) { (void) code; return $!int{104}; }
 $rewrite($after_at, $!Indexed{${%(!and ?base)}}, <?key>)
 meta Code probe_postfix(Code code) { (void) code; return $!int{105}; }
 
+/* Later matching rules must not replace the first accepted rule. */
+$rewrite($at, $!Indexed{${%(!and ?base)}}, <?key>)
+meta Code later_read(Code code) { (void) code; return $!int{999}; }
+
 int main(void) {
   Indexed value = {7};
   int read = value[0], stored = (value[0] = 8), updated = (value[0] += 2);
   int prefix = ++value[0], postfix = value[0]++;
   int ordinary[1] = {9};
-  printf("hooks: %d %d %d %d %d ordinary: %d\n",
+  printf("rewrites: %d %d %d %d %d ordinary: %d\n",
     read, stored, updated, prefix, postfix, ordinary[0]);
   return read != 101 || stored != 102 || updated != 103 || prefix != 104 ||
     postfix != 105 || ordinary[0] != 9;
