@@ -1,10 +1,10 @@
 # Literate Lisp in x2c
 
-[The reference interpreter][source]
-implements x2c Lisp in one source file. It owns its reader, environments,
-closures, special forms, native registry, and standard vocabulary. Evaluation
-recurses over ordinary values; it never constructs a Lisp session, calls the
-production evaluator, or uses its call-frame machinery.
+[The reference interpreter][source] implements x2c Lisp in one source file. It
+implements its reader, environments, closures, special forms, native registry,
+and standard vocabulary. Evaluation recurses over ordinary values; it never
+constructs a Lisp session, calls the production evaluator, or uses its
+call-frame machinery.
 
 Build it from the repository root:
 
@@ -43,7 +43,7 @@ its diagnostic details visible and preserves their value types and order.
 `Interp.apply` receives values. Only `eval` decides which arguments to
 evaluate: ordinary calls evaluate left to right, while a macro receives its
 raw argument forms. Native argument marshalling lives with the native
-operations, so it does not interrupt the evaluator's rules.
+operations, so the evaluator contains only evaluation rules.
 
 `Fn` is a closure: parameters, a body, captured values, and a macro flag. It
 uses the ordinary `Var` value tag `lambda`, preserving sorting, type queries,
@@ -100,8 +100,8 @@ signatures printed in Lisp error messages.
 
 The source uses ordinary runtime collection and pattern operations, including
 `List.match` and replacement. Those operations retain their normal runtime
-implementation; this example replaces Lisp evaluation, not x2c's collection
-or pattern engine.
+implementation; this example reimplements only Lisp evaluation and uses
+x2c's collection and pattern operations unchanged.
 
 ## Compatibility
 
@@ -133,19 +133,23 @@ parameter and computed callables retain possible local reads from their data.
 This can retain local values and their referents longer than their immediate
 use would require; it does not copy or promote borrowed objects.
 
-The reference targets language behavior, not the embedding APIs or native
-stack capacity of the production runtime. Calls consume native stack: sufficiently deep recursion
-can exhaust it. Callable addresses are process-specific, as they are in the
-production implementation. This is a tested reference, not a proof that every
-possible program behaves identically.
+The reference implements language behavior only. It omits the embedding
+APIs and the production stack limits, so sufficiently deep recursion can
+exhaust its native stack. Callable addresses are process-specific, as they
+are in the production implementation. Tests compare the two
+implementations; they do not prove identical behavior for every program.
 
 ## Production execution
 
-The production evaluator runs each call recursively, except a call in tail
-position, which reuses the frame of the call it ends. A self-recursive loop
-written in tail position therefore runs in constant native stack. Other
-recursion consumes native stack, and the evaluator reports `<call-stack>`
-before it runs out. Free names resolve through the Lambda's captures and
+The production evaluator recurses on the C stack for every call except a
+call in tail position, which reuses its caller's frame. A self-recursive loop
+written in tail position therefore runs in constant native stack. The
+outermost call of an evaluation measures the stack. Nested calls may then
+use the smaller of 6 MB and four fifths of the thread's remaining stack, and
+a call beyond that raises `<call-stack>`. Each public entry, such as
+`Lisp.eval`, also opens a budget of 40,000,000 calls, tail calls included;
+`Lisp.call_budget` changes it. Exhausting it raises `<call-stack>` with
+reason `"steps"`. Free names resolve through the Lambda's captures and
 then the session globals and reserved names, never through caller locals.
 The production step budget and interruption flag stop evaluation through
 `<call-stack>` and `<interrupt>`. These shared Error causes allow catches,

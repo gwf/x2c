@@ -41,16 +41,12 @@ tracked portable C
   -> self-host stages 1, 2, and 3
 ```
 
-`make build-safe` builds through stage 0. Language users stop there.
-`builds/0/x2c` is the current development compiler; `bin/x2c` is the bootstrap
-compiler until stage 0 is installed over it.
-
-## Why later stages exist
-
-The self-host stages translate the same compiler repeatedly. A stable compiler
-makes stages 1 through 3 emit identical C and headers. The repository uses that
-agreement to catch compiler regressions. You do not need it to run your own
-programs.
+`make build-safe` builds through stage 0 and links `bin/x2c` to
+`bin/x2c-bootstrap`. `builds/0/x2c` is the development compiler.
+`make build-install` copies it to `bin/x2c-<branch>` and links `bin/x2c`
+there; see [developer workflow](../guide/installation.md#developer-workflow).
+Language users stop at stage 0. `make stage-3` builds the self-host stages,
+which [the self-host build](architecture.md#the-self-host-build) explains.
 
 ## Generated and tracked boundaries
 
@@ -64,16 +60,14 @@ programs.
 
 Do not hand-edit any of them; regenerate them with their targets.
 
-Contributor instructions cover when to regenerate the bootstrap snapshot and
-which checks to run; see [Contributor checks](#contributor-checks).
-
 ## Unit interfaces and native bindings
 
 Each translated unit writes a unit interface, `<stem>.xi`, beside its `.c`
-and `.h`. A stage build leaves the runtime's interfaces under `builds/N/lib`,
-and `lib/x2c.xi` there is the prelude every later translation replays. These
-interfaces are untracked build output;
-[Compiler Architecture](architecture.md#shallow-parse-and-global-environment-discovery)
+and `.h`. A stage build leaves the runtime's interfaces under `builds/N/lib`.
+A later translation replays `lib/x2c.xi` from there as its prelude only when
+the same compiler wrote it; otherwise it reads `lib/x2c.x` from source once
+per process. These interfaces are untracked build output;
+[Compiler Architecture](architecture.md#unit-interfaces)
 describes their contents and validation.
 
 Native `Func` bindings use canonical function `Type` `List`s, for example
