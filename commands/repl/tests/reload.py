@@ -879,13 +879,14 @@ try:
     session.value('shared_saved()', 17)
 
     # Both the selector and the later scalar argument run exactly once.
-    session.run('int shared_index=0;')
-    session.value('shared_pair(&shared_samples[shared_index++],shared_index++)',
+    session.run('int shared_index=0;\n'
+                'int shared_next(void) { return shared_index++; }')
+    session.value('shared_pair(&shared_samples[shared_next()],shared_next())',
                   1701)
     session.value('shared_index', 2)
     session.run('shared_index=0;')
-    session.value('shared_alias(&shared_samples[shared_index++],'
-                  '&shared_samples[shared_index++])', 42)
+    session.value('shared_alias(&shared_samples[shared_next()],'
+                  '&shared_samples[shared_next()])', 42)
     session.value('shared_index', 2)
     session.value('shared_samples[0]', 19)
     session.value('shared_samples[1]', 23)
@@ -915,9 +916,10 @@ try:
     session.run('shared_dependency;', 'unresolved identifier')
     session.run('shared_address();', 'compile-time result is a compiler address')
     session.run('shared_result();', 'compile-time result is a compiler address')
-    session.run('struct SharedPoint shared_local={21,22};')
-    session.run('shared_copy(shared_local);', True)
-    session.value('shared_local.x', 21)
+    session.run('int shared_local=21;')
+    session.run('shared_sum(&shared_local,1);',
+                'arguments must be independent data values')
+    session.value('shared_local', 21)
 
     session.value('objects_next()', 5)
     session.value('operations_next()', 6)

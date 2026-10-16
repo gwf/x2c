@@ -1321,7 +1321,6 @@ Type Compiler.loaded_call_type(Compiler c, Type type) {
 static Type _loaded_declaration(Compiler c, Type type) {
   type = c.sym.normalize_declared_type(type);
   if (!type.is_function()) return type;
-  type = c.loaded_call_type(type);
   List parameters = NULL;
   Type result = NULL;
   type.function_parts(parameters, result);
@@ -1329,7 +1328,8 @@ static Type _loaded_declaration(Compiler c, Type type) {
   foreach (Type parameter, parameters)
     declared.push(c.sym.normalize_declared_type(parameter));
   List args = parameters ? declared.list_free() : %((void));
-  return %((func $args) @{c.sym.normalize_declared_type(result)});
+  return c.loaded_call_type(
+    %((func $args) @{c.sym.normalize_declared_type(result)}));
 }
 
 /** Names declared bindings through one loaded provider. Its own source
@@ -1348,6 +1348,9 @@ void Compiler.name_loaded_provider(
         !_loaded_type_rows(type, visible, symbols))
       $report.type.loaded_declaration(c, name, path);
     _name_meta_provider(c, name, index);
+    // C headers keep their source spellings; declare the linked spelling too.
+    type = type.declared();
+    c.add_early(c.rebuild_statement($!{ extern $type $binding; }).cadr());
   }
 }
 

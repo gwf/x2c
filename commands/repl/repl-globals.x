@@ -150,6 +150,8 @@ static List _object_argument(
   ReplSession session, Type parameter, List argument) {
   Compiler c = session.compiler;
   Type wanted = c.sym.normalize_declared_type(parameter);
+  while (wanted.car() is <symbol> &&
+         wanted.car().symbol().is_type_qualifier()) wanted = wanted.cdr();
   Type source = c.sym.normalize_declared_type(argument.cadr());
   int reference = wanted.is_reference();
   int record = c.sym.resolve_key(wanted).canonicalize().is_aggregate();
