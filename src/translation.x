@@ -592,4 +592,3 @@ static sigset_t _block_stop_signals(void) {
   sigprocmask(SIG_BLOCK, &stops, &previous);
   return previous;
 }
-
