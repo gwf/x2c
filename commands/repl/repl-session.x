@@ -26,7 +26,7 @@ typedef struct ReplSession {
   Array declarations;
   Map files, accessors;
   MetaHelper helper;
-  // Published name -> (value), (type), (native (source PATH) (objects CALL)),
+  // Published name -> (value), (type), (native [(source PATH) (objects CALL)]),
   // (global (source PATH) PATHS), or
   // (function (typed ...) (execution native)).
   Map names;
@@ -117,7 +117,7 @@ List ReplSession.symbols(ReplSession session) {
   return entries.list_free();
 }
 
-/** Returns (value), (type), (native [(source PATH)]),
+/** Returns (value), (type), (native [(source PATH) (objects CALL)]),
     (global (source PATH) PATHS), (function (typed AST) (execution native)),
     or NULL if absent. PATHS maps selections to getter/setter pairs.
     These are the original canonical Lists, borrowed until unit close. */
@@ -136,7 +136,7 @@ String ReplSession.function_info(ReplSession session, String name) {
   Compiler c = session.compiler;
   Type type = c.sym.get_exact(%($name));
   String source = "prompt";
-  match (entry) case %(native (source ?(String path))): {
+  match (entry) case %(native (source ?(String path)) *): {
     ReplLoadedFile file = session.files[path];
     type = file.symbols[%($name)];
     source = path;
