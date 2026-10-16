@@ -129,7 +129,7 @@ meta List _x2c_try_exits_placement(List exits) {
   Atom token = Atom.intern("?__try_cleanup");
   match (exits)
     case %(code-value ? ?statements ?):
-      return %(code-value "lowered" $token ((cleanup $token $statements)));
+      return Code.lowered(token, %((cleanup $token $statements)));
   return NULL;
 }
 

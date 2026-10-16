@@ -2031,6 +2031,14 @@ List _x2c_try_catch_cases(List selected, List arms) {
   return cases.list_free();
 }
 
+List _x2c_try_exits_placement(List exits) {
+  Atom token = Atom.intern("?__try_cleanup");
+  match (exits)
+    case %(code-value ? ?statements ?):
+      return Code.lowered(token, %((cleanup $token $statements)));
+  return NULL;
+}
+
 static Var _try_finalizer_label(Var value, List &at) {
   Array pending = [value], around = [at];
   Var found = NULL;
@@ -2345,6 +2353,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "string_switch_lowering", string_switch_lowering);
   $linked.row(rows, "_try_arm_exits", _try_arm_exits);
   $linked.row(rows, "_x2c_try_catch_cases", _x2c_try_catch_cases);
+  $linked.row(rows, "_x2c_try_exits_placement", _x2c_try_exits_placement);
   $linked.row(rows, "_try_finalizer_label", _try_finalizer_label);
   $linked.row(rows, "_try_check_label", _try_check_label);
   $linked.row(rows, "_try_frame_address", _try_frame_address);
@@ -2403,7 +2412,6 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_x2c_try_catch_patterns", _x2c_try_catch_patterns);
   $linked.row(rows, "_x2c_try_catch_site", _x2c_try_catch_site);
   $linked.row(rows, "_x2c_try_landing", _x2c_try_landing);
-  $linked.row(rows, "_x2c_try_exits_placement", _x2c_try_exits_placement);
   $linked.row(rows, "_x2c_field_copies", _x2c_field_copies);
   $linked.row(rows, "_x2c_field_sets", _x2c_field_sets);
   $linked.row(rows, "source_return_type", source_return_type);
