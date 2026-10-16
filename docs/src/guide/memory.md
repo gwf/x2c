@@ -37,7 +37,9 @@ is valid while the scope that allocated the box is alive. See
 A non-empty `String` and every `List` cell built by `cons` are interned:
 equal content becomes one canonical pointer. An interning pool holds these
 values. By default they stay valid for the rest of the process.
-You do not free them, and you do not keep a scope alive to hold them. The
+You do not free them, and you do not keep a scope alive to hold them. A
+canonical `List` does not extend the lifetime of a mutable object stored
+inside it. The
 `Pool` calls described below give temporary `String` and `List` structure a
 shorter lifetime.
 

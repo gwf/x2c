@@ -106,7 +106,7 @@ so the annotated unit needs no declaration of it. A missing or misused
 helper is an ordinary compile error there.
 
 A helper is a plain function rather than a method on `Cstar` because x2c
-cannot define a method on a type an `import` supplies. The package's own
+cannot define a method on a type that an imported package defines. The package's own
 steps are methods, which is why `$cstar.proof` and `$cstar.helper` are
 separate annotations.
 

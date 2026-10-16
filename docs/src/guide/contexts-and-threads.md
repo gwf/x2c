@@ -23,7 +23,8 @@ and its `String`s and `List`s should live as long as the caller's.
 `Context.open_isolated` and `Context.open_isolated_named` add a child pool.
 New temporary `String`s and `List`s are then reclaimed when the `Context`
 closes. Values already in a parent pool stay visible and keep their
-identity.
+identity. The name given to a `_named` form appears only in `Scope` leak
+diagnostics.
 
 The following program builds a cyclic mutable result around a private `String`,
 exports it, and closes the `Context`. `Context.export` moves the `Array` and
@@ -52,7 +53,7 @@ int main(void) {
 ```
 
 Always use the value returned by `Context.export`. Mutable `Array`s, `Map`s,
-`Block`s, `Buffer`s, and wide scalar boxes retain their identity when their
+`Block`s, `Bytes`, `Buffer`s, and wide scalar boxes retain their identity when their
 storage can be moved. Private `String`s, `Atom`s, and `List`s are canonicalized
 in the destination pool, so their pointers may change. Export walks nested
 `Array`s, `Map`s, and `List`s, including repeated references and `Array`/`Map`
@@ -142,7 +143,8 @@ exporting the result raises. A failed export cannot be retried. Call
 `Thread.free` after `Thread.join` returns or after catching an `Error`
 raised by the join.
 
-Join every started `Thread` before the process exits. If a worker is
+A `Thread` cannot be detached or cancelled. Join every started `Thread`
+before the process exits. If a worker is
 still unjoined at shutdown, even one whose callback has finished, the
 runtime prints a message and aborts. The join reclaims the worker's result
 `Scope` and pool.

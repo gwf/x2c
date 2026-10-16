@@ -713,6 +713,8 @@ expose the field's fields, or forward punctuation, indexing, operators, or
 receiverless calls. `Type.resolve_member` is also direct-only. Its method
 result cannot represent a projected receiver path.
 
+### Thread-local storage
+
 `threaded` is x2c's spelling of C's thread-local storage class, and gives each
 thread its own copy of an object:
 
@@ -725,6 +727,8 @@ It pairs with `static` or `extern`, in either order, which is the only pairing
 C allows. `_Thread_local` and `thread_local` mean the same thing and are
 accepted, so C that already writes it either way passes through unchanged; all
 three emit `_Thread_local`.
+
+### Pointer type mismatches
 
 Where C reports a pointer type mismatch as a warning, x2c reports an error:
 passing a `struct Rec *` to a parameter declared `List`, `String`, `Map`, or

@@ -46,9 +46,9 @@ every element in row-major order as an Array of the same Vars.
 
 An integer dtype never passes through a double, so
 `Tensor.of(%(9007199254740993), %(1), XT_INT64)` round-trips exactly and
-so does doubling it. A shape or index List holds numbers; a bare name
-inside `%()` is a Symbol, so `%(rows 2)` raises `<no-convert>` rather
-than reading the Symbol's payload.
+so does doubling it. A shape or index List holds numbers. A bare name
+inside `%()` is an `Atom`, stored as a compact `Symbol` when it fits, so
+`%(rows 2)` raises `<no-convert>`.
 
 ## Operators
 

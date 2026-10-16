@@ -177,7 +177,8 @@ parentheses without braces do not form a statement expression.
 handler in `src/expressions.x`. Assignment parses a conditional left side;
 whether that side is assignable is a semantic question. An expression-bodied
 function uses a full expression, while a lambda expression body uses an
-assignment expression. Calls and literal element lists permit trailing commas.
+assignment expression. Calls and literal element lists permit trailing commas,
+except that a meta call such as `$name(a, b)` does not.
 
 | Form | Operand or target |
 | --- | --- |

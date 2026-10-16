@@ -10,6 +10,7 @@
 
 ## Language guide
 
+- [Install a Native Compiler](https://x2c-lang.dev/docs/guide/installation.html)
 - [From C to x2c](https://x2c-lang.dev/docs/guide/from-c.html)
 - [x2c Syntax Map](https://x2c-lang.dev/docs/guide/x2c-syntax-map.html)
 - [Values and Var](https://x2c-lang.dev/docs/guide/values.html)
@@ -41,7 +42,6 @@
 - [Syntax as Data](https://x2c-lang.dev/docs/reference/syntax/data.html)
 - [Lexical Data Inventory](https://x2c-lang.dev/docs/reference/syntax/lexical-data.html)
 - [Compiler Options](https://x2c-lang.dev/docs/reference/cli.html)
-- [Install a Native Compiler](https://x2c-lang.dev/docs/guide/installation.html)
 
 ## Libraries and Packages
 
