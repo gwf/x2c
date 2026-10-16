@@ -690,12 +690,11 @@ const char *Scope.name(Scope scope) {
     diagnoses their use. Any regions still linked below it, from retains that
     were never released, are destroyed with it.
 
-    `Scope.destroy` refuses a scope that is still in use, so a double destroy
-    or a mismatched push and pop raises instead of corrupting the allocation
-    lists. The three refused cases are the active root scope, a slot still on
-    the pushed stack (pop it first), and a scope that a later `Scope.retain`
-    layered another region on top of, which the runtime reports as an attached
-    lower scope.
+    `Scope.destroy` refuses a scope that is still in use: the active root
+    scope, a slot still on the pushed stack (pop it first), and a scope that
+    a later `Scope.retain` layered another region on top of, which the
+    runtime reports as an attached lower scope. The handle is a pointer into
+    the destroyed scope, so destroying it again is undefined behavior.
     Raises: `<bad-state>` for the active root, a pushed slot, or an attached
     lower scope. The failure leaves the scope intact. A NULL `scope` does
     nothing. Before `Error` initialization it terminates at the error floor.

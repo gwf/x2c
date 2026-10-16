@@ -75,6 +75,8 @@ int Var_fallback_compare(Var a, Var b);
 
 Iter Var_iter(Var x, Iter dest);
 
+Iter Var_enumerate(Var x, Iter dest);
+
 Iter Var_fallback_iter(Var x, Iter dest);
 
 int Var_contains(Var value, Var needle);

@@ -627,8 +627,21 @@ static void map_growth_survives_a_nested_region(void) {
   EXPECT_INT_EQ(grown.integer(), 511);
 }
 
+/* A boxed Map destructures into the same key and value pairs. */
+static void map_boxed_two_name_foreach(void) {
+  Var boxed = {"a": 1, "b": 2};
+  long keys = 0, values = 0;
+  foreach(Var (key, value), boxed) {
+    keys += key.str().len();
+    values += value.integer();
+  }
+  EXPECT_INT_EQ(keys, 2);
+  EXPECT_INT_EQ(values, 3);
+}
+
 void map_suite(void) {
   $test.run(map_iterates_values_keys_and_pairs);
+  $test.run(map_boxed_two_name_foreach);
   $test.run(map_empty_literal_identity);
   $test.run(map_bare_literal_quotes_only_identifier_keys);
   $test.run(map_set_get_updates);
