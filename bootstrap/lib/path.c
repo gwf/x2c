@@ -116,8 +116,10 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _20 = String_new("Path.temp_dir");
 }
 
-Path Path_new(const char * argument0){
-  return(Path) String_new(argument0);
+String String_new(const char *);
+
+Path Path_new(const char * a0){
+  return(Path) String_new(a0);
 }
 
 int String_len(String);
@@ -186,8 +188,6 @@ String Path_stem(Path path){
   int dot = _extension_dot(base);
   return dot < 0 ? base : String_getslice(base, (-2147483647 - 1), x2c_slice_bound(dot), 1);
 }
-
-String String_new(const char *);
 
 void File_path_error(Var, String, int);
 

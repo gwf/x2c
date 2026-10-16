@@ -138,11 +138,11 @@ meta static void _protocol_descriptor(List descriptor, List slots) {
           init, $!{ x2c_register_builtin_descriptor($symbol, $table); });
         return;
       }
-      x2c_place(init, $!{
-        if (!x2c_register_builtin_descriptor($symbol, $table)) {
-          x2c_register_descriptor($text, $table);
-        }
-      });
+      x2c_place(
+        init, $!{
+          if (!x2c_register_builtin_descriptor($symbol, $table))
+            x2c_register_descriptor($text, $table);
+        });
     }
 }
 

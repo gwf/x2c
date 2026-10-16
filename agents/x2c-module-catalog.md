@@ -37,14 +37,14 @@ shared helpers for x2c compiler AST nodes.
 Public functions:
 
 `Ast.binding`, `Ast.try_binding`, `Ast.binding_spelling`,
-`Ast.prototype_declarator`, `Ast.designated`, `Ast.lvalue_binding`,
-`Ast.addressed_identifier`, `Ast.direct_identifier`, `Ast.indirect_identifier`,
-`Ast.written_operand`, `Ast.rewrite_children`, `Ast.contains_head`,
-`Ast.replace_nodes`, `Ast.collect_binding_references`, `Ast.without_origin`,
-`Ast.rewrap_origin`, `Ast.written_definitions`, `Ast.entry_call`,
-`Ast.reference_guard_exits`, `Ast.never_returns`, `Symbol.is_assignment_op`,
-`Symbol.changes_left_operand`, `Ast.initializer_cases`,
-`Ast.initializer_functions`
+`Ast.append_modifiers`, `Ast.prototype_declarator`, `Ast.designated`,
+`Ast.lvalue_binding`, `Ast.addressed_identifier`, `Ast.direct_identifier`,
+`Ast.indirect_identifier`, `Ast.written_operand`, `Ast.rewrite_children`,
+`Ast.contains_head`, `Ast.replace_nodes`, `Ast.collect_binding_references`,
+`Ast.without_origin`, `Ast.rewrap_origin`, `Ast.written_definitions`,
+`Ast.entry_call`, `Ast.reference_guard_exits`, `Ast.never_returns`,
+`Symbol.is_assignment_op`, `Symbol.changes_left_operand`,
+`Ast.initializer_cases`, `Ast.initializer_functions`
 
 ### [src/build.x](../src/build.x)
 
@@ -811,10 +811,11 @@ x2c semantic types.
 
 Public functions:
 
-`List.type_from_ast`, `Type.parts`, `Type.declaration_ast`,
-`Type.parameter_ast`, `Type.var_tag`, `Type.fixed_var_tag`,
-`Type.var_converter`, `Type.var_tag_row`, `Type.register_var_tag`,
-`Type.register_var_adoption`, `Type.begin_unit`, `Type.end_unit`
+`List.type_from_ast`, `Type.parts`, `Type.declaration_base`,
+`Type.declaration_ast`, `Type.parameter_ast`, `Type.var_tag`,
+`Type.fixed_var_tag`, `Type.var_converter`, `Type.var_tag_row`,
+`Type.register_var_tag`, `Type.register_var_adoption`, `Type.begin_unit`,
+`Type.end_unit`
 
 ### [src/utils.x](../src/utils.x)
 

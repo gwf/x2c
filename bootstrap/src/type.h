@@ -15,6 +15,8 @@ Type List_type_from_ast(List ast);
 
 List Type_parts(Type type);
 
+List Type_declaration_base(Type t, List * modifiers);
+
 List Type_declaration_ast(Type type, List binding);
 
 List Type_parameter_ast(Type type, List binding);

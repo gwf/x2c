@@ -27,7 +27,7 @@ Cleanup regions and the transfers that leave them.
 
 Writes captured addresses in the order capture selection established.
 
-Source: `src/cleanup.x:759`
+Source: `src/cleanup.x:756`
 
 ### `Compiler`
 
@@ -52,7 +52,7 @@ Returns the region that runs `finalizer` when `body` leaves. Ordinary
 cleanup statements take the callable chain; lexical transfers and
 unsupported capture types keep the landing-frame path.
 
-Source: `src/cleanup.x:1110`
+Source: `src/cleanup.x:1107`
 
 <a id="Compiler.rewrite_defer_list"></a>
 #### Compiler.rewrite_defer_list
@@ -62,7 +62,7 @@ Source: `src/cleanup.x:1110`
 Returns `stmts` with each `defer` statement and the statements after
 it replaced by one region; a list without `defer` returns unchanged.
 
-Source: `src/cleanup.x:1086`
+Source: `src/cleanup.x:1083`
 
 <a id="Compiler.static_value_is_runtime"></a>
 #### Compiler.static_value_is_runtime

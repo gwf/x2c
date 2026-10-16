@@ -16,8 +16,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Code _protocol_function(List declared, List name, List forward);
 
-static Code _protocol_runtime(Type result, String name, List arguments);
-
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -110,15 +108,5 @@ static Code _protocol_function(List declared, List name, List forward){
     )), NULL))), NULL)));  cons(_69, cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, cons(_x2c_gensym_literal_part_8, NULL))));
   }
   )), NULL))))), NULL))), NULL)));
-}
-
-static Code _protocol_runtime(Type result, String name, List arguments){
-  return({
-    Var _x2c_gensym_literal_part_11 = List_var(result);  Var _x2c_gensym_literal_part_12 = List_var(({
-      Var _x2c_gensym_literal_part_9 = String_var(name);  Var _x2c_gensym_literal_part_10 = List_var(cons(_63, List_append(arguments, NULL)));  cons(_67, cons(_x2c_gensym_literal_part_9, cons(_x2c_gensym_literal_part_10, NULL)));
-    }
-    ));  cons(_52, cons(_x2c_gensym_literal_part_11, cons(_x2c_gensym_literal_part_12, NULL)));
-  }
-  );
 }
 

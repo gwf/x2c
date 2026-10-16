@@ -40,10 +40,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
     .iter = _x2c_gensym_proto_geo__vec_iter_0, .mul = _x2c_gensym_proto_geo__vec_mul_0
   }
   ;
-  if(! x2c_register_builtin_descriptor(492847477062, _x2c_gensym_protocol_methods_0)){
-    x2c_register_descriptor(String_new("geo__vec"), _x2c_gensym_protocol_methods_0);
-  }
-
+  if(! x2c_register_builtin_descriptor(492847477062, _x2c_gensym_protocol_methods_0)) x2c_register_descriptor(String_new("geo__vec"), _x2c_gensym_protocol_methods_0);
 }
 
 geo__Vec geo__Vec_new(double x, double y){
