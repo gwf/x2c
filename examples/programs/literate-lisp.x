@@ -844,7 +844,7 @@ static Var _eval_text(Interp &self, String source) {
 static Var _import_file(Interp &self, String path) {
   File source = $auto(path.open("r"));                                           // Close File on block exit.
   Block content = $auto(Block.new(sizeof(char)));                                // Release Block on block exit.
-  if (source.read_into(content) == <eof>) return %();                         // EOF gives an empty List result.
+  if (source.read_into(content) == <eof>) return %();                            // EOF gives an empty List result.
   if (content.length > INT_MAX) {                                                // Native C size limit.
     size_t size = content.length, int limit = INT_MAX;                           // Mixed types in one declaration.
     $fail(<size-limit>, "Lisp.eval_file", <size>, size, <limit>, limit);         // Integers box into the error List.
