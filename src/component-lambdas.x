@@ -305,7 +305,8 @@ meta static List _lambda_closure_params(
 meta static Code _lambda_function(List name, List params, Code body) {
   if (!params) params = %((param (void) (bind () ())));
   List lowered = Code.lowered(%(seq @{_lambda_items(body)}));
-  return $!Unit{ static Var $name(@params) { $lowered } };
+  return %(function (static "Var") (bind $name ((fnmod (params @params))))
+           (block $lowered));
 }
 
 $rewrite($lambda_expression)
@@ -353,9 +354,8 @@ meta static List _lambda_member(int index) => %(${%"c$index"});
 meta static Type _lambda_field_type(Type type) =>
   type.car() == <&> ? cons(<*>, type.cdr()) : %("Var");
 
-/* The record `context`, with a field of each type in `types`. The field
-   rows stay canonical syntax, since a field bound on its own loses its
-   member type before the record is bound. */
+/* The record `context`, with a field of each type in `types`, as bound
+   code. */
 meta static Code _lambda_record(List context, List types) {
   Array fields = [];
   foreach (Type type, types) {
@@ -363,45 +363,63 @@ meta static Code _lambda_record(List context, List types) {
     List name = _lambda_member(fields.len());
     fields.push(%(declare $base (bindings (bind $name $modifiers))));
   }
-  List declared = fields.list_free();
-  return $!Unit{ static typedef struct $context { @declared } $context; };
+  return %(code-value "bound"
+           (typedef (static struct $context (fields @{fields.list_free()}))
+             (bindings (bind $context ())))
+           ());
 }
 
-/* The adapter `adapter` of the Func `closure` with arguments `argv`. It
-   reads the arguments of `params` as `reads` says into locals and calls
-   `lifted` with them and with the field of the `context` record for each
-   of `captures`; a reference passes what the address it holds refers to. */
+/* The adapter `adapter` of the Func `closure` with arguments `argv`, as
+   bound code. It reads the arguments of `params` as `reads` says into
+   locals and calls `lifted`, whose parameters are `declared`, with them
+   and with the field of the `context` record for each of `captures`; a
+   reference passes what the address it holds refers to. */
 meta static Code _lambda_adapter(
   List adapter, List closure, List argv, List lifted, List context,
-  List params, List reads, List captures) {
-  List record = x2c_ident("record");
+  List params, List reads, List captures, List declared) {
+  Type pointer = %(* const struct $context);
+  Code record = %(expr $pointer (ident ("record")));
   Array items = [], arguments = [];
   foreach (List read, reads) {
     (Type type, Code value) = read;
-    List local = x2c_ident(%"a${items.len()}");
-    items.push($!{ $type $local = $value; });
+    List name = %(${%"a${items.len()}"});
+    (List base, List modifiers) = type.parts();
+    items.push(
+      %(declare $base (bindings (op = (bind $name $modifiers) $value))));
+    Code local = %(expr $type (ident $name));
     match (params.car()) {
-      case %(param ? (bind ? (& *))): arguments.push($!( *$local ));
-      default: arguments.push($!( $local ));
+      case %(param ? (bind ? (& *))):
+        arguments.push(%(expr ${type.cdr()} (op * $local)));
+      default: arguments.push(local);
     }
     params = params.cdr();
   }
+  Code context_read = %(expr (* const void)
+    (call (expr ((func (("Func"))) * const void) (ident ("Func_context")))
+      (args (expr ("Func") (ident $closure)))));
+  items.push(
+    %(declare (const struct $context)
+       (bindings (op = (bind ("record") (*))
+                      (expr $pointer (cast $pointer $context_read))))));
   int index = 0;
   foreach (List capture, captures) {
-    List field = _lambda_field(index++);
+    Type type = capture.caddr(), stored = _lambda_field_type(type);
+    Code field = %(expr (const @stored)
+                    (op -> $record ${_lambda_member(index++)}));
     arguments.push(
-      capture.caddr().car() == <&> ? $!( *$record->$field )
-                                   : $!( $record->$field ));
+      type.car() == <&> ? %(expr ${type.cdr()} (op * $field)) : field);
   }
-  List setup = items.list_free(), passed = arguments.list_free();
-  return $!Unit{
-    static Var $adapter(Func $closure, const FuncArg *$argv) {
-      @setup
-      const struct $context *$record =
-        (const struct $context *)Func.context($closure);
-      return $lifted(@passed);
-    }
-  };
+  Code call = %(expr ("Var")
+    (call (expr ((func $declared) "Var") (ident $lifted))
+      (args @{arguments.list_free()})));
+  items.push(%(return $call));
+  return %(code-value "bound"
+           (function (static "Var")
+             (bind $adapter
+               ((fnmod (params (param ("Func") (bind $closure ()))
+                               (param (const "FuncArg") (bind $argv (*)))))))
+             (block @{items.list_free()}))
+           ());
 }
 
 /* The bridge `bridge` through which a public inline function makes the
@@ -492,7 +510,8 @@ meta Code lambda_closure(Code node) {
       List declared = _lambda_closure_params(params, reads, captures);
       Code function = _lambda_function(lifted, declared, body);
       Code adapter_function = _lambda_adapter(
-        adapter, closure, argv, lifted, context, params, reads, captures);
+        adapter, closure, argv, lifted, context, params, reads, captures,
+        declared);
       x2c_place(%(unit-support), record_type);
       x2c_place(%(unit-support), function);
       x2c_place(%(unit-support), adapter_function);
