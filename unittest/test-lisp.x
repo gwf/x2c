@@ -1769,6 +1769,40 @@ static void lisp_iterator_callbacks_stay_with_their_session(void) {
   first.destroy();
 }
 
+static void lisp_callback_arguments_precede_session_checks(void) {
+  Lisp lisp = _boot_session();
+  defer lisp.destroy();
+  if (!_load_lisp_layer(lisp, "../etc/lisp-values.xlisp")) return;
+  Iter mapped = _ev(lisp,
+    "(Iter.map (range 1 3 1) (lambda (x) (+ x 1)))");
+  Func unary = mapped.aux;
+  int value = 7, caught = 0;
+  FuncArg args[2] = {
+    FuncArg.reference(&value, %(int)),
+    FuncArg.reference(&value, %(int))
+  };
+  try unary.apply(1, args);
+  catch %(bad-types (sig ?) (index ?index) *): {
+    EXPECT_INT_EQ(index.integer(), 0);
+    caught++;
+  }
+  try unary.apply_value(7);
+  catch %(bad-state (operation "Lisp callback") *): caught++;
+  Iter scanned = _ev(lisp,
+    "(Iter.scan (range 1 3 1) 0 (lambda (a b) (- a b)))");
+  Func binary = scanned.aux;
+  try binary.apply(2, args);
+  catch %(bad-types (sig ?) (index ?index) *): {
+    EXPECT_INT_EQ(index.integer(), 0);
+    caught++;
+  }
+  EXPECT_INT_EQ(caught, 3);
+  lisp.set_global("retained-map", mapped);
+  lisp.set_global("retained-scan", scanned);
+  EXPECT_VAR_EQ(_ev(lisp, "(Iter.list retained-map)"), %(2 3 4).var());
+  EXPECT_VAR_EQ(_ev(lisp, "(Iter.list retained-scan)"), %(-1 -3 -6).var());
+}
+
 static void lisp_iterator_storage_leaves_with_the_session(void) {
   Lisp warm = _boot_session();
   if (!_load_lisp_layer(warm, "../etc/lisp-values.xlisp")) return;
@@ -2085,6 +2119,7 @@ void lisp_suite(void) {
   $test.run(lisp_value_layer_uses_library_operations);
   $test.run(lisp_iterator_callbacks_share_the_entry_budget);
   $test.run(lisp_iterator_callbacks_stay_with_their_session);
+  $test.run(lisp_callback_arguments_precede_session_checks);
   $test.run(lisp_iterator_storage_leaves_with_the_session);
   $test.run(lisp_bootstrap_import_uses_current_session);
   $test.run(lisp_sessions_release_scopes);

@@ -7,71 +7,60 @@
 
    A native operation that takes a Func, such as `List.map`, calls an
    interpreted callable through a Func whose context holds the session and
-   the callable. A callback runs only inside the session that made it. */
+   the callable. A callback runs only inside the session that made it.
+   Ordinary lambda adapters decode arguments before the body checks its
+   session, in parameter order. */
 
-static typedef struct LispCallback {
-  Lisp lisp;
-  Var callable;
-  String operation;
-  unsigned arity;
-} LispCallback;
-
-static List unary_signature = $!Type{ Var (Var) };
-static List binary_signature = $!Type{ Var (Var, Var) };
-
-static Func _unary_callback(Var callable) =>
-  _callback(callable, _call, 1, "Lisp callback");
-static Func _binary_callback(Var callable) =>
-  _callback(callable, _call, 2, "Lisp callback");
-static Func _predicate_callback(Var callable) =>
-  _callback(callable, _predicate_call, 1, "Lisp callback");
-
-/* A Func that meta code can keep, as a value or inside a lazy Iter, lives as
-   long as the session that runs it, whatever region is active when it is
-   made. A callback used only during one call stays in the active region.
-   `Iter` keeps it in its existing auxiliary field; the native pull ABI
-   remains the library's IterNextFn, and the callback carries its iterator
-   and output-cell arguments into the interpreted source function. */
-static Func _iter_callback(Var callable) {
-  Func fn = _callback(callable, _call, 2, "Lisp iterator callback");
-  if (fn) Scope.move(fn, &lisp_active.scope);
-  return fn;
-}
-
-/* A Func of `arity` value arguments that runs `callable` in the active
-   session, or NULL for a nil callable. */
-static Func _callback(
-  Var callable, FuncAdapter adapter, unsigned arity, String operation) {
+/* A callback snapshots its owner and callable. The opaque session is
+   captured as a pointer; its storage still belongs to the session. */
+static void *_callback_owner(Var callable, String operation) {
   if (callable.is_nil()) return NULL;
-  if (!lisp_active)
-    $error.callback.absent(operation);
-  LispCallback context = { lisp_active, callable, operation, arity };
-  List signature = arity == 1 ? unary_signature : binary_signature;
-  return Func.new_context(adapter, signature, &context, sizeof context);
+  if (!lisp_active) $error.callback.absent(operation);
+  return lisp_active;
 }
 
-static Var _call(Func fn, const FuncArg *args) {
-  LispCallback *context = _callback_context(fn);
-  List values = NULL;
-  for (unsigned i = context.arity; i--;)
-    values = cons(x2c_func_value_argument(fn, args, i, <var>), values);
-  return _apply_values(context.lisp, context.callable, values);
+static Lisp _callback_session(void *owner, String operation) {
+  if (!lisp_active || lisp_active != owner)
+    $error.callback.wrong(operation);
+  return owner;
 }
 
-/* A call to _call here would add a C frame to every nested predicate
-   call. */
-static Var _predicate_call(Func fn, const FuncArg *args) {
-  LispCallback *context = _callback_context(fn);
-  Var value = x2c_func_value_argument(fn, args, 0, <var>);
-  return lisp_truth(
-    _apply_values(context.lisp, context.callable, %($value)));
+static Func _unary_callback(Var callable) {
+  void *owner = _callback_owner(callable, "Lisp callback");
+  if (!owner) return NULL;
+  return %!(Var value) => {
+    Lisp session = _callback_session(owner, "Lisp callback");
+    return _apply_values(session, callable, %($value));
+  };
 }
 
-static LispCallback *_callback_context(Func fn) {
-  LispCallback *context = (void *) fn.context();
-  if (!lisp_active || lisp_active != context.lisp)
-    $error.callback.wrong(context.operation);
-  return context;
+static Func _binary_callback_for(Var callable, String operation) {
+  void *owner = _callback_owner(callable, operation);
+  if (!owner) return NULL;
+  return %!(Var left, Var right) => {
+    Lisp session = _callback_session(owner, operation);
+    return _apply_values(session, callable, %($left $right));
+  };
+}
+
+static Func _binary_callback(Var callable) =>
+  _binary_callback_for(callable, "Lisp callback");
+
+static Func _predicate_callback(Var callable) {
+  void *owner = _callback_owner(callable, "Lisp callback");
+  if (!owner) return NULL;
+  return %!(Var value) => {
+    Lisp session = _callback_session(owner, "Lisp callback");
+    return lisp_truth(_apply_values(session, callable, %($value)));
+  };
+}
+
+/* A lazy pull callback outlives the region that creates it. Other callbacks
+   keep their current Scope lifetime. Iter retains the Func in its aux field. */
+static Func _iter_callback(Var callable) {
+  Func fn = _binary_callback_for(callable, "Lisp iterator callback");
+  if (fn) fn.move(&lisp_active.scope);
+  return fn;
 }
 
 static int _iter_next(Iter iter, Var *out) =>
