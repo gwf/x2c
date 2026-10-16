@@ -4,19 +4,17 @@
 #include "x2c.h"
 
 #include "rewrite.h"
-static List _21, _18, _12, _7, _3;
+static List _12, _7, _3;
 
-static String _23, _19, _16, _5, _1;
+static String _5, _1;
 
-static Var _24, _22, _20, _17, _15, _14, _13, _11, _10, _9, _8, _6, _4, _2, _0;
+static Var _14, _13, _11, _10, _9, _8, _6, _4, _2, _0;
 
 static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Code _destructure_element(Atom values, int index);
-
-static Code _destructure_bound(List code, Atom values, Atom result);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -37,16 +35,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _12 = cons(_11, NULL);
   _13 = List_var(_12);
   _14 = Symbol_var(493135733104);
-  _15 = Symbol_var(974419528522);
-  _16 = String_new("destructure");
-  _17 = String_var(_16);
-  _18 = cons(_17, NULL);
-  _19 = String_new("destructure_result");
-  _20 = String_var(_19);
-  _21 = cons(_20, NULL);
-  _22 = Symbol_var(244379323295050);
-  _23 = String_new("bound");
-  _24 = String_var(_23);
 }
 
 static Code _destructure_element(Atom values, int index){
@@ -55,11 +43,5 @@ static Code _destructure_element(Atom values, int index){
     Var _x2c_gensym_literal_part_0 = List_var(cons(_0, cons(_8, cons(List_var(cons(_9, cons(values, NULL))), NULL))));  Var _x2c_gensym_literal_part_1 = List_var(cons(_10, cons(_13, cons(String_var(position), NULL))));  cons(_14, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL)));
   }
   )), NULL)));
-}
-
-static Code _destructure_bound(List code, Atom values, Atom result){
-  List names = cons(List_var(cons(_15, cons(values, _18))), NULL);
-  if(Var_truth(result)) names = cons(List_var(cons(_15, cons(result, _21))), names);
-  return cons(_22, cons(_24, cons(List_var(code), cons(List_var(names), NULL))));
 }
 
