@@ -1,6 +1,7 @@
 > Status: done
-> Implemented 2026-10-16. Focused compatibility checks passed; publication
-> validation is recorded with the delivery commit.
+> Implemented 2026-10-16. Focused compatibility checks passed.
+> Shared-integrator submission selected after dev advanced during validation;
+> final integration and publication belong to the integrator.
 
 # External project creation
 
@@ -17,7 +18,8 @@ starter tests from the CLI probe to the command smoke rather than running
 both. Test direct command invocation and an installed prefix as focused checks.
 
 Review the authored diff, regenerate derived documentation and bootstrap with
-normal targets, and run the existing publication gate before direct delivery.
+normal targets. Submit the reviewed change and focused evidence to the shared
+integrator, which owns final publication validation.
 No new recurring gate or compiler behavior is introduced.
 
 ## Plan review
