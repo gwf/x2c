@@ -4,15 +4,19 @@
 #include "x2c.h"
 
 #include "rewrite.h"
-static List _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _48, _47, _43, _42, _38, _37, _33, _32, _28, _27, _23, _22, _18, _17, _13, _12, _8, _7, _3, _2;
+static List _67, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _48, _47, _43, _42, _38, _37, _33, _32, _28, _27, _23, _22, _18, _17, _13, _12, _8, _7, _3, _2;
 
-static Var _49, _46, _45, _44, _41, _40, _39, _36, _35, _34, _31, _30, _29, _26, _25, _24, _21, _20, _19, _16, _15, _14, _11, _10, _9, _6, _5, _4, _1, _0;
+static String _65;
+
+static Var _69, _68, _66, _64, _63, _62, _61, _60, _49, _46, _45, _44, _41, _40, _39, _36, _35, _34, _31, _30, _29, _26, _25, _24, _21, _20, _19, _16, _15, _14, _11, _10, _9, _6, _5, _4, _1, _0;
 
 static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
 static Symbol _dynamic_operation(Symbol assignment);
+
+static Code _dynamic_update(Type type, Code target, Symbol op, Code value, String helper);
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -78,6 +82,16 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _57 = cons(_14, _56);
   _58 = cons(_9, _57);
   _59 = cons(_4, _58);
+  _60 = Symbol_var(54);
+  _61 = Symbol_var(992);
+  _62 = Symbol_var(77);
+  _63 = Symbol_var(1077029798);
+  _64 = Symbol_var(377892);
+  _65 = String_new("Symbol");
+  _66 = String_var(_65);
+  _67 = cons(_66, NULL);
+  _68 = Symbol_var(102886);
+  _69 = Symbol_var(199448);
 }
 
 static Symbol _dynamic_operation(Symbol assignment){
@@ -93,5 +107,24 @@ static Symbol _dynamic_operation(Symbol assignment){
 
   }
   return 0;
+}
+
+Code Code_lowered(Code, List);
+
+static Code _dynamic_update(Type type, Code target, Symbol op, Code value, String helper){
+  Type target_type = Var_list_payload(List_cadr(target)), address_type = cons(_60, List_append(target_type, NULL));
+  List address =({
+    Var _x2c_gensym_literal_part_0 = List_var(address_type);  Var _x2c_gensym_literal_part_1 = List_var(cons(_61, cons(_62, cons(List_var(cons(_63, cons(List_var(target), NULL))), NULL))));  cons(_64, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL)));
+  }
+  );
+  List operation = Macro_typed(_67, Symbol_var(op));
+  List call = List_truth(value) ?({
+    Var _x2c_gensym_literal_part_2 = String_var(helper);  Var _x2c_gensym_literal_part_3 = List_var(cons(_68, cons(List_var(address), cons(List_var(operation), cons(List_var(value), NULL)))));  cons(_69, cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, NULL)));
+  }
+  ) :({
+    Var _x2c_gensym_literal_part_4 = String_var(helper);  Var _x2c_gensym_literal_part_5 = List_var(cons(_68, cons(List_var(address), cons(List_var(operation), NULL))));  cons(_69, cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, NULL)));
+  }
+  );
+  return Code_lowered(cons(_64, cons(List_var(type), cons(List_var(call), NULL))), NULL);
 }
 

@@ -6214,7 +6214,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_10(void
   _5330 = String_var(_5329);
   _5331 = String_new("lib/meta.x");
   _5332 = String_var(_5331);
-  _5333 = String_new("dc4abb2f");
+  _5333 = String_new("cb517768");
   _5334 = String_var(_5333);
   _5335 = cons(_5334, NULL);
   _5336 = cons(_5332, _5335);
