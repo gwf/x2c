@@ -57,6 +57,25 @@ if grep -q 'up-to-date translate' changed.log; then exit 1; fi
 "$stage" script -v scripts/hello.x >script.out 2>script-changed.log
 grep -q '^x2c: link ' script-changed.log
 
+# Manifest preparation must find commands beside the matching stage driver.
+mkdir project
+cat > project/x2c.toml <<'MANIFEST'
+[dependencies]
+marker = "1"
+[target.app]
+kind = "executable"
+sources = ["main.c"]
+MANIFEST
+printf 'int main(void) { return 0; }\n' > project/main.c
+cat > home/builds/7/libexec/x2c-package <<'PACKAGE'
+#!/bin/sh
+[ "$1" = ensure ] || exit 1
+printf '%s' "$X2C" > "$X2C_STAGE_MARKER"
+PACKAGE
+chmod +x home/builds/7/libexec/x2c-package
+(cd project && X2C_STAGE_MARKER="$BUILD/nested-driver" "$stage" build -q)
+[ "$(cat nested-driver)" = "$stage" ]
+
 # Missing and mismatched commands fail at the driver/command boundary.
 mv home/builds/7/libexec/x2c-build saved-command
 status=0
