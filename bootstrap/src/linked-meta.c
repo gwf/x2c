@@ -12953,7 +12953,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _12027 = List_var(_12026);
   _12028 = String_new("src/cli.x");
   _12029 = String_var(_12028);
-  _12030 = String_new("7bd8cb40");
+  _12030 = String_new("da7f58a2");
   _12031 = String_var(_12030);
   _12032 = cons(_12031, NULL);
   _12033 = cons(_12029, _12032);

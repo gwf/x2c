@@ -23,7 +23,7 @@ ProjectBuild ProjectBuild_plan(CliRequest request);
 
 String CliRequest_project_manifest(CliRequest c);
 
-int CliRequest_new_project(CliRequest request);
+int ProjectBuild_valid_name(String name);
 
 
 #endif /* __GUARD_0x05ED52D8__ */

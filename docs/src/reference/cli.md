@@ -450,7 +450,8 @@ literal operand `@name`.
 
 ## Start a project
 
-`new` creates a project that builds and runs as written:
+`new` invokes the shipped `x2c-new` command to create a project that builds
+and runs as written:
 
 ```sh
 x2c new hello
