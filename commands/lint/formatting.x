@@ -1,5 +1,5 @@
 #pragma indent
-/*  format.x -- the whitespace a unit would have after formatting
+/*  formatting.x -- the whitespace a unit would have after formatting
 
     Formatting changes only space: it drops trailing space, also inside
     comments, keeps at most one blank line in a row, ends the file with one

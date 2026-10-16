@@ -23,7 +23,7 @@
     `--fmt-check` reports, for each file whose spacing formatting would
     change, `FILE: N lines to format`, and exits 1 when any would change;
     `--fmt-diff` also prints the unified difference. Neither writes; see
-    `format.x` for what formatting changes.
+    `formatting.x` for what formatting changes.
 
     The command links the compiler's objects through `make commands`.
     `make commands-check` checks its findings on `tests/`.
@@ -39,7 +39,7 @@
 #include "structure.x"
 #include "policy.x"
 #include "fix.x"
-#include "format.x"
+#include "formatting.x"
 #include "diff.x"
 #include "args.x"
 #include <stdio.h>
