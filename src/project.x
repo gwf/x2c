@@ -8,7 +8,7 @@
 */
 
 #pragma once
-#include "build.x"
+#include "cli.x"
 
 /** Links native build requests in dependency-first order.
     `ProjectBuild.plan` returns the head. Each node and copied `CliRequest`

@@ -164,7 +164,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 
 - Parse: `src/parse.x`
 - Package name collection and resolution: `src/symbols.x`, `src/collect.x`
-- Manifest and native build ownership: `src/project.x`, `src/build.x`, and
+- Manifest and native build ownership: `src/project.x`, `commands/build/build.x`, and
   `src/toolchain.x`
 - Tests: import/package compiler fixtures and the import-greet example
 - See also: [packages and
@@ -410,8 +410,9 @@ interface beside its generated C as Lisp data.
 source files; `src/symbols.x` owns its symbol scopes. `src/diagnostics.x` owns structured errors. `src/utils.x` owns host-environment and process
 helpers, including the C preprocessor process boundary. `src/frontend.x`
 shares configured source stages and sequential unit lifetimes with internal
-tools. `src/main.x` owns the translation loop, inspection output, and exit
-policy; `src/cli.x` owns the option table, command selection, and help rendering.
+tools. `src/translation.x` owns the translation loop, inspections, workers,
+and ordered diagnostics. `commands/build/` owns builds, runs, and script
+caching. `src/main.x` dispatches those workflows to `x2c-build`; `src/cli.x` owns the option table, command selection, and help rendering.
 
 Each feature entry lists the relevant parser, transforms, runtime code, and
 tests so you can follow its complete implementation.

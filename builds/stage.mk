@@ -246,6 +246,8 @@ $(COMMAND_BUILD)/.translated: COMMAND-FORCE-TRANSLATE
 COMMAND-FORCE-TRANSLATE:
 endif
 
+$(COMMAND_OBJECTS): $(COMMAND_BUILD)/.translated
+
 $(COMMAND_BUILD)/%.o: $(COMMAND_BUILD)/%.c | $(COMMAND_H_FILES) $(BIN_H_FILES) $(LIB_H_FILES)
 	$(CC) $(CFLAGS) -iquote $(COMMAND_BUILD) -iquote $(BIN_BUILD) \
 		-iquote $(LIB_BUILD) -iquote $(ROOT)/include/x2c \

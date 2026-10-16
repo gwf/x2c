@@ -1,3 +1,4 @@
+build|shipped|Build and execute applications and scripts
 editor|shipped|Serve semantic editor requests
 graph|experimental|Inspect x2c source graphs
 lint|experimental|Inspect x2c source style and idioms

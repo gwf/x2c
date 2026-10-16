@@ -24,9 +24,8 @@
 #include "digest.x"
 #include "deps.x"
 #include "meta-helper-client.x"
-#include "script.x"
-#include "toolchain.x"
 #include "utils.x"
+#include "toolchain.x"
 #include <unistd.h>
 
 // helper table source

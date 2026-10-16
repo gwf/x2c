@@ -204,7 +204,14 @@ script_value 3 -Xlinker "$BUILD/script-lib/libvalue.a" scripts/library.x
 # A different compiler binary is a different helper.
 cp "$X2C" bin/x2c
 printf 'x' >> bin/x2c
-X2C="$BUILD/bin/x2c" rebuilt "a compiler change"
+mkdir -p changed-compiler
+"$X2C" translate --out-dir changed-compiler -I . -I inc \
+  prog.x top.x chain.x >out.log 2>&1 || fail "compiler baseline: $(cat out.log)"
+helper_id=$(ls -i "$X2C_CACHE_DIR"/meta/project-*/helper | tr '\n' ' ')
+"$BUILD/bin/x2c" translate --out-dir changed-compiler -I . -I inc \
+  prog.x top.x chain.x >out.log 2>&1 || fail "changed compiler: $(cat out.log)"
+[ "$(ls -i "$X2C_CACHE_DIR"/meta/project-*/helper | tr '\n' ' ')" != "$helper_id" ] ||
+  fail "a compiler change did not rebuild the helper"
 
 # The target compiler is never used for meta code.
 rm -rf "$X2C_CACHE_DIR" bd
