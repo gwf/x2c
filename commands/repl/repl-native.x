@@ -177,7 +177,7 @@ static List _prepare(Compiler c, PromptFunction &p) {
         c.sym.bind_identity(NULL, self, %("Func"));
         setup = c.bind_syntax(
           $!{ void **$context = (void **) Func.context(${p.self}); },
-          AST_BLOCK, NULL);
+          <block>, NULL);
         rewritten = _rewrite(p, body);
       }
       c.add_early(%(function (static @spec) $declarator
@@ -194,7 +194,7 @@ static List _prepare(Compiler c, PromptFunction &p) {
         Func $factory(void *$captures) {
           return Func.new_context($made, $signature, $pointer, $size);
         }
-      }, AST_UNIT, NULL);
+      }, <unit>, NULL);
     }
   return NULL;
 }

@@ -116,7 +116,7 @@ List Compiler_leave_item(Compiler c);
 
 List Compiler_finish_initializers(Compiler c, List declaration, Token origin);
 
-List Compiler_bind_syntax(Compiler c, Var syntax, AstPos context, Type return_type);
+List Compiler_bind_syntax(Compiler c, Var syntax, Symbol context, Type return_type);
 
 Var Compiler_source_clause(Symbol kind);
 

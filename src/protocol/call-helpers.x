@@ -45,7 +45,7 @@ static List _generated_function(
   List key = %(api-definition $binding);
   Var authored;
   int documented = c.semantic_binding_facts().try_get(key, authored);
-  List function = c.bind_syntax(syntax, AST_UNIT, NULL);
+  List function = c.bind_syntax(syntax, <unit>, NULL);
   if (documented) c.set_fact(key, authored);
   else c.drop_fact(key);
   return function;
@@ -178,12 +178,12 @@ static List _emit(DiscardCall &d) {
   List helper_binding = d.c.sym.introduce(name);
   List value = d.c.sym.introduce("value");
   List call = d.c.bind_syntax(
-    $!( ${d.binding}(@{d.arguments}) ), AST_EXPRESSION, d.result);
+    $!( ${d.binding}(@{d.arguments}) ), <expression>, d.result);
   List drops = d.discards.list_free();
   List shape = d.result == %(void)
     ? $!{ $call; @drops return; }
     : $!{ ${d.result} $value = $call; @drops return $value; };
-  List body = d.c.bind_syntax(shape, AST_BLOCK, d.result);
+  List body = d.c.bind_syntax(shape, <block>, d.result);
   List helper = d.c.wrapper_function(
     %(static @{d.result}), helper_binding, d.declarations, body.cdr());
   d.c.add_early(helper);

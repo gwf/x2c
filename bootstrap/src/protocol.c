@@ -2970,7 +2970,7 @@ List Compiler_forward_parameters(Compiler c, List types){
 void Compiler_set_fact(Compiler, Var, Var);
 void Compiler_drop_fact(Compiler, Var);
 static List f12_call_helpers____generated_function(Compiler c, List binding, List syntax){
-  List key = cons(_444, cons(List_var(binding), NULL));  Var authored;  int documented = Map_try_get(Compiler_semantic_binding_facts(c), List_var(key), &(authored));  List function = Compiler_bind_syntax(c, List_var(syntax), AST_UNIT, NULL);  if(documented) Compiler_set_fact(c, List_var(key), authored);  else Compiler_drop_fact(c, List_var(key));  return function;
+  List key = cons(_444, cons(List_var(binding), NULL));  Var authored;  int documented = Map_try_get(Compiler_semantic_binding_facts(c), List_var(key), &(authored));  List function = Compiler_bind_syntax(c, List_var(syntax), 1405544, NULL);  if(documented) Compiler_set_fact(c, List_var(key), authored);  else Compiler_drop_fact(c, List_var(key));  return function;
 }
 
 String Compiler_protocol_update_helper(Compiler c, Type participant, String member, int postfix){
@@ -3082,7 +3082,7 @@ static List f12_call_helpers____emit(f12_call_helpers___DiscardCall * d){
     }
     )), NULL)))), NULL)));
   }
-  )), AST_EXPRESSION, (* d).result);  List drops = Array_list_free((* d).discards);  List shape = List_equal(Type_list((* d).result), _598) ? cons(_391, cons(_392, cons(List_var(({
+  )), 405758822009820, (* d).result);  List drops = Array_list_free((* d).discards);  List shape = List_equal(Type_list((* d).result), _598) ? cons(_391, cons(_392, cons(List_var(({
     Var _x2c_gensym_literal_part_110 = List_var(cons(_538, cons(List_var(cons(_398, cons(_545, cons(_546, cons(List_var(call), NULL))))), NULL)));  Var _x2c_gensym_literal_part_111 = List_var(cons(_398, cons(_601, cons(_413, cons(List_var(drops), NULL)))));  cons(_389, cons(_x2c_gensym_literal_part_110, cons(_x2c_gensym_literal_part_111, _604)));
   }
   )), NULL))) :({
@@ -3097,7 +3097,7 @@ static List f12_call_helpers____emit(f12_call_helpers___DiscardCall * d){
     }
     )), NULL)));
   }
-  );  List body = Compiler_bind_syntax((* d).c, List_var(shape), AST_BLOCK, (* d).result);  List helper = Compiler_wrapper_function((* d).c, List_type(cons(_74, List_append(Type_list((* d).result), NULL))), helper_binding, (* d).declarations, List_cdr(body));  Compiler_add_early((* d).c, helper);  List entry =({
+  );  List body = Compiler_bind_syntax((* d).c, List_var(shape), 5011670, (* d).result);  List helper = Compiler_wrapper_function((* d).c, List_type(cons(_74, List_append(Type_list((* d).result), NULL))), helper_binding, (* d).declarations, List_cdr(body));  Compiler_add_early((* d).c, helper);  List entry =({
     Var _x2c_gensym_literal_part_119 = List_var(helper_binding);  Var _x2c_gensym_literal_part_120 = List_var((* d).signature);  cons(_x2c_gensym_literal_part_119, cons(_x2c_gensym_literal_part_120, NULL));
   }
   );  Map_setindex((* d).c -> protocol_helpers, List_var((* d).key), List_var(entry));  long identity =(long) helper_binding;  Map_setindex((* d).c -> protocol_helpers, String_var(String_join(NULL, cons(String_var(_606), cons(String_var(long_str(identity)), NULL)))), int_var(1));  if((* d).fresh) Map_setindex((* d).c -> protocol_helpers, String_var(String_join(NULL, cons(String_var(_590), cons(String_var(long_str(identity)), NULL)))), int_var(1));  return entry;

@@ -127,7 +127,7 @@ static void _carrier_rollback(Compiler c) {
       int retained;
       c.place(%(unit-support $key), support);
       c.take_code_value(carrier, value, retained);
-      c.bind_syntax(value, AST_STATEMENT, NULL);
+      c.bind_syntax(value, <statement>, NULL);
       transaction.commit();
     }
     catch %(malformed *): failed = 1;

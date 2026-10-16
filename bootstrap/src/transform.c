@@ -47,11 +47,11 @@ static Ast _step_tag(Compiler c, Ast ast, Symbol tag);
 
 static Ast _statement_rewrite(Compiler c, Ast ast, Symbol tag);
 
-static List _shipped_lowering(Compiler c, Symbol point, Var kind, List source, AstPos position, Type expected, String form);
+static List _shipped_lowering(Compiler c, Symbol point, Var kind, List source, Symbol position, Type expected, String form);
 
 static Ast _shipped_statement(Compiler c, Ast ast, Symbol tag);
 
-static Ast _destructuring(Compiler c, Ast ast, Symbol tag, AstPos position);
+static Ast _destructuring(Compiler c, Ast ast, Symbol tag, Symbol position);
 
 static int _destructures(List statement);
 
@@ -2176,7 +2176,7 @@ static Ast _step(Compiler c, Ast ast){
 #ifndef X2C_TRANSFORM_SOURCE
 static Ast _step_tag(Compiler c, Ast ast, Symbol tag){
   Ast next = ast;  switch(tag){
-    case 1139215899608 : case 2391080 : case 895740748108 : case 26416091224 : return ast;  case 377892 : return _expression_node(c, ast);  case 3313778 : case 1479708786 : case 26720 : case 1468512 : return _collection_literal(c, ast, tag);  case 199912 : next = _cast(c, ast);  break;  case 19800432 : next = _index(c, ast);  break;  case 228262 : case 101723016 : return _ordered_list(c, ast);  case 45156 : next = _to_var(c, Var_list_payload(List_cadr(ast)));  break;  case 1316904858918 : return _interpolation(c, ast);  case 8932560010 : case 272600 : next = _declaration(c, ast);  break;  case 317060294872 : return _destructuring(c, ast, tag, AST_BLOCK);  case 41184168 : return _destructures(ast) ? _destructuring(c, ast, tag, AST_STATEMENT) : _default_node(c, ast);  case 317060127196 : return _destructuring_value(c, ast);  case 27369680 : return _shipped_statement(c, ast, tag);  case 8728932 : next = _defer_node(c, ast);  break;  case 1219800220 : next = _return(c, ast);  break;  case 37833930 : return _raise_node(c, ast);  case 1323933904 :{
+    case 1139215899608 : case 2391080 : case 895740748108 : case 26416091224 : return ast;  case 377892 : return _expression_node(c, ast);  case 3313778 : case 1479708786 : case 26720 : case 1468512 : return _collection_literal(c, ast, tag);  case 199912 : next = _cast(c, ast);  break;  case 19800432 : next = _index(c, ast);  break;  case 228262 : case 101723016 : return _ordered_list(c, ast);  case 45156 : next = _to_var(c, Var_list_payload(List_cadr(ast)));  break;  case 1316904858918 : return _interpolation(c, ast);  case 8932560010 : case 272600 : next = _declaration(c, ast);  break;  case 317060294872 : return _destructuring(c, ast, tag, 5011670);  case 41184168 : return _destructures(ast) ? _destructuring(c, ast, tag, 43159332400040) : _default_node(c, ast);  case 317060127196 : return _destructuring_value(c, ast);  case 27369680 : return _shipped_statement(c, ast, tag);  case 8728932 : next = _defer_node(c, ast);  break;  case 1219800220 : next = _return(c, ast);  break;  case 37833930 : return _raise_node(c, ast);  case 1323933904 :{
       List rewritten = _statement_rewrite(c, ast, tag);  return rewritten != ast ? rewritten : _default_node(c, ast);
     }
     case 588 : case 48777994 : case 286 : case 13284 : next = _truthy(c, ast);  break;  case 199448 : next = _call(c, ast);  break;  case 992 : next = _operator(c, ast);  break;  case 35407540848 : next = _postfix(c, ast);  break;  default: return _default_node(c, ast);
@@ -2186,16 +2186,16 @@ static Ast _step_tag(Compiler c, Ast ast, Symbol tag){
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
-List Compiler_lower_rewrite(Compiler, Symbol, Var, List, AstPos, Type, Token);
+List Compiler_lower_rewrite(Compiler, Symbol, Var, List, Symbol, Type, Token);
 static Type List_type(List);
 static Ast _statement_rewrite(Compiler c, Ast ast, Symbol tag){
-  List rewritten = Map_truth(c -> rewrite_rules) ? Compiler_lower_rewrite(c, 948490, Symbol_var(tag), ast, AST_STATEMENT, List_type(c -> return_type), NULL) : NULL;  return List_truth(rewritten) ? rewritten : ast;
+  List rewritten = Map_truth(c -> rewrite_rules) ? Compiler_lower_rewrite(c, 948490, Symbol_var(tag), ast, 43159332400040, List_type(c -> return_type), NULL) : NULL;  return List_truth(rewritten) ? rewritten : ast;
 }
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
-static List _shipped_lowering(Compiler c, Symbol point, Var kind, List source, AstPos position, Type expected, String form){
+static List _shipped_lowering(Compiler c, Symbol point, Var kind, List source, Symbol position, Type expected, String form){
   List lowered = Compiler_lower_rewrite(c, point, kind, source, position, expected, NULL);  if(! List_truth(lowered)) Compiler_report_error(c, 50756762, String_join(NULL, cons(String_var(_46), cons(String_var(form), NULL))), NULL, _52);  return lowered;
 }
 
@@ -2224,7 +2224,7 @@ List Compiler_lower_lambda_expr(Compiler c, List expression){
         }
 
       }
-       break; } _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && _x2c_gensym_match_cursor1 && _x2c_gensym_match_cursor1->car.u64 == 9224497937569878274ULL && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {return _shipped_lowering(c, 26416091224, Symbol_var(808259842), expression, AST_EXPRESSION, Var_type(List_cadr(expression)), _429);  break; } default: break;
+       break; } _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && _x2c_gensym_match_cursor1 && _x2c_gensym_match_cursor1->car.u64 == 9224497937569878274ULL && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {return _shipped_lowering(c, 26416091224, Symbol_var(808259842), expression, 405758822009820, Var_type(List_cadr(expression)), _429);  break; } default: break;
     }
 
   }
@@ -2233,21 +2233,21 @@ List Compiler_lower_lambda_expr(Compiler c, List expression){
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
-List Compiler_rewrite(Compiler, Symbol, Var, List, AstPos, Type, Token);
+List Compiler_rewrite(Compiler, Symbol, Var, List, Symbol, Type, Token);
 void Compiler_shipped_support(Compiler c, Symbol kind, List source, String form){
-  if(! _init_guard_) _file_init_();  List bound = Compiler_rewrite(c, 948490, Symbol_var(kind), source, AST_UNIT, NULL, NULL);  if(! List_truth(bound)) Compiler_report_error(c, 50756762, String_join(NULL, cons(String_var(_46), cons(String_var(form), NULL))), NULL, _52);  else Compiler_add_support(c, bound);
+  if(! _init_guard_) _file_init_();  List bound = Compiler_rewrite(c, 948490, Symbol_var(kind), source, 1405544, NULL, NULL);  if(! List_truth(bound)) Compiler_report_error(c, 50756762, String_join(NULL, cons(String_var(_46), cons(String_var(form), NULL))), NULL, _52);  else Compiler_add_support(c, bound);
 }
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
 static Ast _shipped_statement(Compiler c, Ast ast, Symbol tag){
-  return _shipped_lowering(c, 948490, Symbol_var(tag), ast, AST_STATEMENT, List_type(c -> return_type), String_join(NULL, cons(String_var(Symbol_str(tag)), cons(String_var(_430), NULL))));
+  return _shipped_lowering(c, 948490, Symbol_var(tag), ast, 43159332400040, List_type(c -> return_type), String_join(NULL, cons(String_var(Symbol_str(tag)), cons(String_var(_430), NULL))));
 }
 
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
-static Ast _destructuring(Compiler c, Ast ast, Symbol tag, AstPos position){
-  String form = position == AST_BLOCK ? _431 : _432;  return _shipped_lowering(c, 948490, Symbol_var(tag), ast, position, List_type(c -> return_type), form);
+static Ast _destructuring(Compiler c, Ast ast, Symbol tag, Symbol position){
+  String form = position == 5011670 ? _431 : _432;  return _shipped_lowering(c, 948490, Symbol_var(tag), ast, position, List_type(c -> return_type), form);
 }
 
 #endif
@@ -2265,7 +2265,7 @@ static int _destructures(List statement){
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
 static Ast _destructuring_value(Compiler c, Ast ast){
-  Type type = Var_type(Var_cadr(List_caddr(ast)));  return Var_list_payload(List_caddr(_shipped_lowering(c, 26416091224, Symbol_var(317060127196), cons(_22, cons(List_var(type), cons(List_var(ast), NULL))), AST_EXPRESSION, type, _433)));
+  Type type = Var_type(Var_cadr(List_caddr(ast)));  return Var_list_payload(List_caddr(_shipped_lowering(c, 26416091224, Symbol_var(317060127196), cons(_22, cons(List_var(type), cons(List_var(ast), NULL))), 405758822009820, type, _433)));
 }
 
 #endif
@@ -2452,8 +2452,8 @@ static List _function_rewrite(Compiler c, List function, List return_type, int w
       }
       ;  x2c_cleanup_push(& _x2c_gensym_defer_record_2); {
         * _x2c_gensym_macro_address_1 = written ? & shipped : c -> slot_watch; {
-          List replaced = Compiler_lower_rewrite(c, 458361162716, List_var(return_type), function, AST_UNIT, NULL, NULL); {
-            List _x2c_gensym_return_value_1 = List_truth(replaced) ? replaced : Compiler_lower_rewrite(c, 458361162716, Symbol_var(2994), function, AST_UNIT, NULL, NULL); {
+          List replaced = Compiler_lower_rewrite(c, 458361162716, List_var(return_type), function, 1405544, NULL, NULL); {
+            List _x2c_gensym_return_value_1 = List_truth(replaced) ? replaced : Compiler_lower_rewrite(c, 458361162716, Symbol_var(2994), function, 1405544, NULL, NULL); {
               x2c_cleanup_leave(& _x2c_gensym_defer_record_2);  return _x2c_gensym_return_value_1;
             }
 
@@ -2639,7 +2639,7 @@ static List _expression_rewrite(Compiler c, List expression){
     }
 
   }
-  return Var_truth(kind) ? Compiler_lower_rewrite(c, point, kind, source, AST_EXPRESSION, Var_type(List_cadr(expression)), NULL) : NULL;
+  return Var_truth(kind) ? Compiler_lower_rewrite(c, point, kind, source, 405758822009820, Var_type(List_cadr(expression)), NULL) : NULL;
 }
 
 #endif
@@ -2864,7 +2864,7 @@ static Ast _collection_literal(Compiler c, Ast ast, Symbol tag){
     }
     ));  cons(_22, cons(_x2c_gensym_literal_part_16, cons(_x2c_gensym_literal_part_17, NULL)));
   }
-  ), AST_EXPRESSION, type, String_join(NULL, cons(String_var(List_repr(Type_list(type))), cons(String_var(_498), NULL)))); {
+  ), 405758822009820, type, String_join(NULL, cons(String_var(List_repr(Type_list(type))), cons(String_var(_498), NULL)))); {
     List _x2c_gensym_match_expr = lowered; List _x2c_gensym_match_cursor, _x2c_gensym_match_cursor1, _x2c_gensym_match_cursor2;  switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
         case 9224497936761996324ULL: ;  _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && _x2c_gensym_match_cursor1 && _x2c_gensym_match_cursor1->car.u64 == 9224497936761817880ULL && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && _x2c_gensym_match_cursor1) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor1->car; if ((_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && _x2c_gensym_match_cursor1 && Var_is(_x2c_gensym_match_cursor1->car, 806120) && (_x2c_gensym_match_cursor2 = Var_list_payload(_x2c_gensym_match_cursor1->car), 1) && _x2c_gensym_match_cursor2 && _x2c_gensym_match_cursor2->car.u64 == 9224497936761721318ULL && (_x2c_gensym_match_cursor2 = _x2c_gensym_match_cursor2->cdr, 1)) { List _x2c_gensym_match_list_1 = _x2c_gensym_match_cursor2; if ((_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && !_x2c_gensym_match_cursor1 && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
         Var callee;  callee = _x2c_gensym_match_value_0;  List arguments;  arguments = _x2c_gensym_match_list_1; {
@@ -3181,7 +3181,7 @@ static Ast _interpolation(Compiler c, Ast ast){
     }
 
   }
-  List source = source_string_content(Array_list_free(rows));  List lowered = _shipped_lowering(c, 26416091224, Symbol_var(1316904858918), cons(_22, cons(_763, cons(List_var(source), NULL))), AST_EXPRESSION, List_type(_762), _790); {
+  List source = source_string_content(Array_list_free(rows));  List lowered = _shipped_lowering(c, 26416091224, Symbol_var(1316904858918), cons(_22, cons(_763, cons(List_var(source), NULL))), 405758822009820, List_type(_762), _790); {
     List _x2c_gensym_match_expr = lowered; Var _x2c_gensym_match_values[5]; MatchCaptureBuffer _x2c_gensym_match_capture = { .values = _x2c_gensym_match_values, .capacity = 5 };  switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
         case 9224497936761996324ULL: ;  static MatchCaptureSite _x2c_gensym_match_site_0; if (x2c_match_site_try_capture(&_x2c_gensym_match_site_0, _x2c_gensym_match_expr, List_var(_819), &_x2c_gensym_match_capture)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_values[0]; Var _x2c_gensym_match_value_1 = _x2c_gensym_match_values[1]; Var _x2c_gensym_match_value_2 = _x2c_gensym_match_values[2]; List _x2c_gensym_match_list_3 = Var_list_payload(_x2c_gensym_match_values[3]); Var _x2c_gensym_match_value_4 = _x2c_gensym_match_values[4]; {
         Var type;  type = _x2c_gensym_match_value_0;  Var callee;  callee = _x2c_gensym_match_value_1;  Var separator;  separator = _x2c_gensym_match_value_2;  List declarations;  declarations = _x2c_gensym_match_list_3;  Var parts;  parts = _x2c_gensym_match_value_4;  return _ordered(declarations, Var_type(type), ({
@@ -3378,7 +3378,7 @@ static List _change(Compiler c, List ast, Symbol op, List arg, Type type, int po
 #endif
 #ifndef X2C_TRANSFORM_SOURCE
 static List _dynamic(Compiler c, Symbol point, Type type, List operation){
-  List kind = x2c_var_equal(List_car(operation), Symbol_var(35407540848)) ? cons(_1134, cons(List_cadr(operation), _1142)) : cons(List_cadr(operation), _1142);  List rewritten = Compiler_rewrite(c, point, List_var(kind), cons(_22, cons(_1141, cons(List_var(operation), NULL))), AST_EXPRESSION, type, NULL);  return Var_list_payload(List_truth(rewritten) ? List_caddr(rewritten) : List_var(operation));
+  List kind = x2c_var_equal(List_car(operation), Symbol_var(35407540848)) ? cons(_1134, cons(List_cadr(operation), _1142)) : cons(List_cadr(operation), _1142);  List rewritten = Compiler_rewrite(c, point, List_var(kind), cons(_22, cons(_1141, cons(List_var(operation), NULL))), 405758822009820, type, NULL);  return Var_list_payload(List_truth(rewritten) ? List_caddr(rewritten) : List_var(operation));
 }
 
 #endif

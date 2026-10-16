@@ -89,12 +89,12 @@ static Var _rewrite(ReplSession session, Var node) {
       foreach (List target, targets)
         if (_global(session, target)) return _rewrite(
           session,
-          c.rewrite(<node>, <stmnt>, node, AST_STATEMENT, NULL, NULL));
+          c.rewrite(<node>, <stmnt>, node, <statement>, NULL, NULL));
     case %(expr ?type (dstrasgn (targets *targets) ?)):
       foreach (List target, targets)
         if (_global(session, target)) return _rewrite(
           session,
-          c.rewrite(<literal>, <dstrasgn>, node, AST_EXPRESSION, type, NULL));
+          c.rewrite(<literal>, <dstrasgn>, node, <expression>, type, NULL));
     /* Dynamic calls prepare both value and reference alternatives. A remote
        object supplies a value, never an address, including optional refs. */
     case %(expr ? (call (!set ?callee

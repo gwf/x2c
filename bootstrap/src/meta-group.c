@@ -1556,7 +1556,7 @@ static int _main_arity(Compiler c, Type type){
 
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
 List Sym_introduce(Sym, String);
-List Compiler_bind_syntax(Compiler, Var, AstPos, Type);
+List Compiler_bind_syntax(Compiler, Var, Symbol, Type);
 static List _loaded_entry(Compiler c, List binding, Type type){
   int arity = _main_arity(c, type);  if(arity < 0) Compiler_report_error(c, 1362954, _56, NULL, NULL);  Compiler_ensure_macro_lisp(c);  List entry = Sym_introduce(c -> sym, Compiler_fresh_name(c, _57));  List target =({
     Var _x2c_gensym_literal_part_2 = List_var(type);  Var _x2c_gensym_literal_part_3 = List_var(cons(_58, cons(List_var(binding), NULL)));  cons(_59, cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, NULL)));
@@ -1564,10 +1564,10 @@ static List _loaded_entry(Compiler c, List binding, Type type){
   );  if(! arity) return Compiler_bind_syntax(c, List_var(cons(_61, cons(_62, cons(List_var(cons(_63, cons(List_var(cons(_64, cons(_65, cons(_67, cons(List_var(({
     Var _x2c_gensym_literal_part_4 = List_var(cons(_19, cons(List_var(cons(_69, cons(_84, cons(_85, cons(List_var(entry), NULL))))), _108)));  Var _x2c_gensym_literal_part_5 = List_var(cons(_109, cons(List_var(cons(_111, cons(List_var(cons(_112, cons(_113, cons(List_var(cons(_59, cons(_116, cons(List_var(cons(_117, cons(List_var(cons(_69, cons(_123, cons(_124, cons(List_var(target), NULL))))), _132))), NULL)))), NULL)))), NULL))), NULL)));  cons(_15, cons(_135, cons(_x2c_gensym_literal_part_4, cons(_x2c_gensym_literal_part_5, NULL))));
   }
-  )), NULL))))), NULL))), NULL)))), AST_UNIT, NULL);  return Compiler_bind_syntax(c, List_var(cons(_61, cons(_178, cons(List_var(cons(_63, cons(List_var(cons(_64, cons(_179, cons(_67, cons(List_var(({
+  )), NULL))))), NULL))), NULL)))), 1405544, NULL);  return Compiler_bind_syntax(c, List_var(cons(_61, cons(_178, cons(List_var(cons(_63, cons(List_var(cons(_64, cons(_179, cons(_67, cons(List_var(({
     Var _x2c_gensym_literal_part_6 = List_var(cons(_19, cons(List_var(cons(_69, cons(_84, cons(_85, cons(List_var(entry), NULL))))), _199)));  Var _x2c_gensym_literal_part_7 = List_var(cons(_109, cons(_247, cons(_366, cons(_609, cons(List_var(cons(_111, cons(List_var(cons(_112, cons(_113, cons(List_var(cons(_59, cons(_116, cons(List_var(cons(_117, cons(List_var(cons(_69, cons(_123, cons(_124, cons(List_var(target), NULL))))), _614))), NULL)))), NULL)))), NULL))), NULL))))));  cons(_15, cons(_135, cons(_x2c_gensym_literal_part_6, cons(_x2c_gensym_literal_part_7, NULL))));
   }
-  )), NULL))))), NULL))), NULL)))), AST_UNIT, NULL);
+  )), NULL))))), NULL))), NULL)))), 1405544, NULL);
 }
 
 List Compiler_func_signature(Compiler, Type);
@@ -1773,7 +1773,7 @@ static void _loaded_global(Compiler c, Type spec, List row, Map present){
             }
             )), NULL))), NULL)));  cons(_15, cons(_x2c_gensym_literal_part_25, cons(_x2c_gensym_literal_part_26, cons(_x2c_gensym_literal_part_27, NULL))));
           }
-          )), NULL))))), NULL))), NULL)))), AST_UNIT, NULL);
+          )), NULL))))), NULL))), NULL)))), 1405544, NULL);
           Array_push(c -> meta_group, List_var(({
             Var _x2c_gensym_literal_part_28 = List_var(get);  Var _x2c_gensym_literal_part_29 = String_var(String_add(_659, name));  Var _x2c_gensym_literal_part_30 = List_var(Compiler_func_signature(c, List_type(cons(_665, List_append(Type_list(bridge), NULL)))));  cons(_15, cons(_x2c_gensym_literal_part_28, cons(_x2c_gensym_literal_part_29, cons(_x2c_gensym_literal_part_30, NULL))));
           }
@@ -1843,7 +1843,7 @@ static List _loaded_setter(Compiler c, Type bridge, List setter, List target){
     )), NULL))), NULL))));  cons(_15, cons(_x2c_gensym_literal_part_62, cons(_x2c_gensym_literal_part_63, cons(_x2c_gensym_literal_part_64, NULL))));
   }
   )), NULL))))), NULL))), NULL)));
-  return Compiler_bind_syntax(c, List_var(function), AST_UNIT, NULL);
+  return Compiler_bind_syntax(c, List_var(function), 1405544, NULL);
 }
 
 int Compiler_bind_native_meta(Compiler, String);

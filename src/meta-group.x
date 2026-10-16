@@ -172,7 +172,7 @@ static List _loaded_entry(Compiler c, List binding, Type type) {
   List target = %(expr $type (ident $binding));
   if (!arity)
     return c.bind_syntax(
-      $!Unit{ static int $entry(void) { return $target(); } }, AST_UNIT, NULL);
+      $!Unit{ static int $entry(void) { return $target(); } }, <unit>, NULL);
   return c.bind_syntax(
     $!Unit{
       static int $entry(Array values) {
@@ -186,7 +186,7 @@ static List _loaded_entry(Compiler c, List binding, Type type) {
         }
         return $target(count, argv);
       }
-    }, AST_UNIT, NULL);
+    }, <unit>, NULL);
 }
 
 /** Exposes a loaded unit's main through the ordinary helper target table.
@@ -261,7 +261,7 @@ static void _loaded_global(Compiler c, Type spec, List row, Map present) {
     List getter = c.sym.introduce(c.fresh_name("loaded_get"));
     List get = c.bind_syntax(
       $!Unit{ static $bridge $getter(void) { return ($bridge) $target; } },
-      AST_UNIT, NULL);
+      <unit>, NULL);
     c.meta_group.push(
       %(function $get ${"get global " + name}
         ${c.func_signature(%((func ((void))) @bridge))}));
@@ -294,7 +294,7 @@ static List _loaded_setter(
       return ($bridge) ($target = value);
     }
   };
-  return c.bind_syntax(function, AST_UNIT, NULL);
+  return c.bind_syntax(function, <unit>, NULL);
 }
 
 /** Answers whether a `meta` body reaches the compiler itself: it names a

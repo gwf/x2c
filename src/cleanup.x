@@ -191,7 +191,7 @@ static List _landing_form(Compiler c, List node, Map runtime) {
   List form = written
     ? c.rewrite_written(<try>, node, c.return_type)
     : c.rewrite_lowered(
-      <node>, <try>, node, AST_STATEMENT, c.return_type, NULL);
+      <node>, <try>, node, <statement>, c.return_type, NULL);
   match (form) case %(landing ?code ?rows): {
     Array parts = [];
     foreach (List row, rows)
@@ -692,9 +692,9 @@ static List _bind_parts(Compiler c, Var code, Map parts) {
     Var replaced = _replaced(values, parts);
     if (replaced != values)
       code = %("x2c.template" $definition $replaced);
-    return c.bind_syntax(code, AST_BLOCK, c.return_type);
+    return c.bind_syntax(code, <block>, c.return_type);
   }
-  return c.bind_syntax(_replaced(code, parts), AST_BLOCK, c.return_type);
+  return c.bind_syntax(_replaced(code, parts), <block>, c.return_type);
 }
 
 /* `value` with each token `parts` maps replaced. A List without one is
@@ -727,14 +727,14 @@ static List _lower_defer(
       ${_region(w, cleanup, body)}
       $cleanup
     }
-  }, AST_BLOCK, c.return_type);
+  }, <block>, c.return_type);
 }
 
 /* The runtime unlinks this record and calls its thunk. */
 static List _defer_cleanup(Compiler c, List record) {
   List call = c.bind_syntax(
     $!{ x2c_cleanup_leave(${_address_of(_record_type, record)}); },
-    AST_BLOCK, c.return_type);
+    <block>, c.return_type);
   return Code.lowered(%(seq $call), NULL);
 }
 
@@ -1049,7 +1049,7 @@ static void _escape_declared(Preserve &p, Array output, List binds) {
         if (spelling && spelling in p.escaped) {
           output.push(
             c.bind_syntax(
-              $!{ x2c_exception_escaped = &$name; }, AST_BLOCK,
+              $!{ x2c_exception_escaped = &$name; }, <block>,
               c.return_type));
         }
       }
@@ -1258,8 +1258,8 @@ static List _defer_callback(
         $type *$env_local = ($type *)$opaque;
         $body
       }
-    }, AST_UNIT, NULL);
+    }, <unit>, NULL);
   }
   return c.bind_syntax(
-    $!Unit{ static void $callback(void *$opaque) { $body } }, AST_UNIT, NULL);
+    $!Unit{ static void $callback(void *$opaque) { $body } }, <unit>, NULL);
 }

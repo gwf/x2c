@@ -131,7 +131,7 @@ List Compiler.replay_declaration_source(Compiler c) {
       List bound;
       $let(c.replaying_declaration, 1) {
         _restore_declaration_bindings(c, syntax, facts, {});
-        bound = c.bind_syntax(syntax, AST_UNIT, NULL);
+        bound = c.bind_syntax(syntax, <unit>, NULL);
       }
       while (c.peek(0) != <eof> && c.token.pos < end) c.next();
       return bound;
