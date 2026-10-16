@@ -136,10 +136,13 @@ static List _helper_body(Compiler c, List body) {
 }
 
 /** Binds the file-static context type `name` with the field rows `fields`,
-    for callable defers. The complete typedef is bound at once, so each
-    field keeps its member type.
+    for callable defers and function-pointer `Func` values. The complete
+    typedef is bound at once, so each field keeps its member type. It binds
+    at file scope whatever local scope is open.
 */
 List Compiler.capture_environment(Compiler c, List name, List fields) {
+  Block local = c.sym.close_local_scopes();
+  defer c.sym.reopen_scopes(local);
   return c.bind_syntax(
     $!Unit{ static typedef struct $name { @fields } $name; },
     AST_UNIT, NULL);
@@ -427,16 +430,8 @@ static void _func_pointer_context(
   context_name = c.fresh_name("func_pointer_context");
   List context_binding = c.sym.introduce(context_name);
   field_binding = c.sym.introduce(c.fresh_name("func_pointer"));
-  List (field_base, field_mods) = pointer_type.parts();
-  c.add_early(
-    %(
-    typedef
-      (static struct $context_name
-        (fields
-          (declare $field_base
-            (bindings (bind $field_binding $field_mods)))))
-      (bindings (bind $context_binding ()))
-  ));
+  List field = c.rebuild_statement($!{ $pointer_type $field_binding; }).cadr();
+  c.add_early(c.capture_environment(context_binding, %($field)));
 }
 
 static List _func_context_declaration(
