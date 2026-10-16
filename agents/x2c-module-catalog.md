@@ -404,8 +404,8 @@ brace initializer conversion.
 
 Public functions:
 
-`Compiler.convert_initializer`, `Compiler.initializer_rows`,
-`Compiler.initializer_field_path`, `Compiler.initializer_slot`,
+`Compiler.initializer_rows`, `Compiler.initializer_field_path`,
+`Compiler.initializer_slot`, `Compiler.convert_initializer`,
 `Compiler.convert_compound_literal`, `Compiler.initializer_native_types`
 
 ### [src/lambdas.x](../src/lambdas.x)
