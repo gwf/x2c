@@ -393,7 +393,7 @@ Source: `src/compiler/parsing/tokens.x:246`
 
 Records a nonnull optional parameter for the current lexical path.
 
-Source: `src/compiler/binding-facts.x:28`
+Source: `src/compiler/binding-facts.x:22`
 
 <a id="Compiler.match_pattern_binders"></a>
 #### Compiler.match_pattern_binders
@@ -490,7 +490,7 @@ Returns the optional-reference parameter tested by `condition`, or NULL.
 `truth` is set to whether the condition's true arm proves that the caller
 supplied an object. Only a direct truth or null test proves presence.
 
-Source: `src/compiler/binding-facts.x:54`
+Source: `src/compiler/binding-facts.x:48`
 
 <a id="Compiler.own_diagnostics"></a>
 #### Compiler.own_diagnostics
@@ -545,7 +545,7 @@ Source: `src/compiler/source-files.x:71`
 
 Returns the optional references proven present in this lexical path.
 
-Source: `src/compiler/binding-facts.x:24`
+Source: `src/compiler/binding-facts.x:18`
 
 <a id="Compiler.queue_declaration_effect"></a>
 #### Compiler.queue_declaration_effect
@@ -638,7 +638,7 @@ Source: `src/compiler/parsing/tokens.x:140`
 
 Restores the optional-reference facts saved before a lexical path.
 
-Source: `src/compiler/binding-facts.x:44`
+Source: `src/compiler/binding-facts.x:38`
 
 <a id="Compiler.return_unit_state"></a>
 #### Compiler.return_unit_state
@@ -681,7 +681,7 @@ Marks the optional reference `binding` present after an `if` when the
 arm that runs without it cannot fall through: `no` when the true arm
 proves presence, `yes` otherwise. A missing `no` arm falls through.
 
-Source: `src/compiler/binding-facts.x:37`
+Source: `src/compiler/binding-facts.x:31`
 
 <a id="Compiler.shallow_parse"></a>
 #### Compiler.shallow_parse
