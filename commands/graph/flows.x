@@ -129,28 +129,6 @@ static List _flow_source(
   );
 }
 
-static void _flow_collect_parameters(
-  List modifiers, Map parameters, Array records) {
-  match (modifiers)
-    case %((fnmod (params *values)) *): {
-      int position = 0;
-      foreach (Var value, values) {
-        match (value)
-          case %(
-            param ?type
-            (bind (!set ?binding (binding ? ?spelling)) ?)
-          ):
-            parameters[binding] = %(
-              parameter $position $spelling $type
-            );
-        match (value)
-          case %(param ?type (bind (binding ? ?spelling) ?)):
-            records.push(%(parameter $position $spelling $type));
-        position++;
-      }
-    }
-}
-
 static void _flow_collect_calls(
   Compiler compiler, Var value, String path, int origin, Map definitions,
   Map parameters, Map locals, Array calls) {
@@ -480,8 +458,14 @@ List _x2c_flow_analyze_unit(Compiler compiler, List ast, String path) {
         Map parameters = {}, locals = {};
         Array parameter_records = [], returns = [], calls = [];
         Array unresolved = [];
-        _flow_collect_parameters(
-          modifiers, parameters, parameter_records);
+        foreach (List parameter, project_parameters(modifiers))
+          match (parameter)
+            case %(parameter ?position
+                   (!set ?binding (binding ? ?spelling)) ?type): {
+              List record = %(parameter $position $spelling $type);
+              parameters[binding] = record;
+              parameter_records.push(record);
+            }
         _flow_statement(
           compiler, body, path, 0, definitions, parameters, locals,
           returns, calls, unresolved);

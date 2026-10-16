@@ -128,6 +128,24 @@ List project_location(Compiler compiler, String path, int origin) {
   return %(location $source $line $column);
 }
 
+/** The named parameters in a function's modifiers, in order, as
+    `(parameter POSITION BINDING TYPE)` rows. POSITION counts every
+    parameter, named or not. */
+List project_parameters(List modifiers) {
+  Array rows = [];
+  match (modifiers)
+    case %((fnmod (params *values)) *): {
+      int position = 0;
+      foreach (Var value, values) {
+        match (value)
+          case %(param ?type (bind (!set ?binding (binding ? ?)) ?)):
+            rows.push(%(parameter $position $binding $type));
+        position++;
+      }
+    }
+  return rows.list_free();
+}
+
 /** The binding a direct identifier names beneath expression, parenthesis,
     and location wrappers, or NULL. */
 List project_direct_binding(Var value) {

@@ -318,26 +318,6 @@ static void _collect_walk_calls(
       compiler, child, path, origin, definitions, calls);
 }
 
-static void _walk_collect_parameters(
-  List modifiers, Map parameters, Array records) {
-  match (modifiers)
-    case %((fnmod (params *values)) *): {
-      int position = 0;
-      foreach (Var value, values) {
-        match (value)
-          case %(
-            param ?type
-            (bind (binding (!set ?identity) ?spelling) ?)
-          ): {
-            parameters[identity] = position;
-            records.push(
-              %(parameter $position $identity $type $spelling));
-          }
-        position++;
-      }
-    }
-}
-
 static int _walk_root_parameter(List root, Map parameters) {
   match (root)
     case %(root ?binding ? ? (path *) ?): {
@@ -444,10 +424,12 @@ static List _analyze_walk_unit(Compiler compiler, List ast, String path) {
              (bind (!set ?binding (binding ? ?)) ?modifiers)
              ?body): {
         List target = definitions[binding];
-        Map parameters = {};
         Array parameter_records = [];
-        _walk_collect_parameters(
-          modifiers, parameters, parameter_records);
+        foreach (List parameter, project_parameters(modifiers))
+          match (parameter)
+            case %(parameter ?position (binding ?identity ?spelling) ?type):
+              parameter_records.push(
+                %(parameter $position $identity $type $spelling));
         List parameter_list = parameter_records.list_free();
         Array calls = [];
         _collect_walk_calls(
@@ -756,13 +738,12 @@ static List _site_argument_summary(
   );
 }
 
-static void _site_collect_parameters(List modifiers, Map parameters) {
-  match (modifiers)
-    case %((fnmod (params *values)) *):
-      foreach (Var value, values)
-        match (value)
-          case %(param ? (bind (!set ?binding (binding ? ?)) ?)):
-            parameters[binding] = 1;
+static Map _site_parameters(List modifiers) {
+  Map parameters = {};
+  foreach (List parameter, project_parameters(modifiers))
+    match (parameter)
+      case %(parameter ? ?binding ?): parameters[binding] = 1;
+  return parameters;
 }
 
 static void _collect_sites(
@@ -857,8 +838,7 @@ static List _analyze_sites_unit(
       case %(function ?type
              (bind (!set ?binding (binding ? ?)) ?modifiers)
              ?body): {
-        Map parameters = {}, prior_writes = {};
-        _site_collect_parameters(modifiers, parameters);
+        Map parameters = _site_parameters(modifiers), prior_writes = {};
         String caller = compiler.emitted_binding_name(binding);
         Symbol visibility = project_visibility(type);
         _collect_sites(
@@ -1017,12 +997,11 @@ static List _analyze_field_sites_unit(
       case %(function ?type
              (bind (!set ?binding (binding ? ?)) ?modifiers)
              ?body): {
-        Map parameters = {};
-        _site_collect_parameters(modifiers, parameters);
         _collect_field_sites(
           compiler, body, path, compiler.emitted_binding_name(binding),
           project_visibility(type),
-          receiver_name, field_name, parameters, <read>, void, 0, sites);
+          receiver_name, field_name, _site_parameters(modifiers), <read>,
+          void, 0, sites);
         continue;
       }
     _collect_field_sites(
