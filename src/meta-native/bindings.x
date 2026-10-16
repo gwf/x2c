@@ -26,7 +26,7 @@ void Compiler.record_native_meta_effect(
     %(native-meta $name ${c.func_signature(type)}));
 }
 
-static String _native_meta_name(
+module String _native_meta_name(
   Compiler c, List declaration, Token marker) {
   String name = NULL;
   match (declaration)

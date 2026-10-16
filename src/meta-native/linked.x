@@ -11,7 +11,7 @@ static Map shipped_targets = NULL;
 
 /* The linked body an advertisement binds when its texts and signature
    agree, or 0. */
-static Var _linked_target(
+module Var _linked_target(
   Compiler c, String name, List signature, String provider) {
   List key = %($name $signature $provider);
   Var function = 0;
@@ -80,7 +80,7 @@ int Compiler.bind_linked_meta(Compiler c, List fn, Type type) {
 
 /* The linked module's targets, loaded with the definition hashes on first
    use. */
-static Map _linked_module(void) {
+module Map _linked_module(void) {
   if (!Compiler.native_module_loaded(linked_supplier)) {
     Compiler.add_native_module(linked_supplier, linked_meta_targets);
     $scope(&native_module_scope) linked_hashes = linked_meta_hashes();
@@ -104,7 +104,7 @@ List Compiler.linked_meta_provider_source(String provider) {
 /* A row without a hash is the runtime library's own compiled definition
    of a `lib/meta.x` builder, which has no copy to compare; only
    `lib/meta.x` itself binds it. */
-static int _linked_copy(Compiler c, String name, Map linked) {
+module int _linked_copy(Compiler c, String name, Map linked) {
   if (name in linked_hashes) return _linked_texts_match(c, name, linked, {});
   return c.filename &&
     Path.absolute(c.filename) == %"${x2c_get_root()}/lib/meta.x";

@@ -4,7 +4,7 @@
 */
 
 /* The paths of the selected native modules that define `name`, in order. */
-static List _native_module_suppliers(String name) =>
+module List _native_module_suppliers(String name) =>
   native_module_order.filter(
     %!(String path) => name in ((Map) native_modules[path]));
 
@@ -18,9 +18,9 @@ static List _native_module_suppliers(String name) =>
    paths the current request names, in its order. A module stays loaded for
    the process, so its Map lives in a Scope that lasts as long, while each
    request binds only the modules it names. */
-static Map native_modules = NULL;
+module Map native_modules = NULL;
 static List native_module_order = NULL;
-static Scope native_module_scope = NULL;
+module Scope native_module_scope = NULL;
 
 /* The compiler supplies the operations `lib/meta.x` declares with a bodyless
    `meta` prototype, the `x2c_` targets, as the native module
