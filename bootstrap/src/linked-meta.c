@@ -13263,7 +13263,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12334 = List_var(_12333);
   _12335 = String_new("src/meta-group.x");
   _12336 = String_var(_12335);
-  _12337 = String_new("b47eca45");
+  _12337 = String_new("46e8a2f6");
   _12338 = String_var(_12337);
   _12339 = cons(_12338, NULL);
   _12340 = cons(_12336, _12339);
