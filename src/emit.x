@@ -284,6 +284,9 @@ static List _emit(Emitter &e, List ast) {
     case %((!or fnmod func) ?params): return _parameters(e, params);
     case %(label ?name): return _label(e, name);
     case %(ident ?binding): return _ident(e, binding);
+    case %(falias (!set ?declaration (declare ? (bindings (bind ?target ?))))
+                  ?native):
+      return _foreign_alias(e, declaration, target, native);
   }
   return _leaf(e, ast);
 }
@@ -329,7 +332,6 @@ static List _leaf(Emitter &e, List ast) {
     case <declare>:    return _declare_stmt(e, ast);
     case <decl>:       return _decl_stmt(e, ast);
     case <enum>:       return _enum(e, ast);
-    case <falias>:     return _foreign_alias(e, ast);
     case <function>:   return _function(e, ast);
     case <param>:      return _param(e, ast);
     case <struct>:     return _aggregate(e, ast);
@@ -624,14 +626,13 @@ static List _capture_source(
 static List _capture_definition(
   Emitter &e, List node, Array inputs, Array declarations) {
   (Type definition, Type reference) = e.initializer_native_types(node);
-  if (node.car() == <enum>) {
-    reference = %(enum ${node.cadr()});
-    match (node)
-      case %(enum (gensym ? ?) ?body): {
-        String name = e.fresh_name("static_enum");
-        definition = %(enum $name $body);
-        reference = %(enum $name);
-      }
+  match (node) {
+    case %(enum (gensym ? ?) ?body): {
+      String name = e.fresh_name("static_enum");
+      definition = %(enum $name $body);
+      reference = %(enum $name);
+    }
+    case %(enum ?tag ?): reference = %(enum $tag);
   }
   definition = _capture_children(e, definition, inputs, declarations);
   declarations.push(%(declare $definition (bindings (bind () ()))));
@@ -814,8 +815,8 @@ static List _unary(Emitter &e, Symbol operator, Var argument) {
 
 static List _binary(
   Emitter &e, Symbol operator, Var left, Var right) {
-  if (left is <list> && left.list().match(%(expr ? (op *))))
-    return _op_spine(e, operator, left, right);
+  match (left)
+    case %(expr ? (op *)): return _op_spine(e, operator, left, right);
   Symbol binary = operator;
   return %(@{_operand(e, left, _left_operand_level(binary))} $operator
            @{_operand(e, right, _right_operand_level(binary))});
@@ -907,10 +908,8 @@ static List _raise(Emitter &e, Ast ast, Var cause, List arguments) {
   String file = location
     ? location.assoc(<file>) : e.c.filename;
   int line = location ? location.assoc(<line>) : 0;
-  String function = e.fn_name
-    ? e.fn_name : "<unknown>";
   String file_literal = _c_string_literal(file);
-  String function_literal = _c_string_literal(function);
+  String function_literal = _c_string_literal(e.fn_name);
   List tail = arguments ? %("," @arg_tokens) : NULL;
   List terminal = ast.never_returns()
                 ? %("__builtin_unreachable();") : NULL;
@@ -1025,7 +1024,7 @@ static List _args(Emitter &e, List ast) {
   int first = 1;
   foreach (List argument, ast.cdr()) {
     List emitted = _emit(e, argument);
-    if (argument.match(%(expr ? (commas *)))) emitted = _parens(emitted);
+    match (argument) case %(expr ? (commas *)): emitted = _parens(emitted);
     if (!first) result.push(", ");
     result.push(emitted);
     first = 0;
@@ -1055,9 +1054,8 @@ static List _function(Emitter &e, List ast) {
 }
 
 // Emit a checked native-function alias without a wrapper object.
-static List _foreign_alias(Emitter &e, List ast) {
-  List (declaration, native_binding) = ast.cdr();
-  List bindings = declaration.caddr(), target = bindings.cadr().cadr();
+static List _foreign_alias(
+  Emitter &e, List declaration, List target, List native_binding) {
   Type function_type = declaration.type_from_ast().declared();
   Type pointer_type = function_type.reference();
   List pointer = _semantic_type(e, pointer_type);
@@ -1071,12 +1069,13 @@ static List _foreign_alias(Emitter &e, List ast) {
 
 static List _typedef(Emitter &e, List ast) {
   List code = %("typedef" @{_emit(e, ast.cdr())} ";");
-  foreach (List declarator, ast.caddr().cdr()) {
-    List binding = declarator.cadr();
-    Var type;
-    if (e.semantic_binding_facts().try_get(%(ntype $binding), type))
-      e.native_aliases = cons(%($type $binding), e.native_aliases);
-  }
+  match (ast) case %(typedef ? (bindings *declarators)):
+    foreach (List declarator, declarators) {
+      List binding = declarator.cadr();
+      Var type;
+      if (e.semantic_binding_facts().try_get(%(ntype $binding), type))
+        e.native_aliases = cons(%($type $binding), e.native_aliases);
+    }
   return code;
 }
 
@@ -1180,11 +1179,7 @@ static List _enum(Emitter &e, List ast) {
   if (name) name = _emit(e, name);
   body = _emit(e, body);
   body = _commas(body);
-  if (name) {
-    if (body) return %( ${ast.car()} @name "{" @body "}");
-    return %( ${ast.car()} @name );
-  }
-  return %( ${ast.car()} "{" @body "}");
+  return _tagged(ast, name, body);
 }
 
 static List _aggregate(Emitter &e, List ast) {
@@ -1199,6 +1194,10 @@ static List _aggregate(Emitter &e, List ast) {
   List body = ast.type().body();
   body = _emit(e, body);
   body = body.flatten_all();
+  return _tagged(ast, tag, body);
+}
+
+static List _tagged(List ast, List tag, List body) {
   if (tag && body) return %( ${ast.car()} @tag "{" @body "}");
   if (tag) return %( ${ast.car()} @tag );
   return %( ${ast.car()} "{" @body "}");
@@ -1211,8 +1210,6 @@ static List _aggregate(Emitter &e, List ast) {
    is what the source wrote, and tagless typedefs are compatible across
    translation units (C11 6.2.7). */
 static int _is_gensym_tag(List tag) {
-  if (!tag) return 0;
-  Var head = tag.car();
-  if (head is not <list>) return 0;
-  return head.list().car() == <gensym>;
+  match (tag) case %((gensym *) *): return 1;
+  return 0;
 }
