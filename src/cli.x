@@ -100,38 +100,21 @@ static macro Stmt $report.cli.option_unknown(Expr $arg) =>
 
 // commands and options
 
-static enum {
-  CLI_TOP       = 1,
-  CLI_TRANSLATE = 2,
-  CLI_BUILD     = 4,
-  CLI_RUN       = 8,
-  CLI_SCRIPT    = 16,
-  CLI_ENV       = 64,
-  CLI_INSTALL   = 128,
-  CLI_REMOVE    = 256,
-  CLI_LIST      = 512,
-  CLI_NEW       = 1024,
-  // Commands that build native code from options on the command line.
-  CLI_NATIVE    = CLI_BUILD | CLI_RUN | CLI_SCRIPT
-};
-
 static typedef struct CliCommand {
-  Symbol name, int mask, const char *description;
+  Symbol name, const char *description;
 } CliCommand;
 
-// `help` parses no options of its own, so it carries the top-level mask.
 static CliCommand cli_commands[] = {
-  { <translate>, CLI_TRANSLATE, "Translate .x files to .c and .h files" },
-  { <build>,     CLI_BUILD,
-    "Translate, compile, and optionally link a target" },
-  { <run>,       CLI_RUN,       "Build an executable and run it" },
-  { <new>,       CLI_NEW,       "Create a project that builds and runs" },
-  { <script>,    CLI_SCRIPT,    "Build a script when it changes and run it" },
-  { <env>,       CLI_ENV,       "Show the resolved home, layout, and tools" },
-  { <install>,   CLI_INSTALL,   "Install a package into the home" },
-  { <remove>,    CLI_REMOVE,    "Remove an installed package" },
-  { <list>,      CLI_LIST,      "List installed packages" },
-  { <help>,      CLI_TOP,       "Show help for x2c or one command" },
+  { <translate>, "Translate .x files to .c and .h files" },
+  { <build>,     "Translate, compile, and optionally link a target" },
+  { <run>,       "Build an executable and run it" },
+  { <new>,       "Create a project that builds and runs" },
+  { <script>,    "Build a script when it changes and run it" },
+  { <env>,       "Show the resolved home, layout, and tools" },
+  { <install>,   "Install a package into the home" },
+  { <remove>,    "Remove an installed package" },
+  { <list>,      "List installed packages" },
+  { <help>,      "Show help for x2c or one command" },
   { 0 }
 };
 
@@ -141,7 +124,7 @@ static CliCommand cli_commands[] = {
    An option with a request field sets it as `apply` says; each other
    option has an arm in _apply. */
 static typedef struct CliOption {
-  Symbol id, int commands, Symbol group, String spelling;
+  Symbol id, SymbolSet commands, Symbol group, String spelling;
   const char *value, *description, int hidden;
   String alias, label, int prefix;
   Symbol apply, int package_native;
@@ -168,197 +151,195 @@ static CliGroup cli_groups[] = {
   .offset = offsetof(struct CliRequest, field)
 
 static CliOption cli_options[] = {
-  { <help>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE |
-    CLI_ENV | CLI_INSTALL | CLI_REMOVE | CLI_LIST | CLI_NEW,
+  { <help>, %<<top translate build run script env install remove list new>>,
     <general>,
     "-h", NULL, "Show help and exit", 0, .alias = "--help" },
-  { <version>, CLI_TOP, <global>, "-V", NULL,
+  { <version>, %<<top>>, <global>, "-V", NULL,
     "Show the x2c version and exit", 0, .alias = "--version" },
-  { <verbose>, CLI_TRANSLATE | CLI_NATIVE,
+  { <verbose>, %<<translate build run script>>,
     <general>, "-v", NULL,
     "Show commands as they are executed", 0, .alias = "--verbose",
     CLI_FIELD(<flag>, verbose) },
-  { <dry-run>, CLI_TRANSLATE | CLI_NATIVE,
+  { <dry-run>, %<<translate build run script>>,
     <general>, "-###", NULL, "Show commands without executing them", 0,
     CLI_FIELD(<flag>, dry_run) },
-  { <quiet>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN |
-    CLI_INSTALL | CLI_REMOVE | CLI_NEW,
+  { <quiet>, %<<translate build run install remove new>>,
     <general>, "-q", NULL,
     "Suppress successful progress and receipts", 0, .alias = "--quiet",
     CLI_FIELD(<flag>, quiet) },
-  { <plain>, CLI_TRANSLATE | CLI_NATIVE,
+  { <plain>, %<<translate build run script>>,
     <general>, "--plain", NULL,
     "Use stable output without terminal rendering", 0, CLI_FIELD(<flag>, plain) },
-  { <color>, CLI_TRANSLATE | CLI_NATIVE,
+  { <color>, %<<translate build run script>>,
     <general>, "--color", "<auto|always|never>", "Control terminal color", 0 },
-  { <debug>, CLI_TRANSLATE | CLI_NATIVE,
+  { <debug>, %<<translate build run script>>,
     <general>, "--debug", NULL, "Enable compiler debug logging", 0,
     CLI_FIELD(<flag>, debugging) },
-  { <max-errors>, CLI_TRANSLATE | CLI_NATIVE, <general>, "--max-errors",
+  { <max-errors>, %<<translate build run script>>, <general>, "--max-errors",
     "<count>", "Stop after <count> errors per unit (default: 20)", 0 },
-  { <diag-file>, CLI_TRANSLATE | CLI_NATIVE, <general>,
+  { <diag-file>, %<<translate build run script>>, <general>,
     "--diagnostics-file", "<file>",
     "Write compiler diagnostics to <file> as JSON Lines", 0,
     CLI_FIELD(<text>, diagnostics_file) },
-  { <fatal-warn>, CLI_TRANSLATE, <general>, "--fatal-warnings", NULL,
+  { <fatal-warn>, %<<translate>>, <general>, "--fatal-warnings", NULL,
     "Fail a unit that reports a warning", 1, CLI_FIELD(<flag>, fatal_warnings) },
-  { <no-iface>, CLI_TRANSLATE, <source>, "--no-interfaces", NULL,
+  { <no-iface>, %<<translate>>, <source>, "--no-interfaces", NULL,
     "Collect every unit cold without reading .xi interfaces", 1,
     CLI_FIELD(<flag>, no_interfaces) },
-  { <out-dir>, CLI_TRANSLATE, <output>, "--out-dir", "<dir>",
+  { <out-dir>, %<<translate>>, <output>, "--out-dir", "<dir>",
     "Write generated files under <dir> (default: .)", 0,
     CLI_FIELD(<text>, out_dir) },
-  { <src-map>, CLI_TRANSLATE | CLI_NATIVE, <output>, "--source-map",
+  { <src-map>, %<<translate build run script>>, <output>, "--source-map",
     NULL, "Map generated C locations to original x2c sources", 0,
     CLI_FIELD(<flag>, source_map) },
-  { <no-deps>, CLI_TRANSLATE, <output>, "--no-deps", NULL,
+  { <no-deps>, %<<translate>>, <output>, "--no-deps", NULL,
     "Do not write x2c dependency files", 0, CLI_FIELD(<flag>, no_deps) },
-  { <dep-file>, CLI_TRANSLATE, <output>, "--dep-file", "<file>",
+  { <dep-file>, %<<translate>>, <output>, "--dep-file", "<file>",
     "Override the depfile path (one input only)", 0,
     CLI_FIELD(<text>, dep_file) },
-  { <dep-target>, CLI_TRANSLATE, <output>, "--dep-target",
+  { <dep-target>, %<<translate>>, <output>, "--dep-target",
     "<target>", "Override the depfile target (one input only)", 0,
     CLI_FIELD(<text>, dep_target) },
-  { <no-phony>, CLI_TRANSLATE, <output>,
+  { <no-phony>, %<<translate>>, <output>,
     "--no-phony-deps", NULL, "Omit phony rules for included files", 0,
     CLI_FIELD(<flag>, no_phony_deps) },
-  { <manifest>, CLI_BUILD | CLI_RUN, <target>, "--manifest-path",
+  { <manifest>, %<<build run>>, <target>, "--manifest-path",
     "<file>", "Use <file> instead of discovering x2c.toml", 0,
     CLI_FIELD(<text>, manifest) },
-  { <target>, CLI_BUILD | CLI_RUN, <target>, "--target", "<name>",
+  { <target>, %<<build run>>, <target>, "--target", "<name>",
     "Build the named manifest target", 0, CLI_FIELD(<text>, target) },
-  { <profile>, CLI_BUILD | CLI_RUN, <target>, "--profile", "<name>",
+  { <profile>, %<<build run>>, <target>, "--profile", "<name>",
     "Apply the named manifest build profile", 0, CLI_FIELD(<text>, profile) },
-  { <kind>, CLI_BUILD, <target>, "--kind", "<kind>",
+  { <kind>, %<<build>>, <target>, "--kind", "<kind>",
     "executable, static-library, or meta-module", 0 },
-  { <compile>, CLI_BUILD, <target>, "-c",
+  { <compile>, %<<build>>, <target>, "-c",
     NULL, "Produce object files without linking", 0,
     .alias = "--compile-only", CLI_FIELD(<flag>, compile_only) },
-  { <jobs>, CLI_TRANSLATE | CLI_NATIVE, <target>, "-j",
+  { <jobs>, %<<translate build run script>>, <target>, "-j",
     "<count>", "Maximum parallel translation and compilation jobs", 0,
     .alias = "--jobs" },
-  { <output>, CLI_BUILD | CLI_RUN, <output>, "--output", "<file>",
+  { <output>, %<<build run>>, <output>, "--output", "<file>",
     "Name the executable, library, or single object", 0,
     CLI_FIELD(<text>, output) },
-  { <rebuild>, CLI_SCRIPT, <output>, "--rebuild", NULL,
+  { <rebuild>, %<<script>>, <output>, "--rebuild", NULL,
     "Build the script even when its cached executable is current", 0,
     CLI_FIELD(<flag>, rebuild) },
-  { <clean>, CLI_SCRIPT, <output>, "--clean", NULL,
+  { <clean>, %<<script>>, <output>, "--clean", NULL,
     "Remove the script's cached build and exit without running it", 0,
     CLI_FIELD(<flag>, clean) },
-  { <build-dir>, CLI_BUILD | CLI_RUN, <output>, "--build-dir",
+  { <build-dir>, %<<build run>>, <output>, "--build-dir",
     "<dir>", "Store generated C, objects, deps, and state here", 0,
     CLI_FIELD(<text>, build_dir) },
-  { <cc-db>, CLI_BUILD | CLI_RUN, <output>, "--compile-commands",
+  { <cc-db>, %<<build run>>, <output>, "--compile-commands",
     "<file>", "Write native compile commands and retain generated files", 0 },
-  { <save-temp>, CLI_BUILD | CLI_RUN, <output>,
+  { <save-temp>, %<<build run>>, <output>,
     "--save-temps", NULL,
     "Keep generated C and other intermediate files", 0,
     .label = "--save-temps[=<dir>]", CLI_FIELD(<flag>, save_temps) },
-  { <sha256>, CLI_INSTALL, <package>, "--sha256", "<hex>",
+  { <sha256>, %<<install>>, <package>, "--sha256", "<hex>",
     "Require this digest of a downloaded or local archive", 0,
     CLI_FIELD(<text>, sha256) },
-  { <index>, CLI_INSTALL | CLI_BUILD | CLI_RUN, <package>, "--index",
+  { <index>, %<<install build run>>, <package>, "--index",
     "<url-or-path>",
     "Resolve package names through this index", 0, CLI_FIELD(<text>, index) },
-  { <force>, CLI_INSTALL, <package>, "--force", NULL,
+  { <force>, %<<install>>, <package>, "--force", NULL,
     "Install a bundle built for another x2c version", 0,
     CLI_FIELD(<flag>, force) },
-  { <include>, CLI_TRANSLATE | CLI_NATIVE, <source>,
+  { <include>, %<<translate build run script>>, <source>,
     "-I", "<dir>", "Add a shared x2c/C include directory", 0,
     .package_native = 1 },
-  { <x-include>, CLI_TRANSLATE | CLI_NATIVE, <source>,
+  { <x-include>, %<<translate build run script>>, <source>,
     "--x-include-dir", "<dir>", "Add an x2c-only include directory", 0 },
-  { <c-include>, CLI_NATIVE, <source>,
+  { <c-include>, %<<build run script>>, <source>,
     "--c-include-dir", "<dir>", "Add a C-only ordinary include directory", 0,
     .package_native = 1 },
-  { <c-system>, CLI_NATIVE, <source>,
+  { <c-system>, %<<build run script>>, <source>,
     "--c-system-dir", "<dir>", "Add a C-only system include directory", 0,
     .package_native = 1 },
-  { <pkg-dir>, CLI_TRANSLATE | CLI_NATIVE | CLI_ENV, <source>,
+  { <pkg-dir>, %<<translate build run script env>>, <source>,
     "--package-dir", "<dir>", "Add a directory of x2c packages", 0,
     CLI_FIELD(<list>, package_dirs) },
-  { <native>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
+  { <native>, %<<translate build run>>, <source>,
     "--native-module", "<file>",
     "Load a native module for compile-time calls", 0,
     CLI_FIELD(<list>, native_modules) },
-  { <extension>, CLI_BUILD, <source>,
+  { <extension>, %<<build>>, <source>,
     "--extension", "<dir>",
     "Link a package's compile-time part into a compiler", 0,
     CLI_FIELD(<list>, extensions) },
-  { <no-cpp>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
+  { <no-cpp>, %<<translate build run>>, <source>,
     "--no-cpp", NULL, "Skip symbol collection and preprocessing", 0,
     CLI_FIELD(<flag>, no_cpp) },
-  { <live-syms>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
+  { <live-syms>, %<<translate build run>>, <source>,
     "--live-symbols", NULL,
     "Collect symbols through the host preprocessor", 0,
     CLI_FIELD(<flag>, live_symbols) },
-  { <cpp-syms>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
+  { <cpp-syms>, %<<translate build run>>, <source>,
     "--cpp-symbols", NULL, "Use CPP collection for this translation", 0,
     CLI_FIELD(<flag>, cpp_symbols) },
-  { <cc>, CLI_NATIVE | CLI_ENV, <c-compiler>,
+  { <cc>, %<<build run script env>>, <c-compiler>,
     "--cc", "<program>",
     "Use <program> as the host C compiler", 0, CLI_FIELD(<text>, cc) },
-  { <meta-cc>, CLI_TRANSLATE | CLI_NATIVE, <c-compiler>,
+  { <meta-cc>, %<<translate build run script>>, <c-compiler>,
     "--meta-cc", "<program>",
     "Use <program> to build meta code, whatever --cc is", 0,
     CLI_FIELD(<text>, meta_cc) },
-  { <ar>, CLI_BUILD | CLI_ENV, <c-compiler>,
+  { <ar>, %<<build env>>, <c-compiler>,
     "--ar", "<program>",
     "Use <program> as the static-library archiver", 0, CLI_FIELD(<text>, ar) },
-  { <opt>, CLI_NATIVE,
+  { <opt>, %<<build run script>>,
     <c-compiler>,
     "-O", NULL, "Set C optimization", 0,
     .label = "-O0, -O1, -O2, -O3, -Os", .prefix = 1 },
-  { <g>, CLI_NATIVE, <c-compiler>, "-g", NULL,
+  { <g>, %<<build run script>>, <c-compiler>, "-g", NULL,
     "Emit debug information", 0 },
-  { <define>, CLI_NATIVE, <c-compiler>, "-D",
+  { <define>, %<<build run script>>, <c-compiler>, "-D",
     "<name>[=<value>]", "Define a C preprocessor macro", 0,
     .package_native = 1 },
-  { <undefine>, CLI_NATIVE, <c-compiler>, "-U", "<name>",
+  { <undefine>, %<<build run script>>, <c-compiler>, "-U", "<name>",
     "Undefine a C preprocessor macro", 0, .package_native = 1 },
-  { <xcc>, CLI_NATIVE, <c-compiler>, "-Xcc", "<arg>",
+  { <xcc>, %<<build run script>>, <c-compiler>, "-Xcc", "<arg>",
     "Pass one argument only to C compilation", 0 },
-  { <lib-dir>, CLI_NATIVE, <linker>, "-L", "<dir>",
+  { <lib-dir>, %<<build run script>>, <linker>, "-L", "<dir>",
     "Add a library search directory", 0, .package_native = 1 },
-  { <library>, CLI_NATIVE, <linker>, "-l", "<name>",
+  { <library>, %<<build run script>>, <linker>, "-l", "<name>",
     "Link library <name>", 0, .package_native = 1 },
-  { <rpath>, CLI_NATIVE, <linker>, "--rpath", "<dir>",
+  { <rpath>, %<<build run script>>, <linker>, "--rpath", "<dir>",
     "Search <dir> for shared libraries when the program runs", 0,
     .package_native = 1 },
-  { <wl>, CLI_NATIVE, <linker>, "-Wl,",
+  { <wl>, %<<build run script>>, <linker>, "-Wl,",
     NULL, "Pass comma-separated arguments to the linker", 0,
     .label = "-Wl,<arg>[,<arg>...]", .prefix = 1, .package_native = 1 },
-  { <pthread>, CLI_NATIVE, <c-compiler>, "-pthread", NULL,
+  { <pthread>, %<<build run script>>, <c-compiler>, "-pthread", NULL,
     "Enable native threading for compilation and linking", 0,
     .package_native = 1 },
-  { <framework>, CLI_NATIVE, <linker>, "-framework", "<name>",
+  { <framework>, %<<build run script>>, <linker>, "-framework", "<name>",
     "Link a native framework on macOS", 0, .package_native = 1 },
-  { <xlinker>, CLI_NATIVE, <linker>, "-Xlinker", "<arg>",
+  { <xlinker>, %<<build run script>>, <linker>, "-Xlinker", "<arg>",
     "Pass one argument to the linker", 0, .package_native = 1 },
-  { <tokens>, CLI_TRANSLATE, <inspection>, "--dump-tokens",
+  { <tokens>, %<<translate>>, <inspection>, "--dump-tokens",
     NULL, "Print source tokens and stop", 0 },
-  { <dump-cpp>, CLI_TRANSLATE, <inspection>, "--dump-cpp", NULL,
+  { <dump-cpp>, %<<translate>>, <inspection>, "--dump-cpp", NULL,
     "Print host-preprocessed text and stop", 0 },
-  { <dump-cpp>, CLI_TRANSLATE, <inspection>,
+  { <dump-cpp>, %<<translate>>, <inspection>,
     "--dump-cpp-text", NULL, "Alias for --dump-cpp", 0 },
-  { <cpp-tokens>, CLI_TRANSLATE, <inspection>,
+  { <cpp-tokens>, %<<translate>>, <inspection>,
     "--dump-cpp-tokens", NULL, "Print host-preprocessed tokens and stop", 0 },
-  { <dump-ast>, CLI_TRANSLATE, <inspection>, "--dump-ast", NULL,
+  { <dump-ast>, %<<translate>>, <inspection>, "--dump-ast", NULL,
     "Print the parsed AST and stop", 0 },
-  { <transforms>, CLI_TRANSLATE, <inspection>,
+  { <transforms>, %<<translate>>, <inspection>,
     "--dump-transforms", NULL, "Print the transformed AST and stop", 0 },
-  { <dump-defs>, CLI_TRANSLATE, <inspection>, "--dump-definitions", NULL,
+  { <dump-defs>, %<<translate>>, <inspection>, "--dump-definitions", NULL,
     "Print each definition's location and documentation and stop", 0 },
-  { <dump-code>, CLI_TRANSLATE, <inspection>, "--dump-code", NULL,
+  { <dump-code>, %<<translate>>, <inspection>, "--dump-code", NULL,
     "Print unformatted generated code and stop", 0 },
-  { <symbols>, CLI_TRANSLATE, <inspection>, "--dump-symbols",
+  { <symbols>, %<<translate>>, <inspection>, "--dump-symbols",
     NULL, "Print the source symbol table and stop", 0 },
-  { <dump-csym>, CLI_TRANSLATE, <inspection>,
+  { <dump-csym>, %<<translate>>, <inspection>,
     "--dump-cpp-symbols", NULL, "Print the CPP symbol table and stop", 0 },
-  { <dump-cache>, CLI_TRANSLATE, <inspection>, "--dump-cache", NULL,
+  { <dump-cache>, %<<translate>>, <inspection>, "--dump-cache", NULL,
     "Print the compiler cache and stop", 0 },
-  { <conform>, CLI_TRANSLATE, <inspection>,
+  { <conform>, %<<translate>>, <inspection>,
     "--dump-conformance", NULL, "Print protocol conformance and stop", 0 },
   { 0 }
 };
@@ -367,16 +348,8 @@ static CliOption cli_options[] = {
    options and is not a subject of `x2c help <command>`. */
 static CliCommand *_command_row(const char *word) {
   for (CliCommand *row = cli_commands; row.name; row++)
-    if (row.mask != CLI_TOP && strcmp(word, row.name.str()) == 0) return row;
+    if (row.name != <help> && strcmp(word, row.name.str()) == 0) return row;
   return NULL;
-}
-
-/* A command outside the table, such as 0 for top-level help, has the
-   top-level mask. */
-static int _command_mask(Symbol command) {
-  for (CliCommand *row = cli_commands; row.name; row++)
-    if (row.name == command) return row.mask;
-  return CLI_TOP;
 }
 
 // parsing
@@ -426,19 +399,18 @@ static void _read_arguments(Array args, int argc, char **argv) {
    in the order they are written. `operands` is set after `--`, and a
    script's words before `expanded` came from a response file. */
 static typedef struct Parse {
-  CliRequest request, Array args, int mask, operands, expanded;
+  CliRequest request, Array args, int operands, expanded;
   Array inputs, run_args, include_dirs, cpp_args, cc_args, ld_args;
 } Parse;
 
 static CliRequest _parse_command(Array args, CliCommand &command) {
   Parse p = {
     .request = CliRequest.new(command.name), .args = args,
-    .mask = command.mask,
     .inputs = [], .run_args = [], .include_dirs = [], .cpp_args = [],
     .cc_args = [], .ld_args = []};
   for (int i = 1; i < args.len(); i++) _word(p, i);
   _finish_request(p);
-  _check(p.request, p.mask);
+  _check(p.request);
   return p.request;
 }
 
@@ -454,7 +426,7 @@ static void _word(Parse &p, int &i) {
 /* A script expands a response file among its options. The expanded words
    replace the reference and are read next, but never expanded again. */
 static int _expands(Parse &p, String arg, int i) =>
-  p.mask == CLI_SCRIPT && !p.operands && i >= p.expanded &&
+  p.request.command == <script> && !p.operands && i >= p.expanded &&
   arg.startswith("@");
 
 static void _expand(Parse &p, String arg, int &i) {
@@ -468,9 +440,9 @@ static void _expand(Parse &p, String arg, int &i) {
 /* An operand is an input, or after `--` a program argument for `run`.
    Every word after a script belongs to the script, `@` and `--` too. */
 static void _operand(Parse &p, String arg, int &i) {
-  if (p.operands && p.mask == CLI_RUN) p.run_args.push(arg);
+  if (p.operands && p.request.command == <run>) p.run_args.push(arg);
   else p.inputs.push(arg);
-  if (p.mask == CLI_SCRIPT)
+  if (p.request.command == <script>)
     while (++i < p.args.len()) p.run_args.push(p.args[i]);
 }
 
@@ -490,9 +462,9 @@ static void _finish_request(Parse &p) {
 }
 
 /* Operand counts and option conflicts, once every word is read. */
-static void _check(CliRequest r, int mask) {
+static void _check(CliRequest r) {
   Symbol name = r.command, List inputs = r.inputs;
-  if (mask == CLI_TRANSLATE && !inputs)
+  if (name == <translate> && !inputs)
     Diagnostics.driver_error("translate requires at least one input");
   if (inputs.cdr() && (r.dep_file || r.dep_target))
     Diagnostics.driver_error(
@@ -503,14 +475,14 @@ static void _check(CliRequest r, int mask) {
   if (r.compile_only && r.kind != <executable>)
     Diagnostics.driver_error(
       "--compile-only conflicts with a library target kind");
-  if (mask == CLI_ENV && inputs.cdr())
+  if (name == <env> && inputs.cdr())
     Diagnostics.driver_error("env accepts at most one name");
-  if ((mask == CLI_INSTALL || mask == CLI_REMOVE || mask == CLI_NEW) &&
+  if ((name in %<<install remove new>>) &&
       (!inputs || inputs.cdr()))
     $report.cli.operand_required(name);
-  if (mask == CLI_LIST && inputs)
+  if (name == <list> && inputs)
     $report.cli.operands_forbidden(name);
-  if (mask == CLI_SCRIPT && !inputs)
+  if (name == <script> && !inputs)
     Diagnostics.driver_error("script requires a script file");
 }
 
@@ -539,12 +511,12 @@ static typedef struct Given {
    from the table. */
 static void _option(Parse &p, String arg, int &i) {
   if (arg == "-o") _removed_output();
-  if ((p.mask & (CLI_BUILD | CLI_RUN)) && arg.startswith("--save-temps=")) {
+  if ((p.request.command in %<<build run>>) && arg.startswith("--save-temps=")) {
     _save_temps_dir(p.request, arg);
     return;
   }
-  Given given = _take_option(p.args, i, p.mask);
-  if (!given.option) _unknown_option(arg, p.mask);
+  Given given = _take_option(p.args, i, p.request.command);
+  if (!given.option) _unknown_option(arg, p.request.command);
   _apply(p, given);
 }
 
@@ -557,18 +529,18 @@ static void _save_temps_dir(CliRequest r, String arg) {
     Diagnostics.driver_error("--save-temps= requires a directory");
 }
 
-/* Reads the option at `i` for `mask`, advancing `i` past a separate value.
+/* Reads the option at `i` for `command`, advancing `i` past a separate value.
    A long option may carry its value after `=`, as `--out-dir=gen`; an empty
    one is the option's own missing value, not the next word. An unknown
    spelling gives no option, so each caller phrases its own diagnostic. */
-static Given _take_option(Array args, int &i, int mask) {
+static Given _take_option(Array args, int &i, Symbol command) {
   String arg = args[i], written = arg, joined = NULL, suffix = NULL;
   int equals = arg.startswith("--") ? arg.find("=") : -1;
   if (equals > 2) {
     written = arg[:equals];
     joined = arg[equals + 1:];
   }
-  Given given = {_find_option(written, mask, suffix), written};
+  Given given = {_find_option(written, command, suffix), written};
   if (!given.option) return given;
   if (equals > 2 && !given.option.value)
     $report.cli.option_value_forbidden(arg);
@@ -584,13 +556,14 @@ static Given _take_option(Array args, int &i, int mask) {
   return given;
 }
 
-/* Finds the option `spelling` names for `mask`. A two-letter option that
+/* Finds the option `spelling` names for `command`. A two-letter option that
    takes a value also accepts it in the same argument, as `-Idir`, and
    reports the remainder through `attached`. */
-static CliOption *_find_option(String spelling, int mask, String &attached) {
+static CliOption *_find_option(
+  String spelling, Symbol command, String &attached) {
   attached = NULL;
   for (CliOption *option = cli_options; option.spelling; option++) {
-    if (!(option.commands & mask)) continue;
+    if (!(command in option.commands)) continue;
     String form = option.spelling;
     int longer = spelling.len() > form.len() && spelling.startswith(form);
     if (option.prefix) {
@@ -757,7 +730,7 @@ CliRequest CliRequest.package_options(String path, String package) {
   CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
   request.command = <build>;
   Parse p = {
-    .request = request, .args = words, .mask = CLI_BUILD, .include_dirs = [],
+    .request = request, .args = words, .include_dirs = [],
     .cpp_args = [], .cc_args = [], .ld_args = []};
   for (int i = 0; i < words.len(); i++) _native(p, i);
   p.include_dirs.free();
@@ -776,7 +749,7 @@ static void _native(Parse &p, int &i) {
     p.ld_args.push(arg);
     return;
   }
-  Given given = _take_option(p.args, i, p.mask);
+  Given given = _take_option(p.args, i, p.request.command);
   if (!given.option || !given.option.package_native)
     $report.cli.native_unsupported(arg);
   _apply(p, given);
@@ -1148,35 +1121,36 @@ static void _print_page(HelpPage &page) {
 /* Top-level help lists its few options under one title; a command's help
    groups its options under titles in a fixed order. */
 static void _print_options(Symbol command) {
-  int mask = _command_mask(command);
-  if (mask == CLI_TOP) {
+  if (!command) command = <top>;
+  if (command == <top>) {
     puts("\nGlobal options:");
     for (CliOption *option = cli_options; option.spelling; option++)
-      if (_listed(*option, mask)) _print_option(*option);
+      if (_listed(*option, command)) _print_option(*option);
     return;
   }
   for (CliGroup *group = cli_groups; group.group; group++)
-    _print_group(command, mask, *group);
+    _print_group(command, *group);
 }
 
 /* A group's title prints only above options the command lists. Translate
    names its source group for what it reads. */
-static void _print_group(Symbol command, int mask, CliGroup &group) {
+static void _print_group(Symbol command, CliGroup &group) {
   CliOption *option = cli_options;
-  while (option.spelling && !_in_group(*option, mask, group.group)) option++;
+  while (option.spelling && !_in_group(*option, command, group.group))
+    option++;
   if (!option.spelling) return;
   const char *title = command == <translate> && group.group == <source> ?
                       "Source options:" : group.title;
   printf("\n%s\n", title);
   for (; option.spelling; option++)
-    if (_in_group(*option, mask, group.group)) _print_option(*option);
+    if (_in_group(*option, command, group.group)) _print_option(*option);
 }
 
-static int _listed(CliOption &option, int mask) =>
-  !option.hidden && (option.commands & mask);
+static int _listed(CliOption &option, Symbol command) =>
+  !option.hidden && (command in option.commands);
 
-static int _in_group(CliOption &option, int mask, Symbol group) =>
-  _listed(option, mask) && option.group == group;
+static int _in_group(CliOption &option, Symbol command, Symbol group) =>
+  _listed(option, command) && option.group == group;
 
 static void _print_option(const CliOption &option) {
   String spelled = option.label ? option.label :
@@ -1222,8 +1196,8 @@ static void _expected_command(String arg) {
 }
 
 /* translate corrects a one-dash long option. */
-static void _unknown_option(String arg, int mask) {
-  String spelling = mask == CLI_TRANSLATE ? _two_dash(arg) : NULL;
+static void _unknown_option(String arg, Symbol command) {
+  String spelling = command == <translate> ? _two_dash(arg) : NULL;
   if (spelling) _one_dash_removed(arg, spelling);
   $report.cli.option_unknown(arg);
 }
@@ -1233,7 +1207,7 @@ static void _unknown_option(String arg, int mask) {
 static String _two_dash(String arg) {
   if (arg.len() <= 2 || arg[0] != '-' || arg[1] == '-') return NULL;
   String spelling = %"-$arg", attached;
-  return _find_option(spelling, CLI_TRANSLATE, attached) ? spelling : NULL;
+  return _find_option(spelling, <translate>, attached) ? spelling : NULL;
 }
 
 static void _one_dash_removed(String arg, String use) {
@@ -1250,12 +1224,11 @@ static void _response_error(String path, int line, const char *message) {
 
 /** Constructs a request with the command's ordinary CLI defaults. */
 CliRequest CliRequest.new(Symbol command) {
-  int mask = _command_mask(command);
   CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
   request.command = command;
   request.jobs = _default_jobs();
   request.max_errors = 20;
-  if (mask & CLI_NATIVE) request.kind = <executable>;
+  if (command in %<<build run script>>) request.kind = <executable>;
   return request;
 }
 
