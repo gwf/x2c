@@ -13055,7 +13055,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _12144 = List_var(_12143);
   _12145 = String_new("src/macros.x");
   _12146 = String_var(_12145);
-  _12147 = String_new("22cb2d9d");
+  _12147 = String_new("f9a7a005");
   _12148 = String_var(_12147);
   _12149 = cons(_12148, NULL);
   _12150 = cons(_12146, _12149);
