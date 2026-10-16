@@ -290,53 +290,60 @@ meta List ad_sum_squares(List a) {
    its typed arguments and their zero-based position; an unknown name has no
    primitive derivative. */
 meta List ad_partial(String name, int i, List a) {
-  List x = a[0];
-  List y = a[1];
-  if (name == "sin") return ad_call("cos", a);
-  if (name == "cos") return ad_neg(ad_call("sin", a));
-  if (name == "tan") return ad_recip(ad_square(ad_call("cos", a)));
-  if (name == "asin")
-    return ad_recip(ad_call1("sqrt", ad_minus_one(ad_square(x))));
-  if (name == "acos")
-    return ad_neg(ad_recip(ad_call1("sqrt", ad_minus_one(ad_square(x)))));
-  if (name == "atan") return ad_recip(ad_plus_one(ad_square(x)));
-  if (name == "atan2") return i == 0 ? ad_div(y, ad_sum_squares(a))
-                    : ad_neg(ad_div(x, ad_sum_squares(a)));
-  if (name == "sinh") return ad_call("cosh", a);
-  if (name == "cosh") return ad_call("sinh", a);
-  if (name == "tanh") return ad_minus_one(ad_square(ad_call("tanh", a)));
-  if (name == "asinh")
-    return ad_recip(ad_call1("sqrt", ad_plus_one(ad_square(x))));
-  if (name == "acosh")
-    return ad_recip(ad_call1("sqrt",
-      ad_sub(ad_square(x), ad_lit("1.0"))));
-  if (name == "atanh") return ad_recip(ad_minus_one(ad_square(x)));
-  if (name == "exp") return ad_call("exp", a);
-  if (name == "exp2")
-    return ad_mul(ad_call("exp2", a), ad_lit("0.6931471805599453"));
-  if (name == "expm1") return ad_call("exp", a);
-  if (name == "log") return ad_recip(x);
-  if (name == "log2")
-    return ad_recip(ad_mul(x, ad_lit("0.6931471805599453")));
-  if (name == "log10")
-    return ad_recip(ad_mul(x, ad_lit("2.302585092994046")));
-  if (name == "log1p") return ad_recip(ad_plus_one(x));
-  if (name == "sqrt") return ad_div(ad_lit("0.5"), ad_call("sqrt", a));
-  if (name == "cbrt")
-    return ad_recip(ad_mul(ad_lit("3.0"), ad_square(ad_call("cbrt", a))));
-  if (name == "hypot") return ad_div(i == 0 ? x : y, ad_call("hypot", a));
-  if (name == "fabs") return ad_select(ad_less(x, ad_lit("0.0")),
-                       ad_lit("-1.0"), ad_lit("1.0"));
-  if (name == "fmin") return i == 0
-               ? ad_select(ad_less_eq(x, y), ad_lit("1.0"), ad_lit("0.0"))
-               : ad_select(ad_less(y, x), ad_lit("1.0"), ad_lit("0.0"));
-  if (name == "fmax") return i == 0
-               ? ad_select(ad_less_eq(y, x), ad_lit("1.0"), ad_lit("0.0"))
-               : ad_select(ad_less(x, y), ad_lit("1.0"), ad_lit("0.0"));
-  if (name == "pow") return i == 0
-               ? ad_mul(y, ad_call("pow",
-                   %($x ${ad_sub(y, ad_lit("1.0"))})))
-               : ad_mul(ad_call("pow", a), ad_call1("log", x));
+  List (x, y) = a;
+  switch (name) {
+    case "sin": return ad_call("cos", a);
+    case "cos": return ad_neg(ad_call("sin", a));
+    case "tan": return ad_recip(ad_square(ad_call("cos", a)));
+    case "asin":
+      return ad_recip(ad_call1("sqrt", ad_minus_one(ad_square(x))));
+    case "acos":
+      return ad_neg(ad_recip(ad_call1("sqrt", ad_minus_one(ad_square(x)))));
+    case "atan": return ad_recip(ad_plus_one(ad_square(x)));
+    case "atan2":
+      return i == 0
+        ? ad_div(y, ad_sum_squares(a))
+        : ad_neg(ad_div(x, ad_sum_squares(a)));
+    case "sinh": return ad_call("cosh", a);
+    case "cosh": return ad_call("sinh", a);
+    case "tanh": return ad_minus_one(ad_square(ad_call("tanh", a)));
+    case "asinh":
+      return ad_recip(ad_call1("sqrt", ad_plus_one(ad_square(x))));
+    case "acosh":
+      return ad_recip(ad_call1("sqrt",
+        ad_sub(ad_square(x), ad_lit("1.0"))));
+    case "atanh": return ad_recip(ad_minus_one(ad_square(x)));
+    case "exp":
+    case "expm1": return ad_call("exp", a);
+    case "exp2":
+      return ad_mul(ad_call("exp2", a), ad_lit("0.6931471805599453"));
+    case "log": return ad_recip(x);
+    case "log2":
+      return ad_recip(ad_mul(x, ad_lit("0.6931471805599453")));
+    case "log10":
+      return ad_recip(ad_mul(x, ad_lit("2.302585092994046")));
+    case "log1p": return ad_recip(ad_plus_one(x));
+    case "sqrt": return ad_div(ad_lit("0.5"), ad_call("sqrt", a));
+    case "cbrt":
+      return ad_recip(ad_mul(ad_lit("3.0"), ad_square(ad_call("cbrt", a))));
+    case "hypot": return ad_div(i == 0 ? x : y, ad_call("hypot", a));
+    case "fabs":
+      return ad_select(ad_less(x, ad_lit("0.0")),
+        ad_lit("-1.0"), ad_lit("1.0"));
+    case "fmin":
+      return i == 0
+        ? ad_select(ad_less_eq(x, y), ad_lit("1.0"), ad_lit("0.0"))
+        : ad_select(ad_less(y, x), ad_lit("1.0"), ad_lit("0.0"));
+    case "fmax":
+      return i == 0
+        ? ad_select(ad_less_eq(y, x), ad_lit("1.0"), ad_lit("0.0"))
+        : ad_select(ad_less(x, y), ad_lit("1.0"), ad_lit("0.0"));
+    case "pow":
+      return i == 0
+        ? ad_mul(y, ad_call("pow",
+          %($x ${ad_sub(y, ad_lit("1.0"))})))
+        : ad_mul(ad_call("pow", a), ad_call1("log", x));
+  }
   return %();
 }
 
@@ -482,10 +489,10 @@ meta List ad_fwd_decl(List declarator, List names) {
 
 meta List ad_fwd_update(List s, List update, List names) {
   if (!update) return %(${ad_unbind(ad_pure(s))});
-  Var n = update[0];
-  ad_pure(update[1]);
-  if (!names.contains(n)) return %(${ad_unbind(s)});
-  List tangent = ad_assign(ad_dot(n), ad_tangent(update[1], names));
+  (Var n, List rhs) = update;
+  ad_pure(rhs);
+  if (!(n in names)) return %(${ad_unbind(s)});
+  List tangent = ad_assign(ad_dot(n), ad_tangent(rhs, names));
   return %($tangent ${ad_unbind(s)});
 }
 
@@ -881,17 +888,11 @@ meta List ad_rev_decl(List type, List d, List names) {
   ad_fail("unsupported declarator", d);
 }
 
-meta List ad_rev_decls(List type, List decls, List names) {
-  Array out = $auto([]);
-  foreach (List d, decls) out.push(ad_rev_decl(type, d, names));
-  return out;
-}
+meta List ad_rev_decls(List type, List decls, List names) =>
+  decls.map(%!(List d) => ad_rev_decl(type, d, names));
 
-meta List ad_rev_items(List items, List names) {
-  Array out = $auto([]);
-  foreach (List item, items) out.push(ad_rev_item(item, names));
-  return out;
-}
+meta List ad_rev_items(List items, List names) =>
+  items.map(%!(List item) => ad_rev_item(item, names));
 
 meta List ad_rev_block(List items, List names) {
   return ad_sequence(ad_rev_items(items, names));
@@ -936,19 +937,11 @@ meta int ad_is_loop_exit(List x) {
   return kind == <break> || kind == <continue>;
 }
 
-meta List ad_loop_exits(List exits, int want) {
-  Array out = $auto([]);
-  foreach (List x, exits)
-    if (ad_is_loop_exit(x) == want) out.push(x);
-  return out;
-}
+meta List ad_loop_exits(List exits, int want) =>
+  exits.filter(%!(List x) => ad_is_loop_exit(x) == want);
 
-meta List ad_return_exits(List exits) {
-  Array out = $auto([]);
-  foreach (List x, exits)
-    if (ad_exit_kind(x) == <return>) out.push(x);
-  return out;
-}
+meta List ad_return_exits(List exits) =>
+  exits.filter(%!(List x) => ad_exit_kind(x) == <return>);
 
 meta List ad_count(Var n, Var op) {
   return ad_set(n, ad_raw(op, ad_id(n), ad_int("1")));
@@ -967,11 +960,8 @@ meta List ad_pruned_exit(List x, List s) {
 }
 
 /* One iteration: count, body, step, then the exit code. */
-meta List ad_pruned_exits(List exits, List s) {
-  Array out = $auto([]);
-  foreach (List x, exits) out.push(ad_pruned_exit(x, s));
-  return out;
-}
+meta List ad_pruned_exits(List exits, List s) =>
+  exits.map(%!(List x) => ad_pruned_exit(x, s));
 
 meta List ad_loop_parts(List c, List body, List step, List names) {
   List saved = ad_state.loop_step;
@@ -1112,12 +1102,8 @@ macro Stmt $ad.write_slot(Name $gradient, Name $value) {
   *$gradient = $value;
 }
 
-meta List ad_hoisted(List locals, List params) {
-  Array out = $auto([]);
-  foreach (List entry, locals)
-    if (!(entry[0] in params)) out.push(entry);
-  return out;
-}
+meta List ad_hoisted(List locals, List params) =>
+  locals.filter(%!(List entry) => !(entry[0] in params));
 
 meta List ad_declare_locals(List locals) {
   Array out = $auto([]);
