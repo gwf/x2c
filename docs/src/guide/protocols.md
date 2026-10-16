@@ -233,7 +233,9 @@ only the forward conversion. A default returning `T` also needs the reverse
 conversion to turn its base result into the participant type. The adapter
 generator does not convert `T` inside compound parameter or result types, so
 those types are rejected. A missing or unsupported conversion produces an
-error at the adoption, naming the method that needs it.
+error at the adoption, naming the method that needs it. A member the
+participant implements needs no adapter, so its signature may use `T` inside
+a compound type, as in `int T_area(T *self)`.
 
 ## Member resolution
 
