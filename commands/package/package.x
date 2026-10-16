@@ -1,4 +1,4 @@
-/*  install.x -- Package installation into the x2c home
+/*  package.x -- Package installation into the x2c home
 
     Copyright (c) 2026 Gary William Flake.
 
@@ -9,7 +9,15 @@
 */
 
 #pragma once
-#include "build.x"
+#include "cli.x"
+#include "compiler.x"
+
+/* Options owned by the package command, independent of a build request. */
+typedef struct PackageOptions {
+  String sha256, index, lock;
+  List inputs;
+  int quiet, force;
+} PackageOptions;
 
 #include <stdio.h>
 #include <string.h>
@@ -167,7 +175,7 @@ static void _host_error(List detail) {
    package, and `version` the version it resolved to. `packages` is the
    home's packages directory and `work` the staging directory. */
 static typedef struct Install {
-  CliRequest request, String spec, source, url, sha256, version;
+  PackageOptions request, String spec, source, url, sha256, version;
   String packages, work;
 } Install;
 
@@ -177,7 +185,7 @@ static typedef struct Install {
     verified against this compiler's version unless `--force`; a pure-x2c
     source package is built by this compiler. Failures exit with status 2.
 */
-int CliRequest.install(CliRequest request) {
+int PackageOptions.install(PackageOptions request) {
   Install i = _locked_install(request, request.inputs.car());
   defer _release_packages();
   i.sha256 = request.sha256;
@@ -193,8 +201,8 @@ int CliRequest.install(CliRequest request) {
     instead. The row has the `install_rows` shape, and an already satisfied
     dependency reaches no network. Failures exit with status 2.
 */
-List CliRequest.require_package(
-  CliRequest request, String name, String version, List locked) {
+List PackageOptions.require_package(
+  PackageOptions request, String name, String version, List locked) {
   Install i = _locked_install(request, name);
   defer _release_packages();
   List row = locked ? locked : _index_row(request, name, i.work);
@@ -210,7 +218,7 @@ List CliRequest.require_package(
 
 /* An install of `spec` that holds the packages lock and owns a fresh
    staging directory; the caller defers `_release_packages`. */
-static Install _locked_install(CliRequest request, String spec) {
+static Install _locked_install(PackageOptions request, String spec) {
   String packages = _locked_packages("install", request.quiet);
   return (Install) {
     .request = request, .spec = spec, .packages = packages,
@@ -299,7 +307,7 @@ static void _publish(String staged, String packages, String name) {
 
 // bundles and source packages
 
-static void _check_bundle(CliRequest request, String package, String name) {
+static void _check_bundle(PackageOptions request, String package, String name) {
   String built = _marker_string(%"$package/BUNDLE.json", "x2c_version");
   String current = Compiler.version();
   if (!built) $report.install.bundle_version_missing(name);
@@ -315,7 +323,8 @@ static void _check_bundle(CliRequest request, String package, String name) {
    it also builds the module an import loads. These are the commands
    `packages/package.mk` runs. */
 static void _build_source(String package, String name, String spec) {
-  String src = %"$package/src", x2c = x2c_get_executable();
+  String src = %"$package/src", x2c = Compiler.driver_executable();
+  if (!x2c) _error("matching compiler is unavailable; reinstall x2c");
   List units = _source_units(src, name, spec);
   _refuse_native(package, name);
   Path builds = _empty_builds(package);
@@ -379,7 +388,7 @@ static int _native_meta(String builds, String name) {
 /** Returns the version an installed package records, or NULL when no package
     of that name is installed or it records no version. Reaches no network.
 */
-String install_version(String name) =>
+static String install_version(String name) =>
   _installed_version(%"${_home_packages("install")}/$name");
 
 static String _installed_version(String package) {
@@ -417,7 +426,7 @@ static String _marker_string(String path, String field) {
     and lines with another field count are skipped. The package index and a
     project lockfile share this format.
 */
-List install_rows(String text) {
+static List install_rows(String text) {
   Array rows = [];
   foreach (String line, text.split_lines(0)) {
     List fields = line.split(" ").filter(%!(String field) => field != NULL);
@@ -428,7 +437,7 @@ List install_rows(String text) {
 
 /* The index's first bundle row for `name` on this platform, else its last
    source row for `name`. */
-static List _index_row(CliRequest request, String name, String work) {
+static List _index_row(PackageOptions request, String name, String work) {
   String location = request.index ? request.index :
     "https://x2c-lang.dev/packages/index.txt";
   String path =
@@ -520,7 +529,7 @@ static List _files_with(String directory, String suffix) {
 /** Removes the installed package named by the request's one operand.
     A directory without an install marker is left alone. Returns 0.
 */
-int CliRequest.remove_package(CliRequest request) {
+int PackageOptions.remove_package(PackageOptions request) {
   String name = request.inputs.car();
   String target = %"${_home_packages("remove")}/$name";
   if (!name.is_identifier())
@@ -547,7 +556,7 @@ static void _check_removable(String target, String name) {
 }
 
 /** Lists installed packages as `name version kind` lines and returns 0. */
-int CliRequest.list_packages(CliRequest request) {
+int PackageOptions.list_packages(PackageOptions request) {
   String packages = _home_packages("list");
   foreach (String name, Path.is_dir(packages) ? _entries(packages) : NULL) {
     String package = %"$packages/$name", kind = _installed_kind(package);
@@ -557,3 +566,64 @@ int CliRequest.list_packages(CliRequest request) {
   }
   return 0;
 }
+
+// project dependencies
+
+/* Prepares the declared name/version pairs, preserving the lockfile's
+   archive choices and leaving satisfied installations offline. */
+int PackageOptions.ensure(PackageOptions request) {
+  if (!request.inputs) {
+    try Path.remove_file(request.lock);
+    catch %(io-fail *detail): Diagnostics.host_error(detail);
+    return 0;
+  }
+  List locked = _read_lock(request.lock);
+  if (_lock_satisfies(request.inputs, locked)) return 0;
+  Array rows = [];
+  for (List rest = request.inputs; rest; rest = rest.cdr().cdr()) {
+    String name = rest.car(), version = rest.cadr();
+    List row = _locked_row(locked, name, version);
+    rows.push(request.require_package(name, version, row));
+  }
+  _write_lock(request.lock, rows.list_free());
+  return 0;
+}
+
+/* The lockfile's rows, or NULL when it is absent. */
+static List _read_lock(String path) {
+  String text = NULL;
+  try text = Path.read_text(path);
+  catch %(not-found *): return NULL;
+  return install_rows(text);
+}
+
+/* Every dependency is locked at its pinned version and already installed at
+   that version, so the build needs no index and no network. */
+static int _lock_satisfies(List inputs, List rows) {
+  if (!rows) return 0;
+  for (List rest = inputs; rest; rest = rest.cdr().cdr()) {
+    String name = rest.car(), version = rest.cadr();
+    if (!_locked_row(rows, name, version)) return 0;
+    if (install_version(name) != version) return 0;
+  }
+  return 1;
+}
+
+/* The lockfile row that pins `entry` at its version, or NULL when the
+   lockfile has none and the index has to resolve it. */
+static List _locked_row(List rows, String name, String version) {
+  List found = NULL;
+  foreach (List row, rows)
+    if (row.car() == name && row.cadr() == version) found = row;
+  return found;
+}
+
+static void _write_lock(String path, List rows) {
+  String text =
+    "# x2c lockfile. Written by x2c build; keep it with the manifest.\n"
+    "# name version kind platform url sha256\n";
+  foreach (List row, rows) text = %"$text${" ".join(row)}\n";
+  try Path.publish_files(%($path $text));
+  catch %(io-fail *detail): Diagnostics.host_error(detail);
+}
+

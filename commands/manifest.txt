@@ -1,3 +1,4 @@
 graph|experimental|Inspect x2c source graphs
 lint|experimental|Inspect x2c source style and idioms
+package|shipped|Install, remove, and list packages
 repl|shipped|Evaluate a supported x2c subset (experimental)

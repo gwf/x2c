@@ -50,11 +50,11 @@ typedef struct Diagnostics * Diagnostics;
 
 static String executable_path, root_path;
 
-static List _34, _33;
+static List _37, _36;
 
-static String _42, _41, _40, _39, _38, _37, _36, _35, _31, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _45, _44, _43, _42, _41, _40, _39, _38, _34, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _32, _30;
+static Var _35, _33;
 
 static int _init_guard_ = 0;
 
@@ -127,28 +127,31 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _18 = String_new("/packages");
   _19 = String_new("/libexec");
   _20 = String_new("/libexec/x2c");
-  _21 = String_new(":");
-  _22 = String_new(".x");
-  _23 = String_new(".xp");
-  _24 = String_new(".c");
-  _25 = String_new(".h");
-  _26 = String_new(".o");
-  _27 = String_new(".a");
-  _28 = String_new("/");
-  _29 = String_new(".x");
-  _30 = String_var(_29);
-  _31 = String_new(".xp");
-  _32 = String_var(_31);
-  _33 = cons(_32, NULL);
-  _34 = cons(_30, _33);
-  _35 = String_new("/src/");
-  _36 = String_new("x2c-module-stamp:");
-  _37 = String_new("%016llx");
-  _38 = String_new("%08X");
-  _39 = String_new("cannot lock ");
-  _40 = String_new(".tmp.%ld");
-  _41 = String_new(" ");
-  _42 = String_new(": ");
+  _21 = String_new("/x2c-");
+  _22 = String_new("missing x2c-");
+  _23 = String_new(" command; install the matching x2c commands");
+  _24 = String_new(":");
+  _25 = String_new(".x");
+  _26 = String_new(".xp");
+  _27 = String_new(".c");
+  _28 = String_new(".h");
+  _29 = String_new(".o");
+  _30 = String_new(".a");
+  _31 = String_new("/");
+  _32 = String_new(".x");
+  _33 = String_var(_32);
+  _34 = String_new(".xp");
+  _35 = String_var(_34);
+  _36 = cons(_35, NULL);
+  _37 = cons(_33, _36);
+  _38 = String_new("/src/");
+  _39 = String_new("x2c-module-stamp:");
+  _40 = String_new("%016llx");
+  _41 = String_new("%08X");
+  _42 = String_new("cannot lock ");
+  _43 = String_new(".tmp.%ld");
+  _44 = String_new(" ");
+  _45 = String_new(": ");
   _x2c_gensym_static_initialize_0();
   _x2c_gensym_static_initialize_1();
   _x2c_gensym_static_initialize_2();
@@ -296,6 +299,90 @@ String Compiler_home_libexec(void){
   return String_truth(home) ? String_join(NULL, cons(String_var(home), cons(String_var(_20), NULL))) : NULL;
 }
 
+String Compiler_command_path(String name){
+  if(! _init_guard_) _file_init_();
+  String libexec = Compiler_home_libexec();
+  if(! String_truth(libexec)) return NULL;
+  String path = String_join(NULL, cons(String_var(libexec), cons(String_var(_21), cons(String_var(name), NULL))));
+  return Path_is_executable(path) ? path : NULL;
+}
+
+String Compiler_identity(void);
+
+Map Compiler_command_environment(void){
+  if(! _init_guard_) _file_init_();
+  Map environment = Map_new();
+  String home = Compiler_home_dir(), driver = Compiler_driver_executable();
+  String identity = Compiler_identity();
+  if(String_truth(home)) Map_setindex(environment, String_var(_4), String_var(home));
+  if(String_truth(driver)) Map_setindex(environment, String_var(_14), String_var(driver));
+  if(String_truth(identity)) Map_setindex(environment, String_var(_0), String_var(identity));
+  return environment;
+}
+
+void Diagnostics_host_error(List detail);
+
+#include "error.h"
+
+
+
+
+int Compiler_run_command(String name, List arguments){
+  if(! _init_guard_) _file_init_();
+  String path = Compiler_command_path(name);
+  if(! String_truth(path)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_22), cons(String_var(name), cons(String_var(_23), NULL)))));
+  Map options = Map_update_n(Map_new(), 2, Symbol_var(11180), Map_var(Compiler_command_environment()), Symbol_var(1317305704), Symbol_var(20284019304));
+  {
+    ExceptionFrame _x2c_gensym_exception_frame_0;
+    static MatchCaptureSite _x2c_gensym_macro_arms_0[1];
+    Var _x2c_gensym_macro_patterns_0[1];
+    static ErrorCatchSite _x2c_gensym_macro_site_0 ={
+      _x2c_gensym_macro_arms_0, -1, 1, ERROR_CATCH_PENDING, - 1
+    }
+    ;
+    if(x2c_error_catch_site_pending(& _x2c_gensym_macro_site_0)){
+      _x2c_gensym_macro_patterns_0[0] = List_var(cons(List_var(cons(Symbol_var(62436), cons(Symbol_var(31862161386376), cons(Symbol_var(20399393368), NULL)))), cons(Symbol_var(58262293080), NULL)));
+    }
+    volatile ErrorHandler _x2c_gensym_error_handler_0 = x2c_error_catch_site_push(& _x2c_gensym_exception_frame_0, & _x2c_gensym_macro_site_0, _x2c_gensym_macro_patterns_0);
+    x2c_exception_push(& _x2c_gensym_exception_frame_0);
+    if(! sigsetjmp(_x2c_gensym_exception_frame_0.env, 0)){
+      int _x2c_gensym_return_value_0 = Job_status(Job_options(List_job(cons(String_var(path), List_append(arguments, NULL))), options));
+      {
+        x2c_error_catch_close(_x2c_gensym_error_handler_0);
+        _x2c_gensym_error_handler_0 = NULL;
+        x2c_exception_leave(& _x2c_gensym_exception_frame_0);
+        return _x2c_gensym_return_value_0;
+      }
+
+    }
+    else{
+      x2c_exception_landed(& _x2c_gensym_exception_frame_0);
+      if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_0)){
+        int _x2c_gensym_macro_selected_0 = x2c_error_catch_selected(_x2c_gensym_error_handler_0);
+        x2c_error_catch_detach(_x2c_gensym_error_handler_0);
+        x2c_exception_mark_handled(& _x2c_gensym_exception_frame_0);
+        if(_x2c_gensym_macro_selected_0 == 0){
+          List volatile detail;
+          detail = Var_list_payload(x2c_error_catch_capture(_x2c_gensym_error_handler_0, 0));
+          Diagnostics_host_error(detail);
+        }
+
+      }
+      else{
+        x2c_error_catch_close(_x2c_gensym_error_handler_0);
+        _x2c_gensym_error_handler_0 = NULL;
+        x2c_exception_leave(& _x2c_gensym_exception_frame_0);
+        __builtin_unreachable();
+      }
+
+    }
+    x2c_error_catch_close(_x2c_gensym_error_handler_0);
+    _x2c_gensym_error_handler_0 = NULL;
+    x2c_exception_leave(& _x2c_gensym_exception_frame_0);
+  }
+  return 2;
+}
+
 List Compiler_default_include_dirs(void){
   if(! _init_guard_) _file_init_();
   return default_includes;
@@ -310,7 +397,7 @@ String Env_find_program(String name){
   if(! _init_guard_) _file_init_();
   {
     String directory;
-    List _x2c_gensym_macro_object_0 = String_split(Env_get(_6), _21);
+    List _x2c_gensym_macro_object_0 = String_split(Env_get(_6), _24);
     List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
     Var _x2c_gensym_macro_cursor_output_0;
     while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
@@ -328,8 +415,8 @@ String Env_find_program(String name){
 
 int Path_is_x2c_source(String path){
   if(! _init_guard_) _file_init_();
-  if(String_endswith(path, _22) || String_endswith(path, _23)) return 1;
-  if(String_endswith(path, _24) || String_endswith(path, _25) || String_endswith(path, _26) || String_endswith(path, _27)) return 0;
+  if(String_endswith(path, _25) || String_endswith(path, _26)) return 1;
+  if(String_endswith(path, _27) || String_endswith(path, _28) || String_endswith(path, _29) || String_endswith(path, _30)) return 0;
   FILE * file = fopen(path, "r");
   if(! file) return 0;
   char head[2];
@@ -340,7 +427,7 @@ int Path_is_x2c_source(String path){
 
 int Path_is_layout_source(String path){
   if(! _init_guard_) _file_init_();
-  return String_truth(path) && String_endswith(path, _23);
+  return String_truth(path) && String_endswith(path, _26);
 }
 
 String Compiler_package_directory(List roots, String path){
@@ -354,7 +441,7 @@ String Compiler_package_directory(List roots, String path){
     while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
       root = Var_as_string(_x2c_gensym_macro_cursor_output_1);
       {
-        String prefix = String_join(NULL, cons(String_var(Path_absolute(root)), cons(String_var(_28), NULL)));
+        String prefix = String_join(NULL, cons(String_var(Path_absolute(root)), cons(String_var(_31), NULL)));
         if(! String_startswith(source, prefix)) continue;
         String name = Var_as_string(List_car(String_split(String_remove_prefix(source, prefix), _7)));
         if(String_is_identifier(name) && ! String_equal(source, String_join(NULL, cons(String_var(prefix), cons(String_var(name), NULL))))) return String_join(NULL, cons(String_var(prefix), cons(String_var(name), NULL)));
@@ -377,19 +464,19 @@ String SourceView_package_entry(SourceView sources, List roots, String name, Str
       package_dir = Var_as_string(_x2c_gensym_macro_cursor_output_3);
       {
         String root =({
-          Var _x2c_gensym_literal_part_0 = String_var(Path_absolute(package_dir));  String_join(NULL, cons(_x2c_gensym_literal_part_0, cons(String_var(_28), cons(String_var(name), NULL))));
+          Var _x2c_gensym_literal_part_0 = String_var(Path_absolute(package_dir));  String_join(NULL, cons(_x2c_gensym_literal_part_0, cons(String_var(_31), cons(String_var(name), NULL))));
         }
         );
         {
           String suffix;
-          List _x2c_gensym_macro_object_2 = _34;
+          List _x2c_gensym_macro_object_2 = _37;
           List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
           Var _x2c_gensym_macro_cursor_output_2;
           while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
             suffix = Var_as_string(_x2c_gensym_macro_cursor_output_2);
             {
-              String nested = String_join(NULL, cons(String_var(root), cons(String_var(_35), cons(String_var(name), cons(String_var(suffix), NULL)))));
-              String entry = SourceView_exists(sources, nested) ? nested : String_join(NULL, cons(String_var(root), cons(String_var(_28), cons(String_var(name), cons(String_var(suffix), NULL)))));
+              String nested = String_join(NULL, cons(String_var(root), cons(String_var(_38), cons(String_var(name), cons(String_var(suffix), NULL)))));
+              String entry = SourceView_exists(sources, nested) ? nested : String_join(NULL, cons(String_var(root), cons(String_var(_31), cons(String_var(name), cons(String_var(suffix), NULL)))));
               if(! SourceView_exists(sources, entry)) continue;
               (* directory) = root;
               return Path_absolute(entry);
@@ -409,9 +496,9 @@ String SourceView_package_entry(SourceView sources, List roots, String name, Str
 
 int Compiler_is_package_source(String directory, String path){
   if(! _init_guard_) _file_init_();
-  if(String_startswith(path, String_join(NULL, cons(String_var(directory), cons(String_var(_35), NULL))))) return 1;
+  if(String_startswith(path, String_join(NULL, cons(String_var(directory), cons(String_var(_38), NULL))))) return 1;
   String name = String_getslice(directory, x2c_slice_bound(String_rfind(directory, _7) + 1), (-2147483647 - 1), 1);
-  return String_equal(path, String_join(NULL, cons(String_var(directory), cons(String_var(_28), cons(String_var(name), cons(String_var(_29), NULL)))))) || String_equal(path, String_join(NULL, cons(String_var(directory), cons(String_var(_28), cons(String_var(name), cons(String_var(_31), NULL))))));
+  return String_equal(path, String_join(NULL, cons(String_var(directory), cons(String_var(_31), cons(String_var(name), cons(String_var(_32), NULL)))))) || String_equal(path, String_join(NULL, cons(String_var(directory), cons(String_var(_31), cons(String_var(name), cons(String_var(_34), NULL))))));
 }
 
 String Compiler_identity(void){
@@ -422,7 +509,7 @@ String Compiler_identity(void){
 String Compiler_module_stamp(void){
   if(! _init_guard_) _file_init_();
   String identity = Compiler_identity();
-  return String_truth(identity) ? String_join(NULL, cons(String_var(_36), cons(String_var(identity), NULL))) : NULL;
+  return String_truth(identity) ? String_join(NULL, cons(String_var(_39), cons(String_var(identity), NULL))) : NULL;
 }
 
 uint64_t fnv_file(uint64_t hash, String path, int * ok);
@@ -432,7 +519,7 @@ String Path_content_identity(String path){
   int ok = path != NULL;
   uint64_t hash = FNV_OFFSET_BASIS;
   if(ok) hash = fnv_file(hash, path, &(ok));
-  return ok ? String_printf(_37, (unsigned long long) hash) : NULL;
+  return ok ? String_printf(_40, (unsigned long long) hash) : NULL;
 }
 
 uint64_t fnv_bytes(uint64_t hash, const void * bytes, size_t length);
@@ -476,13 +563,13 @@ String Path_identifier_hash(String filename){
     }
 
   }
-  return String_printf(_38, hash);
+  return String_printf(_41, hash);
 }
 
 int Path_lock_file(Path p, int wait){
   if(! _init_guard_) _file_init_();
   int lock = open(p, O_RDWR | O_CREAT | O_CLOEXEC, 0666);
-  if(lock < 0) Diagnostics_driver_error(String_join(NULL, cons(String_var(_39), cons(String_var(p), NULL))));
+  if(lock < 0) Diagnostics_driver_error(String_join(NULL, cons(String_var(_42), cons(String_var(p), NULL))));
   int operation = wait ? LOCK_EX : LOCK_EX | LOCK_NB;
   while(flock(lock, operation)){
     if(errno == EINTR) continue;
@@ -494,7 +581,7 @@ int Path_lock_file(Path p, int wait){
 
 void Path_publish_files(List outputs){
   if(! _init_guard_) _file_init_();
-  String suffix = String_printf(_40, (long) getpid());
+  String suffix = String_printf(_43, (long) getpid());
   {
     _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
       0
@@ -543,7 +630,7 @@ void Diagnostics_host_error(List detail){
   if(Var_is_void(subject)) subject = List_assoc(detail, Symbol_var(35599650906));
   long error = Var_long(Var_convert(List_assoc(detail, Symbol_var(11703198)), 818062));
   Diagnostics_driver_error(({
-    Var _x2c_gensym_literal_part_2 = String_var(Var_str(List_assoc(detail, Symbol_var(34096809266140))));  Var _x2c_gensym_literal_part_3 = String_var(Var_str(subject));  Var _x2c_gensym_literal_part_4 = String_var(String_new(strerror(error)));  String_join(NULL, cons(_x2c_gensym_literal_part_2, cons(String_var(_41), cons(_x2c_gensym_literal_part_3, cons(String_var(_42), cons(_x2c_gensym_literal_part_4, NULL))))));
+    Var _x2c_gensym_literal_part_2 = String_var(Var_str(List_assoc(detail, Symbol_var(34096809266140))));  Var _x2c_gensym_literal_part_3 = String_var(Var_str(subject));  Var _x2c_gensym_literal_part_4 = String_var(String_new(strerror(error)));  String_join(NULL, cons(_x2c_gensym_literal_part_2, cons(String_var(_44), cons(_x2c_gensym_literal_part_3, cons(String_var(_45), cons(_x2c_gensym_literal_part_4, NULL))))));
   }
   ));
 }

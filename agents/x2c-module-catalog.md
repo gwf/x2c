@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 64
+- Compiler modules: 63
 - Runtime modules: 77
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -416,15 +416,6 @@ Public functions:
 `Compiler.initializer_field_path`, `Compiler.initializer_slot`,
 `Compiler.convert_compound_literal`, `Compiler.initializer_native_types`
 
-### [src/install.x](../src/install.x)
-
-Package installation into the x2c home.
-
-Public functions:
-
-`CliRequest.install`, `CliRequest.require_package`, `install_version`,
-`install_rows`, `CliRequest.remove_package`, `CliRequest.list_packages`
-
 ### [src/lambdas.x](../src/lambdas.x)
 
 lambda parsing and capture resolution.
@@ -827,7 +818,8 @@ Public functions:
 `x2c_initialize_environment`, `x2c_initialize_command_environment`,
 `x2c_set_root`, `x2c_get_root`, `x2c_get_executable`,
 `Compiler.driver_executable`, `Compiler.home_dir`, `Compiler.stage_dir`,
-`Compiler.home_packages`, `Compiler.home_libexec`,
+`Compiler.home_packages`, `Compiler.home_libexec`, `Compiler.command_path`,
+`Compiler.command_environment`, `Compiler.run_command`,
 `Compiler.default_include_dirs`, `Compiler.cpp_include_dirs`,
 `Env.find_program`, `Path.is_x2c_source`, `Path.is_layout_source`,
 `Compiler.package_directory`, `SourceView.package_entry`,

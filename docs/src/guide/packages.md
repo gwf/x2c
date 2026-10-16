@@ -414,6 +414,12 @@ make -C packages/sqlite test run run-lisp
 
 ## Install packages
 
+Package management runs in the shipped `x2c-package` command. The familiar
+`x2c install`, `x2c remove`, and `x2c list` forms select its operations.
+Project builds use the same command to prepare declared dependencies and
+maintain `x2c.lock` before compilation starts.
+
+
 `x2c install` places a package under `<home>/packages`, where every build
 finds it without `--package-dir`:
 

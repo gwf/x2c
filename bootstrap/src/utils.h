@@ -43,6 +43,12 @@ String Compiler_home_packages(void);
 
 String Compiler_home_libexec(void);
 
+String Compiler_command_path(String name);
+
+Map Compiler_command_environment(void);
+
+int Compiler_run_command(String name, List arguments);
+
 List Compiler_default_include_dirs(void);
 
 List Compiler_cpp_include_dirs(void);

@@ -139,7 +139,6 @@
   - [src/generate.x](internals/compiler-api/generate.md)
   - [src/grammar.x](internals/compiler-api/grammar.md)
   - [src/initializers.x](internals/compiler-api/initializers.md)
-  - [src/install.x](internals/compiler-api/install.md)
   - [src/lambdas.x](internals/compiler-api/lambdas.md)
   - [src/linked-meta.x](internals/compiler-api/linked-meta.md)
   - [src/literals.x](internals/compiler-api/literals.md)

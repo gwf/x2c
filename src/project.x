@@ -25,9 +25,9 @@ typedef struct ProjectBuild {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include "buffer.x"
-#include "install.x"
 
 // source templates
 
@@ -574,68 +574,27 @@ static ProjectProfile _selected_profile(
 
 // package dependencies
 
-/* Installs whatever the manifest pins that the home does not already hold,
-   then records what was resolved beside the manifest. A pin the lockfile
-   already covers is installed from the archive the lockfile recorded, which
-   is what makes a later build reproduce the same packages; only a pin the
-   lockfile does not cover reaches the index. A manifest with no pins has
-   nothing to reproduce, so a lockfile left from an earlier `[dependencies]`
-   section goes. The editor reads a source view and never installs, and a dry
-   run creates nothing. */
+/* The package command owns lockfile and installation state. Editor source
+   views and dry runs do not prepare dependencies. */
 static void _resolve_dependencies(Project p) {
   CliRequest request = p.command;
   if (p.sources || request.dry_run) return;
   String path = %"${p.root}/x2c.lock";
-  if (!p.dependencies) {
-    try Path.remove_file(path);
-    catch %(io-fail *detail): Diagnostics.host_error(detail);
-    return;
+  struct stat lock;
+  if (!p.dependencies && lstat(path, &lock) && errno == ENOENT) return;
+  Array args = ["ensure", "--lock", path];
+  if (request.index) {
+    args.push("--index");
+    args.push(request.index);
   }
-  List locked = _read_lock(path);
-  if (_lock_satisfies(p, locked)) return;
-  Array rows = [];
+  if (request.quiet) args.push("--quiet");
+  args.push("--");
   for (ProjectDependency entry = p.dependencies; entry; entry = entry.next) {
-    List row = _locked_row(locked, entry);
-    rows.push(request.require_package(entry.name, entry.version, row));
+    args.push(entry.name);
+    args.push(entry.version);
   }
-  _write_lock(path, rows.list_free());
-}
-
-/* The lockfile's rows, or NULL when it is absent. */
-static List _read_lock(String path) {
-  String text = NULL;
-  try text = Path.read_text(path);
-  catch %(not-found *): return NULL;
-  return install_rows(text);
-}
-
-/* Every dependency is locked at its pinned version and already installed at
-   that version, so the build needs no index and no network. */
-static int _lock_satisfies(Project p, List rows) {
-  if (!rows) return 0;
-  for (ProjectDependency entry = p.dependencies; entry; entry = entry.next) {
-    if (!_locked_row(rows, entry)) return 0;
-    if (install_version(entry.name) != entry.version) return 0;
-  }
-  return 1;
-}
-
-/* The lockfile row that pins `entry` at its version, or NULL when the
-   lockfile has none and the index has to resolve it. */
-static List _locked_row(List rows, ProjectDependency entry) {
-  List found = NULL;
-  foreach (List row, rows)
-    if (row.car() == entry.name && row.cadr() == entry.version) found = row;
-  return found;
-}
-
-static void _write_lock(String path, List rows) {
-  String text =
-    "# x2c lockfile. Written by x2c build; keep it with the manifest.\n"
-    "# name version kind platform url sha256\n";
-  foreach (List row, rows) text = %"$text${" ".join(row)}\n";
-  try Path.publish_files(%($path $text));
-  catch %(io-fail *detail): Diagnostics.host_error(detail);
+  int status = Compiler.run_command("package", args);
+  if (status) exit(status);
 }
 
 // build plans

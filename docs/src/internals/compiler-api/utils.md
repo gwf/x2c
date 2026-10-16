@@ -19,6 +19,8 @@ System utilities for environment discovery and workers.
 | [`x2c_initialize_command_environment`](#x2c_initialize_command_environment) | Initializes an external command with the compiler identity embedded when it was built. |
 | [`x2c_initialize_environment`](#x2c_initialize_environment) | Initializes compiler paths and default include `List`s once. |
 | [`x2c_set_root`](#x2c_set_root) | Overrides the repository root and rebuilds its default include `List`s. |
+| [`Compiler.command_environment`](#Compiler.command_environment) | Returns the home, driver, and identity supplied to external commands. |
+| [`Compiler.command_path`](#Compiler.command_path) | Returns an executable command in this compiler's libexec, or NULL. |
 | [`Compiler.cpp_include_dirs`](#Compiler.cpp_include_dirs) | Returns the borrowed preprocessor `List` `<root>/lib`, then `<root>/src`. |
 | [`Compiler.default_include_dirs`](#Compiler.default_include_dirs) | Returns the borrowed default include `List`, `<root>/include/x2c`. |
 | [`Compiler.driver_executable`](#Compiler.driver_executable) | Returns the matching compiler executable for a recursive translation. |
@@ -29,6 +31,7 @@ System utilities for environment discovery and workers.
 | [`Compiler.is_package_source`](#Compiler.is_package_source) | Recognizes a package's `src/` files or its package-named legacy entry. |
 | [`Compiler.module_stamp`](#Compiler.module_stamp) | Returns the stamp a native module records: `x2c-module-stamp:` and the running compiler's identity. |
 | [`Compiler.package_directory`](#Compiler.package_directory) | Returns the package directory that holds `path` below one of `roots`: the root's child on the way to `path`, compared by canonical path, when that child's name is an identifier. |
+| [`Compiler.run_command`](#Compiler.run_command) | Runs an external command with inherited streams and returns its status. |
 | [`Compiler.stage_dir`](#Compiler.stage_dir) | Returns the directory of a compiler staged at `<home>/builds/<stage>/`, or NULL for any other compiler. |
 | [`Diagnostics.driver_error`](#Diagnostics.driver_error) | Prints `x2c: error: <message>` to stderr and exits with status 2. |
 | [`Diagnostics.host_error`](#Diagnostics.host_error) | Reports a caught `<not-found>` or `<io-fail>` through `Diagnostics.driver_error` as its operation, path or program, and system reason. |
@@ -50,7 +53,7 @@ System utilities for environment discovery and workers.
 
 Returns `hash` extended with `length` `bytes` by 64-bit FNV-1a.
 
-Source: `src/utils.x:362`
+Source: `src/utils.x:396`
 
 #### fnv_file
 
@@ -59,7 +62,7 @@ Source: `src/utils.x:362`
 Returns `hash` extended with the contents of the file at `path`.
 A missing or unreadable file clears `ok`.
 
-Source: `src/utils.x:347`
+Source: `src/utils.x:381`
 
 #### x2c_get_executable
 
@@ -119,6 +122,24 @@ Source: `src/utils.x:167`
 
 ### `Compiler`
 
+<a id="Compiler.command_environment"></a>
+#### Compiler.command_environment
+
+`Map Compiler.command_environment(void)`
+
+Returns the home, driver, and identity supplied to external commands.
+
+Source: `src/utils.x:236`
+
+<a id="Compiler.command_path"></a>
+#### Compiler.command_path
+
+`String Compiler.command_path(String name)`
+
+Returns an executable command in this compiler's libexec, or NULL.
+
+Source: `src/utils.x:228`
+
 <a id="Compiler.cpp_include_dirs"></a>
 #### Compiler.cpp_include_dirs
 
@@ -128,7 +149,7 @@ Returns the borrowed preprocessor `List` `<root>/lib`, then `<root>/src`.
 `<root>/src` is present only when the home has that directory. Returns
 NULL before environment setup.
 
-Source: `src/utils.x:236`
+Source: `src/utils.x:270`
 
 <a id="Compiler.default_include_dirs"></a>
 #### Compiler.default_include_dirs
@@ -138,7 +159,7 @@ Source: `src/utils.x:236`
 Returns the borrowed default include `List`, `<root>/include/x2c`.
 Returns NULL before environment setup.
 
-Source: `src/utils.x:230`
+Source: `src/utils.x:264`
 
 <a id="Compiler.driver_executable"></a>
 #### Compiler.driver_executable
@@ -188,7 +209,7 @@ Ordinary compiler startup hashes its executable with FNV-1a; an external
 command uses the identity embedded from the compiler that built it.
 Returns NULL if ordinary startup could not read its executable.
 
-Source: `src/utils.x:323`
+Source: `src/utils.x:357`
 
 <a id="Compiler.is_package_source"></a>
 #### Compiler.is_package_source
@@ -198,7 +219,7 @@ Source: `src/utils.x:323`
 Recognizes a package's `src/` files or its package-named legacy entry.
 Other files under the package directory are consumers.
 
-Source: `src/utils.x:310`
+Source: `src/utils.x:344`
 
 <a id="Compiler.module_stamp"></a>
 #### Compiler.module_stamp
@@ -209,7 +230,7 @@ Returns the stamp a native module records: `x2c-module-stamp:` and the
 running compiler's identity. Returns NULL when the executable cannot be
 read. Only the compiler that built a module loads it.
 
-Source: `src/utils.x:329`
+Source: `src/utils.x:363`
 
 <a id="Compiler.package_directory"></a>
 #### Compiler.package_directory
@@ -220,7 +241,18 @@ Returns the package directory that holds `path` below one of `roots`:
 the root's child on the way to `path`, compared by canonical path, when
 that child's name is an identifier. Returns NULL for any other path.
 
-Source: `src/utils.x:276`
+Source: `src/utils.x:310`
+
+<a id="Compiler.run_command"></a>
+#### Compiler.run_command
+
+`int Compiler.run_command(String name, List arguments)`
+
+Runs an external command with inherited streams and returns its status.
+Resolves only this compiler's libexec and passes literal arguments without
+a shell. An unavailable command reports an error and exits with status 2.
+
+Source: `src/utils.x:250`
 
 <a id="Compiler.stage_dir"></a>
 #### Compiler.stage_dir
@@ -244,7 +276,7 @@ The streams are flushed and `atexit` handlers do not run, so the call is
 safe inside a `try` body or a catch arm, whose records those handlers
 would otherwise find still live.
 
-Source: `src/utils.x:434`
+Source: `src/utils.x:468`
 
 <a id="Diagnostics.host_error"></a>
 #### Diagnostics.host_error
@@ -255,7 +287,7 @@ Reports a caught `<not-found>` or `<io-fail>` through
 `Diagnostics.driver_error` as its operation, path or program, and system
 reason.
 
-Source: `src/utils.x:444`
+Source: `src/utils.x:478`
 
 ### `Env`
 
@@ -268,7 +300,7 @@ Returns the spelling of the first `PATH` candidate for the program `name`
 that this process may execute, searched as `execvp` searches, or NULL.
 An empty entry names the current directory.
 
-Source: `src/utils.x:242`
+Source: `src/utils.x:276`
 
 ### `Job`
 
@@ -281,7 +313,7 @@ Decodes the wait status `raw` of a child that has ended. Returns its
 exit status, `128 + signal` when a signal ended it, or -1 otherwise,
 and stores that signal in `signal`, or 0 when no signal ended it.
 
-Source: `src/utils.x:421`
+Source: `src/utils.x:455`
 
 ### `Path`
 
@@ -293,7 +325,7 @@ Source: `src/utils.x:421`
 Returns the identity a compiler executable at `path` has when it runs:
 the FNV-1a hash of its bytes, or NULL when `path` is NULL or unreadable.
 
-Source: `src/utils.x:337`
+Source: `src/utils.x:371`
 
 <a id="Path.identifier_hash"></a>
 #### Path.identifier_hash
@@ -302,7 +334,7 @@ Source: `src/utils.x:337`
 
 Hashes unit filename spelling for stable generated C identifiers.
 
-Source: `src/utils.x:372`
+Source: `src/utils.x:406`
 
 <a id="Path.is_layout_source"></a>
 #### Path.is_layout_source
@@ -311,7 +343,7 @@ Source: `src/utils.x:372`
 
 Reports whether `path` names a file in the indentation syntax.
 
-Source: `src/utils.x:269`
+Source: `src/utils.x:303`
 
 <a id="Path.is_x2c_source"></a>
 #### Path.is_x2c_source
@@ -321,7 +353,7 @@ Source: `src/utils.x:269`
 Reports whether `path` is x2c source: a `.x` or `.xp` file, or a file
 of any other name whose first line is a shebang, which is a script.
 
-Source: `src/utils.x:255`
+Source: `src/utils.x:289`
 
 <a id="Path.lock_file"></a>
 #### Path.lock_file
@@ -332,7 +364,7 @@ Locks the file `p`, creating it, and returns a descriptor that holds the
 lock until it is closed or the process exits. Returns -1 when `wait` is
 zero and another process holds the lock.
 
-Source: `src/utils.x:384`
+Source: `src/utils.x:418`
 
 <a id="Path.publish_files"></a>
 #### Path.publish_files
@@ -348,7 +380,7 @@ destinations replaced.
 
 **Raises:** `<not-found>` or `<io-fail>`, after removing the siblings.
 
-Source: `src/utils.x:404`
+Source: `src/utils.x:438`
 
 ### `SourceView`
 
@@ -361,7 +393,7 @@ Resolves the first readable package entry under `roots`, preferring `.x`
 to `.xp`, using the importing compiler's source view. Returns its directory
 through `directory`, or NULL when the package does not exist.
 
-Source: `src/utils.x:292`
+Source: `src/utils.x:326`
 
 ## Public types
 

@@ -29,7 +29,7 @@ empty, and its last component names the target. Any other directory, an
 unusable name, or a failed write prints a diagnostic and exits with
 status 2.
 
-Source: `src/project.x:891`
+Source: `src/project.x:850`
 
 <a id="CliRequest.project_manifest"></a>
 #### CliRequest.project_manifest
