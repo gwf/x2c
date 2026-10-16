@@ -429,10 +429,13 @@ cat >packages/sibling/src/sibling.x <<'EOF'
 meta int increment(int);
 int increment(int n) => n + 1;
 EOF
+compiler_sources=()
+while IFS= read -r source; do compiler_sources+=("$source"); done < <(
+  python3 "$ROOT/tools/compiler-sources.py" --root "$ROOT")
 "$X2C" build -q -j 2 --extension packages/tally \
   --extension packages/sibling --build-dir linked \
   --c-include-dir "$ROOT/builds/0/src" --output linked/x2c \
-  "$ROOT"/src/*.x "$ROOT"/src/components/*.x
+  "${compiler_sources[@]}"
 "$X2C" translate -q --package-dir packages --out-dir out app/main.x \
   2>/dev/null && fail "stale module accepted"
 # The helper links the implementation the compiler was built with, not the

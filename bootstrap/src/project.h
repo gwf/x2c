@@ -2,11 +2,11 @@
 
 #pragma once
 
-#ifndef __GUARD_0x05ED52D8__
-#define __GUARD_0x05ED52D8__
+#ifndef __GUARD_0x0D185262__
+#define __GUARD_0x0D185262__
 
 #include "x2c.h"
-#include "cli.h"
+#include "cli/cli.h"
 typedef struct ProjectBuild{
   CliRequest request;
   struct ProjectBuild * next;
@@ -26,4 +26,4 @@ ProjectBuild ProjectBuild_plan(CliRequest request);
 String CliRequest_project_manifest(CliRequest c);
 
 
-#endif /* __GUARD_0x05ED52D8__ */
+#endif /* __GUARD_0x0D185262__ */

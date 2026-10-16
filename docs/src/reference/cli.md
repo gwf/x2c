@@ -26,7 +26,7 @@ place of its source when it is current:
 ```sh
 mkdir -p /tmp/x2c-generated
 ./x2c translate --out-dir /tmp/x2c-generated \
-  src/main.x src/parse.x
+  src/main.x src/parse/parse.x
 ```
 
 Without `--out-dir`, output goes to the current directory. An explicitly
@@ -441,7 +441,7 @@ build/tool
 -I
 include
 src/main.x
-src/parse.x
+src/parse/parse.x
 ```
 
 Invoke one as `./x2c @build.rsp`. Whitespace separates arguments;

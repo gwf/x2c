@@ -4,7 +4,7 @@
 > **Provisional API:** This reference documents current compiler behavior.
 > Compatibility is not yet promised.
 
-# `src/expressions.x`
+# `src/expressions/expressions.x`
 
 Expression syntax and its resolution.
 
@@ -359,7 +359,7 @@ A printf-family function: its name, the indexes of its format and first
 value arguments, and whether only a spelling no declaration resolves
 names it.
 
-Source: `src/expressions.x:19`
+Source: `src/expressions/expressions.x:19`
 
 ## Design notes
 

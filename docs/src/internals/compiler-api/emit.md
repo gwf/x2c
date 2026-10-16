@@ -4,7 +4,7 @@
 > **Provisional API:** This reference documents current compiler behavior.
 > Compatibility is not yet promised.
 
-# `src/emit.x`
+# `src/emit/emit.x`
 
 C tokens from normalized x2c ASTs.
 

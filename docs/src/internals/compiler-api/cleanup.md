@@ -4,7 +4,7 @@
 > **Provisional API:** This reference documents current compiler behavior.
 > Compatibility is not yet promised.
 
-# `src/cleanup.x`
+# `src/cleanup/cleanup.x`
 
 Cleanup regions and the transfers that leave them.
 

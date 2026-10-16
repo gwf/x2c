@@ -74,9 +74,9 @@ policy or public trim API requires a separately settled design.
 ## 2. temporary-result-ownership.md
 
 Treat the guard as a correctness boundary to preserve, not an obsolete check.
-[Compiler.discard_helper](../../src/protocol.x) retains temporary inputs when
+[Compiler.discard_helper](../../src/protocol/protocol.x) retains temporary inputs when
 an ordinary pointer/aggregate-returning function might return an input or an
-interior view. [Expression lowering](../../src/expressions.x) records fresh
+interior view. [Expression lowering](../../src/expressions/expressions.x) records fresh
 callees for protocol operators, numeric converters, and their wrappers. Current
 operator cleanup fixtures cover borrowed handles and interior views.
 

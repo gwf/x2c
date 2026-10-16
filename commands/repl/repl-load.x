@@ -4,8 +4,8 @@
 */
 #pragma once
 #include "repl-session.x"
-#include "collect.x"
-#include "meta-group.x"
+#include "collect/collect.x"
+#include "meta-group/meta-group.x"
 #include "meta-project.x"
 #include "datum.x"
 #include "ast-rewrite.x"

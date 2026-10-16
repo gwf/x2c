@@ -14,7 +14,7 @@
 #include "common.h"
 typedef struct Diagnostics * Diagnostics;
 
-#include "compiler.h"
+#include "compiler/compiler.h"
 typedef struct Diagnostics{
   Array entries;
   Map published;

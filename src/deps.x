@@ -7,11 +7,11 @@
 */
 
 #pragma once
-#include "cli.x"
-#include "compiler.x"
+#include "cli/cli.x"
+#include "compiler/compiler.x"
 #include "utils.x"
 
-#include "collect.x"
+#include "collect/collect.x"
 
 #include <stdio.h>
 #include <string.h>

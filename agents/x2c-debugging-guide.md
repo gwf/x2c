@@ -10,7 +10,7 @@ and validating runtime behaviour. The AST fragments below are illustrative.
 ### 1.1 Var, Symbol, List Basics
 
 `car()` returns a `Var`, which supports direct comparison with a `Symbol`.
-For example, `src/generate.x` tests `declaration.car() == <declare>`.
+For example, `src/generate/generate.x` tests `declaration.car() == <declare>`.
 
 ```x2c
 #include "list-selectors.x"

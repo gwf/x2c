@@ -4,7 +4,7 @@
 > **Provisional API:** This reference documents current compiler behavior.
 > Compatibility is not yet promised.
 
-# `src/meta-group.x`
+# `src/meta-group/meta-group.x`
 
 A unit's meta group, emitted as C.
 

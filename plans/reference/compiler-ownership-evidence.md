@@ -75,8 +75,8 @@ maps is not deep isolation. Cache retention is an explicit separate operation.
    mode, macro/literal/session handles and shifts token coordinates. Parsing
    returns replacement segment handles to owner; declarations/statics/deps merge.
    close_child does not free compiler allocation. Evidence:
-   [collect.x:339](../../src/collect.x#L339),
-   [compiler.x:2636](../../src/compiler.x#L2636),
+   [collect.x:339](../../src/collect/collect.x#L339),
+   [compiler.x:2636](../../src/compiler/compiler.x#L2636),
    [fields.x:32](../../src/fields.x#L32).
 
 3. Cold included file: new_shared keeps unit binding identity/package/shared
@@ -85,24 +85,24 @@ maps is not deep isolation. Cache retention is an explicit separate operation.
    active cycle-prefix arrays are shared into fresh visited map. _walk_apart
    temporarily replaces names.counters on the shared GenNames record while
    next_binding remains shared. Evidence:
-   [collect.x:591](../../src/collect.x#L591),
-   [collect.x:580](../../src/collect.x#L580),
-   [collect.x:617](../../src/collect.x#L617).
+   [collect.x:591](../../src/collect/collect.x#L591),
+   [collect.x:580](../../src/collect/collect.x#L580),
+   [collect.x:617](../../src/collect/collect.x#L617).
 
 4. Package compiler: caller registers root before constructing child, so normal
    shared package_roots identity supplies package scope. Package child builds
    cached public surface; caller merges definitions/deps and retains public
-   effects. Evidence: [collect.x:1272](../../src/collect.x#L1272).
+   effects. Evidence: [collect.x:1272](../../src/collect/collect.x#L1272).
 
 5. Default-selection shadow: fresh Sym overlay over collected file symbols;
    borrows owner's Lisp and meta group; rebuilds protocols, resets conforms;
    merges selected declarations/statics/definitions back. Evidence:
-   [compiler.x:895](../../src/compiler.x#L895),
-   [compiler.x:921](../../src/compiler.x#L921).
+   [compiler.x:895](../../src/compiler/compiler.x#L895),
+   [compiler.x:921](../../src/compiler/compiler.x#L921).
 
 6. Import replay shadow: take_unit_state, reset symbols, start collection,
    replay imports, return_unit_state and merge dependencies. Evidence:
-   [collect.x:1465](../../src/collect.x#L1465).
+   [collect.x:1465](../../src/collect/collect.x#L1465).
 
 7. Host CPP compiler: new_shared, separate tokenizer/line markers, retained
    inside ParsedUnit; borrows imports/Lisp/meta group explicitly. Source facts
@@ -116,9 +116,9 @@ maps is not deep isolation. Cache retention is an explicit separate operation.
    same compiler replays signatures, tokenizes original text, binds bodies,
    publishes dependencies, clears public_bodies and closes. This is deliberately
    longer than one child call, still bounded by unit Context. Evidence:
-   [collect.x:966](../../src/collect.x#L966),
-   [collect.x:995](../../src/collect.x#L995),
-   [compiler.x:2618](../../src/compiler.x#L2618).
+   [collect.x:966](../../src/collect/collect.x#L966),
+   [collect.x:995](../../src/collect/collect.x#L995),
+   [compiler.x:2618](../../src/compiler/compiler.x#L2618).
 
 9. Meta-group emission is not a new_shared child. Backend needs more owner state
    than the child constructor copies. It snapshots entire Compiler and GenNames,
@@ -126,20 +126,20 @@ maps is not deep isolation. Cache retention is an explicit separate operation.
    output state, runs lowering/generation, restores structs, then rolls back.
    Its result must remain allocated after restore. It shares inherited pointers
    not explicitly copied; those must not acquire unrolled-back mutation.
-   Evidence: [meta-group.x:210](../../src/meta-group.x#L210),
-   [meta-group.x:283](../../src/meta-group.x#L283).
+   Evidence: [meta-group.x:210](../../src/meta-group/meta-group.x#L210),
+   [meta-group.x:283](../../src/meta-group/meta-group.x#L283).
 
 10. Collection macro production copies name counters and retains the copy only
     when retaining generated declaration production. Ordinary repeated expansion
     restores original counters while retaining required helper declarations.
-    Evidence: [compiler.x:633](../../src/compiler.x#L633).
+    Evidence: [compiler.x:633](../../src/compiler/compiler.x#L633).
 
 11. Builtin/shipped definition child: _install_source replaces child.sym,
     fn_defs, macros and kw_aliases with the owner's exact handles. Its fresh
     Sym becomes unused Scope storage. Sym.c still names the owner, so diagnostic
     ownership differs from ordinary fresh-Sym children. Child tokenizer and
     diagnostics remain local. Evidence:
-    [macros.x:4729](../../src/macros.x#L4729).
+    [macros.x:4729](../../src/macros/macros.x#L4729).
 
 12. Shared-surface preload: frontend uses a nonisolated named Context, not an
     ordinary private canonical pool. It attaches borrowed shared Lisp and closes

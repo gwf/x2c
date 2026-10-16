@@ -6,7 +6,7 @@
     the public operator lookups below.
 */
 
-#include "compiler.x"
+#include "compiler/compiler.x"
 
 meta static List _operator_rows(void) => %(
   (<||>       1 0        0         0)

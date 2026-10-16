@@ -27,7 +27,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-/** Names the translation state that `src/compiler.x` defines. */
+/** Names the translation state that `src/compiler/compiler.x` defines. */
 typedef struct Compiler *Compiler;
 
 /** Names the positioned diagnostic store that `src/diagnostics.x` defines. */

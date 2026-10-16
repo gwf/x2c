@@ -4,7 +4,7 @@
 > **Provisional API:** This reference documents current compiler behavior.
 > Compatibility is not yet promised.
 
-# `src/literals.x`
+# `src/literals/literals.x`
 
 X2c literal parsing.
 

@@ -4,7 +4,7 @@
 > **Provisional API:** This reference documents current compiler behavior.
 > Compatibility is not yet promised.
 
-# `src/callables.x`
+# `src/callables/callables.x`
 
 Callable values lowered to C helpers.
 
@@ -143,5 +143,5 @@ A callable value that C cannot spell directly becomes a static helper
 queued with `Compiler.add_early`. Every `Func` helper shares one
 `FuncAdapter` ABI: arguments are read in index order from the argument
 vector, and the result is boxed into a `Var`.
-`src/components/component-lambdas.x`
+`src/components/lambda-functions.x`
 lowers lambdas.

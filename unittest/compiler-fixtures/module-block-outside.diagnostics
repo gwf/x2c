@@ -1,3 +1,0 @@
-unittest/compiler-fixtures/module-block-outside.x:5:1: driver: module member 'module-block/implementation.x' is outside 'module-block-outside/'
-  note: a member lies under the companion directory of the file that names it
-

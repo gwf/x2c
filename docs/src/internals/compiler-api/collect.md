@@ -4,7 +4,7 @@
 > **Provisional API:** This reference documents current compiler behavior.
 > Compatibility is not yet promised.
 
-# `src/collect.x`
+# `src/collect/collect.x`
 
 Source-ordered shallow symbol collection and replay.
 
@@ -326,13 +326,12 @@ Source: `src/collect/providers.x:106`
 
 Returns the x2c source at `path`, whose own text is `text`, with its
 file-scope `module` block replaced by the text of each member it names,
-in order, or NULL when the text has no block. A member lies under the
-companion directory of the file that names it, `NAME/` beside `NAME.x`,
-and its own block is spliced in turn. A member's quoted include of a
-file beside it is spelled from the entry's directory, so it names the
-same file there.
+in order, or NULL when the text has no block. Member paths are relative
+to the file that names them, and their own blocks are spliced in turn.
+A member's quoted include of a file beside it is spelled from the
+entry's directory, so it names the same file there.
 
-Source: `src/collect/splice.x:29`
+Source: `src/collect/splice.x:28`
 
 <a id="Compiler.name_loaded_provider"></a>
 #### Compiler.name_loaded_provider

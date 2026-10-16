@@ -12,9 +12,9 @@
 
 #include "frontend.x"
 #include "meta-project.x"
-#include "project.x"
+#include "project/project.x"
 #include "sourceview.x"
-#include "emit.x"
+#include "emit/emit.x"
 #include "format.x"
 #include "diagnostics.x"
 #include "report.x"

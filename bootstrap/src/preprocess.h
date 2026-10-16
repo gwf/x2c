@@ -6,7 +6,7 @@
 #define __GUARD_0x5295F561__
 
 #include "x2c.h"
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include <ctype.h>
 String Compiler_preproc_directive(String text);
 

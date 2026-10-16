@@ -2,11 +2,11 @@
 
 #pragma once
 
-#ifndef __GUARD_0xAB8728A9__
-#define __GUARD_0xAB8728A9__
+#ifndef __GUARD_0xAB859D04__
+#define __GUARD_0xAB859D04__
 
 #include "x2c.h"
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include "ast-rewrite.h"
 #include "buffer.h"
 #include "datum.h"
@@ -93,4 +93,4 @@ String Compiler_interface_text(Compiler c);
 Map Compiler_linked_prelude_records(Compiler c);
 
 
-#endif /* __GUARD_0xAB8728A9__ */
+#endif /* __GUARD_0xAB859D04__ */

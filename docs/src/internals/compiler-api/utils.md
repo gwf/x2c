@@ -410,7 +410,7 @@ Source: `src/utils.x:334`
 
 | Type | Kind | Summary |
 | --- | --- | --- |
-| [`Compiler`](#Compiler) | struct | Names the translation state that `src/compiler.x` defines. |
+| [`Compiler`](#Compiler) | struct | Names the translation state that `src/compiler/compiler.x` defines. |
 | [`Diagnostics`](#Diagnostics) | struct | Names the positioned diagnostic store that `src/diagnostics.x` defines. |
 
 <a id="Compiler"></a>
@@ -418,7 +418,7 @@ Source: `src/utils.x:334`
 
 `typedef struct Compiler *Compiler`
 
-Names the translation state that `src/compiler.x` defines.
+Names the translation state that `src/compiler/compiler.x` defines.
 
 Source: `src/utils.x:31`
 

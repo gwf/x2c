@@ -2,17 +2,17 @@
 
 #pragma once
 
-#ifndef __GUARD_0xC5263D59__
-#define __GUARD_0xC5263D59__
+#ifndef __GUARD_0xBD8B85AE__
+#define __GUARD_0xBD8B85AE__
 
 #include "x2c.h"
 #include "private-keywords.h"
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include "grammar.h"
-#include "parse.h"
+#include "parse/parse.h"
 #include "type.h"
-#include "expressions.h"
-#include "transform.h"
+#include "expressions/expressions.h"
+#include "transform/transform.h"
 #include "lambdas.h"
 #include <stdint.h>
 #include <string.h>
@@ -47,4 +47,4 @@ List Compiler_parse_string_literal(Compiler c);
 List Compiler_parse_atomic_literal(Compiler c);
 
 
-#endif /* __GUARD_0xC5263D59__ */
+#endif /* __GUARD_0xBD8B85AE__ */

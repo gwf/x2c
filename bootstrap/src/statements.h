@@ -7,12 +7,12 @@
 
 #include "x2c.h"
 #include "private-keywords.h"
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include "parse-reports.h"
-#include "parse.h"
-#include "expressions.h"
-#include "literals.h"
-#include "macros.h"
+#include "parse/parse.h"
+#include "expressions/expressions.h"
+#include "literals/literals.h"
+#include "macros/macros.h"
 List Compiler_parse_statement(Compiler c);
 
 List Compiler_with_binding(Compiler c);

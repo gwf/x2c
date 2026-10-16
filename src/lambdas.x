@@ -5,16 +5,16 @@
     A source lambda and a lambda that a macro or transform constructs bind
     through the same capture operations, which record each captured binding
     and its value or reference mode in semantic binding facts. The rows
-    leave here resolved and in first-use order; `component-lambdas.x`
+    leave here resolved and in first-use order; `lambda-functions.x`
     lowers them.
 */
 #pragma once
-#include "compiler.x"
+#include "compiler/compiler.x"
 #include "ast-rewrite.x"
 #include "grammar.x"
-#include "parse.x"
+#include "parse/parse.x"
 #include "type.x"
-#include "expressions.x"
+#include "expressions/expressions.x"
 
 // local types used by lifted functions
 

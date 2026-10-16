@@ -272,6 +272,8 @@ static void _check_module_counts(void):
   foreach String folder in %("src" "src/components"):
     foreach String name in root.join(folder).list_dir():
       if name.endswith(".x"): sources.push(name.remove_suffix(".x"))
+  foreach Path source in root.join("src/*/*.x").glob():
+    if source.stem() == source.dirname().basename(): sources.push(source.stem())
   int src_count = sources.len(), lib_count = 0
   foreach String name in root.join("lib").list_dir():
     if name.endswith(".x") && name != "x2c.x": lib_count++
@@ -291,7 +293,7 @@ static void _check_module_counts(void):
                     %"$count but expected $expected")
   Regex quoted = Regex.compile("`([^`]+)`")
   Regex module = Regex.compile(
-    "^(?:src/(?:components/)?)?([a-z][a-z0-9-]*)(?:\\.x)?$")
+    "^(?:src/(?:[a-z][a-z0-9-]*/)?)?([a-z][a-z0-9-]*)(?:\\.x)?$")
   foreach List entry in _src_module_lists():
     (String relative, String start_marker, String end_marker) = entry
     String text = _read(relative)

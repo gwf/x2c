@@ -10,7 +10,7 @@
     compiler's side of the project helper is in `meta-helper-client.x`.
 */
 #pragma once
-#include "compiler.x"
+#include "compiler/compiler.x"
 
 #include "grammar.x"
 #include "type.x"

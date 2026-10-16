@@ -7,7 +7,7 @@
 */
 
 #pragma once
-#include "cli.x"
+#include "cli/cli.x"
 #include "path.x"
 #include "process.x"
 

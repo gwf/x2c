@@ -2,12 +2,12 @@
 
 #pragma once
 
-#ifndef __GUARD_0xAA205D9A__
-#define __GUARD_0xAA205D9A__
+#ifndef __GUARD_0xEA8B7FE6__
+#define __GUARD_0xEA8B7FE6__
 
 #include "x2c.h"
 #include "private-keywords.h"
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include "type.h"
 typedef struct PrintfFn{
   const char * name;
@@ -17,13 +17,13 @@ PrintfFn;
 
 #include "ast-rewrite.h"
 #include "grammar.h"
-#include "parse.h"
-#include "literals.h"
-#include "protocol.h"
-#include "transform.h"
+#include "parse/parse.h"
+#include "literals/literals.h"
+#include "protocol/protocol.h"
+#include "transform/transform.h"
 #include "stage.h"
-#include "initializers.h"
-#include "macros.h"
+#include "initializers/initializers.h"
+#include "macros/macros.h"
 #include "expressions-reports.h"
 List Compiler_parse_expression(Compiler c);
 
@@ -82,4 +82,4 @@ List Compiler_converter_call(Compiler c, List expr, Type type, Type target);
 int Compiler_is_builtin_converter_call(Compiler c, List expr);
 
 
-#endif /* __GUARD_0xAA205D9A__ */
+#endif /* __GUARD_0xEA8B7FE6__ */

@@ -544,7 +544,7 @@ hand. `lib/var-tags.x` defined its own `var.tag.int-expr` and
 `var.tag.symbol-expr`; `lib/varops.x` spelled a three-level index node inline;
 the `(expr () (composite (commas ...)))` initializer wrapper appeared four
 times across two files. The shapes are only discoverable by reading
-`src/emit.x`, and getting one wrong fails as `compile-time Lisp evaluation
+`src/emit/emit.x`, and getting one wrong fails as `compile-time Lisp evaluation
 failed` at the invocation, not at the definition.
 
 Direct form:

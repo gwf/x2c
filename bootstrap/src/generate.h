@@ -2,20 +2,20 @@
 
 #pragma once
 
-#ifndef __GUARD_0x3F61ACEA__
-#define __GUARD_0x3F61ACEA__
+#ifndef __GUARD_0x459178CE__
+#define __GUARD_0x459178CE__
 
 #include "x2c.h"
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include "grammar.h"
 #include "ast-rewrite.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "cache.h"
-#include "collect.h"
+#include "collect/collect.h"
 #include "format.h"
-#include "emit.h"
+#include "emit/emit.h"
 #include "utils.h"
 typedef struct Init{
   Compiler c;
@@ -44,4 +44,4 @@ List Compiler_definition_rows(Compiler c, List ast);
 void Compiler_dump_definitions(Compiler c, List ast);
 
 
-#endif /* __GUARD_0x3F61ACEA__ */
+#endif /* __GUARD_0x459178CE__ */

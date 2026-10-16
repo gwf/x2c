@@ -24,7 +24,11 @@ mkdir "$scratch/lib" "$scratch/src"
   cd builds/1
   translate() {
     local sources=(../../"$1"/*.x)
-    if [[ $1 == src ]]; then sources+=(../../src/components/*.x); fi
+    if [[ $1 == src ]]; then
+      sources=()
+      while IFS= read -r source; do sources+=("$source"); done < <(
+        python3 ../../tools/compiler-sources.py --root ../..)
+    fi
     ../0/x2c translate ${BUILD_JOBS:+-j "$BUILD_JOBS"} -q --no-interfaces \
       --out-dir "$scratch/$1" "${sources[@]}"
   }

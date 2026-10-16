@@ -2,7 +2,7 @@
 
 /** Lowers a resolved lambda expression, under any position wrappers and
     parentheses, through the lambda rule of
-    `src/components/component-lambdas.x`;
+    `src/components/lambda-functions.x`;
     other expressions pass through. A noncapturing lambda typed `Func`,
     which only a meta body leaves unlifted, lifts to a `Func` of its native
     signature. */

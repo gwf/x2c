@@ -1,49 +1,49 @@
-#define _x2c_gensym_initializer_choice_8AA1709E_0_expanded(_x2c_gensym_static_input_0) static void _x2c_gensym_static_initialize_0(void){\
+#define _x2c_gensym_initializer_choice_65953FEE_0_expanded(_x2c_gensym_static_input_0) static void _x2c_gensym_static_initialize_0(void){\
   _x2c_gensym_static_input_0;\
 }
-#define _x2c_gensym_initializer_choice_8AA1709E_0(_x2c_gensym_static_input_0) _x2c_gensym_initializer_choice_8AA1709E_0_expanded(_x2c_gensym_static_input_0)
-#define _x2c_gensym_initializer_choice_8AA1709E_1_expanded(_x2c_gensym_static_input_1) static void _x2c_gensym_static_initialize_1(void){\
+#define _x2c_gensym_initializer_choice_65953FEE_0(_x2c_gensym_static_input_0) _x2c_gensym_initializer_choice_65953FEE_0_expanded(_x2c_gensym_static_input_0)
+#define _x2c_gensym_initializer_choice_65953FEE_1_expanded(_x2c_gensym_static_input_1) static void _x2c_gensym_static_initialize_1(void){\
   _x2c_gensym_static_input_1;\
 }
-#define _x2c_gensym_initializer_choice_8AA1709E_1(_x2c_gensym_static_input_1) _x2c_gensym_initializer_choice_8AA1709E_1_expanded(_x2c_gensym_static_input_1)
-#define _x2c_gensym_initializer_choice_8AA1709E_2_expanded(_x2c_gensym_static_input_2) static void _x2c_gensym_static_initialize_2(void){\
+#define _x2c_gensym_initializer_choice_65953FEE_1(_x2c_gensym_static_input_1) _x2c_gensym_initializer_choice_65953FEE_1_expanded(_x2c_gensym_static_input_1)
+#define _x2c_gensym_initializer_choice_65953FEE_2_expanded(_x2c_gensym_static_input_2) static void _x2c_gensym_static_initialize_2(void){\
   _x2c_gensym_static_input_2;\
 }
-#define _x2c_gensym_initializer_choice_8AA1709E_2(_x2c_gensym_static_input_2) _x2c_gensym_initializer_choice_8AA1709E_2_expanded(_x2c_gensym_static_input_2)
-#define _x2c_gensym_initializer_choice_8AA1709E_3_expanded(_x2c_gensym_static_input_3) static void _x2c_gensym_static_initialize_3(void){\
+#define _x2c_gensym_initializer_choice_65953FEE_2(_x2c_gensym_static_input_2) _x2c_gensym_initializer_choice_65953FEE_2_expanded(_x2c_gensym_static_input_2)
+#define _x2c_gensym_initializer_choice_65953FEE_3_expanded(_x2c_gensym_static_input_3) static void _x2c_gensym_static_initialize_3(void){\
   _x2c_gensym_static_input_3;\
 }
-#define _x2c_gensym_initializer_choice_8AA1709E_3(_x2c_gensym_static_input_3) _x2c_gensym_initializer_choice_8AA1709E_3_expanded(_x2c_gensym_static_input_3)
-#define _x2c_gensym_initializer_choice_8AA1709E_4_expanded(_x2c_gensym_static_input_4) static void _x2c_gensym_static_initialize_4(void){\
+#define _x2c_gensym_initializer_choice_65953FEE_3(_x2c_gensym_static_input_3) _x2c_gensym_initializer_choice_65953FEE_3_expanded(_x2c_gensym_static_input_3)
+#define _x2c_gensym_initializer_choice_65953FEE_4_expanded(_x2c_gensym_static_input_4) static void _x2c_gensym_static_initialize_4(void){\
   _x2c_gensym_static_input_4;\
 }
-#define _x2c_gensym_initializer_choice_8AA1709E_4(_x2c_gensym_static_input_4) _x2c_gensym_initializer_choice_8AA1709E_4_expanded(_x2c_gensym_static_input_4)
-#define _x2c_gensym_initializer_choice_8AA1709E_5_expanded(_x2c_gensym_static_input_5) static void _x2c_gensym_static_initialize_5(void){\
+#define _x2c_gensym_initializer_choice_65953FEE_4(_x2c_gensym_static_input_4) _x2c_gensym_initializer_choice_65953FEE_4_expanded(_x2c_gensym_static_input_4)
+#define _x2c_gensym_initializer_choice_65953FEE_5_expanded(_x2c_gensym_static_input_5) static void _x2c_gensym_static_initialize_5(void){\
   _x2c_gensym_static_input_5;\
 }
-#define _x2c_gensym_initializer_choice_8AA1709E_5(_x2c_gensym_static_input_5) _x2c_gensym_initializer_choice_8AA1709E_5_expanded(_x2c_gensym_static_input_5)
-#define _x2c_gensym_initializer_choice_8AA1709E_6_expanded(_x2c_gensym_static_input_6) static void _x2c_gensym_static_initialize_6(void){\
+#define _x2c_gensym_initializer_choice_65953FEE_5(_x2c_gensym_static_input_5) _x2c_gensym_initializer_choice_65953FEE_5_expanded(_x2c_gensym_static_input_5)
+#define _x2c_gensym_initializer_choice_65953FEE_6_expanded(_x2c_gensym_static_input_6) static void _x2c_gensym_static_initialize_6(void){\
   _x2c_gensym_static_input_6;\
 }
-#define _x2c_gensym_initializer_choice_8AA1709E_6(_x2c_gensym_static_input_6) _x2c_gensym_initializer_choice_8AA1709E_6_expanded(_x2c_gensym_static_input_6)
-#define _x2c_gensym_initializer_choice_8AA1709E_7_expanded(_x2c_gensym_static_input_7) static void _x2c_gensym_static_initialize_7(void){\
+#define _x2c_gensym_initializer_choice_65953FEE_6(_x2c_gensym_static_input_6) _x2c_gensym_initializer_choice_65953FEE_6_expanded(_x2c_gensym_static_input_6)
+#define _x2c_gensym_initializer_choice_65953FEE_7_expanded(_x2c_gensym_static_input_7) static void _x2c_gensym_static_initialize_7(void){\
   _x2c_gensym_static_input_7;\
 }
-#define _x2c_gensym_initializer_choice_8AA1709E_7(_x2c_gensym_static_input_7) _x2c_gensym_initializer_choice_8AA1709E_7_expanded(_x2c_gensym_static_input_7)
-#define _x2c_gensym_initializer_choice_8AA1709E_8_expanded(_x2c_gensym_static_input_8) static void _x2c_gensym_static_initialize_8(void){\
+#define _x2c_gensym_initializer_choice_65953FEE_7(_x2c_gensym_static_input_7) _x2c_gensym_initializer_choice_65953FEE_7_expanded(_x2c_gensym_static_input_7)
+#define _x2c_gensym_initializer_choice_65953FEE_8_expanded(_x2c_gensym_static_input_8) static void _x2c_gensym_static_initialize_8(void){\
   _x2c_gensym_static_input_8;\
 }
-#define _x2c_gensym_initializer_choice_8AA1709E_8(_x2c_gensym_static_input_8) _x2c_gensym_initializer_choice_8AA1709E_8_expanded(_x2c_gensym_static_input_8)
+#define _x2c_gensym_initializer_choice_65953FEE_8(_x2c_gensym_static_input_8) _x2c_gensym_initializer_choice_65953FEE_8_expanded(_x2c_gensym_static_input_8)
 /* auto-generated by x2c.  Do not edit! */
 
-#define __GUARD_0x8AA1709E__
+#define __GUARD_0x65953FEE__
 #include "x2c.h"
 
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include "grammar.h"
-#include "macros.h"
-#include "meta-group.h"
-#include "meta-sdk.h"
+#include "macros/macros.h"
+#include "meta-group/meta-group.h"
+#include "meta-sdk/meta-sdk.h"
 #include "meta.h"
 #include "stage.h"
 #include "utils.h"
@@ -71,16 +71,16 @@ static Map native_modules;
 
 
 
-_x2c_gensym_initializer_choice_8AA1709E_0((native_modules = NULL))
+_x2c_gensym_initializer_choice_65953FEE_0((native_modules = NULL))
 static List f7_modules___native_module_order;
 
-_x2c_gensym_initializer_choice_8AA1709E_1((f7_modules___native_module_order = NULL))
+_x2c_gensym_initializer_choice_65953FEE_1((f7_modules___native_module_order = NULL))
 static Scope native_module_scope;
 
-_x2c_gensym_initializer_choice_8AA1709E_2((native_module_scope = NULL))
+_x2c_gensym_initializer_choice_65953FEE_2((native_module_scope = NULL))
 static String f7_modules___compiler_supplier;
 
-_x2c_gensym_initializer_choice_8AA1709E_3((f7_modules___compiler_supplier = _14))
+_x2c_gensym_initializer_choice_65953FEE_3((f7_modules___compiler_supplier = _14))
 static Map f7_modules____compiler_targets(void);
 
 static void f7_modules____load_compiler_module(void);
@@ -102,18 +102,18 @@ static struct Extension{
 }
 * f7_modules___extensions;
 
-_x2c_gensym_initializer_choice_8AA1709E_4((f7_modules___extensions = NULL))
+_x2c_gensym_initializer_choice_65953FEE_4((f7_modules___extensions = NULL))
 static Map f6_linked___shipped_targets;
 
-_x2c_gensym_initializer_choice_8AA1709E_5((f6_linked___shipped_targets = NULL))
+_x2c_gensym_initializer_choice_65953FEE_5((f6_linked___shipped_targets = NULL))
 static Var _linked_target(Compiler c, String name, List signature, String provider);
 
 static String f6_linked___linked_supplier;
 
-_x2c_gensym_initializer_choice_8AA1709E_6((f6_linked___linked_supplier = _260))
+_x2c_gensym_initializer_choice_65953FEE_6((f6_linked___linked_supplier = _260))
 static Map f6_linked___linked_hashes;
 
-_x2c_gensym_initializer_choice_8AA1709E_7((f6_linked___linked_hashes = NULL))
+_x2c_gensym_initializer_choice_65953FEE_7((f6_linked___linked_hashes = NULL))
 static Map _linked_module(void);
 
 static int _linked_copy(Compiler c, String name, Map linked);
@@ -142,7 +142,7 @@ static Var f5_calls____run_meta(Compiler c, List expression, String name, List a
 
 static List f5_calls___meta_call_form;
 
-_x2c_gensym_initializer_choice_8AA1709E_8((f5_calls___meta_call_form = NULL))
+_x2c_gensym_initializer_choice_65953FEE_8((f5_calls___meta_call_form = NULL))
 static Var f5_calls____meta_call_value(Compiler c, List expression, Token site);
 
 static Var f5_calls____meta_named_value(Compiler c, String name, List arguments, Token site);
@@ -3554,21 +3554,21 @@ static void _x2c_gensym_defer_cleanup_22(void * _x2c_gensym_defer_opaque_22){
   Scope_free((*(FuncArg * *) _x2c_gensym_defer_data_17->_x2c_gensym_defer_capture_30));
 }
 
-#undef _x2c_gensym_initializer_choice_8AA1709E_0_expanded
-#undef _x2c_gensym_initializer_choice_8AA1709E_0
-#undef _x2c_gensym_initializer_choice_8AA1709E_1_expanded
-#undef _x2c_gensym_initializer_choice_8AA1709E_1
-#undef _x2c_gensym_initializer_choice_8AA1709E_2_expanded
-#undef _x2c_gensym_initializer_choice_8AA1709E_2
-#undef _x2c_gensym_initializer_choice_8AA1709E_3_expanded
-#undef _x2c_gensym_initializer_choice_8AA1709E_3
-#undef _x2c_gensym_initializer_choice_8AA1709E_4_expanded
-#undef _x2c_gensym_initializer_choice_8AA1709E_4
-#undef _x2c_gensym_initializer_choice_8AA1709E_5_expanded
-#undef _x2c_gensym_initializer_choice_8AA1709E_5
-#undef _x2c_gensym_initializer_choice_8AA1709E_6_expanded
-#undef _x2c_gensym_initializer_choice_8AA1709E_6
-#undef _x2c_gensym_initializer_choice_8AA1709E_7_expanded
-#undef _x2c_gensym_initializer_choice_8AA1709E_7
-#undef _x2c_gensym_initializer_choice_8AA1709E_8_expanded
-#undef _x2c_gensym_initializer_choice_8AA1709E_8
+#undef _x2c_gensym_initializer_choice_65953FEE_0_expanded
+#undef _x2c_gensym_initializer_choice_65953FEE_0
+#undef _x2c_gensym_initializer_choice_65953FEE_1_expanded
+#undef _x2c_gensym_initializer_choice_65953FEE_1
+#undef _x2c_gensym_initializer_choice_65953FEE_2_expanded
+#undef _x2c_gensym_initializer_choice_65953FEE_2
+#undef _x2c_gensym_initializer_choice_65953FEE_3_expanded
+#undef _x2c_gensym_initializer_choice_65953FEE_3
+#undef _x2c_gensym_initializer_choice_65953FEE_4_expanded
+#undef _x2c_gensym_initializer_choice_65953FEE_4
+#undef _x2c_gensym_initializer_choice_65953FEE_5_expanded
+#undef _x2c_gensym_initializer_choice_65953FEE_5
+#undef _x2c_gensym_initializer_choice_65953FEE_6_expanded
+#undef _x2c_gensym_initializer_choice_65953FEE_6
+#undef _x2c_gensym_initializer_choice_65953FEE_7_expanded
+#undef _x2c_gensym_initializer_choice_65953FEE_7
+#undef _x2c_gensym_initializer_choice_65953FEE_8_expanded
+#undef _x2c_gensym_initializer_choice_65953FEE_8

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "compiler.x"
+#include "compiler/compiler.x"
 
 
 Map project_function_targets(Compiler compiler, List ast, String path) {

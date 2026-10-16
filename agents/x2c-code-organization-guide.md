@@ -27,16 +27,16 @@ Files below are relative to `src/` unless a path is shown.
   `regions.x`;
 - shipped components under `src/components/`, each lowering one language
   feature on the rewrite
-  primitives: `component-access.x` (bracket access policy),
-  `component-delegate.x` (delegate fields), `component-destructuring.x`
-  (flat List destructuring), `component-interpolation.x` (interpolated
-  Strings), `component-lambdas.x` (lambda lowering), `component-literals.x`
-  (Array and Map literals), `component-match.x` (match statements),
-  `component-operators.x` (dynamic operators), `component-printf.x` (Var
-  values in printf-family formats), `component-protocols.x` (protocol
-  adapters and Var descriptors), `component-raise.x` (raise),
-  `component-string-switch.x` (switches on a String), and
-  `component-try.x` (try, catch, and finally);
+  primitives: `bracket-access.x` (bracket access policy),
+  `delegate-members.x` (delegate fields), `destructuring.x`
+  (flat List destructuring), `interpolation.x` (interpolated
+  Strings), `lambda-functions.x` (lambda lowering), `collection-literals.x`
+  (Array and Map literals), `pattern-match.x` (match statements),
+  `dynamic-operators.x` (dynamic operators), `printf-format.x` (Var
+  values in printf-family formats), `protocol-adapters.x` (protocol
+  adapters and Var descriptors), `raise.x` (raise),
+  `string-switch.x` (switches on a String), and
+  `try-catch.x` (try, catch, and finally);
 - output: `cache.x`, `generate.x`, `emit.x`, `format.x`;
 - project planning and native primitives: `project.x`, `toolchain.x`;
   build/run/script workflows live in `commands/build/`, and the editor

@@ -2,18 +2,18 @@
 
 #pragma once
 
-#ifndef __GUARD_0xEF59A7A3__
-#define __GUARD_0xEF59A7A3__
+#ifndef __GUARD_0xBAA100F8__
+#define __GUARD_0xBAA100F8__
 
 #include "x2c.h"
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include "ast-rewrite.h"
 #include "meta.h"
 #include "grammar.h"
 #include "ast.h"
 #include "type.h"
-#include "parse.h"
-#include "callables.h"
+#include "parse/parse.h"
+#include "callables/callables.h"
 List Compiler_lower_cleanup(Compiler c, List node);
 
 int Compiler_static_value_is_runtime(Compiler c, List value, Map runtime);
@@ -25,4 +25,4 @@ List Compiler_rewrite_defer_list(Compiler c, List stmts);
 List Compiler_lower_defer_region(Compiler c, List body, List finalizer);
 
 
-#endif /* __GUARD_0xEF59A7A3__ */
+#endif /* __GUARD_0xBAA100F8__ */

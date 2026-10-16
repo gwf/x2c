@@ -9,7 +9,7 @@
     say about layout and the unit's `#define` names.
 */
 #pragma once
-#include "compiler.x"
+#include "compiler/compiler.x"
 #include <ctype.h>
 
 /* directive lines

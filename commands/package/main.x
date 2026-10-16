@@ -4,7 +4,7 @@
 */
 #include "package.x"
 #include "args.x"
-#include "cli.x"
+#include "cli/cli.x"
 
 String x2c_embedded_identity(void);
 

@@ -2,11 +2,11 @@
 
 #pragma once
 
-#ifndef __GUARD_0xBF7298EC__
-#define __GUARD_0xBF7298EC__
+#ifndef __GUARD_0xA2A5DA8E__
+#define __GUARD_0xA2A5DA8E__
 
 #include "x2c.h"
-#include "compiler.h"
+#include "compiler/compiler.h"
 #if defined(_WIN32) || defined(__CYGWIN__)
 #define X2C_NATIVE_MODULES 0
 #else
@@ -15,11 +15,11 @@
 #include "grammar.h"
 #include "ast-rewrite.h"
 #include "type.h"
-#include "generate.h"
-#include "macros.h"
+#include "generate/generate.h"
+#include "macros/macros.h"
 #include "utils.h"
 #include "toolchain.h"
-#include "transform.h"
+#include "transform/transform.h"
 #include <unistd.h>
 void Compiler_use_meta_toolchain(String cc, String include_dir);
 
@@ -60,4 +60,4 @@ void Compiler_bind_meta_group(Compiler c, String name, Token site);
 Map Compiler_stage_session_function(Compiler c, List declarations, Func prepare, String * failure);
 
 
-#endif /* __GUARD_0xBF7298EC__ */
+#endif /* __GUARD_0xA2A5DA8E__ */

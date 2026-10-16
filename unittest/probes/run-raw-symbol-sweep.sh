@@ -145,8 +145,11 @@ exclusions["$ROOT/unittest/compiler-fixtures/meta-import-included.x"]=$(
     "resolves from the includer's directory"
 )
 
+compiler_sources=()
+while IFS= read -r source; do compiler_sources+=("$source"); done < <(
+  python3 "$ROOT/tools/compiler-sources.py" --root "$ROOT")
 sources=()
-for src in "$ROOT"/src/*.x "$ROOT"/src/components/*.x \
+for src in "${compiler_sources[@]}" \
     "$ROOT"/lib/*.x "$ROOT"/examples/*.x \
     "$ROOT"/unittest/*.x "$ROOT"/unittest/compiler-fixtures/*.x \
     "$ROOT"/unittest/probes/*.x "$ROOT"/unittest/benchmarks/*.x; do

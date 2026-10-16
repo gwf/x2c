@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "compiler.x"
+#include "compiler/compiler.x"
 #include "targets.x"
 
 typedef struct Lifetime Lifetime;

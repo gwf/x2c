@@ -4,7 +4,7 @@
 > **Provisional API:** This reference documents current compiler behavior.
 > Compatibility is not yet promised.
 
-# `src/protocol.x`
+# `src/protocol/protocol.x`
 
 Protocols from declaration to conform forms.
 
@@ -93,7 +93,7 @@ Inserts native aliases and presents other resolved conformances as
 `conform` forms. A native alias is inserted at the participant's inferred
 public or private boundary. Each other conformance whose forward converter
 the unit defines goes to the rule on the `conform` head, which
-`src/components/component-protocols.x` registers to write its adapters into
+`src/components/protocol-adapters.x` registers to write its adapters into
 the unit's
 pending support. The external conformances the unit declares are first
 recorded in its interface. Returns `ast` with native insertions applied.
@@ -298,7 +298,7 @@ This module owns the protocol feature: it parses protocol and adoption
 declarations, keeps their rows in per-unit registries, resolves each
 adoption into a conformance, answers member and operator lookups, and
 presents each conformance as native aliases or a `conform` form, from which
-`src/components/component-protocols.x` writes the adapters. Registries are
+`src/components/protocol-adapters.x` writes the adapters. Registries are
 rebuilt per
 translation unit; a static row is visible only in the unit of its canonical
 source path. The unit that declares an external adoption resolves it and

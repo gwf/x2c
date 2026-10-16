@@ -14,7 +14,7 @@
 
         tools/gen-api-reference --write
         tools/gen-api-reference --check
-        tools/gen-api-reference --check-path src/compiler.x
+        tools/gen-api-reference --check-path src/compiler/compiler.x
 */
 #include "definitions.x"
 
@@ -616,6 +616,9 @@ static List _sources(String pattern):
   Array paths = []
   foreach Path source in root.join(pattern).glob():
     String path = _relative(source)
+    if path.startswith("src/") && source.dirname().basename() != "src" &&
+       source.dirname().basename() != "components" &&
+       source.stem() != source.dirname().basename(): continue
     if path != "lib/x2c.x": paths.push(path)
   return paths.list_free()
 
@@ -627,7 +630,7 @@ static Map _load(List paths):
 /* Every page as `(path text)`, then SUMMARY.md's text. */
 static List _build(void):
   List compiler_paths =
-    _sources("src/*.x").append(_sources("src/components/*.x"))
+    _sources("src/*.x").append(_sources("src/*/*.x"))
   Map units = _load(_sources("lib/*.x").append(compiler_paths))
   Array modules = _collect(units)
   Array compiler = _collect_compiler(units, compiler_paths)
@@ -711,7 +714,8 @@ static int _check_paths(List requested):
     String path = absolute[root.len() + 1:]
     List parts = path.split("/")
     if !(parts.len() == 2 && (parts.car() == "src" || parts.car() == "lib") ||
-         parts.len() == 3 && path.startswith("src/components/")) ||
+         parts.len() == 3 && (path.startswith("src/components/") ||
+           source.stem() == source.dirname().basename())) ||
        !path.endswith(".x"):
       _fatal(%"$path: expected one compiler or runtime source unit")
     if !source.is_file() || path == "lib/x2c.x":

@@ -6,8 +6,8 @@
 #define __GUARD_0xB1CED777__
 
 #include "x2c.h"
-#include "compiler.h"
-#include "meta-group.h"
+#include "compiler/compiler.h"
+#include "meta-group/meta-group.h"
 #include "datum.h"
 #include <errno.h>
 #include <fcntl.h>

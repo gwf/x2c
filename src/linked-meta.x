@@ -207,7 +207,7 @@ static List _update_operation(Var function) {
   return $!(String){ String.new($spelling) };
 }
 
-/* --- src/components/component-access.x ----------------------------------- */
+/* --- src/components/bracket-access.x ------------------------------------- */
 
 static int _collection_family(Code base) {
   Type type = base.type();
@@ -339,7 +339,7 @@ Code access_postfix(Code code) {
   return $!Var{ Map_postfixindex($base, $key, $op) };
 }
 
-/* --- src/components/component-delegate.x --------------------------------- */
+/* --- src/components/delegate-members.x ----------------------------------- */
 
 static String _delegate_type_name(Type type) {
   List base = type_base_suffix(type);
@@ -440,7 +440,7 @@ Code delegate_member(Code code) {
   return code;
 }
 
-/* --- src/components/component-destructuring.x ---------------------------- */
+/* --- src/components/destructuring.x -------------------------------------- */
 
 static Code _destructure_list(Code source) {
   Code converted =
@@ -543,7 +543,109 @@ Code destructure_value(Code node) {
   return node;
 }
 
-/* --- src/components/component-lambdas.x ---------------------------------- */
+/* --- src/components/dynamic-operators.x ---------------------------------- */
+
+static int _dynamic_operand(Type type, int text) =>
+  type.is_named("Var") || (text ? type.is_text() : !!type.numeric());
+
+/** Boxes both operands of an arithmetic, shift, or bitwise operator for
+    `Var.binary`, after rejecting an operand that is neither a number nor,
+    for `+` beside text, text. The call is returned lowered, because an
+    operator chain applies this rule once for each term and binding would
+    search the whole remaining chain each time. */
+Code dynamic_binary(Code code) {
+  match (code) case %(expr ? (op ?(Symbol op) ?left ?right)): {
+    Code lhs = left, rhs = right;
+    Type left_type = lhs.cadr(), right_type = rhs.cadr();
+    int text = op == <+> && _dynamic_operand(left_type, 1) &&
+      _dynamic_operand(right_type, 1);
+    if (!text && (!_dynamic_operand(left_type, 0) ||
+                  !_dynamic_operand(right_type, 0))) {
+      $fail.operators_numeric_operands(NULL, left_type, right_type, op);
+    }
+    Code left_var = lhs.convert(%("Var")), right_var = rhs.convert(%("Var"));
+    return Code.lowered($!Var{ Var_binary($left_var, $op, $right_var) }, NULL);
+  }
+  return code;
+}
+
+static Symbol _dynamic_operation(Symbol assignment) {
+  foreach (List row, %((<+=> <+>) (<-=> <->) (<*=> <*>) (</=> </>)
+                       (<%=> <%>) (<"<<="> <"<<">) (<">>="> <">>">)
+                       (<&=> <&>) (<^=> <^>) (<|=> <|>)))
+    if (row.car() == assignment) return row.cadr();
+  return 0;
+}
+
+static Code _dynamic_update(
+  Type type, Code target, Symbol op, Code value, String helper) {
+  Type target_type = target.cadr(), address_type = %(* @target_type);
+  List address = %(expr $address_type (op & (parens $target)));
+  List operation = $!Symbol{ $op };
+  List call = value
+    ? %(call $helper (args $address $operation $value))
+    : %(call $helper (args $address $operation));
+  return Code.lowered(%(expr $type $call), NULL);
+}
+
+static String _dynamic_helper(Type type) {
+  if (type.is_named("Var")) return "x2c_var_update_volatile";
+  Type scalar = type.numeric();
+  match (scalar)
+    case %(enum *):
+      $fail.operators_enum_target(NULL);
+  String helper = type.update_helper();
+  if (!helper)
+    $fail.operators_numeric_target(NULL, type);
+  return helper;
+}
+
+/** Updates a `Var` or numeric lvalue with a `Var` or numeric operand
+    through the update helper of its storage. */
+Code dynamic_compound(Code code) {
+  match (code) case %(expr ? (op ?(Symbol op) ?left ?right)): {
+    Code target = left, rhs = right;
+    Type type = target.cadr(), right_type = rhs.cadr();
+    Symbol operation = _dynamic_operation(op);
+    match (type)
+      case %((bitfield *) *):
+        $fail.operators_bitfield_target(NULL);
+    if (!right_type.is_named("Var") && !right_type.numeric() &&
+        !(operation == <+> && right_type.is_text()))
+      $fail.operators_operand(NULL, operation, right_type);
+    String helper = _dynamic_helper(type);
+    return _dynamic_update(
+      type, target, operation, rhs.convert(%("Var")), helper);
+  }
+  return code;
+}
+
+/** Adds or subtracts one through the `Var` update helpers; the postfix
+    forms return the value before the change. */
+Code dynamic_change(Code code) {
+  match (code) {
+    case %(expr ? (op ?(Symbol op) ?(Code target))): {
+      Code one = $!int{ 1 };
+      return _dynamic_update(
+        target.cadr(), target, op == <++> ? <+> : <->,
+        one.convert(%("Var")), "x2c_var_update_volatile");
+    }
+    case %(expr ? (postfix ?(Symbol op) ?(Code target))):
+      return _dynamic_update(
+        target.cadr(), target, op, NULL, "x2c_var_postfix_volatile");
+  }
+  return code;
+}
+
+/** Rejects a unary numeric operator on a `Var`. */
+Code dynamic_unary(Code code) {
+  x2c_diagnostic_fail_at(
+    NULL, <xform>, "dynamic unary numeric operators are not supported",
+    %("use Var.binary with an explicit numeric operand"));
+  return code;
+}
+
+/* --- src/components/lambda-functions.x ----------------------------------- */
 
 static List _lambda_cell_name(List binding, Map cells) {
   (Var name, Type type) = cells[binding];
@@ -1041,7 +1143,7 @@ Code lambda_cells(Code node) {
   return node;
 }
 
-/* --- src/components/component-match.x ------------------------------------ */
+/* --- src/components/pattern-match.x -------------------------------------- */
 
 static void _match_flush(Buffer b, Array out) {
   if (b.len()) {
@@ -1437,109 +1539,7 @@ Code match_lowering(Code node) {
   return node;
 }
 
-/* --- src/components/component-operators.x -------------------------------- */
-
-static int _dynamic_operand(Type type, int text) =>
-  type.is_named("Var") || (text ? type.is_text() : !!type.numeric());
-
-/** Boxes both operands of an arithmetic, shift, or bitwise operator for
-    `Var.binary`, after rejecting an operand that is neither a number nor,
-    for `+` beside text, text. The call is returned lowered, because an
-    operator chain applies this rule once for each term and binding would
-    search the whole remaining chain each time. */
-Code dynamic_binary(Code code) {
-  match (code) case %(expr ? (op ?(Symbol op) ?left ?right)): {
-    Code lhs = left, rhs = right;
-    Type left_type = lhs.cadr(), right_type = rhs.cadr();
-    int text = op == <+> && _dynamic_operand(left_type, 1) &&
-      _dynamic_operand(right_type, 1);
-    if (!text && (!_dynamic_operand(left_type, 0) ||
-                  !_dynamic_operand(right_type, 0))) {
-      $fail.operators_numeric_operands(NULL, left_type, right_type, op);
-    }
-    Code left_var = lhs.convert(%("Var")), right_var = rhs.convert(%("Var"));
-    return Code.lowered($!Var{ Var_binary($left_var, $op, $right_var) }, NULL);
-  }
-  return code;
-}
-
-static Symbol _dynamic_operation(Symbol assignment) {
-  foreach (List row, %((<+=> <+>) (<-=> <->) (<*=> <*>) (</=> </>)
-                       (<%=> <%>) (<"<<="> <"<<">) (<">>="> <">>">)
-                       (<&=> <&>) (<^=> <^>) (<|=> <|>)))
-    if (row.car() == assignment) return row.cadr();
-  return 0;
-}
-
-static Code _dynamic_update(
-  Type type, Code target, Symbol op, Code value, String helper) {
-  Type target_type = target.cadr(), address_type = %(* @target_type);
-  List address = %(expr $address_type (op & (parens $target)));
-  List operation = $!Symbol{ $op };
-  List call = value
-    ? %(call $helper (args $address $operation $value))
-    : %(call $helper (args $address $operation));
-  return Code.lowered(%(expr $type $call), NULL);
-}
-
-static String _dynamic_helper(Type type) {
-  if (type.is_named("Var")) return "x2c_var_update_volatile";
-  Type scalar = type.numeric();
-  match (scalar)
-    case %(enum *):
-      $fail.operators_enum_target(NULL);
-  String helper = type.update_helper();
-  if (!helper)
-    $fail.operators_numeric_target(NULL, type);
-  return helper;
-}
-
-/** Updates a `Var` or numeric lvalue with a `Var` or numeric operand
-    through the update helper of its storage. */
-Code dynamic_compound(Code code) {
-  match (code) case %(expr ? (op ?(Symbol op) ?left ?right)): {
-    Code target = left, rhs = right;
-    Type type = target.cadr(), right_type = rhs.cadr();
-    Symbol operation = _dynamic_operation(op);
-    match (type)
-      case %((bitfield *) *):
-        $fail.operators_bitfield_target(NULL);
-    if (!right_type.is_named("Var") && !right_type.numeric() &&
-        !(operation == <+> && right_type.is_text()))
-      $fail.operators_operand(NULL, operation, right_type);
-    String helper = _dynamic_helper(type);
-    return _dynamic_update(
-      type, target, operation, rhs.convert(%("Var")), helper);
-  }
-  return code;
-}
-
-/** Adds or subtracts one through the `Var` update helpers; the postfix
-    forms return the value before the change. */
-Code dynamic_change(Code code) {
-  match (code) {
-    case %(expr ? (op ?(Symbol op) ?(Code target))): {
-      Code one = $!int{ 1 };
-      return _dynamic_update(
-        target.cadr(), target, op == <++> ? <+> : <->,
-        one.convert(%("Var")), "x2c_var_update_volatile");
-    }
-    case %(expr ? (postfix ?(Symbol op) ?(Code target))):
-      return _dynamic_update(
-        target.cadr(), target, op, NULL, "x2c_var_postfix_volatile");
-  }
-  return code;
-}
-
-/** Rejects a unary numeric operator on a `Var`. */
-Code dynamic_unary(Code code) {
-  x2c_diagnostic_fail_at(
-    NULL, <xform>, "dynamic unary numeric operators are not supported",
-    %("use Var.binary with an explicit numeric operand"));
-  return code;
-}
-
-/* --- src/components/component-printf.x ----------------------------------- */
+/* --- src/components/printf-format.x -------------------------------------- */
 
 static int _printf_is_var(Code value) => value.type().is_named("Var");
 
@@ -1685,7 +1685,7 @@ Code printf_values(Code code) {
   return code;
 }
 
-/* --- src/components/component-protocols.x -------------------------------- */
+/* --- src/components/protocol-adapters.x ---------------------------------- */
 
 static List _protocol_forward(
   Type target, String source, Type template, String binder, String convert) {
@@ -1823,7 +1823,7 @@ Code protocol_conformance(Code node) {
   return node;
 }
 
-/* --- src/components/component-raise.x ------------------------------------ */
+/* --- src/components/raise.x ---------------------------------------------- */
 
 static int _raise_immutable(Type type) {
   if (!type) return 0;
@@ -1862,7 +1862,7 @@ Code raise_lowering(Code node) {
   return node;
 }
 
-/* --- src/components/component-string-switch.x ---------------------------- */
+/* --- src/components/string-switch.x -------------------------------------- */
 
 static String _string_case_bytes(String spelling) {
   const char *p = spelling;
@@ -1956,7 +1956,7 @@ Code string_switch_lowering(Code node) {
   return node;
 }
 
-/* --- src/components/component-try.x -------------------------------------- */
+/* --- src/components/try-catch.x ------------------------------------------ */
 
 static int _try_arm_exits(List arm) {
   match (arm) case %(code-value ? ?statement ?): {
@@ -2207,6 +2207,14 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "destructure_declaration", destructure_declaration);
   $linked.row(rows, "destructure_statement", destructure_statement);
   $linked.row(rows, "destructure_value", destructure_value);
+  $linked.row(rows, "_dynamic_operand", _dynamic_operand);
+  $linked.row(rows, "dynamic_binary", dynamic_binary);
+  $linked.row(rows, "_dynamic_operation", _dynamic_operation);
+  $linked.row(rows, "_dynamic_update", _dynamic_update);
+  $linked.row(rows, "_dynamic_helper", _dynamic_helper);
+  $linked.row(rows, "dynamic_compound", dynamic_compound);
+  $linked.row(rows, "dynamic_change", dynamic_change);
+  $linked.row(rows, "dynamic_unary", dynamic_unary);
   $linked.row(rows, "_lambda_cell_name", _lambda_cell_name);
   $linked.row(rows, "_lambda_cell_read", _lambda_cell_read);
   $linked.row(rows, "_lambda_cell", _lambda_cell);
@@ -2257,14 +2265,6 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_match_lowered", _match_lowered);
   $linked.row(rows, "_match_dynamic_read", _match_dynamic_read);
   $linked.row(rows, "match_lowering", match_lowering);
-  $linked.row(rows, "_dynamic_operand", _dynamic_operand);
-  $linked.row(rows, "dynamic_binary", dynamic_binary);
-  $linked.row(rows, "_dynamic_operation", _dynamic_operation);
-  $linked.row(rows, "_dynamic_update", _dynamic_update);
-  $linked.row(rows, "_dynamic_helper", _dynamic_helper);
-  $linked.row(rows, "dynamic_compound", dynamic_compound);
-  $linked.row(rows, "dynamic_change", dynamic_change);
-  $linked.row(rows, "dynamic_unary", dynamic_unary);
   $linked.row(rows, "_printf_is_var", _printf_is_var);
   $linked.row(rows, "_printf_fail", _printf_fail);
   $linked.row(rows, "_printf_valid", _printf_valid);
@@ -2350,9 +2350,9 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_tag_constant_rows", _tag_constant_rows);
   $linked.row(rows, "_tag_group_top", _tag_group_top);
   $linked.row(rows, "_tag_types", _tag_types);
-  $linked.row(rows, "interpolation_lowering", interpolation_lowering);
   $linked.row(rows, "array_literal", array_literal);
   $linked.row(rows, "map_literal", map_literal);
+  $linked.row(rows, "interpolation_lowering", interpolation_lowering);
   $linked.row(rows, "_x2c_try_catch_patterns", _x2c_try_catch_patterns);
   $linked.row(rows, "_x2c_try_catch_site", _x2c_try_catch_site);
   $linked.row(rows, "_x2c_try_landing", _x2c_try_landing);

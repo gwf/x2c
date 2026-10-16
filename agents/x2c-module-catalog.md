@@ -63,111 +63,6 @@ Public functions:
 `Compiler.setup_cache_init`, `Compiler.zero_initializer`,
 `Compiler.initialization_guard`
 
-### [src/callables.x](../src/callables.x)
-
-callable values lowered to C helpers.
-
-Public functions:
-
-`Compiler.capture_environment`, `Compiler.prepend_setup`,
-`Compiler.maybe_adapt_func_arg`, `Compiler.context_func_adapter`,
-`Compiler.func_parameters`, `Compiler.func_signature`,
-`Compiler.lift_func_expression`, `Compiler.lower_typed_adapter_expr`,
-`Compiler.adapt_lambda_arg`
-
-### [src/cleanup.x](../src/cleanup.x)
-
-cleanup regions and the transfers that leave them.
-
-Public functions:
-
-`Compiler.lower_cleanup`, `Compiler.static_value_is_runtime`,
-`Ast.defer_captures`, `Compiler.rewrite_defer_list`,
-`Compiler.lower_defer_region`
-
-### [src/cli.x](../src/cli.x)
-
-x2c command-line parsing and presentation.
-
-Public functions:
-
-`CliRequest.parse`, `CliRequest.parse_arguments`,
-`CliRequest.dependency_option`, `CliRequest.package_options`,
-`CliRequest.is_builtin`, `CliRequest.read_arguments`,
-`CliRequest.command_arguments`, `TargetKind.named`, `TargetKind.of`,
-`CliRequest.new`, `Compiler.version`, `CliRequest.inspects`,
-`CliRequest.package_roots`, `CliRequest.require_input`
-
-### [src/collect.x](../src/collect.x)
-
-source-ordered shallow symbol collection and replay.
-
-Public functions:
-
-`Compiler.refresh_source_collections`, `Compiler.forget_provisional_entries`,
-`Compiler.module_source`, `Compiler.collect_symbols`,
-`Compiler.prelude_sources`, `Compiler.is_prelude_source`,
-`Compiler.configure_package`, `SourceView.resolve_include`,
-`Compiler.included_compile_time_effects`, `Compiler.install_included_effects`,
-`Compiler.include_typedef_names`, `Compiler.include_type_dependencies`,
-`Compiler.include_function_declarations`,
-`Compiler.runtime_function_declarations`, `Compiler.publishes_typedef`,
-`Compiler.publishes_type_family`, `Compiler.callable_symbols`,
-`Compiler.inline_type_dependencies`, `Compiler.publish_inline_types`,
-`Compiler.record_generated_symbol`, `Compiler.record_conformance_rows`,
-`Compiler.declared_adoptions`, `Compiler.linked_meta_provider_current`,
-`Compiler.linked_meta_definitions_current`, `Compiler.complete_meta_hashes`,
-`Compiler.meta_provider_hashes`, `Compiler.add_linked_meta_provider_hashes`,
-`Compiler.name_meta_provider_bindings`, `Compiler.loaded_provider`,
-`Compiler.loaded_call_type`, `Compiler.name_loaded_provider`,
-`Compiler.collect_package`, `Compiler.replay_package_imports`,
-`Compiler.configure_interfaces`, `Compiler.prelude_interface`,
-`Compiler.interface_text`, `Compiler.linked_prelude_records`
-
-### [src/compiler.x](../src/compiler.x)
-
-one x2c unit's translation state and its two parses.
-
-Public functions:
-
-`Compiler.var`, `Var.compiler`, `Compiler.own_diagnostics`,
-`Compiler.close_child`, `Compiler.share_meta_group`,
-`Compiler.take_unit_state`, `Compiler.return_unit_state`, `Compiler.new`,
-`Compiler.new_shared`, `Compiler.free_lisp`, `Compiler.shallow_parse`,
-`Compiler.shallow_parse_overlay`, `Compiler.start_collection`,
-`Compiler.collect_compile_time_definition`,
-`Compiler.finish_collected_declaration`, `Compiler.record_inline_function`,
-`_x2c_at_function_arrow`, `_x2c_skip_shallow_expression`,
-`Compiler.full_parse`, `Compiler.skip_collected_script_statement`,
-`Compiler.skip_script_statement`, `Compiler.tokenize`, `Compiler.peek`,
-`Token.skip_trivia`, `Compiler.require_input`, `Compiler.expect`,
-`Compiler.next`, `Compiler.test`, `Compiler.at_word`, `Compiler.take_word`,
-`Symbol.group_step`, `Token.group_close`, `Token.after_group`,
-`Compiler.mark_completion`, `Compiler.at_completion`, `_x2c_complete_here`,
-`Compiler.queue_declaration_effect`, `Compiler.run_declaration_effects`,
-`Compiler.collect_unit_macro`, `Compiler.replay_declaration_source`,
-`Compiler.freeze_declaration_syntax`, `Compiler.thaw_declaration_syntax`,
-`Compiler.select_declaration_defaults`, `Compiler.record_origin`,
-`Compiler.anchor_origin`, `Compiler.record_source_declaration`,
-`Compiler.record_source_reference`, `Compiler.copy_source_declaration`,
-`Compiler.merge_source_declarations`, `Compiler.fresh_name`, `Compiler.gensym`,
-`Compiler.add_early`, `Compiler.add_support`, `Compiler.add_init`,
-`Pending.reset`, `Pending.area`, `Pending.initializes`, `Pending.checkpoint`,
-`Pending.restore`, `Compiler.emitted_binding_name`,
-`Compiler.present_references`, `Compiler.mark_reference_present`,
-`Compiler.settle_reference`, `Compiler.restore_reference_presence`,
-`Compiler.optional_reference_test`, `Compiler.cache`,
-`Compiler.cache_cons_cell`, `Compiler.cache_literal_var`,
-`Compiler.cache_literal_list`, `Compiler.match_pattern_value`,
-`Compiler.match_value_is_static`, `Compiler.match_pattern_is_static`,
-`Compiler.match_pattern_binders`, `Compiler.define_pattern_binders`,
-`Compiler.match_capture_value`, `Compiler.pattern_binder_declarations`,
-`Compiler.read_source`, `Compiler.canonical_path`, `Path.real`,
-`Path.resolved_absolute`, `Compiler.portable_path`,
-`Compiler.absolute_home_path`, `Map.merge_translation_dependency`,
-`Compiler.add_translation_dependency`,
-`Compiler.merge_translation_dependencies`
-
 ### [src/deps.x](../src/deps.x)
 
 Make dependency output for x2c translation units.
@@ -193,14 +88,6 @@ Public functions:
 `Compiler.error_count`, `Compiler.diagnostics`, `Compiler.dump_tokens`,
 `Compiler.dump_symbol_table`, `Compiler.dump_cache`
 
-### [src/emit.x](../src/emit.x)
-
-C tokens from normalized x2c ASTs.
-
-Public functions:
-
-`Compiler.emit`
-
 ### [src/expressions-reports.x](../src/expressions-reports.x)
 
 expression typing diagnostics.
@@ -208,27 +95,6 @@ expression typing diagnostics.
 Public functions:
 
 None. This module has no non-static function definitions.
-
-### [src/expressions.x](../src/expressions.x)
-
-expression syntax and its resolution.
-
-Public functions:
-
-`Compiler.parse_expression`, `Compiler.parse_assignment`,
-`Compiler.parse_conditional`, `Compiler.parse_parenthesized_statement`,
-`Compiler.parse_macro_expression_target`, `Compiler.apply_macro_value`,
-`Compiler.parse_primary`, `Compiler.parse_variable`,
-`Compiler.resolve_expression`, `Compiler.needs_resolution`,
-`Compiler.require_var_tag`, `Compiler.var_tag_expression`,
-`Compiler.resolve_map_entry`, `_x2c_nominal_getindex`,
-`Compiler.resolve_postfix_member`, `Compiler.postfix_completions`,
-`_x2c_func_call_arguments`, `Compiler.func_call_parts`,
-`Compiler.complete_iter_chain`, `List.printf_family`,
-`Compiler.printf_static_format`, `_x2c_indexed_builtin_helper`,
-`Compiler.check_explicit_converter`, `Compiler.promote_string_literal`,
-`Compiler.convert_expression`, `Compiler.convert_segment_to_string`,
-`Compiler.converter_call`, `Compiler.is_builtin_converter_call`
 
 ### [src/fields.x](../src/fields.x)
 
@@ -256,17 +122,6 @@ Public functions:
 `Frontend.start`, `ParsedUnit.collect`, `ParsedUnit.parse`, `ParsedUnit.close`,
 `Frontend.preload_macro_libraries`, `Frontend.load_support`, `Frontend.new`
 
-### [src/generate.x](../src/generate.x)
-
-the generated header and source of one unit.
-
-Public functions:
-
-`Compiler.generate_code`, `Compiler.generate_code_text`,
-`Compiler.place_source_prelude`, `Compiler.initializer_function`,
-`Compiler.run_once_body`, `Init.enter`, `Compiler.init_statements`,
-`Compiler.definition_rows`, `Compiler.dump_definitions`
-
 ### [src/grammar.x](../src/grammar.x)
 
 the source forms that lowering recognizes.
@@ -283,16 +138,6 @@ Public functions:
 `source_literal_content`, `source_declarator_row`, `source_expression`,
 `source_catch_handle`, `source_retain_catch_handle`
 
-### [src/initializers.x](../src/initializers.x)
-
-brace initializer conversion.
-
-Public functions:
-
-`Compiler.initializer_rows`, `Compiler.initializer_field_path`,
-`Compiler.initializer_slot`, `Compiler.convert_initializer`,
-`Compiler.convert_compound_literal`, `Compiler.initializer_native_types`
-
 ### [src/lambdas.x](../src/lambdas.x)
 
 lambda parsing and capture resolution.
@@ -305,64 +150,6 @@ Public functions:
 `Compiler.lambda_capture_required`, `Compiler.capture_lambda_identifier`,
 `Compiler.respell_captures`, `Compiler.check_lambda_captures`
 
-### [src/literals.x](../src/literals.x)
-
-x2c literal parsing.
-
-Public functions:
-
-`Compiler.parse_list_literal`, `Compiler.parse_macro_pattern_arguments`,
-`Compiler.try_parse_macro_pattern_insertion`, `Compiler.literal_cell`,
-`Compiler.typed_match_pattern`, `Compiler.parse_raise_literal`,
-`Compiler.parse_catch_pattern_literal`, `Compiler.parse_symbol_set_literal`,
-`Compiler.symbol_set_expression`, `Compiler.parse_array_literal`,
-`Compiler.parse_map_literal`, `Compiler.parse_map_entries`,
-`Compiler.parse_map_entry`, `Compiler.parse_string_literal`,
-`Compiler.parse_atomic_literal`
-
-### [src/macros.x](../src/macros.x)
-
-source macros and the compile-time Lisp they run.
-
-Public functions:
-
-`Compiler.report_lisp_failure`, `Compiler.parse_macro_definition`,
-`Compiler.macro_introduced_name`, `Compiler.macro_tag_name`,
-`Compiler.parse_macro_quotation`, `Compiler.try_parse_macro_slot`,
-`Compiler.peek_macro_hole`, `Compiler.after_hole`,
-`Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_member`,
-`Compiler.expand_macro_invocation_node`, `Compiler.macro_invocation_site`,
-`Compiler.marked_rewrite`, `Compiler.has_rewrites`, `Compiler.rewrite`,
-`Compiler.rewrite_lowered`, `Compiler.lower_replacement`,
-`Compiler.rewrite_written`, `Compiler.lower_rewrite`,
-`Compiler.written_support`, `Compiler.applying_shipped`, `Compiler.rebound`,
-`Compiler.watched_step`, `Compiler.publish_macro_definition_node`,
-`Compiler.record_compile_time_effect`, `Compiler.install_compile_time_effects`,
-`Compiler.macro_form_is_definition`, `Compiler.local_macro_form_is_definition`,
-`Compiler.keyword_form_is_definition`, `Compiler.parse_keyword_definition`,
-`Compiler.macro_starts_target_at`, `Compiler.macro_invocation_collection`,
-`Compiler.skip_macro_invocation`, `Compiler.skip_named_type_declaration`,
-`Compiler.macro_targets_unit`, `Compiler.try_parse_macro_target_at`,
-`Compiler.try_parse_macro_expression`, `Compiler.evaluate_macro_slot`,
-`Compiler.evaluate_macro_rows`, `Compiler.evaluate_meta_value`,
-`Compiler.evaluate_declaration_recipe`, `x2c_template_call`,
-`Compiler.rebuild_expression`, `Compiler.rebuild_statement`,
-`Compiler.rebuild_unit_function`, `Compiler.rebuild_function`,
-`Compiler.land_quotation`, `Compiler.macro_value_literal`,
-`Compiler.try_parse_macro_pattern`, `Compiler.macro_pattern_at`,
-`Compiler.try_parse_macro_subpattern`, `Compiler.capture_macro_value`,
-`Compiler.take_code_value`, `Compiler.place`, `Compiler.bind_code_value`,
-`Compiler.ensure_macro_lisp`, `Compiler.parse_macro_lisp_top_level`,
-`Compiler.parse_macro_lisp_shallow`, `Compiler.evaluate_declaration_effect`,
-`Compiler.parse_macro_lisp_expression`, `Compiler.lift_macro_lisp_expression`,
-`Compiler.bind_macro_lisp_statement`, `Compiler.source_path`,
-`Compiler.open_macro_library`, `Compiler.add_library_dependencies`,
-`Compiler.publish_macro_library`, `Compiler.inherits_import`,
-`Compiler.record_comptime`, `Compiler.inherit_library_comptime`,
-`Compiler.library_filling`, `Compiler.shared_definitions`,
-`Compiler.shares_meta_definition`, `Compiler.install_builtin_macros`,
-`Compiler.bind_meta_operation`, `Compiler.reset_macro_library`
-
 ### [src/main.x](../src/main.x)
 
 x2c command dispatch.
@@ -370,22 +157,6 @@ x2c command dispatch.
 Public functions:
 
 `main`
-
-### [src/meta-group.x](../src/meta-group.x)
-
-a unit's meta group, emitted as C.
-
-Public functions:
-
-`Compiler.use_meta_toolchain`, `Compiler.meta_cc`, `Compiler.meta_cc_identity`,
-`Compiler.meta_cc_run`, `Compiler.prepare_loaded_main`,
-`Compiler.prepare_loaded_functions`, `Compiler.stage_meta_in_process`,
-`Compiler.groups_meta`, `Compiler.group_meta_function`,
-`Compiler.meta_reaches_compile_time`, `Compiler.finish_meta_functions`,
-`Compiler.public_native_function`, `Compiler.meta_call_missing`,
-`Compiler.refuse_meta_call`, `Compiler.refuse_record_meta_call`,
-`Compiler.use_meta_build_directory`, `Compiler.write_meta_build`,
-`Compiler.bind_meta_group`, `Compiler.stage_session_function`
 
 ### [src/meta-helper-client.x](../src/meta-helper-client.x)
 
@@ -399,30 +170,6 @@ Public functions:
 `Compiler.begin_meta_unit`, `Compiler.stop_meta_helper`, `MetaHelper.restart`,
 `MetaHelper.close`
 
-### [src/meta-native.x](../src/meta-native.x)
-
-meta functions and the native code they call.
-
-Public functions:
-
-`Compiler.compiler_targets`, `Compiler.select_native_modules`,
-`Compiler.select_package_module`, `Compiler.load_native_module`,
-`Compiler.preload_native_module`, `Compiler.add_native_module`,
-`Compiler.native_module_loaded`, `Compiler.native_module_targets`,
-`Compiler.supplies_native_meta`, `x2c_register_extension`,
-`Compiler.links_extension`, `Compiler.extension_archive`,
-`Compiler.project_meta_uses_linked`, `Compiler.bind_linked_meta`,
-`Compiler.links_meta_function`, `Compiler.linked_meta_provider_source`,
-`Compiler.install_meta_function`, `Compiler.install_collected_meta_function`,
-`Compiler.matches_macro`, `Compiler.install_meta_declaration`,
-`Compiler.record_project_meta_effect`, `Compiler.install_project_meta_effect`,
-`Compiler.bind_project_meta`, `Compiler.evaluate_meta_expression`,
-`Compiler.evaluate_meta_statement`, `Compiler.run_meta_call`,
-`Compiler.apply_meta_function`, `Compiler.record_native_meta_effect`,
-`Compiler.install_native_meta_effects`, `Compiler.bind_native_meta`,
-`Compiler.install_native_meta_function`, `Compiler.native_meta_accepts`,
-`Compiler.native_meta_module`, `Compiler.native_meta_targets`
-
 ### [src/meta-project.x](../src/meta-project.x)
 
 the project meta build.
@@ -430,33 +177,6 @@ the project meta build.
 Public functions:
 
 `Frontend.prepare_meta`, `Frontend.build_meta`, `Frontend.build_loaded`
-
-### [src/meta-sdk.x](../src/meta-sdk.x)
-
-the compiler's answers to `lib/meta.x` operations.
-
-Public functions:
-
-`MetaContext.current`, `Compiler.expanding`, `MetaContext.invocation_location`,
-`x2c_invocation_file`, `x2c_invocation_line`, `x2c_invocation_column`,
-`x2c_diagnostic_fail`, `x2c_diagnostic_fail_at`, `x2c_diagnostic_error_at`,
-`x2c_diagnostic_warn`, `MetaContext.reject`, `Type.is_named`, `Type.numeric`,
-`Type.is_text`, `Type.aggregate`, `Type.marked_fields`, `Type.resolve_member`,
-`Type.protocol_member`, `Type.getter`, `Type.update_helper`, `Type.element`,
-`Type.parameters`, `Type.return_type`, `Type.reverse_name`, `Type.resolve`,
-`Type.layout`, `Type.is_value`, `Type.tag_name`, `Type.members`, `Type.fields`,
-`MetaContext.type_description`, `Code.type`, `Code.value`,
-`Code.call_in_order`, `Code.lowered`, `Code.bound`, `Code.func_parameters`,
-`Code.exits`, `Code.convert`, `Code.format`, `Code.is_static_pattern`,
-`Code.pattern_value`, `Code.promoted`, `Code.declared_bindings`,
-`MetaContext.function_reference`, `Code.binding_spelling`, `x2c_ident`,
-`x2c_binding_fresh`, `x2c_binding_for`, `MetaContext.fresh_binding`,
-`Code.name`, `Code.body`, `Code.arguments`, `Code.parameter`,
-`Code.native_signature`, `x2c_enclosing`, `x2c_place`,
-`_x2c_complete_iterator`, `Code.register_rewrite`,
-`Code.register_after_initialization`, `Code.source_text`, `x2c_embed_text`,
-`MetaContext.source_description`, `x2c_meta_definition_hashes`,
-`MetaContext.literal_list`, `Compiler.bind_sdk_primitives`
 
 ### [src/operator-ledger.x](../src/operator-ledger.x)
 
@@ -476,39 +196,6 @@ Public functions:
 
 None. This module has no non-static function definitions.
 
-### [src/parse.x](../src/parse.x)
-
-x2c declarations, parsed from source or constructed.
-
-Public functions:
-
-`Compiler.parse_top_level_mode`, `Compiler.skip_linkage_brace`,
-`Compiler.parse_top_level`, `Compiler.parse_submission`,
-`Compiler.defines_main`, `Compiler.script_statement_starts`,
-`Compiler.script_statement_executes`, `Compiler.protocol_form_starts`,
-`Compiler.meta_form_is_declaration`, `Compiler.take_meta_marker`,
-`Compiler.parse_import_declaration`, `Compiler.definition_doc`,
-`Compiler.finish_foreign_alias`, `Compiler.parse_declaration_row`,
-`Compiler.parse_simple_declaration`, `Compiler.parse_type_operand`,
-`Compiler.parse_declaration_argument`, `Compiler.test_static_assert`,
-`Compiler.parse_static_assert`, `Compiler.test_declaration`,
-`Compiler.check_reference_placement`, `Compiler.parse_type_name`,
-`Compiler.parse_fields`, `Compiler.parse_field`, `Compiler.parse_named_type`,
-`Compiler.parse_enumerators`, `Compiler.parse_enumerator`,
-`Compiler.parse_declarator_argument`, `Compiler.bind_template_local`,
-`Compiler.parse_parameter_list`, `Compiler.parse_parameter`,
-`Compiler.bind_parameter`, `Compiler.parse_complex_identifier`,
-`Compiler.package_alias_spelling`, `Compiler.parse_basic_identifier`,
-`Compiler.parse_optional_identifier`, `Compiler.parse_function_definition`,
-`Compiler.parse_function_target`, `Ast.declared_return`, `Compiler.enter`,
-`Compiler.enclosing`, `Compiler.enter_function`, `Compiler.function_entry`,
-`Compiler.exit_function`, `Compiler.place_entry`, `Compiler.place_after`,
-`Compiler.close_placements`, `Compiler.leave_item`,
-`Compiler.finish_initializers`, `Compiler.bind_syntax`,
-`Compiler.source_clause`, `Compiler.bind_source_statement`,
-`Compiler.bind_catch_arm`, `Compiler.bind_match_arm`,
-`Compiler.bind_callable_body`
-
 ### [src/preprocess.x](../src/preprocess.x)
 
 C preprocessor directives in x2c source.
@@ -521,42 +208,6 @@ Public functions:
 `Compiler.scan_conditionals`, `Compiler.leading_preproc`,
 `Compiler.note_preprocessor_macros`, `Compiler.note_object_macro`,
 `Compiler.preproc_track_arms`, `Compiler.preproc_within_arms`
-
-### [src/project.x](../src/project.x)
-
-x2c project manifests.
-
-Public functions:
-
-`ProjectBuild.valid_name`, `ProjectBuild.plan`, `CliRequest.project_manifest`
-
-### [src/protocol.x](../src/protocol.x)
-
-protocols from declaration to conform forms.
-
-Public functions:
-
-`Compiler.reverse_converter_spelling`, `Compiler.publish_protocol_node`,
-`Compiler.rebuild_protocols`, `Compiler.parse_protocol_declaration`,
-`Compiler.resolve_protocols`, `Compiler.conformance_rows`,
-`Compiler.resolve_as_declared`, `Compiler.protocol_members_for`,
-`Compiler.protocol_member_names`, `Compiler.protocol_rejects_direct_member`,
-`Compiler.dump_conformance`, `Compiler.resolve_protocol_member`,
-`Compiler.wrapper_function`, `Compiler.forward_parameters`,
-`Compiler.protocol_update_helper`, `Compiler.discard_helper`,
-`Compiler.protocol_discard_helper`, `Compiler.generate_protocol_adapters`,
-`Compiler.install_generated_protocol_symbols`,
-`Compiler.native_protocol_alias`, `Compiler.record_source_typedef`
-
-### [src/regions.x](../src/regions.x)
-
-values that can outlive the region that allocated them.
-
-Public functions:
-
-`Compiler.region_result`, `Compiler.region_wrapper`, `Compiler.has_region_row`,
-`Compiler.region_effect`, `Compiler.check_regions`,
-`Compiler.check_meta_regions`, `Compiler.audit_regions`
 
 ### [src/report.x](../src/report.x)
 
@@ -650,15 +301,6 @@ Public functions:
 `ToolAction.start`, `ToolRun.ready`, `ToolRun.wait`, `tool_capture`,
 `Toolchain.preprocess`, `Toolchain.search_directories`
 
-### [src/transform.x](../src/transform.x)
-
-x2c AST transformation pipeline.
-
-Public functions:
-
-`Compiler.transform`, `Compiler.normalize`, `Compiler.shipped_support`,
-`Compiler.lower_lambda_expr`, `Compiler.call_in_order`
-
 ### [src/translation.x](../src/translation.x)
 
 synchronous compiler translation requests.
@@ -706,7 +348,112 @@ Public functions:
 `Path.lock_file`, `Path.publish_files`, `Job.decode_wait_status`,
 `Diagnostics.driver_error`, `Diagnostics.host_error`, `Compiler.cache_root`
 
-### [src/components/component-access.x](../src/components/component-access.x)
+### [src/callables/callables.x](../src/callables/callables.x)
+
+callable values lowered to C helpers.
+
+Public functions:
+
+`Compiler.capture_environment`, `Compiler.prepend_setup`,
+`Compiler.maybe_adapt_func_arg`, `Compiler.context_func_adapter`,
+`Compiler.func_parameters`, `Compiler.func_signature`,
+`Compiler.lift_func_expression`, `Compiler.lower_typed_adapter_expr`,
+`Compiler.adapt_lambda_arg`
+
+### [src/cleanup/cleanup.x](../src/cleanup/cleanup.x)
+
+cleanup regions and the transfers that leave them.
+
+Public functions:
+
+`Compiler.lower_cleanup`, `Compiler.static_value_is_runtime`,
+`Ast.defer_captures`, `Compiler.rewrite_defer_list`,
+`Compiler.lower_defer_region`
+
+### [src/cli/cli.x](../src/cli/cli.x)
+
+x2c command-line parsing and presentation.
+
+Public functions:
+
+`CliRequest.parse`, `CliRequest.parse_arguments`,
+`CliRequest.dependency_option`, `CliRequest.package_options`,
+`CliRequest.is_builtin`, `CliRequest.read_arguments`,
+`CliRequest.command_arguments`, `TargetKind.named`, `TargetKind.of`,
+`CliRequest.new`, `Compiler.version`, `CliRequest.inspects`,
+`CliRequest.package_roots`, `CliRequest.require_input`
+
+### [src/collect/collect.x](../src/collect/collect.x)
+
+source-ordered shallow symbol collection and replay.
+
+Public functions:
+
+`Compiler.refresh_source_collections`, `Compiler.forget_provisional_entries`,
+`Compiler.module_source`, `Compiler.collect_symbols`,
+`Compiler.prelude_sources`, `Compiler.is_prelude_source`,
+`Compiler.configure_package`, `SourceView.resolve_include`,
+`Compiler.included_compile_time_effects`, `Compiler.install_included_effects`,
+`Compiler.include_typedef_names`, `Compiler.include_type_dependencies`,
+`Compiler.include_function_declarations`,
+`Compiler.runtime_function_declarations`, `Compiler.publishes_typedef`,
+`Compiler.publishes_type_family`, `Compiler.callable_symbols`,
+`Compiler.inline_type_dependencies`, `Compiler.publish_inline_types`,
+`Compiler.record_generated_symbol`, `Compiler.record_conformance_rows`,
+`Compiler.declared_adoptions`, `Compiler.linked_meta_provider_current`,
+`Compiler.linked_meta_definitions_current`, `Compiler.complete_meta_hashes`,
+`Compiler.meta_provider_hashes`, `Compiler.add_linked_meta_provider_hashes`,
+`Compiler.name_meta_provider_bindings`, `Compiler.loaded_provider`,
+`Compiler.loaded_call_type`, `Compiler.name_loaded_provider`,
+`Compiler.collect_package`, `Compiler.replay_package_imports`,
+`Compiler.configure_interfaces`, `Compiler.prelude_interface`,
+`Compiler.interface_text`, `Compiler.linked_prelude_records`
+
+### [src/compiler/compiler.x](../src/compiler/compiler.x)
+
+one x2c unit's translation state and its two parses.
+
+Public functions:
+
+`Compiler.var`, `Var.compiler`, `Compiler.own_diagnostics`,
+`Compiler.close_child`, `Compiler.share_meta_group`,
+`Compiler.take_unit_state`, `Compiler.return_unit_state`, `Compiler.new`,
+`Compiler.new_shared`, `Compiler.free_lisp`, `Compiler.shallow_parse`,
+`Compiler.shallow_parse_overlay`, `Compiler.start_collection`,
+`Compiler.collect_compile_time_definition`,
+`Compiler.finish_collected_declaration`, `Compiler.record_inline_function`,
+`_x2c_at_function_arrow`, `_x2c_skip_shallow_expression`,
+`Compiler.full_parse`, `Compiler.skip_collected_script_statement`,
+`Compiler.skip_script_statement`, `Compiler.tokenize`, `Compiler.peek`,
+`Token.skip_trivia`, `Compiler.require_input`, `Compiler.expect`,
+`Compiler.next`, `Compiler.test`, `Compiler.at_word`, `Compiler.take_word`,
+`Symbol.group_step`, `Token.group_close`, `Token.after_group`,
+`Compiler.mark_completion`, `Compiler.at_completion`, `_x2c_complete_here`,
+`Compiler.queue_declaration_effect`, `Compiler.run_declaration_effects`,
+`Compiler.collect_unit_macro`, `Compiler.replay_declaration_source`,
+`Compiler.freeze_declaration_syntax`, `Compiler.thaw_declaration_syntax`,
+`Compiler.select_declaration_defaults`, `Compiler.record_origin`,
+`Compiler.anchor_origin`, `Compiler.record_source_declaration`,
+`Compiler.record_source_reference`, `Compiler.copy_source_declaration`,
+`Compiler.merge_source_declarations`, `Compiler.fresh_name`, `Compiler.gensym`,
+`Compiler.add_early`, `Compiler.add_support`, `Compiler.add_init`,
+`Pending.reset`, `Pending.area`, `Pending.initializes`, `Pending.checkpoint`,
+`Pending.restore`, `Compiler.emitted_binding_name`,
+`Compiler.present_references`, `Compiler.mark_reference_present`,
+`Compiler.settle_reference`, `Compiler.restore_reference_presence`,
+`Compiler.optional_reference_test`, `Compiler.cache`,
+`Compiler.cache_cons_cell`, `Compiler.cache_literal_var`,
+`Compiler.cache_literal_list`, `Compiler.match_pattern_value`,
+`Compiler.match_value_is_static`, `Compiler.match_pattern_is_static`,
+`Compiler.match_pattern_binders`, `Compiler.define_pattern_binders`,
+`Compiler.match_capture_value`, `Compiler.pattern_binder_declarations`,
+`Compiler.read_source`, `Compiler.canonical_path`, `Path.real`,
+`Path.resolved_absolute`, `Compiler.portable_path`,
+`Compiler.absolute_home_path`, `Map.merge_translation_dependency`,
+`Compiler.add_translation_dependency`,
+`Compiler.merge_translation_dependencies`
+
+### [src/components/bracket-access.x](../src/components/bracket-access.x)
 
 Bracket access policy: Array and Map mutation through their typed helpers, and any other participant's read, store, and update through its indexing members, with each operand evaluated once, in order. Getter resolution remains with admission.
 
@@ -714,39 +461,7 @@ Public functions:
 
 None. This module has no non-static function definitions.
 
-### [src/components/component-delegate.x](../src/components/component-delegate.x)
-
-delegate fields.
-
-Public functions:
-
-None. This module has no non-static function definitions.
-
-### [src/components/component-destructuring.x](../src/components/component-destructuring.x)
-
-flat List destructuring.
-
-Public functions:
-
-None. This module has no non-static function definitions.
-
-### [src/components/component-interpolation.x](../src/components/component-interpolation.x)
-
-interpolated Strings.
-
-Public functions:
-
-`interpolation_lowering`
-
-### [src/components/component-lambdas.x](../src/components/component-lambdas.x)
-
-lambda lowering.
-
-Public functions:
-
-None. This module has no non-static function definitions.
-
-### [src/components/component-literals.x](../src/components/component-literals.x)
+### [src/components/collection-literals.x](../src/components/collection-literals.x)
 
 Array and Map literals.
 
@@ -754,15 +469,23 @@ Public functions:
 
 `array_literal`, `map_literal`
 
-### [src/components/component-match.x](../src/components/component-match.x)
+### [src/components/delegate-members.x](../src/components/delegate-members.x)
 
-match statements.
+delegate fields.
 
 Public functions:
 
 None. This module has no non-static function definitions.
 
-### [src/components/component-operators.x](../src/components/component-operators.x)
+### [src/components/destructuring.x](../src/components/destructuring.x)
+
+flat List destructuring.
+
+Public functions:
+
+None. This module has no non-static function definitions.
+
+### [src/components/dynamic-operators.x](../src/components/dynamic-operators.x)
 
 dynamic operators.
 
@@ -770,7 +493,31 @@ Public functions:
 
 None. This module has no non-static function definitions.
 
-### [src/components/component-printf.x](../src/components/component-printf.x)
+### [src/components/interpolation.x](../src/components/interpolation.x)
+
+interpolated Strings.
+
+Public functions:
+
+`interpolation_lowering`
+
+### [src/components/lambda-functions.x](../src/components/lambda-functions.x)
+
+lambda lowering.
+
+Public functions:
+
+None. This module has no non-static function definitions.
+
+### [src/components/pattern-match.x](../src/components/pattern-match.x)
+
+match statements.
+
+Public functions:
+
+None. This module has no non-static function definitions.
+
+### [src/components/printf-format.x](../src/components/printf-format.x)
 
 Var values in printf-family formats.
 
@@ -778,7 +525,7 @@ Public functions:
 
 None. This module has no non-static function definitions.
 
-### [src/components/component-protocols.x](../src/components/component-protocols.x)
+### [src/components/protocol-adapters.x](../src/components/protocol-adapters.x)
 
 protocol adapters and Var descriptors.
 
@@ -786,7 +533,7 @@ Public functions:
 
 None. This module has no non-static function definitions.
 
-### [src/components/component-raise.x](../src/components/component-raise.x)
+### [src/components/raise.x](../src/components/raise.x)
 
 raise.
 
@@ -794,7 +541,7 @@ Public functions:
 
 None. This module has no non-static function definitions.
 
-### [src/components/component-string-switch.x](../src/components/component-string-switch.x)
+### [src/components/string-switch.x](../src/components/string-switch.x)
 
 switches on a String.
 
@@ -802,13 +549,266 @@ Public functions:
 
 None. This module has no non-static function definitions.
 
-### [src/components/component-try.x](../src/components/component-try.x)
+### [src/components/try-catch.x](../src/components/try-catch.x)
 
 try, catch, and finally.
 
 Public functions:
 
 `_x2c_try_catch_patterns`, `_x2c_try_catch_site`, `_x2c_try_landing`
+
+### [src/emit/emit.x](../src/emit/emit.x)
+
+C tokens from normalized x2c ASTs.
+
+Public functions:
+
+`Compiler.emit`
+
+### [src/expressions/expressions.x](../src/expressions/expressions.x)
+
+expression syntax and its resolution.
+
+Public functions:
+
+`Compiler.parse_expression`, `Compiler.parse_assignment`,
+`Compiler.parse_conditional`, `Compiler.parse_parenthesized_statement`,
+`Compiler.parse_macro_expression_target`, `Compiler.apply_macro_value`,
+`Compiler.parse_primary`, `Compiler.parse_variable`,
+`Compiler.resolve_expression`, `Compiler.needs_resolution`,
+`Compiler.require_var_tag`, `Compiler.var_tag_expression`,
+`Compiler.resolve_map_entry`, `_x2c_nominal_getindex`,
+`Compiler.resolve_postfix_member`, `Compiler.postfix_completions`,
+`_x2c_func_call_arguments`, `Compiler.func_call_parts`,
+`Compiler.complete_iter_chain`, `List.printf_family`,
+`Compiler.printf_static_format`, `_x2c_indexed_builtin_helper`,
+`Compiler.check_explicit_converter`, `Compiler.promote_string_literal`,
+`Compiler.convert_expression`, `Compiler.convert_segment_to_string`,
+`Compiler.converter_call`, `Compiler.is_builtin_converter_call`
+
+### [src/generate/generate.x](../src/generate/generate.x)
+
+the generated header and source of one unit.
+
+Public functions:
+
+`Compiler.generate_code`, `Compiler.generate_code_text`,
+`Compiler.place_source_prelude`, `Compiler.initializer_function`,
+`Compiler.run_once_body`, `Init.enter`, `Compiler.init_statements`,
+`Compiler.definition_rows`, `Compiler.dump_definitions`
+
+### [src/initializers/initializers.x](../src/initializers/initializers.x)
+
+brace initializer conversion.
+
+Public functions:
+
+`Compiler.initializer_rows`, `Compiler.initializer_field_path`,
+`Compiler.initializer_slot`, `Compiler.convert_initializer`,
+`Compiler.convert_compound_literal`, `Compiler.initializer_native_types`
+
+### [src/literals/literals.x](../src/literals/literals.x)
+
+x2c literal parsing.
+
+Public functions:
+
+`Compiler.parse_list_literal`, `Compiler.parse_macro_pattern_arguments`,
+`Compiler.try_parse_macro_pattern_insertion`, `Compiler.literal_cell`,
+`Compiler.typed_match_pattern`, `Compiler.parse_raise_literal`,
+`Compiler.parse_catch_pattern_literal`, `Compiler.parse_symbol_set_literal`,
+`Compiler.symbol_set_expression`, `Compiler.parse_array_literal`,
+`Compiler.parse_map_literal`, `Compiler.parse_map_entries`,
+`Compiler.parse_map_entry`, `Compiler.parse_string_literal`,
+`Compiler.parse_atomic_literal`
+
+### [src/macros/macros.x](../src/macros/macros.x)
+
+source macros and the compile-time Lisp they run.
+
+Public functions:
+
+`Compiler.report_lisp_failure`, `Compiler.parse_macro_definition`,
+`Compiler.macro_introduced_name`, `Compiler.macro_tag_name`,
+`Compiler.parse_macro_quotation`, `Compiler.try_parse_macro_slot`,
+`Compiler.peek_macro_hole`, `Compiler.after_hole`,
+`Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_member`,
+`Compiler.expand_macro_invocation_node`, `Compiler.macro_invocation_site`,
+`Compiler.marked_rewrite`, `Compiler.has_rewrites`, `Compiler.rewrite`,
+`Compiler.rewrite_lowered`, `Compiler.lower_replacement`,
+`Compiler.rewrite_written`, `Compiler.lower_rewrite`,
+`Compiler.written_support`, `Compiler.applying_shipped`, `Compiler.rebound`,
+`Compiler.watched_step`, `Compiler.publish_macro_definition_node`,
+`Compiler.record_compile_time_effect`, `Compiler.install_compile_time_effects`,
+`Compiler.macro_form_is_definition`, `Compiler.local_macro_form_is_definition`,
+`Compiler.keyword_form_is_definition`, `Compiler.parse_keyword_definition`,
+`Compiler.macro_starts_target_at`, `Compiler.macro_invocation_collection`,
+`Compiler.skip_macro_invocation`, `Compiler.skip_named_type_declaration`,
+`Compiler.macro_targets_unit`, `Compiler.try_parse_macro_target_at`,
+`Compiler.try_parse_macro_expression`, `Compiler.evaluate_macro_slot`,
+`Compiler.evaluate_macro_rows`, `Compiler.evaluate_meta_value`,
+`Compiler.evaluate_declaration_recipe`, `x2c_template_call`,
+`Compiler.rebuild_expression`, `Compiler.rebuild_statement`,
+`Compiler.rebuild_unit_function`, `Compiler.rebuild_function`,
+`Compiler.land_quotation`, `Compiler.macro_value_literal`,
+`Compiler.try_parse_macro_pattern`, `Compiler.macro_pattern_at`,
+`Compiler.try_parse_macro_subpattern`, `Compiler.capture_macro_value`,
+`Compiler.take_code_value`, `Compiler.place`, `Compiler.bind_code_value`,
+`Compiler.ensure_macro_lisp`, `Compiler.parse_macro_lisp_top_level`,
+`Compiler.parse_macro_lisp_shallow`, `Compiler.evaluate_declaration_effect`,
+`Compiler.parse_macro_lisp_expression`, `Compiler.lift_macro_lisp_expression`,
+`Compiler.bind_macro_lisp_statement`, `Compiler.source_path`,
+`Compiler.open_macro_library`, `Compiler.add_library_dependencies`,
+`Compiler.publish_macro_library`, `Compiler.inherits_import`,
+`Compiler.record_comptime`, `Compiler.inherit_library_comptime`,
+`Compiler.library_filling`, `Compiler.shared_definitions`,
+`Compiler.shares_meta_definition`, `Compiler.install_builtin_macros`,
+`Compiler.bind_meta_operation`, `Compiler.reset_macro_library`
+
+### [src/meta-group/meta-group.x](../src/meta-group/meta-group.x)
+
+a unit's meta group, emitted as C.
+
+Public functions:
+
+`Compiler.use_meta_toolchain`, `Compiler.meta_cc`, `Compiler.meta_cc_identity`,
+`Compiler.meta_cc_run`, `Compiler.prepare_loaded_main`,
+`Compiler.prepare_loaded_functions`, `Compiler.stage_meta_in_process`,
+`Compiler.groups_meta`, `Compiler.group_meta_function`,
+`Compiler.meta_reaches_compile_time`, `Compiler.finish_meta_functions`,
+`Compiler.public_native_function`, `Compiler.meta_call_missing`,
+`Compiler.refuse_meta_call`, `Compiler.refuse_record_meta_call`,
+`Compiler.use_meta_build_directory`, `Compiler.write_meta_build`,
+`Compiler.bind_meta_group`, `Compiler.stage_session_function`
+
+### [src/meta-native/meta-native.x](../src/meta-native/meta-native.x)
+
+meta functions and the native code they call.
+
+Public functions:
+
+`Compiler.compiler_targets`, `Compiler.select_native_modules`,
+`Compiler.select_package_module`, `Compiler.load_native_module`,
+`Compiler.preload_native_module`, `Compiler.add_native_module`,
+`Compiler.native_module_loaded`, `Compiler.native_module_targets`,
+`Compiler.supplies_native_meta`, `x2c_register_extension`,
+`Compiler.links_extension`, `Compiler.extension_archive`,
+`Compiler.project_meta_uses_linked`, `Compiler.bind_linked_meta`,
+`Compiler.links_meta_function`, `Compiler.linked_meta_provider_source`,
+`Compiler.install_meta_function`, `Compiler.install_collected_meta_function`,
+`Compiler.matches_macro`, `Compiler.install_meta_declaration`,
+`Compiler.record_project_meta_effect`, `Compiler.install_project_meta_effect`,
+`Compiler.bind_project_meta`, `Compiler.evaluate_meta_expression`,
+`Compiler.evaluate_meta_statement`, `Compiler.run_meta_call`,
+`Compiler.apply_meta_function`, `Compiler.record_native_meta_effect`,
+`Compiler.install_native_meta_effects`, `Compiler.bind_native_meta`,
+`Compiler.install_native_meta_function`, `Compiler.native_meta_accepts`,
+`Compiler.native_meta_module`, `Compiler.native_meta_targets`
+
+### [src/meta-sdk/meta-sdk.x](../src/meta-sdk/meta-sdk.x)
+
+the compiler's answers to `lib/meta.x` operations.
+
+Public functions:
+
+`MetaContext.current`, `Compiler.expanding`, `MetaContext.invocation_location`,
+`x2c_invocation_file`, `x2c_invocation_line`, `x2c_invocation_column`,
+`x2c_diagnostic_fail`, `x2c_diagnostic_fail_at`, `x2c_diagnostic_error_at`,
+`x2c_diagnostic_warn`, `MetaContext.reject`, `Type.is_named`, `Type.numeric`,
+`Type.is_text`, `Type.aggregate`, `Type.marked_fields`, `Type.resolve_member`,
+`Type.protocol_member`, `Type.getter`, `Type.update_helper`, `Type.element`,
+`Type.parameters`, `Type.return_type`, `Type.reverse_name`, `Type.resolve`,
+`Type.layout`, `Type.is_value`, `Type.tag_name`, `Type.members`, `Type.fields`,
+`MetaContext.type_description`, `Code.type`, `Code.value`,
+`Code.call_in_order`, `Code.lowered`, `Code.bound`, `Code.func_parameters`,
+`Code.exits`, `Code.convert`, `Code.format`, `Code.is_static_pattern`,
+`Code.pattern_value`, `Code.promoted`, `Code.declared_bindings`,
+`MetaContext.function_reference`, `Code.binding_spelling`, `x2c_ident`,
+`x2c_binding_fresh`, `x2c_binding_for`, `MetaContext.fresh_binding`,
+`Code.name`, `Code.body`, `Code.arguments`, `Code.parameter`,
+`Code.native_signature`, `x2c_enclosing`, `x2c_place`,
+`_x2c_complete_iterator`, `Code.register_rewrite`,
+`Code.register_after_initialization`, `Code.source_text`, `x2c_embed_text`,
+`MetaContext.source_description`, `x2c_meta_definition_hashes`,
+`MetaContext.literal_list`, `Compiler.bind_sdk_primitives`
+
+### [src/parse/parse.x](../src/parse/parse.x)
+
+x2c declarations, parsed from source or constructed.
+
+Public functions:
+
+`Compiler.parse_top_level_mode`, `Compiler.skip_linkage_brace`,
+`Compiler.parse_top_level`, `Compiler.parse_submission`,
+`Compiler.defines_main`, `Compiler.script_statement_starts`,
+`Compiler.script_statement_executes`, `Compiler.protocol_form_starts`,
+`Compiler.meta_form_is_declaration`, `Compiler.take_meta_marker`,
+`Compiler.parse_import_declaration`, `Compiler.definition_doc`,
+`Compiler.finish_foreign_alias`, `Compiler.parse_declaration_row`,
+`Compiler.parse_simple_declaration`, `Compiler.parse_type_operand`,
+`Compiler.parse_declaration_argument`, `Compiler.test_static_assert`,
+`Compiler.parse_static_assert`, `Compiler.test_declaration`,
+`Compiler.check_reference_placement`, `Compiler.parse_type_name`,
+`Compiler.parse_fields`, `Compiler.parse_field`, `Compiler.parse_named_type`,
+`Compiler.parse_enumerators`, `Compiler.parse_enumerator`,
+`Compiler.parse_declarator_argument`, `Compiler.bind_template_local`,
+`Compiler.parse_parameter_list`, `Compiler.parse_parameter`,
+`Compiler.bind_parameter`, `Compiler.parse_complex_identifier`,
+`Compiler.package_alias_spelling`, `Compiler.parse_basic_identifier`,
+`Compiler.parse_optional_identifier`, `Compiler.parse_function_definition`,
+`Compiler.parse_function_target`, `Ast.declared_return`, `Compiler.enter`,
+`Compiler.enclosing`, `Compiler.enter_function`, `Compiler.function_entry`,
+`Compiler.exit_function`, `Compiler.place_entry`, `Compiler.place_after`,
+`Compiler.close_placements`, `Compiler.leave_item`,
+`Compiler.finish_initializers`, `Compiler.bind_syntax`,
+`Compiler.source_clause`, `Compiler.bind_source_statement`,
+`Compiler.bind_catch_arm`, `Compiler.bind_match_arm`,
+`Compiler.bind_callable_body`
+
+### [src/project/project.x](../src/project/project.x)
+
+x2c project manifests.
+
+Public functions:
+
+`ProjectBuild.valid_name`, `ProjectBuild.plan`, `CliRequest.project_manifest`
+
+### [src/protocol/protocol.x](../src/protocol/protocol.x)
+
+protocols from declaration to conform forms.
+
+Public functions:
+
+`Compiler.reverse_converter_spelling`, `Compiler.publish_protocol_node`,
+`Compiler.rebuild_protocols`, `Compiler.parse_protocol_declaration`,
+`Compiler.resolve_protocols`, `Compiler.conformance_rows`,
+`Compiler.resolve_as_declared`, `Compiler.protocol_members_for`,
+`Compiler.protocol_member_names`, `Compiler.protocol_rejects_direct_member`,
+`Compiler.dump_conformance`, `Compiler.resolve_protocol_member`,
+`Compiler.wrapper_function`, `Compiler.forward_parameters`,
+`Compiler.protocol_update_helper`, `Compiler.discard_helper`,
+`Compiler.protocol_discard_helper`, `Compiler.generate_protocol_adapters`,
+`Compiler.install_generated_protocol_symbols`,
+`Compiler.native_protocol_alias`, `Compiler.record_source_typedef`
+
+### [src/regions/regions.x](../src/regions/regions.x)
+
+values that can outlive the region that allocated them.
+
+Public functions:
+
+`Compiler.region_result`, `Compiler.region_wrapper`, `Compiler.has_region_row`,
+`Compiler.region_effect`, `Compiler.check_regions`,
+`Compiler.check_meta_regions`, `Compiler.audit_regions`
+
+### [src/transform/transform.x](../src/transform/transform.x)
+
+x2c AST transformation pipeline.
+
+Public functions:
+
+`Compiler.transform`, `Compiler.normalize`, `Compiler.shipped_support`,
+`Compiler.lower_lambda_expr`, `Compiler.call_in_order`
 
 ## Runtime modules
 

@@ -281,17 +281,17 @@ manifest, including the deterministic Lisp showcase.
 
 ## Implementation landmarks
 
-- Percent literals: `src/literals.x`; lambdas: `src/lambdas.x` parses them
-  and resolves captures, and `src/components/component-lambdas.x` lowers them.
+- Percent literals: `src/literals/literals.x`; lambdas: `src/lambdas.x` parses them
+  and resolves captures, and `src/components/lambda-functions.x` lowers them.
 - Statements: `src/statements.x`; the built-in `foreach(item, collection)`
   source macro: `etc/builtin-macros.x` and `src/builtins.x`, loaded by
-  `src/macros.x`.
-- Type initialization: `src/parse.x`, `src/generate.x`, and `src/cache.x`.
-- Type conversion: `src/type.x`, `src/expressions.x`, `src/transform.x`,
+  `src/macros/macros.x`.
+- Type initialization: `src/parse/parse.x`, `src/generate/generate.x`, and `src/cache.x`.
+- Type conversion: `src/type.x`, `src/expressions/expressions.x`, `src/transform/transform.x`,
   `lib/varconvert.x`, and `lib/varops.x`.
-- C token emission and formatting: `src/emit.x` and `src/format.x`.
+- C token emission and formatting: `src/emit/emit.x` and `src/format.x`.
 - Native actions and project lowering: `src/toolchain.x`, `commands/build/build.x`, and
-  `src/project.x`.
+  `src/project/project.x`.
 - Shared scanning and tokenization: `lib/scan.x` and `lib/tokenizer.x`.
 
 The book owns language semantics. Start with

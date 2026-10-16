@@ -4,7 +4,7 @@
 > **Provisional API:** This reference documents current compiler behavior.
 > Compatibility is not yet promised.
 
-# `src/compiler.x`
+# `src/compiler/compiler.x`
 
 One x2c unit's translation state and its two parses.
 
@@ -982,7 +982,7 @@ the transform lowers it, a block item with the token or origin it
 starts at, or an initialized declarator with its declaration base in
 `base` and its `(bind ...)` node in `node`.
 
-Source: `src/compiler.x:99`
+Source: `src/compiler/compiler.x:99`
 
 <a id="Compiler"></a>
 ### Compiler
@@ -995,7 +995,7 @@ The structure, its state, and its owned compile-time `Lisp` session belong
 to the current `Scope`. `Compiler.free_lisp` permits early session cleanup;
 otherwise Scope teardown releases it. All Lisp calls must return first.
 
-Source: `src/compiler.x:113`
+Source: `src/compiler/compiler.x:113`
 
 <a id="Diagnostics"></a>
 ### Diagnostics
@@ -1004,7 +1004,7 @@ Source: `src/compiler.x:113`
 
 Names the positioned diagnostic store routed by a `Compiler`.
 
-Source: `src/compiler.x:26`
+Source: `src/compiler/compiler.x:26`
 
 <a id="GenNames"></a>
 ### GenNames
@@ -1021,7 +1021,7 @@ number names one live declaration across every symbol table in the unit.
 Exported rows use their interface's own numbering, which starts at 1;
 imported templates rebind those references in the consuming unit.
 
-Source: `src/compiler.x:62`
+Source: `src/compiler/compiler.x:62`
 
 <a id="ModuleSource"></a>
 ### ModuleSource
@@ -1036,7 +1036,7 @@ precedes that offset on its line and the prefix that file's statics
 take. The first row marks the start of `text`. `members` maps each member's
 canonical path to its content hash.
 
-Source: `src/compiler.x:46`
+Source: `src/compiler/compiler.x:46`
 
 <a id="Pending"></a>
 ### Pending
@@ -1047,7 +1047,7 @@ Holds generated code awaiting insertion, by `Pending.area` destination:
 unit support declarations, which `Compiler.transform` lowers after the
 unit, then the lowered statements of each file initialization area.
 
-Source: `src/compiler.x:82`
+Source: `src/compiler/compiler.x:82`
 
 <a id="PendingMark"></a>
 ### PendingMark
@@ -1056,7 +1056,7 @@ Source: `src/compiler.x:82`
 
 Holds each destination's length for `Pending.restore`.
 
-Source: `src/compiler.x:85`
+Source: `src/compiler/compiler.x:85`
 
 <a id="ScriptUnit"></a>
 ### ScriptUnit
@@ -1068,7 +1068,7 @@ canonical path, its first line as written, and whether it defines `main`
 itself. Every compiler of that unit shares one record, so collection sees
 the same script settings the full parse does.
 
-Source: `src/compiler.x:33`
+Source: `src/compiler/compiler.x:33`
 
 <a id="SlotWatch"></a>
 ### SlotWatch
@@ -1078,7 +1078,7 @@ Source: `src/compiler.x:33`
 Names the slots a rewrite's first lowering watches; see "prepared
 replacements" in macros.x.
 
-Source: `src/compiler.x:92`
+Source: `src/compiler/compiler.x:92`
 
 <a id="Sym"></a>
 ### Sym
@@ -1087,7 +1087,7 @@ Source: `src/compiler.x:92`
 
 Names the scope-owned semantic table belonging to one compiler.
 
-Source: `src/compiler.x:88`
+Source: `src/compiler/compiler.x:88`
 
 <a id="SymScope"></a>
 ### SymScope
@@ -1099,7 +1099,7 @@ Holds the three mutable maps that form one lexical semantic scope.
 Active scopes have initialized maps. The zero value is only the sentinel
 returned when an empty scope stack is popped.
 
-Source: `src/compiler.x:72`
+Source: `src/compiler/compiler.x:72`
 
 <a id="SymTxn"></a>
 ### SymTxn
@@ -1112,7 +1112,7 @@ copying it does not coordinate completion. The symbol table's undo log
 holds the rows it may restore from `mark`; the staged generated-name
 counters and other snapshots live in its initial Scope.
 
-Source: `src/compiler.x:292`
+Source: `src/compiler/compiler.x:292`
 
 ## Design notes
 

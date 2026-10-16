@@ -4,7 +4,7 @@
 > **Provisional API:** This reference documents current compiler behavior.
 > Compatibility is not yet promised.
 
-# `src/generate.x`
+# `src/generate/generate.x`
 
 The generated header and source of one unit.
 
@@ -154,7 +154,7 @@ the unit's shutdown function, `synthetic` is the synthetic initializer or
 NULL, and `reachable` holds the entries a cache-only file guards, or is
 NULL when every public entry is guarded.
 
-Source: `src/generate.x:37`
+Source: `src/generate/generate.x:37`
 
 ## Design notes
 

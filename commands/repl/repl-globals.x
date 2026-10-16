@@ -5,8 +5,8 @@
 #pragma once
 #include "repl-session.x"
 #include "ast-rewrite.x"
-#include "expressions.x"
-#include "collect.x"
+#include "expressions/expressions.x"
+#include "collect/collect.x"
 
 /* Follow only field and index selections rooted at the actual published
    binding. Locals with the same spelling remain ordinary objects. */

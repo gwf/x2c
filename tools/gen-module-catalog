@@ -80,10 +80,13 @@ if write && check:
   return 2
 
 Array paths = []
-foreach String pattern in %("src/*.x" "src/components/*.x" "lib/*.x"):
+foreach String pattern in %("src/*.x" "src/*/*.x" "lib/*.x"):
   foreach Path source in root.join(pattern).glob():
     String path = source
     path = path[root.len() + 1:]
+    if path.startswith("src/") && source.dirname().basename() != "src" &&
+       source.dirname().basename() != "components" &&
+       source.stem() != source.dirname().basename(): continue
     if path != "lib/x2c.x" && path != "src/linked-meta.x": paths.push(path)
 String text = _render(Unit.load(x2c, root, paths))
 if write:

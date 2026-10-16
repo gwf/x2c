@@ -16,15 +16,15 @@
     and `List` canonicalization preserves value identity across them.
 */
 #pragma once
-#include "compiler.x"
+#include "compiler/compiler.x"
 #include "ast-rewrite.x"
 #include "type.x"
 #include "var.x"
 #include "string.x"
-#include "transform.x"
-#include "cleanup.x"
-#include "expressions.x"
-#include "generate.x"
+#include "transform/transform.x"
+#include "cleanup/cleanup.x"
+#include "expressions/expressions.x"
+#include "generate/generate.x"
 #include "logger.x"
 #include <stdio.h>
 #include <stdint.h>

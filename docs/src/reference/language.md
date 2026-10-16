@@ -83,16 +83,15 @@ translates as one unit with two private storage classes: `static` is visible
 in the file that declares it, and `module` is visible in every file of the
 unit.
 
-The entry `calculations.x` lists members under its companion directory
-`calculations/`:
+The entry `calculations/calculations.x` lists members beside it:
 
 <!-- ignore: These two source files must be saved at the displayed paths. -->
 ```x2c,ignore
-/* calculations.x */
+/* calculations/calculations.x */
 #include <stdio.h>
 
 module {
-  "calculations/implementation.x",
+  "implementation.x",
 }
 
 int main(void) {
@@ -113,10 +112,10 @@ trailing comma, and `}`, with no final semicolon. It appears at file scope,
 once per file. Before a file-scope declaration `module` is a storage class,
 described below. Elsewhere it is an ordinary identifier, and
 `struct module {` declares a tag. Each path is relative to the file that holds
-the block and must lead to a file under that file's companion directory,
-`NAME/` for `NAME.x`, once `..` and symbolic links are resolved. A path that
-leads elsewhere, a member that is already being spliced, an unreadable member,
-a malformed block, or a second block is a driver error at the block.
+the block. Members may be siblings, descendants, or files elsewhere; no
+same-named companion directory is required. A member that is already being
+spliced, an unreadable member, a malformed block, or a second block is a driver
+error at the block.
 
 The block is spliced before C preprocessing, so a preprocessor condition does
 not choose members. x2c skips a block only inside a conditional arm that C
@@ -136,8 +135,8 @@ A member's text stands where the block stood, in the listed order. All members
 share the entry's translation unit. Function declarations are collected across
 that complete unit, so a function can call a later-defined function without an
 explicit prototype. Other declarations retain their ordinary placement rules.
-A member may hold its own block, whose members lie under the member's companion
-directory; their text is spliced in turn, and the namespace stays flat.
+A member may hold its own block, whose paths are relative to that member;
+their text is spliced in turn, and the namespace stays flat.
 
 The `module` storage class declares a file-scope name for every file of the
 module unit. It is written where `static` would be, before an object,
@@ -167,11 +166,11 @@ enumerators of an enum declared without a typedef stay unit-wide, even under
 `static`. A later declaration without `static` refers to the file's static, as
 in C. Examples are the definition after a `static` prototype and a block-scope
 `extern` declaration or prototype. A file's statics take a prefix in the
-generated C: the file's path under the entry's companion directory without its
+generated C: the file's path relative to the entry's directory without its
 extension, with each character that cannot continue a C identifier made `_`,
 then `___`. The prefix starts with `f`, the normalized path's length, and `_`;
 a path that starts with a digit gets a leading `x` before its length is
-measured. Under the entry `parser.x`, a static `advance` in
+measured. Under the entry `parser/parser.x`, a static `advance` in
 `parser/statements/loops.x` emits as `f16_statements_loops___advance`, and one
 in the entry itself as `f6_parser___advance`. Trailing `_` of the path's
 spelling are dropped first, so `a.x` and `a-.x` give one prefix. A package
@@ -681,7 +680,7 @@ temporary, runtime check, symbol, or dispatch table.
 Ordinary [dot-call lookup](#dot-call-lookup) runs first. Delegate fields are
 searched only if those lookups fail, and a member rewrite a program registers
 for the receiver's own type is tried before them. The shipped component
-`src/components/component-delegate.x` does this search. `$rewrite` registers
+`src/components/delegate-members.x` does this search. `$rewrite` registers
 it with the receiver pattern `%(expr <delegate> *)`. It runs only when the
 receiver's aggregate declares a delegate field. The search visits marked
 fields in source order to produce consistent diagnostics. One resolving path
@@ -3044,7 +3043,7 @@ the same crossing but splices the evaluated `List`'s elements. Collection
 insertion converts to the representation required by the literal; `String`
 insertion accepts `String`, `Symbol`, declared converters, `Var`, aliases of
 `Var`, and supported numeric values under the existing conversion rules. The
-shipped component `src/components/component-interpolation.x` joins a `%""`
+shipped component `src/components/interpolation.x` joins a `%""`
 literal's parts, a translator that `$rewrite(%(expr ("String") (segments *)))`
 registers on the literal's `segments` head. A program's rule for `String.join`
 receives only the calls that the program writes, including one inside a `$`
@@ -3436,7 +3435,7 @@ static format literal. Automatic lowering covers numeric conversions, `%c`,
 `%s`, `*` width and precision, and the `hh`, `h`, `l`, `ll`, and `L` modifiers.
 Other modifiers, pointer and count conversions, wide strings and characters,
 and positional formats require explicit native arguments. This lowering is
-the compiler component `src/components/component-printf.x`, which registers a `$rewrite`
+the compiler component `src/components/printf-format.x`, which registers a `$rewrite`
 call pattern for each family member. A project can register its own call
 pattern the same way, for example for its own logging function.
 
@@ -3507,7 +3506,7 @@ For `+`, when each operand is a `String`, an alias reaching `String`, a
 the result is the `String` that `String.add` returns, so `path + ".o"`
 concatenates.
 
-The shipped component `src/components/component-operators.x` implements these
+The shipped component `src/components/dynamic-operators.x` implements these
 lowerings. It also implements the dynamic compound assignments and increments
 below, and unary fallback rejection after protocol resolution. It registers
 each translator with `$rewrite` and a Match pattern typed `Var`, such as
@@ -3982,7 +3981,7 @@ after matching, with captures visible, and uses ordinary truth conversion.
 False tries the next arm; errors propagate normally. A successful guard runs
 the body once.
 
-The shipped component `src/components/component-match.x` lowers `match`.
+The shipped component `src/components/pattern-match.x` lowers `match`.
 `$rewrite($matched)` registers it on the `match` statement head; a rule a
 program registers there runs first. A program's `switch` rule receives the
 statements in the arms. It does not receive the `switch` that the lowering
@@ -4001,7 +4000,7 @@ pointers, mutable containers, resources, custom objects, and other
 identity-bearing values are invalid. A value whose own type is invalid is a
 compiler error; invalid contents of a `List` or `Var` value reach `Error`'s
 `<bad-types>` raw floor when the `raise` runs. The shipped component
-`src/components/component-raise.x` performs the conversions and the check.
+`src/components/raise.x` performs the conversions and the check.
 `$rewrite($raised)` registers on the `raise` statement head. The compiler
 evaluates the converted code and values once each, left to right, and builds
 their literals when the `raise` runs. A `try` may have adjacent `catch` arms:

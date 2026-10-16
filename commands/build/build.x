@@ -8,10 +8,10 @@
 */
 
 #pragma once
-#include "cli.x"
+#include "cli/cli.x"
 #include "deps.x"
 #include "toolchain.x"
-#include "compiler.x"
+#include "compiler/compiler.x"
 
 /** Holds `Scope`-owned mutable state for one prepared native build target.
     `CliRequest.prepare` allocates the record in the current `Scope` and

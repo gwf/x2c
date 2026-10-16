@@ -64,7 +64,7 @@ A second run with `--min-size 512` made the larger matches easy to inspect.
   `$integer.raw(_integer_raw)`. This is a correct match and an existing
   abstraction, not newly discovered handwritten duplication.
 - A 528-cell match joins `Compiler.convert_compound_literal` near
-  `src/expressions.x:3733` and `_convert_composite` near line 3566. Both
+  `src/expressions/expressions.x:3733` and `_convert_composite` near line 3566. Both
   construct the same nested typed zero-pointer dereference template under
   different local names. This is a concrete candidate for investigating a
   shared constructor. The experiment does not establish whether extracting

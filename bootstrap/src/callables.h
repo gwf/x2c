@@ -2,21 +2,21 @@
 
 #pragma once
 
-#ifndef __GUARD_0xB4B5E4BA__
-#define __GUARD_0xB4B5E4BA__
+#ifndef __GUARD_0x6D0C4926__
+#define __GUARD_0x6D0C4926__
 
 #include "x2c.h"
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include "adapter-memo.h"
 #include "ast-rewrite.h"
 #include "meta.h"
 #include "grammar.h"
 #include "ast.h"
 #include "type.h"
-#include "parse.h"
-#include "expressions.h"
-#include "protocol.h"
-#include "transform.h"
+#include "parse/parse.h"
+#include "expressions/expressions.h"
+#include "protocol/protocol.h"
+#include "transform/transform.h"
 #include "lambdas.h"
 List Compiler_capture_environment(Compiler c, List name, List fields);
 
@@ -37,4 +37,4 @@ List Compiler_lower_typed_adapter_expr(Compiler c, List expression);
 List Compiler_adapt_lambda_arg(Compiler c, List argument, List expected_type);
 
 
-#endif /* __GUARD_0xB4B5E4BA__ */
+#endif /* __GUARD_0x6D0C4926__ */

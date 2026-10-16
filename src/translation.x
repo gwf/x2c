@@ -20,16 +20,16 @@ static keyword loop $private.loop;
 #include <unistd.h>
 
 #include "report.x"
-#include "collect.x"
-#include "cli.x"
-#include "compiler.x"
+#include "collect/collect.x"
+#include "cli/cli.x"
+#include "compiler/compiler.x"
 #include "deps.x"
 #include "logger.x"
 #include "utils.x"
-#include "emit.x"
-#include "generate.x"
+#include "emit/emit.x"
+#include "generate/generate.x"
 #include "format.x"
-#include "protocol.x"
+#include "protocol/protocol.x"
 
 static macro Stmt $report.main_stem_collision(
   Expr $stem, Expr $first, Expr $other, Expr $directory) =>

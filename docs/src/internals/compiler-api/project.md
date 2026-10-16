@@ -4,7 +4,7 @@
 > **Provisional API:** This reference documents current compiler behavior.
 > Compatibility is not yet promised.
 
-# `src/project.x`
+# `src/project/project.x`
 
 X2c project manifests.
 
@@ -71,7 +71,7 @@ struct is owned by the current `Scope` and needs no individual cleanup; its
 `String` and `List` fields retain their canonical pool lifetimes and may
 share values with the command request.
 
-Source: `src/project.x:19`
+Source: `src/project/project.x:19`
 
 ## Design notes
 

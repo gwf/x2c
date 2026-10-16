@@ -5,11 +5,11 @@
 #pragma once
 #include "repl-session.x"
 #include "ast-rewrite.x"
-#include "callables.x"
-#include "expressions.x"
-#include "meta-group.x"
+#include "callables/callables.x"
+#include "expressions/expressions.x"
+#include "meta-group/meta-group.x"
 #include "lambdas.x"
-#include "protocol.x"
+#include "protocol/protocol.x"
 #include "repl-native-types.x"
 
 static typedef struct PromptFunction {

@@ -128,19 +128,19 @@ commits need not rebuild from their own bootstrap.
   `stage`, which carries values across the compile-time boundary, and
   `builtins` and `linked-meta`, the compile-time code compiled into the
   compiler, with independent extensions under `src/components/`:
-  `component-access` supplying bracket access policy,
-  `component-try` lowering try, catch, and finally,
-  `component-delegate` searching delegate fields,
-  `component-literals` building Array and Map literals,
-  `component-printf` converting Var values in printf-family formats,
-  `component-operators` lowering dynamic operators,
-  `component-raise` lowering raise,
-  `component-match` lowering match,
-  `component-interpolation` joining interpolated Strings,
-  `component-destructuring` lowering List destructuring,
-  `component-lambdas` lowering lambdas and their cells,
-  `component-protocols` writing protocol adapters and Var descriptors, and
-  `component-string-switch` lowering switches on a String)/
+  `bracket-access` supplying bracket access policy,
+  `try-catch` lowering try, catch, and finally,
+  `delegate-members` searching delegate fields,
+  `collection-literals` building Array and Map literals,
+  `printf-format` converting Var values in printf-family formats,
+  `dynamic-operators` lowering dynamic operators,
+  `raise` lowering raise,
+  `pattern-match` lowering match,
+  `interpolation` joining interpolated Strings,
+  `destructuring` lowering List destructuring,
+  `lambda-functions` lowering lambdas and their cells,
+  `protocol-adapters` writing protocol adapters and Var descriptors, and
+  `string-switch` lowering switches on a String)/
   `literals` (+ `lambdas`) -> `ast` (+ `ast-rewrite`, AST traversal and
   rewriting, and `grammar`, source forms used by lowering) ->
   `type` (+ `type-ledger`)/`protocol`

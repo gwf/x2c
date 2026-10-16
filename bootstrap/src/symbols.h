@@ -6,12 +6,16 @@
 #define __GUARD_0x23009D1A__
 
 #include "x2c.h"
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include "parse-reports.h"
 #include "grammar.h"
 typedef struct Sym * Sym;
 
 Sym Sym_new(Compiler c);
+
+void Sym_put(Sym s, Map map, Var key, Var value);
+
+void Sym_drop(Sym s, Map map, Var key);
 
 void Sym_reset(Sym s, Map globals);
 
@@ -44,16 +48,6 @@ Map Sym_file_statics(Sym s);
 void Sym_mark_static(Sym s, List key);
 
 List Sym_visible_symbols(Sym s);
-
-void Sym_define_macro(Sym s, Atom name, List definition);
-
-int Sym_has_local_macros(Sym s);
-
-List Sym_lookup_macro(Sym s, Atom name);
-
-Map Compiler_macro_definition_locals(Compiler c);
-
-int Compiler_macro_template_local(Compiler c, List binding);
 
 void Sym_set(Sym s, List key, List type);
 
@@ -137,6 +131,16 @@ List Compiler_imported_providers(Compiler c, String name);
 
 String Compiler_imported_spelling(Compiler c, String name);
 
+void Sym_define_macro(Sym s, Atom name, List definition);
+
+int Sym_has_local_macros(Sym s);
+
+List Sym_lookup_macro(Sym s, Atom name);
+
+Map Compiler_macro_definition_locals(Compiler c);
+
+int Compiler_macro_template_local(Compiler c, List binding);
+
 #define RESOLVE_KEY_MAX_TYPEDEFS 64
 #define RESOLVE_KEY_MAX_HOPS (2 * RESOLVE_KEY_MAX_TYPEDEFS)
 Type Sym_resolve_key(Sym s, Type key);
@@ -174,10 +178,6 @@ void Sym_mark_field(Sym s, Type aggregate, Symbol mark, String name);
 List Sym_marked_fields(Sym s, Type aggregate, Symbol mark);
 
 Type Sym_aggregate_of(Sym s, Type type);
-
-void Sym_put(Sym s, Map map, Var key, Var value);
-
-void Sym_drop(Sym s, Map map, Var key);
 
 SymTxn Compiler_begin_semantic_transaction(Compiler c);
 

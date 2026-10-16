@@ -7,15 +7,15 @@
 #define __GUARD_0x9578BA41__
 #include "x2c.h"
 
-#include "compiler.h"
+#include "compiler/compiler.h"
 #include "ast-rewrite.h"
 #include "type.h"
 #include "var.h"
 #include "string.h"
-#include "transform.h"
-#include "cleanup.h"
-#include "expressions.h"
-#include "generate.h"
+#include "transform/transform.h"
+#include "cleanup/cleanup.h"
+#include "expressions/expressions.h"
+#include "generate/generate.h"
 #include "logger.h"
 #include <stdio.h>
 #include <stdint.h>

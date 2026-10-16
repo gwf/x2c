@@ -9,8 +9,8 @@
 #include "meta.h"
 #include "grammar.h"
 #include "lisp.h"
-#include "macros.h"
-#include "transform.h"
+#include "macros/macros.h"
+#include "transform/transform.h"
 Map Compiler_builtin_targets(void);
 
 
