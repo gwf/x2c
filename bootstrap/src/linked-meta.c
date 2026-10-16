@@ -12985,7 +12985,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _12070 = List_var(_12069);
   _12071 = String_new("src/compiler/literal-cache.x");
   _12072 = String_var(_12071);
-  _12073 = String_new("e5fd6b99");
+  _12073 = String_new("fc96db54");
   _12074 = String_var(_12073);
   _12075 = cons(_12074, NULL);
   _12076 = cons(_12072, _12075);
@@ -13083,7 +13083,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _12168 = List_var(_12167);
   _12169 = String_new("src/macros.x");
   _12170 = String_var(_12169);
-  _12171 = String_new("f9a7a005");
+  _12171 = String_new("a4782c23");
   _12172 = String_var(_12171);
   _12173 = cons(_12172, NULL);
   _12174 = cons(_12170, _12173);
@@ -13221,7 +13221,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12303 = cons(_463, _12302);
   _12304 = String_new("src/collect.x");
   _12305 = String_var(_12304);
-  _12306 = String_new("fcc447e8");
+  _12306 = String_new("ec0d6f51");
   _12307 = String_var(_12306);
   _12308 = cons(_12307, NULL);
   _12309 = cons(_12305, _12308);
@@ -13448,7 +13448,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12530 = List_var(_12529);
   _12531 = String_new("src/expressions.x");
   _12532 = String_var(_12531);
-  _12533 = String_new("3522d132");
+  _12533 = String_new("dc182fd9");
   _12534 = String_var(_12533);
   _12535 = cons(_12534, NULL);
   _12536 = cons(_12532, _12535);
@@ -13476,7 +13476,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12558 = List_var(_12557);
   _12559 = String_new("src/meta-native.x");
   _12560 = String_var(_12559);
-  _12561 = String_new("b1163394");
+  _12561 = String_new("92a57fc8");
   _12562 = String_var(_12561);
   _12563 = cons(_12562, NULL);
   _12564 = cons(_12560, _12563);
@@ -14139,7 +14139,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_25(void
   _13218 = cons(_463, _13217);
   _13219 = String_new("src/component-string-switch.x");
   _13220 = String_var(_13219);
-  _13221 = String_new("62aac791");
+  _13221 = String_new("83b5dc91");
   _13222 = String_var(_13221);
   _13223 = String_new("c5840fc1");
   _13224 = String_var(_13223);
