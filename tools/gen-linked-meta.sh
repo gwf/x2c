@@ -17,7 +17,7 @@ cd "$root"
 # definitions are discovered in the ordinary source modules that own them.
 sources=$(awk '/^meta / && !/^meta native / && !seen[FILENAME]++ {
     print FILENAME
-  }' lib/*.x src/*.x |
+  }' lib/*.x src/*.x src/components/*.x |
   sed '/^src\/linked-meta\.x$/d' | sort)
 
 tmp="$out.$$"
@@ -177,8 +177,9 @@ END {
   print "#pragma once"
   print ""
   print "#include \"x2c.x\""
+  # Components are already supplied by the compiler prelude.
   for (i = 1; i <= ndef; i++)
-    if (!included[files[i]]++) {
+    if (files[i] !~ /^src\/components\// && !included[files[i]]++) {
       unit = files[i]; sub(/.*\//, "", unit)
       print "#include \"" unit "\""
     }

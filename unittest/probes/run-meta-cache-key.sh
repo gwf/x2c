@@ -285,7 +285,9 @@ fi
 mkdir -p home/bin home/lib home/include/x2c home/etc
 cp "$ROOT"/lib/*.x home/lib/
 mkdir -p home/src
-cp "$ROOT"/src/{component-access,component-try,component-delegate,component-literals,component-printf,component-operators,component-raise,component-match,component-interpolation,component-destructuring,component-lambdas,component-protocols,component-string-switch,grammar}.x home/src/
+mkdir -p home/src/components
+cp "$ROOT"/src/components/*.x home/src/components/
+cp "$ROOT"/src/grammar.x home/src/
 cp "$ROOT"/lib/*.x "$(dirname "$X2C")"/lib/*.h \
   home/include/x2c/
 cp "$ROOT"/etc/*.xlisp "$ROOT"/etc/*.x \
@@ -302,7 +304,7 @@ grep -q "int n = 1;" installed/p.c || fail "installed meta call: wrong value"
 # stores translate, the helper's own loop translates with them, and the
 # edit shows only in a compiler built from it.
 sed -i.orig 's/Var, or String operand/Var, or String edited/' \
-  home/src/component-access.x
+  home/src/components/component-access.x
 cat > installed/store.x <<'EOF'
 meta int good(void) => 1;
 int main(void) {

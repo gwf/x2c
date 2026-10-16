@@ -23,8 +23,10 @@ mkdir "$scratch/lib" "$scratch/src"
 (
   cd builds/1
   translate() {
+    local sources=(../../"$1"/*.x)
+    if [[ $1 == src ]]; then sources+=(../../src/components/*.x); fi
     ../0/x2c translate ${BUILD_JOBS:+-j "$BUILD_JOBS"} -q --no-interfaces \
-      --out-dir "$scratch/$1" ../../"$1"/*.x
+      --out-dir "$scratch/$1" "${sources[@]}"
   }
   . ../../commands/parallel.sh
   parallel_start lib translate lib

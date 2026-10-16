@@ -163,7 +163,7 @@ required sequence.
 | `make check` | Standalone extended non-mutating checks. |
 | `make verify-fixtures` | Check exact compiler fixture artifacts without rewriting them. |
 | `make verify-fixtures-update` | Accept an intentional, reviewed fixture-output change. |
-| `make proof-conformance` | Optional prelude/live protocol conformance comparison. |
+| `make proof-conformance` | Optional runtime protocol conformance comparison between prelude and live symbol modes. |
 | `make check-native-modules` | Optional native module build, load, and rejection checks. |
 | `make examples` | Check the curated executable examples manifest. |
 | `make examples-update` | Accept intentional, reviewed example-output changes. |
@@ -282,7 +282,7 @@ manifest, including the deterministic Lisp showcase.
 ## Implementation landmarks
 
 - Percent literals: `src/literals.x`; lambdas: `src/lambdas.x` parses them
-  and resolves captures, and `src/component-lambdas.x` lowers them.
+  and resolves captures, and `src/components/component-lambdas.x` lowers them.
 - Statements: `src/statements.x`; the built-in `foreach(item, collection)`
   source macro: `etc/builtin-macros.x` and `src/builtins.x`, loaded by
   `src/macros.x`.

@@ -2,10 +2,10 @@
 
 #pragma once
 
-#ifndef __GUARD_0xF893D60A__
-#define __GUARD_0xF893D60A__
+#ifndef __GUARD_0xC7BD1CAD__
+#define __GUARD_0xC7BD1CAD__
 
 #include "x2c.h"
 #include "rewrite.h"
 
-#endif /* __GUARD_0xF893D60A__ */
+#endif /* __GUARD_0xC7BD1CAD__ */

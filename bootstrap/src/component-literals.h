@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x3DBC6269__
-#define __GUARD_0x3DBC6269__
+#ifndef __GUARD_0x0CE5A90C__
+#define __GUARD_0x0CE5A90C__
 
 #include "x2c.h"
 #include "rewrite.h"
@@ -13,4 +13,4 @@ Code array_literal(Code code);
 Code map_literal(Code code);
 
 
-#endif /* __GUARD_0x3DBC6269__ */
+#endif /* __GUARD_0x0CE5A90C__ */

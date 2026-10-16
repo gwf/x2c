@@ -2061,7 +2061,7 @@ Normal method lookup remains first, including direct methods, imported methods,
 protocol-selected methods, and typedef ancestors in their existing order.
 Delegate fields are searched only if those lookups fail, and a member rewrite a
 program registers for the receiver's own type is tried before them. The search
-belongs to the shipped component `src/component-delegate.x`, a translator for
+belongs to the shipped component `src/components/component-delegate.x`, a translator for
 missed calls that `$rewrite` registers with the receiver pattern
 `%(expr <delegate> *)`. It runs only for a receiver whose aggregate declares a
 delegate field. The search visits
@@ -4305,7 +4305,7 @@ the same crossing but splices the evaluated `List`'s elements. Collection
 insertion converts to the representation required by the literal; `String`
 insertion accepts `String`, `Symbol`, declared converters, `Var`, aliases of
 `Var`, and supported numeric values under the existing conversion rules. The
-shipped component `src/component-interpolation.x` joins a `%""` literal's
+shipped component `src/components/component-interpolation.x` joins a `%""` literal's
 parts, a translator that `$rewrite(%(expr ("String") (segments *)))` registers
 on the literal's `segments` head; a rule a program registers there runs first.
 The `String.join` call the shipped rule writes is not program code, so a
@@ -4700,7 +4700,7 @@ static format literal. Automatic lowering covers numeric conversions, `%c`,
 `%s`, `*` width and precision, and the `hh`, `h`, `l`, `ll`, and `L` modifiers.
 Other modifiers, pointer and count conversions, wide strings and characters,
 and positional formats require explicit native arguments. This lowering is
-the compiler component `src/component-printf.x`, which registers a `$rewrite`
+the compiler component `src/components/component-printf.x`, which registers a `$rewrite`
 call pattern for each family member. A project can register its own call
 pattern the same way, for example for its own logging function.
 
@@ -4775,7 +4775,7 @@ concatenates.
 
 These lowerings, the dynamic compound assignments and increments below, and
 unary fallback rejection after protocol resolution belong to the shipped
-component `src/component-operators.x`. It registers each translator with
+component `src/components/component-operators.x`. It registers each translator with
 `$rewrite` and a Match pattern typed `Var`, such as
 `%(expr ("Var") (op (!or + - (!quote *) / % ...) ? ?))`, which keys the rule
 by each operator the pattern names and `Var`. A pattern that types the
@@ -5258,7 +5258,7 @@ False tries the next arm; errors propagate normally. A successful guard runs
 the body once. Capture scopes and the existing `break`, `continue`, and
 cleanup rules apply to guarded arms too.
 
-The lowering belongs to the shipped component `src/component-match.x`, a
+The lowering belongs to the shipped component `src/components/component-match.x`, a
 translator that `$rewrite($matched)` registers on the `match` statement
 head; a rule a program registers there runs first. A `switch` rule a
 program registers sees the statements in the arms, but not the `switch` the
@@ -5277,7 +5277,7 @@ pointers, mutable containers, resources, custom objects, and other
 identity-bearing values are invalid. A value whose own type is invalid is a
 compiler error; invalid contents of a `List` or `Var` value reach `Error`'s
 `<bad-types>` raw floor when the `raise` runs. The conversions and the check belong to the shipped
-component `src/component-raise.x`, a translator that `$rewrite($raised)`
+component `src/components/component-raise.x`, a translator that `$rewrite($raised)`
 registers on the `raise` statement head; a rule a program registers there runs
 first. The compiler evaluates the converted code and values once each, left to
 right, and builds their literals when the `raise` runs. A `try` may have
@@ -6100,7 +6100,8 @@ literal operand `@name`.
 
 ## Start a project
 
-`new` creates a project that builds and runs as written:
+`new` invokes the shipped `x2c-new` command to create a project that builds
+and runs as written:
 
 ```sh
 x2c new hello

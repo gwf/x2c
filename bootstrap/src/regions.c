@@ -1466,6 +1466,11 @@ int Compiler_has_region_row(String name){
   return Map_contains(f7_runtime___runtime, String_var(name));
 }
 
+Var Compiler_region_effect(String name){
+  if(! _init_guard_) _file_init_();
+  return Map_getindex(f7_runtime___runtime, String_var(name));
+}
+
 static Var Fact_var(Fact fact){
   return Var_new(3683441, fact);
 }

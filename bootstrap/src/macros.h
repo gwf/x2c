@@ -38,14 +38,10 @@
 #include <string.h>
 #include <sys/stat.h>
 #include "expressions-reports.h"
-List Compiler_expand_macro_invocation_node(Compiler c, Var stored, List arguments, Token invocation, Symbol position);
-
-Token Compiler_macro_invocation_site(Compiler c, Var site);
+void Compiler_report_lisp_failure(Compiler c, Token invocation, List error, String source);
 
 List Compiler_parse_macro_definition(Compiler c);
 
-#define MACRO_CATEGORY_COUNT \
-  (int) (sizeof(macro_categories) / sizeof(macro_categories[0]))
 List Compiler_try_parse_macro_slot(Compiler c, Symbol role);
 
 List Compiler_peek_macro_hole(Compiler c);
@@ -62,19 +58,24 @@ List Compiler_macro_introduced_name(Compiler c, String spelling);
 
 List Compiler_macro_tag_name(Compiler c, Symbol kind, String name, int definition);
 
-List Compiler_publish_macro_definition_node(Compiler c, List node);
+List Compiler_expand_macro_invocation_node(Compiler c, Var stored, List arguments, Token invocation, Symbol position);
 
-void Compiler_record_compile_time_effect(Compiler c, List row, Token start);
+Token Compiler_macro_invocation_site(Compiler c, Var site);
 
-void Compiler_install_compile_time_effects(Compiler c, List rows);
+typedef struct f8_rewrites___Effects{
+  int bindings, names, origins, pending, placements, diagnostics;
+}
+f8_rewrites___Effects;
 
-int Compiler_macro_form_is_definition(Compiler c);
-
-int Compiler_local_macro_form_is_definition(Compiler c);
-
-int Compiler_keyword_form_is_definition(Compiler c);
-
-Atom Compiler_parse_keyword_definition(Compiler c);
+struct SlotWatch{
+  List values;
+  Array outputs, order;
+  f8_rewrites___Effects inner;
+  int repeated, prepares, shipped, kept;
+  List outer;
+  SlotWatch parent;
+}
+;
 
 List Compiler_marked_rewrite(Compiler c, Type aggregate, List source, Token site);
 
@@ -94,24 +95,23 @@ List Compiler_written_support(Compiler c, List bound);
 
 int Compiler_applying_shipped(Compiler c);
 
-typedef struct Effects{
-  int bindings, names, origins, pending, placements, diagnostics;
-}
-Effects;
-
-struct SlotWatch{
-  List values;
-  Array outputs, order;
-  Effects inner;
-  int repeated, prepares, shipped, kept;
-  List outer;
-  SlotWatch parent;
-}
-;
-
 void Compiler_rebound(Compiler c, Var source, List bound);
 
 Ast Compiler_watched_step(Compiler c, Ast ast);
+
+List Compiler_publish_macro_definition_node(Compiler c, List node);
+
+void Compiler_record_compile_time_effect(Compiler c, List row, Token start);
+
+void Compiler_install_compile_time_effects(Compiler c, List rows);
+
+int Compiler_macro_form_is_definition(Compiler c);
+
+int Compiler_local_macro_form_is_definition(Compiler c);
+
+int Compiler_keyword_form_is_definition(Compiler c);
+
+Atom Compiler_parse_keyword_definition(Compiler c);
 
 int Compiler_macro_starts_target_at(Compiler c, Symbol position);
 
@@ -200,8 +200,6 @@ int Compiler_shares_meta_definition(Compiler c, String name);
 void Compiler_install_builtin_macros(Compiler c);
 
 void Compiler_bind_meta_operation(Lisp lisp, String name, Var function);
-
-void Compiler_report_lisp_failure(Compiler c, Token invocation, List error, String source);
 
 void Compiler_reset_macro_library(void);
 

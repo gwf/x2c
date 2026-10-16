@@ -62,6 +62,38 @@ static int _chain_start(Lint l, int at):
       return -1
   return -1
 
+/* Find the logical statement's indentation, skipping complete brackets.
+   An enclosing bracket prevents a physical line from ending a statement.
+   Layout block colons arrive as `{` tokens with their source positions. */
+static int _statement_indent(Lint l, int close):
+  int indent = 0, line = 0, block = 0
+  for (int at = 0; at <= close; at = l.next(at)):
+    Token t = l.at(at)
+    if t.type == <space> || t.type == <comment> || t.type == <preproc>:
+      continue
+    if t.line > line && (t.col <= indent + 1 || block):
+      indent = l.indent(t.line)
+    block = t.type == <"{"> && l.source(at, at) == ":"
+    if !block && l.partner[at] > close: return -1
+    if !block && l.partner[at] > at: at = l.partner[at]
+    line = l.end_line(at)
+  return indent
+
+/* Only layout statement ends supply the omitted semicolon. Loose written
+   neighbors still qualify independently, including inside brackets. */
+static int _statement_end(Lint l, int close, int after):
+  if !l.layout: return 0
+  int indent = _statement_indent(l, close)
+  if indent < 0: return 0
+  while after < l.count && l.tokens[after].type == <comment>:
+    after = l.next(after)
+  if after >= l.count: return 1
+  Token next = l.at(after)
+  if next.line <= l.tokens[close].line || next.col > indent + 1:
+    return 0
+  return !strchr(".+-*/%&|^<>=!?~([", next.text[0]) &&
+         next.type != <in> && next.type != <is>
+
 /* `c.contains(x)` where `x in c` needs no parentheses. A negated test
    keeps the call: `!(x in c)` emits different C. */
 static void _contains_in(Lint l):
@@ -76,10 +108,12 @@ static void _contains_in(Lint l):
     int start = _chain_start(l, at - 2)
     if start < 0: continue
     int before = l.prev(start), after = l.next(close)
-    if before < 0 || after >= l.count: continue
+    if before < 0: continue
     Symbol left = l.tokens[before].type
     if left == <">"> && l.tokens[before - 1].text == "=": left = <return>
-    if !(left in loose_before) || !(l.tokens[after].type in loose_after):
+    if !(left in loose_before): continue
+    if !(after < l.count && l.tokens[after].type in loose_after) &&
+       !_statement_end(l, close, after):
       continue
     String receiver = l.source(start, at - 2)
     if "\n" in receiver: continue

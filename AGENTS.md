@@ -122,7 +122,8 @@ commits need not rebuild from their own bootstrap.
   loads native modules, `meta-group`, which emits a unit's meta group,
   `stage`, which carries values across the compile-time boundary, and
   `builtins` and `linked-meta`, the compile-time code compiled into the
-  compiler, with `component-access` supplying bracket access policy,
+  compiler, with independent extensions under `src/components/`:
+  `component-access` supplying bracket access policy,
   `component-try` lowering try, catch, and finally,
   `component-delegate` searching delegate fields,
   `component-literals` building Array and Map literals,
@@ -158,7 +159,8 @@ commits need not rebuild from their own bootstrap.
   change `.x` sources and regenerate through the publication command below.
 - `builds/` - staged toolchains (`builds/0` drives local builds).
 - `commands/` - external commands built against the current compiler;
-  `commands/manifest.txt` records maturity and help summaries. `repl` owns
+  `commands/manifest.txt` records maturity and help summaries. `new` owns
+  starter-project creation. `repl` owns
   terminal interaction, editing, persistent submissions, and inspection.
   `package` owns installation, removal, listing, and project lockfiles.
 - `agents/` - agent-facing documentation and project skills (`agents/skills/`,

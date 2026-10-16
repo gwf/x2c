@@ -12,7 +12,7 @@ def git_revision(root):
         revision = subprocess.check_output(["git", "-C", root, "rev-parse", "--short", "HEAD"], text=True, stderr=subprocess.DEVNULL).strip()
         dirty = subprocess.check_output(["git", "-C", root, "status", "--porcelain", "--", "src", "lib"], text=True)
         if dirty:
-            paths = sorted(glob.glob(os.path.join(root, "src", "*.x")) + glob.glob(os.path.join(root, "lib", "*.x")))
+            paths = sorted(glob.glob(os.path.join(root, "src", "*.x")) + glob.glob(os.path.join(root, "src", "components", "*.x")) + glob.glob(os.path.join(root, "lib", "*.x")))
             digest = hashlib.sha256()
             for path in paths:
                 if os.path.basename(path) == "x2c.x":
@@ -31,7 +31,7 @@ out_path = sys.argv[3] if len(sys.argv) > 3 else os.path.join(root, "explorer", 
 
 # ---- discover modules -------------------------------------------------------
 module_ids = []
-for p in sorted(glob.glob(os.path.join(root, "src", "*.x"))):
+for p in sorted(glob.glob(os.path.join(root, "src", "*.x")) + glob.glob(os.path.join(root, "src", "components", "*.x"))):
     module_ids.append(os.path.relpath(p, root))
 for p in sorted(glob.glob(os.path.join(root, "lib", "*.x"))):
     rel = os.path.relpath(p, root)

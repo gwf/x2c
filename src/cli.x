@@ -972,6 +972,7 @@ static void _print_external_commands(void) {
     char *maturity = strchr(line, '|');
     if (!maturity) continue;
     *maturity++ = 0;
+    if (CliRequest.is_builtin(line)) continue;
     char *summary = strchr(maturity, '|');
     if (!summary) continue;
     *summary++ = 0;

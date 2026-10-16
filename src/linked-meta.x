@@ -21,19 +21,6 @@
 #include "system-macros.x"
 #include "var-tags.x"
 #include "varops.x"
-#include "component-access.x"
-#include "component-delegate.x"
-#include "component-destructuring.x"
-#include "component-interpolation.x"
-#include "component-lambdas.x"
-#include "component-literals.x"
-#include "component-match.x"
-#include "component-operators.x"
-#include "component-printf.x"
-#include "component-protocols.x"
-#include "component-raise.x"
-#include "component-string-switch.x"
-#include "component-try.x"
 #include "fields.x"
 #include "grammar.x"
 #include "operator-ledger.x"
@@ -220,7 +207,7 @@ static List _update_operation(Var function) {
   return $!(String){ String.new($spelling) };
 }
 
-/* --- src/component-access.x ---------------------------------------------- */
+/* --- src/components/component-access.x ----------------------------------- */
 
 static int _collection_family(Code base) {
   Type type = base.type();
@@ -371,7 +358,7 @@ Code access_postfix(Code code) {
   return $!Var{ Map_postfixindex($base, $key, $op) };
 }
 
-/* --- src/component-delegate.x -------------------------------------------- */
+/* --- src/components/component-delegate.x --------------------------------- */
 
 static String _delegate_type_name(Type type) {
   List base = type_base_suffix(type);
@@ -471,7 +458,7 @@ Code delegate_member(Code code) {
   return code;
 }
 
-/* --- src/component-destructuring.x --------------------------------------- */
+/* --- src/components/component-destructuring.x ---------------------------- */
 
 static Code _destructure_list(Code source) {
   Code converted =
@@ -575,7 +562,7 @@ Code destructure_value(Code node) {
   return node;
 }
 
-/* --- src/component-lambdas.x --------------------------------------------- */
+/* --- src/components/component-lambdas.x ---------------------------------- */
 
 static List _lambda_cell_name(List binding, Map cells) {
   (Var name, Type type) = cells[binding];
@@ -1073,7 +1060,7 @@ Code lambda_cells(Code node) {
   return node;
 }
 
-/* --- src/component-match.x ----------------------------------------------- */
+/* --- src/components/component-match.x ------------------------------------ */
 
 static void _match_flush(Buffer b, Array out) {
   if (b.len()) {
@@ -1469,7 +1456,7 @@ Code match_lowering(Code node) {
   return node;
 }
 
-/* --- src/component-operators.x ------------------------------------------- */
+/* --- src/components/component-operators.x -------------------------------- */
 
 static int _dynamic_operand(Type type, int text) =>
   type.is_named("Var") || (text ? type.is_text() : !!type.numeric());
@@ -1584,7 +1571,7 @@ Code dynamic_unary(Code code) {
   return code;
 }
 
-/* --- src/component-printf.x ---------------------------------------------- */
+/* --- src/components/component-printf.x ----------------------------------- */
 
 static int _printf_is_var(Code value) => value.type().is_named("Var");
 
@@ -1733,7 +1720,7 @@ Code printf_values(Code code) {
   return code;
 }
 
-/* --- src/component-protocols.x ------------------------------------------- */
+/* --- src/components/component-protocols.x -------------------------------- */
 
 static List _protocol_forward(
   Type target, String source, Type template, String binder, String convert) {
@@ -1871,7 +1858,7 @@ Code protocol_conformance(Code node) {
   return node;
 }
 
-/* --- src/component-raise.x ----------------------------------------------- */
+/* --- src/components/component-raise.x ------------------------------------ */
 
 static int _raise_immutable(Type type) {
   if (!type) return 0;
@@ -1912,7 +1899,7 @@ Code raise_lowering(Code node) {
   return node;
 }
 
-/* --- src/component-string-switch.x --------------------------------------- */
+/* --- src/components/component-string-switch.x ---------------------------- */
 
 static String _string_case_bytes(String spelling) {
   const char *p = spelling;
@@ -2008,7 +1995,7 @@ Code string_switch_lowering(Code node) {
   return node;
 }
 
-/* --- src/component-try.x ------------------------------------------------- */
+/* --- src/components/component-try.x -------------------------------------- */
 
 static int _try_arm_exits(List arm) {
   match (arm) case %(code-value ? ?statement ?): {

@@ -17,7 +17,9 @@ def generate(root, output):
     subprocess.run(['make', 'commands', 'COMMAND_NAMES=graph'], cwd=root, check=True)
     with tempfile.TemporaryDirectory(prefix='partition-') as temporary:
         datasets = Path(temporary) / 'datasets'
-        sources = sorted(p.relative_to(root).as_posix() for p in (root / 'src').glob('*.x'))
+        sources = sorted(p.relative_to(root).as_posix()
+                         for directory in (root / 'src', root / 'src/components')
+                         for p in directory.glob('*.x'))
         library = sorted(p.relative_to(root).as_posix() for p in (root / 'lib').glob('*.x') if p.name != 'x2c.x')
         subprocess.run([str(root / 'builds/0/libexec/x2c-graph'), 'datasets', str(datasets),
                         '-I', '.', '-I', 'src', '-I', 'lib', *sources, '--', *library],

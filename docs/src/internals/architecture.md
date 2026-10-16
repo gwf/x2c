@@ -364,7 +364,7 @@ Consumes the parsed AST, produces a lowered AST that the emitter can walk
 without knowing about x2c. `src/transform.x` normalizes each node until its
 identity stops changing, because lowering one construct can expose another.
 `src/cleanup.x` places function cleanup within the shared driver.
-`src/component-lambdas.x` lowers lambdas, which need additional
+`src/components/component-lambdas.x` lowers lambdas, which need additional
 declarations: each becomes a static function, and `src/callables.x` adds an
 adapter when the receiving callback type differs from its signature. When a
 `Func` is expected, a direct function or noncapturing lambda also gets one
@@ -384,7 +384,7 @@ appended to the unit.
 
 Cleanup lowering completes each function after its body is normalized. A
 `try` first takes the landing form the shipped try component answers, an
-ordinary statement rewrite registered in `src/component-try.x`. A program's
+ordinary statement rewrite registered in `src/components/component-try.x`. A program's
 rule on `try` applies here as well. Binding and lowering its replacement
 keep the parts of the `try`, which are already lowered, as they are. The
 pass then assigns a name to the runtime record of every `defer` region and
@@ -426,7 +426,7 @@ lambda normalization within the function.
 The interpolation is gone, replaced by a `String_join` call over a cons list
 of boxed `Var` values, each `String_var` call naming its callee as a resolved
 binding carrying that function's type. The shipped component
-`src/component-interpolation.x` wrote the join; the driver boxed and ordered
+`src/components/component-interpolation.x` wrote the join; the driver boxed and ordered
 its parts. The `return` no longer carries a type annotation; nothing
 downstream needs it. Some children are now raw C text. Lowering may produce
 emitter-ready fragments, so `"String_join(NULL, "` sits in the tree as a
@@ -513,37 +513,41 @@ status per fixture, so a change in any phase shows up as a diff.
 
 ## Module ownership
 
-The modules under `src/` divide ownership as follows:
+The compiler source units under `src/` divide ownership as follows.
+`src/components/` groups independent compiler extensions; it is not a module
+block and gives its files no shared private scope. The stage build translates
+these files alongside the top-level units and keeps generated artifacts in
+the same flat output directory.
 
-- `src/component-access.x` -- bracket access policy registered through
+- `src/components/component-access.x` -- bracket access policy registered through
   ordinary macro patterns and quotations: Array/Map mutation and any other
   protocol participant's read, store, and update;
-- `src/component-try.x` -- the try, catch, and finally lowering and its
+- `src/components/component-try.x` -- the try, catch, and finally lowering and its
   templates, registered as a statement rewrite;
-- `src/component-delegate.x` -- the delegate field search, registered as a
+- `src/components/component-delegate.x` -- the delegate field search, registered as a
   member rewrite for aggregates that declare a delegate field;
-- `src/component-literals.x` -- the Array and Map literal constructors,
+- `src/components/component-literals.x` -- the Array and Map literal constructors,
   registered as literal rewrites for their heads;
-- `src/component-printf.x` -- Var values in printf-family formats,
+- `src/components/component-printf.x` -- Var values in printf-family formats,
   registered as a call rewrite for each family member;
-- `src/component-operators.x` -- the dynamic `Var` operators, compound
+- `src/components/component-operators.x` -- the dynamic `Var` operators, compound
   assignments, and increments;
-- `src/component-raise.x` -- the raise conversions and detail type check,
+- `src/components/component-raise.x` -- the raise conversions and detail type check,
   registered as a statement rewrite;
-- `src/component-match.x` -- the match lowering, C text around the subject,
+- `src/components/component-match.x` -- the match lowering, C text around the subject,
   patterns, and bodies, registered as a statement rewrite;
-- `src/component-interpolation.x` -- the join of an interpolated `String`'s
+- `src/components/component-interpolation.x` -- the join of an interpolated `String`'s
   parts, registered as a literal rewrite for its head;
-- `src/component-destructuring.x` -- flat List destructuring, registered as
+- `src/components/component-destructuring.x` -- flat List destructuring, registered as
   statement rewrites for its declarations and assignment statements and as
   a literal rewrite for its assignment expressions;
-- `src/component-lambdas.x` -- lambdas lifted to static functions,
+- `src/components/component-lambdas.x` -- lambdas lifted to static functions,
   registered as literal rewrites for both lambda forms, and their shared
   cells, registered as a function rule;
-- `src/component-protocols.x` -- protocol forwarding members, `Var`
+- `src/components/component-protocols.x` -- protocol forwarding members, `Var`
   descriptor thunks, and descriptor registration, registered as a rewrite
   of the conformance form;
-- `src/component-string-switch.x` -- switches on a String, lowered to an
+- `src/components/component-string-switch.x` -- switches on a String, lowered to an
   integer switch on a shared helper's result, registered as a statement
   rewrite;
 - `src/operator-ledger.x` -- operator precedence, compound assignment,
@@ -606,7 +610,7 @@ The modules under `src/` divide ownership as follows:
   lowering;
 - `src/type.x`, `src/protocol.x` -- type representation, conversions, protocol
   declarations, conformance, and native aliases, with the conformance form
-  that presents each conformance's adapters to `src/component-protocols.x`;
+  that presents each conformance's adapters to `src/components/component-protocols.x`;
 - `src/type-ledger.x` -- the `Var` tag lookups projected from the tag ledger,
   kept in their own unit so the units that include `type.x` do not load it;
 - `src/collect.x` -- global environment discovery, unit interfaces, and the
@@ -762,7 +766,7 @@ same phase run twice has to produce the same bytes.
 
 ### Builtin components
 
-`src/component-access.x` registers bracket reads, stores, and updates
+`src/components/component-access.x` registers bracket reads, stores, and updates
 through ordinary macro patterns and quotations. `lib/rewrite.x` supplies the
 decorator. Array and Map mutations call their typed helpers; any other
 protocol participant calls its getter, `setindex`, `updateindex`, or
@@ -770,7 +774,7 @@ protocol participant calls its getter, `setindex`, `updateindex`, or
 operand once, in order. Binding, index admission, evaluation order, and
 cleanup remain compiler responsibilities.
 
-`src/component-try.x` registers `try` through the same decorator, on the
+`src/components/component-try.x` registers `try` through the same decorator, on the
 statement family keyed by the `try` head. Its translator answers a landing
 form, `(landing CODE ROWS)`: the frame and catch-site template, the
 finalizer, the exits that close the catch site, claim the finalizer, and
@@ -779,7 +783,7 @@ walk lowers the rows in order, places the exits on every transfer out of a
 region, rejects a `goto` into one, and keeps the locals the rows write
 valid when control lands.
 
-`src/component-delegate.x` registers a member call pattern whose receiver
+`src/components/component-delegate.x` registers a member call pattern whose receiver
 hole is `%(expr <delegate> *)`, a field keyword where a type would go. The
 parser marks each `delegate` field
 of an aggregate; a method call that ordinary lookup misses tests the rules
@@ -789,7 +793,7 @@ fields with `Type.marked_fields` and `Type.resolve_member`, reports an
 ambiguous path or a cycle, and returns the call through the field path as
 constructed syntax, which ordinary call resolution binds.
 
-`src/component-literals.x` registers the Array and Map literal forms,
+`src/components/component-literals.x` registers the Array and Map literal forms,
 `$array_value` and `$map_value` from `src/grammar.x`, on the literal family
 keyed by the `array` and `map` heads. Each translator answers the counted
 constructor, `Array.update_n` or `Map.update_n` on a new container, with
@@ -800,7 +804,7 @@ or more parts read state, the transform moves each part that reads state,
 through the last one that may change state, into a temporary ahead of the
 call, as "literal order" in `src/transform.x` describes.
 
-`src/component-printf.x` registers one call pattern for each printf-family
+`src/components/component-printf.x` registers one call pattern for each printf-family
 member, on the call family keyed by the callee's spelling, so a call to any
 other function only looks its spelling up. The translator reads the static
 format with `Code.format`, walks it once, and has each `Var` value a
@@ -809,7 +813,7 @@ conversion reads, or displayed through `Var.str` for `%s`. The redundant
 `.str()` warning for those values stays with the conversion checks in
 `src/expressions.x`.
 
-`src/component-operators.x` registers its translators with Match patterns
+`src/components/component-operators.x` registers its translators with Match patterns
 typed `Var` whose operator positions name a set, `(!or OP...)`, on the
 binary family for binary operators and compound assignments and the unary
 family for increments, decrements, and unary operators, keyed by each
@@ -827,7 +831,7 @@ replacement holds lower outside the active rule, so a store nested in
 another store's value applies the same rule again. A rule whose pattern was
 derived without the subject's bindings matches without collecting them.
 
-`src/component-raise.x` registers `raise` on the statement family keyed by
+`src/components/component-raise.x` registers `raise` on the statement family keyed by
 the `raise` head. Its translator converts the code to a `Symbol` and each
 detail key and value to a `Var` with `Code.convert`, promotes a C string
 literal value with `Code.promoted`, and reports a value whose type is not
@@ -837,7 +841,7 @@ leaves as it is. The compiler lowers that raise's parts in source order,
 moving them into temporaries as literal parts move, and builds its literals
 at run time.
 
-`src/component-match.x` registers `match` on the statement family keyed by
+`src/components/component-match.x` registers `match` on the statement family keyed by
 the `match` head. Its translator answers a lowered carrier of verbatim C
 text around the subject, the patterns, and the arm bodies: a block that
 converts the subject to a `List` once with `Code.convert` and switches on
@@ -854,7 +858,7 @@ runtime through the capture buffer, at a static site when
 match lower outside its rule, so a nested match applies it again. The
 `switch` is the barrier that an arm's `break` leaves.
 
-`src/component-string-switch.x` registers `switch` on the statement family
+`src/components/component-string-switch.x` registers `switch` on the statement family
 keyed by the `switch` head and declines a selector whose type is not
 `String` or an alias of it. Its translator replaces each label the switch
 owns by the label's index, leaving nested switches and expressions alone,
@@ -866,7 +870,7 @@ list under `(unit-support KEY)`, named by `x2c_binding_for` with the same
 key, so switches with the same labels share it. A program's `switch` rule
 sees the source switches but not the integer switch the rule writes.
 
-`src/component-interpolation.x` registers a `%"..."` literal on the literal
+`src/components/component-interpolation.x` registers a `%"..."` literal on the literal
 family keyed by the `segments` head. The transform first converts each `$`
 insertion to a `String` as the parser converts its own, and a constructed
 String of one constant text reuses the parsed literal's cache slot. The
@@ -876,7 +880,7 @@ constructed syntax spells. The compiler boxes the chain's parts and
 evaluates them once each, left to right, moving them ahead of the join when
 they move.
 
-`src/component-destructuring.x` registers destructuring declarations on the
+`src/components/component-destructuring.x` registers destructuring declarations on the
 statement family keyed by the `dstrdecl` head, an assignment statement keyed
 by `stmnt`, and an assignment expression on the literal family keyed by
 `dstrasgn`. Its translators answer bound carriers: a `List` local read from
@@ -887,7 +891,7 @@ parser has already declared the targets, so binding leaves their
 declarations alone and they keep their scope and identity; the locals are
 `new-name` effects.
 
-`src/component-lambdas.x` registers both lambda forms on the literal family
+`src/components/component-lambdas.x` registers both lambda forms on the literal family
 keyed by the `lambda` head, which the transform offers each lambda it meets.
 A noncapturing lambda answers a bound carrier: the name of a static function
 placed among the unit's support declarations, whose body is the lambda's
@@ -908,7 +912,7 @@ call. A parameter is copied into its cell at entry, a declarator becomes the
 cell's declaration, a destructuring declaration copies its target after it,
 and every read goes through the cell; the replacement is bound again.
 
-`src/component-protocols.x` registers on the `conform` head. Before the
+`src/components/component-protocols.x` registers on the `conform` head. Before the
 transform, the compiler presents each conformance whose forward converter
 the unit defines, and whose participant is not numeric, as a form
 `(conform BASE PARTICIPANT FORWARD REVERSE BINDER DESCRIPTOR (ROW...))`.
