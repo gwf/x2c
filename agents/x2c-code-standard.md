@@ -905,12 +905,15 @@ typed shells, resolved forms, and measured hot paths. A macro case is not
 its raw pattern. It also matches through `(at ...)` and `(src ...)`
 wrappers, a one-element `(seq ...)`, and a retained invocation of the
 macro. Name the macro in the case, not through a `Macro` variable: a
-`case $m(...)` tests the derived pattern in place, at about 344
-instructions per call against 153 for the raw pattern. A case through a
-variable, or on a pattern that repeats a hole, resolves a name, holds a
-literal other than a Symbol, or captures nothing, calls the runtime at
-about 1,410. A conversion from a raw pattern therefore changes what
-matches, and on a per-node path it needs an A/B measurement.
+`case $m(...)` tests the derived pattern in place. Per call, a hit costs
+about 115 instructions for a statement form and 138 for an Expression
+form, against 124 and 128 for the raw pattern; a miss on another head
+costs about 48 and 122. A case through a variable, or on a pattern that
+repeats a hole, resolves a name, holds a literal other than a Symbol or
+an empty List, or declares a local, calls the runtime at about 2,100 for
+a hit and 600 to 970 for a miss. A conversion from a raw pattern
+therefore changes what matches, and on a per-node path it needs an A/B
+measurement.
 
 **MA-8** A lowering recognizes its input with a source form, gathers facts
 in ordinary named functions, and builds its output with one template beside
