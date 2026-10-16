@@ -89,10 +89,9 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
   numeric segment takes its nearest declared `T_str` converter when one exists
   and is
   boxed and rendered through `Var_str` otherwise
-- Lower/generate: `src/components/component-interpolation.x` joins the segments
-  with `String_join`, a literal rewrite on the `segments` head;
-  `src/transform.x` converts each insertion and moves ordered parts ahead of
-  the join
+- Lower/generate: `src/transform.x` converts each insertion, then
+  `src/components/component-interpolation.x` joins them; see [builtin
+  components](architecture.md#builtin-components)
 - Runtime: `lib/string.x`, plus `Var.str` for the boxed segments
 - Tests: interpolation suite
 - See also: [values](../guide/values.md)
@@ -131,9 +130,8 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 - Parse, publish, and resolve declarations and adoptions, and choose each
   member's owner: `src/protocol.x`; operator mappings:
   `src/operator-ledger.x`
-- Write forwarding members, `Var` descriptor thunks, method tables, and
-  descriptor registration: `src/components/component-protocols.x`, on the
-  `conform` form `src/protocol.x` presents for each conformance
+- Write each conformance's adapters: `src/components/component-protocols.x`;
+  see [builtin components](architecture.md#builtin-components)
 - Runtime descriptors and their registration: `lib/dispatch.x`; built-in
   adoptions: `lib/protocols.x`
 - Tests: protocol, adoption, and conformance compiler fixtures and the
@@ -245,9 +243,9 @@ inline-lisp example
 - Typedefs: declarations are file-scope; direct and chained aliases of `Var`
   use the same conversions and operators as `Var`
 - Numeric conversion: all 15 numeric tags use one implementation that raises
-  the appropriate `Error` cause on failure; `long`/`ulong`, `llong`/`ullong`, and
-  `ldouble` name native `long`, `long long`, and `long double` families rather
-  than fixed widths
+  the appropriate `Error` cause on failure; `long`/`ulong`, `llong`/`ullong`,
+  and `ldouble` name native `long`, `long long`, and `long double` families
+  rather than fixed widths
 - Limits: numeric-to-`String` conversion remains partial; other nonnumeric
   values use their declared conversions; helper-backed collection, enum, and
   bit-field compound assignment are unsupported; the C compiler checks ordinary
@@ -288,15 +286,16 @@ inline-lisp example
   `etc/builtin-macros.x`; the expansion algorithm in
   `src/builtins.x`
 - Lower/generate the expanded loop: `src/transform.x`, `src/emit.x`
-- Runtime: `lib/iter.x` and collection adapters; `Iter.try_next` returns the traversal status
+- Runtime: `lib/iter.x` and collection adapters; `Iter.try_next` returns the
+  traversal status
 - Tests: `foreach` fixture, `Iter` suite, and checked example
 - See also: [iteration](../guide/iteration.md)
 
 ### Status-bearing Map operations
 
 - Runtime owner: `lib/map.x`
-- Literal boundary: `src/components/component-literals.x` builds counted
-  `Map.update_n` construction
+- Literal boundary: `src/components/component-literals.x`; see [builtin
+  components](architecture.md#builtin-components)
 - Generic routing: `lib/dispatch.x`
 - Value-returning wrappers: `Map.get` and `Map.del`
 - Cursor contract: structural mutation invalidates outstanding traversal state
@@ -307,8 +306,8 @@ inline-lisp example
 ### Counted Array construction
 
 - Runtime owner: `lib/array.x` through `Array.update_n` and `Array.push`
-- Literal boundary: `src/components/component-literals.x` builds counted
-  `Array.update_n` construction
+- Literal boundary: `src/components/component-literals.x`; see [builtin
+  components](architecture.md#builtin-components)
 - Value contract: raw `Null` is data; `void` is rejected
 - Tests: `Array` suite and the counted-literal compiler fixture
 - See also: [collections](../guide/collections.md)
@@ -316,9 +315,8 @@ inline-lisp example
 ### Var values in printf-family formats
 
 - Parse and type the call: `src/expressions.x`
-- Lower: `src/components/component-printf.x` reads the static format once and
-  converts each `Var` value a conversion consumes, one call pattern per family
-  member
+- Lower: `src/components/component-printf.x`; see [builtin
+  components](architecture.md#builtin-components)
 - Runtime: `Var.convert` in `lib/varconvert.x` and `Var.str` in
   `lib/dispatch.x`
 - Tests: the `printf-var` compiler fixtures
@@ -327,32 +325,30 @@ inline-lisp example
 ### Match statement
 
 - Parse: `src/statements.x`
-- Lower: `src/components/component-match.x` emits direct tests for static
-  patterns and capture storage for runtime matching
+- Lower: `src/components/component-match.x`; see [builtin
+  components](architecture.md#builtin-components)
 - Native emission: `src/emit.x`
-- Runtime: `lib/match.x` owns pattern semantics; `lib/match-plan.x`
-  compiles patterns to plans, `lib/match-cache.x` retains them, and
-  `lib/match-machine.x` executes them over wordcode and state definitions
-  from `lib/machine.x`; patterns and binding sets are ordinary `List`s from
-  `lib/list.x`
+- Runtime: `lib/match.x` and the plan modules listed in [the runtime
+  boundary](architecture.md#the-runtime-boundary); patterns and binding sets
+  are ordinary `List`s from `lib/list.x`
 - Tests: match suites and checked nested example
 - See also: [pattern matching](../guide/match.md)
 
 ### String switch
 
 - Parse: `src/statements.x`
-- Lower: `src/components/component-string-switch.x` numbers the labels of a
-  switch on a `String` and switches on a shared helper's result
+- Lower: `src/components/component-string-switch.x`; see [builtin
+  components](architecture.md#builtin-components)
 - Tests: the `string-switch` and `rewrite-string-switch` compiler fixtures
 - See also: [C control flow](../reference/language.md#c-control-flow)
 
 ### Raise, filtered catch, finally, and defer
 
 - Parse: `src/statements.x`
-- Lower/generate: `src/transform.x`; `src/components/component-raise.x`
-  converts a `raise`'s code and details; `src/components/component-try.x`
-  lowers `try` to a landing form; `src/cleanup.x` places cleanup on every exit
-  from a region; `src/emit.x`
+- Lower/generate: `src/transform.x`, `src/components/component-raise.x`,
+  `src/components/component-try.x` (see [builtin
+  components](architecture.md#builtin-components)), `src/cleanup.x`,
+  `src/emit.x`
 - Runtime: `lib/exception.x` implements the frames and jumps for transfer
   and cleanup; `lib/error.x` owns handlers, policy, watermarks, accumulated
   records, matching, and transferring registration lifetime
@@ -366,11 +362,9 @@ inline-lisp example
 - Parse: `src/parse.x`
 - Lower/generate: `src/generate.x`, `src/cache.x`
 - Runtime: generated guard plus `TYPE.initialize()`
-- Boundary: every non-static function except the protocol bootstrap
-  functions checks the guard. In a file whose only initialization is cache
-  setup, only functions that reach a cache directly or through calls check
-  it. Static functions do not check it. A header function that reads a
-  header cache checks the header's guard.
+- Boundary: [generation and cache
+  staging](architecture.md#generation-and-cache-staging) lists the functions
+  that check each guard
 - Tests: type-initializer fixtures
 
 ### Structured diagnostics

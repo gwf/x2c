@@ -367,38 +367,29 @@ Lowering turns the parsed AST into a lowered AST that the emitter can walk
 without knowing about x2c. `src/transform.x` normalizes each node until its
 identity stops changing, because lowering one construct can expose another.
 `src/cleanup.x` places function cleanup within the shared driver.
-`src/components/component-lambdas.x` lowers lambdas, which need additional
-declarations: each becomes a static function, and `src/callables.x` adds an
-adapter when the receiving callback type differs from its signature. When a
-`Func` is expected, a direct function or noncapturing lambda also gets one
-reusable file-static handle. A function-pointer value uses an adapter shared
-by its canonical pointer type and a new `Func` whose copied context
-snapshots that pointer. A capturing lambda's function also takes its
-captures, and its `Func` copies their value snapshots and explicitly
-captured reference addresses into a typed context that a `FuncAdapter`
-passes back. Capture bindings have separate identities from their source
-bindings, so moving a source into a shared cell cannot retarget a sibling
-snapshot. Parsed lambdas and constructed capture rows resolve in the same
-lexical environment. A public inline function reaches these source-owned
-helpers through a generated bridge that also runs the owning unit's
-initializer. Those synthesized declarations go onto a compiler-owned
-early-declaration queue, are normalized by the same driver, and are
-appended to the unit.
+`src/components/component-lambdas.x` lowers each lambda the driver meets; see
+[builtin components](#builtin-components). `src/callables.x` converts callable
+values. It adds an adapter when a receiving callback type differs from a
+function's signature. A direct function gets one reusable file-static `Func`
+handle, and a function pointer is copied into a new `Func` context. A public
+inline function reaches these helpers through a generated bridge that also
+runs the owning unit's initializer. The helpers are queued as early
+declarations, normalized by the same driver, and appended to the unit.
 
 Cleanup lowering completes each function after its body is normalized. A `try`
-first takes the landing form that `src/components/component-try.x` returns, an
-ordinary statement rewrite registered in `src/components/component-try.x`. A
-program's rule on `try` applies here as well. Binding and lowering its
-replacement keep the parts of the `try`, which are already lowered, as they
-are. The pass then assigns a name to the runtime record of every `defer` region
-and landing frame, builds the statements that leave each region, and runs them
-wherever control leaves it: the region's own end, a `return` -- after saving
-the value, since cleanup may change what the expression read -- a `break` or
-`continue` that leaves the construct that bounds it, and an outward `goto`. The
-pass rejects a jump into a region, including the region a static local's
-runtime initializer opens over the rest of its block. The pass also marks the
-locals and parameters a landing's parts write as `volatile`, which C requires
-of automatic state changed across `sigsetjmp`. Transfer rewriting follows
+first takes the landing form that `src/components/component-try.x` returns;
+see [builtin components](#builtin-components). A program's rule on `try`
+applies here as well. Binding and lowering its replacement keep the already
+lowered parts of the `try` as they are. The pass then assigns a name to the
+runtime record of every `defer` region and landing frame, builds the
+statements that leave each region, and runs them wherever control leaves it:
+the region's own end, a `return` -- after saving the value, since cleanup may
+change what the expression read -- a `break` or `continue` that leaves the
+construct that bounds it, and an outward `goto`. The pass rejects a jump into
+a region, including the region a static local's runtime initializer opens over
+the rest of its block. The pass also keeps the locals and parameters a
+landing's parts write valid across `sigsetjmp`, as C requires: it qualifies
+them `volatile` unless their address escapes. Transfer rewriting follows
 expression and lambda normalization within the function.
 
 ```sh
@@ -425,14 +416,14 @@ expression and lambda normalization within the function.
               (nil)))) ")"))))))
 ```
 
-The interpolation is gone, replaced by a `String_join` call over a cons list of
-boxed `Var` values, each `String_var` call naming its callee as a resolved
-binding carrying that function's type. The shipped component
-`src/components/component-interpolation.x` wrote the join; the driver boxed and
-ordered its parts. The `return` no longer carries a type annotation; nothing
-downstream needs it. Some children are now raw C text. Lowering may produce
-emitter-ready fragments, so `"String_join(NULL, "` sits in the tree as a
-`String` instead of a call node.
+The interpolation is gone, replaced by a `String_join` call over a cons list
+of boxed `Var` values, each `String_var` call naming its callee as a resolved
+binding carrying that function's type.
+`src/components/component-interpolation.x` wrote the join; see [builtin
+components](#builtin-components). The `return` no longer carries a type
+annotation; nothing downstream needs it. Some children are now raw C text.
+Lowering may produce emitter-ready fragments, so `"String_join(NULL, "` sits
+in the tree as a `String` instead of a call node.
 
 ### Generation and cache staging
 
@@ -447,15 +438,17 @@ spacing, add the unit's own header as its primary include, and patch `main`
 when the unit has one. Generation synthesizes already-lowered nodes, so it
 runs no further transform pass.
 
-`src/cache.x` creates `_0` in the worked example. It owns discovery and
-materialization of cached constants between lowering and emission: immutable
-`String`, boxed `Var`, and canonical `List`/cons graphs share generated
-storage, while mutable collections are copied at their use sites, so caching
-never changes identity semantics. An ordinary C literal promoted to `String`
-enters this same cache without changing its C escape spelling. Parenthesized
-and conditional raw-string expressions distribute promotion to their literal
-leaves; dynamic leaves retain their per-evaluation conversion and conditional
-evaluation still selects only one arm.
+`src/cache.x` creates `_0` in the worked example. Parsing and lowering intern
+each constant through `Compiler.cache` in `src/compiler/literal-cache.x`,
+which assigns its slot; `src/cache.x` materializes those slots between
+lowering and emission: immutable `String`, boxed `Var`, and canonical
+`List`/cons graphs share generated storage, while mutable collections are
+copied at their use sites, so caching never changes identity semantics. An
+ordinary C literal promoted to `String` enters this same cache without
+changing its C escape spelling. Parenthesized and conditional raw-string
+expressions distribute promotion to their literal leaves; dynamic leaves
+retain their per-evaluation conversion and conditional evaluation still
+selects only one arm.
 
 Generation computes the transitive cache graph used by each output region.
 Source-resident values keep the compact `_N` statics in the `.c` file. A public
@@ -466,25 +459,25 @@ and `List` canonicalization makes the resulting value identity the same.
 
 The generated C provides two ways to run the guarded initializer.
 `__attribute__((constructor))` runs the source or TU-local header initializer
-at load time where the host supports it. Every public source function checks
-the file's guard; in a file whose only initialization is cache setup, only the
-public functions that reach a cache check it. Every header function that reads
-a header cache checks the header's guard. Therefore initialization also runs
-on hosts without constructor support. These immutable values are allocated
-eagerly and retained for the process lifetime, so an allocation failure
-happens during load-time initialization instead of at the literal's source
-expression.
+at load time where the host supports it. Every nonstatic source function
+except the protocol bootstrap functions checks the file's guard. In a file
+whose only initialization is cache setup, only those that reach a cache,
+directly or through calls, check it. Every header function that reads a header
+cache checks the header's guard. Therefore initialization also runs on hosts
+without constructor support. These immutable values are allocated eagerly and
+retained for the process lifetime, so an allocation failure happens during
+load-time initialization instead of at the literal's source expression.
 
 ### C token emission
 
 Emission turns the lowered AST into a flat `List` of C tokens. `src/emit.x`
 does this with one stack-local `Emitter` per translation unit, which holds the
 current function's name and static objects. Emission is therefore reentrant,
-and state from a failed unit does not reach the next unit. `src/cleanup.x` has
-already placed each region's cleanup statements on every exit that leaves the
-region, so emission prints frames, records, and statements where the AST puts
-them. Preprocessor nodes are re-emitted here too, with `.x` include targets
-rewritten to the generated `.h` they correspond to.
+and state from a failed unit does not reach the next unit. Lowering has
+already placed every cleanup statement, so emission prints frames, records,
+and statements where the AST puts them. Preprocessor nodes are re-emitted here
+too, with `.x` include targets rewritten to the generated `.h` they correspond
+to.
 
 ```sh
 ./builds/0/x2c translate --dump-code greet.x
@@ -522,7 +515,6 @@ status per fixture, so a change in any phase shows up as a diff.
 Each module under `src/` and `commands/` has these responsibilities.
 `src/components/` groups the builtin components. It is a directory, not a
 module block, so its files share no private scope.
-
 
 - the builtin components, described in [builtin
   components](#builtin-components): `src/components/component-access.x`
@@ -766,10 +758,9 @@ responsibilities.
 forms from `src/grammar.x` through the same decorator, both on the `try` head.
 Its translator returns a landing form, `(landing CODE ROWS)`: the frame and
 catch-site template, the finalizer, the exits that close the catch site, claim
-the finalizer, and leave the frame, and the body and each catch arm as regions.
-The cleanup walk lowers the rows in order, places the exits on every transfer
-out of a region, rejects a `goto` into one, and keeps the locals the rows write
-valid when control lands.
+the finalizer, and leave the frame, and the body and each catch arm as
+regions. The finalizer is also a region. The cleanup walk described under
+[lowering](#lowering) lowers the rows in order.
 
 `src/components/component-delegate.x` registers a member call pattern whose
 receiver hole is `%(expr <delegate> *)`, a field keyword where a type would go.
@@ -875,11 +866,11 @@ form keeps the source in a result local as its value. The parser has already
 declared the targets, so binding leaves their declarations alone and they keep
 their scope and identity; the locals are `new-name` effects.
 
-`src/components/component-lambdas.x` registers both lambda forms on the literal
-family keyed by the `lambda` head, which the transform offers each lambda it
-meets. A noncapturing lambda returns a bound carrier: the name of a static
-function placed among the unit's support declarations, whose body is the
-lambda's bound body as a lowered carrier, so it is not bound again. The
+`src/components/component-lambdas.x` registers both lambda forms on the
+literal family keyed by the `lambda` head, which the transform offers each
+lambda it meets. A noncapturing lambda returns a bound carrier: the name of a
+static function placed among the unit's support declarations, whose body is
+the lambda's bound body as a lowered carrier, so it is not bound again. The
 function lowers with the unit's other support declarations, so it prepares its
 own cells and takes its own entry placements. An expression body carries the
 origin of the item that held the lambda, which `x2c_enclosing(<statement>)`
@@ -887,14 +878,16 @@ returns while lowering, so a diagnostic in it points there. A capturing
 lambda's function also takes each captured binding as a parameter, a reference
 as a reference, so its body is not rewritten. The rule places a context record
 and an adapter, which reads the arguments through `Code.func_parameters` and
-calls the function with them and the record's fields, and returns the statement
-expression that evaluates the captures left to right and makes the `Func`. The
-component also registers a function rule for every definition: a local or
-parameter that a lambda in the body shares by reference moves into a Scope
-cell, so the binding outlives the call. A parameter is copied into its cell at
-entry, a declarator becomes the cell's declaration, a destructuring declaration
-copies its target after it, and every read goes through the cell; the
-replacement is bound again.
+calls the function with them and the record's fields, and returns the
+statement expression that evaluates the captures left to right and makes the
+`Func`. The component also registers a function rule for every definition: a
+local or parameter that a lambda in the body shares by reference moves into a
+Scope cell, so the binding outlives the call. A parameter is copied into its
+cell at entry, a declarator becomes the cell's declaration, a destructuring
+declaration copies its target after it, and every read goes through the cell;
+the replacement is bound again. Capture bindings have separate identities from
+their source bindings, so moving a source into a shared cell cannot retarget a
+sibling snapshot.
 
 `src/components/component-protocols.x` registers on the `conform` head. Before
 the transform, the compiler presents each conformance whose forward converter
