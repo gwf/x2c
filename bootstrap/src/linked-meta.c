@@ -13160,7 +13160,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _12245 = List_var(_12244);
   _12246 = String_new("src/parse.x");
   _12247 = String_var(_12246);
-  _12248 = String_new("9e04bfb0");
+  _12248 = String_new("82e633db");
   _12249 = String_var(_12248);
   _12250 = cons(_12249, NULL);
   _12251 = cons(_12247, _12250);
@@ -13437,7 +13437,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12519 = List_var(_12518);
   _12520 = String_new("src/transform.x");
   _12521 = String_var(_12520);
-  _12522 = String_new("06580661");
+  _12522 = String_new("ad319fd6");
   _12523 = String_var(_12522);
   _12524 = cons(_12523, NULL);
   _12525 = cons(_12521, _12524);
@@ -13500,7 +13500,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12582 = List_var(_12581);
   _12583 = String_new("src/expressions.x");
   _12584 = String_var(_12583);
-  _12585 = String_new("3522d132");
+  _12585 = String_new("7d15cb29");
   _12586 = String_var(_12585);
   _12587 = cons(_12586, NULL);
   _12588 = cons(_12584, _12587);
@@ -13542,7 +13542,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12624 = List_var(_12623);
   _12625 = String_new("src/regions.x");
   _12626 = String_var(_12625);
-  _12627 = String_new("157052eb");
+  _12627 = String_new("f10459a4");
   _12628 = String_var(_12627);
   _12629 = cons(_12628, NULL);
   _12630 = cons(_12626, _12629);
@@ -13633,14 +13633,14 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12715 = List_var(_12714);
   _12716 = String_new("src/callables.x");
   _12717 = String_var(_12716);
-  _12718 = String_new("d5837a75");
+  _12718 = String_new("58dc015b");
   _12719 = String_var(_12718);
   _12720 = cons(_12719, NULL);
   _12721 = cons(_12717, _12720);
   _12722 = List_var(_12721);
   _12723 = String_new("src/cleanup.x");
   _12724 = String_var(_12723);
-  _12725 = String_new("3f87a0e3");
+  _12725 = String_new("7a1aec68");
   _12726 = String_var(_12725);
   _12727 = cons(_12726, NULL);
   _12728 = cons(_12724, _12727);
