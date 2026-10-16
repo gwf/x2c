@@ -13,7 +13,6 @@
     Callable adapters borrow this record until the session closes. */
 typedef struct ReplLoadedFile {
   String path;
-  MetaHelper helper;
   Map symbols, signatures;
   List types;
 } *ReplLoadedFile;
@@ -26,6 +25,7 @@ typedef struct ReplSession {
   ReplLower lowering;
   Array declarations;
   Map files, accessors;
+  MetaHelper helper;
   // Published name -> (value), (type), (native [(source PATH)]),
   // (global (source PATH) PATHS), or
   // (function (typed ...) (execution native)).
@@ -623,11 +623,12 @@ void ReplSession.close(ReplSession session) {
   session.evaluator = NULL;
   foreach (Var (path, value), session.files) {
     ReplLoadedFile file = value;
-    Scope.free(file.helper);
     file.symbols.cleanup();
     file.signatures.cleanup();
     Scope.free(file);
   }
+  Scope.free(session.helper);
+  session.helper = NULL;
   session.files.cleanup();
   session.files = NULL;
   session.accessors.cleanup();

@@ -64,7 +64,7 @@ static macro Stmt $output.helper.count(Expr $out, Expr $count) {
 static typedef struct Helper {
   Frontend frontend, Array owners, Map packages;
   Toolchain toolchain, String include, identity, directory;
-  String entry;
+  List entries;
   List flags, Array modules;
   Map deps, before, Array groups, built, failures, objects, int changed;
 } Helper;
@@ -84,15 +84,15 @@ MetaHelper Frontend.build_meta(Frontend f, List inputs) {
   return _build_meta(f, inputs, NULL);
 }
 
-/** Builds an independent helper exposing the loaded file's public functions.
+/** Builds one helper exposing the loaded files' public functions.
     Main's native signature stays inside the helper; argc/argv calls accept
     an Array of argument Strings through the data protocol. */
-MetaHelper Frontend.build_loaded(Frontend f, String filename) =>
-  _build_meta(f, %($filename), Path.absolute(filename));
+MetaHelper Frontend.build_loaded(Frontend f, List filenames) =>
+  _build_meta(f, filenames, filenames);
 
-static MetaHelper _build_meta(Frontend f, List inputs, String entry) {
+static MetaHelper _build_meta(Frontend f, List inputs, List entries) {
   Helper h = {
-    .frontend = f, .owners = [], .entry = entry,
+    .frontend = f, .owners = [], .entries = entries,
     .packages = {}, .deps = {}, .before = {}, .groups = [], .built = [],
     .failures = [], .objects = []};
   if (_support_unit(inputs))
@@ -175,7 +175,7 @@ static void _scan(Helper &h, List inputs) {
       .request = h.frontend.request, .c = c, .units = [], .seen = {},
       .packages = h.packages};
     int meta = _file(s, path);
-    if (path == h.entry) meta |= 1;
+    if (h.entries.contains(path)) meta |= 1;
     if (!meta) continue;
     if (meta & 1) _own(h, path, owned);
     foreach (String unit, s.units) _own(h, unit, owned);
@@ -364,7 +364,7 @@ static Array _modules(CliRequest request, Map packages) {
 static String _identify(Helper &h, String stamp, String compiler) {
   String loop = _loop_text();
   return %"$stamp\n$compiler\n${_cc_flags().repr()}\n"
-    + %"${h.entry ? "loaded" : "ordinary"}\n"
+    + %"${h.entries.repr()}\n"
     + %"${h.flags.repr()}\n${h.include}\n${h.toolchain.runtime_lib}\n"
     + %"${h.modules.list().repr()}\n"
     + %"${h.frontend.request.package_dirs.repr()}\n"
@@ -463,7 +463,7 @@ static void _parse_source(
   int started = f.start(path, unit);
   defer unit.close();
   unit.compiler.meta_build = index + 1;
-  unit.compiler.load_source = path == h.entry;
+  unit.compiler.load_source = h.entries.contains(path);
   unit.compiler.diagnostics.limit = 0;
   if (!started) return;
   /* A call of a project function the collection meets fails before the
