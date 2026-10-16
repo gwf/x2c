@@ -788,11 +788,11 @@ static Map _lifetime_summaries(List functions, Map publics) {
         case %(function ?target ? ? (returns *facts))
           if (!summaries.contains(target)): {
           Symbol kind;
-          if (_lifetime_resolve_summary(
-                target, facts, publics, summaries, kind)) {
-            summaries[target] = kind;
-            changed = 1;
-          }
+          if (!_lifetime_resolve_summary(
+            target, facts, publics, summaries, kind))
+            continue;
+          summaries[target] = kind;
+          changed = 1;
         }
     if (!changed) break;
   }
