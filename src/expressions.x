@@ -1702,6 +1702,10 @@ static List _method(CallSite &k, List receiver, List field) {
     List callee = %(expr (<macro-expr>) (op . ${k.receiver} ${k.field}));
     return _finish(k, k.result_type, callee, NULL, NULL);
   }
+  /* A template's free owner can name a type only where it lands, and
+     `T.member` there calls `T_member`, as the parser folds it. */
+  if (!resolution) match (k.type) case %(typedef ?(String owner)):
+    return _function(k, %(expr () (ident (${%"${owner}_${k.method}"}))));
   if (!resolution && !k.c.macro_holes && k.c.rewrite_rules) {
     List rewritten = _member_rewrite(k);
     if (rewritten) return rewritten;
