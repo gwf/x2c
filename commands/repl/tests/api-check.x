@@ -383,6 +383,70 @@ static void _interpreter_ownership(ReplSession s) {
   _expect(s, "returned.x;", <value>, 23);
 }
 
+static void _lambda_results(ReplSession s) {
+  _expect(
+    s, "Func lambda_uncast = %!() => %!() => 17;", <rejected>, void);
+  _expect(
+    s, "Func lambda_factory = %!(int n) => %!() => n;",
+    <executed>, void);
+  _expect(s, "Func lambda_first = lambda_factory(3);", <executed>, void);
+  _expect(s, "Func lambda_second = lambda_factory(9);", <executed>, void);
+  _expect(s, "lambda_first();", <value>, 3);
+  _expect(s, "lambda_second();", <value>, 9);
+  _expect(s, "lambda_first();", <value>, 3);
+
+  _expect(
+    s, "Func lambda_add = %!(int n) => %!(int x) => n + x;",
+    <executed>, void);
+  _expect(s, "Func lambda_plus = lambda_add(7);", <executed>, void);
+  _expect(s, "apply_capture(lambda_plus, 5);", <value>, 12);
+  _expect(
+    s, "Func lambda_three = %!(int a) => "
+       "%!(int b) => %!(int c) => a + b + c;", <executed>, void);
+  _expect(s, "Func lambda_two = lambda_three(10);", <executed>, void);
+  _expect(s, "Func lambda_one = lambda_two(20);", <executed>, void);
+  _expect(s, "lambda_one(30);", <value>, 60);
+
+  _expect(
+    s, "Func lambda_counter = %!(int n) => %!() using &n => ++n;",
+    <executed>, void);
+  _expect(s, "Func lambda_count_a = lambda_counter(40);", <executed>, void);
+  _expect(s, "Func lambda_count_b = lambda_counter(50);", <executed>, void);
+  _expect(s, "lambda_count_a();", <value>, 41);
+  _expect(s, "lambda_count_b();", <value>, 51);
+  _expect(s, "lambda_count_a();", <value>, 42);
+
+  _expect(
+    s, "Func lambda_bare = %!() => (Func) (%!() => 17);",
+    <executed>, void);
+  _expect(s, "Func lambda_plain = lambda_bare();", <executed>, void);
+  _expect(s, "lambda_plain();", <value>, 17);
+  _expect(s, "int lambda_named(int n) { return n * 2; }", <defined>, void);
+  _expect(
+    s, "Func lambda_uncast = %!() => lambda_named;", <rejected>, void);
+  _expect(
+    s, "Func lambda_uncast = %!() => (Func) lambda_named;",
+    <executed>, void);
+  _expect(s, "Func lambda_native = lambda_uncast();", <executed>, void);
+  _expect(s, "lambda_native(4);", <value>, 8);
+  _expect(s, "Func lambda_identity = %!(Func fn) => fn;", <executed>, void);
+  _expect(
+    s, "Func lambda_same = lambda_identity(lambda_first);", <executed>, void);
+  _expect(s, "lambda_same == lambda_first;", <value>, 1);
+
+  _expect(
+    s, "Func lambda_narrow = %!(int n) => (unsigned char)n;",
+    <executed>, void);
+  _expect(s, "lambda_narrow(511).tag() == <u8>;", <value>, 1);
+  _expect(s, "lambda_narrow(511).int();", <value>, 255);
+  _expect(s, "int lambda_effects = 0;", <executed>, void);
+  _expect(
+    s, "void lambda_effect(void) { lambda_effects++; }", <defined>, void);
+  _expect(s, "Func lambda_void = %!() => lambda_effect();", <executed>, void);
+  _expect(s, "lambda_void();", <value>, void);
+  _expect(s, "lambda_effects;", <value>, 1);
+}
+
 static void _reference_captures(ReplSession s) {
   _expect(s, "Func ref_read = %!() => 0;", <executed>, void);
   _expect(
@@ -693,6 +757,7 @@ int main(int argc, char **argv) {
         _retained_results(session);
         _meta_records(session);
         _interpreter_ownership(session);
+        _lambda_results(session);
         _reference_captures(session);
         _reference_arguments(session);
         _compiled_functions(session);

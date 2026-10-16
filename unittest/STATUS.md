@@ -33,6 +33,9 @@ Keep the assertion; investigate separately from the source split.
   submissions, including shared mutations, earlier addresses, fixed arrays,
   records, nested captures, and exceptions. Session teardown releases the
   retained allocations; reference parameters remain borrowed aliases.
+- REPL expression-lambda result checks cover returned callables, nested
+  snapshots and reference captures, native callbacks, explicit function
+  conversions, scalar tags, and effect-only results.
 - Linked extension probes build with parallel translation, so registration
   units collect package-prefixed declarations without a preceding unit cache.
 - Lisp cases cover special-form rebinding after earlier effects or call
@@ -201,21 +204,6 @@ stack limit. The export now belongs only to `help`. The unchanged fixture
 passed six repeated nested-Make probes, and help output remains byte-identical.
 
 ## Outstanding Items
-
-An interpreted expression lambda that directly returns another lambda does
-not adapt the returned callable to `Func`. This reproducer crashes when the
-returned lambda is called, even though the capture is by value:
-
-```x2c
-Func factory = %!(int n) => %!() => n;
-Func nested = factory(3);
-nested();
-```
-
-The lowered outer body returns a Lisp lambda where the `Func` initializer
-expects a native callable. Assigning the inner lambda to a `Func` variable
-inside the outer body supplies the conversion. This callable-conversion
-defect remains separate from reference-capture storage lifetime.
 
 Adding `List cached = %("stack-check"); (void) cached;` at the start of
 `static-local-flat-chain`'s `main` makes translation of its 4,000 additions

@@ -439,6 +439,17 @@ Reference captures share the original local or parameter, whose storage
 remains alive until the session ends. Capturing an existing reference parameter
 keeps its caller's alias and does not extend the caller object's lifetime.
 
+An expression lambda can return another captured lambda:
+
+```x2c
+Func factory = %!(int n) => %!() => n;
+Func nested = factory(3);
+nested();  // 3
+```
+
+A returned noncapturing lambda or named function needs a `(Func)` cast,
+as in native code.
+
 The whole interpreter exposes the fixed-signature
 `String.format(String fmt, List values)` operation. Call it as
 `fmt.format(values)`:
