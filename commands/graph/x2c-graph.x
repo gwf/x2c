@@ -1397,15 +1397,6 @@ enum {
   ARCHITECTURE_BRIDGE_SECOND_GROUP = 2
 };
 
-/* Orders `records` by the key `key` builds for each one, keeps the first
-   `limit`, and returns them as a List. */
-static List _ranked_records(Array records, Func key, int limit) {
-  records.sort_by(key);
-  if ((int) records.len() > limit)
-    records.remslice(limit, records.len()).free();
-  return records.list_free();
-}
-
 static void _architecture_call_counts(
   List graph, Map definitions, Map cross_units, Map units, Map functions,
   Map calls) {
@@ -1475,7 +1466,7 @@ static List _architecture_choke_points(List graph) {
     );
     ranked.push(record);
   }
-  return _ranked_records(
+  return project_ranked_records(
     ranked, %!(List record) => {
       match (record)
         case %(function ?path ?name ?
@@ -1524,7 +1515,7 @@ static List _architecture_reciprocal(List graph) {
     );
     ranked.push(record);
   }
-  return _ranked_records(
+  return project_ranked_records(
     ranked, %!(List record) => {
       match (record)
         case %(units ?left ?right (calls (? ? ?forward) (? ? ?reverse))): {
@@ -1624,7 +1615,7 @@ static List _architecture_dependency_width(List graph) {
     );
     ranked.push(record);
   }
-  return _ranked_records(
+  return project_ranked_records(
     ranked, %!(List record) => {
       match (record)
         case %(units ?left ?right
@@ -1781,7 +1772,7 @@ static List _architecture_bridges(List graph) {
             _collect_unit_bridges(
               path, names, adjacency, components, 0, ranked);
           }
-  return _ranked_records(
+  return project_ranked_records(
     ranked, %!(List record) => {
       match (record)
         case %(function ?path ?name (groups ? *rest)): {
@@ -1839,7 +1830,7 @@ static List _structure(List graph, String wanted) {
               Array bridge_rows = [];
               _collect_unit_bridges(
                 path, names, adjacency, groups, 1, bridge_rows);
-              List bridges = _ranked_records(
+              List bridges = project_ranked_records(
                 bridge_rows,
                 %!(List record) => {
                   match (record)
@@ -2730,10 +2721,6 @@ List certify_result(Frontend frontend, Array inputs, Array roots,
 }
 
 
-static void _usage(String program) {
-  $output.graph.usage(program);
-}
-
 /* Each command's operand and option rows, ahead of the shared `-I DIR`
    and input rows; NULL for an unknown command. `datasets` and `compare`
    split their words at `--` first. */
@@ -2783,7 +2770,7 @@ int main(int argc, char **argv) {
   x2c_initialize_command_environment(argv[0], x2c_embedded_identity());
   if (argc == 2 && (!strcmp(argv[1], "--help") ||
                     !strcmp(argv[1], "-h"))) {
-    _usage(argv[0]);
+    $output.graph.usage(argv[0]);
     return 0;
   }
   String verb = argc > 1 ? String.new(argv[1]) : "";
@@ -2818,7 +2805,7 @@ int main(int argc, char **argv) {
       raise %(bad-arg);
   }
   catch %(bad-arg *): {
-    _usage(argv[0]);
+    $output.graph.usage(argv[0]);
     return 2;
   }
   String name = options.getdefault("NAME", NULL);
@@ -2861,7 +2848,8 @@ int main(int argc, char **argv) {
       result = _parse_tail_units(frontend, inputs);
     else if (verb == "loop-allocations")
       result = _parse_loop_allocation_units(
-        frontend, inputs, options["all"] ? 0 : LOOP_ALLOCATION_LIMIT);
+        frontend, inputs,
+        options["all"] ? INT_MAX : LOOP_ALLOCATION_LIMIT);
     else if (verb == "lifetime-escapes" || verb == "allocation-returns")
       result = _parse_lifetime_units(frontend, inputs, name);
     else if (verb == "flows")

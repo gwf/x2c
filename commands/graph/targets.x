@@ -100,6 +100,15 @@ int project_add_unique(Map lists, Var key, Var value) {
 Symbol project_visibility(Type type) =>
   type.is_static() ? <static> : <public>;
 
+/** Orders `records` by the key `key` builds for each one, keeps the first
+    `limit`, and returns them as a List. */
+List project_ranked_records(Array records, Func key, int limit) {
+  records.sort_by(key);
+  if ((int) records.len() > limit)
+    records.remslice(limit, records.len()).free();
+  return records.list_free();
+}
+
 /** Adds `amount` to the count stored under `key`, reading absence as zero. */
 void project_count(Map counts, List key, int amount) {
   counts[key] = counts.getdefault(key, 0).int() + amount;

@@ -300,12 +300,12 @@ List LoopAllocations.finish(List units, int limit) {
   foreach (List event, resolved)
     _loop_add_event(groups, totals, functions, event);
 
-  Array ranked = [];
+  Array candidates = [];
   foreach (Var (raw_key, raw_events), groups)
-    ranked.push(_loop_candidate(raw_key, raw_events));
-  ranked.sort_by(%!(List candidate) => _loop_candidate_rank(candidate));
-  if (limit && (int) ranked.len() > limit)
-    ranked.remslice(limit, ranked.len()).free();
+    candidates.push(_loop_candidate(raw_key, raw_events));
+  List ranked = project_ranked_records(
+    candidates, %!(List candidate) => _loop_candidate_rank(candidate),
+    limit);
 
   int function_count = functions.len();
   int expression_count = groups.len();
@@ -321,6 +321,6 @@ List LoopAllocations.finish(List units, int limit) {
              (helper-calls (pooled $helper_pooled)
                            (scoped $helper_scoped))
              (reported $reported))
-    (candidates @{ranked.list_free()})
+    (candidates @ranked)
   );
 }

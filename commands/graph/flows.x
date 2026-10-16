@@ -254,12 +254,11 @@ static void _flow_statement(
       foreach (Var entry, bindings) {
         List binding = _flow_local_binding(entry);
         if (!binding) continue;
-        String spelling = "local";
-        match (binding) case %(binding ? ?name): spelling = name.str();
         match (entry) {
           case %(op = ? ?initial):
             _flow_set_local(
-              compiler, binding, spelling, initial, <local>, path,
+              compiler, binding, Ast.binding_spelling(binding), initial,
+              <local>, path,
               origin, definitions, parameters, locals);
           default:
             locals[binding] = %(
@@ -275,13 +274,10 @@ static void _flow_statement(
     }
     case %(stmnt (expr ? (op = ?left ?right))): {
       List binding = _flow_local_binding(left);
-      if (binding) {
-        String spelling = "local";
-        match (binding) case %(binding ? ?name): spelling = name.str();
+      if (binding)
         _flow_set_local(
-          compiler, binding, spelling, right, <assignment>, path,
-          origin, definitions, parameters, locals);
-      }
+          compiler, binding, Ast.binding_spelling(binding), right,
+          <assignment>, path, origin, definitions, parameters, locals);
       else
         unresolved.push(
           %(unresolved "field-storage"
@@ -297,8 +293,6 @@ static void _flow_statement(
     case %(stmnt (expr ? (op ?operator ?left ?right))): {
       List binding = _flow_local_binding(left);
       if (binding && operator != <=>) {
-        String spelling = "local";
-        match (binding) case %(binding ? ?name): spelling = name.str();
         List prior = locals.contains(binding)
                    ? locals[binding].list()
                    : %(
@@ -603,10 +597,6 @@ static void _flow_build_taint(List functions) {
   } while (changed);
 }
 
-static List _flow_prepend(List step, List suffix) {
-  return cons(step, suffix);
-}
-
 static void _flow_record_result(
   Array paths, Array unresolved, String blocked, List steps) {
   if (blocked)
@@ -637,31 +627,31 @@ static void _flow_trace(
     case %(wrapper ?name ?location ?inner):
       _flow_trace(
         inner, current, environment,
-        _flow_prepend(%(step wrapper $name $location), suffix), blocked,
+        cons(%(step wrapper $name $location), suffix), blocked,
         producer, by_target, publics, functions, active, paths,
         unresolved);
     case %(choice ?location ?ontrue ?onfalse): {
       _flow_trace(
         ontrue, current, environment,
-        _flow_prepend(%(step choice $location), suffix), blocked,
+        cons(%(step choice $location), suffix), blocked,
         producer, by_target, publics, functions, active, paths,
         unresolved);
       _flow_trace(
         onfalse, current, environment,
-        _flow_prepend(%(step choice $location), suffix), blocked,
+        cons(%(step choice $location), suffix), blocked,
         producer, by_target, publics, functions, active, paths,
         unresolved);
     }
     case %((!or local assignment) ?spelling ?location ?inner):
       _flow_trace(
         inner, current, environment,
-        _flow_prepend(%(step ${source.car()} $spelling $location), suffix),
+        cons(%(step ${source.car()} $spelling $location), suffix),
         blocked, producer, by_target, publics, functions, active,
         paths, unresolved);
     case %(return ?location ?inner):
       _flow_trace(
         inner, current, environment,
-        _flow_prepend(%(step return $location), suffix), blocked,
+        cons(%(step return $location), suffix), blocked,
         producer, by_target, publics, functions, active, paths,
         unresolved);
     case %(unknown ?reason ?location *inners):
@@ -675,7 +665,7 @@ static void _flow_trace(
       if (environment.try_get(position.integer(), replacement)) {
         _flow_trace(
           replacement, current, {},
-          _flow_prepend(
+          cons(
             %(step parameter $position $spelling $type), suffix),
           blocked, producer, by_target, publics, functions, active,
           paths, unresolved
@@ -705,7 +695,7 @@ static void _flow_trace(
                     next_active[caller_target] = 1;
                     _flow_trace(
                       argument, caller_target, {},
-                      _flow_prepend(%(step call $name $location), suffix),
+                      cons(%(step call $name $location), suffix),
                       blocked, producer, by_target, publics, functions,
                       next_active, paths, unresolved);
                   }
@@ -718,7 +708,7 @@ static void _flow_trace(
       if (target && List.equal(target, producer)) {
         _flow_record_result(
           paths, unresolved, blocked,
-          _flow_prepend(
+          cons(
             %(step producer $target $location), suffix)
         );
         return;
@@ -763,7 +753,7 @@ static void _flow_trace(
             returned = 1;
             _flow_trace(
               returned_source, target, next_environment,
-              _flow_prepend(%(step call $name $location), suffix),
+              cons(%(step call $name $location), suffix),
               blocked, producer, by_target, publics, functions,
               next_active, paths, unresolved);
           }
