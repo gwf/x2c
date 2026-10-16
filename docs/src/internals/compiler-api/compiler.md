@@ -40,6 +40,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.gensym`](#Compiler.gensym) | Returns a fresh semantic identity for an anonymous aggregate. |
 | [`Compiler.mark_completion`](#Compiler.mark_completion) | Retags the token beginning at `position` as a private completion marker. |
 | [`Compiler.mark_reference_present`](#Compiler.mark_reference_present) | Records a nonnull optional parameter for the current lexical path. |
+| [`Compiler.match_capture_value`](#Compiler.match_capture_value) | Returns the typed expression reading one native match capture slot. |
 | [`Compiler.match_pattern_binders`](#Compiler.match_pattern_binders) | Returns definite binders from a typed `Match` pattern AST. |
 | [`Compiler.match_pattern_is_static`](#Compiler.match_pattern_is_static) | Reports whether a typed `Match` pattern has a fully static value graph. |
 | [`Compiler.match_pattern_value`](#Compiler.match_pattern_value) | Recovers a pattern value graph, using `x2c-dyn` for computed values. |
@@ -395,6 +396,15 @@ Records a nonnull optional parameter for the current lexical path.
 
 Source: `src/compiler/binding-facts.x:22`
 
+<a id="Compiler.match_capture_value"></a>
+#### Compiler.match_capture_value
+
+`List Compiler.match_capture_value(Var binder, int index)`
+
+Returns the typed expression reading one native match capture slot.
+
+Source: `src/compiler/patterns.x:108`
+
 <a id="Compiler.match_pattern_binders"></a>
 #### Compiler.match_pattern_binders
 
@@ -512,7 +522,7 @@ Source: `src/compiler/lifecycle.x:20`
 Builds ordinary declarations from a pattern scope's issued bindings.
 A catch reads through its handler; a match reads its capture slots.
 
-Source: `src/compiler/patterns.x:109`
+Source: `src/compiler/patterns.x:115`
 
 <a id="Compiler.peek"></a>
 #### Compiler.peek

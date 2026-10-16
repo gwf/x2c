@@ -161,10 +161,11 @@ Public functions:
 `Compiler.cache_literal_list`, `Compiler.match_pattern_value`,
 `Compiler.match_value_is_static`, `Compiler.match_pattern_is_static`,
 `Compiler.match_pattern_binders`, `Compiler.define_pattern_binders`,
-`Compiler.pattern_binder_declarations`, `Compiler.read_source`,
-`Compiler.canonical_path`, `Path.real`, `Path.resolved_absolute`,
-`Compiler.portable_path`, `Compiler.absolute_home_path`,
-`Map.merge_translation_dependency`, `Compiler.add_translation_dependency`,
+`Compiler.match_capture_value`, `Compiler.pattern_binder_declarations`,
+`Compiler.read_source`, `Compiler.canonical_path`, `Path.real`,
+`Path.resolved_absolute`, `Compiler.portable_path`,
+`Compiler.absolute_home_path`, `Map.merge_translation_dependency`,
+`Compiler.add_translation_dependency`,
 `Compiler.merge_translation_dependencies`
 
 ### [src/deps.x](../src/deps.x)
@@ -1187,15 +1188,16 @@ Public functions:
 `List.compare`, `List.promote`, `List.try_own`, `car`, `cdr`, `List.car`,
 `List.cdr`, `List.caar`, `List.cadr`, `List.cddr`, `List.caddr`, `Var.car`,
 `Var.cdr`, `Var.caar`, `Var.cadr`, `Var.cddr`, `Var.caddr`, `List.try_next`,
-`List.iter`, `Array.list`, `Array.list_free`, `List.array`, `Map.list`,
-`Iter.list`, `List.append`, `List.concat_n`, `List.list_n`, `List.reverse`,
-`List.len`, `List.last`, `List.index`, `List.contains`, `List.nth_cdr`,
-`List.getindex`, `List.get`, `List.assoc`, `List.head`, `List.tail`,
-`List.subseq`, `List.getslice`, `List.map`, `List.filter`, `List.foldl`,
-`List.find`, `List.any`, `List.all`, `List.zip_with`, `List.map2`, `List.sort`,
+`List.iter`, `List.len`, `List.last`, `List.index`, `List.contains`,
+`List.nth_cdr`, `List.getindex`, `List.get`, `List.assoc`, `List.head`,
+`List.tail`, `List.subseq`, `List.getslice`, `List.unpack_n`,
+`List.unpack_vars_n`, `Array.list`, `Array.list_free`, `List.array`,
+`Map.list`, `Iter.list`, `List.append`, `List.concat_n`, `List.list_n`,
+`List.reverse`, `List.map`, `List.filter`, `List.foldl`, `List.find`,
+`List.any`, `List.all`, `List.zip_with`, `List.map2`, `List.sort`,
 `List.sort_with`, `List.sort_by`, `List.unique`, `List.flatten`,
-`List.flatten_all`, `List.sublis`, `List.unpack_n`, `List.unpack_vars_n`,
-`List.str`, `List.write_str`, `List.repr`, `List.write_repr`
+`List.flatten_all`, `List.sublis`, `List.str`, `List.write_str`, `List.repr`,
+`List.write_repr`
 
 ### [lib/logger.x](../lib/logger.x)
 
