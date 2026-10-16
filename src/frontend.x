@@ -467,6 +467,7 @@ static void _tokenize_cpp(Compiler cpp, String text) {
 
 // The child parses in the unit's compile-time session.
 static void _share_session(Compiler cpp, Compiler c) {
+  cpp.load_main = c.load_main;
   cpp.imports = c.imports;
   cpp.macro_lisp = c.macro_lisp;
   cpp.borrowed_lisp = cpp.macro_lisp != NULL;

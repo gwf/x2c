@@ -1955,7 +1955,8 @@ static List _declarator(
     _direct_declarator(
       c, context, method_identity, source_first,
       source_after).cdr();
-  List sfx = _declarator_suffix(c);
+  List sfx = _declarator_suffix(
+    c, c.load_main && !c.return_type && key == %("main"));
   List modifiers = %( @infix @sfx @ptr );
   List ast = modifiers.append(type);
   // A parenthesized declarator is assembled twice. Preserve its raw key until
@@ -2046,7 +2047,7 @@ static List _parenthesized(
   return decl;
 }
 
-static List _declarator_suffix(Compiler c) {
+static List _declarator_suffix(Compiler c, int loaded_main) {
   List type = NULL;
   loop {
     // An attribute after a declarator modifies that declarator alone.
@@ -2061,7 +2062,7 @@ static List _declarator_suffix(Compiler c) {
       type = %( @type (bitfield $expr) );
     }
     else if (c.peek(0) == <(>) {
-      List params = _function_parameters(c);
+      List params = _function_parameters(c, loaded_main);
       params = %( params @params );
       type = type ? %(fnmod $params $type) : %((fnmod $params));
     }
@@ -2324,10 +2325,10 @@ static void _method_facts(
    yet know whether a body follows, so keep that scope in `params`; finishing
    a definition replays it around the body, while a prototype never pushes
    the captured scope. */
-static List _function_parameters(Compiler c) {
+static List _function_parameters(Compiler c, int loaded_main) {
   c.next();
   _x2c_complete_here(c, <type>, _type_keywords());
-  if (c.peek(0) == <)>)
+  if (c.peek(0) == <)> && !loaded_main)
     $report.parse.params_empty(c);
   SymScope saved = c.params, parsed;
   int complete = 0;
@@ -2336,7 +2337,8 @@ static List _function_parameters(Compiler c) {
   c.sym.push_new_scope();
   {
     defer parsed = c.sym.pop_scope();
-    params = c.parse_parameter_list();
+    params = c.peek(0) == <)> ? %((param (void) (bind () ())))
+                            : c.parse_parameter_list();
   }
   if (c.peek(0) != <)>) {
     c.require_input();

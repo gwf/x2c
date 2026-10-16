@@ -216,6 +216,7 @@ typedef struct Compiler {
   /* Zero for ordinary parsing, one for metadata collection, or the
      project helper table index plus one. */
   int meta_build;
+  int load_main;  // Expose this loaded unit's main through a data adapter.
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int module_declaration;  // Parsing a `module` declaration.
   int replaying_declaration;  // Binding a collected declaration's syntax.
