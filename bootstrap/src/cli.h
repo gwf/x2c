@@ -51,6 +51,10 @@ TargetKind;
   .offset = offsetof(struct CliRequest, field)
 CliRequest CliRequest_parse(int argc, char * * argv);
 
+CliRequest CliRequest_parse_arguments(Array args);
+
+Array CliRequest_read_arguments(int argc, char * * argv);
+
 Symbol TargetKind_named(String spelling, String * refusal);
 
 TargetKind * TargetKind_of(Symbol kind);
@@ -68,6 +72,8 @@ String Compiler_version(void);
 int CliRequest_inspects(CliRequest request);
 
 List CliRequest_package_roots(CliRequest request);
+
+void CliRequest_require_input(String input);
 
 
 #endif /* __GUARD_0x29BB659F__ */

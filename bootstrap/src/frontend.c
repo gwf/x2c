@@ -34,7 +34,6 @@ ParsedUnit;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "build.h"
 #include "collect.h"
 #include "deps.h"
 #include "utils.h"

@@ -467,7 +467,7 @@ static CliOption cli_options[] ={
 }
 ;
 
-static String _159, _158, _157, _156, _155, _154, _153, _152, _151, _150, _149, _148, _147, _146, _145, _144, _143, _142, _141, _140, _139, _138, _137, _136, _135, _134, _133, _132, _131, _130, _129, _128, _127, _126, _125, _124, _123, _122, _121, _120, _119, _118, _117, _116, _115, _114, _113, _112, _111, _110, _109, _108, _107, _106, _105, _104, _103, _102, _101, _100, _99, _98, _97, _96, _95, _94, _93, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _160, _159, _158, _157, _156, _155, _154, _153, _152, _151, _150, _149, _148, _147, _146, _145, _144, _143, _142, _141, _140, _139, _138, _137, _136, _135, _134, _133, _132, _131, _130, _129, _128, _127, _126, _125, _124, _123, _122, _121, _120, _119, _118, _117, _116, _115, _114, _113, _112, _111, _110, _109, _108, _107, _106, _105, _104, _103, _102, _101, _100, _99, _98, _97, _96, _95, _94, _93, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -693,8 +693,6 @@ _x2c_gensym_initializer_choice_29BB659F_0((0 < sizeof(cli_options) / sizeof(cli_
 }
 ))
 static CliCommand * _command_row(const char * word);
-
-static void _read_arguments(Array args, int argc, char * * argv);
 
 typedef struct Parse{
   CliRequest request;
@@ -1109,6 +1107,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _157 = String_new("use \'");
   _158 = String_new("MAKELEVEL");
   _159 = String_new("x2c 0.15.0");
+  _160 = String_new("input is not a regular file: ");
   _x2c_gensym_static_initialize_0();
   _x2c_gensym_static_initialize_1();
   _x2c_gensym_static_initialize_2();
@@ -1119,11 +1118,13 @@ static CliCommand * _command_row(const char * word){
   return NULL;
 }
 
-String Compiler_version(void);
+Array CliRequest_read_arguments(int argc, char * * argv);
+
+CliRequest CliRequest_parse_arguments(Array args);
 
 CliRequest CliRequest_parse(int argc, char * * argv){
   if(! _init_guard_) _file_init_();
-  Array args = Array_new();
+  Array args = CliRequest_read_arguments(argc, argv);
   const Array _x2c_gensym_macro_acquired_0 = args;
   {
     _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
@@ -1137,43 +1138,52 @@ CliRequest CliRequest_parse(int argc, char * * argv){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
-      _read_arguments(args, argc, argv);
-      if(! Array_len(args)) _help_exit(0, 2);
-      String first = Var_as_string(Array_getindex(args, 0));
-      if(! String_truth(first)) Diagnostics_driver_error("expected a command, found an empty argument");
-      CliCommand * command = _command_row(first);
-      if(command){
-        CliRequest _x2c_gensym_return_value_0 = _parse_command(args, &(* command));
+      {
+        CliRequest _x2c_gensym_return_value_0 = CliRequest_parse_arguments(args);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
           return _x2c_gensym_return_value_0;
         }
 
       }
-      if(String_equal(first, _1) || String_equal(first, _0)) _help_exit(0, 0);
-      if(String_equal(first, _3) || String_equal(first, _2)){
-        puts(Compiler_version());
-        exit(0);
-      }
-      if(String_equal(first, _79)) _help_command(args);
-      if(String_equal(first, _80)) _cli_fail_removed_output();
-      String spelling = _two_dash(first);
-      if(String_truth(spelling)) _cli_fail_one_dash_removed(first, String_join(NULL, cons(String_var(_81), cons(String_var(spelling), cons(String_var(_82), NULL)))));
-      if(String_getindex(first, 0) != '-') _cli_fail_expected_command(first);
-      Diagnostics_driver_error(String_join(NULL, cons(String_var(_83), cons(String_var(first), cons(String_var(_84), NULL)))));
+
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
   }
 
 }
 
-static void _read_arguments(Array args, int argc, char * * argv){
+String Compiler_version(void);
+
+CliRequest CliRequest_parse_arguments(Array args){
+  if(! _init_guard_) _file_init_();
+  if(! Array_len(args)) _help_exit(0, 2);
+  String first = Var_as_string(Array_getindex(args, 0));
+  if(! String_truth(first)) Diagnostics_driver_error("expected a command, found an empty argument");
+  CliCommand * command = _command_row(first);
+  if(command) return _parse_command(args, &(* command));
+  if(String_equal(first, _1) || String_equal(first, _0)) _help_exit(0, 0);
+  if(String_equal(first, _3) || String_equal(first, _2)){
+    puts(Compiler_version());
+    exit(0);
+  }
+  if(String_equal(first, _79)) _help_command(args);
+  if(String_equal(first, _80)) _cli_fail_removed_output();
+  String spelling = _two_dash(first);
+  if(String_truth(spelling)) _cli_fail_one_dash_removed(first, String_join(NULL, cons(String_var(_81), cons(String_var(spelling), cons(String_var(_82), NULL)))));
+  if(String_getindex(first, 0) != '-') _cli_fail_expected_command(first);
+  Diagnostics_driver_error(String_join(NULL, cons(String_var(_83), cons(String_var(first), cons(String_var(_84), NULL)))));
+}
+
+Array CliRequest_read_arguments(int argc, char * * argv){
+  if(! _init_guard_) _file_init_();
+  Array args = Array_new();
   int script = argc > 1 && ! strcmp(argv[1], "script");
   for(int i = 1;  i < argc;  i ++){
     if(script) Array_push(args, String_var(String_new(argv[i])));
     else _expand_argument(args, String_new(argv[i]), NULL);
   }
-
+  return args;
 }
 
 CliRequest CliRequest_new(Symbol command);
@@ -1896,6 +1906,25 @@ List CliRequest_package_roots(CliRequest request){
   String home = Compiler_home_packages();
   if(! Path_is_dir(home)) return request -> package_dirs;
   return List_append(request -> package_dirs, cons(String_var(home), NULL));
+}
+
+int Path_is_file(Path);
+
+int Path_exists(Path);
+
+void CliRequest_require_input(String input){
+  if(! _init_guard_) _file_init_();
+  if(! String_truth(input)) Diagnostics_driver_error("input path is empty");
+  if(Path_is_file(input)) return;
+  if(Path_is_dir(input)){
+    fprintf(stderr, "x2c: error: input is a directory: %s\n", input);
+    fputs("note: pass source files, use a shell wildcard, or define a " "manifest target\n", stderr);
+    exit(2);
+  }
+  if(Path_exists(input)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_160), cons(String_var(input), NULL))));
+  fprintf(stderr, "x2c: error: input does not exist: %s\n", input);
+  if(strpbrk(input, "*?[")) fputs("note: x2c does not expand wildcard operands\n", stderr);
+  exit(2);
 }
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){

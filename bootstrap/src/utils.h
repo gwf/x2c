@@ -87,5 +87,7 @@ _Noreturn void Diagnostics_driver_error(const char * message);
 
 void Diagnostics_host_error(List detail);
 
+String Compiler_cache_root(void);
+
 
 #endif /* __GUARD_0x6E6B8BB0__ */

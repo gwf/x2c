@@ -90,6 +90,23 @@ MatchCaptureSite;
 #include "match-plan.h"
 #include "match-cache.h"
 #include "scan.h"
+typedef struct f6_layout___NormalizedCell{
+  List original;
+  Var head;
+}
+f6_layout___NormalizedCell;
+
+typedef struct f6_layout___MatchLayoutBuilder{
+  Atom binders[MACHINE_BINDER_MAX];
+  int count, malformed_binder, leading_list_binder, past_capacity;
+}
+f6_layout___MatchLayoutBuilder;
+
+typedef struct f6_layout___MatchSlots{
+  unsigned long definite, possible;
+}
+f6_layout___MatchSlots;
+
 static List _3;
 
 static Var _2, _1, _0;
@@ -98,60 +115,43 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-static int _binder_kind(Var atom);
+static int f6_layout____binder_kind(Var atom);
 
 static int _named_binder(Var value);
 
-static int _reserved_predicate(Var atom);
+static int f6_layout____reserved_predicate(Var atom);
 
-static List _normalize_pattern(List pattern);
+static List f6_layout____normalize_pattern(List pattern);
 
-typedef struct NormalizedCell{
-  List original;
-  Var head;
-}
-NormalizedCell;
+static List f6_layout____normalize_elements(List elements);
 
-static List _normalize_elements(List elements);
+static void f6_layout____collect(f6_layout___MatchLayoutBuilder * b, Var pattern);
 
-typedef struct MatchLayoutBuilder{
-  Atom binders[MACHINE_BINDER_MAX];
-  int count, malformed_binder, leading_list_binder, past_capacity;
-}
-MatchLayoutBuilder;
+static void f6_layout____atom(f6_layout___MatchLayoutBuilder * b, Var atom);
 
-typedef struct MatchSlots{
-  unsigned long definite, possible;
-}
-MatchSlots;
+static int f6_layout____add(f6_layout___MatchLayoutBuilder * b, Atom binder);
 
-static void _collect(MatchLayoutBuilder * b, Var pattern);
+static const char * f6_layout____malformed(f6_layout___MatchLayoutBuilder * b);
 
-static void _atom(MatchLayoutBuilder * b, Var atom);
+static MatchCaptureLayout f6_layout____layout(f6_layout___MatchLayoutBuilder * b, Var normalized, const char * malformed);
 
-static int _add(MatchLayoutBuilder * b, Atom binder);
+static f6_layout___MatchSlots f6_layout____slots(MatchCaptureLayout m, Var pattern);
 
-static const char * _malformed(MatchLayoutBuilder * b);
+static f6_layout___MatchSlots f6_layout____guard_slots(MatchCaptureLayout m, Var op, List args);
 
-static MatchCaptureLayout _layout(MatchLayoutBuilder * b, Var normalized, const char * malformed);
+static int f6_layout____set_capture(List args);
 
-static MatchSlots _slots(MatchCaptureLayout m, Var pattern);
+static f6_layout___MatchSlots f6_layout____sequence_slots(MatchCaptureLayout m, List patterns);
 
-static MatchSlots _guard_slots(MatchCaptureLayout m, Var op, List args);
+static f6_layout___MatchSlots f6_layout____choice_slots(MatchCaptureLayout m, List patterns);
 
-static int _set_capture(List args);
+static f6_layout___MatchSlots f6_layout____binder_slot(MatchCaptureLayout m, Var binder);
 
-static MatchSlots _sequence_slots(MatchCaptureLayout m, List patterns);
+static f6_layout___MatchSlots f6_layout____union(f6_layout___MatchSlots a, f6_layout___MatchSlots b);
 
-static MatchSlots _choice_slots(MatchCaptureLayout m, List patterns);
+static int f6_layout____find(MatchCaptureLayout layout, Atom binder);
 
-static MatchSlots _binder_slot(MatchCaptureLayout m, Var binder);
-
-static MatchSlots _union(MatchSlots a, MatchSlots b);
-
-static int _find(MatchCaptureLayout layout, Atom binder);
-
-static List _binders(MatchCaptureLayout layout, unsigned long included);
+static List f6_layout____binders(MatchCaptureLayout layout, unsigned long included);
 
 static int _capture_bit(unsigned long bits, int index);
 
@@ -161,21 +161,42 @@ static int _buffer_valid(MatchCaptureLayout layout, MatchCaptureBuffer * capture
 
 static int _capture(MatchPlan m, Var input, MatchCaptureBuffer * captures, MachineStats * stats);
 
-static List _seen_list(Var value, Var(* view)(Var));
+static List f9_execution____seen_list(Var value, Var(* view)(Var));
 
-static int _key_admits(MatchPlan plan, MatchKey * key, List list, Var(* view)(Var));
+static int f9_execution____key_admits(MatchPlan plan, MatchKey * key, List list, Var(* view)(Var));
 
-static int _key_equal(MatchPlan plan, Var value, Var key);
+static int f9_execution____key_equal(MatchPlan plan, Var value, Var key);
 
 static int _run_capture(MachineView view, MatchMachine * m, Var input, MatchCaptureBuffer * captures);
 
-static int _commit(MachineView view, MatchMachine * m, MatchCaptureBuffer * captures);
+static int f9_execution____commit(MachineView view, MatchMachine * m, MatchCaptureBuffer * captures);
 
-static int _run(MatchPlan mm, MatchMachine * m, Var input, List * out);
+static int f9_execution____run(MatchPlan mm, MatchMachine * m, Var input, List * out);
 
 static List _publish_captures(MatchCaptureLayout layout, MatchCaptureBuffer * captures);
 
-typedef struct MatchWalk{
+typedef struct ReplacementSource{
+  MatchCaptureLayout layout;
+  MatchCaptureBuffer * captures;
+  List bindings;
+}
+ReplacementSource;
+
+typedef struct f9_templates___ReplacementCell{
+  Var value;
+  int splice;
+}
+f9_templates___ReplacementCell;
+
+static int f9_templates____replace_match(MatchPlan plan, List input, Var template, Var * out);
+
+static Var f9_templates____value(ReplacementSource * source, Var binder);
+
+static Var f9_templates____captured(MatchCaptureLayout layout, MatchCaptureBuffer * captures, Var binder);
+
+static Var _replace(Var input, ReplacementSource * source);
+
+typedef struct f9_traversal___MatchWalk{
   MatchPlan plan;
   MachineView view;
   MatchCaptureBuffer * captures;
@@ -185,93 +206,72 @@ typedef struct MatchWalk{
   List bindings, results;
   int error;
 }
-MatchWalk;
+f9_traversal___MatchWalk;
 
-static int _first(MatchPlan plan, List input, Var * out_match, List * out_bindings);
+static int f9_traversal____first(MatchPlan plan, List input, Var * out_match, List * out_bindings);
 
-static int _all(MatchPlan plan, List input, List * out_results);
+static int f9_traversal____all(MatchPlan plan, List input, List * out_results);
 
-static int _replace_all(MatchPlan plan, List input, Var template, List * out);
+static int f9_traversal____replace_all(MatchPlan plan, List input, Var template, List * out);
 
-static int _test(MatchWalk * m, Var node);
+static int f9_traversal____test(f9_traversal___MatchWalk * m, Var node);
 
-static List _hit(MatchWalk * walk, Var node);
+static List f9_traversal____hit(f9_traversal___MatchWalk * walk, Var node);
 
-static Var _spine_get(Block spine, size_t index);
+static Var f9_traversal____spine_get(Block spine, size_t index);
 
-static int _walk_all(MatchWalk * walk, Var input, int include_empty);
+static int f9_traversal____walk_all(f9_traversal___MatchWalk * walk, Var input, int include_empty);
 
-static void _answer(MatchWalk * walk, size_t base);
+static void f9_traversal____answer(f9_traversal___MatchWalk * walk, size_t base);
 
-static int _walk_first(MatchWalk * walk, Var input, int include_empty);
+static int f9_traversal____walk_first(f9_traversal___MatchWalk * walk, Var input, int include_empty);
 
-static int _settle(MatchWalk * walk, Var node);
+static int f9_traversal____settle(f9_traversal___MatchWalk * walk, Var node);
 
-static Var _rewrite(MatchWalk * walk, Var node, int include_empty);
+static Var f9_traversal____rewrite(f9_traversal___MatchWalk * walk, Var node, int include_empty);
 
-static Var _replace_node(MatchWalk * walk, Var node);
+static Var f9_traversal____replace_node(f9_traversal___MatchWalk * walk, Var node);
 
-typedef struct ReplacementSource{
-  MatchCaptureLayout layout;
-  MatchCaptureBuffer * captures;
-  List bindings;
-}
-ReplacementSource;
+static int f5_sites____pattern_borrowable(Var value, int depth, int permanent_lists);
 
-static int _replace_match(MatchPlan plan, List input, Var template, Var * out);
+static int f5_sites____object_borrowable(Var value, int depth, int permanent_lists);
 
-static Var _value(ReplacementSource * source, Var binder);
+static Scope f5_sites___match_capture_site_scope;
 
-static Var _captured(MatchCaptureLayout layout, MatchCaptureBuffer * captures, Var binder);
+static Block f5_sites___match_capture_sites;
 
-typedef struct ReplacementCell{
-  Var value;
-  int splice;
-}
-ReplacementCell;
-
-static Var _replace(Var input, ReplacementSource * source);
-
-static int _pattern_borrowable(Var value, int depth, int permanent_lists);
-
-static int _object_borrowable(Var value, int depth, int permanent_lists);
-
-static Scope match_capture_site_scope;
-
-static Block match_capture_sites;
-
-static pthread_mutex_t match_site_mutex;
+static pthread_mutex_t f5_sites___match_site_mutex;
 
 #include "exception.h"
 
 
 
 
-_x2c_gensym_initializer_choice_6A4A1365_0((match_site_mutex =(pthread_mutex_t) PTHREAD_MUTEX_INITIALIZER))
-static MatchPlan _published(MatchCaptureSite * site, Var pattern);
+_x2c_gensym_initializer_choice_6A4A1365_0((f5_sites___match_site_mutex =(pthread_mutex_t) PTHREAD_MUTEX_INITIALIZER))
+static MatchPlan f5_sites____published(MatchCaptureSite * site, Var pattern);
 
-static MatchPlan _publish_plan(MatchCaptureSite * m, Var pattern);
+static MatchPlan f5_sites____publish_plan(MatchCaptureSite * m, Var pattern);
 
-static void _prepare(MatchCaptureSite * site, Var pattern);
+static void f5_sites____prepare(MatchCaptureSite * site, Var pattern);
 
-static void _sites_initialize(void);
+static void f5_sites____sites_initialize(void);
 
-static void _site_lock(void);
+static void f5_sites____site_lock(void);
 
-static void _site_unlock(void);
+static void f5_sites____site_unlock(void);
 
-static void _thread_check(int status, const char * action);
+static void f5_sites____thread_check(int status, const char * action);
 
-static MatchPlan _plan(MatchCaptureSite * site, Var pattern);
+static MatchPlan f5_sites____plan(MatchCaptureSite * site, Var pattern);
 
-static pthread_once_t match_shutdown_once;
+static pthread_once_t f5_sites___match_shutdown_once;
 
-_x2c_gensym_initializer_choice_6A4A1365_1((match_shutdown_once =(pthread_once_t) PTHREAD_ONCE_INIT))
-static void _register_shutdown_once(void);
+_x2c_gensym_initializer_choice_6A4A1365_1((f5_sites___match_shutdown_once =(pthread_once_t) PTHREAD_ONCE_INIT))
+static void f5_sites____register_shutdown_once(void);
 
-static void _shutdown(void);
+static void f5_sites____shutdown(void);
 
-static void _sites_shutdown(void);
+static void f5_sites____sites_shutdown(void);
 
 typedef struct _x2c_gensym_defer_env_0{
   const void * _x2c_gensym_defer_capture_0;
@@ -307,17 +307,17 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 int Var_is_atom_binder(Var atom){
   if(! _init_guard_) _file_init_();
-  return _binder_kind(atom) == '?';
+  return f6_layout____binder_kind(atom) == '?';
 }
 
 int Var_is_list_binder(Var atom){
   if(! _init_guard_) _file_init_();
-  return _binder_kind(atom) == '*';
+  return f6_layout____binder_kind(atom) == '*';
 }
 
 int Var_is_binder(Var atom){
   if(! _init_guard_) _file_init_();
-  return _binder_kind(atom) > 0;
+  return f6_layout____binder_kind(atom) > 0;
 }
 
 int Var_is_match_op(Var atom){
@@ -330,7 +330,7 @@ int Var_is_match_op(Var atom){
   return 0;
 }
 
-static int _binder_kind(Var atom){
+static int f6_layout____binder_kind(Var atom){
   char sigil = Atom_first(atom);
   if(sigil != '?' && sigil != '*') return 0;
   char decoded[SYMBOL_MAX_5BIT + 1];
@@ -354,13 +354,13 @@ static int _named_binder(Var value){
   return Var_is_binder(value) && ! x2c_var_equal(value, Symbol_var(58)) && ! x2c_var_equal(value, Symbol_var(54));
 }
 
-static int _reserved_predicate(Var atom){
+static int f6_layout____reserved_predicate(Var atom){
   return Var_is(atom, 1328354264) &&(x2c_var_equal(atom, Symbol_var(1997793406138)) || x2c_var_equal(atom, Symbol_var(1860354452666)) || x2c_var_equal(atom, Symbol_var(1997882)));
 }
 
-static List _normalize_pattern(List pattern){
+static List f6_layout____normalize_pattern(List pattern){
   if(! List_truth(pattern) || x2c_var_equal(List_car(pattern), Symbol_var(2050325770))) return pattern;
-  List normalized = _normalize_elements(pattern);
+  List normalized = f6_layout____normalize_elements(pattern);
   Var op = List_car(normalized);
   List args = List_cdr(normalized);
   if(! Var_is_match_op(op) || x2c_var_equal(op, Symbol_var(2050325770)) || ! List_truth(args)) return normalized;
@@ -368,13 +368,13 @@ static List _normalize_pattern(List pattern){
   List rest = List_cdr(args);
   if(! Var_is_binder(binder) || ! List_truth(rest) ||(x2c_var_equal(op, Symbol_var(2005352)) && ! List_truth(List_cdr(rest)))) return normalized;
   return({
-    Var _x2c_gensym_literal_part_0 = binder;  Var _x2c_gensym_literal_part_1 = List_var(_normalize_pattern(cons(op, List_append(rest, NULL))));  cons(_0, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL)));
+    Var _x2c_gensym_literal_part_0 = binder;  Var _x2c_gensym_literal_part_1 = List_var(f6_layout____normalize_pattern(cons(op, List_append(rest, NULL))));  cons(_0, cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL)));
   }
   );
 }
 
-static List _normalize_elements(List elements){
-  Block spine = Block_new(sizeof(NormalizedCell));
+static List f6_layout____normalize_elements(List elements){
+  Block spine = Block_new(sizeof(f6_layout___NormalizedCell));
   const Block _x2c_gensym_macro_acquired_0 = spine;
   {
     _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
@@ -390,15 +390,15 @@ static List _normalize_elements(List elements){
     {
       for(List cell = elements;  List_truth(cell);  cell = List_cdr(cell)){
         Var head = List_car(cell);
-        NormalizedCell row ={
-          cell, Var_is_row(head, 9, 7, 4) ? List_var(_normalize_pattern(Var_list_payload(head))) : head
+        f6_layout___NormalizedCell row ={
+          cell, Var_is_row(head, 9, 7, 4) ? List_var(f6_layout____normalize_pattern(Var_list_payload(head))) : head
         }
         ;
         Block_push(spine, & row);
       }
       List out = NULL;
       for(size_t i = spine -> length;  i > 0;  i --){
-        NormalizedCell row =((NormalizedCell *) spine -> bytes)[i - 1];
+        f6_layout___NormalizedCell row =((f6_layout___NormalizedCell *) spine -> bytes)[i - 1];
         out = x2c_var_equal(row.head, List_car(row.original)) && List_equal(out, List_cdr(row.original)) ? row.original : cons(row.head, out);
       }
       {
@@ -418,27 +418,27 @@ static List _normalize_elements(List elements){
 
 MatchCaptureLayout MatchCaptureLayout_analyze(Var pattern){
   if(! _init_guard_) _file_init_();
-  MatchLayoutBuilder builder ={
+  f6_layout___MatchLayoutBuilder builder ={
     _x2c_gensym_initializer_choice_6A4A1365_2((0))
   }
   ;
-  _collect(&(builder), pattern);
-  const char * malformed = _malformed(&(builder));
+  f6_layout____collect(&(builder), pattern);
+  const char * malformed = f6_layout____malformed(&(builder));
   Var normalized = pattern;
   if(malformed) builder.count = 0;
-  else if(Var_is_row(pattern, 9, 7, 4)) normalized = List_var(_normalize_pattern(Var_list_payload(pattern)));
-  MatchCaptureLayout layout = _layout(&(builder), normalized, malformed);
+  else if(Var_is_row(pattern, 9, 7, 4)) normalized = List_var(f6_layout____normalize_pattern(Var_list_payload(pattern)));
+  MatchCaptureLayout layout = f6_layout____layout(&(builder), normalized, malformed);
   if(! malformed && builder.count){
-    MatchSlots slots = _slots(layout, normalized);
+    f6_layout___MatchSlots slots = f6_layout____slots(layout, normalized);
     layout -> definite = slots.definite;
     layout -> possible = slots.possible;
   }
   return layout;
 }
 
-static void _collect(MatchLayoutBuilder * b, Var pattern){
+static void f6_layout____collect(f6_layout___MatchLayoutBuilder * b, Var pattern){
   if(! Var_is_row(pattern, 9, 7, 4)){
-    _atom(&((* b)), pattern);
+    f6_layout____atom(&((* b)), pattern);
     return;
   }
   if(Var_is_nil(pattern)) return;
@@ -453,34 +453,34 @@ static void _collect(MatchLayoutBuilder * b, Var pattern){
   int predicate_form = x2c_var_equal(head, Symbol_var(62054));
   for(List at = parts;  List_truth(at);  at = List_cdr(at)){
     Var part = List_car(at);
-    if(predicate_form && ! List_truth(List_cdr(at)) && _reserved_predicate(part)) continue;
-    _collect(&((* b)), part);
+    if(predicate_form && ! List_truth(List_cdr(at)) && f6_layout____reserved_predicate(part)) continue;
+    f6_layout____collect(&((* b)), part);
     if((* b).malformed_binder) return;
   }
 
 }
 
-static void _atom(MatchLayoutBuilder * b, Var atom){
-  int kind = _binder_kind(atom);
+static void f6_layout____atom(f6_layout___MatchLayoutBuilder * b, Var atom){
+  int kind = f6_layout____binder_kind(atom);
   if(kind < 0)(* b).malformed_binder = 1;
-  else if(kind && ! x2c_var_equal(atom, Symbol_var(58)) && ! x2c_var_equal(atom, Symbol_var(54)) && _add(&((* b)), atom) < 0)(* b).past_capacity = 1;
+  else if(kind && ! x2c_var_equal(atom, Symbol_var(58)) && ! x2c_var_equal(atom, Symbol_var(54)) && f6_layout____add(&((* b)), atom) < 0)(* b).past_capacity = 1;
 }
 
-static int _add(MatchLayoutBuilder * b, Atom binder){
+static int f6_layout____add(f6_layout___MatchLayoutBuilder * b, Atom binder){
   for(int i = 0;  i <(* b).count;  i ++) if((* b).binders[i].u64 == binder.u64) return i;
   if((* b).count >= MACHINE_BINDER_MAX) return - 1;
   (* b).binders[(* b).count] = binder;
   return(* b).count ++;
 }
 
-static const char * _malformed(MatchLayoutBuilder * b){
+static const char * f6_layout____malformed(f6_layout___MatchLayoutBuilder * b){
   if((* b).malformed_binder) return "binder-name";
   if((* b).leading_list_binder) return "leading-list-binder-in-guard";
   if((* b).past_capacity) return "binder-capacity";
   return NULL;
 }
 
-static MatchCaptureLayout _layout(MatchLayoutBuilder * b, Var normalized, const char * malformed){
+static MatchCaptureLayout f6_layout____layout(f6_layout___MatchLayoutBuilder * b, Var normalized, const char * malformed){
   size_t bytes = sizeof(struct MatchCaptureLayout) + sizeof(Atom) *(* b).count;
   MatchCaptureLayout layout = Scope_calloc(1, bytes);
   layout -> binders =(Atom *)((char *) layout + sizeof(struct MatchCaptureLayout));
@@ -492,46 +492,46 @@ static MatchCaptureLayout _layout(MatchLayoutBuilder * b, Var normalized, const 
   return layout;
 }
 
-static MatchSlots _slots(MatchCaptureLayout m, Var pattern){
-  if(_named_binder(pattern)) return _binder_slot(m, pattern);
-  if(! Var_is_row(pattern, 9, 7, 4) || Var_is_nil(pattern)) return(MatchSlots){
+static f6_layout___MatchSlots f6_layout____slots(MatchCaptureLayout m, Var pattern){
+  if(_named_binder(pattern)) return f6_layout____binder_slot(m, pattern);
+  if(! Var_is_row(pattern, 9, 7, 4) || Var_is_nil(pattern)) return(f6_layout___MatchSlots){
     0, 0
   }
   ;
   List list = Var_list_payload(pattern);
   Var head = List_car(list);
   List args = List_cdr(list);
-  if(x2c_var_equal(head, Symbol_var(2050325770))) return(MatchSlots){
+  if(x2c_var_equal(head, Symbol_var(2050325770))) return(f6_layout___MatchSlots){
     0, 0
   }
   ;
-  if(x2c_var_equal(head, Symbol_var(1059020478773725))) return(MatchSlots){
-    0, _sequence_slots(m, args).possible
+  if(x2c_var_equal(head, Symbol_var(1059020478773725))) return(f6_layout___MatchSlots){
+    0, f6_layout____sequence_slots(m, args).possible
   }
   ;
-  if(! Var_is_match_op(head)) return _sequence_slots(m, list);
-  return _guard_slots(m, head, args);
+  if(! Var_is_match_op(head)) return f6_layout____sequence_slots(m, list);
+  return f6_layout____guard_slots(m, head, args);
 }
 
-static MatchSlots _guard_slots(MatchCaptureLayout m, Var op, List args){
-  if(x2c_var_equal(op, Symbol_var(1969032)) ||(x2c_var_equal(op, Symbol_var(2005352)) && _set_capture(args))) return _sequence_slots(m, args);
-  if(x2c_var_equal(op, Symbol_var(62436)) || x2c_var_equal(op, Symbol_var(2005352))) return _choice_slots(m, args);
-  if(x2c_var_equal(op, Symbol_var(1995752))) return(MatchSlots){
-    0, _sequence_slots(m, args).possible
+static f6_layout___MatchSlots f6_layout____guard_slots(MatchCaptureLayout m, Var op, List args){
+  if(x2c_var_equal(op, Symbol_var(1969032)) ||(x2c_var_equal(op, Symbol_var(2005352)) && f6_layout____set_capture(args))) return f6_layout____sequence_slots(m, args);
+  if(x2c_var_equal(op, Symbol_var(62436)) || x2c_var_equal(op, Symbol_var(2005352))) return f6_layout____choice_slots(m, args);
+  if(x2c_var_equal(op, Symbol_var(1995752))) return(f6_layout___MatchSlots){
+    0, f6_layout____sequence_slots(m, args).possible
   }
   ;
-  return(MatchSlots){
+  return(f6_layout___MatchSlots){
     0, 0
   }
   ;
 }
 
-static int _set_capture(List args){
+static int f6_layout____set_capture(List args){
   return List_truth(args) && List_truth(List_cdr(args)) && ! List_truth(List_cddr(args)) && Var_is_atom_binder(List_car(args));
 }
 
-static MatchSlots _sequence_slots(MatchCaptureLayout m, List patterns){
-  MatchSlots slots ={
+static f6_layout___MatchSlots f6_layout____sequence_slots(MatchCaptureLayout m, List patterns){
+  f6_layout___MatchSlots slots ={
     0, 0
   }
   ;
@@ -542,15 +542,15 @@ static MatchSlots _sequence_slots(MatchCaptureLayout m, List patterns){
     Var _x2c_gensym_macro_cursor_output_0;
     while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
       pattern = _x2c_gensym_macro_cursor_output_0;
-      slots = _union(slots, _slots(m, pattern));
+      slots = f6_layout____union(slots, f6_layout____slots(m, pattern));
     }
 
   }
   return slots;
 }
 
-static MatchSlots _choice_slots(MatchCaptureLayout m, List patterns){
-  MatchSlots slots ={
+static f6_layout___MatchSlots f6_layout____choice_slots(MatchCaptureLayout m, List patterns){
+  f6_layout___MatchSlots slots ={
     0, 0
   }
   ;
@@ -563,7 +563,7 @@ static MatchSlots _choice_slots(MatchCaptureLayout m, List patterns){
     while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
       pattern = _x2c_gensym_macro_cursor_output_1;
       {
-        MatchSlots part = _slots(m, pattern);
+        f6_layout___MatchSlots part = f6_layout____slots(m, pattern);
         slots.possible |= part.possible;
         slots.definite = first ? part.definite : slots.definite & part.definite;
         first = 0;
@@ -575,24 +575,24 @@ static MatchSlots _choice_slots(MatchCaptureLayout m, List patterns){
   return slots;
 }
 
-static MatchSlots _binder_slot(MatchCaptureLayout m, Var binder){
-  int index = _find(m, binder);
+static f6_layout___MatchSlots f6_layout____binder_slot(MatchCaptureLayout m, Var binder){
+  int index = f6_layout____find(m, binder);
   assert(index >= 0);
   unsigned long bit = 1UL << index;
-  return(MatchSlots){
+  return(f6_layout___MatchSlots){
     bit, bit
   }
   ;
 }
 
-static MatchSlots _union(MatchSlots a, MatchSlots b){
-  return(MatchSlots){
+static f6_layout___MatchSlots f6_layout____union(f6_layout___MatchSlots a, f6_layout___MatchSlots b){
+  return(f6_layout___MatchSlots){
     a.definite | b.definite, a.possible | b.possible
   }
   ;
 }
 
-static int _find(MatchCaptureLayout layout, Atom binder){
+static int f6_layout____find(MatchCaptureLayout layout, Atom binder){
   for(int i = 0;  i < layout -> binder_count;  i ++) if(layout -> binders[i].u64 == binder.u64) return i;
   return - 1;
 }
@@ -604,15 +604,15 @@ void MatchCaptureLayout_free(MatchCaptureLayout layout){
 
 List MatchCaptureLayout_definite_list(MatchCaptureLayout layout){
   if(! _init_guard_) _file_init_();
-  return layout ? _binders(layout, layout -> definite) : NULL;
+  return layout ? f6_layout____binders(layout, layout -> definite) : NULL;
 }
 
 List MatchCaptureLayout_possible_list(MatchCaptureLayout layout){
   if(! _init_guard_) _file_init_();
-  return layout ? _binders(layout, layout -> possible) : NULL;
+  return layout ? f6_layout____binders(layout, layout -> possible) : NULL;
 }
 
-static List _binders(MatchCaptureLayout layout, unsigned long included){
+static List f6_layout____binders(MatchCaptureLayout layout, unsigned long included){
   List binders = NULL;
   for(int i = layout -> binder_count - 1;  i >= 0;  i --) if(_capture_bit(included, i)) binders = cons(layout -> binders[i], binders);
   return binders;
@@ -620,7 +620,7 @@ static List _binders(MatchCaptureLayout layout, unsigned long included){
 
 int MatchCaptureLayout_index(MatchCaptureLayout layout, Atom binder){
   if(! _init_guard_) _file_init_();
-  return layout ? _find(layout, binder) : - 1;
+  return layout ? f6_layout____find(layout, binder) : - 1;
 }
 
 int MatchCaptureBuffer_has(MatchCaptureBuffer * m, int index){
@@ -642,7 +642,7 @@ _Noreturn void MatchPlan_raise_ineligible(const char * reason, const char * owne
   if(! _init_guard_) _file_init_();
   String fence = String_new(reason), site = String_new(owner);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/match.x",.function = "MatchPlan_raise_ineligible",.line = 456};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/match/execution.x",.function = "MatchPlan_raise_ineligible",.line = 17};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 1358596898646632, 2, Symbol_var(34096809266140), String_var(site), Symbol_var(12939466), String_var(fence));
     __builtin_unreachable();
   }
@@ -684,34 +684,34 @@ static int _capture(MatchPlan m, Var input, MatchCaptureBuffer * captures, Machi
 int MatchPlan_admits(MatchPlan plan, Var input, Var(* view)(Var)){
   if(! _init_guard_) _file_init_();
   if(! plan -> key_count) return 1;
-  List list = _seen_list(input, view);
+  List list = f9_execution____seen_list(input, view);
   if(! List_truth(list)) return 0;
-  for(int i = 0;  i < plan -> key_count;  i ++) if(_key_admits(plan, & plan -> keys[i], list, view)) return 1;
+  for(int i = 0;  i < plan -> key_count;  i ++) if(f9_execution____key_admits(plan, & plan -> keys[i], list, view)) return 1;
   return 0;
 }
 
 List Var_list(Var);
 
-static List _seen_list(Var value, Var(* view)(Var)){
+static List f9_execution____seen_list(Var value, Var(* view)(Var)){
   if(view) value = view(value);
   return Var_is_row(value, 9, 7, 4) ? Var_list(value) : NULL;
 }
 
-static int _key_admits(MatchPlan plan, MatchKey * key, List list, Var(* view)(Var)){
-  if(! _key_equal(plan, List_car(list), key -> head)) return 0;
+static int f9_execution____key_admits(MatchPlan plan, MatchKey * key, List list, Var(* view)(Var)){
+  if(! f9_execution____key_equal(plan, List_car(list), key -> head)) return 0;
   if(! key -> index) return 1;
   for(int i = 0;  i < key -> index && List_truth(list);  i ++) list = List_cdr(list);
   if(! List_truth(list)) return 0;
   Var element = List_car(list);
   if(key -> nested){
-    List inner = _seen_list(element, view);
+    List inner = f9_execution____seen_list(element, view);
     if(! List_truth(inner)) return 0;
     element = List_car(inner);
   }
-  return _key_equal(plan, element, key -> inner);
+  return f9_execution____key_equal(plan, element, key -> inner);
 }
 
-static int _key_equal(MatchPlan plan, Var value, Var key){
+static int f9_execution____key_equal(MatchPlan plan, Var value, Var key){
   return plan -> key_bits ? value.u64 == key.u64 : Var_equal(value, key);
 }
 
@@ -720,13 +720,13 @@ static int _run_capture(MachineView view, MatchMachine * m, Var input, MatchCapt
   MatchMachine_begin(&((* m)), view, input);
   MatchMachine_run(&((* m)));
   int result = - 1;
-  if((* m).status == 982) result = _commit(view, &((* m)), captures);
+  if((* m).status == 982) result = f9_execution____commit(view, &((* m)), captures);
   else if((* m).status == 395864) result = 0;
   MatchMachine_finish(&((* m)));
   return result;
 }
 
-static int _commit(MachineView view, MatchMachine * m, MatchCaptureBuffer * captures){
+static int f9_execution____commit(MachineView view, MatchMachine * m, MatchCaptureBuffer * captures){
   Var values[MACHINE_BINDER_MAX];
   unsigned long present = 0;
   for(int i = 0;  i < view.binder_count;  i ++){
@@ -750,7 +750,7 @@ int MatchPlan_execute(MatchPlan plan, Var input, List * out_bindings, MachineSta
   if(! MatchPlan_admits(plan, input, NULL)) return 0;
   MatchMachine * machine = MatchMachine_acquire(stats);
   List bindings;
-  int result = _run(plan, &(* machine), input, &(bindings));
+  int result = f9_execution____run(plan, &(* machine), input, &(bindings));
   MatchMachine_release(machine);
   if(result == 1)(* out_bindings) = bindings;
   return result;
@@ -761,7 +761,7 @@ int MatchPlan_try_match(MatchPlan plan, List input, List * out_bindings){
   return MatchPlan_execute(plan, List_var(input), out_bindings, NULL);
 }
 
-static int _run(MatchPlan mm, MatchMachine * m, Var input, List * out){
+static int f9_execution____run(MatchPlan mm, MatchMachine * m, Var input, List * out){
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captures ={
     values, 0, MACHINE_BINDER_MAX
@@ -785,212 +785,13 @@ static List _publish_captures(MatchCaptureLayout layout, MatchCaptureBuffer * ca
   return bindings;
 }
 
-int MatchPlan_try_search(MatchPlan plan, List input, Var * out_match, List * out_bindings){
-  if(! _init_guard_) _file_init_();
-  if(! _prepared(plan, "MatchPlan.try_search") || ! out_match || ! out_bindings) return - 1;
-  return _first(plan, input, out_match, out_bindings);
-}
-
-static int _first(MatchPlan plan, List input, Var * out_match, List * out_bindings){
-  MatchMachine * machine = MatchMachine_acquire(NULL);
-  Var _x2c_gensym_macro_values_0[MACHINE_BINDER_MAX];
-  MatchCaptureBuffer _x2c_gensym_macro_captures_0 ={
-    _x2c_gensym_macro_values_0, 0, MACHINE_BINDER_MAX
-  }
-  ;
-  MatchWalk walk ={
-    plan, MachineProgram_view((plan) -> program), & _x2c_gensym_macro_captures_0, machine, Block_new(sizeof(Var))
-  }
-  ;
-  int result = _walk_first(&(walk), List_var(input), 1);
-  Block_free(walk.spine);
-  MatchMachine_release(machine);
-  if(result == 1){
-    (* out_match) = walk.found;
-    (* out_bindings) = walk.bindings;
-  }
-  return result;
-}
-
-int MatchPlan_search(MatchPlan plan, List input, List * out_results){
-  if(! _init_guard_) _file_init_();
-  if(! _prepared(plan, "MatchPlan.search") || ! out_results) return - 1;
-  return _all(plan, input, out_results);
-}
-
-static int _all(MatchPlan plan, List input, List * out_results){
-  MatchMachine * machine = MatchMachine_acquire(NULL);
-  Var _x2c_gensym_macro_values_1[MACHINE_BINDER_MAX];
-  MatchCaptureBuffer _x2c_gensym_macro_captures_1 ={
-    _x2c_gensym_macro_values_1, 0, MACHINE_BINDER_MAX
-  }
-  ;
-  MatchWalk walk ={
-    plan, MachineProgram_view((plan) -> program), & _x2c_gensym_macro_captures_1, machine, Block_new(sizeof(Var))
-  }
-  ;
-  int status = _walk_all(&(walk), List_var(input), 1);
-  Block_free(walk.spine);
-  MatchMachine_release(machine);
-  if(status < 0) return - 1;
-  (* out_results) = walk.results;
-  return 1;
-}
-
-int MatchPlan_search_replace(MatchPlan plan, List input, Var template, List * out){
-  if(! _init_guard_) _file_init_();
-  if(! _prepared(plan, "MatchPlan.search_replace") || ! out) return - 1;
-  return _replace_all(plan, input, template, out);
-}
-
-static int _replace_all(MatchPlan plan, List input, Var template, List * out){
-  MatchMachine * machine = MatchMachine_acquire(NULL);
-  Var _x2c_gensym_macro_values_2[MACHINE_BINDER_MAX];
-  MatchCaptureBuffer _x2c_gensym_macro_captures_2 ={
-    _x2c_gensym_macro_values_2, 0, MACHINE_BINDER_MAX
-  }
-  ;
-  MatchWalk walk ={
-    plan, MachineProgram_view((plan) -> program), & _x2c_gensym_macro_captures_2, machine, Block_new(sizeof(Var))
-  }
-  ;
-  walk.template = template;
-  Var result = _rewrite(&(walk), List_var(input), 1);
-  Block_free(walk.spine);
-  MatchMachine_release(machine);
-  if(walk.error) return - 1;
-  (* out) = Var_list_payload(result);
-  return 1;
-}
-
-static int _test(MatchWalk * m, Var node){
-  return MatchPlan_admits((* m).plan, node, NULL) ? _run_capture((* m).view, &(*(* m).m), node, (* m).captures) : 0;
-}
-
-static List _hit(MatchWalk * walk, Var node){
-  return cons(List_var(cons(_1, cons(node, NULL))), _publish_captures((* walk).plan -> layout, (* walk).captures));
-}
-
-static Var _spine_get(Block spine, size_t index){
-  return((Var *) spine -> bytes)[index];
-}
-
-static int _walk_all(MatchWalk * walk, Var input, int include_empty){
-  Block hits =(* walk).spine;
-  size_t base = hits -> length;
-  int visit_tail = 1;
-  while(Var_is_row(input, 9, 7, 4)){
-    List lst = Var_list_payload(input);
-    if(! List_truth(lst)){
-      visit_tail = include_empty;
-      break;
-    }
-    if(_walk_all(&((* walk)), List_car(lst), 1) < 0) return - 1;
-    int status = _test(&((* walk)), input);
-    if(status < 0) return - 1;
-    if(status == 1){
-      Var hit = List_var(_hit(&((* walk)), input));
-      Block_push(hits, & hit);
-    }
-    input = List_var(List_cdr(lst));
-    include_empty = 0;
-  }
-  if(visit_tail){
-    int status = _test(&((* walk)), input);
-    if(status < 0) return - 1;
-    if(status == 1)(* walk).results = cons(List_var(_hit(&((* walk)), input)), (* walk).results);
-  }
-  _answer(&((* walk)), base);
-  return 0;
-}
-
-static void _answer(MatchWalk * walk, size_t base){
-  Block hits =(* walk).spine;
-  for(size_t i = hits -> length;  i > base;  i --)(* walk).results = cons(_spine_get(hits, i - 1), (* walk).results);
-  Block_truncate(hits, base);
-}
-
-static int _walk_first(MatchWalk * walk, Var input, int include_empty){
-  Var last_cell =((void) 0, Void);
-  int have_cell = 0, visit_tail = 1;
-  while(Var_is_row(input, 9, 7, 4)){
-    List lst = Var_list_payload(input);
-    if(! List_truth(lst)){
-      visit_tail = include_empty;
-      break;
-    }
-    int found = _walk_first(&((* walk)), List_car(lst), 1);
-    if(found) return found;
-    int status = _test(&((* walk)), input);
-    if(status < 0) return - 1;
-    if(status == 1){
-      last_cell = input;
-      have_cell = 1;
-    }
-    input = List_var(List_cdr(lst));
-    include_empty = 0;
-  }
-  if(visit_tail){
-    int status = _settle(&((* walk)), input);
-    if(status) return status;
-  }
-  return have_cell ? _settle(&((* walk)), last_cell) : 0;
-}
-
-static int _settle(MatchWalk * walk, Var node){
-  int status = _test(&((* walk)), node);
-  if(status != 1) return status;
-  (* walk).found = node;
-  (* walk).bindings = _publish_captures((* walk).plan -> layout, (* walk).captures);
-  return 1;
-}
-
-static Var _rewrite(MatchWalk * walk, Var node, int include_empty){
-  Block heads =(* walk).spine;
-  size_t base = heads -> length;
-  int visit_tail = 1;
-  while(Var_is_row(node, 9, 7, 4)){
-    List lst = Var_list_payload(node);
-    if(! List_truth(lst)){
-      visit_tail = include_empty;
-      break;
-    }
-    Var head = _rewrite(&((* walk)), List_car(lst), 1);
-    if((* walk).error) return node;
-    Block_push(heads, & head);
-    node = List_var(List_cdr(lst));
-    include_empty = 0;
-  }
-  if(visit_tail) node = _replace_node(&((* walk)), node);
-  for(size_t i = heads -> length;  i > base && !(* walk).error;  i --){
-    List tail = Var_list_payload(node);
-    node = _replace_node(&((* walk)), List_var(cons(_spine_get(heads, i - 1), tail)));
-  }
-  Block_truncate(heads, base);
-  return node;
-}
-
-static Var _replace_node(MatchWalk * walk, Var node){
-  int status = _test(&((* walk)), node);
-  if(status < 0){
-    (* walk).error = 1;
-    return node;
-  }
-  if(status == 0) return node;
-  ReplacementSource source ={
-    (* walk).plan -> layout, (* walk).captures, NULL
-  }
-  ;
-  return _replace((* walk).template, &(source));
-}
-
 int MatchPlan_try_match_replace(MatchPlan plan, List input, Var template, Var * out){
   if(! _init_guard_) _file_init_();
   if(! _prepared(plan, "MatchPlan.try_match_replace") || ! out) return - 1;
-  return _replace_match(plan, input, template, out);
+  return f9_templates____replace_match(plan, input, template, out);
 }
 
-static int _replace_match(MatchPlan plan, List input, Var template, Var * out){
+static int f9_templates____replace_match(MatchPlan plan, List input, Var template, Var * out){
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captures ={
     values, 0, MACHINE_BINDER_MAX
@@ -1006,13 +807,13 @@ static int _replace_match(MatchPlan plan, List input, Var template, Var * out){
   return 1;
 }
 
-static Var _value(ReplacementSource * source, Var binder){
-  if((* source).captures) return _captured((* source).layout, (* source).captures, binder);
+static Var f9_templates____value(ReplacementSource * source, Var binder){
+  if((* source).captures) return f9_templates____captured((* source).layout, (* source).captures, binder);
   Var bound = List_assoc((* source).bindings, binder);
   return Var_is_void(bound) ? binder : bound;
 }
 
-static Var _captured(MatchCaptureLayout layout, MatchCaptureBuffer * captures, Var binder){
+static Var f9_templates____captured(MatchCaptureLayout layout, MatchCaptureBuffer * captures, Var binder){
   int index = MatchCaptureLayout_index(layout, binder);
   if(index < 0 || ! _capture_bit(captures -> present, index)) return binder;
   return captures -> values[index];
@@ -1030,12 +831,12 @@ List List_replace(List template, List bindings){
 }
 
 static Var _replace(Var input, ReplacementSource * source){
-  if(_named_binder(input)) return _value(&((* source)), input);
+  if(_named_binder(input)) return f9_templates____value(&((* source)), input);
   if(! Var_is_row(input, 9, 7, 4)) return input;
   List list = Var_list_payload(input);
   if(! List_truth(list)) return input;
   if(x2c_var_equal(List_car(list), Symbol_var(2050325770))) return List_cadr(list);
-  Block spine = Block_new(sizeof(ReplacementCell));
+  Block spine = Block_new(sizeof(f9_templates___ReplacementCell));
   const Block _x2c_gensym_macro_acquired_1 = spine;
   {
     _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
@@ -1056,14 +857,14 @@ static Var _replace(Var input, ReplacementSource * source){
           tail = List_cadr(list);
           break;
         }
-        ReplacementCell row ={
+        f9_templates___ReplacementCell row ={
           _replace(head, &((* source))), Var_is_list_binder(head) && ! x2c_var_equal(head, Symbol_var(54)) && ! x2c_var_equal(head, Symbol_var(58))
         }
         ;
         Block_push(spine, & row);
       }
       for(size_t i = spine -> length;  i > 0;  i --){
-        ReplacementCell row =((ReplacementCell *) spine -> bytes)[i - 1];
+        f9_templates___ReplacementCell row =((f9_templates___ReplacementCell *) spine -> bytes)[i - 1];
         Var head = row.value;
         if(row.splice && Var_is_row(head, 9, 7, 4)) tail = List_var(({
           List _x2c_gensym_literal_part_4 = Var_list_payload(head);  List _x2c_gensym_literal_part_5 = Var_list_payload(tail);  List_append(_x2c_gensym_literal_part_4, List_append(_x2c_gensym_literal_part_5, NULL));
@@ -1089,12 +890,211 @@ static Var _replace(Var input, ReplacementSource * source){
 
 }
 
-static int _pattern_borrowable(Var value, int depth, int permanent_lists){
+int MatchPlan_try_search(MatchPlan plan, List input, Var * out_match, List * out_bindings){
+  if(! _init_guard_) _file_init_();
+  if(! _prepared(plan, "MatchPlan.try_search") || ! out_match || ! out_bindings) return - 1;
+  return f9_traversal____first(plan, input, out_match, out_bindings);
+}
+
+static int f9_traversal____first(MatchPlan plan, List input, Var * out_match, List * out_bindings){
+  MatchMachine * machine = MatchMachine_acquire(NULL);
+  Var _x2c_gensym_macro_values_0[MACHINE_BINDER_MAX];
+  MatchCaptureBuffer _x2c_gensym_macro_captures_0 ={
+    _x2c_gensym_macro_values_0, 0, MACHINE_BINDER_MAX
+  }
+  ;
+  f9_traversal___MatchWalk walk ={
+    plan, MachineProgram_view((plan) -> program), & _x2c_gensym_macro_captures_0, machine, Block_new(sizeof(Var))
+  }
+  ;
+  int result = f9_traversal____walk_first(&(walk), List_var(input), 1);
+  Block_free(walk.spine);
+  MatchMachine_release(machine);
+  if(result == 1){
+    (* out_match) = walk.found;
+    (* out_bindings) = walk.bindings;
+  }
+  return result;
+}
+
+int MatchPlan_search(MatchPlan plan, List input, List * out_results){
+  if(! _init_guard_) _file_init_();
+  if(! _prepared(plan, "MatchPlan.search") || ! out_results) return - 1;
+  return f9_traversal____all(plan, input, out_results);
+}
+
+static int f9_traversal____all(MatchPlan plan, List input, List * out_results){
+  MatchMachine * machine = MatchMachine_acquire(NULL);
+  Var _x2c_gensym_macro_values_1[MACHINE_BINDER_MAX];
+  MatchCaptureBuffer _x2c_gensym_macro_captures_1 ={
+    _x2c_gensym_macro_values_1, 0, MACHINE_BINDER_MAX
+  }
+  ;
+  f9_traversal___MatchWalk walk ={
+    plan, MachineProgram_view((plan) -> program), & _x2c_gensym_macro_captures_1, machine, Block_new(sizeof(Var))
+  }
+  ;
+  int status = f9_traversal____walk_all(&(walk), List_var(input), 1);
+  Block_free(walk.spine);
+  MatchMachine_release(machine);
+  if(status < 0) return - 1;
+  (* out_results) = walk.results;
+  return 1;
+}
+
+int MatchPlan_search_replace(MatchPlan plan, List input, Var template, List * out){
+  if(! _init_guard_) _file_init_();
+  if(! _prepared(plan, "MatchPlan.search_replace") || ! out) return - 1;
+  return f9_traversal____replace_all(plan, input, template, out);
+}
+
+static int f9_traversal____replace_all(MatchPlan plan, List input, Var template, List * out){
+  MatchMachine * machine = MatchMachine_acquire(NULL);
+  Var _x2c_gensym_macro_values_2[MACHINE_BINDER_MAX];
+  MatchCaptureBuffer _x2c_gensym_macro_captures_2 ={
+    _x2c_gensym_macro_values_2, 0, MACHINE_BINDER_MAX
+  }
+  ;
+  f9_traversal___MatchWalk walk ={
+    plan, MachineProgram_view((plan) -> program), & _x2c_gensym_macro_captures_2, machine, Block_new(sizeof(Var))
+  }
+  ;
+  walk.template = template;
+  Var result = f9_traversal____rewrite(&(walk), List_var(input), 1);
+  Block_free(walk.spine);
+  MatchMachine_release(machine);
+  if(walk.error) return - 1;
+  (* out) = Var_list_payload(result);
+  return 1;
+}
+
+static int f9_traversal____test(f9_traversal___MatchWalk * m, Var node){
+  return MatchPlan_admits((* m).plan, node, NULL) ? _run_capture((* m).view, &(*(* m).m), node, (* m).captures) : 0;
+}
+
+static List f9_traversal____hit(f9_traversal___MatchWalk * walk, Var node){
+  return cons(List_var(cons(_1, cons(node, NULL))), _publish_captures((* walk).plan -> layout, (* walk).captures));
+}
+
+static Var f9_traversal____spine_get(Block spine, size_t index){
+  return((Var *) spine -> bytes)[index];
+}
+
+static int f9_traversal____walk_all(f9_traversal___MatchWalk * walk, Var input, int include_empty){
+  Block hits =(* walk).spine;
+  size_t base = hits -> length;
+  int visit_tail = 1;
+  while(Var_is_row(input, 9, 7, 4)){
+    List lst = Var_list_payload(input);
+    if(! List_truth(lst)){
+      visit_tail = include_empty;
+      break;
+    }
+    if(f9_traversal____walk_all(&((* walk)), List_car(lst), 1) < 0) return - 1;
+    int status = f9_traversal____test(&((* walk)), input);
+    if(status < 0) return - 1;
+    if(status == 1){
+      Var hit = List_var(f9_traversal____hit(&((* walk)), input));
+      Block_push(hits, & hit);
+    }
+    input = List_var(List_cdr(lst));
+    include_empty = 0;
+  }
+  if(visit_tail){
+    int status = f9_traversal____test(&((* walk)), input);
+    if(status < 0) return - 1;
+    if(status == 1)(* walk).results = cons(List_var(f9_traversal____hit(&((* walk)), input)), (* walk).results);
+  }
+  f9_traversal____answer(&((* walk)), base);
+  return 0;
+}
+
+static void f9_traversal____answer(f9_traversal___MatchWalk * walk, size_t base){
+  Block hits =(* walk).spine;
+  for(size_t i = hits -> length;  i > base;  i --)(* walk).results = cons(f9_traversal____spine_get(hits, i - 1), (* walk).results);
+  Block_truncate(hits, base);
+}
+
+static int f9_traversal____walk_first(f9_traversal___MatchWalk * walk, Var input, int include_empty){
+  Var last_cell =((void) 0, Void);
+  int have_cell = 0, visit_tail = 1;
+  while(Var_is_row(input, 9, 7, 4)){
+    List lst = Var_list_payload(input);
+    if(! List_truth(lst)){
+      visit_tail = include_empty;
+      break;
+    }
+    int found = f9_traversal____walk_first(&((* walk)), List_car(lst), 1);
+    if(found) return found;
+    int status = f9_traversal____test(&((* walk)), input);
+    if(status < 0) return - 1;
+    if(status == 1){
+      last_cell = input;
+      have_cell = 1;
+    }
+    input = List_var(List_cdr(lst));
+    include_empty = 0;
+  }
+  if(visit_tail){
+    int status = f9_traversal____settle(&((* walk)), input);
+    if(status) return status;
+  }
+  return have_cell ? f9_traversal____settle(&((* walk)), last_cell) : 0;
+}
+
+static int f9_traversal____settle(f9_traversal___MatchWalk * walk, Var node){
+  int status = f9_traversal____test(&((* walk)), node);
+  if(status != 1) return status;
+  (* walk).found = node;
+  (* walk).bindings = _publish_captures((* walk).plan -> layout, (* walk).captures);
+  return 1;
+}
+
+static Var f9_traversal____rewrite(f9_traversal___MatchWalk * walk, Var node, int include_empty){
+  Block heads =(* walk).spine;
+  size_t base = heads -> length;
+  int visit_tail = 1;
+  while(Var_is_row(node, 9, 7, 4)){
+    List lst = Var_list_payload(node);
+    if(! List_truth(lst)){
+      visit_tail = include_empty;
+      break;
+    }
+    Var head = f9_traversal____rewrite(&((* walk)), List_car(lst), 1);
+    if((* walk).error) return node;
+    Block_push(heads, & head);
+    node = List_var(List_cdr(lst));
+    include_empty = 0;
+  }
+  if(visit_tail) node = f9_traversal____replace_node(&((* walk)), node);
+  for(size_t i = heads -> length;  i > base && !(* walk).error;  i --){
+    List tail = Var_list_payload(node);
+    node = f9_traversal____replace_node(&((* walk)), List_var(cons(f9_traversal____spine_get(heads, i - 1), tail)));
+  }
+  Block_truncate(heads, base);
+  return node;
+}
+
+static Var f9_traversal____replace_node(f9_traversal___MatchWalk * walk, Var node){
+  int status = f9_traversal____test(&((* walk)), node);
+  if(status < 0){
+    (* walk).error = 1;
+    return node;
+  }
+  if(status == 0) return node;
+  ReplacementSource source ={
+    (* walk).plan -> layout, (* walk).captures, NULL
+  }
+  ;
+  return _replace((* walk).template, &(source));
+}
+
+static int f5_sites____pattern_borrowable(Var value, int depth, int permanent_lists){
   if(depth >= 128) return 0;
   switch(Var_kind(value)){
     case 1328354264 : return 1;
     case 35386204516 : case 39939274535114 : return 0;
-    case 1011493096 : return _object_borrowable(value, depth, permanent_lists);
+    case 1011493096 : return f5_sites____object_borrowable(value, depth, permanent_lists);
   }
   return ! Var_is(value, 818062) && ! Var_is(value, 44858254) && ! Var_is(value, 25983886) && ! Var_is(value, 1435270030) && ! Var_is(value, 26071077642);
 }
@@ -1103,7 +1103,7 @@ int String_is_permanent(String);
 
 String Var_as_string(Var);
 
-static int _object_borrowable(Var value, int depth, int permanent_lists){
+static int f5_sites____object_borrowable(Var value, int depth, int permanent_lists){
   if(Var_is(value, 826970)) return String_is_permanent((String) Var_pointer(value));
   if(Var_is_row(value, 11, 7, 1)) return String_is_permanent(Var_as_string(value));
   if(! Var_is_row(value, 9, 7, 4)) return 0;
@@ -1116,7 +1116,7 @@ static int _object_borrowable(Var value, int depth, int permanent_lists){
     Var _x2c_gensym_macro_cursor_output_2;
     while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
       part = _x2c_gensym_macro_cursor_output_2;
-      if(! _pattern_borrowable(part, depth + 1, permanent_lists)) return 0;
+      if(! f5_sites____pattern_borrowable(part, depth + 1, permanent_lists)) return 0;
     }
 
   }
@@ -1125,7 +1125,7 @@ static int _object_borrowable(Var value, int depth, int permanent_lists){
 
 int MatchPlan_borrowable(Var pattern, int permanent_lists){
   if(! _init_guard_) _file_init_();
-  return _pattern_borrowable(pattern, 0, permanent_lists);
+  return f5_sites____pattern_borrowable(pattern, 0, permanent_lists);
 }
 
 int x2c_match_try_capture(List input, Var pattern, MatchCaptureBuffer * captures);
@@ -1133,22 +1133,22 @@ int x2c_match_try_capture(List input, Var pattern, MatchCaptureBuffer * captures
 int x2c_match_site_try_capture(MatchCaptureSite * site, List input, Var pattern, MatchCaptureBuffer * captures){
   if(! _init_guard_) _file_init_();
   if(! captures) return 0;
-  MatchPlan plan = _published(site, pattern);
+  MatchPlan plan = f5_sites____published(site, pattern);
   if(! plan) return x2c_match_try_capture(input, pattern, captures);
   if(plan -> status == 28682226919752) return 0;
   return _prepared(plan, "match") && _buffer_valid(plan -> layout, captures) && _capture(plan, List_var(input), captures, NULL) == 1;
 }
 
-static MatchPlan _published(MatchCaptureSite * site, Var pattern){
+static MatchPlan f5_sites____published(MatchCaptureSite * site, Var pattern){
   if(! site) return NULL;
   MatchPlan plan = __atomic_load_n(& site -> plan, __ATOMIC_ACQUIRE);
   if(plan) return plan;
   if(__atomic_load_n(& site -> refused, __ATOMIC_ACQUIRE)) return NULL;
-  return _publish_plan(site, pattern);
+  return f5_sites____publish_plan(site, pattern);
 }
 
-static MatchPlan _publish_plan(MatchCaptureSite * m, Var pattern){
-  _site_lock();
+static MatchPlan f5_sites____publish_plan(MatchCaptureSite * m, Var pattern){
+  f5_sites____site_lock();
   {
     X2CCleanup _x2c_gensym_defer_record_2 ={
       .fn = _x2c_gensym_defer_cleanup_2, .env = 0
@@ -1156,7 +1156,7 @@ static MatchPlan _publish_plan(MatchCaptureSite * m, Var pattern){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_2);
     {
-      if(! m -> plan) _prepare(m, pattern);
+      if(! m -> plan) f5_sites____prepare(m, pattern);
       {
         MatchPlan _x2c_gensym_return_value_2 = m -> plan;
         {
@@ -1172,15 +1172,15 @@ static MatchPlan _publish_plan(MatchCaptureSite * m, Var pattern){
 
 }
 
-static void _prepare(MatchCaptureSite * site, Var pattern){
+static void f5_sites____prepare(MatchCaptureSite * site, Var pattern){
   if(! MatchPlan_borrowable(pattern, 1)){
     __atomic_store_n(& site -> refused, 1, __ATOMIC_RELEASE);
     return;
   }
-  _sites_initialize();
+  f5_sites____sites_initialize();
   MatchPlan plan = NULL;
   {
-    Scope_push(& match_capture_site_scope);
+    Scope_push(& f5_sites___match_capture_site_scope);
     {
       {
         X2CCleanup _x2c_gensym_defer_record_3 ={
@@ -1191,7 +1191,7 @@ static void _prepare(MatchCaptureSite * site, Var pattern){
         {
           {
             plan = MatchPlan_prepare(pattern);
-            Block_push(match_capture_sites, & site);
+            Block_push(f5_sites___match_capture_sites, & site);
           }
 
         }
@@ -1207,11 +1207,11 @@ static void _prepare(MatchCaptureSite * site, Var pattern){
 
 void x2c_match_initialize(void);
 
-static void _sites_initialize(void){
-  if(match_capture_site_scope) return;
-  match_capture_site_scope = Scope_new_named("Match source-site plans");
+static void f5_sites____sites_initialize(void){
+  if(f5_sites___match_capture_site_scope) return;
+  f5_sites___match_capture_site_scope = Scope_new_named("Match source-site plans");
   {
-    Scope_push(& match_capture_site_scope);
+    Scope_push(& f5_sites___match_capture_site_scope);
     {
       {
         X2CCleanup _x2c_gensym_defer_record_4 ={
@@ -1221,7 +1221,7 @@ static void _sites_initialize(void){
         x2c_cleanup_push(& _x2c_gensym_defer_record_4);
         {
           {
-            match_capture_sites = Block_new(sizeof(MatchCaptureSite *));
+            f5_sites___match_capture_sites = Block_new(sizeof(MatchCaptureSite *));
           }
 
         }
@@ -1234,15 +1234,15 @@ static void _sites_initialize(void){
   x2c_match_initialize();
 }
 
-static void _site_lock(void){
-  _thread_check(pthread_mutex_lock(& match_site_mutex), "lock source site");
+static void f5_sites____site_lock(void){
+  f5_sites____thread_check(pthread_mutex_lock(& f5_sites___match_site_mutex), "lock source site");
 }
 
-static void _site_unlock(void){
-  _thread_check(pthread_mutex_unlock(& match_site_mutex), "unlock source site");
+static void f5_sites____site_unlock(void){
+  f5_sites____thread_check(pthread_mutex_unlock(& f5_sites___match_site_mutex), "unlock source site");
 }
 
-static void _thread_check(int status, const char * action){
+static void f5_sites____thread_check(int status, const char * action){
   if(! status) return;
   fprintf(stderr, "Match: could not %s\n", action);
   abort();
@@ -1255,11 +1255,11 @@ int x2c_match_pattern_retainable(Var pattern){
 
 MatchPlan x2c_match_site_prepare(MatchCaptureSite * site, Var pattern){
   if(! _init_guard_) _file_init_();
-  return _published(site, pattern);
+  return f5_sites____published(site, pattern);
 }
 
-static MatchPlan _plan(MatchCaptureSite * site, Var pattern){
-  MatchPlan plan = _published(site, pattern);
+static MatchPlan f5_sites____plan(MatchCaptureSite * site, Var pattern){
+  MatchPlan plan = f5_sites____published(site, pattern);
   return plan && plan -> status != 664475009618698 ? plan : NULL;
 }
 
@@ -1267,7 +1267,7 @@ int List_try_match(List input, Var pat, List * out_bindings);
 
 int x2c_match_site_try_match(MatchCaptureSite * site, List input, Var pat, List * out_bindings){
   if(! _init_guard_) _file_init_();
-  MatchPlan plan = _plan(site, pat);
+  MatchPlan plan = f5_sites____plan(site, pat);
   if(! plan) return List_try_match(input, pat, &(* out_bindings));
   if(! out_bindings) return 0;
   return MatchPlan_try_match(plan, input, &(* out_bindings)) == 1;
@@ -1284,7 +1284,7 @@ int List_try_search(List input, Var pat, Var * out_match, List * out_bindings);
 
 int x2c_match_site_try_search(MatchCaptureSite * site, List input, Var pat, Var * out_match, List * out_bindings){
   if(! _init_guard_) _file_init_();
-  MatchPlan plan = _plan(site, pat);
+  MatchPlan plan = f5_sites____plan(site, pat);
   if(! plan) return List_try_search(input, pat, &(* out_match), &(* out_bindings));
   if(! out_match || ! out_bindings) return 0;
   return MatchPlan_try_search(plan, input, &(* out_match), &(* out_bindings)) == 1;
@@ -1294,7 +1294,7 @@ List List_search(List input, Var pat);
 
 List x2c_match_site_search(MatchCaptureSite * site, List input, Var pat){
   if(! _init_guard_) _file_init_();
-  MatchPlan plan = _plan(site, pat);
+  MatchPlan plan = f5_sites____plan(site, pat);
   if(! plan) return List_search(input, pat);
   List results = NULL;
   MatchPlan_search(plan, input, &(results));
@@ -1305,7 +1305,7 @@ int List_try_match_replace(List input, Var pat, Var template, Var * out);
 
 int x2c_match_site_try_match_replace(MatchCaptureSite * site, List input, Var pat, Var template, Var * out){
   if(! _init_guard_) _file_init_();
-  MatchPlan plan = _plan(site, pat);
+  MatchPlan plan = f5_sites____plan(site, pat);
   if(! plan) return List_try_match_replace(input, pat, template, &(* out));
   if(! out) return 0;
   return MatchPlan_try_match_replace(plan, input, template, &(* out)) == 1;
@@ -1322,11 +1322,40 @@ List List_search_replace(List input, Var pat, Var template);
 
 List x2c_match_site_search_replace(MatchCaptureSite * site, List input, Var pat, Var template){
   if(! _init_guard_) _file_init_();
-  MatchPlan plan = _plan(site, pat);
+  MatchPlan plan = f5_sites____plan(site, pat);
   if(! plan) return List_search_replace(input, pat, template);
   List result = input;
   MatchPlan_search_replace(plan, input, template, &(result));
   return result;
+}
+
+void x2c_match_initialize(void){
+  if(! _init_guard_) _file_init_();
+  int status = pthread_once(& f5_sites___match_shutdown_once, f5_sites____register_shutdown_once);
+  f5_sites____thread_check(status, "register shutdown");
+}
+
+static void f5_sites____register_shutdown_once(void){
+  Scope_shutdown_hook(f5_sites____shutdown);
+}
+
+static void f5_sites____shutdown(void){
+  x2c_match_thread_release();
+  f5_sites____sites_shutdown();
+}
+
+static void f5_sites____sites_shutdown(void){
+  if(! f5_sites___match_capture_site_scope) return;
+  MatchCaptureSite * * sites = f5_sites___match_capture_sites != NULL ? f5_sites___match_capture_sites -> bytes : NULL;
+  for(size_t i = 0;  i < f5_sites___match_capture_sites -> length;  i ++){
+    MatchCaptureSite * site = sites[i];
+    if(! site || ! site -> plan) continue;
+    MatchPlan_free(site -> plan);
+    site -> plan = NULL;
+  }
+  if(f5_sites___match_capture_sites != NULL) Block_free(f5_sites___match_capture_sites);
+  Scope_destroy(f5_sites___match_capture_site_scope);
+  f5_sites___match_capture_site_scope = NULL;
 }
 
 int x2c_match_try_capture(List input, Var pattern, MatchCaptureBuffer * captures){
@@ -1378,35 +1407,6 @@ List List_search_replace(List input, Var pat, Var template){
   return result;
 }
 
-void x2c_match_initialize(void){
-  if(! _init_guard_) _file_init_();
-  int status = pthread_once(& match_shutdown_once, _register_shutdown_once);
-  _thread_check(status, "register shutdown");
-}
-
-static void _register_shutdown_once(void){
-  Scope_shutdown_hook(_shutdown);
-}
-
-static void _shutdown(void){
-  x2c_match_thread_release();
-  _sites_shutdown();
-}
-
-static void _sites_shutdown(void){
-  if(! match_capture_site_scope) return;
-  MatchCaptureSite * * sites = match_capture_sites != NULL ? match_capture_sites -> bytes : NULL;
-  for(size_t i = 0;  i < match_capture_sites -> length;  i ++){
-    MatchCaptureSite * site = sites[i];
-    if(! site || ! site -> plan) continue;
-    MatchPlan_free(site -> plan);
-    site -> plan = NULL;
-  }
-  if(match_capture_sites != NULL) Block_free(match_capture_sites);
-  Scope_destroy(match_capture_site_scope);
-  match_capture_site_scope = NULL;
-}
-
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
   _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
   Block_cleanup((*(const Block *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
@@ -1418,7 +1418,7 @@ static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
 }
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
-  _site_unlock();
+  f5_sites____site_unlock();
 }
 
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){

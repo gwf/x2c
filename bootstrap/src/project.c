@@ -15,7 +15,7 @@
 #define __GUARD_0x05ED52D8__
 #include "x2c.h"
 
-#include "build.h"
+#include "cli.h"
 typedef struct ProjectBuild{
   CliRequest request;
   struct ProjectBuild * next;
@@ -670,8 +670,6 @@ static List * _target_list(ProjectTarget target, String key){
   return NULL;
 }
 
-Symbol TargetKind_named(String, String *);
-
 static void _set_kind(Project p, ProjectTarget target, int line, String value){
   String kind = _string_value(p, line, value), refusal = NULL;
   target -> kind = TargetKind_named(kind, &(refusal));
@@ -929,8 +927,6 @@ static void _set_product(Project p, ProjectTarget target, CliRequest request){
   request -> temps_dir = NULL;
 }
 
-TargetKind * TargetKind_of(Symbol);
-
 static String _target_output(Project p, ProjectTarget target, Symbol kind){
   if(String_truth(target -> output)) return Path_join(p -> root, target -> output);
   TargetKind * row = TargetKind_of(kind);
@@ -1133,8 +1129,6 @@ static List _profile_flags(Project p, ProjectProfile profile){
   }
   );
 }
-
-int CliRequest_dependency_option(String);
 
 static List _c_flags(Project p, List values){
   {

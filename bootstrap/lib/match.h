@@ -101,15 +101,15 @@ int MatchPlan_execute(MatchPlan plan, Var input, List * out_bindings, MachineSta
 
 int MatchPlan_try_match(MatchPlan plan, List input, List * out_bindings);
 
+int MatchPlan_try_match_replace(MatchPlan plan, List input, Var template, Var * out);
+
+List List_replace(List template, List bindings);
+
 int MatchPlan_try_search(MatchPlan plan, List input, Var * out_match, List * out_bindings);
 
 int MatchPlan_search(MatchPlan plan, List input, List * out_results);
 
 int MatchPlan_search_replace(MatchPlan plan, List input, Var template, List * out);
-
-int MatchPlan_try_match_replace(MatchPlan plan, List input, Var template, Var * out);
-
-List List_replace(List template, List bindings);
 
 int MatchPlan_borrowable(Var pattern, int permanent_lists);
 
@@ -133,6 +133,8 @@ List x2c_match_site_match_replace(MatchCaptureSite * site, List input, Var pat, 
 
 List x2c_match_site_search_replace(MatchCaptureSite * site, List input, Var pat, Var template);
 
+void x2c_match_initialize(void);
+
 int x2c_match_try_capture(List input, Var pattern, MatchCaptureBuffer * captures);
 
 int List_try_match(List input, Var pat, List * out_bindings);
@@ -148,8 +150,6 @@ List List_search(List input, Var pat);
 int List_try_search(List input, Var pat, Var * out_match, List * out_bindings);
 
 List List_search_replace(List input, Var pat, Var template);
-
-void x2c_match_initialize(void);
 
 
 #endif /* __GUARD_0x6A4A1365__ */

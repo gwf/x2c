@@ -16,9 +16,8 @@
 #include "digest.h"
 #include "deps.h"
 #include "meta-helper-client.h"
-#include "script.h"
-#include "toolchain.h"
 #include "utils.h"
+#include "toolchain.h"
 #include <unistd.h>
 typedef struct Helper{
   Frontend frontend;

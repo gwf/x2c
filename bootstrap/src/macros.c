@@ -88,9 +88,8 @@
 #include "regions.h"
 #include "statements.h"
 #include "digest.h"
-#include "script.h"
-#include "toolchain.h"
 #include "utils.h"
+#include "toolchain.h"
 #include <dlfcn.h>
 #include <unistd.h>
 #include <errno.h>

@@ -38,10 +38,9 @@
 #include "type.h"
 #include "generate.h"
 #include "macros.h"
-#include "script.h"
+#include "utils.h"
 #include "toolchain.h"
 #include "transform.h"
-#include "utils.h"
 #include <unistd.h>
 static String meta_cc, meta_include_dir;
 
@@ -322,7 +321,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _62 = List_var(NULL);
   _63 = Symbol_var(39266);
   _64 = Symbol_var(106239471489226);
-  _65 = int_var(178);
+  _65 = int_var(177);
   _66 = String_new("");
   _67 = String_var(_66);
   _68 = String_new("x2c.hole");
@@ -436,7 +435,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _176 = cons(_147, _175);
   _177 = cons(_141, _176);
   _178 = List_var(_177);
-  _179 = int_var(181);
+  _179 = int_var(180);
   _180 = String_new("Array");
   _181 = String_var(_180);
   _182 = cons(_181, NULL);
@@ -3560,7 +3559,7 @@ static String _build_module(String directory, String module, List code){
   );  Path_make_dirs(directory);  Path_write_text(String_join(NULL, cons(String_var(directory), cons(String_var(_1378), cons(String_var(hfile), NULL)))), header);  Path_write_text(String_join(NULL, cons(String_var(directory), cons(String_var(_1378), cons(String_var(cfile), NULL)))), source);  Toolchain linker = Toolchain_for_meta(meta_cc);  List arguments = Toolchain_module_action(linker, output, ({
     Var _x2c_gensym_literal_part_187 = String_var(directory);  Var _x2c_gensym_literal_part_188 = String_var(meta_include_dir);  Var _x2c_gensym_literal_part_189 = String_var(String_join(NULL, cons(String_var(directory), cons(String_var(_1378), cons(String_var(cfile), NULL)))));  cons(_1391, cons(_1393, cons(_1395, cons(_1397, cons(_x2c_gensym_literal_part_187, cons(_1397, cons(_x2c_gensym_literal_part_188, cons(_x2c_gensym_literal_part_189, NULL))))))));
   }
-  )) -> arguments;  String failure = Compiler_meta_cc_run(arguments, directory);  if(! String_truth(failure)) Path_move_to(output, module);  return failure;
+  ), x2c_get_executable()) -> arguments;  String failure = Compiler_meta_cc_run(arguments, directory);  if(! String_truth(failure)) Path_move_to(output, module);  return failure;
 }
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){

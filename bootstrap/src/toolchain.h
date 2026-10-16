@@ -56,7 +56,7 @@ ToolAction Toolchain_archive_action(Toolchain t, String output, List objects);
 
 ToolAction Toolchain_link_action(Toolchain t, String output, List inputs);
 
-ToolAction Toolchain_module_action(Toolchain t, String output, List inputs);
+ToolAction Toolchain_module_action(Toolchain t, String output, List inputs, String loader);
 
 int ToolAction_run(ToolAction action);
 

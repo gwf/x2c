@@ -61,7 +61,7 @@ static ToolAction _action(Toolchain t, Symbol phase, List arguments);
 
 static List _compile_arguments(Toolchain t, List gen_dirs);
 
-static List _module_shape(void);
+static List _module_shape(String loader);
 
 static int _capture(Job command, String program, String * output, String * errors);
 
@@ -350,7 +350,7 @@ static String _recorded_tool(String name){
 
 static void _layout(Toolchain t){
   String home = Compiler_home_dir(), stage = Compiler_stage_dir();
-  String executable = x2c_get_executable(), prefix = home;
+  String executable = Compiler_driver_executable(), prefix = home;
   if(! String_truth(prefix)) prefix = Path_dirname(String_truth(executable) ? Path_dirname(executable) : _7);
   t -> include_dir = String_join(NULL, cons(String_var(prefix), cons(String_var(_8), NULL)));
   t -> runtime_lib = String_join(NULL, cons(String_var(prefix), cons(String_var(_9), NULL)));
@@ -416,17 +416,17 @@ ToolAction Toolchain_link_action(Toolchain t, String output, List inputs){
   return _action(t, 805782, cons(String_var(t -> cc), List_append(inputs, List_append(t -> ld_args, cons(String_var(t -> runtime_lib), cons(_34, cons(_24, cons(String_var(output), NULL))))))));
 }
 
-ToolAction Toolchain_module_action(Toolchain t, String output, List inputs){
+ToolAction Toolchain_module_action(Toolchain t, String output, List inputs, String loader){
   if(! _init_guard_) _file_init_();
   return _action(t, 805782, ({
-    Var _x2c_gensym_literal_part_4 = String_var(t -> cc);  List _x2c_gensym_literal_part_5 = inputs;  List _x2c_gensym_literal_part_6 = t -> ld_args;  List _x2c_gensym_literal_part_7 = _module_shape();  cons(_x2c_gensym_literal_part_4, List_append(_x2c_gensym_literal_part_5, List_append(_x2c_gensym_literal_part_6, List_append(_x2c_gensym_literal_part_7, cons(_24, cons(String_var(output), NULL))))));
+    Var _x2c_gensym_literal_part_4 = String_var(t -> cc);  List _x2c_gensym_literal_part_5 = inputs;  List _x2c_gensym_literal_part_6 = t -> ld_args;  List _x2c_gensym_literal_part_7 = _module_shape(loader);  cons(_x2c_gensym_literal_part_4, List_append(_x2c_gensym_literal_part_5, List_append(_x2c_gensym_literal_part_6, List_append(_x2c_gensym_literal_part_7, cons(_24, cons(String_var(output), NULL))))));
   }
   ));
 }
 
-static List _module_shape(void){
+static List _module_shape(String loader){
 #ifdef __APPLE__
-  return cons(_36, cons(_38, cons(String_var(x2c_get_executable()), NULL)));
+  return cons(_36, cons(_38, cons(String_var(loader), NULL)));
 #else
   return _44;
 #endif

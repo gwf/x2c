@@ -17,10 +17,9 @@
 #include "type.h"
 #include "generate.h"
 #include "macros.h"
-#include "script.h"
+#include "utils.h"
 #include "toolchain.h"
 #include "transform.h"
-#include "utils.h"
 #include <unistd.h>
 void Compiler_use_meta_toolchain(String cc, String include_dir);
 
