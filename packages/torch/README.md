@@ -343,8 +343,8 @@ Scope.retain();
 ## Errors
 
 A failure inside libtorch raises `<bad-state>` with `(library "torch")`, the
-operation name, and the first line of libtorch's message; the full message
-stays available through `xt_last_error_full` in the raw API. Every entry
+operation name, and the first line of libtorch's text under `(message ...)`;
+the full text stays available through `xt_last_error_full` in the raw API. Every entry
 point in `torch-2.10.h` catches, so no C++ exception crosses the ABI: a
 function returning a handle returns NULL on failure, and one producing a
 scalar returns a status and writes its result through an out parameter.

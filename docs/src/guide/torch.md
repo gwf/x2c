@@ -321,8 +321,8 @@ reach.
 ## Errors
 
 A failure inside libtorch raises `<bad-state>` with `(library "torch")`,
-the operation name, and the first line of libtorch's message; the full
-message stays available through `xt_last_error_full` in the raw API.
+the operation name, and the first line of libtorch's text under
+`(message ...)`; the full text stays available through `xt_last_error_full` in the raw API.
 Every entry point in `torch-2.10.h` catches, so no C++ exception crosses
 the ABI. This arm in `examples/mlp.x` prints `caught matmul: mat1 and
 mat2 shapes cannot be multiplied (3x5 and 4x8)`.
@@ -332,8 +332,8 @@ mat2 shapes cannot be multiplied (3x5 and 4x8)`.
 try { (void) _forward(model, Tensor.randn(%(3 5), XT_FLOAT32)); }
 catch %(bad-state (library "torch") *detail): {
   String operation = detail.assoc(<operation>).string();
-  String reason = detail.assoc(<reason>).string();
-  printf("%s", %"caught $operation: $reason\n");
+  String message = detail.assoc(<message>).string();
+  printf("%s", %"caught $operation: $message\n");
 }
 ```
 

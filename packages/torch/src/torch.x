@@ -111,9 +111,9 @@ static void _inference_drop(void *ptr) {
 }
 
 static void _torch_failed(String operation) {
-  String reason = String.new(xt_last_error());
+  String message = String.new(xt_last_error());
   raise %(bad-state (library "torch") (operation $operation)
-          (reason $reason));
+          (message $message));
 }
 
 /* Each handle record owns one libtorch handle. `drop` releases it once,
