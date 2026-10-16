@@ -70,9 +70,9 @@ callable values lowered to C helpers.
 Public functions:
 
 `Compiler.capture_environment`, `Compiler.prepend_setup`,
-`Compiler.lift_func_expression`, `Compiler.maybe_adapt_func_arg`,
-`Compiler.context_func_adapter`, `Compiler.func_parameters`,
-`Compiler.func_signature`, `Compiler.lower_typed_adapter_expr`,
+`Compiler.maybe_adapt_func_arg`, `Compiler.context_func_adapter`,
+`Compiler.func_parameters`, `Compiler.func_signature`,
+`Compiler.lift_func_expression`, `Compiler.lower_typed_adapter_expr`,
 `Compiler.adapt_lambda_arg`
 
 ### [src/cleanup.x](../src/cleanup.x)
