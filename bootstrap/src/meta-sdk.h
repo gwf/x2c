@@ -26,6 +26,24 @@ MetaContext * MetaContext_current(void);
 
 Compiler Compiler_expanding(void);
 
+List MetaContext_invocation_location(void);
+
+String x2c_invocation_file(void);
+
+int x2c_invocation_line(void);
+
+int x2c_invocation_column(void);
+
+void x2c_diagnostic_fail(String message, List notes);
+
+void x2c_diagnostic_fail_at(Var node, Symbol category, String message, List notes);
+
+void x2c_diagnostic_error_at(Var node, Symbol category, String message, List notes);
+
+void x2c_diagnostic_warn(String message, List notes);
+
+_Noreturn void MetaContext_reject(String message, List notes);
+
 int Type_is_named(Type type, String name);
 
 Type Type_numeric(Type type);
@@ -43,6 +61,28 @@ Code Type_protocol_member(Type type, String name);
 Code Type_getter(Type type);
 
 String Type_update_helper(Type type);
+
+Type Type_element(Type t);
+
+List Type_parameters(Type type);
+
+Type Type_return_type(Type type);
+
+String Type_reverse_name(String base, String participant);
+
+Type Type_resolve(Type type);
+
+List Type_layout(Type type);
+
+int Type_is_value(Type type);
+
+Symbol Type_tag_name(String name);
+
+List Type_members(Type type);
+
+List Type_fields(Type t);
+
+List MetaContext_type_description(Var value);
 
 Type Code_type(Code value);
 
@@ -68,33 +108,9 @@ Var Code_pattern_value(Code pattern);
 
 Code Code_promoted(Code value);
 
-Code Code_register_rewrite(Code function, List pattern, List holes);
-
-Code Code_register_after_initialization(Code c, Macro shape, List holes);
-
 List Code_declared_bindings(List declaration);
 
 List MetaContext_function_reference(String name);
-
-Type Type_element(Type t);
-
-List Type_parameters(Type type);
-
-Type Type_return_type(Type type);
-
-String Type_reverse_name(String base, String participant);
-
-Type Type_resolve(Type type);
-
-List Type_layout(Type type);
-
-int Type_is_value(Type type);
-
-Symbol Type_tag_name(String name);
-
-List Type_members(Type type);
-
-List Type_fields(Type t);
 
 String Code_binding_spelling(Var syntax);
 
@@ -106,8 +122,6 @@ List x2c_binding_for(Var key, String role);
 
 Var MetaContext_fresh_binding(String stem);
 
-Map x2c_meta_definition_hashes(void);
-
 String Code_name(Code function);
 
 List Code_body(Code function);
@@ -118,39 +132,25 @@ Code Code_parameter(Code function, String wanted);
 
 List Code_native_signature(List syntax);
 
-List MetaContext_literal_list(List values);
+Code x2c_enclosing(Symbol what);
+
+void x2c_place(List where, Code code);
+
+List _x2c_complete_iterator(List expression);
+
+Code Code_register_rewrite(Code function, List pattern, List holes);
+
+Code Code_register_after_initialization(Code c, Macro shape, List holes);
 
 String Code_source_text(Var value);
 
 String x2c_embed_text(Var requested);
 
-List MetaContext_invocation_location(void);
-
-String x2c_invocation_file(void);
-
-int x2c_invocation_line(void);
-
-int x2c_invocation_column(void);
-
-void x2c_diagnostic_fail(String message, List notes);
-
-void x2c_diagnostic_fail_at(Var node, Symbol category, String message, List notes);
-
-void x2c_diagnostic_error_at(Var node, Symbol category, String message, List notes);
-
-void x2c_diagnostic_warn(String message, List notes);
-
-Code x2c_enclosing(Symbol what);
-
-void x2c_place(List where, Code code);
-
-List MetaContext_type_description(Var value);
-
 List MetaContext_source_description(Var value);
 
-List _x2c_complete_iterator(List expression);
+Map x2c_meta_definition_hashes(void);
 
-_Noreturn void MetaContext_reject(String message, List notes);
+List MetaContext_literal_list(List values);
 
 void Compiler_bind_sdk_primitives(Lisp lisp);
 
