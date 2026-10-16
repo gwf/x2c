@@ -51,8 +51,9 @@ static int _lower_bool_type(Sym sym, Type type) =>
 
 /* One lowering. `env` maps a binding id to the Lisp form that produces it;
    `locals` are the ids the function declares, so an id outside it is
-   file-scope state. `on_loop` records whether the current point is on a
-   loop's iteration path, where a binding form would cost frame reuse.
+   file-scope state. `shared` holds locals captured by reference whose
+   storage belongs to the session. `on_loop` records whether the current
+   point is on a loop's iteration path, where a binding form costs frame reuse.
    `on_break` and `on_continue` are the continuations the nearest enclosing
    loop or `switch` gave, or nothing outside one. `pending` is the innermost
    block cleanup the current point runs inside, or NULL. */
@@ -60,7 +61,7 @@ static typedef struct Lowering {
   Compiler compiler;
   ReplLower owner;
   Scope scratch;
-  Map env, locals, cells, arrays, records, cursors;
+  Map env, locals, cells, arrays, records, cursors, shared;
   Map lambda_signatures;
   Array definitions;
   String own;
@@ -384,6 +385,9 @@ static void _lower_scan(Lowering &l, Var form) {
       foreach (List target, targets)
         match (target) case %(binding ?(int id) ?): l.locals[id] = 1;
     case %(op & ?operand): _lower_scan_address(l, operand);
+    case %(capture ? (& *) (expr ? (op & ?target))):
+      match (Ast.lvalue_binding(target))
+        case %(binding ?(int id) ?): l.shared[id] = 1;
     case %(call ?callee (args *arguments)):
       _lower_scan_call(l, callee, arguments);
     /* A function named where a value is wanted rather than called: `Func f
@@ -492,10 +496,11 @@ static Var _lower_quoted(Lowering &l, Var node) {
 /* --- expressions -------------------------------------------------------- */
 
 /* Reads the `type` object a place addresses. An object with a native layout
-   is read from its bytes, and a record reads as its own address; any other
-   place is an evaluator cell. A field place's offset goes to the access
-   itself, so reading a field is one native call. */
+   is read from its bytes; arrays and records read as their own address.
+   Any other place is an evaluator cell. A field place's offset goes to the
+   access itself, so reading a field is one native call. */
 static Var _lower_load(Lowering &l, Type type, Var place) {
+  if (type.is_array()) return place;
   List layout = l.owner.type_layout(type);
   if (!layout) return %(C.load $place);
   if (layout.car() == <record>) return place;
@@ -1801,7 +1806,12 @@ static Var _lower_switch(
 static Var _lower_boxed(Lowering &l, int id, Var value, int fresh) {
   if (_lower_failed(l, value)) return void;
   List layout = _lower_storage_layout(l, id);
-  if (layout) return _lower_new_object(l, layout, value, fresh);
+  if (layout) value = _lower_new_object(l, layout, value, fresh);
+  /* Keep the original allocation, so references and earlier addresses
+     still alias it. An array's cell holds the address of these bytes. */
+  if (id in l.shared && (layout || id in l.arrays))
+    value = %(C.retain $value);
+  if (layout) return value;
   if (id in l.cells) return %(C.cell $value);
   return value;
 }
@@ -2552,6 +2562,7 @@ List ReplLower.lower(ReplLower self, List fn) {
     .records = _lower_scratch_map(scratch),
     .lambda_signatures = _lower_scratch_map(scratch),
     .cursors = _lower_scratch_map(scratch),
+    .shared = _lower_scratch_map(scratch),
     .definitions = definitions
   };
   self.reason = NULL;

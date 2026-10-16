@@ -51,6 +51,7 @@
 // offset, and size; see `lisp_peek` in repl-runtime.x. A record reads as its
 // own address, and assigning one copies into the bytes it already has.
 (def C.bytes repl.native.lisp_bytes)
+(def C.retain repl.native.lisp_retain)
 (defun C.array (layout values) (repl.native.lisp_array layout values))
 (def C.at repl.native.lisp_at)
 (def C.copy repl.native.lisp_copy)

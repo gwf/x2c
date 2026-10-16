@@ -383,6 +383,75 @@ static void _interpreter_ownership(ReplSession s) {
   _expect(s, "returned.x;", <value>, 23);
 }
 
+static void _reference_captures(ReplSession s) {
+  _expect(s, "Func ref_read = %!() => 0;", <executed>, void);
+  _expect(
+    s, "{ Var x = 1; ref_read = %!() using &x => x.int(); x = 9; }",
+    <executed>, void);
+  _expect(s, "ref_read();", <value>, 9);
+
+  _expect(s, "Func ref_write = %!() => 0;", <executed>, void);
+  _expect(s, "Func ref_snapshot = %!() => 0;", <executed>, void);
+  _expect(s, "int *ref_address = 0;", <executed>, void);
+  _expect(
+    s, "{ int x = 2; ref_address = &x; ref_snapshot = %!() => x; "
+       "ref_read = %!() using &x => x; "
+       "ref_write = %!() using &x => ++x; x = 10; }", <executed>, void);
+  _expect(s, "ref_read();", <value>, 10);
+  _expect(s, "ref_write();", <value>, 11);
+  _expect(s, "*ref_address;", <value>, 11);
+  _expect(s, "*ref_address = 20;", <executed>, void);
+  _expect(s, "ref_read();", <value>, 20);
+  _expect(s, "ref_snapshot();", <value>, 2);
+
+  _expect(
+    s, "{ struct ReplPoint p = {3}; "
+       "ref_read = %!() using &p => p.x; "
+       "ref_write = %!() using &p => ++p.x; p.x = 30; }",
+    <executed>, void);
+  _expect(s, "ref_read();", <value>, 30);
+  _expect(s, "ref_write();", <value>, 31);
+  _expect(s, "ref_read();", <value>, 31);
+
+  _expect(
+    s, "{ int a[2] = {3,4}; ref_read = %!() using &a => a[0] + a[1]; "
+       "ref_write = %!() using &a => ++a[0]; a[1] = 9; }",
+    <executed>, void);
+  _expect(s, "ref_read();", <value>, 12);
+  _expect(s, "ref_write();", <value>, 4);
+  _expect(s, "ref_read();", <value>, 13);
+
+  _expect(
+    s, "Func ref_factory = %!(int n) => "
+       "ref_read = %!() using &n => ++n;", <executed>, void);
+  _expect(s, "{ ref_factory(40); }", <executed>, void);
+  _expect(s, "Func ref_first = ref_read;", <executed>, void);
+  _expect(s, "{ ref_factory(50); }", <executed>, void);
+  _expect(s, "ref_first();", <value>, 41);
+  _expect(s, "ref_read();", <value>, 51);
+  _expect(s, "ref_first();", <value>, 42);
+  _expect(
+    s, "{ int x = 5; Func make = %!() using &x => "
+       "ref_read = %!() using &x => ++x; make(); x = 60; }",
+    <executed>, void);
+  _expect(s, "ref_read();", <value>, 61);
+
+  _expect(s, "int ref_caller = 70;", <executed>, void);
+  _expect(
+    s, "Func ref_borrow = %!(int &n) => "
+       "ref_read = %!() using &n => ++n;", <executed>, void);
+  _expect(s, "{ ref_borrow(ref_caller); }", <executed>, void);
+  _expect(s, "ref_read();", <value>, 71);
+  _expect(s, "ref_caller;", <value>, 71);
+
+  _expect(s, "int ref_fail(void) { raise %(probe); }", <defined>, void);
+  _expect(
+    s, "{ int x = 80; ref_read = %!() using &x => ++x; "
+       "ref_fail(); }", <failed>, void);
+  _expect(s, "ref_read();", <value>, 81);
+  _expect(s, "ref_read();", <value>, 82);
+}
+
 static void _delegate_completion(ReplSession session) {
   _expect(session, "typedef struct ReplPart { int value; } ReplPart;",
           <defined>, void);
@@ -624,6 +693,7 @@ int main(int argc, char **argv) {
         _retained_results(session);
         _meta_records(session);
         _interpreter_ownership(session);
+        _reference_captures(session);
         _reference_arguments(session);
         _compiled_functions(session);
         _truth_values(session);
