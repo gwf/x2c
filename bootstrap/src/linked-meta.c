@@ -13266,14 +13266,14 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_24(void
   _12350 = List_var(_12349);
   _12351 = String_new("src/meta-group.x");
   _12352 = String_var(_12351);
-  _12353 = String_new("3e506be9");
+  _12353 = String_new("c7c1b3a4");
   _12354 = String_var(_12353);
   _12355 = cons(_12354, NULL);
   _12356 = cons(_12352, _12355);
   _12357 = List_var(_12356);
   _12358 = String_new("src/meta-helper-client.x");
   _12359 = String_var(_12358);
-  _12360 = String_new("ad7201de");
+  _12360 = String_new("714f6629");
   _12361 = String_var(_12360);
   _12362 = cons(_12361, NULL);
   _12363 = cons(_12359, _12362);
