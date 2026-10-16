@@ -263,7 +263,10 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
 
 /* Builtin components contribute compile-time definitions beside the runtime
    prelude, with the shared source forms they recognize. They do not add
-   compiler headers to a user's generated C. */
+   compiler headers to a user's generated C. Their includes still declare
+   into every unit, so they include no module outside `lib/x2c.x` with a
+   public inline function, such as `lib/type.x`: a unit calling one would
+   declare it without a definition. */
 /** Returns the compiler-owned prelude sources relative to its home. Their
     runtime implementations are already linked into the shipped binaries. */
 List Compiler.prelude_sources(void) => %(
