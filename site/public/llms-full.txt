@@ -2865,11 +2865,11 @@ likewise yield exactly one statement. A compound statement may contain the
 captured target plus any additional block items without requiring braces at
 the invocation.
 
-A `Stmt` decorator standing before a file-scope function
-definition decorates that function's body. The body is parsed as usual, the
-decorator's production replaces it, and the same function is rebuilt around
-the result, so parameters resolve inside the produced items and a `return`
-from within the body runs the decorator's deferred cleanup before leaving:
+A `Stmt` decorator standing before a file-scope function definition decorates
+that function's body. The body is parsed as usual, and the decorator's
+production replaces it. The same function is then rebuilt around the result.
+Therefore parameters resolve inside the produced items, and a `return` from
+within the body runs the decorator's deferred cleanup before leaving:
 
 ```x2c
 #include "x2c.x"
@@ -2951,10 +2951,12 @@ explicit arguments is recognized only when the next significant token is `(`.
 The same spelling remains available as a type, declaration, field, label, or
 function name, but a direct call or typedef-style cast has the invocation shape
 and is claimed by the alias. A zero-explicit-argument decorator has no
-parenthesized delimiter. Its spelling is therefore claimed at each parser
-position compatible with its target kind; a bare expression decorator can
-capture a same-named expression read, and a bare block or function decorator
-can overlap a declaration beginning with a same-named typedef.
+parenthesized delimiter. Therefore its spelling is claimed at each parser
+position that fits its target kind:
+
+- A bare expression decorator can capture a read of a same-named expression.
+- A bare block or function decorator can overlap a declaration that begins
+  with a same-named typedef.
 
  A nonstatic `keyword` declaration becomes
 available to including files at the include position, together with the macro
@@ -3111,11 +3113,17 @@ a type with that spelling uses the parenthesized form. A `$!( ... )` group
 followed directly by `{` is a typed quotation; otherwise it is an expression
 quotation. A typed quotation builds `(expr T CONTENT)` where it is written. It
 binds nothing, counts no expansion, and opens no transaction. Its holes take
-the values a rebuild gives them: syntax unchanged, a binding identity or
-`x2c.ident` spelling as an identifier expression, an `x2c.ident` in a member
-position as its spelling and in a declarator as the name it declares, a number
-as a literal of its own type with its exact value, and a String or Symbol as a
-literal. Each number, String, or Symbol item of an expression sequence also
+the values a rebuild gives them:
+
+- Syntax is used unchanged.
+- A binding identity or `x2c.ident` spelling becomes an identifier
+  expression.
+- An `x2c.ident` in a member position becomes its spelling. In a declarator,
+  it becomes the name the declarator declares.
+- A number becomes a literal of its own type with its exact value.
+- A String or Symbol becomes a literal.
+
+Each number, String, or Symbol item of an expression sequence also
 becomes its literal. A String is a String literal when the whole expression is
 the hole and `T` is `String`; elsewhere it is a C string literal. Inner nodes
 keep the placeholder type of unbound syntax. Free names bind where the code is
@@ -3141,17 +3149,16 @@ recognizes a local that another macro renamed for hygiene. A different
 same-spelled binding or a different member does not match. The case captures
 the original binding syntax.
 
-A template can call a `meta` function in a slot and pass it a sequence
-hole written with `$name`; the function receives the captured items as
-one `List`. Applying a macro value with one `List` of syntax as the last
-argument passes that List as the whole trailing sequence, so
-`outer(head, items)` and `outer(head, a, b)` build the same code. A `List`
-of numbers or Strings, such as `%(1 2 3)`, passes the whole sequence too,
-and each item becomes its literal. A `case`
-on a macro value captures what a spliced slot built under the sequence
-hole the slot was given, one element per statement, so each element can
-be recognized with a `case` on the macro that built it. The pattern a
-literal macro value derives is prepared once per process.
+A template can call a `meta` function in a slot and pass it a sequence hole
+written with `$name`; the function receives the captured items as one `List`.
+Applying a macro value with one `List` of syntax as the last argument passes
+that List as the whole trailing sequence, so `outer(head, items)` and
+`outer(head, a, b)` build the same code. A `List` of numbers or Strings, such
+as `%(1 2 3)`, passes the whole sequence too, and each item becomes its
+literal. A `case` on a macro value captures what a spliced slot built. The
+capture is bound to the slot's sequence hole, with one element per statement.
+Each element can then be recognized with a `case` on the macro that built it.
+The pattern a literal macro value derives is prepared once per process.
 
 A macro's pattern is also a pattern wherever patterns go. In a `case`,
 `${$name(P, ...)}` is the pattern of code `$name` builds with each argument
@@ -3199,8 +3206,8 @@ invocations. One with a nested pattern among its arguments, such as
 ### Hygiene and generated names
 
 An expansion means what the same code would mean if it were written where
-the expansion lands, with two exceptions: the names its body declares are
-private to that expansion, and a name the macro lists with `using` keeps the
+the expansion lands. There are two exceptions. The names its body declares
+are private to that expansion. A name the macro lists with `using` keeps the
 file-scope declaration where the macro is written.
 
 Arguments are parsed and typed where the invocation is written, and the names
@@ -3314,9 +3321,9 @@ An anonymous macro keeps one kind of value from where it is written: a
 `Macro` value that its body applies. Templates compose by value, so a later
 application applies the same children.
 
-A `case` on a macro recognizes a name the macro lists with `using` only by its
-file-scope declaration, and any other free name by its spelling, since the
-code the macro builds binds that name where it lands.
+A `case` on a macro recognizes a name the macro lists with `using` only by
+its file-scope declaration. It recognizes any other free name by its
+spelling, because the code the macro builds binds that name where it lands.
 
 A `struct`, `union`, or `enum` tag that a body defines or declares is private
 to each expansion, like a typedef, and so are the enumerators it lists. Tags
@@ -3577,11 +3584,16 @@ the parser has already consumed, such as a multi-line interpolated `%"..."`, is
 rejected; read its spelling with `Code.source_text` instead.
 
 `Type.members` returns an enum's members in source order as `(("NAME"
-VALUE) ...)`. `VALUE` is `nil` when the member takes its position's value, the
-literal's exact spelling as a `String` when the initializer is one literal,
-carrying its base, suffix, and character quotes, and otherwise the
-initializer's expression node, which a generator can splice or walk. Test it
-with `string?` when both kinds can occur. A non-enum `Type` is rejected.
+VALUE) ...)`. `VALUE` is one of these:
+
+- `nil` when the member takes its position's value;
+- the literal's exact spelling as a `String` when the initializer is one
+  literal, including its base, suffix, and character quotes;
+- otherwise the initializer's expression node, which a generator can splice
+  or walk.
+
+Test it with `string?` when both kinds can occur. A non-enum `Type` is
+rejected.
 
 The Lisp operation `x2c.diagnostic.warn` reports a macro warning at the
 invocation with `String` notes and returns `nil`, so expansion continues.
@@ -3846,17 +3858,16 @@ and `x2c.literal.symbol` have no x2c declaration.
 The operations are bodyless `meta` prototypes supplied by the compiler
 itself, which generates its table of them from those declarations.
 
-`x2c_meta_definition_hashes()` returns a `Map` from the name of each
-function or initialized file-static value the unit has defined so far to a
-String hash of its definition's code tokens, from the first token after any
-`meta` marker to the end of its body or initializer. The compiler carries
-native copies of the `meta` functions in the source modules it ships
-(`src/linked-meta.x`, generated from them) and
-records their hashes with it. An included `meta` definition runs as its
-copy when its hash, and the hash of every definition of the unit that it
-reaches through references, matches the copy's; an edited one, or one
-that reaches an edited definition, is compiled with the unit's group like
-any other.
+`x2c_meta_definition_hashes()` returns a `Map` with one entry for each function
+or initialized file-static value the unit has defined so far. The key is the
+definition's name. The value is a String hash of the definition's code tokens,
+from the first token after any `meta` marker to the end of its body or
+initializer. The compiler carries native copies of the `meta` functions in the
+source modules it ships (`src/linked-meta.x`, generated from them) and records
+their hashes with it. An included `meta` definition runs as its native copy
+when its hash matches the copy's. The hash of every unit definition it reaches
+through references must match too. An edited definition, or one that reaches an
+edited definition, is compiled with the unit's group like any other.
 
 A `meta` function that makes an explicit `$` call or uses a source-template
 constructor is also compile-time-only. A run-time call to a compile-time-only
@@ -3867,10 +3878,10 @@ Compiler facilities load before author imports, and macro code cannot redefine
 them.
 
 Standard Lisp exposes the `List` matcher of [Pattern
-Matching](https://x2c-lang.dev/docs/guide/match.html) as six names. `match` tests a whole subject and
+Matching](https://x2c-lang.dev/docs/guide/match.html) as six names. `match` tests a whole subject. It
 returns association-list bindings, `nil` on failure, and truthy `(())` for a
-match with no named binders; a pattern describes a `List` shape, so a subject
-that is not a `List` fails rather than raising. `bound` reads one binder out of
+match with no named binders. A pattern describes a `List` shape, so a subject
+that is not a `List` fails without raising. `bound` reads one binder out of
 that alist. `search` finds the first matching subtree. `match-replace` and
 `search-replace` rewrite the whole subject or the first matching subtree from a
 template. `match-case` tries each clause's pattern in order and evaluates the
@@ -4023,21 +4034,24 @@ An explicit `new` suppresses its generated constructor and init requirement.
 Derived classes forward the nearest applicable constructor; variadic forwarding
 requires an explicit constructor.
 
-An aggregate class that defines `void T.init(T &, ...)` for a value (also
-accepting the existing `T *` receiver), or `void T.init(T, ...)` or
-`int T.init(T, ...)` for a heap pointer, gets a `new`
-taking the parameters after the receiver; it calls `init` on zero-initialized
-storage, which a heap class obtains from its replaceable `T.alloc`. A zero
-result from an `int` initializer releases that storage and makes `new`
-return NULL. Otherwise
-flat value fields produce positional constructors in declaration order, with
-unnamed bitfield padding omitted, and non-flat or resource-containing
-aggregates require `init`. Heap defaults allocate through Scope and provide
-early `free`, which accepts NULL and calls `void T.drop(T)` first when the
-class defines it; they do not otherwise own fields. Scalar and derived
-aliases retain their ordinary Var representation. Heap classes box identity;
-aggregate values box a Scope-owned copy and require compatible equal/hash
-operations, generated for supported value fields.
+An aggregate class gets a generated `new` when it defines one of these
+initializers:
+
+- `void T.init(T &, ...)` for a value, which also accepts the existing `T *`
+  receiver;
+- `void T.init(T, ...)` or `int T.init(T, ...)` for a heap pointer.
+
+That `new` takes the parameters after the receiver. It calls `init` on
+zero-initialized storage, which a heap class obtains from its replaceable
+`T.alloc`. A zero result from an `int` initializer releases that storage and
+makes `new` return NULL. Otherwise flat value fields produce positional
+constructors in declaration order, with unnamed bitfield padding omitted, and
+non-flat or resource-containing aggregates require `init`. Heap defaults
+allocate through Scope and provide early `free`, which accepts NULL and calls
+`void T.drop(T)` first when the class defines it; they do not otherwise own
+fields. Scalar and derived aliases retain their ordinary Var representation.
+Heap classes box identity; aggregate values box a Scope-owned copy and require
+compatible equal/hash operations, generated for supported value fields.
 
 `str` and `repr` are independently replaceable. Aggregate value str delegates
 to repr; heap str prints identity. Generated repr traverses printable fields
@@ -4051,11 +4065,11 @@ descriptor table's capacity.
 `$auto(value)` is an ordinary expression macro. Its expansion asks
 `x2c.enclosing` for the initialized declarator, places a release after that
 declarator with `x2c.place`, and returns `value` unchanged. Forwarding through
-another macro or parentheses keeps that result the complete initializer.
-When the declaration finishes, it checks that the result is the declarator's
-complete initializer and then binds the release, which requires automatic
-storage and Cleanup participation, saves the initialized value in a private
-const local, and defers that saved value's `cleanup` call.
+another macro or parentheses keeps that result the complete initializer. When
+the declaration finishes, the compiler checks that the result is the
+declarator's complete initializer. Then it binds the release. The release
+requires automatic storage and Cleanup participation. It saves the initialized
+value in a private const local and defers that saved value's `cleanup` call.
 The declaration keeps its type, binding identity, initialization conversions,
 and enclosing scope.
 
@@ -4160,14 +4174,14 @@ kinds; nested `List` data is written `%(...)`.
 Elements, keys, and values are evaluated once each, left to right in source
 order, as in the percent forms below.
 
-`[]` is a fresh empty `Array`. The empty brace `{}` is a fresh empty `Map`
-when its destination is a `Map`, a `Var`, an alias of either, or a type that
-converts from `Map`, and likewise for `Array`; for any other destination it
-is the native zero initializer. An element or value of a bare
+`[]` is a fresh empty `Array`. The empty brace `{}` is a fresh empty `Map` when
+its destination is a `Map`, a `Var`, an alias of either, or a type that
+converts from `Map`. The same rule applies to `Array`. For any other
+destination, `{}` is the native zero initializer. An element or value of a bare
 `[...]` or `{...}` literal is the exception: there `{}` is an empty `Map`, so
 `[{}]` holds one Map. Outside a declaration initializer, a brace that remains
-an initializer becomes a compound literal of its destination, as an argument,
-a `return` value, an assignment, or a `?:` arm: `Map m = ready ? {} : NULL;`
+an initializer becomes a compound literal of its destination, as an argument, a
+`return` value, an assignment, or a `?:` arm: `Map m = ready ? {} : NULL;`
 builds a Map, `Var v = ready ? {} : NULL;` holds a Map when `ready`, and
 `return {3, 4};` in a function returning a struct builds that struct. An
 anonymous struct or union destination has no compound-literal spelling and is
@@ -4198,11 +4212,15 @@ brace, the `%` is the modulo operator, except where a statement begins:
 - after the `}` of a compound statement or declaration body, so a `%(...)`
   statement may follow the closing brace of a `foreach` body.
 
-A brace counts as a body when the token before its `{` is `;`, `:`, `{`, `}`,
-`]`, an identifier, `else`, `do`, `try`, `finally`, or `defer`, or a `)` that
-closes a control condition, a `match` subject, or a parenthesized list after
-an identifier, as in a function header, `foreach`, `with`, or a decorator. A
-compound literal or initializer brace follows an operator or a cast, so `%`
+A brace counts as a body when the token before its `{` is one of these:
+
+- `;`, `:`, `{`, `}`, `]`, or an identifier;
+- `else`, `do`, `try`, `finally`, or `defer`;
+- a `)` that closes a control condition, a `match` subject, or a
+  parenthesized list after an identifier, as in a function header,
+  `foreach`, `with`, or a decorator.
+
+A compound literal or initializer brace follows an operator or a cast, so `%`
 after it stays modulo: `(int){9} %(4)` is `1`.
 
 The tokenizer has no type information, so it cannot distinguish a cast from a
