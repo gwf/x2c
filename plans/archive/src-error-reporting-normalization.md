@@ -197,8 +197,15 @@ Do not run its broad components separately solely for publication. Review any
 generated deltas. Apply existing performance guidance only if the actual
 change reaches a covered hot path; this plan adds no performance requirement.
 
-Gary authorized implementation on 2026-10-16. This session owns direct
-integration, validation, and delivery under the repository default.
+Gary authorized implementation on 2026-10-16 and subsequently selected
+shared-integrator delivery. This session submits the reviewed change; the
+integrator owns final combined validation and publication.
+
+The full `agent-pr-check` gate passed at
+`7a2524f72c182d40572c245cc61068f1129203ac`: 1,239 compiler fixtures,
+951 unit tests, and 26,008 assertions passed. The later integration of
+`dc98736033a92c37ffcd94b83faaf07b99e45b55` changes optional conformance
+tooling and guidance. That integrated tree has not repeated the full gate.
 
 ## Implementation record
 
