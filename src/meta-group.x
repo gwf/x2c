@@ -582,7 +582,9 @@ static List _emit_prepared(
 static void _name_provider_bindings(
   Compiler c, String provider, Array units, Map dependencies) {
   foreach (Var (path, index), meta_build_tables)
-    if (path != provider && path in dependencies)
+    if (meta_build_providers && path != provider)
+      c.name_loaded_provider(path, index, meta_build_providers[path]);
+    else if (path != provider && path in dependencies)
       c.name_meta_provider_bindings(path, index);
   int index = c.meta_build - 1;
   c.name_meta_provider_bindings(provider, index);
@@ -1206,13 +1208,15 @@ static String _unbound_callee(Compiler c, Var node) {
 
 /* Where the project meta build writes each unit's group, while it runs. */
 static String meta_build_directory = NULL;
-static Map meta_build_tables = NULL;
+static Map meta_build_tables = NULL, meta_build_providers = NULL;
 
 /** Directs each provider group into `directory`, using `owners` to name
     their headers by table, or stops that when `directory` is NULL. */
-void Compiler.use_meta_build_directory(String directory, Array owners) {
+void Compiler.use_meta_build_directory(
+  String directory, Array owners, Map providers) {
   meta_build_directory = directory;
   meta_build_tables = {};
+  meta_build_providers = providers;
   int index = 1;
   foreach (String owner, owners) meta_build_tables[owner] = index++;
 }

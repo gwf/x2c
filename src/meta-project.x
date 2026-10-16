@@ -66,7 +66,8 @@ static typedef struct Helper {
   Toolchain toolchain, String include, identity, directory;
   List entries;
   List flags, Array modules;
-  Map deps, before, Array groups, built, failures, objects, int changed;
+  Map deps, before, providers;
+  Array groups, built, failures, objects, int changed;
 } Helper;
 
 /** Builds the helper that runs the project `meta` functions `inputs`
@@ -87,8 +88,10 @@ MetaHelper Frontend.build_meta(Frontend f, List inputs) {
 /** Builds one helper exposing the loaded files' public functions.
     Main's native signature stays inside the helper; argc/argv calls accept
     an Array of argument Strings through the data protocol. */
-MetaHelper Frontend.build_loaded(Frontend f, List filenames) =>
-  _build_meta(f, filenames, filenames);
+MetaHelper Frontend.build_loaded(Frontend f, List filenames) {
+  List paths = filenames.map(%!(String path) => Path.absolute(path));
+  return _build_meta(f, paths, paths);
+}
 
 static MetaHelper _build_meta(Frontend f, List inputs, List entries) {
   Helper h = {
@@ -417,17 +420,68 @@ static List _build(Helper &h) {
   }
   foreach (String path, %(@{h.owners} @{h.modules} @{_loop_sources()}))
     h.deps[path] = 1;
-  Compiler.use_meta_build_directory(h.directory, h.owners);
+  String failure = h.entries ? _loaded_providers(h) : NULL;
+  if (failure) {
+    Compiler.forget_provisional_entries();
+    return _write_manifest(h, failure);
+  }
+  Compiler.use_meta_build_directory(h.directory, h.owners, h.providers);
   int index = 1;
   foreach (String owner, h.owners) _parse(h, owner, index++);
-  Compiler.use_meta_build_directory(NULL, NULL);
+  Compiler.use_meta_build_directory(NULL, NULL, NULL);
   index = 1;
   foreach (String owner, h.owners) {
-    String failure = _compile(h, index, owner);
-    _record(h, index++, failure);
+    String problem = _compile(h, index, owner);
+    _record(h, index++, problem);
+    if (h.entries && problem && !failure)
+      failure = %"$owner: $problem";
   }
   Compiler.forget_provisional_entries();
-  return _write_manifest(h, _link(h, count));
+  return _write_manifest(h, failure ? failure : _link(h, count));
+}
+
+/* Collect every owner before emission so declarations can name a provider
+   later in the load order. Each source still parses in its own Context. */
+static String _loaded_providers(Helper &h) {
+  h.providers = {};
+  Map owners = $auto({});
+  int index = 1;
+  foreach (String path, h.owners) {
+    List provider = _loaded_provider(h, path, index++);
+    h.providers[path] = provider;
+    Map declarations = provider.car();
+    foreach (String name, declarations.keys()) {
+      Var previous;
+      if (owners.try_get(name, previous))
+        return %"duplicate native definition: $name ($previous and $path)";
+      owners[name] = path;
+    }
+  }
+  return NULL;
+}
+
+static List _loaded_provider(Helper &h, String path, int index) {
+  Frontend f = h.frontend;
+  $let(f.request.package_dirs, f.request.package_dirs) {
+    foreach (Var (root, _), h.packages)
+      f.request.package_dirs = f.request.package_dirs.append(
+        %(${Path.dirname(root)}));
+    return _collect_provider(h, f, path, index);
+  }
+}
+
+static List _collect_provider(
+  Helper &h, Frontend f, String path, int index) {
+  ParsedUnit unit;
+  int started = f.start(path, unit);
+  defer unit.close();
+  Compiler c = unit.compiler;
+  c.meta_build = index + 1;
+  c.load_source = path in h.entries;
+  c.diagnostics.limit = 0;
+  if (started) unit.collect(f);
+  c.sym.reset(unit.globals);
+  return unit.context.export(c.loaded_provider());
 }
 
 /* The path of table `index`'s group files, without their suffixes. */
@@ -470,7 +524,9 @@ static void _parse_source(
      helper exists; the parse still reaches every definition. */
   unit.collect(f);
   unit.compiler.diagnostics.reset();
-  unit.parse();
+  if (!unit.parse() && h.entries)
+    Path.write_text(
+      %"${_base(h, index)}.failure", unit.compiler.diagnostics().repr());
   foreach (Var (read, _), unit.compiler.deps) h.deps[read] = 1;
 }
 
