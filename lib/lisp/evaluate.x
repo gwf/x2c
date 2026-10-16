@@ -82,8 +82,7 @@ static Symbol _special_id(Lisp lisp, Func fn) {
 
 /* Applies `callable` to evaluated `values`. A macro, or a special form other
    than `apply`, is not a procedure. */
-module Var _apply_values(
-  Lisp lisp, Var callable, List values, LispEnv *env) {
+module Var _apply_values(Lisp lisp, Var callable, List values) {
   if (callable is <lambda>) {
     Lambda lambda = callable;
     if (lambda.macro) _not_procedure(callable);
@@ -96,7 +95,7 @@ module Var _apply_values(
   if (special != <apply>) _not_procedure(callable);
   _arity(values, 2, "apply");
   List rest = _list_argument(values.cadr());
-  return _apply_values(lisp, values.car(), rest, env);
+  return _apply_values(lisp, values.car(), rest);
 }
 
 static Var _call_native(Lisp lisp, Func fn, List values) {
@@ -218,7 +217,7 @@ static Var _special_apply(Lisp lisp, List args, LispEnv *env) {
   Var (callable_form, values_form) = args;
   Var callable = _eval(lisp, callable_form, env);
   Var values = _eval(lisp, values_form, env);
-  return _apply_values(lisp, callable, _list_argument(values), env);
+  return _apply_values(lisp, callable, _list_argument(values));
 }
 
 /* `import` hands its path to the `_x2c.import-hook` global when one is
@@ -770,7 +769,7 @@ Var Lisp.eval(Lisp lisp, Var expression) {
 $lisp.entry("Lisp.apply")
 Var Lisp.apply(Lisp lisp, Var callable, List values) {
   _open_call_budget(lisp);
-  return _apply_values(lisp, callable, values, NULL);
+  return _apply_values(lisp, callable, values);
 }
 
 /** Reads and evaluates every form in `source`.
