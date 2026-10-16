@@ -140,9 +140,7 @@ static typedef struct Stdio { int input, output, errors; } Stdio;
 
 /* What a child writes to its report pipe when a step fails: the step and
    its errno. */
-static typedef struct Failure { int step, error; } Failure;
-
-static enum { _STEP_DIR = 1, _STEP_EXEC = 2 };
+static typedef struct Failure { Symbol step, int error; } Failure;
 
 // launching
 
@@ -279,11 +277,11 @@ static void _child(char **argv, JobLaunch &launch, Stdio stdio, int report) {
   if (stdio.output >= 0) dup2(stdio.output, STDOUT_FILENO);
   if (launch.errors_to_output) dup2(STDOUT_FILENO, STDERR_FILENO);
   else if (stdio.errors >= 0) dup2(stdio.errors, STDERR_FILENO);
-  Failure failure = { _STEP_DIR, 0 };
+  Failure failure = { <dir>, 0 };
   if (!launch.dir || chdir(launch.dir) == 0) {
     if (launch.environment) environ = launch.environment;
     execvp(argv[0], argv);
-    failure.step = _STEP_EXEC;
+    failure.step = <exec>;
   }
   failure.error = errno;
   ssize_t written = write(report, &failure, sizeof(failure));
@@ -310,7 +308,7 @@ static Failure _read_report(int fd) {
 
 static void _child_failed(Failure failure, String dir, char **argv) {
   int error = failure.error;
-  if (failure.step == _STEP_DIR) File.path_error("Job.start", dir, error);
+  if (failure.step == <dir>) File.path_error("Job.start", dir, error);
   String program = argv[0];
   if (error == ENOENT)
     $error.start.missing(program, error);

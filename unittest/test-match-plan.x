@@ -16,7 +16,7 @@ static MatchCaptureSite capture_site;
    with no user bindings (both arms report nil bindings). */
 static void _exact_case(List input, Var pattern, List expected) {
   MatchPlan plan = MatchPlan.prepare(pattern);
-  if (!EXPECT_INT_EQ(plan.status, MACHINE_PREPARED)) {
+  if (!EXPECT_TRUE(plan.status == <prepared>)) {
     plan.free();
     return;
   }
@@ -37,7 +37,7 @@ static void _exact_case(List input, Var pattern, List expected) {
 /* Oracle/candidate parity without a fixed expectation. */
 static void _parity_case(List input, Var pattern) {
   MatchPlan plan = MatchPlan.prepare(pattern);
-  if (!EXPECT_INT_EQ(plan.status, MACHINE_PREPARED)) {
+  if (!EXPECT_TRUE(plan.status == <prepared>)) {
     plan.free();
     return;
   }
@@ -49,9 +49,9 @@ static void _parity_case(List input, Var pattern) {
   plan.free();
 }
 
-static void _status_case(Var pattern, int status, const char *reason) {
+static void _status_case(Var pattern, Symbol status, const char *reason) {
   MatchPlan plan = MatchPlan.prepare(pattern);
-  EXPECT_INT_EQ(plan.status, status);
+  EXPECT_TRUE(plan.status == status);
   EXPECT_STR_EQ(String.new(plan.reason), reason);
   plan.free();
 }
@@ -223,7 +223,7 @@ static void plan_star_matrix(void) {
   // S1: fresh final star shares the actual suffix in O(1).
   List s1_input = %(tag a b);
   MatchPlan s1 = MatchPlan.prepare(%(tag *rest));
-  if (!EXPECT_INT_EQ(s1.status, MACHINE_PREPARED)) return;
+  if (!EXPECT_TRUE(s1.status == <prepared>)) return;
   MachineStats s1_stats = _stats_case(s1, s1_input, 1, %((*rest (a b))));
   EXPECT_INT_EQ((int) s1_stats.direct_shares, 1);
   EXPECT_INT_EQ((int) s1_stats.materializations_avoided, 1);
@@ -254,7 +254,7 @@ static void plan_star_matrix(void) {
     int size = sizes[i];
     Var pattern = %(*pre anchor ?seen terminal);
     MatchPlan plan = MatchPlan.prepare(pattern);
-    if (!EXPECT_INT_EQ(plan.status, MACHINE_PREPARED)) return;
+    if (!EXPECT_TRUE(plan.status == <prepared>)) return;
     MachineStats miss = _stats_case(plan, _repeat_pair(size), 0, NULL);
     EXPECT_INT_EQ((int) miss.materialization_requests, 0);
     EXPECT_INT_EQ((int) miss.cons_requests, 0);
@@ -380,24 +380,24 @@ static void plan_star_supplementals(void) {
 // categorized preparation boundary - - - - - - - - - - - - - - - - - - - - -
 
 static void plan_status_categorization(void) {
-  _status_case(%(!or *whole missing), MACHINE_MALFORMED,
+  _status_case(%(!or *whole missing), <malformed>,
                "leading-list-binder-in-guard");
-  _status_case(%(!not *whole missing), MACHINE_MALFORMED,
+  _status_case(%(!not *whole missing), <malformed>,
                "leading-list-binder-in-guard");
-  _status_case(%(!set *whole missing), MACHINE_MALFORMED,
+  _status_case(%(!set *whole missing), <malformed>,
                "leading-list-binder-in-guard");
-  _status_case(%(wrap (!and *x a) end), MACHINE_MALFORMED,
+  _status_case(%(wrap (!and *x a) end), <malformed>,
                "leading-list-binder-in-guard");
-  _status_case(%(!quote (!or *x red)), MACHINE_PREPARED, "prepared");
-  _status_case(%(!or *whole ?bad-name), MACHINE_MALFORMED,
+  _status_case(%(!quote (!or *x red)), <prepared>, "prepared");
+  _status_case(%(!or *whole ?bad-name), <malformed>,
                "binder-name");
-  _status_case(%(!quote a b), MACHINE_INELIGIBLE, "quote-arity");
-  _status_case(%(!quote), MACHINE_INELIGIBLE, "quote-arity");
+  _status_case(%(!quote a b), <ineligible>, "quote-arity");
+  _status_case(%(!quote), <ineligible>, "quote-arity");
 
   // Frame depth is fenced at preparation, not mid-execution.
   Var deep = %(x);
   for (int i = 0; i < MACHINE_FRAME_MAX + 8; i++) deep = %((!and $deep));
-  _status_case(deep, MACHINE_INELIGIBLE, "frame-depth");
+  _status_case(deep, <ineligible>, "frame-depth");
 
   // A pattern wider than the code fence is categorized cleanly.
   List wide = NULL;
@@ -406,7 +406,7 @@ static void plan_status_categorization(void) {
     for (int j = 0; j < 100; j++) sub = cons(<?x>, sub);
     wide = cons(sub, wide);
   }
-  _status_case(wide, MACHINE_INELIGIBLE, "code-capacity");
+  _status_case(wide, <ineligible>, "code-capacity");
 
   // Binder capacity is fenced by the layout, ahead of lowering.
   List binders = NULL;
@@ -414,7 +414,7 @@ static void plan_status_categorization(void) {
     Symbol binder = Symbol.new(String.printf("?w%d", i));
     binders = cons(Symbol.var(binder), binders);
   }
-  _status_case(binders, MACHINE_MALFORMED, "binder-capacity");
+  _status_case(binders, <malformed>, "binder-capacity");
 
 }
 
@@ -431,11 +431,11 @@ static List _wide_operand(int inner) {
 static void plan_guard_at_the_code_limit_reports_capacity(void) {
   for (int inner = 4084; inner <= 4087; inner++) {
     List wide = _wide_operand(inner);
-    _status_case(%(!or $wide x y), MACHINE_INELIGIBLE, "code-capacity");
+    _status_case(%(!or $wide x y), <ineligible>, "code-capacity");
   }
   for (int inner = 4079; inner <= 4085; inner++) {
     List wide = _wide_operand(inner);
-    _status_case(%(!not $wide x y), MACHINE_INELIGIBLE, "code-capacity");
+    _status_case(%(!not $wide x y), <ineligible>, "code-capacity");
   }
 }
 
@@ -458,7 +458,7 @@ static List _fenced_wide_pattern(List tail) {
 
 static void plan_fenced_pattern_raises_at_every_entry(void) {
   MatchPlan plan = MatchPlan.prepare(_fenced_deep_pattern());
-  if (!EXPECT_INT_EQ(plan.status, MACHINE_INELIGIBLE)) {
+  if (!EXPECT_TRUE(plan.status == <ineligible>)) {
     plan.free();
     return;
   }
@@ -739,7 +739,7 @@ static void capture_layout_owns_canonical_order(void) {
            *tail)
   );
   if (!EXPECT_NOT_NULL(layout)) return;
-  EXPECT_INT_EQ(layout.status, MACHINE_PREPARED);
+  EXPECT_TRUE(layout.status == <prepared>);
   EXPECT_TRUE(layout.possible_list() ==
               %(?root ?left ?shared ?right ?hidden *tail));
   EXPECT_TRUE(layout.definite_list() == %(?root ?shared *tail));
@@ -751,7 +751,7 @@ static void capture_layout_owns_canonical_order(void) {
   MatchPlan plan = MatchPlan.prepare(
     %(node ?first (?second ?first) *rest)
   );
-  if (!EXPECT_INT_EQ(plan.status, MACHINE_PREPARED)) {
+  if (!EXPECT_TRUE(plan.status == <prepared>)) {
     plan.free();
     return;
   }
@@ -781,7 +781,7 @@ static void prepared_capture_is_atomic_and_positional(void) {
   MatchPlan plan = MatchPlan.prepare(
     %(!or (ok ?value) (err ?message *rest))
   );
-  if (!EXPECT_INT_EQ(plan.status, MACHINE_PREPARED)) {
+  if (!EXPECT_TRUE(plan.status == <prepared>)) {
     plan.free();
     return;
   }
@@ -828,11 +828,11 @@ static void capture_layout_refuses_past_the_binder_limit(void) {
     input_values.free();
     return;
   }
-  EXPECT_INT_EQ(layout.status, MACHINE_MALFORMED);
+  EXPECT_TRUE(layout.status == <malformed>);
   EXPECT_STR_EQ(String.new(layout.reason), "binder-capacity");
   EXPECT_INT_EQ(layout.binder_count, 0);
   MatchPlan plan = MatchPlan.prepare(pattern);
-  EXPECT_INT_EQ(plan.status, MACHINE_MALFORMED);
+  EXPECT_TRUE(plan.status == <malformed>);
   EXPECT_STR_EQ(String.new(plan.reason), "binder-capacity");
 
   Var values[MACHINE_BINDER_MAX];
@@ -928,7 +928,7 @@ static void source_site_keeps_its_normalized_pattern(void) {
   MatchPlan plan = x2c_match_site_prepare(&normalizing_site, pattern);
   Pool.close();
   if (!EXPECT_NOT_NULL(plan)) return;
-  EXPECT_INT_EQ(plan.status, MACHINE_PREPARED);
+  EXPECT_TRUE(plan.status == <prepared>);
   if (!EXPECT_TRUE(Pool.is_permanent(plan.layout.normalized))) return;
   Var value = <old>;
   MatchCaptureBuffer captures = { &value, 0, 1 };
@@ -1035,7 +1035,7 @@ static void source_site_reports_a_fence_like_the_operation(void) {
 
 static void plan_programs_stay_immutable(void) {
   MatchPlan plan = MatchPlan.prepare(%(?x ?x));
-  if (!EXPECT_INT_EQ(plan.status, MACHINE_PREPARED)) return;
+  if (!EXPECT_TRUE(plan.status == <prepared>)) return;
   for (int i = 0; i < 4; i++) {
     List bindings = %(sentinel);
     EXPECT_INT_EQ(plan.try_match(%(ok ok), bindings), 1);
@@ -1051,7 +1051,7 @@ static void plan_long_atom_binder_layout(void) {
   MatchPlan plan = MatchPlan.prepare(
     %(item ?VeryLongIdentifierValue *RemainingLongValues)
   );
-  if (!EXPECT_INT_EQ(plan.status, MACHINE_PREPARED)) {
+  if (!EXPECT_TRUE(plan.status == <prepared>)) {
     plan.free();
     return;
   }

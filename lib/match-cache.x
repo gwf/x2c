@@ -13,11 +13,6 @@
 #include "error-macros.x"
 #include "match.x"
 
-/** Cache pressure is the acquire status beyond MachinePrepare: every slot is
-    leased, so none can be recycled.
-*/
-#define MATCH_CACHE_PRESSURE 3
-
 /** Names an explicit cache of immutable prepared Match plans.
     A cache is not synchronized. Its caller must serialize access, keep every
     admitted pattern value alive until disposal, and dispose it when no lease
@@ -82,14 +77,14 @@ static struct MatchCache {
     fence diagnostic should report. The lease is initialized on every
     returning path. An admitted pattern reuses or creates an LRU entry; an
     inadmissible pattern gets a transient plan owned by the lease. Returns the
-    plan's `MachinePrepare` status, or `MATCH_CACHE_PRESSURE` when every entry
-    is pinned. Release the lease after any returned status; releasing the
+    plan's status symbol, or `<pressure>` when every entry is pinned.
+    Release the lease after any returned status; releasing the
     inactive pressure lease is a no-op.
     Raises: `<size-limit>` when `pattern` exceeds a lowering limit. Such a
     pattern compiles to no program, so it is never cached and never leased.
     `<alloc-fail>` may also be raised while preparing or growing storage.
 */
-int MatchCache.acquire(
+Symbol MatchCache.acquire(
   MatchCache m, Var pattern, MatchLease &lease, const char *owner) {
   lease = (MatchLease) {.slot = -1};
   if (!_admitted(m, pattern)) return _transient(m, pattern, &lease, owner);
@@ -101,7 +96,7 @@ int MatchCache.acquire(
     return m.entries[slot].plan.status;
   }
   slot = m.size < m.capacity ? _free_slot(m) : _victim(m);
-  if (slot < 0) return MATCH_CACHE_PRESSURE;
+  if (slot < 0) return <pressure>;
   MatchPlan plan = _prepare(m, pattern, owner);
   if (m.entries[slot].occupied) _remove(m, slot);
   _insert(m, slot, key, plan);
@@ -110,7 +105,7 @@ int MatchCache.acquire(
 }
 
 /* An inadmissible pattern gets a plan its lease owns. */
-static int _transient(
+static Symbol _transient(
   MatchCache cache, Var pattern, MatchLease *lease, const char *owner) {
   MatchPlan plan = _unfenced(MatchPlan.prepare(pattern), owner);
   lease.cache = cache;
@@ -131,7 +126,7 @@ static MatchPlan _prepare(
 
 /* Frees a fenced plan and raises its fence; returns any other plan. */
 static MatchPlan _unfenced(MatchPlan plan, const char *owner) {
-  if (plan.status == MACHINE_INELIGIBLE) {
+  if (plan.status == <ineligible>) {
     const char *reason = plan.reason;
     plan.free();
     MatchPlan.raise_ineligible(reason, owner);
@@ -343,9 +338,9 @@ static macro Stmt $match.plan(
   Name $plan, Expr $cache, Expr $pattern, Expr $owner) {
   MatchLease storage;
   MatchLease *lease = &storage;
-  int status = $cache.acquire($pattern, *lease, $owner);
+  Symbol status = $cache.acquire($pattern, *lease, $owner);
   defer lease.release();
-  MatchPlan $plan = status == MACHINE_PREPARED ? lease.plan() : NULL;
+  MatchPlan $plan = status == <prepared> ? lease.plan() : NULL;
 }
 
 /** Matches through `cache` into caller-owned positional storage.

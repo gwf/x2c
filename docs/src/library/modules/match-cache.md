@@ -28,7 +28,7 @@ already be closed.
 
 **Raises:** `<bad-state>` when a lease remains active.
 
-Source: `lib/match-cache.x:525`
+Source: `lib/match-cache.x:520`
 
 ### `MatchCache`
 
@@ -44,7 +44,7 @@ the token storage remains owned by its `Context` `Scope`.
 **Raises:** `<bad-state>` when `token` is not the top state or its cache has an
 active lease. The failure leaves the state installed.
 
-Source: `lib/match-cache.x:508`
+Source: `lib/match-cache.x:503`
 
 <a id="MatchCache.context_open"></a>
 #### MatchCache.context_open
@@ -59,7 +59,7 @@ active `Scope` and must be passed to `MatchCache.context_close` before that
 
 **Raises:** `<alloc-fail>` when the state cannot be allocated.
 
-Source: `lib/match-cache.x:494`
+Source: `lib/match-cache.x:489`
 
 ### `MatchLease`
 
@@ -70,7 +70,7 @@ Source: `lib/match-cache.x:494`
 
 Borrows the acquired program until this active lease is released.
 
-Source: `lib/match-cache.x:321`
+Source: `lib/match-cache.x:316`
 
 ## Runtime-internal callables
 
@@ -97,22 +97,22 @@ for source readers but are not supported as user API.
 <a id="MatchCache.acquire"></a>
 #### MatchCache.acquire
 
-`int MatchCache.acquire( MatchCache m, Var pattern, MatchLease &lease, const char *owner)`
+`Symbol MatchCache.acquire( MatchCache m, Var pattern, MatchLease &lease, const char *owner)`
 
 Acquires a lease for a cached prepared pattern.
 `cache` and `lease` must be nonnull, and `owner` names the operation a
 fence diagnostic should report. The lease is initialized on every
 returning path. An admitted pattern reuses or creates an LRU entry; an
 inadmissible pattern gets a transient plan owned by the lease. Returns the
-plan's `MachinePrepare` status, or `MATCH_CACHE_PRESSURE` when every entry
-is pinned. Release the lease after any returned status; releasing the
+plan's status symbol, or `<pressure>` when every entry is pinned.
+Release the lease after any returned status; releasing the
 inactive pressure lease is a no-op.
 
 **Raises:** `<size-limit>` when `pattern` exceeds a lowering limit. Such a
 pattern compiles to no program, so it is never cached and never leased.
 `<alloc-fail>` may also be raised while preparing or growing storage.
 
-Source: `lib/match-cache.x:92`
+Source: `lib/match-cache.x:87`
 
 <a id="MatchCache.current"></a>
 #### MatchCache.current
@@ -123,7 +123,7 @@ Returns the active default `Match` cache, creating it on first use.
 
 **Raises:** `<alloc-fail>` when the cache cannot be created.
 
-Source: `lib/match-cache.x:461`
+Source: `lib/match-cache.x:456`
 
 <a id="MatchCache.dispose"></a>
 #### MatchCache.dispose
@@ -137,7 +137,7 @@ invalidates every alias.
 **Raises:** `<bad-state>` when a lease remains active. The failure leaves the
 cache intact.
 
-Source: `lib/match-cache.x:570`
+Source: `lib/match-cache.x:565`
 
 <a id="MatchCache.flush_default"></a>
 #### MatchCache.flush_default
@@ -151,7 +151,7 @@ compiler capture sites are unaffected.
 **Raises:** `<bad-state>` when a lease remains active. The failure leaves the
 cache installed.
 
-Source: `lib/match-cache.x:480`
+Source: `lib/match-cache.x:475`
 
 <a id="MatchCache.new"></a>
 #### MatchCache.new
@@ -167,7 +167,7 @@ pools. `MatchCache.dispose` is required after every lease is released.
 storage dimensions cannot be represented, and `<alloc-fail>` when cache
 storage cannot be allocated.
 
-Source: `lib/match-cache.x:542`
+Source: `lib/match-cache.x:537`
 
 <a id="MatchCache.search"></a>
 #### MatchCache.search
@@ -183,7 +183,7 @@ that `List` is nonempty.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing or constructing results.
 
-Source: `lib/match-cache.x:401`
+Source: `lib/match-cache.x:396`
 
 <a id="MatchCache.search_replace"></a>
 #### MatchCache.search_replace
@@ -198,7 +198,7 @@ or machine error returns 0 and writes `input` unchanged.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing, traversing, or replacing.
 
-Source: `lib/match-cache.x:432`
+Source: `lib/match-cache.x:427`
 
 <a id="MatchCache.try_capture"></a>
 #### MatchCache.try_capture
@@ -213,7 +213,7 @@ malformed pattern, invalid buffer, cache pressure, or machine error returns
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing or matching.
 
-Source: `lib/match-cache.x:358`
+Source: `lib/match-cache.x:353`
 
 <a id="MatchCache.try_match"></a>
 #### MatchCache.try_match
@@ -228,7 +228,7 @@ binding shape and order follow `MatchPlan.execute`.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing, materializing, or publishing.
 
-Source: `lib/match-cache.x:372`
+Source: `lib/match-cache.x:367`
 
 <a id="MatchCache.try_match_replace"></a>
 #### MatchCache.try_match_replace
@@ -243,7 +243,7 @@ may be any `Var`.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing, materializing, or replacing.
 
-Source: `lib/match-cache.x:418`
+Source: `lib/match-cache.x:413`
 
 <a id="MatchCache.try_search"></a>
 #### MatchCache.try_search
@@ -258,7 +258,7 @@ follows `MatchPlan.try_search`.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing or constructing bindings.
 
-Source: `lib/match-cache.x:386`
+Source: `lib/match-cache.x:381`
 
 ### `MatchLease`
 
@@ -274,7 +274,7 @@ transient plan or unpins its cached entry and makes the lease inactive.
 **Raises:** `<bad-arg>` when lease is NULL and `<bad-state>` when its cache or
 entry state is inconsistent. The failure leaves the lease active.
 
-Source: `lib/match-cache.x:297`
+Source: `lib/match-cache.x:292`
 
 ## Public types
 
@@ -293,7 +293,7 @@ A cache is not synchronized. Its caller must serialize access, keep every
 admitted pattern value alive until disposal, and dispose it when no lease
 remains active.
 
-Source: `lib/match-cache.x:26`
+Source: `lib/match-cache.x:21`
 
 <a id="MatchLease"></a>
 ### MatchLease
@@ -305,7 +305,7 @@ A cached lease pins its entry; a transient lease owns its plan. Initialize
 it only through `MatchCache.acquire` and call `MatchLease.release` on every
 exit after acquisition returns, including a pressure result.
 
-Source: `lib/match-cache.x:33`
+Source: `lib/match-cache.x:28`
 
 ## Design notes
 

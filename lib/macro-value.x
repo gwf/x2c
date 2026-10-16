@@ -583,9 +583,9 @@ int MacroMatcher.matches(MacroMatcher &m, List code) {
   List pattern =
     m.pattern ? m.pattern : _case_shape(m.shape, m.holes);
   MatchLease lease;
-  int status = MatchCache.current().acquire(pattern, lease, "Macro.matches");
+  Symbol status = MatchCache.current().acquire(pattern, lease, "Macro.matches");
   defer lease.release();
-  if (status != MACHINE_PREPARED) return 0;
+  if (status != <prepared>) return 0;
   MatchPlan plan = lease.plan();
   MacroFixedSlots policy = _fixed_slots(m.shape, m.holes, plan);
   return _case_match(code, plan, &policy, NULL);
@@ -719,7 +719,7 @@ static int _keep(
   MacroPublishing &route) {
   MatchPlan kept = site && !macro_subject_used && List.try_own(pattern)
                  ? x2c_match_site_prepare(&site.match, pattern) : NULL;
-  if (!kept || kept.status != MACHINE_PREPARED) return 0;
+  if (!kept || kept.status != <prepared>) return 0;
   site.policy = _fixed_slots(t, names, kept);
   site.route = route;
   __atomic_store_n(&site.ready, 1, __ATOMIC_RELEASE);
@@ -779,7 +779,7 @@ static MacroFixedSlots _fixed_slots(
   Macro t, List names, MatchPlan plan) {
   MacroFixedSlots policy;
   policy.count = policy.names = 0;
-  if (plan.status != MACHINE_PREPARED) return policy;
+  if (plan.status != <prepared>) return policy;
   int ordinal = 0;
   foreach (List fresh, t.assoc(<fresh>).list()) {
     int slot = plan.layout.index(_fixed(ordinal++));
@@ -801,7 +801,7 @@ static MacroFixedSlots _fixed_slots(
 static int _case_match(
   List code, MatchPlan plan, MacroFixedSlots *policy,
   MatchCaptureBuffer *captured) {
-  if (plan.status != MACHINE_PREPARED)
+  if (plan.status != <prepared>)
     return plan.execute_capture(code, *captured, NULL) == 1;
   if (!plan.admits(code, _unwrap)) return 0;
   MatchMachine machine;
@@ -824,8 +824,8 @@ static int _take_slots(
   MatchMachine &machine, MatchCaptureBuffer *captured) {
   for (int i = 0; i < machine.slot_count; i++) {
     MachineSlot *slot = &machine.slots[i];
-    if (slot.kind == MACHINE_SLOT_INVALID) continue;
-    captured.values[i] = slot.kind == MACHINE_SLOT_SPAN
+    if (slot.kind == <invalid>) continue;
+    captured.values[i] = slot.kind == <span>
       ? machine.materialize_span(slot.span) : slot.value;
     captured.present |= 1UL << i;
   }
@@ -876,7 +876,7 @@ static int _held_elsewhere(
   MatchMachine &machine, MacroFixedSlots *policy, int slot, Var value) {
   for (int i = 0; i < policy.count; i++) {
     int other = policy.slots[i];
-    if (other != slot && machine.slots[other].kind == MACHINE_SLOT_VALUE &&
+    if (other != slot && machine.slots[other].kind == <value> &&
         machine.slots[other].value.equal(value))
       return 1;
   }

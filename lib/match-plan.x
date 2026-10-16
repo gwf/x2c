@@ -37,7 +37,7 @@ static typedef struct MatchLower {
 
 /** Compiles `pattern` into a reusable immutable `MatchPlan`.
     The caller owns the returned plan in the active `Scope`. Preparation
-    records `MACHINE_PREPARED`, `MACHINE_MALFORMED`, or `MACHINE_INELIGIBLE`
+    records `<prepared>`, `<malformed>`, or `<ineligible>`
     in the plan and raises for none of them; only a prepared plan has a
     program. `reason` is a borrowed static category string. The plan borrows
     pattern constants, which must outlive it.
@@ -51,8 +51,8 @@ MatchPlan MatchPlan.prepare(Var pattern) {
   plan.reason = plan.layout.reason;
   plan.key_count = 0;
   Var normalized = plan.layout.normalized;
-  if (plan.status == MACHINE_PREPARED) _lower(plan, normalized);
-  if (plan.status == MACHINE_PREPARED) _record_keys(plan, normalized);
+  if (plan.status == <prepared>) _lower(plan, normalized);
+  if (plan.status == <prepared>) _record_keys(plan, normalized);
   return plan;
 }
 
@@ -64,11 +64,11 @@ static void _lower(MatchPlan plan, Var pattern) {
   defer l.b.free();
   for (int i = 0; i < plan.layout.binder_count; i++)
     if (l.b.binder(plan.layout.binders[i]) != i) break;
-  l.b.root = l.b.status == MACHINE_PREPARED ? _compile_value(l, pattern) : -1;
+  l.b.root = l.b.status == <prepared> ? _compile_value(l, pattern) : -1;
   if (l.b.root < 0) _fail(l, "lowering");
   plan.status = l.b.status;
   plan.reason = l.b.reason;
-  if (plan.status == MACHINE_PREPARED) plan.program = l.b.freeze();
+  if (plan.status == <prepared>) plan.program = l.b.freeze();
   if (l.sites) Scope.free(l.sites);
 }
 
@@ -256,15 +256,15 @@ static int _emit_call(MatchLower &l, int child, int mode, int reg) {
 
 /* Records the first ineligibility reason and returns the failed entry. */
 static int _fail(MatchLower &l, const char *reason) {
-  if (l.b.status == MACHINE_PREPARED) {
-    l.b.status = MACHINE_INELIGIBLE;
+  if (l.b.status == <prepared>) {
+    l.b.status = <ineligible>;
     l.b.reason = reason;
   }
   return -1;
 }
 
 static int _stopped(MatchLower &l) =>
-  l.b.status != MACHINE_PREPARED;
+  l.b.status != <prepared>;
 
 /* guards
 
@@ -829,10 +829,6 @@ static int _star_retry(MatchLower &l, MatchStar &star, int loop) {
    otherwise costs a few comparisons. The program tests every key itself,
    so the check never refuses an input the plan matches. */
 
-/* What a pattern constrains: the current value itself, the first element
-   of a List, or that element with one later element. */
-static enum { MATCH_KEY_VALUE, MATCH_KEY_LIST, MATCH_KEY_INPUT };
-
 static typedef struct MatchKeys {
   MatchKey keys[MATCH_KEY_MAX];
   int count;
@@ -842,7 +838,7 @@ static typedef struct MatchKeys {
    more than the plan holds, records none. */
 static void _record_keys(MatchPlan plan, Var pattern) {
   MatchKeys found = {.count = 0};
-  if (!_keys(pattern, MATCH_KEY_INPUT, found)) return;
+  if (!_keys(pattern, <input>, found)) return;
   plan.key_bits = 1;
   for (int i = 0; i < found.count; i++) {
     MatchKey key = found.keys[i];
@@ -856,16 +852,16 @@ static void _record_keys(MatchPlan plan, Var pattern) {
 /* Adds the keys `pattern` fixes in `mode`, or returns 0. In value and List
    modes a key's `head` is the value, and `nested` says which mode found
    it. Alternatives contribute their keys only when every one has some. */
-static int _keys(Var pattern, int mode, MatchKeys &keys) {
+static int _keys(Var pattern, Symbol mode, MatchKeys &keys) {
   if (pattern is not <list>)
-    return mode == MATCH_KEY_VALUE && !pattern.is_binder() &&
+    return mode == <value> && !pattern.is_binder() &&
            _add(keys, (MatchKey) {pattern, void, 0, 0});
   List list = pattern;
   if (!list) return 0;
   Var op = list.car();
   List args = list.cdr();
   if (!op.is_match_op())
-    return mode != MATCH_KEY_VALUE && _segment_keys(list, mode, keys);
+    return mode != <value> && _segment_keys(list, mode, keys);
   if (op == <!set> && _set_binds(args)) return _keys(args.cadr(), mode, keys);
   if (op == <!or> || op == <!set>) {
     foreach (Var arm, args) if (!_keys(arm, mode, keys)) return 0;
@@ -883,10 +879,10 @@ static int _keys(Var pattern, int mode, MatchKeys &keys) {
 /* A segment fixes its first element when that is a value; in input mode
    each value pairs with every key of the first later element that has
    some. */
-static int _segment_keys(List pattern, int mode, MatchKeys &keys) {
+static int _segment_keys(List pattern, Symbol mode, MatchKeys &keys) {
   MatchKeys heads = {.count = 0}, inner = {.count = 0};
-  if (!_keys(pattern.car(), MATCH_KEY_VALUE, heads)) return 0;
-  int index = mode == MATCH_KEY_INPUT ? _inner_keys(pattern.cdr(), inner) : 0;
+  if (!_keys(pattern.car(), <value>, heads)) return 0;
+  int index = mode == <input> ? _inner_keys(pattern.cdr(), inner) : 0;
   for (int i = 0; i < heads.count; i++) {
     Var head = heads.keys[i].head;
     if (!index && !_add(keys, (MatchKey) {head, void, 0, 1})) return 0;
@@ -905,9 +901,9 @@ static int _inner_keys(List rest, MatchKeys &inner) {
   int index = 1;
   foreach (Var part, rest) {
     if (part.is_list_binder()) return 0;
-    if (_keys(part, MATCH_KEY_VALUE, inner)) return index;
+    if (_keys(part, <value>, inner)) return index;
     inner.count = 0;
-    if (_keys(part, MATCH_KEY_LIST, inner)) return index;
+    if (_keys(part, <list>, inner)) return index;
     inner.count = 0;
     index++;
   }

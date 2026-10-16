@@ -123,7 +123,7 @@ static void _match_lane(
   int binders, Var pattern, List hit, List miss, int iterations, int reverse) {
   MatchPlan plan = MatchPlan.prepare(pattern);
   MatchCaptureLayout layout = MatchCaptureLayout.analyze(pattern);
-  if (!plan || plan.status != MACHINE_PREPARED || !layout) exit(2);
+  if (!plan || plan.status != <prepared> || !layout) exit(2);
   List inputs[2] = { hit, miss };
   const char *outcomes[2] = { "hit", "miss" };
   for (int lane = 0; lane < 2; lane++) {

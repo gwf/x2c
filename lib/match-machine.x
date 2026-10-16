@@ -84,10 +84,10 @@ static void _execute(MatchMachine &m, const MachineWord &w) {
     case MW_MARK: _mark(m).undo_count = m.undo_count; break;
     case MW_ROLLBACK: _restore(m, w); break;
     case MW_SLOT_VALID:
-      if (m.slots[w.a].kind != MACHINE_SLOT_INVALID) m.pc = w.target;
+      if (m.slots[w.a].kind != <invalid>) m.pc = w.target;
       break;
     case MW_SLOT_IS_SPAN:
-      if (m.slots[w.a].kind == MACHINE_SLOT_SPAN) m.pc = w.target;
+      if (m.slots[w.a].kind == <span>) m.pc = w.target;
       break;
     case MW_SLOT_SET_VALUE: _set_value(m, w.a, m.value, w.b); break;
     case MW_SLOT_SET_SPAN: _set_span(m, w); break;
@@ -275,9 +275,8 @@ static void _pop_frame(MatchMachine &m) {
    `replace_span`, hold the span whose materialized List `value` memoizes. */
 static void _set_value(
   MatchMachine &m, int index, Var value, int replace_span) {
-  MachineSlot capture = {.kind = MACHINE_SLOT_VALUE, .value = value};
-  MachineSlotKind expected =
-    replace_span ? MACHINE_SLOT_SPAN : MACHINE_SLOT_INVALID;
+  MachineSlot capture = {.kind = <value>, .value = value};
+  Symbol expected = replace_span ? <span> : <invalid>;
   if (m.slots[index].kind != expected) _error(m, <slot-state>);
   else _journal(m, index, capture);
 }
@@ -287,10 +286,10 @@ static void _set_value(
 static void _set_span(MatchMachine &m, const MachineWord &w) {
   int length = *_distance(m, w.c) - *_distance(m, w.b);
   MachineSlot capture = {
-    .kind = MACHINE_SLOT_SPAN,
+    .kind = <span>,
     .span = (MachineSpan) {*_cursor(m, w.b), *_cursor(m, w.c), length}};
   if (m.stats) m.stats.span_descriptors++;
-  if (m.slots[w.a].kind != MACHINE_SLOT_INVALID) _error(m, <slot-state>);
+  if (m.slots[w.a].kind != <invalid>) _error(m, <slot-state>);
   else _journal(m, w.a, capture);
 }
 
@@ -322,7 +321,7 @@ static void _restore(MatchMachine &m, const MachineWord &w) {
 
 static int _value_equal(MatchMachine &m, int index, Var value) {
   MachineSlot *slot = &m.slots[index];
-  if (slot.kind != MACHINE_SLOT_VALUE) return 0;
+  if (slot.kind != <value>) return 0;
   if (m.relation)
     return m.relation(&m, index, slot.value, value, m.relation_context);
   return slot.value.equal(value);
@@ -345,7 +344,7 @@ static int _sequence_equal(
   if (!m.relation)
     return final ? slot.final_equal(input, m.stats)
                  : slot.prefix_equal(input, length, m.stats);
-  List expected = slot.kind == MACHINE_SLOT_SPAN
+  List expected = slot.kind == <span>
     ? m.materialize_span(slot.span) : slot.value.list();
   if (m.status == <error>) return 0;
   if (final) return m.relation(&m, index, expected, input, m.relation_context);
@@ -374,7 +373,7 @@ static void _eq_head(MatchMachine &m, const MachineWord &w) {
 static void _bind_head(MatchMachine &m, const MachineWord &w) {
   List at = *_cursor(m, w.b);
   if (!at) m.pc = w.target;
-  else if (m.slots[w.a].kind == MACHINE_SLOT_INVALID) {
+  else if (m.slots[w.a].kind == <invalid>) {
     _set_value(m, w.a, at.car(), 0);
     if (m.status != <error>) _skip(m, w.b, at);
   }
@@ -587,7 +586,7 @@ void MatchMachine.release_spares(void) {
 static void _clear_slots(MatchMachine &m) {
   for (int i = 0; i < m.slot_count; i++) {
     memset(&m.slots[i], 0, sizeof(MachineSlot));
-    m.slots[i].kind = MACHINE_SLOT_INVALID;
+    m.slots[i].kind = <invalid>;
   }
 }
 

@@ -20,7 +20,7 @@
 
 /* The cache names the operation that reports a fence; these tests exercise
    the cache itself, so every call names the cache operation. */
-static int _acquire(MatchCache cache, Var pattern, MatchLease &lease) =>
+static Symbol _acquire(MatchCache cache, Var pattern, MatchLease &lease) =>
   cache.acquire(pattern, lease, "MatchCache.acquire");
 
 static int _try_capture(
@@ -322,7 +322,7 @@ static void _check_mode(void) {
 
   // Losing star candidates construct nothing at the plan boundary.
   MatchPlan miss_plan = MatchPlan.prepare(patterns[4]);
-  _check(miss_plan.status == MACHINE_PREPARED, "star-miss-prepare");
+  _check(miss_plan.status == <prepared>, "star-miss-prepare");
   MachineStats miss_stats;
   memset(&miss_stats, 0, sizeof(miss_stats));
   List miss_bindings;
@@ -494,7 +494,7 @@ static void _time_mode(int sample) {
   Var status_pattern = %(status-lane ?value);
   List status_input = %(status-lane ok);
   MatchPlan plan = MatchPlan.prepare(status_pattern);
-  _check(plan.status == MACHINE_PREPARED, "status-lane-prepare");
+  _check(plan.status == <prepared>, "status-lane-prepare");
   uint64_t start = _now_ns();
   for (int i = 0; i < iterations; i++) {
     List bindings = NULL;

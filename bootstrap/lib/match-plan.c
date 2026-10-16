@@ -160,11 +160,6 @@ static int _star_tail(MatchLower * l, MatchStar * star);
 
 static int _star_retry(MatchLower * l, MatchStar * star, int loop);
 
-enum{
-  MATCH_KEY_VALUE, MATCH_KEY_LIST, MATCH_KEY_INPUT
-}
-;
-
 typedef struct MatchKeys{
   MatchKey keys[MATCH_KEY_MAX];
   int count;
@@ -173,9 +168,9 @@ MatchKeys;
 
 static void _record_keys(MatchPlan plan, Var pattern);
 
-static int _keys(Var pattern, int mode, MatchKeys * keys);
+static int _keys(Var pattern, Symbol mode, MatchKeys * keys);
 
-static int _segment_keys(List pattern, int mode, MatchKeys * keys);
+static int _segment_keys(List pattern, Symbol mode, MatchKeys * keys);
 
 static int _inner_keys(List rest, MatchKeys * inner);
 
@@ -220,8 +215,8 @@ MatchPlan MatchPlan_prepare(Var pattern){
   plan -> reason = plan -> layout -> reason;
   plan -> key_count = 0;
   Var normalized = plan -> layout -> normalized;
-  if(plan -> status == MACHINE_PREPARED) _lower(plan, normalized);
-  if(plan -> status == MACHINE_PREPARED) _record_keys(plan, normalized);
+  if(plan -> status == 1138535534920) _lower(plan, normalized);
+  if(plan -> status == 1138535534920) _record_keys(plan, normalized);
   return plan;
 }
 
@@ -253,11 +248,11 @@ static void _lower(MatchPlan plan, Var pattern){
     x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
       for(int i = 0;  i < plan -> layout -> binder_count;  i ++) if(MachineBuilder_binder(&(l.b), plan -> layout -> binders[i]) != i) break;
-      l.b.root = l.b.status == MACHINE_PREPARED ? _compile_value(&(l), pattern) : - 1;
+      l.b.root = l.b.status == 1138535534920 ? _compile_value(&(l), pattern) : - 1;
       if(l.b.root < 0) _fail(&(l), "lowering");
       plan -> status = l.b.status;
       plan -> reason = l.b.reason;
-      if(plan -> status == MACHINE_PREPARED) plan -> program = MachineBuilder_freeze(&(l.b));
+      if(plan -> status == 1138535534920) plan -> program = MachineBuilder_freeze(&(l.b));
       if(l.sites) Scope_free(l.sites);
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
@@ -441,15 +436,15 @@ static int _emit_call(MatchLower * l, int child, int mode, int reg){
 }
 
 static int _fail(MatchLower * l, const char * reason){
-  if((* l).b.status == MACHINE_PREPARED){
-    (* l).b.status = MACHINE_INELIGIBLE;
+  if((* l).b.status == 1138535534920){
+    (* l).b.status = 664475009618698;
     (* l).b.reason = reason;
   }
   return - 1;
 }
 
 static int _stopped(MatchLower * l){
-  return(* l).b.status != MACHINE_PREPARED;
+  return(* l).b.status != 1138535534920;
 }
 
 static int _compile_guard(MatchLower * l, Var op, List args){
@@ -939,7 +934,7 @@ static void _record_keys(MatchPlan plan, Var pattern){
     .count = 0
   }
   ;
-  if(! _keys(pattern, MATCH_KEY_INPUT, &(found))) return;
+  if(! _keys(pattern, 19826024, &(found))) return;
   plan -> key_bits = 1;
   for(int i = 0;  i < found.count;  i ++){
     MatchKey key = found.keys[i];
@@ -949,8 +944,8 @@ static void _record_keys(MatchPlan plan, Var pattern){
   plan -> key_count = found.count;
 }
 
-static int _keys(Var pattern, int mode, MatchKeys * keys){
-  if(! Var_is_row(pattern, 9, 7, 4)) return mode == MATCH_KEY_VALUE && ! Var_is_binder(pattern) && _add(&((* keys)), (MatchKey){
+static int _keys(Var pattern, Symbol mode, MatchKeys * keys){
+  if(! Var_is_row(pattern, 9, 7, 4)) return mode == 46228810 && ! Var_is_binder(pattern) && _add(&((* keys)), (MatchKey){
     pattern, ((void) 0, Void), 0, 0
   }
   );
@@ -958,7 +953,7 @@ static int _keys(Var pattern, int mode, MatchKeys * keys){
   if(! List_truth(list)) return 0;
   Var op = List_car(list);
   List args = List_cdr(list);
-  if(! Var_is_match_op(op)) return mode != MATCH_KEY_VALUE && _segment_keys(list, mode, &((* keys)));
+  if(! Var_is_match_op(op)) return mode != 46228810 && _segment_keys(list, mode, &((* keys)));
   if(x2c_var_equal(op, Symbol_var(2005352)) && _set_binds(args)) return _keys(List_cadr(args), mode, &((* keys)));
   if(x2c_var_equal(op, Symbol_var(62436)) || x2c_var_equal(op, Symbol_var(2005352))){
     {
@@ -994,7 +989,7 @@ static int _keys(Var pattern, int mode, MatchKeys * keys){
   return 0;
 }
 
-static int _segment_keys(List pattern, int mode, MatchKeys * keys){
+static int _segment_keys(List pattern, Symbol mode, MatchKeys * keys){
   MatchKeys heads ={
     .count = 0
   }
@@ -1002,8 +997,8 @@ static int _segment_keys(List pattern, int mode, MatchKeys * keys){
     .count = 0
   }
   ;
-  if(! _keys(List_car(pattern), MATCH_KEY_VALUE, &(heads))) return 0;
-  int index = mode == MATCH_KEY_INPUT ? _inner_keys(List_cdr(pattern), &(inner)) : 0;
+  if(! _keys(List_car(pattern), 46228810, &(heads))) return 0;
+  int index = mode == 19826024 ? _inner_keys(List_cdr(pattern), &(inner)) : 0;
   for(int i = 0;  i < heads.count;  i ++){
     Var head = heads.keys[i].head;
     if(! index && ! _add(&((* keys)), (MatchKey){
@@ -1033,9 +1028,9 @@ static int _inner_keys(List rest, MatchKeys * inner){
       part = _x2c_gensym_macro_cursor_output_10;
       {
         if(Var_is_list_binder(part)) return 0;
-        if(_keys(part, MATCH_KEY_VALUE, &((* inner)))) return index;
+        if(_keys(part, 46228810, &((* inner)))) return index;
         (* inner).count = 0;
-        if(_keys(part, MATCH_KEY_LIST, &((* inner)))) return index;
+        if(_keys(part, 806120, &((* inner)))) return index;
         (* inner).count = 0;
         index ++;
       }

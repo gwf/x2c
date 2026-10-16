@@ -7,7 +7,6 @@
 
 #include "error-macros.h"
 #include "match.h"
-#define MATCH_CACHE_PRESSURE 3
 typedef struct MatchCache * MatchCache;
 
 typedef struct MatchLease{
@@ -23,7 +22,7 @@ MatchLease;
 #include "pool.h"
 #include "scope.h"
 #define MATCH_ADMITTED_MEMO 256
-int MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char * owner);
+Symbol MatchCache_acquire(MatchCache m, Var pattern, MatchLease * lease, const char * owner);
 
 void MatchLease_release(MatchLease * lease);
 

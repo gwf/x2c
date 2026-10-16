@@ -31,16 +31,6 @@
 
 // vocabulary
 
-/* Records the result of preparing a program.
-
-    PREPARED programs may execute, INELIGIBLE inputs use their ordinary path,
-    and MALFORMED inputs must be rejected. */
-typedef enum MachinePrepare {
-  MACHINE_PREPARED,
-  MACHINE_INELIGIBLE,
-  MACHINE_MALFORMED
-} MachinePrepare;
-
 /* Names the Match wordcode operations.
 
     A star, guard, or alternative is a template composed from these; there
@@ -110,13 +100,6 @@ enum MachineRollback {
   MACHINE_ROLLBACK_RETRY
 };
 
-/* Identifies the active member of a Match capture slot. */
-typedef enum MachineSlotKind {
-  MACHINE_SLOT_INVALID,
-  MACHINE_SLOT_VALUE,
-  MACHINE_SLOT_SPAN
-} MachineSlotKind;
-
 // representation
 
 /* Stores one eight-byte machine instruction. */
@@ -150,13 +133,14 @@ class MachineProgram struct {
 
     The first ineligibility reason is sticky. Constants and binders are
     shallow values whose pointees must outlive any frozen program. Copying
-    a builder shares its mutable arrays; release them through one owner. */
+    a builder shares its mutable arrays; release them through one owner.
+    Status is `<prepared>`, `<ineligible>`, or `<malformed>`. */
 typedef struct MachineBuilder {
   MachineWord *code;
   Var *consts;
   Atom binders[MACHINE_BINDER_MAX];
   int length, code_capacity, const_count, const_capacity, binder_count, root;
-  MachinePrepare status, const char *reason;
+  Symbol status, const char *reason;
 } MachineBuilder;
 
 protocol Cleanup(MachineBuilder);
@@ -170,9 +154,10 @@ typedef struct MachineSpan {
 
 /* Stores either one captured value or one borrowed List span.
 
-    The value's pointee and the span's List cells are borrowed. */
+    The value's pointee and the span's List cells are borrowed.
+    Kind is `<invalid>`, `<value>`, or `<span>`. */
 typedef struct MachineSlot {
-  MachineSlotKind kind;
+  Symbol kind;
   Var value;
   MachineSpan span;
 } MachineSlot;
@@ -262,7 +247,7 @@ inline int MachineSlot.prefix_equal(
   MachineSlot *slot, List input, int length, MachineStats *stats) {
   if (stats) stats.range_comparisons++;
   List expected, end = NULL;
-  if (slot.kind == MACHINE_SLOT_VALUE) expected = slot.value;
+  if (slot.kind == <value>) expected = slot.value;
   else {
     if (slot.span.length != length) return 0;
     expected = slot.span.begin;
@@ -273,7 +258,7 @@ inline int MachineSlot.prefix_equal(
     input = input.cdr();
     expected = expected.cdr();
   }
-  return slot.kind == MACHINE_SLOT_SPAN ? expected == end : !expected;
+  return slot.kind == <span> ? expected == end : !expected;
 }
 
 /* Compares a captured value or span with an exact final List.
@@ -285,7 +270,7 @@ inline int MachineSlot.prefix_equal(
     memoizes that suffix as VALUE. */
 inline int MachineSlot.final_equal(
   MachineSlot *slot, List input, MachineStats *stats) {
-  if (slot.kind == MACHINE_SLOT_VALUE) {
+  if (slot.kind == <value>) {
     List expected = slot.value;
     if (expected == input) return 1;
     while (expected && input) {
@@ -320,7 +305,7 @@ inline int MachineSlot.final_equal(
    and all later emissions return -1. Allocation can raise. */
 int MachineBuilder.emit(
   MachineBuilder &b, int op, int a, int operand_b, int c, int d, int target) {
-  if (b.status != MACHINE_PREPARED || _grow_code(b) < 0) return -1;
+  if (b.status != <prepared> || _grow_code(b) < 0) return -1;
   if (op < 0 || op > 255 || operand_b < 0 || operand_b > 255 ||
       c < 0 || c > 255 || d < 0 || d > 255 ||
       a < -1 || a >= MACHINE_CODE_MAX ||
@@ -346,7 +331,7 @@ static int _grow_code(MachineBuilder &b) {
 /* Intern a constant by raw Var bits and return its byte-sized index. The
    stored value is shallow; capacity failure makes the builder ineligible. */
 int MachineBuilder.constant(MachineBuilder &b, Var value) {
-  if (b.status != MACHINE_PREPARED) return -1;
+  if (b.status != <prepared>) return -1;
   for (int i = 0; i < b.const_count; i++)
     if (b.consts[i].u64 == value.u64) return i;
   if (_grow_consts(b) < 0) return -1;
@@ -370,7 +355,7 @@ static int _grow_consts(MachineBuilder &b) {
 
 /* Intern a binder by raw Atom bits and return its fixed-table index. */
 int MachineBuilder.binder(MachineBuilder &b, Atom binder) {
-  if (b.status != MACHINE_PREPARED) return -1;
+  if (b.status != <prepared>) return -1;
   for (int i = 0; i < b.binder_count; i++)
     if (b.binders[i].u64 == binder.u64) return i;
   if (b.binder_count >= MACHINE_BINDER_MAX) return _fail(b, "binder-capacity");
@@ -403,8 +388,8 @@ void MachineBuilder.patch(
 }
 
 static int _fail(MachineBuilder &b, const char *reason) {
-  if (b.status == MACHINE_PREPARED) {
-    b.status = MACHINE_INELIGIBLE;
+  if (b.status == <prepared>) {
+    b.status = <ineligible>;
     b.reason = reason;
   }
   return -1;
@@ -417,7 +402,7 @@ static int _fail(MachineBuilder &b, const char *reason) {
    must make root name emitted code; freeze only checks that it is
    nonnegative. */
 MachineProgram MachineBuilder.freeze(MachineBuilder &b) {
-  if (b.status != MACHINE_PREPARED || b.root < 0) return NULL;
+  if (b.status != <prepared> || b.root < 0) return NULL;
   size_t bytes = _program_bytes(b.length, b.const_count, b.binder_count);
   MachineProgram program = Scope.malloc(bytes);
   *program = (struct MachineProgram) {
@@ -466,7 +451,7 @@ MachineBuilder MachineBuilder.new(void) {
 /* Prepare fresh builder storage with no root selected. */
 void MachineBuilder.init(MachineBuilder &b) {
   b = (MachineBuilder) {
-    .root = -1, .status = MACHINE_PREPARED, .reason = "prepared"};
+    .root = -1, .status = <prepared>, .reason = "prepared"};
 }
 
 /* Free the mutable arrays. Any builder view becomes invalid; constant and

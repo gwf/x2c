@@ -206,15 +206,11 @@ typedef struct CliOption{
   int hidden;
   String alias, label;
   int prefix;
-  int apply, package_native;
+  Symbol apply;
+  int package_native;
   size_t offset;
 }
 CliOption;
-
-enum{
-  FIELD_FLAG = 1, FIELD_TEXT, FIELD_LIST
-}
-;
 
 typedef struct CliGroup{
   Symbol group;
@@ -257,11 +253,7 @@ static CliGroup cli_groups[] ={
 }
 ;
 
-#define CLI_FIELD_FLAG(field) .apply = FIELD_FLAG, \
-  .offset = offsetof(struct CliRequest, field)
-#define CLI_FIELD_TEXT(field) .apply = FIELD_TEXT, \
-  .offset = offsetof(struct CliRequest, field)
-#define CLI_FIELD_LIST(field) .apply = FIELD_LIST, \
+#define CLI_FIELD(kind, field) .apply = kind, \
   .offset = offsetof(struct CliRequest, field)
 static CliOption cli_options[] ={
   {
@@ -499,97 +491,97 @@ _x2c_gensym_initializer_choice_29BB659F_0((0 < sizeof(cli_options) / sizeof(cli_
   47619197916, CLI_TOP, 495915096, _2, NULL, "Show the x2c version and exit", 0, .alias = _3
 }
 ), (2ULL < sizeof(cli_options) / sizeof(cli_options[2ULL])), (cli_options[2ULL] =(CliOption){
-  47618096330, CLI_TRANSLATE | CLI_NATIVE, 15397654616, _4, NULL, "Show commands as they are executed", 0, .alias = _5, CLI_FIELD_FLAG(verbose)
+  47618096330, CLI_TRANSLATE | CLI_NATIVE, 15397654616, _4, NULL, "Show commands as they are executed", 0, .alias = _5, CLI_FIELD(417870, verbose)
 }
 ), (3ULL < sizeof(cli_options) / sizeof(cli_options[3ULL])), (cli_options[3ULL] =(CliOption){
-  9852392796, CLI_TRANSLATE | CLI_NATIVE, 15397654616, _6, NULL, "Show commands without executing them", 0, CLI_FIELD_FLAG(dry_run)
+  9852392796, CLI_TRANSLATE | CLI_NATIVE, 15397654616, _6, NULL, "Show commands without executing them", 0, CLI_FIELD(417870, dry_run)
 }
 ), (4ULL < sizeof(cli_options) / sizeof(cli_options[4ULL])), (cli_options[4ULL] =(CliOption){
-  37046632, CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_INSTALL | CLI_REMOVE | CLI_NEW, 15397654616, _7, NULL, "Suppress successful progress and receipts", 0, .alias = _8, CLI_FIELD_FLAG(quiet)
+  37046632, CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_INSTALL | CLI_REMOVE | CLI_NEW, 15397654616, _7, NULL, "Suppress successful progress and receipts", 0, .alias = _8, CLI_FIELD(417870, quiet)
 }
 ), (5ULL < sizeof(cli_options) / sizeof(cli_options[5ULL])), (cli_options[5ULL] =(CliOption){
-  34343516, CLI_TRANSLATE | CLI_NATIVE, 15397654616, _9, NULL, "Use stable output without terminal rendering", 0, CLI_FIELD_FLAG(plain)
+  34343516, CLI_TRANSLATE | CLI_NATIVE, 15397654616, _9, NULL, "Use stable output without terminal rendering", 0, CLI_FIELD(417870, plain)
 }
 ), (6ULL < sizeof(cli_options) / sizeof(cli_options[6ULL])), (cli_options[6ULL] =(CliOption){
   7300068, CLI_TRANSLATE | CLI_NATIVE, 15397654616, _10, "<auto|always|never>", "Control terminal color", 0
 }
 ), (7ULL < sizeof(cli_options) / sizeof(cli_options[7ULL])), (cli_options[7ULL] =(CliOption){
-  8721742, CLI_TRANSLATE | CLI_NATIVE, 15397654616, _11, NULL, "Enable compiler debug logging", 0, CLI_FIELD_FLAG(debugging)
+  8721742, CLI_TRANSLATE | CLI_NATIVE, 15397654616, _11, NULL, "Enable compiler debug logging", 0, CLI_FIELD(417870, debugging)
 }
 ), (8ULL < sizeof(cli_options) / sizeof(cli_options[8ULL])), (cli_options[8ULL] =(CliOption){
   918708911504550, CLI_TRANSLATE | CLI_NATIVE, 15397654616, _12, "<count>", "Stop after <count> errors per unit (default: 20)", 0
 }
 ), (9ULL < sizeof(cli_options) / sizeof(cli_options[9ULL])), (cli_options[9ULL] =(CliOption){
-  9417250982666, CLI_TRANSLATE | CLI_NATIVE, 15397654616, _13, "<file>", "Write compiler diagnostics to <file> as JSON Lines", 0, CLI_FIELD_TEXT(diagnostics_file)
+  9417250982666, CLI_TRANSLATE | CLI_NATIVE, 15397654616, _13, "<file>", "Write compiler diagnostics to <file> as JSON Lines", 0, CLI_FIELD(1322536, diagnostics_file)
 }
 ), (10ULL < sizeof(cli_options) / sizeof(cli_options[10ULL])), (cli_options[10ULL] =(CliOption){
-  425788897168540, CLI_TRANSLATE, 15397654616, _14, NULL, "Fail a unit that reports a warning", 1, CLI_FIELD_FLAG(fatal_warnings)
+  425788897168540, CLI_TRANSLATE, 15397654616, _14, NULL, "Fail a unit that reports a warning", 1, CLI_FIELD(417870, fatal_warnings)
 }
 ), (11ULL < sizeof(cli_options) / sizeof(cli_options[11ULL])), (cli_options[11ULL] =(CliOption){
-  996384573642, CLI_TRANSLATE, 1307939018, _15, NULL, "Collect every unit cold without reading .xi interfaces", 1, CLI_FIELD_FLAG(no_interfaces)
+  996384573642, CLI_TRANSLATE, 1307939018, _15, NULL, "Collect every unit cold without reading .xi interfaces", 1, CLI_FIELD(417870, no_interfaces)
 }
 ), (12ULL < sizeof(cli_options) / sizeof(cli_options[12ULL])), (cli_options[12ULL] =(CliOption){
-  33665524324, CLI_TRANSLATE, 1052018024, _16, "<dir>", "Write generated files under <dir> (default: .)", 0, CLI_FIELD_TEXT(out_dir)
+  33665524324, CLI_TRANSLATE, 1052018024, _16, "<dir>", "Write generated files under <dir> (default: .)", 0, CLI_FIELD(1322536, out_dir)
 }
 ), (13ULL < sizeof(cli_options) / sizeof(cli_options[13ULL])), (cli_options[13ULL] =(CliOption){
-  42018498656, CLI_TRANSLATE | CLI_NATIVE, 1052018024, _17, NULL, "Map generated C locations to original x2c sources", 0, CLI_FIELD_FLAG(source_map)
+  42018498656, CLI_TRANSLATE | CLI_NATIVE, 1052018024, _17, NULL, "Map generated C locations to original x2c sources", 0, CLI_FIELD(417870, source_map)
 }
 ), (14ULL < sizeof(cli_options) / sizeof(cli_options[14ULL])), (cli_options[14ULL] =(CliOption){
-  31136689190, CLI_TRANSLATE, 1052018024, _18, NULL, "Do not write x2c dependency files", 0, CLI_FIELD_FLAG(no_deps)
+  31136689190, CLI_TRANSLATE, 1052018024, _18, NULL, "Do not write x2c dependency files", 0, CLI_FIELD(417870, no_deps)
 }
 ), (15ULL < sizeof(cli_options) / sizeof(cli_options[15ULL])), (cli_options[15ULL] =(CliOption){
-  286754491146, CLI_TRANSLATE, 1052018024, _19, "<file>", "Override the depfile path (one input only)", 0, CLI_FIELD_TEXT(dep_file)
+  286754491146, CLI_TRANSLATE, 1052018024, _19, "<file>", "Override the depfile path (one input only)", 0, CLI_FIELD(1322536, dep_file)
 }
 ), (16ULL < sizeof(cli_options) / sizeof(cli_options[16ULL])), (cli_options[16ULL] =(CliOption){
-  293637522078056, CLI_TRANSLATE, 1052018024, _20, "<target>", "Override the depfile target (one input only)", 0, CLI_FIELD_TEXT(dep_target)
+  293637522078056, CLI_TRANSLATE, 1052018024, _20, "<target>", "Override the depfile target (one input only)", 0, CLI_FIELD(1322536, dep_target)
 }
 ), (17ULL < sizeof(cli_options) / sizeof(cli_options[17ULL])), (cli_options[17ULL] =(CliOption){
-  996399414194, CLI_TRANSLATE, 1052018024, _21, NULL, "Omit phony rules for included files", 0, CLI_FIELD_FLAG(no_phony_deps)
+  996399414194, CLI_TRANSLATE, 1052018024, _21, NULL, "Omit phony rules for included files", 0, CLI_FIELD(417870, no_phony_deps)
 }
 ), (18ULL < sizeof(cli_options) / sizeof(cli_options[18ULL])), (cli_options[18ULL] =(CliOption){
-  896459484392, CLI_BUILD | CLI_RUN, 1345468776, _22, "<file>", "Use <file> instead of discovering x2c.toml", 0, CLI_FIELD_TEXT(manifest)
+  896459484392, CLI_BUILD | CLI_RUN, 1345468776, _22, "<file>", "Use <file> instead of discovering x2c.toml", 0, CLI_FIELD(1322536, manifest)
 }
 ), (19ULL < sizeof(cli_options) / sizeof(cli_options[19ULL])), (cli_options[19ULL] =(CliOption){
-  1345468776, CLI_BUILD | CLI_RUN, 1345468776, _23, "<name>", "Build the named manifest target", 0, CLI_FIELD_TEXT(target)
+  1345468776, CLI_BUILD | CLI_RUN, 1345468776, _23, "<name>", "Build the named manifest target", 0, CLI_FIELD(1322536, target)
 }
 ), (20ULL < sizeof(cli_options) / sizeof(cli_options[20ULL])), (cli_options[20ULL] =(CliOption){
-  35599567626, CLI_BUILD | CLI_RUN, 1345468776, _24, "<name>", "Apply the named manifest build profile", 0, CLI_FIELD_TEXT(profile)
+  35599567626, CLI_BUILD | CLI_RUN, 1345468776, _24, "<name>", "Apply the named manifest build profile", 0, CLI_FIELD(1322536, profile)
 }
 ), (21ULL < sizeof(cli_options) / sizeof(cli_options[21ULL])), (cli_options[21ULL] =(CliOption){
   740232, CLI_BUILD, 1345468776, _25, "<kind>", "executable, static-library, or meta-module", 0
 }
 ), (22ULL < sizeof(cli_options) / sizeof(cli_options[22ULL])), (cli_options[22ULL] =(CliOption){
-  7477414666, CLI_BUILD, 1345468776, _26, NULL, "Produce object files without linking", 0, .alias = _27, CLI_FIELD_FLAG(compile_only)
+  7477414666, CLI_BUILD, 1345468776, _26, NULL, "Produce object files without linking", 0, .alias = _27, CLI_FIELD(417870, compile_only)
 }
 ), (23ULL < sizeof(cli_options) / sizeof(cli_options[23ULL])), (cli_options[23ULL] =(CliOption){
   686246, CLI_TRANSLATE | CLI_NATIVE, 1345468776, _28, "<count>", "Maximum parallel translation and compilation jobs", 0, .alias = _29
 }
 ), (24ULL < sizeof(cli_options) / sizeof(cli_options[24ULL])), (cli_options[24ULL] =(CliOption){
-  1052018024, CLI_BUILD | CLI_RUN, 1052018024, _30, "<file>", "Name the executable, library, or single object", 0, CLI_FIELD_TEXT(output)
+  1052018024, CLI_BUILD | CLI_RUN, 1052018024, _30, "<file>", "Name the executable, library, or single object", 0, CLI_FIELD(1322536, output)
 }
 ), (25ULL < sizeof(cli_options) / sizeof(cli_options[25ULL])), (cli_options[25ULL] =(CliOption){
-  38995839752, CLI_SCRIPT, 1052018024, _31, NULL, "Build the script even when its cached executable is current", 0, CLI_FIELD_FLAG(rebuild)
+  38995839752, CLI_SCRIPT, 1052018024, _31, NULL, "Build the script even when its cached executable is current", 0, CLI_FIELD(417870, rebuild)
 }
 ), (26ULL < sizeof(cli_options) / sizeof(cli_options[26ULL])), (cli_options[26ULL] =(CliOption){
-  7088220, CLI_SCRIPT, 1052018024, _32, NULL, "Remove the script's cached build and exit without running it", 0, CLI_FIELD_FLAG(clean)
+  7088220, CLI_SCRIPT, 1052018024, _32, NULL, "Remove the script's cached build and exit without running it", 0, CLI_FIELD(417870, clean)
 }
 ), (27ULL < sizeof(cli_options) / sizeof(cli_options[27ULL])), (cli_options[27ULL] =(CliOption){
-  5861298610788, CLI_BUILD | CLI_RUN, 1052018024, _33, "<dir>", "Store generated C, objects, deps, and state here", 0, CLI_FIELD_TEXT(build_dir)
+  5861298610788, CLI_BUILD | CLI_RUN, 1052018024, _33, "<dir>", "Store generated C, objects, deps, and state here", 0, CLI_FIELD(1322536, build_dir)
 }
 ), (28ULL < sizeof(cli_options) / sizeof(cli_options[28ULL])), (cli_options[28ULL] =(CliOption){
   6551812, CLI_BUILD | CLI_RUN, 1052018024, _34, "<file>", "Write native compile commands and retain generated files", 0
 }
 ), (29ULL < sizeof(cli_options) / sizeof(cli_options[29ULL])), (cli_options[29ULL] =(CliOption){
-  41897807850336, CLI_BUILD | CLI_RUN, 1052018024, _35, NULL, "Keep generated C and other intermediate files", 0, .label = _36, CLI_FIELD_FLAG(save_temps)
+  41897807850336, CLI_BUILD | CLI_RUN, 1052018024, _35, NULL, "Keep generated C and other intermediate files", 0, .label = _36, CLI_FIELD(417870, save_temps)
 }
 ), (30ULL < sizeof(cli_options) / sizeof(cli_options[30ULL])), (cli_options[30ULL] =(CliOption){
-  7958982899053, CLI_INSTALL, 34433862090, _37, "<hex>", "Require this digest of a downloaded or local archive", 0, CLI_FIELD_TEXT(sha256)
+  7958982899053, CLI_INSTALL, 34433862090, _37, "<hex>", "Require this digest of a downloaded or local archive", 0, CLI_FIELD(1322536, sha256)
 }
 ), (31ULL < sizeof(cli_options) / sizeof(cli_options[31ULL])), (cli_options[31ULL] =(CliOption){
-  19800432, CLI_INSTALL | CLI_BUILD | CLI_RUN, 34433862090, _38, "<url-or-path>", "Resolve package names through this index", 0, CLI_FIELD_TEXT(index)
+  19800432, CLI_INSTALL | CLI_BUILD | CLI_RUN, 34433862090, _38, "<url-or-path>", "Resolve package names through this index", 0, CLI_FIELD(1322536, index)
 }
 ), (32ULL < sizeof(cli_options) / sizeof(cli_options[32ULL])), (cli_options[32ULL] =(CliOption){
-  13603018, CLI_INSTALL, 34433862090, _39, NULL, "Install a bundle built for another x2c version", 0, CLI_FIELD_FLAG(force)
+  13603018, CLI_INSTALL, 34433862090, _39, NULL, "Install a bundle built for another x2c version", 0, CLI_FIELD(417870, force)
 }
 ), (33ULL < sizeof(cli_options) / sizeof(cli_options[33ULL])), (cli_options[33ULL] =(CliOption){
   20273998090, CLI_TRANSLATE | CLI_NATIVE, 1307939018, _40, "<dir>", "Add a shared x2c/C include directory", 0, .package_native = 1
@@ -604,31 +596,31 @@ _x2c_gensym_initializer_choice_29BB659F_0((0 < sizeof(cli_options) / sizeof(cli_
   274059207002, CLI_NATIVE, 1307939018, _43, "<dir>", "Add a C-only system include directory", 0, .package_native = 1
 }
 ), (37ULL < sizeof(cli_options) / sizeof(cli_options[37ULL])), (cli_options[37ULL] =(CliOption){
-  35114656356, CLI_TRANSLATE | CLI_NATIVE | CLI_ENV, 1307939018, _44, "<dir>", "Add a directory of x2c packages", 0, CLI_FIELD_LIST(package_dirs)
+  35114656356, CLI_TRANSLATE | CLI_NATIVE | CLI_ENV, 1307939018, _44, "<dir>", "Add a directory of x2c packages", 0, CLI_FIELD(806120, package_dirs)
 }
 ), (38ULL < sizeof(cli_options) / sizeof(cli_options[38ULL])), (cli_options[38ULL] =(CliOption){
-  942951818, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, _45, "<file>", "Load a native module for compile-time calls", 0, CLI_FIELD_LIST(native_modules)
+  942951818, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, _45, "<file>", "Load a native module for compile-time calls", 0, CLI_FIELD(806120, native_modules)
 }
 ), (39ULL < sizeof(cli_options) / sizeof(cli_options[39ULL])), (cli_options[39ULL] =(CliOption){
-  12687699561436, CLI_BUILD, 1307939018, _46, "<dir>", "Link a package's compile-time part into a compiler", 0, CLI_FIELD_LIST(extensions)
+  12687699561436, CLI_BUILD, 1307939018, _46, "<dir>", "Link a package's compile-time part into a compiler", 0, CLI_FIELD(806120, extensions)
 }
 ), (40ULL < sizeof(cli_options) / sizeof(cli_options[40ULL])), (cli_options[40ULL] =(CliOption){
-  973020192, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, _47, NULL, "Skip symbol collection and preprocessing", 0, CLI_FIELD_FLAG(no_cpp)
+  973020192, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, _47, NULL, "Skip symbol collection and preprocessing", 0, CLI_FIELD(417870, no_cpp)
 }
 ), (41ULL < sizeof(cli_options) / sizeof(cli_options[41ULL])), (cli_options[41ULL] =(CliOption){
-  27054400850790, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, _48, NULL, "Collect symbols through the host preprocessor", 0, CLI_FIELD_FLAG(live_symbols)
+  27054400850790, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, _48, NULL, "Collect symbols through the host preprocessor", 0, CLI_FIELD(417870, live_symbols)
 }
 ), (42ULL < sizeof(cli_options) / sizeof(cli_options[42ULL])), (cli_options[42ULL] =(CliOption){
-  241658219366, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, _49, NULL, "Use CPP collection for this translation", 0, CLI_FIELD_FLAG(cpp_symbols)
+  241658219366, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, 1307939018, _49, NULL, "Use CPP collection for this translation", 0, CLI_FIELD(417870, cpp_symbols)
 }
 ), (43ULL < sizeof(cli_options) / sizeof(cli_options[43ULL])), (cli_options[43ULL] =(CliOption){
-  198, CLI_NATIVE | CLI_ENV, 279515230724452, _50, "<program>", "Use <program> as the host C compiler", 0, CLI_FIELD_TEXT(cc)
+  198, CLI_NATIVE | CLI_ENV, 279515230724452, _50, "<program>", "Use <program> as the host C compiler", 0, CLI_FIELD(1322536, cc)
 }
 ), (44ULL < sizeof(cli_options) / sizeof(cli_options[44ULL])), (cli_options[44ULL] =(CliOption){
-  28294904006, CLI_TRANSLATE | CLI_NATIVE, 279515230724452, _51, "<program>", "Use <program> to build meta code, whatever --cc is", 0, CLI_FIELD_TEXT(meta_cc)
+  28294904006, CLI_TRANSLATE | CLI_NATIVE, 279515230724452, _51, "<program>", "Use <program> to build meta code, whatever --cc is", 0, CLI_FIELD(1322536, meta_cc)
 }
 ), (45ULL < sizeof(cli_options) / sizeof(cli_options[45ULL])), (cli_options[45ULL] =(CliOption){
-  100, CLI_BUILD | CLI_ENV, 279515230724452, _52, "<program>", "Use <program> as the static-library archiver", 0, CLI_FIELD_TEXT(ar)
+  100, CLI_BUILD | CLI_ENV, 279515230724452, _52, "<program>", "Use <program> as the static-library archiver", 0, CLI_FIELD(1322536, ar)
 }
 ), (46ULL < sizeof(cli_options) / sizeof(cli_options[46ULL])), (cli_options[46ULL] =(CliOption){
   31784, CLI_NATIVE, 279515230724452, _53, NULL, "Set C optimization", 0, .label = _54, .prefix = 1
@@ -1494,15 +1486,15 @@ int CliRequest_dependency_option(String s){
 static void _set_field(CliRequest r, CliOption * option, String value){
   char * field =(char *) r +(* option).offset;
   switch((* option).apply){
-    case FIELD_FLAG :{
+    case 417870 :{
       *(int *) field = 1;
       break;
     }
-    case FIELD_TEXT :{
+    case 1322536 :{
       *(String *) field = value;
       break;
     }
-    case FIELD_LIST :{
+    case 806120 :{
       *(List *) field = cons(String_var(value), *(List *) field);
       break;
     }
