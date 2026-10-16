@@ -405,8 +405,12 @@ A hand-built `%(...)` List is still right in these cases:
   `src/cache.x` does.
 - **Measured hot paths.** Keep the List where a converged A/B shows that
   the quotation costs more. As a quotation, `_assignment` cost 2.1% more
-  (PR #142). Measure before converting a producer that runs for every
-  expression or statement.
+  (PR #142). A placed `$!Unit` quotation binds every declaration and
+  expression of the function again, so `_lambda_function`,
+  `_lambda_record`, and `_lambda_adapter` stay Lists. Translating
+  `unittest/test-lambda.x` cost 0.6% more with the function as a
+  quotation, and 4.9% more with all three. Measure before converting a
+  producer that runs for every expression or statement.
 
 ## Rebuilding a bound source expression
 
