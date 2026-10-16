@@ -281,8 +281,7 @@ try, catch, and finally.
 
 Public functions:
 
-`_x2c_try_catch_patterns`, `_x2c_try_catch_site`, `_x2c_try_landing`,
-`_x2c_try_exits_placement`
+`_x2c_try_catch_patterns`, `_x2c_try_catch_site`, `_x2c_try_landing`
 
 ### [src/deps.x](../src/deps.x)
 
