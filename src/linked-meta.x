@@ -207,6 +207,11 @@ static List _update_decode(List id, List value) {
   return decoded;
 }
 
+static List _update_operation(Var function) {
+  String spelling = Code.binding_spelling(function);
+  return $!(String){ String.new($spelling) };
+}
+
 /* --- src/component-access.x ---------------------------------------------- */
 
 static int _collection_family(Code base) {
@@ -1126,22 +1131,33 @@ static void _match_and(Buffer b, int &testing) {
   testing = 1;
 }
 
-static void _match_bind(
-  Buffer b, Var binder, String cell, Array seen, int &testing, int &braces) {
+static int _match_bind(
+  Buffer b, Var binder, String cell, Array seen, Array binders, int &testing,
+  int &braces) {
+  int list = binder.is_list_binder();
+  if (binders) {
+    int slot = binders.find(binder);
+    if (slot < 0) return 0;
+    _match_and(b, testing);
+    b.printf(
+      "(_x2c_gensym_match_values[%d] = %s%s%s, 1)",
+      slot, list ? "List_var(" : "", cell, list ? ")" : "");
+    return 1;
+  }
   if (testing) {
     b.write(") {");
     braces++;
     testing = 0;
   }
-  int index = seen.len() - 1;
-  int list = binder.is_list_binder();
   b.printf(
     " %s _x2c_gensym_match_%s_%d = %s;",
-    list ? "List" : "Var", list ? "list" : "value", index, cell);
+    list ? "List" : "Var", list ? "list" : "value", seen.len() - 1, cell);
+  return 1;
 }
 
 static int _match_element(
-  Buffer b, Var part, String cell, Array seen, int &testing, int &braces) {
+  Buffer b, Var part, String cell, Array seen, Array binders, int &testing,
+  int &braces) {
   Var binder = part;
   Symbol tag = part is <list> ? _match_capture_tag(part, binder) : 0;
   if (tag) {
@@ -1149,18 +1165,24 @@ static int _match_element(
     b.printf("Var_is(%s, %lu)", cell, (unsigned long) tag);
     part = binder;
   }
+  Var literal = part;
+  match (part) case %((!quote !quote) ?(Symbol quoted)): {
+    literal = quoted;
+    _match_and(b, testing);
+    b.printf("%s.u64 == %lluULL", cell, (unsigned long long) literal.u64);
+    return 0;
+  }
   if (part == <?>) return 0;
   if (part.is_atom_binder() && !(part in seen)) {
     seen.push(part);
-    _match_bind(b, part, cell, seen, testing, braces);
-    return 0;
+    return _match_bind(b, part, cell, seen, binders, testing, braces) ? 0 : -1;
   }
   List list = part is <list> ? part.list() : NULL;
   if (part.is_binder() || part.is_match_op() || part == <x2c-dyn> ||
       (list && list.car().is_match_op()))
     return -1;
-  if (part is not <symbol> && !list) return 2;
-  Var literal = part;
+  if (part is not <symbol> && !list) return binders ? -1 : 2;
+  if (list && binders) return 1;
   Symbol tested = <list>;
   _match_and(b, testing);
   if (list) b.printf("Var_is(%s, %lu)", cell, (unsigned long) tested);
@@ -1169,16 +1191,19 @@ static int _match_element(
 }
 
 static int _match_nested(
-  Buffer b, Array out, List pattern, Var value, int &depths) {
-  if (!pattern.match(%(expr ? (!or (cache ?) (expr ? (cache ?))))) ||
+  Buffer b, Array out, List pattern, Var value, Array binders, int &depths) {
+  if ((!binders &&
+       !pattern.match(%(expr ? (!or (cache ?) (expr ? (cache ?)))))) ||
       value is not <list>)
     return -1;
   _match_flush(b, out);
   Array rests = [], paths = [], seen = [];
-  int mark = out.len(), testing = 0, braces = 0, step = 0, deepest = 0;
+  int mark = out.len(), testing = !!binders, braces = 0, step = 0;
+  int deepest = 0;
   List rest = value;
   String path = "";
-  b.write(" _x2c_gensym_match_cursor = _x2c_gensym_match_expr;");
+  if (!binders)
+    b.write(" _x2c_gensym_match_cursor = _x2c_gensym_match_expr;");
   for (;;) {
     int levels = rests.len();
     String cursor = _match_cursor(levels);
@@ -1187,11 +1212,12 @@ static int _match_nested(
       String cell = %"$cursor->car";
       _match_and(b, testing);
       b.write(cursor);
-      step = _match_element(b, part, cell, seen, testing, braces);
+      step = _match_element(b, part, cell, seen, binders, testing, braces);
       if (step == 1) {
         _match_and(b, testing);
-        b.printf(
-          "(%s = Var_list_payload(%s), 1)", _match_cursor(levels + 1), cell);
+        String next = _match_cursor(levels + 1);
+        if (binders) b.printf("Macro_case_enter(%s, &%s)", cell, next);
+        else b.printf("(%s = Var_list_payload(%s), 1)", next, cell);
         rests.push(rest);
         paths.push(path);
         if (levels >= deepest) deepest = levels + 1;
@@ -1216,7 +1242,8 @@ static int _match_nested(
       else if (rest.cdr() || part in seen) step = -1;
       else if (part != <*>) {
         seen.push(part);
-        _match_bind(b, part, cursor, seen, testing, braces);
+        if (!_match_bind(b, part, cursor, seen, binders, testing, braces))
+          step = -1;
       }
       if (step < 0 || !levels) break;
       rest = rests.take_last();
@@ -1229,12 +1256,13 @@ static int _match_nested(
     rest = rest.cdr();
     path = path + "->cdr";
   }
+  if (binders && seen.len() < binders.len()) step = -1;
   if (step < 0) {
     while (out.len() > mark) out.take_last();
     b.clear();
     return -1;
   }
-  if (testing) {
+  if (testing && !binders) {
     b.write(") {");
     braces++;
   }
@@ -1254,10 +1282,52 @@ static void _match_captures(Buffer b, List binders) {
   }
 }
 
-static int _match_test(Buffer b, Array out, List pattern, int &sites) {
+static int _match_viewed(
+  Buffer b, Array out, List template, List labels, Code shape, List binders,
+  int &depths) {
+  Var derived = shape.pattern_value();
+  int statement = 0;
+  match (derived) case %((!quote !or) ?single (seq ?again)): {
+    Symbol head = _match_head(single);
+    if (head && head != <seq> && single.equal(again)) {
+      derived = single;
+      statement = 1;
+    }
+  }
+  Buffer tests = Buffer.new(0);
+  if (_match_nested(tests, [], NULL, derived, binders, depths) < 0)
+    return -1;
+  b.write(" { int _x2c_gensym_match_root = ");
+  /* A subject headed by the pattern's own head is neither a retained
+     invocation nor a wrapper, so it is its own view. */
+  Var head = _match_head(derived);
+  if (head && !(head in %(at src expr seq)))
+    b.printf(
+      "_x2c_gensym_match_expr && "
+      "_x2c_gensym_match_expr->car.u64 == %lluULL ? "
+      "(_x2c_gensym_match_cursor = _x2c_gensym_match_expr, 2) : ",
+      (unsigned long long) head.u64);
+  b.write("Macro_case_root(_x2c_gensym_match_expr, ");
+  _match_place(b, out, template);
+  b.write(", ");
+  _match_place(b, out, labels);
+  b.printf(
+    ", %d, &_x2c_gensym_match_cursor, &_x2c_gensym_match_capture); "
+    "if (_x2c_gensym_match_root == 1 || (_x2c_gensym_match_root == 2%s)) {",
+    statement, tests.str_free());
+  return 2;
+}
+
+static int _match_test(
+  Buffer b, Array out, List pattern, List binders, int &sites, int &depths) {
   match (pattern)
-    case %(expr ? (call (expr ? (ident (binding ? "Macro_case_pattern")))
-                        (args ?template ?labels))): {
+    case %(expr ? (call (expr ? (ident (binding ? (!or "Macro_case_pattern"
+                                                     "Macro_case_shape"))))
+                        (args ?template ?labels *shape))): {
+      int braces = shape
+        ? _match_viewed(b, out, template, labels, shape.car(), binders, depths)
+        : -1;
+      if (braces >= 0) return braces;
       int site = sites++;
       b.printf(
         " static MacroCaseSite _x2c_gensym_macro_site_%d; "
@@ -1349,11 +1419,11 @@ static Code _match_lowered(Code subject, List rows) {
     int guarded = dynamic && !otherwise;
     if (guarded) b.write(" if (!_x2c_gensym_match_none) {");
     int braces =
-      otherwise ? 0 : _match_nested(b, out, pattern, value, depths);
+      otherwise ? 0 : _match_nested(b, out, pattern, value, NULL, depths);
     if (braces < 0) {
       List binders = _match_binders(value);
       if (binders.len() > values) values = binders.len();
-      braces = _match_test(b, out, pattern, sites);
+      braces = _match_test(b, out, pattern, binders, sites, depths);
       _match_captures(b, binders);
     }
     _match_body(b, out, body, braces + guarded);
@@ -2144,6 +2214,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_update_cast_out", _update_cast_out);
   $linked.row(rows, "_update_box", _update_box);
   $linked.row(rows, "_update_decode", _update_decode);
+  $linked.row(rows, "_update_operation", _update_operation);
   $linked.row(rows, "_collection_family", _collection_family);
   $linked.row(rows, "access_read", access_read);
   $linked.row(rows, "_participant_store", _participant_store);
@@ -2212,6 +2283,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_match_element", _match_element);
   $linked.row(rows, "_match_nested", _match_nested);
   $linked.row(rows, "_match_captures", _match_captures);
+  $linked.row(rows, "_match_viewed", _match_viewed);
   $linked.row(rows, "_match_test", _match_test);
   $linked.row(rows, "_match_body", _match_body);
   $linked.row(rows, "_match_label", _match_label);

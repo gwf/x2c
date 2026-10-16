@@ -75,11 +75,12 @@ cat >"$tmp/unlinked.x" <<'EOF'
 int absent_native_body(int);
 meta int unlinked(int n) { return absent_native_body(n); }
 EOF
+cp "$tmp/native.x" "$tmp/conflict.x"
 printf '%s\n' ":load \"$tmp/native.x\"" 'loaded_answer(1);' \
   ":load \"$tmp/second.x\"" 'ordinary_color;' 'LOAD_RED;' \
   ':load no-quotes' ":load \"$tmp/missing.x\"" \
   ":load \"$tmp/broken.x\"" ":load \"$tmp/unlinked.x\"" \
-  ":load \"$tmp/native.x\"" 'loaded_calls();' \
+  ":load \"$tmp/conflict.x\"" 'loaded_calls();' \
   'Array cycle = [];' 'cycle.push(cycle);' 'loaded_append(cycle);' \
   'loaded_calls();' 'loaded_exit();' 'loaded_calls();' '1+2;' \
   >"$tmp/input"
@@ -100,9 +101,8 @@ tail -n 2 "$tmp/out" >"$tmp/recovery"
 printf '=> 0\n=> 3\n' >"$tmp/recovery-expected"
 cmp "$tmp/recovery-expected" "$tmp/recovery"
 
-# A failed load can be fixed without restarting. A rejected reload cannot
-# change the executable used by an earlier load, even before its first call
-# or after that helper exits and restarts.
+# A failed load can be fixed without restarting. An incompatible replacement
+# cannot change earlier code, even before its first call or after a restart.
 python3 - "$tmp" <<'PY'
 import pathlib
 import subprocess
@@ -117,26 +117,28 @@ repl = subprocess.Popen(
 repl.stdin.write(f':load "{source}"\n')
 repl.stdin.flush()
 assert "no public bodied meta functions" in repl.stderr.readline()
-def version(number):
+def version(number, parameter="void"):
     source.write_text(
         "#include <stdlib.h>\n"
-        f"meta int fresh_name(void) {{ return {number}; }}\n"
+        f"meta int fresh_name({parameter}) {{ return {number}; }}\n"
         "meta void end_helper(void) { exit(8); }\n")
 version(41)
 repl.stdin.write(f':load "{source}"\nunknown_sync;\n')
 repl.stdin.flush()
 line = repl.stderr.readline()
 assert "unresolved identifier: unknown_sync" in line, line
-version(42)
+version(42, "int n")
 out, err = repl.communicate(
     f':load "{source}"\nfresh_name();\nend_helper();\nfresh_name();\n',
     timeout=60)
 assert repl.returncode == 1, (out, err)
 assert 'loaded ("fresh_name" "end_helper")' in out, (out, err)
 assert out.count("=> 41\n") == 2 and "=> 42" not in out, (out, err)
-assert "name already defined: fresh_name" in err, err
+assert "function type changed: fresh_name" in err, err
 assert "the body exited with status 8" in err, err
 PY
+
+python3 commands/repl/tests/reload.py "$tmp"
 
 # Every retained executable directory belongs to a closed session.
 set -- "$tmp"/x2c-*

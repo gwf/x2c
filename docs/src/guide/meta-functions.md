@@ -731,6 +731,13 @@ Inside a `meta` body the whole body runs at compile time, so `$f(x)` there
 is an ordinary call of `f`. `$` keeps its meaning only where program code
 meets compile-time code, and says evaluate now and insert the result.
 
+A `match` or `catch` pattern in a `meta` body is the exception. Its
+captures come from its value, so a `$f(...)` call in it runs while the
+body is translated. Only meta code linked into the compiler can run then,
+such as the [source-form builders](../internals/compiler-api/grammar.md).
+A call of a project function waits until the body runs, so a pattern built
+by one cannot capture.
+
 Each unit gets its own `meta static` values: the helper runs their
 initializers again before the first call a unit makes. What those
 initializers allocate, a Job one starts included, lasts until the next

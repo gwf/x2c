@@ -11,7 +11,10 @@ Macros as values that build and recognize code.
 | --- | --- |
 | [`Macro_apply`](#Macro_apply) | Applies a macro value to code values. |
 | [`Macro_case_capture_at`](#Macro_case_capture_at) | Recognizes code built by `t` for the `case` whose site is `site`, which may be NULL, and publishes the captures under `names`. |
+| [`Macro_case_enter`](#Macro_case_enter) | Stores in `*cursor` the List a macro-valued `case` examines for `value`, beneath its source wrappers, and returns whether there is one. |
 | [`Macro_case_pattern`](#Macro_case_pattern) | The pattern a macro-valued `case` compiles to; the compiler lowers a call of this to `Macro_case_capture_at` over the match subject. |
+| [`Macro_case_root`](#Macro_case_root) | Starts a macro-valued `case` whose derived pattern generated `match` code tests in place. |
+| [`Macro_case_shape`](#Macro_case_shape) | The pattern a macro-valued `case` compiles to when the compiler derived `shape`, the pattern the case tests, while compiling it. |
 | [`Macro_close`](#Macro_close) | Records the Macro values an anonymous macro captured where it was created, so applying it later applies the same children. |
 | [`Macro_pattern`](#Macro_pattern) | Derives the Match pattern that recognizes code this macro builds, capturing each parameter under the given binder. |
 | [`Macro.declared`](#Macro.declared) | Returns the name a typed quotation declares with a Name hole whose local holds `value`: the name form of an `x2c_ident` spelling or a String, or a binding as it is. |
@@ -48,7 +51,18 @@ may be NULL, and publishes the captures under `names`. A pattern that
 does not depend on the current call's subject is prepared once and kept
 in the site; generated `match` code calls this for a macro-valued case.
 
-Source: `lib/macro-value.x:508`
+Source: `lib/macro-value.x:516`
+
+<a id="Macro_case_enter"></a>
+#### Macro_case_enter
+
+`int Macro_case_enter(Var value, List *cursor)`
+
+Stores in `*cursor` the List a macro-valued `case` examines for
+`value`, beneath its source wrappers, and returns whether there is
+one.
+
+Source: `lib/macro-value.x:553`
 
 <a id="Macro_case_pattern"></a>
 #### Macro_case_pattern
@@ -59,6 +73,33 @@ The pattern a macro-valued `case` compiles to; the compiler lowers a
 call of this to `Macro_case_capture_at` over the match subject.
 
 Source: `lib/macro-value.x:501`
+
+<a id="Macro_case_root"></a>
+#### Macro_case_root
+
+`int Macro_case_root( List code, Macro t, List names, int statement, List *cursor, MatchCaptureBuffer *published)`
+
+Starts a macro-valued `case` whose derived pattern generated `match`
+code tests in place. Returns 1 when `code` is a retained invocation of
+`t` and its arguments captured under `names` into `published`, 0 when
+`code` cannot match, and 2 after storing in `*cursor` the List the
+pattern tests: the view of `code` or, for a `statement` body, of the one
+statement a `seq` holds.
+
+Source: `lib/macro-value.x:534`
+
+<a id="Macro_case_shape"></a>
+#### Macro_case_shape
+
+`List Macro_case_shape(Macro t, List names, List shape)`
+
+The pattern a macro-valued `case` compiles to when the compiler derived
+`shape`, the pattern the case tests, while compiling it. Generated
+`match` code tests `shape` in place through `Macro_case_root` when it
+can, and otherwise lowers a call of this as it lowers
+`Macro_case_pattern`.
+
+Source: `lib/macro-value.x:508`
 
 <a id="Macro_close"></a>
 #### Macro_close
@@ -127,7 +168,7 @@ Source: `lib/macro-value.x:129`
 Prepares repeated recognition without retaining subject-specific
 bindings.
 
-Source: `lib/macro-value.x:531`
+Source: `lib/macro-value.x:571`
 
 <a id="Macro.matches"></a>
 #### Macro.matches
@@ -137,7 +178,7 @@ Source: `lib/macro-value.x:531`
 Tests complete code against a macro and its hole patterns. Repeated
 recognition can retain `Macro.matcher` so the pattern is derived once.
 
-Source: `lib/macro-value.x:556`
+Source: `lib/macro-value.x:596`
 
 <a id="Macro.number_literal"></a>
 #### Macro.number_literal
@@ -204,7 +245,7 @@ Source: `lib/macro-value.x:163`
 Tests code with the same source views and identity rules as a macro
 case.
 
-Source: `lib/macro-value.x:542`
+Source: `lib/macro-value.x:582`
 
 ## Runtime-internal callables
 
@@ -270,7 +311,7 @@ independent of subject bindings is derived once; contextual references
 are resolved against each subject. The caller keeps the source values
 alive as long as this record. Match plans use the active Match cache.
 
-Source: `lib/macro-value.x:524`
+Source: `lib/macro-value.x:564`
 
 <a id="MacroPublishing"></a>
 ### MacroPublishing

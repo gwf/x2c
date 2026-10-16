@@ -887,9 +887,8 @@ static List _declaration(Compiler c, List ast) {
 }
 
 static List _return(Compiler c, List ast) {
-  Macro returned = $return_value;
   match (ast)
-    case returned(?expression): {
+    case $return_value(?expression): {
       List value = c.convert_expression(expression, source_return_type(ast));
       return source_return_content(%($value));
     }
@@ -1014,19 +1013,19 @@ static List _truthy(Compiler c, List ast) {
   Macro while_loop = $while_loop, do_loop = $do_loop;
   Macro for_loop = $for_loop;
   match (ast) {
-    case if_then(?condition, ?yes):
+    case $if_then(?condition, ?yes):
       return c.rebuild_statement(
         if_then(_truthy_expression(c, condition), yes)).cadr();
-    case if_else(?condition, ?yes, ?no):
+    case $if_else(?condition, ?yes, ?no):
       return c.rebuild_statement(
         if_else(_truthy_expression(c, condition), yes, no)).cadr();
-    case while_loop(?condition, ?body):
+    case $while_loop(?condition, ?body):
       return c.rebuild_statement(
         while_loop(_truthy_expression(c, condition), body)).cadr();
-    case do_loop(?body, ?condition):
+    case $do_loop(?body, ?condition):
       return c.rebuild_statement(
         do_loop(body, _truthy_expression(c, condition))).cadr();
-    case for_loop(?init, ?condition, ?increment, ?body):
+    case $for_loop(?init, ?condition, ?increment, ?body):
       return c.rebuild_statement(
         for_loop(
           init, _truthy_expression(c, condition), increment,

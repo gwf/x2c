@@ -1456,32 +1456,32 @@ Symbol Logger_error_handler(List errors, Var data){
 
 void Logger_trace(Logger logger, Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
-  Logger_log((logger), 43124938, category, fields);
+  Logger_log(logger, 43124938, category, fields);
 }
 
 void Logger_debug(Logger logger, Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
-  Logger_log((logger), 8721742, category, fields);
+  Logger_log(logger, 8721742, category, fields);
 }
 
 void Logger_info(Logger logger, Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
-  Logger_log((logger), 618910, category, fields);
+  Logger_log(logger, 618910, category, fields);
 }
 
 void Logger_warn(Logger logger, Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
-  Logger_log((logger), 1510556, category, fields);
+  Logger_log(logger, 1510556, category, fields);
 }
 
 void Logger_error(Logger logger, Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
-  Logger_log((logger), 11703268, category, fields);
+  Logger_log(logger, 11703268, category, fields);
 }
 
 void Logger_fatal(Logger logger, Symbol category, List fields){
   if(! _init_guard_) Logger_initialize();
-  Logger_log((logger), 12689496, category, fields);
+  Logger_log(logger, 12689496, category, fields);
 }
 
 void log_trace(Symbol category, List fields){

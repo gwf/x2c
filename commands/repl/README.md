@@ -7,11 +7,15 @@ supported language subset, and limitations.
 `main.x` owns options and compiler identity. `repl.x` owns terminal output;
 `repl-input.x` owns editing and history. `repl-session.x` provides submissions,
 completion, diagnostics, and inspection without terminal interaction.
-`repl-load.x` builds an independent project meta helper for each `:load`,
+`repl-load.x` builds an independent project meta helper for each loaded file,
 publishes its public function and type declarations, and bridges calls
 through the helper's existing data protocol. Each load retains its executable
 across cache rebuilds. Source collection indexes refresh between loads;
-previously published declarations keep their storage.
+previously published declarations keep their storage. A repeated load of
+the same resolved path checks existing declarations before replacing its
+helper. Call adapters borrow the file's persistent record, so saved functions
+follow the replacement. `:info` uses compiler declaration formatting;
+`:symbols` optionally filters names by prefix.
 `repl-lower.x` lowers typed compiler ASTs to ordinary Lisp; `repl-runtime.x`
 and its Lisp source provide interpreter storage and value operations.
 These command services link against `libx2c-dev.a` for compiler parsing,
@@ -28,4 +32,6 @@ owners. Shared Lisp evaluation and compiled Match remain in
 
 After building the command, run `sh commands/repl/tests/run.sh` for its
 direct API and executable transcript checks. They exercise failure rollback,
-retained results, completion, inspection, source loading, and session teardown.
+retained results, completion, inspection, source loading and replacement,
+and session teardown. The replacement tests also load and edit a temporary
+copy of the autodiff module.

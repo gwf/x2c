@@ -729,10 +729,10 @@ static macro Unit $logger.method(Name $method, Literal $level) {
       Delivery and failure behavior follow `Logger.log`.
   */
   void Logger.$method(
-    Logger $(x2c.ident "logger"), Symbol $(x2c.ident "category"),
-    List $(x2c.ident "fields")) {
-    ($(x2c.ident "logger")).log(
-      $level, $(x2c.ident "category"), $(x2c.ident "fields"));
+    Logger $x2c_ident("logger"), Symbol $x2c_ident("category"),
+    List $x2c_ident("fields")) {
+    $x2c_ident("logger").log(
+      $level, $x2c_ident("category"), $x2c_ident("fields"));
   }
 }
 
@@ -748,8 +748,8 @@ static macro Unit $logger.global(
   /** Logs borrowed `fields` globally at $method level under `category`.
       Delivery and failure behavior follow `log_event`.
   */
-  void $function(Symbol $(x2c.ident "category"), List $(x2c.ident "fields")) {
-    log_event($level, $(x2c.ident "category"), $(x2c.ident "fields"));
+  void $function(Symbol $x2c_ident("category"), List $x2c_ident("fields")) {
+    log_event($level, $x2c_ident("category"), $x2c_ident("fields"));
   }
 }
 

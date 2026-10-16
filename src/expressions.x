@@ -979,20 +979,19 @@ List Compiler.resolve_expression(Compiler c, List input, Token origin) {
 
 /** True when syntax still needs ordinary binding or macro substitution. */
 int Compiler.needs_resolution(Compiler c, Var value) {
-  Macro lambda = $lambda_expression, captured = $lambda_captured;
   List syntax;
   $ast.walk(value, syntax)
     match (syntax) {
       case %(expr (!or () (<macro-expr>)) ?): return 1;
       case %(expr ? (parens (block *))): continue;
-      case captured(?body, *captures, *params): {
+      case $lambda_captured(?body, *captures, *params): {
         foreach (List row, captures)
           match (row) case %(capture ?binding ? ?):
             if (!(%(lambda-depth $binding) in c.semantic_binding_facts()))
               return 1;
         continue;
       }
-      case lambda(?body, *params): return 1;
+      case $lambda_expression(?body, *params): return 1;
       case %(at m-origin ?):
         if (c.source_map && !c.macro_holes) return 1;
       case %((!or macro-bind macro-invoke macro-slot meta-call macro-value
@@ -1050,20 +1049,19 @@ static List _resolve_content(
 }
 
 static List _content(Resolve &r, List content) {
-  Macro lambda = $lambda_expression, captured = $lambda_captured;
   match (r.input) {
-    case captured(?body, *rows, *params):
+    case $lambda_captured(?body, *rows, *params):
       return _lambda(r, body, rows, params);
-    case lambda(?body, *params): return _lambda(r, body, NULL, params);
+    case $lambda_expression(?body, *params):
+      return _lambda(r, body, NULL, params);
   }
   if (content && (content.car() == <at> || content.car() == <src>))
     return _source(r, content);
   if (content && content.car() == <expr>)
     match (content) case %(!set ?inner (expr ? ?)):
       return r.c.resolve_expression(inner, r.origin);
-  Macro indexed = $indexed;
   match (r.input) {
-    case indexed(?base, ?index):
+    case $indexed(?base, ?index):
       return _resolve_indexed(r.c, base, index, r.origin);
   }
   match (content) {
@@ -1154,7 +1152,8 @@ static List _source(Resolve &r, List content) {
 }
 
 static List _meta_call(Resolve &r) {
-  if (r.c.meta_body || r.c.macro_holes) return r.input;
+  if ((r.c.meta_body && !r.c.in_pattern) || r.c.macro_holes)
+    return r.input;
   if (r.origin == r.c.meta_statement && r.c.peek(0) == <;>) return r.input;
   return r.c.evaluate_meta_expression(r.input, r.origin);
 }
@@ -1702,6 +1701,10 @@ static List _method(CallSite &k, List receiver, List field) {
     List callee = %(expr (<macro-expr>) (op . ${k.receiver} ${k.field}));
     return _finish(k, k.result_type, callee, NULL, NULL);
   }
+  /* A template's free owner can name a type only where it lands, and
+     `T.member` there calls `T_member`, as the parser folds it. */
+  if (!resolution) match (k.type) case %(typedef ?(String owner)):
+    return _function(k, %(expr () (ident (${%"${owner}_${k.method}"}))));
   if (!resolution && !k.c.macro_holes && k.c.rewrite_rules) {
     List rewritten = _member_rewrite(k);
     if (rewritten) return rewritten;
@@ -2877,7 +2880,7 @@ static List _splice(Resolve &r, List expression) =>
 
 static List _array_value(Resolve &r) {
   Macro array_value = $array_value;
-  match (r.input) case array_value(*elements): {
+  match (r.input) case $array_value(*elements): {
     Array resolved = [];
     foreach (Var element, elements)
       foreach (List row, r.c.evaluate_macro_rows(element))
@@ -2890,7 +2893,7 @@ static List _array_value(Resolve &r) {
 
 static List _map_value(Resolve &r) {
   Macro map_value = $map_value;
-  match (r.input) case map_value(*entries): {
+  match (r.input) case $map_value(*entries): {
     Array resolved = [];
     foreach (Var entry, entries)
       foreach (Var row, r.c.evaluate_macro_rows(entry))

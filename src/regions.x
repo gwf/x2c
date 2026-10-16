@@ -431,27 +431,24 @@ static void _analyze(Walk &w, List function) {
 // statements
 
 static void _walk(Walk &w, Var node) {
-  Macro statement = $expression_statement;
-  Macro deferred = $deferred;
-  Macro returned = $return_value;
   match (node) {
     case %(at ?origin ?inner): _walk_at(w, origin, inner);
     case $source_block_content(%(*statements)):
       _walk_block(w, statements);
     case %(seq *statements): _walk_sequence(w, statements);
-    case deferred(?body): _walk_defer(w, body);
+    case $deferred(?body): _walk_defer(w, body);
     /* A lowered defer keeps its environment and capture records. */
     case %(defer ?body ?environment ?callback ?records ?written):
       _walk_defer(w, body);
     case %((!or declare decl) ?specifiers (bindings *bindings)):
       _declare(w, specifiers, bindings);
-    case returned(?result):
+    case $return_value(?result):
       _walk_return(w, source_return_type(node), result);
     /* A jump leaves the statements after it to another path, and a label is
        where that path arrives, so neither carries forward what the path
        before it freed. */
     case %((!or goto label) *): _revive(w);
-    case statement(?expression): _walk_expression(w, expression);
+    case $expression_statement(?expression): _walk_expression(w, expression);
     /* A control construct's children run conditionally, so they count as a
        nested block: what they free does not end the fall-through. */
     case $source_conditional_statement():
@@ -568,8 +565,7 @@ static void _walk_rows(Walk &w, List rows) {
 static void _walk_defer(Walk &w, Var body) {
   List arguments = NULL;
   String callee = NULL;
-  Macro statement = $expression_statement;
-  match (body) case statement(?expression):
+  match (body) case $expression_statement(?expression):
     callee = _callee_of(expression, arguments);
   Fact fact = _fact_of(w, arguments.car(), NULL);
   match (callee ? _effect(w, callee) : void) {
@@ -603,8 +599,7 @@ static void _walk_defer(Walk &w, Var body) {
    defer. A store into a place this block restores is undone before the
    block ends, so it is not an escape. */
 static int _note_restored(Walk &w, Var body) {
-  Macro statement = $expression_statement;
-  match (body) case statement(?expression):
+  match (body) case $expression_statement(?expression):
     match (_source_assignment(_unwrap(expression))) case %(?target ?): {
       Var place = _target_place(w, target);
       if (place == _unwrap(target)) return 0;
@@ -1169,12 +1164,11 @@ static Region _birth(
     case %(alloc *): return _active(w);
     case %(pool): return _pooled(w, born);
   }
-  Macro captured = $lambda_captured;
   match (source_expression(value)) {
     /* A closure holds what it captures, so it lives no longer than they. A
        reference capture moves its local into a cell of the active region,
        so the closure holds the local's value, not its address. */
-    case captured(?body, *captures, *params):
+    case $lambda_captured(?body, *captures, *params):
       return _captured_birth(w, captures, born, other, acquired);
   }
   match (_unwrap(value)) {

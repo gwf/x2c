@@ -351,6 +351,11 @@ List Compiler.evaluate_meta_statement(
 static List _meta_result(
   Compiler c, List expression, Var value, Token site) {
   if (value is void && c.meta_build) {
+    /* A meta body's pattern makes the call when the body runs. */
+    if (c.meta_body)
+      match (expression) case %(expr ?type (meta-call ?callee ?arguments)):
+        return c.resolve_expression(
+          %(expr $type (call $callee $arguments)), site);
     List placeholder = %(expr (int) (literal (int) "0"));
     c.meta_group.push(%(later $placeholder));
     return placeholder;
