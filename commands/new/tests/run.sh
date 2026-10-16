@@ -30,4 +30,3 @@ mkdir -p "$BUILD/starter/real-name"
 ln -s real-name "$BUILD/starter/link-name"
 "$X2C" new -q "$BUILD/starter/link-name"
 grep -Fxq '[target.link-name]' "$BUILD/starter/real-name/x2c.toml"
-
