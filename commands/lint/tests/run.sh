@@ -123,7 +123,7 @@ cmp "$tests/src/suppression-accepted.x" "$work/suppression.x"
 
 # The violation census includes zero-count rules from the current catalog.
 "$tool" --rules >"$work/rules"
-git ls-files -z -- ':(glob)src/*.x' ':(glob)lib/*.x' \
+git ls-files -z -- ':(glob)src/*.x' ':(glob)src/components/*.x' ':(glob)lib/*.x' \
   ':(exclude)lib/x2c.x' ':(exclude)src/linked-meta.x' >"$work/census.files"
 xargs -0 "$tool" --all -I src -I lib <"$work/census.files" \
   >"$work/census"

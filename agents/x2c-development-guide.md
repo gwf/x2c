@@ -23,7 +23,7 @@ generated-header changes rebuild their consumers. A clean build is a recovery
 and diagnostic tool, not a substitute for dependency tracking.
 
 A shipped component, one of the prelude sources `Compiler.prelude_sources`
-lists, such as `src/component-access.x`, belongs to the compiler that links
+lists, such as `src/components/component-access.x`, belongs to the compiler that links
 it, as the kernel does. That compiler runs its linked copies of the
 component's translators even after the source changes. It also skips a
 prelude rule whose translator it does not link, so the form keeps its own

@@ -74,7 +74,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 ### Collection and String literals
 
 - Parse: `src/literals.x`
-- Lower/generate: `src/component-literals.x`, `src/transform.x`, `src/cache.x`
+- Lower/generate: `src/components/component-literals.x`, `src/transform.x`, `src/cache.x`
 - Runtime: `lib/list.x`, `lib/array.x`, `lib/map.x`, `lib/string.x`
 - Tests: literal-cache and mutable-empty fixtures, collection suites
 - See also: [collections](../guide/collections.md)
@@ -88,7 +88,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
   numeric segment takes its nearest declared `T_str` converter when one exists
   and is
   boxed and rendered through `Var_str` otherwise
-- Lower/generate: `src/component-interpolation.x` joins the segments with
+- Lower/generate: `src/components/component-interpolation.x` joins the segments with
   `String_join`, a literal rewrite on the `segments` head; `src/transform.x`
   converts each insertion and moves ordered parts ahead of the join
 - Runtime: `lib/string.x`, plus `Var.str` for the boxed segments
@@ -108,7 +108,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 ### Indexing and slicing
 
 - Parse/type: `src/expressions.x`, `src/type.x`
-- Lower: `src/component-access.x` with ordinary ordered-call and conversion
+- Lower: `src/components/component-access.x` with ordinary ordered-call and conversion
   operations from `src/transform.x`
 - Runtime: collection helpers plus the shared bounds normalizer in
   `lib/common.x`
@@ -120,7 +120,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 - Parse/type: `src/expressions.x`, `src/type.x`
 - Lower: `src/transform.x`; a call that finds no member on a receiver with
   `delegate` fields goes through the one field path that provides it,
-  which `src/component-delegate.x` finds
+  which `src/components/component-delegate.x` finds
 - Runtime: statically selected module function
 - Tests: unit suites across runtime types and the delegate compiler fixtures
 
@@ -130,7 +130,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
   member's owner: `src/protocol.x`; operator mappings:
   `src/operator-ledger.x`
 - Write forwarding members, `Var` descriptor thunks, method tables, and
-  descriptor registration: `src/component-protocols.x`, on the `conform`
+  descriptor registration: `src/components/component-protocols.x`, on the `conform`
   form `src/protocol.x` presents for each conformance
 - Runtime descriptors and their registration: `lib/dispatch.x`; built-in
   adoptions: `lib/protocols.x`
@@ -208,7 +208,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 ### List destructuring
 
 - Parse declarations and binders: `src/parse.x`, `src/statements.x`
-- Type access: `src/type.x`; lower: `src/component-destructuring.x`,
+- Type access: `src/type.x`; lower: `src/components/component-destructuring.x`,
   dispatched from `src/transform.x`
 - Runtime source values: `lib/list.x`
 - Tests: destructuring suite and list-destructuring compiler fixtures
@@ -229,7 +229,7 @@ inline-lisp example
 - Typedef identity and scopes: `src/symbols.x`, `src/statements.x`
 - Conversion lowering: `src/expressions.x`
 - Protocol operator selection: `src/expressions.x`
-- Dynamic operators: `src/component-operators.x`
+- Dynamic operators: `src/components/component-operators.x`
 - Truthiness and native emission: `src/transform.x`, `src/emit.x`
 - Sentinel literal parsing and C spelling: `src/literals.x`, `src/emit.x`;
   expression context distinguishes the literal from C `void` type positions
@@ -273,7 +273,7 @@ inline-lisp example
 ### Lambdas
 
 - Parse and resolve captures: `src/literals.x`, `src/lambdas.x`
-- Lower: `src/component-lambdas.x`, dispatched from `src/transform.x`
+- Lower: `src/components/component-lambdas.x`, dispatched from `src/transform.x`
 - Direct `Func` calls and conversions: `src/callables.x`,
   `src/expressions.x`
 - Runtime: `lib/func.x` and receiving callback APIs
@@ -292,7 +292,7 @@ inline-lisp example
 ### Status-bearing Map operations
 
 - Runtime owner: `lib/map.x`
-- Literal boundary: `src/component-literals.x` builds counted
+- Literal boundary: `src/components/component-literals.x` builds counted
   `Map.update_n` construction
 - Generic routing: `lib/dispatch.x`
 - Value-returning wrappers: `Map.get` and `Map.del`
@@ -304,7 +304,7 @@ inline-lisp example
 ### Counted Array construction
 
 - Runtime owner: `lib/array.x` through `Array.update_n` and `Array.push`
-- Literal boundary: `src/component-literals.x` builds counted
+- Literal boundary: `src/components/component-literals.x` builds counted
   `Array.update_n` construction
 - Value contract: raw `Null` is data; `void` is rejected
 - Tests: `Array` suite and the counted-literal compiler fixture
@@ -313,7 +313,7 @@ inline-lisp example
 ### Var values in printf-family formats
 
 - Parse and type the call: `src/expressions.x`
-- Lower: `src/component-printf.x` reads the static format once and converts
+- Lower: `src/components/component-printf.x` reads the static format once and converts
   each `Var` value a conversion consumes, one call pattern per family member
 - Runtime: `Var.convert` in `lib/varconvert.x` and `Var.str` in
   `lib/dispatch.x`
@@ -323,7 +323,7 @@ inline-lisp example
 ### Match statement
 
 - Parse: `src/statements.x`
-- Lower: `src/component-match.x` emits direct tests for static patterns and
+- Lower: `src/components/component-match.x` emits direct tests for static patterns and
   capture storage for runtime matching
 - Native emission: `src/emit.x`
 - Runtime: `lib/match.x` owns pattern semantics; `lib/match-plan.x`
@@ -337,7 +337,7 @@ inline-lisp example
 ### String switch
 
 - Parse: `src/statements.x`
-- Lower: `src/component-string-switch.x` numbers the labels a switch on a
+- Lower: `src/components/component-string-switch.x` numbers the labels a switch on a
   `String` owns and switches on a shared helper's result
 - Tests: the `string-switch` and `rewrite-string-switch` compiler fixtures
 - See also: [C control flow](../reference/language.md#c-control-flow)
@@ -345,8 +345,8 @@ inline-lisp example
 ### Raise, filtered catch, finally, and defer
 
 - Parse: `src/statements.x`
-- Lower/generate: `src/transform.x`; `src/component-raise.x` converts a
-  `raise`'s code and details; `src/component-try.x` lowers `try` to a
+- Lower/generate: `src/transform.x`; `src/components/component-raise.x` converts a
+  `raise`'s code and details; `src/components/component-try.x` lowers `try` to a
   landing form; `src/cleanup.x` places cleanup on every exit from a region;
   `src/emit.x`
 - Runtime: `lib/exception.x` owns the frame/jump engine for transfer and
@@ -390,11 +390,11 @@ The main translation steps are:
 4. `src/type.x` supplies type facts and canonical forms.
 5. `src/transform.x` normalizes the typed forms and dispatches each
    feature a shipped component owns to its rules, such as lambdas to
-   `src/component-lambdas.x`; `src/callables.x` owns `Func` adapter
+   `src/components/component-lambdas.x`; `src/callables.x` owns `Func` adapter
    synthesis.
 6. `src/cleanup.x` names each `defer` region's runtime record and each
    landing's frame, and places cleanup statements on every exit that leaves
-   a region; `src/component-try.x` answers the landing form of a `try`.
+   a region; `src/components/component-try.x` answers the landing form of a `try`.
 7. `src/generate.x` partitions the translation unit and installs init
    scaffolding; `src/cache.x` owns literal-cache initialization.
 8. `src/emit.x` emits C tokens and `src/format.x` formats them.

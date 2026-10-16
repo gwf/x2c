@@ -103,7 +103,7 @@ captures a value; by itself it does not establish that value's type.
 | Type-owned shutdown | verified | parser/generator and `Scope.shutdown_hook` | lifecycle fixtures and Scope probes |
 | Typedef method and converter inheritance | verified | postfix parser and conversion lowering | fixtures/example |
 | Numeric/`Var` String interpolation | verified | interpolation converter | interpolation suite/example |
-| Static printf-family `Var` conversion | verified | `src/component-printf.x` | compiler fixtures |
+| Static printf-family `Var` conversion | verified | `src/components/component-printf.x` | compiler fixtures |
 | Structural `Var` decoding | verified | `lib/var.x` | VarOps suite |
 | Cross-tag numeric conversion | verified | `Var.convert` | VarOps |
 | Dynamic numeric operations | verified | `Var.binary` | VarOps/fixture |
@@ -779,7 +779,7 @@ also renders through `Var.str` for every runtime tag.
 The interpolation suite provides executable evidence.
 
 Static printf-family formats provide a separate presentation crossing for
-`Var`. `src/component-printf.x` recognizes `printf`, `fprintf`, `sprintf`,
+`Var`. `src/components/component-printf.x` recognizes `printf`, `fprintf`, `sprintf`,
 `snprintf`, and the `printf` methods on String, File, and Buffer. Numeric
 conversions use checked `Var.convert`, while `%s` uses `Var.str`; the
 compiler fixtures own the exact supported format grammar and its

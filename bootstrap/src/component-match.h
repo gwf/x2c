@@ -2,11 +2,11 @@
 
 #pragma once
 
-#ifndef __GUARD_0xCAB6D4B4__
-#define __GUARD_0xCAB6D4B4__
+#ifndef __GUARD_0x1574C8F1__
+#define __GUARD_0x1574C8F1__
 
 #include "x2c.h"
 #include "rewrite.h"
 #include "grammar.h"
 
-#endif /* __GUARD_0xCAB6D4B4__ */
+#endif /* __GUARD_0x1574C8F1__ */
