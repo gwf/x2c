@@ -32,7 +32,6 @@ X2c declarations, parsed from source or constructed.
 | [`Compiler.finish_initializers`](#Compiler.finish_initializers) | Lowers block declarations whose declarators placed code after themselves, or that an after-initialization rewrite follows, to declarations followed by that code in source order, preserving their installed bindings and the enclosing lifetime. |
 | [`Compiler.function_entry`](#Compiler.function_entry) | Returns the code placed at the entry of the function row at `depth` since it was entered or last asked, in placement order, or NULL. |
 | [`Compiler.leave_item`](#Compiler.leave_item) | Leaves the block item `enter` began and returns the code placed after it, bound in its block, or NULL. |
-| [`Compiler.lowering_body`](#Compiler.lowering_body) | Reports whether the transform is lowering a function body, whose local scopes the symbol table no longer holds. |
 | [`Compiler.meta_form_is_declaration`](#Compiler.meta_form_is_declaration) | Reports whether the cursor begins a contextual top-level `meta` declaration: a function or an initialized file-static value. |
 | [`Compiler.package_alias_spelling`](#Compiler.package_alias_spelling) | Returns the folded package-member spelling at the current token, or NULL. |
 | [`Compiler.parse_basic_identifier`](#Compiler.parse_basic_identifier) | Consumes one `ident` token and returns its spelling as a one-item `List`. |
@@ -182,7 +181,7 @@ Source: `src/parse/declarations.x:291`
 Gives the placements made since `first` the `result` of the expansion
 that made them.
 
-Source: `src/parse/placement.x:129`
+Source: `src/parse/placement.x:121`
 
 <a id="Compiler.defines_main"></a>
 #### Compiler.defines_main
@@ -243,7 +242,7 @@ Enters the function definition `declaration`, whose body the
 transform lowers next, so a rule lowering that body places code at its
 entry. Returns the row's depth for `Compiler.leave_function`.
 
-Source: `src/parse/placement.x:68`
+Source: `src/parse/placement.x:60`
 
 <a id="Compiler.exit_function"></a>
 #### Compiler.exit_function
@@ -253,7 +252,7 @@ Source: `src/parse/placement.x:68`
 Leaves the function row at `depth` that `Compiler.enter_function`
 began.
 
-Source: `src/parse/placement.x:95`
+Source: `src/parse/placement.x:87`
 
 <a id="Compiler.finish_foreign_alias"></a>
 #### Compiler.finish_foreign_alias
@@ -277,7 +276,7 @@ themselves, or that an after-initialization rewrite follows, to
 declarations followed by that code in source order, preserving their
 installed bindings and the enclosing lifetime.
 
-Source: `src/parse/placement.x:177`
+Source: `src/parse/placement.x:169`
 
 <a id="Compiler.function_entry"></a>
 #### Compiler.function_entry
@@ -290,7 +289,7 @@ code binds in a scope of its own with the function's result type; its
 caller lowers it while the row is still entered, so a placement that
 lowering makes lands at the entry too.
 
-Source: `src/parse/placement.x:82`
+Source: `src/parse/placement.x:74`
 
 <a id="Compiler.leave_item"></a>
 #### Compiler.leave_item
@@ -301,17 +300,7 @@ Leaves the block item `enter` began and returns the code placed after
 it, bound in its block, or NULL. A declarator in the item that placed
 code is incomplete unless its block declaration took that code.
 
-Source: `src/parse/placement.x:139`
-
-<a id="Compiler.lowering_body"></a>
-#### Compiler.lowering_body
-
-`int Compiler.lowering_body(Compiler c)`
-
-Reports whether the transform is lowering a function body, whose
-local scopes the symbol table no longer holds.
-
-Source: `src/parse/placement.x:58`
+Source: `src/parse/placement.x:131`
 
 <a id="Compiler.meta_form_is_declaration"></a>
 #### Compiler.meta_form_is_declaration
@@ -593,7 +582,7 @@ Records `code` to follow the innermost block item, or the initialized
 declarator whose initializer is being parsed directly in it. The
 expansion that placed it gives it its result when it finishes.
 
-Source: `src/parse/placement.x:116`
+Source: `src/parse/placement.x:108`
 
 <a id="Compiler.place_entry"></a>
 #### Compiler.place_entry
@@ -606,7 +595,7 @@ a lambda body is inside the definition that holds it; while lowering, a
 lambda body is the body of its own lifted function, and a finalizer the
 kernel wrote as a callback has no entry a program can place at.
 
-Source: `src/parse/placement.x:104`
+Source: `src/parse/placement.x:96`
 
 <a id="Compiler.protocol_form_starts"></a>
 #### Compiler.protocol_form_starts

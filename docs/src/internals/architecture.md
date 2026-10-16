@@ -781,7 +781,7 @@ an empty brace among them is an empty Map, and an empty literal is the bare
 `Array.new()` or `Map.new()`. Each part runs once, left to right: once two or
 more parts read state, the transform moves each part that reads state, through
 the last one that may change state, into a temporary ahead of the call, as
-"literal order" in `src/transform.x` describes.
+"literal order" in `src/transform/literals.x` describes.
 
 `src/components/component-printf.x` registers one call pattern for each
 printf-family member, on the call family keyed by the callee's spelling, so a

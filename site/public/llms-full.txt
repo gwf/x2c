@@ -6138,8 +6138,8 @@ sources = ["src/*.x"]
 The directory may be missing or empty; `x2c new .` fills the current empty
 directory. `new` exits with an error for any other existing path and never
 overwrites a file. The target name is the directory's last component and may
-contain letters, digits, `_`, and `-`. `-q` suppresses the `x2c: created
-<dir>` line.
+contain letters, digits, `_`, and `-`. `-q` suppresses the
+`x2c: created <dir>` line.
 
 ## Project manifests
 

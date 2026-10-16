@@ -83,7 +83,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 ### String interpolation
 
 - Parse: `src/literals.x` for `$name` and `${expr}`, which are separate sites
-- Type/convert: `Compiler.convert_segment_to_string` in `src/expressions.x`
+- Type/convert: `Compiler.convert_segment_to_string` in `src/expressions/conversions.x`
   selects the conversion for each segment. A segment that is already a `Var`,
   canonical or aliased, renders through `Var_str` whatever its run-time tag; a
   numeric segment takes its nearest declared `T_str` converter when one exists
@@ -183,7 +183,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
   `Compiler.source_token`
 - Member dependencies and the entry's content hash: `FileWalk` in
   `src/collect.x`
-- The `module` storage class: `_module_storage_form` in `src/parse.x`
+- The `module` storage class: `_module_storage_form` in `src/parse/units.x`
   retypes the word as `static` under `Compiler.module_declaration`
 - File-private statics: each marker row carries its file's prefix from
   `_file_prefix` in `src/collect.x`; `_declared_key` in `src/symbols.x`

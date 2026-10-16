@@ -33,7 +33,7 @@ uses ordinary file scope. A script without `main` retains file-level
 functions, types, imports, macros, and explicit static declarations, while
 its executable block items become the implicit script body. This partition
 uses `Compiler.script_statement_starts`, `_declaration_stays`, and
-`defines_main`, defined in `src/parse.x`. File-level functions cannot refer
+`defines_main`, defined in `src/parse/units.x`. File-level functions cannot refer
 to script locals.
 
 Module blocks are expanded by `src/collect.x` before `translation-unit`

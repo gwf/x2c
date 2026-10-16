@@ -69,7 +69,7 @@ Rejects writes and reference access to read-only snapshot bindings.
 The body has already resolved identifiers and call arguments. Templates
 defer this check until expansion; nested lambdas check their own bodies.
 
-Source: `src/lambdas.x:640`
+Source: `src/lambdas.x:639`
 
 <a id="Compiler.end_lambda_captures"></a>
 #### Compiler.end_lambda_captures
@@ -131,7 +131,7 @@ Source: `src/lambdas.x:155`
 Gives the captures of `binding` that the enclosing lambdas already
 recorded the C spelling `binding` emits under.
 
-Source: `src/lambdas.x:622`
+Source: `src/lambdas.x:621`
 
 ## Design notes
 

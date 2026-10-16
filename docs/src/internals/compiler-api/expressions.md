@@ -50,7 +50,7 @@ Inside a template body the call is retained so the template can capture
 the value it applies; elsewhere it is an ordinary `Macro_apply` over the
 argument values.
 
-Source: `src/expressions/syntax.x:516`
+Source: `src/expressions/syntax.x:533`
 
 <a id="Compiler.check_explicit_converter"></a>
 #### Compiler.check_explicit_converter
@@ -227,7 +227,7 @@ Parses one primary expression or expression-valued macro slot.
 Dispatch starts at `c.token` to the selected literal, identifier,
 grouping, or macro parser and leaves the token after that primary form.
 
-Source: `src/expressions/syntax.x:590`
+Source: `src/expressions/syntax.x:607`
 
 <a id="Compiler.parse_variable"></a>
 #### Compiler.parse_variable
@@ -237,7 +237,7 @@ Source: `src/expressions/syntax.x:590`
 Parses and resolves one complex identifier expression.
 Parsing starts at `c.token` and leaves it after the identifier.
 
-Source: `src/expressions/syntax.x:648`
+Source: `src/expressions/syntax.x:665`
 
 <a id="Compiler.postfix_completions"></a>
 #### Compiler.postfix_completions
@@ -247,7 +247,7 @@ Source: `src/expressions/syntax.x:648`
 Returns sorted visible field and method names that resolve on `receiver`
 through `access`.
 
-Source: `src/expressions/access.x:320`
+Source: `src/expressions/access.x:327`
 
 <a id="Compiler.printf_static_format"></a>
 #### Compiler.printf_static_format
