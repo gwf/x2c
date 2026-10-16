@@ -29,15 +29,15 @@ String Compiler_meta_cc_identity(String cc);
 
 String Compiler_meta_cc_run(List arguments, String directory);
 
+void Compiler_prepare_loaded_main(Compiler c, Array nodes);
+
+void Compiler_prepare_loaded_functions(Compiler c, Array nodes);
+
 void Compiler_stage_meta_in_process(void);
 
 int Compiler_groups_meta(Compiler c);
 
 void Compiler_group_meta_function(Compiler c, List fn);
-
-void Compiler_prepare_loaded_main(Compiler c, Array nodes);
-
-void Compiler_prepare_loaded_functions(Compiler c, Array nodes);
 
 int Compiler_meta_reaches_compile_time(Compiler c, Var node);
 
