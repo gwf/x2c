@@ -5697,7 +5697,7 @@ static Var _kept_lowered(Var result, List source, Array parts){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_34);
     {
-      Map_setindex(kept, Var_new(3683441, (void *) source), List_var(cons(_501, cons(_503, cons(List_var(source), _292)))));
+      Map_setindex(kept, Var_new(3683441, (void *) source), List_var(Code_lowered(source, NULL)));
       {
         List part;
         Array _x2c_gensym_macro_object_38 = parts;
@@ -5705,7 +5705,7 @@ static Var _kept_lowered(Var result, List source, Array parts){
         Var _x2c_gensym_macro_cursor_output_39;
         while(Array_try_next(_x2c_gensym_macro_object_38, &(_x2c_gensym_macro_cursor_41), &(_x2c_gensym_macro_cursor_output_39))){
           part = Var_list_payload(_x2c_gensym_macro_cursor_output_39);
-          Map_setindex(kept, Var_new(3683441, (void *) part), List_var(cons(_501, cons(_503, cons(List_var(part), _292)))));
+          Map_setindex(kept, Var_new(3683441, (void *) part), List_var(Code_lowered(part, NULL)));
         }
 
       }
@@ -9095,7 +9095,7 @@ static Var _eval_string(Compiler c, String source, Token invocation){
                     x2c_exception_landed(& _x2c_gensym_exception_frame_0);  if(x2c_exception_is_error_target(& _x2c_gensym_exception_frame_0)){
                       int _x2c_gensym_macro_selected_0 = x2c_error_catch_selected(_x2c_gensym_error_handler_0);  x2c_error_catch_detach(_x2c_gensym_error_handler_0);  x2c_exception_mark_handled(& _x2c_gensym_exception_frame_0);  if(_x2c_gensym_macro_selected_0 == 0){
                         Var volatile category;  category = x2c_error_catch_capture(_x2c_gensym_error_handler_0, 0); {
-                          static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/macros.x",.function = "_eval_string",.line = 5143};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
+                          static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/macros.x",.function = "_eval_string",.line = 5142};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 28682226919752, 1, Symbol_var(209659067570), category);  __builtin_unreachable();
                         }
 
                       }
@@ -9254,7 +9254,7 @@ static Var _lisp_import_hook(String path){
   MetaContext * context = MetaContext_current();
   Compiler c = context -> evaluator;
   if(! c){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 5297};
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 5296};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));
     __builtin_unreachable();
   }
