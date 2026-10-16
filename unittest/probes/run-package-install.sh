@@ -65,6 +65,52 @@ grep -q 'missing x2c-package command' "$BUILD/missing.err" || fail "missing diag
 (cd "$BUILD/empty-project" && "$x2c" build -q)
 mv "$package.saved" "$package"
 
+# Legacy vectors expand once; the direct package dialect stays literal.
+python3 - "$x2c" "$BUILD" <<'PYTHON'
+import pathlib, subprocess, sys
+compiler, scratch = sys.argv[1], pathlib.Path(sys.argv[2])
+def run(args):
+    return subprocess.run([compiler, *args], cwd=scratch, capture_output=True)
+for legacy, direct, name in [
+    (["remove", "@@absent"], ["package", "remove", "@absent"], "@absent"),
+    (["remove", "--", "--help"], ["package", "remove", "--", "--help"], "--help"),
+]:
+    left, right = run(legacy), run(direct)
+    assert left.returncode == right.returncode == 2, (left, right)
+    assert left.stderr == right.stderr and name.encode() in left.stderr, (left, right)
+(scratch / "remove.rsp").write_text("remove @@absent")
+assert run(["@remove.rsp"]).stderr == run(["remove", "@@absent"]).stderr
+for operation in ["install", "remove", "list"]:
+    assert run([operation, "--help"]).returncode == 0
+    assert run(["help", operation]).returncode == 0
+result = run(["install", "--index", "--help"])
+assert result.returncode == 2 and b"requires exactly one operand" in result.stderr
+PYTHON
+
+# Command startup checks identity before parsing forwarded legacy help.
+mv "$package" "$package.saved"
+printf '#!/bin/sh\nexport X2C_IDENTITY=wrong\nexec "%s" "$@"\n' \
+  "$package.saved" >"$package"
+chmod +x "$package"
+set +e
+"$x2c" install --help >"$BUILD/legacy-mismatch.out" 2>"$BUILD/legacy-mismatch.err"
+[[ $? == 2 ]] || fail "legacy help bypassed command identity"
+set -e
+grep -q 'identity' "$BUILD/legacy-mismatch.err" || fail "legacy identity diagnostic"
+[[ ! -s "$BUILD/legacy-mismatch.out" ]] || fail "mismatch printed help"
+mv "$package.saved" "$package"
+
+# New's missing-command fallback retains legacy help and operand errors.
+new="$BUILD/home/libexec/x2c/x2c-new"
+mv "$new" "$new.saved"
+"$x2c" new --help >"$BUILD/new.help"
+set +e
+"$x2c" new >"$BUILD/new-missing.out" 2>"$BUILD/new-missing.err"
+[[ $? == 2 ]] || fail "missing new operand accepted"
+set -e
+grep -q 'requires exactly one operand' "$BUILD/new-missing.err" || fail "new parse fallback"
+mv "$new.saved" "$new"
+
 # A failed removal names its own command and takes no lock.
 set +e
 "$x2c" remove nosuch 2>"$BUILD/remove-nosuch.stderr"

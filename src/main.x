@@ -101,42 +101,24 @@ static void _exec(String path, char **args) {
   $fail.main_external_failed(path);
 }
 
-/* Legacy commands keep CLI parsing and response-file expansion here. The
-   package command receives literal values and owns every package operation. */
-static int _run_package(CliRequest request) {
-  Array args = [request.command.str()];
-  if (request.quiet) args.push("--quiet");
-  if (request.force) args.push("--force");
-  if (request.index) {
-    args.push("--index");
-    args.push(request.index);
-  }
-  if (request.sha256) {
-    args.push("--sha256");
-    args.push(request.sha256);
-  }
-  args.push("--");
-  foreach (String input, request.inputs) args.push(input);
-  return Compiler.run_command("package", args);
-}
-
-/* Project creation receives literal values after ordinary CLI parsing. */
-static int _run_new(CliRequest request) {
-  Array args = [];
-  if (request.quiet) args.push("--quiet");
-  args.push("--");
-  foreach (String input, request.inputs) args.push(input);
-  return Compiler.run_command("new", args);
-}
-
 /* Initial argument reading belongs to the driver. The command receives that
    exact vector, so response files are never expanded a second time. */
-static void _run_workflow(Array arguments) {
+static void _run_command(Array arguments) {
   if (!arguments.len()) return;
   String operation = arguments[0];
-  if (operation != "build" && operation != "run" && operation != "script") return;
-  String path = Compiler.command_path("build");
-  if (!path) Diagnostics.driver_error("missing x2c-build command; install the matching x2c commands");
+  String command = NULL;
+  switch (operation) {
+    case "build": case "run": case "script": command = "build"; break;
+    case "new": command = "new"; break;
+    case "install": case "remove": case "list": command = "package"; break;
+    default: return;
+  }
+  String path = Compiler.command_path(command);
+  if (!path) {
+    if (command != "build") CliRequest.parse_arguments(arguments);
+    Diagnostics.driver_error(
+      %"missing x2c-$command command; install the matching x2c commands");
+  }
   char **args = Scope.calloc(arguments.len() + 3, sizeof(char *));
   args[1] = "--driver-arguments";
   for (int i = 0; i < arguments.len(); i++) {
@@ -159,7 +141,7 @@ int main(int argc, char **argv) {
   x2c_initialize_environment(argv[0]);
   if (argc > 1) _run_external(argc, argv);
   Array arguments = $auto(CliRequest.read_arguments(argc, argv));
-  _run_workflow(arguments);
+  _run_command(arguments);
   CliRequest request = CliRequest.parse_arguments(arguments);
   String diagnostics = request.diagnostics_file;
   if (diagnostics && !diagnostics_write_json(diagnostics))
@@ -168,12 +150,7 @@ int main(int argc, char **argv) {
     request.quiet, request.plain, request.color_mode,
     request.verbose || request.debugging,
     request.dry_run, request.inspects());
-  switch (request.command) {
-    case <env>:     return _run_env(request);
-    case <install>: case <remove>: case <list>:
-      return _run_package(request);
-    case <new>:     return _run_new(request);
-  }
+  if (request.command == <env>) return _run_env(request);
   return _run_compiler(request);
 }
 

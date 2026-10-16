@@ -30,3 +30,18 @@ mkdir -p "$BUILD/starter/real-name"
 ln -s real-name "$BUILD/starter/link-name"
 "$X2C" new -q "$BUILD/starter/link-name"
 grep -Fxq '[target.link-name]' "$BUILD/starter/real-name/x2c.toml"
+
+# Response files can select new; a word after -- is still expanded once.
+printf 'new -q -- "%s"\n' "$BUILD/from-response" >"$BUILD/new.rsp"
+"$X2C" "@$BUILD/new.rsp"
+[ -f "$BUILD/from-response/x2c.toml" ]
+printf '"%s"\n' "$BUILD/operand-response" >"$BUILD/operand.rsp"
+"$X2C" new -q -- "@$BUILD/operand.rsp"
+[ -f "$BUILD/operand-response/x2c.toml" ]
+
+# Direct invocation keeps @ literal, so it fails name validation, not IO.
+status=0
+(cd "$BUILD" && "$ROOT/builds/0/libexec/x2c-new" -- @missing) \
+  >"$BUILD/direct.out" 2>"$BUILD/direct.err" || status=$?
+[ "$status" = 2 ]
+grep -q 'not a target name' "$BUILD/direct.err"

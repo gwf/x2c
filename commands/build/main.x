@@ -15,7 +15,9 @@ int main(int argc, char **argv) {
          "Use x2c-build <operation> --help for operation options.");
     return 0;
   }
-  Array arguments = $auto(_arguments(argc, argv));
+  Array arguments = CliRequest.command_arguments(argc, argv);
+  if (!arguments) arguments = CliRequest.read_arguments(argc, argv);
+  defer arguments.free();
   String operation = arguments.len() ? arguments[0] : NULL;
   if (operation != "build" && operation != "run" && operation != "script")
     Diagnostics.driver_error("expected build, run, or script");
@@ -48,13 +50,4 @@ static void _configure_logging(int debugging) {
   if (!debugging) return;
   logger.set_min_level(<debug>);
   logger.add_stderr_sink();
-}
-
-/* The private mode receives the driver's already-read argument vector. */
-static Array _arguments(int argc, char **argv) {
-  if (argc < 2 || strcmp(argv[1], "--driver-arguments"))
-    return CliRequest.read_arguments(argc, argv);
-  Array arguments = [];
-  for (int i = 2; i < argc; i++) arguments.push(String.new(argv[i]));
-  return arguments;
 }
