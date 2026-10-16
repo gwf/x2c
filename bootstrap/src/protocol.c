@@ -812,7 +812,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _391 = String_var(_390);
   _392 = List_var(NULL);
   _393 = Symbol_var(106239471489226);
-  _394 = int_var(2179);
+  _394 = int_var(2181);
   _395 = String_new("");
   _396 = String_var(_395);
   _397 = String_new("x2c.hole");
@@ -890,7 +890,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _469 = cons(_461, _468);
   _470 = cons(_455, _469);
   _471 = List_var(_470);
-  _472 = int_var(2240);
+  _472 = int_var(2242);
   _473 = Symbol_var(1544849476362);
   _474 = List_var(_44);
   _475 = cons(_474, NULL);
@@ -1002,7 +1002,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _578 = cons(_461, _577);
   _579 = cons(_455, _578);
   _580 = List_var(_579);
-  _581 = int_var(2247);
+  _581 = int_var(2249);
   _582 = cons(_495, NULL);
   _583 = cons(_528, _571);
   _584 = cons(_547, _583);
@@ -2644,7 +2644,7 @@ int Compiler_protocol_rejects_direct_member(Compiler c, Type participant, String
         Type ancestor;  List _x2c_gensym_macro_object_33 = _ancestry(c, owner);  List _x2c_gensym_macro_cursor_33 = _x2c_gensym_macro_object_33;  Var _x2c_gensym_macro_cursor_output_36;  while(List_try_next(_x2c_gensym_macro_object_33, &(_x2c_gensym_macro_cursor_33), &(_x2c_gensym_macro_cursor_output_36))){
           ancestor = Var_type(_x2c_gensym_macro_cursor_output_36); {
             List row = f6_lookup____member_row(c, protocols, ancestor, member);  if(List_truth(row)){
-              Symbol status = Var_symbol(List_cadr(row));  rejects = status != 647492367624;  break;
+              Symbol status = Var_symbol(List_cadr(row));  if(status != 647492367624) rejects = List_equal(Type_list(ancestor), Type_list(owner)) ? 1 : 2;  break;
             }
 
           }

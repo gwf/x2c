@@ -211,7 +211,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _189 = cons(_188, NULL);
   _190 = List_var(_189);
   _191 = Symbol_var(19147688);
-  _192 = Atom_intern(String_new("binding-global"));
+  _192 = Atom_intern(String_new("binding-name"));
   _193 = String_new("Array_new");
   _194 = String_var(_193);
   _195 = cons(_194, NULL);

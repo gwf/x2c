@@ -243,7 +243,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _6 = List_var(_5);
   _7 = Symbol_var(199448);
   _8 = Symbol_var(19147688);
-  _9 = Atom_intern(String_new("binding-global"));
+  _9 = Atom_intern(String_new("binding-name"));
   _10 = String_new("car");
   _11 = String_var(_10);
   _12 = cons(_11, NULL);
