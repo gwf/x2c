@@ -1,6 +1,6 @@
 > Status: active
-> Conventions agreed; implementation not started.
-> Written 2026-10-16 against `d12bd43ff`. This request delivers the plan only.
+> Implementation complete; combined publication validation is pending.
+> Planned against `d12bd43ff`; implementation authorized 2026-10-16.
 
 # Normalize error reporting in src
 
@@ -195,9 +195,37 @@ Do not run its broad components separately solely for publication. Review any
 generated deltas. Apply existing performance guidance only if the actual
 change reaches a covered hot path; this plan adds no performance requirement.
 
-The current planning request stops with this document. It does not authorize
-source migration, builds, or publication. Later implementation follows the
-delivery mode Gary selects, with direct delivery as the repository default.
+Gary authorized implementation on 2026-10-16. This session owns direct
+integration, validation, and delivery under the repository default.
+
+## Implementation record
+
+Definitions remain with their owners. Shared parse reports now live in
+`src/parse-reports.x`. Driver errors, warnings, and progress have distinct
+names. Component definitions followed the upstream move into `src/components/`.
+All existing catalogue bodies retain their reporting construction; substantial
+inline construction now has local definitions or typed helpers.
+
+The compiler catalogue migration checked 341 existing bodies against their
+originals after reversing explicit-site substitutions. All matched. A paired
+translation produced 50 C/header files: 40 were byte-identical; the others
+include changed source metadata and extracted construction. Driver paired
+translation produced 16 files: 15 were identical and one differed only in three
+private helper names. These comparisons do not claim whole-tree byte parity.
+The component worker passed 33 existing fixtures without expectation changes.
+The final integrated gate remains pending.
+
+Two component constraints preserve existing behavior: generated linked-meta
+copies consume exported macros from their owners, and `dynamic_unary` keeps
+its direct diagnostic because operation discovery does not expand macros.
+The native duplicate warning uses a typed local helper because its nested
+String join did not type-check after macro extraction. No generator changes,
+message changes, or new checks were introduced to bypass these constraints.
+
+The survey retained generic reporting boundaries, pass-through messages,
+typed protocol/cycle helpers, native failure floors, short structured raises,
+simple driver literal errors, and generated script exception rendering.
+Full per-owner evidence is in `.context/report-normalization/coverage.md`.
 
 ## Plan review
 
