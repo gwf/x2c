@@ -795,8 +795,7 @@ static List _lambda_closure_params(
 static Code _lambda_function(List name, List params, Code body) {
   if (!params) params = %((param (void) (bind () ())));
   List lowered = Code.lowered(%(seq @{_lambda_items(body)}));
-  return %(function (static "Var") (bind $name ((fnmod (params @params))))
-           (block $lowered));
+  return $!Unit{ static Var $name(@params) { $lowered } };
 }
 
 /** Lifts the noncapturing lambda `node` to a static function, whose name
@@ -838,58 +837,41 @@ static Code _lambda_record(List context, List types) {
     List name = _lambda_member(fields.len());
     fields.push(%(declare $base (bindings (bind $name $modifiers))));
   }
-  return %(code-value "bound"
-           (typedef (static struct $context (fields @{fields.list_free()}))
-             (bindings (bind $context ())))
-           ());
+  List declared = fields.list_free();
+  return $!Unit{ static typedef struct $context { @declared } $context; };
 }
 
 static Code _lambda_adapter(
   List adapter, List closure, List argv, List lifted, List context,
-  List params, List reads, List captures, List declared) {
-  Type pointer = %(* const struct $context);
-  Code record = %(expr $pointer (ident ("record")));
+  List params, List reads, List captures) {
+  List record = x2c_ident("record");
   Array items = [], arguments = [];
   foreach (List read, reads) {
     (Type type, Code value) = read;
-    List name = %(${%"a${items.len()}"});
-    (List base, List modifiers) = type.parts();
-    items.push(
-      %(declare $base (bindings (op = (bind $name $modifiers) $value))));
-    Code local = %(expr $type (ident $name));
+    List local = x2c_ident(%"a${items.len()}");
+    items.push($!{ $type $local = $value; });
     match (params.car()) {
-      case %(param ? (bind ? (& *))):
-        arguments.push(%(expr ${type.cdr()} (op * $local)));
-      default: arguments.push(local);
+      case %(param ? (bind ? (& *))): arguments.push($!( *$local ));
+      default: arguments.push($!( $local ));
     }
     params = params.cdr();
   }
-  Code context_read = %(expr (* const void)
-    (call (expr ((func (("Func"))) * const void) (ident ("Func_context")))
-      (args (expr ("Func") (ident $closure)))));
-  items.push(
-    %(declare (const struct $context)
-       (bindings (op = (bind ("record") (*))
-                      (expr $pointer (cast $pointer $context_read))))));
   int index = 0;
   foreach (List capture, captures) {
-    Type type = capture.caddr(), stored = _lambda_field_type(type);
-    Code field = %(expr (const @stored)
-                    (op -> $record ${_lambda_member(index++)}));
+    List field = _lambda_field(index++);
     arguments.push(
-      type.car() == <&> ? %(expr ${type.cdr()} (op * $field)) : field);
+      capture.caddr().car() == <&> ? $!( *$record->$field )
+                                   : $!( $record->$field ));
   }
-  Code call = %(expr ("Var")
-    (call (expr ((func $declared) "Var") (ident $lifted))
-      (args @{arguments.list_free()})));
-  items.push(%(return $call));
-  return %(code-value "bound"
-           (function (static "Var")
-             (bind $adapter
-               ((fnmod (params (param ("Func") (bind $closure ()))
-                               (param (const "FuncArg") (bind $argv (*)))))))
-             (block @{items.list_free()}))
-           ());
+  List setup = items.list_free(), passed = arguments.list_free();
+  return $!Unit{
+    static Var $adapter(Func $closure, const FuncArg *$argv) {
+      @setup
+      const struct $context *$record =
+        (const struct $context *)Func.context($closure);
+      return $lifted(@passed);
+    }
+  };
 }
 
 static Code _lambda_bridge(
@@ -973,8 +955,7 @@ Code lambda_closure(Code node) {
       List declared = _lambda_closure_params(params, reads, captures);
       Code function = _lambda_function(lifted, declared, body);
       Code adapter_function = _lambda_adapter(
-        adapter, closure, argv, lifted, context, params, reads, captures,
-        declared);
+        adapter, closure, argv, lifted, context, params, reads, captures);
       x2c_place(%(unit-support), record_type);
       x2c_place(%(unit-support), function);
       x2c_place(%(unit-support), adapter_function);
@@ -1715,9 +1696,6 @@ static Code _protocol_prototype(List name, Type expected) {
   return $!Unit{ $result $name(@declared); };
 }
 
-static Code _protocol_runtime(Type result, String name, List arguments) =>
-  %(expr $result (call $name (args @arguments)));
-
 static void _protocol_descriptor(List descriptor, List slots) {
   match (descriptor)
     case %(?(List methods) ?(String name) ?(Symbol var_tag) ?(Symbol area)
@@ -1732,23 +1710,21 @@ static void _protocol_descriptor(List descriptor, List slots) {
         (expr (* char) (literal (* char) ${%"\"$name\""})))));
       if (explicit) {
         Code tag = $!Symbol{ ${explicit.car()} };
-        Code tagged = _protocol_runtime(
-          %(void), "x2c_register_tagged_descriptor", %($tag $text $table));
-        x2c_place(init, Code.lowered(%(stmnt $tagged)));
+        x2c_place(
+          init, $!{ x2c_register_tagged_descriptor($tag, $text, $table); });
         return;
       }
       Code symbol = %(expr ("Symbol") (literal ("Symbol") $name $var_tag));
-      Code early = _protocol_runtime(
-        %(int), "x2c_register_builtin_descriptor", %($symbol $table));
       if (area == <protocol>) {
-        x2c_place(init, Code.lowered(%(stmnt $early)));
+        x2c_place(
+          init, $!{ x2c_register_builtin_descriptor($symbol, $table); });
         return;
       }
-      Code fallback = _protocol_runtime(
-        %(void), "x2c_register_descriptor", %($text $table));
-      Code missing = %(expr (int) (op ${<!>} $early));
-      Code registration = %(if $missing (block (stmnt $fallback)));
-      x2c_place(init, Code.lowered(registration));
+      x2c_place(init, $!{
+        if (!x2c_register_builtin_descriptor($symbol, $table)) {
+          x2c_register_descriptor($text, $table);
+        }
+      });
     }
 }
 
@@ -2250,7 +2226,6 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_protocol_renders", _protocol_renders);
   $linked.row(rows, "_protocol_guarded", _protocol_guarded);
   $linked.row(rows, "_protocol_prototype", _protocol_prototype);
-  $linked.row(rows, "_protocol_runtime", _protocol_runtime);
   $linked.row(rows, "_protocol_descriptor", _protocol_descriptor);
   $linked.row(rows, "protocol_conformance", protocol_conformance);
   $linked.row(rows, "_raise_immutable", _raise_immutable);

@@ -886,13 +886,6 @@ static List _declaration(Compiler c, List ast) {
   return ast;
 }
 
-static List _value_declaration(Type type, List binding, List value) {
-  (List base, List mods) = type.parts();
-  return value
-    ? %(declare $base (bindings (op = (bind $binding $mods) $value)))
-    : %(declare $base (bindings (bind $binding $mods)));
-}
-
 static List _return(Compiler c, List ast) {
   Macro returned = $return_value;
   match (ast)
@@ -1161,7 +1154,8 @@ static List _sequenced(
   Compiler c, List value, String stem, Array declarations) {
   Type type = value.cadr();
   List temporary = c.sym.introduce(c.fresh_name(stem));
-  declarations.push(_value_declaration(type, temporary, value));
+  declarations.push(
+    c.rebuild_statement($!{ $type $temporary = $value; }).cadr());
   return $!($type){ $temporary };
 }
 

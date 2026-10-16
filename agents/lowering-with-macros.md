@@ -374,7 +374,9 @@ examples are excerpts from current source.
 
    A declaration of a bound name rebuilds the same way, so
    `c.rebuild_statement($!{ $storage_type $field; }).cadr()` needs no
-   `declaration_parts`; `$!Type{ ... }` builds a constant type at once.
+   `declaration_parts`: a pointer, array, or function type moves its
+   modifiers onto the declarator, as parsing does. `$!Type{ ... }` builds
+   a constant type at once.
 
    [Retained template construction](#retained-template-construction)
    explains why the lambda producers use it.
