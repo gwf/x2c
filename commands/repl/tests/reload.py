@@ -856,6 +856,7 @@ try:
     session.value('shared_through()', 22)
     session.value('shared_holder.point.x', 6)
     session.value('shared_copy(shared_point)', 103)
+    session.value('(shared_copy)(shared_point)', 103)
     session.value('shared_point.x', 1)
     session.run('shared_shift(&shared_point,5);')
     session.value('shared_reference(shared_point,2)', 8)
@@ -889,6 +890,7 @@ try:
                        'shared_alias(&shared_locked[0],&shared_samples[0]);',
                        'shared_reference(shared_frozen,1);',
                        'shared_copy(shared_holder);',
+                       'shared_copy(shared_points);',
                        'shared_shift(&shared_samples[0],1);']:
         session.run(expression, True)
     for expression in ['shared_sum(&shared_samples[3],1);',

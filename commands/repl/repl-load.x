@@ -293,6 +293,36 @@ static Var _call(Func function, const FuncArg *argv) {
     return c.meta_helper_call(call.name, c.token, arguments, call.file.path);
 }
 
+/* The prompt has already checked native argument types. Envelopes contain
+   only data; the helper supplies the addresses to its native adapters. */
+static Var _call_objects(Func function, const FuncArg *argv) {
+  const LoadedCall *call = Func.context(function);
+  List arguments = x2c_func_value_argument(function, argv, 0, <list>);
+  List problem = datum_result_problem(arguments, {});
+  if (problem)
+    raise %(repl (reason "loaded function arguments must be independent data values")
+                 (detail $problem));
+  Compiler c = call.session.compiler;
+  $let(c.meta_helper, call.session.helper)
+    return c.loaded_helper_call(call.name, c.token, arguments, call.file.path);
+}
+
+static List _object_adapter(
+  ReplSession session, ReplLoadedFile file, String name, Type signature) {
+  Compiler c = session.compiler;
+  Type result = signature.apply();
+  Type type = %((func (("List"))) @result);
+  String hidden = %"__repl_call_${session.accessors.len()}";
+  c.sym.define_global(%($hidden), type);
+  List binding = c.sym.resolve_global(%($hidden), NULL);
+  LoadedCall call = {.session = session, .file = file, .name = name};
+  Func function = Func.new_context(
+    _call_objects, c.func_signature(type), &call, sizeof call);
+  session.evaluator.set_global(hidden, function);
+  session.accessors[hidden] = 1;
+  return %(expr $type (ident $binding));
+}
+
 static void _publish_types(ReplSession session, Map symbols) {
   foreach (Var (key, value), symbols) {
     String name = _type_name(key, value);
@@ -361,7 +391,8 @@ static void _publish(
     LoadedCall call = {.session = session, .file = file, .name = name};
     Func function = Func.new_context(_call, signature, &call, sizeof call);
     session.evaluator.set_global(name, function);
-    session.names[name] = %(native (source $filename));
+    List adapter = _object_adapter(session, file, name, signature);
+    session.names[name] = %(native (source $filename) (objects $adapter));
   }
   if (file.symbols) file.symbols.cleanup();
   if (file.signatures) file.signatures.cleanup();
@@ -383,7 +414,7 @@ ReplResult ReplSession.load(
   if (!replacing) paths.push(filename);
   paths.sort();
   Compiler.refresh_source_collections();
-  MetaHelper helper = frontend.build_loaded(paths.list());
+  MetaHelper helper = frontend.build_loaded(paths);
   Map prepared = $auto({});
   ReplResult result = {.status = <rejected>, .value = void};
   defer {
@@ -417,7 +448,7 @@ ReplResult ReplSession.load(
     }
     helper.retain_executable();
     // Declaration inspection may have called meta code. Runtime starts fresh.
-    helper.close();
+    helper.restart();
   }
   catch %(repl (reason ?why)): {
     result.status = <rejected>;

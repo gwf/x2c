@@ -89,6 +89,7 @@ static Scope primary_scope = NULL;
 static typedef struct Call {
   Compiler compiler, String name, Token site, int table;
   double limit, deadline;
+  Symbol operation;
 } Call;
 
 /** Calls the project `meta` function `name` in the helper with the values
@@ -100,7 +101,18 @@ static typedef struct Call {
     file's own, which runs the constants it computes as its own translation
     does, or else the unit's. */
 Var Compiler.meta_helper_call(
-  Compiler c, String name, Token site, List arguments, String provider) {
+  Compiler c, String name, Token site, List arguments, String provider) =>
+  _call_helper(c, name, site, arguments, provider, <call>);
+
+/** Calls a loaded function with data values and helper-owned object selections.
+    Object selectors resolve inside the helper; no address crosses its pipes. */
+Var Compiler.loaded_helper_call(
+  Compiler c, String name, Token site, List arguments, String provider) =>
+  _call_helper(c, name, site, arguments, provider, <load-call>);
+
+static Var _call_helper(
+  Compiler c, String name, Token site, List arguments, String provider,
+  Symbol operation) {
   MetaHelper previous = active;
   active = c.meta_helper ? c.meta_helper : primary;
   defer active = previous;
@@ -110,7 +122,7 @@ Var Compiler.meta_helper_call(
   String file = provider ? Path.real(Compiler.absolute_home_path(provider))
                          : Path.real(c.token_source(site, NULL));
   Call call = {
-    .compiler = c, .name = name, .site = site,
+    .compiler = c, .name = name, .site = site, .operation = operation,
     .table = _table_of(file, active.table)};
   _check(call);
   c.refuse_record_meta_call(name, site);
@@ -173,7 +185,7 @@ static void _send(Call &c, List arguments) {
   }
   Var subject = Macro.subject();
   if (subject is void) subject = %();
-  _send_frame(c, %(call ${c.table} ${c.name} $arguments $subject));
+  _send_frame(c, %(${c.operation} ${c.table} ${c.name} $arguments $subject));
 }
 
 static void _send_frame(Call &call, List message) {
@@ -512,6 +524,15 @@ void Compiler.stop_meta_helper(void) {
   if (!primary) return;
   MetaHelper previous = active;
   active = primary;
+  defer active = previous;
+  _stop(0);
+}
+
+/** Stops the process while retaining its executable and configuration.
+    Its next call starts with fresh native state. */
+void MetaHelper.restart(MetaHelper helper) {
+  MetaHelper previous = active;
+  active = helper;
   defer active = previous;
   _stop(0);
 }

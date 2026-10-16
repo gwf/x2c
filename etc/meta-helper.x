@@ -15,6 +15,9 @@
                             call NAME in table K; each GLOBAL is
                             `(SPELLING BINDING)`, the unit's binding that a
                             macro value's free reference recognizes
+      (load-call K NAME (ARG ...) (GLOBAL ...))
+                            ARG is (value V) or (object PATH INDICES REF TAG);
+                            object addresses stay inside the helper
       (answer V)            the compiler's answer to the call's last query
       (quit)
 
@@ -270,13 +273,14 @@ static void _serve(Var request) {
   Var found;
   match (request) {
     case %(reset): _reset();
-    case %(call ?(int index) ?(String name) ?(List arguments)
+    case %((!set ?operation (!or call load-call))
+           ?(int index) ?(String name) ?(List arguments)
            ?(List globals)): {
       Macro.use_subject(globals);
       Map table = helper_tables.try_get(index, found) ? found : NULL;
       List failure = _start(index, table);
       if (failure) _reply(failure);
-      else _call(table, name, arguments);
+      else _call(table, name, arguments, operation == <load-call>);
     }
     default: {
       helper_unit_scope.destroy();
@@ -285,24 +289,56 @@ static void _serve(Var request) {
   }
 }
 
-static void _call(Map table, String name, List arguments) {
+static void _call(Map table, String name, List arguments, int objects) {
   Var target;
   $let(helper_notices, []) {
     if (!table || !table.try_get(name, target)) _reply(%(missing));
-    else _apply(target, name, arguments);
+    else _apply(target, name, arguments, objects);
   }
+}
+
+/* Only the load-call envelope interprets selections. Ordinary List
+   arguments retain their contents, even if they resemble these forms. */
+static FuncArg _loaded_argument(List argument) {
+  match (argument) {
+    case %(value ?value): return FuncArg.value(value);
+    case %(object ?(String path) ?(List indices) ?(int reference) ?(Symbol tag)): {
+      String name = "address global " + path;
+      foreach (Var (index, value), helper_tables) {
+        Map table = value;
+        Var target;
+        if (!table.try_get(name, target)) continue;
+        List failure = _start(index, table);
+        match (failure) case %(failure (?code *detail)): Error.raise(code, detail);
+        Func selector = target;
+        unsigned count = indices.len(), i = 0;
+        FuncArg *args = Scope.calloc(count ? count : 1, sizeof(FuncArg));
+        foreach (Var value, indices) args[i++] = FuncArg.value(value);
+        List selected = selector.apply(count, args);
+        void *address = selected.cadr().pointer();
+        return reference ? FuncArg.reference(address, selected.car())
+                         : FuncArg.value(Var.new(tag, address));
+      }
+      raise %(repl (reason "loaded object selector is unavailable"));
+    }
+  }
+  raise %(repl (reason "invalid loaded argument"));
 }
 
 /* Calls `target` and writes its replies. The call has a Scope of its own
    that ends after them, so what the body allocates ends with the call when
    it returns or raises, and a Job it started is terminated and reaped. */
-$scope() static void _apply(Var target, String name, List arguments) {
+$scope() static void _apply(
+  Var target, String name, List arguments, int objects) {
   unsigned count = arguments.len(), i = 0;
   FuncArg *argv = Scope.calloc(count ? count : 1, sizeof(FuncArg));
-  foreach (Var argument, arguments) argv[i++] = FuncArg.value(argument);
   Var result = void;
   List failure = NULL;
-  try result = ((Func) target.pointer()).apply(count, argv);
+  try {
+    foreach (Var argument, arguments)
+      argv[i++] = objects ? _loaded_argument(argument) : FuncArg.value(argument);
+    result = ((Func) target.pointer()).apply(count, argv);
+  }
   catch %(meta-fail (message ?message) (notes ?notes)):
     failure = Error.snapshot(%(error $message $notes));
   catch %(meta-fail

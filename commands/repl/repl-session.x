@@ -9,7 +9,7 @@
 #include "emit.x"
 #include "format.x"
 
-/** One loaded file's current executable and published declarations.
+/** One loaded file's origin and published declarations.
     Callable adapters borrow this record until the session closes. */
 typedef struct ReplLoadedFile {
   String path;
@@ -26,7 +26,7 @@ typedef struct ReplSession {
   Array declarations;
   Map files, accessors;
   MetaHelper helper;
-  // Published name -> (value), (type), (native [(source PATH)]),
+  // Published name -> (value), (type), (native (source PATH) (objects CALL)),
   // (global (source PATH) PATHS), or
   // (function (typed ...) (execution native)).
   Map names;
