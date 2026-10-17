@@ -6,11 +6,11 @@ These separate runs close diagnostic coverage gaps. They do not turn diagnostic 
 
 - Tree `2b7a63cbb2270eaf1ceba98b31b089fcae56850f` plus uncommitted changes, `x2c 0.12.0`.
 - macOS-15.7.9-arm64-arm-64bit-Mach-O, Apple M4 Max, 16 physical and 16 logical cores.
-- Build lane `primary`, prefix `/Users/gary/Git/Bonsai-demo/.venv/lib/python3.11/site-packages/torch`, handle counters on.
+- Build lane `primary`, prefix `/path/to/venv/lib/python3.11/site-packages/torch`, handle counters on.
   - `libtorch_cpu.dylib` 214082912 bytes, SHA-256 `941f3e16a8e02b23`
   - `libtorch.dylib` 16736 bytes, SHA-256 `2178657b7eeffc0c`
   - `libc10.dylib` 1084640 bytes, SHA-256 `f203c171b7a71c74`
-- Python at `/Users/gary/Git/Bonsai-demo/.venv/bin/python`, torch `2.10.0`.
+- Python at `/path/to/venv/bin/python`, torch `2.10.0`.
 - Artifacts, SHA-256 prefixes: `interop-init.pt 7d2ca9e5c1bc`, `mnist-batches.pt d13f17c6f88a`, `mnist-init.pt 8f855dfc9ea5`, `sequence-data.pt 72665ed75b42`, `sequence-init.pt 939cffb5ef4a`, `tabular-batches.pt ebaf4a532b32`, `tabular-data.pt a9465db47665`, `tabular-init.pt bf60a5298a61`.
 
 ## Startup, loading and checkpoints

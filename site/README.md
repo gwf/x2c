@@ -40,6 +40,10 @@ Check copy, layout, interactions, routes, fragments, and canonical metadata
 in the local preview. Check DNS, TLS, redirects, the Pages configuration, and
 CDN delivery after deployment.
 
+`public/x2c-version.txt` and `public/packages/index.txt` are checked in at the
+last published release and rewritten by `tools/release-candidate.py site` at
+candidate assembly.
+
 `site/dist/` is generated and untracked. The build renders Astro first and
 then mdBook into `site/dist/docs/`.
 

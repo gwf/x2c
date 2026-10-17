@@ -26,7 +26,9 @@ BINARIES = os.path.join(WORK, "bin")
 OUTPUTS = os.environ.get("X2C_TORCH_OUTPUTS", os.path.join(WORK, "out"))
 LOGS = os.path.join(ROOT, "debug", "torch-comparison")
 
-DEFAULT_PYTHON = "/Users/gary/Git/Bonsai-demo/.venv/bin/python"
+# The interpreter with the pinned torch wheel. `TORCH_PYTHON` overrides it;
+# the default is a virtual environment beside this repository.
+DEFAULT_PYTHON = os.path.join(os.path.dirname(ROOT), "torch-venv", "bin", "python")
 
 # The artifact layout. A program that reads an artifact checks this number
 # and refuses a mismatch, so a stale dataset cannot be compared silently.

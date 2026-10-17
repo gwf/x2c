@@ -18,7 +18,7 @@ the record of what the first pass saw and how the gaps were found.
 - macOS arm64, Apple M-series, 12 logical cores; torch `2.10.0`.
 - Primary attribution lane: the x2c programs and the C++ control link the
   libtorch dylibs inside the pinned wheel at
-  `/Users/gary/Git/Bonsai-demo/.venv/lib/python3.11/site-packages/torch/lib`,
+  `/path/to/venv/lib/python3.11/site-packages/torch/lib`,
   so both languages call the same backend binary. `libtorch_cpu.dylib`
   is 214,082,912 bytes, SHA-256 `941f3e16a8e02b23`; the full library and
   artifact hashes are in `debug/torch-comparison/pilot/environment.json`.
