@@ -23,14 +23,19 @@ mkdir "$scratch/lib" "$scratch/src"
 (
   cd builds/1
   translate() {
-    local sources=(../../"$1"/*.x)
-    if [[ $1 == src ]]; then
-      sources=()
-      while IFS= read -r source; do sources+=("$source"); done < <(
-        python3 ../../tools/compiler-sources.py --root ../..)
-    fi
+    local sources=()
+    while IFS= read -r source; do sources+=("$source"); done < <(
+      python3 ../../tools/sources.py --root ../.. --area "$1")
     ../0/x2c translate ${BUILD_JOBS:+-j "$BUILD_JOBS"} -q --no-interfaces \
       --out-dir "$scratch/$1" "${sources[@]}"
+    for source in "${sources[@]}"; do
+      relative=${source#../../$1/}
+      if [[ $relative == */* ]]; then
+        name=${relative##*/}
+        mkdir -p "$scratch/$1/${relative%/*}"
+        printf '#include "../%s.h"\n' "${name%.x}" > "$scratch/$1/${relative%.x}.h"
+      fi
+    done
   }
   . ../../commands/parallel.sh
   parallel_start lib translate lib

@@ -25,8 +25,8 @@ protocol Contains(SymbolSet);
 #include "array.x"
 #include "block.x"
 #include "iter.x"
-#include "scope.x"
-#include "var.x"
+#include "scope/scope.x"
+#include "var/var.x"
 
 /* A little-endian header holds the table width, three pad bytes, member
    count, vertex mask, and seed. Three perfect-hash spans of 1-, 2-, or 4-byte

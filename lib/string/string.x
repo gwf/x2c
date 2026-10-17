@@ -44,21 +44,21 @@ protocol const char *(String);
 #include <stdint.h>
 #include <string.h>
 
-#include "var.x"
-#include "list.x"
+#include "var/var.x"
+#include "list/list.x"
 #include "array.x"
 #include "buffer.x"
 #include "exception.x"
 #include "func.x"
 #include "symbol.x"
-#include "pool.x"
+#include "pool/pool.x"
 
 module {
-  "string/storage.x",
-  "string/search.x",
-  "string/editing.x",
-  "string/building.x",
-  "string/splitting.x",
-  "string/mapping.x",
-  "string/adapters.x",
+  "storage.x",
+  "search.x",
+  "editing.x",
+  "building.x",
+  "splitting.x",
+  "mapping.x",
+  "adapters.x",
 }

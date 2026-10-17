@@ -310,7 +310,7 @@ boundary. The built-in source macro in `src/macros/macros.x`, `etc/builtin-macro
 and the algorithms in `src/builtins.x` expand `foreach` during this pass.
 `src/type.x` owns the `List`-backed `Type` representation those modules
 consult; `src/ast.x` owns sequence placement and binding helpers;
-`src/symbols.x` owns lexical scopes and symbol lookup from inner to outer;
+`src/symtab/symtab.x` owns lexical scopes and symbol lookup from inner to outer;
 `src/compiler/names.x` owns generated names; `src/compiler/parsing/tokens.x`
 raises `<malformed>` for a token mismatch, and `src/compiler/parsing/parse.x`
 holds the filtered recovery boundary that synchronizes after a parse
@@ -560,7 +560,7 @@ module block, so its files share no private scope.
   support declarations, and source files and locations;
 - `src/fields.x` -- macros that copy or set named fields and transfer a
   segment's compile-time state;
-- `src/symbols.x` -- the symbol table: scopes, bindings, lookup, typedef
+- `src/symtab/symtab.x` -- the symbol table: scopes, bindings, lookup, typedef
   resolution, and semantic transactions;
 - `src/preprocess.x` -- preprocessor directive lines, conditional arms, and
   the directives before each form;
@@ -654,31 +654,31 @@ programs use. There is no compiler-private collection library, so every
 runtime weakness the compiler hits is one a user program can hit. The main
 divisions:
 
-- `lib/scope.x` owns allocation lifetime, and `lib/pool.x` the nested
+- `lib/scope/scope.x` owns allocation lifetime, and `lib/pool/pool.x` the nested
   interning pools layered over it;
-- `lib/var.x`, `lib/varconvert.x`, `lib/varops.x`, and `lib/dispatch.x` own
+- `lib/var/var.x`, `lib/varconvert.x`, `lib/varops.x`, and `lib/dispatch.x` own
   tagged values, cause-raising conversion, operators, and dynamic dispatch;
-- `lib/string.x`, `lib/symbol.x`, `lib/atom.x`, and `lib/list.x` own
+- `lib/string/string.x`, `lib/symbol.x`, `lib/atom.x`, and `lib/list/list.x` own
   canonical immutable values;
 - `lib/block.x`, `lib/buffer.x`, `lib/array.x`, and `lib/map.x` own mutable
   storage;
 - `lib/iter.x` owns status-bearing traversal;
-- `lib/match.x` owns list-pattern matching; `lib/match-plan.x` compiles
+- `lib/match/match.x` owns list-pattern matching; `lib/match-plan.x` compiles
   patterns to plans, `lib/match-cache.x` retains them, and
   `lib/match-machine.x` executes them over the wordcode and state
   definitions in `lib/machine.x`;
-- `lib/lisp.x` owns the embedded Lisp reader, session, and evaluator; the
+- `lib/lisp/lisp.x` owns the embedded Lisp reader, session, and evaluator; the
   compiler uses it to read `.xi` interfaces and to run compile-time macros;
 - `lib/func.x` owns generic native calls through generated adapters;
 - `lib/tokenizer.x` and `lib/scan.x` own tokenization, so the compiler's
   first phase is library code;
-- `lib/error.x` owns failure records, handlers, and policy;
+- `lib/error/error.x` owns failure records, handlers, and policy;
 - `lib/exception.x` owns `Error` transfer and cleanup frames, while
   `lib/file.x` and `lib/logger.x` provide file I/O and logging;
 - `lib/common.x` supplies shared representation and initialization support;
 - `lib/lib.x` contains the standalone `DisjointSet` utility.
 
-`lib/lisp.x` evaluates recursively with tail calls; see
+`lib/lisp/lisp.x` evaluates recursively with tail calls; see
 [production execution](reference-lisp.md#production-execution). Pattern
 matching executes compiled Match plans on MatchMachine.
 

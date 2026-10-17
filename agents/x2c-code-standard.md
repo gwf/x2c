@@ -552,7 +552,7 @@ Generated Array and Map family helpers remain lookup exceptions. Typed-alias
 consumers inherit core helpers through typedef method lookup
 (`_next_method_type` in `src/expressions/expressions.x`). Other consumers need a stable
 name outside the defining macro expansion: Map `find_hashed` and `reinsert`
-have handwritten callers in `lib/map.x` and `lib/pool.x`, while Array
+have handwritten callers in `lib/map.x` and `lib/pool/pool.x`, while Array
 `compare_elements` and `write_elements` and Map `compare_entries` and
 `write_entries` connect separate observation expansions. Array helpers take
 an `element` qualifier and Map helpers an `entry` or `table` qualifier,

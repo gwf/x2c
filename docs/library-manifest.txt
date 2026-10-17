@@ -21,7 +21,7 @@ lib/cmath.x|internal|C99 `<math.h>` prototypes, declared so a `Var` argument unb
 lib/common.x|api|
 lib/context.x|api|
 lib/dispatch.x|api|
-lib/error.x|api|
+lib/error/error.x|api|
 lib/error_init.x|internal|Type-owned initialization shim that preserves `Error`'s pre-initialization boundary.
 lib/exception.x|api|
 lib/file.x|api|
@@ -30,31 +30,31 @@ lib/iter.x|api|
 lib/lib.x|api|
 lib/lisp-init.x|internal|The standard Lisp algorithms `etc/init.xlisp` binds by name into every `Lisp` session.
 lib/lisp-targets.x|internal|The native operations a `Lisp` session can bind, built outside the implicit prelude so the optional modules that supply them stay out of it.
-lib/lisp.x|api|
-lib/list.x|api|
+lib/lisp/lisp.x|api|
+lib/list/list.x|api|
 lib/list-selectors.x|optional|Compound selectors beyond caar, cadr, cddr, and caddr; explicitly include `list-selectors.x` to use them.
 lib/logger.x|api|
 lib/machine.x|internal|`Match` wordcode, builder, and execution-state definitions.
-lib/macro-value.x|api|
+lib/macrovalue/macrovalue.x|api|
 lib/map.x|api|
 lib/match-cache.x|api|
 lib/match-machine.x|internal|Private `Match` wordcode decoder.
 lib/match-plan.x|api|
-lib/match.x|api|
+lib/match/match.x|api|
 lib/meta.x|optional|Syntax builders and compiler operations for `meta` functions. Pure builders also run at runtime; operations that query the compiler remain compile-time only. Every unit reaches it through the prelude's `varops.x`; include `meta.x` explicitly where `meta` functions are written.
 lib/type.x|optional|Structural operations on captured Type values, available at runtime and compile time; include `type.x` to use them.
 lib/mutex.x|api|
-lib/pool.x|api|
+lib/pool/pool.x|api|
 lib/protocols.x|internal|The built-in `Cleanup`, `Block`, `Iter`, and `Var` protocol declarations used to generate runtime dispatch adapters.
 lib/scan.x|internal|Allocation-free character scanners used by the tokenizer.
-lib/scope.x|api|
+lib/scope/scope.x|api|
 lib/split.x|api|
 lib/static-init.x|internal|Compiler-owned first-use static storage and initialization guards.
 lib/string-classify.x|api|
 lib/string-escape.x|api|
 lib/string-format.x|api|
 lib/string-number.x|api|
-lib/string.x|api|
+lib/string/string.x|api|
 lib/symbol.x|api|
 lib/symbolset.x|api|
 lib/thread-state.x|internal|Native pthread-key storage for per-thread runtime state.
@@ -73,7 +73,7 @@ lib/typed-array.x|optional|Packed typed storage with a raw native bracket; expli
 lib/typed-list.x|optional|Typed views over canonical `List` cells; explicitly include `typed-list.x` to use them.
 lib/typed-map.x|optional|Typed maps over native numeric or canonical `String` fields; explicitly include `typed-map.x` to use them.
 lib/var-ledger.x|internal|The `Var` tag tables and decoder table projected from `lib/var-tags.x`, in the one runtime unit that includes the ledger.
-lib/var.x|api|
+lib/var/var.x|api|
 lib/varconvert.x|api|
 lib/varops.x|api|
 lib/array-generics.x|internal|Shared declaration templates for typed array operations.

@@ -12,7 +12,7 @@
 #include "common.x"
 typedef struct Error *Error;
 
-#include "error.x"
+#include "error/error.x"
 
 /* Initializes the current thread's Error runtime owner. Runtime startup
    calls this; source programs rely on automatic initialization. */

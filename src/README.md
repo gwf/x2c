@@ -96,7 +96,7 @@ linked into the compiler itself.
 | [initializers/](initializers/README.md) | Brace initializer destinations and value conversion. |
 | [literals/](literals/README.md) | Scalar, quoted List, interpolated String, collection, and exception-payload syntax. |
 | [lambdas.x](lambdas.x) | Lambda parsing and capture resolution. |
-| [symbols.x](symbols.x) | Scoped semantic symbol tables and binding identities. |
+| [symtab/symtab.x](symtab/symtab.x) | Scoped semantic symbol tables and binding identities. |
 | [type.x](type.x) | Semantic types and per-unit Var registrations; structural operations live in lib/type.x. |
 | [type-ledger.x](type-ledger.x) | Compiler tables projected from the runtime's Var tag ledger. |
 | [protocol/](protocol/README.md) | Protocol declarations, conformance resolution, and preparation for adapter generation. |

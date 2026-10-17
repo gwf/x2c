@@ -35,7 +35,7 @@ one filename per argument (including in zsh):
 
 ```sh
 set -- src/*.x
-for unit in lib/*.x; do
+for unit in $(python3 tools/sources.py --area lib); do
   [ "$unit" = lib/x2c.x ] || set -- "$@" "$unit"
 done
 builds/0/libexec/x2c-graph flows String_split_n List_iter "$@"
@@ -111,7 +111,7 @@ For example, run over the compiler and runtime, omitting the generated prelude:
 
 ```sh
 set -- src/*.x
-for unit in lib/*.x; do
+for unit in $(python3 tools/sources.py --area lib); do
   [ "$unit" = lib/x2c.x ] || set -- "$@" "$unit"
 done
 builds/0/libexec/x2c-graph clones --min-size 100 "$@"
@@ -200,7 +200,7 @@ generated `lib/x2c.x` prelude:
 
 ```sh
 set -- src/*.x --
-for unit in lib/*.x; do
+for unit in $(python3 tools/sources.py --area lib); do
   [ "$unit" = lib/x2c.x ] || set -- "$@" "$unit"
 done
 builds/0/libexec/x2c-graph datasets /tmp/x2c-datasets "$@"

@@ -14,10 +14,10 @@
 
 #include <assert.h>
 #include <string.h>
-#include "scope.x"
+#include "scope/scope.x"
 #include "array.x"
 #include "exception.x"
-#include "match.x"
+#include "match/match.x"
 
 // operands
 

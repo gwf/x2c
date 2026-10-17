@@ -9,8 +9,8 @@
 #pragma once
 #include "meta.x"
 #include "array.x"
-#include "list.x"
-#include "match.x"
+#include "list/list.x"
+#include "match/match.x"
 #include "symbolset.x"
 #include "native-scalar-types.x"
 #include <limits.h>

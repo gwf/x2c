@@ -11,7 +11,7 @@
 #pragma once
 
 #include "error-macros.x"
-#include "match.x"
+#include "match/match.x"
 
 /** Names an explicit cache of immutable prepared Match plans.
     A cache is not synchronized. Its caller must serialize access, keep every
@@ -34,8 +34,8 @@ typedef struct MatchLease {
 
 #include <assert.h>
 #include <string.h>
-#include "pool.x"
-#include "scope.x"
+#include "pool/pool.x"
+#include "scope/scope.x"
 
 /* the plan cache
 

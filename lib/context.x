@@ -22,15 +22,15 @@ protocol Cleanup(Context);
 #include "block.x"
 #include "buffer.x"
 #include "dispatch.x"
-#include "error.x"
+#include "error/error.x"
 #include "exception.x"
-#include "list.x"
+#include "list/list.x"
 #include "map.x"
 #include "match-cache.x"
-#include "pool.x"
-#include "scope.x"
-#include "string.x"
-#include "var.x"
+#include "pool/pool.x"
+#include "scope/scope.x"
+#include "string/string.x"
+#include "var/var.x"
 
 #include <stdlib.h>
 

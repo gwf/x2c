@@ -15,7 +15,7 @@ typedef struct ReplOptions {
 #include "repl-output.x"
 #include "repl-input.x"
 #include "diagnostics.x"
-#include "lisp.x"
+#include "lisp/lisp.x"
 #include "file.x"
 #include <stdio.h>
 #include <unistd.h>

@@ -11,14 +11,14 @@
 
 #pragma once
 
-#include "string.x"
+#include "string/string.x"
 
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>
 
-#include "var.x"
-#include "list.x"
+#include "var/var.x"
+#include "list/list.x"
 #include "buffer.x"
 #include "exception.x"
 

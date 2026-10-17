@@ -1,5 +1,5 @@
 #include "x2c.x"
-#include "lisp.x"
+#include "lisp/lisp.x"
 #include "machine.x"
 #include "typed-array.x"
 #include "typed-map.x"

@@ -87,12 +87,12 @@ typedef struct MatchCaptureSite {
 #include <stdlib.h>
 #include <stddef.h>
 #include <assert.h>
-#include "var.x"
-#include "list.x"
+#include "var/var.x"
+#include "list/list.x"
 #include "atom.x"
 #include "exception.x"
 #include "symbol.x"
-#include "scope.x"
+#include "scope/scope.x"
 #include "block.x"
 #include "match-machine.x"
 #include "match-plan.x"
@@ -100,10 +100,10 @@ typedef struct MatchCaptureSite {
 #include "scan.x"
 
 module {
-  "match/layout.x",
-  "match/execution.x",
-  "match/templates.x",
-  "match/traversal.x",
-  "match/sites.x",
-  "match/operations.x",
+  "layout.x",
+  "execution.x",
+  "templates.x",
+  "traversal.x",
+  "sites.x",
+  "operations.x",
 }

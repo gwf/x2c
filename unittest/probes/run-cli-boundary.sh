@@ -493,7 +493,7 @@ grep -Fq "$BUILD/deps/src/leaf.x:" "$BUILD/deps/out/root.d"
   -I "$BUILD/deps/src" "$BUILD/deps/src/root.x"
 grep -Fq "$BUILD/deps/src/leaf.x" "$BUILD/deps/live-out/root.d"
 "$X2C" translate --out-dir "$BUILD/deps/repo-out" "$ROOT/src/main.x"
-grep -Fq "$ROOT/lib/list.x" "$BUILD/deps/repo-out/main.d"
+grep -Fq "$ROOT/lib/list/list.x" "$BUILD/deps/repo-out/main.d"
 cp "$BUILD/deps/out/root.d" "$BUILD/deps/root.d.saved"
 printf 'int broken( {\n' >"$BUILD/deps/bad-src/root.x"
 set +e

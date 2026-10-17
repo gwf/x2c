@@ -23,7 +23,7 @@ operand or assignment.
 
 ## Related code
 
-[type.x](../type.x) supplies semantic types, [symbols.x](../symbols.x) supplies
+[type.x](../type.x) supplies semantic types, [symtab/symtab.x](../symtab/symtab.x) supplies
 bindings, and [protocol](../protocol/README.md) selects protocol
 implementations. Aggregate traversal belongs to
 [initializers](../initializers/README.md). Diagnostics live in

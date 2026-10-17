@@ -25,7 +25,7 @@ module.
 
 ## Related code
 
-[symbols.x](../symbols.x) owns symbol tables, [sourceview.x](../sourceview.x)
+[symtab/symtab.x](../symtab/symtab.x) owns symbol tables, [sourceview.x](../sourceview.x)
 supplies source bytes, and [diagnostics.x](../diagnostics.x) stores reports.
 [Collect](../collect/README.md) walks sources; [parse](../parse/README.md)
 implements shared grammar and binding.

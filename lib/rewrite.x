@@ -1,7 +1,7 @@
 /* Pattern registration for compiler rewrites. */
 #pragma once
 #include "meta.x"
-#include "macro-value.x"
+#include "macrovalue/macrovalue.x"
 
 /** Registers the decorated translator with its pattern and hole patterns. */
 meta Code register_rewrite(Code function, Code pattern, List holes) {

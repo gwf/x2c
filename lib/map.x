@@ -40,9 +40,9 @@ protocol Cleanup(Map);
 #include <stdarg.h>
 #include <stdio.h>
 
-#include "var.x"
+#include "var/var.x"
 #include "exception.x"
-#include "scope.x"
+#include "scope/scope.x"
 #include "block.x"
 #include "buffer.x"
 #include "varconvert.x"

@@ -4,7 +4,7 @@
 */
 #pragma once
 #include "compiler/compiler.x"
-#include "lisp.x"
+#include "lisp/lisp.x"
 
 /* Interpreter state belongs to one REPL session. */
 typedef struct ReplLower {
@@ -35,9 +35,9 @@ String ReplLower.declined(ReplLower self) => self.reason;
 #include "decline-errors.x"
 #include "type.x"
 #include "transform/transform.x"
-#include "var.x"
-#include "string.x"
-#include "lisp.x"
+#include "var/var.x"
+#include "string/string.x"
+#include "lisp/lisp.x"
 #include "atom.x"
 #include "logger.x"
 #include "path.x"

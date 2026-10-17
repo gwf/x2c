@@ -65,7 +65,7 @@ int Var.known_tag(Symbol tag) =>
 #include <string.h>
 #include "symbol.x"
 #include "map.x"
-#include "scope.x"
+#include "scope/scope.x"
 #include "exception.x"
 #include "string-number.x"
 #include "symbolset.x"
@@ -75,9 +75,9 @@ extern const SymbolSet x2c_var_tags;
 extern const VarDecodeGroup x2c_var_decode_groups[];
 
 module {
-  "var/encoding.x",
-  "var/classes.x",
-  "var/construction.x",
-  "var/numbers.x",
-  "var/ordering.x",
+  "encoding.x",
+  "classes.x",
+  "construction.x",
+  "numbers.x",
+  "ordering.x",
 }

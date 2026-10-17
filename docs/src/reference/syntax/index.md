@@ -47,7 +47,7 @@ change.
 | Tokenizer and layout | `lib/tokenizer.x` | Ordered scanning, mode stack, operand context, keyword reclassification, indentation rewrite, positions | Contextual and stateful, not a single token regex table |
 | Preprocessor handling | `src/preprocess.x`, `src/frontend.x` | Directive handling, conditional groups, configured units and host-preprocessed imports | Host C preprocessing has its own language and target configuration |
 | Compiler token preparation | `src/compiler/parsing/tokens.x` (`Compiler.tokenize`, `_retag_keywords`) | Phase ordering and contextual `in`/`match` token types | Runs after raw tokenization and conditional scanning |
-| Lisp reader | `lib/lisp.x` (`LispReader`) | Lists, reader prefixes and atomic forms over Lisp-mode tokens | Evaluation and compile-time operations are not source grammar |
+| Lisp reader | `lib/lisp/lisp.x` (`LispReader`) | Lists, reader prefixes and atomic forms over Lisp-mode tokens | Evaluation and compile-time operations are not source grammar |
 | Generated API pages | `docs/src/internals/compiler-api/`, notably `parse.md` and `grammar.md` | Public signatures and source doc comments | Derived API documentation, not an independent grammar |
 | Architecture and ownership map | `docs/src/internals/{architecture,implementation-map}.md` | Phase order and syntax owners | Describes organization, not acceptance rules |
 | Scanner/tokenizer tests | `unittest/test-scan.x`, `unittest/test-tokenizer.x` | Executable recognition, boundary, mode and layout cases | Finite observations, not a formal definition |

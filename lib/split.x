@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "string.x"
+#include "string/string.x"
 
 /** Describes an immutable, repeatable lazy traversal of a borrowed `String`.
     The descriptor is `Scope`-owned and keeps no position; each caller or
@@ -37,11 +37,11 @@ protocol Var(Split);
 #include <ctype.h>
 #include <string.h>
 
-#include "var.x"
-#include "list.x"
+#include "var/var.x"
+#include "list/list.x"
 #include "array.x"
 #include "iter.x"
-#include "scope.x"
+#include "scope/scope.x"
 
 static struct Split {
   String str, sep;

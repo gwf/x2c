@@ -51,7 +51,7 @@ provisional label means those pages describe current compiler behavior without
 promising API stability. Never hand-edit those pages or their table-of-contents
 entries.
 
-Prose on generated pages comes from doc comments in `src/*.x`, `lib/*.x`, and
+Prose on generated pages comes from doc comments in compiler and runtime entry files, and
 the generic templates that own published definitions:
 
 - A doc comment opens exactly `/**` and sits immediately above a public
@@ -97,5 +97,5 @@ the generic templates that own published definitions:
   types in optional library modules. A doc comment on a function in a
   `contract` or `internal` module (see `docs/library-manifest.txt`) is an error,
   not a silent omission. Every
-  `lib/*.x` needs a row there, so a new module fails `make doc-generate` until
+  runtime entry file needs a row there, so a new module fails `make doc-generate` until
   it is classified.

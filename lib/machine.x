@@ -13,11 +13,11 @@
 
 #pragma once
 #include "common.x"
-#include "var.x"
-#include "list.x"
+#include "var/var.x"
+#include "list/list.x"
 #include "symbol.x"
 #include "func.x"
-#include "scope.x"
+#include "scope/scope.x"
 
 // capacity fences
 

@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "string.x"
+#include "string/string.x"
 
 #include <ctype.h>
 #include <errno.h>

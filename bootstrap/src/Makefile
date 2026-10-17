@@ -34,7 +34,7 @@ clean:
 
 realclean:
 	rm -f x2c *.[odch]
-	find . -type l -name '*.h' -delete
+	find . -mindepth 2 -name '*.h' -delete
 
 .PHONY: clean realclean
 

@@ -115,7 +115,7 @@ commits need not rebuild from their own bootstrap.
   helper build) and `meta-helper-client` (its calls) -> `compiler`
   (translation state, with members under `src/compiler/` for parsing,
   declarations, generated names, lifecycle, binding facts, the literal cache,
-  match patterns, and source files and locations; + `symbols`, its symbol
+  match patterns, and source files and locations; + `symtab`, its symbol
   table, and `fields`, which copies named fields) ->
   shared runtime `lib/tokenizer.x` (+ `preprocess`, which reads its
   directives) ->

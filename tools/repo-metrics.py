@@ -42,7 +42,7 @@ RESET = "\033[0m"
 LISP_PATTERNS = ("src/*.xlisp", "lib/*.xlisp", "etc/*.xlisp")
 SUMMARY_GROUPS = {
     "src": "src/**/*.x",
-    "lib": "lib/*.x",
+    "lib": "lib/**/*.x",
     "xlisp": "**/*.xlisp",
     "etc": "etc/*.x",
 }
@@ -55,7 +55,7 @@ class Fatal(Exception):
 # Metric groups: (name, glob, what one "unit" means)
 SOURCE_GROUPS = [
     ("compiler", "src/**/*.x", "module"),
-    ("runtime", "lib/*.x", "module"),
+    ("runtime", "lib/**/*.x", "module"),
     ("support", "etc/*.x", "module"),
     ("lisp", LISP_PATTERNS, "Lisp file"),
     ("tests", "unittest/test-*.x", "suite"),

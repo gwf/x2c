@@ -79,8 +79,8 @@ typedef ReplInputCompletion (*ReplInputComplete)(
 #include <unistd.h>
 
 #include "file.x"
-#include "scope.x"
-#include "string.x"
+#include "scope/scope.x"
+#include "string/string.x"
 
 #define REPL_HISTORY_MAX 100
 #define LINENOISE_MAX_FOLDS 16

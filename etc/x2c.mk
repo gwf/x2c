@@ -53,7 +53,7 @@ $(BUILD):
 # the batch (self-healing). An outer build that exports BUILD_JOBS gives the
 # batch that many translation workers.
 ifneq ($(strip $(X_FILES)),)
-X2C_TRANSLATE_DEPS = $(X2C) $(wildcard $(REPO_ROOT)/lib/*.x)
+X2C_TRANSLATE_DEPS = $(X2C) $(shell find $(REPO_ROOT)/lib -name '*.x')
 MISSING_GENERATED = $(filter-out \
 	$(wildcard $(BUILD)/*.c $(BUILD)/*.h $(BUILD)/*.xi), \
 	$(C_FILES) $(H_FILES) $(XI_FILES))

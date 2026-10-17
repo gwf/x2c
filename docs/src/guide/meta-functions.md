@@ -1011,7 +1011,7 @@ int main(void) {
 ```
 
 `lib/native-scalar-types.x` keeps the compiler's exact C scalar table
-this way: `src/type.x` inserts it, and the `lib/lisp.x` access records read
+this way: `src/type.x` inserts it, and the `lib/lisp/lisp.x` access records read
 their tags from it.
 
 ### Names the compile-time library already defines

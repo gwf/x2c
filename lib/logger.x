@@ -64,15 +64,15 @@ typedef void (*LogFlusher)(Logger logger, Var data);
 #include "buffer.x"
 #include "exception.x"
 #include "mutex.x"
-#include "error.x"
+#include "error/error.x"
 #include "error_init.x"
 #include "file.x"
-#include "list.x"
-#include "pool.x"
-#include "scope.x"
-#include "string.x"
+#include "list/list.x"
+#include "pool/pool.x"
+#include "scope/scope.x"
+#include "string/string.x"
 #include "symbol.x"
-#include "var.x"
+#include "var/var.x"
 
 static typedef void (*LogDataDestructor)(Var data);
 

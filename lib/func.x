@@ -11,9 +11,9 @@
 #pragma once
 
 #include "common.x"
-#include "var.x"
-#include "list.x"
-#include "string.x"
+#include "var/var.x"
+#include "list/list.x"
+#include "string/string.x"
 
 Func Var.func(Var value);
 protocol Var(Func);
@@ -48,11 +48,11 @@ typedef struct FuncArg {
 typedef Var (*FuncAdapter)(Func fn, const FuncArg *argv);
 
 #include "varconvert.x"
-#include "error.x"
+#include "error/error.x"
 #include "exception.x"
-#include "match.x"
+#include "match/match.x"
 #include "symbol.x"
-#include "scope.x"
+#include "scope/scope.x"
 #include "meta.x"
 
 #include "func-errors.x"

@@ -125,9 +125,9 @@ $native.update(float, x2c_var_update_f32, <f32>);
 $native.update(double, x2c_var_update_f64, <f64>);
 $native.update(long double, x2c_var_update_long_double, <ldouble>);
 
-#include "var.x"
+#include "var/var.x"
 #include "dispatch.x"
-#include "string.x"
+#include "string/string.x"
 #include "array.x"
 #include "map.x"
 

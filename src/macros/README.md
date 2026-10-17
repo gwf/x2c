@@ -27,7 +27,7 @@ guides describe those parts.
 [parse/binding.x](../parse/binding.x) binds expansion output. [Meta
 SDK](../meta-sdk/README.md) exposes compiler operations;
 [meta-native](../meta-native/README.md) executes native meta code.
-[lib/macro-value.x](../../lib/macro-value.x) defines Macro values.
+[lib/macrovalue/macrovalue.x](../../lib/macrovalue/macrovalue.x) defines Macro values.
 `definitions/templates.x` builds stored templates; this directory's
 `templates.x` evaluates and lands them.
 

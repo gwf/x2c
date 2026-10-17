@@ -1,12 +1,12 @@
 #pragma once
 #include "common.x"
-#include "macro-value.x"
+#include "macrovalue/macrovalue.x"
 
 /*  native-scalar-types.x -- exact C scalar ledger
 
     These are the native C scalar spellings the compiler can carry through a
     Var.  The compiler projects its Type lookup from these rows, and
-    `lib/lisp.x` invokes `$native.scalar.access.all` to get each row's
+    `lib/lisp/lisp.x` invokes `$native.scalar.access.all` to get each row's
     native size, alignment, load, and store for compile-time code that
     keeps C objects in bytes.  Var's i48/u48 numeric payload families are
     deliberately absent: neither is an exact C type.

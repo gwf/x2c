@@ -7,7 +7,7 @@
     shallowly, skipping function bodies; the full parse produces its AST.
     The related compilers of one unit share its package registries,
     generated names, and binding numbers. The symbol table is `Sym`, in
-    `symbols.x`.
+    `symtab/symtab.x`.
 
     Diagnostics may exit immediately or raise `<malformed>` while a recovery
     boundary is active.
@@ -305,7 +305,7 @@ typedef struct SymTxn {
 } SymTxn;
 
 #include "diagnostics.x"
-#include "symbols.x"
+#include "symtab/symtab.x"
 #include "preprocess.x"
 
 protocol Var(Compiler) as void *;

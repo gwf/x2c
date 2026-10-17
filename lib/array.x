@@ -47,7 +47,7 @@ protocol Cleanup(Array);
 #include "func.x"
 #include "iter.x"
 #include "block.x"
-#include "var.x"
+#include "var/var.x"
 #include "varconvert.x"
 
 $array.core.family(Array, Var);

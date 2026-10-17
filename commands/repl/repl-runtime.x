@@ -1,6 +1,6 @@
 /* Interpreter storage and native crossings owned by the REPL command. */
 #pragma once
-#include "lisp.x"
+#include "lisp/lisp.x"
 
 macro Expression $repl.values() =>
   $(x2c.literal.string (x2c.embed.text "../../etc/lisp-values.xlisp"));

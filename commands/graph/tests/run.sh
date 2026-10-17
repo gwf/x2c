@@ -416,9 +416,9 @@ check_sites() {
 }
 
 check_walks() {
-  $tool walks "$fixtures/walks.x" "$fixtures/calls.x" lib/list.x \
+  $tool walks "$fixtures/walks.x" "$fixtures/calls.x" lib/list/list.x \
     >"$tmp/walks"
-  $tool walks lib/list.x "$fixtures/calls.x" "$fixtures/walks.x" \
+  $tool walks lib/list/list.x "$fixtures/calls.x" "$fixtures/walks.x" \
     >"$tmp/walks-reversed"
   cmp "$tmp/walks" "$tmp/walks-reversed"
   tr '\n' ' ' <"$tmp/walks" | sed 's/  */ /g' >"$tmp/walks-line"

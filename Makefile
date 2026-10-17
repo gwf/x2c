@@ -239,8 +239,10 @@ bootstrap-refresh: build				## Refresh the portable bootstrap
 	$(MAKE) -C bootstrap realclean
 	cp builds/0/lib/*.[ch] bootstrap/lib/
 	cp builds/0/src/*.[ch] bootstrap/src/
-	@for directory in builds/0/src/*/; do \
-		[ ! -d "$$directory" ] || cp -R "$${directory%/}" bootstrap/src/; \
+	@for area in lib src; do \
+		for directory in builds/0/$$area/*/; do \
+			[ ! -d "$$directory" ] || cp -R "$${directory%/}" bootstrap/$$area/; \
+		done; \
 	done
 	$(MAKE) bootstrap-build
 

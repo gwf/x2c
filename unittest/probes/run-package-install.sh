@@ -29,6 +29,11 @@ mkdir -p "$BUILD/home/include/x2c" "$BUILD/home/etc" "$BUILD/home/lib" \
 cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.x "$BUILD/home/etc/"
 copy_runtime_sources "$BUILD/home/include/x2c/"
 cp "$ROOT/builds/0/lib/"*.h "$BUILD/home/include/x2c/"
+for header in "$ROOT/builds/0/lib"/*/*.h; do
+  directory=$(basename "$(dirname "$header")")
+  mkdir -p "$BUILD/home/include/x2c/$directory"
+  cp -L "$header" "$BUILD/home/include/x2c/$directory/"
+done
 copy_runtime_sources "$BUILD/home/lib/"
 mkdir -p "$BUILD/home/src"
 mkdir -p "$BUILD/home/src/components"

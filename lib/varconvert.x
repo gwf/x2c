@@ -112,10 +112,10 @@ static macro Stmt $error.convert.range(Expr $source_tag, Expr $target) {
   raise %(conv-range (source ${$source_tag}) (target ${$target}));
 }
 
-#include "var.x"
-#include "error.x"
-#include "list.x"
-#include "string.x"
+#include "var/var.x"
+#include "error/error.x"
+#include "list/list.x"
+#include "string/string.x"
 #include "symbol.x"
 #include "symbolset.x"
 

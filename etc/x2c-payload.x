@@ -80,7 +80,7 @@ static void copy_support(Path destination) {
     ("lib/scope" ("*.x") ("lib/scope" "include/x2c/scope"))
     ("lib/pool" ("*.x") ("lib/pool" "include/x2c/pool"))
     ("lib/error" ("*.x") ("lib/error" "include/x2c/error"))
-    ("lib/macro-value" ("*.x") ("lib/macro-value" "include/x2c/macro-value"))
+    ("lib/macrovalue" ("*.x") ("lib/macrovalue" "include/x2c/macrovalue"))
     ("src" ("grammar.x") ("src"))
     ("src/components" ("*.x") ("src/components"))
     ("builds/0/lib" ("*.h") ("include/x2c"))
@@ -102,6 +102,9 @@ static void copy_support(Path destination) {
                          .join(source.basename()));
     }
   }
+  foreach (Path source, root.join("builds/0/lib/*/*.h").glob())
+    copy(source, destination.join("include/x2c")
+      .join(source.dirname().basename()).join(source.basename()));
 }
 
 /* An interface replays only for the compiler that wrote it, so the staged
@@ -112,8 +115,12 @@ static void write_interfaces(Path stage) {
   Path out = stage.join(".x2c-interfaces");
   out.make_dirs();
   Array sources = [];
-  foreach (Path source, stage.join("lib/*.x").glob())
-    sources.push(%"lib/${source.basename()}");
+  foreach (String pattern, %("lib/*.x" "lib/*/*.x"))
+    foreach (Path source, stage.join(pattern).glob()) {
+      if (source.dirname().basename() != "lib" &&
+          source.stem() != source.dirname().basename()) continue;
+      sources.push(source.remove_prefix(%"$stage/"));
+    }
   %(${stage.join("bin/x2c")} "translate" "--out-dir" ".x2c-interfaces"
     @{sources.list()}).job()
     .options({dir: stage, env: {"X2C_HOME": "."}, stdout: <capture>,
@@ -121,7 +128,7 @@ static void write_interfaces(Path stage) {
     .check();
   foreach (Path source, sources) {
     String name = %"${source.stem()}.xi";
-    out.join(name).move_to(stage.join("lib").join(name));
+    out.join(name).move_to(stage.join(source.dirname()).join(name));
   }
   out.remove_tree();
 }

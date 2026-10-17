@@ -1,4 +1,4 @@
-/*  macro-value.x -- macros as values that build and recognize code
+/*  macrovalue.x -- macros as values that build and recognize code
 
     Copyright (c) 2025 Gary William Flake
 
@@ -13,7 +13,7 @@
 #pragma once
 
 #include "common.x"
-#include "match.x"
+#include "match/match.x"
 
 /** Records fixed-local slots for distinct-identity checks and Name slots
     for member-spelling comparisons during recognition. */
@@ -47,11 +47,11 @@ typedef struct MacroCaseSite {
 
 #include "array.x"
 #include "atom.x"
-#include "list.x"
+#include "list/list.x"
 #include "match-machine.x"
 #include "match-cache.x"
 #include "meta.x"
-#include "string.x"
+#include "string/string.x"
 #include "varconvert.x"
 #include <math.h>
 
@@ -111,7 +111,7 @@ typedef struct MacroMatcher {
 } MacroMatcher;
 
 module {
-  "macro-value/construction.x",
-  "macro-value/patterns.x",
-  "macro-value/recognition.x",
+  "construction.x",
+  "patterns.x",
+  "recognition.x",
 }

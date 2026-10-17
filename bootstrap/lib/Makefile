@@ -15,6 +15,7 @@ clean:
 
 realclean:
 	rm -f libx2c.a *.[odch]
+	find . -mindepth 2 -name '*.h' -delete
 
 .PHONY: clean realclean
 

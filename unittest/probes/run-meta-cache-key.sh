@@ -303,6 +303,11 @@ for source in "$ROOT"/lib/*; do
     cp -R "$source" home/include/x2c/
   fi
 done
+for header in "$(dirname "$X2C")/lib"/*/*.h; do
+  directory=$(basename "$(dirname "$header")")
+  mkdir -p "home/include/x2c/$directory"
+  cp -L "$header" "home/include/x2c/$directory/"
+done
 cp "$ROOT"/etc/*.xlisp "$ROOT"/etc/*.x \
   home/etc/
 cp "$X2C" home/bin/x2c

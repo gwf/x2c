@@ -64,7 +64,7 @@ the private conversion pair, declare `protocol Var(PrivateRecord);`, and let
 typed arguments, results, assignments, and initializers request the crossing.
 Keep explicit tag checks where the incoming `Var` is genuinely dynamic. The
 generated adapters remain local because the participant is private.
-`Lambda` in `lib/lisp.x` and `LogTextSink` in `lib/logger.x` are checked
+`Lambda` in `lib/lisp/lisp.x` and `LogTextSink` in `lib/logger.x` are checked
 repository examples. Sharing
 `<p48>` with other callback state is not a reason to leave a known private
 callback payload untyped. Macro definitions and their typed slots are ordinary
@@ -92,7 +92,7 @@ alias-typed temporary solely to trigger conversion. For a hot callback,
 inspect generated C and run the existing benchmark to confirm that the
 converter reduces to the original pointer load.
 
-`MatchPlan` in `lib/match.x` is the reusable executor. The cache retains the
+`MatchPlan` in `lib/match/match.x` is the reusable executor. The cache retains the
 plan itself, and callers use its executor methods directly. A protocol whose
 only work is to convert the receiver and forward those methods would add
 functions without sharing an implementation.
@@ -139,7 +139,7 @@ Current proven shapes include:
   direct `p64` store and load used by iterator callbacks.
 - The native update family, `$native.update` at `lib/varops.x:95` and its
   invocations after it. Each invocation supplies the facts that differ.
-- Local resource setup in `$match.machine` in `lib/match.x` and
+- Local resource setup in `$match.machine` in `lib/match/match.x` and
   `$match.plan` in `lib/match-cache.x`. The macro hides stack-storage
   mechanics while release and fallback policy stay visible.
 - Test registration in `unittest/test-macros.x:1`. The macro removes a
@@ -184,7 +184,7 @@ Keep fixed policy in the module whose behavior it defines, as
 shared source module may keep AST projection mechanics beside its ledger,
 as `lib/var-tags.x` does. `lib/var-ledger.x` and `src/type-ledger.x` both
 include that tag ledger. The runtime tables belong to those two units;
-`lib/var.x` declares them `extern`. A single three-row table does not justify five one-use
+`lib/var/var.x` declares them `extern`. A single three-row table does not justify five one-use
 macros: direct aligns,
 offsets, and copies keep a frozen program's byte layout visible.
 A one-use data-only module adds a file boundary without sharing an
@@ -348,12 +348,12 @@ runtime proof.
 
 Status: proven
 Checked: 2026-07-30 at `9d762c97`
-Owner: `lib/lisp.x`
+Owner: `lib/lisp/lisp.x`
 
 Problem: `Lisp.eval`, `Lisp.apply`, and `Lisp.eval_string` repeated the same
 null-session failure and session-Scope wrapper. `$lisp.entry` leaves each
 business body visible and centralizes that orthogonal boundary, reducing
-`lib/lisp.x` by 10 lines. The source scanner also had to learn decorator
+`lib/lisp/lisp.x` by 10 lines. The source scanner also had to learn decorator
 adjacency so generated API documentation still sees the original signature
 and comment. Macro-authored `raise` does not survive constructed-fragment
 elaboration, so the decorator delegates that operation to one private helper.
@@ -364,7 +364,7 @@ scanner own the proof.
 
 Status: proven
 Checked: 2026-08-01 at `b2ac91ae`
-Owner: `lib/var.x` and `lib/symbolset.x`
+Owner: `lib/var/var.x` and `lib/symbolset.x`
 
 Problem: the var-tag ledger projected two 109-case switches (`$var.tag.cases`,
 `$var.tag.kind.cases`) merely to map a Symbol to its dense id and kind.
@@ -561,7 +561,7 @@ quasiquoted List where the generator manipulates structure. A wrong literal
 argument reports `x2c.literal.int requires a number` instead of failing later
 inside an expansion.
 
-Proof: generated `.h` and `.c` byte-identical for `lib/var.x` and
+Proof: generated `.h` and `.c` byte-identical for `lib/var/var.x` and
 `lib/varops.x` before and after adoption; `make precommit` and `make check`.
 
 Limits or counterexample: the SDK declares no other constructors. A

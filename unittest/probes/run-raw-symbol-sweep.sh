@@ -147,10 +147,13 @@ exclusions["$ROOT/unittest/compiler-fixtures/meta-import-included.x"]=$(
 
 compiler_sources=()
 while IFS= read -r source; do compiler_sources+=("$source"); done < <(
-  python3 "$ROOT/tools/compiler-sources.py" --root "$ROOT")
+  python3 "$ROOT/tools/sources.py" --root "$ROOT")
+library_sources=()
+while IFS= read -r source; do library_sources+=("$source"); done < <(
+  python3 "$ROOT/tools/sources.py" --root "$ROOT" --area lib)
 sources=()
 for src in "${compiler_sources[@]}" \
-    "$ROOT"/lib/*.x "$ROOT"/examples/*.x \
+    "${library_sources[@]}" "$ROOT"/examples/*.x \
     "$ROOT"/unittest/*.x "$ROOT"/unittest/compiler-fixtures/*.x \
     "$ROOT"/unittest/probes/*.x "$ROOT"/unittest/benchmarks/*.x; do
   total=$((total + 1))

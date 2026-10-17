@@ -61,10 +61,10 @@ struct UnzipShared {
   struct Iter column_iters[2];
 };
 
-#include "list.x"
-#include "var.x"
+#include "list/list.x"
+#include "var/var.x"
 #include "symbol.x"
-#include "scope.x"
+#include "scope/scope.x"
 #include "array.x"
 #include "block.x"
 #include "func.x"

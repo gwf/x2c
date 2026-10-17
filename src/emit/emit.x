@@ -12,8 +12,8 @@
 #include "compiler/compiler.x"
 #include <stdlib.h>
 #include <stdio.h>
-#include "string.x"
-#include "var.x"
+#include "string/string.x"
+#include "var/var.x"
 #include "ast.x"
 #include "format.x"
 #include "cleanup/cleanup.x"

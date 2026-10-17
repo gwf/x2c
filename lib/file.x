@@ -66,11 +66,11 @@ typedef Symbol FileReadStatus;
 
 $cleanup.by(File, close);
 
-#include "string.x"
+#include "string/string.x"
 #include "block.x"
 #include "buffer.x"
 #include "exception.x"
-#include "var.x"
+#include "var/var.x"
 #include "iter.x"
 
 #include <unistd.h>

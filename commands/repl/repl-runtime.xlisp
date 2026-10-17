@@ -167,7 +167,7 @@
 
 // A lowered iterator call binds on first use from its `meta` declaration in
 // lib/iter.x or lib/protocols.x, through `C.iterator.call`. These rows bind
-// through their adapters in lib/lisp.x.
+// through their adapters in lib/lisp/lisp.x.
 (defun Iter_init (destination object callable state)
   ((bind "Iter_init" nil) destination object callable state))
 (def Iter_any (bind "Iter_any" nil))

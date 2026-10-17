@@ -104,7 +104,7 @@ captures a value; by itself it does not establish that value's type.
 | Typedef method and converter inheritance | verified | postfix parser and conversion lowering | fixtures/example |
 | Numeric/`Var` String interpolation | verified | interpolation converter | interpolation suite/example |
 | Static printf-family `Var` conversion | verified | `src/components/printf-format.x` | compiler fixtures |
-| Structural `Var` decoding | verified | `lib/var.x` | VarOps suite |
+| Structural `Var` decoding | verified | `lib/var/var.x` | VarOps suite |
 | Cross-tag numeric conversion | verified | `Var.convert` | VarOps |
 | Dynamic numeric operations | verified | `Var.binary` | VarOps/fixture |
 | `Var` truthiness | verified | `Var.truth` | VarOps/Error fixture |
@@ -115,7 +115,7 @@ captures a value; by itself it does not establish that value's type.
 | Malformed splice | verified | literal parser | diagnostic fixture |
 | Promoted immutable literal caching | verified | expression lowering, cache and generator | promoted-string-cache fixture |
 | Match transform dump | verified | `String.repr` | transform fixture |
-| Pooled interning | verified | `lib/pool.x` (`Pool.retain*`/`.release`/`.insert`/`.lookup`/`.owns`), `String.promote`, `List.promote` | Pool suite |
+| Pooled interning | verified | `lib/pool/pool.x` (`Pool.retain*`/`.release`/`.insert`/`.lookup`/`.owns`), `String.promote`, `List.promote` | Pool suite |
 | Unit interfaces | verified | `Compiler.interface_text`/`_interface_read` (`src/collect/collect.x`), `<stem>.xi` beside generated C | `run-header-cache.sh`, `run-artifact-atomicity` |
 | Batch-compilation memory brackets | partial | `src/main.x` per-unit `Scope`/pool brackets, the per-unit `Context` in `src/frontend.x` | batch/solo output parity in `run-header-cache.sh`; no probe yet asserts the pool-release/no-leak discipline directly |
 
@@ -570,7 +570,7 @@ processing of the returned call arguments.
 
 Generated identifiers belong to one compiler translation session shared by
 the original-source and shallow declaration compilers. The reserved space is
-whatever `_is_reserved_spelling` (`src/symbols.x`) accepts: the `_x2c_gensym_`
+whatever `_is_reserved_spelling` (`src/symtab/symtab.x`) accepts: the `_x2c_gensym_`
 prefix, `_init_guard_`, `_file_init_`, and `_` followed only by digits. A
 source declaration whose spelling falls in that space is rejected with a
 located diagnostic — one check per declaration in
@@ -678,7 +678,7 @@ saved value.
 
 A `Pool` pairs a `Scope` that owns storage with a private `PoolTable`
 that stores canonical identities, linked to an enclosing parent pool.
-`lib/pool.x` owns lookup
+`lib/pool/pool.x` owns lookup
 (shadowing outward through the parent chain), creation (always landing in the
 innermost pool), and release. `Pool.retain`/`Pool.retain_named`
 establish a pooling scope for the shared `String` and `List`
@@ -938,11 +938,11 @@ Exemplars endorse a property, not every line in a file:
 
 - `lib/common.x` - `x2c_normalize_index` and `x2c_normalize_slice` centralize
   cross-type semantic contracts.
-- `lib/scope.x` - scope registration and release centralize allocation
+- `lib/scope/scope.x` - scope registration and release centralize allocation
   lifetimes.
 - `lib/exception.x` - compact structured control flow with a narrow runtime
   mechanism.
-- `lib/match.x` - the self-hosting matcher, including the distinction between
+- `lib/match/match.x` - the self-hosting matcher, including the distinction between
   binding and typed constraints.
 - `src/statements.x` - parser code shaped like the grammar it recognizes.
 - `src/cache.x` - initialization rewrites match expression structure while

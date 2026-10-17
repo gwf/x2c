@@ -1,6 +1,6 @@
 #pragma once
 #include "common.x"
-#include "macro-value.x"
+#include "macrovalue/macrovalue.x"
 
 /*  grammar.x -- the source forms that lowering recognizes
 

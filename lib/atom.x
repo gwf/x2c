@@ -83,7 +83,7 @@ Buffer Atom.write_repr(Atom value, Buffer out) {
 #include "buffer.x"
 #include "dispatch.x"
 #include "scan.x"
-#include "string.x"
+#include "string/string.x"
 #include "symbol.x"
 
 #include <stdlib.h>

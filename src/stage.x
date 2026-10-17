@@ -14,8 +14,8 @@
 
 #include "grammar.x"
 #include "type.x"
-#include "var.x"
-#include "string.x"
+#include "var/var.x"
+#include "string/string.x"
 #include "varconvert.x"
 #include "datum.x"
 #include <limits.h>

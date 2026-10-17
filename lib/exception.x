@@ -214,7 +214,7 @@ void x2c_exception_leave(ExceptionFrame *frame) {
   if (should_unwind) ExceptionFrame.unwind(target);
 }
 
-#include "error.x"
+#include "error/error.x"
 
 static inline ExceptionFrame *_current(void) => _thread().exception_top;
 

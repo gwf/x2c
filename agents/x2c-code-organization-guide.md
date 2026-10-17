@@ -12,7 +12,7 @@ Files below are relative to `src/` unless a path is shown.
 - entry and shared state: `main.x`, `cli.x`, `translation.x`, `frontend.x`, `compiler.x`
   (its members in `compiler/` hold parsing, declarations, generated names,
   lifecycle, binding facts, the literal cache, match patterns, and source
-  files and locations), `symbols.x`, `diagnostics.x`, `sourceview.x`,
+  files and locations), `symtab/symtab.x`, `diagnostics.x`, `sourceview.x`,
   `collect.x`, `report.x`, `deps.x`, `utils.x`;
 - shared runtime tokenization: `lib/tokenizer.x`; compiler parsing:
   `preprocess.x`, `parse.x`, `expressions.x`, `initializers.x`,
@@ -76,7 +76,7 @@ typed-list                    typed views
 iter, match, match-plan,      traversal, pattern matching, plan lowering
 match-cache, machine,         and caching, and the Match wordcode machine
 match-machine
-macro-value, system-macros    macros as values that build and recognize
+macrovalue, system-macros    macros as values that build and recognize
                               code, and convenience macros
 error, error_init,            ambient errors, their shared causes and
 error-macros, error-private,  transfer layouts, and structured control

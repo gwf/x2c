@@ -339,7 +339,7 @@ meta List _tag_decode_groups(void) {
 
 /* --- the enum check ----------------------------------------------------- */
 
-/* `TagId` is written out in `lib/var.x`; each row asserts that its ID
+/* `TagId` is written out in `lib/var/var.x`; each row asserts that its ID
    has the row's ledger position. */
 meta List _tag_id_checks(void) {
   Array checks = [];

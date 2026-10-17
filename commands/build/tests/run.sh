@@ -34,6 +34,11 @@ mkdir -p home/builds/7/libexec
 cp -R "$ROOT/lib" "$ROOT/etc" "$ROOT/src" home/
 mkdir -p home/include/x2c
 cp "$ROOT/builds/0/lib/"*.h "$ROOT/lib/"*.x home/include/x2c/
+for header in "$ROOT/builds/0/lib"/*/*.h; do
+  directory=$(basename "$(dirname "$header")")
+  mkdir -p "home/include/x2c/$directory"
+  cp -L "$header" "home/include/x2c/$directory/"
+done
 cp "$X2C" home/builds/7/x2c
 cp "$COMMAND" home/builds/7/libexec/x2c-build
 cp "$ROOT/builds/0/libx2c.a" home/builds/7/libx2c.a

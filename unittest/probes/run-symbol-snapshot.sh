@@ -116,9 +116,15 @@ diff -u "$BUILD/cold/foreach.h" "$BUILD/default/foreach.h"
 # Interfaces its own compiler wrote make the same home replay the prelude
 # and still produce the same C.
 mkdir -p "$BUILD/cold-interfaces" "$BUILD/warm"
+library_sources=()
+while IFS= read -r source; do library_sources+=("$source"); done < <(
+  python3 "$ROOT/tools/sources.py" --root "$cold_root" --area lib)
 "$cold_root/bin/x2c" translate --out-dir "$BUILD/cold-interfaces" \
-  "$cold_root"/lib/*.x >/dev/null 2>&1
-cp "$BUILD/cold-interfaces/"*.xi "$cold_root/lib/"
+  "${library_sources[@]}" >/dev/null 2>&1
+for source in "${library_sources[@]}"; do
+  name=${source##*/}
+  cp "$BUILD/cold-interfaces/${name%.x}.xi" "${source%/*}/"
+done
 [[ -n "$("$cold_root/bin/x2c" env prelude)" ]] || exit 1
 "$cold_root/bin/x2c" translate --out-dir "$BUILD/warm" "$ROOT/examples/foreach.x"
 diff -u "$BUILD/warm/foreach.c" "$BUILD/default/foreach.c"

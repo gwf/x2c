@@ -9,7 +9,7 @@ int twice(int x);
 Path home_path(void);
 
 
-#include "string.x"
+#include "string/string.x"
 
 int twice(int x) { return 2 * x; }
 

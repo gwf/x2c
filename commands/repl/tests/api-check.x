@@ -3,8 +3,8 @@
     Copyright (c) 2026 Gary William Flake.
 */
 #include "repl-session.x"
-#include "lisp.x"
-#include "scope.x"
+#include "lisp/lisp.x"
+#include "scope/scope.x"
 #include "macros/macros.x"
 #include <stdio.h>
 

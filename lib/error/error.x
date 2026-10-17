@@ -16,7 +16,7 @@
 #pragma once
 
 #include "common.x"
-#include "match.x"
+#include "match/match.x"
 #include "mutex.x"
 
 /** Names the structured-error runtime and its static operations.
@@ -59,14 +59,14 @@ typedef struct ErrorCatchSite {
 #include "array.x"
 #include "block.x"
 #include "exception.x"
-#include "list.x"
+#include "list/list.x"
 #include "map.x"
-#include "pool.x"
-#include "scope.x"
-#include "string.x"
+#include "pool/pool.x"
+#include "scope/scope.x"
+#include "string/string.x"
 #include "symbol.x"
 #include "symbolset.x"
-#include "var.x"
+#include "var/var.x"
 
 #include "error-macros.x"
 #include "error-private.x"
@@ -111,9 +111,9 @@ module typedef struct ErrorThreadState {
 } *ErrorThreadState;
 
 module {
-  "error/dispatch.x",
-  "error/policy.x",
-  "error/records.x",
-  "error/handlers.x",
-  "error/runtime.x",
+  "dispatch.x",
+  "policy.x",
+  "records.x",
+  "handlers.x",
+  "runtime.x",
 }

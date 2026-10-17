@@ -10,11 +10,11 @@
 
 #pragma once
 
-#include "match.x"
+#include "match/match.x"
 
 #include <assert.h>
-#include "scope.x"
-#include "list.x"
+#include "scope/scope.x"
+#include "list/list.x"
 
 /* lowering to Match words
 

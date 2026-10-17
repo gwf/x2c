@@ -124,7 +124,7 @@ as an ordinary filesystem/include problem, not escaped as command text.
   `Compiler.parse_simple_declaration` at that parser boundary.
 - Missing field lookup: inspect pointer/aggregate classification in
   `src/type.x` and field resolution in `Sym.lookup_field` in
-  `src/symbols.x`.
+  `src/symtab/symtab.x`.
 - Iterator returning nothing: inspect the adapter in `lib/dispatch.x` and the
   protocol in `lib/iter.x`.
 - Literal emitted twice: inspect `src/cache.x` and the lowering that emits the
@@ -156,7 +156,7 @@ the change, then run `./builds/0/x2c` against a tree **with** it:
 git stash push -u -m probe-aside   # or copy the changed files aside
 make build                         # builds/0/x2c now carries the probe
 git stash pop                      # restore the change
-./builds/0/x2c translate --out-dir /tmp/x2c-debug lib/var.x
+./builds/0/x2c translate --out-dir /tmp/x2c-debug lib/var/var.x
 ```
 
 The same asymmetry explains a diagnostic that looks less informative than the

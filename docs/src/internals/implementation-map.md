@@ -76,7 +76,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 - Parse: `src/literals/literals.x`
 - Lower/generate: `src/components/collection-literals.x`, `src/transform/transform.x`,
   `src/cache.x`
-- Runtime: `lib/list.x`, `lib/array.x`, `lib/map.x`, `lib/string.x`
+- Runtime: `lib/list/list.x`, `lib/array.x`, `lib/map.x`, `lib/string/string.x`
 - Tests: literal-cache and mutable-empty fixtures, collection suites
 - See also: [collections](../guide/collections.md)
 
@@ -92,7 +92,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 - Lower/generate: `src/transform/transform.x` converts each insertion, then
   `src/components/interpolation.x` joins them; see [builtin
   components](architecture.md#builtin-components)
-- Runtime: `lib/string.x`, plus `Var.str` for the boxed segments
+- Runtime: `lib/string/string.x`, plus `Var.str` for the boxed segments
 - Tests: interpolation suite
 - See also: [values](../guide/values.md)
 
@@ -144,7 +144,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 - Compiler operations for `meta` code, the `Code` and `Type` methods and
   the `x2c_` helpers: `lib/meta.x`
 - Macro values, their application, and macro-valued `case` recognition:
-  `lib/macro-value.x`
+  `lib/macrovalue/macrovalue.x`
 - Compile-time Lisp boundary adapters: `etc/compiler-sdk.xlisp`
 - `meta` arguments and results: `src/stage.x`; a unit's `meta` group and
   in-process staging: `src/meta-group/meta-group.x`; the project helper:
@@ -153,7 +153,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
   `tools/gen-meta-queries.sh` generates from `lib/meta.x` into
   `etc/meta-queries.x`
 - Embedded native bindings: `etc/lisp-bindings.x`,
-  `etc/lisp-bindings.xlisp`, `lib/lisp-targets.x`, `lib/lisp.x`, and
+  `etc/lisp-bindings.xlisp`, `lib/lisp-targets.x`, `lib/lisp/lisp.x`, and
   `lib/func.x`
 - Tests: macro import, template, decorator, inline-Lisp, and inferred-binding
   compiler fixtures; Lisp and `Func` suites; compile-time-macros, decorators,
@@ -163,7 +163,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 ### Package imports and `with` names
 
 - Parse: `src/parse/parse.x`
-- Package name collection and resolution: `src/symbols.x`, `src/collect/collect.x`
+- Package name collection and resolution: `src/symtab/symtab.x`, `src/collect/collect.x`
 - Manifest and native build ownership: `src/project/project.x`, `commands/build/build.x`, and
   `src/toolchain.x`
 - Tests: import/package compiler fixtures and the import-greet example
@@ -186,7 +186,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 - The `module` storage class: `_module_storage_form` in `src/parse/units.x`
   retypes the word as `static` under `Compiler.module_declaration`
 - File-private statics: each marker row carries its file's prefix from
-  `_file_prefix` in `src/collect/collect.x`; `_declared_key` in `src/symbols.x`
+  `_file_prefix` in `src/collect/collect.x`; `_declared_key` in `src/symtab/symtab.x`
   respells a static's key with `Compiler.private_prefix` and
   `Compiler.declared_spelling`, which records prefixed spellings so derived
   names keep theirs; `Sym.get` and `_lookup_from` try the current
@@ -200,7 +200,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 - Parse, type, and lower: `src/expressions/expressions.x` types each test as a
   `Var.is`, `Var.is_void`, or constant-row `Var.is_row` call; `src/type.x`
   supplies the tag facts
-- Runtime tag representation: `lib/var.x`, `lib/common.x`
+- Runtime tag representation: `lib/var/var.x`, `lib/common.x`
 - Tests: is-type and is-not compiler fixtures plus `Var` suites
 - See also: [exact Var-tag
   tests](../reference/language.md#exact-var-tag-tests-with-is-and-is-not)
@@ -210,7 +210,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 - Parse declarations and binders: `src/parse/parse.x`, `src/statements.x`
 - Type access: `src/type.x`; lower: `src/components/destructuring.x`,
   dispatched from `src/transform/transform.x`
-- Runtime source values: `lib/list.x`
+- Runtime source values: `lib/list/list.x`
 - Tests: destructuring suite and list-destructuring compiler fixtures
 
 ### Inline Lisp bindings
@@ -218,7 +218,7 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 - Parse and expand `$lisp.bind`, `$lisp.binding`, and `$lisp.install`:
   `src/macros/macros.x`, `etc/lisp-bindings.x`, and
   `etc/lisp-bindings.xlisp`
-- Runtime call boundary: `lib/lisp.x`, `lib/func.x`
+- Runtime call boundary: `lib/lisp/lisp.x`, `lib/func.x`
 - Tests: Lisp binding compiler fixtures, Lisp/`Func` suites, and the
 inline-lisp example
 - See also: [compile-time macros](../reference/language.md#compile-time-macros)
@@ -226,14 +226,14 @@ inline-lisp example
 ### Var boxing, conversion, operations, and dispatch
 
 - Type selection: `src/type.x`
-- Typedef identity and scopes: `src/symbols.x`, `src/statements.x`
+- Typedef identity and scopes: `src/symtab/symtab.x`, `src/statements.x`
 - Conversion lowering: `src/expressions/expressions.x`
 - Protocol operator selection: `src/expressions/expressions.x`
 - Dynamic operators: `src/components/dynamic-operators.x`
 - Truthiness and native emission: `src/transform/transform.x`, `src/emit/emit.x`
 - Sentinel literal parsing and C spelling: `src/literals/literals.x`, `src/emit/emit.x`;
   expression context distinguishes the literal from C `void` type positions
-- Runtime representation: `lib/common.x`, `lib/var.x`, `lib/scope.x`
+- Runtime representation: `lib/common.x`, `lib/var/var.x`, `lib/scope/scope.x`
 - Numeric metadata, conversion, and failure causes: `lib/varconvert.x`;
   shared representation declarations: `lib/common.x`
 - Arithmetic, truthiness, and compound assignment: `lib/varops.x`
@@ -265,7 +265,7 @@ inline-lisp example
 - Parse: `src/parse/parse.x`, `src/literals/literals.x`, `src/expressions/expressions.x`
 - Canonical type owner: `src/type.x`
 - Conversion: `src/transform/transform.x`, `src/expressions/expressions.x`
-- Runtime representation: `lib/var.x`, `lib/scope.x`
+- Runtime representation: `lib/var/var.x`, `lib/scope/scope.x`
 - Tests: canonical scalar fixture, invalid-scalar and overflow diagnostics,
   `Var` suite
 - See also: [values and Var](../guide/values.md)
@@ -328,9 +328,9 @@ inline-lisp example
 - Lower: `src/components/pattern-match.x`; see [builtin
   components](architecture.md#builtin-components)
 - Native emission: `src/emit/emit.x`
-- Runtime: `lib/match.x` and the plan modules listed in [the runtime
+- Runtime: `lib/match/match.x` and the plan modules listed in [the runtime
   boundary](architecture.md#the-runtime-boundary); patterns and binding sets
-  are ordinary `List`s from `lib/list.x`
+  are ordinary `List`s from `lib/list/list.x`
 - Tests: match suites and checked nested example
 - See also: [pattern matching](../guide/match.md)
 
@@ -350,7 +350,7 @@ inline-lisp example
   components](architecture.md#builtin-components)), `src/cleanup/cleanup.x`,
   `src/emit/emit.x`
 - Runtime: `lib/exception.x` implements the frames and jumps for transfer
-  and cleanup; `lib/error.x` owns handlers, policy, watermarks, accumulated
+  and cleanup; `lib/error/error.x` owns handlers, policy, watermarks, accumulated
   records, matching, and transferring registration lifetime
 - Tests: optimized `defer`/try and filtered-catch compiler fixtures,
   exception/`defer`/`Error` suites, and fatal/floor subprocess probes

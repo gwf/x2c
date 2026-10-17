@@ -235,7 +235,7 @@ pattern. Its arguments are `?`/`*` binders with optional identifiers, nested
 macro patterns, or List patterns. `${$macro(...)}` embeds a derived pattern
 inside a List; in an `(expr TYPE CONTENT)` pattern its position can request
 only the content. Typed captures use `?(Type name)` and the type's Var tag.
-`src/literals/literals.x` and `src/macros/macros.x` implement these rules. `lib/match.x`
+`src/literals/literals.x` and `src/macros/macros.x` implement these rules. `lib/match/match.x`
 defines what a pattern means.
 
 Raise and catch payloads have narrower rules than an arbitrary List.

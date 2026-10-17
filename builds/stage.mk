@@ -82,16 +82,17 @@ MAKEFLAGS        += -S
 .PRECIOUS: $(BIN_BUILD)/%.c $(BIN_BUILD)/%.d $(BIN_BUILD)/%.c.d
 ###############################################################################
 # Library source files and generated files
-LIB_X_FILES  = $(wildcard $(LIB_SOURCE)/*.x)
-LIB_H_FILES  = $(patsubst $(LIB_SOURCE)/%.x,$(LIB_BUILD)/%.h,$(LIB_X_FILES))
-LIB_C_FILES  = $(patsubst $(LIB_SOURCE)/%.x,$(LIB_BUILD)/%.c,$(LIB_X_FILES))
-LIB_XI_FILES = $(patsubst $(LIB_SOURCE)/%.x,$(LIB_BUILD)/%.xi,$(LIB_X_FILES))
-LIB_OBJECTS  = $(patsubst $(LIB_SOURCE)/%.x,$(LIB_BUILD)/%.o,$(LIB_X_FILES))
-LIB_X_DEPS   = $(patsubst $(LIB_SOURCE)/%.x,$(LIB_BUILD)/%.d,$(LIB_X_FILES))
-LIB_C_DEPS   = $(patsubst $(LIB_SOURCE)/%.x,$(LIB_BUILD)/%.c.d,$(LIB_X_FILES))
+LIB_X_FILES  = $(shell python3 $(ROOT)/tools/sources.py --root $(ROOT) --area lib)
+LIB_X_NAMES  = $(sort $(notdir $(LIB_X_FILES)))
+LIB_H_FILES  = $(patsubst %.x,$(LIB_BUILD)/%.h,$(LIB_X_NAMES))
+LIB_C_FILES  = $(patsubst %.x,$(LIB_BUILD)/%.c,$(LIB_X_NAMES))
+LIB_XI_FILES = $(patsubst %.x,$(LIB_BUILD)/%.xi,$(LIB_X_NAMES))
+LIB_OBJECTS  = $(patsubst %.x,$(LIB_BUILD)/%.o,$(LIB_X_NAMES))
+LIB_X_DEPS   = $(patsubst %.x,$(LIB_BUILD)/%.d,$(LIB_X_NAMES))
+LIB_C_DEPS   = $(patsubst %.x,$(LIB_BUILD)/%.c.d,$(LIB_X_NAMES))
 ###############################################################################
 # Binary source files and generated files
-BIN_X_FILES  = $(shell python3 $(ROOT)/tools/compiler-sources.py --root $(ROOT))
+BIN_X_FILES  = $(shell python3 $(ROOT)/tools/sources.py --root $(ROOT))
 # Components are independent units; keep their unique artifact names flat.
 BIN_X_NAMES  = $(sort $(notdir $(BIN_X_FILES)))
 # Module members trigger the batch but are not separate translation units.
@@ -125,16 +126,7 @@ $(LIB_BUILD):
 # without them a macro-only edit leaves every generated file untouched.
 # Each batch writes a .xi interface beside every unit's C; the library batch
 # produces lib/x2c.xi, which later batches and stages replay as the prelude.
-X2C_TRANSLATE_DEPS = $(X2C_COMPILER) $(LIB_X_FILES) \
-	$(wildcard $(LIB_SOURCE)/match/*.x) \
-	$(wildcard $(LIB_SOURCE)/string/*.x) \
-	$(wildcard $(LIB_SOURCE)/var/*.x) \
-	$(wildcard $(LIB_SOURCE)/list/*.x) \
-	$(wildcard $(LIB_SOURCE)/lisp/*.x) \
-	$(wildcard $(LIB_SOURCE)/scope/*.x) \
-	$(wildcard $(LIB_SOURCE)/pool/*.x) \
-	$(wildcard $(LIB_SOURCE)/error/*.x) \
-	$(wildcard $(LIB_SOURCE)/macro-value/*.x) \
+X2C_TRANSLATE_DEPS = $(X2C_COMPILER) $(shell find $(LIB_SOURCE) -name '*.x') \
 	$(wildcard $(ROOT)/etc/init.xlisp $(ROOT)/etc/compiler-sdk.xlisp \
 		$(ROOT)/etc/lisp-bindings.xlisp \
 		$(ROOT)/etc/lisp-values.xlisp) \
@@ -143,8 +135,6 @@ X2C_TRANSLATE_DEPS = $(X2C_COMPILER) $(LIB_X_FILES) \
 LIB_MISSING_GENERATED = $(filter-out \
 	$(wildcard $(LIB_BUILD)/*.c $(LIB_BUILD)/*.h $(LIB_BUILD)/*.xi), \
 	$(LIB_C_FILES) $(LIB_H_FILES) $(LIB_XI_FILES))
-LIB_MISSING_X = $(sort $(patsubst $(LIB_BUILD)/%,$(LIB_SOURCE)/%.x, \
-	$(basename $(LIB_MISSING_GENERATED))))
 
 $(LIB_BUILD)/.translated: $(X2C_TRANSLATE_DEPS) | $(LIB_BUILD)
 	$(X2C_TRANSLATE) --out-dir $(LIB_BUILD) \
@@ -155,18 +145,18 @@ $(LIB_C_FILES) $(LIB_H_FILES): $(LIB_BUILD)/.translated
 # The stamp owns translation. A clean parallel build may decide that these
 # targets are missing before the batch finishes, so their recipes must not
 # start overlapping per-file translations after the stamp has produced them.
-$(LIB_BUILD)/%.c: $(LIB_SOURCE)/%.x
+$(LIB_BUILD)/%.c:
 	@:
 
 $(LIB_BUILD)/%.h: $(LIB_BUILD)/%.c
 
-ifneq ($(strip $(LIB_MISSING_X)),)
+ifneq ($(strip $(LIB_MISSING_GENERATED)),)
 $(LIB_BUILD)/.translated: LIB-FORCE-TRANSLATE
 .PHONY: LIB-FORCE-TRANSLATE
 LIB-FORCE-TRANSLATE:
 endif
 # compile library object files
-$(LIB_BUILD)/%.o: $(LIB_BUILD)/%.c | $(LIB_H_FILES)
+$(LIB_BUILD)/%.o: $(LIB_BUILD)/%.c | $(LIB_H_FILES) $(LIB_BUILD)/.module-headers
 	$(CC) $(CFLAGS) -iquote $(LIB_BUILD) -MMD -MP \
 		-MF $(LIB_BUILD)/$*.c.d -MT $@ -c $< -o $@
 
@@ -201,21 +191,25 @@ $(BIN_BUILD)/.translated: BIN-FORCE-TRANSLATE
 .PHONY: BIN-FORCE-TRANSLATE
 BIN-FORCE-TRANSLATE:
 endif
-# Preserve explicit source include paths while keeping one flat artifact per unit.
-$(BIN_BUILD)/.module-headers: $(BIN_H_FILES)
-	@find $(BIN_BUILD) -type l -name '*.h' -delete
-	@for source in $(BIN_X_FILES); do \
-		relative=$${source#$(BIN_SOURCE)/}; \
-		case "$$relative" in */*) \
-			name=$${relative##*/}; directory=$${relative%/*}; \
-			mkdir -p "$(BIN_BUILD)/$$directory"; \
-			ln -sf "../$${name%.x}.h" "$(BIN_BUILD)/$${relative%.x}.h" ;; \
+# Preserve source include paths while retaining flat generated artifacts.
+define module_headers
+$(1)/.module-headers: $(3)
+	@find $(1) -mindepth 2 -name '*.h' -delete
+	@for source in $(4); do \
+		relative=$$$${source#$(2)/}; \
+		case "$$$$relative" in */*) \
+			name=$$$${relative##*/}; directory=$$$${relative%/*}; \
+			mkdir -p "$(1)/$$$$directory"; \
+			printf '#include "../%s.h"\n' "$$$${name%.x}" > "$(1)/$$$${relative%.x}.h" ;; \
 		esac; \
 	done
-	@touch $@
+	@touch $$@
+endef
+$(eval $(call module_headers,$(LIB_BUILD),$(LIB_SOURCE),$(LIB_H_FILES),$(LIB_X_FILES)))
+$(eval $(call module_headers,$(BIN_BUILD),$(BIN_SOURCE),$(BIN_H_FILES),$(BIN_X_FILES)))
 
 # compile binary object files
-$(BIN_BUILD)/%.o: $(BIN_BUILD)/%.c | $(LIB_H_FILES) $(BIN_BUILD)/.module-headers
+$(BIN_BUILD)/%.o: $(BIN_BUILD)/%.c | $(LIB_H_FILES) $(LIB_BUILD)/.module-headers $(BIN_BUILD)/.module-headers
 	$(CC) $(CFLAGS) -iquote $(LIB_BUILD) -iquote $(BIN_BUILD) \
 		-MMD -MP -MF $(BIN_BUILD)/$*.c.d -MT $@ -c $< -o $@
 # link binary executable
@@ -270,7 +264,7 @@ endif
 
 $(COMMAND_OBJECTS): $(COMMAND_BUILD)/.translated
 
-$(COMMAND_BUILD)/%.o: $(COMMAND_BUILD)/%.c | $(COMMAND_H_FILES) $(BIN_H_FILES) $(LIB_H_FILES)
+$(COMMAND_BUILD)/%.o: $(COMMAND_BUILD)/%.c | $(COMMAND_H_FILES) $(BIN_H_FILES) $(LIB_H_FILES) $(BIN_BUILD)/.module-headers $(LIB_BUILD)/.module-headers
 	$(CC) $(CFLAGS) -iquote $(COMMAND_BUILD) -iquote $(BIN_BUILD) \
 		-iquote $(LIB_BUILD) -iquote $(ROOT)/include/x2c \
 		-MMD -MP -MF $(COMMAND_BUILD)/$*.c.d -MT $@ -c $< -o $@

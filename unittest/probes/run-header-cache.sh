@@ -1029,7 +1029,7 @@ done
 # from the stage interfaces, walks cold, or comes from the host preprocessor.
 mkdir -p "$FAKE/builds/0/lib"
 cat >"$FAKE/src/native-aliases.x" <<'EOF_NATIVE_ALIASES'
-#include "string.x"
+#include "string/string.x"
 #include "array.x"
 int main(void) {
   String value = %"hello";
@@ -1041,7 +1041,8 @@ int main(void) {
   return 0;
 }
 EOF_NATIVE_ALIASES
-(cd "$FAKE" && ./builds/0/x2c translate --out-dir builds/0/lib lib/*.x) \
+(cd "$FAKE" && python3 "$ROOT/tools/sources.py" --area lib |
+  xargs ./builds/0/x2c translate --out-dir builds/0/lib) \
   >/dev/null 2>&1 || fail "the fake stage could not write its interfaces"
 for mode in cached cold live; do
   output="$FAKE/native-$mode"

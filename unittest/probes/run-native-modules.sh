@@ -164,7 +164,7 @@ grep -Fq "the compiler's own function hides a native module's" \
 # `meta native` exports the C target. References and native handles keep
 # that target's ABI; a declared Func accepted by a Var target is boxed.
 cat >abi.x <<'EOF'
-#include "scope.x"
+#include "scope/scope.x"
 struct NativePair { int value; };
 meta native int pair_value(struct NativePair *pair, int &extra) {
   extra += pair->value;
@@ -431,7 +431,7 @@ int increment(int n) => n + 1;
 EOF
 compiler_sources=()
 while IFS= read -r source; do compiler_sources+=("$source"); done < <(
-  python3 "$ROOT/tools/compiler-sources.py" --root "$ROOT")
+  python3 "$ROOT/tools/sources.py" --root "$ROOT")
 "$X2C" build -q -j 2 --extension packages/tally \
   --extension packages/sibling --build-dir linked \
   --x-include-dir "$ROOT/src" --c-include-dir "$ROOT/builds/0/src" \

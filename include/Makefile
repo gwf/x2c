@@ -1,36 +1,32 @@
-# Makefile to create soft links to all lib/*.h files under x2c/ in this
-# directory, so a consumer compiles with -I <prefix>/include and writes
-# #include <x2c/string.h> without shadowing a system header.
-
+# Development headers and sources mirror the runtime module layout.
 .PHONY: all clean
 
 ROOT = ..
 LIB_SOURCE = $(ROOT)/lib
 LIB_BUILD = $(ROOT)/builds/0/lib
 HEADER_DIR = x2c
+LIB_ENTRIES = $(shell python3 $(ROOT)/tools/sources.py --root $(ROOT) --area lib)
 
-LIB_X_SRCS = $(addprefix $(HEADER_DIR)/,\
-  $(notdir $(wildcard $(LIB_SOURCE)/*.x)))
-LIB_H_HDRS = $(patsubst %.x,%.h, $(LIB_X_SRCS))
-LIB_X_DIRS = $(HEADER_DIR)/match $(HEADER_DIR)/string $(HEADER_DIR)/var $(HEADER_DIR)/list $(HEADER_DIR)/lisp $(HEADER_DIR)/pool $(HEADER_DIR)/error $(HEADER_DIR)/macro-value $(HEADER_DIR)/scope
-
-# A link whose lib/ source was deleted is removed.
-all: $(LIB_X_SRCS) $(LIB_H_HDRS) $(LIB_X_DIRS)
-	@for link in $(HEADER_DIR)/*; do \
-	  case " $(LIB_X_SRCS) $(LIB_H_HDRS) $(LIB_X_DIRS) " in \
-	    *" $$link "*) ;; \
-	    *) [ ! -L "$$link" ] || rm -f "$$link" ;; \
-	  esac; \
+all:
+	@mkdir -p $(HEADER_DIR)
+	@find $(HEADER_DIR) -type l -delete
+	@for source in $(LIB_SOURCE)/*.x $(LIB_SOURCE)/*/*.x; do \
+	  relative=$${source#$(LIB_SOURCE)/}; \
+	  directory=$${relative%/*}; prefix=../; \
+	  if [ "$$directory" != "$$relative" ]; then \
+	    mkdir -p "$(HEADER_DIR)/$$directory"; prefix=../../; \
+	  fi; \
+	  ln -sf "$$prefix$$source" "$(HEADER_DIR)/$$relative"; \
 	done
-
-$(LIB_X_SRCS) $(LIB_X_DIRS): | $(HEADER_DIR)
-	@ln -sfn ../$(LIB_SOURCE)/$(@F) $@
-
-$(LIB_H_HDRS): | $(HEADER_DIR)
-	@ln -sf ../$(LIB_BUILD)/$(@F) $@
-
-$(HEADER_DIR):
-	@mkdir -p $@
+	@for source in $(LIB_ENTRIES); do \
+	  relative=$${source#$(LIB_SOURCE)/}; \
+	  name=$${relative##*/}; name=$${name%.x}.h; \
+	  ln -sf "../$(LIB_BUILD)/$$name" "$(HEADER_DIR)/$$name"; \
+	  directory=$${relative%/*}; \
+	  if [ "$$directory" != "$$relative" ]; then \
+	    ln -sf "../../$(LIB_BUILD)/$$directory/$$name" "$(HEADER_DIR)/$$directory/$$name"; \
+	  fi; \
+	done
 
 clean:
 	rm -rf $(HEADER_DIR)

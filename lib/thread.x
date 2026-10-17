@@ -28,15 +28,15 @@ typedef struct Thread *Thread;
 
 #include "context.x"
 #include "dispatch.x"
-#include "error.x"
+#include "error/error.x"
 #include "error_init.x"
 #include "exception.x"
-#include "list.x"
+#include "list/list.x"
 #include "logger.x"
-#include "match.x"
-#include "pool.x"
-#include "scope.x"
-#include "string.x"
+#include "match/match.x"
+#include "pool/pool.x"
+#include "scope/scope.x"
+#include "string/string.x"
 
 #include <errno.h>
 #include <stddef.h>

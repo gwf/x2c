@@ -21,7 +21,7 @@
 #include <string.h>
 
 #include "buffer.x"
-#include "string.x"
+#include "string/string.x"
 
 // encoding
 

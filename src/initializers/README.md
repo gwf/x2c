@@ -19,7 +19,7 @@ into `initializer_rows` in `subobjects.x`.
 
 [Expression conversions](../expressions/conversions.x) converts individual
 values. [parse/declarations.x](../parse/declarations.x) binds declaration
-initializers. [type.x](../type.x) and [symbols.x](../symbols.x) describe types
+initializers. [type.x](../type.x) and [symtab/symtab.x](../symtab/symtab.x) describe types
 and fields.
 
 [Source guide](../README.md)

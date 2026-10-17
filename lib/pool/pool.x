@@ -17,8 +17,8 @@
 
 #include <stddef.h>
 #include "common.x"
-#include "scope.x"
-#include "var.x"
+#include "scope/scope.x"
+#include "var/var.x"
 
 /** Maps each canonical value of one `Pool` level to itself.
     A bucket stores the value once, beside its 32-bit hash, so the table costs
@@ -71,7 +71,7 @@ module unsigned long value_epoch;
 module int pool_multithreaded;
 
 module {
-  "pool/interning.x",
-  "pool/storage.x",
-  "pool/threads.x",
+  "interning.x",
+  "storage.x",
+  "threads.x",
 }

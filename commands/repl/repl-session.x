@@ -54,8 +54,8 @@ typedef struct ReplCompletion {
 
 #include "parse/parse.x"
 #include "diagnostics.x"
-#include "lisp.x"
-#include "scope.x"
+#include "lisp/lisp.x"
+#include "scope/scope.x"
 #include "meta.x"
 #include "refusal-errors.x"
 #include "repl-native.x"

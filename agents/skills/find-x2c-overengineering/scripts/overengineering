@@ -316,10 +316,14 @@ static Array _select(List regions, Map attempted, int budget):
 
 static int _scan(Path x2c, int budget, Path base):
   Array paths = []
-  foreach String pattern in %("src/*.x" "lib/*.x"):
+  foreach String pattern in %("src/*.x" "src/*/*.x" "lib/*.x" "lib/*/*.x"):
     foreach Path source in root.join(pattern).glob():
       String path = source
       path = path[root.len() + 1:]
+      if source.dirname().basename() != "src" &&
+         source.dirname().basename() != "lib" &&
+         source.dirname().basename() != "components" &&
+         source.stem() != source.dirname().basename(): continue
       if path != "lib/x2c.x": paths.push(path)
   List sources = paths
   Map texts = {}

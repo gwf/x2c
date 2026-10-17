@@ -18,7 +18,7 @@
 
 #include "error-macros.x"
 #include "common.x"
-#include "var.x"
+#include "var/var.x"
 
 /** Names an immutable canonical cons cell, or `nil` as NULL.
     A nonnull cell is borrowed from the pool that owns its exact car and tail
@@ -62,9 +62,9 @@ List List.cons_in(Pool pool, Var head, List tail) {
 #include "exception.x"
 #include "func.x"
 #include "map.x"
-#include "scope.x"
-#include "pool.x"
-#include "string.x"
+#include "scope/scope.x"
+#include "pool/pool.x"
+#include "string/string.x"
 #include "iter.x"
 #include "array.x"
 
@@ -75,9 +75,9 @@ List List.cons_in(Pool pool, Var head, List tail) {
 #include <limits.h>
 
 module {
-  "list/cells.x",
-  "list/traversal.x",
-  "list/building.x",
-  "list/transformations.x",
-  "list/rendering.x",
+  "cells.x",
+  "traversal.x",
+  "building.x",
+  "transformations.x",
+  "rendering.x",
 }

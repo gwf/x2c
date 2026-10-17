@@ -38,7 +38,7 @@ $cleanup.by(Block, free);
 $cleanup.by(Bytes, free);
 
 #include "exception.x"
-#include "scope.x"
+#include "scope/scope.x"
 
 /* storage layout
 

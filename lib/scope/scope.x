@@ -79,8 +79,8 @@ module atomic_size_t scope_creations, scope_destructions;
 module atomic_size_t raw_alloc_count, raw_free_count;
 
 module {
-  "scope/allocation.x",
-  "scope/regions.x",
-  "scope/accounting.x",
-  "scope/runtime.x",
+  "allocation.x",
+  "regions.x",
+  "accounting.x",
+  "runtime.x",
 }

@@ -251,43 +251,6 @@ Public functions:
 `Compiler.parse_compound_statement`, `Compiler.parse_block_items`,
 `Compiler.parse_callable_body`
 
-### [src/symbols.x](../src/symbols.x)
-
-the compiler's semantic symbol table.
-
-Public functions:
-
-`Sym.new`, `Sym.reset`, `Sym.reset_overlay`, `Sym.push_new_scope`,
-`Sym.push_scope`, `Sym.pop_scope`, `Sym.scope_count`, `Sym.at_file_scope`,
-`Sym.close_local_scopes`, `Sym.reopen_scopes`, `Sym.global_symbols`,
-`Sym.base_symbols`, `Sym.current_symbols`, `Sym.unit_symbols`,
-`Sym.file_statics`, `Sym.mark_static`, `Sym.visible_symbols`,
-`Sym.define_macro`, `Sym.has_local_macros`, `Sym.lookup_macro`,
-`Compiler.macro_definition_locals`, `Compiler.macro_template_local`, `Sym.set`,
-`Sym.define`, `Sym.seed_var_tags`, `Sym.define_global`,
-`Sym.declare_enumerator`, `Sym.introduced`, `Sym.introduce`,
-`Sym.current_binding`, `Sym.enumerator_owner`, `Sym.binding_is_local`,
-`Sym.binding_is_local_before`, `Compiler.semantic_binding_facts`,
-`Compiler.fact`, `Compiler.set_fact`, `Compiler.drop_fact`, `Sym.get`,
-`Sym.get_exact`, `Sym.has_local`, `Sym.lookup`, `Sym.reference`,
-`Sym.resolve_global`, `Sym.reference_global`, `Sym.declare`,
-`Sym.declare_resolved`, `Sym.declared_key`, `Sym.is_file_static`,
-`Sym.unshadow_visible`, `Sym.bind_identity`, `Compiler.aggregate_name`,
-`Compiler.record_declaration_visibility`, `Compiler.private_prefix`,
-`Compiler.scoped_spelling`, `Compiler.declared_spelling`,
-`Compiler.file_prefixes`, `Compiler.unprefixed`, `Compiler.package_spelling`,
-`Compiler.register_package_alias`, `Compiler.register_package_member`,
-`Compiler.package_member_spelling`, `Compiler.imported_providers`,
-`Compiler.imported_spelling`, `Sym.resolve_key`, `Sym.next_typedef`,
-`Sym.sole_typedef`, `Sym.normalize_declared_type`, `Sym.local_type`,
-`Sym.resolve_numeric_type`, `Sym.var_tag_for_type`, `Sym.is_var_type`,
-`Sym.is_string_type`, `Sym.is_array_type`, `Sym.is_map_type`,
-`Sym.is_named_value_type`, `Sym.lookup_field`, `Sym.declare_field_order`,
-`Sym.field_order`, `Sym.mark_field`, `Sym.marked_fields`, `Sym.aggregate_of`,
-`Sym.put`, `Sym.drop`, `Compiler.begin_semantic_transaction`,
-`SymTxn.local_macros_changed`, `Sym.transacting`, `Sym.end_log`,
-`SymTxn.commit`, `SymTxn.commit_transient`, `SymTxn.rollback`
-
 ### [src/toolchain.x](../src/toolchain.x)
 
 Host preprocessing, compilation, archive, and link actions.
@@ -801,6 +764,43 @@ Public functions:
 `Compiler.region_effect`, `Compiler.check_regions`,
 `Compiler.check_meta_regions`, `Compiler.audit_regions`
 
+### [src/symtab/symtab.x](../src/symtab/symtab.x)
+
+the compiler's semantic symbol table.
+
+Public functions:
+
+`Sym.new`, `Sym.reset`, `Sym.reset_overlay`, `Sym.push_new_scope`,
+`Sym.push_scope`, `Sym.pop_scope`, `Sym.scope_count`, `Sym.at_file_scope`,
+`Sym.close_local_scopes`, `Sym.reopen_scopes`, `Sym.global_symbols`,
+`Sym.base_symbols`, `Sym.current_symbols`, `Sym.unit_symbols`,
+`Sym.file_statics`, `Sym.mark_static`, `Sym.visible_symbols`,
+`Sym.define_macro`, `Sym.has_local_macros`, `Sym.lookup_macro`,
+`Compiler.macro_definition_locals`, `Compiler.macro_template_local`, `Sym.set`,
+`Sym.define`, `Sym.seed_var_tags`, `Sym.define_global`,
+`Sym.declare_enumerator`, `Sym.introduced`, `Sym.introduce`,
+`Sym.current_binding`, `Sym.enumerator_owner`, `Sym.binding_is_local`,
+`Sym.binding_is_local_before`, `Compiler.semantic_binding_facts`,
+`Compiler.fact`, `Compiler.set_fact`, `Compiler.drop_fact`, `Sym.get`,
+`Sym.get_exact`, `Sym.has_local`, `Sym.lookup`, `Sym.reference`,
+`Sym.resolve_global`, `Sym.reference_global`, `Sym.declare`,
+`Sym.declare_resolved`, `Sym.declared_key`, `Sym.is_file_static`,
+`Sym.unshadow_visible`, `Sym.bind_identity`, `Compiler.aggregate_name`,
+`Compiler.record_declaration_visibility`, `Compiler.private_prefix`,
+`Compiler.scoped_spelling`, `Compiler.declared_spelling`,
+`Compiler.file_prefixes`, `Compiler.unprefixed`, `Compiler.package_spelling`,
+`Compiler.register_package_alias`, `Compiler.register_package_member`,
+`Compiler.package_member_spelling`, `Compiler.imported_providers`,
+`Compiler.imported_spelling`, `Sym.resolve_key`, `Sym.next_typedef`,
+`Sym.sole_typedef`, `Sym.normalize_declared_type`, `Sym.local_type`,
+`Sym.resolve_numeric_type`, `Sym.var_tag_for_type`, `Sym.is_var_type`,
+`Sym.is_string_type`, `Sym.is_array_type`, `Sym.is_map_type`,
+`Sym.is_named_value_type`, `Sym.lookup_field`, `Sym.declare_field_order`,
+`Sym.field_order`, `Sym.mark_field`, `Sym.marked_fields`, `Sym.aggregate_of`,
+`Sym.put`, `Sym.drop`, `Compiler.begin_semantic_transaction`,
+`SymTxn.local_macros_changed`, `Sym.transacting`, `Sym.end_log`,
+`SymTxn.commit`, `SymTxn.commit_transient`, `SymTxn.rollback`
+
 ### [src/transform/transform.x](../src/transform/transform.x)
 
 x2c AST transformation pipeline.
@@ -1005,24 +1005,6 @@ Public functions:
 
 None. This module has no non-static function definitions.
 
-### [lib/error.x](../lib/error.x)
-
-handler stack and accumulated errors.
-
-Public functions:
-
-`Error.raise`, `x2c_error_raise`, `x2c_error_raise_n`, `Error.depth`,
-`Error.note_rendered`, `Error.policy_set`, `Error.policy_get`, `Error.bound`,
-`Error.bound_set`, `Error.policy_capture`, `Error.policy_adopt`,
-`Error.policy_release`, `Error.context_open`, `Error.context_close`,
-`Error.count`, `Error.mark`, `Error.since`, `Error.since_in`, `Error.snapshot`,
-`Error.snapshot_in`, `Error.push`, `Error.pop`, `Error.handler_depth`,
-`Error.handler_head`, `x2c_error_catch_site_push`, `x2c_error_catch_push`,
-`x2c_error_catch_site_pending`, `x2c_error_catch_selected`,
-`x2c_error_catch_capture`, `x2c_error_catch_detach`, `x2c_error_catch_close`,
-`Error.unwind_head`, `Error.restore_landing`, `Error.trim`, `Error.restore`,
-`Error.initialize_raw`, `Error.shutdown_raw`, `Error.ready`
-
 ### [lib/error_init.x](../lib/error_init.x)
 
 initialization entry points for `Error`.
@@ -1140,26 +1122,6 @@ Public functions:
 
 `lisp_native_targets`
 
-### [lib/lisp.x](../lib/lisp.x)
-
-the Lisp runtime: reader, session, and evaluator.
-
-Public functions:
-
-`native_scalar_access`, `Lisp.cleanup`, `Lisp.call_budget`,
-`Lisp.set_interrupted`, `Lisp.eval`, `Lisp.apply`, `Lisp.eval_string`,
-`Lisp.eval_file`, `lisp_source_function`, `Lisp.kernel`, `Lisp.new`,
-`Lisp.destroy`, `Lisp.adopt`, `Lisp.freeze`, `Lisp.try_get`, `Lisp.set_global`,
-`Lisp.bind`, `Lisp.active`, `Lisp.storage`, `Lisp.automatic_storage`,
-`Lisp.result_storage`, `Lisp.read`, `lisp_truth`, `lisp_atom`, `lisp_car`,
-`lisp_cdr`, `lisp_eq`, `lisp_pair`, `lisp_list`, `lisp_number`, `lisp_string`,
-`lisp_symbol`, `lisp_procedure`, `lisp_type`, `lisp_compare`, `lisp_add`,
-`lisp_plus`, `lisp_minus`, `lisp_times`, `lisp_divide`, `lisp_eq_chain`,
-`lisp_lt_chain`, `lisp_le_chain`, `lisp_gt_chain`, `lisp_ge_chain`, `lisp_str`,
-`lisp_repr`, `lisp_string_append`, `lisp_substring`, `lisp_string_downcase`,
-`lisp_string_strip`, `lisp_string_lstrip`, `lisp_string_rstrip`,
-`lisp_match_replace`, `lisp_read_file`, `lisp_write_file`
-
 ### [lib/list-selectors.x](../lib/list-selectors.x)
 
 optional compound `List` selectors.
@@ -1176,27 +1138,6 @@ Public functions:
 `List.cadadr`, `Var.cadadr`, `List.cddadr`, `Var.cddadr`, `List.caaddr`,
 `Var.caaddr`, `List.cdaddr`, `Var.cdaddr`, `List.cadddr`, `Var.cadddr`,
 `List.cddddr`, `Var.cddddr`
-
-### [lib/list.x](../lib/list.x)
-
-linked list with `Var` elements.
-
-Public functions:
-
-`List.cons_in`, `cons`, `List.cons`, `Var.cons`, `List.hash`, `List.equal`,
-`List.compare`, `List.promote`, `List.try_own`, `car`, `cdr`, `List.car`,
-`List.cdr`, `List.caar`, `List.cadr`, `List.cddr`, `List.caddr`, `Var.car`,
-`Var.cdr`, `Var.caar`, `Var.cadr`, `Var.cddr`, `Var.caddr`, `List.try_next`,
-`List.iter`, `List.len`, `List.last`, `List.index`, `List.contains`,
-`List.nth_cdr`, `List.getindex`, `List.get`, `List.assoc`, `List.head`,
-`List.tail`, `List.subseq`, `List.getslice`, `List.unpack_n`,
-`List.unpack_vars_n`, `Array.list`, `Array.list_free`, `List.array`,
-`Map.list`, `Iter.list`, `List.append`, `List.concat_n`, `List.list_n`,
-`List.reverse`, `List.map`, `List.filter`, `List.foldl`, `List.find`,
-`List.any`, `List.all`, `List.zip_with`, `List.map2`, `List.sort`,
-`List.sort_with`, `List.sort_by`, `List.unique`, `List.flatten`,
-`List.flatten_all`, `List.sublis`, `List.str`, `List.write_str`, `List.repr`,
-`List.write_repr`
 
 ### [lib/logger.x](../lib/logger.x)
 
@@ -1226,20 +1167,6 @@ Public functions:
 `MachineProgram.view`, `MachineProgram.bytes`, `MachineBuilder.new`,
 `MachineBuilder.init`, `MachineBuilder.drop`, `MachineBuilder.free`,
 `MachineBuilder.cleanup`
-
-### [lib/macro-value.x](../lib/macro-value.x)
-
-macros as values that build and recognize code.
-
-Public functions:
-
-`Macro_case_start`, `Macro_case_own`, `Macro_case_symbol`, `Macro_case_enter`,
-`Macro_close`, `Macro_apply`, `Macro.inserted`, `Macro.declared`,
-`Macro.inserted_items`, `Macro.typed`, `Macro.number_type`,
-`Macro.number_literal`, `Macro.subject`, `Macro.use_subject`, `Macro_pattern`,
-`Macro.binder`, `Macro_case_pattern`, `Macro_case_shape`,
-`Macro_case_capture_at`, `Macro_case_root`, `Macro_case_view`, `Macro.matcher`,
-`MacroMatcher.matches`, `Macro.matches`
 
 ### [lib/map-generics.x](../lib/map-generics.x)
 
@@ -1295,30 +1222,6 @@ Public functions:
 
 `MatchPlan.prepare`, `MatchPlan.free`
 
-### [lib/match.x](../lib/match.x)
-
-pattern matching and transformation utilities for lists.
-
-Public functions:
-
-`Var.is_atom_binder`, `Var.is_list_binder`, `Var.is_binder`, `Var.is_match_op`,
-`MatchCaptureLayout.analyze`, `MatchCaptureLayout.free`,
-`MatchCaptureLayout.definite_list`, `MatchCaptureLayout.possible_list`,
-`MatchCaptureLayout.index`, `MatchCaptureBuffer.has`,
-`MatchPlan.raise_ineligible`, `MatchPlan.execute_capture`,
-`MatchPlan.try_capture`, `MatchPlan.admits`, `MatchPlan.execute`,
-`MatchPlan.try_match`, `MatchPlan.try_match_replace`, `List.replace`,
-`MatchPlan.try_search`, `MatchPlan.search`, `MatchPlan.search_replace`,
-`MatchPlan.borrowable`, `x2c_match_site_try_capture`,
-`x2c_match_pattern_retainable`, `x2c_match_site_prepare`,
-`x2c_match_site_try_match`, `x2c_match_site_match`,
-`x2c_match_site_try_search`, `x2c_match_site_search`,
-`x2c_match_site_try_match_replace`, `x2c_match_site_match_replace`,
-`x2c_match_site_search_replace`, `x2c_match_initialize`,
-`x2c_match_try_capture`, `List.try_match`, `List.match`,
-`List.try_match_replace`, `List.match_replace`, `List.search`,
-`List.try_search`, `List.search_replace`
-
 ### [lib/meta.x](../lib/meta.x)
 
 the compiler surface a `meta` function calls.
@@ -1359,19 +1262,6 @@ Public functions:
 `Path.remove_file`, `Path.remove_tree`, `Path.copy_file`, `Path.copy_tree`,
 `Path.move_to`, `Path.symlink_to`, `Path.read_text`, `Path.write_text`,
 `Path.temp_dir`
-
-### [lib/pool.x](../lib/pool.x)
-
-nested interning pools with region-backed object storage.
-
-Public functions:
-
-`Pool.lookup`, `Pool.intern`, `Pool.intern_new`, `Pool.insert`, `Pool.owns`,
-`Pool.retain_named`, `Pool.retain`, `Pool.release`, `Pool.malloc`, `Pool.free`,
-`Pool.promote`, `Pool.own`, `Pool.stats`, `Pool.thread_start`, `Pool.current`,
-`Pool.initialize`, `Pool.thread_initialize`, `Pool.shutdown`,
-`Pool.open_named`, `Pool.open`, `Pool.close`, `Pool.detach`,
-`Pool.is_permanent`, `Pool.epoch`
 
 ### [lib/private-keywords.x](../lib/private-keywords.x)
 
@@ -1436,20 +1326,6 @@ Public functions:
 `scan_symbol_set_atom`, `scan_atom_status`, `scan_atom`,
 `scan_escape_sequence`, `scan_utf8_length`, `scan_next_line_col`
 
-### [lib/scope.x](../lib/scope.x)
-
-memory allocation scope management.
-
-Public functions:
-
-`Scope.malloc`, `Scope.malloc_finalized`, `Scope.malloc_in`,
-`Scope.malloc_finalized_in`, `Scope.calloc`, `Scope.calloc_in`, `Scope.memdup`,
-`Scope.memdup_in`, `Scope.free`, `Scope.owner`, `Scope.move`, `Scope.realloc`,
-`Scope.push`, `Scope.top`, `Scope.pop`, `Scope.retain`, `Scope.release`,
-`Scope.new`, `Scope.new_named`, `Scope.destroy`, `Scope.cleanup`,
-`x2c_scope_thread_release`, `Scope.name`, `Scope.stats`, `Scope.initialize`,
-`Scope.shutdown_hook`, `Scope_shutdown`
-
 ### [lib/scripting.x](../lib/scripting.x)
 
 the modules every script unit includes.
@@ -1512,27 +1388,6 @@ numeric parsing from canonical byte strings.
 Public functions:
 
 `String.try_long`, `String.try_double`
-
-### [lib/string.x](../lib/string.x)
-
-canonical byte strings and core text operations.
-
-Public functions:
-
-`String.len`, `String.hash`, `String.equal`, `String.compare`, `String.new`,
-`String.new_len`, `String.new_in`, `String.intern`, `String.malloc`,
-`String.intern_free`, `String.free`, `String.promote`, `String.try_own`,
-`String.is_permanent`, `String.find`, `String.find_within`, `String.rfind`,
-`String.find_all`, `String.count`, `String.contains`, `String.startswith`,
-`String.endswith`, `String.replace`, `String.replace_n`, `String.getindex`,
-`String.getslice`, `String.withindex`, `String.add`, `String.repeat`,
-`String.new_fill`, `String.join`, `String.pad_left`, `String.pad_right`,
-`String.pad_center`, `String.printf`, `String.strip`, `String.lstrip`,
-`String.rstrip`, `String.dedent`, `String.remove_prefix`,
-`String.remove_suffix`, `String.partition`, `String.rpartition`,
-`String.lower`, `String.upper`, `String.capitalize`, `String.filter`,
-`String.map`, `String.keep`, `String.reject`, `String.squeeze`, `String.str`,
-`String.write_str`, `String.symbol`, `String.iter`, `String.try_next`
 
 ### [lib/symbol.x](../lib/symbol.x)
 
@@ -1801,26 +1656,6 @@ Public functions:
 `_tag_constant_row`, `_tag_list`, `_tag_sibling_counts`, `_tag_row_entry`,
 `_tag_constant_rows`, `_tag_group_top`, `_tag_types`
 
-### [lib/var.x](../lib/var.x)
-
-variant type for dynamic typing.
-
-Public functions:
-
-`Var.known_tag`, `Var.tag_top`, `Var.tag_bottom`, `Var.tag`, `Var.is`,
-`Var.kind`, `Var.is_floating`, `Var.is_integer`, `Var.is_pointer`,
-`Var.is_reference`, `Var.is_object`, `Var.is_void`, `Var.is_null`, `Var.null`,
-`Var.is_nil`, `Var.encoding_valid`, `x2c_var_descriptor_index`,
-`Var.custom_descriptor_index`, `x2c_var_tag_descriptor_index`,
-`x2c_var_custom_descriptor`, `Var.box_record`, `Var.pointer`,
-`Var.register_object_tag`, `x2c_var_declare`, `Var.new`, `Var.parse`,
-`Var.box_long`, `Var.box_ulong`, `Var.box_long_long`, `Var.box_ulong_long`,
-`Var.box_long_double`, `Var.clone_wide`, `Var.move_wide_to`, `Var.wide_owner`,
-`Var.floating`, `Var.integer`, `Var.long_value`, `Var.ulong_value`,
-`Var.long_long_value`, `Var.ulong_long_value`, `Var.long_double_value`,
-`Var.wide_hash`, `Var.wide_equal`, `Var.wide_compare`, `Var.integer_compare`,
-`Var.integer_floating_compare`
-
 ### [lib/varconvert.x](../lib/varconvert.x)
 
 `Var` numeric conversion policy.
@@ -1848,3 +1683,168 @@ Public functions:
 `x2c_var_equal`, `x2c_var_identical`, `x2c_var_order`, `Var.truth`,
 `Var.fallback_truth`, `Var.update`, `x2c_var_update_volatile`, `Var.postfix`,
 `x2c_var_postfix_volatile`
+
+### [lib/error/error.x](../lib/error/error.x)
+
+handler stack and accumulated errors.
+
+Public functions:
+
+`Error.raise`, `x2c_error_raise`, `x2c_error_raise_n`, `Error.depth`,
+`Error.note_rendered`, `Error.policy_set`, `Error.policy_get`, `Error.bound`,
+`Error.bound_set`, `Error.policy_capture`, `Error.policy_adopt`,
+`Error.policy_release`, `Error.context_open`, `Error.context_close`,
+`Error.count`, `Error.mark`, `Error.since`, `Error.since_in`, `Error.snapshot`,
+`Error.snapshot_in`, `Error.push`, `Error.pop`, `Error.handler_depth`,
+`Error.handler_head`, `x2c_error_catch_site_push`, `x2c_error_catch_push`,
+`x2c_error_catch_site_pending`, `x2c_error_catch_selected`,
+`x2c_error_catch_capture`, `x2c_error_catch_detach`, `x2c_error_catch_close`,
+`Error.unwind_head`, `Error.restore_landing`, `Error.trim`, `Error.restore`,
+`Error.initialize_raw`, `Error.shutdown_raw`, `Error.ready`
+
+### [lib/lisp/lisp.x](../lib/lisp/lisp.x)
+
+the Lisp runtime: reader, session, and evaluator.
+
+Public functions:
+
+`native_scalar_access`, `Lisp.cleanup`, `Lisp.call_budget`,
+`Lisp.set_interrupted`, `Lisp.eval`, `Lisp.apply`, `Lisp.eval_string`,
+`Lisp.eval_file`, `lisp_source_function`, `Lisp.kernel`, `Lisp.new`,
+`Lisp.destroy`, `Lisp.adopt`, `Lisp.freeze`, `Lisp.try_get`, `Lisp.set_global`,
+`Lisp.bind`, `Lisp.active`, `Lisp.storage`, `Lisp.automatic_storage`,
+`Lisp.result_storage`, `Lisp.read`, `lisp_truth`, `lisp_atom`, `lisp_car`,
+`lisp_cdr`, `lisp_eq`, `lisp_pair`, `lisp_list`, `lisp_number`, `lisp_string`,
+`lisp_symbol`, `lisp_procedure`, `lisp_type`, `lisp_compare`, `lisp_add`,
+`lisp_plus`, `lisp_minus`, `lisp_times`, `lisp_divide`, `lisp_eq_chain`,
+`lisp_lt_chain`, `lisp_le_chain`, `lisp_gt_chain`, `lisp_ge_chain`, `lisp_str`,
+`lisp_repr`, `lisp_string_append`, `lisp_substring`, `lisp_string_downcase`,
+`lisp_string_strip`, `lisp_string_lstrip`, `lisp_string_rstrip`,
+`lisp_match_replace`, `lisp_read_file`, `lisp_write_file`
+
+### [lib/list/list.x](../lib/list/list.x)
+
+linked list with `Var` elements.
+
+Public functions:
+
+`List.cons_in`, `cons`, `List.cons`, `Var.cons`, `List.hash`, `List.equal`,
+`List.compare`, `List.promote`, `List.try_own`, `car`, `cdr`, `List.car`,
+`List.cdr`, `List.caar`, `List.cadr`, `List.cddr`, `List.caddr`, `Var.car`,
+`Var.cdr`, `Var.caar`, `Var.cadr`, `Var.cddr`, `Var.caddr`, `List.try_next`,
+`List.iter`, `List.len`, `List.last`, `List.index`, `List.contains`,
+`List.nth_cdr`, `List.getindex`, `List.get`, `List.assoc`, `List.head`,
+`List.tail`, `List.subseq`, `List.getslice`, `List.unpack_n`,
+`List.unpack_vars_n`, `Array.list`, `Array.list_free`, `List.array`,
+`Map.list`, `Iter.list`, `List.append`, `List.concat_n`, `List.list_n`,
+`List.reverse`, `List.map`, `List.filter`, `List.foldl`, `List.find`,
+`List.any`, `List.all`, `List.zip_with`, `List.map2`, `List.sort`,
+`List.sort_with`, `List.sort_by`, `List.unique`, `List.flatten`,
+`List.flatten_all`, `List.sublis`, `List.str`, `List.write_str`, `List.repr`,
+`List.write_repr`
+
+### [lib/macrovalue/macrovalue.x](../lib/macrovalue/macrovalue.x)
+
+macros as values that build and recognize code.
+
+Public functions:
+
+`Macro_case_start`, `Macro_case_own`, `Macro_case_symbol`, `Macro_case_enter`,
+`Macro_close`, `Macro_apply`, `Macro.inserted`, `Macro.declared`,
+`Macro.inserted_items`, `Macro.typed`, `Macro.number_type`,
+`Macro.number_literal`, `Macro.subject`, `Macro.use_subject`, `Macro_pattern`,
+`Macro.binder`, `Macro_case_pattern`, `Macro_case_shape`,
+`Macro_case_capture_at`, `Macro_case_root`, `Macro_case_view`, `Macro.matcher`,
+`MacroMatcher.matches`, `Macro.matches`
+
+### [lib/match/match.x](../lib/match/match.x)
+
+pattern matching and transformation utilities for lists.
+
+Public functions:
+
+`Var.is_atom_binder`, `Var.is_list_binder`, `Var.is_binder`, `Var.is_match_op`,
+`MatchCaptureLayout.analyze`, `MatchCaptureLayout.free`,
+`MatchCaptureLayout.definite_list`, `MatchCaptureLayout.possible_list`,
+`MatchCaptureLayout.index`, `MatchCaptureBuffer.has`,
+`MatchPlan.raise_ineligible`, `MatchPlan.execute_capture`,
+`MatchPlan.try_capture`, `MatchPlan.admits`, `MatchPlan.execute`,
+`MatchPlan.try_match`, `MatchPlan.try_match_replace`, `List.replace`,
+`MatchPlan.try_search`, `MatchPlan.search`, `MatchPlan.search_replace`,
+`MatchPlan.borrowable`, `x2c_match_site_try_capture`,
+`x2c_match_pattern_retainable`, `x2c_match_site_prepare`,
+`x2c_match_site_try_match`, `x2c_match_site_match`,
+`x2c_match_site_try_search`, `x2c_match_site_search`,
+`x2c_match_site_try_match_replace`, `x2c_match_site_match_replace`,
+`x2c_match_site_search_replace`, `x2c_match_initialize`,
+`x2c_match_try_capture`, `List.try_match`, `List.match`,
+`List.try_match_replace`, `List.match_replace`, `List.search`,
+`List.try_search`, `List.search_replace`
+
+### [lib/pool/pool.x](../lib/pool/pool.x)
+
+nested interning pools with region-backed object storage.
+
+Public functions:
+
+`Pool.lookup`, `Pool.intern`, `Pool.intern_new`, `Pool.insert`, `Pool.owns`,
+`Pool.retain_named`, `Pool.retain`, `Pool.release`, `Pool.malloc`, `Pool.free`,
+`Pool.promote`, `Pool.own`, `Pool.stats`, `Pool.thread_start`, `Pool.current`,
+`Pool.initialize`, `Pool.thread_initialize`, `Pool.shutdown`,
+`Pool.open_named`, `Pool.open`, `Pool.close`, `Pool.detach`,
+`Pool.is_permanent`, `Pool.epoch`
+
+### [lib/scope/scope.x](../lib/scope/scope.x)
+
+memory allocation scope management.
+
+Public functions:
+
+`Scope.malloc`, `Scope.malloc_finalized`, `Scope.malloc_in`,
+`Scope.malloc_finalized_in`, `Scope.calloc`, `Scope.calloc_in`, `Scope.memdup`,
+`Scope.memdup_in`, `Scope.free`, `Scope.owner`, `Scope.move`, `Scope.realloc`,
+`Scope.push`, `Scope.top`, `Scope.pop`, `Scope.retain`, `Scope.release`,
+`Scope.new`, `Scope.new_named`, `Scope.destroy`, `Scope.cleanup`,
+`x2c_scope_thread_release`, `Scope.name`, `Scope.stats`, `Scope.initialize`,
+`Scope.shutdown_hook`, `Scope_shutdown`
+
+### [lib/string/string.x](../lib/string/string.x)
+
+canonical byte strings and core text operations.
+
+Public functions:
+
+`String.len`, `String.hash`, `String.equal`, `String.compare`, `String.new`,
+`String.new_len`, `String.new_in`, `String.intern`, `String.malloc`,
+`String.intern_free`, `String.free`, `String.promote`, `String.try_own`,
+`String.is_permanent`, `String.find`, `String.find_within`, `String.rfind`,
+`String.find_all`, `String.count`, `String.contains`, `String.startswith`,
+`String.endswith`, `String.replace`, `String.replace_n`, `String.getindex`,
+`String.getslice`, `String.withindex`, `String.add`, `String.repeat`,
+`String.new_fill`, `String.join`, `String.pad_left`, `String.pad_right`,
+`String.pad_center`, `String.printf`, `String.strip`, `String.lstrip`,
+`String.rstrip`, `String.dedent`, `String.remove_prefix`,
+`String.remove_suffix`, `String.partition`, `String.rpartition`,
+`String.lower`, `String.upper`, `String.capitalize`, `String.filter`,
+`String.map`, `String.keep`, `String.reject`, `String.squeeze`, `String.str`,
+`String.write_str`, `String.symbol`, `String.iter`, `String.try_next`
+
+### [lib/var/var.x](../lib/var/var.x)
+
+variant type for dynamic typing.
+
+Public functions:
+
+`Var.known_tag`, `Var.tag_top`, `Var.tag_bottom`, `Var.tag`, `Var.is`,
+`Var.kind`, `Var.is_floating`, `Var.is_integer`, `Var.is_pointer`,
+`Var.is_reference`, `Var.is_object`, `Var.is_void`, `Var.is_null`, `Var.null`,
+`Var.is_nil`, `Var.encoding_valid`, `x2c_var_descriptor_index`,
+`Var.custom_descriptor_index`, `x2c_var_tag_descriptor_index`,
+`x2c_var_custom_descriptor`, `Var.box_record`, `Var.pointer`,
+`Var.register_object_tag`, `x2c_var_declare`, `Var.new`, `Var.parse`,
+`Var.box_long`, `Var.box_ulong`, `Var.box_long_long`, `Var.box_ulong_long`,
+`Var.box_long_double`, `Var.clone_wide`, `Var.move_wide_to`, `Var.wide_owner`,
+`Var.floating`, `Var.integer`, `Var.long_value`, `Var.ulong_value`,
+`Var.long_long_value`, `Var.ulong_long_value`, `Var.long_double_value`,
+`Var.wide_hash`, `Var.wide_equal`, `Var.wide_compare`, `Var.integer_compare`,
+`Var.integer_floating_compare`

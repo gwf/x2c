@@ -23,7 +23,7 @@
 static keyword loop $private.loop;
 #include "cleanup.x"
 #include "x2c.x"
-#include "macro-value.x"
+#include "macrovalue/macrovalue.x"
 
 /** Reads one exact C scalar from `bytes`; a wide result is boxed in
     `owner`. */
@@ -59,7 +59,7 @@ NativeScalarAccess native_scalar_access(List exact_type) =>
 typedef struct Lisp *Lisp;
 
 macro Expression $lisp._standard.source() =>
-  $(x2c.literal.string (x2c.embed.text "../etc/init.xlisp"));
+  $(x2c.literal.string (x2c.embed.text "../../etc/init.xlisp"));
 
 $cleanup.by(Lisp, destroy);
 
@@ -296,12 +296,12 @@ module struct Lisp {
 module Lisp threaded lisp_active;
 #include "var-adapters.x"
 
-static $(import "../etc/lisp-bindings.xlisp")
+static $(import "../../etc/lisp-bindings.xlisp")
 
 module {
-  "lisp/evaluate.x",
-  "lisp/native.x",
-  "lisp/sessions.x",
-  "lisp/reader.x",
-  "lisp/primitives.x",
+  "evaluate.x",
+  "native.x",
+  "sessions.x",
+  "reader.x",
+  "primitives.x",
 }

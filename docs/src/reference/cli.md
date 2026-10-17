@@ -254,7 +254,7 @@ compiler imports the package without loading its module. From a built compiler
 checkout, include every compiler unit and both header search roots:
 
 ```sh
-python3 tools/compiler-sources.py |
+python3 tools/sources.py |
   xargs ./x2c build --extension packages/tally \
     --x-include-dir src --c-include-dir builds/0/src --output /tmp/x2c
 ```

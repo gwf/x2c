@@ -1,4 +1,4 @@
-/*  symbols.x -- the compiler's semantic symbol table
+/*  symtab.x -- the compiler's semantic symbol table
 
     Copyright (c) 2025 Gary William Flake.
 
@@ -131,10 +131,10 @@ module typedef struct Sym {
 module typedef struct SymUndo { Map map, Var key, value; } SymUndo;
 
 module {
-  "symbols/scopes.x",
-  "symbols/bindings.x",
-  "symbols/declarations.x",
-  "symbols/namespaces.x",
-  "symbols/types.x",
-  "symbols/transactions.x",
+  "scopes.x",
+  "bindings.x",
+  "declarations.x",
+  "namespaces.x",
+  "types.x",
+  "transactions.x",
 }

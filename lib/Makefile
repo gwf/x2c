@@ -12,7 +12,7 @@ OPTIONAL_SOURCES := args.x datum.x diff.x digest.x json.x list-selectors.x \
                     func-errors.x integer-ops.x map-generics.x \
                     native-scalar-types.x private-keywords.x system-macros.x \
                     var-adapters.x var-tags.x
-SOURCES := $(sort $(filter-out x2c.x $(OPTIONAL_SOURCES),$(wildcard *.x)))
+SOURCES := $(sort $(filter-out x2c.x $(OPTIONAL_SOURCES),$(patsubst ../lib/%,%,$(shell python3 ../tools/sources.py --root .. --area lib))))
 
 .PHONY: FORCE
 FORCE:

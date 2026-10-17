@@ -13,7 +13,7 @@
 
 #pragma once
 #include "x2c.x"
-#include "lisp.x"
+#include "lisp/lisp.x"
 
 static int _nil(Var value) => value == %();
 
