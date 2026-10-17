@@ -428,7 +428,9 @@ current = replacement;
 Both Arrays are cleaned up at block exit. Reassignment neither releases the
 first Array early nor transfers its cleanup to the replacement. Returning or
 storing an alias does not cancel cleanup; the caller must choose an
-appropriate lifetime. There is no move or recursive ownership system. Var
+appropriate lifetime. A managed local cannot be managed again: `$auto` of a
+local that an earlier `$auto` manages, or of another `$auto`, is a
+compile-time error, because the value would be released twice. There is no move or recursive ownership system. Var
 itself has no owning cleanup contract, and Pool's `free` operation requires a
 separate allocation argument.
 
