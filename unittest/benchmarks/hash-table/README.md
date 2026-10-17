@@ -129,8 +129,8 @@ and never trigger cleanup.
 
 ### Optimization research
 
-`research.py` derives named `.x` variants from the retained pre-optimization
-commit, translates every variant normally, and runs them in rotated order. It
+`research.py` derives named `.x` variants from the current `x2c/u32-map.x`,
+translates every variant normally, and runs them in rotated order. It
 never edits generated C. Each variant is differential-tested against khashl,
 symbol-audited, compiled to assembly with Clang inline diagnostics, and
 checksum-matched under both udb3 workloads before its timing is summarized.
@@ -141,27 +141,17 @@ For a quick screen or a longer finalist comparison:
 ./unittest/benchmarks/hash-table/research.py --repeats 3 \
   -N 20000000 -n 2500000 -k 5
 ./unittest/benchmarks/hash-table/research.py \
-  --variants baseline portable-core all-hinted \
+  --variants baseline split-result record-iterator \
   --repeats 5 -N 80000000 -n 10000000 -k 11
-```
-
-Later experiments can instead use the current applied U32Map as their
-control. The parallel-key-array experiment is intentionally available only
-in this mode:
-
-```sh
-./unittest/benchmarks/hash-table/research.py --source current \
-  --variants baseline parallel-keys \
-  --repeats 3 -N 80000000 -n 10000000 -k 11
 ```
 
 Every invocation creates a new directory under
 `unittest/build/benchmarks/hash-table/research/results/`, including the exact
 derived x2c source, generated C, raw output, assembly, inlining reports,
-checksums, run order, and normalized table. The baseline source is read from
-commit `8c851593`, so later improvements to `x2c/u32-map.x` do not move the
-ordinary control. `--source current` is explicit and records the current
-source checksum alongside each derived variant. See
+checksums, run order, and normalized table. The `baseline` variant is the
+current source unchanged, and the metadata records that source's checksum.
+Recipes for the earlier pre-optimization study no longer apply to the current
+source; they remain in `research.py` at commit `8529c449a`. See
 [RESEARCH.md](RESEARCH.md) for the retained findings and the
 production-portability assessment.
 

@@ -1,6 +1,6 @@
 > Status: active - launch-readiness review of `dev` `8529c449a` on 2026-10-17,
 > one commit past v0.15.0 (`main` `314994819`). Four mitigation sessions were
-> started the same day; this file records findings, owners, and outcomes.
+> started the same day; one found its item already fixed; this file records findings, owners, and outcomes.
 > Repository settings and the SECURITY.md wording are Gary's decisions.
 
 # Public launch mitigation
@@ -19,14 +19,14 @@ secret scanning off.
 
 | Item | Observed on the shipped 0.15.0 binary | Mitigation | Owner |
 | --- | --- | --- | --- |
-| A1 return inside `defer` | After `defer { if (n < 0) return -1; }` runs its return, the next `raise` inside a `try` in the caller is reported uncaught and the process aborts (134). `docs/src/guide/exceptions.md` says the transfer leaves its frame first. | Make every transfer out of a finalizer leave the frame; add a fixture that raises after such a return. | Session "Fix return inside defer leaking the exception frame" |
+| A1 return inside `defer` | Refuted on 2026-10-17: the review probe used `catch %(bad-arg):`, which matches only a bare payload; with `%(bad-arg *)` the raise is caught. A1 itself was fixed on 2026-10-12 by `f92e94c94`, pinned by fixture `finalizer-return-frame`. | None needed. | Closed by the A1 session without a change |
 | A9 repeated `$auto` | `Block b = $auto(a)` on an `$auto`-managed `a` segfaults (139); the review record shows a double release under ASan. | Reject a nested or duplicate `$auto` at compile time; state the rule in the book. | Session "Reject nested or repeated $auto instead of segfaulting" |
 | Uncaught error report | A logger `error/err-report` line with structured detail and, for runtime raises, `../../lib/...` paths prints before `x2c error floor: ...`. | One user-facing line by default; keep the structured event for configured loggers. | Session "One-line uncaught error report for users" |
 | Private paths in public files | `packages/torch/README.md` and the torch benchmark reports print `/Users/gary/Git/Bonsai-demo/...`; `plans/archive/memory-retention.md`, linked from the torch chapter, cites `/Users/gary/Documents/...`. | Neutralize or drop the links. | Session "Public-surface hygiene for the 0.15.0 launch" |
 | Release notes | The v0.15.0 release body is the generated `Source ...; candidate ...` line; no human summary exists. | Add `docs/src/reference/release-notes.md` and a paste-ready copy for the release page. | Same hygiene session |
 | Stale checked-in site values | `site/public/x2c-version.txt` and `site/public/packages/index.txt` say 0.14.0; candidate assembly rewrites them, so production is correct. | Update the checked-in copies and document the rewrite. | Same hygiene session |
 | Templates | No `.github/ISSUE_TEMPLATE` or PR template although CONTRIBUTING.md declines code contributions. | Add a bug-report template and a PR template stating the policy. | Same hygiene session |
-| A8 self-meta copy | Did not reproduce in a plain `meta` function; needs a program function rule. | Remains in `repository-review-2026-10-12.md`. | None started |
+| A8 self-meta copy | Not a defect: repository review decision 7 (2026-10-12) records that a function rule rewrites the program's definitions while the copy the compiler runs is compiled as written; `docs/src/guide/meta-functions.md` states it. | None. | Settled |
 
 ## Decisions for Gary
 
