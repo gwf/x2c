@@ -1,6 +1,0 @@
-{
-  "$schema": "https://randomlabs.ai/config.json",
-  "permission": {
-    "*": "allow"
-  }
-}
