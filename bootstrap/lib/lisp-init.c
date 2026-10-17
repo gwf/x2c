@@ -63,7 +63,7 @@ static String _string(Var value, String operation){
     Var _x2c_gensym_literal_part_0 = String_var(operation);
     Var _x2c_gensym_literal_part_1 = Symbol_var(Var_tag(value));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/lisp-init.x",.function = "_string",.line = 26};
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/lisp-init.x",.function = "_string",.line = 26,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(74754136), _x2c_gensym_literal_part_1, Symbol_var(1510312), Symbol_var(1318210446));
       __builtin_unreachable();
     }
@@ -79,7 +79,7 @@ static List _list(Var value, String operation){
     Var _x2c_gensym_literal_part_2 = String_var(operation);
     Var _x2c_gensym_literal_part_3 = Symbol_var(Var_tag(value));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/lisp-init.x",.function = "_list",.line = 33};
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/lisp-init.x",.function = "_list",.line = 33,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(74754136), _x2c_gensym_literal_part_3, Symbol_var(1510312), Symbol_var(806120));
       __builtin_unreachable();
     }

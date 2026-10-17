@@ -307,7 +307,7 @@ String String_join(String sep, List strings);
 String String_withindex(String str, int index, char value){
   if(! String_truth(str) || ! * str) return str;  if(value == '\0'){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("String.withindex")), NULL))); {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/string/editing.x",.function = "String_withindex",.line = 129};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(19800432), int_var(index));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/string/editing.x",.function = "String_withindex",.line = 129,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(19800432), int_var(index));  __builtin_unreachable();
     }
 
   }
@@ -316,7 +316,7 @@ String String_withindex(String str, int index, char value){
 
 String String_add(String str, String other){
   if(! String_truth(other)) return str;  if(! String_truth(str)) return other;  int left_len = String_len(str), right_len = String_len(other);  size_t length =(size_t) left_len +(size_t) right_len;  if(length > INT_MAX - 1){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/string/building.x",.function = "String_add",.line = 23};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.add")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/string/building.x",.function = "String_add",.line = 23,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.add")), NULL))));  __builtin_unreachable();
   }
   if(length <= STRING_STACK_BYTES){
     char bytes[STRING_STACK_BYTES];  memcpy(bytes, str, left_len);  memcpy(bytes + left_len, other, right_len);  return _from_bytes(bytes, (int) length);
@@ -333,11 +333,11 @@ String String_repeat(String str, int count){
 
 String String_new_fill(char fill, int count){
   if(count <= 0) return NULL;  if(fill == '\0'){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/string/building.x",.function = "String_new_fill",.line = 64};  x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/string/building.x",.function = "String_new_fill",.line = 64,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))));  __builtin_unreachable();
   }
   if(count == INT_MAX){
     Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("String.new_fill")), NULL))); {
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/string/building.x",.function = "String_new_fill",.line = 65};  x2c_error_raise_n(& _x2c_gensym_error_site_3, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(7318440), int_var(count));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/string/building.x",.function = "String_new_fill",.line = 65,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_3, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(7318440), int_var(count));  __builtin_unreachable();
     }
 
   }
@@ -391,11 +391,11 @@ String String_pad_center(String str, int width, char fill){
 
 static String f8_building____pad(String str, int width, char fill, int side){
   if(fill == '\0'){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/string/building.x",.function = "f8_building____pad",.line = 152};  x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/string/building.x",.function = "f8_building____pad",.line = 152,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))));  __builtin_unreachable();
   }
   int length = String_len(str);  if(width <= length) return str;  if(width == INT_MAX){
     Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))); {
-      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/string/building.x",.function = "f8_building____pad",.line = 155};  x2c_error_raise_n(& _x2c_gensym_error_site_5, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(48833808), int_var(width));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/string/building.x",.function = "f8_building____pad",.line = 155,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_5, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(48833808), int_var(width));  __builtin_unreachable();
     }
 
   }
@@ -515,7 +515,7 @@ String String_map(String str, Func fn){
       char * out = string;  const char * src = str;  for(int i = 0;  i < n;  i ++){
         char ch = Var_char(Var_convert(Func_apply_value(fn, char_var(src[i])), 26993));  if(! ch){
           Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL))); {
-            static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/string/mapping.x",.function = "String_map",.line = 107};  x2c_error_raise_n(& _x2c_gensym_error_site_6, 143279181245224, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(19800432), int_var(i));  __builtin_unreachable();
+            static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/string/mapping.x",.function = "String_map",.line = 107,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_6, 143279181245224, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(19800432), int_var(i));  __builtin_unreachable();
           }
 
         }

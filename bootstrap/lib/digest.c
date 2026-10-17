@@ -115,7 +115,7 @@ String File_sha256(File file){
   if(ferror(file)){
     int error = errno;
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/digest.x",.function = "File_sha256",.line = 125};
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/digest.x",.function = "File_sha256",.line = 125,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_0, 20399393368, 2, Symbol_var(34096809266140), Symbol_var(1189960), Symbol_var(11703198), int_var(error));
       __builtin_unreachable();
     }

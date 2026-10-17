@@ -65,7 +65,7 @@ String Var_string(Var value){
     Var _x2c_gensym_literal_part_0 = Symbol_var(Var_tag(value));
     Var _x2c_gensym_literal_part_1 = String_var(String_new("String"));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/varconvert.x",.function = "Var_string",.line = 73};
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/varconvert.x",.function = "Var_string",.line = 73,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_0, 1020285550996648, 2, Symbol_var(1307939018), _x2c_gensym_literal_part_0, Symbol_var(1345468776), _x2c_gensym_literal_part_1);
       __builtin_unreachable();
     }
@@ -79,7 +79,7 @@ Array Var_array(Var _x2c_gensym_macro_value_0){
     Var _x2c_gensym_literal_part_2 = Symbol_var(Var_tag(_x2c_gensym_macro_value_0));
     Var _x2c_gensym_literal_part_3 = String_var(String_new("Array"));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/varconvert.x",.function = "Var_array",.line = 90};
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/varconvert.x",.function = "Var_array",.line = 90,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_1, 1020285550996648, 2, Symbol_var(1307939018), _x2c_gensym_literal_part_2, Symbol_var(1345468776), _x2c_gensym_literal_part_3);
       __builtin_unreachable();
     }
@@ -93,7 +93,7 @@ Block Var_block(Var _x2c_gensym_macro_value_1){
     Var _x2c_gensym_literal_part_4 = Symbol_var(Var_tag(_x2c_gensym_macro_value_1));
     Var _x2c_gensym_literal_part_5 = String_var(String_new("Block"));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/varconvert.x",.function = "Var_block",.line = 91};
+      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/varconvert.x",.function = "Var_block",.line = 91,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_2, 1020285550996648, 2, Symbol_var(1307939018), _x2c_gensym_literal_part_4, Symbol_var(1345468776), _x2c_gensym_literal_part_5);
       __builtin_unreachable();
     }
@@ -107,7 +107,7 @@ Buffer Var_buffer(Var _x2c_gensym_macro_value_2){
     Var _x2c_gensym_literal_part_6 = Symbol_var(Var_tag(_x2c_gensym_macro_value_2));
     Var _x2c_gensym_literal_part_7 = String_var(String_new("Buffer"));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/varconvert.x",.function = "Var_buffer",.line = 92};
+      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/varconvert.x",.function = "Var_buffer",.line = 92,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_3, 1020285550996648, 2, Symbol_var(1307939018), _x2c_gensym_literal_part_6, Symbol_var(1345468776), _x2c_gensym_literal_part_7);
       __builtin_unreachable();
     }
@@ -121,7 +121,7 @@ Bytes Var_bytes(Var _x2c_gensym_macro_value_3){
     Var _x2c_gensym_literal_part_8 = Symbol_var(Var_tag(_x2c_gensym_macro_value_3));
     Var _x2c_gensym_literal_part_9 = String_var(String_new("Bytes"));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/varconvert.x",.function = "Var_bytes",.line = 93};
+      static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/varconvert.x",.function = "Var_bytes",.line = 93,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_4, 1020285550996648, 2, Symbol_var(1307939018), _x2c_gensym_literal_part_8, Symbol_var(1345468776), _x2c_gensym_literal_part_9);
       __builtin_unreachable();
     }
@@ -135,7 +135,7 @@ File Var_file(Var _x2c_gensym_macro_value_4){
     Var _x2c_gensym_literal_part_10 = Symbol_var(Var_tag(_x2c_gensym_macro_value_4));
     Var _x2c_gensym_literal_part_11 = String_var(String_new("File"));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/varconvert.x",.function = "Var_file",.line = 94};
+      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/varconvert.x",.function = "Var_file",.line = 94,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_5, 1020285550996648, 2, Symbol_var(1307939018), _x2c_gensym_literal_part_10, Symbol_var(1345468776), _x2c_gensym_literal_part_11);
       __builtin_unreachable();
     }
@@ -149,7 +149,7 @@ Iter Var_as_iter(Var _x2c_gensym_macro_value_5){
     Var _x2c_gensym_literal_part_12 = Symbol_var(Var_tag(_x2c_gensym_macro_value_5));
     Var _x2c_gensym_literal_part_13 = String_var(String_new("Iter"));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/varconvert.x",.function = "Var_as_iter",.line = 95};
+      static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/varconvert.x",.function = "Var_as_iter",.line = 95,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_6, 1020285550996648, 2, Symbol_var(1307939018), _x2c_gensym_literal_part_12, Symbol_var(1345468776), _x2c_gensym_literal_part_13);
       __builtin_unreachable();
     }
@@ -163,7 +163,7 @@ List Var_list(Var _x2c_gensym_macro_value_6){
     Var _x2c_gensym_literal_part_14 = Symbol_var(Var_tag(_x2c_gensym_macro_value_6));
     Var _x2c_gensym_literal_part_15 = String_var(String_new("List"));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/varconvert.x",.function = "Var_list",.line = 96};
+      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/varconvert.x",.function = "Var_list",.line = 96,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_7, 1020285550996648, 2, Symbol_var(1307939018), _x2c_gensym_literal_part_14, Symbol_var(1345468776), _x2c_gensym_literal_part_15);
       __builtin_unreachable();
     }
@@ -177,7 +177,7 @@ Map Var_map(Var _x2c_gensym_macro_value_7){
     Var _x2c_gensym_literal_part_16 = Symbol_var(Var_tag(_x2c_gensym_macro_value_7));
     Var _x2c_gensym_literal_part_17 = String_var(String_new("Map"));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/varconvert.x",.function = "Var_map",.line = 97};
+      static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/varconvert.x",.function = "Var_map",.line = 97,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_8, 1020285550996648, 2, Symbol_var(1307939018), _x2c_gensym_literal_part_16, Symbol_var(1345468776), _x2c_gensym_literal_part_17);
       __builtin_unreachable();
     }
@@ -193,19 +193,19 @@ Var Var_convert(Var value, Symbol target){
   if(! Var_encoding_valid(value)){
     unsigned long bits = value.u64;
     {
-      static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 152};
+      static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 152,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_9, 4372507526, 1, Symbol_var(46228810), Var_box_ulong(bits));
       __builtin_unreachable();
     }
 
   }
   if(Var_is_void(value)){
-    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 154};
+    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 154,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_10, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.convert")), NULL))));
     __builtin_unreachable();
   }
   if(! target || ! Var_known_tag(target) || target == 1473096 || target == 28764 || target == 2050956 || target == 1854348){
-    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 155};
+    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 155,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_11, 143279306979688, 1, Symbol_var(1345468776), Symbol_var(target));
     __builtin_unreachable();
   }
@@ -216,7 +216,7 @@ Var Var_convert(Var value, Symbol target){
   if(! Var_numeric_info(source_tag, &(info))){
     List _x2c_gensym_macro_lower_0 = cons(_0, cons(List_var(cons(_1, cons(Symbol_var(source_tag), NULL))), NULL));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 165};
+      static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 165,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_12, 1020285550996648, 2, Symbol_var(1345468776), Symbol_var(target), Symbol_var(6401226), List_var(_x2c_gensym_macro_lower_0));
       __builtin_unreachable();
     }
@@ -225,7 +225,7 @@ Var Var_convert(Var value, Symbol target){
   X2CVarNumeric source;
   _numeric_decode(value, info, &(source));
   if(! Var_numeric_info(target, &(info))){
-    static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 168};
+    static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/varconvert.x",.function = "Var_convert",.line = 168,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_13, 1020285550996648, 2, Symbol_var(1307939018), Symbol_var(source_tag), Symbol_var(1345468776), Symbol_var(target));
     __builtin_unreachable();
   }
@@ -243,28 +243,28 @@ int Var_numeric_info(Symbol tag, X2CVarNumericInfo * out){
 
 void Var_numeric_decode(Var value, X2CVarNumeric * out){
   if(! out){
-    static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/varconvert.x",.function = "Var_numeric_decode",.line = 196};
+    static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/varconvert.x",.function = "Var_numeric_decode",.line = 196,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_14, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.numeric_decode")), NULL))));
     __builtin_unreachable();
   }
   if(! Var_encoding_valid(value)){
     unsigned long bits = value.u64;
     {
-      static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/varconvert.x",.function = "Var_numeric_decode",.line = 199};
+      static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/varconvert.x",.function = "Var_numeric_decode",.line = 199,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_15, 4372507526, 1, Symbol_var(46228810), Var_box_ulong(bits));
       __builtin_unreachable();
     }
 
   }
   if(Var_is_void(value)){
-    static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/varconvert.x",.function = "Var_numeric_decode",.line = 201};
+    static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/varconvert.x",.function = "Var_numeric_decode",.line = 201,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_16, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.numeric_decode")), NULL))));
     __builtin_unreachable();
   }
   X2CVarNumericInfo info;
   Symbol tag = Var_tag(value);
   if(! Var_numeric_info(tag, &(info))){
-    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/varconvert.x",.function = "Var_numeric_decode",.line = 204};
+    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/varconvert.x",.function = "Var_numeric_decode",.line = 204,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_17, 4477479911782, 1, Symbol_var(1307939018), Symbol_var(tag));
     __builtin_unreachable();
   }
@@ -327,7 +327,7 @@ static Var _convert_to_integer(X2CVarNumeric * source, Symbol target, int unsign
 _Noreturn static void _out_of_range(X2CVarNumeric * source, Symbol target){
   Symbol source_tag =(* source).tag;
   {
-    static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/varconvert.x",.function = "_out_of_range",.line = 263};
+    static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/varconvert.x",.function = "_out_of_range",.line = 263,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_18, 245103016899018, 2, Symbol_var(1307939018), Symbol_var(source_tag), Symbol_var(1345468776), Symbol_var(target));
     __builtin_unreachable();
   }
@@ -342,7 +342,7 @@ static long double _integer_limit(int bits){
 Var Var_integer_box(Symbol target, unsigned long long raw){
   X2CVarNumericInfo info;
   if(! Var_numeric_info(target, &(info)) || info.floating){
-    static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../lib/varconvert.x",.function = "Var_integer_box",.line = 280};
+    static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../lib/varconvert.x",.function = "Var_integer_box",.line = 280,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_19, 143279306979688, 1, Symbol_var(1345468776), Symbol_var(target));
     __builtin_unreachable();
   }
@@ -363,7 +363,7 @@ Var Var_integer_box(Symbol target, unsigned long long raw){
     case 1435270030 : return Var_box_ulong_long(raw);
   }
   {
-    static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../lib/varconvert.x",.function = "Var_integer_box",.line = 298};
+    static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../lib/varconvert.x",.function = "Var_integer_box",.line = 298,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_20, 143279306979688, 1, Symbol_var(1345468776), Symbol_var(target));
     __builtin_unreachable();
   }
@@ -406,7 +406,7 @@ static Var _convert_to_float(X2CVarNumeric * source, Symbol target){
     case 3356265 : return Var_box_f64(X2CVarNumeric_f64(&((* source))));
     case 26071077642 : return Var_box_long_double(X2CVarNumeric_ldouble(&((* source))));
     default:{
-      static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../lib/varconvert.x",.function = "_convert_to_float",.line = 346};
+      static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../lib/varconvert.x",.function = "_convert_to_float",.line = 346,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_21, 143279306979688, 1, Symbol_var(1345468776), Symbol_var(target));
       __builtin_unreachable();
     }

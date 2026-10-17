@@ -130,7 +130,7 @@ static void * _input(Thread thread){
 Thread Thread_start(ThreadFn function, const void * input, size_t input_size){
   if(! _init_guard_) _file_init_();
   if(! function ||(input_size && ! input)){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/thread.x",.function = "Thread_start",.line = 92};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/thread.x",.function = "Thread_start",.line = 92,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread.start")), NULL))));
     __builtin_unreachable();
   }
@@ -156,7 +156,7 @@ Thread Thread_start(ThreadFn function, const void * input, size_t input_size){
 static Thread _new_handle(ThreadFn function, const void * input, size_t input_size){
   size_t input_offset = _input_offset();
   if(input_size > SIZE_MAX - input_offset){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/thread.x",.function = "_new_handle",.line = 118};
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/thread.x",.function = "_new_handle",.line = 118,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 1358596898646632, 0);
     __builtin_unreachable();
   }
@@ -165,7 +165,7 @@ static Thread _new_handle(ThreadFn function, const void * input, size_t input_si
   if(! thread){
     Error_policy_release(policy);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/thread.x",.function = "_new_handle",.line = 123};
+      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/thread.x",.function = "_new_handle",.line = 123,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_2, 97614135954008, 0);
       __builtin_unreachable();
     }
@@ -217,7 +217,7 @@ static void _stack_attributes(pthread_attr_t * attributes){
 _Noreturn static void _error(const char * operation, int error){
   String name = String_new(operation);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/thread.x",.function = "_error",.line = 181};
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/thread.x",.function = "_error",.line = 181,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_3, 20399393368, 2, Symbol_var(34096809266140), String_var(name), Symbol_var(11703198), int_var(error));
     __builtin_unreachable();
   }
@@ -339,7 +339,7 @@ static Symbol _capture_errors(List errors, Var data){
   if(Error_policy_get(Var_symbol(code)) != 2260136) return 285842436424;
   thread -> errors = Error_snapshot_in(List_var(errors), & thread -> result_scope, thread -> result_pool);
   {
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/thread.x",.function = "_capture_errors",.line = 259};
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/thread.x",.function = "_capture_errors",.line = 259,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_4, 23041356991064, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread callback")), NULL))));
     __builtin_unreachable();
   }
@@ -356,14 +356,14 @@ static void _worker_failed(Thread thread, int mark){
 Var Thread_join(Thread t){
   if(! _init_guard_) _file_init_();
   if(! t){
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 287};
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 287,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread.join")), NULL))));
     __builtin_unreachable();
   }
   Symbol expected = 40094288782;
   if(! __atomic_compare_exchange_n(& t -> state, & expected, 22501280654, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST)){
     {
-      static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 292};
+      static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 292,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_6, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread.join")), NULL))));
       __builtin_unreachable();
     }
@@ -391,7 +391,7 @@ Var Thread_join(Thread t){
       if(! Var_is_void(t -> errors)) errors = Context_export_scope(t -> result_scope, t -> result_pool, t -> errors);
       else result = Context_export_scope(t -> result_scope, t -> result_pool, t -> result);
       if(! Var_is_void(errors)){
-        static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 307};
+        static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 307,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_7, 23041356991064, 1, Symbol_var(374504614), errors);
         __builtin_unreachable();
       }
@@ -421,7 +421,7 @@ static void _finish_join(Thread thread){
 void Thread_free(Thread t){
   if(! _init_guard_) _file_init_();
   if(! t || __atomic_load_n(& t -> state, __ATOMIC_SEQ_CST) != 703164744){
-    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/thread.x",.function = "Thread_free",.line = 327};
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/thread.x",.function = "Thread_free",.line = 327,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_8, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Thread.free")), NULL))));
     __builtin_unreachable();
   }

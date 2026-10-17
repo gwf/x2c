@@ -11677,7 +11677,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _10755 = List_var(_10754);
   _10756 = String_new("lib/error/records.x");
   _10757 = String_var(_10756);
-  _10758 = String_new("7dd156b1");
+  _10758 = String_new("fe6058b8");
   _10759 = String_var(_10758);
   _10760 = cons(_10759, NULL);
   _10761 = cons(_10757, _10760);
@@ -12147,7 +12147,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _11225 = List_var(_11224);
   _11226 = String_new("lib/logger.x");
   _11227 = String_var(_11226);
-  _11228 = String_new("2ef9c8be");
+  _11228 = String_new("08e26bf1");
   _11229 = String_var(_11228);
   _11230 = cons(_11229, NULL);
   _11231 = cons(_11227, _11230);

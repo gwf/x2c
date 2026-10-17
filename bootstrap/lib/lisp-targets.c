@@ -4287,7 +4287,7 @@ Buffer Buffer_write_len(Buffer, const char *, size_t);
 
 static Buffer _buffer_write_len(Buffer buf, const char * text, size_t length){
   if(text && strnlen(text, length) < length){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/lisp-targets.x",.function = "_buffer_write_len",.line = 224};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/lisp-targets.x",.function = "_buffer_write_len",.line = 224,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Buffer.write_len")), NULL))));
     __builtin_unreachable();
   }
