@@ -114,4 +114,27 @@ shootout, and runtime measurements. Its final compiler workload failed because
 it requested `--live-symbols` for module units. The closeout removes that
 unsupported mode while retaining the same default-mode sources and CSV keys.
 The failed attempt remains `20261017T001121Z-fab576c27853` in performance history.
-A corrected full snapshot follows before closeout publication.
+The corrected full snapshot passed at `c5c136b7`, run
+`20261017T002054Z-c5c136b76c48`. The compiler and runtime sources are unchanged
+from the landed wave at `fab576c2`. The reference revision `b4c16946` was then
+measured again on the same host, run `20261017T002543Z-b4c1694632e3`, retained
+under `debug/wave-closeout-baseline/` in the main checkout.
+
+| Workload | Reference rerun | Closed wave |
+| --- | ---: | ---: |
+| Sequential stage build, child CPU seconds | 43.064 | 50.770 |
+| Build through stage 3, elapsed seconds | 17.926 | 26.251 |
+| Representative translation, stage 0, elapsed seconds | 2.072 | 3.338 |
+| Representative translation, stage 1, elapsed seconds | 2.061 | 3.296 |
+
+These increases persisted when the reference was repeated. The current build
+CPU measurement also repeated at 50.763 and 50.770 seconds. They establish a
+higher cost for building and translating this wave's source tree; they do not
+isolate the cause or attribute it to the external-build extraction. The
+representative inputs changed from flat files to module units, so these rows
+are not identical-input compiler throughput measurements. The optional live
+mode is absent from the new workload because module units cannot use it.
+
+Remaining performance follow-up: isolate the cost across the wave's revisions
+with a fixed source workload before choosing an optimization. No compiler or
+runtime behavior was changed to conceal the measured difference.
