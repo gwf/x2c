@@ -734,7 +734,7 @@ static int _plain_report(Logger logger) =>
   !getenv("X2C_DEBUG");
 
 static void _report_uncaught(List entry) {
-  String line = %"x2c: uncaught <${entry.assoc(<code>).str()}>";
+  String line = %"x2c: uncaught <${entry.assoc(<code>)}>";
   List location = entry.assoc(<location>);
   if (location && location.assoc(<runtime>) is <void>)
     line = %"$line in ${location.assoc(<function>)} (${
