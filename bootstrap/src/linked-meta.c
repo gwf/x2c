@@ -5971,7 +5971,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_9(void)
   _5085 = List_var(_5084);
   _5086 = String_new("lib/common.x");
   _5087 = String_var(_5086);
-  _5088 = String_new("49bdd128");
+  _5088 = String_new("f58e4b36");
   _5089 = String_var(_5088);
   _5090 = cons(_5089, NULL);
   _5091 = cons(_5087, _5090);
@@ -11621,7 +11621,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_20(void
   _10702 = List_var(_10701);
   _10703 = String_new("lib/error/dispatch.x");
   _10704 = String_var(_10703);
-  _10705 = String_new("04c6579b");
+  _10705 = String_new("1666a0cc");
   _10706 = String_var(_10705);
   _10707 = cons(_10706, NULL);
   _10708 = cons(_10704, _10707);
@@ -11677,7 +11677,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _10755 = List_var(_10754);
   _10756 = String_new("lib/error/records.x");
   _10757 = String_var(_10756);
-  _10758 = String_new("dd9e6af1");
+  _10758 = String_new("7dd156b1");
   _10759 = String_var(_10758);
   _10760 = cons(_10759, NULL);
   _10761 = cons(_10757, _10760);
@@ -12147,7 +12147,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _11225 = List_var(_11224);
   _11226 = String_new("lib/logger.x");
   _11227 = String_var(_11226);
-  _11228 = String_new("5f87a6d8");
+  _11228 = String_new("2ef9c8be");
   _11229 = String_var(_11228);
   _11230 = cons(_11229, NULL);
   _11231 = cons(_11227, _11230);
@@ -17055,7 +17055,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_31(void
   _16103 = List_var(_16102);
   _16104 = String_new("src/emit/dispatch.x");
   _16105 = String_var(_16104);
-  _16106 = String_new("00055028");
+  _16106 = String_new("19f2959f");
   _16107 = String_var(_16106);
   _16108 = cons(_16107, NULL);
   _16109 = cons(_16105, _16108);

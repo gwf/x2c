@@ -115,6 +115,8 @@ static void f8_dispatch____leave(void);
 
 static Symbol f8_dispatch____dispatch(f8_dispatch___ErrorRaise r);
 
+static void f8_dispatch____terminate(ErrorThreadState e, f8_dispatch___ErrorRaise r, const char * why);
+
 static Symbol f8_dispatch____offer(ErrorThreadState e, ErrorHandler h, Symbol code);
 
 static Symbol f8_dispatch____observe(ErrorThreadState e, ErrorHandler h);
@@ -342,9 +344,14 @@ static Symbol f8_dispatch____dispatch(f8_dispatch___ErrorRaise r){
   state -> dispatch_saved = outer;
   state -> dispatch_running = outer_running;
   f8_dispatch____leave();
-  if(_never_returns(r.code)) _floor(r.code, "non-returning error was not caught");
+  if(_never_returns(r.code)) f8_dispatch____terminate(state, r, "non-returning error was not caught");
   if(disposition == 285842436424) f8_dispatch____apply_policy(state, r);
   return disposition;
+}
+
+static void f8_dispatch____terminate(ErrorThreadState e, f8_dispatch___ErrorRaise r, const char * why){
+  if(e -> rendered[r.depth]) abort();
+  _floor(r.code, why);
 }
 
 static Symbol f8_dispatch____offer(ErrorThreadState e, ErrorHandler h, Symbol code){
@@ -406,7 +413,7 @@ Symbol Error_policy_get(Symbol code);
 
 static void f8_dispatch____apply_policy(ErrorThreadState e, f8_dispatch___ErrorRaise r){
   Symbol policy = Error_policy_get(r.code);
-  if(policy == 2260136) _floor(r.code, "unhandled and policy is abort");
+  if(policy == 2260136) f8_dispatch____terminate(e, r, "unhandled and policy is abort");
   if(policy == 25550){
     if(! e -> rendered[r.depth]) f8_dispatch____report(r.code);
     _truncate(r.raised_at);
@@ -637,7 +644,8 @@ static List f7_records____location(ErrorRegion * e, const X2CErrorSite * site){
   if(! site) return NULL;
   String file = f7_records____site_text(e, site -> file);
   String function = f7_records____site_text(e, site -> function);
-  List location = f7_records____field(e, Symbol_var(458361162716), String_var(function), NULL);
+  List location = site -> runtime ? f7_records____field(e, Symbol_var(40094681930), int_var(1), NULL) : NULL;
+  location = f7_records____field(e, Symbol_var(458361162716), String_var(function), location);
   location = f7_records____field(e, Symbol_var(805770), int_var(site -> line), location);
   return f7_records____field(e, Symbol_var(412426), String_var(file), location);
 }

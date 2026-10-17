@@ -203,9 +203,10 @@ typedef struct VarDescriptor {
 /* Compiler-emitted raises cross every runtime unit through this ABI. */
 /** Borrowed source location supplied during one compiler-generated raise.
     The pointed-to file and function spellings must outlive that call.
+    `runtime` is set for a site compiled inside the runtime library.
 */
 typedef struct X2CErrorSite {
-  const char *file, *function, int line;
+  const char *file, *function, int line, runtime;
 } X2CErrorSite;
 
 #define VAR_NULL_BITS 0ul

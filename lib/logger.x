@@ -700,9 +700,13 @@ void log_event(Symbol level, Symbol category, List fields) {
 /** Offers the newest `Error` to the current global `Logger`.
     A well-formed entry with `<abort>` or `<log>` policy is rendered as an
     `<err-report>` event; missing, malformed, `<collect>`, and `<ignore>` input
-    produces no event. The borrowed input is never consumed, `data` is ignored,
-    and the handler always returns `<declined>`, leaving transfer to `Error` or
-    another handler.
+    produces no event. An `<abort>` entry reaching the default `Logger` with
+    only its stderr sink is instead reported as one line, `x2c: uncaught
+    <code> in function (file:line): key value, ...`, omitting a location
+    inside the runtime library; setting `X2C_DEBUG` keeps the event. The
+    borrowed input is never consumed, `data` is ignored, and the handler
+    always returns `<declined>`, leaving transfer to `Error` or another
+    handler.
     Raises: any cause from `Logger` delivery.
 */
 synchronized
@@ -717,9 +721,40 @@ Symbol Logger.error_handler(List errors, Var data) {
   if (code is not <symbol>) return <declined>;
   Symbol policy = Error.policy_get(code);
   if (policy != <abort> && policy != <log>) return <declined>;
-  logger.log(<error>, <err-report>, entry);
+  if (policy == <abort> && _plain_report(logger)) _report_uncaught(entry);
+  else logger.log(<error>, <err-report>, entry);
   Error.note_rendered();
   return <declined>;
+}
+
+/* The default Logger with only its stderr sink reports an uncaught error
+   as one line unless `X2C_DEBUG` asks for the structured event. */
+static int _plain_report(Logger logger) =>
+  logger == default_logger && logger.sink_count() == 1 &&
+  !getenv("X2C_DEBUG");
+
+static void _report_uncaught(List entry) {
+  String line = %"x2c: uncaught <${entry.assoc(<code>).str()}>";
+  List location = entry.assoc(<location>);
+  if (location && location.assoc(<runtime>) is <void>)
+    line = %"$line in ${location.assoc(<function>)} (${
+      location.assoc(<file>)}:${location.assoc(<line>)})";
+  List detail = entry.assoc(<detail>);
+  if (detail) line = %"$line: ${_detail_text(detail)}";
+  fprintf(stderr, "%s\n", line);
+  fflush(stderr);
+}
+
+/* `key value` pairs in raise order; Strings and Symbols show their text. */
+static String _detail_text(List detail) {
+  List parts = NULL;
+  foreach (List pair, detail) {
+    Var value = pair.cadr();
+    String text = value is <string> || value is <symbol>
+                ? value.str() : value.repr();
+    parts = %(@parts ${%"${pair.car} $text"});
+  }
+  return String.join(", ", parts);
 }
 
 // level shorthands

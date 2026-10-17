@@ -125,9 +125,15 @@ static Symbol _dispatch(ErrorRaise r) {
   state.dispatch_running = outer_running;
   _leave();
   if (_never_returns(r.code))
-    _floor(r.code, "non-returning error was not caught");
+    _terminate(state, r, "non-returning error was not caught");
   if (disposition == <declined>) _apply_policy(state, r);
   return disposition;
+}
+
+/* Logger has already reported a rendered error, so the floor adds nothing. */
+static void _terminate(ErrorThreadState e, ErrorRaise r, const char *why) {
+  if (e.rendered[r.depth]) abort();
+  _floor(r.code, why);
 }
 
 /* Offers the error to each handler from `h` outward. `<handled>` consumes
@@ -178,7 +184,7 @@ static void _transfer(
    `<ignore>` drop the records the raise added; `<collect>` keeps them. */
 static void _apply_policy(ErrorThreadState e, ErrorRaise r) {
   Symbol policy = Error.policy_get(r.code);
-  if (policy == <abort>) _floor(r.code, "unhandled and policy is abort");
+  if (policy == <abort>) _terminate(e, r, "unhandled and policy is abort");
   if (policy == <log>) {
     if (!e.rendered[r.depth]) _report(r.code);
     _truncate(r.raised_at);

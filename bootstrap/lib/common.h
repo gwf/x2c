@@ -134,7 +134,7 @@ VarDescriptor;
 #include "protocols.h"
 typedef struct X2CErrorSite{
   const char * file, * function;
-  int line;
+  int line, runtime;
 }
 X2CErrorSite;
 

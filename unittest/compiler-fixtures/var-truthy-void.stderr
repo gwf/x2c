@@ -1,4 +1,1 @@
-<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=
-((operation "Var.truth")) location=
-((file "../../lib/varops.x") (line <line>) (function "Var_fallback_truth"))
-x2c error floor: <void-op>: non-returning error was not caught
+x2c: uncaught <void-op>: operation Var.truth

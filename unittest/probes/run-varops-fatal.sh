@@ -35,13 +35,7 @@ check_case() {
   ) 2>/dev/null
   probe_status=$?
   set -e
-  sed -E '
-    /^[0-9]+:[0-9][0-9]\.[0-9][0-9][0-9] (trace|debug|info|warn|error|fatal)\// {
-      s/^[0-9]+:[0-9][0-9]\.[0-9][0-9][0-9]/<elapsed>/
-      s/start_time="[^"]*"/start_time="<wall-time>"/
-    }
-    s/\(line [0-9]+\)/(line <line>)/
-  ' "$BUILD/$name.stderr.raw" >"$BUILD/$name.stderr"
+  cp "$BUILD/$name.stderr.raw" "$BUILD/$name.stderr"
 
   if [[ $probe_status -eq 0 ]]; then
     echo "$name: expected terminal failure" >&2
@@ -51,38 +45,12 @@ check_case() {
   test "$(cat "$BUILD/$name.stderr")" = "$expected"
 }
 
-check_case convert \
-  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op>'\
-$' detail=\n((operation "Var.convert")) location=\n((file'\
-$' "../../lib/varconvert.x") (line <line>)\x20\n (function'\
-$' "Var_convert"))\nx2c error floor: <void-op>: non-returning error was'\
-$' not caught'
-check_case truth \
-  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op>'\
-$' detail=\n((operation "Var.truth")) location=\n((file'\
-$' "../../lib/varops.x") (line <line>) (function'\
-$' "Var_fallback_truth"))\nx2c error floor: <void-op>: non-returning error'\
-$' was not caught'
-check_case hash \
-  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op>'\
-$' detail=\n((operation "Var.hash")) location=\n((file'\
-$' "../../lib/dispatch.x") (line <line>)\x20\n (function "Var_hash"))\nx2c'\
-$' error floor: <void-op>: non-returning error was not caught'
-check_case compare \
-  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op>'\
-$' detail=\n((operation "Var.compare")) location=\n((file'\
-$' "../../lib/dispatch.x") (line <line>)\x20\n (function'\
-$' "Var_compare"))\nx2c error floor: <void-op>: non-returning error was'\
-$' not caught'
-check_case iter \
-  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op>'\
-$' detail=\n((operation "Var.iter")) location=\n((file'\
-$' "../../lib/dispatch.x") (line <line>)\x20\n (function "Var_iter"))\nx2c'\
-$' error floor: <void-op>: non-returning error was not caught'
-check_case binary \
-  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((op +)) location=\n((file "../../lib/varops.x") (line <line>) (function "_protocol_arithmetic"))\nx2c error floor: <void-op>: non-returning error was not caught'
-check_case update \
-  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((op +)) location=\n((file "../../lib/varops.x") (line <line>) (function "x2c_var_update_volatile"))\nx2c error floor: <void-op>: non-returning error was not caught'
-check_case postfix \
-  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((op ++)) location=\n((file "../../lib/varops.x") (line <line>) (function "x2c_var_postfix_volatile"))\nx2c error floor: <void-op>: non-returning error was not caught'
+check_case convert 'x2c: uncaught <void-op>: operation Var.convert'
+check_case truth 'x2c: uncaught <void-op>: operation Var.truth'
+check_case hash 'x2c: uncaught <void-op>: operation Var.hash'
+check_case compare 'x2c: uncaught <void-op>: operation Var.compare'
+check_case iter 'x2c: uncaught <void-op>: operation Var.iter'
+check_case binary 'x2c: uncaught <void-op>: op +'
+check_case update 'x2c: uncaught <void-op>: op +'
+check_case postfix 'x2c: uncaught <void-op>: op ++'
 echo "Var fatal probes passed"
