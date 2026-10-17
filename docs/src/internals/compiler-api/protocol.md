@@ -44,7 +44,7 @@ Protocols from declaration to conform forms.
 Returns the interface rows of the resolved conformances `adoptions`
 declare.
 
-Source: `src/protocol/resolution.x:201`
+Source: `src/protocol/resolution.x:211`
 
 <a id="Compiler.discard_helper"></a>
 #### Compiler.discard_helper
@@ -238,7 +238,7 @@ parse resolves its own: before the parse, and again, after the
 generated members are published, where the parse publishes each one.
 Their declaring units report their failures, so nothing is reported.
 
-Source: `src/protocol/resolution.x:217`
+Source: `src/protocol/resolution.x:227`
 
 <a id="Compiler.resolve_protocol_member"></a>
 #### Compiler.resolve_protocol_member

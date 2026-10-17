@@ -52,6 +52,7 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.next`](#Compiler.next) | Consumes the current token and advances past following trivia. |
 | [`Compiler.optional_reference_test`](#Compiler.optional_reference_test) | Returns the optional-reference parameter tested by `condition`, or NULL. |
 | [`Compiler.own_diagnostics`](#Compiler.own_diagnostics) | Routes this compiler's diagnostic store through its own printer. |
+| [`Compiler.owns_package_source`](#Compiler.owns_package_source) | Reports whether an x2c source belongs to the current package root. |
 | [`Compiler.pattern_binder_declarations`](#Compiler.pattern_binder_declarations) | Builds ordinary declarations from a pattern scope's issued bindings. |
 | [`Compiler.peek`](#Compiler.peek) | Returns the non-trivia token type `steps` from parser position. |
 | [`Compiler.portable_path`](#Compiler.portable_path) | Returns `path` relative to the canonical x2c home when it lies below the home, otherwise `path`. |
@@ -104,7 +105,7 @@ One x2c unit's translation state and its two parses.
 
 Returns the absolute path that a `Compiler.portable_path` spelling names.
 
-Source: `src/compiler/source-files.x:77`
+Source: `src/compiler/source-files.x:87`
 
 <a id="Compiler.add_early"></a>
 #### Compiler.add_early
@@ -144,7 +145,7 @@ Source: `src/compiler/pending.x:11`
 
 Records a path dependency not embedded in generated C.
 
-Source: `src/compiler/source-files.x:89`
+Source: `src/compiler/source-files.x:99`
 
 <a id="Compiler.anchor_origin"></a>
 #### Compiler.anchor_origin
@@ -252,7 +253,7 @@ Collects macro definitions or keyword aliases before the full source parse.
 The owning source reports malformed definitions during its full parse,
 which can recover at later forms. Included providers reject them here.
 
-Source: `src/compiler/parsing/collection.x:71`
+Source: `src/compiler/parsing/collection.x:77`
 
 <a id="Compiler.collect_unit_macro"></a>
 #### Compiler.collect_unit_macro
@@ -315,7 +316,7 @@ Source: `src/compiler/parsing/tokens.x:149`
 Records declaration visibility and meta facts, then skips its body.
 The declaration is already bound by the shared top-level parser.
 
-Source: `src/compiler/parsing/collection.x:93`
+Source: `src/compiler/parsing/collection.x:99`
 
 <a id="Compiler.free_lisp"></a>
 #### Compiler.free_lisp
@@ -459,7 +460,7 @@ Source: `src/compiler/source-locations.x:93`
 
 Merges another translation's dependency rows into this compiler.
 
-Source: `src/compiler/source-files.x:94`
+Source: `src/compiler/source-files.x:104`
 
 <a id="Compiler.new"></a>
 #### Compiler.new
@@ -514,6 +515,16 @@ back from another compiler.
 
 Source: `src/compiler/lifecycle.x:20`
 
+<a id="Compiler.owns_package_source"></a>
+#### Compiler.owns_package_source
+
+`int Compiler.owns_package_source(Compiler c, String path)`
+
+Reports whether an x2c source belongs to the current package root.
+Native headers and source outside that root keep their own names.
+
+Source: `src/compiler/source-files.x:26`
+
 <a id="Compiler.pattern_binder_declarations"></a>
 #### Compiler.pattern_binder_declarations
 
@@ -546,7 +557,7 @@ home, otherwise `path`. Interfaces, macro definitions, retained
 declarations, and generated identities spell paths this way, so they do
 not depend on where the home is installed.
 
-Source: `src/compiler/source-files.x:71`
+Source: `src/compiler/source-files.x:81`
 
 <a id="Compiler.present_references"></a>
 #### Compiler.present_references
@@ -586,7 +597,7 @@ Source: `src/compiler/source-files.x:6`
 Records the header linkage of a public inline definition. Semantic
 function types discard storage, so this declaration fact survives there.
 
-Source: `src/compiler/parsing/collection.x:134`
+Source: `src/compiler/parsing/collection.x:140`
 
 <a id="Compiler.record_origin"></a>
 #### Compiler.record_origin
@@ -754,7 +765,7 @@ Starts a collection pass with the built-in macros. It parses no bodies,
 and an import it reads installs the protocols visible to it when a
 template or `meta` body first asks for one.
 
-Source: `src/compiler/parsing/collection.x:52`
+Source: `src/compiler/parsing/collection.x:58`
 
 <a id="Compiler.take_unit_state"></a>
 #### Compiler.take_unit_state
@@ -826,7 +837,7 @@ Source: `src/compiler/lifecycle.x:5`
 
 Merges one translation dependency, preserving an existing content hash.
 
-Source: `src/compiler/source-files.x:81`
+Source: `src/compiler/source-files.x:91`
 
 ### `Path`
 
@@ -839,7 +850,7 @@ Returns the real path of the existing file at `path`, or NULL when
 `path` is NULL or does not resolve. Each spelling is resolved once per
 process.
 
-Source: `src/compiler/source-files.x:33`
+Source: `src/compiler/source-files.x:43`
 
 <a id="Path.resolved_absolute"></a>
 #### Path.resolved_absolute
@@ -849,7 +860,7 @@ Source: `src/compiler/source-files.x:33`
 Returns `Path.absolute(path)`, resolving an existing file through
 `Path.real`.
 
-Source: `src/compiler/source-files.x:46`
+Source: `src/compiler/source-files.x:56`
 
 ### `Pending`
 

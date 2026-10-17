@@ -20,6 +20,16 @@ String Compiler.canonical_path(Compiler c, String path) {
   return real ? real : path;
 }
 
+/** Reports whether an x2c source belongs to the current package root.
+    Native headers and source outside that root keep their own names.
+*/
+int Compiler.owns_package_source(Compiler c, String path) {
+  if (!c.package || !Path.is_x2c_source(path)) return 0;
+  Var root = c.package_roots[c.package];
+  return root is not void &&
+    c.canonical_path(path).startswith(%"${c.canonical_path(root)}/");
+}
+
 /* The real paths this process has resolved, by spelling. The compiler
    never changes its working directory, and translation workers are forked
    processes, so a spelling keeps its answer. A spelling that does not

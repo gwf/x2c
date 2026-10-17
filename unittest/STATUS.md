@@ -1,5 +1,12 @@
 # Status
 
+## Symbol-mode comparison scope
+
+Module units support only default symbol collection. The optional raw-symbol
+sweep classifies them as exclusions, and the conformance-mode comparison
+checks flat runtime units. The stage and cold-collection comparisons cover
+module units using their supported collection mode.
+
 ## Dual-macro migration follow-ups
 
 The [migration tasks](../plans/archive/compiler-dual-macro-contract.md#migration-defect-tasks)

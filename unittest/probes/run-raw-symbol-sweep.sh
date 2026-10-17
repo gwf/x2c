@@ -168,6 +168,11 @@ for src in "${compiler_sources[@]}" \
       printf '%s' "indented unit: CPP symbol modes lose its indentation"
     )
   fi
+  if grep -Eq '^module[[:space:]]*\{' "$src"; then
+    exclusions["$src"]=$(
+      printf '%s' "module unit: only default symbol collection is supported"
+    )
+  fi
   if [[ -n ${exclusions[$src]+classified} ]]; then
     echo "raw symbol exclusion: $relative -- ${exclusions[$src]}"
     excluded=$((excluded + 1))

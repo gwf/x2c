@@ -192,6 +192,8 @@ static void f10_resolution____resolve_visible(Compiler c, int report);
 
 static void _record_conformances(Compiler c);
 
+static String f10_resolution____recorded_spelling(Compiler c, String name);
+
 static List f10_resolution____recorded_conformance(Compiler c, Type base, Type participant);
 
 static List f10_resolution____recorded(Compiler c, Type base, Type participant);
@@ -812,7 +814,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _391 = String_var(_390);
   _392 = List_var(NULL);
   _393 = Symbol_var(106239471489226);
-  _394 = int_var(2181);
+  _394 = int_var(2191);
   _395 = String_new("");
   _396 = String_var(_395);
   _397 = String_new("x2c.hole");
@@ -890,7 +892,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _469 = cons(_461, _468);
   _470 = cons(_455, _469);
   _471 = List_var(_470);
-  _472 = int_var(2242);
+  _472 = int_var(2252);
   _473 = Symbol_var(1544849476362);
   _474 = List_var(_44);
   _475 = cons(_474, NULL);
@@ -1002,7 +1004,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _578 = cons(_461, _577);
   _579 = cons(_455, _578);
   _580 = List_var(_579);
-  _581 = int_var(2249);
+  _581 = int_var(2259);
   _582 = cons(_495, NULL);
   _583 = cons(_528, _571);
   _584 = cons(_547, _583);
@@ -1797,6 +1799,11 @@ static void _record_conformances(Compiler c){
   Compiler_record_conformance_rows(c, Compiler_conformance_rows(c, Compiler_declared_adoptions(c)));
 }
 
+List Sym_lookup(Sym, List, Type *);
+static String f10_resolution____recorded_spelling(Compiler c, String name){
+  if(! String_truth(name)) return name;  List binding = Sym_lookup(c -> sym, cons(String_var(name), NULL), NULL);  return List_truth(binding) ? Ast_binding_spelling(binding) : name;
+}
+
 static List f10_resolution____recorded_conformance(Compiler c, Type base, Type participant){
   if(_visibility(c, base, participant) != 396490862680) return NULL; {
     Var _x2c_gensym_match_var = Map_getindex(c -> conforms, List_var(cons(List_var(base), cons(List_var(participant), NULL)))); int _x2c_gensym_match_none = !Var_is(_x2c_gensym_match_var, 806120);  List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var); List _x2c_gensym_match_cursor, _x2c_gensym_match_cursor1;  switch(0){
@@ -1817,8 +1824,8 @@ static List f10_resolution____recorded_conformance(Compiler c, Type base, Type p
                         default: ;  _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 1328354264)) { Var _x2c_gensym_match_value_1 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 1318210446)) { Var _x2c_gensym_match_value_2 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1)) {{
                         Var member;  member = _x2c_gensym_match_value_0;  Var status;  status = _x2c_gensym_match_value_1;  Var source;  source = _x2c_gensym_match_value_2; {
                           Var _x2c_gensym_match_value_11 = status;  Var _x2c_gensym_match_value_12 = source; {
-                            Symbol status = Var_symbol(_x2c_gensym_match_value_11);  String source = Var_as_string(_x2c_gensym_match_value_12);  if(status != 31884573479268 && ! _is_private(c, source)){
-                              Array_push(resolved, List_var(cons(member, cons(Symbol_var(status), cons(String_var(source), NULL)))));  break;
+                            Symbol status = Var_symbol(_x2c_gensym_match_value_11);  String source = Var_as_string(_x2c_gensym_match_value_12); {
+                              source = f10_resolution____recorded_spelling(c, source);  if(status != 31884573479268 && ! _is_private(c, source)) Array_push(resolved, List_var(cons(member, cons(Symbol_var(status), cons(String_var(source), NULL)))));
                             }
 
                           }
@@ -1826,7 +1833,7 @@ static List f10_resolution____recorded_conformance(Compiler c, Type base, Type p
                         }
 
                       }
-                       } } } }
+                       break; } } } }
                     }
 
                   }
@@ -1834,7 +1841,7 @@ static List f10_resolution____recorded_conformance(Compiler c, Type base, Type p
                 }
 
               }
-              return({
+              forward = String_var(f10_resolution____recorded_spelling(c, Var_as_string(forward)));  reverse = String_var(f10_resolution____recorded_spelling(c, Var_as_string(reverse)));  return({
                 Var _x2c_gensym_literal_part_29 = List_var(base);  Var _x2c_gensym_literal_part_30 = List_var(participant);  Var _x2c_gensym_literal_part_31 = forward;  Var _x2c_gensym_literal_part_32 = reverse;  Var _x2c_gensym_literal_part_33 = List_var(cons(_186, List_append(Array_list_free(bound), NULL)));  List _x2c_gensym_literal_part_34 = Array_list_free(resolved);  cons(_129, cons(_x2c_gensym_literal_part_29, cons(_x2c_gensym_literal_part_30, cons(_x2c_gensym_literal_part_31, cons(_x2c_gensym_literal_part_32, cons(_x2c_gensym_literal_part_33, List_append(_x2c_gensym_literal_part_34, NULL)))))));
               }
               );

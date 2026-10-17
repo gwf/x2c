@@ -50,9 +50,14 @@ Functions can call earlier functions and recurse directly. A saved `Func`
 keeps the same bindings, so changes to shared variables remain visible:
 
 ```x2c
+~int total = 20;
+~int plus(int x) { return total + x; }
+~int main(void) {
 Func saved = plus;
 total = 30;
 saved(3);  // 33
+~  return 0;
+~}
 ```
 
 Submit one declaration or function at a time. Executable input may contain

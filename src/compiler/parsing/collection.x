@@ -36,7 +36,13 @@ static void _shallow_parse_loop(Compiler c) {
   c.braces.clear();
   while (c.peek(0) != <eof>) {
     Token start = c.token;
-    (void) c.parse_top_level_mode(1);
+    if (c.package && c.line_markers && c.source_private < 0) {
+      int line = start.line;
+      String package = c.owns_package_source(c.token_source(start, line))
+                     ? c.package : NULL;
+      $let(c.package, package) (void) c.parse_top_level_mode(1);
+    }
+    else (void) c.parse_top_level_mode(1);
     _debug_tokens(start, c.token);
   }
   /* Definitions after the last declaration, as before an include, still

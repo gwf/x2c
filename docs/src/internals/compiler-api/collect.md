@@ -138,7 +138,7 @@ Source: `src/collect/interfaces.x:27`
 Selects a source file's own package, as its standalone translation does.
 A cold provider does not register an import in its including unit.
 
-Source: `src/collect/walk.x:372`
+Source: `src/collect/walk.x:361`
 
 <a id="Compiler.declared_adoptions"></a>
 #### Compiler.declared_adoptions
@@ -212,7 +212,7 @@ The ordered cache walk counts each file once and groups effects by the
 canonical path of the unit's direct include. The parser installs those
 effects when it reaches that include.
 
-Source: `src/collect/walk.x:608`
+Source: `src/collect/walk.x:597`
 
 <a id="Compiler.inline_type_dependencies"></a>
 #### Compiler.inline_type_dependencies
@@ -231,7 +231,7 @@ Source: `src/collect/declarations.x:438`
 Installs the definitions of each include among the directives before
 the cursor.
 
-Source: `src/collect/walk.x:653`
+Source: `src/collect/walk.x:642`
 
 <a id="Compiler.interface_text"></a>
 #### Compiler.interface_text
@@ -471,7 +471,7 @@ Source: `src/collect/declarations.x:184`
 The file the include of `target` from `includer_dir` names, searched as
 collection searches `dirs`, or NULL.
 
-Source: `src/collect/walk.x:463`
+Source: `src/collect/walk.x:452`
 
 ## Design notes
 

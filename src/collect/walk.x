@@ -249,7 +249,7 @@ static void _parse(FileWalk &w, String segment, Map overlay) {
 /* The shadow parses the segment as part of this file, in the unit's state,
    with token lines and positions counted from the start of the file. */
 static void _prepare(FileWalk &w, Compiler shadow, String segment) {
-  if (!w.unit || !_package_owns(w.c, w.path)) shadow.package = NULL;
+  if (!w.c.owns_package_source(w.path)) shadow.package = NULL;
   shadow.filename = w.path;
   shadow.load_source =
     w.c.load_source && w.path == Path.absolute(w.c.filename);
@@ -276,17 +276,6 @@ static void _shift_tokens(Tokenizer t, int line, int pos) {
     token.line += line - 1;
     token.pos += pos;
   }
-}
-
-/* A package renames what it declares, not what it includes: only x2c source
-   under its root takes its prefix. A C header, a runtime module, or foreign
-   x2c source keeps its own spellings, as including that file directly gives
-   them, so the collected entry is the same whichever unit walks it first. */
-module int _package_owns(Compiler c, String path) {
-  if (!c.package) return 0;
-  Var root = c.package_roots[c.package];
-  return root is not void &&
-    path.startswith(%"${_canonical_path(root)}/");
 }
 
 /* The file takes every row the segment declared. Selection after the last

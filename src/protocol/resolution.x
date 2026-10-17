@@ -175,6 +175,12 @@ module void _record_conformances(Compiler c) {
   c.record_conformance_rows(c.conformance_rows(c.declared_adoptions()));
 }
 
+static String _recorded_spelling(Compiler c, String name) {
+  if (!name) return name;
+  List binding = c.sym.lookup(%($name), NULL);
+  return binding ? Ast.binding_spelling(binding) : name;
+}
+
 static List _recorded_conformance(
   Compiler c, Type base, Type participant) {
   if (_visibility(c, base, participant) != <external>) return NULL;
@@ -187,9 +193,13 @@ static List _recorded_conformance(
       bound.sort();
       foreach (List row, rows)
         match (row)
-          case %(?member ?(Symbol status) ?(String source) *)
-            if (status != <no-member> && !_is_private(c, source)):
+          case %(?member ?(Symbol status) ?(String source) *): {
+            source = _recorded_spelling(c, source);
+            if (status != <no-member> && !_is_private(c, source))
               resolved.push(%($member $status $source));
+          }
+      forward = _recorded_spelling(c, forward);
+      reverse = _recorded_spelling(c, reverse);
       return %(conformance $base $participant $forward $reverse
                (bindings @{bound.list_free()}) @{resolved.list_free()});
     }

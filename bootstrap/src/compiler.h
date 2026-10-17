@@ -353,6 +353,8 @@ int Compiler_read_source(Compiler c, String path, String volatile * text);
 
 String Compiler_canonical_path(Compiler c, String path);
 
+int Compiler_owns_package_source(Compiler c, String path);
+
 String Path_real(String path);
 
 String Path_resolved_absolute(String path);

@@ -521,15 +521,25 @@ EOF
 cat >"$BUILD/package-import/packages/depcache/src/helper.xlisp" <<'EOF'
 (def depcache-helper 1)
 EOF
+cat >"$BUILD/package-import/packages/depcache/src/native.h" <<'EOF'
+typedef struct CachePoint { int x; } CachePoint;
+EOF
 cat >"$BUILD/package-import/packages/depcache/src/depcache.x" <<'EOF'
 #include "helper.x"
+#include "native.h"
 $(import "helper.xlisp")
 typedef int Value;
 class CachedValue { int value; };
 static class HiddenValue { int value; };
+protocol Addition(T) { T T.add(T, T); }
+inline CachePoint CachePoint.add(CachePoint a, CachePoint b) {
+  return (CachePoint) { a.x + b.x };
+}
+protocol Addition(CachePoint);
 EOF
 cat >"$BUILD/package-import/src/consumer.x" <<'EOF'
 import "depcache" as dep;
+CachePoint package_sum(CachePoint a, CachePoint b) { return a + b; }
 int package_dependency(dep.Value value) { return value; }
 int package_class(int value) {
   dep.CachedValue original = dep.CachedValue.new(value);
@@ -549,6 +559,18 @@ grep -q 'depcache__Var_cachedvalue' \
   fail "package class lost its canonical reverse converter"
 ! grep -q 'HiddenValue' "$BUILD/package-import/out/depcache.h" ||
   fail "private package class escaped through generated defaults"
+
+# Recording a package interface must retain resolved native-type methods.
+mkdir -p "$BUILD/package-import/packages/depcache/builds" \
+  "$BUILD/package-import/replay"
+(cd "$BUILD/package-import" && "$X2C" translate --package-dir packages \
+  --out-dir packages/depcache/builds packages/depcache/src/depcache.x && \
+  "$X2C" translate --package-dir packages --out-dir replay src/consumer.x)
+for directory in out replay; do
+  grep -q 'depcache__CachePoint_add(a, b)' \
+    "$BUILD/package-import/$directory/consumer.c" ||
+    fail "package conformance lost its resolved native-type method ($directory)"
+done
 
 # Case 10: public aliases reach includers, and static aliases stay in their
 # source module. An including file keeps its aliases across another include.

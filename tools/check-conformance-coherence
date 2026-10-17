@@ -7,8 +7,8 @@
     dumped; adapter emission is keyed separately, to the unit defining the
     forward converter. If the two modes disagree, the collected conformance
     table depends on which symbol transport built the tree. Each mode runs the
-    runtime batch the stage build uses, so cross-unit collection
-    state matches a real translation.
+    flat runtime units together. Module units support only default symbol
+    collection and are covered by the stage and cold-collection comparisons.
 */
 #include <unistd.h>
 
@@ -20,11 +20,8 @@ static String x2c
    parse does not expand the unit macros its included files rely on. */
 static String _dump(List mode):
   Array sources = []
-  foreach String pattern in %("lib/*.x" "lib/*/*.x"):
-    foreach Path source in Path.glob(pattern):
-      if source.dirname().basename() != "lib" &&
-         source.stem() != source.dirname().basename(): continue
-      if source != "lib/x2c.x": sources.push(source)
+  foreach Path source in Path.glob("lib/*.x"):
+    if source != "lib/x2c.x": sources.push(source)
   List batch = sources.list_free()
   return %($x2c translate @mode --dump-conformance @batch).job().output()
 
@@ -63,4 +60,4 @@ if difference:
                 "usually means: make build).\n")
   return 1
 printf("runtime conformance: owned rows agree between prelude and live symbol modes "
-       "(%d units)\n", units)
+       "(%d flat units; module units use default collection only)\n", units)

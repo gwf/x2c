@@ -308,7 +308,7 @@ module List _interface_include_dirs(
   String root = Compiler.package_directory(c.package_source_dirs, canonical);
   String package = root && Compiler.is_package_source(root, canonical)
                  ? Path.basename(root)
-                 : _package_owns(c, canonical) ? c.package : NULL;
+                 : c.owns_package_source(canonical) ? c.package : NULL;
   int source = Path.is_x2c_source(canonical);
   dirs.push(source && package ? %(package $package) : %(package));
   return dirs.list_free();

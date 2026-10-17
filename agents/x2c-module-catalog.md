@@ -410,10 +410,10 @@ Public functions:
 `Compiler.match_value_is_static`, `Compiler.match_pattern_is_static`,
 `Compiler.match_pattern_binders`, `Compiler.define_pattern_binders`,
 `Compiler.match_capture_value`, `Compiler.pattern_binder_declarations`,
-`Compiler.read_source`, `Compiler.canonical_path`, `Path.real`,
-`Path.resolved_absolute`, `Compiler.portable_path`,
-`Compiler.absolute_home_path`, `Map.merge_translation_dependency`,
-`Compiler.add_translation_dependency`,
+`Compiler.read_source`, `Compiler.canonical_path`,
+`Compiler.owns_package_source`, `Path.real`, `Path.resolved_absolute`,
+`Compiler.portable_path`, `Compiler.absolute_home_path`,
+`Map.merge_translation_dependency`, `Compiler.add_translation_dependency`,
 `Compiler.merge_translation_dependencies`
 
 ### [src/components/bracket-access.x](../src/components/bracket-access.x)

@@ -211,8 +211,6 @@ static void f4_walk____prepare(FileWalk * w, Compiler shadow, String segment);
 
 static void f4_walk____shift_tokens(Tokenizer t, int line, int pos);
 
-static int _package_owns(Compiler c, String path);
-
 static void f4_walk____merge_file(FileWalk * w, Compiler shadow, Map overlay);
 
 static void f4_walk____include_file(FileWalk * w, String target, int angle);
@@ -2316,7 +2314,7 @@ static void f4_walk____parse(FileWalk * w, String segment, Map overlay){
 }
 
 static void f4_walk____prepare(FileWalk * w, Compiler shadow, String segment){
-  if(!(* w).unit || ! _package_owns((* w).c, (* w).path)) shadow -> package = NULL;
+  if(! Compiler_owns_package_source((* w).c, (* w).path)) shadow -> package = NULL;
   shadow -> filename =(* w).path;
   shadow -> load_source =(* w).c -> load_source && String_equal((* w).path, Path_absolute((* w).c -> filename));
   shadow -> meta_hashes =(* w).hashes;
@@ -2340,12 +2338,6 @@ static void f4_walk____shift_tokens(Tokenizer t, int line, int pos){
     token -> pos += pos;
   }
 
-}
-
-static int _package_owns(Compiler c, String path){
-  if(! String_truth(c -> package)) return 0;
-  Var root = Map_getindex(c -> package_roots, String_var(c -> package));
-  return ! Var_is_void(root) && String_startswith(path, String_join(NULL, cons(String_var(_canonical_path(Var_as_string(root))), cons(String_var(_34), NULL))));
 }
 
 Map Sym_file_statics(Sym);
@@ -5957,7 +5949,7 @@ static List _interface_include_dirs(Compiler c, String canonical){
 
   }
   String root = Compiler_package_directory(c -> package_source_dirs, canonical);
-  String package = String_truth(root) && Compiler_is_package_source(root, canonical) ? Path_basename(root) : _package_owns(c, canonical) ? c -> package : NULL;
+  String package = String_truth(root) && Compiler_is_package_source(root, canonical) ? Path_basename(root) : Compiler_owns_package_source(c, canonical) ? c -> package : NULL;
   int source = Path_is_x2c_source(canonical);
   Array_push(dirs, List_var(source && String_truth(package) ? cons(_388, cons(String_var(package), NULL)) : _389));
   return Array_list_free(dirs);
