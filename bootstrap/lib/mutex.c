@@ -6,7 +6,7 @@
 #include "common.h"
 typedef struct Mutex * Mutex;
 
-#include "scope.h"
+#include "scope/scope.h"
 #include <errno.h>
 #include <pthread.h>
 #include <stdio.h>

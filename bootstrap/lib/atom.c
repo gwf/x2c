@@ -9,7 +9,7 @@ static int _init_guard_ = 0;
 #include "buffer.h"
 #include "dispatch.h"
 #include "scan.h"
-#include "string.h"
+#include "string/string.h"
 #include "symbol.h"
 #include <stdlib.h>
 static int _numeric_prefix(String spelling);

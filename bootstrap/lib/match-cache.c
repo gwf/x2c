@@ -2,7 +2,7 @@
 
 #define __GUARD_0xEC6B1D5A__
 #include "error-macros.h"
-#include "match.h"
+#include "match/match.h"
 typedef struct MatchCache * MatchCache;
 
 typedef struct MatchLease{
@@ -15,8 +15,8 @@ MatchLease;
 
 #include <assert.h>
 #include <string.h>
-#include "pool.h"
-#include "scope.h"
+#include "pool/pool.h"
+#include "scope/scope.h"
 #define MATCH_ADMITTED_MEMO 256
 typedef struct MatchCacheEntry{
   unsigned long key;

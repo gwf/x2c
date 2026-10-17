@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x6A4A1365__
-#define __GUARD_0x6A4A1365__
+#ifndef __GUARD_0xCE191C9B__
+#define __GUARD_0xCE191C9B__
 
 #include "error-macros.h"
 typedef struct MatchCaptureSite MatchCaptureSite;
@@ -58,12 +58,12 @@ MatchCaptureSite;
 #include <stdlib.h>
 #include <stddef.h>
 #include <assert.h>
-#include "var.h"
-#include "list.h"
+#include "var/var.h"
+#include "list/list.h"
 #include "atom.h"
 #include "exception.h"
 #include "symbol.h"
-#include "scope.h"
+#include "scope/scope.h"
 #include "block.h"
 #include "match-machine.h"
 #include "match-plan.h"
@@ -152,4 +152,4 @@ int List_try_search(List input, Var pat, Var * out_match, List * out_bindings);
 List List_search_replace(List input, Var pat, Var template);
 
 
-#endif /* __GUARD_0x6A4A1365__ */
+#endif /* __GUARD_0xCE191C9B__ */

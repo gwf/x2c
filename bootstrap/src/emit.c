@@ -6,8 +6,8 @@
 #include "compiler/compiler.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include "string.h"
-#include "var.h"
+#include "string/string.h"
+#include "var/var.h"
 #include "ast.h"
 #include "format.h"
 #include "cleanup/cleanup.h"

@@ -1,1 +1,1 @@
-../generate.h
+#include "../generate.h"

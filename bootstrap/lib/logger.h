@@ -36,15 +36,15 @@ typedef void(* LogFlusher)(Logger logger, Var data);
 #include "buffer.h"
 #include "exception.h"
 #include "mutex.h"
-#include "error.h"
+#include "error/error.h"
 #include "error_init.h"
 #include "file.h"
-#include "list.h"
-#include "pool.h"
-#include "scope.h"
-#include "string.h"
+#include "list/list.h"
+#include "pool/pool.h"
+#include "scope/scope.h"
+#include "string/string.h"
 #include "symbol.h"
-#include "var.h"
+#include "var/var.h"
 void Logger_log(Logger logger, Symbol level, Symbol category, List fields);
 
 int Logger_should_log(Logger logger, Symbol level, Symbol category);

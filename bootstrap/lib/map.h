@@ -22,9 +22,9 @@ typedef struct Map{
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include "var.h"
+#include "var/var.h"
 #include "exception.h"
-#include "scope.h"
+#include "scope/scope.h"
 #include "block.h"
 #include "buffer.h"
 #include "varconvert.h"

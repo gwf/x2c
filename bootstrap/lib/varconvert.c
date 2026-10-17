@@ -24,10 +24,10 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
-#include "var.h"
-#include "error.h"
-#include "list.h"
-#include "string.h"
+#include "var/var.h"
+#include "error/error.h"
+#include "list/list.h"
+#include "string/string.h"
 #include "symbol.h"
 #include "symbolset.h"
 #include <limits.h>

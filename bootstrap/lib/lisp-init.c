@@ -2,7 +2,7 @@
 
 #define __GUARD_0x396C5583__
 #include "x2c.h"
-#include "lisp.h"
+#include "lisp/lisp.h"
 static String _4, _1, _0;
 
 static Var _3, _2;

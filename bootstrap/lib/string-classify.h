@@ -5,7 +5,7 @@
 #ifndef __GUARD_0x246C5420__
 #define __GUARD_0x246C5420__
 
-#include "string.h"
+#include "string/string.h"
 #include <ctype.h>
 int String_contains_digit(String str);
 

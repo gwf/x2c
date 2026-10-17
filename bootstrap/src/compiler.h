@@ -178,7 +178,7 @@ typedef struct SymTxn{
 SymTxn;
 
 #include "diagnostics.h"
-#include "symbols.h"
+#include "symtab/symtab.h"
 #include "preprocess.h"
 #include "grammar.h"
 #include "utils.h"

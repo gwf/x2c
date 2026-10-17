@@ -41,7 +41,7 @@ stays 49,954,816 bytes. The equal second burst reuses all 24,391 blocks and
 allocates no new blocks.
 
 This is intentional retained backing, not evidence of unreachable storage.
-[Pool._block_return](../../lib/pool.x) transfers ownership to the depot, and
+[Pool._block_return](../../lib/pool/pool.x) transfers ownership to the depot, and
 `_block_lease` reuses it. The process registry and page index retain those
 addresses until `_storage_shutdown`. A trim cannot safely free depot blocks
 without updating both registry and index under the storage lock.

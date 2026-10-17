@@ -43,7 +43,7 @@ or refactor equivalence experiment was performed.
 | Lisp and native modules | Explicit Lisp session destruction versus process-lived native code and function handles. |
 
 Relevant boundaries are in [frontend.x](../src/frontend.x#L157),
-[sourceview.x](../src/sourceview.x#L13), [symbols.x](../src/symbols.x#L100),
+[sourceview.x](../src/sourceview.x#L13), [symbols.x](../src/symtab/symtab.x#L100),
 [collect.x](../src/collect/collect.x#L1035), and [meta-native.x](../src/meta-native/meta-native.x#L1138).
 A replacement Session should not duplicate these owners.
 
@@ -92,7 +92,7 @@ counter-map identity so REPL scratch storage can close. Completion always rolls
 back. Submission can commit accepted declarations while interpreter side effects
 on previously published globals persist after a later failure.
 
-The controlling code is [transaction completion](../src/symbols.x#L1353),
+The controlling code is [transaction completion](../src/symtab/symtab.x#L1353),
 [REPL completion](../commands/repl/repl-session.x#L200), and
 [REPL submission](../commands/repl/repl-session.x#L391).
 These callers do not have one universal publication policy.

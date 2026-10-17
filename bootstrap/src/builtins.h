@@ -8,7 +8,7 @@
 #include "x2c.h"
 #include "meta.h"
 #include "grammar.h"
-#include "lisp.h"
+#include "lisp/lisp.h"
 #include "macros/macros.h"
 #include "transform/transform.h"
 Map Compiler_builtin_targets(void);

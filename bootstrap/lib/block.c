@@ -15,7 +15,7 @@ typedef struct Block{
 * Block;
 
 #include "exception.h"
-#include "scope.h"
+#include "scope/scope.h"
 static size_t _allocation_size(size_t width, size_t cap);
 
 static void * _allocation(Block b);

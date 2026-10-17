@@ -12,8 +12,8 @@
 #include "array.h"
 #include "block.h"
 #include "iter.h"
-#include "scope.h"
-#include "var.h"
+#include "scope/scope.h"
+#include "var/var.h"
 #define SYMBOL_SET_HEADER_SIZE 20
 size_t SymbolSet_len(SymbolSet x);
 

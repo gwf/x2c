@@ -1,4 +1,4 @@
-#define _x2c_gensym_initializer_choice_D7C30390_0_expanded(_x2c_gensym_static_input_0,_x2c_gensym_static_input_1,_x2c_gensym_static_input_2,_x2c_gensym_static_input_3,_x2c_gensym_static_input_4,_x2c_gensym_static_input_5,_x2c_gensym_static_input_6,_x2c_gensym_static_input_7,_x2c_gensym_static_input_8,_x2c_gensym_static_input_9,_x2c_gensym_static_input_10,_x2c_gensym_static_input_11,_x2c_gensym_static_input_12,_x2c_gensym_static_input_13,_x2c_gensym_static_input_14,_x2c_gensym_static_input_15,_x2c_gensym_static_input_16,_x2c_gensym_static_input_17,_x2c_gensym_static_input_18,_x2c_gensym_static_input_19,_x2c_gensym_static_input_20,_x2c_gensym_static_input_21,_x2c_gensym_static_input_22,_x2c_gensym_static_input_23,_x2c_gensym_static_input_24,_x2c_gensym_static_input_25,_x2c_gensym_static_input_26,_x2c_gensym_static_input_27,_x2c_gensym_static_input_28,_x2c_gensym_static_input_29) static void _x2c_gensym_static_initialize_0(void){\
+#define _x2c_gensym_initializer_choice_CBF06E4F_0_expanded(_x2c_gensym_static_input_0,_x2c_gensym_static_input_1,_x2c_gensym_static_input_2,_x2c_gensym_static_input_3,_x2c_gensym_static_input_4,_x2c_gensym_static_input_5,_x2c_gensym_static_input_6,_x2c_gensym_static_input_7,_x2c_gensym_static_input_8,_x2c_gensym_static_input_9,_x2c_gensym_static_input_10,_x2c_gensym_static_input_11,_x2c_gensym_static_input_12,_x2c_gensym_static_input_13,_x2c_gensym_static_input_14,_x2c_gensym_static_input_15,_x2c_gensym_static_input_16,_x2c_gensym_static_input_17,_x2c_gensym_static_input_18,_x2c_gensym_static_input_19,_x2c_gensym_static_input_20,_x2c_gensym_static_input_21,_x2c_gensym_static_input_22,_x2c_gensym_static_input_23,_x2c_gensym_static_input_24,_x2c_gensym_static_input_25,_x2c_gensym_static_input_26,_x2c_gensym_static_input_27,_x2c_gensym_static_input_28,_x2c_gensym_static_input_29) static void _x2c_gensym_static_initialize_0(void){\
   {\
     if(_x2c_gensym_static_input_0) if(_x2c_gensym_static_input_1) _x2c_gensym_static_input_2;\
     if(_x2c_gensym_static_input_3) if(_x2c_gensym_static_input_4) _x2c_gensym_static_input_5;\
@@ -13,8 +13,8 @@
   }\
 \
 }
-#define _x2c_gensym_initializer_choice_D7C30390_0(_x2c_gensym_static_input_0,_x2c_gensym_static_input_1,_x2c_gensym_static_input_2,_x2c_gensym_static_input_3,_x2c_gensym_static_input_4,_x2c_gensym_static_input_5,_x2c_gensym_static_input_6,_x2c_gensym_static_input_7,_x2c_gensym_static_input_8,_x2c_gensym_static_input_9,_x2c_gensym_static_input_10,_x2c_gensym_static_input_11,_x2c_gensym_static_input_12,_x2c_gensym_static_input_13,_x2c_gensym_static_input_14,_x2c_gensym_static_input_15,_x2c_gensym_static_input_16,_x2c_gensym_static_input_17,_x2c_gensym_static_input_18,_x2c_gensym_static_input_19,_x2c_gensym_static_input_20,_x2c_gensym_static_input_21,_x2c_gensym_static_input_22,_x2c_gensym_static_input_23,_x2c_gensym_static_input_24,_x2c_gensym_static_input_25,_x2c_gensym_static_input_26,_x2c_gensym_static_input_27,_x2c_gensym_static_input_28,_x2c_gensym_static_input_29) _x2c_gensym_initializer_choice_D7C30390_0_expanded(_x2c_gensym_static_input_0,_x2c_gensym_static_input_1,_x2c_gensym_static_input_2,_x2c_gensym_static_input_3,_x2c_gensym_static_input_4,_x2c_gensym_static_input_5,_x2c_gensym_static_input_6,_x2c_gensym_static_input_7,_x2c_gensym_static_input_8,_x2c_gensym_static_input_9,_x2c_gensym_static_input_10,_x2c_gensym_static_input_11,_x2c_gensym_static_input_12,_x2c_gensym_static_input_13,_x2c_gensym_static_input_14,_x2c_gensym_static_input_15,_x2c_gensym_static_input_16,_x2c_gensym_static_input_17,_x2c_gensym_static_input_18,_x2c_gensym_static_input_19,_x2c_gensym_static_input_20,_x2c_gensym_static_input_21,_x2c_gensym_static_input_22,_x2c_gensym_static_input_23,_x2c_gensym_static_input_24,_x2c_gensym_static_input_25,_x2c_gensym_static_input_26,_x2c_gensym_static_input_27,_x2c_gensym_static_input_28,_x2c_gensym_static_input_29)
-#define _x2c_gensym_initializer_choice_D7C30390_1_expanded(_x2c_gensym_static_input_30,_x2c_gensym_static_input_31,_x2c_gensym_static_input_32,_x2c_gensym_static_input_33,_x2c_gensym_static_input_34,_x2c_gensym_static_input_35,_x2c_gensym_static_input_36,_x2c_gensym_static_input_37,_x2c_gensym_static_input_38,_x2c_gensym_static_input_39,_x2c_gensym_static_input_40,_x2c_gensym_static_input_41,_x2c_gensym_static_input_42,_x2c_gensym_static_input_43,_x2c_gensym_static_input_44,_x2c_gensym_static_input_45,_x2c_gensym_static_input_46,_x2c_gensym_static_input_47,_x2c_gensym_static_input_48,_x2c_gensym_static_input_49,_x2c_gensym_static_input_50,_x2c_gensym_static_input_51,_x2c_gensym_static_input_52,_x2c_gensym_static_input_53,_x2c_gensym_static_input_54,_x2c_gensym_static_input_55,_x2c_gensym_static_input_56,_x2c_gensym_static_input_57,_x2c_gensym_static_input_58,_x2c_gensym_static_input_59) static void _x2c_gensym_static_initialize_1(void){\
+#define _x2c_gensym_initializer_choice_CBF06E4F_0(_x2c_gensym_static_input_0,_x2c_gensym_static_input_1,_x2c_gensym_static_input_2,_x2c_gensym_static_input_3,_x2c_gensym_static_input_4,_x2c_gensym_static_input_5,_x2c_gensym_static_input_6,_x2c_gensym_static_input_7,_x2c_gensym_static_input_8,_x2c_gensym_static_input_9,_x2c_gensym_static_input_10,_x2c_gensym_static_input_11,_x2c_gensym_static_input_12,_x2c_gensym_static_input_13,_x2c_gensym_static_input_14,_x2c_gensym_static_input_15,_x2c_gensym_static_input_16,_x2c_gensym_static_input_17,_x2c_gensym_static_input_18,_x2c_gensym_static_input_19,_x2c_gensym_static_input_20,_x2c_gensym_static_input_21,_x2c_gensym_static_input_22,_x2c_gensym_static_input_23,_x2c_gensym_static_input_24,_x2c_gensym_static_input_25,_x2c_gensym_static_input_26,_x2c_gensym_static_input_27,_x2c_gensym_static_input_28,_x2c_gensym_static_input_29) _x2c_gensym_initializer_choice_CBF06E4F_0_expanded(_x2c_gensym_static_input_0,_x2c_gensym_static_input_1,_x2c_gensym_static_input_2,_x2c_gensym_static_input_3,_x2c_gensym_static_input_4,_x2c_gensym_static_input_5,_x2c_gensym_static_input_6,_x2c_gensym_static_input_7,_x2c_gensym_static_input_8,_x2c_gensym_static_input_9,_x2c_gensym_static_input_10,_x2c_gensym_static_input_11,_x2c_gensym_static_input_12,_x2c_gensym_static_input_13,_x2c_gensym_static_input_14,_x2c_gensym_static_input_15,_x2c_gensym_static_input_16,_x2c_gensym_static_input_17,_x2c_gensym_static_input_18,_x2c_gensym_static_input_19,_x2c_gensym_static_input_20,_x2c_gensym_static_input_21,_x2c_gensym_static_input_22,_x2c_gensym_static_input_23,_x2c_gensym_static_input_24,_x2c_gensym_static_input_25,_x2c_gensym_static_input_26,_x2c_gensym_static_input_27,_x2c_gensym_static_input_28,_x2c_gensym_static_input_29)
+#define _x2c_gensym_initializer_choice_CBF06E4F_1_expanded(_x2c_gensym_static_input_30,_x2c_gensym_static_input_31,_x2c_gensym_static_input_32,_x2c_gensym_static_input_33,_x2c_gensym_static_input_34,_x2c_gensym_static_input_35,_x2c_gensym_static_input_36,_x2c_gensym_static_input_37,_x2c_gensym_static_input_38,_x2c_gensym_static_input_39,_x2c_gensym_static_input_40,_x2c_gensym_static_input_41,_x2c_gensym_static_input_42,_x2c_gensym_static_input_43,_x2c_gensym_static_input_44,_x2c_gensym_static_input_45,_x2c_gensym_static_input_46,_x2c_gensym_static_input_47,_x2c_gensym_static_input_48,_x2c_gensym_static_input_49,_x2c_gensym_static_input_50,_x2c_gensym_static_input_51,_x2c_gensym_static_input_52,_x2c_gensym_static_input_53,_x2c_gensym_static_input_54,_x2c_gensym_static_input_55,_x2c_gensym_static_input_56,_x2c_gensym_static_input_57,_x2c_gensym_static_input_58,_x2c_gensym_static_input_59) static void _x2c_gensym_static_initialize_1(void){\
   {\
     if(_x2c_gensym_static_input_30) if(_x2c_gensym_static_input_31) _x2c_gensym_static_input_32;\
     if(_x2c_gensym_static_input_33) if(_x2c_gensym_static_input_34) _x2c_gensym_static_input_35;\
@@ -29,26 +29,26 @@
   }\
 \
 }
-#define _x2c_gensym_initializer_choice_D7C30390_1(_x2c_gensym_static_input_30,_x2c_gensym_static_input_31,_x2c_gensym_static_input_32,_x2c_gensym_static_input_33,_x2c_gensym_static_input_34,_x2c_gensym_static_input_35,_x2c_gensym_static_input_36,_x2c_gensym_static_input_37,_x2c_gensym_static_input_38,_x2c_gensym_static_input_39,_x2c_gensym_static_input_40,_x2c_gensym_static_input_41,_x2c_gensym_static_input_42,_x2c_gensym_static_input_43,_x2c_gensym_static_input_44,_x2c_gensym_static_input_45,_x2c_gensym_static_input_46,_x2c_gensym_static_input_47,_x2c_gensym_static_input_48,_x2c_gensym_static_input_49,_x2c_gensym_static_input_50,_x2c_gensym_static_input_51,_x2c_gensym_static_input_52,_x2c_gensym_static_input_53,_x2c_gensym_static_input_54,_x2c_gensym_static_input_55,_x2c_gensym_static_input_56,_x2c_gensym_static_input_57,_x2c_gensym_static_input_58,_x2c_gensym_static_input_59) _x2c_gensym_initializer_choice_D7C30390_1_expanded(_x2c_gensym_static_input_30,_x2c_gensym_static_input_31,_x2c_gensym_static_input_32,_x2c_gensym_static_input_33,_x2c_gensym_static_input_34,_x2c_gensym_static_input_35,_x2c_gensym_static_input_36,_x2c_gensym_static_input_37,_x2c_gensym_static_input_38,_x2c_gensym_static_input_39,_x2c_gensym_static_input_40,_x2c_gensym_static_input_41,_x2c_gensym_static_input_42,_x2c_gensym_static_input_43,_x2c_gensym_static_input_44,_x2c_gensym_static_input_45,_x2c_gensym_static_input_46,_x2c_gensym_static_input_47,_x2c_gensym_static_input_48,_x2c_gensym_static_input_49,_x2c_gensym_static_input_50,_x2c_gensym_static_input_51,_x2c_gensym_static_input_52,_x2c_gensym_static_input_53,_x2c_gensym_static_input_54,_x2c_gensym_static_input_55,_x2c_gensym_static_input_56,_x2c_gensym_static_input_57,_x2c_gensym_static_input_58,_x2c_gensym_static_input_59)
-#define _x2c_gensym_initializer_choice_D7C30390_2_expanded(_x2c_gensym_static_input_60) static void _x2c_gensym_static_initialize_2(void){\
+#define _x2c_gensym_initializer_choice_CBF06E4F_1(_x2c_gensym_static_input_30,_x2c_gensym_static_input_31,_x2c_gensym_static_input_32,_x2c_gensym_static_input_33,_x2c_gensym_static_input_34,_x2c_gensym_static_input_35,_x2c_gensym_static_input_36,_x2c_gensym_static_input_37,_x2c_gensym_static_input_38,_x2c_gensym_static_input_39,_x2c_gensym_static_input_40,_x2c_gensym_static_input_41,_x2c_gensym_static_input_42,_x2c_gensym_static_input_43,_x2c_gensym_static_input_44,_x2c_gensym_static_input_45,_x2c_gensym_static_input_46,_x2c_gensym_static_input_47,_x2c_gensym_static_input_48,_x2c_gensym_static_input_49,_x2c_gensym_static_input_50,_x2c_gensym_static_input_51,_x2c_gensym_static_input_52,_x2c_gensym_static_input_53,_x2c_gensym_static_input_54,_x2c_gensym_static_input_55,_x2c_gensym_static_input_56,_x2c_gensym_static_input_57,_x2c_gensym_static_input_58,_x2c_gensym_static_input_59) _x2c_gensym_initializer_choice_CBF06E4F_1_expanded(_x2c_gensym_static_input_30,_x2c_gensym_static_input_31,_x2c_gensym_static_input_32,_x2c_gensym_static_input_33,_x2c_gensym_static_input_34,_x2c_gensym_static_input_35,_x2c_gensym_static_input_36,_x2c_gensym_static_input_37,_x2c_gensym_static_input_38,_x2c_gensym_static_input_39,_x2c_gensym_static_input_40,_x2c_gensym_static_input_41,_x2c_gensym_static_input_42,_x2c_gensym_static_input_43,_x2c_gensym_static_input_44,_x2c_gensym_static_input_45,_x2c_gensym_static_input_46,_x2c_gensym_static_input_47,_x2c_gensym_static_input_48,_x2c_gensym_static_input_49,_x2c_gensym_static_input_50,_x2c_gensym_static_input_51,_x2c_gensym_static_input_52,_x2c_gensym_static_input_53,_x2c_gensym_static_input_54,_x2c_gensym_static_input_55,_x2c_gensym_static_input_56,_x2c_gensym_static_input_57,_x2c_gensym_static_input_58,_x2c_gensym_static_input_59)
+#define _x2c_gensym_initializer_choice_CBF06E4F_2_expanded(_x2c_gensym_static_input_60) static void _x2c_gensym_static_initialize_2(void){\
   _x2c_gensym_static_input_60;\
 }
-#define _x2c_gensym_initializer_choice_D7C30390_2(_x2c_gensym_static_input_60) _x2c_gensym_initializer_choice_D7C30390_2_expanded(_x2c_gensym_static_input_60)
-#define _x2c_gensym_initializer_choice_D7C30390_3_expanded(_x2c_gensym_static_input_61) static void _x2c_gensym_static_initialize_3(void){\
+#define _x2c_gensym_initializer_choice_CBF06E4F_2(_x2c_gensym_static_input_60) _x2c_gensym_initializer_choice_CBF06E4F_2_expanded(_x2c_gensym_static_input_60)
+#define _x2c_gensym_initializer_choice_CBF06E4F_3_expanded(_x2c_gensym_static_input_61) static void _x2c_gensym_static_initialize_3(void){\
   _x2c_gensym_static_input_61;\
 }
-#define _x2c_gensym_initializer_choice_D7C30390_3(_x2c_gensym_static_input_61) _x2c_gensym_initializer_choice_D7C30390_3_expanded(_x2c_gensym_static_input_61)
+#define _x2c_gensym_initializer_choice_CBF06E4F_3(_x2c_gensym_static_input_61) _x2c_gensym_initializer_choice_CBF06E4F_3_expanded(_x2c_gensym_static_input_61)
 /* auto-generated by x2c.  Do not edit! */
 
-#define __GUARD_0xD7C30390__
+#define __GUARD_0xCBF06E4F__
 #include "error-macros.h"
 #include "private-keywords.h"
 #include <stddef.h>
 typedef struct Pool * Pool;
 
 #include "common.h"
-#include "scope.h"
-#include "var.h"
+#include "scope/scope.h"
+#include "var/var.h"
 typedef struct PoolTable{
   Scope scope;
   Bytes hashes, entries;
@@ -98,97 +98,97 @@ struct PoolRecord{
 
 static int _init_guard_ = 0;
 
-_Noreturn static void f14_pool_interning____reinsert_error(unsigned _x2c_gensym_macro_capacity_0, int _x2c_gensym_macro_probe_0);
+_Noreturn static void f9_interning____reinsert_error(unsigned _x2c_gensym_macro_capacity_0, int _x2c_gensym_macro_probe_0);
 
-_Noreturn static void f14_pool_interning____insert_error(unsigned _x2c_gensym_macro_capacity_1);
+_Noreturn static void f9_interning____insert_error(unsigned _x2c_gensym_macro_capacity_1);
 
-static Var * f14_pool_interning____record_key(PoolTable _x2c_gensym_macro_map_0, unsigned _x2c_gensym_macro_index_0);
+static Var * f9_interning____record_key(PoolTable _x2c_gensym_macro_map_0, unsigned _x2c_gensym_macro_index_0);
 
-static Var * f14_pool_interning____record_value(PoolTable _x2c_gensym_macro_map_1, unsigned _x2c_gensym_macro_index_1);
+static Var * f9_interning____record_value(PoolTable _x2c_gensym_macro_map_1, unsigned _x2c_gensym_macro_index_1);
 
-static unsigned f14_pool_interning____table_hash(Var * _x2c_gensym_macro_key_0);
+static unsigned f9_interning____table_hash(Var * _x2c_gensym_macro_key_0);
 
-static int f14_pool_interning____table_key_equal(Var * _x2c_gensym_macro_a_0, Var * _x2c_gensym_macro_b_0);
+static int f9_interning____table_key_equal(Var * _x2c_gensym_macro_a_0, Var * _x2c_gensym_macro_b_0);
 
-static int f14_pool_interning____table_value_equal(Var * _x2c_gensym_macro_a_1, Var * _x2c_gensym_macro_b_1);
+static int f9_interning____table_value_equal(Var * _x2c_gensym_macro_a_1, Var * _x2c_gensym_macro_b_1);
 
-static void f14_pool_interning____table_value_valid(Var * _x2c_gensym_macro_value_0);
+static void f9_interning____table_value_valid(Var * _x2c_gensym_macro_value_0);
 
-static void f14_pool_interning___PoolTable_free_table(PoolTable _x2c_gensym_macro_map_2);
+static void f9_interning___PoolTable_free_table(PoolTable _x2c_gensym_macro_map_2);
 
-static PoolTable f14_pool_interning___PoolTable_new_table(PoolTable _x2c_gensym_macro_unused_0, unsigned _x2c_gensym_macro_capacity_2);
+static PoolTable f9_interning___PoolTable_new_table(PoolTable _x2c_gensym_macro_unused_0, unsigned _x2c_gensym_macro_capacity_2);
 
-static long f14_pool_interning___PoolTable_find_hashed(PoolTable _x2c_gensym_macro_map_4, Var * _x2c_gensym_macro_key_1, unsigned _x2c_gensym_macro_key_hash_0);
+static long f9_interning___PoolTable_find_hashed(PoolTable _x2c_gensym_macro_map_4, Var * _x2c_gensym_macro_key_1, unsigned _x2c_gensym_macro_key_hash_0);
 
-static long f14_pool_interning___PoolTable_find_index(PoolTable _x2c_gensym_macro_map_5, Var * _x2c_gensym_macro_key_2);
+static long f9_interning___PoolTable_find_index(PoolTable _x2c_gensym_macro_map_5, Var * _x2c_gensym_macro_key_2);
 
-static int f14_pool_interning___PoolTable_try_get_entry(PoolTable _x2c_gensym_macro_map_6, Var * _x2c_gensym_macro_key_3, Var * _x2c_gensym_macro_out_0);
+static int f9_interning___PoolTable_try_get_entry(PoolTable _x2c_gensym_macro_map_6, Var * _x2c_gensym_macro_key_3, Var * _x2c_gensym_macro_out_0);
 
-static void f14_pool_interning___PoolTable_reinsert(PoolTable _x2c_gensym_macro_map_7, unsigned _x2c_gensym_macro_todo_hash_0, struct PoolRecord _x2c_gensym_macro_todo_0, int _x2c_gensym_macro_psl_0);
+static void f9_interning___PoolTable_reinsert(PoolTable _x2c_gensym_macro_map_7, unsigned _x2c_gensym_macro_todo_hash_0, struct PoolRecord _x2c_gensym_macro_todo_0, int _x2c_gensym_macro_psl_0);
 
 static void _x2c_gensym_macro__expand_0(PoolTable _x2c_gensym_macro_map_8);
 
-static Var * f14_pool_interning___PoolTable_get_or_insert(PoolTable _x2c_gensym_macro_map_9, Var * _x2c_gensym_macro_key_4, Var * _x2c_gensym_macro_val_0, int * _x2c_gensym_macro_inserted_0);
+static Var * f9_interning___PoolTable_get_or_insert(PoolTable _x2c_gensym_macro_map_9, Var * _x2c_gensym_macro_key_4, Var * _x2c_gensym_macro_val_0, int * _x2c_gensym_macro_inserted_0);
 
-static void f14_pool_interning___PoolTable_set_entry(PoolTable _x2c_gensym_macro_map_10, Var * _x2c_gensym_macro_key_5, Var * _x2c_gensym_macro_val_1);
+static void f9_interning___PoolTable_set_entry(PoolTable _x2c_gensym_macro_map_10, Var * _x2c_gensym_macro_key_5, Var * _x2c_gensym_macro_val_1);
 
-static int f14_pool_interning___PoolTable_try_del_entry(PoolTable _x2c_gensym_macro_map_11, Var * _x2c_gensym_macro_key_6, Var * _x2c_gensym_macro_out_1);
+static int f9_interning___PoolTable_try_del_entry(PoolTable _x2c_gensym_macro_map_11, Var * _x2c_gensym_macro_key_6, Var * _x2c_gensym_macro_out_1);
 
-static int f14_pool_interning___PoolTable_try_next_entry(PoolTable _x2c_gensym_macro_map_12, unsigned * _x2c_gensym_macro_cursor_0, Var * _x2c_gensym_macro_key_7, Var * _x2c_gensym_macro_val_2);
+static int f9_interning___PoolTable_try_next_entry(PoolTable _x2c_gensym_macro_map_12, unsigned * _x2c_gensym_macro_cursor_0, Var * _x2c_gensym_macro_key_7, Var * _x2c_gensym_macro_val_2);
 
 static void _x2c_gensym_macro__insert_all_0(PoolTable _x2c_gensym_macro_map_13, PoolTable _x2c_gensym_macro_other_0);
 
-static PoolTable f14_pool_interning___PoolTable_copy_entries(PoolTable _x2c_gensym_macro_map_14);
+static PoolTable f9_interning___PoolTable_copy_entries(PoolTable _x2c_gensym_macro_map_14);
 
-static PoolTable f14_pool_interning___PoolTable_merge_entries(PoolTable _x2c_gensym_macro_map_15, PoolTable _x2c_gensym_macro_other_1);
+static PoolTable f9_interning___PoolTable_merge_entries(PoolTable _x2c_gensym_macro_map_15, PoolTable _x2c_gensym_macro_other_1);
 
-static int f14_pool_interning___PoolTable_has_entries(PoolTable _x2c_gensym_macro_map_16);
+static int f9_interning___PoolTable_has_entries(PoolTable _x2c_gensym_macro_map_16);
 
-static int f14_pool_interning___PoolTable_equal_entries(PoolTable _x2c_gensym_macro_a_2, PoolTable _x2c_gensym_macro_b_2);
+static int f9_interning___PoolTable_equal_entries(PoolTable _x2c_gensym_macro_a_2, PoolTable _x2c_gensym_macro_b_2);
 
-static Var f14_pool_interning____get_hashed(PoolTable table, Var key, unsigned key_hash);
+static Var f9_interning____get_hashed(PoolTable table, Var key, unsigned key_hash);
 
 static Var _setdefault(PoolTable table, Var object, int * inserted);
 
-static Var f14_pool_interning____lookup_locked(Pool inner, Var key, unsigned key_hash);
+static Var f9_interning____lookup_locked(Pool inner, Var key, unsigned key_hash);
 
-static Var f14_pool_interning____intern_locked(Pool inner, Var object, int * discard);
+static Var f9_interning____intern_locked(Pool inner, Var object, int * discard);
 
-static void f14_pool_interning____insert_locked(Pool inner, Var object);
+static void f9_interning____insert_locked(Pool inner, Var object);
 
 static int _owns_locked(Pool pool, Var key);
 
-static unsigned f14_pool_interning____child_capacity(Pool inner);
+static unsigned f9_interning____child_capacity(Pool inner);
 
 enum PoolStorageConstant{
   POOL_CLASS_COUNT = 10, POOL_DEPOT_COUNT = 5, POOL_KEEP_WORDS = 1
 }
 ;
 
-typedef struct f12_pool_storage___PoolBlock{
-  struct f12_pool_storage___PoolBlock * next, * registry_next;
+typedef struct f7_storage___PoolBlock{
+  struct f7_storage___PoolBlock * next, * registry_next;
   struct Pool * owner;
   void * free;
   size_t used;
   unsigned class_index, keep_count, bytes;
   uint64_t keep[POOL_KEEP_WORDS];
 }
-* f12_pool_storage___PoolBlock;
+* f7_storage___PoolBlock;
 
-typedef struct f12_pool_storage___PoolPromotion{
-  f12_pool_storage___PoolBlock block;
+typedef struct f7_storage___PoolPromotion{
+  f7_storage___PoolBlock block;
   unsigned slot;
-  struct f12_pool_storage___PoolPromotion * next;
+  struct f7_storage___PoolPromotion * next;
 }
-* f12_pool_storage___PoolPromotion;
+* f7_storage___PoolPromotion;
 
 enum PoolBlockConstant{
   POOL_BLOCK_DATA_OFFSET = 64
 }
 ;
 
-_Static_assert(sizeof(struct f12_pool_storage___PoolBlock) == 64, "the pool block header is 64 bytes");
-static unsigned f12_pool_storage___pool_class_sizes[POOL_CLASS_COUNT] ={
+_Static_assert(sizeof(struct f7_storage___PoolBlock) == 64, "the pool block header is 64 bytes");
+static unsigned f7_storage___pool_class_sizes[POOL_CLASS_COUNT] ={
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 }
 ;
@@ -197,203 +197,203 @@ static unsigned f12_pool_storage___pool_class_sizes[POOL_CLASS_COUNT] ={
 
 
 
-_x2c_gensym_initializer_choice_D7C30390_0((0ULL < sizeof(f12_pool_storage___pool_class_sizes) / sizeof(f12_pool_storage___pool_class_sizes[0ULL])), (0ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0])))), (f12_pool_storage___pool_class_sizes[0ULL] = __builtin_choose_expr(0ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0]))), __builtin_choose_expr(0ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0]))), 16, (__typeof__(f12_pool_storage___pool_class_sizes[0ULL])){
+_x2c_gensym_initializer_choice_CBF06E4F_0((0ULL < sizeof(f7_storage___pool_class_sizes) / sizeof(f7_storage___pool_class_sizes[0ULL])), (0ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0])))), (f7_storage___pool_class_sizes[0ULL] = __builtin_choose_expr(0ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0]))), __builtin_choose_expr(0ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0]))), 16, (__typeof__(f7_storage___pool_class_sizes[0ULL])){
   0
 }
 ), (unsigned){
   0
 }
-)), (1ULL < sizeof(f12_pool_storage___pool_class_sizes) / sizeof(f12_pool_storage___pool_class_sizes[1ULL])), (1ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0])))), (f12_pool_storage___pool_class_sizes[1ULL] = __builtin_choose_expr(1ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0]))), __builtin_choose_expr(1ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0]))), 32, (__typeof__(f12_pool_storage___pool_class_sizes[1ULL])){
+)), (1ULL < sizeof(f7_storage___pool_class_sizes) / sizeof(f7_storage___pool_class_sizes[1ULL])), (1ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0])))), (f7_storage___pool_class_sizes[1ULL] = __builtin_choose_expr(1ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0]))), __builtin_choose_expr(1ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0]))), 32, (__typeof__(f7_storage___pool_class_sizes[1ULL])){
   0
 }
 ), (unsigned){
   0
 }
-)), (2ULL < sizeof(f12_pool_storage___pool_class_sizes) / sizeof(f12_pool_storage___pool_class_sizes[2ULL])), (2ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0])))), (f12_pool_storage___pool_class_sizes[2ULL] = __builtin_choose_expr(2ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0]))), __builtin_choose_expr(2ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0]))), 48, (__typeof__(f12_pool_storage___pool_class_sizes[2ULL])){
+)), (2ULL < sizeof(f7_storage___pool_class_sizes) / sizeof(f7_storage___pool_class_sizes[2ULL])), (2ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0])))), (f7_storage___pool_class_sizes[2ULL] = __builtin_choose_expr(2ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0]))), __builtin_choose_expr(2ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0]))), 48, (__typeof__(f7_storage___pool_class_sizes[2ULL])){
   0
 }
 ), (unsigned){
   0
 }
-)), (3ULL < sizeof(f12_pool_storage___pool_class_sizes) / sizeof(f12_pool_storage___pool_class_sizes[3ULL])), (3ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0])))), (f12_pool_storage___pool_class_sizes[3ULL] = __builtin_choose_expr(3ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0]))), __builtin_choose_expr(3ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0]))), 64, (__typeof__(f12_pool_storage___pool_class_sizes[3ULL])){
+)), (3ULL < sizeof(f7_storage___pool_class_sizes) / sizeof(f7_storage___pool_class_sizes[3ULL])), (3ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0])))), (f7_storage___pool_class_sizes[3ULL] = __builtin_choose_expr(3ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0]))), __builtin_choose_expr(3ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0]))), 64, (__typeof__(f7_storage___pool_class_sizes[3ULL])){
   0
 }
 ), (unsigned){
   0
 }
-)), (4ULL < sizeof(f12_pool_storage___pool_class_sizes) / sizeof(f12_pool_storage___pool_class_sizes[4ULL])), (4ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0])))), (f12_pool_storage___pool_class_sizes[4ULL] = __builtin_choose_expr(4ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0]))), __builtin_choose_expr(4ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0]))), 96, (__typeof__(f12_pool_storage___pool_class_sizes[4ULL])){
+)), (4ULL < sizeof(f7_storage___pool_class_sizes) / sizeof(f7_storage___pool_class_sizes[4ULL])), (4ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0])))), (f7_storage___pool_class_sizes[4ULL] = __builtin_choose_expr(4ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0]))), __builtin_choose_expr(4ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0]))), 96, (__typeof__(f7_storage___pool_class_sizes[4ULL])){
   0
 }
 ), (unsigned){
   0
 }
-)), (5ULL < sizeof(f12_pool_storage___pool_class_sizes) / sizeof(f12_pool_storage___pool_class_sizes[5ULL])), (5ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0])))), (f12_pool_storage___pool_class_sizes[5ULL] = __builtin_choose_expr(5ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0]))), __builtin_choose_expr(5ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0]))), 128, (__typeof__(f12_pool_storage___pool_class_sizes[5ULL])){
+)), (5ULL < sizeof(f7_storage___pool_class_sizes) / sizeof(f7_storage___pool_class_sizes[5ULL])), (5ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0])))), (f7_storage___pool_class_sizes[5ULL] = __builtin_choose_expr(5ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0]))), __builtin_choose_expr(5ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0]))), 128, (__typeof__(f7_storage___pool_class_sizes[5ULL])){
   0
 }
 ), (unsigned){
   0
 }
-)), (6ULL < sizeof(f12_pool_storage___pool_class_sizes) / sizeof(f12_pool_storage___pool_class_sizes[6ULL])), (6ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0])))), (f12_pool_storage___pool_class_sizes[6ULL] = __builtin_choose_expr(6ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0]))), __builtin_choose_expr(6ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0]))), 192, (__typeof__(f12_pool_storage___pool_class_sizes[6ULL])){
+)), (6ULL < sizeof(f7_storage___pool_class_sizes) / sizeof(f7_storage___pool_class_sizes[6ULL])), (6ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0])))), (f7_storage___pool_class_sizes[6ULL] = __builtin_choose_expr(6ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0]))), __builtin_choose_expr(6ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0]))), 192, (__typeof__(f7_storage___pool_class_sizes[6ULL])){
   0
 }
 ), (unsigned){
   0
 }
-)), (7ULL < sizeof(f12_pool_storage___pool_class_sizes) / sizeof(f12_pool_storage___pool_class_sizes[7ULL])), (7ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0])))), (f12_pool_storage___pool_class_sizes[7ULL] = __builtin_choose_expr(7ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0]))), __builtin_choose_expr(7ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0]))), 256, (__typeof__(f12_pool_storage___pool_class_sizes[7ULL])){
+)), (7ULL < sizeof(f7_storage___pool_class_sizes) / sizeof(f7_storage___pool_class_sizes[7ULL])), (7ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0])))), (f7_storage___pool_class_sizes[7ULL] = __builtin_choose_expr(7ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0]))), __builtin_choose_expr(7ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0]))), 256, (__typeof__(f7_storage___pool_class_sizes[7ULL])){
   0
 }
 ), (unsigned){
   0
 }
-)), (8ULL < sizeof(f12_pool_storage___pool_class_sizes) / sizeof(f12_pool_storage___pool_class_sizes[8ULL])), (8ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0])))), (f12_pool_storage___pool_class_sizes[8ULL] = __builtin_choose_expr(8ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0]))), __builtin_choose_expr(8ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0]))), 384, (__typeof__(f12_pool_storage___pool_class_sizes[8ULL])){
+)), (8ULL < sizeof(f7_storage___pool_class_sizes) / sizeof(f7_storage___pool_class_sizes[8ULL])), (8ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0])))), (f7_storage___pool_class_sizes[8ULL] = __builtin_choose_expr(8ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0]))), __builtin_choose_expr(8ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0]))), 384, (__typeof__(f7_storage___pool_class_sizes[8ULL])){
   0
 }
 ), (unsigned){
   0
 }
-)), (9ULL < sizeof(f12_pool_storage___pool_class_sizes) / sizeof(f12_pool_storage___pool_class_sizes[9ULL])), (9ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0])))), (f12_pool_storage___pool_class_sizes[9ULL] = __builtin_choose_expr(9ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0]))), __builtin_choose_expr(9ULL <(sizeof(f12_pool_storage___pool_class_sizes) /(sizeof(f12_pool_storage___pool_class_sizes[0]))), 512, (__typeof__(f12_pool_storage___pool_class_sizes[9ULL])){
+)), (9ULL < sizeof(f7_storage___pool_class_sizes) / sizeof(f7_storage___pool_class_sizes[9ULL])), (9ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0])))), (f7_storage___pool_class_sizes[9ULL] = __builtin_choose_expr(9ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0]))), __builtin_choose_expr(9ULL <(sizeof(f7_storage___pool_class_sizes) /(sizeof(f7_storage___pool_class_sizes[0]))), 512, (__typeof__(f7_storage___pool_class_sizes[9ULL])){
   0
 }
 ), (unsigned){
   0
 }
 )))
-static unsigned f12_pool_storage___pool_block_sizes[POOL_CLASS_COUNT] ={
+static unsigned f7_storage___pool_block_sizes[POOL_CLASS_COUNT] ={
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 }
 ;
-_x2c_gensym_initializer_choice_D7C30390_1((0ULL < sizeof(f12_pool_storage___pool_block_sizes) / sizeof(f12_pool_storage___pool_block_sizes[0ULL])), (0ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0])))), (f12_pool_storage___pool_block_sizes[0ULL] = __builtin_choose_expr(0ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0]))), __builtin_choose_expr(0ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0]))), 512, (__typeof__(f12_pool_storage___pool_block_sizes[0ULL])){
+_x2c_gensym_initializer_choice_CBF06E4F_1((0ULL < sizeof(f7_storage___pool_block_sizes) / sizeof(f7_storage___pool_block_sizes[0ULL])), (0ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0])))), (f7_storage___pool_block_sizes[0ULL] = __builtin_choose_expr(0ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0]))), __builtin_choose_expr(0ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0]))), 512, (__typeof__(f7_storage___pool_block_sizes[0ULL])){
   0
 }
 ), (unsigned){
   0
 }
-)), (1ULL < sizeof(f12_pool_storage___pool_block_sizes) / sizeof(f12_pool_storage___pool_block_sizes[1ULL])), (1ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0])))), (f12_pool_storage___pool_block_sizes[1ULL] = __builtin_choose_expr(1ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0]))), __builtin_choose_expr(1ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0]))), 1024, (__typeof__(f12_pool_storage___pool_block_sizes[1ULL])){
+)), (1ULL < sizeof(f7_storage___pool_block_sizes) / sizeof(f7_storage___pool_block_sizes[1ULL])), (1ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0])))), (f7_storage___pool_block_sizes[1ULL] = __builtin_choose_expr(1ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0]))), __builtin_choose_expr(1ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0]))), 1024, (__typeof__(f7_storage___pool_block_sizes[1ULL])){
   0
 }
 ), (unsigned){
   0
 }
-)), (2ULL < sizeof(f12_pool_storage___pool_block_sizes) / sizeof(f12_pool_storage___pool_block_sizes[2ULL])), (2ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0])))), (f12_pool_storage___pool_block_sizes[2ULL] = __builtin_choose_expr(2ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0]))), __builtin_choose_expr(2ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0]))), 2048, (__typeof__(f12_pool_storage___pool_block_sizes[2ULL])){
+)), (2ULL < sizeof(f7_storage___pool_block_sizes) / sizeof(f7_storage___pool_block_sizes[2ULL])), (2ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0])))), (f7_storage___pool_block_sizes[2ULL] = __builtin_choose_expr(2ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0]))), __builtin_choose_expr(2ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0]))), 2048, (__typeof__(f7_storage___pool_block_sizes[2ULL])){
   0
 }
 ), (unsigned){
   0
 }
-)), (3ULL < sizeof(f12_pool_storage___pool_block_sizes) / sizeof(f12_pool_storage___pool_block_sizes[3ULL])), (3ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0])))), (f12_pool_storage___pool_block_sizes[3ULL] = __builtin_choose_expr(3ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0]))), __builtin_choose_expr(3ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0]))), 2048, (__typeof__(f12_pool_storage___pool_block_sizes[3ULL])){
+)), (3ULL < sizeof(f7_storage___pool_block_sizes) / sizeof(f7_storage___pool_block_sizes[3ULL])), (3ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0])))), (f7_storage___pool_block_sizes[3ULL] = __builtin_choose_expr(3ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0]))), __builtin_choose_expr(3ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0]))), 2048, (__typeof__(f7_storage___pool_block_sizes[3ULL])){
   0
 }
 ), (unsigned){
   0
 }
-)), (4ULL < sizeof(f12_pool_storage___pool_block_sizes) / sizeof(f12_pool_storage___pool_block_sizes[4ULL])), (4ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0])))), (f12_pool_storage___pool_block_sizes[4ULL] = __builtin_choose_expr(4ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0]))), __builtin_choose_expr(4ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0]))), 4096, (__typeof__(f12_pool_storage___pool_block_sizes[4ULL])){
+)), (4ULL < sizeof(f7_storage___pool_block_sizes) / sizeof(f7_storage___pool_block_sizes[4ULL])), (4ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0])))), (f7_storage___pool_block_sizes[4ULL] = __builtin_choose_expr(4ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0]))), __builtin_choose_expr(4ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0]))), 4096, (__typeof__(f7_storage___pool_block_sizes[4ULL])){
   0
 }
 ), (unsigned){
   0
 }
-)), (5ULL < sizeof(f12_pool_storage___pool_block_sizes) / sizeof(f12_pool_storage___pool_block_sizes[5ULL])), (5ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0])))), (f12_pool_storage___pool_block_sizes[5ULL] = __builtin_choose_expr(5ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0]))), __builtin_choose_expr(5ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0]))), 4096, (__typeof__(f12_pool_storage___pool_block_sizes[5ULL])){
+)), (5ULL < sizeof(f7_storage___pool_block_sizes) / sizeof(f7_storage___pool_block_sizes[5ULL])), (5ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0])))), (f7_storage___pool_block_sizes[5ULL] = __builtin_choose_expr(5ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0]))), __builtin_choose_expr(5ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0]))), 4096, (__typeof__(f7_storage___pool_block_sizes[5ULL])){
   0
 }
 ), (unsigned){
   0
 }
-)), (6ULL < sizeof(f12_pool_storage___pool_block_sizes) / sizeof(f12_pool_storage___pool_block_sizes[6ULL])), (6ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0])))), (f12_pool_storage___pool_block_sizes[6ULL] = __builtin_choose_expr(6ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0]))), __builtin_choose_expr(6ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0]))), 4096, (__typeof__(f12_pool_storage___pool_block_sizes[6ULL])){
+)), (6ULL < sizeof(f7_storage___pool_block_sizes) / sizeof(f7_storage___pool_block_sizes[6ULL])), (6ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0])))), (f7_storage___pool_block_sizes[6ULL] = __builtin_choose_expr(6ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0]))), __builtin_choose_expr(6ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0]))), 4096, (__typeof__(f7_storage___pool_block_sizes[6ULL])){
   0
 }
 ), (unsigned){
   0
 }
-)), (7ULL < sizeof(f12_pool_storage___pool_block_sizes) / sizeof(f12_pool_storage___pool_block_sizes[7ULL])), (7ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0])))), (f12_pool_storage___pool_block_sizes[7ULL] = __builtin_choose_expr(7ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0]))), __builtin_choose_expr(7ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0]))), 4096, (__typeof__(f12_pool_storage___pool_block_sizes[7ULL])){
+)), (7ULL < sizeof(f7_storage___pool_block_sizes) / sizeof(f7_storage___pool_block_sizes[7ULL])), (7ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0])))), (f7_storage___pool_block_sizes[7ULL] = __builtin_choose_expr(7ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0]))), __builtin_choose_expr(7ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0]))), 4096, (__typeof__(f7_storage___pool_block_sizes[7ULL])){
   0
 }
 ), (unsigned){
   0
 }
-)), (8ULL < sizeof(f12_pool_storage___pool_block_sizes) / sizeof(f12_pool_storage___pool_block_sizes[8ULL])), (8ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0])))), (f12_pool_storage___pool_block_sizes[8ULL] = __builtin_choose_expr(8ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0]))), __builtin_choose_expr(8ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0]))), 4096, (__typeof__(f12_pool_storage___pool_block_sizes[8ULL])){
+)), (8ULL < sizeof(f7_storage___pool_block_sizes) / sizeof(f7_storage___pool_block_sizes[8ULL])), (8ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0])))), (f7_storage___pool_block_sizes[8ULL] = __builtin_choose_expr(8ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0]))), __builtin_choose_expr(8ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0]))), 4096, (__typeof__(f7_storage___pool_block_sizes[8ULL])){
   0
 }
 ), (unsigned){
   0
 }
-)), (9ULL < sizeof(f12_pool_storage___pool_block_sizes) / sizeof(f12_pool_storage___pool_block_sizes[9ULL])), (9ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0])))), (f12_pool_storage___pool_block_sizes[9ULL] = __builtin_choose_expr(9ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0]))), __builtin_choose_expr(9ULL <(sizeof(f12_pool_storage___pool_block_sizes) /(sizeof(f12_pool_storage___pool_block_sizes[0]))), 4096, (__typeof__(f12_pool_storage___pool_block_sizes[9ULL])){
+)), (9ULL < sizeof(f7_storage___pool_block_sizes) / sizeof(f7_storage___pool_block_sizes[9ULL])), (9ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0])))), (f7_storage___pool_block_sizes[9ULL] = __builtin_choose_expr(9ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0]))), __builtin_choose_expr(9ULL <(sizeof(f7_storage___pool_block_sizes) /(sizeof(f7_storage___pool_block_sizes[0]))), 4096, (__typeof__(f7_storage___pool_block_sizes[9ULL])){
   0
 }
 ), (unsigned){
   0
 }
 )))
-typedef struct f12_pool_storage___PoolIndexSlot{
-  uintptr_t page;  f12_pool_storage___PoolBlock block;
+typedef struct f7_storage___PoolIndexSlot{
+  uintptr_t page;  f7_storage___PoolBlock block;
 }
-f12_pool_storage___PoolIndexSlot;
+f7_storage___PoolIndexSlot;
 enum PoolIndexConstant{
   POOL_INDEX_PAGE_SHIFT = 12, POOL_INDEX_FIRST_SLOTS = 256
 }
 ;
-static f12_pool_storage___PoolBlock f12_pool_storage___pool_registry;
-static f12_pool_storage___PoolIndexSlot * f12_pool_storage___pool_index;
-static unsigned f12_pool_storage___pool_index_slots, f12_pool_storage___pool_index_used;
-static int f12_pool_storage___pool_index_complete;
-_x2c_gensym_initializer_choice_D7C30390_2((f12_pool_storage___pool_index_complete = 1))
-static f12_pool_storage___PoolBlock f12_pool_storage___pool_depot[POOL_DEPOT_COUNT];
-static int f12_pool_storage___pool_storage_ready;
-static size_t f12_pool_storage___pool_allocation_calls, f12_pool_storage___pool_free_calls, f12_pool_storage___pool_requested_bytes;
-static size_t f12_pool_storage___pool_block_allocations, f12_pool_storage___pool_block_reuses;
-static size_t f12_pool_storage___pool_slot_reuses, f12_pool_storage___pool_backing_bytes;
-static size_t f12_pool_storage___pool_active_blocks, f12_pool_storage___pool_active_bytes;
-static size_t f12_pool_storage___pool_depot_blocks, f12_pool_storage___pool_depot_bytes;
-static pthread_mutex_t f12_pool_storage___pool_storage_mutex;
-_x2c_gensym_initializer_choice_D7C30390_3((f12_pool_storage___pool_storage_mutex =(pthread_mutex_t) PTHREAD_MUTEX_INITIALIZER))
-static void * f12_pool_storage____small_malloc(Pool inner, int class_index, size_t size);
-static int f12_pool_storage____size_class(size_t size);
-static f12_pool_storage___PoolBlock f12_pool_storage____block_with_room(Pool pool, int class_index);
-static int f12_pool_storage____has_room(f12_pool_storage___PoolBlock block);
-static void * f12_pool_storage____take_slot(f12_pool_storage___PoolBlock block, int class_index);
-static f12_pool_storage___PoolBlock f12_pool_storage____fresh_block(Pool inner, int class_index);
-static void f12_pool_storage____free_slot(f12_pool_storage___PoolBlock block, void * ptr);
-static void f12_pool_storage____push_free(f12_pool_storage___PoolBlock block, void * slot);
-static f12_pool_storage___PoolBlock f12_pool_storage____block_lease(Pool p, int class_index, f12_pool_storage___PoolBlock fresh);
-static unsigned f12_pool_storage____block_bytes(Pool pool, int class_index);
-static f12_pool_storage___PoolBlock f12_pool_storage____depot_pop(unsigned bytes);
-static f12_pool_storage___PoolBlock f12_pool_storage____registry_add(f12_pool_storage___PoolBlock block, unsigned bytes);
-static void f12_pool_storage____reset(f12_pool_storage___PoolBlock block, Pool owner);
-static void f12_pool_storage____link(f12_pool_storage___PoolBlock block, Pool pool);
-static void f12_pool_storage____depot_push(f12_pool_storage___PoolBlock block);
-static int f12_pool_storage____depot_index(unsigned bytes);
-static inline char * f12_pool_storage____data(f12_pool_storage___PoolBlock block);
-static inline void * f12_pool_storage____slot(f12_pool_storage___PoolBlock block, unsigned slot);
-static inline unsigned f12_pool_storage____slot_index(f12_pool_storage___PoolBlock block, void * alloc);
-static int f12_pool_storage____contains(f12_pool_storage___PoolBlock block, const void * ptr);
-static f12_pool_storage___PoolBlock f12_pool_storage____find_block(const void * ptr);
-static f12_pool_storage___PoolBlock f12_pool_storage____index_find(const void * ptr);
-static f12_pool_storage___PoolBlock f12_pool_storage____registry_find(const void * ptr);
-static void f12_pool_storage____index_add(f12_pool_storage___PoolBlock block, unsigned bytes);
-static int f12_pool_storage____index_grow(void);
-static void f12_pool_storage____index_place(f12_pool_storage___PoolIndexSlot * table, unsigned slots, uintptr_t page, f12_pool_storage___PoolBlock block);
-static unsigned f12_pool_storage____index_start(uintptr_t page, unsigned slots);
-static int f12_pool_storage____promote_level(Pool inner, Var object, void * alloc, f12_pool_storage___PoolBlock block);
-static f12_pool_storage___PoolBlock f12_pool_storage____block_of(void * alloc);
-static void f12_pool_storage____mark_slot(f12_pool_storage___PoolBlock block, unsigned slot);
-static void f12_pool_storage____push_promotion(Pool inner, f12_pool_storage___PoolPromotion promotion);
+static f7_storage___PoolBlock f7_storage___pool_registry;
+static f7_storage___PoolIndexSlot * f7_storage___pool_index;
+static unsigned f7_storage___pool_index_slots, f7_storage___pool_index_used;
+static int f7_storage___pool_index_complete;
+_x2c_gensym_initializer_choice_CBF06E4F_2((f7_storage___pool_index_complete = 1))
+static f7_storage___PoolBlock f7_storage___pool_depot[POOL_DEPOT_COUNT];
+static int f7_storage___pool_storage_ready;
+static size_t f7_storage___pool_allocation_calls, f7_storage___pool_free_calls, f7_storage___pool_requested_bytes;
+static size_t f7_storage___pool_block_allocations, f7_storage___pool_block_reuses;
+static size_t f7_storage___pool_slot_reuses, f7_storage___pool_backing_bytes;
+static size_t f7_storage___pool_active_blocks, f7_storage___pool_active_bytes;
+static size_t f7_storage___pool_depot_blocks, f7_storage___pool_depot_bytes;
+static pthread_mutex_t f7_storage___pool_storage_mutex;
+_x2c_gensym_initializer_choice_CBF06E4F_3((f7_storage___pool_storage_mutex =(pthread_mutex_t) PTHREAD_MUTEX_INITIALIZER))
+static void * f7_storage____small_malloc(Pool inner, int class_index, size_t size);
+static int f7_storage____size_class(size_t size);
+static f7_storage___PoolBlock f7_storage____block_with_room(Pool pool, int class_index);
+static int f7_storage____has_room(f7_storage___PoolBlock block);
+static void * f7_storage____take_slot(f7_storage___PoolBlock block, int class_index);
+static f7_storage___PoolBlock f7_storage____fresh_block(Pool inner, int class_index);
+static void f7_storage____free_slot(f7_storage___PoolBlock block, void * ptr);
+static void f7_storage____push_free(f7_storage___PoolBlock block, void * slot);
+static f7_storage___PoolBlock f7_storage____block_lease(Pool p, int class_index, f7_storage___PoolBlock fresh);
+static unsigned f7_storage____block_bytes(Pool pool, int class_index);
+static f7_storage___PoolBlock f7_storage____depot_pop(unsigned bytes);
+static f7_storage___PoolBlock f7_storage____registry_add(f7_storage___PoolBlock block, unsigned bytes);
+static void f7_storage____reset(f7_storage___PoolBlock block, Pool owner);
+static void f7_storage____link(f7_storage___PoolBlock block, Pool pool);
+static void f7_storage____depot_push(f7_storage___PoolBlock block);
+static int f7_storage____depot_index(unsigned bytes);
+static inline char * f7_storage____data(f7_storage___PoolBlock block);
+static inline void * f7_storage____slot(f7_storage___PoolBlock block, unsigned slot);
+static inline unsigned f7_storage____slot_index(f7_storage___PoolBlock block, void * alloc);
+static int f7_storage____contains(f7_storage___PoolBlock block, const void * ptr);
+static f7_storage___PoolBlock f7_storage____find_block(const void * ptr);
+static f7_storage___PoolBlock f7_storage____index_find(const void * ptr);
+static f7_storage___PoolBlock f7_storage____registry_find(const void * ptr);
+static void f7_storage____index_add(f7_storage___PoolBlock block, unsigned bytes);
+static int f7_storage____index_grow(void);
+static void f7_storage____index_place(f7_storage___PoolIndexSlot * table, unsigned slots, uintptr_t page, f7_storage___PoolBlock block);
+static unsigned f7_storage____index_start(uintptr_t page, unsigned slots);
+static int f7_storage____promote_level(Pool inner, Var object, void * alloc, f7_storage___PoolBlock block);
+static f7_storage___PoolBlock f7_storage____block_of(void * alloc);
+static void f7_storage____mark_slot(f7_storage___PoolBlock block, unsigned slot);
+static void f7_storage____push_promotion(Pool inner, f7_storage___PoolPromotion promotion);
 static void _release_blocks(Pool inner);
-static void f12_pool_storage____transfer(f12_pool_storage___PoolBlock block, Pool parent);
-static void f12_pool_storage____free_unkept(f12_pool_storage___PoolBlock block);
-static int f12_pool_storage____slot_kept(f12_pool_storage___PoolBlock block, unsigned slot);
+static void f7_storage____transfer(f7_storage___PoolBlock block, Pool parent);
+static void f7_storage____free_unkept(f7_storage___PoolBlock block);
+static int f7_storage____slot_kept(f7_storage___PoolBlock block, unsigned slot);
 static void _storage_lock(void);
 static void _storage_unlock(void);
 static void _lock(Pool pool);
 static void _unlock(Pool pool);
 _Noreturn static void _fatal(const char * message);
-static void f12_pool_storage____record_request(size_t size);
+static void f7_storage____record_request(size_t size);
 static void _storage_initialize(void);
-static void f12_pool_storage____storage_shutdown(void);
-typedef struct f12_pool_threads___PoolValueThreadState{
+static void f7_storage____storage_shutdown(void);
+typedef struct f7_threads___PoolValueThreadState{
   Pool current;
 }
-* f12_pool_threads___PoolValueThreadState;
-static Pool f12_pool_threads___value_root;
-static _Thread_local struct f12_pool_threads___PoolValueThreadState f12_pool_threads___value_thread;
+* f7_threads___PoolValueThreadState;
+static Pool f7_threads___value_root;
+static _Thread_local struct f7_threads___PoolValueThreadState f7_threads___value_thread;
 typedef struct _x2c_gensym_defer_env_0{
   const void * _x2c_gensym_defer_capture_0;
 }
@@ -478,77 +478,77 @@ static void _x2c_gensym_defer_cleanup_18(void * _x2c_gensym_defer_opaque_18);
 
 
 
-_Noreturn static void f14_pool_interning____reinsert_error(unsigned _x2c_gensym_macro_capacity_0, int _x2c_gensym_macro_probe_0){
+_Noreturn static void f9_interning____reinsert_error(unsigned _x2c_gensym_macro_capacity_0, int _x2c_gensym_macro_probe_0){
   {
     Var _x2c_gensym_literal_part_0 = String_var(String_new("PoolTable.reinsert")); {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/pool/interning.x",.function = "f14_pool_interning____reinsert_error",.line = 12};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 20800632064936, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_0), Symbol_var(34764938), int_var(_x2c_gensym_macro_probe_0));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/pool/interning.x",.function = "f9_interning____reinsert_error",.line = 12};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 20800632064936, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_0), Symbol_var(34764938), int_var(_x2c_gensym_macro_probe_0));  __builtin_unreachable();
     }
 
   }
 
 }
 
-_Noreturn static void f14_pool_interning____insert_error(unsigned _x2c_gensym_macro_capacity_1){
+_Noreturn static void f9_interning____insert_error(unsigned _x2c_gensym_macro_capacity_1){
   {
     Var _x2c_gensym_literal_part_1 = String_var(String_new("PoolTable.insert")); {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/pool/interning.x",.function = "f14_pool_interning____insert_error",.line = 12};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 20800632064936, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_1));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/pool/interning.x",.function = "f9_interning____insert_error",.line = 12};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 20800632064936, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(209381969202), unsigned_var(_x2c_gensym_macro_capacity_1));  __builtin_unreachable();
     }
 
   }
 
 }
 
-static Var * f14_pool_interning____record_key(PoolTable _x2c_gensym_macro_map_0, unsigned _x2c_gensym_macro_index_0){
+static Var * f9_interning____record_key(PoolTable _x2c_gensym_macro_map_0, unsigned _x2c_gensym_macro_index_0){
   struct PoolRecord * _x2c_gensym_macro_records_0 = _x2c_gensym_macro_map_0 -> entries;  return & _x2c_gensym_macro_records_0[_x2c_gensym_macro_index_0].key;
 }
 
-static Var * f14_pool_interning____record_value(PoolTable _x2c_gensym_macro_map_1, unsigned _x2c_gensym_macro_index_1){
+static Var * f9_interning____record_value(PoolTable _x2c_gensym_macro_map_1, unsigned _x2c_gensym_macro_index_1){
   struct PoolRecord * _x2c_gensym_macro_records_1 = _x2c_gensym_macro_map_1 -> entries;  return & _x2c_gensym_macro_records_1[_x2c_gensym_macro_index_1].val;
 }
 
-static unsigned f14_pool_interning____table_hash(Var * _x2c_gensym_macro_key_0){
+static unsigned f9_interning____table_hash(Var * _x2c_gensym_macro_key_0){
   return Var_hash(_x2c_gensym_macro_key_0[0]);
 }
 
-static int f14_pool_interning____table_key_equal(Var * _x2c_gensym_macro_a_0, Var * _x2c_gensym_macro_b_0){
+static int f9_interning____table_key_equal(Var * _x2c_gensym_macro_a_0, Var * _x2c_gensym_macro_b_0){
   if(Var_same(_x2c_gensym_macro_a_0[0], _x2c_gensym_macro_b_0[0])) return 1;  List _x2c_gensym_macro_alist_0 = Var_list_payload(_x2c_gensym_macro_a_0[0]), _x2c_gensym_macro_blist_0 = Var_list_payload(_x2c_gensym_macro_b_0[0]);  if(List_truth(_x2c_gensym_macro_alist_0) && List_truth(_x2c_gensym_macro_blist_0)) return List_equal(_x2c_gensym_macro_alist_0, _x2c_gensym_macro_blist_0);  String _x2c_gensym_macro_astr_0 = Var_string_payload(_x2c_gensym_macro_a_0[0]), _x2c_gensym_macro_bstr_0 = Var_string_payload(_x2c_gensym_macro_b_0[0]);  if(String_truth(_x2c_gensym_macro_astr_0) && String_truth(_x2c_gensym_macro_bstr_0)) return String_equal(_x2c_gensym_macro_astr_0, _x2c_gensym_macro_bstr_0);  return ! Var_is(_x2c_gensym_macro_a_0[0], 3313778) && ! Var_is(_x2c_gensym_macro_a_0[0], 26720) && Var_equal(_x2c_gensym_macro_a_0[0], _x2c_gensym_macro_b_0[0]);
 }
 
-static int f14_pool_interning____table_value_equal(Var * _x2c_gensym_macro_a_1, Var * _x2c_gensym_macro_b_1){
+static int f9_interning____table_value_equal(Var * _x2c_gensym_macro_a_1, Var * _x2c_gensym_macro_b_1){
   return x2c_var_equal(_x2c_gensym_macro_a_1[0], _x2c_gensym_macro_b_1[0]);
 }
 
-static void f14_pool_interning____table_value_valid(Var * _x2c_gensym_macro_value_0){
+static void f9_interning____table_value_valid(Var * _x2c_gensym_macro_value_0){
   if(Var_is_void(_x2c_gensym_macro_value_0[0])){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/pool/interning.x",.function = "f14_pool_interning____table_value_valid",.line = 17};  x2c_error_raise_n(& _x2c_gensym_error_site_2, 48270474208, 0);  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/pool/interning.x",.function = "f9_interning____table_value_valid",.line = 17};  x2c_error_raise_n(& _x2c_gensym_error_site_2, 48270474208, 0);  __builtin_unreachable();
   }
 
 }
 
-static void f14_pool_interning___PoolTable_free_table(PoolTable _x2c_gensym_macro_map_2){
+static void f9_interning___PoolTable_free_table(PoolTable _x2c_gensym_macro_map_2){
   if((void *) _x2c_gensym_macro_map_2 == 0) return;  Bytes_free(_x2c_gensym_macro_map_2 -> hashes);  Bytes_free(_x2c_gensym_macro_map_2 -> entries);  Scope_free(_x2c_gensym_macro_map_2);
 }
 
-static PoolTable f14_pool_interning___PoolTable_new_table(PoolTable _x2c_gensym_macro_unused_0, unsigned _x2c_gensym_macro_capacity_2){
+static PoolTable f9_interning___PoolTable_new_table(PoolTable _x2c_gensym_macro_unused_0, unsigned _x2c_gensym_macro_capacity_2){
   (void) _x2c_gensym_macro_unused_0;  PoolTable _x2c_gensym_macro_map_3 = Scope_malloc(sizeof(struct PoolTable));  _x2c_gensym_macro_map_3 -> scope = * Scope_top();  _x2c_gensym_macro_map_3 -> hashes = Bytes_new(sizeof(unsigned));  _x2c_gensym_macro_map_3 -> hashes = Bytes_append(_x2c_gensym_macro_map_3 -> hashes, 0, _x2c_gensym_macro_capacity_2);  _x2c_gensym_macro_map_3 -> entries = Bytes_new(sizeof(struct PoolRecord));  _x2c_gensym_macro_map_3 -> entries = Bytes_append(_x2c_gensym_macro_map_3 -> entries, 0, _x2c_gensym_macro_capacity_2);  _x2c_gensym_macro_map_3 -> capacity = _x2c_gensym_macro_capacity_2;  _x2c_gensym_macro_map_3 -> mask = _x2c_gensym_macro_capacity_2 - 1;  _x2c_gensym_macro_map_3 -> used = 0;  return _x2c_gensym_macro_map_3;
 }
 
-static long f14_pool_interning___PoolTable_find_hashed(PoolTable _x2c_gensym_macro_map_4, Var * _x2c_gensym_macro_key_1, unsigned _x2c_gensym_macro_key_hash_0){
+static long f9_interning___PoolTable_find_hashed(PoolTable _x2c_gensym_macro_map_4, Var * _x2c_gensym_macro_key_1, unsigned _x2c_gensym_macro_key_hash_0){
   unsigned * _x2c_gensym_macro_hashes_0 = _x2c_gensym_macro_map_4 -> hashes;  unsigned _x2c_gensym_macro_mask_0 = _x2c_gensym_macro_map_4 -> mask, _x2c_gensym_macro_todo_start_0 = _x2c_gensym_macro_key_hash_0 & _x2c_gensym_macro_mask_0;  unsigned _x2c_gensym_macro_cap_0 = _x2c_gensym_macro_map_4 -> capacity;  for(int _x2c_gensym_macro_todo_psl_0 = 0;  _x2c_gensym_macro_todo_psl_0 <(int) _x2c_gensym_macro_cap_0;  _x2c_gensym_macro_todo_psl_0 ++){
-    unsigned _x2c_gensym_macro_index_2 =(_x2c_gensym_macro_todo_start_0 + _x2c_gensym_macro_todo_psl_0) & _x2c_gensym_macro_mask_0;  unsigned _x2c_gensym_macro_stored_0 = _x2c_gensym_macro_hashes_0[_x2c_gensym_macro_index_2];  if(_x2c_gensym_macro_stored_0 == 0) break;  if(_x2c_gensym_macro_stored_0 == _x2c_gensym_macro_key_hash_0 && f14_pool_interning____table_key_equal(f14_pool_interning____record_key(_x2c_gensym_macro_map_4, _x2c_gensym_macro_index_2), _x2c_gensym_macro_key_1)) return(long) _x2c_gensym_macro_index_2;  unsigned _x2c_gensym_macro_stored_start_0 = _x2c_gensym_macro_stored_0 & _x2c_gensym_macro_mask_0;  int _x2c_gensym_macro_stored_psl_0 =(_x2c_gensym_macro_cap_0 + _x2c_gensym_macro_index_2 - _x2c_gensym_macro_stored_start_0) & _x2c_gensym_macro_mask_0;  if(_x2c_gensym_macro_stored_psl_0 < _x2c_gensym_macro_todo_psl_0) break;
+    unsigned _x2c_gensym_macro_index_2 =(_x2c_gensym_macro_todo_start_0 + _x2c_gensym_macro_todo_psl_0) & _x2c_gensym_macro_mask_0;  unsigned _x2c_gensym_macro_stored_0 = _x2c_gensym_macro_hashes_0[_x2c_gensym_macro_index_2];  if(_x2c_gensym_macro_stored_0 == 0) break;  if(_x2c_gensym_macro_stored_0 == _x2c_gensym_macro_key_hash_0 && f9_interning____table_key_equal(f9_interning____record_key(_x2c_gensym_macro_map_4, _x2c_gensym_macro_index_2), _x2c_gensym_macro_key_1)) return(long) _x2c_gensym_macro_index_2;  unsigned _x2c_gensym_macro_stored_start_0 = _x2c_gensym_macro_stored_0 & _x2c_gensym_macro_mask_0;  int _x2c_gensym_macro_stored_psl_0 =(_x2c_gensym_macro_cap_0 + _x2c_gensym_macro_index_2 - _x2c_gensym_macro_stored_start_0) & _x2c_gensym_macro_mask_0;  if(_x2c_gensym_macro_stored_psl_0 < _x2c_gensym_macro_todo_psl_0) break;
   }
   return - 1;
 }
 
-static long f14_pool_interning___PoolTable_find_index(PoolTable _x2c_gensym_macro_map_5, Var * _x2c_gensym_macro_key_2){
-  return f14_pool_interning___PoolTable_find_hashed(_x2c_gensym_macro_map_5, _x2c_gensym_macro_key_2, f14_pool_interning____table_hash(_x2c_gensym_macro_key_2));
+static long f9_interning___PoolTable_find_index(PoolTable _x2c_gensym_macro_map_5, Var * _x2c_gensym_macro_key_2){
+  return f9_interning___PoolTable_find_hashed(_x2c_gensym_macro_map_5, _x2c_gensym_macro_key_2, f9_interning____table_hash(_x2c_gensym_macro_key_2));
 }
 
-static int f14_pool_interning___PoolTable_try_get_entry(PoolTable _x2c_gensym_macro_map_6, Var * _x2c_gensym_macro_key_3, Var * _x2c_gensym_macro_out_0){
-  if((void *) _x2c_gensym_macro_map_6 == 0 || ! _x2c_gensym_macro_out_0) return 0;  long _x2c_gensym_macro_index_3 = f14_pool_interning___PoolTable_find_index(_x2c_gensym_macro_map_6, _x2c_gensym_macro_key_3);  if(_x2c_gensym_macro_index_3 < 0) return 0;  * _x2c_gensym_macro_out_0 = * f14_pool_interning____record_value(_x2c_gensym_macro_map_6, (unsigned) _x2c_gensym_macro_index_3);  return 1;
+static int f9_interning___PoolTable_try_get_entry(PoolTable _x2c_gensym_macro_map_6, Var * _x2c_gensym_macro_key_3, Var * _x2c_gensym_macro_out_0){
+  if((void *) _x2c_gensym_macro_map_6 == 0 || ! _x2c_gensym_macro_out_0) return 0;  long _x2c_gensym_macro_index_3 = f9_interning___PoolTable_find_index(_x2c_gensym_macro_map_6, _x2c_gensym_macro_key_3);  if(_x2c_gensym_macro_index_3 < 0) return 0;  * _x2c_gensym_macro_out_0 = * f9_interning____record_value(_x2c_gensym_macro_map_6, (unsigned) _x2c_gensym_macro_index_3);  return 1;
 }
 
-static void f14_pool_interning___PoolTable_reinsert(PoolTable _x2c_gensym_macro_map_7, unsigned _x2c_gensym_macro_todo_hash_0, struct PoolRecord _x2c_gensym_macro_todo_0, int _x2c_gensym_macro_psl_0){
+static void f9_interning___PoolTable_reinsert(PoolTable _x2c_gensym_macro_map_7, unsigned _x2c_gensym_macro_todo_hash_0, struct PoolRecord _x2c_gensym_macro_todo_0, int _x2c_gensym_macro_psl_0){
   unsigned * _x2c_gensym_macro_hashes_1 = _x2c_gensym_macro_map_7 -> hashes;  struct PoolRecord * _x2c_gensym_macro_entries_0 = _x2c_gensym_macro_map_7 -> entries;  unsigned _x2c_gensym_macro_mask_1 = _x2c_gensym_macro_map_7 -> mask, _x2c_gensym_macro_todo_start_1 = _x2c_gensym_macro_todo_hash_0 & _x2c_gensym_macro_mask_1;  unsigned _x2c_gensym_macro_cap_1 = _x2c_gensym_macro_map_7 -> capacity;  for(int _x2c_gensym_macro_todo_psl_1 = _x2c_gensym_macro_psl_0;  _x2c_gensym_macro_todo_psl_1 <(int) _x2c_gensym_macro_cap_1;  _x2c_gensym_macro_todo_psl_1 ++){
     unsigned _x2c_gensym_macro_index_4 =(_x2c_gensym_macro_todo_start_1 + _x2c_gensym_macro_todo_psl_1) & _x2c_gensym_macro_mask_1;  unsigned _x2c_gensym_macro_stored_1 = _x2c_gensym_macro_hashes_1[_x2c_gensym_macro_index_4];  if(_x2c_gensym_macro_stored_1 == 0){
       _x2c_gensym_macro_hashes_1[_x2c_gensym_macro_index_4] = _x2c_gensym_macro_todo_hash_0;  _x2c_gensym_macro_entries_0[_x2c_gensym_macro_index_4] = _x2c_gensym_macro_todo_0;  return;
@@ -558,7 +558,7 @@ static void f14_pool_interning___PoolTable_reinsert(PoolTable _x2c_gensym_macro_
     }
 
   }
-  (void) f14_pool_interning____reinsert_error(_x2c_gensym_macro_cap_1, _x2c_gensym_macro_psl_0);
+  (void) f9_interning____reinsert_error(_x2c_gensym_macro_cap_1, _x2c_gensym_macro_psl_0);
 }
 
 static void _x2c_gensym_macro__expand_0(PoolTable _x2c_gensym_macro_map_8){
@@ -581,7 +581,7 @@ static void _x2c_gensym_macro__expand_0(PoolTable _x2c_gensym_macro_map_8){
           .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
         }
         ;  x2c_cleanup_push(& _x2c_gensym_defer_record_1); {
-          _x2c_gensym_macro_staged_entries_0 = Bytes_append(_x2c_gensym_macro_staged_entries_0, 0, _x2c_gensym_macro_capacity_3);  struct PoolTable _x2c_gensym_macro_expanded_0 = * _x2c_gensym_macro_map_8;  _x2c_gensym_macro_expanded_0.hashes = _x2c_gensym_macro_staged_hashes_0;  _x2c_gensym_macro_expanded_0.entries = _x2c_gensym_macro_staged_entries_0;  _x2c_gensym_macro_expanded_0.capacity = _x2c_gensym_macro_capacity_3;  _x2c_gensym_macro_expanded_0.mask = _x2c_gensym_macro_capacity_3 - 1;  PoolTable _x2c_gensym_macro_expanded_map_0 =(PoolTable) & _x2c_gensym_macro_expanded_0;  for(unsigned _x2c_gensym_macro_i_0 = 0;  _x2c_gensym_macro_i_0 < _x2c_gensym_macro_cap_2;  _x2c_gensym_macro_i_0 ++) if(_x2c_gensym_macro_hashes_2[_x2c_gensym_macro_i_0]) f14_pool_interning___PoolTable_reinsert(_x2c_gensym_macro_expanded_map_0, _x2c_gensym_macro_hashes_2[_x2c_gensym_macro_i_0], _x2c_gensym_macro_entries_1[_x2c_gensym_macro_i_0], 0);  Scope_move(Bytes_block(_x2c_gensym_macro_staged_hashes_0), & _x2c_gensym_macro_map_8 -> scope);  Scope_move((unsigned char *) _x2c_gensym_macro_staged_hashes_0 - sizeof(Block), & _x2c_gensym_macro_map_8 -> scope);  Scope_move(Bytes_block(_x2c_gensym_macro_staged_entries_0), & _x2c_gensym_macro_map_8 -> scope);  Scope_move((unsigned char *) _x2c_gensym_macro_staged_entries_0 - sizeof(Block), & _x2c_gensym_macro_map_8 -> scope);  _x2c_gensym_macro_map_8 -> hashes = _x2c_gensym_macro_expanded_0.hashes;  _x2c_gensym_macro_map_8 -> entries = _x2c_gensym_macro_expanded_0.entries;  _x2c_gensym_macro_map_8 -> capacity = _x2c_gensym_macro_expanded_0.capacity;  _x2c_gensym_macro_map_8 -> mask = _x2c_gensym_macro_expanded_0.mask;  _x2c_gensym_macro_staged_hashes_0 = 0;  _x2c_gensym_macro_staged_entries_0 = 0;  Bytes_free((Bytes) _x2c_gensym_macro_hashes_2);  Bytes_free((Bytes) _x2c_gensym_macro_entries_1);
+          _x2c_gensym_macro_staged_entries_0 = Bytes_append(_x2c_gensym_macro_staged_entries_0, 0, _x2c_gensym_macro_capacity_3);  struct PoolTable _x2c_gensym_macro_expanded_0 = * _x2c_gensym_macro_map_8;  _x2c_gensym_macro_expanded_0.hashes = _x2c_gensym_macro_staged_hashes_0;  _x2c_gensym_macro_expanded_0.entries = _x2c_gensym_macro_staged_entries_0;  _x2c_gensym_macro_expanded_0.capacity = _x2c_gensym_macro_capacity_3;  _x2c_gensym_macro_expanded_0.mask = _x2c_gensym_macro_capacity_3 - 1;  PoolTable _x2c_gensym_macro_expanded_map_0 =(PoolTable) & _x2c_gensym_macro_expanded_0;  for(unsigned _x2c_gensym_macro_i_0 = 0;  _x2c_gensym_macro_i_0 < _x2c_gensym_macro_cap_2;  _x2c_gensym_macro_i_0 ++) if(_x2c_gensym_macro_hashes_2[_x2c_gensym_macro_i_0]) f9_interning___PoolTable_reinsert(_x2c_gensym_macro_expanded_map_0, _x2c_gensym_macro_hashes_2[_x2c_gensym_macro_i_0], _x2c_gensym_macro_entries_1[_x2c_gensym_macro_i_0], 0);  Scope_move(Bytes_block(_x2c_gensym_macro_staged_hashes_0), & _x2c_gensym_macro_map_8 -> scope);  Scope_move((unsigned char *) _x2c_gensym_macro_staged_hashes_0 - sizeof(Block), & _x2c_gensym_macro_map_8 -> scope);  Scope_move(Bytes_block(_x2c_gensym_macro_staged_entries_0), & _x2c_gensym_macro_map_8 -> scope);  Scope_move((unsigned char *) _x2c_gensym_macro_staged_entries_0 - sizeof(Block), & _x2c_gensym_macro_map_8 -> scope);  _x2c_gensym_macro_map_8 -> hashes = _x2c_gensym_macro_expanded_0.hashes;  _x2c_gensym_macro_map_8 -> entries = _x2c_gensym_macro_expanded_0.entries;  _x2c_gensym_macro_map_8 -> capacity = _x2c_gensym_macro_expanded_0.capacity;  _x2c_gensym_macro_map_8 -> mask = _x2c_gensym_macro_expanded_0.mask;  _x2c_gensym_macro_staged_hashes_0 = 0;  _x2c_gensym_macro_staged_entries_0 = 0;  Bytes_free((Bytes) _x2c_gensym_macro_hashes_2);  Bytes_free((Bytes) _x2c_gensym_macro_entries_1);
         }
         x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
       }
@@ -592,31 +592,31 @@ static void _x2c_gensym_macro__expand_0(PoolTable _x2c_gensym_macro_map_8){
 
 }
 
-static Var * f14_pool_interning___PoolTable_get_or_insert(PoolTable _x2c_gensym_macro_map_9, Var * _x2c_gensym_macro_key_4, Var * _x2c_gensym_macro_val_0, int * _x2c_gensym_macro_inserted_0){
-  * _x2c_gensym_macro_inserted_0 = 0;  retry :;  unsigned _x2c_gensym_macro_key_hash_1 = f14_pool_interning____table_hash(_x2c_gensym_macro_key_4), _x2c_gensym_macro_mask_2 = _x2c_gensym_macro_map_9 -> mask;  unsigned _x2c_gensym_macro_todo_start_2 = _x2c_gensym_macro_key_hash_1 & _x2c_gensym_macro_mask_2;  unsigned * _x2c_gensym_macro_hashes_3 = _x2c_gensym_macro_map_9 -> hashes;  struct PoolRecord * _x2c_gensym_macro_entries_2 = _x2c_gensym_macro_map_9 -> entries;  unsigned _x2c_gensym_macro_cap_3 = _x2c_gensym_macro_map_9 -> capacity;  for(int _x2c_gensym_macro_todo_psl_2 = 0;  _x2c_gensym_macro_todo_psl_2 <(int) _x2c_gensym_macro_cap_3;  _x2c_gensym_macro_todo_psl_2 ++){
-    unsigned _x2c_gensym_macro_index_5 =(_x2c_gensym_macro_todo_start_2 + _x2c_gensym_macro_todo_psl_2) & _x2c_gensym_macro_mask_2;  unsigned _x2c_gensym_macro_stored_2 = _x2c_gensym_macro_hashes_3[_x2c_gensym_macro_index_5];  if(_x2c_gensym_macro_stored_2 == _x2c_gensym_macro_key_hash_1 && f14_pool_interning____table_key_equal(f14_pool_interning____record_key(_x2c_gensym_macro_map_9, _x2c_gensym_macro_index_5), _x2c_gensym_macro_key_4)) return f14_pool_interning____record_value(_x2c_gensym_macro_map_9, _x2c_gensym_macro_index_5);  if(_x2c_gensym_macro_stored_2 == 0){
-      (void) f14_pool_interning____table_value_valid(_x2c_gensym_macro_val_0);  if(_x2c_gensym_macro_map_9 -> used >=(unsigned long) _x2c_gensym_macro_map_9 -> capacity * 3 / 4){
+static Var * f9_interning___PoolTable_get_or_insert(PoolTable _x2c_gensym_macro_map_9, Var * _x2c_gensym_macro_key_4, Var * _x2c_gensym_macro_val_0, int * _x2c_gensym_macro_inserted_0){
+  * _x2c_gensym_macro_inserted_0 = 0;  retry :;  unsigned _x2c_gensym_macro_key_hash_1 = f9_interning____table_hash(_x2c_gensym_macro_key_4), _x2c_gensym_macro_mask_2 = _x2c_gensym_macro_map_9 -> mask;  unsigned _x2c_gensym_macro_todo_start_2 = _x2c_gensym_macro_key_hash_1 & _x2c_gensym_macro_mask_2;  unsigned * _x2c_gensym_macro_hashes_3 = _x2c_gensym_macro_map_9 -> hashes;  struct PoolRecord * _x2c_gensym_macro_entries_2 = _x2c_gensym_macro_map_9 -> entries;  unsigned _x2c_gensym_macro_cap_3 = _x2c_gensym_macro_map_9 -> capacity;  for(int _x2c_gensym_macro_todo_psl_2 = 0;  _x2c_gensym_macro_todo_psl_2 <(int) _x2c_gensym_macro_cap_3;  _x2c_gensym_macro_todo_psl_2 ++){
+    unsigned _x2c_gensym_macro_index_5 =(_x2c_gensym_macro_todo_start_2 + _x2c_gensym_macro_todo_psl_2) & _x2c_gensym_macro_mask_2;  unsigned _x2c_gensym_macro_stored_2 = _x2c_gensym_macro_hashes_3[_x2c_gensym_macro_index_5];  if(_x2c_gensym_macro_stored_2 == _x2c_gensym_macro_key_hash_1 && f9_interning____table_key_equal(f9_interning____record_key(_x2c_gensym_macro_map_9, _x2c_gensym_macro_index_5), _x2c_gensym_macro_key_4)) return f9_interning____record_value(_x2c_gensym_macro_map_9, _x2c_gensym_macro_index_5);  if(_x2c_gensym_macro_stored_2 == 0){
+      (void) f9_interning____table_value_valid(_x2c_gensym_macro_val_0);  if(_x2c_gensym_macro_map_9 -> used >=(unsigned long) _x2c_gensym_macro_map_9 -> capacity * 3 / 4){
         _x2c_gensym_macro__expand_0(_x2c_gensym_macro_map_9);  goto retry;
       }
-      _x2c_gensym_macro_hashes_3[_x2c_gensym_macro_index_5] = _x2c_gensym_macro_key_hash_1;  _x2c_gensym_macro_entries_2[_x2c_gensym_macro_index_5].key = * _x2c_gensym_macro_key_4;  _x2c_gensym_macro_entries_2[_x2c_gensym_macro_index_5].val = * _x2c_gensym_macro_val_0;  _x2c_gensym_macro_map_9 -> used += 1;  * _x2c_gensym_macro_inserted_0 = 1;  return f14_pool_interning____record_value(_x2c_gensym_macro_map_9, _x2c_gensym_macro_index_5);
+      _x2c_gensym_macro_hashes_3[_x2c_gensym_macro_index_5] = _x2c_gensym_macro_key_hash_1;  _x2c_gensym_macro_entries_2[_x2c_gensym_macro_index_5].key = * _x2c_gensym_macro_key_4;  _x2c_gensym_macro_entries_2[_x2c_gensym_macro_index_5].val = * _x2c_gensym_macro_val_0;  _x2c_gensym_macro_map_9 -> used += 1;  * _x2c_gensym_macro_inserted_0 = 1;  return f9_interning____record_value(_x2c_gensym_macro_map_9, _x2c_gensym_macro_index_5);
     }
     unsigned _x2c_gensym_macro_stored_start_2 = _x2c_gensym_macro_stored_2 & _x2c_gensym_macro_mask_2;  int _x2c_gensym_macro_stored_psl_2 =(_x2c_gensym_macro_cap_3 + _x2c_gensym_macro_index_5 - _x2c_gensym_macro_stored_start_2) & _x2c_gensym_macro_mask_2;  if(_x2c_gensym_macro_stored_psl_2 < _x2c_gensym_macro_todo_psl_2){
-      (void) f14_pool_interning____table_value_valid(_x2c_gensym_macro_val_0);  if(_x2c_gensym_macro_map_9 -> used >=(unsigned long) _x2c_gensym_macro_map_9 -> capacity * 3 / 4){
+      (void) f9_interning____table_value_valid(_x2c_gensym_macro_val_0);  if(_x2c_gensym_macro_map_9 -> used >=(unsigned long) _x2c_gensym_macro_map_9 -> capacity * 3 / 4){
         _x2c_gensym_macro__expand_0(_x2c_gensym_macro_map_9);  goto retry;
       }
-      struct PoolRecord _x2c_gensym_macro_displaced_0 = _x2c_gensym_macro_entries_2[_x2c_gensym_macro_index_5];  _x2c_gensym_macro_hashes_3[_x2c_gensym_macro_index_5] = _x2c_gensym_macro_key_hash_1;  _x2c_gensym_macro_entries_2[_x2c_gensym_macro_index_5].key = * _x2c_gensym_macro_key_4;  _x2c_gensym_macro_entries_2[_x2c_gensym_macro_index_5].val = * _x2c_gensym_macro_val_0;  _x2c_gensym_macro_map_9 -> used += 1;  * _x2c_gensym_macro_inserted_0 = 1;  f14_pool_interning___PoolTable_reinsert(_x2c_gensym_macro_map_9, _x2c_gensym_macro_stored_2, _x2c_gensym_macro_displaced_0, _x2c_gensym_macro_stored_psl_2 + 1);  return f14_pool_interning____record_value(_x2c_gensym_macro_map_9, _x2c_gensym_macro_index_5);
+      struct PoolRecord _x2c_gensym_macro_displaced_0 = _x2c_gensym_macro_entries_2[_x2c_gensym_macro_index_5];  _x2c_gensym_macro_hashes_3[_x2c_gensym_macro_index_5] = _x2c_gensym_macro_key_hash_1;  _x2c_gensym_macro_entries_2[_x2c_gensym_macro_index_5].key = * _x2c_gensym_macro_key_4;  _x2c_gensym_macro_entries_2[_x2c_gensym_macro_index_5].val = * _x2c_gensym_macro_val_0;  _x2c_gensym_macro_map_9 -> used += 1;  * _x2c_gensym_macro_inserted_0 = 1;  f9_interning___PoolTable_reinsert(_x2c_gensym_macro_map_9, _x2c_gensym_macro_stored_2, _x2c_gensym_macro_displaced_0, _x2c_gensym_macro_stored_psl_2 + 1);  return f9_interning____record_value(_x2c_gensym_macro_map_9, _x2c_gensym_macro_index_5);
     }
 
   }
-  (void) f14_pool_interning____insert_error(_x2c_gensym_macro_cap_3);
+  (void) f9_interning____insert_error(_x2c_gensym_macro_cap_3);
 }
 
-static void f14_pool_interning___PoolTable_set_entry(PoolTable _x2c_gensym_macro_map_10, Var * _x2c_gensym_macro_key_5, Var * _x2c_gensym_macro_val_1){
-  int _x2c_gensym_macro_inserted_1;  Var * _x2c_gensym_macro_stored_3 = f14_pool_interning___PoolTable_get_or_insert(_x2c_gensym_macro_map_10, _x2c_gensym_macro_key_5, _x2c_gensym_macro_val_1, & _x2c_gensym_macro_inserted_1);  if(! _x2c_gensym_macro_inserted_1) _x2c_gensym_macro_stored_3[0] = _x2c_gensym_macro_val_1[0];
+static void f9_interning___PoolTable_set_entry(PoolTable _x2c_gensym_macro_map_10, Var * _x2c_gensym_macro_key_5, Var * _x2c_gensym_macro_val_1){
+  int _x2c_gensym_macro_inserted_1;  Var * _x2c_gensym_macro_stored_3 = f9_interning___PoolTable_get_or_insert(_x2c_gensym_macro_map_10, _x2c_gensym_macro_key_5, _x2c_gensym_macro_val_1, & _x2c_gensym_macro_inserted_1);  if(! _x2c_gensym_macro_inserted_1) _x2c_gensym_macro_stored_3[0] = _x2c_gensym_macro_val_1[0];
 }
 
-static int f14_pool_interning___PoolTable_try_del_entry(PoolTable _x2c_gensym_macro_map_11, Var * _x2c_gensym_macro_key_6, Var * _x2c_gensym_macro_out_1){
-  if((void *) _x2c_gensym_macro_map_11 == 0 || ! _x2c_gensym_macro_out_1) return 0;  long _x2c_gensym_macro_found_0 = f14_pool_interning___PoolTable_find_index(_x2c_gensym_macro_map_11, _x2c_gensym_macro_key_6);  if(_x2c_gensym_macro_found_0 < 0) return 0;  unsigned * _x2c_gensym_macro_hashes_4 = _x2c_gensym_macro_map_11 -> hashes;  struct PoolRecord * _x2c_gensym_macro_entries_3 = _x2c_gensym_macro_map_11 -> entries;  unsigned _x2c_gensym_macro_mask_3 = _x2c_gensym_macro_map_11 -> mask, _x2c_gensym_macro_index_6 =(unsigned) _x2c_gensym_macro_found_0, _x2c_gensym_macro_empty_0;  * _x2c_gensym_macro_out_1 = * f14_pool_interning____record_value(_x2c_gensym_macro_map_11, _x2c_gensym_macro_index_6);  _x2c_gensym_macro_hashes_4[_x2c_gensym_macro_index_6] = 0;  _x2c_gensym_macro_map_11 -> used --;  while(1){
+static int f9_interning___PoolTable_try_del_entry(PoolTable _x2c_gensym_macro_map_11, Var * _x2c_gensym_macro_key_6, Var * _x2c_gensym_macro_out_1){
+  if((void *) _x2c_gensym_macro_map_11 == 0 || ! _x2c_gensym_macro_out_1) return 0;  long _x2c_gensym_macro_found_0 = f9_interning___PoolTable_find_index(_x2c_gensym_macro_map_11, _x2c_gensym_macro_key_6);  if(_x2c_gensym_macro_found_0 < 0) return 0;  unsigned * _x2c_gensym_macro_hashes_4 = _x2c_gensym_macro_map_11 -> hashes;  struct PoolRecord * _x2c_gensym_macro_entries_3 = _x2c_gensym_macro_map_11 -> entries;  unsigned _x2c_gensym_macro_mask_3 = _x2c_gensym_macro_map_11 -> mask, _x2c_gensym_macro_index_6 =(unsigned) _x2c_gensym_macro_found_0, _x2c_gensym_macro_empty_0;  * _x2c_gensym_macro_out_1 = * f9_interning____record_value(_x2c_gensym_macro_map_11, _x2c_gensym_macro_index_6);  _x2c_gensym_macro_hashes_4[_x2c_gensym_macro_index_6] = 0;  _x2c_gensym_macro_map_11 -> used --;  while(1){
     _x2c_gensym_macro_empty_0 = _x2c_gensym_macro_index_6;  _x2c_gensym_macro_index_6 =(_x2c_gensym_macro_index_6 + 1) & _x2c_gensym_macro_mask_3;  if(_x2c_gensym_macro_hashes_4[_x2c_gensym_macro_index_6] == 0 ||(_x2c_gensym_macro_hashes_4[_x2c_gensym_macro_index_6] & _x2c_gensym_macro_mask_3) == _x2c_gensym_macro_index_6) break;  unsigned _x2c_gensym_macro_swap_hash_0 = _x2c_gensym_macro_hashes_4[_x2c_gensym_macro_empty_0];  struct PoolRecord _x2c_gensym_macro_swap_entry_0 = _x2c_gensym_macro_entries_3[_x2c_gensym_macro_empty_0];  _x2c_gensym_macro_hashes_4[_x2c_gensym_macro_empty_0] = _x2c_gensym_macro_hashes_4[_x2c_gensym_macro_index_6];  _x2c_gensym_macro_entries_3[_x2c_gensym_macro_empty_0] = _x2c_gensym_macro_entries_3[_x2c_gensym_macro_index_6];  _x2c_gensym_macro_hashes_4[_x2c_gensym_macro_index_6] = _x2c_gensym_macro_swap_hash_0;  _x2c_gensym_macro_entries_3[_x2c_gensym_macro_index_6] = _x2c_gensym_macro_swap_entry_0;
   }
   _x2c_gensym_macro_entries_3[_x2c_gensym_macro_empty_0] =(struct PoolRecord){
@@ -625,10 +625,10 @@ static int f14_pool_interning___PoolTable_try_del_entry(PoolTable _x2c_gensym_ma
   ;  return 1;
 }
 
-static int f14_pool_interning___PoolTable_try_next_entry(PoolTable _x2c_gensym_macro_map_12, unsigned * _x2c_gensym_macro_cursor_0, Var * _x2c_gensym_macro_key_7, Var * _x2c_gensym_macro_val_2){
+static int f9_interning___PoolTable_try_next_entry(PoolTable _x2c_gensym_macro_map_12, unsigned * _x2c_gensym_macro_cursor_0, Var * _x2c_gensym_macro_key_7, Var * _x2c_gensym_macro_val_2){
   if((void *) _x2c_gensym_macro_map_12 == 0 || ! _x2c_gensym_macro_cursor_0 || ! _x2c_gensym_macro_key_7 || ! _x2c_gensym_macro_val_2) return 0;  unsigned * _x2c_gensym_macro_hashes_5 = _x2c_gensym_macro_map_12 -> hashes;  while(* _x2c_gensym_macro_cursor_0 < _x2c_gensym_macro_map_12 -> capacity){
     unsigned _x2c_gensym_macro_index_7 = * _x2c_gensym_macro_cursor_0;  * _x2c_gensym_macro_cursor_0 += 1;  if(_x2c_gensym_macro_hashes_5[_x2c_gensym_macro_index_7] != 0){
-      * _x2c_gensym_macro_key_7 = * f14_pool_interning____record_key(_x2c_gensym_macro_map_12, _x2c_gensym_macro_index_7);  * _x2c_gensym_macro_val_2 = * f14_pool_interning____record_value(_x2c_gensym_macro_map_12, _x2c_gensym_macro_index_7);  return 1;
+      * _x2c_gensym_macro_key_7 = * f9_interning____record_key(_x2c_gensym_macro_map_12, _x2c_gensym_macro_index_7);  * _x2c_gensym_macro_val_2 = * f9_interning____record_value(_x2c_gensym_macro_map_12, _x2c_gensym_macro_index_7);  return 1;
     }
 
   }
@@ -636,11 +636,11 @@ static int f14_pool_interning___PoolTable_try_next_entry(PoolTable _x2c_gensym_m
 }
 
 static void _x2c_gensym_macro__insert_all_0(PoolTable _x2c_gensym_macro_map_13, PoolTable _x2c_gensym_macro_other_0){
-  unsigned _x2c_gensym_macro_cursor_1 = 0;  Var _x2c_gensym_macro_key_8;  Var _x2c_gensym_macro_val_3;  while(f14_pool_interning___PoolTable_try_next_entry(_x2c_gensym_macro_other_0, & _x2c_gensym_macro_cursor_1, & _x2c_gensym_macro_key_8, & _x2c_gensym_macro_val_3)) f14_pool_interning___PoolTable_set_entry(_x2c_gensym_macro_map_13, & _x2c_gensym_macro_key_8, & _x2c_gensym_macro_val_3);
+  unsigned _x2c_gensym_macro_cursor_1 = 0;  Var _x2c_gensym_macro_key_8;  Var _x2c_gensym_macro_val_3;  while(f9_interning___PoolTable_try_next_entry(_x2c_gensym_macro_other_0, & _x2c_gensym_macro_cursor_1, & _x2c_gensym_macro_key_8, & _x2c_gensym_macro_val_3)) f9_interning___PoolTable_set_entry(_x2c_gensym_macro_map_13, & _x2c_gensym_macro_key_8, & _x2c_gensym_macro_val_3);
 }
 
-static PoolTable f14_pool_interning___PoolTable_copy_entries(PoolTable _x2c_gensym_macro_map_14){
-  PoolTable _x2c_gensym_macro_copy_0 = f14_pool_interning___PoolTable_new_table(_x2c_gensym_macro_map_14, 2), _x2c_gensym_macro_result_0 = 0; {
+static PoolTable f9_interning___PoolTable_copy_entries(PoolTable _x2c_gensym_macro_map_14){
+  PoolTable _x2c_gensym_macro_copy_0 = f9_interning___PoolTable_new_table(_x2c_gensym_macro_map_14, 2), _x2c_gensym_macro_result_0 = 0; {
     _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0
     }
@@ -661,9 +661,9 @@ static PoolTable f14_pool_interning___PoolTable_copy_entries(PoolTable _x2c_gens
 
 }
 
-static PoolTable f14_pool_interning___PoolTable_merge_entries(PoolTable _x2c_gensym_macro_map_15, PoolTable _x2c_gensym_macro_other_1){
+static PoolTable f9_interning___PoolTable_merge_entries(PoolTable _x2c_gensym_macro_map_15, PoolTable _x2c_gensym_macro_other_1){
   if(! _x2c_gensym_macro_other_1) return _x2c_gensym_macro_map_15;  int _x2c_gensym_macro_created_0 = 0;  if((void *) _x2c_gensym_macro_map_15 == 0){
-    _x2c_gensym_macro_map_15 = f14_pool_interning___PoolTable_new_table(_x2c_gensym_macro_map_15, 2);  _x2c_gensym_macro_created_0 = 1;
+    _x2c_gensym_macro_map_15 = f9_interning___PoolTable_new_table(_x2c_gensym_macro_map_15, 2);  _x2c_gensym_macro_created_0 = 1;
   }
   PoolTable _x2c_gensym_macro_result_1 = 0; {
     _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
@@ -686,20 +686,20 @@ static PoolTable f14_pool_interning___PoolTable_merge_entries(PoolTable _x2c_gen
 
 }
 
-static int f14_pool_interning___PoolTable_has_entries(PoolTable _x2c_gensym_macro_map_16){
+static int f9_interning___PoolTable_has_entries(PoolTable _x2c_gensym_macro_map_16){
   return(void *) _x2c_gensym_macro_map_16 != 0 && _x2c_gensym_macro_map_16 -> used != 0;
 }
 
-static int f14_pool_interning___PoolTable_equal_entries(PoolTable _x2c_gensym_macro_a_2, PoolTable _x2c_gensym_macro_b_2){
-  if((void *) _x2c_gensym_macro_a_2 ==(void *) _x2c_gensym_macro_b_2) return 1;  if((void *) _x2c_gensym_macro_a_2 == 0 ||(void *) _x2c_gensym_macro_b_2 == 0) return 0;  if(_x2c_gensym_macro_a_2 -> used != _x2c_gensym_macro_b_2 -> used) return 0;  unsigned _x2c_gensym_macro_cursor_2 = 0;  Var _x2c_gensym_macro_key_9;  Var _x2c_gensym_macro_avalue_0, _x2c_gensym_macro_bvalue_0;  while(f14_pool_interning___PoolTable_try_next_entry(_x2c_gensym_macro_a_2, & _x2c_gensym_macro_cursor_2, & _x2c_gensym_macro_key_9, & _x2c_gensym_macro_avalue_0)) if(! f14_pool_interning___PoolTable_try_get_entry(_x2c_gensym_macro_b_2, & _x2c_gensym_macro_key_9, & _x2c_gensym_macro_bvalue_0) || ! f14_pool_interning____table_value_equal(& _x2c_gensym_macro_avalue_0, & _x2c_gensym_macro_bvalue_0)) return 0;  return 1;
+static int f9_interning___PoolTable_equal_entries(PoolTable _x2c_gensym_macro_a_2, PoolTable _x2c_gensym_macro_b_2){
+  if((void *) _x2c_gensym_macro_a_2 ==(void *) _x2c_gensym_macro_b_2) return 1;  if((void *) _x2c_gensym_macro_a_2 == 0 ||(void *) _x2c_gensym_macro_b_2 == 0) return 0;  if(_x2c_gensym_macro_a_2 -> used != _x2c_gensym_macro_b_2 -> used) return 0;  unsigned _x2c_gensym_macro_cursor_2 = 0;  Var _x2c_gensym_macro_key_9;  Var _x2c_gensym_macro_avalue_0, _x2c_gensym_macro_bvalue_0;  while(f9_interning___PoolTable_try_next_entry(_x2c_gensym_macro_a_2, & _x2c_gensym_macro_cursor_2, & _x2c_gensym_macro_key_9, & _x2c_gensym_macro_avalue_0)) if(! f9_interning___PoolTable_try_get_entry(_x2c_gensym_macro_b_2, & _x2c_gensym_macro_key_9, & _x2c_gensym_macro_bvalue_0) || ! f9_interning____table_value_equal(& _x2c_gensym_macro_avalue_0, & _x2c_gensym_macro_bvalue_0)) return 0;  return 1;
 }
 
-static Var f14_pool_interning____get_hashed(PoolTable table, Var key, unsigned key_hash){
-  long index = f14_pool_interning___PoolTable_find_hashed(table, & key, key_hash);  return index < 0 ?((void) 0, Void) : * f14_pool_interning____record_key(table, (unsigned) index);
+static Var f9_interning____get_hashed(PoolTable table, Var key, unsigned key_hash){
+  long index = f9_interning___PoolTable_find_hashed(table, & key, key_hash);  return index < 0 ?((void) 0, Void) : * f9_interning____record_key(table, (unsigned) index);
 }
 
 static Var _setdefault(PoolTable table, Var object, int * inserted){
-  return * f14_pool_interning___PoolTable_get_or_insert(table, & object, & object, &(* inserted));
+  return * f9_interning___PoolTable_get_or_insert(table, & object, & object, &(* inserted));
 }
 
 void Pool_initialize(void);
@@ -708,15 +708,15 @@ Var Pool_lookup(Pool inner, Var key){
   if(! _init_guard_) Pool_initialize();
   if(! inner) return((void) 0, Void);
   unsigned key_hash = Var_hash(key);
-  if(pool_multithreaded) return f14_pool_interning____lookup_locked(inner, key, key_hash);
+  if(pool_multithreaded) return f9_interning____lookup_locked(inner, key, key_hash);
   for(Pool pool = inner;  pool;  pool = pool -> up){
-    Var found = f14_pool_interning____get_hashed(pool -> table, key, key_hash);
+    Var found = f9_interning____get_hashed(pool -> table, key, key_hash);
     if(! Var_is_void(found)) return found;
   }
   return((void) 0, Void);
 }
 
-static Var f14_pool_interning____lookup_locked(Pool inner, Var key, unsigned key_hash){
+static Var f9_interning____lookup_locked(Pool inner, Var key, unsigned key_hash){
   Pool locked = NULL;
   {
     _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_4 ={
@@ -733,7 +733,7 @@ static Var f14_pool_interning____lookup_locked(Pool inner, Var key, unsigned key
       for(Pool pool = inner;  pool;  pool = pool -> up){
         _lock(pool);
         locked = pool;
-        Var found = f14_pool_interning____get_hashed(pool -> table, key, key_hash);
+        Var found = f9_interning____get_hashed(pool -> table, key, key_hash);
         _unlock(pool);
         locked = NULL;
         if(! Var_is_void(found)){
@@ -791,7 +791,7 @@ Var Pool_intern(Pool inner, Var object, void * alloc){
           canonical = existing;
           discard = 1;
         }
-        else canonical = f14_pool_interning____intern_locked(inner, object, &(discard));
+        else canonical = f9_interning____intern_locked(inner, object, &(discard));
       }
       x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
     }
@@ -801,7 +801,7 @@ Var Pool_intern(Pool inner, Var object, void * alloc){
   return canonical;
 }
 
-static Var f14_pool_interning____intern_locked(Pool inner, Var object, int * discard){
+static Var f9_interning____intern_locked(Pool inner, Var object, int * discard){
   int inserted;
   Var stored = _setdefault(inner -> table, object, &(inserted));
   if(inserted) inner -> interned ++;
@@ -832,7 +832,7 @@ Var Pool_intern_new(Pool inner, Var object, void * alloc){
       ;
       x2c_cleanup_push(& _x2c_gensym_defer_record_6);
       {
-        canonical = f14_pool_interning____intern_locked(inner, object, &(discard));
+        canonical = f9_interning____intern_locked(inner, object, &(discard));
       }
       x2c_cleanup_leave(& _x2c_gensym_defer_record_6);
     }
@@ -862,15 +862,15 @@ void Pool_insert(Pool inner, Var object){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_7);
     {
-      f14_pool_interning____insert_locked(inner, object);
+      f9_interning____insert_locked(inner, object);
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_7);
   }
 
 }
 
-static void f14_pool_interning____insert_locked(Pool inner, Var object){
-  f14_pool_interning___PoolTable_set_entry(inner -> table, & object, & object);
+static void f9_interning____insert_locked(Pool inner, Var object){
+  f9_interning___PoolTable_set_entry(inner -> table, & object, & object);
   inner -> interned ++;
 }
 
@@ -906,14 +906,14 @@ int Pool_owns(Pool pool, Var key){
 }
 
 static int _owns_locked(Pool pool, Var key){
-  Var found = f14_pool_interning____get_hashed(pool -> table, key, Var_hash(key));
+  Var found = f9_interning____get_hashed(pool -> table, key, Var_hash(key));
   return ! Var_is_void(found) && Var_same(found, key);
 }
 
 Pool Pool_retain_named(Pool inner, const char * name){
   if(! _init_guard_) Pool_initialize();
   _storage_initialize();
-  unsigned capacity = f14_pool_interning____child_capacity(inner);
+  unsigned capacity = f9_interning____child_capacity(inner);
   Scope scope = Scope_new_named(name);
   Pool pool = NULL;
   int mutex_ready = 0, finished = 0;
@@ -949,7 +949,7 @@ Pool Pool_retain_named(Pool inner, const char * name){
             ;
             x2c_cleanup_push(& _x2c_gensym_defer_record_10);
             {
-              pool -> table = f14_pool_interning___PoolTable_new_table(NULL, capacity);
+              pool -> table = f9_interning___PoolTable_new_table(NULL, capacity);
             }
             x2c_cleanup_leave(& _x2c_gensym_defer_record_10);
           }
@@ -973,7 +973,7 @@ Pool Pool_retain_named(Pool inner, const char * name){
 
 }
 
-static unsigned f14_pool_interning____child_capacity(Pool inner){
+static unsigned f9_interning____child_capacity(Pool inner){
   if(! inner) return 2;
   _lock(inner);
   unsigned capacity = inner -> child_capacity;
@@ -1013,10 +1013,10 @@ void * Pool_malloc(Pool inner, size_t size){
     x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.malloc")), NULL))));
     __builtin_unreachable();
   }
-  int class_index = f12_pool_storage____size_class(size);
-  if(class_index >= 0) return f12_pool_storage____small_malloc(inner, class_index, size);
+  int class_index = f7_storage____size_class(size);
+  if(class_index >= 0) return f7_storage____small_malloc(inner, class_index, size);
   _storage_lock();
-  f12_pool_storage____record_request(size);
+  f7_storage____record_request(size);
   _storage_unlock();
   _lock(inner);
   {
@@ -1046,17 +1046,17 @@ void * Pool_malloc(Pool inner, size_t size){
 
 }
 
-static void * f12_pool_storage____small_malloc(Pool inner, int class_index, size_t size){
-  f12_pool_storage___PoolBlock fresh = NULL;
+static void * f7_storage____small_malloc(Pool inner, int class_index, size_t size){
+  f7_storage___PoolBlock fresh = NULL;
   while(1){
     _storage_lock();
     _lock(inner);
-    f12_pool_storage___PoolBlock block = f12_pool_storage____block_with_room(inner, class_index);
-    if(! block) block = f12_pool_storage____block_lease(inner, class_index, fresh);
+    f7_storage___PoolBlock block = f7_storage____block_with_room(inner, class_index);
+    if(! block) block = f7_storage____block_lease(inner, class_index, fresh);
     if(block){
       if(block == fresh) fresh = NULL;
-      void * slot = f12_pool_storage____take_slot(block, class_index);
-      f12_pool_storage____record_request(size);
+      void * slot = f7_storage____take_slot(block, class_index);
+      f7_storage____record_request(size);
       _unlock(inner);
       _storage_unlock();
       free(fresh);
@@ -1064,45 +1064,45 @@ static void * f12_pool_storage____small_malloc(Pool inner, int class_index, size
     }
     _unlock(inner);
     _storage_unlock();
-    fresh = f12_pool_storage____fresh_block(inner, class_index);
+    fresh = f7_storage____fresh_block(inner, class_index);
   }
 
 }
 
-static int f12_pool_storage____size_class(size_t size){
-  for(int i = 0;  i < POOL_CLASS_COUNT;  i ++) if(size <= f12_pool_storage___pool_class_sizes[i]) return i;
+static int f7_storage____size_class(size_t size){
+  for(int i = 0;  i < POOL_CLASS_COUNT;  i ++) if(size <= f7_storage___pool_class_sizes[i]) return i;
   return - 1;
 }
 
-static f12_pool_storage___PoolBlock f12_pool_storage____block_with_room(Pool pool, int class_index){
-  f12_pool_storage___PoolBlock current = pool -> current[class_index];
-  return f12_pool_storage____has_room(current) ? current : NULL;
+static f7_storage___PoolBlock f7_storage____block_with_room(Pool pool, int class_index){
+  f7_storage___PoolBlock current = pool -> current[class_index];
+  return f7_storage____has_room(current) ? current : NULL;
 }
 
-static int f12_pool_storage____has_room(f12_pool_storage___PoolBlock block){
+static int f7_storage____has_room(f7_storage___PoolBlock block){
   if(! block) return 0;
   if(block -> free) return 1;
-  unsigned size = f12_pool_storage___pool_class_sizes[block -> class_index];
+  unsigned size = f7_storage___pool_class_sizes[block -> class_index];
   return block -> used + size <= block -> bytes - POOL_BLOCK_DATA_OFFSET;
 }
 
-static void * f12_pool_storage____take_slot(f12_pool_storage___PoolBlock block, int class_index){
+static void * f7_storage____take_slot(f7_storage___PoolBlock block, int class_index){
   void * slot = block -> free;
   if(slot){
     block -> free = *(void * *) slot;
-    f12_pool_storage___pool_slot_reuses ++;
+    f7_storage___pool_slot_reuses ++;
     return slot;
   }
-  slot = f12_pool_storage____data(block) + block -> used;
-  block -> used += f12_pool_storage___pool_class_sizes[class_index];
+  slot = f7_storage____data(block) + block -> used;
+  block -> used += f7_storage___pool_class_sizes[class_index];
   return slot;
 }
 
-static f12_pool_storage___PoolBlock f12_pool_storage____fresh_block(Pool inner, int class_index){
-  f12_pool_storage___PoolBlock fresh = malloc(f12_pool_storage____block_bytes(inner, class_index));
+static f7_storage___PoolBlock f7_storage____fresh_block(Pool inner, int class_index){
+  f7_storage___PoolBlock fresh = malloc(f7_storage____block_bytes(inner, class_index));
   if(fresh) return fresh;
   if(x2c_error_runtime_ready){
-    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/pool/storage.x",.function = "f12_pool_storage____fresh_block",.line = 156};
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/pool/storage.x",.function = "f7_storage____fresh_block",.line = 156};
     x2c_error_raise_n(& _x2c_gensym_error_site_8, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool backing block")), NULL))));
     __builtin_unreachable();
   }
@@ -1138,9 +1138,9 @@ void Pool_free(Pool inner, void * alloc){
         ;
         x2c_cleanup_push(& _x2c_gensym_defer_record_13);
         {
-          f12_pool_storage___PoolBlock block = f12_pool_storage____find_block(alloc);
-          f12_pool_storage___pool_free_calls ++;
-          if(block) f12_pool_storage____free_slot(block, alloc);
+          f7_storage___PoolBlock block = f7_storage____find_block(alloc);
+          f7_storage___pool_free_calls ++;
+          if(block) f7_storage____free_slot(block, alloc);
           else Scope_free(alloc);
         }
         x2c_cleanup_leave(& _x2c_gensym_defer_record_13);
@@ -1152,57 +1152,57 @@ void Pool_free(Pool inner, void * alloc){
 
 }
 
-static void f12_pool_storage____free_slot(f12_pool_storage___PoolBlock block, void * ptr){
-  f12_pool_storage____push_free(block, ptr);
+static void f7_storage____free_slot(f7_storage___PoolBlock block, void * ptr){
+  f7_storage____push_free(block, ptr);
   block -> owner -> current[block -> class_index] = block;
 }
 
-static void f12_pool_storage____push_free(f12_pool_storage___PoolBlock block, void * slot){
+static void f7_storage____push_free(f7_storage___PoolBlock block, void * slot){
   *(void * *) slot = block -> free;
   block -> free = slot;
 }
 
-static f12_pool_storage___PoolBlock f12_pool_storage____block_lease(Pool p, int class_index, f12_pool_storage___PoolBlock fresh){
-  unsigned bytes = f12_pool_storage____block_bytes(p, class_index);
-  f12_pool_storage___PoolBlock block = f12_pool_storage____depot_pop(bytes);
+static f7_storage___PoolBlock f7_storage____block_lease(Pool p, int class_index, f7_storage___PoolBlock fresh){
+  unsigned bytes = f7_storage____block_bytes(p, class_index);
+  f7_storage___PoolBlock block = f7_storage____depot_pop(bytes);
   if(! block){
     if(! fresh) return NULL;
-    block = f12_pool_storage____registry_add(fresh, bytes);
+    block = f7_storage____registry_add(fresh, bytes);
   }
-  f12_pool_storage___pool_active_blocks ++;
-  f12_pool_storage___pool_active_bytes += bytes;
-  f12_pool_storage____reset(block, p);
+  f7_storage___pool_active_blocks ++;
+  f7_storage___pool_active_bytes += bytes;
+  f7_storage____reset(block, p);
   block -> class_index = class_index;
   block -> bytes = bytes;
-  f12_pool_storage____link(block, p);
+  f7_storage____link(block, p);
   return block;
 }
 
-static unsigned f12_pool_storage____block_bytes(Pool pool, int class_index){
-  return class_index == 0 && pool -> up ? 256 : f12_pool_storage___pool_block_sizes[class_index];
+static unsigned f7_storage____block_bytes(Pool pool, int class_index){
+  return class_index == 0 && pool -> up ? 256 : f7_storage___pool_block_sizes[class_index];
 }
 
-static f12_pool_storage___PoolBlock f12_pool_storage____depot_pop(unsigned bytes){
-  int depot_index = f12_pool_storage____depot_index(bytes);
-  f12_pool_storage___PoolBlock block = f12_pool_storage___pool_depot[depot_index];
+static f7_storage___PoolBlock f7_storage____depot_pop(unsigned bytes){
+  int depot_index = f7_storage____depot_index(bytes);
+  f7_storage___PoolBlock block = f7_storage___pool_depot[depot_index];
   if(! block) return NULL;
-  f12_pool_storage___pool_depot[depot_index] = block -> next;
-  f12_pool_storage___pool_depot_blocks --;
-  f12_pool_storage___pool_depot_bytes -= bytes;
-  f12_pool_storage___pool_block_reuses ++;
+  f7_storage___pool_depot[depot_index] = block -> next;
+  f7_storage___pool_depot_blocks --;
+  f7_storage___pool_depot_bytes -= bytes;
+  f7_storage___pool_block_reuses ++;
   return block;
 }
 
-static f12_pool_storage___PoolBlock f12_pool_storage____registry_add(f12_pool_storage___PoolBlock block, unsigned bytes){
-  block -> registry_next = f12_pool_storage___pool_registry;
-  f12_pool_storage___pool_registry = block;
-  f12_pool_storage____index_add(block, bytes);
-  f12_pool_storage___pool_block_allocations ++;
-  f12_pool_storage___pool_backing_bytes += bytes;
+static f7_storage___PoolBlock f7_storage____registry_add(f7_storage___PoolBlock block, unsigned bytes){
+  block -> registry_next = f7_storage___pool_registry;
+  f7_storage___pool_registry = block;
+  f7_storage____index_add(block, bytes);
+  f7_storage___pool_block_allocations ++;
+  f7_storage___pool_backing_bytes += bytes;
   return block;
 }
 
-static void f12_pool_storage____reset(f12_pool_storage___PoolBlock block, Pool owner){
+static void f7_storage____reset(f7_storage___PoolBlock block, Pool owner){
   block -> owner = owner;
   block -> free = NULL;
   block -> used = 0;
@@ -1210,24 +1210,24 @@ static void f12_pool_storage____reset(f12_pool_storage___PoolBlock block, Pool o
   memset(block -> keep, 0, sizeof block -> keep);
 }
 
-static void f12_pool_storage____link(f12_pool_storage___PoolBlock block, Pool pool){
+static void f7_storage____link(f7_storage___PoolBlock block, Pool pool){
   block -> next = pool -> blocks;
   pool -> blocks = block;
   pool -> current[block -> class_index] = block;
 }
 
-static void f12_pool_storage____depot_push(f12_pool_storage___PoolBlock block){
-  int depot_index = f12_pool_storage____depot_index(block -> bytes);
-  f12_pool_storage____reset(block, NULL);
-  block -> next = f12_pool_storage___pool_depot[depot_index];
-  f12_pool_storage___pool_depot[depot_index] = block;
-  f12_pool_storage___pool_active_blocks --;
-  f12_pool_storage___pool_active_bytes -= block -> bytes;
-  f12_pool_storage___pool_depot_blocks ++;
-  f12_pool_storage___pool_depot_bytes += block -> bytes;
+static void f7_storage____depot_push(f7_storage___PoolBlock block){
+  int depot_index = f7_storage____depot_index(block -> bytes);
+  f7_storage____reset(block, NULL);
+  block -> next = f7_storage___pool_depot[depot_index];
+  f7_storage___pool_depot[depot_index] = block;
+  f7_storage___pool_active_blocks --;
+  f7_storage___pool_active_bytes -= block -> bytes;
+  f7_storage___pool_depot_blocks ++;
+  f7_storage___pool_depot_bytes += block -> bytes;
 }
 
-static int f12_pool_storage____depot_index(unsigned bytes){
+static int f7_storage____depot_index(unsigned bytes){
   switch(bytes){
     case 256 : return 0;
     case 512 : return 1;
@@ -1238,88 +1238,88 @@ static int f12_pool_storage____depot_index(unsigned bytes){
 
 }
 
-static inline char * f12_pool_storage____data(f12_pool_storage___PoolBlock block){
+static inline char * f7_storage____data(f7_storage___PoolBlock block){
   return(char *) block + POOL_BLOCK_DATA_OFFSET;
 }
 
-static inline void * f12_pool_storage____slot(f12_pool_storage___PoolBlock block, unsigned slot){
-  return f12_pool_storage____data(block) + slot * f12_pool_storage___pool_class_sizes[block -> class_index];
+static inline void * f7_storage____slot(f7_storage___PoolBlock block, unsigned slot){
+  return f7_storage____data(block) + slot * f7_storage___pool_class_sizes[block -> class_index];
 }
 
-static inline unsigned f12_pool_storage____slot_index(f12_pool_storage___PoolBlock block, void * alloc){
-  return((char *) alloc - f12_pool_storage____data(block)) / f12_pool_storage___pool_class_sizes[block -> class_index];
+static inline unsigned f7_storage____slot_index(f7_storage___PoolBlock block, void * alloc){
+  return((char *) alloc - f7_storage____data(block)) / f7_storage___pool_class_sizes[block -> class_index];
 }
 
-static int f12_pool_storage____contains(f12_pool_storage___PoolBlock block, const void * ptr){
+static int f7_storage____contains(f7_storage___PoolBlock block, const void * ptr){
   if(! block || ! ptr || ! block -> owner) return 0;
-  const char * data = f12_pool_storage____data(block), * candidate = ptr;
-  unsigned size = f12_pool_storage___pool_class_sizes[block -> class_index];
+  const char * data = f7_storage____data(block), * candidate = ptr;
+  unsigned size = f7_storage___pool_class_sizes[block -> class_index];
   if(candidate < data || candidate >= data + block -> used) return 0;
   return(size_t)(candidate - data) % size == 0;
 }
 
-static f12_pool_storage___PoolBlock f12_pool_storage____find_block(const void * ptr){
-  return f12_pool_storage___pool_index_complete ? f12_pool_storage____index_find(ptr) : f12_pool_storage____registry_find(ptr);
+static f7_storage___PoolBlock f7_storage____find_block(const void * ptr){
+  return f7_storage___pool_index_complete ? f7_storage____index_find(ptr) : f7_storage____registry_find(ptr);
 }
 
-static f12_pool_storage___PoolBlock f12_pool_storage____index_find(const void * ptr){
-  if(! f12_pool_storage___pool_index_slots) return NULL;
+static f7_storage___PoolBlock f7_storage____index_find(const void * ptr){
+  if(! f7_storage___pool_index_slots) return NULL;
   uintptr_t page =(uintptr_t) ptr >> POOL_INDEX_PAGE_SHIFT;
-  unsigned at = f12_pool_storage____index_start(page, f12_pool_storage___pool_index_slots);
-  while(f12_pool_storage___pool_index[at].block){
-    if(f12_pool_storage___pool_index[at].page == page && f12_pool_storage____contains(f12_pool_storage___pool_index[at].block, ptr)) return f12_pool_storage___pool_index[at].block;
-    at =(at + 1) &(f12_pool_storage___pool_index_slots - 1);
+  unsigned at = f7_storage____index_start(page, f7_storage___pool_index_slots);
+  while(f7_storage___pool_index[at].block){
+    if(f7_storage___pool_index[at].page == page && f7_storage____contains(f7_storage___pool_index[at].block, ptr)) return f7_storage___pool_index[at].block;
+    at =(at + 1) &(f7_storage___pool_index_slots - 1);
   }
   return NULL;
 }
 
-static f12_pool_storage___PoolBlock f12_pool_storage____registry_find(const void * ptr){
-  for(f12_pool_storage___PoolBlock block = f12_pool_storage___pool_registry;  block;  block = block -> registry_next) if(f12_pool_storage____contains(block, ptr)) return block;
+static f7_storage___PoolBlock f7_storage____registry_find(const void * ptr){
+  for(f7_storage___PoolBlock block = f7_storage___pool_registry;  block;  block = block -> registry_next) if(f7_storage____contains(block, ptr)) return block;
   return NULL;
 }
 
-static void f12_pool_storage____index_add(f12_pool_storage___PoolBlock block, unsigned bytes){
-  if(! f12_pool_storage___pool_index_complete) return;
+static void f7_storage____index_add(f7_storage___PoolBlock block, unsigned bytes){
+  if(! f7_storage___pool_index_complete) return;
   uintptr_t first =(uintptr_t) block >> POOL_INDEX_PAGE_SHIFT;
   uintptr_t last =((uintptr_t) block + bytes - 1) >> POOL_INDEX_PAGE_SHIFT;
   for(uintptr_t page = first;  page <= last;  page ++){
-    if((f12_pool_storage___pool_index_used + 1) * 2 > f12_pool_storage___pool_index_slots && ! f12_pool_storage____index_grow()){
-      f12_pool_storage___pool_index_complete = 0;
+    if((f7_storage___pool_index_used + 1) * 2 > f7_storage___pool_index_slots && ! f7_storage____index_grow()){
+      f7_storage___pool_index_complete = 0;
       return;
     }
-    f12_pool_storage____index_place(f12_pool_storage___pool_index, f12_pool_storage___pool_index_slots, page, block);
-    f12_pool_storage___pool_index_used ++;
+    f7_storage____index_place(f7_storage___pool_index, f7_storage___pool_index_slots, page, block);
+    f7_storage___pool_index_used ++;
   }
 
 }
 
-static int f12_pool_storage____index_grow(void){
-  unsigned slots = f12_pool_storage___pool_index_slots * 2;
+static int f7_storage____index_grow(void){
+  unsigned slots = f7_storage___pool_index_slots * 2;
   if(! slots) slots = POOL_INDEX_FIRST_SLOTS;
-  f12_pool_storage___PoolIndexSlot * table = calloc(slots, sizeof(f12_pool_storage___PoolIndexSlot));
+  f7_storage___PoolIndexSlot * table = calloc(slots, sizeof(f7_storage___PoolIndexSlot));
   if(! table) return 0;
-  for(unsigned at = 0;  at < f12_pool_storage___pool_index_slots;  at ++) if(f12_pool_storage___pool_index[at].block) f12_pool_storage____index_place(table, slots, f12_pool_storage___pool_index[at].page, f12_pool_storage___pool_index[at].block);
-  free(f12_pool_storage___pool_index);
-  f12_pool_storage___pool_index = table;
-  f12_pool_storage___pool_index_slots = slots;
+  for(unsigned at = 0;  at < f7_storage___pool_index_slots;  at ++) if(f7_storage___pool_index[at].block) f7_storage____index_place(table, slots, f7_storage___pool_index[at].page, f7_storage___pool_index[at].block);
+  free(f7_storage___pool_index);
+  f7_storage___pool_index = table;
+  f7_storage___pool_index_slots = slots;
   return 1;
 }
 
-static void f12_pool_storage____index_place(f12_pool_storage___PoolIndexSlot * table, unsigned slots, uintptr_t page, f12_pool_storage___PoolBlock block){
-  unsigned at = f12_pool_storage____index_start(page, slots);
+static void f7_storage____index_place(f7_storage___PoolIndexSlot * table, unsigned slots, uintptr_t page, f7_storage___PoolBlock block){
+  unsigned at = f7_storage____index_start(page, slots);
   while(table[at].block) at =(at + 1) &(slots - 1);
   table[at].page = page;
   table[at].block = block;
 }
 
-static unsigned f12_pool_storage____index_start(uintptr_t page, unsigned slots){
+static unsigned f7_storage____index_start(uintptr_t page, unsigned slots){
   return(unsigned)((page * 0x9E3779B97F4A7C15ull) >> 32) &(slots - 1);
 }
 
 int Pool_promote(Pool inner, Var object, void * alloc){
   if(! _init_guard_) Pool_initialize();
   if(! inner || ! inner -> up || ! alloc) return 0;
-  return f12_pool_storage____promote_level(inner, object, alloc, f12_pool_storage____block_of(alloc));
+  return f7_storage____promote_level(inner, object, alloc, f7_storage____block_of(alloc));
 }
 
 int Pool_own(Pool inner, Var object, void * alloc){
@@ -1330,15 +1330,15 @@ int Pool_own(Pool inner, Var object, void * alloc){
   if(! owner) return 0;
   if(! owner -> up) return 1;
   if(! alloc) return 0;
-  f12_pool_storage___PoolBlock block = f12_pool_storage____block_of(alloc);
+  f7_storage___PoolBlock block = f7_storage____block_of(alloc);
   while(owner -> up){
-    if(! f12_pool_storage____promote_level(owner, object, alloc, block)) return 0;
+    if(! f7_storage____promote_level(owner, object, alloc, block)) return 0;
     owner = owner -> up;
   }
   return 1;
 }
 
-static int f12_pool_storage____promote_level(Pool inner, Var object, void * alloc, f12_pool_storage___PoolBlock block){
+static int f7_storage____promote_level(Pool inner, Var object, void * alloc, f7_storage___PoolBlock block){
   _lock(inner);
   {
     _x2c_gensym_defer_env_13 _x2c_gensym_macro_environment_13 ={
@@ -1360,10 +1360,10 @@ static int f12_pool_storage____promote_level(Pool inner, Var object, void * allo
         }
 
       }
-      unsigned slot = block ? f12_pool_storage____slot_index(block, alloc) : 0;
-      f12_pool_storage___PoolPromotion promotion = NULL;
+      unsigned slot = block ? f7_storage____slot_index(block, alloc) : 0;
+      f7_storage___PoolPromotion promotion = NULL;
       if(block && block -> owner != inner){
-        promotion = Scope_malloc_in(& inner -> scope, sizeof(struct f12_pool_storage___PoolPromotion));
+        promotion = Scope_malloc_in(& inner -> scope, sizeof(struct f7_storage___PoolPromotion));
         promotion -> block = block;
         promotion -> slot = slot;
       }
@@ -1384,8 +1384,8 @@ static int f12_pool_storage____promote_level(Pool inner, Var object, void * allo
           int inserted;
           _setdefault(up -> table, object, &(inserted));
           if(inserted) up -> interned ++;
-          if(block && block -> owner == inner) f12_pool_storage____mark_slot(block, slot);
-          else if(promotion) f12_pool_storage____push_promotion(inner, promotion);
+          if(block && block -> owner == inner) f7_storage____mark_slot(block, slot);
+          else if(promotion) f7_storage____push_promotion(inner, promotion);
           else Scope_move(alloc, & up -> scope);
           inner -> promoted ++;
           {
@@ -1408,63 +1408,63 @@ static int f12_pool_storage____promote_level(Pool inner, Var object, void * allo
 
 }
 
-static f12_pool_storage___PoolBlock f12_pool_storage____block_of(void * alloc){
+static f7_storage___PoolBlock f7_storage____block_of(void * alloc){
   _storage_lock();
-  f12_pool_storage___PoolBlock block = f12_pool_storage____find_block(alloc);
+  f7_storage___PoolBlock block = f7_storage____find_block(alloc);
   _storage_unlock();
   return block;
 }
 
-static void f12_pool_storage____mark_slot(f12_pool_storage___PoolBlock block, unsigned slot){
+static void f7_storage____mark_slot(f7_storage___PoolBlock block, unsigned slot){
   uint64_t mask =(uint64_t) 1 <<(slot % 64), * word = & block -> keep[slot / 64];
   if(* word & mask) return;
   * word |= mask;
   block -> keep_count ++;
 }
 
-static void f12_pool_storage____push_promotion(Pool inner, f12_pool_storage___PoolPromotion promotion){
+static void f7_storage____push_promotion(Pool inner, f7_storage___PoolPromotion promotion){
   promotion -> next = inner -> promotions;
   inner -> promotions = promotion;
 }
 
 static void _release_blocks(Pool inner){
-  for(f12_pool_storage___PoolPromotion p = inner -> promotions;  p;  p = p -> next) f12_pool_storage____mark_slot(p -> block, p -> slot);
-  f12_pool_storage___PoolBlock block = inner -> blocks;
+  for(f7_storage___PoolPromotion p = inner -> promotions;  p;  p = p -> next) f7_storage____mark_slot(p -> block, p -> slot);
+  f7_storage___PoolBlock block = inner -> blocks;
   while(block){
-    f12_pool_storage___PoolBlock next = block -> next;
-    if(inner -> up && block -> keep_count) f12_pool_storage____transfer(block, inner -> up);
-    else f12_pool_storage____depot_push(block);
+    f7_storage___PoolBlock next = block -> next;
+    if(inner -> up && block -> keep_count) f7_storage____transfer(block, inner -> up);
+    else f7_storage____depot_push(block);
     block = next;
   }
   inner -> blocks = NULL;
   for(int i = 0;  i < POOL_CLASS_COUNT;  i ++) inner -> current[i] = NULL;
 }
 
-static void f12_pool_storage____transfer(f12_pool_storage___PoolBlock block, Pool parent){
-  f12_pool_storage____free_unkept(block);
+static void f7_storage____transfer(f7_storage___PoolBlock block, Pool parent){
+  f7_storage____free_unkept(block);
   block -> owner = parent;
   block -> keep_count = 0;
   memset(block -> keep, 0, sizeof block -> keep);
-  f12_pool_storage____link(block, parent);
+  f7_storage____link(block, parent);
 }
 
-static void f12_pool_storage____free_unkept(f12_pool_storage___PoolBlock block){
-  unsigned count = block -> used / f12_pool_storage___pool_class_sizes[block -> class_index];
+static void f7_storage____free_unkept(f7_storage___PoolBlock block){
+  unsigned count = block -> used / f7_storage___pool_class_sizes[block -> class_index];
   block -> free = NULL;
-  for(unsigned slot = count;  slot -- > 0; ) if(! f12_pool_storage____slot_kept(block, slot)) f12_pool_storage____push_free(block, f12_pool_storage____slot(block, slot));
+  for(unsigned slot = count;  slot -- > 0; ) if(! f7_storage____slot_kept(block, slot)) f7_storage____push_free(block, f7_storage____slot(block, slot));
 }
 
-static int f12_pool_storage____slot_kept(f12_pool_storage___PoolBlock block, unsigned slot){
+static int f7_storage____slot_kept(f7_storage___PoolBlock block, unsigned slot){
   uint64_t mask =(uint64_t) 1 <<(slot % 64);
   return(block -> keep[slot / 64] & mask) != 0;
 }
 
 static void _storage_lock(void){
-  if(pool_multithreaded && pthread_mutex_lock(& f12_pool_storage___pool_storage_mutex)) _fatal("could not lock storage mutex");
+  if(pool_multithreaded && pthread_mutex_lock(& f7_storage___pool_storage_mutex)) _fatal("could not lock storage mutex");
 }
 
 static void _storage_unlock(void){
-  if(pool_multithreaded && pthread_mutex_unlock(& f12_pool_storage___pool_storage_mutex)) _fatal("could not unlock storage mutex");
+  if(pool_multithreaded && pthread_mutex_unlock(& f7_storage___pool_storage_mutex)) _fatal("could not unlock storage mutex");
 }
 
 static void _lock(Pool pool){
@@ -1480,10 +1480,10 @@ _Noreturn static void _fatal(const char * message){
   abort();
 }
 
-static void f12_pool_storage____record_request(size_t size){
-  f12_pool_storage___pool_allocation_calls ++;
-  if(SIZE_MAX - f12_pool_storage___pool_requested_bytes < size) f12_pool_storage___pool_requested_bytes = SIZE_MAX;
-  else f12_pool_storage___pool_requested_bytes += size;
+static void f7_storage____record_request(size_t size){
+  f7_storage___pool_allocation_calls ++;
+  if(SIZE_MAX - f7_storage___pool_requested_bytes < size) f7_storage___pool_requested_bytes = SIZE_MAX;
+  else f7_storage___pool_requested_bytes += size;
 }
 
 PoolStats Pool_stats(Pool inner){
@@ -1510,7 +1510,7 @@ PoolStats Pool_stats(Pool inner){
         x2c_cleanup_push(& _x2c_gensym_defer_record_17);
         {
           PoolStats stats ={
-            .allocation_calls = f12_pool_storage___pool_allocation_calls, .free_calls = f12_pool_storage___pool_free_calls, .requested_bytes = f12_pool_storage___pool_requested_bytes, .block_allocations = f12_pool_storage___pool_block_allocations, .block_reuses = f12_pool_storage___pool_block_reuses, .slot_reuses = f12_pool_storage___pool_slot_reuses, .backing_bytes = f12_pool_storage___pool_backing_bytes, .active_blocks = f12_pool_storage___pool_active_blocks, .active_bytes = f12_pool_storage___pool_active_bytes, .depot_blocks = f12_pool_storage___pool_depot_blocks, .depot_bytes = f12_pool_storage___pool_depot_bytes
+            .allocation_calls = f7_storage___pool_allocation_calls, .free_calls = f7_storage___pool_free_calls, .requested_bytes = f7_storage___pool_requested_bytes, .block_allocations = f7_storage___pool_block_allocations, .block_reuses = f7_storage___pool_block_reuses, .slot_reuses = f7_storage___pool_slot_reuses, .backing_bytes = f7_storage___pool_backing_bytes, .active_blocks = f7_storage___pool_active_blocks, .active_bytes = f7_storage___pool_active_bytes, .depot_blocks = f7_storage___pool_depot_blocks, .depot_bytes = f7_storage___pool_depot_bytes
           }
           ;
           for(Pool pool = inner;  pool;  pool = pool -> up) stats.depth ++;
@@ -1547,35 +1547,35 @@ static void _storage_initialize(void){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_18);
     {
-      if(f12_pool_storage___pool_storage_ready){
+      if(f7_storage___pool_storage_ready){
         x2c_cleanup_leave(& _x2c_gensym_defer_record_18);
         return;
       }
-      Scope_shutdown_hook(f12_pool_storage____storage_shutdown);
-      f12_pool_storage___pool_storage_ready = 1;
+      Scope_shutdown_hook(f7_storage____storage_shutdown);
+      f7_storage___pool_storage_ready = 1;
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_18);
   }
 
 }
 
-static void f12_pool_storage____storage_shutdown(void){
-  f12_pool_storage___PoolBlock block = f12_pool_storage___pool_registry;
+static void f7_storage____storage_shutdown(void){
+  f7_storage___PoolBlock block = f7_storage___pool_registry;
   while(block){
-    f12_pool_storage___PoolBlock next = block -> registry_next;
+    f7_storage___PoolBlock next = block -> registry_next;
     free(block);
     block = next;
   }
-  f12_pool_storage___pool_registry = NULL;
-  free(f12_pool_storage___pool_index);
-  f12_pool_storage___pool_index = NULL;
-  f12_pool_storage___pool_index_slots = f12_pool_storage___pool_index_used = 0;
-  f12_pool_storage___pool_index_complete = 1;
-  for(int i = 0;  i < POOL_DEPOT_COUNT;  i ++) f12_pool_storage___pool_depot[i] = NULL;
-  f12_pool_storage___pool_backing_bytes = 0;
-  f12_pool_storage___pool_active_blocks = f12_pool_storage___pool_active_bytes = 0;
-  f12_pool_storage___pool_depot_blocks = f12_pool_storage___pool_depot_bytes = 0;
-  f12_pool_storage___pool_storage_ready = 0;
+  f7_storage___pool_registry = NULL;
+  free(f7_storage___pool_index);
+  f7_storage___pool_index = NULL;
+  f7_storage___pool_index_slots = f7_storage___pool_index_used = 0;
+  f7_storage___pool_index_complete = 1;
+  for(int i = 0;  i < POOL_DEPOT_COUNT;  i ++) f7_storage___pool_depot[i] = NULL;
+  f7_storage___pool_backing_bytes = 0;
+  f7_storage___pool_active_blocks = f7_storage___pool_active_bytes = 0;
+  f7_storage___pool_depot_blocks = f7_storage___pool_depot_bytes = 0;
+  f7_storage___pool_storage_ready = 0;
 }
 
 void Pool_thread_start(void){
@@ -1585,8 +1585,8 @@ void Pool_thread_start(void){
 
 Pool Pool_current(void){
   if(! _init_guard_) Pool_initialize();
-  if(! f12_pool_threads___value_thread.current) Pool_initialize();
-  return f12_pool_threads___value_thread.current;
+  if(! f7_threads___value_thread.current) Pool_initialize();
+  return f7_threads___value_thread.current;
 }
 
 void Pool_shutdown(void);
@@ -1598,30 +1598,30 @@ void Pool_initialize(void){
   _x2c_gensym_static_initialize_1();
   _x2c_gensym_static_initialize_2();
   _x2c_gensym_static_initialize_3();
-  if(f12_pool_threads___value_thread.current) return;
-  if(! f12_pool_threads___value_root) f12_pool_threads___value_root = Pool_retain_named(NULL, "canonical values");
-  f12_pool_threads___value_thread.current = f12_pool_threads___value_root;
+  if(f7_threads___value_thread.current) return;
+  if(! f7_threads___value_root) f7_threads___value_root = Pool_retain_named(NULL, "canonical values");
+  f7_threads___value_thread.current = f7_threads___value_root;
   Scope_shutdown_hook(Pool_shutdown);
 }
 
 void Pool_thread_initialize(void){
   if(! _init_guard_) Pool_initialize();
-  if(f12_pool_threads___value_thread.current) return;
-  if(! f12_pool_threads___value_root) _fatal("canonical value root is not initialized");
-  f12_pool_threads___value_thread.current = f12_pool_threads___value_root;
+  if(f7_threads___value_thread.current) return;
+  if(! f7_threads___value_root) _fatal("canonical value root is not initialized");
+  f7_threads___value_thread.current = f7_threads___value_root;
 }
 
 void Pool_shutdown(void){
   if(! _init_guard_) Pool_initialize();
-  while(f12_pool_threads___value_thread.current && f12_pool_threads___value_thread.current != f12_pool_threads___value_root) f12_pool_threads___value_thread.current = Pool_release(f12_pool_threads___value_thread.current);
-  while(f12_pool_threads___value_root) f12_pool_threads___value_root = Pool_release(f12_pool_threads___value_root);
-  f12_pool_threads___value_thread.current = NULL;
+  while(f7_threads___value_thread.current && f7_threads___value_thread.current != f7_threads___value_root) f7_threads___value_thread.current = Pool_release(f7_threads___value_thread.current);
+  while(f7_threads___value_root) f7_threads___value_root = Pool_release(f7_threads___value_root);
+  f7_threads___value_thread.current = NULL;
 }
 
 Pool Pool_open_named(const char * name){
   if(! _init_guard_) Pool_initialize();
   Pool nested = Pool_retain_named(Pool_current(), name);
-  f12_pool_threads___value_thread.current = nested;
+  f7_threads___value_thread.current = nested;
   return nested;
 }
 
@@ -1637,7 +1637,7 @@ void Pool_close(void){
     x2c_error_raise_n(& _x2c_gensym_error_site_10, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.close")), NULL))));
     __builtin_unreachable();
   }
-  f12_pool_threads___value_thread.current = Pool_release(f12_pool_threads___value_thread.current);
+  f7_threads___value_thread.current = Pool_release(f7_threads___value_thread.current);
 }
 
 Pool Pool_detach(void){
@@ -1648,13 +1648,13 @@ Pool Pool_detach(void){
     x2c_error_raise_n(& _x2c_gensym_error_site_11, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.detach")), NULL))));
     __builtin_unreachable();
   }
-  f12_pool_threads___value_thread.current = detached -> up;
+  f7_threads___value_thread.current = detached -> up;
   return detached;
 }
 
 int Pool_is_permanent(Var value){
   if(! _init_guard_) Pool_initialize();
-  return f12_pool_threads___value_root && Pool_owns(f12_pool_threads___value_root, value);
+  return f7_threads___value_root && Pool_owns(f7_threads___value_root, value);
 }
 
 unsigned long Pool_epoch(void){
@@ -1674,12 +1674,12 @@ static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
   _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_2;
-  if((void *)(*(PoolTable *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2) == 0) f14_pool_interning___PoolTable_free_table((*(PoolTable *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3));
+  if((void *)(*(PoolTable *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2) == 0) f9_interning___PoolTable_free_table((*(PoolTable *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3));
 }
 
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
   _x2c_gensym_defer_env_3 * _x2c_gensym_defer_data_3 =(_x2c_gensym_defer_env_3 *) _x2c_gensym_defer_opaque_3;
-  if((*(int *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_4) && !(*(PoolTable *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_5)) f14_pool_interning___PoolTable_free_table((*(PoolTable *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_6));
+  if((*(int *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_4) && !(*(PoolTable *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_5)) f9_interning___PoolTable_free_table((*(PoolTable *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_6));
 }
 
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
@@ -1757,11 +1757,11 @@ static void _x2c_gensym_defer_cleanup_18(void * _x2c_gensym_defer_opaque_18){
   _storage_unlock();
 }
 
-#undef _x2c_gensym_initializer_choice_D7C30390_0_expanded
-#undef _x2c_gensym_initializer_choice_D7C30390_0
-#undef _x2c_gensym_initializer_choice_D7C30390_1_expanded
-#undef _x2c_gensym_initializer_choice_D7C30390_1
-#undef _x2c_gensym_initializer_choice_D7C30390_2_expanded
-#undef _x2c_gensym_initializer_choice_D7C30390_2
-#undef _x2c_gensym_initializer_choice_D7C30390_3_expanded
-#undef _x2c_gensym_initializer_choice_D7C30390_3
+#undef _x2c_gensym_initializer_choice_CBF06E4F_0_expanded
+#undef _x2c_gensym_initializer_choice_CBF06E4F_0
+#undef _x2c_gensym_initializer_choice_CBF06E4F_1_expanded
+#undef _x2c_gensym_initializer_choice_CBF06E4F_1
+#undef _x2c_gensym_initializer_choice_CBF06E4F_2_expanded
+#undef _x2c_gensym_initializer_choice_CBF06E4F_2
+#undef _x2c_gensym_initializer_choice_CBF06E4F_3_expanded
+#undef _x2c_gensym_initializer_choice_CBF06E4F_3

@@ -1,1 +1,1 @@
-../meta-group.h
+#include "../meta-group.h"

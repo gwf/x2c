@@ -2,11 +2,11 @@
 
 #pragma once
 
-#ifndef __GUARD_0xE00406E8__
-#define __GUARD_0xE00406E8__
+#ifndef __GUARD_0x66DB1561__
+#define __GUARD_0x66DB1561__
 
 #include "common.h"
-#include "match.h"
+#include "match/match.h"
 #include "mutex.h"
 typedef struct Error * Error;
 
@@ -26,14 +26,14 @@ ErrorCatchSite;
 #include "array.h"
 #include "block.h"
 #include "exception.h"
-#include "list.h"
+#include "list/list.h"
 #include "map.h"
-#include "pool.h"
-#include "scope.h"
-#include "string.h"
+#include "pool/pool.h"
+#include "scope/scope.h"
+#include "string/string.h"
 #include "symbol.h"
 #include "symbolset.h"
-#include "var.h"
+#include "var/var.h"
 #include "error-macros.h"
 #include "error-private.h"
 Atom Atom_intern(String spelling);
@@ -122,4 +122,4 @@ void Error_shutdown_raw(void);
 int Error_ready(void);
 
 
-#endif /* __GUARD_0xE00406E8__ */
+#endif /* __GUARD_0x66DB1561__ */

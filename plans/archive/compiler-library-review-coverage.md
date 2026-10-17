@@ -92,7 +92,7 @@ baseline probes and integrated mitigation validation are separate.
 
 | File | Lines | Operations reviewed | Gap or retained boundary |
 | --- | ---: | --- | --- |
-| [lib/var.x](../../lib/var.x) | 1291 | encoding, constructors, registry/direct and overflow object dispatch, equality/identity, wide boxes, native readers | Keep exact tag/pointer/wide identities; numeric consumer proposal P4; enum projection remains unproved |
+| [lib/var.x](../../lib/var/var.x) | 1291 | encoding, constructors, registry/direct and overflow object dispatch, equality/identity, wide boxes, native readers | Keep exact tag/pointer/wide identities; numeric consumer proposal P4; enum projection remains unproved |
 | [lib/varconvert.x](../../lib/varconvert.x) | 289 | fifteen-family decode/metadata; checked float-to-int and modular int conversion; target casts | One decoded-to-native owner P4; no numeric record ABI merge |
 | [lib/varops.x](../../lib/varops.x) | 583 | fast i32/f64 paths; promotion; shifts/overflow policy; general floating reboxing; truth | Delete promotion intermediate P4; full family parity and timing unrun |
 | [lib/varops.x](../../lib/varops.x) | 79 | operator row/template projection and update routing | Small shared policy owner already; no new generic operator framework |
@@ -103,10 +103,10 @@ baseline probes and integrated mitigation validation are separate.
 | [lib/native-scalar-types.x](../../lib/native-scalar-types.x) | 92 | native names, widths, Var tag/read/box ledger | Existing fact owner; platform width must remain native |
 | [lib/integer-ops.x](../../lib/integer-ops.x) | 45 | native integer update policy, bit arithmetic and shifts | TypedMap modular policy differs native typedArray C operations; retain distinction |
 | [lib/datum.x](../../lib/datum.x) | 264 | write/read tagged values, nested containers, frame protocol and result rejection | decode-list scratch candidate P2 follow-up; malformed/cycle corpus not executed |
-| [lib/string.x](../../lib/string.x) | 1842 | all constructors, Pool ownership, byte operations, replace/slice/join, callbacks, format, escapes, conversions and cursors | find-all/render scratch and Symbol roundtrip follow-ups; callback construction guards already present |
+| [lib/string.x](../../lib/string/string.x) | 1842 | all constructors, Pool ownership, byte operations, replace/slice/join, callbacks, format, escapes, conversions and cursors | find-all/render scratch and Symbol roundtrip follow-ups; callback construction guards already present |
 | [lib/string-classify.x](../../lib/string-classify.x) | 98 | byte classification and whole-string predicates | Locale/byte policy explicit; no duplicate-owner deletion established |
 | [lib/string-number.x](../../lib/string-number.x) | 98 | checked number parsing and native formatting conversions | Parse vs scan distinction intentional; no alternate parser consolidation proposed |
-| [lib/list.x](../../lib/list.x) | 1037 | canonical cells, ownership, builders, selectors, functional loops, conversions, sorts and iteration | List.array producer guard then sort copy-walk deletion; shared kernels already |
+| [lib/list.x](../../lib/list/list.x) | 1037 | canonical cells, ownership, builders, selectors, functional loops, conversions, sorts and iteration | List.array producer guard then sort copy-walk deletion; shared kernels already |
 | [lib/list-selectors.x](../../lib/list-selectors.x) | 113 | optional compound selector projections and receiver behavior | Optional surface intentional, not obsolete aliases without caller inventory |
 | [lib/typed-list.x](../../lib/typed-list.x) | 102 | typed List view helpers/methods and value transforms | Zero-copy validated view differs packed arrays; keep |
 | [lib/array.x](../../lib/array.x) | 455 | Var-array instantiations, functional and heap operations, observers/exports | Producer and managed-render follow-ups; no wholesale typed-family replay |
@@ -119,12 +119,12 @@ baseline probes and integrated mitigation validation are separate.
 | [lib/iter.x](../../lib/iter.x) | 890 | cursor lifecycle, fluent/Func callbacks, map/filter/scan/zip/unzip/unique/chain/reductions | P3 remove discarded prefix; whole Unzip rewrite not run |
 | [lib/protocols.x](../../lib/protocols.x) | 85 | concrete lifecycle, iteration and Var protocol declarations | No second representation; generic protocol cleanup must respect borrowed returns |
 | [lib/lib.x](../../lib/lib.x) | 93 | DisjointSet find/union/roots/sizes and observers | Sizes Array finish-only candidate; no rank/parent derived-state deletion proved |
-| [lib/lisp.x](../../lib/lisp.x) | 2161 | session lifecycle, recursive/tail evaluator, special identities, capture/lookup, native bridges, budgets/interrupt, reader and API | P6 separate semantics; accepted capture/limit/adoption/reader work already root candidate |
+| [lib/lisp.x](../../lib/lisp/lisp.x) | 2161 | session lifecycle, recursive/tail evaluator, special identities, capture/lookup, native bridges, budgets/interrupt, reader and API | P6 separate semantics; accepted capture/limit/adoption/reader work already root candidate |
 | [lib/lisp-init.x](../../lib/lisp-init.x) | 163 | native standard binder/signature/construction algorithms and registration adapters | Prior flat binder/let repairs done; no duplicate old proposal |
 | [lib/lisp-targets.x](../../lib/lisp-targets.x) | 35 | optional native binding rows/filter boundary | Target isolation purposeful; no reintroducing optional packages into prelude |
 | [lib/context.x](../../lib/context.x) | 365 | complete open rollback/close ordering, built-in graph export, cycles and custom hooks | Keep move-identity-before-walk/Map rehash; generic transfer collapse unsupported |
 | [lib/func.x](../../lib/func.x) | 426 | signature construction, copied native contexts, adapters, arity/reference/return checks | Native crossing checks protect hand-written adapters; no blanket redundant-check deletion |
-| [lib/match.x](../../lib/match.x) | 2777 | all grammar/normalization/layout/lowering/execution/search/template/cache/site/shutdown paths | P1 and P5; two replacement lookup policies differ; no direct-map cache rollback |
+| [lib/match.x](../../lib/match/match.x) | 2777 | all grammar/normalization/layout/lowering/execution/search/template/cache/site/shutdown paths | P1 and P5; two replacement lookup policies differ; no direct-map cache rollback |
 | [lib/match-machine.x](../../lib/match-machine.x) | 526 | all opcode execution, undo/span/relation/materialization/lifecycle | Relation scratch early return candidate unprobed; public finish running refusal deliberate |
 | [lib/machine.x](../../lib/machine.x) | 471 | instruction/builder/program/view/decoder and capacity ownership | Match-only current architecture; no Lisp machine reinvention |
 | [lib/meta.x](../../lib/meta.x) | 1040 | all syntax/type/source/literal/statement/function/macro construction helpers and compiler-only declarations | Ordinary AST values; scratch request lifetime needs complete caller audit; no blanket map callbacks |
@@ -142,11 +142,11 @@ baseline probes and integrated mitigation validation are separate.
 
 | File | Lines | Operations reviewed | Gap or retained boundary |
 | --- | ---: | --- | --- |
-| [lib/scope.x](../../lib/scope.x) | 1073 | Intrusive links, aligned prefix, realloc/move, finalizers, shutdown/thread owner, stats | scope suite; Job finalizer probe; native allocation-failure paths not injected |
+| [lib/scope.x](../../lib/scope/scope.x) | 1073 | Intrusive links, aligned prefix, realloc/move, finalizers, shutdown/thread owner, stats | scope suite; Job finalizer probe; native allocation-failure paths not injected |
 | [lib/block.x](../../lib/block.x) | 331 | Stable handle/backptr, capacity/growth, borrowed Bytes, release/move/export operations | Exercised through Buffer/File/Regex; independent block suite not run here |
-| [lib/pool.x](../../lib/pool.x) | 1000 | Intern hit/discard, bitmap/slots/depot registry, promotion, parent release, locks and current/thread lifetime | pool/thread suites; Args allocation probe; mutex-init/atomic proposals not patched |
+| [lib/pool.x](../../lib/pool/pool.x) | 1000 | Intern hit/discard, bitmap/slots/depot registry, promotion, parent release, locks and current/thread lifetime | pool/thread suites; Args allocation probe; mutex-init/atomic proposals not patched |
 | [lib/buffer.x](../../lib/buffer.x) | 357 | Text/line Blocks, alias growth, indents/status, formatting, canonical consumption, ownership | buffer suite; JSON and Regex probes; source proposal not built |
-| [lib/error.x](../../lib/error.x) | 1401 | Record regions, snapshot copying, visible/hidden/running handlers, capture/retain/landing/reset/pop/shutdown | error/exception/thread/logger suites; custom callback full fault matrix not run |
+| [lib/error.x](../../lib/error/error.x) | 1401 | Record regions, snapshot copying, visible/hidden/running handlers, capture/retain/landing/reset/pop/shutdown | error/exception/thread/logger suites; custom callback full fault matrix not run |
 | [lib/error_init.x](../../lib/error_init.x) | 27 | Separate startup wrapper avoids automatic emitter-facing initialization | Startup through all probes; boundary retained; preinit subprocess fixture not rerun |
 | [lib/error-private.x](../../lib/error-private.x) | 27 | Complete generated private record/view/handler storage shapes | error suite; fields traced to consumers; not flattened |
 | [lib/error-macros.x](../../lib/error-macros.x) | 41 | Complete nonreturning ledger and custom fallback decorator | error/exception suites; ledger/return distinction retained |

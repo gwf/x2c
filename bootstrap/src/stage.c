@@ -6,8 +6,8 @@
 #include "compiler/compiler.h"
 #include "grammar.h"
 #include "type.h"
-#include "var.h"
-#include "string.h"
+#include "var/var.h"
+#include "string/string.h"
 #include "varconvert.h"
 #include "datum.h"
 #include <limits.h>

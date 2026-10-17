@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "buffer.h"
-#include "string.h"
+#include "string/string.h"
 static const char _symbol_alphabet[] = "\0abcdefghijklmnopqrstuvwxyz*+?!-";
 
 static int _char_to_5bit(int c);

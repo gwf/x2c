@@ -5,12 +5,12 @@
 #ifndef __GUARD_0xD130DD53__
 #define __GUARD_0xD130DD53__
 
-#include "string.h"
+#include "string/string.h"
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>
-#include "var.h"
-#include "list.h"
+#include "var/var.h"
+#include "list/list.h"
 #include "buffer.h"
 #include "exception.h"
 String String_format(String fmt, List values);

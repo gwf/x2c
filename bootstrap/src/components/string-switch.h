@@ -1,1 +1,1 @@
-../string-switch.h
+#include "../string-switch.h"

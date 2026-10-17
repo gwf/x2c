@@ -30,9 +30,9 @@ static List _update_cast_in(List id);
 
 static List _update_cast_out(List id);
 
-#include "var.h"
+#include "var/var.h"
 #include "dispatch.h"
-#include "string.h"
+#include "string/string.h"
 #include "array.h"
 #include "map.h"
 static inline unsigned long long _integer_raw(Symbol _x2c_gensym_macro_op_0, unsigned long long _x2c_gensym_macro_a_0, unsigned long long _x2c_gensym_macro_b_0, int _x2c_gensym_macro_bits_0, int _x2c_gensym_macro_unsigned_value_0);

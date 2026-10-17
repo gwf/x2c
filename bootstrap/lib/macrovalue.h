@@ -2,11 +2,11 @@
 
 #pragma once
 
-#ifndef __GUARD_0x55030A90__
-#define __GUARD_0x55030A90__
+#ifndef __GUARD_0xD484EB6F__
+#define __GUARD_0xD484EB6F__
 
 #include "common.h"
-#include "match.h"
+#include "match/match.h"
 typedef struct MacroFixedSlots{
   int count, slots[MACHINE_BINDER_MAX];
   int names, name_slots[MACHINE_BINDER_MAX];
@@ -31,11 +31,11 @@ MacroCaseSite;
 
 #include "array.h"
 #include "atom.h"
-#include "list.h"
+#include "list/list.h"
 #include "match-machine.h"
 #include "match-cache.h"
 #include "meta.h"
-#include "string.h"
+#include "string/string.h"
 #include "varconvert.h"
 #include <math.h>
 static int List_truth(List);
@@ -127,4 +127,4 @@ int MacroMatcher_matches(MacroMatcher * m, List code);
 int Macro_matches(Macro t, List code, List holes);
 
 
-#endif /* __GUARD_0x55030A90__ */
+#endif /* __GUARD_0xD484EB6F__ */

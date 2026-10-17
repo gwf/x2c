@@ -5,7 +5,7 @@
 #ifndef __GUARD_0x447E3425__
 #define __GUARD_0x447E3425__
 
-#include "string.h"
+#include "string/string.h"
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>

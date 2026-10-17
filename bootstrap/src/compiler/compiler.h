@@ -1,1 +1,1 @@
-../compiler.h
+#include "../compiler.h"

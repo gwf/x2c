@@ -410,9 +410,9 @@ gain or net line reduction has been measured. It is independent of C12.
 
 | Independently interpreted fact | Compiler location | Runtime owner |
 | --- | --- | --- |
-| Leading binder in `(!is binder type tag)` | [compiler.x](https://github.com/gwf/x2c/blob/f28fc36fd11116666cf21962c66c5b27dda66d0b/src/compiler.x#L2012), _flat_capture_tag 2012-2022 | [match.x](https://github.com/gwf/x2c/blob/f28fc36fd11116666cf21962c66c5b27dda66d0b/lib/match.x#L332), normalization 332-344 |
+| Leading binder in `(!is binder type tag)` | [compiler.x](https://github.com/gwf/x2c/blob/f28fc36fd11116666cf21962c66c5b27dda66d0b/src/compiler.x#L2012), _flat_capture_tag 2012-2022 | [match.x](https://github.com/gwf/x2c/blob/f28fc36fd11116666cf21962c66c5b27dda66d0b/lib/match/match.x#L332), normalization 332-344 |
 | Type-tag alias treatment | compiler.x:2018-2020 excludes aliases | match.x:686-690 canonicalizes them |
-| Normalized type predicate | compiler's tag extraction above | [match.x](https://github.com/gwf/x2c/blob/f28fc36fd11116666cf21962c66c5b27dda66d0b/lib/match.x#L1342), lowering 1342-1351 |
+| Normalized type predicate | compiler's tag extraction above | [match.x](https://github.com/gwf/x2c/blob/f28fc36fd11116666cf21962c66c5b27dda66d0b/lib/match/match.x#L1342), lowering 1342-1351 |
 
 MatchCaptureLayout already constructs normalized pattern data at match.x:556-596
 and stores it at 588. Compiler binder analysis at compiler.x:2055-2062 consumes

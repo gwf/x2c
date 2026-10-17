@@ -6,7 +6,7 @@
 #define __GUARD_0x396C5583__
 
 #include "x2c.h"
-#include "lisp.h"
+#include "lisp/lisp.h"
 Var lisp_last(Var values);
 
 Var lisp_begin(List values);

@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "buffer.h"
-#include "string.h"
+#include "string/string.h"
 Symbol Symbol_new_len(const char * str, int len);
 
 Symbol Symbol_new(const char * str);

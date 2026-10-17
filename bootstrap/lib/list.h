@@ -2,14 +2,14 @@
 
 #pragma once
 
-#ifndef __GUARD_0xD09D0392__
-#define __GUARD_0xD09D0392__
+#ifndef __GUARD_0x479A1F8F__
+#define __GUARD_0x479A1F8F__
 
 #include "error-macros.h"
 typedef struct List * List;
 
 #include "common.h"
-#include "var.h"
+#include "var/var.h"
 static inline Var car(List x);
 
 static inline List cdr(List x);
@@ -183,4 +183,4 @@ String List_repr(List lst);
 Buffer List_write_repr(List lst, Buffer out);
 
 
-#endif /* __GUARD_0xD09D0392__ */
+#endif /* __GUARD_0x479A1F8F__ */

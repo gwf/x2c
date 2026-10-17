@@ -94,11 +94,11 @@ _Static_assert(_Generic(& setbuf, void(*)(File, char *) : 1, default: 0), "nativ
 #define File_setbuf setbuf
 static String _0;
 static int _init_guard_ = 0;
-#include "string.h"
+#include "string/string.h"
 #include "block.h"
 #include "buffer.h"
 #include "exception.h"
-#include "var.h"
+#include "var/var.h"
 #include "iter.h"
 #include <unistd.h>
 #include <stdarg.h>

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0x41126DC7__
-#define __GUARD_0x41126DC7__
+#ifndef __GUARD_0x74CEA5DF__
+#define __GUARD_0x74CEA5DF__
 
 #include "error-macros.h"
 #include "common.h"
@@ -138,4 +138,4 @@ int Var_integer_compare(Var a, Var b);
 int Var_integer_floating_compare(Var integer, Var floating);
 
 
-#endif /* __GUARD_0x41126DC7__ */
+#endif /* __GUARD_0x74CEA5DF__ */

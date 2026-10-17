@@ -1,1 +1,1 @@
-../interpolation.h
+#include "../interpolation.h"

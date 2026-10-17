@@ -2,13 +2,13 @@
 
 #pragma once
 
-#ifndef __GUARD_0xD09CF48E__
-#define __GUARD_0xD09CF48E__
+#ifndef __GUARD_0xA8155D0F__
+#define __GUARD_0xA8155D0F__
 
 #include "private-keywords.h"
 #include "cleanup.h"
 #include "x2c.h"
-#include "macro-value.h"
+#include "macrovalue/macrovalue.h"
 typedef Var(* NativeScalarLoad)(const void * bytes, Scope * owner);
 
 typedef void(* NativeScalarStore)(void * bytes, Var value);
@@ -147,4 +147,4 @@ Var lisp_read_file(String path);
 Var lisp_write_file(String path, String text);
 
 
-#endif /* __GUARD_0xD09CF48E__ */
+#endif /* __GUARD_0xA8155D0F__ */

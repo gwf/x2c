@@ -1,5 +1,5 @@
 <elapsed> error/err-report start_time="<wall-time>" code=<conv-range> detail=
 ((operation "Var.new") (target i48)) location=
 ((file "../../lib/var/construction.x") (line <line>) 
- (function "f16_var_construction____new_integer"))
+ (function "f12_construction____new_integer"))
 x2c error floor: <conv-range>: non-returning error was not caught

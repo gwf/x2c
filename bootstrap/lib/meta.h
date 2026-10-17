@@ -8,9 +8,9 @@
 #include "array.h"
 #include "atom.h"
 #include "common.h"
-#include "list.h"
-#include "match.h"
-#include "string.h"
+#include "list/list.h"
+#include "match/match.h"
+#include "string/string.h"
 #include "symbol.h"
 #include "symbolset.h"
 typedef List Macro;

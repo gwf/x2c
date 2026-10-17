@@ -4,7 +4,7 @@
 #include "common.h"
 typedef struct Error * Error;
 
-#include "error.h"
+#include "error/error.h"
 static int _init_guard_ = 0;
 
 void Error_shutdown(void);

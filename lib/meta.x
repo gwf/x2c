@@ -5,9 +5,9 @@
     A `meta` function runs inside the compiler, so it can ask the compiler
     questions and build syntax for it to bind. This module declares those
     operations in x2c; the macro values a `meta` function applies and
-    recognizes are in `macrovalue/macrovalue.x`. Code builds code with quotations
-    (`$!( ... )`, `$!{ ... }`, `$!T{ ... }`) and `%(...)` Lists, so the
-    surface declares no constructors.
+    recognizes are in `macrovalue/macrovalue.x`. Code builds code with
+    quotations (`$!( ... )`, `$!{ ... }`, `$!T{ ... }`) and `%(...)` Lists,
+    so the surface declares no constructors.
 
     The operations on a value are methods of the value's type: `Code`,
     captured code, and `Type`, a semantic type. The rest are `x2c_` helpers

@@ -7,8 +7,8 @@
 
 #include "meta.h"
 #include "array.h"
-#include "list.h"
-#include "match.h"
+#include "list/list.h"
+#include "match/match.h"
 #include "symbolset.h"
 #include "native-scalar-types.h"
 #include <limits.h>

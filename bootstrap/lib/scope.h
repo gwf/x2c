@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xAAD89034__
-#define __GUARD_0xAAD89034__
+#ifndef __GUARD_0x7792FEF9__
+#define __GUARD_0x7792FEF9__
 
 #include "error-macros.h"
 #include <stddef.h>
@@ -89,4 +89,4 @@ void Scope_shutdown_hook(void(* hook)(void));
 void Scope_shutdown(void);
 
 
-#endif /* __GUARD_0xAAD89034__ */
+#endif /* __GUARD_0x7792FEF9__ */

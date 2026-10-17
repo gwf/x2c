@@ -16,11 +16,11 @@ typedef struct MachineStats MachineStats;
 typedef struct MatchMachine MatchMachine;
 
 #include "common.h"
-#include "var.h"
-#include "list.h"
+#include "var/var.h"
+#include "list/list.h"
 #include "symbol.h"
 #include "func.h"
-#include "scope.h"
+#include "scope/scope.h"
 #define MACHINE_CODE_MAX     4096
 #define MACHINE_CONST_MAX     256
 #define MACHINE_BINDER_MAX     64

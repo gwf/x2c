@@ -135,7 +135,7 @@ that all storage owners lose their callback choices.
 
 ### PoolTable: a sixth production core consumer
 
-The refreshed [pool.x](../../lib/pool.x) has 1,035 lines. PoolTable's type at
+The refreshed [pool.x](../../lib/pool/pool.x) has 1,035 lines. PoolTable's type at
 lines 28-31 has the Scope, parallel hash/entry Blocks, used count, capacity,
 and mask that the shared Map core expects. Its scaffold at 73-76, Var
 callbacks at 78-79, and core family at 81-84 compose the existing owners.

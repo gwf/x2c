@@ -6,9 +6,9 @@
 #define __GUARD_0xC7068438__
 
 #include "common.h"
-#include "var.h"
-#include "list.h"
-#include "string.h"
+#include "var/var.h"
+#include "list/list.h"
+#include "string/string.h"
 typedef union FuncArgData{
   Var value;
   const void * reference;
@@ -24,11 +24,11 @@ FuncArg;
 typedef Var(* FuncAdapter)(Func fn, const FuncArg * argv);
 
 #include "varconvert.h"
-#include "error.h"
+#include "error/error.h"
 #include "exception.h"
-#include "match.h"
+#include "match/match.h"
 #include "symbol.h"
-#include "scope.h"
+#include "scope/scope.h"
 #include "meta.h"
 #include "func-errors.h"
 #include <stddef.h>

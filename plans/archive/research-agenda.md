@@ -52,7 +52,7 @@ or fixes the other.
 Evidence: [Torch's report](../../packages/torch/benchmarks/REPORT.md) records
 stable native/Scope counts and bounded canonical storage in the pooled variant,
 but an unexplained incremental process-peak excess. Historical pool churn is
-not equivalent to a leak. [Pool._block_return](../../lib/pool.x) places
+not equivalent to a leak. [Pool._block_return](../../lib/pool/pool.x) places
 released blocks in the process depot; the registry frees them at shutdown. The
 block registry/page index assumes storage remains allocated until shutdown.
 

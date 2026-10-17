@@ -5,7 +5,7 @@
 #ifndef __GUARD_0xC0DA537A__
 #define __GUARD_0xC0DA537A__
 
-#include "string.h"
+#include "string/string.h"
 typedef struct Split * Split;
 
 Var Split_var(Split split);

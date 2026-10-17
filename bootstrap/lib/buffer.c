@@ -15,8 +15,8 @@ typedef struct Buffer{
 * Buffer;
 
 #include "exception.h"
-#include "scope.h"
-#include "string.h"
+#include "scope/scope.h"
+#include "string/string.h"
 #include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>

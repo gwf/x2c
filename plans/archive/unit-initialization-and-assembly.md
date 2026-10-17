@@ -145,8 +145,8 @@ transformation stage. Insertion order alone does not define execution order.
 
 **Two rollback paths restore pending code.** `SymTxn` checkpoints
 `early_decls` and `inits` only for macro applications
-(`transaction.extended`, [symbols.x:1271](../../src/symbols.x) and
-[1292](../../src/symbols.x)). `_speculate`
+(`transaction.extended`, [symbols.x:1271](../../src/symtab/symtab.x) and
+[1292](../../src/symtab/symtab.x)). `_speculate`
 ([initializers.x:734](../../src/initializers/initializers.x)) separately snapshots and
 restores `early_decls`, `id_keys`, `key_ids`, and the adapter map by hand.
 The pending owner provides one checkpoint and restore that both use.

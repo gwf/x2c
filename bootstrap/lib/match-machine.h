@@ -8,10 +8,10 @@
 #include "machine.h"
 #include <assert.h>
 #include <string.h>
-#include "scope.h"
+#include "scope/scope.h"
 #include "array.h"
 #include "exception.h"
-#include "match.h"
+#include "match/match.h"
 void MatchMachine_run(MatchMachine * m);
 
 int MatchMachine_step(MatchMachine * m);

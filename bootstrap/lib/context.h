@@ -12,15 +12,15 @@
 #include "block.h"
 #include "buffer.h"
 #include "dispatch.h"
-#include "error.h"
+#include "error/error.h"
 #include "exception.h"
-#include "list.h"
+#include "list/list.h"
 #include "map.h"
 #include "match-cache.h"
-#include "pool.h"
-#include "scope.h"
-#include "string.h"
-#include "var.h"
+#include "pool/pool.h"
+#include "scope/scope.h"
+#include "string/string.h"
+#include "var/var.h"
 #include <stdlib.h>
 Var Context_export(Context context, Var value);
 

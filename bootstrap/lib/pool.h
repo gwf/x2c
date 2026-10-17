@@ -2,8 +2,8 @@
 
 #pragma once
 
-#ifndef __GUARD_0xD7C30390__
-#define __GUARD_0xD7C30390__
+#ifndef __GUARD_0xCBF06E4F__
+#define __GUARD_0xCBF06E4F__
 
 #include "error-macros.h"
 #include "private-keywords.h"
@@ -11,8 +11,8 @@
 typedef struct Pool * Pool;
 
 #include "common.h"
-#include "scope.h"
-#include "var.h"
+#include "scope/scope.h"
+#include "var/var.h"
 typedef struct PoolTable{
   Scope scope;
   Bytes hashes, entries;
@@ -97,4 +97,4 @@ int Pool_is_permanent(Var value);
 unsigned long Pool_epoch(void);
 
 
-#endif /* __GUARD_0xD7C30390__ */
+#endif /* __GUARD_0xCBF06E4F__ */

@@ -5,7 +5,7 @@
 #ifndef __GUARD_0x22AD6B5D__
 #define __GUARD_0x22AD6B5D__
 
-#include "string.h"
+#include "string/string.h"
 #include <limits.h>
 #include "buffer.h"
 #include "exception.h"

@@ -37,10 +37,10 @@ struct UnzipShared{
 }
 ;
 
-#include "list.h"
-#include "var.h"
+#include "list/list.h"
+#include "var/var.h"
 #include "symbol.h"
-#include "scope.h"
+#include "scope/scope.h"
 #include "array.h"
 #include "block.h"
 #include "func.h"

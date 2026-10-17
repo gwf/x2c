@@ -21,7 +21,7 @@ typedef Block Array;
 #include "func.h"
 #include "iter.h"
 #include "block.h"
-#include "var.h"
+#include "var/var.h"
 #include "varconvert.h"
 Array Array_new(void);
 

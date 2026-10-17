@@ -4,10 +4,10 @@
 #include "machine.h"
 #include <assert.h>
 #include <string.h>
-#include "scope.h"
+#include "scope/scope.h"
 #include "array.h"
 #include "exception.h"
-#include "match.h"
+#include "match/match.h"
 static List * _cursor(MatchMachine * m, int reg);
 
 static int * _distance(MatchMachine * m, int reg);
