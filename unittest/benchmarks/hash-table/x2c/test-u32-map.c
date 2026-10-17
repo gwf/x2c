@@ -29,27 +29,9 @@ static X2CU32MapItr put(
   X2CU32Map map, uint32_t key, uint64_t hash,
   uint32_t initial, int *inserted
 ) {
-#ifdef U32_MAP_COMPACT_RESULT
-  X2CU32MapResult result = x2c_u32_map_get_or_insert_hashed(
-    map, key, hash, initial
-  );
-  *inserted = x2c_u32_map_result_inserted(result);
-  X2CU32MapItr itr = { .slot = result.slot };
-#elif defined(U32_MAP_DIRECT_RESULT)
-  X2CU32MapResult result = x2c_u32_map_get_or_insert_hashed(
-    map, key, hash, initial
-  );
-  *inserted = result.inserted;
-  X2CU32MapItr itr = result.itr;
-#elif defined(U32_MAP_OUT_VALUE)
-  X2CU32MapItr itr = x2c_u32_map_get_or_insert_hashed(
-    map, key, hash, initial, inserted, NULL
-  );
-#else
   X2CU32MapItr itr = x2c_u32_map_get_or_insert_hashed(
     map, key, hash, initial, inserted
   );
-#endif
   check(x2c_u32_map_valid(map, itr), "insertion returned invalid iterator");
   return itr;
 }

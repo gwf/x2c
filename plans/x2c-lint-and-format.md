@@ -362,7 +362,9 @@ output on the same tree. Two behaviors are kept for that parity and are
 worth revisiting: public types still stop at the first `#pragma private`,
 which hides the documented-in-prose but `/*`-commented `MatchCache` and
 `MatchLease`; and a Unit-macro product's signature is still spelled from its
-type. The stale-interface and signature cross-checks against `.xi` files
+type. The first is resolved: visibility pragmas were removed on 2026-10-06
+(`67feaf60d`), and `tools/gen-api-reference` now reads the compiler's
+publication flag (`a5cd78da1`). The stale-interface and signature cross-checks against `.xi` files
 are gone, because pages and compiler now read the same walk. Each
 generator's check went from about 3.1-3.6 s on one core to about 2 s, using
 about 15 s of processor time across cores. The Pages workflow builds the
