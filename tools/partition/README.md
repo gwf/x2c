@@ -16,6 +16,14 @@ and accepts `--port` and `--graph`. Generation builds stage 0, exports the
 source graph through `commands/graph`, and atomically replaces ignored
 `data/graph.json`. `--repo` and `--output` select another checkout or output.
 
+Generation exports the entry units that `tools/sources.py` lists. A module
+unit is one file record, as in the compiler; its `members` hold the text of
+its other files. Each function records the file that holds it (`p`) and its
+storage tier (`v`): `static`, `module`, or `public`, as defined in the
+[source graph datasets](../../commands/graph/README.md#export-datasets).
+`s` marks a definition private to its unit, which is either private tier.
+Source peek shows the file that holds the function.
+
 ## Build responsibilities
 
 Open a file or group and select **Analyze source**. The local server uses the

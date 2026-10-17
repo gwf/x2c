@@ -363,7 +363,7 @@ List _x2c_flow_analyze_unit(Compiler compiler, List ast, String path) {
         functions.push(
           %(function ${definitions[binding]}
             ${compiler.emitted_binding_name(binding)}
-            ${project_visibility(type)}
+            ${project_visibility(compiler, type, binding)}
             (parameters @{parameter_records.list_free()})
             (returns @{unit.returns.list_free()})
             (calls @{unit.calls.list_free()})

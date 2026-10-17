@@ -220,8 +220,8 @@ $(BINARY): $(BIN_OBJECTS) $(LIBRARY)
 # linked compiler, then use the same native flags and archives as the driver.
 # Other commands reuse this archive and embedded identity from the root Makefile.
 COMMAND_X_FILES = $(wildcard $(ROOT)/commands/build/*.x) $(COMMAND_IDENTITY)
-COMMAND_NAMES = $(notdir $(basename $(COMMAND_X_FILES)))
-COMMAND_C_FILES = $(addprefix $(COMMAND_BUILD)/,$(addsuffix .c,$(COMMAND_NAMES)))
+COMMAND_STEMS = $(notdir $(basename $(COMMAND_X_FILES)))
+COMMAND_C_FILES = $(addprefix $(COMMAND_BUILD)/,$(addsuffix .c,$(COMMAND_STEMS)))
 COMMAND_H_FILES = $(COMMAND_C_FILES:.c=.h)
 COMMAND_XI_FILES = $(COMMAND_C_FILES:.c=.xi)
 COMMAND_OBJECTS = $(COMMAND_C_FILES:.c=.o)

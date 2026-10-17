@@ -40,12 +40,14 @@ function showDecomposition(
 function showSource(v) {
   const previous = [...$("source-content").childNodes];
   const f = D.functions[v],
-    file = D.files[f.f];
+    file = D.files[f.f],
+    path = f.p || file.id,
+    source = path === file.id ? file.source : file.members?.[path];
   $("source-content").innerHTML =
-    `<div class="paneltag">SNAPSHOT SOURCE ${esc(D.revision)}</div><h2>${esc(f.n)}</h2><p>${esc(file.id)} &middot; source order ${f.o}. Exact definition range unavailable; search matches can include declarations and uses.</p><label>Find in source <input id="source-find" value="${esc(f.n)}"></label><button id="source-next">Next match</button><span id="source-matches"></span><div class="source-lines">${
-      file.source === undefined
+    `<div class="paneltag">SNAPSHOT SOURCE ${esc(D.revision)}</div><h2>${esc(f.n)}</h2><p>${esc(path)}${path === file.id ? "" : ` in ${esc(file.id)}`} &middot; source order ${f.o}. Exact definition range unavailable; search matches can include declarations and uses.</p><label>Find in source <input id="source-find" value="${esc(f.n)}"></label><button id="source-next">Next match</button><span id="source-matches"></span><div class="source-lines">${
+      source === undefined
         ? "Source text unavailable in this snapshot. Regenerate graph data."
-        : file.source
+        : source
             .split("\n")
             .map(
               (line, i) =>

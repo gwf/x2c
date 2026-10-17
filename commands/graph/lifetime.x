@@ -715,7 +715,7 @@ List Lifetime.analyze_unit(
           return_facts.push(%(other));
         if (state.summary_unresolved)
           return_facts.push(%(unresolved));
-        Symbol visibility = project_visibility(type);
+        Symbol visibility = project_visibility(compiler, type, binding);
         List summary = %(
           function ${state.target} ${state.function} $visibility
           (returns @{return_facts.list_free()})

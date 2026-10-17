@@ -76,13 +76,13 @@ class Analyses:
                 edges = [e for e in data['edges'] if e[0] in selected or e[1] in selected]
                 relevant = selected | {v for e in edges for v in e[:2]}
                 files = {data['functions'][v]['f'] for v in relevant}
-                for file_id in range(len(data['files'])):
-                    file = data['files'][file_id]
-                    path = root / 'source' / file['id']
-                    if not path.resolve().is_relative_to((root / 'source').resolve()):
-                        raise ValueError('Invalid source path in snapshot.')
-                    path.parent.mkdir(parents=True, exist_ok=True)
-                    path.write_text('\n'.join(f'{i}: {line}' for i, line in enumerate(file.get('source', '').splitlines(), 1)))
+                for file in data['files']:
+                    for name, text in [(file['id'], file.get('source', '')), *file.get('members', {}).items()]:
+                        path = root / 'source' / name
+                        if not path.resolve().is_relative_to((root / 'source').resolve()):
+                            raise ValueError('Invalid source path in snapshot.')
+                        path.parent.mkdir(parents=True, exist_ok=True)
+                        path.write_text('\n'.join(f'{i}: {line}' for i, line in enumerate(text.splitlines(), 1)))
                 indexed = {v: k for k, v in keys.items()}
                 context = {
                     'revision': data['revision'], 'selected': scope,

@@ -119,7 +119,7 @@ List LoopAllocations.analyze_unit(Compiler compiler, List ast, String path) {
              (bind (!set ?binding (binding ? ?)) ?)
              ?body): {
         walk.function = compiler.emitted_binding_name(binding);
-        walk.visibility = project_visibility(type);
+        walk.visibility = project_visibility(compiler, type, binding);
         _loop_collect(walk, body, 0, 0, <nested>);
       }
   walk.direct.sort();

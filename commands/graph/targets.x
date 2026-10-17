@@ -96,9 +96,60 @@ int project_add_unique(Map lists, Var key, Var value) {
   return 1;
 }
 
-/** `<static>` for a definition of static `type`, otherwise `<public>`. */
-Symbol project_visibility(Type type) =>
-  type.is_static() ? <static> : <public>;
+/** The storage tier of a definition of `type` bound to `binding`:
+    `<static>` for a static private to its file, `<module>` for a static
+    that every file of a module unit sees, otherwise `<public>`. A module
+    unit spells each file-private static with its file's prefix. */
+Symbol project_visibility(Compiler compiler, Type type, List binding) {
+  if (!type.is_static()) return <public>;
+  List prefixes = compiler.file_prefixes();
+  if (!prefixes) return <static>;
+  String name = compiler.emitted_binding_name(binding);
+  foreach (String prefix, prefixes)
+    if (name.startswith(prefix)) return <static>;
+  return <module>;
+}
+
+/** The display paths of a module unit's files, or NULL for a single-file
+    unit. */
+Map project_member_files(Compiler compiler) {
+  if (!compiler.line_markers) return NULL;
+  Map members = {};
+  foreach (List row, compiler.line_markers)
+    match (row) case %(? ? ?(String member) *):
+      members[compiler.display_path(member)] = 1;
+  return members;
+}
+
+static String _member_file(Compiler compiler, Map members, Var value) {
+  if (value is not <list>) return NULL;
+  List node = value;
+  match (node) case %(at ?origin ?): {
+    List location = compiler.origin_location(origin.integer());
+    Var file = location ? location.assoc(<file>) : void;
+    if (file is <string>) {
+      String source = compiler.display_path(file.str());
+      if (source in members) return source;
+    }
+  }
+  foreach (Var child, node) {
+    String file = _member_file(compiler, members, child);
+    if (file) return file;
+  }
+  return NULL;
+}
+
+/** The file of unit `path` that holds `definition`: the file of its first
+    node located in one of `members`, the unit's files. A single-file unit,
+    or a definition with no such node, gives `path`. Macro templates locate
+    their nodes in the files that define them, so other files do not
+    count. */
+String project_definition_file(
+  Compiler compiler, Map members, String path, List definition) {
+  if (!members) return path;
+  String file = _member_file(compiler, members, definition);
+  return file ? file : path;
+}
 
 /** Orders `records` by the key `key` builds for each one, keeps the first
     `limit`, and returns them as a List. */

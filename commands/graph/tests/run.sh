@@ -81,8 +81,9 @@ $fixtures/collision-a.x $fixtures/collision-b.x"
 
   tab=$(printf '\t')
   function_header="function_id${tab}kind${tab}subtree${tab}unit${tab}"
-  function_header="${function_header}unit_lines${tab}source_order${tab}"
-  function_header="${function_header}source_name${tab}emitted_name${tab}"
+  function_header="${function_header}file${tab}unit_lines${tab}"
+  function_header="${function_header}source_order${tab}source_name${tab}"
+  function_header="${function_header}emitted_name${tab}"
   function_header="${function_header}visibility${tab}external_calls${tab}"
   function_header="${function_header}indirect_calls"
   [ "$(head -n 1 "$dataset_dir/functions.tsv")" = \
@@ -1005,8 +1006,27 @@ check_query_failures() {
   grep -q 'external "Scope_free"' "$tmp/binding-number"
 }
 
+# A module unit has three storage tiers. Each definition names the member
+# file that holds it and its source spelling without the file prefix.
+check_tiers() {
+  tiers="$fixtures/tiers"
+  $tool datasets "$tmp/tiers" "$tiers/tiers.x" -- "$fixtures/dataset-lib.x"
+  cut -f4,5,8-10 "$tmp/tiers/functions.tsv" | grep "^$tiers/" |
+    sed "s#$tiers/##g" >"$tmp/tiers-rows"
+  cat >"$tmp/tiers-expected" <<EOF_TIERS
+tiers.x	parts.x	tiers_part_helper	f5_parts___tiers_part_helper	static
+tiers.x	tiers.x	tiers_entry_helper	f5_tiers___tiers_entry_helper	static
+tiers.x	parts.x	tiers_part	tiers_part	public
+tiers.x	tiers.x	tiers_public	tiers_public	public
+tiers.x	parts.x	tiers_shared	tiers_shared	module
+EOF_TIERS
+  cmp "$tmp/tiers-expected" "$tmp/tiers-rows"
+  $tool digest "$tiers/tiers.x" | tr '\n' ' ' | sed 's/  */ /g' |
+    grep -q '(functions (public 2) (module 1) (static 2))'
+}
+
 . commands/parallel.sh
-for check in ast_parity calls architecture fields sites walks \
+for check in ast_parity calls tiers architecture fields sites walks \
   loop_allocations lifetimes flows flow_failures graph_failures \
   query_failures
 do

@@ -11,15 +11,19 @@ From the repository root, after `make commands`:
 
 ```sh
 # Find parsed callers and callees before changing syntax binding.
-builds/0/libexec/x2c-graph focus Compiler_bind_syntax src/*.x
-grep -n 'bind_syntax' src/*.x
+builds/0/libexec/x2c-graph focus Compiler_bind_syntax \
+  $(python3 tools/sources.py --area src)
+grep -rn 'bind_syntax' src
 
 # Inspect returned allocation before removing an apparent copy.
 builds/0/libexec/x2c-graph allocation-returns String_split_n lib/split.x
 
 # Find repeated full walks that may merit source inspection.
-builds/0/libexec/x2c-graph walks src/*.x
+builds/0/libexec/x2c-graph walks $(python3 tools/sources.py --area src)
 ```
+
+`tools/sources.py` lists the entry units of `src` or `lib`. Each module entry
+splices its member files into one unit, so pass the entry, not the members.
 
 Commands use emitted
 names (`String_split_n` for `String.split_n`); supply the relevant source
@@ -34,7 +38,7 @@ units, this shell example excludes the generated `lib/x2c.x` prelude and keeps
 one filename per argument (including in zsh):
 
 ```sh
-set -- src/*.x
+set -- $(python3 tools/sources.py --area src)
 for unit in $(python3 tools/sources.py --area lib); do
   [ "$unit" = lib/x2c.x ] || set -- "$@" "$unit"
 done
@@ -72,8 +76,9 @@ within their source unit and then to one uniquely named public definition in
 the supplied files. Function pointers and computed callees remain indirect;
 missing or ambiguous definitions remain external.
 
-`digest` condenses that graph into per-unit function counts, internal and
-cross-unit call counts, unresolved and indirect calls, and cross-unit cycles.
+`digest` condenses that graph into per-unit function counts by storage tier,
+internal and cross-unit call counts, unresolved and indirect calls, and
+cross-unit cycles.
 
 ### Repeated syntax experiment
 
@@ -110,7 +115,7 @@ selected syntax roots, so its totals differ from the all-cell distribution.
 For example, run over the compiler and runtime, omitting the generated prelude:
 
 ```sh
-set -- src/*.x
+set -- $(python3 tools/sources.py --area src)
 for unit in $(python3 tools/sources.py --area lib); do
   [ "$unit" = lib/x2c.x ] || set -- "$@" "$unit"
 done
@@ -158,17 +163,30 @@ not leave a partial dataset.
 `functions.tsv` has these columns:
 
 ```text
-function_id  kind  subtree  unit  unit_lines  source_order  source_name  emitted_name  visibility  external_calls  indirect_calls
+function_id  kind  subtree  unit  file  unit_lines  source_order  source_name  emitted_name  visibility  external_calls  indirect_calls
 ```
 
 The separators in the actual file are tabs. `function_id` is
 `UNIT::EMITTED_NAME`, the canonical endpoint used in both edge files. A line
 or column is not part of identity. `kind` is `function` or `top-level`, and
-`subtree` is the explicit `src` or `lib` group. `unit_lines` is the physical
-source-file line count. `source_order` is the one-based order of parsed
-functions in the unit; the synthetic top-level caller uses zero.
-`source_name` preserves an x2c method as `Owner.member`, while `emitted_name`
-is its resolved C name. `visibility` is `static` or `public`.
+`subtree` is the explicit `src` or `lib` group. `unit` is the input file.
+`file` is the file that holds the definition: a member file of a module unit,
+or `unit` itself. The exporter takes it from the first source location in the
+definition that lies in one of the unit's files. A definition with none, such
+as a macro-generated helper, takes `unit`. `unit_lines` is the physical line
+count of the unit, including every member file of a module unit.
+`source_order` is the one-based order of parsed functions in the unit; the
+synthetic top-level caller uses zero.
+`source_name` is the name as written in source: an x2c method stays
+`Owner.member`, and a file-private static keeps no file prefix. `emitted_name`
+is its resolved C name. `visibility` is the storage tier, described under
+"Module blocks" in `docs/src/reference/language.md`:
+
+- `static` is private to its file: a static in a single-file unit, or a
+  static whose emitted name begins with its file's prefix in a module unit.
+- `module` is a static that every file of a module unit sees. It emits with
+  no file prefix.
+- `public` is a nonstatic definition, which other units can link to.
 `external_calls` and `indirect_calls` count parsed call expressions made by
 that function whose target is respectively missing or ambiguous, or computed.
 They are counts, not graph endpoints.
@@ -199,7 +217,7 @@ To export the compiler and runtime units, this shell example names the
 generated `lib/x2c.x` prelude:
 
 ```sh
-set -- src/*.x --
+set -- $(python3 tools/sources.py --area src) --
 for unit in $(python3 tools/sources.py --area lib); do
   [ "$unit" = lib/x2c.x ] || set -- "$@" "$unit"
 done
@@ -212,10 +230,11 @@ The compiler driver runs the same command as
 ### Reading and analyzing the datasets
 
 The direct function graph uses every `function_id` as a node and every row in
-the two call files as a directed edge. Use `unit`, `subtree`, `visibility`,
-and `source_order` as node attributes. Begin clustering with one unit of
-weight per edge, then compare the result using `static_calls`; agreement is
-more informative than treating the syntactic count as observed execution.
+the two call files as a directed edge. Use `unit`, `file`, `subtree`,
+`visibility`, and `source_order` as node attributes. Begin clustering with one
+unit of weight per edge, then compare the result using `static_calls`;
+agreement is more informative than treating the syntactic count as observed
+execution.
 
 A file graph is derived rather than separately exported. Join each endpoint
 to `functions.tsv`, group edges by caller and callee `unit`, and retain both
@@ -225,18 +244,22 @@ participate.
 
 To examine a large source file, select its nodes and the edges whose two
 endpoints are both in that unit. Cluster that induced graph without using the
-current unit label. For a proposed split, report the number of functions and
-internal edges in each part, directed edges and summed call occurrences that
-cross the proposed cut, and cut edges whose callee is currently `static`.
-Also list public functions and sum external and indirect calls in each part.
-Those facts distinguish a low graph cut from a move that would require new
-linkage or leave important unresolved dependencies unexplained.
+current unit or file label. For a proposed split, report the number of
+functions and internal edges in each part, directed edges and summed call
+occurrences that cross the proposed cut, and cut edges by callee tier. A cut
+edge to a `static` callee needs that callee to become `module` if the parts
+become files of one module unit, or `public` if they become separate units. A
+`module` callee needs `public` only for separate units. Also list public
+functions and sum external and indirect calls in each part. Those facts
+distinguish a low graph cut from a move that would require wider storage or
+leave important unresolved dependencies unexplained.
 
-For visualization, files work well as containers, discovered communities as
-colors, visibility as node shape, optional `static_calls` as edge width, and
-the proposed cut as highlighted edges. Network-flow and community algorithms
-should treat direction deliberately: a symmetrized graph answers a different
-question from conductance, directed modularity, or a caller-to-callee cut.
+For visualization, units and their files work well as nested containers,
+discovered communities as colors, visibility as node shape, optional
+`static_calls` as edge width, and the proposed cut as highlighted edges.
+Network-flow and community algorithms should treat direction deliberately: a
+symmetrized graph answers a different question from conductance, directed
+modularity, or a caller-to-callee cut.
 
 These datasets contain the parsed direct-call graph, not every dependency
 needed to move code safely. Calls introduced only by later transforms,
@@ -267,8 +290,8 @@ reciprocal dependency reported by `architecture`; it does not imply that the
 dependency is unnecessary.
 
 `focus` emits the resolved callers and callees for every definition with the
-exact emitted `NAME`. Same-named static functions remain separate and
-unit-qualified.
+exact emitted `NAME`. Same-named `static` and `module` functions remain
+separate and unit-qualified.
 
 `field` emits the functions that access the exact `FIELD` on the exact parsed
 receiver `TYPE`. It counts ordinary reads separately from occurrences in an

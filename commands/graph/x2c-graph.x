@@ -69,11 +69,12 @@ static String _source_function_name(Compiler compiler, List binding) {
       case %((!is ?owner type string) (!is ?member type string)):
         return %"$owner.$member";
   }
-  return Ast.binding_spelling(binding);
+  return compiler.unprefixed(Ast.binding_spelling(binding));
 }
 
 static List _analyze_unit(Compiler compiler, List ast, String path) {
   Map definitions = project_function_targets(compiler, ast, path);
+  Map members = project_member_files(compiler);
   Array functions = [];
   Map top_level_calls = {};
   int source_order = 0;
@@ -86,11 +87,13 @@ static List _analyze_unit(Compiler compiler, List ast, String path) {
         _collect_calls(compiler, definitions, body, calls);
         String name = compiler.emitted_binding_name(binding);
         String source_name = _source_function_name(compiler, binding);
-        Symbol visibility = project_visibility(type);
+        Symbol visibility = project_visibility(compiler, type, binding);
+        String file =
+          project_definition_file(compiler, members, path, node);
         source_order++;
         functions.push(
           %(function $identity $name $visibility
-            (source $source_name $source_order)
+            (source $source_name $source_order $file)
             (calls @{_call_records(calls)})));
         continue;
       }
@@ -100,7 +103,7 @@ static List _analyze_unit(Compiler compiler, List ast, String path) {
   if (top_level_calls.len())
     functions.push(
       %(function 0 "<top-level>" static
-        (source "<top-level>" 0)
+        (source "<top-level>" 0 $path)
         (calls @{_call_records(top_level_calls)})));
   functions.sort();
   return functions.list_free();
@@ -246,7 +249,7 @@ static List _analyze_tail_unit(Compiler compiler, List ast, String path) {
         walk.sites.sort();
         functions.push(
           %(function ${compiler.emitted_binding_name(binding)}
-            ${project_visibility(type)}
+            ${project_visibility(compiler, type, binding)}
             (calls (tail $tail) (non-tail $non_tail))
             (blockers @{blocker_rows.list_free()})
             (sites @{walk.sites.list_free()})));
@@ -422,7 +425,7 @@ static List _analyze_walk_unit(Compiler compiler, List ast, String path) {
           compiler, body, path, 0, definitions, calls);
         calls.sort();
         List call_list = calls.list_free();
-        Symbol visibility = project_visibility(type);
+        Symbol visibility = project_visibility(compiler, type, binding);
         functions.push(
           %(function $target ${compiler.emitted_binding_name(binding)}
             $visibility (parameters @parameter_list) (calls @call_list)
@@ -826,7 +829,7 @@ static List _analyze_sites_unit(
              ?body): {
         SiteWalk walk = top;
         walk.caller = compiler.emitted_binding_name(binding);
-        walk.visibility = project_visibility(type);
+        walk.visibility = project_visibility(compiler, type, binding);
         walk.parameters = _site_parameters(modifiers);
         walk.prior_writes = {};
         _collect_sites(walk, body);
@@ -957,7 +960,7 @@ static List _analyze_field_sites_unit(
              ?body): {
         FieldWalk walk = top;
         walk.caller = compiler.emitted_binding_name(binding);
-        walk.visibility = project_visibility(type);
+        walk.visibility = project_visibility(compiler, type, binding);
         walk.parameters = _site_parameters(modifiers);
         _collect_field_sites(walk, body, <read>, void, 0);
         continue;
@@ -1215,7 +1218,7 @@ static List _resolve_graph(List units, Map attributes) {
           match (function)
             case %(
               function ? ?name ?visibility
-              (source ?source_name ?source_order)
+              (source ?source_name ?source_order ?file)
               (calls *calls)
             ): {
               Map resolved = {};
@@ -1227,7 +1230,7 @@ static List _resolve_graph(List units, Map attributes) {
                   resolved, external_calls, indirect_calls);
                 attributes[%(target $path $name)] = %(
                   node $subtree $source_lines $source_order $source_name
-                  $external_calls $indirect_calls
+                  $file $external_calls $indirect_calls
                 );
               }
               output_functions.push(
@@ -1309,13 +1312,15 @@ static List _digest(List graph) {
         match (unit)
           case %(unit ?path (functions *functions)): {
             paths.push(path);
-            int public_count = 0, static_count = 0, internal_count = 0;
+            int public_count = 0, module_count = 0, static_count = 0;
+            int internal_count = 0;
             int unit_external = 0, unit_indirect = 0;
             Map dependencies = {};
             foreach (List function, functions) {
               function_count++;
               match (function) {
                 case %(function ? public (calls *calls)): public_count++;
+                case %(function ? module (calls *calls)): module_count++;
                 case %(function ? static (calls *calls)): static_count++;
               }
               match (function)
@@ -1347,7 +1352,8 @@ static List _digest(List graph) {
             adjacency[path] = adjacent;
             units.push(
               %(unit $path
-                (functions (public $public_count) (static $static_count))
+                (functions (public $public_count) (module $module_count)
+                           (static $static_count))
                 (internal $internal_count)
                 (dependencies @{dependency_rows.list_free()})
                 (external $unit_external)
@@ -2003,15 +2009,15 @@ static void _dataset_rows(
                   match (node)
                     case %(
                       node ?subtree ?unit_lines ?source_order ?source_name
-                      ?external_calls ?indirect_calls
+                      ?file ?external_calls ?indirect_calls
                     ): {
                       String function_id = _dataset_function_id(path, name);
                       String kind = name == "<top-level>"
                                   ? "top-level" : "function";
                       $output.graph.function_row(
                         functions, function_id, kind, subtree.symbol().str(),
-                        path, unit_lines.int(), source_order.int(), source_name,
-                        name, visibility, external_calls.int(),
+                        path, file, unit_lines.int(), source_order.int(),
+                        source_name, name, visibility, external_calls.int(),
                         indirect_calls.int());
                       foreach (List call, calls)
                         match (call)
@@ -2100,7 +2106,7 @@ static List _certify_parse_units(Frontend frontend, Array inputs) {
       Array extended = [];
       foreach (List function, functions) extended.push(function);
       extended.push(%(function 0 "<top-level>" static
-                      (source "<top-level>" 0) (calls)));
+                      (source "<top-level>" 0 $path) (calls)));
       functions = extended.sort().list_free();
     }
     List record = %(

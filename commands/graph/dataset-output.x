@@ -3,17 +3,17 @@
 /*  dataset-output.x -- graph TSV headers and row layouts */
 
 macro Expression $output.graph.function_header() => "".join(
-  %("function_id\tkind\tsubtree\tunit\tunit_lines\tsource_order\t"
+  %("function_id\tkind\tsubtree\tunit\tfile\tunit_lines\tsource_order\t"
     "source_name\temitted_name\tvisibility\texternal_calls\t"
     "indirect_calls"));
 
 macro Stmt $output.graph.function_row(
-  Expr $rows, Expr $id, Expr $kind, Expr $subtree, Expr $unit,
+  Expr $rows, Expr $id, Expr $kind, Expr $subtree, Expr $unit, Expr $file,
   Expr $lines, Expr $order,
   Expr $source, Expr $emitted, Expr $visibility, Expr $external,
   Expr $indirect) {
-  String row = "%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t%d\t%d".printf(
-    $id, $kind, $subtree, $unit, $lines, $order, $source, $emitted,
+  String row = "%s\t%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t%d\t%d".printf(
+    $id, $kind, $subtree, $unit, $file, $lines, $order, $source, $emitted,
     $visibility, $external, $indirect);
   $rows.push(row);
 }

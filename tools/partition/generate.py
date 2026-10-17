@@ -9,6 +9,14 @@ import tempfile
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
+sys.path.insert(0, str(HERE.parent))
+from sources import sources
+
+
+def units(root, area):
+    """Entry units of an area; each module entry stands for its members."""
+    return [p.relative_to(root).as_posix() for p in sources(root, area)
+            if p.relative_to(root).as_posix() != 'lib/x2c.x']
 
 
 def generate(root, output):
@@ -17,13 +25,9 @@ def generate(root, output):
     subprocess.run(['make', 'commands', 'COMMAND_NAMES=graph'], cwd=root, check=True)
     with tempfile.TemporaryDirectory(prefix='partition-') as temporary:
         datasets = Path(temporary) / 'datasets'
-        sources = sorted(p.relative_to(root).as_posix()
-                         for p in list((root / 'src').glob('*.x')) + list((root / 'src').glob('*/*.x'))
-                         if p.parent == root / 'src' or p.parent.name == 'components'
-                         or p.stem == p.parent.name)
-        library = sorted(p.relative_to(root).as_posix() for p in (root / 'lib').glob('*.x') if p.name != 'x2c.x')
         subprocess.run([str(root / 'builds/0/libexec/x2c-graph'), 'datasets', str(datasets),
-                        '-I', '.', '-I', 'src', '-I', 'lib', *sources, '--', *library],
+                        '-I', '.', '-I', 'src', '-I', 'lib',
+                        *units(root, 'src'), '--', *units(root, 'lib')],
                        cwd=root, check=True)
         # Stage beside the destination so replacement is atomic across filesystems.
         with tempfile.NamedTemporaryFile(dir=output.parent, suffix='.json', delete=False) as staged:

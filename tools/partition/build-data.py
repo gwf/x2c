@@ -7,19 +7,21 @@ The exporter owns parsing and call resolution; this adapter aggregates its TSVs.
 import csv, glob, hashlib, json, os, subprocess, sys
 from collections import defaultdict
 
-def compiler_sources(root):
-    paths = glob.glob(os.path.join(root, "src", "*.x"))
-    paths += [p for p in glob.glob(os.path.join(root, "src", "*", "*.x"))
-              if os.path.basename(os.path.dirname(p)) == "components"
-              or os.path.splitext(os.path.basename(p))[0] == os.path.basename(os.path.dirname(p))]
-    return paths
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+from sources import sources
+
+def unit_sources(root):
+    """Entry units of src and lib, without the generated prelude."""
+    units = [os.path.relpath(p, root) for area in ("src", "lib") for p in sources(root, area)]
+    return [unit for unit in units if unit != "lib/x2c.x"]
 
 def git_revision(root):
     try:
         revision = subprocess.check_output(["git", "-C", root, "rev-parse", "--short", "HEAD"], text=True, stderr=subprocess.DEVNULL).strip()
         dirty = subprocess.check_output(["git", "-C", root, "status", "--porcelain", "--", "src", "lib"], text=True)
         if dirty:
-            paths = sorted(compiler_sources(root) + glob.glob(os.path.join(root, "lib", "*.x")))
+            paths = sorted(glob.glob(os.path.join(root, "src", "**", "*.x"), recursive=True) +
+                           glob.glob(os.path.join(root, "lib", "**", "*.x"), recursive=True))
             digest = hashlib.sha256()
             for path in paths:
                 if os.path.basename(path) == "x2c.x":
@@ -36,19 +38,18 @@ root = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else ".")
 datasets = sys.argv[2] if len(sys.argv) > 2 else os.path.join(root, "explorer", "data")
 out_path = sys.argv[3] if len(sys.argv) > 3 else os.path.join(root, "explorer", "data", "graph.json")
 
-# ---- discover modules -------------------------------------------------------
-module_ids = []
-for p in sorted(compiler_sources(root)):
-    module_ids.append(os.path.relpath(p, root))
-for p in sorted(glob.glob(os.path.join(root, "lib", "*.x"))):
-    rel = os.path.relpath(p, root)
-    if rel == "lib/x2c.x":
-        continue  # generated prelude
-    module_ids.append(rel)
+# ---- discover units ---------------------------------------------------------
+# Each file is a translation unit; a module unit's member files are spliced
+# into its entry, and functions.tsv names the file holding each definition.
+module_ids = unit_sources(root)
 
 def count_lines(rel):
     with open(os.path.join(root, rel), "rb") as fh:
         return sum(1 for _ in fh)
+
+def read_source(rel):
+    with open(os.path.join(root, rel), encoding="utf-8") as fh:
+        return fh.read()
 
 files, fidx = [], {}
 for mid in module_ids:
@@ -59,8 +60,9 @@ for mid in module_ids:
         "dir": os.path.dirname(mid) or ".",
         "name": os.path.basename(mid),
         "lines": count_lines(mid),
-        "source": open(os.path.join(root, mid), encoding="utf-8").read(),
-        "functions": 0, "staticFns": 0, "publicFns": 0, "topLevel": 0,
+        "source": read_source(mid),
+        "members": {},
+        "functions": 0, "staticFns": 0, "moduleFns": 0, "publicFns": 0, "topLevel": 0,
         "internalCalls": 0, "outCalls": 0, "inCalls": 0,
         "externalCalls": 0, "indirectCalls": 0,
         "outFiles": set(), "inFiles": set(),
@@ -77,23 +79,25 @@ with open(os.path.join(datasets, "functions.tsv"), newline="") as fh:
             continue
         fi = fidx[unit]
         f = files[fi]
-        is_static = 1 if row["visibility"] == "static" else 0
+        tier, member = row["visibility"], row["file"]
+        if member != unit and member not in f["members"]:
+            f["members"][member] = read_source(member)
+            f["lines"] += count_lines(member)
         kind = 1 if row["kind"] == "top-level" else 0
         ext, ind = int(row["external_calls"]), int(row["indirect_calls"])
         f["functions"] += 1
         if kind:
             f["topLevel"] += 1
-        elif is_static:
-            f["staticFns"] += 1
         else:
-            f["publicFns"] += 1
+            f[tier + "Fns"] += 1
         f["externalCalls"] += ext
         f["indirectCalls"] += ind
         fnidx[row["function_id"]] = len(functions)
         fn_unit.append(unit)
-        functions.append({"f": fi, "n": row["source_name"], "e": row["emitted_name"],
-                          "s": is_static, "k": kind, "o": int(row["source_order"]),
-                          "x": ext, "i": ind})
+        # `s` marks a definition private to its unit: file-private or module.
+        functions.append({"f": fi, "p": member, "n": row["source_name"], "e": row["emitted_name"],
+                          "s": 0 if tier == "public" else 1, "v": tier, "k": kind,
+                          "o": int(row["source_order"]), "x": ext, "i": ind})
 
 # ---- call edges -------------------------------------------------------------
 edges = []
@@ -121,14 +125,14 @@ for name in ("src-calls.tsv", "lib-calls.tsv"):
 # ---- include edges (module dependency overlay) ------------------------------
 include_edges = []
 for mid in module_ids:
-    source = mid
-    with open(os.path.join(root, mid), encoding="utf-8", errors="replace") as fh:
-        for line in fh:
+    f = files[fidx[mid]]
+    for path, text in [(mid, f["source"]), *f["members"].items()]:
+        for line in text.splitlines():
             line = line.strip()
             if not line.startswith('#include "'):
                 continue
             target = line[len('#include "'):].split('"', 1)[0]
-            cand = [os.path.normpath(os.path.join(os.path.dirname(mid), target)),
+            cand = [os.path.normpath(os.path.join(os.path.dirname(path), target)),
                     os.path.normpath(os.path.join("src", target)),
                     os.path.normpath(os.path.join("lib", target))]
             for c in cand:
@@ -156,8 +160,9 @@ for f in files:
 stats = {
     "files": len(files),
     "functions": len(functions),
-    "staticFns": sum(1 for f in functions if f["s"] and not f["k"]),
-    "publicFns": sum(1 for f in functions if not f["s"] and not f["k"]),
+    "staticFns": sum(1 for f in functions if f["v"] == "static" and not f["k"]),
+    "moduleFns": sum(1 for f in functions if f["v"] == "module" and not f["k"]),
+    "publicFns": sum(1 for f in functions if f["v"] == "public" and not f["k"]),
     "topLevel": sum(1 for f in functions if f["k"]),
     "edges": len(edges),
     "fileEdges": len(file_edges),
