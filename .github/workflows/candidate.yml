@@ -137,6 +137,23 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           path: built
+      - name: Install pinned PDF tools
+        env:
+          PANDOC_SHA256: 67d7d011fed8c8543306022b985b9b2499ab9b74818df91d8727c7e9ebc5ba06
+          TYPST_SHA256: 59b207df01be2dab9f13e80f73d04d7ff8273ffd46b3dd1b9eef5c60f3eeabea
+        run: |
+          curl -fsSL https://github.com/jgm/pandoc/releases/download/3.12/pandoc-3.12-linux-amd64.tar.gz \
+            -o "$RUNNER_TEMP/pandoc.tar.gz"
+          echo "$PANDOC_SHA256  $RUNNER_TEMP/pandoc.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/pandoc.tar.gz" -C "$RUNNER_TEMP"
+          curl -fsSL https://github.com/typst/typst/releases/download/v0.15.0/typst-x86_64-unknown-linux-musl.tar.xz \
+            -o "$RUNNER_TEMP/typst.tar.xz"
+          echo "$TYPST_SHA256  $RUNNER_TEMP/typst.tar.xz" | sha256sum --check
+          tar -xJf "$RUNNER_TEMP/typst.tar.xz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/pandoc-3.12/bin" >> "$GITHUB_PATH"
+          echo "$RUNNER_TEMP/typst-x86_64-unknown-linux-musl" >> "$GITHUB_PATH"
+      - name: Typeset the complete book at selected source
+        run: make -C source doc-pdf
       - name: Assemble once with the candidate compiler
         env:
           SOURCE_SHA: ${{ needs.select.outputs.source_sha }}

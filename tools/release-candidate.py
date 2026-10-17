@@ -138,6 +138,7 @@ def assemble(args):
     missing = inventory(version) - {p.name for p in candidate.iterdir()}
     if missing:
         raise ValueError(f'missing matrix assets: {sorted(missing)}')
+    shutil.copyfile(source / 'docs/x2c-book.pdf', candidate / 'x2c-book.pdf')
     manifest['assets'] = {p.name: {'sha256': digest(p), 'size': p.stat().st_size}
                           for p in sorted(candidate.iterdir())}
     write(candidate / 'candidate.json', manifest)
@@ -236,6 +237,9 @@ def site(args):
                                 else 'index-production.txt'),
                     directory / 'packages/index.txt')
     (directory / 'x2c-version.txt').write_text(manifest['version'] + '\n')
+    # Older retained candidates predate the PDF release asset.
+    if 'x2c-book.pdf' in manifest['assets']:
+        shutil.copyfile(candidate / 'x2c-book.pdf', directory / 'x2c-book.pdf')
     write(directory / 'release-candidate.json', {
         'identity': manifest['identity'], 'source_sha': manifest['source_sha'],
         'manifest_sha256': digest(candidate / 'candidate.json'),

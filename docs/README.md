@@ -17,8 +17,12 @@ brew install pandoc typst
 make doc-pdf
 ```
 
-The result is `docs/x2c-book.pdf`, a local build product that Git ignores;
-it is not tracked or published. The target stops with an install hint when
+The result is `docs/x2c-book.pdf`, a build product that Git ignores.
+Each release candidate builds it once and retains `x2c-book.pdf` as a release
+asset, with its size and SHA-256 in the candidate manifest. Staging and
+production distribute those same bytes. Each release keeps its own download;
+the website footer links to the PDF for the deployed release.
+The target stops with an install hint when
 either tool is missing or Pandoc is too old. It sets no document date and
 takes `SOURCE_DATE_EPOCH` from the last commit. This optional target does not build
 the compiler, run the website highlighter, or change the Markdown sources.

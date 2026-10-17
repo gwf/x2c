@@ -20,7 +20,8 @@ and their costs are unchanged.
   The CLI boundary probe and installer example carry corresponding version strings.
 - `candidate.yml` manually builds the selected full source SHA. It retains
   the existing four compiler platforms and 26 native package bundles, then
-  assembles immutable archives, destination indexes and both complete sites.
+  typesets the complete book PDF, then assembles immutable archives,
+  destination indexes and both complete sites.
   It publishes nothing. Tags do not trigger a rebuild.
 - Candidate identity is `candidate-<full-sha>-<run-id>-<attempt>`, separate
   from compiler version. A rebuild creates a new identity and requires fresh

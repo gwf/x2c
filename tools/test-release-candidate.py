@@ -81,6 +81,22 @@ class Candidates(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'missing regular asset'):
             c.verify(self.candidate)
 
+    def test_book_pdf_is_preserved_in_sites_and_release(self):
+        book = self.candidate / 'x2c-book.pdf'
+        book.write_bytes(b'%PDF-1.7\nrelease book\n%%EOF\n')
+        self.freeze()
+        self.sites()
+        c.receipt(argparse.Namespace(candidate=self.candidate, destination='staging',
+                                    run_url='https://github.com/gwf/x2c/actions/runs/123'))
+        for destination in c.SITES:
+            _, files = c.assets(self.candidate, destination)
+            self.assertEqual(files['x2c-book.pdf'].read_bytes(), book.read_bytes())
+            self.assertEqual((self.directory / destination / 'x2c-book.pdf').read_bytes(),
+                             book.read_bytes())
+        book.write_bytes(b'changed book')
+        with self.assertRaisesRegex(ValueError, 'mismatch'):
+            c.verify(self.candidate)
+
     def test_same_version_changed_bytes_are_not_accepted(self):
         (self.candidate / 'x2c-1.2.3-linux-x86_64.tar.gz').write_bytes(b'other candidate')
         with self.assertRaisesRegex(ValueError, 'mismatch'):

@@ -54,6 +54,11 @@ def main():
         tag = args.identity if args.destination == "staging" else "v" + version
         repo = "gwf/x2c-staging" if args.destination == "staging" else "gwf/x2c"
         releases = f"https://github.com/{repo}/releases/download"
+        if "x2c-book.pdf" in manifest["assets"]:
+            for url in (f"{releases}/{tag}/x2c-book.pdf", f"{site}/x2c-book.pdf"):
+                book = work / "x2c-book.pdf"
+                download(url, book)
+                assert digest(book) == manifest["assets"]["x2c-book.pdf"]["sha256"]
         compiler_name = f"x2c-{version}-{target}.tar.gz"
         download(f"{releases}/{tag}/{compiler_name}", work / compiler_name)
         assert digest(work / compiler_name) == manifest["assets"][compiler_name]["sha256"]
