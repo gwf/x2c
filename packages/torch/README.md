@@ -199,7 +199,7 @@ weights in the pinned Python torch, runs `examples/jit-infer.x` over a
 fixed batch, and compares every number with Python's:
 
 ```text
-torch 2.10.0 at /Users/gary/Git/Bonsai-demo/.venv/bin/python
+torch 2.10.0 at /path/to/venv/bin/python
 model builds/scripted.pt
 input ( 2 4 )
 logits 0 -0.230555 0.082929 0.396414
@@ -271,7 +271,7 @@ initial parameters and data, then Python's trained weights are evaluated on
 both sides:
 
 ```text
-torch 2.10.0 at /Users/gary/Git/Bonsai-demo/.venv/bin/python
+torch 2.10.0 at /path/to/venv/bin/python
 trained loss                 x2c 0.59051228  python 0.59051239  relative 1.95e-07
 python weights in x2c        x2c 0.59051239  python 0.59051239  relative 8.31e-09
 module state names          10 modules, 31 names identical

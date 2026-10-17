@@ -36,6 +36,7 @@
   - [Syntax as Data](reference/syntax/data.md)
   - [Lexical Data Inventory](reference/syntax/lexical-data.md)
 - [Compiler Options](reference/cli.md)
+- [Release Notes](reference/release-notes.md)
 
 # Libraries and Packages
 

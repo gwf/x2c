@@ -20,7 +20,7 @@
     "environment": {},
     "machine": "arm64",
     "platform": "macOS-15.7.9-arm64-arm-64bit-Mach-O",
-    "translator": "/Users/gary/.codex/worktrees/e176/x2c/.context/post-integration-campaign/metrics/baseline-x2c",
+    "translator": "<worktree>/.context/post-integration-campaign/metrics/baseline-x2c",
     "translator_sha256": "5fe497f9b6612923f2958e81c31927a1650954969490d5f116cb1aff57f3b642"
   },
   "total_source_lines": 86970,

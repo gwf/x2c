@@ -507,7 +507,7 @@ initial footprint was 2.24 times Python's. Native handles and canonical pool
 storage stayed bounded. These historical observations do not establish
 generally lower memory use.
 
-A later [memory investigation][torch-memory] of the pooled request profile
+A later memory investigation of the pooled request profile
 on macOS arm64 CPU identified substantial allocator-reclaimable residency
 and ruled out its 2 KB Pool depot as the source of the multi-MB residual.
 It did not identify individual allocation stacks or separate every native
@@ -526,8 +526,6 @@ performance, `torch.compile`, or workloads beyond these comparisons.
   https://github.com/gwf/x2c/blob/main/packages/torch/benchmarks/REMEDIES.md
 [torch-matched]:
   https://github.com/gwf/x2c/blob/main/packages/torch/benchmarks/MATCHED.md
-[torch-memory]:
-  https://github.com/gwf/x2c/blob/main/plans/archive/memory-retention.md
 
 ## Limits
 
@@ -536,8 +534,7 @@ performance, `torch.compile`, or workloads beyond these comparisons.
 - Python optimizer interchange covers Adam; other optimizers retain the
   C++ archive format. Module state works in both directions.
 - The generated tier binds 1182 operators;
-  `packages/torch/schema/README.md` lists the families it leaves out. The
-  design is in `plans/archive/x2c-torch.md`.
+  `packages/torch/schema/README.md` lists the families it leaves out.
 - Custom autograd currently supports one output and first-order gradients.
 - `torch.compile` and TorchScript capture of x2c code are not possible:
   they capture Python. x2c runs a TorchScript model but cannot produce

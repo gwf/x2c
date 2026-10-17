@@ -79,8 +79,8 @@ elapsed time excluding system sleep; ordinary scheduling delays still count.
 `CLOCK_MONOTONIC` includes system sleep on macOS and is unsuitable for this
 comparison.
 
-`prepare` needs the pinned wheel; `TORCH_PYTHON` names it and defaults to
-`/Users/gary/Git/Bonsai-demo/.venv/bin/python`. The MNIST lane reads the
+`prepare` needs the pinned wheel; `TORCH_PYTHON` names its interpreter and
+defaults to `../torch-venv/bin/python` beside the repository. The MNIST lane reads the
 four published IDX files in place; `TORCH_MNIST` names the directory and
 defaults to `/tmp/mnist-real`. `prepare` records their SHA-256 in
 `config.json` beside the artifacts.
