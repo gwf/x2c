@@ -64,28 +64,7 @@ X2CU32MapItr x2c_u32_map_find_hashed(
   return _public_itr(U32Map_find_hashed(_map(map), key, hash));
 }
 
-#ifdef U32_MAP_COMPACT_RESULT
-X2CU32MapResult x2c_u32_map_get_or_insert_hashed(
-  X2CU32Map map, uint32_t key, uint64_t hash, uint32_t initial
-) {
-  U32MapResult result = U32Map_get_or_insert_hashed(
-    _map(map), key, hash, initial
-  );
-  return (X2CU32MapResult) {
-    .slot = result.slot,
-    .record_and_inserted = result.record_and_inserted,
-  };
-}
-
-uint32_t *x2c_u32_map_result_value(
-  X2CU32Map map, X2CU32MapResult result
-) {
-  return U32Map_result_value(_map(map), (U32MapResult) {
-    .slot = result.slot,
-    .record_and_inserted = result.record_and_inserted,
-  });
-}
-#elif defined(U32_MAP_SPLIT_RESULT)
+#ifdef U32_MAP_SPLIT_RESULT
 X2CU32MapValueResult x2c_u32_map_get_or_insert_value_hashed(
   X2CU32Map map, uint32_t key, uint64_t hash, uint32_t initial
 ) {
@@ -104,30 +83,6 @@ X2CU32MapItr x2c_u32_map_get_or_insert_hashed(
 ) {
   return _public_itr(
     U32Map_get_or_insert_hashed(_map(map), key, hash, initial, inserted)
-  );
-}
-#elif defined(U32_MAP_DIRECT_RESULT)
-X2CU32MapResult x2c_u32_map_get_or_insert_hashed(
-  X2CU32Map map, uint32_t key, uint64_t hash, uint32_t initial
-) {
-  U32MapResult result = U32Map_get_or_insert_hashed(
-    _map(map), key, hash, initial
-  );
-  return (X2CU32MapResult) {
-    .value = result.value,
-    .itr = _public_itr(result.itr),
-    .inserted = result.inserted,
-  };
-}
-#elif defined(U32_MAP_OUT_VALUE)
-X2CU32MapItr x2c_u32_map_get_or_insert_hashed(
-  X2CU32Map map, uint32_t key, uint64_t hash,
-  uint32_t initial, int *inserted, uint32_t **value
-) {
-  return _public_itr(
-    U32Map_get_or_insert_hashed(
-      _map(map), key, hash, initial, inserted, value
-    )
   );
 }
 #else
