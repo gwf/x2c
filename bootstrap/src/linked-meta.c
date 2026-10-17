@@ -13985,7 +13985,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_25(void
   _13051 = cons(_465, _13050);
   _13052 = String_new("src/builtins.x");
   _13053 = String_var(_13052);
-  _13054 = String_new("cb36f52a");
+  _13054 = String_new("4cabc779");
   _13055 = String_var(_13054);
   _13056 = String_new("cwd:./lisp/lisp.x");
   _13057 = String_var(_13056);
