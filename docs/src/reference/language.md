@@ -2814,7 +2814,9 @@ Initializers run once in source order. Each successful initializer registers
 its cleanup before the following initializer runs, including within a compound
 declaration. Cleanup releases the acquired value even if the declared binding
 is reassigned. Reassignment does not release that value early, and returning
-or storing an alias does not cancel cleanup. Use an explicit `defer` when
+or storing an alias does not cancel cleanup. An argument that is itself an
+`$auto` form, or a plain name of a local that an earlier `$auto` manages, is
+rejected, since the value would be released twice. Use an explicit `defer` when
 cleanup must instead read the binding's value at exit, such as a lazily filled
 Scope slot or a staging buffer cleared after ownership transfer.
 

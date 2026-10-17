@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/managed-twice.x:8:3: parse: managed initializer cannot manage an already managed local
+    Block b = $auto((a));
+    ^^^^^
+  note: local: a
+
