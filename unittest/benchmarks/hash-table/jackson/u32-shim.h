@@ -17,30 +17,12 @@ template< typename blueprint > struct x2c_u32_map
     const typename blueprint::key_type &key
   )
   {
-#ifdef U32_MAP_COMPACT_RESULT
-    X2CU32MapResult result = x2c_u32_map_get_or_insert_hashed(
-      table, key, blueprint::hash_key( key ), 0
-    );
-    *x2c_u32_map_result_value( table, result ) = {};
-#elif defined(U32_MAP_SPLIT_RESULT)
+#ifdef U32_MAP_SPLIT_RESULT
     X2CU32MapValueResult result =
       x2c_u32_map_get_or_insert_value_hashed(
         table, key, blueprint::hash_key( key ), 0
       );
     *result.value = {};
-#elif defined(U32_MAP_DIRECT_RESULT)
-    X2CU32MapResult result = x2c_u32_map_get_or_insert_hashed(
-      table, key, blueprint::hash_key( key ), 0
-    );
-    *result.value = {};
-#elif defined(U32_MAP_OUT_VALUE)
-    int inserted;
-    uint32_t *value;
-    (void)x2c_u32_map_get_or_insert_hashed(
-      table, key, blueprint::hash_key( key ), 0, &inserted, &value
-    );
-    (void)inserted;
-    *value = {};
 #else
     int inserted;
     itr_type itr = x2c_u32_map_get_or_insert_hashed(

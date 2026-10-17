@@ -110,8 +110,11 @@ next large targets.
   alternate hashes, changed load factor, and benchmark pre-sizing were
   rejected because they would change the algorithm or fairness contract.
 
-All these variants remain named in `research.py`; complete and incomplete
-timestamped runs remain in the ignored research result tree.
+These variants were derived from a pre-optimization commit that is not in
+this repository's history. On 2026-10-17 `research.py` dropped the recipes
+that no longer match the current U32Map; they remain in `research.py` at
+commit `8529c449a`. Complete and incomplete timestamped runs
+remain in the ignored research result tree.
 
 ## Production Map follow-up
 
@@ -533,9 +536,9 @@ rare.
 Median peak memory was essentially unchanged for counting: 798.2 MiB current
 versus 805.5 MiB parallel. The parallel layout reduced the mixed run from
 521.2 MiB to 408.1 MiB because its reusable records contain values only, but
-the speed cost disqualifies it as the benchmark default. The working variant
-remains named `parallel-keys` in `research.py`; the current U32Map remains
-unchanged.
+the speed cost disqualifies it as the benchmark default. The current U32Map
+remains unchanged. The `parallel-keys` recipe no longer applies to the current
+source and remains in `research.py` at commit `8529c449a`.
 
 ## Returning the record found by get-or-insert
 
@@ -591,9 +594,10 @@ and combined ASan and UBSan run passed.
 
 These experiments confirm the sampling result: the returned-value accessor
 is real work, but it is too small to pay for a wider result or an additional
-conditional output. The working `direct-result`, `split-result`, `out-value`,
-`compact-result`, and `record-iterator` variants remain available in
-`research.py`; `u32-map.x` remains unchanged.
+conditional output. `u32-map.x` remains unchanged. The `split-result` and
+`record-iterator` variants remain in `research.py`. The `direct-result`,
+`out-value`, and `compact-result` recipes no longer apply to the current
+source and remain in `research.py` at commit `8529c449a`.
 
 ## MapStringString easy-win closeout
 
