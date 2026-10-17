@@ -26,7 +26,8 @@ int main(void) {
   defer UnloadFont(font);
   if (font.baseSize != 84) return 1;
 
-  Image chart = $auto(Image.new(2160, 960, paper));
+  Image chart = Image.new(2160, 960, paper);
+  defer chart.free();
   _label(chart, font, "Seattle", 38, 28, 28, ink);
   _label(chart, font, "A week of daily highs", 40, 68, 16, muted);
   _label(chart, font, "TEMPERATURE / F", 514, 38, 12, muted);

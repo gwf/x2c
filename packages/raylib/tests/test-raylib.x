@@ -39,7 +39,8 @@ static void raylib_colors_build_from_named_components(void) {
 }
 
 static void raylib_images_draw_and_export(void) {
-  Image image = $auto(Image.new(64, 48, RAYWHITE));
+  Image image = Image.new(64, 48, RAYWHITE);
+  defer image.free();
   EXPECT_TRUE(image.valid());
 
   image.draw_rectangle_xy(8, 8, 24, 16, RED);
@@ -229,7 +230,8 @@ static void raylib_image_color_rejects_coordinates_out_of_range(void) {
 }
 
 static void raylib_image_mutators_update_the_owned_image(void) {
-  Image image = $auto(Image.new(5, 3, Color.rgba(200, 100, 50, 64)));
+  Image image = Image.new(5, 3, Color.rgba(200, 100, 50, 64));
+  defer image.free();
   Image mask = $auto(Image.new(8, 4, Color.rgba(0, 0, 0, 128)));
 
   image.format(PIXELFORMAT_UNCOMPRESSED_R5G6B5);
