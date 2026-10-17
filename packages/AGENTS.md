@@ -9,10 +9,9 @@ tests, or a focused probe.
 
 Gary approved all nine library packages on 2026-09-09: `pcre2/`, `yyjson/`,
 `sqlite/`, `libcurl/`, `termbox2/`, `blis/`, `libuv/`, `raylib/`, and `torch/`. The old
-experimental or awaiting-review designations are obsolete. C* remains a
-separate experiment because of its closed-source toolchain, macOS arm64
-restriction, and verification limitations. Public descriptions should explain
-capabilities and concrete limitations, not expose internal review labels.
+experimental or awaiting-review designations are obsolete. Public descriptions
+should explain capabilities and concrete limitations, not expose internal
+review labels.
 
 Start with
 [parse-log.x](pcre2/examples/parse-log.x) for copied captures, indexing, and

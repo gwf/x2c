@@ -50,7 +50,6 @@
 - [Module Reference](https://x2c-lang.dev/docs/library/modules/index.html)
 - [Advanced Topics](https://x2c-lang.dev/docs/library/advanced-topics.html)
 - [Automatic Differentiation](https://x2c-lang.dev/docs/guide/autodiff.html)
-- [Verifying Functions with C*](https://x2c-lang.dev/docs/guide/verification.html)
 - [Training and Inference with torch](https://x2c-lang.dev/docs/guide/torch.html)
 - [The Region Model](https://x2c-lang.dev/docs/guide/regions.html)
 

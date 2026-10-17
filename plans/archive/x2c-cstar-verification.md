@@ -1,7 +1,8 @@
-> Status: done
+> Status: retired
 > The optional verification package shipped in eb124ed and its reporting
-> and adapter repairs in 95888df. Archived 2026-09-10. Backend licensing
-> and platform limitations remain documented in the package README.
+> and adapter repairs in 95888df. Archived 2026-09-10. Removed 2026-10-16
+> because its exceptional platform and dependency requirements were too costly
+> to maintain. This document retains the historical design.
 
 # C* verification for x2c
 

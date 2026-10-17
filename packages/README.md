@@ -18,13 +18,10 @@ publishes prebuilt CPU libtorch for those two alone.
 | [BLIS](blis/README.md) | Matrix and vector operations |
 | [libuv](libuv/README.md) | Event loops, processes, files, and networking |
 | [raylib](raylib/README.md) | Images, charts, and optional desktop windows |
-| [C*](cstar/README.md) | Function contracts and proofs checked by the C* symbolic executor |
 | [torch](torch/README.md) | Tensors, autograd, modules, optimizers, checkpoints, and TorchScript over libtorch |
 
 torch links libtorch dynamically, so its programs are not self-contained;
-its README explains the required runtime libraries. C* is a verification
-experiment: its core toolchain is closed source, it is macOS arm64 only,
-and it stays outside `make packages` and `make packages-check`.
+its README explains the required runtime libraries.
 
 SQLite is prepared and checked separately:
 

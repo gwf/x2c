@@ -97,7 +97,6 @@
     - [lib/varops.x](library/modules/varops.md)
 - [Advanced Topics](library/advanced-topics.md)
   - [Automatic Differentiation](guide/autodiff.md)
-  - [Verifying Functions with C*](guide/verification.md)
   - [Training and Inference with torch](guide/torch.md)
   - [The Region Model](guide/regions.md)
 

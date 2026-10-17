@@ -161,10 +161,6 @@
     "source": "packages/blis/examples/page-rank.x"
   },
   {
-    "slide": "packages-09-cstar.md",
-    "source": "packages/cstar/examples/abs.x"
-  },
-  {
     "slide": "packages-00-torch.md",
     "source": "packages/torch/examples/mlp.x"
   }

@@ -1,4 +1,5 @@
 ---
+import { destination } from "../../release-destination.mjs";
 
 interface Props {
   home?: boolean;
@@ -23,8 +24,9 @@ const brandHref = home ? "#top" : local("");
   <p>
     &copy; 2025&ndash;2026 <a href="https://flake.org">GWF</a> &middot; <a
       href="https://github.com/gwf/x2c/blob/main/LICENSE">Apache 2.0</a> &middot; <a
-      href="https://github.com/gwf/x2c/blob/main/TRADEMARKS.md">Trademarks</a> &middot; <a
-      href={local("x2c-book.pdf")}>Book PDF</a>
+      href="https://github.com/gwf/x2c/blob/main/TRADEMARKS.md">Trademarks</a>
+    {destination.candidate && <>&middot; <a
+      href={local("x2c-book.pdf")}>Book PDF</a></>}
   </p>
   <a href="#main" class="footer-top dark-link">
     Back to top <span aria-hidden="true">&uarr;</span>
