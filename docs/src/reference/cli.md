@@ -253,7 +253,9 @@ registers its `meta` functions under the package's name. The resulting
 compiler imports the package without loading its module:
 
 ```sh
-./x2c build --extension packages/tally --output /tmp/x2c src/*.x
+python3 tools/compiler-sources.py |
+  xargs ./x2c build --extension packages/tally \
+    --c-include-dir builds/0/src --output /tmp/x2c
 ```
 [Native modules](../guide/meta-functions.md#native-modules) explains what a
 module contains.

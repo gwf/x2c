@@ -21,16 +21,13 @@ fi
 
 measure() {
   local stage=$1
-  local mode=$2
   local compiler="$ROOT/builds/$stage/x2c"
-  local -a flags=()
-  if [[ $mode == live ]]; then flags+=(--live-symbols); fi
-  local output="$BUILD/stage-$stage-$mode"
+  local output="$BUILD/stage-$stage-default"
 
   rm -rf "$output"
   mkdir -p "$output"
   for source in "${sources[@]}"; do
-    "$compiler" translate "${flags[@]}" --out-dir "$output" "$ROOT/$source" >/dev/null
+    "$compiler" translate --out-dir "$output" "$ROOT/$source" >/dev/null
   done
 
   local bytes digest
@@ -45,13 +42,13 @@ measure() {
     local start finish elapsed
     start=$(perl -MTime::HiRes=time -e 'printf "%.9f", time')
     for source in "${sources[@]}"; do
-      "$compiler" translate "${flags[@]}" --out-dir "$output" "$ROOT/$source" >/dev/null
+      "$compiler" translate --out-dir "$output" "$ROOT/$source" >/dev/null
     done
     finish=$(perl -MTime::HiRes=time -e 'printf "%.9f", time')
     elapsed=$(awk -v start="$start" -v finish="$finish" \
       'BEGIN { printf "%.6f", finish - start }')
     printf 'translation,stage-%s,%s,%s,%s,%s,%s\n' \
-      "$stage" "$mode" "$sample" "$elapsed" "$bytes" "$digest"
+      "$stage" default "$sample" "$elapsed" "$bytes" "$digest"
   done
 }
 
@@ -60,9 +57,6 @@ printf 'benchmark,stage,mode,sample,seconds,bytes,sha256\n'
 for stage in 0 1; do
   compiler="$ROOT/builds/$stage/x2c"
   [[ -x $compiler ]] || continue
-  measure "$stage" default
-  if { "$compiler" translate --help 2>&1 || true; } |
-      grep -q -- '--live-symbols'; then
-    measure "$stage" live
-  fi
+  # Module units require default symbol collection; live mode cannot read them.
+  measure "$stage"
 done

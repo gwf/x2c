@@ -50,7 +50,6 @@ Their impact was reviewed against `2b5ee957`; no executable reproduction was rer
 
 | Owning plan | Accepted behavior or deliverable | Next action |
 | --- | --- | --- |
-| [Module storage class](module-storage-class.md#result) | `module T name` is a module-wide static with a short name; `static` inside a module unit is private to its file through a path prefix on its key, including `static typedef`. | Step 1: parse `module` and refresh bootstrap; convert the compiler's cross-member statics; then step 2 makes `static` file-private. |
 | [Review remediation: writing](review-remediation-2026-10-11.md#writing-and-supported-features) | Explain legal source forms, rewrite behavior, and compile-time Lisp behavior. Maintain the factual support list. | Finish the three book explanations with accepted examples. |
 | [Language component foundation](language-components-foundation.md#recorded-decisions) | Rules see developer-written expressions and program meta definitions. Compiler-inserted support calls stay outside program rules. Templates retain author bindings. Constructed `with` behaves like handwritten `with`. | Delivered: the support-call and author-binding boundaries in PR #193 on 2026-10-13; constructed `with` already behaved as decided. The plan's [open list](language-components-foundation.md#open-needing-research-before-a-decision) holds the remaining items. |
 | [Repository review](repository-review-2026-10-12.md#execution-log) | Decisions 1-11 recorded on 2026-10-12: numeric comparisons, 32-bit indices, non-List match, Var to String, component dispatch, cleanup labels, self-meta, SDK, seams, AR-3, and deferrals and hygiene. | Carried out in ten batches through `4b387196` on dev, plus hygiene. No delivery is recorded for the section D cleanup backlog, the section E documentation drift, or the typed list views that batch 10 left as a follow-up. |
@@ -107,6 +106,14 @@ owners. Unselected consolidation, formatting, Match, descriptor, Torch, numeric
 table, and arbitrary script-port experiments remain reference material.
 
 ### Decisions and completed records
+
+Archived 2026-10-16 after wave closeout:
+
+- [Module storage class](archive/module-storage-class.md): delivered in
+  #196 and #197; module adoption and layout landed through #273.
+- [External build workflows](archive/external-build-workflows.md): delivered
+  in #237; retained submission evidence is historical.
+
 
 Archived 2026-10-09 to 2026-10-11:
 

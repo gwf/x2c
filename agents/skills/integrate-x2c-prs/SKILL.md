@@ -106,7 +106,12 @@ work. Parked revisions and their dependents stay held until superseded by a
 new submission or explicitly retried after diagnosis with
 `prepare --retry <batch-id>`. Retry resumes the retained candidate and its
 frozen PR heads, preserving local repairs; finish or park any other active
-batch first. Never reinterpret a newer PR head as validated.
+batch first. Never reinterpret a newer PR head as validated. If a moved head prevents
+retrying the frozen batch, use `release <batch-id> --prs N ... --reason TEXT`
+to release selected holds for a new batch. This keeps the original candidate,
+pinned membership, and logs. Unreleased revisions stay held; a batch with
+released holds cannot be retried. Review retained local repairs when preparing
+the new batch; release does not carry them or gate evidence forward.
 
 When a parked PR has a `contact`, use its Postbag bag and peer to notify the
 author. Join with a fresh unique integrator name. Send the PR, pinned head,

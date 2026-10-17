@@ -273,7 +273,10 @@ class Queue:
         pulls = self.api("pulls?state=open&base=dev&per_page=100", pages=True)
         held = {(pr["number"], pr["head"]) for record in self.records()
                 if record["state"] == "parked"
-                for pr in record["prs"]}
+                for pr in record["prs"]
+                if not any(released["number"] == pr["number"] and
+                           released["head"] == pr["head"]
+                           for released in record.get("released_prs", []))}
         ready, pending = [], []
         self.observed_pending = pending
         for pull in pulls:
@@ -395,6 +398,8 @@ class Queue:
             record = self.read(args.retry)
             if record["state"] != "parked":
                 raise ValueError("only a parked batch can be retried")
+            if record.get("released_prs"):
+                raise ValueError("batch holds were released; prepare a new batch")
             if self.active():
                 raise ValueError("finish or park the active batch before retrying")
             if args.prs and set(args.prs) != {
@@ -459,6 +464,24 @@ class Queue:
             record.pop("reason", None)
         except (RuntimeError, ValueError) as error:
             record.update(state="needs-attention", reason=str(error))
+        self.save(record)
+        output(record)
+
+    def release(self, args):
+        self.integrator()
+        record = self.read(args.batch)
+        if record["state"] != "parked":
+            raise ValueError("only parked batch holds can be released")
+        selected = set(args.prs)
+        if not selected <= {entry["number"] for entry in record["prs"]}:
+            raise ValueError("selected PR is not in the frozen batch")
+        released = record.setdefault("released_prs", [])
+        for entry in record["prs"]:
+            if entry["number"] in selected and not any(
+                    prior["number"] == entry["number"] and
+                    prior["head"] == entry["head"] for prior in released):
+                released.append({**entry, "released_at": now(),
+                                 "reason": args.reason})
         self.save(record)
         output(record)
 
@@ -653,6 +676,11 @@ def main():
     park = commands.add_parser("park", help="retain a candidate and hold its revisions")
     park.add_argument("batch")
     park.add_argument("--reason", default="parked for diagnosis")
+    release = commands.add_parser(
+        "release", help="release selected parked holds for a new batch")
+    release.add_argument("batch")
+    release.add_argument("--prs", type=int, nargs="+", required=True)
+    release.add_argument("--reason", default="released for reselection")
     args = parser.parse_args()
     try:
         deadline = None
@@ -683,6 +711,8 @@ def main():
                     queue.prepare(args)
                 elif args.operation == "land":
                     queue.land(args)
+                elif args.operation == "release":
+                    queue.release(args)
                 elif args.operation == "park":
                     queue.integrator()
                     record = queue.read(args.batch)

@@ -715,6 +715,40 @@ if hasattr(lock,'close'): lock.close()
         first=self.state()['pulls']['1']['head']['sha']
         self.assertNotEqual(self.git('merge-base','--is-ancestor',first,'HEAD',cwd=candidate,ok=False).returncode,0)
 
+    def test_release_unchanged_peer_after_another_head_moves(self):
+        first=self.pr(1); second=self.pr(2); batch=self.prepare()
+        self.cli('park',batch); before=self.record(batch)
+        self.pr(2,content='updated change 2\n',base=second)
+        self.assertNotEqual(self.cli('prepare','--retry',batch,ok=False).returncode,0)
+        status=json.loads(self.cli('status').stdout)
+        self.assertIn(1,[p['number'] for p in status['pending']])
+        self.cli('release',batch,'--prs',1,'--reason','peer resubmitted')
+        released=self.record(batch)
+        for key in ('prs','worktree','candidate','attempts'):
+            self.assertEqual(released[key],before[key])
+        self.assertEqual(released['released_prs'][0]['head'],first)
+        self.assertEqual(released['released_prs'][0]['reason'],'peer resubmitted')
+        self.cli('release',batch,'--prs',1)
+        self.assertEqual(self.record(batch),released)
+        self.assertNotEqual(self.cli('prepare','--retry',batch,ok=False).returncode,0)
+        fresh=self.prepare('--prs',1,2)
+        self.assertNotEqual(fresh,batch)
+        self.assertEqual([p['number'] for p in self.record(fresh)['prs']],[1,2])
+        self.assertEqual(self.state().get('gates',[]),[])
+        self.assertEqual(self.tip(),self.base)
+
+    def test_release_rejects_active_or_unknown_selection_atomically(self):
+        self.pr(1); self.pr(2); batch=self.prepare(); before=self.record(batch)
+        self.assertNotEqual(self.cli('release',batch,'--prs',1,ok=False).returncode,0)
+        self.assertEqual(self.record(batch),before)
+        self.cli('park',batch); before=self.record(batch)
+        self.assertNotEqual(self.cli('release',batch,'--prs',1,99,ok=False).returncode,0)
+        self.assertEqual(self.record(batch),before)
+        self.cli('release',batch,'--prs',1)
+        status=json.loads(self.cli('status').stdout)
+        self.assertEqual([p['number'] for p in status['ready']],[1])
+        self.assertEqual([p['number'] for p in status['pending']],[2])
+
     def test_retry_preserves_candidate_repairs_and_frozen_prs(self):
         self.pr(1); batch=self.prepare()
         original=self.record(batch); candidate=self.checkout(original)

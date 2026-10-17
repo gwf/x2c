@@ -1,7 +1,7 @@
-> Status: active
-> Implementation is ready for shared integration. Focused correctness checks
-> pass. Gary authorized deferring quiet-host timing to the shared integrator
-> on 2026-10-16 because other sessions kept the host under compilation load.
+> Status: done; delivered in #237 (`b4f96d2e`) on 2026-10-16.
+> Archived after the integration wave through #273 (`fab576c2`).
+> The implementation evidence below records the submission, not pending work.
+> Wave-closeout performance evidence is recorded below.
 
 # External build, run, and script workflows
 
@@ -95,14 +95,23 @@ separate review of the native Make rules and compiler/command boundaries.
   driver paths. Linux native Make invocation was inspected by dry-run; runtime
   execution was verified on macOS, not Linux.
 
-No timing results are claimed. The saved baseline is revision
+At submission, no timing results were claimed. The saved baseline was revision
 `3c537279f77db4a190ba605ff2829438168cc4dc`. A baseline toolchain and alternating
 cold-build, unchanged-build, and warm-script measurement script are retained in
 this workspace's temporary files and `.context/build-extraction/`. Both the
 baseline and candidate stage 1 report usable prelude interfaces. The shared
-integrator must take the quiet-host measurements and investigate regressions.
+integrator was assigned the quiet-host measurements and regression review.
 
 Before final bootstrap refresh, the integrator must clean the stage through
 `make build-safe`. Incremental directories can retain generated `src/build.*`
 and `src/script.*` after their sources move; `bootstrap-refresh` copies stage
 C/H globs. Final bootstrap and generated documentation remain integrator-owned.
+
+## Wave closeout (2026-10-16)
+
+The full snapshot of `fab576c2` completed stage comparisons, build scaling,
+shootout, and runtime measurements. Its final compiler workload failed because
+it requested `--live-symbols` for module units. The closeout removes that
+unsupported mode while retaining the same default-mode sources and CSV keys.
+The failed attempt remains `20261017T001121Z-fab576c27853` in performance history.
+A corrected full snapshot follows before closeout publication.

@@ -22,6 +22,10 @@ The command prepares a fresh bootstrap without timing it, then records:
 - every focused runtime observation in `bm-all`; and
 - the representative compiler-translation CSV and medians.
 
+The compiler workload uses default symbol collection. Its module units cannot
+use `--live-symbols`; historical live-mode rows are not produced for this
+workload.
+
 Each run has an immutable directory beneath `runs/YYYY/MM/DD/`.
 `history.jsonl` retains a compact longitudinal row, `latest-attempt.json`
 records the latest attempt, and `latest.json` and `latest.md` change only after

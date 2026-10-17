@@ -1,4 +1,11 @@
-> Status: active; landed on `dev` in #196 (`bd63bc6f`) and its second
+> Status: done; archived 2026-10-16 after delivery in #196 and #197.
+> Module adoption and layout work landed through #273 (`fab576c2`).
+> The design and limits below are historical, not newly verified defects.
+> Current member paths are relative to the entry directory and may name
+> siblings or parents. Private prefixes include the encoded spelling length.
+> The language reference and `src/collect/splice.x` own the current contract.
+
+> Historical delivery record: landed on `dev` in #196 (`bd63bc6f`) and its second
 > review round in #197 (`ef772117`). Stages 0 and 1 agree. Known limits:
 > a private class's repr heading shows the prefixed name
 > (`second__Node { ... }`), because `_class_write_fields` in `src/builtins.x`
@@ -38,7 +45,7 @@
 ## Result
 
 A module unit is an entry file with a file-scope `module { ... }` block
-([module blocks](../docs/src/reference/language.md#module-blocks)). Its
+([module blocks](../../docs/src/reference/language.md#module-blocks)). Its
 members are spliced into one text and one translation unit. Today every
 file-scope `static` in that unit is visible to every member, so a module
 has no file-private names. This change gives it two storage classes:
