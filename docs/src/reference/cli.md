@@ -250,12 +250,13 @@ reports a warning. Modules work on macOS, Linux and WSL.
 executable being built, which must be the compiler, and repeats. The
 package's `src/*.x` and `src/*.c` become inputs, and a generated unit
 registers its `meta` functions under the package's name. The resulting
-compiler imports the package without loading its module:
+compiler imports the package without loading its module. From a built compiler
+checkout, include every compiler unit and both header search roots:
 
 ```sh
 python3 tools/compiler-sources.py |
   xargs ./x2c build --extension packages/tally \
-    --c-include-dir builds/0/src --output /tmp/x2c
+    --x-include-dir src --c-include-dir builds/0/src --output /tmp/x2c
 ```
 [Native modules](../guide/meta-functions.md#native-modules) explains what a
 module contains.
