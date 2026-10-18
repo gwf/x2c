@@ -77,6 +77,8 @@ static void _answer(Call * c, String operation, List operands);
 
 static void _check(Call * call);
 
+static String _failure(int table);
+
 static void _send(Call * c, List arguments);
 
 static void _send_frame(Call * call, List message);
@@ -526,10 +528,16 @@ static void _answer(Call * c, String operation, List operands){
 }
 
 static void _check(Call * call){
+  String failure = _failure((* call).table);
+  if(String_truth(failure)) _refuse(&((* call)), failure);
+}
+
+static String _failure(int table){
   Var failure;
-  if(! String_truth(active -> path) && Map_truth(active -> failures) && Map_try_get(active -> failures, int_var(- 1), &(failure))) _refuse(&((* call)), Var_as_string(failure));
-  if(! String_truth(active -> path)) _refuse(&((* call)), _0);
-  if(Map_truth(active -> failures) && Map_try_get(active -> failures, int_var((* call).table), &(failure))) _refuse(&((* call)), Var_as_string(failure));
+  if(! String_truth(active -> path) && Map_truth(active -> failures) && Map_try_get(active -> failures, int_var(- 1), &(failure))) return Var_as_string(failure);
+  if(! String_truth(active -> path)) return _0;
+  if(Map_truth(active -> failures) && Map_try_get(active -> failures, int_var(table), &(failure))) return Var_as_string(failure);
+  return NULL;
 }
 
 static void _send(Call * c, List arguments){
@@ -924,7 +932,7 @@ void Compiler_use_meta_helper(MetaHelper helper){
 
 }
 
-void MetaHelper_check(MetaHelper m, Compiler c, String name, String provider){
+String MetaHelper_failure(MetaHelper m, String provider){
   if(! _init_guard_) _file_init_();
   MetaHelper previous = active;
   active = m;
@@ -940,11 +948,15 @@ void MetaHelper_check(MetaHelper m, Compiler c, String name, String provider){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_4);
     {
-      Call call ={
-        .compiler = c, .name = name, .site = c -> token, .table = _table_of(Path_real(provider), 0)
+      {
+        String _x2c_gensym_return_value_5 = _failure(_table_of(Path_real(provider), 0));
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
+          return _x2c_gensym_return_value_5;
+        }
+
       }
-      ;
-      _check(&(call));
+
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
   }

@@ -14227,7 +14227,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_25(void
   _13293 = List_var(_13292);
   _13294 = String_new("src/expressions-reports.x");
   _13295 = String_var(_13294);
-  _13296 = String_new("6cd84ed4");
+  _13296 = String_new("83670c35");
   _13297 = String_var(_13296);
   _13298 = cons(_13297, NULL);
   _13299 = cons(_13295, _13298);
@@ -14483,7 +14483,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_26(void
   _13546 = List_var(_13545);
   _13547 = String_new("src/meta-helper-client.x");
   _13548 = String_var(_13547);
-  _13549 = String_new("9849d748");
+  _13549 = String_new("d02f945a");
   _13550 = String_var(_13549);
   _13551 = cons(_13550, NULL);
   _13552 = cons(_13548, _13551);
@@ -15473,7 +15473,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_28(void
   _14530 = List_var(_14529);
   _14531 = String_new("src/expressions/calls.x");
   _14532 = String_var(_14531);
-  _14533 = String_new("3a940767");
+  _14533 = String_new("1703131d");
   _14534 = String_var(_14533);
   _14535 = cons(_14534, NULL);
   _14536 = cons(_14532, _14535);

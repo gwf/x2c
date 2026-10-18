@@ -1183,7 +1183,7 @@ if (cd "$root" && "$X2C" translate -q --package-dir packages \
     --out-dir warm src/two.x) >"$root/tamper.out" 2>"$root/tamper.err"; then
   fail "tampered package alias did not reach interface replay"
 fi
-grep -q 'has no method sum' "$root/tamper.err" ||
+grep -q 'unresolved identifier: f$' "$root/tamper.err" ||
   fail "tampered package alias produced the wrong diagnostic"
 mv "$root/warm/z-first.good" "$root/warm/z-first.xi"
 

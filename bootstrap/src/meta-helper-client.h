@@ -40,7 +40,7 @@ void MetaHelper_retain_executable(MetaHelper helper);
 
 void Compiler_use_meta_helper(MetaHelper helper);
 
-void MetaHelper_check(MetaHelper m, Compiler c, String name, String provider);
+String MetaHelper_failure(MetaHelper m, String provider);
 
 void Compiler_begin_meta_unit(Compiler c, String filename);
 
