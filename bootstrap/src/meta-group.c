@@ -2405,6 +2405,11 @@ int Compiler_groups_meta(Compiler c){
   return String_truth(meta_cc) && ! Map_truth(c -> macro_holes) &&(void *) c -> meta_group &&(c -> meta_build ||(! c -> meta_helper && X2C_NATIVE_MODULES && f9_selection___meta_in_process));
 }
 
+int Compiler_meta_calls_wait(Compiler c){
+  if(! _init_guard_) _file_init_();
+  return c -> meta_build && ! c -> meta_helper;
+}
+
 void Compiler_group_meta_function(Compiler c, List fn){
   if(! _init_guard_) _file_init_();
   {
@@ -3068,6 +3073,8 @@ static List _emit(Compiler c, String stamp, String stem, String suffix, String *
 
 SymTxn Compiler_begin_semantic_transaction(Compiler);
 
+List Compiler_generate_protocol_adapters(Compiler, List);
+
 List Diagnostics_entries(Diagnostics);
 
 void SymTxn_rollback(SymTxn *);
@@ -3110,7 +3117,8 @@ static List _emit_prepared(Compiler c, String stamp, String stem, String suffix,
         units = _units(c);
       }
       if(c -> meta_build) f8_emission____name_provider_bindings(c, provider, units, saved.deps);
-      List lowered = f8_emission____lower(c, units, stamp, suffix);
+      List volatile lowered = f8_emission____lower(c, units, stamp, suffix);
+      if(c -> meta_build) lowered = Compiler_generate_protocol_adapters(c, lowered);
       List ast = Compiler_transform(c, lowered);
       code = Compiler_generate_code_text(c, ast, stem);
     }

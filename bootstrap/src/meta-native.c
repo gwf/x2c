@@ -1600,7 +1600,7 @@ void Compiler_install_meta_function(Compiler c, List fn, Token marker){
               if(Compiler_meta_reaches_compile_time(c, List_var(fn))) Compiler_record_comptime(c, name);
               if(Map_truth(c -> macro_holes)) return;
               Compiler_group_meta_function(c, fn);
-              if(c -> meta_build) return;
+              if(Compiler_meta_calls_wait(c)) return;
               if(! Compiler_library_filling() && ! Compiler_shares_meta_definition(c, name)) f9_functions____install_stub(c, name, Var_type(List_last((Var_list_payload(Array_getindex(c -> meta_group, - 1))))), NULL, marker);
             }
 
@@ -1731,7 +1731,7 @@ static Var f9_functions____meta_stub(Func function, const FuncArg * argv){
     }
 
   }
-  if(c -> meta_build){
+  if(Compiler_meta_calls_wait(c)){
     static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/meta-native/functions.x",.function = "f9_functions____meta_stub",.line = 118};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 927167433253220, 1, Symbol_var(920394), String_var(name));
   }
@@ -1750,7 +1750,7 @@ static Var f9_functions____meta_stub(Func function, const FuncArg * argv){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_11);
     {
-      if(! Compiler_groups_meta(c)){
+      if(c -> meta_helper || ! Compiler_groups_meta(c)){
         Var _x2c_gensym_return_value_2 = Compiler_meta_helper_call(c, name, site, Array_list_free(values), provider);
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_11);
@@ -1993,7 +1993,7 @@ void Compiler_install_project_meta_effect(Compiler c, List row){
           Map_setindex(c -> project_meta, name, List_var(cons(signature, cons(provider, NULL))));
           Map_del(c -> native_meta, name);
           Map_del(c -> meta_group_bound, String_var(String_join(NULL, cons(String_var(_263), cons(String_var(Var_str(name)), cons(String_var(_242), NULL))))));
-          if(! c -> meta_build){
+          if(! Compiler_meta_calls_wait(c)){
             Compiler_ensure_macro_lisp(c);
             f9_functions____bind_project_meta(c, Var_as_string(name), 1);
           }
@@ -2021,7 +2021,7 @@ int Compiler_bind_project_meta(Compiler c, String name){
 static int f9_functions____bind_project_meta(Compiler c, String name, int install){
   Var target;
   if(! Map_try_get(c -> project_meta, String_var(name), &(target))) return 0;
-  if(c -> meta_build) return 0;
+  if(Compiler_meta_calls_wait(c)) return 0;
   Var bound;
   if(! install && Lisp_try_get(c -> macro_lisp, name, &(bound))) return 1;
   Var signature, provider;

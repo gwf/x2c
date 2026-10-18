@@ -59,9 +59,11 @@ static macro Stmt $output.helper.count(Expr $out, Expr $count) {
 
 /* One project meta build. The Kth owner parses into table K.
    A build records the files it reads in `deps` and
-   the result of each table in the fields after it. */
+   the result of each table in the fields after it. A loaded build's
+   parses call `meta`, the ordinary helper of the same sources. */
 static typedef struct Helper {
   Frontend frontend, Array owners, Map packages;
+  MetaHelper meta;
   Toolchain toolchain, String include, identity, directory;
   List entries;
   List flags, Array modules;
@@ -419,6 +421,8 @@ static List _build(Helper &h) {
   }
   foreach (String path, %(@{h.owners} @{h.modules} @{_loop_sources()}))
     h.deps[path] = 1;
+  if (h.entries) h.meta = h.frontend.build_meta(h.entries);
+  defer if (h.meta) Scope.free(h.meta);
   String failure = h.entries ? _loaded_providers(h) : NULL;
   if (failure) {
     Compiler.forget_provisional_entries();
@@ -476,15 +480,24 @@ static List _collect_provider(
   int started = f.start(path, unit);
   defer unit.close();
   Compiler c = unit.compiler;
-  c.meta_build = index + 1;
-  c.load_source = path in h.entries;
-  c.diagnostics.limit = 0;
+  _start_parse(h, c, path, index);
   if (!started || !unit.collect(f)) {
     _print_diagnostics(c);
     return unit.context.export(%(failure ${%"$path: x2c reported errors"}));
   }
   c.sym.reset(unit.globals);
   return unit.context.export(c.loaded_provider());
+}
+
+/* Gives the unit's compiler table `index`, and in a loaded build the
+   ordinary helper, which runs the calls its group emits as their values. */
+static void _start_parse(Helper &h, Compiler c, String path, int index) {
+  c.meta_build = index + 1;
+  c.load_source = h.entries.contains(path);
+  c.diagnostics.limit = 0;
+  if (!h.meta) return;
+  c.meta_helper = h.meta;
+  c.begin_meta_unit(path);
 }
 
 /* Nothing else reports a loaded build's diagnostics, so they print as a
@@ -527,9 +540,7 @@ static void _parse_source(
   ParsedUnit unit;
   int started = f.start(path, unit);
   defer unit.close();
-  unit.compiler.meta_build = index + 1;
-  unit.compiler.load_source = h.entries.contains(path);
-  unit.compiler.diagnostics.limit = 0;
+  _start_parse(h, unit.compiler, path, index);
   if (!started) return;
   /* A call of a project function the collection meets fails before the
      helper exists; the parse still reaches every definition. */

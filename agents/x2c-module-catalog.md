@@ -637,12 +637,13 @@ Public functions:
 `Compiler.use_meta_toolchain`, `Compiler.meta_cc`, `Compiler.meta_cc_identity`,
 `Compiler.meta_cc_run`, `Compiler.prepare_loaded_main`,
 `Compiler.prepare_loaded_functions`, `Compiler.stage_meta_in_process`,
-`Compiler.groups_meta`, `Compiler.group_meta_function`,
-`Compiler.meta_reaches_compile_time`, `Compiler.finish_meta_functions`,
-`Compiler.public_native_function`, `Compiler.meta_call_missing`,
-`Compiler.refuse_meta_call`, `Compiler.refuse_record_meta_call`,
-`Compiler.use_meta_build_directory`, `Compiler.write_meta_build`,
-`Compiler.bind_meta_group`, `Compiler.stage_session_function`
+`Compiler.groups_meta`, `Compiler.meta_calls_wait`,
+`Compiler.group_meta_function`, `Compiler.meta_reaches_compile_time`,
+`Compiler.finish_meta_functions`, `Compiler.public_native_function`,
+`Compiler.meta_call_missing`, `Compiler.refuse_meta_call`,
+`Compiler.refuse_record_meta_call`, `Compiler.use_meta_build_directory`,
+`Compiler.write_meta_build`, `Compiler.bind_meta_group`,
+`Compiler.stage_session_function`
 
 ### [src/meta-native/meta-native.x](../src/meta-native/meta-native.x)
 

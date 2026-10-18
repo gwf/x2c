@@ -190,6 +190,31 @@ if grep -e '<repl>' -e 'macro:' -e 'gensym' -e 'group-' -e 'malformed' \
   exit 1
 fi
 
+# Loaded code boxes its classes, expands its own meta functions, and calls
+# protocol base defaults as an ordinary build does.
+cat >"$tmp/program.x" <<'EOF'
+#include "meta.x"
+class Point { int x; int y; };
+int boxed_x(void) { Point p = Point.new(1, 2); Var b = p; Point c = b; return c.x; }
+meta static List doubled(List value) => $!( $value * 2 );
+macro Expression $double(Expr $value) => $doubled($value);
+int expanded(void) { return $double(21); }
+class Meters { long value; };
+class Cm { long value; };
+protocol Meters(T) { long T.magnitude(T); }
+long Meters.magnitude(Meters value) => value.value;
+Meters Cm.meters(Cm value) => Meters.new(value.value / 100);
+static protocol Meters(Cm);
+long cm_magnitude(void) { return Cm.new(1800).magnitude(); }
+EOF
+printf '%s\n' ":load \"$tmp/program.x\"" 'boxed_x();' 'expanded();' \
+  'cm_magnitude();' >"$tmp/input"
+builds/0/x2c repl <"$tmp/input" >"$tmp/out" 2>"$tmp/err"
+grep '^=> ' "$tmp/out" >"$tmp/values"
+printf '=> 1\n=> 42\n=> 18l\n' >"$tmp/values-expected"
+cmp "$tmp/values-expected" "$tmp/values"
+test ! -s "$tmp/err"
+
 python3 commands/repl/tests/reload.py "$tmp"
 
 # Every retained executable directory belongs to a closed session.
