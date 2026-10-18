@@ -63,6 +63,8 @@ void Sym_seed_var_tags(Sym s, Map symbols);
 
 void Sym_define_global(Sym s, List key, List type);
 
+void Sym_undefine_global(Sym s, List key);
+
 void Sym_declare_enumerator(Sym s, List key, Symbol owner);
 
 int Sym_introduced(Sym s);

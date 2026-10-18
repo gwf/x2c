@@ -795,6 +795,15 @@ void Sym_define_global(Sym s, List key, List type){
   f8_bindings____seed_var_tag(s, key, type);
 }
 
+void Sym_drop(Sym s, Map map, Var key);
+
+void Sym_undefine_global(Sym s, List key){
+  if(! _init_guard_) _file_init_();
+  SymScope * scope = _scope_at(s, s -> base_scopes - 1);
+  Sym_drop(s, scope -> symbols, List_var(key));
+  Sym_drop(s, scope -> bindings, List_var(key));
+}
+
 void Sym_declare_enumerator(Sym s, List key, Symbol owner){
   if(! _init_guard_) _file_init_();
   SymScope * scope = _scope_at(s, - 1);
@@ -912,8 +921,6 @@ void Compiler_set_fact(Compiler c, Var key, Var value){
   if(! _init_guard_) _file_init_();
   Sym_put(c -> sym, c -> sym -> binding_facts, key, value);
 }
-
-void Sym_drop(Sym s, Map map, Var key);
 
 void Compiler_drop_fact(Compiler c, Var key){
   if(! _init_guard_) _file_init_();
