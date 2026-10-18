@@ -192,7 +192,7 @@ static Array _meta_values(
    call to a project function there is left for the translation. */
 static Var _meta_function(Compiler c, String name, Token site) {
   Var function = void;
-  if (!c.macro_lisp.try_get(name, function) && c.bind_project_meta(name))
+  if (!c.macro_lisp.try_get(name, function) && _bind_project_meta(c, name))
     c.macro_lisp.try_get(name, function);
   if (!c.macro_lisp.try_get(name, function) && c.bind_native_meta(name))
     c.macro_lisp.try_get(name, function);

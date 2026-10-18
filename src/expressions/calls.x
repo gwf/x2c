@@ -481,9 +481,9 @@ static const PrintfFn printf_family_info[] = {
   { "Buffer_printf", 1, 2, 0 }
 };
 
-/** Returns the printf-family entry a callee names, or `NULL`. A resolved
-    user function that happens to use a libc spelling is not one. */
-const PrintfFn *List.printf_family(List l) {
+/* Returns the printf-family entry a callee names, or `NULL`. A resolved
+   user function that happens to use a libc spelling is not one. */
+module const PrintfFn *_printf_family(List l) {
   match (l)
     case %(expr ?type ${$source_identifier_content(%(?binding))}): {
       String name = Ast.binding_spelling(binding);

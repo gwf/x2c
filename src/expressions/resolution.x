@@ -264,7 +264,7 @@ static List _is_type(Resolve &r, List operand, Type target) {
     List callee = _resolve_identifier(r.c, "Var_is_void", NULL, r.origin);
     return r.c.rebuild_expression(%(int), called(callee, %($lhs)));
   }
-  Symbol vartag = r.c.require_var_tag(target, r.origin);
+  Symbol vartag = _require_var_tag(r.c, target, r.origin);
   List direct = _constant_row_test(r.c, lhs, vartag, r.origin);
   if (direct) return direct;
   String tagsym = %"${(unsigned long) vartag}";
@@ -318,11 +318,10 @@ static List _constant_row_test(
   return c.rebuild_expression(%(int), called(callee, arguments));
 }
 
-/** Returns the exact Var tag for a type test, rejecting types without one.
-    Enums retain no identity after boxing and cannot be tested this way.
+/* Returns the exact Var tag for a type test, rejecting types without one.
+   Enums retain no identity after boxing and cannot be tested this way.
 */
-Symbol Compiler.require_var_tag(
-  Compiler c, Type target, Token origin) {
+static Symbol _require_var_tag(Compiler c, Type target, Token origin) {
   Type resolved = NULL;
   Symbol vartag = c.sym.var_tag_for_type(target, resolved);
   if (resolved && resolved.is_enum())
@@ -337,7 +336,7 @@ Symbol Compiler.require_var_tag(
 List Compiler.var_tag_expression(Compiler c, Type target, Token origin) {
   if (_deferred_type_test(target))
     return %(expr (<macro-expr>) (type-tag $target));
-  Symbol tag = c.require_var_tag(target, origin);
+  Symbol tag = _require_var_tag(c, target, origin);
   return %(expr ("Symbol") (literal ("Symbol") ${tag.str()} $tag));
 }
 

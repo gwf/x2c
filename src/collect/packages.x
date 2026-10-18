@@ -186,12 +186,12 @@ static int _package_protocol_row(List key, Var value) {
 
 // import replay
 
-/** Replays package imports and public compile-time definitions in source
-    order. The shadow borrows the unit's macro state and package registries.
-    The full parse collects effects for the include line and leaves the
-    unit's own definitions at their source sites.
+/* Replays package imports and public compile-time definitions in source
+   order. The shadow borrows the unit's macro state and package registries.
+   The full parse collects effects for the include line and leaves the
+   unit's own definitions at their source sites.
 */
-void Compiler.replay_package_imports(
+module void _replay_package_imports(
   Compiler c, Map globs, Map rows, Array exports) {
   Array imports = NULL;
   defer if (imports) imports.free();

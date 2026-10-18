@@ -26,7 +26,6 @@ Source-ordered shallow symbol collection and replay.
 | [`Compiler.include_type_dependencies`](#Compiler.include_type_dependencies) | The semantic type rows reached by an ordinary source include. |
 | [`Compiler.include_typedef_names`](#Compiler.include_typedef_names) | The typedef names published by the files that the current unit's include of `target` reaches, including its transitive includes. |
 | [`Compiler.included_compile_time_effects`](#Compiler.included_compile_time_effects) | Prepares included compile-time effects after full parsing resets macros. |
-| [`Compiler.inline_type_dependencies`](#Compiler.inline_type_dependencies) | Records the actual type dependencies of typed public inline bodies. |
 | [`Compiler.install_included_effects`](#Compiler.install_included_effects) | Installs the definitions of each include among the directives before the cursor. |
 | [`Compiler.interface_text`](#Compiler.interface_text) | Returns the compiler's own collected contribution as interface text, or NULL when the unit has not collected its symbols or the compiler's identity is unknown, since no compiler could replay that interface. |
 | [`Compiler.is_prelude_source`](#Compiler.is_prelude_source) | Reports whether the canonical `path` is a compiler prelude source. |
@@ -47,7 +46,6 @@ Source-ordered shallow symbol collection and replay.
 | [`Compiler.record_conformance_rows`](#Compiler.record_conformance_rows) | Replaces the recorded conformance rows of the current file's collected entry with `rows`, which join the declaration map its interface publishes, as `record_generated_symbol` adds its rows. |
 | [`Compiler.record_generated_symbol`](#Compiler.record_generated_symbol) | Records one generated public callable in the declaration map that the current file's collected entry contributes, which is the map its interface publishes. |
 | [`Compiler.refresh_source_collections`](#Compiler.refresh_source_collections) | Makes the next collection recheck source files and interfaces after an interactive edit. |
-| [`Compiler.replay_package_imports`](#Compiler.replay_package_imports) | Replays package imports and public compile-time definitions in source order. |
 | [`Compiler.runtime_function_declarations`](#Compiler.runtime_function_declarations) | The runtime umbrella includes each listed module's generated header. |
 | [`SourceView.resolve_include`](#SourceView.resolve_include) | The file the include of `target` from `includer_dir` names, searched as collection searches `dirs`, or NULL. |
 
@@ -162,7 +160,7 @@ declares, in no particular order. A file that imports a package
 declares none here: the walk that records them for a cold entry does
 not install a package's surface.
 
-Source: `src/collect/declarations.x:614`
+Source: `src/collect/declarations.x:613`
 
 <a id="Compiler.forget_provisional_entries"></a>
 #### Compiler.forget_provisional_entries
@@ -225,15 +223,6 @@ canonical path of the unit's direct include. The parser installs those
 effects when it reaches that include.
 
 Source: `src/collect/walk.x:597`
-
-<a id="Compiler.inline_type_dependencies"></a>
-#### Compiler.inline_type_dependencies
-
-`Map Compiler.inline_type_dependencies(Compiler c, List ast)`
-
-Records the actual type dependencies of typed public inline bodies.
-
-Source: `src/collect/declarations.x:453`
 
 <a id="Compiler.install_included_effects"></a>
 #### Compiler.install_included_effects
@@ -395,7 +384,7 @@ Source: `src/collect/walk.x:51`
 Promotes the selected type families after the owning ordinary full
 parse. The header and Xi then use the same complete family selection.
 
-Source: `src/collect/declarations.x:497`
+Source: `src/collect/declarations.x:496`
 
 <a id="Compiler.publishes_type_family"></a>
 #### Compiler.publishes_type_family
@@ -426,7 +415,7 @@ publishes, as `record_generated_symbol` adds its rows. A row an earlier
 cold walk recorded may sit in an earlier map. The cache retains each key
 and value.
 
-Source: `src/collect/declarations.x:590`
+Source: `src/collect/declarations.x:589`
 
 <a id="Compiler.record_generated_symbol"></a>
 #### Compiler.record_generated_symbol
@@ -438,7 +427,7 @@ current file's collected entry contributes, which is the map its
 interface publishes. A file without a collected declaration map records
 nothing. The cache retains `signature`.
 
-Source: `src/collect/declarations.x:570`
+Source: `src/collect/declarations.x:569`
 
 <a id="Compiler.refresh_source_collections"></a>
 #### Compiler.refresh_source_collections
@@ -450,18 +439,6 @@ interactive edit. Drops cache indexes, retaining their backing rows:
 already-open units may still use those declarations.
 
 Source: `src/collect/cache.x:147`
-
-<a id="Compiler.replay_package_imports"></a>
-#### Compiler.replay_package_imports
-
-`void Compiler.replay_package_imports( Compiler c, Map globs, Map rows, Array exports)`
-
-Replays package imports and public compile-time definitions in source
-order. The shadow borrows the unit's macro state and package registries.
-The full parse collects effects for the include line and leaves the
-unit's own definitions at their source sites.
-
-Source: `src/collect/packages.x:194`
 
 <a id="Compiler.runtime_function_declarations"></a>
 #### Compiler.runtime_function_declarations

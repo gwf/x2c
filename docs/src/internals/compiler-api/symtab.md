@@ -50,7 +50,6 @@ The compiler's semantic symbol table.
 | [`Sym.define_global`](#Sym.define_global) | Defines `key` in the unit's writable base scope. |
 | [`Sym.define_macro`](#Sym.define_macro) | Defines or replaces a macro in the active lexical scope. |
 | [`Sym.drop`](#Sym.drop) | Deletes `key` from `map` so that an active transaction can restore it. |
-| [`Sym.end_log`](#Sym.end_log) | Stops one transaction's semantic write log. |
 | [`Sym.enumerator_owner`](#Sym.enumerator_owner) | Returns the current scope's enum owner for `key`, or zero. |
 | [`Sym.field_order`](#Sym.field_order) | Returns recorded fields in source order, or `NULL`. |
 | [`Sym.file_statics`](#Sym.file_statics) | Returns the borrowed set of file-static declaration keys. |
@@ -518,15 +517,6 @@ Source: `src/symtab/scopes.x:167`
 Deletes `key` from `map` so that an active transaction can restore it.
 
 Source: `src/symtab/transactions.x:12`
-
-<a id="Sym.end_log"></a>
-#### Sym.end_log
-
-`void Sym.end_log(Sym s)`
-
-Stops one transaction's semantic write log.
-
-Source: `src/symtab/transactions.x:124`
 
 <a id="Sym.enumerator_owner"></a>
 #### Sym.enumerator_owner

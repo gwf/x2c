@@ -569,7 +569,7 @@ module void _replay_cached(
   foreach (Var part, entry.car()) {
     if (part is <map>) {
       _merge_rows(c, globs, part);
-      c.replay_package_imports(globs, part, effects);
+      _replay_package_imports(c, globs, part, effects);
     }
     else if (part is <string>)
       _replay_include(c, part, globs, visited, effects);
@@ -611,7 +611,7 @@ Map Compiler.included_compile_time_effects(Compiler c, Map globs) {
   if (!entry) return delivered;
   foreach (Var part, entry.car()) {
     Array exports = [];
-    if (part is <map>) c.replay_package_imports(globs, part, exports);
+    if (part is <map>) _replay_package_imports(c, globs, part, exports);
     else if (part is <string>) {
       _replay_included(c, globs, part, visited, exports, NULL);
       if (exports.len()) delivered[part] = exports.list_free();
@@ -631,7 +631,7 @@ static void _replay_included(
   if (!entry && prefix is not <array>) return;
   List parts = prefix is <array> ? prefix.array().list() : entry.car();
   foreach (Var part, parts) {
-    if (part is <map>) c.replay_package_imports(globs, part, exports);
+    if (part is <map>) _replay_package_imports(c, globs, part, exports);
     else if (part is <string>)
       _replay_included(c, globs, part, visited, exports, active);
   }

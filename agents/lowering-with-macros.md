@@ -267,7 +267,7 @@ places or returns, such as a lifted lambda or a protocol's forwarding
 member, is written (`Ast.written_definitions`): only shipped function rules see
 it, while its source statements still reach a program's statement rules. A
 definition the source writes, or a program's meta code places or returns,
-reaches every function rule (`Compiler.written_support`).
+reaches every function rule (`_written_support` in `src/macros/rewrites.x`).
 The walk does not read the text. Text therefore declares only locals that
 no region owns, transfers control only where no region opens, and holds a
 `switch` or a loop as a node, which stays the barrier its `break` and

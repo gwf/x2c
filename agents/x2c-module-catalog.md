@@ -37,14 +37,14 @@ shared helpers for x2c compiler AST nodes.
 Public functions:
 
 `Ast.binding`, `Ast.try_binding`, `Ast.binding_spelling`,
-`Ast.append_modifiers`, `Ast.prototype_declarator`, `Ast.designated`,
-`Ast.lvalue_binding`, `Ast.addressed_identifier`, `Ast.direct_identifier`,
-`Ast.indirect_identifier`, `Ast.written_operand`, `Ast.rewrite_children`,
-`Ast.contains_head`, `Ast.replace_nodes`, `Ast.collect_binding_references`,
-`Ast.without_origin`, `Ast.rewrap_origin`, `Ast.written_definitions`,
-`Ast.entry_call`, `Ast.reference_guard_exits`, `Ast.never_returns`,
-`Symbol.is_assignment_op`, `Symbol.changes_left_operand`,
-`Ast.initializer_cases`, `Ast.initializer_functions`
+`Ast.append_modifiers`, `Ast.prototype_declarator`, `Ast.lvalue_binding`,
+`Ast.addressed_identifier`, `Ast.direct_identifier`, `Ast.indirect_identifier`,
+`Ast.written_operand`, `Ast.rewrite_children`, `Ast.contains_head`,
+`Ast.replace_nodes`, `Ast.collect_binding_references`, `Ast.without_origin`,
+`Ast.rewrap_origin`, `Ast.written_definitions`, `Ast.entry_call`,
+`Ast.reference_guard_exits`, `Ast.never_returns`, `Symbol.is_assignment_op`,
+`Symbol.changes_left_operand`, `Ast.initializer_cases`,
+`Ast.initializer_functions`
 
 ### [src/builtins.x](../src/builtins.x)
 
@@ -148,7 +148,7 @@ Public functions:
 `Compiler.lambda_param_types`, `Compiler.bind_lambda_expression`,
 `Compiler.begin_lambda_captures`, `Compiler.end_lambda_captures`,
 `Compiler.lambda_capture_required`, `Compiler.capture_lambda_identifier`,
-`Compiler.respell_captures`, `Compiler.check_lambda_captures`
+`Compiler.respell_captures`
 
 ### [src/main.x](../src/main.x)
 
@@ -168,7 +168,7 @@ Public functions:
 `Compiler.loaded_helper_call`, `MetaHelper.new`,
 `MetaHelper.retain_executable`, `Compiler.use_meta_helper`,
 `MetaHelper.failure`, `Compiler.begin_meta_unit`, `Compiler.stop_meta_helper`,
-`MetaHelper.restart`, `MetaHelper.close`
+`MetaHelper.restart`
 
 ### [src/meta-project.x](../src/meta-project.x)
 
@@ -176,7 +176,7 @@ the project meta build.
 
 Public functions:
 
-`Frontend.prepare_meta`, `Frontend.build_meta`, `Frontend.build_loaded`
+`Frontend.prepare_meta`, `Frontend.build_loaded`
 
 ### [src/operator-ledger.x](../src/operator-ledger.x)
 
@@ -244,12 +244,11 @@ x2c statement parsing.
 
 Public functions:
 
-`Compiler.parse_statement`, `Compiler.with_binding`,
-`Compiler.parse_source_clause`, `Compiler.finish_return_statement`,
-`Compiler.parse_match_row_argument`, `Compiler.parse_case_body`,
-`Compiler.parse_governed`, `Compiler.parse_block_item`,
-`Compiler.parse_compound_statement`, `Compiler.parse_block_items`,
-`Compiler.parse_callable_body`
+`Compiler.with_binding`, `Compiler.parse_source_clause`,
+`Compiler.finish_return_statement`, `Compiler.parse_match_row_argument`,
+`Compiler.parse_case_body`, `Compiler.parse_governed`,
+`Compiler.parse_block_item`, `Compiler.parse_compound_statement`,
+`Compiler.parse_block_items`, `Compiler.parse_callable_body`
 
 ### [src/toolchain.x](../src/toolchain.x)
 
@@ -361,17 +360,16 @@ Public functions:
 `Compiler.include_function_declarations`,
 `Compiler.runtime_function_declarations`, `Compiler.collected_names`,
 `Compiler.publishes_typedef`, `Compiler.publishes_type_family`,
-`Compiler.callable_symbols`, `Compiler.inline_type_dependencies`,
-`Compiler.publish_inline_types`, `Compiler.record_generated_symbol`,
-`Compiler.record_conformance_rows`, `Compiler.declared_adoptions`,
-`Compiler.linked_meta_provider_current`,
+`Compiler.callable_symbols`, `Compiler.publish_inline_types`,
+`Compiler.record_generated_symbol`, `Compiler.record_conformance_rows`,
+`Compiler.declared_adoptions`, `Compiler.linked_meta_provider_current`,
 `Compiler.linked_meta_definitions_current`, `Compiler.complete_meta_hashes`,
 `Compiler.meta_provider_hashes`, `Compiler.add_linked_meta_provider_hashes`,
 `Compiler.name_meta_provider_bindings`, `Compiler.loaded_provider`,
 `Compiler.loaded_call_type`, `Compiler.name_loaded_provider`,
-`Compiler.collect_package`, `Compiler.replay_package_imports`,
-`Compiler.configure_interfaces`, `Compiler.prelude_interface`,
-`Compiler.interface_text`, `Compiler.linked_prelude_records`
+`Compiler.collect_package`, `Compiler.configure_interfaces`,
+`Compiler.prelude_interface`, `Compiler.interface_text`,
+`Compiler.linked_prelude_records`
 
 ### [src/compiler/compiler.x](../src/compiler/compiler.x)
 
@@ -388,11 +386,11 @@ Public functions:
 `Compiler.finish_collected_declaration`, `Compiler.record_inline_function`,
 `_x2c_at_function_arrow`, `_x2c_skip_shallow_expression`,
 `Compiler.full_parse`, `Compiler.skip_collected_script_statement`,
-`Compiler.skip_script_statement`, `Compiler.tokenize`, `Compiler.peek`,
-`Token.skip_trivia`, `Compiler.require_input`, `Compiler.expect`,
-`Compiler.next`, `Compiler.test`, `Compiler.at_word`, `Compiler.take_word`,
-`Symbol.group_step`, `Token.group_close`, `Token.after_group`,
-`Compiler.mark_completion`, `Compiler.at_completion`, `_x2c_complete_here`,
+`Compiler.tokenize`, `Compiler.peek`, `Token.skip_trivia`,
+`Compiler.require_input`, `Compiler.expect`, `Compiler.next`, `Compiler.test`,
+`Compiler.at_word`, `Compiler.take_word`, `Symbol.group_step`,
+`Token.group_close`, `Token.after_group`, `Compiler.mark_completion`,
+`Compiler.at_completion`, `_x2c_complete_here`,
 `Compiler.queue_declaration_effect`, `Compiler.run_declaration_effects`,
 `Compiler.collect_unit_macro`, `Compiler.replay_declaration_source`,
 `Compiler.freeze_declaration_syntax`, `Compiler.thaw_declaration_syntax`,
@@ -537,18 +535,17 @@ Public functions:
 
 `Compiler.parse_expression`, `Compiler.parse_assignment`,
 `Compiler.parse_conditional`, `Compiler.parse_parenthesized_statement`,
-`Compiler.parse_macro_expression_target`, `Compiler.apply_macro_value`,
-`Compiler.parse_primary`, `Compiler.parse_variable`,
-`Compiler.resolve_expression`, `Compiler.needs_resolution`,
-`Compiler.require_var_tag`, `Compiler.var_tag_expression`,
+`Compiler.parse_macro_expression_target`, `Compiler.parse_primary`,
+`Compiler.parse_variable`, `Compiler.resolve_expression`,
+`Compiler.needs_resolution`, `Compiler.var_tag_expression`,
 `Compiler.resolve_map_entry`, `_x2c_nominal_getindex`,
 `Compiler.resolve_postfix_member`, `Compiler.postfix_completions`,
 `_x2c_func_call_arguments`, `Compiler.func_call_parts`,
-`Compiler.complete_iter_chain`, `List.printf_family`,
-`Compiler.printf_static_format`, `_x2c_indexed_builtin_helper`,
-`Compiler.check_explicit_converter`, `Compiler.promote_string_literal`,
-`Compiler.convert_expression`, `Compiler.convert_segment_to_string`,
-`Compiler.converter_call`, `Compiler.is_builtin_converter_call`
+`Compiler.complete_iter_chain`, `Compiler.printf_static_format`,
+`_x2c_indexed_builtin_helper`, `Compiler.check_explicit_converter`,
+`Compiler.promote_string_literal`, `Compiler.convert_expression`,
+`Compiler.convert_segment_to_string`, `Compiler.converter_call`,
+`Compiler.is_builtin_converter_call`
 
 ### [src/generate/generate.x](../src/generate/generate.x)
 
@@ -601,10 +598,10 @@ Public functions:
 `Compiler.marked_rewrite`, `Compiler.has_rewrites`, `Compiler.rewrite`,
 `Compiler.rewrite_lowered`, `Compiler.lower_replacement`,
 `Compiler.rewrite_written`, `Compiler.lower_rewrite`,
-`Compiler.written_support`, `Compiler.applying_shipped`, `Compiler.rebound`,
-`Compiler.watched_step`, `Compiler.publish_macro_definition_node`,
-`Compiler.record_compile_time_effect`, `Compiler.install_compile_time_effects`,
-`Compiler.macro_form_is_definition`, `Compiler.local_macro_form_is_definition`,
+`Compiler.applying_shipped`, `Compiler.rebound`, `Compiler.watched_step`,
+`Compiler.publish_macro_definition_node`,
+`Compiler.install_compile_time_effects`, `Compiler.macro_form_is_definition`,
+`Compiler.local_macro_form_is_definition`,
 `Compiler.keyword_form_is_definition`, `Compiler.parse_keyword_definition`,
 `Compiler.macro_starts_target_at`, `Compiler.macro_invocation_collection`,
 `Compiler.skip_macro_invocation`, `Compiler.skip_named_type_declaration`,
@@ -654,16 +651,14 @@ Public functions:
 
 `Compiler.compiler_targets`, `Compiler.select_native_modules`,
 `Compiler.select_package_module`, `Compiler.load_native_module`,
-`Compiler.preload_native_module`, `Compiler.add_native_module`,
-`Compiler.native_module_loaded`, `Compiler.native_module_targets`,
+`Compiler.preload_native_module`, `Compiler.native_module_targets`,
 `Compiler.supplies_native_meta`, `x2c_register_extension`,
 `Compiler.links_extension`, `Compiler.extension_archive`,
-`Compiler.project_meta_uses_linked`, `Compiler.bind_linked_meta`,
-`Compiler.links_meta_function`, `Compiler.linked_meta_provider_source`,
-`Compiler.install_meta_function`, `Compiler.install_collected_meta_function`,
-`Compiler.matches_macro`, `Compiler.install_meta_declaration`,
-`Compiler.record_project_meta_effect`, `Compiler.install_project_meta_effect`,
-`Compiler.bind_project_meta`, `Compiler.evaluate_meta_expression`,
+`Compiler.bind_linked_meta`, `Compiler.links_meta_function`,
+`Compiler.linked_meta_provider_source`, `Compiler.install_meta_function`,
+`Compiler.install_collected_meta_function`, `Compiler.matches_macro`,
+`Compiler.install_meta_declaration`, `Compiler.record_project_meta_effect`,
+`Compiler.install_project_meta_effect`, `Compiler.evaluate_meta_expression`,
 `Compiler.evaluate_meta_statement`, `Compiler.run_meta_call`,
 `Compiler.apply_meta_function`, `Compiler.record_native_meta_effect`,
 `Compiler.install_native_meta_effects`, `Compiler.bind_native_meta`,
@@ -703,29 +698,27 @@ x2c declarations, parsed from source or constructed.
 
 Public functions:
 
-`Compiler.parse_top_level_mode`, `Compiler.skip_linkage_brace`,
-`Compiler.parse_top_level`, `Compiler.parse_submission`,
-`Compiler.defines_main`, `Compiler.script_statement_starts`,
-`Compiler.script_statement_executes`, `Compiler.protocol_form_starts`,
-`Compiler.meta_form_is_declaration`, `Compiler.take_meta_marker`,
-`Compiler.parse_import_declaration`, `Compiler.definition_doc`,
-`Compiler.finish_foreign_alias`, `Compiler.parse_declaration_row`,
-`Compiler.parse_simple_declaration`, `Compiler.parse_type_operand`,
-`Compiler.parse_declaration_argument`, `Compiler.test_static_assert`,
-`Compiler.parse_static_assert`, `Compiler.test_declaration`,
-`Compiler.check_reference_placement`, `Compiler.parse_type_name`,
-`Compiler.parse_fields`, `Compiler.parse_field`, `Compiler.parse_named_type`,
-`Compiler.parse_enumerators`, `Compiler.parse_enumerator`,
-`Compiler.parse_declarator_argument`, `Compiler.bind_template_local`,
-`Compiler.parse_parameter_list`, `Compiler.parse_parameter`,
-`Compiler.bind_parameter`, `Compiler.parse_complex_identifier`,
-`Compiler.package_alias_spelling`, `Compiler.parse_basic_identifier`,
-`Compiler.parse_optional_identifier`, `Compiler.parse_function_definition`,
-`Compiler.parse_function_target`, `Ast.declared_return`, `Compiler.enter`,
-`Compiler.enclosing`, `Compiler.enter_function`, `Compiler.function_entry`,
-`Compiler.exit_function`, `Compiler.place_entry`, `Compiler.place_after`,
-`Compiler.close_placements`, `Compiler.leave_item`,
-`Compiler.finish_initializers`, `Compiler.bind_syntax`,
+`Compiler.parse_top_level_mode`, `Compiler.parse_top_level`,
+`Compiler.parse_submission`, `Compiler.defines_main`,
+`Compiler.script_statement_starts`, `Compiler.script_statement_executes`,
+`Compiler.protocol_form_starts`, `Compiler.meta_form_is_declaration`,
+`Compiler.definition_doc`, `Compiler.finish_foreign_alias`,
+`Compiler.parse_declaration_row`, `Compiler.parse_simple_declaration`,
+`Compiler.parse_type_operand`, `Compiler.parse_declaration_argument`,
+`Compiler.test_static_assert`, `Compiler.parse_static_assert`,
+`Compiler.test_declaration`, `Compiler.check_reference_placement`,
+`Compiler.parse_type_name`, `Compiler.parse_fields`, `Compiler.parse_field`,
+`Compiler.parse_named_type`, `Compiler.parse_enumerators`,
+`Compiler.parse_enumerator`, `Compiler.parse_declarator_argument`,
+`Compiler.bind_template_local`, `Compiler.parse_parameter_list`,
+`Compiler.parse_parameter`, `Compiler.bind_parameter`,
+`Compiler.parse_complex_identifier`, `Compiler.package_alias_spelling`,
+`Compiler.parse_basic_identifier`, `Compiler.parse_optional_identifier`,
+`Compiler.parse_function_definition`, `Compiler.parse_function_target`,
+`Ast.declared_return`, `Compiler.enter`, `Compiler.enclosing`,
+`Compiler.enter_function`, `Compiler.function_entry`, `Compiler.exit_function`,
+`Compiler.place_entry`, `Compiler.place_after`, `Compiler.close_placements`,
+`Compiler.leave_item`, `Compiler.finish_initializers`, `Compiler.bind_syntax`,
 `Compiler.source_clause`, `Compiler.bind_source_statement`,
 `Compiler.bind_catch_arm`, `Compiler.bind_match_arm`,
 `Compiler.bind_callable_body`
@@ -800,8 +793,8 @@ Public functions:
 `Sym.is_named_value_type`, `Sym.lookup_field`, `Sym.declare_field_order`,
 `Sym.field_order`, `Sym.mark_field`, `Sym.marked_fields`, `Sym.aggregate_of`,
 `Sym.put`, `Sym.drop`, `Compiler.begin_semantic_transaction`,
-`SymTxn.local_macros_changed`, `Sym.transacting`, `Sym.end_log`,
-`SymTxn.commit`, `SymTxn.commit_transient`, `SymTxn.rollback`
+`SymTxn.local_macros_changed`, `Sym.transacting`, `SymTxn.commit`,
+`SymTxn.commit_transient`, `SymTxn.rollback`
 
 ### [src/transform/transform.x](../src/transform/transform.x)
 

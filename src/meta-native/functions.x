@@ -219,23 +219,22 @@ void Compiler.install_project_meta_effect(Compiler c, List row) {
     c.meta_group_bound.del(%"<unbound $name>");
     if (!c.meta_calls_wait()) {
       c.ensure_macro_lisp();
-      _bind_project_meta(c, name, 1);
+      _bind_advertised_meta(c, name, 1);
     }
   }
 }
 
-/** Binds an advertised meta function and reports whether it was found.
-    Its provider supplies the helper table and private helpers. */
-int Compiler.bind_project_meta(Compiler c, String name) {
+/* Binds an advertised meta function and reports whether it was found.
+   Its provider supplies the helper table and private helpers. */
+module int _bind_project_meta(Compiler c, String name) {
   if (!c.project_meta.len())
     c.install_native_meta_effects(c.sym.unit_symbols());
-  return _bind_project_meta(c, name, 0);
+  return _bind_advertised_meta(c, name, 0);
 }
 
 /* An include installs its provider at that position. Later lookups keep
    any Lisp definition the unit installs after the include. */
-static int _bind_project_meta(
-  Compiler c, String name, int install) {
+static int _bind_advertised_meta(Compiler c, String name, int install) {
   Var target;
   if (!c.project_meta.try_get(name, target)) return 0;
   if (c.meta_calls_wait()) return 0;

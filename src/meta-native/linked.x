@@ -17,7 +17,7 @@ module Var _linked_target(
   Var function = 0;
   if (shipped_targets && shipped_targets.try_get(key, function))
     return function;
-  if (!c.project_meta_uses_linked(name, provider)) return 0;
+  if (!_project_meta_uses_linked(c, name, provider)) return 0;
   function = _linked_module()[name];
   if (!c.native_meta_accepts(function, signature)) return 0;
   if (c.builtin_defs) $scope(&native_module_scope) {
@@ -28,10 +28,10 @@ module Var _linked_target(
   return function;
 }
 
-/** Answers whether a provider's function can use its linked body.
-    Copied definitions retain precise callees; runtime bodies retain their
-    provider's source dependencies, including private helpers. */
-int Compiler.project_meta_uses_linked(
+/* Answers whether a provider's function can use its linked body.
+   Copied definitions retain precise callees; runtime bodies retain their
+   provider's source dependencies, including private helpers. */
+static int _project_meta_uses_linked(
   Compiler c, String name, String provider) {
   Map linked = _linked_module();
   if (!(name in linked)) return 0;
@@ -81,8 +81,8 @@ int Compiler.bind_linked_meta(Compiler c, List fn, Type type) {
 /* The linked module's targets, loaded with the definition hashes on first
    use. */
 module Map _linked_module(void) {
-  if (!Compiler.native_module_loaded(linked_supplier)) {
-    Compiler.add_native_module(linked_supplier, linked_meta_targets);
+  if (!_native_module_loaded(linked_supplier)) {
+    _add_native_module(linked_supplier, linked_meta_targets);
     $scope(&native_module_scope) linked_hashes = linked_meta_hashes();
     foreach (Var (name, row), linked_hashes) {
       name.string().try_own();

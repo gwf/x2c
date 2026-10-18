@@ -285,7 +285,7 @@ module void _bind_pending_inline_bodies(
     body.tokenize(text);
     if (markers is not void) body.line_markers = markers;
     List ast = body.full_parse(symbols, 0);
-    Map additions = body.inline_type_dependencies(ast);
+    Map additions = _inline_type_dependencies(body, ast);
     _publish_inline_dependencies(body, path, own, statics, additions);
     foreach (Var part, _entry(body, path).car())
       if (part is <map>) _merge_rows(c, globs, part);
@@ -449,8 +449,7 @@ module List _sorted_names(Map definitions) {
   return names.list_free();
 }
 
-/** Records the actual type dependencies of typed public inline bodies. */
-Map Compiler.inline_type_dependencies(Compiler c, List ast) {
+static Map _inline_type_dependencies(Compiler c, List ast) {
   Map rows = {};
   List function;
   $ast.walk(ast, function) {
@@ -495,7 +494,7 @@ Map Compiler.inline_type_dependencies(Compiler c, List ast) {
 /** Promotes the selected type families after the owning ordinary full
     parse. The header and Xi then use the same complete family selection. */
 void Compiler.publish_inline_types(Compiler c, List ast) {
-  Map additions = c.inline_type_dependencies(ast);
+  Map additions = _inline_type_dependencies(c, ast);
   if (!additions.len()) return;
   String path = _canonical_path(c.filename);
   _publish_inline_dependencies(

@@ -72,8 +72,9 @@ void Compiler.parse_macro_lisp_shallow(Compiler c) {
     if (!c.source_private) {
       String path =
         Compiler.portable_path(_canonical_path(c, requested, c.token));
-      c.record_compile_time_effect(
-        %(compile-time import $path ${_effect_source(c, c.token)}), c.token);
+      _record_compile_time_effect(
+        c, %(compile-time import $path ${_effect_source(c, c.token)}),
+        c.token);
     }
     c.parse_macro_lisp_top_level();
     return;
@@ -84,8 +85,8 @@ void Compiler.parse_macro_lisp_shallow(Compiler c) {
      import's forms, and running one again would rebind an ancestor's name. */
   if (c.inherited_lisp) return;
   if (!c.source_private)
-    c.record_compile_time_effect(
-      %(compile-time lisp $form ${_effect_source(c, first)}), first);
+    _record_compile_time_effect(
+      c, %(compile-time lisp $form ${_effect_source(c, first)}), first);
   c.queue_declaration_effect(form, first, c.token);
 }
 

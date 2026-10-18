@@ -15,7 +15,7 @@
 */
 List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
   _leading_directives(c, skip_body);
-  if (c.skip_linkage_brace()) return NULL;
+  if (_skip_linkage_brace(c)) return NULL;
   if (skip_body && c.skip_collected_script_statement()) return NULL;
   if (c.test_static_assert()) return c.parse_static_assert();
   List slot = skip_body ? NULL : c.try_parse_macro_slot(<unit>);
@@ -46,7 +46,7 @@ List Compiler.parse_top_level_mode(Compiler c, int skip_body) {
         c.expect(<;>);
         return NULL;
       }
-      return c.parse_import_declaration();
+      return _parse_import_declaration(c);
     case <"$(">:   return _top_level_lisp(c, skip_body);
     case <@>:      return _top_level_decorator(c);
   }
@@ -99,14 +99,14 @@ static void _track_conditional_arms(Compiler c) {
     }
 }
 
-/** Consumes one brace of a C linkage specification at file scope and reports
-    whether it did. `extern "C" {` opens a group; a `}` at file scope closes
-    the innermost open group, because every other file-scope form consumes
-    its own braces. The declarations between them stay at file scope. The
-    `#ifdef __cplusplus` arm of the usual header guard is skipped, so only an
-    unguarded group reaches this operation.
+/* Consumes one brace of a C linkage specification at file scope and reports
+   whether it did. `extern "C" {` opens a group; a `}` at file scope closes
+   the innermost open group, because every other file-scope form consumes
+   its own braces. The declarations between them stay at file scope. The
+   `#ifdef __cplusplus` arm of the usual header guard is skipped, so only an
+   unguarded group reaches this operation.
 */
-int Compiler.skip_linkage_brace(Compiler c) {
+static int _skip_linkage_brace(Compiler c) {
   if (c.peek(0) == <extern> && c.peek(1) == <lit-char*> &&
       c.peek(2) == <"{">) {
     c.next();
@@ -170,7 +170,7 @@ static List _top_level_decorator(Compiler c) {
 static List _declaration_form(Compiler c, int skip_body) {
   Token meta = NULL;
   int native = 0;
-  if (c.meta_form_is_declaration()) meta = c.take_meta_marker(native);
+  if (c.meta_form_is_declaration()) meta = _take_meta_marker(c, native);
   Token first = c.token;
   List decl;
   $let(c.shallow, c.shallow || c.public_bodies)
@@ -308,17 +308,17 @@ int Compiler.protocol_form_starts(Compiler c) {
 int Compiler.meta_form_is_declaration(Compiler c) {
   if (!c.at_word("meta")) return 0;
   Token head = c.token;
-  c.take_meta_marker(NULL);
+  _take_meta_marker(c, NULL);
   int marker = c.test_declaration();
   c.token = head;
   return marker;
 }
 
-/** Consumes the `meta` marker at the cursor and the contextual `native`
-    marker that may follow it, and returns the `meta` token. `native` binds
-    the definition after it the way a bodyless prototype would. `*native`,
-    when requested, reports whether that marker was present. */
-Token Compiler.take_meta_marker(Compiler c, int &?native) {
+/* Consumes the `meta` marker at the cursor and the contextual `native`
+   marker that may follow it, and returns the `meta` token. `native` binds
+   the definition after it the way a bodyless prototype would. `*native`,
+   when requested, reports whether that marker was present. */
+static Token _take_meta_marker(Compiler c, int &?native) {
   Token meta = c.token;
   c.next();
   Token after = c.token;
@@ -334,12 +334,12 @@ Token Compiler.take_meta_marker(Compiler c, int &?native) {
 
 // imports
 
-/** Parses and registers one `import` declaration, including its semicolon.
-    The alias defaults to the package name; `with` members add source-ordered
-    local spellings. These spellings affect source resolution only; the package
-    name in the returned AST drives the generated header include.
+/* Parses and registers one `import` declaration, including its semicolon.
+   The alias defaults to the package name; `with` members add source-ordered
+   local spellings. These spellings affect source resolution only; the package
+   name in the returned AST drives the generated header include.
 */
-List Compiler.parse_import_declaration(Compiler c) {
+static List _parse_import_declaration(Compiler c) {
   Token start = c.token;
   c.expect(<import>);
   String name = _package_name(c), alias = _import_alias(c, name);

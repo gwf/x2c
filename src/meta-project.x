@@ -76,14 +76,7 @@ static typedef struct Helper {
     calls. Inputs that reach none use no helper. A group or helper that
     does not build is reported at the first call that needs it. */
 void Frontend.prepare_meta(Frontend f, List inputs) {
-  Compiler.use_meta_helper(f.build_meta(inputs));
-}
-
-/** Builds an independent helper for the meta functions `inputs` reach.
-    The caller owns its lifetime. Uses the ordinary source, include,
-    package, native object, and cache dependency handling. */
-MetaHelper Frontend.build_meta(Frontend f, List inputs) {
-  return _build_meta(f, inputs, NULL);
+  Compiler.use_meta_helper(_build_meta(f, inputs, NULL));
 }
 
 /** Builds one helper exposing the loaded files' public functions.
@@ -94,6 +87,9 @@ MetaHelper Frontend.build_loaded(Frontend f, List filenames) {
   return _build_meta(f, paths, paths);
 }
 
+/* Builds an independent helper for the meta functions `inputs` reach; the
+   caller owns it. `entries`, when given, names the loaded files whose public
+   functions the helper exposes. */
 static MetaHelper _build_meta(Frontend f, List inputs, List entries) {
   Helper h = {
     .frontend = f, .owners = [], .entries = entries,
@@ -421,7 +417,7 @@ static List _build(Helper &h) {
   }
   foreach (String path, %(@{h.owners} @{h.modules} @{_loop_sources()}))
     h.deps[path] = 1;
-  if (h.entries) h.meta = h.frontend.build_meta(h.entries);
+  if (h.entries) h.meta = _build_meta(h.frontend, h.entries, NULL);
   defer if (h.meta) Scope.free(h.meta);
   String failure = h.entries ? _loaded_providers(h) : NULL;
   if (failure) {

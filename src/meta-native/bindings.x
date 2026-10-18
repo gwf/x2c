@@ -62,7 +62,7 @@ void Compiler.install_native_meta_effects(Compiler c, Map globs) {
     the parse installs the advertisements, so the first lookup there
     installs the ones visible so far. */
 int Compiler.bind_native_meta(Compiler c, String name) {
-  if (c.bind_project_meta(name)) return 1;
+  if (_bind_project_meta(c, name)) return 1;
   Var signature, bound;
   if (!c.native_meta.len())
     c.install_native_meta_effects(c.sym.unit_symbols());
@@ -81,7 +81,7 @@ void Compiler.install_native_meta_function(
   if (!c.collect_protocols) c.run_declaration_effects();
   c.ensure_macro_lisp();
   List signature = c.func_signature(type);
-  if (c.bind_project_meta(name)) return;
+  if (_bind_project_meta(c, name)) return;
   c.native_meta[name] = signature;
   _bind_native_meta(c, name, signature, marker);
 }

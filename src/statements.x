@@ -1,6 +1,6 @@
 /*  statements.x -- x2c statement parsing
 
-    `Compiler.parse_statement` dispatches each statement form to one
+    `_parse_statement` dispatches each statement form to one
     production, which consumes its tokens in grammar order and returns its
     node. Preprocessor directives between statements stay in the tree, so
     each one emits where C read it. Return checking uses the return type
@@ -67,11 +67,11 @@ static macro Stmt $fail.statements_catch_pattern(Expr $c, Expr $site) =>
 
 // statements
 
-/** Parses and binds one statement or statement-position macro at the current
-    token. On return, the cursor follows the complete statement and any
-    temporary `Sym` scopes opened by the statement have been closed.
+/* Parses and binds one statement or statement-position macro at the current
+   token. On return, the cursor follows the complete statement and any
+   temporary `Sym` scopes opened by the statement have been closed.
 */
-List Compiler.parse_statement(Compiler c) => _statement(c, <statement>);
+static List _parse_statement(Compiler c) => _statement(c, <statement>);
 
 /* A meta call written as the whole statement binds its result at
    `position`. */
@@ -623,7 +623,7 @@ List Compiler.parse_governed(Compiler c, Symbol position) {
   loop {
     Token start = c.token;
     items.push(
-      position == <block> ? c.parse_block_item() : c.parse_statement());
+      position == <block> ? c.parse_block_item() : _parse_statement(c));
     depth = _depth_after(c, start, depth);
     if (depth <= 0) break;
     Symbol end = _arm_end(c.leading_preproc());
@@ -705,7 +705,7 @@ List Compiler.parse_block_item(Compiler c) {
   List slot = c.try_parse_macro_slot(<block>);
   if (slot) return slot;
   if (c.local_macro_form_is_definition()) return _local_macro(c);
-  if (c.at_word("with")) return c.parse_statement();
+  if (c.at_word("with")) return _parse_statement(c);
   // An identifier naming a live `with` expression is no macro target.
   int with_expression = !!c.with_binding();
   List macro = with_expression ? NULL : c.try_parse_macro_target_at(<block>);

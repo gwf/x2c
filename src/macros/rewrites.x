@@ -372,7 +372,7 @@ static List _bound(
   _held_parts(source, point, parts);
   if (lower) result = _kept_lowered(result, source, parts);
   List bound = _bind_replacement(c, result, position, expected);
-  if (position == <unit>) bound = c.written_support(bound);
+  if (position == <unit>) bound = _written_support(c, bound);
   struct SlotWatch held = {parts.list()};
   return _bound_held(c, &held, kind, bound, position, expected, site, lower);
 }
@@ -423,15 +423,15 @@ static List _lowered_definition(Compiler c, Var result) {
   List bound = c.bind_syntax(result, <unit>, NULL);
   match (bound) case %(seq ?only): bound = only;
   match (result) case %(code-value "lowered" *): return bound;
-  $let(c.slot_watch, NULL) return c.normalize(c.written_support(bound));
+  $let(c.slot_watch, NULL) return c.normalize(_written_support(c, bound));
 }
 
-/** The bound file-scope code `bound` that the rule now writing gives,
-    written as the kernel's when that rule is shipped. A rule writes while
-    its meta function runs, until a rule it reaches binds, and while its
-    replacement binds and lowers. What a program writes, or a placement
-    outside any rule, is source. */
-List Compiler.written_support(Compiler c, List bound) {
+/* The bound file-scope code `bound` that the rule now writing gives,
+   written as the kernel's when that rule is shipped. A rule writes while
+   its meta function runs, until a rule it reaches binds, and while its
+   replacement binds and lowers. What a program writes, or a placement
+   outside any rule, is source. */
+module List _written_support(Compiler c, List bound) {
   List writers = c.applying && c.applying.cdr() === c.active_rewrites
     ? c.applying : c.active_rewrites;
   RewriteRule writer = writers ? writers.car() : NULL;

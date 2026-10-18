@@ -15,7 +15,6 @@ Lambda parsing and capture resolution.
 | [`Compiler.begin_lambda_captures`](#Compiler.begin_lambda_captures) | Opens lexical capture resolution while a lambda body is parsed or bound. |
 | [`Compiler.bind_lambda_expression`](#Compiler.bind_lambda_expression) | Binds a constructed lambda through the lexical capture operations used by source literals. |
 | [`Compiler.capture_lambda_identifier`](#Compiler.capture_lambda_identifier) | Resolves an automatic identifier through each enclosing lambda's captures. |
-| [`Compiler.check_lambda_captures`](#Compiler.check_lambda_captures) | Rejects writes and reference access to read-only snapshot bindings. |
 | [`Compiler.end_lambda_captures`](#Compiler.end_lambda_captures) | Finishes the active lambda's captures in first-use order. |
 | [`Compiler.lambda_capture_required`](#Compiler.lambda_capture_required) | Reports whether the active lambda still needs to capture a binding. |
 | [`Compiler.lambda_param_types`](#Compiler.lambda_param_types) | The parameter types of a lambda's function signature, keeping typed declarators; a bare parameter is a `Var`. |
@@ -59,17 +58,6 @@ rewriting. Reference captures preserve qualifiers; snapshots of reference
 parameters copy their current referents.
 
 Source: `src/lambdas.x:485`
-
-<a id="Compiler.check_lambda_captures"></a>
-#### Compiler.check_lambda_captures
-
-`void Compiler.check_lambda_captures(Compiler c, List ast)`
-
-Rejects writes and reference access to read-only snapshot bindings.
-The body has already resolved identifiers and call arguments. Templates
-defer this check until expansion; nested lambdas check their own bodies.
-
-Source: `src/lambdas.x:639`
 
 <a id="Compiler.end_lambda_captures"></a>
 #### Compiler.end_lambda_captures

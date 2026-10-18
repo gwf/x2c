@@ -120,8 +120,8 @@ int SymTxn.local_macros_changed(SymTxn &s) {
 /** Returns whether a semantic transaction is open. */
 int Sym.transacting(Sym s) => s.transactions > 0;
 
-/** Stops one transaction's semantic write log. */
-void Sym.end_log(Sym s) {
+/* Stops one transaction's semantic write log. */
+static void _end_log(Sym s) {
   if (!--s.transactions) s.undo.clear();
 }
 
@@ -147,7 +147,7 @@ void SymTxn.commit(SymTxn &?s) {
 /* Completing the outermost transaction empties the undo log. */
 static void _finish(SymTxn &s) {
   s.active = 0;
-  s.c.sym.end_log();
+  _end_log(s.c.sym);
 }
 
 /** Commits an active transaction, retaining the original counters map.
