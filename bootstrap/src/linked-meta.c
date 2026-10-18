@@ -16540,7 +16540,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_30(void
   _15591 = List_var(_15590);
   _15592 = String_new("src/collect/declarations.x");
   _15593 = String_var(_15592);
-  _15594 = String_new("f8848cc9");
+  _15594 = String_new("56de3fb7");
   _15595 = String_var(_15594);
   _15596 = cons(_15595, NULL);
   _15597 = cons(_15593, _15596);
