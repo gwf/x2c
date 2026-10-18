@@ -33,4 +33,18 @@ assert.equal(m.publicEdges[0][2], 9);
 assert.equal(m.topEdges.length, 1);
 assert.equal(m.authored, 6);
 assert.deepEqual(m.topLevel, [6]);
-console.log('PASS: shared and transitive static components, public boundaries, and top-level coverage');
+const tiers = {
+  functions: [
+    { f: 0, p: "a" },
+    { f: 0, p: "a", s: 1, v: "static" },
+    { f: 0, p: "b", s: 1, v: "module" },
+  ],
+  edges: [
+    [0, 1, 1],
+    [0, 2, 1],
+  ],
+};
+const split = E.metrics(tiers, [{ members: [0] }, { members: [1, 2] }]);
+assert.deepEqual(split.exposed.sort(), [1, 2]);
+assert.deepEqual(split.toModule, [1]);
+console.log('PASS: shared and transitive static components, public boundaries, tiered promotions, and top-level coverage');

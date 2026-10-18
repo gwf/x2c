@@ -2,13 +2,13 @@ const assert = require("node:assert/strict");
 const { anchors } = require("../web/engine.js");
 const data = {
   functions: [
-    { f: 0 },
-    { f: 0, s: true },
-    { f: 0, s: true },
-    { f: 0 },
-    { f: 0, s: true },
-    { f: 1 },
-    { f: 1, s: true },
+    { f: 0, p: "a" },
+    { f: 0, p: "a", s: true, v: "static" },
+    { f: 0, p: "a", s: true, v: "static" },
+    { f: 0, p: "a" },
+    { f: 0, p: "a", s: true, v: "static" },
+    { f: 1, p: "b" },
+    { f: 1, p: "b", s: true, v: "static" },
   ],
   edges: [
     [5, 0, 9],

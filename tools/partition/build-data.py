@@ -95,8 +95,11 @@ with open(os.path.join(datasets, "functions.tsv"), newline="") as fh:
         fnidx[row["function_id"]] = len(functions)
         fn_unit.append(unit)
         # `s` marks a definition private to its unit: file-private or module.
+        # `r` is the narrowest storage its resolved callers need, or None.
+        needed = row["needed"]
         functions.append({"f": fi, "p": member, "n": row["source_name"], "e": row["emitted_name"],
-                          "s": 0 if tier == "public" else 1, "v": tier, "k": kind,
+                          "s": 0 if tier == "public" else 1, "v": tier,
+                          "r": None if needed == "none" else needed, "k": kind,
                           "o": int(row["source_order"]), "x": ext, "i": ind})
 
 # ---- call edges -------------------------------------------------------------

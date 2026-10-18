@@ -1,6 +1,8 @@
 /* Pure partition operations. Directed edge weights count static call sites. */
 const Engine = (() => {
   // Original-file attachment is independent of the tentative partition.
+  // A file static moves with its file; a module function serves every file
+  // of its unit, so it is not a dependency that must move.
   function anchors(data) {
     const outgoing = data.functions.map(() => new Set()),
       incoming = data.functions.map(() => new Set());
@@ -16,8 +18,8 @@ const Engine = (() => {
         for (const v of outgoing[stack.pop()]) {
           if (
             seen.has(v) ||
-            !data.functions[v].s ||
-            data.functions[v].f !== f.f
+            data.functions[v].v !== "static" ||
+            data.functions[v].p !== f.p
           )
             continue;
           seen.add(v);
@@ -88,9 +90,14 @@ const Engine = (() => {
     groups.forEach((g, i) => g.members.forEach((v) => (a[v] = i)));
     return a;
   }
+  // `exposed` are private targets called across groups: separate units
+  // would need them public. `toModule` are the file statics among them
+  // called from their own unit: groups kept as member files of one module
+  // unit would need them in module storage.
   function metrics(data, groups) {
     const m = membership(groups, data.functions.length),
-      exposed = new Set();
+      exposed = new Set(),
+      toModule = new Set();
     let cut = 0,
       pairs = 0;
     const links = new Map();
@@ -99,10 +106,15 @@ const Engine = (() => {
       cut += w;
       pairs++;
       if (data.functions[b].s) exposed.add(b);
+      if (
+        data.functions[b].v === "static" &&
+        data.functions[a].f === data.functions[b].f
+      )
+        toModule.add(b);
       const key = m[a] + ":" + m[b];
       links.set(key, (links.get(key) || 0) + w);
     }
-    return { cut, pairs, exposed: [...exposed], links };
+    return { cut, pairs, exposed: [...exposed], toModule: [...toModule], links };
   }
   function atoms(members, ties) {
     const included = new Set(members),

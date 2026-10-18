@@ -1147,3 +1147,106 @@ pre {
 .analysis-job { padding: 10px 0; border-bottom: 1px solid #344047; display: grid; gap: 5px; }
 .analysis-job strong, .analysis-job small { overflow-wrap: anywhere; }
 .analysis-job small { color: #a2b1b9; }
+/* Member files: storage tiers drawn as containment depth. */
+.member-view {
+  padding: 4px 0 24px;
+}
+.member-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  font-size: 11px;
+  margin-bottom: 10px;
+}
+.member-ring {
+  color: #ef8f7e;
+}
+.member-svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 18px;
+}
+.member-frame {
+  fill: none;
+  stroke: #86c7ff;
+  stroke-opacity: 0.45;
+  stroke-dasharray: 6 4;
+}
+.member-box rect {
+  fill: #1a2226;
+  stroke: #c7a2e8;
+  stroke-opacity: 0.55;
+}
+.member-box text {
+  fill: var(--text);
+  font: 12px ui-monospace, SFMono-Regular, monospace;
+}
+.member-box .member-counts {
+  fill: var(--muted);
+  font-size: 10px;
+}
+.member-link {
+  fill: none;
+  stroke-opacity: 0.42;
+}
+.member-link:hover {
+  stroke-opacity: 0.9;
+}
+.member-leader {
+  stroke: #86c7ff;
+  stroke-opacity: 0.18;
+  pointer-events: none;
+}
+.member-trace {
+  stroke-width: 1.4;
+  pointer-events: none;
+}
+.member-trace.out {
+  stroke: #b5dba0;
+}
+.member-trace.in {
+  stroke: #dfb67b;
+}
+.member-dot {
+  cursor: pointer;
+}
+.member-dot circle {
+  stroke: #142023;
+}
+.member-dot circle.selected {
+  stroke: #fff;
+  stroke-width: 2;
+}
+.member-dot .member-wider {
+  fill: none;
+  stroke: #ef8f7e;
+  stroke-dasharray: 2 2;
+}
+.member-matrix-wrap {
+  overflow-x: auto;
+  margin-bottom: 18px;
+}
+.member-matrix {
+  border-collapse: collapse;
+  font: 11px ui-monospace, SFMono-Regular, monospace;
+}
+.member-matrix th,
+.member-matrix td {
+  border: 1px solid var(--line);
+  padding: 4px 8px;
+  text-align: right;
+  white-space: nowrap;
+}
+.member-matrix thead th {
+  text-align: left;
+  color: var(--muted);
+  font-weight: normal;
+}
+.member-matrix tbody th {
+  text-align: left;
+  font-weight: normal;
+}
+.member-matrix .member-internal {
+  color: var(--muted);
+}

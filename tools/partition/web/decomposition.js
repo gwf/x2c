@@ -9,7 +9,7 @@ function memberRows(members) {
     )
     .map((v) => {
       const f = D.functions[v];
-      return `<div class="connection"><span>${f.k ? "TOP" : f.s ? "static" : "public"}</span><button data-source="${v}">${esc(f.n)}</button><small>order ${f.o}</small></div>`;
+      return `<div class="connection"><span>${f.k ? "TOP" : f.v}</span><button data-source="${v}">${esc(f.n)}</button><small>order ${f.o}</small></div>`;
     })
     .join("");
 }

@@ -163,7 +163,7 @@ not leave a partial dataset.
 `functions.tsv` has these columns:
 
 ```text
-function_id  kind  subtree  unit  file  unit_lines  source_order  source_name  emitted_name  visibility  external_calls  indirect_calls
+function_id  kind  subtree  unit  file  unit_lines  source_order  source_name  emitted_name  visibility  needed  external_calls  indirect_calls
 ```
 
 The separators in the actual file are tabs. `function_id` is
@@ -187,6 +187,15 @@ is its resolved C name. `visibility` is the storage tier, described under
 - `module` is a static that every file of a module unit sees. It emits with
   no file prefix.
 - `public` is a nonstatic definition, which other units can link to.
+
+`needed` is the narrowest of those tiers that reaches every resolved caller
+of the definition. It is `static` when every caller is in the definition's
+file, `module` when every caller is in its unit, and `public` otherwise. It is
+`none` when no resolved call reaches the definition. A `needed` narrower than
+`visibility` marks a candidate for narrower storage, not a proof: indirect
+references, callbacks, compiler-generated adapters, external commands, and
+published API are not resolved calls.
+
 `external_calls` and `indirect_calls` count parsed call expressions made by
 that function whose target is respectively missing or ambiguous, or computed.
 They are counts, not graph endpoints.
@@ -279,9 +288,20 @@ these results to explore dependencies and assess the impact of a change.
 
 `structure` reports on one exact input `UNIT`. It emits internal-call totals,
 isolated functions, the member names in each local call-graph component, and
-the groups separated by each qualifying bridge function. Relative unit paths
-are normalized the same way as graph output. Use this with `focus NAME` to
-trace a finding before proposing a move, deletion, or simplification.
+the groups separated by each qualifying bridge function. It then describes
+the unit's files: a single-file unit has one, and a module unit has its
+member files.
+
+- `members` lists each file with its definitions counted by storage tier,
+  its calls within the file, and its `interface`: the definitions that other
+  files of the unit call.
+- `member-calls` counts the call sites from one file to another.
+- `wider` lists definitions whose storage is wider than their `needed` tier,
+  as defined for datasets.
+
+Relative unit paths are normalized the same way as graph output. Use this
+with `focus NAME` to trace a finding before proposing a move, deletion, or
+simplification.
 
 `between` shows the exact resolved calls in both directions between two input
 units. Each direction includes its total call count and the sorted caller,

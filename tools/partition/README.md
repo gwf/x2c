@@ -54,10 +54,11 @@ a server restart marks interrupted jobs unfinished instead of leaving them busy.
 Proposals opened in the browser can be exported. The CLI uses its existing configured
 model and account. Compiler and runtime sources are not edited.
 
-## Reviewed examples and reproduction
+## Reviewed examples
 
 `web/responsibilities/*.x.json` contains reviewed public-operation evidence for
-compiler.x, macros.x, and collect.x at snapshot `dbdafacb`. These descriptions
+compiler.x, macros.x, and collect.x at snapshot `dbdafacb`, before those files
+became module units. They load only against that snapshot. These descriptions
 come from source bodies and caller evidence, not graph communities. Caller
 bodies were inspected selectively, not exhaustively. Known private callbacks
 are included; private declarations remain explicitly unresolved where their
@@ -65,7 +66,6 @@ ownership has not been established.
 
 ```sh
 node tools/partition/prepare-responsibilities.cjs
-node tools/partition/tests/compare-decompositions.cjs
 ```
 
 The preparation command reproduces the versioned `*.manifest.json` files from
@@ -84,13 +84,24 @@ balance is imposed. See [validation results](decomposition-results.md).
 ## Graph exploration
 
 Group arrangement, Functions, and Function list preserve zoom, pan, weighted
-calls, static/public colors, selection, source peek, and manual movement.
+calls, storage-tier colors, selection, source peek, and manual movement.
 Outside caller groups remain on the periphery; their links fade in previews.
 Group circles show function counts, edges show call-site weights, and arrows
 run from blue to orange. Manual moves show cut changes and private-visibility
-opportunities separately. Undo/redo applies to graph-plan changes.
+opportunities separately. A private target called across groups would need
+public storage if the groups became separate units. A file static among them
+would need only module storage if the groups stayed member files of one
+module unit; the metrics and move results count those separately. Undo/redo
+applies to graph-plan changes.
 
-Selecting a function highlights directed transitive same-original-file static
+**Member files** draws the view's files by storage tier. File statics sit
+inside their file, module functions on their file's border, and public
+functions on the view's outer border. Lines aggregate calls between files. A
+dashed ring marks storage wider than the exporter's `needed` tier. Below the
+drawing, a matrix counts call sites between files, and a list gives every
+definition with wider storage than needed.
+
+Selecting a function highlights directed transitive same-file static
 callees and reports external callers, shared helpers, and its anchor score:
 `ln(1+external callers) * ln(1+static dependencies)`, normalized to 100. These
 counts do not include missing indirect references. Source peek shows complete
@@ -105,7 +116,6 @@ does not supply one.
 
 ```sh
 node tools/partition/tests/check-responsibilities.cjs
-node tools/partition/tests/compare-decompositions.cjs
 node tools/partition/tests/check-engine.cjs
 node tools/partition/tests/check-privacy.cjs
 node tools/partition/tests/check-moves.cjs

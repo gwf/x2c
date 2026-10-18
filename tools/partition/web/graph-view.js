@@ -7,15 +7,13 @@ let graphWorker = null,
   graphLastKey = "";
 function functionColor(id) {
   const f = D.functions[id];
-  return f.k ? "#a5adb7" : f.s ? "#edbc7a" : "#86c7ff";
+  return f.k ? "#a5adb7" : TIER_COLOR[f.v];
 }
 function functionVisibility(id) {
   const f = D.functions[id];
   return f.k
     ? "File initializer"
-    : f.s
-      ? "Static function"
-      : "Non-static function";
+    : { static: "File static", module: "Module function", public: "Public function" }[f.v];
 }
 function renderGraph(gs, map) {
   graphWorker?.terminate();
@@ -23,7 +21,7 @@ function renderGraph(gs, map) {
   const generation = ++graphGeneration;
   const host = $("workspace");
   host.classList.add("graph-workspace");
-  host.innerHTML = `<div class="graph-tools"><button id="zoom-out" aria-label="Zoom out">\u2212</button><button id="fit-graph">Fit graph</button><button id="zoom-in" aria-label="Zoom in">+</button><span id="zoom-value"></span><button id="focus-function" disabled>Focus function</button><button id="relayout">Arrange again</button><button id="boundary-summary" title="Inspect all calls across the view boundary"></button><span id="layout-state">Arranging connected functions\u2026</span></div><svg id="graph-svg" aria-label="Interactive function call graph"></svg><div class="graph-legend"><span><span style="color:#edbc7a">\u25cf Static</span> &nbsp; <span style="color:#86c7ff">\u25cf Non-static</span> &nbsp; <span style="color:#a5adb7">\u25cf Initializer</span> \u00b7 Green paths: static dependencies \u00b7 Size: public = outside consumers; static = inside consumers</span><span id="label-count"></span></div><div id="graph-tooltip"></div>`;
+  host.innerHTML = `<div class="graph-tools"><button id="zoom-out" aria-label="Zoom out">\u2212</button><button id="fit-graph">Fit graph</button><button id="zoom-in" aria-label="Zoom in">+</button><span id="zoom-value"></span><button id="focus-function" disabled>Focus function</button><button id="relayout">Arrange again</button><button id="boundary-summary" title="Inspect all calls across the view boundary"></button><span id="layout-state">Arranging connected functions\u2026</span></div><svg id="graph-svg" aria-label="Interactive function call graph"></svg><div class="graph-legend"><span><span style="color:#edbc7a">\u25cf File static</span> &nbsp; <span style="color:#c7a2e8">\u25cf Module</span> &nbsp; <span style="color:#86c7ff">\u25cf Public</span> &nbsp; <span style="color:#a5adb7">\u25cf Initializer</span> \u00b7 Green paths: static dependencies \u00b7 Size: public = outside consumers; static = inside consumers</span><span id="label-count"></span></div><div id="graph-tooltip"></div>`;
   const svg = $("graph-svg"),
     bounds = () => ({
       width: svg.clientWidth || 800,

@@ -1769,7 +1769,108 @@ static int _unit_internal_calls(String path, List functions) {
   return count;
 }
 
-static List _structure(List graph, String wanted) {
+static int _storage_rank(Symbol storage) =>
+  storage == <public> ? 2 : storage == <module> ? 1 : 0;
+
+static Symbol _storage_tier(int rank) =>
+  rank == 2 ? <public> : rank == 1 ? <module> : <static>;
+
+static String _definition_file(Map attributes, List target) {
+  match (attributes[target])
+    case %(node ? ? ? ? ?(String file) *): return file;
+  return NULL;
+}
+
+/* The narrowest storage each called definition needs, as a
+   `_storage_rank`: static when every resolved caller shares its file,
+   module when they share its unit, and otherwise public. Definitions that
+   no resolved call reaches are absent. */
+static Map _needed_storage(List graph, Map attributes) {
+  Map needed = {};
+  foreach (List call, _direct_calls(graph))
+    match (call)
+      case %(call ?(String path) ?(String caller) ?
+             ?(String target) ?(String callee) ?): {
+        List key = %(target $target $callee);
+        int rank = path != target ? 2
+                 : _definition_file(attributes, %(target $path $caller)) ==
+                   _definition_file(attributes, key) ? 0 : 1;
+        if (rank > needed.getdefault(key, -1).int()) needed[key] = rank;
+      }
+  return needed;
+}
+
+static List _sorted_names(List names) {
+  Array sorted = [];
+  foreach (String name, names) sorted.push(name);
+  sorted.sort();
+  return sorted.list_free();
+}
+
+/* The files of unit `path`: each file's definitions by storage, its calls
+   within the file, and its interface, the definitions other files of the
+   unit call; the calls between files; and the definitions whose storage
+   reaches further than every resolved caller needs. */
+static List _structure_files(
+  Map attributes, Map needed, String path, List functions) {
+  Map tallies = {}, internal = {}, between = {}, interface = {};
+  Array wider = [];
+  foreach (List function, functions)
+    match (function)
+      case %(function ?(String name) ?storage (calls *calls)): {
+        List target = %(target $path $name);
+        String file = _definition_file(attributes, target);
+        project_count(tallies, %($file $storage), 1);
+        project_count(internal, %($file), 0);
+        foreach (List call, calls)
+          match (call)
+            case %(call direct ?(String destination) ?(String callee) ?count):
+              if (destination == path) {
+                String callee_file =
+                  _definition_file(attributes, %(target $path $callee));
+                if (callee_file == file)
+                  project_count(internal, %($file), count.int());
+                else {
+                  project_count(between, %($file $callee_file), count.int());
+                  project_add_unique(interface, callee_file, callee);
+                }
+              }
+        int need = needed.getdefault(target, -1).int();
+        if (need >= 0 && _storage_rank(storage) > need)
+          wider.push(
+            %(function $name $file $storage (needs ${_storage_tier(need)})));
+      }
+  Array calls = [];
+  foreach (List key, between.keys())
+    calls.push(%(calls @key ${between[key].int()}));
+  calls.sort();
+  wider.sort();
+  return %(
+    (members @{_member_rows(tallies, internal, interface)})
+    (member-calls @{calls.list_free()})
+    (wider @{wider.list_free()})
+  );
+}
+
+static List _member_rows(Map tallies, Map internal, Map interface) {
+  Array members = [];
+  foreach (List key, internal.keys()) {
+    String file = key.car();
+    members.push(
+      %(member $file
+        (functions (public ${tallies.getdefault(%($file public), 0).int()})
+                   (module ${tallies.getdefault(%($file module), 0).int()})
+                   (static ${tallies.getdefault(%($file static), 0).int()}))
+        (internal ${internal[key].int()})
+        (interface
+          @{_sorted_names(interface.getdefault(file, NULL))})));
+  }
+  members.sort();
+  return members.list_free();
+}
+
+static List _structure(List graph, Map attributes, String wanted) {
+  Map needed = _needed_storage(graph, attributes);
   Array matches = [];
   match (graph)
     case %(graph *units):
@@ -1807,7 +1908,8 @@ static List _structure(List graph, String wanted) {
                   (internal ${_unit_internal_calls(path, functions)})
                   (isolated @{isolated.list_free()})
                   (components @components)
-                  (bridges @bridges)));
+                  (bridges @bridges)
+                  @{_structure_files(attributes, needed, path, functions)}));
             }
   return %(structure $wanted (matches @{matches.list_free()}));
 }
@@ -1992,7 +2094,7 @@ static void _dataset_write_rows(
 }
 
 static void _dataset_rows(
-  List graph, Map attributes, Array functions, Array src_calls,
+  List graph, Map attributes, Map needed, Array functions, Array src_calls,
   Array lib_calls) {
   match (graph)
     case %(graph *units):
@@ -2014,11 +2116,13 @@ static void _dataset_rows(
                       String function_id = _dataset_function_id(path, name);
                       String kind = name == "<top-level>"
                                   ? "top-level" : "function";
+                      String need = target in needed
+                        ? _storage_tier(needed[target].int()).str() : "none";
                       $output.graph.function_row(
                         functions, function_id, kind, subtree.symbol().str(),
                         path, file, unit_lines.int(), source_order.int(),
-                        source_name, name, visibility, external_calls.int(),
-                        indirect_calls.int());
+                        source_name, name, visibility, need,
+                        external_calls.int(), indirect_calls.int());
                       foreach (List call, calls)
                         match (call)
                           case %(
@@ -2049,7 +2153,9 @@ static void _dataset_rows(
 static void _write_datasets(
   String output, List graph, Map attributes) {
   Array functions = [], src_calls = [], lib_calls = [];
-  _dataset_rows(graph, attributes, functions, src_calls, lib_calls);
+  _dataset_rows(
+    graph, attributes, _needed_storage(graph, attributes), functions,
+    src_calls, lib_calls);
   functions.sort();
   src_calls.sort();
   lib_calls.sort();
@@ -2788,14 +2894,14 @@ int main(int argc, char **argv) {
       List units = _parse_units(
         frontend, inputs, datasets ? subtrees : NULL);
       if (units) {
-        Map attributes = datasets ? {} : NULL;
+        Map attributes = datasets || verb == "structure" ? {} : NULL;
         List graph = _resolve_graph(units, attributes);
         if (datasets) _write_datasets(name, graph, attributes);
         result = datasets || verb == "graph" ? graph
                : verb == "digest" ? _digest(graph)
                : verb == "architecture" ? _architecture(graph)
                : verb == "structure"
-               ? _structure(graph, _display_input(name))
+               ? _structure(graph, attributes, _display_input(name))
                : verb == "between"
                ? _between(graph, _display_input(left), _display_input(right))
                : compare ? _compare_result(

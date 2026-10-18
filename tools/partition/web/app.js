@@ -147,11 +147,15 @@ function render(skipInspector = false) {
       preview?.moduleArrangement ? "Private helpers shared across members" : "New private boundaries",
       m.exposed.filter((v) => !base.exposed.includes(v)).length,
     ) +
+    metric(
+      "File statics needing module",
+      m.toModule.filter((v) => !base.toModule.includes(v)).length,
+    ) +
     (scope
       ? metric("Crossing within this view", fmt(scopeCut))
       : metric("Functions", fmt(D.functions.length)));
   $("toolbar").innerHTML =
-    `${scope ? `<button id="back">\u2190 ${previewGroup ? "Group arrangement" : scopeStack.length ? "Parent group" : "Project"}</button>` : ""}<button id="split" ${scope ? "hidden" : ""} ${selected.size !== 1 || preview ? "disabled" : ""}>Build responsibilities</button><button id="merge" ${view === "responsibilities" && scope ? "hidden" : ""} ${selected.size < 2 || preview ? "disabled" : ""}>Merge ${selected.size > 1 ? selected.size + " groups" : "groups"}</button>${preview ? '<span class="previewbadge">Tentative split</span>' : ""}${scope ? `<button id="view-responsibilities" ${preview ? "disabled" : ""}>Responsibilities</button><button id="view-groups">Group arrangement</button><button id="view-graph">Functions</button><button id="view-list">Function list</button>` : ""}<small>${scope ? "Open groups or switch to Functions to move members" : "Lines show aggregated calls \u00b7 hover to trace connections"}</small>`;
+    `${scope ? `<button id="back">\u2190 ${previewGroup ? "Group arrangement" : scopeStack.length ? "Parent group" : "Project"}</button>` : ""}<button id="split" ${scope ? "hidden" : ""} ${selected.size !== 1 || preview ? "disabled" : ""}>Build responsibilities</button><button id="merge" ${view === "responsibilities" && scope ? "hidden" : ""} ${selected.size < 2 || preview ? "disabled" : ""}>Merge ${selected.size > 1 ? selected.size + " groups" : "groups"}</button>${preview ? '<span class="previewbadge">Tentative split</span>' : ""}${scope ? `<button id="view-responsibilities" ${preview ? "disabled" : ""}>Responsibilities</button><button id="view-groups">Group arrangement</button><button id="view-graph">Functions</button><button id="view-files">Member files</button><button id="view-list">Function list</button>` : ""}<small>${scope ? "Open groups or switch to Functions to move members" : "Lines show aggregated calls \u00b7 hover to trace connections"}</small>`;
   $("back")?.addEventListener("click", () => {
     if (previewGroup) {
       previewGroup = null;
@@ -170,7 +174,7 @@ function render(skipInspector = false) {
   });
   $("split").onclick = startPreview;
   $("merge").onclick = merge;
-  for (const mode of ["responsibilities", "groups", "graph", "list"])
+  for (const mode of ["responsibilities", "groups", "graph", "files", "list"])
     $("view-" + mode)?.addEventListener("click", () => {
       view = mode;
       previewGroup = null;
@@ -183,6 +187,7 @@ function render(skipInspector = false) {
       : scoped;
     if (view === "responsibilities") renderResponsibilities();
     else if (view === "groups" && shown.length > 1) renderMap(shown);
+    else if (view === "files") renderMemberFiles(shown);
     else if (view === "list") renderBoard(shown, map);
     else renderGraph(shown, map);
   } else renderMap(gs);
@@ -271,7 +276,7 @@ function renderBoard(gs, map) {
             .sort((a, b) => D.functions[a].o - D.functions[b].o)
             .map(
               (v) =>
-                `<div class="fnrow ${v === fn ? "selected" : ""}" draggable="${!preview}" data-drag="${v}"><input type="checkbox" aria-label="Select function ${esc(D.functions[v].n)}" data-pick="${v}" ${picked.has(v) ? "checked" : ""} ${preview ? "disabled" : ""}><span class="vis ${D.functions[v].s ? "" : "pub"}">${D.functions[v].k ? "TOP" : D.functions[v].s ? "PVT" : "API"}</span><button data-fn="${v}" title="${esc(D.functions[v].n)}">${esc(D.functions[v].n)}</button>${S.ties.some((t) => t.includes(v)) ? '<span title="Kept together">\u2301</span>' : ""}<span class="cross" title="Incoming plus outgoing crossing call sites">${crosses.get(v) || "\u00b7"}</span></div>`,
+                `<div class="fnrow ${v === fn ? "selected" : ""}" draggable="${!preview}" data-drag="${v}"><input type="checkbox" aria-label="Select function ${esc(D.functions[v].n)}" data-pick="${v}" ${picked.has(v) ? "checked" : ""} ${preview ? "disabled" : ""}><span class="vis ${D.functions[v].s ? "" : "pub"}">${D.functions[v].k ? "TOP" : { static: "STA", module: "MOD", public: "API" }[D.functions[v].v]}</span><button data-fn="${v}" title="${esc(D.functions[v].n)}">${esc(D.functions[v].n)}</button>${S.ties.some((t) => t.includes(v)) ? '<span title="Kept together">\u2301</span>' : ""}<span class="cross" title="Incoming plus outgoing crossing call sites">${crosses.get(v) || "\u00b7"}</span></div>`,
             )
             .join("")}</section>`,
       )
@@ -461,7 +466,7 @@ function peel() {
 }
 function moveImpactMarkup(effect) {
   const names = (values) => values.map((v) => esc(D.functions[v].n)).join(", ");
-  return `<h3>Cut change</h3><p><strong>${effect.delta > 0 ? "+" : ""}${fmt(effect.delta)} crossing call sites${effect.delta === 0 ? " (unchanged)" : ""}</strong><br>Global cut: ${fmt(effect.beforeCut)} \u2192 ${fmt(effect.afterCut)}<br>${effect.removedCalls} removed; ${effect.addedCalls} introduced</p><h3>Private visibility opportunities</h3><p>${effect.localized.length} gained; ${effect.delocalized.length} lost</p>${effect.localized.length ? `<p>New candidates: ${names(effect.localized)}</p>` : ""}${effect.delocalized.length ? `<p>Now have outside callers: ${names(effect.delocalized)}</p>` : ""}<p class="note">Candidates have no known callers outside their group. Check callbacks, exported uses, and unresolved references before making them private. Source visibility is unchanged.</p><p>Existing private targets crossing: +${effect.added.length} / -${effect.removed.length}</p>`;
+  return `<h3>Cut change</h3><p><strong>${effect.delta > 0 ? "+" : ""}${fmt(effect.delta)} crossing call sites${effect.delta === 0 ? " (unchanged)" : ""}</strong><br>Global cut: ${fmt(effect.beforeCut)} \u2192 ${fmt(effect.afterCut)}<br>${effect.removedCalls} removed; ${effect.addedCalls} introduced</p><h3>Private visibility opportunities</h3><p>${effect.localized.length} gained; ${effect.delocalized.length} lost</p>${effect.localized.length ? `<p>New candidates: ${names(effect.localized)}</p>` : ""}${effect.delocalized.length ? `<p>Now have outside callers: ${names(effect.delocalized)}</p>` : ""}<p class="note">Candidates have no known callers outside their group. Check callbacks, exported uses, and unresolved references before making them private. Source visibility is unchanged.</p><p>Existing private targets crossing: +${effect.added.length} / -${effect.removed.length}</p><p class="note">Of the new crossings, ${effect.added.filter((v) => D.functions[v].v === "static").length} file statics would need module storage if the groups stay member files of one module unit. All ${effect.added.length} would need public storage in separate units.</p>`;
 }
 function renderMoveFeedback(members, effect) {
   $("inspector").innerHTML =
@@ -580,7 +585,7 @@ function renderFunction(m) {
       .filter(([a, b]) => a === fn || b === fn)
       .sort((a, b) => b[2] - a[2]);
   $("inspector").innerHTML =
-    `<div class="paneltag">FUNCTION INSPECTOR</div><h2 class="fnname">${esc(f.n)}</h2><p>${f.s ? "Private function" : f.k ? "File initializer" : "Public API"} \u00b7 ${esc(D.files[f.f].id)}</p>${anchorDetails(fn)}<h3>Current group</h3><select id="destination" aria-label="Move function to group">${S.groups.map((g) => `<option value="${g.id}" ${g.id === owner.id ? "selected" : ""}>${esc(g.name)}</option>`).join("")}</select><button id="move" class="wide">Move ${set.length > 1 ? set.length + " linked functions" : "function"}</button>${set.length > 1 ? '<button id="release" class="quiet wide">Release keep-together set</button>' : ""}<button id="peek" class="quiet wide">Peek at source \u2197</button>${callRelationships(fn)}`;
+    `<div class="paneltag">FUNCTION INSPECTOR</div><h2 class="fnname">${esc(f.n)}</h2><p>${functionVisibility(fn)} \u00b7 ${esc(f.p)}${f.p === D.files[f.f].id ? "" : " in " + esc(D.files[f.f].id)}</p><p class="note">${f.k ? "" : f.r ? `Its resolved callers need ${f.r} storage${widerThanNeeded(f) ? `, narrower than ${f.v}` : ""}.` : "No resolved callers."}</p>${anchorDetails(fn)}<h3>Current group</h3><select id="destination" aria-label="Move function to group">${S.groups.map((g) => `<option value="${g.id}" ${g.id === owner.id ? "selected" : ""}>${esc(g.name)}</option>`).join("")}</select><button id="move" class="wide">Move ${set.length > 1 ? set.length + " linked functions" : "function"}</button>${set.length > 1 ? '<button id="release" class="quiet wide">Release keep-together set</button>' : ""}<button id="peek" class="quiet wide">Peek at source \u2197</button>${callRelationships(fn)}`;
   $("move").onclick = () => move(fn, $("destination").value);
   $("release")?.addEventListener("click", () =>
     change(

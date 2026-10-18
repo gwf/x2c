@@ -84,7 +84,8 @@ $fixtures/collision-a.x $fixtures/collision-b.x"
   function_header="${function_header}file${tab}unit_lines${tab}"
   function_header="${function_header}source_order${tab}source_name${tab}"
   function_header="${function_header}emitted_name${tab}"
-  function_header="${function_header}visibility${tab}external_calls${tab}"
+  function_header="${function_header}visibility${tab}needed${tab}"
+  function_header="${function_header}external_calls${tab}"
   function_header="${function_header}indirect_calls"
   [ "$(head -n 1 "$dataset_dir/functions.tsv")" = \
     "$function_header" ]
@@ -97,22 +98,22 @@ $fixtures/collision-a.x $fixtures/collision-b.x"
 
   method="dataset-src.x::DatasetValue_read${tab}function${tab}src${tab}"
   method="${method}.*${tab}38${tab}2${tab}DatasetValue.read${tab}"
-  method="${method}DatasetValue_read${tab}public${tab}0${tab}0$"
+  method="${method}DatasetValue_read${tab}public${tab}none${tab}0${tab}0$"
   grep -q "$method" \
     "$dataset_dir/functions.tsv"
   top_level="dataset-src.x::<top-level>${tab}top-level${tab}src${tab}"
   top_level="${top_level}.*${tab}38${tab}0${tab}<top-level>${tab}"
-  top_level="${top_level}<top-level>${tab}static${tab}0${tab}0$"
+  top_level="${top_level}<top-level>${tab}static${tab}none${tab}0${tab}0$"
   grep -q "$top_level" \
     "$dataset_dir/functions.tsv"
   external="dataset-src.x::dataset_src_external${tab}function${tab}src${tab}"
   external="${external}.*${tab}38${tab}6${tab}dataset_src_external${tab}"
-  external="${external}dataset_src_external${tab}static${tab}1${tab}0$"
+  external="${external}dataset_src_external${tab}static${tab}none${tab}1${tab}0$"
   grep -q "$external" \
     "$dataset_dir/functions.tsv"
   indirect="dataset-src.x::dataset_src_indirect${tab}function${tab}src${tab}"
   indirect="${indirect}.*${tab}38${tab}7${tab}dataset_src_indirect${tab}"
-  indirect="${indirect}dataset_src_indirect${tab}static${tab}0${tab}1$"
+  indirect="${indirect}dataset_src_indirect${tab}static${tab}none${tab}0${tab}1$"
   grep -q "$indirect" \
     "$dataset_dir/functions.tsv"
   grep -q "collision-a.x::helper${tab}function${tab}src${tab}" \
@@ -1011,18 +1012,28 @@ check_query_failures() {
 check_tiers() {
   tiers="$fixtures/tiers"
   $tool datasets "$tmp/tiers" "$tiers/tiers.x" -- "$fixtures/dataset-lib.x"
-  cut -f4,5,8-10 "$tmp/tiers/functions.tsv" | grep "^$tiers/" |
+  cut -f4,5,8-11 "$tmp/tiers/functions.tsv" | grep "^$tiers/" |
     sed "s#$tiers/##g" >"$tmp/tiers-rows"
   cat >"$tmp/tiers-expected" <<EOF_TIERS
-tiers.x	parts.x	tiers_part_helper	f5_parts___tiers_part_helper	static
-tiers.x	tiers.x	tiers_entry_helper	f5_tiers___tiers_entry_helper	static
-tiers.x	parts.x	tiers_part	tiers_part	public
-tiers.x	tiers.x	tiers_public	tiers_public	public
-tiers.x	parts.x	tiers_shared	tiers_shared	module
+tiers.x	parts.x	tiers_part_helper	f5_parts___tiers_part_helper	static	static
+tiers.x	tiers.x	tiers_entry_helper	f5_tiers___tiers_entry_helper	static	static
+tiers.x	parts.x	tiers_local	tiers_local	module	static
+tiers.x	parts.x	tiers_part	tiers_part	public	module
+tiers.x	tiers.x	tiers_public	tiers_public	public	none
+tiers.x	parts.x	tiers_shared	tiers_shared	module	module
 EOF_TIERS
   cmp "$tmp/tiers-expected" "$tmp/tiers-rows"
   $tool digest "$tiers/tiers.x" | tr '\n' ' ' | sed 's/  */ /g' |
-    grep -q '(functions (public 2) (module 1) (static 2))'
+    grep -q '(functions (public 2) (module 2) (static 2))'
+  $tool structure "$tiers/tiers.x" "$tiers/tiers.x" | tr '\n' ' ' |
+    sed -e 's/  */ /g' -e "s#$tiers/##g" >"$tmp/tiers-structure"
+  grep -q '(member "parts.x" (functions (public 1) (module 2) (static 1)) (internal 3) (interface "tiers_part" "tiers_shared"))' \
+    "$tmp/tiers-structure"
+  grep -q '(member "tiers.x" (functions (public 1) (module 0) (static 1)) (internal 1) (interface))' \
+    "$tmp/tiers-structure"
+  grep -q '(member-calls (calls "tiers.x" "parts.x" 2))' "$tmp/tiers-structure"
+  grep -q '(wider (function "tiers_local" "parts.x" module (needs static)) (function "tiers_part" "parts.x" public (needs module)))' \
+    "$tmp/tiers-structure"
 }
 
 . commands/parallel.sh
