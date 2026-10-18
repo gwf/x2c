@@ -74,6 +74,8 @@ skipped_units = set()
 with open(os.path.join(datasets, "functions.tsv"), newline="") as fh:
     for row in csv.DictReader(fh, delimiter="\t"):
         unit = row["unit"]
+        if row["subtree"] == "commands":
+            continue  # command callers already count in `needed`
         if unit not in fidx:
             skipped_units.add(unit)
             continue
@@ -96,10 +98,12 @@ with open(os.path.join(datasets, "functions.tsv"), newline="") as fh:
         fn_unit.append(unit)
         # `s` marks a definition private to its unit: file-private or module.
         # `r` is the narrowest storage its resolved callers need, or None.
+        # `g` marks a definition the compiler or a macro generated.
         needed = row["needed"]
         functions.append({"f": fi, "p": member, "n": row["source_name"], "e": row["emitted_name"],
                           "s": 0 if tier == "public" else 1, "v": tier,
-                          "r": None if needed == "none" else needed, "k": kind,
+                          "r": None if needed == "none" else needed,
+                          "g": 1 if row["origin"] == "generated" else 0, "k": kind,
                           "o": int(row["source_order"]), "x": ext, "i": ind})
 
 # ---- call edges -------------------------------------------------------------

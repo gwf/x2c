@@ -84,7 +84,7 @@ $fixtures/collision-a.x $fixtures/collision-b.x"
   function_header="${function_header}file${tab}unit_lines${tab}"
   function_header="${function_header}source_order${tab}source_name${tab}"
   function_header="${function_header}emitted_name${tab}"
-  function_header="${function_header}visibility${tab}needed${tab}"
+  function_header="${function_header}visibility${tab}needed${tab}origin${tab}"
   function_header="${function_header}external_calls${tab}"
   function_header="${function_header}indirect_calls"
   [ "$(head -n 1 "$dataset_dir/functions.tsv")" = \
@@ -98,22 +98,22 @@ $fixtures/collision-a.x $fixtures/collision-b.x"
 
   method="dataset-src.x::DatasetValue_read${tab}function${tab}src${tab}"
   method="${method}.*${tab}38${tab}2${tab}DatasetValue.read${tab}"
-  method="${method}DatasetValue_read${tab}public${tab}none${tab}0${tab}0$"
+  method="${method}DatasetValue_read${tab}public${tab}none${tab}source${tab}0${tab}0$"
   grep -q "$method" \
     "$dataset_dir/functions.tsv"
   top_level="dataset-src.x::<top-level>${tab}top-level${tab}src${tab}"
   top_level="${top_level}.*${tab}38${tab}0${tab}<top-level>${tab}"
-  top_level="${top_level}<top-level>${tab}static${tab}none${tab}0${tab}0$"
+  top_level="${top_level}<top-level>${tab}static${tab}none${tab}source${tab}0${tab}0$"
   grep -q "$top_level" \
     "$dataset_dir/functions.tsv"
   external="dataset-src.x::dataset_src_external${tab}function${tab}src${tab}"
   external="${external}.*${tab}38${tab}6${tab}dataset_src_external${tab}"
-  external="${external}dataset_src_external${tab}static${tab}none${tab}1${tab}0$"
+  external="${external}dataset_src_external${tab}static${tab}none${tab}source${tab}1${tab}0$"
   grep -q "$external" \
     "$dataset_dir/functions.tsv"
   indirect="dataset-src.x::dataset_src_indirect${tab}function${tab}src${tab}"
   indirect="${indirect}.*${tab}38${tab}7${tab}dataset_src_indirect${tab}"
-  indirect="${indirect}dataset_src_indirect${tab}static${tab}none${tab}0${tab}1$"
+  indirect="${indirect}dataset_src_indirect${tab}static${tab}none${tab}source${tab}0${tab}1$"
   grep -q "$indirect" \
     "$dataset_dir/functions.tsv"
   grep -q "collision-a.x::helper${tab}function${tab}src${tab}" \
@@ -1011,6 +1011,7 @@ check_query_failures() {
 # file that holds it and its source spelling without the file prefix.
 check_tiers() {
   tiers="$fixtures/tiers"
+  tab=$(printf '\t')
   $tool datasets "$tmp/tiers" "$tiers/tiers.x" -- "$fixtures/dataset-lib.x"
   cut -f4,5,8-11 "$tmp/tiers/functions.tsv" | grep "^$tiers/" |
     sed "s#$tiers/##g" >"$tmp/tiers-rows"
@@ -1034,6 +1035,17 @@ EOF_TIERS
   grep -q '(member-calls (calls "tiers.x" "parts.x" 2))' "$tmp/tiers-structure"
   grep -q '(wider (function "tiers_local" "parts.x" module (needs static)) (function "tiers_part" "parts.x" public (needs module)))' \
     "$tmp/tiers-structure"
+
+  # Command callers count, and generated definitions are never candidates.
+  $tool datasets "$tmp/tiers-commands" "$tiers/tiers.x" -- \
+    "$tiers/class.x" -- "$tiers/tool.x"
+  rows="$tmp/tiers-commands/functions.tsv"
+  grep -q "^$tiers/tiers.x::tiers_part${tab}.*${tab}public${tab}public${tab}source${tab}" "$rows"
+  grep -q "^$tiers/tool.x::main${tab}function${tab}commands${tab}" "$rows"
+  grep -q "::TiersBox_write_str${tab}.*${tab}public${tab}static${tab}generated${tab}" "$rows"
+  grep -q "::tiers_box${tab}.*${tab}public${tab}none${tab}source${tab}" "$rows"
+  $tool structure "$tiers/class.x" "$tiers/class.x" | tr '\n' ' ' |
+    grep -q '(wider))'
 }
 
 . commands/parallel.sh

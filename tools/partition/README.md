@@ -70,7 +70,9 @@ applies to graph-plan changes.
 **Member files** draws the view's files by storage tier. File statics sit
 inside their file, module functions on their file's border, and public
 functions on the view's outer border. Lines aggregate calls between files. A
-dashed ring marks storage wider than the exporter's `needed` tier. Below the
+dashed ring marks storage wider than the exporter's `needed` tier. Generation
+passes the external commands as callers, so their calls count; generated
+definitions never get the ring. Below the
 drawing, a matrix counts call sites between files, and a list gives every
 definition with wider storage than needed.
 

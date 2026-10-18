@@ -16,11 +16,12 @@ with tempfile.TemporaryDirectory() as directory:
     (root / 'lib/m/part.x').write_text('#include "../b.x"\nfour\nfive\n')
     (root / 'lib/x2c.x').write_text('generated\n')
     (root / 'functions.tsv').write_text(
-        'function_id\tunit\tfile\tvisibility\tneeded\tkind\texternal_calls\tindirect_calls\tsource_name\temitted_name\tsource_order\n'
-        'A\tsrc/a.x\tsrc/a.x\tpublic\tnone\tfunction\t0\t1\ta\ta\t1\n'
-        'B\tlib/b.x\tlib/b.x\tstatic\tpublic\tfunction\t2\t0\tb\tb\t1\n'
-        'C\tlib/m/m.x\tlib/m/part.x\tmodule\tstatic\tfunction\t0\t0\tc\tc\t1\n'
-        'D\tlib/m/m.x\tlib/m/part.x\tstatic\tnone\tfunction\t0\t0\td\tf1_part___d\t2\n')
+        'function_id\tsubtree\tunit\tfile\tvisibility\tneeded\torigin\tkind\texternal_calls\tindirect_calls\tsource_name\temitted_name\tsource_order\n'
+        'A\tsrc\tsrc/a.x\tsrc/a.x\tpublic\tnone\tsource\tfunction\t0\t1\ta\ta\t1\n'
+        'B\tlib\tlib/b.x\tlib/b.x\tstatic\tpublic\tsource\tfunction\t2\t0\tb\tb\t1\n'
+        'C\tlib\tlib/m/m.x\tlib/m/part.x\tmodule\tstatic\tsource\tfunction\t0\t0\tc\tc\t1\n'
+        'D\tlib\tlib/m/m.x\tlib/m/part.x\tstatic\tnone\tgenerated\tfunction\t0\t0\td\tf1_part___d\t2\n'
+        'E\tcommands\tcommands/c/c.x\tcommands/c/c.x\tpublic\tnone\tsource\tfunction\t0\t0\tmain\tmain\t1\n')
     header = 'caller_id\tcallee_id\tstatic_calls\n'
     (root / 'src-calls.tsv').write_text(header)
     (root / 'lib-calls.tsv').write_text(header + 'A\tB\t3\n')
@@ -35,10 +36,11 @@ with tempfile.TemporaryDirectory() as directory:
     assert [(f['v'], f['s']) for f in data['functions']] == [
         ('public', 0), ('static', 1), ('module', 1), ('static', 1)]
     assert [f['r'] for f in data['functions']] == [None, 'public', 'static', None]
+    assert [f['g'] for f in data['functions']] == [0, 0, 0, 1]
     assert [data['stats'][k] for k in ('staticFns', 'moduleFns', 'publicFns')] == [2, 1, 1]
     module = data['files'][2]
     assert data['functions'][2]['p'] == 'lib/m/part.x'
     assert module['members'] == {'lib/m/part.x': '#include "../b.x"\nfour\nfive\n'}
     assert module['lines'] == 6
     assert data['includeEdges'] == [[2, 1]]
-print('PASS: unit discovery, prelude exclusion, storage tiers, needed storage, member files, line counts, weighted edges')
+print('PASS: unit discovery, prelude exclusion, storage tiers, needed storage, generated definitions, skipped commands, member files, line counts, weighted edges')

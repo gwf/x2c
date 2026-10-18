@@ -53,7 +53,7 @@ The executable accepts explicit x2c source files and optional include paths:
 builds/0/libexec/x2c-graph graph [-I DIR] FILE...
 builds/0/libexec/x2c-graph digest [-I DIR] FILE...
 builds/0/libexec/x2c-graph clones [--min-size N] [-I DIR] FILE...
-builds/0/libexec/x2c-graph datasets OUTPUT [-I DIR] SRC_FILE... -- LIB_FILE...
+builds/0/libexec/x2c-graph datasets OUTPUT [-I DIR] SRC_FILE... -- LIB_FILE... [-- COMMAND_FILE...]
 builds/0/libexec/x2c-graph architecture [-I DIR] FILE...
 builds/0/libexec/x2c-graph structure UNIT [-I DIR] FILE...
 builds/0/libexec/x2c-graph between LEFT RIGHT [-I DIR] FILE...
@@ -153,17 +153,20 @@ lib-calls.tsv
 
 The files are UTF-8 TSV with LF endings, one header, no comments, and rows
 sorted by endpoint ID. The files named before `--` receive the `src` label;
-those named after it receive the `lib` label. This explicit grouping makes the
-label independent of checkout paths or symlinks. Both groups must contain at
-least one source file. Inputs are canonicalized and deduplicated within each
-group; one file cannot belong to both. All inputs are parsed and resolved
+those named after it receive the `lib` label. An optional third group after a
+second `--` receives the `commands` label; list the source files of external
+commands there so that their calls count as callers. This explicit grouping
+makes the label independent of checkout paths or symlinks. The `src` and
+`lib` groups must each contain at least one source file. Inputs are
+canonicalized and deduplicated within each group; one file cannot belong to
+two groups. All inputs are parsed and resolved
 before the output directory is created, so a missing or malformed input does
 not leave a partial dataset.
 
 `functions.tsv` has these columns:
 
 ```text
-function_id  kind  subtree  unit  file  unit_lines  source_order  source_name  emitted_name  visibility  needed  external_calls  indirect_calls
+function_id  kind  subtree  unit  file  unit_lines  source_order  source_name  emitted_name  visibility  needed  origin  external_calls  indirect_calls
 ```
 
 The separators in the actual file are tabs. `function_id` is
@@ -193,8 +196,11 @@ of the definition. It is `static` when every caller is in the definition's
 file, `module` when every caller is in its unit, and `public` otherwise. It is
 `none` when no resolved call reaches the definition. A `needed` narrower than
 `visibility` marks a candidate for narrower storage, not a proof: indirect
-references, callbacks, compiler-generated adapters, external commands, and
-published API are not resolved calls.
+references, callbacks, implicit conversions such as `T.var`, calls from
+inputs not supplied, and published API are not resolved calls.
+
+`origin` is `source` for a definition written in source and `generated` for
+one the compiler or a macro made, such as a class adapter.
 
 `external_calls` and `indirect_calls` count parsed call expressions made by
 that function whose target is respectively missing or ambiguous, or computed.
@@ -207,9 +213,10 @@ caller_id  callee_id  static_calls
 ```
 
 Direction is caller to callee. `src-calls.tsv` contains only `src` to `src`
-edges. `lib-calls.tsv` contains `lib` to `lib` edges and every edge crossing
-between `src` and `lib`. Its name therefore means the graph containing the
-library subtree and its compiler boundary, not merely calls made by `lib`.
+edges. `lib-calls.tsv` contains every other edge: `lib` to `lib`, those
+crossing between `src` and `lib`, and those with a `commands` endpoint. Its
+name therefore means the graph containing the library subtree and its
+boundaries, not merely calls made by `lib`.
 Concatenating the data rows of both files reconstructs the complete resolved
 direct-call graph without duplicate edges. `static_calls` is the number of
 parsed call expressions aggregated for the endpoint pair after compile-time
@@ -223,18 +230,22 @@ two count columns on their caller; the exporter never invents a destination.
 
 To export the compiler and runtime units, this shell example names the
 `src` files before `--` and the `lib` files after it, excluding the
-generated `lib/x2c.x` prelude:
+generated `lib/x2c.x` prelude, and then the external commands:
 
 ```sh
 set -- $(python3 tools/sources.py --area src) --
 for unit in $(python3 tools/sources.py --area lib); do
   [ "$unit" = lib/x2c.x ] || set -- "$@" "$unit"
 done
-builds/0/libexec/x2c-graph datasets /tmp/x2c-datasets "$@"
+set -- "$@" --
+for name in $(cut -d'|' -f1 commands/manifest.txt); do
+  set -- "$@" commands/"$name"/*.x
+done
+builds/0/libexec/x2c-graph datasets /tmp/x2c-datasets -I . -I src -I lib "$@"
 ```
 
 The compiler driver runs the same command as
-`x2c graph datasets OUTPUT [-I DIR] SRC_FILE... -- LIB_FILE...`.
+`x2c graph datasets OUTPUT [-I DIR] SRC_FILE... -- LIB_FILE... [-- COMMAND_FILE...]`.
 
 ### Reading and analyzing the datasets
 
@@ -296,8 +307,8 @@ member files.
   its calls within the file, and its `interface`: the definitions that other
   files of the unit call.
 - `member-calls` counts the call sites from one file to another.
-- `wider` lists definitions whose storage is wider than their `needed` tier,
-  as defined for datasets.
+- `wider` lists written definitions whose storage is wider than their
+  `needed` tier, as defined for datasets. Generated definitions are omitted.
 
 Relative unit paths are normalized the same way as graph output. Use this
 with `focus NAME` to trace a finding before proposing a move, deletion, or

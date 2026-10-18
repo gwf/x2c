@@ -19,6 +19,12 @@ def units(root, area):
             if p.relative_to(root).as_posix() != 'lib/x2c.x']
 
 
+def command_files(root):
+    """Source files of each external command, whose calls count as callers."""
+    names = [line.split('|', 1)[0] for line in (root / 'commands/manifest.txt').read_text().splitlines() if line]
+    return [p.relative_to(root).as_posix() for name in names for p in sorted((root / 'commands' / name).glob('*.x'))]
+
+
 def generate(root, output):
     output.parent.mkdir(parents=True, exist_ok=True)
     subprocess.run(['make', 'build-safe'], cwd=root, check=True)
@@ -27,7 +33,7 @@ def generate(root, output):
         datasets = Path(temporary) / 'datasets'
         subprocess.run([str(root / 'builds/0/libexec/x2c-graph'), 'datasets', str(datasets),
                         '-I', '.', '-I', 'src', '-I', 'lib',
-                        *units(root, 'src'), '--', *units(root, 'lib')],
+                        *units(root, 'src'), '--', *units(root, 'lib'), '--', *command_files(root)],
                        cwd=root, check=True)
         # Stage beside the destination so replacement is atomic across filesystems.
         with tempfile.NamedTemporaryFile(dir=output.parent, suffix='.json', delete=False) as staged:

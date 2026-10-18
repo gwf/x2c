@@ -93,7 +93,8 @@ static List _analyze_unit(Compiler compiler, List ast, String path) {
         source_order++;
         functions.push(
           %(function $identity $name $visibility
-            (source $source_name $source_order $file)
+            (source $source_name $source_order $file
+                    ${project_origin(compiler, binding)})
             (calls @{_call_records(calls)})));
         continue;
       }
@@ -103,7 +104,7 @@ static List _analyze_unit(Compiler compiler, List ast, String path) {
   if (top_level_calls.len())
     functions.push(
       %(function 0 "<top-level>" static
-        (source "<top-level>" 0 $path)
+        (source "<top-level>" 0 $path source)
         (calls @{_call_records(top_level_calls)})));
   functions.sort();
   return functions.list_free();
@@ -1218,7 +1219,7 @@ static List _resolve_graph(List units, Map attributes) {
           match (function)
             case %(
               function ? ?name ?visibility
-              (source ?source_name ?source_order ?file)
+              (source ?source_name ?source_order ?file ?origin)
               (calls *calls)
             ): {
               Map resolved = {};
@@ -1230,7 +1231,7 @@ static List _resolve_graph(List units, Map attributes) {
                   resolved, external_calls, indirect_calls);
                 attributes[%(target $path $name)] = %(
                   node $subtree $source_lines $source_order $source_name
-                  $file $external_calls $indirect_calls
+                  $file $origin $external_calls $indirect_calls
                 );
               }
               output_functions.push(
@@ -1781,6 +1782,12 @@ static String _definition_file(Map attributes, List target) {
   return NULL;
 }
 
+static int _generated(Map attributes, List target) {
+  match (attributes[target])
+    case %(node ? ? ? ? ? generated *): return 1;
+  return 0;
+}
+
 /* The narrowest storage each called definition needs, as a
    `_storage_rank`: static when every resolved caller shares its file,
    module when they share its unit, and otherwise public. Definitions that
@@ -1836,7 +1843,8 @@ static List _structure_files(
                 }
               }
         int need = needed.getdefault(target, -1).int();
-        if (need >= 0 && _storage_rank(storage) > need)
+        if (need >= 0 && _storage_rank(storage) > need &&
+            !_generated(attributes, target))
           wider.push(
             %(function $name $file $storage (needs ${_storage_tier(need)})));
       }
@@ -2111,7 +2119,7 @@ static void _dataset_rows(
                   match (node)
                     case %(
                       node ?subtree ?unit_lines ?source_order ?source_name
-                      ?file ?external_calls ?indirect_calls
+                      ?file ?origin ?external_calls ?indirect_calls
                     ): {
                       String function_id = _dataset_function_id(path, name);
                       String kind = name == "<top-level>"
@@ -2121,7 +2129,7 @@ static void _dataset_rows(
                       $output.graph.function_row(
                         functions, function_id, kind, subtree.symbol().str(),
                         path, file, unit_lines.int(), source_order.int(),
-                        source_name, name, visibility, need,
+                        source_name, name, visibility, need, origin,
                         external_calls.int(), indirect_calls.int());
                       foreach (List call, calls)
                         match (call)
@@ -2212,7 +2220,7 @@ static List _certify_parse_units(Frontend frontend, Array inputs) {
       Array extended = [];
       foreach (List function, functions) extended.push(function);
       extended.push(%(function 0 "<top-level>" static
-                      (source "<top-level>" 0 $path) (calls)));
+                      (source "<top-level>" 0 $path source) (calls)));
       functions = extended.sort().list_free();
     }
     List record = %(
@@ -2792,6 +2800,16 @@ static int _add_inputs(
   return 1;
 }
 
+/* The words before the first `--`; `rest` receives the words after it, or
+   NULL when there is no separator. */
+static List _split_group(List words, List &rest) {
+  Array before = [];
+  for (; words && words.car().str() != "--"; words = words.cdr())
+    before.push(words.car());
+  rest = words ? words.cdr() : NULL;
+  return before.list_free();
+}
+
 /* A clone size in [1, INT_MAX], or 0 for anything else. */
 static int _clone_minimum(String text) {
   char *end;
@@ -2812,17 +2830,14 @@ int main(int argc, char **argv) {
   String verb = argc > 1 ? String.new(argv[1]) : "";
   int datasets = verb == "datasets", compare = verb == "compare";
   List rows = _command_rows(verb), words = Args.from_argv(argc, argv).cdr();
-  List after = NULL;
+  List after = NULL, commands = NULL;
   if (datasets || compare) {
-    Array before = [];
-    for (; words && words.car().str() != "--"; words = words.cdr())
-      before.push(words.car());
-    after = words ? words.cdr() : NULL;
-    words = before.list_free();
+    words = _split_group(words, after);
+    if (datasets) after = _split_group(after, commands);
   }
   List common = %((-I (value DIR) repeated));
   List files = %(@common (inputs repeated required));
-  Map options = NULL, libraries = NULL;
+  Map options = NULL, libraries = NULL, command_files = NULL;
   int clone_minimum = 24;
   Array inputs = [];
   Map subtrees = {};
@@ -2830,6 +2845,7 @@ int main(int argc, char **argv) {
     if (!rows || ((datasets || compare) && !after)) raise %(bad-arg);
     options = Args.parse(words, %(@{rows.cdr()} @{compare ? common : files}));
     if (after) libraries = Args.parse(after, files);
+    if (commands) command_files = Args.parse(commands, files);
     if (verb == "clones" && options["min-size"])
       clone_minimum = _clone_minimum(options["min-size"]);
     if (!clone_minimum ||
@@ -2837,7 +2853,9 @@ int main(int argc, char **argv) {
                      <src>) ||
         (libraries &&
          !_add_inputs(inputs, subtrees, libraries["inputs"],
-                      datasets ? <lib> : <src>)))
+                      datasets ? <lib> : <src>)) ||
+        (command_files &&
+         !_add_inputs(inputs, subtrees, command_files["inputs"], <commands>)))
       raise %(bad-arg);
   }
   catch %(bad-arg *): {
@@ -2854,6 +2872,9 @@ int main(int argc, char **argv) {
   if (libraries)
     request.include_dirs =
       %(@{request.include_dirs} @{libraries["I"].list()});
+  if (command_files)
+    request.include_dirs =
+      %(@{request.include_dirs} @{command_files["I"].list()});
   Frontend frontend = Frontend.new(request);
   frontend.preprocessor_errors = _preprocessor_errors;
   if (!frontend.preload_macro_libraries()) return 1;

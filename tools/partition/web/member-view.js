@@ -4,7 +4,7 @@
 const TIER_COLOR = { static: "#edbc7a", module: "#c7a2e8", public: "#86c7ff" },
   TIER_RANK = { static: 0, module: 1, public: 2 };
 function widerThanNeeded(f) {
-  return !f.k && !!f.r && TIER_RANK[f.v] > TIER_RANK[f.r];
+  return !f.k && !f.g && !!f.r && TIER_RANK[f.v] > TIER_RANK[f.r];
 }
 function memberLayout(files, byFile) {
   const box = 230, gap = 46, pad = 56, dot = 9, perRow = 23,
@@ -216,7 +216,7 @@ function memberMatrix(files, names, calls) {
   return `<h3>Calls between member files</h3><p class="note">Rows call columns. Each cell counts resolved call sites; the diagonal counts calls within one file. Calls between files reach module or public functions.</p><div class="member-matrix-wrap"><table class="member-matrix"><thead><tr><th>Caller \\ callee</th>${files.map((p) => `<th>${esc(names.get(p))}</th>`).join("")}</tr></thead><tbody>${files.map((from) => `<tr><th>${esc(names.get(from))}</th>${files.map((to) => cell(from, to)).join("")}</tr>`).join("")}</tbody></table></div>`;
 }
 function memberWider(wider) {
-  return `<h3>Storage wider than needed (${wider.length})</h3><p class="note">Every resolved caller would still reach these definitions with the narrower storage. Indirect references, callbacks, generated adapters, external commands, and published API are outside the resolved calls, so check the source before narrowing.</p>${wider
+  return `<h3>Storage wider than needed (${wider.length})</h3><p class="note">Every resolved caller would still reach these definitions with the narrower storage. Indirect references, callbacks, implicit conversions such as <code>T.var</code>, and published API are outside the resolved calls, so check the source before narrowing. Calls from external commands count; generated definitions are left out.</p>${wider
     .sort((a, b) => D.functions[a].p.localeCompare(D.functions[b].p) || D.functions[a].n.localeCompare(D.functions[b].n))
     .map((v) => {
       const f = D.functions[v];

@@ -6,7 +6,8 @@ macro Stmt $output.graph.usage(Expr $program) {
   Stderr.printf("usage: %s graph|digest [-I DIR] FILE...\n", $program);
   Stderr.printf("       %s clones [--min-size N] [-I DIR] FILE...\n", $program);
   Stderr.printf(
-    "       %s datasets OUTPUT [-I DIR] SRC_FILE... -- LIB_FILE...\n",
+    "       %s datasets OUTPUT [-I DIR] SRC_FILE... -- LIB_FILE... "
+    "[-- COMMAND_FILE...]\n",
     $program);
   Stderr.printf("       %s architecture [-I DIR] FILE...\n", $program);
   Stderr.printf("       %s structure UNIT [-I DIR] FILE...\n", $program);

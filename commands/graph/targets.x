@@ -110,6 +110,15 @@ Symbol project_visibility(Compiler compiler, Type type, List binding) {
   return <module>;
 }
 
+/** `<source>` for a definition written in source, or `<generated>` for one
+    the compiler or a macro made, such as a class adapter. Only a written
+    definition records its declarator. */
+Symbol project_origin(Compiler compiler, List binding) {
+  match (compiler.semantic_binding_facts()[%(api-definition $binding)])
+    case %(? ? (? ?)): return <source>;
+  return <generated>;
+}
+
 /** The display paths of a module unit's files, or NULL for a single-file
     unit. */
 Map project_member_files(Compiler compiler) {

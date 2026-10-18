@@ -4,17 +4,18 @@
 
 macro Expression $output.graph.function_header() => "".join(
   %("function_id\tkind\tsubtree\tunit\tfile\tunit_lines\tsource_order\t"
-    "source_name\temitted_name\tvisibility\tneeded\texternal_calls\t"
-    "indirect_calls"));
+    "source_name\temitted_name\tvisibility\tneeded\torigin\t"
+    "external_calls\tindirect_calls"));
 
 macro Stmt $output.graph.function_row(
   Expr $rows, Expr $id, Expr $kind, Expr $subtree, Expr $unit, Expr $file,
   Expr $lines, Expr $order,
   Expr $source, Expr $emitted, Expr $visibility, Expr $needed,
-  Expr $external, Expr $indirect) {
-  String row = "%s\t%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t%s\t%d\t%d".printf(
+  Expr $origin, Expr $external, Expr $indirect) {
+  String row =
+    "%s\t%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%d\t%d".printf(
     $id, $kind, $subtree, $unit, $file, $lines, $order, $source, $emitted,
-    $visibility, $needed, $external, $indirect);
+    $visibility, $needed, $origin, $external, $indirect);
   $rows.push(row);
 }
 
