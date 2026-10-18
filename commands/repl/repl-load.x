@@ -263,22 +263,77 @@ static LoadedSource _prepare(
   return loaded;
 }
 
+/* A struct or union passes by value as a native address, which data
+   cannot carry across the helper boundary. */
+static int _is_record(Compiler c, Type type) {
+  if (!c.sym.is_var_type(type)) type = c.sym.resolve_key(type);
+  return type.is_aggregate();
+}
+
+/* The helper reports a loaded call's failure in compile-time terms at the
+   prompt's last token. The prompt reports it once, as a failure of the
+   named function. Warnings the body makes still print. */
+static Var _helper_run(
+  const LoadedCall *call, Type result, List arguments, Symbol operation) {
+  Compiler c = call.session.compiler;
+  DiagnosticsHold hold = c.diagnostics.hold();
+  Var value = void;
+  try {
+    $let(c.meta_helper, call.session.helper)
+      value = operation == <load-call>
+        ? c.loaded_helper_call(call.name, c.token, arguments, call.file.path)
+        : c.meta_helper_call(call.name, c.token, arguments, call.file.path);
+  }
+  catch %(malformed *): {
+    List failure = NULL;
+    foreach (List entry, c.diagnostics()) failure = entry;
+    c.diagnostics.release(hold, 0);
+    raise %(repl (reason ${_call_failure(c, call.name, result, failure)}));
+  }
+  c.diagnostics.release(hold, 1);
+  return value;
+}
+
+/* The helper names why it stopped in a `reason:` note; a result it cannot
+   return is a record or a native pointer. */
+static String _call_failure(
+  Compiler c, String name, Type result, List entry) {
+  String why = "the call failed";
+  match (entry) case %(* (message ?(String message)) * (notes ?notes)): {
+    why = message;
+    foreach (Var note, notes)
+      if (note is <string> && note.str().startswith("reason: "))
+        why = note.str().remove_prefix("reason: ");
+    if (why == "compile-time result is a compiler address")
+      why = _is_record(c, result)
+        ? "record values cannot cross the helper boundary"
+        : "native pointers cannot cross the helper boundary";
+  }
+  return %"$name failed: $why";
+}
+
 /* Native adapters in the helper check declared value types. This adapter
-   refuses references before reading their carrier as a value. */
+   refuses records and references before reading their carrier as a
+   value. */
 static Var _call(Func function, const FuncArg *argv) {
   const LoadedCall *call = Func.context(function);
-  List parameters = function.signature().car().list().cadr();
+  Compiler c = call.session.compiler;
+  List signature = function.signature();
+  List parameters = signature.car().list().cadr();
   int count = parameters == %((void)) ? 0 : parameters.len();
   Array arguments = $auto([]);
-  for (int i = 0; i < count; i++)
+  List parameter = parameters;
+  for (int i = 0; i < count; i++, parameter = parameter.cdr()) {
+    if (_is_record(c, parameter.car()))
+      raise %(repl (reason ${call.name + " failed: record values cannot "
+                                             "cross the helper boundary"}));
     arguments.push(x2c_func_value_argument(function, argv, i, <var>));
+  }
   List problem = datum_result_problem(arguments, {});
   if (problem)
     raise %(repl (reason "loaded function arguments must be independent data values")
                  (detail $problem));
-  Compiler c = call.session.compiler;
-  $let(c.meta_helper, call.session.helper)
-    return c.meta_helper_call(call.name, c.token, arguments, call.file.path);
+  return _helper_run(call, signature.cdr(), arguments, <call>);
 }
 
 /* The prompt has already checked native argument types. Envelopes contain
@@ -290,9 +345,7 @@ static Var _call_objects(Func function, const FuncArg *argv) {
   if (problem)
     raise %(repl (reason "loaded function arguments must be independent data values")
                  (detail $problem));
-  Compiler c = call.session.compiler;
-  $let(c.meta_helper, call.session.helper)
-    return c.loaded_helper_call(call.name, c.token, arguments, call.file.path);
+  return _helper_run(call, function.signature().cdr(), arguments, <load-call>);
 }
 
 static List _object_adapter(
@@ -416,8 +469,12 @@ ReplResult ReplSession.load(
       Scope.free(loaded);
     }
   }
+  String failure = helper.failure(filename);
+  if (failure) {
+    result.message = failure;
+    return result;
+  }
   try {
-    helper.check(session.compiler, ":load", filename);
     Map visible = $auto(session.compiler.sym.unit_symbols());
     foreach (String path, paths) {
       LoadedSource *loaded = Scope.calloc(1, sizeof(LoadedSource));

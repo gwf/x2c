@@ -141,6 +141,55 @@ assert "function type changed: fresh_name" in err, err
 assert "the body exited with status 8" in err, err
 PY
 
+# Failures name the loaded file or function, not the helper that runs it.
+cat >"$tmp/raise.x" <<'EOF'
+int bad_raise(void) { raise 1; return 0; }
+EOF
+cat >"$tmp/undeclared.x" <<'EOF'
+int bad_c(void) {
+  return undeclared_c_name;
+}
+EOF
+cat >"$tmp/calls.x" <<'EOF'
+#include <stdlib.h>
+typedef struct Pair { int x, y; } Pair;
+void stop(void) { abort(); }
+Pair make_pair(void) { Pair p = {1, 2}; return p; }
+int pair_x(Pair p) { return p.x; }
+int main(int argc, char **argv) { return argc; }
+EOF
+printf '%s\n' ":load \"$tmp/raise.x\"" ":load \"$tmp/undeclared.x\"" \
+  ":load \"$tmp/calls.x\"" 'stop();' 'make_pair();' 'Pair p = {1, 2};' \
+  'pair_x(p);' 'main();' 'int none(void) { return 1; }' 'none(1);' \
+  >"$tmp/input"
+if builds/0/x2c repl <"$tmp/input" >"$tmp/out" 2>"$tmp/raw"; then
+  echo "failed loads and calls unexpectedly succeeded" >&2
+  exit 1
+fi
+real=$(cd "$tmp" && pwd -P)
+sed -e "s|$real/|TMP/|g" -e "s|$tmp/|TMP/|g" "$tmp/raw" >"$tmp/err"
+grep -qx 'TMP/raise.x:1:29: parse: raise requires a %() payload literal' \
+  "$tmp/err"
+grep -qx '  int bad_raise(void) { raise 1; return 0; }' "$tmp/err"
+grep -qx 'load failed: TMP/raise.x: x2c reported errors' "$tmp/err"
+grep -q '^TMP/undeclared.x:2:[0-9]*: error: ' "$tmp/err"
+grep -q 'return undeclared_c_name;' "$tmp/err"
+grep -qx 'load failed: TMP/undeclared.x: the C compiler reported errors' \
+  "$tmp/err"
+grep -q '^evaluation failed: stop failed: the body crashed' "$tmp/err"
+boundary='failed: record values cannot cross the helper boundary'
+grep -qx "evaluation failed: make_pair $boundary" "$tmp/err"
+grep -qx "evaluation failed: pair_x $boundary" "$tmp/err"
+grep -qx 'evaluation failed: main takes 1 argument, not 0: int main(Array)' \
+  "$tmp/err"
+grep -qx 'evaluation failed: none takes 0 arguments, not 1: int none(void)' \
+  "$tmp/err"
+test "$(grep -c '^evaluation failed: ' "$tmp/err")" -eq 5
+if grep -e '<repl>' -e 'macro:' -e 'gensym' -e 'group-' -e 'malformed' \
+     "$tmp/err"; then
+  exit 1
+fi
+
 python3 commands/repl/tests/reload.py "$tmp"
 
 # Every retained executable directory belongs to a closed session.

@@ -95,6 +95,10 @@ macro Stmt $fail.expressions_method_missing(
     <type>, %"type ${$type.repr()} has no method ${$name}",
     $origin, NULL);
 
+macro Stmt $fail.expressions_receiver_unresolved(
+  Expr $c, Expr $origin, Expr $name) =>
+  $c.report_error(<type>, %"unresolved identifier: ${$name}", $origin, NULL);
+
 macro Stmt $fail.expressions_receiver_address(Expr $c, Expr $origin) =>
   $c.report_error(
     <type>, "method pointer receiver requires an addressable value",

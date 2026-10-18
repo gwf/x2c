@@ -479,10 +479,18 @@ static List _collect_provider(
   c.meta_build = index + 1;
   c.load_source = path in h.entries;
   c.diagnostics.limit = 0;
-  if (!started || !unit.collect(f))
-    return unit.context.export(%(failure ${c.diagnostics().repr()}));
+  if (!started || !unit.collect(f)) {
+    _print_diagnostics(c);
+    return unit.context.export(%(failure ${%"$path: x2c reported errors"}));
+  }
   c.sym.reset(unit.globals);
   return unit.context.export(c.loaded_provider());
+}
+
+/* Nothing else reports a loaded build's diagnostics, so they print as a
+   translation prints its own. */
+static void _print_diagnostics(Compiler c) {
+  foreach (Var entry, c.diagnostics()) c.print_diagnostic(entry);
 }
 
 /* The path of table `index`'s group files, without their suffixes. */
@@ -499,12 +507,14 @@ static void _clear(String base) {
 
 /* Parses the unit at `path` for the group of table `index`, which the
    parse writes into the build directory, adding the files it read to
-   `deps`. Diagnostics are the translation's to report; a unit that does
-   not parse leaves the part it reached, and the files it read decide when
-   it parses again. */
+   `deps`. Diagnostics are the translation's to report, except in a loaded
+   build, which has no translation and maps its C to its sources. A unit
+   that does not parse leaves the part it reached, and the files it read
+   decide when it parses again. */
 static void _parse(Helper &h, String path, int index) {
   Frontend f = h.frontend;
-  $let(f.request.package_dirs, f.request.package_dirs) {
+  $let(f.request.package_dirs, f.request.package_dirs)
+  $let(f.request.source_map, f.request.source_map || h.entries) {
     foreach (Var (root, _), h.packages)
       f.request.package_dirs = f.request.package_dirs.append(
         %(${Path.dirname(root)}));
@@ -525,9 +535,10 @@ static void _parse_source(
      helper exists; the parse still reaches every definition. */
   unit.collect(f);
   unit.compiler.diagnostics.reset();
-  if (!unit.parse() && h.entries)
-    Path.write_text(
-      %"${_base(h, index)}.failure", unit.compiler.diagnostics().repr());
+  if (!unit.parse() && h.entries) {
+    _print_diagnostics(unit.compiler);
+    Path.write_text(%"${_base(h, index)}.failure", "x2c reported errors");
+  }
   foreach (Var (read, _), unit.compiler.deps) h.deps[read] = 1;
 }
 
@@ -539,13 +550,23 @@ static String _compile(Helper &h, int index, String unit) {
   if (!Path.is_file(%"$base.deps")) return "the unit has no group";
   if (Path.is_file(%"$base.failure")) return Path.read_text(%"$base.failure");
   Toolchain t = h.toolchain;
-  String failure = Compiler.meta_cc_run(
+  List command =
     %(${t.cc} @{_cc_flags()} "-iquote" ${h.directory}
       "-iquote" ${Path.dirname(unit)} "-iquote" ${h.include} @{h.flags}
-      "-MD" "-MF" ${%"$base.d"} "-c" ${%"$base.c"} "-o" ${%"$base.o"}),
-    h.directory);
+      "-MD" "-MF" ${%"$base.d"} "-c" ${%"$base.c"} "-o" ${%"$base.o"});
+  String failure = h.entries ? _compile_loaded(command)
+                             : Compiler.meta_cc_run(command, h.directory);
   _add_depfile(%"$base.d", h.deps);
   return failure;
+}
+
+/* A loaded group's C maps to its sources, so the C compiler's own report
+   prints whole, as a build prints it. Returns NULL when it compiles. */
+static String _compile_loaded(List command) {
+  String printed = NULL, errors = NULL;
+  if (!tool_capture(command, printed, errors)) return NULL;
+  if (errors) fputs(errors, stderr);
+  return "the C compiler reported errors";
 }
 
 /* Adds each dependency of the depfile at `path` to `deps`. */

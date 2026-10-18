@@ -307,6 +307,12 @@ static int _load_source(
   return 0;
 }
 
+/* A session failure carries its own reason; another cause prints whole. */
+static String _cause_text(List cause) {
+  match (cause) case %(repl (reason ?(String why)) *): return why;
+  return cause.repr();
+}
+
 /** Runs the experimental REPL on stdin. Piped input continues after errors
     and exits with status one if any submission or command failed. Interactive
     errors leave the session usable; SIGINT stops a running submission. */
@@ -347,6 +353,7 @@ int repl_run(CliRequest request, ReplOptions options) {
     else {
       line = Stdin.readline();
       if (!line) break;
+      line = line.remove_suffix("\n");
     }
     String command = line.strip(NULL);
     if (interactive && command.startswith(":")) input.remember(command);
@@ -403,7 +410,7 @@ int repl_run(CliRequest request, ReplOptions options) {
         break;
       case <failed>:
         failed = 1;
-        fprintf(stderr, "evaluation failed: %s\n", result.cause.repr());
+        fprintf(stderr, "evaluation failed: %s\n", _cause_text(result.cause));
         break;
     }
     if (result.status != <incomplete>) {

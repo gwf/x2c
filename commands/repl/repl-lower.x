@@ -12,7 +12,7 @@ typedef struct ReplLower {
   Lisp lisp;
   Map layouts;
   int counter;
-  String reason, missing;
+  String reason, unbound;
 } *ReplLower;
 
 ReplLower ReplLower.new(Compiler compiler, Lisp lisp) {
@@ -21,7 +21,7 @@ ReplLower ReplLower.new(Compiler compiler, Lisp lisp) {
   self.lisp = lisp;
   self.layouts = {};
   self.counter = 0;
-  self.reason = self.missing = NULL;
+  self.reason = self.unbound = NULL;
   return self;
 }
 
@@ -305,6 +305,10 @@ static int _lower_scan_declaration(Lowering &l, Var type, List rest) {
   return 1;
 }
 
+/* A named type by its name, and another by its canonical form. */
+static String _lower_type_text(Type type) =>
+  type.len() == 1 ? type.car().str() : type.repr();
+
 /* Resolve calls only against this interpreter's environment. */
 static int _lower_known(Lowering &l, String name) {
   Var value;
@@ -317,10 +321,28 @@ static int _lower_known(Lowering &l, String name) {
 }
 
 static void _lower_scan_callee(Lowering &l, String name) {
-  if (!_lower_known(l, name)) {
-    l.uncallable = 1;
-    l.owner.missing = name;
-  }
+  if (!_lower_known(l, name)) _lower_unbound(l, $reason.scan.binding(name));
+}
+
+/* The first unbound callee names the reason. A call's callee is also
+   visited as a value after its call. */
+static void _lower_unbound(Lowering &l, String reason) {
+  if (!l.uncallable) l.owner.unbound = reason;
+  l.uncallable = 1;
+}
+
+/* A conversion the compiler inserted names its types, not its converter. */
+static String _lower_unbound_call(
+  Lowering &l, List callee, List arguments, String name) {
+  match (callee) case %(expr ((func (?from)) *to) ?):
+    match (arguments) case %(?argument):
+      match (l.compiler.converter_call(argument, from, to))
+        case %(expr ? (call (expr ? (ident (binding ? ?(String converter))))
+                            ?)):
+          if (converter == name)
+            return $reason.scan.conversion(
+              _lower_type_text(from), _lower_type_text(to));
+  return $reason.scan.binding(name);
 }
 
 /* A reference parameter takes its argument's address, and the callee needs
@@ -334,10 +356,11 @@ static void _lower_scan_call(Lowering &l, Var callee, List arguments) {
     }
   match (callee) {
     case %(expr ? (ident (binding ? ?(String name)))):
-      _lower_scan_callee(l, name);
+      if (!_lower_known(l, name))
+        _lower_unbound(l, _lower_unbound_call(l, callee, arguments, name));
     default:
       if (callee is <string>) _lower_scan_callee(l, callee);
-      else l.uncallable = 1;
+      else _lower_unbound(l, $reason.scan.callee());
   }
 }
 
@@ -1997,7 +2020,8 @@ static Var _lower_coerce(Lowering &l, List want, Var node, Var value) {
         case %(expr ? (call (expr ? (ident (binding ? ?(String name)))) ?)): {
         _lower_scan_callee(l, name);
         if (l.uncallable)
-          return $decline.binding.missing(l, name);
+          return $decline.conversion.missing(
+            l, _lower_type_text(from), _lower_type_text(want));
         return %(${Atom.intern(name)} $value);
       }
     }
@@ -2570,7 +2594,7 @@ List ReplLower.lower(ReplLower self, List fn) {
     .definitions = definitions
   };
   self.reason = NULL;
-  self.missing = NULL;
+  self.unbound = NULL;
   match (fn) {
     case %(function ?spec
            (bind (binding ? ?(String name))
@@ -2584,8 +2608,7 @@ List ReplLower.lower(ReplLower self, List fn) {
          decision; `rejected` now means only `goto`. */
       if (!l.declined) {
         if (l.rejected) l.owner.reason = $reason.scan.goto();
-        else if (l.uncallable)
-          l.owner.reason = $reason.scan.binding(l.owner.missing);
+        else if (l.uncallable) l.owner.reason = l.owner.unbound;
       }
       if (l.declined || l.rejected || l.uncallable) return NULL;
       Array slots = $auto([]);

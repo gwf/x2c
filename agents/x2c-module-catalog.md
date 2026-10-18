@@ -166,9 +166,9 @@ Public functions:
 
 `Compiler.report_meta_error`, `Compiler.meta_helper_call`,
 `Compiler.loaded_helper_call`, `MetaHelper.new`,
-`MetaHelper.retain_executable`, `Compiler.use_meta_helper`, `MetaHelper.check`,
-`Compiler.begin_meta_unit`, `Compiler.stop_meta_helper`, `MetaHelper.restart`,
-`MetaHelper.close`
+`MetaHelper.retain_executable`, `Compiler.use_meta_helper`,
+`MetaHelper.failure`, `Compiler.begin_meta_unit`, `Compiler.stop_meta_helper`,
+`MetaHelper.restart`, `MetaHelper.close`
 
 ### [src/meta-project.x](../src/meta-project.x)
 

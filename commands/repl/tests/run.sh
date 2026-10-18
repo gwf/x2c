@@ -69,6 +69,30 @@ printf '%s\n' 'ok' '=> (block (if (not ready) (call wait)) (call save))' \
   '=> (a b)' >"$tmp/list-expected"
 cmp "$tmp/list-expected" "$tmp/list"
 
+# Reports locate the submission's own lines and name what it wrote.
+printf '%s\n' '1 +;' 'int y = 1;' 'y = 1 +' '  2 +;' 'nosuch.len();' \
+  '(%!() => 42)();' 'List x = %(b c);' '%(a ${x});' |
+  builds/0/libexec/x2c-repl >/dev/null 2>"$tmp/reports" || true
+cat >"$tmp/reports-expected" <<'EOF'
+<repl>:1:4: parse: expected atomic expression
+  1 +;
+     ^
+  note: token: ; kind: ;
+
+<repl>:2:6: parse: expected atomic expression
+    2 +;
+       ^
+  note: token: ; kind: ;
+
+<repl>:1:11: type: unresolved identifier: nosuch
+  nosuch.len();
+            ^
+
+rejected: unsupported: a call of a value that is not a function name
+rejected: unsupported: a conversion from List to Var
+EOF
+cmp "$tmp/reports-expected" "$tmp/reports"
+
 # SIGINT stops the running submission, and the next one still runs. A
 # background job starts with SIGINT ignored, so a signal sent before the
 # submission runs is lost and the loop sends another.

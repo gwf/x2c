@@ -314,9 +314,12 @@ session = Session(crossing_root)
 try:
     session.load(crossing_file)
     session.value("loaded_record_value()", 42)
-    session.run("loaded_record();", "compile-time result is a compiler address")
+    session.run("loaded_record();", "evaluation failed: loaded_record failed: "
+                "record values cannot cross the helper boundary\n")
     session.run("int kept=7;")
-    session.run("loaded_pointer();", "compile-time result is a compiler address")
+    session.run("loaded_pointer();",
+                "evaluation failed: loaded_pointer failed: "
+                "native pointers cannot cross the helper boundary\n")
     session.run("loaded_deref(&kept);", "arguments must be independent data values")
     session.run("loaded_ref(kept);", "want value")
     session.value("kept", 7)
@@ -914,8 +917,10 @@ try:
     session.value('shared_frozen.x', 9)
     session.run('private_shared;', 'unresolved identifier')
     session.run('shared_dependency;', 'unresolved identifier')
-    session.run('shared_address();', 'compile-time result is a compiler address')
-    session.run('shared_result();', 'compile-time result is a compiler address')
+    session.run('shared_address();',
+                'native pointers cannot cross the helper boundary')
+    session.run('shared_result();',
+                'record values cannot cross the helper boundary')
     session.run('int shared_local=21;')
     session.run('shared_sum(&shared_local,1);',
                 'arguments must be independent data values')

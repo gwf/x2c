@@ -8,6 +8,7 @@
 #include "repl-runtime.x"
 #include "emit/emit.x"
 #include "format.x"
+#include "ast-rewrite.x"
 
 /** One loaded file's origin and published declarations.
     Callable adapters borrow this record until the session closes. */
@@ -130,12 +131,21 @@ List ReplSession.inspect(ReplSession session, String name) {
     name. Formatting uses the compiler's declaration emitter without calling
     the function. Loaded files supply their current declaration. */
 String ReplSession.function_info(ReplSession session, String name) {
+  String source = "prompt";
+  String declaration = _function_declaration(session, name, source);
+  if (!declaration) return NULL;
+  return %"$declaration;\nsource: $source\nexecution: native";
+}
+
+/* A session function's declaration without its semicolon, and the file or
+   `prompt` that defines it, or NULL for another name. */
+static String _function_declaration(
+  ReplSession session, String name, String &source) {
   List entry = session.inspect(name);
   if (!entry || (entry.car() != <function> && entry.car() != <native>))
     return NULL;
   Compiler c = session.compiler;
   Type type = c.sym.get_exact(%($name));
-  String source = "prompt";
   match (entry) case %(native (source ?(String path)) *): {
     ReplLoadedFile file = session.files[path];
     type = file.symbols[%($name)];
@@ -144,7 +154,7 @@ String ReplSession.function_info(ReplSession session, String name) {
   List declaration = type.declaration_ast(%($name));
   String text = String.new(
     c.code_pretty_string(c.emit(%($declaration), NULL), NULL));
-  return %"${text.strip(NULL)}\nsource: $source\nexecution: native";
+  return text.strip(NULL).rstrip(";");
 }
 
 /* The compiler's input state, which a submission or completion replaces
@@ -290,7 +300,7 @@ ReplCompletion ReplSession.complete(
     int declaration = c.test_declaration();
     int end = marked.len();
     if (!declaration) {
-      String head = "void __repl_eval(void) {\n";
+      String head = _eval_head();
       end += head.len();
       marked = head + marked + "\n}";
       _tokenize(c, marked, scratch);
@@ -314,6 +324,9 @@ static List _bare(List node) {
   match (node) case %(at ? ?inner): return inner;
   return node;
 }
+
+/* Statements run in a function that the submission does not spell. */
+static String _eval_head(void) => "void __repl_eval(void) {\n";
 
 static List _thunk(List items) =>
   %(function (int)
@@ -434,8 +447,75 @@ static int _native_prototype(Compiler c) {
     prefix. Only successfully initialized declarations publish new bindings;
     evaluation effects on previously published values survive failure.
     While the submission is evaluated, SIGINT fails it with `<interrupt>`;
-    the previous SIGINT disposition returns afterward. */
+    the previous SIGINT disposition returns afterward. Diagnostics locate
+    the submission's own lines and columns. */
 ReplResult ReplSession.submit(ReplSession session, String source) {
+  ReplResult result = _submit(session, source);
+  if (result.source == source) return result;
+  String filename = session.compiler.filename;
+  Array entries = $auto([]);
+  foreach (List entry, result.diagnostics)
+    entries.push(_submission_entry(entry, filename, source));
+  result.diagnostics = entries;
+  result.source = source;
+  return result;
+}
+
+/* An entry located in the wrapped text moves to the same byte of `source`.
+   The wrapper's closing brace stands for the end of the submission. */
+static List _submission_entry(List entry, String filename, String source) {
+  match (entry)
+    case %(?code ?severity ?message
+           (location ((file ?(String file)) ? ? (length ?length)
+                      (position ?(int position))))
+           ?notes): {
+      if (file != filename) return entry;
+      int last = source.rstrip(NULL).len();
+      int at = position - _eval_head().len();
+      at = at < 0 ? 0 : at > last ? last : at;
+      int line = 1, start = 0;
+      for (int i = 0; i < at; i++)
+        if (source[i] == '\n') { line++; start = i + 1; }
+      return %($code $severity $message
+               (location ((file $file) (line $line)
+                          (column ${at - start + 1}) (length $length)
+                          (position $at)))
+               $notes);
+    }
+  return entry;
+}
+
+/* A call with the wrong number of arguments fails as its callee rejects
+   them, naming only counts and the callee's signature. The submission's
+   call with those counts names the function and its declaration. */
+static List _arity_cause(ReplSession session, List syntax, List cause) {
+  match (cause)
+    case %(bad-arity (sig ?) (expected ?wanted) (actual ?given)): {
+      int expected = wanted.int(), actual = given.int();
+      String source = NULL, plural = expected == 1 ? "" : "s";
+      List node;
+      $ast.walk(syntax, node) {
+        match (node)
+          case %(call (expr ((func ?(List parameters)) *)
+                            (ident (binding ? ?(String name))))
+                      (args *arguments)): {
+            int count = 0;
+            foreach (Var argument, arguments)
+              if (!argument.equal(%(expr (void) ()))) count++;
+            int declared = parameters == %((void)) ? 0 : parameters.len();
+            String declaration = declared == expected && count == actual
+              ? _function_declaration(session, name, source) : NULL;
+            if (declaration)
+              return %(repl (reason ${
+                %"$name takes $expected argument$plural, not $actual: "
+                + declaration}));
+          }
+      }
+    }
+  return cause;
+}
+
+static ReplResult _submit(ReplSession session, String source) {
   Compiler c = session.compiler;
   Map names = session.names;
   ReplResult result = { .status = <rejected>, .value = void };
@@ -486,7 +566,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
       $refusal.declaration.unsupported();
     int declaration = native || c.test_declaration();
     if (!declaration) {
-      String prefix = "void __repl_eval(void) {\n";
+      String prefix = _eval_head();
       end += prefix.len();
       result.source = prefix + source + "\n}";
       _tokenize(c, result.source, scratch);
@@ -600,7 +680,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
       }
     }
     result.status = <failed>;
-    result.cause = cons(cause, details);
+    result.cause = _arity_cause(session, result.syntax, cons(cause, details));
     result.diagnostics = c.diagnostics();
     return result;
   }

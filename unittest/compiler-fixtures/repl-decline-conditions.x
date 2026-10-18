@@ -25,7 +25,7 @@ static Var _lower_decline(DeclineState *lowering, String why) {
 int main(void) {
   (void) disturbance;
   Var first = $decline.layout.host(_state());
-  Var second = $decline.binding.missing(_state(), _name());
+  Var second = $decline.conversion.missing(_state(), _name(), "Var");
   if (first is not void || second is not void || state.calls != 2 ||
       receivers != 2 || operands != 1 ||
       state.reason != "a compile-time struct with no host layout") return 1;
