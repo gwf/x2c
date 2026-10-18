@@ -37,6 +37,8 @@ void Compiler_stage_meta_in_process(void);
 
 int Compiler_groups_meta(Compiler c);
 
+int Compiler_meta_calls_wait(Compiler c);
+
 void Compiler_group_meta_function(Compiler c, List fn);
 
 int Compiler_meta_reaches_compile_time(Compiler c, Var node);
