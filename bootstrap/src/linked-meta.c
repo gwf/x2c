@@ -17256,7 +17256,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_31(void
   _16304 = List_var(_16303);
   _16305 = String_new("src/literals/quotation.x");
   _16306 = String_var(_16305);
-  _16307 = String_new("25a39caf");
+  _16307 = String_new("ad54c1a9");
   _16308 = String_var(_16307);
   _16309 = cons(_16308, NULL);
   _16310 = cons(_16306, _16309);
