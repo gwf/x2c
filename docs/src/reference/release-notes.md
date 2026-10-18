@@ -15,7 +15,9 @@ packages need rebuilding.
   See [Handlers and policy](../guide/exceptions.md#handlers-and-policy).
 - `$auto` on a local that is already managed is a compile-time error
   instead of a crash at scope exit.
-- The REPL continues a list literal across lines.
+- The REPL continues a list literal across lines, and code it loads
+  boxes classes, expands its own meta functions, and calls protocol
+  defaults as an ordinary build does.
 - The book gains this release notes page, and the repository gains a
   security policy, a pull request template, and a bug report template.
 
