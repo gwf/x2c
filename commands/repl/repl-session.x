@@ -33,8 +33,8 @@ typedef struct ReplSession {
   Map names;
 } *ReplSession;
 
-/** status is incomplete, rejected, defined, loaded, reloaded, executed,
-    value, or failed.
+/** status is incomplete, empty, rejected, defined, loaded, reloaded,
+    executed, value, or failed. Empty input holds only space and comments.
     diagnostics are ordinary compiler reports; message/cause describe the
     adapter or evaluator failure. source retains diagnostic source text;
     syntax and lowered support optional tracing. */
@@ -374,11 +374,14 @@ static void _tokenize(Compiler c, String source, Scope scratch) {
   $scope(&scratch) { c.tokenize(source); }
 }
 
-// Prompt submissions require bound names and session-owned persistent state.
+/* Prompt submissions require bound names and session-owned persistent state.
+   `NULL` and `assert` are the C macros a prompt may name without a
+   declaration, as an ordinary file does. */
 static void _require_evaluable(Var syntax) {
   match (syntax) {
     case %(expr () (ident (binding ? ?name))):
-      $refusal.binding.unresolved(name);
+      if (name != "NULL" && name != "assert")
+        $refusal.binding.unresolved(name);
     case %(declare ?spec ?):
       if (<static> in spec || <extern> in spec || <threaded> in spec)
         $refusal.storage.native();
@@ -387,17 +390,69 @@ static void _require_evaluable(Var syntax) {
     _require_evaluable(child);
 }
 
+/* Records one new session value, which no earlier name may already hold. */
+static void _add_value(
+  Map names, Array added, Array ids, int id, String name) {
+  if (name in names || name in added || name.startswith("__repl_"))
+    $refusal.binding.redefined();
+  added.push(name);
+  ids.push(id);
+}
+
+/* An interpreted `assert` names the text between its parentheses, which
+   the typed call no longer carries. Calls and their token groups share
+   source order. A compiled prompt function keeps C's own `assert`. */
+static List _asserts(Compiler c, List node) {
+  Array texts = $auto([]);
+  for (Token token = c.tokenizer.tokens; token.type != <eof>; token++) {
+    Token open = Token.skip_trivia(token + 1);
+    if (token.type != <ident> || token.text != "assert" || open.type != <(>)
+      continue;
+    Token close = open.group_close();
+    texts.push(String.new_len(
+      c.tokenizer.text + open.pos + 1, close.pos - open.pos - 1).strip(NULL));
+  }
+  int index = 0;
+  return _assert_calls(node, texts, index);
+}
+
+static Var _assert_calls(Var node, Array texts, int &index) {
+  if (node is not <list>) return node;
+  match (node)
+    case %(expr () (call (expr () (ident (binding ? "assert")))
+                         (args ?test)))
+      if (index < texts.len()): {
+        String text = texts[index++];
+        return %(expr (void)
+          (repl-assert ${_assert_calls(test, texts, index)} $text));
+      }
+  List child;
+  $ast.rewrite_children(node, child, _assert_calls(child, texts, index));
+}
+
 static List _initializers(List node, Map names, Array added, Array ids) {
   Array statements = $auto([]);
+  match (_bare(node)) {
+    /* `T (a, b) = source;` publishes each target as a session value. */
+    case %(dstrdecl ?spec (targets *targets) ?source): {
+      foreach (List target, targets)
+        match (target) case %(binding ?(int id) ?(String name)):
+          _add_value(names, added, ids, id, name);
+      return _thunk(%((repl-destructure $spec (targets @targets) $source)));
+    }
+  }
   match (node) {
     case %(declare ?spec (bindings *bindings)): {
       foreach (List item, bindings) {
-        match (item) {
-          case %(op = (bind (binding ?id ?(String name)) ?mods) ?value): {
-            if (name in names || name in added || name.startswith("__repl_"))
-              $refusal.binding.redefined();
-            added.push(name);
-            ids.push(id);
+        /* A declaration without a value starts at zero, as at file scope. */
+        List declarator = item, value = NULL;
+        match (item) case %(op = ?bound ?initial): {
+          declarator = bound;
+          value = initial;
+        }
+        match (declarator) {
+          case %(bind (binding ?(int id) ?(String name)) ?mods): {
+            _add_value(names, added, ids, id, name);
             /* Keep the declaration's declarator and initializer together.
                Braced initialization has meaning only in that type context;
                the compile-time lowering consumes this private wrapper with
@@ -407,7 +462,7 @@ static List _initializers(List node, Map names, Array added, Array ids) {
             continue;
           }
         }
-        $refusal.binding.initializer();
+        $refusal.binding.simple();
       }
       return _thunk(statements);
     }
@@ -566,7 +621,7 @@ static ReplResult _submit(ReplSession session, String source) {
         $refusal.qualifier.native();
     }
     if (c.peek(0) == <eof>) {
-      result.status = <executed>;
+      result.status = <empty>;
       return result;
     }
     int native = _native_prototype(c);
@@ -617,7 +672,7 @@ static ReplResult _submit(ReplSession session, String source) {
       return result;
     }
     if (!declaration) {
-      fn = _result_body(session, node, prints);
+      fn = _result_body(session, _asserts(c, node), prints);
       execute = 1;
     }
     else {

@@ -36,8 +36,9 @@ x2c> plus(3);
 
 The function calls display `=> 13` and `=> 23`: later calls read the current
 value of `total`. Definitions display `defined NAME`; initializations and
-statements display `ok`. A final expression displays its value using
-`Var.repr`, so character and unsigned values retain their printed tags.
+statements display `ok`, and a blank or comment-only line displays
+nothing. A final expression displays its value using `Var.repr`, so
+character and unsigned values retain their printed tags.
 
 A function is compiled once, when its complete definition is submitted.
 Compilation needs the matching x2c compiler and host C toolchain. Later calls
@@ -433,7 +434,7 @@ function leave the helper and its state running.
 
 ## Supported subset
 
-The current subset includes initialized simple variables, function
+The current subset includes simple variables, function
 definitions, integer arithmetic and narrowing, assignment, conditionals,
 `for` loops, self recursion, and calls to earlier functions. String values
 and length, List literals and indexing, and Array construction, mutation,
@@ -496,6 +497,13 @@ writes the String's bytes; `println` writes those bytes followed by one
 newline. Both are REPL-only, reserve their names in the session, and report
 `ok`. Compiled prompt functions can call them too.
 
+A session accepts C's `assert` and `NULL` without an include. An
+interpreted `assert` that fails stops the submission with an error naming
+its expression, such as `(assert (expression "n > 0"))`. Compiled prompt
+functions use C's own `assert` macro, which aborts the REPL process when it
+fails. A String or List compared with `NULL` follows the compiled
+comparison, which treats an empty String or List as equal to it.
+
 A session also declares `Json`, `Diff` and `Path`, so `Json.parse`,
 `Diff.unified` and `Path.basename` evaluate without an include.
 
@@ -508,8 +516,11 @@ definitions entered at the prompt, preprocessor directives, and direct Lisp
 input are outside this subset. A bodyless `meta`
 prototype is accepted: it makes a function the compiler links, or one from a
 [native module](meta-functions.md#native-modules) loaded with
-`--native-module`, callable in the session. Variables need
-initializers; declarator modifiers, `const`, and `volatile` are rejected.
+`--native-module`, callable in the session. A variable declared without
+an initializer starts at zero, as a C file-scope variable does, so
+`long q;` and `Var v;` are accepted. A destructuring declaration such as
+`Var (a, b) = pair;` reads its source once and publishes each target as a
+session value. Declarator modifiers, `const`, and `volatile` are rejected.
 Function-local `static`, `extern`, and `threaded` storage remain rejected.
 Top-level statement expressions can contain local declarations followed by
 one value expression, such as `({ int n=3; n+4; })`. Other statement

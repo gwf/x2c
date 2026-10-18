@@ -23,6 +23,10 @@
 
 (defun C.not (a) (if (C.true? a) 0 1))
 
+// A failed `assert` raises with the source text of its expression.
+(defun C.assert (test text)
+  (if (C.true? test) (C.void) (repl.native.lisp_assert_fail text)))
+
 // C negation keeps the operand's type. A floating zero is multiplied by -1 in
 // its own type, since `0 - 0.0` is `+0.0` where C gives `-0.0`.
 (defun C.neg (a)

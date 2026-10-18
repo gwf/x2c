@@ -69,6 +69,21 @@ printf '%s\n' 'ok' '=> 3' '=> 2' 'defined f' 'from f' 'p' '=> 1' 'ok' \
   '=> [ 6, 1 ]' >"$tmp/updates-expected"
 cmp "$tmp/updates-expected" "$tmp/updates"
 
+# Empty input prints nothing. Destructured targets and values declared
+# without one become session values, and assert and NULL are C's own.
+printf '%s\n' '' '// just a comment' 'List sel = %(1 2);' \
+  'Var (a, b) = sel;' 'a + b;' 'long q;' 'Var v;' 'String t;' \
+  '"42".try_long(&q);' 'q;' 't == NULL;' 'int *p = NULL;' 'p == NULL;' \
+  'assert(q == 42);' 'int g(void) { assert(b == 2); return a + q; }' 'g();' \
+  'assert(a  > b);' 'q;' |
+  builds/0/libexec/x2c-repl >"$tmp/forms" 2>"$tmp/forms-err" || true
+printf '%s\n' 'ok' 'ok' '=> 3' 'ok' 'ok' 'ok' '=> 1' '=> 42l' '=> 1' 'ok' \
+  '=> 1' 'ok' 'defined g' '=> 43' '=> 42l' >"$tmp/forms-expected"
+cmp "$tmp/forms-expected" "$tmp/forms"
+printf 'evaluation failed: (assert (expression "a  > b"))\n' \
+  >"$tmp/forms-err-expected"
+cmp "$tmp/forms-err-expected" "$tmp/forms-err"
+
 set +e
 builds/0/x2c repl extra </dev/null >"$tmp/bad-out" \
   2>"$tmp/bad-err"

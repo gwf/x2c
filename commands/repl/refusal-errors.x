@@ -12,8 +12,8 @@ macro Stmt $refusal.storage.native() =>
 macro Stmt $refusal.binding.redefined() =>
   _refuse("redeclaration is disabled; use assignment");
 
-macro Stmt $refusal.binding.initializer() =>
-  _refuse("top-level values need an initializer and a simple binding");
+macro Stmt $refusal.binding.simple() =>
+  _refuse("top-level values need a simple binding");
 
 macro Stmt $refusal.form.unsupported() =>
   _refuse("this top-level form is outside the REPL subset");
