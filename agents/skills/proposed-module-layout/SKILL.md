@@ -99,8 +99,7 @@ Keep its implementation responsibility and private dependency chain visible.
 Combine small components by meaning, not equal sizes. Record the prior
 component IDs and concrete reason for each merge. A large coherent component
 is a valid result. Do not force eight groups, balanced files, singleton targets,
-or standalone compilation. Use any compiler eight-group reference only as a
-comparison and explain disagreements through current source behavior.
+or standalone compilation.
 
 ## Show the useful result first
 

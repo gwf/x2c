@@ -54,33 +54,6 @@ a server restart marks interrupted jobs unfinished instead of leaving them busy.
 Proposals opened in the browser can be exported. The CLI uses its existing configured
 model and account. Compiler and runtime sources are not edited.
 
-## Reviewed examples
-
-`web/responsibilities/*.x.json` contains reviewed public-operation evidence for
-compiler.x, macros.x, and collect.x at snapshot `dbdafacb`, before those files
-became module units. They load only against that snapshot. These descriptions
-come from source bodies and caller evidence, not graph communities. Caller
-bodies were inspected selectively, not exhaustively. Known private callbacks
-are included; private declarations remain explicitly unresolved where their
-ownership has not been established.
-
-```sh
-node tools/partition/prepare-responsibilities.cjs
-```
-
-The preparation command reproduces the versioned `*.manifest.json` files from
-that evidence and the matching graph. It refuses another snapshot. Review and
-update source evidence before preparing manifests for a new revision. The UI's
-**Load reviewed source analysis** loads these editable examples for their
-complete original-file scopes. From a previously split group, loading the
-analysis opens the whole original file without changing existing groups.
-
-The compiler eight-group fixture is a comparison, never an assignment input.
-The comparison view shows the public operations and source behavior behind
-current responsibilities alongside the reference destinations. `macros.x` and
-`collect.x` retain large components with module members; no group count or size
-balance is imposed. See [validation results](decomposition-results.md).
-
 ## Graph exploration
 
 Group arrangement, Functions, and Function list preserve zoom, pan, weighted

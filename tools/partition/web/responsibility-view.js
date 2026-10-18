@@ -33,7 +33,7 @@ function renderResponsibilities() {
     labels = new Map(m.responsibilities.map((r) => [r.id, r]));
   $("workspace").classList.remove("graph-workspace");
   $("workspace").innerHTML =
-    `<div class="responsibility-workspace"><p>Inspect a source-informed proposal, then adjust the responsibilities.</p><div class="responsibility-actions"><button id="show-arrangement" class="primary" ${m.responsibilities.length ? "" : "hidden"}>Show proposed arrangement</button><button id="analyze-source">Analyze source</button><span id="analysis-status" role="status"></span></div><details class="analysis-tools"><summary>Evidence, saved analyses, and manifests</summary><div class="responsibility-actions"><button id="load-analysis">Load reviewed source analysis</button><button id="import-responsibilities">Import manifest</button><button id="export-responsibilities">Export manifest</button></div></details><p>${a.unreviewed.length ? `${a.unreviewed.length} public operations await agent analysis.` : "Public operations have source evidence."} ${a.components.length} private dependency components. ${m.constraints.length} non-function constraints.</p>
+    `<div class="responsibility-workspace"><p>Inspect a source-informed proposal, then adjust the responsibilities.</p><div class="responsibility-actions"><button id="show-arrangement" class="primary" ${m.responsibilities.length ? "" : "hidden"}>Show proposed arrangement</button><button id="analyze-source">Analyze source</button><span id="analysis-status" role="status"></span></div><details class="analysis-tools"><summary>Evidence, saved analyses, and manifests</summary><div class="responsibility-actions"><button id="import-responsibilities">Import manifest</button><button id="export-responsibilities">Export manifest</button></div></details><p>${a.unreviewed.length ? `${a.unreviewed.length} public operations await agent analysis.` : "Public operations have source evidence."} ${a.components.length} private dependency components. ${m.constraints.length} non-function constraints.</p>
     <details class="workflow-stage" data-stage="operations"><summary>Public operations (${a.members.filter((v) => !D.functions[v].s && !D.functions[v].k).length})</summary><div class="operation-list">${a.members
       .filter((v) => !D.functions[v].s && !D.functions[v].k)
       .map((v) => {
@@ -64,7 +64,7 @@ function renderResponsibilities() {
         )
         .join("") || "<p>Each component has one documented responsibility.</p>"
     }</details>
-    <details class="workflow-stage" data-stage="proposal"><summary>Assignment details</summary><p>${a.valid ? "Every function is assigned exactly once." : "Assignment error."} ${a.metrics.privateEdges.length} static crossing pairs; ${a.metrics.publicEdges.length} existing public crossing pairs (${a.metrics.publicEdges.reduce((n, e) => n + e[2], 0)} call sites).</p><p>${a.metrics.unresolved} unresolved/external calls; ${a.metrics.indirect} indirect calls. ${a.unresolvedConstraints.length} unresolved non-function constraints.</p><p class="note">${esc(m.coverage)}</p>${a.units.map((u) => `<section><h3>${esc(u.name)}</h3><p>${esc(u.classification)}: ${u.members.length} functions</p>${u.moduleMembers.map((r) => `<p>Module-member candidate: ${esc(labels.get(r.responsibility).name)} (retained in this translation unit)</p>`).join("")}<details><summary>Exact membership</summary>${memberRows(u.members)}</details></section>`).join("")}<p class="hint">Candidates are not extraction proofs. Private types, macros, file-local state, function values, and unresolved uses must be reviewed before moving source.</p><button id="preview-responsibilities" ${a.valid ? "" : "disabled"}>Preview responsibility arrangement</button><button id="compare-reference">Compare compiler reference</button></details>
+    <details class="workflow-stage" data-stage="proposal"><summary>Assignment details</summary><p>${a.valid ? "Every function is assigned exactly once." : "Assignment error."} ${a.metrics.privateEdges.length} static crossing pairs; ${a.metrics.publicEdges.length} existing public crossing pairs (${a.metrics.publicEdges.reduce((n, e) => n + e[2], 0)} call sites).</p><p>${a.metrics.unresolved} unresolved/external calls; ${a.metrics.indirect} indirect calls. ${a.unresolvedConstraints.length} unresolved non-function constraints.</p><p class="note">${esc(m.coverage)}</p>${a.units.map((u) => `<section><h3>${esc(u.name)}</h3><p>${esc(u.classification)}: ${u.members.length} functions</p>${u.moduleMembers.map((r) => `<p>Module-member candidate: ${esc(labels.get(r.responsibility).name)} (retained in this translation unit)</p>`).join("")}<details><summary>Exact membership</summary>${memberRows(u.members)}</details></section>`).join("")}<p class="hint">Candidates are not extraction proofs. Private types, macros, file-local state, function values, and unresolved uses must be reviewed before moving source.</p><button id="preview-responsibilities" ${a.valid ? "" : "disabled"}>Preview responsibility arrangement</button></details>
     <details><summary>Assignment and merge history (${m.history.length})</summary>${m.history.map((h) => `<p><strong>${esc(h.action)}</strong>: ${esc(h.reason || h.name || "")}<br><small>${esc((h.components || []).join("\n"))}</small></p>`).join("") || "No decisions recorded."}</details></div>`;
   document
     .querySelectorAll("[data-operation]")
@@ -91,12 +91,10 @@ function renderResponsibilities() {
   updateResponsibilityJob();
   $("add-responsibility").onclick = () => editResponsibility();
   $("merge-responsibilities").onclick = mergeResponsibilities;
-  $("load-analysis").onclick = loadResponsibilityAnalysis;
   $("dependency-review").onclick = editDependencyConstraints;
   $("export-responsibilities").onclick = () =>
     downloadResponsibilityManifest(m, a);
   $("import-responsibilities").onclick = importResponsibilityManifest;
-  $("compare-reference").onclick = compareResponsibilityReference;
   $("preview-responsibilities").onclick = () => previewResponsibilities(m, a);
 }
 function roleOptions(m, selected) {
@@ -387,54 +385,6 @@ function importResponsibilityManifest() {
     },
   );
 }
-async function loadResponsibilityAnalysis() {
-  const current = responsibilityManifest(),
-    files = [
-      ...new Set(scope.members.map((v) => D.files[D.functions[v].f].id)),
-    ];
-  if (files.length !== 1) {
-    toast("Open one original source file to load its reviewed analysis.");
-    return;
-  }
-  try {
-    if (Object.keys(current.operations).length) {
-      toast(
-        "This workspace already has an analysis. Export it before replacing it through Import manifest.",
-      );
-      return;
-    }
-    const response = await fetch(
-      "responsibilities/" +
-        files[0].split("/").pop().replace(".x", ".manifest.json"),
-    );
-    if (!response.ok)
-      throw Error(
-        "No saved analysis is supplied for this file. Select Analyze source to produce one.",
-      );
-    const m = await response.json();
-    Responsibilities.analyze(D, m, S.ties);
-    const key = m.scope.slice().sort().join("|");
-    if (key !== responsibilityKey) {
-      scopeStack.push(clone(scope));
-      const ids = new Map(
-        D.functions.map((_, v) => [Responsibilities.key(D, v), v]),
-      );
-      scope = { name: files[0], members: m.scope.map((k) => ids.get(k)) };
-      responsibilityKey = key;
-      selected.clear();
-      toast(
-        "Opened the complete original file for responsibility review. Existing groups are unchanged.",
-      );
-    }
-    S.responsibilities[responsibilityKey] ||= m;
-    if (!Object.keys(S.responsibilities[responsibilityKey].operations).length)
-      S.responsibilities[responsibilityKey] = m;
-    save();
-    openResponsibilityResult();
-  } catch (error) {
-    toast(error.message);
-  }
-}
 function previewResponsibilities(m, a) {
   const modules = Responsibilities.moduleUnits(D, m), units = modules || a.units;
   previewGroup = null;
@@ -499,37 +449,6 @@ function renderResponsibilityPreview() {
       scope.members,
       preview.units.map((u) => u.name),
     );
-}
-async function compareResponsibilityReference() {
-  const m = responsibilityManifest(),
-    a = Responsibilities.analyze(D, m, S.ties),
-    r = await (await fetch("fixtures/compiler-responsibilities.json")).json();
-  if (
-    !r.revision.startsWith(D.revision) ||
-    a.members.some((v) => D.files[D.functions[v].f].id !== r.file)
-  ) {
-    toast(
-      "The eight-group reference is only for compiler.x at " +
-        r.revision.slice(0, 8),
-    );
-    return;
-  }
-  const assignment = new Map(
-    r.groups.flatMap((g) => g.functions.map((f) => [f.e, g.name])),
-  );
-  responsibilityDialog(
-    `<h2>Compare responsibilities with the eight-group reference</h2><p>The reference combines responsibilities into broader source sections. It is not used to generate this proposal.</p><p>${a.units.length} current translation-unit candidates versus ${r.groups.length} reference groups. Differences below show which public operations were combined differently.</p>${m.responsibilities
-      .map((role) => {
-        const ops = a.members.filter(
-          (v) =>
-            m.operations[Responsibilities.key(D, v)]?.responsibility ===
-            role.id,
-        );
-        return `<section><h3>${esc(role.name)}</h3><p>${esc(role.description)}</p><p>${esc(role.evidence)}</p>${ops.map((v) => `<p><button data-source="${v}">${esc(D.functions[v].n)}</button> &rarr; reference: ${esc(assignment.get(D.functions[v].e) || "Unassigned")}</p>`).join("")}</section>`;
-      })
-      .join("")}`,
-    () => {},
-  );
 }
 
 function updateResponsibilityJob() {
