@@ -274,7 +274,8 @@ EOF
 cmp "$tmp/expected" "$tmp/err"
 
 # Package imports use the same package directories as `x2c run`.
-make -C examples/packages/greet build >/dev/null
+make -C examples/packages/greet build >"$tmp/package" 2>&1 ||
+  { cat "$tmp/package" >&2; exit 1; }
 printf '%s\n' ':load "examples/power/greet-client.x"' 'main();' |
   builds/0/x2c repl --package-dir examples/packages >"$tmp/out" 2>"$tmp/err"
 {
