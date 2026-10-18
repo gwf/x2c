@@ -447,13 +447,18 @@ static List _build(Helper &h) {
    later in the load order. Each source still parses in its own Context. */
 static String _loaded_providers(Helper &h) {
   h.providers = {};
-  Map owners = $auto({});
+  Map owners = $auto({}), packaged = $auto({});
   int index = 1;
   foreach (String path, h.owners) {
     List provider = _loaded_provider(h, path, index++);
     match (provider) case %(failure ?(String message)): return message;
     h.providers[path] = provider;
-    Map declarations = provider.car();
+    if (_package_source(h, path))
+      foreach (String name, provider.car().map().keys()) packaged[name] = 1;
+  }
+  foreach (String path, h.owners) {
+    Map declarations = h.providers[path].list().car();
+    if (!_package_source(h, path)) _drop_imported(declarations, packaged);
     foreach (String name, declarations.keys()) {
       Var previous;
       if (owners.try_get(name, previous))
@@ -462,6 +467,22 @@ static String _loaded_providers(Helper &h) {
     }
   }
   return NULL;
+}
+
+static int _package_source(Helper &h, String path) {
+  foreach (Var (root, _), h.packages)
+    if (Compiler.is_package_source(Path.resolved_absolute(root), path))
+      return 1;
+  return 0;
+}
+
+/* An import merges its package's definitions into the importing file's
+   collection. The package's own provider defines them. */
+static void _drop_imported(Map declarations, Map packaged) {
+  Array imported = $auto([]);
+  foreach (String name, declarations.keys())
+    if (name in packaged) imported.push(name);
+  foreach (String name, imported) declarations.del(name);
 }
 
 static List _loaded_provider(Helper &h, String path, int index) {

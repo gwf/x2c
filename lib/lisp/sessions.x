@@ -205,12 +205,27 @@ int Lisp.try_get(Lisp lisp, String name, Var &?out) =>
 void Lisp.set_global(Lisp lisp, String name, Var value) {
   if (!lisp || !name) $error.global.args();
   if (lisp.frozen)
-    $error.global.frozen();
+    $error.global.frozen("Lisp.set_global");
   $scope(&lisp.scope) {
     Var interned = Atom.intern(name);
     _binding_set(&lisp.scope, lisp.globals, interned, value);
     if (name.startswith("x2c.")) lisp.protect_x2c = 1;
   }
+}
+
+/** Removes this session's global binding for `name`, if present. An
+    ancestor's binding of the same name becomes visible again. Code that
+    already resolved the binding keeps its value; value referents keep their
+    owners.
+    Raises: `<bad-arg>` for a null session or name, `<bad-state>` for a
+    frozen session, or `<alloc-fail>` or `<bad-enc>` while canonicalizing
+    the name.
+*/
+void Lisp.remove_global(Lisp lisp, String name) {
+  if (!lisp || !name) $error.entry.null("Lisp.remove_global");
+  if (lisp.frozen)
+    $error.global.frozen("Lisp.remove_global");
+  lisp.globals.del(Atom.intern(name));
 }
 
 /** Installs `function` as `name` and transfers its storage to `lisp`.

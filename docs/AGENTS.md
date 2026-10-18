@@ -74,14 +74,15 @@ the generic templates that own published definitions:
   substitutes captured invocation arguments and reports the invocation line.
   It does not evaluate compile-time Lisp or computed declaration names, and
   every expanded signature is still checked against the compiler artifact.
-- Published callables default to the primary tier. The compact
+- Published callables and types default to the primary tier. The compact
   `docs/library-api-tiers.txt` file owns advanced, compatibility, and
   internal exceptions; it rejects duplicate and stale names. Source-level
   `API:` paragraphs are errors. The `compatibility` tier is presented as
   Convenience API; its prose names the preferred operation. Internal callables
-  remain discoverable for source readers but are not supported user API; the
-  generated internal-tier heading explains
-  that once rather than repeating it beside every function.
+  and types remain discoverable for source readers but are not supported user
+  API; the generated internal headings explain that once rather than
+  repeating it beside every entry. `x2c repl` completion hides the names that
+  this file and `docs/library-manifest.txt` mark internal.
 - `Raises:` and `See:` begin recognized sections whether or not an empty line
   precedes them. Every `See:` target must be a real public `Type.method`; an
   unresolvable one fails `make doc-generate`, since link auditing strips

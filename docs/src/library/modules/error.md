@@ -562,7 +562,6 @@ Source: `lib/error/records.x:286`
 | Type | Kind | Summary |
 | --- | --- | --- |
 | [`Error`](#Error) | struct | Names the structured-error runtime and its static operations. |
-| [`ErrorCatchSite`](#ErrorCatchSite) | struct | Holds the process-lifetime plans of one compiler-generated filtered catch. |
 | [`ErrorHandler`](#ErrorHandler) | struct | Identifies one `Error`-owned handler registration. |
 | [`ErrorHandlerFn`](#ErrorHandlerFn) | callback | Handles a borrowed oldest-first `List` of errors raised since registration. |
 
@@ -576,19 +575,6 @@ Programs do not construct `Error` values; automatic runtime initialization
 owns the per-thread handler, record, policy, and dispatch state.
 
 Source: `lib/error/error.x:26`
-
-<a id="ErrorCatchSite"></a>
-### ErrorCatchSite
-
-`typedef struct ErrorCatchSite { MatchCaptureSite *arms; int default_arm, arm_count, state, fenced_arm; } ErrorCatchSite`
-
-Holds the process-lifetime plans of one compiler-generated filtered catch.
-`arms` is a zero-initialized static array of `arm_count` `Match` sites and
-`default_arm` is the first unpatterned arm, or -1. `state` and `fenced_arm`
-belong to `Error`; a site must be static storage that the first
-registration binds to its patterns.
-
-Source: `lib/error/error.x:50`
 
 <a id="ErrorHandler"></a>
 ### ErrorHandler
@@ -615,6 +601,29 @@ reserved for compiler-generated catches. Any other result behaves as
 contents expire on return.
 
 Source: `lib/error/error.x:42`
+
+## Internal types
+
+These types connect runtime translation units and compiler-generated
+code. They are documented for source readers but are not supported as
+user API.
+
+| Type | Kind | Summary |
+| --- | --- | --- |
+| [`ErrorCatchSite`](#ErrorCatchSite) | struct | Holds the process-lifetime plans of one compiler-generated filtered catch. |
+
+<a id="ErrorCatchSite"></a>
+### ErrorCatchSite
+
+`typedef struct ErrorCatchSite { MatchCaptureSite *arms; int default_arm, arm_count, state, fenced_arm; } ErrorCatchSite`
+
+Holds the process-lifetime plans of one compiler-generated filtered catch.
+`arms` is a zero-initialized static array of `arm_count` `Match` sites and
+`default_arm` is the first unpatterned arm, or -1. `state` and `fenced_arm`
+belong to `Error`; a site must be static storage that the first
+registration binds to its patterns.
+
+Source: `lib/error/error.x:50`
 
 ## Design notes
 

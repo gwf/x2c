@@ -3160,29 +3160,29 @@ static List _emit_prepared(Compiler c, String stamp, String stem, String suffix,
   return code;
 }
 
-void Compiler_name_loaded_provider(Compiler, String, int, List);
-
 void Compiler_name_meta_provider_bindings(Compiler, String, int);
+
+void Compiler_name_loaded_provider(Compiler, String, int, List);
 
 void Compiler_set_fact(Compiler, Var, Var);
 
 static void f8_emission____name_provider_bindings(Compiler c, String provider, Array units, Map dependencies){
+  int index = c -> meta_build - 1;
+  Compiler_name_meta_provider_bindings(c, provider, index);
   {
-    Var path, index;
+    Var path, table;
     Map _x2c_gensym_macro_object_25 = meta_build_tables;
     unsigned _x2c_gensym_macro_cursor_26 = 0;
     Var _x2c_gensym_macro_cursor_output_26;
     Var _x2c_gensym_macro_cursor_output_27;
     while(Map_try_next(_x2c_gensym_macro_object_25, &(_x2c_gensym_macro_cursor_26), &(_x2c_gensym_macro_cursor_output_26), &(_x2c_gensym_macro_cursor_output_27))){
       path = _x2c_gensym_macro_cursor_output_26;
-      index = _x2c_gensym_macro_cursor_output_27;
-      if(Map_truth(meta_build_providers) && ! x2c_var_equal(path, String_var(provider))) Compiler_name_loaded_provider(c, Var_as_string(path), Var_int(Var_convert(index, 3453797)), Var_list_payload(Map_getindex(meta_build_providers, path)));
-      else if(! x2c_var_equal(path, String_var(provider)) && Map_contains(dependencies, path)) Compiler_name_meta_provider_bindings(c, Var_as_string(path), Var_int(Var_convert(index, 3453797)));
+      table = _x2c_gensym_macro_cursor_output_27;
+      if(Map_truth(meta_build_providers) && ! x2c_var_equal(path, String_var(provider))) Compiler_name_loaded_provider(c, Var_as_string(path), Var_int(Var_convert(table, 3453797)), Var_list_payload(Map_getindex(meta_build_providers, path)));
+      else if(! x2c_var_equal(path, String_var(provider)) && Map_contains(dependencies, path)) Compiler_name_meta_provider_bindings(c, Var_as_string(path), Var_int(Var_convert(table, 3453797)));
     }
 
   }
-  int index = c -> meta_build - 1;
-  Compiler_name_meta_provider_bindings(c, provider, index);
   Var identity;
   String name;
   {

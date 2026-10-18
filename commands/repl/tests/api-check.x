@@ -529,6 +529,19 @@ static void _delegate_completion(ReplSession session) {
   _expect(session, "owner.read();", <value>, 7);
 }
 
+/* Completion offers a runtime name the API ledgers mark internal only when
+   no public name matches; the full spelling still compiles. */
+static void _internal_completion(ReplSession s) {
+  _completion(s, "", "String", "MachineBuilder");
+  _completion(s, "", "Scope", "ScopeAlloc");
+  _completion(s, "", "Stdout", "_array_");
+  _completion(s, "x2c_var_", NULL, "x2c_var_taginfo");
+  _completion(s, "Scope", "ScopeStats", "ScopeAlloc");
+  _completion(s, "ScopeA", "ScopeAlloc", NULL);
+  _completion(s, "MachineB", "MachineBuilder", NULL);
+  _expect(s, "typedef ScopeAlloc ReplHeader;", <defined>, void);
+}
+
 static void _completion_does_not_publish_meta(ReplSession session) {
   Compiler compiler = session.compiler;
   size_t values = compiler.meta_group.len();
@@ -838,6 +851,7 @@ int main(int argc, char **argv) {
         _truth_values(session);
         _pointer_updates(session);
         _delegate_completion(session);
+        _internal_completion(session);
         _completion_does_not_publish_meta(session);
         session.close();
       }

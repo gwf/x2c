@@ -11,11 +11,13 @@ helper execution.
 x2c repl
 x2c repl --help
 x2c repl --dump --stats
+x2c repl --package-dir examples/packages
 ```
 
 No source file or checkout is needed when using an installed development
 build. The command reads standard input and accepts no file operands. It also
 runs directly as `x2c-repl` from the installation's `libexec/x2c` directory.
+An unknown option is an error that names the option.
 
 ## Try a session
 
@@ -82,6 +84,14 @@ contextual keywords. Narrow continuation contexts offer `else`, `catch`, or
 available on a typed receiver. At a blank primary prompt completion also
 offers colon commands, grouped with keywords, session names, types, and other
 callables. Unsupported REPL declarations and imports are not suggested.
+
+Completion leaves out runtime names that the library reference marks
+internal: names from internal modules, internal types and functions, and
+constants or variables of an internal type. They remain ordinary names, so a
+submission that spells one in full compiles as usual. An internal name is
+offered only when no other name matches the typed prefix. For example,
+`Scope` + Tab offers `Scope` and `ScopeStats`, while `ScopeA` + Tab completes
+the internal `ScopeAlloc`.
 
 A colon-prefixed line completes commands even at a continuation prompt;
 `:ast` and `:lowered` then complete published function names, and `:stats`
@@ -174,6 +184,9 @@ x2c> plus_answer(20);
 
 `:load` builds all loaded files into one native helper program. It uses the
 ordinary include, module, package, and native dependency handling.
+`--package-dir DIR` adds a package directory for every load, with the same
+meaning as for `x2c build` and `x2c run`. As for `x2c run`, build an
+imported package before loading a file that imports it.
 Public functions with bodies in the loaded file become prompt functions,
 including `main`. No `meta` annotation is needed. Static helpers such as
 `twice` remain private. Functions from included files and declaration-only
@@ -361,10 +374,39 @@ Other C dialect and dependency limitations still apply; loading does not
 provide missing libraries. Calling `exit` ends the helper, as described
 below under interrupted calls.
 
-`main` follows the same replacement rules as other loaded functions. Saved
-function values and compiled prompt callers use its replacement. Changing
-between the no-argument and argc/argv forms requires a new session. A second
-loaded file cannot publish another `main` in that session.
+Reloading the same file follows the replacement rules of other loaded
+functions. Saved function values and compiled prompt callers use the new
+`main`. Changing that file's `main` between the no-argument and argc/argv
+forms requires a new session.
+
+Loading a different file that defines `main` replaces the file that defined
+it, so one session can run several programs. Save this as `goodbye.c`:
+
+```x2c
+#include <stdio.h>
+int main(void) { puts("goodbye"); return 0; }
+```
+
+Load it after `hello.c`:
+
+```text
+x2c> :load "goodbye.c"
+removed ("main") from /home/me/hello.c
+loaded ("main")
+reset all loaded native state
+x2c> main();
+goodbye
+=> 0
+```
+
+The new `main` may use either form. The earlier file leaves the session, and
+the output names it and every public name it removed: its functions and
+globals, and the types that no remaining file publishes. Removal follows the
+rule for [an edited file](#edit-a-loaded-file): if prompt code refers to one
+of those names, the load fails and names that referrer. Other loaded files
+and their globals stay registered, although the successful load resets their
+native state. Only `main` replaces a file; other duplicate public names still
+fail.
 
 ### Edit a loaded file
 
@@ -382,8 +424,21 @@ Existing functions must keep their argument and return types. Parameter
 names may change. Existing public types must keep their definitions. New
 functions, globals, and types are allowed when their names do not
 conflict. Existing globals must keep their declared types and qualifiers,
-including `const`. Removing an existing function, global, or type, or
-changing its type, requires a new session.
+including `const`. Changing the type of a function, global, or type
+requires a new session.
+
+A file may remove a function, global, or type when no prompt definition
+refers to it. The load prints `removed ("helper") from` and the file's path.
+The name leaves `:symbols`, a later prompt reference reports an unresolved
+identifier, and a later version may define it again. A prompt function
+refers to the functions it calls, the globals it uses, and the types in its
+declarations. A prompt variable refers to its type and to a function it
+holds as a `Func`; a prompt type refers to the types of its fields. If
+prompt code refers to a removed name, the load fails and names the
+referrer, for example
+`load failed: helper is called by prompt function plus_helper` or
+`load failed: Pair is used by prompt variable kept`. A type that another
+loaded file also publishes stays.
 A refused replacement leaves the whole previous native program and its
 variables intact. This includes a compile, link, or compatibility failure
 in any loaded file, even when the command names a different file.

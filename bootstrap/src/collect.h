@@ -46,6 +46,8 @@ void Compiler_include_function_declarations(Compiler c, String target, int angle
 
 void Compiler_runtime_function_declarations(Compiler c, Map available);
 
+List Compiler_collected_names(String path);
+
 int Compiler_publishes_typedef(Compiler c, String name);
 
 int Compiler_publishes_type_family(Compiler c, List family);

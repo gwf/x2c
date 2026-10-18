@@ -276,7 +276,11 @@ entry state is inconsistent. The failure leaves the lease active.
 
 Source: `lib/match-cache.x:292`
 
-## Public types
+## Internal types
+
+These types connect runtime translation units and compiler-generated
+code. They are documented for source readers but are not supported as
+user API.
 
 | Type | Kind | Summary |
 | --- | --- | --- |

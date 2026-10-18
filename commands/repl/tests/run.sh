@@ -13,7 +13,7 @@ builds/0/x2c build --plain ${BUILD_JOBS:+-j "$BUILD_JOBS"} \
   commands/repl/tests/api-check.x commands/repl/repl-session.x \
   commands/repl/repl-lower.x commands/repl/repl-runtime.x \
   commands/repl/repl-native.x commands/repl/repl-globals.x \
-  commands/repl/repl-native-types.x \
+  commands/repl/repl-native-types.x commands/repl/repl-ledgers.x \
   commands/repl/decline-errors.x commands/repl/refusal-errors.x \
   builds/0/libx2c-dev.a
 "$tmp/api-check"
@@ -91,6 +91,12 @@ result=$?
 set -e
 test "$result" -eq 2
 grep -qx 'x2c repl: unexpected operand' "$tmp/bad-err"
+set +e
+builds/0/x2c repl --bogus </dev/null >"$tmp/bad-out" 2>"$tmp/bad-err"
+result=$?
+set -e
+test "$result" -eq 2
+grep -qx 'x2c repl: unknown option: --bogus' "$tmp/bad-err"
 
 printf '%s\n' 'int n = 0;' \
   'for (int i = 0; i < 100000; i++) n += i;' 'n;' |

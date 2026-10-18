@@ -73,6 +73,15 @@ void Sym.define_global(Sym s, List key, List type) {
   _seed_var_tag(s, key, type);
 }
 
+/** Removes `key`'s definition and binding from the unit's writable base
+    scope. A later reference no longer resolves; a later definition receives
+    a fresh binding. */
+void Sym.undefine_global(Sym s, List key) {
+  SymScope *scope = _scope_at(s, s.base_scopes - 1);
+  s.drop(scope.symbols, key);
+  s.drop(scope.bindings, key);
+}
+
 /** Associates an enumerator key with its owner in the active scope. */
 void Sym.declare_enumerator(Sym s, List key, Symbol owner) {
   SymScope *scope = _scope_at(s, -1);

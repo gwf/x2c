@@ -166,10 +166,11 @@ static String _type_name(List key, Type type) {
 
 /* Source declarations cannot change the types or meanings of live values. */
 static void _check_names(
-  ReplSession session, ReplLoadedFile file, Map visible,
-  Map symbols, List names) {
+  ReplSession session, ReplLoadedFile file, ReplLoadedFile retired,
+  Map visible, Map symbols, List names) {
   foreach (String name, names) {
     if (file && %($name) in file.symbols) continue;
+    if (retired && %($name) in retired.symbols) continue;
     Var existing;
     if (%($name) in visible || name in session.names ||
         name.startswith("__repl_") ||
@@ -196,13 +197,13 @@ static void _check_names(
 
 /* Existing prompt code keeps its calling types and layouts. Function
    signatures omit parameter names; receiver metadata and type rows retain
-   their exact declared meaning. */
+   their exact declared meaning. Declarations the file no longer publishes
+   are removals, which `_check_removed` checks. */
 static void _check_replacement(
   ReplLoadedFile file, Map symbols, Map signatures) {
   foreach (Var (name, signature), file.signatures) {
     Var replacement;
-    if (!signatures.try_get(name, replacement))
-      _changed(%"function removed: $name");
+    if (!signatures.try_get(name, replacement)) continue;
     if (!signature.equal(replacement))
       _changed(%"function type changed: $name");
     List receiver = %(self $name);
@@ -215,9 +216,222 @@ static void _check_replacement(
       case %(self ?name): if (name in file.signatures) continue;
     }
     Var replacement;
-    if (!symbols.try_get(key, replacement) || !declaration.equal(replacement))
-      _changed(%"declaration changed or removed: ${key.repr()}");
+    if (symbols.try_get(key, replacement) && !declaration.equal(replacement))
+      _changed(%"declaration changed: ${key.repr()}");
   }
+}
+
+/* The public name a symbol row declares: a function, global, or type. */
+static String _row_name(List key) {
+  match (key) {
+    case %(?(String name)): return name;
+    case %((!or typedef struct union enum) ?(String name)): return name;
+  }
+  return NULL;
+}
+
+/* The type family a row belongs to, or NULL for a function or global. */
+static List _row_family(List key, Var declaration) {
+  match (key) {
+    case %((!set ?kind (!or typedef struct union enum)) ?name *):
+      return %($kind $name);
+    case %(?name "layout-attribute"): return %(typedef $name);
+    case %(?name): if (declaration == %(typedef $name)) return declaration;
+  }
+  return NULL;
+}
+
+/* Rows of `file` that no loaded file publishes after this load leave the
+   session with their public names, unless prompt code refers to those
+   names. A replaced file also loses its functions and globals, whose
+   adapters name that file. Adds the rows to `dropped` and returns the
+   sorted names. */
+static List _check_removed(
+  ReplSession session, ReplLoadedFile file, Map published, int retiring,
+  Map dropped) {
+  Array names = $auto([]);
+  foreach (Var (key, declaration), file.symbols) {
+    List family = _row_family(key, declaration);
+    // Another file or the runtime introduced this type.
+    if (family && !file.types.contains(family)) continue;
+    String name = _row_name(key);
+    Var current;
+    if (published.try_get(key, current) && current.equal(declaration)) {
+      if (!retiring || family || !name) continue;
+    }
+    else {
+      if (!retiring && family && !family.equal(key) && family in published)
+        _changed(%"declaration changed: ${key.repr()}");
+      dropped[key] = 1;
+    }
+    if (name && name in session.names && !(name in names)) {
+      _check_unreferenced(session, name);
+      names.push(name);
+    }
+  }
+  return names.sort();
+}
+
+/* A removed name leaves no prompt definition that refers to it. */
+static void _check_unreferenced(ReplSession session, String name) {
+  Symbol kind = session.inspect(name).car();
+  if (kind == <type>) _check_type_unreferenced(session, name);
+  else _check_value_unreferenced(session, name, kind);
+}
+
+/* Prompt functions refer to a function or global by binding; prompt
+   variables can hold a function as a Func. */
+static void _check_value_unreferenced(
+  ReplSession session, String name, Symbol kind) {
+  Compiler c = session.compiler;
+  List binding = c.sym.resolve_global(%($name), NULL);
+  String use = kind == <native> ? "called" : "used";
+  Var callable = void, stored = void;
+  session.evaluator.try_get(name, callable);
+  session.evaluator.try_get("C.globals", stored);
+  foreach (Var (referrer, entry), session.names)
+    match (entry) {
+      case %(function (typed ?syntax) *):
+        if (_mentions(syntax, binding))
+          _referred(%"$name is $use by prompt function $referrer");
+      case %(value):
+        if (_holds(c, referrer, stored, callable))
+          _referred(%"$name is saved in prompt variable $referrer");
+    }
+}
+
+/* Types appear by name in typed syntax, variable types, and prompt type
+   declarations. */
+static void _check_type_unreferenced(ReplSession session, String name) {
+  Compiler c = session.compiler;
+  foreach (Var (referrer, entry), session.names)
+    match (entry) {
+      case %(function (typed ?syntax) *):
+        if (_mentions_type(syntax, name))
+          _referred(%"$name is used by prompt function $referrer");
+      case %(value):
+        if (_mentions_type(c.sym.get_exact(%($referrer)), name))
+          _referred(%"$name is used by prompt variable $referrer");
+    }
+  foreach (List declaration, session.declarations) {
+    if (!_mentions_type(declaration, name)) continue;
+    Array declared = $auto([]);
+    _type_submission_names(declaration, declared);
+    _referred(%"$name is used by prompt type ${declared[0]}");
+  }
+}
+
+static void _referred(String why) { raise %(repl (reason $why)); }
+
+static int _mentions(Var syntax, List binding) {
+  List node;
+  $ast.walk(syntax, node) {
+    match (node) case %(ident ?found): if (found.equal(binding)) return 1;
+  }
+  return 0;
+}
+
+static int _mentions_type(Var syntax, String name) {
+  List node;
+  $ast.walk(syntax, node) {
+    match (node) {
+      case %(?(String found)): if (found == name) return 1;
+      case %((!or struct union enum) ?(String found) *):
+        if (found == name) return 1;
+    }
+  }
+  return 0;
+}
+
+/* Prompt variables are native objects addressed through `C.globals`. */
+static int _holds(Compiler c, String name, Map globals, Var callable) {
+  Type type = NULL;
+  List binding = c.sym.resolve_global(%($name), type);
+  if (callable is not <func> || type != %("Func")) return 0;
+  Var address = globals[binding.cadr()];
+  return *(Func *) address.pointer() == callable.pointer();
+}
+
+/* The loaded file that defines main, or NULL. */
+static ReplLoadedFile _main_owner(ReplSession session) {
+  foreach (Var (path, record), session.files) {
+    ReplLoadedFile file = record;
+    if ("main" in file.signatures) return file;
+  }
+  return NULL;
+}
+
+/* Collection names a file's native definitions before its helper builds. */
+static int _defines_main(Frontend frontend, String filename) {
+  ParsedUnit unit;
+  int opened = frontend.start(filename, unit);
+  defer unit.close();
+  unit.compiler.load_source = 1;
+  return opened && unit.collect(frontend) &&
+    "main" in unit.compiler.loaded_provider().car().map();
+}
+
+/* Whether another loaded file also publishes the row `key`. */
+static int _shared(ReplSession session, ReplLoadedFile retired, List key) {
+  foreach (Var (path, record), session.files) {
+    ReplLoadedFile file = record;
+    if (file != retired && key in file.symbols) return 1;
+  }
+  return 0;
+}
+
+/* Removes a public name from the prompt with its callable and adapters.
+   Hidden adapter names stay reserved so later adapters number uniquely. */
+static void _unpublish(ReplSession session, String name) {
+  match (session.inspect(name)) {
+    case %(native * (objects ?adapter)): {
+      _forget(session, adapter);
+      session.evaluator.remove_global(name);
+    }
+    case %(global ? ?paths):
+      foreach (Var (path, accessors), paths.map())
+        foreach (Var accessor, accessors.list()) _forget(session, accessor);
+  }
+  session.names.del(name);
+}
+
+/* A file that still publishes a type the replaced file introduced
+   introduces it now. */
+static void _adopt_type(ReplSession session, List family) {
+  foreach (Var (path, record), session.files) {
+    ReplLoadedFile file = record;
+    if (!(family in file.symbols)) continue;
+    file.types = cons(family, file.types);
+    return;
+  }
+}
+
+static void _forget(ReplSession session, Var adapter) {
+  match (adapter) case %(expr ? (ident ?binding)): {
+    String hidden = Ast.binding_spelling(binding);
+    session.compiler.sym.undefine_global(%($hidden));
+    session.evaluator.remove_global(hidden);
+  }
+}
+
+/* Applies checked removals before the remaining files publish. Returns the
+   types the replaced file introduced that another file still publishes. */
+static List _remove(
+  ReplSession session, List removed, Map dropped, ReplLoadedFile retired) {
+  foreach (List row, removed)
+    foreach (String name, row.cadr()) _unpublish(session, name);
+  foreach (Var key, dropped.keys()) session.compiler.sym.undefine_global(key);
+  foreach (Var (path, record), session.files) {
+    ReplLoadedFile file = record;
+    file.types = file.types.filter(%!(List family) => !(family in dropped));
+  }
+  if (!retired) return NULL;
+  session.files.del(retired.path);
+  List kept = retired.types.filter(%!(List family) => !(family in dropped));
+  retired.symbols.cleanup();
+  retired.signatures.cleanup();
+  Scope.free(retired);
+  return kept;
 }
 
 static Map _signatures(Compiler c, Map symbols, List names) {
@@ -443,22 +657,43 @@ static void _publish(
   session.files[filename] = (void *) file;
 }
 
+/* The file a new `filename` that defines main replaces, or NULL. */
+static ReplLoadedFile _retired(
+  ReplSession session, Frontend frontend, String filename) {
+  if (filename in session.files) return NULL;
+  ReplLoadedFile owner = _main_owner(session);
+  if (!owner || !_defines_main(frontend, filename)) return NULL;
+  // The build collects again with its own helper and package roots.
+  Compiler.refresh_source_collections();
+  return owner;
+}
+
 /** Builds all loaded files and dependencies in one replacement helper.
     Successful loads reset all loaded native state and preserve prompt values
-    and callable adapters. Rejected loads preserve the running helper and its
+    and callable adapters. A new file that defines main replaces the file
+    that defined it. Rejected loads preserve the running helper and its
     state. Top-level prompt evaluation remains interpreted. */
 ReplResult ReplSession.load(
   ReplSession session, Frontend frontend, String filename) {
   session.compiler.diagnostics.reset();
   filename = Path.absolute(filename);
   int replacing = filename in session.files;
-  Array paths = $auto(session.files.keys());
+  ReplResult result = {.status = <rejected>, .value = void};
+  Compiler.refresh_source_collections();
+  ReplLoadedFile retired = NULL;
+  try retired = _retired(session, frontend, filename);
+  catch %(repl (reason ?why)): {
+    result.message = why;
+    return result;
+  }
+  Array paths = $auto([]);
+  foreach (String path, session.files.keys())
+    if (!retired || path != retired.path) paths.push(path);
   if (!replacing) paths.push(filename);
   paths.sort();
-  Compiler.refresh_source_collections();
   MetaHelper helper = frontend.build_loaded(paths);
-  Map prepared = $auto({});
-  ReplResult result = {.status = <rejected>, .value = void};
+  Map prepared = $auto({}), dropped = $auto({});
+  Array removed = $auto([]);
   defer {
     if (helper) Scope.free(helper);
     foreach (Var (path, value), prepared) {
@@ -476,6 +711,10 @@ ReplResult ReplSession.load(
   }
   try {
     Map visible = $auto(session.compiler.sym.unit_symbols());
+    Map published = $auto({});
+    if (retired)
+      foreach (Var key, retired.symbols.keys())
+        if (!_shared(session, retired, key)) visible.del(key);
     foreach (String path, paths) {
       LoadedSource *loaded = Scope.calloc(1, sizeof(LoadedSource));
       prepared[path] = (void *) loaded;
@@ -489,9 +728,19 @@ ReplResult ReplSession.load(
       List names = loaded->result.value;
       loaded->signatures = _signatures(session.compiler, normalized, names);
       if (file) _check_replacement(file, normalized, loaded->signatures);
-      _check_names(session, file, visible, normalized, names);
-      foreach (Var (key, value), normalized) visible[key] = value;
+      _check_names(session, file, retired, visible, normalized, names);
+      visible.merge(normalized);
+      published.merge(normalized);
     }
+    foreach (String path, paths) {
+      ReplLoadedFile file = session.files[path].pointer();
+      List gone =
+        file ? _check_removed(session, file, published, 0, dropped) : NULL;
+      if (gone) removed.push(%($path $gone));
+    }
+    if (retired)
+      removed.push(%(${retired.path}
+        ${_check_removed(session, retired, published, 1, dropped)}));
     helper.retain_executable();
     // Declaration inspection may have called meta code. Runtime starts fresh.
     helper.restart();
@@ -511,10 +760,13 @@ ReplResult ReplSession.load(
     result.message = %"cannot retain compiled helper: ${detail.repr()}";
     return result;
   }
+  List kept = _remove(session, removed, dropped, retired);
   foreach (String path, paths) {
     LoadedSource *loaded = prepared[path].pointer();
     _publish(session, path, *loaded);
   }
+  foreach (List family, kept) _adopt_type(session, family);
+  result.removed = removed;
   MetaHelper previous = session.helper;
   session.helper = helper;
   helper = NULL;
