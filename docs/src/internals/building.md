@@ -4,7 +4,8 @@ Language users can skip this chapter. It describes how the self-hosting
 repository builds itself and what a contributor is expected to rebuild.
 
 A source checkout needs a GCC- or Clang-compatible C compiler, `ar`,
-GNU Make, Python 3, and `/bin/bash`. Python runs repository build tooling.
+GNU Make, and `/bin/bash`. Optional package preparation and contributor
+checks also use Python 3.
 
 ## Check build prerequisites
 

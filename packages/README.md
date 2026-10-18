@@ -54,9 +54,9 @@ before building x2c or native dependencies. To check only Game of Life's
 package, use `./configure --packages termbox2`.
 
 The report lists missing commands together and gives Fedora installation
-commands. Core compilation needs a C compiler, `ar`, Make, Python 3, and Bash.
-Package builds additionally check their own profile tools, such as `shasum`
-and BLIS's `jq`. Preparation tools are required only when the selected native
+commands. Core compilation needs a C compiler, `ar`, Make, and Bash.
+Package builds also need Python 3 and check their own profile tools, such as
+`shasum` and BLIS's `jq`. Preparation tools are required only when the selected native
 dependency is not already cached and no native prefix override was supplied.
 For example, a fresh OpenSSL build needs Perl's `FindBin` and `IPC::Cmd`
 modules; fresh libuv needs Autotools. Dependency preparation also checks these

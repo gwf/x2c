@@ -17,7 +17,7 @@ cd "$root"
 # definitions are discovered in the ordinary source modules that own them.
 sources=$(awk '/^meta / && !/^meta native / && !seen[FILENAME]++ {
     print FILENAME
-  }' $(python3 tools/sources.py --area lib) $(python3 tools/sources.py) |
+  }' $(tools/sources.sh --area lib) $(tools/sources.sh) |
   sed '/^src\/linked-meta\.x$/d' | sort)
 
 tmp="$out.$$"

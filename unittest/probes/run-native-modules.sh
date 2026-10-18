@@ -431,7 +431,7 @@ int increment(int n) => n + 1;
 EOF
 compiler_sources=()
 while IFS= read -r source; do compiler_sources+=("$source"); done < <(
-  python3 "$ROOT/tools/sources.py" --root "$ROOT")
+  "$ROOT/tools/sources.sh" --root "$ROOT")
 "$X2C" build -q -j 2 --extension packages/tally \
   --extension packages/sibling --build-dir linked \
   --x-include-dir "$ROOT/src" --c-include-dir "$ROOT/builds/0/src" \

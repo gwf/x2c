@@ -82,7 +82,7 @@ MAKEFLAGS        += -S
 .PRECIOUS: $(BIN_BUILD)/%.c $(BIN_BUILD)/%.d $(BIN_BUILD)/%.c.d
 ###############################################################################
 # Library source files and generated files
-LIB_X_FILES  = $(shell python3 $(ROOT)/tools/sources.py --root $(ROOT) --area lib)
+LIB_X_FILES  = $(shell $(ROOT)/tools/sources.sh --root $(ROOT) --area lib)
 LIB_X_NAMES  = $(sort $(notdir $(LIB_X_FILES)))
 LIB_H_FILES  = $(patsubst %.x,$(LIB_BUILD)/%.h,$(LIB_X_NAMES))
 LIB_C_FILES  = $(patsubst %.x,$(LIB_BUILD)/%.c,$(LIB_X_NAMES))
@@ -92,7 +92,7 @@ LIB_X_DEPS   = $(patsubst %.x,$(LIB_BUILD)/%.d,$(LIB_X_NAMES))
 LIB_C_DEPS   = $(patsubst %.x,$(LIB_BUILD)/%.c.d,$(LIB_X_NAMES))
 ###############################################################################
 # Binary source files and generated files
-BIN_X_FILES  = $(shell python3 $(ROOT)/tools/sources.py --root $(ROOT))
+BIN_X_FILES  = $(shell $(ROOT)/tools/sources.sh --root $(ROOT))
 # Components are independent units; keep their unique artifact names flat.
 BIN_X_NAMES  = $(sort $(notdir $(BIN_X_FILES)))
 # Module members trigger the batch but are not separate translation units.

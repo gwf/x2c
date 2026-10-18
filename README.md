@@ -30,7 +30,7 @@ shows more: maps, matching, memory scopes, exceptions, and macros.
 ## Build and run
 
 From a checkout, you need a GCC- or Clang-compatible C compiler, `ar`, GNU Make,
-Python 3, and Bash. You do not need an existing x2c compiler: the checkout
+and Bash. You do not need an existing x2c compiler: the checkout
 contains generated C for the bootstrap.
 
 ```sh

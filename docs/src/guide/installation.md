@@ -24,7 +24,7 @@ x2c build hello.x --output hello
 ./hello
 ```
 
-A source build needs a C compiler, `ar`, GNU Make, Python 3, and `/bin/bash`;
+A source build needs a C compiler, `ar`, GNU Make, and `/bin/bash`;
 see [building the compiler](../internals/building.md). The install command
 builds the compiler and installs its matching runtime, headers, compile-time
 Lisp SDK, unit interfaces written by the installed compiler, runnable

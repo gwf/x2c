@@ -7,12 +7,12 @@ The exporter owns parsing and call resolution; this adapter aggregates its TSVs.
 import csv, glob, hashlib, json, os, subprocess, sys
 from collections import defaultdict
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-from sources import sources
-
 def unit_sources(root):
     """Entry units of src and lib, without the generated prelude."""
-    units = [os.path.relpath(p, root) for area in ("src", "lib") for p in sources(root, area)]
+    units = [os.path.relpath(p, root) for area in ("src", "lib")
+             for p in subprocess.check_output(
+                 [os.path.join(root, "tools/sources.sh"), "--root", root, "--area", area],
+                 text=True).splitlines()]
     return [unit for unit in units if unit != "lib/x2c.x"]
 
 def git_revision(root):

@@ -12,17 +12,17 @@ From the repository root, after `make commands`:
 ```sh
 # Find parsed callers and callees before changing syntax binding.
 builds/0/libexec/x2c-graph focus Compiler_bind_syntax \
-  $(python3 tools/sources.py --area src)
+  $(tools/sources.sh --area src)
 grep -rn 'bind_syntax' src
 
 # Inspect returned allocation before removing an apparent copy.
 builds/0/libexec/x2c-graph allocation-returns String_split_n lib/split.x
 
 # Find repeated full walks that may merit source inspection.
-builds/0/libexec/x2c-graph walks $(python3 tools/sources.py --area src)
+builds/0/libexec/x2c-graph walks $(tools/sources.sh --area src)
 ```
 
-`tools/sources.py` lists the entry units of `src` or `lib`. Each module entry
+`tools/sources.sh` lists the entry units of `src` or `lib`. Each module entry
 splices its member files into one unit, so pass the entry, not the members.
 
 Commands use emitted
@@ -38,8 +38,8 @@ units, this shell example excludes the generated `lib/x2c.x` prelude and keeps
 one filename per argument (including in zsh):
 
 ```sh
-set -- $(python3 tools/sources.py --area src)
-for unit in $(python3 tools/sources.py --area lib); do
+set -- $(tools/sources.sh --area src)
+for unit in $(tools/sources.sh --area lib); do
   [ "$unit" = lib/x2c.x ] || set -- "$@" "$unit"
 done
 builds/0/libexec/x2c-graph flows String_split_n List_iter "$@"
@@ -115,8 +115,8 @@ selected syntax roots, so its totals differ from the all-cell distribution.
 For example, run over the compiler and runtime, omitting the generated prelude:
 
 ```sh
-set -- $(python3 tools/sources.py --area src)
-for unit in $(python3 tools/sources.py --area lib); do
+set -- $(tools/sources.sh --area src)
+for unit in $(tools/sources.sh --area lib); do
   [ "$unit" = lib/x2c.x ] || set -- "$@" "$unit"
 done
 builds/0/libexec/x2c-graph clones --min-size 100 "$@"
@@ -226,8 +226,8 @@ To export the compiler and runtime units, this shell example names the
 generated `lib/x2c.x` prelude:
 
 ```sh
-set -- $(python3 tools/sources.py --area src) --
-for unit in $(python3 tools/sources.py --area lib); do
+set -- $(tools/sources.sh --area src) --
+for unit in $(tools/sources.sh --area lib); do
   [ "$unit" = lib/x2c.x ] || set -- "$@" "$unit"
 done
 builds/0/libexec/x2c-graph datasets /tmp/x2c-datasets "$@"

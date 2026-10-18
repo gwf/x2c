@@ -1063,7 +1063,7 @@ int main(void) {
   return 0;
 }
 EOF_NATIVE_ALIASES
-(cd "$FAKE" && python3 "$ROOT/tools/sources.py" --area lib |
+(cd "$FAKE" && "$ROOT/tools/sources.sh" --area lib |
   xargs ./builds/0/x2c translate --out-dir builds/0/lib) \
   >/dev/null 2>&1 || fail "the fake stage could not write its interfaces"
 for mode in cached cold live; do
