@@ -15,6 +15,17 @@ commands, and packages since the previous release. The
   definition refers to; otherwise the load names the referrer. The load
   names what it removed. See
   [Load a program with main](../guide/repl.md#load-a-program-with-main).
+- The REPL prompt accepts more ordinary code: C's `printf`, `puts`,
+  `assert`, and `NULL`; String `len`; compound assignment to Map and Array
+  elements; destructuring declarations; and declarations without an
+  initializer, which start at zero. Compiled prompt functions can call
+  `print` and `println`. A blank or comment-only line prints nothing. See
+  [Supported subset](../guide/repl.md#supported-subset).
+- REPL errors name the user's file, function, and submission line instead
+  of generated code, and a loaded file's diagnostics print as `x2c build`
+  prints them.
+- REPL completion leaves out runtime names that the library reference
+  marks internal.
 
 ## 0.15.1 (2026-10-17)
 
@@ -30,8 +41,6 @@ packages need rebuilding.
 - The REPL continues a list literal across lines, and code it loads
   boxes classes, expands its own meta functions, and calls protocol
   defaults as an ordinary build does.
-- REPL input and compiled prompt functions can call C's `printf` and
-  `puts`. See [the REPL guide](../guide/repl.md#supported-subset).
 - The book gains this release notes page, and the repository gains a
   security policy, a pull request template, and a bug report template.
 
