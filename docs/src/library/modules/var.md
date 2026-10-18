@@ -778,7 +778,11 @@ Returns the `Scope` owning a live wide numeric box, or NULL otherwise.
 
 Source: `lib/var/numbers.x:162`
 
-## Public types
+## Internal types
+
+These types connect runtime translation units and compiler-generated
+code. They are documented for source readers but are not supported as
+user API.
 
 | Type | Kind | Summary |
 | --- | --- | --- |

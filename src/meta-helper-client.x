@@ -167,14 +167,21 @@ static void _answer(Call &c, String operation, List operands) {
 }
 
 /* Refuses the call when the project's helper or the call's table did not
-   build, or when the function returns a struct or union. */
+   build. */
 static void _check(Call &call) {
+  String failure = _failure(call.table);
+  if (failure) _refuse(call, failure);
+}
+
+/* Why the active helper or its table `table` did not build, or NULL. */
+static String _failure(int table) {
   Var failure;
   if (!active.path && active.failures && active.failures.try_get(-1, failure))
-    _refuse(call, failure);
-  if (!active.path) _refuse(call, "the project meta module was not built");
-  if (active.failures && active.failures.try_get(call.table, failure))
-    _refuse(call, failure);
+    return failure;
+  if (!active.path) return "the project meta module was not built";
+  if (active.failures && active.failures.try_get(table, failure))
+    return failure;
+  return NULL;
 }
 
 /* Sends the call, after the unit's reset when that is still to be sent. */
@@ -474,16 +481,14 @@ void Compiler.use_meta_helper(MetaHelper helper) {
   foreach (Var (key, value), helper.units) key.string().try_own();
 }
 
-/** Checks that this helper built the provider table needed by `name`.
-    Does not invoke the function or reset native state. */
-void MetaHelper.check(MetaHelper m, Compiler c, String name, String provider) {
+/** Returns why this helper cannot call the functions of `provider`: the
+    helper or the provider's table did not build. Returns NULL when it can.
+    Does not invoke a function or reset native state. */
+String MetaHelper.failure(MetaHelper m, String provider) {
   MetaHelper previous = active;
   active = m;
   defer active = previous;
-  Call call = {
-    .compiler = c, .name = name, .site = c.token,
-    .table = _table_of(Path.real(provider), 0)};
-  _check(call);
+  return _failure(_table_of(Path.real(provider), 0));
 }
 
 /** Selects the table of the unit at `filename` for the calls that follow,

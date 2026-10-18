@@ -23,6 +23,10 @@
 
 (defun C.not (a) (if (C.true? a) 0 1))
 
+// A failed `assert` raises with the source text of its expression.
+(defun C.assert (test text)
+  (if (C.true? test) (C.void) (repl.native.lisp_assert_fail text)))
+
 // C negation keeps the operand's type. A floating zero is multiplied by -1 in
 // its own type, since `0 - 0.0` is `+0.0` where C gives `-0.0`.
 (defun C.neg (a)
@@ -179,6 +183,7 @@
 (def String_rstrip String.rstrip)
 
 (def String_getindex String.getindex)
+(def String_len string-length)
 (def String_str str)
 (def String_repr repr)
 (def String_add String.add)
@@ -253,6 +258,8 @@
 (defun Var_new (tag value) (repl.native.lisp_box tag value))
 (defun Func_var (v) v)
 (defun Var_func (v) v)
+
+(defun printf (format . values) (repl.printf format values))
 
 // Preserve printed syntax in meta diagnostics.
 (def Var_repr repr)

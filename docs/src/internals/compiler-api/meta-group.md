@@ -17,6 +17,7 @@ A unit's meta group, emitted as C.
 | [`Compiler.group_meta_function`](#Compiler.group_meta_function) | Records a native callable body `fn` in the unit's helper group. |
 | [`Compiler.groups_meta`](#Compiler.groups_meta) | Answers whether a `meta` function or value belongs to the unit's group: a parse meets it outside a macro definition while the project meta build parses the unit or a session stages it. |
 | [`Compiler.meta_call_missing`](#Compiler.meta_call_missing) | Returns why the group function `name` has no compile-time entry, from its type. |
+| [`Compiler.meta_calls_wait`](#Compiler.meta_calls_wait) | Answers whether a call of a project `meta` function waits for the translation: the project meta build's own parse has no helper yet. |
 | [`Compiler.meta_cc`](#Compiler.meta_cc) | Returns the C compiler and the runtime header directory that build `meta` code, or NULL before `Compiler.use_meta_toolchain`. |
 | [`Compiler.meta_cc_identity`](#Compiler.meta_cc_identity) | Returns the identity of the C compiler at `cc`: its path and content hash. |
 | [`Compiler.meta_cc_run`](#Compiler.meta_cc_run) | Runs `arguments`, a C compiler command building the group C in `directory`, and returns NULL, or else its first error, which names `directory` when a group's C is the cause. |
@@ -53,7 +54,7 @@ Closes compile-time-only calls across later meta definitions.
 Retained group bodies hold the bound calls, including literal insertions.
 Select runtime definitions only after that relation is complete.
 
-Source: `src/meta-group/selection.x:57`
+Source: `src/meta-group/selection.x:62`
 
 <a id="Compiler.group_meta_function"></a>
 #### Compiler.group_meta_function
@@ -62,7 +63,7 @@ Source: `src/meta-group/selection.x:57`
 
 Records a native callable body `fn` in the unit's helper group.
 
-Source: `src/meta-group/selection.x:23`
+Source: `src/meta-group/selection.x:28`
 
 <a id="Compiler.groups_meta"></a>
 #### Compiler.groups_meta
@@ -83,7 +84,18 @@ Source: `src/meta-group/selection.x:18`
 Returns why the group function `name` has no compile-time entry, from
 its type.
 
-Source: `src/meta-group/selection.x:278`
+Source: `src/meta-group/selection.x:283`
+
+<a id="Compiler.meta_calls_wait"></a>
+#### Compiler.meta_calls_wait
+
+`int Compiler.meta_calls_wait(Compiler c)`
+
+Answers whether a call of a project `meta` function waits for the
+translation: the project meta build's own parse has no helper yet. A
+loaded helper's parse calls the ordinary helper of its sources.
+
+Source: `src/meta-group/selection.x:25`
 
 <a id="Compiler.meta_cc"></a>
 #### Compiler.meta_cc
@@ -125,7 +137,7 @@ Answers whether a `meta` body reaches the compiler itself: it names a
 compile-time-only function or a compiler operation, or constructs a
 template. Such a function has no runtime form.
 
-Source: `src/meta-group/selection.x:36`
+Source: `src/meta-group/selection.x:41`
 
 <a id="Compiler.prepare_loaded_functions"></a>
 #### Compiler.prepare_loaded_functions
@@ -158,7 +170,7 @@ Source: `src/meta-group/loaded.x:56`
 Answers whether a definition has public native linkage.
 Main is excluded because its process entry needs a separate adapter.
 
-Source: `src/meta-group/selection.x:268`
+Source: `src/meta-group/selection.x:273`
 
 <a id="Compiler.refuse_meta_call"></a>
 #### Compiler.refuse_meta_call
@@ -168,7 +180,7 @@ Source: `src/meta-group/selection.x:268`
 Reports at `site` that the `meta` function `name` cannot run at compile
 time, and `why`.
 
-Source: `src/meta-group/selection.x:297`
+Source: `src/meta-group/selection.x:302`
 
 <a id="Compiler.refuse_record_meta_call"></a>
 #### Compiler.refuse_record_meta_call
@@ -179,7 +191,7 @@ Reports at `site` that the group function `name` cannot run at compile
 time when its result is a struct or union, which its type alone
 decides.
 
-Source: `src/meta-group/selection.x:305`
+Source: `src/meta-group/selection.x:310`
 
 <a id="Compiler.stage_meta_in_process"></a>
 #### Compiler.stage_meta_in_process

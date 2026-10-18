@@ -97,7 +97,7 @@ typedef struct LogMemorySink{
 * LogMemorySink;
 
 #include "var-adapters.h"
-static String _3, _2, _1, _0;
+static String _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -214,6 +214,12 @@ static Var _retain_lisp_symbol(LogMemorySink l, Var value);
 static List _retain_list(LogMemorySink l, List list);
 
 static int _pool_chain_owns(Pool pool, Var value);
+
+static int _plain_report(Logger logger);
+
+static void _report_uncaught(List entry);
+
+static String _detail_text(List detail);
 
 static void _log_pending(Logger active);
 
@@ -777,7 +783,7 @@ static LogSink _new_sink(Logger logger, LogEmitter emit, LogFlusher flush, Var d
 
 static void _require_quiescent(Logger logger, String owner){
   if(logger && logger -> emission_depth != 0){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/logger.x",.function = "_require_quiescent",.line = 332};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/logger.x",.function = "_require_quiescent",.line = 332,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(owner));
     __builtin_unreachable();
   }
@@ -1437,7 +1443,8 @@ Symbol Logger_error_handler(List errors, Var data){
         }
 
       }
-      Logger_log(logger, 11703268, 392730881588392, entry);
+      if(policy == 2260136 && _plain_report(logger)) _report_uncaught(entry);
+      else Logger_log(logger, 11703268, 392730881588392, entry);
       Error_note_rendered();
       {
         Symbol _x2c_gensym_return_value_24 = 285842436424;
@@ -1452,6 +1459,53 @@ Symbol Logger_error_handler(List errors, Var data){
     x2c_cleanup_leave(& _x2c_gensym_defer_record_27);
   }
 
+}
+
+static int _plain_report(Logger logger){
+  return logger == default_logger && Logger_sink_count(logger) == 1 && ! getenv("X2C_DEBUG");
+}
+
+static void _report_uncaught(List entry){
+  String line = String_join(NULL, cons(String_var(_3), cons(String_var(Var_str(List_assoc(entry, Symbol_var(227594)))), cons(String_var(_4), NULL))));
+  List location = Var_list_payload(List_assoc(entry, Symbol_var(857050729436)));
+  if(List_truth(location) && Var_is(List_assoc(location, Symbol_var(40094681930)), 1473096)) line =({
+    Var _x2c_gensym_literal_part_0 = String_var(line);  Var _x2c_gensym_literal_part_1 = String_var(Var_str(List_assoc(location, Symbol_var(458361162716))));  Var _x2c_gensym_literal_part_2 = String_var(Var_str(List_assoc(location, Symbol_var(412426))));  Var _x2c_gensym_literal_part_3 = String_var(Var_str(List_assoc(location, Symbol_var(805770))));  String_join(NULL, cons(_x2c_gensym_literal_part_0, cons(String_var(_5), cons(_x2c_gensym_literal_part_1, cons(String_var(_6), cons(_x2c_gensym_literal_part_2, cons(String_var(_7), cons(_x2c_gensym_literal_part_3, cons(String_var(_8), NULL)))))))));
+  }
+  );
+  List detail = Var_list_payload(List_assoc(entry, Symbol_var(280234584)));
+  if(List_truth(detail)) line =({
+    Var _x2c_gensym_literal_part_4 = String_var(line);  Var _x2c_gensym_literal_part_5 = String_var(_detail_text(detail));  String_join(NULL, cons(_x2c_gensym_literal_part_4, cons(String_var(_9), cons(_x2c_gensym_literal_part_5, NULL))));
+  }
+  );
+  fprintf(stderr, "%s\n", line);
+  fflush(stderr);
+}
+
+static String _detail_text(List detail){
+  List parts = NULL;
+  {
+    List pair;
+    List _x2c_gensym_macro_object_1 = detail;
+    List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
+    Var _x2c_gensym_macro_cursor_output_1;
+    while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
+      pair = Var_list_payload(_x2c_gensym_macro_cursor_output_1);
+      {
+        Var value = List_cadr(pair);
+        String text = Var_is_row(value, 11, 7, 1) || Var_is(value, 1328354264) ? Var_str(value) : Var_repr(value);
+        parts =({
+          List _x2c_gensym_literal_part_7 = parts;  Var _x2c_gensym_literal_part_8 = String_var(({
+            Var _x2c_gensym_literal_part_6 = String_var(Var_str(pair -> car));  String_join(NULL, cons(_x2c_gensym_literal_part_6, cons(String_var(_10), cons(String_var(text), NULL))));
+          }
+          ));  List_append(_x2c_gensym_literal_part_7, cons(_x2c_gensym_literal_part_8, NULL));
+        }
+        );
+      }
+
+    }
+
+  }
+  return String_join(_11, parts);
 }
 
 void Logger_trace(Logger logger, Symbol category, List fields){
@@ -1566,7 +1620,7 @@ void Logger_free(Logger logger){
         x2c_cleanup_leave(& _x2c_gensym_defer_record_29);
         return;
       }
-      _require_quiescent(logger, _3);
+      _require_quiescent(logger, _12);
       Logger_flush(logger);
       Logger_clear_sinks(logger);
       if(global_logger == logger) global_logger = NULL;
@@ -1588,7 +1642,16 @@ void Logger_initialize(void){
   _0 = String_new("Logger.add_sink");
   _1 = String_new("Logger.remove_sink");
   _2 = String_new("Logger.clear_sinks");
-  _3 = String_new("Logger.free");
+  _3 = String_new("x2c: uncaught <");
+  _4 = String_new(">");
+  _5 = String_new(" in ");
+  _6 = String_new(" (");
+  _7 = String_new(":");
+  _8 = String_new(")");
+  _9 = String_new(": ");
+  _10 = String_new(" ");
+  _11 = String_new(", ");
+  _12 = String_new("Logger.free");
   _x2c_gensym_static_initialize_0();
   _x2c_gensym_static_initialize_1();
   _x2c_gensym_static_initialize_2();
@@ -1648,11 +1711,11 @@ static void _log_pending(Logger active){
   List pending = Error_since(logger_error_mark);
   {
     List entry;
-    List _x2c_gensym_macro_object_1 = pending;
-    List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
-    Var _x2c_gensym_macro_cursor_output_1;
-    while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
-      entry = Var_list_payload(_x2c_gensym_macro_cursor_output_1);
+    List _x2c_gensym_macro_object_2 = pending;
+    List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
+    Var _x2c_gensym_macro_cursor_output_2;
+    while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
+      entry = Var_list_payload(_x2c_gensym_macro_cursor_output_2);
       Logger_log(active, 11703268, 392730881588392, entry);
     }
 

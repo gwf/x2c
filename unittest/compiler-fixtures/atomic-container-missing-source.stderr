@@ -1,4 +1,1 @@
-<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=
-((operation "Array.updateindex") (index 0)) location=
-((file "../../lib/array.x") (line <line>) (function "Array_updateindex"))
-x2c error floor: <void-op>: non-returning error was not caught
+x2c: uncaught <void-op>: operation Array.updateindex, index 0

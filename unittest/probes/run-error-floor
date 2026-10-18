@@ -36,6 +36,14 @@ static void _check_case(String name, String reason) {
     probe_fail(%"$name: stderr lacks reason '$reason': $output");
 }
 
+/* The default Logger reports an uncaught error as one line and the floor
+   then aborts silently. */
+static void _check_uncaught(String name, String code) {
+  Job job = _run(name);
+  if (!job.status()) probe_fail(%"$name: expected terminal failure");
+  _expect(name, _last(_stderr(job)), %"x2c: uncaught <$code>");
+}
+
 static Job _passes(String name) {
   Job job = _run(name);
   if (job.status())
@@ -75,10 +83,9 @@ Path preinit_c = root.join("unittest/probes/error-fatal-preinit.c");
   .job().run();
 
 _check_case("preinit", "raise before initialization");
-_check_case("abort-policy", "unhandled and policy is abort");
-foreach (String name, %("uncaught-invariant" "uncaught-format"
-                        "uncaught-not-found" "uncaught-malformed"))
-  _check_case(name, "non-returning error was not caught");
+_check_uncaught("abort-policy", "abort-prob");
+foreach (String code, %("invariant" "format" "not-found" "malformed"))
+  _check_uncaught(%"uncaught-$code", code);
 _check_case("after-shutdown", "raise re-entered or after shutdown");
 _check_case("dynamic-invalid",
             "error detail contains an identity-bearing value");

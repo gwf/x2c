@@ -117,7 +117,9 @@ int Frontend.open_session(Frontend frontend, ParsedUnit &unit) =>
   (Compiler.stage_meta_in_process(), 1) && _start(
     frontend, NULL, unit, _unit_context(), "$(begin)\n"
     "void print(String text);\n"
-    "void println(String text);\n") &&
+    "void println(String text);\n"
+    "int printf(const char *format, ...);\n"
+    "int puts(const char *text);\n") &&
   unit.collect(frontend) && unit.parse();
 
 /** Tokenizes one input into a fresh unit with its own isolated `Context`.

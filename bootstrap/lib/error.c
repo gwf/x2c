@@ -115,6 +115,8 @@ static void f8_dispatch____leave(void);
 
 static Symbol f8_dispatch____dispatch(f8_dispatch___ErrorRaise r);
 
+static void f8_dispatch____terminate(ErrorThreadState e, f8_dispatch___ErrorRaise r, const char * why);
+
 static Symbol f8_dispatch____offer(ErrorThreadState e, ErrorHandler h, Symbol code);
 
 static Symbol f8_dispatch____observe(ErrorThreadState e, ErrorHandler h);
@@ -342,9 +344,14 @@ static Symbol f8_dispatch____dispatch(f8_dispatch___ErrorRaise r){
   state -> dispatch_saved = outer;
   state -> dispatch_running = outer_running;
   f8_dispatch____leave();
-  if(_never_returns(r.code)) _floor(r.code, "non-returning error was not caught");
+  if(_never_returns(r.code)) f8_dispatch____terminate(state, r, "non-returning error was not caught");
   if(disposition == 285842436424) f8_dispatch____apply_policy(state, r);
   return disposition;
+}
+
+static void f8_dispatch____terminate(ErrorThreadState e, f8_dispatch___ErrorRaise r, const char * why){
+  if(e -> rendered[r.depth]) abort();
+  _floor(r.code, why);
 }
 
 static Symbol f8_dispatch____offer(ErrorThreadState e, ErrorHandler h, Symbol code){
@@ -406,7 +413,7 @@ Symbol Error_policy_get(Symbol code);
 
 static void f8_dispatch____apply_policy(ErrorThreadState e, f8_dispatch___ErrorRaise r){
   Symbol policy = Error_policy_get(r.code);
-  if(policy == 2260136) _floor(r.code, "unhandled and policy is abort");
+  if(policy == 2260136) f8_dispatch____terminate(e, r, "unhandled and policy is abort");
   if(policy == 25550){
     if(! e -> rendered[r.depth]) f8_dispatch____report(r.code);
     _truncate(r.raised_at);
@@ -443,7 +450,7 @@ void Error_policy_set(Symbol code, Symbol disposition){
   if(disposition != 2260136 && disposition != 25550 && disposition != 7475046632 && disposition != 619609226){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/error/policy.x",.function = "Error_policy_set",.line = 27};
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/error/policy.x",.function = "Error_policy_set",.line = 27,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(302607262917214), Symbol_var(disposition));
       __builtin_unreachable();
     }
@@ -452,7 +459,7 @@ void Error_policy_set(Symbol code, Symbol disposition){
   if(_never_returns(code) && disposition != 2260136){
     Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/error/policy.x",.function = "Error_policy_set",.line = 30};
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/error/policy.x",.function = "Error_policy_set",.line = 30,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(227594), Symbol_var(code), Symbol_var(302607262917214), Symbol_var(disposition));
       __builtin_unreachable();
     }
@@ -503,7 +510,7 @@ void * Error_policy_capture(void){
   capacity *= 2;
   f6_policy___ErrorPolicyCapture capture = malloc(sizeof(struct f6_policy___ErrorPolicyCapture) +(size_t) capacity * sizeof(Symbol));
   if(! capture){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/error/policy.x",.function = "Error_policy_capture",.line = 98};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/error/policy.x",.function = "Error_policy_capture",.line = 98,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_capture")), NULL))));
     __builtin_unreachable();
   }
@@ -637,7 +644,8 @@ static List f7_records____location(ErrorRegion * e, const X2CErrorSite * site){
   if(! site) return NULL;
   String file = f7_records____site_text(e, site -> file);
   String function = f7_records____site_text(e, site -> function);
-  List location = f7_records____field(e, Symbol_var(458361162716), String_var(function), NULL);
+  List location = site -> runtime ? f7_records____field(e, Symbol_var(40094681930), int_var(1), NULL) : NULL;
+  location = f7_records____field(e, Symbol_var(458361162716), String_var(function), location);
   location = f7_records____field(e, Symbol_var(805770), int_var(site -> line), location);
   return f7_records____field(e, Symbol_var(412426), String_var(file), location);
 }
@@ -1002,7 +1010,7 @@ ErrorHandler x2c_error_catch_site_push(void * target, ErrorCatchSite * site, Var
     {
       Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("catch")), NULL)));
       {
-        static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/error/handlers.x",.function = "x2c_error_catch_site_push",.line = 272};
+        static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/error/handlers.x",.function = "x2c_error_catch_site_push",.line = 272,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_3, 1358596898646632, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(3226), int_var(arm), Symbol_var(12939466), String_var(fence));
         __builtin_unreachable();
       }

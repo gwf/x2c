@@ -198,7 +198,7 @@ Source: `lib/error/policy.x:67`
 Returns the number of errors currently accumulated.
 Returns zero before `Error` initialization and after shutdown.
 
-Source: `lib/error/records.x:200`
+Source: `lib/error/records.x:202`
 
 <a id="Error.depth"></a>
 #### Error.depth
@@ -252,7 +252,7 @@ Source: `lib/error/runtime.x:47`
 Captures the current error-stack position.
 Pass the result to `Error.since` to inspect only later errors.
 
-Source: `lib/error/records.x:205`
+Source: `lib/error/records.x:207`
 
 <a id="Error.note_rendered"></a>
 #### Error.note_rendered
@@ -263,7 +263,7 @@ Marks the current nested error dispatch as already rendered by `Logger`.
 This suppresses only `Error`'s fallback report for a `<log>` policy.
 Calling outside dispatch has no effect.
 
-Source: `lib/error/dispatch.x:201`
+Source: `lib/error/dispatch.x:207`
 
 <a id="Error.policy_adopt"></a>
 #### Error.policy_adopt
@@ -436,13 +436,14 @@ Source: `lib/error/runtime.x:68`
 `List Error.since(int mark)`
 
 Returns the accumulated errors at and after `mark`, oldest first.
-Each entry has `code`, `detail`, and `location` fields. An invalid mark or
+Each entry has `code`, `detail`, and `location` fields; a location
+inside the runtime library also holds `(runtime 1)`. An invalid mark or
 an unavailable `Error` runtime returns `nil`. The snapshot enters the
 caller's outermost `Scope` and canonical pools and remains live until
 those owners are released. Failure to materialize it reaches the
 non-reentrant error floor.
 
-Source: `lib/error/records.x:214`
+Source: `lib/error/records.x:217`
 
 <a id="Error.snapshot"></a>
 #### Error.snapshot
@@ -457,7 +458,7 @@ outermost `Scope`, so nested caller brackets may be released safely.
 Invalid or identity-bearing values and failures while copying reach the raw
 error floor; they never re-enter handler dispatch.
 
-Source: `lib/error/records.x:268`
+Source: `lib/error/records.x:271`
 
 <a id="Error.trim"></a>
 #### Error.trim
@@ -540,7 +541,7 @@ live until that `Scope` is destroyed. An unavailable runtime or negative
 mark returns `nil`. `Null` owners or failures while copying reach the raw
 floor.
 
-Source: `lib/error/records.x:243`
+Source: `lib/error/records.x:246`
 
 <a id="Error.snapshot_in"></a>
 #### Error.snapshot_in
@@ -554,14 +555,13 @@ live until their actual owning pool is released. Wide scalar boxes enter
 live until that `Scope` is destroyed. `Null` owners, invalid or
 identity-bearing values, and failures while copying reach the raw floor.
 
-Source: `lib/error/records.x:283`
+Source: `lib/error/records.x:286`
 
 ## Public types
 
 | Type | Kind | Summary |
 | --- | --- | --- |
 | [`Error`](#Error) | struct | Names the structured-error runtime and its static operations. |
-| [`ErrorCatchSite`](#ErrorCatchSite) | struct | Holds the process-lifetime plans of one compiler-generated filtered catch. |
 | [`ErrorHandler`](#ErrorHandler) | struct | Identifies one `Error`-owned handler registration. |
 | [`ErrorHandlerFn`](#ErrorHandlerFn) | callback | Handles a borrowed oldest-first `List` of errors raised since registration. |
 
@@ -575,19 +575,6 @@ Programs do not construct `Error` values; automatic runtime initialization
 owns the per-thread handler, record, policy, and dispatch state.
 
 Source: `lib/error/error.x:26`
-
-<a id="ErrorCatchSite"></a>
-### ErrorCatchSite
-
-`typedef struct ErrorCatchSite { MatchCaptureSite *arms; int default_arm, arm_count, state, fenced_arm; } ErrorCatchSite`
-
-Holds the process-lifetime plans of one compiler-generated filtered catch.
-`arms` is a zero-initialized static array of `arm_count` `Match` sites and
-`default_arm` is the first unpatterned arm, or -1. `state` and `fenced_arm`
-belong to `Error`; a site must be static storage that the first
-registration binds to its patterns.
-
-Source: `lib/error/error.x:50`
 
 <a id="ErrorHandler"></a>
 ### ErrorHandler
@@ -614,6 +601,29 @@ reserved for compiler-generated catches. Any other result behaves as
 contents expire on return.
 
 Source: `lib/error/error.x:42`
+
+## Internal types
+
+These types connect runtime translation units and compiler-generated
+code. They are documented for source readers but are not supported as
+user API.
+
+| Type | Kind | Summary |
+| --- | --- | --- |
+| [`ErrorCatchSite`](#ErrorCatchSite) | struct | Holds the process-lifetime plans of one compiler-generated filtered catch. |
+
+<a id="ErrorCatchSite"></a>
+### ErrorCatchSite
+
+`typedef struct ErrorCatchSite { MatchCaptureSite *arms; int default_arm, arm_count, state, fenced_arm; } ErrorCatchSite`
+
+Holds the process-lifetime plans of one compiler-generated filtered catch.
+`arms` is a zero-initialized static array of `arm_count` `Match` sites and
+`default_arm` is the first unpatterned arm, or -1. `state` and `fenced_arm`
+belong to `Error`; a site must be static storage that the first
+registration binds to its patterns.
+
+Source: `lib/error/error.x:50`
 
 ## Design notes
 

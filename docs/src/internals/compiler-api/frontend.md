@@ -34,7 +34,7 @@ Loads process-owned collection support and the native modules `request`
 names before units, and selects those modules, in order, for its
 compile-time calls.
 
-Source: `src/frontend.x:532`
+Source: `src/frontend.x:534`
 
 <a id="Frontend.new"></a>
 #### Frontend.new
@@ -45,7 +45,7 @@ Borrows a configured request for sequential units. The request and this
 session must outlive its units. Initialize process support above any
 temporary command Context before creating a session inside that Context.
 
-Source: `src/frontend.x:543`
+Source: `src/frontend.x:545`
 
 <a id="Frontend.open"></a>
 #### Frontend.open
@@ -90,7 +90,7 @@ own definitions, once for the active build or translation target. Returns
 zero after reporting a failed preload, without publishing a partial
 session.
 
-Source: `src/frontend.x:479`
+Source: `src/frontend.x:481`
 
 <a id="Frontend.start"></a>
 #### Frontend.start
@@ -100,7 +100,7 @@ Source: `src/frontend.x:479`
 Tokenizes one input into a fresh unit with its own isolated `Context`.
 The caller must close the unit on either result.
 
-Source: `src/frontend.x:126`
+Source: `src/frontend.x:128`
 
 ### `ParsedUnit`
 
@@ -112,7 +112,7 @@ Source: `src/frontend.x:126`
 Releases the unit after its caller has inspected or exported its
 results.
 
-Source: `src/frontend.x:166`
+Source: `src/frontend.x:168`
 
 <a id="ParsedUnit.collect"></a>
 #### ParsedUnit.collect
@@ -122,7 +122,7 @@ Source: `src/frontend.x:166`
 Collects symbols and retains preprocessor outputs for adapter
 inspection.
 
-Source: `src/frontend.x:132`
+Source: `src/frontend.x:134`
 
 <a id="ParsedUnit.parse"></a>
 #### ParsedUnit.parse
@@ -132,7 +132,7 @@ Source: `src/frontend.x:132`
 Parses a collected unit, retaining both its AST and unsuccessful
 reports.
 
-Source: `src/frontend.x:155`
+Source: `src/frontend.x:157`
 
 ## Public types
 

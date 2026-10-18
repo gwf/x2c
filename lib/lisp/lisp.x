@@ -194,8 +194,8 @@ static macro Stmt $error.global.args() {
   raise %(bad-arg (operation "Lisp.set_global"));
 }
 
-static macro Stmt $error.global.frozen() {
-  raise %(bad-state (operation "Lisp.set_global") (reason "frozen"));
+static macro Stmt $error.global.frozen(Expr $operation) {
+  raise %(bad-state (operation ${$operation}) (reason "frozen"));
 }
 
 static macro Stmt $error.bind.args() {

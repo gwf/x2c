@@ -619,7 +619,6 @@ Source: `lib/iter.x:196`
 | --- | --- | --- |
 | [`Iter`](#Iter) | struct | Caller-owned handle to single-pass iterator state. |
 | [`IterNextFn`](#IterNextFn) | callback | Advances an `Iter`, reporting success separately from the element. |
-| [`UnzipColumn`](#UnzipColumn) | struct | Internal column selector embedded in `UnzipShared`. |
 | [`UnzipShared`](#UnzipShared) | struct | Caller-owned buffering shared by the two iterators from `Iter.unzip`. |
 
 <a id="Iter"></a>
@@ -647,17 +646,6 @@ exhaustion and must leave `out` unchanged.
 
 Source: `lib/iter.x:30`
 
-<a id="UnzipColumn"></a>
-### UnzipColumn
-
-`typedef struct { UnzipShared *shared, int column; } UnzipColumn`
-
-Internal column selector embedded in `UnzipShared`.
-Callers reserve it as part of that shared record and do not initialize or
-use it independently.
-
-Source: `lib/iter.x:54`
-
 <a id="UnzipShared"></a>
 ### UnzipShared
 
@@ -670,6 +658,27 @@ that `Scope` must remain live through all column pulls and provides
 cleanup.
 
 Source: `lib/iter.x:48`
+
+## Internal types
+
+These types connect runtime translation units and compiler-generated
+code. They are documented for source readers but are not supported as
+user API.
+
+| Type | Kind | Summary |
+| --- | --- | --- |
+| [`UnzipColumn`](#UnzipColumn) | struct | Internal column selector embedded in `UnzipShared`. |
+
+<a id="UnzipColumn"></a>
+### UnzipColumn
+
+`typedef struct { UnzipShared *shared, int column; } UnzipColumn`
+
+Internal column selector embedded in `UnzipShared`.
+Callers reserve it as part of that shared record and do not initialize or
+use it independently.
+
+Source: `lib/iter.x:54`
 
 ## Design notes
 

@@ -166,9 +166,9 @@ Public functions:
 
 `Compiler.report_meta_error`, `Compiler.meta_helper_call`,
 `Compiler.loaded_helper_call`, `MetaHelper.new`,
-`MetaHelper.retain_executable`, `Compiler.use_meta_helper`, `MetaHelper.check`,
-`Compiler.begin_meta_unit`, `Compiler.stop_meta_helper`, `MetaHelper.restart`,
-`MetaHelper.close`
+`MetaHelper.retain_executable`, `Compiler.use_meta_helper`,
+`MetaHelper.failure`, `Compiler.begin_meta_unit`, `Compiler.stop_meta_helper`,
+`MetaHelper.restart`, `MetaHelper.close`
 
 ### [src/meta-project.x](../src/meta-project.x)
 
@@ -359,11 +359,12 @@ Public functions:
 `Compiler.included_compile_time_effects`, `Compiler.install_included_effects`,
 `Compiler.include_typedef_names`, `Compiler.include_type_dependencies`,
 `Compiler.include_function_declarations`,
-`Compiler.runtime_function_declarations`, `Compiler.publishes_typedef`,
-`Compiler.publishes_type_family`, `Compiler.callable_symbols`,
-`Compiler.inline_type_dependencies`, `Compiler.publish_inline_types`,
-`Compiler.record_generated_symbol`, `Compiler.record_conformance_rows`,
-`Compiler.declared_adoptions`, `Compiler.linked_meta_provider_current`,
+`Compiler.runtime_function_declarations`, `Compiler.collected_names`,
+`Compiler.publishes_typedef`, `Compiler.publishes_type_family`,
+`Compiler.callable_symbols`, `Compiler.inline_type_dependencies`,
+`Compiler.publish_inline_types`, `Compiler.record_generated_symbol`,
+`Compiler.record_conformance_rows`, `Compiler.declared_adoptions`,
+`Compiler.linked_meta_provider_current`,
 `Compiler.linked_meta_definitions_current`, `Compiler.complete_meta_hashes`,
 `Compiler.meta_provider_hashes`, `Compiler.add_linked_meta_provider_hashes`,
 `Compiler.name_meta_provider_bindings`, `Compiler.loaded_provider`,
@@ -637,12 +638,13 @@ Public functions:
 `Compiler.use_meta_toolchain`, `Compiler.meta_cc`, `Compiler.meta_cc_identity`,
 `Compiler.meta_cc_run`, `Compiler.prepare_loaded_main`,
 `Compiler.prepare_loaded_functions`, `Compiler.stage_meta_in_process`,
-`Compiler.groups_meta`, `Compiler.group_meta_function`,
-`Compiler.meta_reaches_compile_time`, `Compiler.finish_meta_functions`,
-`Compiler.public_native_function`, `Compiler.meta_call_missing`,
-`Compiler.refuse_meta_call`, `Compiler.refuse_record_meta_call`,
-`Compiler.use_meta_build_directory`, `Compiler.write_meta_build`,
-`Compiler.bind_meta_group`, `Compiler.stage_session_function`
+`Compiler.groups_meta`, `Compiler.meta_calls_wait`,
+`Compiler.group_meta_function`, `Compiler.meta_reaches_compile_time`,
+`Compiler.finish_meta_functions`, `Compiler.public_native_function`,
+`Compiler.meta_call_missing`, `Compiler.refuse_meta_call`,
+`Compiler.refuse_record_meta_call`, `Compiler.use_meta_build_directory`,
+`Compiler.write_meta_build`, `Compiler.bind_meta_group`,
+`Compiler.stage_session_function`
 
 ### [src/meta-native/meta-native.x](../src/meta-native/meta-native.x)
 
@@ -777,7 +779,7 @@ Public functions:
 `Sym.file_statics`, `Sym.mark_static`, `Sym.visible_symbols`,
 `Sym.define_macro`, `Sym.has_local_macros`, `Sym.lookup_macro`,
 `Compiler.macro_definition_locals`, `Compiler.macro_template_local`, `Sym.set`,
-`Sym.define`, `Sym.seed_var_tags`, `Sym.define_global`,
+`Sym.define`, `Sym.seed_var_tags`, `Sym.define_global`, `Sym.undefine_global`,
 `Sym.declare_enumerator`, `Sym.introduced`, `Sym.introduce`,
 `Sym.current_binding`, `Sym.enumerator_owner`, `Sym.binding_is_local`,
 `Sym.binding_is_local_before`, `Compiler.semantic_binding_facts`,
@@ -1712,13 +1714,14 @@ Public functions:
 `Lisp.set_interrupted`, `Lisp.eval`, `Lisp.apply`, `Lisp.eval_string`,
 `Lisp.eval_file`, `lisp_source_function`, `Lisp.kernel`, `Lisp.new`,
 `Lisp.destroy`, `Lisp.adopt`, `Lisp.freeze`, `Lisp.try_get`, `Lisp.set_global`,
-`Lisp.bind`, `Lisp.active`, `Lisp.storage`, `Lisp.automatic_storage`,
-`Lisp.result_storage`, `Lisp.read`, `lisp_truth`, `lisp_atom`, `lisp_car`,
-`lisp_cdr`, `lisp_eq`, `lisp_pair`, `lisp_list`, `lisp_number`, `lisp_string`,
-`lisp_symbol`, `lisp_procedure`, `lisp_type`, `lisp_compare`, `lisp_add`,
-`lisp_plus`, `lisp_minus`, `lisp_times`, `lisp_divide`, `lisp_eq_chain`,
-`lisp_lt_chain`, `lisp_le_chain`, `lisp_gt_chain`, `lisp_ge_chain`, `lisp_str`,
-`lisp_repr`, `lisp_string_append`, `lisp_substring`, `lisp_string_downcase`,
+`Lisp.remove_global`, `Lisp.bind`, `Lisp.active`, `Lisp.storage`,
+`Lisp.automatic_storage`, `Lisp.result_storage`, `Lisp.read`, `lisp_truth`,
+`lisp_atom`, `lisp_car`, `lisp_cdr`, `lisp_eq`, `lisp_pair`, `lisp_list`,
+`lisp_number`, `lisp_string`, `lisp_symbol`, `lisp_procedure`, `lisp_type`,
+`lisp_compare`, `lisp_add`, `lisp_plus`, `lisp_minus`, `lisp_times`,
+`lisp_divide`, `lisp_eq_chain`, `lisp_lt_chain`, `lisp_le_chain`,
+`lisp_gt_chain`, `lisp_ge_chain`, `lisp_str`, `lisp_repr`,
+`lisp_string_append`, `lisp_substring`, `lisp_string_downcase`,
 `lisp_string_strip`, `lisp_string_lstrip`, `lisp_string_rstrip`,
 `lisp_match_replace`, `lisp_read_file`, `lisp_write_file`
 

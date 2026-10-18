@@ -323,9 +323,30 @@ Source: `lib/macrovalue/patterns.x:109`
 
 | Type | Kind | Summary |
 | --- | --- | --- |
+| [`MacroMatcher`](#MacroMatcher) | struct | Retains a macro and hole patterns for repeated recognition. |
+
+<a id="MacroMatcher"></a>
+### MacroMatcher
+
+`typedef struct MacroMatcher { Macro shape; List holes, pattern; } MacroMatcher`
+
+Retains a macro and hole patterns for repeated recognition. A pattern
+independent of subject bindings is derived once; contextual references
+are resolved against each subject. The caller keeps the source values
+alive as long as this record. Match plans use the active Match cache.
+
+Source: `lib/macrovalue/macrovalue.x:108`
+
+## Internal types
+
+These types connect runtime translation units and compiler-generated
+code. They are documented for source readers but are not supported as
+user API.
+
+| Type | Kind | Summary |
+| --- | --- | --- |
 | [`MacroCaseSite`](#MacroCaseSite) | struct | Holds one macro-valued `case` site's prepared recognition for the process: the plan Match keeps, the slots of the macro's fixed locals, and where each binder reads its capture. |
 | [`MacroFixedSlots`](#MacroFixedSlots) | struct | Records fixed-local slots for distinct-identity checks and Name slots for member-spelling comparisons during recognition. |
-| [`MacroMatcher`](#MacroMatcher) | struct | Retains a macro and hole patterns for repeated recognition. |
 | [`MacroPublishing`](#MacroPublishing) | struct | Records where each of a `case`'s binders reads its capture: the slot of its internal binder in the pattern that captured, and its own slot in the `case`, which need not share the parameters' order. |
 
 <a id="MacroCaseSite"></a>
@@ -349,18 +370,6 @@ Records fixed-local slots for distinct-identity checks and Name slots
 for member-spelling comparisons during recognition.
 
 Source: `lib/macrovalue/macrovalue.x:20`
-
-<a id="MacroMatcher"></a>
-### MacroMatcher
-
-`typedef struct MacroMatcher { Macro shape; List holes, pattern; } MacroMatcher`
-
-Retains a macro and hole patterns for repeated recognition. A pattern
-independent of subject bindings is derived once; contextual references
-are resolved against each subject. The caller keeps the source values
-alive as long as this record. Match plans use the active Match cache.
-
-Source: `lib/macrovalue/macrovalue.x:108`
 
 <a id="MacroPublishing"></a>
 ### MacroPublishing

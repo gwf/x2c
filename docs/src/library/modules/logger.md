@@ -25,7 +25,7 @@ owns a private `Scope` for sink state. An invalid level returns NULL.
 **Raises:** `<alloc-fail>` when the `Logger` or its private `Scope` cannot be
 allocated.
 
-Source: `lib/logger.x:772`
+Source: `lib/logger.x:807`
 
 ## Advanced and interop API
 
@@ -73,7 +73,7 @@ Source: `lib/logger.x:772`
 Logs borrowed `fields` globally at debug level under `category`.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:757`
+Source: `lib/logger.x:792`
 
 #### log_error
 
@@ -82,7 +82,7 @@ Source: `lib/logger.x:757`
 Logs borrowed `fields` globally at error level under `category`.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:760`
+Source: `lib/logger.x:795`
 
 #### log_event
 
@@ -101,7 +101,7 @@ Source: `lib/logger.x:696`
 Logs borrowed `fields` globally at fatal level under `category`.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:761`
+Source: `lib/logger.x:796`
 
 #### log_get_global_logger
 
@@ -118,7 +118,7 @@ Source: `lib/logger.x:689`
 Logs borrowed `fields` globally at info level under `category`.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:758`
+Source: `lib/logger.x:793`
 
 #### log_set_global_logger
 
@@ -146,7 +146,7 @@ Source: `lib/logger.x:197`
 Logs borrowed `fields` globally at trace level under `category`.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:756`
+Source: `lib/logger.x:791`
 
 #### log_warn
 
@@ -155,7 +155,7 @@ Source: `lib/logger.x:756`
 Logs borrowed `fields` globally at warn level under `category`.
 Delivery and failure behavior follow `log_event`.
 
-Source: `lib/logger.x:759`
+Source: `lib/logger.x:794`
 
 ### `Logger`
 
@@ -244,7 +244,7 @@ Source: `lib/logger.x:281`
 Logs borrowed `fields` synchronously at debug level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:740`
+Source: `lib/logger.x:775`
 
 <a id="Logger.error"></a>
 #### Logger.error
@@ -254,7 +254,7 @@ Source: `lib/logger.x:740`
 Logs borrowed `fields` synchronously at error level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:743`
+Source: `lib/logger.x:778`
 
 <a id="Logger.fatal"></a>
 #### Logger.fatal
@@ -264,7 +264,7 @@ Source: `lib/logger.x:743`
 Logs borrowed `fields` synchronously at fatal level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:744`
+Source: `lib/logger.x:779`
 
 <a id="Logger.flush"></a>
 #### Logger.flush
@@ -292,7 +292,7 @@ nothing.
 Either failure leaves the `Logger` and all sinks live; earlier flushers may
 already have run.
 
-Source: `lib/logger.x:790`
+Source: `lib/logger.x:825`
 
 <a id="Logger.info"></a>
 #### Logger.info
@@ -302,7 +302,7 @@ Source: `lib/logger.x:790`
 Logs borrowed `fields` synchronously at info level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:741`
+Source: `lib/logger.x:776`
 
 <a id="Logger.initialize"></a>
 #### Logger.initialize
@@ -317,7 +317,7 @@ shuts down.
 
 **Raises:** any cause from `Error` or `Logger` initialization.
 
-Source: `lib/logger.x:810`
+Source: `lib/logger.x:845`
 
 <a id="Logger.level_priority"></a>
 #### Logger.level_priority
@@ -406,7 +406,7 @@ a no-op.
 event delivery or a sink flusher. The failure may interrupt the remaining
 cleanup.
 
-Source: `lib/logger.x:831`
+Source: `lib/logger.x:866`
 
 <a id="Logger.sink_count"></a>
 #### Logger.sink_count
@@ -425,7 +425,7 @@ Source: `lib/logger.x:295`
 Logs borrowed `fields` synchronously at trace level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:739`
+Source: `lib/logger.x:774`
 
 <a id="Logger.warn"></a>
 #### Logger.warn
@@ -435,7 +435,7 @@ Source: `lib/logger.x:739`
 Logs borrowed `fields` synchronously at warn level under `category`.
 Delivery and failure behavior follow `Logger.log`.
 
-Source: `lib/logger.x:742`
+Source: `lib/logger.x:777`
 
 ## Runtime-internal callables
 
@@ -456,13 +456,17 @@ for source readers but are not supported as user API.
 Offers the newest `Error` to the current global `Logger`.
 A well-formed entry with `<abort>` or `<log>` policy is rendered as an
 `<err-report>` event; missing, malformed, `<collect>`, and `<ignore>` input
-produces no event. The borrowed input is never consumed, `data` is ignored,
-and the handler always returns `<declined>`, leaving transfer to `Error` or
-another handler.
+produces no event. An `<abort>` entry reaching the default `Logger` with
+only its stderr sink is instead reported as one line, `x2c: uncaught
+<code> in function (file:line): key value, ...`, omitting a location
+inside the runtime library; setting `X2C_DEBUG` keeps the event. The
+borrowed input is never consumed, `data` is ignored, and the handler
+always returns `<declined>`, leaving transfer to `Error` or another
+handler.
 
 **Raises:** any cause from `Logger` delivery.
 
-Source: `lib/logger.x:709`
+Source: `lib/logger.x:713`
 
 ## Public types
 

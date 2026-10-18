@@ -183,9 +183,24 @@ unchanged. It also rejects `<log>`, `<collect>`, or `<ignore>` for every
 non-returning cause, leaving those policies at `<abort>`. Unknown `Error` codes
 remain legal and default to `<abort>`.
 
-The default `Logger` registers an observing `Error` handler. It renders
-policy-selected `<abort>` and `<log>` entries as structured log events, then
-declines. `Error` then transfers control or consumes the errors as required.
+The default `Logger` registers an observing `Error` handler. An uncaught
+`Error`, one whose policy is `<abort>`, is reported as one line on standard
+error, and the process then aborts:
+
+```text
+x2c: uncaught <bad-state> in main (config.x:12): operation load-config, path x.toml
+```
+
+The line names the cause, the raising function and source line, and the
+detail pairs. An `Error` raised inside the runtime library shows its detail
+without the runtime's own source location; the `operation` detail names the
+call. A `<log>` entry is rendered as a structured `<err-report>` log event.
+Setting `X2C_DEBUG` in the environment renders uncaught errors as that event
+too, with the complete detail and location. A program that installs its own
+global `Logger`, or adds a sink to the default one, receives the structured
+event for both policies, so a configured log never loses information. After
+rendering, the handler declines, and `Error` transfers control or consumes
+the errors as required.
 
 ## `finally` and `defer`
 

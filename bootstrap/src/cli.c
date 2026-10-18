@@ -1106,7 +1106,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _156 = String_new("shared-library");
   _157 = String_new("shared-library is not supported by this compiler");
   _158 = String_new("MAKELEVEL");
-  _159 = String_new("x2c 0.15.0");
+  _159 = String_new("x2c 0.15.1");
   _160 = String_new("input is not a regular file: ");
   _x2c_gensym_static_initialize_0();
   _x2c_gensym_static_initialize_1();

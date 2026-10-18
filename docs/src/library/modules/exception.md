@@ -156,8 +156,6 @@ Source: `lib/exception.x:158`
 | Type | Kind | Summary |
 | --- | --- | --- |
 | [`ExceptionFrame`](#ExceptionFrame) | struct | Holds one caller-owned non-local `Error` transfer frame. |
-| [`X2CCleanup`](#X2CCleanup) | struct | Holds one caller-owned cleanup registration. |
-| [`X2CCleanupFn`](#X2CCleanupFn) | callback | Performs one compiler-generated cleanup using its borrowed environment. |
 
 <a id="ExceptionFrame"></a>
 ### ExceptionFrame
@@ -171,6 +169,17 @@ fields capture cleanup and `Error` restore points and are runtime-managed
 while the frame is active.
 
 Source: `lib/exception.x:39`
+
+## Internal types
+
+These types connect runtime translation units and compiler-generated
+code. They are documented for source readers but are not supported as
+user API.
+
+| Type | Kind | Summary |
+| --- | --- | --- |
+| [`X2CCleanup`](#X2CCleanup) | struct | Holds one caller-owned cleanup registration. |
+| [`X2CCleanupFn`](#X2CCleanupFn) | callback | Performs one compiler-generated cleanup using its borrowed environment. |
 
 <a id="X2CCleanup"></a>
 ### X2CCleanup

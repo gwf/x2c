@@ -636,7 +636,7 @@ int datum_unframe(String input, size_t * used, Var * value){
   unsigned cursor = 0;
   (* value) =((void) 0, Void);
   if(! datum_read(frame, &(cursor), &((* value)))){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/datum.x",.function = "datum_unframe",.line = 319};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/datum.x",.function = "datum_unframe",.line = 319,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 28682226919752, 1, Symbol_var(13765450), String_var(frame));
     __builtin_unreachable();
   }

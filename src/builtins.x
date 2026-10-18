@@ -44,12 +44,30 @@ static List _auto_expand(List value) {
     _auto_fail(
       <parse>,
       "managed initializer requires a complete block-local initializer", %());
+  _auto_reject_managed(value);
   match (local) case %(declare ? (bindings (bind ?binding ?))): {
+    Compiler c = Compiler.expanding();
+    c.sym.put(c.semantic_binding_facts(), %(managed $binding), 1);
     Macro release = $auto_release;
     x2c_place(
       %(after-statement), x2c_template_call(release, %($local $binding)));
   }
   return value;
+}
+
+/* A local that an earlier `$auto` manages is released once at block exit;
+   managing it again would release it twice. */
+static void _auto_reject_managed(List value) {
+  match (value) {
+    case %(expr ? ${$grouped(?inner)}): _auto_reject_managed(inner);
+    case %(expr ? ${$source_identifier_content(%(?binding))}): {
+      Compiler c = Compiler.expanding();
+      if (%(managed $binding) in c.semantic_binding_facts())
+        _auto_fail(
+          <parse>, "managed initializer cannot manage an already managed local",
+          %("local: ${Ast.binding_spelling(binding)}"));
+    }
+  }
 }
 
 /* A managed declaration has automatic storage and a type that participates

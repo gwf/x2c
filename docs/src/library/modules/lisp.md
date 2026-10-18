@@ -159,7 +159,7 @@ noncapturing lambda converts to a shared handle that lives for the
 program; the session only borrows it. Values inside the `Func`,
 including its signature graph, retain their existing owners.
 
-Source: `lib/lisp/sessions.x:226`
+Source: `lib/lisp/sessions.x:241`
 
 <a id="Lisp.call_budget"></a>
 #### Lisp.call_budget
@@ -303,6 +303,7 @@ Source: `lib/lisp/sessions.x:189`
 | [`Lisp.cleanup`](#Lisp.cleanup) | Ends the owned lifetime when a managed local leaves its block. |
 | [`Lisp.destroy`](#Lisp.destroy) | Releases a `Lisp` session and invalidates all session-owned state. |
 | [`Lisp.read`](#Lisp.read) | Reads one Lisp form and returns `<value>` or `<eof>`. |
+| [`Lisp.remove_global`](#Lisp.remove_global) | Removes this session's global binding for `name`, if present. |
 | [`Lisp.set_global`](#Lisp.set_global) | Binds `name` to `value` in the embedded Lisp global environment. |
 
 ### `Lisp`
@@ -351,6 +352,22 @@ reader syntax, or `<alloc-fail>`, `<size-limit>`, or `<bad-enc>` while
 tokenizing, constructing, interning, or boxing the form.
 
 Source: `lib/lisp/reader.x:173`
+
+<a id="Lisp.remove_global"></a>
+#### Lisp.remove_global
+
+`void Lisp.remove_global(Lisp lisp, String name)`
+
+Removes this session's global binding for `name`, if present. An
+ancestor's binding of the same name becomes visible again. Code that
+already resolved the binding keeps its value; value referents keep their
+owners.
+
+**Raises:** `<bad-arg>` for a null session or name, `<bad-state>` for a
+frozen session, or `<alloc-fail>` or `<bad-enc>` while canonicalizing
+the name.
+
+Source: `lib/lisp/sessions.x:224`
 
 <a id="Lisp.set_global"></a>
 #### Lisp.set_global
@@ -668,7 +685,7 @@ Source: `lib/lisp/primitives.x:264`
 
 Borrows the session executing the current native Lisp callback.
 
-Source: `lib/lisp/sessions.x:235`
+Source: `lib/lisp/sessions.x:250`
 
 <a id="Lisp.automatic_storage"></a>
 #### Lisp.automatic_storage
@@ -677,7 +694,7 @@ Source: `lib/lisp/sessions.x:235`
 
 Borrows the current lowered source activation's automatic storage.
 
-Source: `lib/lisp/sessions.x:239`
+Source: `lib/lisp/sessions.x:254`
 
 <a id="Lisp.result_storage"></a>
 #### Lisp.result_storage
@@ -686,7 +703,7 @@ Source: `lib/lisp/sessions.x:239`
 
 Borrows the caller's storage for a lowered record result.
 
-Source: `lib/lisp/sessions.x:242`
+Source: `lib/lisp/sessions.x:257`
 
 <a id="Lisp.storage"></a>
 #### Lisp.storage
@@ -695,7 +712,7 @@ Source: `lib/lisp/sessions.x:242`
 
 Borrows the storage owner for callback state retained by this session.
 
-Source: `lib/lisp/sessions.x:237`
+Source: `lib/lisp/sessions.x:252`
 
 ## Public types
 

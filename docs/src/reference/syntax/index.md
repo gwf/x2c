@@ -54,7 +54,6 @@ change.
 | Compiler fixtures | `unittest/compiler-fixtures/` | Token dumps, AST/translation outputs, diagnostics, successful and rejected programs | Expectations cover selected cases, not all derivations |
 | Editor grammars | `etc/vsc-extension/syntaxes/{x2c,x2c-lisp}.tmLanguage.json` | TextMate regular expressions and highlighting contexts | Approximate; cannot decide acceptance or reproduce binding |
 | Editor grammar tests | `etc/vsc-extension/test/current-grammar.test.x` | Expected highlighting scopes | Contains syntax-shaped samples that are not accepted programs; not an acceptance corpus |
-| Historical designs | `plans/archive/indentation-syntax.md`, `plans/archive/macro-function-style-syntax.md` | Design rationale and earlier syntax decisions | Historical; current implementation and book take precedence |
 | Bootstrap copies | `bootstrap/lib/scan.{c,h}`, `bootstrap/lib/tokenizer.{c,h}` | Generated C implementation of lexical rules | Derived copies, not independent owners |
 | Executable examples | `examples/manifest.txt` and its programs | Working uses of the language with recorded checks | Demonstrations, not exhaustive syntax rules |
 

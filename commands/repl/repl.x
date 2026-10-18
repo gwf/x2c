@@ -299,12 +299,20 @@ static int _load_source(
     foreach (Var entry, result.diagnostics)
       session.compiler.print_diagnostic(entry);
   if (result.status == <loaded> || result.status == <reloaded>) {
+    foreach (List row, result.removed)
+      printf("removed %s from %s\n", row.cadr().repr(), row.car());
     printf("%s %s\n", result.status.str(), result.value.repr());
     puts("reset all loaded native state");
     return 1;
   }
   if (result.message) fprintf(stderr, "load failed: %s\n", result.message);
   return 0;
+}
+
+/* A session failure carries its own reason; another cause prints whole. */
+static String _cause_text(List cause) {
+  match (cause) case %(repl (reason ?(String why)) *): return why;
+  return cause.repr();
 }
 
 /** Runs the experimental REPL on stdin. Piped input continues after errors
@@ -347,6 +355,7 @@ int repl_run(CliRequest request, ReplOptions options) {
     else {
       line = Stdin.readline();
       if (!line) break;
+      line = line.remove_suffix("\n");
     }
     String command = line.strip(NULL);
     if (interactive && command.startswith(":")) input.remember(command);
@@ -403,7 +412,7 @@ int repl_run(CliRequest request, ReplOptions options) {
         break;
       case <failed>:
         failed = 1;
-        fprintf(stderr, "evaluation failed: %s\n", result.cause.repr());
+        fprintf(stderr, "evaluation failed: %s\n", _cause_text(result.cause));
         break;
     }
     if (result.status != <incomplete>) {

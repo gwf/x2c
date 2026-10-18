@@ -141,6 +141,175 @@ assert "function type changed: fresh_name" in err, err
 assert "the body exited with status 8" in err, err
 PY
 
+# Failures name the loaded file or function, not the helper that runs it.
+cat >"$tmp/raise.x" <<'EOF'
+int bad_raise(void) { raise 1; return 0; }
+EOF
+cat >"$tmp/undeclared.x" <<'EOF'
+int bad_c(void) {
+  return undeclared_c_name;
+}
+EOF
+cat >"$tmp/calls.x" <<'EOF'
+#include <stdlib.h>
+typedef struct Pair { int x, y; } Pair;
+void stop(void) { abort(); }
+Pair make_pair(void) { Pair p = {1, 2}; return p; }
+int pair_x(Pair p) { return p.x; }
+int main(int argc, char **argv) { return argc; }
+EOF
+printf '%s\n' ":load \"$tmp/raise.x\"" ":load \"$tmp/undeclared.x\"" \
+  ":load \"$tmp/calls.x\"" 'stop();' 'make_pair();' 'Pair p = {1, 2};' \
+  'pair_x(p);' 'main();' 'int none(void) { return 1; }' 'none(1);' \
+  >"$tmp/input"
+if builds/0/x2c repl <"$tmp/input" >"$tmp/out" 2>"$tmp/raw"; then
+  echo "failed loads and calls unexpectedly succeeded" >&2
+  exit 1
+fi
+real=$(cd "$tmp" && pwd -P)
+sed -e "s|$real/|TMP/|g" -e "s|$tmp/|TMP/|g" "$tmp/raw" >"$tmp/err"
+grep -qx 'TMP/raise.x:1:29: parse: raise requires a %() payload literal' \
+  "$tmp/err"
+grep -qx '  int bad_raise(void) { raise 1; return 0; }' "$tmp/err"
+grep -qx 'load failed: TMP/raise.x: x2c reported errors' "$tmp/err"
+grep -q '^TMP/undeclared.x:2:[0-9]*: error: ' "$tmp/err"
+grep -q 'return undeclared_c_name;' "$tmp/err"
+grep -qx 'load failed: TMP/undeclared.x: the C compiler reported errors' \
+  "$tmp/err"
+grep -q '^evaluation failed: stop failed: the body crashed' "$tmp/err"
+boundary='failed: record values cannot cross the helper boundary'
+grep -qx "evaluation failed: make_pair $boundary" "$tmp/err"
+grep -qx "evaluation failed: pair_x $boundary" "$tmp/err"
+grep -qx 'evaluation failed: main takes 1 argument, not 0: int main(Array)' \
+  "$tmp/err"
+grep -qx 'evaluation failed: none takes 0 arguments, not 1: int none(void)' \
+  "$tmp/err"
+test "$(grep -c '^evaluation failed: ' "$tmp/err")" -eq 5
+if grep -e '<repl>' -e 'macro:' -e 'gensym' -e 'group-' -e 'malformed' \
+     "$tmp/err"; then
+  exit 1
+fi
+
+# Loaded code boxes its classes, expands its own meta functions, and calls
+# protocol base defaults as an ordinary build does.
+cat >"$tmp/program.x" <<'EOF'
+#include "meta.x"
+class Point { int x; int y; };
+int boxed_x(void) { Point p = Point.new(1, 2); Var b = p; Point c = b; return c.x; }
+meta static List doubled(List value) => $!( $value * 2 );
+macro Expression $double(Expr $value) => $doubled($value);
+int expanded(void) { return $double(21); }
+class Meters { long value; };
+class Cm { long value; };
+protocol Meters(T) { long T.magnitude(T); }
+long Meters.magnitude(Meters value) => value.value;
+Meters Cm.meters(Cm value) => Meters.new(value.value / 100);
+static protocol Meters(Cm);
+long cm_magnitude(void) { return Cm.new(1800).magnitude(); }
+EOF
+printf '%s\n' ":load \"$tmp/program.x\"" 'boxed_x();' 'expanded();' \
+  'cm_magnitude();' >"$tmp/input"
+builds/0/x2c repl <"$tmp/input" >"$tmp/out" 2>"$tmp/err"
+grep '^=> ' "$tmp/out" >"$tmp/values"
+printf '=> 1\n=> 42\n=> 18l\n' >"$tmp/values-expected"
+cmp "$tmp/values-expected" "$tmp/values"
+test ! -s "$tmp/err"
+
+# A newer main replaces the file that defined main, in either form. Its
+# functions, globals, and types leave the session unless prompt code refers
+# to them.
+cat >"$tmp/first-main.x" <<'EOF'
+int first_helper(int n) { return n + 1; }
+int main(int argc, char **argv) { return argc; }
+EOF
+cat >"$tmp/second-main.x" <<'EOF'
+int main(void) { return 7; }
+EOF
+cat >"$tmp/typed-main.x" <<'EOF'
+typedef struct Pair { int x, y; } Pair;
+int typed_count = 3;
+int pair_sum(Pair p) { return p.x + p.y; }
+int main(void) { return 8; }
+EOF
+printf '%s\n' ":load \"$tmp/first-main.x\"" 'main(["p"]);' \
+  ":load \"$tmp/second-main.x\"" 'main();' 'first_helper(1);' ':symbols' \
+  ":load \"$tmp/typed-main.x\"" 'typed_count;' \
+  ":load \"$tmp/second-main.x\"" ':symbols' 'typed_count;' \
+  ":load \"$tmp/typed-main.x\"" >"$tmp/input"
+builds/0/x2c repl <"$tmp/input" >"$tmp/raw" 2>"$tmp/raw-err" || true
+sed -e "s|$real/|TMP/|g" -e "s|$tmp/|TMP/|g" "$tmp/raw" >"$tmp/out"
+sed -e "s|$real/|TMP/|g" -e "s|$tmp/|TMP/|g" "$tmp/raw-err" >"$tmp/err"
+cat >"$tmp/expected" <<'EOF'
+loaded ("main" "first_helper")
+reset all loaded native state
+=> 1
+removed ("first_helper" "main") from TMP/first-main.x
+loaded ("main")
+reset all loaded native state
+=> 7
+%((native "main"))
+removed ("main") from TMP/second-main.x
+loaded ("main" "pair_sum" "typed_count")
+reset all loaded native state
+=> 3
+removed ("Pair" "main" "pair_sum" "typed_count") from TMP/typed-main.x
+loaded ("main")
+reset all loaded native state
+%((native "main"))
+removed ("main") from TMP/second-main.x
+loaded ("main" "pair_sum" "typed_count")
+reset all loaded native state
+EOF
+cmp "$tmp/expected" "$tmp/out"
+printf '%s\n' 'rejected: unresolved identifier: first_helper' \
+  'rejected: unresolved identifier: typed_count' >"$tmp/expected"
+cmp "$tmp/expected" "$tmp/err"
+
+# Each kind of prompt referrer keeps the earlier main file.
+for referrer in 'int through(int n) { return first_helper(n); }' \
+    'Func saved = first_helper;' 'Pair kept = {1, 2};' \
+    'int twice(void) { return typed_count * 2; }' \
+    'int sum(Pair p) { return p.x + p.y; }' \
+    'typedef struct Holder { Pair inner; } Holder;'; do
+  case $referrer in
+    *first_helper*) first=first-main.x ;;
+    *) first=typed-main.x ;;
+  esac
+  printf '%s\n' ":load \"$tmp/$first\"" "$referrer" \
+    ":load \"$tmp/second-main.x\"" >"$tmp/input"
+  builds/0/x2c repl <"$tmp/input" >/dev/null 2>"$tmp/err" || true
+  echo "$referrer" >>"$tmp/referrers"
+  grep '^load failed: ' "$tmp/err" >>"$tmp/referrers"
+done
+cat >"$tmp/expected" <<'EOF'
+int through(int n) { return first_helper(n); }
+load failed: first_helper is called by prompt function through
+Func saved = first_helper;
+load failed: first_helper is saved in prompt variable saved
+Pair kept = {1, 2};
+load failed: Pair is used by prompt variable kept
+int twice(void) { return typed_count * 2; }
+load failed: typed_count is used by prompt function twice
+int sum(Pair p) { return p.x + p.y; }
+load failed: Pair is used by prompt function sum
+typedef struct Holder { Pair inner; } Holder;
+load failed: Pair is used by prompt type Holder
+EOF
+cmp "$tmp/expected" "$tmp/referrers"
+
+# Package imports use the same package directories as `x2c run`.
+make -C examples/packages/greet build >"$tmp/package" 2>&1 ||
+  { cat "$tmp/package" >&2; exit 1; }
+printf '%s\n' ':load "examples/power/greet-client.x"' 'main();' |
+  builds/0/x2c repl --package-dir examples/packages >"$tmp/out" 2>"$tmp/err"
+{
+  printf 'loaded ("main")\nreset all loaded native state\n'
+  cat examples/expected/import-greet.stdout
+  printf '=> 0\n'
+} >"$tmp/expected"
+cmp "$tmp/expected" "$tmp/out"
+test ! -s "$tmp/err"
+
 python3 commands/repl/tests/reload.py "$tmp"
 
 # Every retained executable directory belongs to a closed session.

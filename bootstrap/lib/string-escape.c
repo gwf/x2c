@@ -123,7 +123,7 @@ String String_unescape(String str){
   if(_unescape_into(string, str) < 0){
     String_free(string);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/string-escape.x",.function = "String_unescape",.line = 129};
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/string-escape.x",.function = "String_unescape",.line = 129,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.unescape")), NULL))));
       __builtin_unreachable();
     }

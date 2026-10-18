@@ -602,11 +602,35 @@ Source: `lib/match/traversal.x:45`
 
 | Type | Kind | Summary |
 | --- | --- | --- |
+| [`MatchPlan`](#MatchPlan) | struct | Holds one reusable immutable compiled `Match` pattern. |
+
+<a id="MatchPlan"></a>
+### MatchPlan
+
+`typedef struct MatchPlan { MachineProgram program; MatchCaptureLayout layout; Symbol status, const char *reason; int key_count, key_bits; MatchKey keys[MATCH_KEY_MAX]; } *MatchPlan`
+
+Holds one reusable immutable compiled `Match` pattern.
+A prepared plan owns `program` and `layout`; malformed and ineligible plans
+have no executable program and retain their categorized `status` and
+static `reason`. A prepared plan whose pattern fixes how a matching input
+begins lists the `keys` it may begin with; `key_bits` says that raw bits
+compare them. Pattern constants are borrowed, so the caller must free
+the plan before their canonical pools or other owners expire.
+
+Source: `lib/match/match.x:68`
+
+## Internal types
+
+These types connect runtime translation units and compiler-generated
+code. They are documented for source readers but are not supported as
+user API.
+
+| Type | Kind | Summary |
+| --- | --- | --- |
 | [`MatchCaptureBuffer`](#MatchCaptureBuffer) | struct | Supplies caller-owned positional storage for one `Match` invocation. |
 | [`MatchCaptureLayout`](#MatchCaptureLayout) | struct | Describes the canonical binder slots and preparation status of a pattern. |
 | [`MatchCaptureSite`](#MatchCaptureSite) | struct | Stores the process-lifetime plan for one compiler-emitted `Match` site. |
 | [`MatchKey`](#MatchKey) | struct | Describes one way an input a plan matches can begin: its first element equals `head` and, when `index` is nonzero, its element at `index` equals `inner`, or is a List whose first element does when `nested` is set. |
-| [`MatchPlan`](#MatchPlan) | struct | Holds one reusable immutable compiled `Match` pattern. |
 
 <a id="MatchCaptureBuffer"></a>
 ### MatchCaptureBuffer
@@ -658,21 +682,6 @@ equals `inner`, or is a List whose first element does when `nested` is
 set. Both values are borrowed pattern constants.
 
 Source: `lib/match/match.x:53`
-
-<a id="MatchPlan"></a>
-### MatchPlan
-
-`typedef struct MatchPlan { MachineProgram program; MatchCaptureLayout layout; Symbol status, const char *reason; int key_count, key_bits; MatchKey keys[MATCH_KEY_MAX]; } *MatchPlan`
-
-Holds one reusable immutable compiled `Match` pattern.
-A prepared plan owns `program` and `layout`; malformed and ineligible plans
-have no executable program and retain their categorized `status` and
-static `reason`. A prepared plan whose pattern fixes how a matching input
-begins lists the `keys` it may begin with; `key_bits` says that raw bits
-compare them. Pattern constants are borrowed, so the caller must free
-the plan before their canonical pools or other owners expire.
-
-Source: `lib/match/match.x:68`
 
 ## Design notes
 

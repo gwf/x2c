@@ -39,8 +39,9 @@ module List _emit_prepared(
     }
     if (c.meta_build) _name_provider_bindings(c, provider, units, saved.deps);
     List lowered = _lower(c, units, stamp, suffix);
-    /* The unit's protocol adapters and their registration belong to the
-       program; group code reaches the runtime's own. */
+    /* A project group holds the unit's public functions, so it also
+       holds the protocol adapters they call and their registration. */
+    if (c.meta_build) lowered = c.generate_protocol_adapters(lowered);
     List ast = c.transform(lowered);
     code = c.generate_code_text(ast, stem);
   }
@@ -58,16 +59,18 @@ module List _emit_prepared(
 
 /* A helper owns replacement bodies separately from the linked runtime.
    Included definitions take their provider's spelling; this file's public
-   definitions take its own. Evaluator names remain source spellings. */
+   definitions take its own. An import merges its package's definitions into
+   this file's collection, so the package's provider names them afterward.
+   Evaluator names remain source spellings. */
 static void _name_provider_bindings(
   Compiler c, String provider, Array units, Map dependencies) {
-  foreach (Var (path, index), meta_build_tables)
-    if (meta_build_providers && path != provider)
-      c.name_loaded_provider(path, index, meta_build_providers[path]);
-    else if (path != provider && path in dependencies)
-      c.name_meta_provider_bindings(path, index);
   int index = c.meta_build - 1;
   c.name_meta_provider_bindings(provider, index);
+  foreach (Var (path, table), meta_build_tables)
+    if (meta_build_providers && path != provider)
+      c.name_loaded_provider(path, table, meta_build_providers[path]);
+    else if (path != provider && path in dependencies)
+      c.name_meta_provider_bindings(path, table);
   Var identity, String name;
   foreach (List item, units)
     if (_function_identity(item, identity, name) &&

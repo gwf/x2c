@@ -13,7 +13,7 @@ builds/0/x2c build --plain ${BUILD_JOBS:+-j "$BUILD_JOBS"} \
   commands/repl/tests/api-check.x commands/repl/repl-session.x \
   commands/repl/repl-lower.x commands/repl/repl-runtime.x \
   commands/repl/repl-native.x commands/repl/repl-globals.x \
-  commands/repl/repl-native-types.x \
+  commands/repl/repl-native-types.x commands/repl/repl-ledgers.x \
   commands/repl/decline-errors.x commands/repl/refusal-errors.x \
   builds/0/libx2c-dev.a
 "$tmp/api-check"
@@ -47,6 +47,43 @@ printf '1+2;\n' | builds/0/x2c repl >"$tmp/dispatch"
 printf '=> 3\n' >"$tmp/dispatch-expected"
 cmp "$tmp/dispatch-expected" "$tmp/dispatch"
 
+# Interpreted and compiled code both reach printf and puts.
+printf '%s\n' 'printf("%s=%04d\n", "answer", 42);' 'puts("done");' \
+  'int f(int x) { printf("f%d\n", x); puts("p"); return x; }' 'f(7);' |
+  builds/0/libexec/x2c-repl >"$tmp/stdio"
+printf '%s\n' 'answer=0042' '=> 12' 'done' '=> 5' 'defined f' 'f7' 'p' \
+  '=> 7' >"$tmp/stdio-expected"
+cmp "$tmp/stdio-expected" "$tmp/stdio"
+
+# String length, println in compiled code, and element updates that
+# evaluate their receiver and key once.
+printf '%s\n' 'String s = "abc";' 's.len();' '"ab".len();' \
+  'int f(void) { println("from f"); print("p\n"); return 1; }' 'f();' \
+  'Map m = {"t": 1};' 'int calls = 0;' \
+  'String key(void) { calls++; return "t"; }' 'm[key()] += 2;' 'calls;' \
+  '++m["t"];' 'Var v = (m["t"] *= 2);' 'v;' 'Array a = [1, 2];' \
+  'a[0] += 5;' 'a[1]--;' 'a;' |
+  builds/0/libexec/x2c-repl >"$tmp/updates"
+printf '%s\n' 'ok' '=> 3' '=> 2' 'defined f' 'from f' 'p' '=> 1' 'ok' \
+  'ok' 'defined key' 'ok' '=> 1' 'ok' 'ok' '=> 8' 'ok' 'ok' 'ok' \
+  '=> [ 6, 1 ]' >"$tmp/updates-expected"
+cmp "$tmp/updates-expected" "$tmp/updates"
+
+# Empty input prints nothing. Destructured targets and values declared
+# without one become session values, and assert and NULL are C's own.
+printf '%s\n' '' '// just a comment' 'List sel = %(1 2);' \
+  'Var (a, b) = sel;' 'a + b;' 'long q;' 'Var v;' 'String t;' \
+  '"42".try_long(&q);' 'q;' 't == NULL;' 'int *p = NULL;' 'p == NULL;' \
+  'assert(q == 42);' 'int g(void) { assert(b == 2); return a + q; }' 'g();' \
+  'assert(a  > b);' 'q;' |
+  builds/0/libexec/x2c-repl >"$tmp/forms" 2>"$tmp/forms-err" || true
+printf '%s\n' 'ok' 'ok' '=> 3' 'ok' 'ok' 'ok' '=> 1' '=> 42l' '=> 1' 'ok' \
+  '=> 1' 'ok' 'defined g' '=> 43' '=> 42l' >"$tmp/forms-expected"
+cmp "$tmp/forms-expected" "$tmp/forms"
+printf 'evaluation failed: (assert (expression "a  > b"))\n' \
+  >"$tmp/forms-err-expected"
+cmp "$tmp/forms-err-expected" "$tmp/forms-err"
+
 set +e
 builds/0/x2c repl extra </dev/null >"$tmp/bad-out" \
   2>"$tmp/bad-err"
@@ -54,12 +91,50 @@ result=$?
 set -e
 test "$result" -eq 2
 grep -qx 'x2c repl: unexpected operand' "$tmp/bad-err"
+set +e
+builds/0/x2c repl --bogus </dev/null >"$tmp/bad-out" 2>"$tmp/bad-err"
+result=$?
+set -e
+test "$result" -eq 2
+grep -qx 'x2c repl: unknown option: --bogus' "$tmp/bad-err"
 
 printf '%s\n' 'int n = 0;' \
   'for (int i = 0; i < 100000; i++) n += i;' 'n;' |
   builds/0/libexec/x2c-repl >"$tmp/loop"
 printf 'ok\nok\n=> 704982704\n' >"$tmp/loop-expected"
 cmp "$tmp/loop-expected" "$tmp/loop"
+
+# A List literal continues across lines until its closing parenthesis.
+printf '%s\n' 'List code = %(block' '  (if (not ready)' '    (call wait))' \
+  '  (call save));' 'code;' '%(a' 'b);' |
+  builds/0/libexec/x2c-repl >"$tmp/list"
+printf '%s\n' 'ok' '=> (block (if (not ready) (call wait)) (call save))' \
+  '=> (a b)' >"$tmp/list-expected"
+cmp "$tmp/list-expected" "$tmp/list"
+
+# Reports locate the submission's own lines and name what it wrote.
+printf '%s\n' '1 +;' 'int y = 1;' 'y = 1 +' '  2 +;' 'nosuch.len();' \
+  '(%!() => 42)();' 'List x = %(b c);' '%(a ${x});' |
+  builds/0/libexec/x2c-repl >/dev/null 2>"$tmp/reports" || true
+cat >"$tmp/reports-expected" <<'EOF'
+<repl>:1:4: parse: expected atomic expression
+  1 +;
+     ^
+  note: token: ; kind: ;
+
+<repl>:2:6: parse: expected atomic expression
+    2 +;
+       ^
+  note: token: ; kind: ;
+
+<repl>:1:11: type: unresolved identifier: nosuch
+  nosuch.len();
+            ^
+
+rejected: unsupported: a call of a value that is not a function name
+rejected: unsupported: a conversion from List to Var
+EOF
+cmp "$tmp/reports-expected" "$tmp/reports"
 
 # SIGINT stops the running submission, and the next one still runs. A
 # background job starts with SIGINT ignored, so a signal sent before the

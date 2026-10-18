@@ -16,6 +16,7 @@ Source-ordered shallow symbol collection and replay.
 | [`Compiler.callable_symbols`](#Compiler.callable_symbols) | Returns the collected source's public type families and the declarations of `names`, including their receiver rows. |
 | [`Compiler.collect_package`](#Compiler.collect_package) | Collects a package once and installs its public surface in the current unit. |
 | [`Compiler.collect_symbols`](#Compiler.collect_symbols) | Collects the current translation unit's declarations into `globs`. |
+| [`Compiler.collected_names`](#Compiler.collected_names) | Returns the one-part names that the source at home-relative `path` declares itself, without its includes, as this process collected it. |
 | [`Compiler.complete_meta_hashes`](#Compiler.complete_meta_hashes) | Completes a linked function's own source hashes before a shallow call. |
 | [`Compiler.configure_interfaces`](#Compiler.configure_interfaces) | Creates the process cache and names the directories searched for `.xi` interfaces. |
 | [`Compiler.configure_package`](#Compiler.configure_package) | Selects a source file's own package, as its standalone translation does. |
@@ -71,7 +72,7 @@ of `names`, including their receiver rows. Includes contribute their
 selected declarations, without replaying compile-time effects.
 Unselected functions and variables do not enter the result.
 
-Source: `src/collect/declarations.x:407`
+Source: `src/collect/declarations.x:422`
 
 <a id="Compiler.collect_package"></a>
 #### Compiler.collect_package
@@ -105,6 +106,17 @@ and macro state. Keyword alias maps and seen-name state are file-local
 and restored when each file walk ends.
 
 Source: `src/collect/walk.x:18`
+
+<a id="Compiler.collected_names"></a>
+#### Compiler.collected_names
+
+`List Compiler.collected_names(String path)`
+
+Returns the one-part names that the source at home-relative `path`
+declares itself, without its includes, as this process collected it.
+A source this process has not collected declares no names.
+
+Source: `src/collect/declarations.x:195`
 
 <a id="Compiler.complete_meta_hashes"></a>
 #### Compiler.complete_meta_hashes
@@ -150,7 +162,7 @@ declares, in no particular order. A file that imports a package
 declares none here: the walk that records them for a cold entry does
 not install a package's surface.
 
-Source: `src/collect/declarations.x:599`
+Source: `src/collect/declarations.x:614`
 
 <a id="Compiler.forget_provisional_entries"></a>
 #### Compiler.forget_provisional_entries
@@ -221,7 +233,7 @@ Source: `src/collect/walk.x:597`
 
 Records the actual type dependencies of typed public inline bodies.
 
-Source: `src/collect/declarations.x:438`
+Source: `src/collect/declarations.x:453`
 
 <a id="Compiler.install_included_effects"></a>
 #### Compiler.install_included_effects
@@ -383,7 +395,7 @@ Source: `src/collect/walk.x:51`
 Promotes the selected type families after the owning ordinary full
 parse. The header and Xi then use the same complete family selection.
 
-Source: `src/collect/declarations.x:482`
+Source: `src/collect/declarations.x:497`
 
 <a id="Compiler.publishes_type_family"></a>
 #### Compiler.publishes_type_family
@@ -392,7 +404,7 @@ Source: `src/collect/declarations.x:482`
 
 Reports whether this unit's interface publishes the type `family`.
 
-Source: `src/collect/declarations.x:227`
+Source: `src/collect/declarations.x:242`
 
 <a id="Compiler.publishes_typedef"></a>
 #### Compiler.publishes_typedef
@@ -401,7 +413,7 @@ Source: `src/collect/declarations.x:227`
 
 Reports whether this unit's selected interface publishes `name`.
 
-Source: `src/collect/declarations.x:222`
+Source: `src/collect/declarations.x:237`
 
 <a id="Compiler.record_conformance_rows"></a>
 #### Compiler.record_conformance_rows
@@ -414,7 +426,7 @@ publishes, as `record_generated_symbol` adds its rows. A row an earlier
 cold walk recorded may sit in an earlier map. The cache retains each key
 and value.
 
-Source: `src/collect/declarations.x:575`
+Source: `src/collect/declarations.x:590`
 
 <a id="Compiler.record_generated_symbol"></a>
 #### Compiler.record_generated_symbol
@@ -426,7 +438,7 @@ current file's collected entry contributes, which is the map its
 interface publishes. A file without a collected declaration map records
 nothing. The cache retains `signature`.
 
-Source: `src/collect/declarations.x:555`
+Source: `src/collect/declarations.x:570`
 
 <a id="Compiler.refresh_source_collections"></a>
 #### Compiler.refresh_source_collections

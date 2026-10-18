@@ -392,7 +392,6 @@ Source: `lib/pool/threads.x:20`
 | --- | --- | --- |
 | [`Pool`](#Pool) | struct | Holds one level of canonical values and their backing storage. |
 | [`PoolStats`](#PoolStats) | struct | Reports one pool level's activity and process-wide storage counters. |
-| [`PoolTable`](#PoolTable) | struct | Maps each canonical value of one `Pool` level to itself. |
 
 <a id="Pool"></a>
 ### Pool
@@ -415,6 +414,16 @@ Reports one pool level's activity and process-wide storage counters.
 The snapshot owns no storage; `requested_bytes` saturates at `SIZE_MAX`.
 
 Source: `lib/pool/pool.x:47`
+
+## Internal types
+
+These types connect runtime translation units and compiler-generated
+code. They are documented for source readers but are not supported as
+user API.
+
+| Type | Kind | Summary |
+| --- | --- | --- |
+| [`PoolTable`](#PoolTable) | struct | Maps each canonical value of one `Pool` level to itself. |
 
 <a id="PoolTable"></a>
 ### PoolTable

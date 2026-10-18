@@ -12,7 +12,7 @@ typedef struct ReplLower {
   Lisp lisp;
   Map layouts;
   int counter;
-  String reason, missing;
+  String reason, unbound;
 } *ReplLower;
 
 ReplLower ReplLower.new(Compiler compiler, Lisp lisp) {
@@ -21,7 +21,7 @@ ReplLower ReplLower.new(Compiler compiler, Lisp lisp) {
   self.lisp = lisp;
   self.layouts = {};
   self.counter = 0;
-  self.reason = self.missing = NULL;
+  self.reason = self.unbound = NULL;
   return self;
 }
 
@@ -305,6 +305,10 @@ static int _lower_scan_declaration(Lowering &l, Var type, List rest) {
   return 1;
 }
 
+/* A named type by its name, and another by its canonical form. */
+static String _lower_type_text(Type type) =>
+  type.len() == 1 ? type.car().str() : type.repr();
+
 /* Resolve calls only against this interpreter's environment. */
 static int _lower_known(Lowering &l, String name) {
   Var value;
@@ -317,10 +321,28 @@ static int _lower_known(Lowering &l, String name) {
 }
 
 static void _lower_scan_callee(Lowering &l, String name) {
-  if (!_lower_known(l, name)) {
-    l.uncallable = 1;
-    l.owner.missing = name;
-  }
+  if (!_lower_known(l, name)) _lower_unbound(l, $reason.scan.binding(name));
+}
+
+/* The first unbound callee names the reason. A call's callee is also
+   visited as a value after its call. */
+static void _lower_unbound(Lowering &l, String reason) {
+  if (!l.uncallable) l.owner.unbound = reason;
+  l.uncallable = 1;
+}
+
+/* A conversion the compiler inserted names its types, not its converter. */
+static String _lower_unbound_call(
+  Lowering &l, List callee, List arguments, String name) {
+  match (callee) case %(expr ((func (?from)) *to) ?):
+    match (arguments) case %(?argument):
+      match (l.compiler.converter_call(argument, from, to))
+        case %(expr ? (call (expr ? (ident (binding ? ?(String converter))))
+                            ?)):
+          if (converter == name)
+            return $reason.scan.conversion(
+              _lower_type_text(from), _lower_type_text(to));
+  return $reason.scan.binding(name);
 }
 
 /* A reference parameter takes its argument's address, and the callee needs
@@ -334,10 +356,11 @@ static void _lower_scan_call(Lowering &l, Var callee, List arguments) {
     }
   match (callee) {
     case %(expr ? (ident (binding ? ?(String name)))):
-      _lower_scan_callee(l, name);
+      if (!_lower_known(l, name))
+        _lower_unbound(l, _lower_unbound_call(l, callee, arguments, name));
     default:
       if (callee is <string>) _lower_scan_callee(l, callee);
-      else l.uncallable = 1;
+      else _lower_unbound(l, $reason.scan.callee());
   }
 }
 
@@ -362,7 +385,8 @@ static void _lower_scan(Lowering &l, Var form) {
     return;
   }
   match (items) {
-    case %(repl-init ? ? ?initializer): {
+    case %(!or (repl-init ? ? ?initializer)
+               (repl-destructure ? ? ?initializer)): {
       _lower_scan(l, initializer);
       return;
     }
@@ -884,6 +908,15 @@ static int _lower_null_constant(Var operand) {
   return 0;
 }
 
+/* The evaluator reads a null String as "" and a null List as (), so a null
+   pointer constant compared with one takes the same form. */
+static Var _lower_null_like(Var other, Var value) {
+  String container = _lower_container(_lower_type_of(other));
+  if (container && container.equal("String")) return "";
+  if (container && container.equal("List")) return Atom.intern("nil");
+  return value;
+}
+
 /* Two object pointers, or one and a null pointer constant, compare by
    address as C compares them. */
 static int _lower_object_pointer_operands(Lowering &l, List operands) {
@@ -954,6 +987,10 @@ static Var _lower_operands(
                       (quote $operator) (C.address $right (quote <p48>)));
     if (_lower_relation(operator) && _lower_mixed_scalars(l, operands))
       return %(C.compare $left (quote $operator) $right);
+    if (_lower_relation(operator) && _lower_null_constant(operands.cadr()))
+      right = _lower_null_like(operands.car(), right);
+    if (_lower_relation(operator) && _lower_null_constant(operands.car()))
+      left = _lower_null_like(operands.cadr(), left);
     if (operator == <+> || operator == <->) {
       Var moved = _lower_pointer_step(l, operator, operands, left, right);
       if (moved is not void) return moved;
@@ -1304,6 +1341,11 @@ static Var _lower_content(Lowering &l, List type, Var content) {
           l, operand, operator == <++> ? <+> : <->,
           _lower_step_of(operand));
       return _lower_operands(l, type, operator, %($operand));
+    }
+    case %(repl-assert ?test ?(String text)): {
+      Var value = _lower_expr(l, test);
+      if (_lower_failed(l, value)) return void;
+      return %(C.assert $value $text);
     }
     case %(call (expr ? (ident (binding ? "Func_apply"))) ?):
       return _lower_application(l, content);
@@ -1997,7 +2039,8 @@ static Var _lower_coerce(Lowering &l, List want, Var node, Var value) {
         case %(expr ? (call (expr ? (ident (binding ? ?(String name)))) ?)): {
         _lower_scan_callee(l, name);
         if (l.uncallable)
-          return $decline.binding.missing(l, name);
+          return $decline.conversion.missing(
+            l, _lower_type_text(from), _lower_type_text(want));
         return %(${Atom.intern(name)} $value);
       }
     }
@@ -2011,6 +2054,15 @@ static Var _lower_coerce(Lowering &l, List want, Var node, Var value) {
 static int _lower_braced_init(Var init) {
   match (init) case %(expr ? (composite *)): return 1;
   return 0;
+}
+
+/* A session value declared without one reads its type's zero bytes. */
+static Var _lower_global_zero(Lowering &l, List layout) {
+  match (layout) case %(? ? ?size *): {
+    l.automatic = 1;
+    return %(C.peek (C.bytes $size) 0 (quote $layout));
+  }
+  return $decline.layout.unsupported(l);
 }
 
 static Var _lower_initializer(Lowering &l, List type, int id, Var init) {
@@ -2139,6 +2191,28 @@ static Var _lower_destructure(
   return %((lambda ($held) $after) $source);
 }
 
+/* `T (a, b) = source;` at the prompt reads its source once as a `List` and
+   stores each element, converted to `T`, in its target's session storage. */
+static Var _lower_global_destructure(
+  Lowering &l, Type type, List targets, Var init, List rest, List k) {
+  List layout = l.owner.type_layout(type);
+  if (!layout) return $decline.layout.unsupported(l);
+  Var source = _lower_expr(l, init);
+  if (_lower_failed(l, source)) return void;
+  source = _lower_coerce(l, %("List"), init, source);
+  Var held = _lower_name(l, "hold");
+  Array stores = $auto([]);
+  int index = 0;
+  foreach (List target, targets)
+    match (target) case %(binding ?(int id) ?): {
+      Var element = _lower_to_type(l, type, %(List_getindex $held $index));
+      stores.push(%(C.ginit $id (quote $layout) $element));
+      index++;
+    }
+  Var store = %((lambda ($held) (begin @{stores.list()})) $source);
+  return _lower_effect(l, store, rest, k);
+}
+
 /* The binding id an lvalue names, or -1 when it is not a plain local. */
 static int _lower_target(Var form) {
   match (form)
@@ -2205,10 +2279,32 @@ static Var _lower_update_value(
   return _lower_to_type(l, _lower_type_of(target), value);
 }
 
+/* `m[k] += v` on a library container reads and writes one element. It
+   evaluates the receiver and key once and returns the new value. */
+static Var _lower_element_update(
+  Lowering &l, Var target, Var receiver, Var key, Var operator, Var right) {
+  String container = _lower_indexed(receiver, 0);
+  if (!container)
+    return $decline.index.type(l);
+  if (container.equal("List") || container.equal("String"))
+    return $decline.index.immutable(l);
+  Var object = _lower_expr(l, receiver), index = _lower_expr(l, key);
+  if (_lower_failed(l, object) || _lower_failed(l, index)) return void;
+  Var held = _lower_name(l, "held"), at = _lower_name(l, "at");
+  Var value = _lower_name(l, "new");
+  Var old = %(${Atom.intern(container + "_getindex")} $held $at);
+  Var combined = _lower_update_value(l, target, operator, old, right);
+  Var store = %(${Atom.intern(container + "_setindex")} $held $at $value);
+  return %((lambda ($held $at) ((lambda ($value) (begin $store $value))
+    $combined)) $object $index);
+}
+
 /* A compound update evaluates the place once and returns its new value. */
 static Var _lower_update_expr(
   Lowering &l, Var target, Symbol operator, Var right) {
   if (_lower_failed(l, right)) return void;
+  match (target) case %(expr ? (getindex ?receiver ?key)):
+    return _lower_element_update(l, target, receiver, key, operator, right);
   Var place = _lower_place(l, target);
   if (l.declined || place is void)
     return $decline.update.storage(l);
@@ -2247,6 +2343,9 @@ static Var _lower_update(
   Lowering &l, Var target, Var operator, Var right, List rest, List k) {
   int id = _lower_target(target);
   if (_lower_failed(l, right)) return void;
+  match (target) case %(expr ? (getindex ?receiver ?key)):
+    return _lower_effect(l, _lower_element_update(
+      l, target, receiver, key, operator, right), rest, k);
   Type want = _lower_type_of(target);
   Var place = _lower_place(l, target);
   if (l.declined) return void;
@@ -2377,7 +2476,7 @@ static Var _lower_expression_stmnt(
   }
   match (e) {
     /* A call's result can be discarded: it runs for what it writes. */
-    case %(expr ? (!or (call ? ?) (parens (block *)))):
+    case %(expr ? (!or (call ? ?) (parens (block *)) (repl-assert ? ?))):
       return _lower_effect(l, _lower_expr(l, e), rest, k);
     /* A cast to `void` discards the result but not the work: `(void) x;`
        marks a local used and does nothing, while `(void) f();` still calls
@@ -2475,14 +2574,18 @@ static Var _lower_stmnt(Lowering &l, Var form, List rest, List k) {
       List bound = %(bind (binding $id $name) $mods);
       Type declared = %(declare $type (bindings $bound))
         .type_from_ast().declared();
-      Var value = _lower_initializer(l, declared, id, initializer);
-      if (_lower_failed(l, value)) return void;
       List layout = l.owner.type_layout(declared);
+      Var value = initializer
+        ? _lower_initializer(l, declared, id, initializer)
+        : _lower_global_zero(l, layout);
+      if (_lower_failed(l, value)) return void;
       if (!layout) return $decline.layout.unsupported(l);
       return _lower_effect(l, %(C.ginit $id (quote $layout) $value), rest, k);
     }
     case %(declare ?type (bindings ?declarator)):
       return _lower_declarator(l, type, declarator, rest, k);
+    case %(repl-destructure ?type (targets *targets) ?init):
+      return _lower_global_destructure(l, type, targets, init, rest, k);
     case %(dstrdecl ? (targets *targets) ?init):
       return _lower_destructure(l, targets, init, rest, k);
     case %(dstrdecl (params *params) ?init):
@@ -2570,7 +2673,7 @@ List ReplLower.lower(ReplLower self, List fn) {
     .definitions = definitions
   };
   self.reason = NULL;
-  self.missing = NULL;
+  self.unbound = NULL;
   match (fn) {
     case %(function ?spec
            (bind (binding ? ?(String name))
@@ -2584,8 +2687,7 @@ List ReplLower.lower(ReplLower self, List fn) {
          decision; `rejected` now means only `goto`. */
       if (!l.declined) {
         if (l.rejected) l.owner.reason = $reason.scan.goto();
-        else if (l.uncallable)
-          l.owner.reason = $reason.scan.binding(l.owner.missing);
+        else if (l.uncallable) l.owner.reason = l.owner.unbound;
       }
       if (l.declined || l.rejected || l.uncallable) return NULL;
       Array slots = $auto([]);

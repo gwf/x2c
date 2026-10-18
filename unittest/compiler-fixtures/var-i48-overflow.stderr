@@ -1,5 +1,1 @@
-<elapsed> error/err-report start_time="<wall-time>" code=<conv-range> detail=
-((operation "Var.new") (target i48)) location=
-((file "../../lib/var/construction.x") (line <line>) 
- (function "f12_construction____new_integer"))
-x2c error floor: <conv-range>: non-returning error was not caught
+x2c: uncaught <conv-range>: operation Var.new, target i48

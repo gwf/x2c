@@ -11,11 +11,13 @@ helper execution.
 x2c repl
 x2c repl --help
 x2c repl --dump --stats
+x2c repl --package-dir examples/packages
 ```
 
 No source file or checkout is needed when using an installed development
 build. The command reads standard input and accepts no file operands. It also
 runs directly as `x2c-repl` from the installation's `libexec/x2c` directory.
+An unknown option is an error that names the option.
 
 ## Try a session
 
@@ -36,8 +38,9 @@ x2c> plus(3);
 
 The function calls display `=> 13` and `=> 23`: later calls read the current
 value of `total`. Definitions display `defined NAME`; initializations and
-statements display `ok`. A final expression displays its value using
-`Var.repr`, so character and unsigned values retain their printed tags.
+statements display `ok`, and a blank or comment-only line displays
+nothing. A final expression displays its value using `Var.repr`, so
+character and unsigned values retain their printed tags.
 
 A function is compiled once, when its complete definition is submitted.
 Compilation needs the matching x2c compiler and host C toolchain. Later calls
@@ -81,6 +84,14 @@ contextual keywords. Narrow continuation contexts offer `else`, `catch`, or
 available on a typed receiver. At a blank primary prompt completion also
 offers colon commands, grouped with keywords, session names, types, and other
 callables. Unsupported REPL declarations and imports are not suggested.
+
+Completion leaves out runtime names that the library reference marks
+internal: names from internal modules, internal types and functions, and
+constants or variables of an internal type. They remain ordinary names, so a
+submission that spells one in full compiles as usual. An internal name is
+offered only when no other name matches the typed prefix. For example,
+`Scope` + Tab offers `Scope` and `ScopeStats`, while `ScopeA` + Tab completes
+the internal `ScopeAlloc`.
 
 A colon-prefixed line completes commands even at a continuation prompt;
 `:ast` and `:lowered` then complete published function names, and `:stats`
@@ -173,6 +184,9 @@ x2c> plus_answer(20);
 
 `:load` builds all loaded files into one native helper program. It uses the
 ordinary include, module, package, and native dependency handling.
+`--package-dir DIR` adds a package directory for every load, with the same
+meaning as for `x2c build` and `x2c run`. As for `x2c run`, build an
+imported package before loading a file that imports it.
 Public functions with bodies in the loaded file become prompt functions,
 including `main`. No `meta` annotation is needed. Static helpers such as
 `twice` remain private. Functions from included files and declaration-only
@@ -360,10 +374,39 @@ Other C dialect and dependency limitations still apply; loading does not
 provide missing libraries. Calling `exit` ends the helper, as described
 below under interrupted calls.
 
-`main` follows the same replacement rules as other loaded functions. Saved
-function values and compiled prompt callers use its replacement. Changing
-between the no-argument and argc/argv forms requires a new session. A second
-loaded file cannot publish another `main` in that session.
+Reloading the same file follows the replacement rules of other loaded
+functions. Saved function values and compiled prompt callers use the new
+`main`. Changing that file's `main` between the no-argument and argc/argv
+forms requires a new session.
+
+Loading a different file that defines `main` replaces the file that defined
+it, so one session can run several programs. Save this as `goodbye.c`:
+
+```x2c
+#include <stdio.h>
+int main(void) { puts("goodbye"); return 0; }
+```
+
+Load it after `hello.c`:
+
+```text
+x2c> :load "goodbye.c"
+removed ("main") from /home/me/hello.c
+loaded ("main")
+reset all loaded native state
+x2c> main();
+goodbye
+=> 0
+```
+
+The new `main` may use either form. The earlier file leaves the session, and
+the output names it and every public name it removed: its functions and
+globals, and the types that no remaining file publishes. Removal follows the
+rule for [an edited file](#edit-a-loaded-file): if prompt code refers to one
+of those names, the load fails and names that referrer. Other loaded files
+and their globals stay registered, although the successful load resets their
+native state. Only `main` replaces a file; other duplicate public names still
+fail.
 
 ### Edit a loaded file
 
@@ -381,8 +424,21 @@ Existing functions must keep their argument and return types. Parameter
 names may change. Existing public types must keep their definitions. New
 functions, globals, and types are allowed when their names do not
 conflict. Existing globals must keep their declared types and qualifiers,
-including `const`. Removing an existing function, global, or type, or
-changing its type, requires a new session.
+including `const`. Changing the type of a function, global, or type
+requires a new session.
+
+A file may remove a function, global, or type when no prompt definition
+refers to it. The load prints `removed ("helper") from` and the file's path.
+The name leaves `:symbols`, a later prompt reference reports an unresolved
+identifier, and a later version may define it again. A prompt function
+refers to the functions it calls, the globals it uses, and the types in its
+declarations. A prompt variable refers to its type and to a function it
+holds as a `Func`; a prompt type refers to the types of its fields. If
+prompt code refers to a removed name, the load fails and names the
+referrer, for example
+`load failed: helper is called by prompt function plus_helper` or
+`load failed: Pair is used by prompt variable kept`. A type that another
+loaded file also publishes stays.
 A refused replacement leaves the whole previous native program and its
 variables intact. This includes a compile, link, or compatibility failure
 in any loaded file, even when the command names a different file.
@@ -433,11 +489,13 @@ function leave the helper and its state running.
 
 ## Supported subset
 
-The current subset includes initialized simple variables, function
+The current subset includes simple variables, function
 definitions, integer arithmetic and narrowing, assignment, conditionals,
 `for` loops, self recursion, and calls to earlier functions. String values
 and length, List literals and indexing, and Array construction, mutation,
-and indexing are exercised by the focused checks. Captured `Func` values
+and indexing are exercised by the focused checks. Map and Array elements
+accept compound assignment and `++` and `--`, as in `m["t"] += 1`; the
+receiver and key are evaluated once. Captured `Func` values
 can be called directly or passed to supported native callbacks. A record
 captured by value retains a copy through later submissions.
 Reference captures share the original local or parameter, whose storage
@@ -472,12 +530,34 @@ lengths are rejected. The result follows the process locale, and a failure
 publishes no partial String. Native `String.printf` retains its ordinary C
 varargs contract for compiled code.
 
+A session declares C's `printf` and `puts`, so example code that prints runs
+at the prompt:
+
+```text
+x2c> printf("%s=%04d\n", "answer", 42);
+answer=0042
+=> 12
+x2c> puts("done");
+done
+=> 5
+```
+
+Interpreted `printf` formats with `String.format` and the conversions above,
+and returns the number of bytes written. `puts` writes its String and one
+newline. Compiled prompt functions call the C library's own `printf` and
+`puts`.
+
 REPL sessions also provide `print(String)` and `println(String)`. `print`
 writes the String's bytes; `println` writes those bytes followed by one
-newline. Use String interpolation for formatting, such as
-`println(%"count=$count")`. Both functions are REPL-only, reserve their names
-in the session, and report `ok`. They are not
-varargs aliases.
+newline. Both are REPL-only, reserve their names in the session, and report
+`ok`. Compiled prompt functions can call them too.
+
+A session accepts C's `assert` and `NULL` without an include. An
+interpreted `assert` that fails stops the submission with an error naming
+its expression, such as `(assert (expression "n > 0"))`. Compiled prompt
+functions use C's own `assert` macro, which aborts the REPL process when it
+fails. A String or List compared with `NULL` follows the compiled
+comparison, which treats an empty String or List as equal to it.
 
 A session also declares `Json`, `Diff` and `Path`, so `Json.parse`,
 `Diff.unified` and `Path.basename` evaluate without an include.
@@ -491,8 +571,11 @@ definitions entered at the prompt, preprocessor directives, and direct Lisp
 input are outside this subset. A bodyless `meta`
 prototype is accepted: it makes a function the compiler links, or one from a
 [native module](meta-functions.md#native-modules) loaded with
-`--native-module`, callable in the session. Variables need
-initializers; declarator modifiers, `const`, and `volatile` are rejected.
+`--native-module`, callable in the session. A variable declared without
+an initializer starts at zero, as a C file-scope variable does, so
+`long q;` and `Var v;` are accepted. A destructuring declaration such as
+`Var (a, b) = pair;` reads its source once and publishes each target as a
+session value. Declarator modifiers, `const`, and `volatile` are rejected.
 Function-local `static`, `extern`, and `threaded` storage remain rejected.
 Top-level statement expressions can contain local declarations followed by
 one value expression, such as `({ int n=3; n+4; })`. Other statement

@@ -161,6 +161,9 @@ static List _method(CallSite &k, List receiver, List field) {
     if (rewritten) return rewritten;
   }
   if (!resolution) {
+    match (k.receiver) case %(expr () (ident ?binding)):
+      $fail.expressions_receiver_unresolved(
+        k.c, k.origin, Ast.binding_spelling(binding));
     Var name = k.field.car();
     $fail.expressions_method_missing(k.c, k.origin, k.type, name);
   }

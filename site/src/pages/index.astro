@@ -186,7 +186,9 @@ const [titleHtml, kickerHtml] = await Promise.all([
           <code>{destination.staging
             ? "x2c install <package> --index " +
               absoluteSiteUrl("/packages/index.txt")
-            : "x2c install <package>"}</code>.
+            : "x2c install <package>"}</code>.{" "}
+          The <a href={local("docs/reference/release-notes.html")}>release
+          notes</a> list what changed and how to upgrade.
         </p>
         <p>
           <strong>Or build from source.</strong>{" "}

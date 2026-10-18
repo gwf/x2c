@@ -59,6 +59,11 @@ Var lisp_retain(Var object) {
 Var lisp_at(Var base, Var offset, Symbol tag) =>
   Var.new(tag, (char *) base.pointer() + offset.long_long());
 
+/** Raises the failure of an interpreted `assert`, naming its expression. */
+void lisp_assert_fail(String text) {
+  raise %(assert (expression $text));
+}
+
 /** Zeroes `size` bytes at `destination` and returns it. */
 Var lisp_zero(Var destination, Var size) {
   memset(destination.pointer(), 0, (size_t) size.long_long());
@@ -237,6 +242,7 @@ void repl_runtime_initialize(Lisp lisp) {
   $lisp.bind(lisp, "repl.native.lisp_retain", lisp_retain);
   $lisp.bind(lisp, "repl.native.lisp_at", lisp_at);
   $lisp.bind(lisp, "repl.native.lisp_zero", lisp_zero);
+  $lisp.bind(lisp, "repl.native.lisp_assert_fail", lisp_assert_fail);
   $lisp.bind(lisp, "repl.native.lisp_copy", lisp_copy);
   $lisp.bind(lisp, "repl.native.lisp_record_result", lisp_record_result);
   $lisp.bind(lisp, "repl.native.lisp_session_copy", lisp_session_copy);

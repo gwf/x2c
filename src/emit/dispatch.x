@@ -272,11 +272,12 @@ static List _raise(Emitter &e, Ast ast, Var cause, List arguments) {
   List tail = arguments ? %("," @arg_tokens) : NULL;
   List terminal = ast.never_returns()
                 ? %("__builtin_unreachable();") : NULL;
+  List runtime = e.c.runtime_inc ? NULL : %("," ".runtime = 1");
   return %("{"
     "static const X2CErrorSite " $site_name " = {"
       ".file = " $file_literal ","
       ".function = " $function_literal ","
-      ".line = " $line
+      ".line = " $line @runtime
     "};"
     "x2c_error_raise_n(&" $site_name "," @code ","
       "${arguments.len() / 2}" @tail ");"

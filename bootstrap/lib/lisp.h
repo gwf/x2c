@@ -65,6 +65,8 @@ int Lisp_try_get(Lisp lisp, String name, Var * out);
 
 void Lisp_set_global(Lisp lisp, String name, Var value);
 
+void Lisp_remove_global(Lisp lisp, String name);
+
 void Lisp_bind(Lisp lisp, String name, Func function);
 
 Lisp Lisp_active(void);

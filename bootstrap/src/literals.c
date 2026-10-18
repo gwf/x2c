@@ -545,6 +545,7 @@ static List f9_quotation____atom_element(Compiler c, String spelling){
 }
 
 static List _parse_list_head(Compiler c){
+  Compiler_require_input(c);
   List reader_form = f9_quotation____parse_reader_prefix(c);
   if(List_truth(reader_form)) return reader_form;
   List splice = f9_quotation____parse_splice(c);

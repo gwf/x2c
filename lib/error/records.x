@@ -4,7 +4,8 @@
 
    A record's entry has the shape of a Diagnostics entry,
    `((code C) (detail D) (location L))`, so a handler can match on it. Its
-   detail is copied into the record's own region. */
+   detail is copied into the record's own region. A location raised inside
+   the runtime library carries `(runtime 1)` so a report can omit it. */
 
 module void _record(const X2CErrorSite *site, Symbol code, List detail) {
   if (Error.count() >= Error.bound())
@@ -68,7 +69,8 @@ static List _location(ErrorRegion *e, const X2CErrorSite *site) {
   if (!site) return NULL;
   String file = _site_text(e, site.file);
   String function = _site_text(e, site.function);
-  List location = _field(e, <function>, function, NULL);
+  List location = site.runtime ? _field(e, <runtime>, 1, NULL) : NULL;
+  location = _field(e, <function>, function, location);
   location = _field(e, <line>, site.line, location);
   return _field(e, <file>, file, location);
 }
@@ -205,7 +207,8 @@ int Error.count(void) => Error.ready() ? (int) _thread().stack.length : 0;
 int Error.mark(void) => Error.count();
 
 /** Returns the accumulated errors at and after `mark`, oldest first.
-    Each entry has `code`, `detail`, and `location` fields. An invalid mark or
+    Each entry has `code`, `detail`, and `location` fields; a location
+    inside the runtime library also holds `(runtime 1)`. An invalid mark or
     an unavailable `Error` runtime returns `nil`. The snapshot enters the
     caller's outermost `Scope` and canonical pools and remains live until
     those owners are released. Failure to materialize it reaches the

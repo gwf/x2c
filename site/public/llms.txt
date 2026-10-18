@@ -42,6 +42,7 @@
 - [Syntax as Data](https://x2c-lang.dev/docs/reference/syntax/data.html)
 - [Lexical Data Inventory](https://x2c-lang.dev/docs/reference/syntax/lexical-data.html)
 - [Compiler Options](https://x2c-lang.dev/docs/reference/cli.html)
+- [Release Notes](https://x2c-lang.dev/docs/reference/release-notes.html)
 
 ## Libraries and Packages
 

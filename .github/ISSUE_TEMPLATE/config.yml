@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security report
+    url: https://github.com/gwf/x2c/blob/main/SECURITY.md
+    about: Report vulnerabilities privately as described in SECURITY.md, not in a public issue.
+  - name: Documentation
+    url: https://x2c-lang.dev/docs/
+    about: The language guide and reference.

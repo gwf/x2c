@@ -17,19 +17,26 @@ int main(int argc, char **argv) {
     (--stats (help "Print runtime statistics at exit"))
     (--verbose-stats (help "Print detailed statistics at exit"))
     (--native-module (value file) repeated
-      (help "Load a native compile-time module")));
+      (help "Load a native compile-time module"))
+    (--package-dir (value dir) repeated
+      (help "Add a directory of x2c packages")));
   if ("-h" in args || "--help" in args) {
     printf("%s", Args.usage("x2c repl", spec));
     return 0;
   }
   Map parsed = NULL;
   try parsed = Args.parse(args, spec);
+  catch %(bad-arg (operation "Args.parse") (reason ?why) (option ?option)): {
+    Stderr.printf("x2c repl: %s: %s\n", why, option);
+    return 2;
+  }
   catch %(bad-arg (operation "Args.parse") (reason ?why) *): {
     Stderr.printf("x2c repl: %s\n", why);
     return 2;
   }
   CliRequest request = CliRequest.new(<repl>);
   request.native_modules = parsed["native-module"];
+  request.package_dirs = parsed["package-dir"];
   ReplOptions options = {
     .dump = parsed["dump"].integer(),
     .stats = parsed["stats"].integer(),
