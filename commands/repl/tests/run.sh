@@ -47,6 +47,14 @@ printf '1+2;\n' | builds/0/x2c repl >"$tmp/dispatch"
 printf '=> 3\n' >"$tmp/dispatch-expected"
 cmp "$tmp/dispatch-expected" "$tmp/dispatch"
 
+# Interpreted and compiled code both reach printf and puts.
+printf '%s\n' 'printf("%s=%04d\n", "answer", 42);' 'puts("done");' \
+  'int f(int x) { printf("f%d\n", x); puts("p"); return x; }' 'f(7);' |
+  builds/0/libexec/x2c-repl >"$tmp/stdio"
+printf '%s\n' 'answer=0042' '=> 12' 'done' '=> 5' 'defined f' 'f7' 'p' \
+  '=> 7' >"$tmp/stdio-expected"
+cmp "$tmp/stdio-expected" "$tmp/stdio"
+
 set +e
 builds/0/x2c repl extra </dev/null >"$tmp/bad-out" \
   2>"$tmp/bad-err"

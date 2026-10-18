@@ -254,6 +254,8 @@
 (defun Func_var (v) v)
 (defun Var_func (v) v)
 
+(defun printf (format . values) (repl.printf format values))
+
 // Preserve printed syntax in meta diagnostics.
 (def Var_repr repr)
 
