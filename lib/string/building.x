@@ -83,7 +83,6 @@ meta native String String.new_fill(char fill, int count) {
 meta native String String.join(String sep, List strings) {
   if (!strings) return NULL;
   int n = strings.len();
-  if (n == 0) return NULL;
   int sep_len = sep ? sep.len() : 0;
   int total = _join_length(strings, n, sep_len);
   if (total < 0) return NULL;

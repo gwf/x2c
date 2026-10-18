@@ -220,7 +220,7 @@ fi
 for mode in snapshot live; do
   flags=()
   if [[ "$mode" == live ]]; then flags=(--live-symbols); fi
-  if "$X2C" translate "${flags[@]}" \
+  if "$X2C" translate ${flags[@]+"${flags[@]}"} \
       --out-dir "$BUILD/protocol-static" \
       "$SOURCE/protocol-static-consumer.x" \
       >"$BUILD/protocol-static/$mode.stdout" \
@@ -238,7 +238,7 @@ cmp -s "$BUILD/protocol-static/snapshot.stderr" \
 for mode in snapshot live; do
   flags=()
   if [[ "$mode" == live ]]; then flags=(--live-symbols); fi
-  if "$X2C" translate "${flags[@]}" \
+  if "$X2C" translate ${flags[@]+"${flags[@]}"} \
       --out-dir "$BUILD/protocol-static" \
       "$SOURCE/protocol-static-inherited-consumer.x" \
       >"$BUILD/protocol-static/inherited-$mode.stdout" \
@@ -261,7 +261,7 @@ for mode in snapshot live; do
   flags=()
   if [[ "$mode" == live ]]; then flags=(--live-symbols); fi
   out="$BUILD/protocol-inherited/$mode"
-  "$X2C" translate "${flags[@]}" --out-dir "$out" "$inherited"
+  "$X2C" translate ${flags[@]+"${flags[@]}"} --out-dir "$out" "$inherited"
   "$CC" -iquote "$ROOT/include/x2c" \
     "$out/protocol-typedef-inherited-adoption.c" \
     -L"$ROOT/builds/0" -lx2c -lm -o "$out/program"
@@ -304,7 +304,7 @@ for mode in snapshot live; do
       protocol-generated-owner-precedence-swapped; do
     out="$BUILD/protocol-generated-owner/$mode-$name"
     mkdir -p "$out"
-    "$X2C" translate "${flags[@]}" --out-dir "$out" "$FIXTURES/$name.x"
+    "$X2C" translate ${flags[@]+"${flags[@]}"} --out-dir "$out" "$FIXTURES/$name.x"
     count=$(grep -c '^int Packet_truth(Packet a0){$' "$out/$name.c")
     [[ "$count" == 1 ]] ||
       fail "$mode $name emitted $count Packet_truth definitions"
@@ -319,7 +319,7 @@ for mode in snapshot live; do
       protocol-generated-collision-swapped; do
     out="$BUILD/protocol-generated-owner/$mode-$name"
     mkdir -p "$out"
-    if "$X2C" translate "${flags[@]}" --out-dir "$out" \
+    if "$X2C" translate ${flags[@]+"${flags[@]}"} --out-dir "$out" \
         "$FIXTURES/$name.x" \
         >"$out/stdout" 2>"$out/stderr"; then
       fail "$mode $name accepted competing generated owners"

@@ -15,7 +15,6 @@ static List _cache_alias(List key) {
     case %(var (cache ?id)):                  return %(cache $id);
     case %(expr ? (cache ?id)):               return %(cache $id);
     case %(var (expr ("Var") (cache ?id))):   return %(cache $id);
-    case %(expr ("List") (cache ?id)):        return %(cache $id);
   }
   return NULL;
 }

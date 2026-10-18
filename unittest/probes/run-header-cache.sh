@@ -835,7 +835,7 @@ for mode in default live cpp; do
   esac
   # Each unit evaluates public imports and Lisp in its own session.
   # Declaration and field production remain retained across both units.
-  "$X2C" translate -j 1 "${options[@]}" --out-dir "$declarations/$mode" \
+  "$X2C" translate -j 1 ${options[@]+"${options[@]}"} --out-dir "$declarations/$mode" \
     "$declarations/src/provider.x" "$declarations/src/consumer.x"
   [ "$(cat "$declarations/effects")" = imxfim ] ||
     fail "declaration import, producer, or field ran twice in $mode mode"
@@ -1076,7 +1076,7 @@ for mode in cached cold live; do
   fi
   if [[ $mode == cold ]]; then rm "$FAKE/builds/0/lib/"*.xi; fi
   if [[ $mode == live ]]; then flags=(--live-symbols); fi
-  (cd "$FAKE" && ./builds/0/x2c translate "${flags[@]}" --out-dir "$output" \
+  (cd "$FAKE" && ./builds/0/x2c translate ${flags[@]+"${flags[@]}"} --out-dir "$output" \
     src/native-aliases.x)
   "$ROOT/builds/0/x2c" build --quiet -j1 --output "$output/run" \
     -Xcc -iquote -Xcc "$ROOT/include/x2c" "$output/native-aliases.c"

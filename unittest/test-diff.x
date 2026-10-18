@@ -61,6 +61,12 @@ static void diff_lines_releases_scratch(void) {
 
 static void diff_unified_prints_hunks_with_context(void) {
   $test.scoped();
+  EXPECT_STR_EQ(Diff.unified("a\n\nb\n", "a\n\nB\n", "old", "new"),
+                "--- old\n+++ new\n@@ -1,3 +1,3 @@\n a\n \n-b\n+B\n");
+  EXPECT_STR_EQ(Diff.unified(NULL, "\n", "a", "b"),
+                "--- a\n+++ b\n@@ -0,0 +1,1 @@\n+\n");
+  EXPECT_STR_EQ(Diff.unified("\n", NULL, "a", "b"),
+                "--- a\n+++ b\n@@ -1,1 +0,0 @@\n-\n");
   EXPECT_NULL(Diff.unified("a\nb\n", "a\nb\n", "x", "y"));
   EXPECT_STR_EQ(Diff.unified("a\nb\nc\n", "a\nB\nc\n", "old", "new"),
                 "--- old\n+++ new\n@@ -1,3 +1,3 @@\n a\n-b\n+B\n c\n");

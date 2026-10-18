@@ -19,10 +19,10 @@ typedef Symbol Diff;
 
 static const int _LIMIT = 2000;
 
-/* The lines of both texts and the edits so far, newest first. The texts
+/* The lines of both texts and the edits so far, in output order. The texts
    differ only in old[lo..lo + n) and new[lo..lo + m). */
 static typedef struct Script {
-  Array old, new, List edits, int lo, n, m;
+  Array old, new, edits, int lo, n, m;
 } Script;
 
 /** Returns the line edits that turn `old` into `new`: a `List` of
@@ -34,11 +34,12 @@ static typedef struct Script {
 meta native List Diff.lines(String old, String new) {
   Array old_lines = $auto(old.split_lines(0));
   Array new_lines = $auto(new.split_lines(0));
-  Script s = {old_lines, new_lines};
+  Array edits = $auto([]);
+  Script s = {old_lines, new_lines, edits};
   _trim(s);
   if (_myers(s) < 0) _replace(s);
   for (int i = s.lo + s.n; i < s.old.len(); i++) _emit(s, <same>, s.old[i]);
-  return s.edits.reverse();
+  return edits;
 }
 
 /* Emits the lines both texts start with and sets the middle to the lines
@@ -60,7 +61,7 @@ static void _replace(Script &s) {
 }
 
 static void _emit(Script &s, Symbol kind, String line) =>
-  s.edits = cons(%($kind $line), s.edits);
+  s.edits.push(%($kind $line));
 
 static int _same(Script &s, int i, int j) =>
   s.old[i].string() == s.new[j].string();
@@ -166,10 +167,10 @@ static List _diagonal(List path, int x, int y, int to_x, int to_y) {
 
 static const int _CONTEXT = 3;
 
-/* One hunk: its end in the edits, where it starts in each text, how many
-   lines of each text it covers, and its marked lines, newest first. */
+/* One hunk's bounds in the edits, where it starts in each text, and how
+   many lines of each text it covers. */
 static typedef struct Hunk {
-  int end, old_start, old_count, new_start, new_count, List lines;
+  int start, end, old_start, old_count, new_start, new_count;
 } Hunk;
 
 /** Returns the unified difference between `old` and `new`, as `diff -u`
@@ -188,7 +189,7 @@ meta native String Diff.unified(
     }
     if (!out.len()) out.printf("--- %s\n+++ %s\n", old_name, new_name);
     Hunk h = _hunk(edits, at, old_line, new_line);
-    _write(h, out);
+    _write(h, edits, out);
     at = h.end;
     old_line = h.old_start + h.old_count;
     new_line = h.new_start + h.new_count;
@@ -202,10 +203,10 @@ static Symbol _kind(Array edits, int at) => edits[at].list().car();
    text and `new_line` of the new precede. */
 static Hunk _hunk(Array edits, int at, int old_line, int new_line) {
   int start = at > _CONTEXT ? at - _CONTEXT : 0, lead = at - start;
-  Hunk h = {_hunk_end(edits, at), old_line - lead, 0, new_line - lead, 0};
+  Hunk h = {start, _hunk_end(edits, at), old_line - lead, 0,
+            new_line - lead, 0};
   for (int i = start; i < h.end; i++) {
-    (Symbol kind, String text) = edits[i].list();
-    h.lines = cons(%"${_mark(kind)}$text\n", h.lines);
+    Symbol kind = _kind(edits, i);
     if (kind != <insert>) h.old_count++;
     if (kind != <delete>) h.new_count++;
   }
@@ -233,9 +234,14 @@ static char _mark(Symbol kind) {
 
 /* An empty side of a hunk starts at the line before it, as `diff -u`
    prints it. */
-static void _write(Hunk &h, Buffer out) {
+static void _write(Hunk &h, Array edits, Buffer out) {
   out.printf(
     "@@ -%d,%d +%d,%d @@\n", h.old_count ? h.old_start + 1 : h.old_start,
     h.old_count, h.new_count ? h.new_start + 1 : h.new_start, h.new_count);
-  foreach (String line, h.lines.reverse()) out.write(line);
+  for (int i = h.start; i < h.end; i++) {
+    (Symbol kind, String text) = edits[i].list();
+    out.write_char(_mark(kind));
+    out.write_len(text, text.len());
+    out.write_char('\n');
+  }
 }

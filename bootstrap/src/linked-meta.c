@@ -11300,7 +11300,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_20(void
   _10381 = List_var(_10380);
   _10382 = String_new("lib/string/building.x");
   _10383 = String_var(_10382);
-  _10384 = String_new("46ab901f");
+  _10384 = String_new("f115422e");
   _10385 = String_var(_10384);
   _10386 = cons(_10385, NULL);
   _10387 = cons(_10383, _10386);
@@ -11546,7 +11546,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_20(void
   _10627 = cons(_465, _10626);
   _10628 = String_new("lib/context.x");
   _10629 = String_var(_10628);
-  _10630 = String_new("47df5fdd");
+  _10630 = String_new("050a1107");
   _10631 = String_var(_10630);
   _10632 = cons(_10255, NULL);
   _10633 = cons(_10253, _10632);
@@ -12636,7 +12636,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_22(void
   _11711 = String_var(_11710);
   _11712 = String_new("lib/path.x");
   _11713 = String_var(_11712);
-  _11714 = String_new("2bde2920");
+  _11714 = String_new("a7bafce5");
   _11715 = String_var(_11714);
   _11716 = cons(_11715, NULL);
   _11717 = cons(_11713, _11716);
@@ -12751,7 +12751,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_23(void
   _11823 = List_var(_11822);
   _11824 = String_new("lib/lisp/evaluate.x");
   _11825 = String_var(_11824);
-  _11826 = String_new("0ca30103");
+  _11826 = String_new("662774d2");
   _11827 = String_var(_11826);
   _11828 = cons(_11827, NULL);
   _11829 = cons(_11825, _11828);
@@ -15167,7 +15167,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_27(void
   _14227 = List_var(_14226);
   _14228 = String_new("src/compiler/literal-cache.x");
   _14229 = String_var(_14228);
-  _14230 = String_new("fc96db54");
+  _14230 = String_new("2cce0497");
   _14231 = String_var(_14230);
   _14232 = cons(_14231, NULL);
   _14233 = cons(_14229, _14232);
@@ -16914,7 +16914,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_31(void
   _15962 = List_var(_15961);
   _15963 = String_new("src/symtab/transactions.x");
   _15964 = String_var(_15963);
-  _15965 = String_new("bf845535");
+  _15965 = String_new("6db7e36a");
   _15966 = String_var(_15965);
   _15967 = cons(_15966, NULL);
   _15968 = cons(_15964, _15967);

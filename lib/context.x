@@ -43,13 +43,7 @@ static struct Context {
   Pool destination_pool, void *error_state, *match_state;
 };
 
-static typedef struct ContextThreadState {
-  Context current;
-} *ContextThreadState;
-
-static threaded struct ContextThreadState context_thread;
-
-static ContextThreadState _thread(void) => &context_thread;
+static threaded Context current_context;
 
 // export
 
@@ -70,7 +64,7 @@ static ContextThreadState _thread(void) => &context_thread;
     unsupported value without a registered exporter, or a cause from nested
     allocation, hashing, equality, or custom export. */
 meta native Var Context.export(Context context, Var value) {
-  if (!context || _thread().current != context)
+  if (!context || current_context != context)
     raise %(bad-state (operation "Context.export"));
   return _export_value(context, value);
 }
@@ -287,7 +281,7 @@ static Context _open(const char *name, int isolated) {
   Context.initialize();
   Context context = Scope.calloc(1, sizeof(struct Context));
   with context {
-    _.parent = _thread().current;
+    _.parent = current_context;
     _.destination_scope = Scope.top();
     int pushed = 0, installed = 0;
     /* Publish the Context only after its Scope, optional pool, Error state,
@@ -311,14 +305,14 @@ static Context _open(const char *name, int isolated) {
     }
     _.error_state = Error.context_open();
     _.match_state = MatchCache.context_open();
-    _thread().current = _;
+    current_context = _;
     installed = 1;
     return _;
   }
 }
 
 /** Returns the `Context` currently active on this thread, or NULL. */
-meta native Context Context.current(void) => _thread().current;
+meta native Context Context.current(void) => current_context;
 
 /** Closes the current `Context`, reclaims unexported state, and restores
     parent.
@@ -329,7 +323,7 @@ meta native Context Context.current(void) => _thread().current;
     `Match`
     cache has an active lease. The failure leaves the `Context` active. */
 meta native void Context.close(Context c) {
-  if (!c || _thread().current != c)
+  if (!c || current_context != c)
     raise %(bad-state (operation "Context.close"));
 
   /* Match and Error teardown can still use Context-owned values. Release the
@@ -347,7 +341,7 @@ meta native void Context.close(Context c) {
   while (Scope.top() != &c.scope) Scope.pop();
   Scope.pop();
   scope.destroy();
-  _thread().current = parent;
+  current_context = parent;
   Scope.free(c);
 }
 
@@ -366,7 +360,7 @@ static pthread_once_t context_shutdown_once =
   (pthread_once_t) PTHREAD_ONCE_INIT;
 
 static void _shutdown(void) {
-  while (_thread().current) _thread().current.close();
+  while (current_context) current_context.close();
 }
 
 static void _register_shutdown(void) {

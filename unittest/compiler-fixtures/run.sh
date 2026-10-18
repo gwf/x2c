@@ -115,7 +115,7 @@ run_dump() {
   local errors="$case_build/$phase.stderr"
 
   if ! (cd "$root" && "$x2c" translate "$flag" \
-      "${extra_flags[@]}" "$source_rel") \
+      ${extra_flags[@]+"${extra_flags[@]}"} "$source_rel") \
       >"$actual" 2>"$errors"; then
     cat "$errors" >&2
     record_failure "$name/$phase compiler invocation failed"
@@ -140,7 +140,7 @@ run_symbol_dump() {
     return
   fi
   if ! (cd "$root" && "$x2c" translate --dump-symbols \
-      "${extra_flags[@]}" "$source_rel") \
+      ${extra_flags[@]+"${extra_flags[@]}"} "$source_rel") \
       >"$raw" 2>"$errors"; then
     cat "$errors" >&2
     record_failure "$name/symbols compiler invocation failed"
@@ -226,7 +226,7 @@ run_fixture() {
     errors="$case_build/tokens.stderr"
     actual="$case_build/tokens.actual"
     if (cd "$root" && "$x2c" translate --no-cpp --dump-tokens \
-        "${extra_flags[@]}" "$source_rel") \
+        ${extra_flags[@]+"${extra_flags[@]}"} "$source_rel") \
         >"$raw" 2>"$errors"; then
       awk -F '\t' \
         '$2 !~ /^(space|comment|preproc)[[:space:]]/' "$raw" >"$actual"
@@ -258,7 +258,7 @@ run_fixture() {
 
   set +e
   (cd "$root" && "$x2c" translate --quiet \
-    --out-dir "$output" "${extra_flags[@]}" "$source_rel") \
+    --out-dir "$output" ${extra_flags[@]+"${extra_flags[@]}"} "$source_rel") \
     >"$compile_stdout" 2>"$compile_stderr"
   compile_status=$?
   set -e
@@ -304,7 +304,7 @@ run_fixture() {
       generated_sources+=("$generated")
   done
   # The C locale keeps the compiler's quotes in its warnings ASCII.
-  if ! LC_ALL=C "$cc" -fsigned-char "${build_cflags[@]}" \
+  if ! LC_ALL=C "$cc" -fsigned-char ${build_cflags[@]+"${build_cflags[@]}"} \
       -iquote "$root/include/x2c" -iquote "$fixture_dir" \
       "${generated_sources[@]}" \
       -L"$root/builds/0" -lx2c -lm -o "$program" \

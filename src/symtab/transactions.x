@@ -159,12 +159,11 @@ void SymTxn.commit_transient(SymTxn &s) {
   Map counters = c.names.counters;
   s.commit();
   c.names.counters = s.counters;
-  _replace_map(s.counters, counters);
+  s.counters.merge(counters);
 }
 
 /* Gives `original` exactly the rows of `staged` and keeps its identity.
-   Deletions matter: a declaration can remove an earlier file-static
-   designation. */
+   Source-definition rollback also removes rows added by the transaction. */
 static void _replace_map(Map original, Map staged) {
   Array keys = $auto(original.keys());
   foreach (Var key, keys) if (!(key in staged)) original.del(key);

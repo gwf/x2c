@@ -298,6 +298,7 @@ static String _output_dir(Translation &t, String input) {
 }
 
 static void _report(Translation &t, unsigned long started_at) {
+  if (!report_receipts()) return;
   String out_dir = t.request.out_dir;
   unsigned long long bytes = 0;
   foreach (String input, t.request.inputs) {

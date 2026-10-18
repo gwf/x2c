@@ -1045,7 +1045,7 @@ Source: `src/symtab/transactions.x:104`
 Restores every semantic value captured by an active transaction.
 An absent or inactive transaction has no effect.
 
-Source: `src/symtab/transactions.x:177`
+Source: `src/symtab/transactions.x:176`
 
 ## Public types
 

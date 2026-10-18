@@ -36,7 +36,7 @@ Returns the unified difference between `old` and `new`, as `diff -u`
 prints it with `old_name` and `new_name` in the header and three lines
 of context, or NULL when the texts are equal line for line.
 
-Source: `lib/diff.x:179`
+Source: `lib/diff.x:180`
 
 ## Public types
 

@@ -345,7 +345,7 @@ String String_new_fill(char fill, int count){
 }
 
 String String_join(String sep, List strings){
-  if(! List_truth(strings)) return NULL;  int n = List_len(strings);  if(n == 0) return NULL;  int sep_len = String_truth(sep) ? String_len(sep) : 0;  int total = f8_building____join_length(strings, n, sep_len);  if(total < 0) return NULL;  if(total <= STRING_STACK_BYTES){
+  if(! List_truth(strings)) return NULL;  int n = List_len(strings);  int sep_len = String_truth(sep) ? String_len(sep) : 0;  int total = f8_building____join_length(strings, n, sep_len);  if(total < 0) return NULL;  if(total <= STRING_STACK_BYTES){
     char bytes[STRING_STACK_BYTES];  f8_building____join_into(bytes, strings, sep, sep_len);  return _from_bytes(bytes, total);
   }
   String string = String_malloc(total + 1);  f8_building____join_into(string, strings, sep, sep_len);  return _finish(string, total);
@@ -391,11 +391,11 @@ String String_pad_center(String str, int width, char fill){
 
 static String f8_building____pad(String str, int width, char fill, int side){
   if(fill == '\0'){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/string/building.x",.function = "f8_building____pad",.line = 152,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/string/building.x",.function = "f8_building____pad",.line = 151,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))));  __builtin_unreachable();
   }
   int length = String_len(str);  if(width <= length) return str;  if(width == INT_MAX){
     Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))); {
-      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/string/building.x",.function = "f8_building____pad",.line = 155,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_5, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(48833808), int_var(width));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/string/building.x",.function = "f8_building____pad",.line = 154,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_5, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(48833808), int_var(width));  __builtin_unreachable();
     }
 
   }

@@ -384,7 +384,7 @@ Pads both sides of `str` to the requested width.
 
 **Raises:** the same causes as `String.pad_left`.
 
-Source: `lib/string/building.x:146`
+Source: `lib/string/building.x:145`
 
 <a id="String.pad_left"></a>
 #### String.pad_left
@@ -397,7 +397,7 @@ Pads the left side of `str` to the requested width.
 cannot be represented, or `<alloc-fail>` when result storage cannot be
 allocated.
 
-Source: `lib/string/building.x:134`
+Source: `lib/string/building.x:133`
 
 <a id="String.pad_right"></a>
 #### String.pad_right
@@ -408,7 +408,7 @@ Pads the right side of `str` to the requested width.
 
 **Raises:** the same causes as `String.pad_left`.
 
-Source: `lib/string/building.x:140`
+Source: `lib/string/building.x:139`
 
 <a id="String.partition"></a>
 #### String.partition
@@ -887,7 +887,7 @@ you want, and `String.format` when the arguments must be checked.
 `fmt` or formatting error also returns NULL without raising. Arguments
 that do not match the conversions are undefined behavior as in C.
 
-Source: `lib/string/building.x:177`
+Source: `lib/string/building.x:176`
 
 <a id="String.promote"></a>
 #### String.promote

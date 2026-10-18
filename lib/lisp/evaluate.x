@@ -15,7 +15,7 @@ static keyword loop $private.loop;
 module typedef struct LispEnv {
   Map bindings, List params;
   const Var *values;
-  int value_count, struct LispEnv *parent;
+  struct LispEnv *parent;
 } LispEnv;
 
 module inline Var Lambda.var(Lambda value) {
@@ -307,21 +307,14 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv *env, int macro) {
 }
 
 static void _capture(Lisp lisp, LispEnv *env, Lambda lambda) {
-  Array names = $auto([]);
-  FreeNames walk = {lisp, env, names};
+  FreeNames walk = {lisp, env, lambda.captures};
   _free_form(walk, lambda.body, lambda.params, 0);
-  foreach (Var name, names) {
-    Var value;
-    if (name in lambda.captures) continue;
-    if (_env_lookup(env, name, value))
-      _binding_set(&lisp.scope, lambda.captures, name, value);
-  }
 }
 
 /* One capture analysis: the session and environment that resolve call
-   heads, and the free names found so far. */
+   heads, and the captured local values. */
 static typedef struct FreeNames {
-  Lisp lisp, LispEnv *env, Array out;
+  Lisp lisp, LispEnv *env, Map captures;
 } FreeNames;
 
 /* A captured local callable keeps its identity. Global, parameter and
@@ -331,7 +324,7 @@ static typedef struct FreeNames {
    Stable special identities preserve quote opacity and inner binders. */
 static void _free_form(FreeNames &f, Var form, List bound, int depth) {
   if (form.is_atom()) {
-    if (depth <= 0 && !_param_has(bound, form)) f.out.push(form);
+    if (depth <= 0 && !_param_has(bound, form)) _capture_name(f, form);
     return;
   }
   if (form is not <list>) return;
@@ -340,6 +333,13 @@ static void _free_form(FreeNames &f, Var form, List bound, int depth) {
   if (depth < 0) _all(f, items, bound, depth);
   else if (depth > 0) _quoted(f, items, bound, depth);
   else _free_call(f, items, bound);
+}
+
+static void _capture_name(FreeNames &f, Var name) {
+  if (name in f.captures) return;
+  Var value;
+  if (_env_lookup(f.env, name, value))
+    _binding_set(&f.lisp.scope, f.captures, name, value);
 }
 
 static void _all(FreeNames &f, List items, List bound, int depth) {
@@ -497,7 +497,6 @@ static void _bind_values(
     $error.apply.arity(lambda.body);
   local.params = lambda.params;
   local.values = values;
-  local.value_count = count;
 }
 
 /* A lowered source function owns its automatic storage in the frame. A
@@ -587,7 +586,7 @@ static int _env_lookup(LispEnv *env, Var name, Var &out) {
    matches, no case where the two disagreed. */
 static int _local_lookup(LispEnv *env, Var name, Var &out) {
   int found = 0, at = 0;
-  for (List p = env.params; p && at < env.value_count; p = p.cdr(), at++)
+  for (List p = env.params; p; p = p.cdr(), at++)
     if (p.car().u64 == name.u64) {
       out = env.values[at];
       found = 1;

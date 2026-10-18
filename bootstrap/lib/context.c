@@ -31,16 +31,9 @@ struct Context{
 }
 ;
 
-typedef struct ContextThreadState{
-  Context current;
-}
-* ContextThreadState;
-
-static _Thread_local struct ContextThreadState context_thread;
+static _Thread_local Context current_context;
 
 static int _init_guard_ = 0;
-
-static ContextThreadState _thread(void);
 
 static Var _export_value(Context c, Var v);
 
@@ -110,10 +103,6 @@ _x2c_gensym_defer_env_3;
 
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3);
 
-static ContextThreadState _thread(void){
-  return & context_thread;
-}
-
 void Context_initialize(void);
 
 #include "error.h"
@@ -123,8 +112,8 @@ void Context_initialize(void);
 
 Var Context_export(Context context, Var value){
   if(! _init_guard_) Context_initialize();
-  if(! context || _thread() -> current != context){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/context.x",.function = "Context_export",.line = 73,.runtime = 1};
+  if(! context || current_context != context){
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/context.x",.function = "Context_export",.line = 67,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL))));
     __builtin_unreachable();
   }
@@ -156,7 +145,7 @@ static Var _export_value(Context c, Var v){
   {
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/context.x",.function = "_export_value",.line = 117,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/context.x",.function = "_export_value",.line = 111,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477479911782, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(41038), Symbol_var(tag));
       __builtin_unreachable();
     }
@@ -364,7 +353,7 @@ static Context _open(const char * name, int isolated){
   Context_initialize();
   Context context = Scope_calloc(1, sizeof(struct Context));
   {
-    (context) -> parent = _thread() -> current;
+    (context) -> parent = current_context;
     (context) -> destination_scope = Scope_top();
     int pushed = 0, installed = 0;
     {
@@ -390,7 +379,7 @@ static Context _open(const char * name, int isolated){
         }
         (context) -> error_state = Error_context_open();
         (context) -> match_state = MatchCache_context_open();
-        _thread() -> current =(context);
+        current_context =(context);
         installed = 1;
         {
           Context _x2c_gensym_return_value_3 =(context);
@@ -411,13 +400,13 @@ static Context _open(const char * name, int isolated){
 
 Context Context_current(void){
   if(! _init_guard_) Context_initialize();
-  return _thread() -> current;
+  return current_context;
 }
 
 void Context_close(Context c){
   if(! _init_guard_) Context_initialize();
-  if(! c || _thread() -> current != c){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/context.x",.function = "Context_close",.line = 332,.runtime = 1};
+  if(! c || current_context != c){
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/context.x",.function = "Context_close",.line = 326,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.close")), NULL))));
     __builtin_unreachable();
   }
@@ -429,7 +418,7 @@ void Context_close(Context c){
   while(Scope_top() != & c -> scope) Scope_pop();
   Scope_pop();
   Scope_destroy(scope);
-  _thread() -> current = parent;
+  current_context = parent;
   Scope_free(c);
 }
 
@@ -450,7 +439,7 @@ void Context_initialize(void){
 }
 
 static void _shutdown(void){
-  while(_thread() -> current) Context_close(_thread() -> current);
+  while(current_context) Context_close(current_context);
 }
 
 static void _register_shutdown(void){

@@ -1807,13 +1807,6 @@ static Map _needed_storage(List graph, Map attributes) {
   return needed;
 }
 
-static List _sorted_names(List names) {
-  Array sorted = [];
-  foreach (String name, names) sorted.push(name);
-  sorted.sort();
-  return sorted.list_free();
-}
-
 /* The files of unit `path`: each file's definitions by storage, its calls
    within the file, and its interface, the definitions other files of the
    unit call; the calls between files; and the definitions whose storage
@@ -1871,7 +1864,7 @@ static List _member_rows(Map tallies, Map internal, Map interface) {
                    (static ${tallies.getdefault(%($file static), 0).int()}))
         (internal ${internal[key].int()})
         (interface
-          @{_sorted_names(interface.getdefault(file, NULL))})));
+          @{List.sort(interface.getdefault(file, NULL))})));
   }
   members.sort();
   return members.list_free();
@@ -2289,17 +2282,13 @@ Map certify_contracts(String path, int &valid) {
 }
 
 static List _certify_path(List target, Map parent) {
-  Array reversed = [];
-  List current = target;
-  while (current) {
-    reversed.push(current);
+  List path = NULL;
+  for (List current = target; current;) {
+    path = cons(current, path);
     Var prior = parent[current];
     current = prior is <list> ? prior.list() : NULL;
   }
-  Array path = [];
-  for (int i = reversed.len() - 1; i >= 0; i--)
-    path.push(reversed[i]);
-  return path.list_free();
+  return path;
 }
 
 static void _certify_reach(List graph, Array roots, Map nodes,

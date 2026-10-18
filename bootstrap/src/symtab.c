@@ -2099,7 +2099,7 @@ void SymTxn_commit_transient(SymTxn * s){
   Map counters = c -> names -> counters;
   SymTxn_commit(&((* s)));
   c -> names -> counters =(* s).counters;
-  f12_transactions____replace_map((* s).counters, counters);
+  Map_merge((* s).counters, counters);
 }
 
 static void f12_transactions____replace_map(Map original, Map staged){

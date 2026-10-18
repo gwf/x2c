@@ -7,13 +7,10 @@ typedef Symbol Diff;
 static const int _LIMIT = 2000;
 
 typedef struct Script{
-  Array old, new;
-  List edits;
+  Array old, new, edits;
   int lo, n, m;
 }
 Script;
-
-static String _3;
 
 static Var _2, _1, _0;
 
@@ -50,8 +47,7 @@ static List _diagonal(List path, int x, int y, int to_x, int to_y);
 static const int _CONTEXT = 3;
 
 typedef struct Hunk{
-  int end, old_start, old_count, new_start, new_count;
-  List lines;
+  int start, end, old_start, old_count, new_start, new_count;
 }
 Hunk;
 
@@ -63,7 +59,7 @@ static int _hunk_end(Array edits, int at);
 
 static char _mark(Symbol kind);
 
-static void _write(Hunk * h, Buffer out);
+static void _write(Hunk * h, Array edits, Buffer out);
 
 typedef struct _x2c_gensym_defer_env_0{
   const void * _x2c_gensym_defer_capture_0;
@@ -100,6 +96,13 @@ _x2c_gensym_defer_env_4;
 
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4);
 
+typedef struct _x2c_gensym_defer_env_5{
+  const void * _x2c_gensym_defer_capture_5;
+}
+_x2c_gensym_defer_env_5;
+
+static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5);
+
 static Var Symbol_var(Symbol);
 
 #include "exception.h"
@@ -114,7 +117,6 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _0 = Symbol_var(634596520);
   _1 = Symbol_var(279719178);
   _2 = Symbol_var(1248074);
-  _3 = String_new("\n");
 }
 
 Array List_array(List);
@@ -123,11 +125,13 @@ List String_split_lines(String, int);
 
 void x2c_cleanup_push(X2CCleanup *);
 
+Array Array_new(void);
+
 String Var_as_string(Var);
 
 Var Array_getindex(Array, int);
 
-List List_reverse(List);
+List Array_list(Array);
 
 void x2c_cleanup_leave(X2CCleanup *);
 
@@ -136,13 +140,13 @@ List Diff_lines(String old, String new){
   Array old_lines = List_array(String_split_lines(old, 0));
   const Array _x2c_gensym_macro_acquired_0 = old_lines;
   {
-    _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
+    _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_acquired_0;
+    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_2 =(const void *) & _x2c_gensym_macro_acquired_0;
     X2CCleanup _x2c_gensym_defer_record_0 ={
-      .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_1
+      .fn = _x2c_gensym_defer_cleanup_2, .env = & _x2c_gensym_macro_environment_2
     }
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_0);
@@ -150,32 +154,51 @@ List Diff_lines(String old, String new){
       Array new_lines = List_array(String_split_lines(new, 0));
       const Array _x2c_gensym_macro_acquired_1 = new_lines;
       {
-        _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
+        _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
           0
         }
         ;
-        _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_acquired_1;
+        _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_acquired_1;
         X2CCleanup _x2c_gensym_defer_record_1 ={
-          .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
+          .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_1
         }
         ;
         x2c_cleanup_push(& _x2c_gensym_defer_record_1);
         {
-          Script s ={
-            old_lines, new_lines
-          }
-          ;
-          _trim(&(s));
-          if(_myers(&(s)) < 0) _replace(&(s));
-          for(int i = s.lo + s.n;  i < Array_len(s.old);  i ++) _emit(&(s), 1248074, Var_as_string(Array_getindex(s.old, i)));
+          Array edits = Array_new();
+          const Array _x2c_gensym_macro_acquired_2 = edits;
           {
-            List _x2c_gensym_return_value_0 = List_reverse(s.edits);
-            {
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-              return _x2c_gensym_return_value_0;
+            _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
+              0
             }
+            ;
+            _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_acquired_2;
+            X2CCleanup _x2c_gensym_defer_record_2 ={
+              .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
+            }
+            ;
+            x2c_cleanup_push(& _x2c_gensym_defer_record_2);
+            {
+              Script s ={
+                old_lines, new_lines, edits
+              }
+              ;
+              _trim(&(s));
+              if(_myers(&(s)) < 0) _replace(&(s));
+              for(int i = s.lo + s.n;  i < Array_len(s.old);  i ++) _emit(&(s), 1248074, Var_as_string(Array_getindex(s.old, i)));
+              {
+                List _x2c_gensym_return_value_0 = Array_list(edits);
+                {
+                  x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
+                  x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+                  x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+                  return _x2c_gensym_return_value_0;
+                }
 
+              }
+
+            }
+            x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
           }
 
         }
@@ -200,14 +223,14 @@ static void _replace(Script * s){
   for(int j =(* s).lo;  j <(* s).lo +(* s).m;  j ++) _emit(&((* s)), 634596520, Var_as_string(Array_getindex((* s).new, j)));
 }
 
-List cons(Var, List);
+Var Array_push(Array, Var);
 
 static Var List_var(List);
 
 static Var String_var(String);
 
 static void _emit(Script * s, Symbol kind, String line){
-  (* s).edits = cons(List_var(cons(Symbol_var(kind), cons(String_var(line), NULL))), (* s).edits);
+  Array_push((* s).edits, List_var(cons(Symbol_var(kind), cons(String_var(line), NULL))));
 }
 
 int String_equal(String, String);
@@ -230,22 +253,22 @@ static int _myers(Script * s){
   int max =(* s).n +(* s).m < _LIMIT ?(* s).n +(* s).m : _LIMIT;
   Trace trace = Scope_calloc((max + 1) *(max + 1), sizeof(int));
   {
-    _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
+    _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_2 =(const void *) & trace;
-    X2CCleanup _x2c_gensym_defer_record_2 ={
-      .fn = _x2c_gensym_defer_cleanup_2, .env = & _x2c_gensym_macro_environment_2
+    _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_3 =(const void *) & trace;
+    X2CCleanup _x2c_gensym_defer_record_3 ={
+      .fn = _x2c_gensym_defer_cleanup_3, .env = & _x2c_gensym_macro_environment_3
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_2);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_3);
     {
       int found = _forward(&((* s)), trace, max);
       if(found < 0){
         int _x2c_gensym_return_value_1 = - 1;
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
           return _x2c_gensym_return_value_1;
         }
 
@@ -271,14 +294,14 @@ static int _myers(Script * s){
       {
         int _x2c_gensym_return_value_2 = found;
         {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
           return _x2c_gensym_return_value_2;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
   }
 
 }
@@ -311,6 +334,8 @@ static int _at(Trace trace, int step, int k){
 static int _inserted(int step, int k, int left, int right){
   return k == - step ||(k != step && left < right);
 }
+
+List cons(Var, List);
 
 static Var int_var(int);
 
@@ -351,32 +376,32 @@ String Buffer_str(Buffer);
 String Diff_unified(String old, String new, String old_name, String new_name){
   if(! _init_guard_) _file_init_();
   Array edits = List_array(Diff_lines(old, new));
-  const Array _x2c_gensym_macro_acquired_2 = edits;
+  const Array _x2c_gensym_macro_acquired_3 = edits;
   {
-    _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_4 ={
+    _x2c_gensym_defer_env_5 _x2c_gensym_macro_environment_5 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_4 =(const void *) & _x2c_gensym_macro_acquired_2;
-    X2CCleanup _x2c_gensym_defer_record_3 ={
-      .fn = _x2c_gensym_defer_cleanup_4, .env = & _x2c_gensym_macro_environment_4
+    _x2c_gensym_macro_environment_5._x2c_gensym_defer_capture_5 =(const void *) & _x2c_gensym_macro_acquired_3;
+    X2CCleanup _x2c_gensym_defer_record_4 ={
+      .fn = _x2c_gensym_defer_cleanup_5, .env = & _x2c_gensym_macro_environment_5
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_3);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_4);
     {
       Buffer out = Buffer_new(0);
-      const Buffer _x2c_gensym_macro_acquired_3 = out;
+      const Buffer _x2c_gensym_macro_acquired_4 = out;
       {
-        _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
+        _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_4 ={
           0
         }
         ;
-        _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_3 =(const void *) & _x2c_gensym_macro_acquired_3;
-        X2CCleanup _x2c_gensym_defer_record_4 ={
-          .fn = _x2c_gensym_defer_cleanup_3, .env = & _x2c_gensym_macro_environment_3
+        _x2c_gensym_macro_environment_4._x2c_gensym_defer_capture_4 =(const void *) & _x2c_gensym_macro_acquired_4;
+        X2CCleanup _x2c_gensym_defer_record_5 ={
+          .fn = _x2c_gensym_defer_cleanup_4, .env = & _x2c_gensym_macro_environment_4
         }
         ;
-        x2c_cleanup_push(& _x2c_gensym_defer_record_4);
+        x2c_cleanup_push(& _x2c_gensym_defer_record_5);
         {
           int count = Array_len(edits), at = 0, old_line = 0, new_line = 0;
           while(at < count){
@@ -386,7 +411,7 @@ String Diff_unified(String old, String new, String old_name, String new_name){
             }
             if(! Buffer_len(out)) Buffer_printf(out, "--- %s\n+++ %s\n", old_name, new_name);
             Hunk h = _hunk(edits, at, old_line, new_line);
-            _write(&(h), out);
+            _write(&(h), edits, out);
             at = h.end;
             old_line = h.old_start + h.old_count;
             new_line = h.new_start + h.new_count;
@@ -394,19 +419,19 @@ String Diff_unified(String old, String new, String old_name, String new_name){
           {
             String _x2c_gensym_return_value_3 = Buffer_str(out);
             {
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
               x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
               return _x2c_gensym_return_value_3;
             }
 
           }
 
         }
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_5);
       }
 
     }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_4);
   }
 
 }
@@ -419,24 +444,14 @@ static Symbol _kind(Array edits, int at){
   return Var_symbol(List_car(Var_list(Array_getindex(edits, at))));
 }
 
-static String char_str(char);
-
-String String_join(String, List);
-
 static Hunk _hunk(Array edits, int at, int old_line, int new_line){
   int start = at > _CONTEXT ? at - _CONTEXT : 0, lead = at - start;
   Hunk h ={
-    _hunk_end(edits, at), old_line - lead, 0, new_line - lead, 0
+    start, _hunk_end(edits, at), old_line - lead, 0, new_line - lead, 0
   }
   ;
   for(int i = start;  i < h.end;  i ++){
-    List _x2c_gensym_destructure_1 = Var_list(Array_getindex(edits, i));
-    Symbol kind = Var_symbol(List_getindex(_x2c_gensym_destructure_1, 0));
-    String text = Var_as_string(List_getindex(_x2c_gensym_destructure_1, 1));
-    h.lines = cons(String_var(({
-      Var _x2c_gensym_literal_part_2 = String_var(char_str(_mark(kind)));  String_join(NULL, cons(_x2c_gensym_literal_part_2, cons(String_var(text), cons(String_var(_3), NULL))));
-    }
-    )), h.lines);
+    Symbol kind = _kind(edits, i);
     if(kind != 634596520) h.old_count ++;
     if(kind != 279719178) h.new_count ++;
   }
@@ -458,20 +473,21 @@ static char _mark(Symbol kind){
   return '+';
 }
 
-Buffer Buffer_write(Buffer, const char *);
+Buffer Buffer_write_char(Buffer, char);
 
-static void _write(Hunk * h, Buffer out){
+Buffer Buffer_write_len(Buffer, const char *, size_t);
+
+int String_len(String);
+
+static void _write(Hunk * h, Array edits, Buffer out){
   Buffer_printf(out, "@@ -%d,%d +%d,%d @@\n", (* h).old_count ?(* h).old_start + 1 :(* h).old_start, (* h).old_count, (* h).new_count ?(* h).new_start + 1 :(* h).new_start, (* h).new_count);
-  {
-    String line;
-    List _x2c_gensym_macro_object_1 = List_reverse((* h).lines);
-    List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
-    Var _x2c_gensym_macro_cursor_output_1;
-    while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
-      line = Var_as_string(_x2c_gensym_macro_cursor_output_1);
-      Buffer_write(out, line);
-    }
-
+  for(int i =(* h).start;  i <(* h).end;  i ++){
+    List _x2c_gensym_destructure_1 = Var_list(Array_getindex(edits, i));
+    Symbol kind = Var_symbol(List_getindex(_x2c_gensym_destructure_1, 0));
+    String text = Var_as_string(List_getindex(_x2c_gensym_destructure_1, 1));
+    Buffer_write_char(out, _mark(kind));
+    Buffer_write_len(out, text, String_len(text));
+    Buffer_write_char(out, '\n');
   }
 
 }
@@ -488,22 +504,27 @@ static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
   Array_cleanup((*(const Array *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1));
 }
 
-void Scope_free(void *);
-
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
   _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_2;
-  Scope_free((*(Trace *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2));
+  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2));
+}
+
+void Scope_free(void *);
+
+static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
+  _x2c_gensym_defer_env_3 * _x2c_gensym_defer_data_3 =(_x2c_gensym_defer_env_3 *) _x2c_gensym_defer_opaque_3;
+  Scope_free((*(Trace *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_3));
 }
 
 void Buffer_cleanup(Buffer);
 
-static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
-  _x2c_gensym_defer_env_3 * _x2c_gensym_defer_data_3 =(_x2c_gensym_defer_env_3 *) _x2c_gensym_defer_opaque_3;
-  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_3));
-}
-
 static void _x2c_gensym_defer_cleanup_4(void * _x2c_gensym_defer_opaque_4){
   _x2c_gensym_defer_env_4 * _x2c_gensym_defer_data_4 =(_x2c_gensym_defer_env_4 *) _x2c_gensym_defer_opaque_4;
-  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_4));
+  Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_4->_x2c_gensym_defer_capture_4));
+}
+
+static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5){
+  _x2c_gensym_defer_env_5 * _x2c_gensym_defer_data_5 =(_x2c_gensym_defer_env_5 *) _x2c_gensym_defer_opaque_5;
+  Array_cleanup((*(const Array *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_5));
 }
 

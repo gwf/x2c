@@ -98,7 +98,7 @@ static typedef struct EditState {
   char *buf, **history;
   size_t buflen, buflen_max;
   const char *prompt;
-  size_t plen, pos, oldpos, len, cols, oldrows;
+  size_t plen, pos, len, cols, oldrows;
   int oldrpos, history_index, history_len, fold_count;
   ReplInputComplete complete;
   void *completion_context;
@@ -941,7 +941,6 @@ static void _render(EditState &l, int flags) {
     if (col) ab.printf("\x1b[%dC", col);
   }
 
-  l.oldpos = l.pos;
   if (flags & REFRESH_WRITE) l.oldrpos = rpos2;
 
   _write_bytes(fd, ab.content.bytes, ab.len());

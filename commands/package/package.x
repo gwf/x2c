@@ -619,10 +619,15 @@ static List _locked_row(List rows, String name, String version) {
 }
 
 static void _write_lock(String path, List rows) {
-  String text =
+  Buffer out = $auto(Buffer.new(0));
+  out.write(
     "# x2c lockfile. Written by x2c build; keep it with the manifest.\n"
-    "# name version kind platform url sha256\n";
-  foreach (List row, rows) text = %"$text${" ".join(row)}\n";
+    "# name version kind platform url sha256\n");
+  foreach (List row, rows) {
+    out.write(" ".join(row));
+    out.write_char('\n');
+  }
+  String text = out;
   try Path.publish_files(%($path $text));
   catch %(io-fail *detail): Diagnostics.host_error(detail);
 }

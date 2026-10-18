@@ -239,15 +239,6 @@ Iter Path.walk(Path root, Iter dest) {
   return dest.init((Var) {0}, _walk_next, pending);
 }
 
-static void _walk(Path directory, int depth, int hidden, Array paths) {
-  foreach (String name, directory.list_dir()) {
-    Path child = directory.join(name);
-    paths.push(child);
-    if (depth != 1 && (hidden || !name.startswith(".")) && _descends(child))
-      _walk(child, depth - 1, hidden, paths);
-  }
-}
-
 // globbing
 
 /* A `]` that opens a class is a member, as in a shell. */
@@ -366,6 +357,25 @@ static int _glob_depth(String components) {
   return depth;
 }
 
+/* One glob's matching policy and results, shared by its directory walk. */
+static typedef struct Glob {
+  Path pattern, Array matches;
+  int rooted, directories, hidden;
+} Glob;
+
+static void _glob(Glob &g, Path directory, int depth) {
+  foreach (String name, directory.list_dir()) {
+    Path child = directory.join(name);
+    String candidate = child;
+    if (!g.rooted) candidate = candidate[2:];
+    if (g.directories) candidate = %"$candidate/";
+    if (g.pattern.glob_match(candidate) &&
+        (!g.directories || child.is_dir())) g.matches.push(candidate);
+    if (depth != 1 && (g.hidden || !name.startswith(".")) && _descends(child))
+      _glob(g, child, depth - 1);
+  }
+}
+
 /** Returns the existing paths that match the glob `pattern`, sorted.
     The walk starts at the longest leading directory without a wildcard,
     spelled as the pattern spells it, and descends only as deep as the
@@ -381,17 +391,11 @@ List Path.glob(Path pattern) {
   int cut = wildcard - (const char *) text;
   while (cut && text[cut - 1] != '/') cut--;
   Path base = cut ? text[:cut] : NULL, root = base ? base : ".";
-  int directories = text.endswith("/"), depth = _glob_depth(text[cut:]);
-  int hidden = pattern.startswith(".") || "/." in pattern;
-  Array paths = [], matches = [];
-  if (root.is_dir()) _walk(root, depth, hidden, paths);
-  foreach (String path, paths) {
-    String candidate = base ? path : path[2:];
-    if (directories) candidate = %"$candidate/";
-    if (pattern.glob_match(candidate) && (!directories || Path.is_dir(path)))
-      matches.push(candidate);
-  }
-  return matches.sort().list_free();
+  Array matches = $auto([]);
+  Glob g = {pattern, matches, !!base, text.endswith("/"),
+            pattern.startswith(".") || "/." in pattern};
+  if (root.is_dir()) _glob(g, root, _glob_depth(text[cut:]));
+  return matches.sort();
 }
 
 // changing the filesystem
