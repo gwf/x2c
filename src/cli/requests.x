@@ -59,7 +59,7 @@ static int _make_owned(void) {
 }
 
 /** Returns the version line `--version` prints, without a newline. */
-String Compiler.version(void) => "x2c 0.15.0";
+String Compiler.version(void) => "x2c 0.15.1";
 
 /** Returns whether `request` selects a terminating inspection or dump mode. */
 int CliRequest.inspects(CliRequest request) => request.dump != 0;

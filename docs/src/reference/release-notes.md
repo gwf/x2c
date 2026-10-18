@@ -4,6 +4,21 @@ Each section summarizes what changed for a user of the compiler, runtime,
 commands, and packages since the previous release. The
 [installation chapter](../guide/installation.md) carries the upgrade steps.
 
+## 0.15.1 (2026-10-17)
+
+A patch release of 0.15.0. Existing installations upgrade in place; no
+packages need rebuilding.
+
+- An uncaught error prints one line naming the error, the raising function
+  and location, and its details, then aborts with the same status. The
+  full logger event remains available with `X2C_DEBUG` or a `<log>` policy.
+  See [Handlers and policy](../guide/exceptions.md#handlers-and-policy).
+- `$auto` on a local that is already managed is a compile-time error
+  instead of a crash at scope exit.
+- The REPL continues a list literal across lines.
+- The book gains this release notes page, and the repository gains a
+  security policy, a pull request template, and a bug report template.
+
 ## 0.15.0 (2026-10-17)
 
 Releases ship for macOS arm64 and x86_64 and Linux aarch64 and x86_64, with
