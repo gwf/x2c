@@ -94,6 +94,7 @@ static List _atom_element(Compiler c, String spelling) {
 }
 
 module List _parse_list_head(Compiler c) {
+  c.require_input();
   List reader_form = _parse_reader_prefix(c);
   if (reader_form) return reader_form;
   List splice = _parse_splice(c);

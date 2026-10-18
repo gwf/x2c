@@ -61,6 +61,14 @@ printf '%s\n' 'int n = 0;' \
 printf 'ok\nok\n=> 704982704\n' >"$tmp/loop-expected"
 cmp "$tmp/loop-expected" "$tmp/loop"
 
+# A List literal continues across lines until its closing parenthesis.
+printf '%s\n' 'List code = %(block' '  (if (not ready)' '    (call wait))' \
+  '  (call save));' 'code;' '%(a' 'b);' |
+  builds/0/libexec/x2c-repl >"$tmp/list"
+printf '%s\n' 'ok' '=> (block (if (not ready) (call wait)) (call save))' \
+  '=> (a b)' >"$tmp/list-expected"
+cmp "$tmp/list-expected" "$tmp/list"
+
 # SIGINT stops the running submission, and the next one still runs. A
 # background job starts with SIGINT ignored, so a signal sent before the
 # submission runs is lost and the loop sends another.

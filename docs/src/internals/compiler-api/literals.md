@@ -39,7 +39,7 @@ Conses the element expression `head` onto the cells `tail`, or appends
 the List a `(splice EXPR)` head holds, and folds the cell into the
 literal cache when both parts are constant.
 
-Source: `src/literals/quotation.x:255`
+Source: `src/literals/quotation.x:256`
 
 <a id="Compiler.parse_array_literal"></a>
 #### Compiler.parse_array_literal
@@ -94,7 +94,7 @@ Parses a macro pattern's parenthesized arguments and returns the static
 pattern of each: a binder or wildcard, a nested macro pattern, or a
 `%(...)` List pattern.
 
-Source: `src/literals/quotation.x:145`
+Source: `src/literals/quotation.x:146`
 
 <a id="Compiler.parse_map_entries"></a>
 #### Compiler.parse_map_entries
@@ -183,7 +183,7 @@ derived pattern, or returns NULL without consuming tokens. `content`
 selects the bare content, for the content position of an
 `(expr TYPE ...)` shell.
 
-Source: `src/literals/quotation.x:183`
+Source: `src/literals/quotation.x:184`
 
 <a id="Compiler.typed_match_pattern"></a>
 #### Compiler.typed_match_pattern
@@ -192,7 +192,7 @@ Source: `src/literals/quotation.x:183`
 
 Applies each typed capture's predicate to every unquoted occurrence.
 
-Source: `src/literals/quotation.x:335`
+Source: `src/literals/quotation.x:336`
 
 ## Design notes
 
