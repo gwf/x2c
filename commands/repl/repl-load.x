@@ -289,9 +289,11 @@ static int _defines_main(Frontend frontend, String filename) {
    file publishes refuse the replacement, as they refuse a reload. */
 static void _check_retired(ReplSession session, ReplLoadedFile retired) {
   String replacing = %"replacing ${retired.path} would remove";
+  Array types = $auto([]);
   foreach (List family, retired.types)
-    if (!_shared(session, retired, family))
-      _changed(%"$replacing ${family.car()} ${family.cadr()}");
+    if (!_shared(session, retired, family)) types.push(family.cadr());
+  // A typedef and its tag are separate rows of one type.
+  if (types.len()) _changed(%"$replacing type ${types.sort()[0]}");
   foreach (Var (name, entry), session.names)
     match (entry) case %(global (source ${retired.path}) *):
       _changed(%"$replacing global $name");

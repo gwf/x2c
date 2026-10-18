@@ -269,7 +269,7 @@ EOF
 cmp "$tmp/expected" "$tmp/out"
 cat >"$tmp/expected" <<'EOF'
 rejected: unresolved identifier: first_helper
-load failed: replacing TMP/typed-main.x would remove struct Pair; start a new session
+load failed: replacing TMP/typed-main.x would remove type Pair; start a new session
 EOF
 cmp "$tmp/expected" "$tmp/err"
 
