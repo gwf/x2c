@@ -134,7 +134,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("$(begin)\n" "void print(String text);\n" "void println(String text);\n");
+  _0 = String_new("$(begin)\n" "void print(String text);\n" "void println(String text);\n" "int printf(const char *format, ...);\n" "int puts(const char *text);\n");
   _1 = String_new("<repl>");
   _2 = String_new("#!");
   _3 = String_new("/");
