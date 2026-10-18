@@ -174,10 +174,10 @@ try:
     rejected = [
         (version(extra=addition) + "int broken( {", "expected"),
         (version(result="long", extra=addition), "function type changed"),
-        (version(answer=False, extra=addition), "function removed"),
+        (version(answer=False, extra=addition), "loaded_answer is "),
         (version(extra=addition).replace(
             "Count loaded_answer", "static Count loaded_answer"),
-         "function removed"),
+         "loaded_answer is "),
         (version(count="long", extra=addition), "declaration changed or removed"),
         (version(fields="int x; int y;", extra=addition),
          "declaration changed or removed"),
@@ -475,7 +475,7 @@ try:
             (main_version() + 'broken {', 'expected'),
             (main_version('void', 'return 9;'), 'function type changed: main'),
             ('meta int main_calls(void) { return 99; }\n',
-             'function removed: main')]:
+             'main is ')]:
         program.write_text(changed)
         session.load(program, error)
         session.value('main_calls()', 2)
@@ -974,6 +974,45 @@ try:
     session.value('shared_holder.point.x', 5)
     session.value('shared_saved()', 50)
     session.finish()
+finally:
+    session.close()
+
+# A reload may remove a function that no prompt code refers to. The name
+# leaves the session, and a later version may define it again.
+removal_root = root / "removal"
+removal_root.mkdir()
+removal = removal_root / "removal.x"
+kept = "int removal_kept(int n) { return n + 1; }\n"
+helper = "int removal_helper(int n) { return n * 2; }\n"
+other = "int removal_other(int n) { return n; }\n"
+removal.write_text(kept + helper)
+session = Session(removal_root)
+try:
+    session.load(removal)
+    session.value("removal_helper(4)", 8)
+    removal.write_text(kept)
+    session.load(removal)
+    session.run("removal_helper(4);", "unresolved identifier: removal_helper")
+    session.run(":info removal_helper", "not a session function")
+    session.run(":symbols removal_")
+    session.value("removal_kept(4)", 5)
+    removal.write_text(kept + helper.replace("n * 2", "n * 3") + other)
+    session.load(removal)
+    session.value("removal_helper(4)", 12)
+    session.run("int plus_helper(int n) { return removal_helper(n) + 1; }\n"
+                "Func saved_other = removal_other;")
+    removal.write_text(kept + other)
+    session.load(removal, "removal_helper is called by prompt function "
+                 "plus_helper")
+    removal.write_text(kept + helper)
+    session.load(removal, "removal_other is saved in prompt variable "
+                 "saved_other")
+    session.value("plus_helper(4)", 13)
+    session.value("saved_other(4)", 4)
+    output = session.finish()
+    assert f'removed ("removal_helper") from {removal}' in output, output
+    assert '%((native "removal_kept"))' in output, output
+    assert output.count("reloaded (") == 2, output
 finally:
     session.close()
 

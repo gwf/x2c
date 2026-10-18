@@ -59,16 +59,18 @@ module List _emit_prepared(
 
 /* A helper owns replacement bodies separately from the linked runtime.
    Included definitions take their provider's spelling; this file's public
-   definitions take its own. Evaluator names remain source spellings. */
+   definitions take its own. An import merges its package's definitions into
+   this file's collection, so the package's provider names them afterward.
+   Evaluator names remain source spellings. */
 static void _name_provider_bindings(
   Compiler c, String provider, Array units, Map dependencies) {
-  foreach (Var (path, index), meta_build_tables)
-    if (meta_build_providers && path != provider)
-      c.name_loaded_provider(path, index, meta_build_providers[path]);
-    else if (path != provider && path in dependencies)
-      c.name_meta_provider_bindings(path, index);
   int index = c.meta_build - 1;
   c.name_meta_provider_bindings(provider, index);
+  foreach (Var (path, table), meta_build_tables)
+    if (meta_build_providers && path != provider)
+      c.name_loaded_provider(path, table, meta_build_providers[path]);
+    else if (path != provider && path in dependencies)
+      c.name_meta_provider_bindings(path, table);
   Var identity, String name;
   foreach (List item, units)
     if (_function_identity(item, identity, name) &&

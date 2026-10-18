@@ -55,6 +55,20 @@ printf '%s\n' 'answer=0042' '=> 12' 'done' '=> 5' 'defined f' 'f7' 'p' \
   '=> 7' >"$tmp/stdio-expected"
 cmp "$tmp/stdio-expected" "$tmp/stdio"
 
+# String length, println in compiled code, and element updates that
+# evaluate their receiver and key once.
+printf '%s\n' 'String s = "abc";' 's.len();' '"ab".len();' \
+  'int f(void) { println("from f"); print("p\n"); return 1; }' 'f();' \
+  'Map m = {"t": 1};' 'int calls = 0;' \
+  'String key(void) { calls++; return "t"; }' 'm[key()] += 2;' 'calls;' \
+  '++m["t"];' 'Var v = (m["t"] *= 2);' 'v;' 'Array a = [1, 2];' \
+  'a[0] += 5;' 'a[1]--;' 'a;' |
+  builds/0/libexec/x2c-repl >"$tmp/updates"
+printf '%s\n' 'ok' '=> 3' '=> 2' 'defined f' 'from f' 'p' '=> 1' 'ok' \
+  'ok' 'defined key' 'ok' '=> 1' 'ok' 'ok' '=> 8' 'ok' 'ok' 'ok' \
+  '=> [ 6, 1 ]' >"$tmp/updates-expected"
+cmp "$tmp/updates-expected" "$tmp/updates"
+
 set +e
 builds/0/x2c repl extra </dev/null >"$tmp/bad-out" \
   2>"$tmp/bad-err"
@@ -62,6 +76,12 @@ result=$?
 set -e
 test "$result" -eq 2
 grep -qx 'x2c repl: unexpected operand' "$tmp/bad-err"
+set +e
+builds/0/x2c repl --bogus </dev/null >"$tmp/bad-out" 2>"$tmp/bad-err"
+result=$?
+set -e
+test "$result" -eq 2
+grep -qx 'x2c repl: unknown option: --bogus' "$tmp/bad-err"
 
 printf '%s\n' 'int n = 0;' \
   'for (int i = 0; i < 100000; i++) n += i;' 'n;' |

@@ -39,12 +39,13 @@ typedef struct ReplSession {
     value, or failed.
     diagnostics are ordinary compiler reports; message/cause describe the
     adapter or evaluator failure. source retains diagnostic source text;
-    syntax and lowered support optional tracing. */
+    syntax and lowered support optional tracing. removed lists
+    `(PATH (NAME ...))` for each file whose functions a load removed. */
 typedef struct ReplResult {
   Symbol status;
   Var value;
   String name, message, source;
-  List diagnostics, cause, syntax, lowered;
+  List diagnostics, cause, syntax, lowered, removed;
 } ReplResult;
 
 /** Byte range and sorted `(kind "spelling")` replacement candidates for one

@@ -11,11 +11,13 @@ helper execution.
 x2c repl
 x2c repl --help
 x2c repl --dump --stats
+x2c repl --package-dir examples/packages
 ```
 
 No source file or checkout is needed when using an installed development
 build. The command reads standard input and accepts no file operands. It also
 runs directly as `x2c-repl` from the installation's `libexec/x2c` directory.
+An unknown option is an error that names the option.
 
 ## Try a session
 
@@ -181,6 +183,9 @@ x2c> plus_answer(20);
 
 `:load` builds all loaded files into one native helper program. It uses the
 ordinary include, module, package, and native dependency handling.
+`--package-dir DIR` adds a package directory for every load, with the same
+meaning as for `x2c build` and `x2c run`. As for `x2c run`, build an
+imported package before loading a file that imports it.
 Public functions with bodies in the loaded file become prompt functions,
 including `main`. No `meta` annotation is needed. Static helpers such as
 `twice` remain private. Functions from included files and declaration-only
@@ -368,10 +373,40 @@ Other C dialect and dependency limitations still apply; loading does not
 provide missing libraries. Calling `exit` ends the helper, as described
 below under interrupted calls.
 
-`main` follows the same replacement rules as other loaded functions. Saved
-function values and compiled prompt callers use its replacement. Changing
-between the no-argument and argc/argv forms requires a new session. A second
-loaded file cannot publish another `main` in that session.
+Reloading the same file follows the replacement rules of other loaded
+functions. Saved function values and compiled prompt callers use the new
+`main`. Changing that file's `main` between the no-argument and argc/argv
+forms requires a new session.
+
+Loading a different file that defines `main` replaces the file that defined
+it, so one session can run several programs. Save this as `goodbye.c`:
+
+```x2c
+#include <stdio.h>
+int main(void) { puts("goodbye"); return 0; }
+```
+
+Load it after `hello.c`:
+
+```text
+x2c> :load "goodbye.c"
+removed ("main") from /home/me/hello.c
+loaded ("main")
+reset all loaded native state
+x2c> main();
+goodbye
+=> 0
+```
+
+The new `main` may use either form. The earlier file leaves the session, and
+the output names it and every function it removed. Removal follows the rule
+for [an edited file](#edit-a-loaded-file): if a prompt function or saved
+`Func` refers to one of those functions, the load fails and names that
+referrer. Public types and globals that only the earlier file publishes also
+make the load fail; start a new session for that change. Other loaded files
+and their globals stay registered, although the successful load resets their
+native state. Only `main` replaces a file; other duplicate public names still
+fail.
 
 ### Edit a loaded file
 
@@ -389,8 +424,18 @@ Existing functions must keep their argument and return types. Parameter
 names may change. Existing public types must keep their definitions. New
 functions, globals, and types are allowed when their names do not
 conflict. Existing globals must keep their declared types and qualifiers,
-including `const`. Removing an existing function, global, or type, or
-changing its type, requires a new session.
+including `const`. Removing an existing global or type, or changing the type
+of a function, global, or type, requires a new session.
+
+A file may remove a function when no prompt function calls it and no prompt
+variable holds it as a `Func`. The load prints `removed ("helper") from`
+and the file's path. The name leaves `:symbols`, a later prompt reference
+reports an unresolved identifier, and a later version may define it again.
+If prompt code refers to the function, the load fails and names the
+referrer, for example
+`load failed: helper is called by prompt function plus_helper`. A removal
+that also drops a public type, such as the only signature that names it,
+fails as a type removal.
 A refused replacement leaves the whole previous native program and its
 variables intact. This includes a compile, link, or compatibility failure
 in any loaded file, even when the command names a different file.
@@ -445,7 +490,9 @@ The current subset includes initialized simple variables, function
 definitions, integer arithmetic and narrowing, assignment, conditionals,
 `for` loops, self recursion, and calls to earlier functions. String values
 and length, List literals and indexing, and Array construction, mutation,
-and indexing are exercised by the focused checks. Captured `Func` values
+and indexing are exercised by the focused checks. Map and Array elements
+accept compound assignment and `++` and `--`, as in `m["t"] += 1`; the
+receiver and key are evaluated once. Captured `Func` values
 can be called directly or passed to supported native callbacks. A record
 captured by value retains a copy through later submissions.
 Reference captures share the original local or parameter, whose storage
@@ -500,7 +547,7 @@ newline. Compiled prompt functions call the C library's own `printf` and
 REPL sessions also provide `print(String)` and `println(String)`. `print`
 writes the String's bytes; `println` writes those bytes followed by one
 newline. Both are REPL-only, reserve their names in the session, and report
-`ok`.
+`ok`. Compiled prompt functions can call them too.
 
 A session also declares `Json`, `Diff` and `Path`, so `Json.parse`,
 `Diff.unified` and `Path.basename` evaluate without an include.

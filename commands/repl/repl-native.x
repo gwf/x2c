@@ -77,6 +77,16 @@ static List _rewrite_call(
         (args ${_local(c, p.self)} @{rewritten.list()})));
   Var callee = _rewrite(p, target);
   match (callee) case %(expr ("Func") ?): {
+    /* A Func boxes each value argument by its own type, so give it the type
+       the declaration names, as the native call it replaces would. The call
+       passes a reference argument's own place. */
+    match (target) case %(expr ((func ?declared) *) ?):
+      for (int i = 0; declared && i < rewritten.len(); i++) {
+        Var param = car(declared);
+        declared = cdr(declared);
+        if (param is <list> && !((Type) param).is_reference())
+          rewritten[i] = c.convert_expression(rewritten[i], param);
+      }
     List call = c.resolve_expression(
       %(expr () (call $callee (args @{rewritten.list()}))), NULL);
     return c.convert_expression(call, result);
