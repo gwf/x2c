@@ -273,11 +273,11 @@ static void f15_parsing_scripts____hoist(f15_parsing_scripts___ScriptParse * p, 
 
 static void _finish_script(Compiler c, List ast);
 
-static void _reject_statement(Compiler c);
+static void f15_parsing_scripts____reject_statement(Compiler c);
 
-static void _report_script_statement(Compiler c);
+static void f15_parsing_scripts____report_script_statement(Compiler c);
 
-static void _push_conditionals(Compiler c, Array statements, int first, int end);
+static void f15_parsing_scripts____push_conditionals(Compiler c, Array statements, int first, int end);
 
 static String f15_parsing_scripts___script_main;
 
@@ -287,13 +287,13 @@ static String f15_parsing_scripts___script_main;
 
 
 _x2c_gensym_initializer_choice_DC21180E_0((f15_parsing_scripts___script_main = _21))
-static void _append_script_main(Compiler c, Array statements);
+static void f15_parsing_scripts____append_script_main(Compiler c, Array statements);
 
 static Bytes f15_parsing_scripts____append_runs(Bytes stream, Token tokens, Array statements);
 
 static Bytes f15_parsing_scripts____append_placed(Bytes stream, Token token, Token first);
 
-static void _check_script_locals(Compiler c, List ast);
+static void f15_parsing_scripts____check_script_locals(Compiler c, List ast);
 
 static Map f15_parsing_scripts____script_locals(List ast);
 
@@ -1970,8 +1970,8 @@ static void _parse_script(Compiler c, Array nodes){
             Token tokens = c -> tokenizer -> tokens;
             if(Map_contains(c -> fn_defs, String_var(_16))) conflict = tokens + p.first;
             else{
-              _push_conditionals(c, p.statements, p.gap, c -> token - tokens);
-              _append_script_main(c, p.statements);
+              f15_parsing_scripts____push_conditionals(c, p.statements, p.gap, c -> token - tokens);
+              f15_parsing_scripts____append_script_main(c, p.statements);
               _parse_forms(c, nodes);
             }
 
@@ -1986,7 +1986,7 @@ static void _parse_script(Compiler c, Array nodes){
   }
   if(conflict){
     c -> token = conflict;
-    _report_script_statement(c);
+    f15_parsing_scripts____report_script_statement(c);
   }
 
 }
@@ -2010,12 +2010,12 @@ static int f15_parsing_scripts____script_form(f15_parsing_scripts___ScriptParse 
     x2c_exception_push(& _x2c_gensym_exception_frame_2);
     if(! sigsetjmp(_x2c_gensym_exception_frame_2.env, 0)){
       if(! c -> script -> defines_main){
-        _push_conditionals(c, (* p).statements, (* p).gap, begin);
+        f15_parsing_scripts____push_conditionals(c, (* p).statements, (* p).gap, begin);
         if(Compiler_script_statement_starts(c)) f15_parsing_scripts____hoist(&((* p)), begin, tokens);
         else _top_level(c, (* p).nodes);
       }
       else{
-        _reject_statement(c);
+        f15_parsing_scripts____reject_statement(c);
         _top_level(c, (* p).nodes);
       }
       (* p).gap = _end_index(c, tokens);
@@ -2086,7 +2086,7 @@ static void f15_parsing_scripts____hoist(f15_parsing_scripts___ScriptParse * p, 
 }
 
 static void _finish_script(Compiler c, List ast){
-  if(! c -> script -> defines_main && ! Compiler_error_count(c)) _check_script_locals(c, ast);
+  if(! c -> script -> defines_main && ! Compiler_error_count(c)) f15_parsing_scripts____check_script_locals(c, ast);
 }
 
 int Compiler_skip_collected_script_statement(Compiler c){
@@ -2096,7 +2096,7 @@ int Compiler_skip_collected_script_statement(Compiler c){
     Compiler_skip_script_statement(c);
     return 1;
   }
-  _reject_statement(c);
+  f15_parsing_scripts____reject_statement(c);
   return 0;
 }
 
@@ -2115,15 +2115,15 @@ void Compiler_skip_script_statement(Compiler c){
 
 }
 
-static void _reject_statement(Compiler c){
-  if(c -> script && c -> script -> defines_main && Compiler_script_statement_executes(c)) _report_script_statement(c);
+static void f15_parsing_scripts____reject_statement(Compiler c){
+  if(c -> script && c -> script -> defines_main && Compiler_script_statement_executes(c)) f15_parsing_scripts____report_script_statement(c);
 }
 
-static void _report_script_statement(Compiler c){
+static void f15_parsing_scripts____report_script_statement(Compiler c){
   Compiler_report_error(c, 33658058, _17, c -> token, _20);
 }
 
-static void _push_conditionals(Compiler c, Array statements, int first, int end){
+static void f15_parsing_scripts____push_conditionals(Compiler c, Array statements, int first, int end){
   Token tokens = c -> tokenizer -> tokens;
   for(int i = first;  i < end;  i ++){
     Token token = tokens + i;
@@ -2136,7 +2136,7 @@ static void _push_conditionals(Compiler c, Array statements, int first, int end)
 
 Token Token_skip_trivia(Token token);
 
-static void _append_script_main(Compiler c, Array statements){
+static void f15_parsing_scripts____append_script_main(Compiler c, Array statements){
   Token tokens = c -> tokenizer -> tokens, eof = c -> token;
   long kept = _end_index(c, tokens);
   Token first = tokens + Var_integer(Array_getindex(statements, 0));
@@ -2171,7 +2171,7 @@ static Bytes f15_parsing_scripts____append_placed(Bytes stream, Token token, Tok
   return Bytes_append(stream, & placed, 1);
 }
 
-static void _check_script_locals(Compiler c, List ast){
+static void f15_parsing_scripts____check_script_locals(Compiler c, List ast){
   Map locals = f15_parsing_scripts____script_locals(ast);
   if(! Map_len(locals)) return;
   {
