@@ -610,7 +610,6 @@ Source: `lib/scope/runtime.x:83`
 | Type | Kind | Summary |
 | --- | --- | --- |
 | [`Scope`](#Scope) | struct | Handle for a region and any retained regions linked below it. |
-| [`ScopeAlloc`](#ScopeAlloc) | struct | Intrusive header stored immediately before each `Scope`-owned allocation. |
 | [`ScopeStats`](#ScopeStats) | struct | Value snapshot of process-wide `Scope` allocation and lifetime counters. |
 
 <a id="Scope"></a>
@@ -624,16 +623,6 @@ allocation and region links.
 
 Source: `lib/scope/scope.x:34`
 
-<a id="ScopeAlloc"></a>
-### ScopeAlloc
-
-`typedef struct ScopeAlloc { struct ScopeAlloc *prev, *next; } *ScopeAlloc`
-
-Intrusive header stored immediately before each `Scope`-owned allocation.
-Its links are allocator-managed; callers must not construct or mutate it.
-
-Source: `lib/scope/scope.x:26`
-
 <a id="ScopeStats"></a>
 ### ScopeStats
 
@@ -646,6 +635,26 @@ Live and peak requested bytes count public payload only, excluding Scope
 metadata, native allocator overhead, and Pool's direct small-object blocks.
 
 Source: `lib/scope/scope.x:45`
+
+## Internal types
+
+These types connect runtime translation units and compiler-generated
+code. They are documented for source readers but are not supported as
+user API.
+
+| Type | Kind | Summary |
+| --- | --- | --- |
+| [`ScopeAlloc`](#ScopeAlloc) | struct | Intrusive header stored immediately before each `Scope`-owned allocation. |
+
+<a id="ScopeAlloc"></a>
+### ScopeAlloc
+
+`typedef struct ScopeAlloc { struct ScopeAlloc *prev, *next; } *ScopeAlloc`
+
+Intrusive header stored immediately before each `Scope`-owned allocation.
+Its links are allocator-managed; callers must not construct or mutate it.
+
+Source: `lib/scope/scope.x:26`
 
 ## Design notes
 

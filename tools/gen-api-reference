@@ -4,7 +4,7 @@
 
     Pages come from what the compiler says each runtime and compiler source
     unit defines (see `definitions.x`): signatures, lines, and doc
-    comments. Non-primary library API tiers come from
+    comments. Non-primary library callable and type tiers come from
     `docs/library-api-tiers.txt`. This tool owns `docs/src/library/modules/`,
     `docs/src/internals/compiler-api/`, and their sections of
     `docs/src/SUMMARY.md`; `docs/src/library/overview.md` is authored prose.
@@ -248,7 +248,7 @@ static Map _manifest(int validate):
       _fatal(%"$where lists $path, which does not exist")
   return rows
 
-/* `path|name` to tier for every non-primary callable. */
+/* `path|name` to tier for every non-primary callable or type. */
 static Map _tier_ledger(void):
   Map tiers = {}
   String where = "docs/library-api-tiers.txt"
@@ -295,6 +295,14 @@ static Map _module(Unit unit, String visibility, String note):
   module["declarations"] = []
   return module
 
+/* Removes and returns the ledger tier of `name` in `path`, or "primary". */
+static String _take_tier(Map remaining, String path, String name):
+  String key = %"$path|$name"
+  if !remaining.contains(key): return "primary"
+  String tier = remaining[key]
+  remaining.del(key)
+  return tier
+
 static Array _collect(Map units):
   Map manifest = _manifest(1), remaining = _tier_ledger()
   Array modules = []
@@ -305,13 +313,10 @@ static Array _collect(Map units):
     if visibility == "api" || visibility == "optional":
       (List callables, List declarations) = _public_surface(unit, 0)
       foreach List definition in callables:
-        String key = %"$path|${definition.car()}"
-        String tier = "primary"
-        if remaining.contains(key):
-          tier = remaining[key]
-          remaining.del(key)
+        String tier = _take_tier(remaining, path, definition.car())
         module["items"].array().push(_item(definition, tier, NULL))
       foreach Map item in declarations:
+        item["tier"] = _take_tier(remaining, path, item["name"])
         module["declarations"].array().push(item)
     else:
       foreach Map row in unit["functions"].array():
@@ -324,7 +329,7 @@ static Array _collect(Map units):
     List parts = remaining.keys().list().sort().car().str().partition("|")
     String path = parts.car(), name = parts.caddr()
     _fatal(%"docs/library-api-tiers.txt classifies $name in $path, but " +
-           "that name is not a published callable in that module")
+           "that name is not a published callable or type in that module")
   foreach Map module in modules:
     int primary = 0
     foreach Map item in module["items"].array():
@@ -394,19 +399,29 @@ static void _entry(Array lines, Map module, Map item, int level):
   _doc(lines, module, item)
   _add(lines, %(${%"Source: `${item["path"]}:${item["line"]}`"} ""))
 
-static List _by_name(Array items) =>
-  items.list().sort_by(%!(Map item) => item["name"])
-
+/* Public types, then the types the tier ledger marks internal. */
 static void _types(Array lines, Map module):
-  Array declarations = module["declarations"]
-  if !declarations.len(): return
-  _add(lines, %("## Public types" "" "| Type | Kind | Summary |"
-                "| --- | --- | --- |"))
-  foreach Map item in _by_name(declarations):
+  List declarations = module["declarations"].array()
+  _type_section(lines, module, "Public types", NULL,
+    declarations.filter(%!(Map item) => item["tier"] != "internal"))
+  _type_section(lines, module, "Internal types", %(
+    "These types connect runtime translation units and compiler-generated"
+    "code. They are documented for source readers but are not supported as"
+    "user API." ""),
+    declarations.filter(%!(Map item) => item["tier"] == "internal"))
+
+static void _type_section(
+    Array lines, Map module, String heading, List note, List items):
+  if !items: return
+  _add(lines, %(${%"## $heading"} ""))
+  _add(lines, note)
+  _add(lines, %("| Type | Kind | Summary |" "| --- | --- | --- |"))
+  List sorted = items.sort_by(%!(Map item) => item["name"])
+  foreach Map item in sorted:
     lines.push(%"| [`${item["name"]}`](#${item["name"]}) | " +
                %"${item["kind"]} | ${item["summary"]} |")
   lines.push("")
-  foreach Map item in _by_name(declarations): _entry(lines, module, item, 3)
+  foreach Map item in sorted: _entry(lines, module, item, 3)
 
 /* The summary table of `items`, then their entries grouped by receiver. */
 static void _callables(Array lines, Map module, List items):

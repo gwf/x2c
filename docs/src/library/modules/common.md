@@ -1049,8 +1049,6 @@ Source: `lib/common.x:440`
 | [`VarUnaryFn`](#VarUnaryFn) | callback | Applies one descriptor-owned unary operation and returns its result. |
 | [`VarUpdateIndexFn`](#VarUpdateIndexFn) | callback | Applies an indexed compound operation and returns the stored result. |
 | [`VarWriteFn`](#VarWriteFn) | callback | Appends one `Var` rendering to a caller-owned `Buffer` and returns it. |
-| [`X2CErrorSite`](#X2CErrorSite) | struct | Borrowed source location supplied during one compiler-generated raise. |
-| [`X2CStatic`](#X2CStatic) | struct | Zero-initialized compiler storage for one dynamic local static. |
 | [`uchar`](#uchar) | alias | Unsigned native character type. |
 | [`uint`](#uint) | alias | Unsigned native int type. |
 | [`ulong`](#ulong) | alias | Unsigned native long type. |
@@ -1405,30 +1403,6 @@ Appends one `Var` rendering to a caller-owned `Buffer` and returns it.
 
 Source: `lib/common.x:135`
 
-<a id="X2CErrorSite"></a>
-### X2CErrorSite
-
-`typedef struct X2CErrorSite { const char *file, *function, int line, runtime; } X2CErrorSite`
-
-Borrowed source location supplied during one compiler-generated raise.
-The pointed-to file and function spellings must outlive that call.
-`runtime` is set for a site compiled inside the runtime library.
-
-Source: `lib/common.x:208`
-
-<a id="X2CStatic"></a>
-### X2CStatic
-
-`typedef struct X2CStatic { int ready; void *payload, *owner; struct X2CStatic *next; } X2CStatic`
-
-Zero-initialized compiler storage for one dynamic local static.
-The runtime owns its fields. `payload` becomes available to the winning
-initializer before publication; an acquire returning zero observes the
-committed value. Failed attempts retain their address until teardown.
-Payload storage retains no referenced runtime objects.
-
-Source: `lib/common.x:243`
-
 ### uchar
 
 `typedef unsigned char uchar`
@@ -1460,6 +1434,41 @@ Source: `lib/common.x:119`
 Unsigned native short type.
 
 Source: `lib/common.x:115`
+
+## Internal types
+
+These types connect runtime translation units and compiler-generated
+code. They are documented for source readers but are not supported as
+user API.
+
+| Type | Kind | Summary |
+| --- | --- | --- |
+| [`X2CErrorSite`](#X2CErrorSite) | struct | Borrowed source location supplied during one compiler-generated raise. |
+| [`X2CStatic`](#X2CStatic) | struct | Zero-initialized compiler storage for one dynamic local static. |
+
+<a id="X2CErrorSite"></a>
+### X2CErrorSite
+
+`typedef struct X2CErrorSite { const char *file, *function, int line, runtime; } X2CErrorSite`
+
+Borrowed source location supplied during one compiler-generated raise.
+The pointed-to file and function spellings must outlive that call.
+`runtime` is set for a site compiled inside the runtime library.
+
+Source: `lib/common.x:208`
+
+<a id="X2CStatic"></a>
+### X2CStatic
+
+`typedef struct X2CStatic { int ready; void *payload, *owner; struct X2CStatic *next; } X2CStatic`
+
+Zero-initialized compiler storage for one dynamic local static.
+The runtime owns its fields. `payload` becomes available to the winning
+initializer before publication; an acquire returning zero observes the
+committed value. Failed attempts retain their address until teardown.
+Payload storage retains no referenced runtime objects.
+
+Source: `lib/common.x:243`
 
 ## Design notes
 
