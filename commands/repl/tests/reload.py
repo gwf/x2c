@@ -178,19 +178,19 @@ try:
         (version(extra=addition).replace(
             "Count loaded_answer", "static Count loaded_answer"),
          "loaded_answer is "),
-        (version(count="long", extra=addition), "declaration changed or removed"),
+        (version(count="long", extra=addition), "declaration changed"),
         (version(fields="int x; int y;", extra=addition),
-         "declaration changed or removed"),
-        (version(shape=False, extra=addition), "declaration changed or removed"),
+         "declaration changed"),
+        (version(shape=False, extra=addition), "LoadShape is used by prompt "),
         (version(fields="int x; delegate Part part;", extra=addition),
          "conflicting declaration"),
         (version(extra=addition).replace(
             "typedef int Count;", "typedef int Count __attribute__((aligned(16)));"),
-         "declaration changed or removed"),
+         "declaration changed"),
         (version(extra=addition).replace("LOAD_FIRST = 1", "LOAD_FIRST = 100"),
-         "declaration changed or removed"),
+         "declaration changed"),
         (version(extra=addition).replace("LOAD_SECOND", "LOAD_RENAMED"),
-         "declaration changed or removed"),
+         "declaration changed"),
         (version(extra=addition + "int second_answer(int n) { return n; }\n"),
          True),
         (version(extra=addition + "int through(int n) { return n; }\n"),
@@ -361,12 +361,12 @@ try:
             "typedef struct { const int x; int y; } Point;\ntypedef Point Same;\n",
             "typedef struct { int y; int x; } Point;\ntypedef Point Same;\n"]:
         types_file.write_text(extra + changed + ping)
-        session.load(types_file, "declaration changed or removed")
+        session.load(types_file, "declaration changed")
         session.value("p.x", 8)
     split = ("typedef struct { int x; int y; } Point;\n"
              "typedef struct { int x; int y; } Same;\n")
     types_file.write_text(extra + split + ping)
-    session.load(types_file, "declaration changed or removed")
+    session.load(types_file, "declaration changed")
     session.value("ping()", 7)
     session.finish()
 finally:
@@ -611,11 +611,13 @@ try:
     session.value('added', 6)
     session.value('label', '"start"')
     session.value('small == 250', 1)
-    for changed in [scalar_version(90, 'long counter', 'int added=6;'),
-                    scalar_version(90, 'const int counter', 'int added=6;'),
-                    scalar_version(90, 'static int counter', 'int added=6;')]:
+    for declaration, error in [
+            ('long counter', 'declaration changed'),
+            ('const int counter', 'declaration changed'),
+            ('static int counter', 'counter is used by prompt function ')]:
+        changed = scalar_version(90, declaration, 'int added=6;')
         scalars.write_text(changed.replace('counter = n;', '(void) n;'))
-        session.load(scalars, 'declaration changed or removed')
+        session.load(scalars, error)
         session.value('counter', 43)
         session.value('read_counter()', 43)
     scalars.write_text(scalar_version() + 'broken {')
@@ -772,7 +774,7 @@ try:
     for changed in [aggregate_version(90, size=4),
                     aggregate_version(90, field='long x;')]:
         aggregates.write_text(changed)
-        session.load(aggregates, 'declaration changed or removed')
+        session.load(aggregates, 'declaration changed')
         session.value('samples[1]', 21)
         session.value('points[1].x', 8)
         session.value('index_calls', 1)
@@ -1009,10 +1011,32 @@ try:
                  "saved_other")
     session.value("plus_helper(4)", 13)
     session.value("saved_other(4)", 4)
+
+    # Types and globals follow the same rule.
+    current = kept + helper.replace("n * 2", "n * 3") + other
+    box = ("typedef struct Box { int v; } Box;\nint box_count = 2;\n"
+           "int box_value(Box b) { return b.v; }\n")
+    removal.write_text(current + box)
+    session.load(removal)
+    session.value("box_count", 2)
+    removal.write_text(current)
+    session.load(removal)
+    session.run("box_count;", "unresolved identifier: box_count")
+    removal.write_text(current + box)
+    session.load(removal)
+    session.run("int uses_count(void) { return box_count; }\n"
+                "int uses_box(Box b) { return b.v; }")
+    removal.write_text(current + box.replace("int box_count = 2;\n", ""))
+    session.load(removal, "box_count is used by prompt function uses_count")
+    removal.write_text(current)
+    session.load(removal, "is used by prompt function uses_")
+    session.value("uses_count()", 2)
     output = session.finish()
     assert f'removed ("removal_helper") from {removal}' in output, output
+    assert (f'removed ("Box" "box_count" "box_value") from {removal}'
+            in output), output
     assert '%((native "removal_kept"))' in output, output
-    assert output.count("reloaded (") == 2, output
+    assert output.count("reloaded (") == 5, output
 finally:
     session.close()
 

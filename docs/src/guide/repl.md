@@ -399,11 +399,10 @@ goodbye
 ```
 
 The new `main` may use either form. The earlier file leaves the session, and
-the output names it and every function it removed. Removal follows the rule
-for [an edited file](#edit-a-loaded-file): if a prompt function or saved
-`Func` refers to one of those functions, the load fails and names that
-referrer. Public types and globals that only the earlier file publishes also
-make the load fail; start a new session for that change. Other loaded files
+the output names it and every public name it removed: its functions and
+globals, and the types that no remaining file publishes. Removal follows the
+rule for [an edited file](#edit-a-loaded-file): if prompt code refers to one
+of those names, the load fails and names that referrer. Other loaded files
 and their globals stay registered, although the successful load resets their
 native state. Only `main` replaces a file; other duplicate public names still
 fail.
@@ -424,18 +423,21 @@ Existing functions must keep their argument and return types. Parameter
 names may change. Existing public types must keep their definitions. New
 functions, globals, and types are allowed when their names do not
 conflict. Existing globals must keep their declared types and qualifiers,
-including `const`. Removing an existing global or type, or changing the type
-of a function, global, or type, requires a new session.
+including `const`. Changing the type of a function, global, or type
+requires a new session.
 
-A file may remove a function when no prompt function calls it and no prompt
-variable holds it as a `Func`. The load prints `removed ("helper") from`
-and the file's path. The name leaves `:symbols`, a later prompt reference
-reports an unresolved identifier, and a later version may define it again.
-If prompt code refers to the function, the load fails and names the
+A file may remove a function, global, or type when no prompt definition
+refers to it. The load prints `removed ("helper") from` and the file's path.
+The name leaves `:symbols`, a later prompt reference reports an unresolved
+identifier, and a later version may define it again. A prompt function
+refers to the functions it calls, the globals it uses, and the types in its
+declarations. A prompt variable refers to its type and to a function it
+holds as a `Func`; a prompt type refers to the types of its fields. If
+prompt code refers to a removed name, the load fails and names the
 referrer, for example
-`load failed: helper is called by prompt function plus_helper`. A removal
-that also drops a public type, such as the only signature that names it,
-fails as a type removal.
+`load failed: helper is called by prompt function plus_helper` or
+`load failed: Pair is used by prompt variable kept`. A type that another
+loaded file also publishes stays.
 A refused replacement leaves the whole previous native program and its
 variables intact. This includes a compile, link, or compatibility failure
 in any loaded file, even when the command names a different file.

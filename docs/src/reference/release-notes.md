@@ -10,9 +10,10 @@ commands, and packages since the previous release. The
   as `x2c build` and `x2c run` do, so loaded files can import packages. An
   unknown option is reported by name.
 - In the REPL, loading a new file that defines `main` replaces the file that
-  defined `main`, so one session can run several programs. A reload may
-  remove a function that no prompt code refers to. The load names the
-  functions it removed. See
+  defined `main`, so one session can run several programs. A reload or
+  replacement may remove a function, global, or type that no prompt
+  definition refers to; otherwise the load names the referrer. The load
+  names what it removed. See
   [Load a program with main](../guide/repl.md#load-a-program-with-main).
 
 ## 0.15.1 (2026-10-17)

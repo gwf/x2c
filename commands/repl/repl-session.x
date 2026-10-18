@@ -391,7 +391,7 @@ static List _thunk(List items) =>
 
 static void _refuse(String why) { raise %(repl (reason $why)); }
 
-static int _type_submission_names(List node, Array added) {
+int _type_submission_names(List node, Array added) {
   match (node) {
     case %(typedef ? (bindings *bindings)): {
       foreach (List binding, bindings)
