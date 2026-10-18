@@ -35,8 +35,6 @@ List Compiler_parse_parenthesized_statement(Compiler c);
 
 List Compiler_parse_macro_expression_target(Compiler c);
 
-List Compiler_apply_macro_value(Compiler c, List expr, List supplied, Token origin);
-
 List Compiler_parse_primary(Compiler c);
 
 List Compiler_parse_variable(Compiler c);
@@ -44,8 +42,6 @@ List Compiler_parse_variable(Compiler c);
 List Compiler_resolve_expression(Compiler c, List input, Token origin);
 
 int Compiler_needs_resolution(Compiler c, Var value);
-
-Symbol Compiler_require_var_tag(Compiler c, Type target, Token origin);
 
 List Compiler_var_tag_expression(Compiler c, Type target, Token origin);
 
@@ -62,8 +58,6 @@ List _x2c_func_call_arguments(List function, List storage, List arguments);
 List Compiler_func_call_parts(Compiler c, Var content);
 
 List Compiler_complete_iter_chain(Compiler c, List expression);
-
-const PrintfFn * List_printf_family(List l);
 
 String Compiler_printf_static_format(Compiler c, Var format);
 

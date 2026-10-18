@@ -42,8 +42,8 @@ Map Compiler.compiler_targets(void) {
 }
 
 static void _load_compiler_module(void) {
-  if (!Compiler.native_module_loaded(compiler_supplier))
-    Compiler.add_native_module(compiler_supplier, _compiler_targets);
+  if (!_native_module_loaded(compiler_supplier))
+    _add_native_module(compiler_supplier, _compiler_targets);
 }
 
 /** Selects the loaded native modules, by absolute path, that bodyless `meta`
@@ -55,8 +55,7 @@ void Compiler.select_native_modules(List paths) {
   Array linked = [];
   for (struct Extension *e = extensions; e; e = e.next) {
     String key = %"<${String.new(e.name)}>";
-    if (!Compiler.native_module_loaded(key))
-      Compiler.add_native_module(key, e.targets);
+    if (!_native_module_loaded(key)) _add_native_module(key, e.targets);
     linked.push(key);
   }
   paths = %($compiler_supplier @paths @{linked.list_free()});
@@ -77,7 +76,7 @@ void Compiler.select_package_module(
   if (!X2C_NATIVE_MODULES)
     $fail.meta_native_package_platform(c, token, name, module);
   c.add_translation_dependency(module);
-  if (!Compiler.native_module_loaded(module))
+  if (!_native_module_loaded(module))
     _load_package_module(c, name, module, token);
   if (module in native_module_order) return;
   $scope(&native_module_scope) {
@@ -102,7 +101,7 @@ String Compiler.load_native_module(String path) {
   if (!X2C_NATIVE_MODULES)
     $fail.meta_native_module_platform();
   String absolute = Path.absolute(path);
-  if (Compiler.native_module_loaded(absolute)) return absolute;
+  if (_native_module_loaded(absolute)) return absolute;
   int stamp = _module_stamp(path);
   if (stamp < 0) $fail.meta_native_module_invalid(path);
   if (!stamp)
@@ -117,7 +116,7 @@ String Compiler.load_native_module(String path) {
     for the import to report.
 */
 void Compiler.preload_native_module(String path) {
-  if (X2C_NATIVE_MODULES && !Compiler.native_module_loaded(path) &&
+  if (X2C_NATIVE_MODULES && !_native_module_loaded(path) &&
       _module_stamp(path) == 1)
     _open_native_module(path);
 }
@@ -168,14 +167,14 @@ static void _open_native_module(String path) {
     $fail.meta_native_module_load(path, String.new(dlerror()));
   Map (*entry)(void) = (Map (*)(void)) dlsym(handle, "x2c_module_targets");
   if (!entry) $fail.meta_native_module_invalid(path);
-  Compiler.add_native_module(path, entry);
+  _add_native_module(path, entry);
 }
 
-/** Records the name-to-`Func` Map that the entry of the native module loaded
-    from absolute `path` returns. The Funcs, names, signatures, and path last
-    for the process.
+/* Records the name-to-`Func` Map that the entry of the native module loaded
+   from absolute `path` returns. The Funcs, names, signatures, and path last
+   for the process.
 */
-void Compiler.add_native_module(String path, Map (*entry)(void)) {
+module void _add_native_module(String path, Map (*entry)(void)) {
   Map targets = NULL;
   $scope(&native_module_scope) {
     if (!(void *) native_modules) {
@@ -199,8 +198,8 @@ static void _native_module_shutdown(void) {
   native_module_order = NULL;
 }
 
-/** Reports whether the native module at absolute `path` is loaded. */
-int Compiler.native_module_loaded(String path) =>
+/* `path` is absolute, as `_add_native_module` records it. */
+module int _native_module_loaded(String path) =>
   (void *) native_modules && path in native_modules;
 
 /** Returns the name-to-`Func` Map of the loaded native module at absolute

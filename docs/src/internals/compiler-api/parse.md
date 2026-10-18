@@ -45,7 +45,6 @@ X2c declarations, parsed from source or constructed.
 | [`Compiler.parse_fields`](#Compiler.parse_fields) | Parses aggregate fields in source order up to the current closing brace. |
 | [`Compiler.parse_function_definition`](#Compiler.parse_function_definition) | Parses one function declaration and its required compound body. |
 | [`Compiler.parse_function_target`](#Compiler.parse_function_target) | Parses one function decorator target and returns its resulting AST. |
-| [`Compiler.parse_import_declaration`](#Compiler.parse_import_declaration) | Parses and registers one `import` declaration, including its semicolon. |
 | [`Compiler.parse_named_type`](#Compiler.parse_named_type) | Captures a name followed by an ordinary complete type and semicolon. |
 | [`Compiler.parse_optional_identifier`](#Compiler.parse_optional_identifier) | Consumes and returns the current identifier, or NULL without consuming. |
 | [`Compiler.parse_parameter`](#Compiler.parse_parameter) | Parses one parameter and returns `(param TYPE DECLARATOR)` or `(...)`. |
@@ -62,9 +61,7 @@ X2c declarations, parsed from source or constructed.
 | [`Compiler.protocol_form_starts`](#Compiler.protocol_form_starts) | Reports whether the cursor begins a protocol declaration or adoption, including its `meta` and `static` markers. |
 | [`Compiler.script_statement_executes`](#Compiler.script_statement_executes) | Reports whether the top-level item at the cursor is a script statement that runs, rather than a declaration: an expression, control flow, a `with` block, or a statement macro. |
 | [`Compiler.script_statement_starts`](#Compiler.script_statement_starts) | Reports whether the top-level item at the cursor is one of a script unit's statements, which become `main`'s body. |
-| [`Compiler.skip_linkage_brace`](#Compiler.skip_linkage_brace) | Consumes one brace of a C linkage specification at file scope and reports whether it did. |
 | [`Compiler.source_clause`](#Compiler.source_clause) | The source clause `kind`, which the binder parses when it reaches it. |
-| [`Compiler.take_meta_marker`](#Compiler.take_meta_marker) | Consumes the `meta` marker at the cursor and the contextual `native` marker that may follow it, and returns the `meta` token. |
 | [`Compiler.test_declaration`](#Compiler.test_declaration) | Tests whether the current token can begin a declaration without consuming. |
 | [`Compiler.test_static_assert`](#Compiler.test_static_assert) | Reports whether the current identifier starts a C static assertion. |
 
@@ -440,18 +437,6 @@ an ordinary function definition is required.
 
 Source: `src/parse/functions.x:28`
 
-<a id="Compiler.parse_import_declaration"></a>
-#### Compiler.parse_import_declaration
-
-`List Compiler.parse_import_declaration(Compiler c)`
-
-Parses and registers one `import` declaration, including its semicolon.
-The alias defaults to the package name; `with` members add source-ordered
-local spellings. These spellings affect source resolution only; the package
-name in the returned AST drives the generated header include.
-
-Source: `src/parse/units.x:342`
-
 <a id="Compiler.parse_named_type"></a>
 #### Compiler.parse_named_type
 
@@ -633,20 +618,6 @@ and definitions stay at file scope. This query does not consume tokens.
 
 Source: `src/parse/units.x:254`
 
-<a id="Compiler.skip_linkage_brace"></a>
-#### Compiler.skip_linkage_brace
-
-`int Compiler.skip_linkage_brace(Compiler c)`
-
-Consumes one brace of a C linkage specification at file scope and reports
-whether it did. `extern "C" {` opens a group; a `}` at file scope closes
-the innermost open group, because every other file-scope form consumes
-its own braces. The declarations between them stay at file scope. The
-`#ifdef __cplusplus` arm of the usual header guard is skipped, so only an
-unguarded group reaches this operation.
-
-Source: `src/parse/units.x:109`
-
 <a id="Compiler.source_clause"></a>
 #### Compiler.source_clause
 
@@ -655,18 +626,6 @@ Source: `src/parse/units.x:109`
 The source clause `kind`, which the binder parses when it reaches it.
 
 Source: `src/parse/binding.x:307`
-
-<a id="Compiler.take_meta_marker"></a>
-#### Compiler.take_meta_marker
-
-`Token Compiler.take_meta_marker(Compiler c, int &?native)`
-
-Consumes the `meta` marker at the cursor and the contextual `native`
-marker that may follow it, and returns the `meta` token. `native` binds
-the definition after it the way a bodyless prototype would. `*native`,
-when requested, reports whether that marker was present.
-
-Source: `src/parse/units.x:321`
 
 <a id="Compiler.test_declaration"></a>
 #### Compiler.test_declaration

@@ -78,7 +78,7 @@ module void _check_converter_args(
      family's positions count the receiver a method call spells before the
      dot, which `arguments` has already dropped. A format the printf
      component cannot read leaves those values as written. */
-  const PrintfFn *info = callee.printf_family();
+  const PrintfFn *info = _printf_family(callee);
   if (!info || !c.printf_static_format(supplied[info.fmt_arg])) return;
   int first = info.first_arg - method, index = 0;
   for (List a = arguments, n = notes; a; a = cdr(a), n = cdr(n))

@@ -106,12 +106,12 @@ static List _prototype_params(List parameters, int &changed) {
 
 // designated nodes
 
-/** Returns the innermost node `value` designates, past the forms that still
-    name the same object: an `expr` wrapper, parentheses, a member, and an
-    index into an array. What remains is a name, a designation through a
-    pointer, or another expression; a non-list designates nothing.
+/* Returns the innermost node `value` designates, past the forms that still
+   name the same object: an `expr` wrapper, parentheses, a member, and an
+   index into an array. What remains is a name, a designation through a
+   pointer, or another expression; a non-list designates nothing.
 */
-List Ast.designated(Var value) {
+static List _designated(Var value) {
   while (value is <list>) {
     List node = value;
     match (node) {
@@ -131,7 +131,7 @@ List Ast.designated(Var value) {
     array field remains part of its containing aggregate.
 */
 List Ast.lvalue_binding(Ast ast) {
-  List designated = Ast.designated(ast);
+  List designated = _designated(ast);
   match (designated)
     case $source_identifier_content(%(?binding)): return binding;
   return NULL;
@@ -158,7 +158,7 @@ String Ast.addressed_identifier(Var value) {
     an error transfer requires, applies to this name.
 */
 String Ast.direct_identifier(Var value) {
-  List designated = Ast.designated(value);
+  List designated = _designated(value);
   match (designated) {
     case $source_identifier_content(%(?binding)):
       return Ast.binding_spelling(binding);
@@ -176,7 +176,7 @@ String Ast.direct_identifier(Var value) {
     holds, which `Ast.direct_identifier` reports as no name at all.
 */
 String Ast.indirect_identifier(Var value) {
-  List designated = Ast.designated(value);
+  List designated = _designated(value);
   match (designated) {
     case ${$indexed(%(!set ?base (expr ? ?)), ?)}:
       return Ast.direct_identifier(base);

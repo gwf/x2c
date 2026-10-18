@@ -29,10 +29,6 @@ String Compiler_load_native_module(String path);
 
 void Compiler_preload_native_module(String path);
 
-void Compiler_add_native_module(String path, Map(* entry)(void));
-
-int Compiler_native_module_loaded(String path);
-
 Map Compiler_native_module_targets(String path);
 
 int Compiler_supplies_native_meta(String name);
@@ -42,8 +38,6 @@ void x2c_register_extension(const char * name, Map(* targets)(void));
 int Compiler_links_extension(String name);
 
 String Compiler_extension_archive(void);
-
-int Compiler_project_meta_uses_linked(Compiler c, String name, String provider);
 
 int Compiler_bind_linked_meta(Compiler c, List fn, Type type);
 
@@ -62,8 +56,6 @@ void Compiler_install_meta_declaration(Compiler c, List declaration, Token marke
 void Compiler_record_project_meta_effect(Compiler c, List declaration, Token marker);
 
 void Compiler_install_project_meta_effect(Compiler c, List row);
-
-int Compiler_bind_project_meta(Compiler c, String name);
 
 List Compiler_evaluate_meta_expression(Compiler c, List expression, Token site);
 

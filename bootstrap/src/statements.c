@@ -20,6 +20,8 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 
+static List _parse_statement(Compiler c);
+
 static List _statement(Compiler c, Symbol position);
 
 static List _statement_keywords(void);
@@ -387,8 +389,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _167 = cons(_166, NULL);
 }
 
-List Compiler_parse_statement(Compiler c){
-  if(! _init_guard_) _file_init_();
+static List _parse_statement(Compiler c){
   return _statement(c, 43159332400040);
 }
 
@@ -1053,7 +1054,7 @@ List Compiler_parse_governed(Compiler c, Symbol position){
     }
     ;  x2c_cleanup_push(& _x2c_gensym_defer_record_6); {
       int depth = _take_directives(c, items);  while(1){
-        Token start = c -> token;  Array_push(items, List_var(position == 5011670 ? Compiler_parse_block_item(c) : Compiler_parse_statement(c)));  depth = _depth_after(c, start, depth);  if(depth <= 0) break;  Symbol end = _arm_end(Compiler_leading_preproc(c));  if(! end) break;  depth += _take_directives(c, items);  c -> directives_taken = c -> token;  if(depth <= 0 || end == 7109834 || Compiler_peek(c, 0) == 251 || Compiler_peek(c, 0) == 11212) break;
+        Token start = c -> token;  Array_push(items, List_var(position == 5011670 ? Compiler_parse_block_item(c) : _parse_statement(c)));  depth = _depth_after(c, start, depth);  if(depth <= 0) break;  Symbol end = _arm_end(Compiler_leading_preproc(c));  if(! end) break;  depth += _take_directives(c, items);  c -> directives_taken = c -> token;  if(depth <= 0 || end == 7109834 || Compiler_peek(c, 0) == 251 || Compiler_peek(c, 0) == 11212) break;
       }
       {
         List _x2c_gensym_return_value_3 = Var_list_payload(Array_len(items) == 1 ? Array_getindex(items, 0) : List_var(cons(_138, List_append(Array_list(items), NULL)))); {
@@ -1110,7 +1111,7 @@ static List _continued(Compiler c, List statement){
 }
 
 List Compiler_parse_block_item(Compiler c){
-  if(! _init_guard_) _file_init_();  _x2c_complete_here(c, 5011670, _block_keywords());  if(Compiler_test_static_assert(c)) return Compiler_parse_static_assert(c);  List slot = Compiler_try_parse_macro_slot(c, 5011670);  if(List_truth(slot)) return slot;  if(Compiler_local_macro_form_is_definition(c)) return _local_macro(c);  if(Compiler_at_word(c, _0)) return Compiler_parse_statement(c);  int with_expression = ! ! List_truth(Compiler_with_binding(c));  List macro = with_expression ? NULL : Compiler_try_parse_macro_target_at(c, 5011670);  if(List_truth(macro)) return macro;  if(Compiler_test_declaration(c)) return _declaration_item(c);  return _statement(c, 5011670);
+  if(! _init_guard_) _file_init_();  _x2c_complete_here(c, 5011670, _block_keywords());  if(Compiler_test_static_assert(c)) return Compiler_parse_static_assert(c);  List slot = Compiler_try_parse_macro_slot(c, 5011670);  if(List_truth(slot)) return slot;  if(Compiler_local_macro_form_is_definition(c)) return _local_macro(c);  if(Compiler_at_word(c, _0)) return _parse_statement(c);  int with_expression = ! ! List_truth(Compiler_with_binding(c));  List macro = with_expression ? NULL : Compiler_try_parse_macro_target_at(c, 5011670);  if(List_truth(macro)) return macro;  if(Compiler_test_declaration(c)) return _declaration_item(c);  return _statement(c, 5011670);
 }
 
 static List _block_keywords(void){

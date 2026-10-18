@@ -20,8 +20,6 @@
 #include "utils.h"
 List Compiler_parse_top_level_mode(Compiler c, int skip_body);
 
-int Compiler_skip_linkage_brace(Compiler c);
-
 List Compiler_parse_top_level(Compiler c);
 
 List Compiler_parse_submission(Compiler c, int end_position);
@@ -35,10 +33,6 @@ int Compiler_script_statement_executes(Compiler c);
 int Compiler_protocol_form_starts(Compiler c);
 
 int Compiler_meta_form_is_declaration(Compiler c);
-
-Token Compiler_take_meta_marker(Compiler c, int * native);
-
-List Compiler_parse_import_declaration(Compiler c);
 
 String Compiler_definition_doc(Compiler c, Token start);
 

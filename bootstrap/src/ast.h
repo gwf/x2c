@@ -22,8 +22,6 @@ List Ast_append_modifiers(List declarator, List modifiers);
 
 List Ast_prototype_declarator(List declarator);
 
-List Ast_designated(Var value);
-
 List Ast_lvalue_binding(Ast ast);
 
 String Ast_addressed_identifier(Var value);

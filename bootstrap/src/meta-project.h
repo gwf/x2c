@@ -16,8 +16,6 @@
 #include <unistd.h>
 void Frontend_prepare_meta(Frontend f, List inputs);
 
-MetaHelper Frontend_build_meta(Frontend f, List inputs);
-
 MetaHelper Frontend_build_loaded(Frontend f, List filenames);
 
 

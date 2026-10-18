@@ -117,6 +117,8 @@ static void _stopped(Call * call, String reason);
 
 static int _table_of(String path, int otherwise);
 
+static void _close(MetaHelper helper);
+
 static void _drop(void * raw);
 
 static void _shutdown(void);
@@ -893,11 +895,9 @@ void MetaHelper_retain_executable(MetaHelper helper){
   helper -> path = path;
 }
 
-void MetaHelper_close(MetaHelper helper);
-
 void Compiler_use_meta_helper(MetaHelper helper){
   if(! _init_guard_) _file_init_();
-  if(primary) MetaHelper_close(primary);
+  if(primary) _close(primary);
   if(! primary_scope) Scope_shutdown_hook(_shutdown);
   primary = helper;
   if(! helper) return;
@@ -1045,8 +1045,7 @@ void MetaHelper_restart(MetaHelper helper){
 
 }
 
-void MetaHelper_close(MetaHelper helper){
-  if(! _init_guard_) _file_init_();
+static void _close(MetaHelper helper){
   if(! helper || ! helper -> scope) return;
   MetaHelper previous = active;
   active = helper;
@@ -1080,7 +1079,7 @@ void MetaHelper_close(MetaHelper helper){
 }
 
 static void _drop(void * raw){
-  MetaHelper_close(raw);
+  _close(raw);
 }
 
 static void _shutdown(void){

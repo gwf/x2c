@@ -169,7 +169,7 @@ List Compiler.parse_lambda_literal(Compiler c) {
     List body = _parse_lambda_body(c);
     List ftype = %((func ${c.lambda_param_types(entries)}) "Var");
     List captures = c.end_lambda_captures();
-    c.check_lambda_captures(body);
+    _check_lambda_captures(c, body);
     if (c.macro_holes) captures = prescribed.list_free();
     c.sym.pop_scope();
     if (c.macro_holes) return _lambda_template(c, body, captures, entries);
@@ -348,7 +348,7 @@ List Compiler.bind_lambda_expression(
       _add_param(c, entries, _declare_param(c, entry));
     body = _bind_body(c, body);
     List captures = c.end_lambda_captures();
-    c.check_lambda_captures(body);
+    _check_lambda_captures(c, body);
     List params = entries.list_free();
     if (captures)
       return c.rebuild_expression(
@@ -632,11 +632,11 @@ void Compiler.respell_captures(Compiler c, List binding) {
 
 // capture checks
 
-/** Rejects writes and reference access to read-only snapshot bindings.
-    The body has already resolved identifiers and call arguments. Templates
-    defer this check until expansion; nested lambdas check their own bodies.
+/* Rejects writes and reference access to read-only snapshot bindings.
+   The body has already resolved identifiers and call arguments. Templates
+   defer this check until expansion; nested lambdas check their own bodies.
 */
-void Compiler.check_lambda_captures(Compiler c, List ast) {
+static void _check_lambda_captures(Compiler c, List ast) {
   if (c.macro_holes) return;
   List node;
   $ast.walk(ast, node)

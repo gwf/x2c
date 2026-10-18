@@ -276,8 +276,8 @@ static Map _code_effects(Compiler c, Var effects) {
       case %(rewrite ?point ?kind ?name ?shape ?holes): {
         _register_rewrite(
           c, _rewrite_rule(point, kind, name, shape, holes, 0, 1));
-        c.record_compile_time_effect(
-          %(compile-time rewrite $point ${c.freeze_declaration_syntax(kind)}
+        _record_compile_time_effect(
+          c, %(compile-time rewrite $point ${c.freeze_declaration_syntax(kind)}
             $name ${c.freeze_declaration_syntax(shape)}
             ${c.freeze_declaration_syntax(holes)}), c.token);
       }
@@ -331,7 +331,7 @@ void Compiler.place(Compiler c, List where, Var code) {
 static void _place_support(Compiler c, Var code) {
   Block local = c.sym.close_local_scopes();
   defer c.sym.reopen_scopes(local);
-  c.add_support(c.written_support(c.bind_syntax(code, <unit>, NULL)));
+  c.add_support(_written_support(c, c.bind_syntax(code, <unit>, NULL)));
 }
 
 /** Binds a code-value carrier that a meta call returned outside a macro

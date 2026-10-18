@@ -545,6 +545,8 @@ static Var f8_rewrites____bound_held(Compiler c, SlotWatch held, Symbol kind, Va
 
 static List f8_rewrites____lowered_definition(Compiler c, Var result);
 
+static List _written_support(Compiler c, List bound);
+
 static List f8_rewrites____lowered(Compiler c, Var result, Symbol position, Type expected, Token site);
 
 static f8_rewrites___Effects f8_rewrites____effects(Compiler c);
@@ -587,6 +589,8 @@ typedef struct MacroPos{
   int semicolon;
 }
 MacroPos;
+
+static void _record_compile_time_effect(Compiler c, List row, Token start);
 
 static int f23_invocations_recognition____fixed_alias(Compiler c, Atom alias);
 
@@ -5444,8 +5448,6 @@ static void f8_rewrites____held_parts(List source, Symbol point, Array found){
 
 }
 
-List Compiler_written_support(Compiler c, List bound);
-
 static List f8_rewrites____bound(Compiler c, Symbol point, Var kind, List source, Var result, Symbol position, Type expected, Token site, int lower){
   if(point != 948490) return f8_rewrites____bind_replacement(c, result, position, expected);
   Array parts = Array_new();
@@ -5465,7 +5467,7 @@ static List f8_rewrites____bound(Compiler c, Symbol point, Var kind, List source
       f8_rewrites____held_parts(source, point, parts);
       if(lower) result = f8_rewrites____kept_lowered(result, source, parts);
       List bound = f8_rewrites____bind_replacement(c, result, position, expected);
-      if(position == 1405544) bound = Compiler_written_support(c, bound);
+      if(position == 1405544) bound = _written_support(c, bound);
       struct SlotWatch held ={
         Array_list(parts)
       }
@@ -5638,7 +5640,7 @@ static List f8_rewrites____lowered_definition(Compiler c, Var result){
       {
         * _x2c_gensym_macro_address_17 = NULL;
         {
-          List _x2c_gensym_return_value_17 = Compiler_normalize(c, Compiler_written_support(c, bound));
+          List _x2c_gensym_return_value_17 = Compiler_normalize(c, _written_support(c, bound));
           {
             x2c_cleanup_leave(& _x2c_gensym_defer_record_29);
             return _x2c_gensym_return_value_17;
@@ -5656,8 +5658,7 @@ static List f8_rewrites____lowered_definition(Compiler c, Var result){
 
 List Ast_written_definitions(List);
 
-List Compiler_written_support(Compiler c, List bound){
-  if(! _init_guard_) _file_init_();
+static List _written_support(Compiler c, List bound){
   List writers = List_truth(c -> applying) && List_cdr(c -> applying) == c -> active_rewrites ? c -> applying : c -> active_rewrites;
   RewriteRule writer = List_truth(writers) ? Var_pointer(List_car(writers)) : NULL;
   return writer && writer -> builtin ? Ast_written_definitions(bound) : bound;
@@ -6259,14 +6260,13 @@ Ast Compiler_watched_step(Compiler c, Ast ast){
   return lowered;
 }
 
-void Compiler_record_compile_time_effect(Compiler c, List row, Token start);
 List Compiler_publish_macro_definition_node(Compiler c, List node){
-  if(! _init_guard_) _file_init_();  Map_setindex(c -> macros, List_assoc(node, Symbol_var(920394)), List_var(node));  if(c -> shallow && ! Map_truth(c -> macro_holes) && ! Var_equal(List_assoc(node, Symbol_var(1317118534)), int_var(1)) && ! Var_int(List_assoc(node, Symbol_var(26155096)))) Compiler_record_compile_time_effect(c, cons(_439, cons(_111, cons(Compiler_freeze_declaration_syntax(c, List_var(node)), NULL))), c -> token);  return node;
+  if(! _init_guard_) _file_init_();  Map_setindex(c -> macros, List_assoc(node, Symbol_var(920394)), List_var(node));  if(c -> shallow && ! Map_truth(c -> macro_holes) && ! Var_equal(List_assoc(node, Symbol_var(1317118534)), int_var(1)) && ! Var_int(List_assoc(node, Symbol_var(26155096)))) _record_compile_time_effect(c, cons(_439, cons(_111, cons(Compiler_freeze_declaration_syntax(c, List_var(node)), NULL))), c -> token);  return node;
 }
 
 void Sym_set(Sym, List, List);
-void Compiler_record_compile_time_effect(Compiler c, List row, Token start){
-  if(! _init_guard_) _file_init_();  if(! c -> shallow || c -> source_private || Map_truth(c -> macro_holes) || ! Sym_at_file_scope(c -> sym) || c -> builtin_defs || ! String_truth(c -> filename) || String_startswith(c -> filename, _517)) return;  String source = Compiler_portable_path(Path_absolute(c -> filename));  List key = cons(_519, cons(List_var(cons(_439, cons(String_var(source), cons(int_var(start -> pos), NULL)))), NULL));  List previous = Sym_get(c -> sym, key);  if(List_truth(previous)) row = cons(_439, cons(_520, cons(List_var(previous), cons(List_var(row), NULL))));  Sym_set(c -> sym, key, row);
+static void _record_compile_time_effect(Compiler c, List row, Token start){
+  if(! c -> shallow || c -> source_private || Map_truth(c -> macro_holes) || ! Sym_at_file_scope(c -> sym) || c -> builtin_defs || ! String_truth(c -> filename) || String_startswith(c -> filename, _517)) return;  String source = Compiler_portable_path(Path_absolute(c -> filename));  List key = cons(_519, cons(List_var(cons(_439, cons(String_var(source), cons(int_var(start -> pos), NULL)))), NULL));  List previous = Sym_get(c -> sym, key);  if(List_truth(previous)) row = cons(_439, cons(_520, cons(List_var(previous), cons(List_var(row), NULL))));  Sym_set(c -> sym, key, row);
 }
 
 void Compiler_evaluate_declaration_effect(Compiler c, String form, Token invocation);
@@ -6422,7 +6422,7 @@ Atom Compiler_parse_keyword_definition(Compiler c){
   if(! _init_guard_) _file_init_();  Token declaration = c -> token;  int storage = Compiler_test(c, 1317118534) || c -> source_private;  Compiler_expect(c, 19147688);  if(Compiler_peek(c, 0) != 19147688) Compiler_report_error(c, 33658058, _561, c -> token, NULL);  Atom alias = Atom_intern(c -> token -> text);  Compiler_next(c);  if(f23_invocations_recognition____fixed_alias(c, alias)) Compiler_report_error(c, 27335838, _562, declaration, NULL);  Token reference = c -> token;  List definition = _lookup(c, _name(c), reference);  Symbol kind = Var_symbol(List_assoc(definition, Symbol_var(740232)));  if(!(SymbolSet_contains(f23_invocations_recognition___alias_kinds, kind))){
     String spelling = _kind_spelling(kind);  Compiler_report_error(c, 27335838, String_join(NULL, cons(String_var(_563), cons(String_var(spelling), cons(String_var(_7), NULL)))), declaration, cons(String_var(_definition_note(definition)), NULL));
   }
-  Compiler_expect(c, 119);  Map_setindex(c -> kw_aliases, alias, List_var(definition));  if(! storage) Compiler_record_compile_time_effect(c, ({
+  Compiler_expect(c, 119);  Map_setindex(c -> kw_aliases, alias, List_var(definition));  if(! storage) _record_compile_time_effect(c, ({
     Atom _x2c_gensym_literal_part_86 = alias;  Var _x2c_gensym_literal_part_87 = Compiler_freeze_declaration_syntax(c, List_var(definition));  cons(_439, cons(_529, cons(_x2c_gensym_literal_part_86, cons(_x2c_gensym_literal_part_87, NULL))));
   }
   ), declaration);  return alias;
@@ -8873,7 +8873,7 @@ static Map f6_values____code_effects(Compiler c, Var effects){
             holes = _x2c_gensym_match_value_4;
             {
               _register_rewrite(c, _rewrite_rule(Var_symbol(point), kind, Var_as_string(name), Var_list_payload(shape), Var_list_payload(holes), 0, 1));
-              Compiler_record_compile_time_effect(c, ({
+              _record_compile_time_effect(c, ({
                 Var _x2c_gensym_literal_part_127 = point;  Var _x2c_gensym_literal_part_128 = Compiler_freeze_declaration_syntax(c, kind);  Var _x2c_gensym_literal_part_129 = name;  Var _x2c_gensym_literal_part_130 = Compiler_freeze_declaration_syntax(c, shape);  Var _x2c_gensym_literal_part_131 = Compiler_freeze_declaration_syntax(c, holes);  cons(_439, cons(_440, cons(_x2c_gensym_literal_part_127, cons(_x2c_gensym_literal_part_128, cons(_x2c_gensym_literal_part_129, cons(_x2c_gensym_literal_part_130, cons(_x2c_gensym_literal_part_131, NULL)))))));
               }
               ), c -> token);
@@ -8974,7 +8974,7 @@ static void f6_values____place_support(Compiler c, Var code){
       .fn = _x2c_gensym_defer_cleanup_73, .env = & _x2c_gensym_macro_environment_71
     }
     ;  x2c_cleanup_push(& _x2c_gensym_defer_record_73); {
-      Compiler_add_support(c, Compiler_written_support(c, Compiler_bind_syntax(c, code, 1405544, NULL)));
+      Compiler_add_support(c, _written_support(c, Compiler_bind_syntax(c, code, 1405544, NULL)));
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_73);
   }
@@ -9145,14 +9145,14 @@ List Compiler_parse_macro_lisp_top_level(Compiler c){
 void Compiler_parse_macro_lisp_shallow(Compiler c){
   if(! _init_guard_) _file_init_();  String requested = NULL;  if(f4_lisp____import_path(c, &(requested))){
     if(! c -> source_private){
-      String path = Compiler_portable_path(f4_lisp____canonical_path(c, requested, c -> token));  Compiler_record_compile_time_effect(c, ({
+      String path = Compiler_portable_path(f4_lisp____canonical_path(c, requested, c -> token));  _record_compile_time_effect(c, ({
         Var _x2c_gensym_literal_part_132 = String_var(path);  Var _x2c_gensym_literal_part_133 = List_var(f4_lisp____effect_source(c, c -> token));  cons(_439, cons(_548, cons(_x2c_gensym_literal_part_132, cons(_x2c_gensym_literal_part_133, NULL))));
       }
       ), c -> token);
     }
     Compiler_parse_macro_lisp_top_level(c);  return;
   }
-  Token first = c -> token;  String form = _lisp_form(c);  if(c -> inherited_lisp) return;  if(! c -> source_private) Compiler_record_compile_time_effect(c, ({
+  Token first = c -> token;  String form = _lisp_form(c);  if(c -> inherited_lisp) return;  if(! c -> source_private) _record_compile_time_effect(c, ({
     Var _x2c_gensym_literal_part_134 = String_var(form);  Var _x2c_gensym_literal_part_135 = List_var(f4_lisp____effect_source(c, first));  cons(_439, cons(_536, cons(_x2c_gensym_literal_part_134, cons(_x2c_gensym_literal_part_135, NULL))));
   }
   ), first);  Compiler_queue_declaration_effect(c, form, first, c -> token);
@@ -9260,7 +9260,7 @@ static Var f4_lisp____lisp_import_hook(String path){
   MetaContext * context = MetaContext_current();
   Compiler c = context -> evaluator;
   if(! c){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/macros/lisp.x",.function = "f4_lisp____lisp_import_hook",.line = 187};
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/macros/lisp.x",.function = "f4_lisp____lisp_import_hook",.line = 188};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));
     __builtin_unreachable();
   }

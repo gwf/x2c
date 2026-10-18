@@ -236,7 +236,7 @@ typedef struct Compiler {
   int capture_unit;
   List active_rewrites;
   /* The rules active while a rule's meta function runs, that rule first;
-     see `Compiler.written_support`. */
+     see `_written_support` in macros/rewrites.x. */
   List applying;
   Map rewrite_rules;
   /* Each rewrite replacement lowered once in this unit, by its template and

@@ -296,6 +296,8 @@ static void f12_declarations____gather_declarations(Compiler c, String path, f12
 
 static List _sorted_names(Map definitions);
 
+static Map f12_declarations____inline_type_dependencies(Compiler c, List ast);
+
 static void f12_declarations____publish_inline_dependencies(Compiler c, String path, Map all, Map statics, Map additions);
 
 static Map f12_declarations____contribution(String filename);
@@ -346,6 +348,8 @@ static int _in_runtime(String path);
 static String f8_packages____package_key_spelling(List key);
 
 static int f8_packages____package_protocol_row(List key, Var value);
+
+static void _replay_package_imports(Compiler c, Map globs, Map rows, Array exports);
 
 static int f8_packages____imported_here(Compiler c, String path);
 
@@ -2754,8 +2758,6 @@ static void f4_walk____publish(FileWalk * w){
 
 }
 
-void Compiler_replay_package_imports(Compiler c, Map globs, Map rows, Array exports);
-
 static void _replay_cached(Compiler c, List entry, String path, Map globs, Map visited, Array effects){
   Array prefix = effects != NULL ? NULL : Array_new();
   if(prefix != NULL) Map_setindex(visited, String_var(path), Array_var(prefix));
@@ -2785,7 +2787,7 @@ static void _replay_cached(Compiler c, List entry, String path, Map globs, Map v
       {
         if(Var_is(part, 26720)){
           _merge_rows(c, globs, Var_map_payload(part));
-          Compiler_replay_package_imports(c, globs, Var_map_payload(part), effects);
+          _replay_package_imports(c, globs, Var_map_payload(part), effects);
         }
         else if(Var_is_row(part, 11, 7, 1)) f4_walk____replay_include(c, Var_as_string(part), globs, visited, effects);
         if(prefix != NULL) Array_push(prefix, part);
@@ -2871,7 +2873,7 @@ Map Compiler_included_compile_time_effects(Compiler c, Map globs){
       part = _x2c_gensym_macro_item_22;
       {
         Array exports = Array_new();
-        if(Var_is(part, 26720)) Compiler_replay_package_imports(c, globs, Var_map_payload(part), exports);
+        if(Var_is(part, 26720)) _replay_package_imports(c, globs, Var_map_payload(part), exports);
         else if(Var_is_row(part, 11, 7, 1)){
           f4_walk____replay_included(c, globs, Var_as_string(part), visited, exports, NULL);
           if(Array_len(exports)) Map_setindex(delivered, part, List_var(Array_list_free(exports)));
@@ -2900,7 +2902,7 @@ static void f4_walk____replay_included(Compiler c, Map globs, String path, Map v
     while(List_try_next(_x2c_gensym_macro_object_23, &(_x2c_gensym_macro_cursor_23), &(_x2c_gensym_macro_cursor_output_20))){
       part = _x2c_gensym_macro_cursor_output_20;
       {
-        if(Var_is(part, 26720)) Compiler_replay_package_imports(c, globs, Var_map_payload(part), exports);
+        if(Var_is(part, 26720)) _replay_package_imports(c, globs, Var_map_payload(part), exports);
         else if(Var_is_row(part, 11, 7, 1)) f4_walk____replay_included(c, globs, Var_as_string(part), visited, exports, active);
       }
 
@@ -3695,8 +3697,6 @@ static void f12_declarations____add_typedef_names(Compiler c, Array names, Strin
 
 }
 
-Map Compiler_inline_type_dependencies(Compiler c, List ast);
-
 static void _bind_pending_inline_bodies(Compiler c, Map globs, String unit){
   Array pending = c -> pending_inline_bodies;
   if(! Array_len(pending)) return;
@@ -3719,7 +3719,7 @@ static void _bind_pending_inline_bodies(Compiler c, Map globs, String unit){
     Compiler_tokenize(body, text);
     if(! Var_is_void(markers)) body -> line_markers = Var_array_payload(markers);
     List ast = Compiler_full_parse(body, symbols, 0);
-    Map additions = Compiler_inline_type_dependencies(body, ast);
+    Map additions = f12_declarations____inline_type_dependencies(body, ast);
     f12_declarations____publish_inline_dependencies(body, path, own, statics, additions);
     {
       Var part;
@@ -4075,8 +4075,7 @@ Type Sym_aggregate_of(Sym, Type);
 
 String Ast_binding_spelling(List);
 
-Map Compiler_inline_type_dependencies(Compiler c, List ast){
-  if(! _init_guard_) _file_init_();
+static Map f12_declarations____inline_type_dependencies(Compiler c, List ast){
   Map rows = Map_new();
   List function;
   Array _x2c_gensym_macro_pending_2 = Array_update_n(Array_new(), 1, List_var(ast));
@@ -4230,7 +4229,7 @@ Map Compiler_inline_type_dependencies(Compiler c, List ast){
 
 Map Sym_unit_symbols(Sym);
 void Compiler_publish_inline_types(Compiler c, List ast){
-  if(! _init_guard_) _file_init_();  Map additions = Compiler_inline_type_dependencies(c, ast);  if(! Map_len(additions)) return;  String path = _canonical_path(c -> filename);  f12_declarations____publish_inline_dependencies(c, path, Sym_unit_symbols(c -> sym), Sym_file_statics(c -> sym), additions);
+  if(! _init_guard_) _file_init_();  Map additions = f12_declarations____inline_type_dependencies(c, ast);  if(! Map_len(additions)) return;  String path = _canonical_path(c -> filename);  f12_declarations____publish_inline_dependencies(c, path, Sym_unit_symbols(c -> sym), Sym_file_statics(c -> sym), additions);
 }
 
 static void f12_declarations____publish_inline_dependencies(Compiler c, String path, Map all, Map statics, Map additions){
@@ -5391,8 +5390,8 @@ static int f8_packages____package_protocol_row(List key, Var value){
   if(! x2c_var_equal(List_car(key), String_var(_310)) || ! Var_is_row(value, 9, 7, 4)) return 0;  List row = Var_list_payload(value);  return List_truth(row) && List_contains(_327, List_car(row));
 }
 
-void Compiler_replay_package_imports(Compiler c, Map globs, Map rows, Array exports){
-  if(! _init_guard_) _file_init_();  Array imports = NULL; {
+static void _replay_package_imports(Compiler c, Map globs, Map rows, Array exports){
+  Array imports = NULL; {
     _x2c_gensym_defer_env_40 _x2c_gensym_macro_environment_40 ={
       0
     }

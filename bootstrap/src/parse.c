@@ -49,6 +49,8 @@ static void f5_units____leading_directives(Compiler c, int skip_body);
 
 static void f5_units____track_conditional_arms(Compiler c);
 
+static int f5_units____skip_linkage_brace(Compiler c);
+
 static List f5_units____keyword_definition(Compiler c, int skip_body);
 
 static int f5_units____skip_collected_form(Compiler c);
@@ -60,6 +62,10 @@ static List f5_units____top_level_decorator(Compiler c);
 static List f5_units____declaration_form(Compiler c, int skip_body);
 
 static int f5_units____declaration_stays(Compiler c);
+
+static Token f5_units____take_meta_marker(Compiler c, int * native);
+
+static List f5_units____parse_import_declaration(Compiler c);
 
 static String f5_units____package_name(Compiler c);
 
@@ -2812,20 +2818,16 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _2022 = cons(_2021, _2015);
 }
 
-int Compiler_skip_linkage_brace(Compiler c);
-
 int Compiler_test_static_assert(Compiler c);
 
 List Compiler_parse_static_assert(Compiler c);
 
 int Compiler_protocol_form_starts(Compiler c);
 
-List Compiler_parse_import_declaration(Compiler c);
-
 List Compiler_parse_top_level_mode(Compiler c, int skip_body){
   if(! _init_guard_) _file_init_();
   f5_units____leading_directives(c, skip_body);
-  if(Compiler_skip_linkage_brace(c)) return NULL;
+  if(f5_units____skip_linkage_brace(c)) return NULL;
   if(skip_body && Compiler_skip_collected_script_statement(c)) return NULL;
   if(Compiler_test_static_assert(c)) return Compiler_parse_static_assert(c);
   List slot = skip_body ? NULL : Compiler_try_parse_macro_slot(c, 1405544);
@@ -2918,7 +2920,7 @@ List Compiler_parse_top_level_mode(Compiler c, int skip_body){
       Compiler_expect(c, 119);
       return NULL;
     }
-    return Compiler_parse_import_declaration(c);
+    return f5_units____parse_import_declaration(c);
     case 9297 : return f5_units____top_level_lisp(c, skip_body);
     case 129 : return f5_units____top_level_decorator(c);
   }
@@ -2961,8 +2963,7 @@ static void f5_units____track_conditional_arms(Compiler c){
 
 }
 
-int Compiler_skip_linkage_brace(Compiler c){
-  if(! _init_guard_) _file_init_();
+static int f5_units____skip_linkage_brace(Compiler c){
   if(Compiler_peek(c, 0) == 387198108 && Compiler_peek(c, 1) == 27051791223990 && Compiler_peek(c, 2) == 247){
     Compiler_next(c);
     Compiler_next(c);
@@ -3019,8 +3020,6 @@ static List f5_units____top_level_decorator(Compiler c){
 
 int Compiler_meta_form_is_declaration(Compiler c);
 
-Token Compiler_take_meta_marker(Compiler c, int * native);
-
 List Compiler_parse_declaration_row(Compiler c);
 
 Type List_type_from_ast(List);
@@ -3030,7 +3029,7 @@ void Compiler_install_collected_meta_function(Compiler, List, Token);
 static List f5_units____declaration_form(Compiler c, int skip_body){
   Token meta = NULL;
   int native = 0;
-  if(Compiler_meta_form_is_declaration(c)) meta = Compiler_take_meta_marker(c, &(native));
+  if(Compiler_meta_form_is_declaration(c)) meta = f5_units____take_meta_marker(c, &(native));
   Token first = c -> token;
   List decl;
   {
@@ -3196,14 +3195,13 @@ int Compiler_meta_form_is_declaration(Compiler c){
   if(! _init_guard_) _file_init_();
   if(! Compiler_at_word(c, _18)) return 0;
   Token head = c -> token;
-  Compiler_take_meta_marker(c, NULL);
+  f5_units____take_meta_marker(c, NULL);
   int marker = Compiler_test_declaration(c);
   c -> token = head;
   return marker;
 }
 
-Token Compiler_take_meta_marker(Compiler c, int * native){
-  if(! _init_guard_) _file_init_();
+static Token f5_units____take_meta_marker(Compiler c, int * native){
   Token meta = c -> token;
   Compiler_next(c);
   Token after = c -> token;
@@ -3223,8 +3221,7 @@ void Sym_set(Sym, List, List);
 
 Path Path_absolute(Path);
 
-List Compiler_parse_import_declaration(Compiler c){
-  if(! _init_guard_) _file_init_();
+static List f5_units____parse_import_declaration(Compiler c){
   Token start = c -> token;
   Compiler_expect(c, 632323240);
   String name = f5_units____package_name(c), alias = f5_units____import_alias(c, name);

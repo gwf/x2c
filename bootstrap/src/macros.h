@@ -96,8 +96,6 @@ List Compiler_rewrite_written(Compiler c, Symbol kind, List source, Type expecte
 
 List Compiler_lower_rewrite(Compiler c, Symbol point, Var kind, List source, Symbol position, Type expected, Token site);
 
-List Compiler_written_support(Compiler c, List bound);
-
 int Compiler_applying_shipped(Compiler c);
 
 void Compiler_rebound(Compiler c, Var source, List bound);
@@ -105,8 +103,6 @@ void Compiler_rebound(Compiler c, Var source, List bound);
 Ast Compiler_watched_step(Compiler c, Ast ast);
 
 List Compiler_publish_macro_definition_node(Compiler c, List node);
-
-void Compiler_record_compile_time_effect(Compiler c, List row, Token start);
 
 void Compiler_install_compile_time_effects(Compiler c, List rows);
 

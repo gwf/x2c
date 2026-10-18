@@ -12,7 +12,6 @@ Expression syntax and its resolution.
 
 | Function | Summary |
 | --- | --- |
-| [`Compiler.apply_macro_value`](#Compiler.apply_macro_value) | Applies the Macro value `expr` to `supplied` argument expressions. |
 | [`Compiler.check_explicit_converter`](#Compiler.check_explicit_converter) | Reports `parsed` when it is the explicit converter call resolved last and `target` converts its receiver on its own: either side is Var, the types share one C type, or the receiver declares a converter to the target. |
 | [`Compiler.complete_iter_chain`](#Compiler.complete_iter_chain) | Completes an eligible resolved `Iter` call chain for immediate consumption. |
 | [`Compiler.convert_expression`](#Compiler.convert_expression) | Adds operations to convert a resolved expression AST to `target`. |
@@ -31,26 +30,12 @@ Expression syntax and its resolution.
 | [`Compiler.postfix_completions`](#Compiler.postfix_completions) | Returns sorted visible field and method names that resolve on `receiver` through `access`. |
 | [`Compiler.printf_static_format`](#Compiler.printf_static_format) | Returns the C spelling of the format a printf-family call consumes when it is known at translation time, or `NULL`. |
 | [`Compiler.promote_string_literal`](#Compiler.promote_string_literal) | Converts a C string literal to `String` where no C meaning applies: as a method receiver, a `foreach` collection, or a raise detail. |
-| [`Compiler.require_var_tag`](#Compiler.require_var_tag) | Returns the exact Var tag for a type test, rejecting types without one. |
 | [`Compiler.resolve_expression`](#Compiler.resolve_expression) | Resolves and type-annotates one expression AST in current compiler state. |
 | [`Compiler.resolve_map_entry`](#Compiler.resolve_map_entry) | Resolves the key and value of one `(map-entry key value)` AST row. |
 | [`Compiler.resolve_postfix_member`](#Compiler.resolve_postfix_member) | Resolves one field or method selection without consuming parser tokens. |
 | [`Compiler.var_tag_expression`](#Compiler.var_tag_expression) | Builds an exact tag expression, deferring macro type slots until binding. |
-| [`List.printf_family`](#List.printf_family) | Returns the printf-family entry a callee names, or `NULL`. |
 
 ### `Compiler`
-
-<a id="Compiler.apply_macro_value"></a>
-#### Compiler.apply_macro_value
-
-`List Compiler.apply_macro_value( Compiler c, List expr, List supplied, Token origin)`
-
-Applies the Macro value `expr` to `supplied` argument expressions.
-Inside a template body the call is retained so the template can capture
-the value it applies; elsewhere it is an ordinary `Macro_apply` over the
-argument values.
-
-Source: `src/expressions/syntax.x:533`
 
 <a id="Compiler.check_explicit_converter"></a>
 #### Compiler.check_explicit_converter
@@ -274,16 +259,6 @@ other expression is returned unchanged.
 
 Source: `src/expressions/conversions.x:176`
 
-<a id="Compiler.require_var_tag"></a>
-#### Compiler.require_var_tag
-
-`Symbol Compiler.require_var_tag( Compiler c, Type target, Token origin)`
-
-Returns the exact Var tag for a type test, rejecting types without one.
-Enums retain no identity after boxing and cannot be tested this way.
-
-Source: `src/expressions/resolution.x:324`
-
 <a id="Compiler.resolve_expression"></a>
 #### Compiler.resolve_expression
 
@@ -306,7 +281,7 @@ Source: `src/expressions/resolution.x:55`
 Resolves the key and value of one `(map-entry key value)` AST row.
 Any other shape is reported at `origin` as a parse error.
 
-Source: `src/expressions/resolution.x:450`
+Source: `src/expressions/resolution.x:449`
 
 <a id="Compiler.resolve_postfix_member"></a>
 #### Compiler.resolve_postfix_member
@@ -330,19 +305,7 @@ Source: `src/expressions/access.x:177`
 Builds an exact tag expression, deferring macro type slots until
 binding.
 
-Source: `src/expressions/resolution.x:337`
-
-### `List`
-
-<a id="List.printf_family"></a>
-#### List.printf_family
-
-`const PrintfFn *List.printf_family(List l)`
-
-Returns the printf-family entry a callee names, or `NULL`. A resolved
-user function that happens to use a libc spelling is not one.
-
-Source: `src/expressions/calls.x:486`
+Source: `src/expressions/resolution.x:336`
 
 ## Public types
 

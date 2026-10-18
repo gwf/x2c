@@ -18,7 +18,6 @@ Shared helpers for x2c compiler AST nodes.
 | [`Ast.binding_spelling`](#Ast.binding_spelling) | Returns a valid binding node's source spelling, or `NULL`. |
 | [`Ast.collect_binding_references`](#Ast.collect_binding_references) | Records in `referenced` the identity of every binding `node` names. |
 | [`Ast.contains_head`](#Ast.contains_head) | Returns whether any list under `value` has `kind` as its head. |
-| [`Ast.designated`](#Ast.designated) | Returns the innermost node `value` designates, past the forms that still name the same object: an `expr` wrapper, parentheses, a member, and an index into an array. |
 | [`Ast.direct_identifier`](#Ast.direct_identifier) | Returns the name an expression designates directly, following the forms that still name the same object - parentheses, a member, an array index, a dereference - or `NULL` when the expression designates no single name. |
 | [`Ast.entry_call`](#Ast.entry_call) | Returns the statement calling the `void (void)` function `entry`. |
 | [`Ast.indirect_identifier`](#Ast.indirect_identifier) | Returns the name of the pointer an expression designates through, or `NULL` when it designates no object through a single name. |
@@ -95,18 +94,6 @@ Source: `src/ast.x:256`
 Returns whether any list under `value` has `kind` as its head.
 
 Source: `src/ast.x:218`
-
-<a id="Ast.designated"></a>
-#### Ast.designated
-
-`List Ast.designated(Var value)`
-
-Returns the innermost node `value` designates, past the forms that still
-name the same object: an `expr` wrapper, parentheses, a member, and an
-index into an array. What remains is a name, a designation through a
-pointer, or another expression; a non-list designates nothing.
-
-Source: `src/ast.x:114`
 
 <a id="Ast.direct_identifier"></a>
 #### Ast.direct_identifier

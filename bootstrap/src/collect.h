@@ -54,8 +54,6 @@ int Compiler_publishes_type_family(Compiler c, List family);
 
 Map Compiler_callable_symbols(Compiler c, List names);
 
-Map Compiler_inline_type_dependencies(Compiler c, List ast);
-
 void Compiler_publish_inline_types(Compiler c, List ast);
 
 void Compiler_record_generated_symbol(Compiler c, String name, Type signature);
@@ -83,8 +81,6 @@ Type Compiler_loaded_call_type(Compiler c, Type type);
 void Compiler_name_loaded_provider(Compiler c, String path, int index, List provider);
 
 void Compiler_collect_package(Compiler c, String name, Token token);
-
-void Compiler_replay_package_imports(Compiler c, Map globs, Map rows, Array exports);
 
 void Compiler_configure_interfaces(String out_dir, int cold);
 

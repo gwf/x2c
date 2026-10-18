@@ -48,7 +48,5 @@ void Compiler_stop_meta_helper(void);
 
 void MetaHelper_restart(MetaHelper helper);
 
-void MetaHelper_close(MetaHelper helper);
-
 
 #endif /* __GUARD_0xB1CED777__ */

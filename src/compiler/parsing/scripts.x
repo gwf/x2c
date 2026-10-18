@@ -67,7 +67,7 @@ static int _script_form(ScriptParse &p) {
 }
 
 static void _hoist(ScriptParse &p, int begin, Token tokens) {
-  p.c.skip_script_statement();
+  _skip_script_statement(p.c);
   p.statements.push(begin);
   p.statements.push(_end_index(p.c, tokens));
   if (p.first < 0) p.first = begin;
@@ -83,18 +83,18 @@ module void _finish_script(Compiler c, List ast) {
 int Compiler.skip_collected_script_statement(Compiler c) {
   if (!c.script) return 0;
   if (!c.script.defines_main && c.script_statement_starts()) {
-    c.skip_script_statement();
+    _skip_script_statement(c);
     return 1;
   }
   _reject_statement(c);
   return 0;
 }
 
-/** Moves past one run of a script unit's statement tokens, through a `;` or
-    a closing `}` outside every bracket. A statement that ends early this
-    way leaves its remainder as the next run, and runs are rejoined in order.
+/* Moves past one run of a script unit's statement tokens, through a `;` or
+   a closing `}` outside every bracket. A statement that ends early this
+   way leaves its remainder as the next run, and runs are rejoined in order.
 */
-void Compiler.skip_script_statement(Compiler c) {
+static void _skip_script_statement(Compiler c) {
   for (int depth = 0; c.peek(0) != <eof>;) {
     Symbol type = c.peek(0);
     if (type == <"$(">) {

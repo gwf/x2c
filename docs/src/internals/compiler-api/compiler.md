@@ -74,7 +74,6 @@ One x2c unit's translation state and its two parses.
 | [`Compiler.shallow_parse_overlay`](#Compiler.shallow_parse_overlay) | Collects declarations with reads over `base` then `overlay`. |
 | [`Compiler.share_meta_group`](#Compiler.share_meta_group) | Shares `owner`'s pending `meta` group and the definitions it reads, which belong with the Lisp session that holds the group's stubs. |
 | [`Compiler.skip_collected_script_statement`](#Compiler.skip_collected_script_statement) | Skips a collected script statement, or diagnoses one beside `main`. |
-| [`Compiler.skip_script_statement`](#Compiler.skip_script_statement) | Moves past one run of a script unit's statement tokens, through a `;` or a closing `}` outside every bracket. |
 | [`Compiler.start_collection`](#Compiler.start_collection) | Starts a collection pass with the built-in macros. |
 | [`Compiler.take_unit_state`](#Compiler.take_unit_state) | Takes over `owner`'s macro, object-like `#define`, include, keyword, literal cache, and Lisp state for one segment of a collected file. |
 | [`Compiler.take_word`](#Compiler.take_word) | Consumes the identifier `word` when current and reports whether it matched. |
@@ -744,17 +743,6 @@ Skips a collected script statement, or diagnoses one beside `main`.
 Called after top-level directives establish source visibility.
 
 Source: `src/compiler/parsing/scripts.x:83`
-
-<a id="Compiler.skip_script_statement"></a>
-#### Compiler.skip_script_statement
-
-`void Compiler.skip_script_statement(Compiler c)`
-
-Moves past one run of a script unit's statement tokens, through a `;` or
-a closing `}` outside every bracket. A statement that ends early this
-way leaves its remainder as the next run, and runs are rejoined in order.
-
-Source: `src/compiler/parsing/scripts.x:97`
 
 <a id="Compiler.start_collection"></a>
 #### Compiler.start_collection

@@ -15,14 +15,14 @@ List Compiler.publish_macro_definition_node(Compiler c, List node) {
   c.macros[node.assoc(<name>)] = node;
   if (c.shallow && !c.macro_holes &&
       !node.assoc(<static>).equal(1) && !node.assoc(<local>).int())
-    c.record_compile_time_effect(
-      %(compile-time macrodef ${c.freeze_declaration_syntax(node)}), c.token);
+    _record_compile_time_effect(
+      c, %(compile-time macrodef ${c.freeze_declaration_syntax(node)}),
+      c.token);
   return node;
 }
 
-/** Records a public source effect where its completed definition stands. */
-void Compiler.record_compile_time_effect(
-  Compiler c, List row, Token start) {
+/* Records a public source effect where its completed definition stands. */
+module void _record_compile_time_effect(Compiler c, List row, Token start) {
   if (!c.shallow || c.source_private || c.macro_holes ||
       !c.sym.at_file_scope() ||
       c.builtin_defs || !c.filename ||
@@ -135,8 +135,8 @@ Atom Compiler.parse_keyword_definition(Compiler c) {
   c.expect(<;>);
   c.kw_aliases[alias] = definition;
   if (!storage)
-    c.record_compile_time_effect(
-      %(compile-time keyword $alias
+    _record_compile_time_effect(
+      c, %(compile-time keyword $alias
         ${c.freeze_declaration_syntax(definition)}), declaration);
   return alias;
 }

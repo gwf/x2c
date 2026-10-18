@@ -21,7 +21,6 @@ X2c statement parsing.
 | [`Compiler.parse_governed`](#Compiler.parse_governed) | Parses the statement a control keyword or statement macro governs, or a block item at `<block>`. |
 | [`Compiler.parse_match_row_argument`](#Compiler.parse_match_row_argument) | Parses one MatchRow macro argument with the ordinary match-arm owner. |
 | [`Compiler.parse_source_clause`](#Compiler.parse_source_clause) | Parses the clause `kind` of a source `if`, `while`, `do`, `for`, `match`, or `try`, with the punctuation after it, when the binder reaches that clause. |
-| [`Compiler.parse_statement`](#Compiler.parse_statement) | Parses and binds one statement or statement-position macro at the current token. |
 | [`Compiler.with_binding`](#Compiler.with_binding) | Returns the binding of the current identifier when it names a live `with` expression, or NULL. |
 
 ### `Compiler`
@@ -124,17 +123,6 @@ reaches that clause. An absent `else`, `for` header, `catch`, or
 
 Source: `src/statements.x:223`
 
-<a id="Compiler.parse_statement"></a>
-#### Compiler.parse_statement
-
-`List Compiler.parse_statement(Compiler c)`
-
-Parses and binds one statement or statement-position macro at the current
-token. On return, the cursor follows the complete statement and any
-temporary `Sym` scopes opened by the statement have been closed.
-
-Source: `src/statements.x:74`
-
 <a id="Compiler.with_binding"></a>
 #### Compiler.with_binding
 
@@ -147,7 +135,7 @@ Source: `src/statements.x:206`
 
 ## Design notes
 
-`Compiler.parse_statement` dispatches each statement form to one
+`_parse_statement` dispatches each statement form to one
 production, which consumes its tokens in grammar order and returns its
 node. Preprocessor directives between statements stay in the tree, so
 each one emits where C read it. Return checking uses the return type

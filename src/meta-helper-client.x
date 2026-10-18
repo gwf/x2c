@@ -471,7 +471,7 @@ void MetaHelper.retain_executable(MetaHelper helper) {
 /** Uses `helper` for ordinary translation, retaining its configuration
     through process shutdown. Replaces and closes the preceding helper. */
 void Compiler.use_meta_helper(MetaHelper helper) {
-  if (primary) primary.close();
+  if (primary) _close(primary);
   if (!primary_scope) Scope.shutdown_hook(_shutdown);
   primary = helper;
   if (!helper) return;
@@ -528,9 +528,9 @@ void MetaHelper.restart(MetaHelper helper) {
   _stop(0);
 }
 
-/** Stops this helper and releases its pipe buffer and configuration maps.
-    A later close is harmless. */
-void MetaHelper.close(MetaHelper helper) {
+/* Stops this helper and releases its pipe buffer and configuration maps.
+   A later close is harmless. */
+static void _close(MetaHelper helper) {
   if (!helper || !helper.scope) return;
   MetaHelper previous = active;
   active = helper;
@@ -548,7 +548,7 @@ void MetaHelper.close(MetaHelper helper) {
   helper.input = NULL;
 }
 
-static void _drop(void *raw) { MetaHelper.close(raw); }
+static void _drop(void *raw) { _close(raw); }
 
 static void _shutdown(void) {
   primary_scope.destroy();

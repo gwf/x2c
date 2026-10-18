@@ -18,7 +18,6 @@ The compiler's side of the project meta helper.
 | [`Compiler.report_meta_error`](#Compiler.report_meta_error) | Reports a meta function's error `message` with `notes` under `category` at the position recorded first in or around `node`, or at `site` when it has none. |
 | [`Compiler.stop_meta_helper`](#Compiler.stop_meta_helper) | Stops the helper this process runs, which a translation worker does when its units are done and every process does as it ends. |
 | [`Compiler.use_meta_helper`](#Compiler.use_meta_helper) | Uses `helper` for ordinary translation, retaining its configuration through process shutdown. |
-| [`MetaHelper.close`](#MetaHelper.close) | Stops this helper and releases its pipe buffer and configuration maps. |
 | [`MetaHelper.failure`](#MetaHelper.failure) | Returns why this helper cannot call the functions of `provider`: the helper or the provider's table did not build. |
 | [`MetaHelper.new`](#MetaHelper.new) | Creates an independent helper at `path`, with failures by table index and source paths mapped to their table indices. |
 | [`MetaHelper.restart`](#MetaHelper.restart) | Stops the process while retaining its executable and configuration. |
@@ -94,16 +93,6 @@ through process shutdown. Replaces and closes the preceding helper.
 Source: `src/meta-helper-client.x:473`
 
 ### `MetaHelper`
-
-<a id="MetaHelper.close"></a>
-#### MetaHelper.close
-
-`void MetaHelper.close(MetaHelper helper)`
-
-Stops this helper and releases its pipe buffer and configuration maps.
-A later close is harmless.
-
-Source: `src/meta-helper-client.x:533`
 
 <a id="MetaHelper.failure"></a>
 #### MetaHelper.failure

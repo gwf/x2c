@@ -66,7 +66,6 @@ Source macros and the compile-time Lisp they run.
 | [`Compiler.rebuild_function`](#Compiler.rebuild_function) | Rebuilds a bound function through a Function decorator without binding it again. |
 | [`Compiler.rebuild_statement`](#Compiler.rebuild_statement) | Rebuilds a statement template as a canonical unbraced `seq`. |
 | [`Compiler.rebuild_unit_function`](#Compiler.rebuild_unit_function) | Constructs a fresh function from a Unit template after lowering. |
-| [`Compiler.record_compile_time_effect`](#Compiler.record_compile_time_effect) | Records a public source effect where its completed definition stands. |
 | [`Compiler.record_comptime`](#Compiler.record_comptime) | Records that `name` is compile-time only in `c`, and in the shared session when it is being filled. |
 | [`Compiler.report_lisp_failure`](#Compiler.report_lisp_failure) | Reports that the compile-time Lisp `source` failed with `error` at `invocation`. |
 | [`Compiler.reset_macro_library`](#Compiler.reset_macro_library) | Ends the shared compile-time library before its build-target Context is reclaimed. |
@@ -86,7 +85,6 @@ Source macros and the compile-time Lisp they run.
 | [`Compiler.try_parse_macro_subpattern`](#Compiler.try_parse_macro_subpattern) | Parses `$NAME(P, ...)` in a pattern, where each argument is a pattern, into the pattern for code NAME builds with each argument pattern in its hole. |
 | [`Compiler.try_parse_macro_target_at`](#Compiler.try_parse_macro_target_at) | Parses a direct or keyword-alias macro at the requested syntax position. |
 | [`Compiler.watched_step`](#Compiler.watched_step) | Lowers `ast` when it is a value the active lowering watches; NULL otherwise. |
-| [`Compiler.written_support`](#Compiler.written_support) | The bound file-scope code `bound` that the rule now writing gives, written as the kernel's when that rule is shipped. |
 
 ### Functions
 
@@ -110,7 +108,7 @@ Source: `src/macros/templates.x:261`
 Records the compile-time Lisp libraries as dependencies of `c`, as each
 use of its session does.
 
-Source: `src/macros/lisp.x:410`
+Source: `src/macros/lisp.x:411`
 
 <a id="Compiler.after_hole"></a>
 #### Compiler.after_hole
@@ -151,7 +149,7 @@ Source: `src/macros/values.x:340`
 Binds a compile-time Lisp code `value` returned to a statement at
 `context`.
 
-Source: `src/macros/lisp.x:153`
+Source: `src/macros/lisp.x:154`
 
 <a id="Compiler.bind_meta_operation"></a>
 #### Compiler.bind_meta_operation
@@ -162,7 +160,7 @@ Binds `function`, the operation `lib/meta.x` declares as `name`, under
 its Lisp name in `lisp`. A definition the compile-time libraries
 already give that name wins, because it adapts the arguments.
 
-Source: `src/macros/lisp.x:602`
+Source: `src/macros/lisp.x:603`
 
 <a id="Compiler.capture_macro_value"></a>
 #### Compiler.capture_macro_value
@@ -193,7 +191,7 @@ Source: `src/macros/lisp.x:13`
 
 Evaluates a queued source Lisp form with its original diagnostic site.
 
-Source: `src/macros/lisp.x:103`
+Source: `src/macros/lisp.x:104`
 
 <a id="Compiler.evaluate_declaration_recipe"></a>
 #### Compiler.evaluate_declaration_recipe
@@ -269,7 +267,7 @@ Source: `src/macros/rewrites.x:230`
 Marks the shared session's compile-time-only definitions in a fresh
 compiler pass, which reads them without defining them.
 
-Source: `src/macros/lisp.x:465`
+Source: `src/macros/lisp.x:466`
 
 <a id="Compiler.inherits_import"></a>
 #### Compiler.inherits_import
@@ -279,7 +277,7 @@ Source: `src/macros/lisp.x:465`
 Whether the shared session evaluated the file at `path`. A unit that is
 that file, as when a library is linted, inherits its Lisp forms.
 
-Source: `src/macros/lisp.x:448`
+Source: `src/macros/lisp.x:449`
 
 <a id="Compiler.install_builtin_macros"></a>
 #### Compiler.install_builtin_macros
@@ -288,7 +286,7 @@ Source: `src/macros/lisp.x:448`
 
 Installs the compiler-shipped source macros into `c` once.
 
-Source: `src/macros/lisp.x:513`
+Source: `src/macros/lisp.x:514`
 
 <a id="Compiler.install_compile_time_effects"></a>
 #### Compiler.install_compile_time_effects
@@ -329,7 +327,7 @@ Source: `src/macros/templates.x:433`
 Answers whether the shared compile-time session is still being filled,
 before `lib/meta.x` has defined the syntax builders.
 
-Source: `src/macros/lisp.x:472`
+Source: `src/macros/lisp.x:473`
 
 <a id="Compiler.lift_macro_lisp_expression"></a>
 #### Compiler.lift_macro_lisp_expression
@@ -341,7 +339,7 @@ Scalars, immutable values, representable Array/Map roots, compiler-issued
 identifiers, and nonempty code `List`s are accepted; `invocation` locates
 an unsupported result.
 
-Source: `src/macros/lisp.x:139`
+Source: `src/macros/lisp.x:140`
 
 <a id="Compiler.local_macro_form_is_definition"></a>
 #### Compiler.local_macro_form_is_definition
@@ -517,7 +515,7 @@ reports against the unit that needed it.
 The session is not published until `Compiler.publish_macro_library`, so a
 unit opened in between still builds its own.
 
-Source: `src/macros/lisp.x:358`
+Source: `src/macros/lisp.x:359`
 
 <a id="Compiler.parse_keyword_definition"></a>
 #### Compiler.parse_keyword_definition
@@ -550,7 +548,7 @@ Parses a compile-time Lisp form in an expression position.
 Macro-definition parsing records a deferred slot; ordinary parsing
 evaluates the form in the translation unit's Lisp session and lifts it.
 
-Source: `src/macros/lisp.x:124`
+Source: `src/macros/lisp.x:125`
 
 <a id="Compiler.parse_macro_lisp_shallow"></a>
 #### Compiler.parse_macro_lisp_shallow
@@ -628,7 +626,7 @@ Source: `src/macros/invocations/recognition.x:14`
 Prepares and freezes the shared session and makes it every unit's parent.
 `shared` must be the session `Compiler.open_macro_library` returned.
 
-Source: `src/macros/lisp.x:430`
+Source: `src/macros/lisp.x:431`
 
 <a id="Compiler.rebound"></a>
 #### Compiler.rebound
@@ -686,15 +684,6 @@ run.
 
 Source: `src/macros/templates.x:361`
 
-<a id="Compiler.record_compile_time_effect"></a>
-#### Compiler.record_compile_time_effect
-
-`void Compiler.record_compile_time_effect( Compiler c, List row, Token start)`
-
-Records a public source effect where its completed definition stands.
-
-Source: `src/macros/invocations/recognition.x:24`
-
 <a id="Compiler.record_comptime"></a>
 #### Compiler.record_comptime
 
@@ -703,7 +692,7 @@ Source: `src/macros/invocations/recognition.x:24`
 Records that `name` is compile-time only in `c`, and in the shared
 session when it is being filled.
 
-Source: `src/macros/lisp.x:456`
+Source: `src/macros/lisp.x:457`
 
 <a id="Compiler.report_lisp_failure"></a>
 #### Compiler.report_lisp_failure
@@ -723,7 +712,7 @@ Source: `src/macros/diagnostics.x:357`
 Ends the shared compile-time library before its build-target Context is
 reclaimed. A later target creates a fresh session in its own Context.
 
-Source: `src/macros/lisp.x:629`
+Source: `src/macros/lisp.x:630`
 
 <a id="Compiler.rewrite"></a>
 #### Compiler.rewrite
@@ -770,7 +759,7 @@ Source: `src/macros/rewrites.x:267`
 Returns the published definition keys, or null before publication.
 The borrowed map is the shared session's source identity table.
 
-Source: `src/macros/lisp.x:477`
+Source: `src/macros/lisp.x:478`
 
 <a id="Compiler.shares_meta_definition"></a>
 #### Compiler.shares_meta_definition
@@ -781,7 +770,7 @@ Answers whether the published shared session already holds the
 definition of `name` from this file, which a unit reading the file again
 leaves alone.
 
-Source: `src/macros/lisp.x:485`
+Source: `src/macros/lisp.x:486`
 
 <a id="Compiler.skip_macro_invocation"></a>
 #### Compiler.skip_macro_invocation
@@ -811,7 +800,7 @@ Source: `src/macros/invocations/recognition.x:389`
 Returns the canonical path of the source `file`. A relative name that
 is not a file resolves against the home.
 
-Source: `src/macros/lisp.x:292`
+Source: `src/macros/lisp.x:293`
 
 <a id="Compiler.take_code_value"></a>
 #### Compiler.take_code_value
@@ -911,19 +900,6 @@ replacement's rule too, and that replacement still watches its own
 values within it.
 
 Source: `src/macros/rewrites.x:707`
-
-<a id="Compiler.written_support"></a>
-#### Compiler.written_support
-
-`List Compiler.written_support(Compiler c, List bound)`
-
-The bound file-scope code `bound` that the rule now writing gives,
-written as the kernel's when that rule is shipped. A rule writes while
-its meta function runs, until a rule it reaches binds, and while its
-replacement binds and lowers. What a program writes, or a placement
-outside any rule, is source.
-
-Source: `src/macros/rewrites.x:434`
 
 ## Design notes
 

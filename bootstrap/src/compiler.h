@@ -233,8 +233,6 @@ List Compiler_full_parse(Compiler c, Map globs, int generated_symbols);
 
 int Compiler_skip_collected_script_statement(Compiler c);
 
-void Compiler_skip_script_statement(Compiler c);
-
 void Compiler_tokenize(Compiler c, char * text);
 
 Symbol Compiler_peek(Compiler c, int steps);
