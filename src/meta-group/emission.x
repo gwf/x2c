@@ -39,8 +39,9 @@ module List _emit_prepared(
     }
     if (c.meta_build) _name_provider_bindings(c, provider, units, saved.deps);
     List lowered = _lower(c, units, stamp, suffix);
-    /* The unit's protocol adapters and their registration belong to the
-       program; group code reaches the runtime's own. */
+    /* A project group holds the unit's public functions, so it also
+       holds the protocol adapters they call and their registration. */
+    if (c.meta_build) lowered = c.generate_protocol_adapters(lowered);
     List ast = c.transform(lowered);
     code = c.generate_code_text(ast, stem);
   }

@@ -28,7 +28,7 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
       if (c.meta_reaches_compile_time(fn)) c.record_comptime(name);
       if (c.macro_holes) return;
       c.group_meta_function(fn);
-      if (c.meta_build) return;
+      if (c.meta_calls_wait()) return;
       if (!Compiler.library_filling() && !c.shares_meta_definition(name))
         _install_stub(c, name, ((List) c.meta_group[-1]).last(), NULL, marker);
     }
@@ -115,12 +115,12 @@ static Var _meta_stub(Func function, const FuncArg *argv) {
         return c.macro_lisp.apply(linked[name], values.list_free());
     }
   }
-  if (c.meta_build) raise %(meta-later (name $name));
+  if (c.meta_calls_wait()) raise %(meta-later (name $name));
   List rows = _subject_rows(c, values);
   Var previous = Macro.subject();
   Macro.use_subject(rows);
   defer Macro.use_subject(previous);
-  if (!c.groups_meta())
+  if (c.meta_helper || !c.groups_meta())
     return c.meta_helper_call(name, site, values.list_free(), provider);
   c.bind_meta_group(name, site);
   Var bound;
@@ -217,7 +217,7 @@ void Compiler.install_project_meta_effect(Compiler c, List row) {
     c.project_meta[name] = %($signature $provider);
     c.native_meta.del(name);
     c.meta_group_bound.del(%"<unbound $name>");
-    if (!c.meta_build) {
+    if (!c.meta_calls_wait()) {
       c.ensure_macro_lisp();
       _bind_project_meta(c, name, 1);
     }
@@ -238,7 +238,7 @@ static int _bind_project_meta(
   Compiler c, String name, int install) {
   Var target;
   if (!c.project_meta.try_get(name, target)) return 0;
-  if (c.meta_build) return 0;
+  if (c.meta_calls_wait()) return 0;
   Var bound;
   if (!install && c.macro_lisp.try_get(name, bound)) return 1;
   Var (signature, provider) = target;
