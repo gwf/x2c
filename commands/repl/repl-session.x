@@ -26,6 +26,8 @@ typedef struct ReplSession {
   ReplLower lowering;
   Array declarations;
   Map files, accessors;
+  // Runtime names the API ledgers mark internal, which completion hides.
+  Map internal;
   MetaHelper helper;
   // Published name -> (value), (type), (native [(source PATH) (objects CALL)]),
   // (global (source PATH) PATHS), or
@@ -61,6 +63,7 @@ typedef struct ReplCompletion {
 #include "refusal-errors.x"
 #include "repl-native.x"
 #include "repl-globals.x"
+#include "repl-ledgers.x"
 #include <errno.h>
 #include <signal.h>
 #include <stdio.h>
@@ -97,6 +100,28 @@ static void _interrupt(int signal) {
   _running.set_interrupted(1);
 }
 
+static List _ledger_rows(String text) {
+  Array rows = [];
+  foreach (String line, text.split("\n"))
+    if (line && line[0] != '#') rows.push(line.split("|"));
+  return rows.list_free();
+}
+
+/* The names declared by modules `docs/library-manifest.txt` marks internal,
+   and the callables and types `docs/library-api-tiers.txt` marks internal,
+   in the C spelling completion offers. */
+static Map _internal_names(void) {
+  Map names = {};
+  foreach (List row, _ledger_rows(repl_library_manifest()))
+    match (row) case %(?(String path) "internal" *):
+      foreach (String name, Compiler.collected_names(path)) names[name] = 1;
+  foreach (List row, _ledger_rows(repl_library_api_tiers()))
+    match (row) case %(? "internal" ?(String listed)):
+      foreach (String name, listed.split(","))
+        names[name.replace(".", "_")] = 1;
+  return names;
+}
+
 /** Borrows an initialized submission compiler until its unit closes.
     Source-fact collection must be disabled because submission scratch maps
     are reclaimed after each call. */
@@ -109,6 +134,7 @@ ReplSession ReplSession.new(Compiler compiler) {
   session.names = {};
   session.files = {};
   session.accessors = {};
+  session.internal = _internal_names();
   session.declarations = [];
   session.evaluator = Lisp.new();
   repl_runtime_initialize(session.evaluator);
@@ -204,9 +230,21 @@ static void _restore_parser_input(Compiler c, struct _ParserInput input) {
   c.packed_marks = input.packed_marks;
 }
 
+/* An internal name, or a value or constant whose type is internal. */
+static int _is_internal(ReplSession session, String name, Type type) {
+  if (name in session.internal) return 1;
+  if (!type || type.is_typedef() || type.is_function()) return 0;
+  match (type.base_type()) {
+    case %(?(String base) *): return base in session.internal;
+    case %(enum ?(String base) *): return base in session.internal;
+  }
+  return 0;
+}
+
+/* Internal runtime names are offered only when no other candidate matches. */
 static List _completion_filter(
   ReplSession session, Symbol kind, List rows, List keywords, String prefix) {
-  Array candidates = [];
+  Array candidates = [], internal = [];
   foreach (String keyword, keywords)
     if (keyword.startswith(prefix)) candidates.push(%(<keyword> $keyword));
   foreach (Var row, rows) {
@@ -243,9 +281,12 @@ static List _completion_filter(
     }
     else if (type == <typemacro>) candidate_kind = <type>;
     else if (type == <macro>) candidate_kind = <callable>;
-    candidates.push(%($candidate_kind $name));
+    if (candidate_kind != <session> &&
+        _is_internal(session, name, semantic_type))
+      internal.push(%($candidate_kind $name));
+    else candidates.push(%($candidate_kind $name));
   }
-  return candidates.sort().list_free();
+  return (candidates.len() ? candidates : internal).sort().list_free();
 }
 
 /** Returns sorted published session functions matching `prefix`.

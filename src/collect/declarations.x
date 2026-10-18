@@ -189,6 +189,21 @@ void Compiler.runtime_function_declarations(Compiler c, Map available) {
     if (part is <string>) _add_function_declarations(c, part, available);
 }
 
+/** Returns the one-part names that the source at home-relative `path`
+    declares itself, without its includes, as this process collected it.
+    A source this process has not collected declares no names. */
+List Compiler.collected_names(String path) {
+  String canonical = _canonical_path(Compiler.absolute_home_path(path));
+  Var entry = _process_cache()[canonical];
+  if (entry is not <list>) return NULL;
+  Array names = [];
+  foreach (Var part, entry.list().car())
+    if (part is <map>)
+      foreach (Var key, part.map().keys())
+        match (key) case %(?(String name)): names.push(name);
+  return names.list_free();
+}
+
 static void _add_function_declarations(
   Compiler c, String path, Map available) {
   if (path == _canonical_path(c.filename)) return;

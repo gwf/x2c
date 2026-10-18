@@ -82,6 +82,14 @@ available on a typed receiver. At a blank primary prompt completion also
 offers colon commands, grouped with keywords, session names, types, and other
 callables. Unsupported REPL declarations and imports are not suggested.
 
+Completion leaves out runtime names that the library reference marks
+internal: names from internal modules, internal types and functions, and
+constants or variables of an internal type. They remain ordinary names, so a
+submission that spells one in full compiles as usual. An internal name is
+offered only when no other name matches the typed prefix. For example,
+`Scope` + Tab offers `Scope` and `ScopeStats`, while `ScopeA` + Tab completes
+the internal `ScopeAlloc`.
+
 A colon-prefixed line completes commands even at a continuation prompt;
 `:ast` and `:lowered` then complete published function names, and `:stats`
 completes `verbose`. A sole match replaces the current name; otherwise Tab

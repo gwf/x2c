@@ -1040,7 +1040,7 @@ equality, layout, boxing, and error policy visible as inputs.
 **RT-6** Treat everything reachable through the prelude as public surface,
 including struct fields and typedefs. Keep optional modules out of the
 prelude; `docs/library-manifest.txt` owns module visibility and
-`docs/library-api-tiers.txt` owns callable tiers.
+`docs/library-api-tiers.txt` owns callable and type tiers.
 
 ## Packages and public API
 
