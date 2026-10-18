@@ -11,7 +11,8 @@ def unit_sources(root):
     """Entry units of src and lib, without the generated prelude."""
     units = [os.path.relpath(p, root) for area in ("src", "lib")
              for p in subprocess.check_output(
-                 [os.path.join(root, "tools/sources.sh"), "--root", root, "--area", area],
+                 [os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "sources.sh"),
+                  "--root", root, "--area", area],
                  text=True).splitlines()]
     return [unit for unit in units if unit != "lib/x2c.x"]
 
