@@ -62,6 +62,12 @@ result=$?
 set -e
 test "$result" -eq 2
 grep -qx 'x2c repl: unexpected operand' "$tmp/bad-err"
+set +e
+builds/0/x2c repl --bogus </dev/null >"$tmp/bad-out" 2>"$tmp/bad-err"
+result=$?
+set -e
+test "$result" -eq 2
+grep -qx 'x2c repl: unknown option: --bogus' "$tmp/bad-err"
 
 printf '%s\n' 'int n = 0;' \
   'for (int i = 0; i < 100000; i++) n += i;' 'n;' |

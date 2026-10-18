@@ -299,6 +299,8 @@ static int _load_source(
     foreach (Var entry, result.diagnostics)
       session.compiler.print_diagnostic(entry);
   if (result.status == <loaded> || result.status == <reloaded>) {
+    foreach (List row, result.removed)
+      printf("removed %s from %s\n", row.cadr().repr(), row.car());
     printf("%s %s\n", result.status.str(), result.value.repr());
     puts("reset all loaded native state");
     return 1;
