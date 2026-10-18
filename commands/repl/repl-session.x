@@ -76,6 +76,18 @@ static void _write_stdout(String text, int newline, Symbol operation) {
 static void _repl_print(String text) => _write_stdout(text, 0, <print>);
 static void _repl_println(String text) => _write_stdout(text, 1, <println>);
 
+static int _repl_puts(String text) {
+  _write_stdout(text, 1, <puts>);
+  return text.len() + 1;
+}
+
+/* Interpreted printf: the REPL's fixed-signature format, written out. */
+static int _repl_printf(String format, List values) {
+  String text = format.format(values);
+  _write_stdout(text, 0, <printf>);
+  return text.len();
+}
+
 /* The evaluator a SIGINT interrupts while a submission runs. */
 static Lisp _running;
 
@@ -102,6 +114,8 @@ ReplSession ReplSession.new(Compiler compiler) {
   session.lowering = ReplLower.new(compiler, session.evaluator);
   $lisp.bind(session.evaluator, "print", _repl_print);
   $lisp.bind(session.evaluator, "println", _repl_println);
+  $lisp.bind(session.evaluator, "puts", _repl_puts);
+  $lisp.bind(session.evaluator, "repl.printf", _repl_printf);
   return session;
 }
 

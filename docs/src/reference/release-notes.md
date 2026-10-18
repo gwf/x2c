@@ -18,6 +18,8 @@ packages need rebuilding.
 - The REPL continues a list literal across lines, and code it loads
   boxes classes, expands its own meta functions, and calls protocol
   defaults as an ordinary build does.
+- REPL input and compiled prompt functions can call C's `printf` and
+  `puts`. See [the REPL guide](../guide/repl.md#supported-subset).
 - The book gains this release notes page, and the repository gains a
   security policy, a pull request template, and a bug report template.
 

@@ -472,12 +472,27 @@ lengths are rejected. The result follows the process locale, and a failure
 publishes no partial String. Native `String.printf` retains its ordinary C
 varargs contract for compiled code.
 
+A session declares C's `printf` and `puts`, so example code that prints runs
+at the prompt:
+
+```text
+x2c> printf("%s=%04d\n", "answer", 42);
+answer=0042
+=> 12
+x2c> puts("done");
+done
+=> 5
+```
+
+Interpreted `printf` formats with `String.format` and the conversions above,
+and returns the number of bytes written. `puts` writes its String and one
+newline. Compiled prompt functions call the C library's own `printf` and
+`puts`.
+
 REPL sessions also provide `print(String)` and `println(String)`. `print`
 writes the String's bytes; `println` writes those bytes followed by one
-newline. Use String interpolation for formatting, such as
-`println(%"count=$count")`. Both functions are REPL-only, reserve their names
-in the session, and report `ok`. They are not
-varargs aliases.
+newline. Both are REPL-only, reserve their names in the session, and report
+`ok`.
 
 A session also declares `Json`, `Diff` and `Path`, so `Json.parse`,
 `Diff.unified` and `Path.basename` evaluate without an include.
