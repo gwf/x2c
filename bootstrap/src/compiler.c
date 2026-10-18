@@ -273,6 +273,8 @@ static void f15_parsing_scripts____hoist(f15_parsing_scripts___ScriptParse * p, 
 
 static void _finish_script(Compiler c, List ast);
 
+static void f15_parsing_scripts____skip_script_statement(Compiler c);
+
 static void f15_parsing_scripts____reject_statement(Compiler c);
 
 static void f15_parsing_scripts____report_script_statement(Compiler c);
@@ -2076,10 +2078,8 @@ static int f15_parsing_scripts____script_form(f15_parsing_scripts___ScriptParse 
   return 1;
 }
 
-void Compiler_skip_script_statement(Compiler c);
-
 static void f15_parsing_scripts____hoist(f15_parsing_scripts___ScriptParse * p, int begin, Token tokens){
-  Compiler_skip_script_statement((* p).c);
+  f15_parsing_scripts____skip_script_statement((* p).c);
   Array_push((* p).statements, int_var(begin));
   Array_push((* p).statements, long_var(_end_index((* p).c, tokens)));
   if((* p).first < 0)(* p).first = begin;
@@ -2093,15 +2093,14 @@ int Compiler_skip_collected_script_statement(Compiler c){
   if(! _init_guard_) _file_init_();
   if(! c -> script) return 0;
   if(! c -> script -> defines_main && Compiler_script_statement_starts(c)){
-    Compiler_skip_script_statement(c);
+    f15_parsing_scripts____skip_script_statement(c);
     return 1;
   }
   f15_parsing_scripts____reject_statement(c);
   return 0;
 }
 
-void Compiler_skip_script_statement(Compiler c){
-  if(! _init_guard_) _file_init_();
+static void f15_parsing_scripts____skip_script_statement(Compiler c){
   for(int depth = 0;  Compiler_peek(c, 0) != 11212; ){
     Symbol type = Compiler_peek(c, 0);
     if(type == 9297){

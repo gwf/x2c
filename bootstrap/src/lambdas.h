@@ -30,7 +30,5 @@ List Compiler_capture_lambda_identifier(Compiler c, List binding, Type type);
 
 void Compiler_respell_captures(Compiler c, List binding);
 
-void Compiler_check_lambda_captures(Compiler c, List ast);
-
 
 #endif /* __GUARD_0x57655C8B__ */

@@ -187,8 +187,6 @@ int SymTxn_local_macros_changed(SymTxn * s);
 
 int Sym_transacting(Sym s);
 
-void Sym_end_log(Sym s);
-
 void SymTxn_commit(SymTxn * s);
 
 void SymTxn_commit_transient(SymTxn * s);

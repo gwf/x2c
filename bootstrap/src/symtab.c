@@ -163,6 +163,8 @@ static int f12_transactions____tracks(SymTxn * s, Map map);
 
 static int f12_transactions____same(Map a, Map b);
 
+static void f12_transactions____end_log(Sym s);
+
 static void f12_transactions____finish(SymTxn * s);
 
 static void f12_transactions____replace_map(Map original, Map staged);
@@ -2070,8 +2072,7 @@ int Sym_transacting(Sym s){
   return s -> transactions > 0;
 }
 
-void Sym_end_log(Sym s){
-  if(! _init_guard_) _file_init_();
+static void f12_transactions____end_log(Sym s){
   if(! -- s -> transactions) Block_clear(s -> undo);
 }
 
@@ -2090,7 +2091,7 @@ void SymTxn_commit(SymTxn * s){
 
 static void f12_transactions____finish(SymTxn * s){
   (* s).active = 0;
-  Sym_end_log((* s).c -> sym);
+  f12_transactions____end_log((* s).c -> sym);
 }
 
 void SymTxn_commit_transient(SymTxn * s){

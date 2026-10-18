@@ -93,7 +93,11 @@ static int f7_modules____stamp_in(char * data, size_t size, String expected);
 
 static void f7_modules____open_native_module(String path);
 
+static void _add_native_module(String path, Map(* entry)(void));
+
 static void f7_modules____native_module_shutdown(void);
+
+static int _native_module_loaded(String path);
 
 static struct Extension{
   const char * name;
@@ -107,6 +111,8 @@ static Map f6_linked___shipped_targets;
 
 _x2c_gensym_initializer_choice_65953FEE_5((f6_linked___shipped_targets = NULL))
 static Var _linked_target(Compiler c, String name, List signature, String provider);
+
+static int f6_linked____project_meta_uses_linked(Compiler c, String name, String provider);
 
 static String f6_linked___linked_supplier;
 
@@ -132,7 +138,9 @@ static List f9_functions____subject_rows(Compiler c, Array values);
 
 static void f9_functions____subject_globals(Compiler c, Var value, Map globals, Map source_names);
 
-static int f9_functions____bind_project_meta(Compiler c, String name, int install);
+static int _bind_project_meta(Compiler c, String name);
+
+static int f9_functions____bind_advertised_meta(Compiler c, String name, int install);
 
 static List f5_calls____meta_result(Compiler c, List expression, Var value, Token site);
 
@@ -970,12 +978,8 @@ Map Compiler_compiler_targets(void){
   return f7_modules____compiler_targets();
 }
 
-int Compiler_native_module_loaded(String path);
-
-void Compiler_add_native_module(String path, Map(* entry)(void));
-
 static void f7_modules____load_compiler_module(void){
-  if(! Compiler_native_module_loaded(f7_modules___compiler_supplier)) Compiler_add_native_module(f7_modules___compiler_supplier, f7_modules____compiler_targets);
+  if(! _native_module_loaded(f7_modules___compiler_supplier)) _add_native_module(f7_modules___compiler_supplier, f7_modules____compiler_targets);
 }
 
 void Compiler_select_native_modules(List paths){
@@ -984,7 +988,7 @@ void Compiler_select_native_modules(List paths){
   Array linked = Array_new();
   for(struct Extension * e = f7_modules___extensions;  e;  e = e -> next){
     String key = String_join(NULL, cons(String_var(_241), cons(String_var(String_new(e -> name)), cons(String_var(_242), NULL))));
-    if(! Compiler_native_module_loaded(key)) Compiler_add_native_module(key, e -> targets);
+    if(! _native_module_loaded(key)) _add_native_module(key, e -> targets);
     Array_push(linked, String_var(key));
   }
   paths =({
@@ -1010,7 +1014,7 @@ void Compiler_select_package_module(Compiler c, String name, String root, Token 
   }
   ));
   Compiler_add_translation_dependency(c, module);
-  if(! Compiler_native_module_loaded(module)) f7_modules____load_package_module(c, name, module, token);
+  if(! _native_module_loaded(module)) f7_modules____load_package_module(c, name, module, token);
   if(List_contains(f7_modules___native_module_order, String_var(module))) return;
   {
     Scope_push(& native_module_scope);
@@ -1048,7 +1052,7 @@ String Compiler_load_native_module(String path){
   if(! _init_guard_) _file_init_();
   if(! X2C_NATIVE_MODULES) Diagnostics_driver_error("native modules are not supported on this platform");
   String absolute = Path_absolute(path);
-  if(Compiler_native_module_loaded(absolute)) return absolute;
+  if(_native_module_loaded(absolute)) return absolute;
   int stamp = f7_modules____module_stamp(path);
   if(stamp < 0) Diagnostics_driver_error(String_join(NULL, cons(String_var(_250), cons(String_var(path), NULL))));
   if(! stamp) Diagnostics_driver_error(String_join(NULL, cons(String_var(_251), cons(String_var(path), cons(String_var(_249), NULL)))));
@@ -1058,7 +1062,7 @@ String Compiler_load_native_module(String path){
 
 void Compiler_preload_native_module(String path){
   if(! _init_guard_) _file_init_();
-  if(X2C_NATIVE_MODULES && ! Compiler_native_module_loaded(path) && f7_modules____module_stamp(path) == 1) f7_modules____open_native_module(path);
+  if(X2C_NATIVE_MODULES && ! _native_module_loaded(path) && f7_modules____module_stamp(path) == 1) f7_modules____open_native_module(path);
 }
 
 static int f7_modules____module_stamp(String path){
@@ -1116,11 +1120,10 @@ static void f7_modules____open_native_module(String path){
   ));
   Map(* entry)(void) =(Map(*)(void)) dlsym(handle, "x2c_module_targets");
   if(! entry) Diagnostics_driver_error(String_join(NULL, cons(String_var(_250), cons(String_var(path), NULL))));
-  Compiler_add_native_module(path, entry);
+  _add_native_module(path, entry);
 }
 
-void Compiler_add_native_module(String path, Map(* entry)(void)){
-  if(! _init_guard_) _file_init_();
+static void _add_native_module(String path, Map(* entry)(void)){
   Map targets = NULL;
   {
     Scope_push(& native_module_scope);
@@ -1176,8 +1179,7 @@ static void f7_modules____native_module_shutdown(void){
   f7_modules___native_module_order = NULL;
 }
 
-int Compiler_native_module_loaded(String path){
-  if(! _init_guard_) _file_init_();
+static int _native_module_loaded(String path){
   return(void *) native_modules && Map_contains(native_modules, String_var(path));
 }
 
@@ -1214,15 +1216,13 @@ String Compiler_extension_archive(void){
   return f7_modules___extensions ? String_add(String_join(NULL, cons(String_var(x2c_get_executable()), cons(String_var(_258), NULL))), String_join(NULL, cons(String_var(Compiler_identity()), cons(String_var(_259), NULL)))) : NULL;
 }
 
-int Compiler_project_meta_uses_linked(Compiler c, String name, String provider);
-
 int Compiler_native_meta_accepts(Compiler c, Var function, List signature);
 
 static Var _linked_target(Compiler c, String name, List signature, String provider){
   List key = cons(String_var(name), cons(List_var(signature), cons(String_var(provider), NULL)));
   Var function = int_var(0);
   if(Map_truth(f6_linked___shipped_targets) && Map_try_get(f6_linked___shipped_targets, List_var(key), &(function))) return function;
-  if(! Compiler_project_meta_uses_linked(c, name, provider)) return int_var(0);
+  if(! f6_linked____project_meta_uses_linked(c, name, provider)) return int_var(0);
   function = Map_getindex(_linked_module(), String_var(name));
   if(! Compiler_native_meta_accepts(c, function, signature)) return int_var(0);
   if(c -> builtin_defs){
@@ -1253,8 +1253,7 @@ static Var _linked_target(Compiler c, String name, List signature, String provid
 
 Map Compiler_meta_provider_hashes(Compiler, String);
 
-int Compiler_project_meta_uses_linked(Compiler c, String name, String provider){
-  if(! _init_guard_) _file_init_();
+static int f6_linked____project_meta_uses_linked(Compiler c, String name, String provider){
   Map linked = _linked_module();
   if(!(Map_contains(linked, String_var(name)))) return 0;
   Map hashes = Compiler_meta_provider_hashes(c, provider);
@@ -1389,8 +1388,8 @@ Map linked_meta_targets(void);
 Map linked_meta_hashes(void);
 
 static Map _linked_module(void){
-  if(! Compiler_native_module_loaded(f6_linked___linked_supplier)){
-    Compiler_add_native_module(f6_linked___linked_supplier, linked_meta_targets);
+  if(! _native_module_loaded(f6_linked___linked_supplier)){
+    _add_native_module(f6_linked___linked_supplier, linked_meta_targets);
     {
       Scope_push(& native_module_scope);
       {
@@ -1995,7 +1994,7 @@ void Compiler_install_project_meta_effect(Compiler c, List row){
           Map_del(c -> meta_group_bound, String_var(String_join(NULL, cons(String_var(_263), cons(String_var(Var_str(name)), cons(String_var(_242), NULL))))));
           if(! Compiler_meta_calls_wait(c)){
             Compiler_ensure_macro_lisp(c);
-            f9_functions____bind_project_meta(c, Var_as_string(name), 1);
+            f9_functions____bind_advertised_meta(c, Var_as_string(name), 1);
           }
 
         }
@@ -2012,13 +2011,12 @@ void Compiler_install_native_meta_effects(Compiler c, Map globs);
 
 Map Sym_unit_symbols(Sym);
 
-int Compiler_bind_project_meta(Compiler c, String name){
-  if(! _init_guard_) _file_init_();
+static int _bind_project_meta(Compiler c, String name){
   if(! Map_len(c -> project_meta)) Compiler_install_native_meta_effects(c, Sym_unit_symbols(c -> sym));
-  return f9_functions____bind_project_meta(c, name, 0);
+  return f9_functions____bind_advertised_meta(c, name, 0);
 }
 
-static int f9_functions____bind_project_meta(Compiler c, String name, int install){
+static int f9_functions____bind_advertised_meta(Compiler c, String name, int install){
   Var target;
   if(! Map_try_get(c -> project_meta, String_var(name), &(target))) return 0;
   if(Compiler_meta_calls_wait(c)) return 0;
@@ -2401,7 +2399,7 @@ int Compiler_bind_native_meta(Compiler c, String name);
 
 static Var f5_calls____meta_function(Compiler c, String name, Token site){
   Var function =((void) 0, Void);
-  if(! Lisp_try_get(c -> macro_lisp, name, &(function)) && Compiler_bind_project_meta(c, name)) Lisp_try_get(c -> macro_lisp, name, &(function));
+  if(! Lisp_try_get(c -> macro_lisp, name, &(function)) && _bind_project_meta(c, name)) Lisp_try_get(c -> macro_lisp, name, &(function));
   if(! Lisp_try_get(c -> macro_lisp, name, &(function)) && Compiler_bind_native_meta(c, name)) Lisp_try_get(c -> macro_lisp, name, &(function));
   if(Var_is_void(function) && c -> meta_build){
     static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/meta-native/calls.x",.function = "f5_calls____meta_function",.line = 199};
@@ -2516,7 +2514,7 @@ void Compiler_install_native_meta_effects(Compiler c, Map globs){
 
 int Compiler_bind_native_meta(Compiler c, String name){
   if(! _init_guard_) _file_init_();
-  if(Compiler_bind_project_meta(c, name)) return 1;
+  if(_bind_project_meta(c, name)) return 1;
   Var signature, bound;
   if(! Map_len(c -> native_meta)) Compiler_install_native_meta_effects(c, Sym_unit_symbols(c -> sym));
   if(! Map_try_get(c -> native_meta, String_var(name), &(signature))) return 0;
@@ -2531,7 +2529,7 @@ void Compiler_install_native_meta_function(Compiler c, List declaration, Token m
   if(! c -> collect_protocols) Compiler_run_declaration_effects(c);
   Compiler_ensure_macro_lisp(c);
   List signature = Compiler_func_signature(c, type);
-  if(Compiler_bind_project_meta(c, name)) return;
+  if(_bind_project_meta(c, name)) return;
   Map_setindex(c -> native_meta, String_var(name), List_var(signature));
   f8_bindings____bind_native_meta(c, name, signature, marker);
 }

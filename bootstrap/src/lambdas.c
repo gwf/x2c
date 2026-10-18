@@ -80,6 +80,8 @@ static List _record(Capture * k, Type captured_type, List expression, int refere
 
 static void _inherit_spelling(Compiler c, List source, List captured);
 
+static void _check_lambda_captures(Compiler c, List ast);
+
 static void _require_capture_lvalue(Compiler c, List target);
 
 static void _require_reference_arguments(Compiler c, Type callee_type, List arguments);
@@ -975,7 +977,6 @@ void Compiler_begin_lambda_captures(Compiler c, List references, List supplied);
 void Sym_push_scope(Sym, SymScope);
 List Compiler_lambda_param_types(Compiler c, List entries);
 List Compiler_end_lambda_captures(Compiler c);
-void Compiler_check_lambda_captures(Compiler c, List ast);
 List Compiler_rebuild_expression(Compiler, Type, List);
 List Compiler_parse_lambda_literal(Compiler c){
   if(! _init_guard_) _file_init_();  Compiler_expect(c, 9539);  Compiler_expect(c, 81);  Sym_push_new_scope(c -> sym);  List entries = Compiler_peek(c, 0) == 83 ? NULL : _parse_params(c);  Compiler_expect(c, 83);  SymScope params = Sym_pop_scope(c -> sym);  Array references = Array_new(), prescribed = Array_new();  _parse_using(c, references, prescribed);  Compiler_expect(c, 123);  Compiler_expect(c, 125); {
@@ -988,7 +989,7 @@ List Compiler_parse_lambda_literal(Compiler c){
       }
       ;  x2c_cleanup_push(& _x2c_gensym_defer_record_4); {
         * _x2c_gensym_macro_address_0 = c -> lambda_scopes; {
-          Compiler_begin_lambda_captures(c, Array_list_free(references), NULL);  Sym_push_scope(c -> sym, params);  List body = _parse_lambda_body(c);  List ftype = cons(List_var(cons(_54, cons(List_var(Compiler_lambda_param_types(c, entries)), NULL))), _66);  List captures = Compiler_end_lambda_captures(c);  Compiler_check_lambda_captures(c, body);  if(Map_truth(c -> macro_holes)) captures = Array_list_free(prescribed);  Sym_pop_scope(c -> sym);  if(Map_truth(c -> macro_holes)){
+          Compiler_begin_lambda_captures(c, Array_list_free(references), NULL);  Sym_push_scope(c -> sym, params);  List body = _parse_lambda_body(c);  List ftype = cons(List_var(cons(_54, cons(List_var(Compiler_lambda_param_types(c, entries)), NULL))), _66);  List captures = Compiler_end_lambda_captures(c);  _check_lambda_captures(c, body);  if(Map_truth(c -> macro_holes)) captures = Array_list_free(prescribed);  Sym_pop_scope(c -> sym);  if(Map_truth(c -> macro_holes)){
             List _x2c_gensym_return_value_3 = _lambda_template(c, body, captures, entries); {
               x2c_cleanup_leave(& _x2c_gensym_defer_record_4);  return _x2c_gensym_return_value_3;
             }
@@ -1226,7 +1227,7 @@ List Compiler_bind_lambda_expression(Compiler c, Type type, List parameters, Lis
                     }
 
                   }
-                  body = _bind_body(c, body);  List captures = Compiler_end_lambda_captures(c);  Compiler_check_lambda_captures(c, body);  List params = Array_list_free(entries);  if(List_truth(captures)){
+                  body = _bind_body(c, body);  List captures = Compiler_end_lambda_captures(c);  _check_lambda_captures(c, body);  List params = Array_list_free(entries);  if(List_truth(captures)){
                     List _x2c_gensym_return_value_7 = Compiler_rebuild_expression(c, List_type(_80), _lambda_node(body, captures, params)); {
                       x2c_cleanup_leave(& _x2c_gensym_defer_record_8);  x2c_cleanup_leave(& _x2c_gensym_defer_record_7);  x2c_cleanup_leave(& _x2c_gensym_defer_record_6);  return _x2c_gensym_return_value_7;
                     }
@@ -1564,8 +1565,8 @@ void Compiler_respell_captures(Compiler c, List binding){
 }
 
 List Ast_written_operand(Ast);
-void Compiler_check_lambda_captures(Compiler c, List ast){
-  if(! _init_guard_) _file_init_();  if(Map_truth(c -> macro_holes)) return;  List node;  Array _x2c_gensym_macro_pending_4 = Array_update_n(Array_new(), 1, List_var(ast));  const Array _x2c_gensym_macro_acquired_4 = _x2c_gensym_macro_pending_4; {
+static void _check_lambda_captures(Compiler c, List ast){
+  if(Map_truth(c -> macro_holes)) return;  List node;  Array _x2c_gensym_macro_pending_4 = Array_update_n(Array_new(), 1, List_var(ast));  const Array _x2c_gensym_macro_acquired_4 = _x2c_gensym_macro_pending_4; {
     _x2c_gensym_defer_env_11 _x2c_gensym_macro_environment_11 ={
       0
     }

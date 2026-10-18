@@ -416,16 +416,9 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _x2c_gensym_static_initialize_2();
 }
 
-MetaHelper Frontend_build_meta(Frontend f, List inputs);
-
 void Frontend_prepare_meta(Frontend f, List inputs){
   if(! _init_guard_) _file_init_();
-  Compiler_use_meta_helper(Frontend_build_meta(f, inputs));
-}
-
-MetaHelper Frontend_build_meta(Frontend f, List inputs){
-  if(! _init_guard_) _file_init_();
-  return _build_meta(f, inputs, NULL);
+  Compiler_use_meta_helper(_build_meta(f, inputs, NULL));
 }
 
 MetaHelper Frontend_build_loaded(Frontend f, List filenames){
@@ -1019,7 +1012,7 @@ static List _build(Helper * h){
     }
 
   }
-  if(List_truth((* h).entries))(* h).meta = Frontend_build_meta((* h).frontend, (* h).entries);
+  if(List_truth((* h).entries))(* h).meta = _build_meta((* h).frontend, (* h).entries, NULL);
   {
     _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0

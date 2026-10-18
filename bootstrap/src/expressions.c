@@ -128,6 +128,8 @@ static List f6_syntax____parse_slice(Compiler c, List expr, List start);
 
 static List f6_syntax____parse_postfix_apply(Compiler c, List expr);
 
+static List f6_syntax____apply_macro_value(Compiler c, List expr, List supplied, Token origin);
+
 static List f6_syntax____parse_postfix_arrow(Compiler c, List expr);
 
 static List f6_syntax____parse_postfix_dot(Compiler c, List expr);
@@ -201,6 +203,8 @@ static List f10_resolution____is_type(Resolve * r, List operand, Type target);
 static List f10_resolution____is_symbol(Resolve * r, List operand, List selector);
 
 static List f10_resolution____constant_row_test(Compiler c, List lhs, Symbol tag, Token origin);
+
+static Symbol f10_resolution____require_var_tag(Compiler c, Type target, Token origin);
 
 static int f10_resolution____deferred_type_test(Type target);
 
@@ -388,6 +392,8 @@ static const PrintfFn f5_calls___printf_family_info[] ={
 
 }
 ;
+
+static const PrintfFn * _printf_family(List l);
 
 static List _unary(Resolve * r, Var operator, List operand);
 
@@ -2787,7 +2793,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2212 = cons(_2211, NULL);
   _2213 = cons(_253, _2212);
   _2214 = List_var(_2213);
-  _2215 = int_var(89783);
+  _2215 = int_var(89778);
   _2216 = cons(_2215, NULL);
   _2217 = cons(_258, _2216);
   _2218 = List_var(_2217);
@@ -2983,7 +2989,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2408 = cons(_2407, NULL);
   _2409 = cons(_245, _2408);
   _2410 = List_var(_2409);
-  _2411 = int_var(90145);
+  _2411 = int_var(90140);
   _2412 = cons(_2411, NULL);
   _2413 = cons(_258, _2412);
   _2414 = List_var(_2413);
@@ -3100,7 +3106,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2525 = cons(_2524, NULL);
   _2526 = cons(_245, _2525);
   _2527 = List_var(_2526);
-  _2528 = int_var(90557);
+  _2528 = int_var(90552);
   _2529 = cons(_2528, NULL);
   _2530 = cons(_258, _2529);
   _2531 = List_var(_2530);
@@ -3201,7 +3207,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2623 = cons(_2622, NULL);
   _2624 = cons(_245, _2623);
   _2625 = List_var(_2624);
-  _2626 = int_var(90641);
+  _2626 = int_var(90636);
   _2627 = cons(_2626, NULL);
   _2628 = cons(_258, _2627);
   _2629 = List_var(_2628);
@@ -3293,7 +3299,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2715 = cons(_2714, NULL);
   _2716 = cons(_245, _2715);
   _2717 = List_var(_2716);
-  _2718 = int_var(90848);
+  _2718 = int_var(90843);
   _2719 = cons(_2718, NULL);
   _2720 = cons(_258, _2719);
   _2721 = List_var(_2720);
@@ -3505,7 +3511,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2927 = cons(_2926, NULL);
   _2928 = cons(_245, _2927);
   _2929 = List_var(_2928);
-  _2930 = int_var(92764);
+  _2930 = int_var(92759);
   _2931 = cons(_2930, NULL);
   _2932 = cons(_258, _2931);
   _2933 = List_var(_2932);
@@ -4323,12 +4329,11 @@ static List f6_syntax____parse_slice(Compiler c, List expr, List start){
 }
 
 int Sym_is_named_value_type(Sym, Type, String);
-List Compiler_apply_macro_value(Compiler c, List expr, List supplied, Token origin);
 static List f6_syntax____parse_postfix_apply(Compiler c, List expr){
   Token origin = c -> token;  Compiler_expect(c, 81);  Array arguments = Array_new(), notes = Array_new();  if(Compiler_peek(c, 0) == 83) Array_push(arguments, List_var(_547));  while(Compiler_peek(c, 0) != 83){
     List argument = Compiler_try_parse_macro_slot(c, 107888847784);  Array_push(arguments, List_var(List_truth(argument) ? argument : Compiler_parse_assignment(c)));  Array_push(notes, Map_getdefault(c -> protocol_helpers, String_var(_531), List_var(NULL)));  if(! Compiler_test(c, 89)) break;
   }
-  Compiler_expect(c, 83);  List supplied = Array_list_free(arguments);  if(Sym_is_named_value_type(c -> sym, Var_type(List_cadr(expr)), _548)) return Compiler_apply_macro_value(c, expr, supplied, origin);  Macro called = _692;  List result = Compiler_resolve_expression(c, Compiler_rebuild_expression(c, NULL, Macro_apply(called, cons(List_var(expr), cons(List_var(supplied), NULL)))), origin);  int method = ! ! List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_3;  x2c_match_site_match(& _x2c_gensym_match_site_3, expr, List_var(_702)); }));  _check_converter_args(c, result, method, Array_list_free(notes));  if(method && supplied == _704){
+  Compiler_expect(c, 83);  List supplied = Array_list_free(arguments);  if(Sym_is_named_value_type(c -> sym, Var_type(List_cadr(expr)), _548)) return f6_syntax____apply_macro_value(c, expr, supplied, origin);  Macro called = _692;  List result = Compiler_resolve_expression(c, Compiler_rebuild_expression(c, NULL, Macro_apply(called, cons(List_var(expr), cons(List_var(supplied), NULL)))), origin);  int method = ! ! List_truth(({ static MatchCaptureSite _x2c_gensym_match_site_3;  x2c_match_site_match(& _x2c_gensym_match_site_3, expr, List_var(_702)); }));  _check_converter_args(c, result, method, Array_list_free(notes));  if(method && supplied == _704){
     List _x2c_gensym_match_expr = expr; List _x2c_gensym_match_cursor, _x2c_gensym_match_cursor1, _x2c_gensym_match_cursor2;  switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
         case 9224497936761996324ULL: ;  _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_equal(_x2c_gensym_match_cursor->car, _714 ->cdr->car) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && _x2c_gensym_match_cursor1 && _x2c_gensym_match_cursor1->car.u64 == 9224497936761619424ULL && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && _x2c_gensym_match_cursor1 && _x2c_gensym_match_cursor1->car.u64 == 9224497936761618525ULL && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && _x2c_gensym_match_cursor1 && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && _x2c_gensym_match_cursor1 && Var_is(_x2c_gensym_match_cursor1->car, 806120) && (_x2c_gensym_match_cursor2 = Var_list_payload(_x2c_gensym_match_cursor1->car), 1) && _x2c_gensym_match_cursor2) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor2->car; if ((_x2c_gensym_match_cursor2 = _x2c_gensym_match_cursor2->cdr, 1) && !_x2c_gensym_match_cursor2 && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && !_x2c_gensym_match_cursor1 && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
         Var name;  name = _x2c_gensym_match_value_0;  _note_explicit_converter(c, result, Var_str(name), origin);
@@ -4341,8 +4346,8 @@ static List f6_syntax____parse_postfix_apply(Compiler c, List expr){
 }
 
 List Compiler_convert_expression(Compiler c, List expr, Type target);
-List Compiler_apply_macro_value(Compiler c, List expr, List supplied, Token origin){
-  if(! _init_guard_) _file_init_();  if(Map_truth(c -> macro_holes)) return cons(_0, cons(_715, cons(List_var(({
+static List f6_syntax____apply_macro_value(Compiler c, List expr, List supplied, Token origin){
+  if(Map_truth(c -> macro_holes)) return cons(_0, cons(_715, cons(List_var(({
     Var _x2c_gensym_literal_part_18 = List_var(expr);  Var _x2c_gensym_literal_part_19 = List_var(cons(_133, List_append(supplied, NULL)));  cons(_716, cons(_x2c_gensym_literal_part_18, cons(_x2c_gensym_literal_part_19, NULL)));
   }
   )), NULL)));  List values = _726;  if(supplied == _704) supplied = NULL; {
@@ -5012,7 +5017,6 @@ static List f10_resolution____macro_slot(Resolve * r, List content){
 }
 
 int Sym_is_var_type(Sym, Type);
-Symbol Compiler_require_var_tag(Compiler c, Type target, Token origin);
 static List f10_resolution____is_type(Resolve * r, List operand, Type target){
   List lhs = Compiler_resolve_expression((* r).c, operand, (* r).origin);  Type lhs_type = Var_type(List_cadr(lhs));  if(_deferred_receiver(lhs) || f10_resolution____deferred_type_test(target)){
     Macro has_type = _297;  return Compiler_rebuild_expression((* r).c, List_type(_454), Macro_apply(has_type, cons(List_var(lhs), cons(List_var(target), NULL))));
@@ -5023,7 +5027,7 @@ static List f10_resolution____is_type(Resolve * r, List operand, Type target){
     }
     )));
   }
-  Symbol vartag = Compiler_require_var_tag((* r).c, target, (* r).origin);  List direct = f10_resolution____constant_row_test((* r).c, lhs, vartag, (* r).origin);  if(List_truth(direct)) return direct;  String tagsym = String_join(NULL, cons(String_var(Var_str(Var_box_ulong((unsigned long) vartag))), NULL));  List callee = _resolve_identifier((* r).c, String_var(_1378), NULL, (* r).origin);  return Compiler_rebuild_expression((* r).c, List_type(_1377), Macro_apply(called, ({
+  Symbol vartag = f10_resolution____require_var_tag((* r).c, target, (* r).origin);  List direct = f10_resolution____constant_row_test((* r).c, lhs, vartag, (* r).origin);  if(List_truth(direct)) return direct;  String tagsym = String_join(NULL, cons(String_var(Var_str(Var_box_ulong((unsigned long) vartag))), NULL));  List callee = _resolve_identifier((* r).c, String_var(_1378), NULL, (* r).origin);  return Compiler_rebuild_expression((* r).c, List_type(_1377), Macro_apply(called, ({
     Var _x2c_gensym_literal_part_44 = List_var(callee);  Var _x2c_gensym_literal_part_45 = List_var(({
       Var _x2c_gensym_literal_part_42 = List_var(lhs);  Var _x2c_gensym_literal_part_43 = List_var(cons(_0, cons(_1382, cons(String_var(tagsym), NULL))));  cons(_x2c_gensym_literal_part_42, cons(_x2c_gensym_literal_part_43, NULL));
     }
@@ -5066,15 +5070,15 @@ static List f10_resolution____constant_row_test(Compiler c, List lhs, Symbol tag
 }
 
 Symbol Sym_var_tag_for_type(Sym, Type, Type *);
-Symbol Compiler_require_var_tag(Compiler c, Type target, Token origin){
-  if(! _init_guard_) _file_init_();  Type resolved = NULL;  Symbol vartag = Sym_var_tag_for_type(c -> sym, target, &(resolved));  if(List_truth(Type_list(resolved)) && Type_is_enum(resolved)){
+static Symbol f10_resolution____require_var_tag(Compiler c, Type target, Token origin){
+  Type resolved = NULL;  Symbol vartag = Sym_var_tag_for_type(c -> sym, target, &(resolved));  if(List_truth(Type_list(resolved)) && Type_is_enum(resolved)){
     String _x2c_gensym_macro_note_0 = _1402;  Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(_1403), cons(String_var(List_repr(Type_list(target))), cons(String_var(_1404), NULL)))), origin, cons(String_var(_x2c_gensym_macro_note_0), NULL));
   }
   if(! vartag) Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(_1405), cons(String_var(List_repr(Type_list(target))), cons(String_var(_1406), NULL)))), origin, NULL);  return vartag;
 }
 
 List Compiler_var_tag_expression(Compiler c, Type target, Token origin){
-  if(! _init_guard_) _file_init_();  if(f10_resolution____deferred_type_test(target)) return cons(_0, cons(_715, cons(List_var(cons(_1407, cons(List_var(target), NULL))), NULL)));  Symbol tag = Compiler_require_var_tag(c, target, origin);  return cons(_0, cons(_1382, cons(List_var(({
+  if(! _init_guard_) _file_init_();  if(f10_resolution____deferred_type_test(target)) return cons(_0, cons(_715, cons(List_var(cons(_1407, cons(List_var(target), NULL))), NULL)));  Symbol tag = f10_resolution____require_var_tag(c, target, origin);  return cons(_0, cons(_1382, cons(List_var(({
     Var _x2c_gensym_literal_part_52 = String_var(Symbol_str(tag));  cons(_533, cons(_1382, cons(_x2c_gensym_literal_part_52, cons(Symbol_var(tag), NULL))));
   }
   )), NULL)));
@@ -6362,7 +6366,7 @@ static List f5_calls____iter_destination(void){
   return _3048;
 }
 
-const PrintfFn * List_printf_family(List l){
+static const PrintfFn * _printf_family(List l){
   {
     List _x2c_gensym_match_expr = l; List _x2c_gensym_match_cursor, _x2c_gensym_match_cursor1;  switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
         case 9224497936761996324ULL: ;  _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761996324ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && _x2c_gensym_match_cursor1 && _x2c_gensym_match_cursor1->car.u64 == 9224497936780766120ULL && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && _x2c_gensym_match_cursor1) { Var _x2c_gensym_match_value_1 = _x2c_gensym_match_cursor1->car; if ((_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && !_x2c_gensym_match_cursor1 && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
@@ -6709,7 +6713,7 @@ static void _check_converter_args(Compiler c, List result, int method, List note
   List n = notes;  for(List p = params, a = arguments;  List_truth(p) && List_truth(a);  p = cdr(p), a = cdr(a), n = cdr(n)){
     if(! Var_is_row(car(p), 9, 7, 4) || ! Var_is_row(car(a), 9, 7, 4)) continue;  List param = Var_list_payload(car(p)), argument = Var_list_payload(car(a));  Type expected = x2c_var_equal(List_car(param), Symbol_var(33656922)) ? List_type_from_ast(param) : List_type(param);  f11_conversions____check_noted_converter(c, Var_list_payload(car(n)), argument, expected, 0);
   }
-  const PrintfFn * info = List_printf_family(callee);  if(! info || ! String_truth(Compiler_printf_static_format(c, List_getindex(supplied, info -> fmt_arg)))) return;  int first = info -> first_arg - method, index = 0;  for(List a = arguments, n = notes;  List_truth(a);  a = cdr(a), n = cdr(n)) if(index ++ >= first && Var_is_row(car(a), 9, 7, 4)) f11_conversions____check_noted_converter(c, Var_list_payload(car(n)), Var_list_payload(car(a)), Var_type(List_cadr(Var_list(car(a)))), 2);
+  const PrintfFn * info = _printf_family(callee);  if(! info || ! String_truth(Compiler_printf_static_format(c, List_getindex(supplied, info -> fmt_arg)))) return;  int first = info -> first_arg - method, index = 0;  for(List a = arguments, n = notes;  List_truth(a);  a = cdr(a), n = cdr(n)) if(index ++ >= first && Var_is_row(car(a), 9, 7, 4)) f11_conversions____check_noted_converter(c, Var_list_payload(car(n)), Var_list_payload(car(a)), Var_type(List_cadr(Var_list(car(a)))), 2);
 }
 
 void Compiler_report_warning_at(Compiler, Symbol, String, List, List);
