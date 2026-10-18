@@ -5,7 +5,7 @@ ROOT = ..
 LIB_SOURCE = $(ROOT)/lib
 LIB_BUILD = $(ROOT)/builds/0/lib
 HEADER_DIR = x2c
-LIB_ENTRIES = $(shell python3 $(ROOT)/tools/sources.py --root $(ROOT) --area lib)
+LIB_ENTRIES = $(shell $(ROOT)/tools/sources.sh --root $(ROOT) --area lib)
 
 all:
 	@mkdir -p $(HEADER_DIR)

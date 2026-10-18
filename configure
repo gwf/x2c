@@ -30,7 +30,7 @@ check_command() {
   fi
 }
 check make
-check python3
+if [ "$package_check" -eq 1 ]; then check python3; fi
 check /bin/bash
 check_command "${CC-cc}"
 check_command "${AR-ar}"
@@ -42,8 +42,9 @@ if [ "$package_check" -eq 1 ] && command -v python3 >/dev/null 2>&1; then
 fi
 if [ "$core_missing" -ne 0 ]; then
   cat >&2 <<'HELP'
-Core build tools on Fedora: sudo dnf install gcc binutils make python3 bash
-On macOS: xcode-select --install; brew install python
+Core build tools on Fedora: sudo dnf install gcc binutils make bash
+On macOS: xcode-select --install
+Package preparation also needs Python 3 (Fedora: python3; Homebrew: python).
 For custom CC/AR/X2C_CC values, install the selected tool or correct its path.
 HELP
 fi

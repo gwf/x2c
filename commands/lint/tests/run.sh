@@ -130,8 +130,8 @@ cmp "$tests/src/suppression-accepted.x" "$work/suppression.x"
 python3 - <<'CENSUS' >"$work/census.files"
 import subprocess, sys
 from pathlib import Path
-sources = subprocess.check_output(['python3', 'tools/sources.py'], text=True).splitlines()
-sources += subprocess.check_output(['python3', 'tools/sources.py', '--area', 'lib'], text=True).splitlines()
+sources = subprocess.check_output(['tools/sources.sh'], text=True).splitlines()
+sources += subprocess.check_output(['tools/sources.sh', '--area', 'lib'], text=True).splitlines()
 for path in sources:
     if path not in ('lib/x2c.x', 'src/linked-meta.x'):
         sys.stdout.buffer.write(path.encode() + b'\0')

@@ -9,14 +9,14 @@ import tempfile
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
-sys.path.insert(0, str(HERE.parent))
-from sources import sources
 
 
 def units(root, area):
     """Entry units of an area; each module entry stands for its members."""
-    return [p.relative_to(root).as_posix() for p in sources(root, area)
-            if p.relative_to(root).as_posix() != 'lib/x2c.x']
+    paths = subprocess.check_output(
+        [str(root / 'tools/sources.sh'), '--root', str(root), '--area', area], text=True)
+    units = [Path(p).relative_to(root).as_posix() for p in paths.splitlines()]
+    return [p for p in units if p != 'lib/x2c.x']
 
 
 def command_files(root):

@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 class ConfigureTests(unittest.TestCase):
-  def test_missing_python_compiler_and_archiver_are_reported_together(self):
+  def test_missing_compiler_and_archiver_are_reported_together(self):
     with tempfile.TemporaryDirectory() as directory:
       for name in ("make", "cat"):
         Path(directory, name).symlink_to(shutil.which(name))
@@ -22,19 +22,27 @@ class ConfigureTests(unittest.TestCase):
         env={"PATH": directory},
       )
     self.assertNotEqual(result.returncode, 0)
-    for command in ("python3", "cc", "ar"):
+    for command in ("cc", "ar"):
       self.assertIn("missing core build tool: " + command, result.stderr)
+    self.assertNotIn("missing core build tool: python3", result.stderr)
     self.assertIn("sudo dnf install", result.stderr)
 
   def test_core_does_not_require_package_tools_or_unused_defaults(self):
     with tempfile.TemporaryDirectory() as directory:
-      for name in ("make", "python3", "selected-cc", "selected-ar"):
+      for name in ("make", "selected-cc", "selected-ar"):
         Path(directory, name).symlink_to(shutil.which("true"))
       result = subprocess.run(
         ["/bin/sh", str(ROOT / "configure")], capture_output=True, text=True,
         env={"PATH": directory, "CC": "selected-cc", "AR": "selected-ar"},
       )
+      packages = subprocess.run(
+        ["/bin/sh", str(ROOT / "configure"), "--packages"],
+        capture_output=True, text=True,
+        env={"PATH": directory, "CC": "selected-cc", "AR": "selected-ar"},
+      )
     self.assertEqual(result.returncode, 0, result.stderr)
+    self.assertNotEqual(packages.returncode, 0)
+    self.assertIn("missing core build tool: python3", packages.stderr)
 
   def test_failed_preflight_precedes_bootstrap_and_clean_in_parallel_make(self):
     for target in ("build", "build-safe", "packages"):

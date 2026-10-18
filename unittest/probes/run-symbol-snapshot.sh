@@ -118,7 +118,7 @@ diff -u "$BUILD/cold/foreach.h" "$BUILD/default/foreach.h"
 mkdir -p "$BUILD/cold-interfaces" "$BUILD/warm"
 library_sources=()
 while IFS= read -r source; do library_sources+=("$source"); done < <(
-  python3 "$ROOT/tools/sources.py" --root "$cold_root" --area lib)
+  "$ROOT/tools/sources.sh" --root "$cold_root" --area lib)
 "$cold_root/bin/x2c" translate --out-dir "$BUILD/cold-interfaces" \
   "${library_sources[@]}" >/dev/null 2>&1
 for source in "${library_sources[@]}"; do
