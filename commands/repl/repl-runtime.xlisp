@@ -179,6 +179,7 @@
 (def String_rstrip String.rstrip)
 
 (def String_getindex String.getindex)
+(def String_len string-length)
 (def String_str str)
 (def String_repr repr)
 (def String_add String.add)

@@ -437,7 +437,9 @@ The current subset includes initialized simple variables, function
 definitions, integer arithmetic and narrowing, assignment, conditionals,
 `for` loops, self recursion, and calls to earlier functions. String values
 and length, List literals and indexing, and Array construction, mutation,
-and indexing are exercised by the focused checks. Captured `Func` values
+and indexing are exercised by the focused checks. Map and Array elements
+accept compound assignment and `++` and `--`, as in `m["t"] += 1`; the
+receiver and key are evaluated once. Captured `Func` values
 can be called directly or passed to supported native callbacks. A record
 captured by value retains a copy through later submissions.
 Reference captures share the original local or parameter, whose storage
@@ -492,7 +494,7 @@ newline. Compiled prompt functions call the C library's own `printf` and
 REPL sessions also provide `print(String)` and `println(String)`. `print`
 writes the String's bytes; `println` writes those bytes followed by one
 newline. Both are REPL-only, reserve their names in the session, and report
-`ok`.
+`ok`. Compiled prompt functions can call them too.
 
 A session also declares `Json`, `Diff` and `Path`, so `Json.parse`,
 `Diff.unified` and `Path.basename` evaluate without an include.

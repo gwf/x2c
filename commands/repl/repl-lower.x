@@ -2229,10 +2229,32 @@ static Var _lower_update_value(
   return _lower_to_type(l, _lower_type_of(target), value);
 }
 
+/* `m[k] += v` on a library container reads and writes one element. It
+   evaluates the receiver and key once and returns the new value. */
+static Var _lower_element_update(
+  Lowering &l, Var target, Var receiver, Var key, Var operator, Var right) {
+  String container = _lower_indexed(receiver, 0);
+  if (!container)
+    return $decline.index.type(l);
+  if (container.equal("List") || container.equal("String"))
+    return $decline.index.immutable(l);
+  Var object = _lower_expr(l, receiver), index = _lower_expr(l, key);
+  if (_lower_failed(l, object) || _lower_failed(l, index)) return void;
+  Var held = _lower_name(l, "held"), at = _lower_name(l, "at");
+  Var value = _lower_name(l, "new");
+  Var old = %(${Atom.intern(container + "_getindex")} $held $at);
+  Var combined = _lower_update_value(l, target, operator, old, right);
+  Var store = %(${Atom.intern(container + "_setindex")} $held $at $value);
+  return %((lambda ($held $at) ((lambda ($value) (begin $store $value))
+    $combined)) $object $index);
+}
+
 /* A compound update evaluates the place once and returns its new value. */
 static Var _lower_update_expr(
   Lowering &l, Var target, Symbol operator, Var right) {
   if (_lower_failed(l, right)) return void;
+  match (target) case %(expr ? (getindex ?receiver ?key)):
+    return _lower_element_update(l, target, receiver, key, operator, right);
   Var place = _lower_place(l, target);
   if (l.declined || place is void)
     return $decline.update.storage(l);
@@ -2271,6 +2293,9 @@ static Var _lower_update(
   Lowering &l, Var target, Var operator, Var right, List rest, List k) {
   int id = _lower_target(target);
   if (_lower_failed(l, right)) return void;
+  match (target) case %(expr ? (getindex ?receiver ?key)):
+    return _lower_effect(l, _lower_element_update(
+      l, target, receiver, key, operator, right), rest, k);
   Type want = _lower_type_of(target);
   Var place = _lower_place(l, target);
   if (l.declined) return void;
