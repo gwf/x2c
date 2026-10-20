@@ -211,6 +211,73 @@ static void scope_allocator_edge_behavior(void) {
     Scope.stats().live_requested_bytes, before.live_requested_bytes);
 }
 
+static void scope_c_allocation_aliases(void) {
+  EXPECT_TRUE(xmalloc == Scope.malloc);
+  EXPECT_TRUE(xcalloc == Scope.calloc);
+  EXPECT_TRUE(xrealloc == Scope.realloc);
+  EXPECT_TRUE(xfree == Scope.free);
+  EXPECT_TRUE(xmemdup == Scope.memdup);
+
+  ScopeStats before = Scope.stats();
+  Scope.retain();
+  char *outer = xmemdup("outer", 6);
+  Scope owner = Scope.owner(outer), pushed = NULL;
+  Scope.push(&pushed);
+  char *buffer = xmalloc(8);
+  fill(buffer, "copy");
+  int *zeroes = xcalloc(3, sizeof(int));
+  EXPECT_TRUE(Scope.owner(buffer) == pushed);
+  EXPECT_TRUE(Scope.owner(zeroes) == pushed);
+  for (int i = 0; i < 3; i++) EXPECT_INT_EQ(zeroes[i], 0);
+
+  Scope pushed_owner = pushed;
+  Scope.retain();
+  char *inner = xmemdup(buffer, 5);
+  EXPECT_TRUE(Scope.owner(inner) == *Scope.top());
+  EXPECT_TRUE(Scope.owner(inner) != pushed_owner);
+  outer = xrealloc(outer, 64);
+  EXPECT_TRUE(Scope.owner(outer) == owner);
+  EXPECT_STR_EQ(outer, "outer");
+  EXPECT_STR_EQ(inner, "copy");
+  xfree(buffer);
+  Scope.release();
+  Scope.pop();
+  pushed.destroy();
+  EXPECT_STR_EQ(outer, "outer");
+  Scope.release();
+  EXPECT_INT_EQ(Scope.stats().live_allocations, before.live_allocations);
+  EXPECT_INT_EQ(
+    Scope.stats().live_requested_bytes, before.live_requested_bytes);
+}
+
+static void scope_c_allocation_alias_edges(void) {
+  ScopeStats before = Scope.stats();
+  Scope.retain();
+  void *zero = xmalloc(0), *zeroed = xcalloc(0, sizeof(int));
+  void *empty = xcalloc(3, 0), *from_null = xrealloc(NULL, 0);
+  EXPECT_NOT_NULL(zero);
+  EXPECT_NOT_NULL(zeroed);
+  EXPECT_NOT_NULL(empty);
+  EXPECT_NOT_NULL(from_null);
+  EXPECT_TRUE(zero != zeroed && zero != empty && zero != from_null);
+  EXPECT_NULL(xmemdup(NULL, 4));
+  EXPECT_NULL(xmemdup("x", 0));
+  EXPECT_NULL(xrealloc(from_null, 0));
+  char *buffer = xrealloc(NULL, 8);
+  fill(buffer, "grow");
+  buffer = xrealloc(buffer, 32);
+  EXPECT_STR_EQ(buffer, "grow");
+  buffer = xrealloc(buffer, 5);
+  EXPECT_STR_EQ(buffer, "grow");
+  xfree(buffer);
+  xfree(zero);
+  xfree(zeroed);
+  xfree(empty);
+  xfree(NULL);
+  Scope.release();
+  EXPECT_INT_EQ(Scope.stats().live_allocations, before.live_allocations);
+}
+
 static void scope_size_limits_are_terminal(void) {
   EXPECT_TRUE(_scope_rejected(_malloc_overflow));
   EXPECT_TRUE(_scope_rejected(_calloc_overflow));
@@ -464,6 +531,8 @@ void scope_suite(void) {
   $test.run(scope_realloc_updates_any_position);
   $test.run(scope_named_direct_allocation);
   $test.run(scope_allocator_edge_behavior);
+  $test.run(scope_c_allocation_aliases);
+  $test.run(scope_c_allocation_alias_edges);
   $test.run(scope_size_limits_are_terminal);
   $test.run(scope_nested_stats_restore);
   $test.run(scope_release_requires_matching_retain);

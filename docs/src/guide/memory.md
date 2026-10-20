@@ -49,6 +49,36 @@ All other storage is mutable and belongs to a scope: `Block`, `Array`,
 
 ## A scope is a group of allocations
 
+The public C-style names `xmalloc`, `xcalloc`, `xrealloc`, `xfree`, and
+`xmemdup` alias `Scope.malloc`, `Scope.calloc`, `Scope.realloc`, `Scope.free`,
+and `Scope.memdup`. They have the same signatures, error behavior, and
+compile-time availability. They are available through the standard prelude:
+
+```x2c
+char *word = xmemdup("first", 6);
+word = xrealloc(word, 32);
+strcpy(word, "second");
+puts(word);
+xfree(word);
+```
+
+New allocations belong to the current active scope. A nested retain or
+pushed scope becomes the destination for new allocations. Resizing an
+existing block preserves its owner. Allocations left in a scope are reclaimed
+when that scope ends; the default root ends at thread or process shutdown.
+
+`xmalloc(0)` and zero-sized `xcalloc` requests return distinct managed
+pointers. `xmemdup(NULL, size)` and `xmemdup(ptr, 0)` return NULL.
+`xrealloc(NULL, size)` allocates, even when `size` is zero.
+`xrealloc(ptr, 0)` frees a nonnull pointer and returns NULL. `xfree(NULL)`
+does nothing. Size overflow and allocation failure follow the corresponding
+`Scope` operation's errors.
+
+Keep native allocations with their native allocator. For example, a buffer
+allocated by `getline` must use native `free`. Passing that buffer to `xfree`
+or `xrealloc`, or passing managed memory to native `free` or `realloc`, is
+undefined behavior.
+
 `Scope.retain` opens a new region on the currently active scope slot;
 `Scope.release` frees everything allocated inside it. Between them, the
 allocation calls go into the retained region:

@@ -10,6 +10,11 @@ Memory allocation scope management.
 | Function | Summary |
 | --- | --- |
 | [`x2c_scope_thread_release`](#x2c_scope_thread_release) | Destroys this thread's `Scope` chain and its push and retain stacks. |
+| [`xcalloc`](#xcalloc) | Allocates zeroed objects in the active scope through `Scope.calloc`. |
+| [`xfree`](#xfree) | Frees scope-owned memory through `Scope.free`; NULL does nothing. |
+| [`xmalloc`](#xmalloc) | Allocates uninitialized bytes in the active scope through `Scope.malloc`. |
+| [`xmemdup`](#xmemdup) | Copies bytes into the active scope through `Scope.memdup`. |
+| [`xrealloc`](#xrealloc) | Resizes scope-owned memory through `Scope.realloc`, preserving its owner. |
 | [`Scope.malloc_finalized`](#Scope.malloc_finalized) | Allocates `size` uninitialized bytes in the active scope with a finalizer. |
 | [`Scope.malloc_finalized_in`](#Scope.malloc_finalized_in) | Allocates `size` bytes with finalizer `drop` in the scope held by `s`. |
 | [`Scope.new`](#Scope.new) | Creates a detached, unnamed scope and returns it. |
@@ -27,6 +32,67 @@ It runs last in `x2c_thread_state_release` and repeats harmlessly; a
 thread that never created a `Scope` has nothing to destroy.
 
 Source: `lib/scope/regions.x:300`
+
+#### xcalloc
+
+`void * xcalloc(size_t count, size_t size)`
+
+Allocates zeroed objects in the active scope through `Scope.calloc`.
+The count overflow check, zero-size behavior, and raised errors are the
+same. Release the result with `xfree` or let its scope reclaim it.
+
+**See:** [`Scope.calloc`](#Scope.calloc)
+
+Source: `lib/scope/scope.x:103`
+
+#### xfree
+
+`void xfree(void *ptr)`
+
+Frees scope-owned memory through `Scope.free`; NULL does nothing.
+Native allocations, including buffers from `getline`, require native
+`free`. Passing them to `xfree` is undefined behavior.
+
+**See:** [`Scope.free`](#Scope.free)
+
+Source: `lib/scope/scope.x:120`
+
+#### xmalloc
+
+`void * xmalloc(size_t size)`
+
+Allocates uninitialized bytes in the active scope through `Scope.malloc`.
+The signature, ownership, zero-size behavior, and raised errors are the
+same. Release the result with `xfree` or let its scope reclaim it.
+
+**See:** [`Scope.malloc`](#Scope.malloc)
+
+Source: `lib/scope/scope.x:95`
+
+#### xmemdup
+
+`void * xmemdup(const void *ptr, size_t size)`
+
+Copies bytes into the active scope through `Scope.memdup`.
+A NULL source or zero size returns NULL without allocating. Copy a
+string's terminator too. The signature and raised errors are unchanged.
+
+**See:** [`Scope.memdup`](#Scope.memdup)
+
+Source: `lib/scope/scope.x:128`
+
+#### xrealloc
+
+`void * xrealloc(void *ptr, size_t size)`
+
+Resizes scope-owned memory through `Scope.realloc`, preserving its owner.
+A NULL pointer allocates in the active scope, including for size zero.
+A nonnull pointer with size zero is freed and returns NULL.
+The signature and raised errors are the same as `Scope.realloc`.
+
+**See:** [`Scope.realloc`](#Scope.realloc)
+
+Source: `lib/scope/scope.x:112`
 
 ### `Scope`
 

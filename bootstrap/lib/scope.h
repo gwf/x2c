@@ -88,5 +88,25 @@ void Scope_shutdown_hook(void(* hook)(void));
 
 void Scope_shutdown(void);
 
+#ifndef X2CCPP
+_Static_assert(_Generic(& Scope_malloc, void *(*)(size_t) : 1, default: 0), "native alias xmalloc does not match Scope_malloc");
+#endif
+#define xmalloc Scope_malloc
+#ifndef X2CCPP
+_Static_assert(_Generic(& Scope_calloc, void *(*)(size_t, size_t) : 1, default: 0), "native alias xcalloc does not match Scope_calloc");
+#endif
+#define xcalloc Scope_calloc
+#ifndef X2CCPP
+_Static_assert(_Generic(& Scope_realloc, void *(*)(void *, size_t) : 1, default: 0), "native alias xrealloc does not match Scope_realloc");
+#endif
+#define xrealloc Scope_realloc
+#ifndef X2CCPP
+_Static_assert(_Generic(& Scope_free, void(*)(void *) : 1, default: 0), "native alias xfree does not match Scope_free");
+#endif
+#define xfree Scope_free
+#ifndef X2CCPP
+_Static_assert(_Generic(& Scope_memdup, void *(*)(const void *, size_t) : 1, default: 0), "native alias xmemdup does not match Scope_memdup");
+#endif
+#define xmemdup Scope_memdup
 
 #endif /* __GUARD_0x7792FEF9__ */
