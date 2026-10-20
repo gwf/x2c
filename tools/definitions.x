@@ -99,7 +99,7 @@ List Unit.callables(Unit unit):
     int line = row["line"].integer()
     List source = row["source"]
     if !source: source = %(${unit["path"]} $line)
-    if row["origin"] == <alias>: continue
+    if row["origin"] == <alias> && !doc: continue
     if row["origin"] == <source>:
       found.push(%($display ${row["text"]} $line ${Prose.normalize(doc)} $source))
       continue

@@ -1802,7 +1802,8 @@ Public functions:
 `Scope.push`, `Scope.top`, `Scope.pop`, `Scope.retain`, `Scope.release`,
 `Scope.new`, `Scope.new_named`, `Scope.destroy`, `Scope.cleanup`,
 `x2c_scope_thread_release`, `Scope.name`, `Scope.stats`, `Scope.initialize`,
-`Scope.shutdown_hook`, `Scope_shutdown`
+`Scope.shutdown_hook`, `Scope_shutdown`, `xmalloc`, `xcalloc`, `xrealloc`,
+`xfree`, `xmemdup`
 
 ### [lib/string/string.x](../lib/string/string.x)
 

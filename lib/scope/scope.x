@@ -84,3 +84,46 @@ module {
   "accounting.x",
   "runtime.x",
 }
+
+// C-style allocation names
+
+/** Allocates uninitialized bytes in the active scope through `Scope.malloc`.
+    The signature, ownership, zero-size behavior, and raised errors are the
+    same. Release the result with `xfree` or let its scope reclaim it.
+    See: Scope.malloc
+*/
+$x2c.foreign.alias(Scope.malloc)
+meta native void *xmalloc(size_t size);
+
+/** Allocates zeroed objects in the active scope through `Scope.calloc`.
+    The count overflow check, zero-size behavior, and raised errors are the
+    same. Release the result with `xfree` or let its scope reclaim it.
+    See: Scope.calloc
+*/
+$x2c.foreign.alias(Scope.calloc)
+meta native void *xcalloc(size_t count, size_t size);
+
+/** Resizes scope-owned memory through `Scope.realloc`, preserving its owner.
+    A NULL pointer allocates in the active scope, including for size zero.
+    A nonnull pointer with size zero is freed and returns NULL.
+    The signature and raised errors are the same as `Scope.realloc`.
+    See: Scope.realloc
+*/
+$x2c.foreign.alias(Scope.realloc)
+meta native void *xrealloc(void *ptr, size_t size);
+
+/** Frees scope-owned memory through `Scope.free`; NULL does nothing.
+    Native allocations, including buffers from `getline`, require native
+    `free`. Passing them to `xfree` is undefined behavior.
+    See: Scope.free
+*/
+$x2c.foreign.alias(Scope.free)
+meta native void xfree(void *ptr);
+
+/** Copies bytes into the active scope through `Scope.memdup`.
+    A NULL source or zero size returns NULL without allocating. Copy a
+    string's terminator too. The signature and raised errors are unchanged.
+    See: Scope.memdup
+*/
+$x2c.foreign.alias(Scope.memdup)
+meta native void *xmemdup(const void *ptr, size_t size);

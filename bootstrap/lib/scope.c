@@ -120,6 +120,31 @@ static void f7_runtime____initialize(void);
 static void _require_running(void);
 static void f7_runtime____ensure_running(void);
 static void f7_runtime____run_hooks(void);
+void * Scope_malloc(size_t size);
+#ifndef X2CCPP
+_Static_assert(_Generic(& Scope_malloc, void *(*)(size_t) : 1, default: 0), "native alias xmalloc does not match Scope_malloc");
+#endif
+#define xmalloc Scope_malloc
+void * Scope_calloc(size_t count, size_t size);
+#ifndef X2CCPP
+_Static_assert(_Generic(& Scope_calloc, void *(*)(size_t, size_t) : 1, default: 0), "native alias xcalloc does not match Scope_calloc");
+#endif
+#define xcalloc Scope_calloc
+void * Scope_realloc(void * ptr, size_t size);
+#ifndef X2CCPP
+_Static_assert(_Generic(& Scope_realloc, void *(*)(void *, size_t) : 1, default: 0), "native alias xrealloc does not match Scope_realloc");
+#endif
+#define xrealloc Scope_realloc
+void Scope_free(void * ptr);
+#ifndef X2CCPP
+_Static_assert(_Generic(& Scope_free, void(*)(void *) : 1, default: 0), "native alias xfree does not match Scope_free");
+#endif
+#define xfree Scope_free
+void * Scope_memdup(const void * ptr, size_t size);
+#ifndef X2CCPP
+_Static_assert(_Generic(& Scope_memdup, void *(*)(const void *, size_t) : 1, default: 0), "native alias xmemdup does not match Scope_memdup");
+#endif
+#define xmemdup Scope_memdup
 void Scope_initialize(void);
 void * Scope_malloc(size_t size){
   if(! _init_guard_) Scope_initialize();  _require_running();  return f10_allocation____malloc_in(_thread() -> active, size, NULL);
