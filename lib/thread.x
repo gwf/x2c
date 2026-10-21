@@ -533,11 +533,10 @@ void Thread.finish_all(Array pending) {
     Raises: `<bad-arg>` for a nonpositive worker count, or `<alloc-fail>` for
     descriptor storage.
 */
-ParallelMap Iter.parallel_map(
-  Iter source, ThreadValueFn function, int workers) {
+ParallelMap Iter.parallel_map(Iter i, ThreadValueFn function, int workers) {
   if (workers <= 0) raise %(bad-arg (operation "Iter.parallel_map"));
   ParallelMap map = Scope.malloc(sizeof(struct ParallelMap));
-  *map = (struct ParallelMap) { source, function, workers };
+  *map = (struct ParallelMap) { i, function, workers };
   return map;
 }
 

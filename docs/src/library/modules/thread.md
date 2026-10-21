@@ -24,7 +24,7 @@
 <a id="Iter.parallel_map"></a>
 #### Iter.parallel_map
 
-`ParallelMap Iter.parallel_map( Iter source, ThreadValueFn function, int workers)`
+`ParallelMap Iter.parallel_map(Iter i, ThreadValueFn function, int workers)`
 
 Describes mapping `function` over `source` with at most `workers` Threads.
 Nothing runs until `ParallelMap.foldl` consumes the operation. The
@@ -64,7 +64,7 @@ This descriptor supports consuming folds, not general pull iteration.
 **Raises:** source, start, worker, export, allocation, or accumulator causes,
 including `<void-op>` for a `void` worker result.
 
-Source: `lib/thread.x:561`
+Source: `lib/thread.x:560`
 
 ### `Thread`
 

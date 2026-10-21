@@ -330,6 +330,9 @@ assertions). Command checks exposed baseline lint violations: five over-width
 lines and six wrapped openings in unchanged `lib/thread.x` and `lib/pool/pool.x`.
 Those lines were reformatted without changing executable tokens or behavior;
 the lint baseline was not raised. Derived Thread documentation was regenerated.
+Lint's subject-name rule also required the standard `Iter i` parameter
+spelling in `Iter.parallel_map`; its signature and initializer were updated
+together. The complete `sh commands/lint/tests/run.sh` check now passes.
 The separate lifetime repair remains outside this change. Rerun the exception
 gate on this completed tree before delivery.
 
