@@ -753,16 +753,16 @@ void Thread_finish_all(Array pending){
 
 }
 
-ParallelMap Iter_parallel_map(Iter source, ThreadValueFn function, int workers){
+ParallelMap Iter_parallel_map(Iter i, ThreadValueFn function, int workers){
   if(! _init_guard_) _file_init_();
   if(workers <= 0){
-    static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/thread.x",.function = "Iter_parallel_map",.line = 538,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/thread.x",.function = "Iter_parallel_map",.line = 537,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_13, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Iter.parallel_map")), NULL))));
     __builtin_unreachable();
   }
   ParallelMap map = Scope_malloc(sizeof(struct ParallelMap));
   * map =(struct ParallelMap){
-    source, function, workers
+    i, function, workers
   }
   ;
   return map;
@@ -835,7 +835,7 @@ Var ParallelMap_foldl(ParallelMap map, Var seed, Func accumulate){
                 Var item = _parallel_result(worker);
                 active --;
                 if(Var_is_void(item)){
-                  static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/thread.x",.function = "ParallelMap_foldl",.line = 577,.runtime = 1};
+                  static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/thread.x",.function = "ParallelMap_foldl",.line = 576,.runtime = 1};
                   x2c_error_raise_n(& _x2c_gensym_error_site_14, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("ParallelMap.foldl")), NULL))));
                   __builtin_unreachable();
                 }

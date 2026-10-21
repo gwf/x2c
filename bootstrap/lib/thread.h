@@ -45,7 +45,7 @@ Var Thread_finish_any(Array pending);
 
 void Thread_finish_all(Array pending);
 
-ParallelMap Iter_parallel_map(Iter source, ThreadValueFn function, int workers);
+ParallelMap Iter_parallel_map(Iter i, ThreadValueFn function, int workers);
 
 Var ParallelMap_foldl(ParallelMap map, Var seed, Func accumulate);
 
