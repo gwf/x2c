@@ -452,7 +452,7 @@ For example, copy the autodiff module from a repository checkout:
 
 ```sh
 cp packages/autodiff/src/autodiff-macros.x /tmp/autodiff-repl.x
-x2c repl
+./x2c repl
 ```
 
 At the prompt, load and inspect the copy:

@@ -100,8 +100,8 @@ static HelpPage help_pages[] = {
       Translate each x2c input into a matching C source and header."),
     "Read additional arguments from a response file", "End option parsing",
     $dedent(%"
-      The output directory defaults to the current directory and must already
-      exist. Use --out-dir to select another directory.
+      The output directory defaults to the current directory. Use --out-dir
+      to select another directory; missing directories are created.
       Shell wildcards are allowed because the shell expands them; x2c does not
       interpret wildcard characters in input operands.
       Inputs translate in parallel, one job per online processor. Under Make
@@ -120,7 +120,19 @@ static HelpPage help_pages[] = {
     $dedent(%"
       Inputs may be .x, .c, .o, or .a files. x2c links its runtime and
       required platform libraries automatically. Directory operands and
-      unexpanded wildcard operands are rejected.") },
+      unexpanded wildcard operands are rejected.
+      Direct builds default to a.out, lib<first-input-stem>.a, or
+      <first-input-stem>.so. Compile-only builds default to <stem>.o in the
+      current directory; a named build directory keeps multiple objects there.
+      Manifest products default to <project>/.x2c-build/<target-product>.
+      One manifest target is selected automatically; several need --target
+      or project.default-target. Profiles apply only when selected.
+      Direct intermediates are temporary. --save-temps retains and reuses them
+      in .x2c-build; --save-temps=<dir> and --build-dir <dir> select a directory.
+      The last named directory wins. Under Make, jobs default to one;
+      otherwise they default to the online processor count.
+      --debug logs compiler activity; -g emits native debug information.
+      Add --source-map -O0 to -g for debugging original x2c sources.") },
   { <run>,
     $dedent(%"
       Usage:
@@ -133,7 +145,14 @@ static HelpPage help_pages[] = {
     "End build options and begin program arguments",
     $dedent(%"
       The selected target must be executable. After a successful build,
-      x2c returns the program's exit status.") },
+      x2c returns the program's exit status.
+      Direct runs use a temporary executable unless intermediates are retained.
+      --save-temps retains and reuses intermediates in .x2c-build.
+      --save-temps=<dir> and --build-dir <dir> select the retained directory;
+      the last named directory wins. Manifest products default to
+      <project>/.x2c-build/<target-product>.
+      --debug logs compiler activity; use -g --source-map -O0 for source
+      debugging. See 'x2c help build' for other build defaults.") },
   { <new>,
     $dedent(%"
       Usage:

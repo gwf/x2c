@@ -55,8 +55,8 @@ General options:
   @<file>                     Read additional arguments from a response file
   --                          End option parsing
 
-The output directory defaults to the current directory and must already
-exist. Use --out-dir to select another directory.
+The output directory defaults to the current directory. Use --out-dir
+to select another directory; missing directories are created.
 Shell wildcards are allowed because the shell expands them; x2c does not
 interpret wildcard characters in input operands.
 Inputs translate in parallel, one job per online processor. Under Make

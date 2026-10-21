@@ -41,7 +41,7 @@ make build-safe
 `run` compiles and executes the program. To keep an executable instead:
 
 ```sh
-./x2c build hello.x --output hello
+./x2c build hello.x -o hello
 ./hello
 ```
 

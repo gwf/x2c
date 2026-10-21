@@ -17,11 +17,11 @@ Target options:
 
 Output options:
       --source-map            Map generated C locations to original x2c sources
-      --output <file>         Name the executable, library, or single object
+  -o, --output <file>         Name the executable, library, or single object
       --build-dir <dir>       Store generated C, objects, deps, and state here
       --compile-commands <file>
                               Write native compile commands and retain generated files
-      --save-temps[=<dir>]    Keep generated C and other intermediate files
+      --save-temps[=<dir>]    Retain and reuse intermediates (default: .x2c-build)
 
 Translation options:
   -I <dir>                    Add a shared x2c/C include directory
@@ -75,3 +75,15 @@ General options:
 Inputs may be .x, .c, .o, or .a files. x2c links its runtime and
 required platform libraries automatically. Directory operands and
 unexpanded wildcard operands are rejected.
+Direct builds default to a.out, lib<first-input-stem>.a, or
+<first-input-stem>.so. Compile-only builds default to <stem>.o in the
+current directory; a named build directory keeps multiple objects there.
+Manifest products default to <project>/.x2c-build/<target-product>.
+One manifest target is selected automatically; several need --target
+or project.default-target. Profiles apply only when selected.
+Direct intermediates are temporary. --save-temps retains and reuses them
+in .x2c-build; --save-temps=<dir> and --build-dir <dir> select a directory.
+The last named directory wins. Under Make, jobs default to one;
+otherwise they default to the online processor count.
+--debug logs compiler activity; -g emits native debug information.
+Add --source-map -O0 to -g for debugging original x2c sources.

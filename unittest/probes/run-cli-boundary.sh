@@ -357,13 +357,13 @@ grep -Fq "color requires auto, always, or never" \
 
 rm -f "$BUILD/out/item.c" "$BUILD/out/item.h"
 set +e
-"$X2C" translate --out-dir "$BUILD/out" "$BUILD/a/item.x" \
+"$X2C" translate --out-dir "$BUILD/invalid-out" "$BUILD/a/item.x" \
   "$BUILD/missing.x" >"$BUILD/preflight.stdout" 2>"$BUILD/preflight.stderr"
 preflight_status=$?
 "$X2C" translate --out-dir "$BUILD/out" "$BUILD/a/item.x" \
   "$BUILD/b/item.x" >"$BUILD/collision.stdout" 2>"$BUILD/collision.stderr"
 collision_status=$?
-"$X2C" translate --out-dir "$BUILD/absent" "$BUILD/a/item.x" \
+"$X2C" translate --out-dir "$BUILD/absent/nested" "$BUILD/a/item.x" \
   >"$BUILD/out-dir.stdout" 2>"$BUILD/out-dir.stderr"
 out_dir_status=$?
 "$X2C" translate --out-dir "$BUILD/out" "$BUILD/a" \
@@ -371,16 +371,21 @@ out_dir_status=$?
 directory_status=$?
 set -e
 [[ $preflight_status == 2 && $collision_status == 2 ]] || exit 1
-[[ $out_dir_status == 2 && $directory_status == 2 ]] || exit 1
+[[ $out_dir_status == 0 && $directory_status == 2 ]] || exit 1
+[[ -f "$BUILD/absent/nested/item.c" && ! -e "$BUILD/invalid-out" ]] || exit 1
 [[ ! -e "$BUILD/out/item.c" && ! -e "$BUILD/out/item.h" ]] || exit 1
 grep -Fq "$BUILD/missing.x" "$BUILD/preflight.stderr"
 grep -Fq "$BUILD/a" "$BUILD/directory.stderr"
 grep -Fq "inputs produce the same output stem 'item'" \
   "$BUILD/collision.stderr"
 
-"$X2C" translate -### --out-dir "$BUILD/out" "$BUILD/a/item.x" \
+"$X2C" translate -### --out-dir "$BUILD/dry-out" "$BUILD/a/item.x" \
   >"$BUILD/dry-run.stdout" 2>"$BUILD/dry-run.stderr"
 [[ ! -e "$BUILD/out/item.c" && ! -e "$BUILD/out/item.h" ]] || exit 1
+[[ ! -e "$BUILD/dry-out" ]] || exit 1
+"$X2C" translate --dump-tokens --out-dir "$BUILD/inspect-out" \
+  "$BUILD/a/item.x" >/dev/null
+[[ ! -e "$BUILD/inspect-out" ]] || exit 1
 grep -Fq "x2c: translate --out-dir" "$BUILD/dry-run.stderr"
 
 # An inspection covers every input, so a later input's error fails it.
@@ -438,7 +443,7 @@ set -e
 [[ $no_command_status == 2 && $old_o_status == 2 ]] || exit 1
 [[ $one_dash_status == 2 ]] || exit 1
 grep -Fq "expected a command before" "$BUILD/no-command.stderr"
-grep -Fq "option '-o' was removed" "$BUILD/old-o.stderr"
+grep -Fq "option '-o' needs build or run" "$BUILD/old-o.stderr"
 grep -Fq "one-dash long option '-dump-ast' was removed" \
   "$BUILD/one-dash.stderr"
 
@@ -1088,6 +1093,109 @@ set -e
 [[ $compile_only_status == 2 && $run_status == 0 ]] || exit 1
 [[ $(cat "$BUILD/direct/run.stdout") == one ]] || exit 1
 grep -Fq 'temporary; removed after run' "$BUILD/direct/run.stderr"
+
+# Defaults, retained builds, and directory aliases share the native driver.
+python3 - "$X2C" "$BUILD/defaults" <<'PY_DEFAULTS'
+import json
+import pathlib
+import subprocess
+import sys
+
+compiler, directory = sys.argv[1:]
+root = pathlib.Path(directory)
+root.mkdir()
+(root / 'first.x').write_text('int first(void) { return 42; }\n')
+(root / 'main.c').write_text(
+    'int first(void); int main(void) { return first() != 42; }\n')
+
+def run(*args, cwd=root, status=0):
+    result = subprocess.run([compiler, *args], cwd=cwd, text=True,
+                            capture_output=True)
+    assert result.returncode == status, (args, result.stdout, result.stderr)
+    return result
+
+run('build', '-q', 'first.x', 'main.c')
+assert (root / 'a.out').is_file()
+subprocess.run([str(root / 'a.out')], check=True)
+run('build', '-q', '-c', 'first.x', 'main.c')
+assert all((root / name).is_file() for name in ['first.o', 'main.o'])
+run('build', '-q', 'first.o', 'main.o', '-o', 'linked')
+subprocess.run([str(root / 'linked')], check=True)
+run('build', '-q', '-c', 'first.x')
+run('build', '-q', '--kind', 'static-library', 'first.x')
+assert (root / 'libfirst.a').is_file()
+module = run('build', '-###', '--kind', 'meta-module', 'first.x')
+assert '-o first.so' in module.stderr, module.stderr
+
+for options, product in [(['-o', 'short'], 'short'),
+                         (['-oattached'], 'attached'),
+                         (['-o', 'unused', '--output', 'long'], 'long'),
+                         (['--output', 'unused', '-olast'], 'last')]:
+    run('build', '-q', 'first.x', 'main.c', *options)
+    assert (root / product).is_file()
+assert not (root / 'unused').exists()
+run('run', '-q', '-oran', 'first.x', 'main.c')
+assert (root / 'ran').is_file()
+run('run', '-q', '--output', 'long-ran', 'first.x', 'main.c')
+assert (root / 'long-ran').is_file()
+run('translate', '-o', 'bad', 'first.x', status=2)
+for options in [['--build-dir='], ['--build-dir', ''], ['--save-temps=']]:
+    result = run('build', *options, 'first.x', 'main.c', status=2)
+    assert 'requires' in result.stderr
+
+# Every retention spelling enables reuse, and input changes rebuild.
+for index, (options, work) in enumerate([
+        (['--save-temps'], '.x2c-build'),
+        (['--save-temps=saved'], 'saved'),
+        (['--build-dir', 'named'], 'named'),
+        (['--compile-commands', 'commands.json'], '.x2c-build')]):
+    command = ['build', '-q', '-v', *options, 'first.x', 'main.c']
+    run(*command)
+    warm = run(*command)
+    assert 'x2c: compile ' not in warm.stderr, warm.stderr
+    assert 'up-to-date compile' in warm.stderr, warm.stderr
+    assert (root / work / '.x2c-state').is_dir()
+    with (root / 'main.c').open('a') as source:
+        source.write(f'int changed_{index}(void) {{return 1;}}\n')
+    assert 'x2c: compile ' in run(*command).stderr
+
+for options, chosen, ignored in [
+    (['--build-dir', 'ignored1', '--save-temps=chosen1'], 'chosen1', 'ignored1'),
+    (['--save-temps=ignored2', '--build-dir', 'chosen2', '--save-temps'],
+     'chosen2', 'ignored2')]:
+    run('build', '-q', *options, 'first.x', 'main.c')
+    assert (root / chosen / '.x2c-state').is_dir()
+    assert not (root / ignored).exists()
+
+run('build', '-q', '-c', '--save-temps', '--compile-commands', 'objects.json',
+    'first.x', 'main.c')
+rows = json.loads((root / 'objects.json').read_text())
+assert {row['output'] for row in rows} == {'first.o', 'main.o'}, rows
+run('build', '-q', '-c', '--save-temps=objects', 'first.x', 'main.c')
+assert len(list((root / 'objects/obj').glob('*.o'))) == 2
+(root / 'other').mkdir()
+(root / 'other/first.c').write_text('int other(void) {return 0;}\n')
+(root / 'collision').mkdir()
+run('build', '-q', '-c', '../first.x', '../other/first.c',
+    cwd=root / 'collision', status=2)
+assert not list((root / 'collision').iterdir())
+run('translate', '--out-dir', 'main.c', 'first.x', status=2)
+run('build', '-q', '-c', '--build-dir', 'separate', 'first.x', 'other/first.c')
+assert len(list((root / 'separate/obj').glob('*.o'))) == 2
+
+(root / 'nested').mkdir()
+(root / 'x2c.toml').write_text(
+    '[project]\nbuild-dir="configured"\n'
+    '[target.app]\nsources=["first.x", "main.c"]\n')
+run('build', '-q', '--save-temps', cwd=root / 'nested')
+assert (root / 'configured/app').is_file()
+run('build', '-q', '--save-temps=override', '-omanifest-app',
+    cwd=root / 'nested')
+assert (root / 'nested/manifest-app').is_file()
+assert (root / 'nested/override/.x2c/app/.x2c-state').is_dir()
+run('run', '-q', '--save-temps=override', '-omanifest-app',
+    cwd=root / 'nested')
+PY_DEFAULTS
 
 cat >"$BUILD/direct/terminal.c" <<'EOF'
 #include <stdio.h>

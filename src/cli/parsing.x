@@ -107,9 +107,9 @@ module CliOption cli_options[] = {
   { <jobs>, %<<translate build run script>>, <target>, "-j",
     "<count>", "Maximum parallel translation and compilation jobs", 0,
     .alias = "--jobs" },
-  { <output>, %<<build run>>, <output>, "--output", "<file>",
+  { <output>, %<<build run>>, <output>, "-o", "<file>",
     "Name the executable, library, or single object", 0,
-    CLI_FIELD(<text>, output) },
+    .alias = "--output", CLI_FIELD(<text>, output) },
   { <rebuild>, %<<script>>, <output>, "--rebuild", NULL,
     "Build the script even when its cached executable is current", 0,
     CLI_FIELD(<flag>, rebuild) },
@@ -123,7 +123,7 @@ module CliOption cli_options[] = {
     "<file>", "Write native compile commands and retain generated files", 0 },
   { <save-temp>, %<<build run>>, <output>,
     "--save-temps", NULL,
-    "Keep generated C and other intermediate files", 0,
+    "Retain and reuse intermediates (default: .x2c-build)", 0,
     .label = "--save-temps[=<dir>]", CLI_FIELD(<flag>, save_temps) },
   { <sha256>, %<<install>>, <package>, "--sha256", "<hex>",
     "Require this digest of a downloaded or local archive", 0,
@@ -271,7 +271,7 @@ CliRequest CliRequest.parse_arguments(Array args) {
     exit(0);
   }
   if (first == "help") _help_command(args);
-  if (first == "-o") _cli_fail_removed_output();
+  if (first == "-o") _cli_fail_output_command();
   String spelling = _two_dash(first);
   if (spelling) _cli_fail_one_dash_removed(first, %"x2c translate $spelling ...");
   if (first[0] != '-') _cli_fail_expected_command(first);
@@ -390,10 +390,10 @@ static typedef struct Given {
   CliOption *option, String spelling, value, int attached;
 } Given;
 
-/* A dashed word is the removed `-o`, `--save-temps=<dir>`, or an option
-   from the table. */
+/* Named retention selects the build directory; other options use the table. */
 static void _option(Parse &p, String arg, int &i) {
-  if (arg == "-o") _cli_fail_removed_output();
+  if (arg == "-o" && p.request.command == <translate>)
+    _cli_fail_output_command();
   if ((p.request.command in %<<build run>>) && arg.startswith("--save-temps=")) {
     _save_temps_dir(p.request, arg);
     return;
@@ -407,8 +407,8 @@ static void _option(Parse &p, String arg, int &i) {
    `--save-temps` takes no value. */
 static void _save_temps_dir(CliRequest r, String arg) {
   r.save_temps = 1;
-  r.temps_dir = arg.remove_prefix("--save-temps=");
-  if (!r.temps_dir)
+  r.build_dir = arg.remove_prefix("--save-temps=");
+  if (!r.build_dir)
     Diagnostics.driver_error("--save-temps= requires a directory");
 }
 
@@ -434,7 +434,7 @@ static Given _take_option(Array args, int &i, Symbol command) {
     given.value = args[i];
   }
   if (!given.value &&
-      (given.option.id == <output> || given.option.id == <out-dir>))
+      (given.option.id in %<<output out-dir build-dir>>))
     $fail.cli_option_value_required(written);
   return given;
 }
@@ -620,16 +620,16 @@ module void _fail(String message, String note) {
   exit(2);
 }
 
-static void _cli_fail_removed_output(void) {
+static void _cli_fail_output_command(void) {
   _fail(
-    "option '-o' was removed",
-    "use '--out-dir' with translate or '--output' with build and run");
+    "option '-o' needs build or run",
+    "use '--out-dir' for translation directories");
 }
 
 static void _cli_fail_expected_command(String arg) {
   _fail(
     %"expected a command before '$arg'",
-    %"use 'x2c translate --out-dir <dir> $arg'");
+    %"use 'x2c translate $arg'");
 }
 
 /* translate corrects a one-dash long option. */

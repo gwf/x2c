@@ -183,7 +183,6 @@ static void _set_product(Project p, ProjectTarget target, CliRequest request) {
     command.output : _target_output(p, target, request.kind);
   request.build_dir = %"${p.build_root}/.x2c/${target.name}";
   request.save_temps = 0;
-  request.temps_dir = NULL;
 }
 
 static String _target_output(Project p, ProjectTarget target, Symbol kind) {

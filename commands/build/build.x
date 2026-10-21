@@ -218,18 +218,28 @@ static void _add_inputs(Build b) {
   }
 }
 
-/* Compile-only builds make one object per source, so every input compiles
-   and several objects need a build directory. */
+/* Compile-only builds make one object per source. Without a named build
+   directory, their public object names must be distinct. */
 static void _check_compile_only(Build b) {
   List inputs = b.request.inputs;
   if (b.native_inputs)
     Diagnostics.driver_error("compile-only accepts only .x and .c inputs");
   if (inputs.cdr() && b.request.output)
     $fail.build_output_ambiguous();
-  if (inputs.cdr() && !b.request.build_dir)
-    Diagnostics.driver_error(
-      "multiple compile-only inputs require --build-dir");
+  if (b.request.build_dir) return;
+  Map destinations = {};
+  foreach (String input, inputs) {
+    String object = _object_name(input);
+    if (object in destinations) {
+      String first = destinations[object];
+      Diagnostics.driver_error(
+        %"object '$object' has inputs '$first' and '$input'; use --build-dir");
+    }
+    destinations[object] = input;
+  }
 }
+
+static String _object_name(String input) => %"${Path.stem(input)}.o";
 
 /* The selected compiler and archiver go back to the request. */
 static void _select_tools(Build b) {
@@ -247,7 +257,8 @@ static String _default_output(CliRequest request) {
   if (request.output) return request.output;
   if (request.command == <run>) return NULL;
   String stem = Path.stem(request.inputs.car());
-  if (request.compile_only && !request.inputs.cdr()) return %"$stem.o";
+  if (request.compile_only && !request.inputs.cdr())
+    return _object_name(request.inputs.car());
   if (request.kind == <static-lib>) return %"lib$stem.a";
   if (request.kind == <module>) return %"$stem.so";
   return "a.out";
@@ -265,7 +276,7 @@ static void _make_work_dirs(Build b) {
     b.gen_root = %"${b.work_dir}/gen";
     b.obj_root = %"${b.work_dir}/obj";
     b.dep_root = %"${b.work_dir}/dep";
-    if (request.build_dir) b.state_root = %"${b.work_dir}/.x2c-state";
+    if (!b.temporary) b.state_root = %"${b.work_dir}/.x2c-state";
     List roots = %(${b.gen_root} ${b.obj_root} ${b.dep_root} ${b.state_root});
     if (!request.dry_run)
       foreach (Path root, roots) if (root) root.make_dirs();
@@ -275,7 +286,6 @@ static void _make_work_dirs(Build b) {
 
 static String _kept_dir(CliRequest request) {
   if (request.build_dir) return request.build_dir;
-  if (request.temps_dir) return request.temps_dir;
   return request.save_temps ? ".x2c-build" : NULL;
 }
 
@@ -689,6 +699,8 @@ static List _include_dirs(Build b, String source) {
 static CcJob _compile_job(Build b, String source, List directories) {
   String key = _key(source), object = %"${b.obj_root}/$key.o";
   if (b.request.compile_only && !b.request.inputs.cdr()) object = b.output;
+  else if (b.request.compile_only && !b.request.build_dir)
+    object = _object_name(source);
   String depfile = %"${b.dep_root}/$key.d";
   CcJob job = {
     .action = b.toolchain.compile_action(source, object, depfile, directories),
@@ -1011,7 +1023,8 @@ static String _headline(Build b) {
     return %"$built ${TargetKind.of(b.request.kind).noun} ${b.output} $tail";
   int objects = b.objects.len();
   if (objects == 1) return %"$built object ${b.output} $tail";
-  return %"$built $objects object files in ${b.obj_root} $tail";
+  String directory = b.request.build_dir ? b.obj_root : ".";
+  return %"$built $objects object files in $directory $tail";
 }
 
 static int _all_cached(Build b) {
@@ -1039,7 +1052,7 @@ static String _retention(Build b) {
 int Build.run_program(Build b) {
   $progress.build_running(b);
   ToolAction action = ToolAction.new(
-    <run>, %(${b.output} @{b.request.run_args}), b.request.verbose,
+    <run>, %(${Path.absolute(b.output)} @{b.request.run_args}), b.request.verbose,
     b.request.dry_run);
   action.as_program();
   return action.run();

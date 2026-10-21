@@ -12,6 +12,9 @@ no garbage collector or reference counting.
 
 ## Files, visibility, and the native build
 
+The commands below use an installed compiler on `PATH`. From the repository
+root, use `./x2c` to select the current development build instead.
+
 | Write or run | Meaning |
 | --- | --- |
 | `module.x` | A unit containing declarations and definitions; translation produces a C source and header |
@@ -20,7 +23,7 @@ no garbage collector or reference counting.
 | `static` | Private function/object; also permitted on a type declaration to control its publication |
 | `import "geo" as g with Vec;` | Import a registered package; use `g.Vec` or the selected bare name `Vec` |
 | `x2c translate --out-dir generated main.x` | Let an existing native build compile and link the output |
-| `x2c build --output app main.x helper.x` | Let x2c own compilation and linking; list the local implementation units |
+| `x2c build -o app main.x helper.x` | Let x2c own compilation and linking; list the local implementation units |
 | `x2c run main.x -- argument` | Build and execute |
 
 Declarations are public by default. A type that a public declaration needs
