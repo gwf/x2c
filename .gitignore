@@ -45,6 +45,8 @@ examples/*
 !examples/programs/**
 !examples/tours/
 !examples/tours/**
+!examples/c2x2c/
+!examples/c2x2c/**
 !examples/deprecated/
 !examples/deprecated/**
 !examples/README.md

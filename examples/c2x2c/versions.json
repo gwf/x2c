@@ -1,0 +1,39 @@
+{
+  "title": "c2x2c: word frequency",
+  "status": "Local checkpoint; publication validation deferred",
+  "note": "Assumption: each word's aggregate count fits in int (up to INT_MAX), including across files.",
+  "versions": [
+    {
+      "label": "Version 0",
+      "path": "words-v0.c"
+    },
+    {
+      "label": "Version 1",
+      "path": "words-v1.x"
+    },
+    {
+      "label": "Version 2",
+      "path": "words-v2.x"
+    },
+    {
+      "label": "Version 3",
+      "path": "words-v3.x"
+    },
+    {
+      "label": "Version 4",
+      "path": "words-v4.x"
+    },
+    {
+      "label": "Version 5",
+      "path": "words-v5.x"
+    },
+    {
+      "label": "Version 6",
+      "path": "words-v6.x"
+    },
+    {
+      "label": "Version 7",
+      "path": "words-v7.x"
+    }
+  ]
+}

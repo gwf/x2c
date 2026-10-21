@@ -1,4 +1,11 @@
 # name|category|check|arguments|stdout|note
+c2x2c/words-v1|probe|none||-|C to x2c tutorial stage 1; manual commands in c2x2c/README.md.
+c2x2c/words-v2|probe|none||-|C to x2c tutorial stage 2; manual commands in c2x2c/README.md.
+c2x2c/words-v3|probe|none||-|C to x2c tutorial stage 3; manual commands in c2x2c/README.md.
+c2x2c/words-v4|probe|none||-|C to x2c tutorial stage 4; manual commands in c2x2c/README.md.
+c2x2c/words-v5|probe|none||-|C to x2c tutorial stage 5; manual commands in c2x2c/README.md.
+c2x2c/words-v6|probe|none||-|C to x2c tutorial stage 6; manual commands in c2x2c/README.md.
+c2x2c/words-v7|probe|none||-|C to x2c tutorial stage 7; manual commands in c2x2c/README.md.
 foreach|showcase|run||expected/foreach.stdout|Basic List iteration.
 love/arrays|showcase|run||expected/love-arrays.stdout|Standalone love arrays gallery example.
 love/basic-literals|showcase|run||expected/static-test.stdout|Runtime collection and String literals.

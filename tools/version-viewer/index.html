@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+  <title>Source versions / x2c</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:,">
+</head>
+<body>
+  <header class="app-header">
+    <div class="identity"><span class="wordmark">x2c</span><span class="header-divider"></span><span>Source versions</span></div>
+    <div class="header-actions"><span class="local-state"><span></span> Local only</span><button id="load">Load snapshots <span aria-hidden="true">&#8599;</span></button></div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar" aria-label="Version navigation">
+      <div class="sidebar-title">VERSIONS <span id="version-count"></span></div>
+      <nav id="versions" aria-label="Versions"></nav>
+      <button id="add" class="add-button">+ Add a version</button>
+      <div class="sidebar-note"><span id="dataset-label" class="dataset-label">DEMO DATA</span><p id="dataset-note">Small test snippets.<br>Not the tutorial source.</p><button class="text-button" id="export">Export snapshots &#8599;</button></div>
+    </aside>
+    <main>
+      <section class="comparison-heading">
+        <p class="eyebrow">SOURCE COMPARISON</p>
+        <h1 id="comparison-title">Compare versions</h1>
+        <p id="comparison-description">Each version is compared with the one before it.</p>
+      </section>
+      <div class="toolbar">
+        <div id="counts" class="counts" role="status" aria-live="polite"></div>
+        <div class="view-options"><label class="context-option"><input id="changes-only" type="checkbox"> Changes only</label><div class="segmented" role="group" aria-label="Diff layout"><button id="split" aria-pressed="true">Split</button><button id="unified" aria-pressed="false">Unified</button></div></div>
+      </div>
+      <section class="diff" aria-label="Source diff">
+        <div id="code-scroll" class="code-scroll" tabindex="0" aria-label="Code comparison. Scroll to read all lines."><div class="file-headings" id="file-headings"></div><div id="code"></div></div>
+        <div class="diff-footer"><span id="line-summary"></span><div class="change-navigation"><span id="change-position" aria-live="polite"></span><button id="previous-change" aria-label="Previous change" title="Previous change">&#8593;</button><button id="next-change" aria-label="Next change" title="Next change">&#8595;</button></div></div>
+      </section>
+      <p class="workspace-note" id="dataset-assumption" hidden></p>
+      <p class="workspace-note">Comments hidden. Counts and line numbers use the displayed source. <span class="legend-delete">- deleted</span> <span class="legend-add">+ added</span></p>
+    </main>
+  </div>
+
+  <dialog id="loader" aria-labelledby="loader-title">
+    <form id="snapshot-form">
+      <div class="dialog-heading"><div><p class="eyebrow">LOCAL SNAPSHOTS</p><h2 id="loader-title">Load a snapshot set</h2></div><button type="button" class="close" data-close aria-label="Close">&#215;</button></div>
+      <p class="dialog-description">Choose a JSON file or paste its contents. Array order defines the version order.</p>
+      <label class="file-picker">Choose JSON file<input id="json-file" type="file" accept=".json,application/json"></label>
+      <label for="json-input">Snapshot JSON</label>
+      <textarea id="json-input" spellcheck="false" rows="10" placeholder='{"title":"Intro tutorial","versions":[{"label":"Version 0","filename":"words.c","source":"..."},{"label":"Version 1","filename":"words.x","source":"..."}]}'></textarea>
+      <p class="form-error" id="json-error" role="alert"></p>
+      <div class="dialog-footer"><span>Files stay in this browser tab.</span><button class="primary" type="submit">Load snapshots</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="editor" aria-labelledby="editor-title">
+    <form id="version-form">
+      <div class="dialog-heading"><div><p class="eyebrow">LOCAL SOURCE</p><h2 id="editor-title">Add a version</h2></div><button type="button" class="close" data-close aria-label="Close">&#215;</button></div>
+      <p class="dialog-description" id="add-description">The first added version replaces the demo set.</p>
+      <div class="field-row"><label>Version label<input id="version-label" required placeholder="Version 0"></label><label>Filename<input id="version-filename" required placeholder="words.c"></label></div>
+      <label class="file-picker">Choose source file<input id="source-file" type="file"></label>
+      <label for="source-input">Source code</label><textarea id="source-input" spellcheck="false" rows="13" placeholder="Paste source code here. An empty file is allowed."></textarea>
+      <p class="form-error" id="source-error" role="alert"></p>
+      <div class="dialog-footer"><span>Appended after the last version.</span><button type="submit" class="primary">Add version</button></div>
+    </form>
+  </dialog>
+  <script src="diff.js"></script>
+  <script src="snapshots.js?v=5dde9aa07d8d"></script>
+  <script src="app.js"></script>
+</body>
+</html>

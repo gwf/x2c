@@ -42,6 +42,10 @@ replace the executable paths below with absolute paths too:
 ./examples/build/power-exceptions/exceptions /absolute/path/to/fixtures
 ```
 
+The [c2x2c tutorial](c2x2c/README.md) follows eight versions of a word counter,
+from native C to parallel directory counting. Its manual commands and viewer
+are separate from the curated example checks.
+
 ## Love: values, data, and methods
 
 - [Values](love/values.x): dynamic values, operators, type inspection, and C calls.
