@@ -8,7 +8,7 @@ static void fail(const char *message) {
   exit(EXIT_FAILURE);
 }
 
-static Map word_count(String filename) {
+static Map file_unique_words(String filename) {
   String text = filename.open("r").string_close()
     .filter(%!(unsigned char c) => !ispunct(c)).lower();
   Map counts = {};
@@ -17,20 +17,20 @@ static Map word_count(String filename) {
   return counts;
 }
 
-static Map directory_count(Path root) {
+static Map dir_unique_words(Path root) {
   if (!root.is_dir())
     fail("Not a directory: " + root);
-  return root.walk().filter(Path.is_file).map(word_count)
-    .foldl({}, %!(Map counts, Map part) => counts.merge_with(part,
+  return root.walk().filter(Path.is_file).map(file_unique_words)
+    .foldl({}, %!(Map total, Map counts) => total.merge_with(counts,
       %!(int a, int b) => a + b));
 }
 
 int main(int argc, char **argv) {
   if (argc != 2)
     fail("Usage: " + argv[0] + " DIR");
-  Map counts = directory_count(argv[1]);
+  Map counts = dir_unique_words(argv[1]);
   Array ranked = counts.enumerate()
-    .map(%!(List x) => x.reverse()).array().sort();
+    .map(%!(List entry) => entry.reverse()).array().sort();
   foreach (Var (count, word) in ranked[-10:])
     puts(%"$count\t$word");
   return EXIT_SUCCESS; // Root scope reclaims the Map and ranking Array.

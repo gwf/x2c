@@ -12,14 +12,14 @@ static void count_word(Map counts, String word) {
 }
 
 static void count_line(Map counts, String line) {
-  line = line.lower().filter(%!(unsigned char c) => !ispunct(c));
+  line = line.filter(%!(unsigned char c) => !ispunct(c)).lower();
   foreach (String word in line.words())
     count_word(counts, word);
 }
 
 static void print_top_ten(Map counts) {
   Array ranked = counts.enumerate()
-    .map(%!(List x) => x.reverse()).array().sort();
+    .map(%!(List entry) => entry.reverse()).array().sort();
   foreach (Var (count, word) in ranked[-10:])
     printf("%s\t%s\n", count, word);
 }

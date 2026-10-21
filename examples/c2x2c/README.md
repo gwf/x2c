@@ -27,24 +27,28 @@ additions saved with this tutorial; an older installed x2c is insufficient.
 
 ```sh
 cc -std=gnu11 examples/c2x2c/words-v0.c -o /tmp/c2x2c-v0
-/tmp/c2x2c-v0 examples/c2x2c/input/sample.txt
+/tmp/c2x2c-v0 docs/src/index.md
 
 builds/0/x2c build examples/c2x2c/words-v5.x \
   --output /tmp/c2x2c-v5 --build-dir /tmp/c2x2c-v5-build
-/tmp/c2x2c-v5 examples/c2x2c/input/sample.txt
+/tmp/c2x2c-v5 docs/src/index.md
 
 builds/0/x2c build examples/c2x2c/words-v7.x \
   --output /tmp/c2x2c-v7 --build-dir /tmp/c2x2c-v7-build
-/tmp/c2x2c-v7 examples/c2x2c/input
+/tmp/c2x2c-v7 docs/src
 ```
 
 Substitute versions 1-4 in the Version 5 commands, or Version 6 in the
 Version 7 commands. Versions 0-5 accept one file; Versions 6-7 accept one
-directory. The small fixture has one file and one nested file.
+directory. The file input is the book introduction. The directory input covers
+the complete book source tree, including the generated library reference and
+syntax files, without scanning rendered book output.
 
-Versions 0-2 print the file fixture as `2 alpha`, `1 beta`, `1 gamma`, with
-tabs between columns. Versions 3-5 print `1 beta`, `1 gamma`, `2 alpha`.
-Versions 6-7 print `1 delta`, `1 gamma`, `2 alpha`, `2 beta` for the directory.
+For a small alternative, `input/sample.txt` and `input/` retain the original
+fixture: one file and one nested file. Versions 0-2 print that file as
+`2 alpha`, `1 beta`, `1 gamma`, with tabs between columns. Versions 3-5 print
+`1 beta`, `1 gamma`, `2 alpha`. Versions 6-7 print `1 delta`, `1 gamma`,
+`2 alpha`, `2 beta` for that directory.
 
 The seven x2c stages use `probe|none` in the existing example manifest.
 This preserves manual tutorial checks without adding recurring build work.
@@ -55,7 +59,9 @@ The native C stage is outside that manifest's `.x`/`.xp` source contract.
 Every word's aggregate count must fit in `int`, including across files.
 There are no word-count overflow checks. Native allocation-size guards remain
 in the early stages. Classification uses C's current locale; the programs
-do not change it. Punctuation is removed and text is lowercased.
+do not change it. Punctuation is removed before text is lowercased.
+`file_unique_words` and `dir_unique_words` return Maps with unique word keys
+and occurrence counts as values.
 
 Versions 0-2 print descending counts with ascending word ties. Versions 3-7
 sort ascending `(count word)` tuples, take the last ten with `[-10:]`, and
@@ -75,8 +81,8 @@ follows file symlinks. Unreadable files still raise.
 Version 7 retains this exact chain:
 
 ```x2c
-return root.walk().filter(Path.is_file).parallel_map(word_count, 4)
-  .foldl({}, %!(Map counts, Map part) => counts.merge_with(part,
+return root.walk().filter(Path.is_file).parallel_map(file_unique_words, 4)
+  .foldl({}, %!(Map total, Map counts) => total.merge_with(counts,
     %!(int a, int b) => a + b));
 ```
 
@@ -92,17 +98,22 @@ Inputs are read-only; worker output uses fresh Maps. Keep temporary iterator
 chains and their consuming fold in one full expression. A saved ParallelMap
 description needs named iterator storage that outlives its fold.
 
-## Saved verification
+## Verification
 
-All eight source files preserve the final local tutorial bytes. Before saving,
-the final persistent-worker implementation passed 13 focused tests with 77
+After normalizing names and filter order, all eight versions compiled and
+matched independently calculated word frequencies on the documentation inputs.
+Versions 0-5 used `docs/src/index.md`; Versions 6-7 used all 160 files then
+present under `docs/src/` and produced identical output. Sorting and memory
+lifetimes remain unchanged.
+
+The original persistent-worker implementation passed 13 focused tests with 77
 assertions. Four ParallelMap tests account for 47 assertions, including 16
 jobs on four reused threads, blocked-worker progress, result lifetime, and
 worker/source/accumulator failure cleanup. V7 matched V6 and independently
 calculated output on 17 nested files and an empty directory.
 
-The delivery refreshes bootstrap and rebuilds the compiler from it. The focused
-suites and V7 fixture pass with that rebuilt compiler. Broad publication gates
-were waived for this delivery. See the
+The original delivery refreshed bootstrap and rebuilt the compiler from it.
+The focused suites and V7 fixture passed with that rebuilt compiler. Broad
+publication gates were waived for that delivery. See the
 [continuation note](../../plans/c2x2c-continuation.md) before further thread API
 design; the waiver does not establish a standing validation policy.

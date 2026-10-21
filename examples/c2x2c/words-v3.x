@@ -66,7 +66,7 @@ static void count_word(Counts *counts, String word) {
 }
 
 static void count_line(Counts *counts, String line) {
-  line = line.lower().filter(%!(unsigned char c) => !ispunct(c));
+  line = line.filter(%!(unsigned char c) => !ispunct(c)).lower();
   foreach (String word in line.words())
     count_word(counts, word);
 }
