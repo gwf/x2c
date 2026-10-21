@@ -5,8 +5,8 @@
 > implementation plan. Gary subsequently authorized implementation.
 > Implementation is recorded in `c91d7ed43`. Focused checks and the complete
 > CLI boundary probe pass. Gary authorized delivery despite the known stage-1
-> warning because its separate repair is underway. Exception validation is
-> pending; nothing has been pushed.
+> warning. Exception validation passed, but the push raced with the upstream
+> repair. That repair is now integrated; normal validation is pending.
 > Planning baseline: `e2a78078edece1348abbbb7363c89560ae064706`.
 
 ## Result
@@ -335,6 +335,23 @@ spelling in `Iter.parallel_map`; its signature and initializer were updated
 together. The complete `sh commands/lint/tests/run.sh` check now passes.
 The separate lifetime repair remains outside this change. Rerun the exception
 gate on this completed tree before delivery.
+
+The completed exception gate subsequently passed at `fd6e0c61`. The existing
+build-cost checkpoint measured 54.902535 median CPU seconds across 90,137
+authored source lines, scoring 84.9 against the pinned baseline of 100. It
+used `tools/build-scaling.py --compiler builds/1/x2c --ref HEAD`, with a
+temporary `MAKEFILES` override containing `override STRICT_X2C_FLAGS :=` to
+apply the same warning exception during its three stage builds. This was an
+observation against the historical baseline, not an isolated CLI speedup.
+
+The direct push was rejected because `origin/dev` advanced to `bc0277a63`.
+Its `81a76f090` thread repair is now integrated, together with the upstream
+c2x2c documentation changes. The authored Thread formatting and parameter
+rename were preserved. Generated merge conflicts were resolved by regeneration
+from the merged authoritative source, not by editing generated C or prose.
+Repeat the normal `tools/gate-state.py ensure agent-pr-check` and the existing
+performance checkpoint on this integrated tree. The exception is historical;
+normal warning policy now applies.
 
 ## Plan review
 

@@ -1,7 +1,7 @@
 {
   "title": "c2x2c: word frequency",
   "status": "Compiled and tested locally",
-  "note": "Assumption: each word's aggregate count fits in int (up to INT_MAX), including across files.",
+  "note": "Inputs: docs/src/index.md (V0-5); docs/src/ (V6-7). Each word's aggregate count must fit in int (up to INT_MAX).",
   "versions": [
     {
       "label": "Version 0",

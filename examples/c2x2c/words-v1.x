@@ -31,7 +31,7 @@ static uint64_t hash_word(const char *word) {
   return hash;
 }
 
-static void canonicalize(char *word) {
+static void normalize_word(char *word) {
   char *out = word;
   for (unsigned char *p = (unsigned char *)word; *p; ++p)
     if (!ispunct(*p)) *out++ = (char)tolower(*p);
@@ -89,7 +89,7 @@ static void count_line(Counts *counts, char *line) {
     char *word = p;
     while (*p && !isspace((unsigned char)*p)) ++p;
     if (*p) *p++ = '\0';
-    canonicalize(word);
+    normalize_word(word);
     if (*word) count_word(counts, word);
   }
 }

@@ -58,13 +58,14 @@ A `void` seed uses the first result as accumulator, as with `Iter.foldl`.
 Empty input or a null descriptor returns the seed without invoking the
 worker or accumulator. No result Array is collected. The fold joins all
 remaining workers on every exit, preserving a primary Error during
-cleanup. Native join failures are reported by `Thread.finish_all`.
+cleanup. If native join failure leaves a worker unjoined, the process
+aborts rather than release storage that worker may still use.
 This descriptor supports consuming folds, not general pull iteration.
 
 **Raises:** source, start, worker, export, allocation, or accumulator causes,
 including `<void-op>` for a `void` worker result.
 
-Source: `lib/thread.x:560`
+Source: `lib/thread.x:561`
 
 ### `Thread`
 
