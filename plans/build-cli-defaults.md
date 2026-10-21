@@ -322,8 +322,16 @@ and permits the remaining correctness checks and self-host comparisons to run.
 Inspect all warnings and stop for any additional failure; do not record the
 normal `agent-pr-check` as green. Complete the existing performance checkpoint
 after the self-host comparisons. The exception changes no repository target
-or recurring requirement. No runtime/compiler repair outside the CLI plan
-has been included.
+or recurring requirement.
+
+The first exception run passed self-host comparisons, cold collection,
+documentation, 1,246 compiler fixtures, and all 976 runtime tests (26,314
+assertions). Command checks exposed baseline lint violations: five over-width
+lines and six wrapped openings in unchanged `lib/thread.x` and `lib/pool/pool.x`.
+Those lines were reformatted without changing executable tokens or behavior;
+the lint baseline was not raised. Derived Thread documentation was regenerated.
+The separate lifetime repair remains outside this change. Rerun the exception
+gate on this completed tree before delivery.
 
 ## Plan review
 

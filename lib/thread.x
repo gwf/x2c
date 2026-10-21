@@ -118,11 +118,13 @@ static void *_input(Thread thread) =>
     `<io-fail>` when `pthread_create` fails. Failure during native once
     initialization or mutex setup aborts the process.
 */
-Thread Thread.start_raw(ThreadFn function, const void *input, size_t input_size) {
+Thread Thread.start_raw(
+  ThreadFn function, const void *input, size_t input_size) {
   return _start(function, input, input_size, NULL);
 }
 
-static Thread _start(ThreadFn function, const void *input, size_t input_size,
+static Thread _start(
+  ThreadFn function, const void *input, size_t input_size,
   struct ParallelRun *parallel) {
   if (!function || (input_size && !input))
     raise %(bad-arg (operation "Thread.start_raw"));
@@ -162,14 +164,15 @@ static Var _call_value(const void *input, size_t size) {
     still borrow their caller-owned storage. Result export and Error policy
     are those of `Thread.start_raw` and `Thread.join`. Use `Thread.start_raw`
     for explicit byte-buffer inputs.
-    Raises: `<bad-arg>` for a null callback, or the causes of `Thread.start_raw`.
+    Raises: `<bad-arg>` for a null callback, or the causes of
+    `Thread.start_raw`.
 */
 Thread Thread.start(ThreadValueFn function, Var value) {
   return _start_value(function, value, NULL);
 }
 
-static Thread _start_value(ThreadValueFn function, Var value,
-  struct ParallelRun *parallel) {
+static Thread _start_value(
+  ThreadValueFn function, Var value, struct ParallelRun *parallel) {
   if (!function) raise %(bad-arg (operation "Thread.start"));
   struct ThreadValueInput input = { function, value };
   return _start(_call_value, &input, sizeof(input), parallel);
@@ -353,7 +356,8 @@ static void _completion_check(int error) {
   abort();
 }
 
-/** Waits for a finished worker, removes its handle from `pending`, and returns it.
+/** Waits for a finished worker, removes its handle from `pending`, and
+    returns it.
     A null or empty Array returns NULL. If several workers have finished, the
     first in current Array order wins; completion chronology is not recorded.
     A failed worker is also ready. This does not join, export results, or free
@@ -380,8 +384,9 @@ Thread Thread.wait_any(Array pending) {
       Thread thread = pending[i];
       if (thread.finished) return pending.remove(i);
     }
-    _completion_check(pthread_cond_wait(
-      &thread_completion_condition, &thread_completion_mutex));
+    _completion_check(
+      pthread_cond_wait(
+        &thread_completion_condition, &thread_completion_mutex));
   }
 }
 
@@ -510,7 +515,8 @@ void Thread.finish_all(Array pending) {
   }
   if (!failures) return;
   if (unwinding) {
-    fprintf(stderr, "Thread.finish_all: cleanup failed; %zu handle(s) remain.\n",
+    fprintf(
+      stderr, "Thread.finish_all: cleanup failed; %zu handle(s) remain.\n",
       pending.len());
     return;
   }
@@ -527,7 +533,8 @@ void Thread.finish_all(Array pending) {
     Raises: `<bad-arg>` for a nonpositive worker count, or `<alloc-fail>` for
     descriptor storage.
 */
-ParallelMap Iter.parallel_map(Iter source, ThreadValueFn function, int workers) {
+ParallelMap Iter.parallel_map(
+  Iter source, ThreadValueFn function, int workers) {
   if (workers <= 0) raise %(bad-arg (operation "Iter.parallel_map"));
   ParallelMap map = Scope.malloc(sizeof(struct ParallelMap));
   *map = (struct ParallelMap) { source, function, workers };
@@ -588,8 +595,9 @@ static void _parallel_run(Thread thread) {
     thread.parallel.ready.push(thread);
     _completion_check(pthread_cond_broadcast(&thread_completion_condition));
     while (!thread.assigned && !thread.parallel.stopping)
-      _completion_check(pthread_cond_wait(
-        &thread_completion_condition, &thread_completion_mutex));
+      _completion_check(
+        pthread_cond_wait(
+          &thread_completion_condition, &thread_completion_mutex));
     int again = thread.assigned;
     thread.assigned = 0;
     _completion_check(pthread_mutex_unlock(&thread_completion_mutex));
@@ -601,8 +609,9 @@ static Thread _parallel_wait(struct ParallelRun *run) {
   _completion_check(pthread_mutex_lock(&thread_completion_mutex));
   defer _completion_check(pthread_mutex_unlock(&thread_completion_mutex));
   while (!run.ready.len())
-    _completion_check(pthread_cond_wait(
-      &thread_completion_condition, &thread_completion_mutex));
+    _completion_check(
+      pthread_cond_wait(
+        &thread_completion_condition, &thread_completion_mutex));
   return run.ready.remove(0);
 }
 

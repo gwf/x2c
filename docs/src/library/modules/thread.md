@@ -24,7 +24,7 @@
 <a id="Iter.parallel_map"></a>
 #### Iter.parallel_map
 
-`ParallelMap Iter.parallel_map(Iter source, ThreadValueFn function, int workers)`
+`ParallelMap Iter.parallel_map( Iter source, ThreadValueFn function, int workers)`
 
 Describes mapping `function` over `source` with at most `workers` Threads.
 Nothing runs until `ParallelMap.foldl` consumes the operation. The
@@ -37,7 +37,7 @@ must not mutate or recycle an outstanding input's storage.
 **Raises:** `<bad-arg>` for a nonpositive worker count, or `<alloc-fail>` for
 descriptor storage.
 
-Source: `lib/thread.x:530`
+Source: `lib/thread.x:536`
 
 ### `ParallelMap`
 
@@ -64,7 +64,7 @@ This descriptor supports consuming folds, not general pull iteration.
 **Raises:** source, start, worker, export, allocation, or accumulator causes,
 including `<void-op>` for a `void` worker result.
 
-Source: `lib/thread.x:554`
+Source: `lib/thread.x:561`
 
 ### `Thread`
 
@@ -88,7 +88,7 @@ cleanup failure instead; the original Error continues unchanged.
 `<bad-arg>` for a null entry or `<bad-state>` for a joining entry.
 Error snapshot failures use the existing raw Error floor.
 
-Source: `lib/thread.x:492`
+Source: `lib/thread.x:497`
 
 <a id="Thread.finish_any"></a>
 #### Thread.finish_any
@@ -106,7 +106,7 @@ retained selected handle moves to the end.
 
 **Raises:** the same causes as `Thread.wait_any` and `Thread.join`.
 
-Source: `lib/thread.x:466`
+Source: `lib/thread.x:471`
 
 <a id="Thread.free"></a>
 #### Thread.free
@@ -117,7 +117,7 @@ Frees a `Thread` handle after its consuming join has completed.
 
 **Raises:** `<bad-state>` for NULL, running, or joining handles.
 
-Source: `lib/thread.x:450`
+Source: `lib/thread.x:455`
 
 <a id="Thread.join"></a>
 #### Thread.join
@@ -137,7 +137,7 @@ fails, any cause from result or error export, and
 here. A callback that returns `void` joins as `void`; a handled worker
 failure transfers instead of returning a sentinel.
 
-Source: `lib/thread.x:400`
+Source: `lib/thread.x:405`
 
 <a id="Thread.start"></a>
 #### Thread.start
@@ -155,14 +155,15 @@ still borrow their caller-owned storage. Result export and Error policy
 are those of `Thread.start_raw` and `Thread.join`. Use `Thread.start_raw`
 for explicit byte-buffer inputs.
 
-**Raises:** `<bad-arg>` for a null callback, or the causes of `Thread.start_raw`.
+**Raises:** `<bad-arg>` for a null callback, or the causes of
+`Thread.start_raw`.
 
-Source: `lib/thread.x:167`
+Source: `lib/thread.x:170`
 
 <a id="Thread.start_raw"></a>
 #### Thread.start_raw
 
-`Thread Thread.start_raw(ThreadFn function, const void *input, size_t input_size)`
+`Thread Thread.start_raw( ThreadFn function, const void *input, size_t input_size)`
 
 Starts one worker and returns its heap-owned handle.
 `input_size` bytes are copied before native start and passed once to the
@@ -190,7 +191,8 @@ Source: `lib/thread.x:121`
 
 `Thread Thread.wait_any(Array pending)`
 
-Waits for a finished worker, removes its handle from `pending`, and returns it.
+Waits for a finished worker, removes its handle from `pending`, and
+returns it.
 A null or empty Array returns NULL. If several workers have finished, the
 first in current Array order wins; completion chronology is not recorded.
 A failed worker is also ready. This does not join, export results, or free
@@ -204,7 +206,7 @@ added again and selected again. Freed handles must never be supplied.
 **Raises:** `<bad-arg>` for a null entry, or `<bad-state>` for a joining or
 joined entry. Native completion synchronization failure aborts.
 
-Source: `lib/thread.x:369`
+Source: `lib/thread.x:373`
 
 ## Public types
 

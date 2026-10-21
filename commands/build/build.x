@@ -1051,8 +1051,9 @@ static String _retention(Build b) {
 */
 int Build.run_program(Build b) {
   $progress.build_running(b);
+  String executable = Path.absolute(b.output);
   ToolAction action = ToolAction.new(
-    <run>, %(${Path.absolute(b.output)} @{b.request.run_args}), b.request.verbose,
+    <run>, %($executable @{b.request.run_args}), b.request.verbose,
     b.request.dry_run);
   action.as_program();
   return action.run();
