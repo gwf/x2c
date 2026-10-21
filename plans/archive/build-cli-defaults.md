@@ -1,12 +1,10 @@
 # Build CLI defaults and examples
 
-> Status: active
-> Gary accepted the survey recommendations on 2026-10-21 and requested this
-> implementation plan. Gary subsequently authorized implementation.
-> Implementation is recorded in `c91d7ed43`. Focused checks and the complete
-> CLI boundary probe pass. Gary authorized delivery despite the known stage-1
-> warning. Exception validation passed, but the push raced with the upstream
-> repair. That repair is now integrated; normal validation is pending.
+> Status: done
+> Published to `dev` on 2026-10-21 at `27812dffe`, after integrating the
+> upstream thread repair at `81a76f090`. The normal publication gate and
+> final performance checkpoint passed. No warning exception was needed for
+> the published tree.
 > Planning baseline: `e2a78078edece1348abbbb7363c89560ae064706`.
 
 ## Result
@@ -349,9 +347,21 @@ Its `81a76f090` thread repair is now integrated, together with the upstream
 c2x2c documentation changes. The authored Thread formatting and parameter
 rename were preserved. Generated merge conflicts were resolved by regeneration
 from the merged authoritative source, not by editing generated C or prose.
-Repeat the normal `tools/gate-state.py ensure agent-pr-check` and the existing
-performance checkpoint on this integrated tree. The exception is historical;
-normal warning policy now applies.
+The normal `tools/gate-state.py ensure agent-pr-check` passed and recorded
+valid evidence for the integrated tree. All 1,246 compiler fixtures and 976
+runtime tests passed, together with command, documentation, artifact atomicity,
+cold-collection, and self-host checks. Normal warning policy applied.
+
+The final checkpoint ran `tools/build-scaling.py --compiler builds/1/x2c
+--ref HEAD` at `27812dffe`, with no warning override. Three sequential stage
+builds measured 55.441796 median CPU seconds across 90,147 authored lines,
+scoring 85.7 against the pinned baseline of 100 at `2c8ddfb3` (59.480467 CPU
+seconds across 82,904 authored lines). This historical comparison does not
+isolate the CLI change. The log is `debug/cli-integrated-build-cost.log`;
+normal gate evidence is in `debug/cli-integrated-gate.log`.
+
+The direct push to `origin/dev` succeeded. This plan is archived as complete;
+the final archival update uses documentation-only validation.
 
 ## Plan review
 
