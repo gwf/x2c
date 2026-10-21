@@ -1,11 +1,12 @@
 # Build CLI defaults and examples
 
-> Status: blocked
+> Status: active
 > Gary accepted the survey recommendations on 2026-10-21 and requested this
 > implementation plan. Gary subsequently authorized implementation.
 > Implementation is recorded in `c91d7ed43`. Focused checks and the complete
-> CLI boundary probe pass. Publication is blocked by the same stage-1 region
-> warning reproduced on clean `origin/dev`; nothing has been pushed.
+> CLI boundary probe pass. Gary authorized delivery despite the known stage-1
+> warning because its separate repair is underway. Exception validation is
+> pending; nothing has been pushed.
 > Planning baseline: `e2a78078edece1348abbbb7363c89560ae064706`.
 
 ## Result
@@ -314,11 +315,15 @@ Evidence remains in the worktree's `debug/cli-publication.log`,
 `debug/cli-examples.log`. The preserved baseline is named by
 `debug/cli-baseline-path`; its log is `debug/stage-1.log` within that tree.
 
-Do not publish this change while the required gate fails. The remaining gate
-checks and the existing performance checkpoint have not been completed; the
-checkpoint waits for converged trees. Keep this plan active in the index and
-resume delivery after the baseline blocker is repaired. No runtime/compiler
-repair outside the CLI plan has been included.
+Gary subsequently authorized delivery despite this warning, with its separate
+repair underway in another worktree. For this delivery only, run
+`make agent-pr-check STRICT_X2C_FLAGS=`. This leaves native `-Werror` intact
+and permits the remaining correctness checks and self-host comparisons to run.
+Inspect all warnings and stop for any additional failure; do not record the
+normal `agent-pr-check` as green. Complete the existing performance checkpoint
+after the self-host comparisons. The exception changes no repository target
+or recurring requirement. No runtime/compiler repair outside the CLI plan
+has been included.
 
 ## Plan review
 

@@ -34,7 +34,8 @@ with `--fatal-warnings`. `lib/thread.x:563` reports that the address of local
 `run` can outlive its storage when stored through an unknown pointer.
 The build CLI defaults change reproduces the same warning without editing
 `lib/thread.x`, so its publication gate is blocked by an existing baseline
-failure. The cause and correctness of the lifetime diagnostic remain
+failure. Gary authorized that CLI delivery despite this warning while a
+separate repair proceeds. The cause and correctness of the lifetime diagnostic remain
 unadjudicated. Keep the warning and gate intact; investigate the thread and
 region owners separately. See the [CLI plan](../plans/build-cli-defaults.md)
 for the retained verification evidence.
