@@ -691,16 +691,41 @@ int Map_equal(Map _x2c_gensym_macro_a_3, Map _x2c_gensym_macro_b_3){
   return Map_equal_entries(_x2c_gensym_macro_a_3, _x2c_gensym_macro_b_3);
 }
 
+static Var Func_apply_values(Func, Var, Var);
+
+Map Map_merge_with(Map map, Map other, Func combine){
+  if(! Map_truth(map) || ! Map_truth(other)) return Map_merge(map, other);
+  {
+    Var key, value;
+    Map _x2c_gensym_macro_object_0 = other;
+    unsigned _x2c_gensym_macro_cursor_8 = 0;
+    Var _x2c_gensym_macro_cursor_output_0;
+    Var _x2c_gensym_macro_cursor_output_1;
+    while(Map_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_8), &(_x2c_gensym_macro_cursor_output_0), &(_x2c_gensym_macro_cursor_output_1))){
+      key = _x2c_gensym_macro_cursor_output_0;
+      value = _x2c_gensym_macro_cursor_output_1;
+      {
+        Var previous = Map_getindex(map, key);
+        if(! Var_is_void(previous)) value = Func_apply_values(combine, previous, value);
+        Map_setindex(map, key, value);
+      }
+
+    }
+
+  }
+  return map;
+}
+
 Var Map_updateindex(Map map, Var key, Symbol op, Var rhs){
   if(map == NULL){
-    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 106,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 128,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_8, 4372499598, 0);
     __builtin_unreachable();
   }
   X2CVarNumericInfo info;
   int insert = Var_encoding_valid(rhs) && Var_numeric_info(Var_tag(rhs), &(info));
   if(Var_is_void(key) || Var_is_void(rhs)){
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 109,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 131,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_9, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -712,7 +737,7 @@ Var Map_updateindex(Map map, Var key, Symbol op, Var rhs){
   }
   long index = Map_find_index(map, & key);
   if(index < 0){
-    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 117,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 139,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_10, 4372499598, 1, Symbol_var(22898), key);
     __builtin_unreachable();
   }
@@ -722,18 +747,18 @@ Var Map_updateindex(Map map, Var key, Symbol op, Var rhs){
 
 Var Map_postfixindex(Map map, Var key, Symbol op){
   if(map == NULL){
-    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 129,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 151,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_11, 4372499598, 0);
     __builtin_unreachable();
   }
   if(Var_is_void(key)){
-    static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 130,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 152,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_12, 48270474208, 0);
     __builtin_unreachable();
   }
   long index = Map_find_index(map, & key);
   if(index < 0){
-    static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 132,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 154,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_13, 4372499598, 1, Symbol_var(22898), key);
     __builtin_unreachable();
   }
@@ -801,13 +826,13 @@ void Map_export_to(Map map, Context source, VarExportContextFn export_value, Sco
           exported.entries = rebuilt_entries;
           {
             Var key, val;
-            Map _x2c_gensym_macro_object_0 = map;
-            unsigned _x2c_gensym_macro_cursor_8 = 0;
-            Var _x2c_gensym_macro_cursor_output_0;
-            Var _x2c_gensym_macro_cursor_output_1;
-            while(Map_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_8), &(_x2c_gensym_macro_cursor_output_0), &(_x2c_gensym_macro_cursor_output_1))){
-              key = _x2c_gensym_macro_cursor_output_0;
-              val = _x2c_gensym_macro_cursor_output_1;
+            Map _x2c_gensym_macro_object_1 = map;
+            unsigned _x2c_gensym_macro_cursor_9 = 0;
+            Var _x2c_gensym_macro_cursor_output_2;
+            Var _x2c_gensym_macro_cursor_output_3;
+            while(Map_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_9), &(_x2c_gensym_macro_cursor_output_2), &(_x2c_gensym_macro_cursor_output_3))){
+              key = _x2c_gensym_macro_cursor_output_2;
+              val = _x2c_gensym_macro_cursor_output_3;
               {
                 struct MapRecord record ={
                   .key = export_value(key, source), .val = export_value(val, source)

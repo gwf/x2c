@@ -1,6 +1,6 @@
 {
   "title": "c2x2c: word frequency",
-  "status": "Local checkpoint; publication validation deferred",
+  "status": "Compiled and tested locally",
   "note": "Assumption: each word's aggregate count fits in int (up to INT_MAX), including across files.",
   "versions": [
     {

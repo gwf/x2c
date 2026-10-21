@@ -101,6 +101,8 @@ jobs on four reused threads, blocked-worker progress, result lifetime, and
 worker/source/accumulator failure cleanup. V7 matched V6 and independently
 calculated output on 17 nested files and an empty directory.
 
-This is a local checkpoint. Publication validation and bootstrap refresh are
-deferred. See the [continuation note](../../plans/c2x2c-continuation.md) before
-integration or further thread API design.
+The delivery refreshes bootstrap and rebuilds the compiler from it. The focused
+suites and V7 fixture pass with that rebuilt compiler. Broad publication gates
+were waived for this delivery. See the
+[continuation note](../../plans/c2x2c-continuation.md) before further thread API
+design; the waiver does not establish a standing validation policy.

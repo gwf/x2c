@@ -10984,7 +10984,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_19(void
   _10068 = List_var(_10067);
   _10069 = String_new("lib/map.x");
   _10070 = String_var(_10069);
-  _10071 = String_new("b19e73e4");
+  _10071 = String_new("f98b5be5");
   _10072 = String_var(_10071);
   _10073 = cons(_10072, NULL);
   _10074 = cons(_10070, _10073);
@@ -11278,7 +11278,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_20(void
   _10359 = List_var(_10358);
   _10360 = String_new("lib/pool/pool.x");
   _10361 = String_var(_10360);
-  _10362 = String_new("6a3e3ed1");
+  _10362 = String_new("0c9752db");
   _10363 = String_var(_10362);
   _10364 = cons(_10363, NULL);
   _10365 = cons(_10361, _10364);
@@ -12039,7 +12039,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _11117 = List_var(_11116);
   _11118 = String_new("lib/pool/threads.x");
   _11119 = String_var(_11118);
-  _11120 = String_new("740d2214");
+  _11120 = String_new("20277cf0");
   _11121 = String_var(_11120);
   _11122 = cons(_11121, NULL);
   _11123 = cons(_11119, _11122);
@@ -12223,7 +12223,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_22(void
   _11298 = List_var(_11297);
   _11299 = String_new("lib/thread.x");
   _11300 = String_var(_11299);
-  _11301 = String_new("a9ede7e2");
+  _11301 = String_new("0d12cba3");
   _11302 = String_var(_11301);
   _11303 = cons(_11302, NULL);
   _11304 = cons(_11300, _11303);
@@ -14769,7 +14769,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_27(void
   _13829 = List_var(_13828);
   _13830 = String_new("src/transform/expressions.x");
   _13831 = String_var(_13830);
-  _13832 = String_new("acfd0b6d");
+  _13832 = String_new("079e9a1a");
   _13833 = String_var(_13832);
   _13834 = cons(_13833, NULL);
   _13835 = cons(_13831, _13834);

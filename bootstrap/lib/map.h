@@ -65,6 +65,8 @@ int Map_truth(Map _x2c_gensym_macro_map_36);
 
 int Map_equal(Map _x2c_gensym_macro_a_3, Map _x2c_gensym_macro_b_3);
 
+Map Map_merge_with(Map map, Map other, Func combine);
+
 Var Map_updateindex(Map map, Var key, Symbol op, Var rhs);
 
 Var Map_postfixindex(Map map, Var key, Symbol op);

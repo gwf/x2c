@@ -8,6 +8,10 @@
 #include "common.h"
 typedef Var(* ThreadFn)(const void * input, size_t input_size);
 
+typedef Var(* ThreadValueFn)(Var input);
+
+typedef struct ParallelMap * ParallelMap;
+
 typedef struct Thread * Thread;
 
 #include "context.h"
@@ -27,11 +31,23 @@ typedef struct Thread * Thread;
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-Thread Thread_start(ThreadFn function, const void * input, size_t input_size);
+Thread Thread_start_raw(ThreadFn function, const void * input, size_t input_size);
+
+Thread Thread_start(ThreadValueFn function, Var value);
+
+Thread Thread_wait_any(Array pending);
 
 Var Thread_join(Thread t);
 
 void Thread_free(Thread t);
+
+Var Thread_finish_any(Array pending);
+
+void Thread_finish_all(Array pending);
+
+ParallelMap Iter_parallel_map(Iter source, ThreadValueFn function, int workers);
+
+Var ParallelMap_foldl(ParallelMap map, Var seed, Func accumulate);
 
 
 #endif /* __GUARD_0x251C437E__ */
