@@ -154,7 +154,7 @@ int main(int argc, char **argv) {
   if (!strcmp(argv[1], "live-thread-match")) {
     atomic_int ready = 0;
     LiveThreadInput input = { &ready };
-    Thread thread = Thread.start(
+    Thread thread = Thread.start_raw(
       live_match_worker, &input, sizeof(input)
     );
     while (!atomic_load(&ready)) sched_yield();
@@ -172,7 +172,7 @@ int main(int argc, char **argv) {
   }
 
   if (!strcmp(argv[1], "finalizer-thread")) {
-    Thread thread = Thread.start(finalizer_worker, NULL, 0);
+    Thread thread = Thread.start_raw(finalizer_worker, NULL, 0);
     Var result = Thread.join(thread);
     Scope_shutdown();
     ScopeStats stats = Scope.stats();
@@ -185,10 +185,10 @@ int main(int argc, char **argv) {
     LiveThreadInput input = { &ready };
     /* The first worker also creates the process-lifetime Scope for the
        worker's static catch plans; count only what the second one keeps. */
-    Thread.join(Thread.start(completed_worker, &input, sizeof(input)));
+    Thread.join(Thread.start_raw(completed_worker, &input, sizeof(input)));
     atomic_store(&ready, 0);
     ScopeStats before = Scope.stats();
-    Thread thread = Thread.start(
+    Thread thread = Thread.start_raw(
       completed_worker, &input, sizeof(input)
     );
     while (!atomic_load(&ready)) sched_yield();

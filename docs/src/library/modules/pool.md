@@ -382,7 +382,7 @@ Source: `lib/pool/threads.x:53`
 `void Pool.thread_start(void)`
 
 Makes `Pool` lock from here on, for a process about to start a worker.
-`Thread.start` calls this before `pthread_create`. It never clears.
+`Thread.start_raw` calls this before `pthread_create`. It never clears.
 
 Source: `lib/pool/threads.x:20`
 

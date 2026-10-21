@@ -95,6 +95,28 @@ meta native void Map.set(Map, Var, Var);
 meta native Self Map.copy(Self);
 meta native Self Map.merge(Self, Self);
 
+/** Merges `other` into `map`, combines colliding values, and returns `map`.
+    The borrowed synchronous `combine` receives the destination value first
+    and the source value second. Its result replaces the destination value.
+    Disjoint keys are copied without invoking `combine`. The callback must
+    not structurally mutate either Map. Self-merge combines each value with
+    itself once. A null `other` is a no-op; a null destination uses `Map.merge`
+    to make a fresh copy without invoking `combine`.
+    Completed entries remain if a later callback or insertion fails; the
+    failing callback leaves its entry unchanged. A null callback raises
+    `<bad-arg>` only when a collision invokes it.
+    Raises: causes from `Map.merge`, lookup, `Map.set`, or `Func.apply`.
+*/
+Self Map.merge_with(Self map, Self other, Func combine) {
+  if (!map || !other) return map.merge(other);
+  foreach (Var (key, value), other) {
+    Var previous = map[key];
+    if (previous is not void) value = combine.apply_values(previous, value);
+    map[key] = value;
+  }
+  return map;
+}
+
 /** Applies `op` to the value for `key` and returns the stored result.
     `+` inserts a numeric `rhs` when the key is absent; other updates require
     an existing key. A failing value operation leaves the entry unchanged.

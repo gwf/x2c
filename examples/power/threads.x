@@ -11,9 +11,9 @@ static Var sum_squares(const void *input, size_t bytes) {
 int main(void) {
 // Split the data; launch both workers before waiting for either.
 int values[2][3] = {{1, 2, 3}, {4, 5, 6}};
-Thread first = Thread.start(sum_squares,
+Thread first = Thread.start_raw(sum_squares,
   values[0], sizeof(values[0]));
-Thread second = Thread.start(sum_squares,
+Thread second = Thread.start_raw(sum_squares,
   values[1], sizeof(values[1]));
 values[0][0] = 100;
 values[1][0] = 100;

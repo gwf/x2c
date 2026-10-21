@@ -317,6 +317,7 @@ static int _iter_immediate_consumer(String name) =>
   name == "Iter_try_next" || name == "Iter_next" ||
          name == "Iter_list" || name == "Iter_array" ||
          name == "Iter_foldl" || name == "Iter_any" ||
+         name == "Iter_parallel_map" ||
          name == "Iter_all" || name == "Iter_find" ||
          name == "Iter_count" || name == "Iter_sum" ||
          name == "Iter_product" || name == "Iter_min" ||

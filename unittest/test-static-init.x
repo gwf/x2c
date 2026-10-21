@@ -98,7 +98,7 @@ static Var _concurrent_initializer(const void *input, size_t size) {
 static void static_concurrent_initialization_publishes_once(void) {
   Thread workers[8];
   for (int i = 0; i < 8; i++)
-    workers[i] = Thread.start(_concurrent_initializer, NULL, 0);
+    workers[i] = Thread.start_raw(_concurrent_initializer, NULL, 0);
   for (int i = 0; i < 8; i++) {
     EXPECT_INT_EQ(workers[i].join().int(), 97);
     workers[i].free();
@@ -131,8 +131,8 @@ static Var _cyclic_initializer(const void *input, size_t size) {
 
 static void static_cross_thread_cycle_transfers_and_wakes_waiter(void) {
   int first = 0, second = 1;
-  Thread a = Thread.start(_cyclic_initializer, &first, sizeof(first));
-  Thread b = Thread.start(_cyclic_initializer, &second, sizeof(second));
+  Thread a = Thread.start_raw(_cyclic_initializer, &first, sizeof(first));
+  Thread b = Thread.start_raw(_cyclic_initializer, &second, sizeof(second));
   int successes = a.join().int() + b.join().int();
   a.free();
   b.free();
@@ -164,8 +164,8 @@ static Var _thread_local_initializer(const void *input, size_t size) {
 
 static void static_threaded_storage_releases_with_thread(void) {
   int first = 17, second = 29;
-  Thread a = Thread.start(_thread_local_initializer, &first, sizeof(first));
-  Thread b = Thread.start(_thread_local_initializer, &second, sizeof(second));
+  Thread a = Thread.start_raw(_thread_local_initializer, &first, sizeof(first));
+  Thread b = Thread.start_raw(_thread_local_initializer, &second, sizeof(second));
   EXPECT_INT_EQ(a.join().int(), first);
   EXPECT_INT_EQ(b.join().int(), second);
   a.free();

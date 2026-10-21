@@ -44,8 +44,8 @@ int main(void) {
 
   Work alpha = { "alpha", 1000, &counter, mutex };
   Work beta = { "beta", 1000, &counter, mutex };
-  Thread alpha_thread = Thread.start(count, &alpha, sizeof(alpha));
-  Thread beta_thread = Thread.start(count, &beta, sizeof(beta));
+  Thread alpha_thread = Thread.start_raw(count, &alpha, sizeof(alpha));
+  Thread beta_thread = Thread.start_raw(count, &beta, sizeof(beta));
 
   Map alpha_result = alpha_thread.join();
   Map beta_result = beta_thread.join();

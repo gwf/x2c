@@ -172,8 +172,8 @@ int main(void) {
   int counter = 0;
   Mutex mutex = Mutex.new();
   CounterWork work = { mutex, &counter, "parent label" };
-  Thread first = Thread.start(increment, &work, sizeof(work));
-  Thread second = Thread.start(increment, &work, sizeof(work));
+  Thread first = Thread.start_raw(increment, &work, sizeof(work));
+  Thread second = Thread.start_raw(increment, &work, sizeof(work));
   String a = first.join();
   String b = second.join();
   printf("%s, %s: %d\n", a, b, counter);

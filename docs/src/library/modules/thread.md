@@ -9,11 +9,104 @@
 
 | Function | Summary |
 | --- | --- |
+| [`Iter.parallel_map`](#Iter.parallel_map) | Describes mapping `function` over `source` with at most `workers` Threads. |
+| [`ParallelMap.foldl`](#ParallelMap.foldl) | Consumes ready worker results into one sequential accumulator. |
+| [`Thread.finish_all`](#Thread.finish_all) | Joins and frees every worker in `pending`, discarding returned results. |
+| [`Thread.finish_any`](#Thread.finish_any) | Waits for one worker, joins it, frees its handle, and returns its result. |
 | [`Thread.free`](#Thread.free) | Frees a `Thread` handle after its consuming join has completed. |
 | [`Thread.join`](#Thread.join) | Joins one worker and exports its result into the joining `Scope` and pools. |
-| [`Thread.start`](#Thread.start) | Starts one worker and returns its heap-owned handle. |
+| [`Thread.start`](#Thread.start) | Starts one `Var`-to-`Var` worker using the ordinary Thread lifecycle. |
+| [`Thread.start_raw`](#Thread.start_raw) | Starts one worker and returns its heap-owned handle. |
+| [`Thread.wait_any`](#Thread.wait_any) | Waits for a finished worker, removes its handle from `pending`, and returns it. |
+
+### `Iter`
+
+<a id="Iter.parallel_map"></a>
+#### Iter.parallel_map
+
+`ParallelMap Iter.parallel_map(Iter source, ThreadValueFn function, int workers)`
+
+Describes mapping `function` over `source` with at most `workers` Threads.
+Nothing runs until `ParallelMap.foldl` consumes the operation. The
+descriptor belongs to the caller's Scope and borrows the source iterator
+storage and callback code. Those must remain live until the fold ends.
+Source values follow `Thread.start` borrowing: their input graphs must
+remain live and read-only while outstanding workers use them. A source
+must not mutate or recycle an outstanding input's storage.
+
+**Raises:** `<bad-arg>` for a nonpositive worker count, or `<alloc-fail>` for
+descriptor storage.
+
+Source: `lib/thread.x:530`
+
+### `ParallelMap`
+
+<a id="ParallelMap.foldl"></a>
+#### ParallelMap.foldl
+
+`Var ParallelMap.foldl(ParallelMap map, Var seed, Func accumulate)`
+
+Consumes ready worker results into one sequential accumulator.
+Starts at most the configured worker count and reuses those Threads for
+successive inputs. Each completed job publishes one sealed result; the
+caller exports it and runs `accumulate(acc, result)` before assigning
+that worker another input. Other workers may still be running.
+Results follow completion-queue order, not source order. Source traversal
+and accumulation stay on the calling thread. Each worker holds at most
+one unfinished job or unread result.
+A `void` seed uses the first result as accumulator, as with `Iter.foldl`.
+Empty input or a null descriptor returns the seed without invoking the
+worker or accumulator. No result Array is collected. The fold joins all
+remaining workers on every exit, preserving a primary Error during
+cleanup. Native join failures are reported by `Thread.finish_all`.
+This descriptor supports consuming folds, not general pull iteration.
+
+**Raises:** source, start, worker, export, allocation, or accumulator causes,
+including `<void-op>` for a `void` worker result.
+
+Source: `lib/thread.x:554`
 
 ### `Thread`
+
+<a id="Thread.finish_all"></a>
+#### Thread.finish_all
+
+`void Thread.finish_all(Array pending)`
+
+Joins and frees every worker in `pending`, discarding returned results.
+A null or empty Array does nothing. Already-joined handles are freed.
+Successfully consumed handles are removed, including workers whose join
+reported a worker or result-export error. A native join failure leaves
+its handle in `pending` for a retry; all other entries are still attempted.
+Entries must be unique, valid handles exclusively owned by this caller,
+with no concurrent mutation, joining, or freeing.
+Failures are collected and raised as `<join-fail>` only after cleanup.
+During an existing Error unwind, a native stderr diagnostic reports the
+cleanup failure instead; the original Error continues unchanged.
+
+**Raises:** `<join-fail>` containing the captured join failures, including
+`<bad-arg>` for a null entry or `<bad-state>` for a joining entry.
+Error snapshot failures use the existing raw Error floor.
+
+Source: `lib/thread.x:492`
+
+<a id="Thread.finish_any"></a>
+#### Thread.finish_any
+
+`Var Thread.finish_any(Array pending)`
+
+Waits for one worker, joins it, frees its handle, and returns its result.
+A null or empty Array returns `void`. Selection and exclusive ownership
+follow `Thread.wait_any`. The exported result belongs to the caller's
+Scope and pools, as with `Thread.join`.
+A consuming join removes and frees the handle even when worker failure
+or result export raises. A native join failure retains the live handle
+in `pending` for retry. Other entries keep their relative order; a
+retained selected handle moves to the end.
+
+**Raises:** the same causes as `Thread.wait_any` and `Thread.join`.
+
+Source: `lib/thread.x:466`
 
 <a id="Thread.free"></a>
 #### Thread.free
@@ -24,7 +117,7 @@ Frees a `Thread` handle after its consuming join has completed.
 
 **Raises:** `<bad-state>` for NULL, running, or joining handles.
 
-Source: `lib/thread.x:326`
+Source: `lib/thread.x:450`
 
 <a id="Thread.join"></a>
 #### Thread.join
@@ -44,12 +137,32 @@ fails, any cause from result or error export, and
 here. A callback that returns `void` joins as `void`; a handled worker
 failure transfers instead of returning a sentinel.
 
-Source: `lib/thread.x:286`
+Source: `lib/thread.x:400`
 
 <a id="Thread.start"></a>
 #### Thread.start
 
-`Thread Thread.start(ThreadFn function, const void *input, size_t input_size)`
+`Thread Thread.start(ThreadValueFn function, Var value)`
+
+Starts one `Var`-to-`Var` worker using the ordinary Thread lifecycle.
+Copies the `Var` bits, including `void`, without cloning or transferring
+referenced storage. The input graph and callback code must outlive join;
+treat all referenced input as read-only until then. In particular, a
+borrowed Map is not a private copy and must not receive worker-owned
+values. Return a fresh Map for worker-created output instead.
+Scalars and immutable Strings can be read directly; wide boxed scalars
+still borrow their caller-owned storage. Result export and Error policy
+are those of `Thread.start_raw` and `Thread.join`. Use `Thread.start_raw`
+for explicit byte-buffer inputs.
+
+**Raises:** `<bad-arg>` for a null callback, or the causes of `Thread.start_raw`.
+
+Source: `lib/thread.x:167`
+
+<a id="Thread.start_raw"></a>
+#### Thread.start_raw
+
+`Thread Thread.start_raw(ThreadFn function, const void *input, size_t input_size)`
 
 Starts one worker and returns its heap-owned handle.
 `input_size` bytes are copied before native start and passed once to the
@@ -70,14 +183,49 @@ registration.
 `<io-fail>` when `pthread_create` fails. Failure during native once
 initialization or mutex setup aborts the process.
 
-Source: `lib/thread.x:91`
+Source: `lib/thread.x:121`
+
+<a id="Thread.wait_any"></a>
+#### Thread.wait_any
+
+`Thread Thread.wait_any(Array pending)`
+
+Waits for a finished worker, removes its handle from `pending`, and returns it.
+A null or empty Array returns NULL. If several workers have finished, the
+first in current Array order wins; completion chronology is not recorded.
+A failed worker is also ready. This does not join, export results, or free
+the handle: the caller must still call `Thread.join` and `Thread.free`.
+`join` reports worker errors as usual.
+Entries must be unique, valid Thread handles. The caller exclusively owns
+this Array and its handles throughout the wait; concurrent mutation,
+joining, or freeing is unsupported. A returned unjoined handle may be
+added again and selected again. Freed handles must never be supplied.
+
+**Raises:** `<bad-arg>` for a null entry, or `<bad-state>` for a joining or
+joined entry. Native completion synchronization failure aborts.
+
+Source: `lib/thread.x:369`
 
 ## Public types
 
 | Type | Kind | Summary |
 | --- | --- | --- |
+| [`ParallelMap`](#ParallelMap) | struct | Scope-owned description of a bounded parallel mapping operation. |
 | [`Thread`](#Thread) | struct | A heap-owned native worker handle with one consuming join. |
 | [`ThreadFn`](#ThreadFn) | callback | Computes one `Thread` result from a borrowed copy of the start input bytes. |
+| [`ThreadValueFn`](#ThreadValueFn) | callback | Computes a worker result from one borrowed `Var` input. |
+
+<a id="ParallelMap"></a>
+### ParallelMap
+
+`typedef struct ParallelMap *ParallelMap`
+
+Scope-owned description of a bounded parallel mapping operation.
+Construction starts no workers. The source iterator storage and callback
+are borrowed until a consuming `ParallelMap.foldl` finishes. Use temporary
+iterator chains only when the fold is in the same full expression.
+
+Source: `lib/thread.x:35`
 
 <a id="Thread"></a>
 ### Thread
@@ -88,7 +236,7 @@ A heap-owned native worker handle with one consuming join.
 A started `Thread` must be joined, including after its callback finishes,
 and then released with `Thread.free`.
 
-Source: `lib/thread.x:27`
+Source: `lib/thread.x:41`
 
 <a id="ThreadFn"></a>
 ### ThreadFn
@@ -103,11 +251,23 @@ raise and does not end the callback.
 
 Source: `lib/thread.x:21`
 
+<a id="ThreadValueFn"></a>
+### ThreadValueFn
+
+`typedef Var (*ThreadValueFn)(Var input)`
+
+Computes a worker result from one borrowed `Var` input.
+Referenced input storage must stay alive and unchanged until join.
+Return fresh worker-owned values normally; `Thread.join` exports them.
+Error policy and result transfer follow `ThreadFn`.
+
+Source: `lib/thread.x:28`
+
 ## Design notes
 
-A `Thread` copies its fixed-size input with max_align_t alignment, runs one
-callback in an isolated `Context`, and seals the exported result or error
-snapshot until join. Over-aligned input types are not supported.
+A `Thread` copies Var bits or fixed-size bytes, runs one callback in an
+isolated `Context`, and seals the exported result or error until join.
+Raw input has max_align_t alignment; over-aligned types are unsupported.
 Shared objects require their own coordination.
 
 ## Tests and examples

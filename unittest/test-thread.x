@@ -7,6 +7,7 @@
 #include <sched.h>
 #include <stdatomic.h>
 #include <stdint.h>
+#include <pthread.h>
 
 typedef struct ThreadTestInput {
   int value;
@@ -235,7 +236,7 @@ static void thread_failed_start_does_not_freeze_registration(void) {
 static void thread_input_size_overflow_is_size_limit(void) {
   char input = 0;
   int selected = 0;
-  try Thread.start(_thread_aligned_input_worker, &input, SIZE_MAX);
+  try Thread.start_raw(_thread_aligned_input_worker, &input, SIZE_MAX);
   catch %(size-limit): selected = 1;
   catch %(alloc-fail): selected = 2;
   EXPECT_INT_EQ(selected, 1);
@@ -245,7 +246,7 @@ static void thread_copies_input_at_maximum_alignment(void) {
   ThreadAlignedInput input = {
     UINT64_C(0x0123456789abcdef), 1234.5L
   };
-  Thread thread = Thread.start(
+  Thread thread = Thread.start_raw(
     _thread_aligned_input_worker, &input, sizeof(input)
   );
   EXPECT_INT_EQ(thread.join().integer(), 1);
@@ -255,13 +256,13 @@ static void thread_copies_input_at_maximum_alignment(void) {
 static void thread_rejects_one_of_two_concurrent_joins(void) {
   ThreadJoinProbe probe = { 0 };
   ThreadJoinInput input = { &probe };
-  probe.target = Thread.start(
+  probe.target = Thread.start_raw(
     _thread_join_target_worker, &input, sizeof(input)
   );
-  Thread first = Thread.start(
+  Thread first = Thread.start_raw(
     _thread_join_competitor_worker, &input, sizeof(input)
   );
-  Thread second = Thread.start(
+  Thread second = Thread.start_raw(
     _thread_join_competitor_worker, &input, sizeof(input)
   );
   while (atomic_load(&probe.ready) != 2) sched_yield();
@@ -299,8 +300,8 @@ static void thread_workers_isolate_and_join_results(void) {
   ThreadTestInput second = {
     22, 250, &counter, mutex, ancestor_string, ancestor_list, ancestor_map
   };
-  Thread a = Thread.start(_thread_test_worker, &first, sizeof(first));
-  Thread b = Thread.start(_thread_test_worker, &second, sizeof(second));
+  Thread a = Thread.start_raw(_thread_test_worker, &first, sizeof(first));
+  Thread b = Thread.start_raw(_thread_test_worker, &second, sizeof(second));
   Map a_result = a.join();
   Map b_result = b.join();
 
@@ -332,7 +333,7 @@ static void thread_workers_isolate_and_join_results(void) {
 }
 
 static void thread_join_raises_worker_errors(void) {
-  Thread thread = Thread.start(_thread_error_worker, NULL, 0);
+  Thread thread = Thread.start_raw(_thread_error_worker, NULL, 0);
   int caught = 0, error_count = -1;
   try thread.join();
   catch %(join-fail (errors ?errors)): {
@@ -354,7 +355,7 @@ static Var _thread_ignored_policy_worker(
 
 static void thread_ignored_policy_resumes_in_worker(void) {
   Error.policy_set(<worker-ign>, <ignore>);
-  Thread thread = Thread.start(_thread_ignored_policy_worker, NULL, 0);
+  Thread thread = Thread.start_raw(_thread_ignored_policy_worker, NULL, 0);
   EXPECT_INT_EQ(thread.join().integer(), 42);
   thread.free();
 }
@@ -369,7 +370,7 @@ static Var _thread_shared_cause_worker(const void *input, size_t input_size) {
 }
 
 static void thread_shared_cause_still_fails_join(void) {
-  Thread thread = Thread.start(_thread_shared_cause_worker, NULL, 0);
+  Thread thread = Thread.start_raw(_thread_shared_cause_worker, NULL, 0);
   int caught = 0, error_count = -1;
   try thread.join();
   catch %(join-fail (errors ?errors)): {
@@ -387,7 +388,7 @@ static void thread_memory_sink_retains_worker_events(void) {
   logger.add_memory_sink(&entries);
   Logger previous = log_set_global_logger(logger);
 
-  Thread message = Thread.start(_thread_memory_log_worker, NULL, 0);
+  Thread message = Thread.start_raw(_thread_memory_log_worker, NULL, 0);
   EXPECT_INT_EQ(message.join().integer(), 73);
   List message_entry = entries.car();
   EXPECT_TRUE(message_entry[4].symbol() == <thread-mem>);
@@ -398,7 +399,7 @@ static void thread_memory_sink_retains_worker_events(void) {
 
   /* A `<log>` policy resolves the cause inside the worker as it does here:
      the error is reported and the callback keeps its result. */
-  Thread failure = Thread.start(_thread_logged_error_worker, NULL, 0);
+  Thread failure = Thread.start_raw(_thread_logged_error_worker, NULL, 0);
   EXPECT_INT_EQ(failure.join().integer(), 91);
   List error_entry = entries.car();
   EXPECT_TRUE(error_entry[4].symbol() == <err-report>);
@@ -418,7 +419,7 @@ static void thread_results_stay_private_until_join(void) {
 
   Context destination = Context.open_isolated_named("Thread join target");
   int value = 8675309;
-  Thread thread = Thread.start(
+  Thread thread = Thread.start_raw(
     _thread_private_result_worker, &value, sizeof(value)
   );
   List result = thread.join();
@@ -433,13 +434,13 @@ static void thread_results_stay_private_until_join(void) {
 }
 
 static void thread_join_returns_void_worker_result(void) {
-  Thread thread = Thread.start(_thread_void_result_worker, NULL, 0);
+  Thread thread = Thread.start_raw(_thread_void_result_worker, NULL, 0);
   EXPECT_TRUE(thread.join() is void);
   thread.free();
 }
 
 static void thread_joins_nested_packed_containers(void) {
-  Thread thread = Thread.start(_thread_packed_result_worker, NULL, 0);
+  Thread thread = Thread.start_raw(_thread_packed_result_worker, NULL, 0);
   Array graph = thread.join();
   ArrayChar chars = graph[0];
   ArrayShort shorts = graph[1];
@@ -496,7 +497,7 @@ static void thread_joins_nested_packed_containers(void) {
 }
 
 static void thread_join_runs_recursive_custom_exporter(void) {
-  Thread thread = Thread.start(_thread_recursive_export_worker, NULL, 0);
+  Thread thread = Thread.start_raw(_thread_recursive_export_worker, NULL, 0);
   ContextProbe probe = thread.join();
   EXPECT_INT_EQ(probe.exports, 2);
   Array nested = probe.value;
@@ -512,7 +513,7 @@ static void thread_errors_stay_private_until_join(void) {
 
   Context destination = Context.open_isolated_named("Thread error target");
   int value = 424242;
-  Thread thread = Thread.start(
+  Thread thread = Thread.start_raw(
     _thread_private_error_worker, &value, sizeof(value)
   );
   int caught = 0;
@@ -526,7 +527,7 @@ static void thread_errors_stay_private_until_join(void) {
 }
 
 static void thread_error_wide_values_survive_until_join(void) {
-  Thread thread = Thread.start(_thread_wide_error_worker, NULL, 0);
+  Thread thread = Thread.start_raw(_thread_wide_error_worker, NULL, 0);
   int caught = 0;
   int64_t value = 0;
   try thread.join();
@@ -541,7 +542,7 @@ static void thread_error_wide_values_survive_until_join(void) {
 }
 
 static void _failing_join_round(void) {
-  Thread thread = Thread.start(
+  Thread thread = Thread.start_raw(
     _thread_failing_export_worker, NULL, 0
   );
   int caught = 0;
@@ -568,7 +569,7 @@ static void thread_rejects_free_before_join_and_double_join(void) {
   ThreadTestInput input = {
     3, 0, NULL, NULL, "parent", %(parent), map
   };
-  Thread thread = Thread.start(
+  Thread thread = Thread.start_raw(
     _thread_test_worker, &input, sizeof(input)
   );
   int early = 0, twice = 0;
@@ -628,9 +629,9 @@ static void thread_workers_first_box_classes(void) {
     { &arrived, ThreadBoxLeft.new(1), &left, &right, 1 },
     { &arrived, ThreadBoxRight.new(2), &right, &left, 0 }
   };
-  Thread first = Thread.start(_thread_first_box, &inputs[0],
+  Thread first = Thread.start_raw(_thread_first_box, &inputs[0],
                               sizeof(inputs[0]));
-  Thread second = Thread.start(_thread_first_box, &inputs[1],
+  Thread second = Thread.start_raw(_thread_first_box, &inputs[1],
                                sizeof(inputs[1]));
   EXPECT_INT_EQ(first.join().integer(), 1);
   EXPECT_INT_EQ(second.join().integer(), 1);
@@ -652,8 +653,8 @@ static void thread_rendering_paths_are_independent(void) {
   RenderPath path;
   EXPECT_TRUE(path.enter(shared));
   defer path.leave();
-  Thread first = Thread.start(_thread_render_shared, &shared, sizeof(shared));
-  Thread second = Thread.start(_thread_render_shared, &shared, sizeof(shared));
+  Thread first = Thread.start_raw(_thread_render_shared, &shared, sizeof(shared));
+  Thread second = Thread.start_raw(_thread_render_shared, &shared, sizeof(shared));
   EXPECT_INT_EQ(first.join().integer(), 1);
   EXPECT_INT_EQ(second.join().integer(), 1);
   first.free();
@@ -709,7 +710,7 @@ static void thread_workers_bind_one_catch_site(void) {
   Thread threads[THREAD_RACERS];
   for (int i = 0; i < THREAD_RACERS; i++) {
     inputs[i] = (ThreadRaceInput) { &arrived, i, NULL, NULL };
-    threads[i] = Thread.start(
+    threads[i] = Thread.start_raw(
       _thread_race_catch_worker, &inputs[i], sizeof(inputs[i]));
   }
   int wrong = 0;
@@ -745,7 +746,7 @@ static void thread_promotions_keep_the_first_canonical_identity(void) {
   Thread threads[THREAD_RACERS];
   for (int i = 0; i < THREAD_RACERS; i++) {
     inputs[i] = (ThreadRaceInput) { &arrived, i, promoted, proven };
-    threads[i] = Thread.start(
+    threads[i] = Thread.start_raw(
       _thread_race_promote_worker, &inputs[i], sizeof(inputs[i]));
   }
   for (int i = 0; i < THREAD_RACERS; i++) {
@@ -780,12 +781,12 @@ static Var _thread_regex_depth_worker(const void *input, size_t input_size) {
    rather than overflowing the stack. */
 static void thread_stack_reaches_library_recursion_limits(void) {
   RegexDepthInput deep = { 1999 };
-  Thread thread = Thread.start(_thread_regex_depth_worker, &deep, sizeof deep);
+  Thread thread = Thread.start_raw(_thread_regex_depth_worker, &deep, sizeof deep);
   EXPECT_INT_EQ(thread.join().integer(), 1);
   thread.free();
 
   RegexDepthInput over_limit = { 2500 };
-  Thread limited = Thread.start(
+  Thread limited = Thread.start_raw(
     _thread_regex_depth_worker, &over_limit, sizeof over_limit);
   int caught = 0;
   try limited.join();
@@ -795,6 +796,430 @@ static void thread_stack_reaches_library_recursion_limits(void) {
 }
 
 #include "test-macros.x"
+
+typedef struct ThreadWaitInput { Mutex gate; int value; } ThreadWaitInput;
+
+static Var _thread_wait_worker(const void *input, size_t size) {
+  (void) size;
+  const ThreadWaitInput *work = input;
+  if (work.gate) {
+    work.gate.lock();
+    work.gate.unlock();
+  }
+  return work.value;
+}
+
+static void thread_wait_any_empty_ready_and_removal(void) {
+  $test.scoped();
+  Array pending = [];
+  EXPECT_NULL(Thread.wait_any(NULL));
+  EXPECT_NULL(Thread.wait_any(pending));
+  ThreadWaitInput input = { NULL, 42 };
+  pending.push(Thread.start_raw(_thread_wait_worker, &input, sizeof(input)));
+  pending.push(Thread.start_raw(_thread_wait_worker, &input, sizeof(input)));
+  Thread first = Thread.wait_any(pending), second = Thread.wait_any(pending);
+  EXPECT_INT_EQ(pending.len(), 0);
+  pending.push(second);
+  pending.push(first);
+  EXPECT_TRUE(Thread.wait_any(pending) == second);
+  EXPECT_INT_EQ(second.join().int(), 42);
+  second.free();
+  EXPECT_TRUE(Thread.wait_any(pending) == first);
+  EXPECT_INT_EQ(first.join().int(), 42);
+  pending.push(first);
+  int caught = 0;
+  try Thread.wait_any(pending);
+  catch %(bad-state *): caught++;
+  pending.remove(0);
+  first.free();
+  pending.push(NULL);
+  try Thread.wait_any(pending);
+  catch %(bad-arg *): caught++;
+  EXPECT_INT_EQ(caught, 2);
+}
+
+static void thread_wait_any_skips_unfinished_workers(void) {
+  $test.scoped();
+  Mutex gate = Mutex.new();
+  gate.lock();
+  ThreadWaitInput slow = { gate, 1 }, fast = { NULL, 2 };
+  Thread first = Thread.start_raw(_thread_wait_worker, &slow, sizeof(slow));
+  Thread second = Thread.start_raw(_thread_wait_worker, &fast, sizeof(fast));
+  Array pending = [first, second];
+  EXPECT_TRUE(Thread.wait_any(pending) == second);
+  gate.unlock();
+  EXPECT_INT_EQ(second.join().int(), 2);
+  second.free();
+  EXPECT_TRUE(Thread.wait_any(pending) == first);
+  EXPECT_INT_EQ(first.join().int(), 1);
+  first.free();
+  gate.free();
+}
+
+static void thread_wait_any_leaves_errors_for_join(void) {
+  $test.scoped();
+  Thread worker = Thread.start_raw(_thread_error_worker, NULL, 0);
+  Array pending = [worker];
+  EXPECT_TRUE(Thread.wait_any(pending) == worker);
+  EXPECT_INT_EQ(pending.len(), 0);
+  int caught = 0;
+  try worker.join();
+  catch %(join-fail *): caught++;
+  EXPECT_INT_EQ(caught, 1);
+  worker.free();
+}
+
+void thread_wait_any_suite(void) {
+  $test.run(thread_wait_any_empty_ready_and_removal);
+  $test.run(thread_wait_any_skips_unfinished_workers);
+  $test.run(thread_wait_any_leaves_errors_for_join);
+}
+
+static void thread_finish_all_empty_and_success(void) {
+  $test.scoped();
+  Thread.finish_all(NULL);
+  Array pending = [];
+  Thread.finish_all(pending);
+  EXPECT_INT_EQ(pending.len(), 0);
+  ThreadWaitInput input = { NULL, 42 };
+  Thread joined = Thread.start_raw(_thread_wait_worker, &input, sizeof(input));
+  EXPECT_INT_EQ(joined.join().int(), 42);
+  pending.push(joined);
+  pending.push(Thread.start_raw(_thread_wait_worker, &input, sizeof(input)));
+  Thread.finish_all(pending);
+  EXPECT_INT_EQ(pending.len(), 0);
+}
+
+static void thread_finish_all_cleans_before_reporting_failure(void) {
+  $test.scoped();
+  ThreadWaitInput input = { NULL, 42 };
+  Array pending = [Thread.start_raw(_thread_error_worker, NULL, 0),
+    Thread.start_raw(_thread_wait_worker, &input, sizeof(input))];
+  int caught = 0;
+  try Thread.finish_all(pending);
+  catch %(join-fail *detail): {
+    caught++;
+    EXPECT_TRUE(detail.assoc(<errors>) is <list>);
+    EXPECT_INT_EQ(pending.len(), 0);
+  }
+  EXPECT_INT_EQ(caught, 1);
+}
+
+static void thread_finish_all_preserves_an_unwinding_error(void) {
+  $test.scoped();
+  ThreadWaitInput input = { NULL, 42 };
+  Array pending = [Thread.start_raw(_thread_error_worker, NULL, 0),
+    Thread.start_raw(_thread_wait_worker, &input, sizeof(input))];
+  int caught = 0;
+  try {
+    defer Thread.finish_all(pending);
+    raise %(bad-arg (primary 73));
+  }
+  catch %(bad-arg (primary ?value)): {
+    caught++;
+    EXPECT_INT_EQ(value.int(), 73);
+    EXPECT_INT_EQ(pending.len(), 0);
+  }
+  EXPECT_INT_EQ(caught, 1);
+}
+
+void thread_finish_all_suite(void) {
+  $test.run(thread_finish_all_empty_and_success);
+  $test.run(thread_finish_all_cleans_before_reporting_failure);
+  $test.run(thread_finish_all_preserves_an_unwinding_error);
+}
+
+static Var _thread_finish_map_worker(const void *input, size_t size) {
+  (void) input;
+  (void) size;
+  Map result = {};
+  result[String.new("worker-key")] = String.new("worker-value");
+  return result;
+}
+
+static void thread_finish_any_exports_map_and_frees_handle(void) {
+  $test.scoped();
+  Array pending = [];
+  EXPECT_TRUE(Thread.finish_any(NULL) is void);
+  EXPECT_TRUE(Thread.finish_any(pending) is void);
+  pending.push(Thread.start_raw(_thread_finish_map_worker, NULL, 0));
+  Map result = Thread.finish_any(pending);
+  EXPECT_INT_EQ(pending.len(), 0);
+  EXPECT_INT_EQ(result.len(), 1);
+  EXPECT_STR_EQ(result["worker-key"].string(), "worker-value");
+  result["added-after-finish"] = 7;
+  EXPECT_INT_EQ(result["added-after-finish"].int(), 7);
+}
+
+static void thread_finish_any_cleans_a_failed_worker(void) {
+  $test.scoped();
+  Array pending = [Thread.start_raw(_thread_error_worker, NULL, 0)];
+  int caught = 0;
+  try Thread.finish_any(pending);
+  catch %(join-fail *): caught++;
+  EXPECT_INT_EQ(caught, 1);
+  EXPECT_INT_EQ(pending.len(), 0);
+}
+
+void thread_finish_any_suite(void) {
+  $test.run(thread_finish_any_exports_map_and_frees_handle);
+  $test.run(thread_finish_any_cleans_a_failed_worker);
+}
+
+static Var _thread_value_identity(Var input) => input;
+
+static Var _thread_value_map(Var input) {
+  Map source = input;
+  Map result = {source: source, text: String.new("worker-created value")};
+  return result;
+}
+
+static Var _thread_value_error(Var input) {
+  (void) input;
+  raise %(worker-fai (detail "value worker"));
+  return void;
+}
+
+static void thread_start_copies_bits_and_borrows_strings(void) {
+  $test.scoped();
+  String text = String.new("caller-owned input");
+  Array pending = [Thread.start(_thread_value_identity, 37)];
+  EXPECT_INT_EQ(Thread.finish_any(pending).int(), 37);
+  pending.push(Thread.start(_thread_value_identity, text));
+  EXPECT_TRUE(Thread.finish_any(pending).string() == text);
+  pending.push(Thread.start(_thread_value_identity, void));
+  EXPECT_TRUE(Thread.finish_any(pending) is void);
+  EXPECT_INT_EQ(pending.len(), 0);
+}
+
+static void thread_start_borrows_map_and_exports_fresh_result(void) {
+  $test.scoped();
+  Map source = {key: String.new("caller value")};
+  Array pending = [Thread.start(_thread_value_map, source)];
+  Map result = Thread.finish_any(pending);
+  EXPECT_TRUE(result[<source>].map() === source);
+  EXPECT_INT_EQ(source.len(), 1);
+  EXPECT_STR_EQ(source[<key>].string(), "caller value");
+  EXPECT_STR_EQ(result[<text>].string(), "worker-created value");
+  result[<after>] = 42;
+  EXPECT_INT_EQ(result[<after>].int(), 42);
+}
+
+static void thread_start_preserves_worker_errors(void) {
+  $test.scoped();
+  Array pending = [Thread.start(_thread_value_error, 1)];
+  int caught = 0;
+  try Thread.finish_any(pending);
+  catch %(join-fail *): caught++;
+  EXPECT_INT_EQ(caught, 1);
+  EXPECT_INT_EQ(pending.len(), 0);
+}
+
+static void thread_start_raw_copies_the_input_bytes(void) {
+  $test.scoped();
+  ThreadWaitInput input = { NULL, 37 };
+  Array pending = [Thread.start_raw(_thread_wait_worker, &input, sizeof(input))];
+  input.value = 99;
+  EXPECT_INT_EQ(Thread.finish_any(pending).int(), 37);
+  EXPECT_INT_EQ(pending.len(), 0);
+}
+
+void thread_start_suite(void) {
+  $test.run(thread_start_copies_bits_and_borrows_strings);
+  $test.run(thread_start_borrows_map_and_exports_fresh_result);
+  $test.run(thread_start_preserves_worker_errors);
+  $test.run(thread_start_raw_copies_the_input_bytes);
+}
+
+static Mutex parallel_order_gate;
+static atomic_int parallel_active, parallel_maximum, parallel_started;
+static atomic_int parallel_finished;
+
+static Var _parallel_count(Var input) {
+  int active = atomic_fetch_add(&parallel_active, 1) + 1;
+  atomic_fetch_add(&parallel_started, 1);
+  int maximum = atomic_load(&parallel_maximum);
+  while (maximum < active && !atomic_compare_exchange_weak(
+    &parallel_maximum, &maximum, active)) {}
+  defer atomic_fetch_sub(&parallel_active, 1);
+  defer atomic_fetch_add(&parallel_finished, 1);
+  if (input.int() == 0 && parallel_order_gate) {
+    parallel_order_gate.lock();
+    parallel_order_gate.unlock();
+  }
+  return input;
+}
+
+static int _parallel_order_source(Iter iter, Var *out) {
+  int index = iter.state.int();
+  if (index == 3) return 0;
+  *out = index;
+  iter.state = index + 1;
+  return 1;
+}
+
+static void _parallel_reset(void) {
+  atomic_store(&parallel_active, 0);
+  atomic_store(&parallel_maximum, 0);
+  atomic_store(&parallel_started, 0);
+  atomic_store(&parallel_finished, 0);
+}
+
+static void parallel_map_bounds_and_completion_order(void) {
+  $test.scoped();
+  _parallel_reset();
+  parallel_order_gate = Mutex.new();
+  parallel_order_gate.lock();
+  try {
+    struct Iter storage;
+    Iter source = Iter.init(&storage, void, _parallel_order_source, 0);
+    int folded = 0;
+    ParallelMap map = source.parallel_map(_parallel_count, 2);
+    EXPECT_INT_EQ(atomic_load(&parallel_started), 0);
+    Func collect = %!(Array values, Var item) using &folded => {
+      if (!folded++) {
+        EXPECT_INT_EQ(item.int(), 1);
+        EXPECT_TRUE(atomic_load(&parallel_finished) < 3);
+        parallel_order_gate.unlock();
+      }
+      values.push(item);
+      return values;
+    };
+    Array results = map.foldl([], collect);
+    EXPECT_INT_EQ(results.len(), 3);
+    EXPECT_INT_EQ(results[0].int(), 1);
+    EXPECT_TRUE(atomic_load(&parallel_maximum) <= 2);
+    EXPECT_INT_EQ(atomic_load(&parallel_active), 0);
+    EXPECT_INT_EQ(atomic_load(&parallel_finished), 3);
+  }
+  finally {
+    parallel_order_gate.free();
+    parallel_order_gate = NULL;
+  }
+}
+
+static void parallel_map_results_outlive_workers(void) {
+  $test.scoped();
+  Map input = {key: "caller value"};
+  Array inputs = [input, input];
+  Array results = inputs.iter()
+    .parallel_map(_thread_value_map, 2)
+    .foldl([], %!(Array values, Var item) => {
+      values.push(item);
+      return values;
+    });
+  Map result = results[0];
+  EXPECT_INT_EQ(results.len(), 2);
+  EXPECT_TRUE(result[<source>].map() === input);
+  EXPECT_STR_EQ(result[<text>].string(), "worker-created value");
+  result[<after>] = 42;
+  EXPECT_INT_EQ(result[<after>].int(), 42);
+}
+
+static Var _parallel_worker_error(Var input) {
+  _parallel_count(input);
+  if (input.int() == 0) raise %(worker-fai (detail "parallel map"));
+  return input;
+}
+
+static int _parallel_source_error(Iter iter, Var *out) {
+  int index = iter.state.int();
+  if (index == 3) raise %(bad-arg (primary 73));
+  *out = index;
+  iter.state = index + 1;
+  return 1;
+}
+
+static void parallel_map_cleans_worker_and_source_failures(void) {
+  $test.scoped();
+  _parallel_reset();
+  Array inputs = [0, 1, 2, 3, 4, 5];
+  struct Iter worker_source, failing_source;
+  int caught = 0;
+  Func sum = %!(int total, int item) => total + item;
+  try inputs.iter(&worker_source).parallel_map(_parallel_worker_error, 4)
+    .foldl(0, sum);
+  catch %(join-fail *): caught++;
+  EXPECT_INT_EQ(caught, 1);
+  EXPECT_INT_EQ(atomic_load(&parallel_active), 0);
+  EXPECT_INT_EQ(atomic_load(&parallel_finished),
+                atomic_load(&parallel_started));
+  _parallel_reset();
+  Iter source = Iter.init(&failing_source, void, _parallel_source_error, 0);
+  try source.parallel_map(_parallel_count, 4).foldl(0, sum);
+  catch %(bad-arg (primary ?value)): {
+    caught++;
+    EXPECT_INT_EQ(value.int(), 73);
+  }
+  EXPECT_INT_EQ(caught, 2);
+  EXPECT_INT_EQ(atomic_load(&parallel_active), 0);
+  EXPECT_INT_EQ(atomic_load(&parallel_finished), 3);
+  _parallel_reset();
+  struct Iter stopped_source;
+  try inputs.iter(&stopped_source).parallel_map(_parallel_count, 4)
+    .foldl(0, %!(Var acc, Var item) => {
+      (void) acc;
+      (void) item;
+      raise %(bad-arg (primary 99));
+    });
+  catch %(bad-arg (primary ?value)): {
+    caught++;
+    EXPECT_INT_EQ(value.int(), 99);
+  }
+  EXPECT_INT_EQ(caught, 3);
+  EXPECT_INT_EQ(atomic_load(&parallel_active), 0);
+  EXPECT_INT_EQ(atomic_load(&parallel_started), 4);
+  EXPECT_INT_EQ(atomic_load(&parallel_finished), 4);
+}
+
+static threaded int parallel_reuse_jobs;
+
+static Var _parallel_reuse_worker(Var input) {
+  _parallel_count(input);
+  int jobs = ++parallel_reuse_jobs;
+  Map result = {
+    id: Var.box_ulong((unsigned long) (uintptr_t) pthread_self()),
+    jobs: jobs,
+    text: String.printf("job-%d", input.int())
+  };
+  return result;
+}
+
+static void parallel_map_reuses_workers_and_exports_each_job(void) {
+  $test.scoped();
+  _parallel_reset();
+  Array inputs = [];
+  for (int i = 0; i < 16; i++) inputs.push(i);
+  Array results = inputs.iter().parallel_map(_parallel_reuse_worker, 4)
+    .foldl([], %!(Array values, Var item) => {
+      values.push(item);
+      return values;
+    });
+  Map ids = {}, texts = {};
+  int maximum_jobs = 0;
+  foreach (Map result, results) {
+    ids[result[<id>]] += 1;
+    texts[result[<text>]] = 1;
+    int jobs = result[<jobs>];
+    if (jobs > maximum_jobs) maximum_jobs = jobs;
+  }
+  EXPECT_INT_EQ(results.len(), 16);
+  EXPECT_INT_EQ(ids.len(), 4);
+  EXPECT_TRUE(maximum_jobs > 1);
+  EXPECT_TRUE(atomic_load(&parallel_maximum) <= 4);
+  EXPECT_INT_EQ(atomic_load(&parallel_active), 0);
+  EXPECT_INT_EQ(atomic_load(&parallel_started), 16);
+  EXPECT_INT_EQ(atomic_load(&parallel_finished), 16);
+  for (int i = 0; i < 16; i++)
+    EXPECT_TRUE(texts.contains(String.printf("job-%d", i)));
+}
+
+void thread_parallel_map_suite(void) {
+  $test.run(parallel_map_bounds_and_completion_order);
+  $test.run(parallel_map_results_outlive_workers);
+  $test.run(parallel_map_cleans_worker_and_source_failures);
+  $test.run(parallel_map_reuses_workers_and_exports_each_job);
+}
 
 void thread_suite(void) {
   $test.run(thread_failed_start_does_not_freeze_registration);

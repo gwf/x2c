@@ -1180,7 +1180,7 @@ Public functions:
 `Map.new_capacity`, `Map.new`, `Map.len`, `Map.try_get`, `Map.get`,
 `Map.getindex`, `Map.getdefault`, `Map.setdefault`, `Map.contains`, `Map.set`,
 `Map.setindex`, `Map.try_del`, `Map.del`, `Map.copy`, `Map.merge`,
-`Map.try_next`, `Map.truth`, `Map.equal`, `Map.updateindex`,
+`Map.try_next`, `Map.truth`, `Map.equal`, `Map.merge_with`, `Map.updateindex`,
 `Map.postfixindex`, `Map.get_hashed`, `Map.update_n`, `Map.export_to`,
 `Map.compare`, `Map.write_repr`, `Map.write_str`, `Map.str`, `Map.repr`,
 `Map.iter`, `Map.keys`, `Map.enumerate`, `Map.cleanup`
@@ -1426,7 +1426,9 @@ Public functions:
 
 Public functions:
 
-`Thread.start`, `Thread.join`, `Thread.free`
+`Thread.start_raw`, `Thread.start`, `Thread.wait_any`, `Thread.join`,
+`Thread.free`, `Thread.finish_any`, `Thread.finish_all`, `Iter.parallel_map`,
+`ParallelMap.foldl`
 
 ### [lib/tokenizer.x](../lib/tokenizer.x)
 

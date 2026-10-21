@@ -294,7 +294,7 @@ static void async_thread_wakes_the_loop_and_exports_its_result(void) {
     Var.new(<p48>, &state), _join_async_sender
   );
   AsyncNotifyInput input = { async, 42 };
-  state.sender = Thread.start(_notify_loop, &input, sizeof(input));
+  state.sender = Thread.start_raw(_notify_loop, &input, sizeof(input));
 
   EXPECT_INT_EQ(loop.run(UV_RUN_DEFAULT), 0);
   EXPECT_INT_EQ(state.calls, 1);

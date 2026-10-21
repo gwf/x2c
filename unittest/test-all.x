@@ -6,6 +6,11 @@ void scope_suite(void);
 void context_suite(void);
 void mutex_suite(void);
 void thread_suite(void);
+void thread_wait_any_suite(void);
+void thread_finish_all_suite(void);
+void thread_finish_any_suite(void);
+void thread_start_suite(void);
+void thread_parallel_map_suite(void);
 void static_init_suite(void);
 void pool_suite(void);
 void block_suite(void);
@@ -121,6 +126,11 @@ int main(int argc, char **argv) {
   $test.suite(ast_suite);
   $test.suite(mutex_suite);
   $test.suite(thread_suite);
+  $test.suite(thread_wait_any_suite);
+  $test.suite(thread_finish_all_suite);
+  $test.suite(thread_finish_any_suite);
+  $test.suite(thread_start_suite);
+  $test.suite(thread_parallel_map_suite);
   $test.suite(static_init_suite);
   return TestHarness_finish();
 }

@@ -86,7 +86,27 @@ The complete program is in `examples/power/contexts.x`.
 
 ## Pass shared values to a worker
 
-`Thread.start` copies the input structure's bytes. It does not copy anything
+`Thread.start(function, input)` calls a `Var`-to-`Var` function with one input.
+The input bits are copied, while referenced storage stays with its caller.
+Keep the input graph alive and read-only until join. This includes a Map's
+contents and the storage of wide boxed scalars. Return a fresh Map for values
+the worker creates; the ordinary join exports that result into the caller.
+
+```x2c
+static Var twice(Var input) => (int) input * 2;
+
+int main(void) {
+  Array pending = [Thread.start(twice, 21)];
+  printf("%s\n", Thread.finish_any(pending));
+  return 0;
+}
+```
+
+```text
+42
+```
+
+`Thread.start_raw` copies the input structure's bytes. It does not copy anything
 reached through pointers in that structure. A pointer, `String`, `List`, `Map`,
 or other handle therefore refers to the same parent object in the worker. The
 copied bytes have `max_align_t` alignment, matching ordinary allocation; do not
@@ -121,8 +141,8 @@ int main(void) {
   int counter = 0;
   Mutex mutex = Mutex.new();
   Work work = { 1000, &counter, mutex };
-  Thread first = Thread.start(count, &work, sizeof(work));
-  Thread second = Thread.start(count, &work, sizeof(work));
+  Thread first = Thread.start_raw(count, &work, sizeof(work));
+  Thread second = Thread.start_raw(count, &work, sizeof(work));
 
   first.join();
   second.join();
@@ -170,7 +190,8 @@ The more complete `examples/power/threads.x` uses two workers, parent
 by a `Mutex`, joined `Map` results, and a global memory `Logger` sink.
 
 All type and protocol registration must finish before the first successful
-`Thread.start`. Starting native execution freezes descriptor declaration.
+`Thread.start` or `Thread.start_raw`. Starting native execution freezes
+descriptor declaration.
 Boxing is not frozen: a worker may box the first value of a declared class,
 and every thread then reads that class's complete row.
 

@@ -448,7 +448,7 @@ static void pool_release_and_parent_allocation_do_not_deadlock(void) {
   Pool parent = Pool.retain_named(NULL, "concurrent parent");
   PoolThreadProbe probe = { .parent = parent };
   pthread_t worker;
-  /* Thread.start does this before pthread_create; without it Pool takes no
+  /* Thread.start_raw does this before pthread_create; without it Pool takes no
      lock at all and this test proves nothing about contention. */
   Pool.thread_start();
   int created = pthread_create(

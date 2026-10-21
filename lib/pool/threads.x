@@ -15,7 +15,7 @@ static threaded struct PoolValueThreadState value_thread;
    parent. No potentially failing allocation runs while storage is locked. */
 
 /** Makes `Pool` lock from here on, for a process about to start a worker.
-    `Thread.start` calls this before `pthread_create`. It never clears.
+    `Thread.start_raw` calls this before `pthread_create`. It never clears.
 */
 void Pool.thread_start(void) {
   pool_multithreaded = 1;

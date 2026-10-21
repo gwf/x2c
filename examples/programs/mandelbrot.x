@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
   Array threads = [];
   for (int worker = 0; worker < nworkers; worker++) {
     struct Job job = { worker, pixels };
-    threads.push(Thread.start(render, &job, sizeof(job)));
+    threads.push(Thread.start_raw(render, &job, sizeof(job)));
   }
   for (int worker = 0; worker < nworkers; worker++) {
     Thread thread = threads[worker];

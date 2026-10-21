@@ -38,7 +38,7 @@ int main(void) {
   NotifyState state = { 0 };
   UvAsync async = loop.async(Var.new(<p48>, &state), receive);
   NotifyWork work = { async, 19, 23 };
-  state.worker = Thread.start(add, &work, sizeof(work));
+  state.worker = Thread.start_raw(add, &work, sizeof(work));
 
   loop.run(UV_RUN_DEFAULT);
   printf("worker result: %s\n", state.result);

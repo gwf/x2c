@@ -249,6 +249,68 @@ static void map_growth_preserves_entries(void) {
   }
 }
 
+static void map_merge_with_combines_only_collisions(void) {
+  $test.scoped();
+  Map map = {shared: 7, kept: 3}, other = {shared: 2, added: 9};
+  int calls = 0;
+  Func combine = %!(int destination, int source) using &calls => {
+    calls++;
+    return destination * 10 + source;
+  };
+  EXPECT_TRUE(map.merge_with(other, combine) === map);
+  EXPECT_INT_EQ(calls, 1);
+  EXPECT_TRUE(Var.equal(map, %{shared: 72, kept: 3, added: 9}));
+  EXPECT_TRUE(Var.equal(other, %{shared: 2, added: 9}));
+  Map lower = map.copy().merge_with(other,
+    %!(int left, int right) => left < right ? left : right);
+  Map upper = other.copy().merge_with(map,
+    %!(int left, int right) => left > right ? left : right);
+  EXPECT_INT_EQ(lower[<shared>].int(), 2);
+  EXPECT_INT_EQ(upper[<shared>].int(), 72);
+  EXPECT_TRUE(map.merge(other) === map);
+  EXPECT_INT_EQ(map[<shared>].int(), 2);
+}
+
+static void map_merge_with_handles_null_growth_and_self(void) {
+  $test.scoped();
+  Map empty = {}, other = {a: 1}, none = NULL;
+  EXPECT_TRUE(empty.merge_with(NULL, NULL) === empty);
+  EXPECT_NULL(none.merge_with(NULL, NULL));
+  Map copy = none.merge_with(other, NULL);
+  EXPECT_FALSE(copy === other);
+  EXPECT_TRUE(Var.equal(copy, other));
+  EXPECT_TRUE(empty.merge_with(other, NULL) === empty);
+  for (int i = 0; i < 100; i++) other[i] = i;
+  Func sum = %!(int left, int right) => left + right;
+  empty.merge_with(other, sum);
+  EXPECT_INT_EQ(empty.len(), 101);
+  EXPECT_INT_EQ(empty[<a>].int(), 2);
+  EXPECT_INT_EQ(other[<a>].int(), 1);
+  EXPECT_TRUE(empty.merge_with(empty, sum) === empty);
+  EXPECT_INT_EQ(empty[<a>].int(), 4);
+  for (int i = 0; i < 100; i++) EXPECT_INT_EQ(empty[i].int(), i * 2);
+}
+
+static void map_merge_with_callback_failure_keeps_completed_entries(void) {
+  $test.scoped();
+  MapTestEnv map = {first: 7, second: 11}, other = {first: 2, second: 3};
+  int caught = 0, calls = 0;
+  try map.merge_with(other, NULL);
+  catch %(bad-arg *): caught++;
+  EXPECT_TRUE(Var.equal(map, %{first: 7, second: 11}));
+  Func reject = %!(int left, int right) using &calls => {
+    if (++calls == 2) raise %(bad-arg);
+    return left + right;
+  };
+  try map.merge_with(other, reject);
+  catch %(bad-arg *): caught++;
+  EXPECT_INT_EQ(caught, 2);
+  EXPECT_INT_EQ(calls, 2);
+  EXPECT_INT_EQ((map[<first>].int() == 9) +
+                (map[<second>].int() == 14), 1);
+  EXPECT_TRUE(Var.equal(other, %{first: 2, second: 3}));
+}
+
 static void _find_colliding_keys(
   Var *keys, int count, unsigned mask, unsigned bucket) {
   int found = 0;
@@ -672,6 +734,9 @@ void map_suite(void) {
   $test.run(map_update_boundaries_preserve_failure_order);
   $test.run(map_reports_exhausted_probe_invariant);
   $test.run(map_growth_preserves_entries);
+  $test.run(map_merge_with_combines_only_collisions);
+  $test.run(map_merge_with_handles_null_growth_and_self);
+  $test.run(map_merge_with_callback_failure_keeps_completed_entries);
   $test.run(map_growth_survives_a_nested_region);
   $test.run(map_collision_backshift_and_reuse);
   $test.run(map_reference_model_churn);
