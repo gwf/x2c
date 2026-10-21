@@ -546,25 +546,28 @@ ParallelMap Iter.parallel_map(Iter source, ThreadValueFn function, int workers) 
     Empty input or a null descriptor returns the seed without invoking the
     worker or accumulator. No result Array is collected. The fold joins all
     remaining workers on every exit, preserving a primary Error during
-    cleanup. Native join failures are reported by `Thread.finish_all`.
+    cleanup. If native join failure leaves a worker unjoined, the process
+    aborts rather than release storage that worker may still use.
     This descriptor supports consuming folds, not general pull iteration.
     Raises: source, start, worker, export, allocation, or accumulator causes,
     including `<void-op>` for a `void` worker result.
 */
 Var ParallelMap.foldl(ParallelMap map, Var seed, Func accumulate) {
   if (!map) return seed;
-  Array workers = $auto([]), ready = $auto([]);
+  struct ParallelRun *run = Scope.calloc(1, sizeof(struct ParallelRun));
+  Array workers = NULL;
+  defer _parallel_stop(run, workers);
+  workers = [];
+  run.ready = [];
   ((Block) workers).reserve(map.workers);
-  ((Block) ready).reserve(map.workers);
-  struct ParallelRun run = { ready, 0 };
-  defer _parallel_stop(&run, workers);
+  ((Block) run.ready).reserve(map.workers);
   Var acc = seed, input;
   int seeded = seed is not void;
   while (workers.len() < map.workers && map.source.try_next(input))
-    workers.push(_start_value(map.function, input, &run));
+    workers.push(_start_value(map.function, input, run));
   int active = workers.len();
   while (active) {
-    Thread worker = _parallel_wait(&run);
+    Thread worker = _parallel_wait(run);
     Var item = _parallel_result(worker);
     active--;
     if (item is void) raise %(void-op (operation "ParallelMap.foldl"));
@@ -621,6 +624,13 @@ static void _parallel_assign(Thread worker, Var input) {
 }
 
 static void _parallel_stop(struct ParallelRun *run, Array workers) {
+  defer Scope.free(run);
+  defer workers.cleanup();
+  defer run.ready.cleanup();
+  defer if (workers.len()) {
+    fprintf(stderr, "ParallelMap: cleanup left unjoined workers\n");
+    abort();
+  }
   _completion_check(pthread_mutex_lock(&thread_completion_mutex));
   run.stopping = 1;
   _completion_check(pthread_cond_broadcast(&thread_completion_condition));
