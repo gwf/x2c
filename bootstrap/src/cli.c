@@ -113,7 +113,7 @@ typedef struct CliRequest{
   List cc_args, ld_args, native_modules, extensions;
   Map collection_packages;
   String out_dir, dep_file, dep_target, manifest;
-  String target, profile, output, build_dir, temps_dir, label, state_seed;
+  String target, profile, output, build_dir, label, state_seed;
   String cc, meta_cc, ar, compile_commands, sha256, index;
   Symbol kind;
   String diagnostics_file;
@@ -282,7 +282,7 @@ static CliOption cli_options[] ={
     0, 0, 0, 0, 0, 0, 0, .alias = 0
   }
   , {
-    0, 0, 0, 0, 0, 0, 0, 0
+    0, 0, 0, 0, 0, 0, 0, .alias = 0, 0
   }
   , {
     0, 0, 0, 0, 0, 0, 0, 0
@@ -510,142 +510,142 @@ _x2c_gensym_initializer_choice_6D011170_0((0 < sizeof(cli_options) / sizeof(cli_
   686246, (SymbolSet) "\001\000\000\000\004\000\000\000\001\000\000\000\047\012\274\150\352\066\167\210\000\001\001\000\000\002\012\015\154\272\040\051\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 1345468776, _28, "<count>", "Maximum parallel translation and compilation jobs", 0, .alias = _29
 }
 ), (24ULL < sizeof(cli_options) / sizeof(cli_options[24ULL])), (cli_options[24ULL] =(CliOption){
-  1052018024, (SymbolSet) "\001\000\000\000\002\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\001\000\000\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", 1052018024, _30, "<file>", "Name the executable, library, or single object", 0, CLI_FIELD(1322536, output)
+  1052018024, (SymbolSet) "\001\000\000\000\002\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\001\000\000\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", 1052018024, _30, "<file>", "Name the executable, library, or single object", 0, .alias = _31, CLI_FIELD(1322536, output)
 }
 ), (25ULL < sizeof(cli_options) / sizeof(cli_options[25ULL])), (cli_options[25ULL] =(CliOption){
-  38995839752, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\050\114\162\114\000\000\000\000", 1052018024, _31, NULL, "Build the script even when its cached executable is current", 0, CLI_FIELD(417870, rebuild)
+  38995839752, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\050\114\162\114\000\000\000\000", 1052018024, _32, NULL, "Build the script even when its cached executable is current", 0, CLI_FIELD(417870, rebuild)
 }
 ), (26ULL < sizeof(cli_options) / sizeof(cli_options[26ULL])), (cli_options[26ULL] =(CliOption){
-  7088220, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\050\114\162\114\000\000\000\000", 1052018024, _32, NULL, "Remove the script's cached build and exit without running it", 0, CLI_FIELD(417870, clean)
+  7088220, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\050\114\162\114\000\000\000\000", 1052018024, _33, NULL, "Remove the script's cached build and exit without running it", 0, CLI_FIELD(417870, clean)
 }
 ), (27ULL < sizeof(cli_options) / sizeof(cli_options[27ULL])), (cli_options[27ULL] =(CliOption){
-  5861298610788, (SymbolSet) "\001\000\000\000\002\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\001\000\000\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", 1052018024, _33, "<dir>", "Store generated C, objects, deps, and state here", 0, CLI_FIELD(1322536, build_dir)
+  5861298610788, (SymbolSet) "\001\000\000\000\002\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\001\000\000\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", 1052018024, _34, "<dir>", "Store generated C, objects, deps, and state here", 0, CLI_FIELD(1322536, build_dir)
 }
 ), (28ULL < sizeof(cli_options) / sizeof(cli_options[28ULL])), (cli_options[28ULL] =(CliOption){
-  6551812, (SymbolSet) "\001\000\000\000\002\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\001\000\000\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", 1052018024, _34, "<file>", "Write native compile commands and retain generated files", 0
+  6551812, (SymbolSet) "\001\000\000\000\002\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\001\000\000\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", 1052018024, _35, "<file>", "Write native compile commands and retain generated files", 0
 }
 ), (29ULL < sizeof(cli_options) / sizeof(cli_options[29ULL])), (cli_options[29ULL] =(CliOption){
-  41897807850336, (SymbolSet) "\001\000\000\000\002\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\001\000\000\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", 1052018024, _35, NULL, "Keep generated C and other intermediate files", 0, .label = _36, CLI_FIELD(417870, save_temps)
+  41897807850336, (SymbolSet) "\001\000\000\000\002\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\001\000\000\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", 1052018024, _36, NULL, "Retain and reuse intermediates (default: .x2c-build)", 0, .label = _37, CLI_FIELD(417870, save_temps)
 }
 ), (30ULL < sizeof(cli_options) / sizeof(cli_options[30ULL])), (cli_options[30ULL] =(CliOption){
-  7958982899053, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\030\013\164\272\004\000\000\000", 34433862090, _37, "<hex>", "Require this digest of a downloaded or local archive", 0, CLI_FIELD(1322536, sha256)
+  7958982899053, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\030\013\164\272\004\000\000\000", 34433862090, _38, "<hex>", "Require this digest of a downloaded or local archive", 0, CLI_FIELD(1322536, sha256)
 }
 ), (31ULL < sizeof(cli_options) / sizeof(cli_options[31ULL])), (cli_options[31ULL] =(CliOption){
-  19800432, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\003\000\002\000\000\000\030\013\164\272\004\000\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", 34433862090, _38, "<url-or-path>", "Resolve package names through this index", 0, CLI_FIELD(1322536, index)
+  19800432, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\003\000\002\000\000\000\030\013\164\272\004\000\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", 34433862090, _39, "<url-or-path>", "Resolve package names through this index", 0, CLI_FIELD(1322536, index)
 }
 ), (32ULL < sizeof(cli_options) / sizeof(cli_options[32ULL])), (cli_options[32ULL] =(CliOption){
-  13603018, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\030\013\164\272\004\000\000\000", 34433862090, _39, NULL, "Install a bundle built for another x2c version", 0, CLI_FIELD(417870, force)
+  13603018, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\030\013\164\272\004\000\000\000", 34433862090, _40, NULL, "Install a bundle built for another x2c version", 0, CLI_FIELD(417870, force)
 }
 ), (33ULL < sizeof(cli_options) / sizeof(cli_options[33ULL])), (cli_options[33ULL] =(CliOption){
-  20273998090, (SymbolSet) "\001\000\000\000\004\000\000\000\001\000\000\000\047\012\274\150\352\066\167\210\000\001\001\000\000\002\012\015\154\272\040\051\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 1307939018, _40, "<dir>", "Add a shared x2c/C include directory", 0, .package_native = 1
+  20273998090, (SymbolSet) "\001\000\000\000\004\000\000\000\001\000\000\000\047\012\274\150\352\066\167\210\000\001\001\000\000\002\012\015\154\272\040\051\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 1307939018, _41, "<dir>", "Add a shared x2c/C include directory", 0, .package_native = 1
 }
 ), (34ULL < sizeof(cli_options) / sizeof(cli_options[34ULL])), (cli_options[34ULL] =(CliOption){
-  54927135910154, (SymbolSet) "\001\000\000\000\004\000\000\000\001\000\000\000\047\012\274\150\352\066\167\210\000\001\001\000\000\002\012\015\154\272\040\051\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 1307939018, _41, "<dir>", "Add an x2c-only include directory", 0
+  54927135910154, (SymbolSet) "\001\000\000\000\004\000\000\000\001\000\000\000\047\012\274\150\352\066\167\210\000\001\001\000\000\002\012\015\154\272\040\051\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 1307939018, _42, "<dir>", "Add an x2c-only include directory", 0
 }
 ), (35ULL < sizeof(cli_options) / sizeof(cli_options[35ULL])), (cli_options[35ULL] =(CliOption){
-  8747647543562, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 1307939018, _42, "<dir>", "Add a C-only ordinary include directory", 0, .package_native = 1
+  8747647543562, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 1307939018, _43, "<dir>", "Add a C-only ordinary include directory", 0, .package_native = 1
 }
 ), (36ULL < sizeof(cli_options) / sizeof(cli_options[36ULL])), (cli_options[36ULL] =(CliOption){
-  274059207002, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 1307939018, _43, "<dir>", "Add a C-only system include directory", 0, .package_native = 1
+  274059207002, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 1307939018, _44, "<dir>", "Add a C-only system include directory", 0, .package_native = 1
 }
 ), (37ULL < sizeof(cli_options) / sizeof(cli_options[37ULL])), (cli_options[37ULL] =(CliOption){
-  35114656356, (SymbolSet) "\001\000\000\000\005\000\000\000\003\000\000\000\025\174\112\177\271\171\067\236\000\000\003\003\000\000\002\000\007\000\000\000\012\015\154\272\040\051\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000\254\053\000\000\000\000\000\000", 1307939018, _44, "<dir>", "Add a directory of x2c packages", 0, CLI_FIELD(806120, package_dirs)
+  35114656356, (SymbolSet) "\001\000\000\000\005\000\000\000\003\000\000\000\025\174\112\177\271\171\067\236\000\000\003\003\000\000\002\000\007\000\000\000\012\015\154\272\040\051\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000\254\053\000\000\000\000\000\000", 1307939018, _45, "<dir>", "Add a directory of x2c packages", 0, CLI_FIELD(806120, package_dirs)
 }
 ), (38ULL < sizeof(cli_options) / sizeof(cli_options[38ULL])), (cli_options[38ULL] =(CliOption){
-  942951818, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\030\151\335\120\354\303\354\157\002\000\000\001\000\000\012\015\154\272\040\051\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", 1307939018, _45, "<file>", "Load a native module for compile-time calls", 0, CLI_FIELD(806120, native_modules)
+  942951818, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\030\151\335\120\354\303\354\157\002\000\000\001\000\000\012\015\154\272\040\051\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", 1307939018, _46, "<file>", "Load a native module for compile-time calls", 0, CLI_FIELD(806120, native_modules)
 }
 ), (39ULL < sizeof(cli_options) / sizeof(cli_options[39ULL])), (cli_options[39ULL] =(CliOption){
-  12687699561436, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\010\113\125\000\000\000\000\000", 1307939018, _46, "<dir>", "Link a package's compile-time part into a compiler", 0, CLI_FIELD(806120, extensions)
+  12687699561436, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\010\113\125\000\000\000\000\000", 1307939018, _47, "<dir>", "Link a package's compile-time part into a compiler", 0, CLI_FIELD(806120, extensions)
 }
 ), (40ULL < sizeof(cli_options) / sizeof(cli_options[40ULL])), (cli_options[40ULL] =(CliOption){
-  973020192, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\030\151\335\120\354\303\354\157\002\000\000\001\000\000\012\015\154\272\040\051\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", 1307939018, _47, NULL, "Skip symbol collection and preprocessing", 0, CLI_FIELD(417870, no_cpp)
+  973020192, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\030\151\335\120\354\303\354\157\002\000\000\001\000\000\012\015\154\272\040\051\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", 1307939018, _48, NULL, "Skip symbol collection and preprocessing", 0, CLI_FIELD(417870, no_cpp)
 }
 ), (41ULL < sizeof(cli_options) / sizeof(cli_options[41ULL])), (cli_options[41ULL] =(CliOption){
-  27054400850790, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\030\151\335\120\354\303\354\157\002\000\000\001\000\000\012\015\154\272\040\051\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", 1307939018, _48, NULL, "Collect symbols through the host preprocessor", 0, CLI_FIELD(417870, live_symbols)
+  27054400850790, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\030\151\335\120\354\303\354\157\002\000\000\001\000\000\012\015\154\272\040\051\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", 1307939018, _49, NULL, "Collect symbols through the host preprocessor", 0, CLI_FIELD(417870, live_symbols)
 }
 ), (42ULL < sizeof(cli_options) / sizeof(cli_options[42ULL])), (cli_options[42ULL] =(CliOption){
-  241658219366, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\030\151\335\120\354\303\354\157\002\000\000\001\000\000\012\015\154\272\040\051\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", 1307939018, _49, NULL, "Use CPP collection for this translation", 0, CLI_FIELD(417870, cpp_symbols)
+  241658219366, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\030\151\335\120\354\303\354\157\002\000\000\001\000\000\012\015\154\272\040\051\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", 1307939018, _50, NULL, "Use CPP collection for this translation", 0, CLI_FIELD(417870, cpp_symbols)
 }
 ), (43ULL < sizeof(cli_options) / sizeof(cli_options[43ULL])), (cli_options[43ULL] =(CliOption){
-  198, (SymbolSet) "\001\000\000\000\004\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\001\000\003\003\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000\254\053\000\000\000\000\000\000", 279515230724452, _50, "<program>", "Use <program> as the host C compiler", 0, CLI_FIELD(1322536, cc)
+  198, (SymbolSet) "\001\000\000\000\004\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\001\000\003\003\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000\254\053\000\000\000\000\000\000", 279515230724452, _51, "<program>", "Use <program> as the host C compiler", 0, CLI_FIELD(1322536, cc)
 }
 ), (44ULL < sizeof(cli_options) / sizeof(cli_options[44ULL])), (cli_options[44ULL] =(CliOption){
-  28294904006, (SymbolSet) "\001\000\000\000\004\000\000\000\001\000\000\000\047\012\274\150\352\066\167\210\000\001\001\000\000\002\012\015\154\272\040\051\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 279515230724452, _51, "<program>", "Use <program> to build meta code, whatever --cc is", 0, CLI_FIELD(1322536, meta_cc)
+  28294904006, (SymbolSet) "\001\000\000\000\004\000\000\000\001\000\000\000\047\012\274\150\352\066\167\210\000\001\001\000\000\002\012\015\154\272\040\051\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 279515230724452, _52, "<program>", "Use <program> to build meta code, whatever --cc is", 0, CLI_FIELD(1322536, meta_cc)
 }
 ), (45ULL < sizeof(cli_options) / sizeof(cli_options[45ULL])), (cli_options[45ULL] =(CliOption){
-  100, (SymbolSet) "\001\000\000\000\002\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\000\000\000\001\000\010\113\125\000\000\000\000\000\254\053\000\000\000\000\000\000", 279515230724452, _52, "<program>", "Use <program> as the static-library archiver", 0, CLI_FIELD(1322536, ar)
+  100, (SymbolSet) "\001\000\000\000\002\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\000\000\000\001\000\010\113\125\000\000\000\000\000\254\053\000\000\000\000\000\000", 279515230724452, _53, "<program>", "Use <program> as the static-library archiver", 0, CLI_FIELD(1322536, ar)
 }
 ), (46ULL < sizeof(cli_options) / sizeof(cli_options[46ULL])), (cli_options[46ULL] =(CliOption){
-  31784, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 279515230724452, _53, NULL, "Set C optimization", 0, .label = _54, .prefix = 1
+  31784, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 279515230724452, _54, NULL, "Set C optimization", 0, .label = _55, .prefix = 1
 }
 ), (47ULL < sizeof(cli_options) / sizeof(cli_options[47ULL])), (cli_options[47ULL] =(CliOption){
-  14, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 279515230724452, _55, NULL, "Emit debug information", 0
+  14, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 279515230724452, _56, NULL, "Emit debug information", 0
 }
 ), (48ULL < sizeof(cli_options) / sizeof(cli_options[48ULL])), (cli_options[48ULL] =(CliOption){
-  279333770, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 279515230724452, _56, "<name>[=<value>]", "Define a C preprocessor macro", 0, .package_native = 1
+  279333770, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 279515230724452, _57, "<name>[=<value>]", "Define a C preprocessor macro", 0, .package_native = 1
 }
 ), (49ULL < sizeof(cli_options) / sizeof(cli_options[49ULL])), (cli_options[49ULL] =(CliOption){
-  1473453116298, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 279515230724452, _57, "<name>", "Undefine a C preprocessor macro", 0, .package_native = 1
+  1473453116298, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 279515230724452, _58, "<name>", "Undefine a C preprocessor macro", 0, .package_native = 1
 }
 ), (50ULL < sizeof(cli_options) / sizeof(cli_options[50ULL])), (cli_options[50ULL] =(CliOption){
-  49350, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 279515230724452, _58, "<arg>", "Pass one argument only to C compilation", 0
+  49350, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 279515230724452, _59, "<arg>", "Pass one argument only to C compilation", 0
 }
 ), (51ULL < sizeof(cli_options) / sizeof(cli_options[51ULL])), (cli_options[51ULL] =(CliOption){
-  26380018276, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 825121124, _59, "<dir>", "Add a library search directory", 0, .package_native = 1
+  26380018276, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 825121124, _60, "<dir>", "Add a library search directory", 0, .package_native = 1
 }
 ), (52ULL < sizeof(cli_options) / sizeof(cli_options[52ULL])), (cli_options[52ULL] =(CliOption){
-  26379160754, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 825121124, _60, "<name>", "Link library <name>", 0, .package_native = 1
+  26379160754, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 825121124, _61, "<name>", "Link library <name>", 0, .package_native = 1
 }
 ), (53ULL < sizeof(cli_options) / sizeof(cli_options[53ULL])), (cli_options[53ULL] =(CliOption){
-  38800656, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 825121124, _61, "<dir>", "Search <dir> for shared libraries when the program runs", 0, .package_native = 1
+  38800656, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 825121124, _62, "<dir>", "Search <dir> for shared libraries when the program runs", 0, .package_native = 1
 }
 ), (54ULL < sizeof(cli_options) / sizeof(cli_options[54ULL])), (cli_options[54ULL] =(CliOption){
-  1496, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 825121124, _62, NULL, "Pass comma-separated arguments to the linker", 0, .label = _63, .prefix = 1, .package_native = 1
+  1496, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 825121124, _63, NULL, "Pass comma-separated arguments to the linker", 0, .label = _64, .prefix = 1, .package_native = 1
 }
 ), (55ULL < sizeof(cli_options) / sizeof(cli_options[55ULL])), (cli_options[55ULL] =(CliOption){
-  35719882824, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 279515230724452, _64, NULL, "Enable native threading for compilation and linking", 0, .package_native = 1
+  35719882824, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 279515230724452, _65, NULL, "Enable native threading for compilation and linking", 0, .package_native = 1
 }
 ), (56ULL < sizeof(cli_options) / sizeof(cli_options[56ULL])), (cli_options[56ULL] =(CliOption){
-  14434122038422, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 825121124, _65, "<name>", "Link a native framework on macOS", 0, .package_native = 1
+  14434122038422, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 825121124, _66, "<name>", "Link a native framework on macOS", 0, .package_native = 1
 }
 ), (57ULL < sizeof(cli_options) / sizeof(cli_options[57ULL])), (cli_options[57ULL] =(CliOption){
-  52364728676, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 825121124, _66, "<arg>", "Pass one argument to the linker", 0, .package_native = 1
+  52364728676, (SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\001\000\001\002\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000\050\114\162\114\000\000\000\000", 825121124, _67, "<arg>", "Pass one argument to the linker", 0, .package_native = 1
 }
 ), (58ULL < sizeof(cli_options) / sizeof(cli_options[58ULL])), (cli_options[58ULL] =(CliOption){
-  1374366630, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _67, NULL, "Print source tokens and stop", 0
+  1374366630, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _68, NULL, "Print source tokens and stop", 0
 }
 ), (59ULL < sizeof(cli_options) / sizeof(cli_options[59ULL])), (cli_options[59ULL] =(CliOption){
-  320883072032, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _68, NULL, "Print host-preprocessed text and stop", 0
+  320883072032, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _69, NULL, "Print host-preprocessed text and stop", 0
 }
 ), (60ULL < sizeof(cli_options) / sizeof(cli_options[60ULL])), (cli_options[60ULL] =(CliOption){
-  320883072032, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _69, NULL, "Alias for --dump-cpp", 0
+  320883072032, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _70, NULL, "Alias for --dump-cpp", 0
 }
 ), (61ULL < sizeof(cli_options) / sizeof(cli_options[61ULL])), (cli_options[61ULL] =(CliOption){
-  247458062609318, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _70, NULL, "Print host-preprocessed tokens and stop", 0
+  247458062609318, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _71, NULL, "Print host-preprocessed tokens and stop", 0
 }
 ), (62ULL < sizeof(cli_options) / sizeof(cli_options[62ULL])), (cli_options[62ULL] =(CliOption){
-  320883068136, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _71, NULL, "Print the parsed AST and stop", 0
+  320883068136, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _72, NULL, "Print the parsed AST and stop", 0
 }
 ), (63ULL < sizeof(cli_options) / sizeof(cli_options[63ULL])), (cli_options[63ULL] =(CliOption){
-  1447057375073126, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _72, NULL, "Print the transformed AST and stop", 0
+  1447057375073126, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _73, NULL, "Print the transformed AST and stop", 0
 }
 ), (64ULL < sizeof(cli_options) / sizeof(cli_options[64ULL])), (cli_options[64ULL] =(CliOption){
-  10268258347430, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _73, NULL, "Print each definition's location and documentation and stop", 0
+  10268258347430, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _74, NULL, "Print each definition's location and documentation and stop", 0
 }
 ), (65ULL < sizeof(cli_options) / sizeof(cli_options[65ULL])), (cli_options[65ULL] =(CliOption){
-  10268258302218, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _74, NULL, "Print unformatted generated code and stop", 0
+  10268258302218, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _75, NULL, "Print unformatted generated code and stop", 0
 }
 ), (66ULL < sizeof(cli_options) / sizeof(cli_options[66ULL])), (cli_options[66ULL] =(CliOption){
-  42507336486, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _75, NULL, "Print the source symbol table and stop", 0
+  42507336486, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _76, NULL, "Print the source symbol table and stop", 0
 }
 ), (67ULL < sizeof(cli_options) / sizeof(cli_options[67ULL])), (cli_options[67ULL] =(CliOption){
-  10268258311770, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _76, NULL, "Print the CPP symbol table and stop", 0
+  10268258311770, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _77, NULL, "Print the CPP symbol table and stop", 0
 }
 ), (68ULL < sizeof(cli_options) / sizeof(cli_options[68ULL])), (cli_options[68ULL] =(CliOption){
-  328584264751626, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _77, NULL, "Print the compiler cache and stop", 0
+  328584264751626, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _78, NULL, "Print the compiler cache and stop", 0
 }
 ), (69ULL < sizeof(cli_options) / sizeof(cli_options[69ULL])), (cli_options[69ULL] =(CliOption){
-  7478869146, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _78, NULL, "Print protocol conformance and stop", 0
+  7478869146, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _79, NULL, "Print protocol conformance and stop", 0
 }
 ), (70ULL < sizeof(cli_options) / sizeof(cli_options[70ULL])), (cli_options[70ULL] =(CliOption){
   0
@@ -714,7 +714,7 @@ static void f7_parsing____native(f7_parsing___Parse * p, int * i);
 
 _Noreturn static void _fail(String message, String note);
 
-static void f7_parsing____cli_fail_removed_output(void);
+static void f7_parsing____cli_fail_output_command(void);
 
 static void f7_parsing____cli_fail_expected_command(String arg);
 
@@ -977,57 +977,57 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _27 = String_new("--compile-only");
   _28 = String_new("-j");
   _29 = String_new("--jobs");
-  _30 = String_new("--output");
-  _31 = String_new("--rebuild");
-  _32 = String_new("--clean");
-  _33 = String_new("--build-dir");
-  _34 = String_new("--compile-commands");
-  _35 = String_new("--save-temps");
-  _36 = String_new("--save-temps[=<dir>]");
-  _37 = String_new("--sha256");
-  _38 = String_new("--index");
-  _39 = String_new("--force");
-  _40 = String_new("-I");
-  _41 = String_new("--x-include-dir");
-  _42 = String_new("--c-include-dir");
-  _43 = String_new("--c-system-dir");
-  _44 = String_new("--package-dir");
-  _45 = String_new("--native-module");
-  _46 = String_new("--extension");
-  _47 = String_new("--no-cpp");
-  _48 = String_new("--live-symbols");
-  _49 = String_new("--cpp-symbols");
-  _50 = String_new("--cc");
-  _51 = String_new("--meta-cc");
-  _52 = String_new("--ar");
-  _53 = String_new("-O");
-  _54 = String_new("-O0, -O1, -O2, -O3, -Os");
-  _55 = String_new("-g");
-  _56 = String_new("-D");
-  _57 = String_new("-U");
-  _58 = String_new("-Xcc");
-  _59 = String_new("-L");
-  _60 = String_new("-l");
-  _61 = String_new("--rpath");
-  _62 = String_new("-Wl,");
-  _63 = String_new("-Wl,<arg>[,<arg>...]");
-  _64 = String_new("-pthread");
-  _65 = String_new("-framework");
-  _66 = String_new("-Xlinker");
-  _67 = String_new("--dump-tokens");
-  _68 = String_new("--dump-cpp");
-  _69 = String_new("--dump-cpp-text");
-  _70 = String_new("--dump-cpp-tokens");
-  _71 = String_new("--dump-ast");
-  _72 = String_new("--dump-transforms");
-  _73 = String_new("--dump-definitions");
-  _74 = String_new("--dump-code");
-  _75 = String_new("--dump-symbols");
-  _76 = String_new("--dump-cpp-symbols");
-  _77 = String_new("--dump-cache");
-  _78 = String_new("--dump-conformance");
-  _79 = String_new("help");
-  _80 = String_new("-o");
+  _30 = String_new("-o");
+  _31 = String_new("--output");
+  _32 = String_new("--rebuild");
+  _33 = String_new("--clean");
+  _34 = String_new("--build-dir");
+  _35 = String_new("--compile-commands");
+  _36 = String_new("--save-temps");
+  _37 = String_new("--save-temps[=<dir>]");
+  _38 = String_new("--sha256");
+  _39 = String_new("--index");
+  _40 = String_new("--force");
+  _41 = String_new("-I");
+  _42 = String_new("--x-include-dir");
+  _43 = String_new("--c-include-dir");
+  _44 = String_new("--c-system-dir");
+  _45 = String_new("--package-dir");
+  _46 = String_new("--native-module");
+  _47 = String_new("--extension");
+  _48 = String_new("--no-cpp");
+  _49 = String_new("--live-symbols");
+  _50 = String_new("--cpp-symbols");
+  _51 = String_new("--cc");
+  _52 = String_new("--meta-cc");
+  _53 = String_new("--ar");
+  _54 = String_new("-O");
+  _55 = String_new("-O0, -O1, -O2, -O3, -Os");
+  _56 = String_new("-g");
+  _57 = String_new("-D");
+  _58 = String_new("-U");
+  _59 = String_new("-Xcc");
+  _60 = String_new("-L");
+  _61 = String_new("-l");
+  _62 = String_new("--rpath");
+  _63 = String_new("-Wl,");
+  _64 = String_new("-Wl,<arg>[,<arg>...]");
+  _65 = String_new("-pthread");
+  _66 = String_new("-framework");
+  _67 = String_new("-Xlinker");
+  _68 = String_new("--dump-tokens");
+  _69 = String_new("--dump-cpp");
+  _70 = String_new("--dump-cpp-text");
+  _71 = String_new("--dump-cpp-tokens");
+  _72 = String_new("--dump-ast");
+  _73 = String_new("--dump-transforms");
+  _74 = String_new("--dump-definitions");
+  _75 = String_new("--dump-code");
+  _76 = String_new("--dump-symbols");
+  _77 = String_new("--dump-cpp-symbols");
+  _78 = String_new("--dump-cache");
+  _79 = String_new("--dump-conformance");
+  _80 = String_new("help");
   _81 = String_new("x2c translate ");
   _82 = String_new(" ...");
   _83 = String_new("unknown command or global option \'");
@@ -1064,10 +1064,10 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _114 = String_new("{package}");
   _115 = String_new(".a");
   _116 = String_new("unsupported package native argument \'");
-  _117 = String_new("option '-o' was removed");
-  _118 = String_new("use '--out-dir' with translate or '--output' with build and run");
+  _117 = String_new("option '-o' needs build or run");
+  _118 = String_new("use '--out-dir' for translation directories");
   _119 = String_new("expected a command before \'");
-  _120 = String_new("use \'x2c translate --out-dir <dir> ");
+  _120 = String_new("use \'x2c translate ");
   _121 = String_new("unknown option \'");
   _122 = String_new("-");
   _123 = String_new("one-dash long option \'");
@@ -1078,11 +1078,11 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _128 = String_new("Run \'x2c help <command>\' or \'x2c <command> --help\' for command help.");
   _129 = String_new("/commands.txt");
   _130 = String_new("Usage:\n  x2c translate [options] <input.x>...\n\nTranslate each x2c input into a matching C source and header.");
-  _131 = String_new("The output directory defaults to the current directory and must already\nexist. Use --out-dir to select another directory.\nShell wildcards are allowed because the shell expands them; x2c does not\ninterpret wildcard characters in input operands.\nInputs translate in parallel, one job per online processor. Under Make\nthe default is one job; -j 1 translates serially.");
+  _131 = String_new("The output directory defaults to the current directory. Use --out-dir\nto select another directory; missing directories are created.\nShell wildcards are allowed because the shell expands them; x2c does not\ninterpret wildcard characters in input operands.\nInputs translate in parallel, one job per online processor. Under Make\nthe default is one job; -j 1 translates serially.");
   _132 = String_new("Usage:\n  x2c build [options] <input>...\n  x2c build [options] [--target <name>]\n\nTranslate x2c sources, compile C sources, and link one target.\nWith explicit inputs, the default target is an executable. Without\ninputs, x2c reads the nearest x2c.toml and builds its default\ntarget.");
-  _133 = String_new("Inputs may be .x, .c, .o, or .a files. x2c links its runtime and\nrequired platform libraries automatically. Directory operands and\nunexpanded wildcard operands are rejected.");
+  _133 = String_new("Inputs may be .x, .c, .o, or .a files. x2c links its runtime and\nrequired platform libraries automatically. Directory operands and\nunexpanded wildcard operands are rejected.\nDirect builds default to a.out, lib<first-input-stem>.a, or\n<first-input-stem>.so. Compile-only builds default to <stem>.o in the\ncurrent directory; a named build directory keeps multiple objects there.\nManifest products default to <project>/.x2c-build/<target-product>.\nOne manifest target is selected automatically; several need --target\nor project.default-target. Profiles apply only when selected.\nDirect intermediates are temporary. --save-temps retains and reuses them\nin .x2c-build; --save-temps=<dir> and --build-dir <dir> select a directory.\nThe last named directory wins. Under Make, jobs default to one;\notherwise they default to the online processor count.\n--debug logs compiler activity; -g emits native debug information.\nAdd --source-map -O0 to -g for debugging original x2c sources.");
   _134 = String_new("Usage:\n  x2c run [build-options] <input>... [-- <argument>...]\n  x2c run [build-options] [--target <name>] [-- <argument>...]\n\nBuild one executable and run it. Arguments after -- are passed\nunchanged to the executable.");
-  _135 = String_new("The selected target must be executable. After a successful build,\nx2c returns the program\'s exit status.");
+  _135 = String_new("The selected target must be executable. After a successful build,\nx2c returns the program\'s exit status.\nDirect runs use a temporary executable unless intermediates are retained.\n--save-temps retains and reuses intermediates in .x2c-build.\n--save-temps=<dir> and --build-dir <dir> select the retained directory;\nthe last named directory wins. Manifest products default to\n<project>/.x2c-build/<target-product>.\n--debug logs compiler activity; use -g --source-map -O0 for source\ndebugging. See \'x2c help build\' for other build defaults.");
   _136 = String_new("Usage:\n  x2c new [options] <dir>\n\nCreate a project in <dir> that builds and runs as written: x2c.toml,\nsrc/main.x, and .gitignore. The directory may be missing or empty.");
   _137 = String_new("The target is named after the last component of <dir>, which may\ncontain letters, digits, \'_\', and \'-\'. Run \'x2c run\' in <dir> next.");
   _138 = String_new("Usage:\n  x2c script [options] <file> [<argument>...]\n\nRun an x2c source file as a script. The first run builds an executable in\nthe per-user cache; later runs start it directly until the script, a file\nit includes or imports, the compiler, the runtime, or an option changes.");
@@ -1167,8 +1167,8 @@ CliRequest CliRequest_parse_arguments(Array args){
     puts(Compiler_version());
     exit(0);
   }
-  if(String_equal(first, _79)) f7_parsing____help_command(args);
-  if(String_equal(first, _80)) f7_parsing____cli_fail_removed_output();
+  if(String_equal(first, _80)) f7_parsing____help_command(args);
+  if(String_equal(first, _30)) f7_parsing____cli_fail_output_command();
   String spelling = f7_parsing____two_dash(first);
   if(String_truth(spelling)) f7_parsing____cli_fail_one_dash_removed(first, String_join(NULL, cons(String_var(_81), cons(String_var(spelling), cons(String_var(_82), NULL)))));
   if(String_getindex(first, 0) != '-') f7_parsing____cli_fail_expected_command(first);
@@ -1244,14 +1244,14 @@ static void f7_parsing____help_command(Array args){
   if(Array_len(args) == 1) _help_exit(0, 0);
   if(Array_len(args) > 2) Diagnostics_driver_error("help accepts at most one command");
   String name = Var_as_string(Array_getindex(args, 1));
-  if(String_equal(name, _79) || String_equal(name, _1) || String_equal(name, _0)) _help_exit(535328, 0);
+  if(String_equal(name, _80) || String_equal(name, _1) || String_equal(name, _0)) _help_exit(535328, 0);
   CliCommand * asked = String_truth(name) ? f7_parsing____command_row(name) : NULL;
   if(! asked) Diagnostics_driver_error(String_join(NULL, cons(String_var(_89), cons(String_var(name), cons(String_var(_84), NULL)))));
   _help_exit(asked -> name, 0);
 }
 
 static void f7_parsing____option(f7_parsing___Parse * p, String arg, int * i){
-  if(String_equal(arg, _80)) f7_parsing____cli_fail_removed_output();
+  if(String_equal(arg, _30) &&(* p).request -> command == 45220543335690) f7_parsing____cli_fail_output_command();
   if((SymbolSet_contains((SymbolSet) "\001\000\000\000\002\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\001\000\000\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", (* p).request -> command)) && String_startswith(arg, _90)){
     f7_parsing____save_temps_dir((* p).request, arg);
     return;
@@ -1263,8 +1263,8 @@ static void f7_parsing____option(f7_parsing___Parse * p, String arg, int * i){
 
 static void f7_parsing____save_temps_dir(CliRequest r, String arg){
   r -> save_temps = 1;
-  r -> temps_dir = String_remove_prefix(arg, _90);
-  if(! String_truth(r -> temps_dir)) Diagnostics_driver_error("--save-temps= requires a directory");
+  r -> build_dir = String_remove_prefix(arg, _90);
+  if(! String_truth(r -> build_dir)) Diagnostics_driver_error("--save-temps= requires a directory");
 }
 
 static f7_parsing___Given f7_parsing____take_option(Array args, int * i, Symbol command){
@@ -1286,7 +1286,7 @@ static f7_parsing___Given f7_parsing____take_option(Array args, int * i, Symbol 
     if(++(* i) == Array_len(args)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_93), cons(String_var(arg), cons(String_var(_84), NULL)))));
     given.value = Var_as_string(Array_getindex(args, (* i)));
   }
-  if(! String_truth(given.value) &&(given.option -> id == 1052018024 || given.option -> id == 33665524324)) Diagnostics_driver_error(String_join(NULL, cons(String_var(_93), cons(String_var(written), cons(String_var(_84), NULL)))));
+  if(! String_truth(given.value) &&(SymbolSet_contains((SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\002\000\000\000\002\001\150\205\264\076\000\000\000\000\144\042\237\326\007\000\000\000\144\042\237\260\124\005\000\000", given.option -> id))) Diagnostics_driver_error(String_join(NULL, cons(String_var(_93), cons(String_var(written), cons(String_var(_84), NULL)))));
   return given;
 }
 
@@ -1353,7 +1353,7 @@ static void f7_parsing____apply(f7_parsing___Parse * p, f7_parsing___Given given
       break;
     }
     case 8747647543562 :{
-      f7_parsing____push_pair((* p).cc_args, _40, value);
+      f7_parsing____push_pair((* p).cc_args, _41, value);
       break;
     }
     case 274059207002 :{
@@ -1431,7 +1431,7 @@ static int f7_parsing____count(String value, int minimum, String noun){
 
 static void f7_parsing____include_dir(f7_parsing___Parse * p, String dir){
   Array_push((* p).include_dirs, String_var(dir));
-  if((* p).request -> command != 45220543335690) f7_parsing____push_pair((* p).cc_args, _40, dir);
+  if((* p).request -> command != 45220543335690) f7_parsing____push_pair((* p).cc_args, _41, dir);
 }
 
 static void f7_parsing____forward(Array out, f7_parsing___Given given){
@@ -1547,7 +1547,7 @@ _Noreturn static void _fail(String message, String note){
   exit(2);
 }
 
-static void f7_parsing____cli_fail_removed_output(void){
+static void f7_parsing____cli_fail_output_command(void){
   _fail(_117, _118);
 }
 

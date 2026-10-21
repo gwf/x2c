@@ -16236,7 +16236,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_29(void
   _15290 = cons(_465, _15289);
   _15291 = String_new("src/cli/cli.x");
   _15292 = String_var(_15291);
-  _15293 = String_new("2fc16e77");
+  _15293 = String_new("261b9078");
   _15294 = String_var(_15293);
   _15295 = String_new("cwd:./report.x");
   _15296 = String_var(_15295);
@@ -16259,14 +16259,14 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_29(void
   _15313 = List_var(_15312);
   _15314 = String_new("src/cli/help.x");
   _15315 = String_var(_15314);
-  _15316 = String_new("22ba15f7");
+  _15316 = String_new("3ff36eb2");
   _15317 = String_var(_15316);
   _15318 = cons(_15317, NULL);
   _15319 = cons(_15315, _15318);
   _15320 = List_var(_15319);
   _15321 = String_new("src/cli/parsing.x");
   _15322 = String_var(_15321);
-  _15323 = String_new("408db41f");
+  _15323 = String_new("c855aa48");
   _15324 = String_var(_15323);
   _15325 = cons(_15324, NULL);
   _15326 = cons(_15322, _15325);

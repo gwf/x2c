@@ -1,9 +1,11 @@
 # Build CLI defaults and examples
 
-> Status: active
+> Status: blocked
 > Gary accepted the survey recommendations on 2026-10-21 and requested this
 > implementation plan. Gary subsequently authorized implementation.
-> Authored implementation is complete; publication validation is pending.
+> Implementation is recorded in `c91d7ed43`. Focused checks and the complete
+> CLI boundary probe pass. Publication is blocked by the same stage-1 region
+> warning reproduced on clean `origin/dev`; nothing has been pushed.
 > Planning baseline: `e2a78078edece1348abbbb7363c89560ae064706`.
 
 ## Result
@@ -269,6 +271,54 @@ on the completed integrated tree. The gate owns final bootstrap refresh and
 correctness validation. Follow the existing performance-checkpoint guidance
 because retained-build reuse changes build orchestration; reuse the existing
 workload rather than adding a benchmark or threshold.
+
+## Implementation and verification record (2026-10-21)
+
+The authored change is in `c91d7ed43`. It includes the six decisions, examples,
+help expectations, and existing CLI boundary probe updates. The independent
+review found documentation omissions, which were corrected. Source review also
+corrected the multiple-object receipt to report the actual product directory.
+
+A new run probe reproduced an existing executable-selection defect: a bare
+relative `--output app` caused the driver to search PATH instead of launching
+its own product. The driver now launches the absolute artifact path. Both
+`run -oapp` and `run --output app` pass, including manifest execution.
+
+Verification completed:
+
+- `make build` and the gate's regenerated-bootstrap stage-0 rebuild succeeded.
+- The focused defaults probe passed, including retention/reuse, changed-input
+  rebuilds, directory ordering, mixed object linking, collisions, aliases,
+  compilation databases, and manifest overrides from a nested directory.
+- `unittest/probes/run-cli-boundary.sh` passed in full on the final script.
+  The earlier run was invalidated by editing the script during execution;
+  its shell-reading failure was not a product failure.
+- `make commands` and `make doc-check` passed. The documentation audit checked
+  183 files, 417 linked files, and 20 path-audited entry points.
+- Representative checkout execution, retained executable, translation plus
+  external C compilation, and project creation/run examples passed. Project
+  commands were checked using an absolute checkout compiler and PATH selection;
+  a new installed prefix was not created.
+- `make doc-generate` refreshed derived documentation. The publication command
+  regenerated bootstrap artifacts, whose changes were reviewed against source.
+
+`tools/gate-state.py ensure agent-pr-check` failed at stage 1. Fatal-warning
+translation reports a region warning at `lib/thread.x:563` concerning the
+address of local `run` stored through an unknown pointer. The CLI change does
+not edit that file. An isolated archive of clean `origin/dev` at the planning
+baseline, built with `make build-safe stage-1`, fails with the same warning.
+The cause and correctness of the thread lifetime diagnostic remain unadjudicated.
+
+Evidence remains in the worktree's `debug/cli-publication.log`,
+`debug/cli-boundary-final.log`, `debug/cli-doc-check.log`, and
+`debug/cli-examples.log`. The preserved baseline is named by
+`debug/cli-baseline-path`; its log is `debug/stage-1.log` within that tree.
+
+Do not publish this change while the required gate fails. The remaining gate
+checks and the existing performance checkpoint have not been completed; the
+checkpoint waits for converged trees. Keep this plan active in the index and
+resume delivery after the baseline blocker is repaired. No runtime/compiler
+repair outside the CLI plan has been included.
 
 ## Plan review
 

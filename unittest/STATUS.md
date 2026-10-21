@@ -26,6 +26,19 @@ same failure (108 passed, one failed, 8368 assertions). The allocation owner
 and whether this is retained state or leaked storage remain uninvestigated.
 Keep the assertion; investigate separately from the source split.
 
+## Stage-1 thread region warning
+
+On 2026-10-21, `make build-safe stage-1` in an isolated clean archive of
+`e2a78078edece1348abbbb7363c89560ae064706` fails while translating the runtime
+with `--fatal-warnings`. `lib/thread.x:563` reports that the address of local
+`run` can outlive its storage when stored through an unknown pointer.
+The build CLI defaults change reproduces the same warning without editing
+`lib/thread.x`, so its publication gate is blocked by an existing baseline
+failure. The cause and correctness of the lifetime diagnostic remain
+unadjudicated. Keep the warning and gate intact; investigate the thread and
+region owners separately. See the [CLI plan](../plans/build-cli-defaults.md)
+for the retained verification evidence.
+
 ## Coverage
 
 - Retired component experiments leave focused compiler fixtures for indexed
