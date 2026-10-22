@@ -17,6 +17,7 @@ typedef struct ThreadTestInput {
   String ancestor_string;
   List ancestor_list;
   Map ancestor_map;
+  Scope output;
 } ThreadTestInput;
 
 typedef struct ThreadAlignedInput {
@@ -102,6 +103,9 @@ static Var _thread_test_worker(const void *input, size_t input_size) {
   result[<ancestor-m>] = data.ancestor_map[<number>];
   result[<private-st>] = String.new("shared worker result");
   result[<wide>] = Var.box_long(0x123456789L);
+  Scope contents = result, output = data.output;
+  result[<wide>].move_wide_to(&contents);
+  result.move_to(&output);
   return result;
 }
 
@@ -138,7 +142,7 @@ static Var _thread_private_result_worker(
 }
 
 static Var _thread_packed_result_worker(const void *input, size_t input_size) {
-  (void) input;
+  Scope output = *(Scope *) input;
   (void) input_size;
   ArrayChar chars = ArrayChar.new();
   ArrayShort shorts = ArrayShort.new();
@@ -176,12 +180,22 @@ static Var _thread_packed_result_worker(const void *input, size_t input_size) {
   graph.push(double_map);
   graph.push(string_map);
   graph.push(ints);
+  chars.move_to(&output);
+  shorts.move_to(&output);
+  ints.move_to(&output);
+  longs.move_to(&output);
+  floats.move_to(&output);
+  doubles.move_to(&output);
+  integer_map.move_to(&output);
+  double_map.move_to(&output);
+  string_map.move_to(&output);
+  graph.move_to(&output);
   return graph;
 }
 
 static Var _thread_recursive_export_worker(
   const void *input, size_t input_size) {
-  (void) input;
+  Scope output = *(Scope *) input;
   (void) input_size;
   ContextProbe probe = Scope.malloc(sizeof(struct ContextProbe));
   Array nested = [];
@@ -189,6 +203,8 @@ static Var _thread_recursive_export_worker(
   probe.value = nested;
   probe.exports = 0;
   probe.fail_at = 0;
+  nested.move_to(&output);
+  Scope.move(probe, &output);
   return Var.new(<ctxprobe>, probe);
 }
 
@@ -218,12 +234,13 @@ static Var _thread_wide_error_worker(const void *input, size_t input_size) {
 
 static Var _thread_failing_export_worker(
   const void *input, size_t input_size) {
-  (void) input;
+  Scope output = *(Scope *) input;
   (void) input_size;
   ContextProbe probe = Scope.malloc(sizeof(struct ContextProbe));
   probe.value = String.new("join export failure value");
   probe.exports = 0;
   probe.fail_at = 1;
+  Scope.move(probe, &output);
   return Var.new(<ctxprobe>, probe);
 }
 
@@ -295,10 +312,12 @@ static void thread_workers_isolate_and_join_results(void) {
   Map ancestor_map = {};
   ancestor_map[<number>] = 47;
   ThreadTestInput first = {
-    11, 250, &counter, mutex, ancestor_string, ancestor_list, ancestor_map
+    11, 250, &counter, mutex, ancestor_string, ancestor_list, ancestor_map,
+    Scope.child()
   };
   ThreadTestInput second = {
-    22, 250, &counter, mutex, ancestor_string, ancestor_list, ancestor_map
+    22, 250, &counter, mutex, ancestor_string, ancestor_list, ancestor_map,
+    Scope.child()
   };
   Thread a = Thread.start_raw(_thread_test_worker, &first, sizeof(first));
   Thread b = Thread.start_raw(_thread_test_worker, &second, sizeof(second));
@@ -413,10 +432,7 @@ static void thread_memory_sink_retains_worker_events(void) {
   logger.free();
 }
 
-static void thread_results_stay_private_until_join(void) {
-  Pool root = Pool.current();
-  size_t before = root.stats().interned;
-
+static void thread_results_use_shared_canonical_pool(void) {
   Context destination = Context.open_isolated_named("Thread join target");
   int value = 8675309;
   Thread thread = Thread.start_raw(
@@ -430,7 +446,8 @@ static void thread_results_stay_private_until_join(void) {
   thread.free();
   destination.close();
 
-  EXPECT_INT_EQ(root.stats().interned, before);
+  EXPECT_TRUE(Pool.is_permanent(result));
+  EXPECT_STR_EQ(result.assoc(<text>).string(), "sealed-worker-result-8675309");
 }
 
 static void thread_join_returns_void_worker_result(void) {
@@ -440,7 +457,10 @@ static void thread_join_returns_void_worker_result(void) {
 }
 
 static void thread_joins_nested_packed_containers(void) {
-  Thread thread = Thread.start_raw(_thread_packed_result_worker, NULL, 0);
+  Scope output = Scope.child();
+  defer output.destroy();
+  Thread thread = Thread.start_raw(
+    _thread_packed_result_worker, &output, sizeof(output));
   Array graph = thread.join();
   ArrayChar chars = graph[0];
   ArrayShort shorts = graph[1];
@@ -496,10 +516,13 @@ static void thread_joins_nested_packed_containers(void) {
   thread.free();
 }
 
-static void thread_join_runs_recursive_custom_exporter(void) {
-  Thread thread = Thread.start_raw(_thread_recursive_export_worker, NULL, 0);
+static void thread_join_does_not_run_custom_exporter(void) {
+  Scope output = Scope.child();
+  defer output.destroy();
+  Thread thread = Thread.start_raw(
+    _thread_recursive_export_worker, &output, sizeof(output));
   ContextProbe probe = thread.join();
-  EXPECT_INT_EQ(probe.exports, 2);
+  EXPECT_INT_EQ(probe.exports, 0);
   Array nested = probe.value;
   EXPECT_PTR_EQ(nested[0].string(), String.new("recursive-worker-51"));
   nested.push(52);
@@ -507,10 +530,7 @@ static void thread_join_runs_recursive_custom_exporter(void) {
   thread.free();
 }
 
-static void thread_errors_stay_private_until_join(void) {
-  Pool root = Pool.current();
-  size_t before = root.stats().interned;
-
+static void thread_error_snapshot_survives_worker_cleanup(void) {
   Context destination = Context.open_isolated_named("Thread error target");
   int value = 424242;
   Thread thread = Thread.start_raw(
@@ -518,12 +538,15 @@ static void thread_errors_stay_private_until_join(void) {
   );
   int caught = 0;
   try thread.join();
-  catch %(join-fail *): caught = 1;
+  catch %(join-fail (errors ?errors)): {
+    caught = 1;
+    EXPECT_TRUE(errors.repr().contains("sealed-worker-error-424242"));
+  }
   EXPECT_TRUE(caught);
   thread.free();
   destination.close();
 
-  EXPECT_INT_EQ(root.stats().interned, before);
+
 }
 
 static void thread_error_wide_values_survive_until_join(void) {
@@ -542,19 +565,19 @@ static void thread_error_wide_values_survive_until_join(void) {
 }
 
 static void _failing_join_round(void) {
+  Scope output = Scope.child();
+  defer output.destroy();
   Thread thread = Thread.start_raw(
-    _thread_failing_export_worker, NULL, 0
-  );
-  int caught = 0;
-  try thread.join();
-  catch %(thread-exp *): caught = 1;
-  EXPECT_TRUE(caught);
+    _thread_failing_export_worker, &output, sizeof(output));
+  ContextProbe probe = thread.join();
+  EXPECT_INT_EQ(probe.exports, 0);
+  EXPECT_STR_EQ(probe.value.string(), "join export failure value");
   thread.free();
 }
 
 /* The first round publishes the catch site's plans, which `Match` keeps for
    the life of the process; the second measures the steady state. */
-static void thread_failed_join_export_releases_storage(void) {
+static void thread_unused_exporter_preserves_explicit_storage(void) {
   _failing_join_round();
   ScopeStats before = Scope.stats();
   _failing_join_round();
@@ -567,7 +590,7 @@ static void thread_rejects_free_before_join_and_double_join(void) {
   Map map = {};
   map[<number>] = 47;
   ThreadTestInput input = {
-    3, 0, NULL, NULL, "parent", %(parent), map
+    3, 0, NULL, NULL, "parent", %(parent), map, Scope.child()
   };
   Thread thread = Thread.start_raw(
     _thread_test_worker, &input, sizeof(input)
@@ -930,19 +953,21 @@ void thread_finish_all_suite(void) {
 }
 
 static Var _thread_finish_map_worker(const void *input, size_t size) {
-  (void) input;
+  Scope output = *(Scope *) input;
   (void) size;
   Map result = {};
   result[String.new("worker-key")] = String.new("worker-value");
+  result.move_to(&output);
   return result;
 }
 
-static void thread_finish_any_exports_map_and_frees_handle(void) {
+static void thread_finish_any_preserves_explicit_map_owner(void) {
   $test.scoped();
   Array pending = [];
   EXPECT_TRUE(Thread.finish_any(NULL) is void);
   EXPECT_TRUE(Thread.finish_any(pending) is void);
-  pending.push(Thread.start_raw(_thread_finish_map_worker, NULL, 0));
+  Scope output = Scope.child();
+  pending.push(Thread.start_raw(_thread_finish_map_worker, &output, sizeof(output)));
   Map result = Thread.finish_any(pending);
   EXPECT_INT_EQ(pending.len(), 0);
   EXPECT_INT_EQ(result.len(), 1);
@@ -962,7 +987,7 @@ static void thread_finish_any_cleans_a_failed_worker(void) {
 }
 
 void thread_finish_any_suite(void) {
-  $test.run(thread_finish_any_exports_map_and_frees_handle);
+  $test.run(thread_finish_any_preserves_explicit_map_owner);
   $test.run(thread_finish_any_cleans_a_failed_worker);
 }
 
@@ -971,6 +996,14 @@ static Var _thread_value_identity(Var input) => input;
 static Var _thread_value_map(Var input) {
   Map source = input;
   Map result = {source: source, text: String.new("worker-created value")};
+  return result;
+}
+
+static Var _thread_value_owned_map(Var input) {
+  Array args = input;
+  Map result = _thread_value_map(args[0]);
+  Scope output = args[1];
+  result.move_to(&output);
   return result;
 }
 
@@ -992,12 +1025,15 @@ static void thread_start_copies_bits_and_borrows_strings(void) {
   EXPECT_INT_EQ(pending.len(), 0);
 }
 
-static void thread_start_borrows_map_and_exports_fresh_result(void) {
+static void thread_start_borrows_map_with_explicit_output_owner(void) {
   $test.scoped();
   Map source = {key: String.new("caller value")};
-  Array pending = [Thread.start(_thread_value_map, source)];
+  Scope output = Scope.child(), source_owner = Scope.owner(source);
+  Array pending = [Thread.start(_thread_value_owned_map, [source, output])];
   Map result = Thread.finish_any(pending);
   EXPECT_TRUE(result[<source>].map() === source);
+  EXPECT_PTR_EQ(Scope.owner(result), output);
+  EXPECT_PTR_EQ(Scope.owner(source), source_owner);
   EXPECT_INT_EQ(source.len(), 1);
   EXPECT_STR_EQ(source[<key>].string(), "caller value");
   EXPECT_STR_EQ(result[<text>].string(), "worker-created value");
@@ -1024,9 +1060,68 @@ static void thread_start_raw_copies_the_input_bytes(void) {
   EXPECT_INT_EQ(pending.len(), 0);
 }
 
+static atomic_int thread_temporary_drops, thread_output_drops;
+
+static void _thread_drop_temporary(void *value) {
+  (void) value;
+  atomic_fetch_add(&thread_temporary_drops, 1);
+}
+
+static void _thread_drop_output(void *value) {
+  (void) value;
+  atomic_fetch_add(&thread_output_drops, 1);
+}
+
+static Var _thread_explicit_output(Var input) {
+  Array args = input;
+  Scope output = args[0];
+  Scope.malloc_finalized(8, _thread_drop_temporary);
+  Scope.malloc_finalized_in(&output, 8, _thread_drop_output);
+  Map result = {borrowed: args[2]};
+  Array links = [result];
+  Scope contents = result;
+  links.move_to(&contents);
+  result[<links>] = links;
+  result.move_to(&output);
+  if (args[1].int()) raise %(worker-fai (detail "after explicit transfer"));
+  return result;
+}
+
+static void thread_explicit_output_survives_exit_and_failure(void) {
+  $test.scoped();
+  atomic_store(&thread_temporary_drops, 0);
+  atomic_store(&thread_output_drops, 0);
+  Scope output = Scope.child();
+  Map borrowed = {};
+  Scope borrowed_owner = Scope.owner(borrowed);
+  Thread worker = Thread.start(_thread_explicit_output, [output, 0, borrowed]);
+  Map result = worker.join();
+  worker.free();
+  EXPECT_INT_EQ(atomic_load(&thread_temporary_drops), 1);
+  EXPECT_INT_EQ(atomic_load(&thread_output_drops), 0);
+  EXPECT_PTR_EQ(Scope.owner(result), output);
+  EXPECT_PTR_EQ(Scope.owner(borrowed), borrowed_owner);
+  EXPECT_TRUE(result[<borrowed>].map() === borrowed);
+  EXPECT_TRUE(result[<links>].array()[0].map() === result);
+  output.destroy();
+  EXPECT_INT_EQ(atomic_load(&thread_output_drops), 1);
+  output = Scope.child();
+  worker = Thread.start(_thread_explicit_output, [output, 1, borrowed]);
+  int caught = 0;
+  try worker.join();
+  catch %(join-fail *): caught = 1;
+  worker.free();
+  EXPECT_INT_EQ(caught, 1);
+  EXPECT_INT_EQ(atomic_load(&thread_temporary_drops), 2);
+  EXPECT_INT_EQ(atomic_load(&thread_output_drops), 1);
+  output.destroy();
+  EXPECT_INT_EQ(atomic_load(&thread_output_drops), 2);
+}
+
 void thread_start_suite(void) {
+  $test.run(thread_explicit_output_survives_exit_and_failure);
   $test.run(thread_start_copies_bits_and_borrows_strings);
-  $test.run(thread_start_borrows_map_and_exports_fresh_result);
+  $test.run(thread_start_borrows_map_with_explicit_output_owner);
   $test.run(thread_start_preserves_worker_errors);
   $test.run(thread_start_raw_copies_the_input_bytes);
 }
@@ -1389,13 +1484,13 @@ void thread_suite(void) {
   $test.run(thread_ignored_policy_resumes_in_worker);
   $test.run(thread_shared_cause_still_fails_join);
   $test.run(thread_memory_sink_retains_worker_events);
-  $test.run(thread_results_stay_private_until_join);
+  $test.run(thread_results_use_shared_canonical_pool);
   $test.run(thread_join_returns_void_worker_result);
   $test.run(thread_joins_nested_packed_containers);
-  $test.run(thread_join_runs_recursive_custom_exporter);
-  $test.run(thread_errors_stay_private_until_join);
+  $test.run(thread_join_does_not_run_custom_exporter);
+  $test.run(thread_error_snapshot_survives_worker_cleanup);
   $test.run(thread_error_wide_values_survive_until_join);
-  $test.run(thread_failed_join_export_releases_storage);
+  $test.run(thread_unused_exporter_preserves_explicit_storage);
   $test.run(thread_freezes_late_descriptor_registration);
   $test.run(thread_workers_first_box_classes);
   $test.run(thread_stack_reaches_library_recursion_limits);

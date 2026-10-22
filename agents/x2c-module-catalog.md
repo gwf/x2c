@@ -1433,7 +1433,7 @@ Public functions:
 
 ### [lib/thread.x](../lib/thread.x)
 
-`Context`-backed native worker threads.
+native workers with explicit result lifetimes.
 
 Public functions:
 

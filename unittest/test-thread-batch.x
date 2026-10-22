@@ -47,12 +47,16 @@ static void batch_empty_and_void_results(void) {
 static void batch_results_outlive_joined_handles(void) {
   $test.scoped();
   Map saved = NULL;
+  Scope output = Scope.child();
   Thread.run([(Func) (%!(void) => {
     Map result = {};
     result[String.printf("batch-result-%d", 31)] = 31;
+    Scope owner = output;
+    result.move_to(&owner);
     return result;
   })], %!(Var result) using &saved => saved = result);
   EXPECT_INT_EQ(saved["batch-result-31"].integer(), 31);
+  EXPECT_PTR_EQ(Scope.owner(saved), output);
   saved["later"] = 32;
   EXPECT_INT_EQ(saved["later"].integer(), 32);
 }
@@ -128,25 +132,24 @@ static void batch_callback_failure_stops_all_peers(void) {
   EXPECT_INT_EQ(atomic_load(&batch_finished), 1);
 }
 
-static void batch_export_failure_stops_all_peers(void) {
+static void batch_does_not_invoke_result_exporter(void) {
   $test.scoped();
-  _batch_reset();
-  int caught = 0;
-  Array jobs = [
-    (Func) _batch_wait_for_stop,
-    (Func) (%!(void) => {
-      _batch_wait_ready(1);
-      ContextProbe probe = Scope.malloc(sizeof(struct ContextProbe));
-      probe.value = 23;
-      probe.exports = 0;
-      probe.fail_at = 1;
-      return Var.new(<ctxprobe>, probe);
-    })
-  ];
-  try Thread.run(jobs);
-  catch %(thread-exp *): caught = 1;
-  EXPECT_TRUE(caught);
-  EXPECT_INT_EQ(atomic_load(&batch_finished), 1);
+  Scope output = Scope.child();
+  int completed = 0;
+  Thread.run([%!(void) => {
+    Scope owner = output;
+    ContextProbe probe = Scope.malloc_in(&owner, sizeof(struct ContextProbe));
+    probe.value = 23;
+    probe.exports = 0;
+    probe.fail_at = 1;
+    return Var.new(<ctxprobe>, probe);
+  }], %!(Var value) using &completed => {
+    ContextProbe probe = value;
+    EXPECT_INT_EQ(probe.exports, 0);
+    EXPECT_INT_EQ(probe.value.int(), 23);
+    completed++;
+  });
+  EXPECT_INT_EQ(completed, 1);
 }
 
 static Var _batch_nested_worker(const void *bytes, size_t size) {
@@ -203,7 +206,40 @@ static void batch_explicit_private_pool_result_exports(void) {
   EXPECT_TRUE(Pool.is_permanent(result));
 }
 
+static atomic_int batch_temporary_drops, batch_owned_drops;
+
+static void _batch_drop_temporary(void *value) {
+  (void) value;
+  atomic_fetch_add(&batch_temporary_drops, 1);
+}
+
+static void _batch_drop_owned(void *value) {
+  (void) value;
+  atomic_fetch_add(&batch_owned_drops, 1);
+}
+
+static void batch_failure_preserves_explicit_owner(void) {
+  $test.scoped();
+  Scope output = Scope.child();
+  atomic_store(&batch_temporary_drops, 0);
+  atomic_store(&batch_owned_drops, 0);
+  int caught = 0;
+  try Thread.run([%!(void) => {
+    Scope owner = output;
+    Scope.malloc_finalized(8, _batch_drop_temporary);
+    Scope.malloc_finalized_in(&owner, 8, _batch_drop_owned);
+    raise %(batch-fail (detail "after explicit allocation"));
+  }]);
+  catch %(join-fail *): caught = 1;
+  EXPECT_INT_EQ(caught, 1);
+  EXPECT_INT_EQ(atomic_load(&batch_temporary_drops), 1);
+  EXPECT_INT_EQ(atomic_load(&batch_owned_drops), 0);
+  output.destroy();
+  EXPECT_INT_EQ(atomic_load(&batch_owned_drops), 1);
+}
+
 void thread_batch_suite(void) {
+  $test.run(batch_failure_preserves_explicit_owner);
   $test.run(batch_pending_stop_prevents_startup);
   $test.run(batch_explicit_private_pool_result_exports);
   $test.run(batch_empty_and_void_results);
@@ -212,6 +248,6 @@ void thread_batch_suite(void) {
   $test.run(batch_partial_startup_stops_started_jobs);
   $test.run(batch_worker_failure_stops_all_peers);
   $test.run(batch_callback_failure_stops_all_peers);
-  $test.run(batch_export_failure_stops_all_peers);
+  $test.run(batch_does_not_invoke_result_exporter);
   $test.run(batch_nested_coordinator_stop_cleans_children);
 }
