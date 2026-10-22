@@ -154,9 +154,14 @@ static Var _export_array(Context c, Var value) {
   Array array = value;
   if (!c.owns(array)) return value;
   Scope owner = Scope.owner(array);
-  Scope.move(array, c.destination_scope);
+  Scope storage = array.lifetime, parent = storage.parent();
+  if (storage) array.move_to(c.destination_scope);
+  else Scope.move(array, c.destination_scope);
   int exported = 0;
-  defer if (!exported) Scope.move(array, &owner);
+  defer if (!exported) {
+    if (storage) storage.transfer(parent);
+    else Scope.move(array, &owner);
+  }
   Var *items = array.bytes;
   for (size_t i = 0; i < array.length; i++)
     items[i] = _export_value(c, items[i]);
@@ -168,10 +173,10 @@ static Var _export_array(Context c, Var value) {
 static Var _export_map(Context c, Var value) {
   Map map = value;
   if (!c.owns(map)) return value;
-  Scope owner = Scope.owner(map);
-  Scope.move(map, c.destination_scope);
+  Scope storage = map.scope(), parent = storage.parent();
+  storage.transfer(*c.destination_scope);
   int exported = 0;
-  defer if (!exported) Scope.move(map, &owner);
+  defer if (!exported) storage.transfer(parent);
   map.export_to(c, _export_callback, c.destination_scope);
   exported = 1;
   return value;
@@ -222,7 +227,7 @@ int Context.owns(Context context, void *allocation) =>
 static int _owns_scope(Context context, Scope owner) {
   if (!context || !owner) return 0;
   for (Scope scope = context.scope; scope; scope = scope.down)
-    if (scope == owner) return 1;
+    if (scope.contains(owner)) return 1;
   return 0;
 }
 
