@@ -74,7 +74,7 @@ payload scopes explicitly transferred beneath it:
 
 <!-- ignore: illustrative worker fragment with caller-supplied Channel and Map -->
 ```x2c,ignore
-part.scope().transfer(results.scope());
+part.scope().transfer(results);
 results.send(part);
 ```
 
