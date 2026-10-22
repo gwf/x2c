@@ -9,18 +9,16 @@
 #include <stdlib.h>
 #include "substring-map.x"
 
+int main(int argc, char **argv) {
+  if (argc != 2)
+    fail("Usage: " + argv[0] + " FILE");
+  print_top_ten(count_words(argv[1]));
+  return EXIT_SUCCESS; // Root scope reclaims the Map and ranking Array.
+}
+
 static void fail(const char *message) {
   fprintf(stderr, "%s\n", message);
   exit(EXIT_FAILURE);
-}
-
-static MapSubInt count_words(String filename) {
-  String text = filename.open("r").string_close()
-    .reject("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~").lower();
-  MapSubInt counts = MapSubInt.new();
-  foreach (Substr word in text)
-    counts.increment(word);
-  return counts;
 }
 
 static void print_top_ten(MapSubInt counts) {
@@ -36,9 +34,11 @@ static void print_top_ten(MapSubInt counts) {
   }
 }
 
-int main(int argc, char **argv) {
-  if (argc != 2)
-    fail("Usage: " + argv[0] + " FILE");
-  print_top_ten(count_words(argv[1]));
-  return EXIT_SUCCESS; // Root scope reclaims the Map and ranking Array.
+static MapSubInt count_words(String filename) {
+  String text = filename.open("r").string_close()
+    .reject("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~").lower();
+  MapSubInt counts = MapSubInt.new();
+  foreach (Substr word in text)
+    counts.increment(word);
+  return counts;
 }

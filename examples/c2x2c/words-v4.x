@@ -9,13 +9,20 @@
 #include <stdlib.h>
 #include "substring-map.x"
 
+int main(int argc, char **argv) {
+  if (argc != 2)
+    fail("Usage: " + argv[0] + " FILE");
+  MapSubInt counts = MapSubInt.new(); // Replaces the explicit table.
+  File input = File.open(argv[1], "r"); // Open failures raise.
+  defer input.close(); // Close on return.
+  count_words(counts, input.string());
+  print_top_ten(counts);
+  return EXIT_SUCCESS; // Root scope reclaims the Map and ranking Array.
+}
+
 static void fail(const char *message) {
   fprintf(stderr, "%s\n", message);
   exit(EXIT_FAILURE);
-}
-
-static void count_word(MapSubInt counts, Substr word) {
-  counts.increment(word); // Map owns lookup, insertion, and growth.
 }
 
 static void count_words(MapSubInt counts, String text) {
@@ -37,13 +44,6 @@ static void print_top_ten(MapSubInt counts) {
   }
 }
 
-int main(int argc, char **argv) {
-  if (argc != 2)
-    fail("Usage: " + argv[0] + " FILE");
-  MapSubInt counts = MapSubInt.new(); // Replaces the explicit table.
-  File input = File.open(argv[1], "r"); // Open failures raise.
-  defer input.close(); // Close on return.
-  count_words(counts, input.string());
-  print_top_ten(counts);
-  return EXIT_SUCCESS; // Root scope reclaims the Map and ranking Array.
+static void count_word(MapSubInt counts, Substr word) {
+  counts.increment(word); // Map owns lookup, insertion, and growth.
 }

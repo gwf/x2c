@@ -24,29 +24,40 @@ typedef struct {
   size_t length;
 } Counts;
 
+int main(int argc, char **argv) {
+  if (argc != 2)
+    fail("Usage: " + argv[0] + " FILE");
+  Counts counts = {0};
+  File input = File.open(argv[1], "r"); // Open failures raise.
+  defer input.close(); // Close on return.
+  count_words(&counts, input.string());
+  print_top_ten(&counts);
+  return EXIT_SUCCESS; // Root scope frees entries and table.
+}
+
 static void fail(const char *message) {
   fprintf(stderr, "%s\n", message);
   exit(EXIT_FAILURE);
 }
 
-static void grow_counts(Counts *counts) {
-  if (counts.capacity > SIZE_MAX / 2)
-    fail("Too many words.");
-  size_t capacity = counts.capacity ? counts.capacity * 2 : 64;
-  Entry **buckets = xcalloc(capacity, sizeof(*buckets)); // Replaces allocate.
-  for (size_t i = 0; i < counts.capacity; ++i) {
-    Entry *entry = counts.buckets[i];
-    while (entry) {
-      Entry *next = entry.next;
-      size_t bucket = entry.hash % capacity;
-      entry.next = buckets[bucket];
-      buckets[bucket] = entry;
-      entry = next;
+static void count_words(Counts *counts, String text) {
+  text = text.reject("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~").lower();
+  foreach (Substr word in text)
+    count_word(counts, word);
+}
+
+static void print_top_ten(const Counts *counts) {
+  Array ranked = []; // Keep only the ten largest (count word) tuples.
+  for (size_t i = 0; i < counts.capacity; ++i)
+    for (Entry *entry = counts.buckets[i]; entry; entry = entry.next) {
+      if (ranked.len() == 10 && entry.count < ranked[0][0]) continue;
+      ranked.heap_push(%(${entry.count} ${entry.word.str()}));
+      if (ranked.len() > 10) ranked.heap_pop();
     }
+  foreach (List pair in ranked.sort()) {
+    (int count, String word) = pair;
+    printf("%d\t%s\n", count, word);
   }
-  xfree(counts.buckets); // Release obsolete scope-owned storage early.
-  counts.buckets = buckets;
-  counts.capacity = capacity;
 }
 
 static void count_word(Counts *counts, Substr word) {
@@ -72,33 +83,22 @@ static void count_word(Counts *counts, Substr word) {
   ++counts.length;
 }
 
-static void count_words(Counts *counts, String text) {
-  text = text.reject("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~").lower();
-  foreach (Substr word in text)
-    count_word(counts, word);
-}
-
-static void print_top_ten(const Counts *counts) {
-  Array ranked = []; // Keep only the ten largest (count word) tuples.
-  for (size_t i = 0; i < counts.capacity; ++i)
-    for (Entry *entry = counts.buckets[i]; entry; entry = entry.next) {
-      if (ranked.len() == 10 && entry.count < ranked[0][0]) continue;
-      ranked.heap_push(%(${entry.count} ${entry.word.str()}));
-      if (ranked.len() > 10) ranked.heap_pop();
+static void grow_counts(Counts *counts) {
+  if (counts.capacity > SIZE_MAX / 2)
+    fail("Too many words.");
+  size_t capacity = counts.capacity ? counts.capacity * 2 : 64;
+  Entry **buckets = xcalloc(capacity, sizeof(*buckets)); // Replaces allocate.
+  for (size_t i = 0; i < counts.capacity; ++i) {
+    Entry *entry = counts.buckets[i];
+    while (entry) {
+      Entry *next = entry.next;
+      size_t bucket = entry.hash % capacity;
+      entry.next = buckets[bucket];
+      buckets[bucket] = entry;
+      entry = next;
     }
-  foreach (List pair in ranked.sort()) {
-    (int count, String word) = pair;
-    printf("%d\t%s\n", count, word);
   }
-}
-
-int main(int argc, char **argv) {
-  if (argc != 2)
-    fail("Usage: " + argv[0] + " FILE");
-  Counts counts = {0};
-  File input = File.open(argv[1], "r"); // Open failures raise.
-  defer input.close(); // Close on return.
-  count_words(&counts, input.string());
-  print_top_ten(&counts);
-  return EXIT_SUCCESS; // Root scope frees entries and table.
+  xfree(counts.buckets); // Release obsolete scope-owned storage early.
+  counts.buckets = buckets;
+  counts.capacity = capacity;
 }

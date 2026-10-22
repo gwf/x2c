@@ -7,7 +7,7 @@ directory counting. These files are the canonical tutorial sources.
 
 | Version | Lines | Change |
 | --- | ---: | --- |
-| [0](words-v0.c) | 171 | Native C: explicit hash table, allocation, sorting, and cleanup. |
+| [0](words-v0.c) | 182 | Native C: explicit hash table, allocation, sorting, and cleanup. |
 | [1](words-v1.x) | 146 | Scope allocation, pointer member access with dots, and defer. |
 | [2](words-v2.x) | 109 | Substr word views and whole-file reading; retain the explicit hash table. |
 | [3](words-v3.x) | 104 | Bounded Array min-heap of `(count word)` Lists and typed destructured printing. |
