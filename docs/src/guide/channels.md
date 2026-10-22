@@ -103,12 +103,10 @@ must not be sent twice. Do not leave a separate `$auto` or deferred cleanup arme
 for it; sending cannot disarm existing cleanup. Unrelated aliases do not disappear
 when ownership changes.
 
-Receipt attaches the detached transport Scope beneath the receiver's private
-active Scope before returning. The receiver may clean up the container directly,
-retain it under that private owner, or explicitly move its complete storage to
-another exclusive owner. If the receiver fails, private-scope teardown reclaims
-the received transport and its storage. Empty transport scopes remain under that
-private owner until teardown if their container was freed earlier.
+Receipt moves ordinary Map or Array storage into the receiver's private active
+Scope and destroys the empty transport Scope before returning. The receiver may
+clean up the container directly or move its complete storage to another owner.
+If the receiver fails, private-scope teardown reclaims the received storage.
 
 The automatic path handles ordinary Map and Array tags. Existing typed containers
 and custom roots require a caller-prepared exclusive inactive subtree containing
@@ -126,7 +124,8 @@ results.send_owned(values);
 
 Until acceptance the caller owns this prepared scope. Failure restores its
 original parent; a prepared detached scope remains detached and caller-owned.
-After acceptance it belongs to the queue, then the receiver. A custom root must
+After acceptance it belongs to the queue, then joins the receiver's private
+scope as a child. A custom root must
 be a live nonnull Scope allocation whose existing allocation owner is that
 exclusive inactive subtree. The operation does not discover pointer provenance
 or validate an object graph. Canonical Strings/Lists, ordinary scalars, borrowed

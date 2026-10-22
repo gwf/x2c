@@ -360,9 +360,10 @@ void Channel.send(Channel c, Var value) => _send(c, value, 0);
     Raises: the send causes, or <bad-arg> for a null/nonpointer payload. */
 void Channel.send_owned(Channel c, Var value) => _send(c, value, 1);
 
-/** Receives one accepted Var. Ordinary payloads stay borrowed. An owned
-    payload's detached storage subtree joins the receiver's private active
-    Scope before return, so receiver failure cleanup reclaims it normally.
+/** Receives one accepted Var. Ordinary payloads stay borrowed. Owned Map and
+    Array storage moves into the receiver's private active Scope, releasing
+    the empty transport Scope. Prepared custom subtrees join that private
+    owner. Receiver failure cleanup reclaims received storage normally.
     Returns void only after close and draining; null remains ordinary data.
     A committed delivery succeeds despite a later stop request.
     Raises: <bad-arg> for NULL, <alloc-fail> preparing receiver storage, or
@@ -380,7 +381,14 @@ Var Channel.receive(Channel channel) {
   if (message) { value = message.value; owned = message.owned; }
   x2c_thread_wait_unlock();
   if (message) free(message);
-  if (owned) Scope.owner(value.pointer()).transfer(*destination);
+  if (owned) {
+    Scope transport = Scope.owner(value.pointer());
+    if (_container(value)) {
+      _move_container(value, destination);
+      transport.destroy();
+    }
+    else transport.transfer(*destination);
+  }
   if (status < 0) x2c_thread_cancel();
   return value;
 }

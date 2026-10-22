@@ -311,7 +311,7 @@ static void channel_owned_receive_joins_receiver_scope(void) {
   source.destroy();
   EXPECT_INT_EQ(atomic_load(&channel_payload_drops), 0);
   Map received = channel.receive();
-  EXPECT_PTR_EQ(Scope.owner(received).parent(), *Scope.top());
+  EXPECT_PTR_EQ(Scope.owner(received), *Scope.top());
   EXPECT_INT_EQ(received[<value>].integer(), 107);
   received.cleanup();
   EXPECT_INT_EQ(atomic_load(&channel_payload_drops), 1);
@@ -569,7 +569,25 @@ static void channel_owned_typed_array_uses_explicit_group(void) {
   received.free();
 }
 
+static void channel_owned_receive_releases_transport_scope(void) {
+  $test.scoped();
+  Channel channel = $auto(Channel.new(1));
+  size_t scopes = Scope.stats().live_scopes;
+  for (int i = 0; i < 32; ++i) {
+    Map map = _channel_owned_result();
+    channel.send_owned(map);
+    Map received_map = channel.receive();
+    received_map.cleanup();
+    Array array = [i];
+    channel.send_owned(array);
+    Array received_array = channel.receive();
+    received_array.free();
+    EXPECT_INT_EQ(Scope.stats().live_scopes, scopes);
+  }
+}
+
 void channel_suite(void) {
+  $test.run(channel_owned_receive_releases_transport_scope);
   $test.run(channel_owned_plain_map_moves_and_grows);
   $test.run(channel_owned_plain_array_moves_and_grows);
   $test.run(channel_owned_nested_contents_move_with_record);

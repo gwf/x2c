@@ -47,9 +47,10 @@ record's existing allocation header. No private allocation locks, new owner
 pointers, descriptor machinery, or changes to canonical-value ownership.
 
 Messages and rendezvous waits carry an owned bit, not another scope pointer.
-Receive recovers the scope from the payload and attaches it to the receiver's
-private active scope before returning or dispatching errors. Prepare that owner
-before any commit. A committed rendezvous completes adoption despite later stop.
+Receive recovers the scope from the payload. Ordinary containers move into the
+receiver's private active scope and the empty transport scope is destroyed.
+Prepared custom subtrees attach beneath that owner. Prepare the owner before
+any commit. A committed rendezvous completes adoption despite later stop.
 Channel teardown after all users finish destroys scopes still queued, outside
 the existing queue monitor. Normal close continues to permit draining.
 

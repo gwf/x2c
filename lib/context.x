@@ -226,8 +226,8 @@ static Var _export_map(Context c, Var value) {
   if (!c.owns(map) || _visited(c, value)) return value;
   map.export_to(c, _export_callback, c.destination_scope);
   c.move_allocation(map);
-  c.move_block(map.hashes.block());
-  c.move_block(map.entries.block());
+  c.move_block(map.hashes);
+  c.move_block(map.entries);
   c.move_scope(map.scope);
   return value;
 }
