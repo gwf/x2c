@@ -207,14 +207,12 @@ static String _text(const void *bytes, size_t length) {
   if (!length) return NULL;
   if (!bytes) raise %(bad-arg (operation "File.text") (reason "null bytes"));
   int allocation = _string_allocation(length);
-  String copy = String.malloc(allocation);
-  memcpy(copy, bytes, length);
-  return _finish_text(copy, length);
+  _validate_text(bytes, length);
+  return x2c_string_from_bytes(bytes, allocation - 1);
 }
 
-/* Every text adapter ends here. Byte input then cannot produce a String
-   whose visible length differs from the consumed length. `intern_free`
-   consumes the temporary allocation and returns the canonical String. */
+/* Validates and canonicalizes an owned text buffer. `intern_free` consumes
+   the temporary allocation and returns the canonical String. */
 static String _finish_text(String text, size_t length) {
   _validate_text(text, length);
   char *out = text;

@@ -1,11 +1,11 @@
-#include <ctype.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "substring.x"
 
 typedef struct Entry {
-  String word; // Canonical String; no per-word copy.
+  Substr word; // Borrows normalized text storage; no per-word copy.
   int count;
   uint64_t hash;
   struct Entry *next;
@@ -42,12 +42,12 @@ static void grow_counts(Counts *counts) {
   counts.capacity = capacity;
 }
 
-static void count_word(Counts *counts, String word) {
+static void count_word(Counts *counts, Substr word) {
   if (!counts.capacity) grow_counts(counts);
-  uint64_t hash = word.hash(); // Cached hash replaces hash_word().
+  uint64_t hash = word.hash();
   size_t bucket = hash % counts.capacity;
   for (Entry *entry = counts.buckets[bucket]; entry; entry = entry.next) {
-    if (entry.hash == hash && entry.word == word) { // Canonical equality.
+    if (entry.hash == hash && entry.word.equal(word)) {
       ++entry.count;
       return;
     }
@@ -57,7 +57,7 @@ static void count_word(Counts *counts, String word) {
     bucket = hash % counts.capacity;
   }
   Entry *entry = xcalloc(1, sizeof(*entry)); // Allocation failure raises.
-  entry.word = word; // Keep the canonical String; no xmemdup.
+  entry.word = word;
   entry.count = 1;
   entry.hash = hash;
   entry.next = counts.buckets[bucket];
@@ -65,9 +65,9 @@ static void count_word(Counts *counts, String word) {
   ++counts.length;
 }
 
-static void count_line(Counts *counts, String line) {
-  line = line.filter(%!(unsigned char c) => !ispunct(c)).lower();
-  foreach (String word in line.words())
+static void count_words(Counts *counts, String text) {
+  text = text.reject("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~").lower();
+  foreach (Substr word in text)
     count_word(counts, word);
 }
 
@@ -87,7 +87,7 @@ static void print_top_ten(const Counts *counts) {
       entries[length++] = entry;
   qsort(entries, length, sizeof(*entries), compare_entries);
   for (size_t i = 0; i < length && i < 10; ++i)
-    printf("%d\t%s\n", entries[i].count, entries[i].word);
+    printf("%d\t%s\n", entries[i].count, entries[i].word.str());
 } // Root scope releases the sorting array.
 
 int main(int argc, char **argv) {
@@ -96,8 +96,7 @@ int main(int argc, char **argv) {
   Counts counts = {0};
   File input = File.open(argv[1], "r"); // Open failures raise.
   defer input.close(); // Close on return.
-  foreach (String line in input) // No getline.
-    count_line(&counts, line);
+  count_words(&counts, input.string());
   print_top_ten(&counts);
   return EXIT_SUCCESS; // Root scope frees entries and table.
 }

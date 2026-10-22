@@ -1,5 +1,6 @@
+#include "substring-map.x"
+#include "typed-map.x"
 #include "path.x"
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -8,30 +9,41 @@ static void fail(const char *message) {
   exit(EXIT_FAILURE);
 }
 
-static Map file_unique_words(String filename) {
-  String text = filename.open("r").string_close()
-    .filter(%!(unsigned char c) => !ispunct(c)).lower();
-  Map counts = {};
-  foreach (String word in text.words())
-    counts[word] += 1;
+static Var file_unique_words(Var filename) {
+  String text = filename.string().open("r").string_close()
+    .reject("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~").lower();
+  MapSubInt counts = MapSubInt.new();
+  foreach (Substr word in text)
+    counts.increment(word);
   return counts;
 }
 
-static Map dir_unique_words(Path root) {
+static MapStringInt accumulate(MapStringInt total, MapSubInt counts) {
+  foreach ((Substr word, int count) in counts) total[word.str()] += count;
+  counts.cleanup();
+  return total;
+}
+
+static MapStringInt dir_unique_words(Path root) {
   if (!root.is_dir())
     fail("Not a directory: " + root);
   return root.walk().filter(Path.is_file).map(file_unique_words)
-    .foldl({}, %!(Map total, Map counts) => total.merge_with(counts,
-      %!(int a, int b) => a + b));
+    .foldl(MapStringInt.new(), accumulate);
 }
 
 int main(int argc, char **argv) {
   if (argc != 2)
     fail("Usage: " + argv[0] + " DIR");
-  Map counts = dir_unique_words(argv[1]);
-  Array ranked = counts.enumerate()
-    .map(%!(List entry) => entry.reverse()).array().sort();
-  foreach (Var (count, word) in ranked[-10:])
+  MapStringInt counts = dir_unique_words(argv[1]);
+  Array ranked = [];
+  foreach ((String word, int count) in counts) {
+    if (ranked.len() == 10 && count < ranked[0][0]) continue;
+    ranked.heap_push(%($count $word));
+    if (ranked.len() > 10) ranked.heap_pop();
+  }
+  foreach (List pair in ranked.sort()) {
+    (int count, String word) = pair;
     puts(%"$count\t$word");
+  }
   return EXIT_SUCCESS; // Root scope reclaims the Map and ranking Array.
 }

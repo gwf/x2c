@@ -25,7 +25,7 @@ String String.add(String str, String other) {
     char bytes[STRING_STACK_BYTES];
     memcpy(bytes, str, left_len);
     memcpy(bytes + left_len, other, right_len);
-    return _from_bytes(bytes, (int) length);
+    return x2c_string_from_bytes(bytes, (int) length);
   }
   String string = String.malloc((int) length + 1);
   memcpy(string, str, left_len);
@@ -89,7 +89,7 @@ meta native String String.join(String sep, List strings) {
   if (total <= STRING_STACK_BYTES) {
     char bytes[STRING_STACK_BYTES];
     _join_into(bytes, strings, sep, sep_len);
-    return _from_bytes(bytes, total);
+    return x2c_string_from_bytes(bytes, total);
   }
   String string = String.malloc(total + 1);
   _join_into(string, strings, sep, sep_len);
@@ -189,7 +189,7 @@ String String.printf(String fmt, ...) {
     int written = vsnprintf(bytes, n + 1, fmt, args);
     va_end(args);
     if (written != n) return NULL;
-    return _from_bytes(bytes, n);
+    return x2c_string_from_bytes(bytes, n);
   }
   String string = String.malloc(n + 1);
   int written = vsnprintf(string, n + 1, fmt, args);

@@ -1333,11 +1333,13 @@ An `Expr` argument stays one operand. With the argument `value > 0`, the body
 mean `(21 + 21) * 2`. Generated C has these parentheses only where C
 precedence would otherwise regroup the expression.
 
-A `Decl` argument captures one declaration without a trailing semicolon. Its
+A `Decl` argument captures a declaration without a trailing semicolon. Its
 comma or closing parenthesis belongs to the macro invocation. The declaration
 may have an initializer or use flat destructuring with two or more simple
 identifier targets, but it may not contain multiple comma-separated
-declarators.
+declarators. Parentheses group independently typed declarations, such as
+`(String word, int count)`. A grouped capture is a canonical `seq` of ordinary
+declarations; each declaration follows the same binding and placement rules.
 
 A `DeclaratorRow` argument has no leading type or trailing semicolon. A
 declaration template supplies the shared type, and a trailing
@@ -3904,7 +3906,9 @@ A statement that calls a function named `with` uses the spelling
 `foreach (declaration in expression) statement` evaluates the expression
 once and visits its elements. A comma may take the place of `in`. The
 declaration has no trailing semicolon and may bind one name or destructure a
-key and value:
+key and value. Use `(Type key, OtherType value)` for independently typed
+bindings, as in `foreach ((String word, int count) in counts)`. Each binding
+receives the ordinary conversion from its cursor output or iterator element:
 
 ```x2c
 ~int main(void) {
@@ -3920,9 +3924,11 @@ foreach (int value, values) total -= value;
 ~}
 ```
 
-Cursor-backed collections use their typed `try_next` member directly. Other
-values convert to `Iter`, and each yielded `Var` converts to the declared loop
-type when that conversion exists. [Iteration](../guide/iteration.md) covers
+The declared element type can supply a matching `try_next` cursor for the
+source. Otherwise, cursor-backed collections use their own `try_next` member.
+Native cursors need no `Iter` adoption and deliver typed outputs directly.
+Other values convert to `Iter`, and each yielded `Var` converts to the declared
+loop type when that conversion exists. [Iteration](../guide/iteration.md) covers
 the loop forms and the `Iter` protocol in tutorial order.
 
 Foreach uses `Iter.try_next`. A boxed `Var` without a registered iterator

@@ -156,7 +156,7 @@ static int _words_next(Split split, int *cursor, String *out) {
   if (index >= length) return 0;
   int start = index;
   while (index < length && !isspace((unsigned char) p[index])) index++;
-  String field = String.new_len(p + start, index - start);
+  String field = x2c_string_from_bytes(p + start, index - start);
   *out = field;
   *cursor = index;
   return 1;

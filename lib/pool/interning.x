@@ -29,6 +29,41 @@ static Var _get_hashed(
   return index < 0 ? void : *_record_key(table, (unsigned) index);
 }
 
+/* String construction already knows the bytes, length, and content hash.
+   Probe the shared table without boxing a temporary String query. */
+static String _get_string(
+  PoolTable table, const char *bytes, int length, unsigned hash) {
+  unsigned *hashes = table.hashes;
+  unsigned mask = table.mask, start = hash & mask, capacity = table.capacity;
+  for (unsigned distance = 0; distance < capacity; distance++) {
+    unsigned index = (start + distance) & mask, stored = hashes[index];
+    if (!stored) break;
+    if (stored == hash) {
+      Var entry = *_record_key(table, index);
+      String string = entry.string_payload();
+      if (string && strncmp(string, bytes, (size_t) length) == 0 &&
+          ((const char *) string)[length] == '\0')
+        return string;
+    }
+    if (((capacity + index - (stored & mask)) & mask) < distance) break;
+  }
+  return NULL;
+}
+
+/* Nonempty byte queries cannot match the null String. Native comparison
+   cannot raise, so each acquired pool lock can be released directly. */
+String x2c_pool_lookup_string(
+  Pool inner, const char *bytes, int length, unsigned hash) {
+  int threads_active = pool_multithreaded;
+  for (Pool pool = inner; pool; pool = pool.up) {
+    if (threads_active) _lock(pool);
+    String found = _get_string(pool.table, bytes, length, hash);
+    if (threads_active) _unlock(pool);
+    if (found) return found;
+  }
+  return NULL;
+}
+
 /* The stored value equal to `object`, which is installed when absent. */
 module Var _setdefault(
   PoolTable table, Var object, int &inserted) {

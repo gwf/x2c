@@ -150,7 +150,11 @@ static Type _binding_type(List binding) =>
 /** Returns an expression reading each binding `declaration` declares. */
 List Code.declared_bindings(List declaration) {
   Array result = [];
-  match (declaration)
+  match (declaration) {
+    case %(seq *declarations):
+      foreach (List item, declarations)
+        foreach (List binding, Code.declared_bindings(item))
+          result.push(binding);
     case %((!or declare decl typedef) ? (bindings *bindings)):
       foreach (List binding, bindings) {
         List bound = binding;
@@ -169,6 +173,7 @@ List Code.declared_bindings(List declaration) {
           }
         }
       }
+  }
   return result.list_free();
 }
 

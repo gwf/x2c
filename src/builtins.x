@@ -112,23 +112,23 @@ static List _foreach_expand(
   Type type = ((Code) collection).type();
   int direct = type == %("Iter");
   List converter = direct ? %() : _converter(type);
-  List spec = direct ? %() : _cursor_spec(type);
   if (targets.len() != 1 && targets.len() != 2)
     x2c_diagnostic_fail(
       "foreach requires one binding or a two-name destructuring declaration",
       %());
-  if (!direct && !converter) {
+  List spec = direct ? %() : _typed_cursor_spec(type, targets);
+  if (!direct && !spec) spec = _cursor_spec(type, type, targets.len());
+  if (!direct && !converter && !spec) {
     Var printable = type;
     x2c_diagnostic_fail(
       "type " + printable.repr() + " is not iterable",
-      %("declare an Iter protocol adoption or iterate an Iter directly"));
+      %("declare a matching try_next cursor or an Iter protocol adoption"));
   }
   Foreach f = {
     .declaration = declaration, .collection = collection, .body = body,
     .targets = targets, .type = type, .iterator = iterator, .item = item,
     .pair = pair, .object = object, .cursor = cursor};
-  if (spec && (targets.len() == 1 || List.len(spec[2]) >= 2))
-    return _with_cursor(f, spec);
+  if (spec) return _with_cursor(f, spec);
   return _with_iter(f, converter);
 }
 
@@ -137,14 +137,11 @@ static List _converter(Type type) =>
   type == %("Var") ? MetaContext.function_reference("Var_iter")
                     : type.protocol_member("iter");
 
-/* The cursor loop's `(function cursor-type output-types)` for a
-   collection whose owner declares `int T_try_next(T, C *, O *...)` with an
-   integral cursor or one of the collection's own type, or else an empty
-   List. */
-static List _cursor_spec(List collection_type) {
-  if (!_atom_type(collection_type)) return %();
-  String owner = collection_type.car().str();
-  Code function = MetaContext.function_reference(owner + "_try_next");
+/* A source or element owner can supply `int try_next(Source, C *, O *...)`.
+   Return its cursor and output types when the source and arity match. */
+static List _cursor_spec(Type collection_type, Type owner, int arity) {
+  if (!_atom_type(collection_type) || !_atom_type(owner)) return %();
+  Code function = _method(owner, "try_next");
   if (!function) return %();
   Type type = function.type();
   List parameters = type.parameters();
@@ -152,18 +149,31 @@ static List _cursor_spec(List collection_type) {
   Type cursor_parameter = rest ? rest.car() : %();
   List outputs = rest ? rest.cdr() : %();
   if (type.return_type() != %(int) ||
-      parameters.car() != collection_type ||
+      Type.resolve(parameters.car()) != collection_type.resolve() ||
       !cursor_parameter.canonicalize().is_pointer()) return %();
   Type cursor_type = cursor_parameter.element();
-  if (!cursor_type.is_integral() && cursor_type != collection_type)
+  if (!cursor_type.is_integral() &&
+      cursor_type.resolve() != collection_type.resolve())
     return %();
-  if (!outputs) return %();
+  if (!outputs || (arity == 2 && outputs.len() < 2)) return %();
   if (!_valid_outputs(outputs)) return %();
   List output_types = outputs.map(%!(Type output) => output.element());
   /* A fourth element marks reference parameters. */
   if (cursor_parameter.car() == <*>)
     return %($function $cursor_type $output_types);
   return %($function $cursor_type $output_types reference);
+}
+
+/* A requested element can supply a native cursor for this source. Match
+   its output exactly before considering the collection's default cursor. */
+static List _typed_cursor_spec(Type collection_type, List targets) {
+  if (!targets) return %();
+  Type requested = Code.type(targets.last());
+  List spec = _cursor_spec(collection_type, requested, targets.len());
+  if (!spec) return %();
+  List outputs = spec[2];
+  Type output = targets.len() == 1 ? outputs.last() : outputs[1];
+  return output.resolve() == requested.resolve() ? spec : %();
 }
 
 /* Whether `type` is named by one String or Symbol. */
@@ -204,7 +214,8 @@ static List _with_cursor(Foreach &f, List spec) {
     $!( $function($object_expression, $cursor_argument, @addresses) );
   List loop_body =
     $!{ { @{_cursor_assignments(f.targets, values)} ${f.body} } };
-  List initial = cursor_type == f.type ? object_expression : $!( 0 );
+  List initial = Type.resolve(cursor_type) == Type.resolve(f.type)
+    ? object_expression : $!( 0 );
   List setup = %(
     ${_declare(f.type, f.object, f.collection)}
     ${_declare(cursor_type, f.cursor, initial)}

@@ -71,6 +71,8 @@ lib/digest.x|optional|SHA-256 digests of `String`s and streams; explicitly inclu
 lib/process.x|optional|Commands, pipelines, and background jobs without a shell; explicitly include `process.x` to use them.
 lib/typed-array.x|optional|Packed typed storage with a raw native bracket; explicitly include `typed-array.x` to use it.
 lib/typed-list.x|optional|Typed views over canonical `List` cells; explicitly include `typed-list.x` to use them.
+lib/substring.x|optional|Borrowed immutable String views; explicitly include `substring.x` to use them.
+lib/substring-map.x|optional|Native Substr occurrence counts; explicitly include `substring-map.x` to use them.
 lib/typed-map.x|optional|Typed maps over native numeric or canonical `String` fields; explicitly include `typed-map.x` to use them.
 lib/var-ledger.x|internal|The `Var` tag tables and decoder table projected from `lib/var-tags.x`, in the one runtime unit that includes the ledger.
 lib/var/var.x|api|

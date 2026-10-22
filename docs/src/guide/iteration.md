@@ -46,8 +46,8 @@ foreach(int score, scores)
   printf("score = %d\n", score);
 
 Map ages = {"ada": 36, "alan": 41};
-foreach(Var (name, age), ages)
-  printf("%s is %d\n", name, age.int());
+foreach ((String name, int age) in ages)
+  printf("%s is %d\n", name, age);
 
 String word = "hi";
 foreach(int ch, word)
@@ -56,6 +56,13 @@ foreach(int ch, word)
 foreach(char ch, word)
   printf("char = %c\n", ch);
 ```
+
+Parenthesize declarations to give each loop binding its own type, as in
+`foreach ((String name, int age) in ages)`. The shared-type form
+`foreach (Var (name, age) in ages)` remains available. Native cursors assign
+each output directly to its declared type; iterator outputs use the ordinary
+`Var` conversions. For example, `foreach ((Substr word, int count) in counts)`
+can traverse a `MapSubInt` without boxing keys or allocating an iterator.
 
 A `Map` yields its values, like every other collection. Two binders yield
 the key as well; with native loop types the loop does not allocate. For an
@@ -114,7 +121,7 @@ that must survive.
 A `Var` is iterated through its descriptor, so a boxed `List` or `Array`
 iterates the way the unboxed value does. A boxed value with no iterator
 adapter produces an already-exhausted iterator, and the loop body runs zero
-times. A receiver with a statically known type must have a visible `Iter`
+times. A receiver without a matching native cursor must have a visible `Iter`
 conformance, from its own adoption or from the nearest typedef ancestor.
 `typedef List Ast;` lets `foreach` over `Ast` reuse `List`'s conformance
 without `protocol Iter(Ast);`. A type with neither is rejected as not
@@ -150,8 +157,20 @@ converting type or take a `Var` and convert in the body.
 
 ### What foreach guarantees
 
-The collection expression's static type selects the traversal.
-Cursor-backed collections use their typed `try_next` member. A `Var`
+For a statically typed collection other than `Iter`, the declared loop type
+can supply a native cursor. Foreach first looks for that type's `try_next`
+method. Its first parameter must match the collection type. The output
+assigned to the last loop binding must match that binding's type. A single
+binding receives the final output; two bindings receive the first two outputs. Ordinary member lookup follows typedef
+aliases. The cursor must be integral or have the collection's own type, as
+with collection-owned cursors. A matching cursor needs no `Iter` adoption.
+
+For example, `foreach (Substr word in text)` uses the prototype
+`Substring.try_next(String, int &, Substring &)` declared in `substring.x`.
+It yields borrowed word views without constructing canonical Strings.
+
+If no element-owned cursor matches, foreach uses the collection's
+`try_next` member, then its `Iter` conversion. A `Var`
 dispatches through its runtime descriptor, and an `Iter` is used as it
 stands. Foreach keeps the traversal state in local variables and converts
 each output to the declared loop type, so the loop itself allocates nothing
