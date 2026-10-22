@@ -120,14 +120,6 @@ macro Unit $map.storage.family(Type $map, Type $storage, Type $key, Type $value,
     return result = map;
   }
 
-  /** Returns the Map's complete storage scope, without adopting its values.
-      The scope contains the stable handle and all backing allocations.
-      Explicitly adopted child scopes move and die with it. NULL returns NULL.
-  */
-  Scope $map.scope($map map) {
-    return (void *) map == 0 ? NULL : map.scope;
-  }
-
   /* Returns the bucket index of `key`, which must hash to `key_hash`, or -1.
      A probe reads only the hash array; the entry is touched once a hash
      matches. A caller searching several tables for one key hashes it once
@@ -387,6 +379,14 @@ macro Unit $map.core.family(Type $family, Type $storage, Type $key, Type $value,
     $family, $storage, $key, $value, $hash_cell, $entry,
     $hash, $key_equal, $value_equal, $value_valid,
     $key_at, $value_at, $reinsert_error, $insert_error, 1);
+
+  /** Returns the Map's complete storage scope, without adopting its values.
+      The scope contains the stable handle and all backing allocations.
+      Explicitly adopted child scopes move and die with it. NULL returns NULL.
+  */
+  Scope $family.scope($family map) {
+    return (void *) map == 0 ? NULL : map.scope;
+  }
 }
 
 macro Unit $map.typed.operations(

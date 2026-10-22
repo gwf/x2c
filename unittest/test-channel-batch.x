@@ -12,23 +12,22 @@ static void channel_batch_worker_failure_stops_both_directions(void) {
   Channel ready = $auto(Channel.new(2));
   Array jobs = $auto([]);
   atomic_int finished = 0;
-  atomic_int *done = &finished;
   int callbacks = 0, caught = 0;
 
-  jobs.push(%!(void) => {
-    defer atomic_fetch_add(done, 1);
+  jobs.push(%!(void) using &finished => {
+    defer atomic_fetch_add(&finished, 1);
     ready.send(<producer>);
     files.send("never consumed");
     return <unexpected>;
   });
-  jobs.push(%!(void) => {
-    defer atomic_fetch_add(done, 1);
+  jobs.push(%!(void) using &finished => {
+    defer atomic_fetch_add(&finished, 1);
     ready.send(<consumer>);
     results.receive();
     return <unexpected>;
   });
-  jobs.push(%!(void) => {
-    defer atomic_fetch_add(done, 1);
+  jobs.push(%!(void) using &finished => {
+    defer atomic_fetch_add(&finished, 1);
     ready.receive();
     ready.receive();
     raise %(bad-arg (primary 73));
@@ -46,7 +45,7 @@ static void channel_batch_worker_failure_stops_both_directions(void) {
   }
   EXPECT_INT_EQ(caught, 1);
   EXPECT_INT_EQ(callbacks, 0);
-  EXPECT_INT_EQ(atomic_load(done), 3);
+  EXPECT_INT_EQ(atomic_load(&finished), 3);
 }
 
 static void channel_batch_service_failure_stops_reply_wait(void) {
@@ -55,17 +54,16 @@ static void channel_batch_service_failure_stops_reply_wait(void) {
   Channel reply = $auto(Channel.new());
   Array jobs = $auto([]);
   atomic_int finished = 0;
-  atomic_int *done = &finished;
   int callbacks = 0, caught = 0;
 
-  jobs.push(%!(void) => {
-    defer atomic_fetch_add(done, 1);
+  jobs.push(%!(void) using &finished => {
+    defer atomic_fetch_add(&finished, 1);
     requests.receive();
     raise %(bad-arg (primary 91));
     return void;
   });
-  jobs.push(%!(void) => {
-    defer atomic_fetch_add(done, 1);
+  jobs.push(%!(void) using &finished => {
+    defer atomic_fetch_add(&finished, 1);
     requests.send("request");
     return reply.receive();
   });
@@ -81,7 +79,7 @@ static void channel_batch_service_failure_stops_reply_wait(void) {
   }
   EXPECT_INT_EQ(caught, 1);
   EXPECT_INT_EQ(callbacks, 0);
-  EXPECT_INT_EQ(atomic_load(done), 2);
+  EXPECT_INT_EQ(atomic_load(&finished), 2);
 }
 
 void channel_batch_suite(void) {

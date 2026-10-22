@@ -83,7 +83,7 @@ aliases or access permissions. Nested mutable values retain their independent
 owners unless explicitly adopted. Private-pool String keys do not become safe
 when their containing Map moves.
 
-A consumer can merge a transferred Map and call `part.free()`. A failed send
+A consumer can merge a transferred Map and call `part.cleanup()`. A failed send
 does not undo a preceding transfer. An undelivered adopted Map stays beneath
 the Channel's scope until explicitly moved or freed, or until scope destruction.
 A plain borrowed payload is never recursively freed by Channel cleanup.

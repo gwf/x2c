@@ -13,6 +13,7 @@ lib/atom.x|advanced|Atom.first,Atom.initialize,Atom.intern,Atom.str
 lib/block.x|advanced|Block.append,Block.append_fill,Block.capacity,Block.clear
 lib/block.x|advanced|Block.cleanup,Bytes.cleanup
 lib/block.x|advanced|Block.free,Block.len,Block.new,Block.pop,Block.push,Block.reserve
+lib/block.x|advanced|Block.scope
 lib/block.x|advanced|Block.truncate,Block.truth,Block.try_pop,Bytes.append
 lib/block.x|advanced|Bytes.append_fill,Bytes.block
 lib/block.x|advanced|Bytes.new,Bytes.push,Bytes.reserve,Bytes.try_pop
@@ -52,7 +53,7 @@ lib/common.x|advanced|x2c_normalize_index,x2c_normalize_slice,x2c_slice_bound
 lib/common.x|internal|x2c_hash_bytes,x2c_hash_word,x2c_mix64
 lib/common.x|internal|X2CErrorSite,X2CStatic
 lib/context.x|advanced|Context.move_allocation,Context.owns
-lib/context.x|internal|Context.move_scope
+lib/context.x|internal|Context.move_scope,Context.move_block
 lib/context.x|internal|Context.export_destination,Context.initialize
 lib/context.x|internal|Context.export_nested,Context.export_scope
 lib/dispatch.x|advanced|RenderPath.enter,RenderPath.leave

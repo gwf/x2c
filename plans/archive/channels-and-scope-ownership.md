@@ -1,10 +1,12 @@
 # Channels, Thread batches, and explicit scope ownership
 
-> Status: active
+> Status: done
+> Implementation integrated locally on 2026-10-22 through 862aea43a.
+> The combined publication gate and performance checkpoint remain pending.
 > Unified design agreed on 2026-10-22 after Channel, threading, and error-design
 > chat review. Gary accepted Thread.run and the explicit worker completion count.
-> This document is the single contract for their connected work. Optional
-> Channel constructor/tag defaults remain proposals where marked below.
+> This document records the agreed contract and its implementation.
+> Constructor defaults below were selected during implementation.
 > Implementation authorized by Gary on 2026-10-22. The coordinating chat owns
 > combined integration, validation, and direct delivery; Channel and Thread
 > workers provide private handoffs and do not publish independently.
@@ -33,7 +35,7 @@ automatic payload adoption, recursive transport export, or inferred dependency
 on all users of a Channel. Ordinary Thread.start/join and ParallelMap remain
 compatible. General callable.go is deferred, not needed by this selected batch.
 
-The [tutorial continuation](c2x2c-continuation.md) records existing behavior.
+The [tutorial continuation](../c2x2c-continuation.md) records existing behavior.
 The contracts below describe intended additions, not implemented capabilities.
 
 ## Agreed ownership semantics
@@ -405,7 +407,7 @@ static Map directory_count(Path root) {
   jobs.push(%!(void) => {
     foreach (Map part in results) {
       counts.merge_with(part, %!(int a, int b) => a + b);
-      part.free();
+      part.cleanup();
     }
     return <consumer>;
   });
@@ -425,7 +427,7 @@ uses counts after Thread.run succeeds. No transfer of counts is needed.
 
 Each worker transfers a part's storage scope beneath results before sending.
 For this example the worker stops accessing part after successful send. The
-consumer merges and calls part.free directly. Process-pool keys remain valid.
+consumer merges and calls part.cleanup directly. Process-pool keys remain valid.
 Nested mutable objects would need separate adoption; this example has integer
 values. An undelivered Map or failed send after transfer leaves storage beneath
 results. Channel destruction reclaims it only after Thread.run finishes all jobs.
@@ -578,3 +580,29 @@ constructor/tag defaults remain identified proposals, not silently agreed behavi
 Implementation must finish with authored-source and generated-diff review before
 the existing publication proof. Gary has subsequently authorized implementation with one integration owner.
 No runtime behavior or validation result is claimed from the illustrative example.
+
+## Integration evidence (2026-10-22)
+
+The coordinator integrated both private handoffs. Storage owns Scope hierarchy,
+Map/Array lifetimes, and Context export. Thread owns batch supervision and the
+shared stop/wait monitor. Channel owns communication and close/drain only.
+
+The complete word-count and service examples compile and match their expected
+output. The combined unit runner passes 1,014 tests and 26,668 assertions,
+including 36 new batch, transport, storage, and cross-component tests with
+352 assertions. Failure tests preserve the primary error and verify that all
+participants finish cleanup before the caller continues.
+
+Review corrected empty-Block truth tests, retained PoolTable's raw ownership,
+and reproduced then fixed raw typed-Block export. Context recursively exports
+private canonical values while preserving adopted storage subtrees. The
+public Map cleanup spelling remains `cleanup`; no new free alias was added.
+
+Readiness flags do not prove that stop occurred after Channel wait registration.
+The monitor protocol was source-reviewed, and tests exercise commitment before
+stop, but do not force every scheduling interleaving. Native create/join and
+condition initialization failures were not fault-injected. No testing-only
+production API was introduced.
+
+Final bootstrap, documentation, correctness-gate, and performance evidence are
+owned by the coordinator. Publication follows only after their review.
