@@ -9,7 +9,9 @@ If opening a `Context` fails, the parts already opened are closed before the
 failure reaches an outer `catch`. A failed open does not change
 `Context.current()` or leave a pool active.
 
-A `Thread` runs a callback in an isolated `Context` on a native worker thread.
+`Thread.start` and `Thread.start_raw` run callbacks in isolated `Context`s on
+native worker threads. `Thread.run` uses the shared process canonical pool
+for its jobs, as described below.
 The worker may read parent values and may access shared mutable objects. The
 program must keep those objects alive and coordinate any access that could
 race.
@@ -199,3 +201,79 @@ and every thread then reads that class's complete row.
 that has never started a worker does not lock them. Create native threads
 through `Thread`; one made by calling `pthread_create` directly can share
 interned values with no lock protecting them.
+
+## Run cooperating jobs as one batch
+
+`Thread.run(jobs, completed)` accepts an Array of zero-argument `Func` values.
+It starts native workers and owns every handle until all jobs finish. Each
+successful joined result reaches `completed` on the calling thread. The
+callback is optional: `Thread.run(jobs)` discards results after ordinary join
+export. A void job result is also a successful completion.
+
+Capturing lambdas already produce `Func` values. Bind a direct function or a
+noncapturing lambda to `Func` before putting it in an Array. This uses the
+ordinary callable conversion rather than a separate batch calling convention.
+
+```x2c
+static int answer(void) => 42;
+
+int main(void) {
+  Func job = answer;
+  Thread.run([job], %!(Var result) => {
+    printf("%ld\n", result.integer());
+  });
+  return 0;
+}
+```
+
+```text
+42
+```
+
+Keep the jobs, their captures, callback code, and borrowed objects alive through
+`Thread.run`. Capturing a Map copies its handle; its contents can be changed by
+one designated writer while the caller waits. Changing a captured variable's
+binding itself requires `using &name`. The completion callback must perform
+short coordination and must not wait on participant progress.
+
+Each job has bounded mutable work storage but starts with the shared process
+canonical pool active. Interned Strings and Lists therefore survive job exit.
+They remain until process shutdown, so bounded communication does not bound
+canonical-pool memory. Opening an explicit private pool retains the usual
+lifetime rules; export survivors before closing it. Ordinary Thread callbacks
+and ParallelMap still use their private canonical pools.
+
+Completion results have ordinary joined/exported ownership in the caller's
+Scope and active pool. They are not borrowed from a freed Thread or silently
+reclaimed after the completion callback. Explicitly free or move mutable
+results when their application lifetime ends.
+
+On startup, job, export, completion-callback, or coordinator-stop failure,
+`Thread.run` stops all remaining jobs before joining any of them. It preserves
+the triggering error, invokes no completion callbacks during failure cleanup,
+and waits for every started worker before returning control through the error.
+This includes partial startup and nested batches. Cleanup joins cannot be
+interrupted by a pending stop. A native join failure that prevents establishing
+safe completion aborts rather than return with live borrowers.
+
+## Cooperative stopping
+
+`thread.stop()` records a persistent stop request and wakes the Thread's
+registered Channel or completion wait. It does not close a Channel, transfer
+payload ownership, interrupt arbitrary native I/O, or forcibly terminate code.
+A blocked operation leaves its queue locks before raising
+`(bad-state (operation "Thread.stop") (cancelled 1))`. Ambient resumable Error
+policies cannot suppress this shared cause. Explicit catches can handle it,
+so code that ignores stopping can delay batch cleanup indefinitely.
+
+A Channel insertion, dequeue, or rendezvous that already committed succeeds
+even when a stop arrives before that operation returns. A later operation
+observes the pending stop. A stopped receive raises; it is not successful EOF.
+The normal application protocol still closes Channels and drains accepted data.
+
+A batch can stop only its own jobs. It does not acquire cancellation authority
+over independently owned services or everyone using a borrowed Channel. A
+stopped client is not evidence that a service finished reading borrowed request
+bytes. Keep those bytes under an owner that survives actual borrower completion,
+including failure cleanup. Services shared outside the batch need an explicit
+failure-reply or dependency protocol.

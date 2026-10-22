@@ -42,6 +42,8 @@ typedef struct Thread *Thread;
 
 #include "context.x"
 #include "dispatch.x"
+#include "func.x"
+#include "rewrite.x"
 #include "error/error.x"
 #include "error_init.x"
 #include "exception.x"
@@ -71,6 +73,7 @@ static struct Thread {
   int finished;
   struct ParallelRun *parallel;
   int assigned;
+  int batch;
   int stop_requested;
   pthread_cond_t *waiting;
 };
@@ -180,16 +183,24 @@ void Thread.stop(Thread thread) {
 */
 Thread Thread.start_raw(
   ThreadFn function, const void *input, size_t input_size) {
-  return _start(function, input, input_size, NULL);
+  return _start(function, input, input_size, NULL, 0);
 }
 
 static Thread _start(
   ThreadFn function, const void *input, size_t input_size,
-  struct ParallelRun *parallel) {
+  struct ParallelRun *parallel, int batch) {
   if (!function || (input_size && !input))
     raise %(bad-arg (operation "Thread.start_raw"));
   Thread thread = _new_handle(function, input, input_size);
   thread.parallel = parallel;
+  thread.batch = batch;
+  int started = 0;
+  defer if (!started) {
+    if (thread.result_scope) Scope.destroy(thread.result_scope);
+    Error.policy_release(thread.policy);
+    free(thread);
+  }
+  if (batch) thread.result_scope = Scope.new_named("Thread batch result");
   if (pthread_once(&thread_shutdown_once, _register_shutdown)) {
     Error.policy_release(thread.policy);
     free(thread);
@@ -201,10 +212,9 @@ static Thread _start(
   int error = _create_native(thread);
   if (error) {
     __atomic_fetch_sub(&thread_live_count, 1, __ATOMIC_SEQ_CST);
-    Error.policy_release(thread.policy);
-    free(thread);
     _error("pthread_create", error);
   }
+  started = 1;
   return thread;
 }
 
@@ -235,7 +245,7 @@ static Thread _start_value(
   ThreadValueFn function, Var value, struct ParallelRun *parallel) {
   if (!function) raise %(bad-arg (operation "Thread.start"));
   struct ThreadValueInput input = { function, value };
-  return _start(_call_value, &input, sizeof(input), parallel);
+  return _start(_call_value, &input, sizeof(input), parallel, 0);
 }
 
 /* The handle holds the copied input after its own fields, and this thread's
@@ -321,6 +331,7 @@ static void *_run(void *argument) {
   running_thread = thread;
   (void) Scope.top();
   Pool.thread_initialize();
+  if (thread.batch) thread.result_pool = Pool.current();
   Error.initialize_raw();
   Error.policy_adopt(thread.policy);
   thread.policy = NULL;
@@ -340,36 +351,37 @@ static void *_run(void *argument) {
 /* Each job uses the same isolated work and sealed result owners as a one-shot
    Thread. A reusable worker waits until the consumer releases those owners. */
 static void _run_job(Thread thread) {
-  thread.result_scope = Scope.new_named("Thread result");
-  Scope.push(&thread.result_scope);
-  thread.result_pool = Pool.open_named("Thread result");
+  if (!thread.batch) {
+    thread.result_scope = Scope.new_named("Thread result");
+    Scope.push(&thread.result_scope);
+    thread.result_pool = Pool.open_named("Thread result");
+  }
   _work(thread);
-  thread.result_pool = Pool.detach();
-  Scope.pop();
+  if (!thread.batch) {
+    thread.result_pool = Pool.detach();
+    Scope.pop();
+  }
 }
 
-/* Callback temporaries belong to `work`; its exported result or Error
-   snapshot is moved or copied into the outer result stores before `work`
-   closes. */
+/* Register the worker observer before opening the work Context, so failure
+   constructing its bounded state is captured just like callback failure. */
 static void _work(Thread thread) {
-  Context work = Context.open_isolated_named("Thread callback");
   int mark = Error.mark();
-  try _call(thread, work);
-  /* A registered catch is consulted during dispatch, before `Error` reaches
-     its policy table, so a bare `catch:` would match first and no policy could
-     ever resume inside a worker. `_capture_errors` converts the causes that
-     really must leave the callback, so this backstop needs only that cause and
-     the one an `Error.push` failure can raise before the observer exists. */
+  try {
+    ErrorHandler observer = Error.push(_capture_errors, thread);
+    defer Error.pop(observer);
+    if (thread.batch) Scope.push(&thread.result_scope);
+    defer if (thread.batch) Scope.pop();
+    Context work = thread.batch ? Context.open_named("Thread batch callback")
+                                : Context.open_isolated_named("Thread callback");
+    defer work.close();
+    _call(thread, work);
+  }
   catch %(join-fail *): _worker_failed(thread, mark);
   catch %(alloc-fail *): _worker_failed(thread, mark);
-  work.close();
 }
 
-/* The exported result reaches the result stores while both handlers are
-   registered. */
 static void _call(Thread thread, Context work) {
-  ErrorHandler observer = Error.push(_capture_errors, thread);
-  defer Error.pop(observer);
   ErrorHandler logger_handler = Error.push(Logger.error_handler, void);
   defer Error.pop(logger_handler);
   const void *input = thread.input_size ? _input(thread) : NULL;
@@ -507,7 +519,7 @@ static void _finish_join(Thread thread) {
 }
 
 static void _release_result(Thread thread) {
-  if (thread.result_pool) thread.result_pool.release();
+  if (thread.result_pool && !thread.batch) thread.result_pool.release();
   thread.result_pool = NULL;
   if (thread.result_scope) Scope.destroy(thread.result_scope);
   thread.result_scope = NULL;
@@ -587,6 +599,72 @@ void Thread.finish_all(Array pending) {
     return;
   }
   raise %(join-fail (errors ${failures.reverse()}));
+}
+
+// synchronous callable batches
+
+static Var _batch_call(const void *bytes, size_t size) {
+  (void) size;
+  Func function = *(Func const *) bytes;
+  return function.apply(0, NULL);
+}
+
+static void _batch_stop(Array pending) {
+  stop_mask++;
+  defer --stop_mask;
+  foreach (Thread worker, pending) worker.stop();
+  defer if (pending.len()) {
+    fprintf(stderr, "Thread.run: cleanup left unjoined workers\n");
+    abort();
+  }
+  Thread.finish_all(pending);
+}
+
+static void _batch_check_stop(void) {
+  x2c_thread_wait_lock();
+  int stopped = x2c_thread_stopping();
+  x2c_thread_wait_unlock();
+  if (stopped) x2c_thread_cancel();
+}
+
+/** Runs zero-argument callable jobs concurrently and waits for all of them.
+    Each successful joined/exported result, including void, reaches completed
+    on the caller when that callback is nonnull. Jobs and their captures stay
+    borrowed through the call. Results have ordinary caller-owned join lifetime.
+    Batch jobs use the shared process canonical pool and private mutable work
+    scopes; explicitly opened private pools retain their own lifetime rules.
+    The completion callback must not wait on participant progress.
+
+    On startup, job, export, callback, or coordinator-stop failure, requests
+    stop on every remaining job before joining any, then propagates the
+    triggering error. No callback runs during failure cleanup. Stopping is
+    cooperative, so jobs ignoring stop or blocking in native I/O can delay
+    completion indefinitely. Native join failure aborts if cleanup cannot
+    establish that borrowed storage is no longer in use.
+    Raises: startup, callback, export, stop, or worker join causes. */
+void Thread.run(Array jobs, Func completed) {
+  Array pending = $auto([]);
+  ((Block) pending).reserve(jobs.len());
+  defer _batch_stop(pending);
+  foreach (Func job, jobs) {
+    _batch_check_stop();
+    pending.push(_start(_batch_call, &job, sizeof(job), NULL, 1));
+  }
+  while (pending.len()) {
+    Var result = Thread.finish_any(pending);
+    _batch_check_stop();
+    if (completed) completed.apply_value(result);
+  }
+  _batch_check_stop();
+}
+
+macro Expression $thread.run.jobs(Expr $jobs) => Thread.run($jobs);
+
+$rewrite($thread.run.jobs)
+meta static Code _batch_without_callback(Code code) {
+  match (code) case $thread.run.jobs(?jobs):
+    return $!void{ Thread.run($jobs, NULL) };
+  return code;
 }
 
 /** Describes mapping `function` over `source` with at most `workers` Threads.
