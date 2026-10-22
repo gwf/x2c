@@ -24,6 +24,7 @@
 ( ProbeMapShortLong_map ) ==> (( func (( ProbeMapShortLong ))) Map )
 ( ProbeMapShortLong_merge ) ==> (( func (( ProbeMapShortLong ) ( ProbeMapShortLong ))) ProbeMapShortLong )
 ( ProbeMapShortLong_merge_entries ) ==> (( func (( ProbeMapShortLong ) ( ProbeMapShortLong ))) ProbeMapShortLong )
+( ProbeMapShortLong_move_to ) ==> (( func (( ProbeMapShortLong ) ( * Scope ))) void )
 ( ProbeMapShortLong_new ) ==> (( func (( void ))) ProbeMapShortLong )
 ( ProbeMapShortLong_new_capacity ) ==> (( func (( unsigned ))) ProbeMapShortLong )
 ( ProbeMapShortLong_new_table ) ==> (( func (( ProbeMapShortLong ) ( unsigned ))) ProbeMapShortLong )

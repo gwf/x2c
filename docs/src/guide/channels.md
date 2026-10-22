@@ -112,8 +112,8 @@ private owner until teardown if their container was freed earlier.
 
 The automatic path handles ordinary Map and Array tags. Existing typed containers
 and custom roots require a caller-prepared exclusive inactive subtree containing
-their complete physical storage. No descriptor registration or layout cast infers
-that grouping. For example, prepare a packed ArrayInt using its existing move:
+their complete physical storage. For example, prepare a packed ArrayInt using
+its existing move:
 
 <!-- ignore: illustrative fragment with optional typed-array.x and a Channel -->
 ```x2c,ignore
