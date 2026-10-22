@@ -228,6 +228,121 @@ static void storage_concurrent_adoption_and_destruction(void) {
   EXPECT_INT_EQ(storage_drops, 512);
 }
 
+static void _storage_export_order(int child_first) {
+  $scope() {
+    Context work = Context.open_isolated();
+    Map parent = {}, child = {};
+    ArrayString strings = ArrayString.new();
+    MapStringString table = MapStringString.new();
+    Scope owner = parent, child_owner = child;
+    Scope strings_owner = strings, table_owner = table;
+    child_owner.transfer(owner);
+    strings_owner.transfer(owner);
+    table_owner.transfer(owner);
+    String key = String.printf("ordered-key-%d", child_first);
+    String text = String.printf("ordered-text-%d", child_first);
+    EXPECT_FALSE(Pool.is_permanent(key));
+    EXPECT_FALSE(Pool.is_permanent(text));
+    child[key] = text;
+    strings.push(text);
+    table[key] = text;
+    Scope.push(&owner);
+    Block block = Block.new(sizeof(int));
+    int number = 37;
+    block.push(&number);
+    Buffer buffer = Buffer.new(0);
+    buffer.write("ordered buffer");
+    ContextProbe probe = Scope.malloc(sizeof(struct ContextProbe));
+    *probe = (struct ContextProbe) {.value = text};
+    Var object = Var.new(<ctxprobe>, probe);
+    Var wide = Var.box_long(0x123456789L), clone = wide.clone_wide();
+    Scope.pop();
+    parent["child"] = child;
+    parent["strings"] = strings;
+    parent["table"] = table;
+    parent["block"] = block;
+    parent["buffer"] = buffer;
+    parent["probe"] = object;
+    parent["wide"] = wide;
+    parent["clone"] = clone;
+    Array root = [];
+    if (!child_first) root.push(parent);
+    root.push(child);
+    root.push(strings);
+    root.push(table);
+    root.push(block);
+    root.push(buffer);
+    root.push(object);
+    root.push(wide);
+    root.push(clone);
+    if (child_first) root.push(parent);
+    work.export(root);
+    work.close();
+    EXPECT_PTR_EQ(child_owner.parent(), owner);
+    EXPECT_PTR_EQ(strings_owner.parent(), owner);
+    EXPECT_PTR_EQ(table_owner.parent(), owner);
+    EXPECT_PTR_EQ(Scope.owner(block), owner);
+    EXPECT_PTR_EQ(Scope.owner(buffer), owner);
+    EXPECT_PTR_EQ(Scope.owner(buffer.content), owner);
+    EXPECT_PTR_EQ(Scope.owner(buffer.indents), owner);
+    EXPECT_PTR_EQ(Scope.owner(probe), owner);
+    EXPECT_PTR_EQ(wide.wide_owner(), owner);
+    EXPECT_PTR_EQ(clone.wide_owner(), owner);
+    EXPECT_FALSE(wide.same(clone));
+    EXPECT_INT_EQ(wide.long_value(), 0x123456789L);
+    EXPECT_INT_EQ(clone.long_value(), 0x123456789L);
+    EXPECT_INT_EQ(*((int *) block.bytes), 37);
+    EXPECT_STR_EQ(buffer.str(), "ordered buffer");
+    String lookup = String.printf("ordered-key-%d", child_first);
+    String expected = String.printf("ordered-text-%d", child_first);
+    EXPECT_STR_EQ(child[lookup].str(), expected);
+    EXPECT_STR_EQ(strings[0], expected);
+    EXPECT_STR_EQ(table[lookup], expected);
+    EXPECT_STR_EQ(probe.value.str(), expected);
+    parent.cleanup();
+    root.free();
+  }
+}
+
+static void storage_exports_child_before_parent(void) {
+  _storage_export_order(1);
+}
+
+static void storage_exports_parent_before_child(void) {
+  _storage_export_order(0);
+}
+
+static void storage_exports_child_independently(void) {
+  $test.scoped();
+  Context work = Context.open_isolated();
+  Map parent = {}, child = {};
+  Scope owner = parent, nested = child;
+  nested.transfer(owner);
+  child["value"] = String.printf("independent-child-%d", 709);
+  work.export(child);
+  work.close();
+  EXPECT_TRUE(nested.parent() != owner);
+  EXPECT_STR_EQ(child["value"].str(), "independent-child-709");
+  child.cleanup();
+}
+
+static void storage_exports_distinct_equal_wide_boxes(void) {
+  $test.scoped();
+  Scope destination = *Scope.top();
+  Context work = Context.open_isolated();
+  Var wide = Var.box_long(0x123456789L), clone = wide.clone_wide();
+  Array root = [wide, clone];
+  work.export(root);
+  EXPECT_PTR_EQ(wide.wide_owner(), destination);
+  EXPECT_PTR_EQ(clone.wide_owner(), destination);
+  EXPECT_FALSE(wide.same(clone));
+  work.close();
+  EXPECT_INT_EQ(wide.long_value(), 0x123456789L);
+  EXPECT_INT_EQ(clone.long_value(), 0x123456789L);
+  EXPECT_TRUE(root[0].same(wide));
+  EXPECT_TRUE(root[1].same(clone));
+}
+
 void storage_ownership_suite(void) {
   $test.run(storage_scope_transfer_preserves_allocations);
   $test.run(storage_empty_arrays_have_private_scopes);
@@ -238,4 +353,8 @@ void storage_ownership_suite(void) {
   $test.run(storage_failed_export_can_retry_adopted_graph);
   $test.run(storage_exports_raw_typed_block_views);
   $test.run(storage_concurrent_adoption_and_destruction);
+  $test.run(storage_exports_child_before_parent);
+  $test.run(storage_exports_parent_before_child);
+  $test.run(storage_exports_child_independently);
+  $test.run(storage_exports_distinct_equal_wide_boxes);
 }

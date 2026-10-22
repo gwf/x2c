@@ -96,8 +96,11 @@ Channel capacity does not bound canonical-pool retention.
 
 Explicit `Context.export` retains its recursive semantics: it exports private
 canonical values, preserves container identities, and keeps explicitly adopted
-children under their parent. Its container memo breaks reference cycles during
-export. This operation is separate from both Scope transfer and channel transport.
+children under their parent when both participate in the same root export.
+Reference traversal order does not change that adoption. Exporting only a child
+can move it independently. The export memo breaks reference cycles and records
+storage moves; root export commits the moves after recursive value export.
+This operation is separate from both Scope transfer and channel transport.
 
 Raw Blocks remain type agnostic. `Block.new` creates ordinary managed handle
 and backing allocations. `Block.new_owned` groups that storage beneath a child
