@@ -241,7 +241,8 @@ canonical pool active. Interned Strings and Lists therefore survive job exit.
 They remain until process shutdown, so bounded communication does not bound
 canonical-pool memory. Opening an explicit private pool retains the usual
 lifetime rules; export survivors before closing it. Ordinary Thread callbacks
-and ParallelMap still use their private canonical pools.
+still use their private canonical pools. ParallelMap uses the shared canonical
+pool and borrows each result until its reducer returns.
 
 Completion results have ordinary joined/exported ownership in the caller's
 Scope and active pool. They are not borrowed from a freed Thread or silently
@@ -277,3 +278,20 @@ stopped client is not evidence that a service finished reading borrowed request
 bytes. Keep those bytes under an owner that survives actual borrower completion,
 including failure cleanup. Services shared outside the batch need an explicit
 failure-reply or dependency protocol.
+
+### Parallel mapping and explicit ownership
+
+`source.parallel_map(callback, workers).foldl(seed, reducer)` reuses bounded
+workers and invokes the reducer on the caller in completion order. Each worker
+keeps its callback storage alive until the reducer returns. Returning a value
+or inserting it into a container does not transfer ownership. The reducer must
+explicitly transfer any worker-owned storage it retains, using the existing
+`move_to` operations. Untransferred storage is reclaimed by the worker.
+References can form cycles without changing this rule.
+
+With a `void` seed, the first result becomes the accumulator without a reducer
+call. Use that form only when the result survives worker cleanup independently.
+For worker-owned results, supply a seed and transfer storage in the reducer.
+Canonical values use the shared pool; explicitly opened private pools retain
+their own lifetime rules. On failure, the fold requests stop on all workers
+before joining them. Channel waits cooperate; arbitrary native I/O does not.

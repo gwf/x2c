@@ -1105,6 +1105,7 @@ static void parallel_map_results_outlive_workers(void) {
   Array results = inputs.iter()
     .parallel_map(_thread_value_map, 2)
     .foldl([], %!(Array values, Var item) => {
+      item.map().move_to(Scope.top());
       values.push(item);
       return values;
     });
@@ -1182,16 +1183,21 @@ static Var _parallel_reuse_worker(Var input) {
     jobs: jobs,
     text: String.printf("job-%d", input.int())
   };
+  if (result[<id>].is_wide()) {
+    Scope contents = result;
+    result[<id>].move_wide_to(&contents);
+  }
   return result;
 }
 
-static void parallel_map_reuses_workers_and_exports_each_job(void) {
+static void parallel_map_reuses_workers_with_explicit_transfer(void) {
   $test.scoped();
   _parallel_reset();
   Array inputs = [];
   for (int i = 0; i < 16; i++) inputs.push(i);
   Array results = inputs.iter().parallel_map(_parallel_reuse_worker, 4)
     .foldl([], %!(Array values, Var item) => {
+      item.map().move_to(Scope.top());
       values.push(item);
       return values;
     });
@@ -1214,11 +1220,111 @@ static void parallel_map_reuses_workers_and_exports_each_job(void) {
     EXPECT_TRUE(texts.contains(String.printf("job-%d", i)));
 }
 
+static atomic_int parallel_dropped;
+static Channel parallel_blocked;
+static atomic_int parallel_entered;
+
+static void _parallel_drop(void *value) {
+  (void) value;
+  atomic_fetch_add(&parallel_dropped, 1);
+}
+
+static Var _parallel_owned_result(Var input) {
+  (void) input;
+  Scope.malloc_finalized(8, _parallel_drop);
+  Map result = {text: "shared text"};
+  result[<self>] = result;
+  Array links = [result];
+  Scope contents = result;
+  links.move_to(&contents);
+  result[<links>] = links;
+  return result;
+}
+
+static void parallel_map_borrows_until_reducer_returns(void) {
+  $test.scoped();
+  atomic_store(&parallel_dropped, 0);
+  Map kept = [0, 1].iter().parallel_map(_parallel_owned_result, 1)
+    .foldl({}, %!(Map previous, Map item) => {
+      EXPECT_TRUE(item[<self>].map() === item);
+      if (previous.contains(<self>)) {
+        EXPECT_INT_EQ(atomic_load(&parallel_dropped), 1);
+        EXPECT_TRUE(previous[<self>].map() === previous);
+      }
+      else EXPECT_INT_EQ(atomic_load(&parallel_dropped), 0);
+      item.move_to(Scope.top());
+      return item;
+    });
+  EXPECT_INT_EQ(atomic_load(&parallel_dropped), 2);
+  EXPECT_TRUE(kept[<self>].map() === kept);
+  EXPECT_TRUE(kept[<links>].array()[0].map() === kept);
+  EXPECT_STR_EQ(kept[<text>].string(), "shared text");
+  atomic_store(&parallel_dropped, 0);
+  [0, 1].iter().parallel_map(_parallel_owned_result, 1)
+    .foldl(0, %!(int count, Map item) => {
+      EXPECT_TRUE(item[<self>].map() === item);
+      EXPECT_INT_EQ(atomic_load(&parallel_dropped), count);
+      return count + 1;
+    });
+  EXPECT_INT_EQ(atomic_load(&parallel_dropped), 2);
+}
+
+static Var _parallel_channel_wait(Var input) {
+  if (input.int()) {
+    atomic_store(&parallel_entered, 1);
+    return parallel_blocked.receive();
+  }
+  while (!atomic_load(&parallel_entered)) sched_yield();
+  return input;
+}
+
+static void parallel_map_stops_channel_wait_on_reducer_failure(void) {
+  $test.scoped();
+  parallel_blocked = Channel.new();
+  atomic_store(&parallel_entered, 0);
+  int caught = 0;
+  try [0, 1].iter().parallel_map(_parallel_channel_wait, 2)
+    .foldl(0, %!(Var acc, Var item) => {
+      (void) acc;
+      (void) item;
+      raise %(bad-arg (primary 99));
+    });
+  catch %(bad-arg (primary ?value)): caught = value.int();
+  EXPECT_INT_EQ(caught, 99);
+  parallel_blocked.free();
+  parallel_blocked = NULL;
+}
+
+static Var _parallel_waiting_fold(Var input) {
+  (void) input;
+  return [1].iter().parallel_map(_parallel_channel_wait, 1)
+    .foldl(0, %!(int acc, int item) => acc + item);
+}
+
+static void parallel_map_coordinator_stop_wakes_workers(void) {
+  $test.scoped();
+  parallel_blocked = Channel.new();
+  atomic_store(&parallel_entered, 0);
+  Thread coordinator = Thread.start(_parallel_waiting_fold, void);
+  while (!atomic_load(&parallel_entered)) sched_yield();
+  coordinator.stop();
+  int caught = 0;
+  try coordinator.join();
+  catch %(join-fail *): caught = 1;
+  EXPECT_INT_EQ(caught, 1);
+  coordinator.free();
+  parallel_blocked.free();
+  parallel_blocked = NULL;
+}
+
 void thread_parallel_map_suite(void) {
+  $test.run(parallel_map_coordinator_stop_wakes_workers);
+  $test.run(parallel_map_borrows_until_reducer_returns);
+  $test.run(parallel_map_stops_channel_wait_on_reducer_failure);
   $test.run(parallel_map_bounds_and_completion_order);
   $test.run(parallel_map_results_outlive_workers);
   $test.run(parallel_map_cleans_worker_and_source_failures);
-  $test.run(parallel_map_reuses_workers_and_exports_each_job);
+  $test.run(parallel_map_reuses_workers_with_explicit_transfer);
 }
 
 static pthread_cond_t stop_probe_condition =
