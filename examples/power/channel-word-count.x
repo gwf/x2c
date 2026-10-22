@@ -40,7 +40,7 @@ static Map directory_count(Path root) {
   jobs.push(%!(void) => {
     foreach (Map part in results) {
       counts.merge_with(part, %!(int a, int b) => a + b);
-      part.free();
+      part.cleanup();
     }
     return <consumer>;
   });
