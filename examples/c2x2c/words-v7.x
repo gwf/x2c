@@ -38,10 +38,7 @@ static MapStringInt dir_unique_words(Path root) {
     .foldl(MapStringInt.new(), accumulate);
 }
 
-int main(int argc, char **argv) {
-  if (argc != 2)
-    fail("Usage: " + argv[0] + " DIR");
-  MapStringInt counts = dir_unique_words(argv[1]);
+static void print_top_ten(MapStringInt counts) {
   Array ranked = [];
   foreach ((String word, int count) in counts) {
     if (ranked.len() == 10 && count < ranked[0][0]) continue;
@@ -52,5 +49,11 @@ int main(int argc, char **argv) {
     (int count, String word) = pair;
     puts(%"$count\t$word");
   }
+}
+
+int main(int argc, char **argv) {
+  if (argc != 2)
+    fail("Usage: " + argv[0] + " DIR");
+  print_top_ten(dir_unique_words(argv[1]));
   return EXIT_SUCCESS; // Root scope reclaims the Map and ranking Array.
 }

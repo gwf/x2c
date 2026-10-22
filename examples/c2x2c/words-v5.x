@@ -23,10 +23,7 @@ static MapSubInt file_unique_words(String filename) {
   return counts;
 }
 
-int main(int argc, char **argv) {
-  if (argc != 2)
-    fail("Usage: " + argv[0] + " FILE");
-  MapSubInt counts = file_unique_words(argv[1]);
+static void print_top_ten(MapSubInt counts) {
   Array ranked = [];
   foreach ((Substr word, int count) in counts) {
     if (ranked.len() == 10 && count < ranked[0][0]) continue;
@@ -37,5 +34,11 @@ int main(int argc, char **argv) {
     (int count, String word) = pair;
     puts(%"$count\t$word");
   }
+}
+
+int main(int argc, char **argv) {
+  if (argc != 2)
+    fail("Usage: " + argv[0] + " FILE");
+  print_top_ten(file_unique_words(argv[1]));
   return EXIT_SUCCESS; // Root scope reclaims the Map and ranking Array.
 }
