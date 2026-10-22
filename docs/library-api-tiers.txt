@@ -186,6 +186,9 @@ lib/scope/scope.x|advanced|Scope.top
 lib/scope/scope.x|internal|Scope.initialize,Scope.shutdown_hook
 lib/scope/scope.x|internal|Scope.owner
 lib/scope/scope.x|internal|ScopeAlloc
+lib/thread.x|internal|x2c_thread_wait_lock,x2c_thread_wait_unlock
+lib/thread.x|internal|x2c_thread_wait_owner,x2c_thread_wait_stopped
+lib/thread.x|internal|x2c_thread_stopping,x2c_thread_wait,x2c_thread_cancel
 lib/string-escape.x|advanced|String.escape,String.parse,String.parse_char
 lib/string-escape.x|advanced|String.repr,String.write_repr
 lib/string-number.x|advanced|String.try_double,String.try_long
