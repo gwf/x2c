@@ -6,6 +6,8 @@
 */
 
 #include <ctype.h>
+#include <errno.h>
+#include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,6 +26,7 @@ typedef struct {
   size_t length;
 } Counts;
 
+static void fail(const char *format, ...);
 static void count_line(Counts *counts, char *line);
 static void free_counts(Counts *counts);
 static void print_top_ten(const Counts *counts);
@@ -33,18 +36,13 @@ static void *allocate(size_t count, size_t size);
 static int compare_entries(const void *a, const void *b);
 static void grow_counts(Counts *counts);
 static uint64_t hash_word(const char *word);
-static void fail(const char *message);
 
 int main(int argc, char **argv) {
-  if (argc != 2) {
-    fprintf(stderr, "Usage: %s FILE\n", argv[0]);
-    return EXIT_FAILURE;
-  }
+  if (argc != 2)
+    fail("Usage: %s FILE", argv[0]);
   FILE *input = fopen(argv[1], "r");
-  if (!input) {
-    perror(argv[1]);
-    return EXIT_FAILURE;
-  }
+  if (!input)
+    fail("%s: %s", argv[1], strerror(errno));
   Counts counts = {0};
   char *line = NULL;
   size_t capacity = 0;
@@ -54,12 +52,20 @@ int main(int argc, char **argv) {
   fclose(input);
   if (!finished) {
     free_counts(&counts);
-    fprintf(stderr, "Could not finish reading %s\n", argv[1]);
-    return EXIT_FAILURE;
+    fail("Could not finish reading %s", argv[1]);
   }
   print_top_ten(&counts);
   free_counts(&counts);
   return EXIT_SUCCESS;
+}
+
+static void fail(const char *format, ...) {
+  va_list args;
+  va_start(args, format);
+  vfprintf(stderr, format, args);
+  va_end(args);
+  fputc('\n', stderr);
+  exit(EXIT_FAILURE);
 }
 
 static void count_line(Counts *counts, char *line) {
@@ -174,9 +180,4 @@ static uint64_t hash_word(const char *word) {
     hash *= 0x100000001b3ULL;
   }
   return hash;
-}
-
-static void fail(const char *message) {
-  fprintf(stderr, "%s\n", message);
-  exit(EXIT_FAILURE);
 }
