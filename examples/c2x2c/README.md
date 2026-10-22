@@ -116,8 +116,8 @@ Versions 4-7 use `MapSubInt` from `lib/substring-map.x`. This count table
 reuses the runtime's Map storage, probing, and growth templates. `increment`
 copies only a view on insertion. Version 4 uses
 `foreach ((Substr word, int count) in counts)` for native, allocation-free
-traversal. `strings()` converts unique keys into a canonical String-keyed Map
-for file results in Version 5. Versions 6-7 return `MapSubInt` directly.
+traversal. Versions 5-7 return `MapSubInt` directly, preserving borrowed keys
+and native Substr/int iteration.
 Their shared `MapStringInt` accumulator looks up borrowed word bytes and
 materializes a String only when inserting a new word. It merges
 and releases each consumed count table. Ranking traverses typed String/int

@@ -1,8 +1,8 @@
-/*  words-v5.x -- one file-counting function and String-keyed results
+/*  words-v5.x -- one file-counting function
 
-    Consolidates V4's reading and counting into file_unique_words. Converts
-    unique Substr keys to canonical Strings in a generic Map, then ranks its
-    entries with String/int bindings and prints with interpolation.
+    Consolidates V4's reading and counting into file_unique_words. Keeps its
+    MapSubInt result and Substr/int iteration, materializes only heap candidate
+    words, and prints with interpolation.
 */
 
 #include <stdio.h>
@@ -14,23 +14,23 @@ static void fail(const char *message) {
   exit(EXIT_FAILURE);
 }
 
-static Map file_unique_words(String filename) {
+static MapSubInt file_unique_words(String filename) {
   String text = filename.open("r").string_close()
     .reject("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~").lower();
   MapSubInt counts = MapSubInt.new();
   foreach (Substr word in text)
     counts.increment(word);
-  return counts.strings();
+  return counts;
 }
 
 int main(int argc, char **argv) {
   if (argc != 2)
     fail("Usage: " + argv[0] + " FILE");
-  Map counts = file_unique_words(argv[1]);
+  MapSubInt counts = file_unique_words(argv[1]);
   Array ranked = [];
-  foreach ((String word, int count) in counts) {
+  foreach ((Substr word, int count) in counts) {
     if (ranked.len() == 10 && count < ranked[0][0]) continue;
-    ranked.heap_push(%($count $word));
+    ranked.heap_push(%($count ${word.str()}));
     if (ranked.len() > 10) ranked.heap_pop();
   }
   foreach (List pair in ranked.sort()) {
