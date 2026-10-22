@@ -23,6 +23,8 @@ Scope Channel_scope(Channel channel);
 
 void Channel_send(Channel c, Var value);
 
+void Channel_send_owned(Channel c, Var value);
+
 Var Channel_receive(Channel channel);
 
 void Channel_close(Channel channel);
