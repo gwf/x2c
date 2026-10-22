@@ -98,7 +98,7 @@ in the early stages. Versions 0-1 classify punctuation with C's current
 locale. Versions 2-7 reject a fixed ASCII punctuation set. All versions
 remove punctuation before lowercasing with C's current locale; the programs
 do not change it.
-`file_unique_words` and `dir_unique_words` return Maps with unique word keys
+`count_words` and `dir_unique_words` return Maps with unique word keys
 and occurrence counts as values.
 
 Versions 2-7 use `lib/substring.x`. A `Substr` (also named `Substring`) is a
@@ -146,7 +146,7 @@ follows file symlinks. Unreadable files still raise.
 Version 7 retains this exact chain:
 
 ```x2c
-return root.walk().filter(Path.is_file).parallel_map(file_unique_words, 4)
+return root.walk().filter(Path.is_file).parallel_map(count_words, 4)
   .foldl({}, accumulate);
 ```
 

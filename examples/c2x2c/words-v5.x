@@ -1,6 +1,6 @@
 /*  words-v5.x -- one file-counting function
 
-    Consolidates V4's reading and counting into file_unique_words. Keeps its
+    Consolidates V4's reading and counting into count_words. Keeps its
     MapSubInt result and Substr/int iteration, materializes only heap candidate
     words, and prints with interpolation.
 */
@@ -14,7 +14,7 @@ static void fail(const char *message) {
   exit(EXIT_FAILURE);
 }
 
-static MapSubInt file_unique_words(String filename) {
+static MapSubInt count_words(String filename) {
   String text = filename.open("r").string_close()
     .reject("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~").lower();
   MapSubInt counts = MapSubInt.new();
@@ -39,6 +39,6 @@ static void print_top_ten(MapSubInt counts) {
 int main(int argc, char **argv) {
   if (argc != 2)
     fail("Usage: " + argv[0] + " FILE");
-  print_top_ten(file_unique_words(argv[1]));
+  print_top_ten(count_words(argv[1]));
   return EXIT_SUCCESS; // Root scope reclaims the Map and ranking Array.
 }

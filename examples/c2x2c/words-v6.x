@@ -16,7 +16,7 @@ static void fail(const char *message) {
   exit(EXIT_FAILURE);
 }
 
-static Var file_unique_words(Var filename) {
+static Var count_words(Var filename) {
   String text = filename.string().open("r").string_close()
     .reject("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~").lower();
   MapSubInt counts = MapSubInt.new();
@@ -34,7 +34,7 @@ static MapStringInt accumulate(MapStringInt total, MapSubInt counts) {
 static MapStringInt dir_unique_words(Path root) {
   if (!root.is_dir())
     fail("Not a directory: " + root);
-  return root.walk().filter(Path.is_file).map(file_unique_words)
+  return root.walk().filter(Path.is_file).map(count_words)
     .foldl(MapStringInt.new(), accumulate);
 }
 
