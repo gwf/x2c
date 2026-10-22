@@ -1,3 +1,10 @@
+/*  words-v7.x -- parallel recursive directory counting
+
+    Replaces V6's sequential map with four persistent workers. The caller
+    accumulates each returned MapSubInt while its worker waits, then releases
+    the table. Counting, accumulation, and ranking otherwise match V6.
+*/
+
 #include "substring-map.x"
 #include "typed-map.x"
 #include "path.x"
@@ -19,7 +26,7 @@ static Var file_unique_words(Var filename) {
 }
 
 static MapStringInt accumulate(MapStringInt total, MapSubInt counts) {
-  foreach ((Substr word, int count) in counts) total[word.str()] += count;
+  foreach ((Substr word, int count) in counts) total.add_substr(word, count);
   counts.cleanup();
   return total;
 }

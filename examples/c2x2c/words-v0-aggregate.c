@@ -1,4 +1,9 @@
-/* Benchmark-only multi-file entry point; reuse V0's counting implementation. */
+/*  words-v0-aggregate.c -- sequential multi-file C benchmark baseline
+
+    Reuses V0's implementation but accepts several named files and counts
+    them into one table. Reuses one line buffer and prints one combined
+    top ten; the benchmark driver supplies directory traversal.
+*/
 #define main words_v0_single_file_main
 #include "words-v0.c"
 #undef main

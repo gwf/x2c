@@ -1,3 +1,10 @@
+/*  words-v5.x -- one file-counting function and String-keyed results
+
+    Consolidates V4's reading and counting into file_unique_words. Converts
+    unique Substr keys to canonical Strings in a generic Map, then ranks its
+    entries and prints with interpolation.
+*/
+
 #include "substring-map.x"
 #include <stdio.h>
 #include <stdlib.h>

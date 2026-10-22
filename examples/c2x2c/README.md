@@ -7,14 +7,14 @@ directory counting. These files are the canonical tutorial sources.
 
 | Version | Lines | Change |
 | --- | ---: | --- |
-| [0](words-v0.c) | 164 | Native C: explicit hash table, allocation, sorting, and cleanup. |
-| [1](words-v1.x) | 139 | Scope allocation, pointer member access with dots, and defer. |
-| [2](words-v2.x) | 102 | Substr word views and whole-file reading; retain the explicit hash table. |
-| [3](words-v3.x) | 97 | Bounded Array min-heap of `(count word)` Lists and typed destructured printing. |
-| [4](words-v4.x) | 42 | A native Substr count map and mixed-type foreach replace the explicit table traversal. |
-| [5](words-v5.x) | 34 | One file counting function; interpolated output. |
-| [6](words-v6.x) | 49 | Recursive directory traversal; merge native per-file count maps into MapStringInt. |
-| [7](words-v7.x) | 49 | Four persistent workers return native count maps; the caller converts keys and merges. |
+| [0](words-v0.c) | 171 | Native C: explicit hash table, allocation, sorting, and cleanup. |
+| [1](words-v1.x) | 146 | Scope allocation, pointer member access with dots, and defer. |
+| [2](words-v2.x) | 109 | Substr word views and whole-file reading; retain the explicit hash table. |
+| [3](words-v3.x) | 104 | Bounded Array min-heap of `(count word)` Lists and typed destructured printing. |
+| [4](words-v4.x) | 49 | A native Substr count map and mixed-type foreach replace the explicit table traversal. |
+| [5](words-v5.x) | 41 | One file counting function; interpolated output. |
+| [6](words-v6.x) | 56 | Recursive directory traversal; merge native per-file count maps into MapStringInt. |
+| [7](words-v7.x) | 56 | Four persistent workers return native count maps; the caller converts keys and merges. |
 
 Line counts include comments. The viewer hides comments and calculates its
 diffs and displayed line numbers from that representation.
@@ -118,7 +118,8 @@ copies only a view on insertion. Version 4 uses
 `foreach ((Substr word, int count) in counts)` for native, allocation-free
 traversal. `strings()` converts unique keys into a canonical String-keyed Map
 for file results in Version 5. Versions 6-7 return `MapSubInt` directly.
-Their shared `MapStringInt` accumulator materializes word Strings while merging
+Their shared `MapStringInt` accumulator looks up borrowed word bytes and
+materializes a String only when inserting a new word. It merges
 and releases each consumed count table. Ranking traverses typed String/int
 bindings. Version 7 borrows the table while its worker waits for accumulation
 to finish; no automatic result export is needed. Its source Strings use the

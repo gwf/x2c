@@ -15,6 +15,7 @@
 #include <string.h>
 #include "map-generics.x"
 #include "integer-ops.x"
+#include "substring.x"
 
 // representation
 
@@ -317,6 +318,29 @@ $map.core.observe(
   MapStringInt, String, int, struct MapStringIntRecord,
   _box_string, _box_int, _compare_string, _compare_int);
 $map.typed.observe(MapStringInt, String, int, _box_string, _box_int);
+
+/** Adds count using borrowed bytes for lookup. Only a missing key is
+    converted to a canonical String; the map never retains the view.
+    Integer addition and insertion follow updateindex. */
+int MapStringInt.add_substr(MapStringInt map, Substr key, int count) {
+  if ((void *) map == NULL) _bad_arg("MapStringInt");
+  unsigned hash = key.hash();
+  if (!hash) hash = -1;
+  unsigned *hashes = map.hashes;
+  struct MapStringIntRecord *entries = map.entries;
+  unsigned start = hash & map.mask;
+  for (unsigned distance = 0; distance < map.capacity; distance++) {
+    unsigned index = (start + distance) & map.mask, stored = hashes[index];
+    if (!stored) break;
+    if (stored == hash && entries[index].key.len() == key.length &&
+        (!key.length || memcmp(entries[index].key,
+          (const char *) key.source + key.offset, (size_t) key.length) == 0))
+      return _update_int(&entries[index].val, <+>, count);
+    if (((map.capacity + index - (stored & map.mask)) & map.mask) < distance)
+      break;
+  }
+  return map.updateindex(key, <+>, count);
+}
 
 static MapStringInt _prepare_string_int_export(
   MapStringInt map, Context source) {

@@ -1,3 +1,10 @@
+/*  words-v3.x -- bounded top-ten heap
+
+    Keeps V2's word counting but replaces the full sorting array and comparator
+    with an Array min-heap of at most ten (count word) Lists. Destructures the
+    final tuples for printing in ascending count and word order.
+*/
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>

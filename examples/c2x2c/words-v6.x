@@ -1,3 +1,10 @@
+/*  words-v6.x -- sequential recursive directory counting
+
+    Extends V5 to every normal file under a directory. Returns each file's
+    MapSubInt directly and folds it into one MapStringInt, converting a view
+    to String only when inserting a new word into the total.
+*/
+
 #include "substring-map.x"
 #include "typed-map.x"
 #include "path.x"
@@ -19,7 +26,7 @@ static Var file_unique_words(Var filename) {
 }
 
 static MapStringInt accumulate(MapStringInt total, MapSubInt counts) {
-  foreach ((Substr word, int count) in counts) total[word.str()] += count;
+  foreach ((Substr word, int count) in counts) total.add_substr(word, count);
   counts.cleanup();
   return total;
 }

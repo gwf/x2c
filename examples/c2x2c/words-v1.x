@@ -1,3 +1,10 @@
+/*  words-v1.x -- scope-owned allocation and deferred cleanup
+
+    Keeps V0's line reader, hash table, and full sort. Replaces checked native
+    allocations with scope-owned storage, uses dot member access, and defers
+    cleanup of the native getline buffer.
+*/
+
 #include <ctype.h>
 #include <stdint.h>
 #include <stdio.h>

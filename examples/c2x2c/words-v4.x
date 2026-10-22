@@ -1,3 +1,10 @@
+/*  words-v4.x -- native typed counting map
+
+    Replaces V3's explicit hash table with MapSubInt. Uses mixed-type foreach
+    bindings to read Substr keys and int counts directly, while retaining
+    borrowed word storage and the bounded top-ten heap.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "substring-map.x"

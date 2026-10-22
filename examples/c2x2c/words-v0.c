@@ -1,3 +1,10 @@
+/*  words-v0.c -- native C word-frequency baseline
+
+    Reads one file, removes punctuation, lowercases words, and counts them in
+    an explicit hash table. Sorts all entries to print the ten most frequent
+    words, then frees the table and its copied word strings.
+*/
+
 #include <ctype.h>
 #include <stdint.h>
 #include <stdio.h>

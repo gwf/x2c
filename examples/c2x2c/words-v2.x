@@ -1,3 +1,10 @@
+/*  words-v2.x -- whole-file Strings and borrowed word views
+
+    Replaces V1's line parsing and copied words with whole-file String input,
+    reject/lower normalization, and allocation-free Substr iteration. Keeps
+    the explicit hash table and full sort, borrowing each word's text.
+*/
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
