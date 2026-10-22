@@ -357,11 +357,10 @@ static void _x2c_gensym_macro__expand_0(Map _x2c_gensym_macro_map_10){
           _x2c_gensym_macro_expanded_0.mask = _x2c_gensym_macro_capacity_3 - 1;
           Map _x2c_gensym_macro_expanded_map_0 =(Map) & _x2c_gensym_macro_expanded_0;
           for(unsigned _x2c_gensym_macro_i_0 = 0;  _x2c_gensym_macro_i_0 < _x2c_gensym_macro_cap_2;  _x2c_gensym_macro_i_0 ++) if(_x2c_gensym_macro_hashes_2[_x2c_gensym_macro_i_0]) Map_reinsert(_x2c_gensym_macro_expanded_map_0, _x2c_gensym_macro_hashes_2[_x2c_gensym_macro_i_0], _x2c_gensym_macro_entries_1[_x2c_gensym_macro_i_0], 0);
-          Scope _x2c_gensym_macro_owner_0 = 1 ? Scope_owner(_x2c_gensym_macro_map_10) : _x2c_gensym_macro_map_10 -> scope;
-          Scope_move(Bytes_block(_x2c_gensym_macro_staged_hashes_0), & _x2c_gensym_macro_owner_0);
-          Scope_move((unsigned char *) _x2c_gensym_macro_staged_hashes_0 - sizeof(Block), & _x2c_gensym_macro_owner_0);
-          Scope_move(Bytes_block(_x2c_gensym_macro_staged_entries_0), & _x2c_gensym_macro_owner_0);
-          Scope_move((unsigned char *) _x2c_gensym_macro_staged_entries_0 - sizeof(Block), & _x2c_gensym_macro_owner_0);
+          Scope_move_before(Bytes_block(_x2c_gensym_macro_staged_hashes_0), Bytes_block(_x2c_gensym_macro_map_10 -> hashes));
+          Scope_move_before((unsigned char *) _x2c_gensym_macro_staged_hashes_0 - sizeof(Block), (unsigned char *) _x2c_gensym_macro_map_10 -> hashes - sizeof(Block));
+          Scope_move_before(Bytes_block(_x2c_gensym_macro_staged_entries_0), Bytes_block(_x2c_gensym_macro_map_10 -> entries));
+          Scope_move_before((unsigned char *) _x2c_gensym_macro_staged_entries_0 - sizeof(Block), (unsigned char *) _x2c_gensym_macro_map_10 -> entries - sizeof(Block));
           _x2c_gensym_macro_map_10 -> hashes = _x2c_gensym_macro_expanded_0.hashes;
           _x2c_gensym_macro_map_10 -> entries = _x2c_gensym_macro_expanded_0.entries;
           _x2c_gensym_macro_map_10 -> capacity = _x2c_gensym_macro_expanded_0.capacity;

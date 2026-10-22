@@ -11919,7 +11919,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_21(void
   _10980 = List_var(_10979);
   _10981 = String_new("lib/scope/allocation.x");
   _10982 = String_var(_10981);
-  _10983 = String_new("fda87f0a");
+  _10983 = String_new("14e0d722");
   _10984 = String_var(_10983);
   _10985 = cons(_10984, NULL);
   _10986 = cons(_10982, _10985);
@@ -12419,7 +12419,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_22(void
   _11477 = cons(_223, _11476);
   _11478 = String_new("lib/map-generics.x");
   _11479 = String_var(_11478);
-  _11480 = String_new("b5849f64");
+  _11480 = String_new("5bb47e84");
   _11481 = String_var(_11480);
   _11482 = cons(_11481, NULL);
   _11483 = cons(_11479, _11482);

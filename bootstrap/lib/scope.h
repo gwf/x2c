@@ -57,6 +57,8 @@ Scope Scope_owner(void * ptr);
 
 void Scope_move(void * ptr, Scope * slot);
 
+void Scope_move_before(void * ptr, void * anchor);
+
 void * Scope_realloc(void * ptr, size_t size);
 
 void Scope_push(Scope * scope);
