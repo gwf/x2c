@@ -352,8 +352,8 @@ Block Block_new_owned(size_t width){
 
 }
 
-Scope Block_scope(Block block){
-  return block != NULL ?(block -> lifetime ? block -> lifetime : Scope_owner(block)) : NULL;
+Scope Block_scope(Block b){
+  return b != NULL ?(b -> lifetime ? b -> lifetime : Scope_owner(b)) : NULL;
 }
 
 Bytes Bytes_new(size_t width){

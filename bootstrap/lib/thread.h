@@ -47,7 +47,7 @@ void x2c_thread_wait(pthread_cond_t * condition);
 
 _Noreturn void x2c_thread_cancel(void);
 
-void Thread_stop(Thread thread);
+void Thread_stop(Thread t);
 
 Thread Thread_start_raw(ThreadFn function, const void * input, size_t input_size);
 

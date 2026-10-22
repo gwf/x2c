@@ -21,7 +21,7 @@ Channel Channel_new(Var type, Var capacity);
 
 Scope Channel_scope(Channel channel);
 
-void Channel_send(Channel channel, Var value);
+void Channel_send(Channel c, Var value);
 
 Var Channel_receive(Channel channel);
 
@@ -35,7 +35,7 @@ Var Channel_var(Channel channel);
 
 Channel Var_channel(Var value);
 
-Iter Channel_iter(Channel channel, Iter dest);
+Iter Channel_iter(Channel c, Iter dest);
 
 
 #endif /* __GUARD_0x32AB01A3__ */
