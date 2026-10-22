@@ -10,11 +10,11 @@ directory counting. These files are the canonical tutorial sources.
 | [0](words-v0.c) | 182 | Native C: explicit hash table, allocation, sorting, and cleanup. |
 | [1](words-v1.x) | 146 | Scope allocation, pointer member access with dots, and defer. |
 | [2](words-v2.x) | 109 | Substr word views and whole-file reading; retain the explicit hash table. |
-| [3](words-v3.x) | 104 | Bounded Array min-heap of `(count word)` Lists and typed destructured printing. |
-| [4](words-v4.x) | 49 | A native Substr count map and mixed-type foreach replace the explicit table traversal. |
-| [5](words-v5.x) | 44 | One file counting function; interpolated output. |
-| [6](words-v6.x) | 59 | Recursive directory traversal; merge native per-file count maps into MapStringInt. |
-| [7](words-v7.x) | 59 | Four persistent workers return native count maps; the caller converts keys and merges. |
+| [3](words-v3.x) | 102 | Bounded Array min-heap of `(count word)` Lists and typed destructured printing. |
+| [4](words-v4.x) | 47 | A native Substr count map and mixed-type foreach replace the explicit table traversal. |
+| [5](words-v5.x) | 42 | One file counting function; interpolated output. |
+| [6](words-v6.x) | 57 | Recursive directory traversal; merge native per-file count maps into MapStringInt. |
+| [7](words-v7.x) | 57 | Four persistent workers return native count maps; the caller converts keys and merges. |
 
 Line counts include comments. The viewer hides comments and calculates its
 diffs and displayed line numbers from that representation.

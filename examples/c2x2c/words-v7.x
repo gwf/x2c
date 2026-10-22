@@ -30,10 +30,8 @@ static void print_top_ten(MapStringInt counts) {
     ranked.heap_push(%($count $word));
     if (ranked.len() > 10) ranked.heap_pop();
   }
-  foreach (List pair in ranked.sort()) {
-    (int count, String word) = pair;
+  foreach ((int count, String word) in ranked.sort())
     puts(%"$count\t$word");
-  }
 }
 
 static MapStringInt dir_unique_words(Path root) {

@@ -38,10 +38,8 @@ static void print_top_ten(MapSubInt counts) {
     ranked.heap_push(%($count ${word.str()}));
     if (ranked.len() > 10) ranked.heap_pop();
   }
-  foreach (List pair in ranked.sort()) {
-    (int count, String word) = pair;
+  foreach ((int count, String word) in ranked.sort())
     printf("%d\t%s\n", count, word);
-  }
 }
 
 static void count_word(MapSubInt counts, Substr word) {
