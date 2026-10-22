@@ -317,8 +317,8 @@ Block Block.new_owned(size_t width) {
     Raw Blocks use their handle's allocation owner. Grouped Blocks expose
     their private storage scope. NULL returns NULL.
 */
-Scope Block.scope(Block block) =>
-  block != NULL ? (block.lifetime ? block.lifetime : Scope.owner(block)) : NULL;
+Scope Block.scope(Block b) =>
+  b != NULL ? (b.lifetime ? b.lifetime : Scope.owner(b)) : NULL;
 
 /** Allocates empty byte storage for elements of `width` bytes.
     The result is the base view of a `Scope`-owned `Block`. Methods that may

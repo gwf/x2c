@@ -132,7 +132,8 @@ int x2c_thread_stopping(void) =>
 /** Waits on condition with the internal monitor held. Registration and the
     pending-stop check share that monitor with Thread.stop. Returns holding
     the monitor, with the registration removed, including on pending stop.
-    Queue callers recheck predicates and stop before committing an operation. */
+    Queue callers recheck predicates and stop before committing an operation.
+*/
 void x2c_thread_wait(pthread_cond_t *condition) {
   Thread owner = x2c_thread_wait_owner();
   if (x2c_thread_wait_stopped(owner)) return;
@@ -152,12 +153,11 @@ void x2c_thread_cancel(void) {
     and arbitrary native I/O are not interrupted. Repeated requests are safe
     while the handle remains live; stop does not join or free it.
     Raises: <bad-arg> for a null handle. */
-void Thread.stop(Thread thread) {
-  if (!thread) raise %(bad-arg (operation "Thread.stop"));
+void Thread.stop(Thread t) {
+  if (!t) raise %(bad-arg (operation "Thread.stop"));
   x2c_thread_wait_lock();
-  thread.stop_requested = 1;
-  if (thread.waiting)
-    _completion_check(pthread_cond_broadcast(thread.waiting));
+  t.stop_requested = 1;
+  if (t.waiting) _completion_check(pthread_cond_broadcast(t.waiting));
   x2c_thread_wait_unlock();
 }
 
@@ -630,7 +630,8 @@ static void _batch_check_stop(void) {
 /** Runs zero-argument callable jobs concurrently and waits for all of them.
     Each successful joined/exported result, including void, reaches completed
     on the caller when that callback is nonnull. Jobs and their captures stay
-    borrowed through the call. Results have ordinary caller-owned join lifetime.
+    borrowed through the call. Results have ordinary caller-owned join
+    lifetime.
     Batch jobs use the shared process canonical pool and private mutable work
     scopes; explicitly opened private pools retain their own lifetime rules.
     The completion callback must not wait on participant progress.

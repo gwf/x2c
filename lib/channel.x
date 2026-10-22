@@ -68,7 +68,8 @@ static void _native_check(int error) {
 
 static void _drop(void *bytes) {
   Channel channel = bytes;
-  if (channel.initialized) _native_check(pthread_cond_destroy(&channel.changed));
+  if (channel.initialized)
+    _native_check(pthread_cond_destroy(&channel.changed));
 }
 
 static size_t _capacity(Var value) {
@@ -246,21 +247,20 @@ static int _buffer_receive(Channel channel, ChannelMessage **out) {
     Raises: <bad-arg> for NULL, <void-op> for void, <bad-types> for a tag
     mismatch, <bad-state> for closure or cooperative stop, or <alloc-fail>
     for buffered queue storage. No failure dispatch holds the queue lock. */
-void Channel.send(Channel channel, Var value) {
-  if (!channel) raise %(bad-arg (operation "Channel.send"));
+void Channel.send(Channel c, Var value) {
+  if (!c) raise %(bad-arg (operation "Channel.send"));
   if (value is void) raise %(void-op (operation "Channel.send"));
-  if (channel.type != <var> && value.tag() != channel.type)
+  if (c.type != <var> && value.tag() != c.type)
     raise %(bad-types (operation "Channel.send"));
   ChannelMessage *message = NULL;
   int status = 0;
   defer if (message && status != 1) Scope.free(message);
-  if (channel.capacity) {
-    message = Scope.malloc_in(&channel.lifetime, sizeof(ChannelMessage));
+  if (c.capacity) {
+    message = Scope.malloc_in(&c.lifetime, sizeof(ChannelMessage));
     *message = (ChannelMessage) { .value = value };
   }
   x2c_thread_wait_lock();
-  status = channel.capacity ? _buffer_send(channel, message)
-                            : _rendezvous_send(channel, value);
+  status = c.capacity ? _buffer_send(c, message) : _rendezvous_send(c, value);
   x2c_thread_wait_unlock();
   if (status < 0) x2c_thread_cancel();
   if (!status) raise %(bad-state (operation "Channel.send") (closed 1));
@@ -331,7 +331,6 @@ static int _next(Iter iter, Var *out) {
 /** Initializes a borrowed iterator that blocks for each received message.
     Normal close and draining end iteration; cooperative stop raises instead.
     The Channel must outlive traversal. */
-Iter Channel.iter(Channel channel, Iter dest) =>
-  dest.init(channel, _next, void);
+Iter Channel.iter(Channel c, Iter dest) => dest.init(c, _next, void);
 
 protocol Iter(Channel);

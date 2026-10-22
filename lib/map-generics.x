@@ -78,7 +78,8 @@ macro Unit $map.scaffold(
 
 /* PoolTable keeps its table in the Pool's existing scope. Public families
    use the ordinary core entry to group their own storage. */
-macro Unit $map.storage.family(Type $map, Type $storage, Type $key, Type $value,
+macro Unit $map.storage.family(
+  Type $map, Type $storage, Type $key, Type $value,
   Type $hash_cell,
   Type $entry,
   Name $hash,
@@ -370,7 +371,8 @@ macro Unit $map.storage.family(Type $map, Type $storage, Type $key, Type $value,
   }
 }
 
-macro Unit $map.core.family(Type $family, Type $storage, Type $key, Type $value,
+macro Unit $map.core.family(
+  Type $family, Type $storage, Type $key, Type $value,
   Type $hash_cell, Type $entry,
   Name $hash, Name $key_equal, Name $value_equal, Name $value_valid,
   Name $key_at, Name $value_at, Name $reinsert_error, Name $insert_error

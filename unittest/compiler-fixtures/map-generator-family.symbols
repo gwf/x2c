@@ -30,6 +30,7 @@
 ( ProbeMapShortLong_postfixindex ) ==> (( func (( ProbeMapShortLong ) ( short ) ( Symbol ))) long )
 ( ProbeMapShortLong_reinsert ) ==> (( func (( ProbeMapShortLong ) ( unsigned )           ( struct ProbeMapShortLongRecord ) ( int )))   void )
 ( ProbeMapShortLong_repr ) ==> (( func (( ProbeMapShortLong ))) String )
+( ProbeMapShortLong_scope ) ==> (( func (( ProbeMapShortLong ))) Scope )
 ( ProbeMapShortLong_set ) ==> (( func (( ProbeMapShortLong ) ( short ) ( long ))) void )
 ( ProbeMapShortLong_set_entry ) ==> (( func (( ProbeMapShortLong ) ( * short ) ( * long ))) void )
 ( ProbeMapShortLong_setdefault ) ==> (( func (( ProbeMapShortLong ) ( short ) ( long ))) long )
