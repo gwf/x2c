@@ -88,10 +88,10 @@ property syntax or publicly writable ownership links:
 
 ```c
 map.scope().transfer(array.scope());
-node.scope().transfer(peer.scope().owner());
+node.scope().transfer(peer.scope().parent());
 ```
 
-`object.scope()` returns its complete storage scope. `scope.owner()` returns
+`object.scope()` returns its complete storage scope. `scope.parent()` returns
 the enclosing lifetime owner, distinct from the active allocation destination.
 `scope.transfer(destination)` moves the complete ownership subtree. Transfer
 to the existing owner is a no-op. Thread roots are not transferable children.
@@ -102,6 +102,9 @@ It does not destroy its enclosing owner or siblings. Destroying a common graph
 scope is an explicit operation on that scope. Existing aliases, including
 separately scheduled cleanup calls for adopted children, become invalid after
 parent destruction; the developer must have one destruction responsibility.
+
+Preserve `Scope.owner(allocation)` as the allocation-owner query; use
+`scope.parent()` for the lifetime parent to avoid a conflicting signature.
 
 Keep Scope push/pop and retain/release behavior distinct from ownership links.
 Changing the active allocation destination neither transfers nor frees storage.

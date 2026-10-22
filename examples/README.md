@@ -65,6 +65,11 @@ are separate from the curated example checks.
   file list; verify cleanup on normal exit, return, and exception.
 - [Match](power/match.x): simplify nested code using patterns and templates.
 - [Threads](power/threads.x): square two copied batches and combine their sums.
+- [Channel word count](power/channel-word-count.x): stream filenames and Maps
+  through bounded channels in one supervised batch. Strings use the shared
+  process canonical pool; each result Map transfers explicitly.
+- [Channel service](power/channel-service.x): send requests with reply channels.
+  The service and its clients finish together under `Thread.run`.
 - [Exceptions](power/exceptions.x): close a file before handling a failed read.
 - [Generics](power/generics.x): count response codes with typed collections.
 - [Imports](power/imports.x): use PCRE2 to extract named request fields.
