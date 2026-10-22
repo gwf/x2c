@@ -9,7 +9,7 @@ Hash table mapping `Var` keys to `Var` values.
 
 | Function | Summary |
 | --- | --- |
-| [`Map.cleanup`](#Map.cleanup) | Releases this Map and both backing Blocks without freeing stored values. |
+| [`Map.cleanup`](#Map.cleanup) | Destroys the Map's storage scope and explicitly adopted child scopes. |
 | [`Map.contains`](#Map.contains) | Returns one when `key` is present, or zero for a null map. |
 | [`Map.copy`](#Map.copy) | Returns a fresh shallow copy in the current `Scope`. |
 | [`Map.enumerate`](#Map.enumerate) | Initializes `dest` to yield canonical `(key value)` `List`s in bucket order. |
@@ -22,6 +22,7 @@ Hash table mapping `Var` keys to `Var` values.
 | [`Map.merge_with`](#Map.merge_with) | Merges `other` into `map`, combines colliding values, and returns `map`. |
 | [`Map.new`](#Map.new) | Returns a fresh empty map owned by the current `Scope`. |
 | [`Map.postfixindex`](#Map.postfixindex) | Applies postfix `++` or `--` and returns the previous value. |
+| [`Map.scope`](#Map.scope) | Returns the Map's complete storage scope, without adopting its values. |
 | [`Map.set`](#Map.set) | Copies `key` and `val` into the table, replacing an existing value. |
 | [`Map.setdefault`](#Map.setdefault) | Returns the value for `key`, inserting `defval` when absent. |
 | [`Map.setindex`](#Map.setindex) | Stores `val` under `key` and returns `val`. |
@@ -39,9 +40,11 @@ Hash table mapping `Var` keys to `Var` values.
 
 `meta native void Map.cleanup(Map value)`
 
-Releases this Map and both backing Blocks without freeing stored values.
+Destroys the Map's storage scope and explicitly adopted child scopes.
+Referenced keys and values with independent owners remain unchanged.
+NULL does nothing. Every alias becomes invalid after destruction.
 
-Source: `lib/map.x:258`
+Source: `lib/map.x:260`
 
 <a id="Map.contains"></a>
 #### Map.contains
@@ -86,7 +89,7 @@ retaining it must not outlive that `Scope`.
 for MapLongDouble, `<alloc-fail>` or `<bad-enc>` while boxing its key.
 Shared causes do not return from the pull.
 
-Source: `lib/map.x:253`
+Source: `lib/map.x:252`
 
 <a id="Map.get_hashed"></a>
 #### Map.get_hashed
@@ -125,7 +128,7 @@ live during traversal. A null `dest` returns NULL. Values follow bucket
 order, a null map is exhausted, and structural mutation invalidates the
 iterator.
 
-Source: `lib/map.x:253`
+Source: `lib/map.x:252`
 
 <a id="Map.keys"></a>
 #### Map.keys
@@ -146,7 +149,7 @@ not outlive that
 **Raises:** MapLongDouble iteration may raise `<alloc-fail>` or `<bad-enc>`
 while boxing a key.
 
-Source: `lib/map.x:253`
+Source: `lib/map.x:252`
 
 <a id="Map.len"></a>
 #### Map.len
@@ -216,6 +219,17 @@ unchanged.
 key, or a cause from `Var.postfix` for an unsupported value or operation.
 
 Source: `lib/map.x:150`
+
+<a id="Map.scope"></a>
+#### Map.scope
+
+`Scope Map.scope(Map map)`
+
+Returns the Map's complete storage scope, without adopting its values.
+The scope contains the stable handle and all backing allocations.
+Explicitly adopted child scopes move and die with it. NULL returns NULL.
+
+Source: `lib/map.x:76`
 
 <a id="Map.set"></a>
 #### Map.set
@@ -322,7 +336,7 @@ Source: `lib/map.x:127`
 
 Appends the typed-Map display text in bucket order.
 
-Source: `lib/map.x:252`
+Source: `lib/map.x:251`
 
 ## Advanced and interop API
 
@@ -347,7 +361,7 @@ Identical handles compare equal and NULL sorts first. Neither Map is
 mutated. Raises: `<alloc-fail>` while creating temporary storage, or any
 cause from key or value comparison.
 
-Source: `lib/map.x:252`
+Source: `lib/map.x:251`
 
 <a id="Map.equal"></a>
 #### Map.equal
@@ -366,7 +380,7 @@ Source: `lib/map.x:87`
 
 Returns the readable typed-Map representation.
 
-Source: `lib/map.x:252`
+Source: `lib/map.x:251`
 
 <a id="Map.str"></a>
 #### Map.str
@@ -375,7 +389,7 @@ Source: `lib/map.x:252`
 
 Returns the typed-Map display String.
 
-Source: `lib/map.x:252`
+Source: `lib/map.x:251`
 
 <a id="Map.update_n"></a>
 #### Map.update_n
@@ -399,7 +413,7 @@ Source: `lib/map.x:183`
 
 Appends the readable typed-Map representation in bucket order.
 
-Source: `lib/map.x:252`
+Source: `lib/map.x:251`
 
 ## Convenience API
 
@@ -452,7 +466,7 @@ for source readers but are not supported as user API.
 
 | Function | Summary |
 | --- | --- |
-| [`Map.export_to`](#Map.export_to) | Exports every key and value, rebuilds the table, then moves its `Block`s. |
+| [`Map.export_to`](#Map.export_to) | Exports every key and value and rebuilds the table in its storage scope. |
 | [`Map.new_capacity`](#Map.new_capacity) | Returns a fresh empty map with exactly `capacity` buckets. |
 
 ### `Map`
@@ -462,13 +476,13 @@ for source readers but are not supported as user API.
 
 `void Map.export_to( Map map, Context source, VarExportContextFn export_value, Scope *scope)`
 
-Exports every key and value, rebuilds the table, then moves its `Block`s.
+Exports every key and value and rebuilds the table in its storage scope.
 The borrowed `export_value` callback runs synchronously for each stored
 key and value and may return replacement `Var`s. Rebuilding is required
 because an exported key may hash differently. On success the old backing
-`Block`s are freed, the rebuilt `Block`s move into `scope`, and the `Map`
-identity remains unchanged. `Context` moves that identity before this call
-to break cycles.
+`Block`s are freed and their replacements enter the Map's storage scope.
+`Context` owns cycle detection and reparents the complete storage scope
+after recursion, preserving explicitly adopted descendants.
 
 A failure while staging leaves the `Map`'s original records, backing
 storage, and recorded `Scope` unchanged. Effects of callbacks that
@@ -500,17 +514,17 @@ Source: `lib/map.x:87`
 
 | Type | Kind | Summary |
 | --- | --- | --- |
-| [`Map`](#Map) | struct | `Scope`-backed mutable hash table from `Var` keys to `Var` values. |
+| [`Map`](#Map) | struct | Mutable hash table with a private child Scope for its complete storage. |
 
 <a id="Map"></a>
 ### Map
 
 `typedef struct Map { Scope scope, Bytes hashes, entries; unsigned used; unsigned capacity; unsigned mask; } *Map`
 
-`Scope`-backed mutable hash table from `Var` keys to `Var` values.
-The `Map` records the `Scope` used for its two backing `Block`s.
-`Context` moves the `Map` allocation itself before recursively exporting
-those `Block`s. Stored `Var` bits are shallow and retain no pointee;
+Mutable hash table with a private child Scope for its complete storage.
+The stable handle and both backing `Block`s share that storage scope.
+Explicit scope transfer preserves addresses and adopted child lifetimes.
+Stored `Var` bits are shallow and retain no pointee;
 those values must remain valid while the `Map` can read, compare, hash,
 or return them. A valid empty `Map` is allocated and distinct from NULL.
 

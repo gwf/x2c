@@ -14,16 +14,32 @@
 #pragma once
 
 #include "x2c.x"
+#include "channel.x"
 #include "common.x"
 #include "list-selectors.x"
 #include "native-scalar-types.x"
 #include "rewrite.x"
 #include "system-macros.x"
+#include "thread.x"
 #include "var-tags.x"
 #include "varops.x"
 #include "fields.x"
 #include "grammar.x"
 #include "operator-ledger.x"
+
+/* --- lib/channel.x ------------------------------------------------------- */
+
+static Code _new_empty(Code code) {
+  match (code) case $channel.new.empty():
+    return $!Channel{ Channel.new(<var>, 0) };
+  return code;
+}
+
+static Code _new_one(Code code) {
+  match (code) case $channel.new.one(?value):
+    return $!Channel{ Channel.new($value, void) };
+  return code;
+}
 
 /* --- lib/common.x -------------------------------------------------------- */
 
@@ -112,6 +128,14 @@ List _macros_location(void) =>
 
 List _macros_source(Source code) =>
   $!String{ ${Code.source_text(code)} };
+
+/* --- lib/thread.x -------------------------------------------------------- */
+
+static Code _batch_without_callback(Code code) {
+  match (code) case $thread.run.jobs(?jobs):
+    return $!void{ Thread.run($jobs, NULL) };
+  return code;
+}
 
 /* --- lib/var-tags.x ------------------------------------------------------ */
 
@@ -2155,6 +2179,8 @@ macro Stmt $linked.row(Expr $rows, Expr $name, Expr $function) {
 /** Returns the linked copies, and the runtime builders, by name. */
 Map linked_meta_targets(void) {
   Map rows = {};
+  $linked.row(rows, "_new_empty", _new_empty);
+  $linked.row(rows, "_new_one", _new_one);
   $linked.row(rows, "_literal_tag", _literal_tag);
   $linked.row(rows, "_var_tag_top", _var_tag_top);
   $linked.row(rows, "_var_tag_bottom", _var_tag_bottom);
@@ -2168,6 +2194,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_dedent_expand", _dedent_expand);
   $linked.row(rows, "_macros_location", _macros_location);
   $linked.row(rows, "_macros_source", _macros_source);
+  $linked.row(rows, "_batch_without_callback", _batch_without_callback);
   $linked.row(rows, "_tag_decode_group", _tag_decode_group);
   $linked.row(rows, "_tag_decode_groups", _tag_decode_groups);
   $linked.row(rows, "_tag_id_checks", _tag_id_checks);

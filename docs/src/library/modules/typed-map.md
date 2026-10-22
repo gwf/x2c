@@ -32,6 +32,7 @@ Typed `Map`s generated from shared storage.
 | [`MapIntInt.new_capacity`](#MapIntInt.new_capacity) | Returns a fresh empty map with exactly `capacity` buckets. |
 | [`MapIntInt.postfixindex`](#MapIntInt.postfixindex) | Applies postfix `++` or `--` and returns the previous value. |
 | [`MapIntInt.repr`](#MapIntInt.repr) | Returns the readable typed-Map representation. |
+| [`MapIntInt.scope`](#MapIntInt.scope) | Returns the Map's complete storage scope, without adopting its values. |
 | [`MapIntInt.set`](#MapIntInt.set) | Copies `key` and `val` into the table, replacing an existing value. |
 | [`MapIntInt.setdefault`](#MapIntInt.setdefault) | Returns the value for `key`, inserting `defval` when absent. |
 | [`MapIntInt.setindex`](#MapIntInt.setindex) | Stores `val` under `key` and returns `val`. |
@@ -63,6 +64,7 @@ Typed `Map`s generated from shared storage.
 | [`MapLongDouble.new_capacity`](#MapLongDouble.new_capacity) | Returns a fresh empty map with exactly `capacity` buckets. |
 | [`MapLongDouble.postfixindex`](#MapLongDouble.postfixindex) | Applies postfix `++` or `--` and returns the previous value. |
 | [`MapLongDouble.repr`](#MapLongDouble.repr) | Returns the readable typed-Map representation. |
+| [`MapLongDouble.scope`](#MapLongDouble.scope) | Returns the Map's complete storage scope, without adopting its values. |
 | [`MapLongDouble.set`](#MapLongDouble.set) | Copies `key` and `val` into the table, replacing an existing value. |
 | [`MapLongDouble.setdefault`](#MapLongDouble.setdefault) | Returns the value for `key`, inserting `defval` when absent. |
 | [`MapLongDouble.setindex`](#MapLongDouble.setindex) | Stores `val` under `key` and returns `val`. |
@@ -94,6 +96,7 @@ Typed `Map`s generated from shared storage.
 | [`MapStringInt.new_capacity`](#MapStringInt.new_capacity) | Returns a fresh empty map with exactly `capacity` buckets. |
 | [`MapStringInt.postfixindex`](#MapStringInt.postfixindex) | Applies postfix `++` or `--` and returns the previous value. |
 | [`MapStringInt.repr`](#MapStringInt.repr) | Returns the readable typed-Map representation. |
+| [`MapStringInt.scope`](#MapStringInt.scope) | Returns the Map's complete storage scope, without adopting its values. |
 | [`MapStringInt.set`](#MapStringInt.set) | Copies `key` and `val` into the table, replacing an existing value. |
 | [`MapStringInt.setdefault`](#MapStringInt.setdefault) | Returns the value for `key`, inserting `defval` when absent. |
 | [`MapStringInt.setindex`](#MapStringInt.setindex) | Stores `val` under `key` and returns `val`. |
@@ -125,6 +128,7 @@ Typed `Map`s generated from shared storage.
 | [`MapStringString.new_capacity`](#MapStringString.new_capacity) | Returns a fresh empty map with exactly `capacity` buckets. |
 | [`MapStringString.postfixindex`](#MapStringString.postfixindex) | Applies postfix `++` or `--` and returns the previous value. |
 | [`MapStringString.repr`](#MapStringString.repr) | Returns the readable typed-Map representation. |
+| [`MapStringString.scope`](#MapStringString.scope) | Returns the Map's complete storage scope, without adopting its values. |
 | [`MapStringString.set`](#MapStringString.set) | Copies `key` and `val` into the table, replacing an existing value. |
 | [`MapStringString.setdefault`](#MapStringString.setdefault) | Returns the value for `key`, inserting `defval` when absent. |
 | [`MapStringString.setindex`](#MapStringString.setindex) | Stores `val` under `key` and returns `val`. |
@@ -444,6 +448,17 @@ Source: `lib/typed-map.x:232`
 Returns the readable typed-Map representation.
 
 Source: `lib/typed-map.x:240`
+
+<a id="MapIntInt.scope"></a>
+#### MapIntInt.scope
+
+`Scope MapIntInt.scope(MapIntInt map)`
+
+Returns the Map's complete storage scope, without adopting its values.
+The scope contains the stable handle and all backing allocations.
+Explicitly adopted child scopes move and die with it. NULL returns NULL.
+
+Source: `lib/typed-map.x:225`
 
 <a id="MapIntInt.set"></a>
 #### MapIntInt.set
@@ -822,6 +837,17 @@ Returns the readable typed-Map representation.
 
 Source: `lib/typed-map.x:260`
 
+<a id="MapLongDouble.scope"></a>
+#### MapLongDouble.scope
+
+`Scope MapLongDouble.scope(MapLongDouble map)`
+
+Returns the Map's complete storage scope, without adopting its values.
+The scope contains the stable handle and all backing allocations.
+Explicitly adopted child scopes move and die with it. NULL returns NULL.
+
+Source: `lib/typed-map.x:245`
+
 <a id="MapLongDouble.set"></a>
 #### MapLongDouble.set
 
@@ -1199,6 +1225,17 @@ Returns the readable typed-Map representation.
 
 Source: `lib/typed-map.x:319`
 
+<a id="MapStringInt.scope"></a>
+#### MapStringInt.scope
+
+`Scope MapStringInt.scope(MapStringInt map)`
+
+Returns the Map's complete storage scope, without adopting its values.
+The scope contains the stable handle and all backing allocations.
+Explicitly adopted child scopes move and die with it. NULL returns NULL.
+
+Source: `lib/typed-map.x:304`
+
 <a id="MapStringInt.set"></a>
 #### MapStringInt.set
 
@@ -1575,6 +1612,17 @@ Source: `lib/typed-map.x:273`
 Returns the readable typed-Map representation.
 
 Source: `lib/typed-map.x:281`
+
+<a id="MapStringString.scope"></a>
+#### MapStringString.scope
+
+`Scope MapStringString.scope(MapStringString map)`
+
+Returns the Map's complete storage scope, without adopting its values.
+The scope contains the stable handle and all backing allocations.
+Explicitly adopted child scopes move and die with it. NULL returns NULL.
+
+Source: `lib/typed-map.x:266`
 
 <a id="MapStringString.set"></a>
 #### MapStringString.set

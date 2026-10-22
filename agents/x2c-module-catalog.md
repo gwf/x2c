@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 61
-- Runtime modules: 77
+- Runtime modules: 78
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -860,8 +860,8 @@ Public functions:
 `Bytes.append`, `Block.append_fill`, `Bytes.append_fill`, `Block.push`,
 `Bytes.push`, `Block.reserve`, `Bytes.reserve`, `Block.len`, `Block.capacity`,
 `Block.truth`, `Block.truncate`, `Block.clear`, `Block.try_pop`,
-`Bytes.try_pop`, `Block.pop`, `Block.new`, `Bytes.new`, `Block.free`,
-`Block.move_to`
+`Bytes.try_pop`, `Block.pop`, `Block.new`, `Block.new_owned`, `Block.scope`,
+`Bytes.new`, `Block.free`, `Block.move_to`
 
 ### [lib/buffer.x](../lib/buffer.x)
 
@@ -876,6 +876,16 @@ Public functions:
 `Buffer.getindex`, `Buffer.len`, `Buffer.str`, `Buffer.str_free`,
 `Buffer.repr`, `Buffer.truth`, `Buffer.new`, `Buffer.reserve`, `Buffer.clear`,
 `Buffer.move_to`, `Buffer.free`
+
+### [lib/channel.x](../lib/channel.x)
+
+non-owning Var transport and explicit stream completion.
+
+Public functions:
+
+`Channel.new`, `Channel.scope`, `Channel.send`, `Channel.receive`,
+`Channel.close`, `Channel.free`, `Channel.cleanup`, `Channel.var`,
+`Var.channel`, `Channel.iter`
 
 ### [lib/cleanup.x](../lib/cleanup.x)
 
@@ -935,9 +945,9 @@ Public functions:
 
 `Context.export`, `Context.export_scope`, `Context.export_nested`,
 `Context.owns`, `Context.export_destination`, `Context.move_allocation`,
-`Context.open`, `Context.open_named`, `Context.open_isolated`,
-`Context.open_isolated_named`, `Context.current`, `Context.close`,
-`Context.cleanup`, `Context.initialize`
+`Context.move_scope`, `Context.move_block`, `Context.open`,
+`Context.open_named`, `Context.open_isolated`, `Context.open_isolated_named`,
+`Context.current`, `Context.close`, `Context.cleanup`, `Context.initialize`
 
 ### [lib/datum.x](../lib/datum.x)
 
@@ -1177,9 +1187,9 @@ hash table mapping `Var` keys to `Var` values.
 
 Public functions:
 
-`Map.new_capacity`, `Map.new`, `Map.len`, `Map.try_get`, `Map.get`,
-`Map.getindex`, `Map.getdefault`, `Map.setdefault`, `Map.contains`, `Map.set`,
-`Map.setindex`, `Map.try_del`, `Map.del`, `Map.copy`, `Map.merge`,
+`Map.scope`, `Map.new_capacity`, `Map.new`, `Map.len`, `Map.try_get`,
+`Map.get`, `Map.getindex`, `Map.getdefault`, `Map.setdefault`, `Map.contains`,
+`Map.set`, `Map.setindex`, `Map.try_del`, `Map.del`, `Map.copy`, `Map.merge`,
 `Map.try_next`, `Map.truth`, `Map.equal`, `Map.merge_with`, `Map.updateindex`,
 `Map.postfixindex`, `Map.get_hashed`, `Map.update_n`, `Map.export_to`,
 `Map.compare`, `Map.write_repr`, `Map.write_str`, `Map.str`, `Map.repr`,
@@ -1426,9 +1436,11 @@ Public functions:
 
 Public functions:
 
-`Thread.start_raw`, `Thread.start`, `Thread.wait_any`, `Thread.join`,
-`Thread.free`, `Thread.finish_any`, `Thread.finish_all`, `Iter.parallel_map`,
-`ParallelMap.foldl`
+`x2c_thread_wait_lock`, `x2c_thread_wait_unlock`, `x2c_thread_wait_owner`,
+`x2c_thread_wait_stopped`, `x2c_thread_stopping`, `x2c_thread_wait`,
+`x2c_thread_cancel`, `Thread.stop`, `Thread.start_raw`, `Thread.start`,
+`Thread.wait_any`, `Thread.join`, `Thread.free`, `Thread.finish_any`,
+`Thread.finish_all`, `Thread.run`, `Iter.parallel_map`, `ParallelMap.foldl`
 
 ### [lib/tokenizer.x](../lib/tokenizer.x)
 
@@ -1576,7 +1588,7 @@ typed `Map`s generated from shared storage.
 
 Public functions:
 
-`MapIntInt.new_capacity`, `MapIntInt.new`, `MapIntInt.len`,
+`MapIntInt.scope`, `MapIntInt.new_capacity`, `MapIntInt.new`, `MapIntInt.len`,
 `MapIntInt.try_get`, `MapIntInt.get`, `MapIntInt.getindex`,
 `MapIntInt.getdefault`, `MapIntInt.setdefault`, `MapIntInt.contains`,
 `MapIntInt.set`, `MapIntInt.setindex`, `MapIntInt.try_del`, `MapIntInt.del`,
@@ -1585,18 +1597,19 @@ Public functions:
 `Map.mapintint`, `MapIntInt.compare`, `MapIntInt.write_repr`,
 `MapIntInt.write_str`, `MapIntInt.str`, `MapIntInt.repr`, `MapIntInt.map`,
 `MapIntInt.var`, `Var.mapintint`, `MapIntInt.iter`, `MapIntInt.keys`,
-`MapIntInt.enumerate`, `MapIntInt.cleanup`, `MapLongDouble.new_capacity`,
-`MapLongDouble.new`, `MapLongDouble.len`, `MapLongDouble.try_get`,
-`MapLongDouble.get`, `MapLongDouble.getindex`, `MapLongDouble.getdefault`,
-`MapLongDouble.setdefault`, `MapLongDouble.contains`, `MapLongDouble.set`,
-`MapLongDouble.setindex`, `MapLongDouble.try_del`, `MapLongDouble.del`,
-`MapLongDouble.copy`, `MapLongDouble.merge`, `MapLongDouble.try_next`,
-`MapLongDouble.truth`, `MapLongDouble.equal`, `MapLongDouble.updateindex`,
+`MapIntInt.enumerate`, `MapIntInt.cleanup`, `MapLongDouble.scope`,
+`MapLongDouble.new_capacity`, `MapLongDouble.new`, `MapLongDouble.len`,
+`MapLongDouble.try_get`, `MapLongDouble.get`, `MapLongDouble.getindex`,
+`MapLongDouble.getdefault`, `MapLongDouble.setdefault`,
+`MapLongDouble.contains`, `MapLongDouble.set`, `MapLongDouble.setindex`,
+`MapLongDouble.try_del`, `MapLongDouble.del`, `MapLongDouble.copy`,
+`MapLongDouble.merge`, `MapLongDouble.try_next`, `MapLongDouble.truth`,
+`MapLongDouble.equal`, `MapLongDouble.updateindex`,
 `MapLongDouble.postfixindex`, `Map.maplongdouble`, `MapLongDouble.compare`,
 `MapLongDouble.write_repr`, `MapLongDouble.write_str`, `MapLongDouble.str`,
 `MapLongDouble.repr`, `MapLongDouble.map`, `MapLongDouble.var`,
 `Var.maplongdouble`, `MapLongDouble.iter`, `MapLongDouble.keys`,
-`MapLongDouble.enumerate`, `MapLongDouble.cleanup`,
+`MapLongDouble.enumerate`, `MapLongDouble.cleanup`, `MapStringString.scope`,
 `MapStringString.new_capacity`, `MapStringString.new`, `MapStringString.len`,
 `MapStringString.try_get`, `MapStringString.get`, `MapStringString.getindex`,
 `MapStringString.getdefault`, `MapStringString.setdefault`,
@@ -1609,18 +1622,18 @@ Public functions:
 `MapStringString.write_str`, `MapStringString.str`, `MapStringString.repr`,
 `MapStringString.map`, `MapStringString.var`, `Var.mapstringstring`,
 `MapStringString.iter`, `MapStringString.keys`, `MapStringString.enumerate`,
-`MapStringString.cleanup`, `MapStringInt.new_capacity`, `MapStringInt.new`,
-`MapStringInt.len`, `MapStringInt.try_get`, `MapStringInt.get`,
-`MapStringInt.getindex`, `MapStringInt.getdefault`, `MapStringInt.setdefault`,
-`MapStringInt.contains`, `MapStringInt.set`, `MapStringInt.setindex`,
-`MapStringInt.try_del`, `MapStringInt.del`, `MapStringInt.copy`,
-`MapStringInt.merge`, `MapStringInt.try_next`, `MapStringInt.truth`,
-`MapStringInt.equal`, `MapStringInt.updateindex`, `MapStringInt.postfixindex`,
-`Map.mapstringint`, `MapStringInt.compare`, `MapStringInt.write_repr`,
-`MapStringInt.write_str`, `MapStringInt.str`, `MapStringInt.repr`,
-`MapStringInt.map`, `MapStringInt.var`, `Var.mapstringint`,
-`MapStringInt.iter`, `MapStringInt.keys`, `MapStringInt.enumerate`,
-`MapStringInt.cleanup`
+`MapStringString.cleanup`, `MapStringInt.scope`, `MapStringInt.new_capacity`,
+`MapStringInt.new`, `MapStringInt.len`, `MapStringInt.try_get`,
+`MapStringInt.get`, `MapStringInt.getindex`, `MapStringInt.getdefault`,
+`MapStringInt.setdefault`, `MapStringInt.contains`, `MapStringInt.set`,
+`MapStringInt.setindex`, `MapStringInt.try_del`, `MapStringInt.del`,
+`MapStringInt.copy`, `MapStringInt.merge`, `MapStringInt.try_next`,
+`MapStringInt.truth`, `MapStringInt.equal`, `MapStringInt.updateindex`,
+`MapStringInt.postfixindex`, `Map.mapstringint`, `MapStringInt.compare`,
+`MapStringInt.write_repr`, `MapStringInt.write_str`, `MapStringInt.str`,
+`MapStringInt.repr`, `MapStringInt.map`, `MapStringInt.var`,
+`Var.mapstringint`, `MapStringInt.iter`, `MapStringInt.keys`,
+`MapStringInt.enumerate`, `MapStringInt.cleanup`
 
 ### [lib/var-adapters.x](../lib/var-adapters.x)
 
@@ -1802,7 +1815,8 @@ Public functions:
 `Scope.malloc_finalized_in`, `Scope.calloc`, `Scope.calloc_in`, `Scope.memdup`,
 `Scope.memdup_in`, `Scope.free`, `Scope.owner`, `Scope.move`, `Scope.realloc`,
 `Scope.push`, `Scope.top`, `Scope.pop`, `Scope.retain`, `Scope.release`,
-`Scope.new`, `Scope.new_named`, `Scope.destroy`, `Scope.cleanup`,
+`Scope.new`, `Scope.child`, `Scope.parent`, `Scope.transfer`, `Scope.contains`,
+`Scope.new_named`, `Scope.destroy`, `Scope.cleanup`,
 `x2c_scope_thread_release`, `Scope.name`, `Scope.stats`, `Scope.initialize`,
 `Scope.shutdown_hook`, `Scope_shutdown`, `xmalloc`, `xcalloc`, `xrealloc`,
 `xfree`, `xmemdup`

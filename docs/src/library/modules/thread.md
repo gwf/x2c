@@ -15,8 +15,10 @@
 | [`Thread.finish_any`](#Thread.finish_any) | Waits for one worker, joins it, frees its handle, and returns its result. |
 | [`Thread.free`](#Thread.free) | Frees a `Thread` handle after its consuming join has completed. |
 | [`Thread.join`](#Thread.join) | Joins one worker and exports its result into the joining `Scope` and pools. |
+| [`Thread.run`](#Thread.run) | Runs zero-argument callable jobs concurrently and waits for all of them. |
 | [`Thread.start`](#Thread.start) | Starts one `Var`-to-`Var` worker using the ordinary Thread lifecycle. |
 | [`Thread.start_raw`](#Thread.start_raw) | Starts one worker and returns its heap-owned handle. |
+| [`Thread.stop`](#Thread.stop) | Requests cooperative stopping without closing any Channel. |
 | [`Thread.wait_any`](#Thread.wait_any) | Waits for a finished worker, removes its handle from `pending`, and returns it. |
 
 ### `Iter`
@@ -37,7 +39,7 @@ must not mutate or recycle an outstanding input's storage.
 **Raises:** `<bad-arg>` for a nonpositive worker count, or `<alloc-fail>` for
 descriptor storage.
 
-Source: `lib/thread.x:536`
+Source: `lib/thread.x:680`
 
 ### `ParallelMap`
 
@@ -65,7 +67,7 @@ This descriptor supports consuming folds, not general pull iteration.
 **Raises:** source, start, worker, export, allocation, or accumulator causes,
 including `<void-op>` for a `void` worker result.
 
-Source: `lib/thread.x:561`
+Source: `lib/thread.x:705`
 
 ### `Thread`
 
@@ -89,7 +91,7 @@ cleanup failure instead; the original Error continues unchanged.
 `<bad-arg>` for a null entry or `<bad-state>` for a joining entry.
 Error snapshot failures use the existing raw Error floor.
 
-Source: `lib/thread.x:497`
+Source: `lib/thread.x:575`
 
 <a id="Thread.finish_any"></a>
 #### Thread.finish_any
@@ -107,7 +109,7 @@ retained selected handle moves to the end.
 
 **Raises:** the same causes as `Thread.wait_any` and `Thread.join`.
 
-Source: `lib/thread.x:471`
+Source: `lib/thread.x:549`
 
 <a id="Thread.free"></a>
 #### Thread.free
@@ -118,7 +120,7 @@ Frees a `Thread` handle after its consuming join has completed.
 
 **Raises:** `<bad-state>` for NULL, running, or joining handles.
 
-Source: `lib/thread.x:455`
+Source: `lib/thread.x:533`
 
 <a id="Thread.join"></a>
 #### Thread.join
@@ -138,7 +140,31 @@ fails, any cause from result or error export, and
 here. A callback that returns `void` joins as `void`; a handled worker
 failure transfers instead of returning a sentinel.
 
-Source: `lib/thread.x:405`
+Source: `lib/thread.x:483`
+
+<a id="Thread.run"></a>
+#### Thread.run
+
+`void Thread.run(Array jobs, Func completed)`
+
+Runs zero-argument callable jobs concurrently and waits for all of them.
+Each successful joined/exported result, including void, reaches completed
+on the caller when that callback is nonnull. Jobs and their captures stay
+borrowed through the call. Results have ordinary caller-owned join lifetime.
+Batch jobs use the shared process canonical pool and private mutable work
+scopes; explicitly opened private pools retain their own lifetime rules.
+The completion callback must not wait on participant progress.
+
+On startup, job, export, callback, or coordinator-stop failure, requests
+stop on every remaining job before joining any, then propagates the
+triggering error. No callback runs during failure cleanup. Stopping is
+cooperative, so jobs ignoring stop or blocking in native I/O can delay
+completion indefinitely. Native join failure aborts if cleanup cannot
+establish that borrowed storage is no longer in use.
+
+**Raises:** startup, callback, export, stop, or worker join causes.
+
+Source: `lib/thread.x:645`
 
 <a id="Thread.start"></a>
 #### Thread.start
@@ -159,7 +185,7 @@ for explicit byte-buffer inputs.
 **Raises:** `<bad-arg>` for a null callback, or the causes of
 `Thread.start_raw`.
 
-Source: `lib/thread.x:170`
+Source: `lib/thread.x:240`
 
 <a id="Thread.start_raw"></a>
 #### Thread.start_raw
@@ -185,7 +211,21 @@ registration.
 `<io-fail>` when `pthread_create` fails. Failure during native once
 initialization or mutex setup aborts the process.
 
-Source: `lib/thread.x:121`
+Source: `lib/thread.x:184`
+
+<a id="Thread.stop"></a>
+#### Thread.stop
+
+`void Thread.stop(Thread thread)`
+
+Requests cooperative stopping without closing any Channel. The request
+persists and wakes a registered Channel or completion wait. Computation
+and arbitrary native I/O are not interrupted. Repeated requests are safe
+while the handle remains live; stop does not join or free it.
+
+**Raises:** <bad-arg> for a null handle.
+
+Source: `lib/thread.x:155`
 
 <a id="Thread.wait_any"></a>
 #### Thread.wait_any
@@ -207,7 +247,87 @@ added again and selected again. Freed handles must never be supplied.
 **Raises:** `<bad-arg>` for a null entry, or `<bad-state>` for a joining or
 joined entry. Native completion synchronization failure aborts.
 
-Source: `lib/thread.x:373`
+Source: `lib/thread.x:446`
+
+## Runtime-internal callables
+
+These callables connect runtime translation units. They are documented
+for source readers but are not supported as user API.
+
+| Function | Summary |
+| --- | --- |
+| [`x2c_thread_cancel`](#x2c_thread_cancel) | Raises a non-resumable stop outcome after queue locks and wait records have been released. |
+| [`x2c_thread_stopping`](#x2c_thread_stopping) | Tests the current wait's pending stop under the internal monitor. |
+| [`x2c_thread_wait`](#x2c_thread_wait) | Waits on condition with the internal monitor held. |
+| [`x2c_thread_wait_lock`](#x2c_thread_wait_lock) | Locks the internal monitor shared by stop publication and queue commits. |
+| [`x2c_thread_wait_owner`](#x2c_thread_wait_owner) | Returns the current wait's borrowed Thread token, or NULL for an unmanaged or cleanup-masked caller. |
+| [`x2c_thread_wait_stopped`](#x2c_thread_wait_stopped) | Tests a borrowed wait token under the internal monitor. |
+| [`x2c_thread_wait_unlock`](#x2c_thread_wait_unlock) | Unlocks the internal stop/queue monitor. |
+
+### Functions
+
+#### x2c_thread_cancel
+
+`void x2c_thread_cancel(void)`
+
+Raises a non-resumable stop outcome after queue locks and wait records
+have been released. Explicit catches may handle this shared cause.
+
+Source: `lib/thread.x:146`
+
+#### x2c_thread_stopping
+
+`int x2c_thread_stopping(void)`
+
+Tests the current wait's pending stop under the internal monitor.
+
+Source: `lib/thread.x:129`
+
+#### x2c_thread_wait
+
+`void x2c_thread_wait(pthread_cond_t *condition)`
+
+Waits on condition with the internal monitor held. Registration and the
+pending-stop check share that monitor with Thread.stop. Returns holding
+the monitor, with the registration removed, including on pending stop.
+Queue callers recheck predicates and stop before committing an operation.
+
+Source: `lib/thread.x:136`
+
+#### x2c_thread_wait_lock
+
+`void x2c_thread_wait_lock(void)`
+
+Locks the internal monitor shared by stop publication and queue commits.
+Native synchronization failure aborts without entering Error dispatch.
+
+Source: `lib/thread.x:113`
+
+#### x2c_thread_wait_owner
+
+`Thread x2c_thread_wait_owner(void)`
+
+Returns the current wait's borrowed Thread token, or NULL for an unmanaged
+or cleanup-masked caller. Call while holding the internal monitor.
+
+Source: `lib/thread.x:122`
+
+#### x2c_thread_wait_stopped
+
+`int x2c_thread_wait_stopped(Thread owner)`
+
+Tests a borrowed wait token under the internal monitor. A null token has
+no stop request. Queues use this before committing a rendezvous peer.
+
+Source: `lib/thread.x:126`
+
+#### x2c_thread_wait_unlock
+
+`void x2c_thread_wait_unlock(void)`
+
+Unlocks the internal stop/queue monitor.
+
+Source: `lib/thread.x:117`
 
 ## Public types
 
@@ -275,4 +395,4 @@ Shared objects require their own coordination.
 
 ## Tests and examples
 
-`make verify` (`unittest/test-thread.x`).
+`make verify` (`unittest/test-thread.x` and `unittest/test-thread-batch.x`).
