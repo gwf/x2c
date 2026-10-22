@@ -44,7 +44,7 @@ function comparison(index) {
         removed[j].parts = parts.before; added[j].parts = parts.after;
         // Punctuation and indentation alone do not identify corresponding source.
         if (parts.before.some((part) => !part.changed && /[\w$]/.test(part.text))) {
-          removed[j].paired = true;
+          removed[j].unified = parts.unified;
         }
       }
     }
@@ -115,13 +115,21 @@ function splitRows() {
 function unifiedRows() {
   return splitRows().flatMap((row) => {
     if (!row.changed) return [{ op: row.left, changed: false }];
-    if (row.left && row.right && row.left.paired) return [row];
+    if (row.left && row.right && row.left.unified) return [row];
     return [row.left, row.right].filter(Boolean).map((op) => ({ op, changed: true }));
   });
 }
 
 function replacementCell(row, previousSource, currentSource) {
-  return `<td class="line-number remove" tabindex="0" role="button" aria-label="Show before block">${row.left.old}</td><td class="line-number add" tabindex="0" role="button" aria-label="Show after block">${row.right.new}</td><td class="marker" aria-hidden="true">~</td><td class="source replacement"><span class="version-before">${sourceText(row.left, previousSource)}</span><span class="version-after">${sourceText(row.right, currentSource)}</span></td>`;
+  const combined = row.left.unified.map((part) => {
+    const text = escapeHTML(part.text), tag = part.type === "remove" ? "del" : "ins";
+    return part.type === "equal" ? text : `<${tag}>${text}</${tag}>`;
+  }).join("");
+  const notes = [];
+  if (row.left.old === lineCount(previousSource) && !previousSource.endsWith("\n")) notes.push("before: no final newline");
+  if (row.right.new === lineCount(currentSource) && !currentSource.endsWith("\n")) notes.push("after: no final newline");
+  const endNote = notes.length ? `<span class="end-of-file"> [${notes.join("; ")}]</span>` : "";
+  return `<td class="line-number remove" tabindex="0" role="button" aria-label="Show before block">${row.left.old}</td><td class="line-number add" tabindex="0" role="button" aria-label="Show after block">${row.right.new}</td><td class="marker" aria-hidden="true">~</td><td class="source replacement"><span class="version-combined">${combined}${endNote}</span><span class="version-before">${sourceText(row.left, previousSource)}</span><span class="version-after">${sourceText(row.right, currentSource)}</span></td>`;
 }
 
 function renderCode() {
@@ -159,7 +167,8 @@ function renderCode() {
   const table = $("code").querySelector("table");
   if (table) {
     const charWidth = parseFloat(getComputedStyle(table).fontSize) * .63;
-    const width = split ? Math.max(360, longest(previousSource) * charWidth + 100, longest(currentSource) * charWidth + 100) * 2 : Math.max(300, Math.max(longest(previousSource), longest(currentSource)) * charWidth + 150);
+    const displayed = rows.map((row) => row.op ? row.op.text : row.left?.unified?.map((part) => part.text).join("") || "").join("\n");
+    const width = split ? Math.max(360, longest(previousSource) * charWidth + 100, longest(currentSource) * charWidth + 100) * 2 : Math.max(300, longest(displayed) * charWidth + 150);
     table.style.minWidth = `${width}px`;
     $("file-headings").style.minWidth = split ? table.style.minWidth : "";
   } else $("file-headings").style.minWidth = "";
@@ -173,17 +182,13 @@ function showBlockVersion(event) {
   const number = event.target.closest('.line-number[role="button"]');
   if (!number) return;
   const block = number.closest("tr").dataset.block;
+  const preview = event.type === "pointerover" || event.type === "focusin";
   $("code").querySelectorAll(`tr[data-block="${block}"]`).forEach((row) => {
-    row.classList.toggle("show-before", number.classList.contains("remove"));
+    row.classList.toggle("show-before", preview && number.classList.contains("remove"));
+    row.classList.toggle("show-after", preview && number.classList.contains("add"));
   });
 }
-for (const type of ["pointerover", "focusin", "click"]) $("code").addEventListener(type, showBlockVersion);
-$("code").addEventListener("keydown", (event) => {
-  if ((event.key === "Enter" || event.key === " ") && event.target.matches('.line-number[role="button"]')) {
-    event.preventDefault();
-    showBlockVersion(event);
-  }
-});
+for (const type of ["pointerover", "pointerout", "focusin", "focusout"]) $("code").addEventListener(type, showBlockVersion);
 
 function revealSelectedVersion() {
   if (!matchMedia("(max-width: 700px)").matches) return;

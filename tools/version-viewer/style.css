@@ -12,8 +12,9 @@
 .code-table .token-change{color:inherit;border-radius:2px;padding:1px 0;background:#b9dfb3;box-shadow:0 0 0 1px #5d985040;font-weight:650}.code-table .remove .token-change{background:#f1b7b5;box-shadow:0 0 0 1px #b2595540}
 @media(max-width:700px){.workspace-note{flex-wrap:wrap;line-height:1.5}.workspace-note .legend-delete{margin-left:0}}
 .net-count{color:var(--ink);white-space:nowrap}.version-detail .net{margin-left:8px;white-space:nowrap}.counts{flex-wrap:wrap}
-.code-table .replacement .version-before,.code-table .show-before .replacement .version-after{display:none}
-.code-table .show-before .replacement .version-before{display:inline}
+.code-table .replacement .version-before,.code-table .replacement .version-after,.code-table .show-before .version-combined,.code-table .show-after .version-combined{display:none}
+.code-table .show-before .replacement .version-before,.code-table .show-after .replacement .version-after{display:inline}
+.code-table .version-combined del{color:var(--red);background:#fff0ef;text-decoration:line-through}.code-table .version-combined ins{color:var(--green);background:#edf7ec;text-decoration:none}
 .code-table .replacement .version-before .token-change{color:var(--red);background:#fff0ef;box-shadow:none}
 .code-table .replacement .version-after .token-change{color:var(--green);background:#edf7ec;box-shadow:none}
 .code-table .line-number[role="button"]{cursor:pointer}.code-table .line-number[role="button"]:focus-visible{outline:2px solid var(--green);outline-offset:-2px}
