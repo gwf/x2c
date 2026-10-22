@@ -27,7 +27,7 @@ Bounded runtime state and value export.
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/context.x:432`
+Source: `lib/context.x:435`
 
 <a id="Context.close"></a>
 #### Context.close
@@ -43,7 +43,7 @@ private canonical pool become invalid.
 `Match`
 cache has an active lease. The failure leaves the `Context` active.
 
-Source: `lib/context.x:408`
+Source: `lib/context.x:411`
 
 <a id="Context.current"></a>
 #### Context.current
@@ -52,7 +52,7 @@ Source: `lib/context.x:408`
 
 Returns the `Context` currently active on this thread, or NULL.
 
-Source: `lib/context.x:398`
+Source: `lib/context.x:401`
 
 <a id="Context.export"></a>
 #### Context.export
@@ -91,7 +91,7 @@ allocations.
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:335`
+Source: `lib/context.x:338`
 
 <a id="Context.open_isolated"></a>
 #### Context.open_isolated
@@ -105,7 +105,7 @@ Export surviving immutable values before closing the `Context`.
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:352`
+Source: `lib/context.x:355`
 
 <a id="Context.open_isolated_named"></a>
 #### Context.open_isolated_named
@@ -120,7 +120,7 @@ The diagnostic name is copied; export survivors before closing the
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:361`
+Source: `lib/context.x:364`
 
 <a id="Context.open_named"></a>
 #### Context.open_named
@@ -135,7 +135,7 @@ parent.
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:344`
+Source: `lib/context.x:347`
 
 ## Advanced and interop API
 
@@ -160,7 +160,7 @@ Application code exports its value with `Context.export` instead.
 
 **Raises:** allocation and table-growth causes while recording the move.
 
-Source: `lib/context.x:302`
+Source: `lib/context.x:305`
 
 <a id="Context.owns"></a>
 #### Context.owns
@@ -174,7 +174,7 @@ allocation scheduled by `Context.move_allocation` answers zero, although
 physical ownership changes only when the enclosing root export commits.
 Scheduling a complete scope does not hide its unvisited descendants.
 
-Source: `lib/context.x:276`
+Source: `lib/context.x:279`
 
 ## Runtime-internal callables
 
@@ -187,7 +187,7 @@ for source readers but are not supported as user API.
 | [`Context.export_nested`](#Context.export_nested) | Recursively exports one nested value through an active or sealed `Context`. |
 | [`Context.export_scope`](#Context.export_scope) | Exports a sealed worker result `Scope` into the current `Scope` and pool. |
 | [`Context.initialize`](#Context.initialize) | Registers `Context` cleanup before workers can start. |
-| [`Context.move_block`](#Context.move_block) | Schedules raw or grouped Block storage for a registered exporter. |
+| [`Context.move_block`](#Context.move_block) | Schedules Block storage and nullable owned contents for an exporter. |
 | [`Context.move_scope`](#Context.move_scope) | Schedules custom-exporter storage while preserving explicit adoption. |
 
 ### `Context`
@@ -201,7 +201,7 @@ Returns the borrowed `Scope` slot that receives exports from `c`.
 The slot remains valid only while the `Context`'s destination state lives;
 a null `Context` returns NULL.
 
-Source: `lib/context.x:292`
+Source: `lib/context.x:295`
 
 <a id="Context.export_nested"></a>
 #### Context.export_nested
@@ -225,7 +225,7 @@ rolled back.
 exporter, or a cause from nested allocation, hashing, equality, or custom
 export.
 
-Source: `lib/context.x:267`
+Source: `lib/context.x:270`
 
 <a id="Context.export_scope"></a>
 #### Context.export_scope
@@ -256,20 +256,20 @@ Source: `lib/context.x:88`
 
 Registers `Context` cleanup before workers can start.
 
-Source: `lib/context.x:435`
+Source: `lib/context.x:438`
 
 <a id="Context.move_block"></a>
 #### Context.move_block
 
 `void Context.move_block(Context c, Block block)`
 
-Schedules raw or grouped Block storage for a registered exporter.
+Schedules Block storage and nullable owned contents for an exporter.
 Root export keeps allocations covered by a scheduled storage scope under
-that owner. Uncovered raw storage moves with `Block.move_to`.
+that owner. Uncovered storage moves with `Block.move_to`.
 
 **Raises:** allocation and table-growth causes while recording the move.
 
-Source: `lib/context.x:320`
+Source: `lib/context.x:323`
 
 <a id="Context.move_scope"></a>
 #### Context.move_scope
@@ -282,7 +282,7 @@ Exporters call this for grouped storage, never from channel transport.
 
 **Raises:** allocation and table-growth causes while recording the move.
 
-Source: `lib/context.x:311`
+Source: `lib/context.x:314`
 
 ## Design notes
 

@@ -20,7 +20,7 @@ Checked dynamic storage for fixed-width elements.
 | [`Block.pop`](#Block.pop) | Removes the final element of `block` when present. |
 | [`Block.push`](#Block.push) | Appends one copied element; storage and failures follow `Block.append`. |
 | [`Block.reserve`](#Block.reserve) | Ensures `block` can hold at least `minimum` elements. |
-| [`Block.scope`](#Block.scope) | Returns the allocation scope holding this Block's complete storage. |
+| [`Block.scope`](#Block.scope) | Acquires this Block's scope for explicitly owned contents. |
 | [`Block.truncate`](#Block.truncate) | Shortens `block` to at most `length` elements. |
 | [`Block.truth`](#Block.truth) | Returns nonzero when `block` contains at least one element. |
 | [`Block.try_pop`](#Block.try_pop) | Removes the final element of `b`, copying it to `out` when present. |
@@ -106,7 +106,7 @@ Source: `lib/block.x:258`
 
 Releases the `Block` and its backing storage, invalidating every alias.
 
-Source: `lib/block.x:331`
+Source: `lib/block.x:322`
 
 <a id="Block.len"></a>
 #### Block.len
@@ -168,11 +168,14 @@ Source: `lib/block.x:206`
 
 `Scope Block.scope(Block b)`
 
-Returns the allocation scope holding this Block's complete storage.
-Raw Blocks use their handle's allocation owner. Grouped Blocks expose
-their private storage scope. NULL returns NULL.
+Acquires this Block's scope for explicitly owned contents.
+The scope is created lazily beneath the handle's allocation owner.
+The handle and backing storage stay outside it; elements remain bytes
+whose references are never adopted automatically. NULL returns NULL.
 
-Source: `lib/block.x:320`
+**Raises:** `<alloc-fail>` when creating the scope.
+
+Source: `lib/block.x:305`
 
 <a id="Block.truncate"></a>
 #### Block.truncate
@@ -258,7 +261,7 @@ grow it return the current `Bytes` pointer, which callers must keep.
 
 **Raises:** the same causes as `Block.new`.
 
-Source: `lib/block.x:328`
+Source: `lib/block.x:319`
 
 <a id="Bytes.push"></a>
 #### Bytes.push
@@ -297,8 +300,7 @@ for source readers but are not supported as user API.
 
 | Function | Summary |
 | --- | --- |
-| [`Block.move_to`](#Block.move_to) | Moves `block` and its backing allocation into `scope`. |
-| [`Block.new_owned`](#Block.new_owned) | Creates fixed-width storage in its own child allocation scope. |
+| [`Block.move_to`](#Block.move_to) | Moves `block`, its backing allocation, and owned contents into `scope`. |
 
 ### `Block`
 
@@ -307,7 +309,7 @@ for source readers but are not supported as user API.
 
 `void Block.move_to(Block block, Scope *scope)`
 
-Moves `block` and its backing allocation into `scope`.
+Moves `block`, its backing allocation, and owned contents into `scope`.
 This preserves the `Block` and `Bytes` pointers and contents while changing
 which `Scope` ends their lifetime. `Context` export calls this method
 instead of assuming a `Block` is one allocation.
@@ -315,21 +317,7 @@ For a nonnull `Block`, raises `<bad-arg>` for a null destination slot, or
 `<alloc-fail>` when an empty slot cannot acquire a `Scope`. Failure leaves
 ownership unchanged.
 
-Source: `lib/block.x:349`
-
-<a id="Block.new_owned"></a>
-#### Block.new_owned
-
-`Block Block.new_owned(size_t width)`
-
-Creates fixed-width storage in its own child allocation scope.
-The handle stays stable through growth. Freeing or moving this Block
-acts on that complete storage scope, including explicitly adopted scopes.
-Elements remain bytes: their referenced values are never inspected.
-
-**Raises:** the same causes as `Block.new` and `Scope.child`.
-
-Source: `lib/block.x:305`
+Source: `lib/block.x:337`
 
 ## Public types
 

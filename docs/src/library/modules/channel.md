@@ -17,7 +17,7 @@ Var transport and explicit storage handoff.
 | [`Channel.receive`](#Channel.receive) | Receives one accepted Var. |
 | [`Channel.scope`](#Channel.scope) | Returns the Channel's own storage scope. |
 | [`Channel.send`](#Channel.send) | Sends non-void representation bits without changing referenced storage ownership. |
-| [`Channel.send_owned`](#Channel.send_owned) | Sends a live Scope-allocated root with its own exclusively owned inactive storage subtree. |
+| [`Channel.send_owned`](#Channel.send_owned) | Hands off an exclusively owned payload. |
 | [`Channel.var`](#Channel.var) | Boxes the borrowed Channel handle without changing its lifetime. |
 | [`Var.channel`](#Var.channel) | Reads a Channel handle with its exact tag. |
 
@@ -30,7 +30,7 @@ Var transport and explicit storage handoff.
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/channel.x:365`
+Source: `lib/channel.x:409`
 
 <a id="Channel.close"></a>
 #### Channel.close
@@ -43,7 +43,7 @@ payloads, or acknowledge completion of a borrow.
 
 **Raises:** <bad-arg> for NULL.
 
-Source: `lib/channel.x:348`
+Source: `lib/channel.x:392`
 
 <a id="Channel.free"></a>
 #### Channel.free
@@ -56,7 +56,7 @@ subtrees are destroyed outside the queue monitor; ordinary payloads are
 not followed. NULL does nothing. Owner destruction releases these native
 queue nodes and resources through the same finalizer.
 
-Source: `lib/channel.x:361`
+Source: `lib/channel.x:405`
 
 <a id="Channel.iter"></a>
 #### Channel.iter
@@ -67,7 +67,7 @@ Initializes a borrowed iterator that blocks for each received message.
 Normal close and draining end iteration; cooperative stop raises instead.
 The Channel must outlive traversal.
 
-Source: `lib/channel.x:392`
+Source: `lib/channel.x:436`
 
 <a id="Channel.new"></a>
 #### Channel.new
@@ -99,7 +99,7 @@ A committed delivery succeeds despite a later stop request.
 **Raises:** <bad-arg> for NULL, <alloc-fail> preparing receiver storage, or
 <bad-state> for cooperative stop.
 
-Source: `lib/channel.x:326`
+Source: `lib/channel.x:370`
 
 <a id="Channel.scope"></a>
 #### Channel.scope
@@ -125,26 +125,29 @@ commits under synchronization; later stop cannot retract that send.
 mismatch, <bad-state> for closure or cooperative stop, or <alloc-fail>
 for native buffered queue storage. Failure dispatch holds no queue lock.
 
-Source: `lib/channel.x:305`
+Source: `lib/channel.x:346`
 
 <a id="Channel.send_owned"></a>
 #### Channel.send_owned
 
 `void Channel.send_owned(Channel c, Var value)`
 
-Sends a live Scope-allocated root with its own exclusively owned inactive
-storage subtree. Detaches before exposure; failed sends restore the
-original parent before raising. Accepted sends relinquish sender access
+Hands off an exclusively owned payload. Ordinary Map and Array records,
+buffers, and existing owned contents move into a transport Scope created
+only for this send. Custom or typed roots require a preexisting exclusive
+inactive subtree containing their full physical storage. The detached
+scope is recovered through the root's allocation header while queued.
+Failed sends restore the container allocation owner and contents parent,
+or the custom subtree parent, before raising. Accepted sends relinquish sender access
 and cleanup responsibility. This cannot disarm an existing $auto or defer;
-the caller must not leave such cleanup armed after acceptance. The same
-subtree must not be handed off twice. Canonical Strings/Lists and their
-referenced objects are not implicitly adopted. The root pointer and its
-allocation header must remain valid until commitment; this operation does
-not validate arbitrary pointer provenance or ownership graphs.
+the caller must not leave such cleanup armed after acceptance. A subtree
+must not be handed off twice. Canonical Strings/Lists and independent
+referenced objects are not implicitly adopted. Pointer provenance and
+ownership graphs remain caller responsibilities.
 
 **Raises:** the send causes, or <bad-arg> for a null/nonpointer payload.
 
-Source: `lib/channel.x:317`
+Source: `lib/channel.x:361`
 
 <a id="Channel.var"></a>
 #### Channel.var
@@ -153,7 +156,7 @@ Source: `lib/channel.x:317`
 
 Boxes the borrowed Channel handle without changing its lifetime.
 
-Source: `lib/channel.x:370`
+Source: `lib/channel.x:414`
 
 ### `Var`
 
@@ -166,7 +169,7 @@ Reads a Channel handle with its exact tag. Ownership is unchanged.
 
 **Raises:** <bad-types> for another tag.
 
-Source: `lib/channel.x:374`
+Source: `lib/channel.x:418`
 
 ## Public types
 
