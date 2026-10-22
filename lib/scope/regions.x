@@ -195,7 +195,6 @@ static void _destroy_chain(Scope scope) {
     _detach_scope(scope);
     while (1) {
       Scope child = scope.children;
-      if (child) _detach_scope(child);
       ScopeAlloc alloc = child ? NULL : scope.first;
       if (alloc) _detach(alloc);
       if (child) _destroy_chain(child);
