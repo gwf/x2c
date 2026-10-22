@@ -59,7 +59,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/symbol.x`](symbol.md) | immediate encoded names. |
 | [`lib/symbolset.x`](symbolset.md) | immutable ordered sets of compact `Symbol`s. |
 | [`lib/system-macros.x`](system-macros.md) | convenience macros for text, timing, and processes. |
-| [`lib/thread.x`](thread.md) | `Context`-backed native worker threads. |
+| [`lib/thread.x`](thread.md) | native workers with explicit result lifetimes. |
 | [`lib/type.x`](type.md) | semantic type values and their structural operations. |
 | [`lib/typed-array.x`](typed-array.md) | packed typed `Array`s generated from shared methods. |
 | [`lib/typed-list.x`](typed-list.md) | typed cons chains generated from typed methods. |
