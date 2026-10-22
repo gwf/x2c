@@ -861,8 +861,7 @@ macro Unit $map.typed.publish(
     defer if ((void *) staged != 0 && (void *) committed == 0)
       staged.free_table();
 
-    Scope *destination = source.export_destination();
-    map.scope.transfer(*destination);
+    source.move_scope(map.scope);
     if ((void *) staged != 0) {
       Bytes old_hashes = map.hashes, old_entries = map.entries;
       staged.hashes.block().move_to(&map.scope);

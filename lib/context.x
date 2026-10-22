@@ -38,9 +38,16 @@ protocol Cleanup(Context);
    Scope and optional canonical pool own work performed inside the Context;
    the destination Scope slot and pool are borrowed from the state captured
    before that work is installed. */
+static typedef struct ContextExportScope {
+  Scope scope;
+  struct ContextExportScope *previous;
+} ContextExportScope;
+
 static struct Context {
   Context parent, Scope scope, *destination_scope, Pool pool;
   Pool destination_pool, void *error_state, *match_state;
+  Map exported;
+  ContextExportScope *export_scopes;
 };
 
 static threaded Context current_context;
@@ -66,7 +73,7 @@ static threaded Context current_context;
 meta native Var Context.export(Context context, Var value) {
   if (!context || current_context != context)
     raise %(bad-state (operation "Context.export"));
-  return _export_value(context, value);
+  return _export_root(context, value);
 }
 
 /** Exports a sealed worker result `Scope` into the current `Scope` and pool.
@@ -91,7 +98,31 @@ Var Context.export_scope(Scope source_scope, Pool pool, Var value) {
     .destination_scope = Scope.top(),
     .destination_pool = Pool.current()
   };
-  return _export_value(&source, value);
+  return _export_root(&source, value);
+}
+
+static Var _export_root(Context c, Var value) {
+  if (c.exported != NULL) return _export_value(c, value);
+  defer {
+    if (c.exported != NULL) c.exported.cleanup();
+    c.exported = NULL;
+  }
+  return _export_value(c, value);
+}
+
+/* Moving a whole ownership subtree cannot mark only the visited container:
+   its adopted descendants still need recursive canonical-value export. */
+static int _visited(Context c, Var value) {
+  if (c.exported == NULL) c.exported = Map.new();
+  if (c.exported.contains(value)) return 1;
+  c.exported.set(value, 1);
+  return 0;
+}
+
+static int _enclosed_export(Context c, Scope scope) {
+  for (ContextExportScope *at = c.export_scopes; at; at = at.previous)
+    if (at.scope.contains(scope)) return 1;
+  return 0;
 }
 
 static Var _export_value(Context c, Var v) {
@@ -145,40 +176,33 @@ static List _export_list(Context c, List list) {
   return tail;
 }
 
-/* Move an Array or Map identity before recursively exporting its contents.
-   A cyclic revisit then sees an object outside the source and terminates.
-   Failure restores this container's original owner, but nested exports that
-   already completed are not rolled back; backing storage moves only after
-   the recursive work succeeds. */
+/* Visit each container once, then move complete storage after its contents.
+   Adopted descendants remain under the enclosing exported container. */
 static Var _export_array(Context c, Var value) {
   Array array = value;
-  if (!c.owns(array)) return value;
-  Scope owner = Scope.owner(array);
-  Scope storage = array.lifetime, parent = storage.parent();
-  if (storage) array.move_to(c.destination_scope);
-  else Scope.move(array, c.destination_scope);
-  int exported = 0;
-  defer if (!exported) {
-    if (storage) storage.transfer(parent);
-    else Scope.move(array, &owner);
-  }
+  if (!c.owns(array) || _visited(c, value)) return value;
+  int enclosed = _enclosed_export(c, Scope.owner(array));
+  ContextExportScope frame = {array.lifetime, c.export_scopes};
+  c.export_scopes = &frame;
+  defer c.export_scopes = frame.previous;
   Var *items = array.bytes;
   for (size_t i = 0; i < array.length; i++)
     items[i] = _export_value(c, items[i]);
-  array.move_to(c.destination_scope);
-  exported = 1;
+  if (!enclosed) array.move_to(c.destination_scope);
   return value;
 }
 
 static Var _export_map(Context c, Var value) {
   Map map = value;
-  if (!c.owns(map)) return value;
-  Scope storage = map.scope(), parent = storage.parent();
-  storage.transfer(*c.destination_scope);
-  int exported = 0;
-  defer if (!exported) storage.transfer(parent);
+  if (!c.owns(map) || _visited(c, value)) return value;
+  Scope storage = map;
+  int enclosed = _enclosed_export(c, storage);
+  ContextExportScope frame = {storage, c.export_scopes};
+  c.export_scopes = &frame;
+  defer c.export_scopes = frame.previous;
   map.export_to(c, _export_callback, c.destination_scope);
-  exported = 1;
+  c.export_scopes = frame.previous;
+  if (!enclosed) c.move_scope(storage);
   return value;
 }
 
@@ -190,6 +214,7 @@ static Var _export_callback(Var value, Context c) =>
 static Var _export_storage(Context c, Var v) {
   void *allocation = v is <bytes> ? v.bytes().block() : v.pointer();
   if (!c.owns(allocation)) return v;
+  if (_enclosed_export(c, Scope.owner(allocation))) return v;
   if (v is <buffer>) ((Buffer) allocation).move_to(c.destination_scope);
   else ((Block) allocation).move_to(c.destination_scope);
   return v;
@@ -242,7 +267,22 @@ Scope *Context.export_destination(Context c) => c ? c.destination_scope : NULL;
     Application code exports its value with `Context.export` instead.
 */
 void Context.move_allocation(Context c, void *allocation) {
-  if (c.owns(allocation)) Scope.move(allocation, c.export_destination());
+  if (c.owns(allocation) &&
+      !_enclosed_export(c, Scope.owner(allocation)))
+    Scope.move(allocation, c.export_destination());
+}
+
+/** Moves custom-exporter storage while preserving explicit parent adoption.
+    An adopted child stays beneath a container currently being exported;
+    otherwise its entire storage scope moves to the destination. Exporters
+    call this after exporting nested values, never from channel transport.
+    Raises: `<alloc-fail>` if an empty destination needs a Scope.
+*/
+void Context.move_scope(Context c, Scope storage) {
+  if (!_owns_scope(c, storage) || _enclosed_export(c, storage)) return;
+  Scope *destination = c.export_destination();
+  if (!*destination) *destination = Scope.new();
+  storage.transfer(*destination);
 }
 
 // lifecycle

@@ -334,8 +334,9 @@ meta native Scope Scope.new_named(const char *name) {
   return _new_scope(name);
 }
 
-/** Destroys a detached scope and frees every allocation it owns.
-    This ends a scope you hold in a variable, and is the counterpart to
+/** Destroys a scope and frees its allocations and adopted child scopes.
+    An adopted scope first detaches from its lifetime parent. This ends a
+    scope you hold in a variable, and is the counterpart to
     `Scope.new` and `Scope.new_named`. It frees the scope's allocations and
     discards its name; pointers into it are dangling afterwards, and nothing
     diagnoses their use. Any regions still linked below it, from retains that

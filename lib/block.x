@@ -305,7 +305,7 @@ Block Block.new(size_t width) {
 Block Block.new_owned(size_t width) {
   Scope lifetime = Scope.child();
   Block result = NULL;
-  defer if (!result) lifetime.destroy();
+  defer if (result == NULL) lifetime.destroy();
   Scope.push(&lifetime);
   defer Scope.pop();
   result = Block.new(width);
@@ -318,7 +318,7 @@ Block Block.new_owned(size_t width) {
     their private storage scope. NULL returns NULL.
 */
 Scope Block.scope(Block block) =>
-  block ? (block.lifetime ? block.lifetime : Scope.owner(block)) : NULL;
+  block != NULL ? (block.lifetime ? block.lifetime : Scope.owner(block)) : NULL;
 
 /** Allocates empty byte storage for elements of `width` bytes.
     The result is the base view of a `Scope`-owned `Block`. Methods that may

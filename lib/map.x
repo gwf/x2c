@@ -20,10 +20,10 @@
 #include "common.x"
 #include "iter.x"
 
-/** `Scope`-backed mutable hash table from `Var` keys to `Var` values.
-    The `Map` records the `Scope` used for its two backing `Block`s.
-    `Context` moves the `Map` allocation itself before recursively exporting
-    those `Block`s. Stored `Var` bits are shallow and retain no pointee;
+/** Mutable hash table with a private child Scope for its complete storage.
+    The stable handle and both backing `Block`s share that storage scope.
+    Explicit scope transfer preserves addresses and adopted child lifetimes.
+    Stored `Var` bits are shallow and retain no pointee;
     those values must remain valid while the `Map` can read, compare, hash,
     or return them. A valid empty `Map` is allocated and distinct from NULL.
 */
@@ -192,13 +192,13 @@ Self Map.update_n(Self map, unsigned pair_count, ...) {
   return map;
 }
 
-/** Exports every key and value, rebuilds the table, then moves its `Block`s.
+/** Exports every key and value and rebuilds the table in its storage scope.
     The borrowed `export_value` callback runs synchronously for each stored
     key and value and may return replacement `Var`s. Rebuilding is required
     because an exported key may hash differently. On success the old backing
-    `Block`s are freed, the rebuilt `Block`s move into `scope`, and the `Map`
-    identity remains unchanged. `Context` moves that identity before this call
-    to break cycles.
+    `Block`s are freed and their replacements enter the Map's storage scope.
+    `Context` owns cycle detection and reparents the complete storage scope
+    after recursion, preserving explicitly adopted descendants.
 
     A failure while staging leaves the `Map`'s original records, backing
     storage, and recorded `Scope` unchanged. Effects of callbacks that
@@ -253,5 +253,8 @@ $map.typed.iterate(Map, Var, Var, map, _box_var, _box_var);
 meta native Iter Map.keys(Map, Iter);
 meta native Iter Map.enumerate(Map, Iter);
 
-/** Releases this Map and both backing Blocks without freeing stored values. */
+/** Destroys the Map's storage scope and explicitly adopted child scopes.
+    Referenced keys and values with independent owners remain unchanged.
+    NULL does nothing. Every alias becomes invalid after destruction.
+*/
 meta native void Map.cleanup(Map value) { value.free_table(); }
