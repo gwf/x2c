@@ -43,8 +43,8 @@ function comparison(index) {
         const parts = SourceDiff.intraline(removed[j].text, added[j].text);
         removed[j].parts = parts.before; added[j].parts = parts.after;
         // Punctuation and indentation alone do not identify corresponding source.
-        if (parts.unified.some((part) => part.type === "equal" && /[\w$]/.test(part.text))) {
-          removed[j].unified = parts.unified;
+        if (parts.before.some((part) => !part.changed && /[\w$]/.test(part.text))) {
+          removed[j].paired = true;
         }
       }
     }
@@ -89,10 +89,13 @@ function cell(op, side, source, border = false) {
   const number = op && (side === "old" ? op.old : op.new);
   const kind = !op ? "empty" : op.type === "equal" ? "" : op.type;
   const mark = !op || op.type === "equal" ? "" : op.type === "add" ? "+" : "-";
-  const sourceNumber = op && (op.type === "remove" ? op.old : number);
-  const endNote = op && sourceNumber === lineCount(source) && !source.endsWith("\n") ? '<span class="end-of-file"> [no final newline]</span>' : "";
-  const text = op && (op.parts ? op.parts.map((part) => part.changed ? `<mark class="token-change">${escapeHTML(part.text)}</mark>` : escapeHTML(part.text)).join("") : escapeHTML(op.text));
-  return `<td class="line-number ${kind} ${border ? "right-start" : ""}">${number || ""}</td><td class="marker ${kind}" aria-hidden="true">${mark}</td><td class="source ${kind}">${op ? text + endNote : ""}</td>`;
+  return `<td class="line-number ${kind} ${border ? "right-start" : ""}">${number || ""}</td><td class="marker ${kind}" aria-hidden="true">${mark}</td><td class="source ${kind}">${op ? sourceText(op, source, op.type === "remove" ? op.old : number) : ""}</td>`;
+}
+
+function sourceText(op, source, number = op.type === "remove" ? op.old : op.new) {
+  const endNote = number === lineCount(source) && !source.endsWith("\n") ? '<span class="end-of-file"> [no final newline]</span>' : "";
+  const text = op.parts ? op.parts.map((part) => part.changed ? `<mark class="token-change">${escapeHTML(part.text)}</mark>` : escapeHTML(part.text)).join("") : escapeHTML(op.text);
+  return text + endNote;
 }
 
 function splitRows() {
@@ -112,22 +115,13 @@ function splitRows() {
 function unifiedRows() {
   return splitRows().flatMap((row) => {
     if (!row.changed) return [{ op: row.left, changed: false }];
-    if (row.left && row.right && row.left.unified) return [row];
+    if (row.left && row.right && row.left.paired) return [row];
     return [row.left, row.right].filter(Boolean).map((op) => ({ op, changed: true }));
   });
 }
 
 function replacementCell(row, previousSource, currentSource) {
-  const text = row.left.unified.map((part) => {
-    const escaped = escapeHTML(part.text);
-    const tag = part.type === "remove" ? "del" : "ins";
-    return part.type === "equal" ? escaped : `<${tag}>${escaped}</${tag}>`;
-  }).join("");
-  const notes = [];
-  if (row.left.old === lineCount(previousSource) && !previousSource.endsWith("\n")) notes.push("before: no final newline");
-  if (row.right.new === lineCount(currentSource) && !currentSource.endsWith("\n")) notes.push("after: no final newline");
-  const endNote = notes.length ? `<span class="end-of-file"> [${notes.join("; ")}]</span>` : "";
-  return `<td class="line-number remove">${row.left.old}</td><td class="line-number add">${row.right.new}</td><td class="marker" aria-hidden="true">~</td><td class="source replacement">${text}${endNote}</td>`;
+  return `<td class="line-number remove" tabindex="0" role="button" aria-label="Show before block">${row.left.old}</td><td class="line-number add" tabindex="0" role="button" aria-label="Show after block">${row.right.new}</td><td class="marker" aria-hidden="true">~</td><td class="source replacement"><span class="version-before">${sourceText(row.left, previousSource)}</span><span class="version-after">${sourceText(row.right, currentSource)}</span></td>`;
 }
 
 function renderCode() {
@@ -145,7 +139,8 @@ function renderCode() {
     if (!visible.has(index)) { hidden++; wasChanged = false; return; }
     gap();
     const start = row.changed && !wasChanged;
-    html += `<tr${start ? ` data-change="${group++}"` : ""}>`;
+    if (start) group++;
+    html += `<tr${start ? ` data-change="${group - 1}"` : ""}${row.changed ? ` data-block="${group - 1}"` : ""}>`;
     if (split) html += cell(row.left, "old", previousSource) + cell(row.right, "new", currentSource, true);
     else if (!selected) html += cell(row.op, "new", currentSource);
     else if (row.left && row.right) html += replacementCell(row, previousSource, currentSource);
@@ -164,8 +159,7 @@ function renderCode() {
   const table = $("code").querySelector("table");
   if (table) {
     const charWidth = parseFloat(getComputedStyle(table).fontSize) * .63;
-    const displayed = rows.map((row) => row.op ? row.op.text : row.left?.unified?.map((part) => part.text).join("") || "").join("\n");
-    const width = split ? Math.max(360, longest(previousSource) * charWidth + 100, longest(currentSource) * charWidth + 100) * 2 : Math.max(300, longest(displayed) * charWidth + 150);
+    const width = split ? Math.max(360, longest(previousSource) * charWidth + 100, longest(currentSource) * charWidth + 100) * 2 : Math.max(300, Math.max(longest(previousSource), longest(currentSource)) * charWidth + 150);
     table.style.minWidth = `${width}px`;
     $("file-headings").style.minWidth = split ? table.style.minWidth : "";
   } else $("file-headings").style.minWidth = "";
@@ -174,6 +168,22 @@ function renderCode() {
   $("next-change").disabled = $("previous-change").disabled = !changeRows.length;
   $("change-position").textContent = `${changeRows.length} ${changeRows.length === 1 ? "change" : "changes"}`;
 }
+
+function showBlockVersion(event) {
+  const number = event.target.closest('.line-number[role="button"]');
+  if (!number) return;
+  const block = number.closest("tr").dataset.block;
+  $("code").querySelectorAll(`tr[data-block="${block}"]`).forEach((row) => {
+    row.classList.toggle("show-before", number.classList.contains("remove"));
+  });
+}
+for (const type of ["pointerover", "focusin", "click"]) $("code").addEventListener(type, showBlockVersion);
+$("code").addEventListener("keydown", (event) => {
+  if ((event.key === "Enter" || event.key === " ") && event.target.matches('.line-number[role="button"]')) {
+    event.preventDefault();
+    showBlockVersion(event);
+  }
+});
 
 function revealSelectedVersion() {
   if (!matchMedia("(max-width: 700px)").matches) return;
