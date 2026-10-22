@@ -152,19 +152,6 @@ static void storage_context_exports_adopted_string_array(void) {
   EXPECT_INT_EQ(storage_drops, 2);
 }
 
-static Var _storage_transfer_worker(Var input) {
-  Scope destination = input;
-  for (int i = 0; i < 128; i++) {
-    Map map = {};
-    Scope owner = map;
-    owner.transfer(destination);
-    Scope.malloc_finalized_in(&owner, 1, _storage_drop);
-    map[i] = i;
-    map.cleanup();
-  }
-  return void;
-}
-
 static void storage_failed_export_can_retry_adopted_graph(void) {
   $test.scoped();
   Context context = Context.open_isolated();
@@ -214,18 +201,51 @@ static void storage_exports_raw_typed_block_views(void) {
   strings.free();
 }
 
-static void storage_concurrent_adoption_and_destruction(void) {
-  $test.scoped();
-  Scope destination = Scope.new();
-  Array workers = $auto([]);
+static void storage_detached_subtree_survives_and_reattaches(void) {
+  ScopeStats before = Scope.stats();
+  Scope source = Scope.new(), destination = Scope.new();
+  Scope.push(&source);
+  Map map = {};
+  Array child = [];
+  Scope owner = map, nested = child;
+  nested.transfer(owner);
+  map[0] = child;
+  child.push(42);
   storage_drops = 0;
-  defer Thread.finish_all(workers);
-  for (int i = 0; i < 4; i++)
-    workers.push(Thread.start(_storage_transfer_worker, destination));
-  Thread.finish_all(workers);
-  EXPECT_INT_EQ(storage_drops, 512);
+  Scope.malloc_finalized_in(&owner, 1, _storage_drop);
+  Scope.malloc_finalized_in(&nested, 1, _storage_drop);
+  Scope.pop();
+  owner.transfer(NULL);
+  owner.transfer(NULL);
+  EXPECT_NULL(owner.parent());
+  EXPECT_NULL(owner.previous);
+  EXPECT_NULL(owner.next);
+  EXPECT_FALSE(source.contains(owner));
+  source.destroy();
+  EXPECT_INT_EQ(storage_drops, 0);
+  EXPECT_PTR_EQ(Scope.owner(map), owner);
+  EXPECT_PTR_EQ(Scope.owner(child), nested);
+  EXPECT_PTR_EQ(nested.parent(), owner);
+  EXPECT_TRUE(owner.contains(nested));
+  EXPECT_PTR_EQ(map[0].array(), child);
+  EXPECT_INT_EQ(child[0].int(), 42);
+  for (int i = 1; i < 128; i++) {
+    map[i] = i;
+    child.push(i);
+  }
+  EXPECT_PTR_EQ(Scope.owner(map.entries.block()), owner);
+  EXPECT_PTR_EQ(Scope.owner((unsigned char *) child.bytes - sizeof(Block)),
+    nested);
+  owner.transfer(destination);
+  EXPECT_PTR_EQ(owner.parent(), destination);
+  EXPECT_PTR_EQ(Scope.owner(map), owner);
+  EXPECT_PTR_EQ(nested.parent(), owner);
+  EXPECT_INT_EQ(map[127].int(), 127);
+  EXPECT_INT_EQ(child[127].int(), 127);
   destination.destroy();
-  EXPECT_INT_EQ(storage_drops, 512);
+  EXPECT_INT_EQ(storage_drops, 2);
+  EXPECT_INT_EQ(Scope.stats().live_allocations, before.live_allocations);
+  EXPECT_INT_EQ(Scope.stats().live_scopes, before.live_scopes);
 }
 
 static void _storage_export_order(int child_first) {
@@ -352,7 +372,7 @@ void storage_ownership_suite(void) {
   $test.run(storage_context_exports_adopted_string_array);
   $test.run(storage_failed_export_can_retry_adopted_graph);
   $test.run(storage_exports_raw_typed_block_views);
-  $test.run(storage_concurrent_adoption_and_destruction);
+  $test.run(storage_detached_subtree_survives_and_reattaches);
   $test.run(storage_exports_child_before_parent);
   $test.run(storage_exports_parent_before_child);
   $test.run(storage_exports_child_independently);

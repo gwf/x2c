@@ -32,10 +32,17 @@ child. Every pointer into either destroyed container becomes invalid.
 changes a fixed number of ownership links without copying elements or walking
 descendants. Destruction still visits and frees the adopted storage.
 
-Transfers require live scopes and exclude concurrent destruction. The source
-must not be active on an allocation stack, and the destination must not be
-the source or its descendant. The runtime does not prove graph lifetimes or
-revoke aliases. Transferring storage does not grant exclusive access.
+`scope.transfer(NULL)` detaches that subtree from its parent. The subtree
+survives destruction of its former parent. Its allocations retain their
+existing owning scopes, so `Scope.owner(pointer)` still works. Reattach with
+another transfer, or destroy the detached scope explicitly.
+
+Transfers require exclusive access to the source and affected ownership
+lists. Concurrent adoption into a shared parent is unsupported. The source
+must not be active on an allocation stack. A nonnull destination must be live
+and must not be the source or its descendant. The runtime does not prove
+graph lifetimes or revoke aliases. Transferring storage does not grant
+exclusive access to referenced values.
 
 `object.scope()` returns its storage scope. A Scope destination accepts a
 container through that converter, so `child.scope().transfer(parent)` uses
@@ -69,19 +76,23 @@ with shallow references; it does not clone or adopt nested objects.
 
 ## Share references between threads
 
-Channels carry non-void Vars. Sending and receiving do not transfer, clone,
-or recursively export referenced storage. A parent can send one Map to several
-workers, keep it alive, and refrain from writing until their reads finish.
+Channels carry non-void Vars. Ordinary `send` borrows references without
+transferring, cloning, or recursively exporting storage. A parent can send
+one Map to several workers, keep it alive, and refrain from writing until
+their reads finish.
 
-When a worker wants a result to survive its own scope, it can explicitly
-transfer the result's storage scope into a longer-lived owner before sending.
-A failed send does not undo that earlier transfer. Sending successfully also
-does not mean the receiver has finished borrowing the value.
+`Channel.send_owned` explicitly detaches a private payload subtree. A failed
+send restores its original parent. After acceptance, the Channel holds the
+detached payload without adopting it as a child. The receiver recovers its
+scope from the existing allocation header and attaches it to the receiver's
+private current scope before returning. Abandoned queued owned payloads are
+explicitly destroyed after all Channel users finish. See
+[Channels](channels.md) for the transport contract.
 
-The developer coordinates reads, writes, and destruction. Metadata operations
-synchronize ownership links so independent workers can adopt different child
-scopes into one live owner while another thread destroys completed children.
-Those internal locks do not synchronize access to Map entries or Array elements.
+The developer coordinates reads, writes, and destruction, including allocation
+and ownership links. Scope operations do not lock those links. A thread must
+have exclusive access while allocating, resizing, freeing, or transferring
+that storage. Sending successfully does not mean a borrower has finished.
 
 ## Canonical values have separate owners
 

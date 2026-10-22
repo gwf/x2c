@@ -29,7 +29,8 @@ typedef struct ScopeAlloc {
 
 /** Handle for a region and any retained regions linked below it.
     The layout is public; only `Scope` operations create or mutate valid
-    allocation and region links.
+    allocation and region links. Callers provide exclusive access to those
+    links, including ownership parents, during allocation and lifetime changes.
 */
 typedef struct Scope {
   ScopeAlloc first;
@@ -80,9 +81,6 @@ module atomic_size_t scope_creations, scope_destructions;
 module atomic_size_t raw_alloc_count, raw_free_count;
 
 #include <pthread.h>
-
-module void _links_lock(void);
-module void _links_unlock(void);
 
 module {
   "allocation.x",

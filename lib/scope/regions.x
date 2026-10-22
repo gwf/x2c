@@ -2,19 +2,6 @@
 
 static threaded struct ScopeThreadState scope_thread;
 
-static pthread_mutex_t scope_links_mutex =
-  (pthread_mutex_t) PTHREAD_MUTEX_INITIALIZER;
-
-module void _links_lock(void) {
-  if (pthread_mutex_lock(&scope_links_mutex))
-    _raw_fatal("could not lock scope links");
-}
-
-module void _links_unlock(void) {
-  if (pthread_mutex_unlock(&scope_links_mutex))
-    _raw_fatal("could not unlock scope links");
-}
-
 module ScopeThreadState _thread(void) {
   ScopeThreadState state = &scope_thread;
   if (!state.active) state.active = &state.root;
@@ -205,16 +192,12 @@ static int _forget_retain(Scope scope, Scope *slot) {
 static void _destroy_chain(Scope scope) {
   while (scope) {
     Scope down = scope.down;
-    _links_lock();
     _detach_scope(scope);
-    _links_unlock();
     while (1) {
-      _links_lock();
       Scope child = scope.children;
       if (child) _detach_scope(child);
       ScopeAlloc alloc = child ? NULL : scope.first;
       if (alloc) _detach(alloc);
-      _links_unlock();
       if (child) _destroy_chain(child);
       else if (alloc) _release(alloc);
       else break;
@@ -260,24 +243,19 @@ Scope Scope.child(void) {
     This is independent of the active allocation stack and retained regions.
 */
 Scope Scope.parent(Scope scope) {
-  if (!scope) return NULL;
-  _links_lock();
-  Scope parent = scope.parent;
-  _links_unlock();
-  return parent;
+  return scope ? scope.parent : NULL;
 }
 
 /** Reparents this storage scope and its adopted descendants without copying.
-    The source must be an inactive storage scope and the destination live. The
-    destination must not be the source or one of its descendants. Callers
-    exclude destruction during use and coordinate access to referenced data.
+    A NULL destination detaches the subtree; its allocations remain owned by
+    their existing scopes until reattachment or explicit destruction.
+    The source must be inactive. A nonnull destination must be live and must
+    not be the source or one of its descendants. Callers provide exclusive
+    access to the affected ownership lists and coordinate payload access.
     Transfer does not follow payload references or revoke aliases.
-    Raises: `<bad-arg>` for a NULL destination.
 */
 void Scope.transfer(Scope scope, Scope destination) {
   if (!scope) return;
-  if (!destination) raise %(bad-arg);
-  _links_lock();
   if (scope.parent != destination) {
     _detach_scope(scope);
     scope.parent = destination;
@@ -287,7 +265,6 @@ void Scope.transfer(Scope scope, Scope destination) {
       destination.children = scope;
     }
   }
-  _links_unlock();
 }
 
 static void _detach_scope(Scope scope) {
@@ -303,11 +280,8 @@ static void _detach_scope(Scope scope) {
 */
 int Scope.contains(Scope scope, Scope candidate) {
   if (!scope || !candidate) return 0;
-  _links_lock();
   while (candidate && candidate != scope) candidate = candidate.parent;
-  int found = candidate == scope;
-  _links_unlock();
-  return found;
+  return candidate == scope;
 }
 
 /** Creates a detached scope carrying a copy of `name` for diagnostics.
