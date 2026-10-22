@@ -1221,8 +1221,58 @@ void thread_parallel_map_suite(void) {
   $test.run(parallel_map_reuses_workers_and_exports_each_job);
 }
 
+static pthread_cond_t stop_probe_condition =
+  (pthread_cond_t) PTHREAD_COND_INITIALIZER;
+
+static typedef struct StopProbe {
+  atomic_int ready, enter;
+  int before_registration;
+} StopProbe;
+
+static Var _stop_probe(const void *bytes, size_t size) {
+  (void) size;
+  StopProbe *probe = *(StopProbe *const *) bytes;
+  if (probe.before_registration) {
+    atomic_store(&probe.ready, 1);
+    while (!atomic_load(&probe.enter)) sched_yield();
+  }
+  x2c_thread_wait_lock();
+  atomic_store(&probe.ready, 1);
+  while (!x2c_thread_stopping())
+    x2c_thread_wait(&stop_probe_condition);
+  x2c_thread_wait_unlock();
+  int caught = 0;
+  try x2c_thread_cancel();
+  catch %(bad-state (operation "Thread.stop") (cancelled 1)): caught = 1;
+  return caught;
+}
+
+static void thread_stop_wakes_registered_wait(void) {
+  StopProbe probe = { 0 };
+  StopProbe *address = &probe;
+  Thread worker = Thread.start_raw(_stop_probe, &address, sizeof(address));
+  while (!atomic_load(&probe.ready)) sched_yield();
+  worker.stop();
+  worker.stop();
+  EXPECT_INT_EQ(worker.join().integer(), 1);
+  worker.free();
+}
+
+static void thread_stop_precedes_wait_registration(void) {
+  StopProbe probe = { .before_registration = 1 };
+  StopProbe *address = &probe;
+  Thread worker = Thread.start_raw(_stop_probe, &address, sizeof(address));
+  while (!atomic_load(&probe.ready)) sched_yield();
+  worker.stop();
+  atomic_store(&probe.enter, 1);
+  EXPECT_INT_EQ(worker.join().integer(), 1);
+  worker.free();
+}
+
 void thread_suite(void) {
   $test.run(thread_failed_start_does_not_freeze_registration);
+  $test.run(thread_stop_wakes_registered_wait);
+  $test.run(thread_stop_precedes_wait_registration);
   $test.run(thread_input_size_overflow_is_size_limit);
   $test.run(thread_copies_input_at_maximum_alignment);
   $test.run(thread_rendering_paths_are_independent);

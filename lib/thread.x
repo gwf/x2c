@@ -71,6 +71,8 @@ static struct Thread {
   int finished;
   struct ParallelRun *parallel;
   int assigned;
+  int stop_requested;
+  pthread_cond_t *waiting;
 };
 
 static struct ThreadValueInput { ThreadValueFn function; Var value; };
@@ -79,6 +81,9 @@ static struct ParallelMap {
   ThreadValueFn function;
   int workers;
 };
+
+static threaded Thread running_thread;
+static threaded int stop_mask;
 
 static int thread_live_count;
 static pthread_mutex_t thread_completion_mutex =
@@ -97,6 +102,61 @@ static size_t _input_offset(void) {
 
 static void *_input(Thread thread) =>
   (unsigned char *) thread + _input_offset();
+
+// cooperative waits
+
+/** Locks the internal monitor shared by stop publication and queue commits.
+    Native synchronization failure aborts without entering Error dispatch. */
+void x2c_thread_wait_lock(void) =>
+  _completion_check(pthread_mutex_lock(&thread_completion_mutex));
+
+/** Unlocks the internal stop/queue monitor. */
+void x2c_thread_wait_unlock(void) =>
+  _completion_check(pthread_mutex_unlock(&thread_completion_mutex));
+
+/** Returns the current wait's borrowed Thread token, or NULL for an unmanaged
+    or cleanup-masked caller. Call while holding the internal monitor. */
+Thread x2c_thread_wait_owner(void) => stop_mask ? NULL : running_thread;
+
+/** Tests a borrowed wait token under the internal monitor. A null token has
+    no stop request. Queues use this before committing a rendezvous peer. */
+int x2c_thread_wait_stopped(Thread owner) => owner && owner.stop_requested;
+
+/** Tests the current wait's pending stop under the internal monitor. */
+int x2c_thread_stopping(void) =>
+  x2c_thread_wait_stopped(x2c_thread_wait_owner());
+
+/** Waits on condition with the internal monitor held. Registration and the
+    pending-stop check share that monitor with Thread.stop. Returns holding
+    the monitor, with the registration removed, including on pending stop.
+    Queue callers recheck predicates and stop before committing an operation. */
+void x2c_thread_wait(pthread_cond_t *condition) {
+  Thread owner = x2c_thread_wait_owner();
+  if (x2c_thread_wait_stopped(owner)) return;
+  if (owner) owner.waiting = condition;
+  _completion_check(pthread_cond_wait(condition, &thread_completion_mutex));
+  if (owner) owner.waiting = NULL;
+}
+
+/** Raises a non-resumable stop outcome after queue locks and wait records
+    have been released. Explicit catches may handle this shared cause. */
+void x2c_thread_cancel(void) {
+  raise %(bad-state (operation "Thread.stop") (cancelled 1));
+}
+
+/** Requests cooperative stopping without closing any Channel. The request
+    persists and wakes a registered Channel or completion wait. Computation
+    and arbitrary native I/O are not interrupted. Repeated requests are safe
+    while the handle remains live; stop does not join or free it.
+    Raises: <bad-arg> for a null handle. */
+void Thread.stop(Thread thread) {
+  if (!thread) raise %(bad-arg (operation "Thread.stop"));
+  x2c_thread_wait_lock();
+  thread.stop_requested = 1;
+  if (thread.waiting)
+    _completion_check(pthread_cond_broadcast(thread.waiting));
+  x2c_thread_wait_unlock();
+}
 
 // starting
 
@@ -258,6 +318,7 @@ static void _error(const char *operation, int error) {
    after no worker-private value still needs them. */
 static void *_run(void *argument) {
   Thread thread = argument;
+  running_thread = thread;
   (void) Scope.top();
   Pool.thread_initialize();
   Error.initialize_raw();
@@ -372,22 +433,27 @@ static void _completion_check(int error) {
 */
 Thread Thread.wait_any(Array pending) {
   if (!pending.len()) return NULL;
-  _completion_check(pthread_mutex_lock(&thread_completion_mutex));
-  defer _completion_check(pthread_mutex_unlock(&thread_completion_mutex));
   foreach (Thread thread, pending) {
     if (!thread) raise %(bad-arg (operation "Thread.wait_any"));
     if (__atomic_load_n(&thread.state, __ATOMIC_SEQ_CST) != <running>)
       raise %(bad-state (operation "Thread.wait_any"));
   }
-  while (1) {
+  x2c_thread_wait_lock();
+  Thread selected = _wait_any(pending);
+  x2c_thread_wait_unlock();
+  if (!selected) x2c_thread_cancel();
+  return selected;
+}
+
+static Thread _wait_any(Array pending) {
+  while (!x2c_thread_stopping()) {
     for (int i = 0; i < pending.len(); i++) {
       Thread thread = pending[i];
       if (thread.finished) return pending.remove(i);
     }
-    _completion_check(
-      pthread_cond_wait(
-        &thread_completion_condition, &thread_completion_mutex));
+    x2c_thread_wait(&thread_completion_condition);
   }
+  return NULL;
 }
 
 /** Joins one worker and exports its result into the joining `Scope` and pools.
