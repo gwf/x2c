@@ -167,20 +167,15 @@ description needs named iterator storage that outlives its fold.
 
 ## Verification
 
-After normalizing names and filter order, all eight versions compiled and
-matched independently calculated word frequencies on the documentation inputs.
-Versions 0-5 used `docs/src/index.md`; Versions 6-7 used all 160 files then
-present under `docs/src/` and produced identical output. Sorting and memory
-lifetimes remain unchanged.
+`unittest/test-substring.x` covers checked spans, canonical conversion,
+allocation-free typed traversal, native count-table growth and export, and
+String-keyed accumulation that materializes only missing keys.
+`unittest/compiler-fixtures/foreach-typed-cursors.x` checks mixed binding
+types, aliases, one-time source evaluation, and destructuring sorted tuples.
 
-The original persistent-worker implementation passed 13 focused tests with 77
-assertions. Four ParallelMap tests account for 47 assertions, including 16
-jobs on four reused threads, blocked-worker progress, result lifetime, and
-worker/source/accumulator failure cleanup. V7 matched V6 and independently
-calculated output on 17 nested files and an empty directory.
-
-The original delivery refreshed bootstrap and rebuilt the compiler from it.
-The focused suites and V7 fixture passed with that rebuilt compiler. Broad
-publication gates were waived for that delivery. See the
-[continuation note](../../plans/c2x2c-continuation.md) before further thread API
-design; the waiver does not establish a standing validation policy.
+The tutorial programs remain manual probes in `examples/manifest.txt`.
+For one-off timing comparisons, build all versions with the same optimization
+level and compare their output against independently calculated frequencies.
+Use `site/public/llms-full.txt` for Versions 0-5 and the same `docs` hierarchy
+for Versions 6-7 and the aggregate C driver. The C baseline and later stages
+print their top ten in different orders, as described above.

@@ -4081,7 +4081,10 @@ static List _declaration_types(Compiler c, List storage){
 }
 
 List Compiler_parse_declaration_argument(Compiler c){
-  if(! _init_guard_) _file_init_();  List storage = _storage_class(c);  if(storage == _144) Compiler_report_error(c, 33658058, _150, c -> token, NULL);  List type, binding_type;  List _x2c_gensym_destructure_3 = _declaration_types(c, storage);  type = Var_list_payload(List_getindex(_x2c_gensym_destructure_3, 0));  binding_type = Var_list_payload(List_getindex(_x2c_gensym_destructure_3, 1));  if(f12_declarations____destructure_starts(c)) return f12_declarations____destructure_declaration(c, type, binding_type, 1);  List binding = _declarator_init(c, binding_type, NULL);  List declaration = _finish_declaration(c, 8932560010, type, cons(List_var(binding), NULL), 0);  if(Type_is_function(List_type_from_ast(declaration))) Compiler_report_error(c, 33658058, _151, c -> token, NULL);  return declaration;
+  if(! _init_guard_) _file_init_();  if(Compiler_test(c, 81)){
+    Array declarations = Array_new();  do Array_push(declarations, List_var(Compiler_parse_declaration_argument(c)));  while(Compiler_test(c, 89)); ;  Compiler_expect(c, 83);  return cons(_79, List_append(Array_list_free(declarations), NULL));
+  }
+  List storage = _storage_class(c);  if(storage == _144) Compiler_report_error(c, 33658058, _150, c -> token, NULL);  List type, binding_type;  List _x2c_gensym_destructure_3 = _declaration_types(c, storage);  type = Var_list_payload(List_getindex(_x2c_gensym_destructure_3, 0));  binding_type = Var_list_payload(List_getindex(_x2c_gensym_destructure_3, 1));  if(f12_declarations____destructure_starts(c)) return f12_declarations____destructure_declaration(c, type, binding_type, 1);  List binding = _declarator_init(c, binding_type, NULL);  List declaration = _finish_declaration(c, 8932560010, type, cons(List_var(binding), NULL), 0);  if(Type_is_function(List_type_from_ast(declaration))) Compiler_report_error(c, 33658058, _151, c -> token, NULL);  return declaration;
 }
 
 int Compiler_test_static_assert(Compiler c){

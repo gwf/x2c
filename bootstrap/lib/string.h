@@ -45,6 +45,7 @@ String String_new(const char * str);
 String String_new_len(const char * str, int len);
 String String_new_in(Pool pool, const char * bytes, int length);
 String String_intern(String string);
+String x2c_string_from_bytes(const char * bytes, int length);
 String String_malloc(int len);
 String String_intern_free(String string);
 void String_free(String str);

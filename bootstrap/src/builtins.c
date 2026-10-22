@@ -67,7 +67,9 @@ static List _foreach_expand(List declaration, List collection, List body, Var it
 
 static List _converter(Type type);
 
-static List _cursor_spec(List collection_type);
+static List _cursor_spec(Type collection_type, Type owner, int arity);
+
+static List _typed_cursor_spec(Type collection_type, List targets);
 
 static int _atom_type(Var type);
 
@@ -733,7 +735,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _445 = String_new("foreach requires one binding or a two-name destructuring declaration");
   _446 = String_new("type ");
   _447 = String_new(" is not iterable");
-  _448 = String_new("declare an Iter protocol adoption or iterate an Iter directly");
+  _448 = String_new("declare a matching try_next cursor or an Iter protocol adoption");
   _449 = String_var(_448);
   _450 = cons(_449, NULL);
   _451 = String_new("Var");
@@ -741,7 +743,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _453 = cons(_452, NULL);
   _454 = String_new("Var_iter");
   _455 = String_new("iter");
-  _456 = String_new("_try_next");
+  _456 = String_new("try_next");
   _457 = Symbol_var(19368);
   _458 = cons(_457, NULL);
   _459 = Symbol_var(39939274535114);
@@ -1951,13 +1953,13 @@ static void _auto_fail(Symbol category, String message, List notes){
 
 List Code_declared_bindings(List);
 static List _foreach_expand(List declaration, List collection, List body, Var iterator, Var item, Var pair, Var object, Var cursor){
-  collection = Code_promoted(((Code) collection));  List targets = Code_declared_bindings(declaration);  Type type = Code_type(((Code) collection));  int direct = List_equal(Type_list(type), _444);  List converter = direct ? NULL : _converter(type);  List spec = direct ? NULL : _cursor_spec(Type_list(type));  if(List_len(targets) != 1 && List_len(targets) != 2) x2c_diagnostic_fail(_445, NULL);  if(! direct && ! List_truth(converter)){
+  collection = Code_promoted(((Code) collection));  List targets = Code_declared_bindings(declaration);  Type type = Code_type(((Code) collection));  int direct = List_equal(Type_list(type), _444);  List converter = direct ? NULL : _converter(type);  if(List_len(targets) != 1 && List_len(targets) != 2) x2c_diagnostic_fail(_445, NULL);  List spec = direct ? NULL : _typed_cursor_spec(type, targets);  if(! direct && ! List_truth(spec)) spec = _cursor_spec(type, type, List_len(targets));  if(! direct && ! List_truth(converter) && ! List_truth(spec)){
     Var printable = List_var(type);  x2c_diagnostic_fail(String_add(String_add(_446, Var_repr(printable)), _447), _450);
   }
   Foreach f ={
     .declaration = declaration, .collection = collection, .body = body, .targets = targets, .type = Type_list(type), .iterator = iterator, .item = item, .pair = pair, .object = object, .cursor = cursor
   }
-  ;  if(List_truth(spec) &&(List_len(targets) == 1 || List_len(Var_list_payload(List_getindex(spec, 2))) >= 2)) return _with_cursor(&(f), spec);  return _with_iter(&(f), converter);
+  ;  if(List_truth(spec)) return _with_cursor(&(f), spec);  return _with_iter(&(f), converter);
 }
 
 List MetaContext_function_reference(String);
@@ -1968,8 +1970,12 @@ static List _converter(Type type){
 int Type_is_pointer(Type);
 Type Type_canonicalize(Type);
 int Type_is_integral(Type);
-static List _cursor_spec(List collection_type){
-  if(! _atom_type(List_var(collection_type))) return NULL;  String owner = Var_str(List_car(collection_type));  Code function = MetaContext_function_reference(String_add(owner, _456));  if(! List_truth(function)) return NULL;  Type type = Code_type(function);  List parameters = Type_parameters(type);  List rest = List_cdr(parameters);  Type cursor_parameter = Var_type(List_truth(rest) ? List_car(rest) : List_var(NULL));  List outputs = List_truth(rest) ? List_cdr(rest) : NULL;  if(! List_equal(Type_list(Type_return_type(type)), _458) || ! x2c_var_equal(List_car(parameters), List_var(collection_type)) || ! Type_is_pointer(Type_canonicalize(cursor_parameter))) return NULL;  Type cursor_type = Type_element(cursor_parameter);  if(! Type_is_integral(cursor_type) && ! List_equal(Type_list(cursor_type), collection_type)) return NULL;  if(! List_truth(outputs)) return NULL;  if(! _valid_outputs(outputs)) return NULL;  List output_types = List_map(outputs, _x2c_gensym_func_handle_0);  if(x2c_var_equal(List_car(Type_list(cursor_parameter)), Symbol_var(54))) return cons(List_var(function), cons(List_var(cursor_type), cons(List_var(output_types), NULL)));  return cons(List_var(function), cons(List_var(cursor_type), cons(List_var(output_types), _460)));
+static List _cursor_spec(Type collection_type, Type owner, int arity){
+  if(! _atom_type(List_var(collection_type)) || ! _atom_type(List_var(owner))) return NULL;  Code function = _method(owner, _456);  if(! List_truth(function)) return NULL;  Type type = Code_type(function);  List parameters = Type_parameters(type);  List rest = List_cdr(parameters);  Type cursor_parameter = Var_type(List_truth(rest) ? List_car(rest) : List_var(NULL));  List outputs = List_truth(rest) ? List_cdr(rest) : NULL;  if(! List_equal(Type_list(Type_return_type(type)), _458) ||(List_equal(Type_list(owner), Type_list(collection_type)) ? ! x2c_var_equal(List_car(parameters), List_var(collection_type)) : ! List_equal(Type_list(Type_resolve(Var_type(List_car(parameters)))), Type_list(Type_resolve(collection_type)))) || ! Type_is_pointer(Type_canonicalize(cursor_parameter))) return NULL;  Type cursor_type = Type_element(cursor_parameter);  if(! Type_is_integral(cursor_type) && ! List_equal(Type_list(Type_resolve(cursor_type)), Type_list(Type_resolve(collection_type)))) return NULL;  if(! List_truth(outputs) ||(arity == 2 && List_len(outputs) < 2)) return NULL;  if(! _valid_outputs(outputs)) return NULL;  List output_types = List_map(outputs, _x2c_gensym_func_handle_0);  if(x2c_var_equal(List_car(Type_list(cursor_parameter)), Symbol_var(54))) return cons(List_var(function), cons(List_var(cursor_type), cons(List_var(output_types), NULL)));  return cons(List_var(function), cons(List_var(cursor_type), cons(List_var(output_types), _460)));
+}
+
+static List _typed_cursor_spec(Type collection_type, List targets){
+  if(! List_truth(targets)) return NULL;  Type requested = Code_type(Var_list_payload(List_last(targets)));  List spec = _cursor_spec(collection_type, requested, List_len(targets));  if(! List_truth(spec)) return NULL;  List outputs = Var_list_payload(List_getindex(spec, 2));  Type output = Var_type(List_len(targets) == 1 ? List_last(outputs) : List_getindex(outputs, 1));  return List_equal(Type_list(Type_resolve(output)), Type_list(Type_resolve(requested))) ? spec : NULL;
 }
 
 static int _atom_type(Var type){
@@ -2000,7 +2006,7 @@ static List _with_cursor(Foreach * f, List spec){
     }
     )), NULL))), NULL)));
   }
-  );  List initial = List_equal(cursor_type, (* f).type) ? object_expression : _478;  List setup =({
+  );  List initial = List_equal(Type_list(Type_resolve(List_type(cursor_type))), Type_list(Type_resolve(List_type((* f).type)))) ? object_expression : _478;  List setup =({
     Var _x2c_gensym_literal_part_11 = List_var(_declare(List_type((* f).type), (* f).object, (* f).collection));  Var _x2c_gensym_literal_part_12 = List_var(_declare(List_type(cursor_type), (* f).cursor, initial));  cons(_x2c_gensym_literal_part_11, cons(_x2c_gensym_literal_part_12, List_append(declarations, NULL)));
   }
   );  return _loop(&((* f)), condition, loop_body, setup);

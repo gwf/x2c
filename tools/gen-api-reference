@@ -803,6 +803,8 @@ static const char *evidence_rows[][2] = {
   {"scope", "`make verify` (`unittest/test-scope.x`) and `make examples` "
             "(`docs-tour`)."},
   {"split", "`make verify` (`unittest/test-split.x`)."},
+  {"substring", "`make verify` (`unittest/test-substring.x`); `examples/c2x2c/words-v2.x` demonstrates borrowed word iteration."},
+  {"substring-map", "`make verify` (`unittest/test-substring.x`); `examples/c2x2c/words-v4.x` demonstrates native word counts."},
   {"string-classify", "`make verify` (`unittest/test-string-classify.x`)."},
   {"string-escape", "`make verify` (`unittest/test-string.x`)."},
   {"string-format", "`make verify` (`unittest/test-string.x`)."},

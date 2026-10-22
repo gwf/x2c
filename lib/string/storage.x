@@ -141,6 +141,10 @@ String String.new_in(Pool pool, const char *bytes, int length) {
 */
 meta native Self String.intern(Self string) => string.new();
 
+/** Canonicalizes a known NUL-free byte span in the active pool chain.
+    Copies bytes only when needed; the caller retains its input storage.
+    Null input or a nonpositive length returns the empty String.
+    Raises alloc-fail if canonical storage cannot be allocated. */
 String x2c_string_from_bytes(const char *bytes, int length) =>
   _from_bytes_in(Pool.current(), bytes, length);
 
@@ -265,7 +269,8 @@ static String _intern_owned(String string) {
     header.hash = _hash_n(string, length);
   }
   Pool pool = Pool.current();
-  String found = x2c_pool_lookup_string(pool, string, header.length - 1, header.hash);
+  String found = x2c_pool_lookup_string(
+    pool, string, header.length - 1, header.hash);
   if (!found) {
     pool.insert(string);
     return string;

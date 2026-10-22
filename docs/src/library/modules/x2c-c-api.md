@@ -64,6 +64,7 @@ prefix.
 | [`x2c_mix64`](common.md#x2c_mix64) | `lib/common.x` | `inline unsigned long x2c_mix64(unsigned long word)` |
 | [`x2c_normalize_index`](common.md#x2c_normalize_index) | `lib/common.x` | `int x2c_normalize_index(int index, int length)` |
 | [`x2c_normalize_slice`](common.md#x2c_normalize_slice) | `lib/common.x` | `int x2c_normalize_slice(int *start, int *stop, int step, int length)` |
+| [`x2c_pool_lookup_string`](pool.md#x2c_pool_lookup_string) | `lib/pool/pool.x` | `String x2c_pool_lookup_string( Pool inner, const char *bytes, int length, unsigned hash)` |
 | [`x2c_register_builtin_descriptor`](dispatch.md#x2c_register_builtin_descriptor) | `lib/dispatch.x` | `int x2c_register_builtin_descriptor(Symbol tag, VarMethods methods)` |
 | [`x2c_register_descriptor`](dispatch.md#x2c_register_descriptor) | `lib/dispatch.x` | `void x2c_register_descriptor(String name, VarMethods methods)` |
 | [`x2c_register_tagged_descriptor`](dispatch.md#x2c_register_tagged_descriptor) | `lib/dispatch.x` | `void x2c_register_tagged_descriptor( Symbol tag, String name, VarMethods methods)` |
@@ -71,6 +72,7 @@ prefix.
 | [`x2c_scope_thread_release`](scope.md#x2c_scope_thread_release) | `lib/scope/scope.x` | `void x2c_scope_thread_release(void)` |
 | `x2c_set_root` | `src/utils.x` | `void x2c_set_root(String root)` |
 | [`x2c_slice_bound`](common.md#x2c_slice_bound) | `lib/common.x` | `int x2c_slice_bound(int bound)` |
+| [`x2c_string_from_bytes`](string.md#x2c_string_from_bytes) | `lib/string/string.x` | `String x2c_string_from_bytes(const char *bytes, int length)` |
 | [`x2c_thread_cancel`](thread.md#x2c_thread_cancel) | `lib/thread.x` | `void x2c_thread_cancel(void)` |
 | [`x2c_thread_stopping`](thread.md#x2c_thread_stopping) | `lib/thread.x` | `int x2c_thread_stopping(void)` |
 | [`x2c_thread_wait`](thread.md#x2c_thread_wait) | `lib/thread.x` | `void x2c_thread_wait(pthread_cond_t *condition)` |
@@ -104,4 +106,4 @@ prefix.
 | [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_volatile`](varops.md#x2c_var_update_volatile) | `lib/varops.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
-Total: 92 functions.
+Total: 94 functions.

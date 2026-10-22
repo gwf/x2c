@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/protocol-iter-adoption-required.x:14:3: macro: type ("Bag") is not iterable
     foreach(int value, bag)
     ^^^^^^^
-  note: declare an Iter protocol adoption or iterate an Iter directly
+  note: declare a matching try_next cursor or an Iter protocol adoption
 

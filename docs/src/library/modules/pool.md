@@ -9,6 +9,7 @@ Nested interning pools with region-backed object storage.
 
 | Function | Summary |
 | --- | --- |
+| [`x2c_pool_lookup_string`](#x2c_pool_lookup_string) | Finds an existing nonempty String from borrowed NUL-free bytes and their x2c_hash_bytes content hash, searching inner and its ancestors. |
 | [`Pool.close`](#Pool.close) | Closes the innermost open bracket and makes its parent active. |
 | [`Pool.current`](#Pool.current) | Returns the borrowed canonical-value pool active on this thread. |
 | [`Pool.detach`](#Pool.detach) | Removes the innermost open bracket without destroying it. |
@@ -17,6 +18,19 @@ Nested interning pools with region-backed object storage.
 | [`Pool.open`](#Pool.open) | Opens a child of the shared `String` and `List` canonical-value pool. |
 | [`Pool.open_named`](#Pool.open_named) | Opens and returns a named child of the pool active on this thread. |
 | [`Pool.stats`](#Pool.stats) | Returns this level's canonical counts plus process-wide storage counters. |
+
+### Functions
+
+#### x2c_pool_lookup_string
+
+`String x2c_pool_lookup_string( Pool inner, const char *bytes, int length, unsigned hash)`
+
+Finds an existing nonempty String from borrowed NUL-free bytes and their
+x2c_hash_bytes content hash, searching inner and its ancestors.
+Returns NULL on a miss and allocates nothing. Native comparisons cannot
+raise, so each acquired pool lock is released directly.
+
+Source: `lib/pool/interning.x:57`
 
 ### `Pool`
 
@@ -88,7 +102,7 @@ worker interns the same value first.
 **Raises:** `<bad-arg>` when `inner` or `alloc` is NULL. Table insertion
 causes propagate and leave the object unregistered.
 
-Source: `lib/pool/interning.x:131`
+Source: `lib/pool/interning.x:168`
 
 <a id="Pool.open"></a>
 #### Pool.open
@@ -159,7 +173,7 @@ invalid. Children must already be released, and no caller may use `inner`
 afterward. Use `Pool.close` instead to end a bracket opened with
 `Pool.open`.
 
-Source: `lib/pool/interning.x:234`
+Source: `lib/pool/interning.x:271`
 
 <a id="Pool.retain"></a>
 #### Pool.retain
@@ -170,7 +184,7 @@ Returns an unnamed child of `inner`, without making it thread-active.
 Ownership, failures, and the comparison with `Pool.open` follow
 `Pool.retain_named`.
 
-Source: `lib/pool/interning.x:225`
+Source: `lib/pool/interning.x:262`
 
 <a id="Pool.retain_named"></a>
 #### Pool.retain_named
@@ -186,7 +200,7 @@ canonical `String` and `List` operations allocate into.
 partial child resources and leaves `inner` unchanged; native mutex
 initialization failure aborts.
 
-Source: `lib/pool/interning.x:191`
+Source: `lib/pool/interning.x:228`
 
 ## Runtime-internal callables
 
@@ -251,7 +265,7 @@ object storage.
 **Raises:** `<bad-arg>` when `inner` is NULL. Table insertion causes propagate
 and leave the object unregistered.
 
-Source: `lib/pool/interning.x:153`
+Source: `lib/pool/interning.x:190`
 
 <a id="Pool.intern"></a>
 #### Pool.intern
@@ -272,7 +286,7 @@ A caller that has already searched the chain uses `Pool.intern_new`.
 **Raises:** `<bad-arg>` when `inner` or `alloc` is NULL. Table lookup and
 insertion causes propagate.
 
-Source: `lib/pool/interning.x:92`
+Source: `lib/pool/interning.x:129`
 
 <a id="Pool.is_permanent"></a>
 #### Pool.is_permanent
@@ -293,7 +307,7 @@ Source: `lib/pool/threads.x:124`
 Returns the first value equal to `key` from `inner` outward, or `void`.
 The returned identity remains owned by the level where it was found.
 
-Source: `lib/pool/interning.x:43`
+Source: `lib/pool/interning.x:80`
 
 <a id="Pool.malloc"></a>
 #### Pool.malloc
@@ -337,7 +351,7 @@ Source: `lib/pool/storage.x:390`
 Reports whether this exact level stores `key` as its canonical identity.
 Ancestors are not searched, and a null pool reports zero.
 
-Source: `lib/pool/interning.x:169`
+Source: `lib/pool/interning.x:206`
 
 <a id="Pool.promote"></a>
 #### Pool.promote

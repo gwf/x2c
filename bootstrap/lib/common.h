@@ -587,12 +587,15 @@ static inline unsigned x2c_hash_word(unsigned long word){
 }
 
 static inline unsigned x2c_hash_bytes(unsigned long seed, const void * data, size_t width){
-  const unsigned char * bytes = data;  unsigned long mixed = x2c_mix64(seed ^(unsigned long) width);  for(size_t offset = 0;  offset < width;  offset += sizeof(unsigned long)){
-    unsigned long word = 0;  size_t remaining = width - offset;  memcpy(& word, bytes + offset, remaining < sizeof word ? remaining : sizeof word);
+  const unsigned char * bytes = data;  unsigned long mixed = x2c_mix64(seed ^(unsigned long) width);  size_t offset = 0;  for(;  width - offset >= sizeof(unsigned long);  offset += sizeof(unsigned long)){
+    unsigned long word;  memcpy(& word, bytes + offset, sizeof word);
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
     word = __builtin_bswap64(word);
 #endif
     mixed = x2c_mix64(mixed ^ word);
+  }
+  if(offset < width){
+    unsigned long word = 0;  for(unsigned shift = 0;  offset < width;  offset ++, shift += 8) word |=(unsigned long) bytes[offset] << shift;  mixed = x2c_mix64(mixed ^ word);
   }
   return x2c_hash_word(mixed);
 }

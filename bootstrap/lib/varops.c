@@ -1012,6 +1012,10 @@ int Var_fallback_truth(Var value);
 
 int Var_truth(Var value){
   if(! Var_encoding_valid(value) || Var_is_void(value)) return Var_fallback_truth(value);
+  switch(Var_tag(value)){
+    case 26993 : case 30065 : case 3453293 : case 3846509 : case 3453797 : case 3847013 : return Var_payload32(value) != 0;
+    case 3454065 : case 3847281 : return(value.u64 &((1ul << 48) - 1)) != 0;
+  }
   int handled = 0, truth = Var_dispatch_truth(value, &(handled));
   return handled ? ! ! truth : Var_fallback_truth(value);
 }
@@ -1019,7 +1023,7 @@ int Var_truth(Var value){
 int Var_fallback_truth(Var value){
   _valid_operand(value);
   if(Var_is_void(value)){
-    static const X2CErrorSite _x2c_gensym_error_site_29 = {.file = "../../lib/varops.x",.function = "Var_fallback_truth",.line = 587,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_29 = {.file = "../../lib/varops.x",.function = "Var_fallback_truth",.line = 593,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_29, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.truth")), NULL))));
     __builtin_unreachable();
   }
@@ -1033,7 +1037,7 @@ int Var_fallback_truth(Var value){
     Var _x2c_gensym_literal_part_2 = Symbol_var(source);
     Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("truthy")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_30 = {.file = "../../lib/varops.x",.function = "Var_fallback_truth",.line = 595,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_30 = {.file = "../../lib/varops.x",.function = "Var_fallback_truth",.line = 601,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_30, 4477479911782, 2, Symbol_var(1307939018), _x2c_gensym_literal_part_2, Symbol_var(34096809266140), _x2c_gensym_literal_part_3);
       __builtin_unreachable();
     }
@@ -1056,18 +1060,18 @@ Var Var_update(Var * lhs, Symbol op, Var rhs){
 
 Var x2c_var_update_volatile(volatile Var * lhs, Symbol op, Var rhs){
   if(! lhs){
-    static const X2CErrorSite _x2c_gensym_error_site_31 = {.file = "../../lib/varops.x",.function = "x2c_var_update_volatile",.line = 624,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_31 = {.file = "../../lib/varops.x",.function = "x2c_var_update_volatile",.line = 630,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_31, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.update")), NULL))));
     __builtin_unreachable();
   }
   _valid_operands((* lhs), rhs);
   if(Var_is_void((* lhs)) || Var_is_void(rhs)){
-    static const X2CErrorSite _x2c_gensym_error_site_32 = {.file = "../../lib/varops.x",.function = "x2c_var_update_volatile",.line = 626,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_32 = {.file = "../../lib/varops.x",.function = "x2c_var_update_volatile",.line = 632,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_32, 48270474208, 1, Symbol_var(992), Symbol_var(op));
     __builtin_unreachable();
   }
   if(! _numeric_operator(op)){
-    static const X2CErrorSite _x2c_gensym_error_site_33 = {.file = "../../lib/varops.x",.function = "x2c_var_update_volatile",.line = 627,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_33 = {.file = "../../lib/varops.x",.function = "x2c_var_update_volatile",.line = 633,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_33, 136641504, 1, Symbol_var(992), Symbol_var(op));
     __builtin_unreachable();
   }
@@ -1095,13 +1099,13 @@ Var Var_postfix(Var * lhs, Symbol op){
 
 Var x2c_var_postfix_volatile(volatile Var * lhs, Symbol op){
   if(! lhs){
-    static const X2CErrorSite _x2c_gensym_error_site_34 = {.file = "../../lib/varops.x",.function = "x2c_var_postfix_volatile",.line = 668,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_34 = {.file = "../../lib/varops.x",.function = "x2c_var_postfix_volatile",.line = 674,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_34, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.postfix")), NULL))));
     __builtin_unreachable();
   }
   _valid_operand((* lhs));
   if(Var_is_void((* lhs))){
-    static const X2CErrorSite _x2c_gensym_error_site_35 = {.file = "../../lib/varops.x",.function = "x2c_var_postfix_volatile",.line = 670,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_35 = {.file = "../../lib/varops.x",.function = "x2c_var_postfix_volatile",.line = 676,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_35, 48270474208, 1, Symbol_var(992), Symbol_var(op));
     __builtin_unreachable();
   }
@@ -1109,7 +1113,7 @@ Var x2c_var_postfix_volatile(volatile Var * lhs, Symbol op){
   if(op == 1848) binary_op = 56;
   else if(op == 2046) binary_op = 62;
   else{
-    static const X2CErrorSite _x2c_gensym_error_site_36 = {.file = "../../lib/varops.x",.function = "x2c_var_postfix_volatile",.line = 672,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_36 = {.file = "../../lib/varops.x",.function = "x2c_var_postfix_volatile",.line = 678,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_36, 136641504, 1, Symbol_var(992), Symbol_var(op));
     __builtin_unreachable();
   }
@@ -1136,7 +1140,7 @@ static inline void _valid_operands(Var lhs, Var rhs){
 _Noreturn static void _bad_bits(Var value){
   unsigned long bits = value.u64;
   {
-    static const X2CErrorSite _x2c_gensym_error_site_37 = {.file = "../../lib/varops.x",.function = "_bad_bits",.line = 705,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_37 = {.file = "../../lib/varops.x",.function = "_bad_bits",.line = 711,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_37, 4372507526, 1, Symbol_var(46228810), Var_box_ulong(bits));
     __builtin_unreachable();
   }
@@ -1149,7 +1153,7 @@ _Noreturn static void _bad_side(Var value, Symbol side){
   {
     Var _x2c_gensym_literal_part_4 = Var_box_ulong(bits);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_38 = {.file = "../../lib/varops.x",.function = "_bad_side",.line = 711,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_38 = {.file = "../../lib/varops.x",.function = "_bad_side",.line = 717,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_38, 4372507526, 2, Symbol_var(46228810), _x2c_gensym_literal_part_4, Symbol_var(1263882), String_var(text));
       __builtin_unreachable();
     }

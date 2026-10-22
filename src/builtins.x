@@ -149,7 +149,9 @@ static List _cursor_spec(Type collection_type, Type owner, int arity) {
   Type cursor_parameter = rest ? rest.car() : %();
   List outputs = rest ? rest.cdr() : %();
   if (type.return_type() != %(int) ||
-      Type.resolve(parameters.car()) != collection_type.resolve() ||
+      (owner == collection_type
+        ? parameters.car() != collection_type
+        : Type.resolve(parameters.car()) != collection_type.resolve()) ||
       !cursor_parameter.canonicalize().is_pointer()) return %();
   Type cursor_type = cursor_parameter.element();
   if (!cursor_type.is_integral() &&

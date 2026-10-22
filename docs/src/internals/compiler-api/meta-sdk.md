@@ -86,7 +86,7 @@ The compiler's answers to `lib/meta.x` operations.
 
 Answers `x2c.binding.for`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk/syntax.x:245`
+Source: `src/meta-sdk/syntax.x:250`
 
 #### x2c_binding_fresh
 
@@ -94,7 +94,7 @@ Source: `src/meta-sdk/syntax.x:245`
 
 Answers `x2c.binding.fresh`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk/syntax.x:237`
+Source: `src/meta-sdk/syntax.x:242`
 
 #### x2c_diagnostic_error_at
 
@@ -143,7 +143,7 @@ Source: `src/meta-sdk/sources.x:53`
 
 Answers `x2c.enclosing`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk/syntax.x:318`
+Source: `src/meta-sdk/syntax.x:323`
 
 #### x2c_ident
 
@@ -151,7 +151,7 @@ Source: `src/meta-sdk/syntax.x:318`
 
 Answers `x2c.ident`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk/syntax.x:229`
+Source: `src/meta-sdk/syntax.x:234`
 
 #### x2c_invocation_column
 
@@ -191,7 +191,7 @@ Source: `src/meta-sdk/primitives.x:22`
 
 Answers `x2c.place`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk/syntax.x:326`
+Source: `src/meta-sdk/syntax.x:331`
 
 ### `Code`
 
@@ -202,7 +202,7 @@ Source: `src/meta-sdk/syntax.x:326`
 
 Answers `Code.arguments`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk/syntax.x:278`
+Source: `src/meta-sdk/syntax.x:283`
 
 <a id="Code.binding_spelling"></a>
 #### Code.binding_spelling
@@ -211,7 +211,7 @@ Source: `src/meta-sdk/syntax.x:278`
 
 Answers `Code.binding_spelling`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk/syntax.x:191`
+Source: `src/meta-sdk/syntax.x:196`
 
 <a id="Code.body"></a>
 #### Code.body
@@ -220,7 +220,7 @@ Source: `src/meta-sdk/syntax.x:191`
 
 Answers `Code.body`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk/syntax.x:272`
+Source: `src/meta-sdk/syntax.x:277`
 
 <a id="Code.bound"></a>
 #### Code.bound
@@ -314,7 +314,7 @@ Source: `src/meta-sdk/syntax.x:99`
 
 Answers `Code.name`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk/syntax.x:265`
+Source: `src/meta-sdk/syntax.x:270`
 
 <a id="Code.native_signature"></a>
 #### Code.native_signature
@@ -324,7 +324,7 @@ Source: `src/meta-sdk/syntax.x:265`
 Returns the `Func` signature of the function syntax `syntax`. A native
 binding stores the same signature as an ordinary Func adapter.
 
-Source: `src/meta-sdk/syntax.x:307`
+Source: `src/meta-sdk/syntax.x:312`
 
 <a id="Code.parameter"></a>
 #### Code.parameter
@@ -333,7 +333,7 @@ Source: `src/meta-sdk/syntax.x:307`
 
 Answers `Code.parameter`, declared in `lib/meta.x`.
 
-Source: `src/meta-sdk/syntax.x:290`
+Source: `src/meta-sdk/syntax.x:295`
 
 <a id="Code.pattern_value"></a>
 #### Code.pattern_value
@@ -443,7 +443,7 @@ Source: `src/meta-sdk/context.x:25`
 
 Returns a fresh binding whose spelling starts with `stem`.
 
-Source: `src/meta-sdk/syntax.x:256`
+Source: `src/meta-sdk/syntax.x:261`
 
 <a id="MetaContext.function_reference"></a>
 #### MetaContext.function_reference
@@ -455,7 +455,7 @@ List when no function of that name is visible. This reads the symbol
 table only, so any compile-time Lisp evaluation may call it, including
 one outside a macro expansion.
 
-Source: `src/meta-sdk/syntax.x:179`
+Source: `src/meta-sdk/syntax.x:184`
 
 <a id="MetaContext.invocation_location"></a>
 #### MetaContext.invocation_location

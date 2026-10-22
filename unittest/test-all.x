@@ -22,6 +22,7 @@ void defer_suite(void);
 void map_suite(void);
 void string_suite(void);
 void split_suite(void);
+void substring_suite(void);
 void string_number_suite(void);
 void string_classify_suite(void);
 void scan_suite(void);
@@ -81,6 +82,7 @@ int main(int argc, char **argv) {
   $test.suite(map_suite);
   $test.suite(string_suite);
   $test.suite(split_suite);
+  $test.suite(substring_suite);
   $test.suite(string_number_suite);
   $test.suite(string_classify_suite);
   $test.suite(scan_suite);

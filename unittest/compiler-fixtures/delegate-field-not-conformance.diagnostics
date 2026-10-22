@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/delegate-field-not-conformance.x:21:3: macro: type ("DelegateNotIterable") is not iterable
     foreach(int item, value) total += item;
     ^^^^^^^
-  note: declare an Iter protocol adoption or iterate an Iter directly
+  note: declare a matching try_next cursor or an Iter protocol adoption
 

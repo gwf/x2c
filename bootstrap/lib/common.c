@@ -382,12 +382,15 @@ static inline unsigned x2c_hash_word(unsigned long word){
 }
 
 static inline unsigned x2c_hash_bytes(unsigned long seed, const void * data, size_t width){
-  const unsigned char * bytes = data;  unsigned long mixed = x2c_mix64(seed ^(unsigned long) width);  for(size_t offset = 0;  offset < width;  offset += sizeof(unsigned long)){
-    unsigned long word = 0;  size_t remaining = width - offset;  memcpy(& word, bytes + offset, remaining < sizeof word ? remaining : sizeof word);
+  const unsigned char * bytes = data;  unsigned long mixed = x2c_mix64(seed ^(unsigned long) width);  size_t offset = 0;  for(;  width - offset >= sizeof(unsigned long);  offset += sizeof(unsigned long)){
+    unsigned long word;  memcpy(& word, bytes + offset, sizeof word);
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
     word = __builtin_bswap64(word);
 #endif
     mixed = x2c_mix64(mixed ^ word);
+  }
+  if(offset < width){
+    unsigned long word = 0;  for(unsigned shift = 0;  offset < width;  offset ++, shift += 8) word |=(unsigned long) bytes[offset] << shift;  mixed = x2c_mix64(mixed ^ word);
   }
   return x2c_hash_word(mixed);
 }
@@ -921,7 +924,7 @@ void x2c_initialize(void){
 int x2c_normalize_index(int index, int length){
   if(! _init_guard_) _file_init_();  if(length < 0){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_index")), NULL))); {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 872,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(816725264), int_var(length));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 877,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(816725264), int_var(length));  __builtin_unreachable();
     }
 
   }
@@ -934,7 +937,7 @@ int x2c_slice_bound(int bound){
 
 int x2c_normalize_slice(int * start, int * stop, int step, int length){
   if(! _init_guard_) _file_init_();  if(! start || ! stop || ! step || length < 0){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 897,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_slice")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 902,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_slice")), NULL))));  __builtin_unreachable();
   }
   int orig_stop = * stop;  if(* start == INT_MIN) * start =(step > 0) ? 0 : length - 1;  if(* stop == INT_MIN) * stop = - 1;  if(* start < 0){
     * start += length;  if(* start < 0) * start =(step < 0) ? - 1 : 0;

@@ -328,16 +328,16 @@ int MapStringInt.add_substr(MapStringInt map, Substr key, int count) {
   if (!hash) hash = -1;
   unsigned *hashes = map.hashes;
   struct MapStringIntRecord *entries = map.entries;
-  unsigned start = hash & map.mask;
-  for (unsigned distance = 0; distance < map.capacity; distance++) {
-    unsigned index = (start + distance) & map.mask, stored = hashes[index];
+  unsigned capacity = map.capacity, mask = map.mask, start = hash & mask;
+  const char *bytes = key.length
+    ? (const char *) key.source + key.offset : NULL;
+  for (unsigned distance = 0; distance < capacity; distance++) {
+    unsigned index = (start + distance) & mask, stored = hashes[index];
     if (!stored) break;
     if (stored == hash && entries[index].key.len() == key.length &&
-        (!key.length || memcmp(entries[index].key,
-          (const char *) key.source + key.offset, (size_t) key.length) == 0))
+        (!key.length || memcmp(entries[index].key, bytes, key.length) == 0))
       return _update_int(&entries[index].val, <+>, count);
-    if (((map.capacity + index - (stored & map.mask)) & map.mask) < distance)
-      break;
+    if (((capacity + index - (stored & mask)) & mask) < distance) break;
   }
   return map.updateindex(key, <+>, count);
 }

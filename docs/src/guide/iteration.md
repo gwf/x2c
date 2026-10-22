@@ -89,6 +89,36 @@ decodes Unicode characters.
 
 ### Lazy String fields
 
+For word counting without constructing a String for every word, include
+`substring.x` and request a `Substr` binding:
+
+```x2c
+#include "substring.x"
+String text = "one two one";
+foreach (Substr word in text)
+  printf("%s\n", word.str());
+```
+
+`Substr` is an alias for `Substring`, an immutable borrowed view with a source
+String, byte offset, and byte length. Iteration coalesces C whitespace and
+yields no empty words. The cursor and each view allocate nothing; keep the
+source String and its owning pool alive through every use of a view.
+
+`text.substring(offset, length)` constructs a checked view. Negative or
+out-of-range spans raise `bad-arg`; an empty span at the end is valid.
+`len()`, `hash()`, `equal()`, and `compare()` operate on the borrowed bytes.
+Equal contents have equal hashes even when their sources or offsets differ.
+`.str()` and `.string()` materialize the same canonical String in the active
+pool chain. The result follows its actual pool's lifetime; export it before
+closing that pool if it must survive.
+
+`substring-map.x` provides `MapSubInt` for native occurrence counts. Its keys
+borrow their source Strings until cleanup; explicit Context export preserves
+those sources. `MapStringInt.add_substr(view, count)` instead retains String
+keys: it compares the view's bytes on lookup and converts only missing keys.
+As with other mutable Maps, callers coordinate concurrent access. Neither
+operation changes the source String's ownership.
+
 `String` provides three ways to iterate over fields without first building a
 `List`:
 

@@ -77,7 +77,7 @@ Applies `Var.postfix` semantics to a volatile destination in generated
 code. Volatile preserves accesses across exception transfer, without
 providing thread synchronization.
 
-Source: `lib/varops.x:667`
+Source: `lib/varops.x:673`
 
 #### x2c_var_update_volatile
 
@@ -87,7 +87,7 @@ Applies `Var.update` semantics to a volatile destination in generated code.
 Volatile preserves accesses across exception transfer, without providing
 thread synchronization.
 
-Source: `lib/varops.x:623`
+Source: `lib/varops.x:629`
 
 ### `Var`
 
@@ -152,7 +152,7 @@ supported built-ins are true. Container-specific truth comes from dispatch.
 **Raises:** `<bad-enc>` for invalid `Var` bits, `<void-op>` for `void`, or
 `<bad-types>` when no truthiness rule exists.
 
-Source: `lib/varops.x:585`
+Source: `lib/varops.x:591`
 
 <a id="Var.matmul"></a>
 #### Var.matmul
@@ -218,7 +218,7 @@ bits, `<void-op>` for `void`, `<bad-op>` for an operator other than
 `++` or `--`, or any cause from `Var.update`. These failures leave the
 stored value unchanged.
 
-Source: `lib/varops.x:661`
+Source: `lib/varops.x:667`
 
 <a id="Var.sub"></a>
 #### Var.sub
@@ -265,7 +265,7 @@ returns `void`, the function leaves the destination unchanged.
 `Var.binary` and `Var.convert`. These failures leave the stored value
 unchanged.
 
-Source: `lib/varops.x:616`
+Source: `lib/varops.x:622`
 
 ## Advanced and interop API
 
