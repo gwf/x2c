@@ -7,6 +7,7 @@ typedef struct Work {
   int iterations;
   int *counter;
   Mutex mutex;
+  Scope output;
 } Work;
 
 static Var count(const void *input, size_t input_size) {
@@ -30,6 +31,8 @@ static Var count(const void *input, size_t input_size) {
     name: work.name,
     message: message
   };
+  Scope output = work.output;
+  result.move_to(&output);
   return result;
 }
 
@@ -42,8 +45,8 @@ int main(void) {
   logger.add_memory_sink(&events);
   Logger previous = log_set_global_logger(logger);
 
-  Work alpha = { "alpha", 1000, &counter, mutex };
-  Work beta = { "beta", 1000, &counter, mutex };
+  Work alpha = { "alpha", 1000, &counter, mutex, Scope.child() };
+  Work beta = { "beta", 1000, &counter, mutex, Scope.child() };
   Thread alpha_thread = Thread.start_raw(count, &alpha, sizeof(alpha));
   Thread beta_thread = Thread.start_raw(count, &beta, sizeof(beta));
 

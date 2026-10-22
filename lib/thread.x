@@ -1,32 +1,28 @@
-/*  thread.x -- `Context`-backed native worker threads
+/*  thread.x -- native workers with explicit result lifetimes
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
-    A `Thread` copies Var bits or fixed-size bytes, runs one callback in an
-    isolated `Context`, and seals the exported result or error until join.
-    Raw input has max_align_t alignment; over-aligned types are unsupported.
-    Shared objects require their own coordination.
+    Thread copies input and result bits. Callbacks explicitly preserve any
+    output that must outlive their private work storage. Errors are captured
+    separately for join; parallel reducers borrow from parked workers.
 */
 
 #pragma once
 
 #include "common.x"
 
-/** Computes one `Thread` result from a borrowed copy of the start input bytes.
-    The input is valid only during the call. The returned value is exported by
-    `Thread.join`; an `Error` escaping the callback is reported as
-    `<join-fail>`. A cause the worker's `Error` policy resolves returns to its
-    raise and does not end the callback.
-*/
+/** Computes a result from borrowed start-input bytes, valid during the call.
+    The return copies bits without exporting or transferring storage. Preserve
+    output explicitly before callback exit; temporary storage is then freed.
+    Workers start in the shared canonical pool. Explicit private pools retain
+    their own lifetime rules. An escaping Error becomes join-fail at join;
+    policies that resume still resume inside the callback. */
 typedef Var (*ThreadFn)(const void *input, size_t input_size);
 
-/** Computes a worker result from one borrowed `Var` input.
-    Referenced input storage must stay alive and unchanged until join.
-    Thread.start accepts fresh worker-owned results; Thread.join exports them.
-    ParallelMap instead borrows results until its reducer returns; retained
-    worker storage requires explicit transfer by that reducer.
-    Thread.start error policy and result transfer follow ThreadFn.
-*/
+/** Computes a result from borrowed Var input. Thread.start copies the return
+    bits; retained storage must already outlive callback exit. ParallelMap
+    instead keeps callback storage alive through its reducer, which explicitly
+    transfers anything it retains. Input storage stays live through use. */
 typedef Var (*ThreadValueFn)(Var input);
 
 /** Scope-owned description of a bounded parallel mapping operation.
@@ -66,8 +62,8 @@ typedef struct Thread *Thread;
 static struct ParallelRun { Array ready; int stopping; };
 
 static struct Thread {
-  pthread_t native, ThreadFn function, size_t input_size, Scope result_scope;
-  Pool result_pool;
+  pthread_t native, ThreadFn function, size_t input_size, Scope error_scope;
+  Pool error_pool;
   Var result;
   Var errors;
   void *policy;
@@ -75,7 +71,6 @@ static struct Thread {
   int finished;
   struct ParallelRun *parallel;
   int assigned;
-  int batch;
   int stop_requested;
   pthread_cond_t *waiting;
 };
@@ -185,24 +180,21 @@ void Thread.stop(Thread t) {
 */
 Thread Thread.start_raw(
   ThreadFn function, const void *input, size_t input_size) {
-  return _start(function, input, input_size, NULL, 0);
+  return _start(function, input, input_size, NULL);
 }
 
 static Thread _start(
   ThreadFn function, const void *input, size_t input_size,
-  struct ParallelRun *parallel, int batch) {
+  struct ParallelRun *parallel) {
   if (!function || (input_size && !input))
     raise %(bad-arg (operation "Thread.start_raw"));
   Thread thread = _new_handle(function, input, input_size);
   thread.parallel = parallel;
-  thread.batch = batch;
   int started = 0;
   defer if (!started) {
-    if (thread.result_scope) Scope.destroy(thread.result_scope);
     Error.policy_release(thread.policy);
     free(thread);
   }
-  if (batch) thread.result_scope = Scope.new_named("Thread batch result");
   if (pthread_once(&thread_shutdown_once, _register_shutdown)) {
     Error.policy_release(thread.policy);
     free(thread);
@@ -226,19 +218,15 @@ static Var _call_value(const void *input, size_t size) {
   return call.function(call.value);
 }
 
-/** Starts one `Var`-to-`Var` worker using the ordinary Thread lifecycle.
-    Copies the `Var` bits, including `void`, without cloning or transferring
-    referenced storage. The input graph and callback code must outlive join;
-    treat all referenced input as read-only until then. In particular, a
-    borrowed Map is not a private copy and must not receive worker-owned
-    values. Return a fresh Map for worker-created output instead.
-    Scalars and immutable Strings can be read directly; wide boxed scalars
-    still borrow their caller-owned storage. Result export and Error policy
-    are those of `Thread.start_raw` and `Thread.join`. Use `Thread.start_raw`
-    for explicit byte-buffer inputs.
-    Raises: `<bad-arg>` for a null callback, or the causes of
-    `Thread.start_raw`.
-*/
+/** Starts one Var-to-Var worker. Input and result bits are copied without
+    cloning, exporting, or transferring referenced storage. Input storage and
+    callback code stay live through join. Shared mutable data requires caller
+    coordination. The callback must explicitly preserve any output it retains
+    beyond exit; use separate output owners for concurrently running workers.
+    Shared canonical Strings and Lists survive worker exit. Wide boxed values
+    still require their backing allocation to survive.
+    Thread.start_raw accepts copied byte-buffer input instead.
+    Raises: bad-arg for a null callback, or Thread.start_raw causes. */
 Thread Thread.start(ThreadValueFn function, Var value) {
   return _start_value(function, value, NULL);
 }
@@ -247,7 +235,7 @@ static Thread _start_value(
   ThreadValueFn function, Var value, struct ParallelRun *parallel) {
   if (!function) raise %(bad-arg (operation "Thread.start"));
   struct ThreadValueInput input = { function, value };
-  return _start(_call_value, &input, sizeof(input), parallel, 0);
+  return _start(_call_value, &input, sizeof(input), parallel);
 }
 
 /* The handle holds the copied input after its own fields, and this thread's
@@ -279,7 +267,7 @@ static void _register_shutdown(void) {
 }
 
 /* The live count falls only after native join succeeds. Process shutdown
-   rejects a finished callback whose sealed result stores were never
+   rejects a finished callback whose handle and captured errors were never
    consumed. */
 static void _shutdown(void) {
   int live = __atomic_load_n(&thread_live_count, __ATOMIC_SEQ_CST);
@@ -323,23 +311,21 @@ static void _error(const char *operation, int error) {
 
 // running the callback
 
-/* The worker sets up its own runtime state under the starting thread's
-   `Error` policy and opens the result stores before the callback runs.
-   Detaching the result pool and popping its Scope afterward seal both for
-   the joining thread. Error and other per-thread state shut down last,
-   after no worker-private value still needs them. */
+/* Workers use shared canonical values and private mutable callback storage.
+   Captured errors have separate storage until join; results keep the lifetime
+   explicitly arranged by the callback. */
 static void *_run(void *argument) {
   Thread thread = argument;
   running_thread = thread;
   (void) Scope.top();
   Pool.thread_initialize();
-  if (thread.batch || thread.parallel) thread.result_pool = Pool.current();
+  thread.error_pool = Pool.current();
   Error.initialize_raw();
   Error.policy_adopt(thread.policy);
   thread.policy = NULL;
 
   if (thread.parallel) _parallel_run(thread);
-  else _run_job(thread);
+  else _work(thread);
 
   Error.shutdown_raw();
   x2c_thread_state_release();
@@ -350,21 +336,6 @@ static void *_run(void *argument) {
   return NULL;
 }
 
-/* Each job uses the same isolated work and sealed result owners as a one-shot
-   Thread. A reusable worker waits until the consumer releases those owners. */
-static void _run_job(Thread thread) {
-  if (!thread.batch) {
-    thread.result_scope = Scope.new_named("Thread result");
-    Scope.push(&thread.result_scope);
-    thread.result_pool = Pool.open_named("Thread result");
-  }
-  _work(thread);
-  if (!thread.batch) {
-    thread.result_pool = Pool.detach();
-    Scope.pop();
-  }
-}
-
 /* Register the worker observer before opening the work Context, so failure
    constructing its bounded state is captured just like callback failure. */
 static int _work(Thread thread) {
@@ -372,13 +343,9 @@ static int _work(Thread thread) {
   try {
     ErrorHandler observer = Error.push(_capture_errors, thread);
     defer Error.pop(observer);
-    if (thread.batch) Scope.push(&thread.result_scope);
-    defer if (thread.batch) Scope.pop();
-    Context work = thread.batch || thread.parallel
-      ? Context.open_named("Thread callback")
-      : Context.open_isolated_named("Thread callback");
+    Context work = Context.open_named("Thread callback");
     defer work.close();
-    again = _call(thread, work);
+    again = _call(thread);
   }
   catch %(join-fail *): _worker_failed(thread, mark);
   catch %(alloc-fail *): _worker_failed(thread, mark);
@@ -389,17 +356,12 @@ static int _work(Thread thread) {
   return again;
 }
 
-static int _call(Thread thread, Context work) {
+static int _call(Thread thread) {
   ErrorHandler logger_handler = Error.push(Logger.error_handler, void);
   defer Error.pop(logger_handler);
   const void *input = thread.input_size ? _input(thread) : NULL;
-  Var result = thread.function(input, thread.input_size);
-  if (thread.parallel) {
-    thread.result = result;
-    return _parallel_park(thread);
-  }
-  thread.result = work.export(result);
-  return 0;
+  thread.result = thread.function(input, thread.input_size);
+  return thread.parallel ? _parallel_park(thread) : 0;
 }
 
 /* The outermost of the worker's registrations, so a cause the callback did not
@@ -421,7 +383,7 @@ static Symbol _capture_errors(List errors, Var data) {
   if (code is not <symbol>) return <declined>;
   if (Error.policy_get(code) != <abort>) return <declined>;
   thread.errors = Error.snapshot_in(
-    errors, &thread.result_scope, thread.result_pool);
+    errors, &thread.error_scope, thread.error_pool);
   raise %(join-fail (operation "Thread callback"));
 }
 
@@ -431,7 +393,7 @@ static Symbol _capture_errors(List errors, Var data) {
 static void _worker_failed(Thread thread, int mark) {
   if (thread.errors is void)
     thread.errors = Error.since_in(
-      mark, &thread.result_scope, thread.result_pool);
+      mark, &thread.error_scope, thread.error_pool);
   thread.result = void;
 }
 
@@ -482,18 +444,15 @@ static Thread _wait_any(Array pending) {
   return NULL;
 }
 
-/** Joins one worker and exports its result into the joining `Scope` and pools.
-    A failure during export still consumes the sealed worker storage.
-    A native join failure leaves the `Thread` joinable for a retry. Concurrent
-    joins are rejected while one is active; once native join succeeds, export
-    cannot be retried.
-    Raises: `<bad-arg>` for a NULL handle, `<bad-state>` when another join is
-    active or the worker was already joined, `<io-fail>` when the native join
-    fails, any cause from result or error export, and
-    `<join-fail>` carrying the worker's exported errors. None of them return
-    here. A callback that returns `void` joins as `void`; a handled worker
-    failure transfers instead of returning a sentinel.
-*/
+/** Joins a worker and returns its result bits without ownership changes.
+    The callback must have preserved any referenced output before exiting.
+    Native join failure leaves the handle joinable. Concurrent or repeated
+    joins are rejected. Once native join succeeds, the handle is consumed,
+    including when a captured worker Error is raised. Free it after the join
+    returns or after catching that Error. Void results remain void.
+    Raises: bad-arg for NULL, bad-state for an active or completed join,
+    io-fail for native join failure, error-export causes, or join-fail
+    containing the captured worker errors. */
 Var Thread.join(Thread t) {
   if (!t) raise %(bad-arg (operation "Thread.join"));
   Symbol expected = <running>;
@@ -514,30 +473,24 @@ Var Thread.join(Thread t) {
 }
 
 static Var _read_result(Thread t) {
-  Var result = void, errors = void;
-  if (t.errors is not void)
-    errors = Context.export_scope(t.result_scope, t.result_pool, t.errors);
-  else if (!t.parallel) result = Context.export_scope(
-    t.result_scope, t.result_pool, t.result);
-  if (errors is not void) raise %(join-fail (errors $errors));
-  return result;
+  if (t.errors is not void) {
+    Var errors = Context.export_scope(t.error_scope, t.error_pool, t.errors);
+    raise %(join-fail (errors $errors));
+  }
+  return t.result;
 }
 
-/* Join owns the sealed result stores after pthread_join succeeds. Release the
-   detached canonical pool before destroying the Scope that holds wide boxes,
-   then publish JOINED so the handle becomes freeable. This runs under a defer,
-   including when result export or `<join-fail>` transfers. */
+/* Join releases only the separately captured Error storage. Successful
+   result ownership remains exactly where the developer placed it. */
 static void _finish_join(Thread thread) {
   _release_result(thread);
   __atomic_store_n(&thread.state, <joined>, __ATOMIC_SEQ_CST);
 }
 
 static void _release_result(Thread thread) {
-  if (thread.result_pool && !thread.batch && !thread.parallel)
-    thread.result_pool.release();
-  thread.result_pool = NULL;
-  if (thread.result_scope) Scope.destroy(thread.result_scope);
-  thread.result_scope = NULL;
+  thread.error_pool = NULL;
+  if (thread.error_scope) Scope.destroy(thread.error_scope);
+  thread.error_scope = NULL;
   thread.result = void;
   thread.errors = void;
 }
@@ -553,11 +506,11 @@ void Thread.free(Thread t) {
 
 /** Waits for one worker, joins it, frees its handle, and returns its result.
     A null or empty Array returns `void`. Selection and exclusive ownership
-    follow `Thread.wait_any`. The exported result belongs to the caller's
-    Scope and pools, as with `Thread.join`.
+    follow Thread.wait_any. Result ownership is unchanged, as with Thread.join.
+    The worker must explicitly preserve output before callback exit.
     A consuming join removes and frees the handle even when worker failure
-    or result export raises. A native join failure retains the live handle
-    in `pending` for retry. Other entries keep their relative order; a
+    or captured-error export raises. Native join failure retains the handle
+    in pending for retry. Other entries keep their relative order; a
     retained selected handle moves to the end.
     Raises: the same causes as `Thread.wait_any` and `Thread.join`.
 */
@@ -576,8 +529,8 @@ Var Thread.finish_any(Array pending) {
 /** Joins and frees every worker in `pending`, discarding returned results.
     A null or empty Array does nothing. Already-joined handles are freed.
     Successfully consumed handles are removed, including workers whose join
-    reported a worker or result-export error. A native join failure leaves
-    its handle in `pending` for a retry; all other entries are still attempted.
+    reported a worker or captured-error export error. Native join failure
+    leaves its handle in pending for retry; all other entries are still attempted.
     Entries must be unique, valid handles exclusively owned by this caller,
     with no concurrent mutation, joining, or freeing.
     Failures are collected and raised as `<join-fail>` only after cleanup.
@@ -642,29 +595,30 @@ static void _batch_check_stop(void) {
   if (stopped) x2c_thread_cancel();
 }
 
-/** Runs zero-argument callable jobs concurrently and waits for all of them.
-    Each successful joined/exported result, including void, reaches completed
-    on the caller when that callback is nonnull. Jobs and their captures stay
-    borrowed through the call. Results have ordinary caller-owned join
-    lifetime.
-    Batch jobs use the shared process canonical pool and private mutable work
-    scopes; explicitly opened private pools retain their own lifetime rules.
+/** Runs zero-argument jobs concurrently and waits for all of them.
+    Each successful result, including void, reaches completed on the caller
+    when that callback is nonnull. Result bits carry no ownership transfer.
+    Each job must explicitly preserve referenced output before returning;
+    completed runs after that job's temporary storage has been reclaimed.
+    Jobs, captures, and borrowed storage stay live through the call. Separate
+    output scopes permit exclusive worker access; a shared allocation scope
+    is not made safe by this API. Canonical values use the shared process pool.
+    Explicit private pools retain their own lifetime rules.
     The completion callback must not wait on participant progress.
 
-    On startup, job, export, callback, or coordinator-stop failure, requests
-    stop on every remaining job before joining any, then propagates the
-    triggering error. No callback runs during failure cleanup. Stopping is
-    cooperative, so jobs ignoring stop or blocking in native I/O can delay
-    completion indefinitely. Native join failure aborts if cleanup cannot
-    establish that borrowed storage is no longer in use.
-    Raises: startup, callback, export, stop, or worker join causes. */
+    Startup, job, callback, or coordinator-stop failure requests stop on all
+    remaining jobs before joining any. Cleanup preserves the original Error
+    and invokes no completion callbacks. Stop is cooperative: native I/O and
+    computation that never checks stop can delay completion. Native join
+    failure aborts if cleanup cannot establish that borrowed storage is idle.
+    Raises: startup, callback, captured-error, stop, or worker join causes. */
 void Thread.run(Array jobs, Func completed) {
   Array pending = $auto([]);
   ((Block) pending).reserve(jobs.len());
   defer _batch_stop(pending);
   foreach (Func job, jobs) {
     _batch_check_stop();
-    pending.push(_start(_batch_call, &job, sizeof(job), NULL, 1));
+    pending.push(_start(_batch_call, &job, sizeof(job), NULL));
   }
   while (pending.len()) {
     Var result = Thread.finish_any(pending);

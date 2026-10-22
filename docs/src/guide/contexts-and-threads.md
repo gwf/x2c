@@ -91,8 +91,10 @@ The complete program is in `examples/power/contexts.x`.
 `Thread.start(function, input)` calls a `Var`-to-`Var` function with one input.
 The input bits are copied, while referenced storage stays with its caller.
 Keep the input graph alive and read-only until join. This includes a Map's
-contents and the storage of wide boxed scalars. Return a fresh Map for values
-the worker creates; the ordinary join exports that result into the caller.
+contents and the storage of wide boxed scalars. Join returns result bits without
+exporting or transferring storage. Preserve worker-created mutable output
+explicitly before the callback exits. Each concurrent worker needs exclusive
+access to its output owner; do not allocate into a shared caller scope.
 
 ```x2c
 static Var twice(Var input) => (int) input * 2;
@@ -107,6 +109,36 @@ int main(void) {
 ```text
 42
 ```
+
+For mutable output, supply an owner that only this worker uses until join:
+
+```x2c
+static Var make_answer(Var destination) {
+  Scope output = destination;
+  Map result = {answer: 42};
+  result.move_to(&output);
+  return result;
+}
+
+int main(void) {
+  Scope output = Scope.child();
+  Thread worker = Thread.start(make_answer, output);
+  Map result = worker.join();
+  worker.free();
+  printf("%d\n", result[<answer>].int());
+  output.destroy();
+  return 0;
+}
+```
+
+```text
+42
+```
+
+Each concurrent worker needs its own output scope. Destroy these scopes only
+after all their users have finished, including when a worker fails. A transfer
+moves the Map's record, buffers, and explicitly owned contents; it does not
+follow references or adopt inserted members.
 
 `Thread.start_raw` copies the input structure's bytes. It does not copy anything
 reached through pointers in that structure. A pointer, `String`, `List`, `Map`,
@@ -155,21 +187,21 @@ int main(void) {
 }
 ```
 
-Each worker gets a private canonical-value pool, so its temporary
-`String`s and `List`s are not kept for the life of the process. The
-callback returns one `Var`. `Thread.join` waits for the worker and exports
-that result into the joining `Scope` and active pool. Until the join, the
-result stays in the sealed worker pool, even after the callback finishes.
-Once the native join succeeds, the `Thread` consumes that storage, even if
-exporting the result raises. A failed export cannot be retried. Call
-`Thread.free` after `Thread.join` returns or after catching an `Error`
-raised by the join.
+Workers start with the shared process canonical pool, so canonical Strings
+and Lists survive callback exit. Explicit private pools retain their own
+lifetime rules. Mutable callback storage is temporary. A callback that returns
+a Map, Array, boxed number, or custom allocation must explicitly preserve its
+storage before returning. A borrowed result retains its existing owner.
 
-A `Thread` cannot be detached or cancelled. Join every started `Thread`
-before the process exits. If a worker is
-still unjoined at shutdown, even one whose callback has finished, the
-runtime prints a message and aborts. The join reclaims the worker's result
-`Scope` and pool.
+`Thread.join` waits for the worker and returns its result bits. It does not
+walk references or transfer ownership. A failed native join can be retried;
+a successful join consumes the handle even if reporting a captured Error
+raises. Call `Thread.free` after join returns or its Error is caught.
+
+Join every started Thread before process exit. `Thread.stop` requests
+cooperative stopping; it does not forcibly interrupt native I/O or computation.
+Shutdown aborts if a worker remains unjoined. Join releases captured Error
+storage, but leaves developer-owned results alone.
 
 A worker uses the starting thread's `Error` policy. A cause whose policy is
 `<collect>`, `<log>`, or `<ignore>` returns to its `raise` inside the
@@ -177,19 +209,19 @@ callback, as it does on the starting thread. A cause whose policy is
 `<abort>` leaves the callback. That includes every shared cause and every
 code that no policy names. `Thread.join` then raises `<join-fail>` with the
 worker's captured errors, and that `raise` does not return to the joiner.
-So `Thread.join` either returns the worker's exported result or transfers.
+So `Thread.join` either returns the worker's result bits or transfers.
 A callback that returns `void` joins as `void`.
 
-Captured errors stay in the sealed worker storage and enter the joining
-pool only during `Thread.join`. A worker `Error` whose policy is `<log>`
+Captured Error allocations have separate storage until join. Their canonical
+values use the shared pool. Join preserves the captured errors for its caller. A worker `Error` whose policy is `<log>`
 also passes through the global `Logger` error handler. `Logger` serializes
 its sinks. A memory sink copies worker `String`s and `List`s into the pool
 captured when its `Logger` was created, so logged entries stay valid after
 the worker exits.
 
 The more complete `examples/power/threads.x` uses two workers, parent
-`String`s, private temporary `List`s and `String`s, a shared counter protected
-by a `Mutex`, joined `Map` results, and a global memory `Logger` sink.
+`String`s and `List`s, a shared counter protected by a `Mutex`, explicitly
+owned Map results, and a global memory `Logger` sink.
 
 All type and protocol registration must finish before the first successful
 `Thread.start` or `Thread.start_raw`. Starting native execution freezes
@@ -207,8 +239,7 @@ interned values with no lock protecting them.
 `Thread.run(jobs, completed)` accepts an Array of zero-argument `Func` values.
 It starts native workers and owns every handle until all jobs finish. Each
 successful joined result reaches `completed` on the calling thread. The
-callback is optional: `Thread.run(jobs)` discards results after ordinary join
-export. A void job result is also a successful completion.
+callback is optional: `Thread.run(jobs)` discards result bits after joining. A void job result is also a successful completion.
 
 Capturing lambdas already produce `Func` values. Bind a direct function or a
 noncapturing lambda to `Func` before putting it in an Array. This uses the
@@ -240,16 +271,18 @@ Each job has bounded mutable work storage but starts with the shared process
 canonical pool active. Interned Strings and Lists therefore survive job exit.
 They remain until process shutdown, so bounded communication does not bound
 canonical-pool memory. Opening an explicit private pool retains the usual
-lifetime rules; export survivors before closing it. Ordinary Thread callbacks
-still use their private canonical pools. ParallelMap uses the shared canonical
-pool and borrows each result until its reducer returns.
+lifetime rules; explicitly preserve survivors before closing it. Ordinary
+Thread callbacks also use the shared pool. ParallelMap borrows each result
+until its reducer returns.
 
-Completion results have ordinary joined/exported ownership in the caller's
-Scope and active pool. They are not borrowed from a freed Thread or silently
-reclaimed after the completion callback. Explicitly free or move mutable
-results when their application lifetime ends.
+Completion callbacks run after job temporary storage has been reclaimed. Jobs
+must explicitly preserve any returned mutable storage before exit, for example
+by moving it into a separate output scope supplied for that job. Inserting a
+reference into a Map or Array does not preserve its owner. The developer owns
+output cleanup on both success and failure; Thread.run neither adopts nor
+destroys those output scopes.
 
-On startup, job, export, completion-callback, or coordinator-stop failure,
+On startup, job, completion-callback, or coordinator-stop failure,
 `Thread.run` stops all remaining jobs before joining any of them. It preserves
 the triggering error, invokes no completion callbacks during failure cleanup,
 and waits for every started worker before returning control through the error.

@@ -438,6 +438,15 @@ static void channel_owned_receive_failure_reclaims_payload(void) {
   EXPECT_INT_EQ(atomic_load(&channel_payload_drops), 1);
 }
 
+static Var _channel_owned_return(Var input) {
+  Array args = input;
+  Channel channel = args[0];
+  Scope output = args[1];
+  Map received = channel.receive();
+  received.move_to(&output);
+  return received;
+}
+
 static void channel_owned_rendezvous_commit_survives_stop(void) {
   $test.scoped();
   atomic_store(&channel_payload_drops, 0);
@@ -453,14 +462,15 @@ static void channel_owned_rendezvous_commit_survives_stop(void) {
     received.cleanup();
     EXPECT_INT_EQ(atomic_load(&channel_payload_drops), 2 * i + 1);
 
-    Thread receiver = Thread.start_raw(
-      _channel_receiver, &channel, sizeof(channel));
+    Scope output = Scope.child();
+    Thread receiver = Thread.start(_channel_owned_return, [channel, output]);
     channel.send_owned(_channel_owned_result());
     receiver.stop();
     Map joined = receiver.join();
     receiver.free();
     EXPECT_INT_EQ(joined[<value>].integer(), 107);
     joined.cleanup();
+    output.destroy();
     EXPECT_INT_EQ(atomic_load(&channel_payload_drops), 2 * i + 2);
   }
 }
