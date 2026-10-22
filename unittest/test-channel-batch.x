@@ -5,6 +5,68 @@
 #include "test-macros.x"
 #include <stdatomic.h>
 
+static atomic_int batch_payload_drops;
+
+static void _batch_payload_drop(void *value) {
+  (void) value;
+  atomic_fetch_add(&batch_payload_drops, 1);
+}
+
+static Map _batch_payload(void) {
+  Map payload = {};
+  Scope owner = payload;
+  Scope.malloc_finalized_in(&owner, 1, _batch_payload_drop);
+  payload["value"] = 37;
+  return payload;
+}
+
+static void channel_batch_failure_reclaims_queued_owned_payload(void) {
+  $test.scoped();
+  Channel results = Channel.new(1);
+  Channel ready = $auto(Channel.new());
+  atomic_store(&batch_payload_drops, 0);
+  int caught = 0;
+  try Thread.run([
+    %!(void) => {
+      results.send_owned(_batch_payload());
+      ready.send(<ready>);
+      return void;
+    },
+    %!(void) => {
+      ready.receive();
+      raise %(bad-arg (primary 81));
+      return void;
+    }
+  ]);
+  catch %(join-fail *): caught++;
+  EXPECT_INT_EQ(caught, 1);
+  EXPECT_INT_EQ(atomic_load(&batch_payload_drops), 0);
+  results.cleanup();
+  EXPECT_INT_EQ(atomic_load(&batch_payload_drops), 1);
+}
+
+static void channel_batch_receiver_failure_reclaims_owned_payload(void) {
+  $test.scoped();
+  Channel results = $auto(Channel.new());
+  atomic_store(&batch_payload_drops, 0);
+  int caught = 0;
+  try Thread.run([
+    %!(void) => {
+      results.send_owned(_batch_payload());
+      return void;
+    },
+    %!(void) => {
+      Map payload = results.receive();
+      if (payload["value"] != 37) raise %(bad-state);
+      raise %(bad-arg (primary 82));
+      return void;
+    }
+  ]);
+  catch %(join-fail *): caught++;
+  EXPECT_INT_EQ(caught, 1);
+  EXPECT_INT_EQ(atomic_load(&batch_payload_drops), 1);
+}
+
 static void channel_batch_worker_failure_stops_both_directions(void) {
   $test.scoped();
   Channel files = $auto(Channel.new());
@@ -83,6 +145,8 @@ static void channel_batch_service_failure_stops_reply_wait(void) {
 }
 
 void channel_batch_suite(void) {
+  $test.run(channel_batch_failure_reclaims_queued_owned_payload);
+  $test.run(channel_batch_receiver_failure_reclaims_owned_payload);
   $test.run(channel_batch_worker_failure_stops_both_directions);
   $test.run(channel_batch_service_failure_stops_reply_wait);
 }

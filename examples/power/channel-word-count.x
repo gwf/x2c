@@ -31,8 +31,7 @@ static Map directory_count(Path root) {
     jobs.push(%!(void) => {
       foreach (Path filename in files) {
         Map part = word_count(filename);
-        part.scope().transfer(results);
-        results.send(part);
+        results.send_owned(part);
       }
       return <worker>;
     });
