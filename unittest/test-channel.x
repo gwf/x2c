@@ -3,6 +3,7 @@
 #include "test-support.x"
 #include "test-macros.x"
 #include "channel.x"
+#include "typed-array.x"
 #include <sched.h>
 #include <stdatomic.h>
 
@@ -310,7 +311,7 @@ static void channel_owned_receive_joins_receiver_scope(void) {
   source.destroy();
   EXPECT_INT_EQ(atomic_load(&channel_payload_drops), 0);
   Map received = channel.receive();
-  EXPECT_PTR_EQ(received.scope().parent(), *Scope.top());
+  EXPECT_PTR_EQ(Scope.owner(received).parent(), *Scope.top());
   EXPECT_INT_EQ(received[<value>].integer(), 107);
   received.cleanup();
   EXPECT_INT_EQ(atomic_load(&channel_payload_drops), 1);
@@ -322,23 +323,26 @@ static void channel_owned_closed_send_restores_parent(void) {
   Channel channel = $auto(Channel.new(1));
   channel.close();
   Map part = _channel_owned_result();
-  Scope original = part.scope().parent();
+  Scope original = Scope.owner(part);
   int rejected = 0;
   try channel.send_owned(part);
   catch %(bad-state (operation "Channel.send") (closed 1)): rejected = 1;
   EXPECT_TRUE(rejected);
-  EXPECT_PTR_EQ(part.scope().parent(), original);
+  EXPECT_PTR_EQ(Scope.owner(part), original);
   part.cleanup();
   EXPECT_INT_EQ(atomic_load(&channel_payload_drops), 1);
 
   Map detached = _channel_owned_result();
-  detached.scope().transfer(NULL);
+  Scope detached_storage = Scope.new();
+  detached.move_to(&detached_storage);
   rejected = 0;
   try channel.send_owned(detached);
   catch %(bad-state (operation "Channel.send") (closed 1)): rejected = 1;
   EXPECT_TRUE(rejected);
-  EXPECT_NULL(detached.scope().parent());
+  EXPECT_PTR_EQ(Scope.owner(detached), detached_storage);
+  EXPECT_NULL(detached_storage.parent());
   detached.cleanup();
+  detached_storage.destroy();
   EXPECT_INT_EQ(atomic_load(&channel_payload_drops), 2);
 }
 
@@ -346,24 +350,24 @@ static void channel_owned_type_failure_keeps_sender_ownership(void) {
   $test.scoped();
   Channel channel = $auto(Channel.new(<i32>, 1));
   Map part = {};
-  Scope original = part.scope().parent();
+  Scope original = Scope.owner(part);
   int rejected = 0;
   try channel.send_owned(part);
   catch %(bad-types *): rejected = 1;
   EXPECT_TRUE(rejected);
-  EXPECT_PTR_EQ(part.scope().parent(), original);
+  EXPECT_PTR_EQ(Scope.owner(part), original);
 }
 
 static Var _channel_owned_stopped_sender(const void *bytes, size_t size) {
   (void) size;
   Channel channel = *(Channel const *) bytes;
   Map part = _channel_owned_result();
-  Scope original = part.scope().parent();
+  Scope original = Scope.owner(part);
   atomic_store(&channel_probe_ready, 1);
   int restored = 0;
   try channel.send_owned(part);
   catch %(bad-state (operation "Thread.stop") (cancelled 1)):
-    restored = part.scope().parent() == original;
+    restored = Scope.owner(part) == original;
   return restored;
 }
 
@@ -461,7 +465,116 @@ static void channel_owned_rendezvous_commit_survives_stop(void) {
   }
 }
 
+static void channel_owned_plain_map_moves_and_grows(void) {
+  $test.scoped();
+  Channel channel = $auto(Channel.new(1));
+  Scope source = Scope.child();
+  Scope.push(&source);
+  Map part = {};
+  part[<first>] = 1;
+  Scope.pop();
+  channel.send_owned(part);
+  source.destroy();
+  Map received = channel.receive();
+  EXPECT_INT_EQ(received[<first>].integer(), 1);
+  for (int i = 0; i < 256; ++i) received[i] = i + 1;
+  EXPECT_INT_EQ(received.len(), 257);
+  EXPECT_INT_EQ(received[255].integer(), 256);
+  received.cleanup();
+}
+
+static void channel_owned_plain_array_moves_and_grows(void) {
+  $test.scoped();
+  Channel channel = $auto(Channel.new(1));
+  Scope source = Scope.child();
+  Scope.push(&source);
+  Array part = [3];
+  Scope.pop();
+  channel.send_owned(part);
+  source.destroy();
+  Array received = channel.receive();
+  for (int i = 0; i < 256; ++i) received.push(i);
+  EXPECT_INT_EQ(received.len(), 257);
+  EXPECT_INT_EQ(received[0].integer(), 3);
+  EXPECT_INT_EQ(received[256].integer(), 255);
+  received.free();
+}
+
+static void channel_owned_nested_contents_move_with_record(void) {
+  $test.scoped();
+  atomic_store(&channel_payload_drops, 0);
+  Channel channel = $auto(Channel.new(1));
+  Scope source = Scope.child();
+  Scope.push(&source);
+  Map part = _channel_owned_result();
+  Array child = [7];
+  Scope contents = part;
+  child.move_to(&contents);
+  part[<child>] = child;
+  Scope.pop();
+  channel.send_owned(part);
+  source.destroy();
+  Map received = channel.receive();
+  Array nested = received[<child>];
+  for (int i = 0; i < 128; ++i) {
+    received[i] = i;
+    nested.push(i);
+  }
+  EXPECT_INT_EQ(received[127].integer(), 127);
+  EXPECT_INT_EQ(nested.len(), 129);
+  received.cleanup();
+  EXPECT_INT_EQ(atomic_load(&channel_payload_drops), 1);
+}
+
+static void channel_owned_failure_restores_contents_parent(void) {
+  $test.scoped();
+  atomic_store(&channel_payload_drops, 0);
+  Channel channel = $auto(Channel.new(1));
+  channel.close();
+  for (int detached = 0; detached < 2; ++detached) {
+    Map part = _channel_owned_result();
+    Scope original = Scope.owner(part), contents = part;
+    Scope separate = detached ? NULL : Scope.child();
+    contents.transfer(separate);
+    int rejected = 0;
+    try channel.send_owned(part);
+    catch %(bad-state (operation "Channel.send") (closed 1)): rejected = 1;
+    EXPECT_TRUE(rejected);
+    EXPECT_PTR_EQ(Scope.owner(part), original);
+    EXPECT_PTR_EQ(contents.parent(), separate);
+    EXPECT_INT_EQ(part[<value>].integer(), 107);
+    part.cleanup();
+    EXPECT_INT_EQ(atomic_load(&channel_payload_drops), detached + 1);
+    if (separate) separate.destroy();
+  }
+}
+
+static void channel_owned_typed_array_uses_explicit_group(void) {
+  $test.scoped();
+  Channel channel = $auto(Channel.new(1));
+  Scope source = Scope.child();
+  Scope.push(&source);
+  ArrayInt part = ArrayInt.new();
+  part.push(11);
+  Scope transport = Scope.new();
+  part.move_to(&transport);
+  Scope.pop();
+  channel.send_owned(part);
+  source.destroy();
+  ArrayInt received = channel.receive();
+  for (int i = 0; i < 256; ++i) received.push(i);
+  EXPECT_INT_EQ(received.len(), 257);
+  EXPECT_INT_EQ(received[0], 11);
+  EXPECT_INT_EQ(received[256], 255);
+  received.free();
+}
+
 void channel_suite(void) {
+  $test.run(channel_owned_plain_map_moves_and_grows);
+  $test.run(channel_owned_plain_array_moves_and_grows);
+  $test.run(channel_owned_nested_contents_move_with_record);
+  $test.run(channel_owned_failure_restores_contents_parent);
+  $test.run(channel_owned_typed_array_uses_explicit_group);
   $test.run(channel_owned_receive_joins_receiver_scope);
   $test.run(channel_owned_closed_send_restores_parent);
   $test.run(channel_owned_type_failure_keeps_sender_ownership);

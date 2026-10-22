@@ -270,6 +270,30 @@ static ChannelMessage *_message(Var value, int owned) {
   return message;
 }
 
+/* Container movement is physical: it does not visit keys, elements, or
+   referenced objects. Custom roots already carry an exclusive subtree. */
+static int _container(Var value) => value is <array> || value is <map>;
+
+static Scope _container_contents(Var value) {
+  if (value is <map>) {
+    Map map = value;
+    return map.scope;
+  }
+  Block array = value.pointer();
+  return array.lifetime;
+}
+
+static void _move_container(Var value, Scope *destination) {
+  if (value is <map>) {
+    Map map = value;
+    map.move_to(destination);
+  }
+  else {
+    Block array = value.pointer();
+    array.move_to(destination);
+  }
+}
+
 static void _send(Channel channel, Var value, int owned) {
   if (!channel) raise %(bad-arg (operation "Channel.send"));
   if (value is void) raise %(void-op (operation "Channel.send"));
@@ -283,15 +307,32 @@ static void _send(Channel channel, Var value, int owned) {
   defer if (message && status != 1) free(message);
   if (channel.capacity) message = _message(value, owned);
 
-  Scope payload = owned ? Scope.owner(value.pointer()) : NULL;
-  Scope previous = owned ? payload.parent() : NULL;
-  if (owned) payload.transfer(NULL);
+  int container = owned && _container(value);
+  Scope payload = NULL, previous = NULL;
+  Scope contents = container ? _container_contents(value) : NULL;
+  Scope contents_parent = contents ? contents.parent() : NULL;
+  if (owned) {
+    Scope owner = Scope.owner(value.pointer());
+    previous = container ? owner : owner.parent();
+    if (container) {
+      payload = Scope.new();
+      _move_container(value, &payload);
+    }
+    else { payload = owner; payload.transfer(NULL); }
+  }
 
   x2c_thread_wait_lock();
   status = channel.capacity ? _buffer_send(channel, message)
                             : _rendezvous_send(channel, value, owned);
   x2c_thread_wait_unlock();
-  if (status != 1 && owned) payload.transfer(previous);
+  if (status != 1 && owned) {
+    if (container) {
+      _move_container(value, &previous);
+      if (contents) contents.transfer(contents_parent);
+      payload.destroy();
+    }
+    else payload.transfer(previous);
+  }
   if (status < 0) x2c_thread_cancel();
   if (!status) raise %(bad-state (operation "Channel.send") (closed 1));
 }
@@ -304,15 +345,18 @@ static void _send(Channel channel, Var value, int owned) {
     for native buffered queue storage. Failure dispatch holds no queue lock. */
 void Channel.send(Channel c, Var value) => _send(c, value, 0);
 
-/** Sends a live Scope-allocated root with its own exclusively owned inactive
-    storage subtree. Detaches before exposure; failed sends restore the
-    original parent before raising. Accepted sends relinquish sender access
+/** Hands off an exclusively owned payload. Ordinary Map and Array records,
+    buffers, and existing owned contents move into a transport Scope created
+    only for this send. Custom or typed roots require a preexisting exclusive
+    inactive subtree containing their full physical storage. The detached
+    scope is recovered through the root's allocation header while queued.
+    Failed sends restore the container allocation owner and contents parent,
+    or the custom subtree parent, before raising. Accepted sends relinquish sender access
     and cleanup responsibility. This cannot disarm an existing $auto or defer;
-    the caller must not leave such cleanup armed after acceptance. The same
-    subtree must not be handed off twice. Canonical Strings/Lists and their
-    referenced objects are not implicitly adopted. The root pointer and its
-    allocation header must remain valid until commitment; this operation does
-    not validate arbitrary pointer provenance or ownership graphs.
+    the caller must not leave such cleanup armed after acceptance. A subtree
+    must not be handed off twice. Canonical Strings/Lists and independent
+    referenced objects are not implicitly adopted. Pointer provenance and
+    ownership graphs remain caller responsibilities.
     Raises: the send causes, or <bad-arg> for a null/nonpointer payload. */
 void Channel.send_owned(Channel c, Var value) => _send(c, value, 1);
 

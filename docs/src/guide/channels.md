@@ -76,8 +76,10 @@ preventing writes until those readers finish. Send acceptance is not evidence
 that any borrower has finished using the object.
 
 Use `send_owned` when a worker produces a Map whose storage must survive worker
-exit. It detaches that Map's own inactive storage scope from the sender before
-exposing the reference:
+exit. Ordinary Maps and Arrays start with records and buffers in their current
+allocation owner and no owned-content scope. The send creates a transport Scope
+only for that handoff and moves the record, buffers, and any existing owned
+contents into it:
 
 <!-- ignore: illustrative worker fragment with caller-supplied Channel and Map -->
 ```x2c,ignore
@@ -85,30 +87,57 @@ Map part = word_count(filename);
 results.send_owned(part);
 ```
 
-An owned payload must be a live, nonnull Scope-allocated root with its own
-exclusively owned inactive storage subtree. Ordinary scalars, canonical Strings
-and Lists, borrowed buffers, and interior pointers do not satisfy this contract.
-The operation does not discover pointer provenance or validate an object graph.
-An already detached subtree may be handed off, but the same subtree must never
-be sent twice. Unrelated aliases do not disappear when ownership changes.
+This is physical storage movement, not traversal of keys, elements, or referenced
+objects. The transport scope remains detached while queued. Queue records contain
+only the Var bits and an owned flag; the object's existing allocation header
+recovers that scope. Workers never adopt into a shared Channel scope.
 
-On successful acceptance, the sender relinquishes access and cleanup for that
-subtree. Do not leave a separate `$auto` or deferred cleanup armed for it. On
-failed send, the original parent is restored before the error is raised; a
-previously detached object stays detached and caller-owned. Failures before
-detachment leave the original ownership unchanged.
+On failed send, ordinary container records, buffers, and owned contents return
+to their original allocation owner. An existing owned-content scope also regains
+its exact original parent, including a deliberately separate or detached owner.
+The empty transport Scope is destroyed before the error is raised. Failures
+before preparation leave ownership unchanged.
 
-The queue holds the object bits and an owned flag. The payload scope remains
-detached while queued; workers never adopt into a shared Channel scope. Receipt
-adopts the detached subtree beneath the receiver's private active Scope before
-returning. The receiver may free it directly, retain it under that private
-owner, or explicitly move it to another exclusive owner. If the receiver fails
-after delivery, ordinary private-scope teardown reclaims the received subtree.
+On successful acceptance, the sender relinquishes access and cleanup. A subtree
+must not be sent twice. Do not leave a separate `$auto` or deferred cleanup armed
+for it; sending cannot disarm existing cleanup. Unrelated aliases do not disappear
+when ownership changes.
 
-Nested mutable values retain their independent owners unless explicitly adopted
-before handoff. Private-pool String keys do not become safe when their containing
-Map moves. Shared process-pool Strings can be borrowed because that pool outlives
-all jobs. Transfer changes lifetime ownership, not access permissions or aliases.
+Receipt attaches the detached transport Scope beneath the receiver's private
+active Scope before returning. The receiver may clean up the container directly,
+retain it under that private owner, or explicitly move its complete storage to
+another exclusive owner. If the receiver fails, private-scope teardown reclaims
+the received transport and its storage. Empty transport scopes remain under that
+private owner until teardown if their container was freed earlier.
+
+The automatic path handles ordinary Map and Array tags. Existing typed containers
+and custom roots require a caller-prepared exclusive inactive subtree containing
+their complete physical storage. No descriptor registration or layout cast infers
+that grouping. For example, prepare a packed ArrayInt using its existing move:
+
+<!-- ignore: illustrative fragment with optional typed-array.x and a Channel -->
+```x2c,ignore
+ArrayInt values = ArrayInt.new();
+values.push(17);
+Scope transport = Scope.new();
+values.move_to(&transport);
+results.send_owned(values);
+```
+
+Until acceptance the caller owns this prepared scope. Failure restores its
+original parent; a prepared detached scope remains detached and caller-owned.
+After acceptance it belongs to the queue, then the receiver. A custom root must
+be a live nonnull Scope allocation whose existing allocation owner is that
+exclusive inactive subtree. The operation does not discover pointer provenance
+or validate an object graph. Canonical Strings/Lists, ordinary scalars, borrowed
+buffers, and interior pointers do not meet that custom-root contract.
+
+Nested mutable values retain independent ownership unless explicitly moved into
+the container's owned contents before handoff. Calling `scope()` creates that
+owned-content scope lazily; it does not group the record or buffers. Move a nested
+container's complete storage with `move_to`, rather than moving only its content
+scope. Private-pool String keys do not become safe when their Map moves. Shared
+process-pool Strings remain borrowable because the pool outlives all jobs.
 
 A Channel's own storage scope, returned by `channel.scope()`, owns its native
 synchronization record. Queue nodes use native allocation independently of Scope
