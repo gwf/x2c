@@ -67,6 +67,36 @@ static void channel_batch_receiver_failure_reclaims_owned_payload(void) {
   EXPECT_INT_EQ(atomic_load(&batch_payload_drops), 1);
 }
 
+static void channel_batch_transfers_nested_storage_after_worker_exit(void) {
+  $test.scoped();
+  Channel results = $auto(Channel.new(1));
+  atomic_store(&batch_payload_drops, 0);
+  Thread.run([
+    %!(void) => {
+      Map payload = _batch_payload();
+      Array child = [19];
+      Scope contents = payload.scope();
+      child.block().move_to(&contents);
+      payload["child"] = child;
+      results.send_owned(payload);
+      return void;
+    }
+  ]);
+  EXPECT_INT_EQ(atomic_load(&batch_payload_drops), 0);
+  Map payload = results.receive();
+  Array child = payload["child"];
+  EXPECT_INT_EQ(child[0].integer(), 19);
+  for (int i = 0; i < 128; ++i) {
+    child.push(i);
+    payload[i] = i;
+  }
+  EXPECT_INT_EQ(child[128].integer(), 127);
+  EXPECT_INT_EQ(payload[127].integer(), 127);
+  EXPECT_PTR_EQ(Scope.owner(child), payload.scope());
+  payload.cleanup();
+  EXPECT_INT_EQ(atomic_load(&batch_payload_drops), 1);
+}
+
 static void channel_batch_worker_failure_stops_both_directions(void) {
   $test.scoped();
   Channel files = $auto(Channel.new());
@@ -147,6 +177,7 @@ static void channel_batch_service_failure_stops_reply_wait(void) {
 void channel_batch_suite(void) {
   $test.run(channel_batch_failure_reclaims_queued_owned_payload);
   $test.run(channel_batch_receiver_failure_reclaims_owned_payload);
+  $test.run(channel_batch_transfers_nested_storage_after_worker_exit);
   $test.run(channel_batch_worker_failure_stops_both_directions);
   $test.run(channel_batch_service_failure_stops_reply_wait);
 }

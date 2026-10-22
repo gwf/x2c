@@ -2,8 +2,9 @@
 
 > Status: active
 > Authorized on 2026-10-22 to correct the implementation shipped at 38f2d503e.
-> Coordinator owns combined review, performance comparison, gate, and dev delivery.
-> Correction implemented locally; combined validation and performance review pending.
+> Coordinator owns combined review, performance comparison, and verification.
+> Publication held by Gary: show benchmark results before publishing.
+> The first local correction passed correctness checks but retained collection costs.
 
 ## Contract
 
@@ -16,11 +17,34 @@ superseded by detached Channel handoff.
 to that scope; `Scope.owner(object)` recovers it through allocation headers.
 Transfer to a live private scope reattaches it. No new owner pointer is added.
 
-Ordinary `Channel.send` stays nonowning. Explicit `Channel.send_owned` accepts a
-live Scope-allocated payload with its own inactive, exclusively owned storage
-subtree. It detaches before publication and restores the original parent on
-failed send before dispatching the error. Acceptance relinquishes sender access
-and cleanup obligations. Aliases and explicit sender cleanup are caller concerns.
+Ordinary `Channel.send` stays nonowning. Explicit `Channel.send_owned` prepares
+an exclusive detached transport scope for an ordinary Map or Array. For typed
+or custom payloads, the caller prepares that subtree with the concrete type's
+`move_to` operation. Failed sends restore the original container owner or
+prepared subtree parent before dispatching errors. Acceptance relinquishes
+sender access and cleanup obligations. Aliases and armed sender cleanup remain
+caller responsibilities.
+
+## Lazy container ownership correction
+
+Gary authorized this design on 2026-10-22 after the first correction left
+collection instruction counts 35% above the original baseline. Array and Map
+records and buffers use ordinary allocation ownership. Their existing scope
+field starts null and owns only explicitly acquired contents. Requesting the
+contents scope creates it lazily beneath the record's allocation owner.
+Insertion remains borrowed and creates no scope.
+
+Cleanup destroys the contents scope, if any, then frees internal buffers and
+the record. Explicit `move_to` moves the record, every backing allocation, and
+the existing contents scope together. Growth places replacements under the
+record's owner. Context export preserves explicit nesting without treating the
+contents scope as the record's owner.
+
+Owned Channel sends prepare detached transport storage only when requested.
+Collection storage moves together into that scope; failed sends restore the
+original owner. Queued cleanup still recovers the transport scope from the
+record's existing allocation header. No private allocation locks, new owner
+pointers, descriptor machinery, or changes to canonical-value ownership.
 
 Messages and rendezvous waits carry an owned bit, not another scope pointer.
 Receive recovers the scope from the payload and attaches it to the receiver's
