@@ -879,13 +879,13 @@ Public functions:
 
 ### [lib/channel.x](../lib/channel.x)
 
-non-owning Var transport and explicit stream completion.
+Var transport and explicit storage handoff.
 
 Public functions:
 
-`Channel.new`, `Channel.scope`, `Channel.send`, `Channel.receive`,
-`Channel.close`, `Channel.free`, `Channel.cleanup`, `Channel.var`,
-`Var.channel`, `Channel.iter`
+`Channel.new`, `Channel.scope`, `Channel.send`, `Channel.send_owned`,
+`Channel.receive`, `Channel.close`, `Channel.free`, `Channel.cleanup`,
+`Channel.var`, `Var.channel`, `Channel.iter`
 
 ### [lib/cleanup.x](../lib/cleanup.x)
 
