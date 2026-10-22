@@ -92,9 +92,9 @@ their reads finish.
 and owned contents for transfer. A failed send restores its original owner.
 After acceptance, the Channel holds the detached payload without adopting it
 as a child. The receiver recovers its scope from the existing allocation
-header and moves the container into its private current scope before returning.
-Abandoned queued owned payloads are
-explicitly destroyed after all Channel users finish. See
+header and attaches that scope beneath its private current scope before
+returning. Abandoned queued owned payloads are explicitly destroyed after all
+Channel users finish. See
 [Channels](channels.md) for the transport contract.
 
 The developer coordinates reads, writes, and destruction, including allocation
