@@ -5,6 +5,12 @@ unified diffs, token changes, change navigation, and line counts. It hides
 comments in the displayed source. It has no external dependencies or network
 services. Loaded source stays in the current browser tab.
 
+Unified view combines corresponding replacement lines, showing shared tokens
+once, deleted tokens in red with a strike-through, and inserted tokens in
+green. It uses the same positional line pairs as split view. Pairs that share
+only punctuation or whitespace stay separate, as do unmatched lines. Both
+original line numbers remain visible; counts still describe source changes.
+
 ## Open c2x2c
 
 From the repository root:
