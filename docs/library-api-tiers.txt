@@ -17,6 +17,7 @@ lib/block.x|advanced|Block.truncate,Block.truth,Block.try_pop,Bytes.append
 lib/block.x|advanced|Bytes.append_fill,Bytes.block
 lib/block.x|advanced|Bytes.new,Bytes.push,Bytes.reserve,Bytes.try_pop
 lib/block.x|internal|Block.move_to
+lib/block.x|internal|Block.new_owned
 lib/buffer.x|advanced|Buffer.cleanup
 lib/buffer.x|advanced|Buffer.free,Buffer.indent,Buffer.newline
 lib/buffer.x|advanced|Buffer.newline_indent,Buffer.pad,Buffer.printf
@@ -51,6 +52,7 @@ lib/common.x|advanced|x2c_normalize_index,x2c_normalize_slice,x2c_slice_bound
 lib/common.x|internal|x2c_hash_bytes,x2c_hash_word,x2c_mix64
 lib/common.x|internal|X2CErrorSite,X2CStatic
 lib/context.x|advanced|Context.move_allocation,Context.owns
+lib/context.x|internal|Context.move_scope
 lib/context.x|internal|Context.export_destination,Context.initialize
 lib/context.x|internal|Context.export_nested,Context.export_scope
 lib/dispatch.x|advanced|RenderPath.enter,RenderPath.leave

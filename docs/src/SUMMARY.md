@@ -14,6 +14,8 @@
 - [Iteration](guide/iteration.md)
 - [Scopes and Lifetime](guide/memory.md)
 - [Contexts and Threads](guide/contexts-and-threads.md)
+- [Storage ownership](guide/storage-ownership.md)
+- [Channels](guide/channels.md)
 - [Exceptions and Cleanup](guide/exceptions.md)
 - [Protocols](guide/protocols.md)
 - [Classes and System Macros](guide/system-macros.md)
