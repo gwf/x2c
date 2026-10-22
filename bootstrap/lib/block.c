@@ -25,11 +25,6 @@ static void _attach(Block b, unsigned char * allocation);
 
 static unsigned char * _end(Block b);
 
-#include "exception.h"
-
-
-
-
 static inline Block Bytes_block(Bytes bytes){
   if(bytes == NULL) return NULL;
   unsigned char * data = bytes;
@@ -109,16 +104,6 @@ static inline int Bytes_try_pop(Bytes bytes, void * out){
 static inline void Block_pop(Block block){
   Block_try_pop(block, NULL);
 }
-
-static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
-
-typedef struct _x2c_gensym_defer_env_0{
-  const void * _x2c_gensym_defer_capture_0;
-  const void * _x2c_gensym_defer_capture_1;
-}
-_x2c_gensym_defer_env_0;
-
-static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1);
 
 void Block_free(Block b);
 
@@ -306,54 +291,13 @@ Block Block_new(size_t width){
   return block;
 }
 
-Block Block_new_owned(size_t width){
-  Scope lifetime = Scope_child();
-  Block result = NULL;
-  {
-    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & result;
-    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_1 =(const void *) & lifetime;
-    X2CCleanup _x2c_gensym_defer_record_0 ={
-      .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_0
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
-    {
-      Scope_push(& lifetime);
-      {
-        X2CCleanup _x2c_gensym_defer_record_1 ={
-          .fn = _x2c_gensym_defer_cleanup_0, .env = 0
-        }
-        ;
-        x2c_cleanup_push(& _x2c_gensym_defer_record_1);
-        {
-          result = Block_new(width);
-          result -> lifetime = lifetime;
-          {
-            Block _x2c_gensym_return_value_0 = result;
-            {
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
-              x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-              return _x2c_gensym_return_value_0;
-            }
-
-          }
-
-        }
-        x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-  }
-
-}
-
 Scope Block_scope(Block b){
-  return b != NULL ?(b -> lifetime ? b -> lifetime : Scope_owner(b)) : NULL;
+  if(b == NULL) return NULL;
+  if(! b -> lifetime){
+    b -> lifetime = Scope_new();
+    Scope_transfer(b -> lifetime, Scope_owner(b));
+  }
+  return b -> lifetime;
 }
 
 Bytes Bytes_new(size_t width){
@@ -362,28 +306,16 @@ Bytes Bytes_new(size_t width){
 
 void Block_free(Block b){
   if(b == NULL) return;
-  if(b -> lifetime){
-    Scope_destroy(b -> lifetime);
-    return;
-  }
+  if(b -> lifetime) Scope_destroy(b -> lifetime);
   if(b -> bytes != NULL) Scope_free(_allocation(b));
   Scope_free(b);
 }
 
 void Block_move_to(Block block, Scope * scope){
   if(block == NULL) return;
-  if(block -> lifetime){
-    if(! scope){
-      static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/block.x",.function = "Block_move_to",.line = 352,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_11, 4372499598, 0);
-      __builtin_unreachable();
-    }
-    if(! * scope) * scope = Scope_new();
-    Scope_transfer(block -> lifetime, * scope);
-    return;
-  }
   if(block -> bytes != NULL) Scope_move(_allocation(block), scope);
   Scope_move(block, scope);
+  Scope_transfer(block -> lifetime, * scope);
 }
 
 void Bytes_clear(Bytes a0){
@@ -412,14 +344,5 @@ void Bytes_free(Bytes a0){
 
 void Bytes_truncate(Bytes a0, size_t a1){
   return Block_truncate(Bytes_block(a0), a1);
-}
-
-static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
-  Scope_pop();
-}
-
-static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
-  _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_1;
-  if((*(Block *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0) == NULL) Scope_destroy((*(Scope *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_1));
 }
 

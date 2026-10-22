@@ -347,13 +347,18 @@ static Var _export_array(Context c, Var value){
   return value;
 }
 
+void Context_move_allocation(Context c, void * allocation);
+
 void Context_move_scope(Context c, Scope storage);
 
 static Var _export_map(Context c, Var value){
   Map map = Var_map_payload(value);
   if(! Context_owns(c, map) || _visited(c, value)) return value;
-  Context_move_scope(c, Map_scope(map));
   Map_export_to(map, c, _export_callback, c -> destination_scope);
+  Context_move_allocation(c, map);
+  Context_move_block(c, Bytes_block(map -> hashes));
+  Context_move_block(c, Bytes_block(map -> entries));
+  Context_move_scope(c, map -> scope);
   return value;
 }
 
@@ -405,8 +410,8 @@ void Context_move_scope(Context c, Scope storage){
 void Context_move_block(Context c, Block block){
   if(! _init_guard_) Context_initialize();
   if(! Context_owns(c, block)) return;
-  if(block -> lifetime) Context_move_scope(c, block -> lifetime);
-  else Map_set(_export_memo(c), Block_var(block), int_var(1));
+  Map_set(_export_memo(c), Block_var(block), int_var(1));
+  Context_move_scope(c, block -> lifetime);
 }
 
 Context Context_open(void){
@@ -486,7 +491,7 @@ Context Context_current(void){
 void Context_close(Context c){
   if(! _init_guard_) Context_initialize();
   if(! c || current_context != c){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/context.x",.function = "Context_close",.line = 409,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/context.x",.function = "Context_close",.line = 412,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.close")), NULL))));
     __builtin_unreachable();
   }
