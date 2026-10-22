@@ -5,9 +5,9 @@
     entries with String/int bindings and prints with interpolation.
 */
 
-#include "substring-map.x"
 #include <stdio.h>
 #include <stdlib.h>
+#include "substring-map.x"
 
 static void fail(const char *message) {
   fprintf(stderr, "%s\n", message);
