@@ -1,32 +1,40 @@
 # Explicit storage ownership
 
 Each thread has a root Scope. Retained regions provide shorter allocation
-lifetimes. Maps and Arrays have private storage scopes beneath the scope
-active at construction. A container's scope holds its stable handle and all
-of its backing allocations. Growth can replace backing storage without
-changing the container handle or its storage scope.
+lifetimes. A Map or Array record and its backing allocations belong to the
+scope active at construction. Growth replaces buffers under the record's
+current allocation owner without changing the container handle.
 
-The storage scope does not own referenced values automatically. Inserting a
-Map into another Map, or pushing an Array into an Array, copies the reference.
-Nested objects keep their existing owners until an explicit transfer.
+`container.scope()` explicitly acquires a separate scope for owned contents.
+That scope is created lazily beneath `Scope.owner(container)`. The container
+record and buffers stay outside it. Ordinary construction, copying, slicing,
+and insertion do not create an owned-content scope or adopt referenced values.
 
 ## Adopt a container
 
-Transfer the inner container's scope beneath the outer container's scope:
+Move the inner container into the outer container's owned-content scope:
 
 ```x2c
 Map parent = {};
 Array child = [];
-child.scope().transfer(parent);
+Scope contents = parent.scope();
+child.move_to(&contents);
 parent["items"] = child;
 child.push(42);
 parent.cleanup();
 ```
 
-The transfer adopts the child's storage scope. The insertion stores a
-reference. These are separate operations. Destroying the parent now destroys
-the child as well. Do not schedule another cleanup through an alias to that
-child. Every pointer into either destroyed container becomes invalid.
+`move_to` moves the child's record, backing buffers, and any owned-content
+scope together. The insertion stores a reference. These are separate
+operations. Destroying the parent now destroys the child as well. Do not
+schedule another cleanup through an alias to that child. Every pointer into
+either destroyed container becomes invalid.
+
+`container.move_to(&destination)` preserves addresses and moves a fixed
+number of allocation records plus any owned-content scope. The destination
+slot acquires a Scope if empty. Container cleanup destroys nullable owned
+contents, then frees its buffers and record. Unadopted referenced values
+retain their independent owners.
 
 `scope.transfer(destination)` reparents a complete ownership subtree. It
 changes a fixed number of ownership links without copying elements or walking
@@ -44,11 +52,11 @@ and must not be the source or its descendant. The runtime does not prove
 graph lifetimes or revoke aliases. Transferring storage does not grant
 exclusive access to referenced values.
 
-`object.scope()` returns its storage scope. A Scope destination accepts a
-container through that converter, so `child.scope().transfer(parent)` uses
-the parent's scope. `scope.parent()` returns the lifetime parent. The existing
-`Scope.owner(pointer)` query reports an individual managed allocation's owner;
-it is not the lifetime-parent query.
+Converting a container to Scope calls `scope()` and can allocate its owned
+contents scope. Moving that scope alone moves only those contents; it does
+not move the container's record or buffers. Use `move_to` for the complete
+container. `scope.parent()` returns the lifetime parent. `Scope.owner(pointer)`
+reports an individual managed allocation's owner without acquiring any scope.
 
 ## Give graph nodes a common owner
 
@@ -57,17 +65,16 @@ Object references may form cycles. The lifetime hierarchy must not.
 ```x2c
 Scope graph = $auto(Scope.new());
 Array first = [], second = [];
-first.scope().transfer(graph);
-second.scope().transfer(graph);
+first.move_to(&graph);
+second.move_to(&graph);
 first.push(second);
 second.push(first);
 ```
 
-Both vertices are children of `graph`. Its cleanup destroys both vertices
-without following their edges. Neither vertex individually owns the other.
-To add a sibling later, transfer a new vertex beneath the existing vertex's
-`scope().parent()`. A node reference alone does not grant authority to destroy
-the common owner.
+Both vertices belong to `graph`. Its cleanup destroys both vertices without
+following their edges. Neither vertex individually owns the other. To add a
+sibling later, move a new vertex to `Scope.owner(first)`. A node reference
+alone does not grant authority to destroy the common owner.
 
 To protect a referenced object from a container's destruction, keep its
 ownership separate. Its independent owner must remain alive while borrowers
@@ -81,11 +88,12 @@ transferring, cloning, or recursively exporting storage. A parent can send
 one Map to several workers, keep it alive, and refrain from writing until
 their reads finish.
 
-`Channel.send_owned` explicitly detaches a private payload subtree. A failed
-send restores its original parent. After acceptance, the Channel holds the
-detached payload without adopting it as a child. The receiver recovers its
-scope from the existing allocation header and attaches it to the receiver's
-private current scope before returning. Abandoned queued owned payloads are
+`Channel.send_owned` explicitly groups a private container's record, buffers,
+and owned contents for transfer. A failed send restores its original owner.
+After acceptance, the Channel holds the detached payload without adopting it
+as a child. The receiver recovers its scope from the existing allocation
+header and moves the container into its private current scope before returning.
+Abandoned queued owned payloads are
 explicitly destroyed after all Channel users finish. See
 [Channels](channels.md) for the transport contract.
 
@@ -96,7 +104,7 @@ that storage. Sending successfully does not mean a borrower has finished.
 
 ## Canonical values have separate owners
 
-Strings and cons cells belong to canonical pools. Moving a Map scope cannot
+Strings and cons cells belong to canonical pools. Moving a Map cannot
 extend the lifetime of keys in a private pool. An immutable cons cell can also
 reference a mutable object whose lifetime remains independent.
 
@@ -113,6 +121,6 @@ can move it independently. The export memo breaks reference cycles and records
 storage moves; root export commits the moves after recursive value export.
 This operation is separate from both Scope transfer and channel transport.
 
-Raw Blocks remain type agnostic. `Block.new` creates ordinary managed handle
-and backing allocations. `Block.new_owned` groups that storage beneath a child
-Scope, without inspecting the fixed-width elements. Arrays use grouped storage.
+Blocks remain type agnostic. `Block.new` creates ordinary managed handle and
+backing allocations. `Block.scope()` lazily acquires an owned-content scope
+without inspecting the fixed-width elements. Arrays use the same storage.

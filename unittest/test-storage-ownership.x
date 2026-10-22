@@ -32,36 +32,61 @@ static void storage_scope_transfer_preserves_allocations(void) {
   EXPECT_INT_EQ(Scope.stats().live_scopes, before.live_scopes);
 }
 
-static void storage_empty_arrays_have_private_scopes(void) {
+static void storage_arrays_acquire_owned_contents_lazily(void) {
   $test.scoped();
+  Scope allocation_owner = *Scope.top();
+  size_t scopes = Scope.stats().live_scopes;
   Array array = [];
   Array copy = array.copy(), slice = array[0:0];
+  EXPECT_NULL(array.lifetime);
+  EXPECT_NULL(copy.lifetime);
+  EXPECT_NULL(slice.lifetime);
+  EXPECT_INT_EQ(Scope.stats().live_scopes, scopes);
+  Scope unrelated = Scope.new();
+  Scope.push(&unrelated);
   Scope owner = array;
+  Scope.pop();
   EXPECT_NOT_NULL(owner);
-  EXPECT_PTR_EQ(Scope.owner(array), owner);
-  EXPECT_PTR_EQ(owner.parent(), *Scope.top());
-  EXPECT_TRUE(copy.scope() != owner);
-  EXPECT_TRUE(slice.scope() != owner);
+  EXPECT_PTR_EQ(array.scope(), owner);
+  EXPECT_PTR_EQ(Scope.owner(array), allocation_owner);
+  EXPECT_PTR_EQ(owner.parent(), allocation_owner);
+  EXPECT_NULL(copy.lifetime);
+  EXPECT_NULL(slice.lifetime);
+  unrelated.destroy();
   Scope destination = Scope.new();
-  owner.transfer(destination);
+  array.move_to(&destination);
   for (int i = 0; i < 128; i++) array.push(i);
-  EXPECT_PTR_EQ(Scope.owner(array), owner);
+  EXPECT_PTR_EQ(Scope.owner(array), destination);
+  EXPECT_PTR_EQ(owner.parent(), destination);
   EXPECT_PTR_EQ(Scope.owner((unsigned char *) array.bytes - sizeof(Block)),
-    owner);
+    destination);
   EXPECT_INT_EQ(array[127].int(), 127);
   destination.destroy();
 }
 
-static void storage_maps_grow_under_their_storage_scope(void) {
+static void storage_maps_grow_under_their_record_owner(void) {
   $test.scoped();
+  size_t scopes = Scope.stats().live_scopes;
   Map map = {};
+  MapIntInt typed = MapIntInt.new();
+  EXPECT_NULL(map.scope);
+  EXPECT_NULL(typed.scope);
+  EXPECT_INT_EQ(Scope.stats().live_scopes, scopes);
   Scope owner = map, destination = Scope.new();
-  owner.transfer(destination);
-  for (int i = 0; i < 128; i++) map[i] = i + 1;
-  EXPECT_PTR_EQ(Scope.owner(map), owner);
-  EXPECT_PTR_EQ(Scope.owner(map.hashes.block()), owner);
-  EXPECT_PTR_EQ(Scope.owner(map.entries.block()), owner);
+  map.move_to(&destination);
+  typed.move_to(&destination);
+  for (int i = 0; i < 128; i++) {
+    map[i] = i + 1;
+    typed[i] = i + 2;
+  }
+  EXPECT_PTR_EQ(Scope.owner(map), destination);
+  EXPECT_PTR_EQ(Scope.owner(map.hashes.block()), destination);
+  EXPECT_PTR_EQ(Scope.owner(map.entries.block()), destination);
+  EXPECT_PTR_EQ(Scope.owner(typed), destination);
+  EXPECT_PTR_EQ(Scope.owner(typed.entries.block()), destination);
+  EXPECT_NULL(typed.scope);
   EXPECT_INT_EQ(map[127].int(), 128);
+  EXPECT_INT_EQ(typed[127], 129);
   EXPECT_PTR_EQ(owner.parent(), destination);
   destination.destroy();
 }
@@ -71,8 +96,8 @@ static void storage_adoption_destroys_cycles_once(void) {
   Map parent = {}, child = {}, independent = {};
   Array links = [];
   Scope parent_scope = parent, child_scope = child, links_scope = links;
-  child_scope.transfer(parent_scope);
-  links_scope.transfer(child_scope);
+  child.move_to(&parent_scope);
+  links.move_to(&child_scope);
   parent["child"] = child;
   child["links"] = links;
   child["independent"] = independent;
@@ -97,8 +122,8 @@ static void storage_context_exports_adopted_private_values(void) {
   Map parent = {}, child = {};
   Array links = [];
   Scope parent_scope = parent, child_scope = child, links_scope = links;
-  child_scope.transfer(parent_scope);
-  links_scope.transfer(child_scope);
+  child.move_to(&parent_scope);
+  links.move_to(&child_scope);
   parent["child"] = child;
   child[key] = text;
   child["links"] = links;
@@ -131,11 +156,12 @@ static void storage_context_exports_adopted_string_array(void) {
   table[key] = values[0];
   Scope owner = values;
   Scope table_owner = table;
+  Scope parent_scope = parent;
   storage_drops = 0;
   Scope.malloc_finalized_in(&owner, 1, _storage_drop);
   Scope.malloc_finalized_in(&table_owner, 1, _storage_drop);
-  owner.transfer(parent);
-  table_owner.transfer(parent);
+  values.move_to(&parent_scope);
+  table.move_to(&parent_scope);
   parent["values"] = values;
   parent["table"] = table;
   context.export(parent);
@@ -147,7 +173,7 @@ static void storage_context_exports_adopted_string_array(void) {
   EXPECT_STR_EQ(table[lookup],
     "private typed adopted text");
   EXPECT_PTR_EQ(Scope.owner((unsigned char *) values.bytes - sizeof(Block)),
-    owner);
+    parent_scope);
   parent.cleanup();
   EXPECT_INT_EQ(storage_drops, 2);
 }
@@ -157,7 +183,7 @@ static void storage_failed_export_can_retry_adopted_graph(void) {
   Context context = Context.open_isolated();
   Map parent = {}, child = {};
   Scope parent_scope = parent, child_scope = child;
-  child_scope.transfer(parent_scope);
+  child.move_to(&parent_scope);
   String key = String.printf("private-retry-key-%d", 706);
   String text = String.printf("private-retry-value-%d", 707);
   EXPECT_FALSE(Pool.is_permanent(key));
@@ -204,27 +230,27 @@ static void storage_exports_raw_typed_block_views(void) {
 static void storage_detached_subtree_survives_and_reattaches(void) {
   ScopeStats before = Scope.stats();
   Scope source = Scope.new(), destination = Scope.new();
+  Scope transit = Scope.new();
   Scope.push(&source);
   Map map = {};
   Array child = [];
   Scope owner = map, nested = child;
-  nested.transfer(owner);
+  child.move_to(&owner);
   map[0] = child;
   child.push(42);
   storage_drops = 0;
   Scope.malloc_finalized_in(&owner, 1, _storage_drop);
   Scope.malloc_finalized_in(&nested, 1, _storage_drop);
   Scope.pop();
-  owner.transfer(NULL);
-  owner.transfer(NULL);
-  EXPECT_NULL(owner.parent());
-  EXPECT_NULL(owner.previous);
-  EXPECT_NULL(owner.next);
-  EXPECT_FALSE(source.contains(owner));
+  map.move_to(&transit);
+  transit.transfer(NULL);
+  EXPECT_NULL(transit.parent());
+  EXPECT_FALSE(source.contains(transit));
   source.destroy();
   EXPECT_INT_EQ(storage_drops, 0);
-  EXPECT_PTR_EQ(Scope.owner(map), owner);
-  EXPECT_PTR_EQ(Scope.owner(child), nested);
+  EXPECT_PTR_EQ(Scope.owner(map), transit);
+  EXPECT_PTR_EQ(Scope.owner(child), owner);
+  EXPECT_PTR_EQ(owner.parent(), transit);
   EXPECT_PTR_EQ(nested.parent(), owner);
   EXPECT_TRUE(owner.contains(nested));
   EXPECT_PTR_EQ(map[0].array(), child);
@@ -233,12 +259,13 @@ static void storage_detached_subtree_survives_and_reattaches(void) {
     map[i] = i;
     child.push(i);
   }
-  EXPECT_PTR_EQ(Scope.owner(map.entries.block()), owner);
+  EXPECT_PTR_EQ(Scope.owner(map.entries.block()), transit);
   EXPECT_PTR_EQ(Scope.owner((unsigned char *) child.bytes - sizeof(Block)),
-    nested);
-  owner.transfer(destination);
+    owner);
+  map.move_to(&destination);
+  transit.destroy();
   EXPECT_PTR_EQ(owner.parent(), destination);
-  EXPECT_PTR_EQ(Scope.owner(map), owner);
+  EXPECT_PTR_EQ(Scope.owner(map), destination);
   EXPECT_PTR_EQ(nested.parent(), owner);
   EXPECT_INT_EQ(map[127].int(), 127);
   EXPECT_INT_EQ(child[127].int(), 127);
@@ -256,9 +283,9 @@ static void _storage_export_order(int child_first) {
     MapStringString table = MapStringString.new();
     Scope owner = parent, child_owner = child;
     Scope strings_owner = strings, table_owner = table;
-    child_owner.transfer(owner);
-    strings_owner.transfer(owner);
-    table_owner.transfer(owner);
+    child.move_to(&owner);
+    strings.move_to(&owner);
+    table.move_to(&owner);
     String key = String.printf("ordered-key-%d", child_first);
     String text = String.printf("ordered-text-%d", child_first);
     EXPECT_FALSE(Pool.is_permanent(key));
@@ -337,7 +364,7 @@ static void storage_exports_child_independently(void) {
   Context work = Context.open_isolated();
   Map parent = {}, child = {};
   Scope owner = parent, nested = child;
-  nested.transfer(owner);
+  child.move_to(&owner);
   child["value"] = String.printf("independent-child-%d", 709);
   work.export(child);
   work.close();
@@ -365,8 +392,8 @@ static void storage_exports_distinct_equal_wide_boxes(void) {
 
 void storage_ownership_suite(void) {
   $test.run(storage_scope_transfer_preserves_allocations);
-  $test.run(storage_empty_arrays_have_private_scopes);
-  $test.run(storage_maps_grow_under_their_storage_scope);
+  $test.run(storage_arrays_acquire_owned_contents_lazily);
+  $test.run(storage_maps_grow_under_their_record_owner);
   $test.run(storage_adoption_destroys_cycles_once);
   $test.run(storage_context_exports_adopted_private_values);
   $test.run(storage_context_exports_adopted_string_array);

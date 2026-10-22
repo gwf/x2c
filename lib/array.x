@@ -28,11 +28,12 @@ static keyword loop $private.loop;
 
 /** Holds a mutable identity-bearing sequence of non-`void` `Var` elements.
     `Array` is the same object as its `Block` view. Its handle and backing
-    storage belong to a private child of the construction-time active Scope.
+    storage belong to the construction-time active Scope. `Array.scope`
+    lazily creates a separate scope for explicitly owned contents.
     Assignment aliases it;
     `Array.copy` creates a new container, but still borrows any objects
-    referenced by its elements. `Array.free` destroys that storage scope and
-    explicitly adopted child scopes, invalidating all aliases.
+    referenced by its elements. `Array.free` destroys owned contents and
+    frees its record and backing storage, invalidating all aliases.
 */
 typedef Block Array;
 

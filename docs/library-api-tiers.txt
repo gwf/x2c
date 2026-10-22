@@ -18,7 +18,6 @@ lib/block.x|advanced|Block.truncate,Block.truth,Block.try_pop,Bytes.append
 lib/block.x|advanced|Bytes.append_fill,Bytes.block
 lib/block.x|advanced|Bytes.new,Bytes.push,Bytes.reserve,Bytes.try_pop
 lib/block.x|internal|Block.move_to
-lib/block.x|internal|Block.new_owned
 lib/buffer.x|advanced|Buffer.cleanup
 lib/buffer.x|advanced|Buffer.free,Buffer.indent,Buffer.newline
 lib/buffer.x|advanced|Buffer.newline_indent,Buffer.pad,Buffer.printf

@@ -224,8 +224,11 @@ static Var _export_array(Context c, Var value) {
 static Var _export_map(Context c, Var value) {
   Map map = value;
   if (!c.owns(map) || _visited(c, value)) return value;
-  c.move_scope(map);
   map.export_to(c, _export_callback, c.destination_scope);
+  c.move_allocation(map);
+  c.move_block(map.hashes.block());
+  c.move_block(map.entries.block());
+  c.move_scope(map.scope);
   return value;
 }
 
@@ -312,15 +315,15 @@ void Context.move_scope(Context c, Scope storage) {
   if (_owns_scope(c, storage)) _export_memo(c).set(storage, 1);
 }
 
-/** Schedules raw or grouped Block storage for a registered exporter.
+/** Schedules Block storage and nullable owned contents for an exporter.
     Root export keeps allocations covered by a scheduled storage scope under
-    that owner. Uncovered raw storage moves with `Block.move_to`.
+    that owner. Uncovered storage moves with `Block.move_to`.
     Raises: allocation and table-growth causes while recording the move.
 */
 void Context.move_block(Context c, Block block) {
   if (!c.owns(block)) return;
-  if (block.lifetime) c.move_scope(block.lifetime);
-  else _export_memo(c).set(block, 1);
+  _export_memo(c).set(block, 1);
+  c.move_scope(block.lifetime);
 }
 
 // lifecycle
