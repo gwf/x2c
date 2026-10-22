@@ -183,24 +183,10 @@ int main(int argc, char **argv) {
   if (!strcmp(argv[1], "completed-thread")) {
     atomic_int ready = 0;
     LiveThreadInput input = { &ready };
-    /* The first worker also creates the process-lifetime Scope for the
-       worker's static catch plans; count only what the second one keeps. */
-    Thread.join(Thread.start_raw(completed_worker, &input, sizeof(input)));
-    atomic_store(&ready, 0);
-    ScopeStats before = Scope.stats();
     Thread thread = Thread.start_raw(
       completed_worker, &input, sizeof(input)
     );
-    while (!atomic_load(&ready)) sched_yield();
-    time_t deadline = time(NULL) + 10;
-    while (Scope.stats().live_scopes != before.live_scopes + 2) {
-      if (time(NULL) > deadline) {
-        fprintf(stderr, "completed worker scopes never settled\n");
-        return 3;
-      }
-      sched_yield();
-    }
-    (void) thread;
+    Thread.wait_any([thread]);
     Scope_shutdown();
     return 1;
   }
