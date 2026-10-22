@@ -84,7 +84,7 @@ Joins and frees every worker in `pending`, discarding returned results.
 A null or empty Array does nothing. Already-joined handles are freed.
 Successfully consumed handles are removed, including workers whose join
 reported a worker or captured-error export error. Native join failure
-leaves its handle in pending for retry; all other entries are still attempted.
+leaves its handle in pending for retry. All other entries are attempted.
 Entries must be unique, valid handles exclusively owned by this caller,
 with no concurrent mutation, joining, or freeing.
 Failures are collected and raised as `<join-fail>` only after cleanup.
