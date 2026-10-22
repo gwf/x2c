@@ -10,7 +10,7 @@
 | Function | Summary |
 | --- | --- |
 | [`Iter.parallel_map`](#Iter.parallel_map) | Describes mapping `function` over `source` with at most `workers` Threads. |
-| [`ParallelMap.foldl`](#ParallelMap.foldl) | Consumes ready worker results into one sequential accumulator. |
+| [`ParallelMap.foldl`](#ParallelMap.foldl) | Folds borrowed worker results on the caller in completion order. |
 | [`Thread.finish_all`](#Thread.finish_all) | Joins and frees every worker in `pending`, discarding returned results. |
 | [`Thread.finish_any`](#Thread.finish_any) | Waits for one worker, joins it, frees its handle, and returns its result. |
 | [`Thread.free`](#Thread.free) | Frees a `Thread` handle after its consuming join has completed. |
@@ -39,7 +39,7 @@ must not mutate or recycle an outstanding input's storage.
 **Raises:** `<bad-arg>` for a nonpositive worker count, or `<alloc-fail>` for
 descriptor storage.
 
-Source: `lib/thread.x:681`
+Source: `lib/thread.x:696`
 
 ### `ParallelMap`
 
@@ -48,26 +48,30 @@ Source: `lib/thread.x:681`
 
 `Var ParallelMap.foldl(ParallelMap map, Var seed, Func accumulate)`
 
-Consumes ready worker results into one sequential accumulator.
-Starts at most the configured worker count and reuses those Threads for
-successive inputs. Each completed job publishes one sealed result; the
-caller exports it and runs `accumulate(acc, result)` before assigning
-that worker another input. Other workers may still be running.
-Results follow completion-queue order, not source order. Source traversal
-and accumulation stay on the calling thread. Each worker holds at most
-one unfinished job or unread result.
-A `void` seed uses the first result as accumulator, as with `Iter.foldl`.
-Empty input or a null descriptor returns the seed without invoking the
-worker or accumulator. No result Array is collected. The fold joins all
-remaining workers on every exit, preserving a primary Error during
-cleanup. If native join failure leaves a worker unjoined, the process
-aborts rather than release storage that worker may still use.
-This descriptor supports consuming folds, not general pull iteration.
+Folds borrowed worker results on the caller in completion order.
+Reuses at most the configured worker count. A worker keeps its callback
+Context alive and waits while the caller consumes its result. The next
+assignment or shutdown releases that Context and its remaining storage.
+No result graph is exported. To retain worker-owned storage, the reducer
+must explicitly move it to its own owner before returning. References,
+including cycles, do not imply ownership. Borrowed input owners stay live
+through the fold; callbacks must not mutate outstanding borrowed inputs.
+Workers use the shared canonical pool. Explicit private pools retain
+their own lifetime rules.
 
-**Raises:** source, start, worker, export, allocation, or accumulator causes,
-including `<void-op>` for a `void` worker result.
+A void seed takes the first result without calling the reducer. That
+result must survive worker cleanup independently; use an explicit seed
+and transfer in the reducer for worker-owned storage. Empty input or a
+null descriptor returns the seed. Source traversal and accumulation run
+on the caller; each worker holds at most one job or unread result.
+Every exit stops and joins remaining workers. Channel waits cooperate
+with stop; arbitrary computation and native I/O need not. Cleanup keeps
+the primary Error. Native join failure leaving a worker live aborts.
 
-Source: `lib/thread.x:706`
+**Raises:** source, start, worker, allocation, accumulator, or stop causes,
+including <void-op> for a void worker result.
+
+Source: `lib/thread.x:724`
 
 ### `Thread`
 
@@ -91,7 +95,7 @@ cleanup failure instead; the original Error continues unchanged.
 `<bad-arg>` for a null entry or `<bad-state>` for a joining entry.
 Error snapshot failures use the existing raw Error floor.
 
-Source: `lib/thread.x:575`
+Source: `lib/thread.x:590`
 
 <a id="Thread.finish_any"></a>
 #### Thread.finish_any
@@ -109,7 +113,7 @@ retained selected handle moves to the end.
 
 **Raises:** the same causes as `Thread.wait_any` and `Thread.join`.
 
-Source: `lib/thread.x:549`
+Source: `lib/thread.x:564`
 
 <a id="Thread.free"></a>
 #### Thread.free
@@ -120,7 +124,7 @@ Frees a `Thread` handle after its consuming join has completed.
 
 **Raises:** `<bad-state>` for NULL, running, or joining handles.
 
-Source: `lib/thread.x:533`
+Source: `lib/thread.x:548`
 
 <a id="Thread.join"></a>
 #### Thread.join
@@ -140,7 +144,7 @@ fails, any cause from result or error export, and
 here. A callback that returns `void` joins as `void`; a handled worker
 failure transfers instead of returning a sentinel.
 
-Source: `lib/thread.x:483`
+Source: `lib/thread.x:497`
 
 <a id="Thread.run"></a>
 #### Thread.run
@@ -165,7 +169,7 @@ establish that borrowed storage is no longer in use.
 
 **Raises:** startup, callback, export, stop, or worker join causes.
 
-Source: `lib/thread.x:646`
+Source: `lib/thread.x:661`
 
 <a id="Thread.start"></a>
 #### Thread.start
@@ -186,7 +190,7 @@ for explicit byte-buffer inputs.
 **Raises:** `<bad-arg>` for a null callback, or the causes of
 `Thread.start_raw`.
 
-Source: `lib/thread.x:240`
+Source: `lib/thread.x:242`
 
 <a id="Thread.start_raw"></a>
 #### Thread.start_raw
@@ -212,7 +216,7 @@ registration.
 `<io-fail>` when `pthread_create` fails. Failure during native once
 initialization or mutex setup aborts the process.
 
-Source: `lib/thread.x:184`
+Source: `lib/thread.x:186`
 
 <a id="Thread.stop"></a>
 #### Thread.stop
@@ -226,7 +230,7 @@ while the handle remains live; stop does not join or free it.
 
 **Raises:** <bad-arg> for a null handle.
 
-Source: `lib/thread.x:156`
+Source: `lib/thread.x:158`
 
 <a id="Thread.wait_any"></a>
 #### Thread.wait_any
@@ -248,7 +252,7 @@ added again and selected again. Freed handles must never be supplied.
 **Raises:** `<bad-arg>` for a null entry, or `<bad-state>` for a joining or
 joined entry. Native completion synchronization failure aborts.
 
-Source: `lib/thread.x:446`
+Source: `lib/thread.x:460`
 
 ## Runtime-internal callables
 
@@ -274,7 +278,7 @@ for source readers but are not supported as user API.
 Raises a non-resumable stop outcome after queue locks and wait records
 have been released. Explicit catches may handle this shared cause.
 
-Source: `lib/thread.x:147`
+Source: `lib/thread.x:149`
 
 #### x2c_thread_stopping
 
@@ -282,7 +286,7 @@ Source: `lib/thread.x:147`
 
 Tests the current wait's pending stop under the internal monitor.
 
-Source: `lib/thread.x:129`
+Source: `lib/thread.x:131`
 
 #### x2c_thread_wait
 
@@ -293,7 +297,7 @@ pending-stop check share that monitor with Thread.stop. Returns holding
 the monitor, with the registration removed, including on pending stop.
 Queue callers recheck predicates and stop before committing an operation.
 
-Source: `lib/thread.x:137`
+Source: `lib/thread.x:139`
 
 #### x2c_thread_wait_lock
 
@@ -302,7 +306,7 @@ Source: `lib/thread.x:137`
 Locks the internal monitor shared by stop publication and queue commits.
 Native synchronization failure aborts without entering Error dispatch.
 
-Source: `lib/thread.x:113`
+Source: `lib/thread.x:115`
 
 #### x2c_thread_wait_owner
 
@@ -311,7 +315,7 @@ Source: `lib/thread.x:113`
 Returns the current wait's borrowed Thread token, or NULL for an unmanaged
 or cleanup-masked caller. Call while holding the internal monitor.
 
-Source: `lib/thread.x:122`
+Source: `lib/thread.x:124`
 
 #### x2c_thread_wait_stopped
 
@@ -320,7 +324,7 @@ Source: `lib/thread.x:122`
 Tests a borrowed wait token under the internal monitor. A null token has
 no stop request. Queues use this before committing a rendezvous peer.
 
-Source: `lib/thread.x:126`
+Source: `lib/thread.x:128`
 
 #### x2c_thread_wait_unlock
 
@@ -328,7 +332,7 @@ Source: `lib/thread.x:126`
 
 Unlocks the internal stop/queue monitor.
 
-Source: `lib/thread.x:117`
+Source: `lib/thread.x:119`
 
 ## Public types
 
@@ -349,7 +353,7 @@ Construction starts no workers. The source iterator storage and callback
 are borrowed until a consuming `ParallelMap.foldl` finishes. Use temporary
 iterator chains only when the fold is in the same full expression.
 
-Source: `lib/thread.x:35`
+Source: `lib/thread.x:37`
 
 <a id="Thread"></a>
 ### Thread
@@ -360,7 +364,7 @@ A heap-owned native worker handle with one consuming join.
 A started `Thread` must be joined, including after its callback finishes,
 and then released with `Thread.free`.
 
-Source: `lib/thread.x:41`
+Source: `lib/thread.x:43`
 
 <a id="ThreadFn"></a>
 ### ThreadFn
@@ -382,10 +386,12 @@ Source: `lib/thread.x:21`
 
 Computes a worker result from one borrowed `Var` input.
 Referenced input storage must stay alive and unchanged until join.
-Return fresh worker-owned values normally; `Thread.join` exports them.
-Error policy and result transfer follow `ThreadFn`.
+Thread.start accepts fresh worker-owned results; Thread.join exports them.
+ParallelMap instead borrows results until its reducer returns; retained
+worker storage requires explicit transfer by that reducer.
+Thread.start error policy and result transfer follow ThreadFn.
 
-Source: `lib/thread.x:28`
+Source: `lib/thread.x:30`
 
 ## Design notes
 
