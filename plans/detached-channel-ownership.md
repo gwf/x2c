@@ -3,6 +3,7 @@
 > Status: active
 > Authorized on 2026-10-22 to correct the implementation shipped at 38f2d503e.
 > Coordinator owns combined review, performance comparison, gate, and dev delivery.
+> Correction implemented locally; combined validation and performance review pending.
 
 ## Contract
 
@@ -59,3 +60,9 @@ metadata. Existing allocation headers identify the cleanup scope. The only
 message metadata added distinguishes explicit owned sends from unchanged borrowed
 sends. This replaces shared-parent lifetime adoption rather than layering another
 ownership protocol over it. Finalizers and failure cleanup remain outside locks.
+
+Combined focused checks pass 84 tests and 778 assertions. Independent source
+review found no lifecycle defect in private Scope detach/reattach or owned
+Channel commitment. Tests cover stopped rendezvous rollback, but do not force
+every postcommit scheduling interleaving. Native allocation failure is not
+fault-injected. Final gate and repeated baseline comparisons remain required.

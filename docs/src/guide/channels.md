@@ -69,7 +69,8 @@ processing.
 ## Borrow or hand off storage
 
 Ordinary `send(value)` copies Var representation bits. The sender keeps its
-storage ownership, and the application keeps every borrower alive. It can send
+storage ownership, and the application keeps storage alive for every borrower.
+It can send
 the same parent-owned Map to several readers without transferring it, while
 preventing writes until those readers finish. Send acceptance is not evidence
 that any borrower has finished using the object.
