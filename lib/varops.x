@@ -572,6 +572,12 @@ static double _floating_order(X2CVarNumeric &lhs, X2CVarNumeric &rhs) {
 */
 meta native int Var.truth(Var value) {
   if (!value.encoding_valid() || value is void) return value.fallback_truth();
+  switch (value.tag()) {
+    case <i8>: case <u8>: case <i16>: case <u16>: case <i32>: case <u32>:
+      return value.payload32() != 0;
+    case <i48>: case <u48>:
+      return (value.u64 & ((1ul << 48) - 1)) != 0;
+  }
   int handled = 0, truth = value.dispatch_truth(handled);
   return handled ? !!truth : value.fallback_truth();
 }

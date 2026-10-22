@@ -148,6 +148,8 @@ static int f9_interning___PoolTable_equal_entries(PoolTable _x2c_gensym_macro_a_
 
 static Var f9_interning____get_hashed(PoolTable table, Var key, unsigned key_hash);
 
+static String f9_interning____get_string(PoolTable table, const char * bytes, int length, unsigned hash);
+
 static Var _setdefault(PoolTable table, Var object, int * inserted);
 
 static Var f9_interning____lookup_locked(Pool inner, Var key, unsigned key_hash);
@@ -698,11 +700,41 @@ static Var f9_interning____get_hashed(PoolTable table, Var key, unsigned key_has
   long index = f9_interning___PoolTable_find_hashed(table, & key, key_hash);  return index < 0 ?((void) 0, Void) : * f9_interning____record_key(table, (unsigned) index);
 }
 
-static Var _setdefault(PoolTable table, Var object, int * inserted){
-  return * f9_interning___PoolTable_get_or_insert(table, & object, & object, &(* inserted));
+int strncmp(const char *, const char *, size_t);
+
+static String f9_interning____get_string(PoolTable table, const char * bytes, int length, unsigned hash){
+  unsigned * hashes = table -> hashes;
+  unsigned mask = table -> mask, start = hash & mask, capacity = table -> capacity;
+  for(unsigned distance = 0;  distance < capacity;  distance ++){
+    unsigned index =(start + distance) & mask, stored = hashes[index];
+    if(! stored) break;
+    if(stored == hash){
+      Var entry = * f9_interning____record_key(table, index);
+      String string = Var_string_payload(entry);
+      if(String_truth(string) && strncmp(string, bytes, (size_t) length) == 0 &&((const char *) string)[length] == '\0') return string;
+    }
+    if(((capacity + index -(stored & mask)) & mask) < distance) break;
+  }
+  return NULL;
 }
 
 void Pool_initialize(void);
+
+String x2c_pool_lookup_string(Pool inner, const char * bytes, int length, unsigned hash){
+  if(! _init_guard_) Pool_initialize();
+  int threads_active = pool_multithreaded;
+  for(Pool pool = inner;  pool;  pool = pool -> up){
+    if(threads_active) _lock(pool);
+    String found = f9_interning____get_string(pool -> table, bytes, length, hash);
+    if(threads_active) _unlock(pool);
+    if(String_truth(found)) return found;
+  }
+  return NULL;
+}
+
+static Var _setdefault(PoolTable table, Var object, int * inserted){
+  return * f9_interning___PoolTable_get_or_insert(table, & object, & object, &(* inserted));
+}
 
 Var Pool_lookup(Pool inner, Var key){
   if(! _init_guard_) Pool_initialize();
@@ -766,7 +798,7 @@ void Pool_free(Pool inner, void * alloc);
 Var Pool_intern(Pool inner, Var object, void * alloc){
   if(! _init_guard_) Pool_initialize();
   if(! inner || ! alloc){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/pool/interning.x",.function = "Pool_intern",.line = 93,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/pool/interning.x",.function = "Pool_intern",.line = 130,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.intern")), NULL))));
     __builtin_unreachable();
   }
@@ -812,7 +844,7 @@ static Var f9_interning____intern_locked(Pool inner, Var object, int * discard){
 Var Pool_intern_new(Pool inner, Var object, void * alloc){
   if(! _init_guard_) Pool_initialize();
   if(! inner || ! alloc){
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/pool/interning.x",.function = "Pool_intern_new",.line = 132,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/pool/interning.x",.function = "Pool_intern_new",.line = 169,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.intern_new")), NULL))));
     __builtin_unreachable();
   }
@@ -845,7 +877,7 @@ Var Pool_intern_new(Pool inner, Var object, void * alloc){
 void Pool_insert(Pool inner, Var object){
   if(! _init_guard_) Pool_initialize();
   if(! inner){
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/pool/interning.x",.function = "Pool_insert",.line = 154,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/pool/interning.x",.function = "Pool_insert",.line = 191,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Pool.insert")), NULL))));
     __builtin_unreachable();
   }

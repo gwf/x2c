@@ -6,6 +6,7 @@ int main(void) {
   int total = 0;
   foreach (Var value in values) total += value.integer();
   foreach (Var (key, value) in map) printf("%s=%ld\n", key, value.integer());
+  foreach ((String word, int count) in map) printf("%s=%d\n", word, count);
   foreach (String word in ["x", "y"]) printf("%s", word);
   foreach (Var value, values) if (value in %(2)) total *= 10;
   printf("\n%d\n", total);

@@ -56,6 +56,8 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/string-format.x`](string-format.md) | checked formatting of `Var` values into a `String`. |
 | [`lib/string-number.x`](string-number.md) | numeric parsing from canonical byte strings. |
 | [`lib/string/string.x`](string.md) | canonical byte strings and core text operations. |
+| [`lib/substring-map.x`](substring-map.md) | native counts of borrowed String views. |
+| [`lib/substring.x`](substring.md) | borrowed immutable views of String bytes. |
 | [`lib/symbol.x`](symbol.md) | immediate encoded names. |
 | [`lib/symbolset.x`](symbolset.md) | immutable ordered sets of compact `Symbol`s. |
 | [`lib/system-macros.x`](system-macros.md) | convenience macros for text, timing, and processes. |
@@ -84,6 +86,8 @@ prelude. Include one explicitly to use its declarations.
 - [`lib/regex.x`](regex.md) - Regular expressions over the bytes of a `String`; explicitly include `regex.x` to use them.
 - [`lib/rewrite.x`](rewrite.md) - Register macro-pattern translators with the $rewrite decorator; include `rewrite.x`.
 - [`lib/scripting.x`](scripting.md) - The `args.x`, `diff.x`, `digest.x`, `path.x`, `process.x`, and `regex.x` modules that every script unit includes; include `scripting.x` to use all six.
+- [`lib/substring-map.x`](substring-map.md) - Native Substr occurrence counts; explicitly include `substring-map.x` to use them.
+- [`lib/substring.x`](substring.md) - Borrowed immutable String views; explicitly include `substring.x` to use them.
 - [`lib/system-macros.x`](system-macros.md) - Compile-time convenience macros; explicitly include system-macros.x to use them.
 - [`lib/type.x`](type.md) - Structural operations on captured Type values, available at runtime and compile time; include `type.x` to use them.
 - [`lib/typed-array.x`](typed-array.md) - Packed typed storage with a raw native bracket; explicitly include `typed-array.x` to use it.

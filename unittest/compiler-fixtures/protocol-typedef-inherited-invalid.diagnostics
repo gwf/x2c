@@ -6,5 +6,5 @@ unittest/compiler-fixtures/protocol-typedef-inherited-invalid.x:17:1: protocol: 
 unittest/compiler-fixtures/protocol-typedef-inherited-invalid.x:21:3: macro: type ("InvalidChild") is not iterable
     foreach(int value, values) (void) value;
     ^^^^^^^
-  note: declare an Iter protocol adoption or iterate an Iter directly
+  note: declare a matching try_next cursor or an Iter protocol adoption
 

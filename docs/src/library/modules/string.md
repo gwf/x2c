@@ -9,6 +9,7 @@ Canonical byte strings and core text operations.
 
 | Function | Summary |
 | --- | --- |
+| [`x2c_string_from_bytes`](#x2c_string_from_bytes) | Canonicalizes a known NUL-free byte span in the active pool chain. |
 | [`String.add`](#String.add) | Returns `str` followed by `other`. |
 | [`String.capitalize`](#String.capitalize) | Upper-cases the first byte of `str` and lower-cases the remainder. |
 | [`String.contains`](#String.contains) | Reports whether the bytes of `sub` occur anywhere in `str`. |
@@ -49,6 +50,19 @@ Canonical byte strings and core text operations.
 | [`String.upper`](#String.upper) | Returns `str` with every lower-case byte raised. |
 | [`String.withindex`](#String.withindex) | Returns a canonical copy of `str` with the byte at `index` set. |
 | [`String.write_str`](#String.write_str) | Appends `str` to `out` unchanged. |
+
+### Functions
+
+#### x2c_string_from_bytes
+
+`String x2c_string_from_bytes(const char *bytes, int length)`
+
+Canonicalizes a known NUL-free byte span in the active pool chain.
+Copies bytes only when needed; the caller retains its input storage.
+Null input or a nonpositive length returns the empty String.
+Raises alloc-fail if canonical storage cannot be allocated.
+
+Source: `lib/string/storage.x:148`
 
 ### `String`
 
@@ -154,7 +168,7 @@ A null `fn` raises `<bad-arg>` on the first invocation.
 **Raises:** whatever `Func.apply`, `fn`, or the returned `Var`'s truth
 operation raises, or `<alloc-fail>` when the result cannot be allocated.
 
-Source: `lib/string/mapping.x:81`
+Source: `lib/string/mapping.x:84`
 
 <a id="String.find"></a>
 #### String.find
@@ -289,7 +303,7 @@ Returns a canonical `String` containing only bytes found in `chars`.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/string/mapping.x:119`
+Source: `lib/string/mapping.x:122`
 
 <a id="String.len"></a>
 #### String.len
@@ -304,7 +318,7 @@ count.
 
 The empty `String` is the null pointer, whose length is 0.
 
-Source: `lib/string/storage.x:43`
+Source: `lib/string/storage.x:36`
 
 <a id="String.lower"></a>
 #### String.lower
@@ -353,7 +367,7 @@ A null `fn` raises `<bad-arg>` on the first invocation.
 `<bad-result>` when the converted result is zero, or `<alloc-fail>` when
 the result cannot be allocated.
 
-Source: `lib/string/mapping.x:99`
+Source: `lib/string/mapping.x:102`
 
 <a id="String.new"></a>
 #### String.new
@@ -373,7 +387,7 @@ representation.
 empty, or oversized input returns NULL, which is indistinguishable from the
 empty `String`, without raising.
 
-Source: `lib/string/storage.x:100`
+Source: `lib/string/storage.x:93`
 
 <a id="String.pad_center"></a>
 #### String.pad_center
@@ -441,7 +455,7 @@ Returns a canonical `String` after removing bytes found in `chars`.
 
 **Raises:** `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string/mapping.x:130`
+Source: `lib/string/mapping.x:133`
 
 <a id="String.remove_prefix"></a>
 #### String.remove_prefix
@@ -574,7 +588,7 @@ Bytes outside `chars` are preserved even when repeated. `Null` or empty
 
 **Raises:** `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string/mapping.x:140`
+Source: `lib/string/mapping.x:147`
 
 <a id="String.startswith"></a>
 #### String.startswith
@@ -705,7 +719,7 @@ locale-aware nor Unicode collation, and only the sign of the result is
 meaningful. The empty `String`, being the null pointer, sorts before
 every non-empty `String`, and two empty `String`s compare equal.
 
-Source: `lib/string/storage.x:78`
+Source: `lib/string/storage.x:71`
 
 <a id="String.equal"></a>
 #### String.equal
@@ -719,7 +733,7 @@ Interning already makes `x == y` a content test for two canonical
 are equal, since the null pointer is the empty `String`, and a null
 equals no non-empty `String`.
 
-Source: `lib/string/storage.x:66`
+Source: `lib/string/storage.x:59`
 
 <a id="String.free"></a>
 #### String.free
@@ -735,7 +749,7 @@ unrelated pool is not a valid argument.
 
 A null argument is ignored.
 
-Source: `lib/string/storage.x:302`
+Source: `lib/string/storage.x:291`
 
 <a id="String.hash"></a>
 #### String.hash
@@ -746,7 +760,7 @@ Returns the content hash of `str`, or zero for the empty `String`.
 Canonical `String`s use the cached hash; transient buffers are hashed from
 their current NUL-terminated contents.
 
-Source: `lib/string/storage.x:53`
+Source: `lib/string/storage.x:46`
 
 <a id="String.intern"></a>
 #### String.intern
@@ -764,7 +778,7 @@ caller to free. Use `String.intern_free` for an owned buffer.
 **Raises:** `<alloc-fail>` when canonical storage cannot be allocated. `Null`
 or empty input returns NULL, the empty `String`, without raising.
 
-Source: `lib/string/storage.x:149`
+Source: `lib/string/storage.x:142`
 
 <a id="String.intern_free"></a>
 #### String.intern_free
@@ -794,7 +808,7 @@ printf("%s %d\n", canonical, canonical == "abcde");
 null argument returns NULL, and a buffer empty at its first byte is
 released and reported as NULL, the empty `String`, without raising.
 
-Source: `lib/string/storage.x:246`
+Source: `lib/string/storage.x:235`
 
 <a id="String.malloc"></a>
 #### String.malloc
@@ -820,7 +834,7 @@ printf("%d writable bytes\n", buf.len());
 **Raises:** `<alloc-fail>` when storage cannot be allocated. A nonpositive or
 oversized `len` returns NULL without raising.
 
-Source: `lib/string/storage.x:213`
+Source: `lib/string/storage.x:202`
 
 <a id="String.new_fill"></a>
 #### String.new_fill
@@ -850,7 +864,7 @@ argument, nonpositive length, or empty input returns NULL.
 
 **Raises:** `<alloc-fail>`, `<size-limit>`, or `<invariant>` while interning.
 
-Source: `lib/string/storage.x:132`
+Source: `lib/string/storage.x:125`
 
 <a id="String.new_len"></a>
 #### String.new_len
@@ -868,7 +882,7 @@ larger buffer.
 `str`, nonpositive `len`, or leading NUL returns NULL, the empty `String`,
 without raising.
 
-Source: `lib/string/storage.x:117`
+Source: `lib/string/storage.x:110`
 
 <a id="String.printf"></a>
 #### String.printf
@@ -901,7 +915,7 @@ unchanged.
 **Raises:** `<alloc-fail>`, `<size-limit>`, or `<invariant>` while recording
 the promotion.
 
-Source: `lib/string/storage.x:325`
+Source: `lib/string/storage.x:314`
 
 <a id="String.str"></a>
 #### String.str
@@ -948,7 +962,7 @@ transient buffer or a `String` a nested pool can still reclaim. Unlike
 `String.try_own` it neither promotes nor allocates, so a caller may ask
 about a `String` it does not own.
 
-Source: `lib/string/storage.x:350`
+Source: `lib/string/storage.x:339`
 
 <a id="String.try_own"></a>
 #### String.try_own
@@ -964,7 +978,7 @@ remain.
 **Raises:** `<alloc-fail>`, `<size-limit>`, or `<invariant>` while recording a
 promotion.
 
-Source: `lib/string/storage.x:339`
+Source: `lib/string/storage.x:328`
 
 ## Public types
 

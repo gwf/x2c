@@ -36,7 +36,7 @@ X2c declarations, parsed from source or constructed.
 | [`Compiler.package_alias_spelling`](#Compiler.package_alias_spelling) | Returns the folded package-member spelling at the current token, or NULL. |
 | [`Compiler.parse_basic_identifier`](#Compiler.parse_basic_identifier) | Consumes one `ident` token and returns its spelling as a one-item `List`. |
 | [`Compiler.parse_complex_identifier`](#Compiler.parse_complex_identifier) | Parses the current identifier or dotted owner/member as a one-item name. |
-| [`Compiler.parse_declaration_argument`](#Compiler.parse_declaration_argument) | Parses one non-function, non-typedef `Decl` macro argument. |
+| [`Compiler.parse_declaration_argument`](#Compiler.parse_declaration_argument) | Parses a non-function, non-typedef `Decl` macro argument. |
 | [`Compiler.parse_declaration_row`](#Compiler.parse_declaration_row) | Parses one x2c declaration row and leaves its terminator current. |
 | [`Compiler.parse_declarator_argument`](#Compiler.parse_declarator_argument) | Parses one declarator row for a macro argument without installing it. |
 | [`Compiler.parse_enumerator`](#Compiler.parse_enumerator) | Parses one enumerator for enum type `context` and returns its AST. |
@@ -168,7 +168,7 @@ Source: `src/parse/declarators.x:292`
 Rejects transparent references in object and function-result types.
 References inside a function's parameter list remain supported.
 
-Source: `src/parse/declarations.x:291`
+Source: `src/parse/declarations.x:297`
 
 <a id="Compiler.close_placements"></a>
 #### Compiler.close_placements
@@ -345,9 +345,9 @@ Source: `src/parse/declarators.x:544`
 
 `List Compiler.parse_declaration_argument(Compiler c)`
 
-Parses one non-function, non-typedef `Decl` macro argument.
-Returns a single declaration without consuming the invocation delimiter;
-flat destructuring may omit an initializer in this position.
+Parses a non-function, non-typedef `Decl` macro argument.
+Parentheses group declarations with independent types. The invocation
+delimiter remains current; flat destructuring may omit its initializer.
 
 Source: `src/parse/declarations.x:110`
 
@@ -498,7 +498,7 @@ Source: `src/parse/declarations.x:35`
 Parses a C assertion declaration; native C owns constant-expression
 checks.
 
-Source: `src/parse/declarations.x:130`
+Source: `src/parse/declarations.x:136`
 
 <a id="Compiler.parse_submission"></a>
 #### Compiler.parse_submission
@@ -636,7 +636,7 @@ Tests whether the current token can begin a declaration without consuming.
 Typedefs, package aliases, and macro-hole kinds are resolved through the
 current compiler state.
 
-Source: `src/parse/declarations.x:157`
+Source: `src/parse/declarations.x:163`
 
 <a id="Compiler.test_static_assert"></a>
 #### Compiler.test_static_assert
@@ -645,7 +645,7 @@ Source: `src/parse/declarations.x:157`
 
 Reports whether the current identifier starts a C static assertion.
 
-Source: `src/parse/declarations.x:125`
+Source: `src/parse/declarations.x:131`
 
 ## Design notes
 

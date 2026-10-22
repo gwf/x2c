@@ -101,6 +101,8 @@
 - [lib/string-format.x](https://x2c-lang.dev/docs/library/modules/string-format.html)
 - [lib/string-number.x](https://x2c-lang.dev/docs/library/modules/string-number.html)
 - [lib/string/string.x](https://x2c-lang.dev/docs/library/modules/string.html)
+- [lib/substring-map.x](https://x2c-lang.dev/docs/library/modules/substring-map.html)
+- [lib/substring.x](https://x2c-lang.dev/docs/library/modules/substring.html)
 - [lib/symbol.x](https://x2c-lang.dev/docs/library/modules/symbol.html)
 - [lib/symbolset.x](https://x2c-lang.dev/docs/library/modules/symbolset.html)
 - [lib/system-macros.x](https://x2c-lang.dev/docs/library/modules/system-macros.html)

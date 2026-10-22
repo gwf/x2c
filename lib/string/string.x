@@ -53,6 +53,10 @@ protocol const char *(String);
 #include "symbol.x"
 #include "pool/pool.x"
 
+/* Internal constructor for borrowed spans already known to contain no NUL.
+   Callers establish the length; canonicalization uses the active pool. */
+String x2c_string_from_bytes(const char *bytes, int length);
+
 module {
   "storage.x",
   "search.x",

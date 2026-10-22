@@ -88,6 +88,8 @@
     - [lib/string-format.x](library/modules/string-format.md)
     - [lib/string-number.x](library/modules/string-number.md)
     - [lib/string/string.x](library/modules/string.md)
+    - [lib/substring-map.x](library/modules/substring-map.md)
+    - [lib/substring.x](library/modules/substring.md)
     - [lib/symbol.x](library/modules/symbol.md)
     - [lib/symbolset.x](library/modules/symbolset.md)
     - [lib/system-macros.x](library/modules/system-macros.md)

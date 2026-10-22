@@ -101,7 +101,7 @@ meta native String String.getslice(String s, int start, int stop, int step) {
   int n = s.len(), len = x2c_normalize_slice(&start, &stop, step, n);
   if (len <= 0) return NULL;
   if (step == 1 && start == 0 && len == n && _is_active_canonical(s)) return s;
-  if (step == 1) return _from_bytes(s + start, len);
+  if (step == 1) return x2c_string_from_bytes(s + start, len);
   String string = String.malloc(len + 1);
   char *out = string, const char *src = s;
   for (int i = 0, idx = start; i < len; i++, idx += step) out[i] = src[idx];

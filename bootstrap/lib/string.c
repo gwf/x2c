@@ -27,10 +27,6 @@ typedef struct f7_storage___StringHeader{
 
 _Static_assert(sizeof(struct f7_storage___StringHeader) == 8, "the String header is 8 bytes, so payloads stay aligned");
 #define STRING_STACK_BYTES 256
-typedef union f7_storage___StringQuery{
-  unsigned long align;  char bytes[sizeof(struct f7_storage___StringHeader) + STRING_STACK_BYTES + 1];
-}
-f7_storage___StringQuery;
 #ifndef X2CCPP
 _Static_assert(_Generic(& strlen, size_t(*)(const char *) : 1, default: 0), "native alias String_c_len does not match strlen");
 #endif
@@ -49,9 +45,7 @@ static int _init_guard_ = 0;
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 static inline f7_storage___StringHeader f7_storage____header(String str);
 static unsigned f7_storage____hash_n(const char * str, int length);
-static String _from_bytes(const char * bytes, int length);
 static String f7_storage____from_bytes_in(Pool pool, const char * bytes, int length);
-static Var f7_storage____lookup_bytes(Pool pool, const char * bytes, int length, unsigned hash);
 static inline String f7_storage____store(f7_storage___StringHeader header, const char * bytes, int length, unsigned hash);
 static String _finish(String string, int length);
 static String f7_storage____intern_owned(String string);
@@ -124,12 +118,13 @@ int String_compare(String x, String y){
   if((void *) x ==(void *) y) return 0;  if(! String_truth(x)) return String_truth(y) ? - 1 : 0;  if(! String_truth(y)) return 1;  int result = strcmp(x, y);  return(result > 0) -(result < 0);
 }
 
+String x2c_string_from_bytes(const char * bytes, int length);
 String String_new(const char * str){
-  if(! str || ! * str) return NULL;  size_t length = strlen(str);  if(length > INT_MAX - 1) return NULL;  return _from_bytes(str, (int) length);
+  if(! str || ! * str) return NULL;  size_t length = strlen(str);  if(length > INT_MAX - 1) return NULL;  return x2c_string_from_bytes(str, (int) length);
 }
 
 String String_new_len(const char * str, int len){
-  if(! str || len <= 0) return NULL;  size_t length = strnlen(str, (size_t) len);  if(length == 0) return NULL;  return _from_bytes(str, (int) length);
+  if(! str || len <= 0) return NULL;  size_t length = strnlen(str, (size_t) len);  if(length == 0) return NULL;  return x2c_string_from_bytes(str, (int) length);
 }
 
 String String_new_in(Pool pool, const char * bytes, int length){
@@ -140,20 +135,16 @@ String String_intern(String string){
   return String_new(string);
 }
 
-static String _from_bytes(const char * bytes, int length){
+String x2c_string_from_bytes(const char * bytes, int length){
   return f7_storage____from_bytes_in(Pool_current(), bytes, length);
 }
 
 String Var_as_string(Var);
 static String f7_storage____from_bytes_in(Pool pool, const char * bytes, int length){
   if(! pool || ! bytes || length <= 0) return NULL;  unsigned hash = f7_storage____hash_n(bytes, length);  if(length <= STRING_STACK_BYTES){
-    Var existing = f7_storage____lookup_bytes(pool, bytes, length, hash);  if(! Var_is_void(existing)) return Var_as_string(existing);
+    String existing = x2c_pool_lookup_string(pool, bytes, length, hash);  if(String_truth(existing)) return existing;
   }
   size_t total = sizeof(struct f7_storage___StringHeader) +(size_t) length + 1;  f7_storage___StringHeader header = Pool_malloc(pool, total);  String string = f7_storage____store(header, bytes, length, hash);  if(length > STRING_STACK_BYTES) return Var_as_string(Pool_intern(pool, String_var(string), header));  Pool_insert(pool, String_var(string));  return string;
-}
-
-static Var f7_storage____lookup_bytes(Pool pool, const char * bytes, int length, unsigned hash){
-  f7_storage___StringQuery query;  return Pool_lookup(pool, String_var(f7_storage____store((f7_storage___StringHeader) query.bytes, bytes, length, hash)));
 }
 
 static inline String f7_storage____store(f7_storage___StringHeader header, const char * bytes, int length, unsigned hash){
@@ -182,10 +173,10 @@ static String f7_storage____intern_owned(String string){
   f7_storage___StringHeader header = f7_storage____header(string);  if(! header -> hash){
     int length = strlen(string);  header -> length = length + 1;  header -> hash = f7_storage____hash_n(string, length);
   }
-  Pool pool = Pool_current();  Var existing = Pool_lookup(pool, String_var(string));  if(Var_is_void(existing)){
+  Pool pool = Pool_current();  String found = x2c_pool_lookup_string(pool, string, header -> length - 1, header -> hash);  if(! String_truth(found)){
     Pool_insert(pool, String_var(string));  return string;
   }
-  String found = Var_as_string(existing);  if(found != string) _free_unchecked(string);  return found;
+  if(found != string) _free_unchecked(string);  return found;
 }
 
 String Var_string(Var);
@@ -295,7 +286,7 @@ int String_getindex(String str, int index){
 }
 
 String String_getslice(String s, int start, int stop, int step){
-  if(! String_truth(s) || step == 0) return NULL;  int n = String_len(s), len = x2c_normalize_slice(& start, & stop, step, n);  if(len <= 0) return NULL;  if(step == 1 && start == 0 && len == n && _is_active_canonical(s)) return s;  if(step == 1) return _from_bytes(s + start, len);  String string = String_malloc(len + 1);  char * out = string;  const char * src = s;  for(int i = 0, idx = start;  i < len;  i ++, idx += step) out[i] = src[idx];  return _finish(string, len);
+  if(! String_truth(s) || step == 0) return NULL;  int n = String_len(s), len = x2c_normalize_slice(& start, & stop, step, n);  if(len <= 0) return NULL;  if(step == 1 && start == 0 && len == n && _is_active_canonical(s)) return s;  if(step == 1) return x2c_string_from_bytes(s + start, len);  String string = String_malloc(len + 1);  char * out = string;  const char * src = s;  for(int i = 0, idx = start;  i < len;  i ++, idx += step) out[i] = src[idx];  return _finish(string, len);
 }
 
 String String_join(String sep, List strings);
@@ -319,7 +310,7 @@ String String_add(String str, String other){
     static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/string/building.x",.function = "String_add",.line = 23,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.add")), NULL))));  __builtin_unreachable();
   }
   if(length <= STRING_STACK_BYTES){
-    char bytes[STRING_STACK_BYTES];  memcpy(bytes, str, left_len);  memcpy(bytes + left_len, other, right_len);  return _from_bytes(bytes, (int) length);
+    char bytes[STRING_STACK_BYTES];  memcpy(bytes, str, left_len);  memcpy(bytes + left_len, other, right_len);  return x2c_string_from_bytes(bytes, (int) length);
   }
   String string = String_malloc((int) length + 1);  memcpy(string, str, left_len);  memcpy(string + left_len, other, right_len);  return _finish(string, (int) length);
 }
@@ -346,7 +337,7 @@ String String_new_fill(char fill, int count){
 
 String String_join(String sep, List strings){
   if(! List_truth(strings)) return NULL;  int n = List_len(strings);  int sep_len = String_truth(sep) ? String_len(sep) : 0;  int total = f8_building____join_length(strings, n, sep_len);  if(total < 0) return NULL;  if(total <= STRING_STACK_BYTES){
-    char bytes[STRING_STACK_BYTES];  f8_building____join_into(bytes, strings, sep, sep_len);  return _from_bytes(bytes, total);
+    char bytes[STRING_STACK_BYTES];  f8_building____join_into(bytes, strings, sep, sep_len);  return x2c_string_from_bytes(bytes, total);
   }
   String string = String_malloc(total + 1);  f8_building____join_into(string, strings, sep, sep_len);  return _finish(string, total);
 }
@@ -407,7 +398,7 @@ String String_printf(String fmt, ...){
     va_end(args);  return NULL;
   }
   if(n <= STRING_STACK_BYTES){
-    char bytes[STRING_STACK_BYTES + 1];  int written = vsnprintf(bytes, n + 1, fmt, args);  va_end(args);  if(written != n) return NULL;  return _from_bytes(bytes, n);
+    char bytes[STRING_STACK_BYTES + 1];  int written = vsnprintf(bytes, n + 1, fmt, args);  va_end(args);  if(written != n) return NULL;  return x2c_string_from_bytes(bytes, n);
   }
   String string = String_malloc(n + 1);  int written = vsnprintf(string, n + 1, fmt, args);  va_end(args);  if(written != n){
     _free_unchecked(string);  return NULL;
@@ -490,7 +481,10 @@ String String_filter(String str, Func fn){
       .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
     }
     ;  x2c_cleanup_push(& _x2c_gensym_defer_record_0); {
-      char * _x2c_gensym_macro_dst_0 = _x2c_gensym_macro_string_3;  for(int i = 0;  i < _x2c_gensym_macro_length_3;  i ++) if(Var_truth(Func_apply_value(fn, char_var((char) String_getindex(str, i))))) * _x2c_gensym_macro_dst_0 ++ = String_getindex(str, i);  String _x2c_gensym_macro_result_0 = _finish(_x2c_gensym_macro_string_3, (int)(_x2c_gensym_macro_dst_0 - _x2c_gensym_macro_string_3));  _x2c_gensym_macro_done_0 = 1; {
+      char * _x2c_gensym_macro_dst_0 = _x2c_gensym_macro_string_3;  const char * _x2c_gensym_macro_src_3 = str;  for(int i = 0;  i < _x2c_gensym_macro_length_3;  i ++){
+        int ch =(unsigned char) _x2c_gensym_macro_src_3[i];  if(Var_truth(Func_apply_value(fn, char_var((char) ch)))) * _x2c_gensym_macro_dst_0 ++ = _x2c_gensym_macro_src_3[i];
+      }
+      String _x2c_gensym_macro_result_0 = _finish(_x2c_gensym_macro_string_3, (int)(_x2c_gensym_macro_dst_0 - _x2c_gensym_macro_string_3));  _x2c_gensym_macro_done_0 = 1; {
         String _x2c_gensym_return_value_0 = _x2c_gensym_macro_result_0; {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_0);  return _x2c_gensym_return_value_0;
         }
@@ -515,7 +509,7 @@ String String_map(String str, Func fn){
       char * out = string;  const char * src = str;  for(int i = 0;  i < n;  i ++){
         char ch = Var_char(Var_convert(Func_apply_value(fn, char_var(src[i])), 26993));  if(! ch){
           Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL))); {
-            static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/string/mapping.x",.function = "String_map",.line = 107,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_6, 143279181245224, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(19800432), int_var(i));  __builtin_unreachable();
+            static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/string/mapping.x",.function = "String_map",.line = 110,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_6, 143279181245224, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(19800432), int_var(i));  __builtin_unreachable();
           }
 
         }
@@ -543,7 +537,10 @@ String String_keep(String str, String chars){
       .fn = _x2c_gensym_defer_cleanup_2, .env = & _x2c_gensym_macro_environment_2
     }
     ;  x2c_cleanup_push(& _x2c_gensym_defer_record_2); {
-      char * _x2c_gensym_macro_dst_1 = _x2c_gensym_macro_string_4;  for(int i = 0;  i < _x2c_gensym_macro_length_4;  i ++) if(strchr(chars, String_getindex(str, i))) * _x2c_gensym_macro_dst_1 ++ = String_getindex(str, i);  String _x2c_gensym_macro_result_1 = _finish(_x2c_gensym_macro_string_4, (int)(_x2c_gensym_macro_dst_1 - _x2c_gensym_macro_string_4));  _x2c_gensym_macro_done_1 = 1; {
+      char * _x2c_gensym_macro_dst_1 = _x2c_gensym_macro_string_4;  const char * _x2c_gensym_macro_src_4 = str;  for(int i = 0;  i < _x2c_gensym_macro_length_4;  i ++){
+        int ch =(unsigned char) _x2c_gensym_macro_src_4[i];  if(strchr(chars, ch)) * _x2c_gensym_macro_dst_1 ++ = _x2c_gensym_macro_src_4[i];
+      }
+      String _x2c_gensym_macro_result_1 = _finish(_x2c_gensym_macro_string_4, (int)(_x2c_gensym_macro_dst_1 - _x2c_gensym_macro_string_4));  _x2c_gensym_macro_done_1 = 1; {
         String _x2c_gensym_return_value_2 = _x2c_gensym_macro_result_1; {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_2);  return _x2c_gensym_return_value_2;
         }
@@ -557,7 +554,10 @@ String String_keep(String str, String chars){
 }
 
 String String_reject(String str, String chars){
-  if(! String_truth(str) || ! String_truth(chars) || ! * str) return str;  int _x2c_gensym_macro_length_5 = String_len(str);  String _x2c_gensym_macro_string_5 = String_malloc(_x2c_gensym_macro_length_5 + 1);  int _x2c_gensym_macro_done_2 = 0; {
+  if(! String_truth(str) || ! String_truth(chars) || ! * str) return str;  unsigned char excluded[256] ={
+    1
+  }
+  ;  const unsigned char * bytes =(const unsigned char *) chars;  while(* bytes) excluded[* bytes ++] = 1;  int _x2c_gensym_macro_length_5 = String_len(str);  String _x2c_gensym_macro_string_5 = String_malloc(_x2c_gensym_macro_length_5 + 1);  int _x2c_gensym_macro_done_2 = 0; {
     _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
       0
     }
@@ -565,7 +565,10 @@ String String_reject(String str, String chars){
       .fn = _x2c_gensym_defer_cleanup_3, .env = & _x2c_gensym_macro_environment_3
     }
     ;  x2c_cleanup_push(& _x2c_gensym_defer_record_3); {
-      char * _x2c_gensym_macro_dst_2 = _x2c_gensym_macro_string_5;  for(int i = 0;  i < _x2c_gensym_macro_length_5;  i ++) if(! strchr(chars, String_getindex(str, i))) * _x2c_gensym_macro_dst_2 ++ = String_getindex(str, i);  String _x2c_gensym_macro_result_2 = _finish(_x2c_gensym_macro_string_5, (int)(_x2c_gensym_macro_dst_2 - _x2c_gensym_macro_string_5));  _x2c_gensym_macro_done_2 = 1; {
+      char * _x2c_gensym_macro_dst_2 = _x2c_gensym_macro_string_5;  const char * _x2c_gensym_macro_src_5 = str;  for(int i = 0;  i < _x2c_gensym_macro_length_5;  i ++){
+        int ch =(unsigned char) _x2c_gensym_macro_src_5[i];  if(! excluded[ch]) * _x2c_gensym_macro_dst_2 ++ = _x2c_gensym_macro_src_5[i];
+      }
+      String _x2c_gensym_macro_result_2 = _finish(_x2c_gensym_macro_string_5, (int)(_x2c_gensym_macro_dst_2 - _x2c_gensym_macro_string_5));  _x2c_gensym_macro_done_2 = 1; {
         String _x2c_gensym_return_value_3 = _x2c_gensym_macro_result_2; {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_3);  return _x2c_gensym_return_value_3;
         }
@@ -587,7 +590,10 @@ String String_squeeze(String str, String chars){
       .fn = _x2c_gensym_defer_cleanup_4, .env = & _x2c_gensym_macro_environment_4
     }
     ;  x2c_cleanup_push(& _x2c_gensym_defer_record_4); {
-      char * _x2c_gensym_macro_dst_3 = _x2c_gensym_macro_string_6;  for(int i = 0;  i < _x2c_gensym_macro_length_6;  i ++) if(!(i && String_getindex(str, i) == String_getindex(str, i - 1) && strchr(chars, String_getindex(str, i)))) * _x2c_gensym_macro_dst_3 ++ = String_getindex(str, i);  String _x2c_gensym_macro_result_3 = _finish(_x2c_gensym_macro_string_6, (int)(_x2c_gensym_macro_dst_3 - _x2c_gensym_macro_string_6));  _x2c_gensym_macro_done_3 = 1; {
+      char * _x2c_gensym_macro_dst_3 = _x2c_gensym_macro_string_6;  const char * _x2c_gensym_macro_src_6 = str;  for(int i = 0;  i < _x2c_gensym_macro_length_6;  i ++){
+        int ch =(unsigned char) _x2c_gensym_macro_src_6[i];  if(!(i && ch ==(unsigned char)((const char *) str)[i - 1] && strchr(chars, ch))) * _x2c_gensym_macro_dst_3 ++ = _x2c_gensym_macro_src_6[i];
+      }
+      String _x2c_gensym_macro_result_3 = _finish(_x2c_gensym_macro_string_6, (int)(_x2c_gensym_macro_dst_3 - _x2c_gensym_macro_string_6));  _x2c_gensym_macro_done_3 = 1; {
         String _x2c_gensym_return_value_4 = _x2c_gensym_macro_result_3; {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_4);  return _x2c_gensym_return_value_4;
         }

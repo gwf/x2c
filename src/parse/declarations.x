@@ -103,11 +103,17 @@ module List _declaration_types(Compiler c, List storage) {
   return %( ${c.sym.local_type(%( @storage @quals @spec ))} $binding_type );
 }
 
-/** Parses one non-function, non-typedef `Decl` macro argument.
-    Returns a single declaration without consuming the invocation delimiter;
-    flat destructuring may omit an initializer in this position.
+/** Parses a non-function, non-typedef `Decl` macro argument.
+    Parentheses group declarations with independent types. The invocation
+    delimiter remains current; flat destructuring may omit its initializer.
 */
 List Compiler.parse_declaration_argument(Compiler c) {
+  if (c.test(<(>)) {
+    Array declarations = [];
+    do declarations.push(c.parse_declaration_argument()); while (c.test(<,>));
+    c.expect(<)>);
+    return %(seq @{declarations.list_free()});
+  }
   List storage = _storage_class(c);
   if (storage === %(typedef))
     $fail.parse_decl_typedef(c, c.token);

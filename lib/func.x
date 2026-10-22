@@ -222,6 +222,9 @@ Var x2c_func_value_argument(
   if (value is void) $error.arg.void(sig, i);
   X2CVarNumericInfo info;
   if (Var.numeric_info(want, info)) {
+    if (!info.floating && info.rank <= 4 &&
+        value.encoding_valid() && value.is_integer())
+      return value.convert(want);
     Var converted = void;
     try {
       converted = value.convert(want);

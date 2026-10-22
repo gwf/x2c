@@ -57,14 +57,17 @@ meta native String String.capitalize(String str) {
 
 /* Builds a filtered copy, leaving each caller to give only its byte test. */
 static macro Stmt $string.select(
-  Expr $subject, Name $index, Expr $selected) {
+  Expr $subject, Name $index, Name $byte, Expr $selected) {
   int length = $subject.len();
   String string = String.malloc(length + 1);
   int done = 0;
   defer if (!done) string.free();
   char *dst = string;
-  for (int $index = 0; $index < length; $index++)
-    if ($selected) *dst++ = $subject[$index];
+  const char *src = $subject;
+  for (int $index = 0; $index < length; $index++) {
+    int $byte = (unsigned char) src[$index];
+    if ($selected) *dst++ = src[$index];
+  }
   String result = _finish(string, (int) (dst - string));
   done = 1;
   return result;
@@ -80,7 +83,7 @@ static macro Stmt $string.select(
 */
 String String.filter(String str, Func fn) {
   if (!str || !*str) return str;
-  $string.select(str, i, fn.apply_value((char) str[i]));
+  $string.select(str, i, ch, fn.apply_value((char) ch));
 }
 
 /** Returns `str` with `fn` applied to every byte.
@@ -120,7 +123,7 @@ meta native String String.keep(String str, String chars) {
   if (!str) return str;
   if (!chars) return NULL;
   if (!*str) return str;
-  $string.select(str, i, strchr(chars, str[i]));
+  $string.select(str, i, ch, strchr(chars, ch));
 }
 
 /** Returns a canonical `String` after removing bytes found in `chars`.
@@ -129,7 +132,11 @@ meta native String String.keep(String str, String chars) {
 */
 meta native String String.reject(String str, String chars) {
   if (!str || !chars || !*str) return str;
-  $string.select(str, i, !strchr(chars, str[i]));
+  /* strchr also matches the set's terminating NUL. */
+  unsigned char excluded[256] = {1};
+  const unsigned char *bytes = (const unsigned char *) chars;
+  while (*bytes) excluded[*bytes++] = 1;
+  $string.select(str, i, ch, !excluded[ch]);
 }
 
 /** Collapses adjacent runs of each byte listed in `chars`.
@@ -140,5 +147,6 @@ meta native String String.reject(String str, String chars) {
 meta native String String.squeeze(String str, String chars) {
   if (!str || !chars || !*str) return str;
   $string.select(
-    str, i, !(i && str[i] == str[i - 1] && strchr(chars, str[i])));
+    str, i, ch, !(i && ch == (unsigned char) ((const char *) str)[i - 1] &&
+                 strchr(chars, ch)));
 }

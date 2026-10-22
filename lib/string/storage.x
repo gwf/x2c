@@ -16,15 +16,8 @@ _Static_assert(
   sizeof(struct StringHeader) == 8,
   "the String header is 8 bytes, so payloads stay aligned");
 
-/* Results up to this many bytes are built and probed on the stack. */
+/* Small construction buffers and lookup-before-allocation share this limit. */
 #define STRING_STACK_BYTES 256
-
-/* A short String and its header on the stack, so probing the pool chain
-   for it allocates nothing. */
-static typedef union StringQuery {
-  unsigned long align;
-  char bytes[sizeof(struct StringHeader) + STRING_STACK_BYTES + 1];
-} StringQuery;
 
 static inline StringHeader _header(String str) =>
   (StringHeader) ((char *) str - sizeof(struct StringHeader));
@@ -101,7 +94,7 @@ String String.new(const char *str) {
   if (!str || !*str) return NULL;
   size_t length = strlen(str);
   if (length > INT_MAX - 1) return NULL;
-  return _from_bytes(str, (int) length);
+  return x2c_string_from_bytes(str, (int) length);
 }
 
 /** Returns the canonical `String` holding at most `len` bytes of `str`.
@@ -118,7 +111,7 @@ String String.new_len(const char *str, int len) {
   if (!str || len <= 0) return NULL;
   size_t length = strnlen(str, (size_t) len);
   if (length == 0) return NULL;
-  return _from_bytes(str, (int) length);
+  return x2c_string_from_bytes(str, (int) length);
 }
 
 /** Returns the canonical `String` for at most `length` borrowed bytes in
@@ -148,18 +141,22 @@ String String.new_in(Pool pool, const char *bytes, int length) {
 */
 meta native Self String.intern(Self string) => string.new();
 
-module String _from_bytes(const char *bytes, int length) =>
+/** Canonicalizes a known NUL-free byte span in the active pool chain.
+    Copies bytes only when needed; the caller retains its input storage.
+    Null input or a nonpositive length returns the empty String.
+    Raises alloc-fail if canonical storage cannot be allocated. */
+String x2c_string_from_bytes(const char *bytes, int length) =>
   _from_bytes_in(Pool.current(), bytes, length);
 
-/* A short `String` probes the whole ancestor chain from a stack copy before
+/* A short `String` probes the whole ancestor chain from borrowed bytes before
    anything is allocated, and a miss is installed in `pool`. A long one is
    stored first, and Pool.intern releases that candidate on a hit. */
 static String _from_bytes_in(Pool pool, const char *bytes, int length) {
   if (!pool || !bytes || length <= 0) return NULL;
   unsigned hash = _hash_n(bytes, length);
   if (length <= STRING_STACK_BYTES) {
-    Var existing = _lookup_bytes(pool, bytes, length, hash);
-    if (existing is not void) return existing;
+    String existing = x2c_pool_lookup_string(pool, bytes, length, hash);
+    if (existing) return existing;
   }
   size_t total = sizeof(struct StringHeader) + (size_t) length + 1;
   StringHeader header = pool.malloc(total);
@@ -167,14 +164,6 @@ static String _from_bytes_in(Pool pool, const char *bytes, int length) {
   if (length > STRING_STACK_BYTES) return pool.intern(string, header);
   pool.insert(string);
   return string;
-}
-
-/* Probes the pool chain from a stack copy of at most STRING_STACK_BYTES
-   bytes. */
-static Var _lookup_bytes(
-  Pool pool, const char *bytes, int length, unsigned hash) {
-  StringQuery query;
-  return pool.lookup(_store((StringHeader) query.bytes, bytes, length, hash));
 }
 
 /* Fills `header` and the `length` bytes after it, with their NUL, and
@@ -280,12 +269,12 @@ static String _intern_owned(String string) {
     header.hash = _hash_n(string, length);
   }
   Pool pool = Pool.current();
-  Var existing = pool.lookup(string);
-  if (existing is void) {
+  String found = x2c_pool_lookup_string(
+    pool, string, header.length - 1, header.hash);
+  if (!found) {
     pool.insert(string);
     return string;
   }
-  String found = existing;
   if (found !== string) _free_unchecked(string);
   return found;
 }

@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 61
-- Runtime modules: 78
+- Runtime modules: 80
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -1395,6 +1395,26 @@ Public functions:
 
 `String.try_long`, `String.try_double`
 
+### [lib/substring-map.x](../lib/substring-map.x)
+
+native counts of borrowed String views.
+
+Public functions:
+
+`MapSubInt.scope`, `MapSubInt.move_to`, `MapSubInt.new`, `MapSubInt.increment`,
+`MapSubInt.try_next`, `MapSubInt.strings`, `MapSubInt.var`, `Var.mapsubint`,
+`MapSubInt.iter`, `MapSubInt.keys`, `MapSubInt.enumerate`, `MapSubInt.cleanup`
+
+### [lib/substring.x](../lib/substring.x)
+
+borrowed immutable views of String bytes.
+
+Public functions:
+
+`Substring.new`, `String.substring`, `Substring.len`, `Substring.hash`,
+`Substring.equal`, `Substring.compare`, `Substring.str`, `Substring.string`,
+`Substring.try_next`
+
 ### [lib/symbol.x](../lib/symbol.x)
 
 immediate encoded names.
@@ -1635,8 +1655,9 @@ Public functions:
 `MapStringInt.updateindex`, `MapStringInt.postfixindex`, `Map.mapstringint`,
 `MapStringInt.compare`, `MapStringInt.write_repr`, `MapStringInt.write_str`,
 `MapStringInt.str`, `MapStringInt.repr`, `MapStringInt.map`,
-`MapStringInt.var`, `Var.mapstringint`, `MapStringInt.iter`,
-`MapStringInt.keys`, `MapStringInt.enumerate`, `MapStringInt.cleanup`
+`MapStringInt.add_substr`, `MapStringInt.var`, `Var.mapstringint`,
+`MapStringInt.iter`, `MapStringInt.keys`, `MapStringInt.enumerate`,
+`MapStringInt.cleanup`
 
 ### [lib/var-adapters.x](../lib/var-adapters.x)
 
@@ -1801,12 +1822,12 @@ nested interning pools with region-backed object storage.
 
 Public functions:
 
-`Pool.lookup`, `Pool.intern`, `Pool.intern_new`, `Pool.insert`, `Pool.owns`,
-`Pool.retain_named`, `Pool.retain`, `Pool.release`, `Pool.malloc`, `Pool.free`,
-`Pool.promote`, `Pool.own`, `Pool.stats`, `Pool.thread_start`, `Pool.current`,
-`Pool.initialize`, `Pool.thread_initialize`, `Pool.shutdown`,
-`Pool.open_named`, `Pool.open`, `Pool.close`, `Pool.detach`,
-`Pool.is_permanent`, `Pool.epoch`
+`x2c_pool_lookup_string`, `Pool.lookup`, `Pool.intern`, `Pool.intern_new`,
+`Pool.insert`, `Pool.owns`, `Pool.retain_named`, `Pool.retain`, `Pool.release`,
+`Pool.malloc`, `Pool.free`, `Pool.promote`, `Pool.own`, `Pool.stats`,
+`Pool.thread_start`, `Pool.current`, `Pool.initialize`,
+`Pool.thread_initialize`, `Pool.shutdown`, `Pool.open_named`, `Pool.open`,
+`Pool.close`, `Pool.detach`, `Pool.is_permanent`, `Pool.epoch`
 
 ### [lib/scope/scope.x](../lib/scope/scope.x)
 
@@ -1831,15 +1852,15 @@ canonical byte strings and core text operations.
 Public functions:
 
 `String.len`, `String.hash`, `String.equal`, `String.compare`, `String.new`,
-`String.new_len`, `String.new_in`, `String.intern`, `String.malloc`,
-`String.intern_free`, `String.free`, `String.promote`, `String.try_own`,
-`String.is_permanent`, `String.find`, `String.find_within`, `String.rfind`,
-`String.find_all`, `String.count`, `String.contains`, `String.startswith`,
-`String.endswith`, `String.replace`, `String.replace_n`, `String.getindex`,
-`String.getslice`, `String.withindex`, `String.add`, `String.repeat`,
-`String.new_fill`, `String.join`, `String.pad_left`, `String.pad_right`,
-`String.pad_center`, `String.printf`, `String.strip`, `String.lstrip`,
-`String.rstrip`, `String.dedent`, `String.remove_prefix`,
+`String.new_len`, `String.new_in`, `String.intern`, `x2c_string_from_bytes`,
+`String.malloc`, `String.intern_free`, `String.free`, `String.promote`,
+`String.try_own`, `String.is_permanent`, `String.find`, `String.find_within`,
+`String.rfind`, `String.find_all`, `String.count`, `String.contains`,
+`String.startswith`, `String.endswith`, `String.replace`, `String.replace_n`,
+`String.getindex`, `String.getslice`, `String.withindex`, `String.add`,
+`String.repeat`, `String.new_fill`, `String.join`, `String.pad_left`,
+`String.pad_right`, `String.pad_center`, `String.printf`, `String.strip`,
+`String.lstrip`, `String.rstrip`, `String.dedent`, `String.remove_prefix`,
 `String.remove_suffix`, `String.partition`, `String.rpartition`,
 `String.lower`, `String.upper`, `String.capitalize`, `String.filter`,
 `String.map`, `String.keep`, `String.reject`, `String.squeeze`, `String.str`,

@@ -11,6 +11,7 @@
 #include <string.h>
 #include "map-generics.h"
 #include "integer-ops.h"
+#include "substring.h"
 typedef struct MapIntInt{
   Scope scope;
   Bytes hashes, entries;
@@ -336,6 +337,8 @@ String MapStringInt_str(MapStringInt _x2c_gensym_macro_map_206);
 String MapStringInt_repr(MapStringInt _x2c_gensym_macro_map_207);
 
 Map MapStringInt_map(MapStringInt _x2c_gensym_macro_map_208);
+
+int MapStringInt_add_substr(MapStringInt map, Substr key, int count);
 
 Var MapStringInt_var(MapStringInt _x2c_gensym_macro_map_209);
 

@@ -39,7 +39,7 @@ argument is accepted, as C converts it to the parameter's pointer type.
 
 **Raises:** `<bad-types>` for any other argument.
 
-Source: `lib/func.x:249`
+Source: `lib/func.x:252`
 
 #### x2c_func_record_result
 
@@ -48,7 +48,7 @@ Source: `lib/func.x:249`
 Boxes a record result as a `<p48>` to a copy of its `size` bytes in the
 active `Scope`.
 
-Source: `lib/func.x:271`
+Source: `lib/func.x:274`
 
 #### x2c_func_reference_argument
 
@@ -58,7 +58,7 @@ Checks a reference argument whose stored pointee matches `want` exactly.
 
 **Raises:** `<bad-types>` on the same mismatches as the shared checker.
 
-Source: `lib/func.x:278`
+Source: `lib/func.x:281`
 
 #### x2c_func_value_argument
 
@@ -138,7 +138,7 @@ NULL when the binding has no context.
 
 **Raises:** `<bad-arg>` for a null binding. It does not return on failure.
 
-Source: `lib/func.x:443`
+Source: `lib/func.x:446`
 
 <a id="Func.new"></a>
 #### Func.new
@@ -155,7 +155,7 @@ parameter count and types.
 **Raises:** `<bad-sig>` for a null adapter or a malformed signature, and
 `<alloc-fail>` when binding storage cannot be allocated.
 
-Source: `lib/func.x:351`
+Source: `lib/func.x:354`
 
 <a id="Func.new_context"></a>
 #### Func.new_context
@@ -173,7 +173,7 @@ borrowed for the `Func` lifetime.
 the allocation size overflows, `<bad-sig>` for a null adapter or malformed
 signature, or `<alloc-fail>` when storage cannot be allocated. None return.
 
-Source: `lib/func.x:378`
+Source: `lib/func.x:381`
 
 <a id="Func.new_rest"></a>
 #### Func.new_rest
@@ -192,7 +192,7 @@ lifetime. The result belongs to the current `Scope`.
 signature whose parameters are anything but one `List`, and `<alloc-fail>`
 when binding storage cannot be allocated.
 
-Source: `lib/func.x:365`
+Source: `lib/func.x:368`
 
 <a id="Func.var"></a>
 #### Func.var
@@ -203,7 +203,7 @@ Boxes `function` without copying or retaining the `Func`.
 The returned `Var` carries the same pointer and shares its `Scope`
 lifetime.
 
-Source: `lib/func.x:462`
+Source: `lib/func.x:465`
 
 ### `FuncArg`
 
@@ -242,7 +242,7 @@ Returns the borrowed native callable carried by `v`.
 
 **Raises:** `<bad-types>` when the value is not a `Func`.
 
-Source: `lib/func.x:466`
+Source: `lib/func.x:469`
 
 ## Runtime-internal callables
 
@@ -269,7 +269,7 @@ and its resolved `want` against the source address before casting.
 
 **Raises:** `<bad-types>` on either mismatch.
 
-Source: `lib/func.x:285`
+Source: `lib/func.x:288`
 
 #### x2c_func_reference_type
 
@@ -296,7 +296,7 @@ and `Func.move` never transfers it.
 
 **Raises:** the causes of `Func.new`.
 
-Source: `lib/func.x:389`
+Source: `lib/func.x:392`
 
 #### x2c_func_unrepresentable_argument
 
@@ -306,7 +306,7 @@ Rejects a value argument whose source type has no `Var` representation.
 Generated calls use this branch instead of compiling an impossible
 conversion. Raises: `<bad-types>`.
 
-Source: `lib/func.x:264`
+Source: `lib/func.x:267`
 
 ### `Func`
 
@@ -322,7 +322,7 @@ operation that takes ownership. A NULL `function` does nothing.
 
 **Raises:** the causes of `Scope.move`, which leave ownership unchanged.
 
-Source: `lib/func.x:454`
+Source: `lib/func.x:457`
 
 <a id="Func.signature"></a>
 #### Func.signature
@@ -333,7 +333,7 @@ Returns a native binding's borrowed canonical signature.
 The result has the `((func (PARAMETERS...)) RESULT...)` shape supplied to
 the constructor and remains valid for the binding's lifetime.
 
-Source: `lib/func.x:433`
+Source: `lib/func.x:436`
 
 ## Public types
 

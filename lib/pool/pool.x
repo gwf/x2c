@@ -70,6 +70,9 @@ module unsigned long value_epoch;
    because a value interned while it was clear was published without one. */
 module int pool_multithreaded;
 
+String x2c_pool_lookup_string(
+  Pool inner, const char *bytes, int length, unsigned hash);
+
 module {
   "interning.x",
   "storage.x",
