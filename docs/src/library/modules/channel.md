@@ -30,7 +30,7 @@ Var transport and explicit storage handoff.
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/channel.x:409`
+Source: `lib/channel.x:417`
 
 <a id="Channel.close"></a>
 #### Channel.close
@@ -43,7 +43,7 @@ payloads, or acknowledge completion of a borrow.
 
 **Raises:** <bad-arg> for NULL.
 
-Source: `lib/channel.x:392`
+Source: `lib/channel.x:400`
 
 <a id="Channel.free"></a>
 #### Channel.free
@@ -56,7 +56,7 @@ subtrees are destroyed outside the queue monitor; ordinary payloads are
 not followed. NULL does nothing. Owner destruction releases these native
 queue nodes and resources through the same finalizer.
 
-Source: `lib/channel.x:405`
+Source: `lib/channel.x:413`
 
 <a id="Channel.iter"></a>
 #### Channel.iter
@@ -67,7 +67,7 @@ Initializes a borrowed iterator that blocks for each received message.
 Normal close and draining end iteration; cooperative stop raises instead.
 The Channel must outlive traversal.
 
-Source: `lib/channel.x:436`
+Source: `lib/channel.x:444`
 
 <a id="Channel.new"></a>
 #### Channel.new
@@ -90,16 +90,17 @@ Source: `lib/channel.x:105`
 
 `Var Channel.receive(Channel channel)`
 
-Receives one accepted Var. Ordinary payloads stay borrowed. An owned
-payload's detached storage subtree joins the receiver's private active
-Scope before return, so receiver failure cleanup reclaims it normally.
+Receives one accepted Var. Ordinary payloads stay borrowed. Owned Map and
+Array storage moves into the receiver's private active Scope, releasing
+the empty transport Scope. Prepared custom subtrees join that private
+owner. Receiver failure cleanup reclaims received storage normally.
 Returns void only after close and draining; null remains ordinary data.
 A committed delivery succeeds despite a later stop request.
 
 **Raises:** <bad-arg> for NULL, <alloc-fail> preparing receiver storage, or
 <bad-state> for cooperative stop.
 
-Source: `lib/channel.x:370`
+Source: `lib/channel.x:371`
 
 <a id="Channel.scope"></a>
 #### Channel.scope
@@ -156,7 +157,7 @@ Source: `lib/channel.x:361`
 
 Boxes the borrowed Channel handle without changing its lifetime.
 
-Source: `lib/channel.x:414`
+Source: `lib/channel.x:422`
 
 ### `Var`
 
@@ -169,7 +170,7 @@ Reads a Channel handle with its exact tag. Ownership is unchanged.
 
 **Raises:** <bad-types> for another tag.
 
-Source: `lib/channel.x:418`
+Source: `lib/channel.x:426`
 
 ## Public types
 
