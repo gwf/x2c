@@ -17,10 +17,10 @@ $map.scaffold(
 $map.var.family(
   _table_hash, _table_key_equal, _table_value_equal, _table_value_valid);
 
-$map.core.family(
+$map.storage.family(
   PoolTable, struct PoolTable, Var, Var, unsigned, struct PoolRecord,
   _table_hash, _table_key_equal, _table_value_equal, _table_value_valid,
-  _record_key, _record_value, _reinsert_error, _insert_error);
+  _record_key, _record_value, _reinsert_error, _insert_error, 0);
 
 /* The stored value equal to `key`, which hashes to `key_hash`, or `void`. */
 static Var _get_hashed(

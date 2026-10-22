@@ -76,7 +76,9 @@ macro Unit $map.scaffold(
    `entry` and `table` qualifiers keep each one apart from the public
    operation that checks and calls it. */
 
-macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
+/* PoolTable keeps its table in the Pool's existing scope. Public families
+   use the ordinary core entry to group their own storage. */
+macro Unit $map.storage.family(Type $map, Type $storage, Type $key, Type $value,
   Type $hash_cell,
   Type $entry,
   Name $hash,
@@ -86,22 +88,28 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
   Name $key_at,
   Name $value_at,
   Name $reinsert_error,
-  Name $insert_error
+  Name $insert_error,
+  Literal $owned
 ) {
   static void $map.free_table($map map) {
     if ((void *) map == 0) return;
-    map.scope.destroy();
+    if ($owned) map.scope.destroy();
+    else {
+      map.hashes.free();
+      map.entries.free();
+      Scope_free(map);
+    }
   }
 
   static $map $map.new_table($map unused, unsigned capacity) {
     (void) unused;
-    Scope lifetime = Scope_child();
+    Scope lifetime = $owned ? Scope_child() : NULL;
     $map result = NULL;
-    defer if ((void *) result == 0) lifetime.destroy();
-    Scope_push(&lifetime);
-    defer Scope_pop();
+    defer if ($owned && (void *) result == 0) lifetime.destroy();
+    if ($owned) Scope_push(&lifetime);
+    defer if ($owned) Scope_pop();
     $map map = Scope_malloc(sizeof($storage));
-    map.scope = lifetime;
+    map.scope = $owned ? lifetime : *Scope_top();
     map.hashes = Bytes_new(sizeof($hash_cell));
     map.hashes = map.hashes.append(0, capacity);
     map.entries = Bytes_new(sizeof($entry));
@@ -368,6 +376,17 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
           !$value_equal(&avalue, &bvalue)) return 0;
     return 1;
   }
+}
+
+macro Unit $map.core.family(Type $family, Type $storage, Type $key, Type $value,
+  Type $hash_cell, Type $entry,
+  Name $hash, Name $key_equal, Name $value_equal, Name $value_valid,
+  Name $key_at, Name $value_at, Name $reinsert_error, Name $insert_error
+) {
+  $map.storage.family(
+    $family, $storage, $key, $value, $hash_cell, $entry,
+    $hash, $key_equal, $value_equal, $value_valid,
+    $key_at, $value_at, $reinsert_error, $insert_error, 1);
 }
 
 macro Unit $map.typed.operations(

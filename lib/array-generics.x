@@ -827,12 +827,12 @@ macro Unit $array.typed.publish(Type $array, Type $element, Name $unbox,
     defer if (staged != NULL && committed == NULL)
       staged.free();
     if (staged == NULL) {
-      source.move_scope(array);
+      source.move_block(array);
       return array;
     }
 
-    source.move_scope(array);
-    Scope owner = array, temporary = staged;
+    source.move_block(array);
+    Scope owner = Scope.owner(array), temporary = staged;
     Scope.move((unsigned char *) staged.bytes - sizeof(Block), &owner);
     Scope.move((unsigned char *) array.bytes - sizeof(Block), &temporary);
     Bytes old_bytes = array.bytes;

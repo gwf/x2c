@@ -165,6 +165,55 @@ static Var _storage_transfer_worker(Var input) {
   return void;
 }
 
+static void storage_failed_export_can_retry_adopted_graph(void) {
+  $test.scoped();
+  Context context = Context.open_isolated();
+  Map parent = {}, child = {};
+  Scope parent_scope = parent, child_scope = child;
+  child_scope.transfer(parent_scope);
+  String key = String.printf("private-retry-key-%d", 706);
+  String text = String.printf("private-retry-value-%d", 707);
+  EXPECT_FALSE(Pool.is_permanent(key));
+  EXPECT_FALSE(Pool.is_permanent(text));
+  parent["child"] = child;
+  child[key] = text;
+  child["bad"] = Scope.malloc(4);
+  int caught = 0;
+  try context.export(parent);
+  catch %(bad-types *): caught = 1;
+  EXPECT_TRUE(caught);
+  EXPECT_TRUE(context.owns(parent));
+  EXPECT_TRUE(context.owns(child));
+  EXPECT_PTR_EQ(child_scope.parent(), parent_scope);
+  child["bad"] = 1;
+  context.export(parent);
+  context.close();
+  String lookup = String.printf("private-retry-key-%d", 706);
+  EXPECT_STR_EQ(child[lookup].str(), "private-retry-value-707");
+  EXPECT_PTR_EQ(child_scope.parent(), parent_scope);
+}
+
+static void storage_exports_raw_typed_block_views(void) {
+  $test.scoped();
+  Context context = Context.open_isolated();
+  ArrayInt numbers = (ArrayInt) Block.new(sizeof(int));
+  ArrayString strings = (ArrayString) Block.new(sizeof(String));
+  numbers.push(37);
+  strings.push(String.printf("raw-typed-private-%d", 708));
+  EXPECT_FALSE(Pool.is_permanent(strings[0]));
+  Var exported_numbers = context.export(numbers);
+  Var exported_strings = context.export(strings);
+  context.close();
+  EXPECT_PTR_EQ(exported_numbers.arrayint(), numbers);
+  EXPECT_PTR_EQ(exported_strings.arraystring(), strings);
+  EXPECT_INT_EQ(numbers[0], 37);
+  EXPECT_STR_EQ(strings[0], "raw-typed-private-708");
+  EXPECT_NULL(numbers.lifetime);
+  EXPECT_NULL(strings.lifetime);
+  numbers.free();
+  strings.free();
+}
+
 static void storage_concurrent_adoption_and_destruction(void) {
   $test.scoped();
   Scope destination = Scope.new();
@@ -186,5 +235,7 @@ void storage_ownership_suite(void) {
   $test.run(storage_adoption_destroys_cycles_once);
   $test.run(storage_context_exports_adopted_private_values);
   $test.run(storage_context_exports_adopted_string_array);
+  $test.run(storage_failed_export_can_retry_adopted_graph);
+  $test.run(storage_exports_raw_typed_block_views);
   $test.run(storage_concurrent_adoption_and_destruction);
 }

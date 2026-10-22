@@ -285,6 +285,16 @@ void Context.move_scope(Context c, Scope storage) {
   storage.transfer(*destination);
 }
 
+/** Moves raw or grouped Block storage for a registered exporter.
+    Storage beneath a container currently being exported stays adopted there.
+    Otherwise `Block.move_to` preserves the raw or grouped storage boundary.
+    Raises: the causes of `Block.move_to`.
+*/
+void Context.move_block(Context c, Block block) {
+  if (c.owns(block) && !_enclosed_export(c, Scope.owner(block)))
+    block.move_to(c.export_destination());
+}
+
 // lifecycle
 
 /** Opens and makes current a `Context` using the active canonical-value pool.
