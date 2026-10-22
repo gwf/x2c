@@ -1380,7 +1380,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _504 = cons(_503, NULL);
   _505 = cons(_95, _504);
   _506 = List_var(_505);
-  _507 = int_var(24236);
+  _507 = int_var(24230);
   _508 = cons(_507, NULL);
   _509 = cons(_108, _508);
   _510 = List_var(_509);
@@ -6358,7 +6358,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_10(void
   _5452 = String_var(_5451);
   _5453 = cons(_5452, _5377);
   _5454 = List_var(_5453);
-  _5455 = String_new("1946eef9");
+  _5455 = String_new("d77bd23c");
   _5456 = String_var(_5455);
   _5457 = cons(_5456, NULL);
   _5458 = cons(_499, _5457);
