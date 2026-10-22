@@ -1,7 +1,7 @@
 # Channels, Thread batches, and explicit scope ownership
 
 > Status: done
-> Implementation integrated locally on 2026-10-22 through 862aea43a.
+> Implementation integrated locally on 2026-10-22, including export-order repairs.
 > The combined publication gate and performance checkpoint remain pending.
 > Unified design agreed on 2026-10-22 after Channel, threading, and error-design
 > chat review. Gary accepted Thread.run and the explicit worker completion count.
@@ -606,3 +606,20 @@ production API was introduced.
 
 Final bootstrap, documentation, correctness-gate, and performance evidence are
 owned by the coordinator. Publication follows only after their review.
+
+Publication review reproduced an export-order defect: exporting an adopted child
+before its parent detached the child. Context now records moves in its existing
+root-export memo and commits them after recursive traversal. Both traversal orders
+preserve adoption; exporting a child alone still extracts it. Raw Block and Buffer
+allocations retain their individual-move path. Focused storage checks pass 13 tests
+and 108 assertions, including distinct equal boxed values and export retry.
+
+Channel rendezvous uses one thread-local wait record during each synchronous wait.
+This removes escaped stack records without adding per-operation heap allocation.
+The registration is removed before error dispatch or caller code can resume.
+
+The publication checks also exposed a stale REPL assertion that total scope count
+never grows. Empty frontend sessions retain three Maps in the process collection
+cache per warmed round. Both empty and full REPL rounds retain the same three
+scopes and 15 allocations. The REPL check compares scope growth against its measured
+empty-session baseline, as it already does for allocation growth.
