@@ -206,14 +206,14 @@ static int Array_remove_element(Array _x2c_gensym_macro_array_2, int _x2c_gensym
 
 static Array Array_copy_elements(Array _x2c_gensym_macro_array_3){
   if(_x2c_gensym_macro_array_3 == NULL) return NULL;
-  Array _x2c_gensym_macro_copy_0 =(Array) Block_new(sizeof(Var));
+  Array _x2c_gensym_macro_copy_0 =(Array) Block_new_owned(sizeof(Var));
   Block_append((Block) _x2c_gensym_macro_copy_0, _x2c_gensym_macro_array_3 -> bytes, _x2c_gensym_macro_array_3 -> length);
   return _x2c_gensym_macro_copy_0;
 }
 
 static Array Array_slice_elements(Array _x2c_gensym_macro_array_4, int _x2c_gensym_macro_start_0, int _x2c_gensym_macro_end_0, int _x2c_gensym_macro_step_0){
   if(_x2c_gensym_macro_array_4 == NULL || ! _x2c_gensym_macro_step_0) return NULL;
-  Array _x2c_gensym_macro_slice_0 =(Array) Block_new(sizeof(Var));
+  Array _x2c_gensym_macro_slice_0 =(Array) Block_new_owned(sizeof(Var));
   int _x2c_gensym_macro_newlen_0 = x2c_normalize_slice(& _x2c_gensym_macro_start_0, & _x2c_gensym_macro_end_0, _x2c_gensym_macro_step_0, (int) _x2c_gensym_macro_array_4 -> length);
   if(_x2c_gensym_macro_newlen_0 <= 0) return _x2c_gensym_macro_slice_0;
   if(_x2c_gensym_macro_step_0 == 1){
@@ -284,7 +284,7 @@ static void Array_replace_elements(Array _x2c_gensym_macro_array_7, int _x2c_gen
         if(_x2c_gensym_macro_delta_0 > INT_MAX - _x2c_gensym_macro_n_3){
           size_t _x2c_gensym_macro_size_0 =(size_t) _x2c_gensym_macro_n_3 +(size_t) _x2c_gensym_macro_delta_0;
           {
-            static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/array.x",.function = "Array_replace_elements",.line = 53,.runtime = 1};
+            static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/array.x",.function = "Array_replace_elements",.line = 54,.runtime = 1};
             x2c_error_raise_n(& _x2c_gensym_error_site_0, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(_x2c_gensym_macro_size_0));
             __builtin_unreachable();
           }
@@ -307,7 +307,7 @@ static Array Array_cut_elements(Array _x2c_gensym_macro_array_8, int _x2c_gensym
   int _x2c_gensym_macro_n_4 =(int) _x2c_gensym_macro_array_8 -> length;
   int _x2c_gensym_macro_begin_2 = _x2c_gensym_macro_start_3, _x2c_gensym_macro_finish_2 = _x2c_gensym_macro_end_2;
   _x2c_gensym_macro__normalize_span_0(_x2c_gensym_macro_array_8, & _x2c_gensym_macro_begin_2, & _x2c_gensym_macro_finish_2);
-  if(_x2c_gensym_macro_begin_2 >= _x2c_gensym_macro_finish_2) return(Array) Block_new(sizeof(Var));
+  if(_x2c_gensym_macro_begin_2 >= _x2c_gensym_macro_finish_2) return(Array) Block_new_owned(sizeof(Var));
   Array _x2c_gensym_macro_removed_0 = Array_slice_elements(_x2c_gensym_macro_array_8, _x2c_gensym_macro_begin_2, _x2c_gensym_macro_finish_2, 1);
   Var * _x2c_gensym_macro_data_5 =(Var *) _x2c_gensym_macro_array_8 -> bytes;
   int _x2c_gensym_macro_tail_1 = _x2c_gensym_macro_n_4 - _x2c_gensym_macro_finish_2;
@@ -370,7 +370,7 @@ static int Array_equal_elements(Array _x2c_gensym_macro_a_1, Array _x2c_gensym_m
 _Noreturn static void _size_limit(String owner, size_t size){
   (void) owner;
   {
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/array.x",.function = "_size_limit",.line = 57,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/array.x",.function = "_size_limit",.line = 58,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(size));
     __builtin_unreachable();
   }
@@ -382,7 +382,7 @@ _Noreturn static void _bad_operation(String owner, Symbol operation){
   {
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Array")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/array.x",.function = "_bad_operation",.line = 61,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/array.x",.function = "_bad_operation",.line = 62,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(74730460), Symbol_var(operation));
       __builtin_unreachable();
     }
@@ -398,7 +398,7 @@ _Noreturn static void _bad_index(String owner, int index, size_t size){
     Var _x2c_gensym_literal_part_2 = int_var(index);
     Var _x2c_gensym_literal_part_3 = Var_box_ulong(size);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/array.x",.function = "_bad_index",.line = 65,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/array.x",.function = "_bad_index",.line = 66,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(19800432), _x2c_gensym_literal_part_2, Symbol_var(1265290), _x2c_gensym_literal_part_3);
       __builtin_unreachable();
     }
@@ -412,7 +412,7 @@ _Noreturn static void _bad_step(String owner, int step){
   {
     Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("Array.getslice")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/array.x",.function = "_bad_step",.line = 69,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/array.x",.function = "_bad_step",.line = 70,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(1286496), int_var(step));
       __builtin_unreachable();
     }
@@ -422,7 +422,7 @@ _Noreturn static void _bad_step(String owner, int step){
 }
 
 Array Array_new(void){
-  return(Array) Block_new(sizeof(Var));
+  return(Array) Block_new_owned(sizeof(Var));
 }
 
 int Array_try_next(Array _x2c_gensym_macro_array_15, int * _x2c_gensym_macro_cursor_1, Var * _x2c_gensym_macro_out_4){
@@ -439,7 +439,7 @@ int Array_try_next(Array _x2c_gensym_macro_array_15, int * _x2c_gensym_macro_cur
 
 Var Array_push(Array _x2c_gensym_macro_array_16, Var _x2c_gensym_macro_value_3){
   if(1 && Var_is_void(_x2c_gensym_macro_value_3)){
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/array.x",.function = "Array_push",.line = 72,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/array.x",.function = "Array_push",.line = 73,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_5, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -473,7 +473,7 @@ Var Array_shift(Array _x2c_gensym_macro_array_19){
 
 Var Array_unshift(Array _x2c_gensym_macro_array_20, Var _x2c_gensym_macro_value_6){
   if(1 && Var_is_void(_x2c_gensym_macro_value_6)){
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/array.x",.function = "Array_unshift",.line = 72,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/array.x",.function = "Array_unshift",.line = 73,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_6, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -495,7 +495,7 @@ Var Array_insert(Array _x2c_gensym_macro_array_21, int _x2c_gensym_macro_index_4
     if(_x2c_gensym_macro_index_4 < 0 || _x2c_gensym_macro_index_4 > _x2c_gensym_macro_n_8) return((void) 0, Void);
     if(_x2c_gensym_macro_n_8 == INT_MAX) _size_limit(0, _x2c_gensym_macro_n_8);
     if(Var_is_void(_x2c_gensym_macro_value_7)){
-      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/array.x",.function = "Array_insert",.line = 72,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/array.x",.function = "Array_insert",.line = 73,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_7, 48270474208, 0);
       __builtin_unreachable();
     }
@@ -599,7 +599,7 @@ Var Array_setindex(Array array, int index, Var value){
   index = x2c_normalize_index(index, (int) array -> length);
   if(index < 0) return((void) 0, Void);
   if(Var_is_void(value)){
-    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/array.x",.function = "Array_setindex",.line = 107,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/array.x",.function = "Array_setindex",.line = 108,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_8, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -608,7 +608,7 @@ Var Array_setindex(Array array, int index, Var value){
 
 void Array_resize(Array arr, size_t size){
   if(size > INT_MAX){
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/array.x",.function = "Array_resize",.line = 127,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/array.x",.function = "Array_resize",.line = 128,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_9, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(size));
     __builtin_unreachable();
   }
@@ -620,7 +620,7 @@ static int _int_length(Array array){
   if(array -> length > INT_MAX){
     size_t size = array -> length;
     {
-      static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/array.x",.function = "_int_length",.line = 135,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/array.x",.function = "_int_length",.line = 136,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_10, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(size));
       __builtin_unreachable();
     }
@@ -642,7 +642,7 @@ Array Array_update_n(Array array, unsigned element_count, ...){
 
 Var Array_updateindex(Array array, int index, Symbol op, Var rhs){
   if(array == NULL){
-    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 158,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 159,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_11, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Array.updateindex")), NULL))));
     __builtin_unreachable();
   }
@@ -651,7 +651,7 @@ Var Array_updateindex(Array array, int index, Symbol op, Var rhs){
   if(index < 0){
     Var _x2c_gensym_literal_part_5 = String_var(String_join(NULL, cons(String_var(String_new("Array.updateindex")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 161,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 162,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_12, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_5, Symbol_var(19800432), int_var(requested));
       __builtin_unreachable();
     }
@@ -660,7 +660,7 @@ Var Array_updateindex(Array array, int index, Symbol op, Var rhs){
   if(Var_is_void(rhs)){
     Var _x2c_gensym_literal_part_6 = String_var(String_join(NULL, cons(String_var(String_new("Array.updateindex")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 163,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 164,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_13, 48270474208, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_6, Symbol_var(19800432), int_var(requested));
       __builtin_unreachable();
     }
@@ -672,7 +672,7 @@ Var Array_updateindex(Array array, int index, Symbol op, Var rhs){
 
 Var Array_postfixindex(Array array, int index, Symbol op){
   if(array == NULL){
-    static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/array.x",.function = "Array_postfixindex",.line = 178,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/array.x",.function = "Array_postfixindex",.line = 179,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_14, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Array.postfixindex")), NULL))));
     __builtin_unreachable();
   }
@@ -681,7 +681,7 @@ Var Array_postfixindex(Array array, int index, Symbol op){
   if(index < 0){
     Var _x2c_gensym_literal_part_7 = String_var(String_join(NULL, cons(String_var(String_new("Array.postfixindex")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/array.x",.function = "Array_postfixindex",.line = 181,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/array.x",.function = "Array_postfixindex",.line = 182,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_15, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_7, Symbol_var(19800432), int_var(requested));
       __builtin_unreachable();
     }

@@ -34,6 +34,10 @@ Scope * Context_export_destination(Context c);
 
 void Context_move_allocation(Context c, void * allocation);
 
+void Context_move_scope(Context c, Scope storage);
+
+void Context_move_block(Context c, Block block);
+
 Context Context_open(void);
 
 Context Context_open_named(const char * name);

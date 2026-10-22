@@ -6,11 +6,13 @@
 #define __GUARD_0x5DA47678__
 
 #include "x2c.h"
+#include "channel.h"
 #include "common.h"
 #include "list-selectors.h"
 #include "native-scalar-types.h"
 #include "rewrite.h"
 #include "system-macros.h"
+#include "thread.h"
 #include "var-tags.h"
 #include "varops.h"
 #include "fields.h"

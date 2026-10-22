@@ -9,6 +9,7 @@
 #include "atom.h"
 #include "block.h"
 #include "buffer.h"
+#include "channel.h"
 #include "clibc.h"
 #include "cmath.h"
 #include "common.h"

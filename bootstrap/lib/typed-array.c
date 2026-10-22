@@ -1626,11 +1626,11 @@ static int ArrayChar_remove_element(ArrayChar _x2c_gensym_macro_array_2, int _x2
   return 1;
 }
 
-Block Block_new(size_t);
+Block Block_new_owned(size_t);
 
 static ArrayChar ArrayChar_copy_elements(ArrayChar _x2c_gensym_macro_array_3){
   if(_x2c_gensym_macro_array_3 == NULL) return NULL;
-  ArrayChar _x2c_gensym_macro_copy_0 =(ArrayChar) Block_new(sizeof(char));
+  ArrayChar _x2c_gensym_macro_copy_0 =(ArrayChar) Block_new_owned(sizeof(char));
   Block_append((Block) _x2c_gensym_macro_copy_0, _x2c_gensym_macro_array_3 -> bytes, _x2c_gensym_macro_array_3 -> length);
   return _x2c_gensym_macro_copy_0;
 }
@@ -1639,7 +1639,7 @@ int x2c_normalize_slice(int *, int *, int, int);
 
 static ArrayChar ArrayChar_slice_elements(ArrayChar _x2c_gensym_macro_array_4, int _x2c_gensym_macro_start_0, int _x2c_gensym_macro_end_0, int _x2c_gensym_macro_step_0){
   if(_x2c_gensym_macro_array_4 == NULL || ! _x2c_gensym_macro_step_0) return NULL;
-  ArrayChar _x2c_gensym_macro_slice_0 =(ArrayChar) Block_new(sizeof(char));
+  ArrayChar _x2c_gensym_macro_slice_0 =(ArrayChar) Block_new_owned(sizeof(char));
   int _x2c_gensym_macro_newlen_0 = x2c_normalize_slice(& _x2c_gensym_macro_start_0, & _x2c_gensym_macro_end_0, _x2c_gensym_macro_step_0, (int) _x2c_gensym_macro_array_4 -> length);
   if(_x2c_gensym_macro_newlen_0 <= 0) return _x2c_gensym_macro_slice_0;
   if(_x2c_gensym_macro_step_0 == 1){
@@ -1726,7 +1726,7 @@ static ArrayChar ArrayChar_cut_elements(ArrayChar _x2c_gensym_macro_array_8, int
   int _x2c_gensym_macro_n_4 =(int) _x2c_gensym_macro_array_8 -> length;
   int _x2c_gensym_macro_begin_2 = _x2c_gensym_macro_start_3, _x2c_gensym_macro_finish_2 = _x2c_gensym_macro_end_2;
   _x2c_gensym_macro__normalize_span_0(_x2c_gensym_macro_array_8, & _x2c_gensym_macro_begin_2, & _x2c_gensym_macro_finish_2);
-  if(_x2c_gensym_macro_begin_2 >= _x2c_gensym_macro_finish_2) return(ArrayChar) Block_new(sizeof(char));
+  if(_x2c_gensym_macro_begin_2 >= _x2c_gensym_macro_finish_2) return(ArrayChar) Block_new_owned(sizeof(char));
   ArrayChar _x2c_gensym_macro_removed_0 = ArrayChar_slice_elements(_x2c_gensym_macro_array_8, _x2c_gensym_macro_begin_2, _x2c_gensym_macro_finish_2, 1);
   char * _x2c_gensym_macro_data_5 =(char *) _x2c_gensym_macro_array_8 -> bytes;
   int _x2c_gensym_macro_tail_1 = _x2c_gensym_macro_n_4 - _x2c_gensym_macro_finish_2;
@@ -1787,7 +1787,7 @@ static int ArrayChar_equal_elements(ArrayChar _x2c_gensym_macro_a_1, ArrayChar _
 }
 
 ArrayChar ArrayChar_new(void){
-  return(ArrayChar) Block_new(sizeof(char));
+  return(ArrayChar) Block_new_owned(sizeof(char));
 }
 
 int ArrayChar_try_next(ArrayChar _x2c_gensym_macro_array_15, int * _x2c_gensym_macro_cursor_1, char * _x2c_gensym_macro_out_4){
@@ -2124,7 +2124,7 @@ Var Array_getindex(Array, int);
 ArrayChar Array_arraychar(Array _x2c_gensym_macro_values_4){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_values_4 == NULL) return NULL;
-  ArrayChar _x2c_gensym_macro_packed_0 =(ArrayChar) Block_new(sizeof(char)), _x2c_gensym_macro_result_1 = NULL;
+  ArrayChar _x2c_gensym_macro_packed_0 =(ArrayChar) Block_new_owned(sizeof(char)), _x2c_gensym_macro_result_1 = NULL;
   {
     _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_4 ={
       0
@@ -2156,11 +2156,13 @@ ArrayChar Array_arraychar(Array _x2c_gensym_macro_values_4){
 
 int Context_owns(Context, void *);
 
-Scope * Context_export_destination(Context);
+void Context_move_block(Context, Block);
 
-void Block_move_to(Block, Scope *);
+Scope Scope_owner(void *);
 
-void Context_move_allocation(Context, void *);
+Scope Block_scope(Block);
+
+void Scope_move(void *, Scope *);
 
 void ArrayChar_free(ArrayChar a0);
 
@@ -2180,9 +2182,8 @@ static ArrayChar ArrayChar_export_context(ArrayChar _x2c_gensym_macro_array_46, 
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_5);
     {
-      Scope * _x2c_gensym_macro_destination_0 = Context_export_destination(_x2c_gensym_macro_source_1);
       if(_x2c_gensym_macro_staged_0 == NULL){
-        Block_move_to(ArrayChar_block(_x2c_gensym_macro_array_46), _x2c_gensym_macro_destination_0);
+        Context_move_block(_x2c_gensym_macro_source_1, ArrayChar_block(_x2c_gensym_macro_array_46));
         {
           ArrayChar _x2c_gensym_return_value_4 = _x2c_gensym_macro_array_46;
           {
@@ -2193,8 +2194,10 @@ static ArrayChar ArrayChar_export_context(ArrayChar _x2c_gensym_macro_array_46, 
         }
 
       }
-      Block_move_to(ArrayChar_block(_x2c_gensym_macro_staged_0), _x2c_gensym_macro_destination_0);
-      Context_move_allocation(_x2c_gensym_macro_source_1, _x2c_gensym_macro_array_46);
+      Context_move_block(_x2c_gensym_macro_source_1, ArrayChar_block(_x2c_gensym_macro_array_46));
+      Scope _x2c_gensym_macro_owner_0 = Scope_owner(_x2c_gensym_macro_array_46), _x2c_gensym_macro_temporary_0 = Block_scope(_x2c_gensym_macro_staged_0);
+      Scope_move((unsigned char *) _x2c_gensym_macro_staged_0 -> bytes - sizeof(Block), & _x2c_gensym_macro_owner_0);
+      Scope_move((unsigned char *) _x2c_gensym_macro_array_46 -> bytes - sizeof(Block), & _x2c_gensym_macro_temporary_0);
       Bytes _x2c_gensym_macro_old_bytes_0 = _x2c_gensym_macro_array_46 -> bytes;
       size_t _x2c_gensym_macro_old_length_0 = _x2c_gensym_macro_array_46 -> length, _x2c_gensym_macro_old_cap_0 = _x2c_gensym_macro_array_46 -> cap;
       _x2c_gensym_macro_array_46 -> bytes = _x2c_gensym_macro_staged_0 -> bytes;
@@ -2276,14 +2279,14 @@ static int ArrayShort_remove_element(ArrayShort _x2c_gensym_macro_array_51, int 
 
 static ArrayShort ArrayShort_copy_elements(ArrayShort _x2c_gensym_macro_array_52){
   if(_x2c_gensym_macro_array_52 == NULL) return NULL;
-  ArrayShort _x2c_gensym_macro_copy_1 =(ArrayShort) Block_new(sizeof(short));
+  ArrayShort _x2c_gensym_macro_copy_1 =(ArrayShort) Block_new_owned(sizeof(short));
   Block_append((Block) _x2c_gensym_macro_copy_1, _x2c_gensym_macro_array_52 -> bytes, _x2c_gensym_macro_array_52 -> length);
   return _x2c_gensym_macro_copy_1;
 }
 
 static ArrayShort ArrayShort_slice_elements(ArrayShort _x2c_gensym_macro_array_53, int _x2c_gensym_macro_start_8, int _x2c_gensym_macro_end_7, int _x2c_gensym_macro_step_2){
   if(_x2c_gensym_macro_array_53 == NULL || ! _x2c_gensym_macro_step_2) return NULL;
-  ArrayShort _x2c_gensym_macro_slice_1 =(ArrayShort) Block_new(sizeof(short));
+  ArrayShort _x2c_gensym_macro_slice_1 =(ArrayShort) Block_new_owned(sizeof(short));
   int _x2c_gensym_macro_newlen_1 = x2c_normalize_slice(& _x2c_gensym_macro_start_8, & _x2c_gensym_macro_end_7, _x2c_gensym_macro_step_2, (int) _x2c_gensym_macro_array_53 -> length);
   if(_x2c_gensym_macro_newlen_1 <= 0) return _x2c_gensym_macro_slice_1;
   if(_x2c_gensym_macro_step_2 == 1){
@@ -2370,7 +2373,7 @@ static ArrayShort ArrayShort_cut_elements(ArrayShort _x2c_gensym_macro_array_57,
   int _x2c_gensym_macro_n_15 =(int) _x2c_gensym_macro_array_57 -> length;
   int _x2c_gensym_macro_begin_5 = _x2c_gensym_macro_start_11, _x2c_gensym_macro_finish_5 = _x2c_gensym_macro_end_9;
   _x2c_gensym_macro__normalize_span_1(_x2c_gensym_macro_array_57, & _x2c_gensym_macro_begin_5, & _x2c_gensym_macro_finish_5);
-  if(_x2c_gensym_macro_begin_5 >= _x2c_gensym_macro_finish_5) return(ArrayShort) Block_new(sizeof(short));
+  if(_x2c_gensym_macro_begin_5 >= _x2c_gensym_macro_finish_5) return(ArrayShort) Block_new_owned(sizeof(short));
   ArrayShort _x2c_gensym_macro_removed_2 = ArrayShort_slice_elements(_x2c_gensym_macro_array_57, _x2c_gensym_macro_begin_5, _x2c_gensym_macro_finish_5, 1);
   short * _x2c_gensym_macro_data_16 =(short *) _x2c_gensym_macro_array_57 -> bytes;
   int _x2c_gensym_macro_tail_3 = _x2c_gensym_macro_n_15 - _x2c_gensym_macro_finish_5;
@@ -2431,7 +2434,7 @@ static int ArrayShort_equal_elements(ArrayShort _x2c_gensym_macro_a_8, ArrayShor
 }
 
 ArrayShort ArrayShort_new(void){
-  return(ArrayShort) Block_new(sizeof(short));
+  return(ArrayShort) Block_new_owned(sizeof(short));
 }
 
 int ArrayShort_try_next(ArrayShort _x2c_gensym_macro_array_64, int * _x2c_gensym_macro_cursor_3, short * _x2c_gensym_macro_out_17){
@@ -2746,7 +2749,7 @@ Array ArrayShort_array(ArrayShort _x2c_gensym_macro_array_90){
 ArrayShort Array_arrayshort(Array _x2c_gensym_macro_values_9){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_values_9 == NULL) return NULL;
-  ArrayShort _x2c_gensym_macro_packed_1 =(ArrayShort) Block_new(sizeof(short)), _x2c_gensym_macro_result_3 = NULL;
+  ArrayShort _x2c_gensym_macro_packed_1 =(ArrayShort) Block_new_owned(sizeof(short)), _x2c_gensym_macro_result_3 = NULL;
   {
     _x2c_gensym_defer_env_9 _x2c_gensym_macro_environment_9 ={
       0
@@ -2794,9 +2797,8 @@ static ArrayShort ArrayShort_export_context(ArrayShort _x2c_gensym_macro_array_9
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_10);
     {
-      Scope * _x2c_gensym_macro_destination_1 = Context_export_destination(_x2c_gensym_macro_source_3);
       if(_x2c_gensym_macro_staged_1 == NULL){
-        Block_move_to(ArrayShort_block(_x2c_gensym_macro_array_95), _x2c_gensym_macro_destination_1);
+        Context_move_block(_x2c_gensym_macro_source_3, ArrayShort_block(_x2c_gensym_macro_array_95));
         {
           ArrayShort _x2c_gensym_return_value_9 = _x2c_gensym_macro_array_95;
           {
@@ -2807,8 +2809,10 @@ static ArrayShort ArrayShort_export_context(ArrayShort _x2c_gensym_macro_array_9
         }
 
       }
-      Block_move_to(ArrayShort_block(_x2c_gensym_macro_staged_1), _x2c_gensym_macro_destination_1);
-      Context_move_allocation(_x2c_gensym_macro_source_3, _x2c_gensym_macro_array_95);
+      Context_move_block(_x2c_gensym_macro_source_3, ArrayShort_block(_x2c_gensym_macro_array_95));
+      Scope _x2c_gensym_macro_owner_1 = Scope_owner(_x2c_gensym_macro_array_95), _x2c_gensym_macro_temporary_1 = Block_scope(_x2c_gensym_macro_staged_1);
+      Scope_move((unsigned char *) _x2c_gensym_macro_staged_1 -> bytes - sizeof(Block), & _x2c_gensym_macro_owner_1);
+      Scope_move((unsigned char *) _x2c_gensym_macro_array_95 -> bytes - sizeof(Block), & _x2c_gensym_macro_temporary_1);
       Bytes _x2c_gensym_macro_old_bytes_1 = _x2c_gensym_macro_array_95 -> bytes;
       size_t _x2c_gensym_macro_old_length_1 = _x2c_gensym_macro_array_95 -> length, _x2c_gensym_macro_old_cap_1 = _x2c_gensym_macro_array_95 -> cap;
       _x2c_gensym_macro_array_95 -> bytes = _x2c_gensym_macro_staged_1 -> bytes;
@@ -2886,14 +2890,14 @@ static int ArrayInt_remove_element(ArrayInt _x2c_gensym_macro_array_100, int _x2
 
 static ArrayInt ArrayInt_copy_elements(ArrayInt _x2c_gensym_macro_array_101){
   if(_x2c_gensym_macro_array_101 == NULL) return NULL;
-  ArrayInt _x2c_gensym_macro_copy_2 =(ArrayInt) Block_new(sizeof(int));
+  ArrayInt _x2c_gensym_macro_copy_2 =(ArrayInt) Block_new_owned(sizeof(int));
   Block_append((Block) _x2c_gensym_macro_copy_2, _x2c_gensym_macro_array_101 -> bytes, _x2c_gensym_macro_array_101 -> length);
   return _x2c_gensym_macro_copy_2;
 }
 
 static ArrayInt ArrayInt_slice_elements(ArrayInt _x2c_gensym_macro_array_102, int _x2c_gensym_macro_start_16, int _x2c_gensym_macro_end_14, int _x2c_gensym_macro_step_4){
   if(_x2c_gensym_macro_array_102 == NULL || ! _x2c_gensym_macro_step_4) return NULL;
-  ArrayInt _x2c_gensym_macro_slice_2 =(ArrayInt) Block_new(sizeof(int));
+  ArrayInt _x2c_gensym_macro_slice_2 =(ArrayInt) Block_new_owned(sizeof(int));
   int _x2c_gensym_macro_newlen_2 = x2c_normalize_slice(& _x2c_gensym_macro_start_16, & _x2c_gensym_macro_end_14, _x2c_gensym_macro_step_4, (int) _x2c_gensym_macro_array_102 -> length);
   if(_x2c_gensym_macro_newlen_2 <= 0) return _x2c_gensym_macro_slice_2;
   if(_x2c_gensym_macro_step_4 == 1){
@@ -2980,7 +2984,7 @@ static ArrayInt ArrayInt_cut_elements(ArrayInt _x2c_gensym_macro_array_106, int 
   int _x2c_gensym_macro_n_26 =(int) _x2c_gensym_macro_array_106 -> length;
   int _x2c_gensym_macro_begin_8 = _x2c_gensym_macro_start_19, _x2c_gensym_macro_finish_8 = _x2c_gensym_macro_end_16;
   _x2c_gensym_macro__normalize_span_2(_x2c_gensym_macro_array_106, & _x2c_gensym_macro_begin_8, & _x2c_gensym_macro_finish_8);
-  if(_x2c_gensym_macro_begin_8 >= _x2c_gensym_macro_finish_8) return(ArrayInt) Block_new(sizeof(int));
+  if(_x2c_gensym_macro_begin_8 >= _x2c_gensym_macro_finish_8) return(ArrayInt) Block_new_owned(sizeof(int));
   ArrayInt _x2c_gensym_macro_removed_4 = ArrayInt_slice_elements(_x2c_gensym_macro_array_106, _x2c_gensym_macro_begin_8, _x2c_gensym_macro_finish_8, 1);
   int * _x2c_gensym_macro_data_27 =(int *) _x2c_gensym_macro_array_106 -> bytes;
   int _x2c_gensym_macro_tail_5 = _x2c_gensym_macro_n_26 - _x2c_gensym_macro_finish_8;
@@ -3041,7 +3045,7 @@ static int ArrayInt_equal_elements(ArrayInt _x2c_gensym_macro_a_15, ArrayInt _x2
 }
 
 ArrayInt ArrayInt_new(void){
-  return(ArrayInt) Block_new(sizeof(int));
+  return(ArrayInt) Block_new_owned(sizeof(int));
 }
 
 int ArrayInt_try_next(ArrayInt _x2c_gensym_macro_array_113, int * _x2c_gensym_macro_cursor_5, int * _x2c_gensym_macro_out_30){
@@ -3354,7 +3358,7 @@ Array ArrayInt_array(ArrayInt _x2c_gensym_macro_array_139){
 ArrayInt Array_arrayint(Array _x2c_gensym_macro_values_14){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_values_14 == NULL) return NULL;
-  ArrayInt _x2c_gensym_macro_packed_2 =(ArrayInt) Block_new(sizeof(int)), _x2c_gensym_macro_result_5 = NULL;
+  ArrayInt _x2c_gensym_macro_packed_2 =(ArrayInt) Block_new_owned(sizeof(int)), _x2c_gensym_macro_result_5 = NULL;
   {
     _x2c_gensym_defer_env_14 _x2c_gensym_macro_environment_14 ={
       0
@@ -3402,9 +3406,8 @@ static ArrayInt ArrayInt_export_context(ArrayInt _x2c_gensym_macro_array_144, Co
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_15);
     {
-      Scope * _x2c_gensym_macro_destination_2 = Context_export_destination(_x2c_gensym_macro_source_5);
       if(_x2c_gensym_macro_staged_2 == NULL){
-        Block_move_to(ArrayInt_block(_x2c_gensym_macro_array_144), _x2c_gensym_macro_destination_2);
+        Context_move_block(_x2c_gensym_macro_source_5, ArrayInt_block(_x2c_gensym_macro_array_144));
         {
           ArrayInt _x2c_gensym_return_value_14 = _x2c_gensym_macro_array_144;
           {
@@ -3415,8 +3418,10 @@ static ArrayInt ArrayInt_export_context(ArrayInt _x2c_gensym_macro_array_144, Co
         }
 
       }
-      Block_move_to(ArrayInt_block(_x2c_gensym_macro_staged_2), _x2c_gensym_macro_destination_2);
-      Context_move_allocation(_x2c_gensym_macro_source_5, _x2c_gensym_macro_array_144);
+      Context_move_block(_x2c_gensym_macro_source_5, ArrayInt_block(_x2c_gensym_macro_array_144));
+      Scope _x2c_gensym_macro_owner_2 = Scope_owner(_x2c_gensym_macro_array_144), _x2c_gensym_macro_temporary_2 = Block_scope(_x2c_gensym_macro_staged_2);
+      Scope_move((unsigned char *) _x2c_gensym_macro_staged_2 -> bytes - sizeof(Block), & _x2c_gensym_macro_owner_2);
+      Scope_move((unsigned char *) _x2c_gensym_macro_array_144 -> bytes - sizeof(Block), & _x2c_gensym_macro_temporary_2);
       Bytes _x2c_gensym_macro_old_bytes_2 = _x2c_gensym_macro_array_144 -> bytes;
       size_t _x2c_gensym_macro_old_length_2 = _x2c_gensym_macro_array_144 -> length, _x2c_gensym_macro_old_cap_2 = _x2c_gensym_macro_array_144 -> cap;
       _x2c_gensym_macro_array_144 -> bytes = _x2c_gensym_macro_staged_2 -> bytes;
@@ -3494,14 +3499,14 @@ static int ArrayLong_remove_element(ArrayLong _x2c_gensym_macro_array_149, int _
 
 static ArrayLong ArrayLong_copy_elements(ArrayLong _x2c_gensym_macro_array_150){
   if(_x2c_gensym_macro_array_150 == NULL) return NULL;
-  ArrayLong _x2c_gensym_macro_copy_3 =(ArrayLong) Block_new(sizeof(long));
+  ArrayLong _x2c_gensym_macro_copy_3 =(ArrayLong) Block_new_owned(sizeof(long));
   Block_append((Block) _x2c_gensym_macro_copy_3, _x2c_gensym_macro_array_150 -> bytes, _x2c_gensym_macro_array_150 -> length);
   return _x2c_gensym_macro_copy_3;
 }
 
 static ArrayLong ArrayLong_slice_elements(ArrayLong _x2c_gensym_macro_array_151, int _x2c_gensym_macro_start_24, int _x2c_gensym_macro_end_21, int _x2c_gensym_macro_step_6){
   if(_x2c_gensym_macro_array_151 == NULL || ! _x2c_gensym_macro_step_6) return NULL;
-  ArrayLong _x2c_gensym_macro_slice_3 =(ArrayLong) Block_new(sizeof(long));
+  ArrayLong _x2c_gensym_macro_slice_3 =(ArrayLong) Block_new_owned(sizeof(long));
   int _x2c_gensym_macro_newlen_3 = x2c_normalize_slice(& _x2c_gensym_macro_start_24, & _x2c_gensym_macro_end_21, _x2c_gensym_macro_step_6, (int) _x2c_gensym_macro_array_151 -> length);
   if(_x2c_gensym_macro_newlen_3 <= 0) return _x2c_gensym_macro_slice_3;
   if(_x2c_gensym_macro_step_6 == 1){
@@ -3588,7 +3593,7 @@ static ArrayLong ArrayLong_cut_elements(ArrayLong _x2c_gensym_macro_array_155, i
   int _x2c_gensym_macro_n_37 =(int) _x2c_gensym_macro_array_155 -> length;
   int _x2c_gensym_macro_begin_11 = _x2c_gensym_macro_start_27, _x2c_gensym_macro_finish_11 = _x2c_gensym_macro_end_23;
   _x2c_gensym_macro__normalize_span_3(_x2c_gensym_macro_array_155, & _x2c_gensym_macro_begin_11, & _x2c_gensym_macro_finish_11);
-  if(_x2c_gensym_macro_begin_11 >= _x2c_gensym_macro_finish_11) return(ArrayLong) Block_new(sizeof(long));
+  if(_x2c_gensym_macro_begin_11 >= _x2c_gensym_macro_finish_11) return(ArrayLong) Block_new_owned(sizeof(long));
   ArrayLong _x2c_gensym_macro_removed_6 = ArrayLong_slice_elements(_x2c_gensym_macro_array_155, _x2c_gensym_macro_begin_11, _x2c_gensym_macro_finish_11, 1);
   long * _x2c_gensym_macro_data_38 =(long *) _x2c_gensym_macro_array_155 -> bytes;
   int _x2c_gensym_macro_tail_7 = _x2c_gensym_macro_n_37 - _x2c_gensym_macro_finish_11;
@@ -3649,7 +3654,7 @@ static int ArrayLong_equal_elements(ArrayLong _x2c_gensym_macro_a_22, ArrayLong 
 }
 
 ArrayLong ArrayLong_new(void){
-  return(ArrayLong) Block_new(sizeof(long));
+  return(ArrayLong) Block_new_owned(sizeof(long));
 }
 
 int ArrayLong_try_next(ArrayLong _x2c_gensym_macro_array_162, int * _x2c_gensym_macro_cursor_7, long * _x2c_gensym_macro_out_43){
@@ -3964,7 +3969,7 @@ Array ArrayLong_array(ArrayLong _x2c_gensym_macro_array_188){
 ArrayLong Array_arraylong(Array _x2c_gensym_macro_values_19){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_values_19 == NULL) return NULL;
-  ArrayLong _x2c_gensym_macro_packed_3 =(ArrayLong) Block_new(sizeof(long)), _x2c_gensym_macro_result_7 = NULL;
+  ArrayLong _x2c_gensym_macro_packed_3 =(ArrayLong) Block_new_owned(sizeof(long)), _x2c_gensym_macro_result_7 = NULL;
   {
     _x2c_gensym_defer_env_19 _x2c_gensym_macro_environment_19 ={
       0
@@ -4012,9 +4017,8 @@ static ArrayLong ArrayLong_export_context(ArrayLong _x2c_gensym_macro_array_193,
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_20);
     {
-      Scope * _x2c_gensym_macro_destination_3 = Context_export_destination(_x2c_gensym_macro_source_7);
       if(_x2c_gensym_macro_staged_3 == NULL){
-        Block_move_to(ArrayLong_block(_x2c_gensym_macro_array_193), _x2c_gensym_macro_destination_3);
+        Context_move_block(_x2c_gensym_macro_source_7, ArrayLong_block(_x2c_gensym_macro_array_193));
         {
           ArrayLong _x2c_gensym_return_value_19 = _x2c_gensym_macro_array_193;
           {
@@ -4025,8 +4029,10 @@ static ArrayLong ArrayLong_export_context(ArrayLong _x2c_gensym_macro_array_193,
         }
 
       }
-      Block_move_to(ArrayLong_block(_x2c_gensym_macro_staged_3), _x2c_gensym_macro_destination_3);
-      Context_move_allocation(_x2c_gensym_macro_source_7, _x2c_gensym_macro_array_193);
+      Context_move_block(_x2c_gensym_macro_source_7, ArrayLong_block(_x2c_gensym_macro_array_193));
+      Scope _x2c_gensym_macro_owner_3 = Scope_owner(_x2c_gensym_macro_array_193), _x2c_gensym_macro_temporary_3 = Block_scope(_x2c_gensym_macro_staged_3);
+      Scope_move((unsigned char *) _x2c_gensym_macro_staged_3 -> bytes - sizeof(Block), & _x2c_gensym_macro_owner_3);
+      Scope_move((unsigned char *) _x2c_gensym_macro_array_193 -> bytes - sizeof(Block), & _x2c_gensym_macro_temporary_3);
       Bytes _x2c_gensym_macro_old_bytes_3 = _x2c_gensym_macro_array_193 -> bytes;
       size_t _x2c_gensym_macro_old_length_3 = _x2c_gensym_macro_array_193 -> length, _x2c_gensym_macro_old_cap_3 = _x2c_gensym_macro_array_193 -> cap;
       _x2c_gensym_macro_array_193 -> bytes = _x2c_gensym_macro_staged_3 -> bytes;
@@ -4104,14 +4110,14 @@ static int ArrayFloat_remove_element(ArrayFloat _x2c_gensym_macro_array_198, int
 
 static ArrayFloat ArrayFloat_copy_elements(ArrayFloat _x2c_gensym_macro_array_199){
   if(_x2c_gensym_macro_array_199 == NULL) return NULL;
-  ArrayFloat _x2c_gensym_macro_copy_4 =(ArrayFloat) Block_new(sizeof(float));
+  ArrayFloat _x2c_gensym_macro_copy_4 =(ArrayFloat) Block_new_owned(sizeof(float));
   Block_append((Block) _x2c_gensym_macro_copy_4, _x2c_gensym_macro_array_199 -> bytes, _x2c_gensym_macro_array_199 -> length);
   return _x2c_gensym_macro_copy_4;
 }
 
 static ArrayFloat ArrayFloat_slice_elements(ArrayFloat _x2c_gensym_macro_array_200, int _x2c_gensym_macro_start_32, int _x2c_gensym_macro_end_28, int _x2c_gensym_macro_step_8){
   if(_x2c_gensym_macro_array_200 == NULL || ! _x2c_gensym_macro_step_8) return NULL;
-  ArrayFloat _x2c_gensym_macro_slice_4 =(ArrayFloat) Block_new(sizeof(float));
+  ArrayFloat _x2c_gensym_macro_slice_4 =(ArrayFloat) Block_new_owned(sizeof(float));
   int _x2c_gensym_macro_newlen_4 = x2c_normalize_slice(& _x2c_gensym_macro_start_32, & _x2c_gensym_macro_end_28, _x2c_gensym_macro_step_8, (int) _x2c_gensym_macro_array_200 -> length);
   if(_x2c_gensym_macro_newlen_4 <= 0) return _x2c_gensym_macro_slice_4;
   if(_x2c_gensym_macro_step_8 == 1){
@@ -4198,7 +4204,7 @@ static ArrayFloat ArrayFloat_cut_elements(ArrayFloat _x2c_gensym_macro_array_204
   int _x2c_gensym_macro_n_48 =(int) _x2c_gensym_macro_array_204 -> length;
   int _x2c_gensym_macro_begin_14 = _x2c_gensym_macro_start_35, _x2c_gensym_macro_finish_14 = _x2c_gensym_macro_end_30;
   _x2c_gensym_macro__normalize_span_4(_x2c_gensym_macro_array_204, & _x2c_gensym_macro_begin_14, & _x2c_gensym_macro_finish_14);
-  if(_x2c_gensym_macro_begin_14 >= _x2c_gensym_macro_finish_14) return(ArrayFloat) Block_new(sizeof(float));
+  if(_x2c_gensym_macro_begin_14 >= _x2c_gensym_macro_finish_14) return(ArrayFloat) Block_new_owned(sizeof(float));
   ArrayFloat _x2c_gensym_macro_removed_8 = ArrayFloat_slice_elements(_x2c_gensym_macro_array_204, _x2c_gensym_macro_begin_14, _x2c_gensym_macro_finish_14, 1);
   float * _x2c_gensym_macro_data_49 =(float *) _x2c_gensym_macro_array_204 -> bytes;
   int _x2c_gensym_macro_tail_9 = _x2c_gensym_macro_n_48 - _x2c_gensym_macro_finish_14;
@@ -4259,7 +4265,7 @@ static int ArrayFloat_equal_elements(ArrayFloat _x2c_gensym_macro_a_29, ArrayFlo
 }
 
 ArrayFloat ArrayFloat_new(void){
-  return(ArrayFloat) Block_new(sizeof(float));
+  return(ArrayFloat) Block_new_owned(sizeof(float));
 }
 
 int ArrayFloat_try_next(ArrayFloat _x2c_gensym_macro_array_211, int * _x2c_gensym_macro_cursor_9, float * _x2c_gensym_macro_out_56){
@@ -4572,7 +4578,7 @@ Array ArrayFloat_array(ArrayFloat _x2c_gensym_macro_array_237){
 ArrayFloat Array_arrayfloat(Array _x2c_gensym_macro_values_24){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_values_24 == NULL) return NULL;
-  ArrayFloat _x2c_gensym_macro_packed_4 =(ArrayFloat) Block_new(sizeof(float)), _x2c_gensym_macro_result_9 = NULL;
+  ArrayFloat _x2c_gensym_macro_packed_4 =(ArrayFloat) Block_new_owned(sizeof(float)), _x2c_gensym_macro_result_9 = NULL;
   {
     _x2c_gensym_defer_env_24 _x2c_gensym_macro_environment_24 ={
       0
@@ -4620,9 +4626,8 @@ static ArrayFloat ArrayFloat_export_context(ArrayFloat _x2c_gensym_macro_array_2
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_25);
     {
-      Scope * _x2c_gensym_macro_destination_4 = Context_export_destination(_x2c_gensym_macro_source_9);
       if(_x2c_gensym_macro_staged_4 == NULL){
-        Block_move_to(ArrayFloat_block(_x2c_gensym_macro_array_242), _x2c_gensym_macro_destination_4);
+        Context_move_block(_x2c_gensym_macro_source_9, ArrayFloat_block(_x2c_gensym_macro_array_242));
         {
           ArrayFloat _x2c_gensym_return_value_24 = _x2c_gensym_macro_array_242;
           {
@@ -4633,8 +4638,10 @@ static ArrayFloat ArrayFloat_export_context(ArrayFloat _x2c_gensym_macro_array_2
         }
 
       }
-      Block_move_to(ArrayFloat_block(_x2c_gensym_macro_staged_4), _x2c_gensym_macro_destination_4);
-      Context_move_allocation(_x2c_gensym_macro_source_9, _x2c_gensym_macro_array_242);
+      Context_move_block(_x2c_gensym_macro_source_9, ArrayFloat_block(_x2c_gensym_macro_array_242));
+      Scope _x2c_gensym_macro_owner_4 = Scope_owner(_x2c_gensym_macro_array_242), _x2c_gensym_macro_temporary_4 = Block_scope(_x2c_gensym_macro_staged_4);
+      Scope_move((unsigned char *) _x2c_gensym_macro_staged_4 -> bytes - sizeof(Block), & _x2c_gensym_macro_owner_4);
+      Scope_move((unsigned char *) _x2c_gensym_macro_array_242 -> bytes - sizeof(Block), & _x2c_gensym_macro_temporary_4);
       Bytes _x2c_gensym_macro_old_bytes_4 = _x2c_gensym_macro_array_242 -> bytes;
       size_t _x2c_gensym_macro_old_length_4 = _x2c_gensym_macro_array_242 -> length, _x2c_gensym_macro_old_cap_4 = _x2c_gensym_macro_array_242 -> cap;
       _x2c_gensym_macro_array_242 -> bytes = _x2c_gensym_macro_staged_4 -> bytes;
@@ -4712,14 +4719,14 @@ static int ArrayDbl_remove_element(ArrayDbl _x2c_gensym_macro_array_247, int _x2
 
 static ArrayDbl ArrayDbl_copy_elements(ArrayDbl _x2c_gensym_macro_array_248){
   if(_x2c_gensym_macro_array_248 == NULL) return NULL;
-  ArrayDbl _x2c_gensym_macro_copy_5 =(ArrayDbl) Block_new(sizeof(double));
+  ArrayDbl _x2c_gensym_macro_copy_5 =(ArrayDbl) Block_new_owned(sizeof(double));
   Block_append((Block) _x2c_gensym_macro_copy_5, _x2c_gensym_macro_array_248 -> bytes, _x2c_gensym_macro_array_248 -> length);
   return _x2c_gensym_macro_copy_5;
 }
 
 static ArrayDbl ArrayDbl_slice_elements(ArrayDbl _x2c_gensym_macro_array_249, int _x2c_gensym_macro_start_40, int _x2c_gensym_macro_end_35, int _x2c_gensym_macro_step_10){
   if(_x2c_gensym_macro_array_249 == NULL || ! _x2c_gensym_macro_step_10) return NULL;
-  ArrayDbl _x2c_gensym_macro_slice_5 =(ArrayDbl) Block_new(sizeof(double));
+  ArrayDbl _x2c_gensym_macro_slice_5 =(ArrayDbl) Block_new_owned(sizeof(double));
   int _x2c_gensym_macro_newlen_5 = x2c_normalize_slice(& _x2c_gensym_macro_start_40, & _x2c_gensym_macro_end_35, _x2c_gensym_macro_step_10, (int) _x2c_gensym_macro_array_249 -> length);
   if(_x2c_gensym_macro_newlen_5 <= 0) return _x2c_gensym_macro_slice_5;
   if(_x2c_gensym_macro_step_10 == 1){
@@ -4806,7 +4813,7 @@ static ArrayDbl ArrayDbl_cut_elements(ArrayDbl _x2c_gensym_macro_array_253, int 
   int _x2c_gensym_macro_n_59 =(int) _x2c_gensym_macro_array_253 -> length;
   int _x2c_gensym_macro_begin_17 = _x2c_gensym_macro_start_43, _x2c_gensym_macro_finish_17 = _x2c_gensym_macro_end_37;
   _x2c_gensym_macro__normalize_span_5(_x2c_gensym_macro_array_253, & _x2c_gensym_macro_begin_17, & _x2c_gensym_macro_finish_17);
-  if(_x2c_gensym_macro_begin_17 >= _x2c_gensym_macro_finish_17) return(ArrayDbl) Block_new(sizeof(double));
+  if(_x2c_gensym_macro_begin_17 >= _x2c_gensym_macro_finish_17) return(ArrayDbl) Block_new_owned(sizeof(double));
   ArrayDbl _x2c_gensym_macro_removed_10 = ArrayDbl_slice_elements(_x2c_gensym_macro_array_253, _x2c_gensym_macro_begin_17, _x2c_gensym_macro_finish_17, 1);
   double * _x2c_gensym_macro_data_60 =(double *) _x2c_gensym_macro_array_253 -> bytes;
   int _x2c_gensym_macro_tail_11 = _x2c_gensym_macro_n_59 - _x2c_gensym_macro_finish_17;
@@ -4867,7 +4874,7 @@ static int ArrayDbl_equal_elements(ArrayDbl _x2c_gensym_macro_a_35, ArrayDbl _x2
 }
 
 ArrayDbl ArrayDbl_new(void){
-  return(ArrayDbl) Block_new(sizeof(double));
+  return(ArrayDbl) Block_new_owned(sizeof(double));
 }
 
 int ArrayDbl_try_next(ArrayDbl _x2c_gensym_macro_array_260, int * _x2c_gensym_macro_cursor_11, double * _x2c_gensym_macro_out_69){
@@ -5180,7 +5187,7 @@ Array ArrayDbl_array(ArrayDbl _x2c_gensym_macro_array_286){
 ArrayDbl Array_arraydbl(Array _x2c_gensym_macro_values_29){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_values_29 == NULL) return NULL;
-  ArrayDbl _x2c_gensym_macro_packed_5 =(ArrayDbl) Block_new(sizeof(double)), _x2c_gensym_macro_result_11 = NULL;
+  ArrayDbl _x2c_gensym_macro_packed_5 =(ArrayDbl) Block_new_owned(sizeof(double)), _x2c_gensym_macro_result_11 = NULL;
   {
     _x2c_gensym_defer_env_29 _x2c_gensym_macro_environment_29 ={
       0
@@ -5228,9 +5235,8 @@ static ArrayDbl ArrayDbl_export_context(ArrayDbl _x2c_gensym_macro_array_291, Co
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_30);
     {
-      Scope * _x2c_gensym_macro_destination_5 = Context_export_destination(_x2c_gensym_macro_source_11);
       if(_x2c_gensym_macro_staged_5 == NULL){
-        Block_move_to(ArrayDbl_block(_x2c_gensym_macro_array_291), _x2c_gensym_macro_destination_5);
+        Context_move_block(_x2c_gensym_macro_source_11, ArrayDbl_block(_x2c_gensym_macro_array_291));
         {
           ArrayDbl _x2c_gensym_return_value_29 = _x2c_gensym_macro_array_291;
           {
@@ -5241,8 +5247,10 @@ static ArrayDbl ArrayDbl_export_context(ArrayDbl _x2c_gensym_macro_array_291, Co
         }
 
       }
-      Block_move_to(ArrayDbl_block(_x2c_gensym_macro_staged_5), _x2c_gensym_macro_destination_5);
-      Context_move_allocation(_x2c_gensym_macro_source_11, _x2c_gensym_macro_array_291);
+      Context_move_block(_x2c_gensym_macro_source_11, ArrayDbl_block(_x2c_gensym_macro_array_291));
+      Scope _x2c_gensym_macro_owner_5 = Scope_owner(_x2c_gensym_macro_array_291), _x2c_gensym_macro_temporary_5 = Block_scope(_x2c_gensym_macro_staged_5);
+      Scope_move((unsigned char *) _x2c_gensym_macro_staged_5 -> bytes - sizeof(Block), & _x2c_gensym_macro_owner_5);
+      Scope_move((unsigned char *) _x2c_gensym_macro_array_291 -> bytes - sizeof(Block), & _x2c_gensym_macro_temporary_5);
       Bytes _x2c_gensym_macro_old_bytes_5 = _x2c_gensym_macro_array_291 -> bytes;
       size_t _x2c_gensym_macro_old_length_5 = _x2c_gensym_macro_array_291 -> length, _x2c_gensym_macro_old_cap_5 = _x2c_gensym_macro_array_291 -> cap;
       _x2c_gensym_macro_array_291 -> bytes = _x2c_gensym_macro_staged_5 -> bytes;
@@ -5320,14 +5328,14 @@ static int ArrayString_remove_element(ArrayString _x2c_gensym_macro_array_296, i
 
 static ArrayString ArrayString_copy_elements(ArrayString _x2c_gensym_macro_array_297){
   if(_x2c_gensym_macro_array_297 == NULL) return NULL;
-  ArrayString _x2c_gensym_macro_copy_6 =(ArrayString) Block_new(sizeof(String));
+  ArrayString _x2c_gensym_macro_copy_6 =(ArrayString) Block_new_owned(sizeof(String));
   Block_append((Block) _x2c_gensym_macro_copy_6, _x2c_gensym_macro_array_297 -> bytes, _x2c_gensym_macro_array_297 -> length);
   return _x2c_gensym_macro_copy_6;
 }
 
 static ArrayString ArrayString_slice_elements(ArrayString _x2c_gensym_macro_array_298, int _x2c_gensym_macro_start_48, int _x2c_gensym_macro_end_42, int _x2c_gensym_macro_step_12){
   if(_x2c_gensym_macro_array_298 == NULL || ! _x2c_gensym_macro_step_12) return NULL;
-  ArrayString _x2c_gensym_macro_slice_6 =(ArrayString) Block_new(sizeof(String));
+  ArrayString _x2c_gensym_macro_slice_6 =(ArrayString) Block_new_owned(sizeof(String));
   int _x2c_gensym_macro_newlen_6 = x2c_normalize_slice(& _x2c_gensym_macro_start_48, & _x2c_gensym_macro_end_42, _x2c_gensym_macro_step_12, (int) _x2c_gensym_macro_array_298 -> length);
   if(_x2c_gensym_macro_newlen_6 <= 0) return _x2c_gensym_macro_slice_6;
   if(_x2c_gensym_macro_step_12 == 1){
@@ -5414,7 +5422,7 @@ static ArrayString ArrayString_cut_elements(ArrayString _x2c_gensym_macro_array_
   int _x2c_gensym_macro_n_70 =(int) _x2c_gensym_macro_array_302 -> length;
   int _x2c_gensym_macro_begin_20 = _x2c_gensym_macro_start_51, _x2c_gensym_macro_finish_20 = _x2c_gensym_macro_end_44;
   _x2c_gensym_macro__normalize_span_6(_x2c_gensym_macro_array_302, & _x2c_gensym_macro_begin_20, & _x2c_gensym_macro_finish_20);
-  if(_x2c_gensym_macro_begin_20 >= _x2c_gensym_macro_finish_20) return(ArrayString) Block_new(sizeof(String));
+  if(_x2c_gensym_macro_begin_20 >= _x2c_gensym_macro_finish_20) return(ArrayString) Block_new_owned(sizeof(String));
   ArrayString _x2c_gensym_macro_removed_12 = ArrayString_slice_elements(_x2c_gensym_macro_array_302, _x2c_gensym_macro_begin_20, _x2c_gensym_macro_finish_20, 1);
   String * _x2c_gensym_macro_data_71 =(String *) _x2c_gensym_macro_array_302 -> bytes;
   int _x2c_gensym_macro_tail_13 = _x2c_gensym_macro_n_70 - _x2c_gensym_macro_finish_20;
@@ -5477,7 +5485,7 @@ static int ArrayString_equal_elements(ArrayString _x2c_gensym_macro_a_41, ArrayS
 }
 
 ArrayString ArrayString_new(void){
-  return(ArrayString) Block_new(sizeof(String));
+  return(ArrayString) Block_new_owned(sizeof(String));
 }
 
 int ArrayString_try_next(ArrayString _x2c_gensym_macro_array_309, int * _x2c_gensym_macro_cursor_13, String * _x2c_gensym_macro_out_82){
@@ -5790,7 +5798,7 @@ Array ArrayString_array(ArrayString _x2c_gensym_macro_array_335){
 ArrayString Array_arraystring(Array _x2c_gensym_macro_values_34){
   if(! _init_guard_) _file_init_();
   if(_x2c_gensym_macro_values_34 == NULL) return NULL;
-  ArrayString _x2c_gensym_macro_packed_6 =(ArrayString) Block_new(sizeof(String)), _x2c_gensym_macro_result_14 = NULL;
+  ArrayString _x2c_gensym_macro_packed_6 =(ArrayString) Block_new_owned(sizeof(String)), _x2c_gensym_macro_result_14 = NULL;
   {
     _x2c_gensym_defer_env_34 _x2c_gensym_macro_environment_34 ={
       0
@@ -5838,9 +5846,8 @@ static ArrayString ArrayString_export_context(ArrayString _x2c_gensym_macro_arra
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_35);
     {
-      Scope * _x2c_gensym_macro_destination_6 = Context_export_destination(_x2c_gensym_macro_source_13);
       if(_x2c_gensym_macro_staged_6 == NULL){
-        Block_move_to(ArrayString_block(_x2c_gensym_macro_array_340), _x2c_gensym_macro_destination_6);
+        Context_move_block(_x2c_gensym_macro_source_13, ArrayString_block(_x2c_gensym_macro_array_340));
         {
           ArrayString _x2c_gensym_return_value_34 = _x2c_gensym_macro_array_340;
           {
@@ -5851,8 +5858,10 @@ static ArrayString ArrayString_export_context(ArrayString _x2c_gensym_macro_arra
         }
 
       }
-      Block_move_to(ArrayString_block(_x2c_gensym_macro_staged_6), _x2c_gensym_macro_destination_6);
-      Context_move_allocation(_x2c_gensym_macro_source_13, _x2c_gensym_macro_array_340);
+      Context_move_block(_x2c_gensym_macro_source_13, ArrayString_block(_x2c_gensym_macro_array_340));
+      Scope _x2c_gensym_macro_owner_6 = Scope_owner(_x2c_gensym_macro_array_340), _x2c_gensym_macro_temporary_6 = Block_scope(_x2c_gensym_macro_staged_6);
+      Scope_move((unsigned char *) _x2c_gensym_macro_staged_6 -> bytes - sizeof(Block), & _x2c_gensym_macro_owner_6);
+      Scope_move((unsigned char *) _x2c_gensym_macro_array_340 -> bytes - sizeof(Block), & _x2c_gensym_macro_temporary_6);
       Bytes _x2c_gensym_macro_old_bytes_6 = _x2c_gensym_macro_array_340 -> bytes;
       size_t _x2c_gensym_macro_old_length_6 = _x2c_gensym_macro_array_340 -> length, _x2c_gensym_macro_old_cap_6 = _x2c_gensym_macro_array_340 -> cap;
       _x2c_gensym_macro_array_340 -> bytes = _x2c_gensym_macro_staged_6 -> bytes;

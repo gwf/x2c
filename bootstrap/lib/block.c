@@ -11,6 +11,7 @@ typedef struct Block * Block;
 typedef struct Block{
   Bytes bytes;
   size_t width, length, cap;
+  Scope lifetime;
 }
 * Block;
 
@@ -23,6 +24,11 @@ static void * _allocation(Block b);
 static void _attach(Block b, unsigned char * allocation);
 
 static unsigned char * _end(Block b);
+
+#include "exception.h"
+
+
+
 
 static inline Block Bytes_block(Bytes bytes){
   if(bytes == NULL) return NULL;
@@ -104,6 +110,16 @@ static inline void Block_pop(Block block){
   Block_try_pop(block, NULL);
 }
 
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
+
+typedef struct _x2c_gensym_defer_env_0{
+  const void * _x2c_gensym_defer_capture_0;
+  const void * _x2c_gensym_defer_capture_1;
+}
+_x2c_gensym_defer_env_0;
+
+static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1);
+
 void Block_free(Block b);
 
 void Block_cleanup(Block _x2c_gensym_macro_value_0){
@@ -141,7 +157,7 @@ static unsigned char * _end(Block b){
 
 void Block_append(Block b, const void * source, size_t count){
   if(b == NULL){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/block.x",.function = "Block_append",.line = 87,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/block.x",.function = "Block_append",.line = 88,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 0);
     __builtin_unreachable();
   }
@@ -164,7 +180,7 @@ static void _append_growing(Block b, const void * source, size_t count){
       Var _x2c_gensym_literal_part_0 = Var_box_ulong(width);
       Var _x2c_gensym_literal_part_1 = Var_box_ulong(count);
       {
-        static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/block.x",.function = "_append_growing",.line = 107,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/block.x",.function = "_append_growing",.line = 108,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_1, 1358596898646632, 2, Symbol_var(48833808), _x2c_gensym_literal_part_0, Symbol_var(7318440), _x2c_gensym_literal_part_1);
         __builtin_unreachable();
       }
@@ -174,7 +190,7 @@ static void _append_growing(Block b, const void * source, size_t count){
   }
   size_t size = count * b -> width, offset = _reserved_offset(b, source);
   if(offset != SIZE_MAX && size > b -> cap * b -> width - offset){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/block.x",.function = "_append_growing",.line = 110,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/block.x",.function = "_append_growing",.line = 111,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(7318440), Var_box_ulong(count));
     __builtin_unreachable();
   }
@@ -195,25 +211,25 @@ static size_t _reserved_offset(Block b, const void * p){
 
 void Block_append_fill(Block b, const void * element, size_t count){
   if(b == NULL){
-    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/block.x",.function = "Block_append_fill",.line = 153,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/block.x",.function = "Block_append_fill",.line = 154,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 0);
     __builtin_unreachable();
   }
   if(! count) return;
   if(! element){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/block.x",.function = "Block_append_fill",.line = 155,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/block.x",.function = "Block_append_fill",.line = 156,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 0);
     __builtin_unreachable();
   }
   if(count > SIZE_MAX - b -> length){
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/block.x",.function = "Block_append_fill",.line = 156,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/block.x",.function = "Block_append_fill",.line = 157,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_5, 1358596898646632, 1, Symbol_var(7318440), Var_box_ulong(count));
     __builtin_unreachable();
   }
   size_t length = b -> length, used = length * b -> width;
   size_t offset = _reserved_offset(b, element);
   if(offset != SIZE_MAX &&(offset > used || b -> width > used - offset)){
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/block.x",.function = "Block_append_fill",.line = 159,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/block.x",.function = "Block_append_fill",.line = 160,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 0);
     __builtin_unreachable();
   }
@@ -231,7 +247,7 @@ static void _fill(Block b, const void * element, size_t count){
 
 void Block_reserve(Block block, size_t minimum){
   if(block == NULL){
-    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/block.x",.function = "Block_reserve",.line = 206,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/block.x",.function = "Block_reserve",.line = 207,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 0);
     __builtin_unreachable();
   }
@@ -244,7 +260,7 @@ void Block_reserve(Block block, size_t minimum){
       Var _x2c_gensym_literal_part_2 = Var_box_ulong(width);
       Var _x2c_gensym_literal_part_3 = Var_box_ulong(cap);
       {
-        static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/block.x",.function = "Block_reserve",.line = 212,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/block.x",.function = "Block_reserve",.line = 213,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_8, 1358596898646632, 2, Symbol_var(48833808), _x2c_gensym_literal_part_2, Symbol_var(6240), _x2c_gensym_literal_part_3);
         __builtin_unreachable();
       }
@@ -271,7 +287,7 @@ int Block_truth(Block block){
 
 Block Block_new(size_t width){
   if(! width){
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/block.x",.function = "Block_new",.line = 289,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/block.x",.function = "Block_new",.line = 290,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_9, 4372499598, 0);
     __builtin_unreachable();
   }
@@ -282,12 +298,62 @@ Block Block_new(size_t width){
   ;
   size_t size = _allocation_size(width, block -> cap);
   if(! size){
-    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/block.x",.function = "Block_new",.line = 293,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/block.x",.function = "Block_new",.line = 294,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_10, 1358596898646632, 1, Symbol_var(48833808), Var_box_ulong(width));
     __builtin_unreachable();
   }
   _attach(block, Scope_malloc(size));
   return block;
+}
+
+Block Block_new_owned(size_t width){
+  Scope lifetime = Scope_child();
+  Block result = NULL;
+  {
+    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & result;
+    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_1 =(const void *) & lifetime;
+    X2CCleanup _x2c_gensym_defer_record_0 ={
+      .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_0
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
+    {
+      Scope_push(& lifetime);
+      {
+        X2CCleanup _x2c_gensym_defer_record_1 ={
+          .fn = _x2c_gensym_defer_cleanup_0, .env = 0
+        }
+        ;
+        x2c_cleanup_push(& _x2c_gensym_defer_record_1);
+        {
+          result = Block_new(width);
+          result -> lifetime = lifetime;
+          {
+            Block _x2c_gensym_return_value_0 = result;
+            {
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+              x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+              return _x2c_gensym_return_value_0;
+            }
+
+          }
+
+        }
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+  }
+
+}
+
+Scope Block_scope(Block block){
+  return block != NULL ?(block -> lifetime ? block -> lifetime : Scope_owner(block)) : NULL;
 }
 
 Bytes Bytes_new(size_t width){
@@ -296,12 +362,26 @@ Bytes Bytes_new(size_t width){
 
 void Block_free(Block b){
   if(b == NULL) return;
+  if(b -> lifetime){
+    Scope_destroy(b -> lifetime);
+    return;
+  }
   if(b -> bytes != NULL) Scope_free(_allocation(b));
   Scope_free(b);
 }
 
 void Block_move_to(Block block, Scope * scope){
   if(block == NULL) return;
+  if(block -> lifetime){
+    if(! scope){
+      static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/block.x",.function = "Block_move_to",.line = 352,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_11, 4372499598, 0);
+      __builtin_unreachable();
+    }
+    if(! * scope) * scope = Scope_new();
+    Scope_transfer(block -> lifetime, * scope);
+    return;
+  }
   if(block -> bytes != NULL) Scope_move(_allocation(block), scope);
   Scope_move(block, scope);
 }
@@ -332,5 +412,14 @@ void Bytes_free(Bytes a0){
 
 void Bytes_truncate(Bytes a0, size_t a1){
   return Block_truncate(Bytes_block(a0), a1);
+}
+
+static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
+  Scope_pop();
+}
+
+static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
+  _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_1;
+  if((*(Block *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0) == NULL) Scope_destroy((*(Scope *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_1));
 }
 

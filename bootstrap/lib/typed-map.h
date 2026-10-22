@@ -69,269 +69,277 @@ struct MapStringIntRecord{
 }
 ;
 
+Scope MapIntInt_scope(MapIntInt _x2c_gensym_macro_map_8);
+
 MapIntInt MapIntInt_new_capacity(unsigned _x2c_gensym_macro_capacity_10);
 
 MapIntInt MapIntInt_new(void);
 
-unsigned MapIntInt_len(MapIntInt _x2c_gensym_macro_map_28);
+unsigned MapIntInt_len(MapIntInt _x2c_gensym_macro_map_29);
 
-int MapIntInt_try_get(MapIntInt _x2c_gensym_macro_map_29, int _x2c_gensym_macro_key_12, int * _x2c_gensym_macro_out_4);
+int MapIntInt_try_get(MapIntInt _x2c_gensym_macro_map_30, int _x2c_gensym_macro_key_12, int * _x2c_gensym_macro_out_4);
 
-int MapIntInt_get(MapIntInt _x2c_gensym_macro_map_30, int _x2c_gensym_macro_key_13);
+int MapIntInt_get(MapIntInt _x2c_gensym_macro_map_31, int _x2c_gensym_macro_key_13);
 
-int MapIntInt_getindex(MapIntInt _x2c_gensym_macro_map_31, int _x2c_gensym_macro_key_14);
+int MapIntInt_getindex(MapIntInt _x2c_gensym_macro_map_32, int _x2c_gensym_macro_key_14);
 
-int MapIntInt_getdefault(MapIntInt _x2c_gensym_macro_map_32, int _x2c_gensym_macro_key_15, int _x2c_gensym_macro_defval_0);
+int MapIntInt_getdefault(MapIntInt _x2c_gensym_macro_map_33, int _x2c_gensym_macro_key_15, int _x2c_gensym_macro_defval_0);
 
-int MapIntInt_setdefault(MapIntInt _x2c_gensym_macro_map_33, int _x2c_gensym_macro_key_16, int _x2c_gensym_macro_defval_1);
+int MapIntInt_setdefault(MapIntInt _x2c_gensym_macro_map_34, int _x2c_gensym_macro_key_16, int _x2c_gensym_macro_defval_1);
 
-int MapIntInt_contains(MapIntInt _x2c_gensym_macro_map_34, int _x2c_gensym_macro_key_17);
+int MapIntInt_contains(MapIntInt _x2c_gensym_macro_map_35, int _x2c_gensym_macro_key_17);
 
-void MapIntInt_set(MapIntInt _x2c_gensym_macro_map_35, int _x2c_gensym_macro_key_18, int _x2c_gensym_macro_val_5);
+void MapIntInt_set(MapIntInt _x2c_gensym_macro_map_36, int _x2c_gensym_macro_key_18, int _x2c_gensym_macro_val_5);
 
-int MapIntInt_setindex(MapIntInt _x2c_gensym_macro_map_36, int _x2c_gensym_macro_key_19, int _x2c_gensym_macro_val_6);
+int MapIntInt_setindex(MapIntInt _x2c_gensym_macro_map_37, int _x2c_gensym_macro_key_19, int _x2c_gensym_macro_val_6);
 
-int MapIntInt_try_del(MapIntInt _x2c_gensym_macro_map_37, int _x2c_gensym_macro_key_20, int * _x2c_gensym_macro_out_7);
+int MapIntInt_try_del(MapIntInt _x2c_gensym_macro_map_38, int _x2c_gensym_macro_key_20, int * _x2c_gensym_macro_out_7);
 
-int MapIntInt_del(MapIntInt _x2c_gensym_macro_map_38, int _x2c_gensym_macro_key_21);
+int MapIntInt_del(MapIntInt _x2c_gensym_macro_map_39, int _x2c_gensym_macro_key_21);
 
-MapIntInt MapIntInt_copy(MapIntInt _x2c_gensym_macro_map_39);
+MapIntInt MapIntInt_copy(MapIntInt _x2c_gensym_macro_map_40);
 
-MapIntInt MapIntInt_merge(MapIntInt _x2c_gensym_macro_map_40, MapIntInt _x2c_gensym_macro_other_2);
+MapIntInt MapIntInt_merge(MapIntInt _x2c_gensym_macro_map_41, MapIntInt _x2c_gensym_macro_other_2);
 
-int MapIntInt_try_next(MapIntInt _x2c_gensym_macro_map_41, unsigned * _x2c_gensym_macro_cursor_4, int * _x2c_gensym_macro_key_22, int * _x2c_gensym_macro_val_7);
+int MapIntInt_try_next(MapIntInt _x2c_gensym_macro_map_42, unsigned * _x2c_gensym_macro_cursor_4, int * _x2c_gensym_macro_key_22, int * _x2c_gensym_macro_val_7);
 
-int MapIntInt_truth(MapIntInt _x2c_gensym_macro_map_42);
+int MapIntInt_truth(MapIntInt _x2c_gensym_macro_map_43);
 
 int MapIntInt_equal(MapIntInt _x2c_gensym_macro_a_2, MapIntInt _x2c_gensym_macro_b_2);
 
-int MapIntInt_updateindex(MapIntInt _x2c_gensym_macro_map_43, int _x2c_gensym_macro_key_23, Symbol _x2c_gensym_macro_op_1, int _x2c_gensym_macro_rhs_0);
+int MapIntInt_updateindex(MapIntInt _x2c_gensym_macro_map_44, int _x2c_gensym_macro_key_23, Symbol _x2c_gensym_macro_op_1, int _x2c_gensym_macro_rhs_0);
 
-int MapIntInt_postfixindex(MapIntInt _x2c_gensym_macro_map_44, int _x2c_gensym_macro_key_24, Symbol _x2c_gensym_macro_op_2);
+int MapIntInt_postfixindex(MapIntInt _x2c_gensym_macro_map_45, int _x2c_gensym_macro_key_24, Symbol _x2c_gensym_macro_op_2);
 
 MapIntInt Map_mapintint(Map _x2c_gensym_macro_entries_4);
 
 int MapIntInt_compare(MapIntInt _x2c_gensym_macro_a_5, MapIntInt _x2c_gensym_macro_b_5);
 
-Buffer MapIntInt_write_repr(MapIntInt _x2c_gensym_macro_map_46, Buffer _x2c_gensym_macro_out_10);
+Buffer MapIntInt_write_repr(MapIntInt _x2c_gensym_macro_map_47, Buffer _x2c_gensym_macro_out_10);
 
-Buffer MapIntInt_write_str(MapIntInt _x2c_gensym_macro_map_47, Buffer _x2c_gensym_macro_out_11);
+Buffer MapIntInt_write_str(MapIntInt _x2c_gensym_macro_map_48, Buffer _x2c_gensym_macro_out_11);
 
-String MapIntInt_str(MapIntInt _x2c_gensym_macro_map_48);
+String MapIntInt_str(MapIntInt _x2c_gensym_macro_map_49);
 
-String MapIntInt_repr(MapIntInt _x2c_gensym_macro_map_49);
+String MapIntInt_repr(MapIntInt _x2c_gensym_macro_map_50);
 
-Map MapIntInt_map(MapIntInt _x2c_gensym_macro_map_50);
+Map MapIntInt_map(MapIntInt _x2c_gensym_macro_map_51);
 
-Var MapIntInt_var(MapIntInt _x2c_gensym_macro_map_51);
+Var MapIntInt_var(MapIntInt _x2c_gensym_macro_map_52);
 
 MapIntInt Var_mapintint(Var _x2c_gensym_macro_value_3);
 
-Iter MapIntInt_iter(MapIntInt _x2c_gensym_macro_map_55, Iter _x2c_gensym_macro_dest_0);
+Iter MapIntInt_iter(MapIntInt _x2c_gensym_macro_map_56, Iter _x2c_gensym_macro_dest_0);
 
-Iter MapIntInt_keys(MapIntInt _x2c_gensym_macro_map_56, Iter _x2c_gensym_macro_dest_1);
+Iter MapIntInt_keys(MapIntInt _x2c_gensym_macro_map_57, Iter _x2c_gensym_macro_dest_1);
 
-Iter MapIntInt_enumerate(MapIntInt _x2c_gensym_macro_map_57, Iter _x2c_gensym_macro_dest_2);
+Iter MapIntInt_enumerate(MapIntInt _x2c_gensym_macro_map_58, Iter _x2c_gensym_macro_dest_2);
 
-void MapIntInt_cleanup(MapIntInt _x2c_gensym_macro_map_53);
+void MapIntInt_cleanup(MapIntInt _x2c_gensym_macro_map_54);
+
+Scope MapLongDouble_scope(MapLongDouble _x2c_gensym_macro_map_59);
 
 MapLongDouble MapLongDouble_new_capacity(unsigned _x2c_gensym_macro_capacity_13);
 
 MapLongDouble MapLongDouble_new(void);
 
-unsigned MapLongDouble_len(MapLongDouble _x2c_gensym_macro_map_78);
+unsigned MapLongDouble_len(MapLongDouble _x2c_gensym_macro_map_80);
 
-int MapLongDouble_try_get(MapLongDouble _x2c_gensym_macro_map_79, long _x2c_gensym_macro_key_45, double * _x2c_gensym_macro_out_21);
+int MapLongDouble_try_get(MapLongDouble _x2c_gensym_macro_map_81, long _x2c_gensym_macro_key_45, double * _x2c_gensym_macro_out_21);
 
-double MapLongDouble_get(MapLongDouble _x2c_gensym_macro_map_80, long _x2c_gensym_macro_key_46);
+double MapLongDouble_get(MapLongDouble _x2c_gensym_macro_map_82, long _x2c_gensym_macro_key_46);
 
-double MapLongDouble_getindex(MapLongDouble _x2c_gensym_macro_map_81, long _x2c_gensym_macro_key_47);
+double MapLongDouble_getindex(MapLongDouble _x2c_gensym_macro_map_83, long _x2c_gensym_macro_key_47);
 
-double MapLongDouble_getdefault(MapLongDouble _x2c_gensym_macro_map_82, long _x2c_gensym_macro_key_48, double _x2c_gensym_macro_defval_2);
+double MapLongDouble_getdefault(MapLongDouble _x2c_gensym_macro_map_84, long _x2c_gensym_macro_key_48, double _x2c_gensym_macro_defval_2);
 
-double MapLongDouble_setdefault(MapLongDouble _x2c_gensym_macro_map_83, long _x2c_gensym_macro_key_49, double _x2c_gensym_macro_defval_3);
+double MapLongDouble_setdefault(MapLongDouble _x2c_gensym_macro_map_85, long _x2c_gensym_macro_key_49, double _x2c_gensym_macro_defval_3);
 
-int MapLongDouble_contains(MapLongDouble _x2c_gensym_macro_map_84, long _x2c_gensym_macro_key_50);
+int MapLongDouble_contains(MapLongDouble _x2c_gensym_macro_map_86, long _x2c_gensym_macro_key_50);
 
-void MapLongDouble_set(MapLongDouble _x2c_gensym_macro_map_85, long _x2c_gensym_macro_key_51, double _x2c_gensym_macro_val_18);
+void MapLongDouble_set(MapLongDouble _x2c_gensym_macro_map_87, long _x2c_gensym_macro_key_51, double _x2c_gensym_macro_val_18);
 
-double MapLongDouble_setindex(MapLongDouble _x2c_gensym_macro_map_86, long _x2c_gensym_macro_key_52, double _x2c_gensym_macro_val_19);
+double MapLongDouble_setindex(MapLongDouble _x2c_gensym_macro_map_88, long _x2c_gensym_macro_key_52, double _x2c_gensym_macro_val_19);
 
-int MapLongDouble_try_del(MapLongDouble _x2c_gensym_macro_map_87, long _x2c_gensym_macro_key_53, double * _x2c_gensym_macro_out_24);
+int MapLongDouble_try_del(MapLongDouble _x2c_gensym_macro_map_89, long _x2c_gensym_macro_key_53, double * _x2c_gensym_macro_out_24);
 
-double MapLongDouble_del(MapLongDouble _x2c_gensym_macro_map_88, long _x2c_gensym_macro_key_54);
+double MapLongDouble_del(MapLongDouble _x2c_gensym_macro_map_90, long _x2c_gensym_macro_key_54);
 
-MapLongDouble MapLongDouble_copy(MapLongDouble _x2c_gensym_macro_map_89);
+MapLongDouble MapLongDouble_copy(MapLongDouble _x2c_gensym_macro_map_91);
 
-MapLongDouble MapLongDouble_merge(MapLongDouble _x2c_gensym_macro_map_90, MapLongDouble _x2c_gensym_macro_other_5);
+MapLongDouble MapLongDouble_merge(MapLongDouble _x2c_gensym_macro_map_92, MapLongDouble _x2c_gensym_macro_other_5);
 
-int MapLongDouble_try_next(MapLongDouble _x2c_gensym_macro_map_91, unsigned * _x2c_gensym_macro_cursor_14, long * _x2c_gensym_macro_key_55, double * _x2c_gensym_macro_val_20);
+int MapLongDouble_try_next(MapLongDouble _x2c_gensym_macro_map_93, unsigned * _x2c_gensym_macro_cursor_14, long * _x2c_gensym_macro_key_55, double * _x2c_gensym_macro_val_20);
 
-int MapLongDouble_truth(MapLongDouble _x2c_gensym_macro_map_92);
+int MapLongDouble_truth(MapLongDouble _x2c_gensym_macro_map_94);
 
 int MapLongDouble_equal(MapLongDouble _x2c_gensym_macro_a_7, MapLongDouble _x2c_gensym_macro_b_7);
 
-double MapLongDouble_updateindex(MapLongDouble _x2c_gensym_macro_map_93, long _x2c_gensym_macro_key_56, Symbol _x2c_gensym_macro_op_3, double _x2c_gensym_macro_rhs_1);
+double MapLongDouble_updateindex(MapLongDouble _x2c_gensym_macro_map_95, long _x2c_gensym_macro_key_56, Symbol _x2c_gensym_macro_op_3, double _x2c_gensym_macro_rhs_1);
 
-double MapLongDouble_postfixindex(MapLongDouble _x2c_gensym_macro_map_94, long _x2c_gensym_macro_key_57, Symbol _x2c_gensym_macro_op_4);
+double MapLongDouble_postfixindex(MapLongDouble _x2c_gensym_macro_map_96, long _x2c_gensym_macro_key_57, Symbol _x2c_gensym_macro_op_4);
 
 MapLongDouble Map_maplongdouble(Map _x2c_gensym_macro_entries_9);
 
 int MapLongDouble_compare(MapLongDouble _x2c_gensym_macro_a_10, MapLongDouble _x2c_gensym_macro_b_10);
 
-Buffer MapLongDouble_write_repr(MapLongDouble _x2c_gensym_macro_map_96, Buffer _x2c_gensym_macro_out_27);
+Buffer MapLongDouble_write_repr(MapLongDouble _x2c_gensym_macro_map_98, Buffer _x2c_gensym_macro_out_27);
 
-Buffer MapLongDouble_write_str(MapLongDouble _x2c_gensym_macro_map_97, Buffer _x2c_gensym_macro_out_28);
+Buffer MapLongDouble_write_str(MapLongDouble _x2c_gensym_macro_map_99, Buffer _x2c_gensym_macro_out_28);
 
-String MapLongDouble_str(MapLongDouble _x2c_gensym_macro_map_98);
+String MapLongDouble_str(MapLongDouble _x2c_gensym_macro_map_100);
 
-String MapLongDouble_repr(MapLongDouble _x2c_gensym_macro_map_99);
+String MapLongDouble_repr(MapLongDouble _x2c_gensym_macro_map_101);
 
-Map MapLongDouble_map(MapLongDouble _x2c_gensym_macro_map_100);
+Map MapLongDouble_map(MapLongDouble _x2c_gensym_macro_map_102);
 
-Var MapLongDouble_var(MapLongDouble _x2c_gensym_macro_map_101);
+Var MapLongDouble_var(MapLongDouble _x2c_gensym_macro_map_103);
 
 MapLongDouble Var_maplongdouble(Var _x2c_gensym_macro_value_7);
 
-Iter MapLongDouble_iter(MapLongDouble _x2c_gensym_macro_map_105, Iter _x2c_gensym_macro_dest_3);
+Iter MapLongDouble_iter(MapLongDouble _x2c_gensym_macro_map_107, Iter _x2c_gensym_macro_dest_3);
 
-Iter MapLongDouble_keys(MapLongDouble _x2c_gensym_macro_map_106, Iter _x2c_gensym_macro_dest_4);
+Iter MapLongDouble_keys(MapLongDouble _x2c_gensym_macro_map_108, Iter _x2c_gensym_macro_dest_4);
 
-Iter MapLongDouble_enumerate(MapLongDouble _x2c_gensym_macro_map_107, Iter _x2c_gensym_macro_dest_5);
+Iter MapLongDouble_enumerate(MapLongDouble _x2c_gensym_macro_map_109, Iter _x2c_gensym_macro_dest_5);
 
-void MapLongDouble_cleanup(MapLongDouble _x2c_gensym_macro_map_103);
+void MapLongDouble_cleanup(MapLongDouble _x2c_gensym_macro_map_105);
+
+Scope MapStringString_scope(MapStringString _x2c_gensym_macro_map_110);
 
 MapStringString MapStringString_new_capacity(unsigned _x2c_gensym_macro_capacity_16);
 
 MapStringString MapStringString_new(void);
 
-unsigned MapStringString_len(MapStringString _x2c_gensym_macro_map_128);
+unsigned MapStringString_len(MapStringString _x2c_gensym_macro_map_131);
 
-int MapStringString_try_get(MapStringString _x2c_gensym_macro_map_129, String _x2c_gensym_macro_key_78, String * _x2c_gensym_macro_out_38);
+int MapStringString_try_get(MapStringString _x2c_gensym_macro_map_132, String _x2c_gensym_macro_key_78, String * _x2c_gensym_macro_out_38);
 
-String MapStringString_get(MapStringString _x2c_gensym_macro_map_130, String _x2c_gensym_macro_key_79);
+String MapStringString_get(MapStringString _x2c_gensym_macro_map_133, String _x2c_gensym_macro_key_79);
 
-String MapStringString_getindex(MapStringString _x2c_gensym_macro_map_131, String _x2c_gensym_macro_key_80);
+String MapStringString_getindex(MapStringString _x2c_gensym_macro_map_134, String _x2c_gensym_macro_key_80);
 
-String MapStringString_getdefault(MapStringString _x2c_gensym_macro_map_132, String _x2c_gensym_macro_key_81, String _x2c_gensym_macro_defval_4);
+String MapStringString_getdefault(MapStringString _x2c_gensym_macro_map_135, String _x2c_gensym_macro_key_81, String _x2c_gensym_macro_defval_4);
 
-String MapStringString_setdefault(MapStringString _x2c_gensym_macro_map_133, String _x2c_gensym_macro_key_82, String _x2c_gensym_macro_defval_5);
+String MapStringString_setdefault(MapStringString _x2c_gensym_macro_map_136, String _x2c_gensym_macro_key_82, String _x2c_gensym_macro_defval_5);
 
-int MapStringString_contains(MapStringString _x2c_gensym_macro_map_134, String _x2c_gensym_macro_key_83);
+int MapStringString_contains(MapStringString _x2c_gensym_macro_map_137, String _x2c_gensym_macro_key_83);
 
-void MapStringString_set(MapStringString _x2c_gensym_macro_map_135, String _x2c_gensym_macro_key_84, String _x2c_gensym_macro_val_31);
+void MapStringString_set(MapStringString _x2c_gensym_macro_map_138, String _x2c_gensym_macro_key_84, String _x2c_gensym_macro_val_31);
 
-String MapStringString_setindex(MapStringString _x2c_gensym_macro_map_136, String _x2c_gensym_macro_key_85, String _x2c_gensym_macro_val_32);
+String MapStringString_setindex(MapStringString _x2c_gensym_macro_map_139, String _x2c_gensym_macro_key_85, String _x2c_gensym_macro_val_32);
 
-int MapStringString_try_del(MapStringString _x2c_gensym_macro_map_137, String _x2c_gensym_macro_key_86, String * _x2c_gensym_macro_out_41);
+int MapStringString_try_del(MapStringString _x2c_gensym_macro_map_140, String _x2c_gensym_macro_key_86, String * _x2c_gensym_macro_out_41);
 
-String MapStringString_del(MapStringString _x2c_gensym_macro_map_138, String _x2c_gensym_macro_key_87);
+String MapStringString_del(MapStringString _x2c_gensym_macro_map_141, String _x2c_gensym_macro_key_87);
 
-MapStringString MapStringString_copy(MapStringString _x2c_gensym_macro_map_139);
+MapStringString MapStringString_copy(MapStringString _x2c_gensym_macro_map_142);
 
-MapStringString MapStringString_merge(MapStringString _x2c_gensym_macro_map_140, MapStringString _x2c_gensym_macro_other_8);
+MapStringString MapStringString_merge(MapStringString _x2c_gensym_macro_map_143, MapStringString _x2c_gensym_macro_other_8);
 
-int MapStringString_try_next(MapStringString _x2c_gensym_macro_map_141, unsigned * _x2c_gensym_macro_cursor_24, String * _x2c_gensym_macro_key_88, String * _x2c_gensym_macro_val_33);
+int MapStringString_try_next(MapStringString _x2c_gensym_macro_map_144, unsigned * _x2c_gensym_macro_cursor_24, String * _x2c_gensym_macro_key_88, String * _x2c_gensym_macro_val_33);
 
-int MapStringString_truth(MapStringString _x2c_gensym_macro_map_142);
+int MapStringString_truth(MapStringString _x2c_gensym_macro_map_145);
 
 int MapStringString_equal(MapStringString _x2c_gensym_macro_a_12, MapStringString _x2c_gensym_macro_b_12);
 
-String MapStringString_updateindex(MapStringString _x2c_gensym_macro_map_143, String _x2c_gensym_macro_key_89, Symbol _x2c_gensym_macro_op_5, String _x2c_gensym_macro_rhs_2);
+String MapStringString_updateindex(MapStringString _x2c_gensym_macro_map_146, String _x2c_gensym_macro_key_89, Symbol _x2c_gensym_macro_op_5, String _x2c_gensym_macro_rhs_2);
 
-String MapStringString_postfixindex(MapStringString _x2c_gensym_macro_map_144, String _x2c_gensym_macro_key_90, Symbol _x2c_gensym_macro_op_6);
+String MapStringString_postfixindex(MapStringString _x2c_gensym_macro_map_147, String _x2c_gensym_macro_key_90, Symbol _x2c_gensym_macro_op_6);
 
 MapStringString Map_mapstringstring(Map _x2c_gensym_macro_entries_14);
 
 int MapStringString_compare(MapStringString _x2c_gensym_macro_a_15, MapStringString _x2c_gensym_macro_b_15);
 
-Buffer MapStringString_write_repr(MapStringString _x2c_gensym_macro_map_146, Buffer _x2c_gensym_macro_out_44);
+Buffer MapStringString_write_repr(MapStringString _x2c_gensym_macro_map_149, Buffer _x2c_gensym_macro_out_44);
 
-Buffer MapStringString_write_str(MapStringString _x2c_gensym_macro_map_147, Buffer _x2c_gensym_macro_out_45);
+Buffer MapStringString_write_str(MapStringString _x2c_gensym_macro_map_150, Buffer _x2c_gensym_macro_out_45);
 
-String MapStringString_str(MapStringString _x2c_gensym_macro_map_148);
+String MapStringString_str(MapStringString _x2c_gensym_macro_map_151);
 
-String MapStringString_repr(MapStringString _x2c_gensym_macro_map_149);
+String MapStringString_repr(MapStringString _x2c_gensym_macro_map_152);
 
-Map MapStringString_map(MapStringString _x2c_gensym_macro_map_150);
+Map MapStringString_map(MapStringString _x2c_gensym_macro_map_153);
 
-Var MapStringString_var(MapStringString _x2c_gensym_macro_map_151);
+Var MapStringString_var(MapStringString _x2c_gensym_macro_map_154);
 
 MapStringString Var_mapstringstring(Var _x2c_gensym_macro_value_11);
 
-Iter MapStringString_iter(MapStringString _x2c_gensym_macro_map_155, Iter _x2c_gensym_macro_dest_6);
+Iter MapStringString_iter(MapStringString _x2c_gensym_macro_map_158, Iter _x2c_gensym_macro_dest_6);
 
-Iter MapStringString_keys(MapStringString _x2c_gensym_macro_map_156, Iter _x2c_gensym_macro_dest_7);
+Iter MapStringString_keys(MapStringString _x2c_gensym_macro_map_159, Iter _x2c_gensym_macro_dest_7);
 
-Iter MapStringString_enumerate(MapStringString _x2c_gensym_macro_map_157, Iter _x2c_gensym_macro_dest_8);
+Iter MapStringString_enumerate(MapStringString _x2c_gensym_macro_map_160, Iter _x2c_gensym_macro_dest_8);
 
-void MapStringString_cleanup(MapStringString _x2c_gensym_macro_map_153);
+void MapStringString_cleanup(MapStringString _x2c_gensym_macro_map_156);
+
+Scope MapStringInt_scope(MapStringInt _x2c_gensym_macro_map_161);
 
 MapStringInt MapStringInt_new_capacity(unsigned _x2c_gensym_macro_capacity_19);
 
 MapStringInt MapStringInt_new(void);
 
-unsigned MapStringInt_len(MapStringInt _x2c_gensym_macro_map_178);
+unsigned MapStringInt_len(MapStringInt _x2c_gensym_macro_map_182);
 
-int MapStringInt_try_get(MapStringInt _x2c_gensym_macro_map_179, String _x2c_gensym_macro_key_111, int * _x2c_gensym_macro_out_55);
+int MapStringInt_try_get(MapStringInt _x2c_gensym_macro_map_183, String _x2c_gensym_macro_key_111, int * _x2c_gensym_macro_out_55);
 
-int MapStringInt_get(MapStringInt _x2c_gensym_macro_map_180, String _x2c_gensym_macro_key_112);
+int MapStringInt_get(MapStringInt _x2c_gensym_macro_map_184, String _x2c_gensym_macro_key_112);
 
-int MapStringInt_getindex(MapStringInt _x2c_gensym_macro_map_181, String _x2c_gensym_macro_key_113);
+int MapStringInt_getindex(MapStringInt _x2c_gensym_macro_map_185, String _x2c_gensym_macro_key_113);
 
-int MapStringInt_getdefault(MapStringInt _x2c_gensym_macro_map_182, String _x2c_gensym_macro_key_114, int _x2c_gensym_macro_defval_6);
+int MapStringInt_getdefault(MapStringInt _x2c_gensym_macro_map_186, String _x2c_gensym_macro_key_114, int _x2c_gensym_macro_defval_6);
 
-int MapStringInt_setdefault(MapStringInt _x2c_gensym_macro_map_183, String _x2c_gensym_macro_key_115, int _x2c_gensym_macro_defval_7);
+int MapStringInt_setdefault(MapStringInt _x2c_gensym_macro_map_187, String _x2c_gensym_macro_key_115, int _x2c_gensym_macro_defval_7);
 
-int MapStringInt_contains(MapStringInt _x2c_gensym_macro_map_184, String _x2c_gensym_macro_key_116);
+int MapStringInt_contains(MapStringInt _x2c_gensym_macro_map_188, String _x2c_gensym_macro_key_116);
 
-void MapStringInt_set(MapStringInt _x2c_gensym_macro_map_185, String _x2c_gensym_macro_key_117, int _x2c_gensym_macro_val_44);
+void MapStringInt_set(MapStringInt _x2c_gensym_macro_map_189, String _x2c_gensym_macro_key_117, int _x2c_gensym_macro_val_44);
 
-int MapStringInt_setindex(MapStringInt _x2c_gensym_macro_map_186, String _x2c_gensym_macro_key_118, int _x2c_gensym_macro_val_45);
+int MapStringInt_setindex(MapStringInt _x2c_gensym_macro_map_190, String _x2c_gensym_macro_key_118, int _x2c_gensym_macro_val_45);
 
-int MapStringInt_try_del(MapStringInt _x2c_gensym_macro_map_187, String _x2c_gensym_macro_key_119, int * _x2c_gensym_macro_out_58);
+int MapStringInt_try_del(MapStringInt _x2c_gensym_macro_map_191, String _x2c_gensym_macro_key_119, int * _x2c_gensym_macro_out_58);
 
-int MapStringInt_del(MapStringInt _x2c_gensym_macro_map_188, String _x2c_gensym_macro_key_120);
+int MapStringInt_del(MapStringInt _x2c_gensym_macro_map_192, String _x2c_gensym_macro_key_120);
 
-MapStringInt MapStringInt_copy(MapStringInt _x2c_gensym_macro_map_189);
+MapStringInt MapStringInt_copy(MapStringInt _x2c_gensym_macro_map_193);
 
-MapStringInt MapStringInt_merge(MapStringInt _x2c_gensym_macro_map_190, MapStringInt _x2c_gensym_macro_other_11);
+MapStringInt MapStringInt_merge(MapStringInt _x2c_gensym_macro_map_194, MapStringInt _x2c_gensym_macro_other_11);
 
-int MapStringInt_try_next(MapStringInt _x2c_gensym_macro_map_191, unsigned * _x2c_gensym_macro_cursor_34, String * _x2c_gensym_macro_key_121, int * _x2c_gensym_macro_val_46);
+int MapStringInt_try_next(MapStringInt _x2c_gensym_macro_map_195, unsigned * _x2c_gensym_macro_cursor_34, String * _x2c_gensym_macro_key_121, int * _x2c_gensym_macro_val_46);
 
-int MapStringInt_truth(MapStringInt _x2c_gensym_macro_map_192);
+int MapStringInt_truth(MapStringInt _x2c_gensym_macro_map_196);
 
 int MapStringInt_equal(MapStringInt _x2c_gensym_macro_a_17, MapStringInt _x2c_gensym_macro_b_17);
 
-int MapStringInt_updateindex(MapStringInt _x2c_gensym_macro_map_193, String _x2c_gensym_macro_key_122, Symbol _x2c_gensym_macro_op_7, int _x2c_gensym_macro_rhs_3);
+int MapStringInt_updateindex(MapStringInt _x2c_gensym_macro_map_197, String _x2c_gensym_macro_key_122, Symbol _x2c_gensym_macro_op_7, int _x2c_gensym_macro_rhs_3);
 
-int MapStringInt_postfixindex(MapStringInt _x2c_gensym_macro_map_194, String _x2c_gensym_macro_key_123, Symbol _x2c_gensym_macro_op_8);
+int MapStringInt_postfixindex(MapStringInt _x2c_gensym_macro_map_198, String _x2c_gensym_macro_key_123, Symbol _x2c_gensym_macro_op_8);
 
 MapStringInt Map_mapstringint(Map _x2c_gensym_macro_entries_19);
 
 int MapStringInt_compare(MapStringInt _x2c_gensym_macro_a_20, MapStringInt _x2c_gensym_macro_b_20);
 
-Buffer MapStringInt_write_repr(MapStringInt _x2c_gensym_macro_map_196, Buffer _x2c_gensym_macro_out_61);
+Buffer MapStringInt_write_repr(MapStringInt _x2c_gensym_macro_map_200, Buffer _x2c_gensym_macro_out_61);
 
-Buffer MapStringInt_write_str(MapStringInt _x2c_gensym_macro_map_197, Buffer _x2c_gensym_macro_out_62);
+Buffer MapStringInt_write_str(MapStringInt _x2c_gensym_macro_map_201, Buffer _x2c_gensym_macro_out_62);
 
-String MapStringInt_str(MapStringInt _x2c_gensym_macro_map_198);
+String MapStringInt_str(MapStringInt _x2c_gensym_macro_map_202);
 
-String MapStringInt_repr(MapStringInt _x2c_gensym_macro_map_199);
+String MapStringInt_repr(MapStringInt _x2c_gensym_macro_map_203);
 
-Map MapStringInt_map(MapStringInt _x2c_gensym_macro_map_200);
+Map MapStringInt_map(MapStringInt _x2c_gensym_macro_map_204);
 
-Var MapStringInt_var(MapStringInt _x2c_gensym_macro_map_201);
+Var MapStringInt_var(MapStringInt _x2c_gensym_macro_map_205);
 
 MapStringInt Var_mapstringint(Var _x2c_gensym_macro_value_15);
 
-Iter MapStringInt_iter(MapStringInt _x2c_gensym_macro_map_205, Iter _x2c_gensym_macro_dest_9);
+Iter MapStringInt_iter(MapStringInt _x2c_gensym_macro_map_209, Iter _x2c_gensym_macro_dest_9);
 
-Iter MapStringInt_keys(MapStringInt _x2c_gensym_macro_map_206, Iter _x2c_gensym_macro_dest_10);
+Iter MapStringInt_keys(MapStringInt _x2c_gensym_macro_map_210, Iter _x2c_gensym_macro_dest_10);
 
-Iter MapStringInt_enumerate(MapStringInt _x2c_gensym_macro_map_207, Iter _x2c_gensym_macro_dest_11);
+Iter MapStringInt_enumerate(MapStringInt _x2c_gensym_macro_map_211, Iter _x2c_gensym_macro_dest_11);
 
-void MapStringInt_cleanup(MapStringInt _x2c_gensym_macro_map_203);
+void MapStringInt_cleanup(MapStringInt _x2c_gensym_macro_map_207);
 
 
 #endif /* __GUARD_0xE8B0EF19__ */

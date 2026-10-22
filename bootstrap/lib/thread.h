@@ -16,6 +16,8 @@ typedef struct Thread * Thread;
 
 #include "context.h"
 #include "dispatch.h"
+#include "func.h"
+#include "rewrite.h"
 #include "error/error.h"
 #include "error_init.h"
 #include "exception.h"
@@ -31,6 +33,22 @@ typedef struct Thread * Thread;
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+void x2c_thread_wait_lock(void);
+
+void x2c_thread_wait_unlock(void);
+
+Thread x2c_thread_wait_owner(void);
+
+int x2c_thread_wait_stopped(Thread owner);
+
+int x2c_thread_stopping(void);
+
+void x2c_thread_wait(pthread_cond_t * condition);
+
+_Noreturn void x2c_thread_cancel(void);
+
+void Thread_stop(Thread thread);
+
 Thread Thread_start_raw(ThreadFn function, const void * input, size_t input_size);
 
 Thread Thread_start(ThreadValueFn function, Var value);
@@ -44,6 +62,8 @@ void Thread_free(Thread t);
 Var Thread_finish_any(Array pending);
 
 void Thread_finish_all(Array pending);
+
+void Thread_run(Array jobs, Func completed);
 
 ParallelMap Iter_parallel_map(Iter i, ThreadValueFn function, int workers);
 
