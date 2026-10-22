@@ -27,6 +27,8 @@ typedef struct ChannelWait{
 }
 ChannelWait;
 
+static _Thread_local ChannelWait rendezvous_wait;
+
 typedef struct ChannelWaits{
   ChannelWait * first, * last;
 }
@@ -215,7 +217,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _93 = cons(_89, _92);
   _94 = List_var(_93);
   _95 = Symbol_var(805770);
-  _96 = int_var(116);
+  _96 = int_var(120);
   _97 = cons(_96, NULL);
   _98 = cons(_95, _97);
   _99 = List_var(_98);
@@ -228,7 +230,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _106 = cons(_103, _105);
   _107 = List_var(_106);
   _108 = Symbol_var(1133019155420);
-  _109 = int_var(3581);
+  _109 = int_var(3791);
   _110 = cons(_109, NULL);
   _111 = cons(_108, _110);
   _112 = List_var(_111);
@@ -423,11 +425,11 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _301 = cons(_300, NULL);
   _302 = cons(_77, _301);
   _303 = List_var(_302);
-  _304 = int_var(117);
+  _304 = int_var(121);
   _305 = cons(_304, NULL);
   _306 = cons(_95, _305);
   _307 = List_var(_306);
-  _308 = int_var(3637);
+  _308 = int_var(3847);
   _309 = cons(_308, NULL);
   _310 = cons(_108, _309);
   _311 = List_var(_310);
@@ -552,7 +554,7 @@ static size_t _capacity(Var value){
     if(capacity >= 0) return(size_t) capacity;
   }
   {
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/channel.x",.function = "_capacity",.line = 78,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/channel.x",.function = "_capacity",.line = 82,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.new")), NULL))), Symbol_var(107888847784), Symbol_var(209381969202));
     __builtin_unreachable();
   }
@@ -580,7 +582,7 @@ Channel Channel_new(Var type, Var capacity){
     else capacity = int_var(0);
   }
   if(! Var_is(type, 1328354264) ||(! x2c_var_equal(type, Symbol_var(45156)) && ! Var_known_tag(Var_symbol(type)))){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/channel.x",.function = "Channel_new",.line = 96,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/channel.x",.function = "Channel_new",.line = 100,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.new")), NULL))), Symbol_var(107888847784), Symbol_var(1362954));
     __builtin_unreachable();
   }
@@ -609,7 +611,7 @@ Channel Channel_new(Var type, Var capacity){
       if(error){
         Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("pthread_cond_init")), NULL)));
         {
-          static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/channel.x",.function = "Channel_new",.line = 110,.runtime = 1};
+          static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/channel.x",.function = "Channel_new",.line = 114,.runtime = 1};
           x2c_error_raise_n(& _x2c_gensym_error_site_2, 20399393368, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(11703198), int_var(error));
           __builtin_unreachable();
         }
@@ -701,14 +703,15 @@ static int _rendezvous_send(Channel channel, Var value){
     _notify(channel);
     return 1;
   }
-  ChannelWait wait ={
+  ChannelWait * wait = & rendezvous_wait;
+  * wait =(ChannelWait){
     .value = value, .owner = x2c_thread_wait_owner()
   }
   ;
-  _append_wait(& channel -> senders, & wait);
-  while(! wait.committed && ! channel -> closed && ! x2c_thread_stopping()) x2c_thread_wait(& channel -> changed);
-  if(wait.committed) return 1;
-  _remove_wait(& channel -> senders, & wait);
+  _append_wait(& channel -> senders, wait);
+  while(! wait -> committed && ! channel -> closed && ! x2c_thread_stopping()) x2c_thread_wait(& channel -> changed);
+  if(wait -> committed) return 1;
+  _remove_wait(& channel -> senders, wait);
   return x2c_thread_stopping() ? - 1 : 0;
 }
 
@@ -723,17 +726,18 @@ static int _rendezvous_receive(Channel channel, Var * out){
     return 1;
   }
   if(channel -> closed) return 0;
-  ChannelWait wait ={
+  ChannelWait * wait = & rendezvous_wait;
+  * wait =(ChannelWait){
     .owner = x2c_thread_wait_owner()
   }
   ;
-  _append_wait(& channel -> receivers, & wait);
-  while(! wait.committed && ! channel -> closed && ! x2c_thread_stopping()) x2c_thread_wait(& channel -> changed);
-  if(wait.committed){
-    * out = wait.value;
+  _append_wait(& channel -> receivers, wait);
+  while(! wait -> committed && ! channel -> closed && ! x2c_thread_stopping()) x2c_thread_wait(& channel -> changed);
+  if(wait -> committed){
+    * out = wait -> value;
     return 1;
   }
-  _remove_wait(& channel -> receivers, & wait);
+  _remove_wait(& channel -> receivers, wait);
   return x2c_thread_stopping() ? - 1 : 0;
 }
 
@@ -768,17 +772,17 @@ void * Scope_malloc_in(Scope *, size_t);
 
 void Channel_send(Channel channel, Var value){
   if(! channel){
-    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/channel.x",.function = "Channel_send",.line = 244,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/channel.x",.function = "Channel_send",.line = 250,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
     __builtin_unreachable();
   }
   if(Var_is_void(value)){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/channel.x",.function = "Channel_send",.line = 245,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/channel.x",.function = "Channel_send",.line = 251,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_4, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
     __builtin_unreachable();
   }
   if(channel -> type != 45156 && Var_tag(value) != channel -> type){
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/channel.x",.function = "Channel_send",.line = 246,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/channel.x",.function = "Channel_send",.line = 252,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_5, 4477479911782, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))));
     __builtin_unreachable();
   }
@@ -809,7 +813,7 @@ void Channel_send(Channel channel, Var value){
       x2c_thread_wait_unlock();
       if(status < 0) x2c_thread_cancel();
       if(! status){
-        static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/channel.x",.function = "Channel_send",.line = 260,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/channel.x",.function = "Channel_send",.line = 266,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_6, 4477477457162, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.send")), NULL))), Symbol_var(227514696), int_var(1));
         __builtin_unreachable();
       }
@@ -824,7 +828,7 @@ void Scope_free(void *);
 
 Var Channel_receive(Channel channel){
   if(! channel){
-    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/channel.x",.function = "Channel_receive",.line = 268,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/channel.x",.function = "Channel_receive",.line = 274,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_7, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.receive")), NULL))));
     __builtin_unreachable();
   }
@@ -841,7 +845,7 @@ Var Channel_receive(Channel channel){
 
 void Channel_close(Channel channel){
   if(! channel){
-    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/channel.x",.function = "Channel_close",.line = 286,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/channel.x",.function = "Channel_close",.line = 292,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_8, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.close")), NULL))));
     __builtin_unreachable();
   }
@@ -871,7 +875,7 @@ Var Channel_var(Channel channel){
 
 Channel Var_channel(Var value){
   if(! Var_is(value, 6982365528)){
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/channel.x",.function = "Var_channel",.line = 311,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/channel.x",.function = "Var_channel",.line = 317,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_9, 4477479911782, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.channel")), NULL))));
     __builtin_unreachable();
   }
