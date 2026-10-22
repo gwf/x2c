@@ -31,14 +31,18 @@ static typedef struct ChannelMessage {
   struct ChannelMessage *next;
 } ChannelMessage;
 
-/* Rendezvous records live on their blocked callers' stacks. Only the shared
-   monitor reads links, owner tokens, and commitment flags. */
+/* Only the shared monitor reads links, owner tokens, and commitment flags. */
 static typedef struct ChannelWait {
   Var value;
   Thread owner;
   struct ChannelWait *previous, *next;
   int committed;
 } ChannelWait;
+
+/* A blocked native thread cannot reenter Channel code: no callback or Error
+   dispatch runs while registered. Every exit unlinks before dispatching, so
+   one native-thread record covers both managed workers and the main thread. */
+static threaded ChannelWait rendezvous_wait;
 
 static typedef struct ChannelWaits {
   ChannelWait *first, *last;
@@ -94,7 +98,7 @@ Channel Channel.new(Var type, Var capacity) {
     else capacity = 0;
   }
   if (type is not <symbol> ||
-      (type != <var> && !Var.known_tag(type.symbol())))
+      (type != <var> && !Var.known_tag(type)))
     raise %(bad-arg (operation "Channel.new") (argument type));
   size_t limit = _capacity(capacity);
   Scope lifetime = Scope.child();
@@ -173,12 +177,13 @@ static int _rendezvous_send(Channel channel, Var value) {
     _notify(channel);
     return 1;
   }
-  ChannelWait wait = { .value = value, .owner = x2c_thread_wait_owner() };
-  _append_wait(&channel.senders, &wait);
+  ChannelWait *wait = &rendezvous_wait;
+  *wait = (ChannelWait) { .value = value, .owner = x2c_thread_wait_owner() };
+  _append_wait(&channel.senders, wait);
   while (!wait.committed && !channel.closed && !x2c_thread_stopping())
     x2c_thread_wait(&channel.changed);
   if (wait.committed) return 1;
-  _remove_wait(&channel.senders, &wait);
+  _remove_wait(&channel.senders, wait);
   return x2c_thread_stopping() ? -1 : 0;
 }
 
@@ -193,12 +198,13 @@ static int _rendezvous_receive(Channel channel, Var *out) {
     return 1;
   }
   if (channel.closed) return 0;
-  ChannelWait wait = { .owner = x2c_thread_wait_owner() };
-  _append_wait(&channel.receivers, &wait);
+  ChannelWait *wait = &rendezvous_wait;
+  *wait = (ChannelWait) { .owner = x2c_thread_wait_owner() };
+  _append_wait(&channel.receivers, wait);
   while (!wait.committed && !channel.closed && !x2c_thread_stopping())
     x2c_thread_wait(&channel.changed);
   if (wait.committed) { *out = wait.value; return 1; }
-  _remove_wait(&channel.receivers, &wait);
+  _remove_wait(&channel.receivers, wait);
   return x2c_thread_stopping() ? -1 : 0;
 }
 
