@@ -2,7 +2,7 @@
 
     Consolidates V4's reading and counting into file_unique_words. Converts
     unique Substr keys to canonical Strings in a generic Map, then ranks its
-    entries and prints with interpolation.
+    entries with String/int bindings and prints with interpolation.
 */
 
 #include "substring-map.x"
@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
     fail("Usage: " + argv[0] + " FILE");
   Map counts = file_unique_words(argv[1]);
   Array ranked = [];
-  foreach (Var (word, count) in counts) {
+  foreach ((String word, int count) in counts) {
     if (ranked.len() == 10 && count < ranked[0][0]) continue;
     ranked.heap_push(%($count $word));
     if (ranked.len() > 10) ranked.heap_pop();
