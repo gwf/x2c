@@ -166,7 +166,7 @@ Source: `lib/block.x:206`
 <a id="Block.scope"></a>
 #### Block.scope
 
-`Scope Block.scope(Block block)`
+`Scope Block.scope(Block b)`
 
 Returns the allocation scope holding this Block's complete storage.
 Raw Blocks use their handle's allocation owner. Grouped Blocks expose

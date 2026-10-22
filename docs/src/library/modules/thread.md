@@ -39,7 +39,7 @@ must not mutate or recycle an outstanding input's storage.
 **Raises:** `<bad-arg>` for a nonpositive worker count, or `<alloc-fail>` for
 descriptor storage.
 
-Source: `lib/thread.x:680`
+Source: `lib/thread.x:681`
 
 ### `ParallelMap`
 
@@ -67,7 +67,7 @@ This descriptor supports consuming folds, not general pull iteration.
 **Raises:** source, start, worker, export, allocation, or accumulator causes,
 including `<void-op>` for a `void` worker result.
 
-Source: `lib/thread.x:705`
+Source: `lib/thread.x:706`
 
 ### `Thread`
 
@@ -150,7 +150,8 @@ Source: `lib/thread.x:483`
 Runs zero-argument callable jobs concurrently and waits for all of them.
 Each successful joined/exported result, including void, reaches completed
 on the caller when that callback is nonnull. Jobs and their captures stay
-borrowed through the call. Results have ordinary caller-owned join lifetime.
+borrowed through the call. Results have ordinary caller-owned join
+lifetime.
 Batch jobs use the shared process canonical pool and private mutable work
 scopes; explicitly opened private pools retain their own lifetime rules.
 The completion callback must not wait on participant progress.
@@ -164,7 +165,7 @@ establish that borrowed storage is no longer in use.
 
 **Raises:** startup, callback, export, stop, or worker join causes.
 
-Source: `lib/thread.x:645`
+Source: `lib/thread.x:646`
 
 <a id="Thread.start"></a>
 #### Thread.start
@@ -216,7 +217,7 @@ Source: `lib/thread.x:184`
 <a id="Thread.stop"></a>
 #### Thread.stop
 
-`void Thread.stop(Thread thread)`
+`void Thread.stop(Thread t)`
 
 Requests cooperative stopping without closing any Channel. The request
 persists and wakes a registered Channel or completion wait. Computation
@@ -225,7 +226,7 @@ while the handle remains live; stop does not join or free it.
 
 **Raises:** <bad-arg> for a null handle.
 
-Source: `lib/thread.x:155`
+Source: `lib/thread.x:156`
 
 <a id="Thread.wait_any"></a>
 #### Thread.wait_any
@@ -273,7 +274,7 @@ for source readers but are not supported as user API.
 Raises a non-resumable stop outcome after queue locks and wait records
 have been released. Explicit catches may handle this shared cause.
 
-Source: `lib/thread.x:146`
+Source: `lib/thread.x:147`
 
 #### x2c_thread_stopping
 
@@ -292,7 +293,7 @@ pending-stop check share that monitor with Thread.stop. Returns holding
 the monitor, with the registration removed, including on pending stop.
 Queue callers recheck predicates and stop before committing an operation.
 
-Source: `lib/thread.x:136`
+Source: `lib/thread.x:137`
 
 #### x2c_thread_wait_lock
 

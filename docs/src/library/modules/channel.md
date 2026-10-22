@@ -59,7 +59,7 @@ Source: `lib/channel.x:303`
 <a id="Channel.iter"></a>
 #### Channel.iter
 
-`Iter Channel.iter(Channel channel, Iter dest)`
+`Iter Channel.iter(Channel c, Iter dest)`
 
 Initializes a borrowed iterator that blocks for each received message.
 Normal close and draining end iteration; cooperative stop raises instead.
@@ -81,7 +81,7 @@ means rendezvous. Queuing does not intern or export message contents.
 **Raises:** <bad-arg> for an unknown tag or invalid capacity, <alloc-fail>
 for storage, or <io-fail> for native condition initialization.
 
-Source: `lib/channel.x:92`
+Source: `lib/channel.x:93`
 
 <a id="Channel.receive"></a>
 #### Channel.receive
@@ -105,12 +105,12 @@ Returns the Channel's complete storage scope, including explicitly
 adopted child scopes. It does not follow references in queued Vars.
 A null Channel returns NULL.
 
-Source: `lib/channel.x:140`
+Source: `lib/channel.x:141`
 
 <a id="Channel.send"></a>
 #### Channel.send
 
-`void Channel.send(Channel channel, Var value)`
+`void Channel.send(Channel c, Var value)`
 
 Sends non-void representation bits without changing referenced storage
 ownership. Waits for queue capacity or a rendezvous match. Acceptance
@@ -120,7 +120,7 @@ commits under synchronization; later stop cannot retract that send.
 mismatch, <bad-state> for closure or cooperative stop, or <alloc-fail>
 for buffered queue storage. No failure dispatch holds the queue lock.
 
-Source: `lib/channel.x:249`
+Source: `lib/channel.x:250`
 
 <a id="Channel.var"></a>
 #### Channel.var
