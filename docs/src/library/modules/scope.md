@@ -552,7 +552,7 @@ As with C, the old pointer must be treated as dead once a resize succeeds.
 allocation fails. Before `Error` initialization these failures terminate at
 the error floor.
 
-Source: `lib/scope/allocation.x:292`
+Source: `lib/scope/allocation.x:304`
 
 <a id="Scope.release"></a>
 #### Scope.release
@@ -682,6 +682,7 @@ for source readers but are not supported as user API.
 | Function | Summary |
 | --- | --- |
 | [`Scope.initialize`](#Scope.initialize) | Initializes the process-wide `Scope` runtime owner. |
+| [`Scope.move_before`](#Scope.move_before) | Moves one allocation immediately before another in its owner's list. |
 | [`Scope.owner`](#Scope.owner) | Returns the `Scope` that currently owns `ptr`. |
 | [`Scope.shutdown_hook`](#Scope.shutdown_hook) | Registers `hook` to run during process-wide `Scope` shutdown. |
 
@@ -695,6 +696,18 @@ for source readers but are not supported as user API.
 Initializes the process-wide `Scope` runtime owner.
 
 Source: `lib/scope/runtime.x:49`
+
+<a id="Scope.move_before"></a>
+#### Scope.move_before
+
+`void Scope.move_before(void *ptr, void *anchor)`
+
+Moves one allocation immediately before another in its owner's list.
+Both pointers must name distinct live Scope allocations under exclusive
+access. This internal storage-replacement operation preserves payloads
+and finalizers without allocation, owner lookup, or scope creation.
+
+Source: `lib/scope/allocation.x:285`
 
 <a id="Scope.owner"></a>
 #### Scope.owner

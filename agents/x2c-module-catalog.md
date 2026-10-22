@@ -1816,13 +1816,13 @@ Public functions:
 
 `Scope.malloc`, `Scope.malloc_finalized`, `Scope.malloc_in`,
 `Scope.malloc_finalized_in`, `Scope.calloc`, `Scope.calloc_in`, `Scope.memdup`,
-`Scope.memdup_in`, `Scope.free`, `Scope.owner`, `Scope.move`, `Scope.realloc`,
-`Scope.push`, `Scope.top`, `Scope.pop`, `Scope.retain`, `Scope.release`,
-`Scope.new`, `Scope.child`, `Scope.parent`, `Scope.transfer`, `Scope.contains`,
-`Scope.new_named`, `Scope.destroy`, `Scope.cleanup`,
-`x2c_scope_thread_release`, `Scope.name`, `Scope.stats`, `Scope.initialize`,
-`Scope.shutdown_hook`, `Scope_shutdown`, `xmalloc`, `xcalloc`, `xrealloc`,
-`xfree`, `xmemdup`
+`Scope.memdup_in`, `Scope.free`, `Scope.owner`, `Scope.move`,
+`Scope.move_before`, `Scope.realloc`, `Scope.push`, `Scope.top`, `Scope.pop`,
+`Scope.retain`, `Scope.release`, `Scope.new`, `Scope.child`, `Scope.parent`,
+`Scope.transfer`, `Scope.contains`, `Scope.new_named`, `Scope.destroy`,
+`Scope.cleanup`, `x2c_scope_thread_release`, `Scope.name`, `Scope.stats`,
+`Scope.initialize`, `Scope.shutdown_hook`, `Scope_shutdown`, `xmalloc`,
+`xcalloc`, `xrealloc`, `xfree`, `xmemdup`
 
 ### [lib/string/string.x](../lib/string/string.x)
 
