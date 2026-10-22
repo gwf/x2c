@@ -8,7 +8,7 @@ const demo = {
     { label: "Demo 2 - output", filename: "sum.c", source: "#include <stdio.h>\n\nint main(void)\n{\n    int values[] = {2, 4, 6, 8};\n    int count = sizeof(values) / sizeof(values[0]);\n    int total = 0;\n\n    for (int i = 0; i < count; i++) {\n        total += values[i];\n    }\n\n    printf(\"%d values, sum: %d\\n\", count, total);\n    return 0;\n}\n" }
   ]
 };
-let dataset = demo, selected = 1, layout = "split", operations = [], changeRows = [], changeIndex = -1;
+let dataset = demo, selected = 1, layout = "unified", operations = [], changeRows = [], changeIndex = -1;
 let comparisons = [], visualSources = [];
 const escapeHTML = (value) => String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
 const lineCount = (source) => SourceDiff.lines(source).length;
