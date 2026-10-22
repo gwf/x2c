@@ -6,6 +6,7 @@
 */
 
 #include <ctype.h>
+#include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,14 +26,12 @@ typedef struct {
 } Counts;
 
 int main(int argc, char **argv) {
-  if (argc != 2) {
-    fprintf(stderr, "Usage: %s FILE\n", argv[0]);
-    return EXIT_FAILURE;
-  }
+  if (argc != 2)
+    fail("Usage: " + argv[0] + " FILE");
   FILE *input = fopen(argv[1], "r");
   if (!input) {
-    perror(argv[1]);
-    return EXIT_FAILURE;
+    String reason = String.new(strerror(errno));
+    fail(argv[1] + ": " + reason);
   }
   Counts counts = {0}; // Default root scope needs no retain/release here.
   char *line = NULL;
@@ -41,12 +40,15 @@ int main(int argc, char **argv) {
   while (getline(&line, &capacity, input) != -1) count_line(&counts, line);
   int finished = feof(input);
   fclose(input);
-  if (!finished) {
-    fprintf(stderr, "Could not finish reading %s\n", argv[1]);
-    return EXIT_FAILURE;
-  }
+  if (!finished)
+    fail("Could not finish reading " + argv[1]);
   print_top_ten(&counts);
   return EXIT_SUCCESS; // Root scope frees words and table.
+}
+
+static void fail(const char *message) {
+  fprintf(stderr, "%s\n", message);
+  exit(EXIT_FAILURE);
 }
 
 static void count_line(Counts *counts, char *line) {
@@ -138,9 +140,4 @@ static uint64_t hash_word(const char *word) {
     hash *= 0x100000001b3ULL;
   }
   return hash;
-}
-
-static void fail(const char *message) {
-  fprintf(stderr, "%s\n", message);
-  exit(EXIT_FAILURE);
 }
