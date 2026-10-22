@@ -107,6 +107,12 @@ table, and arbitrary script-port experiments remain reference material.
 
 ### Decisions and completed records
 
+Archived 2026-10-21:
+
+- [Build CLI defaults](archive/build-cli-defaults.md): delivered at
+  `27812dffe` after integrating the upstream thread repair. Normal publication
+  validation and the performance checkpoint passed.
+
 Archived 2026-10-16 after wave closeout:
 
 - [Module storage class](archive/module-storage-class.md): delivered in

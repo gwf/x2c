@@ -372,7 +372,7 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
   Self $array.reverse(Self);
   int $array.equal($array, $array);
 
-  /** Returns a fresh empty packed array owned by the current `Scope`.
+  /** Returns a fresh empty array in the active allocation scope.
       Raises: `<alloc-fail>` when storage cannot be allocated.
   */
   $array $array.new(void) {
@@ -826,14 +826,15 @@ macro Unit $array.typed.publish(Type $array, Type $element, Name $unbox,
     $array staged = $prepare_export(array, source), committed = NULL;
     defer if (staged != NULL && committed == NULL)
       staged.free();
-    Scope *destination = source.export_destination();
     if (staged == NULL) {
-      array.block().move_to(destination);
+      source.move_block(array);
       return array;
     }
 
-    staged.block().move_to(destination);
-    source.move_allocation(array);
+    source.move_block(array);
+    Scope owner = Scope.owner(array), temporary = Scope.owner(staged);
+    Scope.move((unsigned char *) staged.bytes - sizeof(Block), &owner);
+    Scope.move((unsigned char *) array.bytes - sizeof(Block), &temporary);
     Bytes old_bytes = array.bytes;
     size_t old_length = array.length, old_cap = array.cap;
     array.bytes = staged.bytes;

@@ -2156,11 +2156,11 @@ ArrayChar Array_arraychar(Array _x2c_gensym_macro_values_4){
 
 int Context_owns(Context, void *);
 
-Scope * Context_export_destination(Context);
+void Context_move_block(Context, Block);
 
-void Block_move_to(Block, Scope *);
+Scope Scope_owner(void *);
 
-void Context_move_allocation(Context, void *);
+void Scope_move(void *, Scope *);
 
 void ArrayChar_free(ArrayChar a0);
 
@@ -2180,9 +2180,8 @@ static ArrayChar ArrayChar_export_context(ArrayChar _x2c_gensym_macro_array_46, 
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_5);
     {
-      Scope * _x2c_gensym_macro_destination_0 = Context_export_destination(_x2c_gensym_macro_source_1);
       if(_x2c_gensym_macro_staged_0 == NULL){
-        Block_move_to(ArrayChar_block(_x2c_gensym_macro_array_46), _x2c_gensym_macro_destination_0);
+        Context_move_block(_x2c_gensym_macro_source_1, ArrayChar_block(_x2c_gensym_macro_array_46));
         {
           ArrayChar _x2c_gensym_return_value_4 = _x2c_gensym_macro_array_46;
           {
@@ -2193,8 +2192,10 @@ static ArrayChar ArrayChar_export_context(ArrayChar _x2c_gensym_macro_array_46, 
         }
 
       }
-      Block_move_to(ArrayChar_block(_x2c_gensym_macro_staged_0), _x2c_gensym_macro_destination_0);
-      Context_move_allocation(_x2c_gensym_macro_source_1, _x2c_gensym_macro_array_46);
+      Context_move_block(_x2c_gensym_macro_source_1, ArrayChar_block(_x2c_gensym_macro_array_46));
+      Scope _x2c_gensym_macro_owner_0 = Scope_owner(_x2c_gensym_macro_array_46), _x2c_gensym_macro_temporary_0 = Scope_owner(_x2c_gensym_macro_staged_0);
+      Scope_move((unsigned char *) _x2c_gensym_macro_staged_0 -> bytes - sizeof(Block), & _x2c_gensym_macro_owner_0);
+      Scope_move((unsigned char *) _x2c_gensym_macro_array_46 -> bytes - sizeof(Block), & _x2c_gensym_macro_temporary_0);
       Bytes _x2c_gensym_macro_old_bytes_0 = _x2c_gensym_macro_array_46 -> bytes;
       size_t _x2c_gensym_macro_old_length_0 = _x2c_gensym_macro_array_46 -> length, _x2c_gensym_macro_old_cap_0 = _x2c_gensym_macro_array_46 -> cap;
       _x2c_gensym_macro_array_46 -> bytes = _x2c_gensym_macro_staged_0 -> bytes;
@@ -2794,9 +2795,8 @@ static ArrayShort ArrayShort_export_context(ArrayShort _x2c_gensym_macro_array_9
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_10);
     {
-      Scope * _x2c_gensym_macro_destination_1 = Context_export_destination(_x2c_gensym_macro_source_3);
       if(_x2c_gensym_macro_staged_1 == NULL){
-        Block_move_to(ArrayShort_block(_x2c_gensym_macro_array_95), _x2c_gensym_macro_destination_1);
+        Context_move_block(_x2c_gensym_macro_source_3, ArrayShort_block(_x2c_gensym_macro_array_95));
         {
           ArrayShort _x2c_gensym_return_value_9 = _x2c_gensym_macro_array_95;
           {
@@ -2807,8 +2807,10 @@ static ArrayShort ArrayShort_export_context(ArrayShort _x2c_gensym_macro_array_9
         }
 
       }
-      Block_move_to(ArrayShort_block(_x2c_gensym_macro_staged_1), _x2c_gensym_macro_destination_1);
-      Context_move_allocation(_x2c_gensym_macro_source_3, _x2c_gensym_macro_array_95);
+      Context_move_block(_x2c_gensym_macro_source_3, ArrayShort_block(_x2c_gensym_macro_array_95));
+      Scope _x2c_gensym_macro_owner_1 = Scope_owner(_x2c_gensym_macro_array_95), _x2c_gensym_macro_temporary_1 = Scope_owner(_x2c_gensym_macro_staged_1);
+      Scope_move((unsigned char *) _x2c_gensym_macro_staged_1 -> bytes - sizeof(Block), & _x2c_gensym_macro_owner_1);
+      Scope_move((unsigned char *) _x2c_gensym_macro_array_95 -> bytes - sizeof(Block), & _x2c_gensym_macro_temporary_1);
       Bytes _x2c_gensym_macro_old_bytes_1 = _x2c_gensym_macro_array_95 -> bytes;
       size_t _x2c_gensym_macro_old_length_1 = _x2c_gensym_macro_array_95 -> length, _x2c_gensym_macro_old_cap_1 = _x2c_gensym_macro_array_95 -> cap;
       _x2c_gensym_macro_array_95 -> bytes = _x2c_gensym_macro_staged_1 -> bytes;
@@ -3402,9 +3404,8 @@ static ArrayInt ArrayInt_export_context(ArrayInt _x2c_gensym_macro_array_144, Co
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_15);
     {
-      Scope * _x2c_gensym_macro_destination_2 = Context_export_destination(_x2c_gensym_macro_source_5);
       if(_x2c_gensym_macro_staged_2 == NULL){
-        Block_move_to(ArrayInt_block(_x2c_gensym_macro_array_144), _x2c_gensym_macro_destination_2);
+        Context_move_block(_x2c_gensym_macro_source_5, ArrayInt_block(_x2c_gensym_macro_array_144));
         {
           ArrayInt _x2c_gensym_return_value_14 = _x2c_gensym_macro_array_144;
           {
@@ -3415,8 +3416,10 @@ static ArrayInt ArrayInt_export_context(ArrayInt _x2c_gensym_macro_array_144, Co
         }
 
       }
-      Block_move_to(ArrayInt_block(_x2c_gensym_macro_staged_2), _x2c_gensym_macro_destination_2);
-      Context_move_allocation(_x2c_gensym_macro_source_5, _x2c_gensym_macro_array_144);
+      Context_move_block(_x2c_gensym_macro_source_5, ArrayInt_block(_x2c_gensym_macro_array_144));
+      Scope _x2c_gensym_macro_owner_2 = Scope_owner(_x2c_gensym_macro_array_144), _x2c_gensym_macro_temporary_2 = Scope_owner(_x2c_gensym_macro_staged_2);
+      Scope_move((unsigned char *) _x2c_gensym_macro_staged_2 -> bytes - sizeof(Block), & _x2c_gensym_macro_owner_2);
+      Scope_move((unsigned char *) _x2c_gensym_macro_array_144 -> bytes - sizeof(Block), & _x2c_gensym_macro_temporary_2);
       Bytes _x2c_gensym_macro_old_bytes_2 = _x2c_gensym_macro_array_144 -> bytes;
       size_t _x2c_gensym_macro_old_length_2 = _x2c_gensym_macro_array_144 -> length, _x2c_gensym_macro_old_cap_2 = _x2c_gensym_macro_array_144 -> cap;
       _x2c_gensym_macro_array_144 -> bytes = _x2c_gensym_macro_staged_2 -> bytes;
@@ -4012,9 +4015,8 @@ static ArrayLong ArrayLong_export_context(ArrayLong _x2c_gensym_macro_array_193,
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_20);
     {
-      Scope * _x2c_gensym_macro_destination_3 = Context_export_destination(_x2c_gensym_macro_source_7);
       if(_x2c_gensym_macro_staged_3 == NULL){
-        Block_move_to(ArrayLong_block(_x2c_gensym_macro_array_193), _x2c_gensym_macro_destination_3);
+        Context_move_block(_x2c_gensym_macro_source_7, ArrayLong_block(_x2c_gensym_macro_array_193));
         {
           ArrayLong _x2c_gensym_return_value_19 = _x2c_gensym_macro_array_193;
           {
@@ -4025,8 +4027,10 @@ static ArrayLong ArrayLong_export_context(ArrayLong _x2c_gensym_macro_array_193,
         }
 
       }
-      Block_move_to(ArrayLong_block(_x2c_gensym_macro_staged_3), _x2c_gensym_macro_destination_3);
-      Context_move_allocation(_x2c_gensym_macro_source_7, _x2c_gensym_macro_array_193);
+      Context_move_block(_x2c_gensym_macro_source_7, ArrayLong_block(_x2c_gensym_macro_array_193));
+      Scope _x2c_gensym_macro_owner_3 = Scope_owner(_x2c_gensym_macro_array_193), _x2c_gensym_macro_temporary_3 = Scope_owner(_x2c_gensym_macro_staged_3);
+      Scope_move((unsigned char *) _x2c_gensym_macro_staged_3 -> bytes - sizeof(Block), & _x2c_gensym_macro_owner_3);
+      Scope_move((unsigned char *) _x2c_gensym_macro_array_193 -> bytes - sizeof(Block), & _x2c_gensym_macro_temporary_3);
       Bytes _x2c_gensym_macro_old_bytes_3 = _x2c_gensym_macro_array_193 -> bytes;
       size_t _x2c_gensym_macro_old_length_3 = _x2c_gensym_macro_array_193 -> length, _x2c_gensym_macro_old_cap_3 = _x2c_gensym_macro_array_193 -> cap;
       _x2c_gensym_macro_array_193 -> bytes = _x2c_gensym_macro_staged_3 -> bytes;
@@ -4620,9 +4624,8 @@ static ArrayFloat ArrayFloat_export_context(ArrayFloat _x2c_gensym_macro_array_2
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_25);
     {
-      Scope * _x2c_gensym_macro_destination_4 = Context_export_destination(_x2c_gensym_macro_source_9);
       if(_x2c_gensym_macro_staged_4 == NULL){
-        Block_move_to(ArrayFloat_block(_x2c_gensym_macro_array_242), _x2c_gensym_macro_destination_4);
+        Context_move_block(_x2c_gensym_macro_source_9, ArrayFloat_block(_x2c_gensym_macro_array_242));
         {
           ArrayFloat _x2c_gensym_return_value_24 = _x2c_gensym_macro_array_242;
           {
@@ -4633,8 +4636,10 @@ static ArrayFloat ArrayFloat_export_context(ArrayFloat _x2c_gensym_macro_array_2
         }
 
       }
-      Block_move_to(ArrayFloat_block(_x2c_gensym_macro_staged_4), _x2c_gensym_macro_destination_4);
-      Context_move_allocation(_x2c_gensym_macro_source_9, _x2c_gensym_macro_array_242);
+      Context_move_block(_x2c_gensym_macro_source_9, ArrayFloat_block(_x2c_gensym_macro_array_242));
+      Scope _x2c_gensym_macro_owner_4 = Scope_owner(_x2c_gensym_macro_array_242), _x2c_gensym_macro_temporary_4 = Scope_owner(_x2c_gensym_macro_staged_4);
+      Scope_move((unsigned char *) _x2c_gensym_macro_staged_4 -> bytes - sizeof(Block), & _x2c_gensym_macro_owner_4);
+      Scope_move((unsigned char *) _x2c_gensym_macro_array_242 -> bytes - sizeof(Block), & _x2c_gensym_macro_temporary_4);
       Bytes _x2c_gensym_macro_old_bytes_4 = _x2c_gensym_macro_array_242 -> bytes;
       size_t _x2c_gensym_macro_old_length_4 = _x2c_gensym_macro_array_242 -> length, _x2c_gensym_macro_old_cap_4 = _x2c_gensym_macro_array_242 -> cap;
       _x2c_gensym_macro_array_242 -> bytes = _x2c_gensym_macro_staged_4 -> bytes;
@@ -5228,9 +5233,8 @@ static ArrayDbl ArrayDbl_export_context(ArrayDbl _x2c_gensym_macro_array_291, Co
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_30);
     {
-      Scope * _x2c_gensym_macro_destination_5 = Context_export_destination(_x2c_gensym_macro_source_11);
       if(_x2c_gensym_macro_staged_5 == NULL){
-        Block_move_to(ArrayDbl_block(_x2c_gensym_macro_array_291), _x2c_gensym_macro_destination_5);
+        Context_move_block(_x2c_gensym_macro_source_11, ArrayDbl_block(_x2c_gensym_macro_array_291));
         {
           ArrayDbl _x2c_gensym_return_value_29 = _x2c_gensym_macro_array_291;
           {
@@ -5241,8 +5245,10 @@ static ArrayDbl ArrayDbl_export_context(ArrayDbl _x2c_gensym_macro_array_291, Co
         }
 
       }
-      Block_move_to(ArrayDbl_block(_x2c_gensym_macro_staged_5), _x2c_gensym_macro_destination_5);
-      Context_move_allocation(_x2c_gensym_macro_source_11, _x2c_gensym_macro_array_291);
+      Context_move_block(_x2c_gensym_macro_source_11, ArrayDbl_block(_x2c_gensym_macro_array_291));
+      Scope _x2c_gensym_macro_owner_5 = Scope_owner(_x2c_gensym_macro_array_291), _x2c_gensym_macro_temporary_5 = Scope_owner(_x2c_gensym_macro_staged_5);
+      Scope_move((unsigned char *) _x2c_gensym_macro_staged_5 -> bytes - sizeof(Block), & _x2c_gensym_macro_owner_5);
+      Scope_move((unsigned char *) _x2c_gensym_macro_array_291 -> bytes - sizeof(Block), & _x2c_gensym_macro_temporary_5);
       Bytes _x2c_gensym_macro_old_bytes_5 = _x2c_gensym_macro_array_291 -> bytes;
       size_t _x2c_gensym_macro_old_length_5 = _x2c_gensym_macro_array_291 -> length, _x2c_gensym_macro_old_cap_5 = _x2c_gensym_macro_array_291 -> cap;
       _x2c_gensym_macro_array_291 -> bytes = _x2c_gensym_macro_staged_5 -> bytes;
@@ -5838,9 +5844,8 @@ static ArrayString ArrayString_export_context(ArrayString _x2c_gensym_macro_arra
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_35);
     {
-      Scope * _x2c_gensym_macro_destination_6 = Context_export_destination(_x2c_gensym_macro_source_13);
       if(_x2c_gensym_macro_staged_6 == NULL){
-        Block_move_to(ArrayString_block(_x2c_gensym_macro_array_340), _x2c_gensym_macro_destination_6);
+        Context_move_block(_x2c_gensym_macro_source_13, ArrayString_block(_x2c_gensym_macro_array_340));
         {
           ArrayString _x2c_gensym_return_value_34 = _x2c_gensym_macro_array_340;
           {
@@ -5851,8 +5856,10 @@ static ArrayString ArrayString_export_context(ArrayString _x2c_gensym_macro_arra
         }
 
       }
-      Block_move_to(ArrayString_block(_x2c_gensym_macro_staged_6), _x2c_gensym_macro_destination_6);
-      Context_move_allocation(_x2c_gensym_macro_source_13, _x2c_gensym_macro_array_340);
+      Context_move_block(_x2c_gensym_macro_source_13, ArrayString_block(_x2c_gensym_macro_array_340));
+      Scope _x2c_gensym_macro_owner_6 = Scope_owner(_x2c_gensym_macro_array_340), _x2c_gensym_macro_temporary_6 = Scope_owner(_x2c_gensym_macro_staged_6);
+      Scope_move((unsigned char *) _x2c_gensym_macro_staged_6 -> bytes - sizeof(Block), & _x2c_gensym_macro_owner_6);
+      Scope_move((unsigned char *) _x2c_gensym_macro_array_340 -> bytes - sizeof(Block), & _x2c_gensym_macro_temporary_6);
       Bytes _x2c_gensym_macro_old_bytes_6 = _x2c_gensym_macro_array_340 -> bytes;
       size_t _x2c_gensym_macro_old_length_6 = _x2c_gensym_macro_array_340 -> length, _x2c_gensym_macro_old_cap_6 = _x2c_gensym_macro_array_340 -> cap;
       _x2c_gensym_macro_array_340 -> bytes = _x2c_gensym_macro_staged_6 -> bytes;

@@ -27,11 +27,13 @@ static keyword loop $private.loop;
 #include "common.x"
 
 /** Holds a mutable identity-bearing sequence of non-`void` `Var` elements.
-    `Array` is the same object as its `Block` view; that object and its backing
-    storage belong to the `Scope` active at construction.
+    `Array` is the same object as its `Block` view. Its handle and backing
+    storage belong to the construction-time active Scope. `Array.scope`
+    lazily creates a separate scope for explicitly owned contents.
     Assignment aliases it;
     `Array.copy` creates a new container, but still borrows any objects
-    referenced by its elements. `Array.free` invalidates all aliases.
+    referenced by its elements. `Array.free` destroys owned contents and
+    frees its record and backing storage, invalidating all aliases.
 */
 typedef Block Array;
 

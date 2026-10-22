@@ -935,7 +935,6 @@ static void f8_planning____set_product(Project p, ProjectTarget target, CliReque
   request -> output = chosen && String_truth(command -> output) ? command -> output : f8_planning____target_output(p, target, request -> kind);
   request -> build_dir = String_join(NULL, cons(String_var(p -> build_root), cons(String_var(_74), cons(String_var(target -> name), NULL))));
   request -> save_temps = 0;
-  request -> temps_dir = NULL;
 }
 
 static String f8_planning____target_output(Project p, ProjectTarget target, Symbol kind){

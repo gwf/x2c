@@ -19,6 +19,7 @@ typedef struct ScopeAlloc{
 typedef struct Scope{
   ScopeAlloc first;
   struct Scope * down, * up;
+  struct Scope * parent, * children, * previous, * next;
 }
 * Scope;
 
@@ -56,6 +57,8 @@ Scope Scope_owner(void * ptr);
 
 void Scope_move(void * ptr, Scope * slot);
 
+void Scope_move_before(void * ptr, void * anchor);
+
 void * Scope_realloc(void * ptr, size_t size);
 
 void Scope_push(Scope * scope);
@@ -69,6 +72,14 @@ void Scope_retain(void);
 void Scope_release(void);
 
 Scope Scope_new(void);
+
+Scope Scope_child(void);
+
+Scope Scope_parent(Scope scope);
+
+void Scope_transfer(Scope scope, Scope destination);
+
+int Scope_contains(Scope scope, Scope candidate);
 
 Scope Scope_new_named(const char * name);
 

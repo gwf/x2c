@@ -761,6 +761,9 @@ static const char *evidence_rows[][2] = {
   {"array", "`make verify` (`unittest/test-array.x`) and `make examples`."},
   {"atom", "`make verify` (`unittest/test-atom.x`)."},
   {"buffer", "`make verify` (`unittest/test-buffer.x`)."},
+  {"channel", "`make verify` (`unittest/test-channel.x` and "
+              "`unittest/test-channel-batch.x`) and `make examples` "
+              "(`power/channel-word-count`, `power/channel-service`)."},
   {"context", "`make verify` (`unittest/test-context.x`)."},
   {"diff", "`make verify` (`unittest/test-diff.x`)."},
   {"digest", "`make verify` (`unittest/test-digest.x`)."},
@@ -808,7 +811,8 @@ static const char *evidence_rows[][2] = {
   {"symbol", "`make verify` (`unittest/test-symbol.x`) and `make examples` "
              "(`symbol-literal-demo`)."},
   {"symbolset", "`make verify` (compiler `SymbolSet` fixtures)."},
-  {"thread", "`make verify` (`unittest/test-thread.x`)."},
+  {"thread", "`make verify` (`unittest/test-thread.x` and "
+             "`unittest/test-thread-batch.x`)."},
   {"typed-array", "`make verify` (`unittest/test-typed-array.x`)."},
   {"typed-list", "`make verify` (`unittest/test-typed-list.x`)."},
   {"typed-map", "`make verify` (`unittest/test-typed-map.x`)."},

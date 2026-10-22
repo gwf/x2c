@@ -76,7 +76,10 @@ macro Unit $map.scaffold(
    `entry` and `table` qualifiers keep each one apart from the public
    operation that checks and calls it. */
 
-macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
+/* PoolTable records its allocation scope. Public families reserve that field
+   for lazily acquired owned contents. */
+macro Unit $map.storage.family(
+  Type $map, Type $storage, Type $key, Type $value,
   Type $hash_cell,
   Type $entry,
   Name $hash,
@@ -86,10 +89,12 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
   Name $key_at,
   Name $value_at,
   Name $reinsert_error,
-  Name $insert_error
+  Name $insert_error,
+  Literal $owned
 ) {
   static void $map.free_table($map map) {
     if ((void *) map == 0) return;
+    if ($owned && map.scope) map.scope.destroy();
     map.hashes.free();
     map.entries.free();
     Scope_free(map);
@@ -98,10 +103,7 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
   static $map $map.new_table($map unused, unsigned capacity) {
     (void) unused;
     $map map = Scope_malloc(sizeof($storage));
-    /* The scope itself, not the active slot: a later `Scope.retain`
-       replaces what that slot holds, and growth would follow it into
-       the new region and be freed with it. */
-    map.scope = *Scope_top();
+    map.scope = $owned ? NULL : *Scope_top();
     map.hashes = Bytes_new(sizeof($hash_cell));
     map.hashes = map.hashes.append(0, capacity);
     map.entries = Bytes_new(sizeof($entry));
@@ -202,10 +204,14 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
     for (unsigned i = 0; i < cap; i++)
       if (hashes[i]) expanded_map.reinsert(hashes[i], entries[i], 0);
 
-    Scope_move(staged_hashes.block(), &map.scope);
-    Scope_move((unsigned char *) staged_hashes - sizeof(Block), &map.scope);
-    Scope_move(staged_entries.block(), &map.scope);
-    Scope_move((unsigned char *) staged_entries - sizeof(Block), &map.scope);
+    Scope_move_before(staged_hashes.block(), map.hashes.block());
+    Scope_move_before(
+      (unsigned char *) staged_hashes - sizeof(Block),
+      (unsigned char *) map.hashes - sizeof(Block));
+    Scope_move_before(staged_entries.block(), map.entries.block());
+    Scope_move_before(
+      (unsigned char *) staged_entries - sizeof(Block),
+      (unsigned char *) map.entries - sizeof(Block));
     map.hashes = expanded.hashes;
     map.entries = expanded.entries;
     map.capacity = expanded.capacity;
@@ -359,6 +365,47 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
       if (!b.try_get_entry(&key, &bvalue) ||
           !$value_equal(&avalue, &bvalue)) return 0;
     return 1;
+  }
+}
+
+macro Unit $map.core.family(
+  Type $family, Type $storage, Type $key, Type $value,
+  Type $hash_cell, Type $entry,
+  Name $hash, Name $key_equal, Name $value_equal, Name $value_valid,
+  Name $key_at, Name $value_at, Name $reinsert_error, Name $insert_error
+) {
+  $map.storage.family(
+    $family, $storage, $key, $value, $hash_cell, $entry,
+    $hash, $key_equal, $value_equal, $value_valid,
+    $key_at, $value_at, $reinsert_error, $insert_error, 1);
+
+  /** Acquires the Map's scope for explicitly owned contents.
+      Created lazily beneath the record's owner, this scope excludes the
+      record and backing Blocks. Stored references remain borrowed unless
+      explicitly moved into it. NULL returns NULL.
+      Raises: `<alloc-fail>` when creating the scope.
+  */
+  Scope $family.scope($family map) {
+    if ((void *) map == 0) return NULL;
+    if (!map.scope) {
+      map.scope = Scope_new();
+      map.scope.transfer(Scope_owner(map));
+    }
+    return map.scope;
+  }
+
+  /** Moves the record, backing Blocks, and nullable owned contents together.
+      Pointers and references remain unchanged. The destination slot acquires
+      a scope if empty. NULL maps do nothing.
+      Raises: `<bad-arg>` for a NULL destination slot, or `<alloc-fail>` while
+      creating its scope. Those failures leave ownership unchanged.
+  */
+  void $family.move_to($family map, Scope *destination) {
+    if ((void *) map == 0) return;
+    map.hashes.block().move_to(destination);
+    map.entries.block().move_to(destination);
+    Scope_move(map, destination);
+    map.scope.transfer(*destination);
   }
 }
 
@@ -853,26 +900,26 @@ macro Unit $map.typed.publish(
     defer if ((void *) staged != 0 && (void *) committed == 0)
       staged.free_table();
 
-    Scope *destination = source.export_destination();
-    Scope.move(map, destination);
-    if ((void *) staged == 0) {
-      map.hashes.block().move_to(destination);
-      map.entries.block().move_to(destination);
-    }
-    else {
+    if ((void *) staged != 0) {
       Bytes old_hashes = map.hashes, old_entries = map.entries;
-      staged.hashes.block().move_to(destination);
-      staged.entries.block().move_to(destination);
+      Scope owner = Scope_owner(map);
+      staged.hashes.block().move_to(&owner);
+      staged.entries.block().move_to(&owner);
       map.hashes = staged.hashes;
       map.entries = staged.entries;
       map.used = staged.used;
       map.capacity = staged.capacity;
       map.mask = staged.mask;
-      staged.hashes = old_hashes;
-      staged.entries = old_entries;
+      old_hashes.free();
+      old_entries.free();
+      staged.hashes = 0;
+      staged.entries = 0;
       staged.free_table();
     }
-    map.scope = *destination;
+    source.move_allocation(map);
+    source.move_block(map.hashes.block());
+    source.move_block(map.entries.block());
+    source.move_scope(map.scope);
     committed = map;
     return map;
   }

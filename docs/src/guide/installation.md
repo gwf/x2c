@@ -20,7 +20,7 @@ From a source checkout:
 ```sh
 make install PREFIX="$HOME/.local/x2c"
 export PATH="$HOME/.local/x2c/bin:$PATH"
-x2c build hello.x --output hello
+x2c build hello.x -o hello
 ./hello
 ```
 
@@ -81,7 +81,7 @@ prefix to relocate it. Keep `bin`, `include`, `lib`, `etc`, `packages`, and
 invoking it:
 
 ```sh
-"/path with spaces/x2c/bin/x2c" build hello.x --output hello
+"/path with spaces/x2c/bin/x2c" build hello.x -o hello
 ```
 
 An upgrade stages a complete payload, replaces files owned by the previous
@@ -187,13 +187,15 @@ For source debugging, opt into native debug information and original source
 locations:
 
 ```sh
-x2c build -g --source-map hello.x --output hello
+x2c build -g --source-map -O0 hello.x -o hello
 lldb ./hello
 ```
 
 On macOS this also produces `hello.dSYM`; move that directory with the
 executable. The build removes generated objects; pass `--build-dir` to keep
-them. [Source mapping](../reference/cli.md#source-mapping) gives the
+and reuse them. Bare `--save-temps` uses `.x2c-build` for retained files.
+`--debug` enables compiler logging, not native debug information.
+[Source mapping](../reference/cli.md#source-mapping) gives the
 location rules.
 
 ### Compile C against the x2c runtime

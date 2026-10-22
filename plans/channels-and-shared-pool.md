@@ -1,6 +1,9 @@
 # Channels, ownership transfer, and the shared pool service
 
-> Status: active design proposal, 2026-10-21.
+> Status: historical proposal, superseded by the Channel and explicit ownership
+> work on dev. Preserved below as design history; current contracts are in the
+> [Channels](../docs/src/guide/channels.md) and
+> [Storage ownership](../docs/src/guide/storage-ownership.md) chapters.
 > Requested design only; no runtime implementation or performance result.
 > Source baseline: `e2a78078edece1348abbbb7363c89560ae064706`.
 > This plan owns the proposed channel/thread/pool replacement described below.

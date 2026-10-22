@@ -6,12 +6,11 @@ code, including its normally hidden setup and assertions. Autodiff and package
 slides instead link to existing, independently maintained examples. Both
 kinds of correspondence are listed in [gallery.json](gallery.json).
 
-After building x2c, add the repository root to PATH for this shell. Start
-from the repository root:
+After building x2c, start from the repository root. Use `./x2c` to select
+the current development build:
 
 ```sh
-export PATH="$PWD:$PATH"
-x2c run examples/foreach.x
+./x2c run examples/foreach.x
 make examples
 
 # Run two of the executables that make examples built.
@@ -26,9 +25,9 @@ Files, Counting, and Exceptions use their checked-in data by default when
 started from the repository root:
 
 ```sh
-x2c run examples/love/files.x
-x2c run examples/power/counting.x
-x2c run examples/power/exceptions.x
+./x2c run examples/love/files.x
+./x2c run examples/power/counting.x
+./x2c run examples/power/exceptions.x
 ```
 
 Files and Counting also accept an input filename. Exceptions accepts a
@@ -66,6 +65,11 @@ are separate from the curated example checks.
   file list; verify cleanup on normal exit, return, and exception.
 - [Match](power/match.x): simplify nested code using patterns and templates.
 - [Threads](power/threads.x): square two copied batches and combine their sums.
+- [Channel word count](power/channel-word-count.x): stream filenames and Maps
+  through bounded channels in one supervised batch. Strings use the shared
+  process canonical pool; each result Map transfers explicitly.
+- [Channel service](power/channel-service.x): send requests with reply channels.
+  The service and its clients finish together under `Thread.run`.
 - [Exceptions](power/exceptions.x): close a file before handling a failed read.
 - [Generics](power/generics.x): count response codes with typed collections.
 - [Imports](power/imports.x): use PCRE2 to extract named request fields.
@@ -119,8 +123,8 @@ from the gallery examples.
   [an external Lisp policy](magic/file-policy.x).
 
 ```sh
-x2c run examples/power/word-count-summary.x -- examples/data/docs-words.txt
-x2c run examples/magic/file-policy.x -- examples/magic/policy.xlisp
+./x2c run examples/power/word-count-summary.x -- examples/data/docs-words.txt
+./x2c run examples/magic/file-policy.x -- examples/magic/policy.xlisp
 ```
 
 The [tic-tac-toe game](magic/tic-tac-toe.x) runs an editable
@@ -128,7 +132,7 @@ The [tic-tac-toe game](magic/tic-tac-toe.x) runs an editable
 moves through native board queries. Reuse the executable after editing it:
 
 ```sh
-x2c build --output /tmp/tic-tac-toe examples/magic/tic-tac-toe.x
+./x2c build --output /tmp/tic-tac-toe examples/magic/tic-tac-toe.x
 /tmp/tic-tac-toe examples/magic/tic-tac-toe.xlisp
 ```
 
@@ -153,8 +157,8 @@ evaluator, native bindings, and standard library live in that one file.
 It runs without an initialization file:
 
 ```sh
-x2c run examples/programs/literate-lisp.x -- --selftest
-x2c run examples/programs/literate-lisp.x -- \
+./x2c run examples/programs/literate-lisp.x -- --selftest
+./x2c run examples/programs/literate-lisp.x -- \
   examples/data/reference-lisp/showcase.xlisp
 ```
 
@@ -163,16 +167,16 @@ its representation and compatibility rules. The optional comparison against
 the production Lisp is available with:
 
 ```sh
-x2c script examples/programs/check-reference-lisp --build
+./x2c script examples/programs/check-reference-lisp --build
 ```
 
 [programs/lisp.x](programs/lisp.x) is an interactive Lisp shell. Run it from
 the repository root:
 
 ```sh
-x2c run examples/programs/lisp.x
-x2c run examples/programs/lisp.x -- -e '(def id (lambda (x) x)) (id 42)'
-x2c run examples/programs/lisp.x -- program.xlisp
+./x2c run examples/programs/lisp.x
+./x2c run examples/programs/lisp.x -- -e '(def id (lambda (x) x)) (id 42)'
+./x2c run examples/programs/lisp.x -- program.xlisp
 ```
 
 It loads `etc/init.xlisp` by default; `--init FILE` or `X2C_LISP_INIT` selects

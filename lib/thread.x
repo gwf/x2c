@@ -22,8 +22,10 @@ typedef Var (*ThreadFn)(const void *input, size_t input_size);
 
 /** Computes a worker result from one borrowed `Var` input.
     Referenced input storage must stay alive and unchanged until join.
-    Return fresh worker-owned values normally; `Thread.join` exports them.
-    Error policy and result transfer follow `ThreadFn`.
+    Thread.start accepts fresh worker-owned results; Thread.join exports them.
+    ParallelMap instead borrows results until its reducer returns; retained
+    worker storage requires explicit transfer by that reducer.
+    Thread.start error policy and result transfer follow ThreadFn.
 */
 typedef Var (*ThreadValueFn)(Var input);
 
@@ -42,6 +44,8 @@ typedef struct Thread *Thread;
 
 #include "context.x"
 #include "dispatch.x"
+#include "func.x"
+#include "rewrite.x"
 #include "error/error.x"
 #include "error_init.x"
 #include "exception.x"
@@ -71,6 +75,9 @@ static struct Thread {
   int finished;
   struct ParallelRun *parallel;
   int assigned;
+  int batch;
+  int stop_requested;
+  pthread_cond_t *waiting;
 };
 
 static struct ThreadValueInput { ThreadValueFn function; Var value; };
@@ -79,6 +86,9 @@ static struct ParallelMap {
   ThreadValueFn function;
   int workers;
 };
+
+static threaded Thread running_thread;
+static threaded int stop_mask;
 
 static int thread_live_count;
 static pthread_mutex_t thread_completion_mutex =
@@ -97,6 +107,61 @@ static size_t _input_offset(void) {
 
 static void *_input(Thread thread) =>
   (unsigned char *) thread + _input_offset();
+
+// cooperative waits
+
+/** Locks the internal monitor shared by stop publication and queue commits.
+    Native synchronization failure aborts without entering Error dispatch. */
+void x2c_thread_wait_lock(void) =>
+  _completion_check(pthread_mutex_lock(&thread_completion_mutex));
+
+/** Unlocks the internal stop/queue monitor. */
+void x2c_thread_wait_unlock(void) =>
+  _completion_check(pthread_mutex_unlock(&thread_completion_mutex));
+
+/** Returns the current wait's borrowed Thread token, or NULL for an unmanaged
+    or cleanup-masked caller. Call while holding the internal monitor. */
+Thread x2c_thread_wait_owner(void) => stop_mask ? NULL : running_thread;
+
+/** Tests a borrowed wait token under the internal monitor. A null token has
+    no stop request. Queues use this before committing a rendezvous peer. */
+int x2c_thread_wait_stopped(Thread owner) => owner && owner.stop_requested;
+
+/** Tests the current wait's pending stop under the internal monitor. */
+int x2c_thread_stopping(void) =>
+  x2c_thread_wait_stopped(x2c_thread_wait_owner());
+
+/** Waits on condition with the internal monitor held. Registration and the
+    pending-stop check share that monitor with Thread.stop. Returns holding
+    the monitor, with the registration removed, including on pending stop.
+    Queue callers recheck predicates and stop before committing an operation.
+*/
+void x2c_thread_wait(pthread_cond_t *condition) {
+  Thread owner = x2c_thread_wait_owner();
+  if (x2c_thread_wait_stopped(owner)) return;
+  if (owner) owner.waiting = condition;
+  _completion_check(pthread_cond_wait(condition, &thread_completion_mutex));
+  if (owner) owner.waiting = NULL;
+}
+
+/** Raises a non-resumable stop outcome after queue locks and wait records
+    have been released. Explicit catches may handle this shared cause. */
+void x2c_thread_cancel(void) {
+  raise %(bad-state (operation "Thread.stop") (cancelled 1));
+}
+
+/** Requests cooperative stopping without closing any Channel. The request
+    persists and wakes a registered Channel or completion wait. Computation
+    and arbitrary native I/O are not interrupted. Repeated requests are safe
+    while the handle remains live; stop does not join or free it.
+    Raises: <bad-arg> for a null handle. */
+void Thread.stop(Thread t) {
+  if (!t) raise %(bad-arg (operation "Thread.stop"));
+  x2c_thread_wait_lock();
+  t.stop_requested = 1;
+  if (t.waiting) _completion_check(pthread_cond_broadcast(t.waiting));
+  x2c_thread_wait_unlock();
+}
 
 // starting
 
@@ -118,16 +183,26 @@ static void *_input(Thread thread) =>
     `<io-fail>` when `pthread_create` fails. Failure during native once
     initialization or mutex setup aborts the process.
 */
-Thread Thread.start_raw(ThreadFn function, const void *input, size_t input_size) {
-  return _start(function, input, input_size, NULL);
+Thread Thread.start_raw(
+  ThreadFn function, const void *input, size_t input_size) {
+  return _start(function, input, input_size, NULL, 0);
 }
 
-static Thread _start(ThreadFn function, const void *input, size_t input_size,
-  struct ParallelRun *parallel) {
+static Thread _start(
+  ThreadFn function, const void *input, size_t input_size,
+  struct ParallelRun *parallel, int batch) {
   if (!function || (input_size && !input))
     raise %(bad-arg (operation "Thread.start_raw"));
   Thread thread = _new_handle(function, input, input_size);
   thread.parallel = parallel;
+  thread.batch = batch;
+  int started = 0;
+  defer if (!started) {
+    if (thread.result_scope) Scope.destroy(thread.result_scope);
+    Error.policy_release(thread.policy);
+    free(thread);
+  }
+  if (batch) thread.result_scope = Scope.new_named("Thread batch result");
   if (pthread_once(&thread_shutdown_once, _register_shutdown)) {
     Error.policy_release(thread.policy);
     free(thread);
@@ -139,10 +214,9 @@ static Thread _start(ThreadFn function, const void *input, size_t input_size,
   int error = _create_native(thread);
   if (error) {
     __atomic_fetch_sub(&thread_live_count, 1, __ATOMIC_SEQ_CST);
-    Error.policy_release(thread.policy);
-    free(thread);
     _error("pthread_create", error);
   }
+  started = 1;
   return thread;
 }
 
@@ -162,17 +236,18 @@ static Var _call_value(const void *input, size_t size) {
     still borrow their caller-owned storage. Result export and Error policy
     are those of `Thread.start_raw` and `Thread.join`. Use `Thread.start_raw`
     for explicit byte-buffer inputs.
-    Raises: `<bad-arg>` for a null callback, or the causes of `Thread.start_raw`.
+    Raises: `<bad-arg>` for a null callback, or the causes of
+    `Thread.start_raw`.
 */
 Thread Thread.start(ThreadValueFn function, Var value) {
   return _start_value(function, value, NULL);
 }
 
-static Thread _start_value(ThreadValueFn function, Var value,
-  struct ParallelRun *parallel) {
+static Thread _start_value(
+  ThreadValueFn function, Var value, struct ParallelRun *parallel) {
   if (!function) raise %(bad-arg (operation "Thread.start"));
   struct ThreadValueInput input = { function, value };
-  return _start(_call_value, &input, sizeof(input), parallel);
+  return _start(_call_value, &input, sizeof(input), parallel, 0);
 }
 
 /* The handle holds the copied input after its own fields, and this thread's
@@ -255,8 +330,10 @@ static void _error(const char *operation, int error) {
    after no worker-private value still needs them. */
 static void *_run(void *argument) {
   Thread thread = argument;
+  running_thread = thread;
   (void) Scope.top();
   Pool.thread_initialize();
+  if (thread.batch || thread.parallel) thread.result_pool = Pool.current();
   Error.initialize_raw();
   Error.policy_adopt(thread.policy);
   thread.policy = NULL;
@@ -276,40 +353,53 @@ static void *_run(void *argument) {
 /* Each job uses the same isolated work and sealed result owners as a one-shot
    Thread. A reusable worker waits until the consumer releases those owners. */
 static void _run_job(Thread thread) {
-  thread.result_scope = Scope.new_named("Thread result");
-  Scope.push(&thread.result_scope);
-  thread.result_pool = Pool.open_named("Thread result");
+  if (!thread.batch) {
+    thread.result_scope = Scope.new_named("Thread result");
+    Scope.push(&thread.result_scope);
+    thread.result_pool = Pool.open_named("Thread result");
+  }
   _work(thread);
-  thread.result_pool = Pool.detach();
-  Scope.pop();
+  if (!thread.batch) {
+    thread.result_pool = Pool.detach();
+    Scope.pop();
+  }
 }
 
-/* Callback temporaries belong to `work`; its exported result or Error
-   snapshot is moved or copied into the outer result stores before `work`
-   closes. */
-static void _work(Thread thread) {
-  Context work = Context.open_isolated_named("Thread callback");
-  int mark = Error.mark();
-  try _call(thread, work);
-  /* A registered catch is consulted during dispatch, before `Error` reaches
-     its policy table, so a bare `catch:` would match first and no policy could
-     ever resume inside a worker. `_capture_errors` converts the causes that
-     really must leave the callback, so this backstop needs only that cause and
-     the one an `Error.push` failure can raise before the observer exists. */
+/* Register the worker observer before opening the work Context, so failure
+   constructing its bounded state is captured just like callback failure. */
+static int _work(Thread thread) {
+  int mark = Error.mark(), again = 0;
+  try {
+    ErrorHandler observer = Error.push(_capture_errors, thread);
+    defer Error.pop(observer);
+    if (thread.batch) Scope.push(&thread.result_scope);
+    defer if (thread.batch) Scope.pop();
+    Context work = thread.batch || thread.parallel
+      ? Context.open_named("Thread callback")
+      : Context.open_isolated_named("Thread callback");
+    defer work.close();
+    again = _call(thread, work);
+  }
   catch %(join-fail *): _worker_failed(thread, mark);
   catch %(alloc-fail *): _worker_failed(thread, mark);
-  work.close();
+  if (thread.parallel && thread.errors is not void) {
+    _parallel_park(thread);
+    again = 0;
+  }
+  return again;
 }
 
-/* The exported result reaches the result stores while both handlers are
-   registered. */
-static void _call(Thread thread, Context work) {
-  ErrorHandler observer = Error.push(_capture_errors, thread);
-  defer Error.pop(observer);
+static int _call(Thread thread, Context work) {
   ErrorHandler logger_handler = Error.push(Logger.error_handler, void);
   defer Error.pop(logger_handler);
   const void *input = thread.input_size ? _input(thread) : NULL;
-  thread.result = work.export(thread.function(input, thread.input_size));
+  Var result = thread.function(input, thread.input_size);
+  if (thread.parallel) {
+    thread.result = result;
+    return _parallel_park(thread);
+  }
+  thread.result = work.export(result);
+  return 0;
 }
 
 /* The outermost of the worker's registrations, so a cause the callback did not
@@ -353,7 +443,8 @@ static void _completion_check(int error) {
   abort();
 }
 
-/** Waits for a finished worker, removes its handle from `pending`, and returns it.
+/** Waits for a finished worker, removes its handle from `pending`, and
+    returns it.
     A null or empty Array returns NULL. If several workers have finished, the
     first in current Array order wins; completion chronology is not recorded.
     A failed worker is also ready. This does not join, export results, or free
@@ -368,21 +459,27 @@ static void _completion_check(int error) {
 */
 Thread Thread.wait_any(Array pending) {
   if (!pending.len()) return NULL;
-  _completion_check(pthread_mutex_lock(&thread_completion_mutex));
-  defer _completion_check(pthread_mutex_unlock(&thread_completion_mutex));
   foreach (Thread thread, pending) {
     if (!thread) raise %(bad-arg (operation "Thread.wait_any"));
     if (__atomic_load_n(&thread.state, __ATOMIC_SEQ_CST) != <running>)
       raise %(bad-state (operation "Thread.wait_any"));
   }
-  while (1) {
+  x2c_thread_wait_lock();
+  Thread selected = _wait_any(pending);
+  x2c_thread_wait_unlock();
+  if (!selected) x2c_thread_cancel();
+  return selected;
+}
+
+static Thread _wait_any(Array pending) {
+  while (!x2c_thread_stopping()) {
     for (int i = 0; i < pending.len(); i++) {
       Thread thread = pending[i];
       if (thread.finished) return pending.remove(i);
     }
-    _completion_check(pthread_cond_wait(
-      &thread_completion_condition, &thread_completion_mutex));
+    x2c_thread_wait(&thread_completion_condition);
   }
+  return NULL;
 }
 
 /** Joins one worker and exports its result into the joining `Scope` and pools.
@@ -420,7 +517,7 @@ static Var _read_result(Thread t) {
   Var result = void, errors = void;
   if (t.errors is not void)
     errors = Context.export_scope(t.result_scope, t.result_pool, t.errors);
-  else result = Context.export_scope(
+  else if (!t.parallel) result = Context.export_scope(
     t.result_scope, t.result_pool, t.result);
   if (errors is not void) raise %(join-fail (errors $errors));
   return result;
@@ -436,7 +533,8 @@ static void _finish_join(Thread thread) {
 }
 
 static void _release_result(Thread thread) {
-  if (thread.result_pool) thread.result_pool.release();
+  if (thread.result_pool && !thread.batch && !thread.parallel)
+    thread.result_pool.release();
   thread.result_pool = NULL;
   if (thread.result_scope) Scope.destroy(thread.result_scope);
   thread.result_scope = NULL;
@@ -510,11 +608,79 @@ void Thread.finish_all(Array pending) {
   }
   if (!failures) return;
   if (unwinding) {
-    fprintf(stderr, "Thread.finish_all: cleanup failed; %zu handle(s) remain.\n",
+    fprintf(
+      stderr, "Thread.finish_all: cleanup failed; %zu handle(s) remain.\n",
       pending.len());
     return;
   }
   raise %(join-fail (errors ${failures.reverse()}));
+}
+
+// synchronous callable batches
+
+static Var _batch_call(const void *bytes, size_t size) {
+  (void) size;
+  Func function = *(Func const *) bytes;
+  return function.apply(0, NULL);
+}
+
+static void _batch_stop(Array pending) {
+  stop_mask++;
+  defer --stop_mask;
+  foreach (Thread worker, pending) worker.stop();
+  defer if (pending.len()) {
+    fprintf(stderr, "Thread.run: cleanup left unjoined workers\n");
+    abort();
+  }
+  Thread.finish_all(pending);
+}
+
+static void _batch_check_stop(void) {
+  x2c_thread_wait_lock();
+  int stopped = x2c_thread_stopping();
+  x2c_thread_wait_unlock();
+  if (stopped) x2c_thread_cancel();
+}
+
+/** Runs zero-argument callable jobs concurrently and waits for all of them.
+    Each successful joined/exported result, including void, reaches completed
+    on the caller when that callback is nonnull. Jobs and their captures stay
+    borrowed through the call. Results have ordinary caller-owned join
+    lifetime.
+    Batch jobs use the shared process canonical pool and private mutable work
+    scopes; explicitly opened private pools retain their own lifetime rules.
+    The completion callback must not wait on participant progress.
+
+    On startup, job, export, callback, or coordinator-stop failure, requests
+    stop on every remaining job before joining any, then propagates the
+    triggering error. No callback runs during failure cleanup. Stopping is
+    cooperative, so jobs ignoring stop or blocking in native I/O can delay
+    completion indefinitely. Native join failure aborts if cleanup cannot
+    establish that borrowed storage is no longer in use.
+    Raises: startup, callback, export, stop, or worker join causes. */
+void Thread.run(Array jobs, Func completed) {
+  Array pending = $auto([]);
+  ((Block) pending).reserve(jobs.len());
+  defer _batch_stop(pending);
+  foreach (Func job, jobs) {
+    _batch_check_stop();
+    pending.push(_start(_batch_call, &job, sizeof(job), NULL, 1));
+  }
+  while (pending.len()) {
+    Var result = Thread.finish_any(pending);
+    _batch_check_stop();
+    if (completed) completed.apply_value(result);
+  }
+  _batch_check_stop();
+}
+
+macro Expression $thread.run.jobs(Expr $jobs) => Thread.run($jobs);
+
+$rewrite($thread.run.jobs)
+meta static Code _batch_without_callback(Code code) {
+  match (code) case $thread.run.jobs(?jobs):
+    return $!void{ Thread.run($jobs, NULL) };
+  return code;
 }
 
 /** Describes mapping `function` over `source` with at most `workers` Threads.
@@ -527,31 +693,34 @@ void Thread.finish_all(Array pending) {
     Raises: `<bad-arg>` for a nonpositive worker count, or `<alloc-fail>` for
     descriptor storage.
 */
-ParallelMap Iter.parallel_map(Iter source, ThreadValueFn function, int workers) {
+ParallelMap Iter.parallel_map(Iter i, ThreadValueFn function, int workers) {
   if (workers <= 0) raise %(bad-arg (operation "Iter.parallel_map"));
   ParallelMap map = Scope.malloc(sizeof(struct ParallelMap));
-  *map = (struct ParallelMap) { source, function, workers };
+  *map = (struct ParallelMap) { i, function, workers };
   return map;
 }
 
-/** Consumes ready worker results into one sequential accumulator.
-    Starts at most the configured worker count and reuses those Threads for
-    successive inputs. Each completed job publishes one sealed result; the
-    caller exports it and runs `accumulate(acc, result)` before assigning
-    that worker another input. Other workers may still be running.
-    Results follow completion-queue order, not source order. Source traversal
-    and accumulation stay on the calling thread. Each worker holds at most
-    one unfinished job or unread result.
-    A `void` seed uses the first result as accumulator, as with `Iter.foldl`.
-    Empty input or a null descriptor returns the seed without invoking the
-    worker or accumulator. No result Array is collected. The fold joins all
-    remaining workers on every exit, preserving a primary Error during
-    cleanup. If native join failure leaves a worker unjoined, the process
-    aborts rather than release storage that worker may still use.
-    This descriptor supports consuming folds, not general pull iteration.
-    Raises: source, start, worker, export, allocation, or accumulator causes,
-    including `<void-op>` for a `void` worker result.
-*/
+/** Folds borrowed worker results on the caller in completion order.
+    Reuses at most the configured worker count. A worker keeps its callback
+    Context alive and waits while the caller consumes its result. The next
+    assignment or shutdown releases that Context and its remaining storage.
+    No result graph is exported. To retain worker-owned storage, the reducer
+    must explicitly move it to its own owner before returning. References,
+    including cycles, do not imply ownership. Borrowed input owners stay live
+    through the fold; callbacks must not mutate outstanding borrowed inputs.
+    Workers use the shared canonical pool. Explicit private pools retain
+    their own lifetime rules.
+
+    A void seed takes the first result without calling the reducer. That
+    result must survive worker cleanup independently; use an explicit seed
+    and transfer in the reducer for worker-owned storage. Empty input or a
+    null descriptor returns the seed. Source traversal and accumulation run
+    on the caller; each worker holds at most one job or unread result.
+    Every exit stops and joins remaining workers. Channel waits cooperate
+    with stop; arbitrary computation and native I/O need not. Cleanup keeps
+    the primary Error. Native join failure leaving a worker live aborts.
+    Raises: source, start, worker, allocation, accumulator, or stop causes,
+    including <void-op> for a void worker result. */
 Var ParallelMap.foldl(ParallelMap map, Var seed, Func accumulate) {
   if (!map) return seed;
   struct ParallelRun *run = Scope.calloc(1, sizeof(struct ParallelRun));
@@ -563,8 +732,10 @@ Var ParallelMap.foldl(ParallelMap map, Var seed, Func accumulate) {
   ((Block) run.ready).reserve(map.workers);
   Var acc = seed, input;
   int seeded = seed is not void;
-  while (workers.len() < map.workers && map.source.try_next(input))
+  while (workers.len() < map.workers && map.source.try_next(input)) {
+    _batch_check_stop();
     workers.push(_start_value(map.function, input, run));
+  }
   int active = workers.len();
   while (active) {
     Thread worker = _parallel_wait(run);
@@ -581,41 +752,57 @@ Var ParallelMap.foldl(ParallelMap map, Var seed, Func accumulate) {
       active++;
     }
   }
+  _batch_check_stop();
   return acc;
 }
 
 static void _parallel_run(Thread thread) {
-  while (1) {
-    _run_job(thread);
-    _completion_check(pthread_mutex_lock(&thread_completion_mutex));
-    thread.parallel.ready.push(thread);
-    _completion_check(pthread_cond_broadcast(&thread_completion_condition));
-    while (!thread.assigned && !thread.parallel.stopping)
-      _completion_check(pthread_cond_wait(
-        &thread_completion_condition, &thread_completion_mutex));
-    int again = thread.assigned;
-    thread.assigned = 0;
-    _completion_check(pthread_mutex_unlock(&thread_completion_mutex));
-    if (!again) return;
+  while (_work(thread)) {}
+}
+
+/* The caller borrows callback storage until assignment or shutdown releases
+   this worker. Only the parked worker's consumer may transfer that storage. */
+static int _parallel_park(Thread thread) {
+  x2c_thread_wait_lock();
+  if (thread.parallel.stopping) {
+    thread.result = void;
+    x2c_thread_wait_unlock();
+    return 0;
   }
+  thread.parallel.ready.push(thread);
+  _completion_check(pthread_cond_broadcast(&thread_completion_condition));
+  while (!thread.assigned && !thread.parallel.stopping &&
+         !x2c_thread_stopping())
+    x2c_thread_wait(&thread_completion_condition);
+  int again = thread.assigned && !thread.parallel.stopping &&
+              !x2c_thread_stopping();
+  thread.assigned = 0;
+  thread.result = void;
+  x2c_thread_wait_unlock();
+  return again;
 }
 
 static Thread _parallel_wait(struct ParallelRun *run) {
-  _completion_check(pthread_mutex_lock(&thread_completion_mutex));
-  defer _completion_check(pthread_mutex_unlock(&thread_completion_mutex));
-  while (!run.ready.len())
-    _completion_check(pthread_cond_wait(
-      &thread_completion_condition, &thread_completion_mutex));
-  return run.ready.remove(0);
+  x2c_thread_wait_lock();
+  while (!run.ready.len() && !x2c_thread_stopping())
+    x2c_thread_wait(&thread_completion_condition);
+  Thread ready = x2c_thread_stopping() ? NULL : run.ready.remove(0);
+  x2c_thread_wait_unlock();
+  if (!ready) x2c_thread_cancel();
+  return ready;
 }
 
 static Var _parallel_result(Thread worker) {
-  defer _release_result(worker);
-  return _read_result(worker);
+  if (worker.errors is not void) return _read_result(worker);
+  return worker.result;
 }
 
 static void _parallel_assign(Thread worker, Var input) {
-  _completion_check(pthread_mutex_lock(&thread_completion_mutex));
+  x2c_thread_wait_lock();
+  if (x2c_thread_stopping()) {
+    x2c_thread_wait_unlock();
+    x2c_thread_cancel();
+  }
   struct ThreadValueInput *call = _input(worker);
   call.value = input;
   worker.assigned = 1;
@@ -624,6 +811,8 @@ static void _parallel_assign(Thread worker, Var input) {
 }
 
 static void _parallel_stop(struct ParallelRun *run, Array workers) {
+  stop_mask++;
+  defer --stop_mask;
   defer Scope.free(run);
   defer workers.cleanup();
   defer run.ready.cleanup();
@@ -635,5 +824,6 @@ static void _parallel_stop(struct ParallelRun *run, Array workers) {
   run.stopping = 1;
   _completion_check(pthread_cond_broadcast(&thread_completion_condition));
   _completion_check(pthread_mutex_unlock(&thread_completion_mutex));
+  foreach (Thread worker, workers) worker.stop();
   Thread.finish_all(workers);
 }

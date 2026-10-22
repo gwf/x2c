@@ -30,7 +30,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayChar.indexof`](#ArrayChar.indexof) | Returns the same first-match index as `ArrayChar.find`. |
 | [`ArrayChar.insert`](#ArrayChar.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayChar.iter`](#ArrayChar.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
-| [`ArrayChar.new`](#ArrayChar.new) | Returns a fresh empty packed array owned by the current `Scope`. |
+| [`ArrayChar.new`](#ArrayChar.new) | Returns a fresh empty array in the active allocation scope. |
 | [`ArrayChar.postfixindex`](#ArrayChar.postfixindex) | Applies `++` or `--` at raw `index` and returns the previous value. |
 | [`ArrayChar.push`](#ArrayChar.push) | Appends `value` and returns it. |
 | [`ArrayChar.remove`](#ArrayChar.remove) | Removes and returns the element at normalized `index`. |
@@ -65,7 +65,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayDbl.indexof`](#ArrayDbl.indexof) | Returns the same first-match index as `ArrayDbl.find`. |
 | [`ArrayDbl.insert`](#ArrayDbl.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayDbl.iter`](#ArrayDbl.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
-| [`ArrayDbl.new`](#ArrayDbl.new) | Returns a fresh empty packed array owned by the current `Scope`. |
+| [`ArrayDbl.new`](#ArrayDbl.new) | Returns a fresh empty array in the active allocation scope. |
 | [`ArrayDbl.postfixindex`](#ArrayDbl.postfixindex) | Applies `++` or `--` at raw `index` and returns the previous value. |
 | [`ArrayDbl.push`](#ArrayDbl.push) | Appends `value` and returns it. |
 | [`ArrayDbl.remove`](#ArrayDbl.remove) | Removes and returns the element at normalized `index`. |
@@ -100,7 +100,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayFloat.indexof`](#ArrayFloat.indexof) | Returns the same first-match index as `ArrayFloat.find`. |
 | [`ArrayFloat.insert`](#ArrayFloat.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayFloat.iter`](#ArrayFloat.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
-| [`ArrayFloat.new`](#ArrayFloat.new) | Returns a fresh empty packed array owned by the current `Scope`. |
+| [`ArrayFloat.new`](#ArrayFloat.new) | Returns a fresh empty array in the active allocation scope. |
 | [`ArrayFloat.postfixindex`](#ArrayFloat.postfixindex) | Applies `++` or `--` at raw `index` and returns the previous value. |
 | [`ArrayFloat.push`](#ArrayFloat.push) | Appends `value` and returns it. |
 | [`ArrayFloat.remove`](#ArrayFloat.remove) | Removes and returns the element at normalized `index`. |
@@ -135,7 +135,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayInt.indexof`](#ArrayInt.indexof) | Returns the same first-match index as `ArrayInt.find`. |
 | [`ArrayInt.insert`](#ArrayInt.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayInt.iter`](#ArrayInt.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
-| [`ArrayInt.new`](#ArrayInt.new) | Returns a fresh empty packed array owned by the current `Scope`. |
+| [`ArrayInt.new`](#ArrayInt.new) | Returns a fresh empty array in the active allocation scope. |
 | [`ArrayInt.postfixindex`](#ArrayInt.postfixindex) | Applies `++` or `--` at raw `index` and returns the previous value. |
 | [`ArrayInt.push`](#ArrayInt.push) | Appends `value` and returns it. |
 | [`ArrayInt.remove`](#ArrayInt.remove) | Removes and returns the element at normalized `index`. |
@@ -170,7 +170,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayLong.indexof`](#ArrayLong.indexof) | Returns the same first-match index as `ArrayLong.find`. |
 | [`ArrayLong.insert`](#ArrayLong.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayLong.iter`](#ArrayLong.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
-| [`ArrayLong.new`](#ArrayLong.new) | Returns a fresh empty packed array owned by the current `Scope`. |
+| [`ArrayLong.new`](#ArrayLong.new) | Returns a fresh empty array in the active allocation scope. |
 | [`ArrayLong.postfixindex`](#ArrayLong.postfixindex) | Applies `++` or `--` at raw `index` and returns the previous value. |
 | [`ArrayLong.push`](#ArrayLong.push) | Appends `value` and returns it. |
 | [`ArrayLong.remove`](#ArrayLong.remove) | Removes and returns the element at normalized `index`. |
@@ -205,7 +205,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayShort.indexof`](#ArrayShort.indexof) | Returns the same first-match index as `ArrayShort.find`. |
 | [`ArrayShort.insert`](#ArrayShort.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayShort.iter`](#ArrayShort.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
-| [`ArrayShort.new`](#ArrayShort.new) | Returns a fresh empty packed array owned by the current `Scope`. |
+| [`ArrayShort.new`](#ArrayShort.new) | Returns a fresh empty array in the active allocation scope. |
 | [`ArrayShort.postfixindex`](#ArrayShort.postfixindex) | Applies `++` or `--` at raw `index` and returns the previous value. |
 | [`ArrayShort.push`](#ArrayShort.push) | Appends `value` and returns it. |
 | [`ArrayShort.remove`](#ArrayShort.remove) | Removes and returns the element at normalized `index`. |
@@ -240,7 +240,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayString.indexof`](#ArrayString.indexof) | Returns the same first-match index as `ArrayString.find`. |
 | [`ArrayString.insert`](#ArrayString.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayString.iter`](#ArrayString.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
-| [`ArrayString.new`](#ArrayString.new) | Returns a fresh empty packed array owned by the current `Scope`. |
+| [`ArrayString.new`](#ArrayString.new) | Returns a fresh empty array in the active allocation scope. |
 | [`ArrayString.postfixindex`](#ArrayString.postfixindex) | Raises `<bad-op>` because String elements have no postfix operation. |
 | [`ArrayString.push`](#ArrayString.push) | Appends `value` and returns it. |
 | [`ArrayString.remove`](#ArrayString.remove) | Removes and returns the element at normalized `index`. |
@@ -534,7 +534,7 @@ Source: `lib/typed-array.x:110`
 
 `ArrayChar ArrayChar.new(void)`
 
-Returns a fresh empty packed array owned by the current `Scope`.
+Returns a fresh empty array in the active allocation scope.
 
 **Raises:** `<alloc-fail>` when storage cannot be allocated.
 
@@ -962,7 +962,7 @@ Source: `lib/typed-array.x:155`
 
 `ArrayDbl ArrayDbl.new(void)`
 
-Returns a fresh empty packed array owned by the current `Scope`.
+Returns a fresh empty array in the active allocation scope.
 
 **Raises:** `<alloc-fail>` when storage cannot be allocated.
 
@@ -1388,7 +1388,7 @@ Source: `lib/typed-array.x:146`
 
 `ArrayFloat ArrayFloat.new(void)`
 
-Returns a fresh empty packed array owned by the current `Scope`.
+Returns a fresh empty array in the active allocation scope.
 
 **Raises:** `<alloc-fail>` when storage cannot be allocated.
 
@@ -1814,7 +1814,7 @@ Source: `lib/typed-array.x:128`
 
 `ArrayInt ArrayInt.new(void)`
 
-Returns a fresh empty packed array owned by the current `Scope`.
+Returns a fresh empty array in the active allocation scope.
 
 **Raises:** `<alloc-fail>` when storage cannot be allocated.
 
@@ -2242,7 +2242,7 @@ Source: `lib/typed-array.x:137`
 
 `ArrayLong ArrayLong.new(void)`
 
-Returns a fresh empty packed array owned by the current `Scope`.
+Returns a fresh empty array in the active allocation scope.
 
 **Raises:** `<alloc-fail>` when storage cannot be allocated.
 
@@ -2670,7 +2670,7 @@ Source: `lib/typed-array.x:119`
 
 `ArrayShort ArrayShort.new(void)`
 
-Returns a fresh empty packed array owned by the current `Scope`.
+Returns a fresh empty array in the active allocation scope.
 
 **Raises:** `<alloc-fail>` when storage cannot be allocated.
 
@@ -3098,7 +3098,7 @@ Source: `lib/typed-array.x:165`
 
 `ArrayString ArrayString.new(void)`
 
-Returns a fresh empty packed array owned by the current `Scope`.
+Returns a fresh empty array in the active allocation scope.
 
 **Raises:** `<alloc-fail>` when storage cannot be allocated.
 

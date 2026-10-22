@@ -28,12 +28,23 @@ struct Context{
   Pool pool;
   Pool destination_pool;
   void * error_state, * match_state;
+  Map exported;
 }
 ;
 
 static _Thread_local Context current_context;
 
 static int _init_guard_ = 0;
+
+static Var _export_root(Context c, Var value);
+
+static int _visited(Context c, Var value);
+
+static Map _export_memo(Context c);
+
+static int _scheduled_owner(Context c, Scope scope);
+
+static void _commit_export(Context c);
 
 static Var _export_value(Context c, Var v);
 
@@ -76,30 +87,21 @@ _x2c_gensym_defer_env_0;
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0);
 
+static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1);
+
 typedef struct _x2c_gensym_defer_env_1{
   const void * _x2c_gensym_defer_capture_1;
-  const void * _x2c_gensym_defer_capture_2;
-  const void * _x2c_gensym_defer_capture_3;
 }
 _x2c_gensym_defer_env_1;
 
-static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1);
-
-typedef struct _x2c_gensym_defer_env_2{
-  const void * _x2c_gensym_defer_capture_4;
-  const void * _x2c_gensym_defer_capture_5;
-  const void * _x2c_gensym_defer_capture_6;
-}
-_x2c_gensym_defer_env_2;
-
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2);
 
-typedef struct _x2c_gensym_defer_env_3{
-  const void * _x2c_gensym_defer_capture_7;
-  const void * _x2c_gensym_defer_capture_8;
-  const void * _x2c_gensym_defer_capture_9;
+typedef struct _x2c_gensym_defer_env_2{
+  const void * _x2c_gensym_defer_capture_2;
+  const void * _x2c_gensym_defer_capture_3;
+  const void * _x2c_gensym_defer_capture_4;
 }
-_x2c_gensym_defer_env_3;
+_x2c_gensym_defer_env_2;
 
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3);
 
@@ -113,11 +115,11 @@ void Context_initialize(void);
 Var Context_export(Context context, Var value){
   if(! _init_guard_) Context_initialize();
   if(! context || current_context != context){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/context.x",.function = "Context_export",.line = 67,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/context.x",.function = "Context_export",.line = 68,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL))));
     __builtin_unreachable();
   }
-  return _export_value(context, value);
+  return _export_root(context, value);
 }
 
 Var Context_export_scope(Scope source_scope, Pool pool, Var value){
@@ -126,7 +128,108 @@ Var Context_export_scope(Scope source_scope, Pool pool, Var value){
     .scope = source_scope, .pool = pool, .destination_scope = Scope_top(), .destination_pool = Pool_current()
   }
   ;
-  return _export_value(& source, value);
+  return _export_root(& source, value);
+}
+
+static Var _export_root(Context c, Var value){
+  if(c -> exported != NULL) return _export_value(c, value);
+  {
+    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
+      0
+    }
+    ;
+    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & c;
+    X2CCleanup _x2c_gensym_defer_record_0 ={
+      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
+    }
+    ;
+    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
+    {
+      Var result = _export_value(c, value);
+      _commit_export(c);
+      {
+        Var _x2c_gensym_return_value_0 = result;
+        {
+          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+          return _x2c_gensym_return_value_0;
+        }
+
+      }
+
+    }
+    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
+  }
+
+}
+
+static int _visited(Context c, Var value){
+  _export_memo(c);
+  if(Map_contains(c -> exported, value)) return 1;
+  Map_set(c -> exported, value, int_var(1));
+  return 0;
+}
+
+static Map _export_memo(Context c){
+  if(c -> exported == NULL) c -> exported = Map_new();
+  return c -> exported;
+}
+
+static int _scheduled_owner(Context c, Scope scope){
+  for(;  scope;  scope = Scope_parent(scope)) if(Map_contains(c -> exported, Var_new(40074250, scope))) return 1;
+  return 0;
+}
+
+int Iter_try_next(Iter, Var *);
+
+static void _commit_export(Context c){
+  if(c -> exported == NULL) return;
+  Scope * destination = c -> destination_scope;
+  if(! * destination) * destination = Scope_new();
+  {
+    Var key, value;
+    Map _x2c_gensym_macro_object_0 = c -> exported;
+    unsigned _x2c_gensym_macro_cursor_0 = 0;
+    Var _x2c_gensym_macro_cursor_output_0;
+    Var _x2c_gensym_macro_cursor_output_1;
+    while(Map_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0), &(_x2c_gensym_macro_cursor_output_1))){
+      key = _x2c_gensym_macro_cursor_output_0;
+      value = _x2c_gensym_macro_cursor_output_1;
+      {
+        if(Var_is_wide(value)){
+          if(! _scheduled_owner(c, Var_wide_owner(value))) Var_move_wide_to(value, destination);
+        }
+        else if(Var_is_row(key, 8, 7, 1) || Var_is_row(key, 8, 7, 2) || Var_is_row(key, 0, 0, 0)){
+          void * allocation = Var_pointer(key);
+          if(_scheduled_owner(c, Scope_owner(allocation))) continue;
+          if(Var_is_row(key, 8, 7, 1)) Block_move_to(((Block) allocation), destination);
+          else if(Var_is_row(key, 8, 7, 2)) Buffer_move_to(((Buffer) allocation), destination);
+          else Scope_move(allocation, destination);
+        }
+
+      }
+
+    }
+
+  }
+  {
+    Var key;
+    Iter _x2c_gensym_macro_iterator_1 = Map_keys(c -> exported, &(struct Iter){
+      int_var(0)
+    }
+    );
+    Var _x2c_gensym_macro_item_1;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_1, &(_x2c_gensym_macro_item_1))){
+      key = _x2c_gensym_macro_item_1;
+      {
+        if(! Var_is_row(key, 10, 7, 5)) continue;
+        Scope storage = Var_pointer(key);
+        if(! _scheduled_owner(c, Scope_parent(storage))) Scope_transfer(storage, * destination);
+      }
+
+    }
+
+  }
+
 }
 
 static Var _export_value(Context c, Var v){
@@ -145,7 +248,7 @@ static Var _export_value(Context c, Var v){
   {
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/context.x",.function = "_export_value",.line = 111,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/context.x",.function = "_export_value",.line = 170,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477479911782, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(41038), Symbol_var(tag));
       __builtin_unreachable();
     }
@@ -156,7 +259,27 @@ static Var _export_value(Context c, Var v){
 
 static Var _export_wide(Context c, Var v){
   if(! _owns_scope(c, Var_wide_owner(v))) return v;
-  return Var_move_wide_to(v, c -> destination_scope);
+  Map memo = _export_memo(c);
+  Scope scratch = Map_scope(memo);
+  {
+    Scope_push(& scratch);
+    {
+      {
+        X2CCleanup _x2c_gensym_defer_record_1 ={
+          .fn = _x2c_gensym_defer_cleanup_1, .env = 0
+        }
+        ;
+        x2c_cleanup_push(& _x2c_gensym_defer_record_1);
+        {
+          Map_set(memo, Var_box_ulong(v.u64), v);
+        }
+        x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
+      }
+
+    }
+
+  }
+  return v;
 }
 
 static Var _export_string(Context c, Var value){
@@ -177,16 +300,16 @@ static List _export_list(Context c, List list){
   Block heads = Block_new(sizeof(Var));
   const Block _x2c_gensym_macro_acquired_0 = heads;
   {
-    _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
+    _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
       0
     }
     ;
-    _x2c_gensym_macro_environment_0._x2c_gensym_defer_capture_0 =(const void *) & _x2c_gensym_macro_acquired_0;
-    X2CCleanup _x2c_gensym_defer_record_0 ={
-      .fn = _x2c_gensym_defer_cleanup_0, .env = & _x2c_gensym_macro_environment_0
+    _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & _x2c_gensym_macro_acquired_0;
+    X2CCleanup _x2c_gensym_defer_record_2 ={
+      .fn = _x2c_gensym_defer_cleanup_2, .env = & _x2c_gensym_macro_environment_1
     }
     ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_0);
+    x2c_cleanup_push(& _x2c_gensym_defer_record_2);
     {
       List tail = list;
       while(List_truth(tail) &&(! c -> pool || Pool_owns(c -> pool, List_var(tail)))){
@@ -197,88 +320,10 @@ static List _export_list(Context c, List list){
       Var * items = heads -> bytes;
       for(size_t i = heads -> length;  i;  i --) tail = c -> pool ? List_cons_in(c -> destination_pool, items[i - 1], tail) : List_cons(items[i - 1], tail);
       {
-        List _x2c_gensym_return_value_0 = tail;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-          return _x2c_gensym_return_value_0;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
-  }
-
-}
-
-int Context_owns(Context context, void * allocation);
-
-static Var _export_array(Context c, Var value){
-  Array array = Var_array_payload(value);
-  if(! Context_owns(c, array)) return value;
-  Scope owner = Scope_owner(array);
-  Scope_move(array, c -> destination_scope);
-  int exported = 0;
-  {
-    _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_1 =(const void *) & exported;
-    _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_2 =(const void *) & array;
-    _x2c_gensym_macro_environment_1._x2c_gensym_defer_capture_3 =(const void *) & owner;
-    X2CCleanup _x2c_gensym_defer_record_1 ={
-      .fn = _x2c_gensym_defer_cleanup_1, .env = & _x2c_gensym_macro_environment_1
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_1);
-    {
-      Var * items = array -> bytes;
-      for(size_t i = 0;  i < array -> length;  i ++) items[i] = _export_value(c, items[i]);
-      Block_move_to(Array_block(array), c -> destination_scope);
-      exported = 1;
-      {
-        Var _x2c_gensym_return_value_1 = value;
-        {
-          x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
-          return _x2c_gensym_return_value_1;
-        }
-
-      }
-
-    }
-    x2c_cleanup_leave(& _x2c_gensym_defer_record_1);
-  }
-
-}
-
-static Var _export_map(Context c, Var value){
-  Map map = Var_map_payload(value);
-  if(! Context_owns(c, map)) return value;
-  Scope owner = Scope_owner(map);
-  Scope_move(map, c -> destination_scope);
-  int exported = 0;
-  {
-    _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
-      0
-    }
-    ;
-    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_4 =(const void *) & exported;
-    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_5 =(const void *) & map;
-    _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_6 =(const void *) & owner;
-    X2CCleanup _x2c_gensym_defer_record_2 ={
-      .fn = _x2c_gensym_defer_cleanup_2, .env = & _x2c_gensym_macro_environment_2
-    }
-    ;
-    x2c_cleanup_push(& _x2c_gensym_defer_record_2);
-    {
-      Map_export_to(map, c, _export_callback, c -> destination_scope);
-      exported = 1;
-      {
-        Var _x2c_gensym_return_value_2 = value;
+        List _x2c_gensym_return_value_1 = tail;
         {
           x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
-          return _x2c_gensym_return_value_2;
+          return _x2c_gensym_return_value_1;
         }
 
       }
@@ -287,6 +332,34 @@ static Var _export_map(Context c, Var value){
     x2c_cleanup_leave(& _x2c_gensym_defer_record_2);
   }
 
+}
+
+int Context_owns(Context context, void * allocation);
+
+void Context_move_block(Context c, Block block);
+
+static Var _export_array(Context c, Var value){
+  Array array = Var_array_payload(value);
+  if(! Context_owns(c, array) || _visited(c, value)) return value;
+  Context_move_block(c, Array_block(array));
+  Var * items = array -> bytes;
+  for(size_t i = 0;  i < array -> length;  i ++) items[i] = _export_value(c, items[i]);
+  return value;
+}
+
+void Context_move_allocation(Context c, void * allocation);
+
+void Context_move_scope(Context c, Scope storage);
+
+static Var _export_map(Context c, Var value){
+  Map map = Var_map_payload(value);
+  if(! Context_owns(c, map) || _visited(c, value)) return value;
+  Map_export_to(map, c, _export_callback, c -> destination_scope);
+  Context_move_allocation(c, map);
+  Context_move_block(c, Bytes_block(map -> hashes));
+  Context_move_block(c, Bytes_block(map -> entries));
+  Context_move_scope(c, map -> scope);
+  return value;
 }
 
 static Var _export_callback(Var value, Context c){
@@ -298,8 +371,8 @@ Bytes Var_bytes(Var);
 static Var _export_storage(Context c, Var v){
   void * allocation = Var_is_row(v, 8, 7, 3) ? Bytes_block(Var_bytes(v)) : Var_pointer(v);
   if(! Context_owns(c, allocation)) return v;
-  if(Var_is_row(v, 8, 7, 2)) Buffer_move_to(((Buffer) allocation), c -> destination_scope);
-  else Block_move_to(((Block) allocation), c -> destination_scope);
+  if(Var_is_row(v, 8, 7, 2)) Map_set(_export_memo(c), v, int_var(1));
+  else Context_move_block(c, (Block) allocation);
   return v;
 }
 
@@ -310,12 +383,12 @@ Var Context_export_nested(Context c, Var value){
 
 int Context_owns(Context context, void * allocation){
   if(! _init_guard_) Context_initialize();
-  return allocation && _owns_scope(context, Scope_owner(allocation));
+  return allocation && context && !(context -> exported != NULL && Map_contains(context -> exported, Var_new(3683441, allocation))) && _owns_scope(context, Scope_owner(allocation));
 }
 
 static int _owns_scope(Context context, Scope owner){
   if(! context || ! owner) return 0;
-  for(Scope scope = context -> scope;  scope;  scope = scope -> down) if(scope == owner) return 1;
+  for(Scope scope = context -> scope;  scope;  scope = scope -> down) if(Scope_contains(scope, owner)) return 1;
   return 0;
 }
 
@@ -326,7 +399,19 @@ Scope * Context_export_destination(Context c){
 
 void Context_move_allocation(Context c, void * allocation){
   if(! _init_guard_) Context_initialize();
-  if(Context_owns(c, allocation)) Scope_move(allocation, Context_export_destination(c));
+  if(Context_owns(c, allocation)) Map_set(_export_memo(c), Var_new(3683441, allocation), int_var(1));
+}
+
+void Context_move_scope(Context c, Scope storage){
+  if(! _init_guard_) Context_initialize();
+  if(_owns_scope(c, storage)) Map_set(_export_memo(c), Var_new(40074250, storage), int_var(1));
+}
+
+void Context_move_block(Context c, Block block){
+  if(! _init_guard_) Context_initialize();
+  if(! Context_owns(c, block)) return;
+  Map_set(_export_memo(c), Block_var(block), int_var(1));
+  Context_move_scope(c, block -> lifetime);
 }
 
 Context Context_open(void){
@@ -357,15 +442,15 @@ static Context _open(const char * name, int isolated){
     (context) -> destination_scope = Scope_top();
     int pushed = 0, installed = 0;
     {
-      _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
+      _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
         0
       }
       ;
-      _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_7 =(const void *) & installed;
-      _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_8 =(const void *) & context;
-      _x2c_gensym_macro_environment_3._x2c_gensym_defer_capture_9 =(const void *) & pushed;
+      _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_2 =(const void *) & installed;
+      _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_3 =(const void *) & context;
+      _x2c_gensym_macro_environment_2._x2c_gensym_defer_capture_4 =(const void *) & pushed;
       X2CCleanup _x2c_gensym_defer_record_3 ={
-        .fn = _x2c_gensym_defer_cleanup_3, .env = & _x2c_gensym_macro_environment_3
+        .fn = _x2c_gensym_defer_cleanup_3, .env = & _x2c_gensym_macro_environment_2
       }
       ;
       x2c_cleanup_push(& _x2c_gensym_defer_record_3);
@@ -382,10 +467,10 @@ static Context _open(const char * name, int isolated){
         current_context =(context);
         installed = 1;
         {
-          Context _x2c_gensym_return_value_3 =(context);
+          Context _x2c_gensym_return_value_2 =(context);
           {
             x2c_cleanup_leave(& _x2c_gensym_defer_record_3);
-            return _x2c_gensym_return_value_3;
+            return _x2c_gensym_return_value_2;
           }
 
         }
@@ -406,7 +491,7 @@ Context Context_current(void){
 void Context_close(Context c){
   if(! _init_guard_) Context_initialize();
   if(! c || current_context != c){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/context.x",.function = "Context_close",.line = 326,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/context.x",.function = "Context_close",.line = 412,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.close")), NULL))));
     __builtin_unreachable();
   }
@@ -448,28 +533,31 @@ static void _register_shutdown(void){
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){
   _x2c_gensym_defer_env_0 * _x2c_gensym_defer_data_0 =(_x2c_gensym_defer_env_0 *) _x2c_gensym_defer_opaque_0;
-  Block_cleanup((*(const Block *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0));
+  {
+    if((*(Context *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0) -> exported != NULL) Map_cleanup((*(Context *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0) -> exported);
+    (*(Context *) _x2c_gensym_defer_data_0->_x2c_gensym_defer_capture_0) -> exported = NULL;
+  }
+
 }
 
 static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
-  _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_1;
-  if(!(*(int *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1)) Scope_move((*(Array *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_2), &(*(Scope *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_3));
+  Scope_pop();
 }
 
 static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
-  _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_2;
-  if(!(*(int *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_4)) Scope_move((*(Map *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_5), &(*(Scope *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_6));
+  _x2c_gensym_defer_env_1 * _x2c_gensym_defer_data_1 =(_x2c_gensym_defer_env_1 *) _x2c_gensym_defer_opaque_2;
+  Block_cleanup((*(const Block *) _x2c_gensym_defer_data_1->_x2c_gensym_defer_capture_1));
 }
 
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
-  _x2c_gensym_defer_env_3 * _x2c_gensym_defer_data_3 =(_x2c_gensym_defer_env_3 *) _x2c_gensym_defer_opaque_3;
-  if(!(*(int *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_7)){
-    if(((*(Context *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_8)) -> match_state) MatchCache_context_close(((*(Context *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_8)) -> match_state);
-    if(((*(Context *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_8)) -> error_state) Error_context_close(((*(Context *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_8)) -> error_state, x2c_exception_unwinding());
-    if(((*(Context *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_8)) -> pool) Pool_close();
-    if((*(int *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_9)) Scope_pop();
-    if(((*(Context *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_8)) -> scope) Scope_destroy(((*(Context *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_8)) -> scope);
-    Scope_free(((*(Context *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_8)));
+  _x2c_gensym_defer_env_2 * _x2c_gensym_defer_data_2 =(_x2c_gensym_defer_env_2 *) _x2c_gensym_defer_opaque_3;
+  if(!(*(int *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2)){
+    if(((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)) -> match_state) MatchCache_context_close(((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)) -> match_state);
+    if(((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)) -> error_state) Error_context_close(((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)) -> error_state, x2c_exception_unwinding());
+    if(((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)) -> pool) Pool_close();
+    if((*(int *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_4)) Scope_pop();
+    if(((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)) -> scope) Scope_destroy(((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)) -> scope);
+    Scope_free(((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)));
   }
 
 }

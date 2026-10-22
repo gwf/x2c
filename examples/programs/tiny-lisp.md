@@ -13,10 +13,11 @@ Strings, Lists, Maps, Buffers, and `match`; none calls x2c's Lisp interpreter,
 reader, or standard library. C string literals promote to x2c values where
 the receiving type requires them.
 
-Build and run the annotated version, or substitute either other source:
+From the repository root, build and run the annotated version, or substitute
+either other source:
 
 ```sh
-./builds/0/x2c build examples/programs/tiny-lisp.max.x --output /tmp/tiny-lisp
+./x2c build examples/programs/tiny-lisp.max.x -o /tmp/tiny-lisp
 /tmp/tiny-lisp < examples/data/tiny-lisp.slp
 ```
 

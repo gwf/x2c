@@ -28,10 +28,12 @@ Typed `Map`s generated from shared storage.
 | [`MapIntInt.len`](#MapIntInt.len) | Returns the number of entries, or zero for a null map. |
 | [`MapIntInt.map`](#MapIntInt.map) | Returns a fresh ordinary Map containing boxed keys and values. |
 | [`MapIntInt.merge`](#MapIntInt.merge) | Copies every entry of `other` into `map` and returns the destination. |
+| [`MapIntInt.move_to`](#MapIntInt.move_to) | Moves the record, backing Blocks, and nullable owned contents together. |
 | [`MapIntInt.new`](#MapIntInt.new) | Returns a fresh empty map owned by the current `Scope`. |
 | [`MapIntInt.new_capacity`](#MapIntInt.new_capacity) | Returns a fresh empty map with exactly `capacity` buckets. |
 | [`MapIntInt.postfixindex`](#MapIntInt.postfixindex) | Applies postfix `++` or `--` and returns the previous value. |
 | [`MapIntInt.repr`](#MapIntInt.repr) | Returns the readable typed-Map representation. |
+| [`MapIntInt.scope`](#MapIntInt.scope) | Acquires the Map's scope for explicitly owned contents. |
 | [`MapIntInt.set`](#MapIntInt.set) | Copies `key` and `val` into the table, replacing an existing value. |
 | [`MapIntInt.setdefault`](#MapIntInt.setdefault) | Returns the value for `key`, inserting `defval` when absent. |
 | [`MapIntInt.setindex`](#MapIntInt.setindex) | Stores `val` under `key` and returns `val`. |
@@ -59,10 +61,12 @@ Typed `Map`s generated from shared storage.
 | [`MapLongDouble.len`](#MapLongDouble.len) | Returns the number of entries, or zero for a null map. |
 | [`MapLongDouble.map`](#MapLongDouble.map) | Returns a fresh ordinary Map containing boxed keys and values. |
 | [`MapLongDouble.merge`](#MapLongDouble.merge) | Copies every entry of `other` into `map` and returns the destination. |
+| [`MapLongDouble.move_to`](#MapLongDouble.move_to) | Moves the record, backing Blocks, and nullable owned contents together. |
 | [`MapLongDouble.new`](#MapLongDouble.new) | Returns a fresh empty map owned by the current `Scope`. |
 | [`MapLongDouble.new_capacity`](#MapLongDouble.new_capacity) | Returns a fresh empty map with exactly `capacity` buckets. |
 | [`MapLongDouble.postfixindex`](#MapLongDouble.postfixindex) | Applies postfix `++` or `--` and returns the previous value. |
 | [`MapLongDouble.repr`](#MapLongDouble.repr) | Returns the readable typed-Map representation. |
+| [`MapLongDouble.scope`](#MapLongDouble.scope) | Acquires the Map's scope for explicitly owned contents. |
 | [`MapLongDouble.set`](#MapLongDouble.set) | Copies `key` and `val` into the table, replacing an existing value. |
 | [`MapLongDouble.setdefault`](#MapLongDouble.setdefault) | Returns the value for `key`, inserting `defval` when absent. |
 | [`MapLongDouble.setindex`](#MapLongDouble.setindex) | Stores `val` under `key` and returns `val`. |
@@ -90,10 +94,12 @@ Typed `Map`s generated from shared storage.
 | [`MapStringInt.len`](#MapStringInt.len) | Returns the number of entries, or zero for a null map. |
 | [`MapStringInt.map`](#MapStringInt.map) | Returns a fresh ordinary Map containing boxed keys and values. |
 | [`MapStringInt.merge`](#MapStringInt.merge) | Copies every entry of `other` into `map` and returns the destination. |
+| [`MapStringInt.move_to`](#MapStringInt.move_to) | Moves the record, backing Blocks, and nullable owned contents together. |
 | [`MapStringInt.new`](#MapStringInt.new) | Returns a fresh empty map owned by the current `Scope`. |
 | [`MapStringInt.new_capacity`](#MapStringInt.new_capacity) | Returns a fresh empty map with exactly `capacity` buckets. |
 | [`MapStringInt.postfixindex`](#MapStringInt.postfixindex) | Applies postfix `++` or `--` and returns the previous value. |
 | [`MapStringInt.repr`](#MapStringInt.repr) | Returns the readable typed-Map representation. |
+| [`MapStringInt.scope`](#MapStringInt.scope) | Acquires the Map's scope for explicitly owned contents. |
 | [`MapStringInt.set`](#MapStringInt.set) | Copies `key` and `val` into the table, replacing an existing value. |
 | [`MapStringInt.setdefault`](#MapStringInt.setdefault) | Returns the value for `key`, inserting `defval` when absent. |
 | [`MapStringInt.setindex`](#MapStringInt.setindex) | Stores `val` under `key` and returns `val`. |
@@ -121,10 +127,12 @@ Typed `Map`s generated from shared storage.
 | [`MapStringString.len`](#MapStringString.len) | Returns the number of entries, or zero for a null map. |
 | [`MapStringString.map`](#MapStringString.map) | Returns a fresh ordinary Map containing boxed keys and values. |
 | [`MapStringString.merge`](#MapStringString.merge) | Copies every entry of `other` into `map` and returns the destination. |
+| [`MapStringString.move_to`](#MapStringString.move_to) | Moves the record, backing Blocks, and nullable owned contents together. |
 | [`MapStringString.new`](#MapStringString.new) | Returns a fresh empty map owned by the current `Scope`. |
 | [`MapStringString.new_capacity`](#MapStringString.new_capacity) | Returns a fresh empty map with exactly `capacity` buckets. |
 | [`MapStringString.postfixindex`](#MapStringString.postfixindex) | Applies postfix `++` or `--` and returns the previous value. |
 | [`MapStringString.repr`](#MapStringString.repr) | Returns the readable typed-Map representation. |
+| [`MapStringString.scope`](#MapStringString.scope) | Acquires the Map's scope for explicitly owned contents. |
 | [`MapStringString.set`](#MapStringString.set) | Copies `key` and `val` into the table, replacing an existing value. |
 | [`MapStringString.setdefault`](#MapStringString.setdefault) | Returns the value for `key`, inserting `defval` when absent. |
 | [`MapStringString.setindex`](#MapStringString.setindex) | Stores `val` under `key` and returns `val`. |
@@ -395,6 +403,20 @@ entries already copied remain; a newly created destination is discarded.
 
 Source: `lib/typed-map.x:232`
 
+<a id="MapIntInt.move_to"></a>
+#### MapIntInt.move_to
+
+`void MapIntInt.move_to(MapIntInt map, Scope *destination)`
+
+Moves the record, backing Blocks, and nullable owned contents together.
+Pointers and references remain unchanged. The destination slot acquires
+a scope if empty. NULL maps do nothing.
+
+**Raises:** `<bad-arg>` for a NULL destination slot, or `<alloc-fail>` while
+creating its scope. Those failures leave ownership unchanged.
+
+Source: `lib/typed-map.x:225`
+
 <a id="MapIntInt.new"></a>
 #### MapIntInt.new
 
@@ -444,6 +466,20 @@ Source: `lib/typed-map.x:232`
 Returns the readable typed-Map representation.
 
 Source: `lib/typed-map.x:240`
+
+<a id="MapIntInt.scope"></a>
+#### MapIntInt.scope
+
+`Scope MapIntInt.scope(MapIntInt map)`
+
+Acquires the Map's scope for explicitly owned contents.
+Created lazily beneath the record's owner, this scope excludes the
+record and backing Blocks. Stored references remain borrowed unless
+explicitly moved into it. NULL returns NULL.
+
+**Raises:** `<alloc-fail>` when creating the scope.
+
+Source: `lib/typed-map.x:225`
 
 <a id="MapIntInt.set"></a>
 #### MapIntInt.set
@@ -772,6 +808,20 @@ entries already copied remain; a newly created destination is discarded.
 
 Source: `lib/typed-map.x:252`
 
+<a id="MapLongDouble.move_to"></a>
+#### MapLongDouble.move_to
+
+`void MapLongDouble.move_to(MapLongDouble map, Scope *destination)`
+
+Moves the record, backing Blocks, and nullable owned contents together.
+Pointers and references remain unchanged. The destination slot acquires
+a scope if empty. NULL maps do nothing.
+
+**Raises:** `<bad-arg>` for a NULL destination slot, or `<alloc-fail>` while
+creating its scope. Those failures leave ownership unchanged.
+
+Source: `lib/typed-map.x:245`
+
 <a id="MapLongDouble.new"></a>
 #### MapLongDouble.new
 
@@ -821,6 +871,20 @@ Source: `lib/typed-map.x:252`
 Returns the readable typed-Map representation.
 
 Source: `lib/typed-map.x:260`
+
+<a id="MapLongDouble.scope"></a>
+#### MapLongDouble.scope
+
+`Scope MapLongDouble.scope(MapLongDouble map)`
+
+Acquires the Map's scope for explicitly owned contents.
+Created lazily beneath the record's owner, this scope excludes the
+record and backing Blocks. Stored references remain borrowed unless
+explicitly moved into it. NULL returns NULL.
+
+**Raises:** `<alloc-fail>` when creating the scope.
+
+Source: `lib/typed-map.x:245`
 
 <a id="MapLongDouble.set"></a>
 #### MapLongDouble.set
@@ -1149,6 +1213,20 @@ entries already copied remain; a newly created destination is discarded.
 
 Source: `lib/typed-map.x:311`
 
+<a id="MapStringInt.move_to"></a>
+#### MapStringInt.move_to
+
+`void MapStringInt.move_to(MapStringInt map, Scope *destination)`
+
+Moves the record, backing Blocks, and nullable owned contents together.
+Pointers and references remain unchanged. The destination slot acquires
+a scope if empty. NULL maps do nothing.
+
+**Raises:** `<bad-arg>` for a NULL destination slot, or `<alloc-fail>` while
+creating its scope. Those failures leave ownership unchanged.
+
+Source: `lib/typed-map.x:304`
+
 <a id="MapStringInt.new"></a>
 #### MapStringInt.new
 
@@ -1198,6 +1276,20 @@ Source: `lib/typed-map.x:311`
 Returns the readable typed-Map representation.
 
 Source: `lib/typed-map.x:319`
+
+<a id="MapStringInt.scope"></a>
+#### MapStringInt.scope
+
+`Scope MapStringInt.scope(MapStringInt map)`
+
+Acquires the Map's scope for explicitly owned contents.
+Created lazily beneath the record's owner, this scope excludes the
+record and backing Blocks. Stored references remain borrowed unless
+explicitly moved into it. NULL returns NULL.
+
+**Raises:** `<alloc-fail>` when creating the scope.
+
+Source: `lib/typed-map.x:304`
 
 <a id="MapStringInt.set"></a>
 #### MapStringInt.set
@@ -1526,6 +1618,20 @@ entries already copied remain; a newly created destination is discarded.
 
 Source: `lib/typed-map.x:273`
 
+<a id="MapStringString.move_to"></a>
+#### MapStringString.move_to
+
+`void MapStringString.move_to(MapStringString map, Scope *destination)`
+
+Moves the record, backing Blocks, and nullable owned contents together.
+Pointers and references remain unchanged. The destination slot acquires
+a scope if empty. NULL maps do nothing.
+
+**Raises:** `<bad-arg>` for a NULL destination slot, or `<alloc-fail>` while
+creating its scope. Those failures leave ownership unchanged.
+
+Source: `lib/typed-map.x:266`
+
 <a id="MapStringString.new"></a>
 #### MapStringString.new
 
@@ -1575,6 +1681,20 @@ Source: `lib/typed-map.x:273`
 Returns the readable typed-Map representation.
 
 Source: `lib/typed-map.x:281`
+
+<a id="MapStringString.scope"></a>
+#### MapStringString.scope
+
+`Scope MapStringString.scope(MapStringString map)`
+
+Acquires the Map's scope for explicitly owned contents.
+Created lazily beneath the record's owner, this scope excludes the
+record and backing Blocks. Stored references remain borrowed unless
+explicitly moved into it. NULL returns NULL.
+
+**Raises:** `<alloc-fail>` when creating the scope.
+
+Source: `lib/typed-map.x:266`
 
 <a id="MapStringString.set"></a>
 #### MapStringString.set

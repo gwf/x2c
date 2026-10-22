@@ -20,10 +20,10 @@
 #include "common.x"
 #include "iter.x"
 
-/** `Scope`-backed mutable hash table from `Var` keys to `Var` values.
-    The `Map` records the `Scope` used for its two backing `Block`s.
-    `Context` moves the `Map` allocation itself before recursively exporting
-    those `Block`s. Stored `Var` bits are shallow and retain no pointee;
+/** Mutable hash table whose record and backing Blocks share one owner.
+    `Map.scope` lazily creates a separate scope for explicitly owned contents.
+    `Map.move_to` moves the record, backing storage, and owned contents.
+    Stored `Var` bits are shallow and retain no pointee;
     those values must remain valid while the `Map` can read, compare, hash,
     or return them. A valid empty `Map` is allocated and distinct from NULL.
 */
@@ -192,13 +192,13 @@ Self Map.update_n(Self map, unsigned pair_count, ...) {
   return map;
 }
 
-/** Exports every key and value, rebuilds the table, then moves its `Block`s.
+/** Exports every key and value and rebuilds the table under its record owner.
     The borrowed `export_value` callback runs synchronously for each stored
     key and value and may return replacement `Var`s. Rebuilding is required
     because an exported key may hash differently. On success the old backing
-    `Block`s are freed, the rebuilt `Block`s move into `scope`, and the `Map`
-    identity remains unchanged. `Context` moves that identity before this call
-    to break cycles.
+    `Block`s are freed and their replacements enter the record owner's scope.
+    `Context` owns cycle detection and schedules record, backing storage, and
+    owned-content scope moves after recursion.
 
     A failure while staging leaves the `Map`'s original records, backing
     storage, and recorded `Scope` unchanged. Effects of callbacks that
@@ -240,9 +240,9 @@ void Map.export_to(
   old_hashes.free();
   old_entries.free();
 
-  map.hashes.block().move_to(scope);
-  map.entries.block().move_to(scope);
-  map.scope = *scope;
+  Scope owner = Scope.owner(map);
+  map.hashes.block().move_to(&owner);
+  map.entries.block().move_to(&owner);
 }
 
 static Var _box_var(Var value) => value;
@@ -254,5 +254,8 @@ $map.typed.iterate(Map, Var, Var, map, _box_var, _box_var);
 meta native Iter Map.keys(Map, Iter);
 meta native Iter Map.enumerate(Map, Iter);
 
-/** Releases this Map and both backing Blocks without freeing stored values. */
+/** Destroys owned contents and frees the Map's record and backing Blocks.
+    Referenced keys and values with independent owners remain unchanged.
+    NULL does nothing. Every alias becomes invalid after destruction.
+*/
 meta native void Map.cleanup(Map value) { value.free_table(); }

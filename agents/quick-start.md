@@ -232,23 +232,24 @@ table. Run package checks when compiler or runtime changes can affect package
 clients. Examples, book examples, and packages remain optional checks; choose
 them for relevant work. Save full failure output under `debug/`.
 
-Use `builds/0/x2c` for current development behavior. `bin/x2c` is the
-bootstrap compiler unless stage 0 was intentionally installed.
+From the repository root, use `./x2c`, which links to `builds/0/x2c`, for
+current development behavior. `bin/x2c` is the bootstrap compiler unless
+stage 0 was intentionally installed. Explicit stage paths select that stage.
 
 ## Compile an example
 
-Build an ordinary native executable with the driver:
+From the repository root, build an ordinary native executable with the driver.
+Keep the scratch product outside the checkout:
 
 ```sh
-./builds/0/x2c build --output /tmp/foreach examples/foreach.x
+./x2c build -o /tmp/foreach examples/foreach.x
 /tmp/foreach
 ```
 
 Use `translate` when another build owns native compilation:
 
 ```sh
-mkdir -p /tmp/x2c-example
-./builds/0/x2c translate --out-dir /tmp/x2c-example examples/foreach.x
+./x2c translate --out-dir /tmp/x2c-example examples/foreach.x
 cc -iquote include/x2c /tmp/x2c-example/foreach.c \
   builds/0/libx2c.a -lm -o /tmp/x2c-example/foreach
 /tmp/x2c-example/foreach
@@ -256,6 +257,14 @@ cc -iquote include/x2c /tmp/x2c-example/foreach.c \
 
 Generated output keeps the input basename. `make examples` checks the curated
 manifest, including the deterministic Lisp showcase.
+
+Without `-o`, a direct executable build writes `./a.out`. Translation defaults
+to `.` and creates a named destination when needed. Direct builds normally
+remove temporary intermediates after success. `--save-temps` retains and reuses
+them in `.x2c-build`; `--build-dir <dir>` and `--save-temps=<dir>` select the
+same retained directory, with the last named option winning. Compile-only
+builds default to `<stem>.o` in `.`; multiple inputs with a named build
+directory keep their distinct path-derived objects under `<dir>/obj/`.
 
 ## Repository map
 

@@ -11,6 +11,10 @@ void thread_finish_all_suite(void);
 void thread_finish_any_suite(void);
 void thread_start_suite(void);
 void thread_parallel_map_suite(void);
+void thread_batch_suite(void);
+void channel_batch_suite(void);
+void channel_suite(void);
+void storage_ownership_suite(void);
 void static_init_suite(void);
 void pool_suite(void);
 void block_suite(void);
@@ -131,6 +135,10 @@ int main(int argc, char **argv) {
   $test.suite(thread_finish_any_suite);
   $test.suite(thread_start_suite);
   $test.suite(thread_parallel_map_suite);
+  $test.suite(thread_batch_suite);
+  $test.suite(channel_batch_suite);
+  $test.suite(channel_suite);
+  $test.suite(storage_ownership_suite);
   $test.suite(static_init_suite);
   return TestHarness_finish();
 }

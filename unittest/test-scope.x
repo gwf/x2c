@@ -415,6 +415,39 @@ static void _count_drop(void *ptr) {
   drop_count++;
 }
 
+static void scope_splice_preserves_owners_and_finalizers(void) {
+  ScopeStats before = Scope.stats();
+  Scope target = Scope.new(), source = Scope.new();
+  drop_count = 0;
+  char *a = Scope.malloc_finalized_in(&target, 8, _count_drop);
+  char *b = Scope.malloc_finalized_in(&target, 8, _count_drop);
+  char *c = Scope.malloc_finalized_in(&target, 8, _count_drop);
+  char *d = Scope.malloc_finalized_in(&source, 8, _count_drop);
+  strcpy(d, "moved");
+  ScopeStats allocated = Scope.stats();
+  Scope.move_before(d, c);
+  Scope.move_before(a, b);
+  Scope.move_before(c, a);
+  Scope.move_before(d, b);
+  EXPECT_PTR_EQ(Scope.owner(a), target);
+  EXPECT_PTR_EQ(Scope.owner(b), target);
+  EXPECT_PTR_EQ(Scope.owner(c), target);
+  EXPECT_PTR_EQ(Scope.owner(d), target);
+  EXPECT_INT_EQ(Scope.stats().allocation_calls, allocated.allocation_calls);
+  EXPECT_INT_EQ(Scope.stats().scope_creations, allocated.scope_creations);
+  source.destroy();
+  EXPECT_INT_EQ(drop_count, 0);
+  EXPECT_STR_EQ(d, "moved");
+  target.destroy();
+  EXPECT_INT_EQ(drop_count, 4);
+  EXPECT_PTR_EQ(drop_order[0], c);
+  EXPECT_PTR_EQ(drop_order[1], a);
+  EXPECT_PTR_EQ(drop_order[2], d);
+  EXPECT_PTR_EQ(drop_order[3], b);
+  EXPECT_INT_EQ(Scope.stats().live_allocations, before.live_allocations);
+  EXPECT_INT_EQ(Scope.stats().live_scopes, before.live_scopes);
+}
+
 static Scope dying_scope;
 
 static void _scratch_drop(void *ptr) {
@@ -524,6 +557,7 @@ static void scope_finalizer_realloc_and_scratch(void) {
 #include "test-macros.x"
 
 void scope_suite(void) {
+  $test.run(scope_splice_preserves_owners_and_finalizers);
   $test.run(scope_alloc_release);
   $test.run(scope_push_pop_destroy);
   $test.run(scope_realloc_grows_and_shrinks);

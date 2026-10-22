@@ -21,7 +21,7 @@ typedef struct CliRequest {
   // Package roots for generated registration units during collection.
   Map collection_packages;
   String out_dir, dep_file, dep_target, manifest;
-  String target, profile, output, build_dir, temps_dir, label, state_seed;
+  String target, profile, output, build_dir, label, state_seed;
   String cc, meta_cc, ar, compile_commands, sha256, index, Symbol kind;
   String diagnostics_file, Symbol color_mode;
   // The one --dump-* option in force, or 0. Each prints and stops.

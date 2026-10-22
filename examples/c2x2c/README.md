@@ -120,9 +120,10 @@ traversal. `strings()` converts unique keys into a canonical String-keyed Map
 for file results in Version 5. Versions 6-7 return `MapSubInt` directly.
 Their shared `MapStringInt` accumulator materializes word Strings while merging
 and releases each consumed count table. Ranking traverses typed String/int
-bindings. In Version 7, the existing typed-Map publication
-and context-export pattern transfers the table and preserves its views'
-source Strings. Versions 6 and 7 differ only in using `map` or `parallel_map`.
+bindings. Version 7 borrows the table while its worker waits for accumulation
+to finish; no automatic result export is needed. Its source Strings use the
+shared canonical pool. Versions 6 and 7 differ only in using `map` or
+`parallel_map`.
 
 Versions 0-2 print descending counts with ascending word ties. Versions 3-7
 keep the largest ten `(count word)` tuples in an Array min-heap. Once the
@@ -151,9 +152,12 @@ return root.walk().filter(Path.is_file).parallel_map(file_unique_words, 4)
 `parallel_map` starts no work until `foldl` consumes it. The fold starts up
 to four native threads and reuses them. Each worker holds at most one running
 job or unread result. The caller alone traverses the source and accumulates
-results in completion-queue order. Each job exports a separate result Scope
-and pool before that worker receives another input. Cleanup joins workers
-on success or failure and waits for callbacks; it does not cancel them.
+results in completion-queue order. A worker keeps its temporary Map alive
+until the reducer finishes reading it. This reducer merges counts into the
+caller-owned `MapStringInt` and retains no worker-owned storage, so no ownership
+transfer is needed. Canonical words use the shared pool. Cleanup requests
+cooperative stop on all workers before joining; arbitrary native I/O is not
+interrupted.
 
 The source iterator and borrowed input graphs must remain alive through use.
 Inputs are read-only; worker output uses fresh Maps. Keep temporary iterator

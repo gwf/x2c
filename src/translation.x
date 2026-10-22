@@ -46,12 +46,6 @@ static macro Stmt $progress.main_workers_started(Expr $jobs, Expr $total) =>
 static macro Stmt $fail.main_input_not_x(Expr $input) =>
   Diagnostics.driver_error(%"translation input is not an .x file: ${$input}");
 
-static macro Stmt $fail.main_directory_missing(Expr $out_dir) =>
-  Diagnostics.driver_error(%"output directory does not exist: ${$out_dir}");
-
-static macro Stmt $fail.main_directory_not_dir(Expr $out_dir) =>
-  Diagnostics.driver_error(%"output is not a directory: ${$out_dir}");
-
 static macro Stmt $fail.main_directory_unwritable(Expr $out_dir) =>
   Diagnostics.driver_error(%"output directory is not writable: ${$out_dir}");
 
@@ -235,7 +229,6 @@ int translate_request(
    `--out-dir` must not share an output stem; inspection writes nothing. */
 static void _preflight(Translation &t) {
   CliRequest request = t.request;
-  if (!request.inspects()) _check_out_dir(request.out_dir);
   int shared = !request.inspects() && !t.unit_dirs, Map stems = {};
   foreach (String input, request.inputs) {
     CliRequest.require_input(input);
@@ -246,13 +239,13 @@ static void _preflight(Translation &t) {
       _stem_collision(stem, stems[stem], input, request.out_dir);
     stems[stem] = input;
   }
+  if (!request.inspects() && !request.dry_run)
+    _make_out_dir(request.out_dir);
 }
 
-static void _check_out_dir(String out_dir) {
-  if (!Path.exists(out_dir))
-    $fail.main_directory_missing(out_dir);
-  if (!Path.is_dir(out_dir))
-    $fail.main_directory_not_dir(out_dir);
+static void _make_out_dir(String out_dir) {
+  try Path.make_dirs(out_dir);
+  catch %((!or not-found io-fail) *detail): Diagnostics.host_error(detail);
   if (access(out_dir, W_OK | X_OK))
     $fail.main_directory_unwritable(out_dir);
 }

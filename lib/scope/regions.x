@@ -192,11 +192,14 @@ static int _forget_retain(Scope scope, Scope *slot) {
 static void _destroy_chain(Scope scope) {
   while (scope) {
     Scope down = scope.down;
-    ScopeAlloc alloc;
-    while ((alloc = scope.first)) {
-      scope.first = alloc.next;
-      if (scope.first) scope.first.prev = $scope.tag_pointer(scope);
-      _release(alloc);
+    _detach_scope(scope);
+    while (1) {
+      Scope child = scope.children;
+      ScopeAlloc alloc = child ? NULL : scope.first;
+      if (alloc) _detach(alloc);
+      if (child) _destroy_chain(child);
+      else if (alloc) _release(alloc);
+      else break;
     }
     _unregister_name(scope);
     atomic_fetch_add(&scope_destructions, 1);
@@ -219,6 +222,65 @@ static void _destroy_chain(Scope scope) {
 meta native Scope Scope.new(void) {
   _require_running();
   return _new_scope(NULL);
+}
+
+/** Creates a storage scope owned by the active allocation scope.
+    Its allocations and adopted children are reclaimed with its owner unless
+    explicitly transferred or destroyed first. No object graph is traversed.
+    Raises: `<alloc-fail>` while creating the scope or its initial owner.
+*/
+Scope Scope.child(void) {
+  _require_running();
+  Scope *active = Scope.top();
+  if (!*active) *active = _new_scope(NULL);
+  Scope child = _new_scope(NULL);
+  child.transfer(*active);
+  return child;
+}
+
+/** Returns this scope's lifetime parent, or NULL for a detached scope.
+    This is independent of the active allocation stack and retained regions.
+*/
+Scope Scope.parent(Scope scope) {
+  return scope ? scope.parent : NULL;
+}
+
+/** Reparents this storage scope and its adopted descendants without copying.
+    A NULL destination detaches the subtree; its allocations remain owned by
+    their existing scopes until reattachment or explicit destruction.
+    The source must be inactive. A nonnull destination must be live and must
+    not be the source or one of its descendants. Callers provide exclusive
+    access to the affected ownership lists and coordinate payload access.
+    Transfer does not follow payload references or revoke aliases.
+*/
+void Scope.transfer(Scope scope, Scope destination) {
+  if (!scope) return;
+  if (scope.parent != destination) {
+    _detach_scope(scope);
+    scope.parent = destination;
+    if (destination) {
+      scope.next = destination.children;
+      if (scope.next) scope.next.previous = scope;
+      destination.children = scope;
+    }
+  }
+}
+
+static void _detach_scope(Scope scope) {
+  if (scope.previous) scope.previous.next = scope.next;
+  else if (scope.parent) scope.parent.children = scope.next;
+  if (scope.next) scope.next.previous = scope.previous;
+  scope.parent = scope.previous = scope.next = NULL;
+}
+
+/** Reports whether `scope` owns `candidate` through lifetime parent links.
+    A scope contains itself. Both handles must remain live during the query.
+    This walks scope parents, never object references.
+*/
+int Scope.contains(Scope scope, Scope candidate) {
+  if (!scope || !candidate) return 0;
+  while (candidate && candidate != scope) candidate = candidate.parent;
+  return candidate == scope;
 }
 
 /** Creates a detached scope carrying a copy of `name` for diagnostics.
@@ -245,8 +307,9 @@ meta native Scope Scope.new_named(const char *name) {
   return _new_scope(name);
 }
 
-/** Destroys a detached scope and frees every allocation it owns.
-    This ends a scope you hold in a variable, and is the counterpart to
+/** Destroys a scope and frees its allocations and adopted child scopes.
+    An adopted scope first detaches from its lifetime parent. This ends a
+    scope you hold in a variable, and is the counterpart to
     `Scope.new` and `Scope.new_named`. It frees the scope's allocations and
     discards its name; pointers into it are dangling afterwards, and nothing
     diagnoses their use. Any regions still linked below it, from retains that
@@ -278,8 +341,7 @@ meta native void Scope.cleanup(Scope value) { value.destroy(); }
 
 module Scope _new_scope(const char *name) {
   Scope scope = _data_malloc(sizeof(struct Scope));
-  scope.up = scope.down = NULL;
-  scope.first = NULL;
+  *scope = (struct Scope) {0};
   _register_name(scope, name);
   atomic_fetch_add(&scope_creations, 1);
   return scope;

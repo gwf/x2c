@@ -15,6 +15,7 @@ typedef struct Block * Block;
 typedef struct Block{
   Bytes bytes;
   size_t width, length, cap;
+  Scope lifetime;
 }
 * Block;
 
@@ -95,6 +96,8 @@ static inline void Block_pop(Block block){
 }
 
 Block Block_new(size_t width);
+
+Scope Block_scope(Block b);
 
 Bytes Bytes_new(size_t width);
 

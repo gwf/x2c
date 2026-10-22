@@ -9,7 +9,7 @@ Hash table mapping `Var` keys to `Var` values.
 
 | Function | Summary |
 | --- | --- |
-| [`Map.cleanup`](#Map.cleanup) | Releases this Map and both backing Blocks without freeing stored values. |
+| [`Map.cleanup`](#Map.cleanup) | Destroys owned contents and frees the Map's record and backing Blocks. |
 | [`Map.contains`](#Map.contains) | Returns one when `key` is present, or zero for a null map. |
 | [`Map.copy`](#Map.copy) | Returns a fresh shallow copy in the current `Scope`. |
 | [`Map.enumerate`](#Map.enumerate) | Initializes `dest` to yield canonical `(key value)` `List`s in bucket order. |
@@ -20,8 +20,10 @@ Hash table mapping `Var` keys to `Var` values.
 | [`Map.len`](#Map.len) | Returns the number of entries, or zero for a null map. |
 | [`Map.merge`](#Map.merge) | Copies every entry of `other` into `map` and returns the destination. |
 | [`Map.merge_with`](#Map.merge_with) | Merges `other` into `map`, combines colliding values, and returns `map`. |
+| [`Map.move_to`](#Map.move_to) | Moves the record, backing Blocks, and nullable owned contents together. |
 | [`Map.new`](#Map.new) | Returns a fresh empty map owned by the current `Scope`. |
 | [`Map.postfixindex`](#Map.postfixindex) | Applies postfix `++` or `--` and returns the previous value. |
+| [`Map.scope`](#Map.scope) | Acquires the Map's scope for explicitly owned contents. |
 | [`Map.set`](#Map.set) | Copies `key` and `val` into the table, replacing an existing value. |
 | [`Map.setdefault`](#Map.setdefault) | Returns the value for `key`, inserting `defval` when absent. |
 | [`Map.setindex`](#Map.setindex) | Stores `val` under `key` and returns `val`. |
@@ -39,9 +41,11 @@ Hash table mapping `Var` keys to `Var` values.
 
 `meta native void Map.cleanup(Map value)`
 
-Releases this Map and both backing Blocks without freeing stored values.
+Destroys owned contents and frees the Map's record and backing Blocks.
+Referenced keys and values with independent owners remain unchanged.
+NULL does nothing. Every alias becomes invalid after destruction.
 
-Source: `lib/map.x:258`
+Source: `lib/map.x:261`
 
 <a id="Map.contains"></a>
 #### Map.contains
@@ -191,6 +195,20 @@ failing callback leaves its entry unchanged. A null callback raises
 
 Source: `lib/map.x:110`
 
+<a id="Map.move_to"></a>
+#### Map.move_to
+
+`void Map.move_to(Map map, Scope *destination)`
+
+Moves the record, backing Blocks, and nullable owned contents together.
+Pointers and references remain unchanged. The destination slot acquires
+a scope if empty. NULL maps do nothing.
+
+**Raises:** `<bad-arg>` for a NULL destination slot, or `<alloc-fail>` while
+creating its scope. Those failures leave ownership unchanged.
+
+Source: `lib/map.x:76`
+
 <a id="Map.new"></a>
 #### Map.new
 
@@ -216,6 +234,20 @@ unchanged.
 key, or a cause from `Var.postfix` for an unsupported value or operation.
 
 Source: `lib/map.x:150`
+
+<a id="Map.scope"></a>
+#### Map.scope
+
+`Scope Map.scope(Map map)`
+
+Acquires the Map's scope for explicitly owned contents.
+Created lazily beneath the record's owner, this scope excludes the
+record and backing Blocks. Stored references remain borrowed unless
+explicitly moved into it. NULL returns NULL.
+
+**Raises:** `<alloc-fail>` when creating the scope.
+
+Source: `lib/map.x:76`
 
 <a id="Map.set"></a>
 #### Map.set
@@ -452,7 +484,7 @@ for source readers but are not supported as user API.
 
 | Function | Summary |
 | --- | --- |
-| [`Map.export_to`](#Map.export_to) | Exports every key and value, rebuilds the table, then moves its `Block`s. |
+| [`Map.export_to`](#Map.export_to) | Exports every key and value and rebuilds the table under its record owner. |
 | [`Map.new_capacity`](#Map.new_capacity) | Returns a fresh empty map with exactly `capacity` buckets. |
 
 ### `Map`
@@ -462,13 +494,13 @@ for source readers but are not supported as user API.
 
 `void Map.export_to( Map map, Context source, VarExportContextFn export_value, Scope *scope)`
 
-Exports every key and value, rebuilds the table, then moves its `Block`s.
+Exports every key and value and rebuilds the table under its record owner.
 The borrowed `export_value` callback runs synchronously for each stored
 key and value and may return replacement `Var`s. Rebuilding is required
 because an exported key may hash differently. On success the old backing
-`Block`s are freed, the rebuilt `Block`s move into `scope`, and the `Map`
-identity remains unchanged. `Context` moves that identity before this call
-to break cycles.
+`Block`s are freed and their replacements enter the record owner's scope.
+`Context` owns cycle detection and schedules record, backing storage, and
+owned-content scope moves after recursion.
 
 A failure while staging leaves the `Map`'s original records, backing
 storage, and recorded `Scope` unchanged. Effects of callbacks that
@@ -500,17 +532,17 @@ Source: `lib/map.x:87`
 
 | Type | Kind | Summary |
 | --- | --- | --- |
-| [`Map`](#Map) | struct | `Scope`-backed mutable hash table from `Var` keys to `Var` values. |
+| [`Map`](#Map) | struct | Mutable hash table whose record and backing Blocks share one owner. |
 
 <a id="Map"></a>
 ### Map
 
 `typedef struct Map { Scope scope, Bytes hashes, entries; unsigned used; unsigned capacity; unsigned mask; } *Map`
 
-`Scope`-backed mutable hash table from `Var` keys to `Var` values.
-The `Map` records the `Scope` used for its two backing `Block`s.
-`Context` moves the `Map` allocation itself before recursively exporting
-those `Block`s. Stored `Var` bits are shallow and retain no pointee;
+Mutable hash table whose record and backing Blocks share one owner.
+`Map.scope` lazily creates a separate scope for explicitly owned contents.
+`Map.move_to` moves the record, backing storage, and owned contents.
+Stored `Var` bits are shallow and retain no pointee;
 those values must remain valid while the `Map` can read, compare, hash,
 or return them. A valid empty `Map` is allocated and distinct from NULL.
 

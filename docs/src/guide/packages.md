@@ -86,7 +86,8 @@ builds the dependency into a shared cache outside the worktree and leaves a
 
 ## Using one
 
-Register the directory that holds packages and import by name:
+From the repository root, register the directory that holds packages and
+import by name. Use `./x2c` to select the current development compiler:
 
 <!-- ignore: an import needs a registered --package-dir root. -->
 ```x2c,ignore
@@ -100,7 +101,7 @@ int main(void) {
 ```
 
 ```sh
-x2c build --package-dir packages --output greeter greeter.x
+./x2c build --package-dir packages -o greeter greeter.x
 ```
 
 The driver reads the unit's recorded dependencies, adds the package's `builds`
@@ -249,15 +250,16 @@ same include rules apply to macros and ordinary runtime declarations.
 
 `packages/yyjson/` is the worked example. It publishes the vendored
 `src/yyjson-0.12.h` because four of its options methods take yyjson's own flag
-types, so a consumer needs the upstream header on its system include path:
+types, so a consumer needs the upstream header on its system include path.
+Run these commands from the repository root:
 
 ```sh
 make -C packages/yyjson prepare
 make -C packages/yyjson build
 make -C packages/yyjson test run run-lisp
-x2c build --package-dir packages \
+./x2c build --package-dir packages \
   --c-include-dir packages/yyjson/deps/include \
-  --output catalog catalog.x
+  -o catalog catalog.x
 ```
 
 `prepare` verifies and builds the pinned native dependency. `build` creates the

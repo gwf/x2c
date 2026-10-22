@@ -71,6 +71,13 @@ prefix.
 | [`x2c_scope_thread_release`](scope.md#x2c_scope_thread_release) | `lib/scope/scope.x` | `void x2c_scope_thread_release(void)` |
 | `x2c_set_root` | `src/utils.x` | `void x2c_set_root(String root)` |
 | [`x2c_slice_bound`](common.md#x2c_slice_bound) | `lib/common.x` | `int x2c_slice_bound(int bound)` |
+| [`x2c_thread_cancel`](thread.md#x2c_thread_cancel) | `lib/thread.x` | `void x2c_thread_cancel(void)` |
+| [`x2c_thread_stopping`](thread.md#x2c_thread_stopping) | `lib/thread.x` | `int x2c_thread_stopping(void)` |
+| [`x2c_thread_wait`](thread.md#x2c_thread_wait) | `lib/thread.x` | `void x2c_thread_wait(pthread_cond_t *condition)` |
+| [`x2c_thread_wait_lock`](thread.md#x2c_thread_wait_lock) | `lib/thread.x` | `void x2c_thread_wait_lock(void)` |
+| [`x2c_thread_wait_owner`](thread.md#x2c_thread_wait_owner) | `lib/thread.x` | `Thread x2c_thread_wait_owner(void)` |
+| [`x2c_thread_wait_stopped`](thread.md#x2c_thread_wait_stopped) | `lib/thread.x` | `int x2c_thread_wait_stopped(Thread owner)` |
+| [`x2c_thread_wait_unlock`](thread.md#x2c_thread_wait_unlock) | `lib/thread.x` | `void x2c_thread_wait_unlock(void)` |
 | [`x2c_try_register_descriptor`](dispatch.md#x2c_try_register_descriptor) | `lib/dispatch.x` | `int x2c_try_register_descriptor(String name, VarMethods methods)` |
 | [`x2c_try_register_tagged_descriptor`](dispatch.md#x2c_try_register_tagged_descriptor) | `lib/dispatch.x` | `int x2c_try_register_tagged_descriptor( Symbol tag, String name, VarMethods methods)` |
 | [`x2c_var_custom_descriptor`](var.md#x2c_var_custom_descriptor) | `lib/var/var.x` | `VarDescriptor *x2c_var_custom_descriptor(Var value)` |
@@ -97,4 +104,4 @@ prefix.
 | [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_volatile`](varops.md#x2c_var_update_volatile) | `lib/varops.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
-Total: 85 functions.
+Total: 92 functions.

@@ -15,11 +15,15 @@ Memory allocation scope management.
 | [`xmalloc`](#xmalloc) | Allocates uninitialized bytes in the active scope through `Scope.malloc`. |
 | [`xmemdup`](#xmemdup) | Copies bytes into the active scope through `Scope.memdup`. |
 | [`xrealloc`](#xrealloc) | Resizes scope-owned memory through `Scope.realloc`, preserving its owner. |
+| [`Scope.child`](#Scope.child) | Creates a storage scope owned by the active allocation scope. |
+| [`Scope.contains`](#Scope.contains) | Reports whether `scope` owns `candidate` through lifetime parent links. |
 | [`Scope.malloc_finalized`](#Scope.malloc_finalized) | Allocates `size` uninitialized bytes in the active scope with a finalizer. |
 | [`Scope.malloc_finalized_in`](#Scope.malloc_finalized_in) | Allocates `size` bytes with finalizer `drop` in the scope held by `s`. |
 | [`Scope.new`](#Scope.new) | Creates a detached, unnamed scope and returns it. |
+| [`Scope.parent`](#Scope.parent) | Returns this scope's lifetime parent, or NULL for a detached scope. |
 | [`Scope.pop`](#Scope.pop) | Restores the slot that was active before the matching `Scope.push`. |
 | [`Scope.push`](#Scope.push) | Makes the scope in `scope` active until a matching `Scope.pop`. |
+| [`Scope.transfer`](#Scope.transfer) | Reparents this storage scope and its adopted descendants without copying. |
 
 ### Functions
 
@@ -31,7 +35,7 @@ Destroys this thread's `Scope` chain and its push and retain stacks.
 It runs last in `x2c_thread_state_release` and repeats harmlessly; a
 thread that never created a `Scope` has nothing to destroy.
 
-Source: `lib/scope/regions.x:300`
+Source: `lib/scope/regions.x:362`
 
 #### xcalloc
 
@@ -43,7 +47,7 @@ same. Release the result with `xfree` or let its scope reclaim it.
 
 **See:** [`Scope.calloc`](#Scope.calloc)
 
-Source: `lib/scope/scope.x:103`
+Source: `lib/scope/scope.x:107`
 
 #### xfree
 
@@ -55,7 +59,7 @@ Native allocations, including buffers from `getline`, require native
 
 **See:** [`Scope.free`](#Scope.free)
 
-Source: `lib/scope/scope.x:120`
+Source: `lib/scope/scope.x:124`
 
 #### xmalloc
 
@@ -67,7 +71,7 @@ same. Release the result with `xfree` or let its scope reclaim it.
 
 **See:** [`Scope.malloc`](#Scope.malloc)
 
-Source: `lib/scope/scope.x:95`
+Source: `lib/scope/scope.x:99`
 
 #### xmemdup
 
@@ -79,7 +83,7 @@ string's terminator too. The signature and raised errors are unchanged.
 
 **See:** [`Scope.memdup`](#Scope.memdup)
 
-Source: `lib/scope/scope.x:128`
+Source: `lib/scope/scope.x:132`
 
 #### xrealloc
 
@@ -92,9 +96,33 @@ The signature and raised errors are the same as `Scope.realloc`.
 
 **See:** [`Scope.realloc`](#Scope.realloc)
 
-Source: `lib/scope/scope.x:112`
+Source: `lib/scope/scope.x:116`
 
 ### `Scope`
+
+<a id="Scope.child"></a>
+#### Scope.child
+
+`Scope Scope.child(void)`
+
+Creates a storage scope owned by the active allocation scope.
+Its allocations and adopted children are reclaimed with its owner unless
+explicitly transferred or destroyed first. No object graph is traversed.
+
+**Raises:** `<alloc-fail>` while creating the scope or its initial owner.
+
+Source: `lib/scope/regions.x:232`
+
+<a id="Scope.contains"></a>
+#### Scope.contains
+
+`int Scope.contains(Scope scope, Scope candidate)`
+
+Reports whether `scope` owns `candidate` through lifetime parent links.
+A scope contains itself. Both handles must remain live during the query.
+This walks scope parents, never object references.
+
+Source: `lib/scope/regions.x:280`
 
 <a id="Scope.malloc_finalized"></a>
 #### Scope.malloc_finalized
@@ -154,7 +182,17 @@ exit-time leak report.
 **Raises:** `<alloc-fail>` when the scope cannot be allocated. Before `Error`
 initialization it terminates at the error floor.
 
-Source: `lib/scope/regions.x:219`
+Source: `lib/scope/regions.x:222`
+
+<a id="Scope.parent"></a>
+#### Scope.parent
+
+`Scope Scope.parent(Scope scope)`
+
+Returns this scope's lifetime parent, or NULL for a detached scope.
+This is independent of the active allocation stack and retained regions.
+
+Source: `lib/scope/regions.x:244`
 
 <a id="Scope.pop"></a>
 #### Scope.pop
@@ -209,6 +247,21 @@ Before `Error` initialization they terminate at the error floor.
 
 Source: `lib/scope/regions.x:40`
 
+<a id="Scope.transfer"></a>
+#### Scope.transfer
+
+`void Scope.transfer(Scope scope, Scope destination)`
+
+Reparents this storage scope and its adopted descendants without copying.
+A NULL destination detaches the subtree; its allocations remain owned by
+their existing scopes until reattachment or explicit destruction.
+The source must be inactive. A nonnull destination must be live and must
+not be the source or one of its descendants. Callers provide exclusive
+access to the affected ownership lists and coordinate payload access.
+Transfer does not follow payload references or revoke aliases.
+
+Source: `lib/scope/regions.x:256`
+
 ## Advanced and interop API
 
 | Function | Summary |
@@ -217,7 +270,7 @@ Source: `lib/scope/regions.x:40`
 | [`Scope.calloc`](#Scope.calloc) | Allocates `count` objects of `size` bytes each, zeroed, in the active scope. |
 | [`Scope.calloc_in`](#Scope.calloc_in) | Allocates `count` zeroed objects of `size` bytes in the scope in `slot`. |
 | [`Scope.cleanup`](#Scope.cleanup) | Ends the owned lifetime when a managed local leaves its block. |
-| [`Scope.destroy`](#Scope.destroy) | Destroys a detached scope and frees every allocation it owns. |
+| [`Scope.destroy`](#Scope.destroy) | Destroys a scope and frees its allocations and adopted child scopes. |
 | [`Scope.free`](#Scope.free) | Frees one scope-owned allocation before its scope ends. |
 | [`Scope.malloc`](#Scope.malloc) | Allocates `size` uninitialized bytes in the active scope. |
 | [`Scope.malloc_in`](#Scope.malloc_in) | Allocates `size` uninitialized bytes in the scope held by `slot`. |
@@ -287,15 +340,16 @@ Source: `lib/scope/allocation.x:156`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/scope/regions.x:277`
+Source: `lib/scope/regions.x:340`
 
 <a id="Scope.destroy"></a>
 #### Scope.destroy
 
 `meta native void Scope.destroy(Scope scope)`
 
-Destroys a detached scope and frees every allocation it owns.
-This ends a scope you hold in a variable, and is the counterpart to
+Destroys a scope and frees its allocations and adopted child scopes.
+An adopted scope first detaches from its lifetime parent. This ends a
+scope you hold in a variable, and is the counterpart to
 `Scope.new` and `Scope.new_named`. It frees the scope's allocations and
 discards its name; pointers into it are dangling afterwards, and nothing
 diagnoses their use. Any regions still linked below it, from retains that
@@ -311,7 +365,7 @@ the destroyed scope, so destroying it again is undefined behavior.
 lower scope. The failure leaves the scope intact. A NULL `scope` does
 nothing. Before `Error` initialization it terminates at the error floor.
 
-Source: `lib/scope/regions.x:264`
+Source: `lib/scope/regions.x:327`
 
 <a id="Scope.free"></a>
 #### Scope.free
@@ -478,7 +532,7 @@ Scope.destroy(work);
 or `<size-limit>` when the name is too large. Before `Error`
 initialization these failures terminate the process.
 
-Source: `lib/scope/regions.x:243`
+Source: `lib/scope/regions.x:305`
 
 <a id="Scope.realloc"></a>
 #### Scope.realloc
@@ -498,7 +552,7 @@ As with C, the old pointer must be treated as dead once a resize succeeds.
 allocation fails. Before `Error` initialization these failures terminate at
 the error floor.
 
-Source: `lib/scope/allocation.x:292`
+Source: `lib/scope/allocation.x:304`
 
 <a id="Scope.release"></a>
 #### Scope.release
@@ -628,6 +682,7 @@ for source readers but are not supported as user API.
 | Function | Summary |
 | --- | --- |
 | [`Scope.initialize`](#Scope.initialize) | Initializes the process-wide `Scope` runtime owner. |
+| [`Scope.move_before`](#Scope.move_before) | Moves one allocation immediately before another in its owner's list. |
 | [`Scope.owner`](#Scope.owner) | Returns the `Scope` that currently owns `ptr`. |
 | [`Scope.shutdown_hook`](#Scope.shutdown_hook) | Registers `hook` to run during process-wide `Scope` shutdown. |
 
@@ -641,6 +696,18 @@ for source readers but are not supported as user API.
 Initializes the process-wide `Scope` runtime owner.
 
 Source: `lib/scope/runtime.x:49`
+
+<a id="Scope.move_before"></a>
+#### Scope.move_before
+
+`void Scope.move_before(void *ptr, void *anchor)`
+
+Moves one allocation immediately before another in its owner's list.
+Both pointers must name distinct live Scope allocations under exclusive
+access. This internal storage-replacement operation preserves payloads
+and finalizers without allocation, owner lookup, or scope creation.
+
+Source: `lib/scope/allocation.x:285`
 
 <a id="Scope.owner"></a>
 #### Scope.owner
@@ -681,13 +748,14 @@ Source: `lib/scope/runtime.x:83`
 <a id="Scope"></a>
 ### Scope
 
-`typedef struct Scope { ScopeAlloc first; struct Scope *down, *up; } *Scope`
+`typedef struct Scope { ScopeAlloc first; struct Scope *down, *up; struct Scope *parent, *children, *previous, *next; } *Scope`
 
 Handle for a region and any retained regions linked below it.
 The layout is public; only `Scope` operations create or mutate valid
-allocation and region links.
+allocation and region links. Callers provide exclusive access to those
+links, including ownership parents, during allocation and lifetime changes.
 
-Source: `lib/scope/scope.x:34`
+Source: `lib/scope/scope.x:35`
 
 <a id="ScopeStats"></a>
 ### ScopeStats
@@ -700,7 +768,7 @@ snapshot is taken.
 Live and peak requested bytes count public payload only, excluding Scope
 metadata, native allocator overhead, and Pool's direct small-object blocks.
 
-Source: `lib/scope/scope.x:45`
+Source: `lib/scope/scope.x:47`
 
 ## Internal types
 

@@ -65,8 +65,8 @@ module unsigned long value_epoch;
 
 /* A process that has never started a worker cannot contend for a pool, and
    the compiler is such a process: locking added a seventh to translation
-   time for nothing. `Thread.start_raw` sets this before `pthread_create`, so the
-   worker sees it and every lock taken afterwards is real. It never clears,
+   time for nothing. `Thread.start_raw` sets this before `pthread_create`, so
+   the worker sees it and every lock taken afterwards is real. It never clears,
    because a value interned while it was clear was published without one. */
 module int pool_multithreaded;
 

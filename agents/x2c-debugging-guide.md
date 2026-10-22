@@ -63,6 +63,9 @@ print their selected result and stop:
 
 `--debug` enables compiler debug logging to standard error; `--no-cpp` skips
 symbol collection and preprocessing. Neither option stops translation.
+For native source debugging, use `-g --source-map -O0` with `build` or `run`.
+Add `--save-temps` to retain and reuse generated files in `.x2c-build`, or
+select a retained directory with `--build-dir <dir>`.
 See [compiler options](../docs/src/reference/cli.md) for the full list and
 [Logger and diagnostics](logger-and-diagnostics-guide.md) for logging behavior.
 

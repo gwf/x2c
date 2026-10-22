@@ -32,6 +32,7 @@
 */
 typedef struct Block {
   Bytes bytes, size_t width, length, cap;
+  Scope lifetime;
 } *Block;
 
 $cleanup.by(Block, free);
@@ -295,6 +296,21 @@ Block Block.new(size_t width) {
   return block;
 }
 
+/** Acquires this Block's scope for explicitly owned contents.
+    The scope is created lazily beneath the handle's allocation owner.
+    The handle and backing storage stay outside it; elements remain bytes
+    whose references are never adopted automatically. NULL returns NULL.
+    Raises: `<alloc-fail>` when creating the scope.
+*/
+Scope Block.scope(Block b) {
+  if (b == NULL) return NULL;
+  if (!b.lifetime) {
+    b.lifetime = Scope.new();
+    b.lifetime.transfer(Scope.owner(b));
+  }
+  return b.lifetime;
+}
+
 /** Allocates empty byte storage for elements of `width` bytes.
     The result is the base view of a `Scope`-owned `Block`. Methods that may
     grow it return the current `Bytes` pointer, which callers must keep.
@@ -305,11 +321,12 @@ Bytes Bytes.new(size_t width) => Block.new(width).bytes;
 /** Releases the `Block` and its backing storage, invalidating every alias. */
 void Block.free(Block b) {
   if (b == NULL) return;
+  if (b.lifetime) b.lifetime.destroy();
   if (b.bytes != NULL) Scope.free(_allocation(b));
   Scope.free(b);
 }
 
-/** Moves `block` and its backing allocation into `scope`.
+/** Moves `block`, its backing allocation, and owned contents into `scope`.
     This preserves the `Block` and `Bytes` pointers and contents while changing
     which `Scope` ends their lifetime. `Context` export calls this method
     instead of assuming a `Block` is one allocation.
@@ -321,4 +338,5 @@ void Block.move_to(Block block, Scope *scope) {
   if (block == NULL) return;
   if (block.bytes != NULL) Scope.move(_allocation(block), scope);
   Scope.move(block, scope);
+  block.lifetime.transfer(*scope);
 }

@@ -277,6 +277,18 @@ meta native void Scope.move(void *ptr, Scope *slot) {
   _attach((*slot), alloc);
 }
 
+/** Moves one allocation immediately before another in its owner's list.
+    Both pointers must name distinct live Scope allocations under exclusive
+    access. This internal storage-replacement operation preserves payloads
+    and finalizers without allocation, owner lookup, or scope creation.
+*/
+void Scope.move_before(void *ptr, void *anchor) {
+  ScopeAlloc alloc = $scope.ptr_alloc(ptr);
+  ScopeAlloc before = $scope.ptr_alloc(anchor);
+  _detach(alloc);
+  _relink(alloc, before.prev, before);
+}
+
 /** Resizes one scope-owned allocation and returns the new pointer.
     Ownership does not change: the allocation stays with the scope that
     already held it, even if that is not the active one. Two edge cases follow
@@ -315,7 +327,7 @@ static void _free(ScopeAlloc alloc) {
   _release(alloc);
 }
 
-static void _detach(ScopeAlloc alloc) {
+module void _detach(ScopeAlloc alloc) {
   ScopeAlloc next = alloc.next, prev = alloc.prev;
   _point_to(prev, next);
   if (next) next.prev = prev;
