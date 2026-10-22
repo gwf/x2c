@@ -116,7 +116,9 @@ static void *_malloc_in(Scope *slot, size_t size, void (*drop)(void *)) {
   meta.requested_size = size;
   meta.drop = drop;
   ScopeAlloc alloc = (ScopeAlloc) (meta + 1);
+  _links_lock();
   _attach((*slot), alloc);
+  _links_unlock();
   _record_allocation(size);
   return $scope.alloc_ptr(alloc);
 }
@@ -236,9 +238,12 @@ meta native void Scope.free(void *ptr) {
 Scope Scope.owner(void *ptr) {
   _require_running();
   if (!ptr) return NULL;
+  _links_lock();
   ScopeAlloc alloc = $scope.ptr_alloc(ptr);
   while (alloc && !$scope.is_tagged(alloc.prev)) alloc = alloc.prev;
-  return alloc ? $scope.untag_pointer(alloc.prev) : NULL;
+  Scope owner = alloc ? $scope.untag_pointer(alloc.prev) : NULL;
+  _links_unlock();
+  return owner;
 }
 
 /** Relinks one allocation onto the scope held by `slot`.
@@ -273,8 +278,10 @@ meta native void Scope.move(void *ptr, Scope *slot) {
   if (!slot) raise %(bad-arg);
   if (!*slot) *slot = _new_scope(NULL);
   ScopeAlloc alloc = $scope.ptr_alloc(ptr);
+  _links_lock();
   _detach(alloc);
   _attach((*slot), alloc);
+  _links_unlock();
 }
 
 /** Resizes one scope-owned allocation and returns the new pointer.
@@ -296,26 +303,35 @@ meta native void *Scope.realloc(void *ptr, size_t size) {
     _free($scope.ptr_alloc(ptr));
     return NULL;
   }
-  ScopeAlloc old = $scope.ptr_alloc(ptr), next = old.next, prev = old.prev;
+  ScopeAlloc old = $scope.ptr_alloc(ptr);
   ScopeMetadata *old_meta = $scope.alloc_meta(old);
   size_t old_size = old_meta.requested_size;
   if (size > SIZE_MAX - sizeof(ScopeMetadata) - sizeof(struct ScopeAlloc))
     raise %(size-limit);
-  ScopeMetadata *meta = _data_realloc(
+  _links_lock();
+  ScopeAlloc next = old.next, prev = old.prev;
+  ScopeMetadata *meta = realloc(
     old_meta, sizeof(ScopeMetadata) + sizeof(struct ScopeAlloc) + size);
+  if (!meta) {
+    _links_unlock();
+    raise %(alloc-fail);
+  }
   meta.requested_size = size;
   ScopeAlloc replacement = (ScopeAlloc) (meta + 1);
   _relink(replacement, prev, next);
+  _links_unlock();
   _record_resize(old_size, size);
   return $scope.alloc_ptr(replacement);
 }
 
 static void _free(ScopeAlloc alloc) {
+  _links_lock();
   _detach(alloc);
+  _links_unlock();
   _release(alloc);
 }
 
-static void _detach(ScopeAlloc alloc) {
+module void _detach(ScopeAlloc alloc) {
   ScopeAlloc next = alloc.next, prev = alloc.prev;
   _point_to(prev, next);
   if (next) next.prev = prev;
@@ -354,10 +370,4 @@ module void *_data_malloc(size_t size) {
   void *ptr = malloc(size);
   if (!ptr) raise %(alloc-fail);
   return ptr;
-}
-
-static void *_data_realloc(void *ptr, size_t size) {
-  void *result = realloc(ptr, size);
-  if (!result) raise %(alloc-fail);
-  return result;
 }

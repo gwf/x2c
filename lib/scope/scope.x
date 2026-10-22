@@ -34,6 +34,7 @@ typedef struct ScopeAlloc {
 typedef struct Scope {
   ScopeAlloc first;
   struct Scope *down, *up;
+  struct Scope *parent, *children, *previous, *next;
 } *Scope;
 
 /** Value snapshot of process-wide `Scope` allocation and lifetime counters.
@@ -77,6 +78,11 @@ module atomic_size_t scope_creations, scope_destructions;
 // backing storage
 
 module atomic_size_t raw_alloc_count, raw_free_count;
+
+#include <pthread.h>
+
+module void _links_lock(void);
+module void _links_unlock(void);
 
 module {
   "allocation.x",

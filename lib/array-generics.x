@@ -195,7 +195,7 @@ macro Unit $array.core.family(Type $array, Type $element) {
 
   static $array $array.copy_elements($array array) {
     if (array == NULL) return NULL;
-    $array copy = ($array) Block_new(sizeof($element));
+    $array copy = ($array) Block_new_owned(sizeof($element));
     Block_append((Block) copy, array.bytes, array.length);
     return copy;
   }
@@ -203,7 +203,7 @@ macro Unit $array.core.family(Type $array, Type $element) {
   static $array $array.slice_elements(
     $array array, int start, int end, int step) {
     if (array == NULL || !step) return NULL;
-    $array slice = ($array) Block_new(sizeof($element));
+    $array slice = ($array) Block_new_owned(sizeof($element));
     int newlen = x2c_normalize_slice(&start, &end, step, (int) array.length);
     if (newlen <= 0) return slice;
     if (step == 1) {
@@ -283,7 +283,7 @@ macro Unit $array.core.family(Type $array, Type $element) {
     int n = (int) array.length;
     int begin = start, finish = end;
     _normalize_span(array, &begin, &finish);
-    if (begin >= finish) return ($array) Block_new(sizeof($element));
+    if (begin >= finish) return ($array) Block_new_owned(sizeof($element));
     $array removed = array.slice_elements(begin, finish, 1);
     $element *data = ($element *) array.bytes;
     int tail = n - finish;
@@ -376,7 +376,7 @@ macro Unit $array.typed.operations(Type $array, Type $element, Literal $zero,
       Raises: `<alloc-fail>` when storage cannot be allocated.
   */
   $array $array.new(void) {
-    return ($array) Block_new(sizeof($element));
+    return ($array) Block_new_owned(sizeof($element));
   }
 
   /** Writes the next native element, advances `cursor`, and returns one.
@@ -815,7 +815,7 @@ macro Unit $array.typed.publish(Type $array, Type $element, Name $unbox,
   */
   $array Array.$unbox(Array values) {
     if (values == NULL) return NULL;
-    $array packed = ($array) Block_new(sizeof($element)), result = NULL;
+    $array packed = ($array) Block_new_owned(sizeof($element)), result = NULL;
     defer if (result == NULL) packed.free();
     for (size_t i = 0; i < values.length; i++) packed.push(values[i]);
     return result = packed;
@@ -832,8 +832,10 @@ macro Unit $array.typed.publish(Type $array, Type $element, Name $unbox,
       return array;
     }
 
-    staged.block().move_to(destination);
-    source.move_allocation(array);
+    array.block().move_to(destination);
+    Scope owner = array.block().scope(), temporary = staged.block().scope();
+    Scope.move((unsigned char *) staged.bytes - sizeof(Block), &owner);
+    Scope.move((unsigned char *) array.bytes - sizeof(Block), &temporary);
     Bytes old_bytes = array.bytes;
     size_t old_length = array.length, old_cap = array.cap;
     array.bytes = staged.bytes;

@@ -90,18 +90,18 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
 ) {
   static void $map.free_table($map map) {
     if ((void *) map == 0) return;
-    map.hashes.free();
-    map.entries.free();
-    Scope_free(map);
+    map.scope.destroy();
   }
 
   static $map $map.new_table($map unused, unsigned capacity) {
     (void) unused;
+    Scope lifetime = Scope_child();
+    $map result = NULL;
+    defer if ((void *) result == 0) lifetime.destroy();
+    Scope_push(&lifetime);
+    defer Scope_pop();
     $map map = Scope_malloc(sizeof($storage));
-    /* The scope itself, not the active slot: a later `Scope.retain`
-       replaces what that slot holds, and growth would follow it into
-       the new region and be freed with it. */
-    map.scope = *Scope_top();
+    map.scope = lifetime;
     map.hashes = Bytes_new(sizeof($hash_cell));
     map.hashes = map.hashes.append(0, capacity);
     map.entries = Bytes_new(sizeof($entry));
@@ -109,7 +109,15 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
     map.capacity = capacity;
     map.mask = capacity - 1;
     map.used = 0;
-    return map;
+    return result = map;
+  }
+
+  /** Returns the Map's complete storage scope, without adopting its values.
+      The scope contains the stable handle and all backing allocations.
+      Explicitly adopted child scopes move and die with it. NULL returns NULL.
+  */
+  Scope $map.scope($map map) {
+    return (void *) map == 0 ? NULL : map.scope;
   }
 
   /* Returns the bucket index of `key`, which must hash to `key_hash`, or -1.
@@ -854,25 +862,20 @@ macro Unit $map.typed.publish(
       staged.free_table();
 
     Scope *destination = source.export_destination();
-    Scope.move(map, destination);
-    if ((void *) staged == 0) {
-      map.hashes.block().move_to(destination);
-      map.entries.block().move_to(destination);
-    }
-    else {
+    map.scope.transfer(*destination);
+    if ((void *) staged != 0) {
       Bytes old_hashes = map.hashes, old_entries = map.entries;
-      staged.hashes.block().move_to(destination);
-      staged.entries.block().move_to(destination);
+      staged.hashes.block().move_to(&map.scope);
+      staged.entries.block().move_to(&map.scope);
       map.hashes = staged.hashes;
       map.entries = staged.entries;
       map.used = staged.used;
       map.capacity = staged.capacity;
       map.mask = staged.mask;
-      staged.hashes = old_hashes;
-      staged.entries = old_entries;
+      old_hashes.free();
+      old_entries.free();
       staged.free_table();
     }
-    map.scope = *destination;
     committed = map;
     return map;
   }

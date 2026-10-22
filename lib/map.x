@@ -240,9 +240,8 @@ void Map.export_to(
   old_hashes.free();
   old_entries.free();
 
-  map.hashes.block().move_to(scope);
-  map.entries.block().move_to(scope);
-  map.scope = *scope;
+  map.hashes.block().move_to(&map.scope);
+  map.entries.block().move_to(&map.scope);
 }
 
 static Var _box_var(Var value) => value;
