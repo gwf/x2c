@@ -205,10 +205,12 @@ macro Unit $map.storage.family(
       if (hashes[i]) expanded_map.reinsert(hashes[i], entries[i], 0);
 
     Scope_move_before(staged_hashes.block(), map.hashes.block());
-    Scope_move_before((unsigned char *) staged_hashes - sizeof(Block),
+    Scope_move_before(
+      (unsigned char *) staged_hashes - sizeof(Block),
       (unsigned char *) map.hashes - sizeof(Block));
     Scope_move_before(staged_entries.block(), map.entries.block());
-    Scope_move_before((unsigned char *) staged_entries - sizeof(Block),
+    Scope_move_before(
+      (unsigned char *) staged_entries - sizeof(Block),
       (unsigned char *) map.entries - sizeof(Block));
     map.hashes = expanded.hashes;
     map.entries = expanded.entries;
