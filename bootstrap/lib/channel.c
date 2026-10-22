@@ -935,7 +935,7 @@ Scope * Scope_top(void);
 
 Var Channel_receive(Channel channel){
   if(! channel){
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/channel.x",.function = "Channel_receive",.line = 371,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/channel.x",.function = "Channel_receive",.line = 372,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_9, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.receive")), NULL))));
     __builtin_unreachable();
   }
@@ -952,14 +952,21 @@ Var Channel_receive(Channel channel){
   }
   x2c_thread_wait_unlock();
   if(message) free(message);
-  if(owned) Scope_transfer(Scope_owner(Var_pointer(value)), * destination);
+  if(owned){
+    Scope transport = Scope_owner(Var_pointer(value));
+    if(_container(value)){
+      _move_container(value, destination);
+      Scope_destroy(transport);
+    }
+    else Scope_transfer(transport, * destination);
+  }
   if(status < 0) x2c_thread_cancel();
   return value;
 }
 
 void Channel_close(Channel channel){
   if(! channel){
-    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/channel.x",.function = "Channel_close",.line = 393,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/channel.x",.function = "Channel_close",.line = 401,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_10, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Channel.close")), NULL))));
     __builtin_unreachable();
   }
@@ -987,7 +994,7 @@ Var Channel_var(Channel channel){
 
 Channel Var_channel(Var value){
   if(! Var_is(value, 6982365528)){
-    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/channel.x",.function = "Var_channel",.line = 419,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/channel.x",.function = "Var_channel",.line = 427,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_11, 4477479911782, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.channel")), NULL))));
     __builtin_unreachable();
   }

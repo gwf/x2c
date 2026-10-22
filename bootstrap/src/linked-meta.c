@@ -6274,7 +6274,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_10(void
   _5368 = cons(_4668, _331);
   _5369 = String_new("source_catch_handle");
   _5370 = String_new("source_retain_catch_handle");
-  _5371 = String_new("da711731");
+  _5371 = String_new("05299c63");
   _5372 = String_var(_5371);
   _5373 = String_new("cwd:./pthread.h");
   _5374 = String_var(_5373);
@@ -6401,7 +6401,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_10(void
   _5495 = cons(_5383, _5494);
   _5496 = cons(_5379, _5495);
   _5497 = List_var(_5496);
-  _5498 = String_new("e98d7d18");
+  _5498 = String_new("2592981b");
   _5499 = String_var(_5498);
   _5500 = cons(_5499, NULL);
   _5501 = cons(_5497, _5500);
@@ -6417,7 +6417,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_10(void
   _5511 = List_var(_5510);
   _5512 = String_new("lib/context.x");
   _5513 = String_var(_5512);
-  _5514 = String_new("dae938b4");
+  _5514 = String_new("83904c29");
   _5515 = String_var(_5514);
   _5516 = cons(_5515, NULL);
   _5517 = cons(_5513, _5516);
