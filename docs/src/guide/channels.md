@@ -1,9 +1,9 @@
 # Channels
 
-A Channel communicates non-void `Var` values between threads. Sending and
-receiving copy representation bits without copying, adopting, or exporting
-referenced storage. The application keeps that storage alive and coordinates
-mutable access.
+A Channel communicates non-void `Var` values between threads. Ordinary `send`
+and receive preserve borrowed payload ownership. `send_owned` explicitly hands
+off one exclusively owned storage subtree. The application remains responsible
+for independent nested lifetimes, aliases, and coordinated mutable access.
 
 ## Send, close, and drain
 
@@ -66,33 +66,60 @@ Buffered messages retain FIFO queue order. No fairness order is promised among
 competing senders or receivers. Successful send means acceptance, not completed
 processing.
 
-## Storage ownership
+## Borrow or hand off storage
 
-A Channel has its own attached storage scope, returned by `channel.scope()`.
-The scope owns native synchronization and queue storage. It also owns any
-payload scopes explicitly transferred beneath it:
+Ordinary `send(value)` copies Var representation bits. The sender keeps its
+storage ownership, and the application keeps every borrower alive. It can send
+the same parent-owned Map to several readers without transferring it, while
+preventing writes until those readers finish. Send acceptance is not evidence
+that any borrower has finished using the object.
+
+Use `send_owned` when a worker produces a Map whose storage must survive worker
+exit. It detaches that Map's own inactive storage scope from the sender before
+exposing the reference:
 
 <!-- ignore: illustrative worker fragment with caller-supplied Channel and Map -->
 ```x2c,ignore
-part.scope().transfer(results);
-results.send(part);
+Map part = word_count(filename);
+results.send_owned(part);
 ```
 
-Transfer is separate from communication. It changes lifetime ownership, not
-aliases or access permissions. Nested mutable values retain their independent
-owners unless explicitly adopted. Private-pool String keys do not become safe
-when their containing Map moves.
+An owned payload must be a live, nonnull Scope-allocated root with its own
+exclusively owned inactive storage subtree. Ordinary scalars, canonical Strings
+and Lists, borrowed buffers, and interior pointers do not satisfy this contract.
+The operation does not discover pointer provenance or validate an object graph.
+An already detached subtree may be handed off, but the same subtree must never
+be sent twice. Unrelated aliases do not disappear when ownership changes.
 
-A consumer can merge a transferred Map and call `part.cleanup()`. A failed send
-does not undo a preceding transfer. An undelivered adopted Map stays beneath
-the Channel's scope until explicitly moved or freed, or until scope destruction.
-A plain borrowed payload is never recursively freed by Channel cleanup.
+On successful acceptance, the sender relinquishes access and cleanup for that
+subtree. Do not leave a separate `$auto` or deferred cleanup armed for it. On
+failed send, the original parent is restored before the error is raised; a
+previously detached object stays detached and caller-owned. Failures before
+detachment leave the original ownership unchanged.
 
-Finish every user and waiter before freeing a Channel or destroying its scope.
-`$auto` calls Channel cleanup, which closes and frees it; cleanup does not join
-its users. `Thread.run` completes its jobs before returning, so surrounding
-Channel cleanup runs after batch teardown on both success and failure. Scope
-owner destruction also releases the Channel's native resources.
+The queue holds the object bits and an owned flag. The payload scope remains
+detached while queued; workers never adopt into a shared Channel scope. Receipt
+adopts the detached subtree beneath the receiver's private active Scope before
+returning. The receiver may free it directly, retain it under that private
+owner, or explicitly move it to another exclusive owner. If the receiver fails
+after delivery, ordinary private-scope teardown reclaims the received subtree.
+
+Nested mutable values retain their independent owners unless explicitly adopted
+before handoff. Private-pool String keys do not become safe when their containing
+Map moves. Shared process-pool Strings can be borrowed because that pool outlives
+all jobs. Transfer changes lifetime ownership, not access permissions or aliases.
+
+A Channel's own storage scope, returned by `channel.scope()`, owns its native
+synchronization record. Queue nodes use native allocation independently of Scope
+allocation lists. Allocation/tree metadata belongs to exclusive private owners;
+no Scope or replacement tree mutex coordinates senders through a Channel.
+
+Finish every user and waiter before freeing a Channel or destroying its owner.
+Cleanup explicitly destroys undelivered owned subtrees and frees native queue
+nodes outside the queue monitor. It never destroys ordinary borrowed payloads.
+`$auto` closes and frees the Channel; it does not join its users. `Thread.run`
+finishes every participant before surrounding Channel cleanup on success or
+failure. Parent-scope destruction uses the same native-resource finalizer.
 
 ## Failure and cooperative stopping
 

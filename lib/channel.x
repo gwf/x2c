@@ -1,4 +1,4 @@
-/*  channel.x -- non-owning Var transport and explicit stream completion
+/*  channel.x -- Var transport and explicit storage handoff
 
     Copyright (c) 2026 Gary William Flake.
 
@@ -21,14 +21,16 @@
 #include <string.h>
 
 /** A synchronized non-void Var stream with explicitly managed payload
-    lifetimes. Sending copies representation bits, never storage ownership.
-    Close ends sends and lets accepted values drain. Every user and waiter
-    must finish before the Channel's storage scope is destroyed. */
+    lifetimes. Ordinary send copies bits without ownership changes;
+    send_owned explicitly hands off a detached, exclusively owned storage
+    subtree. Close ends sends and lets accepted values drain. Every user
+    and waiter must finish before the Channel's storage scope is destroyed. */
 typedef struct Channel *Channel;
 
 static typedef struct ChannelMessage {
   Var value;
   struct ChannelMessage *next;
+  int owned;
 } ChannelMessage;
 
 /* Only the shared monitor reads links, owner tokens, and commitment flags. */
@@ -36,7 +38,7 @@ static typedef struct ChannelWait {
   Var value;
   Thread owner;
   struct ChannelWait *previous, *next;
-  int committed;
+  int committed, owned;
 } ChannelWait;
 
 /* A blocked native thread cannot reenter Channel code: no callback or Error
@@ -68,6 +70,16 @@ static void _native_check(int error) {
 
 static void _drop(void *bytes) {
   Channel channel = bytes;
+  ChannelMessage *message = channel.first;
+  channel.first = channel.last = NULL;
+  channel.count = 0;
+  channel.closed = 1;
+  while (message) {
+    ChannelMessage *next = message.next;
+    if (message.owned) Scope.owner(message.value.pointer()).destroy();
+    free(message);
+    message = next;
+  }
   if (channel.initialized)
     _native_check(pthread_cond_destroy(&channel.changed));
 }
@@ -135,9 +147,9 @@ meta static Code _new_one(Code code) {
   return code;
 }
 
-/** Returns the Channel's complete storage scope, including explicitly
-    adopted child scopes. It does not follow references in queued Vars.
-    A null Channel returns NULL. */
+/** Returns the Channel's own storage scope. Owned queued payloads stay
+    detached; ordinary messages remain borrowed. This scope is not a shared
+    adoption destination for concurrent senders. NULL returns NULL. */
 Scope Channel.scope(Channel channel) => channel ? channel.lifetime : NULL;
 
 // rendezvous queues
@@ -167,19 +179,22 @@ static void _notify(Channel channel) =>
 
 /* A positive status means committed, zero means closed, and negative means
    stopped. Callers unlock before dispatching either failure. */
-static int _rendezvous_send(Channel channel, Var value) {
+static int _rendezvous_send(Channel channel, Var value, int owned) {
   if (x2c_thread_stopping()) return -1;
   if (channel.closed) return 0;
   ChannelWait *receiver = _live_wait(&channel.receivers);
   if (receiver) {
     receiver.value = value;
+    receiver.owned = owned;
     receiver.committed = 1;
     _remove_wait(&channel.receivers, receiver);
     _notify(channel);
     return 1;
   }
   ChannelWait *wait = &rendezvous_wait;
-  *wait = (ChannelWait) { .value = value, .owner = x2c_thread_wait_owner() };
+  *wait = (ChannelWait) {
+    .value = value, .owner = x2c_thread_wait_owner(), .owned = owned
+  };
   _append_wait(&channel.senders, wait);
   while (!wait.committed && !channel.closed && !x2c_thread_stopping())
     x2c_thread_wait(&channel.changed);
@@ -188,11 +203,12 @@ static int _rendezvous_send(Channel channel, Var value) {
   return x2c_thread_stopping() ? -1 : 0;
 }
 
-static int _rendezvous_receive(Channel channel, Var *out) {
+static int _rendezvous_receive(Channel channel, Var &out, int &owned) {
   if (x2c_thread_stopping()) return -1;
   ChannelWait *sender = _live_wait(&channel.senders);
   if (sender && !channel.closed) {
-    *out = sender.value;
+    out = sender.value;
+    owned = sender.owned;
     sender.committed = 1;
     _remove_wait(&channel.senders, sender);
     _notify(channel);
@@ -204,7 +220,11 @@ static int _rendezvous_receive(Channel channel, Var *out) {
   _append_wait(&channel.receivers, wait);
   while (!wait.committed && !channel.closed && !x2c_thread_stopping())
     x2c_thread_wait(&channel.changed);
-  if (wait.committed) { *out = wait.value; return 1; }
+  if (wait.committed) {
+    out = wait.value;
+    owned = wait.owned;
+    return 1;
+  }
   _remove_wait(&channel.receivers, wait);
   return x2c_thread_stopping() ? -1 : 0;
 }
@@ -241,45 +261,82 @@ static int _buffer_receive(Channel channel, ChannelMessage **out) {
 
 // communication
 
+/* A sender owns native queue storage until commitment. The queue, then the
+   receiver, owns the accepted node independently of Scope lists. */
+static ChannelMessage *_message(Var value, int owned) {
+  ChannelMessage *message = malloc(sizeof(ChannelMessage));
+  if (!message) raise %(alloc-fail (operation "Channel.send"));
+  *message = (ChannelMessage) { .value = value, .owned = owned };
+  return message;
+}
+
+static void _send(Channel channel, Var value, int owned) {
+  if (!channel) raise %(bad-arg (operation "Channel.send"));
+  if (value is void) raise %(void-op (operation "Channel.send"));
+  if (channel.type != <var> && value.tag() != channel.type)
+    raise %(bad-types (operation "Channel.send"));
+  if (owned && !value.pointer())
+    raise %(bad-arg (operation "Channel.send_owned"));
+
+  ChannelMessage *message = NULL;
+  int status = 0;
+  defer if (message && status != 1) free(message);
+  if (channel.capacity) message = _message(value, owned);
+
+  Scope payload = owned ? Scope.owner(value.pointer()) : NULL;
+  Scope previous = owned ? payload.parent() : NULL;
+  if (owned) payload.transfer(NULL);
+
+  x2c_thread_wait_lock();
+  status = channel.capacity ? _buffer_send(channel, message)
+                            : _rendezvous_send(channel, value, owned);
+  x2c_thread_wait_unlock();
+  if (status != 1 && owned) payload.transfer(previous);
+  if (status < 0) x2c_thread_cancel();
+  if (!status) raise %(bad-state (operation "Channel.send") (closed 1));
+}
+
 /** Sends non-void representation bits without changing referenced storage
     ownership. Waits for queue capacity or a rendezvous match. Acceptance
     commits under synchronization; later stop cannot retract that send.
     Raises: <bad-arg> for NULL, <void-op> for void, <bad-types> for a tag
     mismatch, <bad-state> for closure or cooperative stop, or <alloc-fail>
-    for buffered queue storage. No failure dispatch holds the queue lock. */
-void Channel.send(Channel c, Var value) {
-  if (!c) raise %(bad-arg (operation "Channel.send"));
-  if (value is void) raise %(void-op (operation "Channel.send"));
-  if (c.type != <var> && value.tag() != c.type)
-    raise %(bad-types (operation "Channel.send"));
-  ChannelMessage *message = NULL;
-  int status = 0;
-  defer if (message && status != 1) Scope.free(message);
-  if (c.capacity) {
-    message = Scope.malloc_in(&c.lifetime, sizeof(ChannelMessage));
-    *message = (ChannelMessage) { .value = value };
-  }
-  x2c_thread_wait_lock();
-  status = c.capacity ? _buffer_send(c, message) : _rendezvous_send(c, value);
-  x2c_thread_wait_unlock();
-  if (status < 0) x2c_thread_cancel();
-  if (!status) raise %(bad-state (operation "Channel.send") (closed 1));
-}
+    for native buffered queue storage. Failure dispatch holds no queue lock. */
+void Channel.send(Channel c, Var value) => _send(c, value, 0);
 
-/** Receives one accepted Var without adopting or exporting its storage.
-    Returns void only after normal close and draining. Null remains data.
+/** Sends a live Scope-allocated root with its own exclusively owned inactive
+    storage subtree. Detaches before exposure; failed sends restore the
+    original parent before raising. Accepted sends relinquish sender access
+    and cleanup responsibility. This cannot disarm an existing $auto or defer;
+    the caller must not leave such cleanup armed after acceptance. The same
+    subtree must not be handed off twice. Canonical Strings/Lists and their
+    referenced objects are not implicitly adopted. The root pointer and its
+    allocation header must remain valid until commitment; this operation does
+    not validate arbitrary pointer provenance or ownership graphs.
+    Raises: the send causes, or <bad-arg> for a null/nonpointer payload. */
+void Channel.send_owned(Channel c, Var value) => _send(c, value, 1);
+
+/** Receives one accepted Var. Ordinary payloads stay borrowed. An owned
+    payload's detached storage subtree joins the receiver's private active
+    Scope before return, so receiver failure cleanup reclaims it normally.
+    Returns void only after close and draining; null remains ordinary data.
     A committed delivery succeeds despite a later stop request.
-    Raises: <bad-arg> for NULL or <bad-state> for cooperative stop. */
+    Raises: <bad-arg> for NULL, <alloc-fail> preparing receiver storage, or
+    <bad-state> for cooperative stop. */
 Var Channel.receive(Channel channel) {
   if (!channel) raise %(bad-arg (operation "Channel.receive"));
+  Scope *destination = Scope.top();
+  if (!*destination) *destination = Scope.new();
   Var value = void;
   ChannelMessage *message = NULL;
+  int owned = 0;
   x2c_thread_wait_lock();
   int status = channel.capacity ? _buffer_receive(channel, &message)
-                               : _rendezvous_receive(channel, &value);
-  if (message) value = message.value;
+                               : _rendezvous_receive(channel, value, owned);
+  if (message) { value = message.value; owned = message.owned; }
   x2c_thread_wait_unlock();
-  if (message) Scope.free(message);
+  if (message) free(message);
+  if (owned) Scope.owner(value.pointer()).transfer(*destination);
   if (status < 0) x2c_thread_cancel();
   return value;
 }
@@ -297,9 +354,10 @@ void Channel.close(Channel channel) {
 }
 
 /** Closes and destroys an unused Channel's complete storage scope. Every
-    user and waiter must already have finished. Adopted child scopes are
-    reclaimed; arbitrary referenced payloads are not followed. NULL does
-    nothing. Automatic owner destruction also releases native resources. */
+    user and waiter must already have finished. Undelivered owned payload
+    subtrees are destroyed outside the queue monitor; ordinary payloads are
+    not followed. NULL does nothing. Owner destruction releases these native
+    queue nodes and resources through the same finalizer. */
 void Channel.free(Channel channel) {
   if (channel) { channel.close(); channel.lifetime.destroy(); }
 }
