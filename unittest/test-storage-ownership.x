@@ -75,10 +75,14 @@ static void storage_maps_grow_under_their_record_owner(void) {
   Scope owner = map, destination = Scope.new();
   map.move_to(&destination);
   typed.move_to(&destination);
+  Scope temporary = Scope.new();
+  Scope.push(&temporary);
   for (int i = 0; i < 128; i++) {
     map[i] = i + 1;
     typed[i] = i + 2;
   }
+  Scope.pop();
+  temporary.destroy();
   EXPECT_PTR_EQ(Scope.owner(map), destination);
   EXPECT_PTR_EQ(Scope.owner(map.hashes.block()), destination);
   EXPECT_PTR_EQ(Scope.owner(map.entries.block()), destination);

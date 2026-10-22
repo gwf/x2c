@@ -187,6 +187,7 @@ lib/scope/scope.x|advanced|Scope.release,Scope.retain,Scope_shutdown,Scope.stats
 lib/scope/scope.x|advanced|Scope.top
 lib/scope/scope.x|internal|Scope.initialize,Scope.shutdown_hook
 lib/scope/scope.x|internal|Scope.owner
+lib/scope/scope.x|internal|Scope.move_before
 lib/scope/scope.x|internal|ScopeAlloc
 lib/thread.x|internal|x2c_thread_wait_lock,x2c_thread_wait_unlock
 lib/thread.x|internal|x2c_thread_wait_owner,x2c_thread_wait_stopped

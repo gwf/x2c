@@ -34,6 +34,15 @@ field starts null and owns only explicitly acquired contents. Requesting the
 contents scope creates it lazily beneath the record's allocation owner.
 Insertion remains borrowed and creates no scope.
 
+Map growth stages replacement buffers before commitment. The authorized
+constant-time correction splices each new allocation immediately before its
+old allocation using Scope's existing detach/relink helpers. Normal cleanup
+then removes the old allocations. No owner lookup, field, lock, or change to
+ordinary allocation/free is required. Test neighboring links, cross-scope moves,
+finalizers, and growth while a temporary allocation scope is active. Compare
+growth after zero and 100,000 intervening allocations against the original
+baseline, alongside the existing Scope and construction workloads.
+
 Cleanup destroys the contents scope, if any, then frees internal buffers and
 the record. Explicit `move_to` moves the record, every backing allocation, and
 the existing contents scope together. Growth places replacements under the

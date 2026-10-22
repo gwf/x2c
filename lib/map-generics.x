@@ -204,11 +204,12 @@ macro Unit $map.storage.family(
     for (unsigned i = 0; i < cap; i++)
       if (hashes[i]) expanded_map.reinsert(hashes[i], entries[i], 0);
 
-    Scope owner = $owned ? Scope_owner(map) : map.scope;
-    Scope_move(staged_hashes.block(), &owner);
-    Scope_move((unsigned char *) staged_hashes - sizeof(Block), &owner);
-    Scope_move(staged_entries.block(), &owner);
-    Scope_move((unsigned char *) staged_entries - sizeof(Block), &owner);
+    Scope_move_before(staged_hashes.block(), map.hashes.block());
+    Scope_move_before((unsigned char *) staged_hashes - sizeof(Block),
+      (unsigned char *) map.hashes - sizeof(Block));
+    Scope_move_before(staged_entries.block(), map.entries.block());
+    Scope_move_before((unsigned char *) staged_entries - sizeof(Block),
+      (unsigned char *) map.entries - sizeof(Block));
     map.hashes = expanded.hashes;
     map.entries = expanded.entries;
     map.capacity = expanded.capacity;
