@@ -89,9 +89,11 @@ return root.walk().filter(Path.is_file).parallel_map(file_unique_words, 4)
 `parallel_map` starts no work until `foldl` consumes it. The fold starts up
 to four native threads and reuses them. Each worker holds at most one running
 job or unread result. The caller alone traverses the source and accumulates
-results in completion-queue order. Each job exports a separate result Scope
-and pool before that worker receives another input. Cleanup joins workers
-on success or failure and waits for callbacks; it does not cancel them.
+results in completion-queue order. A worker keeps its temporary Map alive
+until the reducer finishes reading it. This reducer merges counts into the
+caller-owned Map and retains no worker-owned storage, so no ownership transfer
+is needed. Canonical words use the shared pool. Cleanup requests cooperative
+stop on all workers before joining; arbitrary native I/O is not interrupted.
 
 The source iterator and borrowed input graphs must remain alive through use.
 Inputs are read-only; worker output uses fresh Maps. Keep temporary iterator
