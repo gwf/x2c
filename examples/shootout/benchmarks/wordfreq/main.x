@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "substring-map.x"
 
 static int _random_state = 42;
 
@@ -32,12 +33,12 @@ static String _make_text(int word_count) {
 
 static uint64_t _count(String text) {
   $scope() {
-    Map counts = {};
-    foreach (String word, text.words()) counts[word] += 1;
+    MapSubInt counts = MapSubInt.new();
+    foreach (Substr word in text) counts.increment(word);
 
-    uint64_t checksum = counts.len();
-    foreach (Var (word, count), counts)
-      checksum += word.string().len() * count.int();
+    uint64_t checksum = 0;
+    foreach ((Substr word, int count) in counts)
+      checksum += 1 + word.len() * count;
     return checksum;
   }
 }
