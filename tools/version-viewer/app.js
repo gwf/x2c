@@ -8,7 +8,7 @@ const demo = {
     { label: "Demo 2 - output", filename: "sum.c", source: "#include <stdio.h>\n\nint main(void)\n{\n    int values[] = {2, 4, 6, 8};\n    int count = sizeof(values) / sizeof(values[0]);\n    int total = 0;\n\n    for (int i = 0; i < count; i++) {\n        total += values[i];\n    }\n\n    printf(\"%d values, sum: %d\\n\", count, total);\n    return 0;\n}\n" }
   ]
 };
-let dataset = demo, selected = 1, layout = "split", operations = [], changeRows = [], changeIndex = -1;
+let dataset = demo, selected = 1, layout = "unified", operations = [], changeRows = [], changeIndex = -1;
 let comparisons = [], visualSources = [];
 const escapeHTML = (value) => String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
 const lineCount = (source) => SourceDiff.lines(source).length;
@@ -42,6 +42,10 @@ function comparison(index) {
       for (let j = 0; j < Math.min(removed.length, added.length); j++) {
         const parts = SourceDiff.intraline(removed[j].text, added[j].text);
         removed[j].parts = parts.before; added[j].parts = parts.after;
+        // Punctuation and indentation alone do not identify corresponding source.
+        if (parts.before.some((part) => !part.changed && /[\w$]/.test(part.text))) {
+          removed[j].unified = parts.unified;
+        }
       }
     }
     comparisons[index] = ops;
@@ -85,10 +89,13 @@ function cell(op, side, source, border = false) {
   const number = op && (side === "old" ? op.old : op.new);
   const kind = !op ? "empty" : op.type === "equal" ? "" : op.type;
   const mark = !op || op.type === "equal" ? "" : op.type === "add" ? "+" : "-";
-  const sourceNumber = op && (op.type === "remove" ? op.old : number);
-  const endNote = op && sourceNumber === lineCount(source) && !source.endsWith("\n") ? '<span class="end-of-file"> [no final newline]</span>' : "";
-  const text = op && (op.parts ? op.parts.map((part) => part.changed ? `<mark class="token-change">${escapeHTML(part.text)}</mark>` : escapeHTML(part.text)).join("") : escapeHTML(op.text));
-  return `<td class="line-number ${kind} ${border ? "right-start" : ""}">${number || ""}</td><td class="marker ${kind}" aria-hidden="true">${mark}</td><td class="source ${kind}">${op ? text + endNote : ""}</td>`;
+  return `<td class="line-number ${kind} ${border ? "right-start" : ""}">${number || ""}</td><td class="marker ${kind}" aria-hidden="true">${mark}</td><td class="source ${kind}">${op ? sourceText(op, source, op.type === "remove" ? op.old : number) : ""}</td>`;
+}
+
+function sourceText(op, source, number = op.type === "remove" ? op.old : op.new) {
+  const endNote = number === lineCount(source) && !source.endsWith("\n") ? '<span class="end-of-file"> [no final newline]</span>' : "";
+  const text = op.parts ? op.parts.map((part) => part.changed ? `<mark class="token-change">${escapeHTML(part.text)}</mark>` : escapeHTML(part.text)).join("") : escapeHTML(op.text);
+  return text + endNote;
 }
 
 function splitRows() {
@@ -105,11 +112,31 @@ function splitRows() {
   return rows;
 }
 
+function unifiedRows() {
+  return splitRows().flatMap((row) => {
+    if (!row.changed) return [{ op: row.left, changed: false }];
+    if (row.left && row.right && row.left.unified) return [row];
+    return [row.left, row.right].filter(Boolean).map((op) => ({ op, changed: true }));
+  });
+}
+
+function replacementCell(row, previousSource, currentSource) {
+  const combined = row.left.unified.map((part) => {
+    const text = escapeHTML(part.text), tag = part.type === "remove" ? "del" : "ins";
+    return part.type === "equal" ? text : `<${tag}>${text}</${tag}>`;
+  }).join("");
+  const notes = [];
+  if (row.left.old === lineCount(previousSource) && !previousSource.endsWith("\n")) notes.push("before: no final newline");
+  if (row.right.new === lineCount(currentSource) && !currentSource.endsWith("\n")) notes.push("after: no final newline");
+  const endNote = notes.length ? `<span class="end-of-file"> [${notes.join("; ")}]</span>` : "";
+  return `<td class="line-number remove" tabindex="0" role="button" aria-label="Show before block">${row.left.old}</td><td class="line-number add" tabindex="0" role="button" aria-label="Show after block">${row.right.new}</td><td class="marker" aria-hidden="true">~</td><td class="source replacement"><span class="version-combined">${combined}${endNote}</span><span class="version-before">${sourceText(row.left, previousSource)}</span><span class="version-after">${sourceText(row.right, currentSource)}</span></td>`;
+}
+
 function renderCode() {
   const currentSource = visualSources[selected], previousSource = visualSources[Math.max(0, selected - 1)];
   const split = selected && layout === "split";
   $("file-headings").classList.toggle("single-flow", !split);
-  const rows = split ? splitRows() : operations.map((op) => ({ op, changed: op.type !== "equal" }));
+  const rows = split ? splitRows() : unifiedRows();
   const changed = rows.map((row, index) => row.changed ? index : -1).filter((index) => index >= 0);
   const visible = new Set();
   if ($("changes-only").checked && selected) changed.forEach((index) => { for (let i = Math.max(0, index - 3); i <= Math.min(rows.length - 1, index + 3); i++) visible.add(i); });
@@ -120,9 +147,11 @@ function renderCode() {
     if (!visible.has(index)) { hidden++; wasChanged = false; return; }
     gap();
     const start = row.changed && !wasChanged;
-    html += `<tr${start ? ` data-change="${group++}"` : ""}>`;
+    if (start) group++;
+    html += `<tr${start ? ` data-change="${group - 1}"` : ""}${row.changed ? ` data-block="${group - 1}"` : ""}>`;
     if (split) html += cell(row.left, "old", previousSource) + cell(row.right, "new", currentSource, true);
     else if (!selected) html += cell(row.op, "new", currentSource);
+    else if (row.left && row.right) html += replacementCell(row, previousSource, currentSource);
     else {
       const op = row.op, kind = op.type === "equal" ? "" : op.type;
       html += `<td class="line-number ${kind}">${op.old || ""}</td>` + cell(op, "new", op.type === "remove" ? previousSource : currentSource);
@@ -138,7 +167,8 @@ function renderCode() {
   const table = $("code").querySelector("table");
   if (table) {
     const charWidth = parseFloat(getComputedStyle(table).fontSize) * .63;
-    const width = split ? Math.max(360, longest(previousSource) * charWidth + 100, longest(currentSource) * charWidth + 100) * 2 : Math.max(300, Math.max(longest(previousSource), longest(currentSource)) * charWidth + 150);
+    const displayed = rows.map((row) => row.op ? row.op.text : row.left?.unified?.map((part) => part.text).join("") || "").join("\n");
+    const width = split ? Math.max(360, longest(previousSource) * charWidth + 100, longest(currentSource) * charWidth + 100) * 2 : Math.max(300, longest(displayed) * charWidth + 150);
     table.style.minWidth = `${width}px`;
     $("file-headings").style.minWidth = split ? table.style.minWidth : "";
   } else $("file-headings").style.minWidth = "";
@@ -147,6 +177,18 @@ function renderCode() {
   $("next-change").disabled = $("previous-change").disabled = !changeRows.length;
   $("change-position").textContent = `${changeRows.length} ${changeRows.length === 1 ? "change" : "changes"}`;
 }
+
+function showBlockVersion(event) {
+  const number = event.target.closest('.line-number[role="button"]');
+  if (!number) return;
+  const block = number.closest("tr").dataset.block;
+  const preview = event.type === "pointerover" || event.type === "focusin";
+  $("code").querySelectorAll(`tr[data-block="${block}"]`).forEach((row) => {
+    row.classList.toggle("show-before", preview && number.classList.contains("remove"));
+    row.classList.toggle("show-after", preview && number.classList.contains("add"));
+  });
+}
+for (const type of ["pointerover", "pointerout", "focusin", "focusout"]) $("code").addEventListener(type, showBlockVersion);
 
 function revealSelectedVersion() {
   if (!matchMedia("(max-width: 700px)").matches) return;
