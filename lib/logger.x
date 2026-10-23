@@ -440,7 +440,7 @@ static void _destroy_text(Var data) {
     for (size_t i = 0; i < context.scratch.length; i++) buffers[i].free();
     context.scratch.free();
   }
-  Scope.free(context);
+  xfree(context);
 }
 
 // text rendering
@@ -614,7 +614,7 @@ static void _destroy_memory(Var data) {
     values[i].move_wide_to(context.destination_scope);
   context.wide_values.free();
   Scope.destroy(context.values);
-  Scope.free(context);
+  xfree(context);
 }
 
 static Var _retain(LogMemorySink l, Var value) {
@@ -806,7 +806,7 @@ $logger.global(fatal, log_fatal, <fatal>);
 synchronized
 Logger Logger.new(Symbol min_level) {
   if (_level_priority(min_level) < 0) return NULL;
-  Logger logger = Scope.calloc(1, sizeof(struct Logger));
+  Logger logger = xcalloc(1, sizeof(struct Logger));
   *logger = (struct Logger) {
     .min_level = min_level, .owner_scope = *Scope.top(),
     .pool = Pool.current(), .storage = Scope.new_named("Logger")};
@@ -831,7 +831,7 @@ void Logger.free(Logger logger) {
   if (default_logger == logger) default_logger = NULL;
   Scope.destroy(logger.storage);
   logger.storage = NULL;
-  Scope.free(logger);
+  xfree(logger);
 }
 
 /** Installs the process-wide info-level `Logger` and stderr sink.

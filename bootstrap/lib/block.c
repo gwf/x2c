@@ -253,7 +253,7 @@ void Block_reserve(Block block, size_t minimum){
     }
 
   }
-  _attach(block, Scope_realloc(_allocation(block), size));
+  _attach(block, xrealloc(_allocation(block), size));
   block -> cap = cap;
 }
 
@@ -276,7 +276,7 @@ Block Block_new(size_t width){
     x2c_error_raise_n(& _x2c_gensym_error_site_9, 4372499598, 0);
     __builtin_unreachable();
   }
-  Block block = Scope_malloc(sizeof(struct Block));
+  Block block = xmalloc(sizeof(struct Block));
   * block =(struct Block){
     .width = width, .length = 0, .cap = 1
   }
@@ -287,7 +287,7 @@ Block Block_new(size_t width){
     x2c_error_raise_n(& _x2c_gensym_error_site_10, 1358596898646632, 1, Symbol_var(48833808), Var_box_ulong(width));
     __builtin_unreachable();
   }
-  _attach(block, Scope_malloc(size));
+  _attach(block, xmalloc(size));
   return block;
 }
 
@@ -307,8 +307,8 @@ Bytes Bytes_new(size_t width){
 void Block_free(Block b){
   if(b == NULL) return;
   if(b -> lifetime) Scope_destroy(b -> lifetime);
-  if(b -> bytes != NULL) Scope_free(_allocation(b));
-  Scope_free(b);
+  if(b -> bytes != NULL) xfree(_allocation(b));
+  xfree(b);
 }
 
 void Block_move_to(Block block, Scope * scope){

@@ -285,7 +285,7 @@ static void _repeated_prose(Lint l, Comment *all, int n):
     `Compiler.definition_rows` `rows` of a parsed unit, or NULLs. */
 void Lint.comment_rules(Lint l, Compiler c, List ast, List rows):
   Map declarations = _documented_declarations(c, ast, rows)
-  Comment *all = Scope.calloc(l.count + 1, sizeof(Comment))
+  Comment *all = xcalloc(l.count + 1, sizeof(Comment))
   int n = _collect(l, all)
   Array lines = l.text.split("\n")
   for (int at = 0; at < n; at++):

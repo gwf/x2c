@@ -33,8 +33,8 @@ int TruthView.equal(TruthView left, TruthView right) {
 protocol TruthView(Reading);
 
 static Reading reading(int value) {
-  Reading result = Scope.malloc(sizeof(struct Reading));
-  result.view = Scope.malloc(sizeof(struct TruthView));
+  Reading result = xmalloc(sizeof(struct Reading));
+  result.view = xmalloc(sizeof(struct TruthView));
   result.view.value = value;
   return result;
 }

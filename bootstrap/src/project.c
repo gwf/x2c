@@ -423,7 +423,7 @@ static void _parse_manifest(Project p){
 
 static char * f8_manifest____content(String text){
   int length = String_truth(text) ? strlen(text) : 0;
-  char * line = Scope_malloc(length + 1);
+  char * line = xmalloc(length + 1);
   if(length) memcpy(line, text, length);
   line[length] = 0;
   f8_manifest____strip_comment(line);
@@ -569,7 +569,7 @@ static void f8_manifest____set_project_field(Project p, int line, String key, St
 }
 
 static void f8_manifest____set_dependency(Project p, int line, String key, String value){
-  ProjectDependency entry = Scope_calloc(1, sizeof(struct ProjectDependency));
+  ProjectDependency entry = xcalloc(1, sizeof(struct ProjectDependency));
   * entry =(struct ProjectDependency){
     .name = key, .version = f8_manifest____string_value(p, line, value)
   }
@@ -714,7 +714,7 @@ static ProjectTarget _target(Project p, String name){
 }
 
 static ProjectTarget f8_manifest____new_target(Project p, String name){
-  ProjectTarget target = Scope_calloc(1, sizeof(struct ProjectTarget));
+  ProjectTarget target = xcalloc(1, sizeof(struct ProjectTarget));
   * target =(struct ProjectTarget){
     .name = name, .kind = 404971770155786, .seen = Map_new(), .next = p -> targets
   }
@@ -730,7 +730,7 @@ static ProjectProfile _profile(ProjectTarget target, String name){
 }
 
 static ProjectProfile f8_manifest____new_profile(ProjectTarget target, String name){
-  ProjectProfile profile = Scope_calloc(1, sizeof(struct ProjectProfile));
+  ProjectProfile profile = xcalloc(1, sizeof(struct ProjectProfile));
   * profile =(struct ProjectProfile){
     .name = name, .seen = Map_new(), .next = target -> profiles
   }
@@ -771,7 +771,7 @@ int SourceView_read(SourceView, String, volatile String *);
 Path Path_dirname(Path);
 
 static Project f8_planning____open_project(CliRequest request){
-  Project p = Scope_calloc(1, sizeof(struct Project));
+  Project p = xcalloc(1, sizeof(struct Project));
   * p =(struct Project){
     .seen = Map_new(), .sources = request -> sources, .command = request, .path = CliRequest_project_manifest(request)
   }
@@ -894,7 +894,7 @@ static void f8_planning____plan_target(Project p, ProjectTarget target){
 }
 
 static void f8_planning____append_plan(Project p, CliRequest request){
-  ProjectBuild node = Scope_calloc(1, sizeof(struct ProjectBuild));
+  ProjectBuild node = xcalloc(1, sizeof(struct ProjectBuild));
   node -> request = request;
   if(p -> tail) p -> tail -> next = node;
   else p -> head = node;
@@ -903,7 +903,7 @@ static void f8_planning____append_plan(Project p, CliRequest request){
 
 static CliRequest f8_planning____target_request(Project p, ProjectTarget target){
   CliRequest command = p -> command;
-  CliRequest request = Scope_malloc(sizeof(struct CliRequest));
+  CliRequest request = xmalloc(sizeof(struct CliRequest));
   * request = * command;
   f8_planning____set_product(p, target, request);
   request -> inputs = f8_planning____target_inputs(p, target, request -> kind);

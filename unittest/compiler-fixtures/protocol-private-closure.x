@@ -106,7 +106,7 @@ int main(void) {
   PublicParticipant public_value = &public_storage;
   struct PrivateRight right_storage = { 22 };
   PrivateRight right_value = &right_storage;
-  PrivateBox box_value = Scope.malloc(sizeof(struct PrivateBox));
+  PrivateBox box_value = xmalloc(sizeof(struct PrivateBox));
   box_value.value = 23;
   Var boxed = box_value;
   PrivateBox restored = boxed;

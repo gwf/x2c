@@ -966,12 +966,12 @@ static int _sort_key_compare(const void * ap, const void * bp){
   return order ? order :(a -> index > b -> index) -(a -> index < b -> index);
 }
 
-void * Scope_calloc(size_t, size_t);
+void * xcalloc(size_t, size_t);
 
 Array Array_sort_by(Array array, Func key){
   if(! Array_truth(array) || ! array -> length) return array;
   size_t count = array -> length;
-  struct ArraySortEntry * entries = Scope_calloc(count, sizeof(struct ArraySortEntry));
+  struct ArraySortEntry * entries = xcalloc(count, sizeof(struct ArraySortEntry));
   {
     _x2c_gensym_defer_env_6 _x2c_gensym_macro_environment_6 ={
       0
@@ -1170,11 +1170,11 @@ static void _x2c_gensym_defer_cleanup_5(void * _x2c_gensym_defer_opaque_5){
   Array_cleanup((*(const Array *) _x2c_gensym_defer_data_5->_x2c_gensym_defer_capture_8));
 }
 
-void Scope_free(void *);
+void xfree(void *);
 
 static void _x2c_gensym_defer_cleanup_6(void * _x2c_gensym_defer_opaque_6){
   _x2c_gensym_defer_env_6 * _x2c_gensym_defer_data_6 =(_x2c_gensym_defer_env_6 *) _x2c_gensym_defer_opaque_6;
-  Scope_free((*(struct ArraySortEntry * *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_9));
+  xfree((*(struct ArraySortEntry * *) _x2c_gensym_defer_data_6->_x2c_gensym_defer_capture_9));
 }
 
 static void _x2c_gensym_defer_cleanup_7(void * _x2c_gensym_defer_opaque_7){

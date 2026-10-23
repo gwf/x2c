@@ -46,9 +46,9 @@ static void _eval_ata_times_u(
 
 int main(int argc, char **argv) {
   int n = argc > 1 ? atoi(argv[1]) : 100;
-  double *u = Scope.calloc((size_t) n, sizeof(double));
-  double *v = Scope.calloc((size_t) n, sizeof(double));
-  double *tmp = Scope.calloc((size_t) n, sizeof(double));
+  double *u = xcalloc((size_t) n, sizeof(double));
+  double *v = xcalloc((size_t) n, sizeof(double));
+  double *tmp = xcalloc((size_t) n, sizeof(double));
 
   for (int i = 0; i < n; i++) u[i] = 1.0;
   for (int i = 0; i < 10; i++) {

@@ -628,6 +628,8 @@ String String_join(String, List);
 
 static Var Symbol_var(Symbol);
 
+void * xcalloc(size_t, size_t);
+
 String Var_str(Var);
 
 static char * * _argv(List stage){
@@ -641,7 +643,7 @@ static char * * _argv(List stage){
     }
 
   }
-  char * * argv = Scope_calloc(List_len(stage) + 1, sizeof(char *));
+  char * * argv = xcalloc(List_len(stage) + 1, sizeof(char *));
   int index = 0;
   {
     Var word;
@@ -1236,7 +1238,7 @@ static char * * _environment(Map env){
     }
 
   }
-  char * * out = Scope_calloc(Array_len(entries) + 1, sizeof(char *));
+  char * * out = xcalloc(Array_len(entries) + 1, sizeof(char *));
   int index = 0;
   {
     String entry;

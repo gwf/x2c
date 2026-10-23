@@ -1020,7 +1020,7 @@ static void _destroy_text(Var data){
     for(size_t i = 0;  i < context -> scratch -> length;  i ++) Buffer_free(buffers[i]);
     Block_free(context -> scratch);
   }
-  Scope_free(context);
+  xfree(context);
 }
 
 static void _render_text(Buffer out, const LogEvent * event, int color){
@@ -1227,7 +1227,7 @@ static void _destroy_memory(Var data){
   for(size_t i = 0;  i < context -> wide_values -> length;  i ++) Var_move_wide_to(values[i], context -> destination_scope);
   Block_free(context -> wide_values);
   Scope_destroy(context -> values);
-  Scope_free(context);
+  xfree(context);
 }
 
 static Var _retain(LogMemorySink l, Var value){
@@ -1586,7 +1586,7 @@ Logger Logger_new(Symbol min_level){
         }
 
       }
-      Logger logger = Scope_calloc(1, sizeof(struct Logger));
+      Logger logger = xcalloc(1, sizeof(struct Logger));
       * logger =(struct Logger){
         .min_level = min_level, .owner_scope = * Scope_top(), .pool = Pool_current(), .storage = Scope_new_named("Logger")
       }
@@ -1627,7 +1627,7 @@ void Logger_free(Logger logger){
       if(default_logger == logger) default_logger = NULL;
       Scope_destroy(logger -> storage);
       logger -> storage = NULL;
-      Scope_free(logger);
+      xfree(logger);
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_29);
   }

@@ -296,7 +296,7 @@ static Var Interp.closure(
   Interp &self, LispEnv *env, List params, Var body, int macro) {
   Map captures = {};                                                             // Each closure owns a capture Map.
   self.capture(env, body, params, 0, captures);                                  // Capture before the call returns.
-  Fn closure = Scope.malloc(sizeof(struct Fn));                                  // Allocate in the current Scope.
+  Fn closure = xmalloc(sizeof(struct Fn));                                  // Allocate in the current Scope.
   *closure = (struct Fn) { params, body, captures, macro };                      // C dereference and compound literal.
   return Var.new(<lambda>, closure);                                             // Tag an already allocated pointer.
 }
@@ -542,8 +542,8 @@ static Var Reader.read(Reader &self) {
 */
 
 static Var _native_call(Func native, List values) {
-  FuncArg *args = Scope.malloc(values.len() * sizeof(FuncArg));                  // Allocate one FuncArg per value.
-  defer Scope.free(args);                                                        // Cleanup on every block exit.
+  FuncArg *args = xmalloc(values.len() * sizeof(FuncArg));                  // Allocate one FuncArg per value.
+  defer xfree(args);                                                        // Cleanup on every block exit.
   int count = 0;
   foreach (Var value in values) args[count++] = FuncArg.value(value);              // Pack values into a native C array.
   return native.apply(count, args);                                              // Checked native call through Func.

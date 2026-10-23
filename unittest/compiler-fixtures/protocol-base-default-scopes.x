@@ -13,13 +13,13 @@ protocol Meters(T) {
 }
 
 Meters Feet.meters(Feet value) {
-  Meters result = Scope.malloc(sizeof(struct Meters));
+  Meters result = xmalloc(sizeof(struct Meters));
   result.value = value.value / 2.0;
   return result;
 }
 
 Feet Meters.feet(Meters value) {
-  Feet result = Scope.malloc(sizeof(struct Feet));
+  Feet result = xmalloc(sizeof(struct Feet));
   result.value = value.value * 2.0;
   return result;
 }
@@ -42,7 +42,7 @@ static double second_reading(Feet value) {
 }
 
 int main(void) {
-  Feet feet = Scope.malloc(sizeof(struct Feet));
+  Feet feet = xmalloc(sizeof(struct Feet));
   feet.value = 3.0;
   printf("%.1f %.1f\n", first_reading(feet), second_reading(feet));
   return 0;

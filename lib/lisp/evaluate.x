@@ -66,7 +66,7 @@ static Var _apply(Lisp lisp, Var callable, List raw, LispEnv *env) {
   FuncArg narrow[LISP_NATIVE_ARG_MAX];
   FuncArg *argv = count <= LISP_NATIVE_ARG_MAX
     ? narrow : Scope.malloc_in(&lisp.scope, count * sizeof(FuncArg));
-  defer if (argv != narrow) Scope.free(argv);
+  defer if (argv != narrow) xfree(argv);
   unsigned argc = 0;
   foreach (Var arg in raw) argv[argc++] = FuncArg.value(_eval(lisp, arg, env));
   return fn.apply(argc, argv);
@@ -103,7 +103,7 @@ static Var _call_native(Lisp lisp, Func fn, List values) {
   FuncArg narrow[LISP_NATIVE_ARG_MAX];
   FuncArg *argv = count <= LISP_NATIVE_ARG_MAX
     ? narrow : Scope.malloc_in(&lisp.scope, count * sizeof(FuncArg));
-  defer if (argv != narrow) Scope.free(argv);
+  defer if (argv != narrow) xfree(argv);
   unsigned argc = 0;
   foreach (Var value in values) argv[argc++] = FuncArg.value(value);
   return fn.apply(argc, argv);
@@ -296,7 +296,7 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv *env, int macro) {
   }
   Lambda lambda = Scope.malloc_in(&lisp.scope, sizeof(struct Lambda));
   Var result = void;
-  defer if (result is void) Scope.free(lambda);
+  defer if (result is void) xfree(lambda);
   (List params, Var body) = args;
   *lambda = (struct Lambda) {.params = params, .body = body, .macro = macro};
   if (env) {
@@ -405,7 +405,7 @@ static Var _apply_lambda(Lisp l, Lambda lambda, List raw, LispEnv *env) {
   if (lambda.macro) return _eval(l, _call_lambda(l, lambda, raw), env);
   int count = raw.len(), index = 0;
   Var *values = Scope.malloc_in(&l.scope, (count + 1) * sizeof(Var));
-  defer Scope.free(values);
+  defer xfree(values);
   foreach (Var form in raw) values[index++] = _eval(l, form, env);
   return _call_lambda_slots(l, lambda, values, count);
 }
@@ -413,7 +413,7 @@ static Var _apply_lambda(Lisp l, Lambda lambda, List raw, LispEnv *env) {
 static Var _call_lambda(Lisp lisp, Lambda lambda, List args) {
   int count = args.len(), index = 0;
   Var *values = Scope.malloc_in(&lisp.scope, (count + 1) * sizeof(Var));
-  defer Scope.free(values);
+  defer xfree(values);
   foreach (Var value in args) values[index++] = value;
   return _call_lambda_slots(lisp, lambda, values, count);
 }
@@ -427,13 +427,13 @@ static Var _call_lambda_slots(
   lisp.call_depth++;
   defer lisp.call_depth--;
   Var *owned = NULL;
-  defer if (owned) Scope.free(owned);
+  defer if (owned) xfree(owned);
   for (;;) {
     Var result = _run_frame(lisp, lambda, values, count);
     if (!lisp.tail_lambda) return result;
     lambda = lisp.tail_lambda;
     lisp.tail_lambda = NULL;
-    if (owned) Scope.free(owned);
+    if (owned) xfree(owned);
     values = owned = lisp.tail_values;
     count = lisp.tail_count;
     _spend_call(lisp);
@@ -548,7 +548,7 @@ static Var _tail_call(Lisp lisp, Lambda lambda, List raw, LispEnv *env) {
   int count = raw.len(), index = 0;
   Var *values = Scope.malloc_in(&lisp.scope, (count + 1) * sizeof(Var));
   int pending = 0;
-  defer if (!pending) Scope.free(values);
+  defer if (!pending) xfree(values);
   foreach (Var argument in raw) values[index++] = _eval(lisp, argument, env);
   pending = 1;
   lisp.tail_lambda = lambda;

@@ -20,7 +20,7 @@ static protocol Var(StaticDescriptor);
 
 int main(void) {
   StaticDescriptor value =
-    Scope.malloc(sizeof(struct StaticDescriptor));
+    xmalloc(sizeof(struct StaticDescriptor));
   value.value = 42;
   Var boxed = value;
   printf("%s\n", boxed.str());

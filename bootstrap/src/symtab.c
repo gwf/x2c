@@ -430,7 +430,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 Sym Sym_new(Compiler c){
   if(! _init_guard_) _file_init_();
-  Sym s = Scope_calloc(1, sizeof(struct Sym));
+  Sym s = xcalloc(1, sizeof(struct Sym));
   s -> c = c;
   s -> binding_facts = Map_new();
   s -> scopes = Block_new(sizeof(SymScope));

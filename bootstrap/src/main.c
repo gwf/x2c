@@ -208,7 +208,7 @@ static void _run_command(Array arguments){
     if(! String_equal(command, _27)) CliRequest_parse_arguments(arguments);
     Diagnostics_driver_error(String_join(NULL, cons(String_var(_30), cons(String_var(command), cons(String_var(_31), NULL)))));
   }
-  char * * args = Scope_calloc(Array_len(arguments) + 3, sizeof(char *));
+  char * * args = xcalloc(Array_len(arguments) + 3, sizeof(char *));
   args[1] = "--driver-arguments";
   for(int i = 0;  i < Array_len(arguments);  i ++){
     String argument = Var_as_string(Array_getindex(arguments, i));

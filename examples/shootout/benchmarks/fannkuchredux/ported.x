@@ -54,9 +54,9 @@ static inline int _advance(int *perm1, int *count, int n) {
 }
 
 static int _fannkuchredux(int n) {
-  int *perm = Scope.malloc(n * sizeof(int));
-  int *perm1 = Scope.malloc(n * sizeof(int));
-  int *count = Scope.malloc(n * sizeof(int));
+  int *perm = xmalloc(n * sizeof(int));
+  int *perm1 = xmalloc(n * sizeof(int));
+  int *count = xmalloc(n * sizeof(int));
   for (int i = 0; i < n; i++) {
     perm1[i] = i;
     count[i] = i + 1;

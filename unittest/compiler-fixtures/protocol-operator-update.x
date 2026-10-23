@@ -46,7 +46,7 @@ static Bag pick(Bag bag) {
 
 int main(void) {
   x2c_register_type(%"bag");
-  Bag bag = Scope.malloc(sizeof(struct Bag));
+  Bag bag = xmalloc(sizeof(struct Bag));
   bag.slot[1] = 2;
   pick(bag)[1] = 2;
   pick(bag)[1] += 10;

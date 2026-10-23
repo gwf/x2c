@@ -2,7 +2,7 @@
 
 typedef struct Node { struct Node *next; Var value; } *Node;
 
-static Node _fresh_node(void) => Scope.calloc(1, sizeof(struct Node));
+static Node _fresh_node(void) => xcalloc(1, sizeof(struct Node));
 
 // The node is moved into a scope the caller owns.
 static Node moved_out(Scope *keep) {
@@ -61,8 +61,8 @@ static Node named_close(void) {
 
 // A freed pointer that is assigned again is live.
 static int freed_then_cleared(void) {
-  char *p = Scope.malloc(4);
-  Scope.free(p);
+  char *p = xmalloc(4);
+  xfree(p);
   p = NULL;
   return p == NULL;
 }
@@ -97,7 +97,7 @@ static int reused_slot(void) {
   Scope s = NULL;
   Array held = NULL;
   Scope.push(&s);
-  char *first = Scope.malloc(8);
+  char *first = xmalloc(8);
   first[0] = 'x';
   Scope.pop();
   Scope.destroy(s);

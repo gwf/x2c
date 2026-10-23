@@ -487,7 +487,7 @@ void MatchCache.flush_default(void) {
     Raises: `<alloc-fail>` when the state cannot be allocated.
 */
 void *MatchCache.context_open(void) {
-  MatchContextState state = Scope.malloc(sizeof(struct MatchContextState));
+  MatchContextState state = xmalloc(sizeof(struct MatchContextState));
   state.prev = match_thread.context_top;
   state.cache = NULL;
   match_thread.context_top = state;
@@ -543,14 +543,14 @@ MatchCache MatchCache.new(int capacity) {
   Scope owner = Scope.new_named("Match plan cache");
   MatchCache cache;
   $scope(&owner) {
-    cache = Scope.calloc(1, sizeof(struct MatchCache));
+    cache = xcalloc(1, sizeof(struct MatchCache));
     cache.scope = owner;
     cache.capacity = capacity;
     cache.bucket_count = capacity * 2 + 1;
     cache.lru_head = -1;
     cache.pool_epoch = Pool.epoch();
-    cache.entries = Scope.calloc(capacity, sizeof(MatchCacheEntry));
-    cache.buckets = Scope.malloc(sizeof(int) * cache.bucket_count);
+    cache.entries = xcalloc(capacity, sizeof(MatchCacheEntry));
+    cache.buckets = xmalloc(sizeof(int) * cache.bucket_count);
     for (int i = 0; i < cache.bucket_count; i++) cache.buckets[i] = -1;
   }
   return cache;

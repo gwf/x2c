@@ -65,10 +65,10 @@ _Noreturn static void _error(const char * operation, int error){
 }
 
 Mutex Mutex_new(void){
-  Mutex mutex = Scope_malloc(sizeof(struct Mutex));
+  Mutex mutex = xmalloc(sizeof(struct Mutex));
   int error = pthread_mutex_init(& mutex -> native, NULL);
   if(error){
-    Scope_free(mutex);
+    xfree(mutex);
     _error("pthread_mutex_init", error);
   }
   return mutex;
@@ -114,6 +114,6 @@ void Mutex_free(Mutex mutex){
   }
   int error = pthread_mutex_destroy(& mutex -> native);
   if(error) _error("pthread_mutex_destroy", error);
-  Scope_free(mutex);
+  xfree(mutex);
 }
 

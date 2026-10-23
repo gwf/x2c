@@ -302,7 +302,7 @@ Also open after delivery:
   above.
 - `C.gwrite` copies wide scalar globals into session storage; only a REPL
   probe shows it, because no gated REPL test exists.
-- `defer Scope.free(...)` of storage no Scope allocator returned is not
+- `defer xfree(...)` of storage no Scope allocator returned is not
   checked for `bad-free`; local arrays of structs decline in meta code; a
   string literal passed to a `void *` parameter in meta code is not
   retagged.

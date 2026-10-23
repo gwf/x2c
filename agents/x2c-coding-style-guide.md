@@ -668,7 +668,7 @@ Example:
 ```x2c
 if (!source.len()) {
   // Empty String is native zero; scanning still needs one addressable byte.
-  tokenizer.text = Scope.calloc(1, 1);
+  tokenizer.text = xcalloc(1, 1);
 }
 ```
 
@@ -677,7 +677,7 @@ Avoid:
 ```x2c
 if (!source.len()) {
   // Allocate one byte.
-  tokenizer.text = Scope.calloc(1, 1);
+  tokenizer.text = xcalloc(1, 1);
 }
 ```
 

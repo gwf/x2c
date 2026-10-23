@@ -197,7 +197,7 @@ static Var _thread_recursive_export_worker(
   const void *input, size_t input_size) {
   Scope output = *(Scope *) input;
   (void) input_size;
-  ContextProbe probe = Scope.malloc(sizeof(struct ContextProbe));
+  ContextProbe probe = xmalloc(sizeof(struct ContextProbe));
   Array nested = [];
   nested.push(String.printf("recursive-worker-%d", 51));
   probe.value = nested;
@@ -236,7 +236,7 @@ static Var _thread_failing_export_worker(
   const void *input, size_t input_size) {
   Scope output = *(Scope *) input;
   (void) input_size;
-  ContextProbe probe = Scope.malloc(sizeof(struct ContextProbe));
+  ContextProbe probe = xmalloc(sizeof(struct ContextProbe));
   probe.value = String.new("join export failure value");
   probe.exports = 0;
   probe.fail_at = 1;

@@ -9,7 +9,7 @@ Var Mat.var(Mat value) => Var.new(<mat>, value);
 Mat Var.mat(Var value) => (Mat) value.pointer();
 
 Mat Mat.new(int value) {
-  Mat result = Scope.malloc(sizeof(struct Mat));
+  Mat result = xmalloc(sizeof(struct Mat));
   result.value = value;
   return result;
 }

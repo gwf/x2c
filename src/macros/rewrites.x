@@ -74,7 +74,7 @@ module RewriteRule Var.rewrite_rule(Var value) => value.pointer();
 module RewriteRule _rewrite_rule(
   Symbol point, Var kind, String name, List pattern, List holes,
   int builtin, int prepared) {
-  RewriteRule rule = Scope.calloc(1, sizeof(struct RewriteRule));
+  RewriteRule rule = xcalloc(1, sizeof(struct RewriteRule));
   MacroMatcher matcher = {NULL, NULL, pattern};
   if (pattern.car() == <macrodef>) {
     Macro shape = pattern;

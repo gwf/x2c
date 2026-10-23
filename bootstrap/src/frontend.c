@@ -607,7 +607,7 @@ static String _read_input(Compiler c){
 
 static String _script(Compiler c, String text, String path){
   int end = String_find(text, _14);
-  ScriptUnit script = Scope_calloc(1, sizeof(struct ScriptUnit));
+  ScriptUnit script = xcalloc(1, sizeof(struct ScriptUnit));
   script -> path = path;
   script -> shebang = end < 0 ? text : String_getslice(text, (-2147483647 - 1), x2c_slice_bound(end), 1);
   c -> unit_script = script;
@@ -967,7 +967,7 @@ void Compiler_use_meta_toolchain(String, String);
 Frontend Frontend_new(CliRequest request){
   if(! _init_guard_) _file_init_();
   Frontend_load_support(request);
-  Frontend f = Scope_calloc(1, sizeof(struct Frontend));
+  Frontend f = xcalloc(1, sizeof(struct Frontend));
   f -> request = request;
   f -> include_dirs = List_append(request -> include_dirs, Compiler_default_include_dirs());
   f -> toolchain = Toolchain_new(request);

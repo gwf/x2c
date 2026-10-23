@@ -11,7 +11,7 @@ typedef struct Point { int x, y; } *Point;
 
 // Allocate a Point in the current Scope.
 Point Point.new(int x, int y) {
-  Point point = Scope.malloc(sizeof(struct Point));
+  Point point = xmalloc(sizeof(struct Point));
   point.x = x; point.y = y;
   return point;
 }

@@ -46,7 +46,7 @@ protocol Var(Cell) as void *;
 
 int main(void) {
   Row row = %(one two);
-  Cell cell = Scope.malloc(sizeof(struct Cell));
+  Cell cell = xmalloc(sizeof(struct Cell));
   cell.value = 7;
   Var boxed_row = row;
   Var boxed_cell = cell;

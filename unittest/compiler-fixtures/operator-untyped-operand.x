@@ -11,7 +11,7 @@ protocol Arith(T) {
 }
 
 Cell Cell.new(double value) {
-  Cell cell = Scope.calloc(1, sizeof(struct Cell));
+  Cell cell = xcalloc(1, sizeof(struct Cell));
   cell.value = value;
   return cell;
 }

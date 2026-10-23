@@ -96,7 +96,7 @@ static atomic_size_t scope_peak_live_requested_bytes;
     ~int main(void) {
     size_t before = Scope.stats().live_allocations;
     Scope.retain();
-    char *scratch = Scope.malloc(128);
+    char *scratch = xmalloc(128);
     scratch[0] = 0;
     Scope.release();
     printf("reclaimed = %d\n", Scope.stats().live_allocations == before);

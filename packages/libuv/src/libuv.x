@@ -817,8 +817,8 @@ static void _uv_stream_write_callback(uv_write_t *request, int status) {
   if (!write) return;
   UvStream stream = write.stream;
   stream.loop.pending_requests--;
-  Scope.free(write.bytes);
-  Scope.free(write);
+  xfree(write.bytes);
+  xfree(write);
   if (status < 0 && !(status == UV_ECANCELED && stream.closing))
     _uv_stream_fail(stream, "write", status);
 }
@@ -900,8 +900,8 @@ static void _uv_stream_submit_write(
     &write.request, stream.native, &buffer, 1, _uv_stream_write_callback
   );
   if (status < 0) {
-    Scope.free(write.bytes);
-    Scope.free(write);
+    xfree(write.bytes);
+    xfree(write);
     _uv_raise("write", status);
   }
   stream.loop.pending_requests++;
@@ -925,10 +925,10 @@ static void _uv_close_walk_callback(uv_handle_t *handle, void *unused) {
 }
 
 UvLoop UvLoop.new(void) {
-  UvLoop loop = Scope.calloc(1, sizeof(struct UvLoop));
+  UvLoop loop = xcalloc(1, sizeof(struct UvLoop));
   int status = uv_loop_init(&loop.loop);
   if (status < 0) {
-    Scope.free(loop);
+    xfree(loop);
     _uv_raise("loop_init", status);
   }
   loop.initialized = 1;
@@ -992,12 +992,12 @@ UvAddress UvAddress.ip4(String host, int port) {
   if (!host || port < 0 || port > UINT16_MAX) {
     $error.ip4.args();
   }
-  UvAddress address = Scope.calloc(1, sizeof(struct UvAddress));
+  UvAddress address = xcalloc(1, sizeof(struct UvAddress));
   int status = uv_ip4_addr(
     host, port, (struct sockaddr_in *) &address.address
   );
   if (status < 0) {
-    Scope.free(address);
+    xfree(address);
     _uv_raise("ip4_addr", status);
   }
   address.length = sizeof(struct sockaddr_in);
@@ -1009,12 +1009,12 @@ UvAddress UvAddress.ip6(String host, int port) {
   if (!host || port < 0 || port > UINT16_MAX) {
     $error.ip6.args();
   }
-  UvAddress address = Scope.calloc(1, sizeof(struct UvAddress));
+  UvAddress address = xcalloc(1, sizeof(struct UvAddress));
   int status = uv_ip6_addr(
     host, port, (struct sockaddr_in6 *) &address.address
   );
   if (status < 0) {
-    Scope.free(address);
+    xfree(address);
     _uv_raise("ip6_addr", status);
   }
   address.length = sizeof(struct sockaddr_in6);
@@ -1065,7 +1065,7 @@ UvLookup UvLoop.lookup(UvLoop loop, String node, String service) {
   if (!loop || !loop.initialized || (!node && !service)) {
     $error.lookup.args();
   }
-  UvLookup lookup = Scope.calloc(1, sizeof(struct UvLookup));
+  UvLookup lookup = xcalloc(1, sizeof(struct UvLookup));
   lookup.loop = loop;
   lookup.owner_scope = *Scope.top();
   lookup.strings = Pool.current();
@@ -1194,10 +1194,10 @@ static macro Unit $uv.stream(
   };
 
   static $endpoint _new(UvLoop loop) {
-    $endpoint endpoint = Scope.calloc(1, sizeof(*endpoint));
+    $endpoint endpoint = xcalloc(1, sizeof(*endpoint));
     int status = $init(&loop.loop, &endpoint.handle, @init_arguments);
     if (status < 0) {
-      Scope.free(endpoint);
+      xfree(endpoint);
       _uv_raise($init_operation, status);
     }
     _uv_stream_initialize(
@@ -1380,7 +1380,7 @@ UvTcp UvTcp.connect(
 
 static UvAddress _uv_tcp_address(UvTcp tcp, int peer) {
   _uv_tcp_ready(tcp, peer ? "tcp_getpeername" : "tcp_getsockname");
-  UvAddress address = Scope.calloc(1, sizeof(struct UvAddress));
+  UvAddress address = xcalloc(1, sizeof(struct UvAddress));
   int length = sizeof(address.address);
   int status = peer
     ? uv_tcp_getpeername(
@@ -1390,7 +1390,7 @@ static UvAddress _uv_tcp_address(UvTcp tcp, int peer) {
         &tcp.handle, (struct sockaddr *) &address.address, &length
       );
   if (status < 0) {
-    Scope.free(address);
+    xfree(address);
     _uv_raise(peer ? "tcp_getpeername" : "tcp_getsockname", status);
   }
   address.length = length;
@@ -1457,22 +1457,22 @@ static String _uv_pipe_name(UvPipe pipe, int peer) {
     if (!length || length > INT_MAX) {
       $error.pipe.name.limit();
     }
-    buffer = Scope.malloc(length);
+    buffer = xmalloc(length);
     allocated = 1;
     status = peer
       ? uv_pipe_getpeername(&pipe.handle, buffer, &length)
       : uv_pipe_getsockname(&pipe.handle, buffer, &length);
   }
   if (status < 0) {
-    if (allocated) Scope.free(buffer);
+    if (allocated) xfree(buffer);
     _uv_raise(peer ? "pipe_getpeername" : "pipe_getsockname", status);
   }
   if (length > INT_MAX || memchr(buffer, '\0', length)) {
-    if (allocated) Scope.free(buffer);
+    if (allocated) xfree(buffer);
     $error.pipe.name.encoding();
   }
   String name = String.new_len(buffer, (int) length);
-  if (allocated) Scope.free(buffer);
+  if (allocated) xfree(buffer);
   return name;
 }
 
@@ -1602,8 +1602,8 @@ static void _uv_udp_send_callback(uv_udp_send_t *request, int status) {
   if (!send) return;
   UvUdp udp = send.udp;
   udp.loop.pending_requests--;
-  Scope.free(send.bytes);
-  Scope.free(send);
+  xfree(send.bytes);
+  xfree(send);
   if (status < 0 && !(status == UV_ECANCELED && udp.closing))
     _uv_udp_fail(udp, "udp_send", status);
 }
@@ -1612,10 +1612,10 @@ UvUdp UvLoop.udp(UvLoop loop) {
   if (!loop || !loop.initialized) {
     $error.udp.args();
   }
-  UvUdp udp = Scope.calloc(1, sizeof(struct UvUdp));
+  UvUdp udp = xcalloc(1, sizeof(struct UvUdp));
   int status = uv_udp_init(&loop.loop, &udp.udp);
   if (status < 0) {
-    Scope.free(udp);
+    xfree(udp);
     _uv_raise("udp_init", status);
   }
   udp.loop = loop;
@@ -1669,8 +1669,8 @@ static UvUdp _uv_udp_send(
     _uv_udp_send_callback
   );
   if (status < 0) {
-    Scope.free(send.bytes);
-    Scope.free(send);
+    xfree(send.bytes);
+    xfree(send);
     _uv_raise("udp_send", status);
   }
   udp.loop.pending_requests++;
@@ -1747,7 +1747,7 @@ static UvAddress _uv_udp_address(UvUdp udp, int peer) {
   _uv_udp_ready(
     udp, peer ? "udp_getpeername" : "udp_getsockname"
   );
-  UvAddress address = Scope.calloc(1, sizeof(struct UvAddress));
+  UvAddress address = xcalloc(1, sizeof(struct UvAddress));
   int length = sizeof(address.address);
   int status = peer
     ? uv_udp_getpeername(
@@ -1757,7 +1757,7 @@ static UvAddress _uv_udp_address(UvUdp udp, int peer) {
         &udp.udp, (struct sockaddr *) &address.address, &length
       );
   if (status < 0) {
-    Scope.free(address);
+    xfree(address);
     _uv_raise(peer ? "udp_getpeername" : "udp_getsockname", status);
   }
   address.length = length;
@@ -1829,7 +1829,7 @@ static void _uv_fs_started(UvFs fs) {
 
 static void _uv_fs_submit_failed(UvFs fs, String operation, int status) {
   uv_fs_req_cleanup(&fs.request);
-  Scope.free(fs.buffer);
+  xfree(fs.buffer);
   fs.buffer = NULL;
   if (fs.file && fs.file.pending) fs.file.pending--;
   if (fs.file && fs.operation == UV_FS_CLOSE) fs.file.closing = 0;
@@ -1887,7 +1887,7 @@ static int _uv_fs_sync_close(uv_file descriptor);
 static void _uv_fs_finish(UvFs fs) {
   fs.completed = 1;
   if (fs.loop.pending_requests) fs.loop.pending_requests--;
-  Scope.free(fs.buffer);
+  xfree(fs.buffer);
   fs.buffer = NULL;
   if (fs.failure_cause) {
     _uv_callback_failed(fs.loop, fs.failure_cause, fs.failure_detail);
@@ -1951,7 +1951,7 @@ static void _uv_fs_single_callback(uv_fs_t *request) {
     if (fs.operation == UV_FS_OPEN && fs.result >= 0)
       _uv_fs_sync_close((uv_file) fs.result);
     _uv_fs_complete_file(fs);
-    Scope.free(fs.buffer);
+    xfree(fs.buffer);
     fs.buffer = NULL;
     fs.completed = 1;
     if (fs.loop.pending_requests) fs.loop.pending_requests--;
@@ -2464,13 +2464,13 @@ UvAsync UvLoop.async(UvLoop loop, Var value, void (*fn)(UvAsync, Var)) {
   if (!loop || !loop.initialized || !fn) {
     $error.async.args();
   }
-  UvAsync async = Scope.calloc(1, sizeof(struct UvAsync));
+  UvAsync async = xcalloc(1, sizeof(struct UvAsync));
   async.loop = loop;
   async.value = value;
   async.handler = fn;
   int status = uv_async_init(&loop.loop, &async.async, _uv_async_callback);
   if (status < 0) {
-    Scope.free(async);
+    xfree(async);
     _uv_raise("async_init", status);
   }
   async.async.data = async;
@@ -2536,13 +2536,13 @@ static macro Unit $uv.phase(
     if (!loop || !loop.initialized || !fn) {
       $error.phase.args($operation);
     }
-    $phase phase = Scope.calloc(1, sizeof(*phase));
+    $phase phase = xcalloc(1, sizeof(*phase));
     phase.loop = loop;
     phase.value = value;
     phase.handler = fn;
     int status = $init(&loop.loop, &phase.handle);
     if (status < 0) {
-      Scope.free(phase);
+      xfree(phase);
       _uv_raise($init_operation, status);
     }
     phase.handle.data = phase;
@@ -2594,10 +2594,10 @@ UvTimer UvLoop.timer(
   if (!loop || !loop.initialized || !fn || delay < 0 || repeat < 0) {
     $error.timer.args();
   }
-  UvTimer timer = Scope.calloc(1, sizeof(struct UvTimer));
+  UvTimer timer = xcalloc(1, sizeof(struct UvTimer));
   int status = uv_timer_init(&loop.loop, &timer.timer);
   if (status < 0) {
-    Scope.free(timer);
+    xfree(timer);
     _uv_raise("timer_init", status);
   }
   timer.loop = loop;
@@ -2632,10 +2632,10 @@ UvSignal UvLoop.signal(
   if (!loop || !loop.initialized || !fn || number <= 0) {
     $error.signal.args();
   }
-  UvSignal signal = Scope.calloc(1, sizeof(struct UvSignal));
+  UvSignal signal = xcalloc(1, sizeof(struct UvSignal));
   int status = uv_signal_init(&loop.loop, &signal.signal);
   if (status < 0) {
-    Scope.free(signal);
+    xfree(signal);
     _uv_raise("signal_init", status);
   }
   signal.loop = loop;
@@ -2675,10 +2675,10 @@ UvWatch UvLoop.watch(
   if (!loop || !loop.initialized || !fn || !path || !path.len()) {
     $error.watch.args();
   }
-  UvWatch watch = Scope.calloc(1, sizeof(struct UvWatch));
+  UvWatch watch = xcalloc(1, sizeof(struct UvWatch));
   int status = uv_fs_event_init(&loop.loop, &watch.event);
   if (status < 0) {
-    Scope.free(watch);
+    xfree(watch);
     _uv_raise("fs_event_init", status);
   }
   watch.loop = loop;
@@ -2732,7 +2732,7 @@ UvProcess UvLoop.command(UvLoop loop, List arguments) {
   if (count > INT_MAX) {
     $error.command.count(count);
   }
-  char **argv = Scope.calloc(count + 1, sizeof(char *));
+  char **argv = xcalloc(count + 1, sizeof(char *));
   size_t index = 0;
   foreach(Var argument, arguments) {
     if (argument is not <string>) {
@@ -2742,7 +2742,7 @@ UvProcess UvLoop.command(UvLoop loop, List arguments) {
     argv[index++] = text ? text : "";
   }
 
-  UvProcess process = Scope.calloc(1, sizeof(struct UvProcess));
+  UvProcess process = xcalloc(1, sizeof(struct UvProcess));
   process.loop = loop;
   process.argv = argv;
   process.input_closed = 1;
@@ -2796,7 +2796,7 @@ UvProcess UvProcess.environment(UvProcess process, Map variables) {
   if (!variables) {
     $error.command.environment();
   }
-  char **environment = Scope.calloc(variables.len() + 1, sizeof(char *));
+  char **environment = xcalloc(variables.len() + 1, sizeof(char *));
   size_t index = 0;
   foreach(Var (name, value), variables) {
     if (name is not <string> || value is not <string>) {

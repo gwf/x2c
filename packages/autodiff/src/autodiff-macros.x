@@ -39,7 +39,7 @@ macro Unit $ad.dual(
   Expr $sin, Expr $cos, Expr $exp, Expr $log, Expr $sqrt, Expr $tanh
 ) {
   Var $D.var($D value) {
-    $D *boxed = Scope.malloc(sizeof($D));
+    $D *boxed = xmalloc(sizeof($D));
     *boxed = value;
     return Var.new($tag, boxed);
   }

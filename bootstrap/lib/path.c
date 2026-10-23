@@ -782,14 +782,14 @@ void Path_write_text(Path path, String text){
 
 }
 
-void * Scope_memdup(const void *, size_t);
+void * xmemdup(const void *, size_t);
 
 Path Path_temp_dir(void){
   if(! _init_guard_) _file_init_();
   const char * parent = getenv("TMPDIR");
   Path root = parent && * parent ? String_new(parent) : _18;
   String pattern = Path_join(root, _19);
-  char * created = Scope_memdup(pattern, String_len(pattern) + 1);
+  char * created = xmemdup(pattern, String_len(pattern) + 1);
   if(! mkdtemp(created)) File_path_error(String_var(_20), root, errno);
   return String_new(created);
 }

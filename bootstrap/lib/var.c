@@ -450,8 +450,8 @@ Var Var_box_record(Symbol tag, const void * record, size_t size){
     }
 
   }
-  if(row < VAR_DIRECT_ROWS) return _new_custom_pointer(row, Scope_memdup(record, size));
-  char * copy = Scope_malloc(RECORD_PREFIX + size);
+  if(row < VAR_DIRECT_ROWS) return _new_custom_pointer(row, xmemdup(record, size));
+  char * copy = xmalloc(RECORD_PREFIX + size);
   *(VarDescriptor * *) copy = descriptor;
   memcpy(copy + RECORD_PREFIX, record, size);
   return _new_custom_pointer(VAR_RECORD_ROW, copy + RECORD_PREFIX);
@@ -537,7 +537,7 @@ static VarCell * _cell(VarDescriptor * descriptor, void * pointer){
                 cell = first;
                 while(cell && cell -> descriptor != descriptor) cell = cell -> next;
                 if(! cell){
-                  cell = Scope_malloc(sizeof(VarCell));
+                  cell = xmalloc(sizeof(VarCell));
                   * cell =(VarCell){
                     descriptor, pointer, first
                   }
@@ -662,7 +662,7 @@ VarDescriptor * x2c_var_declare(Symbol tag){
         {
           {
             if(f7_classes___declared == NULL) f7_classes___declared = Map_new();
-            descriptor = Scope_calloc(1, sizeof(VarDescriptor));
+            descriptor = xcalloc(1, sizeof(VarDescriptor));
             descriptor -> tag = tag;
             descriptor -> row = - 1;
             Map_setindex(f7_classes___declared, Symbol_var(tag), Var_new(3683441, (void *) descriptor));
@@ -947,12 +947,12 @@ static int _wide_encoding_valid(Var value, Symbol tag){
 }
 
 static Var f7_numbers____new_wide(TagId id, f7_numbers___VarWideValue value){
-  f7_numbers___VarWideBox box = Scope_malloc(sizeof(struct f7_numbers___VarWideBox));
+  f7_numbers___VarWideBox box = xmalloc(sizeof(struct f7_numbers___VarWideBox));
   box -> tag = x2c_var_taginfo[id].tag;
   box -> value = value;
   uintptr_t raw =(uintptr_t) box;
   if((raw & 0x7) != 0 || raw >=(1ul << 48)){
-    Scope_free(box);
+    xfree(box);
     {
       static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/var/numbers.x",.function = "f7_numbers____new_wide",.line = 37,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_12, 4372507526, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.box")), NULL))));
@@ -1017,11 +1017,11 @@ Var Var_box_long_double(long double value){
 Var Var_clone_wide(Var value){
   if(! Var_is_wide(value)) return((void) 0, Void);
   f7_numbers___VarWideBox source = f7_numbers____wide_box(value);
-  f7_numbers___VarWideBox box = Scope_malloc(sizeof(struct f7_numbers___VarWideBox));
+  f7_numbers___VarWideBox box = xmalloc(sizeof(struct f7_numbers___VarWideBox));
   * box = * source;
   uintptr_t raw =(uintptr_t) box;
   if((raw & 0x7) != 0 || raw >=(1ul << 48)){
-    Scope_free(box);
+    xfree(box);
     {
       static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/var/numbers.x",.function = "Var_clone_wide",.line = 139,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_13, 4372507526, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.clone_wide")), NULL))));

@@ -55,7 +55,7 @@ module void _expand_argument(Array out, String arg, List stack) {
 module List _response_arguments(String path) {
   size_t length = 0, char *text = _read_response_file(path, length);
   Array words = _response_words(path, text, length);
-  Scope.free(text);
+  xfree(text);
   return words.list_free();
 }
 
@@ -64,7 +64,7 @@ static char *_read_response_file(String path, size_t &length) {
   FILE *file = fopen(path, "rb");
   if (!file) _response_error(path, 1, strerror(errno));
   long end = _response_size(file, path);
-  char *text = Scope.malloc((size_t) end + 1);
+  char *text = xmalloc((size_t) end + 1);
   size_t got = fread(text, 1, (size_t) end, file), int failed = ferror(file);
   fclose(file);
   if (failed || got != (size_t) end)

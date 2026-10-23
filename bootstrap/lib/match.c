@@ -482,7 +482,7 @@ static const char * f6_layout____malformed(f6_layout___MatchLayoutBuilder * b){
 
 static MatchCaptureLayout f6_layout____layout(f6_layout___MatchLayoutBuilder * b, Var normalized, const char * malformed){
   size_t bytes = sizeof(struct MatchCaptureLayout) + sizeof(Atom) *(* b).count;
-  MatchCaptureLayout layout = Scope_calloc(1, bytes);
+  MatchCaptureLayout layout = xcalloc(1, bytes);
   layout -> binders =(Atom *)((char *) layout + sizeof(struct MatchCaptureLayout));
   layout -> binder_count =(* b).count;
   layout -> status = malformed ? 28682226919752 : 1138535534920;
@@ -599,7 +599,7 @@ static int f6_layout____find(MatchCaptureLayout layout, Atom binder){
 
 void MatchCaptureLayout_free(MatchCaptureLayout layout){
   if(! _init_guard_) _file_init_();
-  if(layout) Scope_free(layout);
+  if(layout) xfree(layout);
 }
 
 List MatchCaptureLayout_definite_list(MatchCaptureLayout layout){

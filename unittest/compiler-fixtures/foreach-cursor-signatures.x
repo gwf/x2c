@@ -173,30 +173,30 @@ int DirectThree.try_next(DirectThree bag, unsigned *cursor,
 protocol Iter(DirectThree);
 
 int main(void) {
-  DirectOne direct_one = Scope.malloc(sizeof(struct DirectOne));
+  DirectOne direct_one = xmalloc(sizeof(struct DirectOne));
   direct_one.values = %(1 2 3);
   long one_total = 0;
   foreach(long value, direct_one) one_total += value;
 
-  DirectTwo direct_two = Scope.malloc(sizeof(struct DirectTwo));
+  DirectTwo direct_two = xmalloc(sizeof(struct DirectTwo));
   direct_two.values = %(10 20 30);
   int two_total = 0;
   foreach(int (key, value), direct_two) two_total += key + value;
 
-  ValueCursor value_cursor = Scope.malloc(sizeof(struct ValueCursor));
+  ValueCursor value_cursor = xmalloc(sizeof(struct ValueCursor));
   value_cursor.values = %(1 2 3);
-  FloatCursor float_cursor = Scope.malloc(sizeof(struct FloatCursor));
+  FloatCursor float_cursor = xmalloc(sizeof(struct FloatCursor));
   float_cursor.values = %(1 2 3);
-  StringCursor string_cursor = Scope.malloc(sizeof(struct StringCursor));
+  StringCursor string_cursor = xmalloc(sizeof(struct StringCursor));
   string_cursor.values = %(1 2 3);
-  VoidCursor void_cursor = Scope.malloc(sizeof(struct VoidCursor));
+  VoidCursor void_cursor = xmalloc(sizeof(struct VoidCursor));
   void_cursor.values = %(1 2 3);
-  ValueOutput value_output = Scope.malloc(sizeof(struct ValueOutput));
+  ValueOutput value_output = xmalloc(sizeof(struct ValueOutput));
   value_output.values = %(1 2 3);
-  WrongReturn wrong_return = Scope.malloc(sizeof(struct WrongReturn));
+  WrongReturn wrong_return = xmalloc(sizeof(struct WrongReturn));
   wrong_return.values = %(1 2 3);
 
-  DirectThree direct_three = Scope.malloc(sizeof(struct DirectThree));
+  DirectThree direct_three = xmalloc(sizeof(struct DirectThree));
   direct_three.values = %(7 8 9);
   int three_total = 0;
   foreach(int value, direct_three) three_total += value;

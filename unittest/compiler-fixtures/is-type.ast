@@ -251,8 +251,7 @@
     (bindings 
      (op = (bind (binding 54 "widget") ()) 
       (expr (* void) 
-       (call (expr ((func (("size_t"))) * void) 
-              (ident (binding 55 "Scope_malloc"))) 
+       (call (expr ((func (("size_t"))) * void) (ident (binding 55 "xmalloc"))) 
         (args (expr ("size_t") 
                (sizeof 
                 (parens (decl (struct "IsWidgetData") (bindings (bind () ()))))))))))))) 

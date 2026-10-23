@@ -13,7 +13,7 @@ Slot Var.slot(Var value) {
 }
 
 Slot Slot.new(int value) {
-  Slot result = Scope.malloc(sizeof(struct Slot));
+  Slot result = xmalloc(sizeof(struct Slot));
   result.value = value;
   return result;
 }

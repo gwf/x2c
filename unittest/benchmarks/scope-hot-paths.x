@@ -22,9 +22,9 @@ int main(void) {
   Scope.retain();
   start = now_ns();
   for (int i = 0; i < count; i++) {
-    void *ptr = Scope.malloc(24);
+    void *ptr = xmalloc(24);
     sink ^= (uintptr_t) ptr;
-    Scope.free(ptr);
+    xfree(ptr);
   }
   result("malloc-free", now_ns() - start, count);
   Scope.release();
@@ -40,9 +40,9 @@ int main(void) {
   start = now_ns();
   for (int i = 0; i < count; i++) {
     Scope.push(&named);
-    void *ptr = Scope.malloc(24);
+    void *ptr = xmalloc(24);
     sink ^= (uintptr_t) ptr;
-    Scope.free(ptr);
+    xfree(ptr);
     Scope.pop();
   }
   result("push-malloc-free-pop", now_ns() - start, count);
@@ -51,7 +51,7 @@ int main(void) {
   for (int i = 0; i < count; i++) {
     void *ptr = Scope.malloc_in(&named, 24);
     sink ^= (uintptr_t) ptr;
-    Scope.free(ptr);
+    xfree(ptr);
   }
   result("malloc-in-free", now_ns() - start, count);
   Scope.destroy(named);

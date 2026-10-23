@@ -436,7 +436,7 @@ Context Context_open_isolated_named(const char * name){
 
 static Context _open(const char * name, int isolated){
   Context_initialize();
-  Context context = Scope_calloc(1, sizeof(struct Context));
+  Context context = xcalloc(1, sizeof(struct Context));
   {
     (context) -> parent = current_context;
     (context) -> destination_scope = Scope_top();
@@ -504,7 +504,7 @@ void Context_close(Context c){
   Scope_pop();
   Scope_destroy(scope);
   current_context = parent;
-  Scope_free(c);
+  xfree(c);
 }
 
 void Context_cleanup(Context value){
@@ -557,7 +557,7 @@ static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
     if(((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)) -> pool) Pool_close();
     if((*(int *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_4)) Scope_pop();
     if(((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)) -> scope) Scope_destroy(((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)) -> scope);
-    Scope_free(((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)));
+    xfree(((*(Context *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_3)));
   }
 
 }

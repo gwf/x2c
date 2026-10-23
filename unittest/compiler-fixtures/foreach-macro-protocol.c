@@ -36,7 +36,7 @@ Iter Bag_iter(Bag bag, Iter dest){
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  Bag bag = Scope_malloc(sizeof(struct Bag));
+  Bag bag = xmalloc(sizeof(struct Bag));
   bag -> values = _5;
   int total = 0;
   {

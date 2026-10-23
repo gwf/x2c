@@ -132,7 +132,7 @@ Iter Iter_init(Iter iter, Var obj, IterNextFn next, Var state){
 }
 
 Iter Iter_new(void){
-  return Scope_calloc(1, sizeof(struct Iter));
+  return xcalloc(1, sizeof(struct Iter));
 }
 
 #include "error.h"

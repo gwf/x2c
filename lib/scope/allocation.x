@@ -162,7 +162,7 @@ void *Scope.calloc_in(Scope *slot, size_t count, size_t size) {
     The copy is ordinary scope-owned memory, freed by `Scope.free` or by the
     release that ends the region. Nothing about the source is remembered, so
     duplicating a C string means copying its terminator too:
-    `Scope.memdup(text, strlen(text) + 1)`.
+    `xmemdup(text, strlen(text) + 1)`.
 
     A NULL `ptr` or a zero `size` returns NULL and allocates nothing, so a
     duplicate of nothing is indistinguishable from failure; check the
@@ -251,7 +251,7 @@ Scope Scope.owner(void *ptr) {
     ~int main(void) {
     Scope keep = Scope.new_named("results");
     Scope.retain();
-    char *text = Scope.memdup("survivor", 9);
+    char *text = xmemdup("survivor", 9);
     Scope.move(text, &keep);
     Scope.release();
     puts(text);

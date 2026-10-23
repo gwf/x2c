@@ -44,7 +44,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 }
 
 geo__Vec geo__Vec_new(double x, double y){
-  geo__Vec v = Scope_malloc(sizeof(struct geo__VecData));
+  geo__Vec v = xmalloc(sizeof(struct geo__VecData));
   v -> x = x;
   v -> y = y;
   return v;

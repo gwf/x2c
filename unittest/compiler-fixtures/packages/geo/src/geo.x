@@ -28,7 +28,7 @@ int ChainLeaf.leaf_len(ChainLeaf values);
 static typedef double Magnitude;
 
 Vec Vec.new(double x, double y) {
-  Vec v = Scope.malloc(sizeof(struct VecData));
+  Vec v = xmalloc(sizeof(struct VecData));
   v.x = x; v.y = y;
   return v;
 }

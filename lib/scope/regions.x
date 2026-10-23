@@ -20,7 +20,7 @@ module ScopeThreadState _thread(void) {
     ~int main(void) {
     Scope work = NULL;
     Scope.push(&work);
-    char *buffer = Scope.malloc(16);
+    char *buffer = xmalloc(16);
     snprintf(buffer, 16, "in work");
     Scope.pop();
     puts(buffer);
@@ -97,7 +97,7 @@ meta native void Scope.pop(void) {
     ~static void report(int width) {
     Scope.retain();
     defer Scope.release();
-    char *line = Scope.malloc(width + 1);
+    char *line = xmalloc(width + 1);
     snprintf(line, width + 1, "%d bytes", width);
     puts(line);
     ~}

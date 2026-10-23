@@ -108,7 +108,7 @@ static int _translate_units(CliRequest request, Build b, List units) {
   Map stale = {};
   List inputs = _stale_inputs(b, units, stale);
   if (!request.dry_run && inputs) {
-    CliRequest translation = Scope.memdup(request, sizeof(struct CliRequest));
+    CliRequest translation = xmemdup(request, sizeof(struct CliRequest));
     translation.inputs = inputs;
     translation.out_dir = b.gen_root;
     if (translate_request(translation, stale, b, _translation_progress)) return 1;

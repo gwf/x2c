@@ -13,7 +13,7 @@ Vec Var.vec(Var value) {
 }
 
 Vec Vec.new(int value) {
-  Vec result = Scope.malloc(sizeof(struct Vec));
+  Vec result = xmalloc(sizeof(struct Vec));
   result.value = value;
   return result;
 }

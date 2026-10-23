@@ -1,7 +1,7 @@
 char *summary_ambiguous(void) {
-  return Scope.memdup("second", 7);
+  return xmemdup("second", 7);
 }
 
 static char *_summary_static(void) {
-  return Scope.memdup("second static", 14);
+  return xmemdup("second static", 14);
 }

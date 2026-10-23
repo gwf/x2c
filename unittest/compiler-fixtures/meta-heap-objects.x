@@ -15,7 +15,7 @@ meta long layout_sizes(void) {
 }
 
 meta struct Node *push_node(struct Node *head, int value) {
-  struct Node *node = Scope.malloc(sizeof *node);
+  struct Node *node = xmalloc(sizeof *node);
   node->value = value;
   node.next = head;
   return node;
@@ -28,19 +28,19 @@ meta long list_sum(int count) {
   for (struct Node *at = head; at; at = at->next) total += at->value;
   while (head) {
     struct Node *next = head->next;
-    Scope.free(head);
+    xfree(head);
     head = next;
   }
   return total;
 }
 
 meta double pair_sum(int count) {
-  struct Pair *pairs = Scope.calloc(count, sizeof(struct Pair));
+  struct Pair *pairs = xcalloc(count, sizeof(struct Pair));
   for (int i = 0; i < count; i++) {
     pairs[i].a = i;
     (pairs + i)->b = i * 0.5;
   }
-  pairs = Scope.realloc(pairs, 2 * count * sizeof *pairs);
+  pairs = xrealloc(pairs, 2 * count * sizeof *pairs);
   for (int i = count; i < 2 * count; i++) {
     struct Pair *at = &pairs[i];
     at->a = i;
@@ -49,15 +49,15 @@ meta double pair_sum(int count) {
   double total = 0;
   for (struct Pair *at = pairs + 2 * count - 1; at >= pairs; at = at - 1)
     total += at->a + at->b;
-  Scope.free(pairs);
+  xfree(pairs);
   return total;
 }
 
 meta int copied_bytes(void) {
   int values[3] = {4, 5, 6};
-  int *copy = Scope.memdup(values, sizeof values[0] * 3);
+  int *copy = xmemdup(values, sizeof values[0] * 3);
   int result = copy[0] * 100 + copy[1] * 10 + *(copy + 2);
-  Scope.free(copy);
+  xfree(copy);
   return result;
 }
 

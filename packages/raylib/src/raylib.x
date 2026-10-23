@@ -598,7 +598,7 @@ static Vector2 *_raylib_vertices(List points, String operation, int &count) {
             (reason "a polygon needs at least three points"));
   }
 
-  Vector2 *vertices = Scope.malloc((size_t) total * sizeof(Vector2));
+  Vector2 *vertices = xmalloc((size_t) total * sizeof(Vector2));
   int index = 0;
   foreach(List point, points) {
     if (point.len() != 2) {
@@ -729,7 +729,7 @@ ImagePixels Image.pixels(Image image) {
             (width ${image.width}) (height ${image.height}));
   }
 
-  ImagePixels pixels = Scope.calloc(1, sizeof(struct ImagePixels));
+  ImagePixels pixels = xcalloc(1, sizeof(struct ImagePixels));
   pixels.data = data;
   pixels.width = image.width;
   pixels.height = image.height;

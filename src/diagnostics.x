@@ -51,7 +51,7 @@ static void _emit_entry(Diagnostics diag, List entry) {
     zero collects without a stopping threshold. The printer is borrowed.
 */
 Diagnostics Diagnostics.new(Compiler printer, int limit) {
-  Diagnostics diag = Scope.malloc(sizeof(struct Diagnostics));
+  Diagnostics diag = xmalloc(sizeof(struct Diagnostics));
   *diag = (struct Diagnostics) {
     .entries = [], .published = {}, .printer = printer,
     .limit = (limit < 0) ? 0 : limit};
@@ -446,7 +446,7 @@ String Compiler.text_source(Compiler c, int position, int &offset) {
     host preprocessor's rows record no offsets, so a token of its output
     keeps its merged offset. */
 Token Compiler.source_token(Compiler c, Token token, String &file) {
-  Token placed = Scope.calloc(1, sizeof(struct Token));
+  Token placed = xcalloc(1, sizeof(struct Token));
   *placed = *token;
   placed.col = c.token_column(token);
   file = c.token_source(token, placed.line);

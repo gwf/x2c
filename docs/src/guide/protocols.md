@@ -231,7 +231,7 @@ String Vec.str(Vec value) {
 protocol Var(Vec);
 
 int main(void) {
-  Vec value = Scope.malloc(sizeof(struct Vec));
+  Vec value = xmalloc(sizeof(struct Vec));
   value.x = 1;
   value.y = 2;
   Var boxed = value;
@@ -269,7 +269,7 @@ protocol Cartesian(T) {
 }
 
 Cartesian Polar.cartesian(Polar value) {
-  Cartesian result = Scope.malloc(sizeof(struct Cartesian));
+  Cartesian result = xmalloc(sizeof(struct Cartesian));
   result.x = value.radius * cos(value.theta);
   result.y = value.radius * sin(value.theta);
   return result;
@@ -290,7 +290,7 @@ double Polar.magnitude(Polar value) {
 protocol Cartesian(Polar);
 
 int main(void) {
-  Polar value = Scope.malloc(sizeof(struct Polar));
+  Polar value = xmalloc(sizeof(struct Polar));
   value.radius = 2.0;
   value.theta = 0.5;
   printf("%.1f %.1f\n", value.magnitude(), value.angle());

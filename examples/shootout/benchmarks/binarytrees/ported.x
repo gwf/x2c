@@ -13,7 +13,7 @@ typedef struct Node *Node;
 struct Node { Node left, right; int item; };
 
 static Node _new_tree(int item, int depth) {
-  Node tree = Scope.malloc(sizeof(struct Node));
+  Node tree = xmalloc(sizeof(struct Node));
   tree.item = item;
   tree.left = depth ? _new_tree(item * 2 - 1, depth - 1) : NULL;
   tree.right = depth ? _new_tree(item * 2, depth - 1) : NULL;

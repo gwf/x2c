@@ -79,7 +79,7 @@ Database Database.open_with(String filename, int flags) {
   if (!filename)
     raise %(bad-arg (library "SQLite") (operation "sqlite3_open_v2")
             (reason "null filename"));
-  Database database = Scope.calloc(1, sizeof(struct Database));
+  Database database = xcalloc(1, sizeof(struct Database));
   int ready = 0;
   defer if (!ready && database.handle) sqlite3_close_v2(database.handle);
   int code = sqlite3_open_v2(filename, &database.handle, flags, NULL);
@@ -144,7 +144,7 @@ sqlite3_int64 Database.last_insert_rowid(Database database) {
 */
 Prepared Database.prepare(Database database, String sql) {
   _database_live(database, "sqlite3_prepare_v2");
-  Prepared statement = Scope.calloc(1, sizeof(struct Prepared));
+  Prepared statement = xcalloc(1, sizeof(struct Prepared));
   statement.database = database;
   int ready = 0;
   defer if (!ready && statement.handle) sqlite3_finalize(statement.handle);

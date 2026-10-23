@@ -23,13 +23,13 @@ protocol Meters(T) {
 }
 
 Meters Feet.meters(Feet value) {
-  Meters result = Scope.malloc(sizeof(struct Meters));
+  Meters result = xmalloc(sizeof(struct Meters));
   result.value = value.value / 2.0;
   return result;
 }
 
 Feet Meters.feet(Meters value) {
-  Feet result = Scope.malloc(sizeof(struct Feet));
+  Feet result = xmalloc(sizeof(struct Feet));
   result.value = value.value * 2.0;
   return result;
 }

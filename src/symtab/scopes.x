@@ -2,7 +2,7 @@
 
 /** Creates the empty symbol table that compiler `c` owns. */
 Sym Sym.new(Compiler c) {
-  Sym s = Scope.calloc(1, sizeof(struct Sym));
+  Sym s = xcalloc(1, sizeof(struct Sym));
   s.c = c;
   s.binding_facts = {};
   s.scopes = Block.new(sizeof(SymScope));

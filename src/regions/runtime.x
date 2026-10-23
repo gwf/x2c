@@ -17,6 +17,8 @@
 static Map runtime = %{
   "Scope_malloc": (alloc),           "Scope_calloc": (alloc),
   "Scope_memdup": (alloc),           "Scope_malloc_finalized": (alloc),
+  "xmalloc": (alloc),                "xcalloc": (alloc),
+  "xmemdup": (alloc),                "xrealloc": (alloc moved),
   "Scope_realloc": (alloc moved),    "String_malloc": (alloc pool),
   "String_new": (alloc pool),        "String_new_len": (alloc pool),
   "String_new_fill": (alloc pool),
@@ -65,6 +67,7 @@ static Map runtime = %{
   "Bytes_cleanup": (free),           "Buffer_free": (free),
   "Buffer_cleanup": (free),          "Context_close": (free),
   "Context_cleanup": (free),         "Scope_free": (free scope),
+  "xfree": (free scope),
   "Scope_destroy": (destroy),        "Scope_cleanup": (destroy),
   "Scope_retain": (open scope),      "Scope_release": (close scope),
   "Pool_open": (open pool),          "Pool_close": (close pool),

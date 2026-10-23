@@ -393,7 +393,7 @@ static void pool_try_own_reports_lifetime_safety(void) {
   EXPECT_FALSE(transient_string.try_own());
   transient_string.free();
 
-  List transient_list = Scope.malloc(sizeof(struct List));
+  List transient_list = xmalloc(sizeof(struct List));
   transient_list.car = 1;
   transient_list.cdr = NULL;
   EXPECT_FALSE(transient_list.try_own());

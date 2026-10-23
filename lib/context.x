@@ -365,7 +365,7 @@ Context Context.open_isolated_named(const char *name) => _open(name, 1);
 
 static Context _open(const char *name, int isolated) {
   Context.initialize();
-  Context context = Scope.calloc(1, sizeof(struct Context));
+  Context context = xcalloc(1, sizeof(struct Context));
   with context {
     _.parent = current_context;
     _.destination_scope = Scope.top();
@@ -380,7 +380,7 @@ static Context _open(const char *name, int isolated) {
       if (_.pool)     Pool.close();
       if (pushed)     Scope.pop();
       if (_.scope)    Scope.destroy(_.scope);
-      Scope.free(_);
+      xfree(_);
     }
     _.scope = name ? Scope.new_named(name) : Scope.new();
     Scope.push(&_.scope);
@@ -428,7 +428,7 @@ meta native void Context.close(Context c) {
   Scope.pop();
   scope.destroy();
   current_context = parent;
-  Scope.free(c);
+  xfree(c);
 }
 
 /** Ends the owned lifetime when a managed local leaves its block. */

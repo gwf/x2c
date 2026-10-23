@@ -19,13 +19,13 @@ static int identity(int value);
 static inline int StaticParticipant_read(StaticParticipant a0, const int * a1, int * * a2, int a3[3], int(* a4)(int));
 
 StaticBase StaticParticipant_staticbase(StaticParticipant value){
-  StaticBase result = Scope_malloc(sizeof(struct StaticBase));
+  StaticBase result = xmalloc(sizeof(struct StaticBase));
   result -> value = value -> value;
   return result;
 }
 
 StaticParticipant StaticBase_staticparticipant(StaticBase value){
-  StaticParticipant result = Scope_malloc(sizeof(struct StaticParticipant));
+  StaticParticipant result = xmalloc(sizeof(struct StaticParticipant));
   result -> value = value -> value;
   return result;
 }
@@ -41,7 +41,7 @@ static int identity(int value){
 
 int main(void){
   x2c_initialize();
-  StaticParticipant participant = Scope_malloc(sizeof(struct StaticParticipant));
+  StaticParticipant participant = xmalloc(sizeof(struct StaticParticipant));
   participant -> value = 3;
   int scale = 2, result = 0, * output = & result, values[3] ={
     4, 0, 0

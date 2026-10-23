@@ -80,7 +80,7 @@ Toolchain Toolchain.new(CliRequest request) {
 Toolchain Toolchain.for_meta(String cc) => _toolchain(cc, NULL);
 
 static Toolchain _toolchain(String cc, String ar) {
-  Toolchain t = Scope.calloc(1, sizeof(struct Toolchain));
+  Toolchain t = xcalloc(1, sizeof(struct Toolchain));
   t.cc = _tool(cc, "CC", "cc");
   t.ar = _tool(ar, "AR", "ar");
   _layout(t);
@@ -140,7 +140,7 @@ String Toolchain.meta_cc(String explicit) => _tool(explicit, "META_CC", "cc");
 */
 ToolAction ToolAction.new(
   Symbol phase, List arguments, int verbose, int dry_run) {
-  ToolAction action = Scope.calloc(1, sizeof(struct ToolAction));
+  ToolAction action = xcalloc(1, sizeof(struct ToolAction));
   *action = (struct ToolAction) {
     .phase = phase, .arguments = arguments, .verbose = verbose,
     .dry_run = dry_run, .report = 1};
@@ -253,7 +253,7 @@ ToolRun ToolAction.start(ToolAction action) {
     report_suspend();
     _print_action(action.phase, action.arguments);
   }
-  ToolRun execution = Scope.calloc(1, sizeof(struct ToolRun));
+  ToolRun execution = xcalloc(1, sizeof(struct ToolRun));
   execution.action = action;
   if (action.dry_run) return execution;
   Job command = action.inherit_stdio ?

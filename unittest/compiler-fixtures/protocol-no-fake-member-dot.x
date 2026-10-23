@@ -17,7 +17,7 @@ String Vec.str(Vec value) {
 }
 
 int main(void) {
-  Vec value = Scope.malloc(sizeof(struct Vec));
+  Vec value = xmalloc(sizeof(struct Vec));
   value.add(value);
   return 0;
 }

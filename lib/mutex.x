@@ -80,10 +80,10 @@ static void _error(const char *operation, int error) {
     the allocated storage.
 */
 Mutex Mutex.new(void) {
-  Mutex mutex = Scope.malloc(sizeof(struct Mutex));
+  Mutex mutex = xmalloc(sizeof(struct Mutex));
   int error = pthread_mutex_init(&mutex.native, NULL);
   if (error) {
-    Scope.free(mutex);
+    xfree(mutex);
     _error("pthread_mutex_init", error);
   }
   return mutex;
@@ -130,5 +130,5 @@ void Mutex.free(Mutex mutex) {
   if (!mutex) raise %(bad-state (operation "Mutex.free"));
   int error = pthread_mutex_destroy(&mutex.native);
   if (error) _error("pthread_mutex_destroy", error);
-  Scope.free(mutex);
+  xfree(mutex);
 }

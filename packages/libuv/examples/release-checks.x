@@ -64,7 +64,7 @@ static void _artifact_read(UvFs request, Var value) {
 static Var _plan(
   UvLoop loop, String work, Map environment, String name, String script,
   long deadline) {
-  Check check = Scope.calloc(1, sizeof(struct Check));
+  Check check = xcalloc(1, sizeof(struct Check));
   check.name = name;
   check.process = loop.command(%("/bin/sh" "-c" $script))
     .directory(work).environment(environment).deadline(deadline).start();
@@ -165,7 +165,7 @@ int main(void) {
 
   Array contents = [];
   foreach(String name, artifacts) {
-    Artifact artifact = Scope.calloc(1, sizeof(struct Artifact));
+    Artifact artifact = xcalloc(1, sizeof(struct Artifact));
     artifact.name = name;
     contents.push((void *) artifact);
     loop.read_file(

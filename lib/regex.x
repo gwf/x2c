@@ -92,7 +92,7 @@ static struct _RegexNode {
 };
 
 static _RegexNode _node(Symbol kind) {
-  _RegexNode node = Scope.calloc(1, sizeof(struct _RegexNode));
+  _RegexNode node = xcalloc(1, sizeof(struct _RegexNode));
   node.kind = kind;
   return node;
 }
@@ -159,7 +159,7 @@ static typedef struct Parser {
 } Parser;
 
 static Regex Regex.new(String pattern) {
-  Regex regex = Scope.calloc(1, sizeof(struct Regex));
+  Regex regex = xcalloc(1, sizeof(struct Regex));
   regex.pattern = pattern;
   Parser p = {regex, regex.pattern, 0, regex.pattern.len()};
   _flags(p);
@@ -466,8 +466,8 @@ static typedef struct Matcher {
 
 static RegexMatch _search(Regex regex, String subject, int offset) {
   int count = regex.capture_count + 1;
-  int *starts = Scope.calloc(2 * count, sizeof(int)), *ends = starts + count;
-  defer Scope.free(starts);
+  int *starts = xcalloc(2 * count, sizeof(int)), *ends = starts + count;
+  defer xfree(starts);
   Matcher m = {regex, subject, subject.len(), 0, 0, starts, ends};
   for (int at = offset; at <= m.len; at++) {
     for (int i = 0; i < count; i++) starts[i] = ends[i] = -1;

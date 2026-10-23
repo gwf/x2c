@@ -50,7 +50,7 @@ String StaticDescriptor_str(StaticDescriptor value){
 
 int main(void){
   x2c_initialize();
-  StaticDescriptor value = Scope_malloc(sizeof(struct StaticDescriptor));
+  StaticDescriptor value = xmalloc(sizeof(struct StaticDescriptor));
   value -> value = 42;
   Var boxed = StaticDescriptor_var(value);
   printf("%s\n", Var_str(boxed));

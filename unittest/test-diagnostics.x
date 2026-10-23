@@ -27,7 +27,7 @@ static void diagnostics_records_entries(void) {
   $test.scoped();
 
   Diagnostics diag =
-    Diagnostics.new(Scope.calloc(1, sizeof(struct Compiler)), 2);
+    Diagnostics.new(xcalloc(1, sizeof(struct Compiler)), 2);
   List first_notes = %( "initialize flag before use" );
   File file;
   int saved = _capture_stderr(file);
@@ -71,7 +71,7 @@ static void diagnostics_records_entries(void) {
 static void diagnostics_release_keeps_or_discards(void) {
   $test.scoped();
 
-  Compiler printer = Scope.calloc(1, sizeof(struct Compiler));
+  Compiler printer = xcalloc(1, sizeof(struct Compiler));
   Diagnostics diag = Diagnostics.new(printer, 1);
   File file;
   int saved = _capture_stderr(file);

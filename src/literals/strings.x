@@ -73,7 +73,7 @@ static String _decode_segment(String raw) {
   raw = _normalize_newlines(raw);
   if (!("$$" in raw)) return raw.unescape();
   int n = raw.len(), dst = 0;
-  char *buf = Scope.malloc(n + 1);
+  char *buf = xmalloc(n + 1);
   for (int i = 0; i < n; i++) {
     char ch = raw[i];
     buf[dst++] = ch;
@@ -82,13 +82,13 @@ static String _decode_segment(String raw) {
   }
   buf[dst] = '\0';
   String text = String.new_len(buf, dst);
-  Scope.free(buf);
+  xfree(buf);
   return text.unescape();
 }
 
 /* Text with no line continuation and no CR returns unchanged. */
 static String _normalize_newlines(String raw) {
-  int n = raw.len(), char *buf = Scope.malloc(n + 1);
+  int n = raw.len(), char *buf = xmalloc(n + 1);
   int dst = 0, changed = 0, i = 0;
   while (i < n) {
     char ch = raw[i];
@@ -109,7 +109,7 @@ static String _normalize_newlines(String raw) {
     }
   }
   String normalized = changed ? String.new_len(buf, dst) : raw;
-  Scope.free(buf);
+  xfree(buf);
   return normalized;
 }
 

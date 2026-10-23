@@ -296,7 +296,7 @@ static String _read_input(Compiler c) {
    line number stays in place. */
 static String _script(Compiler c, String text, String path) {
   int end = text.find("\n");
-  ScriptUnit script = Scope.calloc(1, sizeof(struct ScriptUnit));
+  ScriptUnit script = xcalloc(1, sizeof(struct ScriptUnit));
   script.path = path;
   script.shebang = end < 0 ? text : text[:end];
   c.unit_script = script;
@@ -544,7 +544,7 @@ void Frontend.load_support(CliRequest request) {
 */
 Frontend Frontend.new(CliRequest request) {
   Frontend.load_support(request);
-  Frontend f = Scope.calloc(1, sizeof(struct Frontend));
+  Frontend f = xcalloc(1, sizeof(struct Frontend));
   f.request = request;
   f.include_dirs =
     request.include_dirs.append(Compiler.default_include_dirs());

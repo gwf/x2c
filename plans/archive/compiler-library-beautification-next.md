@@ -243,7 +243,7 @@ static int _try_seed(
 }
 // Failed span, after the unchanged seed loop:
 if (!built) {
-  Scope.free(h.table);
+  xfree(h.table);
   h.span <<= 1;
 }
 // Successful hash/encoding/AST construction stays together:

@@ -322,7 +322,7 @@ static int _grow_code(MachineBuilder &b) {
   if (b.code_capacity >= MACHINE_CODE_MAX) return _fail(b, "code-capacity");
   int capacity = b.code_capacity ? b.code_capacity * 2 : 64;
   if (capacity > MACHINE_CODE_MAX) capacity = MACHINE_CODE_MAX;
-  MachineWord *grown = Scope.realloc(b.code, sizeof(MachineWord) * capacity);
+  MachineWord *grown = xrealloc(b.code, sizeof(MachineWord) * capacity);
   b.code = grown;
   b.code_capacity = capacity;
   return 0;
@@ -347,7 +347,7 @@ static int _grow_consts(MachineBuilder &b) {
     return _fail(b, "constant-capacity");
   int capacity = b.const_capacity ? b.const_capacity * 2 : 16;
   if (capacity > MACHINE_CONST_MAX) capacity = MACHINE_CONST_MAX;
-  Var *grown = Scope.realloc(b.consts, sizeof(Var) * capacity);
+  Var *grown = xrealloc(b.consts, sizeof(Var) * capacity);
   b.consts = grown;
   b.const_capacity = capacity;
   return 0;
@@ -404,7 +404,7 @@ static int _fail(MachineBuilder &b, const char *reason) {
 MachineProgram MachineBuilder.freeze(MachineBuilder &b) {
   if (b.status != <prepared> || b.root < 0) return NULL;
   size_t bytes = _program_bytes(b.length, b.const_count, b.binder_count);
-  MachineProgram program = Scope.malloc(bytes);
+  MachineProgram program = xmalloc(bytes);
   *program = (struct MachineProgram) {
     .length = b.length, .const_count = b.const_count,
     .binder_count = b.binder_count, .root = b.root};
@@ -457,8 +457,8 @@ void MachineBuilder.init(MachineBuilder &b) {
 /* Free the mutable arrays. Any builder view becomes invalid; constant and
    binder pointees are not freed. */
 void MachineBuilder.drop(MachineBuilder &b) {
-  Scope.free(b.code);
-  Scope.free(b.consts);
+  xfree(b.code);
+  xfree(b.consts);
 }
 
 /* Release the owned mutable arrays, invalidating this builder and its copies.

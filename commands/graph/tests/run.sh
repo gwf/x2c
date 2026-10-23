@@ -530,7 +530,7 @@ check_loop_allocations() {
     >"$tmp/loop-direct-allocations-line"
   grep -q '(direct (pooled 1) (scoped 1)) (helper-calls (pooled 0) (scoped 1))' \
     "$tmp/loop-direct-allocations-line"
-  for name in Scope_malloc String_new_len; do
+  for name in xmalloc String_new_len; do
     grep -q "(direct \"$name\" 1)" "$tmp/loop-direct-allocations-line"
   done
   grep -q '(helper "allocate" scoped 1)' \
@@ -650,7 +650,7 @@ check_lifetimes() {
     echo "lifetime-escapes followed a branch assignment" >&2
     exit 1
   fi
-  scope_alias='"lifetime_scope_alias" scope "Scope_memdup" '
+  scope_alias='"lifetime_scope_alias" scope "xmemdup" '
   scope_alias="$scope_alias(allocated (location .*lifetime-escapes.x\" 5 3)) "
   scope_alias="$scope_alias(ended (location .*lifetime-escapes.x\" 7 3)) "
   scope_alias="$scope_alias(returned (location .*lifetime-escapes.x\" 8 3))"

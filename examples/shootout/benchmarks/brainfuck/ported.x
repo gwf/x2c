@@ -18,11 +18,11 @@ typedef struct Program {
 
 static Program Program.compile(const char *source) {
   size_t capacity = strlen(source);
-  Program program = Scope.malloc(sizeof(struct Program));
-  program.commands = Scope.malloc(capacity);
-  program.jumps = Scope.calloc(capacity, sizeof(int));
+  Program program = xmalloc(sizeof(struct Program));
+  program.commands = xmalloc(capacity);
+  program.jumps = xcalloc(capacity, sizeof(int));
   program.len = 0;
-  int *stack = Scope.malloc(capacity * sizeof(int));
+  int *stack = xmalloc(capacity * sizeof(int));
   int depth = 0;
 
   for (const char *cursor = source; *cursor; cursor++) {

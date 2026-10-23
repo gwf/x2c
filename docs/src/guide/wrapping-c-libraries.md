@@ -171,7 +171,7 @@ caller clear their handle in the same expression.
 ~typedef struct Feed *Feed;
 ~struct Feed { feed_parser *native; String source; };
 Feed Feed.open(String text) {
-  Feed feed = Scope.calloc(1, sizeof(struct Feed));
+  Feed feed = xcalloc(1, sizeof(struct Feed));
   feed.source = text.intern();
   feed.native = feed_open(text, text.len());
   return feed;
@@ -225,7 +225,7 @@ The caller then names the lifetime at the acquisition:
 ~typedef struct feed_parser feed_parser;
 ~typedef struct Feed *Feed;
 ~struct Feed { feed_parser *native; String source; };
-~Feed Feed.open(String text) { return Scope.calloc(1, sizeof(struct Feed)); }
+~Feed Feed.open(String text) { return xcalloc(1, sizeof(struct Feed)); }
 ~Feed Feed.close(Feed feed) { return NULL; }
 ~void Feed.cleanup(Feed feed) { feed.close(); }
 ~protocol Cleanup(Feed);
@@ -246,7 +246,7 @@ acquisition:
 ~void feed_close(feed_parser *parser);
 ~typedef struct Feed *Feed;
 ~struct Feed { feed_parser *native; String source; };
-~Feed Feed.open(String text) { return Scope.calloc(1, sizeof(struct Feed)); }
+~Feed Feed.open(String text) { return xcalloc(1, sizeof(struct Feed)); }
 ~Feed Feed.close(Feed feed) { return NULL; }
 ~List Feed.titles(Feed feed) { return NULL; }
 static int count_titles(String document) {
@@ -493,7 +493,7 @@ other importing programs.
 ~void feed_close(feed_parser *parser);
 ~typedef struct Feed *Feed;
 ~struct Feed { feed_parser *native; };
-~Feed Feed.open(String text) { return Scope.calloc(1, sizeof(struct Feed)); }
+~Feed Feed.open(String text) { return xcalloc(1, sizeof(struct Feed)); }
 ~Feed Feed.close(Feed feed) { return NULL; }
 ~List Feed.titles(Feed feed) { return NULL; }
 typedef enum FeedLisp {

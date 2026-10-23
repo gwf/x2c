@@ -27,7 +27,7 @@ Span vendored__Span_add(Span a, Span b){
 }
 
 vendored__Reading vendored__Reading_new(Span span){
-  vendored__Reading reading = Scope_malloc(sizeof(struct vendored__Reading));
+  vendored__Reading reading = xmalloc(sizeof(struct vendored__Reading));
   reading -> span = span;
   return reading;
 }

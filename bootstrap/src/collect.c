@@ -1514,7 +1514,7 @@ ModuleSource Compiler_module_source(Compiler c, String path, String text){
         }
 
       }
-      ModuleSource source = Scope_calloc(1, sizeof(struct ModuleSource));
+      ModuleSource source = xcalloc(1, sizeof(struct ModuleSource));
       * source =(struct ModuleSource){
         .text = Buffer_str(s.out), .own = text, .markers = s.markers, .members = s.members
       }
@@ -1765,7 +1765,7 @@ static Token f6_splice____block(f6_splice___Splice * s){
   Tokenizer tokenizer = Tokenizer_new((* s).text, 3945159);
   tokenizer -> layout = Path_is_layout_source((* s).path);
   Tokenizer_scan(tokenizer);
-  Compiler scan = Scope_calloc(1, sizeof(struct Compiler));
+  Compiler scan = xcalloc(1, sizeof(struct Compiler));
   scan -> tokenizer = tokenizer;
   Compiler_scan_conditionals(scan);
   Token block = NULL, previous = NULL;

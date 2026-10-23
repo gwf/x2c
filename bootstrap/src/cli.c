@@ -1503,7 +1503,7 @@ CliRequest CliRequest_package_options(String path, String package){
         }
 
       }
-      CliRequest request = Scope_calloc(1, sizeof(struct CliRequest));
+      CliRequest request = xcalloc(1, sizeof(struct CliRequest));
       request -> command = 5589768;
       f7_parsing___Parse p ={
         .request = request, .args = words, .include_dirs = Array_new(), .cpp_args = Array_new(), .cc_args = Array_new(), .ld_args = Array_new()
@@ -1628,7 +1628,7 @@ static List _response_arguments(String path){
   size_t length = 0;
   char * text = f9_responses____read_response_file(path, &(length));
   Array words = f9_responses____response_words(path, text, length);
-  Scope_free(text);
+  xfree(text);
   return Array_list_free(words);
 }
 
@@ -1636,7 +1636,7 @@ static char * f9_responses____read_response_file(String path, size_t * length){
   FILE * file = fopen(path, "rb");
   if(! file) f9_responses____response_error(path, 1, strerror(errno));
   long end = f9_responses____response_size(file, path);
-  char * text = Scope_malloc((size_t) end + 1);
+  char * text = xmalloc((size_t) end + 1);
   size_t got = fread(text, 1, (size_t) end, file);
   int failed = ferror(file);
   fclose(file);
@@ -1874,7 +1874,7 @@ TargetKind * TargetKind_of(Symbol kind){
 
 CliRequest CliRequest_new(Symbol command){
   if(! _init_guard_) _file_init_();
-  CliRequest request = Scope_calloc(1, sizeof(struct CliRequest));
+  CliRequest request = xcalloc(1, sizeof(struct CliRequest));
   request -> command = command;
   request -> jobs = f8_requests____default_jobs();
   request -> max_errors = 20;

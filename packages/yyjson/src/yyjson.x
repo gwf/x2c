@@ -510,7 +510,7 @@ static void _json_document_live(JsonDocument document, String operation) {
 
 static JsonDocument _json_document_wrap(yyjson_doc *native) {
   if (!native) return NULL;
-  JsonDocument document = Scope.calloc(1, sizeof(struct JsonDocument));
+  JsonDocument document = xcalloc(1, sizeof(struct JsonDocument));
   document.native = native;
   return document;
 }
@@ -518,7 +518,7 @@ static JsonDocument _json_document_wrap(yyjson_doc *native) {
 static JsonValue _json_value_new(JsonDocument document, yyjson_val *native) {
   if (!native) return NULL;
   _json_document_live(document, "value");
-  JsonValue value = Scope.calloc(1, sizeof(struct JsonValue));
+  JsonValue value = xcalloc(1, sizeof(struct JsonValue));
   value.document = document;
   value.native = native;
   return value;
@@ -677,7 +677,7 @@ String JsonValue.string(JsonValue value) {
 
 JsonArray JsonValue.array(JsonValue value) {
   _json_value_expect(value, <array>, "array");
-  JsonArray array = Scope.calloc(1, sizeof(struct JsonArray));
+  JsonArray array = xcalloc(1, sizeof(struct JsonArray));
   array.document = value.document;
   array.native = value.native;
   return array;
@@ -685,7 +685,7 @@ JsonArray JsonValue.array(JsonValue value) {
 
 JsonObject JsonValue.object(JsonValue value) {
   _json_value_expect(value, <object>, "object");
-  JsonObject object = Scope.calloc(1, sizeof(struct JsonObject));
+  JsonObject object = xcalloc(1, sizeof(struct JsonObject));
   object.document = value.document;
   object.native = value.native;
   return object;
@@ -772,7 +772,7 @@ static int _json_object_next(Iter iter, Var *out) {
 Iter JsonObject.iter(JsonObject object, Iter dest) {
   if (!object) return NULL;
   _json_document_live(object.document, "object iter");
-  JsonObjectCursor cursor = Scope.calloc(1, sizeof(struct JsonObjectCursor));
+  JsonObjectCursor cursor = xcalloc(1, sizeof(struct JsonObjectCursor));
   cursor.object = object;
   cursor.iterator = yyjson_obj_iter_with(object.native);
   return dest.init((void *) cursor, _json_object_next, 0);

@@ -1357,7 +1357,7 @@ static ParallelMap _parallel_map(Iter i, Pool pool, ThreadValueFn function, int 
     }
 
   }
-  ParallelMap map = Scope_malloc(sizeof(struct ParallelMap));
+  ParallelMap map = xmalloc(sizeof(struct ParallelMap));
   * map =(struct ParallelMap){
     i, function, workers, pool
   }
@@ -1370,7 +1370,7 @@ int Iter_try_next(Iter, Var *);
 Var ParallelMap_foldl(ParallelMap map, Var seed, Func accumulate){
   if(! _init_guard_) _file_init_();
   if(! map) return seed;
-  struct ParallelRun * run = Scope_calloc(1, sizeof(struct ParallelRun));
+  struct ParallelRun * run = xcalloc(1, sizeof(struct ParallelRun));
   Array workers = NULL;
   {
     _x2c_gensym_defer_env_10 _x2c_gensym_macro_environment_10 ={
@@ -1672,7 +1672,7 @@ static void _x2c_gensym_defer_cleanup_14(void * _x2c_gensym_defer_opaque_14){
 
 static void _x2c_gensym_defer_cleanup_15(void * _x2c_gensym_defer_opaque_15){
   _x2c_gensym_defer_env_14 * _x2c_gensym_defer_data_14 =(_x2c_gensym_defer_env_14 *) _x2c_gensym_defer_opaque_15;
-  Scope_free((*(struct ParallelRun * *) _x2c_gensym_defer_data_14->_x2c_gensym_defer_capture_17));
+  xfree((*(struct ParallelRun * *) _x2c_gensym_defer_data_14->_x2c_gensym_defer_capture_17));
 }
 
 static void _x2c_gensym_defer_cleanup_16(void * _x2c_gensym_defer_opaque_16){

@@ -123,7 +123,7 @@ static void _own_unit(Compiler c) {
   c.inherit_library_comptime();
   $set_fields(c, {}, package_roots, package_aliases, package_members,
               package_effects);
-  c.names = Scope.calloc(1, sizeof(struct GenNames));
+  c.names = xcalloc(1, sizeof(struct GenNames));
   $set_fields(c.names, {}, counters, adapters, file_scope_owners);
 }
 

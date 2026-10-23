@@ -818,7 +818,7 @@ static void _independent_sessions(Frontend frontend) {
 int main(int argc, char **argv) {
   (void) argc;
   x2c_initialize_environment(argv[0]);
-  CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
+  CliRequest request = xcalloc(1, sizeof(struct CliRequest));
   request.command = <translate>;
   Frontend frontend = Frontend.new(request);
   if (!frontend.preload_macro_libraries()) return 1;

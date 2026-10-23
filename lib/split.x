@@ -144,7 +144,7 @@ meta native List String.split_lines(String str, int keep_ends) {
 
 static Split _new(
   String str, String sep, int (*next)(Split split, int *cursor, String *out)) {
-  Split split = Scope.malloc(sizeof(struct Split));
+  Split split = xmalloc(sizeof(struct Split));
   *split = (struct Split) {.str = str, .sep = sep, .next = next};
   return split;
 }

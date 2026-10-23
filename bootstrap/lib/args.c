@@ -278,7 +278,7 @@ Map Args_parse(List args, List spec){
 
 int List_len(List);
 
-void * Scope_calloc(size_t, size_t);
+void * xcalloc(size_t, size_t);
 
 static int List_try_next(List, List *, Var *);
 
@@ -309,7 +309,7 @@ static Spec _read_spec(List spec){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_3);
     {
-      result.options = Scope_calloc(result.count, sizeof(Option));
+      result.options = xcalloc(result.count, sizeof(Option));
       int position = 0;
       {
         List row;
@@ -417,13 +417,13 @@ static void _read_property(Option * o, List property){
 
 }
 
-void Scope_free(void *);
+void xfree(void *);
 
 void Map_cleanup(Map);
 
 static void _free(Spec * s){
   if((* s).options) for(int i = 0;  i <(* s).count;  i ++) Array_free((* s).options[i].collected);
-  Scope_free((* s).options);
+  xfree((* s).options);
   Map_cleanup((* s).index);
 }
 

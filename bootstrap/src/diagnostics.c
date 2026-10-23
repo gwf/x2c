@@ -199,7 +199,7 @@ static void _emit_entry(Diagnostics diag, List entry){
 
 Diagnostics Diagnostics_new(Compiler printer, int limit){
   if(! _init_guard_) _file_init_();
-  Diagnostics diag = Scope_malloc(sizeof(struct Diagnostics));
+  Diagnostics diag = xmalloc(sizeof(struct Diagnostics));
   * diag =(struct Diagnostics){
     .entries = Array_new(), .published = Map_new(), .printer = printer, .limit =(limit < 0) ? 0 : limit
   }
@@ -683,7 +683,7 @@ String Compiler_text_source(Compiler c, int position, int * offset){
 
 Token Compiler_source_token(Compiler c, Token token, String * file){
   if(! _init_guard_) _file_init_();
-  Token placed = Scope_calloc(1, sizeof(struct Token));
+  Token placed = xcalloc(1, sizeof(struct Token));
   * placed = * token;
   placed -> col = Compiler_token_column(c, token);
   (* file) = Compiler_token_source(c, token, &(placed -> line));

@@ -208,7 +208,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 
 MatchPlan MatchPlan_prepare(Var pattern){
   if(! _init_guard_) _file_init_();
-  MatchPlan plan = Scope_malloc(sizeof(struct MatchPlan));
+  MatchPlan plan = xmalloc(sizeof(struct MatchPlan));
   plan -> program = NULL;
   plan -> layout = MatchCaptureLayout_analyze(pattern);
   plan -> status = plan -> layout -> status;
@@ -253,7 +253,7 @@ static void _lower(MatchPlan plan, Var pattern){
       plan -> status = l.b.status;
       plan -> reason = l.b.reason;
       if(plan -> status == 1138535534920) plan -> program = MachineBuilder_freeze(&(l.b));
-      if(l.sites) Scope_free(l.sites);
+      if(l.sites) xfree(l.sites);
     }
     x2c_cleanup_leave(& _x2c_gensym_defer_record_0);
   }
@@ -266,7 +266,7 @@ void MatchPlan_free(MatchPlan plan){
   if(! plan) return;
   MachineProgram_free(plan -> program);
   MatchCaptureLayout_free(plan -> layout);
-  Scope_free(plan);
+  xfree(plan);
 }
 
 static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
@@ -406,7 +406,7 @@ static int _fail_site(MatchLower * l, int op, int a, int b, int c, int d){
   if(site < 0) return 0;
   if((* l).site_count >=(* l).site_capacity){
     int capacity =(* l).site_capacity ?(* l).site_capacity * 2 : 64;
-    (* l).sites = Scope_realloc((* l).sites, sizeof(int) * capacity);
+    (* l).sites = xrealloc((* l).sites, sizeof(int) * capacity);
     (* l).site_capacity = capacity;
   }
   (* l).sites[(* l).site_count ++] = site;

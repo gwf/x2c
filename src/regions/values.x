@@ -257,7 +257,7 @@ module Fact _slot(Walk &w, Var argument) {
 }
 
 module Fact _new_fact(Walk &w, List binding, int param) {
-  Fact fact = Scope.calloc(1, sizeof(struct Fact));
+  Fact fact = xcalloc(1, sizeof(struct Fact));
   *fact = (struct Fact) {.depth = w.depth, .origin = w.origin, .param = param};
   if (binding) w.facts[binding] = fact;
   return fact;
@@ -265,7 +265,7 @@ module Fact _new_fact(Walk &w, List binding, int param) {
 
 module Acquired _acquired(Fact fact) {
   if (!fact.acquired)
-    fact.acquired = Scope.calloc(1, sizeof(struct Acquired));
+    fact.acquired = xcalloc(1, sizeof(struct Acquired));
   return fact.acquired;
 }
 
@@ -298,7 +298,7 @@ module int _empty(Var value) {
 module Region _owner(Walk &w, Fact slot) {
   if (!slot || slot.param >= 0) return NULL;
   if (!slot.owner) {
-    slot.owner = Scope.calloc(1, sizeof(struct Region));
+    slot.owner = xcalloc(1, sizeof(struct Region));
     *slot.owner = (struct Region) {<local>, slot.depth, slot.origin};
   }
   return slot.owner;
@@ -324,7 +324,7 @@ module void _move(Fact fact, Region region) {
 }
 
 module Region _open_region(Walk &w, Symbol kind, Fact slot) {
-  Region region = Scope.calloc(1, sizeof(struct Region));
+  Region region = xcalloc(1, sizeof(struct Region));
   *region = (struct Region) {kind, w.depth, w.origin, 0, slot, w.open};
   return w.open = region;
 }

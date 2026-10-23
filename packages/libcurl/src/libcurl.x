@@ -351,7 +351,7 @@ static List _curl_blocks(const unsigned char *bytes, size_t length) {
 }
 
 CurlEasy CurlEasy.new(void) {
-  CurlEasy easy = Scope.calloc(1, sizeof(struct CurlEasy));
+  CurlEasy easy = xcalloc(1, sizeof(struct CurlEasy));
   easy.native = curl_easy_init();
   if (!easy.native) {
     raise %(alloc-fail (library "libcurl") (operation "easy_init"));
@@ -619,7 +619,7 @@ static CurlResponse _curl_transfer_finish(
   }
   if (result != CURLE_OK) _curl_raise(easy, operation, result);
 
-  CurlResponse response = Scope.calloc(1, sizeof(struct CurlResponse));
+  CurlResponse response = xcalloc(1, sizeof(struct CurlResponse));
   CurlResponse completed = NULL;
   defer if (!completed) response.free();
   response.file = path ? path.intern() : NULL;
@@ -695,7 +695,7 @@ CurlResponse CurlEasy.download(CurlEasy easy, String url, String path) {
 }
 
 static CurlEasy _curl_duplicate(CurlEasy source) {
-  CurlEasy easy = Scope.calloc(1, sizeof(struct CurlEasy));
+  CurlEasy easy = xcalloc(1, sizeof(struct CurlEasy));
   CurlEasy completed = NULL;
   defer if (!completed) easy.free();
   easy.native = curl_easy_duphandle(source.native);
@@ -775,15 +775,15 @@ CurlBatch CurlEasy.request_all(
     $error.curl.batch_busy();
   easy.performing = 1;
   defer _curl_transfer_end(easy);
-  CurlBatch batch = Scope.calloc(1, sizeof(struct CurlBatch));
+  CurlBatch batch = xcalloc(1, sizeof(struct CurlBatch));
   batch.count = urls.len();
-  batch.items = Scope.calloc(batch.count, sizeof(CurlBatchItem));
+  batch.items = xcalloc(batch.count, sizeof(CurlBatchItem));
   CurlBatch completed = NULL;
   defer if (!completed) batch.free();
   if (!batch.count) return completed = batch;
 
   int width = maximum < batch.count ? maximum : batch.count;
-  CurlSlot *slots = Scope.calloc(width, sizeof(CurlSlot));
+  CurlSlot *slots = xcalloc(width, sizeof(CurlSlot));
   CURLM *multi = curl_multi_init();
   if (!multi)
     raise %(alloc-fail (library "libcurl") (operation "multi_init"));

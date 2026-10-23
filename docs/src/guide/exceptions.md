@@ -303,7 +303,7 @@ runs on the error path too:
 ```x2c
 static void render(String text, int width) {
   $scope() {
-    char *line = Scope.malloc(width + 1);
+    char *line = xmalloc(width + 1);
     if (!text) {
       raise %(bad-arg (operation "render"));
     }

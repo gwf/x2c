@@ -20,7 +20,7 @@ String Vec.str(Vec value) {
 protocol Var(Vec);
 
 int main(void) {
-  Vec value = Scope.malloc(sizeof(struct Vec));
+  Vec value = xmalloc(sizeof(struct Vec));
   value.x = 1;
   value.y = 2;
   Var boxed = value;

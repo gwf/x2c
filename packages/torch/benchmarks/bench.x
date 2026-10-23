@@ -59,7 +59,7 @@ double Bench.now(void) => xb_now();
     Sampling beyond the reservation is dropped rather than allocating
     inside measured work; `Bench.dropped` reports how many. */
 void Bench.begin(int capacity) {
-  bench_samples = Scope.calloc(capacity ? capacity : 1, sizeof(BenchSample));
+  bench_samples = xcalloc(capacity ? capacity : 1, sizeof(BenchSample));
   bench_capacity = capacity;
   bench_count = 0;
   bench_origin = Bench.now();

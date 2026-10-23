@@ -4,7 +4,7 @@
 
 /* The functions `ast` defines, walked to their final summaries. */
 static void _fixpoint(Walk &w, List ast) {
-  w.frame = Scope.calloc(1, sizeof(struct Region));
+  w.frame = xcalloc(1, sizeof(struct Region));
   w.frame.kind = <frame>;
   Array functions = $auto([]);
   _collect_functions(ast, functions);

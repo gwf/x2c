@@ -134,11 +134,11 @@ static int _module_stamp(String path) {
   fseek(input, 0, SEEK_END);
   long end = ftell(input);
   rewind(input);
-  char *data = Scope.malloc(end > 0 ? (size_t) end : 1);
+  char *data = xmalloc(end > 0 ? (size_t) end : 1);
   size_t size = end > 0 ? fread(data, 1, (size_t) end, input) : 0;
   input.close();
   int stamp = _stamp_in(data, size, expected);
-  Scope.free(data);
+  xfree(data);
   return stamp;
 }
 

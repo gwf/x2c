@@ -203,14 +203,14 @@ static void defer_break_in_nested_loop_targets_that_loop(void) {
 static void system_scope_loop_lifetimes(void) {
   ScopeStats before = Scope.stats();
   $scope() for (int i = 0; i < 3; i++) {
-    Scope.malloc(1);
+    xmalloc(1);
     if (i == 1) continue;
   }
   ScopeStats whole = Scope.stats();
   EXPECT_INT_EQ(whole.scope_creations, before.scope_creations + 1);
   EXPECT_INT_EQ(whole.live_allocations, before.live_allocations);
   for (int i = 0; i < 3; i++) $scope() {
-    Scope.malloc(1);
+    xmalloc(1);
     if (i == 1) continue;
   }
   ScopeStats each = Scope.stats();
@@ -219,13 +219,13 @@ static void system_scope_loop_lifetimes(void) {
 }
 
 static int _scope_return(void) {
-  $scope() { Scope.malloc(1); return 9; }
+  $scope() { xmalloc(1); return 9; }
 }
 
 static int _scope_transfer_round(void) {
   int caught = 0;
   try {
-    $scope() { Scope.malloc(1); raise %(invariant); }
+    $scope() { xmalloc(1); raise %(invariant); }
   }
   catch %(invariant): { caught = 1; }
   return caught;
@@ -236,7 +236,7 @@ static void system_scope_restores_destination_and_transfer(void) {
   int evaluations = 0, caught = 0;
   $scope((evaluations++, &destination)) {
     EXPECT_TRUE(Scope.top() == &destination);
-    Scope.malloc(3);
+    xmalloc(3);
   }
   EXPECT_INT_EQ(evaluations, 1);
   EXPECT_TRUE(Scope.top() == previous);

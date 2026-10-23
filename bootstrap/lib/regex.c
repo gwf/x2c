@@ -460,8 +460,10 @@ String Regex_repr(Regex value){
 
 }
 
+void * xcalloc(size_t, size_t);
+
 static _RegexNode _node(Symbol kind){
-  _RegexNode node = Scope_calloc(1, sizeof(struct _RegexNode));
+  _RegexNode node = xcalloc(1, sizeof(struct _RegexNode));
   node -> kind = kind;
   return node;
 }
@@ -525,7 +527,7 @@ static void _fold(_RegexNode node){
 int String_len(String);
 
 static Regex Regex_new(String pattern){
-  Regex regex = Scope_calloc(1, sizeof(struct Regex));
+  Regex regex = xcalloc(1, sizeof(struct Regex));
   regex -> pattern = pattern;
   Parser p ={
     regex, regex -> pattern, 0, String_len(regex -> pattern)
@@ -814,7 +816,7 @@ static int _escape(Parser * p){
 
 static RegexMatch _search(Regex regex, String subject, int offset){
   int count = regex -> capture_count + 1;
-  int * starts = Scope_calloc(2 * count, sizeof(int)), * ends = starts + count;
+  int * starts = xcalloc(2 * count, sizeof(int)), * ends = starts + count;
   {
     _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
       0
@@ -1403,9 +1405,11 @@ static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
   Buffer_free((*(Buffer *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2));
 }
 
+void xfree(void *);
+
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
   _x2c_gensym_defer_env_3 * _x2c_gensym_defer_data_3 =(_x2c_gensym_defer_env_3 *) _x2c_gensym_defer_opaque_3;
-  Scope_free((*(int * *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_3));
+  xfree((*(int * *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_3));
 }
 
 void Buffer_cleanup(Buffer);

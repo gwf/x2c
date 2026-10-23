@@ -611,7 +611,7 @@ void MatchCache_flush_default(void){
 }
 
 void * MatchCache_context_open(void){
-  MatchContextState state = Scope_malloc(sizeof(struct MatchContextState));
+  MatchContextState state = xmalloc(sizeof(struct MatchContextState));
   state -> prev = match_thread.context_top;
   state -> cache = NULL;
   match_thread.context_top = state;
@@ -673,14 +673,14 @@ MatchCache MatchCache_new(int capacity){
         x2c_cleanup_push(& _x2c_gensym_defer_record_7);
         {
           {
-            cache = Scope_calloc(1, sizeof(struct MatchCache));
+            cache = xcalloc(1, sizeof(struct MatchCache));
             cache -> scope = owner;
             cache -> capacity = capacity;
             cache -> bucket_count = capacity * 2 + 1;
             cache -> lru_head = - 1;
             cache -> pool_epoch = Pool_epoch();
-            cache -> entries = Scope_calloc(capacity, sizeof(MatchCacheEntry));
-            cache -> buckets = Scope_malloc(sizeof(int) * cache -> bucket_count);
+            cache -> entries = xcalloc(capacity, sizeof(MatchCacheEntry));
+            cache -> buckets = xmalloc(sizeof(int) * cache -> bucket_count);
             for(int i = 0;  i < cache -> bucket_count;  i ++) cache -> buckets[i] = - 1;
           }
 

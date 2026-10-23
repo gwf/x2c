@@ -241,7 +241,7 @@ static int _same(Script * s, int i, int j){
   return String_equal(Var_string(Array_getindex((* s).old, i)), Var_string(Array_getindex((* s).new, j)));
 }
 
-void * Scope_calloc(size_t, size_t);
+void * xcalloc(size_t, size_t);
 
 static int List_try_next(List, List *, Var *);
 
@@ -251,7 +251,7 @@ Var List_getindex(List, int);
 
 static int _myers(Script * s){
   int max =(* s).n +(* s).m < _LIMIT ?(* s).n +(* s).m : _LIMIT;
-  Trace trace = Scope_calloc((max + 1) *(max + 1), sizeof(int));
+  Trace trace = xcalloc((max + 1) *(max + 1), sizeof(int));
   {
     _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
       0
@@ -509,11 +509,11 @@ static void _x2c_gensym_defer_cleanup_2(void * _x2c_gensym_defer_opaque_2){
   Array_cleanup((*(const Array *) _x2c_gensym_defer_data_2->_x2c_gensym_defer_capture_2));
 }
 
-void Scope_free(void *);
+void xfree(void *);
 
 static void _x2c_gensym_defer_cleanup_3(void * _x2c_gensym_defer_opaque_3){
   _x2c_gensym_defer_env_3 * _x2c_gensym_defer_data_3 =(_x2c_gensym_defer_env_3 *) _x2c_gensym_defer_opaque_3;
-  Scope_free((*(Trace *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_3));
+  xfree((*(Trace *) _x2c_gensym_defer_data_3->_x2c_gensym_defer_capture_3));
 }
 
 void Buffer_cleanup(Buffer);

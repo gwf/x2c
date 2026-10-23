@@ -21,7 +21,7 @@ struct Node {
 };
 
 static Node Node.compile(List source) {
-  Node node = Scope.calloc(1, sizeof(struct Node));
+  Node node = xcalloc(1, sizeof(struct Node));
   match (source) {
     case %(number ?value): node.value = value.int();
     case %(variable ?name): {

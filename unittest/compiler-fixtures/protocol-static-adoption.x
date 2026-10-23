@@ -14,14 +14,14 @@ protocol StaticBase(T) {
 }
 
 StaticBase StaticParticipant.staticbase(StaticParticipant value) {
-  StaticBase result = Scope.malloc(sizeof(struct StaticBase));
+  StaticBase result = xmalloc(sizeof(struct StaticBase));
   result.value = value.value;
   return result;
 }
 
 StaticParticipant StaticBase.staticparticipant(StaticBase value) {
   StaticParticipant result =
-    Scope.malloc(sizeof(struct StaticParticipant));
+    xmalloc(sizeof(struct StaticParticipant));
   result.value = value.value;
   return result;
 }
@@ -41,7 +41,7 @@ static int identity(int value) {
 
 int main(void) {
   StaticParticipant participant =
-    Scope.malloc(sizeof(struct StaticParticipant));
+    xmalloc(sizeof(struct StaticParticipant));
   participant.value = 3;
   int scale = 2, result = 0, *output = &result, values[3] = { 4, 0, 0 };
   printf(

@@ -13,13 +13,13 @@ protocol StaticMeters(T) {
 }
 
 static StaticMeters StaticFeet.staticmeters(StaticFeet value) {
-  StaticMeters result = Scope.malloc(sizeof(struct StaticMeters));
+  StaticMeters result = xmalloc(sizeof(struct StaticMeters));
   result.value = value.value / 2.0;
   return result;
 }
 
 static StaticFeet StaticMeters.staticfeet(StaticMeters value) {
-  StaticFeet result = Scope.malloc(sizeof(struct StaticFeet));
+  StaticFeet result = xmalloc(sizeof(struct StaticFeet));
   result.value = value.value * 2.0;
   return result;
 }

@@ -118,7 +118,7 @@ static Spec _read_spec(List spec) {
   Spec result = { .count = spec.len(), .index = {} };
   int complete = 0;
   defer if (!complete) _free(result);
-  result.options = Scope.calloc(result.count, sizeof(Option));
+  result.options = xcalloc(result.count, sizeof(Option));
   int position = 0;
   foreach (List row in spec) {
     Option *option = &result.options[position];
@@ -190,7 +190,7 @@ static void _read_property(Option &o, List property) {
 static void _free(Spec &s) {
   if (s.options)
     for (int i = 0; i < s.count; i++) s.options[i].collected.free();
-  Scope.free(s.options);
+  xfree(s.options);
   s.index.cleanup();
 }
 

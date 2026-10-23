@@ -418,7 +418,7 @@ static List _build(Helper &h) {
   foreach (String path in %(@{h.owners} @{h.modules} @{_loop_sources()}))
     h.deps[path] = 1;
   if (h.entries) h.meta = _build_meta(h.frontend, h.entries, NULL);
-  defer if (h.meta) Scope.free(h.meta);
+  defer if (h.meta) xfree(h.meta);
   String failure = h.entries ? _loaded_providers(h) : NULL;
   if (failure) {
     Compiler.forget_provisional_entries();

@@ -10,7 +10,7 @@ tab: indexing
 typedef struct Index { Array documents; Map words; } *Index;
 
 Index Index.new(void) {
-  Index index = Scope.malloc(sizeof(struct Index));
+  Index index = xmalloc(sizeof(struct Index));
   index.documents = []; index.words = {};
   return index;
 }

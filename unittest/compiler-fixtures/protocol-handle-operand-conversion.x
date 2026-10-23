@@ -9,7 +9,7 @@ Var Cell.var(Cell cell) => Var.new(<cell>, cell);
 Cell Var.cell(Var value) => (Cell) value.pointer();
 
 Cell Cell.new(double value) {
-  Cell cell = Scope.malloc(sizeof(struct Cell));
+  Cell cell = xmalloc(sizeof(struct Cell));
   cell.value = value;
   return cell;
 }

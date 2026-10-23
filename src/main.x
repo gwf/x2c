@@ -119,7 +119,7 @@ static void _run_command(Array arguments) {
     Diagnostics.driver_error(
       %"missing x2c-$command command; install the matching x2c commands");
   }
-  char **args = Scope.calloc(arguments.len() + 3, sizeof(char *));
+  char **args = xcalloc(arguments.len() + 3, sizeof(char *));
   args[1] = "--driver-arguments";
   for (int i = 0; i < arguments.len(); i++) {
     String argument = arguments[i];

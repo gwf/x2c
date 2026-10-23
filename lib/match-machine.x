@@ -420,7 +420,7 @@ static void _ensure_scratch(MatchMachine &m, int length) {
   if (length <= m.scratch_capacity) return;
   int capacity = m.scratch_capacity ? m.scratch_capacity : 16;
   while (capacity < length) capacity *= 2;
-  Var *grown = Scope.realloc(m.scratch, sizeof(Var) * capacity);
+  Var *grown = xrealloc(m.scratch, sizeof(Var) * capacity);
   m.scratch = grown;
   m.scratch_capacity = capacity;
 }
@@ -535,7 +535,7 @@ int MatchMachine.clean(MatchMachine &m) {
 /* Free reusable materialization scratch. Finish active execution first;
    this does not clear invocation state. */
 void MatchMachine.dispose(MatchMachine &m) {
-  if (m.scratch) Scope.free(m.scratch);
+  if (m.scratch) xfree(m.scratch);
   m.scratch = NULL;
   m.scratch_capacity = 0;
 }

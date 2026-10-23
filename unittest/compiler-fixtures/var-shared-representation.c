@@ -88,7 +88,7 @@ int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   Row row = _4;
-  Cell cell = Scope_malloc(sizeof(struct Cell));
+  Cell cell = xmalloc(sizeof(struct Cell));
   cell -> value = 7;
   Var boxed_row = Row_var(row);
   Var boxed_cell = Cell_var(cell);

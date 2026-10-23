@@ -6,7 +6,7 @@
 typedef struct Meters { double value; } Meters;
 
 Var Meters.var(Meters m) {
-  Meters *boxed = Scope.malloc(sizeof(Meters));
+  Meters *boxed = xmalloc(sizeof(Meters));
   *boxed = m;
   return Var.new(<meters>, boxed);
 }

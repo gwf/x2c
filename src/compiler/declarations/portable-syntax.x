@@ -125,7 +125,7 @@ static List _thaw_rows(Compiler c, List rows) {
 
 static Token _thaw_token(
   Var type, Var text, Var line, Var column, Var length, Var position) {
-  Token token = Scope.calloc(1, sizeof(struct Token));
+  Token token = xcalloc(1, sizeof(struct Token));
   *token = (struct Token) {
     .text = text, .type = Symbol.new(type.string()), .line = line,
     .col = column, .len = length, .pos = position};

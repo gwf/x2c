@@ -11,7 +11,7 @@ Iter Bag.iter(Bag bag, Iter dest) {
 protocol Iter(Bag);
 
 int main(void) {
-  Bag bag = Scope.malloc(sizeof(struct Bag));
+  Bag bag = xmalloc(sizeof(struct Bag));
   bag.values = %(1 2 3);
   int total = 0;
   foreach(int value, bag)

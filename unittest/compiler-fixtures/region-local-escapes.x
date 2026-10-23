@@ -47,7 +47,7 @@ static int *returned_through_callee(void) {
 // Fresh storage outlives the call; the local it points into does not.
 static Box stored_into_fresh(void) {
   int value = 1;
-  Box box = Scope.calloc(1, sizeof(struct Box));
+  Box box = xcalloc(1, sizeof(struct Box));
   box.borrowed = &value;
   return box;
 }

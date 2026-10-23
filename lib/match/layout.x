@@ -201,7 +201,7 @@ static const char *_malformed(MatchLayoutBuilder &b) {
 static MatchCaptureLayout _layout(
   MatchLayoutBuilder &b, Var normalized, const char *malformed) {
   size_t bytes = sizeof(struct MatchCaptureLayout) + sizeof(Atom) * b.count;
-  MatchCaptureLayout layout = Scope.calloc(1, bytes);
+  MatchCaptureLayout layout = xcalloc(1, bytes);
   layout.binders =
     (Atom *) ((char *) layout + sizeof(struct MatchCaptureLayout));
   layout.binder_count = b.count;
@@ -293,7 +293,7 @@ static int _find(MatchCaptureLayout layout, Atom binder) {
     A null layout is ignored; every alias is invalid afterward.
 */
 void MatchCaptureLayout.free(MatchCaptureLayout layout) {
-  if (layout) Scope.free(layout);
+  if (layout) xfree(layout);
 }
 
 /** Returns definite binders in canonical positional order.

@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
   double checksum = 0;
   for (int run = 0; run < runs; run++) {
     Scope.retain();
-    char *copy = Scope.malloc(csv.len() + 1), *line = copy;
+    char *copy = xmalloc(csv.len() + 1), *line = copy;
     memcpy(copy, csv, csv.len() + 1);
     while (line && *line) {
       char *end = strchr(line, '\n');
