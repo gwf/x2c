@@ -7190,7 +7190,7 @@ static void f11_conversions____check_native_crossing(Compiler c, List expr, Type
     }
     );  Compiler_report_error(c, 1362954, _x2c_gensym_macro_message_7, NULL, _3312);
   }
-  if(Type_is_bare_typedef_name(declared_source) && Type_is_bare_typedef_name(declared_target) && ! List_equal(Type_list(declared_source), Type_list(declared_target)) && Type_is_pointer(Sym_resolve_key(c -> sym, declared_target)) && Type_base_type(Sym_resolve_key(c -> sym, declared_source)) != _470 && !(Array_contains(_typedef_names(c, declared_source), List_var(declared_target))) && !(Array_contains(_typedef_names(c, declared_target), List_var(declared_source)))){
+  if(Type_is_bare_typedef_name(declared_source) && Type_is_bare_typedef_name(declared_target) && ! List_equal(Type_list(declared_source), Type_list(declared_target)) && Type_is_pointer(Sym_resolve_key(c -> sym, declared_target)) && ! Type_is_array(Sym_resolve_key(c -> sym, declared_source)) && Type_base_type(Sym_resolve_key(c -> sym, declared_source)) != _470 && !(Array_contains(_typedef_names(c, declared_source), List_var(declared_target))) && !(Array_contains(_typedef_names(c, declared_target), List_var(declared_source)))){
     {
       String _x2c_gensym_macro_message_8 =({
         Var _x2c_gensym_literal_part_223 = String_var(List_repr(Type_list(declared_source)));  Var _x2c_gensym_literal_part_224 = String_var(List_repr(Type_list(declared_target)));  String_join(NULL, cons(String_var(_3278), cons(_x2c_gensym_literal_part_223, cons(String_var(_3293), cons(_x2c_gensym_literal_part_224, NULL)))));
