@@ -17333,7 +17333,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_31(void
   _16364 = List_var(_16363);
   _16365 = String_new("src/symtab/types.x");
   _16366 = String_var(_16365);
-  _16367 = String_new("aff99424");
+  _16367 = String_new("59b2300e");
   _16368 = String_var(_16367);
   _16369 = cons(_16368, NULL);
   _16370 = cons(_16366, _16369);

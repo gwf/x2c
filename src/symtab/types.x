@@ -29,10 +29,13 @@ Type Sym.resolve_key(Sym s, Type key) {
 static Type _resolve_chain(
   Sym s, Type key, Type stop, Type origin, int hops) {
   if (hops > RESOLVE_KEY_MAX_HOPS) _typedef_budget_error(s, origin);
+  while (key.car() is <symbol> &&
+         (key.car().symbol().is_type_qualifier() || key.car() == <unqual>))
+    key = key.cdr();
   if (stop && key == stop) return key;
   if (key.is_typedef_name() || key.is_typedef()) {
     Type type = _typedef_target(s, key);
-    if (type) return _resolve_chain(s, type.canonicalize(), stop, origin, hops + 1);
+    if (type) return _resolve_chain(s, type, stop, origin, hops + 1);
   }
   match (key) case %((!set ?kind (!or struct union))
       (binding ? ?spelling)):
@@ -98,12 +101,11 @@ static Type _normalize_chain(Sym s, Type type, Type origin, int hops) {
            value.car().symbol().is_type_qualifier()) value = value.cdr();
     return _replace_type_base(type, base, value);
   }
-  Type next = _typedef_base_step(s, type);
+  Type next = _typedef_base_step(s, type, base);
   return next ? _normalize_chain(s, next, origin, hops + 1) : type;
 }
 
-static Type _typedef_base_step(Sym s, Type type) {
-  Type base = type.base_type();
+static Type _typedef_base_step(Sym s, Type type, Type base) {
   if (!base || (!base.is_typedef_name() && !base.is_typedef())) return NULL;
   Type next = _typedef_target(s, base);
   if (!next) next = _builtin_typedef_scalar(base);
@@ -224,7 +226,7 @@ static Symbol _var_tag_chain(
     return tag;
   }
   if (hops > RESOLVE_KEY_MAX_HOPS) _typedef_budget_error(s, origin);
-  Type next = _typedef_base_step(s, type);
+  Type next = _typedef_base_step(s, type, type.base_type());
   if (next) return _var_tag_chain(s, next, origin, resolved, hops + 1);
   if (resolved) resolved = type;
   return 0;

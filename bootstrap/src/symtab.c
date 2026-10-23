@@ -126,7 +126,7 @@ static Type f5_types____typedef_target(Sym s, Type key);
 
 static Type f5_types____normalize_chain(Sym s, Type type, Type origin, int hops);
 
-static Type f5_types____typedef_base_step(Sym s, Type type);
+static Type f5_types____typedef_base_step(Sym s, Type type, Type base);
 
 static Type f5_types____replace_type_base(Type type, Type base, Type replacement);
 
@@ -1655,16 +1655,19 @@ Type Sym_resolve_key(Sym s, Type key){
   return f5_types____resolve_chain(s, key, NULL, key, 0);
 }
 
+int Symbol_is_type_qualifier(Symbol);
+
 int Type_is_typedef_name(Type);
 
 List Sym_field_order(Sym s, Type type);
 
 static Type f5_types____resolve_chain(Sym s, Type key, Type stop, Type origin, int hops){
   if(hops > RESOLVE_KEY_MAX_HOPS) f5_types____typedef_budget_error(s, origin);
+  while(Var_is(List_car(Type_list(key)), 1328354264) &&(Symbol_is_type_qualifier(Var_symbol(List_car(Type_list(key)))) || x2c_var_equal(List_car(Type_list(key)), Symbol_var(1439803480)))) key = List_cdr(key);
   if(List_truth(Type_list(stop)) && List_equal(Type_list(key), Type_list(stop))) return key;
   if(Type_is_typedef_name(key) || Type_is_typedef(key)){
     Type type = f5_types____typedef_target(s, key);
-    if(List_truth(Type_list(type))) return f5_types____resolve_chain(s, Type_canonicalize(type), stop, origin, hops + 1);
+    if(List_truth(Type_list(type))) return f5_types____resolve_chain(s, type, stop, origin, hops + 1);
   }
   {
     List _x2c_gensym_match_expr = Type_list(key); Var _x2c_gensym_match_values[2]; MatchCaptureBuffer _x2c_gensym_match_capture = { .values = _x2c_gensym_match_values, .capacity = 2 };
@@ -1734,8 +1737,6 @@ Type Sym_normalize_declared_type(Sym s, Type type){
   return List_truth(Type_list(type)) ? f5_types____normalize_chain(s, type, type, 0) : NULL;
 }
 
-int Symbol_is_type_qualifier(Symbol);
-
 static Type f5_types____normalize_chain(Sym s, Type type, Type origin, int hops){
   type = Type_declared(type);
   if(hops > RESOLVE_KEY_MAX_HOPS) f5_types____typedef_budget_error(s, origin);
@@ -1745,12 +1746,11 @@ static Type f5_types____normalize_chain(Sym s, Type type, Type origin, int hops)
     while(Var_is(List_car(Type_list(value)), 1328354264) && Symbol_is_type_qualifier(Var_symbol(List_car(Type_list(value))))) value = List_cdr(value);
     return f5_types____replace_type_base(type, base, value);
   }
-  Type next = f5_types____typedef_base_step(s, type);
+  Type next = f5_types____typedef_base_step(s, type, base);
   return List_truth(Type_list(next)) ? f5_types____normalize_chain(s, next, origin, hops + 1) : type;
 }
 
-static Type f5_types____typedef_base_step(Sym s, Type type){
-  Type base = Type_base_type(type);
+static Type f5_types____typedef_base_step(Sym s, Type type, Type base){
   if(! List_truth(Type_list(base)) ||(! Type_is_typedef_name(base) && ! Type_is_typedef(base))) return NULL;
   Type next = f5_types____typedef_target(s, base);
   if(! List_truth(Type_list(next))) next = f5_types____builtin_typedef_scalar(base);
@@ -1832,7 +1832,7 @@ static Symbol f5_types____var_tag_chain(Sym s, Type type, Type origin, Type * re
     return tag;
   }
   if(hops > RESOLVE_KEY_MAX_HOPS) f5_types____typedef_budget_error(s, origin);
-  Type next = f5_types____typedef_base_step(s, type);
+  Type next = f5_types____typedef_base_step(s, type, Type_base_type(type));
   if(List_truth(Type_list(next))) return f5_types____var_tag_chain(s, next, origin, resolved, hops + 1);
   if(resolved)(* resolved) = type;
   return 0;
