@@ -39,7 +39,7 @@ static int _fannkuch(int n) {
 
   int maximum = 0, checksum = 0, permutation_count = 0;
   do {
-    for (int i = 0; i < n; i++) working[i] = permutation[i];
+    memcpy(working.bytes, permutation.bytes, (size_t) n * sizeof(int));
     int flips = 0;
     for (int k = working[0]; k; k = working[0]) {
       for (int i = 0, j = k; i < j; i++, j--) {

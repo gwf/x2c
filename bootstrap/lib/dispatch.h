@@ -67,7 +67,9 @@ int Var_equal(Var a, Var b);
 
 int Var_fallback_equal(Var a, Var b);
 
-int Var_same(Var a, Var b);
+static inline int Var_same(Var a, Var b){
+  return a.u64 == b.u64;
+}
 
 int Var_compare(Var a, Var b);
 

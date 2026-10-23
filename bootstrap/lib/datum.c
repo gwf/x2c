@@ -154,7 +154,7 @@ String Var_str(Var);
 
 int String_startswith(String, String);
 
-int List_try_next(List, List *, Var *);
+static int List_try_next(List, List *, Var *);
 
 String Var_as_string(Var);
 

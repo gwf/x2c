@@ -1299,7 +1299,7 @@ List _tag_groups(void){
 
 Array Array_new(void);
 
-int List_try_next(List, List *, Var *);
+static int List_try_next(List, List *, Var *);
 
 static List Var_list_payload(Var);
 

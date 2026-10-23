@@ -442,7 +442,7 @@ Source: `lib/dispatch.x:180`
 <a id="Var.same"></a>
 #### Var.same
 
-`meta native int Var.same(Var a, Var b)`
+`meta native inline int Var.same(Var a, Var b)`
 
 Reports whether `a` and `b` have identical `Var` bits.
 Two boxes of one wide number differ here, although `===` holds for them.

@@ -11,9 +11,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static uint32_t _hash_byte(uint32_t hash, unsigned byte) {
-  return (hash << 5) + hash + byte;
-}
+static uint32_t _hash_byte(uint32_t hash, unsigned byte) =>
+  (hash << 5) + hash + byte;
 
 /* One pixel: 1 while the orbit of (cr, ci) has not escaped after 50 steps.
  * Each step is its own statement so clang contracts exactly what the C

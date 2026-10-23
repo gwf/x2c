@@ -4356,7 +4356,7 @@ static Var _x2c_gensym_func_adapt_4(Func _x2c_gensym_func_binding_4, const FuncA
 
 static List Var_list_payload(Var);
 
-int List_try_next(List, List *, Var *);
+static int List_try_next(List, List *, Var *);
 
 static Var _x2c_gensym_func_adapt_5(Func _x2c_gensym_func_binding_5, const FuncArg * _x2c_gensym_func_argv_5){
   List a0 = Var_list_payload(x2c_func_value_argument(_x2c_gensym_func_binding_5, _x2c_gensym_func_argv_5, 0, 806120));
@@ -5034,7 +5034,7 @@ static Var _x2c_gensym_func_adapt_89(Func _x2c_gensym_func_binding_89, const Fun
   ;
 }
 
-int Var_int(Var);
+static int Var_int(Var);
 
 static Var _x2c_gensym_func_adapt_90(Func _x2c_gensym_func_binding_90, const FuncArg * _x2c_gensym_func_argv_90){
   Var a0 = x2c_func_value_argument(_x2c_gensym_func_binding_90, _x2c_gensym_func_argv_90, 0, 45156);
@@ -7789,7 +7789,7 @@ static Var _x2c_gensym_func_adapt_428(Func _x2c_gensym_func_binding_428, const F
   ;
 }
 
-int Var_same(Var, Var);
+static int Var_same(Var, Var);
 
 static Var _x2c_gensym_func_adapt_429(Func _x2c_gensym_func_binding_429, const FuncArg * _x2c_gensym_func_argv_429){
   Var a0 = x2c_func_value_argument(_x2c_gensym_func_binding_429, _x2c_gensym_func_argv_429, 0, 45156);

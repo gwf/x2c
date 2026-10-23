@@ -104,7 +104,7 @@ The `Var` encoding every runtime module shares.
 
 Initializes the x2c runtime once for the current process.
 
-Source: `lib/common.x:850`
+Source: `lib/common.x:851`
 
 #### x2c_initialize_protocols
 
@@ -112,7 +112,7 @@ Source: `lib/common.x:850`
 
 Runs compiler-generated runtime protocol registration.
 
-Source: `lib/common.x:846`
+Source: `lib/common.x:847`
 
 #### x2c_normalize_index
 
@@ -120,7 +120,7 @@ Source: `lib/common.x:846`
 
 Normalizes one element index against `length`.
 
-Source: `lib/common.x:876`
+Source: `lib/common.x:877`
 
 #### x2c_normalize_slice
 
@@ -128,7 +128,7 @@ Source: `lib/common.x:876`
 
 Normalizes slice bounds and returns the resulting element count.
 
-Source: `lib/common.x:901`
+Source: `lib/common.x:902`
 
 #### x2c_slice_bound
 
@@ -138,7 +138,7 @@ Returns an explicit slice `bound` that `x2c_normalize_slice` cannot
 read as omitted. INT_MIN becomes INT_MIN + 1, which every collection
 shorter than INT_MAX clamps the same way.
 
-Source: `lib/common.x:887`
+Source: `lib/common.x:888`
 
 ### `Array`
 
@@ -428,7 +428,7 @@ Returns `x` as a native `double` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, or
 invalidly encoded.
 
-Source: `lib/common.x:829`
+Source: `lib/common.x:830`
 
 <a id="Var.file_payload"></a>
 #### Var.file_payload
@@ -449,12 +449,12 @@ Returns `x` as a native `float` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, or
 invalidly encoded.
 
-Source: `lib/common.x:820`
+Source: `lib/common.x:821`
 
 <a id="Var.int"></a>
 #### Var.int
 
-`int Var.int(Var x)`
+`inline int Var.int(Var x)`
 
 Returns `x` as a native `int` under the `Var.convert` rules.
 
@@ -514,7 +514,7 @@ Returns `x` as a native `long` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:763`
+Source: `lib/common.x:764`
 
 <a id="Var.long_double"></a>
 #### Var.long_double
@@ -526,7 +526,7 @@ Returns `x` as a native `long double` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, or
 invalidly encoded.
 
-Source: `lib/common.x:810`
+Source: `lib/common.x:811`
 
 <a id="Var.long_long"></a>
 #### Var.long_long
@@ -538,7 +538,7 @@ Returns `x` as a native `long long` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:786`
+Source: `lib/common.x:787`
 
 <a id="Var.map_payload"></a>
 #### Var.map_payload
@@ -611,7 +611,7 @@ Returns `x` as a native `uint` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:745`
+Source: `lib/common.x:746`
 
 <a id="Var.ulong"></a>
 #### Var.ulong
@@ -623,7 +623,7 @@ Returns `x` as a native `ulong` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:775`
+Source: `lib/common.x:776`
 
 <a id="Var.ulong_long"></a>
 #### Var.ulong_long
@@ -636,7 +636,7 @@ rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:798`
+Source: `lib/common.x:799`
 
 <a id="Var.unsigned"></a>
 #### Var.unsigned
@@ -648,7 +648,7 @@ Returns `x` as a native `unsigned` under the `Var.convert` rules.
 **Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
 of floating range, or invalidly encoded.
 
-Source: `lib/common.x:754`
+Source: `lib/common.x:755`
 
 <a id="Var.ushort"></a>
 #### Var.ushort

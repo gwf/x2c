@@ -22,12 +22,17 @@ int main(int argc, char **argv) {
     }
   double checksum = 0;
   for (int run = 0; run < runs; run++) {
-    for (int i = 0; i < n; i++)
-      for (int j = 0; j < n; j++) {
-        double sum = 0;
-        for (int k = 0; k < n; k++) sum += a[i * n + k] * b[k * n + j];
-        c[i * n + j] = sum;
+    for (int i = 0; i < n; i++) {
+      int row = i * n;
+      for (int j = 0; j < n; j++) c[row + j] = 0.0;
+      for (int k = 0; k < n; k++) {
+        double value = a[row + k];
+        int source = k * n;
+        /* One expression preserves the original multiply-add rounding. */
+        for (int j = 0; j < n; j++)
+          c[row + j] = c[row + j] + value * b[source + j];
       }
+    }
     checksum += c[(run * 97) % (n * n)];
   }
   printf("%.9f\n", checksum);

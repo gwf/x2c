@@ -1292,7 +1292,7 @@ void * Scope_malloc_in(Scope *, size_t);
 
 void x2c_exception_push(ExceptionFrame *);
 
-int List_try_next(List, List *, Var *);
+static int List_try_next(List, List *, Var *);
 
 static FuncArg FuncArg_value(Var);
 
@@ -2887,7 +2887,7 @@ static Func f6_native____iter_callback(Var callable){
   return fn;
 }
 
-int Var_int(Var);
+static int Var_int(Var);
 
 static Var Func_apply_values(Func, Var, Var);
 

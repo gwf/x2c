@@ -454,7 +454,7 @@ Source: `lib/list/traversal.x:184`
 <a id="List.try_next"></a>
 #### List.try_next
 
-`int List.try_next(List lst, List &?cursor, Var &?out)`
+`inline int List.try_next(List lst, List &?cursor, Var &?out)`
 
 Writes the next element, advances `cursor`, and returns one.
 Initialize the caller-owned cursor to `lst`. A null pointer or an

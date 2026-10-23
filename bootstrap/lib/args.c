@@ -280,7 +280,7 @@ int List_len(List);
 
 void * Scope_calloc(size_t, size_t);
 
-int List_try_next(List, List *, Var *);
+static int List_try_next(List, List *, Var *);
 
 static List Var_list_payload(Var);
 

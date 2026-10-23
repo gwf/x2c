@@ -119,7 +119,7 @@ List cons(Var, List);
 
 static int List_truth(List);
 
-int List_try_next(List, List *, Var *);
+static int List_try_next(List, List *, Var *);
 
 static Var _append2(Var left, Var right){
   List items = NULL;
