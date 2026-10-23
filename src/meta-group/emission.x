@@ -66,13 +66,13 @@ static void _name_provider_bindings(
   Compiler c, String provider, Array units, Map dependencies) {
   int index = c.meta_build - 1;
   c.name_meta_provider_bindings(provider, index);
-  foreach (Var (path, table), meta_build_tables)
+  foreach ((String path, int table) in meta_build_tables)
     if (meta_build_providers && path != provider)
       c.name_loaded_provider(path, table, meta_build_providers[path]);
     else if (path != provider && path in dependencies)
       c.name_meta_provider_bindings(path, table);
   Var identity, String name;
-  foreach (List item, units)
+  foreach (List item in units)
     if (_function_identity(item, identity, name) &&
         (c.public_native_function(item, name) ||
          (c.load_source && name == "main"))) {
@@ -91,7 +91,7 @@ static String _diagnostic_line(List entry) {
            (location ((file ?file) (line ?row) (column ?column) *))
            (notes ?(List notes))): {
       line = %"$file:$row:$column: $code: $message";
-      foreach (Var note, notes)
+      foreach (Var note in notes)
         if (note is <string>) line = %"$line; $note";
     }
   return line;
@@ -152,7 +152,8 @@ static List _lower(
   }
   Map initials = _initial_copies(c, units);
   foreach (
-    Var unit, _entry(c, stamp, initials, _public_functions(c, units), suffix))
+    List unit in
+    _entry(c, stamp, initials, _public_functions(c, units), suffix))
     units.push(unit);
   return units.list_free();
 }
@@ -186,7 +187,7 @@ static Var _template_calls(Compiler c, Var node, List callee) {
   match (node)
     case %(expr ?type (tpl-call ?stored (args *arguments))): {
       List values = %(nil);
-      foreach (Var argument, arguments.reverse())
+      foreach (List argument in arguments.reverse())
         values = %(expr ("List") (cons ${c.convert_expression(
           _template_calls(c, argument, callee), %("Var"))} $values));
       List template = stored is <list>
@@ -237,7 +238,7 @@ static List _native_call(
   List declared = c.func_signature(callee.list().cadr()).car().list()
                    .cadr();
   List parameters = native.car().list().cadr();
-  foreach (List argument, arguments) {
+  foreach (List argument in arguments) {
     argument = _native_targets(c, argument, lookup);
     if (_boxes_func(c, declared.car(), parameters.car()))
       argument = c.convert_expression(
@@ -283,7 +284,7 @@ static List _native_symbol(
    their existing initializers and braced copies. */
 static Map _initial_copies(Compiler c, Array units) {
   Map copies = {};
-  foreach (List entry, c.meta_group)
+  foreach (List entry in c.meta_group)
     match (entry)
       case %(static (!set ?declaration (declare ?spec
                       (bindings (op = (!set ?bound (bind ?binding ?mods))
@@ -323,7 +324,7 @@ static Map _initial_copies(Compiler c, Array units) {
 static int _braced(Var node) {
   if (node is not <list>) return 0;
   if (((List) node).car() == <composite>) return 1;
-  foreach (Var part, (List) node) if (_braced(part)) return 1;
+  foreach (Var part in (List) node) if (_braced(part)) return 1;
   return 0;
 }
 
@@ -373,7 +374,7 @@ static void _native_entries(Compiler c, Array units, List start) {
 static List _public_functions(Compiler c, Array units) {
   Array functions = [];
   Var identity, String name;
-  foreach (List item, units)
+  foreach (List item in units)
     if (_function_identity(item, identity, name) &&
         c.public_native_function(item, name))
       functions.push(name);
@@ -384,7 +385,7 @@ static List _public_functions(Compiler c, Array units) {
    the unchanging copy `initials` holds for a braced one. */
 static List _resets(Compiler c, Map initials) {
   Array resets = [];
-  foreach (List entry, c.meta_group)
+  foreach (List entry in c.meta_group)
     match (entry)
       case %(static (declare ?spec
                       (bindings (op = (!set ?bound (bind ?binding *))
@@ -415,7 +416,7 @@ static List _resets(Compiler c, Map initials) {
 static List _named(Compiler c, List reset) {
   List named = %(("x2c_module_reset" ${reset.caddr().cadr()}
                   ((func ((void))) void)));
-  foreach (List entry, c.meta_group)
+  foreach (List entry in c.meta_group)
     match (entry) case %(function ?fn ?(String name) ?(Type type) *):
       named = named.append(%(($name ${fn.caddr().cadr()} $type)));
   return named;
@@ -429,7 +430,7 @@ static List _targets(Compiler c, List named, List functions) {
     entries.push(
       %(map-entry ${$!Symbol{ ${<functions>} }}
         ${c.cache_literal_list(functions)}));
-  foreach (List row, named) {
+  foreach (List row in named) {
     (String name, List binding, Type type) = row;
     if (c.load_source) type = c.loaded_call_type(type);
     List function = NULL;

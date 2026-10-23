@@ -75,7 +75,7 @@ Type Sym.next_typedef(Sym s, Type type, int &hops) {
 Type Sym.sole_typedef(Sym s, Type type) {
   String found = NULL;
   for (int i = 0; i < s.base_scopes; i++)
-    foreach (Var (key, target), _scope_at(s, i).symbols)
+    foreach (Var (key, target) in _scope_at(s, i).symbols)
       match (key) case %(typedef ?(String name)):
         if (target == type) {
           if (found && found != name) return NULL;
@@ -259,7 +259,7 @@ Type Sym.lookup_field(Sym s, Type type, List field) {
   if (!type || !type.is_aggregate_tag()) return NULL;
   Type found = s.get(%( @type @field ));
   if (found) return found.qualify(object);
-  foreach (List row, s.field_order(type).cdr()) {
+  foreach (List row in s.field_order(type).cdr()) {
     Type member = row.cadr();
     if (row.car() || !s.resolve_key(member).is_aggregate()) continue;
     found = s.lookup_field(member, field);
@@ -275,11 +275,11 @@ Type Sym.lookup_field(Sym s, Type type, List field) {
 */
 void Sym.declare_field_order(Sym s, Type type, List fields) {
   Array rows = [];
-  foreach (List declaration, fields) {
+  foreach (List declaration in fields) {
     declaration = Ast.without_origin(declaration);
     if (declaration.car() == <c-assert>) continue;
     List bindings = declaration.caddr();
-    foreach (List declarator, bindings.cdr())
+    foreach (List declarator in bindings.cdr())
       rows.push(_field_row(s, type, declaration, declarator));
   }
   s.set(%(@type "field-order"), %(fields @{rows.list_free()}));
@@ -309,7 +309,7 @@ void Sym.mark_field(Sym s, Type aggregate, Symbol mark, String name) {
 List Sym.marked_fields(Sym s, Type aggregate, Symbol mark) {
   List order = s.field_order(aggregate);
   Array rows = [];
-  foreach (List row, order ? order.cdr() : NULL) {
+  foreach (List row in order ? order.cdr() : NULL) {
     String name = row.car();
     if (name && s.get(%(@aggregate $mark $name))) rows.push(row);
   }

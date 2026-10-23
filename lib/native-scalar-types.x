@@ -46,7 +46,7 @@ meta Map native_scalar_types(void) => {
    `_native_scalar_access_unsigned_long`. */
 meta List _scalar_access_record(Type type) {
   String name = "_native_scalar_access";
-  foreach (Symbol word, (List) type) name = %"${name}_$word";
+  foreach (Symbol word in (List) type) name = %"${name}_$word";
   return x2c_ident(name);
 }
 
@@ -63,7 +63,7 @@ meta List _scalar_alignment(Type type) =>
    `%(unsigned long)`. A quotation hole does not reach inside `%(...)`. */
 meta List _scalar_key(Type type) {
   List key = %(expr ("List") (nil));
-  foreach (Symbol word, ((List) type).reverse())
+  foreach (Symbol word in ((List) type).reverse())
     key = %(expr ("List") (cons ${$!Symbol{ $word }} $key));
   return key;
 }
@@ -94,7 +94,7 @@ macro Unit $native.scalar.access(Type $type) {
 meta List _scalar_access_units(Macro access) {
   Array units = [];
   List rows = native_scalar_types().list().sort();
-  foreach (List row, rows) {
+  foreach (List row in rows) {
     Type type = row.car();
     units.push(access(type));
   }

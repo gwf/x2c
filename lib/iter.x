@@ -355,7 +355,7 @@ static int _filter_next(Iter iter, Var *out) {
   Iter source = iter.obj;
   Func func = iter.aux;
   if (!source) return 0;
-  foreach (Var value, source) {
+  foreach (Var value in source) {
     if (func.apply_value(value)) {
       *out = value;
       return 1;
@@ -379,7 +379,7 @@ static int _filter_next(Iter iter, Var *out) {
     struct Iter source_storage, scan_storage;
     Iter running = range(1, 4, 1, &source_storage).scan(0, _add,
                                                        &scan_storage);
-    foreach (int total, running) printf("%d\n", total);
+    foreach (int total in running) printf("%d\n", total);
     ~  return 0;
     ~}
     ```
@@ -758,7 +758,7 @@ Var Iter.foldl(Iter iter, Var seed, Func fn) {
 */
 int Iter.any(Iter iter, Func pred) {
   if (!pred) return 0;
-  foreach (Var item, iter) if (pred.apply_value(item)) return 1;
+  foreach (Var item in iter) if (pred.apply_value(item)) return 1;
   return 0;
 }
 
@@ -789,7 +789,7 @@ int Iter.all(Iter iter, Func pred) {
 */
 Var Iter.find(Iter iter, Func pred) {
   if (!pred) return void;
-  foreach (Var item, iter) if (pred.apply_value(item)) return item;
+  foreach (Var item in iter) if (pred.apply_value(item)) return item;
   return void;
 }
 
@@ -817,7 +817,7 @@ meta native int Iter.count(Iter iter) {
 */
 meta native Var Iter.sum(Iter iter) {
   Var total = 0;
-  foreach (Var item, iter) total = total.binary(<+>, item);
+  foreach (Var item in iter) total = total.binary(<+>, item);
   return total;
 }
 
@@ -830,7 +830,7 @@ meta native Var Iter.sum(Iter iter) {
 */
 meta native Var Iter.product(Iter iter) {
   Var total = 1;
-  foreach (Var item, iter) total = total.binary(<*>, item);
+  foreach (Var item in iter) total = total.binary(<*>, item);
   return total;
 }
 
@@ -844,7 +844,7 @@ meta native Var Iter.product(Iter iter) {
 meta native Var Iter.max(Iter iter) {
   Var best;
   if (!iter.try_next(best)) return void;
-  foreach (Var item, iter) if (item.compare(best) > 0) best = item;
+  foreach (Var item in iter) if (item.compare(best) > 0) best = item;
   return best;
 }
 
@@ -858,6 +858,6 @@ meta native Var Iter.max(Iter iter) {
 meta native Var Iter.min(Iter iter) {
   Var best;
   if (!iter.try_next(best)) return void;
-  foreach (Var item, iter) if (item.compare(best) < 0) best = item;
+  foreach (Var item in iter) if (item.compare(best) < 0) best = item;
   return best;
 }

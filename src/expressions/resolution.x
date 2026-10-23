@@ -24,7 +24,7 @@ module List _statement_expression(
 }
 
 static int _defers_directly(List items) {
-  foreach (List item, items)
+  foreach (List item in items)
     match (Ast.without_origin(item)) {
       case %(defer ?): return 1;
       case %(seq *rows): if (_defers_directly(rows)) return 1;
@@ -84,7 +84,7 @@ int Compiler.needs_resolution(Compiler c, Var value) {
       case %(expr (!or () (<macro-expr>)) ?): return 1;
       case %(expr ? (parens (block *))): continue;
       case $lambda_captured(?body, *captures, *params): {
-        foreach (List row, captures)
+        foreach (List row in captures)
           match (row) case %(capture ?binding ? ?):
             if (!(%(lambda-depth $binding) in c.semantic_binding_facts()))
               return 1;
@@ -341,7 +341,7 @@ List Compiler.var_tag_expression(Compiler c, Type target, Token origin) {
 }
 
 static int _deferred_type_test(Type target) {
-  foreach (Var specifier, target)
+  foreach (Var specifier in target)
     match (specifier)
       case %((!or macro-bind macro-slot) *): return 1;
   return 0;
@@ -376,7 +376,7 @@ static List _tadapt(Resolve &r, List target, List source) {
 static List _segments(Resolve &r, List items) {
   Array resolved = [];
   Type type = %("String");
-  foreach (List item, items) match (item) {
+  foreach (List item in items) match (item) {
     case %((!set ?tag (!or segvar segexp)) ?value): {
       List expression = r.c.resolve_expression(value, r.origin);
       if (_deferred_receiver(expression)) {
@@ -421,8 +421,8 @@ static List _array_value(Resolve &r) {
   Macro array_value = $array_value;
   match (r.input) case $array_value(*elements): {
     Array resolved = [];
-    foreach (Var element, elements)
-      foreach (List row, r.c.evaluate_macro_rows(element))
+    foreach (Var element in elements)
+      foreach (List row in r.c.evaluate_macro_rows(element))
         resolved.push(r.c.resolve_expression(row, r.origin));
     return r.c.rebuild_expression(
       r.type, array_value(resolved.list_free()));
@@ -434,8 +434,8 @@ static List _map_value(Resolve &r) {
   Macro map_value = $map_value;
   match (r.input) case $map_value(*entries): {
     Array resolved = [];
-    foreach (Var entry, entries)
-      foreach (Var row, r.c.evaluate_macro_rows(entry))
+    foreach (Var entry in entries)
+      foreach (Var row in r.c.evaluate_macro_rows(entry))
         resolved.push(r.c.resolve_map_entry(row, r.origin));
     return r.c.rebuild_expression(
       r.type, map_value(resolved.list_free()));
@@ -461,13 +461,13 @@ static List _initval(Resolve &r, List content) {
   Array resolved = [];
   if (header) {
     Array inputs = [];
-    foreach (List argument, header.cdr()) {
+    foreach (List argument in header.cdr()) {
       List value = r.c.resolve_expression(argument.cadr(), r.origin);
       inputs.push(%(${argument.car()} $value));
     }
     resolved.push(%(input @{inputs.list_free()}));
   }
-  foreach (List choice, cases) {
+  foreach (List choice in cases) {
     (List condition, List path, Type destination, List value) = choice;
     if (condition) condition = r.c.resolve_expression(condition, r.origin);
     value = r.c.resolve_expression(value, r.origin);
@@ -478,8 +478,8 @@ static List _initval(Resolve &r, List content) {
 
 static List _composite(Resolve &r, List elements) {
   Array values = [];
-  foreach (Var element, elements)
-    foreach (List row, r.c.evaluate_macro_rows(element))
+  foreach (Var element in elements)
+    foreach (List row in r.c.evaluate_macro_rows(element))
       values.push(_resolve_initializer(r.c, row, r.origin));
   return %(expr ${r.type} ${source_composite_content(
     values.list_free())});
@@ -510,7 +510,7 @@ static List _parens(Resolve &r, List inner) {
 
 static List _commas(Resolve &r, List expressions) {
   Array resolved = [];
-  foreach (List expression, expressions)
+  foreach (List expression in expressions)
     resolved.push(r.c.resolve_expression(expression, r.origin));
   List values = resolved.list_free();
   Type type = r.type;
@@ -520,7 +520,7 @@ static List _commas(Resolve &r, List expressions) {
 
 static List _destructure(Resolve &r, List targets, List source) {
   Array resolved = [];
-  foreach (List target, targets)
+  foreach (List target in targets)
     resolved.push(r.c.resolve_expression(target, r.origin));
   source = r.c.resolve_expression(source, r.origin);
   return %(expr ${source.cadr()}
@@ -530,7 +530,7 @@ static List _destructure(Resolve &r, List targets, List source) {
 static List _generic(Resolve &r, List control, List associations) {
   control = r.c.resolve_expression(control, r.origin);
   Array resolved = [];
-  foreach (List association, associations) match (association)
+  foreach (List association in associations) match (association)
     case %(association ?selector ?value):
       resolved.push(
         %(association $selector ${r.c.resolve_expression(value, r.origin)}));

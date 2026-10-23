@@ -185,7 +185,7 @@ static Symbol _exact_7bit(String spelling) {
   int length = spelling.len();
   if (length > SYMBOL_MAX_7BIT) return 0;
   Symbol result = 0;
-  foreach (int byte, spelling) {
+  foreach (int byte in spelling) {
     unsigned char ch = byte;
     if (ch > 0x7f) return 0;
     result = (result << 7) | ch;

@@ -323,7 +323,7 @@ held; the yielded paths live in the active pool.
 ~#include "path.x"
 ~int main(void) {
 Path source = "src";
-foreach (Path path, source.walk()) printf("%s\n", path);
+foreach (Path path in source.walk()) printf("%s\n", path);
 long units = source.walk().filter(%!(p) => p.str().endswith(".x")).count();
 ~  return units >= 0 ? 0 : 1;
 ~}

@@ -24,7 +24,7 @@ in order as the program:
 ```x2c
 #!/usr/bin/env -S x2c script
 String branch = %(git rev-parse --abbrev-ref HEAD).job().output();
-foreach (String file, %(git diff --name-only).job().lines())
+foreach (String file in %(git diff --name-only).job().lines())
   printf("%s: %s\n", branch, file);
 ```
 
@@ -201,7 +201,7 @@ run at once:
 ~#include "process.x"
 ~int main(void) {
 Array running = [];
-foreach (Var host, %(alpha beta gamma delta)) {
+foreach (Symbol host in %(alpha beta gamma delta)) {
   if (running.len() == 2) Job.wait_any(running).check();
   running.push(%(ping -c 1 $host).job().live().start());
 }
@@ -251,7 +251,7 @@ literal:
 ~#include "path.x"
 ~int main(void) {
 if (Path.exists("build")) Path.remove_tree("build");
-foreach (Path unit, Path.glob("src/**/*.x"))
+foreach (Path unit in Path.glob("src/**/*.x"))
   printf("%s %ld\n", unit, unit.size());
 ~  return 0;
 ~}
@@ -342,7 +342,7 @@ List spec = %(
   (inputs repeated required (help "Files to read")));
 Map options = Args.parse(Args.from_argv(argc, argv), spec);
 String output = options["output"].str();
-foreach (String input, options["inputs"])
+foreach (String input in options["inputs"])
   if (options["verbose"]) printf("%s: %s\n", output, input);
 ~  return 0;
 ~}
@@ -438,7 +438,7 @@ String abc = "abc".sha256();
 ~#include "process.x"
 ~int main(void) {
 Regex row = Regex.compile(%"^ *(?<count>\\d+) (?<file>.+)$$");
-foreach (String line, %(wc -l lib/regex.x lib/path.x).job().lines()) {
+foreach (String line in %(wc -l lib/regex.x lib/path.x).job().lines()) {
   RegexMatch found = row.match(line);
   if (found) printf("%s: %s\n", found[<file>], found[<count>]);
 }
@@ -494,7 +494,7 @@ take part is NULL, and so is one that matched no bytes, since an empty
 ~#include "regex.x"
 ~int main(void) {
 Regex pair = Regex.compile("(\\w+)=(\\w*)");
-foreach (RegexMatch found, pair.find_all("a=1 b= c=3"))
+foreach (RegexMatch found in pair.find_all("a=1 b= c=3"))
   printf("%s -> %s\n", found[1], found[2] ? found[2] : "(empty)");
 ~  return 0;
 ~}
@@ -560,7 +560,7 @@ removed:
 ```x2c
 ~#include "diff.x"
 ~int main(void) {
-foreach (List edit, Diff.lines("a\nb\n", "a\nc\n")) {
+foreach (List edit in Diff.lines("a\nb\n", "a\nc\n")) {
   (Symbol kind, String line) = edit;
   if (kind != <same>) printf("%s %s\n", kind.str(), line);
 }
@@ -602,7 +602,7 @@ from the numbers 1 and 0:
 ~int main(void) {
 Map release = Json.read_file("release.json");
 if (!release["draft"]) printf("release %s\n", release["version"]);
-foreach (Map asset, release["assets"]) printf("  %s\n", asset["name"]);
+foreach (Map asset in release["assets"]) printf("  %s\n", asset["name"]);
 ~  return 0;
 ~}
 ```

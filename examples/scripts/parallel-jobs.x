@@ -21,7 +21,7 @@ int limit = 3, peak = 0, started = 0;
 Array running = [], results = [];
 Map names = {};
 
-foreach (List command, queue) {
+foreach (List command in queue) {
   if (running.len() == limit) {
     Job done = Job.wait_any(running);
     results.push(describe(names[done], done));
@@ -36,7 +36,7 @@ while (running.len()) {
   results.push(describe(names[done], done));
 }
 
-foreach (String line, results.sort()) printf("%s\n", line);
+foreach (String line in results.sort()) printf("%s\n", line);
 printf("peak %d of %d\n", peak, limit);
 
 try %(sh -c "echo broken >&2; exit 4").job().options({stderr: <capture>})

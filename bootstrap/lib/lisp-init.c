@@ -285,7 +285,7 @@ Var lisp_binders(Var pat){
   for(Var parts = pat;  ! _nil(parts);  parts = lisp_cdr(parts)){
     List binders = Var_list_payload(lisp_binders(lisp_car(parts)));
     {
-      Var binder;
+      Atom binder;
       List _x2c_gensym_macro_object_2 = binders;
       List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
       Var _x2c_gensym_macro_cursor_output_2;

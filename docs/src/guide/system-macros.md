@@ -299,7 +299,7 @@ that whole function, without indenting the body a further level:
 ```x2c
 $scope() static int distinct(List words) {
   Map seen = {};
-  foreach (String word, words) seen[word] = 1;
+  foreach (String word in words) seen[word] = 1;
   return seen.len();
 }
 ~int main(void) { return distinct(%("ab" "cd" "ab")) == 2 ? 0 : 1; }

@@ -36,7 +36,7 @@ static int _tag_headed(List list) {
   if (!head.is_atom()) return 0;
   String text = head.str();
   if (!text.startswith("x2c.")) return 0;
-  foreach (String tag, %("x2c.void" "x2c.null" "x2c.symbol0" "x2c.atom"
+  foreach (String tag in %("x2c.void" "x2c.null" "x2c.symbol0" "x2c.atom"
                          "x2c.symbol" "x2c.number" "x2c.array" "x2c.map"
                          "x2c.token" "x2c.quote"))
     if (text == tag) return 1;
@@ -110,7 +110,7 @@ static void _write_number(Buffer out, Var value) {
 
 static int _write_array(Buffer out, Array array) {
   out.write("(x2c.array");
-  foreach (Var item, array) {
+  foreach (Var item in array) {
     out.write_char(' ');
     if (!datum_write(out, item, 1)) return 0;
   }
@@ -120,7 +120,7 @@ static int _write_array(Buffer out, Array array) {
 
 static int _write_map(Buffer out, Map map) {
   out.write("(x2c.map");
-  foreach (Var (key, item), map) {
+  foreach (Var (key, item) in map) {
     out.write(" (");
     if (!datum_write(out, key, 1)) return 0;
     out.write_char(' ');
@@ -266,7 +266,7 @@ static Var _decode(Var value) {
 
 static List _decode_list(List list) {
   Array items = [];
-  foreach (Var item, list) items.push(_decode(item));
+  foreach (Var item in list) items.push(_decode(item));
   return items.list_free();
 }
 
@@ -286,7 +286,7 @@ static Var _decode_number(String tag, String text) {
 
 static Map _decode_map(List entries) {
   Map map = {};
-  foreach (List entry, entries)
+  foreach (List entry in entries)
     map[_decode(entry.car())] = _decode(entry.cadr());
   return map;
 }
@@ -348,17 +348,17 @@ List datum_result_problem(Var value, Map marks) {
 /* The first problem among the items of a List, Array, or Map, or NULL. */
 static List _items_problem(Var value, Map marks) {
   if (value is <list>)
-    foreach (Var item, value.list()) {
+    foreach (Var item in value.list()) {
       List problem = datum_result_problem(item, marks);
       if (problem) return problem;
     }
   else if (value is <array>)
-    foreach (Var item, value.array()) {
+    foreach (Var item in value.array()) {
       List problem = datum_result_problem(item, marks);
       if (problem) return problem;
     }
   else
-    foreach (Var (key, item), (Map) value) {
+    foreach (Var (key, item) in (Map) value) {
       List problem = datum_result_problem(key, marks);
       if (!problem) problem = datum_result_problem(item, marks);
       if (problem) return problem;

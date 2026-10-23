@@ -13,7 +13,7 @@ int Compiler.linked_meta_provider_current(Compiler c, String path) {
   Map seen = {};
   int valid = _linked_provider_current(c, canonical, seen);
   if (valid)
-    foreach (String dependency, seen.keys()) {
+    foreach (String dependency in seen.keys()) {
       _retain(dependency);
       linked_providers[dependency] = 1;
     }
@@ -38,7 +38,7 @@ static int _linked_provider_current(
       Map found = _read_dependencies(c, dependencies);
       if (found == NULL) return 0;
       // Member content was hashed above; only included units own proofs.
-      foreach (Var (dependency, expected), found)
+      foreach ((String dependency, Var expected) in found)
         if (Path.is_x2c_source(dependency) && expected is <string> &&
             !String.startswith(expected, "search:") &&
             Compiler.linked_meta_provider_source(
@@ -61,7 +61,7 @@ int Compiler.linked_meta_definitions_current(Compiler c, String path) {
   match (source) case %(source ? ? ?(String definitions)): {
     List entry = _meta_provider_entry(c, canonical);
     if (!entry) return 0;
-    foreach (Var part, entry.car()) {
+    foreach (Var part in entry.car()) {
       if (part is not <map>) continue;
       Var value;
       if (!part.map().try_get(
@@ -93,9 +93,9 @@ static List _meta_provider_entry(Compiler c, String canonical) {
 void Compiler.complete_meta_hashes(Compiler c) {
   List entry = _meta_provider_entry(c, _canonical_path(c.filename));
   if (entry)
-    foreach (Var part, entry.car()) {
+    foreach (Var part in entry.car()) {
       if (part is not <map>) continue;
-      foreach (Var value, part.map())
+      foreach (Var value in part.map())
         match (value) case %(meta-hashes ? ?(Map hashes)):
           c.meta_hashes.merge(hashes);
     }
@@ -108,14 +108,14 @@ Map Compiler.meta_provider_hashes(Compiler c, String provider) =>
 
 /** Retains source proofs and one definition hash per linked provider. */
 void Compiler.add_linked_meta_provider_hashes(Compiler c, Map rows) {
-  foreach (String path, c.deps.keys()) {
+  foreach (String path in c.deps.keys()) {
     if (!Path.is_x2c_source(path)) continue;
     List entry = _entry(c, _canonical_path(path));
     if (!entry) continue;
     String provider = Compiler.portable_path(_canonical_path(path));
     List proof = NULL;
     Map hashes = NULL;
-    foreach (Var part, entry.car()) {
+    foreach (Var part in entry.car()) {
       if (part is not <map>) continue;
       Var value;
       if (part.map().try_get(
@@ -125,7 +125,7 @@ void Compiler.add_linked_meta_provider_hashes(Compiler c, Map rows) {
         %("source-node" (meta-hashes $provider 0)), value))
         hashes = value.list().caddr();
     }
-    foreach (String name, hashes.keys()) {
+    foreach (String name in hashes.keys()) {
       if (!(name in c.project_meta) && !(name in c.meta_calls)) continue;
       proof = proof.append(
         %(${_content_hash(_stored_meta_hashes(hashes))}));
@@ -142,10 +142,10 @@ void Compiler.name_meta_provider_bindings(
   Compiler c, String path, int index) {
   List entry = _entry(c, _canonical_path(path));
   if (!entry) return;
-  foreach (String name, entry.caddr()) _name_meta_provider(c, name, index);
-  foreach (Var part, entry.car()) {
+  foreach (String name in entry.caddr()) _name_meta_provider(c, name, index);
+  foreach (Var part in entry.car()) {
     if (part is not <map>) continue;
-    foreach (Var value, part.map())
+    foreach (Var value in part.map())
       match (value) case %(native-object ?(String name)):
         _name_meta_provider(c, name, index);
   }
@@ -156,16 +156,16 @@ void Compiler.name_meta_provider_bindings(
 List Compiler.loaded_provider(Compiler c) {
   List entry = _entry(c, _canonical_path(c.filename));
   Array names = [];
-  foreach (String name, entry.caddr())
+  foreach (String name in entry.caddr())
     if (name != "main" || c.load_source) names.push(name);
-  foreach (Var part, entry.car())
+  foreach (Var part in entry.car())
     if (part is <map>)
-      foreach (Var value, part.map())
+      foreach (Var value in part.map())
         match (value) case %(native-object ?(String name)):
           names.push(name);
   List owned = names.list_free();
   Map symbols = c.callable_symbols(owned), declarations = {};
-  foreach (String name, owned)
+  foreach (String name in owned)
     declarations[name] = _loaded_declaration(c, symbols[%($name)]);
   return %($declarations $symbols);
 }
@@ -178,7 +178,7 @@ Type Compiler.loaded_call_type(Compiler c, Type type) {
   Type result = NULL;
   type.function_parts(parameters, result);
   Array adjusted = [];
-  foreach (Type parameter, parameters) {
+  foreach (Type parameter in parameters) {
     Type shape = c.sym.normalize_declared_type(parameter);
     if (shape.is_array()) parameter = shape.dereference().reference();
     while (parameter.car() is <symbol> &&
@@ -196,7 +196,7 @@ static Type _loaded_declaration(Compiler c, Type type) {
   Type result = NULL;
   type.function_parts(parameters, result);
   Array declared = [];
-  foreach (Type parameter, parameters)
+  foreach (Type parameter in parameters)
     declared.push(c.sym.normalize_declared_type(parameter));
   List args = parameters ? declared.list_free() : %((void));
   return c.loaded_call_type(
@@ -209,7 +209,7 @@ void Compiler.name_loaded_provider(
   Compiler c, String path, int index, List provider) {
   (Map declarations, Map symbols) = provider;
   Map visible = $auto(c.sym.unit_symbols());
-  foreach (Var (name, expected), declarations) {
+  foreach ((String name, Type expected) in declarations) {
     if (%($name) in c.sym.file_statics() ||
         %(function $name) in c.sym.file_statics()) continue;
     Type type = NULL;
@@ -239,7 +239,7 @@ static int _loaded_type_rows(Type type, Map visible, Map provider) {
   int changed = 1;
   while (changed) {
     changed = 0;
-    foreach (Var (key, value), visible) {
+    foreach (Var (key, value) in visible) {
       List family = _type_family(key);
       if (!family || !(family in needed) || key in checked) continue;
       Var expected;

@@ -13,7 +13,7 @@ static macro Stmt $fail.meta_sdk_initialization_pattern() =>
 static List _rewrite_holes(Macro shape, List supplied) {
   if (supplied) return supplied;
   Array holes = [];
-  foreach (List parameter, shape.assoc(<parameters>).list()) {
+  foreach (List parameter in shape.assoc(<parameters>).list()) {
     String binder = parameter.assoc(<binder>).str();
     String prefix = parameter.assoc(<sequence>).int() ? "*" : "?";
     holes.push(Atom.intern(prefix + binder[1:]));
@@ -26,7 +26,7 @@ static Code _rewrite_registration(
   Code function, List shape, List holes, Symbol point, List kinds) {
   String name = Code.name(function);
   Array rows = [];
-  foreach (Var kind, kinds)
+  foreach (Var kind in kinds)
     rows.push(%(rewrite $point $kind $name $shape $holes));
   return %(${Code.bound(function, rows.list_free())});
 }
@@ -38,7 +38,7 @@ static Var _function_rule_key(Var type) => _ground(type) ? type : <any>;
 static int _ground(Var pattern) {
   if (pattern is not <list>)
     return !pattern.is_binder() && !pattern.is_match_op();
-  foreach (Var part, pattern.list()) if (!_ground(part)) return 0;
+  foreach (Var part in pattern.list()) if (!_ground(part)) return 0;
   return 1;
 }
 
@@ -59,7 +59,7 @@ static List _rule_operators(Var position) {
   List operators = %($position);
   match (position) case %((!quote !or) *choices): operators = choices;
   Array found = [];
-  foreach (Var operator, operators) {
+  foreach (Var operator in operators) {
     match (operator) case %((!quote !quote) ?quoted): operator = quoted;
     found.push(operator);
   }
@@ -71,7 +71,7 @@ static List _rule_operators(Var position) {
    operations. */
 static int _rule_dynamic(Var type, List operands) {
   if (_rule_var(type)) return 1;
-  foreach (Var operand, operands) {
+  foreach (Var operand in operands) {
     match (operand) case %((!quote !and) ?inner): operand = inner;
     match (operand) case %(expr ?operand_type *):
       if (_rule_var(operand_type)) return 1;
@@ -85,7 +85,7 @@ static int _rule_var(Var type) =>
 /* The dynamic family's keys for `operators` in `form`, `op` or `postfix`. */
 static List _rule_dynamic_kinds(List operators, Symbol form) {
   Array kinds = [];
-  foreach (Symbol operator, operators)
+  foreach (Symbol operator in operators)
     kinds.push(
       form == <postfix> ? %(postfix $operator ("Var")) : %($operator ("Var")));
   return kinds.list_free();
@@ -94,7 +94,7 @@ static List _rule_dynamic_kinds(List operators, Symbol form) {
 /* `holes` with a receiver hole `(expr MARK *)` matching any receiver. */
 static List _unmarked(List holes, Symbol mark) {
   Array kept = [];
-  foreach (Var hole, holes)
+  foreach (Var hole in holes)
     kept.push(hole == %(expr $mark *) ? %(expr ? *) : hole);
   return kept.list_free();
 }

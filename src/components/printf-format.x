@@ -168,7 +168,7 @@ meta static void _printf_scan(
    may consume; a call with no Var among them is left alone. */
 meta static Code _printf_lowered(Code code, Code format, List values) {
   int has_var = 0;
-  foreach (Code value, values) has_var |= _printf_is_var(value);
+  foreach (Code value in values) has_var |= _printf_is_var(value);
   if (!has_var) return code;
   String spelling = format.format();
   if (!spelling)

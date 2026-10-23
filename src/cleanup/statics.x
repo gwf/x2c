@@ -60,7 +60,7 @@ static List _landing_form(Compiler c, List node, Map runtime) {
       <node>, <try>, node, <statement>, c.return_type, NULL);
   match (form) case %(landing ?code ?rows): {
     Array parts = [];
-    foreach (List row, rows)
+    foreach (List row in rows)
       match (row) {
         case %((!set ?kind (!or outer region)) ?token ?part):
           parts.push(%($kind $token ${_static_regions(c, part, runtime)}));
@@ -77,7 +77,7 @@ static List _landing_form(Compiler c, List node, Map runtime) {
 static List _static_initializers(
   Compiler c, Type type, List bindings, Map runtime) {
   Array output = [];
-  foreach (List binding, bindings.cdr()) {
+  foreach (List binding in bindings.cdr()) {
     match (binding)
       case %(op = ?declaration ?value): {
         declaration = _static_regions(c, declaration, runtime);
@@ -101,7 +101,7 @@ static int _runtime_static_declaration(
     case %(at ? ?body): return _runtime_static_declaration(c, body, runtime);
     case %(declare (!set ?type (*)) (bindings *bindings)):
       if (type.list().type().is_static())
-        foreach (List binding, bindings)
+        foreach (List binding in bindings)
           match (binding)
             case %(op = (bind ?name ?) ?value):
               if (c.static_value_is_runtime(value, runtime)) {
@@ -129,7 +129,7 @@ int Compiler.static_value_is_runtime(Compiler c, List value, Map runtime) {
     int result = address ? _address(s, node) : _value(s, node);
     if (result > 0) return 1;
     if (result < 0)
-      foreach (Var child, node) if (child is <list>) _push(s, child, 0);
+      foreach (Var child in node) if (child is <list>) _push(s, child, 0);
   }
   return 0;
 }

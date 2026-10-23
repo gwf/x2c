@@ -28,7 +28,7 @@ static void _bind_name_arguments(
       Var names = captures.car().list().assoc(<value>);
       List values = parameter.assoc(<sequence>).int()
                   ? names : %($names);
-      foreach (Var value, values) {
+      foreach (Var value in values) {
         String name = value is <list>
           ? Ast.binding_spelling(value) : value;
         c.sym.reference(%($name), NULL);
@@ -220,7 +220,7 @@ static List _capture(Decoration &d, List target) {
   Compiler c = d.c;
   List targets = target.car() == <seq> ? target.cdr() : %($target);
   Array captured_targets = [];
-  foreach (Var item, targets)
+  foreach (List item in targets)
     captured_targets.push(_capture_source(c, item, d.start, c.token));
   List captured = captured_targets.list_free();
   List target_capture =

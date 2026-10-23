@@ -114,7 +114,7 @@ static Var Interp.eval(Interp &self, LispEnv *env, Var form) {
    failure leaves earlier effects intact. */
 static List Interp.eval_args(Interp &self, LispEnv *env, List forms) {
   Array values = $auto([]);                                                      // Array literal; cleanup on exit.
-  foreach (Var form, forms) values.push(self.eval(env, form));                   // Typed List iteration.
+  foreach (Var form in forms) values.push(self.eval(env, form));                   // Typed List iteration.
   return values;                                                                 // Build List before Array cleanup.
 }
 
@@ -144,7 +144,7 @@ static Var Interp.special(Interp &self, LispEnv *env, Symbol op, List args) {
     case %(macro ?(List params) ?body):                                          // Check List type while binding.
       return self.closure(env, params, body, 1);                                 // Same receiver syntax for macros.
     case %(cond *clauses) if (clauses): {                                        // * binds the remaining elements.
-      foreach (Var clause, clauses) {                                            // Iterate without an index.
+      foreach (Var clause in clauses) {                                            // Iterate without an index.
         match (clause) {                                                         // Nested structural match.
           case %(?test ?body):                                                   // Require exactly two elements.
             if (!self.eval(env, test).is_nil()) return self.eval(env, body);     // Chain calls on returned values.
@@ -256,7 +256,7 @@ static void Interp.capture(
   List items = form;                                                             // Implicit Var -> List conversion.
   Var head = items.car();                                                        // The head may be an expression.
   if (depth < 0) {                                                               // The call may treat data as code.
-    foreach (Var part, items) self.capture(env, part, bound, depth, captures);   // Typed iteration; recursive call.
+    foreach (Var part in items) self.capture(env, part, bound, depth, captures);   // Typed iteration; recursive call.
     return;
   }
   if (depth > 0) {                                                               // Skip names inside template data.
@@ -266,14 +266,14 @@ static void Interp.capture(
     if (head == <unquote> || head == Atom.intern("unquote-splicing")) {          // Intern the long splice name.
       inner--; parts = items.cdr();                                              // Unquote removes one nesting level.
     }
-    foreach (Var part, parts) self.capture(env, part, bound, inner, captures);   // Pass each child its nesting depth.
+    foreach (Var part in parts) self.capture(env, part, bound, inner, captures);   // Pass each child its nesting depth.
     return;
   }
   self.capture(env, head, bound, 0, captures);                                   // The call head may read a local.
   Var callable;                                                                  // Var holds functions and closures.
   if (!head.is_atom() || head in bound ||                                        // The function is not yet known.
       !_local_value(env, head, callable)) {                                      // Globals may change before the call.
-    foreach (Var part, items.cdr())                                              // Iterate forms without copying them.
+    foreach (Var part in items.cdr())                                              // Iterate forms without copying them.
       self.capture(env, part, bound, -1, captures);                              // Unknown calls may evaluate data.
     return;
   }
@@ -283,13 +283,13 @@ static void Interp.capture(
   if (special == <lambda> || special == <macro>) {                               // lambda and macro introduce names.
     List rest = items.cdr();                                                     // Share the parameter and body tail.
     if (rest && rest.car() is <list>)                                            // C truth test, then List tag test.
-      foreach (Var name, rest.car().list()) bound = cons(name, bound);           // Add nested parameters to bound.
-    foreach (Var part, rest.cdr()) self.capture(env, part, bound, 0, captures);  // Parameters hide outer bindings.
+      foreach (Var name in rest.car().list()) bound = cons(name, bound);           // Add nested parameters to bound.
+    foreach (Var part in rest.cdr()) self.capture(env, part, bound, 0, captures);  // Parameters hide outer bindings.
     return;
   }
   int inner = special == <quasiquote> ? 1 :                                      // Start quasiquote at depth one.
     callable is <lambda> && ((Fn) callable.pointer()).macro ? -1 : 0;            // Read the Fn flag for Lisp macros.
-  foreach (Var part, items.cdr()) self.capture(env, part, bound, inner, captures);
+  foreach (Var part in items.cdr()) self.capture(env, part, bound, inner, captures);
 }
 
 static Var Interp.closure(
@@ -362,13 +362,13 @@ static Var Interp.quasiquote(Interp &self, LispEnv *env, Var form, int depth) {
 static List Interp.quoted_elements(
   Interp &self, LispEnv *env, List items, int depth) {
   Array values = $auto([]);                                                      // Collect values in a temporary Array.
-  foreach (Var item, items) {                                                    // Recurse only into nested forms.
+  foreach (Var item in items) {                                                    // Recurse only into nested forms.
     match (item) {
       case %(unquote-splicing ?argument) if (!depth): {
         Var value = self.eval(env, argument);                                    // Evaluate each splice once, in order.
         if (value is not <list>)
           $fail(<bad-types>, "quasiquote-splice", <actual>, value.kind());
-        foreach (Var part, value.list()) values.push(part);                      // Splice the contributed elements.
+        foreach (Var part in value.list()) values.push(part);                      // Splice the contributed elements.
       }
       default: values.push(self.quasiquote(env, item, depth));                   // An ordinary element adds one value.
     }
@@ -545,7 +545,7 @@ static Var _native_call(Func native, List values) {
   FuncArg *args = Scope.malloc(values.len() * sizeof(FuncArg));                  // Allocate one FuncArg per value.
   defer Scope.free(args);                                                        // Cleanup on every block exit.
   int count = 0;
-  foreach (Var value, values) args[count++] = FuncArg.value(value);              // Pack values into a native C array.
+  foreach (Var value in values) args[count++] = FuncArg.value(value);              // Pack values into a native C array.
   return native.apply(count, args);                                              // Checked native call through Func.
 }
 
@@ -594,7 +594,7 @@ static Var _arithmetic(List values, Symbol op, Var identity) {
   if (!values) $fail(<bad-arity>, op.str(), <expected>, 1, <actual>, 0);         // Macro constructs runtime errors.
   Var result = values.car();                                                     // List head is already a Var.
   if (!values.cdr()) return identity.binary(op, result);                         // Var arithmetic selected by Symbol.
-  foreach (Var value, values.cdr()) result = result.binary(op, value);           // Iterate a List suffix.
+  foreach (Var value in values.cdr()) result = result.binary(op, value);           // Iterate a List suffix.
   return result;
 }
 
@@ -609,7 +609,7 @@ static Var _chain(List values, String op, int want, int expect) {
   int n = values.len();                                                          // List length walks the cons cells.
   if (n < 2) $fail(<bad-arity>, op, <expected>, 2, <actual>, n);                 // Values box into the error record.
   Var left = values.car();                                                       // Receiver access yields a Var.
-  foreach (Var right, values.cdr()) {                                            // Typed iteration over a suffix.
+  foreach (Var right in values.cdr()) {                                            // Typed iteration over a suffix.
     int order = _compare(left, right).integer();                                 // Chain a call and Var conversion.
     if (expect ? order != want : order == want) return _bool(0);                 // C ternary selects comparison logic.
     left = right;
@@ -692,7 +692,7 @@ static void _install_natives(Interp &self) {
     (()              "lisp_write_file"       ${Func.var(_write_file)})
     (()              "List_sort"             ${Func.var(List.sort)})
   );
-  foreach (List row, natives) {                                                  // Typed List traversal.
+  foreach (List row in natives) {                                                  // Typed List traversal.
     (Var name, String symbol, Func fn) = row;                                    // Convert each positional binding.
     self.natives[symbol] = fn;                                                   // Func boxes as a Map value.
     if (!name.is_nil()) self.globals[name] = fn;                                 // Receiver-style Var predicate.
@@ -862,13 +862,13 @@ static Var _reserved(void) => Var.null();                                       
 static Interp _interpreter(void) {
   Interp self = { {}, {}, {}, {} };                                              // Four independently allocated Maps.
   _install_natives(self);                                                        // Borrow the interpreter record.
-  foreach (Var name, %(quote quasiquote cond def lambda macro eval               // Typed iteration over literal data.
+  foreach (Symbol name in %(quote quasiquote cond def lambda macro eval            // Typed iteration over literal data.
                        apply bind import)) {                                     // Iterate literal Symbol values.
     Func fn = Func.new(_reserved, %((func ((void))) "Var"));                     // Give each special form its own Func.
     self.reserved[name] = fn;                                                    // Func implicitly boxes as Var.
     self.specials[fn] = name;                                                    // A callable can be a Map key.
   }
-  foreach (Var form, _stdlib) self.eval(NULL, form);                             // Typed iteration; receiver call.
+  foreach (List form in _stdlib) self.eval(NULL, form);                            // Typed iteration; receiver call.
   return self;
 }
 

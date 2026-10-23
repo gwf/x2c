@@ -156,7 +156,7 @@ static void _start(Job j) {
   _open_streams(j, stdio);
   fflush(NULL);
   int index = 0;
-  foreach (List stage, j.stages)
+  foreach (List stage in j.stages)
     stdio.input = _stage(j, index++, stage, stdio);
   launched = 1;
 }
@@ -257,7 +257,7 @@ static char **_argv(List stage) {
   char **argv = Scope.calloc(stage.len() + 1, sizeof(char *));
   int index = 0;
   // An empty word is a NULL String, which would end the vector early.
-  foreach (Var word, stage) {
+  foreach (Var word in stage) {
     String text = word.str();
     argv[index++] = text ? text : "";
   }
@@ -486,7 +486,7 @@ static Job _unstarted(Job job, String operation) {
 */
 Job Job.options(Job job, Map options) {
   _unstarted(job, "Job.options");
-  foreach (Var (key, value), options) {
+  foreach (Var (key, value) in options) {
     if (key is not Symbol)
       $error.options.key();
     _set(job.launch, key, value);
@@ -642,7 +642,7 @@ void Job.cleanup(Job job) {
     Raises: `<bad-arg>` when a job in `jobs` has not started.
 */
 Job Job.wait_any(Array jobs) {
-  foreach (Job job, jobs)
+  foreach (Job job in jobs)
     if (!job.started)
       $error.wait.unstarted();
   while (jobs.len()) {
@@ -668,16 +668,16 @@ String Env.get(String name) {
 
 static char **_environment(Map env) {
   Map names = {};
-  foreach (Var name, env.keys()) names[name.str()] = 1;
+  foreach (Var name in env.keys()) names[name.str()] = 1;
   Array entries = [];
   for (char **entry = environ; *entry; entry++) {
     String text = String.new(*entry);
     int equals = text.find("=");
     if (!((equals < 0 ? text : text[:equals]) in names)) entries.push(text);
   }
-  foreach (Var (name, value), env) entries.push(%"$name=$value");
+  foreach (Var (name, value) in env) entries.push(%"$name=$value");
   char **out = Scope.calloc(entries.len() + 1, sizeof(char *));
   int index = 0;
-  foreach (String entry, entries) out[index++] = entry;
+  foreach (String entry in entries) out[index++] = entry;
   return out;
 }

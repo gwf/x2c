@@ -45,7 +45,7 @@ module void _expand_argument(Array out, String arg, List stack) {
   if (identity in stack)
     _fail(%"recursive response-file inclusion: $path", NULL);
   List nested = cons(identity, stack);
-  foreach (String word, _response_arguments(path))
+  foreach (String word in _response_arguments(path))
     _expand_argument(out, word, nested);
 }
 

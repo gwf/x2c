@@ -64,7 +64,7 @@ static int _deferred_call(List callee, List receiver, List arguments) {
   if (_deferred_receiver(callee) ||
       (receiver && _deferred_receiver(receiver)))
     return 1;
-  foreach (Var argument, arguments)
+  foreach (Var argument in arguments)
     if (argument is <list> && !argument.is_nil()) {
       List syntax = argument;
       if (_deferred_receiver(syntax) ||
@@ -84,7 +84,7 @@ static void _check_arity(
 }
 
 static int _parameters_variadic(List parameters) {
-  foreach (Var parameter, parameters)
+  foreach (Var parameter in parameters)
     if (parameter == <...> || (parameter is <list> && !parameter.is_nil() &&
         parameter.car() == <...>))
       return 1;
@@ -97,13 +97,13 @@ static List _resolve_call_arguments(
   if (receiver) arguments.push(receiver);
   if (!receiver && !supplied) supplied = %((expr (void) ()));
   if (receiver && supplied === %((expr (void) ()))) supplied = NULL;
-  foreach (Var argument, supplied) {
+  foreach (Var argument in supplied) {
     int slot = argument is <list> && !argument.is_nil() &&
                argument.car() == <macro-slot>;
     Var value = c.evaluate_macro_slot(argument);
     if (value is <list> && !value.is_nil() &&
         value.car() == <seq>)
-      foreach (List item, value.list().cdr())
+      foreach (List item in value.list().cdr())
         arguments.push(c.resolve_expression(item, origin));
     else if (slot)
       arguments.push(
@@ -128,7 +128,7 @@ static List _discarding_callee(
       %"discard-helper ${(long) binding}" in c.protocol_helpers)
     return callee;
   int which = 0, index = 0;
-  foreach (Var argument, arguments) {
+  foreach (Var argument in arguments) {
     if (argument is <list> && _is_operator_temporary(c, argument))
       which |= 1 << index;
     index++;
@@ -293,7 +293,7 @@ List _x2c_func_call_arguments(List function, List storage, List arguments) {
   List count = $!int{ ${arguments.len()} };
   Array prepared = [];
   int position = 0;
-  foreach (List argument, arguments) {
+  foreach (List argument in arguments) {
     List index = $!int{ ${position++} };
     Type type = argument.cadr();
     int forwarded = type.car() == <opt-ref>;
@@ -361,7 +361,7 @@ List Compiler.func_call_parts(Compiler c, Var content) {
     case apply(?callee): return %($callee);
     case call(?callee, ?count, *arguments): {
       Array parts = $auto([callee]);
-      foreach (List argument, _slot_statements(arguments)) {
+      foreach (List argument in _slot_statements(arguments)) {
         List part = _func_arg_part(argument);
         if (!part) return NULL;
         parts.push(part);
@@ -398,10 +398,10 @@ static List _func_arg_part(List argument) {
 /* Open statement groups in a slot. */
 static List _slot_statements(List items) {
   Array opened = $auto([]);
-  foreach (List item, items)
+  foreach (List item in items)
     match (item) {
       case %(seq *group):
-        foreach (List statement, group) opened.push(statement);
+        foreach (List statement in group) opened.push(statement);
       default: opened.push(item);
     }
   return opened;

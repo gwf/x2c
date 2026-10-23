@@ -173,7 +173,7 @@ static int _shadow_identifier(
   if (!visible_type || !(%(automatic $visible) in binding_facts) ||
       (type && !c.sym.resolve_global(%($spelling), NULL)))
     return 0;
-  foreach (List local, c.sym.unshadow_visible(spelling))
+  foreach (List local in c.sym.unshadow_visible(spelling))
     c.respell_captures(local);
   if (!(%(emitted $visible) in binding_facts))
     c.set_fact(%(emitted $visible), c.fresh_name("binding_shadow"));

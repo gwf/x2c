@@ -144,7 +144,7 @@ static int _same(Macro t, Var descriptor) {
 static List _invoke_values(Macro t, List rows) {
   Array projected = [];
   List holes = t.assoc(<parameters>);
-  foreach (List row, rows) {
+  foreach (List row in rows) {
     List hole = holes.car();
     holes = holes.cdr();
     Var value = hole.assoc(<kind>) == <expr>
@@ -173,7 +173,7 @@ static int _pending_capture(
    retained invocation each binder captures one argument. */
 static List _internal_names(Macro t, List names, int pending) {
   Array internal = [];
-  foreach (List hole, t.assoc(<parameters>).list()) {
+  foreach (List hole in t.assoc(<parameters>).list()) {
     String label = names.car().str(), prefix = label[0:1];
     names = names.cdr();
     if (pending) prefix = "?";
@@ -241,7 +241,7 @@ static int _keep(
 static List _case_shape(Macro t, List names) {
   List pattern = _pattern(t, names, 1), replacements = NULL;
   int ordinal = 0;
-  foreach (List fresh, t.assoc(<fresh>).list()) {
+  foreach (List fresh in t.assoc(<fresh>).list()) {
     Atom identity = _fixed(ordinal++);
     replacements = cons(
       %(${fresh.car()} (binding (!and $identity $identity) ?)),
@@ -271,7 +271,7 @@ static Var _view(Var value) {
     case %(binding ? ?): return value;
   }
   Array parts = [];
-  foreach (Var child, node) parts.push(_view(child));
+  foreach (Var child in node) parts.push(_view(child));
   return parts.list_free();
 }
 
@@ -282,11 +282,11 @@ static MacroFixedSlots _fixed_slots(
   policy.count = policy.names = 0;
   if (plan.status != <prepared>) return policy;
   int ordinal = 0;
-  foreach (List fresh, t.assoc(<fresh>).list()) {
+  foreach (List fresh in t.assoc(<fresh>).list()) {
     int slot = plan.layout.index(_fixed(ordinal++));
     if (slot >= 0) policy.slots[policy.count++] = slot;
   }
-  foreach (List hole, t.assoc(<parameters>).list()) {
+  foreach (List hole in t.assoc(<parameters>).list()) {
     if (hole.assoc(<kind>) == <name>) {
       int slot = plan.layout.index(names.car());
       if (slot >= 0) policy.name_slots[policy.names++] = slot;
@@ -364,7 +364,7 @@ static int _has_slot(const int *slots, int count, int slot) {
    subject rows; ordinary bindings use the spelling they already carry. */
 static String _source_spelling(Var value) {
   if (value is not <list>) return NULL;
-  foreach (List row, macro_subject is <list> ? macro_subject.list() : NULL)
+  foreach (List row in macro_subject is <list> ? macro_subject.list() : NULL)
     match (row)
       case %(source-spelling ?binding ?(String spelling)):
         if (List.compare(binding, value) == 0) return spelling;

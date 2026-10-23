@@ -60,7 +60,7 @@ static List _destructure_targets(Compiler c, List lhs) {
       if (_destructure_identifier(target)) return %(targets $target);
       match (target)
         case %(expr ? ${$source_commas_content(%(*targets))}): {
-          foreach (List entry, targets) {
+          foreach (List entry in targets) {
             if (_destructure_identifier(entry)) continue;
             $fail.expressions_destructure_target(c, c.token);
           }
@@ -220,7 +220,7 @@ List Compiler.parse_parenthesized_statement(Compiler c) {
           c, decl, parameter.type_from_ast(), _parse_cast(c), origin);
         return _finish_paren_statement(c, cast, 0);
       }
-    foreach (List parameter, parameters)
+    foreach (List parameter in parameters)
       c.check_reference_placement(parameter.type_from_ast());
     c.expect(<=>);
     List source = c.parse_assignment();
@@ -325,7 +325,7 @@ module int _casts_to_template_typedef(Compiler c, List declaration) {
 static int _casts_to_typedef_name(Compiler c, List declaration) {
   List base = declaration.cadr();
   if (!c.macro_holes || !base.match(%(* ?(String name)))) return 0;
-  foreach (Var word, base)
+  foreach (Var word in base)
     if (word == <struct> || word == <union> || word == <enum>) return 0;
   return 1;
 }
@@ -536,7 +536,7 @@ static List _apply_macro_value(
     return %(expr (<macro-expr>) (tpl-call $expr (args @supplied)));
   List values = %(expr ("List") (nil));
   if (supplied === %((expr (void) ()))) supplied = NULL;
-  foreach (List argument, supplied.reverse())
+  foreach (List argument in supplied.reverse())
     values = %(expr ("List")
       (cons ${c.convert_expression(argument, %("Var"))} $values));
   List callee = c.resolve_expression(

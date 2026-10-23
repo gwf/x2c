@@ -56,7 +56,7 @@ static List _argument_row(Compiler c, List hole, Symbol kind) {
 
 static void _row_directives(Compiler c, Symbol kind, Array captured) {
   if (kind == <match-row> && c.token != c.directives_taken)
-    foreach (List directive, c.leading_preproc()) captured.push(directive);
+    foreach (List directive in c.leading_preproc()) captured.push(directive);
 }
 
 /* `in` may separate a declaration from what follows, as in
@@ -156,14 +156,14 @@ module List _capture_row_project(
    construction requirements. */
 static List _sequence_row(Compiler c, List sources, int retain) {
   Array captured_sources = [], values = [], construction = [];
-  foreach (Var captured, sources) {
+  foreach (Var captured in sources) {
     List forwarded = retain ? NULL : _forwarded_capture(c, captured);
     match (forwarded)
       case %(capture (source *forwarded_sources)
                      (value *forwarded_values) ? ? *required): {
-        foreach (Var item, forwarded_sources) captured_sources.push(item);
-        foreach (Var item, forwarded_values) values.push(item);
-        foreach (Var item, required) construction.push(item);
+        foreach (Var item in forwarded_sources) captured_sources.push(item);
+        foreach (Var item in forwarded_values) values.push(item);
+        foreach (Var item in required) construction.push(item);
         continue;
       }
     captured_sources.push(captured);
@@ -239,7 +239,7 @@ static List _forwarded_hole(Compiler c, Var captured) {
 }
 
 static String _forwarded_prefix(String spelling) {
-  foreach (String prefix, forwarded_prefixes)
+  foreach (String prefix in forwarded_prefixes)
     if (spelling.startswith(prefix)) return prefix;
   return NULL;
 }
@@ -250,7 +250,7 @@ static String _forwarded_prefix(String spelling) {
 static List _forwarded_prefix_list(void) {
   Array prefixes = [];
   Map seen = {};
-  foreach (String projection, %("expression" "value" "source" "splice"))
+  foreach (String projection in %("expression" "value" "source" "splice"))
     for (int sequence = 0; sequence <= 1; sequence++) {
       String prefix = Macro.binder(<?>, projection, sequence).str();
       if (prefix in seen) continue;

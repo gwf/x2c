@@ -177,7 +177,7 @@ static void _directive(ArmScan &s, Token token, size_t i) {
 }
 
 static int _hidden_group(Array stack) {
-  foreach (List group, stack) if (group.caddr() == 2) return 1;
+  foreach (List group in stack) if (group.caddr() == 2) return 1;
   return 0;
 }
 
@@ -300,7 +300,7 @@ List Compiler.leading_preproc(Compiler c) {
 /** Records object-like `#define` names and removes names after `#undef`.
     Source storage determines visibility independently of directives. */
 void Compiler.note_preprocessor_macros(Compiler c, List directives) {
-  foreach (List directive, directives) c.note_object_macro(directive.cadr());
+  foreach (List directive in directives) c.note_object_macro(directive.cadr());
 }
 
 /** Records the name of the `#define` line `content` so a bare atom spelled
@@ -370,7 +370,7 @@ static Var _macro_prefix(Compiler c, Token token, String param) {
     else if (!c.object_macros.try_get(word, definition) ||
              definition is not <list>)
       return 1;
-    else foreach (Var item, definition) words.push(item);
+    else foreach (Symbol item in definition) words.push(item);
     token = next;
   }
   return wrapped ? <wrapper> : words.list_free();
@@ -396,7 +396,7 @@ static int _is_annotation(Compiler c, String word) {
 static int _prefix_rank(Var v) {
   if (v is not <list>) return 0;
   if (List.match(v, %(* static *))) return 4;
-  foreach (Symbol word, v) if (word.is_type_qualifier()) return 1;
+  foreach (Symbol word in v) if (word.is_type_qualifier()) return 1;
   return v.list() ? 3 : 2;
 }
 
@@ -425,9 +425,9 @@ List Compiler.preproc_track_arms(List arms, String text) {
 */
 List Compiler.preproc_within_arms(List arms, List items) {
   Array out = [];
-  foreach (List group, arms.reverse())
-    foreach (List directive, group) out.push(directive);
-  foreach (Var item, items) out.push(item);
+  foreach (List group in arms.reverse())
+    foreach (List directive in group) out.push(directive);
+  foreach (List item in items) out.push(item);
   for (unsigned i = arms.len(); i; i--) out.push(%(preproc "#endif"));
   return out.list_free();
 }

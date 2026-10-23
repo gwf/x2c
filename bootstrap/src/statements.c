@@ -1176,8 +1176,8 @@ static List _block_items(Compiler c, int anchor_items){
         ;  x2c_cleanup_push(& _x2c_gensym_defer_record_9); {
           while(1){
             _x2c_complete_here(c, 5011670, _block_keywords());  if(c -> token != c -> directives_taken){
-              Var directive;  List _x2c_gensym_macro_object_5 = Compiler_leading_preproc(c);  List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;  Var _x2c_gensym_macro_cursor_output_5;  while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_5))){
-                directive = _x2c_gensym_macro_cursor_output_5;  Array_push(block, directive);
+              List directive;  List _x2c_gensym_macro_object_5 = Compiler_leading_preproc(c);  List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;  Var _x2c_gensym_macro_cursor_output_5;  while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_5))){
+                directive = Var_list_payload(_x2c_gensym_macro_cursor_output_5);  Array_push(block, List_var(directive));
               }
 
             }

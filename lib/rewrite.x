@@ -7,7 +7,7 @@
 meta Code register_rewrite(Code function, Code pattern, List holes) {
   Macro shape = pattern.value();
   Array patterns = [];
-  foreach (Code hole, holes) patterns.push(hole.value());
+  foreach (Code hole in holes) patterns.push(hole.value());
   return function.register_rewrite(shape, patterns.list_free());
 }
 

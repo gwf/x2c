@@ -93,7 +93,7 @@ static List _selector_definitions(Macro car, Macro cdr) =>
 
 List _scalar_access_record(Type type) {
   String name = "_native_scalar_access";
-  foreach (Symbol word, (List) type) name = %"${name}_$word";
+  foreach (Symbol word in (List) type) name = %"${name}_$word";
   return x2c_ident(name);
 }
 
@@ -103,7 +103,7 @@ List _scalar_access_record(Type type) {
 Code register_rewrite(Code function, Code pattern, List holes) {
   Macro shape = pattern.value();
   Array patterns = [];
-  foreach (Code hole, holes) patterns.push(hole.value());
+  foreach (Code hole in holes) patterns.push(hole.value());
   return function.register_rewrite(shape, patterns.list_free());
 }
 
@@ -145,7 +145,7 @@ List _tag_decode_group(List rows, Map counts, int top) {
   Array ids = [];
   for (int i = 0; i < 8; i++)
     ids.push($!( _invalid_ ));
-  foreach (List row, rows) {
+  foreach (List row in rows) {
     if (_tag_top(row) != top) continue;
     int selector = immediate ? _tag_middle(row) : _tag_bottom(row) & mask;
     ids[selector] = %(expr () (ident ${x2c_ident(_tag_id(row))}));
@@ -165,7 +165,7 @@ List _tag_decode_groups(void) {
 List _tag_id_checks(void) {
   Array checks = [];
   int index = 0;
-  foreach (List row, _tag_rows()) {
+  foreach (List row in _tag_rows()) {
     checks.push(
       $!Unit{
         _Static_assert(
@@ -376,7 +376,7 @@ static String _delegate_type_name(Type type) {
 
 static String _delegate_path(Type type, List fields, String member) {
   Array parts = [_delegate_type_name(type)];
-  foreach (String field, fields) parts.push(field);
+  foreach (String field in fields) parts.push(field);
   if (member) parts.push(member);
   return ".".join(parts.list_free());
 }
@@ -384,7 +384,7 @@ static String _delegate_path(Type type, List fields, String member) {
 static void _delegate_fail_packages(
   Type outer, Type type, String member, List fields, List packages) {
   Array notes = [%"delegate path: ${_delegate_path(outer, fields, NULL)}"];
-  foreach (String package, packages) notes.push(%"package: '$package'");
+  foreach (String package in packages) notes.push(%"package: '$package'");
   String method = %"${_delegate_type_name(type)}.$member";
   x2c_diagnostic_fail_at(
     NULL, <type>,
@@ -402,7 +402,7 @@ static void _delegate_search(
     return;
   }
   seen = cons(aggregate, seen);
-  foreach (List row, aggregate.marked_fields(<delegate>)) {
+  foreach (List row in aggregate.marked_fields(<delegate>)) {
     String name = row.car();
     Type type = receiver.resolve_member(name, 0).caddr();
     List path = cons(name, reverse);
@@ -421,7 +421,7 @@ static void _delegate_search(
 static void _delegate_fail_ambiguous(
   Type outer, String member, List paths) {
   Array notes = [];
-  foreach (List path, paths) {
+  foreach (List path in paths) {
     String spelling = Code.binding_spelling(path.cadr());
     String description = _delegate_path(outer, path.car(), member);
     notes.push(%"delegate path: $description -> $spelling");
@@ -457,7 +457,7 @@ Code delegate_member(Code code) {
     List fields = _delegate_fields(receiver.cadr(), name);
     if (!fields) return code;
     Code callee = receiver;
-    foreach (String step, fields.append(%($name)))
+    foreach (String step in fields.append(%($name)))
       callee = %(expr () (op . $callee ($step)));
     return %(expr () (call $callee (args @arguments)));
   }
@@ -488,7 +488,7 @@ static Code _destructure_element(Atom values, int index) {
 static List _destructure_writes(List targets, Atom values) {
   Array writes = [];
   int index = 0;
-  foreach (Code target, targets) {
+  foreach (Code target in targets) {
     Type type = target.cadr();
     Code element = _destructure_element(values, index++);
     writes.push(%(stmnt ${$!($type){ $target = $element }}));
@@ -511,7 +511,7 @@ Code destructure_declaration(Code node) {
     case %(dstrdecl (params *parameters) ?source): {
       Array items = [_destructure_read(values, source)];
       int index = 0;
-      foreach (List parameter, parameters)
+      foreach (List parameter in parameters)
         match (parameter) case %(param ?base ?declarator): {
           Code element = _destructure_element(values, index++);
           items.push(%(declare $base (bindings (op = $declarator $element))));
@@ -520,7 +520,7 @@ Code destructure_declaration(Code node) {
     }
     case %(dstrdecl ?(Type type) (targets *names) ?source): {
       Array declarators = [], targets = [];
-      foreach (Var name, names) {
+      foreach (List name in names) {
         declarators.push(%(bind $name ()));
         targets.push(%(expr $type (ident $name)));
       }
@@ -594,7 +594,7 @@ Code dynamic_binary(Code code) {
 }
 
 static Symbol _dynamic_operation(Symbol assignment) {
-  foreach (List row, %((<+=> <+>) (<-=> <->) (<*=> <*>) (</=> </>)
+  foreach (List row in %((<+=> <+>) (<-=> <->) (<*=> <*>) (</=> </>)
                        (<%=> <%>) (<"<<="> <"<<">) (<">>="> <">>">)
                        (<&=> <&>) (<^=> <^>) (<|=> <|>)))
     if (row.car() == assignment) return row.cadr();
@@ -731,7 +731,7 @@ static List _lambda_targets(List node) {
   Array targets = [];
   match (node) {
     case %(dstrdecl (params *params) ?):
-      foreach (List param, params)
+      foreach (List param in params)
         match (param) case %(param ? (bind ?binding ?)): targets.push(binding);
     case %(dstrdecl ? (targets *names) ?): return names;
   }
@@ -741,7 +741,7 @@ static List _lambda_targets(List node) {
 static List _lambda_kept_items(
   Array items, List original, Map declaring) {
   Array out = [], run = [];
-  foreach (Var item, items) {
+  foreach (List item in items) {
     if (item === original.car()) run.push(item);
     else {
       if (run.len()) out.push(Code.lowered(%(seq @{run.list()}), NULL));
@@ -766,7 +766,7 @@ static Var _lambda_declare_cells(List node, Map cells) {
   int celled = 0;
   match (node) {
     case %(declare ?base (bindings *bindings)):
-      foreach (List item, bindings) {
+      foreach (List item in bindings) {
         Code cell = NULL;
         match (item) {
           case %(bind ?binding *):
@@ -780,7 +780,7 @@ static Var _lambda_declare_cells(List node, Map cells) {
       }
     case %(dstrdecl *): {
       items.push(Code.lowered(node, NULL));
-      foreach (List binding, _lambda_targets(node)) {
+      foreach (List binding in _lambda_targets(node)) {
         Code copy = _lambda_copied_cell(binding, cells);
         if (copy) items.push(copy);
         celled |= !!copy;
@@ -807,7 +807,7 @@ static Var _lambda_rebuild(
       int first = done.len() - node.list().len(), index = first;
       Array parts = [];
       int changed = 0, declares = 0;
-      foreach (Var part, node.list()) {
+      foreach (Var part in node.list()) {
         changed |= done[index] !== part;
         declares |= cells && done[index] in declaring;
         parts.push(done[index++]);
@@ -833,7 +833,7 @@ static Var _lambda_rebuild(
     else if (read) done.push(read);
     else {
       Array parts = [];
-      foreach (Var part, node.list()) parts.push(part);
+      foreach (Var part in node.list()) parts.push(part);
       int body = node.list().car() == <lambda> ? parts.len() - 1 : -1;
       pending.push(node);
       modes.push(1);
@@ -870,7 +870,7 @@ static List _lambda_items(Code body) {
 
 static List _lambda_params(List params) {
   Array out = [];
-  foreach (List param, params)
+  foreach (List param in params)
     match (param) {
       case %(binding ? ?): out.push(%(param ("Var") (bind $param ())));
       default: out.push(param);
@@ -881,7 +881,7 @@ static List _lambda_params(List params) {
 static List _lambda_closure_params(
   List params, List reads, List captures) {
   Array out = [];
-  foreach (List param, _lambda_params(params)) {
+  foreach (List param in _lambda_params(params)) {
     Type read = reads.car().list().car();
     reads = reads.cdr();
     match (param) case %(param ? (bind ?binding (& *))): {
@@ -891,7 +891,7 @@ static List _lambda_closure_params(
     }
     out.push(param);
   }
-  foreach (List capture, captures)
+  foreach (List capture in captures)
     match (capture) case %(capture ?binding ?(Type type) ?): {
       (List base, List modifiers) = type.parts();
       out.push(%(param $base (bind $binding $modifiers)));
@@ -942,7 +942,7 @@ static Type _lambda_field_type(Type type) {
 
 static Code _lambda_record(List context, List types) {
   Array fields = [];
-  foreach (Type type, types) {
+  foreach (Type type in types) {
     (List base, List modifiers) = type.parts();
     List name = _lambda_member(fields.len());
     fields.push(%(declare $base (bindings (bind $name $modifiers))));
@@ -959,7 +959,7 @@ static Code _lambda_adapter(
   Type pointer = %(* const struct $context);
   Code record = %(expr $pointer (ident ("record")));
   Array items = [], arguments = [];
-  foreach (List read, reads) {
+  foreach (List read in reads) {
     (Type type, Code value) = read;
     List name = %(${%"a${items.len()}"});
     (List base, List modifiers) = type.parts();
@@ -981,7 +981,7 @@ static Code _lambda_adapter(
        (bindings (op = (bind ("record") (*))
                       (expr $pointer (cast $pointer $context_read))))));
   int index = 0;
-  foreach (List capture, captures) {
+  foreach (List capture in captures) {
     Type type = capture.caddr(), stored = _lambda_field_type(type);
     Code field = %(expr (const @stored)
                     (op -> $record ${_lambda_member(index++)}));
@@ -1005,7 +1005,7 @@ static Code _lambda_bridge(
   List bridge, List adapter, List context, Code signature, List types) {
   List record = x2c_ident("record");
   Array parameters = [], fields = [];
-  foreach (Type type, types) {
+  foreach (Type type in types) {
     (List base, List modifiers) = type.parts();
     List field = _lambda_field(fields.len());
     parameters.push(%(param $base (bind $field $modifiers)));
@@ -1024,7 +1024,7 @@ static Code _lambda_bridge(
 static Code _lambda_value(
   List adapter, List context, Code signature, List captures) {
   Array setup = [], values = [], types = [];
-  foreach (List capture, captures)
+  foreach (List capture in captures)
     match (capture) case %(capture ? ?(Type type) ?(Code value)): {
       Type stored = _lambda_field_type(type);
       (List base, List modifiers) = stored.parts();
@@ -1077,7 +1077,7 @@ Code lambda_closure(Code node) {
         %(expr (* const "FuncArg") (ident $argv)));
       List reads = adapted.cdr();
       Array fields = [];
-      foreach (List capture, captures)
+      foreach (List capture in captures)
         fields.push(_lambda_field_type(capture.caddr()));
       Code record_type = _lambda_record(context, fields.list_free());
       List declared = _lambda_closure_params(params, reads, captures);
@@ -1109,18 +1109,18 @@ static List _lambda_designated(Var value) {
 
 static Map _lambda_shared(List params, List items) {
   Map declared = {}, shared = {}, cells = {};
-  foreach (List param, params)
+  foreach (List param in params)
     match (param) case %(param ? (bind ?binding *)): declared[binding] = 1;
   List node;
   $ast.walk(items, node) match (node) {
     case %(declare (!set ?base (* static *)) *): continue;
     case %(bind ?binding *): declared[binding] = 1;
     case %(dstrdecl *):
-      foreach (List binding, _lambda_targets(node)) declared[binding] = 1;
+      foreach (List binding in _lambda_targets(node)) declared[binding] = 1;
     case %(lambda *parts): {
-      foreach (List part, parts)
+      foreach (List part in parts)
         match (part) case %(captures *rows):
-          foreach (List row, rows)
+          foreach (List row in rows)
             match (row)
               case %(capture ? (& *type) (expr ? (op & ?target))): {
                 List binding = _lambda_designated(target);
@@ -1129,7 +1129,7 @@ static Map _lambda_shared(List params, List items) {
       continue;
     }
   }
-  foreach (Var (binding, type), shared)
+  foreach ((List binding, Type type) in shared)
     if (declared.contains(binding)) cells[binding] = %(0 $type);
   return cells;
 }
@@ -1149,14 +1149,14 @@ Code lambda_cells(Code node) {
       Map cells = _lambda_shared(params, items);
       if (!cells.len()) return node;
       Array entry = [];
-      foreach (List param, params)
+      foreach (List param in params)
         match (param) case %(param ? (bind ?binding *)): {
           Code cell = _lambda_copied_cell(binding, cells);
           if (cell) entry.push(cell);
         }
       Map declaring = {};
       Array body = [];
-      foreach (Var item, items)
+      foreach (List item in items)
         body.push(
           _lambda_mentions(item, cells)
             ? _lambda_rebuild(item, NULL, cells, declaring) : item);
@@ -1183,7 +1183,7 @@ static void _match_place(Buffer b, Array out, Var node) {
 
 static List _match_items(Array out) {
   Array items = [], run = [];
-  foreach (Var piece, out) {
+  foreach (Var piece in out) {
     match (piece) case %(preproc ?): {
       if (run.len()) items.push(cons(" ", run));
       run.clear();
@@ -1378,7 +1378,7 @@ static int _match_nested(
 
 static void _match_captures(Buffer b, List binders) {
   int index = 0;
-  foreach (Var binder, binders) {
+  foreach (Atom binder in binders) {
     int list = binder.is_list_binder();
     b.printf(
       " %s _x2c_gensym_match_%s_%d = %s_x2c_gensym_match_values[%d]%s;",
@@ -1506,7 +1506,7 @@ static Code _match_lowered(Code subject, List rows) {
   int labelling = 1, opening = 0, depth = 0, sites = 0;
   int depths = -1, values = -1;
   int dynamic = subject.type().is_named("Var");
-  foreach (List row, rows) {
+  foreach (List row in rows) {
     match (row) case %(preproc ?(String text)): {
       int nesting = _match_nesting(text);
       _match_place(b, out, row);
@@ -1669,7 +1669,7 @@ static void _printf_scan(
 
 static Code _printf_lowered(Code code, Code format, List values) {
   int has_var = 0;
-  foreach (Code value, values) has_var |= _printf_is_var(value);
+  foreach (Code value in values) has_var |= _printf_is_var(value);
   if (!has_var) return code;
   String spelling = format.format();
   if (!spelling)
@@ -1716,7 +1716,7 @@ static List _protocol_forward(
   List templates = template.car().list().cadr();
   Array params = [], arguments = [];
   int index = 0;
-  foreach (Type type, target.car().list().cadr()) {
+  foreach (Type type in target.car().list().cadr()) {
     List name = x2c_ident(%"a${index++}");
     params.push($!Param{ $type $name });
     Code argument = $!( $name );
@@ -1762,7 +1762,7 @@ static Code _protocol_guarded(
 
 static Code _protocol_prototype(List name, Type expected) {
   Array params = [];
-  foreach (Type type, expected.car().list().cadr()) {
+  foreach (Type type in expected.car().list().cadr()) {
     (List base, List modifiers) = type.parts();
     params.push(%(param $base (bind () $modifiers)));
   }
@@ -1810,10 +1810,10 @@ Code protocol_conformance(Code node) {
     case %(conform ? ?(Type participant) ?(String forward)
            ?(String reverse) ?(String binder) ?descriptor (*rows)): {
       Array slots = [];
-      foreach (List row, rows) match (row)
+      foreach (List row in rows) match (row)
         case %(?(String member) ? ?(String source) ?(Type expected)
                ?(Type template) *parts):
-          foreach (List part, parts) match (part) {
+          foreach (List part in parts) match (part) {
             case %(default ?(List name) ?(Symbol storage)): {
               List declared = storage == <static>
                 ? %(static inline @{expected.cdr()})
@@ -1851,7 +1851,7 @@ Code protocol_conformance(Code node) {
 
 static int _raise_immutable(Type type) {
   if (!type) return 0;
-  foreach (String name, %("Var" "String" "List" "Symbol" "Atom"))
+  foreach (String name in %("Var" "String" "List" "Symbol" "Atom"))
     if (type.is_named(name)) return 1;
   return type.numeric() != NULL;
 }
@@ -1873,7 +1873,7 @@ Code raise_lowering(Code node) {
     Code symbol = ((Code) code).convert(%("Symbol"));
     int changed = symbol != code, index = 0;
     Array converted = [];
-    foreach (Code detail, details) {
+    foreach (Code detail in details) {
       Code part = index++ & 1 ? _raise_value(detail) : detail;
       Code value = part.convert(%("Var"));
       if (value != part) changed = 1;
@@ -1952,7 +1952,7 @@ static Code _string_switch_helper(Type type, List labels) {
   List name = x2c_binding_for(key, "string_switch"), s = x2c_ident("s");
   Array tests = [];
   int index = 0;
-  foreach (List label, labels) {
+  foreach (List label in labels) {
     List value = $!int{ ${++index} };
     tests.push($!{ if ($s == $label) return $value; });
   }
@@ -1993,7 +1993,7 @@ static int _try_arm_exits(List arm) {
 List _x2c_try_catch_cases(List selected, List arms) {
   Array cases = [];
   int index = 0, exits = 1;
-  foreach (List arm, arms) {
+  foreach (List arm in arms) {
     cases.push($!{ if ($selected == $index) $arm });
     index++;
     exits &= _try_arm_exits(arm);
@@ -2031,7 +2031,7 @@ static Var _try_finalizer_label(Var value, List &at) {
         continue;
       }
     }
-    foreach (Var child, node) {
+    foreach (Var child in node) {
       pending.push(child);
       around.push(here);
     }
@@ -2084,7 +2084,7 @@ static List _try_catch_clause(List handle, List records, Array rows) {
   if (!records) return NULL;
   String state = "ERROR_CATCH_PENDING";
   Array arms = [], patterns = [];
-  foreach (List record, records) {
+  foreach (List record in records) {
     Code pattern = record.car();
     if (pattern) {
       if (!pattern.is_static_pattern()) state = "ERROR_CATCH_TRANSIENT";
@@ -2159,7 +2159,7 @@ static List _operator_rows(void) => %(
 
 static List _operator_cases(int key, int value, int derived) {
   Array cases = [];
-  foreach (List row, _operator_rows()) {
+  foreach (List row in _operator_rows()) {
     if (!row[key] || !row[value]) continue;
     if (derived >= 0 && row[4] != derived) continue;
     Symbol label = row[key];

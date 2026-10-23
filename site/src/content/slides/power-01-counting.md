@@ -10,8 +10,8 @@ Map word_count(String path) {
   Map counts = {};
   File input = path.open("r");
   defer input.close();
-  foreach (String line, input)
-    foreach (String word, line.lower().words())
+  foreach (String line in input)
+    foreach (String word in line.lower().words())
       counts[word] += 1;
   return counts;
 }
@@ -28,7 +28,7 @@ Array ranked = counts.enumerate().array().sort_with(
     int order = right[1].compare(left[1]);
     return order ? order : right[0].compare(left[0]);
   });
-foreach (Var (word, n), ranked)
+foreach ((String word, int n) in ranked)
   puts(%"$n $word");
 ~return 0;
 ~}

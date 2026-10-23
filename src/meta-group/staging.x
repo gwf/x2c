@@ -16,7 +16,7 @@ void Compiler.use_meta_build_directory(
   meta_build_tables = {};
   meta_build_providers = providers;
   int index = 1;
-  foreach (String owner, owners) meta_build_tables[owner] = index++;
+  foreach (String owner in owners) meta_build_tables[owner] = index++;
 }
 
 /** Writes the group of a unit the project meta build parsed into the build
@@ -33,7 +33,7 @@ void Compiler.write_meta_build(Compiler c) {
   List code = failure ? NULL : _emit(
     c, Compiler.module_stamp(), %"meta_group_$index", %"_$index", failure);
   Array sources = [];
-  foreach (Var (path, _), c.deps) sources.push(path);
+  foreach ((String path, Var _) in c.deps) sources.push(path);
   Path.write_text(%"$base.deps", "\n".join(sources.list_free()));
   if (!code) {
     Path.write_text(%"$base.failure", failure);
@@ -73,7 +73,7 @@ static String _stage(Compiler c, String &failure) {
     $scope(&session_meta_scope)
       ((Func) targets["x2c_module_reset"].pointer()).apply(0, NULL);
   }
-  foreach (List entry, c.meta_group)
+  foreach (List entry in c.meta_group)
     match (entry) case %(function ? ?(String target) ?(Type type) *): {
       if (target in c.meta_group_bound || !(target in targets)) continue;
       Var bound = targets[target];

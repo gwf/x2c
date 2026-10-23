@@ -79,7 +79,7 @@ meta Code dynamic_binary(Code code) {
 
 /* The operation a compound assignment applies before it stores. */
 meta static Symbol _dynamic_operation(Symbol assignment) {
-  foreach (List row, %((<+=> <+>) (<-=> <->) (<*=> <*>) (</=> </>)
+  foreach (List row in %((<+=> <+>) (<-=> <->) (<*=> <*>) (</=> </>)
                        (<%=> <%>) (<"<<="> <"<<">) (<">>="> <">>">)
                        (<&=> <&>) (<^=> <^>) (<|=> <|>)))
     if (row.car() == assignment) return row.cadr();

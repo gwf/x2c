@@ -631,7 +631,7 @@ that whole function, without indenting the body a further level:
 ```x2c
 $scope() static int distinct(List words) {
   Map seen = {};
-  foreach (String word, words) seen[word] = 1;
+  foreach (String word in words) seen[word] = 1;
   return seen.len();
 }
 int main(void) { return distinct(%("ab" "cd" "ab")) == 2 ? 0 : 1; }
@@ -2881,7 +2881,7 @@ within the body runs the decorator's deferred cleanup before leaving:
 #include "x2c.x"
 $scope() static int total(List values, int bias) {
   int sum = bias;
-  foreach (Var value, values) sum += value.int();
+  foreach (int value in values) sum += value;
   return sum;
 }
 int main(void) { return total(%(1 2 3), 10) == 16 ? 0 : 1; }
@@ -5186,9 +5186,9 @@ int main(void) {
   int total = 0;
 foreach (int value in values) total += value;
 foreach (int key in map.keys()) printf("%d\n", key);
-foreach (Var (key, value) in map)
-  printf("%ld=%ld\n", key.integer(), value.integer());
-foreach (int value, values) total -= value;
+foreach (int (key, value) in map)
+  printf("%d=%d\n", key, value);
+foreach (int value in values) total -= value;
   return total == 0 ? 0 : 1;
 }
 ```

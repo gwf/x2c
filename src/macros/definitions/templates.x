@@ -66,7 +66,7 @@ static List _slot_binders(List replacement) {
    carries. */
 static void _constructed_names(Definition &d, Map bindings) {
   Var required = _hole_key(d.target, "construction");
-  foreach (List parameter, d.parameters)
+  foreach (List parameter in d.parameters)
     if (parameter.assoc(<kind>) == <name>) {
       Var name = Macro.binder(parameter.assoc(<binder>), "value", 0);
       bindings[name] = %($required $name);
@@ -78,7 +78,7 @@ static void _constructed_names(Definition &d, Map bindings) {
    spelling. */
 static Array _local_binders(Definition &d, Map bindings) {
   Array fresh = [];
-  foreach (Var identity, _recorded(d.locals)) {
+  foreach (List identity in _recorded(d.locals)) {
     if (%(provisional $identity) in d.locals) {
       bindings[identity] = d.locals[identity];
       continue;
@@ -91,7 +91,7 @@ static Array _local_binders(Definition &d, Map bindings) {
 }
 
 static void _check_kinds(Definition &d) {
-  foreach (List hole, d.parameters)
+  foreach (List hole in d.parameters)
     if (!hole.assoc(<kind>)) {
       String hole_spelling = hole.assoc(<binder>).str()[1:];
       $fail.macros_hole_untyped(d.c, d.start, hole_spelling);
@@ -102,9 +102,9 @@ static void _check_kinds(Definition &d) {
    expansion; the last field marks the names compile-time Lisp reads. */
 static List _fresh_rows(Definition &d, Array locals) {
   Array fresh = [];
-  foreach (Var binder, d.using.list_free())
+  foreach (Atom binder in d.using.list_free())
     fresh.push(%($binder ${binder.str()[1:]} 1));
-  foreach (Var identity, locals) {
+  foreach (List identity in locals) {
     Var spelling = d.locals[identity];
     Atom binder = _local_binder(
       identity, %(tag-local $identity) in d.locals);
@@ -126,7 +126,7 @@ static Map _binder_uses(List template) {
                   "x2c.template" macrodef syntax-recipe declaration-recipe)
              *):
         return NULL;
-    foreach (Var item, syntax)
+    foreach (Var item in syntax)
       if (item.is_binder()) uses[item] = uses.getdefault(item, 0) + 1;
   }
   return uses;
@@ -137,7 +137,7 @@ static Map _binder_uses(List template) {
    template-origin wrapper remains, because a rebuild opens no invocation. */
 static List _rebuild_template(Definition &d) {
   Map expressions = {};
-  foreach (List hole, d.parameters)
+  foreach (List hole in d.parameters)
     if (hole.assoc(<kind>) == <expr>)
       expressions[_hole_key(hole, "expression")] = 1;
   return _rebuild_syntax(d.template, expressions);
@@ -162,9 +162,9 @@ static Var _rebuild_syntax(Var syntax, Map expressions) {
 static List _rebuild_keys(Definition &d, Map uses) {
   List holes = d.target ? d.parameters.append(%(${d.target})) : d.parameters;
   Array keys = [];
-  foreach (List hole, holes) {
+  foreach (List hole in holes) {
     Array used = [];
-    foreach (String projection,
+    foreach (String projection in
              %("source" "value" "expression" "splice" "return" "declarator"))
       used.push(_used(uses, hole, projection, <?>));
     keys.push(used.list_free());
@@ -179,9 +179,9 @@ static List _rebuild_keys(Definition &d, Map uses) {
    its template can hold the enclosing template's holes. */
 static int _uses_holes_once(Definition &d, Map uses) {
   List holes = d.target ? cons(d.target, d.parameters) : d.parameters;
-  foreach (List hole, holes) {
+  foreach (List hole in holes) {
     int count = 0;
-    foreach (String projection,
+    foreach (String projection in
              %("source" "value" "expression" "splice" "member" "return"
                "declarator" "construction"))
       count += uses.getdefault(_hole_key(hole, projection), 0).int();
@@ -334,7 +334,7 @@ static List _invocation_pattern(Definition &d) {
   Map binders = {};
   _template_binders(d.template, binders);
   Array arguments = [];
-  foreach (List parameter, d.parameters)
+  foreach (List parameter in d.parameters)
     arguments.push(_capture_pattern(parameter, binders));
   List invocation = d.kind == <decorator>
     ? %(
@@ -351,12 +351,12 @@ static void _template_binders(Var value, Map binders) {
     return;
   }
   if (value is not <list>) return;
-  foreach (Var child, value.list()) _template_binders(child, binders);
+  foreach (Var child in value.list()) _template_binders(child, binders);
 }
 
 static List _fresh_patterns(List fresh, Map binders) {
   Array fresh_patterns = [];
-  foreach (Var row, fresh) {
+  foreach (List row in fresh) {
     Var (binder, spelling, lisp) = row;
     (void) spelling;
     if (lisp.int())
@@ -408,7 +408,7 @@ static List _unit_trailing(List hole, Map binders) {
   Var author = hole.assoc(<binder>);
   Var construction = _hole_key(hole, "construction");
   int used = author in binders || construction in binders;
-  foreach (String role, %("source" "value" "splice"))
+  foreach (String role in %("source" "value" "splice"))
     used |= _hole_key(hole, role) in binders;
   return used ? %($construction) : NULL;
 }

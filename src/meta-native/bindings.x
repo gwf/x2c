@@ -41,13 +41,13 @@ module String _native_meta_name(
     binds on first use, so a unit with no compile-time code pays nothing. */
 void Compiler.install_native_meta_effects(Compiler c, Map globs) {
   List unit = %(${Path.resolved_absolute(c.filename)});
-  foreach (Var (key, value), globs) {
+  foreach (Var (key, value) in globs) {
     if (_declared_in(key, unit)) continue;
     if (value is <list>) c.install_project_meta_effect(value);
   }
-  foreach (Var (key, value), globs) {
+  foreach (Var (key, value) in globs) {
     if (_declared_in(key, unit)) continue;
-    foreach (List row, _native_meta_rows(c, value)) {
+    foreach (List row in _native_meta_rows(c, value)) {
       (String name, List signature) = row;
       if (name in c.project_meta) continue;
       c.native_meta[name] = signature;
@@ -194,7 +194,7 @@ static List _native_signature_type(Compiler c, List signature) {
   match (signature)
     case %((func ?(List parameters)) *result): {
       Array resolved = [];
-      foreach (Type parameter, parameters)
+      foreach (Type parameter in parameters)
         resolved.push(_native_parameter(c, parameter));
       Type native = c.sym.normalize_declared_type(result);
       return %((func ${resolved.list_free()}) @native);
@@ -252,7 +252,7 @@ static void _certify_native_meta(
 static List _native_meta_summary(Compiler c, List signature) {
   match (signature) case %((func ?(List parameters)) *result): {
     int takes = 0, gives = _native_handle(c, result, 0);
-    foreach (List parameter, parameters)
+    foreach (List parameter in parameters)
       takes = takes ||
               (_native_handle(c, parameter, 1) &&
                !_native_owned(c, parameter));
@@ -278,7 +278,7 @@ static int _native_handle(Compiler c, List type, int parameter) {
       tag == <list> || tag == <array> || tag == <map> || tag == <func>)
     return 0;
   type = c.sym.normalize_declared_type(type);
-  foreach (Var part, type) if (part is not Symbol || part == <*>) return 1;
+  foreach (Var part in type) if (part is not Symbol || part == <*>) return 1;
   return 0;
 }
 
@@ -306,9 +306,9 @@ List Compiler.native_meta_targets(List paths) {
   Compiler c = Compiler.expanding();
   if (!c) return %();
   Map selected = {};
-  foreach (Var (key, value), c.sym.base_symbols()) {
+  foreach (Var (key, value) in c.sym.base_symbols()) {
     if (paths && !_declared_in(key, paths)) continue;
-    foreach (List row, _native_meta_rows(c, value)) {
+    foreach (List row in _native_meta_rows(c, value)) {
       (String name, List signature) = row;
       if (_takes_callback(signature)) continue;
       String into = %"${name}_into";
@@ -318,7 +318,7 @@ List Compiler.native_meta_targets(List paths) {
   }
   Array names = selected.keys();
   List rows = %();
-  foreach (String name, names.sort()) rows = cons(selected[name], rows);
+  foreach (String name in names.sort()) rows = cons(selected[name], rows);
   return rows.reverse();
 }
 
@@ -350,7 +350,7 @@ static List _witness_rows(Compiler c, Type base, Type participant) {
   List conformance = c.protocol_members_for(participant, base);
   List rows = %();
   if (!conformance) return rows;
-  foreach (List member, conformance.last().list().cdr())
+  foreach (List member in conformance.last().list().cdr())
     match (member) {
       case %(? implmntd ?(String name) ?(Type type) *):
         rows = cons(%($name ${c.func_signature(type)}), rows);

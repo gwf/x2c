@@ -40,7 +40,8 @@ int main(int argc, char **argv) {
   uint64_t checksum = 0;
   for (int run = 0; run < runs; run++) {
     int variables[2] = {0};
-    foreach(List expression, program) checksum += _eval(expression, variables);
+    foreach(List expression in program)
+      checksum += _eval(expression, variables);
   }
   printf("%llu\n", (unsigned long long) checksum);
   return 0;

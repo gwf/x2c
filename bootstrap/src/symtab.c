@@ -603,16 +603,17 @@ List Sym_visible_symbols(Sym s){
 
     }
     if(scope -> macros != NULL){
-      Var name, definition;
+      Var name;
+      List definition;
       Map _x2c_gensym_macro_object_1 = scope -> macros;
       unsigned _x2c_gensym_macro_cursor_1 = 0;
       Var _x2c_gensym_macro_cursor_output_2;
       Var _x2c_gensym_macro_cursor_output_3;
       while(Map_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_2), &(_x2c_gensym_macro_cursor_output_3))){
         name = _x2c_gensym_macro_cursor_output_2;
-        definition = _x2c_gensym_macro_cursor_output_3;
+        definition = Var_list_payload(_x2c_gensym_macro_cursor_output_3);
         if(Var_is_row(name, 11, 7, 1) && f6_scopes____unseen(seen, name)) Array_push(rows, List_var(({
-          Var _x2c_gensym_literal_part_0 = name;  Var _x2c_gensym_literal_part_1 = Symbol_var(f6_scopes____macro_kind(definition));  cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL));
+          Var _x2c_gensym_literal_part_0 = name;  Var _x2c_gensym_literal_part_1 = Symbol_var(f6_scopes____macro_kind(List_var(definition)));  cons(_x2c_gensym_literal_part_0, cons(_x2c_gensym_literal_part_1, NULL));
         }
         )));
       }
@@ -893,15 +894,15 @@ int Sym_binding_is_local_before(Sym s, List binding, int scope_count){
   if(! _init_guard_) _file_init_();
   if(scope_count >(int) Block_len(s -> scopes)) scope_count = Block_len(s -> scopes);
   for(int i = scope_count - 1;  i >= s -> base_scopes;  i --){
-    Var _, candidate;
+    List _, candidate;
     Map _x2c_gensym_macro_object_3 = _scope_at(s, i) -> bindings;
     unsigned _x2c_gensym_macro_cursor_3 = 0;
     Var _x2c_gensym_macro_cursor_output_6;
     Var _x2c_gensym_macro_cursor_output_7;
     while(Map_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_6), &(_x2c_gensym_macro_cursor_output_7))){
-      _ = _x2c_gensym_macro_cursor_output_6;
-      candidate = _x2c_gensym_macro_cursor_output_7;
-      if(List_equal(Var_list_payload(candidate), binding)) return 1;
+      _ = Var_list_payload(_x2c_gensym_macro_cursor_output_6);
+      candidate = Var_list_payload(_x2c_gensym_macro_cursor_output_7);
+      if(List_equal(candidate, binding)) return 1;
     }
 
   }
@@ -1200,16 +1201,15 @@ static int f12_declarations____is_reserved_spelling(String s){
 static String f12_declarations____package_reserved_owner(Compiler c, String spelling){
   if(! String_truth(spelling) || ! Map_len(c -> package_aliases)) return NULL;
   {
-    Var alias, value;
+    String alias, name;
     Map _x2c_gensym_macro_object_6 = c -> package_aliases;
     unsigned _x2c_gensym_macro_cursor_6 = 0;
     Var _x2c_gensym_macro_cursor_output_10;
     Var _x2c_gensym_macro_cursor_output_11;
     while(Map_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_10), &(_x2c_gensym_macro_cursor_output_11))){
-      alias = _x2c_gensym_macro_cursor_output_10;
-      value = _x2c_gensym_macro_cursor_output_11;
+      alias = Var_as_string(_x2c_gensym_macro_cursor_output_10);
+      name = Var_as_string(_x2c_gensym_macro_cursor_output_11);
       {
-        String name = Var_as_string(value);
         if(String_equal(name, c -> package)) continue;
         if(String_startswith(spelling, String_join(NULL, cons(String_var(name), cons(String_var(_90), NULL))))) return name;
       }
@@ -1582,16 +1582,15 @@ List Compiler_imported_providers(Compiler c, String name){
   if(! String_truth(name) || ! Map_len(c -> package_roots)) return NULL;
   List packages = NULL;
   {
-    Var key, root;
+    String package, root;
     Map _x2c_gensym_macro_object_11 = c -> package_roots;
     unsigned _x2c_gensym_macro_cursor_11 = 0;
     Var _x2c_gensym_macro_cursor_output_16;
     Var _x2c_gensym_macro_cursor_output_17;
     while(Map_try_next(_x2c_gensym_macro_object_11, &(_x2c_gensym_macro_cursor_11), &(_x2c_gensym_macro_cursor_output_16), &(_x2c_gensym_macro_cursor_output_17))){
-      key = _x2c_gensym_macro_cursor_output_16;
-      root = _x2c_gensym_macro_cursor_output_17;
+      package = Var_as_string(_x2c_gensym_macro_cursor_output_16);
+      root = Var_as_string(_x2c_gensym_macro_cursor_output_17);
       {
-        String package = Var_as_string(key);
         if(List_truth(Sym_get_exact(c -> sym, cons(String_var(String_join(NULL, cons(String_var(package), cons(String_var(_90), cons(String_var(name), NULL))))), NULL)))) packages = cons(String_var(package), packages);
       }
 

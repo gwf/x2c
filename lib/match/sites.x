@@ -36,7 +36,7 @@ static int _object_borrowable(Var value, int depth, int permanent_lists) {
   if (!value.pointer()) return 1;
   if (permanent_lists && !Pool.is_permanent(value)) return 0;
   // kind and tag prove the raw payload is a List cell
-  foreach (Var part, (List) value.pointer())
+  foreach (Var part in (List) value.pointer())
     if (!_pattern_borrowable(part, depth + 1, permanent_lists)) return 0;
   return 1;
 }

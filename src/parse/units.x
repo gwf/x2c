@@ -486,12 +486,12 @@ static void _record_meta_hash(
 
 static void _record_meta_rows(
   Compiler c, List rows, Token first, int collected_body) {
-  foreach (List row, rows) _record_meta_hash(c, row, first, collected_body);
+  foreach (List row in rows) _record_meta_hash(c, row, first, collected_body);
 }
 
 static void _record_meta_bindings(
   Compiler c, Var spec, List bindings, Token first, int collected_body) {
-  foreach (Var bind, bindings)
+  foreach (List bind in bindings)
     _record_meta_hash(
       c, %(declare $spec (bindings $bind)), first, collected_body);
 }
@@ -645,14 +645,14 @@ static String _filled_doc(Compiler c, String doc) {
 static Map _hole_spellings(Compiler c) {
   Map written = {}, spellings = {};
   String file = Path.resolved_absolute(c.filename);
-  foreach (List frame, c.macro_stack)
-    foreach (List binding, frame[2])
+  foreach (List frame in c.macro_stack)
+    foreach (List binding in frame[2])
       match (binding)
         case %(? (src (source ?(String path) ?(int begin) ?(int end))
                       ?syntax)):
           if (c.text && path == file)
             written[syntax] = String.new_len(c.text + begin, end - begin);
-  foreach (List binding, c.macro_stack.car().list()[2]) {
+  foreach (List binding in c.macro_stack.car().list()[2]) {
     (Var binder, Var value) = binding;
     Var syntax = value;
     match (value) case %(src ? ?captured): syntax = captured;
@@ -686,7 +686,7 @@ module List _bind_bundle(Compiler c, List rows) {
     c.run_declaration_effects();
   }
   Array projected = [];
-  foreach (List row, rows) {
+  foreach (List row in rows) {
     List bound = c.bind_syntax(row, <unit>, c.return_type);
     _append_rows(projected, bound);
   }
@@ -697,9 +697,9 @@ module List _bind_bundle(Compiler c, List rows) {
 static void _append_rows(Array output, List syntax) {
   match (syntax) {
     case %(seq *rows):
-      foreach (List row, rows) _append_rows(output, row);
+      foreach (List row in rows) _append_rows(output, row);
     case %(declaration-bundle (rows *rows)):
-      foreach (List row, rows) _append_rows(output, row);
+      foreach (List row in rows) _append_rows(output, row);
     default: output.push(syntax);
   }
 }
@@ -779,7 +779,7 @@ List Compiler.finish_foreign_alias(
 }
 
 static void _alias_storage(Compiler c, Var base) {
-  foreach (Var part, base) {
+  foreach (Var part in base) {
     if (part is not <symbol>) continue;
     Symbol specifier = part;
     if (specifier.is_storage_class() && specifier != <static>)
@@ -788,7 +788,7 @@ static void _alias_storage(Compiler c, Var base) {
 }
 
 static void _alias_parameters(Compiler c, List parameters) {
-  foreach (Var parameter, parameters)
+  foreach (Var parameter in parameters)
     match (parameter) case %(...):
       $fail.parse_alias_variadic(c, c.token);
 }

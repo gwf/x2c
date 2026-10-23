@@ -78,10 +78,10 @@ module int _prefix_macro_words(Compiler c, int rank, Array words) {
     return 1;
   }
   if (definition is not <list>) return 0;
-  foreach (Symbol word, definition)
+  foreach (Symbol word in definition)
     if ((word.is_type_qualifier() ? 1 : word.is_builtin_type() * 2) > rank)
       return 0;
-  foreach (Symbol word, definition) words.push(word);
+  foreach (Symbol word in definition) words.push(word);
   c.next();
   return 1;
 }
@@ -368,12 +368,12 @@ static List _field(Compiler c, List context, int delegated) {
 
 // Each declarator of a delegate field must name the field.
 static void _declare_delegates(Compiler c, List context, List rows) {
-  foreach (List declaration, rows)
+  foreach (List declaration in rows)
     match (declaration)
       case %(declare ? (bindings *declarators)): {
         if (!declarators)
           $fail.parse_delegate_name(c, c.token);
-        foreach (List declarator, declarators)
+        foreach (List declarator in declarators)
           match (declarator)
             case %(bind ?binding ?): _declare_delegate(c, context, binding);
       }
@@ -568,7 +568,7 @@ module List _publish_enumerator(
    int, or is the enum itself. C requires an implicit value, the previous
    one plus one, to fit in int as well. */
 static int _enum_fits_int(List type, List members) {
-  foreach (List member, members) {
+  foreach (List member in members) {
     match (member) {
       case %(binding *): continue;
       case %(op = ? (expr ?(Type value) *)):
@@ -590,7 +590,7 @@ static int _fits_int(Type value, List type) {
    or the previous enumerator plus one, or zero for the first. */
 static void _record_enum_values(Compiler c, List members) {
   List rule = %(first);
-  foreach (List member, members) {
+  foreach (List member in members) {
     List binding = member;
     match (member) case %(op = ?target ?value): {
       binding = target;
@@ -628,11 +628,11 @@ module List _finish_type(Compiler c, List type) {
     return c.sym.local_type(finished);
   }
   Array bound = [];
-  foreach (Var spec, type) {
+  foreach (Var spec in type) {
     Var finished = _finish_type_spec(c, spec);
     if (finished is <list> && !finished.is_nil() &&
         finished.car() == <seq>)
-      foreach (Var item, finished.list().cdr()) bound.push(item);
+      foreach (Var item in finished.list().cdr()) bound.push(item);
     else bound.push(finished);
   }
   Type resolved = bound.list_free();
@@ -679,8 +679,8 @@ static List _finish_aggregate_type(
   Array bound = [];
   Symbol position = tag == <enum> ? <enumerator> : <field>;
   $let(c.aggregate_type, type) {
-    foreach (List member, members)
-      foreach (Var row, c.evaluate_macro_rows(member))
+    foreach (List member in members)
+      foreach (Var row in c.evaluate_macro_rows(member))
         _push_items(bound, c.bind_syntax(row, position, c.return_type));
   }
   return _publish_aggregate_type(c, tag, name, bound.list_free(), c.token);

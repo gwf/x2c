@@ -349,7 +349,7 @@ module List _hole_record(Compiler c, Atom name) {
 /* The final hole records, with the kinds the body inferred. */
 static List _parameter_rows(Compiler c, List parameters) {
   Array rows = [];
-  foreach (List parameter, parameters)
+  foreach (List parameter in parameters)
     rows.push(_hole_record(c, _hole_name(parameter)));
   return rows.list_free();
 }
@@ -466,7 +466,7 @@ static List _closed_seq(Compiler c, List rows) {
 static List _unit_items(Compiler c) {
   Array items = [];
   while (c.peek(0) != <"}">) {
-    foreach (Var directive, c.leading_preproc()) items.push(directive);
+    foreach (List directive in c.leading_preproc()) items.push(directive);
     if (c.peek(0) == <"}">) break;
     items.push(c.parse_top_level());
   }

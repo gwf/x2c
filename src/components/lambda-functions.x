@@ -106,7 +106,7 @@ meta static List _lambda_targets(List node) {
   Array targets = [];
   match (node) {
     case %(dstrdecl (params *params) ?):
-      foreach (List param, params)
+      foreach (List param in params)
         match (param) case %(param ? (bind ?binding ?)): targets.push(binding);
     case %(dstrdecl ? (targets *names) ?): return names;
   }
@@ -120,7 +120,7 @@ meta static List _lambda_targets(List node) {
 meta static List _lambda_kept_items(
   Array items, List original, Map declaring) {
   Array out = [], run = [];
-  foreach (Var item, items) {
+  foreach (List item in items) {
     if (item === original.car()) run.push(item);
     else {
       if (run.len()) out.push(Code.lowered(%(seq @{run.list()}), NULL));
@@ -152,7 +152,7 @@ meta static Var _lambda_declare_cells(List node, Map cells) {
   int celled = 0;
   match (node) {
     case %(declare ?base (bindings *bindings)):
-      foreach (List item, bindings) {
+      foreach (List item in bindings) {
         Code cell = NULL;
         match (item) {
           case %(bind ?binding *):
@@ -166,7 +166,7 @@ meta static Var _lambda_declare_cells(List node, Map cells) {
       }
     case %(dstrdecl *): {
       items.push(Code.lowered(node, NULL));
-      foreach (List binding, _lambda_targets(node)) {
+      foreach (List binding in _lambda_targets(node)) {
         Code copy = _lambda_copied_cell(binding, cells);
         if (copy) items.push(copy);
         celled |= !!copy;
@@ -199,7 +199,7 @@ meta static Var _lambda_rebuild(
       int first = done.len() - node.list().len(), index = first;
       Array parts = [];
       int changed = 0, declares = 0;
-      foreach (Var part, node.list()) {
+      foreach (Var part in node.list()) {
         changed |= done[index] !== part;
         declares |= cells && done[index] in declaring;
         parts.push(done[index++]);
@@ -225,7 +225,7 @@ meta static Var _lambda_rebuild(
     else if (read) done.push(read);
     else {
       Array parts = [];
-      foreach (Var part, node.list()) parts.push(part);
+      foreach (Var part in node.list()) parts.push(part);
       int body = node.list().car() == <lambda> ? parts.len() - 1 : -1;
       pending.push(node);
       modes.push(1);
@@ -268,7 +268,7 @@ meta static List _lambda_items(Code body) {
 /* A lambda's parameters as a function's: a bare one is a `Var`. */
 meta static List _lambda_params(List params) {
   Array out = [];
-  foreach (List param, params)
+  foreach (List param in params)
     match (param) {
       case %(binding ? ?): out.push(%(param ("Var") (bind $param ())));
       default: out.push(param);
@@ -282,7 +282,7 @@ meta static List _lambda_params(List params) {
 meta static List _lambda_closure_params(
   List params, List reads, List captures) {
   Array out = [];
-  foreach (List param, _lambda_params(params)) {
+  foreach (List param in _lambda_params(params)) {
     Type read = reads.car().list().car();
     reads = reads.cdr();
     match (param) case %(param ? (bind ?binding (& *))): {
@@ -292,7 +292,7 @@ meta static List _lambda_closure_params(
     }
     out.push(param);
   }
-  foreach (List capture, captures)
+  foreach (List capture in captures)
     match (capture) case %(capture ?binding ?(Type type) ?): {
       (List base, List modifiers) = type.parts();
       out.push(%(param $base (bind $binding $modifiers)));
@@ -360,7 +360,7 @@ meta static Type _lambda_field_type(Type type) {
    code. */
 meta static Code _lambda_record(List context, List types) {
   Array fields = [];
-  foreach (Type type, types) {
+  foreach (Type type in types) {
     (List base, List modifiers) = type.parts();
     List name = _lambda_member(fields.len());
     fields.push(%(declare $base (bindings (bind $name $modifiers))));
@@ -382,7 +382,7 @@ meta static Code _lambda_adapter(
   Type pointer = %(* const struct $context);
   Code record = %(expr $pointer (ident ("record")));
   Array items = [], arguments = [];
-  foreach (List read, reads) {
+  foreach (List read in reads) {
     (Type type, Code value) = read;
     List name = %(${%"a${items.len()}"});
     (List base, List modifiers) = type.parts();
@@ -404,7 +404,7 @@ meta static Code _lambda_adapter(
        (bindings (op = (bind ("record") (*))
                       (expr $pointer (cast $pointer $context_read))))));
   int index = 0;
-  foreach (List capture, captures) {
+  foreach (List capture in captures) {
     Type type = capture.caddr(), stored = _lambda_field_type(type);
     Code field = %(expr (const @stored)
                     (op -> $record ${_lambda_member(index++)}));
@@ -431,7 +431,7 @@ meta static Code _lambda_bridge(
   List bridge, List adapter, List context, Code signature, List types) {
   List record = x2c_ident("record");
   Array parameters = [], fields = [];
-  foreach (Type type, types) {
+  foreach (Type type in types) {
     (List base, List modifiers) = type.parts();
     List field = _lambda_field(fields.len());
     parameters.push(%(param $base (bind $field $modifiers)));
@@ -453,7 +453,7 @@ meta static Code _lambda_bridge(
 meta static Code _lambda_value(
   List adapter, List context, Code signature, List captures) {
   Array setup = [], values = [], types = [];
-  foreach (List capture, captures)
+  foreach (List capture in captures)
     match (capture) case %(capture ? ?(Type type) ?(Code value)): {
       Type stored = _lambda_field_type(type);
       (List base, List modifiers) = stored.parts();
@@ -507,7 +507,7 @@ meta Code lambda_closure(Code node) {
         %(expr (* const "FuncArg") (ident $argv)));
       List reads = adapted.cdr();
       Array fields = [];
-      foreach (List capture, captures)
+      foreach (List capture in captures)
         fields.push(_lambda_field_type(capture.caddr()));
       Code record_type = _lambda_record(context, fields.list_free());
       List declared = _lambda_closure_params(params, reads, captures);
@@ -547,18 +547,18 @@ meta static List _lambda_designated(Var value) {
    cell and the binding's type. */
 meta static Map _lambda_shared(List params, List items) {
   Map declared = {}, shared = {}, cells = {};
-  foreach (List param, params)
+  foreach (List param in params)
     match (param) case %(param ? (bind ?binding *)): declared[binding] = 1;
   List node;
   $ast.walk(items, node) match (node) {
     case %(declare (!set ?base (* static *)) *): continue;
     case %(bind ?binding *): declared[binding] = 1;
     case %(dstrdecl *):
-      foreach (List binding, _lambda_targets(node)) declared[binding] = 1;
+      foreach (List binding in _lambda_targets(node)) declared[binding] = 1;
     case %(lambda *parts): {
-      foreach (List part, parts)
+      foreach (List part in parts)
         match (part) case %(captures *rows):
-          foreach (List row, rows)
+          foreach (List row in rows)
             match (row)
               case %(capture ? (& *type) (expr ? (op & ?target))): {
                 List binding = _lambda_designated(target);
@@ -567,7 +567,7 @@ meta static Map _lambda_shared(List params, List items) {
       continue;
     }
   }
-  foreach (Var (binding, type), shared)
+  foreach ((List binding, Type type) in shared)
     if (declared.contains(binding)) cells[binding] = %(0 $type);
   return cells;
 }
@@ -588,14 +588,14 @@ meta Code lambda_cells(Code node) {
       Map cells = _lambda_shared(params, items);
       if (!cells.len()) return node;
       Array entry = [];
-      foreach (List param, params)
+      foreach (List param in params)
         match (param) case %(param ? (bind ?binding *)): {
           Code cell = _lambda_copied_cell(binding, cells);
           if (cell) entry.push(cell);
         }
       Map declaring = {};
       Array body = [];
-      foreach (Var item, items)
+      foreach (List item in items)
         body.push(
           _lambda_mentions(item, cells)
             ? _lambda_rebuild(item, NULL, cells, declaring) : item);

@@ -120,7 +120,7 @@ Var lisp_add(Var a, Var b) {
 Var lisp_plus(List values) {
   Var total = 0;
   if (values && values.car() is <string>) total = %"";
-  foreach (Var value, values) total = lisp_add(total, value);
+  foreach (Var value in values) total = lisp_add(total, value);
   return total;
 }
 
@@ -134,14 +134,14 @@ Var lisp_minus(List values) {
     Var zero = 0;
     return zero.binary(<->, total);
   }
-  foreach (Var value, values.cdr()) total = total.binary(<->, value);
+  foreach (Var value in values.cdr()) total = total.binary(<->, value);
   return total;
 }
 
 /** Multiplies every value; no values gives 1. */
 Var lisp_times(List values) {
   Var total = 1;
-  foreach (Var value, values) total = total.binary(<*>, value);
+  foreach (Var value in values) total = total.binary(<*>, value);
   return total;
 }
 
@@ -155,7 +155,7 @@ Var lisp_divide(List values) {
     Var one = 1;
     return one.binary(</>, total);
   }
-  foreach (Var value, values.cdr()) total = total.binary(</>, value);
+  foreach (Var value in values.cdr()) total = total.binary(</>, value);
   return total;
 }
 

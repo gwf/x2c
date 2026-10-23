@@ -101,7 +101,7 @@ module List _pointer(Compiler c) {
       return ptr;
     Array quals = $auto([]);
     if (!_prefix_macro_words(c, 1, quals)) return ptr;
-    foreach (Var qualifier, quals) ptr = cons(qualifier, ptr);
+    foreach (Symbol qualifier in quals) ptr = cons(qualifier, ptr);
   }
 }
 
@@ -644,7 +644,7 @@ module List _finish_fnmods(Compiler c, List declarator) {
       return %(op = ${_finish_fnmods(c, binding)} $value);
     case %(bind ?binding ?modifiers): {
       Array output = [];
-      foreach (Var modifier, modifiers.list())
+      foreach (Var modifier in modifiers.list())
         output.push(_finish_fnmod(c, modifier));
       return %(bind $binding (@{output.list_free()}));
     }
@@ -664,7 +664,7 @@ static List _finish_prototype(Compiler c, List parameters) {
   c.sym.push_new_scope();
   {
     defer c.sym.pop_scope();
-    foreach (List parameter, parameters) match (parameter) {
+    foreach (List parameter in parameters) match (parameter) {
       case %(param ?base ?declarator):
         params.push(c.bind_parameter(base, declarator));
       default: params.push(parameter);

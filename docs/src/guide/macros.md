@@ -579,10 +579,11 @@ parameters as direct macro calls. A decorator with no explicit arguments uses
 all-sequence decorator uses `ALIAS() TARGET` when the sequence is empty, so a
 parenthesized target of a zero-argument decorator remains unambiguous.
 
-A `Decl` argument ends at the invocation's comma or closing parenthesis, so
-its trailing semicolon is omitted. It accepts one declarator with an optional
+A `Decl` argument ends at the invocation's comma or closing parenthesis;
+`foreach` also accepts `in` after its declaration. The trailing semicolon is
+omitted. A `Decl` accepts one declarator with an optional
 initializer, or flat destructuring with two or more simple identifier targets.
-For example, `foreach(int value, values)` supplies `int value` as one `Decl`
+For example, `foreach(int value in values)` supplies `int value` as one `Decl`
 argument.
 
 The declaration and uses are source ordered. A public alias in an included

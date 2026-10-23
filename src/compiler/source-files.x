@@ -102,6 +102,6 @@ void Compiler.add_translation_dependency(Compiler c, String path) {
 
 /** Merges another translation's dependency rows into this compiler. */
 void Compiler.merge_translation_dependencies(Compiler c, Map dependencies) {
-  foreach (Var (path, content_hash), dependencies)
+  foreach ((String path, Var content_hash) in dependencies)
     c.deps.merge_translation_dependency(path, content_hash);
 }

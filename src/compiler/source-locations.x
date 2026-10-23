@@ -92,6 +92,6 @@ void Compiler.copy_source_declaration(
 /** Carries declaration metadata beside a completed symbol-map merge. */
 void Compiler.merge_source_declarations(Compiler c, Map target, Map source) {
   if (!c.source_facts) return;
-  foreach (Var key, source.keys())
+  foreach (Var key in source.keys())
     if (key is <list>) c.copy_source_declaration(target, source, key);
 }

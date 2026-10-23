@@ -117,13 +117,13 @@ static int _global_key(Sym s, List key) {
 static void _check_module_shadow(
   Sym s, List contexts, String prefix, String name, List ast) {
   Compiler c = s.c;
-  foreach (List context, contexts) {
+  foreach (List context in contexts) {
     if (prefix && !(name in s.prefixed) &&
         %(@context $name) in s.statics)
       $fail.symbols_module_shadow(c, c.token, name);
     if (!c.module_declaration ||
         !(c.source_private > 0 || ast.type().is_static())) continue;
-    foreach (String other, c.file_prefixes())
+    foreach (String other in c.file_prefixes())
       if (%(@context "$other$name") in s.statics)
         $fail.symbols_module_shadow(c, c.token, name);
   }
@@ -166,8 +166,7 @@ static int _is_reserved_spelling(String s) {
    headers may contain `__`, and a package unit keeps its own prefix. */
 static String _package_reserved_owner(Compiler c, String spelling) {
   if (!spelling || !c.package_aliases.len()) return NULL;
-  foreach (Var (alias, value), c.package_aliases) {
-    String name = value;
+  foreach (String (alias, name) in c.package_aliases) {
     if (name == c.package) continue;
     if (spelling.startswith(%"${name}__")) return name;
   }

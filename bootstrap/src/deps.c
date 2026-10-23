@@ -168,20 +168,18 @@ static String _contents(CliRequest request, Compiler compiler, String input, Str
         x2c_cleanup_push(& _x2c_gensym_defer_record_1);
         {
           {
-            Var path, content_hash;
+            String path;
+            Var content_hash;
             Map _x2c_gensym_macro_object_0 = compiler -> deps;
             unsigned _x2c_gensym_macro_cursor_0 = 0;
             Var _x2c_gensym_macro_cursor_output_0;
             Var _x2c_gensym_macro_cursor_output_1;
             while(Map_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0), &(_x2c_gensym_macro_cursor_output_1))){
-              path = _x2c_gensym_macro_cursor_output_0;
+              path = Var_as_string(_x2c_gensym_macro_cursor_output_0);
               content_hash = _x2c_gensym_macro_cursor_output_1;
               {
-                if(Var_is_row(content_hash, 11, 7, 1) && String_startswith(Var_as_string(content_hash), _2)){
-                  String candidate = Var_as_string(path);
-                  Array_push(searches, String_var(String_startswith(candidate, _3) ? String_getslice(candidate, 4, (-2147483647 - 1), 1) : candidate));
-                }
-                else Array_push(paths, path);
+                if(Var_is_row(content_hash, 11, 7, 1) && String_startswith(Var_as_string(content_hash), _2)) Array_push(searches, String_var(String_startswith(path, _3) ? String_getslice(path, 4, (-2147483647 - 1), 1) : path));
+                else Array_push(paths, String_var(path));
               }
 
             }

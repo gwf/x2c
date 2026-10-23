@@ -1,7 +1,7 @@
 # Iteration
 
-x2c has two ways to walk a collection. `foreach(T name, collection)` is the
-short form and covers most cases. `Iter` chains combine operations that process
+x2c has two ways to walk a collection. `foreach(T name in collection)` covers
+most cases. `Iter` chains combine operations that process
 one element at a time, then collect, aggregate, or loop over the result.
 
 At runtime, an immediately consumed chain uses caller stack storage for every
@@ -21,7 +21,7 @@ The loop header declares the loop variable and gives the collection:
 ```x2c
 List values = %(10 20 30);
 int total = 0;
-foreach(int value, values)
+foreach(int value in values)
   total += value;
 printf("total = %d\n", total);
 ```
@@ -42,7 +42,7 @@ own module, so all four work directly:
 
 ```x2c
 Array scores = [3, 4, 5];
-foreach(int score, scores)
+foreach(int score in scores)
   printf("score = %d\n", score);
 
 Map ages = {"ada": 36, "alan": 41};
@@ -50,10 +50,10 @@ foreach ((String name, int age) in ages)
   printf("%s is %d\n", name, age);
 
 String word = "hi";
-foreach(int ch, word)
+foreach(int ch in word)
   printf("char = %c\n", ch);
 
-foreach(char ch, word)
+foreach(char ch in word)
   printf("char = %c\n", ch);
 ```
 
@@ -124,13 +124,13 @@ operation changes the source String's ownership.
 
 ```x2c
 ~String text = "one two\nthree:four";
-foreach(String word, text.words())
+foreach(String word in text.words())
   printf("word=%s\n", word);
 
-foreach(String line, text.lines())
+foreach(String line in text.lines())
   printf("line=%s\n", line);
 
-foreach(String field, text.splits(":"))
+foreach(String field in text.splits(":"))
   printf("field=%s\n", field);
 ```
 
@@ -164,7 +164,7 @@ That combination appears at the end of this chapter.
 
 The general `Iter` path yields a `Var`. The declared loop type selects the
 conversion applied to each element as it arrives. It does not filter the
-elements. `foreach(int value, values)` means "unbox each element with
+elements. `foreach(int value in values)` means "unbox each element with
 `Var.int`" on that path. Cursor-backed collections deliver their typed outputs
 directly.
 
@@ -175,8 +175,8 @@ as `Var` applies no conversion. Do that when the element type varies or when
 the body dispatches on the tag:
 
 ```x2c
-~List values = %(1 2 3);
-foreach(Var item, values)
+~List values = %(1 "two" three);
+foreach(Var item in values)
   printf("%s\n", item);
 ```
 
@@ -260,7 +260,7 @@ and the receiver is the storage:
 ~int main(void) {
 struct Iter storage;
 Iter powers = Iter.init(&storage, 64, _powers_next, 1);
-foreach(int value, powers)
+foreach(int value in powers)
   printf("%d\n", value);
 ~  return 0;
 ~}
@@ -294,7 +294,7 @@ int main(void) {
     Array values = range(1, 8, 1)
       .map(double_value)
       .filter(divisible_by_four);
-    foreach(int value, values)
+    foreach(int value in values)
       printf("%d\n", value);
   }
   return 0;
@@ -446,7 +446,7 @@ a `zip` or `map2`, before the loop starts pulling.
 ~static int is_even(Var value) { return value % 2 == 0; }
 ~
 ~int main(void) {
-foreach(int value, range(1, 10, 1).filter(is_even))
+foreach(int value in range(1, 10, 1).filter(is_even))
   printf("%d\n", value);
 ~  return 0;
 ~}

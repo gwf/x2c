@@ -35,7 +35,7 @@ meta static List _operator_rows(void) => %(
 /* Select key and value columns; -1 includes both direct and derived rows. */
 meta static List _operator_cases(int key, int value, int derived) {
   Array cases = [];
-  foreach (List row, _operator_rows()) {
+  foreach (List row in _operator_rows()) {
     if (!row[key] || !row[value]) continue;
     if (derived >= 0 && row[4] != derived) continue;
     Symbol label = row[key];

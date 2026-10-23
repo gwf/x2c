@@ -3,7 +3,7 @@
 module List _ordered_raise(
   Compiler c, List cause, List arguments) {
   Array values = [cause], orders = $auto([_part_order(c, cause)]);
-  foreach (List argument, arguments) {
+  foreach (List argument in arguments) {
     values.push(argument);
     orders.push(_part_order(c, argument));
   }
@@ -28,7 +28,7 @@ module Ast _collection_literal(Compiler c, Ast ast, Symbol tag) {
     type, %"${type.repr()} literal");
   match (lowered) case %(expr ? (call ?callee (args *arguments))): {
     Array values = $auto([]), orders = $auto([]);
-    foreach (List argument, arguments) {
+    foreach (List argument in arguments) {
       Type passed = argument.cadr();
       values.push(argument);
       orders.push(!passed || passed == %("Var") ? _part_order(c, argument) : 0);
@@ -177,7 +177,7 @@ module Ast _interpolation(Compiler c, Ast ast) {
       if (!c.runtime_literals)
         return c.cache(%(string (expr ("String") (literal ("String") $text))));
   Array rows = [];
-  foreach (List row, ast.cdr()) match (row) {
+  foreach (List row in ast.cdr()) match (row) {
     case %((!set ?tag (!or segvar segexp)) ?value):
       rows.push(%($tag ${c.convert_segment_to_string(value)}));
     default: rows.push(row);
@@ -233,7 +233,7 @@ List Compiler.call_in_order(Compiler c, List callee, List arguments) {
     converted.push(_passed_as(value, expected.car()));
   }
   Array declarations = [], arguments_out = [];
-  foreach (List value, converted)
+  foreach (List value in converted)
     arguments_out.push(_sequenced(c, value, "protocol_arg", declarations));
   converted.free();
   Macro called = $called;

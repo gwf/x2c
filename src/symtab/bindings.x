@@ -56,7 +56,7 @@ module String _var_converter_owner(List key, List type) {
 /** Registers declared `T_var` converters in the active `Type` unit. */
 void Sym.seed_var_tags(Sym s, Map symbols) {
   if (!symbols) return;
-  foreach (Var (key, type), symbols)
+  foreach (Var (key, type) in symbols)
     if (key is <list> && type is <list>) _seed_var_tag(s, key, type);
 }
 
@@ -171,7 +171,7 @@ int Sym.binding_is_local(Sym s, List binding) =>
 int Sym.binding_is_local_before(Sym s, List binding, int scope_count) {
   if (scope_count > (int) s.scopes.len()) scope_count = s.scopes.len();
   for (int i = scope_count - 1; i >= s.base_scopes; i--)
-    foreach (Var (_, candidate), _scope_at(s, i).bindings)
+    foreach (List (_, candidate) in _scope_at(s, i).bindings)
       if (List.equal(candidate, binding)) return 1;
   return 0;
 }

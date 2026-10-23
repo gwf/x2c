@@ -111,7 +111,7 @@ static List _from_declarators(List source_type, List bindings) =>
    of its source attribute text, `("__attribute__((unused))")`, drops. */
 static List _from_bind(List mods, List context) {
   Array typed = [];
-  foreach (Var item, mods)
+  foreach (Var item in mods)
     if (!_is_source_text(item)) typed.push(item);
   return _modify(context, _from_ast(typed.list_free(), context));
 }
@@ -120,7 +120,7 @@ static List _from_bind(List mods, List context) {
    no field. */
 static List _from_fields(List fields, List context) {
   Array types = [];
-  foreach (List field, fields) {
+  foreach (List field in fields) {
     List declaration = Ast.without_origin(field);
     if (declaration.car() != <c-assert>) types.push(_from_ast(field, context));
   }
@@ -148,7 +148,7 @@ static List _without_leading_text(List items) {
   if (!rest.cdr()) return items;
   Array typed = [];
   size_t index = 0, last = items.len() - 1;
-  foreach (Var item, items)
+  foreach (Var item in items)
     if (index++ == last || !_is_source_text(item)) typed.push(item);
   return typed.list_free();
 }
@@ -175,13 +175,13 @@ List Type.parts(Type type) => type_declaration_parts(type);
 List Type.declaration_base(Type t, List &modifiers) {
   Array storage = [], text = [], typed = [];
   defer { storage.free(); text.free(); typed.free(); }
-  foreach (Var item, t)
+  foreach (Var item in t)
     if (item is <list> && car(item) is <string>) text.push(item);
     else typed.push(item);
   List (base, mods) = typed.list().type().declared().parts();
   modifiers = mods;
   if (!mods) return t;
-  foreach (Var item, t)
+  foreach (Var item in t)
     if (item is <symbol> &&
         (Symbol.is_storage_class(item) || Symbol.is_inline(item)))
       storage.push(item);

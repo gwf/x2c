@@ -26,7 +26,7 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
      Its own definitions must not suppress fresh declaration defaults.
      Keep type rows: public inline bodies can promote imported families. */
   if (canonical in visited)
-    foreach (Var name, _entry(c, canonical).caddr()) {
+    foreach (String name in _entry(c, canonical).caddr()) {
       globs.del(%($name));
       globs.del(%(self $name));
       c.fn_defs.del(name);
@@ -69,7 +69,7 @@ int Compiler.is_prelude_source(String path) =>
   Compiler.portable_path(path) in Compiler.prelude_sources();
 
 static void _add_prelude(Compiler c, Map globs, Map visited) {
-  foreach (String source, Compiler.prelude_sources()) {
+  foreach (String source in Compiler.prelude_sources()) {
     String path = %"${x2c_get_root()}/$source";
     String canonical = _canonical_path(path);
     visited[canonical] = 1;
@@ -216,7 +216,7 @@ static int _track_arms(Array arms, String text) {
 }
 
 static int _hidden(Array arms) {
-  foreach (int state, arms) if (state == 2) return 1;
+  foreach (int state in arms) if (state == 2) return 1;
   return 0;
 }
 
@@ -391,7 +391,7 @@ module List _walk_cold(
   /* A fresh file installs its own includes in its own macro state. Only
      active walks cross into that state, to preserve a cycle's prefix. */
   Map own_visited = {};
-  foreach (Var (path, state), visited)
+  foreach ((String path, Var state) in visited)
     if (state is <array>) own_visited[path] = state;
   _walk_apart(file, canonical, text, globs.copy(), own_visited);
   c.merge_translation_dependencies(file.deps);
@@ -442,7 +442,7 @@ static Array _include_dirs(
   dirs.push(canonical ? _canonical_cwd() : ".");
   dirs.push(_canonical_lib());
   dirs.push(_canonical_src());
-  foreach (Var dir, extra_dirs)
+  foreach (Var dir in extra_dirs)
     if (dir is <string>) dirs.push(canonical ? _canonical_path(dir) : dir);
   return dirs;
 }
@@ -477,12 +477,12 @@ static void _add_defaults(FileWalk &w) {
 static void _queue_public_bodies(FileWalk &w) {
   if (!w.unit || !w.c.interface_provider) return;
   int private_types = 0;
-  foreach (Var key, w.statics.keys())
-    if (key is <list> && _type_family(key)) private_types = 1;
+  foreach (List key in w.statics.keys())
+    if (_type_family(key)) private_types = 1;
   if (!private_types) return;
   int exposed = 0;
-  foreach (Var part, w.parts) if (part is <map>)
-    foreach (Var key, part.map().keys())
+  foreach (Var part in w.parts) if (part is <map>)
+    foreach (Var key in part.map().keys())
       match (key) case %("function-inline" ?): exposed = 1;
   if (!exposed) return;
   if (Compiler.library_filling() || w.c.meta_build) {
@@ -490,7 +490,7 @@ static void _queue_public_bodies(FileWalk &w) {
     return;
   }
   Map own = {};
-  foreach (Var part, w.parts) if (part is <map>) own.merge(part);
+  foreach (Var part in w.parts) if (part is <map>) own.merge(part);
   w.c.public_bodies = 1;
   w.c.pending_inline_bodies.push(
     %(${w.c} ${w.path} ${w.text} ${w.globs} $own
@@ -498,9 +498,9 @@ static void _queue_public_bodies(FileWalk &w) {
 }
 
 static int _produces(FileWalk &w) {
-  foreach (Var part, w.parts) {
+  foreach (Var part in w.parts) {
     if (part is not <map>) continue;
-    foreach (Var value, part.map())
+    foreach (Var value in part.map())
       match (value) case %(declaration-source *): return 1;
   }
   return 0;
@@ -527,7 +527,7 @@ static void _publish(FileWalk &w) {
   List parts = w.parts.list_free();
   _retain(w.path);
   _retain_rows(parts);
-  foreach (Var (name, hash), w.hashes) {
+  foreach (String (name, hash) in w.hashes) {
     _retain(name);
     _retain(hash);
   }
@@ -561,12 +561,12 @@ module void _replay_cached(
   Array effects) {
   Array prefix = effects != NULL ? NULL : [];
   if (prefix != NULL) visited[path] = prefix;
-  foreach (Var name, entry.caddr()) c.fn_defs[name] = 1;
+  foreach (String name in entry.caddr()) c.fn_defs[name] = 1;
   /* Parsing this file read these macro and Lisp files. They are
      prerequisites of every unit that reaches it, not only of the one that
      parsed it. */
   c.merge_translation_dependencies(entry[3]);
-  foreach (Var part, entry.car()) {
+  foreach (Var part in entry.car()) {
     if (part is <map>) {
       _merge_rows(c, globs, part);
       _replay_package_imports(c, globs, part, effects);
@@ -598,7 +598,7 @@ Map Compiler.included_compile_time_effects(Compiler c, Map globs) {
   Map visited = {}, delivered = {};
   if (c.prelude) {
     Array effects = [];
-    foreach (String source, Compiler.prelude_sources()) {
+    foreach (String source in Compiler.prelude_sources()) {
       String path = _canonical_path(%"${x2c_get_root()}/$source");
       _replay_included(c, globs, path, visited, effects, NULL);
     }
@@ -609,7 +609,7 @@ Map Compiler.included_compile_time_effects(Compiler c, Map globs) {
   visited[unit] = 1;
   List entry = _entry(c, unit);
   if (!entry) return delivered;
-  foreach (Var part, entry.car()) {
+  foreach (Var part in entry.car()) {
     Array exports = [];
     if (part is <map>) _replay_package_imports(c, globs, part, exports);
     else if (part is <string>) {
@@ -630,7 +630,7 @@ static void _replay_included(
   List entry = prefix is <array> ? NULL : _entry(c, path);
   if (!entry && prefix is not <array>) return;
   List parts = prefix is <array> ? prefix.array().list() : entry.car();
-  foreach (Var part, parts) {
+  foreach (Var part in parts) {
     if (part is <map>) _replay_package_imports(c, globs, part, exports);
     else if (part is <string>)
       _replay_included(c, globs, part, visited, exports, active);

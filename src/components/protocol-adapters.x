@@ -49,7 +49,7 @@ meta static List _protocol_forward(
   List templates = template.car().list().cadr();
   Array params = [], arguments = [];
   int index = 0;
-  foreach (Type type, target.car().list().cadr()) {
+  foreach (Type type in target.car().list().cadr()) {
     List name = x2c_ident(%"a${index++}");
     params.push($!Param{ $type $name });
     Code argument = $!( $name );
@@ -103,7 +103,7 @@ meta static Code _protocol_guarded(
 /* The prototype of `name` with the signature `expected`. */
 meta static Code _protocol_prototype(List name, Type expected) {
   Array params = [];
-  foreach (Type type, expected.car().list().cadr()) {
+  foreach (Type type in expected.car().list().cadr()) {
     (List base, List modifiers) = type.parts();
     params.push(%(param $base (bind () $modifiers)));
   }
@@ -154,10 +154,10 @@ meta Code protocol_conformance(Code node) {
     case %(conform ? ?(Type participant) ?(String forward)
            ?(String reverse) ?(String binder) ?descriptor (*rows)): {
       Array slots = [];
-      foreach (List row, rows) match (row)
+      foreach (List row in rows) match (row)
         case %(?(String member) ? ?(String source) ?(Type expected)
                ?(Type template) *parts):
-          foreach (List part, parts) match (part) {
+          foreach (List part in parts) match (part) {
             case %(default ?(List name) ?(Symbol storage)): {
               List declared = storage == <static>
                 ? %(static inline @{expected.cdr()})

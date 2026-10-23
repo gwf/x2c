@@ -27,7 +27,7 @@ static List _declaration_source_key(Compiler c, Token token) {
 void Compiler.run_declaration_effects(Compiler c) {
   List effects = c.declaration_effects.reverse();
   c.declaration_effects = NULL;
-  foreach (List effect, effects) {
+  foreach (List effect in effects) {
     (List key, int end, String form, Var site, String context) = effect;
     String file = _effect_file(c, key), text = c.text;
     Array markers = c.line_markers;
@@ -154,6 +154,6 @@ module void _restore_declaration_bindings(
       facts.getdefault(%(source-spelling $syntax), spelling));
     return;
   }
-  foreach (Var child, syntax.list())
+  foreach (Var child in syntax.list())
     _restore_declaration_bindings(c, child, facts, seen);
 }

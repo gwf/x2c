@@ -282,7 +282,7 @@ List Compiler.cpp_include_dirs(void) => cpp_includes;
     An empty entry names the current directory.
 */
 String Env.find_program(String name) {
-  foreach (String directory, Env.get("PATH").split(":")) {
+  foreach (String directory in Env.get("PATH").split(":")) {
     Path candidate = Path.join(directory, name);
     if (candidate.is_executable()) return candidate;
   }
@@ -317,7 +317,7 @@ int Path.is_layout_source(String path) =>
 */
 String Compiler.package_directory(List roots, String path) {
   String source = Path.absolute(path);
-  foreach (String root, roots) {
+  foreach (String root in roots) {
     String prefix = %"${Path.absolute(root)}/";
     if (!source.startswith(prefix)) continue;
     String name = source.remove_prefix(prefix).split("/").car();
@@ -333,9 +333,9 @@ String Compiler.package_directory(List roots, String path) {
 */
 String SourceView.package_entry(
   SourceView sources, List roots, String name, String &directory) {
-  foreach (String package_dir, roots) {
+  foreach (String package_dir in roots) {
     String root = %"${Path.absolute(package_dir)}/$name";
-    foreach (String suffix, %(".x" ".xp")) {
+    foreach (String suffix in %(".x" ".xp")) {
       String nested = %"$root/src/$name$suffix";
       String entry = sources.exists(nested) ? nested : %"$root/$name$suffix";
       if (!sources.exists(entry)) continue;
@@ -413,7 +413,7 @@ uint64_t fnv_bytes(uint64_t hash, const void *bytes, size_t length) {
 /** Hashes unit filename spelling for stable generated C identifiers. */
 String Path.identifier_hash(String filename) {
   unsigned hash = 0;
-  foreach (char byte, filename) hash = hash * 31 + (unsigned char) byte;
+  foreach (char byte in filename) hash = hash * 31 + (unsigned char) byte;
   return "%08X".printf(hash);
 }
 

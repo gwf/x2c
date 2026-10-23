@@ -152,11 +152,11 @@ List Code.declared_bindings(List declaration) {
   Array result = [];
   match (declaration) {
     case %(seq *declarations):
-      foreach (List item, declarations)
-        foreach (List binding, Code.declared_bindings(item))
+      foreach (List item in declarations)
+        foreach (List binding in Code.declared_bindings(item))
           result.push(binding);
     case %((!or declare decl typedef) ? (bindings *bindings)):
-      foreach (List binding, bindings) {
+      foreach (List binding in bindings) {
         List bound = binding;
         match (binding) case %(op = ?target ?): bound = target;
         match (bound) {
@@ -284,7 +284,7 @@ List Code.arguments(Code parameters) {
   match (parameters) case %(params *items): parameters = items;
   match (parameters) case %((param (void) (bind () ?))): return %();
   Array arguments = [];
-  foreach (List parameter, parameters)
+  foreach (List parameter in parameters)
     match (parameter)
       case %(param ? (bind ?identity *)):
         arguments.push(%(expr () (ident $identity)));
@@ -295,7 +295,7 @@ List Code.arguments(Code parameters) {
 Code Code.parameter(Code function, String wanted) {
   List parameters = function.match_replace(
     %(function ? (bind ? ((fnmod (params *bound)) *)) ?), %(*bound));
-  foreach (List parameter, parameters) {
+  foreach (List parameter in parameters) {
     match (parameter) {
       case %(param ? (bind ?identity *)):
         if (Code.binding_spelling(identity) == wanted) {

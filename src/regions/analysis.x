@@ -8,7 +8,7 @@ static void _fixpoint(Walk &w, List ast) {
   w.frame.kind = <frame>;
   Array functions = $auto([]);
   _collect_functions(ast, functions);
-  foreach (List function, functions)
+  foreach (List function in functions)
     if (w.summaries[function.car()] is void)
       w.summaries[function.car()] = %(0 ());
   /* Summaries only grow, and a walk reads no summary but its callees', so
@@ -35,8 +35,8 @@ static void _fixpoint(Walk &w, List ast) {
     }
   } while (w.changed);
   w.warnings = [];
-  foreach (Array warnings, found)
-    foreach (Var warning, warnings) w.warnings.push(warning);
+  foreach (Array warnings in found)
+    foreach (List warning in warnings) w.warnings.push(warning);
 }
 
 /* One row per function: its C name, its parameter bindings in order, and
@@ -47,13 +47,13 @@ static void _collect_functions(Var node, Array found) {
     case %(function ? (bind (binding ? ?name) ((fnmod (params *rows)) *))
                     ?body): {
       Array parameters = [];
-      foreach (Var row, rows)
+      foreach (List row in rows)
         match (row) case %(param ? (bind ?parameter ?)):
           parameters.push(parameter);
       found.push(%($name ${parameters.list_free()} $body));
     }
     case %(*children):
-      foreach (Var child, children) _collect_functions(child, found);
+      foreach (Var child in children) _collect_functions(child, found);
   }
 }
 
@@ -69,12 +69,12 @@ static void _analyze(Walk &w, List function) {
   w.open = NULL;
   w.depth = w.origin = 0;
   w.fresh = fresh;
-  foreach (Var row, sinks) w.sinks[row] = 1;
+  foreach (List row in sinks) w.sinks[row] = 1;
   int index = 0;
-  foreach (List parameter, parameters) _new_fact(w, parameter, index++);
+  foreach (List parameter in parameters) _new_fact(w, parameter, index++);
   _walk(w, body);
   Array rows = [];
-  foreach (Var row, w.sinks.keys()) rows.push(row);
+  foreach (List row in w.sinks.keys()) rows.push(row);
   List summary = %(${w.fresh} ${rows.sort().list_free()}),
        previous = w.summaries[name];
   if (summary == previous) return;
@@ -82,7 +82,7 @@ static void _analyze(Walk &w, List function) {
   w.changed = 1;
   Var readers;
   if (w.readers.try_get(name, readers))
-    foreach (int reader, readers) w.stale[reader] = 1;
+    foreach (int reader in readers) w.stale[reader] = 1;
 }
 
 /* A summary is `(OWNER SINKS)`, where OWNER is a bit set of scoped (1) and
@@ -127,7 +127,7 @@ void Compiler.check_regions(Compiler c, List ast) {
   Walk w = {.c = c, .summaries = {}, .pending = [], .freed = []};
   _fixpoint(w, ast);
   int origin = c.origin;
-  foreach (List warning, w.warnings) {
+  foreach (List warning in w.warnings) {
     (Symbol code, int at, String message, List notes) = warning;
     c.origin = at;
     c.report_warning(code, message, NULL, notes);
@@ -169,6 +169,6 @@ Map Compiler.audit_regions(
     .c = c, .summaries = seed.copy(), .effects = effects,
     .pending = [], .freed = [], .audit = 1};
   _fixpoint(w, ast);
-  foreach (List finding, w.warnings) findings.push(finding);
+  foreach (List finding in w.warnings) findings.push(finding);
   return w.summaries;
 }

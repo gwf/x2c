@@ -28,7 +28,7 @@ void Macro.use_subject(Var rows) { macro_subject = rows; }
 static Var _free_reference(String spelling) {
   if (macro_subject is void) return %(binding ? $spelling);
   macro_subject_used = 1;
-  foreach (List row, macro_subject.list())
+  foreach (List row in macro_subject.list())
     if (row.car() == spelling) return row.cadr();
   return %(binding-name $spelling);
 }
@@ -63,7 +63,7 @@ module List _pattern(Macro t, List names, int case_pattern) {
    as `_value_rows` builds it. */
 static List _binder_rows(Macro t, List names, int case_pattern) {
   List rows = NULL;
-  foreach (List hole, t.assoc(<parameters>).list()) {
+  foreach (List hole in t.assoc(<parameters>).list()) {
     Var given = names.car(), kind = hole.assoc(<kind>);
     names = names.cdr();
     if (kind == <type> || kind == <captures>)
@@ -137,13 +137,13 @@ static Var _inline(List environment, Var tree) {
     case %(literal *): return tree;
   }
   Array parts = [];
-  foreach (Var part, tree.list()) parts.push(_inline(environment, part));
+  foreach (Var part in tree.list()) parts.push(_inline(environment, part));
   return parts.list_free();
 }
 
 /* The Macro value the environment captured for `binding`, or NULL. */
 static Macro _child(List environment, Var binding) {
-  foreach (List row, environment)
+  foreach (List row in environment)
     if (List.compare(row.car(), binding) == 0) return row.cadr();
   return NULL;
 }
@@ -160,7 +160,7 @@ static List _instantiate(Macro t, List values) {
    name read as an expression is an identifier of its binding. */
 static List _value_rows(Macro t, List values) {
   List rows = NULL;
-  foreach (List hole, t.assoc(<parameters>).list()) {
+  foreach (List hole in t.assoc(<parameters>).list()) {
     int sequence = hole.assoc(<sequence>);
     Var kind = hole.assoc(<kind>);
     Var value = sequence ? values.var() : values.car();
@@ -222,7 +222,7 @@ static Var _expr_view(Var type, Var body) {
 
 static List _pattern_views(List items) {
   Array parts = [];
-  foreach (Var part, items) parts.push(_pattern_view(part));
+  foreach (Var part in items) parts.push(_pattern_view(part));
   return parts.list_free();
 }
 
@@ -240,7 +240,7 @@ static Var _slot_binder(Var form) {
     return form.str().len() > 1 && form.str()[0] == '*' &&
       _shown(form) == form ? form : NULL;
   if (form is not <list>) return NULL;
-  foreach (Var child, form.list()) {
+  foreach (Var child in form.list()) {
     Var binder = _slot_binder(child);
     if (binder) return binder;
   }

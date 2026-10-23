@@ -10,7 +10,7 @@ void Compiler.record_declaration_visibility(Compiler c, List declaration) {
   int private = c.source_private > 0;
   match (declaration) {
     case %(seq *rows):
-      foreach (List row, rows) c.record_declaration_visibility(row);
+      foreach (List row in rows) c.record_declaration_visibility(row);
     case %(function ?type (bind ?identity *) *): {
       if (!private && !type.type().is_static()) return;
       String name = Ast.binding_spelling(identity);
@@ -41,7 +41,7 @@ static void _record_native_objects(
   if (!c.shallow || c.source_private < 0 ||
       !Path.is_x2c_source(c.filename)) return;
   String path = Compiler.portable_path(c.canonical_path(c.filename));
-  foreach (List row, rows) {
+  foreach (List row in rows) {
     List declarator = row;
     match (row) case %(op = ?bound ?): declarator = bound;
     if (spec.is_extern() && declarator == row) continue;
@@ -60,7 +60,7 @@ static void _record_native_objects(
 static void _record_rows_visibility(
   Compiler c, List declaration, Symbol kind, int private, int mark,
   List rows) {
-  foreach (List row, rows)
+  foreach (List row in rows)
     match (row) case $source_declarator_row(%(?identity *)):
       _record_binding_visibility(
         c, declaration, kind, private, mark, identity);
@@ -135,7 +135,7 @@ static int _derived_spelling(Sym s, String name) {
 List Compiler.file_prefixes(Compiler c) {
   Array prefixes = [];
   if (c.line_markers)
-    foreach (List row, c.line_markers)
+    foreach (List row in c.line_markers)
       match (row) case %(? ? ? ? ? ? ?(String prefix)):
         if (!(prefix in prefixes)) prefixes.push(prefix);
   return prefixes.list_free();
@@ -233,8 +233,7 @@ String Compiler.package_member_spelling(Compiler c, String name) {
 List Compiler.imported_providers(Compiler c, String name) {
   if (!name || !c.package_roots.len()) return NULL;
   List packages = %();
-  foreach (Var (key, root), c.package_roots) {
-    String package = key;
+  foreach (String (package, root) in c.package_roots) {
     if (c.sym.get_exact(%("${package}__$name")))
       packages = cons(package, packages);
   }

@@ -753,13 +753,13 @@ _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String mess
     __builtin_unreachable();
   }
   if(! diag -> printer){
-    Var held;
+    List held;
     List _x2c_gensym_macro_object_2 = Diagnostics_entries(diag);
     List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
     Var _x2c_gensym_macro_cursor_output_2;
     while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
-      held = _x2c_gensym_macro_cursor_output_2;
-      Compiler_print_diagnostic(compiler, Var_list_payload(held));
+      held = Var_list_payload(_x2c_gensym_macro_cursor_output_2);
+      Compiler_print_diagnostic(compiler, held);
     }
 
   }
@@ -831,14 +831,14 @@ static void _show_source_context(Compiler compiler, int line, int column, int le
 static int _text_line(Compiler c, int position){
   int line = 0;
   {
-    Var start;
+    int start;
     Array _x2c_gensym_macro_object_3 = _line_starts(c);
     int _x2c_gensym_macro_cursor_3 = 0;
     Var _x2c_gensym_macro_cursor_output_3;
     while(Array_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
-      start = _x2c_gensym_macro_cursor_output_3;
+      start = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_3, 3453797));
       {
-        if(Var_int(start) > position) break;
+        if(start > position) break;
         line ++;
       }
 

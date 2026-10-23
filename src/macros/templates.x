@@ -148,7 +148,7 @@ Var Compiler.evaluate_meta_value(
    expansion. The keys are the same unwrapped values passed to the helper. */
 static Map _source_captures(List bindings) {
   Map captures = {};
-  foreach (List pair, bindings) {
+  foreach (List pair in bindings) {
     List source;
     Var syntax;
     if (pair && _source_capture_parts(pair.cadr(), source, syntax))
@@ -162,7 +162,7 @@ static Map _source_captures(List bindings) {
 static List _bind_references(
   Compiler c, unsigned long serial, List bindings) {
   List references = NULL;
-  foreach (List pair, bindings) {
+  foreach (List pair in bindings) {
     if (!pair) continue;
     Var (binder, syntax) = pair;
     String spelling = binder.str()[1:];
@@ -302,7 +302,7 @@ static List _hole_row(
   List sources = value;
   if (lifts) {
     Array lifted = [];
-    foreach (Var item, sources) lifted.push(_lifted(c, item, invocation));
+    foreach (Var item in sources) lifted.push(_lifted(c, item, invocation));
     sources = lifted.list_free();
   }
   return _capture_row_project(c, hole, sources, retain_syntax);
@@ -391,7 +391,7 @@ static List _rebuild(
         ${_capture_row_project(
           c, definition.assoc(<targetp>), %($target), 1)}));
   List bindings = NULL;
-  foreach (List row, rows) {
+  foreach (List row in rows) {
     bindings = _row_bindings(keys.car(), row, bindings);
     keys = keys.cdr();
   }
@@ -400,7 +400,7 @@ static List _rebuild(
 
 static List _row_bindings(List keys, List row, List bindings) {
   List fields = _row_fields(row);
-  foreach (Var binder, keys) {
+  foreach (Atom binder in keys) {
     if (binder != <?>) bindings = %(($binder ${fields.car()}) @bindings);
     fields = fields.cdr();
   }
@@ -461,7 +461,7 @@ static Map _private_names(Compiler c, List fresh) {
   // The outermost active row's fourth field is its invocation token.
   Token root = c.macro_stack ? c.macro_stack.last().list()[3] : NULL;
   int file_scope = c.sym.at_file_scope();
-  foreach (List row, fresh) {
+  foreach (List row in fresh) {
     (Var binder, Var spelling, Var file) = row;
     names[binder] = _private_name(
       c, spelling.str(), file_scope && file.int() ? root : NULL);
@@ -489,7 +489,7 @@ static Var _fill_syntax(Landing &l, Var syntax) {
     }
   Array items = NULL;
   int index = 0;
-  foreach (Var item, node) {
+  foreach (Var item in node) {
     List spliced = NULL;
     int splices = _splices(l, item, spliced);
     Var filled = splices ? void : _fill_syntax(l, item);
@@ -499,7 +499,7 @@ static Var _fill_syntax(Landing &l, Var syntax) {
       for (int i = 0; i < index; i++, prior = prior.cdr())
         items.push(prior.car());
     }
-    if (splices) foreach (Var each, spliced) items.push(each);
+    if (splices) foreach (Var each in spliced) items.push(each);
     else if ((void *) items) items.push(filled);
     index++;
   }
@@ -516,7 +516,8 @@ static Var _retained_declaration(List declaration) {
     List base = Type.declaration_base(specifiers, modifiers);
     if (!modifiers) return declaration;
     Array moved = [];
-    foreach (List row, rows) moved.push(Ast.append_modifiers(row, modifiers));
+    foreach (List row in rows)
+      moved.push(Ast.append_modifiers(row, modifiers));
     return %(declare $base (bindings @{moved.list_free()}));
   }
   return declaration;

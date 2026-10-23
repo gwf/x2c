@@ -122,7 +122,7 @@ int Type.is_value(Type type) {
   _require_expansion("Type.is_value");
   type = type.canonicalize();
   match (type) case %((bitfield ?) *rest): type = rest;
-  foreach (String name, %("Symbol" "Var" "Atom" "String" "List"))
+  foreach (String name in %("Symbol" "Var" "Atom" "String" "List"))
     if (active.expander.sym.is_named_value_type(type, name)) return 1;
   return active.expander.sym.resolve_key(type).is_number();
 }
@@ -149,7 +149,7 @@ List Type.members(Type type) {
   if (resolved.car() != <enum>)
     $fail.meta_sdk_members_type(type);
   Array rows = [];
-  foreach (List member, resolved.last()) rows.push(_enum_member(member));
+  foreach (List member in resolved.last()) rows.push(_enum_member(member));
   return rows.list_free();
 }
 
@@ -176,7 +176,7 @@ List Type.fields(Type t) {
   if (!metadata)
     $fail.meta_sdk_fields_complete(t);
   Array named = [];
-  foreach (List row, metadata.cdr()) if (row.car()) named.push(row);
+  foreach (List row in metadata.cdr()) if (row.car()) named.push(row);
   return named.list_free();
 }
 
@@ -199,7 +199,7 @@ List MetaContext.type_description(Var value) {
     default:
       if (_symbol_words(type) && !type.is_pointer()) {
         Array words = [];
-        foreach (Var word, type) words.push(word.str());
+        foreach (Symbol word in type) words.push(word.str());
         name = " ".join(words);
       }
   }
@@ -214,7 +214,7 @@ List MetaContext.type_description(Var value) {
   if (kind == <struct> || kind == <union>) fields = Type.fields(type);
   Compiler c = active.expander;
   Array methods = [];
-  foreach (String member, c.postfix_completions(type, <.>))
+  foreach (String member in c.postfix_completions(type, <.>))
     match (c.resolve_postfix_member(type, %($member), <.>, 1))
       case %(method * *): methods.push(member);
   return %((name $name) (kind $kind) (type $type) (fields $fields)
@@ -223,6 +223,6 @@ List MetaContext.type_description(Var value) {
 
 /* Whether the type `type` is spelled by keywords alone, such as `(int)`. */
 static int _symbol_words(List type) {
-  foreach (Var word, type) if (word is not <symbol>) return 0;
+  foreach (Var word in type) if (word is not <symbol>) return 0;
   return type != NULL;
 }

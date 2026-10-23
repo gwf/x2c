@@ -76,7 +76,7 @@ static List _ordered_occurrences(Compiler c) {
   List result = NULL;
   $memo(c.proto_cache, <proto-ordr>, result) {
     Array ordered = [];
-    foreach (Var (base, occurrence), c.protocols)
+    foreach ((Type base, List occurrence) in c.protocols)
       ordered.push(%($base $occurrence));
     ordered.sort();
     result = ordered.list_free();
@@ -90,7 +90,7 @@ static List _ordered_occurrences(Compiler c) {
 static macro Decorator $adopted_rows(
   Stmt $visit, Expr $compiler, Expr $protocols,
   Expr $participant, Name $base, Name $rows) {
-  foreach (List entry, $protocols) {
+  foreach (List entry in $protocols) {
     $base = entry.car();
     if (!_is_adopted($compiler, $base, $participant)) continue;
     List conformance = $compiler.protocol_members_for($participant, $base);
@@ -107,9 +107,9 @@ List Compiler.protocol_member_names(Compiler c, Type participant) {
   Array names = [];
   List protocols = _ordered_occurrences(c), rows = NULL;
   Type base = NULL;
-  foreach (Type current, _ancestry(c, participant.canonicalize()))
+  foreach (Type current in _ancestry(c, participant.canonicalize()))
     $adopted_rows(c, protocols, current, base, rows) {
-      foreach (List row, rows) {
+      foreach (List row in rows) {
         String name = row.car();
         if (name && !(name in seen)) {
           seen[name] = 1;
@@ -133,7 +133,7 @@ int Compiler.protocol_rejects_direct_member(
   int rejects = 0;
   $memo(c.proto_cache, %("protocol-rejects" $owner $member), rejects) {
     List protocols = _ordered_occurrences(c);
-    foreach (Type ancestor, _ancestry(c, owner)) {
+    foreach (Type ancestor in _ancestry(c, owner)) {
       List row = _member_row(c, protocols, ancestor, member);
       if (row) {
         Symbol status = row.cadr();
@@ -150,7 +150,7 @@ static List _member_row(
   Type base = NULL;
   List rows = NULL;
   $adopted_rows(c, protocols, participant, base, rows) {
-    foreach (List row, rows) if (row.car() == member) return row;
+    foreach (List row in rows) if (row.car() == member) return row;
   }
   return NULL;
 }
@@ -162,15 +162,15 @@ static List _member_row(
 */
 void Compiler.dump_conformance(Compiler c, Map globs) {
   Array names = [];
-  foreach (Var (key, value), globs)
+  foreach (Var (key, value) in globs)
     match (%($key $value))
       case %((?(String name)) (typedef *)):
         names.push(name);
   names.sort();
   List protocols = _ordered_occurrences(c), rows = NULL;
   Type base = NULL;
-  foreach (Var candidate, names) {
-    Type participant = %(${candidate.str()});
+  foreach (String candidate in names) {
+    Type participant = %($candidate);
     $adopted_rows(c, protocols, participant, base, rows) {
       _dump_row(
         "conformance", _owns_adoption(c, base, participant), base,
@@ -185,7 +185,7 @@ static void _dump_row(
   printf(
     "(%s %s %s %s", kind, owned ? "owned" : "visible",
     base.repr(), participant.repr());
-  foreach (List row, rows)
+  foreach (List row in rows)
     match (row)
       case %(?(String member) ?(Symbol status) ?(String source) ? ? ?): {
         const char *name = NULL, *punctuation = "none";
@@ -243,7 +243,7 @@ static List _resolve_member(
 
 static List _generated_member(
   Compiler c, List ancestry, String member) {
-  foreach (Type current, ancestry) {
+  foreach (Type current in ancestry) {
     List decision = _generated_owner(c, current, member);
     match (decision)
       case %(owner ? ? ?signature ?): {
@@ -256,7 +256,7 @@ static List _generated_member(
 
 static List _base_alias(
   Compiler c, List protocols, List ancestry, String member) {
-  foreach (List entry, protocols) {
+  foreach (List entry in protocols) {
     (Type base, List occurrence) = entry;
     if (!(base in ancestry)) continue;
     String base_name = _base_name(base);
@@ -273,13 +273,13 @@ static List _base_alias(
 }
 
 static int _declares_member(List rows, String member) {
-  foreach (List row, rows) if (row.car() == member) return 1;
+  foreach (List row in rows) if (row.car() == member) return 1;
   return 0;
 }
 
 static List _adopted_member(
   Compiler c, List protocols, List ancestry, String member) {
-  foreach (Type current, ancestry) {
+  foreach (Type current in ancestry) {
     List row = _member_row(c, protocols, current, member);
     if (!row) continue;
     match (row)
@@ -310,7 +310,7 @@ static List _generated_decision(
   Type base = NULL;
   List rows = NULL;
   $adopted_rows(c, _ordered_occurrences(c), participant, base, rows) {
-    foreach (List row, rows)
+    foreach (List row in rows)
       if (_consider(owners, c, base, row)) return _decision(owners);
   }
   return _decision(owners);

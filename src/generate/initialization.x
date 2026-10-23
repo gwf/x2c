@@ -24,7 +24,7 @@ module List _file_init(Compiler c, List source) {
   Init init = {.c = c, .initializer = c.init_fn};
   _prepare(init, source);
   Array entries = [];
-  foreach (List item, source)
+  foreach (List item in source)
     entries.push(init.enter(item, _patches(init, item)));
   List guard = c.initialization_guard(init.guard);
   List prelude = init.synthetic ? %($guard ${init.synthetic}) : %($guard);
@@ -171,7 +171,7 @@ static List _shutdown_registration(Compiler c, List source) {
    outside every conditional group is always compiled, which gives NULL. */
 static List _definition_arms(List source, String name) {
   List arms = NULL, found = NULL;
-  foreach (List item, source)
+  foreach (List item in source)
     match (item) {
       case %(function (*) (bind (binding ? ?(String spelling)) ?) (block *)):
         if (spelling == name) {
@@ -189,8 +189,8 @@ static List _definition_arms(List source, String name) {
 static List _within_definitions(List found, List statements) {
   if (!found) return statements;
   Array out = [];
-  foreach (List arms, found)
-    foreach (List item, Compiler.preproc_within_arms(arms, statements))
+  foreach (List arms in found)
+    foreach (List item in Compiler.preproc_within_arms(arms, statements))
       out.push(item);
   return out.list_free();
 }
@@ -214,7 +214,7 @@ static int _cache_only(Compiler c) =>
 /* Every function that directly or transitively reaches a source cache. */
 static Map _cache_reachable(List source) {
   Map callers = {}, reachable = {}, Array queue = [];
-  foreach (List node, source)
+  foreach (List node in source)
     match (node)
       case %(!set ?definition
              (function ? (bind (binding ? ?spelling) ?) ?)):
@@ -224,7 +224,7 @@ static Map _cache_reachable(List source) {
     if (key in reachable) continue;
     reachable[key] = 1;
     if (key in callers)
-      foreach (Var caller, callers[key].list()) queue.push(caller);
+      foreach (String caller in callers[key].list()) queue.push(caller);
   }
   queue.free();
   return reachable;
@@ -247,7 +247,7 @@ static int _record_calls(Var value, Var caller, Map callers) {
     }
   }
   int uses = 0;
-  foreach (Var child, node)
+  foreach (Var child in node)
     if (_record_calls(child, caller, callers)) uses = 1;
   return uses;
 }

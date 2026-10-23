@@ -289,7 +289,7 @@ static MapStringString _prepare_string_export(
   MapStringString staged = MapStringString.new_capacity(map.capacity);
   MapStringString result = NULL;
   defer if (result == NULL) staged.free_table();
-  foreach (String (key, value), map) {
+  foreach (String (key, value) in map) {
     key = source.export_nested(key);
     value = source.export_nested(value);
     staged[key] = value;

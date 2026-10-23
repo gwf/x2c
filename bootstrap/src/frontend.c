@@ -236,13 +236,13 @@ int Frontend_open_reporting(Frontend f, String filename, ParsedUnit * unit){
     if(ParsedUnit_collect(&((* unit)), f) && ParsedUnit_parse(&((* unit)))) return 1;
   }
   else{
-    Var entry;
+    List entry;
     List _x2c_gensym_macro_object_0 = Compiler_diagnostics((* unit).compiler);
     List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
     Var _x2c_gensym_macro_cursor_output_0;
     while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
-      entry = _x2c_gensym_macro_cursor_output_0;
-      Compiler_print_diagnostic((* unit).compiler, Var_list_payload(entry));
+      entry = Var_list_payload(_x2c_gensym_macro_cursor_output_0);
+      Compiler_print_diagnostic((* unit).compiler, entry);
     }
 
   }
@@ -904,13 +904,13 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
     {
       if(started) Compiler_own_diagnostics(c);
       else{
-        Var entry;
+        List entry;
         List _x2c_gensym_macro_object_5 = Compiler_diagnostics(c);
         List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;
         Var _x2c_gensym_macro_cursor_output_6;
         while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_6))){
-          entry = _x2c_gensym_macro_cursor_output_6;
-          Compiler_print_diagnostic(c, Var_list_payload(entry));
+          entry = Var_list_payload(_x2c_gensym_macro_cursor_output_6);
+          Compiler_print_diagnostic(c, entry);
         }
 
       }

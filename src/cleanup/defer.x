@@ -16,7 +16,7 @@ static typedef struct DeferCaptures {
 /** Writes captured addresses in the order capture selection established. */
 List Ast.defer_captures(List environment, List records) {
   Array assignments = [];
-  foreach (List row, records) {
+  foreach (List row in records) {
     /* The capture's storage type keeps a reference parameter's own
        address; the bare binding would read through the reference. */
     List captured = $!(${row.cadr()}){ ${row.car()} };
@@ -116,7 +116,7 @@ static void _collect_captures(DeferCaptures &d, List ast) {
       return;
     }
   List modified = Ast.lvalue_binding(Ast.written_operand(ast));
-  foreach (Var child, ast) if (child is <list>) _collect_captures(d, child);
+  foreach (Var child in ast) if (child is <list>) _collect_captures(d, child);
   Var field;
   List changed = d.written;
   if (modified && d.captures.try_get(modified, field) &&
@@ -187,7 +187,7 @@ static List _rewrite_captures(
 static List _defer_environment(
   Compiler c, List env_binding, List records) {
   Array fields = [];
-  foreach (List record, records)
+  foreach (List record in records)
     fields.push(
       c.rebuild_statement($!{ const void *${record.caddr()}; }).cadr());
   return c.capture_environment(env_binding, fields.list_free());

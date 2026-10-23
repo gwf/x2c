@@ -814,7 +814,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _391 = String_var(_390);
   _392 = List_var(NULL);
   _393 = Symbol_var(106239471489226);
-  _394 = int_var(2191);
+  _394 = int_var(2192);
   _395 = String_new("");
   _396 = String_var(_395);
   _397 = String_new("x2c.hole");
@@ -892,7 +892,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _469 = cons(_461, _468);
   _470 = cons(_455, _469);
   _471 = List_var(_470);
-  _472 = int_var(2252);
+  _472 = int_var(2253);
   _473 = Symbol_var(1544849476362);
   _474 = List_var(_44);
   _475 = cons(_474, NULL);
@@ -1004,7 +1004,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _578 = cons(_461, _577);
   _579 = cons(_455, _578);
   _580 = List_var(_579);
-  _581 = int_var(2259);
+  _581 = int_var(2260);
   _582 = cons(_495, NULL);
   _583 = cons(_528, _571);
   _584 = cons(_547, _583);
@@ -1783,9 +1783,9 @@ void Compiler_resolve_protocols(Compiler c){
 
 static void f10_resolution____resolve_visible(Compiler c, int report){
   c -> conforms = Map_new();  String owner = _path(c); {
-    Var value;  Map _x2c_gensym_macro_object_3 = c -> adoptions;  unsigned _x2c_gensym_macro_cursor_3 = 0;  Var _x2c_gensym_macro_cursor_output_4;  Var _x2c_gensym_macro_cursor_output_5;  while(Map_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_4), &(_x2c_gensym_macro_cursor_output_5))){
-      value = _x2c_gensym_macro_cursor_output_5; {
-        List adoption = Var_list_payload(value);  Type base, participant;  List _x2c_gensym_destructure_1 = List_cdr(adoption);  base = Var_type(List_getindex(_x2c_gensym_destructure_1, 0));  participant = Var_type(List_getindex(_x2c_gensym_destructure_1, 1));  Symbol storage = _adoption_storage(adoption);  List location = _adoption_location(adoption);  String path = _canonical_file(c, location);  if(storage == 1317118534 && ! String_equal(path, owner)) continue;  if(List_truth(f10_resolution____recorded(c, base, participant))) continue;  _resolve_adoption(c, base, participant, report && String_equal(path, owner) ? location : NULL);
+    List adoption;  Map _x2c_gensym_macro_object_3 = c -> adoptions;  unsigned _x2c_gensym_macro_cursor_3 = 0;  Var _x2c_gensym_macro_cursor_output_4;  Var _x2c_gensym_macro_cursor_output_5;  while(Map_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_4), &(_x2c_gensym_macro_cursor_output_5))){
+      adoption = Var_list_payload(_x2c_gensym_macro_cursor_output_5); {
+        Type base, participant;  List _x2c_gensym_destructure_1 = List_cdr(adoption);  base = Var_type(List_getindex(_x2c_gensym_destructure_1, 0));  participant = Var_type(List_getindex(_x2c_gensym_destructure_1, 1));  Symbol storage = _adoption_storage(adoption);  List location = _adoption_location(adoption);  String path = _canonical_file(c, location);  if(storage == 1317118534 && ! String_equal(path, owner)) continue;  if(List_truth(f10_resolution____recorded(c, base, participant))) continue;  _resolve_adoption(c, base, participant, report && String_equal(path, owner) ? location : NULL);
       }
 
     }
@@ -1812,8 +1812,8 @@ static List f10_resolution____recorded_conformance(Compiler c, Type base, Type p
           Var _x2c_gensym_match_value_10 = bindings; {
             Map bindings = Var_map_payload(_x2c_gensym_match_value_10); {
               if(_native_rows(rows)) return NULL;  Array bound = Array_new(), resolved = Array_new(); {
-                Var name, type;  Map _x2c_gensym_macro_object_4 = bindings;  unsigned _x2c_gensym_macro_cursor_4 = 0;  Var _x2c_gensym_macro_cursor_output_6;  Var _x2c_gensym_macro_cursor_output_7;  while(Map_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_6), &(_x2c_gensym_macro_cursor_output_7))){
-                  name = _x2c_gensym_macro_cursor_output_6;  type = _x2c_gensym_macro_cursor_output_7;  Array_push(bound, List_var(cons(name, cons(type, NULL))));
+                String name;  Type type;  Map _x2c_gensym_macro_object_4 = bindings;  unsigned _x2c_gensym_macro_cursor_4 = 0;  Var _x2c_gensym_macro_cursor_output_6;  Var _x2c_gensym_macro_cursor_output_7;  while(Map_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_6), &(_x2c_gensym_macro_cursor_output_7))){
+                  name = Var_as_string(_x2c_gensym_macro_cursor_output_6);  type = Var_type(_x2c_gensym_macro_cursor_output_7);  Array_push(bound, List_var(cons(String_var(name), cons(List_var(type), NULL))));
                 }
 
               }
@@ -1876,11 +1876,11 @@ void Sym_reset(Sym, Map);
 void Compiler_install_generated_protocol_symbols(Compiler c);
 void Compiler_resolve_as_declared(Compiler c, Map symbols){
   if(! _init_guard_) _file_init_();  Sym_reset(c -> sym, symbols);  Compiler_rebuild_protocols(c, symbols);  f10_resolution____resolve_visible(c, 0);  Compiler_install_generated_protocol_symbols(c);  Array pairs = Array_new(); {
-    Var key;  Iter _x2c_gensym_macro_iterator_7 = Map_keys(c -> conforms, &(struct Iter){
+    List key;  Iter _x2c_gensym_macro_iterator_7 = Map_keys(c -> conforms, &(struct Iter){
       int_var(0)
     }
     );  Var _x2c_gensym_macro_item_7;  while(Iter_try_next(_x2c_gensym_macro_iterator_7, &(_x2c_gensym_macro_item_7))){
-      key = _x2c_gensym_macro_item_7;  Array_push(pairs, key);
+      key = Var_list_payload(_x2c_gensym_macro_item_7);  Array_push(pairs, List_var(key));
     }
 
   }
@@ -2302,8 +2302,8 @@ static List f10_resolution____resolve(f10_resolution___MemberResolution * r, Lis
 
   }
   {
-    Var name, value;  Map _x2c_gensym_macro_object_24 =(* r).defaults;  unsigned _x2c_gensym_macro_cursor_24 = 0;  Var _x2c_gensym_macro_cursor_output_25;  Var _x2c_gensym_macro_cursor_output_26;  while(Map_try_next(_x2c_gensym_macro_object_24, &(_x2c_gensym_macro_cursor_24), &(_x2c_gensym_macro_cursor_output_25), &(_x2c_gensym_macro_cursor_output_26))){
-      name = _x2c_gensym_macro_cursor_output_25;  value = _x2c_gensym_macro_cursor_output_26;  Map_setdefault((* r).bindings, name, value);
+    String name;  Type value;  Map _x2c_gensym_macro_object_24 =(* r).defaults;  unsigned _x2c_gensym_macro_cursor_24 = 0;  Var _x2c_gensym_macro_cursor_output_25;  Var _x2c_gensym_macro_cursor_output_26;  while(Map_try_next(_x2c_gensym_macro_object_24, &(_x2c_gensym_macro_cursor_24), &(_x2c_gensym_macro_cursor_output_25), &(_x2c_gensym_macro_cursor_output_26))){
+      name = Var_as_string(_x2c_gensym_macro_cursor_output_25);  value = Var_type(_x2c_gensym_macro_cursor_output_26);  Map_setdefault((* r).bindings, String_var(name), List_var(value));
     }
 
   }
@@ -2598,8 +2598,8 @@ static List f6_lookup____ordered_occurrences(Compiler c){
   if(c -> import_protocols) f6_lookup____install_imports(c);  List result = NULL;  Var _x2c_gensym_macro_cached_3;  if(Map_try_get(c -> proto_cache, Symbol_var(1166557139931428), &(_x2c_gensym_macro_cached_3))) result = Var_list_payload(_x2c_gensym_macro_cached_3);  else{
     {
       Array ordered = Array_new(); {
-        Var base, occurrence;  Map _x2c_gensym_macro_object_29 = c -> protocols;  unsigned _x2c_gensym_macro_cursor_29 = 0;  Var _x2c_gensym_macro_cursor_output_31;  Var _x2c_gensym_macro_cursor_output_32;  while(Map_try_next(_x2c_gensym_macro_object_29, &(_x2c_gensym_macro_cursor_29), &(_x2c_gensym_macro_cursor_output_31), &(_x2c_gensym_macro_cursor_output_32))){
-          base = _x2c_gensym_macro_cursor_output_31;  occurrence = _x2c_gensym_macro_cursor_output_32;  Array_push(ordered, List_var(cons(base, cons(occurrence, NULL))));
+        Type base;  List occurrence;  Map _x2c_gensym_macro_object_29 = c -> protocols;  unsigned _x2c_gensym_macro_cursor_29 = 0;  Var _x2c_gensym_macro_cursor_output_31;  Var _x2c_gensym_macro_cursor_output_32;  while(Map_try_next(_x2c_gensym_macro_object_29, &(_x2c_gensym_macro_cursor_29), &(_x2c_gensym_macro_cursor_output_31), &(_x2c_gensym_macro_cursor_output_32))){
+          base = Var_type(_x2c_gensym_macro_cursor_output_31);  occurrence = Var_list_payload(_x2c_gensym_macro_cursor_output_32);  Array_push(ordered, List_var(cons(List_var(base), cons(List_var(occurrence), NULL))));
         }
 
       }
@@ -2711,9 +2711,9 @@ void Compiler_dump_conformance(Compiler c, Map globs){
 
   }
   Array_sort(names);  List protocols = f6_lookup____ordered_occurrences(c), rows = NULL;  Type base = NULL; {
-    Var candidate;  Array _x2c_gensym_macro_object_38 = names;  int _x2c_gensym_macro_cursor_38 = 0;  Var _x2c_gensym_macro_cursor_output_42;  while(Array_try_next(_x2c_gensym_macro_object_38, &(_x2c_gensym_macro_cursor_38), &(_x2c_gensym_macro_cursor_output_42))){
-      candidate = _x2c_gensym_macro_cursor_output_42; {
-        Type participant = List_type(cons(String_var(Var_str(candidate)), NULL)); {
+    String candidate;  Array _x2c_gensym_macro_object_38 = names;  int _x2c_gensym_macro_cursor_38 = 0;  Var _x2c_gensym_macro_cursor_output_42;  while(Array_try_next(_x2c_gensym_macro_object_38, &(_x2c_gensym_macro_cursor_38), &(_x2c_gensym_macro_cursor_output_42))){
+      candidate = Var_as_string(_x2c_gensym_macro_cursor_output_42); {
+        Type participant = List_type(cons(String_var(candidate), NULL)); {
           List _x2c_gensym_macro_entry_2;  List _x2c_gensym_macro_object_37 = protocols;  List _x2c_gensym_macro_cursor_37 = _x2c_gensym_macro_object_37;  Var _x2c_gensym_macro_cursor_output_41;  while(List_try_next(_x2c_gensym_macro_object_37, &(_x2c_gensym_macro_cursor_37), &(_x2c_gensym_macro_cursor_output_41))){
             _x2c_gensym_macro_entry_2 = Var_list_payload(_x2c_gensym_macro_cursor_output_41); {
               base = Var_type(List_car(_x2c_gensym_macro_entry_2));  if(! _is_adopted(c, base, participant)) continue;  List _x2c_gensym_macro_conformance_2 = Compiler_protocol_members_for(c, participant, base);  if(! List_truth(_x2c_gensym_macro_conformance_2)) continue;  rows = List_cdr(Var_list(List_last(_x2c_gensym_macro_conformance_2))); {
@@ -3151,8 +3151,8 @@ static List f8_adapters____collision_notes(Symbol kind, List first, List second)
 
 List Compiler_generate_protocol_adapters(Compiler c, List ast){
   if(! _init_guard_) _file_init_();  _record_conformances(c);  int central_initializer = f8_adapters____defines_function(c, _621);  Array ordered = Array_new(); {
-    Var key, value;  Map _x2c_gensym_macro_object_48 = c -> conforms;  unsigned _x2c_gensym_macro_cursor_48 = 0;  Var _x2c_gensym_macro_cursor_output_52;  Var _x2c_gensym_macro_cursor_output_53;  while(Map_try_next(_x2c_gensym_macro_object_48, &(_x2c_gensym_macro_cursor_48), &(_x2c_gensym_macro_cursor_output_52), &(_x2c_gensym_macro_cursor_output_53))){
-      key = _x2c_gensym_macro_cursor_output_52;  value = _x2c_gensym_macro_cursor_output_53;  if(Var_is_row(value, 9, 7, 4)) Array_push(ordered, List_var(cons(key, cons(value, NULL))));
+    List key;  Var value;  Map _x2c_gensym_macro_object_48 = c -> conforms;  unsigned _x2c_gensym_macro_cursor_48 = 0;  Var _x2c_gensym_macro_cursor_output_52;  Var _x2c_gensym_macro_cursor_output_53;  while(Map_try_next(_x2c_gensym_macro_object_48, &(_x2c_gensym_macro_cursor_48), &(_x2c_gensym_macro_cursor_output_52), &(_x2c_gensym_macro_cursor_output_53))){
+      key = Var_list_payload(_x2c_gensym_macro_cursor_output_52);  value = _x2c_gensym_macro_cursor_output_53;  if(Var_is_row(value, 9, 7, 4)) Array_push(ordered, List_var(cons(List_var(key), cons(value, NULL))));
     }
 
   }
@@ -3507,11 +3507,11 @@ static List f8_adapters____inherited_part(ProtocolAdapters * a, String member, T
 
 static List f8_adapters____thunk(ProtocolAdapters * a, String member, Type template){
   Map erased = Map_copy((* a).bindings); {
-    Var variable;  Iter _x2c_gensym_macro_iterator_62 = Map_keys((* a).variables, &(struct Iter){
+    String variable;  Iter _x2c_gensym_macro_iterator_62 = Map_keys((* a).variables, &(struct Iter){
       int_var(0)
     }
     );  Var _x2c_gensym_macro_item_62;  while(Iter_try_next(_x2c_gensym_macro_iterator_62, &(_x2c_gensym_macro_item_62))){
-      variable = _x2c_gensym_macro_item_62;  Map_setindex(erased, variable, List_var(_87));
+      variable = Var_as_string(_x2c_gensym_macro_item_62);  Map_setindex(erased, String_var(variable), List_var(_87));
     }
 
   }
@@ -3588,8 +3588,8 @@ static List f8_adapters____insert_at_boundary(List ast, List declaration, int de
       node = Var_list_payload(_x2c_gensym_macro_cursor_output_74); {
         int boundary = eligible && f8_adapters____starts_private_region(node);  if(! inserted && boundary && ! make_static){
           {
-            Var added;  List _x2c_gensym_macro_object_65 = additions;  List _x2c_gensym_macro_cursor_65 = _x2c_gensym_macro_object_65;  Var _x2c_gensym_macro_cursor_output_71;  while(List_try_next(_x2c_gensym_macro_object_65, &(_x2c_gensym_macro_cursor_65), &(_x2c_gensym_macro_cursor_output_71))){
-              added = _x2c_gensym_macro_cursor_output_71;  Array_push(output, added);
+            List added;  List _x2c_gensym_macro_object_65 = additions;  List _x2c_gensym_macro_cursor_65 = _x2c_gensym_macro_object_65;  Var _x2c_gensym_macro_cursor_output_71;  while(List_try_next(_x2c_gensym_macro_object_65, &(_x2c_gensym_macro_cursor_65), &(_x2c_gensym_macro_cursor_output_71))){
+              added = Var_list_payload(_x2c_gensym_macro_cursor_output_71);  Array_push(output, List_var(added));
             }
 
           }
@@ -3597,16 +3597,16 @@ static List f8_adapters____insert_at_boundary(List ast, List declaration, int de
         }
         Array_push(output, List_var(node));  if(! inserted && boundary && make_static){
           {
-            Var added;  List _x2c_gensym_macro_object_66 = additions;  List _x2c_gensym_macro_cursor_66 = _x2c_gensym_macro_object_66;  Var _x2c_gensym_macro_cursor_output_72;  while(List_try_next(_x2c_gensym_macro_object_66, &(_x2c_gensym_macro_cursor_66), &(_x2c_gensym_macro_cursor_output_72))){
-              added = _x2c_gensym_macro_cursor_output_72;  Array_push(output, added);
+            List added;  List _x2c_gensym_macro_object_66 = additions;  List _x2c_gensym_macro_cursor_66 = _x2c_gensym_macro_object_66;  Var _x2c_gensym_macro_cursor_output_72;  while(List_try_next(_x2c_gensym_macro_object_66, &(_x2c_gensym_macro_cursor_66), &(_x2c_gensym_macro_cursor_output_72))){
+              added = Var_list_payload(_x2c_gensym_macro_cursor_output_72);  Array_push(output, List_var(added));
             }
 
           }
           inserted = 1;
         }
         if(! List_equal(node, declaration)) continue;  eligible = 1;  if(! make_static || ! declaration_private) continue; {
-          Var added;  List _x2c_gensym_macro_object_67 = additions;  List _x2c_gensym_macro_cursor_67 = _x2c_gensym_macro_object_67;  Var _x2c_gensym_macro_cursor_output_73;  while(List_try_next(_x2c_gensym_macro_object_67, &(_x2c_gensym_macro_cursor_67), &(_x2c_gensym_macro_cursor_output_73))){
-            added = _x2c_gensym_macro_cursor_output_73;  Array_push(output, added);
+          List added;  List _x2c_gensym_macro_object_67 = additions;  List _x2c_gensym_macro_cursor_67 = _x2c_gensym_macro_object_67;  Var _x2c_gensym_macro_cursor_output_73;  while(List_try_next(_x2c_gensym_macro_object_67, &(_x2c_gensym_macro_cursor_67), &(_x2c_gensym_macro_cursor_output_73))){
+            added = Var_list_payload(_x2c_gensym_macro_cursor_output_73);  Array_push(output, List_var(added));
           }
 
         }
@@ -3617,8 +3617,8 @@ static List f8_adapters____insert_at_boundary(List ast, List declaration, int de
 
   }
   if(! inserted){
-    Var added;  List _x2c_gensym_macro_object_69 = additions;  List _x2c_gensym_macro_cursor_69 = _x2c_gensym_macro_object_69;  Var _x2c_gensym_macro_cursor_output_75;  while(List_try_next(_x2c_gensym_macro_object_69, &(_x2c_gensym_macro_cursor_69), &(_x2c_gensym_macro_cursor_output_75))){
-      added = _x2c_gensym_macro_cursor_output_75;  Array_push(output, added);
+    List added;  List _x2c_gensym_macro_object_69 = additions;  List _x2c_gensym_macro_cursor_69 = _x2c_gensym_macro_object_69;  Var _x2c_gensym_macro_cursor_output_75;  while(List_try_next(_x2c_gensym_macro_object_69, &(_x2c_gensym_macro_cursor_69), &(_x2c_gensym_macro_cursor_output_75))){
+      added = Var_list_payload(_x2c_gensym_macro_cursor_output_75);  Array_push(output, List_var(added));
     }
 
   }

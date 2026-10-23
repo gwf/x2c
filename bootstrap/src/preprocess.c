@@ -443,15 +443,15 @@ static Var _macro_prefix(Compiler c, Token token, String param){
     else if(String_truth(param) && String_equal(word, param) && ! wrapped) wrapped = 1;
     else if(! Map_try_get(c -> object_macros, String_var(word), &(definition)) || ! Var_is_row(definition, 9, 7, 4)) return int_var(1);
     else{
-      Var item;
+      Symbol item;
       Iter _x2c_gensym_macro_iterator_2 = Var_iter(definition, &(struct Iter){
         int_var(0)
       }
       );
       Var _x2c_gensym_macro_item_2;
       while(Iter_try_next(_x2c_gensym_macro_iterator_2, &(_x2c_gensym_macro_item_2))){
-        item = _x2c_gensym_macro_item_2;
-        Array_push(words, item);
+        item = Var_symbol(_x2c_gensym_macro_item_2);
+        Array_push(words, Symbol_var(item));
       }
 
     }
@@ -534,13 +534,13 @@ List Compiler_preproc_within_arms(List arms, List items){
 
   }
   {
-    Var item;
+    List item;
     List _x2c_gensym_macro_object_6 = items;
     List _x2c_gensym_macro_cursor_6 = _x2c_gensym_macro_object_6;
     Var _x2c_gensym_macro_cursor_output_4;
     while(List_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_4))){
-      item = _x2c_gensym_macro_cursor_output_4;
-      Array_push(out, item);
+      item = Var_list_payload(_x2c_gensym_macro_cursor_output_4);
+      Array_push(out, List_var(item));
     }
 
   }

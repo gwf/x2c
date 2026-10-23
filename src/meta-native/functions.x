@@ -152,11 +152,12 @@ int Compiler.matches_macro(Compiler c, MacroMatcher &matcher, List code) {
    the arguments, carried through the existing helper subject context. */
 static List _subject_rows(Compiler c, Array values) {
   Map globals = {}, source_names = {};
-  foreach (Var value, values)
+  foreach (Var value in values)
     _subject_globals(c, value, globals, source_names);
   Array rows = [];
-  foreach (Var (spelling, binding), globals) rows.push(%($spelling $binding));
-  foreach (Var (binding, spelling), source_names)
+  foreach ((String spelling, List binding) in globals)
+    rows.push(%($spelling $binding));
+  foreach ((List binding, String spelling) in source_names)
     rows.push(%(source-spelling $binding $spelling));
   return rows.list_free();
 }

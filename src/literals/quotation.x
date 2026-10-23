@@ -312,7 +312,7 @@ static List _parse_typed_capture(Compiler c) {
 static int _recorded(
   Compiler c, String name, Type type, List tag, Token origin) {
   int repeated = 0;
-  foreach (List previous, c.match_types) match (previous)
+  foreach (List previous in c.match_types) match (previous)
     case %(?previous_name ?previous_type):
       if (previous_name == name &&
           c.var_tag_expression(previous_type, origin) == tag &&
@@ -327,7 +327,7 @@ static List _tag_test(Compiler c, Atom binder, List tag) {
   match (tag)
     case %(expr ("Symbol") ?): tag = c.cache(%(var $tag));
   List tail = c.literal_cell(tag, %(nil));
-  foreach (Var element, elements.reverse())
+  foreach (Var element in elements.reverse())
     tail = c.literal_cell(_atom_element(c, element.str()), tail);
   return %(expr ("List") $tail);
 }
@@ -335,7 +335,7 @@ static List _tag_test(Compiler c, Atom binder, List tag) {
 /** Applies each typed capture's predicate to every unquoted occurrence. */
 List Compiler.typed_match_pattern(Compiler c, List pattern, List types) {
   Map tags = {};
-  foreach (List row, types) match (row)
+  foreach (List row in types) match (row)
     case %(?name ?type):
       tags[Atom.intern(%"?${name}")] = c.var_tag_expression(type, c.token);
   return _typed_pattern(c, pattern, tags);

@@ -57,7 +57,7 @@ String Compiler.meta_cc_run(List arguments, String directory) {
    undefined-symbol report does. */
 static String _cc_error(String errors) {
   Array lines = [];
-  foreach (String line, (errors ? errors : "").split("\n")) {
+  foreach (String line in (errors ? errors : "").split("\n")) {
     String text = line.strip(NULL);
     if (!text) continue;
     if (": error: " in text && !text.startswith("clang:") &&

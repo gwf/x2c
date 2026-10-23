@@ -904,28 +904,30 @@ void Compiler_use_meta_helper(MetaHelper helper){
   Scope_move(helper, & primary_scope);
   String_try_own(helper -> path);
   {
-    Var key, value;
+    int key;
+    String value;
     Map _x2c_gensym_macro_object_1 = helper -> failures;
     unsigned _x2c_gensym_macro_cursor_1 = 0;
     Var _x2c_gensym_macro_cursor_output_1;
     Var _x2c_gensym_macro_cursor_output_2;
     while(Map_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1), &(_x2c_gensym_macro_cursor_output_2))){
-      key = _x2c_gensym_macro_cursor_output_1;
-      value = _x2c_gensym_macro_cursor_output_2;
-      String_try_own(Var_string(value));
+      key = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_1, 3453797));
+      value = Var_as_string(_x2c_gensym_macro_cursor_output_2);
+      String_try_own(value);
     }
 
   }
   {
-    Var key, value;
+    String key;
+    int value;
     Map _x2c_gensym_macro_object_2 = helper -> units;
     unsigned _x2c_gensym_macro_cursor_2 = 0;
     Var _x2c_gensym_macro_cursor_output_3;
     Var _x2c_gensym_macro_cursor_output_4;
     while(Map_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_3), &(_x2c_gensym_macro_cursor_output_4))){
-      key = _x2c_gensym_macro_cursor_output_3;
-      value = _x2c_gensym_macro_cursor_output_4;
-      String_try_own(Var_string(key));
+      key = Var_as_string(_x2c_gensym_macro_cursor_output_3);
+      value = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_4, 3453797));
+      String_try_own(key);
     }
 
   }

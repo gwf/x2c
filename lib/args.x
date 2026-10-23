@@ -120,7 +120,7 @@ static Spec _read_spec(List spec) {
   defer if (!complete) _free(result);
   result.options = Scope.calloc(result.count, sizeof(Option));
   int position = 0;
-  foreach (List row, spec) {
+  foreach (List row in spec) {
     Option *option = &result.options[position];
     _read_row((*option), row, result.index, position);
     Var earlier;
@@ -138,7 +138,7 @@ static Spec _read_spec(List spec) {
 static void _read_row(Option &o, List row, Map index, int position) {
   String first = row.car().str();
   o.operand = !first.startswith("-");
-  foreach (Var word, row) {
+  foreach (Var word in row) {
     if (word is List) {
       _read_property(o, word);
       continue;

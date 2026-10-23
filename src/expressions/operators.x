@@ -419,7 +419,7 @@ static Type _shared_participant(
   if (!lhs_type.is_bare_typedef_name() || !rhs_type.is_bare_typedef_name())
     return NULL;
   Array lhs_names = _typedef_names(c, lhs_type);
-  foreach (Type name, _typedef_names(c, rhs_type))
+  foreach (Type name in _typedef_names(c, rhs_type))
     if (name in lhs_names &&
         c.resolve_protocol_member(name, member))
       return name;

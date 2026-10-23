@@ -806,7 +806,7 @@ String Regex.replace_fn(Regex regex, String subject, Func fn) =>
 RegexCapture RegexMatch.capture(RegexMatch found, Var key) {
   int numbered = key.is_integer(), number = numbered ? key : -1;
   String name = numbered ? NULL : key.str();
-  foreach (RegexCapture capture, found) {
+  foreach (RegexCapture capture in found) {
     if (numbered && capture.index() == number) return capture;
     if (!numbered && capture.name() == name) return capture;
   }

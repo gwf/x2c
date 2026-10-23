@@ -8,10 +8,10 @@ static void write_sources(Path root) {
     "lib/text.x": "String greeting(void) => \"hello\";\n",
     "docs/notes.md": "not source\n"
   };
-  foreach (Var (name, text), sources) {
-    Path path = root.join(name.str());
+  foreach (String (name, text) in sources) {
+    Path path = root.join(name);
     path.dirname().make_dirs();
-    path.write_text(text.str());
+    path.write_text(text);
   }
 }
 
@@ -19,14 +19,14 @@ Path root = Path.temp_dir();
 write_sources(root);
 
 Array running = [], counts = [];
-foreach (Path unit, root.join("**/*.x").glob()) {
+foreach (Path unit in root.join("**/*.x").glob()) {
   if (running.len() == 2) counts.push(Job.wait_any(running).output());
   running.push(%(wc -l $unit).job().start());
 }
 while (running.len()) counts.push(Job.wait_any(running).output());
 
 Array lines = [];
-foreach (String count, counts) {
+foreach (String count in counts) {
   List fields = count.strip(" \n").split(" ").filter(%!(word) => word);
   String path = fields.cadr().str();
   lines.push(%"${fields.car()} ${path[root.len() + 1:]}");

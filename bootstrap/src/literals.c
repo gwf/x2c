@@ -1213,15 +1213,15 @@ static List f11_collections____parse_quoted_entries(Compiler c){
 
 static void f11_collections____push_entry(Array entries, Ast entry){
   if(List_truth(entry) && x2c_var_equal(List_car(entry), Symbol_var(39266))){
-    Var row;
+    List row;
     Iter _x2c_gensym_macro_iterator_4 = List_iter(List_cdr(entry), &(struct Iter){
       int_var(0)
     }
     );
     Var _x2c_gensym_macro_item_4;
     while(Iter_try_next(_x2c_gensym_macro_iterator_4, &(_x2c_gensym_macro_item_4))){
-      row = _x2c_gensym_macro_item_4;
-      Array_push(entries, row);
+      row = Var_list_payload(_x2c_gensym_macro_item_4);
+      Array_push(entries, List_var(row));
     }
 
   }

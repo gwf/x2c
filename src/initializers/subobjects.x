@@ -34,7 +34,7 @@ List Compiler.initializer_rows(
     resolved_root.is_pointer() || resolved_root.is_enum();
   List states = %((() $first_path $available));
   int first = 1;
-  foreach (List original, items) {
+  foreach (List original in items) {
     rows.push(_advance_row(c, root, original, target, states, first));
     first = 0;
   }
@@ -51,7 +51,7 @@ static List _advance_row(
   }
   List cases = _row_cases(c, root, value, states, first);
   Array following = [];
-  foreach (List choice, cases) {
+  foreach (List choice in cases) {
     (List condition, List path, Type type, List input) = choice;
     _advance_path(c, target, path, condition, following);
   }
@@ -69,7 +69,7 @@ static List _row_cases(
       return Ast.initializer_cases(body, header);
     }
   Array cases = [];
-  foreach (List state, states) {
+  foreach (List state in states) {
     (List condition, List path, int available) = state;
     Type type = available ? _path_type(path, root) : NULL;
     if (first && _fills_char_array(c, root, value)) {
@@ -114,7 +114,7 @@ static List _designated_path(
       }
     }
     value = node;
-    foreach (List selector, selectors) node = selector.append(%($node));
+    foreach (List selector in selectors) node = selector.append(%($node));
     normalized = node;
     return path;
   }
@@ -173,7 +173,7 @@ static List _capture_index(
 static List _merge_states(Array states) {
   Map positions = {};
   Array merged = [];
-  foreach (List state, states) {
+  foreach (List state in states) {
     (List condition, List path, int available) = state;
     List key = %($path $available);
     Var stored;
@@ -319,7 +319,7 @@ static List _index_inside(
 
 /** Selects a native subobject without evaluating it when used by sizeof. */
 List Compiler.initializer_slot(Compiler c, List target, List path) {
-  foreach (List frame, path.reverse()) {
+  foreach (List frame in path.reverse()) {
     (Type owner, Symbol kind, Var selector, Type selected, List rest) = frame;
     if (kind == <index>)
       target = %(expr $selected (index $target $selector));
@@ -346,7 +346,7 @@ static List _scalar_rows(
   int array = _resolve_shape(c, root).is_array();
   Array rows = [];
   unsigned long long at = 0;
-  foreach (List value, items) {
+  foreach (List value in items) {
     List ordinal = _ull_literal(at++);
     List count = layout.cadr();
     List condition = array ? %(expr (int)
@@ -360,7 +360,7 @@ static List _scalar_rows(
 }
 
 static int _scalar_inputs(Compiler c, List items, List &string) {
-  foreach (List value, items) {
+  foreach (List value in items) {
     match (value) {
       case %(expr ? (!or (composite *) (initval *))): return 0;
       case %(expr ?type ?): {
@@ -445,7 +445,7 @@ static void _ordinal_cases(
   }
   List start = NULL;
   List one = _ull_literal(1);
-  foreach (List entry, children) {
+  foreach (List entry in children) {
     (List frame, List child) = entry;
     Symbol kind = frame.cadr();
     List units = child.cadr(), position = ordinal, active = condition;

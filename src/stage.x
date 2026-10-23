@@ -319,7 +319,7 @@ static List _data_form(Compiler c, Var value) {
 /* Strings, atoms, numbers, and Lists that hold only such values. */
 static int _immutable(Var value) {
   if (value is <list>) {
-    foreach (Var item, value.list()) if (!_immutable(item)) return 0;
+    foreach (Var item in value.list()) if (!_immutable(item)) return 0;
     return 1;
   }
   return value is <string> || value.is_atom() ||
@@ -328,7 +328,7 @@ static int _immutable(Var value) {
 
 static List _list_form(Compiler c, Var value) {
   List tail = %(nil);
-  foreach (Var item, value.list().reverse()) {
+  foreach (Var item in value.list().reverse()) {
     List head = _data_form(c, item);
     if (!head) return NULL;
     tail = %(expr ("List") (cons $head $tail));
@@ -338,7 +338,7 @@ static List _list_form(Compiler c, Var value) {
 
 static List _array_form(Compiler c, Var value) {
   Array items = $auto([]);
-  foreach (Var item, value.array()) {
+  foreach (Var item in value.array()) {
     List code = _data_form(c, item);
     if (!code) return NULL;
     items.push(code);
@@ -349,9 +349,9 @@ static List _array_form(Compiler c, Var value) {
 static List _map_form(Compiler c, Var value) {
   Map map = value;
   Array keys = $auto([]), entries = $auto([]);
-  foreach (Var (key, item), map) keys.push(key);
+  foreach (Var (key, item) in map) keys.push(key);
   // Cache ids and emission must not depend on bucket layout.
-  foreach (Var key, keys.sort()) {
+  foreach (Var key in keys.sort()) {
     List key_code = _data_form(c, key);
     List value_code = key_code ? _data_form(c, map[key]) : NULL;
     if (!value_code) return NULL;

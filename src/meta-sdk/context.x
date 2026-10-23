@@ -82,7 +82,7 @@ void x2c_diagnostic_warn(String message, List notes) {
 
 static void _check_notes(String operation, List notes) {
   _require_expansion(operation);
-  foreach (Var note, notes)
+  foreach (Var note in notes)
     if (note is not <string>)
       $fail.meta_sdk_notes_string(operation, note);
 }

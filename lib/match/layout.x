@@ -251,7 +251,7 @@ static int _set_capture(List args) =>
 static MatchSlots _sequence_slots(
   MatchCaptureLayout m, List patterns) {
   MatchSlots slots = {0, 0};
-  foreach (Var pattern, patterns) slots = _union(slots, _slots(m, pattern));
+  foreach (Var pattern in patterns) slots = _union(slots, _slots(m, pattern));
   return slots;
 }
 
@@ -261,7 +261,7 @@ static MatchSlots _choice_slots(
   MatchCaptureLayout m, List patterns) {
   MatchSlots slots = {0, 0};
   int first = 1;
-  foreach (Var pattern, patterns) {
+  foreach (Var pattern in patterns) {
     MatchSlots part = _slots(m, pattern);
     slots.possible |= part.possible;
     slots.definite = first ? part.definite : slots.definite & part.definite;

@@ -166,7 +166,7 @@ static Var _apply_linked(Func function, List arguments) {
   unsigned count = arguments.len(), index = 0;
   FuncArg *argv = Scope.calloc(count + 1, sizeof(FuncArg));
   defer Scope.free(argv);
-  foreach (Var argument, arguments) argv[index++] = FuncArg.value(argument);
+  foreach (Var argument in arguments) argv[index++] = FuncArg.value(argument);
   return function.apply(count, argv);
 }
 
@@ -176,7 +176,7 @@ static Array _meta_values(
   List params = NULL;
   match (callee) case %((func ?declared) *): params = declared;
   Array values = [];
-  foreach (List argument, arguments) {
+  foreach (List argument in arguments) {
     Type want = NULL;
     if (params) {
       want = params.car();

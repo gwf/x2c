@@ -138,11 +138,11 @@ static List _manifest(Helper &h) {
    does not build keeps its reason for the first call that needs it. */
 static MetaHelper _use(Helper &h, List manifest) {
   Map failures = {}, units = {}, groups = {};
-  foreach (Var index, manifest.assoc(<groups>)) groups[index] = 1;
-  foreach (List row, manifest.assoc(<failures>))
+  foreach (int index in manifest.assoc(<groups>)) groups[index] = 1;
+  foreach (List row in manifest.assoc(<failures>))
     failures[row.car()] = row.cadr();
   int index = 1;
-  foreach (String owner, h.owners) {
+  foreach (String owner in h.owners) {
     if (index in groups) units[owner] = index;
     index++;
   }
@@ -169,7 +169,7 @@ static void _scan(Helper &h, List inputs) {
   Compiler c = Compiler.new();
   c.sources = h.frontend.request.sources;
   c.include_dirs = h.frontend.include_dirs;
-  foreach (String input, inputs) {
+  foreach (String input in inputs) {
     String path = Path.absolute(input);
     Scan s = {
       .request = h.frontend.request, .c = c, .units = [], .seen = {},
@@ -178,7 +178,7 @@ static void _scan(Helper &h, List inputs) {
     if (h.entries.contains(path)) meta |= 1;
     if (!meta) continue;
     if (meta & 1) _own(h, path, owned);
-    foreach (String unit, s.units) _own(h, unit, owned);
+    foreach (String unit in s.units) _own(h, unit, owned);
   }
   Compiler.forget_provisional_entries();
 }
@@ -306,7 +306,7 @@ static String _quoted(Token token) =>
 
 static int _compiler_owns(String path) {
   String root = x2c_get_root();
-  foreach (String directory, %("lib" "src" "etc"))
+  foreach (String directory in %("lib" "src" "etc"))
     if (path.startswith(%"$root/$directory/")) return 1;
   return 0;
 }
@@ -319,7 +319,7 @@ static int _compiler_owns(String path) {
 static List _group_flags(CliRequest request, Map packages) {
   List includes = request.include_dirs.map(%!(dir) => %("-I" $dir)).flatten();
   List flags = %(@includes @{_host_args(request.cc_args)});
-  foreach (Var (root, _), packages)
+  foreach ((String root, int _) in packages)
     flags = %(@flags "-iquote" ${%"$root/builds"} "-iquote" ${%"$root/src"});
   String archive = Compiler.extension_archive();
   if (archive)
@@ -349,7 +349,7 @@ static List _host_args(List cc_args) {
 static Array _modules(CliRequest request, Map packages) {
   Array modules = request.native_modules.map(
     %!(String path) => Path.absolute(path));
-  foreach (Var (root, _), packages) {
+  foreach ((String root, int _) in packages) {
     String name = Path.basename(root);
     String module = %"$root/builds/$name.module";
     if (!Compiler.links_extension(name) && Path.is_file(module) &&
@@ -384,7 +384,7 @@ static List _loop_sources(void) => %(
 /* The text of that unit, or NULL when a source is missing. */
 static String _loop_text(void) {
   String text = "";
-  foreach (String path, _loop_sources()) {
+  foreach (String path in _loop_sources()) {
     if (!Path.is_file(path)) return NULL;
     text += Path.read_text(path);
   }
@@ -397,7 +397,7 @@ static String _loop_text(void) {
 static String _directory(
   String root, String identity, Array owners) {
   Array key = [identity];
-  foreach (String path, owners) key.push(path);
+  foreach (String path in owners) key.push(path);
   return %"$root/meta/project-${String.sha256("\n".join(key))}";
 }
 
@@ -415,7 +415,7 @@ static List _build(Helper &h) {
     h.before[index] = _digest(%"$base.o");
     _clear(base);
   }
-  foreach (String path, %(@{h.owners} @{h.modules} @{_loop_sources()}))
+  foreach (String path in %(@{h.owners} @{h.modules} @{_loop_sources()}))
     h.deps[path] = 1;
   if (h.entries) h.meta = _build_meta(h.frontend, h.entries, NULL);
   defer if (h.meta) Scope.free(h.meta);
@@ -426,10 +426,10 @@ static List _build(Helper &h) {
   }
   Compiler.use_meta_build_directory(h.directory, h.owners, h.providers);
   int index = 1;
-  foreach (String owner, h.owners) _parse(h, owner, index++);
+  foreach (String owner in h.owners) _parse(h, owner, index++);
   Compiler.use_meta_build_directory(NULL, NULL, NULL);
   index = 1;
-  foreach (String owner, h.owners) {
+  foreach (String owner in h.owners) {
     String problem = _compile(h, index, owner);
     _record(h, index++, problem);
     if (h.entries && problem && !failure)
@@ -445,17 +445,17 @@ static String _loaded_providers(Helper &h) {
   h.providers = {};
   Map owners = $auto({}), packaged = $auto({});
   int index = 1;
-  foreach (String path, h.owners) {
+  foreach (String path in h.owners) {
     List provider = _loaded_provider(h, path, index++);
     match (provider) case %(failure ?(String message)): return message;
     h.providers[path] = provider;
     if (_package_source(h, path))
-      foreach (String name, provider.car().map().keys()) packaged[name] = 1;
+      foreach (String name in provider.car().map().keys()) packaged[name] = 1;
   }
-  foreach (String path, h.owners) {
+  foreach (String path in h.owners) {
     Map declarations = h.providers[path].list().car();
     if (!_package_source(h, path)) _drop_imported(declarations, packaged);
-    foreach (String name, declarations.keys()) {
+    foreach (String name in declarations.keys()) {
       Var previous;
       if (owners.try_get(name, previous))
         return %"duplicate native definition: $name ($previous and $path)";
@@ -466,7 +466,7 @@ static String _loaded_providers(Helper &h) {
 }
 
 static int _package_source(Helper &h, String path) {
-  foreach (Var (root, _), h.packages)
+  foreach ((String root, int _) in h.packages)
     if (Compiler.is_package_source(Path.resolved_absolute(root), path))
       return 1;
   return 0;
@@ -476,15 +476,15 @@ static int _package_source(Helper &h, String path) {
    collection. The package's own provider defines them. */
 static void _drop_imported(Map declarations, Map packaged) {
   Array imported = $auto([]);
-  foreach (String name, declarations.keys())
+  foreach (String name in declarations.keys())
     if (name in packaged) imported.push(name);
-  foreach (String name, imported) declarations.del(name);
+  foreach (String name in imported) declarations.del(name);
 }
 
 static List _loaded_provider(Helper &h, String path, int index) {
   Frontend f = h.frontend;
   $let(f.request.package_dirs, f.request.package_dirs) {
-    foreach (Var (root, _), h.packages)
+    foreach ((String root, int _) in h.packages)
       f.request.package_dirs = f.request.package_dirs.append(
         %(${Path.dirname(root)}));
     return _collect_provider(h, f, path, index);
@@ -520,7 +520,7 @@ static void _start_parse(Helper &h, Compiler c, String path, int index) {
 /* Nothing else reports a loaded build's diagnostics, so they print as a
    translation prints its own. */
 static void _print_diagnostics(Compiler c) {
-  foreach (Var entry, c.diagnostics()) c.print_diagnostic(entry);
+  foreach (List entry in c.diagnostics()) c.print_diagnostic(entry);
 }
 
 /* The path of table `index`'s group files, without their suffixes. */
@@ -529,7 +529,7 @@ static String _base(Helper &h, int index) =>
 
 /* Removes what a parse left of the group at `base`. */
 static void _clear(String base) {
-  foreach (String suffix, %(".c" ".deps" ".failure")) {
+  foreach (String suffix in %(".c" ".deps" ".failure")) {
     String file = %"$base$suffix";
     if (Path.exists(file)) Path.remove_file(file);
   }
@@ -545,7 +545,7 @@ static void _parse(Helper &h, String path, int index) {
   Frontend f = h.frontend;
   $let(f.request.package_dirs, f.request.package_dirs)
   $let(f.request.source_map, f.request.source_map || h.entries) {
-    foreach (Var (root, _), h.packages)
+    foreach ((String root, int _) in h.packages)
       f.request.package_dirs = f.request.package_dirs.append(
         %(${Path.dirname(root)}));
     _parse_source(h, f, path, index);
@@ -567,7 +567,7 @@ static void _parse_source(
     _print_diagnostics(unit.compiler);
     Path.write_text(%"${_base(h, index)}.failure", "x2c reported errors");
   }
-  foreach (Var (read, _), unit.compiler.deps) h.deps[read] = 1;
+  foreach ((String read, Var _) in unit.compiler.deps) h.deps[read] = 1;
 }
 
 /* Compiles the group a parse left for table `index`, adding the headers it
@@ -600,7 +600,8 @@ static String _compile_loaded(List command) {
 /* Adds each dependency of the depfile at `path` to `deps`. */
 static void _add_depfile(String path, Map deps) {
   if (!Path.is_file(path)) return;
-  foreach (String dependency, translation_depfile_parse(Path.read_text(path)))
+  foreach (String dependency in
+           translation_depfile_parse(Path.read_text(path)))
     deps[Path.absolute(dependency)] = 1;
 }
 
@@ -691,10 +692,10 @@ static String _temporary(String path) =>
 static String _tables(Array built, int count) {
   Buffer out = Buffer.new(0);
   $output.helper.header(out);
-  foreach (int index, built)
+  foreach (int index in built)
     $output.helper.target(out, index);
   $output.helper.dispatch_begin(out);
-  foreach (int index, built)
+  foreach (int index in built)
     $output.helper.dispatch_case(out, index);
   $output.helper.dispatch_end(out);
   $output.helper.count(out, count);
@@ -740,7 +741,7 @@ static List _write_manifest(Helper &h, String failure) {
 /* Each file of `paths` that can be read, with its digest, in order. */
 static List _digests(Map paths) {
   Array rows = [];
-  foreach (Var (path, _), paths) {
+  foreach ((String path, int _) in paths) {
     String digest = _digest(path);
     if (digest) rows.push(%($path $digest));
   }
@@ -764,7 +765,7 @@ static List _current(String directory) {
   if (manifest.assoc(<failures>) ||
       ((String) manifest.assoc(<failure>)).len())
     return NULL;
-  foreach (List row, manifest.assoc(<deps>)) {
+  foreach (List row in manifest.assoc(<deps>)) {
     (String file, String digest) = row;
     if (_digest(file) != digest) return NULL;
   }

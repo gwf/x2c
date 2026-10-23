@@ -100,7 +100,7 @@ meta static Code _string_switch_helper(Type type, List labels) {
   List name = x2c_binding_for(key, "string_switch"), s = x2c_ident("s");
   Array tests = [];
   int index = 0;
-  foreach (List label, labels) {
+  foreach (List label in labels) {
     List value = $!int{ ${++index} };
     tests.push($!{ if ($s == $label) return $value; });
   }

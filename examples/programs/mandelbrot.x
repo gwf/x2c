@@ -42,7 +42,7 @@ static ArrayChar _rgb(ArrayDbl pixels) {
   ArrayChar rgb = [];
   rgb.append(NULL, pixels.len() * 3);
   int at = 0;
-  foreach (double value, pixels) {
+  foreach (double value in pixels) {
     double t = value < 0.0 ? 0.0 : fmod(value * 0.015, 1.0);
     double u = 1.0 - t;
     rgb[at++] = (char) (9.0 * u * t * t * t * 255.0);

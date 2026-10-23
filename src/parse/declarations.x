@@ -65,7 +65,7 @@ static List _typedef(Compiler c, List context, int row) {
   /* A typedef's own alignment changes every record field that names it,
      even when the record declaration has no attribute of its own. */
   if (_layout_attribute_since(c, first))
-    foreach (List declarator, bindings) {
+    foreach (List declarator in bindings) {
       String name = Ast.binding_spelling(declarator.cadr());
       if (name) c.sym.set(%($name "layout-attribute"), %(unknown));
     }
@@ -286,7 +286,7 @@ static List _destructure_targets(Compiler c, List binding_type) {
    names. */
 static List _destructure_binds(List targets) {
   Array binds = [];
-  foreach (List target, targets) binds.push(%(bind $target ()));
+  foreach (List target in targets) binds.push(%(bind $target ()));
   return binds.list_free();
 }
 
@@ -309,7 +309,7 @@ static List _linked_static_base(Compiler c, List base, List declarators) {
   if (!c.sym.at_file_scope() || type.is_static() ||
       !declarators)
     return base;
-  foreach (List declarator, declarators) {
+  foreach (List declarator in declarators) {
     Type declared = %(declare $base (bindings $declarator)).type_from_ast();
     List bound = declarator;
     match (declarator) case %(op = ?target ?): bound = target;
@@ -329,12 +329,12 @@ module List _finish_declaration(
   base = Type.declaration_base(base, modifiers);
   if (modifiers) {
     Array bound = [];
-    foreach (List declarator, declarators)
+    foreach (List declarator in declarators)
       bound.push(Ast.append_modifiers(declarator, modifiers));
     declarators = bound.list_free();
   }
   if (tag == <declare> || tag == <decl>)
-    foreach (List declarator, declarators) {
+    foreach (List declarator in declarators) {
       Type type = %(declare $base (bindings $declarator)).type_from_ast();
       c.check_reference_placement(type);
     }
@@ -387,8 +387,7 @@ static Type _self_owner_type(Compiler c, List method) {
 static void _lower_parameter_self(Compiler c, Var replacement) {
   Map symbols = c.params.symbols;
   if (!symbols) return;
-  foreach (Var (key, value), symbols) {
-    List original = value;
+  foreach (List (key, original) in symbols) {
     List lowered = original.search_replace(<self>, replacement);
     if (lowered != original) {
       c.sym.put(symbols, key, lowered);
@@ -425,8 +424,8 @@ module List _bind_declaration(
   List declaration_context = tag == <typedef> ? %(typedef) : field_context;
   Array output = [];
   int preserved_self = 0, initializes = 0;
-  foreach (Var value, declarators)
-    foreach (List declarator, c.evaluate_macro_rows(value)) {
+  foreach (Var value in declarators)
+    foreach (List declarator in c.evaluate_macro_rows(value)) {
       declarator = _finish_fnmods(c, declarator);
       if (context != <field> && _has_bitfield(declarator))
         return _construction_error(c);
@@ -469,7 +468,7 @@ static int _has_bitfield(List declarator) {
 module List _bind_targets(
   Compiler c, Var base, List targets, Var source) {
   Array declarators = [];
-  foreach (Var target, targets) declarators.push(%(bind $target ()));
+  foreach (Var target in targets) declarators.push(%(bind $target ()));
   List declaration = c.bind_syntax(
     %(declare $base
         (bindings @{declarators.list_free()})),
@@ -478,7 +477,7 @@ module List _bind_targets(
   match (declaration)
     case %(declare ?bound_base (bindings *bindings)): {
       Array bound_targets = [];
-      foreach (List binding, bindings)
+      foreach (List binding in bindings)
         match (binding)
           case %(bind ?name ?): bound_targets.push(name);
       return %(dstrdecl $bound_base
@@ -492,7 +491,7 @@ module List _bind_targets(
 module List _bind_typed_targets(
   Compiler c, List parameters, Var source) {
   Array bound_parameters = [];
-  foreach (List parameter, parameters)
+  foreach (List parameter in parameters)
     match (parameter)
       case %(param ?base (!set ?declarator (bind ? ?))): {
         List declaration = c.bind_syntax(

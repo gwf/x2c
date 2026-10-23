@@ -64,7 +64,7 @@ List Compiler.lift_lambda_types(Compiler c, List function) {
   Type signature = function.cadr();
   int public = signature.is_inline() && !signature.is_static();
   Array declarations = [];
-  foreach (Type type, ordered)
+  foreach (Type type in ordered)
     if (%(${type.car()} ${type.cadr()}) in needed) {
       Type body = (Type) Ast.rewrite_children(
         (Ast) type, %!(List child) => Ast.replace_nodes(child, replaced));
@@ -103,7 +103,7 @@ static Code _lambda_type_declaration(Compiler c, Type type, int public) {
   if (name.car() != <gensym>)
     c.set_fact(%(emitted $name), c.fresh_name(role));
   if (type.is_enum())
-    foreach (List member, type.caddr()) {
+    foreach (List member in type.caddr()) {
       List binding = member.car() == <op> ? member.caddr() : member;
       c.set_fact(%(emitted $binding), c.fresh_name(%"${role}_enumerator"));
     }
@@ -199,7 +199,7 @@ static int _params_look_typed(Compiler c) {
 
 static List _parse_typed_params(Compiler c) {
   List params = c.parse_parameter_list();
-  foreach (List param, params)
+  foreach (List param in params)
     match (param)
       case %(param ? (bind ?binding ?)):
         c.set_fact(%(lambda-param $binding), 1);
@@ -291,7 +291,7 @@ static List _parse_lambda_body(Compiler c) {
 List Compiler.lambda_param_types(Compiler c, List entries) {
   if (!entries) return %((void));
   Array types = [];
-  foreach (List entry, entries)
+  foreach (List entry in entries)
     match (entry) {
       case %(binding ? ?): types.push(%("Var"));
       case %(param ? ?): {
@@ -332,10 +332,10 @@ static List _lambda_node(List body, List captures, List params) {
 List Compiler.bind_lambda_expression(
   Compiler c, Type type, List parameters, List supplied, List body) {
   Array prescribed = [], aliases = [];
-  foreach (List row, supplied) _prescribe(c, row, prescribed, aliases);
+  foreach (List row in supplied) _prescribe(c, row, prescribed, aliases);
   c.sym.push_new_scope();
   defer c.sym.pop_scope();
-  foreach (List alias, aliases) {
+  foreach (List alias in aliases) {
     (List binding, Type annotation) = alias;
     c.sym.bind_identity(NULL, binding, annotation.declaration_ast(binding));
   }
@@ -344,7 +344,7 @@ List Compiler.bind_lambda_expression(
     c.sym.push_new_scope();
     defer c.sym.pop_scope();
     Array entries = [];
-    foreach (List entry, parameters.cdr())
+    foreach (List entry in parameters.cdr())
       _add_param(c, entries, _declare_param(c, entry));
     body = _bind_body(c, body);
     List captures = c.end_lambda_captures();
@@ -484,7 +484,7 @@ int Compiler.lambda_capture_required(Compiler c, List binding) {
 */
 List Compiler.capture_lambda_identifier(Compiler c, List binding, Type type) {
   List original = binding;
-  foreach (List frame, c.lambda_scopes.reverse())
+  foreach (List frame in c.lambda_scopes.reverse())
     match (_frame_capture(c, frame, binding, original, type))
       case %(capture ?captured ?captured_type ?): {
         binding = captured;
@@ -531,7 +531,7 @@ static List _frame_capture(
    source binding. */
 static List _prescribed_row(Var supplied, List binding, List original) {
   List prescribed = NULL;
-  foreach (List row, supplied.list())
+  foreach (List row in supplied.list())
     match (row)
       case %(capture ?target ? ?)
         if (target == binding || target == original):
@@ -620,7 +620,7 @@ static void _inherit_spelling(Compiler c, List source, List captured) {
     recorded the C spelling `binding` emits under. */
 void Compiler.respell_captures(Compiler c, List binding) {
   Map facts = c.semantic_binding_facts();
-  foreach (List frame, c.lambda_scopes.reverse())
+  foreach (List frame in c.lambda_scopes.reverse())
     match (frame)
       case %(lambda-scope ?scope * *):
         match (facts.getdefault(%(lambda-capture $scope $binding), NULL))
@@ -645,7 +645,7 @@ static void _check_lambda_captures(Compiler c, List ast) {
       case $source_operator_content(%(& ?target)):
         _require_capture_lvalue(c, target);
       case %(dstrasgn (targets *targets) ?):
-        foreach (List target, targets) _require_capture_lvalue(c, target);
+        foreach (List target in targets) _require_capture_lvalue(c, target);
       case $source_call_content($called,
           %(expr ?callee_type ?), %(*arguments)):
         _require_reference_arguments(c, callee_type, arguments);

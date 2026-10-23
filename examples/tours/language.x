@@ -23,8 +23,8 @@ int main(void) {
     input.puts("alpha beta\nbeta gamma\n");
     input.rewind();
     Map counts = {};
-    foreach(String line, input)
-      foreach(String word, line.words())
+    foreach(String line in input)
+      foreach(String word in line.words())
         counts[word] += 1;
     printf("beta=%ld\n", counts["beta"]);
 

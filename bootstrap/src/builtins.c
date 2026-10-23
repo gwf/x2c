@@ -2212,9 +2212,9 @@ static List _comparison(Shape * s){
 
 static List _writers(Shape * s){
   String owner =(* s).owner;  Array writers = Array_new(); {
-    Var member_value;  List _x2c_gensym_macro_object_3 = _756;  List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;  Var _x2c_gensym_macro_cursor_output_3;  while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
-      member_value = _x2c_gensym_macro_cursor_output_3; {
-        String member = Var_str(member_value);  List selected = _own_method(owner, member);  List writer = _own_method(owner, String_join(NULL, cons(String_var(_757), cons(String_var(member), NULL))));  if(! List_truth(writer)) Array_push(writers, List_var(_writer(owner, (* s).heap, (* s).named, member, selected)));  if(! List_truth(selected)) Array_push(writers, List_var(_string_method(owner, member)));
+    String member;  List _x2c_gensym_macro_object_3 = _756;  List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;  Var _x2c_gensym_macro_cursor_output_3;  while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
+      member = Var_as_string(_x2c_gensym_macro_cursor_output_3); {
+        List selected = _own_method(owner, member);  List writer = _own_method(owner, String_join(NULL, cons(String_var(_757), cons(String_var(member), NULL))));  if(! List_truth(writer)) Array_push(writers, List_var(_writer(owner, (* s).heap, (* s).named, member, selected)));  if(! List_truth(selected)) Array_push(writers, List_var(_string_method(owner, member)));
       }
 
     }

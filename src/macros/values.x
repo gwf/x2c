@@ -162,7 +162,7 @@ static List _macro_subpattern(Macro shape, List patterns, int content) {
   Map replacements = {};
   List spelled = patterns.flatten_all();
   int index = 0;
-  foreach (List hole, shape.assoc(<parameters>).list()) {
+  foreach (List hole in shape.assoc(<parameters>).list()) {
     Var pattern = patterns.car();
     patterns = patterns.cdr();
     if (pattern.is_binder()) {
@@ -198,11 +198,11 @@ static Atom _unused_binder(String sigil, List spelled, int &index) {
 static Var _substitute_binders(Var value, Map replacements) {
   if (value is not <list> || value.is_nil()) return value;
   Array items = [];
-  foreach (Var child, value.list()) {
+  foreach (Var child in value.list()) {
     Var replacement;
     if (child.is_binder() && replacements.try_get(child, replacement)) {
       if (child.str().startswith("*") && replacement is <list>)
-        foreach (Var item, replacement.list()) items.push(item);
+        foreach (Var item in replacement.list()) items.push(item);
       else items.push(replacement);
     }
     else items.push(_substitute_binders(child, replacements));
@@ -219,7 +219,7 @@ List Compiler.capture_macro_value(Compiler c, List definition) {
   List literal = %(expr ("Macro") ${cached.caddr()});
   List rows = %(expr ("List") (nil));
   int captured = 0;
-  foreach (List binding, definition.assoc(<captures>).list()) {
+  foreach (List binding in definition.assoc(<captures>).list()) {
     Type type = c.semantic_binding_facts()[%(type $binding)];
     if (!c.sym.is_named_value_type(type, "Macro")) continue;
     List pair = _captured_pair(c, binding, type);
@@ -271,7 +271,7 @@ int Compiler.take_code_value(
    effect's token in the code. */
 static Map _code_effects(Compiler c, Var effects) {
   Map replacements = {};
-  foreach (List effect, effects)
+  foreach (List effect in effects)
     match (effect) {
       case %(rewrite ?point ?kind ?name ?shape ?holes): {
         _register_rewrite(
@@ -368,7 +368,7 @@ static Var _carrier_binder(Var value) {
                 code-value) *):
       return NULL;
   }
-  foreach (Var child, value.list())
+  foreach (Var child in value.list())
     if (child is <list>) {
       Var binder = _carrier_binder(child);
       if (binder) return binder;

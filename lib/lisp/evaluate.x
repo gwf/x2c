@@ -68,7 +68,7 @@ static Var _apply(Lisp lisp, Var callable, List raw, LispEnv *env) {
     ? narrow : Scope.malloc_in(&lisp.scope, count * sizeof(FuncArg));
   defer if (argv != narrow) Scope.free(argv);
   unsigned argc = 0;
-  foreach (Var arg, raw) argv[argc++] = FuncArg.value(_eval(lisp, arg, env));
+  foreach (Var arg in raw) argv[argc++] = FuncArg.value(_eval(lisp, arg, env));
   return fn.apply(argc, argv);
 }
 
@@ -105,7 +105,7 @@ static Var _call_native(Lisp lisp, Func fn, List values) {
     ? narrow : Scope.malloc_in(&lisp.scope, count * sizeof(FuncArg));
   defer if (argv != narrow) Scope.free(argv);
   unsigned argc = 0;
-  foreach (Var value, values) argv[argc++] = FuncArg.value(value);
+  foreach (Var value in values) argv[argc++] = FuncArg.value(value);
   return fn.apply(argc, argv);
 }
 
@@ -166,7 +166,7 @@ static Var _special_cond(Lisp lisp, List args, LispEnv *env) {
    `void`. */
 static Var _cond_select(Lisp lisp, List args, LispEnv *env) {
   if (!args) $error.cond.empty();
-  foreach (Var clause, args) {
+  foreach (Var clause in args) {
     Var (test, form) = _cond_clause(clause);
     if (lisp_truth(_eval(lisp, test, env))) return form;
   }
@@ -261,9 +261,9 @@ static Var _qq(Lisp l, Var expr, LispEnv *env, int depth) {
 /* Walk siblings as elements, never as another headed quoted form. */
 static List _qq_elements(Lisp lisp, List items, LispEnv *env, int depth) {
   Array values = $auto([]);
-  foreach (Var item, items) {
+  foreach (Var item in items) {
     if (!depth && _is_splice(item))
-      foreach (Var value, _splice(lisp, item, env)) values.push(value);
+      foreach (Var value in _splice(lisp, item, env)) values.push(value);
     else values.push(_qq(lisp, item, env, depth));
   }
   return values;
@@ -343,7 +343,7 @@ static void _capture_name(FreeNames &f, Var name) {
 }
 
 static void _all(FreeNames &f, List items, List bound, int depth) {
-  foreach (Var part, items) _free_form(f, part, bound, depth);
+  foreach (Var part in items) _free_form(f, part, bound, depth);
 }
 
 static void _quoted(FreeNames &f, List items, List bound, int depth) {
@@ -386,12 +386,12 @@ static int _quote_depth(Var head, int depth) {
 /* `bound` with the parameters of an inner `lambda` or `macro` form. */
 static List _with_params(List bound, List rest) {
   if (rest && rest.car() is <list>)
-    foreach (Var name, (List) rest.car()) bound = cons(name, bound);
+    foreach (Var name in (List) rest.car()) bound = cons(name, bound);
   return bound;
 }
 
 static int _param_has(List params, Var name) {
-  foreach (Var param, params) if (param == name) return 1;
+  foreach (Var param in params) if (param == name) return 1;
   return 0;
 }
 
@@ -406,7 +406,7 @@ static Var _apply_lambda(Lisp l, Lambda lambda, List raw, LispEnv *env) {
   int count = raw.len(), index = 0;
   Var *values = Scope.malloc_in(&l.scope, (count + 1) * sizeof(Var));
   defer Scope.free(values);
-  foreach (Var form, raw) values[index++] = _eval(l, form, env);
+  foreach (Var form in raw) values[index++] = _eval(l, form, env);
   return _call_lambda_slots(l, lambda, values, count);
 }
 
@@ -414,7 +414,7 @@ static Var _call_lambda(Lisp lisp, Lambda lambda, List args) {
   int count = args.len(), index = 0;
   Var *values = Scope.malloc_in(&lisp.scope, (count + 1) * sizeof(Var));
   defer Scope.free(values);
-  foreach (Var value, args) values[index++] = value;
+  foreach (Var value in args) values[index++] = value;
   return _call_lambda_slots(lisp, lambda, values, count);
 }
 
@@ -549,7 +549,7 @@ static Var _tail_call(Lisp lisp, Lambda lambda, List raw, LispEnv *env) {
   Var *values = Scope.malloc_in(&lisp.scope, (count + 1) * sizeof(Var));
   int pending = 0;
   defer if (!pending) Scope.free(values);
-  foreach (Var argument, raw) values[index++] = _eval(lisp, argument, env);
+  foreach (Var argument in raw) values[index++] = _eval(lisp, argument, env);
   pending = 1;
   lisp.tail_lambda = lambda;
   lisp.tail_values = values;

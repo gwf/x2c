@@ -15,7 +15,7 @@
 List Compiler.definition_rows(Compiler c, List ast) {
   Array rows = [];
   // Prototypes and imported units have no local function node.
-  foreach (List node, ast) match (node) {
+  foreach (List node in ast) match (node) {
     case %(function ?type (bind ?binding ?modifiers) ?): {
       List row = _function_row(c, type, binding, modifiers, 0);
       if (row) rows.push(row);
@@ -26,7 +26,7 @@ List Compiler.definition_rows(Compiler c, List ast) {
       if (row) rows.push(row);
     }
     case %(typedef ?base (bindings *declarators)):
-      foreach (List declarator, declarators) match (declarator)
+      foreach (List declarator in declarators) match (declarator)
         case %(bind ?binding ?modifiers):
           rows.push(
             %(typedef ${Ast.binding_spelling(binding)} $base $modifiers
@@ -83,7 +83,7 @@ static List _parameter_names(Compiler c, List modifiers) {
   Array names = [];
   match (modifiers)
     case %((fnmod (params *parameters)) *):
-      foreach (List parameter, parameters) match (parameter)
+      foreach (List parameter in parameters) match (parameter)
         case %(param ? (bind ?binding ?)):
           names.push(_parameter_name(c, binding));
   return names.list_free();
@@ -110,7 +110,7 @@ void Compiler.dump_definitions(Compiler c, List ast) {
   Token tokens = c.tokenizer.tokens, first = tokens;
   while (first.type == <space> || first.type == <preproc>) first++;
   if (first.type == <comment>) printf("%s\n", %(module ${first.text}).repr());
-  foreach (List row, c.definition_rows(ast)) match (row) {
+  foreach (List row in c.definition_rows(ast)) match (row) {
     case %(function *): _print_function(c, tokens, row);
     case %(typedef *): _print_type(c, tokens, row);
   }

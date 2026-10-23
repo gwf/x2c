@@ -71,7 +71,7 @@ static Var _append2(Var left, Var right) {
     items = cons(lisp_car(left), items);
   if (!items) return right;
   List tail = _list(right, "append");
-  foreach (Var value, items) tail = cons(value, tail);
+  foreach (Var value in items) tail = cons(value, tail);
   return tail;
 }
 
@@ -80,7 +80,7 @@ Var lisp_append(List lists) {
   if (!lists) return %();
   List reversed = List.reverse(lists);
   Var result = reversed.car();
-  foreach (Var left, reversed.cdr())
+  foreach (Var left in reversed.cdr())
     result = _append2(left, result);
   return result;
 }
@@ -150,7 +150,7 @@ Var lisp_binders(Var pat) {
   List reversed = NULL;
   for (Var parts = pat; !_nil(parts); parts = lisp_cdr(parts)) {
     List binders = lisp_binders(lisp_car(parts));
-    foreach (Var binder, binders) reversed = cons(binder, reversed);
+    foreach (Atom binder in binders) reversed = cons(binder, reversed);
   }
   return reversed.reverse();
 }
@@ -170,7 +170,7 @@ Var lisp_binder_lets(Var bindings, Var binders) {
 /* Concatenates its `String` arguments; no arguments gives "". */
 Var lisp_string_append_all(List strings) {
   Var text = %"";
-  foreach (Var s, strings)
+  foreach (Var s in strings)
     text = lisp_string_append(text, _string(s, "string-append"));
   return text;
 }

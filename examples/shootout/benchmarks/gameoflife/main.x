@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
     next = swap;
   }
   uint32_t hash = 2166136261u;
-  foreach (char cell, cells) hash = (hash ^ cell) * 16777619u;
+  foreach (char cell in cells) hash = (hash ^ cell) * 16777619u;
   printf("%u\n", hash);
   return 0;
 }

@@ -156,14 +156,14 @@ static Var _eval(Var expression, Map environment) {
              parameters. Copy the environment afterward: an argument's def
              must be visible both to later arguments and to the body. */
           Array values = $auto([]);
-          foreach (Var argument, arguments)
+          foreach (Var argument in arguments)
             values.push(_eval(argument, environment));
 
           /* Dynamic scope starts from the caller's current bindings. A
              shallow copy isolates local definitions while sharing immutable
              values. Later duplicate parameter names replace earlier ones. */
           Map local = $auto(environment.copy());
-          foreach (Var value, values) {
+          foreach (Var value in values) {
             if (parameters.car() is not String) return _fail();
             local[parameters.car()] = value;
             parameters = parameters.cdr();

@@ -91,7 +91,7 @@ module List _foreign_alias(
 module List _typedef(Emitter &e, List ast) {
   List code = %("typedef" @{_emit(e, ast.cdr())} ";");
   match (ast) case %(typedef ? (bindings *declarators)):
-    foreach (List declarator, declarators) {
+    foreach (List declarator in declarators) {
       List binding = declarator.cadr();
       Var type;
       if (e.semantic_binding_facts().try_get(%(ntype $binding), type))

@@ -6,7 +6,7 @@
 /* Pushes the items of a `seq`, or any other node itself. */
 module void _push_items(Array out, List node) {
   if (node.car() == <seq>)
-    foreach (Var item, node.cdr()) out.push(item);
+    foreach (List item in node.cdr()) out.push(item);
   else out.push(node);
 }
 
@@ -274,14 +274,14 @@ static List _bind_items(Compiler c, List items, Symbol context) {
     $fail.parse_statement_single(c, c.token);
   }
   Array bound = [];
-  foreach (Var item, items)
+  foreach (Var item in items)
     _push_items(bound, c.bind_syntax(item, context, c.return_type));
   return %(seq @{bound.list_free()});
 }
 
 static List _bind_args(Compiler c, List arguments) {
   Array bound = [];
-  foreach (List argument, arguments) bound.push(_resolve(c, argument));
+  foreach (List argument in arguments) bound.push(_resolve(c, argument));
   return %(args @{bound.list_free()});
 }
 
@@ -416,7 +416,7 @@ static Var _bind_header(Compiler c, Var clause) {
 
 static List _bind_raise(Compiler c, Var code, List details) {
   Array bound = [];
-  foreach (List detail, details) bound.push(_resolve(c, detail));
+  foreach (List detail in details) bound.push(_resolve(c, detail));
   return %(raise ${_resolve(c, code)} (args @{bound.list_free()}));
 }
 
@@ -428,8 +428,8 @@ static List _bind_catchcases(Compiler c, Var arms, List handler) {
      its identity rather than reading a template local's source spelling. */
   c.set_fact(%(type $handle), %("ErrorHandler"));
   Array bound = [];
-  foreach (Var value, arms.list())
-    foreach (List arm, c.evaluate_macro_rows(value)) {
+  foreach (Var value in arms.list())
+    foreach (List arm in c.evaluate_macro_rows(value)) {
       List pattern = arm.car();
       if (pattern) pattern = _resolve(c, pattern);
       bound.push(c.bind_catch_arm(pattern, arm.cadr(), c.token, handle));
@@ -465,11 +465,11 @@ static void _check_binders(
   Compiler c, List pattern, Token start, String role) {
   List possible = NULL;
   List definite = c.match_pattern_binders(pattern, possible);
-  foreach (Var binder, possible) {
+  foreach (Atom binder in possible) {
     if (!(binder in definite))
       $fail.parse_binder_unassigned(c, start, role, binder);
     String name = binder.str()[1:];
-    foreach (Var other, possible) {
+    foreach (Atom other in possible) {
       if (other == binder || other.str()[1:] != name) continue;
       $fail.parse_binder_conflict(c, start, role, name);
     }
@@ -491,7 +491,7 @@ static int _declares_binders(List body, List bindings) {
     case %(?(String slot)): read[slot] = 1;
   }
   int index = 0;
-  foreach (List binding, bindings) {
+  foreach (List binding in bindings) {
     String n = %"${index++}";
     String slot = %"_x2c_gensym_match_${
       binding.car().is_list_binder() ? "list" : "value"}_$n";
@@ -525,8 +525,8 @@ static List _bind_match(Compiler c, Var subject, Var cases) {
 
 static List _bind_rows(Compiler c, List cases) {
   Array bound = [];
-  foreach (Var value, cases)
-    foreach (List row, c.evaluate_macro_rows(value)) {
+  foreach (Var value in cases)
+    foreach (List row in c.evaluate_macro_rows(value)) {
       if (row.car() == <preproc>) {
         bound.push(row);
         continue;
@@ -580,7 +580,7 @@ static List _bind_block(Compiler c, List block) {
 
 static List _bind_group(Compiler c, List children) {
   Array items = [];
-  foreach (Var child, children)
+  foreach (Var child in children)
     items.push(c.bind_syntax(child, <block>, c.return_type));
   return %(group @{items.list_free()});
 }
@@ -596,7 +596,7 @@ List Compiler.bind_callable_body(Compiler c, List syntax, Type return_type) {
       Array stmts = [];
       List present_before = c.present_references();
       defer c.restore_reference_presence(present_before);
-      foreach (Var child, children)
+      foreach (Var child in children)
         _push_items(stmts, c.bind_syntax(child, <block>, return_type));
       return %(block @{stmts.list_free()});
     }

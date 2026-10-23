@@ -972,11 +972,11 @@ List MetaContext_type_description(Var value){
       }
        break; } if(f5_types____symbol_words(Type_list(type)) && ! Type_is_pointer(type)){
         Array words = Array_new(); {
-          Var word;  Iter _x2c_gensym_macro_iterator_4 = List_iter(Type_list(type), &(struct Iter){
+          Symbol word;  Iter _x2c_gensym_macro_iterator_4 = List_iter(Type_list(type), &(struct Iter){
             int_var(0)
           }
           );  Var _x2c_gensym_macro_item_4;  while(Iter_try_next(_x2c_gensym_macro_iterator_4, &(_x2c_gensym_macro_item_4))){
-            word = _x2c_gensym_macro_item_4;  Array_push(words, String_var(Var_str(word)));
+            word = Var_symbol(_x2c_gensym_macro_item_4);  Array_push(words, String_var(Symbol_str(word)));
           }
 
         }
@@ -1789,19 +1789,19 @@ void Compiler_add_linked_meta_provider_hashes(Compiler, Map);
 Map Compiler_meta_provider_hashes(Compiler, String);
 static Map f10_primitives____linked_hashes(void){
   _require_expansion(_383);  Compiler c = active.expander;  Map rows = Map_new();  Compiler_add_linked_meta_provider_hashes(c, rows); {
-    Var name, source;  Map _x2c_gensym_macro_object_20 = c -> project_meta;  unsigned _x2c_gensym_macro_cursor_20 = 0;  Var _x2c_gensym_macro_cursor_output_16;  Var _x2c_gensym_macro_cursor_output_17;  while(Map_try_next(_x2c_gensym_macro_object_20, &(_x2c_gensym_macro_cursor_20), &(_x2c_gensym_macro_cursor_output_16), &(_x2c_gensym_macro_cursor_output_17))){
-      name = _x2c_gensym_macro_cursor_output_16;  source = _x2c_gensym_macro_cursor_output_17; {
-        Var _x2c_gensym_match_var = source; int _x2c_gensym_match_none = !Var_is(_x2c_gensym_match_var, 806120);  List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var); List _x2c_gensym_match_cursor;  switch(0){
-            default: ; if (!_x2c_gensym_match_none) { _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
+    String name;  List source;  Map _x2c_gensym_macro_object_20 = c -> project_meta;  unsigned _x2c_gensym_macro_cursor_20 = 0;  Var _x2c_gensym_macro_cursor_output_16;  Var _x2c_gensym_macro_cursor_output_17;  while(Map_try_next(_x2c_gensym_macro_object_20, &(_x2c_gensym_macro_cursor_20), &(_x2c_gensym_macro_cursor_output_16), &(_x2c_gensym_macro_cursor_output_17))){
+      name = Var_as_string(_x2c_gensym_macro_cursor_output_16);  source = Var_list_payload(_x2c_gensym_macro_cursor_output_17); {
+        List _x2c_gensym_match_expr = source; List _x2c_gensym_match_cursor;  switch(0){
+            default: ;  _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
             Var provider;  provider = _x2c_gensym_match_value_0; {
-              Map hashes = Compiler_meta_provider_hashes(c, Var_as_string(provider));  Map_setindex(rows, name, List_var(({
-                Var _x2c_gensym_literal_part_21 = Map_getindex(hashes, name);  cons(_x2c_gensym_literal_part_21, cons(provider, NULL));
+              Map hashes = Compiler_meta_provider_hashes(c, Var_as_string(provider));  Map_setindex(rows, String_var(name), List_var(({
+                Var _x2c_gensym_literal_part_21 = Map_getindex(hashes, String_var(name));  cons(_x2c_gensym_literal_part_21, cons(provider, NULL));
               }
               )));
             }
 
           }
-           break; } } }
+           break; } }
         }
 
       }

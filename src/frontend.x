@@ -104,7 +104,7 @@ int Frontend.open_reporting(Frontend f, String filename, ParsedUnit &unit) {
     unit.compiler.own_diagnostics();
     if (unit.collect(f) && unit.parse()) return 1;
   }
-  else foreach (Var entry, unit.compiler.diagnostics())
+  else foreach (List entry in unit.compiler.diagnostics())
     unit.compiler.print_diagnostic(entry);
   unit.close();
   return 0;
@@ -341,7 +341,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit &unit) {
   else $let(c.names.counters, c.names.counters.copy())
     cpp.shallow_parse(globs);
   Map symbols = cpp.sym.global_symbols();
-  foreach (List row, private_rows) {
+  foreach (List row in private_rows) {
     if (row.len() == 1) symbols.del(row.car());
     else symbols[row.car()] = row.cadr();
   }
@@ -353,7 +353,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit &unit) {
 static List _unit_private_rows(Compiler c, Map globs) {
   Array rows = [];
   String unit = c.canonical_path(c.filename);
-  foreach (Var (key, owner), globs)
+  foreach (Var (key, owner) in globs)
     match (key) case %("unit-static" ?name): {
       String path = Compiler.absolute_home_path(owner.list().car());
       if (c.canonical_path(path) == unit) continue;
@@ -426,7 +426,7 @@ static Compiler _run_cpp(Frontend frontend, ParsedUnit &unit) {
     frontend.preprocessor_errors(errors);
   if (status)
     $fail.frontend_cpp_failed(c, _first_directive(c), status);
-  foreach (String dependency, translation_depfile_parse(dependency_text))
+  foreach (String dependency in translation_depfile_parse(dependency_text))
     c.add_translation_dependency(dependency);
   return cpp;
 }
@@ -438,7 +438,7 @@ static Compiler _run_cpp(Frontend frontend, ParsedUnit &unit) {
 static String _take_line_markers(Compiler cpp, String text) {
   Array kept = [], markers = [];
   int position = 0, text_line = 1;
-  foreach (String line, text.split("\n")) {
+  foreach (String line in text.split("\n")) {
     int number = 0;
     String file = line.startswith("#")
                 ? Compiler.preproc_marker_file(line, number) : NULL;
@@ -514,9 +514,9 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared) {
   /* As in `Frontend.open_reporting`, the compiler that reports a diagnostic
      prints it, so an imported file's location shows that file's line. */
   if (started) c.own_diagnostics();
-  else foreach (Var entry, c.diagnostics()) c.print_diagnostic(entry);
+  else foreach (List entry in c.diagnostics()) c.print_diagnostic(entry);
   if (!started || !unit.collect(&session) || !unit.parse()) return 0;
-  foreach (String name, c.meta_hashes.keys()) {
+  foreach (String name in c.meta_hashes.keys()) {
     Var function;
     if ((name.startswith("x2c_") || name.startswith("Code_") ||
          name.startswith("Type_")) && shared.try_get(name, function))

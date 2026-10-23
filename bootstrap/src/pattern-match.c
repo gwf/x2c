@@ -347,7 +347,7 @@ static int _match_nested(Buffer b, Array out, List pattern, Var value, Array bin
 static void _match_captures(Buffer b, List binders){
   int index = 0;
   {
-    Var binder;
+    Atom binder;
     List _x2c_gensym_macro_object_1 = binders;
     List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
     Var _x2c_gensym_macro_cursor_output_1;

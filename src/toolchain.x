@@ -102,7 +102,7 @@ static String _recorded_tool(String name) {
   if (!home) return NULL;
   try record = Path.read_text(%"$home/lib/x2c/toolchain");
   catch %(not-found *): {}
-  foreach (String line, record.split_lines(0))
+  foreach (String line in record.split_lines(0))
     if (line.startswith(%"$name=")) return line.remove_prefix(%"$name=");
   return NULL;
 }
@@ -427,7 +427,7 @@ List Toolchain.search_directories(Toolchain t) {
    stops at `End of search list`. */
 static void _add_include_directories(Array directories, String listing) {
   int listed = 0;
-  foreach (String line, listing.split_lines(0)) {
+  foreach (String line in listing.split_lines(0)) {
     if (line.startswith("End of search list")) return;
     if ("search starts here" in line) listed = 1;
     else if (listed) _add_include_directory(directories, line);
@@ -445,10 +445,10 @@ static void _add_include_directory(Array directories, String line) {
 }
 
 static void _add_library_directories(Array directories, String output) {
-  foreach (String line, output.split_lines(0)) {
+  foreach (String line in output.split_lines(0)) {
     if (!line.startswith("libraries: ")) continue;
     String list = line.remove_prefix("libraries: ").remove_prefix("=");
-    foreach (String directory, list.split(":"))
+    foreach (String directory in list.split(":"))
       if (directory) directories.push(directory);
   }
 }
@@ -457,7 +457,7 @@ static void _add_library_directories(Array directories, String output) {
 
 static void _print_action(Symbol phase, List arguments) {
   fprintf(stderr, "x2c: %s", phase.str());
-  foreach (String argument, arguments) {
+  foreach (String argument in arguments) {
     fputc(' ', stderr);
     _print_argument(argument);
   }
@@ -470,7 +470,7 @@ static void _print_argument(String argument) {
     return;
   }
   fputc('\'', stderr);
-  foreach (char ch, argument) {
+  foreach (char ch in argument) {
     if (ch == '\'') fputs("'\\''", stderr);
     else fputc(ch, stderr);
   }
@@ -479,7 +479,7 @@ static void _print_argument(String argument) {
 
 static int _shell_safe(String argument) {
   if (!argument || !argument[0]) return 0;
-  foreach (char raw, argument) {
+  foreach (char raw in argument) {
     unsigned char ch = raw;
     if (!(isalnum(ch) || strchr("_+-=.,/:@", ch))) return 0;
   }

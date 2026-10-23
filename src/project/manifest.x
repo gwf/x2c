@@ -16,7 +16,7 @@ static typedef struct Manifest {
    a field whose array is open. A `#` outside a string starts a comment. */
 module void _parse_manifest(Project p) {
   Manifest m = {.project = p};
-  foreach (String text, p.text.split_lines(0)) {
+  foreach (String text in p.text.split_lines(0)) {
     m.line++;
     char *line = _content(text);
     if (!*line) continue;
@@ -321,7 +321,7 @@ static int _array_open(String value) {
 */
 int ProjectBuild.valid_name(String name) {
   if (!name || !name[0]) return 0;
-  foreach (char raw, name) {
+  foreach (char raw in name) {
     unsigned char ch = raw;
     if (!(isalnum(ch) || ch == '_' || ch == '-')) return 0;
   }

@@ -118,7 +118,7 @@ static List _expression_invocation(
 static List _template_call(Compiler c, List definition) {
   Array arguments = [];
   c.expect(<(>);
-  foreach (List hole, definition.assoc(<parameters>).list()) {
+  foreach (List hole in definition.assoc(<parameters>).list()) {
     if (arguments.len()) c.expect(<,>);
     arguments.push(c.parse_assignment());
   }

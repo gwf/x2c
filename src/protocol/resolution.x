@@ -147,8 +147,7 @@ void Compiler.resolve_protocols(Compiler c) => _resolve_visible(c, 1);
 static void _resolve_visible(Compiler c, int report) {
   c.conforms = {};
   String owner = _path(c);
-  foreach (Var value, c.adoptions) {
-    List adoption = value;
+  foreach (List adoption in c.adoptions) {
     Type (base, participant) = adoption.cdr();
     Symbol storage = _adoption_storage(adoption);
     List location = _adoption_location(adoption);
@@ -189,9 +188,10 @@ static List _recorded_conformance(
            (members *rows)): {
       if (_native_rows(rows)) return NULL;
       Array bound = [], resolved = [];
-      foreach (Var (name, type), bindings) bound.push(%($name $type));
+      foreach ((String name, Type type) in bindings)
+        bound.push(%($name $type));
       bound.sort();
-      foreach (List row, rows)
+      foreach (List row in rows)
         match (row)
           case %(?member ?(Symbol status) ?(String source) *): {
             source = _recorded_spelling(c, source);
@@ -210,7 +210,7 @@ static List _recorded_conformance(
     declare. */
 Map Compiler.conformance_rows(Compiler c, List adoptions) {
   Map rows = {};
-  foreach (List adoption, adoptions) {
+  foreach (List adoption in adoptions) {
     Type (base, participant) = adoption.cdr();
     List recorded = _recorded_conformance(c, base, participant);
     if (recorded)
@@ -230,8 +230,8 @@ void Compiler.resolve_as_declared(Compiler c, Map symbols) {
   _resolve_visible(c, 0);
   c.install_generated_protocol_symbols();
   Array pairs = [];
-  foreach (Var key, c.conforms.keys()) pairs.push(key);
-  foreach (List pair, pairs) {
+  foreach (List key in c.conforms.keys()) pairs.push(key);
+  foreach (List pair in pairs) {
     if (_recorded(c, pair.car(), pair.cadr())) continue;
     c.conforms.del(pair);
     c.proto_cache = {};
@@ -259,14 +259,14 @@ module int _reuse_conformance(
     case %((? ? ? ? (members *templates))
            (conformance ? ? ?forward ?reverse (bindings *bound) *members)): {
       Map variables = {}, bindings = {}, resolved = {};
-      foreach (List pair, bound) {
+      foreach (List pair in bound) {
         (String name, Type type) = pair;
         variables[name] = 1;
         bindings[name] = type;
       }
-      foreach (List member, members) resolved[member.car()] = member;
+      foreach (List member in members) resolved[member.car()] = member;
       Array rows = [];
-      foreach (List template, templates) {
+      foreach (List template in templates) {
         (String member, Type type) = template;
         Type expected = _substitute_signature(type, variables, bindings);
         rows.push(_recorded_row(resolved[member], member, expected, type));
@@ -284,12 +284,12 @@ module int _reuse_conformance(
    `((BASE PARTICIPANT) ROW)` pairs. */
 module List _unused_recorded(Compiler c) {
   Array candidates = [], unused = [];
-  foreach (Var key, c.protocol_helpers.keys())
+  foreach (Var key in c.protocol_helpers.keys())
     match (key)
       case %("recorded-conformance" ?(Type base) ?(Type participant)):
         candidates.push(%($base $participant));
   // Ownership answers are memoized in the helpers, so they follow the scan.
-  foreach (List pair, candidates) {
+  foreach (List pair in candidates) {
     List row = _recorded(c, pair.car(), pair.cadr());
     if (row && !(pair in c.conforms)) unused.push(%($pair $row));
   }
@@ -300,7 +300,7 @@ module List _unused_recorded(Compiler c) {
 /* Installs each recorded conformance with a base default whose forward
    converter is defined, so that its forwarding members are published. */
 module void _reuse_defaults(Compiler c) {
-  foreach (List entry, _unused_recorded(c))
+  foreach (List entry in _unused_recorded(c))
     match (entry)
       case %((?(Type base) ?(Type participant))
              (conformance ? ? ?(String forward) ? ? *members)):
@@ -309,7 +309,7 @@ module void _reuse_defaults(Compiler c) {
 }
 
 static int _has_default(List members) {
-  foreach (List member, members) if (member.cadr() == <base-dflt>) return 1;
+  foreach (List member in members) if (member.cadr() == <base-dflt>) return 1;
   return 0;
 }
 
@@ -426,7 +426,7 @@ static void _report_sig_conflicts(
   Compiler c, Type base, Type participant, List rows, List location) {
   String owner = _adoption_spelling(base, participant);
   String declaration_site = _definition_location(c, base);
-  foreach (List row, rows)
+  foreach (List row in rows)
     match (row)
       case %(?(String member) sig-cnflct ?(String binding)
              ?(Type expected) ? ?): {
@@ -469,7 +469,7 @@ static List _resolve_native(
     .variables = {}, .bindings = {}};
   resolution.variables[requirements.binder] = 1;
   resolution.bindings[requirements.binder] = participant;
-  foreach (List association, requirements.associations) {
+  foreach (List association in requirements.associations) {
     (String association_name, Type binding) = association;
     resolution.variables[association_name] = 1;
     resolution.bindings[association_name] = binding;
@@ -491,7 +491,7 @@ static List _rows(
   NativeResolution &r, List templates, List &failure) {
   Array members = [];
   Map native_bindings = NULL;
-  foreach (List template, templates) {
+  foreach (List template in templates) {
     (String member, Type type, String native) = template;
     List requirement = _native_requirement(
       member, native, type, r.binder, r.definition, r.base);
@@ -539,7 +539,7 @@ static int _contents(Var value, String variable) {
   if (value == <...>) return PROTOCOL_VARIADIC;
   if (value is not <list>) return 0;
   int contents = 0;
-  foreach (Var item, value.list())
+  foreach (Var item in value.list())
     contents |= _contents(item, variable);
   return contents;
 }
@@ -559,7 +559,7 @@ static Type _participant_definition(Compiler c, Type participant) {
 module void _install_native_bindings(
   Compiler c, Type participant, List rows) {
   if (!_native_rows(rows)) return;
-  foreach (List row, rows)
+  foreach (List row in rows)
     match (row)
       case %(?(String member) ? ? ? ? ?(Type signature)): {
         String generated = _member_spelling(participant, member);
@@ -569,7 +569,7 @@ module void _install_native_bindings(
 }
 
 static int _is_native(List templates) {
-  foreach (List template, templates)
+  foreach (List template in templates)
     if (template.caddr().str()) return 1;
   return 0;
 }
@@ -654,19 +654,20 @@ static List _resolve(
   MemberResolution &r, List associations, List templates) {
   r.variables[r.binder] = 1;
   r.bindings[r.binder] = r.participant;
-  foreach (List association, associations) {
+  foreach (List association in associations) {
     (String name, Type value) = association;
     r.variables[name] = 1;
     r.defaults[name] = value;
   }
   Array selected = [];
-  foreach (List row, templates) {
+  foreach (List row in templates) {
     List member = _select(r, row);
     if (member) selected.push(member);
   }
-  foreach (Var (name, value), r.defaults) r.bindings.setdefault(name, value);
+  foreach ((String name, Type value) in r.defaults)
+    r.bindings.setdefault(name, value);
   Array completed = [];
-  foreach (List row, selected) {
+  foreach (List row in selected) {
     List member = _complete(r, row);
     if (member) completed.push(member);
   }
@@ -707,7 +708,7 @@ static Type _find_member(
     }
   }
   if (actual) selected = binding;
-  foreach (Type owner,
+  foreach (Type owner in
            (r.base !== %("Var") || r.representation) && !actual
              ? _ancestry(r.c, r.participant).cdr() : NULL) {
     if (owner == r.base) break;
@@ -792,7 +793,7 @@ static List _complete(MemberResolution &r, List row) {
 }
 
 static List _requirement(ProtocolAdapters &a, List rows) {
-  foreach (List row, rows)
+  foreach (List row in rows)
     match (row)
       case %(?(String member) ?(Symbol status) ? ?
              ?(Symbol default_kind) ?(Type template)): {
@@ -823,7 +824,7 @@ static List _conversion_requirement(
   List parameters = template.car().list().cadr();
   Type result = template.cdr(), variable = %(${a.binder});
   Symbol direction = fallback ? <forward> : <reverse>;
-  foreach (Var parameter, parameters) {
+  foreach (Var parameter in parameters) {
     if (parameter == variable) {
       if (!(fallback ? a.forward : a.reverse))
         return %($member $adapter $direction parameter);

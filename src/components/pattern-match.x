@@ -41,7 +41,7 @@ meta static void _match_place(Buffer b, Array out, Var node) {
    text and nodes between directives as one item. */
 meta static List _match_items(Array out) {
   Array items = [], run = [];
-  foreach (Var piece, out) {
+  foreach (Var piece in out) {
     match (piece) case %(preproc ?): {
       if (run.len()) items.push(cons(" ", run));
       run.clear();
@@ -281,7 +281,7 @@ meta static int _match_nested(
 /* Copies runtime capture slots to the values the ordinary arm reads. */
 meta static void _match_captures(Buffer b, List binders) {
   int index = 0;
-  foreach (Var binder, binders) {
+  foreach (Atom binder in binders) {
     int list = binder.is_list_binder();
     b.printf(
       " %s _x2c_gensym_match_%s_%d = %s_x2c_gensym_match_values[%d]%s;",
@@ -442,7 +442,7 @@ meta static Code _match_lowered(Code subject, List rows) {
   int labelling = 1, opening = 0, depth = 0, sites = 0;
   int depths = -1, values = -1;
   int dynamic = subject.type().is_named("Var");
-  foreach (List row, rows) {
+  foreach (List row in rows) {
     match (row) case %(preproc ?(String text)): {
       int nesting = _match_nesting(text);
       _match_place(b, out, row);

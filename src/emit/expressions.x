@@ -104,7 +104,7 @@ module List _postfix(Emitter &e, Symbol operator, Var argument) {
 module List _generic(Emitter &e, Var control, List associations) {
   List c_control = _emit(e, %($control));
   Array rows = [];
-  foreach (List association, associations) match (association) {
+  foreach (List association in associations) match (association) {
     case %(association default ?value):
       rows.push(%("default" ":" @{_emit(e, %($value))}));
     case %(association ?type ?value):
@@ -239,7 +239,7 @@ static List _atom_intern(String spelling) {
 module List _args(Emitter &e, List ast) {
   Array result = [];
   int first = 1;
-  foreach (List argument, ast.cdr()) {
+  foreach (List argument in ast.cdr()) {
     List emitted = _emit(e, argument);
     match (argument) case %(expr ? (commas *)): emitted = _parens(emitted);
     if (!first) result.push(", ");

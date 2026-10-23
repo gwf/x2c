@@ -44,7 +44,7 @@ a number, a `String`, and a `Symbol`.
 ~Var name = "ada";
 List mixed = %($count $name verbose);
 
-foreach(Var item, mixed)
+foreach(Var item in mixed)
   printf("%s = %s\n", item.tag().str(), item);
 ```
 

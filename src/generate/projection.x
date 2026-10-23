@@ -34,7 +34,7 @@ module List _header_and_source(
   Partition p = {
     .c = c, .header = [], .pending = [], .open = [], .forwarded = {},
     .included = {}, .statics = {}, .source_groups = {}};
-  foreach (Ast node, ast) _add(p, node);
+  foreach (Ast node in ast) _add(p, node);
   return %(${_finish(p)} ${_source_projection(c, ast, inline_bodies)});
 }
 
@@ -44,7 +44,7 @@ module List _header_and_source(
 static List _source_projection(
   Compiler c, List ast, Map inline_bodies) {
   Array source = [];
-  foreach (List node, ast) {
+  foreach (List node in ast) {
     match (node) {
       case %((!or protocol adopt macrodef) *): continue;
       case %(preproc ?(String content)):
@@ -115,7 +115,7 @@ static int _names_static(List node, Map statics) {
     if (item is not <list>) continue;
     match (item) {
       case %(binding ? ?): if (item in statics) return 1;
-      default: foreach (Var part, item) pending.push(part);
+      default: foreach (Var part in item) pending.push(part);
     }
   }
   return 0;
@@ -131,14 +131,14 @@ static void _add_declared(List node, Map statics) {
     match (item) {
       case %(ident *): continue;
       case %(binding ? ?): statics[item] = 1;
-      default: foreach (Var part, item) pending.push(part);
+      default: foreach (Var part in item) pending.push(part);
     }
   }
 }
 
 /* Records the objects or function a static declaration declares. */
 static void _add_statics(Partition &p, List declarators) {
-  foreach (List declarator, declarators) {
+  foreach (List declarator in declarators) {
     List binding = _declaration_binding(declarator);
     if (binding) p.statics[binding] = 1;
   }
@@ -147,7 +147,7 @@ static void _add_statics(Partition &p, List declarators) {
 /* An item the source keeps fills each group open around it. */
 static void _keep(Partition &p) {
   p.source_started = 1;
-  foreach (Var group, p.open) p.source_groups[group] = 1;
+  foreach (Var group in p.open) p.source_groups[group] = 1;
 }
 
 /* Settle pending includes and conditional groups in the public projection.
@@ -186,7 +186,7 @@ static void _add_typedef(Partition &p, List node) {
 }
 
 static int _publishes_typedefs(Partition &p, List names) {
-  foreach (String name, names)
+  foreach (String name in names)
     if (p.c.publishes_typedef(name)) return 1;
   return 0;
 }
@@ -214,14 +214,14 @@ static List _without_static(List type) =>
 static void _hold(Partition &p, List names, List node) {
   p.header.push(%(pending ${p.pending.len()}));
   p.pending.push(%($names $node));
-  foreach (Var group, p.open) p.source_groups[group] = 1;
+  foreach (Var group in p.open) p.source_groups[group] = 1;
 }
 
 static List _typedef_names(List node) {
   match (node)
     case %(typedef ? (bindings *declarators)): {
       Array names = [];
-      foreach (List declarator, declarators)
+      foreach (List declarator in declarators)
         match (declarator) {
           case %(bind (binding ? ?name) ?): names.push(name);
           case %(bind (?name) ?): names.push(name);
@@ -256,7 +256,7 @@ static void _promote_typedefs(Array header, Array pending) {
 /* A header item after position `i` spells one of `names` that no header
    typedef before `i` declares. */
 static int _at(HeaderNeeds &n, int i, List names) {
-  foreach (Var name, names)
+  foreach (String name in names)
     if (!_declared_before(n, i, name) && _spelled_after(n, i, name)) return 1;
   return 0;
 }
@@ -269,7 +269,7 @@ static int _declared_before(HeaderNeeds &n, int i, Var name) {
     int count = n.header.len();
     for (int j = 0; j < count; j++)
       if (n.header[j] is <list>)
-        foreach (Var declared, _declared_type_names(n.header[j]))
+        foreach (Var declared in _declared_type_names(n.header[j]))
           if (!(declared in n.declared)) n.declared[declared] = j;
   }
   Var first;
@@ -367,7 +367,7 @@ static void _forward_tags(Partition &p, List node) {
       p.header.push(%(declare ($tag $name) (bindings (bind () ()))));
       return;
     }
-  foreach (Var item, node) if (item is <list>) _forward_tags(p, item);
+  foreach (Var item in node) if (item is <list>) _forward_tags(p, item);
 }
 
 // declarations
@@ -478,7 +478,7 @@ static List _without_const(List specifiers) =>
    initializer has to run. */
 static List _runtime_without_const(Compiler c, List bindings) {
   Array declarators = [];
-  foreach (List declarator, bindings.cdr()) {
+  foreach (List declarator in bindings.cdr()) {
     match (declarator)
       case %(op = (bind ?name (!set ?mods (const *))) ?value)
         if (c.static_value_is_runtime(value, NULL)):
@@ -490,7 +490,7 @@ static List _runtime_without_const(Compiler c, List bindings) {
 
 /* Objects and functions have linkage; a bare type declaration does not. */
 static int _declared_bindings(List bindings) {
-  foreach (List declarator, bindings.cdr())
+  foreach (List declarator in bindings.cdr())
     if (_declaration_binding(declarator)) return 1;
   return 0;
 }
@@ -498,7 +498,7 @@ static int _declared_bindings(List bindings) {
 /* A binding list with an object declarator owns storage. */
 static int _declares_object(List bindings) {
   match (bindings) case %(bindings *declarators):
-    foreach (List declarator, declarators)
+    foreach (List declarator in declarators)
       match (declarator) {
         case %(bind ? ((fnmod *) *)): continue;
         case %(bind ?name *): if (name) return 1;
@@ -520,7 +520,7 @@ static int _anonymous_body(Type type) {
 static List _header_declaration(List node, Type type, List bindings) {
   if (type.is_extern()) {
     Array declarators = [];
-    foreach (List declarator, bindings.cdr()) {
+    foreach (List declarator in bindings.cdr()) {
       match (declarator) case %(op = ?bind ?): declarator = bind;
       declarators.push(declarator);
     }
@@ -592,14 +592,14 @@ static int _is_pragma_once(String content) =>
 static Map _filled_groups(List items) {
   Map filled = {};
   Array open = [];
-  foreach (List item, items) {
+  foreach (List item in items) {
     match (item)
       case %(conditional ?group ?kind ?): {
         if (kind == <open>) open.push(group);
         else if (kind == <close>) open.take_last();
         continue;
       }
-    foreach (Var group, open) filled[group] = 1;
+    foreach (Var group in open) filled[group] = 1;
   }
   return filled;
 }
@@ -609,7 +609,7 @@ static Map _filled_groups(List items) {
 static List _place_groups(
   List items, Map filled, Map other) {
   Array out = [];
-  foreach (List item, items) {
+  foreach (List item in items) {
     match (item)
       case %(conditional ?group ? ?node): {
         if (group in filled || !(group in other))
@@ -630,10 +630,10 @@ static List _place_groups(
 static List _typedef_forwards(List items, List earlier, Compiler c) {
   Array candidates = _forward_candidates(items, c != NULL), out = [];
   Map available = {}, first = {}, included = {}, moved = {};
-  foreach (List node, earlier) _add_names(available, node);
+  foreach (List node in earlier) _add_names(available, node);
   for (int i = candidates.len() - 1; i >= 0; i--)
     first[candidates[i].car()] = i;
-  foreach (List node, items) {
+  foreach (List node in items) {
     if (node in moved) continue;
     match (node) {
       case %(typedef ?base ?):
@@ -657,14 +657,14 @@ static List _typedef_forwards(List items, List earlier, Compiler c) {
    an enum completely before an included field can use it by value. */
 static Array _forward_candidates(List items, int complete_enums) {
   Array candidates = [];
-  foreach (List node, items)
+  foreach (List node in items)
     match (node) case %(typedef ?base ?bindings): {
       List forward = _typedef_forward(base, bindings);
       if (!forward && complete_enums)
         match (base.list().type().base_type())
           case %(enum ? (*)): forward = node;
       if (!forward) continue;
-      foreach (String alias, _typedef_names(node))
+      foreach (String alias in _typedef_names(node))
         candidates.push(%($alias $forward));
     }
   return candidates;
@@ -690,11 +690,11 @@ static void _add_forwards(
   Map spelled = {};
   _spelled_types(base, spelled);
   Array found = [];
-  foreach (Var name, spelled.keys()) {
+  foreach (Var name in spelled.keys()) {
     Var at;
     if (!(name in available) && first.try_get(name, at)) found.push(at);
   }
-  foreach (int at, found.sort()) {
+  foreach (int at in found.sort()) {
     (String name, List forward) = candidates[at];
     if (name in available) continue;
     out.push(forward);
@@ -704,5 +704,5 @@ static void _add_forwards(
 }
 
 static void _add_names(Map available, List node) {
-  foreach (String name, _typedef_names(node)) available[name] = 1;
+  foreach (String name in _typedef_names(node)) available[name] = 1;
 }

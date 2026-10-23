@@ -57,7 +57,7 @@ static String _converter_name(Var node) {
 int Compiler.match_value_is_static(Var value) {
   if (value == <x2c-dyn>) return 0;
   if (value is not <list>) return 1;
-  foreach (Var part, value.list())
+  foreach (Var part in value.list())
     if (!Compiler.match_value_is_static(part)) return 0;
   return 1;
 }
@@ -88,7 +88,7 @@ List Compiler.match_pattern_binders(
 /** Declares pattern locals and returns their capture-token/binding pairs. */
 List Compiler.define_pattern_binders(Compiler c, List pattern) {
   Array rows = [];
-  foreach (Var binder, c.match_pattern_binders(pattern, NULL)) {
+  foreach (Atom binder in c.match_pattern_binders(pattern, NULL)) {
     String name = binder.str()[1:];
     List binding;
     if (c.macro_holes) {
@@ -116,7 +116,7 @@ List Compiler.pattern_binder_declarations(
   Compiler c, List bindings, List handle) {
   Array declarations = [];
   int index = 0;
-  foreach (List row, bindings) {
+  foreach (List row in bindings) {
     Type type = _binder_type(row.car());
     List value = handle ? %(expr ("Var")
       (call "x2c_error_catch_capture"

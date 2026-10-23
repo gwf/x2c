@@ -59,7 +59,7 @@ void Compiler.report_meta_error(
 static int _syntax_origin(Var node) {
   if (node is not <list>) return 0;
   match (node) case %(at ?(int origin) ?): return origin;
-  foreach (Var child, node.list()) {
+  foreach (Var child in node.list()) {
     int origin = _syntax_origin(child);
     if (origin) return origin;
   }
@@ -477,8 +477,8 @@ void Compiler.use_meta_helper(MetaHelper helper) {
   if (!helper) return;
   Scope.move(helper, &primary_scope);
   helper.path.try_own();
-  foreach (Var (key, value), helper.failures) value.string().try_own();
-  foreach (Var (key, value), helper.units) key.string().try_own();
+  foreach ((int key, String value) in helper.failures) value.try_own();
+  foreach ((String key, int value) in helper.units) key.try_own();
 }
 
 /** Returns why this helper cannot call the functions of `provider`: the

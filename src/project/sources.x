@@ -16,15 +16,15 @@ module Array _target_sources(Project p, ProjectTarget target) {
   Array sources = _expand_patterns(p, target.sources, "source");
   Array excluded = _expand_patterns(p, target.exclude, "exclude");
   Array kept = [];
-  foreach (Var path, sources) {
+  foreach (String path in sources) {
     if (!(path in excluded)) kept.push(path);
     else if (p.command.verbose)
-      $progress.project_source_excluded(path.string(), target.name);
+      $progress.project_source_excluded(path, target.name);
   }
   sources.free();
   excluded.free();
   kept.sort();
-  foreach (String path, kept)
+  foreach (String path in kept)
     if (!(Path.is_x2c_source(path) || path.endswith(".c")))
       _error_name(p, 0, "manifest source is not .x or .c", path);
   return kept;
@@ -33,9 +33,9 @@ module Array _target_sources(Project p, ProjectTarget target) {
 /* The files the patterns match, each once, in the order they first match. */
 static Array _expand_patterns(Project p, List patterns, String owner) {
   Array files = [];
-  foreach (String pattern, patterns) {
+  foreach (String pattern in patterns) {
     Array expanded = _expand_pattern(p, pattern, owner);
-    foreach (Var path, expanded) if (!(path in files)) files.push(path);
+    foreach (String path in expanded) if (!(path in files)) files.push(path);
     expanded.free();
   }
   return files;
@@ -59,7 +59,7 @@ static Array _glob(Project p, String pattern) {
   List found = Path.glob(Path.join(_glob_literal(p.root), pattern));
   if (p.sources) found = found.append(p.sources.overlays.keys());
   Array matches = [];
-  foreach (String path, found)
+  foreach (String path in found)
     if (path.startswith(prefix) &&
         Path.glob_match(pattern, path.remove_prefix(prefix)) &&
         !(p.build_root && path.startswith(%"${p.build_root}/")) &&

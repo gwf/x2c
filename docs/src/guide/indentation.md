@@ -63,8 +63,8 @@ int main(void):
 
 Conditions need no parentheses, except that a `for` header keeps its
 three clauses in them, and a short body can follow its colon on the same
-line. `foreach` separates its declaration from the collection with `in` or
-a comma, as in brace form. The enum keeps its commas, and its name after the dedent
+line. Use `in` to separate the `foreach` declaration from its collection,
+as in brace form. The enum keeps its commas, and its name after the dedent
 completes the `typedef`.
 
 ## Long lines

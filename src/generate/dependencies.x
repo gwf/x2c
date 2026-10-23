@@ -25,7 +25,7 @@ module List _forward_declarations(
   if (c.runtime_inc && source_includes)
     c.runtime_function_declarations(f.available);
   _source_declarations(source, f.statics);
-  foreach (List node, source) {
+  foreach (List node in source) {
     node = _inline_prototype(c, node);
     if (node.car() == <typedef> && node in f.seen) continue;
     if (source_includes) match (node) case %(preproc ?(String text)): {
@@ -52,7 +52,7 @@ static List _inline_prototype(Compiler c, List node) {
     case %(declare ?type (bindings *declarators))
       if (!type.type().is_static()): {
       Array rows = [], int changed = 0;
-      foreach (List declarator, declarators) {
+      foreach (List declarator in declarators) {
         List base = type;
         match (declarator) case %(bind ?binding ((fnmod *) *)):
           if (_inline_binding(c, binding)) {
@@ -83,7 +83,7 @@ module List _move_bodies(List source, Map inline_bodies) {
   Array out = [], bodies = $auto([]);
   Map undefs = $auto(_undef_positions(source)), List arms = NULL;
   int position = 0;
-  foreach (List node, source) {
+  foreach (List node in source) {
     if (position in undefs) _place_bodies(out, bodies, arms);
     position++;
     match (node)
@@ -111,7 +111,7 @@ static Map _undef_positions(List source) {
   Map positions = {};
   Array open = $auto([]);
   int position = 0;
-  foreach (List node, source) {
+  foreach (List node in source) {
     match (node) case %(preproc ?(String content)): {
       Symbol kind = Compiler.preproc_conditional_kind(content);
       if (kind == <open>) open.push(position);
@@ -126,7 +126,7 @@ static Map _undef_positions(List source) {
 
 static void _mark_undef(Map positions, Array open, int position) {
   positions[position] = 1;
-  foreach (Var group, open) positions[group] = 1;
+  foreach (int group in open) positions[group] = 1;
 }
 
 /* Moves to `out` each pending body written under the open `arms`,
@@ -135,7 +135,7 @@ static void _mark_undef(Map positions, Array open, int position) {
 static void _place_bodies(Array out, Array bodies, List arms) {
   size_t kept = 0;
   unsigned open = arms.len();
-  foreach (List pending, bodies) {
+  foreach (List pending in bodies) {
     List written = pending.cdr();
     if (written.tail(open) != arms) {
       bodies[kept++] = pending;
@@ -143,7 +143,7 @@ static void _place_bodies(Array out, Array bodies, List arms) {
     }
     List reopened = written.head(written.len() - open);
     List statement = %(${pending.car()});
-    foreach (List item, Compiler.preproc_within_arms(reopened, statement))
+    foreach (List item in Compiler.preproc_within_arms(reopened, statement))
       out.push(item);
   }
   bodies.resize(kept);
@@ -163,14 +163,14 @@ static void _collect_declared(Var value, Map available) {
       if (node.type_from_ast().is_function())
         _set_function(available, _declaration_binding(declarator), 1);
     case %(declare (*) (bindings *declarators)):
-      foreach (List declarator, declarators) {
+      foreach (List declarator in declarators) {
         List binding = _declaration_binding(declarator);
         if (binding) available[binding] = 1;
       }
     case %(typedef (*) (bindings *declarators)):
-      foreach (List declarator, declarators)
+      foreach (List declarator in declarators)
         _set_typedef(available, _declaration_binding(declarator), 1);
-    default: foreach (Var child, node) _collect_declared(child, available);
+    default: foreach (Var child in node) _collect_declared(child, available);
   }
 }
 
@@ -205,12 +205,12 @@ static void _source_declarations(Var value, Map statics) {
       _set_function(statics, binding, _prototype(type, signature));
     case %(declare ?base (bindings *declarators)):
       if (base.list().type().is_static())
-        foreach (List declarator, declarators)
+        foreach (List declarator in declarators)
           _set_static(statics, base, declarator);
     case %(typedef ? (bindings *declarators)):
-      foreach (List declarator, declarators)
+      foreach (List declarator in declarators)
         _set_typedef(statics, _declaration_binding(declarator), node);
-    default: foreach (Var child, node) _source_declarations(child, statics);
+    default: foreach (Var child in node) _source_declarations(child, statics);
   }
 }
 
@@ -301,7 +301,7 @@ static void _declaration(Forward &f, Var key) {
 static void _types(Forward &f, Type type) {
   Type base = type.base_type();
   if (base.is_bare_typedef_name()) _declaration(f, base.car());
-  foreach (Var modifier, type)
+  foreach (Var modifier in type)
     match (modifier) case %(func (*parameters)):
-      foreach (Type parameter, parameters) _types(f, parameter);
+      foreach (Type parameter in parameters) _types(f, parameter);
 }

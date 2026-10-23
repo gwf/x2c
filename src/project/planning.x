@@ -79,7 +79,7 @@ static void _validate_target(Project p, ProjectTarget target) {
   if (target.visiting)
     _error_name(p, 0, "target dependency cycle reaches", target.name);
   target.visiting = 1;
-  foreach (String name, _prerequisites(target)) {
+  foreach (String name in _prerequisites(target)) {
     ProjectTarget prerequisite = _target(p, name);
     if (!prerequisite) _error_name(p, 0, "unknown target dependency", name);
     _validate_target(p, prerequisite);
@@ -131,7 +131,7 @@ static void _resolve_dependencies(Project p) {
 /* A target plans after its prerequisites, and each target plans once. */
 static void _plan_target(Project p, ProjectTarget target) {
   if (target.planned) return;
-  foreach (String name, _prerequisites(target))
+  foreach (String name in _prerequisites(target))
     _plan_target(p, _target(p, name));
   _append_plan(p, _target_request(p, target));
   target.planned = 1;
@@ -198,7 +198,7 @@ static List _target_inputs(Project p, ProjectTarget target, Symbol kind) {
       p, 0, "static-library target cannot contain target dependencies",
       target.name);
   Array inputs = _target_sources(p, target);
-  foreach (String name, target.dependencies) {
+  foreach (String name in target.dependencies) {
     ProjectTarget dependency = _target(p, name);
     if (dependency.kind != <static-lib>)
       _error_name(
@@ -212,7 +212,7 @@ static List _target_inputs(Project p, ProjectTarget target, Symbol kind) {
    output. */
 static List _target_modules(Project p, ProjectTarget target) {
   Array modules = [];
-  foreach (String name, target.native_modules) {
+  foreach (String name in target.native_modules) {
     ProjectTarget loaded = _target(p, name);
     if (loaded.kind != <module>)
       _error_name(p, 0, "native module target is not a meta-module", name);
@@ -266,7 +266,7 @@ static List _profile_flags(Project p, ProjectProfile profile) {
 }
 
 static List _c_flags(Project p, List values) {
-  foreach (String value, values)
+  foreach (String value in values)
     if (CliRequest.dependency_option(value))
       _error_name(p, 0, "C dependency option is driver-owned", value);
   return values;

@@ -15,9 +15,9 @@ int main(int argc, char **argv) {
   try {
     File input = File.open(argv[1], "r");
     defer input.close();
-    foreach(String line, input) {
+    foreach(String line in input) {
       lines++;
-      foreach(String word, line.lower().words()) {
+      foreach(String word in line.lower().words()) {
         Var old;
         long count = counts.try_get(word, old) ? old.integer() : 0;
         counts[word] = count + 1;

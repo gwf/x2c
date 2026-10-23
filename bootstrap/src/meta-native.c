@@ -1153,17 +1153,18 @@ static void _add_native_module(String path, Map(* entry)(void)){
   }
   String_try_own(path);
   {
-    Var name, target;
+    String name;
+    Func target;
     Map _x2c_gensym_macro_object_0 = targets;
     unsigned _x2c_gensym_macro_cursor_0 = 0;
     Var _x2c_gensym_macro_cursor_output_0;
     Var _x2c_gensym_macro_cursor_output_1;
     while(Map_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0), &(_x2c_gensym_macro_cursor_output_1))){
-      name = _x2c_gensym_macro_cursor_output_0;
-      target = _x2c_gensym_macro_cursor_output_1;
+      name = Var_as_string(_x2c_gensym_macro_cursor_output_0);
+      target = Var_func(_x2c_gensym_macro_cursor_output_1);
       {
-        String_try_own(Var_string(name));
-        List_try_own(Func_signature((Var_pointer(target))));
+        String_try_own(name);
+        List_try_own(Func_signature(target));
       }
 
     }
@@ -1409,17 +1410,18 @@ static Map _linked_module(void){
 
     }
     {
-      Var name, row;
+      String name;
+      List row;
       Map _x2c_gensym_macro_object_1 = f6_linked___linked_hashes;
       unsigned _x2c_gensym_macro_cursor_1 = 0;
       Var _x2c_gensym_macro_cursor_output_2;
       Var _x2c_gensym_macro_cursor_output_3;
       while(Map_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_2), &(_x2c_gensym_macro_cursor_output_3))){
-        name = _x2c_gensym_macro_cursor_output_2;
-        row = _x2c_gensym_macro_cursor_output_3;
+        name = Var_as_string(_x2c_gensym_macro_cursor_output_2);
+        row = Var_list_payload(_x2c_gensym_macro_cursor_output_3);
         {
-          String_try_own(Var_string(name));
-          List_try_own(Var_list(row));
+          String_try_own(name);
+          List_try_own(row);
         }
 
       }
@@ -1850,28 +1852,30 @@ static List f9_functions____subject_rows(Compiler c, Array values){
   }
   Array rows = Array_new();
   {
-    Var spelling, binding;
+    String spelling;
+    List binding;
     Map _x2c_gensym_macro_object_4 = globals;
     unsigned _x2c_gensym_macro_cursor_4 = 0;
     Var _x2c_gensym_macro_cursor_output_6;
     Var _x2c_gensym_macro_cursor_output_7;
     while(Map_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_6), &(_x2c_gensym_macro_cursor_output_7))){
-      spelling = _x2c_gensym_macro_cursor_output_6;
-      binding = _x2c_gensym_macro_cursor_output_7;
-      Array_push(rows, List_var(cons(spelling, cons(binding, NULL))));
+      spelling = Var_as_string(_x2c_gensym_macro_cursor_output_6);
+      binding = Var_list_payload(_x2c_gensym_macro_cursor_output_7);
+      Array_push(rows, List_var(cons(String_var(spelling), cons(List_var(binding), NULL))));
     }
 
   }
   {
-    Var binding, spelling;
+    List binding;
+    String spelling;
     Map _x2c_gensym_macro_object_5 = source_names;
     unsigned _x2c_gensym_macro_cursor_5 = 0;
     Var _x2c_gensym_macro_cursor_output_8;
     Var _x2c_gensym_macro_cursor_output_9;
     while(Map_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_8), &(_x2c_gensym_macro_cursor_output_9))){
-      binding = _x2c_gensym_macro_cursor_output_8;
-      spelling = _x2c_gensym_macro_cursor_output_9;
-      Array_push(rows, List_var(cons(_271, cons(binding, cons(spelling, NULL)))));
+      binding = Var_list_payload(_x2c_gensym_macro_cursor_output_8);
+      spelling = Var_as_string(_x2c_gensym_macro_cursor_output_9);
+      Array_push(rows, List_var(cons(_271, cons(List_var(binding), cons(String_var(spelling), NULL)))));
     }
 
   }

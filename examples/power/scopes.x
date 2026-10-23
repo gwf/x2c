@@ -36,7 +36,7 @@ while (wait_for_day()) $scope() {
   size_t daily = Scope.stats().live_allocations;
 
   // Working data is reclaimed after every file.
-  foreach (String path, files) $scope() {
+  foreach (String path in files) $scope() {
     assert(Scope.stats().live_allocations == daily);
     Map findings = inspect_file(path);
     save_findings(path, findings);

@@ -144,7 +144,7 @@ static int _bits_unique(Var value) {
     case <i32>: case <u32>: case <i48>: case <u48>:
       return 1;
     case <list>: {
-      foreach (Var part, (List) value.pointer())
+      foreach (Var part in (List) value.pointer())
         if (!_bits_unique(part)) return 0;
       return 1;
     }
@@ -170,7 +170,7 @@ static int _emit_literal(MatchLower &l, Var pattern) {
 
 /* A List with no binder and no guard at any depth. */
 static int _is_list_literal(List pat) {
-  foreach (Var head, pat) {
+  foreach (Var head in pat) {
     if (head.is_binder() || head.is_match_op()) return 0;
     if (head is <list> && !_is_list_literal(head)) return 0;
   }
@@ -293,7 +293,7 @@ static int _compile_guard(MatchLower &l, Var op, List args) {
 static int _guard_parts(
   MatchLower &l, List args, MatchParts &parts) {
   int n = 0;
-  foreach (Var part, args) {
+  foreach (Var part in args) {
     if (n >= MATCH_SEGMENT_MAX) return _fail(l, "guard-width") + 1;
     parts.elements[n] = part;
     if (part is not <list>) parts.entries[n++] = -1;
@@ -536,7 +536,7 @@ static int _inline_descend_ok(List child, int reg) {
   if (reg + 1 >= MACHINE_CURSOR_REGS || !child ||
       child.car().is_match_op() || _is_list_literal(child))
     return 0;
-  foreach (Var part, child) if (part.is_list_binder()) return 0;
+  foreach (Var part in child) if (part.is_list_binder()) return 0;
   return 1;
 }
 
@@ -544,7 +544,7 @@ static int _inline_descend_ok(List child, int reg) {
    in traversal order. */
 static int _compile_nested(
   MatchLower &l, List pattern, int reg, MatchInlinePlan &nested) {
-  foreach (Var part, pattern) {
+  foreach (Var part in pattern) {
     if (part is not <list>) continue;
     List child = part;
     if (_inline_descend_ok(child, reg)) {
@@ -580,7 +580,7 @@ static int _segment_star(MatchLower &l, MatchStar &star) {
 }
 
 static int _pattern_contains_binder(List pat, Var binder) {
-  foreach (Var part, pat) {
+  foreach (Var part in pat) {
     if (part == binder) return 1;
     if (part is <list>) {
       List nested = part;
@@ -606,7 +606,7 @@ static int _compile_tail(MatchLower &l, List pattern) {
    the same pattern matches element by element at a fixed position. */
 static int _find_fixed_anchor(List pat, Var &anchor, int &offset) {
   int width = 0;
-  foreach (Var part, pat) {
+  foreach (Var part in pat) {
     if (part.is_list_binder()) return 0;
     if ((part is not <list> && !part.is_binder()) ||
         (part is <list> && _is_list_literal(part) && _bits_unique(part))) {
@@ -670,7 +670,7 @@ static int _emit_framed(MatchLower &l, int entry, int reg) =>
 /* Emits an inline sublist through `reg`; its elements must end with it. */
 static int _emit_inline_segment(
   MatchLower &l, List pattern, int reg, MatchInlinePlan &nested) {
-  foreach (Var part, pattern) {
+  foreach (Var part in pattern) {
     if (part is not <list>) {
       if (!_emit_head_leaf(l, part, reg)) return 0;
       continue;
@@ -864,12 +864,12 @@ static int _keys(Var pattern, Symbol mode, MatchKeys &keys) {
     return mode != <value> && _segment_keys(list, mode, keys);
   if (op == <!set> && _set_binds(args)) return _keys(args.cadr(), mode, keys);
   if (op == <!or> || op == <!set>) {
-    foreach (Var arm, args) if (!_keys(arm, mode, keys)) return 0;
+    foreach (Var arm in args) if (!_keys(arm, mode, keys)) return 0;
     return args != NULL;
   }
   if (op != <!and>) return 0;
   int count = keys.count;
-  foreach (Var operand, args) {
+  foreach (Var operand in args) {
     if (_keys(operand, mode, keys)) return 1;
     keys.count = count;
   }
@@ -899,7 +899,7 @@ static int _segment_keys(List pattern, Symbol mode, MatchKeys &keys) {
    some, and returns its index after the segment's head, or 0. */
 static int _inner_keys(List rest, MatchKeys &inner) {
   int index = 1;
-  foreach (Var part, rest) {
+  foreach (Var part in rest) {
     if (part.is_list_binder()) return 0;
     if (_keys(part, <value>, inner)) return index;
     inner.count = 0;

@@ -429,7 +429,7 @@ static void _completion_check(int error) {
 */
 Thread Thread.wait_any(Array pending) {
   if (!pending.len()) return NULL;
-  foreach (Thread thread, pending) {
+  foreach (Thread thread in pending) {
     if (!thread) raise %(bad-arg (operation "Thread.wait_any"));
     if (__atomic_load_n(&thread.state, __ATOMIC_SEQ_CST) != <running>)
       raise %(bad-state (operation "Thread.wait_any"));
@@ -588,7 +588,7 @@ static Var _batch_call(const void *bytes, size_t size) {
 static void _batch_stop(Array pending) {
   stop_mask++;
   defer --stop_mask;
-  foreach (Thread worker, pending) worker.stop();
+  foreach (Thread worker in pending) worker.stop();
   defer if (pending.len()) {
     fprintf(stderr, "Thread.run: cleanup left unjoined workers\n");
     abort();
@@ -624,7 +624,7 @@ void Thread.run(Array jobs, Func completed) {
   Array pending = $auto([]);
   ((Block) pending).reserve(jobs.len());
   defer _batch_stop(pending);
-  foreach (Func job, jobs) {
+  foreach (Func job in jobs) {
     _batch_check_stop();
     pending.push(_start(_batch_call, &job, sizeof(job), NULL));
   }
@@ -806,6 +806,6 @@ static void _parallel_stop(struct ParallelRun *run, Array workers) {
   run.stopping = 1;
   _completion_check(pthread_cond_broadcast(&thread_completion_condition));
   _completion_check(pthread_mutex_unlock(&thread_completion_mutex));
-  foreach (Thread worker, workers) worker.stop();
+  foreach (Thread worker in workers) worker.stop();
   Thread.finish_all(workers);
 }

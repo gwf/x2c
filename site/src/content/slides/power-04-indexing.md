@@ -19,7 +19,7 @@ Index Index.new(void) {
 void Index.add(Index index, String name, String text) {
   int id = index.documents.len();
   index.documents.push(name);
-  foreach (String word, text.lower().words().iter().unique())
+  foreach (String word in text.lower().words().iter().unique())
     index.words.setdefault(word, []).array().push(id);
 }
 

@@ -14,7 +14,7 @@ $rewrite(%(expr ("String") (segments *)))
 meta Code interpolation_lowering(Code code) {
   match (code) case %(expr ? (segments *segments)): {
     Array parts = [];
-    foreach (List segment, segments) match (segment) {
+    foreach (List segment in segments) match (segment) {
       case %((!or segexp segvar) ?value): parts.push(value);
       case %(segraw ?text): {
         String raw = text;

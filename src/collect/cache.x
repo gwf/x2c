@@ -57,7 +57,7 @@ module List _entry(Compiler c, String canonical) {
 module List _collection_entry(Compiler c, String path) {
   List entry = _entry(c, path);
   if (!entry || path in c.collection_native_files) return entry;
-  foreach (Var part, entry.car())
+  foreach (Var part in entry.car())
     if (part is <map> && %("collection-native") in part.map()) {
       _process_cache().del(path);
       return NULL;
@@ -74,7 +74,7 @@ module void _cache_dependency(Map dependencies, String path, Var hash) {
 }
 
 module void _cache_dependencies(Map dependencies, Map additions) {
-  foreach (Var (path, hash), additions)
+  foreach ((String path, Var hash) in additions)
     _cache_dependency(dependencies, path, hash);
 }
 
@@ -130,9 +130,9 @@ module String _canonical_cwd(void) {
 }
 
 module void _retain_rows(List parts) {
-  foreach (Var part, parts) {
+  foreach (Var part in parts) {
     if (part is not <map>) continue;
-    foreach (Var (key, value), part.map()) {
+    foreach (Var (key, value) in part.map()) {
       _retain(key);
       _retain(value);
     }
@@ -164,7 +164,7 @@ static void _reset_cache(Map &cache) {
     that session is published, and after the meta build's parses. */
 void Compiler.forget_provisional_entries(void) {
   if (!provisional_entries) return;
-  foreach (Var path, provisional_entries.keys())
+  foreach (String path in provisional_entries.keys())
     (void) _process_cache().del(path);
   provisional_entries = NULL;
 }

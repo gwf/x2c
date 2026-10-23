@@ -510,7 +510,7 @@ static void _write_value(Writer &w, Var value, int depth) {
 static void _elements(Writer &w, Var sequence, int depth) {
   int count = 0;
   w.out.write_char('[');
-  foreach (Var element, sequence) {
+  foreach (Var element in sequence) {
     if (count++) w.out.write_char(',');
     _line(w, depth + 1);
     _write_value(w, element, depth + 1);
@@ -521,7 +521,7 @@ static void _elements(Writer &w, Var sequence, int depth) {
 
 static void _members(Writer &w, Map object, int depth) {
   Array names = $auto([]);
-  foreach (Var (name, member), object) {
+  foreach (Var (name, member) in object) {
     if (name is not <string> && !name.is_atom()) {
       Symbol tag = name.tag();
       $error.write.key(tag);
@@ -532,7 +532,7 @@ static void _members(Writer &w, Map object, int depth) {
   int count = 0;
   String previous = NULL;
   w.out.write_char('{');
-  foreach (Var name, names) {
+  foreach (Var name in names) {
     String text = name.str();
     // A String and a Symbol with the same spelling would write one name twice.
     if (count && text == previous)

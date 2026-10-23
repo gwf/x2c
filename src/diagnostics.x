@@ -403,7 +403,7 @@ String Compiler.file_prefix(Compiler c) {
 static Token _unit_token(Compiler c) {
   Token site = NULL;
   if (c.macro_stack)
-    foreach (List active, c.macro_stack) {
+    foreach (List active in c.macro_stack) {
       (Var definition, Var input, Var bindings, Token invocation) = active;
       (void) definition, (void) input, (void) bindings;
       if (_in_unit(c, invocation)) site = invocation;
@@ -471,7 +471,7 @@ static List _token_region(Compiler c, Token token) {
 static List _region(Compiler c, int position) {
   List region = NULL;
   if (c.line_markers)
-    foreach (List row, c.line_markers) {
+    foreach (List row in c.line_markers) {
       if (row.car().int() > position) break;
       region = row;
     }
@@ -502,7 +502,7 @@ void Compiler.report_error(
   /* A unit that holds its diagnostics until it finishes has no printer yet.
      The floor reports what it collected before it leaves. */
   if (!diag.printer)
-    foreach (Var held, diag.entries()) compiler.print_diagnostic(held);
+    foreach (List held in diag.entries()) compiler.print_diagnostic(held);
   exit(1);
 }
 
@@ -564,8 +564,8 @@ static void _show_source_context(
    context shows the line of the text that holds its byte position. */
 static int _text_line(Compiler c, int position) {
   int line = 0;
-  foreach (Var start, _line_starts(c)) {
-    if (start.int() > position) break;
+  foreach (int start in _line_starts(c)) {
+    if (start > position) break;
     line++;
   }
   return line;
@@ -629,7 +629,7 @@ static void _context_caret(
 void Compiler.take_diagnostics(Compiler c, Compiler child) {
   Diagnostics target = c.diagnostics, source = child.diagnostics;
   if (target == source) return;
-  foreach (List entry, source.entries) _store(target, entry);
+  foreach (List entry in source.entries) _store(target, entry);
   target.count += source.count;
   target.limit_notified |= source.limit_notified;
   source.reset();
@@ -676,11 +676,11 @@ void Compiler.dump_tokens(Compiler compiler) {
 
 /** Prints every entry in `map` to stdout in `Map` iteration order. */
 void Compiler.dump_symbol_table(Compiler compiler, Map map) {
-  foreach (Var (key, value), map) printf("%s ==>\n%s\n", key, value);
+  foreach (Var (key, value) in map) printf("%s ==>\n%s\n", key, value);
 }
 
 /** Prints each cached numeric identifier and its key to stdout. */
 void Compiler.dump_cache(Compiler compiler) {
-  foreach (Var (key, value), compiler.key_ids)
+  foreach (Var (key, value) in compiler.key_ids)
     printf("%s\t==>\t%s\n", value.repr(), key.repr());
 }

@@ -456,7 +456,7 @@ static void _render_text(Buffer out, const LogEvent *event, int color) {
   _write_elapsed(out, event.elapsed_us, color);
   _write_label(out, event.level, event.category, color);
   if (event.sequence == 0) _write_start_time(out, event.wall_time_us, color);
-  foreach (List field, event.fields) {
+  foreach (List field in event.fields) {
     if (!field) continue;
     out.write(" ");
     _write_field(out, field, color);
@@ -748,7 +748,7 @@ static void _report_uncaught(List entry) {
 /* `key value` pairs in raise order; Strings and Symbols show their text. */
 static String _detail_text(List detail) {
   List parts = NULL;
-  foreach (List pair, detail) {
+  foreach (List pair in detail) {
     Var value = pair.cadr();
     String text = value is <string> || value is <symbol>
                 ? value.str() : value.repr();
@@ -886,6 +886,6 @@ void Logger.shutdown(void) {
 static void _log_pending(Logger active) {
   Pool.open_named("Logger shutdown errors");
   List pending = Error.since(logger_error_mark);
-  foreach (List entry, pending) active.log(<error>, <err-report>, entry);
+  foreach (List entry in pending) active.log(<error>, <err-report>, entry);
   Pool.close();
 }

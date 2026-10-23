@@ -62,7 +62,7 @@ static void _check(Expansion &x) {
   Compiler c = x.c;
   int leaf = x.definition.assoc(<leaf>) == 1;
   if (!leaf)
-    foreach (List active, c.macro_stack) {
+    foreach (List active in c.macro_stack) {
       (List prior, List prior_input, Var bindings, Var site) = active;
       (void) bindings, (void) site;
       if (prior == x.definition && prior_input == x.input)
@@ -140,7 +140,7 @@ static List _fresh_names(Expansion &x, List old_stack) {
   Token root = old_stack ? old_stack.last().list()[3] : x.invocation;
   if (c.sym.at_file_scope()) _file_scope_locals(%(${x.template}), file_locals);
   Array fresh_values = [];
-  foreach (List fresh, x.definition.assoc(<fresh>).list()) {
+  foreach (List fresh in x.definition.assoc(<fresh>).list()) {
     Var (binder, spelling, lisp) = fresh;
     Token owner = binder in file_locals ? root : NULL;
     if (lisp.int()) {
@@ -167,7 +167,7 @@ static List _member_bindings(
     case %(args *rows): captures = rows;
     case %(target (args *rows) ?): captures = rows;
   }
-  foreach (List parameter, parameters) {
+  foreach (List parameter in parameters) {
     List capture = captures.car();
     captures = captures.cdr();
     if (parameter.assoc(<kind>) != <name> ||
@@ -199,7 +199,7 @@ module Var _member_spelling(Compiler c, Var value) {
    literal. */
 static List _lisp_bindings(List bindings, List &template_bindings) {
   Array lisp = [], compiler = [];
-  foreach (List pair, bindings) {
+  foreach (List pair in bindings) {
     Var binder = pair.car();
     if (binder.is_binder() &&
         !binder.str().startswith("?__macro_") &&
@@ -299,7 +299,7 @@ static String _owner_spelling(Compiler c) {
    linkage or none: objects, functions, typedefs, tags, and enumerators,
    including those a nested invocation declares from this template's names. */
 module void _file_scope_locals(List rows, Map locals) {
-  foreach (Var row, rows) match (row) {
+  foreach (Var row in rows) match (row) {
     case %((!or at src) ? ?inner): _file_scope_locals(%($inner), locals);
     case %(api-source ? ? ?inner): _file_scope_locals(%($inner), locals);
     case %(seq *inner): _file_scope_locals(inner, locals);
@@ -309,7 +309,7 @@ module void _file_scope_locals(List rows, Map locals) {
       _file_scope_locals(%(${definition.assoc(<template>)}), declared);
       List bindings = NULL;
       input.try_match(definition.assoc(<pattern>), bindings);
-      foreach (List pair, bindings)
+      foreach (List pair in bindings)
         if (pair.car() in declared && pair.cadr().is_binder())
           locals[pair.cadr()] = 1;
     }
@@ -327,7 +327,7 @@ module void _file_scope_locals(List rows, Map locals) {
 }
 
 static void _file_scope_declarators(List declarators, Map locals) {
-  foreach (Var declarator, declarators) match (declarator)
+  foreach (Var declarator in declarators) match (declarator)
     case $source_declarator_row(%(?binder ?)):
       if (binder.is_binder()) locals[binder] = 1;
 }

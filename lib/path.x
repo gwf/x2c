@@ -108,7 +108,7 @@ Self Path.absolute(Self path) {
     path = Path.join(String.new(buffer), path);
   }
   Path result = "/";
-  foreach (String part, path.split("/")) {
+  foreach (String part in path.split("/")) {
     if (!part || part == ".") continue;
     if (part == "..") {
       result = result.dirname();
@@ -202,7 +202,7 @@ static int _descends(String path) {
    name. */
 static void _push_children(Array pending, Path directory) {
   List children = directory.list_dir().reverse();
-  foreach (String name, children) pending.push(directory.join(name));
+  foreach (String name in children) pending.push(directory.join(name));
 }
 
 static int _walk_next(Iter iter, Var *out) {
@@ -224,7 +224,7 @@ static int _walk_next(Iter iter, Var *out) {
     ~#include "path.x"
     ~int main(void) {
     Path source = "src";
-    foreach (Path path, source.walk()) printf("%s\n", path);
+    foreach (Path path in source.walk()) printf("%s\n", path);
     long units = source.walk().filter(%!(p) => p.str().endswith(".x")).count();
     ~  return units >= 0 ? 0 : 1;
     ~}
@@ -349,7 +349,7 @@ int Path.glob_match(Path pattern, Path path) =>
    for any depth once a component is `**`. */
 static int _glob_depth(String components) {
   int depth = 0;
-  foreach (String part, components.split("/")) {
+  foreach (String part in components.split("/")) {
     if (!part) continue;
     if (part == "**") return -1;
     depth++;
@@ -364,7 +364,7 @@ static typedef struct Glob {
 } Glob;
 
 static void _glob(Glob &g, Path directory, int depth) {
-  foreach (String name, directory.list_dir()) {
+  foreach (String name in directory.list_dir()) {
     Path child = directory.join(name);
     String candidate = child;
     if (!g.rooted) candidate = candidate[2:];
@@ -502,7 +502,7 @@ static void _copy_tree(Path source, Path target) {
   }
   else if (S_ISDIR(info.st_mode)) {
     target.make_dirs();
-    foreach (String name, source.list_dir())
+    foreach (String name in source.list_dir())
       _copy_tree(source.join(name), target.join(name));
     if (chmod(target, info.st_mode & 07777))
       File.path_error("Path.copy_tree", target, errno);

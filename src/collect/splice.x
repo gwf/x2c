@@ -66,7 +66,7 @@ static int _file(
     List members = _members(s, block, close);
     _own(s, 0, block.pos, 1);
     _end_line(s);
-    foreach (String spelling, members) _member(s, spelling, block);
+    foreach (String spelling in members) _member(s, spelling, block);
     _mark(s, close.line, close.pos + 1);
     _own(s, close.pos + 1, text.len(), close.line);
     return 1;
@@ -172,7 +172,7 @@ static String _file_prefix(String path) {
   if (path.startswith("./")) path = path[2:];
   Buffer spelling = $auto(Buffer.new(0));
   if (isdigit((unsigned char) path[0])) spelling.write_char('x');
-  foreach (char ch, path)
+  foreach (char ch in path)
     spelling.write_char(isalnum((unsigned char) ch) ? ch : '_');
   String stem = spelling;
   int keep = stem.len();

@@ -16,7 +16,7 @@ if (row[4:].try_long(&quantity))
 
 // Iterate bytes directly, or use ordinary C string functions.
 assert(strcmp(raw, "  tea:42  ") == 0);
-foreach (char ch, name)
+foreach (char ch in name)
   putchar(ch);
 printf(" has %zu letters; original: [%s]\n", strlen(name), raw);
 return 0;

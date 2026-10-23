@@ -164,7 +164,7 @@ module String _canonical_file(Compiler c, List location) {
 
 static int _module_member(Compiler c, String file) {
   if (c.line_markers)
-    foreach (List row, c.line_markers)
+    foreach (List row in c.line_markers)
       match (row) case %(? ? ?(String member) ? ? ? ?):
         if (_normalize_file(c, member) == file) return 1;
   return 0;
@@ -450,7 +450,7 @@ static Symbol _published_storage(
 }
 
 static int _has_private_native(Compiler c, List templates) {
-  foreach (List template, templates) {
+  foreach (List template in templates) {
     String binding = template.caddr();
     if (binding && _is_private(c, binding)) return 1;
   }
@@ -508,7 +508,7 @@ void Compiler.rebuild_protocols(Compiler c, Map symbols) {
   c.protocol_helpers = {};
   c.proto_cache = {};
   if (!symbols) return;
-  foreach (Var value, symbols) {
+  foreach (Var value in symbols) {
     if (value is not <list>) continue;
     match (value) {
       case %(protocol

@@ -266,8 +266,8 @@ retains neither argument.
 Foreach may convert each yielded byte to either `int` or `char`:
 
 ```x2c
-foreach (int byte, "abc") printf("%d\n", byte);
-foreach (char ch, "abc") printf("%c\n", ch);
+foreach (int byte in "abc") printf("%d\n", byte);
+foreach (char ch in "abc") printf("%c\n", ch);
 ```
 
 This is byte traversal, not Unicode character iteration.
@@ -630,7 +630,7 @@ Initialize the caller-owned cursor to zero. A null `String`, a null
 pointer, a negative cursor, or exhaustion returns zero without changing
 `cursor` or `out`. This is byte traversal, not Unicode characters.
 
-`foreach (int byte, str)` and `foreach (char ch, str)` compile to this
+`foreach (int byte in str)` and `foreach (char ch in str)` compile to this
 loop.
 
 Source: `lib/string/adapters.x:65`

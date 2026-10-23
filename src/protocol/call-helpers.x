@@ -29,7 +29,7 @@ List Compiler.wrapper_function(
 List Compiler.forward_parameters(Compiler c, List types) {
   Array declarations = [], arguments = [];
   int index = 0;
-  foreach (Type type, types) {
+  foreach (Type type in types) {
     List binding = c.sym.introduce(%"a${index++}");
     declarations.push(type.parameter_ast(binding));
     arguments.push($!($type){ $binding });
@@ -165,7 +165,7 @@ List Compiler.protocol_discard_helper(
 
 static void _collect(DiscardCall &d) {
   int index = 0;
-  foreach (List argument, d.arguments) {
+  foreach (List argument in d.arguments) {
     if (d.which & (1 << index++)) {
       List drop = d.c.resolve_protocol_member(argument.cadr(), "discard");
       if (drop) d.discards.push($!{ ${drop.car()}($argument); });

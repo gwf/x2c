@@ -35,7 +35,7 @@ static macro Stmt $fail.main_diagnostics_unwritable(Expr $diagnostics) =>
 static int _run_env(CliRequest request) {
   String wanted = NULL;
   if (request.inputs) wanted = request.inputs.car();
-  foreach (List row, _env_rows(request)) {
+  foreach (List row in _env_rows(request)) {
     String (name, value) = row;
     const char *text = value ? value : "";
     if (!wanted) printf("%s = %s\n", name, text);
@@ -94,7 +94,7 @@ static int _external_name(const char *name) {
 }
 
 static void _exec(String path, char **args) {
-  foreach (String (name, value), Compiler.command_environment())
+  foreach (String (name, value) in Compiler.command_environment())
     setenv(name, value, 1);
   args[0] = path;
   execv(path, args);

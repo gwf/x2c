@@ -1318,13 +1318,13 @@ List _tag_rows(void){
     while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
       group = Var_list_payload(_x2c_gensym_macro_cursor_output_1);
       {
-        Var row;
+        List row;
         List _x2c_gensym_macro_object_0 = group;
         List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
         Var _x2c_gensym_macro_cursor_output_0;
         while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
-          row = _x2c_gensym_macro_cursor_output_0;
-          Array_push(rows, row);
+          row = Var_list_payload(_x2c_gensym_macro_cursor_output_0);
+          Array_push(rows, List_var(row));
         }
 
       }

@@ -26,7 +26,7 @@ macro Stmt $report.raise_mutable_detail(Expr $site, Expr $type) =>
    share with its raiser. */
 meta static int _raise_immutable(Type type) {
   if (!type) return 0;
-  foreach (String name, %("Var" "String" "List" "Symbol" "Atom"))
+  foreach (String name in %("Var" "String" "List" "Symbol" "Atom"))
     if (type.is_named(name)) return 1;
   return type.numeric() != NULL;
 }
@@ -52,7 +52,7 @@ meta Code raise_lowering(Code node) {
     Code symbol = ((Code) code).convert(%("Symbol"));
     int changed = symbol != code, index = 0;
     Array converted = [];
-    foreach (Code detail, details) {
+    foreach (Code detail in details) {
       Code part = index++ & 1 ? _raise_value(detail) : detail;
       Code value = part.convert(%("Var"));
       if (value != part) changed = 1;

@@ -1070,15 +1070,15 @@ static Array _target_sources(Project p, ProjectTarget target){
   Array excluded = f7_sources____expand_patterns(p, target -> exclude, _25);
   Array kept = Array_new();
   {
-    Var path;
+    String path;
     Array _x2c_gensym_macro_object_7 = sources;
     int _x2c_gensym_macro_cursor_7 = 0;
     Var _x2c_gensym_macro_cursor_output_7;
     while(Array_try_next(_x2c_gensym_macro_object_7, &(_x2c_gensym_macro_cursor_7), &(_x2c_gensym_macro_cursor_output_7))){
-      path = _x2c_gensym_macro_cursor_output_7;
+      path = Var_as_string(_x2c_gensym_macro_cursor_output_7);
       {
-        if(!(Array_contains(excluded, path))) Array_push(kept, path);
-        else if(p -> command -> verbose) fprintf(stderr, "x2c: excluded %s from target %s\n", Var_string(path), target -> name);
+        if(!(Array_contains(excluded, String_var(path)))) Array_push(kept, String_var(path));
+        else if(p -> command -> verbose) fprintf(stderr, "x2c: excluded %s from target %s\n", path, target -> name);
       }
 
     }
@@ -1113,13 +1113,13 @@ static Array f7_sources____expand_patterns(Project p, List patterns, String owne
       {
         Array expanded = f7_sources____expand_pattern(p, pattern, owner);
         {
-          Var path;
+          String path;
           Array _x2c_gensym_macro_object_9 = expanded;
           int _x2c_gensym_macro_cursor_9 = 0;
           Var _x2c_gensym_macro_cursor_output_9;
           while(Array_try_next(_x2c_gensym_macro_object_9, &(_x2c_gensym_macro_cursor_9), &(_x2c_gensym_macro_cursor_output_9))){
-            path = _x2c_gensym_macro_cursor_output_9;
-            if(!(Array_contains(files, path))) Array_push(files, path);
+            path = Var_as_string(_x2c_gensym_macro_cursor_output_9);
+            if(!(Array_contains(files, String_var(path)))) Array_push(files, String_var(path));
           }
 
         }

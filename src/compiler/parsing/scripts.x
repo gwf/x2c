@@ -212,7 +212,7 @@ static Bytes _append_placed(Bytes stream, Token token, Token first) {
 static void _check_script_locals(Compiler c, List ast) {
   Map locals = _script_locals(ast);
   if (!locals.len()) return;
-  foreach (List node, ast) match (node)
+  foreach (List node in ast) match (node)
     case %(function ? (bind (binding ? ?(String function)) ?)
            (block *items)):
       if (function != "x2c_script" && function != "main")
@@ -221,12 +221,12 @@ static void _check_script_locals(Compiler c, List ast) {
 
 static Map _script_locals(List ast) {
   Map locals = {};
-  foreach (List node, ast) match (node)
+  foreach (List node in ast) match (node)
     case %(function ? (bind (binding ? "x2c_script") ?)
         ${$source_block_content(%(*items))}):
-      foreach (List item, items) match (item)
+      foreach (List item in items) match (item)
         case %(at ? (declare ? (bindings *bindings))):
-          foreach (List binding, bindings) match (binding)
+          foreach (List binding in bindings) match (binding)
             case %(!or (bind (binding ? ?(String name)) ?)
                        (op = (bind (binding ? ?(String name)) ?) ?)):
               locals[name] = 1;
@@ -234,8 +234,8 @@ static Map _script_locals(List ast) {
 }
 
 static void _check_local_uses(Compiler c, List items, Map locals) {
-  foreach (List item, items) match (item) case %(at ?origin ?statement):
-    foreach (Var name, locals.keys()) {
+  foreach (List item in items) match (item) case %(at ?origin ?statement):
+    foreach (String name in locals.keys()) {
       Var found;
       List bindings;
       int present = statement.list().try_search(

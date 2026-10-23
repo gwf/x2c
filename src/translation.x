@@ -99,7 +99,7 @@ static void _report_diagnostics(Compiler c) {
   if (c.diagnostics.printer) return;
   List entries = c.diagnostics();
   if (entries) report_suspend();
-  foreach (Var entry, entries) c.print_diagnostic(entry);
+  foreach (List entry in entries) c.print_diagnostic(entry);
 }
 
 static List _transform_ast(Compiler c, List ast) {
@@ -152,7 +152,7 @@ static void _print_conformance(Compiler c, String filename, Map globals) {
 }
 
 static void _print_ast(List ast) {
-  foreach (List node, _renumbered_bindings(ast))
+  foreach (List node in _renumbered_bindings(ast))
     printf("\n%s\n", _node_repr(node));
 }
 
@@ -171,7 +171,7 @@ static List _renumbered_bindings(List ast) {
         %(binding ${numbers[identity]} $spelling);
       continue;
     }
-    foreach (Var child, node.list().reverse()) pending.push(child);
+    foreach (Var child in node.list().reverse()) pending.push(child);
   }
   return Ast.replace_nodes(ast, replaced);
 }
@@ -230,7 +230,7 @@ int translate_request(
 static void _preflight(Translation &t) {
   CliRequest request = t.request;
   int shared = !request.inspects() && !t.unit_dirs, Map stems = {};
-  foreach (String input, request.inputs) {
+  foreach (String input in request.inputs) {
     CliRequest.require_input(input);
     if (!Path.is_x2c_source(input))
       $fail.main_input_not_x(input);
@@ -259,7 +259,7 @@ static void _stem_collision(
 static void _print_command(CliRequest request) {
   fprintf(stderr, "x2c: translate");
   fprintf(stderr, " --out-dir %s", request.out_dir);
-  foreach (String input, request.inputs) fprintf(stderr, " %s", input);
+  foreach (String input in request.inputs) fprintf(stderr, " %s", input);
   fputc('\n', stderr);
 }
 
@@ -269,7 +269,7 @@ static void _preprocessor_errors(String text) {
 
 static void _translate_serial(Translation &t) {
   int done = 0;
-  foreach (String input, t.request.inputs) {
+  foreach (String input in t.request.inputs) {
     if (t.progress) t.progress(t.context, input, 0);
     else report_progress(<translate>, done, t.total, input);
     _translate(t, input);
@@ -294,7 +294,7 @@ static void _report(Translation &t, unsigned long started_at) {
   if (!report_receipts()) return;
   String out_dir = t.request.out_dir;
   unsigned long long bytes = 0;
-  foreach (String input, t.request.inputs) {
+  foreach (String input in t.request.inputs) {
     String stem = Path.stem(input);
     bytes += Path.regular_bytes(%"$out_dir/$stem.c");
     bytes += Path.regular_bytes(%"$out_dir/$stem.h");
@@ -339,7 +339,7 @@ static int _translate_parallel(Translation &t) {
 static void _preload_modules(Translation &t) {
   List roots = t.request.package_roots();
   if (!roots) return;
-  foreach (String name, _package_names(t, roots).keys()) {
+  foreach (String name in _package_names(t, roots).keys()) {
     String root = NULL;
     if (!t.request.sources.package_entry(roots, name, root) ||
         Compiler.links_extension(name)) continue;
@@ -352,13 +352,13 @@ static void _preload_modules(Translation &t) {
    records, which include imports reached through a header. */
 static Map _package_names(Translation &t, List roots) {
   Map names = {};
-  foreach (String input, t.request.inputs) {
-    foreach (String name, _imported_packages(input)) names[name] = 1;
+  foreach (String input in t.request.inputs) {
+    foreach (String name in _imported_packages(input)) names[name] = 1;
     String depfile = %"${_output_dir(t, input)}/${Path.stem(input)}.d";
     String text = NULL;
     try text = Path.read_text(depfile);
     catch %((!or not-found io-fail) *): continue;
-    foreach (String dependency, translation_depfile_parse(text)) {
+    foreach (String dependency in translation_depfile_parse(text)) {
       String package = Compiler.package_directory(roots, dependency);
       if (package) names[Path.basename(package)] = 1;
     }
@@ -472,7 +472,7 @@ static void _start(Workers &w) {
 
 // A forked worker exits after its slice, or at the first unit that fails.
 static void _work(Translation &t, List slice) {
-  foreach (String input, slice) _translate(t, input);
+  foreach (String input in slice) _translate(t, input);
   Compiler.stop_meta_helper();
   _exit_worker(0);
 }

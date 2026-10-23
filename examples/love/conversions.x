@@ -29,7 +29,7 @@ int main(void) {
     $symbol_value
     $list_value
   );
-  foreach(Var item, mixed)
+  foreach(Var item in mixed)
     printf("mixed: %s %s\n", item.tag().str(), item);
 
   return 0;

@@ -2110,15 +2110,15 @@ List Compiler_transform(Compiler c, List ast){
     List items = Array_list(support);
     Array_clear(support);
     {
-      Var sibling;
+      List sibling;
       Iter _x2c_gensym_macro_iterator_0 = List_iter(f9_traversal____sequence(c, items, 0), &(struct Iter){
         int_var(0)
       }
       );
       Var _x2c_gensym_macro_item_0;
       while(Iter_try_next(_x2c_gensym_macro_iterator_0, &(_x2c_gensym_macro_item_0))){
-        sibling = _x2c_gensym_macro_item_0;
-        Array_push(generated, sibling);
+        sibling = Var_list_payload(_x2c_gensym_macro_item_0);
+        Array_push(generated, List_var(sibling));
       }
 
     }

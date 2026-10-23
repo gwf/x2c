@@ -462,7 +462,7 @@ exhausted cursor returns zero without changing `cursor` or `out`. The
 cells are immutable, so only releasing the owning pool invalidates a
 cursor.
 
-`foreach (Var item, lst)` compiles to this loop.
+`foreach (Var item in lst)` compiles to this loop.
 
 Source: `lib/list/traversal.x:53`
 

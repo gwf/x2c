@@ -54,7 +54,7 @@ Closes compile-time-only calls across later meta definitions.
 Retained group bodies hold the bound calls, including literal insertions.
 Select runtime definitions only after that relation is complete.
 
-Source: `src/meta-group/selection.x:62`
+Source: `src/meta-group/selection.x:63`
 
 <a id="Compiler.group_meta_function"></a>
 #### Compiler.group_meta_function
@@ -84,7 +84,7 @@ Source: `src/meta-group/selection.x:18`
 Returns why the group function `name` has no compile-time entry, from
 its type.
 
-Source: `src/meta-group/selection.x:283`
+Source: `src/meta-group/selection.x:284`
 
 <a id="Compiler.meta_calls_wait"></a>
 #### Compiler.meta_calls_wait
@@ -170,7 +170,7 @@ Source: `src/meta-group/loaded.x:56`
 Answers whether a definition has public native linkage.
 Main is excluded because its process entry needs a separate adapter.
 
-Source: `src/meta-group/selection.x:273`
+Source: `src/meta-group/selection.x:274`
 
 <a id="Compiler.refuse_meta_call"></a>
 #### Compiler.refuse_meta_call
@@ -180,7 +180,7 @@ Source: `src/meta-group/selection.x:273`
 Reports at `site` that the `meta` function `name` cannot run at compile
 time, and `why`.
 
-Source: `src/meta-group/selection.x:302`
+Source: `src/meta-group/selection.x:303`
 
 <a id="Compiler.refuse_record_meta_call"></a>
 #### Compiler.refuse_record_meta_call
@@ -191,7 +191,7 @@ Reports at `site` that the group function `name` cannot run at compile
 time when its result is a struct or union, which its type alone
 decides.
 
-Source: `src/meta-group/selection.x:310`
+Source: `src/meta-group/selection.x:311`
 
 <a id="Compiler.stage_meta_in_process"></a>
 #### Compiler.stage_meta_in_process

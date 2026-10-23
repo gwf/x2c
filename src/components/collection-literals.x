@@ -15,7 +15,7 @@ meta Code array_literal(Code code) {
   match (code) case $array_value(*items): {
     if (!items) return $!Array{ Array.new() };
     Array values = [];
-    foreach (Code item, items) {
+    foreach (Code item in items) {
       if (item.match(%(expr ? (composite (commas)))))
         item = $!Map{ Map.new() };
       values.push(%(expr ("Var") (var $item)));
@@ -33,8 +33,8 @@ meta Code map_literal(Code code) {
   match (code) case $map_value(*rows): {
     if (!rows) return $!Map{ Map.new() };
     Array values = [];
-    foreach (List row, rows)
-      foreach (Code item, row.cdr()) {
+    foreach (List row in rows)
+      foreach (Code item in row.cdr()) {
         if (item.match(%(expr ? (composite (commas)))))
           item = $!Map{ Map.new() };
         values.push(%(expr ("Var") (var $item)));

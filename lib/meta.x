@@ -466,7 +466,7 @@ List type_declaration_parts(List type) {
     reversed = reversed.cdr();
   }
   Array syntax = [];
-  foreach (Var item, reversed.reverse()) syntax.push(_modifier_syntax(item));
+  foreach (Var item in reversed.reverse()) syntax.push(_modifier_syntax(item));
   return %(${qualifiers.append(base)} (@{syntax.list_free()}));
 }
 
@@ -475,7 +475,7 @@ static Var _modifier_syntax(Var modifier) {
   match (modifier)
     case %(func ?(List parameters)): {
       Array params = [];
-      foreach (List parameter, parameters) {
+      foreach (List parameter in parameters) {
         List (base, modifiers) = type_declaration_parts(parameter);
         params.push(%(param $base (bind () $modifiers)));
       }

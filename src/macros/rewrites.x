@@ -155,7 +155,7 @@ static int _unit_bound(Var syntax) {
   match (syntax)
     case %((!or declaration-cache declaration-binding declaration-origin) *):
       return 1;
-  foreach (Var child, syntax.list()) if (_unit_bound(child)) return 1;
+  foreach (Var child in syntax.list()) if (_unit_bound(child)) return 1;
   return 0;
 }
 
@@ -184,7 +184,7 @@ module void _register_rewrite(Compiler c, RewriteRule rule) {
   if (c.rewrite_rules.try_get(rule.point, stored)) kinds = stored;
   else c.rewrite_rules[rule.point] = kinds = {};
   List rows = kinds.try_get(rule.kind, stored) ? stored.list() : NULL;
-  foreach (RewriteRule prior, rows)
+  foreach (RewriteRule prior in rows)
     if (prior.name == rule.name &&
         prior.matcher.shape == rule.matcher.shape &&
         prior.matcher.holes == rule.matcher.holes &&
@@ -192,7 +192,7 @@ module void _register_rewrite(Compiler c, RewriteRule rule) {
       return;
   Array ordered = [];
   int inserted = 0;
-  foreach (RewriteRule prior, rows) {
+  foreach (RewriteRule prior in rows) {
     if (!rule.builtin && prior.builtin && !inserted) {
       ordered.push(rule);
       inserted = 1;
@@ -217,7 +217,7 @@ List Compiler.marked_rewrite(
   Compiler c, Type aggregate, List source, Token site) {
   Var stored;
   if (!c.rewrite_rules.try_get(<member>, stored)) return NULL;
-  foreach (Var (mark, _), stored.map()) {
+  foreach (Var (mark, _) in stored.map()) {
     if (mark is not <symbol> || !c.sym.get(%(@aggregate $mark))) continue;
     List rewritten = c.rewrite(
       <member>, mark, source, <expression>, NULL, site);
@@ -298,7 +298,7 @@ static List _rewrite(
     return NULL;
   // Code that a shipped rule or the kernel writes is not source.
   int shipped = c.slot_watch && c.slot_watch.shipped;
-  foreach (RewriteRule rule, _rewrite_candidates(c, point, kind)) {
+  foreach (RewriteRule rule in _rewrite_candidates(c, point, kind)) {
     if (c.active_rewrites.contains(rule) || (shipped && !rule.builtin))
       continue;
     if (lower > 0 && rule.builtin && point == <function>) {
@@ -347,7 +347,7 @@ static Var _applied(
    in one of them applies the rule again. */
 static void _held_parts(List source, Symbol point, Array found) {
   if (point != <node>) {
-    foreach (Var part, source) _expression_nodes(part, found);
+    foreach (Var part in source) _expression_nodes(part, found);
     return;
   }
   List node;
@@ -396,7 +396,7 @@ static Var _kept_lowered(Var result, List source, Array parts) {
   match (result) case %(code-value "lowered" *): return result;
   Map kept = $auto({});
   kept[(void *) source] = Code.lowered(source, NULL);
-  foreach (List part, parts) kept[(void *) part] = Code.lowered(part, NULL);
+  foreach (List part in parts) kept[(void *) part] = Code.lowered(part, NULL);
   return Ast.replace_nodes(result, kept);
 }
 
@@ -514,7 +514,7 @@ static List _prepared(
   struct SlotWatch watch = {values.list(), &preparation};
   watch.outer = c.active_rewrites.cdr();
   watch.shipped = rule.builtin;
-  foreach (Var value, values) preparation.outputs.push(NULL);
+  foreach (List value in values) preparation.outputs.push(NULL);
   Effects before = _effects(c);
   List lowered;
   $let(c.slot_watch, &watch)
@@ -562,7 +562,7 @@ static Var _template(
   if (node is not <list> || node.is_nil()) return node;
   List syntax = node;
   match (syntax) case %(expr ?type ?content):
-    foreach (List value, sources)
+    foreach (List value in sources)
       if (value === syntax)
         return _capture_slot(c, syntax, type, content, values, refused);
   Var child;
@@ -575,7 +575,7 @@ static Var _capture_slot(
   int &refused) {
   match (content) case %(literal *): return value;
   Var shape = _slot_shape(c, content);
-  foreach (List prior, values) if (prior === value) shape = void;
+  foreach (List prior in values) if (prior === value) shape = void;
   if (shape is void) {
     refused = 1;
     return value;
@@ -620,7 +620,7 @@ static int _carries(Var shape) {
   match (shape)
     case %((!or code-value macro-invoke "x2c.template" "x2c.quoted") *):
       return 1;
-  foreach (Var child, shape.list()) if (_carries(child)) return 1;
+  foreach (Var child in shape.list()) if (_carries(child)) return 1;
   return 0;
 }
 
@@ -630,10 +630,10 @@ static int _carries(Var shape) {
    a slot a context that lowering the value alone would not. */
 static List _skeleton(List lowered, Array outputs) {
   Array found = $auto([]);
-  foreach (Var output, outputs) found.push(0);
+  foreach (List output in outputs) found.push(0);
   int refused = 0;
   List skeleton = _marked(lowered, outputs, found, refused);
-  foreach (Var count, found) if (count.int() != 1) refused = 1;
+  foreach (int count in found) if (count != 1) refused = 1;
   return refused ? NULL : skeleton;
 }
 
@@ -658,8 +658,8 @@ static List _fill_values(Compiler c, List prepared, Array values) {
   (List skeleton, List order) = prepared;
   Array lowered = $auto(values.copy());
   $let(c.active_rewrites, c.active_rewrites.cdr())
-    foreach (Var slot, order)
-      lowered[slot.int()] = c.normalize(values[slot.int()]);
+    foreach (int slot in order)
+      lowered[slot] = c.normalize(values[slot]);
   return _filled(skeleton, lowered);
 }
 

@@ -16,7 +16,7 @@ List Macro_apply(Macro t, List values) =>
    parameter takes every remaining argument as one List. */
 static List _group(Macro t, List values) {
   Array grouped = [];
-  foreach (List hole, t.assoc(<parameters>).list()) {
+  foreach (List hole in t.assoc(<parameters>).list()) {
     int sequence = hole.assoc(<sequence>);
     /* One List of syntax or of numbers and Strings passes the whole
        sequence, as `call(f, items)`; the compiler lifts each scalar. */
@@ -100,7 +100,7 @@ module Var _expr_value(Var value) {
 
 module List _expr_values(List values) {
   Array lifted = [];
-  foreach (Var item, values) lifted.push(_expr_value(item));
+  foreach (Var item in values) lifted.push(_expr_value(item));
   return lifted.list_free();
 }
 

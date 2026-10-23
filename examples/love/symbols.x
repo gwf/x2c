@@ -18,7 +18,7 @@ state = stages[stages.index(state) + 1];
 assert(state == running);
 
 // Iterate in declared order and recover each name's text.
-foreach (Symbol stage, stages)
+foreach (Symbol stage in stages)
   printf("%d: %s\n", stages.index(stage), stage.str());
 return 0;
 }

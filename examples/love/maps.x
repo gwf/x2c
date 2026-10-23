@@ -18,7 +18,7 @@ if (stock.try_get("sugar", sugar))
   puts(%"sugar is stocked: $sugar remaining");
 
 // Visit each key and value; traversal order is unspecified.
-foreach (Var (item, quantity), stock)
+foreach ((String item, int quantity) in stock)
   puts(%"$item: $quantity");
 return 0;
 }

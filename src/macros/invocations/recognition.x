@@ -39,7 +39,7 @@ module void _record_compile_time_effect(Compiler c, List row, Token start) {
     them, even if a later macro definition uses the same name.
 */
 void Compiler.install_compile_time_effects(Compiler c, List rows) {
-  foreach (List row, rows) match (row) {
+  foreach (List row in rows) match (row) {
     case %(compile-time effects *effects):
       c.install_compile_time_effects(effects);
     case %(compile-time macrodef ?definition): {

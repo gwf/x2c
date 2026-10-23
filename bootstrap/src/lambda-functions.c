@@ -350,8 +350,8 @@ static Map _lambda_shared(List params, List items){
         for(List _x2c_gensym_macro_cursor_21 = node;  List_truth(_x2c_gensym_macro_cursor_21);  _x2c_gensym_macro_cursor_21 = List_cdr(_x2c_gensym_macro_cursor_21)) if(Var_is_row(List_car(_x2c_gensym_macro_cursor_21), 9, 7, 4)) Array_push(_x2c_gensym_macro_pending_2, List_car(_x2c_gensym_macro_cursor_21));
       }
       {
-        Var binding, type;  Map _x2c_gensym_macro_object_19 = shared;  unsigned _x2c_gensym_macro_cursor_22 = 0;  Var _x2c_gensym_macro_cursor_output_19;  Var _x2c_gensym_macro_cursor_output_20;  while(Map_try_next(_x2c_gensym_macro_object_19, &(_x2c_gensym_macro_cursor_22), &(_x2c_gensym_macro_cursor_output_19), &(_x2c_gensym_macro_cursor_output_20))){
-          binding = _x2c_gensym_macro_cursor_output_19;  type = _x2c_gensym_macro_cursor_output_20;  if(Map_contains(declared, binding)) Map_setindex(cells, binding, List_var(cons(_54, cons(type, NULL))));
+        List binding;  Type type;  Map _x2c_gensym_macro_object_19 = shared;  unsigned _x2c_gensym_macro_cursor_22 = 0;  Var _x2c_gensym_macro_cursor_output_19;  Var _x2c_gensym_macro_cursor_output_20;  while(Map_try_next(_x2c_gensym_macro_object_19, &(_x2c_gensym_macro_cursor_22), &(_x2c_gensym_macro_cursor_output_19), &(_x2c_gensym_macro_cursor_output_20))){
+          binding = Var_list_payload(_x2c_gensym_macro_cursor_output_19);  type = Var_list_payload(_x2c_gensym_macro_cursor_output_20);  if(Map_contains(declared, List_var(binding))) Map_setindex(cells, List_var(binding), List_var(cons(_54, cons(List_var(type), NULL))));
         }
 
       }

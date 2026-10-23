@@ -465,7 +465,7 @@ int main(void) {
   Feed feed = Feed.open(File.open("headlines.xml", "r").string_close());
   defer feed.close();
 
-  foreach(String title, feed.titles())
+  foreach(String title in feed.titles())
     printf("%s", %"- $title\n");
   return 0;
 }

@@ -52,7 +52,8 @@ int Compiler.meta_reaches_compile_time(Compiler c, Var node) {
              Compiler.supplies_native_meta(spelling);
     }
   }
-  foreach (Var child, syntax) if (c.meta_reaches_compile_time(child)) return 1;
+  foreach (Var child in syntax)
+    if (c.meta_reaches_compile_time(child)) return 1;
   return 0;
 }
 
@@ -63,7 +64,7 @@ void Compiler.finish_meta_functions(Compiler c, Array nodes) {
   int grew = 1;
   while (grew) {
     grew = 0;
-    foreach (List entry, c.meta_group)
+    foreach (List entry in c.meta_group)
       match (entry) case %(function ?fn ?(String name) ?):
         if (!(name in c.meta_comptime) && c.meta_reaches_compile_time(fn)) {
           c.record_comptime(name);
@@ -71,11 +72,11 @@ void Compiler.finish_meta_functions(Compiler c, Array nodes) {
         }
   }
   int check_calls = 0;
-  foreach (List entry, c.meta_group)
+  foreach (List entry in c.meta_group)
     match (entry) case %(function ? ?(String name) ?):
       if (name in c.meta_comptime) check_calls = 1;
   int retained = 0;
-  foreach (List node, nodes) {
+  foreach (List node in nodes) {
     if (c.meta_is_comptime_only(node)) continue;
     if (check_calls) _check_runtime_meta_calls(c, node);
     nodes[retained++] = node;
@@ -118,9 +119,9 @@ module Array _units(Compiler c) {
    pass has read none. */
 static Array _runtime_includes(Compiler c, String lib) {
   Array ordered = [];
-  foreach (String header, %("x2c.x" "meta.x"))
+  foreach (String header in %("x2c.x" "meta.x"))
     ordered.push(%(preproc ${%"#include \"$header\""}));
-  foreach (Var (path, hash), c.deps) {
+  foreach ((String path, Var hash) in c.deps) {
     if (hash is <string> && String.startswith(hash, "search:")) continue;
     if (c.canonical_path(path) == c.canonical_path(c.filename)) continue;
     String dependency = path;
@@ -138,7 +139,7 @@ static Array _runtime_includes(Compiler c, String lib) {
 
 static void _source_order(Compiler c, Array ordered, String lib) {
   Map placeholders = _placeholders(c);
-  foreach (Var unit, c.unit_nodes) {
+  foreach (List unit in c.unit_nodes) {
     Var node = _group_include(c, unit, lib);
     if (node is not void) ordered.push(_uninitialized(node, placeholders));
   }
@@ -148,7 +149,7 @@ static void _source_order(Compiler c, Array ordered, String lib) {
    the translation, by address. */
 static Map _placeholders(Compiler c) {
   Map placeholders = {};
-  foreach (List entry, c.meta_group)
+  foreach (List entry in c.meta_group)
     match (entry) case %(later ?(List placeholder)):
       placeholders[%"${(long) (void *) placeholder}"] = 1;
   return placeholders;
@@ -180,7 +181,7 @@ static Var _uninitialized(Var node, Map placeholders) {
   match (node)
     case %(declare ?spec (bindings *bindings)): {
       Array bare = [];
-      foreach (List binding, bindings) {
+      foreach (List binding in bindings) {
         match (binding) case %(op = ?bound ?): binding = bound;
         bare.push(binding);
       }
@@ -194,7 +195,7 @@ static Var _uninitialized(Var node, Map placeholders) {
 static int _holds(Var node, Map placeholders) {
   if (node is not <list>) return 0;
   if (%"${(long) (void *) (List) node}" in placeholders) return 1;
-  foreach (Var child, (List) node) if (_holds(child, placeholders)) return 1;
+  foreach (Var child in (List) node) if (_holds(child, placeholders)) return 1;
   return 0;
 }
 
@@ -204,20 +205,20 @@ static int _holds(Var node, Map placeholders) {
 static Map _roots(Compiler c, Array ordered) {
   Map present = {}, reached = {};
   Var identity, String name;
-  foreach (List item, ordered)
+  foreach (List item in ordered)
     if (_function_identity(item, identity, name)) {
       present[identity] = 1;
       if (c.meta_build && c.public_native_function(item, name))
         reached[identity] = 1;
     }
-  foreach (List entry, c.meta_group)
+  foreach (List entry in c.meta_group)
     match (entry) case %(function ?fn *): {
       Ast.collect_binding_references(fn, reached);
       if (_function_identity(fn, identity, name) && !(identity in present))
         ordered.push(fn);
       reached[identity] = 1;
     }
-  foreach (List item, ordered)
+  foreach (List item in ordered)
     if (!_function_identity(item, identity, name))
       Ast.collect_binding_references(item, reached);
   return reached;
@@ -231,7 +232,7 @@ static void _close(Array ordered, Map reached) {
   int grew = 1;
   while (grew) {
     grew = 0;
-    foreach (List item, ordered)
+    foreach (List item in ordered)
       if (_function_identity(item, identity, name) &&
           identity in reached && !(identity in expanded)) {
         expanded[identity] = 1;
@@ -247,7 +248,7 @@ static void _close(Array ordered, Map reached) {
 static Array _reachable(Compiler c, Array ordered, Map reached) {
   Array units = [];
   Var identity, String name;
-  foreach (List item, ordered) {
+  foreach (List item in ordered) {
     if (!_function_identity(item, identity, name) ||
         (identity in reached && (name != "main" || c.load_source)))
       units.push(item);
@@ -282,7 +283,7 @@ int Compiler.public_native_function(
     its type. */
 String Compiler.meta_call_missing(Compiler c, String name) {
   Type type = NULL;
-  foreach (List entry, c.meta_group)
+  foreach (List entry in c.meta_group)
     match (entry) case %(function ? ?(String target) ?(Type own)):
       if (target == name) type = own;
   Type result = type ? type.apply() : NULL;
@@ -315,7 +316,7 @@ void Compiler.refuse_record_meta_call(Compiler c, String name, Token site) {
 /* Why the group cannot link, or NULL: a function it calls is a bodyless
    `meta` prototype that nothing supplies. */
 module String _unbound(Compiler c) {
-  foreach (List entry, c.meta_group)
+  foreach (List entry in c.meta_group)
     match (entry) case %(function ?fn *): {
       String name = _unbound_callee(c, fn);
       if (name) return %"no binding for $name";
@@ -337,7 +338,7 @@ static String _unbound_callee(Compiler c, Var node) {
             !c.macro_lisp.try_get(spelling, bound) &&
             !c.bind_native_meta(spelling)) ? spelling : NULL;
   }
-  foreach (Var child, (List) node) {
+  foreach (Var child in (List) node) {
     String name = _unbound_callee(c, child);
     if (name) return name;
   }

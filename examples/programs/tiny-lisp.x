@@ -35,9 +35,9 @@ Var E(Var x,Map e){
     case %(?fn *args):match(E(fn,e)){
       case %("lambda" ?(List p) ?body):{
         if(p.len()!=args.len())return F();
-        Array v=$auto([]);foreach(Var a,args)v.push(E(a,e));
+        Array v=$auto([]);foreach(Var a in args)v.push(E(a,e));
         Map d=$auto(e.copy());
-        foreach(Var a,v){if(p.car() is not String)return F();d[p.car()]=a;p=p.cdr();}
+        foreach(Var a in v){if(p.car() is not String)return F();d[p.car()]=a;p=p.cdr();}
         return E(body,d);
       }
     }

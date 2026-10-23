@@ -36,7 +36,7 @@ module void _check_dynamic_target(
       return _check_dynamic_target(c, inner, origin);
   }
   Type type = c.sym.normalize_declared_type(target.cadr());
-  foreach (Var part, type) {
+  foreach (Var part in type) {
     if (part is not <symbol> || !part.symbol().is_type_qualifier()) break;
     if (part == <const>)
       $fail.expressions_dynamic_const(c, origin);
@@ -306,7 +306,7 @@ module List _member(
 module void _report_method_ambiguity(
   Compiler c, Type receiver, String member, List packages, Token origin) {
   Array notes = [];
-  foreach (String package, packages) notes.push(%"package: '$package'");
+  foreach (String package in packages) notes.push(%"package: '$package'");
   String type = _member_type_name(receiver);
   $fail.expressions_method_packages(
     c, origin, type, member, notes.list_free());
@@ -333,7 +333,7 @@ List Compiler.postfix_completions(
   _completion_fields(c, fields, seen, names, {});
   if (access == <.>) _completion_methods(c, receiver, seen, names);
   names.sort();
-  foreach (String name, names) {
+  foreach (String name in names) {
     List resolution = c.resolve_postfix_member(receiver, %($name), access, 1);
     match (resolution) {
       case %((!or field method) ? ?): accepted.push(name);
@@ -348,7 +348,7 @@ static void _completion_fields(
   if (!type || !type.is_aggregate_tag() || type in visited) return;
   visited[type] = 1;
   List order = c.sym.field_order(type);
-  foreach (List row, order ? order.cdr() : NULL) {
+  foreach (List row in order ? order.cdr() : NULL) {
     String name = row.car();
     if (name) _completion_add(seen, names, name);
     else _completion_fields(c, row.cadr(), seen, names, visited);
@@ -363,7 +363,7 @@ static void _completion_methods(
     if (_method_owner(type)) {
       String owner = type.base_type().car();
       _completion_owner_methods(c, %"${owner}_", seen, names);
-      foreach (String name, c.protocol_member_names(type))
+      foreach (String name in c.protocol_member_names(type))
         _completion_add(seen, names, name);
     }
     type = _next_method_type(c, type, hops, tagged);
@@ -374,14 +374,13 @@ static void _completion_methods(
    package, among the visible symbols. */
 static void _completion_owner_methods(
   Compiler c, String prefix, Map seen, Array names) {
-  foreach (List row, c.sym.visible_symbols()) {
+  foreach (List row in c.sym.visible_symbols()) {
     (String spelling, Var raw) = row;
     if (raw is not <list>) continue;
     Type signature = raw;
     if (signature.is_function() && spelling.startswith(prefix))
       _completion_add(seen, names, spelling.remove_prefix(prefix));
-    foreach (Var (raw_package, _), c.package_roots) {
-      String package = raw_package;
+    foreach (String (package, _) in c.package_roots) {
       String imported = %"${package}__$prefix";
       if (signature.is_function() && spelling.startswith(imported))
         _completion_add(seen, names, spelling.remove_prefix(imported));

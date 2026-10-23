@@ -29,7 +29,7 @@ meta static String _delegate_type_name(Type type) {
 /* `TYPE.FIELD...`, then `member` when there is one. */
 meta static String _delegate_path(Type type, List fields, String member) {
   Array parts = [_delegate_type_name(type)];
-  foreach (String field, fields) parts.push(field);
+  foreach (String field in fields) parts.push(field);
   if (member) parts.push(member);
   return ".".join(parts.list_free());
 }
@@ -39,7 +39,7 @@ meta static String _delegate_path(Type type, List fields, String member) {
 meta static void _delegate_fail_packages(
   Type outer, Type type, String member, List fields, List packages) {
   Array notes = [%"delegate path: ${_delegate_path(outer, fields, NULL)}"];
-  foreach (String package, packages) notes.push(%"package: '$package'");
+  foreach (String package in packages) notes.push(%"package: '$package'");
   String method = %"${_delegate_type_name(type)}.$member";
   x2c_diagnostic_fail_at(
     NULL, <type>,
@@ -61,7 +61,7 @@ meta static void _delegate_search(
     return;
   }
   seen = cons(aggregate, seen);
-  foreach (List row, aggregate.marked_fields(<delegate>)) {
+  foreach (List row in aggregate.marked_fields(<delegate>)) {
     String name = row.car();
     Type type = receiver.resolve_member(name, 0).caddr();
     List path = cons(name, reverse);
@@ -81,7 +81,7 @@ meta static void _delegate_search(
 meta static void _delegate_fail_ambiguous(
   Type outer, String member, List paths) {
   Array notes = [];
-  foreach (List path, paths) {
+  foreach (List path in paths) {
     String spelling = Code.binding_spelling(path.cadr());
     String description = _delegate_path(outer, path.car(), member);
     notes.push(%"delegate path: $description -> $spelling");
@@ -127,7 +127,7 @@ meta Code delegate_member(Code code) {
     List fields = _delegate_fields(receiver.cadr(), name);
     if (!fields) return code;
     Code callee = receiver;
-    foreach (String step, fields.append(%($name)))
+    foreach (String step in fields.append(%($name)))
       callee = %(expr () (op . $callee ($step)));
     return %(expr () (call $callee (args @arguments)));
   }

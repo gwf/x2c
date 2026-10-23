@@ -220,8 +220,8 @@ static List _bind_parameters(Compiler c, List values) {
   c.sym.push_new_scope();
   {
     defer c.params = c.sym.pop_scope();
-    foreach (Var value, values)
-      foreach (Var row, c.evaluate_macro_rows(value)) match (row) {
+    foreach (Var value in values)
+      foreach (Var row in c.evaluate_macro_rows(value)) match (row) {
         case %(...): parameters.push(row);
         case %(param ?base (!set ?declarator (bind ? ?))):
           parameters.push(

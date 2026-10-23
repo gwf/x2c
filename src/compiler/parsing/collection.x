@@ -47,7 +47,7 @@ static void _shallow_parse_loop(Compiler c) {
   }
   /* Definitions after the last declaration, as before an include, still
      define macros for the segments that follow. */
-  foreach (List directive, c.leading_preproc())
+  foreach (List directive in c.leading_preproc())
     c.note_object_macro(directive.cadr());
   c.shallow = 0;
 }

@@ -11,7 +11,7 @@ module int _expression_holds_landing(List body) {
       continue;
     }
     case %(landing ? ?rows): {
-      foreach (List row, rows)
+      foreach (List row in rows)
         match (row) case %((!or outer region) ? ?part):
           if (_expression_holds_landing(part)) return 1;
       continue;
@@ -40,7 +40,7 @@ module void _collect_writes(Preserve &p, List body) {
       case %(function *): continue;
       case %(defer ?body ? ? ? ?written *): {
         if (inside)
-          foreach (List binding, written) {
+          foreach (List binding in written) {
             String captured = Ast.binding_spelling(binding);
             if (captured) p.names[captured] = 1;
           }
@@ -49,7 +49,7 @@ module void _collect_writes(Preserve &p, List body) {
         continue;
       }
       case %(landing ? ?rows): {
-        foreach (List row, rows)
+        foreach (List row in rows)
           match (row) case %((!or outer region) ? ?part): {
             pending.push(part);
             flags.push(1);
@@ -57,7 +57,7 @@ module void _collect_writes(Preserve &p, List body) {
         continue;
       }
     }
-    foreach (Var child, node) {
+    foreach (Var child in node) {
       pending.push(child);
       flags.push(inside);
     }
@@ -75,7 +75,7 @@ static void _write(Preserve &p, List node) {
   Var operand = _changed_operand(p.c, node);
   if (!operand) {
     match (node) case %(call ? (args *arguments)):
-      foreach (Var argument, arguments) {
+      foreach (Var argument in arguments) {
         String addressed = Ast.addressed_identifier(argument);
         if (addressed) p.escaped[addressed] = 1;
       }
@@ -103,7 +103,7 @@ static Var _changed_operand(Compiler c, List node) {
       Type native = c.sym.resolve_numeric_type(target.list().cadr());
       if (native && helper == native.var_numeric_update_helper())
         return target;
-      foreach (Var (key, value), c.protocol_helpers)
+      foreach (Var (key, value) in c.protocol_helpers)
         match (key)
           case %("protocol-update-helper" *):
             if (value == helper) return target;
@@ -159,7 +159,7 @@ module Var _preserve_locals(Preserve &p, Var value) {
    right after its declaration; one declared anywhere else is qualified. */
 static List _block(Preserve &p, List statements) {
   Array output = [];
-  foreach (Var statement, statements) {
+  foreach (List statement in statements) {
     int origin = 0, Var inner = statement;
     match (inner) case %(at ?(int anchor) ?wrapped): {
       origin = anchor;
@@ -191,11 +191,11 @@ static void _split(
   if (_declares_name(p, bindings) || _declares_pointee(p, bindings)) {
     Symbol head = declaration.car();
     Array split = [];
-    foreach (List binding, bindings.cdr())
+    foreach (List binding in bindings.cdr())
       split.push(%($head $type (bindings $binding)));
     parts = split.list_free();
   }
-  foreach (List part, parts) {
+  foreach (List part in parts) {
     List one = _declaration(p, part, p.escaped);
     output.push(origin ? %(at $origin $one) : one);
   }
@@ -213,7 +213,7 @@ static List _declaration(Preserve &p, List declaration, Map escaped) {
       !(<volatile> in type.type().flatten_all()))
     type = cons(<volatile>, type);
   Array preserved = [];
-  foreach (List binding, bindings.cdr())
+  foreach (List binding in bindings.cdr())
     match (binding) {
       case %(op = ?bind ?value):
         preserved.push(
@@ -237,7 +237,7 @@ static List _binding(Preserve &p, List bind, Map escaped) {
 }
 
 static int _declares_name(Preserve &p, List bindings) {
-  foreach (List binding, bindings.cdr())
+  foreach (List binding in bindings.cdr())
     match (binding)
       case $source_declarator_row(%(?name ?)): {
         String spelling = Ast.binding_spelling(name);
@@ -252,7 +252,7 @@ static int _declares_name(Preserve &p, List bindings) {
    pointer assigned after its declaration; an initializer that takes the
    address directly says the same thing on its own. */
 static int _declares_pointee(Preserve &p, List bindings) {
-  foreach (List binding, bindings.cdr()) {
+  foreach (List binding in bindings.cdr()) {
     List declarator = binding;
     match (binding) case %(op = ?bind ?value): {
       String addressed = Ast.addressed_identifier(value);
@@ -297,7 +297,7 @@ static List _escape_loop(Preserve &p, List loop) {
    `sigsetjmp` and the raise included, reads and writes the local. */
 static void _escape_declared(Preserve &p, Array output, List binds) {
   Compiler c = p.c;
-  foreach (List bind, binds)
+  foreach (List bind in binds)
     match (bind)
       case $source_declarator_row(%(?name ?)): {
         String spelling = Ast.binding_spelling(name);
@@ -314,7 +314,7 @@ static void _escape_declared(Preserve &p, Array output, List binds) {
 module List _escape_parameters(Preserve &p, List body, List bindings) {
   Array output = [];
   match (bindings) case %(bind ? ((fnmod (params *parameters)) *)):
-    foreach (List parameter, parameters)
+    foreach (List parameter in parameters)
       match (parameter) case %(param ? ?bind):
         _escape_declared(p, output, %($bind));
   return p.c.prepend_setup(body, output.list_free());

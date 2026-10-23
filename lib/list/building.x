@@ -38,7 +38,7 @@ List Array.list_free(Array arr) {
 Array List.array(List lst) {
   Array output = [], result = NULL;
   defer if (result == NULL) output.free();
-  foreach (Var value, lst) output.push(value);
+  foreach (Var value in lst) output.push(value);
   return result = output;
 }
 
@@ -51,7 +51,7 @@ Array List.array(List lst) {
 */
 meta native List Map.list(Map map) {
   Array pairs = [];
-  foreach (Var (key, value), map) pairs.push(%($key $value));
+  foreach (Var (key, value) in map) pairs.push(%($key $value));
   return pairs.list_free();
 }
 
@@ -63,7 +63,7 @@ meta native List Map.list(Map map) {
 */
 meta native List Iter.list(Iter iter) {
   Array values = $auto([]);
-  foreach (Var item, iter) values.push(item);
+  foreach (Var item in iter) values.push(item);
   return values;
 }
 
@@ -145,6 +145,6 @@ static List _list_va(unsigned n, va_list ap) {
 */
 Self List.reverse(Self lst) {
   List rev = NULL;
-  foreach (Var value, lst) rev = cons(value, rev);
+  foreach (Var value in lst) rev = cons(value, rev);
   return rev;
 }

@@ -132,7 +132,7 @@ static void _commit_export(Context c) {
   if (c.exported == NULL) return;
   Scope *destination = c.destination_scope;
   if (!*destination) *destination = Scope.new();
-  foreach (Var (key, value), c.exported) {
+  foreach (Var (key, value) in c.exported) {
     if (value.is_wide()) {
       if (!_scheduled_owner(c, value.wide_owner()))
         value.move_wide_to(destination);
@@ -145,7 +145,7 @@ static void _commit_export(Context c) {
       else Scope.move(allocation, destination);
     }
   }
-  foreach (Var key, c.exported.keys()) {
+  foreach (Var key in c.exported.keys()) {
     if (key is not <scope>) continue;
     Scope storage = key;
     if (!_scheduled_owner(c, storage.parent()))

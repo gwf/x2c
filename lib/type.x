@@ -147,11 +147,11 @@ Type Type.qualify(Type type, Type source) {
   if (source.car() is not <symbol> ||
       !source.car().symbol().is_type_qualifier()) return type;
   Array out = [];
-  foreach (Var item, source) {
+  foreach (Var item in source) {
     if (item is not <symbol> || !item.symbol().is_type_qualifier()) break;
     out.push(item);
   }
-  foreach (Var item, type) out.push(item);
+  foreach (Var item in type) out.push(item);
   return out.list_free();
 }
 
@@ -233,7 +233,7 @@ static Type _canonical(Type type, int keep_qualifiers) {
   while (rest && _kept(rest.car(), keep_qualifiers)) rest = rest.cdr();
   if (!rest) return type;
   Array out = [];
-  foreach (Var item, type) if (_kept(item, keep_qualifiers)) out.push(item);
+  foreach (Var item in type) if (_kept(item, keep_qualifiers)) out.push(item);
   return out.list_free();
 }
 
@@ -342,7 +342,7 @@ static typedef struct Specifiers {
 */
 Type Type.scalar(Type t) {
   Specifiers s = { 0 };
-  foreach (Var item, t)
+  foreach (Var item in t)
     if (item is not <symbol> || !_add(s, item)) return NULL;
   return _spelling(s);
 }

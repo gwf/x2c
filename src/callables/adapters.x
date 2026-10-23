@@ -221,7 +221,7 @@ List Compiler.context_func_adapter(Compiler c, Type type, List target) {
 
 static void _require_func_readers(
   Compiler c, Type diagnostic_type, Type source_type) {
-  foreach (String helper_name,
+  foreach (String helper_name in
            %("x2c_func_value_argument"
              "x2c_func_declared_reference_argument")) {
     Type helper_type = NULL;
@@ -240,7 +240,7 @@ static List _func_argument_locals(
     c, diagnostic_type, types, $!Func{ $fn_binding },
     $!(const FuncArg *){ $argv_binding });
   Array locals = [];
-  foreach (List read, reads) {
+  foreach (List read in reads) {
     (Type storage_type, List value) = read;
     List binding = names.car();
     names = names.cdr();
@@ -267,7 +267,7 @@ static List _func_reads(
   };
   Array reads = [];
   int index = 0;
-  foreach (Type type, types) {
+  foreach (Type type in types) {
     Type storage_type = NULL;
     List value = _read(readers, type, index++, storage_type);
     reads.push(%($storage_type $value));
@@ -388,7 +388,8 @@ List Compiler.func_signature(Compiler c, Type type) {
   Type result = NULL;
   type.function_parts(params, result);
   Array declared = [];
-  foreach (List parameter, params) declared.push(parameter.type().declared());
+  foreach (List parameter in params)
+    declared.push(parameter.type().declared());
   List parameter_types = params ? declared.list_free() : %((void));
   Type declared_result = result.declared();
   return %((func $parameter_types) @declared_result);
@@ -428,7 +429,7 @@ static List _named_decl_params(List types, List names) {
 }
 
 module int _typed_params_variadic(List params) {
-  foreach(Var value, params) {
+  foreach(Var value in params) {
     if (value == <...>) return 1;
     match (value) case %(...): return 1;
   }

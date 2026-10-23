@@ -185,9 +185,9 @@ module void _add_native_module(String path, Map (*entry)(void)) {
     native_modules[path] = targets;
   }
   path.try_own();
-  foreach (Var (name, target), targets) {
-    name.string().try_own();
-    ((Func) target.pointer()).signature().try_own();
+  foreach ((String name, Func target) in targets) {
+    name.try_own();
+    target.signature().try_own();
   }
 }
 

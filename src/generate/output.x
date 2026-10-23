@@ -104,13 +104,13 @@ List Compiler.place_source_prelude(
   (void) c;
   Array out = [];
   int prelude = _anchors(source, 0).function, position = 0;
-  foreach (List node, source) {
+  foreach (List node in source) {
     if (position++ == prelude)
-      foreach (List declaration, declarations) out.push(declaration);
+      foreach (List declaration in declarations) out.push(declaration);
     out.push(node);
   }
   if (prelude < 0)
-    foreach (List declaration, declarations) out.push(declaration);
+    foreach (List declaration in declarations) out.push(declaration);
   return out.list_free();
 }
 
@@ -118,7 +118,7 @@ List Compiler.place_source_prelude(
 static Anchors _anchors(List source, int errors) {
   Anchors at = {-1, -1};
   int position = 0, depth = 0, opening = 0;
-  foreach (List item, source) {
+  foreach (List item in source) {
     int here = depth ? opening : position;
     if (at.function < 0 && _is_function(item)) at.function = here;
     if (errors && at.error < 0 && _needs_errors(item)) at.error = here;
@@ -156,7 +156,7 @@ static int _needs_errors(List item) {
 
 static List _vertical_spacing(List code) {
   Array out = [];
-  foreach (Var node, code) _push_line(out, node);
+  foreach (List node in code) _push_line(out, node);
   return out.list_free();
 }
 
@@ -174,7 +174,7 @@ static List _include_guard(Compiler c, List content) {
 }
 
 static int _has_runtime_include(List content) {
-  foreach (List node, content) match (node) case %(preproc ?(String text)): {
+  foreach (List node in content) match (node) case %(preproc ?(String text)): {
     int angle = 0;
     if (Compiler.preproc_include_target(text, angle) == "x2c.x") return 1;
   }
@@ -212,11 +212,11 @@ static List _source_unit(Compiler c, List content) {
     c.needs_exception ? _include_directive("exception.h") : NULL;
   Array lines = [];
   int position = 0;
-  foreach (List node, content) {
+  foreach (List node in content) {
     if (position == at.error)
-      foreach (List include, error) _push_line(lines, include);
+      foreach (List include in error) _push_line(lines, include);
     if (position++ == at.function)
-      foreach (List include, exception) _push_line(lines, include);
+      foreach (List include in exception) _push_line(lines, include);
     _push_line(lines, _runtime_entry(c, node));
   }
   return %(@{_banner()} (preproc "#define __GUARD_0x${guard}__") @runtime

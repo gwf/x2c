@@ -53,7 +53,7 @@ void Error.initialize_raw(void) {
   state.policy = {};
   Scope.pop();
   x2c_error_runtime_ready = 1;
-  foreach (Symbol code, error_nonreturning_causes)
+  foreach (Symbol code in error_nonreturning_causes)
     Error.policy_set(code, <abort>);
 }
 

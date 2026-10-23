@@ -48,7 +48,7 @@ inline Var  Var.caddr(Var var)     => car(cdr(cdr(var)));
     cells are immutable, so only releasing the owning pool invalidates a
     cursor.
 
-    `foreach (Var item, lst)` compiles to this loop.
+    `foreach (Var item in lst)` compiles to this loop.
 */
 inline int List.try_next(List lst, List &?cursor, Var &?out) {
   if (!cursor) return 0;
@@ -153,7 +153,7 @@ Var List.get(List list, Var key) {
     both return `void`, so the two cases look the same here.
 */
 Var List.assoc(List list, Var key) {
-  foreach (List pair, list) {
+  foreach (List pair in list) {
     if (!pair) continue;
     Var (pair_key, value) = pair;
     if (pair_key == key) return value;

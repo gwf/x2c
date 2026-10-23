@@ -86,11 +86,11 @@ static void _cases(void) {
   _case("raw-macro-operand-capture",
         "(def m (macro (form) form)) "
         "(def f ((lambda (x) (lambda () (m x))) 42)) (f)");
-  foreach (String name, %("quote" "quasiquote"))
+  foreach (String name in %("quote" "quasiquote"))
     _case(%"future-$name-capture",
           %"(def make lambda) (def f ((make (x) (make () ($name x))) 42)) " +
           %"(def $name (make (v) v)) (f)");
-  foreach (String name, %("lambda" "macro"))
+  foreach (String name in %("lambda" "macro"))
     _case(%"future-$name-capture",
           %"(def make lambda) (def f ((make (x) (make () ($name () x))) 42)) " +
           %"(def $name (make (params body) body)) (f)");
@@ -117,7 +117,7 @@ static void _cases(void) {
   _case("quasiquote-effect-order",
         "(def n 0) (list `(,(def n (+ n 1)) "
         ",@(list (def n (+ n 1))) ,(def n (+ n 1))) n)");
-  foreach (String form,
+  foreach (String form in
            %("`(a (unquote))" "`(a (unquote 1 2))"
              "`(a (unquote-splicing))" "`(a (unquote-splicing 1 2))"
              "`(a ,@1)"))
@@ -140,8 +140,8 @@ static void _cases(void) {
   _case("recursion",
         "(defun fact (n) (if (= n 0) 1 (* n (fact (- n 1))))) (map fact '(0 "
         "1 2 3 4 5 6))");
-  foreach (String op, %("+" "-" "*" "/" "=" "<" "<=" ">" ">="))
-    foreach (String arguments, %("" "2" "2 3" "2 3 4" "2 2 2" "2 \"x\""))
+  foreach (String op in %("+" "-" "*" "/" "=" "<" "<=" ">" ">="))
+    foreach (String arguments in %("" "2" "2 3" "2 3 4" "2 2 2" "2 \"x\""))
       _case(%"numeric-$op-$arguments", %"($op $arguments)");
   /* Native signatures are visible in errors, including their return
      types. */
@@ -149,7 +149,7 @@ static void _cases(void) {
   _case("native-signature-repr", "(repr 1 2)");
   _case("native-signature-downcase", "(string-downcase 1)");
   _case("native-signature-string-append", "(_string-append \"a\" 1)");
-  foreach (String native,
+  foreach (String native in
            %("Var_car" "Var_cdr" "Var_cons" "lisp_atom" "lisp_pair"
              "lisp_list" "lisp_eq" "lisp_type" "lisp_number" "lisp_string"
              "lisp_symbol" "lisp_procedure" "List_reverse" "List_len"
@@ -159,7 +159,7 @@ static void _cases(void) {
              "lisp_substring" "lisp_string_downcase" "lisp_read_file"
              "lisp_write_file" "List_sort"))
     _case(%"native-arity-$native", %"((bind \"$native\" nil))");
-  foreach (List types,
+  foreach (List types in
            %(("reverse" "1") ("length" "1") ("_match" "1 nil")
              ("match-replace" "1 nil nil") ("search" "1 nil")
              ("_search-replace" "1 nil nil") ("string-length" "1")
@@ -167,7 +167,7 @@ static void _cases(void) {
     _case(%"native-types-${types.car()}",
           %"(${types.car()} ${types.cdr().car()})");
   int index = 0;
-  foreach (String source,
+  foreach (String source in
            %("missing" "(1 2)" "(quote)" "(quote a b)" "(def)" "(def 1 2)"
              "(cond)" "(cond 1)" "(cond (true))" "(lambda x x)"
              "(lambda (x))" "((lambda (x) x))" "((lambda () 1) 2)"
@@ -256,7 +256,8 @@ String oracle = options["oracle"].str();
 Path root = Path.new(argv[0]).absolute().dirname().dirname().dirname();
 if (options["build"]) {
   Path x2c = root.join("builds/0/x2c");
-  foreach (List build, %(("literate-lisp.x" $reference) ("lisp.x" $oracle))) {
+  foreach (List build in
+           %(("literate-lisp.x" $reference) ("lisp.x" $oracle))) {
     (String source, String output) = build;
     Path program = root.join("examples/programs").join(source);
     %($x2c build --output $output $program).job()
@@ -289,7 +290,7 @@ _case("io", %"(import \"$io\") (list (write-file \"$data\" \"hello\") " +
             %"(read-file \"$data\"))");
 
 int failures = 0;
-foreach (List entry, corpus) {
+foreach (List entry in corpus) {
   (String name, String source) = entry;
   List flag = %("-e" $source);
   if (!_agrees(oracle_command.append(flag), reference_command.append(flag),
@@ -302,7 +303,7 @@ List repl_cases = %(("repl-multiline" "(+ 1\n 2)\n")
                     ("repl-recovery" "(def x 1) missing (def x 2)\nx\n")
                     ("repl-reader-recovery" "(def x 1) )\nx\n")
                     ("repl-incomplete" "(+ 1\n"));
-foreach (List entry, repl_cases) {
+foreach (List entry in repl_cases) {
   (String name, String source) = entry;
   String shown = String.new(_repr_bytes(source).str() + 1);
   if (!_agrees(oracle_command, reference_command, name, source, shown, source))

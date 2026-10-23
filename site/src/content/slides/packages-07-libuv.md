@@ -25,7 +25,7 @@ counted.write("alpha\nbeta\ngamma\n").close_stdin();
 loop.run(UV_RUN_DEFAULT);
 
 printf("normalized:\n");
-foreach(String line, normalized.stdout().lines())
+foreach(String line in normalized.stdout().lines())
   printf("  %s\n", line);
 printf("line count: %s", counted.stdout());
 ```

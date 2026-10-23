@@ -16,8 +16,8 @@ Var total = boosted.foldl(0, %!(a, b) => a + b);
 printf("scores: %s; ranked: %s\n", scores.repr(), ranked.repr());
 
 // Use indexed access or iterate over the resulting values.
-foreach (Var score, boosted)
-  printf("%s ", score);
+foreach (int score in boosted)
+  printf("%d ", score);
 printf("=> total %s, best %s\n", total, boosted[0]);
 return 0;
 }

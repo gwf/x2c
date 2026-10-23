@@ -18,7 +18,7 @@ void Compiler.ensure_macro_lisp(Compiler c) {
     c.macro_lisp.adopt(library_session);
   }
   if (!ready) _install_builtins(c.macro_lisp);
-  foreach (Var (path, message), _library_files())
+  foreach (String (path, message) in _library_files())
     _eval_library(c, ready, path, message);
   if (!ready) _install_native_operations(c);
 }
@@ -223,7 +223,7 @@ module List _import(Compiler c, String requested, Token invocation) {
     else c.queue_declaration_effect(text, invocation, invocation);
   }
   Map added = {};
-  foreach (Var (key, value), c.deps)
+  foreach ((String key, Var value) in c.deps)
     if (before[key] != value) added[key] = value;
   c.imports[path] = added;
   return NULL;
@@ -264,7 +264,7 @@ static void _reference_bindings(
         replacements[binding] = c.sym.reference_global(%($spelling));
       return;
     }
-  foreach (Var child, syntax)
+  foreach (Var child in syntax)
     if (child is <list>) _reference_bindings(c, child, replacements);
 }
 
@@ -377,7 +377,7 @@ static Lisp _fill_library(Compiler c, Lisp shared) {
   library_filling = 1;
   try {
     _install_builtins(shared);
-    foreach (Var (path, message), _library_files())
+    foreach (String (path, message) in _library_files())
       _eval_library(c, 0, path, message);
     _install_native_operations(c);
   }
@@ -396,7 +396,7 @@ static List library_files = NULL;
 static List _library_files(void) {
   if (library_files) return library_files;
   Array rows = [];
-  foreach (Var (relative, message), %(
+  foreach (String (relative, message) in %(
       ("etc/init.xlisp" "cannot open the compile-time Lisp environment")
       ("etc/lisp-values.xlisp" "cannot open the compile-time value operations")
       ("etc/compiler-sdk.xlisp" "cannot open the compile-time Lisp SDK")))
@@ -409,7 +409,7 @@ static List _library_files(void) {
 /** Records the compile-time Lisp libraries as dependencies of `c`, as each
     use of its session does. */
 void Compiler.add_library_dependencies(Compiler c) {
-  foreach (List library, _library_files())
+  foreach (List library in _library_files())
     c.add_translation_dependency(library.car());
 }
 
@@ -465,7 +465,7 @@ void Compiler.record_comptime(Compiler c, String name) {
     compiler pass, which reads them without defining them. */
 void Compiler.inherit_library_comptime(Compiler c) {
   if (library_filling || library_comptime == NULL) return;
-  foreach (String name, library_comptime.keys()) c.meta_comptime[name] = 1;
+  foreach (String name in library_comptime.keys()) c.meta_comptime[name] = 1;
 }
 
 /** Answers whether the shared compile-time session is still being filled,
@@ -576,7 +576,7 @@ module void _use_lisp_bindings(Compiler c, int install) {
 
 static void _install_native_operations(Compiler c) {
   _bind_primitives(c.macro_lisp);
-  foreach (Var (name, function), Compiler.compiler_targets()) {
+  foreach ((String name, Func function) in Compiler.compiler_targets()) {
     c.macro_lisp.set_global(name, function);
     Compiler.bind_meta_operation(c.macro_lisp, name, function);
   }
@@ -592,7 +592,7 @@ static void _bind_primitives(Lisp lisp) {
 /* Binds the built-in macro algorithms into `lisp` under the names its
    compile-time Lisp calls. */
 static void _install_builtins(Lisp lisp) {
-  foreach (Var (name, function), Compiler.builtin_targets())
+  foreach ((String name, Func function) in Compiler.builtin_targets())
     lisp.set_global(name, function);
 }
 

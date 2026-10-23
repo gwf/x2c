@@ -89,7 +89,7 @@ static Func _then(Func first, Func next) {
 
 static void _closure_pipeline(void) {
   Func speech = %!(String text) => text;
-  foreach(String word, %("Hello" ", " "World" "!"))
+  foreach(String word in %("Hello" ", " "World" "!"))
     speech = _then(speech, _says(word));
   String greeting = speech(%"");
   puts(greeting);

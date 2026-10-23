@@ -109,7 +109,7 @@ meta native Self Map.merge(Self, Self);
 */
 Self Map.merge_with(Self map, Self other, Func combine) {
   if (!map || !other) return map.merge(other);
-  foreach (Var (key, value), other) {
+  foreach (Var (key, value) in other) {
     Var previous = map[key];
     if (previous is not void) value = combine.apply_values(previous, value);
     map[key] = value;
@@ -225,7 +225,7 @@ void Map.export_to(
   struct Map exported = *map;
   exported.hashes = rebuilt_hashes;
   exported.entries = rebuilt_entries;
-  foreach (Var (key, val), map) {
+  foreach (Var (key, val) in map) {
     struct MapRecord record = {
       .key = export_value(key, source),
       .val = export_value(val, source)

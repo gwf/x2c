@@ -84,9 +84,9 @@ module Map _linked_module(void) {
   if (!_native_module_loaded(linked_supplier)) {
     _add_native_module(linked_supplier, linked_meta_targets);
     $scope(&native_module_scope) linked_hashes = linked_meta_hashes();
-    foreach (Var (name, row), linked_hashes) {
-      name.string().try_own();
-      row.list().try_own();
+    foreach ((String name, List row) in linked_hashes) {
+      name.try_own();
+      row.try_own();
     }
   }
   return native_modules[linked_supplier];
@@ -149,7 +149,7 @@ static int _linked_texts_match(
     return c.linked_meta_definitions_current(
       Compiler.absolute_home_path(names));
   if (names is <list>)
-    foreach (String callee, names.list())
+    foreach (String callee in names.list())
       if (!_linked_texts_match(c, callee, linked, reached)) return 0;
   return 1;
 }

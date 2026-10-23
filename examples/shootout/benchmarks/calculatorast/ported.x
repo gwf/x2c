@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
   if (argc != 2) return 2;
   Node program[3];
   int at = 0;
-  foreach(List expression, %(
+  foreach(List expression in %(
     (assign a (number 7))
     (assign b (binary * (variable a) (number 6)))
     (binary + (variable b)

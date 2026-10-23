@@ -1186,7 +1186,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _723 = cons(_720, _722);
   _724 = List_var(_723);
   _725 = Symbol_var(1133019155420);
-  _726 = int_var(40005);
+  _726 = int_var(40081);
   _727 = cons(_726, NULL);
   _728 = cons(_725, _727);
   _729 = List_var(_728);
@@ -1269,7 +1269,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _806 = cons(_805, NULL);
   _807 = cons(_712, _806);
   _808 = List_var(_807);
-  _809 = int_var(39915);
+  _809 = int_var(39991);
   _810 = cons(_809, NULL);
   _811 = cons(_725, _810);
   _812 = List_var(_811);
@@ -1737,13 +1737,13 @@ static int f6_output____needs_errors(List item){
 static List f6_output____vertical_spacing(List code){
   Array out = Array_new();
   {
-    Var node;
+    List node;
     List _x2c_gensym_macro_object_4 = code;
     List _x2c_gensym_macro_cursor_4 = _x2c_gensym_macro_object_4;
     Var _x2c_gensym_macro_cursor_output_4;
     while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
-      node = _x2c_gensym_macro_cursor_output_4;
-      f6_output____push_line(out, node);
+      node = Var_list_payload(_x2c_gensym_macro_cursor_output_4);
+      f6_output____push_line(out, List_var(node));
     }
 
   }
@@ -2256,8 +2256,8 @@ static void f10_projection____promote_typedefs(Array header, Array pending){
 
 static int f10_projection____at(f10_projection___HeaderNeeds * n, int i, List names){
   {
-    Var name;  List _x2c_gensym_macro_object_18 = names;  List _x2c_gensym_macro_cursor_18 = _x2c_gensym_macro_object_18;  Var _x2c_gensym_macro_cursor_output_16;  while(List_try_next(_x2c_gensym_macro_object_18, &(_x2c_gensym_macro_cursor_18), &(_x2c_gensym_macro_cursor_output_16))){
-      name = _x2c_gensym_macro_cursor_output_16;  if(! f10_projection____declared_before(&((* n)), i, name) && f10_projection____spelled_after(&((* n)), i, name)) return 1;
+    String name;  List _x2c_gensym_macro_object_18 = names;  List _x2c_gensym_macro_cursor_18 = _x2c_gensym_macro_object_18;  Var _x2c_gensym_macro_cursor_output_16;  while(List_try_next(_x2c_gensym_macro_object_18, &(_x2c_gensym_macro_cursor_18), &(_x2c_gensym_macro_cursor_output_16))){
+      name = Var_as_string(_x2c_gensym_macro_cursor_output_16);  if(! f10_projection____declared_before(&((* n)), i, String_var(name)) && f10_projection____spelled_after(&((* n)), i, String_var(name))) return 1;
     }
 
   }
@@ -3009,8 +3009,8 @@ static Map f14_initialization____cache_reachable(List source){
   }
   for(int i = 0;  i < Array_len(queue);  i ++){
     Var key = Array_getindex(queue, i);  if(Map_contains(reachable, key)) continue;  Map_setindex(reachable, key, int_var(1));  if(Map_contains(callers, key)){
-      Var caller;  List _x2c_gensym_macro_object_40 = Var_list(Map_getindex(callers, key));  List _x2c_gensym_macro_cursor_41 = _x2c_gensym_macro_object_40;  Var _x2c_gensym_macro_cursor_output_37;  while(List_try_next(_x2c_gensym_macro_object_40, &(_x2c_gensym_macro_cursor_41), &(_x2c_gensym_macro_cursor_output_37))){
-        caller = _x2c_gensym_macro_cursor_output_37;  Array_push(queue, caller);
+      String caller;  List _x2c_gensym_macro_object_40 = Var_list(Map_getindex(callers, key));  List _x2c_gensym_macro_cursor_41 = _x2c_gensym_macro_object_40;  Var _x2c_gensym_macro_cursor_output_37;  while(List_try_next(_x2c_gensym_macro_object_40, &(_x2c_gensym_macro_cursor_41), &(_x2c_gensym_macro_cursor_output_37))){
+        caller = Var_as_string(_x2c_gensym_macro_cursor_output_37);  Array_push(queue, String_var(caller));
       }
 
     }
@@ -3248,8 +3248,8 @@ static Map f12_dependencies____undef_positions(List source){
 
 static void f12_dependencies____mark_undef(Map positions, Array open, int position){
   Map_setindex(positions, int_var(position), int_var(1)); {
-    Var group;  Array _x2c_gensym_macro_object_46 = open;  int _x2c_gensym_macro_cursor_47 = 0;  Var _x2c_gensym_macro_cursor_output_43;  while(Array_try_next(_x2c_gensym_macro_object_46, &(_x2c_gensym_macro_cursor_47), &(_x2c_gensym_macro_cursor_output_43))){
-      group = _x2c_gensym_macro_cursor_output_43;  Map_setindex(positions, group, int_var(1));
+    int group;  Array _x2c_gensym_macro_object_46 = open;  int _x2c_gensym_macro_cursor_47 = 0;  Var _x2c_gensym_macro_cursor_output_43;  while(Array_try_next(_x2c_gensym_macro_object_46, &(_x2c_gensym_macro_cursor_47), &(_x2c_gensym_macro_cursor_output_43))){
+      group = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_43, 3453797));  Map_setindex(positions, int_var(group), int_var(1));
     }
 
   }

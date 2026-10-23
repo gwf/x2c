@@ -13,7 +13,7 @@
 List List.map(List lst, Func fn) {
   if (!lst) return NULL;
   Array values = $auto([]);
-  foreach (Var value, lst) values.push(fn.apply_value(value));
+  foreach (Var value in lst) values.push(fn.apply_value(value));
   return values;
 }
 
@@ -27,7 +27,7 @@ List List.map(List lst, Func fn) {
 Self List.filter(Self lst, Func pred) {
   if (!lst) return NULL;
   Array values = $auto([]);
-  foreach (Var value, lst) if (pred.apply_value(value)) values.push(value);
+  foreach (Var value in lst) if (pred.apply_value(value)) values.push(value);
   return values;
 }
 
@@ -169,10 +169,10 @@ meta native Self List.unique(Self lst) {
 meta native Self List.flatten(Self lst) {
   if (!lst) return lst;
   Array values = $auto([]);
-  foreach (Var head, lst) {
+  foreach (Var head in lst) {
     if (head is <list>) {
       List inner = head;
-      foreach (Var item, inner) values.push(item);
+      foreach (Var item in inner) values.push(item);
     }
     else values.push(head);
   }
@@ -191,7 +191,7 @@ meta native Self List.flatten_all(Self lst) {
 }
 
 static void _flatten_into(Array values, List lst) {
-  foreach (Var head, lst) {
+  foreach (Var head in lst) {
     if (head is <list>) _flatten_into(values, head);
     else values.push(head);
   }
@@ -217,6 +217,6 @@ static Var _sublis_node(List alist, Var node) {
   List list = node;
   if (!list) return list;
   Array items = $auto([]);
-  foreach (Var source, list) items.push(_sublis_node(alist, source));
+  foreach (Var source in list) items.push(_sublis_node(alist, source));
   return items.list();
 }

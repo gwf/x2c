@@ -146,8 +146,8 @@ meta List _tag_groups(void) => %(
    readable, so every projection reads one flat sequence. */
 meta List _tag_rows(void) {
   Array rows = [];
-  foreach (List group, _tag_groups())
-    foreach (Var row, group) rows.push(row);
+  foreach (List group in _tag_groups())
+    foreach (List row in group) rows.push(row);
   return rows;
 }
 
@@ -176,7 +176,7 @@ meta List _tag_info_sentinel(void) =>
 
 meta List _tag_info(void) {
   Array cells = [];
-  foreach (List row, _tag_rows()) cells.push(_tag_info_row(row));
+  foreach (List row in _tag_rows()) cells.push(_tag_info_row(row));
   return $!( { @{cells.list_free()}, ${_tag_info_sentinel()} } );
 }
 
@@ -185,7 +185,7 @@ meta int _tag_descriptor(List row) =>
 
 meta List _tag_names(void) {
   Array names = [];
-  foreach (List row, _tag_rows()) names.push(row[0]);
+  foreach (List row in _tag_rows()) names.push(row[0]);
   return names;
 }
 
@@ -193,13 +193,13 @@ meta List _tag_names(void) {
 
 meta List _tag_numeric_rows(void) {
   Array rows = [];
-  foreach (List row, _tag_rows()) if (_tag_numeric(row)) rows.push(row);
+  foreach (List row in _tag_rows()) if (_tag_numeric(row)) rows.push(row);
   return rows;
 }
 
 meta List _tag_numeric_names(void) {
   Array names = [];
-  foreach (List row, _tag_numeric_rows()) names.push(row[0]);
+  foreach (List row in _tag_numeric_rows()) names.push(row[0]);
   return names;
 }
 
@@ -225,7 +225,7 @@ meta List _tag_numeric_row(List row) => $!( {
 
 meta List _tag_numeric_table(void) {
   Array cells = [];
-  foreach (List row, _tag_numeric_rows()) cells.push(_tag_numeric_row(row));
+  foreach (List row in _tag_numeric_rows()) cells.push(_tag_numeric_row(row));
   return $!( { @{cells.list_free()} } );
 }
 
@@ -239,7 +239,7 @@ meta int _tag_decode_row(List row) {
 
 meta List _tag_decode_rows(void) {
   Array rows = [];
-  foreach (List row, _tag_rows()) if (_tag_decode_row(row)) rows.push(row);
+  foreach (List row in _tag_rows()) if (_tag_decode_row(row)) rows.push(row);
   return rows;
 }
 
@@ -279,7 +279,7 @@ meta List _tag_list(List items) {
    whole ledger once per row. */
 meta Map _tag_sibling_counts(List rows) {
   Map counts = {};
-  foreach (List row, rows) {
+  foreach (List row in rows) {
     Var top = _tag_top(row);
     counts[top] = counts.getdefault(top, 0) + 1;
   }
@@ -298,7 +298,7 @@ meta List _tag_constant_rows(void) {
   List rows = _tag_decode_rows();
   Map counts = _tag_sibling_counts(rows);
   Array entries = [];
-  foreach (List row, rows)
+  foreach (List row in rows)
     if (_tag_constant_row(row)) entries.push(_tag_row_entry(row, counts));
   return entries;
 }
@@ -320,7 +320,7 @@ meta List _tag_decode_group(List rows, Map counts, int top) {
   Array ids = [];
   for (int i = 0; i < 8; i++)
     ids.push($!( _invalid_ ));
-  foreach (List row, rows) {
+  foreach (List row in rows) {
     if (_tag_top(row) != top) continue;
     int selector = immediate ? _tag_middle(row) : _tag_bottom(row) & mask;
     ids[selector] = %(expr () (ident ${x2c_ident(_tag_id(row))}));
@@ -344,7 +344,7 @@ meta List _tag_decode_groups(void) {
 meta List _tag_id_checks(void) {
   Array checks = [];
   int index = 0;
-  foreach (List row, _tag_rows()) {
+  foreach (List row in _tag_rows()) {
     checks.push(
       $!Unit{
         _Static_assert(
@@ -363,9 +363,9 @@ meta List _tag_id_checks(void) {
    `("List") : list` and `(* "List") : <list*>`. */
 meta Map _tag_types(List native) {
   Map types = {};
-  foreach (List row, native) types[row[0]] = row[1];
+  foreach (List row in native) types[row[0]] = row[1];
   Symbol star = <*>;
-  foreach (List row, _tag_rows()) {
+  foreach (List row in _tag_rows()) {
     if (!_tag_descriptor(row)) continue;
     String tag = row[0].str();
     String name = tag.capitalize();

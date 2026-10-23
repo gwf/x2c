@@ -172,7 +172,7 @@ static Ast _op_chain(Compiler c, Ast ast) {
         if (operator is <list>) parts.push(_step(c, operator));
         else parts.push(operator);
         parts.push(rebuilt);
-        foreach (Var operand, rest) {
+        foreach (Var operand in rest) {
           if (operand is <list>) parts.push(_step(c, operand));
           else parts.push(operand);
         }
@@ -237,7 +237,7 @@ module List _declaration(Compiler c, List ast) {
     case %((!set ?head (!or declare decl)) ?target
            (bindings *bound_list)): {
       Array values = [], List new_bind = NULL;
-      foreach (Ast binding, bound_list) {
+      foreach (Ast binding in bound_list) {
         new_bind = binding;
         match (binding)
           case %(op = (bind ?var ?mods) ?rhs): {

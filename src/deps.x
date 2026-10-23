@@ -56,11 +56,9 @@ int Compiler.write_depfile(
 static String _contents(
   CliRequest request, Compiler compiler, String input, String output_dir) {
   Array paths = $auto([]), searches = $auto([]);
-  foreach (Var (path, content_hash), compiler.deps) {
-    if (content_hash is <string> && String.startswith(content_hash, "search:")) {
-      String candidate = path;
-      searches.push(candidate.startswith("cwd:") ? candidate[4:] : candidate);
-    }
+  foreach ((String path, Var content_hash) in compiler.deps) {
+    if (content_hash is <string> && String.startswith(content_hash, "search:"))
+      searches.push(path.startswith("cwd:") ? path[4:] : path);
     else paths.push(path);
   }
   if (!paths.len()) paths.push(input);
@@ -68,7 +66,7 @@ static String _contents(
   Buffer out = $auto(Buffer.new(0));
   _write_targets(out, request, input, output_dir);
   out.write_char(':');
-  foreach (String path, paths) {
+  foreach (String path in paths) {
     out.write_char(' ');
     _write_word(out, path);
   }
@@ -81,7 +79,7 @@ static String _contents(
   if (searches.len()) {
     out.write("# x2c-search:");
     searches.sort();
-    foreach (String path, searches) {
+    foreach (String path in searches) {
       out.write_char(' ');
       _write_word(out, path);
     }
@@ -101,7 +99,7 @@ static void _write_targets(
 
 // Every prerequisite except the primary input gets an empty phony rule.
 static void _write_phony(Buffer out, Array paths, String primary) {
-  foreach (String path, paths)
+  foreach (String path in paths)
     if (path != primary) {
       _write_word(out, path);
       out.write(":\n");
@@ -113,7 +111,7 @@ static void _write_phony(Buffer out, Array paths, String primary) {
    doubled separately. */
 static void _write_word(Buffer out, String word) {
   if (!word) out.write("\\ ");
-  foreach (char ch, word) {
+  foreach (char ch in word) {
     if (ch == '$') out.write_char('$');
     else if (ch == ' ' || ch == '\t' || ch == '#' || ch == ':' || ch == '\\')
       out.write_char('\\');

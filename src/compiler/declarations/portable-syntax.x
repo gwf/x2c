@@ -52,7 +52,7 @@ static List _freeze_origin(Compiler c, int origin, Var node) {
 // A List whose head is a marker is escaped, so thawing keeps its value.
 static List _freeze_rows(Compiler c, List syntax) {
   Array rows = [];
-  foreach (Var row, syntax) rows.push(c.freeze_declaration_syntax(row));
+  foreach (Var row in syntax) rows.push(c.freeze_declaration_syntax(row));
   match (syntax)
     case %((!or declaration-void declaration-empty-symbol declaration-atom
                 declaration-token declaration-origin declaration-list
@@ -98,7 +98,7 @@ static Var _freeze_cache_key(Compiler c, Var key) {
   if (key is not <list>) return _freeze_leaf(key);
   match (key) case %(cache ?): return c.freeze_declaration_syntax(key);
   Array out = [];
-  foreach (Var child, key.list()) out.push(_freeze_cache_key(c, child));
+  foreach (Var child in key.list()) out.push(_freeze_cache_key(c, child));
   return out.list_free();
 }
 
@@ -113,13 +113,13 @@ static Var _thaw_cache_key(Compiler c, Var key) {
       return c.thaw_declaration_syntax(key);
   }
   Array out = [];
-  foreach (Var child, key.list()) out.push(_thaw_cache_key(c, child));
+  foreach (Var child in key.list()) out.push(_thaw_cache_key(c, child));
   return out.list_free();
 }
 
 static List _thaw_rows(Compiler c, List rows) {
   Array values = [];
-  foreach (Var row, rows) values.push(c.thaw_declaration_syntax(row));
+  foreach (Var row in rows) values.push(c.thaw_declaration_syntax(row));
   return values.list_free();
 }
 
@@ -144,7 +144,7 @@ static List _thaw_origin(Compiler c, List location, Var node) {
 
 static List _declaration_macro(Compiler c, List rows, int thaw) {
   Array out = [];
-  foreach (List row, rows) out.push(_macro_row(c, row, thaw));
+  foreach (List row in rows) out.push(_macro_row(c, row, thaw));
   return %(macrodef @{out.list_free()});
 }
 
@@ -160,7 +160,7 @@ static List _macro_row(Compiler c, List row, int thaw) {
 
 static List _declaration_location(List location, int thaw) {
   Array rows = [];
-  foreach (List row, location) {
+  foreach (List row in location) {
     match (row)
       case %(file ?path):
         row = %(file ${_declaration_path(path, thaw)});

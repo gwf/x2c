@@ -165,7 +165,7 @@ static Region _summary_birth(
    capture keeps the place it names. */
 static Region _captured_birth(
   Walk &w, List captures, int &born, Region &other, Acquired &acquired) {
-  foreach (Var capture, captures)
+  foreach (List capture in captures)
     match (capture) case %(capture ? ? ?captured): {
       Var place = _address_of(captured);
       Fact fact = _fact_of(w, place is void ? captured : place, NULL);
@@ -187,7 +187,7 @@ module Fact _returned_argument(Walk &w, Var value, List &?named) {
   String callee = _callee_of(value, arguments);
   if (!callee) return NULL;
   List types = _parameter_types(value);
-  foreach (List row, _summary(w, callee).cadr()) {
+  foreach (List row in _summary(w, callee).cadr()) {
     (int index, Var target) = row;
     if (target != <return> || index >= arguments.len()) continue;
     Type type = NULL;

@@ -2793,7 +2793,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2212 = cons(_2211, NULL);
   _2213 = cons(_253, _2212);
   _2214 = List_var(_2213);
-  _2215 = int_var(89778);
+  _2215 = int_var(89805);
   _2216 = cons(_2215, NULL);
   _2217 = cons(_258, _2216);
   _2218 = List_var(_2217);
@@ -2989,7 +2989,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2408 = cons(_2407, NULL);
   _2409 = cons(_245, _2408);
   _2410 = List_var(_2409);
-  _2411 = int_var(90140);
+  _2411 = int_var(90167);
   _2412 = cons(_2411, NULL);
   _2413 = cons(_258, _2412);
   _2414 = List_var(_2413);
@@ -3106,7 +3106,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2525 = cons(_2524, NULL);
   _2526 = cons(_245, _2525);
   _2527 = List_var(_2526);
-  _2528 = int_var(90552);
+  _2528 = int_var(90579);
   _2529 = cons(_2528, NULL);
   _2530 = cons(_258, _2529);
   _2531 = List_var(_2530);
@@ -3207,7 +3207,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2623 = cons(_2622, NULL);
   _2624 = cons(_245, _2623);
   _2625 = List_var(_2624);
-  _2626 = int_var(90636);
+  _2626 = int_var(90663);
   _2627 = cons(_2626, NULL);
   _2628 = cons(_258, _2627);
   _2629 = List_var(_2628);
@@ -3299,7 +3299,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2715 = cons(_2714, NULL);
   _2716 = cons(_245, _2715);
   _2717 = List_var(_2716);
-  _2718 = int_var(90843);
+  _2718 = int_var(90870);
   _2719 = cons(_2718, NULL);
   _2720 = cons(_258, _2719);
   _2721 = List_var(_2720);
@@ -3511,7 +3511,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2927 = cons(_2926, NULL);
   _2928 = cons(_245, _2927);
   _2929 = List_var(_2928);
-  _2930 = int_var(92759);
+  _2930 = int_var(92788);
   _2931 = cons(_2930, NULL);
   _2932 = cons(_258, _2931);
   _2933 = List_var(_2932);
@@ -5895,9 +5895,9 @@ static void f6_access____completion_owner_methods(Compiler c, String prefix, Map
     List row;  List _x2c_gensym_macro_object_26 = Sym_visible_symbols(c -> sym);  List _x2c_gensym_macro_cursor_27 = _x2c_gensym_macro_object_26;  Var _x2c_gensym_macro_cursor_output_25;  while(List_try_next(_x2c_gensym_macro_object_26, &(_x2c_gensym_macro_cursor_27), &(_x2c_gensym_macro_cursor_output_25))){
       row = Var_list_payload(_x2c_gensym_macro_cursor_output_25); {
         List _x2c_gensym_destructure_4 = row;  String spelling = Var_as_string(List_getindex(_x2c_gensym_destructure_4, 0));  Var raw = List_getindex(_x2c_gensym_destructure_4, 1);  if(! Var_is_row(raw, 9, 7, 4)) continue;  Type signature = Var_type(raw);  if(Type_is_function(signature) && String_startswith(spelling, prefix)) f6_access____completion_add(seen, names, String_remove_prefix(spelling, prefix)); {
-          Var raw_package, _;  Map _x2c_gensym_macro_object_25 = c -> package_roots;  unsigned _x2c_gensym_macro_cursor_26 = 0;  Var _x2c_gensym_macro_cursor_output_23;  Var _x2c_gensym_macro_cursor_output_24;  while(Map_try_next(_x2c_gensym_macro_object_25, &(_x2c_gensym_macro_cursor_26), &(_x2c_gensym_macro_cursor_output_23), &(_x2c_gensym_macro_cursor_output_24))){
-            raw_package = _x2c_gensym_macro_cursor_output_23;  _ = _x2c_gensym_macro_cursor_output_24; {
-              String package = Var_as_string(raw_package);  String imported = String_join(NULL, cons(String_var(package), cons(String_var(_1749), cons(String_var(prefix), NULL))));  if(Type_is_function(signature) && String_startswith(spelling, imported)) f6_access____completion_add(seen, names, String_remove_prefix(spelling, imported));
+          String package, _;  Map _x2c_gensym_macro_object_25 = c -> package_roots;  unsigned _x2c_gensym_macro_cursor_26 = 0;  Var _x2c_gensym_macro_cursor_output_23;  Var _x2c_gensym_macro_cursor_output_24;  while(Map_try_next(_x2c_gensym_macro_object_25, &(_x2c_gensym_macro_cursor_26), &(_x2c_gensym_macro_cursor_output_23), &(_x2c_gensym_macro_cursor_output_24))){
+            package = Var_as_string(_x2c_gensym_macro_cursor_output_23);  _ = Var_as_string(_x2c_gensym_macro_cursor_output_24); {
+              String imported = String_join(NULL, cons(String_var(package), cons(String_var(_1749), cons(String_var(prefix), NULL))));  if(Type_is_function(signature) && String_startswith(spelling, imported)) f6_access____completion_add(seen, names, String_remove_prefix(spelling, imported));
             }
 
           }

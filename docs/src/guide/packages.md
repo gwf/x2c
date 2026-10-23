@@ -387,7 +387,7 @@ void show_readings(String filename) {
   );
   defer query.free();
   query.bind(%(400));
-  foreach (List row, query)
+  foreach (List row in query)
     printf("%s", %"${row[0]}: HTTP ${row[1]}\n");
 }
 ```

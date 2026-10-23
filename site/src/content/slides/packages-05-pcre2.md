@@ -21,14 +21,14 @@ Regexp entry = $auto(Regexp.compile(
 Regexp fields = $auto(Regexp.compile("\\s*\\|\\s*", 0));
 Map counts = {};
 
-foreach(String line, lines) {
+foreach(String line in lines) {
   RegexpMatch found = entry.match(line);
   if (!found) continue;
   Var seen = 0;
   counts.try_get(found[<program>], seen);
   counts[found[<program>]] = seen + 1;
   printf("%s %s\n", found[<time>], found[<program>]);
-  foreach(String field, fields.split(found[<text>]))
+  foreach(String field in fields.split(found[<text>]))
     printf("    %s\n", field);
 }
 ```

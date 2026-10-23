@@ -22,7 +22,7 @@ Image chart = Image.new(2160, 960, paper);
 defer chart.free();
 Vector2 origin = { 84, 252 }, previous = { 0 };
 int index = 0;
-foreach(int high, highs) {
+foreach(int high in highs) {
   Vector2 offset = { index * 94, -(high - 60) * 6 };
   Vector2 point = origin + offset;
   // ... fill the area below each segment ...

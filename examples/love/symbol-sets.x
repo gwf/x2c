@@ -16,7 +16,7 @@ int main(void) {
   printf("first light: %s\n", lights.getindex(0).str());
   printf("last light: %s\n", lights.getindex(-1).str());
 
-  foreach(Symbol light, lights) {
+  foreach(Symbol light in lights) {
     printf("light: %s\n", light.str());
   }
 

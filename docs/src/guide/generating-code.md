@@ -271,7 +271,7 @@ number, String, or Symbol as a literal. `@name` splices a `List` local.
 meta static List numbered(List subject, List arms) {
   Array cases = [];
   int index = 0;
-  foreach (List arm, arms) {
+  foreach (List arm in arms) {
     cases.push($!{ if ($subject == $index) $arm });
     index++;
   }
@@ -820,14 +820,14 @@ meta static List shape_fields(TypeInfo type) => type.assoc(<fields>);
 /* One `String` literal holding those field names, comma separated. */
 meta List shape_names(TypeInfo type) {
   Array names = [];
-  foreach (List field, shape_fields(type)) names.push(field.car());
+  foreach (List field in shape_fields(type)) names.push(field.car());
   return $!String{ ${String.join(", ", names)} };
 }
 
 /* `{ p.x, p.y, p.z }`, built from the fields rather than written out. */
 meta List shape_reads(List receiver, TypeInfo type) {
   Array reads = [];
-  foreach (List field, shape_fields(type)) {
+  foreach (List field in shape_fields(type)) {
     String member = field.car();
     reads.push($!( $receiver.$member ));
   }

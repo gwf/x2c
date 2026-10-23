@@ -189,7 +189,7 @@ static int _atom_type(Var type) {
 
 /* Whether each output parameter points to a named type. */
 static int _valid_outputs(List outputs) {
-  foreach (Type output, outputs)
+  foreach (Type output in outputs)
     if (!output.canonicalize().is_pointer() || !_atom_type(output.element()))
       return 0;
   return 1;
@@ -358,14 +358,14 @@ static Shape _shape(String owner, Type type, List location) {
 /* The fields a layout names. */
 static List _named(List fields) {
   Array named = [];
-  foreach (List field, fields)
+  foreach (List field in fields)
     if (field.car() is <string> && field.car().str().len() > 0)
       named.push(field);
   return named.list_free();
 }
 
 static int _positional(List fields) {
-  foreach (List field, fields) if (!Type.is_value(field[1])) return 0;
+  foreach (List field in fields) if (!Type.is_value(field[1])) return 0;
   return 1;
 }
 
@@ -473,8 +473,7 @@ static List _comparison(Shape &s) {
 static List _writers(Shape &s) {
   String owner = s.owner;
   Array writers = [];
-  foreach (Var member_value, %("str" "repr")) {
-    String member = member_value.str();
+  foreach (String member in %("str" "repr")) {
     List selected = _own_method(owner, member);
     List writer = _own_method(owner, %"write_${member}");
     if (!writer)
@@ -521,7 +520,7 @@ static List _scalar_new(String owner, Type representation, int heap) {
 static List _positional_new(
   String owner, Type representation, int heap, List named) {
   Array parameters = [], arguments = [];
-  foreach (List field, named) {
+  foreach (List field in named) {
     String name = %"field_${field[0]}";
     parameters.push(_param(_value_type(field[1]), name));
     arguments.push($!( ${x2c_ident(name)} ));
@@ -539,7 +538,7 @@ static List _initialized_new(
   String owner, int heap, List extras) {
   Type type = %($owner);
   Array parameters = [];
-  foreach (List extra, extras)
+  foreach (List extra in extras)
     parameters.push(_param(extra, %"argument_${parameters.len()}"));
   List value = x2c_ident("value");
   List declaration =
@@ -596,7 +595,7 @@ static List _class_initializer(String owner, Var heap_value) {
 /* One argument for each of `parameters` after the receiver. */
 static List _init_arguments(List parameters) {
   Array arguments = [];
-  foreach (List parameter, parameters.cdr())
+  foreach (List parameter in parameters.cdr())
     arguments.push($!( ${x2c_ident(%"argument_${arguments.len()}")} ));
   return arguments.list_free();
 }
@@ -629,7 +628,7 @@ static List _equal(String owner, int heap, List fields) {
 static List _fields_equal(List fields) {
   List left = x2c_ident("left"), right = x2c_ident("right");
   Array body = [];
-  foreach (List field, fields) {
+  foreach (List field in fields) {
     body.push(
       $!{
         if (!Var_equal(
@@ -655,7 +654,7 @@ static List _hash(String owner, int heap, List fields) {
 static List _fields_hash(List fields) {
   List hash = x2c_ident("hash");
   Array body = [$!{ unsigned $hash = 0; }];
-  foreach (List field, fields)
+  foreach (List field in fields)
     body.push(
       $!{ $hash = x2c_hash_word(
         $hash ^ Var_hash((Var)${_field_value(field)})); });
@@ -706,7 +705,7 @@ static List _repr_guard(String owner) {
 static List _class_write_fields(String owner, List fields) {
   Array body = [$!{ out.write(${%"${owner} { "}); }];
   Var final = fields.last();
-  foreach (List field, fields) {
+  foreach (List field in fields) {
     body.push($!{ out.write(${%"${field[0]}: "}); });
     body.push(_field_write(field));
     if (!field.equal(final)) body.push($!{ out.write(", "); });
@@ -761,7 +760,7 @@ static List _method(Type type, String name) {
       return %(expr $signature (ident $binding));
     case %(ambiguous *packages): {
       Array notes = [];
-      foreach (String package, packages) notes.push(%"package: '$package'");
+      foreach (String package in packages) notes.push(%"package: '$package'");
       x2c_diagnostic_fail(
         %"method '${type.base_type().car()}.$name' is provided by " +
         "multiple imported packages", notes.list_free());
@@ -782,7 +781,7 @@ static List _own_method(String owner, String member) {
 /* `type` without qualifiers or a bitfield width. */
 static List _value_type(List type) {
   Array kept = [];
-  foreach (Var item, type) {
+  foreach (Var item in type) {
     if (item == <const> || item == <volatile> || item == <restrict>) continue;
     match (item) case %(bitfield *): continue;
     kept.push(item);
@@ -835,7 +834,7 @@ static List _binding_record(Var group, Var name, List function) {
     x2c_diagnostic_fail(
       "native Lisp binding appears after its group was installed",
       %("group: $group_name"));
-  foreach (List row, _binding_rows_for(group_name, c.binding_rows))
+  foreach (List row in _binding_rows_for(group_name, c.binding_rows))
     if (row[1] == lisp_name)
       x2c_diagnostic_fail(
         "duplicate native Lisp binding name",
@@ -856,7 +855,7 @@ static String _binding_name(Var node) {
 
 static List _binding_rows_for(String group, List rows) {
   Array selected = [];
-  foreach (List row, rows) if (row.car() == group) selected.push(row);
+  foreach (List row in rows) if (row.car() == group) selected.push(row);
   return selected.list_free();
 }
 
@@ -870,7 +869,7 @@ static List _binding_install(List lisp, Var group) {
   if (!(group_name in c.binding_sealed))
     c.binding_sealed = cons(group_name, c.binding_sealed);
   Array statements = [];
-  foreach (List row, rows) statements.push(_binding_statement(lisp, row));
+  foreach (List row in rows) statements.push(_binding_statement(lisp, row));
   return statements.list_free();
 }
 
@@ -892,8 +891,8 @@ static List _binding_ident(String name) =>
 
 static List _binding_targets(List rows) {
   Array arguments = [];
-  foreach (List row, rows)
-    foreach (Var item, _binding_target_row(row)) arguments.push(item);
+  foreach (List row in rows)
+    foreach (Var item in _binding_target_row(row)) arguments.push(item);
   return $!(
     Map_update_n(Map_new(), ${rows.len()}, @{arguments.list_free()}) );
 }

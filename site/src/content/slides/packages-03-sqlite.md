@@ -19,7 +19,7 @@ Prepared insert = db.prepare(
   "INSERT INTO observation VALUES (?, ?, ?)"
 );
 defer insert.free();
-foreach(List reading, %(
+foreach(List reading in %(
   ("/guide" 200 12000)
   ("/reference" 503 40000)
   ("/source" 200 3100000)
@@ -31,7 +31,7 @@ Prepared report = db.prepare(
 );
 defer report.free();
 report.bind(%(3000000));
-foreach(List row, report)
+foreach(List row in report)
   printf("%s", %"${row[0]}: HTTP ${row[1]}, "
     + %"${row[2]} us\n");
 ```

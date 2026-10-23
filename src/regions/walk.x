@@ -68,7 +68,7 @@ static void _walk_block(Walk &w, List statements) {
   Region outer = w.open;
   Map restored = w.restored;
   w.depth += 1;
-  foreach (Var statement, statements) _walk(w, statement);
+  foreach (List statement in statements) _walk(w, statement);
   _close_to(w, w.open, outer);
   w.open = outer;
   w.restored = restored;
@@ -83,7 +83,7 @@ static void _close_to(Walk &w, Region region, Region outer) {
 }
 
 static void _walk_sequence(Walk &w, List statements) {
-  foreach (Var statement, statements) _walk(w, statement);
+  foreach (List statement in statements) _walk(w, statement);
 }
 
 static void _walk_return(Walk &w, Type type, Var result) {
@@ -95,10 +95,7 @@ static void _walk_return(Walk &w, Type type, Var result) {
 /* A free ends its local for the statements that follow it on the same path.
    Where that path ends, nothing it freed is known to be freed any more. */
 static void _revive(Walk &w) {
-  foreach (Var known, w.facts) {
-    Fact fact = known;
-    fact.dead = 0;
-  }
+  foreach (Fact fact in w.facts) fact.dead = 0;
 }
 
 static void _walk_expression(Walk &w, Var expression) {
@@ -140,15 +137,15 @@ static int _region_call(Walk &w, String callee, List arguments) {
 static void _walk_conditional(Walk &w, List children) {
   Map restored = w.restored;
   w.depth += 1;
-  foreach (Var child, children) _walk(w, child);
+  foreach (Var child in children) _walk(w, child);
   w.depth -= 1;
   w.restored = restored;
 }
 
 static void _walk_rows(Walk &w, List rows) {
-  foreach (List row, rows) {
+  foreach (List row in rows) {
     _scan(w, row.car(), 0);
-    foreach (Var statement, row.cdr()) _walk(w, statement);
+    foreach (List statement in row.cdr()) _walk(w, statement);
   }
 }
 
@@ -213,7 +210,7 @@ static void _note_deferred_stores(Walk &w, Var node) {
     return;
   }
   match (node) case %(*children):
-    foreach (Var child, children) _note_deferred_stores(w, child);
+    foreach (Var child in children) _note_deferred_stores(w, child);
 }
 
 // expressions
@@ -287,7 +284,7 @@ static void _end(Walk &w, Var argument, String op, Symbol how) {
 static void _scan_call(Walk &w, Var call, String callee, List arguments) {
   int count = arguments.len();
   List types = _parameter_types(call);
-  foreach (List row, _summary(w, callee).cadr()) {
+  foreach (List row in _summary(w, callee).cadr()) {
     (int index, Var target) = row;
     if (index >= count) continue;
     Type type = NULL, holder_type = NULL;
@@ -386,7 +383,7 @@ static void _scan_cons(Walk &w, Var node, Var head, Var tail) {
 
 static void _scan_children(Walk &w, List children) {
   int start = w.pending.len();
-  foreach (Var child, children) w.pending.push(child);
+  foreach (Var child in children) w.pending.push(child);
   for (int end = w.pending.len() - 1; start < end; start++, end--) {
     Var first = w.pending[start];
     w.pending[start] = w.pending[end];
@@ -489,14 +486,14 @@ static void _assign(Walk &w, Fact fact, Var value, Type type, int store) {
 static void _declare(Walk &w, Var specifiers, List bindings) {
   Map types = w.c.semantic_binding_facts();
   if (<static> in specifiers || <extern> in specifiers) {
-    foreach (List item, bindings)
+    foreach (List item in bindings)
       match (item) case %(op = (bind ?name ?) ?value): {
         _scan(w, value, 0);
         _flow(w, value, types[%(type $name)], <static>, NULL);
       }
     return;
   }
-  foreach (Var item, bindings)
+  foreach (List item in bindings)
     match (item) {
       case %(op (!quote =) (bind (!set ?name (binding ? ?)) ?) ?value):
         _declare_initialized(w, name, value, types[%(type $name)]);
@@ -507,7 +504,7 @@ static void _declare(Walk &w, Var specifiers, List bindings) {
 static void _declare_initialized(
   Walk &w, List name, Var value, Type type) {
   Fact fact = _new_fact(w, name, -1);
-  foreach (Var part, w.c.sym.normalize_declared_type(type)) {
+  foreach (Var part in w.c.sym.normalize_declared_type(type)) {
     if (part is not <symbol> || !part.symbol().is_type_qualifier()) break;
     if (part == <const>) fact.constant = 1;
   }

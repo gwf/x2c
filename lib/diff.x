@@ -84,7 +84,7 @@ static int _myers(Script &s) {
   defer Scope.free(trace);
   int found = _forward(s, trace, max);
   if (found < 0) return -1;
-  foreach (List step, _path(trace, found, s.n, s.m)) {
+  foreach (List step in _path(trace, found, s.n, s.m)) {
     (Symbol kind, int i, int j) = step;
     _emit(s, kind, kind == <insert> ? s.new[s.lo + j] : s.old[s.lo + i]);
   }

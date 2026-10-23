@@ -464,13 +464,13 @@ List Compiler_setup_cache_init(Compiler c, List header, List source, String pref
   Array scan = Array_new();
   Array_push(scan, List_var(source));
   {
-    Var initializer;
+    List initializer;
     Array _x2c_gensym_macro_object_0 = statics.initializers;
     int _x2c_gensym_macro_cursor_0 = 0;
     Var _x2c_gensym_macro_cursor_output_0;
     while(Array_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
-      initializer = _x2c_gensym_macro_cursor_output_0;
-      Array_push(scan, initializer);
+      initializer = Var_list_payload(_x2c_gensym_macro_cursor_output_0);
+      Array_push(scan, List_var(initializer));
     }
 
   }
@@ -1038,8 +1038,8 @@ static List _entries(HeaderCache * h, List header, List prelude){
           List _x2c_gensym_match_expr = function; List _x2c_gensym_match_cursor, _x2c_gensym_match_cursor1;  switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
               case 9224498395122781148ULL: ;  _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224498395122781148ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 806120) && (_x2c_gensym_match_cursor1 = Var_list_payload(_x2c_gensym_match_cursor->car), 1) && _x2c_gensym_match_cursor1 && _x2c_gensym_match_cursor1->car.u64 == 9224497936766630102ULL && (_x2c_gensym_match_cursor1 = _x2c_gensym_match_cursor1->cdr, 1) && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {if(replaced){
               {
-                Var item;  List _x2c_gensym_macro_object_12 = prelude;  List _x2c_gensym_macro_cursor_12 = _x2c_gensym_macro_object_12;  Var _x2c_gensym_macro_cursor_output_11;  while(List_try_next(_x2c_gensym_macro_object_12, &(_x2c_gensym_macro_cursor_12), &(_x2c_gensym_macro_cursor_output_11))){
-                  item = _x2c_gensym_macro_cursor_output_11;  Array_push(output, item);
+                List item;  List _x2c_gensym_macro_object_12 = prelude;  List _x2c_gensym_macro_cursor_12 = _x2c_gensym_macro_object_12;  Var _x2c_gensym_macro_cursor_output_11;  while(List_try_next(_x2c_gensym_macro_object_12, &(_x2c_gensym_macro_cursor_12), &(_x2c_gensym_macro_cursor_output_11))){
+                  item = Var_list_payload(_x2c_gensym_macro_cursor_output_11);  Array_push(output, List_var(item));
                 }
 
               }
@@ -1211,9 +1211,9 @@ static void _report_cycle(StaticQueue * q){
 
 static Map _cache_bindings(Compiler c, Array ids, String prefix){
   Map bindings = Map_new();  int slot = 0; {
-    Var id;  Array _x2c_gensym_macro_object_25 = ids;  int _x2c_gensym_macro_cursor_26 = 0;  Var _x2c_gensym_macro_cursor_output_24;  while(Array_try_next(_x2c_gensym_macro_object_25, &(_x2c_gensym_macro_cursor_26), &(_x2c_gensym_macro_cursor_output_24))){
-      id = _x2c_gensym_macro_cursor_output_24; {
-        String name = String_truth(prefix) ? String_join(NULL, cons(String_var(prefix), cons(String_var(int_str(slot)), NULL))) : String_join(NULL, cons(String_var(_250), cons(String_var(int_str(slot)), NULL)));  Map_setindex(bindings, id, List_var(Sym_reference(c -> sym, cons(String_var(name), NULL), NULL)));  slot ++;
+    int id;  Array _x2c_gensym_macro_object_25 = ids;  int _x2c_gensym_macro_cursor_26 = 0;  Var _x2c_gensym_macro_cursor_output_24;  while(Array_try_next(_x2c_gensym_macro_object_25, &(_x2c_gensym_macro_cursor_26), &(_x2c_gensym_macro_cursor_output_24))){
+      id = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_24, 3453797)); {
+        String name = String_truth(prefix) ? String_join(NULL, cons(String_var(prefix), cons(String_var(int_str(slot)), NULL))) : String_join(NULL, cons(String_var(_250), cons(String_var(int_str(slot)), NULL)));  Map_setindex(bindings, int_var(id), List_var(Sym_reference(c -> sym, cons(String_var(name), NULL), NULL)));  slot ++;
       }
 
     }
@@ -1256,9 +1256,9 @@ static List _split_ids(Array keys, Array ids){
 
 static List _declare_slots(List ids, String type, Map bindings){
   if(! List_truth(ids)) return NULL;  Array values = Array_new(); {
-    Var id;  List _x2c_gensym_macro_object_27 = ids;  List _x2c_gensym_macro_cursor_28 = _x2c_gensym_macro_object_27;  Var _x2c_gensym_macro_cursor_output_26;  while(List_try_next(_x2c_gensym_macro_object_27, &(_x2c_gensym_macro_cursor_28), &(_x2c_gensym_macro_cursor_output_26))){
-      id = _x2c_gensym_macro_cursor_output_26; {
-        List binding = Var_list_payload(Map_getindex(bindings, id));  Array_push(values, List_var(cons(_94, cons(List_var(binding), _104))));
+    int id;  List _x2c_gensym_macro_object_27 = ids;  List _x2c_gensym_macro_cursor_28 = _x2c_gensym_macro_object_27;  Var _x2c_gensym_macro_cursor_output_26;  while(List_try_next(_x2c_gensym_macro_object_27, &(_x2c_gensym_macro_cursor_28), &(_x2c_gensym_macro_cursor_output_26))){
+      id = Var_int(Var_convert(_x2c_gensym_macro_cursor_output_26, 3453797)); {
+        List binding = Var_list_payload(Map_getindex(bindings, int_var(id)));  Array_push(values, List_var(cons(_94, cons(List_var(binding), _104))));
       }
 
     }

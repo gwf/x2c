@@ -198,7 +198,7 @@ Var Array.postfixindex(Array array, int index, Symbol op) {
 Array Array.map(Array array, Func func) {
   Array output = [], result = NULL;
   defer if (result == NULL) output.free();
-  foreach (Var item, array) output.push(func.apply_value(item));
+  foreach (Var item in array) output.push(func.apply_value(item));
   return result = output;
 }
 
@@ -454,7 +454,7 @@ meta native String Array.join(Array array, String separator) {
 meta native Array Iter.array(Iter iter) {
   Array output = [], result = NULL;
   defer if (result == NULL) output.free();
-  foreach (Var item, iter) output.push(item);
+  foreach (Var item in iter) output.push(item);
   return result = output;
 }
 

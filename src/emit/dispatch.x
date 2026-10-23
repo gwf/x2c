@@ -99,7 +99,7 @@ List Compiler.emit(Compiler c, List ast, Map cache_bindings) {
   Array before = [], after = [];
   if (e.static_support)
     before.push("#include \"exception.h\"\n#include <string.h>");
-  foreach (List entry, e.native_macros.list_free()) {
+  foreach (List entry in e.native_macros.list_free()) {
     (String name, String definition) = entry;
     before.push(definition);
     after.push(%"#undef $name");
@@ -307,7 +307,7 @@ module List _commas(List items) {
   if (!items.cdr()) return items;
   Array result = [];
   int first = 1;
-  foreach (Var item, items) {
+  foreach (Var item in items) {
     if (!first) result.push(", ");
     result.push(item);
     first = 0;

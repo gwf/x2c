@@ -31,7 +31,7 @@ Map Compiler.select_declaration_defaults(
   Defaults d = {
     .c = shadow, .parts = parts, .sources = sources,
     .definitions = definitions, .pending = pending};
-  foreach (Var part, parts) if (part is <map>) _produce_defaults(d, part);
+  foreach (Var part in parts) if (part is <map>) _produce_defaults(d, part);
   _select(d);
   _forward(d);
   _store(d, symbols);
@@ -61,12 +61,12 @@ static void _prepare_shadow(
 // A part's productions run in source order.
 static void _produce_defaults(Defaults &d, Map declarations) {
   Array ordered = [];
-  foreach (Var (key, value), declarations)
+  foreach (Var (key, value) in declarations)
     match (key)
       case %("source-node" (declaration ? ?position)):
         ordered.push(%($position $key $value));
   ordered.sort();
-  foreach (List entry, ordered) {
+  foreach (List entry in ordered) {
     (Var position, Var key, Var value) = entry;
     (void) position;
     match (value)
@@ -83,7 +83,7 @@ static void _produce_defaults(Defaults &d, Map declarations) {
 /* A pending row runs its recipe under the macro stack and privacy of its
    construction, and the rows it generates are produced in turn. */
 static void _produce_rows(Compiler c, List rows, Array selected) {
-  foreach (List row, rows) {
+  foreach (List row in rows) {
     match (row)
       case %(declaration-pending ?callback ?arguments
                ?construction ?privacy): {
@@ -114,7 +114,7 @@ static void _select(Defaults &d) {
   for (size_t index = 0; index < d.sources.len(); index++) {
     (Map declarations, Var key, Var end, List rows) = d.sources[index];
     List selected = _select_rows(d, rows);
-    foreach (List row, selected)
+    foreach (List row in selected)
       match (row)
         case %(declaration-forward ?child *): d.pending[child] = 1;
     d.sources[index] = %($declarations $key $end $selected);
@@ -124,7 +124,7 @@ static void _select(Defaults &d) {
 static List _select_rows(Defaults &d, List rows) {
   Compiler c = d.c;
   Array selected = [];
-  foreach (List row, rows) {
+  foreach (List row in rows) {
     match (row)
       case %(declaration-default ?function ?construction ?privacy): {
         $let(c.macro_stack, construction)
@@ -167,7 +167,8 @@ static int _taken(Defaults &d, String spelling) {
   if (!declared.is_function() || spelling in d.definitions ||
       spelling in c.fn_defs || %(function $spelling) in c.sym.file_statics())
     return 1;
-  foreach (Var part, d.parts) if (part is <map> && key in part.map()) return 0;
+  foreach (Var part in d.parts)
+    if (part is <map> && key in part.map()) return 0;
   return 1;
 }
 
@@ -199,7 +200,7 @@ static void _forward(Defaults &d) {
 
 static List _forward_rows(Defaults &d, List rows, int &remaining) {
   Array selected = [];
-  foreach (List row, rows) {
+  foreach (List row in rows) {
     match (row)
       case %(declaration-forward ?child ?parent ?member ?fallback ?privacy): {
         List bound = NULL;
@@ -251,7 +252,7 @@ static List _forwarder(
   List types = NULL;
   match (signature) case %((func ?parameters) *): types = parameters;
   Array forwarded = [];
-  foreach (Var type, types) {
+  foreach (Var type in types) {
     if (type == <...>)
       $fail.compiler_ctor_variadic(c, c.token, name);
     if (type != %(void)) forwarded.push(type);
@@ -268,7 +269,7 @@ static List _forwarder(
 /* The selected rows replace each production's bundle in its part and in
    the unit's symbols. */
 static void _store(Defaults &d, Map symbols) {
-  foreach (List source, d.sources) {
+  foreach (List source in d.sources) {
     (Map declarations, Var key, Var end, List rows) = source;
     declarations[key] =
       %(declaration-source $end (declaration-bundle (rows @rows))

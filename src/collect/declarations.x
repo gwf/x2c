@@ -59,15 +59,15 @@ module void _needed_types(List syntax, Map rows, Map needed) {
     Type base = type.type().base_type();
     match (base) case %(?(String name)):
       if (%(typedef $name) in rows) needed[%(typedef $name)] = 1;
-    foreach (Var part, item) pending.push(part);
+    foreach (Var part in item) pending.push(part);
   }
 }
 
 module void _select_public(FileWalk &w) {
   if (!w.unit) return;
   Map rows = {}, needed = {}, selected = {};
-  foreach (Var part, w.parts) if (part is <map>) rows.merge(part);
-  foreach (Var (key, value), rows) {
+  foreach (Var part in w.parts) if (part is <map>) rows.merge(part);
+  foreach (Var (key, value) in rows) {
     // The owning unit replays its recipes before its Context closes.
     match (value) case %(declaration-source *): continue;
     List family = _row_type_family(rows, w.statics, key, value);
@@ -79,7 +79,7 @@ module void _select_public(FileWalk &w) {
   int changed;
   do {
     changed = 0;
-    foreach (Var (key, value), rows) {
+    foreach (Var (key, value) in rows) {
       List family = _row_type_family(rows, w.statics, key, value);
       if (!family || !(family in needed) || key in selected) continue;
       selected[key] = 1;
@@ -87,12 +87,12 @@ module void _select_public(FileWalk &w) {
       changed = 1;
     }
   } while (changed);
-  foreach (Var part, w.parts) {
+  foreach (Var part in w.parts) {
     if (part is not <map>) continue;
     Array dropped = $auto([]);
-    foreach (Var key, part.map().keys())
+    foreach (Var key in part.map().keys())
       if (!(key in selected)) dropped.push(key);
-    foreach (Var key, dropped) part.map().del(key);
+    foreach (Var key in dropped) part.map().del(key);
   }
 }
 
@@ -105,7 +105,7 @@ module void _select_public(FileWalk &w) {
    functions belong to every file that includes it. */
 module void _publish_unit_statics(Map statics, Map overlay, String path) {
   List owner = %(${Compiler.portable_path(path)});
-  foreach (Var key, statics.keys())
+  foreach (List key in statics.keys())
     match (%($key)) case %((function ?(String name))): {
       overlay.del(%($name));
       overlay.del(%(self $name));
@@ -149,10 +149,10 @@ static void _add_type_dependencies(
   seen[path] = 1;
   List entry = _entry(c, path);
   if (!entry) return;
-  foreach (Var part, entry.car())
+  foreach (Var part in entry.car())
     match (%($part)) {
       case %(?(Map rows)):
-        foreach (Var (key, value), rows) {
+        foreach (Var (key, value) in rows) {
           if (value is not <list> ||
               (!_type_family(key) && key.list().cdr())) continue;
           List item;
@@ -185,7 +185,7 @@ void Compiler.runtime_function_declarations(Compiler c, Map available) {
   String path = _canonical_path(%"${x2c_get_root()}/lib/x2c.x");
   Var entry = _process_cache()[path];
   if (entry is not <list>) return;
-  foreach (Var part, entry.list().car())
+  foreach (Var part in entry.list().car())
     if (part is <string>) _add_function_declarations(c, part, available);
 }
 
@@ -197,9 +197,9 @@ List Compiler.collected_names(String path) {
   Var entry = _process_cache()[canonical];
   if (entry is not <list>) return NULL;
   Array names = [];
-  foreach (Var part, entry.list().car())
+  foreach (Var part in entry.list().car())
     if (part is <map>)
-      foreach (Var key, part.map().keys())
+      foreach (Var key in part.map().keys())
         match (key) case %(?(String name)): names.push(name);
   return names.list_free();
 }
@@ -209,7 +209,7 @@ static void _add_function_declarations(
   if (path == _canonical_path(c.filename)) return;
   Var entry = _process_cache()[path];
   if (entry is not <list>) return;
-  foreach (String name, _declared_functions(entry))
+  foreach (String name in _declared_functions(entry))
     if (!(name in c.meta_comptime) && !(name in c.project_meta))
       available[%(native $name)] = 1;
 }
@@ -221,9 +221,9 @@ static Array _declared_functions(List entry) {
   if (cached is <array>) return cached;
   $scope(&process_cache_scope) {
     Array names = [];
-    foreach (Var part, entry.car()) {
+    foreach (Var part in entry.car()) {
       if (part is not <map>) continue;
-      foreach (Var (key, value), part.map())
+      foreach (Var (key, value) in part.map())
         match (key) case %(?(String name))
           if (value is <list> && value.list().type().is_function()):
             names.push(name);
@@ -242,7 +242,7 @@ int Compiler.publishes_typedef(Compiler c, String name) {
 int Compiler.publishes_type_family(Compiler c, List family) {
   List entry = _entry(c, _canonical_path(c.filename));
   if (!entry) return 0;
-  foreach (Var part, entry.car())
+  foreach (Var part in entry.car())
     if (part is <map> && family in part.map()) return 1;
   return 0;
 }
@@ -253,10 +253,10 @@ static void _add_typedef_names(
   seen[path] = 1;
   List entry = _entry(c, path);
   if (entry)
-    foreach (Var part, entry.car())
+    foreach (Var part in entry.car())
       match (%($part)) {
         case %(?(Map rows)):
-          foreach (Var key, rows.keys())
+          foreach (Var key in rows.keys())
             match (%($key)) case %((typedef ?(String name))):
               names.push(name);
         case %(?(String include)):
@@ -287,7 +287,7 @@ module void _bind_pending_inline_bodies(
     List ast = body.full_parse(symbols, 0);
     Map additions = _inline_type_dependencies(body, ast);
     _publish_inline_dependencies(body, path, own, statics, additions);
-    foreach (Var part, _entry(body, path).car())
+    foreach (Var part in _entry(body, path).car())
       if (part is <map>) _merge_rows(c, globs, part);
     c.merge_translation_dependencies(body.deps);
     body.public_bodies = 0;
@@ -305,16 +305,16 @@ module void _bind_pending_inline_bodies(
 /* A unit's entry marks its static functions for the units that include it.
    The unit's own walk keeps those markers out of its symbols. */
 static void _forget_own_statics(Map globs, List entry) {
-  foreach (Var part, entry.car())
+  foreach (Var part in entry.car())
     if (part is <map>)
-      foreach (Var key, part.map().keys())
+      foreach (Var key in part.map().keys())
         match (key) case %("unit-static" ?): globs.del(key);
 }
 
 module int _declares_adoption(List parts) {
-  foreach (Var part, parts)
+  foreach (Var part in parts)
     if (part is <map>)
-      foreach (Var value, part.map())
+      foreach (Var value in part.map())
         match (value) case %(adopt ? ? external *): return 1;
   return 0;
 }
@@ -344,7 +344,7 @@ module void _record_cold_conformances(
   while (cold_providers) {
     Map pending = cold_providers;
     cold_providers = NULL;
-    foreach (Var path, pending.keys()) {
+    foreach (String path in pending.keys()) {
       if (path == unit) continue;
       Map rows = _record(cold, path);
       if (path in visited) _merge_rows(c, globs, rows);
@@ -368,7 +368,7 @@ static Map _record(ColdConformances &cold, String path) {
 // Every file but `lib/x2c.x`, which declares no adoption, sees the prelude.
 static Gathered _gather_prelude(Compiler c) {
   Gathered prelude = {.symbols = {}, .definitions = {}, .visited = {}};
-  foreach (String source, Compiler.prelude_sources())
+  foreach (String source in Compiler.prelude_sources())
     _gather_declarations(c, _canonical_path(%"${x2c_get_root()}/$source"), prelude);
   return prelude;
 }
@@ -407,8 +407,8 @@ static void _gather_declarations(Compiler c, String path, Gathered &into) {
   into.visited[path] = 1;
   List entry = _entry(c, path);
   if (!entry) return;
-  foreach (Var name, entry.caddr()) into.definitions[name] = 1;
-  foreach (Var part, entry.car()) {
+  foreach (String name in entry.caddr()) into.definitions[name] = 1;
+  foreach (Var part in entry.car()) {
     if (part is <map>) into.symbols.merge(part);
     else if (part is <string>) _gather_declarations(c, part, into);
   }
@@ -423,7 +423,7 @@ Map Compiler.callable_symbols(Compiler c, List names) {
   Gathered view = {.symbols = {}, .definitions = {}, .visited = {}};
   _gather_declarations(c, _canonical_path(c.filename), view);
   Map selected = {};
-  foreach (Var (key, value), view.symbols) {
+  foreach (Var (key, value) in view.symbols) {
     if (key is not <list> || value is not <list>) continue;
     if (_type_family(key)) {
       selected[key] = value;
@@ -444,7 +444,7 @@ Map Compiler.callable_symbols(Compiler c, List names) {
 /* Sorted so that an entry does not depend on Map order. */
 module List _sorted_names(Map definitions) {
   Array names = [];
-  foreach (Var name, definitions.keys()) names.push(name);
+  foreach (String name in definitions.keys()) names.push(name);
   names.sort();
   return names.list_free();
 }
@@ -463,7 +463,7 @@ static Map _inline_type_dependencies(Compiler c, List ast) {
             case %(expr ?type ?): if (type) types[type] = 1;
             case %((!set ?tag (!or declare decl typedef)) ?base
                      (bindings *bindings)):
-              foreach (List binding, bindings) {
+              foreach (List binding in bindings) {
                 Type type = %(declare $base (bindings $binding))
                   .type_from_ast();
                 if (type) types[type] = 1;
@@ -476,7 +476,7 @@ static Map _inline_type_dependencies(Compiler c, List ast) {
           }
         }
         Array ordered = [];
-        foreach (Var type, types.keys()) ordered.push(type);
+        foreach (Type type in types.keys()) ordered.push(type);
         String path = Compiler.portable_path(Path.absolute(c.filename));
         String name = Ast.binding_spelling(binding);
         rows[%("source-node" (interface-types $path ${-1} $name))] =
@@ -507,11 +507,11 @@ static void _publish_inline_dependencies(
   List entry = _entry(c, path);
   if (!entry) return;
   Map needed = {}, selected = {};
-  foreach (Var value, additions) _needed_types(value, all, needed);
+  foreach (List value in additions) _needed_types(value, all, needed);
   int changed;
   do {
     changed = 0;
-    foreach (Var (key, value), all) {
+    foreach (Var (key, value) in all) {
       List family = _row_type_family(all, statics, key, value);
       if (!family || !(family in needed) || key in selected) continue;
       selected[key] = 1;
@@ -521,28 +521,28 @@ static void _publish_inline_dependencies(
     }
   } while (changed);
   Map published = {};
-  foreach (Var part, entry.car())
+  foreach (Var part in entry.car())
     if (part is <map>)
-      foreach (Var key, part.map().keys()) published[key] = part;
+      foreach (Var key in part.map().keys()) published[key] = part;
   Array dropped = $auto([]);
-  foreach (Var key, additions.keys()) {
+  foreach (List key in additions.keys()) {
     Var owner;
     if (published.try_get(key, owner) &&
         owner.map()[key] == additions[key]) dropped.push(key);
   }
-  foreach (Var key, dropped) additions.del(key);
+  foreach (List key in dropped) additions.del(key);
   _cache_dependencies(entry[3], c.deps);
   if (!additions.len()) return;
   Map retained = _cache_copy(additions);
   _retain_rows(%($retained));
   Array replaced = $auto([]);
-  foreach (Var (key, value), retained) {
+  foreach ((List key, Var value) in retained) {
     Var owner;
     if (!published.try_get(key, owner)) continue;
     owner.map()[key] = value;
     replaced.push(key);
   }
-  foreach (Var key, replaced) retained.del(key);
+  foreach (List key in replaced) retained.del(key);
   if (!retained.len()) return;
   List parts = entry.car().list().append(%($retained));
   List updated = %($parts @{entry.cdr()});
@@ -556,7 +556,7 @@ static Map _contribution(String filename) {
   Var cached = _process_cache()[_canonical_path(filename)];
   if (cached is void) return NULL;
   Map contribution = NULL;
-  foreach (Var part, cached.list().car())
+  foreach (Var part in cached.list().car())
     if (part is <map>) contribution = part;
   return contribution;
 }
@@ -590,16 +590,16 @@ void Compiler.record_conformance_rows(Compiler c, Map rows) {
   Var cached = _process_cache()[_canonical_path(c.filename)];
   if (cached is void) return;
   Map contribution = NULL;
-  foreach (Var part, cached.list().car()) {
+  foreach (Var part in cached.list().car()) {
     if (part is not <map>) continue;
     contribution = part;
     Array stale = $auto([]);
-    foreach (Var (key, value), contribution)
+    foreach (Var (key, value) in contribution)
       match (value) case %(conformance *): stale.push(key);
-    foreach (Var key, stale) contribution.del(key);
+    foreach (Var key in stale) contribution.del(key);
   }
   if (contribution == NULL) return;
-  foreach (Var (key, value), rows) {
+  foreach (List (key, value) in rows) {
     _retain(key);
     _retain(value);
     contribution[key] = value;
@@ -614,9 +614,9 @@ List Compiler.declared_adoptions(Compiler c) {
   Var cached = _process_cache()[_canonical_path(c.filename)];
   if (cached is void) return NULL;
   Array adoptions = $auto([]);
-  foreach (Var part, cached.list().car())
+  foreach (Var part in cached.list().car())
     if (part is <map>)
-      foreach (Var value, part.map())
+      foreach (Var value in part.map())
         match (value) {
           case %(adopt *): adoptions.push(value);
           case %(package-import *): return NULL;

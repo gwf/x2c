@@ -160,7 +160,7 @@ Applies a contextual `meta` marker to one initialized file-static value.
 The unit's staged `meta` group holds the compile-time instance, which
 its module initializes for each unit.
 
-Source: `src/meta-native/functions.x:184`
+Source: `src/meta-native/functions.x:185`
 
 <a id="Compiler.install_meta_function"></a>
 #### Compiler.install_meta_function
@@ -204,7 +204,7 @@ Source: `src/meta-native/bindings.x:77`
 
 Installs an included meta function's evaluator advertisement.
 
-Source: `src/meta-native/functions.x:215`
+Source: `src/meta-native/functions.x:216`
 
 <a id="Compiler.linked_meta_provider_source"></a>
 #### Compiler.linked_meta_provider_source
@@ -331,7 +331,7 @@ Source: `src/meta-native/bindings.x:15`
 Records the provider of a public bodied meta function in its interface.
 The provider owns both its native body and its compile-time state.
 
-Source: `src/meta-native/functions.x:201`
+Source: `src/meta-native/functions.x:202`
 
 <a id="Compiler.run_meta_call"></a>
 #### Compiler.run_meta_call

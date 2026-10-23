@@ -102,7 +102,7 @@ static int _join_length(List strings, int n, int sep_len) {
   if (sep_len && (size_t) (n - 1) > (size_t) (INT_MAX - 1) / (size_t) sep_len)
     return -1;
   size_t total = (size_t) (n - 1) * (size_t) sep_len;
-  foreach (String str, strings) {
+  foreach (String str in strings) {
     int length = str.len();
     if ((size_t) length > (size_t) (INT_MAX - 1) - total) return -1;
     total += (size_t) length;

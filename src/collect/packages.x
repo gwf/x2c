@@ -74,7 +74,7 @@ static void _walk_package(
 /* Replay each package include once and record its dependencies. */
 static void _gather_surface(Surface &s, String path, List entry) {
   s.c.merge_translation_dependencies(entry[3]);
-  foreach (Var part, entry.car())
+  foreach (Var part in entry.car())
     match (%($part)) {
       case %(?(Map rows)): _merge_surface(s, path, rows);
       case %(?(String include)): _include_surface(s, include);
@@ -101,7 +101,7 @@ static void _merge_surface(Surface &s, String path, Map rows) {
   int keeps = _keeps_spellings(path);
   int foreign = !path.startswith(%"${s.root}/");
   _take_exports(s, rows);
-  foreach (Var (key, value), rows) {
+  foreach (Var (key, value) in rows) {
     if (key is not <list> || key.is_nil()) continue;
     String spelling = _package_key_spelling(key);
     if (_package_protocol_row(key, value)) _take(s, rows, key, value);
@@ -114,13 +114,13 @@ static void _merge_surface(Surface &s, String path, Map rows) {
 /* Compile-time definitions follow the package's ordinary include walk. */
 static void _take_exports(Surface &s, Map rows) {
   Array found = $auto([]);
-  foreach (Var (key, value), rows)
+  foreach (Var (key, value) in rows)
     match (%($key $value))
       case %(("source-node" (? ? ?position))
              (!set ?effect ((!or compile-time project-meta) *))):
         found.push(%($position $effect));
   found.sort();
-  foreach (List entry, found) s.exports.push(entry.cadr());
+  foreach (List entry in found) s.exports.push(entry.cadr());
 }
 
 static void _take(Surface &s, Map rows, List key, Var value) {
@@ -136,7 +136,7 @@ static void _reject(Surface &s, String path, String spelling) {
 
 /* The merged rows enter the importing unit's symbols. */
 static void _install(Surface &s) {
-  foreach (Var (key, value), s.merged) {
+  foreach (List (key, value) in s.merged) {
     s.c.sym.set(key, value);
     s.c.copy_source_declaration(s.c.sym.current_symbols(), s.merged, key);
   }
@@ -195,7 +195,7 @@ module void _replay_package_imports(
   Compiler c, Map globs, Map rows, Array exports) {
   Array imports = NULL;
   defer if (imports) imports.free();
-  foreach (Var (key, value), rows)
+  foreach (Var (key, value) in rows)
     match (key)
       case %("source-node" (? ?path ?position)): {
         if (value is not <list> || !value.list() ||
@@ -225,7 +225,7 @@ static void _import_all(
   shadow.builtin_defs = c.builtin_defs;
   shadow.sym.reset(globs);
   shadow.start_collection();
-  foreach (List entry, imports)
+  foreach (List entry in imports)
     match (entry) {
       case %(?(String path) ?
              (package-import ?(String name) ?(String alias) ?members)):
@@ -244,9 +244,9 @@ static void _import_package(
   c.filename = Compiler.absolute_home_path(path);
   c.collect_package(name, NULL);
   c.register_package_alias(name, alias, NULL);
-  foreach (List member, members)
+  foreach (List member in members)
     c.register_package_member(name, member.car(), member.cadr(), NULL, NULL);
   if (effects != NULL)
-    foreach (Var effect, c.package_effects[name]) effects.push(effect);
+    foreach (List effect in c.package_effects[name]) effects.push(effect);
   else c.install_compile_time_effects(c.package_effects[name]);
 }

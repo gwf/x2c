@@ -17,7 +17,7 @@ Save this as `hello.x`:
 ```x2c
 int main(void) {
   Array names = ["Ada", "Grace", "Linus"];
-  foreach (String name, names)
+  foreach (String name in names)
     printf("Hello, %s!\n", name);
   return 0;
 }

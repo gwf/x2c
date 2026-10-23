@@ -114,11 +114,11 @@ List Compiler.generate_protocol_adapters(Compiler c, List ast) {
      one is installed only when this unit emits its adapters. */
   int central_initializer = _defines_function(c, "x2c_initialize_protocols");
   Array ordered = [];
-  foreach (Var (key, value), c.conforms)
+  foreach ((List key, Var value) in c.conforms)
     if (value is <list>) ordered.push(%($key $value));
-  foreach (List entry, _unused_recorded(c)) ordered.push(entry);
+  foreach (List entry in _unused_recorded(c)) ordered.push(entry);
   ordered.sort();
-  foreach (List ordered_row, ordered)
+  foreach (List ordered_row in ordered)
     match (ordered_row) {
       case %(? (protocol-conformance ?(Type base) ?(Type participant)
                 ?(String forward) ?(String reverse) ?(Map variables)
@@ -151,14 +151,14 @@ void Compiler.install_generated_protocol_symbols(Compiler c) {
   _reuse_defaults(c);
   // An owner lookup can install a recorded conformance in the registry.
   Array conformances = [];
-  foreach (Var value, c.conforms) conformances.push(value);
-  foreach (Var value, conformances)
+  foreach (Var value in c.conforms) conformances.push(value);
+  foreach (Var value in conformances)
     match (value)
       case %(protocol-conformance ?(Type base) ?(Type participant)
              ?(String forward) ? ? ? (members *rows)): {
         if (_native_rows(rows)) {
           if (_visibility(c, base, participant) != <external>) continue;
-          foreach (List row, rows)
+          foreach (List row in rows)
             match (row)
               case %(?(String member) ? ? ? ? ?(Type signature)):
                 _install_generated(c, participant, member, signature);
@@ -166,7 +166,7 @@ void Compiler.install_generated_protocol_symbols(Compiler c) {
         }
         if (!(forward in c.fn_defs)) continue;
         if (_numeric_participant(c, participant)) continue;
-        foreach (List row, rows)
+        foreach (List row in rows)
           match (row)
             case %(?(String member) base-dflt ? ? ordinary ?): {
               List decision = _generated_owner(c, participant, member);
@@ -189,12 +189,12 @@ static void _install_generated(
 /** Reports whether a generated member names a native protocol host function.
     Its defining header supplies the alias instead of a C prototype. */
 int Compiler.native_protocol_alias(Compiler c, String name) {
-  foreach (Var conformance, c.conforms)
+  foreach (Var conformance in c.conforms)
     match (conformance)
       case %(protocol-conformance ? ?(Type participant) ? ? ? ?
              (members *rows)):
         if (_native_rows(rows))
-          foreach (List row, rows)
+          foreach (List row in rows)
             if (_member_spelling(participant, row.car()) == name) return 1;
   return 0;
 }
@@ -236,7 +236,7 @@ static void _present_conformance(
             .shares_var_tag = base === %("Var") &&
               _adoption_representation(adoption)};
           Array presented = [];
-          foreach (List row, rows) presented.push(_present(adapters, row));
+          foreach (List row in rows) presented.push(_present(adapters, row));
           List members = presented.list_free();
           List form = %(
             conform $base $participant $forward $reverse $binder
@@ -250,14 +250,14 @@ static void _present_conformance(
 static void _generated_support(Compiler c, List members, List form) {
   Map facts = c.semantic_binding_facts(), authored = {};
   Array keys = [];
-  foreach (List row, members) match (row) case %(? ? ? ? ? *parts):
-    foreach (List part, parts) keys.push(%(api-definition ${part.cadr()}));
-  foreach (List key, keys) {
+  foreach (List row in members) match (row) case %(? ? ? ? ? *parts):
+    foreach (List part in parts) keys.push(%(api-definition ${part.cadr()}));
+  foreach (List key in keys) {
     Var fact;
     if (facts.try_get(key, fact)) authored[key] = fact;
   }
   c.shipped_support(<conform>, form, "protocol conformance");
-  foreach (List key, keys) {
+  foreach (List key in keys) {
     Var fact;
     if (authored.try_get(key, fact)) c.set_fact(key, fact);
     else c.drop_fact(key);
@@ -331,7 +331,7 @@ static List _inherited_part(
 static List _thunk(
   ProtocolAdapters &a, String member, Type template) {
   Map erased = a.bindings.copy();
-  foreach (Var variable, a.variables.keys()) erased[variable] = %("Var");
+  foreach (String variable in a.variables.keys()) erased[variable] = %("Var");
   Type target = _substitute_signature(template, a.variables, erased);
   String participant_name = a.participant.car().str().lower();
   String name = a.c.fresh_name(%"proto_${participant_name}_$member");
@@ -355,7 +355,8 @@ static List _signature_declaration(
   List parameters = signature.car().list().cadr();
   Type result = signature.cdr();
   Array declarations = [];
-  foreach (Type type, parameters) declarations.push(type.parameter_ast(NULL));
+  foreach (Type type in parameters)
+    declarations.push(type.parameter_ast(NULL));
   List binding = c.sym.reference(%($name), NULL);
   List storage = make_static ? %(static @result) : result;
   return %(
@@ -381,7 +382,7 @@ static List _native_aliases(
   (List source, int private) = stored;
   int make_static = _visibility(c, base, participant) == <static>;
   Array aliases = [];
-  foreach (List row, rows)
+  foreach (List row in rows)
     match (row)
       case %(?(String member) ? ?(String binding) ? ?
              ?(Type signature)): {
@@ -408,24 +409,24 @@ static List _insert_at_boundary(
   List ast, List declaration, int declaration_private, List additions,
   int make_static) {
   Array output = [], int eligible = 0, inserted = 0;
-  foreach (List node, ast) {
+  foreach (List node in ast) {
     int boundary = eligible && _starts_private_region(node);
     if (!inserted && boundary && !make_static) {
-      foreach (Var added, additions) output.push(added);
+      foreach (List added in additions) output.push(added);
       inserted = 1;
     }
     output.push(node);
     if (!inserted && boundary && make_static) {
-      foreach (Var added, additions) output.push(added);
+      foreach (List added in additions) output.push(added);
       inserted = 1;
     }
     if (node != declaration) continue;
     eligible = 1;
     if (!make_static || !declaration_private) continue;
-    foreach (Var added, additions) output.push(added);
+    foreach (List added in additions) output.push(added);
     inserted = 1;
   }
-  if (!inserted) foreach (Var added, additions) output.push(added);
+  if (!inserted) foreach (List added in additions) output.push(added);
   return output.list_free();
 }
 

@@ -25,7 +25,7 @@ module void _record_top_level(Compiler c, List node, Token site) {
 /* An initializer makes a file-scope declaration a definition; a tentative
    one may be repeated. */
 static void _record_objects(Compiler c, List bindings, Token site) {
-  foreach (List row, bindings)
+  foreach (List row in bindings)
     match (row) case %(op = (bind (!set ?binding (binding ? ?)) ?) ?): {
       List key = %(defined $binding);
       if (key in c.semantic_binding_facts())
@@ -75,7 +75,7 @@ module void _record_span(Compiler c, List node, int start, int end) {
 // Record only prototypes reached in positioned full-parse source order.
 static void _record_prototypes(
   Compiler c, Type declared_type, List items) {
-  foreach (List target, items)
+  foreach (List target in items)
     match (target)
       case %(bind ?binding ?modifiers): {
         List single = %(declare $declared_type (bindings $target));
@@ -107,7 +107,7 @@ static void _record_prototype(
 static void _record_attributes(
   Compiler c, List binding, List modifiers) {
   List attributes = NULL;
-  foreach (Var item, modifiers)
+  foreach (Var item in modifiers)
     if (item is <list> && car(item) is <string>)
       attributes = attributes ? %( @attributes $item ) : %($item);
   if (attributes)
@@ -175,7 +175,7 @@ static List _completion_contract(
 
 static Type _contract_type(Type type, int keep_qualifiers) {
   Array kept = [];
-  foreach (Var item, type) {
+  foreach (Var item in type) {
     if (item is <list>) kept.push(_contract_type(item, keep_qualifiers));
     else if (!_omitted_specifier(item, keep_qualifiers)) kept.push(item);
   }
@@ -198,7 +198,7 @@ static void _record_static_object(
   if (!declared.is_static()) return;
   int declared_var = c.sym.is_var_type(declared);
   if (!declared_var && !_initializable_type(c, declared)) return;
-  foreach (List binding_init, bindings)
+  foreach (List binding_init in bindings)
     match (binding_init)
       case %(op = (bind (!set ?binding (binding ? ?)) ?)
              (expr (!set ?initializer_type (*)) ?value)): {
@@ -220,7 +220,7 @@ static void _collect_references(Var value, Map references, Array ordered) {
   List node = value;
   match (node)
     case %(input *arguments): {
-      foreach (List argument, arguments)
+      foreach (List argument in arguments)
         _collect_references(argument.cadr(), references, ordered);
       return;
     }
@@ -238,14 +238,13 @@ static void _collect_references(Var value, Map references, Array ordered) {
       }
       return;
     }
-  foreach (Var child, node) _collect_references(child, references, ordered);
+  foreach (Var child in node) _collect_references(child, references, ordered);
 }
 
 module void _check_static_inits(Compiler c) {
   Map statics = c.sym.file_statics();
-  foreach (Var (key, value), c.static_init_deps) {
-    List binding = key, dependencies = value;
-    foreach (List reference, dependencies) {
+  foreach (List (binding, dependencies) in c.static_init_deps) {
+    foreach (List reference in dependencies) {
       String name = Ast.binding_spelling(reference);
       if (!name || %($name) in statics) continue;
       String target = Ast.binding_spelling(binding);

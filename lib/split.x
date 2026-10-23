@@ -244,7 +244,7 @@ meta native Split String.splits(String str, String sep) =>
     while (words.try_next(cursor, word)) printf("%s\n", word);
     ```
 
-    This is what `foreach(String word, split)` lowers to; `Split.iter` is the
+    This is what `foreach(String word in split)` lowers to; `Split.iter` is the
     boxing adapter for every other binder.
     Raises: `<alloc-fail>` while canonicalizing a nonempty field. `Null`
     arguments produce exhaustion without raising.

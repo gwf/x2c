@@ -129,7 +129,7 @@ static void _collect_labels(Walk &w, Var value, List path) {
 
 static void _collect_blocks(Walk &w, List node, List path) {
   Array blocks = $auto(_expression_blocks(node));
-  foreach (List block, blocks) _collect_labels(w, block, path);
+  foreach (List block in blocks) _collect_labels(w, block, path);
 }
 
 static void _collect_label(Walk &w, Var name, List rest, List path) {
@@ -141,7 +141,7 @@ static void _collect_label(Walk &w, Var name, List rest, List path) {
 /* Each region a landing opens has its own identity, such as a `try` body
    and each catch arm, while its outer parts keep the enclosing path. */
 static void _collect_rows(Walk &w, List rows, List path) {
-  foreach (List row, rows)
+  foreach (List row in rows)
     match (row) {
       case %(outer ? ?node): _collect_labels(w, node, path);
       case %(region ? ?node): _collect_labels(w, node, cons(node, path));
@@ -155,7 +155,7 @@ static void _collect_local(
 }
 
 static void _collect_children(Walk &w, List node, List path) {
-  foreach (Var child, node) _collect_labels(w, child, path);
+  foreach (Var child in node) _collect_labels(w, child, path);
 }
 
 /* A label reads as a binding, as a wrapped expression, or as the bare name
@@ -333,7 +333,7 @@ static List _transfer(Walk &w, int stop, List statement) {
 static List _unwind(Walk &w, int stop) {
   Array statements = [];
   for (int i = (int) w.regions.len() - 1; i >= stop; i--)
-    foreach (List statement, w.regions[i].list().car().list())
+    foreach (List statement in w.regions[i].list().car().list())
       statements.push(statement);
   return statements.list_free();
 }
@@ -363,7 +363,7 @@ static int _goto_stop(Walk &w, Var label) {
    jump may only leave a suffix of it. */
 static List _region_path(Walk &w) {
   List path = %();
-  foreach (List region, w.regions) path = cons(region.cadr(), path);
+  foreach (List region in w.regions) path = cons(region.cadr(), path);
   return path;
 }
 
@@ -406,7 +406,7 @@ static List _lower_landing(Walk &w, Var code, List rows) {
   Compiler c = w.c;
   Map parts = $auto({});
   List exits = NULL;
-  foreach (List row, rows)
+  foreach (List row in rows)
     match (row) {
       case %(new-name ?token ?(String role)):
         parts[token] = _region_binding(c, role);

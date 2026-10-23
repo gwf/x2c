@@ -46,7 +46,7 @@ meta static Code _destructure_element(Atom values, int index) {
 meta static List _destructure_writes(List targets, Atom values) {
   Array writes = [];
   int index = 0;
-  foreach (Code target, targets) {
+  foreach (Code target in targets) {
     Type type = target.cadr();
     Code element = _destructure_element(values, index++);
     writes.push(%(stmnt ${$!($type){ $target = $element }}));
@@ -72,7 +72,7 @@ meta Code destructure_declaration(Code node) {
     case %(dstrdecl (params *parameters) ?source): {
       Array items = [_destructure_read(values, source)];
       int index = 0;
-      foreach (List parameter, parameters)
+      foreach (List parameter in parameters)
         match (parameter) case %(param ?base ?declarator): {
           Code element = _destructure_element(values, index++);
           items.push(%(declare $base (bindings (op = $declarator $element))));
@@ -81,7 +81,7 @@ meta Code destructure_declaration(Code node) {
     }
     case %(dstrdecl ?(Type type) (targets *names) ?source): {
       Array declarators = [], targets = [];
-      foreach (Var name, names) {
+      foreach (List name in names) {
         declarators.push(%(bind $name ()));
         targets.push(%(expr $type (ident $name)));
       }

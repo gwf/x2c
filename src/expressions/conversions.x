@@ -330,7 +330,7 @@ static List _convert_generic_arms(
       %(?control *associations))}): {
     Array converted = [];
     int changed = 0;
-    foreach (List association, associations) match (association)
+    foreach (List association in associations) match (association)
       case %(association ?selector ?value): {
         List result = c.convert_expression(value, declared_target);
         if (result != value) changed = 1;
@@ -471,7 +471,7 @@ static List _var_checked_reader(
   Compiler c, List expr, Type type, Type target) {
   List owners = target.is_bare_typedef_name()
               ? _typedef_names(c, target).list_free() : %($target);
-  foreach (Type owner, owners) {
+  foreach (Type owner in owners) {
     List reader = _var_exact_reader(c, expr, owner);
     if (!reader) reader = c.converter_call(expr, type, owner);
     if (reader)
@@ -576,7 +576,7 @@ List Compiler.converter_call(Compiler c, List expr, Type type, Type target) {
   if (!type.match(%(?)) || !target.match(%(?))) return NULL;
   List owners = type.is_bare_typedef_name()
               ? _typedef_names(c, type).list_free() : %($type);
-  foreach (Type owner, owners) {
+  foreach (Type owner in owners) {
     if (owner == target) return NULL;
     int declared = 0;
     List converted = _converter_owned_call(c, expr, owner, target, declared);

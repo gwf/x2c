@@ -399,7 +399,7 @@ static List _match_cases(Compiler c) {
 static int _arm_directives(
   Compiler c, Array cases, Array groups, int saw_default) {
   if (c.token == c.directives_taken) return saw_default;
-  foreach (List directive, c.leading_preproc()) {
+  foreach (List directive in c.leading_preproc()) {
     cases.push(directive);
     saw_default = _default_after_directive(groups, saw_default, directive);
   }
@@ -503,7 +503,7 @@ static List _typed_captures(
 static List _capture_temporaries(
   Compiler c, List types, Array locals) {
   Array declarations = [];
-  foreach (List row, types) match (row)
+  foreach (List row in types) match (row)
     case %(?name ?type): {
       String temporary = c.fresh_name("match_value");
       declarations.push(
@@ -531,7 +531,7 @@ static List _capture_declaration(
 
 static List _capture_locals(Compiler c, Array locals) {
   Array declarations = [];
-  foreach (List row, locals) match (row)
+  foreach (List row in locals) match (row)
     case %(?name ?type ?temporary):
       declarations.push(
         _capture_declaration(
@@ -641,7 +641,7 @@ List Compiler.parse_governed(Compiler c, Symbol position) {
    conditional groups they open, less those they close. */
 static int _take_directives(Compiler c, Array items) {
   int depth = 0;
-  foreach (List directive, c.leading_preproc()) {
+  foreach (List directive in c.leading_preproc()) {
     items.push(directive);
     depth += _group_step(directive.cadr());
   }
@@ -675,7 +675,7 @@ static int _depth_after(Compiler c, Token start, int depth) {
 static Symbol _arm_end(List run) {
   int level = 0;
   Symbol end = 0;
-  foreach (List directive, run) {
+  foreach (List directive in run) {
     Symbol kind = Compiler.preproc_conditional_kind(directive.cadr());
     if (kind == <open>) level++;
     else if (!kind) continue;
@@ -758,7 +758,7 @@ static List _block_items(Compiler c, int anchor_items) {
   loop {
     _x2c_complete_here(c, <block>, _block_keywords());
     if (c.token != c.directives_taken)
-      foreach (Var directive, c.leading_preproc()) block.push(directive);
+      foreach (List directive in c.leading_preproc()) block.push(directive);
     if (c.peek(0) == <"}">) break;
     _push_item(c, block, anchor_items);
   }
@@ -785,7 +785,7 @@ static void _push_item(Compiler c, Array block, int anchor_items) {
   if (!expansion)
     block.push(anchor_items ? c.anchor_origin(stmt, origin) : stmt);
   else after = stmt.cdr().append(after);
-  foreach (List item, after)
+  foreach (List item in after)
     block.push(
       !anchor_items || item.car() == <at>
         ? item : c.anchor_origin(item, origin)

@@ -81,7 +81,7 @@ List Compiler.symbol_set_expression(Compiler c, List values, int &duplicate) {
 static int _duplicate_index(List values) {
   Map seen = {};
   int index = 0;
-  foreach (Symbol value, values) {
+  foreach (Symbol value in values) {
     if (value in seen) return index;
     seen[value] = 1;
     index++;
@@ -171,7 +171,7 @@ static List _parse_quoted_entries(Compiler c) {
 
 static void _push_entry(Array entries, Ast entry) {
   if (entry && entry.car() == <seq>)
-    foreach (Var row, entry.cdr()) entries.push(row);
+    foreach (List row in entry.cdr()) entries.push(row);
   else if (entry) entries.push(entry);
 }
 

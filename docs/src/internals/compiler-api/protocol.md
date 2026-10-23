@@ -226,7 +226,7 @@ Source: `src/protocol/registry.x:505`
 Remembers a source typedef's declaration and visibility, which native
 alias insertion reads for its participant.
 
-Source: `src/protocol/adapters.x:371`
+Source: `src/protocol/adapters.x:372`
 
 <a id="Compiler.resolve_as_declared"></a>
 #### Compiler.resolve_as_declared

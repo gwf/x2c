@@ -33,7 +33,7 @@ macro Stmt $fail.try_finalizer_label(Expr $site, Expr $label) =>
 meta List _x2c_try_catch_patterns(List patterns, List items) {
   Array prepared = [];
   int index = 0;
-  foreach (List pattern, items) {
+  foreach (List pattern in items) {
     prepared.push($!{ $patterns[$index] = $pattern; });
     index++;
   }
@@ -93,7 +93,7 @@ meta static int _try_arm_exits(List arm) {
 meta List _x2c_try_catch_cases(List selected, List arms) {
   Array cases = [];
   int index = 0, exits = 1;
-  foreach (List arm, arms) {
+  foreach (List arm in arms) {
     cases.push($!{ if ($selected == $index) $arm });
     index++;
     exits &= _try_arm_exits(arm);
@@ -182,7 +182,7 @@ meta static Var _try_finalizer_label(Var value, List &at) {
         continue;
       }
     }
-    foreach (Var child, node) {
+    foreach (Var child in node) {
       pending.push(child);
       around.push(here);
     }
@@ -245,7 +245,7 @@ meta static List _try_catch_clause(List handle, List records, Array rows) {
   if (!records) return NULL;
   String state = "ERROR_CATCH_PENDING";
   Array arms = [], patterns = [];
-  foreach (List record, records) {
+  foreach (List record in records) {
     Code pattern = record.car();
     if (pattern) {
       if (!pattern.is_static_pattern()) state = "ERROR_CATCH_TRANSIENT";

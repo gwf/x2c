@@ -78,18 +78,18 @@ void Compiler.prepare_loaded_main(Compiler c, Array nodes) {
     Existing meta entries and the adapted main keep their original targets. */
 void Compiler.prepare_loaded_functions(Compiler c, Array nodes) {
   Map present = {};
-  foreach (List entry, c.meta_group)
+  foreach (List entry in c.meta_group)
     match (entry) case %(function ? ?name ?): present[name] = 1;
   Var identity, String name;
-  foreach (List node, nodes)
+  foreach (List node in nodes)
     if (_function_identity(node, identity, name) &&
         c.public_native_function(node, name) && !(name in present)) {
       c.group_meta_function(node);
       present[name] = 1;
     }
-  foreach (List node, nodes)
+  foreach (List node in nodes)
     match (node) case %(declare ?spec (bindings *rows)):
-      foreach (List row, rows) _loaded_global(c, spec, row, present);
+      foreach (List row in rows) _loaded_global(c, spec, row, present);
 }
 
 /* Each path has one accessor, with one parameter per array dimension.
@@ -167,7 +167,7 @@ static List _loaded_snapshot(
 
 static void _loaded_snapshot_fields(
   Compiler c, Type type, List target, List value, List budget, Array fields) {
-  foreach (List row, c.sym.field_order(_loaded_shape(c, type)).cdr()) {
+  foreach (List row in c.sym.field_order(_loaded_shape(c, type)).cdr()) {
     (String name, Type field) = row;
     field = field.qualify(c.sym.normalize_declared_type(type));
     if (!name) {
@@ -275,7 +275,7 @@ static void _loaded_path(LoadedPath path, Type type, List target, int root) {
 
 static void _loaded_fields(LoadedPath path, Type type, List target) {
   Compiler c = path.compiler;
-  foreach (List row, c.sym.field_order(_loaded_shape(c, type)).cdr()) {
+  foreach (List row in c.sym.field_order(_loaded_shape(c, type)).cdr()) {
     (String name, Type field) = row;
     field = field.qualify(c.sym.normalize_declared_type(type));
     if (!name) {

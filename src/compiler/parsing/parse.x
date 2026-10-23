@@ -95,7 +95,7 @@ module void _top_level(Compiler c, Array nodes) {
   if (!node) node = c.parse_top_level();
   int end = _end_index(c, tokens);
   if (node && node.car() == <seq>)
-    foreach (List item, node.cdr()) _add(c, nodes, item, begin, end);
+    foreach (List item in node.cdr()) _add(c, nodes, item, begin, end);
   else if (node) _add(c, nodes, node, begin, end);
 }
 
@@ -119,7 +119,7 @@ module void _append_preproc(Compiler c, Array nodes) {
   List directives = c.leading_preproc();
   c.note_preprocessor_macros(directives);
   if (c.included_effects.len()) c.install_included_effects();
-  foreach (Var directive, directives) nodes.push(directive);
+  foreach (List directive in directives) nodes.push(directive);
 }
 
 /* A failed declaration is skipped whole from its first token, because a

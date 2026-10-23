@@ -93,7 +93,7 @@ static macro Stmt $fail.emit_static_switch(Expr $c, Expr $site) {
    its ordinary mapping at the invocation and its original storage scope. */
 module List _initializer_macro(Emitter &e, List input, List body) {
   Buffer parameters = Buffer.new(0);
-  foreach (List argument, input.cdr()) {
+  foreach (List argument in input.cdr()) {
     if (parameters.len()) parameters.write_char(',');
     parameters.write(argument.car().str());
   }
@@ -113,7 +113,7 @@ module List _initializer_macro(Emitter &e, List input, List body) {
   String forwarding = $emit.initializer.forwarding(name, formal, expanded);
   e.native_macros.push(%($name $forwarding));
   Array arguments = [];
-  foreach (List argument, input.cdr()) {
+  foreach (List argument in input.cdr()) {
     List emitted = _emit(e, argument.cadr());
     arguments.push(%("(" @emitted ")"));
   }
@@ -130,7 +130,7 @@ module List _initializer_value(Emitter &e, List ast) {
   if (input)
     return _initializer_macro(e, input, %(initval @cases));
   List result = NULL;
-  foreach (List choice, cases.reverse()) {
+  foreach (List choice in cases.reverse()) {
     (List condition, List path, Type type, List value) = choice;
     if (value.match(%(expr ? (composite *))))
       value = type ? %(expr $type (cast $type $value))
@@ -178,7 +178,7 @@ module List _local_static(
   output.push(%("typedef" @base_decl ";"));
   String storage = declared_base.is_threaded() ? "static _Thread_local"
                                               : "static";
-  foreach (List binding, bindings.cdr())
+  foreach (List binding in bindings.cdr())
     _static_binding(e, binding, declared_base, base_name, storage, output);
   // The region shares its source block, including a statement expression's
   // final value; another C block here would turn that value into void.
@@ -191,7 +191,7 @@ static int _static_case_entry(List node) {
     case %((!or switch function expr declare typedef) *): return 0;
     case %((!or case default) *): return 1;
   }
-  foreach (Var child, node)
+  foreach (Var child in node)
     if (child is <list> && _static_case_entry(child)) return 1;
   return 0;
 }
@@ -350,7 +350,7 @@ static List _capture_definition(
 static List _capture_children(
   Emitter &e, List node, Array inputs, Array declarations) {
   Array children = [];
-  foreach (Var child, node) {
+  foreach (Var child in node) {
     if (child is <list>)
       children.push(_capture_source(e, child, inputs, declarations));
     else children.push(child);
@@ -372,7 +372,7 @@ static int _source_type_definition(List value) {
       case %((!or struct union) (fields *)): return 1;
       case %(enum ? (!is type list)): return 1;
     }
-    foreach (Var child, node)
+    foreach (Var child in node)
       if (child is <list>) pending.push(child);
   }
   return 0;

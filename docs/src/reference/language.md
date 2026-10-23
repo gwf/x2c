@@ -1612,7 +1612,7 @@ within the body runs the decorator's deferred cleanup before leaving:
 ~#include "x2c.x"
 $scope() static int total(List values, int bias) {
   int sum = bias;
-  foreach (Var value, values) sum += value.int();
+  foreach (int value in values) sum += value;
   return sum;
 }
 ~int main(void) { return total(%(1 2 3), 10) == 16 ? 0 : 1; }
@@ -3917,9 +3917,9 @@ receives the ordinary conversion from its cursor output or iterator element:
 ~  int total = 0;
 foreach (int value in values) total += value;
 foreach (int key in map.keys()) printf("%d\n", key);
-foreach (Var (key, value) in map)
-  printf("%ld=%ld\n", key.integer(), value.integer());
-foreach (int value, values) total -= value;
+foreach (int (key, value) in map)
+  printf("%d=%d\n", key, value);
+foreach (int value in values) total -= value;
 ~  return total == 0 ? 0 : 1;
 ~}
 ```

@@ -912,7 +912,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _539 = cons(_537, _538);
   _540 = List_var(_539);
   _541 = Symbol_var(1133019155420);
-  _542 = int_var(20108);
+  _542 = int_var(20120);
   _543 = cons(_542, NULL);
   _544 = cons(_541, _543);
   _545 = List_var(_544);
@@ -2746,9 +2746,9 @@ static Var _preserve_locals(Preserve * p, Var value){
 
 static List f12_preservation____block(Preserve * p, List statements){
   Array output = Array_new(); {
-    Var statement;  List _x2c_gensym_macro_object_16 = statements;  List _x2c_gensym_macro_cursor_23 = _x2c_gensym_macro_object_16;  Var _x2c_gensym_macro_cursor_output_13;  while(List_try_next(_x2c_gensym_macro_object_16, &(_x2c_gensym_macro_cursor_23), &(_x2c_gensym_macro_cursor_output_13))){
-      statement = _x2c_gensym_macro_cursor_output_13; {
-        int origin = 0;  Var inner = statement; {
+    List statement;  List _x2c_gensym_macro_object_16 = statements;  List _x2c_gensym_macro_cursor_23 = _x2c_gensym_macro_object_16;  Var _x2c_gensym_macro_cursor_output_13;  while(List_try_next(_x2c_gensym_macro_object_16, &(_x2c_gensym_macro_cursor_23), &(_x2c_gensym_macro_cursor_output_13))){
+      statement = Var_list_payload(_x2c_gensym_macro_cursor_output_13); {
+        int origin = 0;  Var inner = List_var(statement); {
           Var _x2c_gensym_match_var = inner; int _x2c_gensym_match_none = !Var_is(_x2c_gensym_match_var, 806120);  List _x2c_gensym_match_expr = Var_list_payload(_x2c_gensym_match_var); List _x2c_gensym_match_cursor;  switch(_x2c_gensym_match_expr ? _x2c_gensym_match_expr->car.u64 : 0){
               case 9224497936761618536ULL: ; if (!_x2c_gensym_match_none) { _x2c_gensym_match_cursor = _x2c_gensym_match_expr; if (_x2c_gensym_match_cursor && _x2c_gensym_match_cursor->car.u64 == 9224497936761618536ULL && (_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor && Var_is(_x2c_gensym_match_cursor->car, 3453797)) { Var _x2c_gensym_match_value_0 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && _x2c_gensym_match_cursor) { Var _x2c_gensym_match_value_1 = _x2c_gensym_match_cursor->car; if ((_x2c_gensym_match_cursor = _x2c_gensym_match_cursor->cdr, 1) && !_x2c_gensym_match_cursor) {{
               Var anchor;  anchor = _x2c_gensym_match_value_0;  Var wrapped;  wrapped = _x2c_gensym_match_value_1; {
@@ -2781,7 +2781,7 @@ static List f12_preservation____block(Preserve * p, List statements){
         List loop = f12_preservation____escape_loop(&((* p)), Var_list_payload(inner));  if(List_truth(loop)){
           Array_push(output, List_var(origin ? cons(_8, cons(int_var(origin), cons(List_var(loop), NULL))) : loop));  continue;
         }
-        Array_push(output, _preserve_locals(&((* p)), statement));
+        Array_push(output, _preserve_locals(&((* p)), List_var(statement)));
       }
 
     }

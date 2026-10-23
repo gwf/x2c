@@ -7,7 +7,7 @@
    bound in its parameter scope once its body is complete. */
 module List _entry_code(Compiler c, int depth) {
   Array items = [];
-  foreach (List row, _take_placements(c, depth))
+  foreach (List row in _take_placements(c, depth))
     _push_items(items, c.bind_syntax(row[3], <block>, c.return_type));
   return items.list_free();
 }
@@ -135,7 +135,7 @@ List Compiler.leave_item(Compiler c) {
   List placed = _take_placements(c, depth);
   if (!placed) return NULL;
   Array items = [];
-  foreach (List placement, placed) {
+  foreach (List placement in placed) {
     (Var anchor, List binding, Var result, Var code) = placement;
     (void) anchor, (void) result;
     if (binding)
@@ -180,7 +180,7 @@ static void _append_managed(
   Compiler c, List declaration, Array output, Token origin) {
   match (declaration) {
     case %(seq *rows): {
-      foreach (List row, rows)
+      foreach (List row in rows)
         _append_managed(c, row, output, origin);
       return;
     }
@@ -199,7 +199,7 @@ static void _append_managed_rows(
   Array ordinary = $auto([]);
   Var source_base = base;
   size_t remaining = declarators.len();
-  foreach (List declarator, declarators) {
+  foreach (List declarator in declarators) {
     remaining--;
     List after = _after_declarator(c, source_base, declarator, origin);
     if (!after) {
@@ -246,7 +246,7 @@ static List _take_placed(
   Compiler c, List binding, List value, List &result, Token origin) {
   if (!c.placements.len()) return NULL;
   Array kept = [], code = [];
-  foreach (List row, c.placements) {
+  foreach (List row in c.placements) {
     (Var depth, List anchor, List placed, Var item) = row;
     (void) depth;
     if (anchor !== binding) {
@@ -262,7 +262,7 @@ static List _take_placed(
   if (!code.len()) return NULL;
   c.placements = kept;
   Array items = [];
-  foreach (Var item, code)
+  foreach (Var item in code)
     _push_items(items, c.bind_syntax(item, <block>, c.return_type));
   return %(seq @{items.list_free()});
 }
@@ -290,7 +290,7 @@ static Type _share_declaration_type(
     c.bind_syntax($!{ typedef $value $name; }, <block>, c.return_type);
   _push_items(output, alias);
   Array storage = [];
-  foreach (Var item, base)
+  foreach (Var item in base)
     if (item is <symbol> && item.symbol().is_storage_class())
       storage.push(item);
   return %(@{storage.list_free()} $name);

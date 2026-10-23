@@ -190,7 +190,7 @@ static List _quotation(
   /* Each local supplies one hole, a sequence included, so the quotation
      builds its pending invocation with the values already grouped. */
   List values = %(expr ("List") (nil));
-  foreach (List hole, d.parameters.reverse())
+  foreach (List hole in d.parameters.reverse())
     values = _quoted_cons(
       c, %(expr () (ident ${_hole_name(hole).str()})), values, start);
   List definition = c.capture_macro_value(_publish(d));
@@ -221,13 +221,13 @@ static List _construction(Definition &d, Map holes) {
   Map keys = {}, file_locals = {};
   _file_scope_locals(%(${d.template}), file_locals);
   Array fresh = [];
-  foreach (List row, d.fresh) {
+  foreach (List row in d.fresh) {
     Var binder = row.car();
     keys[binder] = 1;
     fresh.push(%($binder ${row.cadr()} ${binder in file_locals ? 1 : 0}));
   }
-  foreach (List hole, d.parameters)
-    foreach (Symbol projection, %(source value expression splice member))
+  foreach (List hole in d.parameters)
+    foreach (Symbol projection in %(source value expression splice member))
       keys[_hole_key(hole, projection)] = %($hole $projection);
   /* Cached pattern literals retain their values across producer sessions. */
   List quoted = %(
@@ -285,7 +285,7 @@ static List _built_hole(
     (kind ${hole.assoc(<kind>)})
     (sequence ${hole.assoc(<sequence>)})
   );
-  foreach (Var constant, %($selected $shape "x2c.hole"))
+  foreach (Var constant in %($selected $shape "x2c.hole"))
     cells = c.literal_cell(c.cache_literal_var(constant), cells);
   return %(expr ("List") $cells);
 }
@@ -336,8 +336,8 @@ static List _part_construction(Definition &d) {
 static Map _written_keys(Definition &d) {
   if (!d.rebuild || d.fresh) $fail.macros_typed_quotation(d.c, d.start);
   Map keys = {};
-  foreach (List hole, d.parameters)
-    foreach (Symbol projection, %(source value expression splice member))
+  foreach (List hole in d.parameters)
+    foreach (Symbol projection in %(source value expression splice member))
       keys[_hole_key(hole, projection)] = %($hole $projection);
   return keys;
 }

@@ -23,7 +23,7 @@ Map x2c_meta_definition_hashes(void) {
   _require_expansion("x2c.meta.definition.hashes");
   Compiler c = active.expander;
   Map hashes = {};
-  foreach (String name, c.meta_calls.keys())
+  foreach (String name in c.meta_calls.keys())
     hashes[name] = c.meta_hashes[name];
   return hashes;
 }
@@ -35,12 +35,12 @@ static Map _linked_hashes(void) {
   Compiler c = active.expander;
   Map rows = {};
   c.add_linked_meta_provider_hashes(rows);
-  foreach (Var (name, source), c.project_meta)
+  foreach ((String name, List source) in c.project_meta)
     match (source) case %(? ?provider): {
       Map hashes = c.meta_provider_hashes(provider);
       rows[name] = %(${hashes[name]} $provider);
     }
-  foreach (String name, c.meta_calls.keys())
+  foreach (String name in c.meta_calls.keys())
     rows[name] = %(${c.meta_hashes[name]} ${c.meta_calls[name]});
   return rows;
 }
@@ -59,7 +59,7 @@ List MetaContext.literal_list(List values) =>
 
 static Var _symbol_set(List values) {
   _require_expansion("_x2c.symbol-set");
-  foreach (Var value, values)
+  foreach (Var value in values)
     if (value is not <symbol>)
       $fail.meta_sdk_symbol_set_value(value);
   int duplicate = -1;

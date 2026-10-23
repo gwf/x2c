@@ -76,7 +76,7 @@ List Ast.append_modifiers(List declarator, List modifiers) {
 */
 List Ast.prototype_declarator(List declarator) {
   Array modifiers = [], int changed = 0;
-  foreach (Var modifier, declarator.caddr()) {
+  foreach (Var modifier in declarator.caddr()) {
     match (modifier)
       case %(fnmod (params *parameters)):
         modifier = _prototype_params(parameters, changed);
@@ -93,7 +93,7 @@ List Ast.prototype_declarator(List declarator) {
    `volatile`; `changed` becomes 1 when one had it. */
 static List _prototype_params(List parameters, int &changed) {
   Array rebuilt = [];
-  foreach (List parameter, parameters) {
+  foreach (List parameter in parameters) {
     match (parameter)
       case %(param ?type (bind ?name (volatile *rest))): {
         parameter = %(param $type (bind $name (@rest)));
@@ -262,7 +262,7 @@ void Ast.collect_binding_references(Var node, Map referenced) {
     referenced[identity] = 1;
     return;
   }
-  foreach (Var child, syntax)
+  foreach (Var child in syntax)
     Ast.collect_binding_references(child, referenced);
 }
 
@@ -407,7 +407,7 @@ List Ast.initializer_functions(Ast ast, List &source) {
   List value = input.cadr();
   List argument = %(expr ${value.cadr()} ${input.car()});
   Array functions = $auto([]);
-  foreach (List choice, cases) {
+  foreach (List choice in cases) {
     List function = _arm_function(choice, argument);
     if (!function) return NULL;
     functions.push(function);

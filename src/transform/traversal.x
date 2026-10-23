@@ -20,7 +20,7 @@ List Compiler.transform(Compiler c, List ast) {
   while (support) {
     List items = support;
     support.clear();
-    foreach (Var sibling, _sequence(c, items, 0)) generated.push(sibling);
+    foreach (List sibling in _sequence(c, items, 0)) generated.push(sibling);
   }
   if (generated) newast = newast.append(generated.list_free());
   return newast;
@@ -221,7 +221,7 @@ static Ast _anchored_sequence(
 
 static List _splice_items(Compiler c, List items, Var parent) {
   Array anchored = [];
-  foreach (List item, items) {
+  foreach (List item in items) {
     c.origins.push(%(generated $parent splice));
     int generated = c.origins.len();
     anchored.push(%(at $generated $item));

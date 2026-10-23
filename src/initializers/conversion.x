@@ -33,7 +33,7 @@ static List _convert_composite(
   // The always-true ICE stays on a retained value, so braces remain braces.
   List excess_check = discarded
     ? _composite_excess_check(parent_condition) : NULL;
-  foreach (List row, rows) {
+  foreach (List row in rows) {
     List row_condition = excess_check
       ? _condition_and(parent_condition, excess_check) : parent_condition;
     excess_check = NULL;
@@ -76,10 +76,10 @@ static List _composite_rows(
   List parent_condition, int &discarded) {
   Array rows = [];
   int initialized = 0;
-  foreach (List row, c.initializer_rows(target, items, native_target)) {
+  foreach (List row in c.initializer_rows(target, items, native_target)) {
     List cases = row.cadr();
     int available = 0;
-    foreach (List choice, cases)
+    foreach (List choice in cases)
       if (choice.caddr()) { available = 1; break; }
     if (parent_condition && initialized && !available) {
       discarded = 1;
@@ -136,7 +136,7 @@ static List _convert_composite_row(
 static RowSelection _select_row(List cases) {
   RowSelection selected = { .homogeneous = 1 };
   int applicable_seen = 0;
-  foreach (List choice, cases) {
+  foreach (List choice in cases) {
     (List condition, List path, Type destination, List input) = choice;
     if (!destination) { selected.excess = 1; continue; }
     selected.applicable = applicable_seen
@@ -153,7 +153,7 @@ static List _convert_initval_row(
   List row_condition, int &?native_used) {
   (List original, List cases) = row;
   Array checked = [];
-  foreach (List choice, cases) {
+  foreach (List choice in cases) {
     (List condition, List path, Type destination, List input) = choice;
     List value = _convert_case(
       c, choice, input, native_target, row_condition, native_used);
@@ -298,7 +298,7 @@ static List _convert_mixed_row(
   if (source.match(%(expr ? (composite *))))
     prepared = _capture_leaves(c, source, captured);
   int native_identity = !parent_condition;
-  foreach (List choice, cases) {
+  foreach (List choice in cases) {
     (List condition, List path, Type destination, List input) = choice;
     List result = _convert_case(
       c, choice, prepared, native_target, row_condition, native_used);
@@ -324,7 +324,7 @@ static List _capture_leaves(
       return %($kind $key ${_capture_leaves(c, inner, inputs)});
     case %(expr ?type ${$source_composite_content(%(*items))}): {
       Array captured = [];
-      foreach (List item, items)
+      foreach (List item in items)
         captured.push(_capture_leaves(c, item, inputs));
       return %(expr $type ${source_composite_content(
         captured.list_free())});
@@ -374,7 +374,7 @@ static List _materialize_mixed_row(
   Array replaced = [];
   List inputs = captured.list_free();
   int uses_input = !!adapted;
-  foreach (List choice, values) {
+  foreach (List choice in values) {
     (List condition, List path, Type destination, List result) = choice;
     List substituted =
       !destination && source.match(%(expr ? (composite *)))
@@ -394,7 +394,7 @@ static List _adapt_choices(
   Type from = _adapter_type(c, source.cadr());
   if (!from || !Ast.contains_head(source, <fields>)) return NULL;
   Array prepared = $auto([]);
-  foreach (List choice, choices) {
+  foreach (List choice in choices) {
     (List condition, List path, Type destination, List value) = choice;
     if (destination && !_adapter_type(c, destination)) return NULL;
     if (value !== source) {
@@ -408,7 +408,7 @@ static List _adapt_choices(
     prepared.push(%($condition $path $destination $value));
   }
   Array adapted = [];
-  foreach (List choice, prepared.list()) {
+  foreach (List choice in prepared.list()) {
     (List condition, List path, Type destination, List value) = choice;
     List adapter = _value_adapter(c, source, value);
     Type callable = adapter.cadr(), result = callable.apply();

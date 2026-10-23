@@ -17,7 +17,7 @@ meta static List fields_of(TypeInfo type) => type.assoc(<fields>);
 // The field names as one comma-joined String literal.
 meta static List field_names(TypeInfo type) {
   Array names = [];
-  foreach (List field, fields_of(type)) names.push(field.car());
+  foreach (List field in fields_of(type)) names.push(field.car());
   return $!String{ ${String.join(", ", names)} };
 }
 
@@ -25,7 +25,7 @@ meta static List field_names(TypeInfo type) {
 // The same argument arrives twice: as syntax to read from, and as a type.
 meta static List field_reads(List receiver, TypeInfo type) {
   Array reads = [];
-  foreach (List field, fields_of(type)) {
+  foreach (List field in fields_of(type)) {
     String member = field.car();
     reads.push($!( $receiver.$member ));
   }

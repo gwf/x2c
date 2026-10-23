@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
     int assets = 0;
 
     printf("%s", %"${releases.len()} releases\n");
-    foreach(Map release, releases) {
+    foreach(Map release in releases) {
       String channel = Json.boolean(release["prerelease"])
         ? "preview" : "stable";
       Var count = 0;

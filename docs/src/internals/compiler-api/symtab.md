@@ -115,7 +115,7 @@ A reference reuses the nearest visible tag; a definition or standalone
 forward declaration introduces the tag in the current lexical scope. A
 macro template names its tags as template locals.
 
-Source: `src/symtab/declarations.x:276`
+Source: `src/symtab/declarations.x:275`
 
 <a id="Compiler.begin_semantic_transaction"></a>
 #### Compiler.begin_semantic_transaction
@@ -192,7 +192,7 @@ Source: `src/symtab/namespaces.x:233`
 
 Returns an unambiguous imported spelling for `name`, or `NULL`.
 
-Source: `src/symtab/namespaces.x:245`
+Source: `src/symtab/namespaces.x:244`
 
 <a id="Compiler.macro_definition_locals"></a>
 #### Compiler.macro_definition_locals
@@ -369,7 +369,7 @@ Source: `src/symtab/scopes.x:104`
 
 Installs an existing binding with `ast`'s qualifier-preserving type.
 
-Source: `src/symtab/declarations.x:255`
+Source: `src/symtab/declarations.x:254`
 
 <a id="Sym.binding_is_local"></a>
 #### Sym.binding_is_local
@@ -969,7 +969,7 @@ name a template keeps reaches the global there, and returns them.
 Locals of other scopes keep their spellings for the native macros that
 name them.
 
-Source: `src/symtab/declarations.x:234`
+Source: `src/symtab/declarations.x:233`
 
 <a id="Sym.var_tag_for_type"></a>
 #### Sym.var_tag_for_type

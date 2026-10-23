@@ -18,7 +18,7 @@ GET missing-slash
 ";
 
 int matches = 0;
-foreach (String line, text.lines()) {
+foreach (String line in text.lines()) {
   rx.RegexpMatch found = request.match(line);
   if (found)
   {

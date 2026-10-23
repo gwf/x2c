@@ -263,13 +263,13 @@ static void _report_diagnostics(Compiler c){
   List entries = Compiler_diagnostics(c);
   if(List_truth(entries)) report_suspend();
   {
-    Var entry;
+    List entry;
     List _x2c_gensym_macro_object_0 = entries;
     List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
     Var _x2c_gensym_macro_cursor_output_0;
     while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
-      entry = _x2c_gensym_macro_cursor_output_0;
-      Compiler_print_diagnostic(c, Var_list_payload(entry));
+      entry = Var_list_payload(_x2c_gensym_macro_cursor_output_0);
+      Compiler_print_diagnostic(c, entry);
     }
 
   }

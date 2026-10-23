@@ -356,7 +356,7 @@ is required. The accumulator and each element are passed as values.
 struct Iter source_storage, scan_storage;
 Iter running = range(1, 4, 1, &source_storage).scan(0, _add,
                                                    &scan_storage);
-foreach (int total, running) printf("%d\n", total);
+foreach (int total in running) printf("%d\n", total);
 ~  return 0;
 ~}
 ```

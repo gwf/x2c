@@ -26,7 +26,7 @@ that stage. Take a `foreach` loop:
 ```x2c
 int sum(List numbers) {
   int total = 0;
-  foreach(Var n, numbers) total += n;
+  foreach(int n in numbers) total += n;
   return total;
 }
 ```
@@ -38,7 +38,7 @@ Print the AST after lowering:
 ```
 
 ```text
-(block (declare ("Var") (bindings (bind (binding 4 "n") ())))
+(block (declare (int) (bindings (bind (binding 4 "n") ())))
  (declare ("List")
   (bindings
    (op = (bind (binding 5 "_x2c_gensym_macro_object_0") ())
@@ -64,8 +64,8 @@ The built-in source macro in `src/macros/macros.x`, `etc/builtin-macros.x`, and
 `while` loop that calls `List_try_next`. The loop keeps the List, a cursor,
 and the current element in generated locals; `List_try_next` advances the
 cursor and stores the element through its reference arguments. The later
-transform pass replaces `total += n` with the run-time compound assignment
-helper for that scalar tag, and it passes the cursor and element by address.
+transform pass converts the yielded `Var` to `int` before `total += n`,
+and it passes the cursor and element by address.
 Compare `--dump-ast` with `--dump-transforms` to see those changes. The full
 set of dump flags is listed under [compiler options](../reference/cli.md).
 
