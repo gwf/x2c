@@ -418,7 +418,7 @@ meta Map x2c_meta_definition_hashes(void);
    The compiler and a project's helper both spell a Type as declaration
    syntax, so the one implementation lives here. */
 
-static const SymbolSet _base_keywords = %<<typedef struct union enum int
+static const SymbolSet _base_keywords = %<<typedef struct union enum unqual int
   long short char signed unsigned void float double>>;
 static const SymbolSet _type_qualifiers = %<<const restrict volatile>>;
 

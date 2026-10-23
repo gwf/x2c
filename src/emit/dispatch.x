@@ -126,6 +126,8 @@ module List _emit(Emitter &e, List ast) {
     return _prefix(e, ast);
   }
   match (ast) {
+    case %(unqual *type):
+      return %("__typeof__((0, (" @{_semantic_type(e, type)} "){0}))");
     case %(at ?origin ?inner): return _at(e, origin, inner);
     case %(cons ?item ?tail): return $emit.cons(e, item, tail);
     case %(append ?head ?tail): return $emit.append(e, head, tail);

@@ -22,4 +22,12 @@ release 24
 release 23
 inferred 7 1 1 1 5 17
 aggregate 28
+anonymous 29 29 1
+anonymous copy 41
+projection 31 36
+projected const 39 1 251
+frozen 39
+release 38
+frozen value 33
+frozen 31
 lazy 1 1

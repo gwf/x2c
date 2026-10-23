@@ -329,8 +329,9 @@ static List _linked_static_base(Compiler c, List base, List declarators) {
 module List _finish_declaration(
   Compiler c, Symbol tag, List base, List declarators,
   int preserved_self) {
+  List before = NULL;
   if (<auto> in base && !c.macro_holes && !c.shallow)
-    base = _auto_declaration(c, tag, base, declarators);
+    base = _auto_declaration(c, tag, base, declarators, before);
   if (tag == <typedef> && c.source_private > 0 &&
       !base.type().is_static()) base = %(static @base);
   if (tag == <declare>) base = _linked_static_base(c, base, declarators);
@@ -348,9 +349,10 @@ module List _finish_declaration(
       c.check_reference_placement(type);
     }
   List declaration = %($tag $base (bindings @declarators));
-  return tag == <declare> && !preserved_self
+  declaration = tag == <declare> && !preserved_self
     ? _lower_self_declaration(c, declaration)
     : declaration;
+  return before ? %(seq $before $declaration) : declaration;
 }
 
 /* Keep Self only in method metadata. The binding and AST receive the

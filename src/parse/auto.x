@@ -1,4 +1,7 @@
-/*  auto.x -- managed declarations and local type inference */
+/*  auto.x -- managed declarations and local type inference
+
+    Copyright (c) 2026 Gary William Flake.
+*/
 
 module int _auto_storage(List declaration) {
   match (declaration) {
@@ -14,7 +17,7 @@ module int _auto_storage(List declaration) {
    auto type already has its installed binding and needs only placement and
    initializer checks. */
 module List _auto_declaration(
-  Compiler c, Symbol tag, Type base, List declarators) {
+  Compiler c, Symbol tag, Type base, List declarators, List &before) {
   if (tag != <declare> || !c.enclosing(<function>) ||
       base.is_static() || base.is_extern() || base.is_threaded())
     $fail.parse_auto_storage(c, c.token);
@@ -34,12 +37,20 @@ module List _auto_declaration(
       Type type = value.cadr();
       if (mods || !type || type == %(void) || type == %(<macro-expr>))
         $fail.parse_auto_inference(c, c.token);
-      while (type.car() is <symbol> &&
-             type.car().symbol().is_type_qualifier()) type = type.cdr();
       Type resolved = c.sym.normalize_declared_type(type);
-      if (resolved == %(void)) $fail.parse_auto_inference(c, c.token);
-      if (resolved.is_array()) type = %(* @{resolved.dereference()});
-      else if (resolved.is_function()) type = %(* @type);
+      Type shape = resolved;
+      while (shape.car() is <symbol> &&
+             shape.car().symbol().is_type_qualifier()) shape = shape.cdr();
+      if (shape == %(void)) $fail.parse_auto_inference(c, c.token);
+      if (shape.is_array()) type = %(* @{resolved.dereference()});
+      else if (shape.is_function()) type = %(* @type);
+      else {
+        while (type.car() is <symbol> &&
+               type.car().symbol().is_type_qualifier()) type = type.cdr();
+        if (c.sym.normalize_declared_type(type) != shape)
+          type = %(unqual @type);
+      }
+      before = _auto_native_type(c, type, value);
       base = %(@base @type);
     }
     Type type = %(declare $base (bindings (bind $binding $mods)))
@@ -51,4 +62,24 @@ module List _auto_declaration(
     c.set_fact(%(managed $binding), 1);
   }
   return base;
+}
+
+/* A previously defined anonymous type needs a native name. typeof does
+   not evaluate its operand; the existing native-alias map keeps the tag's
+   semantic identity while emission uses this private typedef. */
+static List _auto_native_type(Compiler c, Type type, List value) {
+  Type base = type.base_type();
+  match (base) case %((!or struct union enum) (gensym *)): {
+    while (type.is_pointer() || type.is_array()) {
+      type = type.dereference();
+      value = %(expr $type (op * $value));
+    }
+    List alias = c.sym.introduce(c.fresh_name("inferred_type"));
+    c.set_fact(%(ntype $alias), base);
+    value = %(expr $type
+      (commas (expr (int) (literal (int) "0")) $value));
+    return %(typedef ("__typeof__" (parens $value))
+      (bindings (bind $alias ())));
+  }
+  return NULL;
 }

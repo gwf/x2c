@@ -180,6 +180,10 @@ module List _semantic_name(Emitter &e, Type type, String name) {
 // tagged types
 
 module List _enum(Emitter &e, List ast) {
+  if (ast.type().is_enum_tag()) {
+    Var alias = e.native_aliases.assoc(ast);
+    if (alias is <list>) return _emit(e, alias);
+  }
   List name = ast.type().tag(), body = ast.type().body().car();
   if (_is_gensym_tag(name) && !ast.type().is_enum_tag()) name = NULL;
   if (name) name = _emit(e, name);

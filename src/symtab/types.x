@@ -32,7 +32,7 @@ static Type _resolve_chain(
   if (stop && key == stop) return key;
   if (key.is_typedef_name() || key.is_typedef()) {
     Type type = _typedef_target(s, key);
-    if (type) return _resolve_chain(s, type, stop, origin, hops + 1);
+    if (type) return _resolve_chain(s, type.canonicalize(), stop, origin, hops + 1);
   }
   match (key) case %((!set ?kind (!or struct union))
       (binding ? ?spelling)):
@@ -91,6 +91,13 @@ Type Sym.normalize_declared_type(Sym s, Type type) =>
 static Type _normalize_chain(Sym s, Type type, Type origin, int hops) {
   type = type.declared();
   if (hops > RESOLVE_KEY_MAX_HOPS) _typedef_budget_error(s, origin);
+  Type base = type.base_type();
+  if (base.car() == <unqual>) {
+    Type value = _normalize_chain(s, base.cdr(), origin, hops + 1);
+    while (value.car() is <symbol> &&
+           value.car().symbol().is_type_qualifier()) value = value.cdr();
+    return _replace_type_base(type, base, value);
+  }
   Type next = _typedef_base_step(s, type);
   return next ? _normalize_chain(s, next, origin, hops + 1) : type;
 }

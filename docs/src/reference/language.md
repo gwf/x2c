@@ -1842,6 +1842,12 @@ exist only in quotations; in a named template's code, `${` still reports a
 missing macro name. See [Quoting
 code](../guide/generating-code.md#quoting-code-with-) for an example.
 
+An inferred `Type` can contain `%(unqual "T")`, an unqualified-value
+projection of typedef `T`. It retains `T` for method and protocol selection
+while removing the stored value's outer qualifiers, including qualifiers
+hidden by the typedef. Qualifiers before the projection and pointee
+qualifiers remain. This is type data, not a source keyword.
+
 A typed quotation is written `$!T{ expression }`, where `T` is one identifier
 that names a type, or `$!(T){ expression }`, where `T` is any type, a `Type`
 local, or a `${...}` hole of type `Type`. An identifier after `$!` that spells
@@ -2815,6 +2821,11 @@ name and an initializer with a known non-void type. Arrays and functions decay
 to pointers; outer value qualifiers are removed, declaration qualifiers are
 applied, and pointee qualifiers remain. Integer types are not promoted.
 The declared name cannot occur in its own inferred initializer.
+
+Inference also removes outer qualifiers hidden by a typedef, while retaining
+that typedef's methods and Cleanup participation. A typedef of a const pointer
+therefore produces a mutable pointer variable; a pointer to const data keeps
+its pointee qualification.
 
 An `auto` immediately after `=` instead manages the acquired value. For
 example, `Buffer buffer = auto Buffer.new(0);` has the same meaning as
