@@ -83,6 +83,9 @@ passing tests support that result rather than replace it.
   technical facts and their evidence.
 - Follow `agents/x2c-code-standard.md`, the single definition of x2c source
   style. Update the book when documented behavior changes.
+- The compiler emits calls into the runtime and the bootstrap compiles against
+  it, so public runtime signatures are effectively ABI. Preserve them unless
+  the task authorizes a compatibility change.
 
 Review a design before implementation and the completed authored diff before
 publication validation. Look for existing code to reuse or delete, checks
