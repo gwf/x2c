@@ -20,18 +20,12 @@ static double _eval_a(int i, int j) {
 /* x2c has no `restrict`, so out may alias u as far as the compiler can tell.
    Naming the row sum keeps it in a register instead of reloading out[i] on
    every step, which is also the clearer way to say what the row is. */
-static void _eval_a_times_u(int n, ArrayDbl u, ArrayDbl out) {
+static void _eval_a_times_u(
+  int n, ArrayDbl u, ArrayDbl out, int transpose) {
   for (int i = 0; i < n; i++) {
     double sum = 0.0;
-    for (int j = 0; j < n; j++) sum += _eval_a(i, j) * u[j];
-    out[i] = sum;
-  }
-}
-
-static void _eval_at_times_u(int n, ArrayDbl u, ArrayDbl out) {
-  for (int i = 0; i < n; i++) {
-    double sum = 0.0;
-    for (int j = 0; j < n; j++) sum += _eval_a(j, i) * u[j];
+    for (int j = 0; j < n; j++)
+      sum += (transpose ? _eval_a(j, i) : _eval_a(i, j)) * u[j];
     out[i] = sum;
   }
 }
@@ -40,8 +34,8 @@ static void _eval_at_times_u(int n, ArrayDbl u, ArrayDbl out) {
    the matrix and it outlives every sweep. */
 static void _eval_ata_times_u(ArrayDbl scratch, ArrayDbl u, ArrayDbl out) {
   int n = (int) scratch.len();
-  _eval_a_times_u(n, u, scratch);
-  _eval_at_times_u(n, scratch, out);
+  _eval_a_times_u(n, u, scratch, 0);
+  _eval_a_times_u(n, scratch, out, 1);
 }
 
 int main(int argc, char **argv) {

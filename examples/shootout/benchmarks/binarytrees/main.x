@@ -9,17 +9,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+typedef struct Node *Node;
+struct Node { int item; Var left, right; };
+
 static Var _tree(int item, int depth) {
   if (!depth) return item;
   Var left = _tree(item * 2 - 1, depth - 1);
   Var right = _tree(item * 2, depth - 1);
-  return [item, left, right];
+  Node node = Scope.malloc(sizeof(struct Node));
+  *node = (struct Node) {item, left, right};
+  Var result = (void *) node;
+  return result;
 }
 
 static int _sum(Var tree) {
   if (tree.is_integer()) return tree.int();
-  Array node = tree;
-  return node[0].int() + _sum(node[1]) - _sum(node[2]);
+  Node node = tree.pointer();
+  return node.item + _sum(node.left) - _sum(node.right);
 }
 
 int main(int argc, char **argv) {

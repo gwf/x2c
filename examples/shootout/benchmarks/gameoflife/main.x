@@ -20,16 +20,18 @@ int main(int argc, char **argv) {
     next.push(0);
   }
   for (int step = 0; step < steps; step++) {
-    for (int y = 0; y < h; y++)
+    for (int y = 0; y < h; y++) {
+      int above = ((y + h - 1) % h) * w;
+      int row = y * w, below = ((y + 1) % h) * w;
       for (int x = 0; x < w; x++) {
-        int neighbors = 0;
-        for (int dy = -1; dy <= 1; dy++)
-          for (int dx = -1; dx <= 1; dx++)
-            if (dx || dy)
-              neighbors += cells[((y + dy + h) % h) * w + (x + dx + w) % w];
-        int i = y * w + x;
+        int left = (x + w - 1) % w, right = (x + 1) % w;
+        int neighbors = cells[above + left] + cells[above + x]
+          + cells[above + right] + cells[row + left] + cells[row + right]
+          + cells[below + left] + cells[below + x] + cells[below + right];
+        int i = row + x;
         next[i] = neighbors == 3 || (cells[i] && neighbors == 2);
       }
+    }
     ArrayChar swap = cells;
     cells = next;
     next = swap;
