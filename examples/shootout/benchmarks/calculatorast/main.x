@@ -13,19 +13,17 @@
 static int _eval(List ast, int *variables) {
   match (ast) {
     case %(number ?value): return value.int();
-    case %(variable ?name): return variables[name === <a> ? 0 : 1];
+    case %(variable ?name): return variables[name.same(<a>) ? 0 : 1];
     case %(assign ?name ?expression):
-      return variables[name === <a> ? 0 : 1] =
+      return variables[name.same(<a>) ? 0 : 1] =
         _eval(expression, variables);
     case %(binary ?op ?left ?right): {
       int a = _eval(left, variables);
       int b = _eval(right, variables);
-      switch (op.symbol()) {
-        case <+>: return a + b;
-        case <->: return a - b;
-        case <*>: return a * b;
-        default:  return a / b;
-      }
+      if (op.same(<+>)) return a + b;
+      if (op.same(<->)) return a - b;
+      if (op.same(<*>)) return a * b;
+      return a / b;
     }
   }
   return 0;

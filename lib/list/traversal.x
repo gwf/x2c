@@ -50,7 +50,7 @@ inline Var  Var.caddr(Var var)     => car(cdr(cdr(var)));
 
     `foreach (Var item, lst)` compiles to this loop.
 */
-int List.try_next(List lst, List &?cursor, Var &?out) {
+inline int List.try_next(List lst, List &?cursor, Var &?out) {
   if (!cursor) return 0;
   if (!out) return 0;
   List rest = cursor;

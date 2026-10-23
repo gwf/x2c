@@ -408,7 +408,7 @@ int Var.fallback_equal(Var a, Var b) {
 /** Reports whether `a` and `b` have identical `Var` bits.
     Two boxes of one wide number differ here, although `===` holds for them.
 */
-meta native int Var.same(Var a, Var b) => a.u64 == b.u64;
+meta native inline int Var.same(Var a, Var b) => a.u64 == b.u64;
 
 /* ordering
 

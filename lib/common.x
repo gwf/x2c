@@ -733,8 +733,9 @@ meta native ushort Var.ushort(Var x) {
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out
     of floating range, or invalidly encoded.
 */
-int Var.int(Var x) {
-  if (x is <i32>) return (int) x.integer();
+inline int Var.int(Var x) {
+  if ((x.u64 >> 32) == (VAR_I32_PREFIX >> 32))
+    return (int) x.payload32();
   return (int) x.convert(<i32>).integer();
 }
 

@@ -374,6 +374,25 @@ static void var_scalar_reader_conversion(void) {
   EXPECT_INT_EQ(letter.int(), 110);
   EXPECT_TRUE(letter.double() == 110.0);
 
+  unsigned i32_bits[] = {0, 1, 0x7fffffffu, 0x80000000u, 0xffffffffu};
+  for (unsigned i = 0; i < sizeof i32_bits / sizeof *i32_bits; i++) {
+    Var value = Var.box_i32_bits(i32_bits[i]);
+    EXPECT_INT_EQ(value.int(), (int) i32_bits[i]);
+    EXPECT_INT_EQ(value.int(), (int) value.convert(<i32>).integer());
+  }
+
+  unsigned long malformed_bits[] = {
+    0x8002000800000000ul, 0x8002000200000100ul,
+    0x8002000400010000ul, 0x8003000100000001ul
+  };
+  for (unsigned i = 0; i < sizeof malformed_bits / sizeof *malformed_bits; i++) {
+    Var value = (Var) { .u64 = malformed_bits[i] };
+    int caught = 0;
+    try value.int();
+    catch %(bad-enc *): caught++;
+    EXPECT_INT_EQ(caught, 1);
+  }
+
   // every integer-named reader from a floating source agrees with
   // explicit Var.convert plus the raw payload reader for its target
   Var negative = -3.75, positive = 200.5;
