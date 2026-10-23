@@ -15,7 +15,7 @@ parallel directory-counting API. These files are the canonical tutorial sources.
 | [5](words-v5.x) | 42 | One file counting function; interpolated output. |
 | [6](words-v6.x) | 59 | A file or recursive directory traversal; merge native per-file count maps into MapStringInt. |
 | [7](words-v7.x) | 59 | Four persistent workers for directories; a single file runs directly. |
-| [8](words-v8.x) | 102 | A Frequencies class and Path.frequencies API for files or directories; explicit ownership reclaims intermediates without export. Includes frequencies.x. |
+| [8](words-v8.x) | 103 | A Frequencies class and Path.frequencies API for files or directories; explicit ownership reclaims intermediates without export. Includes frequencies.x. |
 
 Line counts include comments. The viewer hides comments and calculates its
 diffs and displayed line numbers from that representation.
@@ -48,8 +48,9 @@ MapSubInt backed by a private string pool. The pool is detached when counting
 returns, and a finalizer in the callback Scope releases it after the reducer
 finishes borrowing the parked worker's result. The reducer converts words
 directly into the caller's pool, updates the caller-owned result, and releases
-the per-file map. Context cleanup reclaims traversal storage and, for a single
-file, the detached pool before the API returns.
+the per-file map. The single-file branch uses `$scope()` to release its
+detached pool before the operation Context closes the parent pool. Context
+cleanup then reclaims traversal storage before the API returns.
 
 The returned map and its keys have the caller's Scope and pool lifetimes.
 No context export, graph traversal, or table rebuild is needed. If the

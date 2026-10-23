@@ -23,8 +23,9 @@ Frequencies Path.frequencies(Path root) {
   int complete = 0;
   defer if (!complete) result.cleanup();
   Context context = $auto(Context.open_isolated());
-  if (root.is_file())
+  if (root.is_file()) $scope() {
     accumulate(result, count_words(root));
+  }
   else {
     if (!root.is_dir())
       raise %(bad-arg (operation "Path.frequencies") (path $root));
