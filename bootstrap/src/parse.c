@@ -1381,7 +1381,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _558 = List_var(_557);
   _559 = cons(_479, _476);
   _560 = List_var(_559);
-  _561 = int_var(89649);
+  _561 = int_var(89691);
   _562 = cons(_561, NULL);
   _563 = cons(_484, _562);
   _564 = List_var(_563);
@@ -4327,7 +4327,7 @@ static List f12_declarations____typedef(Compiler c, List context, int row){
 }
 
 static List _declaration_types(Compiler c, List storage){
-  List quals = _type_qualifiers(c);  List hole = Compiler_peek_macro_hole(c);  int inferred = List_contains(storage, Symbol_var(109854)) &&((Compiler_peek(c, 0) == 19147688 &&(Compiler_peek(c, 1) == 123 || Compiler_peek(c, 1) == 119 || Compiler_peek(c, 1) == 89)) ||(List_truth(hole) && x2c_var_equal(List_assoc(hole, Symbol_var(740232)), Symbol_var(920394))));  Type spec = inferred ? NULL : List_type(_type_specifier(c));  Array trailing = Array_new();  while(1){
+  List quals = _type_qualifiers(c);  int managed = List_contains(storage, Symbol_var(109854));  List hole = managed ? Compiler_peek_macro_hole(c) : NULL;  int inferred = managed &&((Compiler_peek(c, 0) == 19147688 &&(Compiler_peek(c, 1) == 123 || Compiler_peek(c, 1) == 119 || Compiler_peek(c, 1) == 89)) ||(List_truth(hole) && x2c_var_equal(List_assoc(hole, Symbol_var(740232)), Symbol_var(920394))));  Type spec = inferred ? NULL : List_type(_type_specifier(c));  Array trailing = Array_new();  while(1){
     Symbol symbol = Compiler_peek(c, 0);  if(symbol != 44661285196 &&(Symbol_is_storage_class(symbol) || Symbol_is_inline(symbol))){
       Array_push(trailing, Symbol_var(symbol));  Compiler_next(c);  continue;
     }

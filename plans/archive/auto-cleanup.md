@@ -1,7 +1,7 @@
 # auto declarations and complete initializers
 
 > Status: done
-> Implemented on 2026-10-23 in `eeecdad1c` and `47e4f0ba4`.
+> Implemented on 2026-10-23 in `03f704882` and `24ddf4dac`.
 > All 25 focused auto/managed fixtures and the defer suite pass.
 > Publication validation and delivery follow the root workflow.
 
@@ -148,7 +148,8 @@ check now keeps array decay out of its sibling-pointer typedef rule.
 
 ## Performance observation
 
-Five alternating samples in matching temporary checkouts translated four
+Before integrating the upstream Scope-call migration, five alternating
+samples in matching temporary checkouts translated four
 unchanged primary units: transform, generate, type, and tokenizer. The median
 instruction count was 27.75 billion at `c563b5c5e` and 29.86 billion with this
 implementation, an increase of 7.6%. Imported compiler headers include the
