@@ -206,7 +206,7 @@ List _scalar_alignment(Type type){
 
 List List_reverse(List);
 
-int List_try_next(List, List *, Var *);
+static int List_try_next(List, List *, Var *);
 
 List _scalar_key(Type type){
   if(! _init_guard_) _file_init_();

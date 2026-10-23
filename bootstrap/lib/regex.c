@@ -1322,7 +1322,7 @@ String RegexMatch_getindex(RegexMatch found, Var key){
   return List_truth(capture) && RegexCapture_matched(capture) ? RegexCapture_text(capture) : NULL;
 }
 
-int Var_int(Var);
+static int Var_int(Var);
 
 int RegexCapture_index(RegexCapture capture){
   return Var_int(List_getindex(capture, 0));

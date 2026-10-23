@@ -2222,7 +2222,7 @@ static ArrayChar ArrayChar_export_context(ArrayChar _x2c_gensym_macro_array_46, 
 
 }
 
-int Var_int(Var);
+static int Var_int(Var);
 
 static int _x2c_gensym_macro__next_0(Iter _x2c_gensym_macro_iter_0, Var * _x2c_gensym_macro_out_12){
   ArrayChar _x2c_gensym_macro_array_47 = Var_arraychar(_x2c_gensym_macro_iter_0 -> obj);

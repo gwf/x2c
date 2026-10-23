@@ -207,7 +207,7 @@ void File_path_error(Var, String, int);
 
 List String_split(String, String);
 
-int List_try_next(List, List *, Var *);
+static int List_try_next(List, List *, Var *);
 
 String Var_as_string(Var);
 

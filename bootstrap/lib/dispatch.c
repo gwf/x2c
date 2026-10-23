@@ -68,6 +68,15 @@ static unsigned _nonzero(unsigned hash);
 
 static unsigned _default_hash(Var v);
 
+#include "exception.h"
+
+
+
+
+static inline int Var_same(Var a, Var b){
+  return a.u64 == b.u64;
+}
+
 static int _group(Symbol kind, Symbol tag);
 
 static int _is_numeric_kind(Symbol kind);
@@ -109,11 +118,6 @@ static void _install_methods(VarDescriptor * descriptor, VarMethods methods);
 static pthread_mutex_t descriptor_mutex;
 
 static pthread_once_t descriptor_mutex_once;
-
-#include "exception.h"
-
-
-
 
 _x2c_gensym_initializer_choice_4D85CB6E_0((descriptor_mutex_once =(pthread_once_t) PTHREAD_ONCE_INIT))
 static int descriptor_registration_frozen;
@@ -456,11 +460,6 @@ int Var_fallback_equal(Var a, Var b){
   if(a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS) return 0;
   if(Var_tag(a) == Var_tag(b) && Var_is_wide(a)) return Var_wide_equal(a, b);
   return 0;
-}
-
-int Var_same(Var a, Var b){
-  if(! _init_guard_) _file_init_();
-  return a.u64 == b.u64;
 }
 
 int Var_compare(Var a, Var b){

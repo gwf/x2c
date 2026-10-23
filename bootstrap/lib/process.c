@@ -403,7 +403,7 @@ String Job_repr(Job value){
 
 }
 
-int List_try_next(List, List *, Var *);
+static int List_try_next(List, List *, Var *);
 
 static List Var_list_payload(Var);
 

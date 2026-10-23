@@ -94,7 +94,15 @@ static inline Var Var_caddr(Var var){
   return car(cdr(cdr(Var_list_payload(var))));
 }
 
-int List_try_next(List lst, List * cursor, Var * out);
+static inline int List_try_next(List lst, List * cursor, Var * out){
+  if(! cursor) return 0;
+  if(! out) return 0;
+  List rest =(* cursor);
+  if(! List_truth(rest)) return 0;
+  (* out) = List_car(rest);
+  (* cursor) = rest -> cdr;
+  return 1;
+}
 
 Iter List_iter(List lst, Iter dest);
 

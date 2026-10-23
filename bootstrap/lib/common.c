@@ -240,7 +240,7 @@ unsigned Var_hash(Var v);
 unsigned Var_fallback_hash(Var v);
 int Var_equal(Var a, Var b);
 int Var_fallback_equal(Var a, Var b);
-int Var_same(Var a, Var b);
+static int Var_same(Var a, Var b);
 int Var_compare(Var a, Var b);
 int Var_fallback_compare(Var a, Var b);
 int x2c_var_equal(Var a, Var b);
@@ -704,6 +704,10 @@ static inline Symbol Var_symbol(Var x){
   if(Var_is(x, 1328354264)) return Var_integer(x);  return 0;
 }
 
+static inline int Var_int(Var x){
+  if((x.u64 >> 32) ==(VAR_I32_PREFIX >> 32)) return(int) Var_payload32(x);  return(int) Var_integer(Var_convert(x, 3453797));
+}
+
 static inline Block Array_block(Array);
 static inline Block Bytes_block(Bytes);
 static inline void Block_pop(Block);
@@ -838,10 +842,6 @@ ushort Var_ushort(Var x){
   if(! _init_guard_) _file_init_();  if(Var_is(x, 3846509)) return(ushort) Var_integer(x);  return(ushort) Var_integer(Var_convert(x, 3846509));
 }
 
-int Var_int(Var x){
-  if(! _init_guard_) _file_init_();  if(Var_is(x, 3453797)) return(int) Var_integer(x);  return(int) Var_integer(Var_convert(x, 3453797));
-}
-
 uint Var_uint(Var x){
   if(! _init_guard_) _file_init_();  if(Var_is(x, 3847013)) return(uint) Var_integer(x);  return(uint) Var_integer(Var_convert(x, 3847013));
 }
@@ -924,7 +924,7 @@ void x2c_initialize(void){
 int x2c_normalize_index(int index, int length){
   if(! _init_guard_) _file_init_();  if(length < 0){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_index")), NULL))); {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 877,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(816725264), int_var(length));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/common.x",.function = "x2c_normalize_index",.line = 878,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(816725264), int_var(length));  __builtin_unreachable();
     }
 
   }
@@ -937,7 +937,7 @@ int x2c_slice_bound(int bound){
 
 int x2c_normalize_slice(int * start, int * stop, int step, int length){
   if(! _init_guard_) _file_init_();  if(! start || ! stop || ! step || length < 0){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 902,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_slice")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/common.x",.function = "x2c_normalize_slice",.line = 903,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("x2c_normalize_slice")), NULL))));  __builtin_unreachable();
   }
   int orig_stop = * stop;  if(* start == INT_MIN) * start =(step > 0) ? 0 : length - 1;  if(* stop == INT_MIN) * stop = - 1;  if(* start < 0){
     * start += length;  if(* start < 0) * start =(step < 0) ? - 1 : 0;

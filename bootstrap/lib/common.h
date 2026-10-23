@@ -421,7 +421,7 @@ int Var_equal(Var a, Var b);
 
 int Var_fallback_equal(Var a, Var b);
 
-int Var_same(Var a, Var b);
+static int Var_same(Var a, Var b);
 
 int Var_compare(Var a, Var b);
 
@@ -910,7 +910,10 @@ char Var_char(Var x);
 uchar Var_uchar(Var x);
 short Var_short(Var x);
 ushort Var_ushort(Var x);
-int Var_int(Var x);
+static inline int Var_int(Var x){
+  if((x.u64 >> 32) ==(VAR_I32_PREFIX >> 32)) return(int) Var_payload32(x);  return(int) Var_integer(Var_convert(x, 3453797));
+}
+
 uint Var_uint(Var x);
 unsigned Var_unsigned(Var x);
 long Var_long(Var x);
