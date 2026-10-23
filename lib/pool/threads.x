@@ -36,6 +36,14 @@ Pool Pool.current(void) {
   return value_thread.current;
 }
 
+/* Borrows a pool for one runtime callback. The owner keeps it and its
+   ancestors alive; exchanging the thread-local pointer transfers nothing. */
+Pool x2c_pool_exchange(Pool pool) {
+  Pool previous = Pool.current();
+  value_thread.current = pool;
+  return previous;
+}
+
 /** Creates the process-wide canonical-value root and makes it active here.
     `x2c_initialize` calls this once; a repeat call does nothing.
     Raises: `<alloc-fail>` if the root cannot be constructed. Native mutex

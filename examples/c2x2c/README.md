@@ -15,7 +15,7 @@ parallel directory-counting API. These files are the canonical tutorial sources.
 | [5](words-v5.x) | 42 | One file counting function; interpolated output. |
 | [6](words-v6.x) | 59 | A file or recursive directory traversal; merge native per-file count maps into MapStringInt. |
 | [7](words-v7.x) | 59 | Four persistent workers for directories; a single file runs directly. |
-| [8](words-v8.x) | 103 | A Frequencies class and Path.frequencies API for files or directories; explicit ownership reclaims intermediates without export. Includes frequencies.x. |
+| [8](words-v8.x) | 98 | A Frequencies class and Path.frequencies API for files or directories; one temporary pool and one deferred cleanup block. Includes frequencies.x. |
 
 Line counts include comments. The viewer hides comments and calculates its
 diffs and displayed line numbers from that representation.
@@ -42,15 +42,22 @@ use the API independently. The viewer appends the module after the V8 driver
 so both parts remain visible in the version comparison.
 
 Earlier stages rely on the implicit top-level lifetime and shutdown cleanup
-for remaining allocations. V8 creates its result in the caller's Scope before
-opening an isolated Context for the operation. Each file is counted into a
-MapSubInt backed by a private string pool. The pool is detached when counting
-returns, and a finalizer in the callback Scope releases it after the reducer
-finishes borrowing the parked worker's result. The reducer converts words
-directly into the caller's pool, updates the caller-owned result, and releases
-the per-file map. The single-file branch uses `$scope()` to release its
-detached pool before the operation Context closes the parent pool. Context
-cleanup then reclaims traversal storage before the API returns.
+for remaining allocations. V8 creates its result in the caller's Scope, then
+retains a temporary Scope and opens one temporary String pool. One deferred
+block releases the pool and Scope, and releases an unfinished result on failure.
+Directory paths are collected into a List before the pool is explicitly
+detached, restoring the caller's active pool.
+Directory enumeration completes before parallel counting starts.
+
+`parallel_map_in` borrows the same temporary pool for all worker callbacks.
+Each worker returns its MapSubInt for the caller to read while the worker is
+parked. The reducer uses V7's `add_substr` to intern final words in the
+caller's active pool. Existing worker scopes reclaim per-file maps, without
+explicit map cleanup in the reducer. A single file runs directly in the
+temporary pool before detachment. The operation releases its one temporary
+pool and Scope after workers finish, including on errors. No per-file pools,
+pool finalizers, or Context are needed. Temporary file text remains until
+the operation ends; sharing the pool may introduce interning contention.
 
 The returned map and its keys have the caller's Scope and pool lifetimes.
 No context export, graph traversal, or table rebuild is needed. If the

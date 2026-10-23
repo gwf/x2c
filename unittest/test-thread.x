@@ -1412,7 +1412,67 @@ static void parallel_map_coordinator_stop_wakes_workers(void) {
   parallel_blocked = NULL;
 }
 
+static Pool parallel_expected_pool;
+
+static Var _parallel_in_pool(Var input) {
+  String text = String.printf("parallel-in-pool-%d", input.int());
+  return Pool.current() == parallel_expected_pool &&
+    parallel_expected_pool.owns(text);
+}
+
+static Var _parallel_pool_identity(Var input) {
+  (void) input;
+  return Pool.current() == parallel_expected_pool;
+}
+
+static Var _parallel_pool_error(Var input) {
+  String text = String.printf("borrowed-pool-error-%d", input.int());
+  raise %(bad-arg (detail $text));
+}
+
+static void parallel_map_borrows_selected_pool(void) {
+  $test.scoped();
+  Pool caller = Pool.open();
+  defer Pool.close();
+  Pool borrowed = caller.retain();
+  defer borrowed.release();
+  defer parallel_expected_pool = NULL;
+  parallel_expected_pool = borrowed;
+  int total = range(0, 15, 1).parallel_map_in(borrowed, _parallel_in_pool, 4)
+    .foldl(0, %!(int sum, int value) => sum + value);
+  EXPECT_INT_EQ(total, 16);
+  EXPECT_PTR_EQ(Pool.current(), caller);
+  EXPECT_TRUE(Pool.stats(borrowed).interned > 0);
+
+  parallel_expected_pool = caller;
+  while (parallel_expected_pool.up)
+    parallel_expected_pool = parallel_expected_pool.up;
+  Thread worker = Thread.start(_parallel_pool_identity, 0);
+  EXPECT_INT_EQ(worker.join().int(), 1);
+  worker.free();
+}
+
+static void parallel_map_borrowed_pool_survives_failure(void) {
+  $test.scoped();
+  Pool caller = Pool.current(), borrowed = caller.retain();
+  defer borrowed.release();
+  int caught = 0;
+  try range(0, 2, 1).parallel_map_in(borrowed, _parallel_pool_error, 2)
+    .foldl(0, %!(int sum, int value) => sum + value);
+  catch %(join-fail *): caught = 1;
+  EXPECT_INT_EQ(caught, 1);
+  EXPECT_PTR_EQ(Pool.current(), caller);
+  String text = String.new_in(borrowed, "borrowed-pool-still-live", 24);
+  EXPECT_TRUE(borrowed.owns(text));
+}
+
+void thread_borrowed_pool_suite(void) {
+  $test.run(parallel_map_borrows_selected_pool);
+  $test.run(parallel_map_borrowed_pool_survives_failure);
+}
+
 void thread_parallel_map_suite(void) {
+  thread_borrowed_pool_suite();
   $test.run(parallel_map_coordinator_stop_wakes_workers);
   $test.run(parallel_map_borrows_until_reducer_returns);
   $test.run(parallel_map_stops_channel_wait_on_reducer_failure);

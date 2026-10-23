@@ -325,6 +325,16 @@ References can form cycles without changing this rule.
 With a `void` seed, the first result becomes the accumulator without a reducer
 call. Use that form only when the result survives worker cleanup independently.
 For worker-owned results, supply a seed and transfer storage in the reducer.
+`source.parallel_map_in(pool, callback, workers)` selects a borrowed String/List
+pool during callbacks. The caller keeps that pool and its ancestors alive until
+the fold finishes, including worker shutdown on failure. Workers restore their
+previous pool and never release the borrowed pool. Source traversal and the
+reducer continue in the caller's active pool. A shared temporary pool can thus
+collect worker text while the reducer interns surviving words in the caller's
+pool. All temporary canonical values remain until their owner releases the
+shared pool; concurrent interning uses the pool's existing locks.
+
+The ordinary `parallel_map` keeps its existing process-wide pool behavior.
 Canonical values use the shared pool; explicitly opened private pools retain
 their own lifetime rules. On failure, the fold requests stop on all workers
 before joining them. Channel waits cooperate; arbitrary native I/O does not.

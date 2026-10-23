@@ -75,11 +75,12 @@ static struct Thread {
   pthread_cond_t *waiting;
 };
 
-static struct ThreadValueInput { ThreadValueFn function; Var value; };
+static struct ThreadValueInput { ThreadValueFn function; Var value; Pool pool; };
 static struct ParallelMap {
   Iter source;
   ThreadValueFn function;
   int workers;
+  Pool pool;
 };
 
 static threaded Thread running_thread;
@@ -215,6 +216,9 @@ static Thread _start(
 static Var _call_value(const void *input, size_t size) {
   (void) size;
   const struct ThreadValueInput *call = input;
+  if (!call.pool) return call.function(call.value);
+  Pool previous = x2c_pool_exchange(call.pool);
+  defer x2c_pool_exchange(previous);
   return call.function(call.value);
 }
 
@@ -228,13 +232,13 @@ static Var _call_value(const void *input, size_t size) {
     Thread.start_raw accepts copied byte-buffer input instead.
     Raises: bad-arg for a null callback, or Thread.start_raw causes. */
 Thread Thread.start(ThreadValueFn function, Var value) {
-  return _start_value(function, value, NULL);
+  return _start_value(function, value, NULL, NULL);
 }
 
 static Thread _start_value(
-  ThreadValueFn function, Var value, struct ParallelRun *parallel) {
+  ThreadValueFn function, Var value, struct ParallelRun *parallel, Pool pool) {
   if (!function) raise %(bad-arg (operation "Thread.start"));
-  struct ThreadValueInput input = { function, value };
+  struct ThreadValueInput input = { function, value, pool };
   return _start(_call_value, &input, sizeof(input), parallel);
 }
 
@@ -648,9 +652,29 @@ meta static Code _batch_without_callback(Code code) {
     descriptor storage.
 */
 ParallelMap Iter.parallel_map(Iter i, ThreadValueFn function, int workers) {
-  if (workers <= 0) raise %(bad-arg (operation "Iter.parallel_map"));
+  return _parallel_map(i, NULL, function, workers);
+}
+
+/** Maps with a borrowed canonical-value pool active inside each callback.
+    The pool and its ancestors must stay live until foldl finishes. The caller
+    retains ownership; workers restore their previous pool without releasing
+    the borrowed pool. Source traversal and accumulation use the caller's pool.
+    Raises: bad-arg for a null pool or nonpositive worker count, or alloc-fail.
+*/
+ParallelMap Iter.parallel_map_in(
+  Iter i, Pool pool, ThreadValueFn function, int workers) {
+  if (!pool) raise %(bad-arg (operation "Iter.parallel_map_in"));
+  return _parallel_map(i, pool, function, workers);
+}
+
+static ParallelMap _parallel_map(
+  Iter i, Pool pool, ThreadValueFn function, int workers) {
+  if (workers <= 0) {
+    String operation = pool ? "Iter.parallel_map_in" : "Iter.parallel_map";
+    raise %(bad-arg (operation $operation));
+  }
   ParallelMap map = Scope.malloc(sizeof(struct ParallelMap));
-  *map = (struct ParallelMap) { i, function, workers };
+  *map = (struct ParallelMap) { i, function, workers, pool };
   return map;
 }
 
@@ -688,7 +712,7 @@ Var ParallelMap.foldl(ParallelMap map, Var seed, Func accumulate) {
   int seeded = seed is not void;
   while (workers.len() < map.workers && map.source.try_next(input)) {
     _batch_check_stop();
-    workers.push(_start_value(map.function, input, run));
+    workers.push(_start_value(map.function, input, run, map.pool));
   }
   int active = workers.len();
   while (active) {

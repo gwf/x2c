@@ -1,6 +1,6 @@
 /*  frequencies.x -- reusable parallel word frequencies
 
-    Borrows per-file count maps while their private pools remain alive.
+    Uses one temporary String pool for traversal and all worker text.
     Accumulates directly into caller-owned storage without context export.
 */
 
@@ -20,28 +20,34 @@ class Frequencies MapStringInt;
 */
 Frequencies Path.frequencies(Path root) {
   Frequencies result = Frequencies.new();
+  Scope.retain();
+  Pool work = Pool.open();
   int complete = 0;
-  defer if (!complete) result.cleanup();
-  Context context = $auto(Context.open_isolated());
-  if (root.is_file()) $scope() {
-    accumulate(result, count_words(root));
+  defer {
+    if (Pool.current() == work) Pool.detach();
+    work.release();
+    Scope.release();
+    if (!complete) result.cleanup();
   }
-  else {
-    if (!root.is_dir())
-      raise %(bad-arg (operation "Path.frequencies") (path $root));
-    root.walk().filter(Path.is_file).parallel_map(count_words, 4)
-      .foldl(result, accumulate);
+
+  if (root.is_dir()) {
+    List files = root.walk().filter(Path.is_file);
+    Pool.detach();
+    files.iter().parallel_map_in(work, count_words, 4).foldl(result, accumulate);
+    complete = 1;
+    return result;
   }
-  complete = 1;
-  return result;
+  if (root.is_file()) {
+    MapSubInt counts = count_words(root);
+    Pool.detach();
+    accumulate(result, counts);
+    complete = 1;
+    return result;
+  }
+  raise %(bad-arg (operation "Path.frequencies") (path $root));
 }
 
 static Var count_words(Var filename) {
-  // The callback Scope survives reduction; its finalizer releases this pool.
-  Pool *lifetime = Scope.malloc_finalized(sizeof(Pool), release_pool);
-  *lifetime = NULL;
-  Pool.open();
-  defer *lifetime = Pool.detach();
   String text = filename.string().open("r").string_close()
     .reject("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~").lower();
   MapSubInt counts = MapSubInt.new();
@@ -50,18 +56,7 @@ static Var count_words(Var filename) {
   return counts;
 }
 
-static void release_pool(void *allocation) {
-  Pool *lifetime = allocation;
-  (*lifetime).release();
-}
-
 static MapStringInt accumulate(MapStringInt total, MapSubInt counts) {
-  Pool destination = Pool.current().up;
-  foreach ((Substr word, int count) in counts) {
-    String key = String.new_in(
-      destination, word.source + word.offset, word.length);
-    total[key] += count;
-  }
-  counts.cleanup();
+  foreach ((Substr word, int count) in counts) total.add_substr(word, count);
   return total;
 }
