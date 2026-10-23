@@ -633,7 +633,7 @@ static int _kept(Var item, int keep_qualifiers){
 }
 
 static int _omit_specifier(Symbol first, int keep_qualifiers){
-  return(Symbol_is_storage_class(first) ||(! keep_qualifiers && Symbol_is_type_qualifier(first)) || Symbol_is_inline(first)) && first != 44661285196;
+  return(Symbol_is_storage_class(first) ||(! keep_qualifiers &&(Symbol_is_type_qualifier(first) || first == 1439803480)) || Symbol_is_inline(first)) && first != 44661285196;
 }
 
 int Type_discards_qualifiers(Type source, Type target){

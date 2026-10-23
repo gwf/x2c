@@ -122,7 +122,7 @@ Source: `src/parse/binding.x:547`
 Binds one constructed parameter in the current scope, including nested
 function modifiers and reference parameter facts.
 
-Source: `src/parse/declarators.x:505`
+Source: `src/parse/declarators.x:508`
 
 <a id="Compiler.bind_source_statement"></a>
 #### Compiler.bind_source_statement
@@ -158,7 +158,7 @@ Installs a definition-local template binding or typedef provisionally.
 Later template types name a local typedef by its identity, so each
 expansion refers to that expansion's private typedef.
 
-Source: `src/parse/declarators.x:292`
+Source: `src/parse/declarators.x:295`
 
 <a id="Compiler.check_reference_placement"></a>
 #### Compiler.check_reference_placement
@@ -168,7 +168,7 @@ Source: `src/parse/declarators.x:292`
 Rejects transparent references in object and function-result types.
 References inside a function's parameter list remain supported.
 
-Source: `src/parse/declarations.x:297`
+Source: `src/parse/declarations.x:304`
 
 <a id="Compiler.close_placements"></a>
 #### Compiler.close_placements
@@ -318,7 +318,7 @@ Returns the folded package-member spelling at the current token, or NULL.
 The token must be an unshadowed imported alias followed by `.` and an
 identifier. This lookahead does not consume tokens.
 
-Source: `src/parse/declarators.x:606`
+Source: `src/parse/declarators.x:611`
 
 <a id="Compiler.parse_basic_identifier"></a>
 #### Compiler.parse_basic_identifier
@@ -327,7 +327,7 @@ Source: `src/parse/declarators.x:606`
 
 Consumes one `ident` token and returns its spelling as a one-item `List`.
 
-Source: `src/parse/declarators.x:619`
+Source: `src/parse/declarators.x:624`
 
 <a id="Compiler.parse_complex_identifier"></a>
 #### Compiler.parse_complex_identifier
@@ -338,7 +338,7 @@ Parses the current identifier or dotted owner/member as a one-item name.
 Package aliases and imported method spellings are folded through the
 current `Sym`, and all accepted tokens are consumed.
 
-Source: `src/parse/declarators.x:544`
+Source: `src/parse/declarators.x:549`
 
 <a id="Compiler.parse_declaration_argument"></a>
 #### Compiler.parse_declaration_argument
@@ -349,7 +349,7 @@ Parses a non-function, non-typedef `Decl` macro argument.
 Parentheses group declarations with independent types. The invocation
 delimiter remains current; flat destructuring may omit its initializer.
 
-Source: `src/parse/declarations.x:110`
+Source: `src/parse/declarations.x:117`
 
 <a id="Compiler.parse_declaration_row"></a>
 #### Compiler.parse_declaration_row
@@ -370,7 +370,7 @@ Source: `src/parse/declarations.x:15`
 Parses one declarator row for a macro argument without installing it.
 Its enclosing declaration supplies the base type when expanded.
 
-Source: `src/parse/declarators.x:210`
+Source: `src/parse/declarators.x:213`
 
 <a id="Compiler.parse_enumerator"></a>
 #### Compiler.parse_enumerator
@@ -381,7 +381,7 @@ Parses one enumerator for enum type `context` and returns its AST.
 Outside macro-template parsing, its binding is published immediately so
 later initializers and enumerators can resolve it.
 
-Source: `src/parse/types.x:489`
+Source: `src/parse/types.x:491`
 
 <a id="Compiler.parse_enumerators"></a>
 #### Compiler.parse_enumerators
@@ -391,7 +391,7 @@ Source: `src/parse/types.x:489`
 Parses comma-separated enumerators up to the current closing brace.
 Returns their flat source-order `List` and leaves the brace unconsumed.
 
-Source: `src/parse/types.x:473`
+Source: `src/parse/types.x:475`
 
 <a id="Compiler.parse_field"></a>
 #### Compiler.parse_field
@@ -446,7 +446,7 @@ Captures a name followed by an ordinary complete type and semicolon.
 The reserved typedef identity permits fields to refer to their enclosing
 named type before its pointer or value representation is complete.
 
-Source: `src/parse/types.x:412`
+Source: `src/parse/types.x:414`
 
 <a id="Compiler.parse_optional_identifier"></a>
 #### Compiler.parse_optional_identifier
@@ -455,7 +455,7 @@ Source: `src/parse/types.x:412`
 
 Consumes and returns the current identifier, or NULL without consuming.
 
-Source: `src/parse/declarators.x:626`
+Source: `src/parse/declarators.x:631`
 
 <a id="Compiler.parse_parameter"></a>
 #### Compiler.parse_parameter
@@ -466,7 +466,7 @@ Parses one parameter and returns `(param TYPE DECLARATOR)` or `(...)`.
 Outside macro-template parsing, a named parameter is installed in the
 current `Sym` scope. The following delimiter remains current.
 
-Source: `src/parse/declarators.x:493`
+Source: `src/parse/declarators.x:496`
 
 <a id="Compiler.parse_parameter_list"></a>
 #### Compiler.parse_parameter_list
@@ -477,7 +477,7 @@ Parses a nonempty comma-separated parameter `List` in source order.
 The caller owns the parameter scope; the first non-comma delimiter remains
 current.
 
-Source: `src/parse/declarators.x:476`
+Source: `src/parse/declarators.x:479`
 
 <a id="Compiler.parse_simple_declaration"></a>
 #### Compiler.parse_simple_declaration
@@ -498,7 +498,7 @@ Source: `src/parse/declarations.x:35`
 Parses a C assertion declaration; native C owns constant-expression
 checks.
 
-Source: `src/parse/declarations.x:136`
+Source: `src/parse/declarations.x:143`
 
 <a id="Compiler.parse_submission"></a>
 #### Compiler.parse_submission
@@ -636,7 +636,7 @@ Tests whether the current token can begin a declaration without consuming.
 Typedefs, package aliases, and macro-hole kinds are resolved through the
 current compiler state.
 
-Source: `src/parse/declarations.x:163`
+Source: `src/parse/declarations.x:170`
 
 <a id="Compiler.test_static_assert"></a>
 #### Compiler.test_static_assert
@@ -645,7 +645,7 @@ Source: `src/parse/declarations.x:163`
 
 Reports whether the current identifier starts a C static assertion.
 
-Source: `src/parse/declarations.x:131`
+Source: `src/parse/declarations.x:138`
 
 ## Design notes
 

@@ -140,3 +140,8 @@ array typedef decay, and initialization-hook ordering. Focused fixtures now
 cover those cases, acquired versus live cleanup, lazy Scope creation, macros,
 no-op values, and excluded syntax. The defer suite covers cleanup after a later
 initializer raises.
+
+The full fixture run also exposed a native array-decay rejection after hidden
+qualifiers became visible to type resolution. The existing
+`typedef-index-elements` fixture passes on the baseline. The native crossing
+check now keeps array decay out of its sibling-pointer typedef rule.
